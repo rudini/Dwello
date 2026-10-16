@@ -264,7 +264,7 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 `statements_status_idx`, `statements_tenant_period_idx (tenant_id, period_start)`, unique
 `statements_number_idx (statement_number)`.
 
-`heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }`, or the percent of the period's heating costs, the months with their shares and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF prints them after an own profile was changed, renamed or deleted. Empty without a heating profile and for statements created before; their PDF recomputes it from the profile as it is now.
+`heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }`, or the percent of the period's heating costs, the months with their shares and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF prints them after an own profile was changed, renamed or deleted. Empty without a heating profile, without heating costs and for statements created before; the PDF of one created before recomputes it from the profile as it is now (#229).
 
 **Status (Abrechnungsstatus)** — transitions allowed by `updateStatementStatus` in
 `backend/src/services/statement.service.ts`:

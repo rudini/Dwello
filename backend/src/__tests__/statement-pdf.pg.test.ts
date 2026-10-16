@@ -275,8 +275,25 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		expect(text).toContain('Okt 10.00 %, Nov 20.00 %, Dez 20.00 %');
 	});
 
-	// Vor #209 erstellt: nichts gespeichert, das PDF rechnet wie bisher mit dem Heizprofil, wie es jetzt ist (40 %)
-	it('rechnet bei einer früher erstellten Abrechnung mit dem Heizprofil, wie es jetzt ist', async () => {
+	// Gespeichert wie gedruckt, auf zwei Stellen: «Heizung + Warmwasser» Juli bis Dezember 3.7 + 3.6 + 3.7 + 9.5 + 10.7 + 13
+	// = 44.2 %, als Summe von Kommazahlen 44.199999… (Datenprüfung #209, D-1)
+	it('speichert den Anteil nach dem Heizprofil auf zwei Stellen', async () => {
+		const statement = await generateStatement({
+			contractId: moved.contract,
+			buildingId: moved.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			heatingProfileId: (await getHeatingProfileByName('Heating + Hot Water'))!.id,
+			managementFeePercent: 0
+		});
+		await deleteStatement(statement.id);
+
+		expect(statement.heatingShare).toMatchObject({ byDays: false, percent: 44.2 });
+	});
+
+	// Vor #209 erstellt: nichts gespeichert, das PDF rechnet den Anteil wie bisher aus dem Heizprofil neu (40 %); dass es
+	// dabei ein inzwischen geändertes Profil nimmt, bleibt offen in #229 (F-3)
+	it('rechnet bei einer früher erstellten Abrechnung den Anteil aus dem Heizprofil neu', async () => {
 		const statement = await generateStatement({
 			contractId: moved.contract,
 			buildingId: moved.building,

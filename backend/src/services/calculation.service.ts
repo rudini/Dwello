@@ -414,10 +414,11 @@ async function heatingOfRun(
 	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
 	const result = await handleMidYearMoves(profile.id, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
 	if (result.byDays) return { byDays: true };
-	const months = result.monthBreakdown.map(({ month, percentage }) => ({ month, percentage: Math.round(percentage * 100) / 100 }));
+	const twoPlaces = (percent: number) => Math.round(percent * 100) / 100; // as printed
+	const months = result.monthBreakdown.map(({ month, percentage }) => ({ month, percentage: twoPlaces(percentage) }));
 	// the profile's names as they were, so a renamed or deleted own profile still names the share it gave
 	const { name, nameDE, nameFR, nameIT, nameEN } = profile;
-	return { byDays: false, percent: result.percentage, months, names: { name, nameDE, nameFR, nameIT, nameEN } };
+	return { byDays: false, percent: twoPlaces(result.percentage), months, names: { name, nameDE, nameFR, nameIT, nameEN } };
 }
 
 /**
