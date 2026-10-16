@@ -243,6 +243,19 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
     Und steht im PDF "43.00 % 430.00"
 
+  # Eine Periode kürzer als ein Jahr: der Mieter trägt seine Monate von denen der Periode, Januar bis März im «Winter»
+  # 18 + 14 + 11 = 43 % von 18 + 14 + 11 + 5 + 2 + 0 = 50 %, also 86 %; das PDF nennt beide Summen (#229, F-6)
+  @wip
+  Szenario: PDF nennt bei einer Periode unter einem Jahr die Monatsanteile der Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung vom "2024-01-01" bis "2024-06-30" mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "86.00 % der Heizkosten"
+    Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
+    Und steht im PDF "zusammen 43.00 % von 50.00 % der Abrechnungsperiode"
+
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und die Korrespondenz an "Eva Frei" ist auf "Französisch"
