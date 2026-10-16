@@ -15,5 +15,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Personas: `docs/design/personas/marco-w1b.md`, `docs/design/personas/dr-weber-w1b.md`
 - [x] Fixes (V-15/C-1 statements before #96 by time as before; V-16/C-2 Zeitanteil in days like the PDF; C-3 screen `statement-parts-detail` in the axe and language checks, and the rounding rows of the cost table as valid `<dl>`; C-4 Tankbestand pg test; C-6, C-8, C-10, C-12; Marco P-1 Zeitanteil «nach Heizprofil»; M-3/Dr. Weber P-1 refund wording; V-14, V-17, P-6); issue #307 for a changed Tankbestand
 - [x] Slice review round 2: `docs/reviews/w1b-review-2.md`; C-17 scenarios for the Zeitanteil in days and by heating profile
-- [ ] daten-pruefer, closing code-reviewer round (merge with main, C-17)
+- [x] daten-pruefer: `docs/reviews/w1b-datenpruefung-1.md`
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-96-104.md`
+- [ ] Closing code-reviewer round (merge with main, C-17)
 - [ ] Contracts, lint, check, type-check, affected tests and E2E before the push
