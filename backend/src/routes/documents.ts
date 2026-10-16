@@ -8,11 +8,10 @@ import {
 	deleteDocument,
 	getDocumentPdf,
 	listDocuments,
-	markDocumentSent,
 	uploadDocument
 } from '../services/document.service';
 import { CodedError, errorBody } from '../services/coded-error';
-import { ReminderError, sendReminder } from '../services/reminder.service';
+import { markDocumentPosted, ReminderError, sendReminder } from '../services/reminder.service';
 import { fileResponse } from './file-response';
 
 export const documentRoutes = new Elysia({ prefix: '/api/v1' })
@@ -73,7 +72,7 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 	})
 	// The property manager printed and posted the letter
 	.put('/documents/:id/sent', async ({ params, set }) => {
-		const sent = await markDocumentSent(params.id);
+		const sent = await markDocumentPosted(params.id);
 		if (sent) return sent;
 		set.status = 404;
 		return { error: 'Document not found' };

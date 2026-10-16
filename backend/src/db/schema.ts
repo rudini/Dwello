@@ -342,14 +342,17 @@ export type InvoicePart = {
 };
 
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
+type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
 export type HeatingShare =
-	| { byDays: true }
+	// the chosen profile and why it was not applied (#247); both absent on statements created before
+	| { byDays: true; reason?: 'wholePeriod' | 'noHeatingMonths'; names?: HeatingProfileNames }
 	| {
 			byDays: false;
 			percent: number;
 			months: { month: number; percentage: number }[];
 			periodPercent?: number; // the period's months in the profile (#229); absent on statements of #209
-			names: { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+			periodMonths?: { month: number; percentage: number }[]; // where they do not carry 100 % (#232); absent before
+			names: HeatingProfileNames;
 	  };
 
 export const utilityStatements = pgTable(
@@ -491,6 +494,7 @@ export const documents = pgTable(
 		status: varchar('status', { length: 20 }), // sent, to_send; null for an upload
 		sentAt: timestamp('sent_at'),
 		deliveryError: text('delivery_error'),
+		paymentDeadline: date('payment_deadline'), // the Zahlungsfrist a reminder prints; null for an upload
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
 	(table) => [

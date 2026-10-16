@@ -7,6 +7,7 @@ import refused from '../../tests/contracts/contract-end-refused.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
+import contractHasStatements from '../../tests/contracts/contract-delete-refused.json';
 
 describe('Vertragsstatus', () => {
 	it('gibt Liste und Detail den Tag des Servers mit', async () => {
@@ -123,6 +124,17 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
 			}))
 		);
+	});
+
+	// #116: the delete dialog names them, a Mietvertrag they bill is not deleted
+	it('nennt die Abrechnungen des Mietvertrags', async () => {
+		const statements = [statementOf('c1', lastYear - 1), statementOf('c0', lastYear)];
+		const data = (await load({ params: { id: 'c1' }, fetch: backend(statements) } as never)) as {
+			billedBy: unknown;
+		};
+		expect(data.billedBy).toEqual([
+			{ statementNumber: periodStatements.data[0].statementNumber, status: 'paid' }
+		]);
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
@@ -314,7 +326,8 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 	};
 	const fields = { endDate: '2025-03-31', pastConfirmed: 'on', statementId: 's1' };
 
-	it('löscht den Entwurf, beendet den Mietvertrag und öffnet den Assistenten', async () => {
+	// #141: one request, so the backend keeps the draft when it refuses the end
+	it('löscht den Entwurf mit dem Beenden in einem Schritt und öffnet den Assistenten', async () => {
 		const { calls, result } = run(fields, draft);
 
 		await expect(result).rejects.toMatchObject({
@@ -322,16 +335,15 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 			location: '/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
 		});
 		expect(calls.filter((call) => call.method).map((c) => [c.method, c.url, c.body])).toEqual([
-			['DELETE', 'http://localhost:3001/api/v1/statements/s1', undefined],
 			[
 				'PUT',
 				'http://localhost:3001/api/v1/contracts/c1',
-				{ endDate: '2025-03-31', terminated: true }
+				{ endDate: '2025-03-31', terminated: true, deleteDraft: 's1' }
 			]
 		]);
 	});
 
-	// der Entwurf ist gelöscht, der Mietvertrag nicht beendet: kein Assistent, die Ablehnung bleibt im Dialog
+	// der Mietvertrag ist nicht beendet: kein Assistent, die Ablehnung bleibt im Dialog
 	it('öffnet den Assistenten nicht, wenn das Beenden danach abgelehnt wird', async () => {
 		const { result } = run(fields, draft, 500);
 
@@ -371,8 +383,8 @@ describe('Mietvertrag löschen', () => {
 		]);
 	});
 
-	// auch ohne JavaScript: die Nebenkostenabrechnung braucht seine Mietstage
-	it('löscht keinen Mietvertrag, der begonnen hat', async () => {
+	// A-7 (#116): auch ohne JavaScript nur mit Bestätigung, dass er irrtümlich erfasst wurde
+	it('löscht keinen begonnenen Mietvertrag ohne Bestätigung des Irrtums', async () => {
 		const { calls, result } = runAction(
 			actions.delete,
 			'c1',
@@ -382,13 +394,52 @@ describe('Mietvertrag löschen', () => {
 		);
 
 		expect(await result).toMatchObject({
-			status: 409,
+			status: 400,
 			data: {
 				deleteError:
-					'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage, also die Tage, an denen er gilt.'
+					'Bitte bestätigen Sie, dass dieser Mietvertrag irrtümlich erfasst wurde, oder brechen Sie ab.'
 			}
 		});
 		expect(calls.filter((call) => call.method === 'DELETE')).toEqual([]);
+	});
+
+	it('löscht einen begonnenen Mietvertrag mit Bestätigung des Irrtums', async () => {
+		const { calls, result } = runAction(
+			actions.delete,
+			'c1',
+			200,
+			{ mistakeConfirmed: 'on' },
+			{ startDate: '2024-01-01' }
+		);
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: '/contracts' });
+		expect(calls.filter((call) => call.method === 'DELETE').map((call) => call.url)).toEqual([
+			'http://localhost:3001/api/v1/contracts/c1?confirmMistake=true'
+		]);
+	});
+
+	// eine Abrechnung kam nach dem Laden der Seite dazu: die Meldung zum Code des Backends
+	it('nennt den Grund, wenn das Backend einen Mietvertrag mit Abrechnung ablehnt', async () => {
+		const fetch = (async (_url: string, init?: RequestInit) =>
+			init?.method === 'DELETE'
+				? Response.json(contractHasStatements, { status: 409 })
+				: Response.json({ startDate: '2024-01-01' })) as typeof globalThis.fetch;
+		const form = new FormData();
+		form.set('mistakeConfirmed', 'on');
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		const result = (actions.delete as (event: never) => Promise<unknown>)({
+			params: { id: 'c1' },
+			fetch,
+			request
+		} as never);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				deleteError:
+					'Dieser Mietvertrag kann nicht gelöscht werden, weil eine Nebenkostenabrechnung seine Mietstage abrechnet. Laden Sie die Seite neu, um sie zu sehen.'
+			}
+		});
 	});
 
 	it('meldet einen Fehler, wenn das Backend das Löschen ablehnt', async () => {

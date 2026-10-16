@@ -36,9 +36,11 @@ import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { userMenuButton } from '../targets/app-frame';
 import {
+	confirmDeleteContractButton,
 	confirmEndContractButton,
 	contractEndInput,
 	contractEndPastConfirm,
+	deleteContractButton,
 	endContractButton
 } from '../targets/contract-detail';
 import {
@@ -196,6 +198,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'busy-dialog-open': () => (actor) =>
 		actor.attemptsTo(Press.theKey('Enter').on(on.galleryBusyDialogButton), Wait.until(on.labelledDialog)),
 	'end-dialog': () => openDialog(endContractButton),
+	// a started contract without statements: the mistake not confirmed (#116)
+	'delete-unconfirmed': () => (actor) =>
+		actor.attemptsTo(openDialog(deleteContractButton), Click.on(confirmDeleteContractButton), Wait.until(on.dialogError)),
 	'end-dialog-error': () => (actor) =>
 		actor.attemptsTo(openDialog(endContractButton), Click.on(confirmEndContractButton), Wait.until(on.dialogError)),
 	// the end dialog on the contract page, the contract form on its edit page
@@ -228,6 +233,12 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),
+	// the seeded reminder, named in the screen's query; marking it again keeps it as it is, so each viewport can
+	'marked-sent': (example) => (actor) =>
+		actor.attemptsTo(
+			PostFormAction('?/markSent', { id: new URL(example.path, 'http://x').searchParams.get('letter')! }),
+			Wait.until(on.shown('document-marked-sent'))
+		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(

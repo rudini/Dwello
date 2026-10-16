@@ -4,7 +4,14 @@
 	import { backendMessage } from '$lib/backend-error';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
-	import { balanceLabel, paidDateError, paidHelp, statusLabels, statusTones } from '$lib/statement';
+	import {
+		balanceLabel,
+		nextReminderLater,
+		paidDateError,
+		paidHelp,
+		statusLabels,
+		statusTones
+	} from '$lib/statement';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -122,6 +129,7 @@
 			<StatusActions
 				status={statement.status}
 				owes={statement.balance > 0}
+				waiting={!!nextReminderLater(statement)}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
 				onsend={() => (showSend = true)}

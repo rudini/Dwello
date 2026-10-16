@@ -110,7 +110,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	for (const id of created.contracts) await deleteContract(id);
+	for (const id of created.contracts) await deleteContract(id, true);
 	for (const id of created.tenants) await deleteTenant(id);
 	await db.delete(invoices).where(eq(invoices.buildingId, created.building));
 	for (const id of created.apartments) await deleteApartment(id);

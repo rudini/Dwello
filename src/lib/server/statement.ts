@@ -21,11 +21,20 @@ const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0
 });
 
-// The heating profile as the statement stored it when it shares by the profile (#229), else as it is now
+const notApplied: Record<string, () => string> = {
+	wholePeriod: m.statements_profile_reason_whole_period,
+	noHeatingMonths: m.statements_profile_reason_no_heating_months
+};
+
+// The heating profile as the statement stored it (#229), else as it is now; shared by days, not applied and why (#247)
 const profileName = (data: BackendStatement): string => {
-	const stored = data.heatingShare?.names;
-	if (stored) return localName(stored);
-	return data.heatingProfile ? localName(data.heatingProfile) : '';
+	const share = data.heatingShare;
+	const name = share?.names ? localName(share.names) : data.heatingProfile ? localName(data.heatingProfile) : '';
+	if (!name || !share?.byDays) return name;
+	const reason = notApplied[share.reason];
+	return reason
+		? m.statements_profile_not_applied({ profile: name, reason: reason() })
+		: m.statements_profile_not_applied_unknown({ profile: name });
 };
 
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
@@ -51,6 +60,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		paidDate: data.paidDate,
 		pdfGeneratedAt: data.pdfGeneratedAt,
 		lastReminderDate: data.reminderSentDate,
+		nextReminderFrom: data.nextReminderFrom,
 		notes: data.notes,
 		createdAt: data.createdAt,
 		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
