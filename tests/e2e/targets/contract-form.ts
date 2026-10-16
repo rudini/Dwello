@@ -50,3 +50,4 @@ export const runningContractLink = target('Laufender Mietvertrag im Hinweis', (p
 export const newContractAfterEndLink = target('Neuen Mietvertrag erfassen', (page) =>
 	page.getByTestId('contract-parties-new')
 );
+export const rentTakenOver = target('Hinweis auf übernommene Beträge', (page) => page.getByTestId('contract-rent-taken-over'));

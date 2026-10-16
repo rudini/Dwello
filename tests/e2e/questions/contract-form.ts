@@ -9,6 +9,8 @@ import {
 	fixedTenant,
 	partiesHelp,
 	reviewContractsUnknown,
+	advancePaymentInput,
+	rentTakenOver,
 	reviewItem,
 	runningContractHint,
 	startContractsUnknown,
@@ -37,3 +39,5 @@ export const tenantChoices = Count.of(tenantSelect);
 export const apartmentChoices = Count.of(apartmentSelect);
 export const partiesHelpText = Text.of(partiesHelp);
 export const runningContractHintText = Text.of(runningContractHint);
+export const enteredAdvancePayment = Value.of(advancePaymentInput);
+export const rentTakenOverText = Text.of(rentTakenOver);
