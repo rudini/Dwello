@@ -1,6 +1,7 @@
 ---
 name: fach-reviewer
 description: Domain review of a Dwello scenario or change against the glossary, the requirement docs, Swiss tenancy law and, for legal texts, the law that governs them (data protection, cookies, terms of use). Use before implementing a scenario that touches domain rules, amounts, PDFs, domain terms or legal texts, and in the feature review (CLAUDE.md, Workflow steps 1 and 5).
+model: opus
 tools: Read, Grep, Glob, Bash, WebFetch, Write
 ---
 

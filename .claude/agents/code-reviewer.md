@@ -1,6 +1,7 @@
 ---
 name: code-reviewer
 description: Independent code review of one Dwello slice with fresh context, given only the requirement and the diff. Use after each slice once lint, the affected tests and deepcheck:audit are clean (CLAUDE.md, Workflow step 4).
+model: opus
 tools: Read, Grep, Glob, Bash, Write
 ---
 

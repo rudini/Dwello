@@ -295,3 +295,16 @@ Plan: the decided texts of #241 (P-1 note in short sentences, P-2 labelled lines
 - [x] Archive session, push, PR `Fixes #241`, `Fixes #239`, CI, merge (pull request opened after archiving; the merge waits for the product owner because #257, a Major from before, is open)
 
 Issues opened: #247 to #253 (from #227, #240), #256, #257; closed #227, #240; comments on #104, #132, #236, #237.
+
+## Session: subagent models (no issue)
+
+Request: pin `code-reviewer` and `fach-reviewer` to Opus, move `persona` and `daten-pruefer` to Sonnet where a benchmark first shows no loss. Changes only agent definitions and docs: no scenario, no `code-reviewer` round (`.claude/agents/` is not code in Workflow 6), no workflow review (Workflow 7: not for a task that changes only rules).
+
+- [x] Benchmark A: `daten-pruefer` Opus vs Sonnet on `cbbaafa` (#137; known D-1 Major, D-2, D-3 Minor): round 1 ran on the wrong app (the old stack script changed to the main tree; both models noticed), round 2 on `cbbaafa`: both found D-1 in data; Opus D-3, Sonnet D-2
+- [x] Benchmark B: persona Dr. Weber Opus vs Sonnet on `cf49fa5` (#226; known P-1 Major, P-2, P-3 Minor, P-4 Nit): both found all four
+- [x] Benchmark C: persona Marco Opus vs Sonnet on `70fbc67` (#233; known P-1..P-5 Minor, P-6, P-7 Nit): Opus 6 of 7, Sonnet 2 of 7 plus 2 partly
+- [x] Benchmark report `docs/reviews/agent-models-benchmark.md` with the runs' reports in `docs/reviews/agent-models/`
+- [x] `model:` in `.claude/agents/*.md` as the benchmark decides: `code-reviewer`, `fach-reviewer`, `persona` `opus`; `daten-pruefer` `sonnet`
+- [x] Before marking complete (CLAUDE.md): `test:coverage`, `lint`, `check`, backend `test` and `type-check` pass; no E2E scenario is affected
+
+Files: `.claude/agents/{code-reviewer,fach-reviewer,persona,daten-pruefer}.md`, `docs/reviews/agent-models-benchmark.md`, `docs/reviews/agent-models/*`.
