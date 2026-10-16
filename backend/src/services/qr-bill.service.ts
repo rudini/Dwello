@@ -88,7 +88,7 @@ export interface QRBillConfig {
 }
 
 /**
- * Validate Swiss IBAN format
+ * Validate a Swiss or Liechtenstein IBAN
  * Swiss IBANs: CH + 2 check digits + 5 bank code + 12 account number = 21 chars
  * Liechtenstein: LI + 2 check digits + 5 bank code + 12 account number = 21 chars
  */

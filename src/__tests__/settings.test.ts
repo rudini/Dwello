@@ -144,7 +144,11 @@ describe('Einstellungen speichern', () => {
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein' } }
+			data: {
+				errors: {
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein'
+				}
+			}
 		});
 		expect(calls).toEqual([]);
 	});
@@ -161,12 +165,20 @@ describe('Einstellungen speichern', () => {
 	});
 
 	it('lehnt eine IBAN aus Liechtenstein mit falscher Prüfziffer ab', async () => {
-		const { result } = runAction(actions.default, '', 200, {
+		const { calls, result } = runAction(actions.default, '', 200, {
 			...valid,
 			iban: 'LI22 0881 0000 2324 013A A'
 		});
 
-		expect(await result).toMatchObject({ status: 400 });
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				errors: {
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein'
+				}
+			}
+		});
+		expect(calls).toEqual([]);
 	});
 
 	it('meldet, wenn das Backend die Einstellungen ablehnt, und setzt dann auch nichts zurück', async () => {

@@ -79,7 +79,11 @@ describe('Einstellungen', () => {
 
 	it('meldet Fehler pro Feld', () => {
 		expect(
-			settingsPage({ errors: { iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein' } })
+			settingsPage({
+				errors: {
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein'
+				}
+			})
 		).toContain('Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein');
 	});
 
