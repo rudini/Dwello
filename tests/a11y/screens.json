@@ -26,6 +26,7 @@
 		"link-preset": "Statement wizard opened from a link that names a building and a period (after a changed Vertragsende): it starts at the settings step and says what the link chose.",
 		"send-dialog": "The confirmation before marking a statement as sent open.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
+		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
@@ -407,6 +408,13 @@
 			]
 		},
 		{
+			"name": "statement-reminded-detail",
+			"path": "/statements/{remindedStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-empty-detail",
 			"path": "/statements/{emptyStatement}",
 			"states": [
@@ -433,8 +441,12 @@
 			"path": "/documents",
 			"states": [
 				"default",
-				"empty"
-			]
+				"empty",
+				"marked-sent"
+			],
+			"queries": {
+				"marked-sent": "?letter={remindedLetter}"
+			}
 		},
 		{
 			"name": "config",
