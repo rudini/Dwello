@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import HelpPage from '../routes/help/+page.svelte';
 import { navGroups } from '$lib/navigation';
-import { allByTestId, show } from './helpers/dom';
+import { allByTestId, byTestId, show } from './helpers/dom';
 
 const section = (title: string) =>
 	allByTestId('page-section').find((s) => s.querySelector('h2')?.textContent === title);
@@ -37,7 +37,11 @@ describe('Hilfe', () => {
 			'Zahlungsfrist',
 			'Mahnung',
 			'Korrespondenzkanal',
-			'Mietstatus'
+			'Mietstatus',
+			'Befristet / Unbefristet',
+			'Kündigungstermin',
+			'Kündigungsfrist',
+			'Manuell überschrieben'
 		]);
 		expect(glossary?.textContent).toContain('Ist der Saldo positiv, zahlt der Mieter nach');
 		expect(glossary?.textContent).toContain('auf 5 Rappen gerundet');
@@ -47,6 +51,27 @@ describe('Hilfe', () => {
 		expect(glossary?.textContent).not.toContain('Satz und Verteilschlüssel');
 		for (const word of ['Nachzahlung', 'Rückerstattung', 'Wiedervermietet', 'Gesperrt'])
 			expect(glossary?.textContent).toContain(word);
+	});
+
+	// wie das Glossar «Rechnungsdatum» und «Leistungszeitraum»; gleicher Wortlaut wie PR #289 (#67)
+	it('sagt, wann das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {
+		show(HelpPage, {});
+		const glossary = section('Begriffe kurz erklärt')!.textContent;
+		expect(glossary).toContain(
+			'Ohne Leistungszeitraum bestimmt das Rechnungsdatum, in welche Abrechnungsperiode eine Rechnung fällt. Mit Leistungszeitraum zählen dessen Tage in der Abrechnungsperiode.'
+		);
+	});
+
+	// Inhaltsverzeichnis mit eigenem Einstieg in die Begriffe (#109)
+	it('beginnt mit einem Inhalt, der zu jedem Abschnitt und zu den Begriffen führt', () => {
+		show(HelpPage, {});
+		const links = [...byTestId('help-contents').querySelectorAll('a')];
+		const sections = allByTestId('page-section');
+		expect(links.map((a) => a.textContent?.trim())).toEqual(
+			sections.map((s) => s.querySelector('h2')?.textContent)
+		);
+		expect(links.map((a) => a.getAttribute('href'))).toEqual(sections.map((s) => `#${s.id}`));
+		expect(links.at(-1)?.getAttribute('href')).toBe('#glossary');
 	});
 
 	it('erklärt die beiden geführten Abläufe Schritt für Schritt', () => {

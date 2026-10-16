@@ -30,3 +30,14 @@ export const pageTitle = target('Seitentitel', (page) => page.getByRole('heading
 export const termsLinkOnLogin = target('Nutzungsbedingungen', (page) => page.getByTestId('login-terms-link'));
 export const publicLoginLink = target('Zur Anmeldung', (page) => page.getByTestId('public-login-link'));
 export const publicHelpLink = target('Zur Hilfe', (page) => page.getByTestId('public-help-link'));
+export const helpContentsLink = (label: string) =>
+	target(`Inhalt der Hilfe «${label}»`, (page) =>
+		page.getByTestId('help-contents').getByRole('link', { name: label, exact: true })
+	);
+export const glossaryExplanation = (term: string) =>
+	target(`Erklärung von «${term}» in den Begriffen`, (page) =>
+		page
+			.getByTestId('glossary-entry')
+			.filter({ has: page.getByTestId('glossary-term').getByText(term, { exact: true }) })
+			.getByTestId('glossary-explanation')
+	);

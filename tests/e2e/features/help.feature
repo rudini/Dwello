@@ -22,3 +22,23 @@ Funktionalität: Hilfe
 
   Szenario: Die Hilfe nennt das Hochladen mehrerer Rechnungen
     Dann erklärt die Hilfe unter "Rechnungen erfassen" "Mehrere Rechnungen auf einmal: Wählen Sie unter «Rechnungen» «Rechnungen hochladen». Die KI liest die Dateien aus, und Sie prüfen die Angaben, bevor Dwello die Rechnungen erstellt."
+
+  # Begriffe zum Mietvertrag und zur KI-Kategorie (#109)
+  @wip
+  Szenariogrundriss: Die Hilfe erklärt den Begriff "<Begriff>"
+    Dann erklärt die Hilfe den Begriff "<Begriff>" mit "<Erklärung>"
+
+    Beispiele:
+      | Begriff                 | Erklärung                                                       |
+      | Befristet / Unbefristet | endet ohne Kündigung am vereinbarten Vertragsende               |
+      | Kündigungstermin        | Tag, auf den ein unbefristeter Mietvertrag gekündigt werden kann |
+      | Kündigungsfrist         | Zeit zwischen dem Eingang der Kündigung und dem Kündigungstermin |
+      | Manuell überschrieben   | «Manuell»                                                       |
+
+  # Inhaltsverzeichnis (#109)
+  @wip
+  Szenario: Die Hilfe führt vom Inhalt direkt zu den Begriffen
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Wenn der Liegenschaftsverwalter im Inhalt der Hilfe "Begriffe kurz erklärt" wählt
+    Dann sieht der Liegenschaftsverwalter die Begriffe der Hilfe unter ihrer eigenen Adresse
+    Und scrollt die Seite nicht seitwärts
