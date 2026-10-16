@@ -29,6 +29,10 @@ Plan: F-6: the stored share also keeps the period's sum (`periodPercent`); the P
   code-reviewer round 2 (`docs/reviews/issue-229-review-2.md`): C-1 to C-3, C-7, C-8 confirmed, rejection of C-4 holds; fixed C-9 (Nit, these red lines), C-10 (Nit, the older whole-year statement prints no sums), C-11 (Nit, reason of C-4)
 - [ ] Feature review: fach-reviewer, daten-pruefer, persona Dr. Weber (PDF text), persona for the detail page if its text changes (no text changes there)
   fach-reviewer round 2 (`docs/reviews/issue-229-fachreview-2.md`): F-1 to F-6 confirmed, hand-offs to #232 confirmed; fixed V-1 (Minor, a share stored under #209 had the old rounding and no period sum: the note takes the heating position's share; test «nennt bei einer unter #209 gespeicherten Abrechnung den Anteil der Position», red: 70.97 %), V-2 (Nit, English «in total»)
+  Test red (V-1): «nennt bei einer unter #209 gespeicherten Abrechnung den Anteil der Position» – the note printed 70.97 %
+- [x] Fixes of the feature review as a new slice (Workflow 7)
+  Skills: tdd, ponytail, ponytail-review (no findings)
+  code-reviewer round 1 of this slice (`docs/reviews/issue-229-review-3.md`): V-1 confirmed; fixed C-12 (Minor, render test «nennt bei einer Periode unter einem Jahr die Summen der Monate, auch auf Englisch», red with «together»), C-13 (Minor, this Skills line), C-14 (Nit, the Test red line above)
   daten-pruefer round 1 (`docs/reviews/issue-229-datenpruefung-1.md`): 17 statements, amounts, stored shares, PDFs in four languages and the QR-bill right; the clause's case (a period under a year with a move) is not in the demo data -> round 2 after the persona creates it
   persona Dr. Weber round 1 (`docs/design/personas/weber-issue-229.md`): no review: the four demo drafts 2025 of «Seepark Residenz» overlap the period 01.01.–30.09.2025, the persona may not delete them -> run again after deleting them in `dwello_persona` by SQL
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-229.md`
