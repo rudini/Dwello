@@ -30,7 +30,7 @@ const data = {
 const contractsOf: Record<string, unknown[]> = {
 	a1: [{ id: 'c8', startDate: '2015-01-01', endDate: '2019-12-31', tenantName: 'Ueli Graf' }],
 	a2: [{ id: 'c9', startDate: '2024-04-01', endDate: null, tenantName: 'Eva Frei' }],
-	a3: [{ id: 'c7', startDate: '2015-01-01', endDate: '2099-12-31', tenantName: 'Ida Roth' }] // free from 2100
+	a3: [{ id: 'c7', startDate: '2015-01-01', endDate: '2098-12-31', tenantName: 'Ida Roth' }] // free from 2099
 };
 
 function backend() {
@@ -243,7 +243,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		fakeBff(({ path }) =>
 			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
 		);
-		await toPeriod('a3'); // a3 is free only from 2100
+		await toPeriod('a3'); // a3 is free only from 2099
 		expect(byTestId('start-contracts-unknown')!.textContent).toContain(UNKNOWN);
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe(''); // no start suggested
 		expect(minOfStart()).toBe('');
@@ -271,7 +271,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		expect(byTestId('start-contracts-unknown')).toBeNull();
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2101');
-		expect(minOfStart()).toBe('2100-01-01'); // a3 is free from 2100
+		expect(minOfStart()).toBe('2099-01-01'); // a3 is free from 2099
 		// Sven #151: said, and the focus goes to the step, not to the page
 		expect(get(toasts).map((t) => t.message)).toContain(
 			'Die Mietverträge der Wohnung sind geladen.'
@@ -370,13 +370,13 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		type('start-date-input', '01');
 		release();
-		await settle(); // a3 is free from 1.1.2100
+		await settle(); // a3 is free from 1.1.2099
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.');
 	});
 
 	it('füllt einen geleerten Vertragsbeginn nicht wieder aus', async () => {
 		await toPeriod('a3');
-		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2100'); // suggested
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2099'); // suggested
 		type('start-date-input', '');
 		next();
 		await settle();
@@ -583,7 +583,7 @@ describe('Entwurf des Mietvertrags', () => {
 		next();
 		await settle();
 
-		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2100');
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2099');
 	});
 
 	it('übernimmt einen eben erfassten Mieter und bestätigt ihn', async () => {

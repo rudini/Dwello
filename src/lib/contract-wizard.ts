@@ -2,6 +2,7 @@ import { m } from '$lib/paraglide/messages';
 import { plainAmount } from './invoice';
 import {
 	apartmentOption,
+	impossible,
 	initialContractValues,
 	validateContract,
 	type ContractFormValues
@@ -55,9 +56,7 @@ export function stepErrors(values: ContractFormValues, step: number): Record<str
 	);
 }
 
-// A date field typed over can end up in year 12026; such a date is surely a typing mistake
 export const impossibleYear = () => m.common_error_impossible_year();
-export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
 
 function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
 	return {

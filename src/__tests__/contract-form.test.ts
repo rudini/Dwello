@@ -187,4 +187,8 @@ describe('suggestedStartDate', () => {
 		expect(suggestedStartDate('', freeFrom('2025-04-01'))).toBe('2025-04-01');
 		expect(suggestedStartDate('2025-05-01', freeFrom('2025-04-01'))).toBeNull();
 	});
+
+	it('suggests nothing the date check would refuse (#296)', () => {
+		expect(suggestedStartDate('', freeFrom('2100-01-01'))).toBeNull();
+	});
 });

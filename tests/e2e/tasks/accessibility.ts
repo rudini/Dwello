@@ -285,8 +285,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address
 			Click.on(nextButton),
-			Wait.forValue(startDateInput, '01.01.2100'), // the suggestion arrived, it cannot land in the typed date
-			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
+			Wait.forValue(startDateInput, '01.01.2099'), // the suggestion arrived, it cannot land in the typed date
+			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2098
 			Wait.until(on.overlapWarning)
 		),
 	// the amounts of the apartment's last contract filled in, with the note that says so (#144)

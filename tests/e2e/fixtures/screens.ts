@@ -40,14 +40,14 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
 	await seed.apartment('Seeblick', '1.03', 'vacant'); // free: never rented
-	await seed.apartment('Seeblick', '1.04', 'vacant'); // free only from 2100
+	await seed.apartment('Seeblick', '1.04', 'vacant'); // free only from 2099
 	await seed.tenant('Anna');
 	await seed.tenant('Bruno');
 	await seed.tenant('Carla');
 	await seed.upload('Anna', UPLOADED);
 	await seed.contract('Anna', '1.01', { startDate: '2015-01-01', baseRent: '1800.00', monthlyAdvancePayment: '200.00' });
 	await seed.contract('Bruno', '1.02', { startDate: '2015-01-01', baseRent: '1500.00', monthlyAdvancePayment: '150.00' });
-	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2099-12-31', baseRent: '1400.00' });
+	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2098-12-31', baseRent: '1400.00' });
 	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
 	await seed.heatingInvoice('Seeblick', '9000.00', 2025); // Bruno pays more than his Akonto: a reminder can be sent
 	await seed.fuelStock('Seeblick', '2025-12-31', '800.00'); // a Tankbestand to list and to delete

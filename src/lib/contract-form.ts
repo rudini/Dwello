@@ -170,11 +170,14 @@ export function availableFrom(availability: AvailabilityInfo | null | undefined)
 	};
 }
 
-/** Start date a new contract gets once its apartment is chosen: the day the apartment becomes free */
+// A date field typed over can end up in year 12026; such a date is surely a typing mistake
+export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
+
+/** Start date a new contract gets once its apartment is chosen: the day the apartment becomes free, never one the date check refuses (#296) */
 export function suggestedStartDate(
 	startDate: string,
 	availability: AvailabilityInfo | null | undefined
 ) {
-	if (startDate) return null;
-	return availability?.availableFrom || null;
+	const free = availability?.availableFrom;
+	return startDate || !free || impossible(free) ? null : free;
 }
