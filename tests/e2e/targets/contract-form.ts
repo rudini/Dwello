@@ -50,7 +50,7 @@ export const runningContractLink = target('Laufender Mietvertrag im Hinweis', (p
 export const newContractAfterEndLink = target('Neuen Mietvertrag erfassen', (page) =>
 	page.getByTestId('contract-parties-new')
 );
-// the option with its help: the help says when a notice can be withdrawn (#52)
+// the option with its help: the help says when a notice can be withdrawn (F-7)
 export const withdrawNoticeOption = target('Option «Kündigung aufheben» mit Hilfe', (page) =>
 	page
 		.getByTestId('contract-duration')

@@ -76,7 +76,7 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
     Dann meldet Dwello den Fehler "Die Mietverträge der Wohnung konnten wieder nicht geladen werden."
 
-  # F-7 (#52): eine Kündigung lässt sich nur gemeinsam oder durch die Schlichtungsbehörde oder ein Gericht aufheben
+  # F-7: eine Kündigung lässt sich nur gemeinsam oder durch die Schlichtungsbehörde oder ein Gericht aufheben
   Szenario: Kündigung aufheben
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"

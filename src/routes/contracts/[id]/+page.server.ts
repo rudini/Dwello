@@ -197,8 +197,9 @@ async function endDay(fetch: typeof globalThis.fetch, id: string, form: FormData
 	return endRefusal(await stored.json(), endDate, form.get('pastConfirmed') === 'on') ?? endDate;
 }
 
-// The contract ends by notice (A-1), with the day the notice arrived when known (A-3); a stored statement that already bills rent days after that day refuses it,
-// unless it is the one draft named, which the backend then deletes with the end, or keeps when it refuses (#141)
+// The contract ends by notice (A-1), with the day the notice arrived when known (A-3); a stored statement that
+// already bills rent days after that day refuses it, unless it is the one draft named, which the backend then
+// deletes with the end, or keeps when it refuses (#141)
 async function endOn(
 	fetch: typeof globalThis.fetch,
 	id: string,
