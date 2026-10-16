@@ -136,19 +136,26 @@ describe('Mieter löschen', () => {
 });
 
 describe('Mieterliste', () => {
-	it('kennzeichnet Mieter mit laufendem oder künftigem Vertrag als aktiv', async () => {
+	// F-4 (#58): aktiv mit laufendem, künftig nur mit künftigem Mietvertrag
+	it('kennzeichnet Mieter als aktiv oder künftig, wie das Backend sie einordnet', async () => {
 		const { load: loadList } = await import('../routes/tenants/+page.server');
 		const fetch = (async () =>
 			Response.json({
-				tenants: [tenantList.tenants[0], { ...tenantList.tenants[0], id: 't2', isActive: false }],
+				tenants: [
+					tenantList.tenants[0],
+					{ ...tenantList.tenants[0], id: 't2', isActive: false, isFuture: true }
+				],
 				total: 2
 			})) as unknown as typeof globalThis.fetch;
 
 		const data = (await loadList({ url: new URL('http://localhost/tenants'), fetch } as never)) as {
-			tenants: { isActive: boolean }[];
+			tenants: { isActive: boolean; isFuture: boolean }[];
 		};
 
-		expect(data.tenants.map((t) => t.isActive)).toEqual([true, false]);
+		expect(data.tenants.map((t) => [t.isActive, t.isFuture])).toEqual([
+			[true, false],
+			[false, true]
+		]);
 	});
 
 	it('nennt bei einem künftigen Mieter den Vertragsbeginn', async () => {

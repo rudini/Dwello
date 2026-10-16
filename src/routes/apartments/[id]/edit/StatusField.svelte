@@ -6,7 +6,7 @@
 
 	let { apartment }: { apartment: { status: ApartmentStatus; nextContractStart: string | null } } =
 		$props();
-	// Vermietet and Wiedervermietet follow from the rental contracts; only Leer and Gesperrt are set by hand
+	// Vermietet and Vermietet ab follow from the rental contracts; only Leer and Gesperrt are set by hand
 	const rented = $derived(apartment.status === 'occupied' || apartment.status === 'relet');
 </script>
 

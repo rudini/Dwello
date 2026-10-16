@@ -32,6 +32,12 @@ const currentContractEnd = sql<string | null>`(
 	limit 1
 )`;
 
+/** Last day of the apartment's latest rental contract: an empty apartment is empty from the day after (#145) */
+const lastContractEnd = sql<string | null>`(
+	select max(c.end_date)::text from rental_contracts c
+	where c.apartment_id = "apartments"."id" and c.end_date < ${sqlToday}
+)`;
+
 /**
  * Occupied while a rental contract runs today; relet when only a future contract is signed;
  * otherwise as the property manager set it (vacant or reserved).
@@ -48,6 +54,23 @@ export const apartmentStatus = sql<ApartmentStatus>`(case
 	when ${nextContractStart} is not null then 'relet'
 	else "apartments"."status"
 end)`;
+
+/** An apartment with its Mietstatus, the dates it is shown with, and its building's name, as list and detail read it */
+const apartmentFields = {
+	id: apartments.id,
+	buildingId: apartments.buildingId,
+	number: apartments.number,
+	floor: apartments.floor,
+	area: apartments.area,
+	rooms: apartments.rooms,
+	status: apartmentStatus,
+	nextContractStart,
+	currentContractEnd,
+	lastContractEnd,
+	createdAt: apartments.createdAt,
+	updatedAt: apartments.updatedAt,
+	buildingName: buildings.name
+};
 
 export interface ApartmentFilters {
 	search?: string;
@@ -71,6 +94,7 @@ export interface ApartmentWithDetails extends Apartment {
 	currentContractId?: string;
 	nextContractStart?: string | null;
 	currentContractEnd?: string | null;
+	lastContractEnd?: string | null;
 }
 
 /**
@@ -105,20 +129,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 
 	// Query with building name and current tenant
 	const results = await db
-		.select({
-			id: apartments.id,
-			buildingId: apartments.buildingId,
-			number: apartments.number,
-			floor: apartments.floor,
-			area: apartments.area,
-			rooms: apartments.rooms,
-			status: apartmentStatus,
-			nextContractStart,
-			currentContractEnd,
-			createdAt: apartments.createdAt,
-			updatedAt: apartments.updatedAt,
-			buildingName: buildings.name
-		})
+		.select(apartmentFields)
 		.from(apartments)
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(whereClause)
@@ -145,18 +156,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 export async function getApartment(id: string): Promise<ApartmentWithDetails | null> {
 	const [apartment] = await db
 		.select({
-			id: apartments.id,
-			buildingId: apartments.buildingId,
-			number: apartments.number,
-			floor: apartments.floor,
-			area: apartments.area,
-			rooms: apartments.rooms,
-			status: apartmentStatus,
-			nextContractStart,
-			currentContractEnd,
-			createdAt: apartments.createdAt,
-			updatedAt: apartments.updatedAt,
-			buildingName: buildings.name,
+			...apartmentFields,
 			buildingAddress: buildings.address,
 			buildingPostalCode: buildings.postalCode,
 			buildingCity: buildings.city
