@@ -17,6 +17,7 @@ Cause: `heatingOf` (`backend/src/services/statement-pdf.service.ts`) calls `hand
   Skills: tdd, ponytail, ponytail-review (no findings)
 - [ ] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, affected E2E
 - [ ] code-reviewer round(s)
+  code-reviewer round 1 (`docs/reviews/issue-209-review-1.md`): fixed C-1 (Minor, test «rechnet bei einer früher erstellten Abrechnung mit dem Heizprofil, wie es jetzt ist», red without the fallback), C-2 (Minor, `docs/api-specification.md` names `heating` of the preview and `heatingShare` of the detail), C-3 (Nit, `heatingOfRun` reads the profile and its names once; the helper with two non-null assertions is gone), C-4 (Nit, double blank line gone with it)
 - [ ] Feature review: fach-reviewer, daten-pruefer (PDF, statements), persona Dr. Weber only if a PDF text changes
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-209.md`
 - [ ] Archive session, push, PR `Fixes #209`, CI, merge

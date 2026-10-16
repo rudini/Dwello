@@ -23,6 +23,7 @@ import {
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
+import { getHeatingProfile } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 
@@ -64,7 +65,7 @@ export interface StatementCalculation {
 	totalCosts: number;
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, Negative = refund
-	heating: Omit<Extract<HeatingShare, { byDays: false }>, 'names'> | { byDays: true } | null; // as the heating costs were shared (#209)
+	heating: HeatingShare | null; // as the heating costs were shared (#209)
 }
 
 /**
@@ -408,11 +409,15 @@ async function heatingOfRun(
 	heatingProfileId?: string
 ): Promise<StatementCalculation['heating']> {
 	if (!heatingProfileId || !groups.some((group) => group.isHeatingCost)) return null;
+	const profile = await getHeatingProfile(heatingProfileId);
+	if (!profile) return { byDays: true }; // as the per-group calculation shares without a profile
 	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
-	const result = await handleMidYearMoves(heatingProfileId, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
+	const result = await handleMidYearMoves(profile.id, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
 	if (result.byDays) return { byDays: true };
 	const months = result.monthBreakdown.map(({ month, percentage }) => ({ month, percentage: Math.round(percentage * 100) / 100 }));
-	return { byDays: false, percent: result.percentage, months };
+	// the profile's names as they were, so a renamed or deleted own profile still names the share it gave
+	const { name, nameDE, nameFR, nameIT, nameEN } = profile;
+	return { byDays: false, percent: result.percentage, months, names: { name, nameDE, nameFR, nameIT, nameEN } };
 }
 
 /**

@@ -275,6 +275,24 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		expect(text).toContain('Okt 10.00 %, Nov 20.00 %, Dez 20.00 %');
 	});
 
+	// Vor #209 erstellt: nichts gespeichert, das PDF rechnet wie bisher mit dem Heizprofil, wie es jetzt ist (40 %)
+	it('rechnet bei einer früher erstellten Abrechnung mit dem Heizprofil, wie es jetzt ist', async () => {
+		const statement = await generateStatement({
+			contractId: moved.contract,
+			buildingId: moved.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			heatingProfileId: profileId,
+			managementFeePercent: 0
+		});
+		await db.update(utilityStatements).set({ heatingShare: null }).where(eq(utilityStatements.id, statement.id));
+		await generateStatementPdf(statement.id, 'de');
+		const older = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+
+		expect(older).toContain('40.00 % der Heizkosten');
+	});
+
 	// F-1: ein eigenes Heizprofil lässt sich umbenennen und löschen, die Abrechnung nennt es weiter
 	it('nennt das Heizprofil auch nach dem Umbenennen und Löschen, wie es beim Erstellen hiess', async () => {
 		const name = `Eigenes ${crypto.randomUUID()}`;
