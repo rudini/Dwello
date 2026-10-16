@@ -62,7 +62,7 @@ describe('Aufgaben der Übersicht', () => {
 			expect.objectContaining({
 				id: 'fixed-term-c1',
 				title: 'Befristeten Mietvertrag prüfen',
-				text: 'Der befristete Mietvertrag von Eva Frei ist am 31.03.2024 abgelaufen. Wohnt Eva Frei noch in der Wohnung? Dann läuft der Mietvertrag unbefristet weiter.',
+				text: 'Der befristete Mietvertrag von Eva Frei ist am 31.03.2024 abgelaufen. Wohnt Eva Frei noch in der Wohnung und sind Sie damit einverstanden, zum Beispiel weil Sie den Mietzins weiter annehmen? Dann läuft der Mietvertrag unbefristet weiter.',
 				href: '/contracts/c1',
 				action: 'Mietvertrag öffnen'
 			}),

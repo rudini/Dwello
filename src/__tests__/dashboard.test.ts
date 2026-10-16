@@ -152,7 +152,6 @@ describe('Übersicht laden', () => {
 			'successor-n2',
 			'successor-n5',
 			'successor-n1',
-			'fixed-term-f1',
 			// A-6 (#115): only the expired agreed end without a next contract and without a move-out
 			'fixed-term-f1'
 		]);

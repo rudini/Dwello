@@ -190,3 +190,8 @@ When(
 		await verwalter.attemptsTo(startOverviewTaskFor(title, names.get(tenant)!));
 	}
 );
+
+// after the task for the same tenant: the overview has loaded its tasks
+Then('nicht die Aufgabe {string} für {string}', async ({ verwalter, names }, title: string, tenant: string) => {
+	await verwalter.sees(overviewTaskShownFor(title, names.get(tenant)!)).toBe(false);
+});

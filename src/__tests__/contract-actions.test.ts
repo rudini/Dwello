@@ -503,6 +503,8 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 			false
 		);
 		expect(await asked({ ...expired, endDate: '2099-12-31' })).toBe(false);
+		// Fachreview A-6 V-6: am letzten Tag läuft der Mietvertrag noch
+		expect(await asked({ ...expired, endDate: localToday() })).toBe(false);
 		expect(await asked({ ...expired, endDate: null })).toBe(false);
 	});
 
@@ -539,6 +541,30 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 				fixedTermError:
 					'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen.',
 				fixedTermRefused: refused.statements
+			}
+		});
+	});
+
+	// Fachreview A-6 V-2: eine versendete Abrechnung ändert Dwello nicht; die Meldung spricht von keinem Datum
+	it('sagt bei einer versendeten Abrechnung, dass der Mietvertrag hier nicht weiterläuft', async () => {
+		const sent = { statements: [{ ...refused.statements[0], status: 'sent' }] };
+		const { result } = runAction(
+			actions.continueOpenEnded,
+			'c1',
+			200,
+			{},
+			{},
+			{
+				status: 409,
+				answer: sent
+			}
+		);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				fixedTermError:
+					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann der Mietvertrag hier nicht unbefristet weiterlaufen. Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.'
 			}
 		});
 	});

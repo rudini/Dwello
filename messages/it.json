@@ -1486,5 +1486,17 @@
 	"categories_proposal_none": "Nessuna proposta dell’IA",
 	"categories_proposal_checking": "L’IA verifica la categoria …",
 	"categories_proposal_applied": "Dwello ha preselezionato questa scelta. Decide Lei: verifichi la motivazione e modifichi la scelta se non è adatta.",
-	"categories_proposal_kept": "La Sua scelta rimane. La confronti con la motivazione dell’IA."
+	"categories_proposal_kept": "La Sua scelta rimane. La confronti con la motivazione dell’IA.",
+	"dashboard_task_fixed_term": "Verificare il contratto di locazione a tempo determinato",
+	"dashboard_task_fixed_term_action": "Aprire il contratto di locazione",
+	"contracts_fixed_term_question": "Il contratto di locazione a tempo determinato di {name} è scaduto il {date}. {name} abita ancora nell’appartamento e Lei è d’accordo, per esempio perché continua ad accettare la pigione? Allora il contratto di locazione prosegue a tempo indeterminato.",
+	"contracts_fixed_term_title": "Contratto di locazione a tempo determinato scaduto",
+	"contracts_fixed_term_objection": "Se non è d’accordo, esiga subito per iscritto la restituzione dell’appartamento e si faccia consigliare.",
+	"contracts_continue_open_ended": "Proseguire a tempo indeterminato",
+	"contracts_moved_out": "L’inquilino ha traslocato",
+	"contracts_continued_toast": "Il contratto di locazione di {name} prosegue a tempo indeterminato",
+	"contracts_moved_out_toast": "Salvato: {name} ha traslocato",
+	"contracts_delete_draft_and_continue": "Eliminare la bozza e proseguire a tempo indeterminato",
+	"contracts_draft_deleted_continued_toast": "Bozza {number} eliminata. Il contratto di locazione di {name} prosegue a tempo indeterminato. Allestisca ora di nuovo il conteggio spese accessorie.",
+	"contracts_continue_locked_rest": "Dwello non li modifica, perciò qui il contratto di locazione non può proseguire a tempo indeterminato. Concordi la correzione del conteggio direttamente con l’inquilino."
 }

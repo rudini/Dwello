@@ -30,8 +30,15 @@ describe('Mieter ist ausgezogen', () => {
 		expect((await put({ movedOut: true })).status).toBe(200);
 
 		expect(await stored()).toMatchObject({ endDate: '2025-12-31', movedOut: true });
-		const list = await (await callApi(`/api/v1/contracts?apartmentId=${rental.apartment}`)).json();
+		const list = (await (await callApi(`/api/v1/contracts?apartmentId=${rental.apartment}`)).json()) as { contracts: unknown[] };
 		expect(list.contracts).toMatchObject([{ id: rental.contract, movedOut: true }]);
+	});
+
+	// Fachreview A-6 V-3: die Bestätigung gilt für ein Vertragsende
+	it('vergisst die Bestätigung, wenn sich das Vertragsende ändert', async () => {
+		expect((await put({ endDate: '2026-03-31' })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2026-03-31', movedOut: false });
+		expect((await put({ movedOut: true })).status).toBe(200);
 	});
 
 	it('vergisst die Bestätigung, wenn der Mietvertrag unbefristet weiterläuft', async () => {

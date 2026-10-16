@@ -59,6 +59,14 @@ Given(
 );
 
 Given(
+	'für {string} gibt es die versendete Abrechnung {int} im Gebäude {string}',
+	async ({ seed }, tenant: string, year: number, building: string) => {
+		await seed.statement(tenant, building, year);
+		await seed.sendStatement(tenant, year);
+	}
+);
+
+Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von {string}',
 	async ({ verwalter, seed }, tenant: string) => {
 		await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
@@ -275,9 +283,12 @@ When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag unbefri
 	await verwalter.attemptsTo(deleteDraftAndContinue);
 });
 
-Then('fragt der Mietvertrag nicht mehr, ob der Mieter noch in der Wohnung wohnt', async ({ verwalter }) => {
-	await verwalter.sees(fixedTermCheckShown).toBe(false);
-});
+Then(
+	/^fragt der Mietvertrag nicht(?: mehr)?, ob der Mieter noch in der Wohnung wohnt$/,
+	async ({ verwalter }) => {
+		await verwalter.sees(fixedTermCheckShown).toBe(false);
+	}
+);
 
 Then('meldet der Mietvertrag {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(fixedTermErrorText).toContain(message);

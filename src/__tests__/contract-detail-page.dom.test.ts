@@ -681,7 +681,11 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 		expired();
 		const check = byTestId('contract-fixed-term-check')!;
 		expect(text('contract-fixed-term-check')).toContain(
-			'Der befristete Mietvertrag von Anna Keller ist am 31.12.2025 abgelaufen. Wohnt Anna Keller noch in der Wohnung? Dann läuft der Mietvertrag unbefristet weiter.'
+			'Der befristete Mietvertrag von Anna Keller ist am 31.12.2025 abgelaufen. Wohnt Anna Keller noch in der Wohnung und sind Sie damit einverstanden, zum Beispiel weil Sie den Mietzins weiter annehmen? Dann läuft der Mietvertrag unbefristet weiter.'
+		);
+		// Fachreview A-6 M-1: beide Parteien setzen den Mietvertrag fort; wer nicht einverstanden ist, widerspricht sofort
+		expect(text('contract-fixed-term-check')).toContain(
+			'Sind Sie nicht einverstanden, verlangen Sie die Rückgabe der Wohnung sofort schriftlich und lassen Sie sich beraten.'
 		);
 		const button = (testid: string) => [
 			byTestId(testid)!.textContent!.trim(),

@@ -80,6 +80,7 @@ export interface RentalContract {
 	endDate?: string | null;
 	terminated?: boolean; // endDate is a Kündigungstermin of an open-ended contract, not agreed
 	noticeReceivedOn?: string | null; // the day the notice arrived (A-3)
+	movedOut?: boolean; // «Mieter ist ausgezogen» after an agreed end (A-6)
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto

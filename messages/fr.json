@@ -1486,5 +1486,17 @@
 	"categories_proposal_none": "Aucune proposition de l’IA",
 	"categories_proposal_checking": "L’IA vérifie la catégorie …",
 	"categories_proposal_applied": "Dwello a présélectionné ce choix. C’est vous qui décidez : vérifiez la justification et modifiez le choix s’il ne convient pas.",
-	"categories_proposal_kept": "Votre choix est conservé. Comparez-le avec la justification de l’IA."
+	"categories_proposal_kept": "Votre choix est conservé. Comparez-le avec la justification de l’IA.",
+	"dashboard_task_fixed_term": "Vérifier le contrat de bail à durée déterminée",
+	"dashboard_task_fixed_term_action": "Ouvrir le contrat de bail",
+	"contracts_fixed_term_question": "Le contrat de bail à durée déterminée de {name} a expiré le {date}. Est-ce que {name} habite encore l’appartement et êtes-vous d’accord, par exemple parce que vous continuez à accepter le loyer ? Le contrat de bail se poursuit alors pour une durée indéterminée.",
+	"contracts_fixed_term_title": "Contrat de bail à durée déterminée expiré",
+	"contracts_fixed_term_objection": "Si vous n’êtes pas d’accord, exigez immédiatement par écrit la restitution de l’appartement et faites-vous conseiller.",
+	"contracts_continue_open_ended": "Poursuivre pour une durée indéterminée",
+	"contracts_moved_out": "Le locataire a déménagé",
+	"contracts_continued_toast": "Le contrat de bail de {name} se poursuit pour une durée indéterminée",
+	"contracts_moved_out_toast": "Enregistré : {name} a déménagé",
+	"contracts_delete_draft_and_continue": "Supprimer le brouillon et poursuivre pour une durée indéterminée",
+	"contracts_draft_deleted_continued_toast": "Brouillon {number} supprimé. Le contrat de bail de {name} se poursuit pour une durée indéterminée. Établissez maintenant le décompte des charges à nouveau.",
+	"contracts_continue_locked_rest": "Dwello ne les modifie pas, c’est pourquoi le contrat de bail ne peut pas se poursuivre ici pour une durée indéterminée. Réglez la correction du décompte directement avec le locataire."
 }

@@ -1486,5 +1486,17 @@
 	"categories_proposal_none": "Kein Vorschlag der KI",
 	"categories_proposal_checking": "Die KI prüft die Kategorie …",
 	"categories_proposal_applied": "Dwello hat diese Wahl vorgewählt. Sie entscheiden: Prüfen Sie die Begründung und ändern Sie die Wahl, wenn sie nicht passt.",
-	"categories_proposal_kept": "Ihre Wahl bleibt. Vergleichen Sie sie mit der Begründung der KI."
+	"categories_proposal_kept": "Ihre Wahl bleibt. Vergleichen Sie sie mit der Begründung der KI.",
+	"dashboard_task_fixed_term": "Befristeten Mietvertrag prüfen",
+	"dashboard_task_fixed_term_action": "Mietvertrag öffnen",
+	"contracts_fixed_term_question": "Der befristete Mietvertrag von {name} ist am {date} abgelaufen. Wohnt {name} noch in der Wohnung und sind Sie damit einverstanden, zum Beispiel weil Sie den Mietzins weiter annehmen? Dann läuft der Mietvertrag unbefristet weiter.",
+	"contracts_fixed_term_title": "Befristeter Mietvertrag abgelaufen",
+	"contracts_fixed_term_objection": "Sind Sie nicht einverstanden, verlangen Sie die Rückgabe der Wohnung sofort schriftlich und lassen Sie sich beraten.",
+	"contracts_continue_open_ended": "Unbefristet weiterführen",
+	"contracts_moved_out": "Mieter ist ausgezogen",
+	"contracts_continued_toast": "Der Mietvertrag von {name} läuft unbefristet weiter",
+	"contracts_moved_out_toast": "Gespeichert: {name} ist ausgezogen",
+	"contracts_delete_draft_and_continue": "Entwurf löschen und unbefristet weiterführen",
+	"contracts_draft_deleted_continued_toast": "Entwurf {number} gelöscht. Der Mietvertrag von {name} läuft unbefristet weiter. Erstellen Sie jetzt die Nebenkostenabrechnung neu.",
+	"contracts_continue_locked_rest": "Dwello ändert sie nicht, darum kann der Mietvertrag hier nicht unbefristet weiterlaufen. Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter."
 }

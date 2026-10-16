@@ -155,14 +155,12 @@ Funktionalität: Übersicht
 
   # A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag ohne Folgevertrag fragt die Übersicht, ob der Mieter
   # noch in der Wohnung wohnt (Art. 266 Abs. 2 OR)
-  @wip
   Szenario: Abgelaufener befristeter Mietvertrag ohne Nachmieter
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Bruno Meier"
 
-  @wip
   Szenario: Aufgabe führt zum abgelaufenen befristeten Mietvertrag
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
@@ -170,8 +168,7 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Aufgabe "Befristeten Mietvertrag prüfen" für "Bruno Meier" beginnt
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Bruno Meier"
 
-  @wip
-  Szenario: Abgelaufener befristeter Mietvertrag mit Folgevertrag
+  Szenario: Abgelaufener befristeter Mietvertrag mit Nachmieter
     Angenommen der Mieter "Bruno Meier" existiert
     Und der Mieter "Carla Huber" existiert
     Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
@@ -179,10 +176,16 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Bruno Meier"
 
-  @wip
   Szenario: Mieter nach dem befristeten Mietvertrag ausgezogen
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
     Und der Liegenschaftsverwalter hat bestätigt, dass "Bruno Meier" ausgezogen ist
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Bruno Meier"
+
+  # gekündigte Mietverträge laufen nicht stillschweigend weiter: nur die Suche nach einem Nachmieter
+  Szenario: Abgelaufener gekündigter Mietvertrag
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2025-12-31" gekündigt
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Nachmieter für Wohnung 1.01 suchen" für "Anna Keller"
+    Aber nicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Anna Keller"

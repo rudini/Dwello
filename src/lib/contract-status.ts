@@ -123,8 +123,14 @@ export type RefusedStatement = {
 	buildingId: string;
 };
 
-/** New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json) */
-export function billedDaysError(statements: { statementNumber: string; status: string }[]): string {
+/**
+ * New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json);
+ * `lockedRest` says why a sent or paid one blocks them
+ */
+export function billedDaysError(
+	statements: { statementNumber: string; status: string }[],
+	lockedRest = m.contracts_billed_locked_rest
+): string {
 	const drafts = statements
 		.filter((statement) => statement.status === 'draft')
 		.map((s) => s.statementNumber);
@@ -140,7 +146,7 @@ export function billedDaysError(statements: { statementNumber: string; status: s
 			(one ? m.contracts_billed_locked_one : m.contracts_billed_locked_many)({
 				numbers: listed(locked)
 			}),
-			m.contracts_billed_locked_rest(),
+			lockedRest(),
 			...(drafts.length ? [m.contracts_billed_also_draft({ numbers: listed(drafts) })] : [])
 		].join(' ');
 	return one

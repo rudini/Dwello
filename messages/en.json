@@ -1486,5 +1486,17 @@
 	"categories_proposal_none": "No AI suggestion",
 	"categories_proposal_checking": "The AI is checking the category …",
 	"categories_proposal_applied": "Dwello has preselected this choice. You decide: check the reasoning and change the choice if it does not fit.",
-	"categories_proposal_kept": "Your choice stays. Compare it with the AI’s reasoning."
+	"categories_proposal_kept": "Your choice stays. Compare it with the AI’s reasoning.",
+	"dashboard_task_fixed_term": "Check the fixed-term rental contract",
+	"dashboard_task_fixed_term_action": "Open rental contract",
+	"contracts_fixed_term_question": "The fixed-term rental contract of {name} expired on {date}. Does {name} still live in the apartment, and do you agree, for example because you keep accepting the rent? Then the rental contract continues open-ended.",
+	"contracts_fixed_term_title": "Fixed-term rental contract expired",
+	"contracts_fixed_term_objection": "If you do not agree, demand the return of the apartment in writing at once and get advice.",
+	"contracts_continue_open_ended": "Continue open-ended",
+	"contracts_moved_out": "Tenant has moved out",
+	"contracts_continued_toast": "The rental contract of {name} continues open-ended",
+	"contracts_moved_out_toast": "Saved: {name} has moved out",
+	"contracts_delete_draft_and_continue": "Delete draft and continue open-ended",
+	"contracts_draft_deleted_continued_toast": "Draft {number} deleted. The rental contract of {name} continues open-ended. Now create the utility cost statement again.",
+	"contracts_continue_locked_rest": "Dwello does not change them, so the rental contract cannot continue open-ended here. Settle the correction of the statement directly with the tenant."
 }
