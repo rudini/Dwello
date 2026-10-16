@@ -74,6 +74,10 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		apartmentShareColumn: 'Wohnungsanteil',
 		timeShareColumn: 'Zeitanteil',
 		days: '{days}/{total} Tage',
+		partNoPeriod: 'Ohne Leistungszeitraum{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen der Abrechnungsperiode',
+		partBeyond: 'Leistungszeitraum {wholeStart} – {wholeEnd} (Rechnung CHF {wholeAmount}), davon {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
+		partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
+		partShare: 'Ihr Anteil{colon}{apartment} × ({sum}) / {costs} = {share}',
 		yourCosts: 'Ihre Nebenkosten',
 		pageOf: 'Seite {page} von {pages}',
 		tenancyLine: 'Ihr Mietverhältnis in dieser Periode: {start} – {end} ({days} Mietstage von {total} Tagen)',
@@ -86,10 +90,11 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundAccount: 'Teilen Sie uns dafür Ihre IBAN mit, falls Sie das noch nicht getan haben.',
 		balancedNote: 'Ihre Nebenkosten und Ihre Akontobeiträge sind gleich hoch. Sie müssen nichts bezahlen.',
 		balancedRounded: 'Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen und erhalten nichts zurück.',
-		sharesNote: 'Kosten Liegenschaft: die Rechnungen der Abrechnungsperiode; eine Rechnung mit Leistungszeitraum zählt mit den Tagen, die in die Periode fallen. Wohnungsanteil: Kosten der Liegenschaft nach dem Verteilschlüssel. Zeitanteil: Ihre Mietstage in der Abrechnungsperiode{days}{parts}{heating}.',
-		sharesNoteDays: '; bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode',
-		sharesNoteParts: '; bei Rechnungen über verschiedene Tage nach ihren Beträgen gewichtet (Berechnung unter der Abrechnungsposition; Ihr Anteil ist der Wohnungsanteil mal diese Berechnung, der Prozentwert ist gerundet)',
-		sharesNoteHeating: '; bei Heizkosten der Anteil nach dem Heizprofil',
+		sharesNote: 'Kosten Liegenschaft: die Rechnungen der Abrechnungsperiode; eine Rechnung mit Leistungszeitraum zählt mit den Tagen, die in die Periode fallen. Wohnungsanteil: Kosten der Liegenschaft nach dem Verteilschlüssel. Zeitanteil: Ihre Mietstage in der Abrechnungsperiode.{days}{parts} Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil.{rounded}{heating}',
+		sharesNoteDays: ' Bei einer Rechnung mit Leistungszeitraum zählen Ihre Mietstage in diesem Zeitraum.',
+		sharesNoteParts: ' Hat eine Abrechnungsposition Rechnungen über verschiedene Tage, steht die Berechnung darunter.',
+		sharesNoteRounded: ' Der Prozentwert ist gerundet; Ihr Anteil folgt aus der Berechnung unter der Position.',
+		sharesNoteHeating: ' Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil.',
 		sharesNoteFuel: 'Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten).',
 		heatingSection: 'Heiz- und Warmwasserkosten',
 		fuelIntro: 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.',
@@ -144,6 +149,10 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		apartmentShareColumn: 'Part du logement',
 		timeShareColumn: 'Part temporelle',
 		days: '{days}/{total} jours',
+		partNoPeriod: 'Sans période de prestation{colon}CHF {amount}, vos jours de location {days} sur {total} jours de la période de décompte',
+		partBeyond: 'Période de prestation {wholeStart} – {wholeEnd} (facture CHF {wholeAmount}), dont {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
+		partLine: 'Période de prestation {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
+		partShare: 'Votre part{colon}{apartment} × ({sum}) / {costs} = {share}',
 		yourCosts: 'Vos frais accessoires',
 		pageOf: 'Page {page} sur {pages}',
 		tenancyLine: 'Votre bail pendant la période : {start} – {end} ({days} jours sur {total})',
@@ -156,10 +165,11 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundAccount: 'Communiquez-nous votre IBAN si vous ne l’avez pas encore fait.',
 		balancedNote: 'Vos frais accessoires et vos acomptes sont égaux. Vous n’avez rien à payer.',
 		balancedRounded: 'Après l’arrondi à 5 centimes, vous n’avez rien à payer et ne recevez rien.',
-		sharesNote: 'Coûts de l’immeuble : les factures de la période de décompte ; une facture avec période de prestation compte pour les jours compris dans la période. Part du logement : coûts de l’immeuble selon la clé de répartition. Part temporelle : vos jours de location dans la période de décompte{days}{parts}{heating}.',
-		sharesNoteDays: ' ; pour une facture avec période de prestation, vos jours de location compris dans celle-ci sur ses jours dans la période',
-		sharesNoteParts: ' ; pour des factures sur des jours différents, pondérée selon leurs montants (calcul sous le poste du décompte ; votre part est la part du logement multipliée par ce calcul, le pourcentage est arrondi)',
-		sharesNoteHeating: ' ; pour le chauffage la part selon le profil de chauffage',
+		sharesNote: 'Coûts de l’immeuble : les factures de la période de décompte ; une facture avec période de prestation compte pour les jours compris dans la période. Part du logement : coûts de l’immeuble selon la clé de répartition. Part temporelle : vos jours de location dans la période de décompte.{days}{parts} Votre part est la part du logement multipliée par la part temporelle.{rounded}{heating}',
+		sharesNoteDays: ' Pour une facture avec période de prestation, ce sont vos jours de location dans cette période qui comptent.',
+		sharesNoteParts: ' Si un poste du décompte comporte des factures sur des jours différents, le calcul figure en dessous.',
+		sharesNoteRounded: ' Le pourcentage est arrondi ; votre part découle du calcul sous le poste.',
+		sharesNoteHeating: ' Pour les frais de chauffage, la part temporelle est la part selon le profil de chauffage.',
 		sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne : la consommation (voir frais de chauffage et d’eau chaude).',
 		heatingSection: 'Frais de chauffage et d’eau chaude',
 		fuelIntro: 'Le décompte porte sur le combustible consommé et non sur les achats.',
@@ -214,6 +224,10 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		apartmentShareColumn: 'Quota appartamento',
 		timeShareColumn: 'Quota temporale',
 		days: '{days}/{total} giorni',
+		partNoPeriod: 'Senza periodo di prestazione{colon}CHF {amount}, i suoi giorni di locazione {days} su {total} giorni del periodo di conteggio',
+		partBeyond: 'Periodo di prestazione {wholeStart} – {wholeEnd} (fattura CHF {wholeAmount}), di cui {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
+		partLine: 'Periodo di prestazione {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
+		partShare: 'La sua quota{colon}{apartment} × ({sum}) / {costs} = {share}',
 		yourCosts: 'Le sue spese accessorie',
 		pageOf: 'Pagina {page} di {pages}',
 		tenancyLine: 'La sua locazione in questo periodo: {start} – {end} ({days} giorni su {total})',
@@ -226,10 +240,11 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundAccount: 'Ci comunichi il suo IBAN, se non l’ha già fatto.',
 		balancedNote: 'Le sue spese accessorie e i suoi acconti sono uguali. Non deve pagare nulla.',
 		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla e non riceve nulla.',
-		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: costi dell’immobile secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio{days}{parts}{heating}.',
-		sharesNoteDays: '; per una fattura con periodo di prestazione, i suoi giorni di locazione nel periodo di prestazione sui giorni di tale periodo compresi nel periodo di conteggio',
-		sharesNoteParts: '; per fatture su giorni diversi, ponderata secondo i loro importi (calcolo sotto la voce del conteggio; la sua quota è la quota appartamento moltiplicata per questo calcolo, la percentuale è arrotondata)',
-		sharesNoteHeating: '; per il riscaldamento la quota secondo il profilo di riscaldamento',
+		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: costi dell’immobile secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio.{days}{parts} La sua quota è la quota appartamento moltiplicata per la quota temporale.{rounded}{heating}',
+		sharesNoteDays: ' Per una fattura con periodo di prestazione contano i suoi giorni di locazione in tale periodo.',
+		sharesNoteParts: ' Se una voce del conteggio comprende fatture su giorni diversi, il calcolo figura sotto.',
+		sharesNoteRounded: ' La percentuale è arrotondata; la sua quota risulta dal calcolo sotto la voce.',
+		sharesNoteHeating: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento.',
 		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi costi di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
 		fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
@@ -284,6 +299,10 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		apartmentShareColumn: 'Apartment share',
 		timeShareColumn: 'Time share',
 		days: '{days}/{total} days',
+		partNoPeriod: 'Without a service period{colon}CHF {amount}, your days rented {days} of {total} days of the billing period',
+		partBeyond: 'Service period {wholeStart} – {wholeEnd} (invoice CHF {wholeAmount}), of which {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
+		partLine: 'Service period {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
+		partShare: 'Your share{colon}{apartment} × ({sum}) / {costs} = {share}',
 		yourCosts: 'Your utility costs',
 		pageOf: 'Page {page} of {pages}',
 		tenancyLine: 'Your tenancy in this period: {start} – {end} ({days} of {total} days)',
@@ -296,10 +315,11 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundAccount: 'Please send us your IBAN if you have not done so yet.',
 		balancedNote: 'Your utility costs equal your advance payments. You do not need to pay anything.',
 		balancedRounded: 'After rounding to 5 centimes, you do not need to pay anything and receive nothing back.',
-		sharesNote: 'Building costs: the invoices of the billing period; an invoice with a service period counts for its days within the period. Apartment share: the building’s costs by the distribution key. Time share: your days rented in the billing period{days}{parts}{heating}.',
-		sharesNoteDays: '; for an invoice with a service period, your days rented within it out of its days in the period',
-		sharesNoteParts: '; for invoices over different days, weighted by their amounts (calculation below the statement line; your share is the apartment share times this calculation, the percentage is rounded)',
-		sharesNoteHeating: '; for heating the share by the heating profile',
+		sharesNote: 'Building costs: the invoices of the billing period; an invoice with a service period counts for its days within the period. Apartment share: the building’s costs by the distribution key. Time share: your days rented in the billing period.{days}{parts} Your share is the apartment share times the time share.{rounded}{heating}',
+		sharesNoteDays: ' For an invoice with a service period, your days rented within that period count.',
+		sharesNoteParts: ' If a statement line has invoices over different days, the calculation is shown below it.',
+		sharesNoteRounded: ' The percentage is rounded; your share follows from the calculation below the line.',
+		sharesNoteHeating: ' For heating costs, the time share is the share by the heating profile.',
 		sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see heating and hot water costs).',
 		heatingSection: 'Heating and hot water costs',
 		fuelIntro: 'The fuel consumed is billed, not the fuel purchased.',
@@ -639,13 +659,24 @@ function costTable(page: Page, y: number) {
 // The invoices of a position over different days and the sum that weighs them by amount (#226): the tenant recomputes
 // the Zeitanteil, and «Ihr Anteil» as Wohnungsanteil × that sum
 function partLines(item: LineItem, t: Record<string, string>) {
-	if (!item.invoiceParts || item.periodShare == null) return [];
-	const lines = item.invoiceParts.map(
-		(part) => `${formatDate(part.start)} – ${formatDate(part.end)}: ${formatCHF(part.amount)}, ${fill(t.days, part)}`
-	);
+	if (!item.invoiceParts || item.apartmentShare == null) return [];
+	const lines = item.invoiceParts.map((part) => fill(t[partText(part)], partValues(part, t.colon)));
 	const sum = item.invoiceParts.map((part) => `${formatCHF(part.amount)} × ${part.days}/${part.total}`).join(' + ');
-	return [...lines, `(${sum}) / ${formatCHF(item.totalAmount)} = ${formatShare(item.periodShare)}`];
+	const share = { apartment: formatCHF(item.apartmentShare), sum, costs: formatCHF(item.totalAmount), share: formatCHF(item.tenantShare), colon: t.colon };
+	return [...lines, fill(t.partShare, share)];
 }
+
+// An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241)
+const partText = (part: InvoicePart) => (part.noPeriod ? 'partNoPeriod' : part.whole ? 'partBeyond' : 'partLine');
+const partValues = ({ start, end, amount, days, total, whole }: InvoicePart, colon: string) => ({
+	start: formatDate(start),
+	end: formatDate(end),
+	amount: formatCHF(amount),
+	days,
+	total,
+	colon,
+	...(whole && { wholeStart: formatDate(whole.start), wholeEnd: formatDate(whole.end), wholeAmount: formatCHF(whole.amount) })
+});
 
 const PARTS_WIDTH = COLUMNS[4].x + COLUMNS[4].width - COLUMNS[0].x - 8;
 
@@ -673,6 +704,7 @@ function sharesNote(data: StatementPDFData, t: Record<string, string>) {
 	const shares = fill(t.sharesNote, {
 		days: otherDays ? t.sharesNoteDays : '',
 		parts: parts ? t.sharesNoteParts : '',
+		rounded: parts ? t.sharesNoteRounded : '',
 		heating: data.lineItems.some((item) => item.byProfile) ? t.sharesNoteHeating : ''
 	});
 	return data.fuel ? `${shares} ${t.sharesNoteFuel}` : shares;

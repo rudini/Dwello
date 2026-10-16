@@ -311,11 +311,11 @@ apartment_share     DECIMAL(12,2)           -- the apartment's part of the total
 period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating profile's share
 position_rental_days INTEGER                -- the tenant's days in the days billed (null: not a ratio of days)
 billed_days         INTEGER                 -- the days the position's invoices bill in the period
-invoice_parts       JSONB                   -- invoices over different days: [{start, end, amount, days, total}] (null: none)
+invoice_parts       JSONB                   -- invoices over different days: [{start, end, amount, days, total, noPeriod?, whole?}] (null: none)
 sort_order          INTEGER DEFAULT 0
 ```
 
-`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position. `position_rental_days` and `billed_days` (migration `0003`, #208) hold `period_share` as a fraction of days when all invoices of the position bill the same days and it is not shared by the heating profile; the PDF prints them as «x/y Tage». Statements created before keep them empty. `invoice_parts` (migration `0006`, #226) holds, for a position whose invoices bill different days, each invoice's days in the period (`start`, `end`, `total`), its amount for them and the tenant's days in them (`days`); the PDF lists them under the position with the weighted share. It stays empty when the tenant rents the whole period or the invoices sum to zero.
+`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position. `position_rental_days` and `billed_days` (migration `0003`, #208) hold `period_share` as a fraction of days when all invoices of the position bill the same days and it is not shared by the heating profile; the PDF prints them as «x/y Tage». Statements created before keep them empty. `invoice_parts` (migration `0006`, #226) holds, for a position whose invoices bill different days, each invoice's days in the period (`start`, `end`, `total`), its amount for them and the tenant's days in them (`days`); the PDF lists them under the position with the weighted share. `noPeriod` marks an invoice without Leistungszeitraum, `whole` holds the whole Leistungszeitraum and the invoice's amount when it reaches beyond the period (#241); parts stored before have neither. It stays empty when the tenant rents the whole period or the invoices sum to zero.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 
