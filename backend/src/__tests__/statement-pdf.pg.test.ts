@@ -708,6 +708,7 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 		await updateStatementStatus(statementId, 'sent');
 
 		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId)); // removable again (review C-17)
 		expect(text).toContain('Endgasse 9');
 	});
 });

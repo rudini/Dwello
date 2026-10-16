@@ -491,7 +491,7 @@ export async function updateStatementStatus(
 		...additionalData,
 		...sentToday,
 		...settled,
-		// the PDF as sent is made with the tenant and settings of this moment, not a draft's of earlier (review C-9)
+		// the PDF as sent is made anew after sending, with the tenant and settings then, not a draft's of earlier (review C-9)
 		...(sentToday && { pdfBlob: null, pdfGeneratedAt: null })
 	};
 	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93)

@@ -232,8 +232,8 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
     Dann nennt die Bestätigung die Korrespondenzadresse "Marktstätte 3, 78462 Konstanz, Deutschland"
 
-  # Personas W3c (Anna P-1, Helga P-2): das PDF eines Entwurfs nennt die Korrespondenzadresse, wie sie jetzt ist, auch
-  # wenn es vor der neuen Adresse schon einmal erstellt wurde
+  # Persona W3c (Anna P-1): das PDF eines Entwurfs nennt die Korrespondenzadresse, wie sie jetzt ist, auch wenn es vor
+  # der neuen Adresse schon einmal erstellt wurde
   Szenario: Das PDF eines Entwurfs nennt die neue Korrespondenzadresse
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -241,6 +241,17 @@ Funktionalität: Abrechnungsdetail
     Und die Korrespondenzadresse von "Eva Frei" ist "Marktstätte 3", "78462 Konstanz" in "Deutschland"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Marktstätte 3 78462 Konstanz DEUTSCHLAND"
+
+  # Review C-16: am selben Tag versendet, trägt das versendete PDF die Korrespondenzadresse beim Versand
+  Szenario: Das versendete PDF nennt die neue Korrespondenzadresse
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und die Korrespondenzadresse von "Eva Frei" ist "Marktstätte 3", "78462 Konstanz" in "Deutschland"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung versendet
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Marktstätte 3 78462 Konstanz DEUTSCHLAND"
 
   # TODO(fachlich prüfen, #294): «Abrechnungsnummer» fehlt im Glossar
