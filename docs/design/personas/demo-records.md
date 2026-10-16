@@ -21,4 +21,6 @@ For the caller of a persona run, not for the persona: it reads only `README.md`,
 | | OG1 | Kevin Fischer | `b0000003-0003-0003-0003-000000000002` | open-ended since 01.05.2021; no statement 2025 |
 | | OG2 | – | – | vacant |
 
+«Verwaltungspauschale vereinbart» (#89): every contract «Ja, zum Satz des Abrechnungslaufs», except Marco Bernasconi (B2, own rate 2.5 %) and Kevin Fischer in Alpenblick OG1 («Nein», 0 %).
+
 Every contract that ran in 2024 has a paid statement 2024. There is no fixed-term contract and none that starts in the future: a task that needs one has the persona create it in its own building.
