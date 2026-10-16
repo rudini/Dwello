@@ -4,6 +4,7 @@ import {
 	apartmentOfContract,
 	deleteDialogText,
 	endConfirmationInWindow,
+	endDialogDeathText,
 	endDateProblemShown,
 	endOfContract,
 	missingStatementsText,
@@ -20,6 +21,7 @@ import {
 	deleteDraftAndEndContract,
 	editContractFromDetail,
 	endContract,
+	startEndingContract,
 	endContractOn,
 	openContract,
 	openContractApartment,
@@ -197,3 +199,22 @@ Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed 
 	await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
 	await verwalter.sees(endOfContract).toContain(date);
 });
+
+When(
+	'der Liegenschaftsverwalter als nächsten Schritt einen neuen Mietvertrag für {string} erfassen will',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.attemptsTo(chooseNextStep(`Neuen Mietvertrag für ${names.get(tenant) ?? tenant} erfassen`));
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietvertrag beenden will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(startEndingContract);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter im Dialog «Mietvertrag beenden», dass der Mietvertrag beim Tod des Mieters weiterläuft',
+	async ({ verwalter }) => {
+		await verwalter.sees(endDialogDeathText).toContain('Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst');
+		await verwalter.sees(endDialogDeathText).toContain('erst, wenn die Erben oder Sie gekündigt haben');
+	}
+);

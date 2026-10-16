@@ -89,6 +89,8 @@ describe('Mietvertragsdetail', () => {
 		]);
 		expect(links).toEqual([
 			['Nachmieter erfassen', '/contracts/new?apartment=a1'],
+			// B-16 (#156): wer innerhalb des Hauses umzieht, braucht einen neuen Mietvertrag
+			['Neuen Mietvertrag für Anna Keller erfassen', '/contracts/new?tenant=t1'],
 			['Neue Adresse eintragen', '/tenants/t1/edit']
 		]);
 	});
@@ -169,6 +171,17 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('form-error')).toBeNull();
 	});
 
+	// F-23 (#155), Fachreview W10 M-1: beim Tod des Mieters endet der Mietvertrag nicht
+	it('sagt im Dialog «Beenden», dass der Mietvertrag beim Tod des Mieters auf die Erben übergeht', () => {
+		open();
+		click('contract-end-button');
+		// Fachreview W10-2 M-1: die Kündigung der Erben wird hier erfasst (Art. 266i OR)
+		expect(text('contract-end-death')).toContain(
+			'Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst: Er geht auf die Erben über. Erfassen Sie das Vertragsende erst, wenn die Erben oder Sie gekündigt haben.'
+		);
+		expect(text('contract-end-death')).toContain('unter «Adresse»'); // Persona Weber P-1
+	});
+
 	it('bietet bei einer versendeten Abrechnung kein Löschen an', async () => {
 		const sent = refused.statements.map((s) => ({ ...s, status: 'sent' }));
 		open('2024-04-01', null, { endError: 'abgelehnt', refused: sent, refusedDay: '2025-03-31' });
@@ -220,7 +233,7 @@ describe('Mietvertragsdetail', () => {
 		);
 	});
 
-	it('nennt mit erfasstem Nachmieter nur noch die neue Adresse', () => {
+	it('bietet mit erfasstem Nachmieter keinen Nachmieter mehr an', () => {
 		show(ContractPage, {
 			data: {
 				today: '2026-10-10',
@@ -235,7 +248,7 @@ describe('Mietvertragsdetail', () => {
 		const links = [...byTestId('contract-next-steps')!.querySelectorAll('a')].map((a) =>
 			a.textContent!.trim()
 		);
-		expect(links).toEqual(['Neue Adresse eintragen']);
+		expect(links).toEqual(['Neuen Mietvertrag für Anna Keller erfassen', 'Neue Adresse eintragen']);
 	});
 
 	it('nennt ohne Kündigung keine nächsten Schritte', () => {

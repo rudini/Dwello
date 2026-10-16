@@ -134,6 +134,7 @@
 		shown={data.nextSteps}
 		apartmentId={contract.apartmentId}
 		tenantId={contract.tenantId}
+		{name}
 	/>
 	<MissingStatement missing={data.missingStatements} />
 
@@ -224,6 +225,8 @@
 		bind:error={pastError}
 	/>
 	<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
+	<!-- the contract passes to the heirs (#155): ending it would count the time after as Leerstand -->
+	<p class="text-ink-muted" data-testid="contract-end-death">{m.contracts_end_death()}</p>
 </ActionDialog>
 
 <DeleteContract

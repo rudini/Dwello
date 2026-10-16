@@ -139,6 +139,26 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('contract-parties-new')).toBeNull();
 	});
 
+	// F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über; ein Eintritt eines Dritten
+	// (Art. 263 OR, Art. 121 ZGB) ist Vertragsende und neuer Mietvertrag
+	it.each([null, '2099-03-31'])(
+		'erklärt, wie Tod, Übertragung und Zuweisung durch ein Gericht erfasst werden (Vertragsende %s)',
+		async (endDate) => {
+			await open(endDate);
+			const help = byTestId('contract-parties-help')!.textContent!;
+			expect(help).toContain('Stirbt der Mieter, endet der Mietvertrag nicht von selbst');
+			expect(help).toContain('erfassen Sie eines erst, wenn die Erben oder Sie gekündigt haben');
+			expect(help).toContain(
+				// Persona Weber P-1: das Feld heisst im Mieterformular «Adresse»
+				'unter «Adresse» die Adresse ein, an die die Post für die Erben geht, bei Post per E-Mail auch unter «E-Mail»'
+			);
+			// Fachreview W10 M-2, M-4: Vertragsende ohne Kündigungsfrist, gleiche Bedingungen, schriftliche Zustimmung
+			expect(help).toContain('mit Ihrer schriftlichen Zustimmung');
+			expect(help).toContain('bei der Scheidung die Wohnung der Familie'); // Persona Weber P-3
+			expect(help).toContain('am Tag vor dem Wechsel, ohne Kündigungsfrist');
+		}
+	);
+
 	// Fachreview V-2: mit Vertragsende gibt es kein «Beenden» mehr
 	it('nennt bei einem Mietvertrag mit Vertragsende den frühesten Tag des neuen Mietvertrags', async () => {
 		await open('2099-03-31');
@@ -152,8 +172,14 @@ describe('Mietvertrag bearbeiten', () => {
 		);
 		expect(help).toContain('ändern Sie zuerst unten unter «Vertragsdauer» das Vertragsende.');
 		expect(help).not.toContain('«Beenden»');
-		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt
-		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe('/contracts/new');
+		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt; B-16 (#156): mit Mieter und frühestem Beginn,
+		// den der Link nennt, damit ihn niemand für den Nachmieter nimmt (Fachreview W10 V-1)
+		expect(byTestId('contract-parties-new')!.textContent).toBe(
+			'Neuen Mietvertrag für Anna Keller erfassen'
+		);
+		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe(
+			'/contracts/new?tenant=t1&start=2099-04-01'
+		);
 	});
 
 	it('kehrt beim Abbrechen zum Mietvertrag zurück', async () => {

@@ -72,8 +72,9 @@
 	const link =
 		'inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4 hover:text-accent-strong';
 	// the earliest start of a new contract after this one (YYYY-MM-DD is midnight UTC)
-	const dayAfter = (end: string) =>
-		formatDate(new Date(Date.parse(end.slice(0, 10)) + 86_400_000).toISOString().slice(0, 10));
+	const nextDay = (end: string) =>
+		new Date(Date.parse(end.slice(0, 10)) + 86_400_000).toISOString().slice(0, 10);
+	const dayAfter = (end: string) => formatDate(nextDay(end));
 	// «Befristet» for a contract saved open-ended: a notice is entered with «Beenden» (Sven K1 M1); a saved notice
 	// always has an end (backend `checkNotice`)
 	const noticeHint = $derived(!contract.endDate && !values.isUnlimited && !values.terminated);
@@ -213,12 +214,17 @@
 					: m.contracts_parties_fixed_open()}
 			</p>
 			<p>{m.contracts_parties_fixed_mistake()}</p>
+			<p>{m.contracts_parties_fixed_by_law()}</p>
+			<p>{m.contracts_parties_fixed_transfer()}</p>
 			<a href={back} class={link} data-testid="contract-parties-link"
 				>{m.contracts_parties_fixed_link({ name: tenant })}</a
 			>
 			{#if contract.endDate}
-				<a href="/contracts/new" class={link} data-testid="contract-parties-new"
-					>{m.contracts_parties_fixed_new()}</a
+				<!-- for the same tenant, e.g. a move within the house (#156); the name keeps it from the Nachmieter -->
+				<a
+					href="/contracts/new?tenant={contract.tenantId}&start={nextDay(contract.endDate)}"
+					class={link}
+					data-testid="contract-parties-new">{m.contracts_new_for_tenant({ name: tenant })}</a
 				>
 			{/if}
 		</div>
