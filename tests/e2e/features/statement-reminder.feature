@@ -65,3 +65,17 @@ Funktionalität: Mahnungen
     Wenn der Liegenschaftsverwalter eine Mahnung sendet
     Und der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" in den Dokumenten als versendet markiert
     Dann ist die "Zahlungserinnerung" an "Anna Keller" per Brief versendet festgehalten
+
+  # #108: jede Mahnung trägt einen Zahlteil für den offenen Saldo, mit der Referenz der Abrechnung
+  # (die Referenz gibt es nur mit einer QR-IBAN, die IBAN gilt für alle Szenarien: geprüft in reminders.pg.test.ts)
+  @wip
+  Szenario: Zahlungserinnerung mit Zahlteil für den offenen Saldo
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und "Anna Keller" wünscht Korrespondenz per Brief
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter eine Mahnung sendet
+    Und der Liegenschaftsverwalter das PDF der "Zahlungserinnerung" an "Anna Keller" in den Dokumenten herunterlädt
+    Dann steht im PDF "Empfangsschein"
+    Und steht im PDF "Zahlteil"
+    Und steht im PDF "CH93 0076 2011 6238 5295 7"
+    Und steht im PDF "Währung Betrag CHF 2 320.00"
