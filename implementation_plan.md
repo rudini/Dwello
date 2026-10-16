@@ -1,3 +1,13 @@
 # Dwello implementation plan
 
 Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when the task starts, tick them as they are done, note the files changed. Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session 2026-10-16 W4: Heizprofil on the detail page, help text, rounded months (#247, #230, #232)
+
+- [ ] @wip scenarios (statement-detail.feature, heating-profiles.feature), fach-reviewer before implementing
+- [ ] #247: a statement shared by days stores the chosen Heizprofil's names and why it was not applied; the detail page names it «(nicht angewendet: …)»
+- [ ] #230: help text at the Monatsanteile of an own profile: existing statements keep their shares (four languages)
+- [ ] #232: share from the months rounded to two places; PDF prints the division and, under a year, the period's months
+- [ ] #232 C-5: no recompute for statements without a stored share (no Heizprofil note)
+- [ ] Slice reviews, feature review (persona, fach-reviewer, daten-pruefer)
+- [ ] Workflow review, archive the session, pull request

@@ -43,6 +43,12 @@ Funktionalität: Heizprofile
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Bergtal"
     Und trägt der Januar im Heizprofil "18 %" der Heizkosten
 
+  # #230: eine Abrechnung behält die Anteile, mit denen sie erstellt wurde; eine Änderung wirkt erst auf neue
+  @wip
+  Szenario: Bearbeitung eines Heizprofils sagt, dass bestehende Abrechnungen ihre Anteile behalten
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Heizprofils "Bergtal"
+    Dann erklärt die Bearbeitungsseite bei den Monatsanteilen "Bestehende Abrechnungen behalten ihre Anteile. Um einen Entwurf mit den neuen Anteilen zu rechnen, löschen Sie ihn und erstellen ihn neu."
+
   Szenario: Heizprofil löschen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Heizprofils "Bergtal"
     Wenn der Liegenschaftsverwalter das Heizprofil löscht
