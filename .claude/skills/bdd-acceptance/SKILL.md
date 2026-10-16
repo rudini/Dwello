@@ -18,7 +18,7 @@ playwright-bdd is already set up in this repo. **Extend the existing setup; neve
 - Actor: single role **Liegenschaftsverwalter** (see `UBIQUITOUS_LANGUAGE.md`). Use no role tags. Unauthenticated scenarios belong in `authentication.feature`.
 - UI copy is German. Match visible text exactly (e.g. "Neues Gebäude").
 - Selectors: `data-testid` only (kebab-case, with component context, e.g. `building-card-{id}`). Add missing `data-testid` attributes to the Svelte components.
-- No mocks: seed data through real backend endpoints, never `page.route()` fakes. The one exception: a state that only a failing request reaches answers that endpoint (all its calls) with an error status at the browser boundary, never with invented data (`docs/test-pyramid.md`).
+- No mocks: seed data through real backend endpoints, never `page.route()` fakes. The one exception, a failing request: `tests/e2e/CLAUDE.md`, "Rules", failure states.
 - Before writing new steps, check `tests/e2e/steps/` for an existing step with the same text. playwright-bdd fails on duplicate step definitions.
 - Do not stop for confirmations: the user confirmation of Phase 2 and the question in "Iteration" do not apply. Actor and terms come from `UBIQUITOUS_LANGUAGE.md`; a missing term gets `TODO(fachlich prüfen, #<issue>)` and an issue (`CLAUDE.md`, "Open work"). The task or issue names the scenarios to write.
 

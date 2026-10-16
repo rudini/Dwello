@@ -1,3 +1,14 @@
+## Session 2026-10-16: one source for the E2E rules (guide review G-10)
+
+Request (chat): «Setze G-10 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Own pull request after #269 is merged.
+
+- [x] `tests/e2e/CLAUDE.md`, "Rules", is the one source for failure states, negative checks, isolation and `@api`; `CLAUDE.md`, `docs/test-pyramid.md` and `.claude/agents/code-reviewer.md` point there; the `bdd-acceptance` skill too (code review C-1)
+- [x] Nothing lost: every detail of the removed copies is in `tests/e2e/CLAUDE.md`
+- [x] `code-reviewer` round 1 (docs/reviews/g10-review-1.md); its Minor and Nits fixed, no further round
+- [x] Checks: lint, check, the tests that read rule files
+- [x] Archive the session, push after #269 is merged, pull request, CI, merge
+  Files: `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `docs/test-pyramid.md`, `.claude/agents/code-reviewer.md`, `.claude/skills/bdd-acceptance/SKILL.md`; report `docs/reviews/g10-review-1.md`
+
 ## Session 2026-10-16: second guide review R-1 to R-8
 
 Request (chat): «Setze deine Empfehlung um, R-4 auch» from `docs/reviews/opus55-guide-review-2.md`. Rules only, no app behaviour, so no scenario. Same pull request as the G findings (not pushed yet).
