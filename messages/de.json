@@ -1403,7 +1403,7 @@
 	"contracts_duration_terminated": "Unbefristet, gekündigt",
 	"contracts_duration_terminated_help": "Der Mietvertrag endet mit der Kündigung. Hat sich der Kündigungstermin verschoben, ändern Sie das Vertragsende.",
 	"contracts_withdraw_notice": "Kündigung aufheben",
-	"contracts_withdraw_notice_help": "Der Mietvertrag läuft dann ohne Ende weiter.",
+	"contracts_withdraw_notice_help": "Der Mietvertrag läuft dann ohne Ende weiter. Das geht nur, wenn Mieter und Vermieter die Kündigung gemeinsam zurücknehmen oder die Schlichtungsbehörde oder ein Gericht sie für ungültig erklärt. Ist eine Kündigung angekommen, kann sie weder der Mieter noch der Vermieter allein zurücknehmen.",
 	"contracts_notice_withdrawn_toast": "Kündigung von {name} aufgehoben. Der Mietvertrag läuft ohne Ende weiter.",
 	"backend_contract_notice_without_end": "Eine Kündigung braucht ein Vertragsende. Geben Sie den Kündigungstermin ein.",
 	"backend_contract_parties_fixed": "Mieter und Wohnung eines Mietvertrags lassen sich nicht ändern. Geben Sie diesem Mietvertrag ein Vertragsende und erfassen Sie einen neuen Mietvertrag.",
