@@ -323,6 +323,7 @@ export type HeatingShare =
 			byDays: false;
 			percent: number;
 			months: { month: number; percentage: number }[];
+			periodPercent?: number; // the period's months in the profile (#229); absent on statements of #209
 			names: { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
 	  };
 

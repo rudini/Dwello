@@ -14,6 +14,13 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement({ ...backendStatement, heatingProfile: null }).heatingProfileName).toBe('');
 	});
 
+	// #229 (F-7): ein eigenes Heizprofil lässt sich umbenennen; die Abrechnung nennt es, wie sie es gespeichert hat
+	it('nennt das Heizprofil, wie die Abrechnung es gespeichert hat', () => {
+		const names = { name: 'Winter', nameDE: 'Winter', nameFR: null, nameIT: null, nameEN: null };
+		const heatingShare = { byDays: false, percent: 43, months: [], names };
+		expect(toStatement({ ...backendStatement, heatingShare }).heatingProfileName).toBe('Winter');
+	});
+
 	it('übernimmt Mieter, Wohnung, Bemerkungen und Kostenpositionen', () => {
 		expect(toStatement(backendStatement)).toMatchObject({
 			tenantName: 'Eva Frei',

@@ -194,7 +194,7 @@ export async function handleMidYearMoves(
 	totalHeatingCosts: number
 ): Promise<
 	| { byDays: true }
-	| { byDays: false; share: number; percentage: number; monthBreakdown: { month: number; percentage: number }[] }
+	| { byDays: false; share: number; percentage: number; periodPercentage: number; monthBreakdown: { month: number; percentage: number }[] }
 > {
 	const profile = await getHeatingProfile(heatingProfileId);
 	if (!profile) return { byDays: true };
@@ -213,7 +213,8 @@ export async function handleMidYearMoves(
 	const period = calculateHeatingShare(profile, periodStart, periodEnd, totalHeatingCosts);
 	if (period.percentage <= 0) return { byDays: true };
 	const percentage = (tenant.percentage / period.percentage) * 100;
-	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage, byDays: false };
+	// periodPercentage: what the period's months carry in the profile, so the PDF can show the division (#229)
+	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage, periodPercentage: period.percentage, byDays: false };
 }
 
 /**
