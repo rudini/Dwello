@@ -1,6 +1,7 @@
 import { question } from '../screenplay/actor';
 import { ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
+	endDialogDeathHint,
 	confirmEndContractButton,
 	contractApartment,
 	contractEndDate,
@@ -23,3 +24,4 @@ export const endConfirmationInWindow = question(
 
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
+export const endDialogDeathText = Text.of(endDialogDeathHint);

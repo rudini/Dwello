@@ -158,6 +158,20 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Liegenschaftsverwalter auf der Seite "Neuer Mietvertrag"
     Und gilt der neue Mietvertrag für die Wohnung "2.01"
 
+  # F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über, «Beenden» sagt es (Fachreview W10 M-1)
+  Szenario: Beenden nennt den Tod des Mieters
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag beenden will
+    Dann erfährt der Liegenschaftsverwalter im Dialog «Mietvertrag beenden», dass der Mietvertrag beim Tod des Mieters weiterläuft
+
+  # B-16 (#156): wer innerhalb des Hauses umzieht, braucht einen neuen Mietvertrag
+  Szenario: Neuer Mietvertrag für denselben Mieter nach der Kündigung
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beendet
+    Und der Liegenschaftsverwalter als nächsten Schritt einen neuen Mietvertrag für "Anna Keller" erfassen will
+    Dann ist der Liegenschaftsverwalter auf der Seite "Neuer Mietvertrag"
+    Und ist im Mietvertrag der Mieter "Anna Keller" gewählt
+
   # A-10: die Ablehnung führt zum Entwurf und bietet den Weg über das Löschen an
   Szenario: Abgelehnter Entwurf ist verlinkt
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"

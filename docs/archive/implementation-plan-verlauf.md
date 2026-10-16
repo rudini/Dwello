@@ -540,6 +540,27 @@ Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs
 - [x] Workflow notes (`docs/reviews/workflow-notes-issue-247-230-232.md`)
 - [x] Workflow review, archive the session, pull request
 
+## Session: moves within the house and contracts that continue by law (#156, #155)
+
+Request: «Setze #156 #155 um».
+
+- [x] #156 «Nächste Schritte» get «Neuen Mietvertrag für {name} erfassen» to `/contracts/new?tenant=…` (scenario in `contract-detail.feature`, DOM test `NextSteps.svelte`)
+- [x] #156 «Neuer Mietvertrag» hints when the chosen tenant still has an open-ended Mietvertrag for another apartment (not blocking)
+- [x] #156 «Neuen Mietvertrag erfassen» on «Mietvertrag bearbeiten» fills in the tenant and the earliest start (`?start=`)
+- [x] #155 help text (four languages) and `docs/anforderungen-vertragsende.md`: death keeps the Mietvertrag (heirs' address as Korrespondenzadresse); transfer or court assignment is Vertragsende plus new Mietvertrag
+- [x] fach-reviewer on the `@wip` scenarios before implementing
+- [x] fach-reviewer round 1 (`docs/reviews/w10-fachreview-1.md`)
+- [x] #155 also in the dialog «Mietvertrag beenden» (Fachreview W10 M-1); the edit link names the tenant (V-1)
+- [x] code-reviewer round 1 (`docs/reviews/w10-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w10-fachreview-2.md`)
+- [x] persona Helga (`docs/design/personas/helga-b16.md`), persona Dr. Weber (`docs/design/personas/weber-f23.md`)
+- [x] fach-reviewer round 3 (`docs/reviews/w10-fachreview-3.md`), Dr. Weber re-run (`docs/design/personas/weber-f23-2.md`), closing code-reviewer round 2 (`docs/reviews/w10-review-2.md`)
+- [x] Workflow note: «every new test seen red» for a scenario added after a review; collected review with parallel sessions (`docs/reviews/workflow-notes-issue-156.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/routes/contracts/new/OpenContracts.svelte`, `src/lib/contract-form.ts`, `src/lib/contract-wizard.ts`, `src/lib/utils/contract-availability.ts`, `docs/anforderungen-vertragsende.md`, tests in `src/__tests__/` and `tests/e2e/`.
+
 ## Session: statement list tenancy dates and missing PDF (#248, #253)
 
 - [x] #248 scenario `@wip` in `statements.feature`: list shows the tenancy dates within the period
