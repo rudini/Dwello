@@ -11,7 +11,8 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] fach-reviewer round 1 on scenarios and texts: `docs/reviews/w3-fachreview-1.md`; V-2 → #276
 - [x] code-reviewer round 1: `docs/reviews/w3-review-1.md`; C-1 → #282 (decision)
 - [x] personas: `docs/design/personas/weber-w3-leistungszeitraum.md`, `docs/design/personas/helga-w3-leistungszeitraum.md`
-- [ ] fach-reviewer round 2 on the changed texts: `docs/reviews/w3-fachreview-2.md`
+- [x] fach-reviewer round 2 on the changed texts: `docs/reviews/w3-fachreview-2.md`
+- [x] Workflow note: scenario of existing behaviour, one pull request for two issues, contradicting decisions block the merge (`docs/reviews/workflow-notes-issue-250-254.md`)
 - [ ] closing code-reviewer round
 - [ ] pull request merged
 
