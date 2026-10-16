@@ -44,18 +44,20 @@ const contracts = [
 	contract({ id: 'n4', apartmentId: 'a9', startDate: '2027-02-01', endDate: null }),
 	contract({ id: 'n7', apartmentId: 'a6', startDate: '2026-11-21', endDate: null })
 ];
-const billed = (...ids: string[]) =>
-	ids.map((contractId) => ({ ...periodStatements.data[0], contractId }));
-const both = billed('k1', 'k2', 'k3', 'k4', 'k7', 'k8');
+// a statement of the contract over the days given, by default every day of all its periods
+const billed = (contractId: string, periodStart = '2019-07-01', periodEnd = '2026-06-30') => ({
+	...periodStatements.data[0],
+	contractId,
+	periodStart,
+	periodEnd
+});
+const all = ['k1', 'k2', 'k3', 'k4', 'k5', 'k7', 'k8'].map((id) => billed(id));
 
 // The backend as the overview reads it: counts, plus the lists that carry dates
-function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both) {
+function backend(dashboardStatus = 200, statements: unknown[] = all) {
 	const answers: Record<string, unknown> = {
 		'/config': { data: { accounting_period: 'july-june' } },
-		'/statements?periodStart=2025-07-01&periodEnd=2026-06-30&limit=1000': {
-			data: statementsOfLastPeriod,
-			total: statementsOfLastPeriod.length
-		},
+		'/statements?limit=1000': { data: statements, total: statements.length },
 		'/statements?status=overdue&limit=100': {
 			data: [
 				{
@@ -143,18 +145,28 @@ describe('Übersicht laden', () => {
 			'successor-n5',
 			'successor-n1'
 		]);
-		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');
+		// #211: every ended period since the Vertragsbeginn, not only the last one
 		expect(data.tasks[2].text).toContain(
-			'Noch nicht abgerechnet: Ahornhof, Birkenhof, Erlenhof, Lindenhof, Seeblick.'
+			'Lindenhof (01.07.2025 – 30.06.2026, 01.07.2024 – 30.06.2025, 01.07.2023 – 30.06.2024)'
+		);
+		expect(data.tasks[2].text).toMatch(
+			/Noch nicht abgerechnet: Ahornhof \(.*\), Birkenhof \(.*\), Erlenhof \(.*\), Leerbau \(.*\), Lindenhof \(.*\), Seeblick \(.*\)\./
 		);
 	});
 
-	// The tenant who moved out still gets a statement for the days of the period (A-9)
-	it('nennt jedes Gebäude, das in der Periode einen Mietvertrag ohne Abrechnung hatte', async () => {
+	// The tenant who moved out still gets a statement for the days of the period (A-9); a statement that overlaps a
+	// period counts, only the days no statement covers are missing (#199)
+	it('nennt jedes Gebäude mit den Tagen, die keine Abrechnung seiner Mietverträge abdeckt', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const data = await load({ fetch: backend(200, billed('k1', 'k2', 'k7', 'k8')) } as never);
+		const statements = [
+			...all.filter((s) => s.contractId !== 'k4'),
+			billed('k4', '2023-01-01', '2024-12-31')
+		];
+		const data = await load({ fetch: backend(200, statements) } as never);
 		const task = data.tasks.find((t) => t.id === 'missing-period')!;
-		expect(task.text).toContain('Noch nicht abgerechnet: Ahornhof, Lindenhof.');
+		expect(task.text).toContain(
+			'Noch nicht abgerechnet: Ahornhof (01.07.2025 – 30.06.2026, 01.01.2025 – 30.06.2025).'
+		);
 	});
 
 	// The building cards count them too; the overview names when they will be rented

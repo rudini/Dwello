@@ -1010,6 +1010,39 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		);
 	});
 
+	// #199: a statement of another period (e.g. before a change of the setting) leaves days open: they are named with
+	// the statement's period, and a shorter period for them is offered
+	it('nennt die Tage ohne Abrechnung und bietet die Abrechnungsperiode dafür an', async () => {
+		billed([
+			{
+				buildingId: 'b1',
+				contracts: 1,
+				billed: 1,
+				gap: {
+					billed: [{ start: '2023-07-01', end: '2024-06-30' }],
+					open: [{ start: '2024-07-01', end: '2024-12-31' }]
+				}
+			} as never,
+			{ buildingId: 'b2', contracts: 1, billed: 0 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(byTestId('generate-building-gap-b1')!.textContent!.trim()).toBe(
+			'Bestehende Abrechnungen: 01.07.2023 – 30.06.2024. Noch ohne Abrechnung: 01.07.2024 – 31.12.2024.'
+		);
+		const link = byTestId('generate-building-short-period-b1-2024-07-01')!;
+		expect(link.textContent!.trim()).toBe('Abrechnungsperiode 01.07.2024 – 31.12.2024 wählen');
+		expect(link.getAttribute('href')).toBe(
+			'/statements/generate?building=b1&start=2024-07-01&end=2024-12-31'
+		);
+		// a link is no part of the checkbox's label
+		expect(link.closest('label')).toBeNull();
+		expect(byTestId('generate-building-gap-b2')).toBeNull();
+	});
+
 	it('sagt, dass für ein Gebäude keine Abrechnung entsteht, wenn alle Mietverträge eine haben', async () => {
 		billed([
 			{ buildingId: 'b1', contracts: 2, billed: 2 },

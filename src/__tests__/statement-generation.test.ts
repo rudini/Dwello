@@ -85,6 +85,37 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 	});
 });
 
+// #199: an overlapping statement counts, but step 2 names the days it leaves open and the period of the statement
+describe('Tage ohne Abrechnung je Gebäude', () => {
+	it('nennt die Abrechnungen, die die Periode teilweise abdecken, und die Tage ohne Abrechnung', async () => {
+		// a statement made under July–June before the switch to the calendar year
+		const { fetch } = backend([
+			{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30' }
+		]);
+
+		expect(await billedContracts(fetch, period)).toEqual([
+			{
+				buildingId: 'b1',
+				contracts: 2,
+				billed: 1,
+				gap: {
+					billed: [{ start: '2023-07-01', end: '2024-06-30' }],
+					open: [{ start: '2024-07-01', end: '2024-12-31' }]
+				}
+			}
+		]);
+	});
+
+	it('nennt keine Tage, an denen ein abgerechneter Mietvertrag nicht läuft', async () => {
+		// the contract starts on 01.05.2024: January to April have no rent days
+		const { fetch } = backend([
+			{ contractId: 'einzug', periodStart: '2024-05-01', periodEnd: '2024-12-31' }
+		]);
+
+		expect((await billedContracts(fetch, period))[0].gap).toBeUndefined();
+	});
+});
+
 describe('Abrechnungen erstellen', () => {
 	it('zeigt in der Vorschau jeden Mietvertrag, der in die Periode fällt', async () => {
 		const { fetch } = backend();

@@ -55,7 +55,7 @@ function open(
 	form: unknown = null,
 	today = '2026-10-10',
 	terminated = false,
-	missingStatements: { start: string; end: string; href: string }[] = []
+	missingStatements: { start: string; end: string; href: string; invoicesHref?: string }[] = []
 ) {
 	show(ContractPage, {
 		data: {
@@ -208,6 +208,31 @@ describe('Mietvertragsdetail', () => {
 		const links = [...byTestId('contract-missing-statement')!.querySelectorAll('a')];
 		expect(links.map((a) => a.textContent!.trim())).toEqual(['2025 abrechnen', '2023 abrechnen']);
 		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href));
+	});
+
+	// #211: the warning asks for the invoices first and leads to those of the building in that period
+	it('führt zu den Rechnungen des Gebäudes in jeder fehlenden Periode', () => {
+		const missing = [
+			{
+				start: '2025-01-01',
+				end: '2025-12-31',
+				href: '/statements/generate',
+				invoicesHref: '/invoices?building=b1&year=2025'
+			},
+			{
+				start: '2024-07-01',
+				end: '2024-12-31',
+				href: '/statements/generate',
+				invoicesHref: '/invoices?building=b1&year=2024'
+			}
+		];
+		open('2022-04-01', null, null, '2026-10-10', false, missing);
+		const link = (start: string) => byTestId(`contract-missing-statement-invoices-${start}`)!;
+		expect(link('2025-01-01').textContent!.trim()).toBe('Rechnungen 2025 ansehen');
+		expect(link('2025-01-01').getAttribute('href')).toBe('/invoices?building=b1&year=2025');
+		expect(link('2024-07-01').textContent!.trim()).toBe(
+			'Rechnungen 01.07.2024 – 31.12.2024 ansehen'
+		);
 	});
 
 	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {

@@ -106,6 +106,19 @@ describe('Mietvertragsliste', () => {
 		expect(body).toMatch(/aria-label="Mietvertrag von Anna Keller bearbeiten"/);
 	});
 
+	// #211: a missing statement shows in the list, not only on the contract page; in words, not colour alone
+	it('kennzeichnet einen Mietvertrag mit fehlender Abrechnung', () => {
+		const body = list([
+			{ ...contract('c1', 'Anna Keller', '2024-04-01', null), missingStatement: true },
+			contract('c2', 'Ben Meier', '2024-04-01', null)
+		]);
+
+		expect(row(body, 'c1')).toMatch(
+			/data-testid="contract-missing-statement-badge"[\s\S]*?Abrechnung fehlt/
+		);
+		expect(row(body, 'c2')).not.toContain('contract-missing-statement-badge');
+	});
+
 	it('meldet den Status nicht als Live-Region', () => {
 		expect(list([contract('c1', 'Anna Keller', '2024-04-01', null)])).not.toContain(
 			'role="status"'

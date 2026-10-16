@@ -42,6 +42,46 @@ describe('Vertragsstatus', () => {
 	});
 });
 
+// #211: the list marks a contract with missing statements, by the rule of the contract page
+describe('Fehlende Abrechnungen in der Mietvertragsliste', () => {
+	const lastYear = new Date().getFullYear() - 1;
+	const listed = { ...contractList.contracts[0], startDate: `${lastYear}-01-01` };
+	const listOf = async (statements: unknown[] | null) => {
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/config'))
+				return Response.json({ data: { accounting_period: 'calendar' } });
+			if (url.includes('/statements?'))
+				return statements
+					? Response.json({ data: statements })
+					: new Response('down', { status: 500 });
+			return Response.json({ contracts: [listed], total: 1 });
+		}) as typeof globalThis.fetch;
+		const list = (await listLoad({
+			url: new URL('http://localhost/contracts'),
+			fetch
+		} as never)) as {
+			contracts: { missingStatement?: boolean }[];
+		};
+		return list.contracts[0].missingStatement;
+	};
+	const statementOf = (contractId: string) => ({
+		...periodStatements.data[0],
+		contractId,
+		periodStart: `${lastYear}-01-01`,
+		periodEnd: `${lastYear}-12-31`
+	});
+
+	it('kennzeichnet einen Mietvertrag mit Mietstagen ohne Abrechnung', async () => {
+		// another contract's statement does not count
+		expect(await listOf([statementOf('c0')])).toBe(true);
+	});
+
+	it('kennzeichnet keinen abgerechneten Mietvertrag, und keinen, wenn die Abrechnungen nicht laden', async () => {
+		expect(await listOf([statementOf('c1')])).toBe(false);
+		expect(await listOf(null)).toBe(false);
+	});
+});
+
 // Review K-1: «Nächste Schritte» nur, solange die Kündigung läuft und kein Nachmieter erfasst ist
 describe('Nächste Schritte nach einer Kündigung', () => {
 	const backend = (contract: Record<string, unknown>, others: unknown[] | null = []) =>
@@ -120,9 +160,32 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		expect(await missingOf(backend(statements))).toEqual(
 			[lastYear, lastYear - 2].map((y) => ({
 				...year(y),
-				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
+				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`,
+				// #211: the invoices of the building in that period come first
+				invoicesHref: `/invoices?building=b1&year=${y}`
 			}))
 		);
+	});
+
+	// #199: a statement that overlaps the period counts; only the days no statement covers are missing
+	it('nennt bei einer Abrechnung, die die Periode teilweise abdeckt, nur die Tage ohne Abrechnung', async () => {
+		const statements = [
+			statementOf('c1', lastYear - 1),
+			{
+				...statementOf('c1', lastYear - 2),
+				periodStart: `${lastYear - 3}-07-01`,
+				periodEnd: `${lastYear - 2}-06-30`
+			},
+			statementOf('c1', lastYear)
+		];
+		expect(await missingOf(backend(statements))).toEqual([
+			{
+				start: `${lastYear - 2}-07-01`,
+				end: `${lastYear - 2}-12-31`,
+				href: `/statements/generate?building=b1&start=${lastYear - 2}-07-01&end=${lastYear - 2}-12-31`,
+				invoicesHref: `/invoices?building=b1&year=${lastYear - 2}`
+			}
+		]);
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
