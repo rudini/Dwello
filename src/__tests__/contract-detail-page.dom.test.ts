@@ -653,3 +653,79 @@ describe('Mietvertrag löschen', () => {
 		expect(dialog).not.toContain('«Beenden»');
 	});
 });
+
+// A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag fragt die Seite, ob der Mieter noch in der Wohnung wohnt
+describe('Abgelaufener befristeter Mietvertrag', () => {
+	function expired(form: unknown = null, fixedTermCheck = true) {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: null,
+				fixedTermCheck, // the loader decides
+				contract: contract('2024-01-01', '2025-12-31'),
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			},
+			form
+		} as never);
+	}
+	async function answer(action: string, type: string) {
+		const after = actions.get(action)!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type } });
+	}
+
+	it('fragt, ob der Mieter noch in der Wohnung wohnt, mit beiden Antworten', () => {
+		expired();
+		const check = byTestId('contract-fixed-term-check')!;
+		expect(text('contract-fixed-term-check')).toContain(
+			'Der befristete Mietvertrag von Anna Keller ist am 31.12.2025 abgelaufen. Wohnt Anna Keller noch in der Wohnung? Dann läuft der Mietvertrag unbefristet weiter.'
+		);
+		const button = (testid: string) => [
+			byTestId(testid)!.textContent!.trim(),
+			byTestId(testid)!.closest('form')!.getAttribute('action')
+		];
+		expect(button('contract-continue-open-ended')).toEqual([
+			'Unbefristet weiterführen',
+			'?/continueOpenEnded'
+		]);
+		expect(button('contract-moved-out')).toEqual(['Mieter ist ausgezogen', '?/movedOut']);
+		expect(check.contains(byTestId('contract-moved-out'))).toBe(true);
+	});
+
+	it('fragt nicht, wenn der Loader es nicht verlangt', () => {
+		expired(null, false);
+		expect(byTestId('contract-fixed-term-check')).toBeNull();
+	});
+
+	it('meldet, was gespeichert ist', async () => {
+		expired();
+		await answer('?/continueOpenEnded', 'success');
+		await answer('?/movedOut', 'success');
+		expect(get(toasts).map((t) => t.message)).toEqual(
+			expect.arrayContaining([
+				'Der Mietvertrag von Anna Keller läuft unbefristet weiter',
+				'Gespeichert: Anna Keller ist ausgezogen'
+			])
+		);
+	});
+
+	// A-10: die Abrechnung rechnet die Zeit nach dem Vertragsende als Leerstand ab; der Entwurf lässt sich löschen
+	it('nennt die sperrende Abrechnung und bietet an, den Entwurf zu löschen', async () => {
+		expired({ fixedTermError: 'gesperrt', fixedTermRefused: refused.statements });
+		const check = byTestId('contract-fixed-term-check')!;
+		expect(check.querySelector('[data-testid="form-error"]')!.textContent).toContain('gesperrt');
+		expect(byTestId('refused-statement-link')!.getAttribute('href')).toBe('/statements/s1');
+		const form = document.querySelector<HTMLFormElement>('form[action="?/continueDeletingDraft"]')!;
+		expect(form.querySelector<HTMLInputElement>('[name="statementId"]')!.value).toBe('s1');
+		expect(byTestId('delete-draft-and-continue')!.textContent).toContain(
+			'Entwurf löschen und unbefristet weiterführen'
+		);
+		await answer('?/continueDeletingDraft', 'redirect');
+		expect(get(toasts).map((t) => t.message)).toContain(
+			'Entwurf NK-2025-0003 gelöscht. Der Mietvertrag von Anna Keller läuft unbefristet weiter. Erstellen Sie jetzt die Nebenkostenabrechnung neu.'
+		);
+	});
+});

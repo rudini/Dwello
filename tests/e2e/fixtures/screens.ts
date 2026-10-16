@@ -79,6 +79,13 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00' });
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
+	// A-6 (#115): an agreed end in the past, the 2025 statement bills the time after it as Leerstand
+	await seed.building('Talblick', 'Winterthur');
+	await seed.apartment('Talblick', '3.01', 'vacant');
+	await seed.tenant('Emil');
+	await seed.contract('Emil', '3.01', { startDate: '2024-01-01', endDate: '2025-06-30', baseRent: '1300.00' });
+	await seed.heatingInvoice('Talblick', '1200.00', 2025);
+	await seed.statement('Emil', 'Talblick', 2025, 'Standard');
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -87,6 +94,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		tenant: seed.idOf('Anna'), // rents 1.01 without an end: the contract wizard's step «Wohnung» names it (#156)
 		contract: seed.idOf('Mietvertrag Anna'),
 		noticedContract: seed.idOf('Mietvertrag Dora'),
+		expiredContract: seed.idOf('Mietvertrag Emil'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
 		lateInvoice,

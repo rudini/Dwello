@@ -42,7 +42,15 @@ const contracts = [
 		contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01', terminated: true })
 	),
 	contract({ id: 'n4', apartmentId: 'a9', startDate: '2027-02-01', endDate: null }),
-	contract({ id: 'n7', apartmentId: 'a6', startDate: '2026-11-21', endDate: null })
+	contract({ id: 'n7', apartmentId: 'a6', startDate: '2026-11-21', endDate: null }),
+	// A-6 (#115), all agreed ends: expired; expired and moved out; expired with a next contract; still running
+	...[
+		{ id: 'f1', apartmentId: 'f1', endDate: '2026-10-09' },
+		{ id: 'f2', apartmentId: 'f2', endDate: '2026-09-30', movedOut: true },
+		{ id: 'f3', apartmentId: 'f3', endDate: '2026-07-31' },
+		{ id: 'f5', apartmentId: 'f5', endDate: '2026-10-10' }
+	].map((c) => contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01' })),
+	contract({ id: 'f4', apartmentId: 'f3', startDate: '2026-08-01', endDate: null })
 ];
 const billed = (...ids: string[]) =>
 	ids.map((contractId) => ({ ...periodStatements.data[0], contractId }));
@@ -118,7 +126,9 @@ describe('Übersicht laden', () => {
 			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
 			'successor-n2',
 			'successor-n5',
-			'successor-n1'
+			'successor-n1',
+			// A-6 (#115): only the expired agreed end without a next contract and without a move-out
+			'fixed-term-f1'
 		]);
 		expect(data.tasks[1].text).toContain('2 Briefe sind');
 		expect(data.deadlines.map((d) => [d.kind, d.name, d.when])).toEqual([
@@ -141,7 +151,10 @@ describe('Übersicht laden', () => {
 			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
 			'successor-n2',
 			'successor-n5',
-			'successor-n1'
+			'successor-n1',
+			'fixed-term-f1',
+			// A-6 (#115): only the expired agreed end without a next contract and without a move-out
+			'fixed-term-f1'
 		]);
 		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');
 		expect(data.tasks[2].text).toContain(

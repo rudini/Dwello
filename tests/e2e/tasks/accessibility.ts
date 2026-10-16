@@ -41,6 +41,7 @@ import {
 	contractEndInput,
 	contractEndPastConfirm,
 	noticeReceivedInput,
+	continueOpenEndedButton,
 	deleteContractButton,
 	endContractButton
 } from '../targets/contract-detail';
@@ -225,6 +226,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2099-02-15').into(noticeReceivedInput),
 			Wait.until(on.shown('contract-notice-period-hint'))
 		),
+	// A-6 (#115): the 2025 draft bills the time after the agreed end as Leerstand: continuing is refused, the draft offered
+	'continue-refused': () => (actor) =>
+		actor.attemptsTo(Click.on(continueOpenEndedButton), Wait.until(on.refusedStatements)),
 	// the same refusal from the contract form: the 2025 draft bills rent days after 31.03.2025 (A-10)
 	'edit-refused': () => async (actor) => {
 		await clickOnShown(actor, 'Befristet', durationChoice);
