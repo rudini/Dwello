@@ -43,6 +43,13 @@ describe('initialContractValues', () => {
 		);
 	});
 
+	it('takes over no start from the URL the date check would refuse (#296)', () => {
+		const start = (date: string) =>
+			initialContractValues(undefined, new URLSearchParams({ start: date })).startDate;
+		expect(start('2100-01-01')).toBe('');
+		expect(start('2026-04-01')).toBe('2026-04-01');
+	});
+
 	it('takes the values of the contract being edited', () => {
 		const contract = {
 			id: 'c1',

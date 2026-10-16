@@ -1,7 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
-import { impossible } from './contract-form';
-import { impossibleYear } from './contract-wizard';
+import { impossible, impossibleYear } from './contract-form';
 import { formatCurrency, formatDate } from './utils/format';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */

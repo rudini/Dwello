@@ -3,6 +3,7 @@ import { plainAmount } from './invoice';
 import {
 	apartmentOption,
 	impossible,
+	impossibleYear,
 	initialContractValues,
 	validateContract,
 	type ContractFormValues
@@ -55,8 +56,6 @@ export function stepErrors(values: ContractFormValues, step: number): Record<str
 		)
 	);
 }
-
-export const impossibleYear = () => m.common_error_impossible_year();
 
 function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
 	return {

@@ -23,16 +23,21 @@ export interface ContractFormValues {
 const dateForInput = (date: string | null | undefined) =>
 	date ? new Date(date).toISOString().split('T')[0] : '';
 
+// A date field typed over can end up in year 12026; such a date is surely a typing mistake
+export const impossibleYear = () => m.common_error_impossible_year();
+export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
+
 /** Values of the contract being edited, or of a new contract for the tenant and apartment given in the URL */
 export function initialContractValues(
 	contract: RentalContract | undefined,
 	params: URLSearchParams
 ): ContractFormValues {
 	if (!contract) {
+		const start = params.get('start') || '';
 		return {
 			tenantId: params.get('tenant') || '',
 			apartmentId: params.get('apartment') || '',
-			startDate: params.get('start') || '', // the day after the contract it follows (#156)
+			startDate: impossible(start) ? '' : start, // the day after the contract it follows (#156), never one the date check refuses (#296)
 			endDate: '',
 			isUnlimited: true,
 			baseRent: '',
@@ -169,9 +174,6 @@ export function availableFrom(availability: AvailabilityInfo | null | undefined)
 		notice: availability.statusType === 'available-from' ? availability.message : null
 	};
 }
-
-// A date field typed over can end up in year 12026; such a date is surely a typing mistake
-export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
 
 /** Start date a new contract gets once its apartment is chosen: the day the apartment becomes free, never one the date check refuses (#296) */
 export function suggestedStartDate(
