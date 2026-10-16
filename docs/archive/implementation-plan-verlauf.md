@@ -1,5 +1,20 @@
 
 
+## Session 2026-10-16 (14): persona kit finds Playwright wherever the repo is checked out
+
+Request (chat): `docs/design/tools/persona-kit.mjs` resolved `package.json` from `/home/user/Dwello`; in cloud sessions checked out as `/home/user/dwello` it could not load Playwright, and every persona copied and patched the kit (five times in the persona runs of #217). No scenario: tooling of the persona runs.
+
+- [x] `persona-kit.mjs`: `createRequire(new URL('../../../package.json', import.meta.url))`, resolved from the kit itself
+- [x] `.claude/agents/persona.md`, `docs/design/arbeitsregeln.md`: import the kit in place instead of copying it (a copy would resolve `package.json` from the scratchpad); `persona-stack.sh` already resolves its own path on `main`
+- [x] Smoke run: `persona-stack.sh`, a script in the scratchpad imports the kit and opens `/login` (200, signed in, redirected to `/dashboard` «Übersicht - Dwello»), also from a worktree checked out as `…/lc/dwello`
+  Skills: none loaded (one-line tooling fix); no tdd: the kit has no test layer, the smoke run shows it
+- [x] Checks: lint (first run red: `'URL' is not defined` in the kit, fixed), check (0 errors), test:coverage (2486), backend test (630) + type-check, fallow and deepcheck gates
+- [x] code-reviewer round(s)
+  code-reviewer round 1 (`docs/reviews/persona-kit-review-1.md`; general-purpose subagent with `.claude/agents/code-reviewer.md`, the agent type is not registered in this session): fixed C-1 (Minor, items ticked before done), C-2 (Minor, no `Skills:` line)
+- [x] Archive session, push, PR (opened after archiving)
+
+Files: `docs/design/tools/persona-kit.mjs`, `.claude/agents/persona.md`, `docs/design/arbeitsregeln.md`, `docs/reviews/persona-kit-review-1.md`.
+
 ## Session 2026-10-16 (13): #209 statement PDF recomputes the heating share with the current Heizprofil
 
 Request (chat): work through the open bug issues one by one (sessions 10 to 12 in the archive); this is the fourth and last one without `entscheiden`, #208 merged in #228.

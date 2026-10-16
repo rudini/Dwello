@@ -2,9 +2,10 @@
 // Usage (from any directory): import { open, shot } from '<this file>';
 //   const { page, close } = await open({ viewport: 'mobile' | 'desktop', zoom: 1.5 });
 //   await page.goto('/dashboard'); await shot(page, '/tmp/persona-x/01-start.png'); await close();
-/* global TextEncoder, crypto -- Node 20 globals */
+/* global TextEncoder, URL, crypto -- Node 20 globals */
 import { createRequire } from 'module';
-const require = createRequire('/home/user/Dwello/package.json');
+// Resolved from this file, so it works wherever the repo is checked out; import it in place, do not copy it.
+const require = createRequire(new URL('../../../package.json', import.meta.url));
 const { chromium } = require('@playwright/test');
 const { SignJWT } = require('jose');
 
