@@ -26,7 +26,6 @@
 	);
 	// what the KI saw on the file when it was uploaded (persona Anna); costs that are not allocable only on an invoice
 	// that is: one that is not keeps them out already (domain review V-4)
-	// TODO(fachlich prüfen, #222): «Akontorechnung» is decided there but not yet in the glossary
 	const hints = $derived(
 		[
 			invoice.beleg?.deductedAmount &&

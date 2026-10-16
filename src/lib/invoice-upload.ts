@@ -166,7 +166,6 @@ function notesOn(proposal: Proposal, morePages: boolean) {
 		proposal.invoiceCount > 1 && m.invoices_upload_several(),
 		proposal.duplicateOf && m.invoices_upload_duplicate(),
 		proposal.documentType === 'reminder' && m.invoices_upload_reminder(),
-		// TODO(fachlich prüfen, #222): «Gutschrift» is decided there but not yet in the glossary
 		proposal.documentType === 'credit_note' && m.invoices_upload_credit_note(),
 		proposal.deductedAmount && m.invoices_upload_deducted({ amount: formatCurrency(Number(proposal.deductedAmount)) })
 	];
