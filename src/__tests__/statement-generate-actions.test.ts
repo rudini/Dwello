@@ -145,14 +145,14 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		];
 		expect(await openWith(mixed)).toMatchObject({
 			defaultManagementFeePercent: 4.5,
-			preset: { fromStatements: true }
+			preset: { fromStatements: true, feeFromSettings: false }
 		});
-		// none at the run's rate: the settings' rate, and the notice does not claim the statements' settings
+		// none at the run's rate: the settings' rate; the heating profile still comes from the other statements, so
+		// a recreated statement shares it (A-10, closing review C-1), and the notice says where each comes from
 		expect(await openWith(mixed.slice(0, 2))).toMatchObject({
 			defaultManagementFeePercent: 3,
-			// code review C-1: the heating profile too, so «aus den Einstellungen» holds for both
-			defaultHeatingProfileId: 'hp1',
-			preset: { fromStatements: false }
+			defaultHeatingProfileId: 'hp-nein',
+			preset: { fromStatements: true, feeFromSettings: true }
 		});
 	});
 

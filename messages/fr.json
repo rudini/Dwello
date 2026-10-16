@@ -1443,6 +1443,7 @@
 	"statements_preset_title": "Sélection : {building}, période de décompte {period}",
 	"statements_preset_from_statements": "Le profil de chauffage et les frais de gestion sont réglés comme pour les autres décomptes des charges de cette période de décompte. Vérifiez-les et passez à l’aperçu.",
 	"statements_preset_from_settings": "Le profil de chauffage et les frais de gestion proviennent des paramètres. Vérifiez-les et passez à l’aperçu.",
+	"statements_preset_profile_from_statements": "Le profil de chauffage est réglé comme pour les autres décomptes des charges de cette période de décompte, les frais de gestion proviennent des paramètres. Vérifiez-les et passez à l’aperçu.",
 	"statements_profile_not_applied": "{profile} (non appliqué : {reason})",
 	"statements_profile_not_applied_unknown": "{profile} (non appliqué)",
 	"statements_profile_reason_whole_period": "contrat de bail sur toute la période",

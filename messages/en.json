@@ -1443,6 +1443,7 @@
 	"statements_preset_title": "Chosen: {building}, billing period {period}",
 	"statements_preset_from_statements": "The heating profile and management fee are set like the other utility cost statements of this billing period. Check them and go on to the preview.",
 	"statements_preset_from_settings": "The heating profile and management fee come from the settings. Check them and go on to the preview.",
+	"statements_preset_profile_from_statements": "The heating profile is set like the other utility cost statements of this billing period, the management fee comes from the settings. Check them and go on to the preview.",
 	"statements_profile_not_applied": "{profile} (not applied: {reason})",
 	"statements_profile_not_applied_unknown": "{profile} (not applied)",
 	"statements_profile_reason_whole_period": "rental contract over the whole period",

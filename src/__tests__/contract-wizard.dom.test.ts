@@ -205,6 +205,10 @@ describe('Mietvertrag erfassen', () => {
 		expect(byTestId('contract-fee-rate-hint')!.textContent).toContain(
 			'Die Verwaltungspauschale ist höher als der übliche Richtwert von 3 %.'
 		);
+		// closing review C-4: above 10 % the field refuses the rate; no hint on a rate it does not take
+		type('contract-fee-rate-input', '12');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')).toBeNull();
 	});
 
 	it('zeigt vor dem Speichern alles in Worten und speichert Akonto als Akonto', async () => {

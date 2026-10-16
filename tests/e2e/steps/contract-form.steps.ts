@@ -337,6 +337,7 @@ When(
 When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
 	await verwalter.attemptsTo(agreeManagementFee);
 });
+
 Then(
 	'erfährt der Liegenschaftsverwalter, dass {string} einen Mietvertrag ohne Vertragsende für die Wohnung {string} hat',
 	async ({ verwalter, names }, tenant: string, apartment: string) => {

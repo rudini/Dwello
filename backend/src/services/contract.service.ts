@@ -281,12 +281,13 @@ function checkNotice(terminated: boolean | undefined, endDate: string | null | u
 	if (terminated && !endDate) throw new CodedError('CONTRACT_NOTICE_WITHOUT_END', 'A notice needs an end date');
 }
 
+// Without an agreed Verwaltungspauschale no own rate is kept: agreeing again later must not bring it back (#89)
+const feeRate = <T extends Partial<NewRentalContract>>(data: T, agreed = data.managementFeeAgreed): T =>
+	agreed ? data : { ...data, managementFeePercent: null };
+
 /**
  * Create a new contract
  */
-// Without an agreed Verwaltungspauschale no own rate is kept: agreeing again later must not bring it back (#89)
-const feeRate = (data: Partial<NewRentalContract>) =>
-	data.managementFeeAgreed === false ? { ...data, managementFeePercent: null } : data;
 
 export async function createContract(data: NewRentalContract): Promise<RentalContract> {
 	checkNotice(data.terminated, data.endDate);
@@ -303,7 +304,7 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 		});
 	}
 
-	const [contract] = await db.insert(rentalContracts).values(feeRate(data) as NewRentalContract).returning();
+	const [contract] = await db.insert(rentalContracts).values(feeRate(data)).returning();
 
 
 	return contract;
@@ -385,7 +386,7 @@ export async function updateContract(
 			// without an end there is no notice: withdrawing it makes the contract open-ended again; without a notice
 			// there is no day it arrived
 			.set({
-				...feeRate(data),
+				...feeRate(data, data.managementFeeAgreed ?? current.managementFeeAgreed),
 				...(data.endDate === null && { terminated: false }),
 				...((data.endDate === null || data.terminated === false) && { noticeReceivedOn: null }),
 				updatedAt: new Date()

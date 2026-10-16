@@ -1443,6 +1443,7 @@
 	"statements_preset_title": "Selezione: {building}, periodo di conteggio {period}",
 	"statements_preset_from_statements": "Il profilo di riscaldamento e le spese di gestione sono impostati come negli altri conteggi spese accessorie di questo periodo di conteggio. Li verifichi e passi all’anteprima.",
 	"statements_preset_from_settings": "Il profilo di riscaldamento e le spese di gestione provengono dalle impostazioni. Li verifichi e passi all’anteprima.",
+	"statements_preset_profile_from_statements": "Il profilo di riscaldamento è impostato come negli altri conteggi spese accessorie di questo periodo di conteggio, le spese di gestione provengono dalle impostazioni. Li verifichi e passi all’anteprima.",
 	"statements_profile_not_applied": "{profile} (non applicato: {reason})",
 	"statements_profile_not_applied_unknown": "{profile} (non applicato)",
 	"statements_profile_reason_whole_period": "contratto di locazione per tutto il periodo",

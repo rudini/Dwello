@@ -208,6 +208,14 @@ describe('Verwaltungspauschale nach Mietvertrag', () => {
 		expect(await fee(small.contract)).toBe(7.5);
 	});
 
+	// closing review C-2: a rate sent without the agreement keeps no rate on a contract without one
+	it('speichert ohne Vereinbarung keinen eigenen Satz, auch wenn nur der Satz kommt', async () => {
+		await agree(false);
+		await sendJson('PUT', `/api/v1/contracts/${small.contract}`, { managementFeePercent: '2' });
+		await sendJson('PUT', `/api/v1/contracts/${small.contract}`, { managementFeeAgreed: true });
+		expect(await fee(small.contract)).toBe(7.5);
+	});
+
 		it('lehnt einen eigenen Satz über dem Höchstsatz ab', async () => {
 		expect((await agree(true, '10.01')).status).toBe(422);
 	});

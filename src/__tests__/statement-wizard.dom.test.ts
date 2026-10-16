@@ -148,6 +148,25 @@ describe('Abrechnungen erstellen', () => {
 		expect(said).toContain('wie die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode');
 	});
 
+	// #89, closing review C-1: no other statement at the run's rate: the profile from them, the fee from the settings
+	it('sagt, wenn nur das Heizprofil von den übrigen Abrechnungen kommt', async () => {
+		const preset = {
+			building: 'Seeblick',
+			start: '2025-01-01',
+			end: '2025-12-31',
+			fromStatements: true,
+			feeFromSettings: true
+		};
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b1'], preset },
+			form: null
+		} as never);
+		await settle();
+		expect(byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Das Heizprofil ist wie bei den übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode eingestellt, die Verwaltungspauschale kommt aus den Einstellungen.'
+		);
+	});
+
 	it('beginnt mit der vorgeschlagenen Abrechnungsperiode, in Worten wiederholt', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');
