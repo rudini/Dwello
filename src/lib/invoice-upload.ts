@@ -118,17 +118,22 @@ const named = (fields: string[]) =>
 		.map(([, label]) => label())
 		.join(', ');
 
-// What is left to do before creating: the Kategorie, required fields not found, unsure fields, then optional fields
-// not found (personas Anna, Helga; domain review V-5); nothing on a file no invoice is created from
-function toDo(read: { unsure: string[]; missing: string[] }, categoryId: string) {
-	const required = read.missing.filter((field) => REQUIRED.includes(field));
-	const optional = read.missing.filter((field) => !REQUIRED.includes(field));
+/**
+ * What is left to do before creating, from the values as they are now (C-1): the Kategorie, required fields not
+ * found, unsure fields, then optional fields not found (personas Anna, Helga; domain review V-5); nothing on a file
+ * no invoice is created from
+ */
+export function toDoOf(row: UploadRow): string[] {
+	if (row.status !== 'check' || row.several) return [];
+	const missing = row.missing.filter((field) => !row.values[FORM_FIELD[field as keyof Proposal['fields']]]);
+	const required = missing.filter((field) => REQUIRED.includes(field));
+	const optional = missing.filter((field) => !REQUIRED.includes(field));
 	return [
-		!categoryId && m.invoices_upload_category_missing(),
+		!row.values.categoryId && m.invoices_upload_category_missing(),
 		required.length > 0 && m.invoices_upload_fill_in({ fields: named(required) }),
-		read.unsure.length > 0 && m.invoices_upload_check_these({ fields: named(read.unsure) }),
+		row.unsure.length > 0 && m.invoices_upload_check_these({ fields: named(row.unsure) }),
 		optional.length > 0 && m.invoices_upload_add_if_shown({ fields: named(optional) })
-	];
+	].filter((note) => !!note) as string[];
 }
 
 // What the property manager should know about the proposal, in the order the file raises it; costs that are not
@@ -194,7 +199,7 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 	const values = valuesOf(row, proposal.fields, category);
 	const read = readIn(row, proposal);
 	const several = proposal.invoiceCount > 1;
-	const notes = [...notesOn(proposal, row.morePages, values.isValidUtilityCost), ...(several ? [] : toDo(read, values.categoryId))];
+	const notes = notesOn(proposal, row.morePages, values.isValidUtilityCost);
 	return {
 		...row,
 		status: 'check',

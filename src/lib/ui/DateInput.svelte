@@ -85,6 +85,13 @@
 	const words = $derived(value ? formatDateLong(value) : '');
 	// said when the field is left, and an error of the page, also when the field kept the focus (Enter)
 	const announced = $derived(invalid && left ? wrongDate : (error ?? ''));
+	// said once, then taken back: the error stays under the field, not twice in the accessibility tree (persona Anna)
+	let spoken = $state('');
+	$effect(() => {
+		spoken = announced;
+		const quiet = setTimeout(() => (spoken = ''), 2000);
+		return () => clearTimeout(quiet);
+	});
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
 		left = false;
@@ -166,5 +173,5 @@
 		{words}
 	</p>
 	<!-- the focus is in the next field when the check on leaving fails: say it -->
-	<p class="sr-only" aria-live="assertive">{announced}</p>
+	<p class="sr-only" aria-live="assertive">{spoken}</p>
 </div>

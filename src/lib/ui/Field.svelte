@@ -45,8 +45,9 @@
 	const helpId = $derived(`${id}-help`);
 	const errorId = $derived(`${id}-error`);
 	const noteId = $derived(`${id}-note`);
+	// a caution about the value first: it is missed at the end of a long help (persona Sven)
 	const describedBy = $derived(
-		[(help || example) && helpId, note && noteId, shown && errorId].filter(Boolean).join(' ') || undefined
+		[note && noteId, (help || example) && helpId, shown && errorId].filter(Boolean).join(' ') || undefined
 	);
 </script>
 

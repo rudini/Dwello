@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { UploadRow } from '$lib/invoice-upload';
+	import { toDoOf, type UploadRow } from '$lib/invoice-upload';
 	import Alert from '$lib/ui/Alert.svelte';
 
 	// What the property manager should know about a file, then what keeps its invoice from being created
@@ -11,6 +11,7 @@
 		...new Set(
 			[
 				...row.notes,
+				...toDoOf(row),
 				errors.category,
 				Object.keys(errors).some((field) => field !== 'category') && m.invoices_upload_fields_missing(),
 				row.createError

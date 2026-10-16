@@ -4,9 +4,11 @@ import {
 	fileRefusal,
 	invoiceOf,
 	newRow,
+	toDoOf,
 	withoutKi,
 	withProposal,
-	type Proposal
+	type Proposal,
+	type UploadRow
 } from '../lib/invoice-upload';
 import extraction from '../../tests/contracts/invoice-extraction.json';
 
@@ -14,6 +16,8 @@ const pdf = new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 1, 2])], 'bl
 const defaults = { distributionKeyId: 'k1' };
 // The backend's answer from the API contract (tests/contracts/invoice-extraction.json)
 const proposal = (values: Partial<Proposal> = {}): Proposal => ({ ...(extraction as Proposal), ...values });
+// everything the row says: what to know about the file, then what is left to do
+const said = (row: UploadRow) => [...row.notes, ...toDoOf(row)];
 
 describe('Datei für eine Rechnung', () => {
 	it('nimmt PDF, JPG und PNG bis 10 MB nach ihren ersten Bytes an', async () => {
@@ -39,7 +43,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(row.status).toBe('check');
 		expect(row.unsure).toEqual(['invoiceDate']);
 		expect(row.selected).toBe(true);
-		expect(row.notes).toEqual([
+		expect(said(row)).toEqual([
 			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Vorgeschlagen ist das Total der Leistungen vor dem Abzug. Erfassen Sie die Akontozahlungen nicht zusätzlich als eigene Rechnungen, sonst zählen sie doppelt.',
 			'Prüfen Sie: Rechnungsdatum.'
 		]);
@@ -50,7 +54,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		const several = withProposal(newRow(2, pdf, defaults), proposal({ invoiceCount: 2, duplicateOf: null }));
 		expect(several).toMatchObject({ selected: false, several: true });
 		// nothing to check or fill in on a file no invoice is created from (persona Anna)
-		expect(several.notes).toEqual([
+		expect(said(several)).toEqual([
 			'Diese Datei enthält mehrere Rechnungen. Laden Sie jede Rechnung als eigene Datei hoch, oder erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an.',
 			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Vorgeschlagen ist das Total der Leistungen vor dem Abzug. Erfassen Sie die Akontozahlungen nicht zusätzlich als eigene Rechnungen, sonst zählen sie doppelt.'
 		]);
@@ -61,7 +65,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		unsure.categorization = { ...unsure.categorization!, confidence: 0.5 };
 		const row = withProposal(newRow(1, pdf, defaults), unsure);
 		expect(row.values.categoryId).toBe('');
-		expect(row.notes).toEqual([
+		expect(said(row)).toEqual([
 			'Das ist eine Mahnung. Mahngebühren und Verzugszinsen sind keine Nebenkosten; erfassen Sie die ursprüngliche Rechnung.',
 			'Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen.',
 			'Wählen Sie eine Kategorie.',
@@ -74,14 +78,15 @@ describe('Vorschlag der KI für eine Datei', () => {
 		const repairs = { ...proposal().categorization!, category: { id: 'c2', name: 'Repairs', isAllowedUtilityCost: false } };
 		const mixed = (categorization: Proposal['categorization']) =>
 			withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true, categorization }));
-		expect(mixed(repairs).notes.join(' ')).not.toContain('nicht umlagefähig sind');
+		expect(said(mixed(repairs)).join(' ')).not.toContain('nicht umlagefähig sind');
 		expect(mixed(repairs).selected).toBe(false);
-		expect(mixed(proposal().categorization).notes.join(' ')).toContain('nicht umlagefähig sind');
+		expect(said(mixed(proposal().categorization)).join(' ')).toContain('nicht umlagefähig sind');
+		expect(mixed(proposal().categorization).selected).toBe(false);
 	});
 
 	it('sagt bei einer Gutschrift, dass keine Rechnung daraus entsteht und wo sie abgezogen wird', () => {
 		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note' }));
-		expect(row.notes[0]).toBe(
+		expect(said(row)[0]).toBe(
 			'Das ist eine Gutschrift. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: hier in ihrer Zeile oder, wenn sie schon erfasst ist, mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf.'
 		);
 	});
@@ -93,7 +98,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		]) {
 			const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType }));
 			expect(row.selected).toBe(false);
-			expect(row.notes.join(' ')).toContain(note);
+			expect(said(row).join(' ')).toContain(note);
 		}
 	});
 
@@ -101,7 +106,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		const fields = { ...extraction.fields, invoiceNumber: null, dueDate: null, amount: null };
 		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, deductedAmount: null, fields }));
 		expect(row.missing).toEqual(['invoiceNumber', 'amount', 'dueDate']);
-		expect(row.notes).toEqual([
+		expect(said(row)).toEqual([
 			'Füllen Sie aus: Betrag.',
 			'Prüfen Sie: Rechnungsdatum.',
 			'Ergänzen Sie, wenn auf der Rechnung angegeben: Rechnungsnummer, Fälligkeitsdatum.'
@@ -110,7 +115,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 
 	it('nennt eine fehlende Kategorie zuerst (Personas Anna, Helga, Dr. Weber)', () => {
 		const unsure = proposal({ duplicateOf: null, deductedAmount: null, categorization: null });
-		expect(withProposal(newRow(1, pdf, defaults), unsure).notes).toEqual(['Wählen Sie eine Kategorie.', 'Prüfen Sie: Rechnungsdatum.']);
+		expect(said(withProposal(newRow(1, pdf, defaults), unsure))).toEqual(['Wählen Sie eine Kategorie.', 'Prüfen Sie: Rechnungsdatum.']);
 	});
 
 	it('nennt ein selbst ausgefülltes Feld nach erneutem Lesen nicht als unsicher (Code-Review C-42)', () => {
@@ -118,7 +123,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		typed.values.invoiceDate = '2026-03-30';
 		const row = withProposal(typed, proposal({ duplicateOf: null, deductedAmount: null }));
 		expect(row.unsure).toEqual([]);
-		expect(row.notes).toEqual([]);
+		expect(said(row)).toEqual([]);
 	});
 
 	it('nennt ein selbst ausgefülltes Feld nach erneutem Lesen nicht mehr als nicht gefunden', () => {
@@ -147,7 +152,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 
 	it('sagt, dass die KI nur die ersten 3 Seiten gelesen hat', () => {
 		const row = withProposal({ ...newRow(1, pdf, defaults), morePages: true }, proposal({ duplicateOf: null, deductedAmount: null }));
-		expect(row.notes).toEqual([
+		expect(said(row)).toEqual([
 			'Die KI hat nur die ersten 3 Seiten gelesen. Prüfen Sie Betrag und Positionen auf den übrigen Seiten.',
 			'Prüfen Sie: Rechnungsdatum.'
 		]);

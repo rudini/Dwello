@@ -53,6 +53,7 @@
 	let tooMany = $state(false);
 	let creating = $state(false);
 	let discardOpen = $state(false);
+	let removed = $state(''); // the file just removed, said by the status until the next change
 	let nextKey = 0;
 
 	// one building preselected when there is only one
@@ -62,7 +63,36 @@
 
 	const chosen = $derived(rows.filter((row) => row.selected && row.status !== 'reading' && row.status !== 'refused'));
 	const resultShown = $derived(created.length > 0);
+	// after creating: the files chosen but not created, because they still lack something (persona Anna, C-4)
+	const stillOpen = $derived(chosen.map((row) => row.file.name));
+	const buildingOptions = $derived(buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` })));
+	const buildingHelp = $derived(rows.length ? m.invoices_upload_building_locked() : undefined);
+	const discardText = $derived(
+		created.length ? m.invoices_upload_discard_text_created() : m.invoices_upload_discard_text()
+	);
 	const done = $derived(rows.filter((row) => row.status !== 'reading').length);
+	// what a screen reader hears: the progress, when all are read what is to do, or the file just removed (persona Sven)
+	const outcome = $derived(
+		(
+			[
+				[m.invoices_upload_status_check(), 'check'],
+				[m.invoices_upload_status_refused(), 'refused'],
+				[m.invoices_upload_status_error(), 'failed']
+			] as const
+		)
+			.map(([label, status]) => ({ label, count: rows.filter((row) => row.status === status).length }))
+			.filter(({ count }) => count > 0)
+			.map((part) => m.invoices_upload_summary(part))
+	);
+	const status = $derived(
+		removed
+			? m.invoices_upload_removed({ name: removed })
+			: !rows.length
+				? ''
+				: done < rows.length
+					? m.invoices_upload_progress({ done, count: rows.length })
+					: [`${m.invoices_upload_progress({ done, count: rows.length })}.`, ...outcome].join(' ')
+	);
 	// the button counts what it creates: a chosen row that still lacks something is named apart (#233)
 	const complete = $derived(chosen.filter((row) => !Object.keys(checkRow(row)).length).length);
 	const incomplete = $derived(chosen.length - complete);
@@ -80,8 +110,10 @@
 	const reasonOf = (error: { code: string; params?: Record<string, string | number> } | undefined, fallback: string) =>
 		error?.params ? backendMessage({ code: error.code, params: error.params }, fallback) : fallback;
 
-	const update = (key: number, change: (row: UploadRow) => UploadRow) =>
-		(rows = rows.map((row) => (row.key === key ? change(row) : row)));
+	const update = (key: number, change: (row: UploadRow) => UploadRow) => {
+		removed = '';
+		rows = rows.map((row) => (row.key === key ? change(row) : row));
+	};
 
 	// What the KI reads from a file; without the KI or a readable file the property manager fills in the fields
 	async function read(key: number) {
@@ -122,9 +154,11 @@
 
 	const remove = (key: number) => (rows = rows.filter((row) => row.key !== key));
 
-	// removed by the property manager: the focus goes to where files are added
+	// removed by the property manager: said, and the focus goes to where files are added
 	async function removeRow(key: number) {
+		const name = rows.find((row) => row.key === key)!.file.name;
 		remove(key);
+		removed = name;
 		await tick();
 		document.querySelector<HTMLElement>('[data-testid="invoice-upload-file-input"]')?.focus();
 	}
@@ -177,6 +211,7 @@
 <Dialog
 	bind:open
 	wide
+	describedby="invoice-upload-purpose"
 	enterConfirms={false}
 	title={m.invoices_upload_open()}
 	confirmLabel={createLabel}
@@ -187,24 +222,22 @@
 	onrequestclose={requestClose}
 	onconfirm={create}
 >
-	<p class="text-ink">{m.invoices_upload_purpose()}</p>
+	<p id="invoice-upload-purpose" class="text-ink">{m.invoices_upload_purpose()}</p>
 	<p class="text-ink-muted" data-testid="invoice-keep-original">
 		{m.invoices_upload_kept()}
 		{m.invoices_upload_keep_original()}
 	</p>
 
-	{#if resultShown}
-		<UploadResult {created} open={rows.filter((row) => row.status !== 'refused').map((row) => row.file.name)} />
-	{/if}
+	{#if resultShown}<UploadResult {created} open={stillOpen} />{/if}
 
 	<Select
 		id="invoice-upload-building"
 		label={m.apartments_building()}
 		placeholder={m.invoices_choose_building()}
-		options={buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` }))}
+		options={buildingOptions}
 		bind:value={buildingId}
 		disabled={rows.length > 0}
-		help={rows.length > 0 ? m.invoices_upload_building_locked() : undefined}
+		help={buildingHelp}
 		testid="invoice-upload-building-select"
 	/>
 
@@ -214,10 +247,9 @@
 		<Alert tone="caution" title={m.invoices_upload_too_many_title()}><p>{m.invoices_upload_too_many()}</p></Alert>
 	{/if}
 
+	<!-- always there, so the first progress and the removal of the last file are heard too -->
+	<p role="status" class="text-ink-muted empty:hidden" data-testid="invoice-upload-progress">{status}</p>
 	{#if rows.length}
-		<p role="status" class="text-ink-muted" data-testid="invoice-upload-progress">
-			{m.invoices_upload_progress({ done, count: rows.length })}
-		</p>
 		<ul class="flex flex-col divide-y divide-line">
 			{#each rows as row, i (row.key)}
 				<InvoiceUploadRow
@@ -247,7 +279,5 @@
 		finish();
 	}}
 >
-	<p data-testid="invoice-upload-discard-message">
-		{created.length ? m.invoices_upload_discard_text_created() : m.invoices_upload_discard_text()}
-	</p>
+	<p data-testid="invoice-upload-discard-message">{discardText}</p>
 </Dialog>

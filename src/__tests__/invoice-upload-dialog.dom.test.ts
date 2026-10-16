@@ -76,16 +76,20 @@ describe('Rechnungen hochladen', () => {
 	});
 
 	it('nennt nach einem Teil-Erfolg die offenen Dateien und behält beim Verwerfen die erstellten Rechnungen (Persona Anna, C-39)', async () => {
+		const proposals: Record<string, object> = {
+			'werke.pdf': { ...read, categorization: null },
+			'gutschrift.pdf': { ...read, documentType: 'credit_note' }
+		};
 		const answers = (call: { path: string; body: unknown }) =>
-			call.path === '/invoices'
-				? [201, { id: 'i9' }]
-				: [200, (call.body as { fileName: string }).fileName === 'werke.pdf' ? { ...read, categorization: null } : read];
+			call.path === '/invoices' ? [201, { id: 'i9' }] : [200, proposals[(call.body as { fileName: string }).fileName] ?? read];
 		const { oncreated } = open(answers as never);
 		chooseBuilding();
-		await upload(pdf('blitz.pdf'), pdf('werke.pdf'));
+		await upload(pdf('blitz.pdf'), pdf('werke.pdf'), pdf('gutschrift.pdf'));
 		click('invoice-upload-create-button');
 		await settle();
+		// open: what was chosen but not created; not a Gutschrift, which is not to be created (C-4)
 		expect(byTestId('invoice-upload-result')!.textContent).toContain('Noch offen: werke.pdf.');
+		expect(byTestId('invoice-upload-result')!.textContent).not.toContain('gutschrift.pdf');
 		expect(byTestId('invoice-upload-result')!.querySelector('a')!.textContent).toBe('Elektro Blitz AG, 31.03.2026');
 
 		click('dialog-cancel');
@@ -107,6 +111,74 @@ describe('Rechnungen hochladen', () => {
 		);
 		expect(byTestId('invoice-upload-row-message')!.textContent).not.toContain('nicht geantwortet');
 		expect(byTestId('invoice-upload-row-retry')).not.toBeNull();
+	});
+
+	it('beschreibt sich mit seinem ersten Satz, nicht mit dem ganzen Inhalt (Persona Sven)', () => {
+		open(() => [200, read]);
+		const described = document.getElementById(document.querySelector('[role=dialog]')!.getAttribute('aria-describedby') ?? '');
+		expect(described?.textContent).toBe(
+			'Wählen Sie das Gebäude und die Dateien Ihrer Rechnungen. Die KI liest die Angaben aus; Sie prüfen sie, bevor Dwello die Rechnungen erstellt.'
+		);
+	});
+
+	it('sagt nach dem Lesen, was zu tun ist, und meldet jede entfernte Datei, auch die letzte (Persona Sven)', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'), word);
+		const status = () => byTestId('invoice-upload-progress')!.textContent?.trim();
+		expect(status()).toBe('2 von 2 Dateien gelesen. Bitte prüfen: 1. Nicht möglich: 1.');
+		allByTestId('invoice-upload-row-remove')[1].click();
+		await settle();
+		expect(status()).toBe('notizen.docx entfernt.');
+		click('invoice-upload-row-remove');
+		await settle();
+		expect(status()).toBe('blitz.pdf entfernt.');
+	});
+
+	it('liest den Hinweis der KI vor der Hilfe des Feldes vor (Persona Sven)', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		const [first] = byTestId('invoice-date-input')!.getAttribute('aria-describedby')!.split(' ');
+		expect(document.getElementById(first)!.textContent).toContain('Die KI ist unsicher');
+	});
+
+	it('öffnet die Datei gross in einem neuen Tab, zum Vergleichen mit den Feldern (Personas Helga, Marco)', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		const link = byTestId<HTMLAnchorElement>('invoice-upload-file-link')!;
+		expect(link.getAttribute('href')).toMatch(/^blob:/);
+		expect(link.getAttribute('target')).toBe('_blank');
+		expect(link.textContent).toContain('Datei gross anzeigen');
+	});
+
+	it('nimmt eine Aufforderung zurück, sobald das Feld ausgefüllt ist (Code-Review C-1)', async () => {
+		const fields = { ...read.fields, amount: null };
+		open(() => [200, { ...read, categorization: null, fields }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		const message = () => byTestId('invoice-upload-row-message')?.textContent ?? '';
+		expect(message()).toContain('Wählen Sie eine Kategorie.');
+		expect(message()).toContain('Füllen Sie aus: Betrag.');
+		click('invoice-upload-row-toggle');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '80.00');
+		await settle();
+		expect(message()).not.toContain('Wählen Sie eine Kategorie.');
+		expect(message()).not.toContain('Füllen Sie aus');
+		expect(message()).toContain('Prüfen Sie: Rechnungsdatum.');
+	});
+
+	it('sagt die fehlende Kategorie nach dem Erstellen nur einmal (Code-Review C-3)', async () => {
+		open(() => [200, { ...read, categorization: null, duplicateOf: null }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		expect(byTestId('invoice-upload-row-message')!.textContent!.split('Wählen Sie eine Kategorie.').length).toBe(2);
 	});
 
 	it('liest jede Datei sofort aus und erstellt die gewählten Rechnungen mit ihrem Beleg', async () => {
