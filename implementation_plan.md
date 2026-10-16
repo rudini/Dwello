@@ -11,6 +11,7 @@ Task: add the terms the product owner decided in #243 to `UBIQUITOUS_LANGUAGE.md
 - [x] Checks: test:coverage (2606), lint, check, backend test (670) + type-check; no E2E (docs and comments only)
 - [ ] fach-reviewer and code-reviewer round
   code-reviewer round 1 (`docs/reviews/glossary-243-review-1.md`): fixed C-1 (Minor, «No scenario» in the PR text), C-2 (Nit), C-3 (Nit)
+  fach-reviewer round 1 (`docs/reviews/glossary-243-fachreview-1.md`): fixed V-1 (Major, product owner confirmed changing the #243 wording), V-2 (Major, existed before: «geplant (#79)»), V-3, V-4, V-5, V-6, V-7, V-9, V-10, V-11, V-12; V-8 fixed with V-1 («über die Mietstage»)
 - [ ] Archive session, push, PR `Fixes #243` with «No scenario: glossary and comments only, no behaviour change», CI, merge
   Skills: none (no behaviour change; tdd and ponytail do not apply to glossary text and comment removal)
 
