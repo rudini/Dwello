@@ -114,7 +114,7 @@ export const load = async ({
 }: {
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
-	const config = settings(fetch);
+	const config = settings(fetch).catch(() => ({}) as Record<string, string>);
 	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts, stored] =
 		await Promise.all([
 			fetchRecord(

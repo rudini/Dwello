@@ -36,8 +36,8 @@ Funktionalität: Einstellungen
     Und nach erneutem Öffnen der Einstellungen ist die Zahlungsfrist "30" und die Mahnfrist "14" hinterlegt
 
   Szenario: Fristen sind erklärt
-    Dann erklärt das Feld "Zahlungsfrist (Tage)" "Anzahl Tage vom Versand bis zur Zahlungsfrist. Bis dann bezahlt der Mieter eine Nachzahlung, oder Sie überweisen eine Rückerstattung. Vorgabe: 30 Tage. Gilt für Abrechnungen, die Sie ab jetzt versenden; die Frist einer einzelnen Abrechnung ändern Sie dort mit «Frist und Bemerkungen bearbeiten»."
-    Und erklärt das Feld "Mahnfrist (Tage)" "Anzahl Tage nach der Zahlungsfrist der Abrechnung, bis die Übersicht eine Mahnung vorschlägt. Überfällig ist die Abrechnung schon ab dem Tag nach der Zahlungsfrist; mahnen können Sie ab dann. Die nächste Mahnung schlägt die Übersicht nach der Zahlungsfrist der letzten Mahnung vor. Vorgabe: 14 Tage."
+    Dann erklärt die Einstellung "Zahlungsfrist (Tage)" "Wie viele Tage nach dem Versand der Mieter eine Nachzahlung bezahlt oder Sie eine Rückerstattung überweisen. Erlaubt sind 7 bis 90 Tage, Vorgabe: 30 Tage. Gilt für Abrechnungen, die Sie ab jetzt versenden; die Frist einer einzelnen Abrechnung ändern Sie dort mit «Frist und Bemerkungen bearbeiten»."
+    Und erklärt die Einstellung "Mahnfrist (Tage)" "Wie viele Tage nach der Zahlungsfrist einer Nachzahlung die Übersicht eine Mahnung vorschlägt. Erlaubt sind 7 bis 60 Tage, Vorgabe: 14 Tage. Überfällig ist die Abrechnung schon ab dem Tag nach der Zahlungsfrist, und mahnen können Sie ab dann. Nach einer Mahnung schlägt die Übersicht die nächste vor, sobald die Frist in dieser Mahnung abgelaufen ist."
 
   Szenariogrundriss: Frist ausserhalb des erlaubten Bereichs
     Wenn der Liegenschaftsverwalter die <Frist> "<Tage>" speichert

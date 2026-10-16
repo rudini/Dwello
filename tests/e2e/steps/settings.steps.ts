@@ -56,6 +56,6 @@ Then(
 	}
 );
 
-Then('erklärt das Feld {string} {string}', async ({ verwalter }, label: string, help: string) => {
+Then('erklärt die Einstellung {string} {string}', async ({ verwalter }, label: string, help: string) => {
 	await verwalter.sees(settingHelp(FIELDS[label])).toContain(help);
 });

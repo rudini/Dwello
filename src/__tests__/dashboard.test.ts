@@ -242,6 +242,17 @@ describe('Übersicht laden', () => {
 		expect(data.deadlines).toEqual([]);
 	});
 
+	// code review C-6: a broken answer of the settings leaves their defaults, not an error page
+	it('zeigt die Übersicht auch, wenn die Einstellungen kein JSON liefern', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const answer = backend();
+		const fetch = (async (url: string) =>
+			url.endsWith('/config') ? new Response('<html>') : answer(url)) as typeof globalThis.fetch;
+		const data = await load({ fetch } as never);
+
+		expect(data.deadlines.map((d) => d.name)).toContain('Bruno Meier');
+	});
+
 	// Zeros would look like an empty portfolio
 	it('zeigt einen Fehler statt leerer Kennzahlen, wenn das Backend nicht antwortet', async () => {
 		await expect(load({ fetch: backend(500) } as never)).rejects.toMatchObject({
