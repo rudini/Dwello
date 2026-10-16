@@ -582,3 +582,33 @@ Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelt
 - [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts.ts`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/contracts/ContractForm.svelte`, `messages/*.json`, tests (`contract-end.pg`, `contract-delete.pg`, `api-contracts.pg`, test clean-ups, `contract-actions`, `contract-detail-page.dom`, `contract-edit.dom`), `tests/e2e/**`, `tests/a11y/screens.json`, `tests/contracts/*`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md`.
+
+## Session: statement wizard (#251, #252, #201)
+
+Request: «Setze #251 #252 #201 um». Branch `claude/statement-wizard-251-252-201`.
+
+- [x] #251: step 4 asks «trotzdem erstellen» only for real findings, not for existing statements alone (scenario, unit test of `needsConfirmation`)
+- [x] #252: the wizard's saved time in Swiss time (`DraftNotice`, `SaveStatus`). No scenario: the E2E browser runs in the machine's time zone and the stack sets none per scenario; DOM test with a set time zone
+- [x] #201 a: «Alle Gebäude» leaves out buildings whose Mietverträge all have a statement in the period, said next to the counter (scenario)
+- [x] #201 b: step 2 adds «Wenn Sie es wählen, wird dafür nichts erstellt.» and how an existing draft is recalculated (today: delete it and create again; «Neu berechnen» of #132 does not exist yet) (scenario)
+- [x] #201 c: a restored wizard opens in the step it was left in, if still valid (scenario)
+- [x] #201 d: discarding the input asks first («Ihre Angaben werden gelöscht.»); the notice can be closed (scenarios; new dialog state in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`)
+- [x] fach-reviewer on the scenarios before the first test turns green
+- [x] fach-reviewer round 1 (`docs/reviews/wizard-fachreview-1.md`)
+- [x] Fachreview M-1: a statement that covers only part of a contract's days in the period stays a finding (confirmation in step 4, kept by «Alle Gebäude»); `billedContracts` counts such contracts (`partly`), the preview passes them on (`partlyBilled`)
+- [x] Checks on the slice: lint, check, backend type-check, all vitest, E2E `statement-generate.feature`, `contract-new.feature`, axe and language rows of both wizards
+- [x] code-reviewer round 1 (`docs/reviews/wizard-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/wizard-fachreview-2.md`)
+- [x] Persona Anna (`docs/design/personas/anna-issue-201.md`), persona Dr. Weber (`docs/design/personas/dr-weber-issue-251.md`); no daten-pruefer: no amounts, PDFs or QR-bills change
+- [x] Fixes from the reviews: discard button «Angaben verwerfen» as in the dialog (#57's word; Anna P-1 in part); focus on the step heading after closing the notice (Anna, C-5); step 2 says that a run leaves days open instead of «Sie müssen es nicht wählen» and the delete advice when a statement covers only part of the period (V-9, C-3, Dr. Weber P-1/P-2); «Alle Gebäude» stays empty when every building is left out (C-1); scenario waits for the note (C-2); contracts from `tests/contracts` (C-7); C-8; fr/it wording (V-10, V-11, C-9)
+- [x] E2E full suite (chromium, api) on b881ac0: 779 passed; after the fixes `statement-generate.feature`, `contract-new.feature` and their axe and language rows again green
+- [x] fach-reviewer round 3 (`docs/reviews/wizard-fachreview-3.md`): V-12, V-13 wording applied («Mietstage», fr/it word for the run)
+- [x] Closing code-reviewer round (`docs/reviews/wizard-review-2.md`): fixed Major C-1 (empty preview with open days no longer advises deleting drafts, `PreviewEmpty.svelte`), C-2 (test), C-3 in part, C-6
+- [x] Re-review of the C-1 fix (code-reviewer round 3, `docs/reviews/wizard-review-3.md`): fixed the rest of C-1 (the error after «Weiter» on an empty preview with open days no longer advises deleting drafts) and C-10 (scenario «Eine leere Vorschau mit offenen Mietstagen rät nicht, Entwürfe zu löschen»), C-12 (`statements_all_billed` composed from its two sentences), C-13; C-11 left (Minor)
+- [x] Workflow note `docs/reviews/workflow-notes-issue-201.md`
+- [x] Feature review (personas, fach-reviewer)
+- [x] Closing code-reviewer round before push (`docs/reviews/wizard-review-4.md`): no Blocker/Major; C-11, C-14 left (Minor/Nit)
+- [x] Merge of origin/main (plan only); checks before push: lint, check, backend type-check, vitest 2659, full E2E chromium + api
+- [x] Archive session; pull request, CI (merge waits for the product owner: open Majors from before the change, see the pull request)
+
+Files: `src/lib/ui/{DraftNotice,SaveStatus}.svelte`, `src/lib/utils/format.ts`, `src/lib/statement-wizard.ts`, `src/lib/server/statement-generation.ts`, `src/routes/statements/generate/{+page.server.ts,StatementWizard,BuildingStep,BuildingChoice,PreviewChecks}.svelte`, `messages/{de,fr,it,en}.json`, tests in `src/__tests__/`, `tests/e2e/` (features, steps, tasks, questions, targets), `tests/a11y/screens.json`, `docs/reviews/wizard-fachreview-1.md`
