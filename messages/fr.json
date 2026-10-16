@@ -1494,9 +1494,13 @@
 	"contracts_fixed_term_objection": "Si vous n’êtes pas d’accord, exigez immédiatement par écrit la restitution de l’appartement et faites-vous conseiller.",
 	"contracts_continue_open_ended": "Poursuivre pour une durée indéterminée",
 	"contracts_moved_out": "Le locataire a déménagé",
-	"contracts_continued_toast": "Le contrat de bail de {name} se poursuit pour une durée indéterminée",
+	"contracts_continued_toast": "Le contrat de bail de {name} se poursuit pour une durée indéterminée. Il ne prend fin que par une résiliation.",
 	"contracts_moved_out_toast": "Enregistré : {name} a déménagé",
 	"contracts_delete_draft_and_continue": "Supprimer le brouillon et poursuivre pour une durée indéterminée",
 	"contracts_draft_deleted_continued_toast": "Brouillon {number} supprimé. Le contrat de bail de {name} se poursuit pour une durée indéterminée. Établissez maintenant le décompte des charges à nouveau.",
-	"contracts_continue_locked_rest": "Dwello ne les modifie pas, c’est pourquoi le contrat de bail ne peut pas se poursuivre ici pour une durée indéterminée. Réglez la correction du décompte directement avec le locataire."
+	"contracts_continue_locked_rest": "Dwello ne les modifie pas, c’est pourquoi Dwello ne peut pas supprimer la fin du contrat. Pour vous et le locataire, le contrat de bail se poursuit malgré tout pour une durée indéterminée. Réglez la correction du décompte directement avec le locataire.",
+	"contracts_fixed_term_consequences": "Si le contrat de bail se poursuit, Dwello décompte les charges après le {date} avec {name}. Si {name} a déménagé, l’appartement est considéré comme vacant depuis, et les charges de cette période sont à votre charge.",
+	"contracts_moved_out_title": "Confirmer le déménagement de {name}",
+	"contracts_moved_out_consequence": "Le contrat de bail a pris fin le {date}. Depuis, l’appartement est considéré comme vacant, et les charges de cette période sont à votre charge. Dwello ne demandera plus si le contrat de bail se poursuit.",
+	"contracts_moved_out_confirm": "Confirmer le déménagement"
 }

@@ -68,6 +68,7 @@ export const continueOpenEndedButton = target('Unbefristet weiterführen', (page
 	page.getByTestId('contract-continue-open-ended')
 );
 export const movedOutButton = target('Mieter ist ausgezogen', (page) => page.getByTestId('contract-moved-out'));
+export const confirmMovedOutButton = target('Auszug bestätigen', (page) => page.getByTestId('contract-moved-out-confirm'));
 export const fixedTermError = target('Meldung zum Weiterführen', (page) =>
 	fixedTermCheck.locate(page).getByTestId('form-error')
 );

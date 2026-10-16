@@ -21,6 +21,7 @@ import {
 	refusedStatementLink,
 	continueOpenEndedButton,
 	movedOutButton,
+	confirmMovedOutButton,
 	deleteDraftAndContinueButton
 } from '../targets/contract-detail';
 
@@ -74,5 +75,7 @@ export const scrollToEndConfirmation = Scroll.to(confirmEndContractButton);
 
 // A-6 (#115): after an expired fixed-term contract the tenant either still lives there or has moved out
 export const continueOpenEnded = Click.on(continueOpenEndedButton);
-export const confirmMovedOut = Click.on(movedOutButton);
+// the move-out is confirmed with its consequence in a dialog (personas a6 P-1)
+export const confirmMovedOut: Activity = (actor) =>
+	actor.attemptsTo(Click.on(movedOutButton), Click.on(confirmMovedOutButton));
 export const deleteDraftAndContinue = Click.on(deleteDraftAndContinueButton);

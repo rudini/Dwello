@@ -153,7 +153,7 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Schnellaktion "Rechnungen hochladen" wählt
     Dann kann der Liegenschaftsverwalter das Gebäude und die Dateien der Rechnungen wählen
 
-  # A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag ohne Folgevertrag fragt die Übersicht, ob der Mieter
+  # A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag ohne Nachmieter fragt die Übersicht, ob der Mieter
   # noch in der Wohnung wohnt (Art. 266 Abs. 2 OR)
   Szenario: Abgelaufener befristeter Mietvertrag ohne Nachmieter
     Angenommen der Mieter "Bruno Meier" existiert

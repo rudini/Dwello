@@ -1494,9 +1494,13 @@
 	"contracts_fixed_term_objection": "Se non è d’accordo, esiga subito per iscritto la restituzione dell’appartamento e si faccia consigliare.",
 	"contracts_continue_open_ended": "Proseguire a tempo indeterminato",
 	"contracts_moved_out": "L’inquilino ha traslocato",
-	"contracts_continued_toast": "Il contratto di locazione di {name} prosegue a tempo indeterminato",
+	"contracts_continued_toast": "Il contratto di locazione di {name} prosegue a tempo indeterminato. Termina solo con una disdetta.",
 	"contracts_moved_out_toast": "Salvato: {name} ha traslocato",
 	"contracts_delete_draft_and_continue": "Eliminare la bozza e proseguire a tempo indeterminato",
 	"contracts_draft_deleted_continued_toast": "Bozza {number} eliminata. Il contratto di locazione di {name} prosegue a tempo indeterminato. Allestisca ora di nuovo il conteggio spese accessorie.",
-	"contracts_continue_locked_rest": "Dwello non li modifica, perciò qui il contratto di locazione non può proseguire a tempo indeterminato. Concordi la correzione del conteggio direttamente con l’inquilino."
+	"contracts_continue_locked_rest": "Dwello non li modifica, perciò Dwello non può rimuovere la fine del contratto. Per Lei e l’inquilino il contratto di locazione prosegue comunque a tempo indeterminato. Concordi la correzione del conteggio direttamente con l’inquilino.",
+	"contracts_fixed_term_consequences": "Se il contratto di locazione prosegue, Dwello conteggia le spese accessorie dopo il {date} con {name}. Se {name} ha traslocato, da allora l’appartamento è considerato sfitto e le spese accessorie di questo periodo sono a Suo carico.",
+	"contracts_moved_out_title": "Confermare il trasloco di {name}",
+	"contracts_moved_out_consequence": "Il contratto di locazione è terminato il {date}. Da allora l’appartamento è considerato sfitto e le spese accessorie di questo periodo sono a Suo carico. Dwello non chiederà più se il contratto di locazione prosegue.",
+	"contracts_moved_out_confirm": "Confermare il trasloco"
 }

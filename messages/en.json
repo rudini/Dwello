@@ -1494,9 +1494,13 @@
 	"contracts_fixed_term_objection": "If you do not agree, demand the return of the apartment in writing at once and get advice.",
 	"contracts_continue_open_ended": "Continue open-ended",
 	"contracts_moved_out": "Tenant has moved out",
-	"contracts_continued_toast": "The rental contract of {name} continues open-ended",
+	"contracts_continued_toast": "The rental contract of {name} continues open-ended. It ends only with a notice of termination.",
 	"contracts_moved_out_toast": "Saved: {name} has moved out",
 	"contracts_delete_draft_and_continue": "Delete draft and continue open-ended",
 	"contracts_draft_deleted_continued_toast": "Draft {number} deleted. The rental contract of {name} continues open-ended. Now create the utility cost statement again.",
-	"contracts_continue_locked_rest": "Dwello does not change them, so the rental contract cannot continue open-ended here. Settle the correction of the statement directly with the tenant."
+	"contracts_continue_locked_rest": "Dwello does not change them, so Dwello cannot remove the contract end. For you and the tenant the rental contract still continues open-ended. Settle the correction of the statement directly with the tenant.",
+	"contracts_fixed_term_consequences": "If the rental contract continues, Dwello bills the utility costs after {date} to {name}. If {name} has moved out, the apartment counts as vacant since then, and you bear the utility costs of that time.",
+	"contracts_moved_out_title": "Confirm that {name} has moved out",
+	"contracts_moved_out_consequence": "The rental contract ended on {date}. Since then the apartment counts as vacant, and you bear the utility costs of that time. Dwello will no longer ask whether the rental contract continues.",
+	"contracts_moved_out_confirm": "Confirm move-out"
 }

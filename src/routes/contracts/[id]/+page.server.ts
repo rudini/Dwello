@@ -322,7 +322,7 @@ export const actions: Actions = {
 	// the tenant left on the agreed end: the overview stops asking (A-6)
 	movedOut: async ({ params, fetch }) => {
 		const { response } = await save(fetch, params.id, { movedOut: true });
-		if (!response.ok) return fail(response.status, { fixedTermError: m.contracts_save_failed() });
+		if (!response.ok) return fail(response.status, { movedOutError: m.contracts_save_failed() });
 	},
 	// a contract that has started only when confirmed as entered by mistake (A-7, #116); the backend refuses one
 	// that a statement bills

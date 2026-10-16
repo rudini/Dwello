@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import type { RefusedStatement } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
+	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -27,6 +28,9 @@
 	const refused = $derived((form?.fixedTermRefused ?? []) as RefusedStatement[]);
 
 	let busy = $state('');
+	// the move-out is confirmed with its consequence: a click alone would bill the time after the end to the landlord
+	// (personas a6 P-1)
+	let confirming = $state(false);
 	// a toast says what was saved; the reloaded page no longer asks
 	const submit = (action: string, done: () => string) =>
 		dialogSubmit(
@@ -40,6 +44,10 @@
 {#if shown && endDate}
 	<Panel title={m.contracts_fixed_term_title()} testid="contract-fixed-term-check">
 		<p class="text-ink">{m.contracts_fixed_term_question({ name, date: formatDate(endDate) })}</p>
+		<!-- what each answer means for the Nebenkosten (personas a6 P-2) -->
+		<p class="text-ink">
+			{m.contracts_fixed_term_consequences({ name, date: formatDate(endDate) })}
+		</p>
 		<p class="text-ink-muted">{m.contracts_fixed_term_objection()}</p>
 		<div class="flex flex-wrap gap-4">
 			<form
@@ -54,18 +62,9 @@
 					testid="contract-continue-open-ended">{m.contracts_continue_open_ended()}</Button
 				>
 			</form>
-			<form
-				method="POST"
-				action="?/movedOut"
-				use:enhance={submit('movedOut', () => m.contracts_moved_out_toast({ name }))}
+			<Button onclick={() => (confirming = true)} icon="calendar-busy" testid="contract-moved-out"
+				>{m.contracts_moved_out()}</Button
 			>
-				<Button
-					type="submit"
-					icon="calendar-busy"
-					busy={busy === 'movedOut'}
-					testid="contract-moved-out">{m.contracts_moved_out()}</Button
-				>
-			</form>
 		</div>
 		{#if error}
 			<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
@@ -94,4 +93,15 @@
 			</RefusedStatements>
 		{/if}
 	</Panel>
+	<ActionDialog
+		bind:open={confirming}
+		action="?/movedOut"
+		title={m.contracts_moved_out_title({ name })}
+		confirmLabel={m.contracts_moved_out_confirm()}
+		confirmTestid="contract-moved-out-confirm"
+		error={form?.movedOutError as string | undefined}
+		onsuccess={() => addToast('success', m.contracts_moved_out_toast({ name }))}
+	>
+		<p class="text-ink">{m.contracts_moved_out_consequence({ date: formatDate(endDate) })}</p>
+	</ActionDialog>
 {/if}

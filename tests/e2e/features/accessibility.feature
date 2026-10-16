@@ -89,6 +89,7 @@ Funktionalität: Barrierefreiheit
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |
       | contract-detail-expired | default            |
+      | contract-detail-expired | moved-out-dialog   |
       | contract-detail-expired | continue-refused   |
       | contract-edit-notice   | default             |
       | invoices               | default             |

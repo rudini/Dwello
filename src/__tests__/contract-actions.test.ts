@@ -492,11 +492,11 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 		).fixedTermCheck;
 	const expired = { endDate: '2025-12-31', terminated: false, movedOut: false };
 
-	it('fragt nach einem vereinbarten Vertragsende vor heute ohne Folgevertrag', async () => {
+	it('fragt nach einem vereinbarten Vertragsende vor heute ohne späteren Mietvertrag', async () => {
 		expect(await asked(expired)).toBe(true);
 	});
 
-	it('fragt nicht nach einer Kündigung, einem bestätigten Auszug, einem Folgevertrag oder vor dem Ende', async () => {
+	it('fragt nicht nach einer Kündigung, einem bestätigten Auszug, einem späteren Mietvertrag oder vor dem Ende', async () => {
 		expect(await asked({ ...expired, terminated: true })).toBe(false);
 		expect(await asked({ ...expired, movedOut: true })).toBe(false);
 		expect(await asked(expired, [{ id: 'c2', startDate: '2026-01-01', endDate: null }])).toBe(
@@ -545,8 +545,9 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 		});
 	});
 
-	// Fachreview A-6 V-2: eine versendete Abrechnung ändert Dwello nicht; die Meldung spricht von keinem Datum
-	it('sagt bei einer versendeten Abrechnung, dass der Mietvertrag hier nicht weiterläuft', async () => {
+	// Fachreview A-6 V-2: eine versendete Abrechnung ändert Dwello nicht; die Meldung spricht von keinem Datum, und
+	// der Mietvertrag läuft rechtlich trotzdem weiter (M-3)
+	it('sagt bei einer versendeten Abrechnung, dass Dwello das Vertragsende nicht entfernen kann', async () => {
 		const sent = { statements: [{ ...refused.statements[0], status: 'sent' }] };
 		const { result } = runAction(
 			actions.continueOpenEnded,
@@ -564,7 +565,7 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 			status: 409,
 			data: {
 				fixedTermError:
-					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann der Mietvertrag hier nicht unbefristet weiterlaufen. Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.'
+					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann Dwello das Vertragsende nicht entfernen. Für Sie und den Mieter läuft der Mietvertrag trotzdem unbefristet weiter. Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.'
 			}
 		});
 	});
@@ -589,13 +590,14 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 		]);
 	});
 
-	it('meldet, wenn sich der Auszug nicht speichern lässt', async () => {
+	// im Dialog, der den Auszug bestätigt (personas a6 P-1)
+	it('meldet im Dialog, wenn sich der Auszug nicht speichern lässt', async () => {
 		const { result } = runAction(actions.movedOut, 'c1', 500);
 
 		expect(await result).toMatchObject({
 			status: 500,
 			data: {
-				fixedTermError: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.'
+				movedOutError: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.'
 			}
 		});
 	});
