@@ -45,7 +45,7 @@ describe('Hilfe', () => {
 			'ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Nur zulässig, wenn im Mietvertrag vereinbart; das tragen Sie beim Mietvertrag ein. Üblich sind bis 3 %.'
 		);
 		expect(glossary?.textContent).not.toContain('Satz und Verteilschlüssel');
-		for (const word of ['Nachzahlung', 'Rückerstattung', 'Wiedervermietet', 'Gesperrt'])
+		for (const word of ['Nachzahlung', 'Rückerstattung', 'Vermietet ab …', 'Gesperrt'])
 			expect(glossary?.textContent).toContain(word);
 	});
 

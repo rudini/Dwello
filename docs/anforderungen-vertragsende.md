@@ -13,7 +13,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna | #114 |
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | umgesetzt | IF-9 | #115 |
 | A-7 | Doppelt erfassten Mietvertrag entfernen | umgesetzt | Anna (I2, M2) | #116 |
-| A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) | #117 |
+| A-8 | Früheren Mietvertrag als Historie erkennbar machen | umgesetzt | Anna (I2, M3) | #117 |
 | A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) | – |
 | A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | umgesetzt | Anna (I2 M1, I3 M1–M3) | #118, #119 |
 | A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 | #120 |
@@ -250,7 +250,9 @@ Szenario: Irrtümlich erfassten Mietvertrag löschen
 
 ---
 
-## A-8 Früheren Mietvertrag als Historie erkennbar machen
+## A-8 Früheren Mietvertrag als Historie erkennbar machen – umgesetzt
+
+**Umgesetzt** (#117): Die Wohnungsseite zeigt laufende und künftige Mietverträge oben, beendete unter «Frühere Mietverträge» mit der Hilfe zur Historie. Der Löschdialog verlinkt jede Abrechnung des Vertrags mit ihrem Status; ein beendeter Vertrag ohne Abrechnung sagt «Zu diesem Mietvertrag gibt es in Dwello keine Nebenkostenabrechnung.» (Fachreview V-2, `docs/reviews/w4bm-fachreview-1.md`).
 
 **Problem.** Anna (I2) hielt einen beendeten Mietvertrag von 2018–2021 in derselben Wohnung für ein Duplikat. Nichts zeigt, dass er die Historie der Wohnung ist und für alte Abrechnungen gebraucht wird.
 

@@ -7,9 +7,10 @@
 	// Search and status as a plain GET form: the address keeps them, and a choice made while loading counts
 	let { filters }: { filters: { search: string; status: string } } = $props();
 
-	// Aktiv: with a running or future rental contract; ehemalig: all contracts ended (glossary "Mieter")
+	// Aktiv: with a running rental contract; künftig: only a future one; ehemalig: all contracts ended (glossary "Mieter")
 	const statuses = [
 		{ value: 'active', label: m.tenants_active_filter() },
+		{ value: 'future', label: m.tenants_future_filter() },
 		{ value: 'inactive', label: m.tenants_former_filter() }
 	];
 	const filtered = $derived(!!(filters.search || filters.status));

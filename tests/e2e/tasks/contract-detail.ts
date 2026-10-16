@@ -13,6 +13,7 @@ import {
 	contractStatementsLink,
 	contractTenantLink,
 	deleteContractButton,
+	deleteDialogStatementLink,
 	deleteMistakeConfirmation,
 	deleteDraftAndEndButton,
 	endContractButton,
@@ -73,6 +74,7 @@ export const useWindowOf = (width: number, height: number) => Browser.resizeTo({
 // the confirm button scrolled into view inside the dialog
 export const scrollToEndConfirmation = Scroll.to(confirmEndContractButton);
 
+export const openStatementFromDeleteDialog = (statementId: string) => Click.on(deleteDialogStatementLink(statementId));
 // A-6 (#115): after an expired fixed-term contract the tenant either still lives there or has moved out
 export const continueOpenEnded = Click.on(continueOpenEndedButton);
 // the move-out is confirmed with its consequence in a dialog (personas a6 P-1)

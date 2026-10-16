@@ -260,6 +260,7 @@
 	startDate={contract.startDate}
 	endDate={contract.endDate}
 	future={status === 'future'}
+	ended={status === 'ended'}
 	billedBy={data.billedBy}
 	missingStatements={data.missingStatements.length > 0}
 	error={form?.deleteError}

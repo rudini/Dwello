@@ -18,7 +18,8 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
 	missingStatements: { start: string; end: string; href: string }[]; // A-10, #142: newest first
-	billedBy: { statementNumber: string; status: string }[]; // the contract's statements: it cannot be deleted (#116)
+	// the contract's statements: it cannot be deleted (#116); null when they cannot be read (review C-1)
+	billedBy: { id: string; statementNumber: string; status: string }[] | null;
 	nextSteps: { successor: boolean } | null; // A-4: a notice still running
 	fixedTermCheck: boolean; // A-6: an agreed end passed, the tenant may have stayed
 	contract: RentalContract & {
@@ -168,10 +169,12 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 		return {
 			today: localToday(),
 			missingStatements: await missingStatements(fetch, data, statements),
-			billedBy: (statements ?? []).map((s) => ({
-				statementNumber: String(s.statementNumber),
-				status: String(s.status)
-			})),
+			billedBy:
+				statements?.map((s) => ({
+					id: String(s.id),
+					statementNumber: String(s.statementNumber),
+					status: String(s.status)
+				})) ?? null,
 			nextSteps: await nextStepsDue(fetch, data),
 			fixedTermCheck: await fixedTermCheckDue(fetch, data),
 			contract,

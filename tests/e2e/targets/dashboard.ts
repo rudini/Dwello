@@ -11,6 +11,9 @@ const inOccupancy = (building: string, description: string, testId: string) =>
 export const occupancyBuilding = (building: string) => inOccupancy(building, 'Gebäude in der Belegung', 'occupancy-building');
 export const occupancyRate = (building: string) => inOccupancy(building, 'Belegung', 'occupancy-rate');
 export const occupancyCount = (building: string) => inOccupancy(building, 'Vermietete Wohnungen', 'occupancy-count');
+export const occupancyVacancyHelp = target('Hinweis zu leeren Wohnungen in der Belegung', (page) =>
+	page.getByTestId('occupancy-vacancy-help')
+);
 export const statTile = (testId: string) => target(`Kennzahl ${testId}`, (page) => page.getByTestId(testId));
 export const statementsTile = (status: string) =>
 	target(`Abrechnungen ${status}`, (page) => page.getByTestId(`statements-${status}`));

@@ -60,6 +60,10 @@ export function contractPeriod(
 		: m.contracts_period_since({ date: start });
 }
 
+/** The period of a row in a contract history (apartment or tenant page) */
+export const historyPeriod = (c: ContractHistory) =>
+	contractPeriod(c.startDate, c.endDate, c.status, c.terminated);
+
 /** The Vertragsende in words: agreed in a fixed-term contract, or the Kündigungstermin of an open-ended one */
 export function contractEnd(endDate: string | null | undefined, terminated = false) {
 	if (!endDate) return m.contracts_unlimited();
