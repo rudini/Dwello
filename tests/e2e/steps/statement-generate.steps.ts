@@ -56,6 +56,9 @@ import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
 
+// the profile the wizard preselects when no scenario has an own one: the first complete predefined one by name
+const PREDEFINED_PROFILE = 'Heizung + Warmwasser';
+
 Given('der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openStatementWizard);
 });
@@ -70,14 +73,14 @@ When(
 When(
 	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} erstellt',
 	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!));
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, await seed.heatingProfileId(PREDEFINED_PROFILE)));
 	}
 );
 
 Given(
 	'der Liegenschaftsverwalter hat die Abrechnungen {int} für das Gebäude {string} erstellt',
 	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!));
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, await seed.heatingProfileId(PREDEFINED_PROFILE)));
 		await verwalter.sees(generationOutcomeShown).toBe(true);
 	}
 );

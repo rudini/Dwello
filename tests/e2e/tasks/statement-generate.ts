@@ -74,9 +74,12 @@ export const goToGeneration: Activity = async (actor) => {
 	await actor.attemptsTo(goToNextStep);
 };
 
-export const generateStatements = (year: number, buildingId: string) =>
+// The UI run names its heating profile: the wizard preselects the first complete one, which can be a parallel
+// scenario's own profile, deleted before the statement is stored (tests/e2e/CLAUDE.md, Isolation)
+export const generateStatements = (year: number, buildingId: string, heatingProfileId: string) =>
 	throughUiOrApi(
-		(actor) => actor.attemptsTo(openPreviewThroughUi(year, buildingId, {}), goToGeneration, Click.on(generateButton)),
+		(actor) =>
+			actor.attemptsTo(openPreviewThroughUi(year, buildingId, { heatingProfileId }), goToGeneration, Click.on(generateButton)),
 		generateStatementsViaApi(year, buildingId)
 	);
 
