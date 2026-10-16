@@ -170,10 +170,13 @@ export const Cookies = {
 };
 
 export const Browser = {
-	// What the server reads (Accept-Language) and what the page's own scripts read (navigator.languages)
+	// What the server reads (Accept-Language) and what the page's own scripts read (navigator.languages). A
+	// changed request, not an extra header: Chromium sends the context's locale (playwright.config.ts) over that
 	preferLanguages: (acceptLanguage: string): Activity => async (actor) => {
 		const languages = acceptLanguage.split(',').map((language) => language.split(';')[0]);
-		await pageOf(actor).setExtraHTTPHeaders({ 'Accept-Language': acceptLanguage });
+		await pageOf(actor).route('**/*', (route) =>
+			route.continue({ headers: { ...route.request().headers(), 'accept-language': acceptLanguage } })
+		);
 		await pageOf(actor).addInitScript((list) => Object.defineProperty(navigator, 'languages', { get: () => list }), languages);
 	},
 	resizeTo: (size: { width: number; height: number }): Activity => (actor) => pageOf(actor).setViewportSize(size),

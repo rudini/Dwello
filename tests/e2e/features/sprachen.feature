@@ -5,14 +5,12 @@ Funktionalität: Sprache der Oberfläche
   möchte ich Dwello auf Deutsch, Französisch, Italienisch oder Englisch bedienen
   damit ich jeden Schritt verstehe
 
-  @wip
   Szenario: Ohne Wahl zeigt die Anmeldeseite die Sprache des Browsers
     Angenommen der Browser des Besuchers bevorzugt Französisch
     Und ein Besucher hat die Anmeldeseite geöffnet
     Dann ist die Seite auf "Français"
     Und heisst die Seite "Se connecter - Dwello"
 
-  @wip
   Szenario: Ohne Wahl folgt auch die Übersicht der Sprache des Browsers
     Angenommen der Browser des Liegenschaftsverwalters bevorzugt Englisch
     Und der Liegenschaftsverwalter öffnet die Übersicht
@@ -23,7 +21,13 @@ Funktionalität: Sprache der Oberfläche
     Und der Liegenschaftsverwalter öffnet die Übersicht
     Dann ist die Seite auf "Deutsch"
 
-  @wip
+  Szenario: Die Sprache des ersten Besuchs bleibt, auch wenn der Browser später eine andere bevorzugt
+    Angenommen der Browser des Liegenschaftsverwalters bevorzugt Englisch
+    Und der Liegenschaftsverwalter öffnet die Übersicht
+    Und der Browser des Liegenschaftsverwalters bevorzugt Französisch
+    Wenn der Liegenschaftsverwalter die Seite neu lädt
+    Dann ist die Seite auf "English"
+
   Szenario: Die gewählte Sprache gilt vor der Sprache des Browsers
     Angenommen der Browser des Liegenschaftsverwalters bevorzugt Englisch
     Und der Liegenschaftsverwalter öffnet die Übersicht
