@@ -507,3 +507,19 @@ Request: make the CI E2E tests faster (follow-up to "axe check only on UI change
 - [x] Push, pull request, CI shows shard times, merge (CLAUDE.md, Workflow 9)
 
 Files: `.github/workflows/ci.yml`, `docs/test-pyramid.md`
+
+## Session: statement list tenancy dates and missing PDF (#248, #253)
+
+- [x] #248 scenario `@wip` in `statements.feature`: list shows the tenancy dates within the period
+- [x] #248 lower-layer test of the list mapping (the stored rent days)
+- [x] #253 scenario `@wip` in `statements.feature`: a draft without PDF says «PDF noch nicht erstellt» and leads to its detail page
+- [x] #253 DOM test of the row; texts in de/fr/it/en
+- [x] #253 new state in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
+- Files: `src/lib/server/statement.ts` (maps the stored `rentalStart`/`rentalEnd`), `docs/api-specification.md`, `src/routes/statements/+page.server.ts` (reuses `toStatement`), `StatementRow.svelte`, `src/lib/types.ts`, `messages/*.json`, `tests/contracts/statements.json`, tests
+- [x] Slice review round 1: `docs/reviews/list-review-1.md`
+- [x] Feature review: `docs/design/personas/dr-weber-list.md`, `marco-list.md`, `dr-weber-list-2.md` (draft without PDF prepared by SQL in `dwello_persona`)
+- [x] Fixes: the list maps the stored `rentalStart`/`rentalEnd` (no contract join); row locator by statement number; the row names the dates with the Mietstage (the detail page's dates stay with #104)
+- [x] Slice review round 2: `docs/reviews/list-review-2.md` (detail change taken out)
+- [x] Persona re-run on the labelled dates: `docs/design/personas/dr-weber-list-3.md` (P-1 resolved in the list)
+- [x] Workflow note: demo PDFs and the collected review in parallel sessions (`docs/reviews/workflow-notes-issue-248-253.md`)
+- [x] Before marking complete: lint, check, type-check, affected tests and E2E
