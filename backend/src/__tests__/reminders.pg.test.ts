@@ -402,3 +402,26 @@ describe('Mahnung nach gescheiterter E-Mail per Post versendet', () => {
 		expect(sent).toMatchObject({ channel: 'letter', status: 'sent' });
 	});
 });
+
+// #106: die Mahnung folgt der Sprache des Mieters, auch der später ausgedruckte Brief
+describe('Mahnung in der Sprache des Mieters', () => {
+	it('schreibt E-Mail und PDF auf Italienisch', async () => {
+		await updateTenant(rental.tenant, { email: 'anna.keller@example.com', correspondenceChannel: 'email', language: 'it' });
+		const result = await remind(await statement('sent'));
+
+		expect(result.document.title).toBe('Promemoria di pagamento');
+		const mail = mails.at(-1)!;
+		expect(mail.subject).toStartWith('Promemoria di pagamento – Conteggio spese accessorie');
+		expect(mail.text).toContain('Buongiorno');
+		expect(pdfText(mail.attachments[0].content)).toContain('Cordiali saluti');
+	});
+
+	it('macht den Brief beim Versand wieder auf Französisch', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'fr' });
+		const letter = (await remind(await statement('sent'))).document;
+		await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
+
+		expect(pdfText(pdf)).toContain('Meilleures salutations');
+	});
+});

@@ -46,7 +46,7 @@ Dwello provides:
 - Centralized property, tenant, and contract management
 - LLM-powered invoice categorization with validation
 - Professional PDF statement and QR invoice generation
-- German user interface; tenant-facing statement PDFs in five languages (German, French, Italian, Romansh, English)
+- German user interface; tenant-facing statement PDFs and reminders in four languages (German, French, Italian, English)
 - Secure data storage with automated backups
 
 ### 2.4 Target Market
@@ -1351,7 +1351,7 @@ BALANCE (refund): CHF 30
 
 **Internationalization:**
 - User interface in German
-- Tenant-facing statement PDFs in German, French, Italian, Romansh, English
+- Tenant-facing statement PDFs and reminders in German, French, Italian, English
 - Consistent translations across application
 - Date/time formatting per locale
 - Currency formatting (CHF with appropriate symbols)
@@ -1521,7 +1521,7 @@ BALANCE (refund): CHF 30
 
 **Library:** `svelte-i18n`
 - **Purpose:** UI texts (German) and tenant-facing statement PDFs
-- **Languages:** UI in German; statement PDFs in German, French, Italian, Romansh, English
+- **Languages:** UI in German; statement PDFs and reminders in German, French, Italian, English
 - **Format:** JSON translation files per language
 - **Cost:** Free
 
@@ -1647,7 +1647,7 @@ An audit log is planned, not implemented.
 - Swiss QR-bill generation with correct encoding
 - IBAN configuration
 - PDF embedding in database
-- Multi-language PDF templates (German, French, Italian, Romansh, English)
+- Multi-language PDF templates (German, French, Italian, English)
 - Statement number generation
 - PDF download and batch download (ZIP; planned, not implemented)
 - QR-bill validation and testing

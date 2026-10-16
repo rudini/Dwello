@@ -39,6 +39,7 @@ describe('Abrechnung aus dem Backend', () => {
 	it('übernimmt Mieter, Wohnung, Bemerkungen und Kostenpositionen', () => {
 		expect(toStatement(backendStatement)).toMatchObject({
 			tenantName: 'Eva Frei',
+			tenantLanguage: 'fr',
 			apartmentUnit: '3.01',
 			buildingName: 'Lindenhof',
 			notes: 'Hauswart neu',

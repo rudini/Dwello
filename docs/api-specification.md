@@ -78,7 +78,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/` | Query: `search`, `language`, `status` (`active`\|`inactive`), `limit` (default 50), `offset`. → `{ tenants, total }`; items include `currentApartment`, `currentBuilding`, `isActive` (see `tests/contracts/tenants.json`) |
 | GET | `/:id` | → tenant with `currentApartment`, `currentBuilding`, `contractCount`, `isActive`. 404 |
 | GET | `/:id/history` | → `{ tenant, contracts: [{ id, apartmentNumber, buildingName, startDate, endDate, baseRent, isActive }] }`. 404 |
-| POST | `/` | Body: `firstName`, `lastName` required; optional `email` (email format), `phone`, `language` (`de`\|`fr`\|`it`\|`rm`\|`en`), `address`, `postalCode`, `city`, `correspondenceChannel` (`email`\|`letter`). → 201 tenant. 400 |
+| POST | `/` | Body: `firstName`, `lastName` required; optional `email` (email format), `phone`, `language` (`de`\|`fr`\|`it`\|`en`), `address`, `postalCode`, `city`, `correspondenceChannel` (`email`\|`letter`). → 201 tenant. 400 |
 | PUT | `/:id` | Body: any subset of the POST fields. → tenant. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the tenant has an active contract or any contract history |
 
@@ -182,7 +182,7 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 | `iban` | CH or LI IBAN, 21 characters, MOD-97 checksum | `""` |
 | `payment_deadline_days` | 7–90 | `30` |
 | `reminder_after_days` | 7–60 | `14` |
-| `default_language` | `de` \| `fr` \| `it` \| `rm` \| `en` | `de` |
+| `default_language` | `de` \| `fr` \| `it` \| `en` | `de` |
 
 | Method | Path | Notes |
 |---|---|---|
@@ -219,7 +219,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | PUT | `/:id/status` | Body: `status` required; optional `paidDate`, `paidAmount`, `reminderSentDate`. → statement. 404; 400 invalid transition |
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |
-| POST | `/:id/generate-pdf` | Body: optional `language` (`de`\|`fr`\|`it`\|`rm`\|`en`; default tenant language, then `de`). Renders the PDF with Swiss QR-bill and stores it. → `{ success: true, message, qrReference, pdfSize }`. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
+| POST | `/:id/generate-pdf` | Body: optional `language` (`de`\|`fr`\|`it`\|`en`; default tenant language, then `de`). Renders the PDF with Swiss QR-bill and stores it. → `{ success: true, message, qrReference, pdfSize }`. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
 | GET | `/:id/pdf` | → `application/pdf` attachment `statement-<number>.pdf`, made first when missing or (a draft) dated another day. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
 | GET | `/:id/pdf/base64` | → `{ pdfBase64, mimeType: "application/pdf" }`. 404 as above |
 

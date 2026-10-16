@@ -673,6 +673,19 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-pdf-download')!.getAttribute('href')).toBe('/statements/s1/pdf');
 	});
 
+	// #105: wer das PDF erstellt, sieht, in welcher Sprache es entsteht
+	it('nennt beim Erstellen die Sprache des Mieters für das PDF', () => {
+		detail({ tenantLanguage: 'fr' });
+		expect(byTestId('statement-pdf-language')!.textContent).toBe('PDF auf Französisch');
+	});
+
+	// ein erstelltes PDF behält die Sprache, in der es entstand; welche, speichert Dwello nicht
+	it('nennt beim Herunterladen keine Sprache', () => {
+		detail({ tenantLanguage: 'fr', pdfGeneratedAt: '2025-01-16T08:00:00.000Z' });
+		expect(byTestId('statement-pdf-download')).not.toBeNull();
+		expect(byTestId('statement-pdf-language')).toBeNull();
+	});
+
 	it('bleibt beim Erstellen-Button, wenn das PDF nicht erstellt werden kann', async () => {
 		fakeBff(() => [400, { error: 'IBAN not configured' }]);
 		detail();
