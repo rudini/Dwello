@@ -213,7 +213,56 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		await deleteStatement(statement.id);
 
 		expect(mixed).toMatch(/Hauswart Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² 1'206\.52 1'206\.52 51\.66 % /);
-		expect(mixed).not.toContain('Ihre Mietstage darin');
+		expect(mixed).toContain('Ihre Mietstage darin von dessen Tagen in der Periode; bei Rechnungen über verschiedene Tage nach ihren Beträgen gewichtet');
+		expect(mixed).toContain('01.06.2025 – 30.06.2025: 600.00, 16/30 Tage');
+		expect(mixed).toContain('01.07.2025 – 31.08.2025: 606.52, 31/62 Tage');
+		expect(mixed).toContain("(600.00 × 16/30 + 606.52 × 31/62) / 1'206.52 = 51.66 %");
+	});
+
+	// Beträge im Verhältnis der Tage: der gewichtete Anteil ist zufällig genau Mietstage / Tage der Periode, 139/365;
+	// gedruckt wird trotzdem der Anteil mit den Rechnungen, nicht «139/365 Tage» (#226, C-5 von #208)
+	it('druckt bei Rechnungen über verschiedene Tage die Rechnungen, auch wenn der Anteil den Mietstagen entspricht', async () => {
+		const august = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
+		await insertInvoice(august.building, { amount: '1810.00', invoiceDate: '2025-07-05', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-06-30' });
+		await insertInvoice(august.building, { amount: '1840.00', invoiceDate: '2025-12-20', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-12-31' });
+		const statement = await generateStatement({ contractId: august.contract, buildingId: august.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await august.remove();
+
+		expect(text).toContain("(1'810.00 × 0/181 + 1'840.00 × 139/184) / 3'650.00 = 38.08 %");
+		expect(text).not.toMatch(/Hauswart .* 139\/365 Tage/);
+	});
+
+	// Eine Rechnung ohne Leistungszeitraum rechnet die ganze Periode ab, ihre Zeile nennt deren Tage (#226, V-12)
+	it('nennt eine Rechnung ohne Leistungszeitraum unter der Position mit den Tagen der Periode', async () => {
+		const mixed = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
+		await insertInvoice(mixed.building, { amount: '365.00', invoiceDate: '2025-05-05' });
+		await insertInvoice(mixed.building, { amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
+		const statement = await generateStatement({ contractId: mixed.contract, buildingId: mixed.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await mixed.remove();
+
+		expect(text).toContain('01.01.2025 – 31.12.2025: 365.00, 139/365 Tage');
+		expect(text).toContain("(365.00 × 139/365 + 900.00 × 47/92) / 1'265.00 = 47.33 %");
+	});
+
+	// Eine Gutschrift hebt die Rechnung auf: die Position hat keinen Anteil, den die Rechnungen ergeben könnten (#226, V-6)
+	it('druckt keine Rechnungen unter einer Position, deren Rechnungen zusammen null ergeben', async () => {
+		const credit = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
+		await insertInvoice(credit.building, { amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
+		await insertInvoice(credit.building, { amount: '-900.00', invoiceDate: '2025-07-05', servicePeriodStart: '2025-04-01', servicePeriodEnd: '2025-06-30' });
+		const statement = await generateStatement({ contractId: credit.contract, buildingId: credit.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await credit.remove();
+
+		expect(text).toContain('Hauswart');
+		expect(text).not.toContain('47/92 Tage');
 	});
 
 	// Mietvertrag über die ganze Periode: der Mieter trägt alle Tage jeder Rechnung, der Anteil ist 92/92 (Regel 5)
@@ -234,6 +283,7 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		await whole.remove();
 
 		expect(text).toContain("Hauswart Pro Fläche (m²) 70.00 / 70.00 m² 1'206.52 1'206.52 92/92 Tage 1'206.52");
+		expect(text).not.toContain('01.06.2025 – 30.06.2025:'); // no invoice lines: he bears every day of each (V-12)
 	});
 });
 

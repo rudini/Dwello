@@ -237,3 +237,52 @@ describe('Heiz- und Warmwasserkosten im PDF', () => {
 		expect((await textOf(due)).flowing).not.toContain('aus dem Tank');
 	});
 });
+
+// Zwei Rechnungen über verschiedene Leistungszeiträume, Einzug am 15. August: 600 × 0/91 + 1'200 × 47/92 (#226)
+describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
+	const invoiceParts = [
+		{ start: '2025-04-01', end: '2025-06-30', amount: 600, days: 0, total: 91 },
+		{ start: '2025-07-01', end: '2025-09-30', amount: 1200, days: 47, total: 92 }
+	];
+	const mixed = { ...due, lineItems: [{ ...refund.lineItems[0], totalAmount: 1800, apartmentShare: 900, periodShare: 0.3406, invoiceParts, tenantShare: 306.52 }] };
+
+	it.each([
+		['fr', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 jours", 'pondérée selon leurs montants (calcul sous le poste du décompte ;'],
+		['it', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 giorni", 'ponderata secondo i loro importi (calcolo sotto la voce del conteggio;'],
+		['en', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 days", 'weighted by their amounts (calculation below the statement line;']
+	] as const)('nennt die Tage jeder Rechnung und ihre Gewichtung auch auf %s', async (language, line, note) => {
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(mixed, config, language), 'base64')).flowing;
+		expect(text).toContain(line);
+		expect(text).toContain(note); // Code-Review C-8, C-10: the clause in the terms of docs/design/i18n-begriffe.md
+		expect(text).toContain("(600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 34.06 %");
+	});
+
+	// Dr. Weber P-1: die Erläuterung nannte nur die Mietstage in der Periode, der Zeitanteil kam aber aus den Rechnungen
+	it('erklärt die Rechnungen unter der Position und ihre Gewichtung nach den Beträgen', async () => {
+		const text = (await textOf(mixed)).flowing;
+		expect(text).toContain('bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode; bei Rechnungen über verschiedene Tage nach ihren Beträgen gewichtet (Berechnung unter der Abrechnungsposition; Ihr Anteil ist der Wohnungsanteil mal diese Berechnung, der Prozentwert ist gerundet).');
+	});
+
+	it('hält die Rechnungen beim Seitenwechsel bei ihrer Position, unter dem Tabellenkopf', async () => {
+		const many = { ...mixed, lineItems: Array.from({ length: 30 }, (_, i) => ({ ...mixed.lineItems[0], category: `Kategorie ${i + 1}` })) };
+
+		const pdf = await textOf(many);
+
+		expect(pdf.pages).toBeGreaterThanOrEqual(3);
+		expect(pdf.flowing.split('Kategorie Verteilschlüssel').length - 1).toBe(pdf.pages - 1);
+		expect(pdf.flowing).not.toMatch(/Kategorie Verteilschlüssel[^(]*\d{2}\.\d{2}\.2025 – 30\.06\.2025/);
+	});
+
+	// Code-Review C-1: eine Position über mehrere Zeilen am Seitenende, ihre Rechnungen gingen ohne Tabellenkopf weiter
+	// (nach 20, 21 und 62 Positionen brach die Formel auf die nächste Seite)
+	it.each([20, 21, 62])('hält die Rechnungen auch bei einer langen Kategorie nach %i Positionen bei ihr', async (before) => {
+		const long = { ...mixed.lineItems[0], category: 'Allgemeine Betriebskosten Treppenhaus Umgebung Garten Spielplatz Velokeller Waschküche Trocknungsraum' };
+		const plain = (i: number) => ({ category: `Kat ${i}`, key: 'Pro Einheit', totalAmount: 100, apartmentShare: 50, periodShare: 0.3808, tenantShare: 19 });
+
+		const { pageTexts } = await textOf({ ...mixed, lineItems: [...Array.from({ length: before }, (_, i) => plain(i)), long] });
+
+		const pageOf = (text: string) => pageTexts.findIndex((page) => page.includes(text));
+		expect([pageOf('01.04.2025'), pageOf('(600.00')]).toEqual([pageOf('306.52'), pageOf('306.52')]);
+	});
+
+});

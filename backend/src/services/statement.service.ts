@@ -350,6 +350,7 @@ export async function generateStatement(
 			periodShare: String(item.periodShare),
 			positionRentalDays: item.positionRentalDays,
 			billedDays: item.billedDays,
+			invoiceParts: item.invoiceParts,
 			sortOrder: index
 		}))
 	);
