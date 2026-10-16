@@ -35,7 +35,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable'].includes(state)) return { path, building: '', tankBuilding: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable'].includes(state)) return { path, building: '', tankBuilding: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -78,7 +78,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.building('Bergsicht', 'Winterthur');
 	await seed.apartment('Bergsicht', '2.01', 'vacant');
 	await seed.tenant('Dora');
-	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00' });
+	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00', additionalRent: '80.00' }); // a parking space: the wizard's note after her contract names it (#144)
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
 	// empty since a tenancy ended long before any statement: «Leer seit», «Frühere Mietverträge» (#145, #117)
@@ -110,6 +110,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
+		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),
 		// a predefined category shows the reason of its allocability (#186)

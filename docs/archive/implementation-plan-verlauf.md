@@ -658,6 +658,23 @@ Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/s
 
 Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.ts`, `backend/src/services/calculation.service.ts`, `backend/src/routes/statements.ts`, `src/lib/server/statement.ts`, `src/routes/statements/[id]/pdf/+server.ts`, `src/routes/api/statements/[id]/pdf/+server.ts`, `docs/data-model.md`, tests (`statement-creation.pg`, `statement.routes.pg`, `statement-endpoints`, `statement-list-load`), E2E (`statement-generate`, `statement-detail` features, steps, tasks, questions), `docs/api-specification.md`, `docs/design/offene-punkte.md` (O-34), `docs/design/personas/weber-w3-abrechnungsnummer.md`, `docs/reviews/w3b-*.md`, `docs/reviews/workflow-notes-issue-97-101.md`
 
+## Session: invoice check hints (#130, #131, #134)
+
+- [ ] #130 rhythm: blocked on the product owner (fach-review V-1 Major: the literal rule hides a missing Q4; proposal in #130, label `entscheiden`)
+- [x] #130 Leistungszeitraum: a `deviation`/`gap` finding names how many invoices count only in part (unit + DOM test, four languages)
+- [ ] #130 scenario (rhythm): waits for the decision; the Leistungszeitraum part has its scenario
+- [x] #131 late invoices without Leistungszeitraum within 90 days after the period end, listed per building with edit link (pg test, scenario, four languages)
+- [x] #134 period under a year: invoices without Leistungszeitraum listed per building with edit link, a hint only (scenario, four languages)
+- [x] a11y/language state `invoice-hints` for the new hints (screens.json, accessibility.feature, sprachen-bildschirme.feature)
+- [x] fach-reviewer round 1 on the scenarios: `docs/reviews/hints-fachreview-1.md`
+- [x] code-reviewer round 1: `docs/reviews/hints-review-1.md` (C-1, C-2 fixed: scenario «Hinweis auf eine Rechnung, die nur teilweise zählt» and pg test, both seen red without the source line)
+- [x] personas round 1: `docs/design/personas/helga-invoice-hints.md`, `marco-invoice-hints-1.md` (no review: all contracts billed), `marco-invoice-hints-2.md`; P-1 (Heizöl listed) fixed with a pg test
+- [x] code-reviewer round 2 on the fixes: `docs/reviews/hints-review-2.md` (C-10 fixed: scenario «Heizöl für den Tank …», seen red without the filter; C-11, C-13 fixed)
+- [x] Helga round 2 on the row text: `docs/design/personas/helga-invoice-hints-2.md` (no findings)
+- Files: `backend/src/services/invoice-completeness.service.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{PreviewChecks,InvoiceHint}.svelte`, `messages/*.json`, tests (`invoice-completeness*.test.ts`, `api-contracts.pg.test.ts`, `statement-wizard*.test.ts`, `tests/contracts/invoice-completeness.json`, `statement-generate.feature` and steps, a11y screens)
+- [x] workflow-review: `docs/reviews/workflow-notes-issue-131.md`; session archived
+- [x] code-reviewer round 3 (closing): `docs/reviews/hints-review-3.md` (no new findings)
+
 ## Session 2026-10-16 W4b: payment of a statement (#138, #93, #92)
 
 - [x] @wip scenarios (statement-detail.feature), fach-reviewer before implementing (`docs/reviews/w4b-fachreview-1.md`; V-5 and V-3 → #291, V-9 → #290)
@@ -677,3 +694,21 @@ Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.t
 - [x] Merged origin/main (W6 reminders: a11y lists, seed, `src/lib/statement.ts`; migration renamed to 0010); merge review `docs/reviews/w4b-review-merge.md`: no Blocker/Major, C-2 (reset of a reminded statement untested) left as Minor
 - [x] Workflow notes (`docs/reviews/workflow-notes-issue-138-93-92.md`)
 - [x] Workflow notes, archive the session, pull request
+
+## Session: contract wizard keeps the apartment and takes over the rent (#144)
+
+Request: «Setze #144 um» (coordinator W10). #144's "Done means" still asks for an implementation issue; the decided Option A is the requirement, the pull request says `Fixes #144`.
+
+- [x] The preselected apartment survives the detour to «Neuen Mieter erfassen» (scenario in `contract-new.feature`)
+- [x] Nettomiete, Zusatzmiete and Akonto are preset from the apartment's last Mietvertrag, editable, marked as taken over (scenario in `contract-new.feature`)
+- [x] fach-reviewer on the `@wip` scenarios before implementing (amounts)
+- [x] fach-reviewer round 1 (`docs/reviews/p17-fachreview-1.md`): took V-1, V-2, V-3, V-6, M-1, M-3
+- [x] axe/language state `rent-taken-over` (`tests/a11y/screens.json`)
+- [x] Found: suggested Vertragsbeginn 01.01.2100 refused by the wizard's own check → #296
+- [x] code-reviewer round 1 (`docs/reviews/p17-review-1.md`): fixed C-7, C-8; C-1..C-6 stay in the report
+- [x] persona Helga (`docs/design/personas/helga-p17.md`): fixed P-1 (parking sentence only with a Zusatzmiete) and P-2 (wording)
+- [x] Workflow note: decision issue implemented directly; persona re-run after a rewording (`docs/reviews/workflow-notes-issue-144.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `src/lib/contract-wizard.ts`, `src/routes/contracts/new/{ContractWizard,RentStep,TenantStep}.svelte`, `src/routes/tenants/TenantForm.svelte`, `src/routes/tenants/new/+page.svelte`, `src/lib/server/tenant-form.ts`, `messages/*.json`, `tests/a11y/screens.json`, tests in `src/__tests__/` and `tests/e2e/`.

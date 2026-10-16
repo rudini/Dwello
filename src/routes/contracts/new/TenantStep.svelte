@@ -9,11 +9,13 @@
 	// Step 1: who rents; a new tenant is created on the tenant form, which returns here
 	let {
 		tenantId = $bindable(),
+		apartmentId,
 		tenants,
 		createdId,
 		error
 	}: {
 		tenantId: string;
+		apartmentId: string; // kept on the detour to a new tenant (#144)
 		tenants: { id: string; name: string; place?: string }[];
 		createdId: string | null; // back from "Neuen Mieter erfassen" with this tenant
 		error?: string;
@@ -54,7 +56,11 @@
 </Field>
 
 <div>
-	<Button href="/tenants/new?for=contract" icon="user-add" testid="contract-new-tenant"
-		>{m.contracts_new_tenant()}</Button
+	<Button
+		href="/tenants/new?for=contract{apartmentId
+			? `&apartment=${encodeURIComponent(apartmentId)}`
+			: ''}"
+		icon="user-add"
+		testid="contract-new-tenant">{m.contracts_new_tenant()}</Button
 	>
 </div>

@@ -7,6 +7,11 @@ import {
 	billedOfBuilding,
 	buildingChosen,
 	categoryFindingOf,
+	confirmationAsked,
+	invoiceWithoutServicePeriodOn,
+	countOfInvoicesWithoutServicePeriodOn,
+	lateInvoiceOn,
+	countOfLateInvoicesOn,
 	draftsOnly,
 	feeAboveGuideline,
 	feeFieldDescription,
@@ -34,6 +39,7 @@ import {
 	chooseBuilding,
 	chooseBuildingsFor,
 	confirmDespiteWarnings,
+	editHintedInvoice,
 	generateMore,
 	generateStatements,
 	goToGeneration,
@@ -319,4 +325,41 @@ Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text:
 
 Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
+});
+
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, start: string, end: string, building: string) => {
+		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
+	}
+);
+
+Then('verlangt die Vorschau keine Bestätigung', async ({ verwalter }) => {
+	await verwalter.sees(confirmationAsked).toBe(false);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(lateInvoiceOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfLateInvoicesOn(date)).toBe(0);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(invoiceWithoutServicePeriodOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfInvoicesWithoutServicePeriodOn(date)).toBe(0);
+});
+
+When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
+	await verwalter.attemptsTo(editHintedInvoice(date));
 });
