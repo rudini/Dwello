@@ -15,6 +15,7 @@
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
+	import TextInput from '$lib/ui/TextInput.svelte';
 	import InvoiceCategoryFields from '../../InvoiceCategoryFields.svelte';
 	import InvoiceDataFields from '../../InvoiceDataFields.svelte';
 	import InvoiceFormActions from '../../InvoiceFormActions.svelte';
@@ -40,6 +41,7 @@
 		servicePeriodStart: data.invoice.servicePeriodStart ?? '',
 		servicePeriodEnd: data.invoice.servicePeriodEnd ?? '',
 		billingEntity: data.invoice.billingEntity,
+		invoiceNumber: data.invoice.invoiceNumber ?? '',
 		description: data.invoice.description,
 		amount: data.invoice.amount.toFixed(2),
 		categoryId: data.invoice.categoryId || '',
@@ -59,6 +61,21 @@
 		(Object.keys(initial) as (keyof typeof initial)[]).some((key) => values[key] !== initial[key])
 	);
 
+	// the invoice as the backend takes it
+	const body = $derived({
+		buildingId: values.buildingId,
+		invoiceDate: values.invoiceDate,
+		...servicePeriodOf(values),
+		billingEntityName: values.billingEntity.trim(),
+		invoiceNumber: values.invoiceNumber.trim() || null,
+		description: values.description,
+		amount: plainAmount(values.amount),
+		categoryId: values.categoryId || null,
+		distributionKeyId: values.distributionKeyId || null,
+		isValidUtilityCost: values.isValidUtilityCost,
+		...(overrideReason.trim() && { manualOverrideReason: overrideReason.trim() })
+	});
+
 	async function save(event: Event) {
 		event.preventDefault();
 		errors = validateInvoice(values);
@@ -67,18 +84,7 @@
 
 		saving = true;
 		saveError = '';
-		const result = await api.put(`/invoices/${invoice.id}`, {
-			buildingId: values.buildingId,
-			invoiceDate: values.invoiceDate,
-			...servicePeriodOf(values),
-			billingEntityName: values.billingEntity.trim(),
-			description: values.description,
-			amount: plainAmount(values.amount),
-			categoryId: values.categoryId || null,
-			distributionKeyId: values.distributionKeyId || null,
-			isValidUtilityCost: values.isValidUtilityCost,
-			...(overrideReason.trim() && { manualOverrideReason: overrideReason.trim() })
-		});
+		const result = await api.put(`/invoices/${invoice.id}`, body);
 		saving = false;
 		if (result.error) {
 			// the message of a code the UI knows, never the server's own text
@@ -115,6 +121,14 @@
 	{/if}
 
 	<Panel title={m.invoices_data()}>
+		<!-- a number the KI read wrongly is corrected here (persona Helga) -->
+		<TextInput
+			id="invoiceNumber"
+			label={m.invoices_invoice_number()}
+			optional
+			bind:value={values.invoiceNumber}
+			testid="invoice-number-input"
+		/>
 		<InvoiceDataFields
 			bind:buildingId={values.buildingId}
 			bind:invoiceDate={values.invoiceDate}

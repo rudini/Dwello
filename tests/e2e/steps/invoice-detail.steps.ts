@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	amountOfInvoice,
+	numberOfInvoice,
 	categoryOfInvoice,
 	distributionKeyOfInvoice,
 	reasonForOverride,
@@ -84,3 +85,7 @@ Then(
 		await verwalter.sees(reasonForOverride).toBe(reason);
 	}
 );
+
+Then('sieht der Liegenschaftsverwalter die Rechnungsnummer {string}', async ({ verwalter }, number: string) => {
+	await verwalter.sees(numberOfInvoice).toBe(number);
+});

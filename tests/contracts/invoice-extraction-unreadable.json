@@ -1,0 +1,5 @@
+{
+	"error": "The KI answered nothing readable",
+	"code": "EXTRACTION_UNREADABLE",
+	"params": {}
+}

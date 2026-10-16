@@ -91,6 +91,9 @@ Funktionalität: Barrierefreiheit
       | invoices               | filtered-empty      |
       | invoices               | upload-dialog       |
       | invoices               | upload-discard-dialog |
+      | invoices               | upload-partial      |
+      | invoices               | upload-discard-created |
+      | invoices               | upload-unreadable   |
       | invoice-new            | default             |
       | invoice-new            | submit-empty        |
       | invoice-detail         | default             |

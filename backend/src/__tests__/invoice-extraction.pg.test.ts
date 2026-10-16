@@ -83,6 +83,17 @@ describe('Datei auslesen', () => {
 		expect(await response.json()).toMatchObject({ code: 'EXTRACTION_UNAVAILABLE' });
 	});
 
+	it('meldet eine Antwort der KI ohne lesbare Angaben, damit der Liegenschaftsverwalter es erneut versucht (Fachreview V-14)', async () => {
+		const server = openAiCompatible('Ich kann diese Datei nicht lesen.' as never);
+		try {
+			const response = await extract();
+			expect(response.status).toBe(502);
+			expect(await response.json()).toMatchObject({ code: 'EXTRACTION_UNREADABLE' });
+		} finally {
+			server.stop();
+		}
+	});
+
 	it('fragt eine abgeschaltete KI nicht', async () => {
 		const server = ki();
 		llmConfig.enabled = false;

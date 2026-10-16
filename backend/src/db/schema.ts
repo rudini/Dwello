@@ -279,6 +279,9 @@ export const invoiceDocuments = pgTable('invoice_documents', {
 	fileName: varchar('file_name', { length: 255 }).notNull(),
 	mimeType: varchar('mime_type', { length: 50 }).notNull(),
 	content: text('content').notNull(), // Base64 encoded file
+	// what the KI saw on the file when it was uploaded (#233): amounts already paid it deducts, costs not allocable
+	deductedAmount: decimal('deducted_amount', { precision: 12, scale: 2 }),
+	nonAllocableItems: boolean('non_allocable_items').default(false).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
 

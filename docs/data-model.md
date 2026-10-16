@@ -205,10 +205,12 @@ invoice_id  UUID PRIMARY KEY REFERENCES invoices ON DELETE CASCADE  -- at most o
 file_name   VARCHAR(255) NOT NULL
 mime_type   VARCHAR(50) NOT NULL    -- application/pdf | image/jpeg | image/png (checked by the first bytes)
 content     TEXT NOT NULL           -- Base64 encoded file, at most 10 MB
+deducted_amount      DECIMAL(12,2)  -- amounts already paid the file deducts, as the KI read them on upload (#233)
+non_allocable_items  BOOLEAN NOT NULL DEFAULT FALSE  -- the KI saw costs that are not allocable besides the others (#233)
 created_at  TIMESTAMP NOT NULL DEFAULT NOW()  -- uploaded or last replaced
 ```
 
-Migration `0005_invoice_documents.sql` (#217) also drops the unused column `invoices.invoice_pdf`.
+Migration `0005_invoice_documents.sql` (#217) also drops the unused column `invoices.invoice_pdf`; `0006_beleg_hints.sql` (#233) adds the two hints, which a replaced Beleg loses.
 
 ### fuel_stocks (Tankbestand)
 

@@ -1,7 +1,12 @@
 import { question } from '../screenplay/actor';
-import { Checked, OpenedFile, Text, Value } from '../screenplay/questions';
+import { Checked, OpenedFile, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	belegAmount,
+	belegHow,
+	belegUploadHints,
+	createInvoicesButton,
+	createdInvoiceLinks,
+	deleteBilledNote,
 	belegBilledNote,
 	belegCategory,
 	belegInvoiceNumber,
@@ -11,7 +16,9 @@ import {
 	deleteBelegNote,
 	discardMessage,
 	keepOriginalHint,
-	uploadResult
+	uploadBuildingSelect,
+	uploadResult,
+	uploadStatus
 } from '../targets/invoice-upload';
 
 export const proposedAmount = (fileName: string) => Value.of(belegAmount(fileName));
@@ -32,3 +39,10 @@ export const openedBelegName = question('the name of the opened Beleg', async (a
 export const openedBelegMagic = question('the kind of the opened Beleg', async (actor) =>
 	(await actor.answer(OpenedFile)).content.subarray(0, 3).toString('hex')
 );
+export const createdInvoiceNames = Text.ofAll(createdInvoiceLinks);
+export const createButtonLabel = Text.of(createInvoicesButton);
+export const belegHowTo = Text.of(belegHow);
+export const hintsOfUpload = Text.of(belegUploadHints);
+export const billedAdviceOnDelete = Text.of(deleteBilledNote);
+export const uploadDialogShown = Visibility.of(uploadBuildingSelect);
+export const uploadState = Text.of(uploadStatus);

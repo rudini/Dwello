@@ -121,13 +121,22 @@ export const DOWNLOAD = 'download';
 
 /**
  * Follows a link that shows a file in a new tab, as that tab would load it (the page's cookies), and keeps the file for
- * `OpenedFile`; headless Chromium shows no PDF in a tab, so the link is followed by a request instead of a click
+ * `OpenedFile`; headless Chromium shows no PDF in a tab, so the link is followed by a request instead of a click. A file
+ * the page holds itself (a `blob:` address, e.g. one chosen for upload) is read in the page, with the type it is shown as
  */
 export const OpenInNewTab = (target: Target): Activity => async (actor) => {
 	const page = pageOf(actor);
 	const link = locate(actor, target);
 	const newTab = (await link.getAttribute('target')) === '_blank';
-	const response = await page.context().request.get(new URL((await link.getAttribute('href'))!, page.url()).toString());
+	const href = (await link.getAttribute('href'))!;
+	if (href.startsWith('blob:')) {
+		const { type, bytes } = await page.evaluate(async (url) => {
+			const blob = await (await fetch(url)).blob();
+			return { type: blob.type, bytes: [...new Uint8Array(await blob.arrayBuffer())] };
+		}, href);
+		return actor.remember(OPENED, { newTab, disposition: `inline; type=${type}`, content: Buffer.from(bytes) });
+	}
+	const response = await page.context().request.get(new URL(href, page.url()).toString());
 	actor.remember(OPENED, { newTab, disposition: response.headers()['content-disposition'] ?? '', content: await response.body() });
 };
 export const OPENED = 'opened';

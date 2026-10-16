@@ -23,12 +23,15 @@ import {
 import { randomUUID } from 'crypto';
 import {
 	belegDetailsToggle,
+	belegMessage,
 	belegUnsure,
 	cancelUploadButton,
+	createInvoicesButton,
 	discardMessage,
 	uploadBuildingSelect,
 	uploadFileInput,
-	uploadInvoicesButton
+	uploadInvoicesButton,
+	uploadResult
 } from '../targets/invoice-upload';
 import { invoicePdf } from './invoice-upload';
 import { Visibility } from '../screenplay/questions';
@@ -131,6 +134,19 @@ const startUpload = (files: File[]): Activity => (actor) =>
 		Upload.theFile(files).into(uploadFileInput)
 	);
 
+// Two files, one created: the result with the file still open
+const createPartly: Activity = (actor) => {
+	const complete = `Elektro Blitz ${randomUUID()}.pdf`;
+	const open = `Werke ${randomUUID()}.pdf`;
+	return actor.attemptsTo(
+		startUpload([invoicePdf(complete), invoicePdf(open)]),
+		Wait.until(belegDetailsToggle(complete)),
+		Wait.until(belegDetailsToggle(open)),
+		Click.on(createInvoicesButton),
+		Wait.until(uploadResult)
+	);
+};
+
 // What a user does to reach each state
 const states: Record<string, (example: Example, viewport: Viewport) => Activity> = {
 	default: () => async () => {},
@@ -167,6 +183,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(belegDetailsToggle(read)),
 			Wait.until(belegUnsure(read, 'invoiceDate'))
 		);
+	},
+	// one invoice created, the other kept with what it lacks (no Kategorie: the stand-in categorizes only «Elektro Blitz»)
+	'upload-partial': () => (actor) => actor.attemptsTo(createPartly),
+	'upload-discard-created': () => (actor) =>
+		actor.attemptsTo(createPartly, Click.on(cancelUploadButton), Wait.until(discardMessage)),
+	// the stand-in answers no JSON for a file so named
+	'upload-unreadable': () => (actor) => {
+		const read = `Elektro ${randomUUID()} unlesbar.pdf`;
+		return actor.attemptsTo(startUpload([invoicePdf(read)]), Wait.until(belegMessage(read)));
 	},
 	'upload-discard-dialog': () => (actor) => {
 		const read = `Elektro ${randomUUID()}.pdf`;

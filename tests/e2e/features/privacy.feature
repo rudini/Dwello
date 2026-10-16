@@ -46,3 +46,7 @@ Funktionalität: Datenschutz
     Und nennt die Datenschutzerklärung unter "Cookies" "dwello_oauth_state"
     Und nennt die Datenschutzerklärung unter "Cookies" "dwello_login"
     Und nennt die Datenschutzerklärung unter "Cookies" "PARAGLIDE_LOCALE"
+
+  Szenario: Die Datenschutzerklärung spricht wie Dwello von der KI
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "KI"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Sprachmodell"

@@ -56,6 +56,10 @@
 		`inline-flex min-h-12 items-center justify-center gap-2 rounded-control border-2 px-6 py-2 text-base font-semibold transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${full ? 'w-full' : ''}`
 	);
 
+	// visible, as text right after the label so both wrap as one: a new tab can look as if Dwello had gone (personas
+	// Helga, Marco)
+	const newTab = $derived(target ? ` ${m.ui_opens_new_tab()}` : '');
+
 	// A link only while it can be followed; disabled or busy it is a button that cannot be pressed
 	const isLink = $derived(!!href && !disabled && !busy);
 </script>
@@ -65,7 +69,7 @@
 		{busyLabel}
 	{:else}
 		{#if icon}<Icon name={icon} />{/if}
-		{@render children()}
+		{@render children()}{newTab}
 	{/if}
 {/snippet}
 
@@ -74,13 +78,13 @@
 		{href}
 		class={classes}
 		aria-label={ariaLabel}
+		aria-describedby={describedby}
 		data-testid={testid}
 		data-sveltekit-reload={reload || undefined}
 		{target}
 		rel={target ? 'noopener' : undefined}
 	>
 		{@render content()}
-		{#if target}<span class="sr-only">{m.ui_opens_new_tab()}</span>{/if}
 	</a>
 {:else}
 	<button

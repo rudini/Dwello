@@ -12,6 +12,7 @@
 	import Field from '$lib/ui/Field.svelte';
 	import { controlClass } from '$lib/ui/field';
 	import Panel from '$lib/ui/Panel.svelte';
+	import { formatCurrency } from '$lib/utils/format';
 
 	// The Beleg of an invoice: to show to a tenant who asks, to add or to replace (#217)
 	let { invoice, billed }: { invoice: InvoiceWithDetails; billed: boolean } = $props();
@@ -19,6 +20,19 @@
 	let input = $state<HTMLInputElement>();
 	let saving = $state(false);
 	let error = $state<string>();
+	// which file and which button: choosing a file alone changes nothing (persona Helga)
+	const help = $derived(
+		[m.invoices_beleg_file_help(), invoice.beleg ? m.invoices_beleg_how_replace() : m.invoices_beleg_how_add()].join(' ')
+	);
+	// what the KI saw on the file when it was uploaded (persona Anna); costs that are not allocable only on an invoice
+	// that is: one that is not keeps them out already (domain review V-4)
+	const hints = $derived(
+		[
+			invoice.beleg?.deductedAmount &&
+				m.invoices_beleg_deducted({ amount: formatCurrency(Number(invoice.beleg.deductedAmount)) }),
+			invoice.beleg?.nonAllocableItems && invoice.isValidUtilityCost && m.invoices_beleg_mixed()
+		].filter((hint) => !!hint) as string[]
+	);
 
 	// a refusal is read out at the file field, which then holds the focus
 	async function refuse(reason: string) {
@@ -63,13 +77,24 @@
 		{:else}
 			<p class="text-ink-muted">{m.backend_beleg_not_found()}</p>
 		{/if}
+		{#if hints.length}
+			<Alert tone="caution" title={m.invoices_beleg_hints_title()} testid="invoice-document-hints">
+				{#each hints as hint (hint)}<p>{hint}</p>{/each}
+			</Alert>
+		{/if}
 		{#if billed && invoice.beleg}
 			<Alert tone="caution" title={m.invoices_billed_title()} testid="invoice-document-billed">
 				<p>{m.invoices_beleg_billed()}</p>
 			</Alert>
 		{/if}
 		<p class="text-ink-muted" data-testid="invoice-keep-original">{m.invoices_upload_keep_original()}</p>
-		<Field id="invoice-document-file" label={m.invoices_beleg_file_label()} help={m.invoices_beleg_file_help()} {error}>
+		<Field
+			id="invoice-document-file"
+			label={m.invoices_beleg_file_label()}
+			{help}
+			helpTestid="invoice-document-file-help"
+			{error}
+		>
 			{#snippet children(control)}
 				<input
 					bind:this={input}

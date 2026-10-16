@@ -234,18 +234,21 @@ export async function proposeAllocability(
  * What the KI reads from the pages of an uploaded file (images as data URLs); null when the KI does not run or does
  * not answer with the fields
  */
-export async function extractInvoice(fileName: string, pages: string[]): Promise<Extraction | null> {
+export async function extractInvoice(fileName: string, pages: string[]): Promise<Extraction | 'unreadable' | null> {
 	if (!llmConfig.enabled) return null;
+	let answer: string;
 	try {
 		const content: Content = [
 			{ type: 'text', text: buildExtractionPrompt(fileName) },
 			...pages.map((url) => ({ type: 'image_url' as const, image_url: { url } }))
 		];
-		return parseExtractionResponse(await callLlm(content));
+		answer = await callLlm(content);
 	} catch (error) {
 		console.warn('KI could not read the file:', error);
 		return null;
 	}
+	// the KI runs but answered nothing Dwello can read: a second try often works (domain review V-14)
+	return parseExtractionResponse(answer) ?? 'unreadable';
 }
 
 /**

@@ -59,18 +59,30 @@ export type UploadRow = {
 	notes: string[]; // what the property manager should know about the file
 	duplicateOf: string | null;
 	several: boolean;
+	documentType: string; // invoice, reminder or credit_note, as the KI read it
+	byHand: boolean; // the KI read nothing: every field is filled in by hand
+	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
 	selected: boolean;
 	createError?: string; // why the invoice was not created
 };
 
 // The kinds of file Dwello keeps, told by their first bytes, as the backend checks them
-const STARTS = [[0x25, 0x50, 0x44, 0x46, 0x2d], [0xff, 0xd8, 0xff], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]];
+const STARTS: [string, number[]][] = [
+	['application/pdf', [0x25, 0x50, 0x44, 0x46, 0x2d]],
+	['image/jpeg', [0xff, 0xd8, 0xff]],
+	['image/png', [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]]
+];
+
+/** The type of the file by its first bytes, never by its name: a file is shown only as what it is (C-7), or null */
+export async function fileType(file: File): Promise<string | null> {
+	const head = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+	return STARTS.find(([, start]) => start.every((byte, i) => head[i] === byte))?.[0] ?? null;
+}
 
 /** Why Dwello does not take the file, or null */
 export async function fileRefusal(file: File): Promise<string | null> {
 	if (file.size > MAX_MEGABYTES * 1024 * 1024) return m.backend_document_too_large({ megabytes: MAX_MEGABYTES });
-	const head = new Uint8Array(await file.slice(0, 8).arrayBuffer());
-	return STARTS.some((start) => start.every((byte, i) => head[i] === byte)) ? null : m.backend_document_type_not_allowed();
+	return (await fileType(file)) ? null : m.backend_document_type_not_allowed();
 }
 
 export const newRow = (key: number, file: File, defaults: { distributionKeyId: string }): UploadRow => ({
@@ -97,10 +109,13 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	notes: [],
 	duplicateOf: null,
 	several: false,
+	documentType: 'invoice',
+	byHand: false,
+	hints: { deductedAmount: null, nonAllocableItems: false },
 	selected: true
 });
 
-// The fields the property manager checks, with their labels, in the order «Prüfen Sie: …» names them
+// The fields the property manager checks, with their labels, in the order the notes name them
 const FIELD_LABELS: [string, () => string][] = [
 	['billingEntityName', m.invoices_billing_entity],
 	['invoiceNumber', m.invoices_invoice_number],
@@ -108,27 +123,54 @@ const FIELD_LABELS: [string, () => string][] = [
 	['servicePeriodStart', m.invoices_service_period],
 	['dueDate', m.invoices_due_date],
 	['amount', m.invoices_amount],
-	['description', m.invoices_description],
-	['category', m.buildings_category]
+	['description', m.invoices_description]
 ];
+// without these an invoice is not created (validateInvoice)
+const REQUIRED = ['billingEntityName', 'invoiceDate', 'amount', 'description'];
 
-// What the property manager should know about the proposal, in the order the file raises it, and the fields to check
-function notesOn(proposal: Proposal, morePages: boolean, check: string[]) {
-	const fields = FIELD_LABELS.filter(([field]) => check.includes(field)).map(([, label]) => label());
+const named = (fields: string[]) =>
+	FIELD_LABELS.filter(([field]) => fields.includes(field))
+		.map(([, label]) => label())
+		.join(', ');
+
+/**
+ * What is left to do before creating, from the values as they are now (C-1): costs not allocable to take out, the
+ * Kategorie, required fields not found, unsure fields, then optional fields not found (personas Anna, Helga; domain
+ * review V-5, V-8); nothing on a file no invoice is created from
+ */
+export function toDoOf(row: UploadRow): string[] {
+	// nothing to fill in on a file no invoice is created from: several invoices, a Gutschrift, a Mahnung (persona Dr. Weber)
+	if (row.status !== 'check' || row.several || row.documentType !== 'invoice') return [];
+	// costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also
+	// one the property manager chooses later (domain review V-1, V-8)
+	const mixed = row.hints.nonAllocableItems && row.values.isValidUtilityCost;
+	// without the KI the required fields are named at once, not only after creating (persona Helga); a required one
+	// counts as done as the create button counts it, an optional one once anything is in it
+	const formField = (field: string) => FORM_FIELD[field as keyof Proposal['fields']];
+	const wrong = validateInvoice({ buildingId: 'chosen in the dialog', ...row.values });
+	const required = REQUIRED.filter((field) => (row.byHand || row.missing.includes(field)) && wrong[formField(field)]);
+	const optional = row.missing.filter((field) => !REQUIRED.includes(field) && !row.values[formField(field)]);
+	return [
+		mixed && m.invoices_upload_mixed(),
+		!row.values.categoryId && m.invoices_upload_category_missing(),
+		required.length > 0 && m.invoices_upload_fill_in({ fields: named(required) }),
+		row.unsure.length > 0 && m.invoices_upload_check_these({ fields: named(row.unsure) }),
+		optional.length > 0 && m.invoices_upload_add_if_shown({ fields: named(optional) })
+	].filter((note) => !!note) as string[];
+}
+
+// What the property manager should know about the file, in the order it raises it
+function notesOn(proposal: Proposal, morePages: boolean) {
 	return [
 		morePages && m.invoices_upload_more_pages({ pages: MAX_PAGES }),
 		proposal.invoiceCount > 1 && m.invoices_upload_several(),
 		proposal.duplicateOf && m.invoices_upload_duplicate(),
 		proposal.documentType === 'reminder' && m.invoices_upload_reminder(),
 		proposal.documentType === 'credit_note' && m.invoices_upload_credit_note(),
-		proposal.deductedAmount && m.invoices_upload_deducted({ amount: formatCurrency(Number(proposal.deductedAmount)) }),
-		proposal.nonAllocableItems && m.invoices_upload_mixed(),
-		fields.length > 0 && m.invoices_upload_check_these({ fields: fields.join(', ') })
-	].filter((note) => !!note) as string[];
+		proposal.deductedAmount && m.invoices_upload_deducted({ amount: formatCurrency(Number(proposal.deductedAmount)) })
+	];
 }
 
-// The values the KI read, under what the property manager typed before (a file read again after a failure); a
-// Kategorie they chose keeps whether its costs are allocable with it (domain review V-15)
 // The fields of the form each value of the KI's answer goes to
 const FORM_FIELD: Record<keyof Proposal['fields'], keyof UploadValues> = {
 	billingEntityName: 'billingEntity',
@@ -141,6 +183,8 @@ const FORM_FIELD: Record<keyof Proposal['fields'], keyof UploadValues> = {
 	description: 'description'
 };
 
+// The values the KI read, under what the property manager typed before (a file read again after a failure); a
+// Kategorie they chose keeps whether its costs are allocable with it (domain review V-15)
 function valuesOf(row: UploadRow, fields: Proposal['fields'], category: Suggestion['category']): UploadValues {
 	const read = Object.fromEntries(
 		Object.entries(FORM_FIELD).map(([field, formField]) => [formField, fields[field as keyof Proposal['fields']] ?? ''])
@@ -151,12 +195,13 @@ function valuesOf(row: UploadRow, fields: Proposal['fields'], category: Suggesti
 	return { ...row.values, ...read, ...chosen, ...typed, distributionKeyId: row.values.distributionKeyId };
 }
 
-// What the KI did not find and the property manager did not fill in before
-function missingIn(row: UploadRow, fields: Proposal['fields']) {
+// What the KI did not find, or read without being sure, and the property manager did not fill in before (C-42)
+function readIn(row: UploadRow, proposal: Proposal) {
 	const filledIn = (field: string) => !!row.values[FORM_FIELD[field as keyof Proposal['fields']]];
-	return Object.entries(fields)
+	const missing = Object.entries(proposal.fields)
 		.filter(([field, value]) => value === null && field !== 'servicePeriodEnd' && !filledIn(field))
 		.map(([field]) => field);
+	return { missing, unsure: proposal.unsure.filter((field) => !filledIn(field)) };
 }
 
 // Only an invoice that can be created as it is: not a file with several invoices, one already entered, a Gutschrift,
@@ -172,19 +217,21 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 	const suggested = proposal.categorization;
 	const category = suggested && suggested.confidence >= 0.7 ? suggested.category : null;
 	const values = valuesOf(row, proposal.fields, category);
-	const missing = missingIn(row, proposal.fields);
-	// a Kategorie is required here: one the KI could not choose is named with the fields to check
-	const check = [...proposal.unsure, ...missing, ...(values.categoryId ? [] : ['category'])];
+	const read = readIn(row, proposal);
+	const several = proposal.invoiceCount > 1;
+	const notes = notesOn(proposal, row.morePages);
 	return {
 		...row,
 		status: 'check',
 		values,
 		suggestion: suggested,
-		unsure: proposal.unsure,
-		missing,
-		notes: notesOn(proposal, row.morePages, check),
+		...read,
+		notes: notes.filter((note) => !!note) as string[],
 		duplicateOf: proposal.duplicateOf,
-		several: proposal.invoiceCount > 1,
+		several,
+		documentType: proposal.documentType,
+		byHand: false,
+		hints: { deductedAmount: proposal.deductedAmount, nonAllocableItems: proposal.nonAllocableItems },
 		selected: preselected(proposal)
 	};
 }
@@ -193,7 +240,8 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 export const withoutKi = (row: UploadRow, reason: 'unavailable' | 'unreadable'): UploadRow => ({
 	...row,
 	status: 'check',
-	notes: [reason === 'unavailable' ? m.backend_extraction_unavailable() : m.invoices_upload_unreadable()]
+	notes: [reason === 'unavailable' ? m.backend_extraction_unavailable() : m.invoices_upload_unreadable()],
+	byHand: true
 });
 
 /** What the invoice still lacks, by field; a Kategorie is required here, unlike on «Neue Rechnung» (#217) */
@@ -217,7 +265,8 @@ export function invoiceOf(row: UploadRow, buildingId: string) {
 		categoryId: values.categoryId,
 		distributionKeyId: values.distributionKeyId || null,
 		isValidUtilityCost: values.isValidUtilityCost,
-		...suggestionProvenance(row.suggestion)
+		...suggestionProvenance(row.suggestion),
+		beleg: row.hints
 	};
 }
 

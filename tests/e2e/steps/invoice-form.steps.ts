@@ -9,6 +9,7 @@ import {
 	invoiceDateShown,
 	markedAsUtilityCost,
 	nonAllocableCategoryWarning,
+	utilityCostHelpText,
 	utilityCostMarkable
 } from '../questions/invoice-form';
 import { amountOfListedInvoice, categoryOfListedInvoice } from '../questions/invoices';
@@ -16,6 +17,7 @@ import {
 	chooseCategory,
 	clearSupplier,
 	correctAmount,
+	correctInvoiceNumber,
 	enterInvoiceDate,
 	openInvoiceEdit,
 	openNewInvoice,
@@ -142,4 +144,12 @@ Then('ist das Rechnungsdatum leer, damit es bewusst gewählt wird', async ({ ver
 Then('warnt das Rechnungsformular nicht vor dem Rechnungsdatum', async ({ verwalter }) => {
 	await verwalter.sees(invoiceDateShown).toBe(true); // the form is shown
 	await verwalter.sees(dateOutsidePeriodWarnings).toBe(0);
+});
+
+When('der Liegenschaftsverwalter die Rechnungsnummer auf {string} korrigiert', async ({ verwalter }, number: string) => {
+	await verwalter.attemptsTo(correctInvoiceNumber(number));
+});
+
+Then('erklärt das Formular {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(utilityCostHelpText).toBe(text);
 });

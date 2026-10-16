@@ -19,6 +19,7 @@
 		wide = false,
 		onrequestclose,
 		enterConfirms = true,
+		describedby,
 		children
 	}: {
 		open?: boolean;
@@ -35,6 +36,7 @@
 		wide?: boolean; // room for a list of records, e.g. the files of «Rechnungen hochladen»
 		onrequestclose?: () => void; // asks before closing (cancel, Escape) instead of closing at once
 		enterConfirms?: boolean; // false where a form in the dialog holds many records
+		describedby?: string; // the id of the sentence that describes a wide dialog, instead of its whole content
 		children: Snippet;
 	} = $props();
 
@@ -130,7 +132,7 @@
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="{id}-title"
-			aria-describedby={wide ? undefined : `${id}-body`}
+			aria-describedby={describedby ?? (wide ? undefined : `${id}-body`)}
 			tabindex="-1"
 			class="flex max-h-full w-full {wide ? 'max-w-4xl' : 'max-w-lg'} flex-col gap-6 overflow-y-auto rounded-panel bg-surface p-6 text-ink shadow-overlay"
 		>

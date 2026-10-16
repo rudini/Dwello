@@ -15,10 +15,12 @@ import {
 } from '$lib/server/api-proxy';
 import { belegOf, fieldsOf, formOf } from '$lib/server/invoice';
 
-// A file of up to 10 MB is sent as a form: in JSON its Base64 would be larger than the server reads (BODY_SIZE_LIMIT)
+// A file of up to 10 MB is sent as a form: in JSON its Base64 would be larger than the server reads (BODY_SIZE_LIMIT);
+// the fields may bring what the KI saw on the file, which the backend keeps with it
 async function invoiceWithBeleg(request: Request) {
 	const form = await formOf(request);
-	return { ...fieldsOf(form.get('invoice')), beleg: await belegOf(form.get('file')) };
+	const { beleg: hints, ...fields } = fieldsOf(form.get('invoice'));
+	return { ...fields, beleg: { ...(hints as object), ...(await belegOf(form.get('file'))) } };
 }
 
 export const GET: RequestHandler = async ({ url, cookies }) => {

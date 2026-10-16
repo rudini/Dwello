@@ -40,6 +40,8 @@
 	},
 	"beleg": {
 		"fileName": "huber-q1.pdf",
-		"mimeType": "application/pdf"
+		"mimeType": "application/pdf",
+		"deductedAmount": "1000.00",
+		"nonAllocableItems": true
 	}
 }

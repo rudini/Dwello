@@ -15,6 +15,8 @@
 {#if billedIn?.length}
 	<BilledWarning periods={billedIn}>
 		<p>{m.invoices_delete_billed_text()}</p>
-		{#if invoice.beleg}<p>{m.invoices_beleg_billed()}</p>{/if}
+		{#if invoice.beleg}
+			<p data-testid="invoice-delete-billed-document-note">{m.invoices_delete_beleg_billed()}</p>
+		{/if}
 	</BilledWarning>
 {/if}

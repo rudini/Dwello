@@ -57,7 +57,9 @@ beforeAll(async () => {
 		.set({ email: 'anna.keller@example.ch', phone: '+41 44 123 45 67', address: 'Seestrasse 12', postalCode: '8002', city: 'Zürich' })
 		.where(eq(tenants.id, rental.tenant));
 	for (const { id } of await db.select({ id: invoices.id }).from(invoices).where(eq(invoices.buildingId, rental.building)))
-		await db.insert(invoiceDocuments).values({ invoiceId: id, fileName: 'beleg.pdf', mimeType: 'application/pdf', content: 'JVBERi0=' });
+		await db
+			.insert(invoiceDocuments)
+			.values({ invoiceId: id, fileName: 'beleg.pdf', mimeType: 'application/pdf', content: 'JVBERi0=', deductedAmount: '1000.00', nonAllocableItems: true });
 	await db
 		.update(invoices)
 		.set({ llmCategoryId: sql`${invoices.categoryId}`, llmConfidence: '0.86', manualOverrideReason: 'Vertrag geprüft' })
@@ -182,6 +184,18 @@ describe('API-Verträge des Frontends', () => {
 				await sendJson('POST', '/api/v1/invoices/extract', { buildingId: rental.building, fileName: 'r.pdf', pages: ['data:image/png;base64,iVBO'] })
 			).json();
 			expect(drift(await sample('invoice-extraction'), actual)).toEqual([]);
+		} finally {
+			llm.stop();
+		}
+	});
+
+	it('POST /invoices/extract ohne lesbare Antwort der KI liefert die Felder von invoice-extraction-unreadable.json', async () => {
+		const llm = openAiCompatible('Ich kann diese Datei nicht lesen.' as never);
+		try {
+			const actual = await (
+				await sendJson('POST', '/api/v1/invoices/extract', { buildingId: rental.building, fileName: 'r.pdf', pages: ['data:image/png;base64,iVBO'] })
+			).json();
+			expect(drift(await sample('invoice-extraction-unreadable'), actual)).toEqual([]);
 		} finally {
 			llm.stop();
 		}

@@ -61,6 +61,13 @@ describe('Hilfe', () => {
 		);
 	});
 
+	it('nennt das Hochladen mehrerer Rechnungen (Persona Anna)', () => {
+		show(HelpPage, {});
+		expect(section('Rechnungen erfassen')?.textContent).toContain(
+			'Mehrere Rechnungen auf einmal: Wählen Sie unter «Rechnungen» «Rechnungen hochladen». Die KI liest die Dateien aus, und Sie prüfen die Angaben, bevor Dwello die Rechnungen erstellt.'
+		);
+	});
+
 	it('sagt, dass Dwello Abrechnungen nicht selbst verschickt', () => {
 		show(HelpPage, {});
 

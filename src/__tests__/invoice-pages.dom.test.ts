@@ -82,6 +82,13 @@ describe('Rechnungsliste', () => {
 			}
 		} as never);
 
+	// the Übersicht's «Rechnungen hochladen» leads here (persona Anna)
+	it('öffnet «Rechnungen hochladen» gleich, wenn die Adresse es verlangt', () => {
+		url = new URL('http://localhost/invoices?upload');
+		list([]);
+		expect(byTestId('invoice-upload-building-select')).not.toBeNull();
+	});
+
 	// After a search the focus moves here, so the number of results is read out
 	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {
 		list([invoice()]);
@@ -568,6 +575,15 @@ describe('Rechnung erfassen', () => {
 		);
 	});
 
+	it('sagt bei „Umlagefähig“, was das Kästchen gerade bewirkt (Persona Marco)', async () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const help = () => byTestId('invoice-utility-cost-checkbox-help')!.textContent;
+		expect(help()).toBe('Die Rechnung fliesst in die Nebenkostenabrechnung ein.');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c2');
+		await settle();
+		expect(help()).toBe('Die Rechnung fliesst nicht in die Nebenkostenabrechnung ein.');
+	});
+
 	it('sagt, dass ohne Leistungszeitraum das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		expect(document.querySelector('#invoiceDate-help')!.textContent).toContain(
@@ -698,7 +714,7 @@ describe('Rechnung bearbeiten', () => {
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 30.06.2024');
 		expect(warning).toContain(
-			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter.'
+			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter; zu viel Bezahltes zahlen Sie zurück.'
 		);
 	});
 
@@ -738,6 +754,16 @@ describe('Rechnung bearbeiten', () => {
 		expect(get(toasts).map((toast) => toast.message)).toContain(
 			'Rechnung von Hauswart Huber gespeichert'
 		);
+	});
+
+	it('lässt die Rechnungsnummer korrigieren (Persona Helga)', async () => {
+		const calls = fakeBff(() => [200, {}]);
+		edit({ invoiceNumber: 'R-1001' });
+		expect(byTestId<HTMLInputElement>('invoice-number-input')!.value).toBe('R-1001');
+		fireEvent(byTestId<HTMLInputElement>('invoice-number-input')!, 'input', ' R-1002 ');
+		submit('submit-button');
+		await settle();
+		expect(calls[0].body).toMatchObject({ invoiceNumber: 'R-1002' });
 	});
 
 	it('speichert erst nach einer Änderung', async () => {
@@ -846,6 +872,21 @@ describe('Beleg einer Rechnung', () => {
 		expect(byTestId('invoice-delete-document-note')!.textContent).toBe('Der Beleg wird ebenfalls gelöscht.');
 	});
 
+	it('zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat (Persona Anna; Fachreview V-3, V-4)', () => {
+		const beleg = { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: true };
+		detail({ beleg });
+		expect(byTestId('invoice-document-hints')!.textContent).toContain(
+			'Auf dem Beleg sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Prüfen Sie, dass sie nur einmal zählen: Ist der Betrag das Total vor dem Abzug, dürfen die Akontorechnungen nicht zusätzlich erfasst sein.'
+		);
+		expect(byTestId('invoice-document-hints')!.textContent).toContain(
+			'Der Beleg enthält auch Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Prüfen Sie, dass der Betrag nur den umlagefähigen Teil enthält und der Rest als eigene Rechnung in einer nicht umlagefähigen Kategorie erfasst ist.'
+		);
+		// an invoice that is not allocable keeps all its costs out already
+		document.body.innerHTML = '';
+		detail({ beleg: { ...beleg, deductedAmount: null }, isValidUtilityCost: false });
+		expect(byTestId('invoice-document-hints')).toBeNull();
+	});
+
 	it('warnt nur bei einer abgerechneten Rechnung mit Beleg', () => {
 		detail({}, [{ start: '2024-01-01', end: '2024-12-31' }]);
 		expect(text()).toContain('Zu dieser Rechnung ist kein Beleg gespeichert.');
@@ -873,12 +914,30 @@ describe('Beleg einer Rechnung', () => {
 		expect(document.activeElement).toBe(byTestId('invoice-document-file-input'));
 	});
 
-	it('sagt beim Löschen einer abgerechneten Rechnung, dass Mieter den Beleg verlangen können', () => {
+	it('rät beim Löschen einer abgerechneten Rechnung, den Beleg vorher herunterzuladen (Fachreview M-6)', () => {
 		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } }, [{ start: '2024-01-01', end: '2024-12-31' }]);
 		click('invoice-delete-button');
-		expect(byTestId('invoice-billed-warning')!.textContent).toContain(
-			'Die Rechnung ist abgerechnet; Mieter können den Beleg verlangen.'
+		expect(byTestId('invoice-delete-billed-document-note')!.textContent).toBe(
+			'Laden Sie den Beleg vorher herunter, wenn Sie ihn für die Belegeinsicht brauchen.'
 		);
+		expect(byTestId('invoice-billed-warning')!.textContent).not.toContain('Mieter können den Beleg verlangen.');
+	});
+
+	it('sagt beim Beleg, dass erst die Datei gewählt und dann der Knopf gewählt wird (Persona Helga)', () => {
+		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } });
+		expect(byTestId('invoice-document-file-help')!.textContent).toContain('Wählen Sie die neue Datei und dann «Beleg ersetzen».');
+		document.body.innerHTML = '';
+		detail();
+		expect(byTestId('invoice-document-file-help')!.textContent).toContain('Wählen Sie die Datei und dann «Beleg hinzufügen».');
+	});
+
+	it('zeigt sichtbar, dass der Beleg in einem neuen Tab aufgeht (Persona Helga)', () => {
+		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } });
+		const link = byTestId('invoice-document-link')!;
+		expect(link.querySelector('.sr-only')).toBeNull();
+		// text right beside the label, so both wrap as one, not two columns side by side on a phone (personas Marco, Anna)
+		const text = [...link.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent);
+		expect(text.join('').replace(/\s+/g, ' ').trim()).toBe('Beleg anzeigen (öffnet in neuem Tab)');
 	});
 
 	it('zeigt die Rechnungsnummer', () => {

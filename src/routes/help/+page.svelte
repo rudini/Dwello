@@ -22,7 +22,7 @@
 		},
 		{
 			title: m.help_invoices_title(),
-			steps: [m.help_invoices_1(), m.help_invoices_2(), m.help_invoices_3()]
+			steps: [m.help_invoices_1(), m.help_invoices_2(), m.help_invoices_3(), m.help_invoices_4()]
 		},
 		{
 			title: m.help_statements_title(),

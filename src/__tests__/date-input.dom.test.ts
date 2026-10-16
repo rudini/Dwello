@@ -193,6 +193,22 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		);
 	});
 
+	// angesagt, danach steht der Fehler nur noch einmal da, unter dem Feld (Persona Anna)
+	it('nimmt die Ansage nach einem Moment zurück', () => {
+		vi.useFakeTimers();
+		try {
+			date('2024-01-31', { error: 'Bitte geben Sie ein Datum ein.' });
+			const spoken = () => document.querySelector('[aria-live="assertive"]')!.textContent;
+			expect(spoken()).toContain('Bitte geben Sie ein Datum ein.');
+			vi.advanceTimersByTime(3000);
+			flushSync();
+			expect(spoken()).toBe('');
+			expect(document.body.textContent!.split('Bitte geben Sie ein Datum ein.').length).toBe(2);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	it('übernimmt ein eingetipptes Datum und setzt die Punkte selbst', () => {
 		const bound = date();
 

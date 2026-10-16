@@ -14,7 +14,8 @@
 
 	let { data }: { data: InvoicesListData } = $props();
 
-	let uploading = $state(false);
+	// open at once when the Übersicht's «Rechnungen hochladen» led here
+	let uploading = $state($page.url.searchParams.has('upload'));
 	let created = $state<Created[]>([]);
 
 	// Only the year is chosen: an empty list means nothing is recorded yet, not a filter mistake
