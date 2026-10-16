@@ -4,6 +4,7 @@
 	import { balanceLabel } from '$lib/statement';
 	import Table from '$lib/ui/Table.svelte';
 	import { formatCurrency } from '$lib/utils/format';
+	import LineInvoices from './LineInvoices.svelte';
 
 	// The costs line by line, then the Verwaltungspauschale, the Akonto and what remains: the Saldo
 	let { statement }: { statement: StatementWithDetails } = $props();
@@ -18,10 +19,22 @@
 			? cents(Math.abs(statement.balance) - Math.abs(unrounded))
 			: 0
 	);
+	// Wohnungsanteil and Zeitanteil as the PDF shows them: the Zeitanteil as days where it is one (#104)
+	type Item = StatementWithDetails['lineItems'][number];
+	const apartmentShare = (item: Item) =>
+		item.apartmentShare == null ? '–' : formatCurrency(item.apartmentShare);
+	const timeShare = (item: Item) =>
+		item.shareDays
+			? m.statements_share_days(item.shareDays)
+			: item.periodShare == null
+				? '–'
+				: `${(Math.round(item.periodShare * 10000) / 100).toFixed(2)} %`;
 	const columns = [
 		{ label: m.buildings_category() },
 		{ label: m.glossary_key_term() },
 		{ label: m.statements_building_costs(), numeric: true },
+		{ label: m.statements_apartment_share(), numeric: true },
+		{ label: m.statements_time_share(), numeric: true },
 		{ label: m.statements_share(), numeric: true },
 		{ label: m.invoices_amount(), numeric: true }
 	];
@@ -45,11 +58,16 @@
 					</dd>
 					<dt class="text-ink-muted">{m.statements_building_costs()}</dt>
 					<dd class="text-right text-ink">{formatCurrency(item.totalAmount)}</dd>
+					<dt class="text-ink-muted">{m.statements_apartment_share()}</dt>
+					<dd class="text-right text-ink">{apartmentShare(item)}</dd>
+					<dt class="text-ink-muted">{m.statements_time_share()}</dt>
+					<dd class="whitespace-nowrap text-right text-ink">{timeShare(item)}</dd>
 					<dt class="text-ink-muted">{m.statements_share()}</dt>
 					<dd class="whitespace-nowrap text-right text-ink">{item.percentage} %</dd>
 					<dt class="text-ink-muted">{m.invoices_amount()}</dt>
 					<dd class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</dd>
 				</dl>
+				<div class="mt-4"><LineInvoices {item} /></div>
 			</li>
 		{/each}
 	</ul>
@@ -61,9 +79,16 @@
 					<td class="text-ink">{item.categoryName}</td>
 					<td class="text-ink-muted">{item.distributionKeyName}</td>
 					<td class="text-right text-ink-muted">{formatCurrency(item.totalAmount)}</td>
+					<td class="text-right text-ink-muted">{apartmentShare(item)}</td>
+					<td class="whitespace-nowrap text-right text-ink-muted">{timeShare(item)}</td>
 					<td class="whitespace-nowrap text-right text-ink-muted">{item.percentage} %</td>
 					<td class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</td>
 				</tr>
+				{#if item.invoices.length}
+					<tr>
+						<td colspan={columns.length}><LineInvoices {item} /></td>
+					</tr>
+				{/if}
 			{/each}
 		</Table>
 	</div>
@@ -89,7 +114,7 @@
 		<dd class="text-ink">{formatCurrency(statement.managementFee)}</dd>
 	</div>
 	<div class="flex justify-between gap-4 border-t border-line pt-2 font-semibold">
-		<dt class="text-ink">{m.statements_total_costs()}</dt>
+		<dt class="text-ink" data-testid="statement-total-costs-label">{m.statements_total_costs()}</dt>
 		<dd class="text-ink">{formatCurrency(statement.totalCosts)}</dd>
 	</div>
 	<div class="flex justify-between gap-4">

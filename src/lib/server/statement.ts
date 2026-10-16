@@ -18,7 +18,22 @@ const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	distributionKeyName: item.distributionKeyName || '',
 	totalAmount: Number(item.totalAmount),
 	tenantShare: Number(item.tenantShare),
-	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0
+	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0,
+	...sharesOf(item)
+});
+
+const amountOrNull = (value: unknown) => (value == null ? null : Number(value));
+
+// Wohnungsanteil, Zeitanteil (as days where it is one) and the invoices the position billed, in the order of
+// invoiceParts, which hold each one's days where they differ (#96, #104)
+const sharesOf = (item: BackendStatement) => ({
+	apartmentShare: amountOrNull(item.apartmentShare),
+	periodShare: amountOrNull(item.periodShare),
+	shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : null,
+	invoices: (item.invoices ?? []).map((invoice: BackendStatement, index: number) => ({
+		...invoice,
+		part: item.invoiceParts?.[index] ?? null
+	}))
 });
 
 const notApplied: Record<string, () => string> = {

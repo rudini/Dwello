@@ -66,7 +66,6 @@ Funktionalität: Rechnungsdetail
     Dann warnt der Beleg "Die Rechnung ist abgerechnet; Mieter können den Beleg verlangen."
 
   # #96: eine abgerechnete Rechnung, die danach geändert wurde, steht in den Abrechnungen mit ihrem früheren Stand
-  @wip
   Szenario: Warnung bei einer nach der Abrechnung geänderten Rechnung
     Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
     Und der Mieter "Anna Keller" existiert

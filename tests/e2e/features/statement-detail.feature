@@ -383,7 +383,6 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "500.00 70.98 %"
 
   # #104: die Detailseite zeigt dieselben Angaben wie das PDF: die Mietstage der Abrechnung als Daten
-  @wip
   Szenario: Abrechnung nennt das Mietverhältnis in der Periode
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
@@ -391,7 +390,6 @@ Funktionalität: Abrechnungsdetail
 
   # #104: eine einzige Wohnung trägt die ganzen Kosten (Wohnungsanteil 732.00); Eva Frei mietete 91 der 366 Tage,
   # 732.00 × 91/366 = 182.00; die Summe heisst wie im PDF
-  @wip
   Szenario: Kostenposition nennt Wohnungsanteil und Zeitanteil wie das PDF
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -401,7 +399,6 @@ Funktionalität: Abrechnungsdetail
 
   # #104 und #240: unter einer Position mit Rechnungen über verschiedene Tage steht jede Rechnung mit ihren Tagen und die
   # Berechnung, wie im PDF (zwei gleich grosse Wohnungen: Wohnungsanteil 900.00 von 1’800.00)
-  @wip
   Szenario: Kostenposition nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert
@@ -415,7 +412,6 @@ Funktionalität: Abrechnungsdetail
     Und nennt die Position "Hauswart" "Ihr Anteil: 900.00 × (600.00 × 0/91 + 1’200.00 × 47/92) / 1’800.00 = 306.52"
 
   # #104: jede Kostenposition führt zu den Rechnungen, die sie abrechnet
-  @wip
   Szenario: Rechnung einer Kostenposition öffnen
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -425,7 +421,6 @@ Funktionalität: Abrechnungsdetail
 
   # #96: die Abrechnung kennt die Rechnungen, die sie abrechnet; eine Rechnung der Periode, die danach erfasst wurde,
   # fehlt darin
-  @wip
   Szenario: Abrechnung weist auf eine danach erfasste Rechnung hin
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
@@ -433,7 +428,6 @@ Funktionalität: Abrechnungsdetail
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht."
 
   # #96: eine danach geänderte Rechnung zählt wie eine neue
-  @wip
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -441,7 +435,6 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht."
 
-  @wip
   Szenario: Kein Hinweis, solange die Rechnungen der Periode unverändert sind
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

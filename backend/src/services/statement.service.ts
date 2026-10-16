@@ -361,6 +361,7 @@ export async function generateStatement(
 			positionRentalDays: item.positionRentalDays,
 			billedDays: item.billedDays,
 			invoiceParts: item.invoiceParts,
+			invoices: item.invoices,
 			sortOrder: index
 		}))
 	);

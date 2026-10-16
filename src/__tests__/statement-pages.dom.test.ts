@@ -479,14 +479,15 @@ describe('Abrechnungsdetail', () => {
 	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
 		later(2);
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
 		);
 	});
 
 	it('spricht bei einer später erfassten Rechnung in der Einzahl', () => {
 		later(1);
+		expect(byTestId('statement-later-invoices')!.textContent).toContain('Rechnungen seit der Abrechnung geändert');
 		expect(byTestId('statement-later-invoices')!.textContent).toContain(
-			'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+			'wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht'
 		);
 	});
 
@@ -494,9 +495,10 @@ describe('Abrechnungsdetail', () => {
 	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
 		later(1, 'sent');
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin. ' +
+			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. ' +
 				'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. ' +
-				'Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
+				'Ist der Betrag zu hoch, erstatten Sie ihm die Differenz. ' +
+				'Ob Sie zusätzliche Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
 		);
 	});
 

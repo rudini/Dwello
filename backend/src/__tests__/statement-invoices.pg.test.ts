@@ -59,7 +59,11 @@ async function statement() {
 const changed = async (id: string) =>
 	((await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { invoiceIds: string[] }).invoiceIds;
 
-const clear = () => db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+// each test starts without invoices and statements
+async function clear() {
+	for (const id of statements.splice(0)) await deleteStatement(id);
+	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+}
 
 describe('Rechnungen einer Abrechnungsposition', () => {
 	it('speichert zu jeder Position die abgerechneten Rechnungen mit Betrag und Tagen in der Periode', async () => {
@@ -105,7 +109,7 @@ describe('Geänderte Rechnungen seit der Abrechnung', () => {
 		await clear();
 		const billed = await invoice();
 		const { id } = await statement();
-		const [water] = await db.select().from(categories).where(eq(categories.name, 'Water'));
+		const [water] = await db.select().from(categories).where(eq(categories.name, 'Cold Water'));
 		await db.update(invoices).set({ categoryId: water.id }).where(eq(invoices.id, billed));
 		expect(await changed(id)).toEqual([billed]);
 	});
@@ -156,6 +160,16 @@ describe('Abrechnungen einer Rechnung', () => {
 		await statement();
 		await sendJson('PUT', `/api/v1/invoices/${billed}`, { amount: '800.00' });
 		expect(await periodsOf(billed)).toEqual({ billedIn: [year], missedIn: [year] });
+	});
+
+	// M-2: abgerechnet und danach als nicht umlagefähig markiert: die Abrechnung verrechnet sie noch
+	it('nennt bei einer abgerechneten, danach nicht umlagefähigen Rechnung die Periode als abgerechnet', async () => {
+		await clear();
+		const billed = await invoice();
+		const { id } = await statement();
+		await db.update(invoices).set({ isValidUtilityCost: false }).where(eq(invoices.id, billed));
+		expect(await periodsOf(billed)).toEqual({ billedIn: [year], missedIn: [] });
+		expect(await changed(id)).toEqual([billed]);
 	});
 
 	it('nennt bei einer nicht umlagefähigen Rechnung keine verpasste Periode', async () => {
