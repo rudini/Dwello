@@ -17,7 +17,7 @@ See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking g
 
 ## Anti-Pattern: Horizontal Slices
 
-**DO NOT write all tests first, then all implementation.** This is "horizontal slicing" - treating RED as "write all tests" and GREEN as "write all code."
+Do not write all tests first and then all implementation. This is "horizontal slicing" - treating RED as "write all tests" and GREEN as "write all code."
 
 This produces **crap tests**:
 
@@ -59,7 +59,7 @@ Do not wait for approval of this plan: the scenario and the task or issue alread
 
 ### 2. Tracer Bullet
 
-Write ONE test that confirms ONE thing about the system:
+Write one test that confirms one thing about the system:
 
 ```
 RED:   Write test for first behavior → test fails
@@ -94,7 +94,7 @@ After all tests pass, look for [refactor candidates](refactoring.md):
 - [ ] Consider what new code reveals about existing code
 - [ ] Run tests after each refactor step
 
-**Never refactor while RED.** Get to GREEN first.
+Refactor only while green: with a red test, a failure no longer tells whether the refactoring or the missing code caused it.
 
 ## Checklist Per Cycle
 
