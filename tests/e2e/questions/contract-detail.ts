@@ -5,6 +5,7 @@ import {
 	contractApartment,
 	contractEndDate,
 	contractEndError,
+	contractManagementFee,
 	contractStatus,
 	contractTotalRent,
 	missingStatements
@@ -23,3 +24,4 @@ export const endConfirmationInWindow = question(
 
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
+export const managementFeeOfContract = Text.of(contractManagementFee);

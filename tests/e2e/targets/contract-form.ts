@@ -41,3 +41,7 @@ export const reviewItem = (label: string) =>
 export const deleteDraftAndSaveButton = target('Entwurf löschen und speichern', (page) =>
 	page.getByTestId('delete-draft-and-save')
 );
+// «Verwaltungspauschale vereinbart»: Satz des Abrechnungslaufs, eigener Satz or nein (#89)
+export const feeChoice = (choice: 'run' | 'own' | 'none') =>
+	target(`Verwaltungspauschale «${choice}»`, (page) => page.getByTestId(`contract-fee-choice-${choice}`));
+export const feeRateInput = target('Eigener Satz der Verwaltungspauschale', (page) => page.getByTestId('contract-fee-rate-input'));

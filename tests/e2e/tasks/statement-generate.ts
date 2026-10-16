@@ -5,6 +5,7 @@ import { Visibility } from '../screenplay/questions';
 import {
 	backLink,
 	buildingCheckbox,
+	feeNotAgreedLink,
 	confirmMissingInvoices,
 	generateButton,
 	generateMoreButton,
@@ -100,3 +101,4 @@ export const recordInvoiceFromWarning: Activity = (actor) =>
 		Click.on(newInvoiceFromWarning),
 		Wait.forUrl((url) => /\/invoices\/new/.test(url.href))
 	);
+export const openContractWithoutFee = (contractId: string) => Click.on(feeNotAgreedLink(contractId));

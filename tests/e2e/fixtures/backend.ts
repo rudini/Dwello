@@ -146,10 +146,20 @@ export function testData(api: CallTheApi) {
 				apartmentId: ids.get(apartmentNumber),
 				additionalRent: '0',
 				monthlyAdvancePayment: '0',
+				// agreed unless a scenario says otherwise: the amounts of the statement scenarios include the run's fee (#89)
+				managementFeeAgreed: true,
 				...contract
 			});
 			ids.set(`Mietvertrag ${tenantTitle}`, created.id);
 			ids.set(`Wohnung von ${tenantTitle}`, created.apartmentId);
+		},
+
+		// «Verwaltungspauschale vereinbart» on the contract, with its own rate or the run's (#89)
+		async managementFee(tenantTitle: string, agreed: boolean, percent?: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, {
+				managementFeeAgreed: agreed,
+				managementFeePercent: percent ?? null
+			});
 		},
 
 		// A whole year, or the period given (a statement of a shorter period is still named by its year)

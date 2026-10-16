@@ -8,6 +8,8 @@ import {
 	deleteDraftAndSaveButton,
 	durationChoice,
 	endDateInput,
+	feeChoice,
+	feeRateInput,
 	newTenantLink,
 	pastEndConfirm,
 	retryContractsButton,
@@ -25,6 +27,14 @@ export type ContractData = {
 	baseRent: string;
 	advancePayment?: string;
 	confirmPastStart?: boolean; // the wizard asks once about a start in the past
+	managementFee?: string | null; // own rate in percent, 'run' for the run's rate (default), null for no choice (#89)
+};
+
+// «Verwaltungspauschale vereinbart»: the run's rate, an own rate or, with no choice, nothing
+const chooseManagementFee = (fee: string | null): Activity => async (actor) => {
+	if (fee === null) return;
+	if (fee === 'run') return actor.attemptsTo(Click.on(feeChoice('run')));
+	await actor.attemptsTo(Click.on(feeChoice('own')), Enter.theValue(fee).into(feeRateInput));
 };
 
 const NEW_CONTRACT = '/contracts/new';
@@ -57,7 +67,7 @@ const fillContract = (contract: Omit<ContractData, 'tenantId'>): Activity => asy
 	if (contract.confirmPastStart) await actor.attemptsTo(goToNextStep);
 	await actor.attemptsTo(Enter.theValue(contract.baseRent).into(baseRentInput));
 	if (contract.advancePayment) await actor.attemptsTo(Enter.theValue(contract.advancePayment).into(advancePaymentInput));
-	await actor.attemptsTo(goToNextStep);
+	await actor.attemptsTo(chooseManagementFee(contract.managementFee === undefined ? 'run' : contract.managementFee), goToNextStep);
 };
 
 // The tenant chosen before, still on step "Mieter"
@@ -110,3 +120,6 @@ export const withdrawNotice: Activity = (actor) =>
 // «Bearbeiten»: another Vertragsbeginn
 export const saveStartDate = (isoDate: string): Activity => (actor) =>
 	actor.attemptsTo(EnterDate.of(isoDate).into(startDateInput), Click.on(contractSubmitButton));
+// «Bearbeiten»: the fee is agreed at the run's rate
+export const agreeManagementFee: Activity = (actor) =>
+	actor.attemptsTo(Click.on(feeChoice('run')), Click.on(contractSubmitButton));

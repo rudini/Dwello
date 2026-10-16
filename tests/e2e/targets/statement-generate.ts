@@ -51,3 +51,11 @@ export const categoryFinding = (category: string) =>
 		page.getByTestId('category-finding').filter({ hasText: category })
 	);
 export const draftsOnlyNote = target('Hinweis nur Entwürfe', (page) => page.getByTestId('generate-drafts-note'));
+// The contracts of the run without an agreed Verwaltungspauschale, each a link to it (#89, step «Einstellungen»)
+export const feeNotAgreed = target('Mietverträge ohne vereinbarte Verwaltungspauschale', (page) =>
+	page.getByTestId('management-fee-not-agreed')
+);
+export const feeNotAgreedLink = (contractId: string) =>
+	target(`Mietvertrag ${contractId} ohne vereinbarte Verwaltungspauschale`, (page) =>
+		page.getByTestId(`management-fee-not-agreed-link-${contractId}`)
+	);
