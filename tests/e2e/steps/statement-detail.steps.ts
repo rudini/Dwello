@@ -39,6 +39,10 @@ Given('das Heizprofil {string} verteilt die Heizkosten so:', async ({ seed }, ti
 	await seed.heatingProfile(title, table.hashes().map((row) => Number(row.Anteil)));
 });
 
+Given('das Heizprofil {string} verteilt die Heizkosten danach so:', async ({ seed }, title: string, table: DataTable) => {
+	await seed.changeHeatingProfile(title, table.hashes().map((row) => Number(row.Anteil)));
+});
+
 Given(
 	'im Gebäude {string} gibt es eine Heizkostenrechnung über {string} Franken für {int}',
 	async ({ seed }, building: string, amount: string, year: number) => {

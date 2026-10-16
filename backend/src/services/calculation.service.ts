@@ -12,7 +12,7 @@
 
 import { like, max } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements } from '../db/schema';
+import { utilityStatements, type HeatingShare } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -23,6 +23,7 @@ import {
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
+import { getHeatingProfile } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 
@@ -64,6 +65,7 @@ export interface StatementCalculation {
 	totalCosts: number;
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, Negative = refund
+	heating: HeatingShare | null; // as the heating costs were shared (#209)
 }
 
 /**
@@ -297,6 +299,7 @@ export async function calculateStatementForContract(
 	}));
 
 	// Calculate line items
+	const heating = await heatingOfRun(invoiceGroups, contract, periodStart, periodEnd, heatingProfileId);
 	const lineItems: CalculatedLineItem[] = [];
 	let subtotal = 0;
 
@@ -392,8 +395,30 @@ export async function calculateStatementForContract(
 		managementFeePercent: feePercent,
 		totalCosts,
 		totalAdvancePayments,
-		balance
+		balance,
+		heating
 	};
+}
+
+// What the PDF prints of the heating profile, kept with the statement (#209): the same for every heating position
+async function heatingOfRun(
+	groups: InvoiceGroup[],
+	contract: { startDate: string; endDate: string | null },
+	periodStart: Date,
+	periodEnd: Date,
+	heatingProfileId?: string
+): Promise<StatementCalculation['heating']> {
+	if (!heatingProfileId || !groups.some((group) => group.isHeatingCost)) return null;
+	const profile = await getHeatingProfile(heatingProfileId);
+	if (!profile) return { byDays: true }; // as the per-group calculation shares without a profile
+	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
+	const result = await handleMidYearMoves(profile.id, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
+	if (result.byDays) return { byDays: true };
+	const twoPlaces = (percent: number) => Math.round(percent * 100) / 100; // as printed
+	const months = result.monthBreakdown.map(({ month, percentage }) => ({ month, percentage: twoPlaces(percentage) }));
+	// the profile's names as they were, so a renamed or deleted own profile still names the share it gave
+	const { name, nameDE, nameFR, nameIT, nameEN } = profile;
+	return { byDays: false, percent: twoPlaces(result.percentage), months, names: { name, nameDE, nameFR, nameIT, nameEN } };
 }
 
 /**
