@@ -50,4 +50,4 @@ Finish:
   No scenario: the visible «(öffnet in neuem Tab)» (Helga P-5): Playwright reads a screen-reader-only text like a visible one, DOM test instead; screen-reader announcements and descriptions (Sven P-1..P-5, Anna P-9): DOM tests; the Kategorie list at once (Anna P-10): DOM test
 - [ ] Slice reviews (`code-reviewer`), feature review (personas, `fach-reviewer`)
 - [ ] Before marking complete: all checks in `CLAUDE.md`
-- [ ] Workflow review `docs/reviews/workflow-rules-review-issue-233.md`
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-233.md` (W-1..W-7)
