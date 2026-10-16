@@ -712,3 +712,18 @@ Request: «Setze #144 um» (coordinator W10). #144's "Done means" still asks for
 - [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `src/lib/contract-wizard.ts`, `src/routes/contracts/new/{ContractWizard,RentStep,TenantStep}.svelte`, `src/routes/tenants/TenantForm.svelte`, `src/routes/tenants/new/+page.svelte`, `src/lib/server/tenant-form.ts`, `messages/*.json`, `tests/a11y/screens.json`, tests in `src/__tests__/` and `tests/e2e/`.
+
+## Session: Remove the building map (#129)
+
+- [x] `@wip` scenarios: building page shows the address without a map (`building-detail.feature`), privacy page no longer names CARTO (`privacy.feature`); seen red
+- [x] `fach-reviewer` on the scenario before implementing (privacy text): `docs/reviews/map-fachreview-1.md`
+- [x] Remove `BuildingMiniMap.svelte`, its DOM test, `leaflet`, `@types/leaflet`, the `.leaflet-container` rule, the `buildings_map*` messages and the CARTO paragraph `privacy_third_2` (all four languages); the unused `latitude`/`longitude` mapping of the building loads (columns stay)
+- [x] Remove `PUBLIC_CARTO_API_KEY` and the map from `.env.example`, `deploy/demo/.env.example`, `docker-compose.prod.yml`, `docs/tech-stack.md`, README, PRD (marked dropped), U-23 in `offene-punkte.md` (no CSP exists)
+- [x] Comment on #82 that CARTO is no longer a third party (R-1)
+- [x] Slice review (`code-reviewer`): `docs/reviews/map-review-1.md`; closing round `docs/reviews/map-review-2.md`
+- [x] Feature review: personas Dr. Weber (`docs/design/personas/weber-map129.md`) and Marco (`docs/design/personas/marco-map129.md`); no second `fach-reviewer` (the privacy text is the one reviewed before implementing)
+- [x] Workflow review (`docs/reviews/workflow-notes-issue-129.md`), archive session
+- [x] Before marking complete: lint, check, type-check, affected tests and E2E
+- [x] Pull request (Fixes #129)
+
+Files changed: `src/routes/buildings/BuildingMiniMap.svelte` (deleted), `src/__tests__/building-mini-map.dom.test.ts` (deleted), `src/routes/buildings/[id]/BuildingFacts.svelte`, building loads, `src/lib/types.ts`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `src/styles/globals.css`, `package.json`, `bun.lock`, privacy and token tests, deployment files and docs, `tests/e2e/features/building-detail.feature`, `tests/e2e/features/privacy.feature`, `tests/e2e/fixtures/backend.ts`, `tests/e2e/{targets,questions,steps}/building-detail*`

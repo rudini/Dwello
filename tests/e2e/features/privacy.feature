@@ -35,7 +35,7 @@ Funktionalität: Datenschutz
     Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Microsoft"
 
   Szenario: Dienste Dritter, die der Browser aufruft
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "CARTO"
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "CARTO"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "OpenPLZ"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Google Fonts"
