@@ -273,7 +273,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		statementDate: 'Statement date',
 		heatingNote: 'Heating costs by heating profile «{profile}»: {percent} % of the heating costs of your apartment in the billing period',
 		heatingMonths: 'Shares of the months of your tenancy: {months}',
-		heatingPeriodSums: '; together {tenant}\u00a0%. The months of the billing period total {period}\u00a0% in the heating profile',
+		heatingPeriodSums: '; in total {tenant}\u00a0%. The months of the billing period total {period}\u00a0% in the heating profile',
 		months: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
 		feeOwn: '{percent} % of the subtotal of CHF {base}',
 		keyColumn: 'Distribution key',

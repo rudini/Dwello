@@ -404,7 +404,27 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 
 		expect(texts[0]).toContain('70.98 % der Heizkosten');
 		expect(texts[0]).toContain('Anteile der Monate');
+		expect(texts[0]).not.toContain('Die Monate der Abrechnungsperiode'); // a whole year (code review C-10)
 		expect(texts[1]).toContain('Die Monate der Abrechnungsperiode haben im Heizprofil zusammen 52.10 %');
+	});
+
+	// Unter #209 gespeichert: Anteil auf zwei Stellen gerundet (70.97 %), ohne Summe der Periode; die Erläuterung nimmt den
+	// Anteil der Position (70.98 %) (#229, Fachprüfung V-1)
+	it('nennt bei einer unter #209 gespeicherten Abrechnung den Anteil der Position', async () => {
+		const feb = await createRental(crypto.randomUUID(), { startDate: '2025-02-22', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(feb.building, { categoryId: heating.id, amount: '1000.00', description: 'Heizöl 2025' });
+		const own = (await createHeatingProfile({ name: `Halb ${crypto.randomUUID()}`, type: 'custom', ...shares([18.6, 13.9, 11.2, 6.1, 2.3, 0, 0, 0.08, 1.8, 7.7, 13.4, 24.92]) })).id;
+		const statement = await generateStatement({ contractId: feb.contract, buildingId: feb.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId: own, managementFeePercent: 0 });
+		const stored = statement.heatingShare as Extract<NonNullable<typeof statement.heatingShare>, { byDays: false }>;
+		await db.update(utilityStatements).set({ heatingShare: { ...stored, percent: 70.97, periodPercent: undefined } }).where(eq(utilityStatements.id, statement.id));
+		await generateStatementPdf(statement.id, 'de');
+		const earlier = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await feb.remove();
+		await deleteHeatingProfile(own);
+
+		expect(earlier).toContain('70.98 % der Heizkosten');
 	});
 
 	// F-1: ein eigenes Heizprofil lässt sich umbenennen und löschen, die Abrechnung nennt es weiter

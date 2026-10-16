@@ -136,7 +136,9 @@ async function heatingOf(statement: StatementWithDetails, period: { rentalStart:
 	const stored = statement.heatingShare;
 	if (!stored) return recomputedHeating(statement, period, language, lineShare);
 	if (stored.byDays) return {};
-	return { heating: { profile: localName(stored.names, language), percent: stored.percent, months: stored.months, periodPercent: stored.periodPercent } };
+	// the heating position's share where there is one: shares stored under #209 were rounded differently (#229)
+	const percent = lineShare == null ? stored.percent : parseFloat(lineShare) * 100;
+	return { heating: { profile: localName(stored.names, language), percent, months: stored.months, periodPercent: stored.periodPercent } };
 }
 
 // A statement created before #209: the share from the profile as it is now
