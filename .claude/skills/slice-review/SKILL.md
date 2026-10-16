@@ -1,6 +1,6 @@
 ---
 name: slice-review
-description: How to run the reviewer subagents of a Dwello slice (code-reviewer, fach-reviewer, daten-pruefer, persona) - worktree, prompt, report path, triage. Load before starting any reviewer subagent (CLAUDE.md, Workflow steps 1, 4 to 6), or when the user says "slice-review", "review the slice" or "run the reviewers".
+description: How to run the reviewer subagents of a Dwello slice (code-reviewer, fach-reviewer, daten-pruefer, persona) - worktree, prompt, report path, triage. Load before starting any reviewer subagent (CLAUDE.md, Workflow steps 1, 4 to 7), or when the user says "slice-review", "review the slice" or "run the reviewers".
 ---
 
 # Slice review
@@ -38,8 +38,7 @@ For a re-review give only the delta, the open finding IDs and the previous repor
    - A fix that changes behavior (a help or error text the user sees included) gets a failing test first. A wording fix of a translation that a reviewer named and checked needs none, also when it answers a persona finding: the report is the evidence. Any other fixed persona finding is closed by a test that shows it (scenario or lower layer, red before the fix).
    - A persona runs again only when a fix adds a text or screen state it has not seen, and then only the personas whose finding the fix answers, with a task on just that text or state.
    - Persona "Beobachtungen": check each on the base commit. One the change caused or made more visible is a finding of the slice; the others stay in the persona's report.
-   - Rounds: a round is one run of one reviewer on one slice, at most three per slice; a Blocker/Major still open after the third goes under "Blocked on me". Only a fix that answers a Blocker/Major gets a re-review (the delta, the open finding IDs, the previous report). Fixes of feature-review findings form a new slice. Minor/Nit fixes wait for the closing round before the push (skill `pull-request`).
-   - Open when the task ends: a Blocker/Major that needs a product decision (it contradicts what the issue decided) or existed before the change (it shows on the base commit too, and the change does not make it more visible or contradictory) goes under "Blocked on me" and becomes open work (`CLAUDE.md`, "Open work"). A Minor/Nit is fixed when the fix is trivial; otherwise it stays in its report, with no issue or row.
+   - Rounds (`CLAUDE.md`, Workflow 7): a round is one run of one reviewer on one slice; fixes of feature-review findings form a new slice. What stays open when the task ends: `CLAUDE.md`, "Done means".
 3. The plan checklist gets one item per review round that names its report; the findings and their status stay out of the plan. Rejected findings and their reasons go under "Found" in the closing report. Findings of different reviewers with one cause are one fix and one test.
 4. Remove the worktree: `git worktree remove <path>` (no `--force`: the links are ignored).
 
