@@ -192,6 +192,10 @@ export function testData(api: CallTheApi) {
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
 
+		async noEmail(tenantTitle: string) {
+			await put(`tenants/${ids.get(tenantTitle)}`, { email: null });
+		},
+
 		// A PDF the Liegenschaftsverwalter uploaded to the tenant
 		async upload(tenantTitle: string, title: string) {
 			const content = Buffer.from('%PDF-1.4\n%%EOF\n').toString('base64');

@@ -1,10 +1,14 @@
 import { createBdd } from 'playwright-bdd';
 import { inDays } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { deliveryOf, documentFor, documentsFor, mailsTo, reminderOffers, reminderOutcome } from '../questions/documents';
+import { deliveryOf, documentFor, documentsFor, mailsTo, nextReminder, reminderOffers, reminderOutcome } from '../questions/documents';
+import { listedStatement } from '../questions/statements';
 import { markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from '../tasks/documents';
+import { openStatementList } from '../tasks/statements';
 
 const { Given, When, Then } = createBdd(test);
+
+const swissDate = (iso: string) => iso.split('-').reverse().join('.');
 
 const CHANNELS: Record<string, 'email' | 'letter'> = { 'E-Mail': 'email', Brief: 'letter' };
 
@@ -83,3 +87,38 @@ Given('die Zahlungsfrist der Abrechnung {int} von {string} läuft noch', async (
 Then('bietet die Abrechnung keine Mahnung an', async ({ verwalter }) => {
 	await verwalter.sees(reminderOffers).toBe(0);
 });
+
+// the e-mail of the reminder cannot reach the tenant, so the reminder waits to be printed and posted
+Given('{string} wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse', async ({ seed }, tenant: string) => {
+	await seed.correspondence(tenant, 'email');
+	await seed.noEmail(tenant);
+});
+
+Then(
+	'führt die Abrechnung die {string} mit der Zahlungsfrist in {int} Tagen',
+	async ({ verwalter }, title: string, days: number) => {
+		await verwalter.sees(documentFor(title, '')).toContain(`Zahlungsfrist ${swissDate(inDays(days))}`);
+	}
+);
+
+Then('nennt die Abrechnung die nächste Mahnung ab dem Tag in {int} Tagen', async ({ verwalter }, days: number) => {
+	await verwalter.sees(nextReminder).toBe(swissDate(inDays(days)));
+});
+
+Then(
+	'nennt die Liste der Abrechnungen bei {string} die nächste Mahnung ab dem Tag in {int} Tagen',
+	async ({ verwalter, names }, tenant: string, days: number) => {
+		await verwalter.attemptsTo(openStatementList);
+		await verwalter
+			.sees(listedStatement(names.get(tenant) ?? tenant))
+			.toContain(`Nächste Mahnung ab ${swissDate(inDays(days))}`);
+	}
+);
+
+Then(
+	'ist die {string} an {string} per Brief versendet festgehalten',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(openDocuments);
+		await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toMatch(/per Brief.*Versendet/);
+	}
+);

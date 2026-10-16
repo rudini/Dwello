@@ -2,6 +2,7 @@ import { target } from '../screenplay/target';
 
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const confirmReminderButton = target('Mahnung bestätigen', (page) => page.getByTestId('statement-reminder-confirm'));
+export const nextReminderDate = target('Nächste Mahnung möglich ab', (page) => page.getByTestId('statement-next-reminder'));
 export const reminderFeedback = target('Rückmeldung Mahnung', (page) => page.getByTestId('reminder-feedback'));
 export const documentRow = (title: string, tenantName = '') =>
 	target(`Dokument «${title}» ${tenantName}`.trim(), (page) =>
