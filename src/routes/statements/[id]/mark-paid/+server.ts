@@ -3,8 +3,8 @@ import { markStatementPaid } from '$lib/server/statement-actions';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ params, fetch, request }) => {
-	const { paidDate } = await request.json().catch(() => ({}));
-	const refused = await markStatementPaid(fetch, params.id, paidDate);
+	const { paidDate, statementDate } = await request.json().catch(() => ({}));
+	const refused = await markStatementPaid(fetch, params.id, paidDate, statementDate);
 	// in the UI language, shown in the dialog
 	return refused ? json({ message: refused.message }, { status: refused.status }) : json({});
 };

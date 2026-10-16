@@ -264,8 +264,10 @@ heating_share          JSONB                   -- heating costs as calculated (#
 balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
-paid_date              DATE
-paid_amount            DECIMAL(12,2)
+paid_date              DATE                    -- from the Abrechnungsdatum up to today (#138)
+paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93)
+payment_resets         JSONB   NOT NULL DEFAULT '[]' -- payments taken back: { resetOn, paidDate, paidAmount } (#92)
+payment_recorded_at    TIMESTAMP               -- when the payment was recorded; a reset discards only a PDF made after it (#92)
 reminder_sent_date     DATE
 pdf_blob               TEXT                    -- Base64 PDF with QR-bill
 pdf_generated_at       TIMESTAMP
@@ -289,7 +291,7 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 | `draft` (Entwurf) | `sent` |
 | `sent` (Versendet) | `paid` |
 | `overdue` (Überfällig, computed) | `paid` |
-| `paid` (Bezahlt) | — |
+| `paid` (Bezahlt) | `sent` only by `resetPayment` (#92): paid date and amount cleared, the reset appended to `payment_resets`, a PDF made after the payment was recorded discarded |
 
 **Lock rule:** only a `draft` can be deleted (`deleteStatement`), get line items (`addLineItems`) or have its
 amounts changed (`updateStatement` rejects `total_costs`, `total_advance_payments`, `management_fee_percent`,
