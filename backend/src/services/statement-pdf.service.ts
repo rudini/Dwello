@@ -130,18 +130,26 @@ export function toPdfData(
 }
 
 // The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs
-async function heatingOf(statement: StatementWithDetails, period: { rentalStart: string; rentalEnd: string }, language: Language, hasHeating: boolean) {
+async function heatingOf(statement: StatementWithDetails, period: { rentalStart: string; rentalEnd: string }, language: Language, hasHeating: boolean, lineShare?: string | null) {
+	if (!hasHeating) return {};
 	// as the statement was calculated, also after the profile changed (#209); recomputed only for one created before
-	const stored = hasHeating ? statement.heatingShare : null;
-	if (stored) return stored.byDays ? {} : { heating: { profile: localName(stored.names, language), percent: stored.percent, months: stored.months } };
-	const { rentalStart, rentalEnd } = period;
-	const profile = hasHeating && statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
+	const stored = statement.heatingShare;
+	if (!stored) return recomputedHeating(statement, period, language, lineShare);
+	if (stored.byDays) return {};
+	// the heating position's share where there is one: shares stored under #209 were rounded differently (#229)
+	const percent = lineShare == null ? stored.percent : parseFloat(lineShare) * 100;
+	return { heating: { profile: localName(stored.names, language), percent, months: stored.months, periodPercent: stored.periodPercent } };
+}
+
+// A statement created before #209: the share from the profile as it is now
+async function recomputedHeating(statement: StatementWithDetails, period: { rentalStart: string; rentalEnd: string }, language: Language, lineShare?: string | null) {
+	const profile = statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
 	if (!profile) return {};
 	// the same share the calculation takes: the months rented against the months of the period
 	const shared = await handleMidYearMoves(
 		profile.id,
-		new Date(rentalStart),
-		new Date(rentalEnd),
+		new Date(period.rentalStart),
+		new Date(period.rentalEnd),
 		new Date(statement.periodStart),
 		new Date(statement.periodEnd),
 		100
@@ -149,7 +157,13 @@ async function heatingOf(statement: StatementWithDetails, period: { rentalStart:
 	if (shared.byDays) return {}; // the months of the period carry 0 % in the profile: shared by days, no profile note
 	const { percentage, monthBreakdown } = shared;
 	const months = monthBreakdown.map(({ month, percentage }) => ({ month, percentage: Math.round(percentage * 100) / 100 }));
-	return { heating: { profile: localName(profile, language), percent: percentage, months } };
+	// the share of the heating position, as its amount was calculated; the months only while they still give it (#229)
+	const share = lineShare == null ? null : parseFloat(lineShare);
+	if (share == null) return { heating: { profile: localName(profile, language), percent: percentage, months } };
+	// rounded as the calculation rounds period_share, so an unchanged profile keeps its months
+	if (Math.round((percentage / 100) * 10000) !== Math.round(share * 10000)) return { heating: { profile: localName(profile, language), percent: share * 100 } };
+	const periodPercent = Math.round(shared.periodPercentage * 100) / 100;
+	return { heating: { profile: localName(profile, language), percent: share * 100, months, periodPercent } };
 }
 
 // A tank in the period: its category's costs are opening stock + the invoices – closing stock (Art. 5 Abs. 2 lit. a VMWG),
@@ -179,9 +193,10 @@ function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, lang
 async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
 	// the tenant's part of the period, as billed: from moving in or the period start to moving out or the period end
 	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd };
+	const heatingLine = statement.lineItems.find((item) => item.categoryId && names.get(item.categoryId)?.isHeatingCost);
 	return {
 		...rental,
-		...(await heatingOf(statement, rental, language, hasHeating)),
+		...(await heatingOf(statement, rental, language, hasHeating, heatingLine?.periodShare)),
 		...fuelOf(statement, names, language)
 	};
 }

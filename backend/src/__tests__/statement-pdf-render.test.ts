@@ -71,6 +71,14 @@ describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 		const byProfile = { ...byDays, lineItems: [{ ...byDays.lineItems[0], byProfile: true }], heating: { profile: 'Winter', percent: 52.17, months: [] } };
 		expect((await textOf(byProfile)).flowing).toContain('; bei Heizkosten der Anteil nach dem Heizprofil');
 	});
+
+	// #229: eine Periode, deren Monate nicht 100 % tragen, nennt beide Summen, in jeder Sprache
+	it('nennt bei einer Periode unter einem Jahr die Summen der Monate, auch auf Englisch', async () => {
+		const months = [{ month: 3, percentage: 10 }, { month: 4, percentage: 10 }, { month: 5, percentage: 10 }, { month: 6, percentage: 0 }];
+		const short = { ...byDays, lineItems: [{ ...byDays.lineItems[0], byProfile: true }], heating: { profile: 'Winter', percent: 60, months, periodPercent: 50 } };
+		const english = readPdf(Buffer.from(await generateStatementPDFBase64(short, config, 'en'), 'base64')).flowing;
+		expect(english).toContain('; in total 30.00 %. The months of the billing period total 50.00 % in the heating profile.');
+	});
 });
 
 const due: StatementPDFData = { ...refund, totalAdvancePayments: 600, balance: 184.15, paymentDeadline: '2026-03-17' };

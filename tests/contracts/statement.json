@@ -33,5 +33,6 @@
 			"sharePercentage": "100.0000"
 		}
 	],
-	"heatingProfile": { "id": "h1", "name": "Standard" }
+	"heatingProfile": { "id": "h1", "name": "Standard" },
+	"heatingShare": null
 }
