@@ -20,6 +20,7 @@ jobs:
     outputs:
       backend: ${{ steps.diff.outputs.backend }}
       app: ${{ steps.diff.outputs.app }}
+      ui: ${{ steps.diff.outputs.ui }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,13 +28,16 @@ jobs:
       - id: diff
         run: |
           if [ "${{ github.event_name }}" != pull_request ]; then
-            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && exit 0
+            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
           git diff --name-only "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
           # The API contracts are checked against the backend (api-contracts.pg.test.ts)
           echo "backend=$(grep -qE '^(backend|tests/contracts)/' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|screens/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
+          ui_files=$(grep -vE '(^|/)__tests__/|\.(test|spec)\.ts$|\.md$' changed.txt | grep -E '^(src|messages|static|project\.inlang|tests/a11y)/|^tests/e2e/(fixtures|screenplay|targets|tasks|questions|steps)/|^tests/e2e/features/accessibility\.feature$|^(tailwind|postcss|svelte|vite|playwright)\.config\.(js|ts)$|^(package\.json|bun\.lock|\.github/workflows/ci\.yml)$' || true)
+          echo "ui=$([ -n "$ui_files" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   build:
     name: Build
@@ -143,6 +147,9 @@ jobs:
           - name: Accessibility (axe)
             filter: --project=chromium --grep @a11y
             reports: a11y-reports
+    # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
+    env:
+      SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -158,18 +165,28 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
+      - name: No UI change
+        if: env.SKIP == 'true'
+        run: echo "::notice::No file the axe check sees changed, so it is skipped."
       - uses: actions/checkout@v4
+        if: env.SKIP != 'true'
       - uses: actions/setup-node@v4
+        if: env.SKIP != 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
       - uses: oven-sh/setup-bun@v2
+        if: env.SKIP != 'true'
       - run: bun install --frozen-lockfile
+        if: env.SKIP != 'true'
       - run: bun install --frozen-lockfile
+        if: env.SKIP != 'true'
         working-directory: backend
       # Pull requests: Chromium and the API driver only; pushes to main: every browser and the API driver
       - name: Install Playwright browsers
+        if: env.SKIP != 'true'
         run: bunx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
       - name: ${{ matrix.name }}
+        if: env.SKIP != 'true'
         run: bun run test:e2e -- ${{ matrix.filter }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
       - name: Upload reports
         if: ${{ failure() }}
