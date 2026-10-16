@@ -1,10 +1,11 @@
-import { Checked, Count, Enabled, Text, Visibility } from '../screenplay/questions';
+import { Checked, Count, Enabled, HiddenText, Text, Visibility } from '../screenplay/questions';
 import {
 	allowanceOption,
 	allowedBadge,
 	categoryRow,
 	deleteButton,
 	description,
+	descriptionInput,
 	contractNote,
 	formReason,
 	proposal,
@@ -25,3 +26,4 @@ export const reasonOf = (name: string) => Text.of(reason(name));
 export const reasonsOf = (name: string) => Count.of(reason(name));
 export const contractHint = Text.of(contractNote);
 export const formReasonText = Text.of(formReason);
+export const hiddenDescription = HiddenText.of(descriptionInput);

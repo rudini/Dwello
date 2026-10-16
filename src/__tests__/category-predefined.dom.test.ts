@@ -3,7 +3,7 @@ import { toCategory } from '$lib/server/category';
 import CategoryRow from '../routes/config/categories/CategoryRow.svelte';
 import CategoryForm from '../routes/config/categories/CategoryForm.svelte';
 import backendCategory from '../../tests/contracts/category.json';
-import { show } from './helpers/dom';
+import { byTestId, show } from './helpers/dom';
 
 // An own category whose English name equals its German one, as recorded through the form
 const own = toCategory(backendCategory);
@@ -43,6 +43,6 @@ describe('Vordefinierte und eigene Kategorien', () => {
 	// Die Beschreibung nennt, was nicht dazugehört («ohne …», #204); ein einzeiliges Feld schnitt das auf dem Telefon ab
 	it('zeigt die Beschreibung in einem mehrzeiligen Feld', () => {
 		show(CategoryForm, { category: seeded, submitLabel: 'Speichern' });
-		expect(document.querySelector('#description')?.tagName).toBe('TEXTAREA');
+		expect(byTestId('category-description-input')?.tagName).toBe('TEXTAREA');
 	});
 });

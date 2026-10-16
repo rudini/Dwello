@@ -95,6 +95,9 @@ describe('Migrationen anwenden', () => {
 			{ name: 'Building Insurance', description: 'Prämien der Gebäudeversicherung; ohne Prämien, die nur die Heizungsanlage versichern (gehören zur Heizung)' },
 			{ name: 'Administration', description: 'Allgemeine Verwaltungskosten; ohne Verwaltungsarbeit für den Heizbetrieb, z. B. Brennstoff bestellen (gehört zur Heizung), und ohne Verwaltungspauschale' }
 		]);
+		expect(await query(name, `SELECT description FROM categories WHERE name = 'Elevator'`)).toEqual([
+			{ description: 'Strom, Notruftelefon und reine Wartung des Lifts; ohne Reparaturen, Ersatzteile und Serviceabos mit Reparaturen' }
+		]);
 	});
 
 	it('lässt eine Beschreibung, die der Vermieter geändert hat, wie sie ist', async () => {

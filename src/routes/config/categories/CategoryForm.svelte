@@ -105,7 +105,8 @@
 	<Textarea
 		id="description"
 		name="description"
-		rows={3}
+		rows={6}
+		testid="category-description-input"
 		label={m.invoices_description()}
 		help={category?.predefined ? m.categories_description_predefined() : undefined}
 		optional
