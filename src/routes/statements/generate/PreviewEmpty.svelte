@@ -15,9 +15,8 @@
 <!-- all contracts already billed (e.g. after a late invoice): how to recalculate, and where the statements are -->
 {#if billed.length}
 	<p class="text-ink" data-testid="preview-all-billed">
-		{open
-			? `${m.statements_all_billed_lead()} ${m.statements_building_billed_open()}`
-			: m.statements_all_billed()}
+		{m.statements_all_billed_lead()}
+		{open ? m.statements_building_billed_open() : m.statements_building_recalculate()}
 	</p>
 	<ul class="flex flex-col">
 		{#each billed as row (row.buildingId)}

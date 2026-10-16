@@ -23,7 +23,7 @@ Request: «Setze #251 #252 #201 um». Branch `claude/statement-wizard-251-252-20
 - [x] E2E full suite (chromium, api) on b881ac0: 779 passed; after the fixes `statement-generate.feature`, `contract-new.feature` and their axe and language rows again green
 - [x] fach-reviewer round 3 (`docs/reviews/wizard-fachreview-3.md`): V-12, V-13 wording applied («Mietstage», fr/it word for the run)
 - [x] Closing code-reviewer round (`docs/reviews/wizard-review-2.md`): fixed Major C-1 (empty preview with open days no longer advises deleting drafts, `PreviewEmpty.svelte`), C-2 (test), C-3 in part, C-6
-- [ ] Re-review of the C-1 fix (code-reviewer round 3)
+- [x] Re-review of the C-1 fix (code-reviewer round 3, `docs/reviews/wizard-review-3.md`): fixed the rest of C-1 (the error after «Weiter» on an empty preview with open days no longer advises deleting drafts) and C-10 (scenario «Eine leere Vorschau mit offenen Mietstagen rät nicht, Entwürfe zu löschen»), C-12 (`statements_all_billed` composed from its two sentences), C-13; C-11 left (Minor)
 - [x] Workflow note `docs/reviews/workflow-notes-issue-201.md`
 - [ ] Feature review (personas, fach-reviewer)
 - [ ] Checks before push; archive session; pull request, CI, merge

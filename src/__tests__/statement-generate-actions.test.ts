@@ -49,7 +49,6 @@ describe('Vorschau der Abrechnungen', () => {
 		// moved in on 01.05.2024: the statement 2024 leaves 01.01.–30.06.2025 open
 		const contract = {
 			...buildingContracts.contracts[0],
-			id: 'c1',
 			startDate: '2024-05-01',
 			endDate: null
 		};

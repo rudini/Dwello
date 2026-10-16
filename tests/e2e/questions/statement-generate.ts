@@ -3,6 +3,7 @@ import { type Question, question } from '../screenplay/actor';
 import { Accessible, Checked, Count, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	allBuildingsNote,
+	previewAllBilled,
 	confirmMissingInvoices,
 	existingStatements,
 	stepLabel,
@@ -121,3 +122,4 @@ export const existingStatementsText = Text.of(existingStatements);
 // the warnings the confirmation confirms, read with its checkbox
 export const confirmationReason = Accessible.descriptionOf(confirmMissingInvoices);
 export const currentStep = Text.of(stepLabel);
+export const allBilledText = Text.of(previewAllBilled);

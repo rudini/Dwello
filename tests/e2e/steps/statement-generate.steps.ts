@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { pageAddress } from '../questions/navigation';
 import {
+	allBilledText,
 	allBuildingsNoteText,
 	confirmationReason,
 	currentStep,
@@ -394,4 +395,8 @@ Then(
 
 Then('ist der Assistent im Schritt {string}', async ({ verwalter }, step: string) => {
 	await verwalter.sees(currentStep).toBe(step);
+});
+
+Then('sagt die leere Vorschau {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(allBilledText).toBe(text);
 });

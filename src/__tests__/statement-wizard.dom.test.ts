@@ -434,7 +434,7 @@ describe('Abrechnungen erstellen', () => {
 
 	// code review C-1 (round 2), persona Dr. Weber P-1: löscht er den Entwurf und erstellt ihn in dieser Periode neu,
 	// bleiben die Tage, die der Entwurf abrechnete, ohne Abrechnung
-	it('rät bei einer leeren Vorschau mit offenen Tagen nicht, Entwürfe zu löschen', () => {
+	it('rät bei einer leeren Vorschau mit offenen Tagen nicht, Entwürfe zu löschen', async () => {
 		open({
 			preview: [],
 			invoices: [{ ...invoices[0], buildingId: 'b1', statements: 1, partlyBilled: 1 }]
@@ -446,6 +446,11 @@ describe('Abrechnungen erstellen', () => {
 		);
 		expect(empty).not.toContain('löschen Sie ihn');
 		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
+		next();
+		await settle();
+		expect(byTestId('form-error')!.textContent!.trim()).toBe(
+			'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.'
+		);
 	});
 
 	it('nennt Gebäude, deren Rechnungen nur einen Teil der Periode abdecken', () => {

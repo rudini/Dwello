@@ -139,6 +139,14 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-07-01" bis "2025-06-30" für das Gebäude "Lindenhof" öffnet
     Dann verlangt die Vorschau eine Bestätigung, weil es für "Lindenhof" schon Abrechnungen gibt
 
+  # Code review C-1/C-10, persona Dr. Weber P-1: wer hier einen Entwurf löscht und neu erstellt, lässt dessen Tage ohne Abrechnung
+  Szenario: Eine leere Vorschau mit offenen Mietstagen rät nicht, Entwürfe zu löschen
+    Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-07-01" bis "2025-06-30" für das Gebäude "Lindenhof" öffnet
+    Dann sagt die leere Vorschau "Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung."
+    Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude."
+
   Szenario: Eine Bestätigung gilt nur für ihre Vorschau
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
