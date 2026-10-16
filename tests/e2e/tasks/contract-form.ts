@@ -15,7 +15,7 @@ import {
 	tenantSelect
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
-import { discardDraftButton, finishedStep, nextButton, saveStatus } from '../targets/wizard';
+import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
 export type ContractData = {
@@ -79,7 +79,7 @@ export const goBackToStep = (label: string) => Click.on(finishedStep(label));
 export const reopenNewContract: Activity = (actor) =>
 	actor.attemptsTo(Wait.until(saveStatus('Entwurf gespeichert')), openNewContract);
 
-export const discardDraft = Click.on(discardDraftButton);
+export const discardDraft: Activity = (actor) => actor.attemptsTo(Click.on(discardDraftButton), Click.on(discardDraftConfirm));
 export const deleteDraftAndSave = Click.on(deleteDraftAndSaveButton);
 
 export const createTenantForContract = (fullName: string): Activity => (actor) =>

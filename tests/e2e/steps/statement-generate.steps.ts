@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { pageAddress } from '../questions/navigation';
 import {
+	allBuildingsNoteText,
 	announcedFeeHint,
 	balanceOf,
 	billedOfBuilding,
@@ -26,14 +27,20 @@ import {
 	settingsChoiceCount,
 	settingsChoiceName,
 	createdStatements,
+	discardQuestion,
+	restoredDraftShown,
 	restoredDraftText,
 	statementsInPreview,
 	totalCostsOf
 } from '../questions/statement-generate';
 import {
+	chooseAllBuildings,
 	chooseBuilding,
 	chooseBuildingsFor,
+	closeRestoredNotice,
 	confirmDespiteWarnings,
+	confirmDiscarding,
+	discardInput,
 	generateMore,
 	generateStatements,
 	goToGeneration,
@@ -316,4 +323,40 @@ Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text:
 
 Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
+});
+
+When('der Liegenschaftsverwalter alle Gebäude wählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseAllBuildings);
+});
+
+Then('nicht das Gebäude {string}', async ({ verwalter, seed }, building: string) => {
+	await verwalter.sees(buildingChosen(seed.idOf(building)!)).toBe(false);
+});
+
+Then(
+	'sagt die Wahl der Gebäude, dass «Alle Gebäude» die Gebäude auslässt, für die keine neue Abrechnung entsteht',
+	async ({ verwalter }) => {
+		// other scenarios add fully billed buildings too: the count is not checked
+		await verwalter.sees(allBuildingsNoteText).toMatch(/^«Alle Gebäude» lässt \d+ Gebäude aus, für (das|die) keine neue Abrechnung entsteht\.$/);
+	}
+);
+
+When('der Liegenschaftsverwalter seine Angaben verwerfen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(discardInput);
+});
+
+Then('fragt der Assistent zuerst {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(discardQuestion).toContain(text);
+});
+
+When('der Liegenschaftsverwalter das Verwerfen bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmDiscarding);
+});
+
+When('der Liegenschaftsverwalter den Hinweis auf seine wiederhergestellten Angaben schliesst', async ({ verwalter }) => {
+	await verwalter.attemptsTo(closeRestoredNotice);
+});
+
+Then('sieht der Liegenschaftsverwalter keinen Hinweis auf wiederhergestellte Angaben', async ({ verwalter }) => {
+	await verwalter.sees(restoredDraftShown).toBe(false);
 });

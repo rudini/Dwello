@@ -3,6 +3,7 @@ import type { Activity } from '../screenplay/actor';
 import { Check, Click, Enter, EnterDate, Navigate, Select, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import {
+	allBuildingsCheckbox,
 	backLink,
 	buildingCheckbox,
 	confirmMissingInvoices,
@@ -16,7 +17,7 @@ import {
 	previewCount,
 	showStatementsButton
 } from '../targets/statement-generate';
-import { finishedStep, nextButton, saveStatus } from '../targets/wizard';
+import { closeDraftNotice, discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { generateStatementsViaApi, openPreviewViaApi, type RunOptions } from './statement-generate-api';
 
 const WIZARD = '/statements/generate';
@@ -100,3 +101,8 @@ export const recordInvoiceFromWarning: Activity = (actor) =>
 		Click.on(newInvoiceFromWarning),
 		Wait.forUrl((url) => /\/invoices\/new/.test(url.href))
 	);
+
+export const chooseAllBuildings = Check.the(allBuildingsCheckbox);
+export const discardInput = Click.on(discardDraftButton);
+export const confirmDiscarding = Click.on(discardDraftConfirm);
+export const closeRestoredNotice = Click.on(closeDraftNotice);
