@@ -5,7 +5,6 @@ import {
 	deadlines,
 	markedNavItems,
 	occupancyHelp,
-	occupancyOf,
 	occupancyText,
 	occupancyShown,
 	overviewTaskShown,
@@ -85,6 +84,12 @@ Then('nennt die Übersicht die Aufgabe {string}', async ({ verwalter }, title: s
 	await verwalter.sees(overviewTaskShown(title)).toBe(true);
 });
 
+// anchored on the occupancy of the scenario's building: the overview has loaded its data
+Then('nennt die Übersicht die Aufgabe {string} nicht', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(occupancyShown(names.get('Seeblick')!)).toBe(true);
+	await verwalter.sees(overviewTaskShown(title)).toBe(false);
+});
+
 Then(
 	'nennt die Aufgabe {string} das Gebäude {string}',
 	async ({ verwalter, names }, title: string, building: string) => {
@@ -138,8 +143,9 @@ When('der Liegenschaftsverwalter die Schnellaktion {string} wählt', async ({ ve
 	await verwalter.attemptsTo(chooseQuickAction(label));
 });
 
-Then('ist das Gebäude {string} zu {string} belegt', async ({ verwalter, names }, building: string, rate: string) => {
-	await verwalter.sees(occupancyOf(names.get(building)!)).toBe(rate);
+Then('nennt die Belegung von {string} keinen Anteil in Prozent', async ({ verwalter, names }, building: string) => {
+	await verwalter.sees(occupancyShown(names.get(building)!)).toBe(true);
+	await verwalter.sees(occupancyText(names.get(building)!)).not.toContain('%');
 });
 
 Then(

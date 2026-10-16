@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { settingsSaved, storedSetting } from '../questions/settings';
+import { settingHelp, settingsSaved, storedSetting } from '../questions/settings';
 import { openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -11,14 +11,18 @@ const FIELDS: Record<string, string> = {
 	Adresse: 'companyAddress',
 	PLZ: 'companyPostalCode',
 	Ort: 'companyCity',
-	IBAN: 'iban'
+	IBAN: 'iban',
+	Zahlungsfrist: 'paymentDeadlineDays',
+	'Zahlungsfrist (Tage)': 'paymentDeadlineDays',
+	Mahnfrist: 'reminderAfterDays',
+	'Mahnfrist (Tage)': 'reminderAfterDays'
 };
 
 Given('der Liegenschaftsverwalter ist auf den Einstellungen', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openSettings);
 });
 
-When('der Liegenschaftsverwalter folgenden Absender speichert:', async ({ verwalter }, table: DataTable) => {
+When(/^der Liegenschaftsverwalter folgende(?:n Absender| Fristen) speichert:$/, async ({ verwalter }, table: DataTable) => {
 	const fields = Object.entries(table.rowsHash()).map(([label, value]) => [FIELDS[label], value]);
 	await verwalter.attemptsTo(saveSettings(Object.fromEntries(fields)));
 });
@@ -42,3 +46,16 @@ Then(
 		await verwalter.sees(storedSetting('iban')).toBe(iban);
 	}
 );
+
+Then(
+	'nach erneutem Öffnen der Einstellungen ist die Zahlungsfrist {string} und die Mahnfrist {string} hinterlegt',
+	async ({ verwalter }, paymentDays: string, reminderDays: string) => {
+		await verwalter.attemptsTo(openSettings);
+		await verwalter.sees(storedSetting('paymentDeadlineDays')).toBe(paymentDays);
+		await verwalter.sees(storedSetting('reminderAfterDays')).toBe(reminderDays);
+	}
+);
+
+Then('erklärt das Feld {string} {string}', async ({ verwalter }, label: string, help: string) => {
+	await verwalter.sees(settingHelp(FIELDS[label])).toContain(help);
+});
