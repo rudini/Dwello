@@ -74,6 +74,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann kostet die Abrechnung von "Marc Huber" "CHF 927.00"
     Und kostet die Abrechnung von "Eva Frei" "CHF 0.00"
 
+  # Das PDF eines Entwurfs kann schon weitergegeben sein: die Nummer einer gelöschten Abrechnung wird nicht
+  # wieder vergeben, sie bleibt eine Lücke (#97). Eva Frei erhält -0001, Marc Huber -0002, nach dem Löschen -0003.
+  @wip
+  Szenario: Die Nummer einer gelöschten Abrechnung wird nicht wieder vergeben
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Marc Huber" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Und der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Lindenhof" an
+    Dann endet die Nummer der Abrechnung von "Marc Huber" auf "-2024-0003"
+
   # Eine Abrechnungsperiode nur aus Monaten mit 0 % im Heizprofil (Mittelland: Juni bis August): die Heizkosten gehen nach Mietstagen wie jede andere
   # Rechnung, mit ihrem Leistungszeitraum (#137). 900 Franken für Juli bis September: 900 × 62/92 = 606.52 in der Periode,
   # die Hälfte für die Wohnung (303.26), davon 48 der 62 Tage: 234.78, plus 3 % Verwaltungspauschale (7.04)
