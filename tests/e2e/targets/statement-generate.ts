@@ -1,4 +1,4 @@
-import { target } from '../screenplay/target';
+import { type Target, target } from '../screenplay/target';
 
 export const periodStartInput = target('Beginn der Abrechnungsperiode', (page) => page.getByTestId('period-start-input'));
 export const periodEndInput = target('Ende der Abrechnungsperiode', (page) => page.getByTestId('period-end-input'));
@@ -51,3 +51,15 @@ export const categoryFinding = (category: string) =>
 		page.getByTestId('category-finding').filter({ hasText: category })
 	);
 export const draftsOnlyNote = target('Hinweis nur Entwürfe', (page) => page.getByTestId('generate-drafts-note'));
+// Invoices the preview names because their Leistungszeitraum is missing: dated shortly after the period, or counted
+// in full in a period under a year
+export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsperiode', (page) => page.getByTestId('late-invoices'));
+export const invoicesWithoutServicePeriod = target('Hinweis auf Rechnungen ohne Leistungszeitraum', (page) =>
+	page.getByTestId('invoices-without-service-period')
+);
+export const hintedInvoice = (hint: Target, date: string) =>
+	target(`Rechnung vom ${date} in «${hint}»`, (page) => hint.locate(page).getByTestId('hinted-invoice').filter({ hasText: date }));
+export const hintedInvoiceLink = (date: string) =>
+	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>
+		page.getByTestId('hinted-invoice').filter({ hasText: date }).getByRole('link')
+	);

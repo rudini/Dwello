@@ -137,14 +137,52 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # Jede Kategorie mit Kosten im Vorjahr wird mit dem gleichen Zeitraum im Vorjahr verglichen
   Szenario: Hinweis auf fehlende Rechnungen einer Kategorie
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2023-10-15"
-    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "460" Franken vom "2023-03-31"
-    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "475" Franken vom "2023-12-31"
-    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
+    Und im Gebäude "Lindenhof" gibt es im Jahr 2023 4 Rechnungen der Kategorie "Kaltwasser" über je "230" Franken, je eine pro Quartal
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "235" Franken vom "2024-03-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "235" Franken vom "2024-06-15"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Kaminfeger": "Keine Rechnung in dieser Kategorie erfasst"
-    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Rechnung für das 2. Halbjahr fehlt"
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Rechnungen für das 3. Quartal und das 4. Quartal fehlen"
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
+
+  @wip
+  Szenario: Kein Hinweis, wenn der Lieferant seltener, aber regelmässig abrechnet
+    Angenommen im Gebäude "Lindenhof" gibt es im Jahr 2023 12 Rechnungen der Kategorie "Kaltwasser" über je "100" Franken, je eine pro Monat
+    Und im Gebäude "Lindenhof" gibt es im Jahr 2024 4 Rechnungen der Kategorie "Kaltwasser" über je "300" Franken, je eine pro Quartal
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann enthält die Vorschau die Abrechnung von "Marc Huber"
+    Und meldet die Prüfung der Kategorien nichts für "Kaltwasser"
+    Und verlangt die Vorschau keine Bestätigung
+
+  @wip
+  Szenario: Hinweis auf eine Rechnung ohne Leistungszeitraum kurz nach der Abrechnungsperiode
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom "20.01.2025" über "290.00"
+
+  @wip
+  Szenario: Von einer Rechnung nach der Abrechnungsperiode zur Rechnung
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
+    Und der Liegenschaftsverwalter hat die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" geöffnet
+    Wenn der Liegenschaftsverwalter die Rechnung vom "20.01.2025" aus dem Hinweis bearbeitet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
+
+  @wip
+  Szenario: Hinweis auf Rechnungen ohne Leistungszeitraum in einer Abrechnungsperiode unter einem Jahr
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "1200" Franken vom "2024-02-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "300" Franken vom "2024-03-31" für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-01-01" bis "2024-06-30" für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom "15.02.2024" über "1’200.00"
+    Und nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom "31.03.2024"
+
+  @wip
+  Szenario: Von einer Rechnung ohne Leistungszeitraum zur Rechnung
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "1200" Franken vom "2024-02-15"
+    Und der Liegenschaftsverwalter hat die Vorschau der Abrechnungen vom "2024-01-01" bis "2024-06-30" für das Gebäude "Lindenhof" geöffnet
+    Wenn der Liegenschaftsverwalter die Rechnung vom "15.02.2024" aus dem Hinweis bearbeitet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
 
   Szenario: Vor dem Erstellen ist klar, dass nichts verschickt wird
     Angenommen im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024

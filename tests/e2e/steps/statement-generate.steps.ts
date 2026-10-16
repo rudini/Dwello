@@ -7,6 +7,11 @@ import {
 	billedOfBuilding,
 	buildingChosen,
 	categoryFindingOf,
+	categoryFindingsOf,
+	confirmationAsked,
+	invoiceWithoutServicePeriodOn,
+	invoicesWithoutServicePeriodOn,
+	lateInvoiceOn,
 	draftsOnly,
 	feeAboveGuideline,
 	feeFieldDescription,
@@ -34,6 +39,7 @@ import {
 	chooseBuilding,
 	chooseBuildingsFor,
 	confirmDespiteWarnings,
+	editHintedInvoice,
 	generateMore,
 	generateStatements,
 	goToGeneration,
@@ -316,4 +322,68 @@ Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text:
 
 Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
+});
+
+// Months between two invoices of a regular rhythm, and the last day of each such slice of the year
+const RHYTHM: Record<string, number> = { Monat: 1, Quartal: 3, Halbjahr: 6 };
+
+Given(
+	'im Gebäude {string} gibt es im Jahr {int} {int} Rechnungen der Kategorie {string} über je {string} Franken, je eine pro {word}',
+	async ({ seed }, building: string, year: number, count: number, category: string, amount: string, slice: string) => {
+		for (let k = 1; k <= count; k++) {
+			const lastDay = new Date(Date.UTC(year, k * RHYTHM[slice], 0)).toISOString().slice(0, 10);
+			await seed.invoiceOn(building, category, amount, lastDay);
+		}
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, start: string, end: string, building: string) => {
+		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
+	}
+);
+
+Given(
+	'der Liegenschaftsverwalter hat die Vorschau der Abrechnungen {int} für das Gebäude {string} geöffnet',
+	async ({ verwalter, seed }, year: number, building: string) => {
+		await verwalter.attemptsTo(openPreview(year, seed.idOf(building)!));
+	}
+);
+
+Given(
+	'der Liegenschaftsverwalter hat die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} geöffnet',
+	async ({ verwalter, seed }, start: string, end: string, building: string) => {
+		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
+	}
+);
+
+Then('meldet die Prüfung der Kategorien nichts für {string}', async ({ verwalter }, category: string) => {
+	await verwalter.sees(categoryFindingsOf(category)).toBe(0);
+});
+
+Then('verlangt die Vorschau keine Bestätigung', async ({ verwalter }) => {
+	await verwalter.sees(confirmationAsked).toBe(false);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(lateInvoiceOn(date)).toContain(amount);
+	}
+);
+
+Then(
+	'nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(invoiceWithoutServicePeriodOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(invoicesWithoutServicePeriodOn(date)).toBe(0);
+});
+
+When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
+	await verwalter.attemptsTo(editHintedInvoice(date));
 });
