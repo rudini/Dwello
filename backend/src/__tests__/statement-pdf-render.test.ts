@@ -69,7 +69,7 @@ describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 
 	it('erklärt den Zeitanteil der Heizkosten nach dem Heizprofil, wenn eine Position danach geteilt ist', async () => {
 		const byProfile = { ...byDays, lineItems: [{ ...byDays.lineItems[0], byProfile: true }], heating: { profile: 'Winter', percent: 52.17, months: [] } };
-		expect((await textOf(byProfile)).flowing).toContain('; bei Heizkosten der Anteil nach dem Heizprofil');
+		expect((await textOf(byProfile)).flowing).toContain('Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil.');
 	});
 
 	// #229: eine Periode, deren Monate nicht 100 % tragen, nennt beide Summen, in jeder Sprache
@@ -247,20 +247,60 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 	const mixed = { ...due, lineItems: [{ ...refund.lineItems[0], totalAmount: 1800, apartmentShare: 900, periodShare: 0.3406, invoiceParts, tenantShare: 306.52 }] };
 
 	it.each([
-		['fr', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 jours", 'pondérée selon leurs montants (calcul sous le poste du décompte ;'],
-		['it', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 giorni", 'ponderata secondo i loro importi (calcolo sotto la voce del conteggio;'],
-		['en', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 days", 'weighted by their amounts (calculation below the statement line;']
-	] as const)('nennt die Tage jeder Rechnung und ihre Gewichtung auch auf %s', async (language, line, note) => {
+		['fr', "Période de prestation 01.07.2025 – 30.09.2025 : CHF 1'200.00, vos jours de location 47 sur 92", "Votre part : 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'Si un poste du décompte comporte des factures sur des jours différents, le calcul figure en dessous.'],
+		['it', "Periodo di prestazione 01.07.2025 – 30.09.2025: CHF 1'200.00, i suoi giorni di locazione 47 su 92", "La sua quota: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'Se una voce del conteggio comprende fatture su giorni diversi, il calcolo figura sotto.'],
+		['en', "Service period 01.07.2025 – 30.09.2025: CHF 1'200.00, your days rented 47 of 92", "Your share: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'If a statement line has invoices over different days, the calculation is shown below it.']
+	] as const)('nennt die Tage jeder Rechnung und die Berechnung auch auf %s', async (language, line, share, note) => {
 		const text = readPdf(Buffer.from(await generateStatementPDFBase64(mixed, config, language), 'base64')).flowing;
 		expect(text).toContain(line);
-		expect(text).toContain(note); // Code-Review C-8, C-10: the clause in the terms of docs/design/i18n-begriffe.md
-		expect(text).toContain("(600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 34.06 %");
+		expect(text).toContain(share);
+		expect(text).toContain(note); // the terms of docs/design/i18n-begriffe.md (#226, C-8, C-10)
 	});
 
-	// Dr. Weber P-1: die Erläuterung nannte nur die Mietstage in der Periode, der Zeitanteil kam aber aus den Rechnungen
-	it('erklärt die Rechnungen unter der Position und ihre Gewichtung nach den Beträgen', async () => {
+	// #241 P-2, P-3: jede Zeile sagt, was ihre Zahlen sind, und die Berechnung führt bis zu Ihrem Anteil
+	it('beschriftet jede Rechnung mit ihrem Leistungszeitraum und rechnet bis zu Ihrem Anteil', async () => {
 		const text = (await textOf(mixed)).flowing;
-		expect(text).toContain('bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode; bei Rechnungen über verschiedene Tage nach ihren Beträgen gewichtet (Berechnung unter der Abrechnungsposition; Ihr Anteil ist der Wohnungsanteil mal diese Berechnung, der Prozentwert ist gerundet).');
+		expect(text).toContain("Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1'200.00, Ihre Mietstage 47 von 92 Tagen");
+		expect(text).toContain("Ihr Anteil: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52");
+	});
+
+	// #241 V-1: eine Rechnung ohne Leistungszeitraum und eine über die Periode hinaus heissen nicht einfach «Leistungszeitraum»
+	const special = [
+		{ start: '2025-01-01', end: '2025-12-31', amount: 600, days: 139, total: 365, noPeriod: true as const },
+		{ start: '2025-11-01', end: '2025-12-31', amount: 795.65, days: 61, total: 61, whole: { start: '2025-11-01', end: '2026-01-31', amount: 1200 } }
+	];
+	it.each([
+		['de', 'Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode', "Leistungszeitraum 01.11.2025 – 31.01.2026 (Rechnung CHF 1'200.00), davon 01.11.2025 – 31.12.2025: CHF 795.65, Ihre Mietstage 61 von 61 Tagen"],
+		['fr', 'Sans période de prestation : CHF 600.00, vos jours de location 139 sur 365 jours de la période de décompte', "Période de prestation 01.11.2025 – 31.01.2026 (facture CHF 1'200.00), dont 01.11.2025 – 31.12.2025 : CHF 795.65, vos jours de location 61 sur 61"],
+		['it', 'Senza periodo di prestazione: CHF 600.00, i suoi giorni di locazione 139 su 365 giorni del periodo di conteggio', "Periodo di prestazione 01.11.2025 – 31.01.2026 (fattura CHF 1'200.00), di cui 01.11.2025 – 31.12.2025: CHF 795.65, i suoi giorni di locazione 61 su 61"],
+		['en', 'Without a service period: CHF 600.00, your days rented 139 of 365 days of the billing period', "Service period 01.11.2025 – 31.01.2026 (invoice CHF 1'200.00), of which 01.11.2025 – 31.12.2025: CHF 795.65, your days rented 61 of 61"]
+	] as const)('nennt eine Rechnung ohne und eine über die Periode hinaus auf %s als solche', async (language, without, beyond) => {
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: special, tenantShare: 512.08 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+		expect(text).toContain(without);
+		expect(text).toContain(beyond);
+	});
+
+	// #239: die Veränderung des Tankbestands ist keine Rechnung, in jeder Sprache
+	it.each([
+		['de', 'Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen'],
+		['fr', 'Variation du stock de combustible 01.01.2025 – 31.12.2025 : CHF 500.00, vos jours de location 139 sur 365'],
+		['it', 'Variazione della scorta di combustibile 01.01.2025 – 31.12.2025: CHF 500.00, i suoi giorni di locazione 139 su 365'],
+		['en', 'Change in fuel stock 01.01.2025 – 31.12.2025: CHF 500.00, your days rented 139 of 365']
+	] as const)('nennt die Veränderung des Tankbestands auf %s als solche', async (language, line) => {
+		const stock = [
+			{ start: '2025-07-01', end: '2025-09-30', amount: 900, days: 47, total: 92 },
+			{ start: '2025-01-01', end: '2025-12-31', amount: 500, days: 139, total: 365, fuelStock: true as const }
+		];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1400, apartmentShare: 1400, periodShare: 0.4644, invoiceParts: stock, tenantShare: 650.19 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+		expect(text).toContain(line);
+	});
+
+	// Dr. Weber P-1 (#226), #241 P-1, V-2, V-6 bis V-8: die Erläuterung in kurzen Sätzen, mit dem gerundeten Prozentwert
+	it('erklärt die Rechnungen unter der Position und den gerundeten Prozentwert in kurzen Sätzen', async () => {
+		const text = (await textOf(mixed)).flowing;
+		expect(text).toContain('Zeitanteil: Ihre Mietstage in der Abrechnungsperiode. Bei einer Rechnung mit Leistungszeitraum zählen Ihre Mietstage in diesem Zeitraum. Hat eine Abrechnungsposition Rechnungen über verschiedene Tage, steht die Berechnung darunter. Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Der Prozentwert ist gerundet; Ihr Anteil folgt aus der Berechnung unter der Position.');
 	});
 
 	it('hält die Rechnungen beim Seitenwechsel bei ihrer Position, unter dem Tabellenkopf', async () => {

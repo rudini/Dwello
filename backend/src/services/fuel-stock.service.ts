@@ -95,7 +95,7 @@ export async function fuelStockChange(buildingId: string, periodStart: string, p
 				closingDate: readings.closing.readingDate,
 				closing: readings.closing.amount
 			},
-			inPeriod: { start: periodStart, end: periodEnd, amount: parseFloat(readings.opening.amount) - parseFloat(readings.closing.amount) }
+			inPeriod: { start: periodStart, end: periodEnd, amount: parseFloat(readings.opening.amount) - parseFloat(readings.closing.amount), fuelStock: true as const }
 		}
 	];
 }
