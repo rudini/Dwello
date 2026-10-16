@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Independent code review of one Dwello slice with fresh context, given only the requirement and the diff. Use after each slice once lint, the affected tests and deepcheck:audit are clean (CLAUDE.md, Workflow step 4).
+description: Independent code review of one Dwello slice with fresh context, given only the requirement and the diff. Use after each slice once lint and the affected tests are clean (CLAUDE.md, Workflow step 4).
 model: opus
 tools: Read, Grep, Glob, Bash, Write
 ---
@@ -13,7 +13,7 @@ Check against `CLAUDE.md` and the docs it names:
 - Conventions: domain terms from `UBIQUITOUS_LANGUAGE.md`; every UI text in all four `messages/*.json`; backend refusals as coded errors; `data-testid` naming; API contracts in `tests/contracts` updated.
 - Design rules: tokens only (`docs/design/token-referenz.md`), components from `src/lib/ui`, accessibility (labels, focus, keyboard, 48 px controls).
 - Security: auth and XSRF checks, input validation, no data leaking to the client.
-- Simplicity: the shortest diff that works; nothing unused left behind.
+- Simplicity: the shortest diff that works; nothing unused left behind. Read `.claude/skills/ponytail-review/SKILL.md` and apply it to the diff; its findings are Minors or Nits unless they hide a defect.
 - Plan (Minor): `implementation_plan.md` holds only the current session.
 - Red notes (Minor when missing, never more): the commit messages of the range (`git log <range>`) carry a `Red: <test or scenario> – <message>` line for each new test of a behavior and each new or changed scenario (a test written after the code: red shown by taking the code out). Judge whether a test can fail by reading it, not by its note.
 - Acceptance tests, when the diff touches `tests/e2e/`: lint already enforces the Screenplay layers (`tests/e2e/CLAUDE.md`); judge the design it cannot see:

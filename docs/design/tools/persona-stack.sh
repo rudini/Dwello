@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Starts the app for persona runs: fresh database dwello_persona with demo data, backend :3301, frontend :3300 (from a copy of build/ in /tmp/persona-app)
+# Starts the app for persona runs: fresh database dwello_persona with demo data, backend :3301, frontend :3300 (built into /tmp/persona-app)
 set -e
 cd "$(dirname "$0")/../../.."
 export JWT_SECRET=persona-secret-key-at-least-32-characters-long
@@ -8,10 +8,10 @@ for p in 3300 3301; do fuser -k $p/tcp 2>/dev/null || true; done
 su postgres -c "dropdb --if-exists dwello_persona" && su postgres -c "createdb -O dwello dwello_persona"
 (cd backend && DATABASE_URL=$DB bun scripts/migrate.ts > /tmp/persona-migrate.log 2>&1)
 (cd backend && DATABASE_URL=$DB bun scripts/demo-data.ts) > /tmp/persona-demo.log 2>&1
-[ "$1" = "--no-build" ] || bun run build > /tmp/persona-build.log 2>&1
-# serve a copy, so a later build (E2E, another stack) cannot change the pages under a running persona; the copy gets
-# package.json (ES modules) and a link to node_modules
-rm -rf /tmp/persona-app && cp -r build /tmp/persona-app && cp package.json /tmp/persona-app/ && ln -s "$PWD/node_modules" /tmp/persona-app/node_modules
+# its own build directories (svelte.config.js, BUILD_DIR), so an E2E build cannot change the pages under a running persona;
+# the build gets package.json (ES modules) and a link to node_modules; --no-build serves the last one again
+[ "$1" = "--no-build" ] || BUILD_DIR=/tmp/persona-app bun run build > /tmp/persona-build.log 2>&1
+cp package.json /tmp/persona-app/ && ln -sfn "$PWD/node_modules" /tmp/persona-app/node_modules
 # the servers keep none of the script's output open, so a caller that pipes it gets its end when the script exits
 # the KI stand-in of the acceptance tests: it answers the check of a new category and reads uploaded invoice files by
 # their name (backend/scripts/llm-stub.ts); other invoices find no KI

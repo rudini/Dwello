@@ -9,7 +9,10 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const input = JSON.parse(readFileSync(0, 'utf8'));
+// `node commit-msg-gate.mjs --check "<subject>"` checks a subject before the commit, so a blocked command loses no edits
+const [flag, subject] = process.argv.slice(2);
+const checking = flag === '--check';
+const input = checking ? {} : JSON.parse(readFileSync(0, 'utf8'));
 const command = input.tool_input?.command ?? '';
 const repositoryOf = (dir) =>
 	spawnSync('git', ['-C', dir, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' }).stdout?.trim();
@@ -50,7 +53,9 @@ function messageOf(args) {
 	}
 }
 
-const messages = calls.map((call) => messageOf([...words(command.slice(call.index + call[0].length))]));
+const messages = checking
+	? [subject ?? '']
+	: calls.map((call) => messageOf([...words(command.slice(call.index + call[0].length))]));
 if (messages.every((message) => message === undefined)) process.exit(0);
 
 const rules = readFileSync(new URL('../../CLAUDE.md', import.meta.url), 'utf8');
@@ -73,6 +78,6 @@ function problemsOf(message) {
 const found = messages.flatMap((message) => (message === undefined ? [] : problemsOf(message)));
 if (found.length) {
 	console.error(`commit-msg-gate: blocked: ${found.join(' | ')} (CLAUDE.md, Conventions: Commits).`);
-	console.error('commit-msg-gate: nothing in this command ran, edits and git add before the git call included.');
+	if (!checking) console.error('commit-msg-gate: nothing in this command ran, edits and git add before the git call included.');
 	process.exit(2);
 }
