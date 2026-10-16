@@ -1414,7 +1414,7 @@
 	"contracts_duration_terminated": "Open-ended, terminated by notice",
 	"contracts_duration_terminated_help": "The rental contract ends with the notice of termination. If the termination date has moved, change the contract end.",
 	"contracts_withdraw_notice": "Withdraw notice of termination",
-	"contracts_withdraw_notice_help": "The rental contract then runs on without an end.",
+	"contracts_withdraw_notice_help": "The rental contract then runs on without an end. This is only possible if tenant and landlord withdraw the notice of termination together, or if the conciliation authority or a court declares it invalid. Once received, a notice cannot be withdrawn by the tenant or the landlord alone.",
 	"contracts_notice_withdrawn_toast": "Notice of termination of {name} withdrawn. The rental contract runs on without an end.",
 	"backend_contract_notice_without_end": "A notice of termination needs a contract end. Enter the termination date.",
 	"backend_contract_parties_fixed": "The tenant and the apartment of a rental contract cannot be changed. Give this rental contract a contract end and add a new rental contract.",

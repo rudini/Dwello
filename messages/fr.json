@@ -1414,7 +1414,7 @@
 	"contracts_duration_terminated": "Durée indéterminée, résilié",
 	"contracts_duration_terminated_help": "Le contrat de bail prend fin avec la résiliation. Si le terme de résiliation a changé, modifiez la fin du contrat.",
 	"contracts_withdraw_notice": "Annuler la résiliation",
-	"contracts_withdraw_notice_help": "Le contrat de bail court alors sans date de fin.",
+	"contracts_withdraw_notice_help": "Le contrat de bail court alors sans date de fin. Ce n’est possible que si le locataire et le bailleur retirent ensemble la résiliation, ou si l’autorité de conciliation ou un tribunal la déclare non valable. Une fois reçue, une résiliation ne peut être retirée ni par le locataire ni par le bailleur seul.",
 	"contracts_notice_withdrawn_toast": "Résiliation de {name} annulée. Le contrat de bail court sans date de fin.",
 	"backend_contract_notice_without_end": "Une résiliation nécessite une fin du contrat. Saisissez le terme de résiliation.",
 	"backend_contract_parties_fixed": "Le locataire et l’appartement d’un contrat de bail ne peuvent pas être modifiés. Donnez une fin du contrat à ce contrat de bail et saisissez un nouveau contrat de bail.",

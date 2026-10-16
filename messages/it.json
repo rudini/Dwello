@@ -1414,7 +1414,7 @@
 	"contracts_duration_terminated": "A tempo indeterminato, disdetto",
 	"contracts_duration_terminated_help": "Il contratto di locazione termina con la disdetta. Se la scadenza di disdetta è cambiata, modifichi la fine del contratto.",
 	"contracts_withdraw_notice": "Revocare la disdetta",
-	"contracts_withdraw_notice_help": "Il contratto di locazione prosegue allora senza scadenza.",
+	"contracts_withdraw_notice_help": "Il contratto di locazione prosegue allora senza scadenza. È possibile solo se inquilino e locatore ritirano insieme la disdetta, oppure se l’autorità di conciliazione o un tribunale la dichiara non valida. Una volta ricevuta, la disdetta non può essere ritirata né dall’inquilino né dal locatore da solo.",
 	"contracts_notice_withdrawn_toast": "Disdetta di {name} revocata. Il contratto di locazione prosegue senza scadenza.",
 	"backend_contract_notice_without_end": "Una disdetta richiede una fine del contratto. Inserisca la scadenza di disdetta.",
 	"backend_contract_parties_fixed": "L’inquilino e l’appartamento di un contratto di locazione non possono essere modificati. Dia a questo contratto di locazione una fine del contratto e registri un nuovo contratto di locazione.",
