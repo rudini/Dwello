@@ -199,4 +199,10 @@ describe('Datenschutzerklärung: Grenzen der genannten Dienste', () => {
 	it('sagt nicht, das Sprach-Cookie entstehe erst mit einer Wahl', () => {
 		expect(text()).toContain('«PARAGLIDE_LOCALE» speichert die Sprache der Oberfläche');
 	});
+
+	it('sagt, dass das Sprach-Cookie beim ersten Besuch der Sprache des Browsers folgt', () => {
+		expect(text()).toContain(
+			'Beim ersten Besuch setzt Dwello es auf die Sprache Ihres Browsers, wenn sie Deutsch, Französisch, Italienisch oder Englisch ist, sonst auf Deutsch.'
+		);
+	});
 });

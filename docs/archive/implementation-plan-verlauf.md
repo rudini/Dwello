@@ -779,6 +779,20 @@ No scenario for the migration of existing `rm` tenants: E2E starts from fresh mi
 
 Files: `backend/migrations/0012_tenant_language_without_rm.sql`, `backend/src/services/{reminder-letter,reminder.service,pdf.service,statement-pdf.service,config.service}.ts`, `backend/src/routes/{tenants,statements}.ts`, `backend/src/db/schema.ts`, `messages/*.json`, `src/lib/{tenant,types}.ts`, `src/lib/server/{statement,documents,statement-actions}.ts`, `src/routes/statements/[id]/{PdfAction,+page}.svelte`, `src/routes/tenants/+page.server.ts`, tests, `tests/e2e/**`, `tests/contracts/statement.json`, docs (`README.md`, PRD, api-specification, data-model, tech-stack, nebenkostenabrechnung-anforderungen).
 
+## Session W5c: #74 (F-14c) Tankbestand with an allocable invoice in a non-allocable category
+
+- [x] Read #74, #257, #130: neither `entscheiden` issue changes #74's outcome (#257 is how consumption is spread over days, #130 the invoice check)
+- [x] Found: since #25 (merged 2026-10-08, before #74 was written) the backend keeps no invoice of a non-allocable category allocable (`applyCategory` on create and update, the recategorize path, `updateCategory`), so the state Option A answers cannot arise and Option A would be a dead branch in `fuelStockChange`. Followed the code (CLAUDE.md, "Coding guidelines"), said so in the pull request
+- [x] Regression test of #74's case, red with the guard in `applyCategory` taken out (purchase CHF 2000 billed, no stock change)
+- [x] code-reviewer round 1: `docs/reviews/74-review-1.md` (C-1, C-2 fixed; C-3 rejected; C-4 moot after archiving)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-74.md`
+- [x] Checks before push; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+No scenario: the state #74 describes cannot be reached through the UI or the API since #25; the pg test pins it.
+
+Files: `backend/src/__tests__/fuel-stock.pg.test.ts`, `docs/reviews/74-review-1.md`, `docs/reviews/workflow-notes-issue-74.md`
+
 ## Session 2026-10-16 W4b-Mietstatus: an apartment's tenancy (#117, #145, #58)
 
 - [x] @wip scenarios: earlier contracts and the delete dialog's statements (#117), «Leer seit» (#145), «Vermietet ab» and Mieter «Künftig» (#58); fach-reviewer before implementing (`docs/reviews/w4bm-fachreview-1.md`: no Blocker/Major; V-2 wording taken, V-3 covered by `tenant-status.pg.test.ts`, V-6 translations taken)
@@ -797,6 +811,24 @@ Files: `backend/migrations/0012_tenant_language_without_rm.sql`, `backend/src/se
 - [x] Closing code review (`docs/reviews/w4bm-review-3.md`): no Blocker/Major; C-14 (Nit) fixed
 - [x] Workflow notes (`docs/reviews/workflow-notes-issue-117-145-58.md`)
 - [x] Archive the session, pull request (one pull request for the three issues, as the coordinator's brief asks)
+
+## Session: Login and header follow the browser language (#110)
+
+Request: «Setze #110 um» (coordinator W9b). #110's "Done means" asks for an implementation issue; none exists, the decided Option 2 is the requirement, the pull request says `Fixes #110`.
+
+- [x] `@wip` scenarios in `sprachen.feature`: login page in French for a French browser without cookie; overview follows the browser; the chosen language wins over the browser; seen red
+- [x] fach-reviewer on the `@wip` scenarios before implementing (privacy text: the cookie is now set from the browser language)
+- [x] fach-reviewer round 1 (`docs/reviews/p14-fachreview-1.md`): took R-1 (privacy sentence, four languages), V-1 (scenario: the first visit's language stays), V-2 (no `@wip` on «Die gewählte Sprache gilt …», its red shown by swapping the strategy order in the unit test)
+- [x] Strategy `cookie, preferredLanguage, baseLocale` in `package.json` (`i18n`), `vite.config.ts`, `vitest.config.ts`; `Vary: Accept-Language` on pages
+- [x] E2E and a11y language tests keep German (Playwright already pins `locale: 'de-CH'`); DOM tests pin `navigator.languages` to de-CH (`tests/mocks/browser-language.ts`)
+- [x] Found: the old step «bevorzugt Englisch» never reached the server (Chromium sends the context locale over an extra header); `Browser.preferLanguages` now changes the request
+- [x] code-reviewer round 1 (`docs/reviews/p14-review-1.md`): fixed C-1, C-3 (Vary on every answer), C-4; C-2, C-5 stay in the report; closing round `docs/reviews/p14-review-2.md` (C-6 already resolved)
+- [x] Feature review: personas Anna (`docs/design/personas/anna-p14.md`) and Dr. Weber (`docs/design/personas/weber-p14.md`); no second `fach-reviewer` (the privacy sentence is the one reviewed before implementing)
+- [x] Workflow note: decision issue implemented directly; personas README «language stored on the account» is outdated (`docs/reviews/workflow-notes-issue-110.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `package.json`, `vite.config.ts`, `vitest.config.ts`, `src/hooks.server.ts`, `messages/*.json`, `tests/mocks/browser-language.ts`, `src/__tests__/{i18n.test.ts,privacy-page.dom.test.ts}`, `tests/e2e/features/sprachen.feature`, `tests/e2e/{screenplay/interactions,tasks/language,steps/language.steps}.ts`, `docs/reviews/p14-{fachreview,review}-1.md`, persona reports, `docs/reviews/workflow-notes-issue-110.md`
 
 ## Session W1b: statement position ↔ invoices (#96) and statement detail like the PDF (#104)
 
