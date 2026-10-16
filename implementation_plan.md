@@ -14,5 +14,7 @@ The issue's "Done means" is worded for a decision issue; its "Decided (product o
 - [x] Contract detail: `FixedTermCheck.svelte` with «Unbefristet weiterführen» and «Mieter ist ausgezogen»; draft refusal offers delete, a sent one says it cannot continue (Fachreview V-2)
 - [x] Texts in `messages/{de,fr,it,en}.json`; screen `contract-detail-expired` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
 - [x] `docs/anforderungen-vertragsende.md`: A-6 implemented, A-1 point 5 and the J-1 note; `docs/api-specification.md`
-- [ ] Slice review (`code-reviewer`), feature review (personas, `fach-reviewer`)
+- [ ] Code review round 1: `docs/reviews/a6-review-1.md`
+- [ ] Feature review: personas Anna and Dr. Weber (`docs/design/personas/anna-a6.md`, `weber-a6.md`; persona DB seeded by SQL with two expired fixed-term contracts, Lea Huber on Musterhaus 2.02 and Jonas Graf on Seepark B1), Fachreview round 2 `docs/reviews/a6-fachreview-2.md`
+- [ ] Workflow review notes (skill `workflow-review`)
 - [ ] Pull request `Fixes #115`, CI green, merged
