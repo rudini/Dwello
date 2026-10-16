@@ -315,7 +315,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				id: t.String()
 			}),
 			body: t.Object({
-				language: t.Optional(t.String()) // de, fr, it, rm, en
+				language: t.Optional(t.String()) // de, fr, it, en
 			})
 		}
 	)

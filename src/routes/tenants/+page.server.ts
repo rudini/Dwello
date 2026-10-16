@@ -40,7 +40,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 				lastName: (t.lastName as string) || '',
 				email: (t.email as string) || null,
 				phone: (t.phone as string) || null,
-				language: (t.language as 'de' | 'fr' | 'it' | 'rm' | 'en') || 'de',
+				language: (t.language as 'de' | 'fr' | 'it' | 'en') || 'de',
 				address: (t.address as string) || null,
 				postalCode: (t.postalCode as string) || null,
 				city: (t.city as string) || null,
@@ -49,7 +49,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 					: null,
 				currentBuilding: (t.currentBuilding as string) || null,
 				nextContractStart: nextStart(t.id),
-				isActive: t.isActive === true
+				isActive: t.isActive === true,
+				isFuture: t.isFuture === true
 			})
 		);
 

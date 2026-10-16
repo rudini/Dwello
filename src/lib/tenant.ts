@@ -3,7 +3,7 @@ import type { ActionResult } from '@sveltejs/kit';
 import { addToast } from './stores';
 import type { Tenant } from './types';
 
-/** Languages a tenant's statements can be written in, named in the UI language (getters: read when shown) */
+/** Languages a tenant's statements and reminders are written in, named in the UI language (getters: read when shown) */
 export const languageLabels: Record<Tenant['language'], string> = {
 	get de() {
 		return m.tenants_language_de();
@@ -13,9 +13,6 @@ export const languageLabels: Record<Tenant['language'], string> = {
 	},
 	get it() {
 		return m.tenants_language_it();
-	},
-	get rm() {
-		return m.tenants_language_rm();
 	},
 	get en() {
 		return m.tenants_language_en();

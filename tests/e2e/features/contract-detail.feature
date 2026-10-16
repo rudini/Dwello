@@ -243,3 +243,32 @@ Funktionalität: Mietvertragsdetail
     Und sieht der Liegenschaftsverwalter die Abrechnung 2025 von "Anna Keller"
     Aber nicht die Abrechnung 2025 von "Ben Meier"
     Und zählt die Liste 1 Entwurf
+
+  # A-8 (#117): der Löschdialog eines beendeten Mietvertrags führt zu seinen Abrechnungen
+  Szenario: Löschdialog eines beendeten Mietvertrags nennt seine Abrechnungen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2018-01-01" bis "2025-12-31" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
+    Dann nennt der Dialog "Dieser Mietvertrag kann nicht gelöscht werden. Seine Mietstage sind abgerechnet in:"
+    Und verlinkt der Dialog die Abrechnung 2025 von "Bruno Meier"
+
+  Szenario: Abrechnung aus dem Löschdialog öffnen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2018-01-01" bis "2025-12-31" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
+    Und der Liegenschaftsverwalter im Dialog die Abrechnung 2025 von "Bruno Meier" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2025 von "Bruno Meier"
+
+  Szenario: Löschdialog eines beendeten Mietvertrags ohne Abrechnung
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2018-01-01" bis "2021-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
+    Dann nennt der Dialog "Zu diesem Mietvertrag gibt es in Dwello keine Nebenkostenabrechnung."
