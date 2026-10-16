@@ -7,6 +7,6 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 Request (chat): «Setze G-11 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Own pull request after #270 is merged.
 
 - [x] `.claude/skills/tdd/SKILL.md`: «DO NOT», «ONE … ONE» and «Never refactor while RED» in plain words with their reason; labels in examples (WRONG/RIGHT, GOOD/BAD) stay
-- [ ] `code-reviewer` round
+- [x] `code-reviewer` round 1 (docs/reviews/g11-review-1.md): C-1 fixed («WHAT, not HOW» in `tdd/tests.md` and `bdd-acceptance`), C-2 left: the `ponytail` skills are a third-party plugin
 - [x] Checks: lint, the tests that read rule files
 - [ ] Archive the session, push after #270 is merged, pull request, CI, merge
