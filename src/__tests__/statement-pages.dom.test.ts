@@ -955,6 +955,9 @@ describe('Abrechnungsdetail', () => {
 
 		click('statement-reminder-button');
 		expect(text()).toContain('Es wurden bereits 3 Mahnungen versendet.');
+		// #59: what follows is outside Dwello, a termination for arrears needs its own notice
+		expect(text()).toContain('Eine Mahnung von Dwello ist eine Zahlungsaufforderung. Sie ist keine Zahlungsfrist mit Kündigungsandrohung nach Art. 257d OR.');
+		expect(text()).toContain('Lassen Sie sich beraten.');
 		click('statement-reminder-confirm');
 		expect(document.querySelector('[role="dialog"]')).toBeNull();
 	});
