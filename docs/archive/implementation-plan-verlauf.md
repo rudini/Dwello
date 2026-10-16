@@ -1,3 +1,17 @@
+## Session 2026-10-16: fourth guide review T-1 to T-6
+
+Request (chat): «Setze deine Empfehlung um» for `docs/reviews/opus55-guide-review-4.md` (T-1 to T-6). Rules only, no app behaviour, so no scenario.
+
+- [x] T-1: step 1 loads the skill `bdd-acceptance`; its description says when; its run and selector lines point to `tests/e2e/CLAUDE.md` and "Conventions"
+- [x] T-2: step 8 in three parts (start, during, end); the details of workflow notes in the skill `workflow-review`
+- [x] T-3, T-4: "Done means" says the plan's session is moved to the archive, with several pull requests before the last one
+- [x] T-5: step 4 says to keep working while the review runs
+- [x] T-6: the test-database rule once (`backend/CLAUDE.md`), the other places point there; the UI-only sentence on `tdd`/`ponytail` goes
+- [x] `code-reviewer` round 1 (docs/reviews/t16-review-1.md): C-1 (Minor: two run facts missing in `tests/e2e/CLAUDE.md`), C-2, C-3 fixed, no further round
+- [x] Checks: lint, the tests that read rule files
+- [x] Archive the session, push, pull request, CI, merge
+  Files: `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `docs/test-pyramid.md`, `.claude/skills/{bdd-acceptance,workflow-review}/SKILL.md`; reports `docs/reviews/opus55-guide-review-4.md`, `docs/reviews/t16-review-1.md`
+
 ## Session 2026-10-16: project rules only (guide review G-9)
 
 Request (chat): «Setze G-9 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario.
