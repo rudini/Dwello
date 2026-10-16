@@ -876,7 +876,7 @@ describe('Beleg einer Rechnung', () => {
 		const beleg = { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: true };
 		detail({ beleg });
 		expect(byTestId('invoice-document-hints')!.textContent).toContain(
-			'Auf dem Beleg sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Prüfen Sie, dass sie nur einmal zählen: Der Betrag ist das Total vor dem Abzug, und die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, und ihr Betrag ist vom Total abgezogen.'
+			'Auf dem Beleg sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Prüfen Sie, dass sie nur einmal zählen: Der Betrag ist das Total vor dem Abzug, und die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der abgerechneten Periode.'
 		);
 		expect(byTestId('invoice-document-hints')!.textContent).toContain(
 			'Der Beleg enthält auch Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Prüfen Sie, dass der Betrag nur den umlagefähigen Teil enthält und der Rest als eigene Rechnung in einer nicht umlagefähigen Kategorie erfasst ist.'
