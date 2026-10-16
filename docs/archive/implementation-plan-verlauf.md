@@ -644,6 +644,31 @@ Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts
 
 Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/schema.ts`, `backend/src/routes/contracts.ts`, `backend/src/services/contract.service.ts`, `src/lib/contract-status.ts`, `src/lib/types.ts`, `src/routes/contracts/[id]/{+page.svelte,+page.server.ts,ContractTerms.svelte}`, `src/routes/contracts/new/PeriodStep.svelte`, `messages/*.json`, tests (`contract-status`, `contract-actions`, `contract-end.pg`, `tests/contracts/contract.json`, E2E contract-detail/contract-edit, a11y), docs (`anforderungen-vertragsende.md`, `data-model.md`, `api-specification.md`).
 
+## Session 2026-10-16: #124, #89, #60 Verwaltungspauschale
+
+- [x] #60: remove the marker in `SettingsStep.svelte`, cite the Mieterverband leaflet 2026 in the comment (No scenario: code comment only, no behaviour change)
+- [x] #124: preview and generate refuse a rate above 10 % (route schema), `PUT /api/v1/config` refuses `management_fee_pct` above 10 (validator); `*.pg.test.ts` for 10 accepted and stored, 10.01 refused, no 500
+- [x] #124: wizard step «Einstellungen» and settings page refuse above 10 at the field; `statements_error_fee` «von 0 bis 10» in four languages; unit tests in `statement-wizard.test.ts` and for `saveSettings`; hint above 3 % unchanged
+- [x] #124: scenario in `statement-management-fee.feature`: «1000» shows the field error, the wizard stays on the step
+- [x] #89: Mietvertrag gets «Verwaltungspauschale vereinbart» (ja/nein, optional own rate): migration, schema, `docs/data-model.md`, API contracts
+- [x] #89: new contract: ja or nein must be chosen (no default); existing contracts start with «nein»; edit and detail page show it
+- [x] #89: the run rate applies only to contracts with «ja» (or their own rate); «nein» gets 0 %
+- [x] #89: the statement wizard points out the contracts with «nein»
+- [x] #89: help texts (`statements_fee_help`), requirements doc rule 9, four languages
+- [x] fach-reviewer on the @wip scenarios before implementing (`docs/reviews/issue-89-fachreview-1.md`: M-1, V-1, V-2, V-5, V-6, M-2 fixed; V-3, V-4 rejected; #286 opened for the glossary)
+- [x] code-reviewer round 1 (`docs/reviews/issue-89-review-1.md`): no Blocker/Major; C-1, C-2, C-3, C-7, C-9–C-11 fixed; C-4, C-5, C-6, C-8 left as reported
+- [x] Persona Helga (`docs/design/personas/helga-issue-89.md`): P-1, P-2 fixed; P-3, P-4, P-5 left as reported
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-issue-89.md`): P-1, P-2, P-3 fixed; P-4 left as reported
+- [x] fach-reviewer round 2 (`docs/reviews/issue-89-fachreview-2.md`): M-3, M-4, V-5, V-11, V-13, V-15 fixed; V-12, V-14, V-16 left as reported
+- [x] daten-pruefer (`docs/reviews/issue-89-datenpruefung-1.md`): 19 statements match to the Rappen; D-1 fixed, D-2, D-3 existed before
+- [x] E2E isolation: UI runs of the statement wizard name a predefined heating profile (`tests/e2e/{steps,tasks}/statement-generate*`)
+- [x] Workflow note: a notice inside a wizard step vs. a state of `tests/a11y/screens.json`; reviewers cannot run checks in their worktree; stop hook vs. step 9 (`docs/reviews/workflow-notes-issue-89.md`)
+- [x] Merge of main (migration renamed to 0009, after a second merge 0011)
+- [x] Closing code-reviewer round (`docs/reviews/issue-89-review-2.md`): Major C-1 fixed (heating profile again from the other statements, notice names where the fee comes from), C-2, C-4, C-6, C-7, C-8 fixed; C-9 holds again after the C-1 fix; C-3, C-5 rejected; C-10 noted (dev databases only)
+- [x] Closing re-review (`docs/reviews/issue-89-review-3.md`): C-1 confirmed; Major C-11 fixed (scenario «Neue Abrechnung übernimmt das Heizprofil, die Verwaltungspauschale kommt aus den Einstellungen», red on 7d81829); C-13, C-7, C-14, C-15, C-16 fixed; C-12 left as reported
+- [x] Closing re-review (`docs/reviews/issue-89-review-4.md`): C-11 and the delta confirmed, no Blocker/Major open; C-18 fixed, C-17 left (accessibility targets keep their own module)
+- [x] PR
+- Files: `backend/migrations/0011_contract_management_fee.sql`, `backend/src/{db/schema.ts,routes/contracts.ts,routes/statements.ts,services/calculation.service.ts,services/config.service.ts,services/contract.service.ts}`, `backend/demo/demo-data.sql`, `src/lib/{contract-form.ts,contract-wizard.ts,statement-wizard.ts,types.ts,utils/format.ts,server/settings.ts,server/statement-generation.ts}`, `src/routes/contracts/{new/RentStep.svelte,[id]/*}`, `src/routes/statements/generate/{+page.server.ts,FeeNotAgreed.svelte,SettingsStep.svelte,StatementStep.svelte}`, `messages/*.json`, docs
 ## Session 2026-10-16 (#97, #101: identity of a statement)
 
 - [x] #97: a per-building, per-year number sequence that never gives a number twice; a deleted draft leaves a gap (`*.pg.test.ts`: two drafts, delete the second, generate again → `…-0003`); existing numbers unchanged; `docs/data-model.md` names where the sequence is kept

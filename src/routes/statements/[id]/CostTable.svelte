@@ -80,14 +80,17 @@
 		<dt class="text-ink-muted">{m.statements_subtotal()}</dt>
 		<dd class="text-ink">{formatCurrency(subtotal)}</dd>
 	</div>
-	<div class="flex justify-between gap-4" data-testid="statement-management-fee">
-		<dt class="flex flex-col text-ink-muted">
-			<span>{m.glossary_fee_term()}</span>
-			<!-- as the PDF says it: a share of the tenant's own costs -->
-			<span>{m.statements_fee_of_subtotal({ percent: statement.managementFeePercent })}</span>
-		</dt>
-		<dd class="text-ink">{formatCurrency(statement.managementFee)}</dd>
-	</div>
+	<!-- like the PDF: no line without a fee (no Verwaltungspauschale agreed, #89) -->
+	{#if Number(statement.managementFee) > 0}
+		<div class="flex justify-between gap-4" data-testid="statement-management-fee">
+			<dt class="flex flex-col text-ink-muted">
+				<span>{m.glossary_fee_term()}</span>
+				<!-- as the PDF says it: a share of the tenant's own costs -->
+				<span>{m.statements_fee_of_subtotal({ percent: statement.managementFeePercent })}</span>
+			</dt>
+			<dd class="text-ink">{formatCurrency(statement.managementFee)}</dd>
+		</div>
+	{/if}
 	<div class="flex justify-between gap-4 border-t border-line pt-2 font-semibold">
 		<dt class="text-ink">{m.statements_total_costs()}</dt>
 		<dd class="text-ink">{formatCurrency(statement.totalCosts)}</dd>

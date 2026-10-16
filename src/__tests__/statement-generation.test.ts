@@ -67,7 +67,7 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 		]);
 
 		expect(await billedContracts(fetch, period)).toEqual([
-			{ buildingId: 'b1', contracts: 2, billed: 1 }
+			{ buildingId: 'b1', contracts: 2, billed: 1, withoutFee: [] }
 		]);
 	});
 
@@ -80,7 +80,27 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 		const shifted = { ...period, periodStart: '2024-10-01', periodEnd: '2025-09-30' };
 
 		expect(await billedContracts(fetch, shifted)).toEqual([
-			{ buildingId: 'b1', contracts: 2, billed: 1 }
+			{ buildingId: 'b1', contracts: 2, billed: 1, withoutFee: [] }
+		]);
+	});
+});
+
+// #89: the run's rate applies only where the Verwaltungspauschale is agreed; step «Einstellungen» names the others
+describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
+	it('nennt die Mietverträge der Periode, die eine Abrechnung erhalten, ohne vereinbarte Pauschale', async () => {
+		const { fetch } = backend(
+			[{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31' }],
+			[
+				{ ...contract('auszug', '2020-01-01', '2024-03-31'), managementFeeAgreed: false },
+				// already billed: this run makes no statement for it
+				{ ...contract('einzug', '2024-05-01', null), managementFeeAgreed: false },
+				{ ...contract('vorher', '2020-01-01', '2023-12-31'), managementFeeAgreed: false },
+				{ ...contract('eigen', '2024-01-01', null), managementFeePercent: '2.00' } as never
+			]
+		);
+
+		expect((await billedContracts(fetch, period))[0].withoutFee).toEqual([
+			{ id: 'auszug', tenantName: 'Mieter auszug', apartmentNumber: '2.01' }
 		]);
 	});
 });

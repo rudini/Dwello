@@ -469,11 +469,11 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 
 ### 5.8 Management Costs Configuration
 
-**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; a higher agreed percentage is applied as set.
+**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; Dwello accepts at most 10% (#124, against typos). The fee applies only where the rental contract agrees one (#89): at the run's rate, or at the contract's own rate, which takes precedence; a contract without agreement gets 0%.
 
 **Features:**
-- Global management cost percentage (0% or more; default suggestion for new statements, adjustable per statement run)
-- The rate of a statement run applies to every rental contract in it; Dwello does not check whether the fee is agreed in the rental contract
+- Global management cost percentage (0% to 10%; default suggestion for new statements, adjustable per statement run)
+- Per rental contract «Verwaltungspauschale vereinbart»: at the run's rate, with its own rate (0% to 10%, before the run's), or not agreed (0%); the statement wizard names the contracts without agreement
 - No distribution key: the fee is a percentage of each tenant's own costs
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
@@ -493,7 +493,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 **Use Cases:**
 1. Initial setup: Set management fee to agreed percentage (e.g., 2%)
 2. Annual review: Adjust percentage if contract changes
-3. Validation: the percentage may not be negative
+3. Validation: the percentage lies between 0% and 10%
 
 ---
 
@@ -1848,7 +1848,7 @@ This PRD complies with the following Swiss regulations:
 
 Key Legal Requirements Addressed (see the status note below for what is implemented):
 - Allowed/disallowed utility cost validation
-- Management fee: customary guideline up to 3% of total costs, not a cap
+- Management fee: customary guideline up to 3% of the tenant's own utility costs, not a legal cap; only where agreed in the rental contract
 - Detailed statement requirements
 - Tenant-facing statement PDFs in five languages
 - Data retention (10 years for financial records)
