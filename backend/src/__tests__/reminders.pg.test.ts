@@ -13,6 +13,7 @@ import { db } from '../db/connection';
 import { documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { updateTenant } from '../services/tenant.service';
 import { daysAfter, swissToday } from '../services/today';
+import { formatSwissDate } from '../services/pdf-format';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
@@ -70,7 +71,9 @@ const pdfText = (pdf: Buffer) =>
 		.map((tj) => [...tj[1].matchAll(/<([0-9a-f]*)>/g)].map((hex) => Buffer.from(hex[1], 'hex').toString('latin1')).join(''))
 		.join('\n');
 
-const swissDate = (iso: string) => iso.split('-').reverse().join('.');
+const nextReminderFrom = async (statementId: string) =>
+	((await (await api('GET', `/api/v1/statements/${statementId}`)).json()) as { nextReminderFrom: string | null })
+		.nextReminderFrom;
 
 const remind = async (statementId: string) => {
 	const response = await api('POST', `/api/v1/statements/${statementId}/reminders`);
@@ -249,6 +252,13 @@ describe('Mahnung per Brief', () => {
 		expect(result.error).toBe('Es wurden bereits 3 Mahnungen versendet.');
 		expect(result.code).toBe('REMINDER_LIMIT');
 	});
+
+	// #107: after the 3rd Mahnung no next one
+	it('nennt nach der 3. Mahnung keinen Tag für eine nächste Mahnung', async () => {
+		await db.update(documents).set({ paymentDeadline: daysAfter(swissToday(), 10) }).where(eq(documents.statementId, statementId));
+
+		expect(await nextReminderFrom(statementId)).toBeNull();
+	});
 });
 
 describe('Mahnbare Abrechnungen', () => {
@@ -298,15 +308,11 @@ describe('Zahlungsfrist der Mahnung', () => {
 		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${document.id}/pdf`)).arrayBuffer());
 
 		expect(document.paymentDeadline).toBe(deadline);
-		expect(pdfText(pdf)).toContain(swissDate(deadline));
+		expect(pdfText(pdf)).toContain(formatSwissDate(deadline));
 	});
 
 	it('nennt bei der Abrechnung den Tag, ab dem die nächste Mahnung möglich ist', async () => {
-		const statement = (await (await api('GET', `/api/v1/statements/${statementId}`)).json()) as {
-			nextReminderFrom: string | null;
-		};
-
-		expect(statement.nextReminderFrom).toBe(daysAfter(swissToday(), 11));
+		expect(await nextReminderFrom(statementId)).toBe(daysAfter(swissToday(), 11));
 	});
 
 	it('lehnt die nächste Mahnstufe ab, solange die Zahlungsfrist der letzten Mahnung läuft', async () => {
@@ -317,6 +323,13 @@ describe('Zahlungsfrist der Mahnung', () => {
 		expect(result.status).toBe(400);
 		expect(result.code).toBe('REMINDER_TOO_EARLY');
 		expect((result as { params?: object }).params).toEqual({ date: daysAfter(swissToday(), 1), deadline: swissToday() });
+	});
+
+	it('nennt bei einer bezahlten Abrechnung keinen Tag für eine nächste Mahnung', async () => {
+		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+
+		expect(await nextReminderFrom(statementId)).toBeNull();
+		await db.update(utilityStatements).set({ status: 'sent', paidDate: null }).where(eq(utilityStatements.id, statementId));
 	});
 
 	it('erlaubt die nächste Mahnstufe ab dem Tag nach der Zahlungsfrist', async () => {
@@ -352,9 +365,9 @@ describe('Brief, der später versendet wird', () => {
 
 		expect(letter.paymentDeadline).toBe(daysAfter(created, 10));
 		expect(sent.paymentDeadline).toBe(daysAfter(swissToday(), 10));
-		expect(pdfText(pdf)).toContain(swissDate(swissToday()));
-		expect(pdfText(pdf)).toContain(swissDate(daysAfter(swissToday(), 10)));
-		expect(pdfText(pdf)).not.toContain(swissDate(created));
+		expect(pdfText(pdf)).toContain(formatSwissDate(swissToday()));
+		expect(pdfText(pdf)).toContain(formatSwissDate(daysAfter(swissToday(), 10)));
+		expect(pdfText(pdf)).not.toContain(formatSwissDate(created));
 	});
 
 	it('gilt als heute gemahnt', async () => {
@@ -366,9 +379,14 @@ describe('Brief, der später versendet wird', () => {
 	});
 
 	it('ändert einen bereits versendeten Brief nicht mehr', async () => {
-		const again = (await (await api('PUT', `/api/v1/documents/${letter.id}/sent`)).json()) as Document;
+		setSystemTime(new Date(`${daysAfter(swissToday(), 1)}T12:00:00Z`));
+		try {
+			const again = (await (await api('PUT', `/api/v1/documents/${letter.id}/sent`)).json()) as Document;
 
-		expect(again.paymentDeadline).toBe(daysAfter(swissToday(), 10));
+			expect(again.paymentDeadline).toBe(daysAfter(created, 17));
+		} finally {
+			setSystemTime();
+		}
 	});
 });
 

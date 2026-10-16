@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd';
-import { inDays } from '../fixtures/dates';
+import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
 import { deliveryOf, documentFor, documentsFor, mailsTo, nextReminder, reminderOffers, reminderOutcome } from '../questions/documents';
 import { listedStatement } from '../questions/statements';
@@ -7,8 +7,6 @@ import { markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from
 import { openStatementList } from '../tasks/statements';
 
 const { Given, When, Then } = createBdd(test);
-
-const swissDate = (iso: string) => iso.split('-').reverse().join('.');
 
 const CHANNELS: Record<string, 'email' | 'letter'> = { 'E-Mail': 'email', Brief: 'letter' };
 
