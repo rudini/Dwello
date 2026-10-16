@@ -90,6 +90,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
+		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),
 		// a predefined category shows the reason of its allocability (#186)

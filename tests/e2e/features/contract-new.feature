@@ -109,7 +109,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und ist im Mietvertrag die Wohnung "2.01" gewählt
 
   # P-17 (#144): die vorgewählte Wohnung bleibt auf dem Umweg über einen neuen Mieter
-  @wip
   Szenario: Vorgewählte Wohnung bleibt beim Erfassen eines neuen Mieters
     Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
     Wenn der Liegenschaftsverwalter im Mietvertrag den neuen Mieter "Peter Brunner" erfasst
@@ -117,13 +116,12 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann ist im Mietvertrag die Wohnung "2.01" gewählt
 
   # P-17 (#144): die Beträge des letzten Mietvertrags der Wohnung sind vorgeschlagen und änderbar
-  @wip
   Szenario: Beträge des letzten Mietvertrags der Wohnung übernehmen
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "2.01" von "2024-01-01" bis "2025-12-31" für "900" Franken mit "150" Franken Akonto
     Und der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
     Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
-    Dann schlägt die Miete die Nettomiete "900.00" und das Akonto "150.00" aus dem letzten Mietvertrag der Wohnung vor
+    Dann schlägt der Schritt "Miete" die Nettomiete "900.00" und das Akonto "150.00" aus dem letzten Mietvertrag der Wohnung vor
 
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

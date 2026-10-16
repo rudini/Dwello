@@ -368,7 +368,7 @@ When(
 );
 
 Then(
-	'schlägt die Miete die Nettomiete {string} und das Akonto {string} aus dem letzten Mietvertrag der Wohnung vor',
+	'schlägt der Schritt "Miete" die Nettomiete {string} und das Akonto {string} aus dem letzten Mietvertrag der Wohnung vor',
 	async ({ verwalter }, baseRent: string, advancePayment: string) => {
 		await verwalter.sees(enteredBaseRent).toBe(baseRent);
 		await verwalter.sees(enteredAdvancePayment).toBe(advancePayment);

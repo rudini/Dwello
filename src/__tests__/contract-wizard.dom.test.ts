@@ -488,7 +488,7 @@ describe('Vorgewählte Wohnung', () => {
 		expect(byTestId<HTMLInputElement>('contract-advance-payment-input')!.value).toBe('150.00');
 		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('');
 		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
-			'aus dem letzten Mietvertrag dieser Wohnung (Anna Keller, 01.01.2015 bis 31.12.2019)'
+			'aus dem letzten Mietvertrag dieser Wohnung (01.01.2015 – 31.12.2019, gekündigt)'
 		);
 		type('contract-base-rent-input', '980');
 		await settle();

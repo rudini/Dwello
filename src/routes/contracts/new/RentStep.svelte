@@ -9,8 +9,13 @@
 	// Step 4: the monthly amounts, each explained with the glossary's words, and their total
 	let {
 		values = $bindable(),
-		errors
-	}: { values: ContractFormValues; errors: Record<string, string> } = $props();
+		errors,
+		takenFrom = null
+	}: {
+		values: ContractFormValues;
+		errors: Record<string, string>;
+		takenFrom?: string | null; // the period of the contract whose amounts are filled in (#144)
+	} = $props();
 
 	const total = $derived.by(() => {
 		const plain = normalizeAmounts(values); // "1'450" as typed
@@ -21,6 +26,12 @@
 	});
 	const notice = $derived(advancePaymentNotice(values));
 </script>
+
+{#if takenFrom}
+	<Alert title={m.contracts_rent_taken_over_title()} testid="contract-rent-taken-over">
+		<p>{m.contracts_rent_taken_over_text({ period: takenFrom })}</p>
+	</Alert>
+{/if}
 
 <MoneyInput
 	id="baseRent"

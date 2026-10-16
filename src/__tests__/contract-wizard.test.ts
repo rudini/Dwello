@@ -8,6 +8,7 @@ import {
 	contractSummary,
 	firstStepWithError,
 	lastRent,
+	rentTakenOver,
 	rentToPreset,
 	startValues,
 	stepErrors
@@ -211,16 +212,29 @@ describe('Beträge und Daten wie in der Schweiz geschrieben', () => {
 // P-17 (#144): Nettomiete, Zusatzmiete und Akonto aus dem letzten Mietvertrag der Wohnung
 describe('Beträge des letzten Mietvertrags', () => {
 	const contract = listed.contracts[0]; // 950.00 Nettomiete, 0.00 Zusatzmiete, 150.00 Akonto
-	const earlier = { ...contract, id: 'c0', startDate: '2019-01-01', endDate: '2024-03-31', baseRent: '800.00' };
+	const earlier = {
+		...contract,
+		id: 'c0',
+		startDate: '2019-01-01',
+		endDate: '2024-03-31',
+		baseRent: '800.00'
+	};
 	const taken = { baseRent: '950.00', additionalRent: '', advancePayment: '150.00' };
 
 	it('nimmt den Mietvertrag mit dem spätesten Vertragsbeginn, eine Null bleibt leer', () => {
-		expect(lastRent({ data: { contracts: [contract, earlier] } })).toEqual({
+		expect(lastRent({ data: { contracts: [earlier, contract] } })).toEqual({
 			...taken,
-			tenantName: 'Anna Keller',
 			startDate: '2024-04-01',
-			endDate: '2099-03-31'
+			endDate: '2099-03-31',
+			terminated: true
 		});
+	});
+
+	// Fachreview P17 M-1: wer einen älteren Mietvertrag nachträgt, erhält die Beträge des vorangegangenen
+	it('nimmt nur Mietverträge, die vor dem neuen Vertragsbeginn beginnen', () => {
+		expect(lastRent({ data: { contracts: [contract, earlier] } }, '2024-01-01')?.baseRent).toBe(
+			'800.00'
+		);
 	});
 
 	it('hat ohne Mietvertrag oder ohne Antwort nichts zu übernehmen', () => {
@@ -235,6 +249,13 @@ describe('Beträge des letzten Mietvertrags', () => {
 	it('überschreibt keinen eingetippten Betrag', () => {
 		expect(rentToPreset({ ...empty, baseRent: '980' }, taken, null)).toBeNull();
 		expect(rentToPreset({ ...empty, ...taken, baseRent: '980' }, taken, taken)).toBeNull();
+	});
+
+	// Fachreview P17 V-6: «950» ist derselbe Betrag wie «950.00»
+	it('erkennt übernommene Beträge auch anders geschrieben', () => {
+		expect(rentTakenOver({ ...empty, ...taken, baseRent: '950' }, taken)).toBe(true);
+		expect(rentTakenOver({ ...empty, ...taken, baseRent: '980' }, taken)).toBe(false);
+		expect(rentTakenOver({ ...empty, ...taken }, null)).toBe(false);
 	});
 
 	it('ersetzt unveränderte Beträge einer zuvor gewählten Wohnung, auch durch leere', () => {

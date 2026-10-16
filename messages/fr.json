@@ -679,6 +679,8 @@
 	"contracts_advance_label": "Acompte par mois",
 	"contracts_advance_help": "Avance mensuelle du locataire pour les frais accessoires (chauffage, eau, etc.). Elle est imputée dans le décompte des charges.",
 	"contracts_no_advance": "Pas d’acompte",
+	"contracts_rent_taken_over_title": "Montants du dernier contrat de bail",
+	"contracts_rent_taken_over_text": "Les montants proviennent du dernier contrat de bail de cet appartement ({period}). Un champ vide y était à 0.00. Si le nouveau locataire ne loue par exemple pas la place de parc, videz le loyer supplémentaire. Vérifiez les montants et adaptez-les si d’autres valent dans le nouveau contrat de bail.",
 	"contracts_additional_label": "Loyer supplémentaire par mois",
 	"contracts_additional_help": "Coûts mensuels supplémentaires, par exemple pour un garage, une place de parc ou une cave.",
 	"contracts_review_intro": "Vérifiez les données. « Enregistrer le contrat de bail » crée le contrat de bail.",

@@ -679,6 +679,8 @@
 	"contracts_advance_label": "Acconto al mese",
 	"contracts_advance_help": "Anticipo mensile dell’inquilino per le spese accessorie (riscaldamento, acqua ecc.). Viene compensato con il conteggio spese accessorie.",
 	"contracts_no_advance": "Nessun acconto",
+	"contracts_rent_taken_over_title": "Importi dell’ultimo contratto di locazione",
+	"contracts_rent_taken_over_text": "Gli importi provengono dall’ultimo contratto di locazione di questo appartamento ({period}). Un campo vuoto lì era 0.00. Se il nuovo inquilino per esempio non affitta il posteggio, svuoti la pigione supplementare. Verifichi gli importi e li adatti se nel nuovo contratto di locazione valgono altri.",
 	"contracts_additional_label": "Pigione supplementare al mese",
 	"contracts_additional_help": "Costi mensili supplementari, per esempio per garage, posteggio o cantina.",
 	"contracts_review_intro": "Verifichi i dati. Con «Salvare il contratto di locazione» il contratto di locazione viene creato.",
