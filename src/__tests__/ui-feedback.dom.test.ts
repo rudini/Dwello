@@ -114,6 +114,8 @@ describe('Wiederhergestellter Entwurf', () => {
 	it('fragt vor dem Verwerfen, was es löscht', async () => {
 		const ondiscard = vi.fn();
 		show(DraftNotice, { savedAt: new Date('2026-10-09T14:32:00Z'), ondiscard });
+		// «Angaben», as in the dialog: «Entwurf» is the Abrechnungsstatus (#57, persona Anna P-1)
+		expect(byTestId('draft-discard')!.textContent!.trim()).toBe('Angaben verwerfen');
 		byTestId('draft-discard')!.click();
 		await tick();
 		expect(ondiscard).not.toHaveBeenCalled();

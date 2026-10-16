@@ -75,8 +75,8 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 				(c) =>
 					!covers(
 						overlapping.filter((s) => s.contractId === c.id),
-						[c.startDate, periodStart].sort()[1],
-						[c.endDate ?? periodEnd, periodEnd].sort()[0]
+						c.startDate > periodStart ? c.startDate : periodStart,
+						c.endDate && c.endDate < periodEnd ? c.endDate : periodEnd
 					)
 			);
 			return { buildingId, inPeriod, billed, partly };

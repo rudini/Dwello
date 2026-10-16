@@ -16,7 +16,12 @@ Request: «Setze #251 #252 #201 um». Branch `claude/statement-wizard-251-252-20
 - [x] fach-reviewer round 1 (`docs/reviews/wizard-fachreview-1.md`)
 - [x] Fachreview M-1: a statement that covers only part of a contract's days in the period stays a finding (confirmation in step 4, kept by «Alle Gebäude»); `billedContracts` counts such contracts (`partly`), the preview passes them on (`partlyBilled`)
 - [x] Checks on the slice: lint, check, backend type-check, all vitest, E2E `statement-generate.feature`, `contract-new.feature`, axe and language rows of both wizards
-- [ ] Slice reviews (code-reviewer)
+- [x] code-reviewer round 1 (`docs/reviews/wizard-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/wizard-fachreview-2.md`)
+- [x] Persona Anna (`docs/design/personas/anna-issue-201.md`), persona Dr. Weber (`docs/design/personas/dr-weber-issue-251.md`); no daten-pruefer: no amounts, PDFs or QR-bills change
+- [x] Fixes from the reviews: discard button «Angaben verwerfen» as in the dialog (#57's word; Anna P-1 in part); focus on the step heading after closing the notice (Anna, C-5); step 2 says that a run leaves days open instead of «Sie müssen es nicht wählen» and the delete advice when a statement covers only part of the period (V-9, C-3, Dr. Weber P-1/P-2); «Alle Gebäude» stays empty when every building is left out (C-1); scenario waits for the note (C-2); contracts from `tests/contracts` (C-7); C-8; fr/it wording (V-10, V-11, C-9)
+- [x] E2E full suite (chromium, api) on b881ac0: 779 passed; after the fixes `statement-generate.feature`, `contract-new.feature` and their axe and language rows again green
+- [ ] Closing code-reviewer round, fach-reviewer round 3 on the new step-2 texts
 - [ ] Feature review (personas, fach-reviewer)
 - [ ] Checks before push; archive session; pull request, CI, merge
 

@@ -65,6 +65,12 @@
 		all.length > 0 && all.every((id) => selectedBuildingIds.includes(id))
 	);
 
+	// with every building left out there is nothing to choose: the box stays empty (code review C-1)
+	function toggleAll(event: Event & { currentTarget: HTMLInputElement }) {
+		selectedBuildingIds = allSelected ? [] : all;
+		event.currentTarget.checked = allSelected;
+	}
+
 	const toggle = (id: string) =>
 		(selectedBuildingIds = selectedBuildingIds.includes(id)
 			? selectedBuildingIds.filter((other) => other !== id)
@@ -81,7 +87,7 @@
 			<input
 				type="checkbox"
 				checked={allSelected}
-				onchange={() => (selectedBuildingIds = allSelected ? [] : all)}
+				onchange={toggleAll}
 				class="size-6 shrink-0 cursor-pointer accent-accent"
 				data-testid="generate-all-buildings"
 			/>

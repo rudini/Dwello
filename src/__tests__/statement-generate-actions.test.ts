@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/statements/generate/+page.server';
 import periodStatements from '../../tests/contracts/period-statements.json';
+import buildingContracts from '../../tests/contracts/building-contracts.json';
 
 const run = {
 	buildingIds: 'b1',
@@ -45,19 +46,19 @@ describe('Vorschau der Abrechnungen', () => {
 		}))
 			form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		// Marc moved in on 01.05.2024; his statement 2024 leaves 01.01.–30.06.2025 open
 		const contract = {
+			...buildingContracts.contracts[0],
 			id: 'c1',
 			startDate: '2024-05-01',
-			endDate: null,
-			tenantName: 'Marc',
-			apartmentNumber: '3.01'
+			endDate: null
 		};
-		const statement = { contractId: 'c1', periodStart: '2024-01-01', periodEnd: '2024-12-31' };
+		const statement = periodStatements.data[0];
 		const fetch = async (url: string) =>
 			Response.json(
 				url.includes('/for-statement/')
 					? []
-					: { contracts: [contract], data: [statement], total: 1 }
+					: { ...periodStatements, contracts: [contract], data: [statement] }
 			);
 		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
 			fetch,

@@ -24,6 +24,12 @@
 	let closed = $state(false);
 	const when = (at: Date) => ({ date: formatDate(at.toISOString()), time: formatTime(at) });
 
+	// the focus goes back to the step's heading, not to the page (persona Anna, review of #201)
+	function close() {
+		closed = true;
+		document.querySelector<HTMLElement>('h2[tabindex="-1"]')?.focus();
+	}
+
 	function discard() {
 		asking = false;
 		ondiscard();
@@ -48,7 +54,7 @@
 				<Button
 					variant="secondary"
 					icon="close"
-					onclick={() => (closed = true)}
+					onclick={close}
 					testid="draft-close">{m.ui_close_message()}</Button
 				>
 			</div>
@@ -59,7 +65,7 @@
 <Dialog
 	bind:open={asking}
 	title={m.ui_draft_discard_title()}
-	confirmLabel={m.ui_draft_discard_confirm()}
+	confirmLabel={m.ui_draft_discard()}
 	danger
 	onconfirm={discard}
 	confirmTestid="draft-discard-confirm"

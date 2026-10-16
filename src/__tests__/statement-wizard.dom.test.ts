@@ -826,6 +826,10 @@ describe('Entwurf der Abrechnungen', () => {
 		expect(byTestId('draft-restored')).not.toBeNull();
 		expect(heading()).toBe('Gebäude'); // in the step it was left in (#201)
 		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(true);
+		// closed, the notice leaves the focus on the step, not on the page (persona Anna, review of #201)
+		click('draft-close');
+		await settle();
+		expect(document.activeElement).toBe(document.querySelector('h2'));
 	});
 });
 
@@ -1092,6 +1096,30 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(false);
 	});
 
+	// Fachreview V-9, persona Dr. Weber P-1/P-2: offene Tage sind kein «Sie müssen es nicht wählen», und Löschen
+	// und neu Erstellen in dieser Periode rechnete die Tage der bestehenden Abrechnung nicht mehr ab
+	it('sagt bei einem Gebäude mit offenen Tagen, dass dieser Lauf sie nicht abrechnet', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 1 },
+			{ buildingId: 'b2', contracts: 1, billed: 1, partly: 1 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		const open_ =
+			' Mindestens eine dieser Abrechnungen deckt die Mietdauer in dieser Abrechnungsperiode nicht ganz ab. Für die übrigen Tage erstellt dieser Lauf keine Abrechnung.';
+		expect(billedText('b1')).toBe(
+			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.' +
+				open_
+		);
+		expect(billedText('b2')).toBe(
+			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.' +
+				open_
+		);
+	});
+
 	it('nennt beim Zähler mehrere ausgelassene Gebäude in der Mehrzahl', async () => {
 		billed([
 			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 0 },
@@ -1105,6 +1133,11 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		expect(byTestId('generate-all-buildings-note')!.textContent!.trim()).toBe(
 			'«Alle Gebäude» lässt 2 Gebäude aus, deren Mietverträge in dieser Abrechnungsperiode alle schon eine Abrechnung haben.'
 		);
+		// nothing to choose: the box stays empty, as the counter says (code review C-1)
+		click('generate-all-buildings');
+		await settle();
+		expect(byTestId<HTMLInputElement>('generate-all-buildings')!.checked).toBe(false);
+		expect(text()).toContain('0 von 2 gewählt');
 	});
 
 	it('nennt einen einzelnen abgerechneten Mietvertrag in der Einzahl', async () => {

@@ -223,7 +223,8 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   Szenario: Alle Gebäude wählt ein Gebäude, dessen Abrechnung nur einen Teil der Periode abdeckt
     Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen vom "2024-07-01" bis "2025-06-30" wählen will
-    Und der Liegenschaftsverwalter alle Gebäude wählt
+    Dann nennt die Wahl für "Lindenhof" "Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Mindestens eine dieser Abrechnungen deckt die Mietdauer in dieser Abrechnungsperiode nicht ganz ab. Für die übrigen Tage erstellt dieser Lauf keine Abrechnung."
+    Wenn der Liegenschaftsverwalter alle Gebäude wählt
     Dann ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
 
   Szenario: Erstellte Abrechnungen anzeigen
