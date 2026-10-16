@@ -1,6 +1,6 @@
 ---
 name: bdd-acceptance
-description: Write Gherkin acceptance scenarios and their playwright-bdd steps for Dwello, extending the existing setup in tests/e2e. Use when the user wants BDD tests, acceptance criteria, Gherkin scenarios or playwright-bdd step files.
+description: Write or change Dwello's Gherkin acceptance scenarios and their playwright-bdd steps in tests/e2e. Load before writing or changing a scenario (CLAUDE.md, Workflow 1), and when the user wants BDD tests, acceptance criteria or step files.
 ---
 
 # BDD Acceptance Criteria
@@ -13,11 +13,11 @@ playwright-bdd is already set up in this repo. **Extend the existing setup; neve
 
 - Config: `playwright.config.ts` — `defineBddConfig({ paths: ['tests/e2e/features/**/*.feature'], require: ['tests/e2e/fixtures/test.ts', 'tests/e2e/steps/**/*.ts'] })`, `tags: 'not @wip'`
 - Layout and layers: Dwello's own lean Screenplay in `tests/e2e/` (`screenplay/` core with `Actor`, abilities, interactions and web questions; `targets/`, `tasks/`, `questions/`, `steps/`), described in `tests/e2e/CLAUDE.md` and enforced by `bun run lint`. Steps assert with `actor.sees(question)`, never `expect(locator)`.
-- Run: `bun run test:e2e` (= `bddgen && playwright test`). The `webServer` config recreates the E2E database `dwello_e2e` from the migrations, then starts the backend (3101) and the frontend (3100), both with the JWT secret from `tests/e2e/fixtures/session.ts` and Google sign-in configured with test credentials. The development servers and database are never touched. PostgreSQL must be running on 5432 (`docker compose -f docker-compose.dev.yml up -d postgres`).
+- Run and the stack it starts: `tests/e2e/CLAUDE.md`, "Run".
 - Auth: OAuth only (Google/Microsoft), BFF with HTTPOnly cookies. There is no password login and no storageState. `src/hooks.server.ts` requires a valid session JWT for every page except `/login`, `/auth/*` and `/health`; the `page` fixture adds a real session cookie (`fixtures/session.ts`), the `besucher` actor has none. There is no global-setup login, no `.env.test` credentials and no per-role project.
 - Actor: single role **Liegenschaftsverwalter** (see `UBIQUITOUS_LANGUAGE.md`). Use no role tags. Unauthenticated scenarios belong in `authentication.feature`.
 - UI copy is German. Match visible text exactly (e.g. "Neues Gebäude").
-- Selectors: `data-testid` only (kebab-case, with component context, e.g. `building-card-{id}`). Add missing `data-testid` attributes to the Svelte components.
+- Selectors: `data-testid` only (`CLAUDE.md`, "Conventions"); add missing ones to the Svelte components.
 - No mocks: seed data through real backend endpoints, never `page.route()` fakes. The one exception, a failing request: `tests/e2e/CLAUDE.md`, "Rules", failure states.
 - Before writing new steps, check `tests/e2e/steps/` for an existing step with the same text. playwright-bdd fails on duplicate step definitions.
 - Do not stop for confirmations: actor and terms come from `UBIQUITOUS_LANGUAGE.md`; a missing term gets `TODO(fachlich prüfen, #<issue>)` and an issue (`CLAUDE.md`, "Open work"). The task or issue names the scenarios to write.
