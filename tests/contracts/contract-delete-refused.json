@@ -1,0 +1,5 @@
+{
+	"error": "Cannot delete contract with utility statements",
+	"code": "CONTRACT_HAS_STATEMENTS",
+	"params": {}
+}

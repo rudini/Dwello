@@ -32,7 +32,7 @@ export function testData(api: CallTheApi) {
 
 	async function removeContracts(filter: string) {
 		for (const contract of (await get(`contracts?${filter}&limit=100`)).contracts) {
-			await remove(`contracts/${contract.id}`);
+			await remove(`contracts/${contract.id}?confirmMistake=true`); // a started one too (#116)
 		}
 	}
 

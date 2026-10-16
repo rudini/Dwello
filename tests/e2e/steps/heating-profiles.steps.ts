@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { listedProfilesNamed, profileActionCount, shareOf, totalShare } from '../questions/heating-profiles';
+import { listedProfilesNamed, profileActionCount, shareOf, sharesHelpText, totalShare } from '../questions/heating-profiles';
 import { pageTitle } from '../questions/navigation';
 import {
 	changeShares,
@@ -75,4 +75,8 @@ Then('fehlt das Heizprofil {string} in der Liste', async ({ verwalter, names }, 
 Then('kann der Liegenschaftsverwalter das Heizprofil weder bearbeiten noch löschen', async ({ verwalter }) => {
 	await verwalter.sees(pageTitle).toBe('Heizung Bergregion - Dwello');
 	await verwalter.sees(profileActionCount).toBe(0);
+});
+
+Then('erklärt die Bearbeitungsseite bei den Monatsanteilen {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(sharesHelpText).toContain(text);
 });

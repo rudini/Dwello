@@ -507,3 +507,78 @@ Request: make the CI E2E tests faster (follow-up to "axe check only on UI change
 - [x] Push, pull request, CI shows shard times, merge (CLAUDE.md, Workflow 9)
 
 Files: `.github/workflows/ci.yml`, `docs/test-pyramid.md`
+
+## Session: O-34, upload axe states time out in CI
+
+Request: fix O-34 (`docs/design/offene-punkte.md`): the axe states `invoices upload-dialog` and `invoices upload-discard-created` time out in CI. No issue. No scenario: test reliability only, no app behaviour changes.
+
+- [x] Cause: `startUpload` (`tests/e2e/tasks/accessibility.ts`) picks the first building of the select (`index: 1`), in the shared E2E database often a parallel scenario's «Bergsicht …»/«Seeblick …» that its cleanUp deletes while the files are read (extract 404: row «failed», no unsure hint) or created (no result). The KI 503s in the log are the categorization of the «Werke …» files, expected
+- [x] Red: the two states (`--repeat-each=3`) with a parallel churn of buildings «Aarhof …» created and deleted after 4 s: 5 of 6 failed with the CI's timeouts (unsure hint, upload result); without churn, even under CPU load, all pass
+- [x] Fix: all five upload states upload into the example's own building (`uploadBelege` of `tasks/invoice-upload.ts`); under the same churn 15 of 15 pass (`invoices upload-.* @a11y`, `--repeat-each=3`), axe and language checks of the upload states 10 of 10
+- [x] O-34 removed from `docs/design/offene-punkte.md`
+- [x] Checks: lint, check, backend type-check, `open-work.test.ts`, the a11y and language upload states
+- [x] code-reviewer round 1 (docs/reviews/o34-review-1.md)
+- [x] Workflow notes `docs/reviews/workflow-notes-o34.md`
+- [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs/reviews/o34-review-1.md`, `docs/reviews/workflow-notes-o34.md`.
+
+## Session 2026-10-16 W4: Heizprofil on the detail page, help text, rounded months (#247, #230, #232)
+
+- [x] @wip scenarios (statement-detail.feature, heating-profiles.feature), fach-reviewer before implementing (`docs/reviews/w4-fachreview-1.md`)
+- [x] #247: a statement shared by days stores the chosen Heizprofil's names and why it was not applied; the detail page names it «(nicht angewendet: …)»
+- [x] #230: help text at the Monatsanteile of an own profile: existing statements keep their shares (four languages)
+- [x] #232: share from the months rounded to two places; PDF prints the division and the period's months where they do not carry 100 %
+- [x] #232 C-5: no recompute for statements without a stored share (no Heizprofil note)
+- Files: `backend/src/services/{heating-profile,prorating,calculation,statement-pdf,pdf}.service.ts`, `backend/src/db/schema.ts`, `src/lib/server/statement.ts`, `src/routes/config/heating-profiles/HeatingProfileForm.svelte`, `messages/*.json`, `docs/data-model.md`, `docs/api-specification.md`, tests and scenarios
+- [x] Code review round 1 (`docs/reviews/w4-review-1.md`)
+- [x] Persona Helga (`docs/design/personas/helga-w4.md`)
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-w4.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w4-fachreview-2.md`)
+- [x] daten-pruefer (`docs/reviews/w4-datenpruefung-1.md`)
+- [x] Closing code review (`docs/reviews/w4-review-2.md`)
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-247-230-232.md`)
+- [x] Workflow review, archive the session, pull request
+
+## Session: moves within the house and contracts that continue by law (#156, #155)
+
+Request: «Setze #156 #155 um».
+
+- [x] #156 «Nächste Schritte» get «Neuen Mietvertrag für {name} erfassen» to `/contracts/new?tenant=…` (scenario in `contract-detail.feature`, DOM test `NextSteps.svelte`)
+- [x] #156 «Neuer Mietvertrag» hints when the chosen tenant still has an open-ended Mietvertrag for another apartment (not blocking)
+- [x] #156 «Neuen Mietvertrag erfassen» on «Mietvertrag bearbeiten» fills in the tenant and the earliest start (`?start=`)
+- [x] #155 help text (four languages) and `docs/anforderungen-vertragsende.md`: death keeps the Mietvertrag (heirs' address as Korrespondenzadresse); transfer or court assignment is Vertragsende plus new Mietvertrag
+- [x] fach-reviewer on the `@wip` scenarios before implementing
+- [x] fach-reviewer round 1 (`docs/reviews/w10-fachreview-1.md`)
+- [x] #155 also in the dialog «Mietvertrag beenden» (Fachreview W10 M-1); the edit link names the tenant (V-1)
+- [x] code-reviewer round 1 (`docs/reviews/w10-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w10-fachreview-2.md`)
+- [x] persona Helga (`docs/design/personas/helga-b16.md`), persona Dr. Weber (`docs/design/personas/weber-f23.md`)
+- [x] fach-reviewer round 3 (`docs/reviews/w10-fachreview-3.md`), Dr. Weber re-run (`docs/design/personas/weber-f23-2.md`), closing code-reviewer round 2 (`docs/reviews/w10-review-2.md`)
+- [x] Workflow note: «every new test seen red» for a scenario added after a review; collected review with parallel sessions (`docs/reviews/workflow-notes-issue-156.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/routes/contracts/new/OpenContracts.svelte`, `src/lib/contract-form.ts`, `src/lib/contract-wizard.ts`, `src/lib/utils/contract-availability.ts`, `docs/anforderungen-vertragsende.md`, tests in `src/__tests__/` and `tests/e2e/`.
+
+## Session W7: #141 and #116 (draft delete in one step, delete a started Mietvertrag)
+
+- [x] #141 `@wip` scenario «Abgelehntes Vertragsende behält den Entwurf» (`contract-detail.feature`), seen red
+- [x] #116 `@wip` scenarios «Irrtümlich erfassten Mietvertrag löschen», «… nur mit Bestätigung», «Mietvertrag mit Abrechnung kann nicht gelöscht werden» (`contract-detail.feature`), seen red
+- [x] fach-reviewer on the #116 scenarios and texts before implementing
+- [x] #141 backend: `PUT /contracts/:id` with `deleteDraft` in the body deletes the draft and changes the contract in one transaction (`contract-end.pg.test.ts`: refused → draft kept, accepted → draft gone)
+- [x] #141 BFF end dialog (`endDeletingDraft`) and edit form (`deleteDraftAndSave`) use it (DOM test: no separate DELETE)
+- [x] #116 backend: `DELETE /contracts/:id` refuses a started contract without `?confirmMistake=true` (`CONTRACT_STARTED`) and one with statements (`CONTRACT_HAS_STATEMENTS`); pg tests
+- [x] #116 dialog: confirmation checkbox for a started contract; help text `contracts_parties_fixed_mistake` names started contracts
+- [x] Test clean-up (`tests/e2e/fixtures/backend.ts`, backend helpers) passes the flag
+- [x] `tests/contracts/*.json`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md` (A-7 implemented), `tests/a11y/screens.json` + `accessibility.feature` + `sprachen-bildschirme.feature` for the dialog state
+- [x] fach-reviewer round 1: `docs/reviews/w7-fachreview-1.md`; glossary «Leerstand» → #279
+- [x] fach-reviewer round 2: `docs/reviews/w7-fachreview-2.md`
+- [x] code-reviewer round 1: `docs/reviews/w7-review-1.md`
+- [x] personas: `docs/design/personas/anna-w7.md`, `docs/design/personas/helga-w7.md`
+- [x] Helga again on the new text of a billed contract: `docs/design/personas/helga-w7-2.md`
+- [x] code-reviewer round 2: `docs/reviews/w7-review-2.md` (C-13, C-17 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-116-141.md`
+- [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts.ts`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/contracts/ContractForm.svelte`, `messages/*.json`, tests (`contract-end.pg`, `contract-delete.pg`, `api-contracts.pg`, test clean-ups, `contract-actions`, `contract-detail-page.dom`, `contract-edit.dom`), `tests/e2e/**`, `tests/a11y/screens.json`, `tests/contracts/*`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md`.

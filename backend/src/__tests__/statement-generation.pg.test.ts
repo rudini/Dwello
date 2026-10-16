@@ -33,7 +33,7 @@ async function create(resource: string, body: object, post = resource) {
 		error: undefined
 	});
 	const { id } = record;
-	created.push(`${resource}/${id}`);
+	created.push(`${resource}/${id}${resource === 'contracts' ? '?confirmMistake=true' : ''}`); // a started contract too (#116)
 	return id;
 }
 

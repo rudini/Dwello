@@ -15,6 +15,10 @@ export const contractEndError = (message: string) =>
 	target(`Meldung im Dialog «${message}»`, (page) =>
 		page.getByRole('dialog').getByTestId('form-error').filter({ hasText: message })
 	);
+export const deleteDialog = target('Dialog «Mietvertrag löschen?»', (page) => page.getByRole('dialog'));
+export const deleteMistakeConfirmation = target('Bestätigung «irrtümlich erfasst»', (page) =>
+	page.getByTestId('contract-delete-mistake-confirm')
+);
 export const deleteContractButton = target('Mietvertrag löschen', (page) => page.getByTestId('contract-delete-button'));
 export const confirmDeleteContractButton = target('Löschen bestätigen', (page) =>
 	page.getByTestId('contract-delete-confirm')
@@ -42,3 +46,6 @@ export const missingStatementLink = (periodStart: string) =>
 		page.getByTestId(`contract-missing-statement-link-${periodStart}`)
 	);
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
+export const endDialogDeathHint = target('Hinweis zum Tod des Mieters im Dialog «Mietvertrag beenden»', (page) =>
+	page.getByTestId('contract-end-death')
+);

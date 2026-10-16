@@ -68,9 +68,13 @@
 
 	<fieldset class="flex flex-col gap-4" aria-describedby="shares-help">
 		<legend class="text-lg font-semibold text-ink">{m.profiles_shares_legend()}</legend>
-		<p id="shares-help" class="text-ink-muted">
-			{m.profiles_shares_help()}
-		</p>
+		<div id="shares-help" class="flex flex-col gap-2 text-ink-muted" data-testid="heating-profile-shares-help">
+			<p>{m.profiles_shares_help()}</p>
+			{#if profile}
+				<!-- #230: a statement keeps the shares it was calculated with -->
+				<p>{m.profiles_shares_keep()}</p>
+			{/if}
+		</div>
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
 			{#each MONTHS as month (month.key)}
 				<Field id={month.key} label={month.label}>

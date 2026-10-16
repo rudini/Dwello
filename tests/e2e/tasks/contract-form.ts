@@ -8,9 +8,11 @@ import {
 	deleteDraftAndSaveButton,
 	durationChoice,
 	endDateInput,
+	newContractAfterEndLink,
 	newTenantLink,
 	pastEndConfirm,
 	retryContractsButton,
+	runningContractLink,
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
@@ -110,3 +112,6 @@ export const withdrawNotice: Activity = (actor) =>
 // «Bearbeiten»: another Vertragsbeginn
 export const saveStartDate = (isoDate: string): Activity => (actor) =>
 	actor.attemptsTo(EnterDate.of(isoDate).into(startDateInput), Click.on(contractSubmitButton));
+
+export const openRunningContract = Click.on(runningContractLink);
+export const newContractAfterEnd = Click.on(newContractAfterEndLink);
