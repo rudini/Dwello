@@ -56,6 +56,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnungslauf | établissement des décomptes ❓ | allestimento dei conteggi ❓ | statement run ❓ |
 | Abrechnungsperiode | période de décompte | periodo di conteggio | billing period |
 | Abrechnungsposition | poste du décompte | voce del conteggio | statement line |
+| Leistungszeitraum | période de prestation | periodo di prestazione | service period |
 | Kosten Liegenschaft | coûts de l’immeuble | costi immobile | building costs |
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |
@@ -72,6 +73,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Ausweiskopie | copie de pièce d’identité | copia di un documento d’identità | copy of an ID document |
 | QR-Rechnung / Zahlteil / QR-Referenz | QR-facture / section paiement / référence QR | QR-fattura / sezione pagamento / riferimento QR | QR-bill / payment part / QR reference |
 | Tankbestand / Heizmaterial | stock de combustible / combustible | scorta di combustibile / combustibile | fuel stock / fuel |
+| Veränderung Tankbestand | variation du stock de combustible | variazione della scorta di combustibile | change in fuel stock |
 | Anfangsbestand / Endbestand | stock initial / stock final | scorta iniziale / scorta finale | opening stock / closing stock |
 | Zeitanteil | part temporelle | quota temporale | time share |
 | Firmenname / Firmenadresse | nom de l’entreprise / adresse de l’entreprise | nome dell’azienda / indirizzo dell’azienda | company name / company address |

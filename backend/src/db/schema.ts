@@ -330,7 +330,16 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
 
 // An invoice of a position over different days (#226): its days in the period, its amount for them, the tenant's days
-export type InvoicePart = { start: string; end: string; amount: number; days: number; total: number };
+export type InvoicePart = {
+	start: string;
+	end: string;
+	amount: number;
+	days: number;
+	total: number;
+	noPeriod?: true; // an invoice without Leistungszeitraum: it bills the period (#241)
+	whole?: { start: string; end: string; amount: number }; // a Leistungszeitraum beyond the period, with the invoice's amount
+	fuelStock?: true; // the change of the Tankbestand, not an invoice (#239)
+};
 
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 export type HeatingShare =
@@ -434,7 +443,6 @@ export const utilityStatementLineItems = pgTable(
 		apartmentShare: decimal('apartment_share', { precision: 12, scale: 2 }), // the apartment's part of the total by the key
 		periodShare: decimal('period_share', { precision: 8, scale: 4 }), // 0-1: days rented, or the heating profile's share
 		// the period share as days (#208): the tenant's days in the days billed, and those days; null when not a ratio of days
-		// TODO(fachlich prüfen, #75): glossary terms for both
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
 		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
