@@ -21,6 +21,12 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement({ ...backendStatement, heatingShare }).heatingProfileName).toBe('Winter');
 	});
 
+	// #248: die abgerechneten Mietstage, wie die Abrechnung sie gespeichert hat
+	it('übernimmt die abgerechneten Tage des Mietvertrags', () => {
+		const statement = toStatement({ ...backendStatement, rentalStart: '2024-07-01' });
+		expect([statement.rentalStart, statement.rentalEnd]).toEqual(['2024-07-01', '2024-12-31']);
+	});
+
 	it('übernimmt Mieter, Wohnung, Bemerkungen und Kostenpositionen', () => {
 		expect(toStatement(backendStatement)).toMatchObject({
 			tenantName: 'Eva Frei',

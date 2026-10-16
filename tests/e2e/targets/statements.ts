@@ -6,7 +6,8 @@ export const statementRow = (tenantName: string) =>
 	);
 export const statementRowForYear = (tenantName: string, year: number) =>
 	target(`Abrechnung ${year} von ${tenantName} in der Liste`, (page) =>
-		statementRow(tenantName).locate(page).filter({ hasText: `31.12.${year}` })
+		// the year of the period is in the statement number (NK-<building>-<year>-0001); the row's dates are the tenancy's
+		statementRow(tenantName).locate(page).filter({ hasText: new RegExp(`NK-[0-9A-F]{8}-${year}-`) })
 	);
 export const statementRows = target('Abrechnungen in der Liste', (page) => page.getByTestId(/^statement-row-/));
 export const statementSearchInput = target('Suche Abrechnungen', (page) => page.getByTestId('statement-search-input'));

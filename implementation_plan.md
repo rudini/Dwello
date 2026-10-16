@@ -10,5 +10,8 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] #253 DOM test of the row; texts in de/fr/it/en
 - [x] #253 new state in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
 - Files: `backend/src/services/statement.service.ts` (list joins the contract dates), `src/lib/server/statement.ts` (`rentalStart`/`rentalEnd`), `src/routes/statements/+page.server.ts` (reuses `toStatement`), `StatementRow.svelte`, `src/lib/types.ts`, `messages/*.json`, `tests/contracts/statements.json`, tests
-- [ ] Slice review (`code-reviewer`), feature review (persona)
+- [x] Slice review round 1: `docs/reviews/list-review-1.md`
+- [x] Feature review: `docs/design/personas/dr-weber-list.md`, `marco-list.md`, `dr-weber-list-2.md` (draft without PDF prepared by SQL in `dwello_persona`)
+- [x] Fixes: the list maps the stored `rentalStart`/`rentalEnd` (no contract join); row locator by statement number; row and detail name the dates with the Mietstage (part of #104's decision)
+- [ ] Slice review round 2, persona re-run on the labelled dates
 - [ ] Before marking complete: lint, check, type-check, affected tests and E2E

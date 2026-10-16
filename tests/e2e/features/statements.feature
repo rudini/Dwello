@@ -63,7 +63,7 @@ Funktionalität: Nebenkostenabrechnungen
     Und "Nina Brunner" mietet die Wohnung "2.02" seit "2024-07-01" für "1200" Franken mit "180" Franken Akonto
     Und für "Nina Brunner" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Abrechnungen von "Nina Brunner" sucht
-    Dann zeigt die Abrechnungsliste bei der Abrechnung von "Nina Brunner" "01.07.2024 – 31.12.2024"
+    Dann zeigt die Abrechnungsliste bei der Abrechnung von "Nina Brunner" "01.07.2024 – 31.12.2024, 184 Mietstage"
     Aber die Abrechnungsliste zeigt bei der Abrechnung von "Nina Brunner" nicht "01.01.2024"
 
   Szenario: Entwurf ohne PDF in der Liste

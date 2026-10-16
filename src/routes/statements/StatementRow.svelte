@@ -42,7 +42,9 @@
 				})}</span
 			>
 			<span class="text-ink-muted"
-				>{formatDate(statement.rentalStart)} – {formatDate(statement.rentalEnd)}</span
+				>{formatDate(statement.rentalStart)} – {formatDate(statement.rentalEnd)}, {m.statements_rental_days(
+					{ days: statement.rentalDays }
+				)}</span
 			>
 		</p>
 	</div>

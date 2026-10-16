@@ -61,9 +61,10 @@ describe('Abrechnungsliste', () => {
 
 	// #248: eingezogen während der Abrechnungsperiode: die Liste nennt die Mietstage, nicht die ganze Periode
 	it('nennt die Tage des Mietvertrags in der Abrechnungsperiode', () => {
-		list([statement({ rentalStart: '2024-07-01', rentalEnd: '2024-12-31' })]);
+		list([statement({ rentalStart: '2024-07-01', rentalEnd: '2024-12-31', rentalDays: 184 })]);
 
-		expect(byTestId('statement-row-s1')?.textContent).toContain('01.07.2024 – 31.12.2024');
+		// with the Mietstage, so the dates do not read as the Abrechnungsperiode (persona review of #248)
+		expect(byTestId('statement-row-s1')?.textContent).toContain('01.07.2024 – 31.12.2024, 184 Mietstage');
 		expect(byTestId('statement-row-s1')?.textContent).not.toContain('01.01.2024');
 	});
 
@@ -466,6 +467,13 @@ describe('Abrechnungsdetail', () => {
 		]);
 		expect(byTestId('statement-balance')!.textContent).toMatch(/Nachzahlung.*CHF\s363.00/);
 		expect(text()).toContain('366 Mietstage');
+	});
+
+	// #104, persona review of #248: the detail names the same dates as the list
+	it('nennt die Daten der Mietstage in der Abrechnungsperiode', () => {
+		detail({ rentalStart: '2024-07-01', rentalEnd: '2024-12-31', rentalDays: 184 });
+
+		expect(text()).toContain('184 Mietstage (01.07.2024 – 31.12.2024)');
 	});
 
 	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet

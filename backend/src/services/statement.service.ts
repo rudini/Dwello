@@ -12,7 +12,6 @@ import {
 	apartments,
 	buildings,
 	heatingProfiles,
-	rentalContracts,
 	type UtilityStatement,
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
@@ -55,7 +54,6 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	} | null;
 	apartment: { id: string; number: string; floor: number; area: string } | null;
 	building: { id: string; name: string; address: string; postalCode?: string; city?: string } | null;
-	contract?: { startDate: string; endDate: string | null } | null;
 	lineItems: UtilityStatementLineItem[];
 	heatingProfile?: {
 		id: string;
@@ -141,15 +139,12 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 				id: buildings.id,
 				name: buildings.name,
 				address: buildings.address
-			},
-			// the list names the tenancy within the period (#248)
-			contract: { startDate: rentalContracts.startDate, endDate: rentalContracts.endDate }
+			}
 		})
 		.from(utilityStatements)
 		.leftJoin(tenants, eq(utilityStatements.tenantId, tenants.id))
 		.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
-		.leftJoin(rentalContracts, eq(utilityStatements.contractId, rentalContracts.id))
 		.where(whereClause)
 		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt), desc(utilityStatements.id))
 		.limit(limit)
@@ -191,7 +186,6 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 			tenant: row.tenant,
 			apartment: row.apartment,
 			building: row.building,
-			contract: row.contract,
 			lineItems: lineItemsByStatementId.get(row.statement.id) || []
 		};
 	});

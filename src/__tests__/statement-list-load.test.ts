@@ -63,38 +63,15 @@ describe('Abrechnungsliste laden', () => {
 	});
 
 	// #248: wer während der Abrechnungsperiode einzieht oder auszieht, sieht in der Liste seine Mietstage, nicht die ganze Periode
-	describe('nennt die Tage des Mietvertrags in der Abrechnungsperiode', () => {
-		const [row] = listedStatements.data;
-		const listed = async (contract: { startDate: string; endDate: string | null }) => {
-			const fetch = (async (url: string) =>
-				Response.json(
-					url.includes('/statements?') ? { ...listedStatements, data: [{ ...row, contract }] } : {}
-				)) as typeof globalThis.fetch;
-			const data = (await load({
-				url: new URL('http://localhost/statements'),
-				fetch
-			} as never)) as StatementsListData;
-			const [{ rentalStart, rentalEnd }] = data.statements;
-			return [rentalStart, rentalEnd];
-		};
+	it('nennt die abgerechneten Tage des Mietvertrags in der Abrechnungsperiode', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(url.includes('/statements?') ? listedStatements : {})) as typeof globalThis.fetch;
+		const data = (await load({
+			url: new URL('http://localhost/statements'),
+			fetch
+		} as never)) as StatementsListData;
 
-		it('ab dem Einzug', async () => {
-			expect(await listed(row.contract)).toEqual(['2025-07-01', '2025-12-31']);
-		});
-
-		it('bis zum Auszug', async () => {
-			expect(await listed({ startDate: '2014-01-01', endDate: '2025-03-31' })).toEqual([
-				'2025-01-01',
-				'2025-03-31'
-			]);
-		});
-
-		it('die ganze Periode, wenn der Mietvertrag sie ganz umfasst', async () => {
-			expect(await listed({ startDate: '2014-01-01', endDate: '2026-06-30' })).toEqual([
-				'2025-01-01',
-				'2025-12-31'
-			]);
-		});
+		expect(data.statements[0]).toMatchObject({ rentalStart: '2025-07-01', rentalEnd: '2025-12-31' });
 	});
 
 	it('zeigt eine leere Liste, wenn das Backend nicht erreichbar ist', async () => {
