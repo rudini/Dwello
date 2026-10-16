@@ -9,7 +9,7 @@ import {
 	categoryFindingOf,
 	confirmationAsked,
 	invoiceWithoutServicePeriodOn,
-	invoicesWithoutServicePeriodOn,
+	countOfInvoicesWithoutServicePeriodOn,
 	lateInvoiceOn,
 	draftsOnly,
 	feeAboveGuideline,
@@ -349,7 +349,7 @@ Then(
 );
 
 Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
-	await verwalter.sees(invoicesWithoutServicePeriodOn(date)).toBe(0);
+	await verwalter.sees(countOfInvoicesWithoutServicePeriodOn(date)).toBe(0);
 });
 
 When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {

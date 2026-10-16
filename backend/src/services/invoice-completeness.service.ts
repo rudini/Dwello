@@ -4,9 +4,9 @@
  * for the property manager, not a rule: a supplier may bill differently from one year to the next.
  */
 
-import { and, asc, eq, gte, isNull, lte, min } from 'drizzle-orm';
+import { and, asc, eq, gte, isNull, lte, min, notInArray, or } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, invoices } from '../db/schema';
+import { categories, fuelStocks, invoices } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange, hasFuelStocks, periodReadings } from './fuel-stock.service';
 
@@ -230,16 +230,27 @@ async function stockFinding(buildingId: string, period: Period, current: Categor
 	return readings.missing.length > 0 || finding.current.total < 0 ? finding : null;
 }
 
-// The building's allocable invoices without Leistungszeitraum dated in these days: they count where their date lies
+// The building's allocable invoices without Leistungszeitraum dated in these days: they count where their date lies;
+// deliveries in the category of the building's Tankbestand count by consumption, never by a Leistungszeitraum
 const withoutServicePeriod = (buildingId: string, from: string, to: string) =>
 	db
-		.select({ id: invoices.id, billingEntityName: invoices.billingEntityName, invoiceDate: invoices.invoiceDate, amount: invoices.amount })
+		.select({
+			id: invoices.id,
+			billingEntityName: invoices.billingEntityName,
+			description: invoices.description,
+			invoiceDate: invoices.invoiceDate,
+			amount: invoices.amount
+		})
 		.from(invoices)
 		.where(
 			and(
 				eq(invoices.buildingId, buildingId),
 				eq(invoices.isValidUtilityCost, true),
 				isNull(invoices.servicePeriodStart),
+				or(
+					isNull(invoices.categoryId),
+					notInArray(invoices.categoryId, db.select({ id: fuelStocks.categoryId }).from(fuelStocks).where(eq(fuelStocks.buildingId, buildingId)))
+				),
 				gte(invoices.invoiceDate, from),
 				lte(invoices.invoiceDate, to)
 			)

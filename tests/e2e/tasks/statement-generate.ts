@@ -103,4 +103,5 @@ export const recordInvoiceFromWarning: Activity = (actor) =>
 	);
 
 // The edit link of an invoice a hint of the preview names
-export const editHintedInvoice = (date: string) => Click.on(hintedInvoiceLink(date));
+export const editHintedInvoice = (date: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(hintedInvoiceLink(date)), Wait.forUrl((url) => /\/invoices\/[^/]+\/edit/.test(url.href)));

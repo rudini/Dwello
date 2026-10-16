@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories } from '../db/schema';
+import { categories, fuelStocks } from '../db/schema';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -113,7 +113,7 @@ describe('Rechnungen ohne Leistungszeitraum', () => {
 		const body = (await response.json()) as { lateInvoices: unknown[] };
 
 		expect(body.lateInvoices).toEqual([
-			{ id: expect.any(String), billingEntityName: 'Kaminfeger Keller', invoiceDate: '2025-01-20', amount: '290.00' }
+			{ id: expect.any(String), billingEntityName: 'Kaminfeger Keller', description: 'Hauswart 2025', invoiceDate: '2025-01-20', amount: '290.00' }
 		]);
 	});
 
@@ -129,4 +129,34 @@ describe('Rechnungen ohne Leistungszeitraum', () => {
 	it('nennt in einer Abrechnungsperiode von einem Jahr keine Rechnungen ohne Leistungszeitraum', async () => {
 		expect((await listed('2024-01-01', '2024-12-31')).whole).toEqual([]);
 	});
+});
+
+// Der Leistungszeitraum reicht ins nächste Jahr: nur ein Teil zählt, die Abweichung sagt warum (#130)
+it('zählt die Rechnungen, deren Leistungszeitraum über die Abrechnungsperiode hinausreicht', async () => {
+	const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
+	const [water] = await db.select().from(categories).where(eq(categories.name, 'Cold Water'));
+	await insertInvoice(own.building, { categoryId: water.id, amount: '1000.00', invoiceDate: '2024-01-31' });
+	const servicePeriod = { servicePeriodStart: '2025-07-01', servicePeriodEnd: '2026-06-30' };
+	await insertInvoice(own.building, { categoryId: water.id, amount: '1200.00', invoiceDate: '2026-06-30', ...servicePeriod });
+
+	const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2025-01-01&periodEnd=2025-12-31`);
+	const { findings } = (await response.json()) as { findings: { categoryName: string }[] };
+	await own.remove();
+
+	expect(findings.find((f) => f.categoryName === 'Kaltwasser')).toMatchObject({ kind: 'deviation', partialCount: 1 });
+});
+
+// Heizöl zählt über den Tankbestand, nie über einen Leistungszeitraum: die Hinweise nennen seine Lieferungen nicht
+it('nennt Lieferungen der Kategorie des Tankbestands nicht', async () => {
+	const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
+	const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+	await db.insert(fuelStocks).values({ buildingId: own.building, readingDate: '2024-12-31', amount: '800.00', categoryId: heating.id });
+	await insertInvoice(own.building, { billingEntityName: 'Heizöl AG', categoryId: heating.id, invoiceDate: '2025-01-20' });
+	await insertInvoice(own.building, { billingEntityName: 'Kaminfeger Keller', invoiceDate: '2025-01-20' });
+
+	const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2024-01-01&periodEnd=2024-12-31`);
+	const { lateInvoices } = (await response.json()) as { lateInvoices: { billingEntityName: string }[] };
+	await own.remove();
+
+	expect(lateInvoices.map((i) => i.billingEntityName)).toEqual(['Kaminfeger Keller']);
 });

@@ -114,7 +114,7 @@ export const categoryFindingOf = (category: string) => Text.of(categoryFinding(c
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const invoiceWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(invoicesWithoutServicePeriod, date));
-export const invoicesWithoutServicePeriodOn = (date: string) => Count.of(hintedInvoice(invoicesWithoutServicePeriod, date));
+export const countOfInvoicesWithoutServicePeriodOn = (date: string) => Count.of(hintedInvoice(invoicesWithoutServicePeriod, date));
 // the option names the profile and its sum, «Winter … (100%)»
 export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);

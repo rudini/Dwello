@@ -59,6 +59,7 @@ export const invoicesWithoutServicePeriod = target('Hinweis auf Rechnungen ohne 
 );
 export const hintedInvoice = (hint: Target, date: string) =>
 	target(`Rechnung vom ${date} in «${hint}»`, (page) => hint.locate(page).getByTestId('hinted-invoice').filter({ hasText: date }));
+// the date names the invoice in either hint
 export const hintedInvoiceLink = (date: string) =>
 	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>
 		page.getByTestId('hinted-invoice').filter({ hasText: date }).getByRole('link')

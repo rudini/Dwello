@@ -76,6 +76,7 @@ export interface CategoryFinding {
 export interface HintedInvoice {
 	id: string;
 	billingEntityName: string;
+	description: string;
 	invoiceDate: string;
 	amount: string;
 }

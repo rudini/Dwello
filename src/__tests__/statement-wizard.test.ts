@@ -156,6 +156,19 @@ describe('Rechnungen pro Kategorie', () => {
 		).toBe('Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF\u00a0290.00.');
 	});
 
+	// Nur eine Lücke oder Abweichung lässt sich durch einen Teil der Kosten erklären (#130)
+	it('nennt bei Lücke und Abweichung die Rechnungen, die nur teilweise zählen', () => {
+		const parts = { missingParts: [{ start: '2025-07-01', end: '2025-12-31' }], partialCount: 2 };
+
+		expect(findingText(finding('gap', parts))).toContain(
+			'2 Rechnungen zählen nur teilweise: ihre Leistungszeiträume reichen über die Abrechnungsperiode hinaus.'
+		);
+		expect(findingText(finding('deviation', { changePercent: -40, partialCount: 2 }))).toContain(
+			'2 Rechnungen zählen nur teilweise'
+		);
+		expect(findingText(finding('new', { partialCount: 2 }))).not.toContain('teilweise');
+	});
+
 	it('nennt den Teil des Jahres, für den die Rechnung fehlt', () => {
 		const part = (start: string, end: string) => ({ start, end });
 		expect(findingText(finding('gap', { missingParts: [part('2025-07-01', '2025-12-31')] }))).toBe(

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { HintedInvoice } from '$lib/statement-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
@@ -28,9 +29,12 @@
 						<a
 							href="/invoices/{invoice.id}/edit"
 							class="inline-flex min-h-12 items-center text-accent underline underline-offset-4"
-							>{invoice.billingEntityName}, {formatDate(invoice.invoiceDate)}, {formatCurrency(
-								parseFloat(invoice.amount)
-							)}</a
+							>{m.statements_hinted_invoice({
+								supplier: invoice.billingEntityName,
+								description: invoice.description,
+								date: formatDate(invoice.invoiceDate),
+								amount: formatCurrency(parseFloat(invoice.amount))
+							})}</a
 						>
 					</li>
 				{/each}
