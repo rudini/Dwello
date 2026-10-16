@@ -52,7 +52,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 | GET | `/` | Query: `search`, `city`, `canton`, `limit` (default 20), `offset`. → `{ buildings, total }`; each building has `apartmentCount`, `occupiedCount`, `vacantCount` |
 | GET | `/:id` | → building with counts (see `tests/contracts/building.json`). 404 |
 | GET | `/:id/apartments` | → `{ building, apartments }` (apartments as stored rows). 404 |
-| POST | `/` | Body: `name`, `address`, `postalCode` (4–10 chars), `city`, `canton` (2 chars) required; optional `country`, `latitude`, `longitude` (strings), `buildingType`, `yearBuilt` (number). → 201 building. 400 |
+| POST | `/` | Body: `name`, `address`, `postalCode` (4–10 chars), `city`, `canton` (2 chars) required; optional `country`, `latitude`, `longitude` (strings), `buildingType`, `yearBuilt` (number), `noTank` (boolean: no tank or decommissioned, #72). → 201 building. 400 |
 | PUT | `/:id` | Body: any subset of the POST fields. → building. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the building still has apartments |
 | GET | `/:id/fuel-stocks` | → array of `{ id, buildingId, readingDate, amount, categoryId, createdAt }` by date (Tankbestand, see `tests/contracts/fuel-stocks.json`). 404 building |

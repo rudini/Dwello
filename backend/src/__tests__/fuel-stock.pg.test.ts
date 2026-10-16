@@ -4,10 +4,10 @@
  * A reading "am 31.12.2024" closes 2024 and opens 2025.
  */
 
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { afterAll, beforeAll, describe, expect, it, setSystemTime } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, invoices } from '../db/schema';
+import { buildings, categories, distributionKeys, invoices } from '../db/schema';
 import { calculateStatement } from '../services/statement.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { callApi, sendJson } from './helpers/auth';
@@ -76,17 +76,62 @@ describe('Tankbestand', () => {
 		expect(await heatingLine(2023)).toBeUndefined();
 	});
 
+	// a time of the real UTC day, so Bun and PostgreSQL agree on it
+	const onDay = async <T>(day: string, run: () => Promise<T>) => {
+		setSystemTime(new Date(`${day}T12:00:00Z`));
+		try {
+			return await run();
+		} finally {
+			setSystemTime();
+		}
+	};
+
 	it('meldet in der Prüfung den fehlenden Stichtag, damit die Abrechnung nicht still nach Einkauf rechnet', async () => {
-		expect(await findings(rental.building, 2026)).toContainEqual(
+		expect(await onDay('2027-01-01', () => findings(rental.building, 2026))).toContainEqual(
 			expect.objectContaining({ kind: 'stock', categoryId: heating, missingParts: [{ start: '2026-12-31', end: '2026-12-31' }] })
 		);
 	});
 
+	// Periode läuft noch: den Endbestand kann es noch nicht geben (#136)
+	it('meldet keinen fehlenden Endbestand, dessen Stichtag nach heute liegt', async () => {
+		expect((await onDay('2026-12-30', () => findings(rental.building, 2026))).map((f) => f.kind)).not.toContain('stock');
+	});
+
+	it('meldet einen fehlenden Anfangsbestand auch in einer laufenden Periode', async () => {
+		const own = await createRental(`${token}-running`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await record('2024-12-31', '700.00', own.building);
+		const found = await onDay('2026-06-30', () => findings(own.building, 2026));
+		await own.remove();
+
+		expect(found).toContainEqual(expect.objectContaining({ kind: 'stock', missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] }));
+	});
+
+	// 2025 ohne Einkauf: kein «Keine Rechnung in dieser Kategorie»; beide Jahre mit Anfangs- und Endbestand:
+	// ein Hinweis auf die Tankbestände (#73)
 	it('vergleicht in der Prüfung den Verbrauch, nicht den Einkauf', async () => {
-		// 2025 ohne Einkauf: kein «Keine Rechnung in dieser Kategorie»
 		expect((await findings(rental.building, 2025)).filter((f) => f.categoryId === heating)).toEqual([
-			expect.objectContaining({ kind: 'deviation', current: { count: 0, total: 400 }, previous: { count: 1, total: 4500 } })
+			expect.objectContaining({ kind: 'consumption', current: { count: 0, total: 400 }, previous: { count: 1, total: 4500 }, changePercent: -91 })
 		]);
+	});
+
+	// ein negativer Verbrauch im Vorjahr ist schon ein eigener Hinweis: kein Vergleich mit falschem Vorzeichen
+	it('vergleicht den Verbrauch nur, wenn er in beiden Jahren über null liegt', async () => {
+		const own = await createRental(`${token}-negative`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(own.building, { invoiceDate: '2023-01-15' });
+		await insertInvoice(own.building, { categoryId: heating, amount: '1700.00', invoiceDate: '2024-05-10' });
+		await record('2022-12-31', '100.00', own.building);
+		await record('2023-12-31', '400.00', own.building);
+		await record('2024-12-31', '100.00', own.building);
+		const found = (await findings(own.building, 2024)).filter((f) => f.categoryId === heating);
+		await db.delete(invoices).where(eq(invoices.buildingId, own.building));
+		await own.remove();
+
+		expect(found).toEqual([]);
+	});
+
+	// ohne Tankbestände im Vorjahr ist dessen Betrag der Einkauf, kein Verbrauch: die Prüfung vergleicht die Kosten
+	it('vergleicht den Verbrauch nur mit einem Vorjahr, das Anfangs- und Endbestand hat', async () => {
+		expect((await findings(rental.building, 2024)).filter((f) => f.categoryId === heating).map((f) => f.kind)).not.toContain('consumption');
 	});
 
 	// Erste Abrechnung mit Dwello: noch kein Stand erfasst, vielleicht heizt das Gebäude mit Öl
@@ -97,9 +142,54 @@ describe('Tankbestand', () => {
 		expect((await findings(tankOnly.building, 2025)).map((f) => f.kind)).not.toContain('tank');
 	});
 
-	// Tank stillgelegt (z.B. Wechsel auf Fernwärme): spätere Perioden brauchen keinen Stand mehr
-	it('verlangt keinen Stand für eine Periode nach dem letzten Stand', async () => {
-		expect((await findings(rental.building, 2029)).map((f) => f.kind)).not.toContain('stock');
+	// Ein vergessener Tankbestand fällt auf: das Gebäude hatte Tankbestände und ist nicht als ohne Tank festgehalten (#72)
+	it('meldet die fehlenden Stände einer Periode nach dem letzten Stand', async () => {
+		expect(await onDay('2030-01-15', () => findings(rental.building, 2029))).toContainEqual(
+			expect.objectContaining({
+				kind: 'stock',
+				categoryId: heating,
+				missingParts: [
+					{ start: '2028-12-31', end: '2028-12-31' },
+					{ start: '2029-12-31', end: '2029-12-31' }
+				]
+			})
+		);
+	});
+
+	// Tank stillgelegt (z.B. Wechsel auf Fernwärme): spätere Perioden brauchen keinen Stand mehr (#72)
+	it('verlangt keinen Stand, wenn das Gebäude ohne Tank oder mit stillgelegtem Tank festgehalten ist', async () => {
+		const own = await createRental(`${token}-decommissioned`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await record('2024-12-31', '700.00', own.building);
+		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, own.building));
+		await insertInvoice(own.building, { categoryId: heating, amount: '2000.00', invoiceDate: '2026-05-10' });
+		const found = (await findings(own.building, 2026)).map((f) => f.kind);
+		await db.delete(invoices).where(eq(invoices.buildingId, own.building));
+		await own.remove();
+
+		expect(found).not.toContain('stock');
+		expect(found).not.toContain('tank');
+	});
+
+	// im Jahr der Stilllegung zählt noch der Verbrauch: der Endbestand fehlt (fach-review V-1)
+	it('verlangt den Endbestand einer Periode mit Anfangsbestand, auch wenn der Tank stillgelegt ist', async () => {
+		const own = await createRental(`${token}-last-year`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await record('2023-12-31', '700.00', own.building);
+		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, own.building));
+		const found = await findings(own.building, 2024);
+		await own.remove();
+
+		expect(found).toContainEqual(expect.objectContaining({ kind: 'stock', missingParts: [{ start: '2024-12-31', end: '2024-12-31' }] }));
+	});
+
+	it('fragt nicht nach dem Heizmaterial, wenn das Gebäude ohne Tank festgehalten ist', async () => {
+		const own = await createRental(`${token}-district`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, own.building));
+		await insertInvoice(own.building, { categoryId: heating, amount: '2000.00', invoiceDate: '2025-05-10' });
+		const found = (await findings(own.building, 2025)).map((f) => f.kind);
+		await db.delete(invoices).where(eq(invoices.buildingId, own.building));
+		await own.remove();
+
+		expect(found).not.toContain('tank');
 	});
 
 	// Ein Schlüssel, der erst nach der Periode gilt, ändert eine ältere Abrechnung nicht
@@ -112,12 +202,13 @@ describe('Tankbestand', () => {
 		]);
 	});
 
+	// ein Hinweis auf die Tankbestände, keine Bestätigung (#73); nur einer für die Kategorie
 	it('meldet einen negativen Verbrauch', async () => {
 		await record('2026-12-31', '5000.00');
 
-		expect(await findings(rental.building, 2026)).toContainEqual(
-			expect.objectContaining({ kind: 'stock', missingParts: [], current: { count: 0, total: -4900 } })
-		);
+		expect((await findings(rental.building, 2026)).filter((f) => f.categoryId === heating)).toEqual([
+			expect.objectContaining({ kind: 'consumption', missingParts: [], changePercent: null, current: { count: 0, total: -4900 } })
+		]);
 	});
 });
 

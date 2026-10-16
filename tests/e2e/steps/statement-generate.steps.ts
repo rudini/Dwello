@@ -26,6 +26,7 @@ import {
 	missingInvoicesWarnings,
 	noContractsInPeriod,
 	periodRunning,
+	missingStockFindings,
 	periodChoiceShown,
 	previewHasStatementOf,
 	proposedHeatingProfile,
@@ -369,9 +370,9 @@ When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearb
 
 // Tankbestand checks (#136, #72)
 Given(
-	'im Gebäude {string} war am letzten Tag des Vorjahres Heizöl für {string} Franken im Tank',
-	async ({ seed }, building: string, amount: string) => {
-		await seed.fuelStock(building, `${Number(inDays(0).slice(0, 4)) - 1}-12-31`, amount);
+	'im Gebäude {string} war vor {int} Tagen Heizöl für {string} Franken im Tank',
+	async ({ seed }, building: string, days: number, amount: string) => {
+		await seed.fuelStock(building, inDays(-days), amount);
 	}
 );
 
@@ -386,12 +387,18 @@ Given('das Gebäude {string} hat keinen Tank oder der Tank ist stillgelegt', asy
 	await seed.noTank(building);
 });
 
+// A period relative to today: running whatever day today is
 When(
-	'der Liegenschaftsverwalter die Vorschau der Abrechnungen des laufenden Jahres für das Gebäude {string} öffnet',
-	async ({ verwalter, seed }, building: string) => {
-		await verwalter.attemptsTo(openPreview(Number(inDays(0).slice(0, 4)), seed.idOf(building)!));
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen von vor {int} Tagen bis in {int} Tagen für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, ago: number, ahead: number, building: string) => {
+		const [periodStart, periodEnd] = [inDays(-ago), inDays(ahead)];
+		await verwalter.attemptsTo(openPreview(Number(periodStart.slice(0, 4)), seed.idOf(building)!, { periodStart, periodEnd }));
 	}
 );
+
+Then('nennt die Prüfung der Kategorien keinen fehlenden Tankbestand', async ({ verwalter }) => {
+	await verwalter.sees(missingStockFindings).toBe(0);
+});
 
 Then('warnt die Vorschau, dass die Abrechnungsperiode noch läuft', async ({ verwalter }) => {
 	await verwalter.sees(periodRunning).toContain('Periode läuft noch');

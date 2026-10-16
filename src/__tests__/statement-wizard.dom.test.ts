@@ -512,8 +512,42 @@ describe('Abrechnungen erstellen', () => {
 				]
 			});
 
-		withFindings([{ ...heating, kind: 'stock', current: sums(0, -880) }]);
+		withFindings([{ ...heating, kind: 'consumption', current: sums(0, -880) }]);
 		expect(byTestId('category-finding-stock-link')!.textContent).toContain('Tankbestände prüfen');
+		// a hint, no confirmation (#73)
+		expect(byTestId('confirm-missing-invoices')).toBeNull();
+	});
+
+	// without the year before the frame says nothing about a comparison (fach-review V-4)
+	it('nennt einen negativen Verbrauch ohne Vorjahr nicht als Vergleich mit dem Vorjahr', () => {
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: false,
+						findings: [
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'consumption',
+								current: { count: 1, total: -300 },
+								previous: { count: 0, total: 0 },
+								missingParts: [],
+								changePercent: null
+							}
+						]
+					}
+				}
+			]
+		});
+
+		const frame = byTestId('category-check')!;
+		expect(frame.querySelector('p')!.textContent).toBe('Tankbestände prüfen');
+		expect(frame.textContent).not.toContain('Vorjahr');
 	});
 
 	it('bietet bei Heizkosten ohne Tankbestand an, ihn zu erfassen', () => {
@@ -549,6 +583,10 @@ describe('Abrechnungen erstellen', () => {
 		expect(question.textContent).toContain('Heizen Sie mit Öl, Flüssiggas, Pellets oder Holz?');
 		expect(question.querySelector('a')!.getAttribute('href')).toBe('/buildings/b1');
 		expect(question.querySelector('a')!.textContent).toContain('Tankbestand erfassen');
+		// without a tank the landlord records it on the building, and the question stops (#72)
+		const noTank = byTestId<HTMLAnchorElement>('tank-question-no-tank-b1')!;
+		expect(noTank.getAttribute('href')).toBe('/buildings/b1/edit');
+		expect(noTank.textContent).toContain('Kein Tank festhalten');
 	});
 
 	it('nennt pro Kategorie fehlende Rechnungen im Vergleich zum Vorjahr und verlangt eine Bestätigung', async () => {

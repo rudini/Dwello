@@ -15,6 +15,7 @@ export interface Building {
 	longitude?: string | number | null;
 	buildingType?: string | null;
 	yearBuilt?: number | null;
+	noTank?: boolean; // no tank or decommissioned (#72)
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }

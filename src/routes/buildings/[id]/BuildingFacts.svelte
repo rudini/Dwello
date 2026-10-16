@@ -40,6 +40,14 @@
 				</dd>
 			</div>
 		{/if}
+		{#if building.noTank}
+			<div>
+				<dt class="text-ink-muted">{m.buildings_tank()}</dt>
+				<dd class="font-semibold text-ink" data-testid="building-no-tank">
+					{m.buildings_no_tank_fact()}
+				</dd>
+			</div>
+		{/if}
 		<div>
 			<dt class="text-ink-muted">{m.nav_apartments()}</dt>
 			<dd class="font-semibold tabular-nums text-ink">

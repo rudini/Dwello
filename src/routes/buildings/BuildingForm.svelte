@@ -9,6 +9,7 @@
 	import { buildingTypeLabel, buildingTypes } from '$lib/building-type';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Select from '$lib/ui/Select.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -21,6 +22,7 @@
 		canton?: string | null;
 		buildingType?: string | null;
 		yearBuilt?: number | null;
+		noTank?: boolean;
 	}
 
 	interface Props {
@@ -42,6 +44,7 @@
 	let canton = $state(start.canton || '');
 	let buildingType = $state(start.buildingType || '');
 	let yearBuilt = $state(start.yearBuilt?.toString() || '');
+	let noTank = $state(!!start.noTank);
 
 	let isSubmitting = $state(false);
 
@@ -200,6 +203,15 @@
 				testid="building-year-built-input"
 			/>
 		</div>
+		<!-- the statement wizard then stops asking about a Tankbestand (#72) -->
+		<Checkbox
+			id="noTank"
+			name="noTank"
+			label={m.buildings_no_tank()}
+			help={m.buildings_no_tank_help()}
+			bind:checked={noTank}
+			testid="building-no-tank-checkbox"
+		/>
 	</fieldset>
 
 	<div class="flex flex-col-reverse gap-4 border-t border-line pt-6 sm:flex-row">
