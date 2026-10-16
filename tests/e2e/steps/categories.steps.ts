@@ -286,23 +286,24 @@ Then(
 );
 
 Then('erfährt der Liegenschaftsverwalter, dass Dwello die Kategorie mitliefert', async ({ verwalter }) => {
-	await verwalter.sees(predefinedHintText).toContain('Dwello liefert diese Kategorie mit; sie lässt sich nicht löschen.');
+	await verwalter.sees(predefinedHintText).toContain('Dwello liefert diese Kategorie mit');
+	await verwalter.sees(predefinedHintText).toContain('Sie lässt sich nicht löschen.');
 });
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass schon erfasste Rechnungen nicht mehr in die Nebenkostenabrechnung fliessen, wenn er die Kategorie auf nicht umlagefähig stellt',
+	'erfährt der Liegenschaftsverwalter, dass der Mieter Kosten des Vermieters nicht schuldet, auch wenn er die Kategorie auf umlagefähig stellt',
 	async ({ verwalter }) => {
 		await verwalter
 			.sees(predefinedHintText)
-			.toContain('Stellen Sie die Kategorie auf nicht umlagefähig, fliessen auch ihre schon erfassten Rechnungen nicht mehr in die Nebenkostenabrechnung.');
+			.toContain('Wählen Sie «Umlagefähig», schuldet der Mieter Kosten, die das Gesetz dem Vermieter zuweist, trotzdem nicht.');
 	}
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den deutschen Namen oder die Beschreibung ändert',
+	'erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den Namen oder die Beschreibung ändert',
 	async ({ verwalter }) => {
 		await verwalter
 			.sees(predefinedHintText)
-			.toContain('Ändern Sie den deutschen Namen oder die Beschreibung, schlägt die KI für neue Rechnungen womöglich eine andere Kategorie vor.');
+			.toContain('Ändern Sie den Namen oder die Beschreibung, schlägt die KI für neue Rechnungen womöglich eine andere Kategorie vor.');
 	}
 );

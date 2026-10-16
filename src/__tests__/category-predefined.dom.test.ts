@@ -86,27 +86,39 @@ describe('Kennzeichnung und Schutz vordefinierter Kategorien', () => {
 
 	const hint = () => byTestId('category-predefined-hint')!.textContent!.replace(/\s+/g, ' ');
 
-	// Fachreview W5b V-1, M-1, V-3: was eine Änderung wirklich bewirkt
-	it('sagt beim Bearbeiten einer vordefinierten Kategorie, was Änderungen bewirken', () => {
+	// Fachreview W5b V-1, M-1, V-3, V-8, V-9; Helga und Dr. Weber P-1: was eine Änderung wirklich bewirkt
+	it('sagt beim Bearbeiten einer umlagefähigen vordefinierten Kategorie, was Änderungen bewirken', () => {
 		show(EditCategoryPage, { data: { category: seeded, kiEnabled: true }, form: null } as never);
 
 		expect(hint()).toContain('Kategorie «Von Dwello»');
-		expect(hint()).toContain('Dwello liefert diese Kategorie mit; sie lässt sich nicht löschen.');
 		expect(hint()).toContain(
-			'Dwello hat die Umlagefähigkeit nach dem Gesetz gewählt: Kosten, die das Gesetz dem Vermieter zuweist, werden nicht umlagefähig, nur weil Sie die Wahl ändern.'
+			'Dwello liefert diese Kategorie mit und hat ihre Umlagefähigkeit nach dem Mietrecht voreingestellt. Sie lässt sich nicht löschen.'
 		);
 		expect(hint()).toContain(
-			'Stellen Sie die Kategorie auf nicht umlagefähig, fliessen auch ihre schon erfassten Rechnungen nicht mehr in die Nebenkostenabrechnung. Stellen Sie sie zurück, bleiben diese Rechnungen nicht umlagefähig.'
+			'Stellen Sie die Kategorie auf nicht umlagefähig, fliessen ihre schon erfassten Rechnungen nicht mehr in neue Nebenkostenabrechnungen; schon erstellte bleiben, wie sie sind. Stellen Sie sie später zurück, müssen Sie diese Rechnungen einzeln wieder auf «Umlagefähig» stellen.'
 		);
+		expect(hint()).not.toContain('schuldet der Mieter');
 		expect(hint()).toContain(
-			'Ändern Sie den deutschen Namen oder die Beschreibung, schlägt die KI für neue Rechnungen womöglich eine andere Kategorie vor.'
+			'Ändern Sie den Namen oder die Beschreibung, schlägt die KI für neue Rechnungen womöglich eine andere Kategorie vor.'
 		);
+	});
+
+	it('sagt bei einer nicht umlagefähigen vordefinierten Kategorie, dass der Mieter Kosten des Vermieters nicht schuldet', () => {
+		show(EditCategoryPage, {
+			data: { category: { ...seeded, isAllowedUtilityCost: false }, kiEnabled: true },
+			form: null
+		} as never);
+
+		expect(hint()).toContain(
+			'Wählen Sie «Umlagefähig», schuldet der Mieter Kosten, die das Gesetz dem Vermieter zuweist, trotzdem nicht. Die Wahl gilt nur für neue Rechnungen; schon erfasste bleiben nicht umlagefähig.'
+		);
+		expect(hint()).not.toContain('Stellen Sie die Kategorie auf nicht umlagefähig');
 	});
 
 	it('nennt die KI nicht, solange sie ausgeschaltet ist', () => {
 		show(EditCategoryPage, { data: { category: seeded, kiEnabled: false }, form: null } as never);
 
-		expect(hint()).toContain('sie lässt sich nicht löschen');
+		expect(hint()).toContain('Sie lässt sich nicht löschen.');
 		expect(hint()).not.toContain('KI');
 	});
 

@@ -23,11 +23,15 @@
 			{ href: '/config/categories', label: m.nav_categories() }
 		]}
 	/>
-	<!-- What changing one of Dwello's categories does (#166) -->
+	<!-- What changing one of Dwello's categories does, from the allocability it has (#166) -->
 	{#if data.category.predefined}
 		<Alert title={m.categories_predefined_title()} testid="category-predefined-hint">
 			<p>{m.categories_predefined_hint()}</p>
-			<p>{m.categories_predefined_allocable()}</p>
+			<p>
+				{data.category.isAllowedUtilityCost
+					? m.categories_predefined_allocable()
+					: m.categories_predefined_not_allocable()}
+			</p>
 			{#if data.kiEnabled}<p>{m.categories_predefined_ki()}</p>{/if}
 		</Alert>
 	{/if}

@@ -120,5 +120,5 @@ Funktionalität: Kostenkategorien
   Szenario: Bearbeiten einer vordefinierten Kategorie
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Liegenschaftssteuer"
     Dann erfährt der Liegenschaftsverwalter, dass Dwello die Kategorie mitliefert
-    Und erfährt der Liegenschaftsverwalter, dass schon erfasste Rechnungen nicht mehr in die Nebenkostenabrechnung fliessen, wenn er die Kategorie auf nicht umlagefähig stellt
-    Und erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den deutschen Namen oder die Beschreibung ändert
+    Und erfährt der Liegenschaftsverwalter, dass der Mieter Kosten des Vermieters nicht schuldet, auch wenn er die Kategorie auf umlagefähig stellt
+    Und erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den Namen oder die Beschreibung ändert

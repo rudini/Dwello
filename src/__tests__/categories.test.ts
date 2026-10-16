@@ -91,6 +91,15 @@ describe('Neue Kategorie', () => {
 		expect(urls[0]).toMatch(/\/api\/v1\/invoices\/llm-recipient$/);
 	});
 
+	// Code-Review W5b C-2: ohne Antwort bleibt die Prüfung angeboten; eine Ablehnung sagt dann, warum
+	it('bietet die KI an, wenn das Backend nicht sagt, ob sie eingeschaltet ist', async () => {
+		const fails = (async () => {
+			throw new Error('offline');
+		}) as typeof globalThis.fetch;
+
+		expect(await loadNew({ fetch: fails } as never)).toEqual({ kiEnabled: true });
+	});
+
 	// Fachreview W5b V-3: der Hinweis einer vordefinierten Kategorie nennt die KI nur, wenn sie eingeschaltet ist
 	it('fragt beim Bearbeiten das Backend, ob die KI eingeschaltet ist', async () => {
 		const fetch = (async (url: string) =>
