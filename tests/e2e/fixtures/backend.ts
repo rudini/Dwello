@@ -118,6 +118,10 @@ export function testData(api: CallTheApi) {
 			ids.set(title, building.id);
 		},
 
+		async buildingCoordinates(title: string) {
+			await put(`buildings/${ids.get(title)}`, { latitude: '47.5000000', longitude: '8.7200000' });
+		},
+
 		async apartment(buildingTitle: string, number: string, status: string, area = '70') {
 			const apartment = await post('apartments', {
 				buildingId: ids.get(buildingTitle),

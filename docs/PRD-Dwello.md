@@ -75,7 +75,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 | **Authentication** | BFF + OAuth 2.0 / SSO | Backend for Frontend pattern with OAuth 2.0, HTTPOnly cookies, XSRF protection |
 | **LLM** | Any OpenAI-compatible API (default: local Ollama with `qwen2.5vl:7b`) | Self-hosted by default, no vendor lock-in; configured through `.env` |
 | **Deployment** | Docker / Docker Compose | Containerized, portable, easy to run anywhere |
-| **Maps** | OpenStreetMap + Leaflet | Open source, no licensing, complete privacy |
+| **Maps** | none (map dropped, #129) | Address shown as text |
 | **Internationalization** | i18n library | German UI; statement PDFs in five languages |
 | **PDF Generation** | PDFKit | Professional PDFs |
 | **QR Bills** | Own code + `qrcode` (npm) | Standards-compliant Swiss QR-bills |
@@ -177,7 +177,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 - Address validation
 - Manual address entry fallback if API unavailable
 
-**Map Visualization:**
+**Map Visualization** (dropped, #129; not built):
 - Display all buildings on interactive map (OpenStreetMap)
 - Building markers with address and apartment count
 - Click to view building details
@@ -845,7 +845,6 @@ BALANCE (refund): CHF 30
 
 **Top Navigation:**
 - "Buildings" tab (active)
-- "Map View" tab
 - "Add Building" button
 
 **Buildings List View:**
@@ -859,7 +858,6 @@ BALANCE (refund): CHF 30
 
 **Building Card (Grid View):**
 - Address as title
-- Map thumbnail showing location
 - Apartment count badge
 - Occupancy percentage
 - Last updated date
@@ -884,7 +882,7 @@ BALANCE (refund): CHF 30
 - Tab 4: Configuration
   - Notes/metadata
 
-**Map View:**
+**Map View** (dropped, #129; not built):
 - Interactive map (OpenStreetMap) centered on Switzerland
 - Building markers with icons
 - Marker color indicates status (green/yellow/red)
@@ -1509,7 +1507,7 @@ BALANCE (refund): CHF 30
 - Embed in PDF statement
 - Validate QR code format before generation
 
-**Map Integration**
+**Map Integration** (dropped, #129)
 
 **Provider:** OpenStreetMap + Leaflet.js
 - **OpenStreetMap:** Free, open-source map data
@@ -1581,12 +1579,11 @@ An audit log is planned, not implemented.
 - Apartment CRUD endpoints and UI screens
 - Tenant CRUD endpoints and UI screens
 - OpenPLZ API integration for address search
-- Map visualization with Leaflet
 - Building detail views with apartment list
 - Apartment occupancy tracking
 - Data validation and error handling
 
-**Tests:** CRUD operations, API integration, address validation, map rendering
+**Tests:** CRUD operations, API integration, address validation
 
 ### Phase 3: Contract Management (Week 5)
 **Objective:** Rental contract management with PDF storage
