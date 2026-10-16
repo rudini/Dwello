@@ -184,7 +184,8 @@ describe('Verwaltungspauschale nach Mietvertrag', () => {
 			tenantId: tenant.id,
 			startDate: '2030-01-01',
 			baseRent: '900',
-			monthlyAdvancePayment: '0'
+			monthlyAdvancePayment: '0',
+			managementFeePercent: '4' // closing review C-13: a rate without the agreement is not kept
 		});
 		const contract = (await created.json()) as { id: string; managementFeeAgreed: boolean; managementFeePercent: string | null };
 		try {
@@ -216,7 +217,7 @@ describe('Verwaltungspauschale nach Mietvertrag', () => {
 		expect(await fee(small.contract)).toBe(7.5);
 	});
 
-		it('lehnt einen eigenen Satz über dem Höchstsatz ab', async () => {
+	it('lehnt einen eigenen Satz über dem Höchstsatz ab', async () => {
 		expect((await agree(true, '10.01')).status).toBe(422);
 	});
 });

@@ -6,6 +6,7 @@ import {
 	balanceOf,
 	billedOfBuilding,
 	buildingChosen,
+	presetNoticeText,
 	contractsWithoutFee,
 	categoryFindingOf,
 	draftsOnly,
@@ -365,4 +366,8 @@ Given(
 
 Then('schlägt der Assistent eine Verwaltungspauschale von {string} % vor', async ({ verwalter }, fee: string) => {
 	await verwalter.sees(feeFieldValue).toBe(fee);
+});
+
+Then('sagt der Assistent {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(presetNoticeText).toContain(text);
 });

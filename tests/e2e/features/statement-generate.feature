@@ -203,3 +203,12 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann schlägt der Assistent das Heizprofil "Winter" vor
+
+  # #89: hat keine Abrechnung der Periode den Satz des Laufs, kommt nur das Heizprofil von den übrigen Abrechnungen
+  Szenario: Neue Abrechnung übernimmt das Heizprofil, die Verwaltungspauschale kommt aus den Einstellungen
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Mietvertrag von "Eva Frei" ist keine Verwaltungspauschale vereinbart
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann schlägt der Assistent das Heizprofil "Winter" vor
+    Und sagt der Assistent "Das Heizprofil ist wie bei den übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode eingestellt, die Verwaltungspauschale kommt aus den Einstellungen."

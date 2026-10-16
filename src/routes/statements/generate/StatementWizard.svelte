@@ -40,7 +40,7 @@
 				start: string;
 				end: string;
 				fromStatements: boolean;
-				feeFromSettings?: boolean;
+				feeFromSettings: boolean;
 			} | null;
 		};
 		form: {

@@ -288,7 +288,6 @@ const feeRate = <T extends Partial<NewRentalContract>>(data: T, agreed = data.ma
 /**
  * Create a new contract
  */
-
 export async function createContract(data: NewRentalContract): Promise<RentalContract> {
 	checkNotice(data.terminated, data.endDate);
 	// Check for overlapping contracts

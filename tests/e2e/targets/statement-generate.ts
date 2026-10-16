@@ -59,3 +59,5 @@ export const feeNotAgreedLink = (contractId: string) =>
 	target(`Mietvertrag ${contractId} ohne vereinbarte Verwaltungspauschale`, (page) =>
 		page.getByTestId(`management-fee-not-agreed-link-${contractId}`)
 	);
+// What the link that opened the wizard chose, and where its settings come from (A-10)
+export const wizardPresetNotice = target('Vorgaben aus dem Link', (page) => page.getByTestId('wizard-preset'));

@@ -13,7 +13,7 @@
 			start: string;
 			end: string;
 			fromStatements: boolean;
-			feeFromSettings?: boolean; // no other statement at the run's rate (#89)
+			feeFromSettings: boolean; // no other statement at the run's rate (#89)
 		} | null;
 		step: number; // said on the settings step, where the link opens the wizard
 	} = $props();

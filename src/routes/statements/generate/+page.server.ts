@@ -39,7 +39,7 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 	]);
 	const others = (statements.data ?? []) as Row[];
 	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1);
-	// the heating profile is the same for every statement of the run (closing review C-1)
+	// the heating profile comes from any of them, as before #89 (closing review C-1)
 	const ofBuilding = (contracts.contracts ?? []) as Row[];
 	const runRate = others.find((s) =>
 		ofBuilding.some(
