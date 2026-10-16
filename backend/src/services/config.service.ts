@@ -83,7 +83,7 @@ export const CONFIG_KEYS = {
 	},
 	default_language: {
 		type: 'string',
-		validator: (v: string) => ['de', 'fr', 'it', 'rm', 'en'].includes(v),
+		validator: (v: string) => ['de', 'fr', 'it', 'en'].includes(v),
 		default: 'de'
 	}
 } as const;

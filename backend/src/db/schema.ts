@@ -89,7 +89,7 @@ export const tenants = pgTable('tenants', {
 	lastName: varchar('last_name', { length: 100 }).notNull(),
 	email: varchar('email', { length: 255 }),
 	phone: varchar('phone', { length: 30 }),
-	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, rm, en
+	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, en
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),

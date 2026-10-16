@@ -21,7 +21,6 @@ Funktionalität: Mahnungen
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Dann bietet die Abrechnung keine Mahnung an
 
-  @wip
   Szenario: Zahlungserinnerung per E-Mail
     Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
@@ -30,22 +29,23 @@ Funktionalität: Mahnungen
     Und hat "Anna Keller" per E-Mail "Zahlungserinnerung" mit PDF erhalten
     Und die Abrechnung führt die "Zahlungserinnerung" als "Versendet"
 
-  @wip
   Szenario: Mahnung per Brief
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter eine Mahnung sendet
-    Dann meldet die Abrechnung "Das Dokument «Zahlungserinnerung» liegt als Brief zum Ausdrucken in den Dokumenten bereit."
+    Dann meldet die Abrechnung "Das Dokument «Zahlungserinnerung» liegt unter «Dokumente» als Brief zum Ausdrucken bereit."
     Und die Abrechnung führt die "Zahlungserinnerung" als "Zu versenden"
 
   # #106: die Mahnung folgt der Sprache des Mieters wie das PDF der Abrechnung
-  @wip
   Szenario: Zahlungserinnerung in der Sprache des Mieters
     Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail
     Und die Korrespondenz an "Anna Keller" ist auf "Französisch"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter eine Mahnung sendet
     Dann hat "Anna Keller" per E-Mail "Rappel de paiement" mit PDF erhalten
+    # die Oberfläche des Liegenschaftsverwalters bleibt in seiner Sprache
+    Und meldet die Abrechnung "Das Dokument «Zahlungserinnerung» wurde per E-Mail versendet."
+    Und die Abrechnung führt die "Zahlungserinnerung" als "Versendet"
 
   # Jede Mahnung setzt eine neue Zahlungsfrist; die nächste Mahnstufe erst ab dem Tag danach (#107).
   # Dass sie danach möglich ist, prüft reminders.pg.test.ts: die Uhr des Backends lässt sich hier nicht vorstellen.

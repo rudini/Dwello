@@ -868,7 +868,7 @@ describe('Abrechnungsdetail', () => {
 			{ reminder: { document: { title: '2. Mahnung', channel: 'letter' } } }
 		);
 		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'2. Mahnung liegt als Brief zum Ausdrucken in den Dokumenten bereit.'
+			'Das Dokument «2. Mahnung» liegt unter «Dokumente» als Brief zum Ausdrucken bereit.'
 		);
 	});
 });

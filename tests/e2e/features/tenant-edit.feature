@@ -22,7 +22,6 @@ Funktionalität: Mieter bearbeiten
     Und "Anna Keller" erhält Korrespondenz auf "Französisch"
 
   # #63: Rätoromanisch ist keine Sprache des Mieters mehr; #105: das Formular sagt, wofür die Sprache gilt
-  @wip
   Szenario: Sprache für Abrechnung und Mahnungen
     Dann bietet das Formular die Sprachen "Deutsch, Französisch, Italienisch, Englisch" an
     Und heisst die Sprache des Mieters im Formular "Sprache für Abrechnung und Mahnungen"

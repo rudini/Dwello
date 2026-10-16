@@ -6,7 +6,7 @@ import type { StatementDocument } from '$lib/types';
 const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 const API = `${BACKEND}/documents`;
 
-// The backend stores a reminder's German title; its level names it in the UI language
+// The backend stores a reminder's title in the tenant's language; its level names it in the UI language
 const reminderTitles = [m.documents_reminder_1, m.documents_reminder_2, m.documents_reminder_3];
 export const localTitle = (document: StatementDocument) =>
 	(document.type === 'reminder' && reminderTitles[(document.reminderLevel ?? 0) - 1]?.()) ||

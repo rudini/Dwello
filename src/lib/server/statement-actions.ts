@@ -44,7 +44,7 @@ export async function sendStatementReminder(
 	const response = await fetch(`${API}/${id}/reminders`, { method: 'POST' });
 	const result = await response.json();
 	if (response.ok) {
-		// the backend stores the German title; its level names it in the UI language
+		// the backend stores the title in the tenant's language; its level names it in the UI language
 		const { document } = result;
 		const reminder = document
 			? { ...result, document: { ...document, title: localTitle(document) } }

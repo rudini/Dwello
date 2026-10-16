@@ -63,8 +63,8 @@ describe('Mahnschreiben', () => {
 	});
 
 	it.each([
-		['fr', 'Bonjour Anna Keller', 'pour la période du 01.01.2024 au 31.12.2024', 'Montant dû : CHF 245.50', 'jusqu’au 31.03.2025', 'Meilleures salutations\nVerwaltung Muster AG'],
-		['it', 'Buongiorno Anna Keller', 'per il periodo dal 01.01.2024 al 31.12.2024', 'Importo dovuto: CHF 245.50', 'entro il 31.03.2025', 'Cordiali saluti\nVerwaltung Muster AG'],
+		['fr', 'Bonjour Anna Keller', 'pour la période du 01.01.2024 au 31.12.2024', 'Montant dû\u00a0: CHF 245.50', 'au plus tard le 31.03.2025', 'Meilleures salutations\nVerwaltung Muster AG'],
+		['it', 'Gentile Anna Keller', 'per il periodo dal 01.01.2024 al 31.12.2024', 'Importo dovuto: CHF 245.50', 'entro il 31.03.2025', 'Cordiali saluti\nVerwaltung Muster AG'],
 		['en', 'Dear Anna Keller', 'for the period 01.01.2024 – 31.12.2024', 'Amount outstanding: CHF 245.50', 'by 31.03.2025', 'Kind regards\nVerwaltung Muster AG']
 	] as const)('schreibt den Brief auf %s', (language, salutation, period, amount, deadline, closing) => {
 		for (const level of [1, 2, 3]) {
@@ -76,9 +76,14 @@ describe('Mahnschreiben', () => {
 	it.each([
 		['fr', 'Référence 21 00000 00003 13947 14300 09017 (à indiquer lors du paiement)'],
 		['it', 'Riferimento 21 00000 00003 13947 14300 09017 (da indicare al momento del pagamento)'],
-		['en', 'Reference 21 00000 00003 13947 14300 09017 (please state it with your payment)']
+		['en', 'Reference 21 00000 00003 13947 14300 09017 (please quote it with your payment)']
 	] as const)('nennt die Referenz auf %s', (language, reference) => {
 		const { text } = reminderLetter({ ...input, language, reference: '21 00000 00003 13947 14300 09017' });
 		expect(text).toContain(reference);
+	});
+
+	// Fachreview W6b V-1: «nulla» hiesse rechtlich nichtig, nicht gegenstandslos
+	it('sagt auf Italienisch, dass eine bereits geleistete Zahlung den Brief erledigt', () => {
+		expect(reminderLetter({ ...input, language: 'it' }).text).toContain('Se ha già effettuato il pagamento, non tenga conto della presente.');
 	});
 });

@@ -116,16 +116,10 @@ describe('Rundung des Saldos im PDF', () => {
 });
 
 describe('PDF einer Nachzahlung', () => {
-	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code; Rätoromanisch sieht der Zahlteil nicht vor
-	it('druckt den Zahlteil auf Rätoromanisch deutsch und die Mitteilung wie im QR-Code', async () => {
-		const rm = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'rm'), 'base64')).flowing;
+	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code
+	it('druckt die Mitteilung im Zahlteil wie im QR-Code', async () => {
 		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'fr'), 'base64')).flowing;
 
-		expect(rm).toContain('Empfangsschein');
-		expect(rm).toContain('Zahlteil');
-		// Halb übersetzte Sätze wirkten unprofessionell: bis alles übersetzt ist, das ganze PDF deutsch
-		expect(rm).toContain('Nebenkostenabrechnung 01.01.2025 – 31.12.2025');
-		expect(rm).not.toContain('Rendaquint');
 		expect(fr).toContain('Informations supplémentaires Décompte des charges NK-1-2025-0001');
 	});
 

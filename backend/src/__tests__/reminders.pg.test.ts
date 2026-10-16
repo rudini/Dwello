@@ -407,13 +407,19 @@ describe('Mahnung nach gescheiterter E-Mail per Post versendet', () => {
 describe('Mahnung in der Sprache des Mieters', () => {
 	it('schreibt E-Mail und PDF auf Italienisch', async () => {
 		await updateTenant(rental.tenant, { email: 'anna.keller@example.com', correspondenceChannel: 'email', language: 'it' });
-		const result = await remind(await statement('sent'));
+		const statementId = await statement('sent');
+		const result = await remind(statementId);
 
 		expect(result.document.title).toBe('Promemoria di pagamento');
 		const mail = mails.at(-1)!;
 		expect(mail.subject).toStartWith('Promemoria di pagamento – Conteggio spese accessorie');
-		expect(mail.text).toContain('Buongiorno');
+		expect(mail.text).toContain('Gentile');
 		expect(pdfText(mail.attachments[0].content)).toContain('Cordiali saluti');
+
+		// Fachreview W6b V-4: «2° sollecito» bleibt im Dateinamen lesbar
+		await expireReminders(statementId);
+		await remind(statementId);
+		expect(mails.at(-1)!.attachments[0].filename).toStartWith('2° sollecito ');
 	});
 
 	it('macht den Brief beim Versand wieder auf Französisch', async () => {

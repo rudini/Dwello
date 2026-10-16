@@ -124,6 +124,7 @@
 				id={statement.id}
 				generated={!!pdfGeneratedAt}
 				generating={generatingPdf}
+				language={statement.tenantLanguage}
 				ongenerate={generatePdf}
 			/>
 			<StatusActions

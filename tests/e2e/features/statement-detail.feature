@@ -321,7 +321,6 @@ Funktionalität: Abrechnungsdetail
     Dann trägt das PDF den Titel "Décompte des charges"
 
   # #105: vor dem Erstellen sagt die Abrechnung, in welcher Sprache das PDF entsteht
-  @wip
   Szenario: Abrechnung nennt die Sprache ihres PDFs
     Angenommen die Korrespondenz an "Eva Frei" ist auf "Französisch"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
