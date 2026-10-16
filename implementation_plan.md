@@ -11,8 +11,9 @@ Request: make the CI E2E tests faster (follow-up to "axe check only on UI change
 - [x] Workers stay at 2: the repository is private, its `ubuntu-latest` runners have 2 cores
 - [x] actionlint clean; gate filter checked with a sample job list
 - [x] `docs/test-pyramid.md` rows "Acceptance" and "Accessibility"
-- [ ] Checks: lint, check (the rest unaffected: no app code changed)
-- [ ] code-reviewer round
+- [x] Checks: lint, check (the rest unaffected: no app code changed)
+- [x] code-reviewer round
+- code-reviewer round 1 (docs/reviews/ci-shards-review-1.md): fixed C-1 (gate requires `changes` to succeed and, on app changes, all shards of its suite to pass), C-3 (no longer applies: the gate counts passed shards), C-4; C-2 (more runner minutes) accepted as the price of the agreed approach, named in the pull request. No re-review: CI config, not code in the sense of Workflow 6
 - [ ] Push, pull request, CI shows shard times, merge
 
 Files: `.github/workflows/ci.yml`, `docs/test-pyramid.md`
