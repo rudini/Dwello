@@ -28,5 +28,5 @@ playwright-bdd is already set up in this repo. **Extend the existing setup; neve
 - Describe what, not how: no button IDs, no CSS selectors, no field names.
 - `Background` holds only the minimum shared state; data preconditions are explicit `Given` steps the product owner can read, not hooks or tags.
 - `Scenario Outline` only for data-driven cases.
-- Every exit from a page (links, buttons, guards, error redirects) gets exactly one navigation scenario that checks only that the move happened («Dann ist der Liegenschaftsverwalter auf der Seite …»), not what the next page shows. Terminal pages (a confirmation, 404) have none.
+- Every exit from a page (links, buttons, guards, error redirects) gets exactly one navigation scenario that checks only that the move happened (e.g. «Dann ist der Liegenschaftsverwalter auf der Seite …» or «… auf der Detailseite von …»), not what the next page shows. Terminal pages (a confirmation, 404) have none.
 - Isolation, negative checks, failure states and `@api`: `tests/e2e/CLAUDE.md`, "Rules".

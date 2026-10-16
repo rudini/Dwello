@@ -1,3 +1,18 @@
+## Session 2026-10-16: third guide review S-1 to S-6
+
+Request (chat): «Setze deine Empfehlung um» for `docs/reviews/opus55-guide-review-3.md` (S-1 to S-6). Rules only, no app behaviour, so no scenario. Own pull request after #271 is merged.
+
+- [x] S-2: `bdd-acceptance` keeps the Dwello part and the Gherkin rules that hold here; the generic phases, examples and API variant go (2'073 → 465 words; the rule files together 14'939 → 13'380)
+- [x] S-1: the `bdd-acceptance` question out of "When to ask"
+- [x] S-3: workflow-note rule from step 7 "Rounds" to step 8 "Plan"
+- [x] S-4: the two new facts of `arbeitsregeln.md`, "Persona runs: how", into the personas README; `persona.md` and the README point to the README only
+- [x] S-5: circular pointer in `backend/CLAUDE.md` out
+- [x] S-6: `pull-request` points to "Before marking anything complete" instead of a short copy
+- [x] `code-reviewer` round 1 (docs/reviews/s16-review-1.md): C-1 (Major: navigation-scenario rule lost in the cut) restored, C-2..C-4 fixed; round 2 (docs/reviews/s16-review-2.md) confirmed, its Nit C-5 fixed
+- [x] Checks: lint, check, the tests that read rule files
+- [x] Archive the session, push after #271 is merged, pull request, CI, merge
+  Files: `CLAUDE.md`, `backend/CLAUDE.md`, `.claude/agents/persona.md`, `.claude/skills/{bdd-acceptance,pull-request,workflow-review}/SKILL.md`, `docs/design/personas/{README,demo-records}.md`, `docs/design/arbeitsregeln.md`, `docs/design/offene-punkte.md` (H-13); reports `docs/reviews/opus55-guide-review-3.md`, `docs/reviews/s16-review-{1,2}.md`
+
 ## Session 2026-10-16: no shouting in the tdd skill (guide review G-11)
 
 Request (chat): «Setze G-11 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Own pull request after #270 is merged.
