@@ -35,6 +35,7 @@
 	} from '$lib/utils/contract-availability';
 	import { browserStorage, clearDraft, readDraft, writeDraft } from '$lib/wizard-draft';
 	import ApartmentStep from './ApartmentStep.svelte';
+	import OpenContracts from './OpenContracts.svelte';
 	import { retried } from './ContractsUnknown.svelte';
 	import PeriodStep from './PeriodStep.svelte';
 	import RentStep from './RentStep.svelte';
@@ -75,6 +76,15 @@
 	const unknown = $derived(contracts?.get(values.apartmentId) === null);
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId)));
 	const overlap = $derived(overlapWarning(values, contracts?.get(values.apartmentId) ?? []));
+	// contracts of the chosen tenant without a Vertragsende (#156)
+	const openContracts = $derived(
+		apartments.flatMap((apartment) =>
+			(contracts?.get(apartment.id) ?? [])
+				.filter((c) => c.tenant_id === values.tenantId && !c.end_date)
+				.map((c) => ({ id: c.id, apartment }))
+		)
+	);
+	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
 	const contractsOf = async (apartmentId: string) =>
 		[apartmentId, forAvailability(await apiCall(`/contracts?apartmentId=${apartmentId}`))] as const;
@@ -252,6 +262,7 @@
 				error={errors.tenantId}
 			/>
 		{:else if step === 2}
+			<OpenContracts name={tenantName} contracts={openContracts} />
 			<ApartmentStep
 				bind:apartmentId={values.apartmentId}
 				{apartments}
