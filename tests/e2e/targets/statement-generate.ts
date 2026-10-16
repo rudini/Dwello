@@ -13,6 +13,8 @@ export const announcement = (text: string) =>
 	target(`Ansage «${text}»`, (page) => page.getByRole('status').filter({ hasText: text }));
 export const buildingCheckbox = (buildingId: string) =>
 	target(`Gebäude ${buildingId} für die Abrechnungen`, (page) => page.getByTestId(`generate-building-${buildingId}`));
+export const existingStatements = target('Hinweis «Es gibt schon Abrechnungen»', (page) => page.getByTestId('existing-statements'));
+export const stepLabel = target('Name des Schritts', (page) => page.getByTestId('statement-step-label'));
 export const allBuildingsCheckbox = target('Alle Gebäude', (page) => page.getByTestId('generate-all-buildings'));
 // Next to the counter: the buildings «Alle Gebäude» leaves out
 export const allBuildingsNote = target('Hinweis zu «Alle Gebäude»', (page) => page.getByTestId('generate-all-buildings-note'));

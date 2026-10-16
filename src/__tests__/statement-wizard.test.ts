@@ -90,6 +90,7 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: false,
 				partial: true, // nothing after June
 				existing: 0,
+				partlyBilled: 0,
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -101,6 +102,7 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: true,
 				partial: false,
 				existing: 0,
+				partlyBilled: 0,
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -306,6 +308,11 @@ describe('Bestätigung vor dem Erstellen', () => {
 	// #251: Mietverträge mit einer Abrechnung erhalten keine neue; das allein ist kein Befund
 	it('verlangt sie nicht, nur weil es schon Abrechnungen gibt', () => {
 		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(false);
+	});
+
+	// Fachreview M-1: Tage der Mietdauer, die keine Abrechnung abdeckt, werden in diesem Lauf nicht abgerechnet
+	it('verlangt sie, wenn eine Abrechnung nur einen Teil der Mietdauer in der Periode abdeckt', () => {
+		expect(needsConfirmation([coverage({ statements: 1, partlyBilled: 1 })])).toBe(true);
 	});
 
 	it('verlangt sie nicht für Hinweise auf neue Kategorien oder Abweichungen', () => {

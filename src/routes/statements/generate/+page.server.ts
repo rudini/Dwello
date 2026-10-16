@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
 import { toHeatingProfile } from '$lib/server/heating-profile';
 import {
+	billedContracts,
 	generateStatements,
 	invoicesInPeriod,
 	previewStatements,
@@ -89,11 +90,16 @@ export const actions: Actions = {
 	preview: async ({ request, fetch }) => {
 		try {
 			const run = generationRequest(await request.formData());
-			const [preview, invoices] = await Promise.all([
+			const [preview, invoices, billed] = await Promise.all([
 				previewStatements(fetch, run),
-				invoicesInPeriod(fetch, run)
+				invoicesInPeriod(fetch, run),
+				billedContracts(fetch, run)
 			]);
-			return { preview, invoices };
+			const partly = new Map(billed.map((row) => [row.buildingId, row.partly]));
+			return {
+				preview,
+				invoices: invoices.map((row) => ({ ...row, partlyBilled: partly.get(row.buildingId) ?? 0 }))
+			};
 		} catch (err) {
 			return failed(err);
 		}

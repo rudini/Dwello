@@ -28,10 +28,44 @@ describe('Vorschau der Abrechnungen', () => {
 					first: null,
 					last: null,
 					statements: 0,
+					partlyBilled: 0,
 					check: expect.anything()
 				}
 			]
 		});
+	});
+
+	// Fachreview M-1: a statement that leaves days of the contract open is a finding of the preview
+	it('nennt pro Gebäude die Mietverträge, deren Abrechnung nur einen Teil der Periode abdeckt', async () => {
+		const form = new FormData();
+		for (const [name, value] of Object.entries({
+			...run,
+			periodStart: '2024-07-01',
+			periodEnd: '2025-06-30'
+		}))
+			form.append(name, value);
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		const contract = {
+			id: 'c1',
+			startDate: '2024-05-01',
+			endDate: null,
+			tenantName: 'Marc',
+			apartmentNumber: '3.01'
+		};
+		const statement = { contractId: 'c1', periodStart: '2024-01-01', periodEnd: '2024-12-31' };
+		const fetch = async (url: string) =>
+			Response.json(
+				url.includes('/for-statement/')
+					? []
+					: { contracts: [contract], data: [statement], total: 1 }
+			);
+		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
+			fetch,
+			request
+		})) as {
+			invoices: { partlyBilled: number }[];
+		};
+		expect(result.invoices[0].partlyBilled).toBe(1);
 	});
 });
 

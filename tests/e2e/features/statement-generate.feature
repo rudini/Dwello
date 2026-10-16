@@ -122,13 +122,22 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann warnt das Rechnungsformular nicht vor dem Rechnungsdatum
 
   # #251: schon abgerechnete Mietverträge erhalten keine neue Abrechnung; das allein ist kein Befund
-  @wip
   Szenario: Bestehende Abrechnungen allein verlangen keine Bestätigung
     Angenommen im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Und der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
+    Dann nennt die Vorschau die bestehenden Abrechnungen von "Lindenhof"
+    Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann erfährt der Liegenschaftsverwalter, dass die Abrechnungen als Entwurf entstehen und nichts verschickt wird
+
+  # Fachreview M-1: eine Abrechnung, die nur einen Teil der Mietdauer in der Periode abdeckt, bleibt ein Befund
+  Szenario: Eine Abrechnung für einen Teil der Periode verlangt weiter eine Bestätigung
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-01-01" für "900" Franken
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-07-01" bis "2025-06-30" für das Gebäude "Lindenhof" öffnet
+    Dann verlangt die Vorschau eine Bestätigung, weil es für "Lindenhof" schon Abrechnungen gibt
 
   Szenario: Eine Bestätigung gilt nur für ihre Vorschau
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
@@ -162,14 +171,13 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann erfährt der Liegenschaftsverwalter, dass die Abrechnungen als Entwurf entstehen und nichts verschickt wird
 
   # #201: der Assistent öffnet im Schritt, in dem der Liegenschaftsverwalter aufgehört hat
-  @wip
   Szenario: Angefangene Abrechnungen später fortsetzen
     Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
     Dann sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist
+    Und ist der Assistent im Schritt "Gebäude"
     Und ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
 
-  @wip
   Szenario: Angaben verwerfen fragt zuerst
     Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
@@ -178,7 +186,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter das Verwerfen bestätigt
     Dann beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode
 
-  @wip
   Szenario: Den Hinweis auf wiederhergestellte Angaben schliessen
     Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
@@ -194,24 +201,30 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
     Dann sagt der wiederhergestellte Entwurf "Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt 2 «Gebäude»."
 
-  @wip
   Szenario: Schon abgerechnete Mietverträge zeigen sich bei der Wahl der Gebäude
     Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut."
+    Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen."
 
   # #201: «Alle Gebäude» wählt nur Gebäude, für die eine neue Abrechnung entsteht
-  @wip
   Szenario: Alle Gebäude lässt schon abgerechnete Gebäude aus
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut."
+    Dann nennt die Wahl für "Lindenhof" "Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen."
     Wenn der Liegenschaftsverwalter alle Gebäude wählt
     Dann ist für die Abrechnungen das Gebäude "Ahornhof" gewählt
     Aber nicht das Gebäude "Lindenhof"
-    Und sagt die Wahl der Gebäude, dass «Alle Gebäude» die Gebäude auslässt, für die keine neue Abrechnung entsteht
+    Und sagt die Wahl der Gebäude, dass «Alle Gebäude» die Gebäude auslässt, deren Mietverträge alle schon eine Abrechnung haben
+
+  # Fachreview M-1: eine Abrechnung, die nur einen Teil der Mietdauer in der Periode abdeckt, lässt Tage offen
+  Szenario: Alle Gebäude wählt ein Gebäude, dessen Abrechnung nur einen Teil der Periode abdeckt
+    Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen vom "2024-07-01" bis "2025-06-30" wählen will
+    Und der Liegenschaftsverwalter alle Gebäude wählt
+    Dann ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
 
   Szenario: Erstellte Abrechnungen anzeigen
     Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt

@@ -698,7 +698,8 @@ describe('Abrechnungen erstellen', () => {
 		expect(hints).toEqual(['Kosten CHF\u00a01’800.00 (60 %) unter dem Akonto. Fehlen Rechnungen?']);
 	});
 
-	it('warnt, wenn es für ein Gebäude in der Periode schon Abrechnungen gibt, und verlangt eine Bestätigung', async () => {
+	// #251: Mietverträge mit einer Abrechnung erhalten keine neue; das allein ist kein Befund
+	it('nennt die schon erstellten Abrechnungen eines Gebäudes, ohne eine Bestätigung zu verlangen', async () => {
 		open({
 			preview,
 			invoices: [
@@ -713,6 +714,27 @@ describe('Abrechnungen erstellen', () => {
 		expect(
 			byTestId('existing-statements')!.querySelector('a[href="/statements?building=b1"]')
 		).not.toBeNull();
+		expect(byTestId('confirm-missing-invoices')).toBeNull();
+		next();
+		await settle();
+		expect(heading()).toBe('Erstellen');
+	});
+
+	// Fachreview M-1: die Tage, die eine Abrechnung offen lässt, rechnet dieser Lauf nicht ab
+	it('verlangt eine Bestätigung, wenn eine Abrechnung nur einen Teil der Periode abdeckt', async () => {
+		open({
+			preview,
+			invoices: [
+				{
+					buildingId: 'b1',
+					count: 3,
+					first: '2024-01-15',
+					last: '2024-12-15',
+					statements: 1,
+					partlyBilled: 1
+				}
+			]
+		});
 		next();
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Bestätigen Sie');
@@ -802,8 +824,7 @@ describe('Entwurf der Abrechnungen', () => {
 		open();
 		await settle();
 		expect(byTestId('draft-restored')).not.toBeNull();
-		next();
-		await settle();
+		expect(heading()).toBe('Gebäude'); // in the step it was left in (#201)
 		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(true);
 	});
 });
@@ -870,8 +891,8 @@ describe('Zurück vom Erfassen einer Rechnung', () => {
 		await settle();
 		history.replaceState(null, '', '/');
 
-		// the notice asks to check the buildings: the wizard does not skip their step (code review C-5)
-		expect(heading()).toBe('Abrechnungsperiode');
+		// the notice asks to check the buildings: the wizard opens their step (code review C-5)
+		expect(heading()).toBe('Gebäude');
 		expect(byTestId('resume-notice')!.className).toContain('hidden');
 	});
 
@@ -972,7 +993,9 @@ describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 });
 
 describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
-	const billed = (rows: { buildingId: string; contracts: number; billed: number }[]) =>
+	const billed = (
+		rows: { buildingId: string; contracts: number; billed: number; partly?: number }[]
+	) =>
 		fakeBff((call) =>
 			call.path.startsWith('/statements/billed') ? [200, rows] : [200, { invoices: [], total: 0 }]
 		);
@@ -990,7 +1013,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.'
+			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 		expect(billedText('b2')).toBeUndefined();
 		// read after the building's name, not as part of it (persona Sven P-1), and a tap on it still chooses the
@@ -1021,10 +1044,66 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen.'
+			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 		expect(billedText('b2')).toBe(
-			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen.'
+			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+		);
+	});
+
+	// #201: «Alle Gebäude» wählt nur Gebäude, für die eine neue Abrechnung entsteht, und sagt es beim Zähler
+	it('lässt bei «Alle Gebäude» die Gebäude aus, deren Mietverträge alle schon eine Abrechnung haben', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 0 },
+			{ buildingId: 'b2', contracts: 1, billed: 0, partly: 0 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(byTestId('generate-all-buildings-note')!.textContent!.trim()).toBe(
+			'«Alle Gebäude» lässt 1 Gebäude aus, dessen Mietverträge in dieser Abrechnungsperiode alle schon eine Abrechnung haben.'
+		);
+		click('generate-all-buildings');
+		await settle();
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(false);
+		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(true);
+		expect(byTestId<HTMLInputElement>('generate-all-buildings')!.checked).toBe(true);
+		click('generate-all-buildings');
+		await settle();
+		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(false);
+	});
+
+	// Fachreview M-1: eine Abrechnung, die nur einen Teil der Periode abdeckt, lässt Tage offen
+	it('wählt bei «Alle Gebäude» ein Gebäude, dessen Abrechnungen Tage der Periode offen lassen', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 1 },
+			{ buildingId: 'b2', contracts: 1, billed: 1, partly: 0 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		click('generate-all-buildings');
+		await settle();
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(true);
+		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(false);
+	});
+
+	it('nennt beim Zähler mehrere ausgelassene Gebäude in der Mehrzahl', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 0 },
+			{ buildingId: 'b2', contracts: 1, billed: 1, partly: 0 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(byTestId('generate-all-buildings-note')!.textContent!.trim()).toBe(
+			'«Alle Gebäude» lässt 2 Gebäude aus, deren Mietverträge in dieser Abrechnungsperiode alle schon eine Abrechnung haben.'
 		);
 	});
 
@@ -1036,7 +1115,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.'
+			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 	});
 });

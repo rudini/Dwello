@@ -192,7 +192,9 @@ describe('GET /api/statements/billed', () => {
 			fetch
 		} as never);
 
-		expect(await response.json()).toEqual([{ buildingId: 'b/1', contracts: 1, billed: 1 }]);
+		expect(await response.json()).toEqual([
+			{ buildingId: 'b/1', contracts: 1, billed: 1, partly: 0 }
+		]);
 		// an id goes into the backend address encoded, as in the preview (code review C-4)
 		expect(urls).toEqual([
 			'http://localhost:3001/api/v1/contracts?buildingId=b%2F1&limit=1000',

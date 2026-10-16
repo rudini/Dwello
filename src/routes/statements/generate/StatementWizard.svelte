@@ -6,6 +6,7 @@
 		invoiceRows,
 		needsConfirmation,
 		restoredSelection,
+		restoredStep,
 		droppedNotes,
 		selectionErrors,
 		statementSteps,
@@ -88,25 +89,23 @@
 
 	onMount(() => {
 		if (form || chosen) return; // coming back from the server, or a link chose for this visit
-		const draft = readDraft<WizardSelection>(browserStorage(), DRAFT);
+		const draft = readDraft<WizardSelection & { step?: number }>(browserStorage(), DRAFT);
 		if (!draft) return;
-		({ selection, dropped } = restoredSelection(draft.values, {
+		const { step: left, ...values } = draft.values;
+		({ selection, dropped } = restoredSelection(values, {
 			buildingIds: data.buildings.map((b) => b.id),
 			heatingProfileIds: data.heatingProfiles.map((p) => p.id)
 		}));
 		restoredAt = draft.savedAt;
-		// Back from "Rechnung erfassen": the step before the preview, so "Weiter" calculates it anew
-		// a building gone meanwhile is checked first, in step 2 (code review C-5)
-		const complete =
-			!dropped.buildings && [1, 2].every((n) => !Object.keys(selectionErrors(selection, n)).length);
-		if (new URL(location.href).searchParams.get('schritt') === '3' && complete) {
-			step = 3;
-			resumed = true;
-		}
+		// In the step it was left in (#201); back from "Rechnung erfassen" the step before the preview, so "Weiter"
+		// calculates it anew; a building gone meanwhile is checked first, in step 2 (code review C-5)
+		const back = new URL(location.href).searchParams.get('schritt') === '3';
+		step = restoredStep(back ? 3 : left, selection, dropped);
+		resumed = back && step === 3;
 	});
 
 	$effect(() => {
-		const snapshot = $state.snapshot(selection);
+		const snapshot = { ...$state.snapshot(selection), step };
 		if (touched) savedAt = writeDraft(browserStorage(), DRAFT, snapshot, new Date());
 	});
 
@@ -179,6 +178,7 @@
 	}
 
 	function created() {
+		touched = false; // nothing left to keep
 		clearDraft(browserStorage(), DRAFT);
 		return goTo(5);
 	}
@@ -226,7 +226,7 @@
 			<span class="sr-only"
 				>{m.contracts_step_of({ current: step, total: statementSteps.length })}</span
 			>
-			<span data-step-label>{statementSteps[step - 1]}</span>
+			<span data-step-label data-testid="statement-step-label">{statementSteps[step - 1]}</span>
 		</h2>
 		<PresetNotice preset={data.preset} {step} />
 		{#if shownError}

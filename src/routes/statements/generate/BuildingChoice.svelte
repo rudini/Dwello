@@ -32,13 +32,16 @@
 	const billedText = $derived.by(() => {
 		if (!billed?.billed) return '';
 		const { contracts: total, billed: count } = billed;
-		if (count < total)
-			return count === 1
-				? m.statements_building_billed_one({ billed: count, total })
-				: m.statements_building_billed_many({ billed: count, total });
-		return total === 1
-			? m.statements_building_billed_all_one()
-			: m.statements_building_billed_all_many();
+		const text =
+			count < total
+				? count === 1
+					? m.statements_building_billed_one({ billed: count, total })
+					: m.statements_building_billed_many({ billed: count, total })
+				: total === 1
+					? m.statements_building_billed_all_one()
+					: m.statements_building_billed_all_many();
+		// how an existing draft is recalculated, here already (persona Helga P-7, #201)
+		return `${text} ${m.statements_building_recalculate()}`;
 	});
 	const describedBy = $derived(
 		[error && 'buildings-error', billedText && billedId].filter(Boolean).join(' ') || undefined

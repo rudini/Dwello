@@ -21,7 +21,7 @@
 	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview:
 	// one request for the period, counted per building (fewer than 50 apartments, see CLAUDE.md)
 	let invoiceCounts = $state<Record<string, number>>({});
-	let billed = $state<Record<string, { contracts: number; billed: number }>>({});
+	let billed = $state<Record<string, { contracts: number; billed: number; partly: number }>>({});
 	$effect(() => {
 		const ids = buildings.map((b) => b.id);
 		api
@@ -39,18 +39,30 @@
 			});
 		// Contracts with a statement in the period already get none from this run
 		api
-			.get<{ buildingId: string; contracts: number; billed: number }[]>('/statements/billed', {
-				buildingIds: ids.join(','),
-				periodStart: period.start,
-				periodEnd: period.end
-			})
+			.get<{ buildingId: string; contracts: number; billed: number; partly: number }[]>(
+				'/statements/billed',
+				{
+					buildingIds: ids.join(','),
+					periodStart: period.start,
+					periodEnd: period.end
+				}
+			)
 			.then(({ data }) => {
 				if (data) billed = Object.fromEntries(data.map((row) => [row.buildingId, row]));
 			});
 	});
 
+	// «Alle Gebäude» leaves out buildings whose contracts are all billed for the whole period: none gets a statement
+	// (#201); a statement that leaves days of a contract open does not count (Fachreview M-1)
+	const leftOut = $derived(
+		buildings.filter(({ id }) => {
+			const row = billed[id];
+			return !!row?.contracts && row.billed === row.contracts && !row.partly;
+		})
+	);
+	const all = $derived(buildings.filter((b) => !leftOut.includes(b)).map((b) => b.id));
 	const allSelected = $derived(
-		buildings.length > 0 && selectedBuildingIds.length === buildings.length
+		all.length > 0 && all.every((id) => selectedBuildingIds.includes(id))
 	);
 
 	const toggle = (id: string) =>
@@ -69,7 +81,7 @@
 			<input
 				type="checkbox"
 				checked={allSelected}
-				onchange={() => (selectedBuildingIds = allSelected ? [] : buildings.map((b) => b.id))}
+				onchange={() => (selectedBuildingIds = allSelected ? [] : all)}
 				class="size-6 shrink-0 cursor-pointer accent-accent"
 				data-testid="generate-all-buildings"
 			/>
@@ -78,6 +90,13 @@
 		<span class="text-ink-muted" aria-live="polite">
 			{m.statements_selected_of({ selected: selectedBuildingIds.length, total: buildings.length })}
 		</span>
+		{#if leftOut.length}
+			<p class="basis-full text-ink-muted" data-testid="generate-all-buildings-note">
+				{leftOut.length === 1
+					? m.statements_all_buildings_left_out_one()
+					: m.statements_all_buildings_left_out_many({ count: leftOut.length })}
+			</p>
+		{/if}
 	</div>
 
 	{#each buildings as building (building.id)}

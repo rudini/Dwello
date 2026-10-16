@@ -71,7 +71,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-new           | every-wizard-step   |
       | contract-new           | overlap-warning     |
       | contract-new           | draft-restored      |
-      | contract-new           | draft-discard-dialog|
+      | contract-new           | draft-discard-dialog |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
       | contract-detail        | default             |
@@ -120,7 +120,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | tank-question       |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | draft-restored      |
-      | statement-generate     | draft-discard-dialog|
+      | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |

@@ -34,13 +34,10 @@ export const openStatementWizardFor = (buildingId: string, year: number) =>
 export const chooseBuilding = (buildingId: string): Activity => (actor) =>
 	actor.attemptsTo(goToNextStep, Check.the(buildingCheckbox(buildingId)));
 
-// Step "Abrechnungsperiode" with a whole year, on to step "Gebäude"
-export const chooseBuildingsFor = (year: number): Activity => (actor) =>
-	actor.attemptsTo(
-		EnterDate.of(`${year}-01-01`).into(periodStartInput),
-		EnterDate.of(`${year}-12-31`).into(periodEndInput),
-		goToNextStep
-	);
+// Step "Abrechnungsperiode", on to step "Gebäude"
+export const chooseBuildingsForPeriod = (start: string, end: string): Activity => (actor) =>
+	actor.attemptsTo(EnterDate.of(start).into(periodStartInput), EnterDate.of(end).into(periodEndInput), goToNextStep);
+export const chooseBuildingsFor = (year: number) => chooseBuildingsForPeriod(`${year}-01-01`, `${year}-12-31`);
 
 // Step "Heizprofil und Verwaltungspauschale"
 export const setManagementFee = (buildingId: string, percent: number): Activity => (actor) =>

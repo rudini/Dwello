@@ -84,6 +84,7 @@ type Coverage = {
 	first: string | null;
 	last: string | null;
 	statements?: number; // already created for this period
+	partlyBilled?: number; // contracts whose statements leave days of the period unbilled
 	check?: InvoiceCheck;
 };
 
@@ -221,9 +222,10 @@ type Period = { periodStart: string; periodEnd: string };
 const lacksInvoices = (check?: InvoiceCheck) =>
 	!!check?.findings.some((f) => f.kind === 'missing' || f.kind === 'gap' || f.kind === 'stock');
 
-/** No invoices, invoices missing in a category or statements that exist already: going on needs a confirmation */
+/** No invoices, invoices missing in a category or statements that leave days unbilled: going on needs a confirmation;
+ *  a contract whose statement covers its days gets no new one, which alone is no finding (#251) */
 export const needsConfirmation = (coverage: Coverage[]) =>
-	coverage.some((c) => c.count === 0 || (c.statements ?? 0) > 0 || lacksInvoices(c.check));
+	coverage.some((c) => c.count === 0 || (c.partlyBilled ?? 0) > 0 || lacksInvoices(c.check));
 
 // Findings per category; missing invoices (not a hint on new or changed costs) need a confirmation
 const categoryCheck = (check?: InvoiceCheck) => ({
@@ -246,6 +248,7 @@ export const invoiceRows = (
 		// With the year before to compare, the check per category replaces the look at start and end of the period
 		partial: !c.check?.hasComparison && partly(c, period),
 		existing: c.statements ?? 0,
+		partlyBilled: c.partlyBilled ?? 0,
 		...categoryCheck(c.check)
 	}));
 
@@ -266,6 +269,22 @@ export const restoredSelection = (
 		}
 	};
 };
+
+/** The step a restored draft opens in: the one it was left in, at most the step before the preview (the server
+ *  calculates it anew), or the first step that no longer holds; a building gone meanwhile is checked in step 2 */
+export function restoredStep(
+	saved: number | undefined,
+	selection: WizardSelection,
+	dropped: { buildings: number }
+) {
+	const target = Math.min(saved ?? 1, 3);
+	const invalid = [1, 2].find(
+		(n) =>
+			n < target &&
+			(Object.keys(selectionErrors(selection, n)).length > 0 || (n === 2 && dropped.buildings > 0))
+	);
+	return invalid ?? target;
+}
 
 /** What the restored draft named and is gone meanwhile, in words for the draft notice */
 export const droppedNotes = (dropped: { buildings: number; heatingProfile: boolean }) => {

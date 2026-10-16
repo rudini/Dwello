@@ -3,6 +3,9 @@ import { type Question, question } from '../screenplay/actor';
 import { Accessible, Checked, Count, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	allBuildingsNote,
+	confirmMissingInvoices,
+	existingStatements,
+	stepLabel,
 	announcement,
 	buildingBilled,
 	buildingCheckbox,
@@ -114,3 +117,7 @@ export const categoryFindingOf = (category: string) => Text.of(categoryFinding(c
 // the option names the profile and its sum, «Winter … (100%)»
 export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
+export const existingStatementsText = Text.of(existingStatements);
+// the warnings the confirmation confirms, read with its checkbox
+export const confirmationReason = Accessible.descriptionOf(confirmMissingInvoices);
+export const currentStep = Text.of(stepLabel);
