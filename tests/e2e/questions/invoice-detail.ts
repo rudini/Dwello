@@ -1,5 +1,6 @@
 import { Text } from '../screenplay/questions';
 import {
+	invoiceNumber,
 	amount,
 	category,
 	distributionKey,
@@ -16,3 +17,4 @@ export const utilityCostOfInvoice = Text.of(utilityCost);
 export const tenancyLawNote = Text.of(legalNote);
 export const recategorizationFailure = Text.of(recategorizeError);
 export const reasonForOverride = Text.of(overrideReason);
+export const numberOfInvoice = Text.of(invoiceNumber);

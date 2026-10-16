@@ -50,14 +50,15 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" bearbeiten will
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
 
+  @wip
   Szenario: Mehrere Rechnungen hochladen und erstellen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" und das Foto der Rechnung von "Gartenbau Grün" hochlädt
     Dann erinnert Dwello daran, die Originalrechnungen aufzubewahren
     Und schlägt die KI für die Rechnung von "Elektro Blitz" den Betrag "1250.00", die Rechnungsnummer "R-1001" und die Kategorie "Allgemeinstrom" vor
     Und ist bei der Rechnung von "Elektro Blitz" das Rechnungsdatum als unsicher markiert
-    Und sagt die Datei von "Elektro Blitz" "Prüfen Sie: Rechnungsdatum, Fälligkeitsdatum."
     Wenn der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "2 Rechnungen erstellt"
+    Und verlinkt Dwello die erstellte Rechnung von "Elektro Blitz" vom "31.03.2026"
     Wenn der Liegenschaftsverwalter die Rechnungen nach dem Gebäude "Seeblick" filtert
     Dann die Rechnungsliste enthält genau 3 Rechnung
     Wenn der Liegenschaftsverwalter die Rechnung von "Elektro Blitz" ansieht
@@ -85,9 +86,10 @@ Funktionalität: Rechnungsliste
     Dann sagt die Datei von "Hauswart Huber" "Diese Rechnung ist schon erfasst."
     Und ist die Datei von "Hauswart Huber" nicht zum Erstellen ausgewählt
 
+  @wip
   Szenario: Eine Datei mit mehreren Rechnungen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Sammelscan" hochlädt
-    Dann sagt die Datei von "Sammelscan" "Diese Datei enthält mehrere Rechnungen. Laden Sie jede einzeln hoch."
+    Dann sagt die Datei von "Sammelscan" "Diese Datei enthält mehrere Rechnungen. Teilen Sie die Datei in einzelne Rechnungen auf und laden Sie diese hoch, oder erfassen Sie jede Rechnung mit «Rechnung erfassen» und fügen Sie die Datei dort als Beleg hinzu."
     Und ist die Datei von "Sammelscan" nicht zum Erstellen ausgewählt
 
   # Die KI-Ersatzattrappe erkennt am Rechnungssteller, was auf der Rechnung steht (backend/scripts/llm-stub.ts)
@@ -100,9 +102,10 @@ Funktionalität: Rechnungsliste
     Dann sagt die Datei von "Lift Service und Reparatur" "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen."
     Und ist die Datei von "Lift Service und Reparatur" nicht zum Erstellen ausgewählt
 
+  @wip
   Szenario: Eine Gutschrift ist nicht zum Erstellen ausgewählt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Gutschrift" hochlädt
-    Dann sagt die Datei von "Werke Gutschrift" "Das ist eine Gutschrift. Ziehen Sie sie vom Betrag der Rechnung ab, zu der sie gehört."
+    Dann sagt die Datei von "Werke Gutschrift" "Das ist eine Gutschrift. Erstellen Sie aus dieser Datei keine Rechnung. Öffnen Sie die Rechnung, zu der sie gehört, und verringern Sie ihren Betrag um die Gutschrift."
     Und ist die Datei von "Werke Gutschrift" nicht zum Erstellen ausgewählt
 
   Szenario: Hochladen abbrechen verwirft die Dateien
@@ -123,3 +126,34 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt die Datei von "Elektro Blitz" "Die Rechnung wurde nicht erstellt, weil Dwello nicht geantwortet hat. Versuchen Sie es noch einmal."
+
+  @wip
+  Szenario: Unsichere und nicht gefundene Angaben werden getrennt genannt
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
+    Dann sagt die Datei von "Elektro Blitz" "Prüfen Sie: Rechnungsdatum."
+    Und sagt die Datei von "Elektro Blitz" "Ergänzen Sie, falls auf der Rechnung: Fälligkeitsdatum."
+    Und erklärt Dwello "Dwello speichert die Datei jeder erstellten Rechnung als Beleg. Dateien, aus denen Sie keine Rechnung erstellen, speichert Dwello nicht."
+
+  @wip
+  Szenario: Nur vollständige Rechnungen werden gezählt und erstellt
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnungen von "Elektro Blitz" und "Werke Schlussrechnung" hochlädt
+    Dann sagt die Datei von "Werke Schlussrechnung" "Wählen Sie eine Kategorie."
+    Und bietet Dwello "1 Rechnung erstellen (1 unvollständig)" an
+    Wenn der Liegenschaftsverwalter die Rechnungen erstellt
+    Dann sagt Dwello "1 Rechnung erstellt"
+    Und nennt Dwello die Datei von "Werke Schlussrechnung" als noch offen
+    Wenn der Liegenschaftsverwalter das Hochladen abbrechen will
+    Dann fragt Dwello zurück "Erstellte Rechnungen bleiben gespeichert. Die übrigen Dateien und Ihre Eingaben gehen verloren."
+
+  @wip
+  Szenario: Die KI antwortet nichts Lesbares
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nichts Lesbares antwortet
+    Dann sagt die Datei von "Elektro Blitz" "Die KI hat keine lesbare Antwort gegeben. Wählen Sie «Erneut versuchen» oder füllen Sie die Felder aus."
+
+  @wip
+  Szenario: Der Hinweis auf abgezogene Akontozahlungen bleibt bei der Rechnung
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
+    Und der Liegenschaftsverwalter bei der Datei von "Werke Schlussrechnung" die Kategorie "Allgemeinstrom" wählt
+    Und der Liegenschaftsverwalter die Rechnungen erstellt
+    Und der Liegenschaftsverwalter die Rechnung von "Werke Schlussrechnung" ansieht
+    Dann erinnert der Beleg "Auf dem Beleg sind bereits bezahlte Beträge abgezogen (CHF 1’000.00). Prüfen Sie, dass der Betrag das Total vor dem Abzug ist und die Akontozahlungen nicht zusätzlich als Rechnungen erfasst sind."

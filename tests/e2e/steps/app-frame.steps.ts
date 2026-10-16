@@ -141,3 +141,7 @@ Then('zeigt das Browser-Tab das Dwello-Symbol', async ({ verwalter }) => {
 Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: string) => {
 	await verwalter.sees(footerVersionText).toBe(`Version ${version}`);
 });
+
+Then('erklärt die Hilfe unter {string} {string}', async ({ verwalter }, heading: string, text: string) => {
+	await verwalter.sees(sectionText(heading)).toContain(text);
+});

@@ -6,6 +6,7 @@ import {
 	categorySelect,
 	descriptionInput,
 	invoiceDateInput,
+	invoiceNumberInput,
 	invoiceSubmitButton,
 	overrideReasonInput,
 	supplierInput
@@ -43,3 +44,5 @@ export const clearSupplier: Activity = (actor) => actor.attemptsTo(Enter.theValu
 export const typeInvoiceDate = (text: string) => Enter.keyByKey(text).intoAndLeave(invoiceDateInput);
 
 export const enterInvoiceDate = (date: string) => EnterDate.of(date).into(invoiceDateInput);
+export const correctInvoiceNumber = (number: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(number).into(invoiceNumberInput), saveInvoice);

@@ -2,6 +2,12 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	belegChosenForCreating,
+	belegHowTo,
+	billedAdviceOnDelete,
+	createButtonLabel,
+	createdInvoiceNames,
+	hintsOfUpload,
+	uploadDialogShown,
 	belegShown,
 	openedBelegMagic,
 	openedBelegName,
@@ -61,12 +67,14 @@ When(
 	}
 );
 
-// The stand-in fails for a file named «… ohne KI» (backend/scripts/llm-stub.ts)
+// The stand-in fails for a file named «… ohne KI» and answers no JSON for «… unlesbar» (backend/scripts/llm-stub.ts)
+const KI_FILE_SUFFIX: Record<string, string> = { 'nicht verfügbar ist': ' ohne KI', 'nichts Lesbares antwortet': ' unlesbar' };
+
 When(
-	/^der Liegenschaftsverwalter für das Gebäude "([^"]+)" die PDF-Rechnung von "([^"]+)" hochlädt(, während die KI nicht verfügbar ist)?$/,
+	/^der Liegenschaftsverwalter für das Gebäude "([^"]+)" die PDF-Rechnung von "([^"]+)" hochlädt(?:, während die KI (nicht verfügbar ist|nichts Lesbares antwortet))?$/,
 	async ({ verwalter, seed, names }, building: string, supplier: string, how?: string) => {
 		const name = supplierName(names, seed.unique, supplier);
-		const file = how ? `${name} ohne KI.pdf` : pdfOf(name);
+		const file = how ? `${name}${KI_FILE_SUFFIX[how]}.pdf` : pdfOf(name);
 		await verwalter.attemptsTo(uploadBelege(seed.idOf(building)!, [invoicePdf(file)]));
 	}
 );
@@ -192,4 +200,47 @@ Then('warnt der Beleg {string}', async ({ verwalter }, text: string) => {
 
 Then('sagt die Bestätigung zum Löschen der Rechnung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(belegNoteOnDelete).toBe(text);
+});
+
+When(
+	'der Liegenschaftsverwalter für das Gebäude {string} die PDF-Rechnungen von {string} und {string} hochlädt',
+	async ({ verwalter, seed, names }, building: string, first: string, second: string) => {
+		const files = [first, second].map((supplier) => invoicePdf(pdfOf(supplierName(names, seed.unique, supplier))));
+		await verwalter.attemptsTo(uploadBelege(seed.idOf(building)!, files));
+	}
+);
+
+Then('kann der Liegenschaftsverwalter das Gebäude und die Dateien der Rechnungen wählen', async ({ verwalter }) => {
+	await verwalter.sees(uploadDialogShown).toBe(true);
+});
+
+Then('erklärt Dwello {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(keepOriginalNote).toContain(text);
+});
+
+Then('bietet Dwello {string} an', async ({ verwalter }, label: string) => {
+	await verwalter.sees(createButtonLabel).toBe(label);
+});
+
+Then('nennt Dwello die Datei von {string} als noch offen', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.sees(uploadOutcome).toContain(pdfOf(names.get(supplier)!));
+});
+
+Then(
+	'verlinkt Dwello die erstellte Rechnung von {string} vom {string}',
+	async ({ verwalter, names }, supplier: string, date: string) => {
+		await verwalter.sees(createdInvoiceNames).toContain(`${names.get(supplier)}, ${date}`);
+	}
+);
+
+Then('erinnert der Beleg {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(hintsOfUpload).toContain(text);
+});
+
+Then('erklärt der Beleg {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(belegHowTo).toContain(text);
+});
+
+Then('rät die Bestätigung zum Löschen der Rechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(billedAdviceOnDelete).toBe(text);
 });

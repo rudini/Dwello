@@ -101,7 +101,7 @@ function reply(prompt: string) {
 	return Bun.sleep(delay).then(() => Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] }));
 }
 
-// What the stand-in «reads» from an invoice file, by its name: «… ohne KI» fails, «Sammelscan» holds two invoices,
+// What the stand-in «reads» from an invoice file, by its name: «… ohne KI» fails, «… unlesbar» answers no JSON, «Sammelscan» holds two invoices,
 // «Werke Schlussrechnung» deducts Akonto payments, «… Reparatur» mixes in costs that are not allocable, «… Gutschrift» is a
 // credit note
 // What the file name says about the file, as the stand-in «reads» it
@@ -114,6 +114,7 @@ const readsAs = (fileName: string) => ({
 
 function read(fileName: string) {
 	if (fileName.includes('ohne KI')) return new Response(null, { status: 503 });
+	if (fileName.includes('unlesbar')) return Response.json({ choices: [{ message: { content: 'Ich kann diese Datei nicht lesen.' } }] });
 	const answer = {
 		...readsAs(fileName),
 		billingEntityName: fileName.replace(/\.[^.]*$/, ''),

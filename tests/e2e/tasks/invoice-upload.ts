@@ -1,5 +1,6 @@
 import type { Activity } from '../screenplay/actor';
 import { Click, EnterDate, Enter, FailRequests, OpenInNewTab, Select, Upload, Wait } from '../screenplay/interactions';
+import { Visibility } from '../screenplay/questions';
 import { deleteButton } from '../targets/invoice-detail';
 import {
 	belegBillingEntity,
@@ -75,8 +76,11 @@ export const fillInBeleg = (
 		EnterDate.of(invoice.invoiceDate).into(belegInvoiceDate(fileName))
 	);
 
-export const chooseCategory = (fileName: string, category: string): Activity =>
-	Select.option({ label: category }).from(belegCategory(fileName));
+// the invoice of the file is opened first, unless it is open already
+export const chooseCategory = (fileName: string, category: string): Activity => async (actor) => {
+	if (!(await actor.answer(Visibility.of(belegCategory(fileName))))) await actor.attemptsTo(openBeleg(fileName));
+	await actor.attemptsTo(Select.option({ label: category }).from(belegCategory(fileName)));
+};
 
 export const createInvoices = Click.on(createInvoicesButton);
 export const startCancellingUpload = Click.on(cancelUploadButton);

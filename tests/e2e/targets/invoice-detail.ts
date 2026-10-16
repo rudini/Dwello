@@ -16,3 +16,4 @@ export const recategorizeError = target('Fehler beim Kategorisieren', (page) =>
 export const overrideReason = target('Grund der Änderung der KI-Kategorie', (page) =>
 	page.getByTestId('invoice-override-reason')
 );
+export const invoiceNumber = target('Rechnungsnummer', (page) => page.getByTestId('invoice-number'));

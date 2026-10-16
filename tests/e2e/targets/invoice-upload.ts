@@ -39,3 +39,11 @@ export const deleteBelegNote = target('Hinweis Beleg beim Löschen', (page) =>
 // The reminder to keep the paper invoice, in the dialog and at the Beleg of an invoice
 export const keepOriginalHint = target('Hinweis Originalrechnung', (page) => page.getByTestId('invoice-keep-original'));
 export const belegBilledNote = target('Warnung abgerechneter Beleg', (page) => page.getByTestId('invoice-document-billed'));
+export const createdInvoiceLinks = target('Links der erstellten Rechnungen', (page) =>
+	page.getByTestId('invoice-upload-result').getByRole('link')
+);
+export const belegHow = target('Anleitung zum Beleg', (page) => page.getByTestId('invoice-document-file-help'));
+export const belegUploadHints = target('Hinweise aus dem Hochladen', (page) => page.getByTestId('invoice-document-hints'));
+export const deleteBilledNote = target('Rat beim Löschen einer abgerechneten Rechnung', (page) =>
+	page.getByTestId('invoice-delete-billed-document-note')
+);
