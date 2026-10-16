@@ -35,7 +35,13 @@
 		},
 		{
 			title: m.help_payments_title(),
-			steps: [m.help_payments_1(), m.help_payments_2(), m.help_payments_3(), m.help_payments_4()]
+			steps: [
+				m.help_payments_1(),
+				m.help_payments_2(),
+				m.help_payments_3(),
+				m.help_payments_4(),
+				m.statements_reminder_257d()
+			]
 		}
 	];
 </script>

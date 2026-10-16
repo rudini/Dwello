@@ -20,6 +20,7 @@ import {
 import type { Language } from './pdf.service';
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
+import { qrBillConfig } from './statement-pdf.service';
 import { getStatement, updateStatement } from './statement.service';
 import { getTenant } from './tenant.service';
 import { formatSwissDate } from './pdf-format';
@@ -90,7 +91,10 @@ async function reminderOn(statement: Statement, level: number, day: string) {
 		language: tenant.language as Language
 	});
 	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
-	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(day));
+	// a statement paid since then gets no payment part, or the tenant pays twice (as on the statement)
+	const config = statement.status === 'paid' ? null : await qrBillConfig();
+	const payment = config ? { statement: { ...statement, tenant }, config, language: tenant.language as Language } : undefined;
+	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(day), payment);
 	return { tenant, letter, pdf, paymentDeadline };
 }
 

@@ -68,7 +68,6 @@ Funktionalität: Mahnungen
 
   # #108: jede Mahnung trägt einen Zahlteil für den offenen Saldo, mit der Referenz der Abrechnung
   # (die Referenz gibt es nur mit einer QR-IBAN, die IBAN gilt für alle Szenarien: geprüft in reminders.pg.test.ts)
-  @wip
   Szenario: Zahlungserinnerung mit Zahlteil für den offenen Saldo
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und "Anna Keller" wünscht Korrespondenz per Brief
@@ -77,5 +76,5 @@ Funktionalität: Mahnungen
     Und der Liegenschaftsverwalter das PDF der "Zahlungserinnerung" an "Anna Keller" in den Dokumenten herunterlädt
     Dann steht im PDF "Empfangsschein"
     Und steht im PDF "Zahlteil"
-    Und steht im PDF "CH93 0076 2011 6238 5295 7"
+    Und steht im PDF "Zahlbar durch"
     Und steht im PDF "Währung Betrag CHF 2 320.00"

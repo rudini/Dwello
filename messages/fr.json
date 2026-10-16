@@ -1035,6 +1035,7 @@
 	"statements_no_more_reminders_title": "Aucun autre rappel possible",
 	"statements_understood": "Compris",
 	"statements_no_more_reminders_text": "3 rappels ont déjà été envoyés. Dwello n’en crée pas d’autre. Convenez de la suite directement avec le locataire.",
+	"statements_reminder_257d": "Un rappel de Dwello est une demande de paiement. Il ne fixe pas de délai de paiement assorti d’une menace de résiliation selon l’art. 257d CO. Les démarches suivantes, p. ex. une poursuite ou une résiliation pour demeure du locataire selon l’art. 257d CO, se font en dehors de Dwello. Pour cette résiliation, vous fixez d’abord au locataire, par une lettre distincte, un délai de paiement d’au moins 30 jours assorti d’une menace de résiliation. Faites-vous conseiller.",
 	"statements_reminder_undelivered": "Le document « {title} » est prêt à l’envoi sous « Documents ». {reason}",
 	"statements_reminder_emailed": "Le document « {title} » a été envoyé par e-mail.",
 	"statements_reminder_letter": "Le document « {title} » est prêt à être imprimé comme lettre sous « Documents ».",

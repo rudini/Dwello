@@ -474,6 +474,19 @@ describe('Zahlteil der Mahnung', () => {
 		expect(text).toContain('Récépissé');
 	});
 
+	// Fachreview W6c V-1: sonst bezahlt der Mieter mit einem Scan ein zweites Mal
+	it('druckt keinen Zahlteil in den Brief, der erst nach der Zahlung versendet wird', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const letter = (await remind(statementId)).document;
+		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
+
+		expect(pdfText(pdf)).toContain('Freundliche Grüsse');
+		expect(pdfText(pdf)).not.toContain('Zahlteil');
+	});
+
 	it('druckt ohne IBAN keinen Zahlteil', async () => {
 		await deleteConfig('iban');
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });

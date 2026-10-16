@@ -14,7 +14,8 @@ import {
 	generateQRBillForStatement,
 	formatIBANForDisplay,
 	formatQRReferenceForDisplay,
-	type QRBillConfig
+	type QRBillConfig,
+	type StatementForQRBill
 } from './qr-bill.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
@@ -835,7 +836,7 @@ function swissCross(doc: Doc, x: number, y: number) {
 
 // Swiss QR-bill (SIX): receipt 62 mm and payment part 148 mm across the bottom 105 mm of the page; the printed
 // details are those in the QR code
-function paymentPart({ doc, t, data, config }: Page, qr: QRResult) {
+function paymentPart({ doc, t, config }: Pick<Page, 'doc' | 't' | 'config'>, qr: QRResult, balance: number) {
 	const top = PAGE.height - PAYMENT_PART;
 	const receiptWidth = 62 * MM;
 	doc.page.margins.bottom = 0; // printing down to the edge, or pdfkit breaks each line onto a new page
@@ -849,7 +850,7 @@ function paymentPart({ doc, t, data, config }: Page, qr: QRResult) {
 	// the QR code names the debtor only with name, postal code and town
 	const debtor = qrData.debtorPostalCode && qrData.debtorCity ? [qrData.debtorName, qrData.debtorStreet, `${qrData.debtorPostalCode} ${qrData.debtorCity}`] : [];
 	const reference = qr.reference ? [formatQRReferenceForDisplay(qr.reference)] : [];
-	const amount = qrAmount(data.balance);
+	const amount = qrAmount(balance);
 
 	// Receipt
 	const left = 5 * MM;
@@ -873,6 +874,22 @@ function paymentPart({ doc, t, data, config }: Page, qr: QRResult) {
 		[t.payableBy, debtor]
 	];
 	qrBlocks(doc, details, receiptWidth + 56 * MM, top + 5 * MM, [8, 10], 87 * MM);
+}
+
+/**
+ * The QR-bill of a statement's open Saldo at the foot of the letter's page, e.g. a reminder (#108): the statement's
+ * reference and message, labels in the tenant's language; a new page when the letter reaches into it
+ */
+export async function addPaymentPart(
+	doc: Doc,
+	statement: Omit<StatementForQRBill, 'title'>,
+	config: QRBillConfig,
+	language: Language
+) {
+	const t = { ...translations.de, ...translations[language] };
+	const qr = await generateQRBillForStatement({ ...statement, title: t.title }, config);
+	if (doc.y > PAGE.height - PAYMENT_PART - 24) doc.addPage();
+	paymentPart({ doc, t, config }, qr, Number(statement.balance));
 }
 
 // Without a QR code (it could not be made): the account to pay to
@@ -959,7 +976,7 @@ async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig
 			if (qr) {
 				if (y > PAGE.height - PAYMENT_PART - 24) doc.addPage();
 				qrPage = doc.bufferedPageRange().count - 1;
-				paymentPart(page, qr);
+				paymentPart(page, qr, data.balance);
 			} else if (data.balance > 0 && !data.paidDate) {
 				paymentInfo(page, y);
 			}
