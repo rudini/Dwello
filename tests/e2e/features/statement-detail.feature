@@ -131,7 +131,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Und die Zahlung der Abrechnung 2024 von "Eva Frei" ist inzwischen zurückgesetzt
     Wenn der Liegenschaftsverwalter die Zahlung zurücksetzt
-    Dann meldet die Detailseite der Abrechnung "Die Abrechnung ist nicht als bezahlt erfasst. Laden Sie die Seite neu."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Abrechnung ist nicht als bezahlt erfasst. Laden Sie die Seite neu."
 
   # #92: nach Ablauf der Zahlungsfrist ist die Abrechnung nach dem Zurücksetzen wieder überfällig
   Szenario: Zahlung einer Abrechnung mit abgelaufener Zahlungsfrist zurücksetzen

@@ -1,7 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { francs } from '../questions/amounts';
-import { errorMessageShown } from '../questions/form';
 import { downloadedFileHeader, downloadedFileName, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
 import {
 	deleteOffers,
@@ -250,10 +249,6 @@ Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: st
 
 Given('die Abrechnung {int} von {string} ist bezahlt', async ({ seed }, year: number, tenant: string) => {
 	await seed.markPaid(tenant, year);
-});
-
-Then('meldet die Detailseite der Abrechnung {string}', async ({ verwalter }, message: string) => {
-	await verwalter.sees(errorMessageShown(message)).toBe(true);
 });
 
 Given('die Zahlung der Abrechnung {int} von {string} ist inzwischen zurückgesetzt', async ({ seed }, year: number, tenant: string) => {
