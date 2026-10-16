@@ -183,9 +183,14 @@ export const Browser = {
 };
 
 /** Posts a form action of the page without its UI, as from a tab that still shows an older state */
-export const PostFormAction = (action: string): Activity => (actor) =>
-	pageOf(actor).evaluate((action) => {
-		const form = Object.assign(document.createElement('form'), { method: 'POST', action });
-		document.body.append(form);
-		form.submit();
-	}, action);
+export const PostFormAction = (action: string, fields: Record<string, string> = {}): Activity => (actor) =>
+	pageOf(actor).evaluate(
+		({ action, fields }) => {
+			const form = Object.assign(document.createElement('form'), { method: 'POST', action });
+			for (const [name, value] of Object.entries(fields))
+				form.append(Object.assign(document.createElement('input'), { type: 'hidden', name, value }));
+			document.body.append(form);
+			form.submit();
+		},
+		{ action, fields }
+	);

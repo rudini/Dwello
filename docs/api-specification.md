@@ -31,7 +31,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
   - Contracts and statements: `CONTRACT_OVERLAP {contract}`, `CONTRACT_NOTICE_WITHOUT_END`, `CONTRACT_PARTIES_FIXED`, `CONTRACT_STARTED`, `CONTRACT_HAS_STATEMENTS`, `CONTRACT_NOT_IN_PERIOD`, `IBAN_MISSING`, `IBAN_INVALID` (the stored IBAN fails its check when a PDF needs the QR-bill), `CALCULATION_FAILED` (preview or generation failed for another reason, logged), `PDF_FAILED` (500: a PDF could not be made for another reason, logged)
   - Invoices: `KI_UNAVAILABLE`; categories: `KI_PROPOSAL_UNAVAILABLE`, `KI_PROPOSAL_UNSURE`
   - Uploaded documents: `DOCUMENT_TOO_LARGE {megabytes}`, `DOCUMENT_TYPE_NOT_ALLOWED`, `DOCUMENT_TITLE_TOO_LONG {max}`, `TENANT_NOT_FOUND` (404), `DOCUMENT_NOT_DELETABLE`
-  - Reminders: `REMINDER_NOT_SENT`, `REMINDER_NOT_OVERDUE`, `REMINDER_REFUND`, `REMINDER_LIMIT`; delivery errors as `deliveryErrorCode` of a document: `TENANT_NO_EMAIL`, `MAIL_NOT_CONFIGURED`, `MAIL_DELIVERY_FAILED` (any other failure, also one stored before this code existed; the mail server's text is logged, never stored)
+  - Reminders: `REMINDER_NOT_SENT`, `REMINDER_NOT_OVERDUE`, `REMINDER_REFUND`, `REMINDER_LIMIT`, `REMINDER_TOO_EARLY` (`date`: the day from which the next Mahnstufe is possible, `deadline`: the last reminder's Zahlungsfrist, both YYYY-MM-DD); delivery errors as `deliveryErrorCode` of a document: `TENANT_NO_EMAIL`, `MAIL_NOT_CONFIGURED`, `MAIL_DELIVERY_FAILED` (any other failure, also one stored before this code existed; the mail server's text is logged, never stored)
 - **Schema validation:** a body, query or path parameter that fails the Elysia `t` schema returns **422** `{ error: 'Invalid request', code: 'VALIDATION_ERROR', params: {} }` (one `onError` in `backend/src/app.ts`); the UI shows `backend_validation_error`.
 - **Types:** IDs are UUID strings. Money, area, rooms and percentages stored as `numeric` are **strings** (`"450.00"`). Dates are `YYYY-MM-DD`; timestamps ISO 8601.
 - **Pagination:** `limit` and `offset` query parameters (strings parsed as integers). Default `limit` per router is noted below. There is no sorting parameter; each list has a fixed order.
@@ -202,6 +202,8 @@ Transitions (`PUT /:id/status`, checked against the effective status): `draft �
 
 Only **drafts** can be deleted or get line items; amounts (`totalCosts`, `totalAdvancePayments`, `managementFeePercent`, `managementFee`, `balance`) of non-drafts cannot change; no route accepts them, `updateStatement` rejects them in the service.
 
+Every statement of `GET /` and `GET /:id` carries `nextReminderFrom`: the day after its last reminder's `paymentDeadline`, from which the next Mahnstufe is possible; `null` without a reminder, after the 3rd, or once paid (#107).
+
 Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadline not past or none), `overdue` (sent, deadline past), `open` (all `sent`, overdue included).
 
 ### Endpoints
@@ -227,14 +229,14 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/statements/:id/reminders` | No body. Creates the next reminder letter (levels 1–3) as a PDF document and delivers it via the tenant's `correspondenceChannel`: e-mail is sent right away (status `sent`, or `deliveryError` set if sending fails); `letter` stays `to_send` for printing. Sets the statement's `reminderSentDate`. → **201** `{ document, deliveryError? }`. 404 statement; 400 statement not sent/overdue, or 3 reminders already sent |
+| POST | `/statements/:id/reminders` | No body. Creates the next reminder letter (levels 1–3) as a PDF document and delivers it via the tenant's `correspondenceChannel`: e-mail is sent right away (status `sent`, or `deliveryError` set if sending fails); `letter` stays `to_send` for printing. Sets the statement's `reminderSentDate`. → **201** `{ document, deliveryError? }`. 404 statement; 400 statement not sent/overdue, 3 reminders already sent, or the last reminder's `paymentDeadline` not yet passed |
 | POST | `/tenants/:id/documents` | Uploads a file to the tenant (Hochgeladenes Dokument). Body: `title` (empty: the file name without its extension), `fileName`, `content` (Base64). The kind is told by the first bytes: PDF, JPEG or PNG, at most 10 × 1024 × 1024 bytes; title at most 255 characters, a longer file name keeps its last 255. → **201** document (`type: upload`, no `channel`, no `status`). 400 `DOCUMENT_TYPE_NOT_ALLOWED`, `DOCUMENT_TOO_LARGE`, `DOCUMENT_TITLE_TOO_LONG`; 404 `TENANT_NOT_FOUND` |
 | GET | `/documents` | Query: `tenantId`, `statementId`, `status` (`sent`\|`to_send`). → `{ data: [document] }`, newest first; `status` never lists uploads |
 | GET | `/documents/:id/pdf` | → the file as an attachment with its `mimeType` (PDF, JPEG or PNG); `filename*` carries a name outside ASCII. 404 |
 | DELETE | `/documents/:id` | Deletes an uploaded document. → `{ success: true }`. 404; 409 `DOCUMENT_NOT_DELETABLE` for a reminder |
-| PUT | `/documents/:id/sent` | Marks a printed letter as posted (`status: sent`, `sentAt`). → document. 404, also for an upload |
+| PUT | `/documents/:id/sent` | Marks a printed letter as posted (`status: sent`, `sentAt`). A reminder still `to_send` is remade with today's letter date and `paymentDeadline` (today + 10 days), its `channel` becomes `letter` (also after a failed e-mail) and the statement's `reminderSentDate` today. → document. 404, also for an upload |
 
-Document fields: `id, tenantId, statementId, type ("reminder" | "upload"), reminderLevel, title, fileName, mimeType, channel, status, sentAt, deliveryError, deliveryErrorCode, createdAt, tenantName, statementNumber` (the file itself only via `/pdf`; `channel` and `status` are null for an upload). Deleting a tenant without contracts (`DELETE /tenants/:id`) deletes their uploaded documents too.
+Document fields: `id, tenantId, statementId, type ("reminder" | "upload"), reminderLevel, title, fileName, mimeType, channel, status, sentAt, deliveryError, deliveryErrorCode, paymentDeadline, createdAt, tenantName, statementNumber` (the file itself only via `/pdf`; `channel`, `status` and `paymentDeadline` (the Zahlungsfrist a reminder prints) are null for an upload). Deleting a tenant without contracts (`DELETE /tenants/:id`) deletes their uploaded documents too.
 
 ## 14. Dashboard `/api/v1/dashboard`
 

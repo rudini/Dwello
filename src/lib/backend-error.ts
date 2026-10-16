@@ -1,5 +1,6 @@
 import { monthName } from '$lib/heating-profile';
 import { m } from '$lib/paraglide/messages';
+import { formatDate } from '$lib/utils/format';
 
 type Params = Record<string, string | number>;
 
@@ -23,6 +24,7 @@ const codeParams = ['cause', 'reason', 'sample'];
 function render(message: (params: Params) => string, params: Params): string {
 	const shown = Object.entries(params).map(([key, value]) => {
 		if (key === 'month') return [key, monthName(String(value))]; // the backend names a month by its key
+		if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return [key, formatDate(String(value))]; // and a day as YYYY-MM-DD
 		const part = codeParams.includes(key) ? messageOf(value) : undefined;
 		if (!part) return [key, value];
 		const { [key]: _, ...rest } = params; // each part without itself, so nesting ends
