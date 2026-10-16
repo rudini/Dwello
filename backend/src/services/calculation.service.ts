@@ -10,9 +10,9 @@
  * - Balance calculation
  */
 
-import { like, max } from 'drizzle-orm';
+import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements, type HeatingShare, type InvoicePart } from '../db/schema';
+import { statementNumbers, utilityStatements, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -440,7 +440,7 @@ async function heatingOfRun(
 
 /**
  * Next statement number of a building and year: NK-<building>-<year>-0001, 0002, …
- * Counts on from the highest one, so a deleted statement's number does not come back while later ones exist
+ * Never gives a number twice, also after its draft was deleted: the gap stays (#97)
  */
 export async function generateStatementNumber(buildingId: string, periodEnd: Date): Promise<string> {
 	const prefix = `NK-${buildingId.substring(0, 8).toUpperCase()}-${periodEnd.getUTCFullYear()}-`;
@@ -448,7 +448,12 @@ export async function generateStatementNumber(buildingId: string, periodEnd: Dat
 		.select({ highest: max(utilityStatements.statementNumber) })
 		.from(utilityStatements)
 		.where(like(utilityStatements.statementNumber, `${prefix}%`));
-	const sequence = highest ? Number(highest.slice(prefix.length)) + 1 : 1;
+	// the first number of a prefix follows the highest existing one; after that the counter alone decides (#97)
+	const [{ lastNumber }] = await db
+		.insert(statementNumbers)
+		.values({ prefix, lastNumber: highest ? Number(highest.slice(prefix.length)) + 1 : 1 })
+		.onConflictDoUpdate({ target: statementNumbers.prefix, set: { lastNumber: sql`${statementNumbers.lastNumber} + 1` } })
+		.returning({ lastNumber: statementNumbers.lastNumber });
 
-	return `${prefix}${String(sequence).padStart(4, '0')}`;
+	return `${prefix}${String(lastNumber).padStart(4, '0')}`;
 }
