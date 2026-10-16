@@ -76,6 +76,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		days: '{days}/{total} Tage',
 		partNoPeriod: 'Ohne Leistungszeitraum{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen der Abrechnungsperiode',
 		partBeyond: 'Leistungszeitraum {wholeStart} – {wholeEnd} (Rechnung CHF {wholeAmount}), davon {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
+		partStock: 'Veränderung Tankbestand {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partShare: 'Ihr Anteil{colon}{apartment} × ({sum}) / {costs} = {share}',
 		yourCosts: 'Ihre Nebenkosten',
@@ -151,6 +152,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		days: '{days}/{total} jours',
 		partNoPeriod: 'Sans période de prestation{colon}CHF {amount}, vos jours de location {days} sur {total} jours de la période de décompte',
 		partBeyond: 'Période de prestation {wholeStart} – {wholeEnd} (facture CHF {wholeAmount}), dont {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
+		partStock: 'Variation du stock de combustible {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
 		partLine: 'Période de prestation {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
 		partShare: 'Votre part{colon}{apartment} × ({sum}) / {costs} = {share}',
 		yourCosts: 'Vos frais accessoires',
@@ -226,6 +228,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		days: '{days}/{total} giorni',
 		partNoPeriod: 'Senza periodo di prestazione{colon}CHF {amount}, i suoi giorni di locazione {days} su {total} giorni del periodo di conteggio',
 		partBeyond: 'Periodo di prestazione {wholeStart} – {wholeEnd} (fattura CHF {wholeAmount}), di cui {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
+		partStock: 'Variazione della scorta di combustibile {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
 		partLine: 'Periodo di prestazione {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
 		partShare: 'La sua quota{colon}{apartment} × ({sum}) / {costs} = {share}',
 		yourCosts: 'Le sue spese accessorie',
@@ -301,6 +304,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		days: '{days}/{total} days',
 		partNoPeriod: 'Without a service period{colon}CHF {amount}, your days rented {days} of {total} days of the billing period',
 		partBeyond: 'Service period {wholeStart} – {wholeEnd} (invoice CHF {wholeAmount}), of which {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
+		partStock: 'Change in fuel stock {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
 		partLine: 'Service period {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
 		partShare: 'Your share{colon}{apartment} × ({sum}) / {costs} = {share}',
 		yourCosts: 'Your utility costs',
@@ -666,8 +670,10 @@ function partLines(item: LineItem, t: Record<string, string>) {
 	return [...lines, fill(t.partShare, share)];
 }
 
-// An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241)
-const partText = (part: InvoicePart) => (part.noPeriod ? 'partNoPeriod' : part.whole ? 'partBeyond' : 'partLine');
+// An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241);
+// the change of the Tankbestand is no invoice and says so (#239)
+const partText = (part: InvoicePart) =>
+	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.whole ? 'partBeyond' : 'partLine';
 const partValues = ({ start, end, amount, days, total, whole }: InvoicePart, colon: string) => ({
 	start: formatDate(start),
 	end: formatDate(end),

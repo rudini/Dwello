@@ -196,6 +196,9 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 
 	it('erklärt den Bruch einer Rechnung mit Leistungszeitraum', () => {
 		expect(text).toContain('Zeitanteil: Ihre Mietstage in der Abrechnungsperiode. Bei einer Rechnung mit Leistungszeitraum zählen Ihre Mietstage in diesem Zeitraum.');
+		// no position with invoice lines: neither their sentence nor the rounding (#241, C-2)
+		expect(text).not.toContain('Hat eine Abrechnungsposition');
+		expect(text).not.toContain('Der Prozentwert ist gerundet');
 	});
 
 	// Zwei Hauswart-Rechnungen über verschiedene Tage: der Anteil ist nach Beträgen gewichtet, kein Bruch von Tagen (#226)
@@ -554,6 +557,25 @@ describe('Tankbestand im PDF', () => {
 		await deleteStatement(id);
 		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, tank.building));
 		await tank.remove();
+	});
+
+	// #239 (Code-Review C-1 von #241): eine Heizposition nach Tagen mit einer Lieferung über einen Leistungszeitraum;
+	// die Veränderung des Tankbestands ist keine Rechnung und heisst so, nicht «Leistungszeitraum»
+	it('nennt die Veränderung des Tankbestands unter einer Heizposition nach Tagen als solche', async () => {
+		const august = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(august.building, { categoryId: heating.id, amount: '900.00', description: 'Heizöl', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
+		await createFuelStock(august.building, { readingDate: '2024-12-31', amount: '600.00', categoryId: heating.id });
+		await createFuelStock(august.building, { readingDate: '2025-12-31', amount: '100.00', categoryId: heating.id });
+		const statement = await generateStatement({ contractId: august.contract, buildingId: august.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const stock = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, august.building));
+		await august.remove();
+
+		expect(stock).toContain('Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(stock).not.toContain('Leistungszeitraum 01.01.2025 – 31.12.2025');
 	});
 
 	it('leitet die Heizkosten aus Anfangsbestand, Rechnungen und Endbestand her', () => {
