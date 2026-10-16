@@ -297,6 +297,7 @@ export interface Statement {
 	status: StatementStatus;
 	paymentDeadline: string;
 	paidDate?: string;
+	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	lastReminderDate?: string;
 	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
 	pdfGeneratedAt?: string;

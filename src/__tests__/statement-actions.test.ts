@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { runAction } from './helpers/action';
 import { actions } from '../routes/statements/[id]/+page.server';
 import { localToday } from '$lib/contract-status';
+import paidDateRefused from '../../tests/contracts/statement-paid-date-refused.json';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 const today = localToday(); // the day in Switzerland, as the app takes it
@@ -81,6 +82,53 @@ describe('Zahlungsdatum', () => {
 			}
 		});
 		expect(calls).toEqual([]);
+	});
+});
+
+// #138: frühestens das Abrechnungsdatum, das der Dialog mitsendet; das Backend prüft es noch einmal
+describe('Zahlungsdatum und Abrechnungsdatum', () => {
+	it('lehnt ein Zahlungsdatum vor dem Abrechnungsdatum ab, ohne zu speichern', async () => {
+		const { calls, result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2026-01-04', statementDate: '2026-01-05' });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				actionError:
+					'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 05.01.2026. Geben Sie frühestens dieses Datum ein.'
+			}
+		});
+		expect(calls).toEqual([]);
+	});
+
+	it('zeigt die Ablehnung des Backends in Worten', async () => {
+		const { result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2026-01-04' }, {}, { status: 400, answer: paidDateRefused });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				actionError:
+					'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 05.01.2026. Geben Sie frühestens dieses Datum ein.'
+			}
+		});
+	});
+});
+
+// #92: eine erfasste Zahlung zurücksetzen
+describe('Zahlung zurücksetzen', () => {
+	it('lässt das Backend die Zahlung zurücksetzen', async () => {
+		const { calls, result } = runAction(actions.resetPayment, 's1');
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/payment-reset`, body: undefined }]);
+	});
+
+	it('meldet einen Fehler mit dem nächsten Schritt, wenn das Backend scheitert', async () => {
+		const { result } = runAction(actions.resetPayment, 's1', 500);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { actionError: 'Die Zahlung konnte nicht zurückgesetzt werden. Versuchen Sie es erneut.' }
+		});
 	});
 });
 

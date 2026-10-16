@@ -618,7 +618,7 @@ BALANCE (refund): CHF 30
 1. **Entwurf** (`draft`) - Statement generated, not yet sent; the only status in which it can be edited (amounts, line items) or deleted
 2. **Versendet** (`sent`) - Statement delivered to the tenant, awaiting payment
 3. **Überfällig** (`overdue`) - Sent and past the payment deadline (computed from the deadline)
-4. **Bezahlt** (`paid`) - Settled; final, cannot be reverted
+4. **Bezahlt** (`paid`) - Settled; «Zahlung zurücksetzen» takes a wrong payment back to Versendet or Überfällig, recorded in the Verlauf (#92)
 5. **Partial** (future) - If multiple transactions needed
 
 **Status Management:**
@@ -1196,7 +1196,7 @@ BALANCE (refund): CHF 30
 - If paid:
   - Payment date
   - Payment amount (should match statement balance)
-  - No undo: Bezahlt (paid) is final
+  - Payment date from the Abrechnungsdatum up to today (#138); «Zahlung zurücksetzen» takes it back (#92)
 
 **Associated Data:**
 - List of invoices included in this statement
@@ -1206,7 +1206,7 @@ BALANCE (refund): CHF 30
 **Statement Actions:**
 - Download as PDF
 - Print
-- Mark as paid (final, no undo)
+- Mark as paid; reset the payment (#92)
 - Send payment reminder
 - Regenerate (if invoices/contracts changed)
 - Edit amounts and line items (draft only)
