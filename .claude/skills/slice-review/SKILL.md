@@ -33,7 +33,13 @@ For a re-review give only the delta, the open finding IDs and the previous repor
 ## 3. Triage
 
 1. Copy each report from your scratchpad to `docs/reviews/` under the same name.
-2. Judge and fix the findings as `CLAUDE.md`, Workflow 6 says.
+2. Judge and fix the findings (`CLAUDE.md`, Workflow 6):
+   - Every report gives severity (Blocker / Major / Minor / Nit) and evidence (file:line or reproduction steps). Check the evidence before acting; reject a finding with a reason when it does not hold.
+   - A fix that changes behavior (a help or error text the user sees included) gets a failing test first. A wording fix of a translation that a reviewer named and checked needs none, also when it answers a persona finding: the report is the evidence. Any other fixed persona finding is closed by a test that shows it (scenario or lower layer, red before the fix).
+   - A persona runs again only when a fix adds a text or screen state it has not seen, and then only the personas whose finding the fix answers, with a task on just that text or state.
+   - Persona "Beobachtungen": check each on the base commit. One the change caused or made more visible is a finding of the slice; the others go into one issue or one `offene-punkte.md` row per task.
+   - Rounds: a round is one run of one reviewer on one slice, at most three per slice; a Blocker/Major still open after the third goes under "Blocked on me". Only a fix that answers a Blocker/Major gets a re-review (the delta, the open finding IDs, the previous report). Fixes of feature-review findings form a new slice. Minor/Nit fixes wait for the closing round before the push (skill `pull-request`).
+   - Open when the task ends: a Blocker/Major that needs a product decision (it contradicts what the issue decided) or existed before the change (it shows on the base commit too, and the change does not make it more visible) goes under "Blocked on me" and becomes open work (`CLAUDE.md`, "Open work"); Minors/Nits left unfixed become open work.
 3. Add one line per reviewer and round to the latest `## Session` of `implementation_plan.md`:
    `<reviewer> round <n> (<report path>): open <ID (severity)>, fixed <IDs>, rejected <ID: reason>`
    The findings stay in the report. A finding fixed in a later round changes its status in the line of the round that raised it. Findings of different reviewers with one cause are one fix and one test: each line names the finding that holds it (`= P-1`).
