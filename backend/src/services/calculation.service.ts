@@ -85,7 +85,7 @@ interface InvoiceGroup {
 		amount: number;
 		start: string;
 		end: string;
-	}>;
+	} & Pick<InvoicePart, 'noPeriod' | 'whole' | 'fuelStock'>>;
 	isHeatingCost: boolean;
 }
 
@@ -157,7 +157,10 @@ function daysOf(group: InvoiceGroup, rentalStart: string, rentalEnd: string, who
 		end: invoice.end,
 		amount: invoice.amount,
 		days: rentedIn(invoice, rentalStart, rentalEnd),
-		total: days(invoice.start, invoice.end)
+		total: days(invoice.start, invoice.end),
+		...(invoice.noPeriod && { noPeriod: invoice.noPeriod }),
+		...(invoice.whole && { whole: invoice.whole }),
+		...(invoice.fuelStock && { fuelStock: invoice.fuelStock })
 	}));
 	return { ...noDays, invoiceParts };
 }

@@ -510,10 +510,13 @@ function inPeriod(
 	periodEnd: string
 ) {
 	const amount = parseFloat(invoice.amount);
-	if (!invoice.servicePeriodStart || !invoice.servicePeriodEnd) return { start: periodStart, end: periodEnd, amount };
+	if (!invoice.servicePeriodStart || !invoice.servicePeriodEnd) return { start: periodStart, end: periodEnd, amount, noPeriod: true as const };
 	const start = invoice.servicePeriodStart > periodStart ? invoice.servicePeriodStart : periodStart;
 	const end = invoice.servicePeriodEnd < periodEnd ? invoice.servicePeriodEnd : periodEnd;
-	return { start, end, amount: roundToRappen((amount * daysFrom(start, end)) / daysFrom(invoice.servicePeriodStart, invoice.servicePeriodEnd)) };
+	const part = { start, end, amount: roundToRappen((amount * daysFrom(start, end)) / daysFrom(invoice.servicePeriodStart, invoice.servicePeriodEnd)) };
+	// a Leistungszeitraum reaching beyond the period: the receipt's dates and amount, so the tenant finds it (#241)
+	const beyond = start !== invoice.servicePeriodStart || end !== invoice.servicePeriodEnd;
+	return beyond ? { ...part, whole: { start: invoice.servicePeriodStart, end: invoice.servicePeriodEnd, amount } } : part;
 }
 
 /**
