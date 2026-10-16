@@ -36,8 +36,6 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<BuildingsLis
 			city: b.city,
 			canton: b.canton,
 			country: b.country || 'CH',
-			latitude: b.latitude ? Number(b.latitude) : undefined,
-			longitude: b.longitude ? Number(b.longitude) : undefined,
 			yearBuilt: b.yearBuilt ? Number(b.yearBuilt) : undefined,
 			buildingType: b.buildingType,
 			apartmentCount: Number(b.apartmentCount) || 0,

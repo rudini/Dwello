@@ -11,6 +11,7 @@ import {
 	noticeReceivedOn,
 	endDateProblemShown,
 	endOfContract,
+	managementFeeOfContract,
 	missingStatementsText,
 	statementLinkedInDeleteDialog,
 	statusOfContract,
@@ -207,6 +208,21 @@ Then('meldet der Mietvertrag keine fehlende Abrechnung des letzten Jahres', asyn
 Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed }, tenant: string, date: string) => {
 	await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
 	await verwalter.sees(endOfContract).toContain(date);
+});
+
+Given('im Mietvertrag von {string} ist keine Verwaltungspauschale vereinbart', async ({ seed }, tenant: string) => {
+	await seed.managementFee(tenant, false);
+});
+
+Given(
+	'im Mietvertrag von {string} ist eine Verwaltungspauschale von {int} % vereinbart',
+	async ({ seed }, tenant: string, percent: number) => {
+		await seed.managementFee(tenant, true, String(percent));
+	}
+);
+
+Then('zeigt der Mietvertrag bei der Verwaltungspauschale {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(managementFeeOfContract).toBe(text);
 });
 
 When(

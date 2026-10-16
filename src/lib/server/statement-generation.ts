@@ -13,6 +13,7 @@ type Contract = {
 	endDate: string | null;
 	tenantName: string;
 	apartmentNumber: string;
+	managementFeeAgreed?: boolean;
 };
 
 export interface GenerationRequest {
@@ -73,12 +74,18 @@ async function contractsInPeriod(fetch: Fetch, request: GenerationRequest) {
 	);
 }
 
-/** Per building: its contracts in the period and how many of them have a statement there already (wizard step 2) */
+/**
+ * Per building: its contracts in the period and how many of them have a statement there already (wizard step 2), and
+ * those this run bills without an agreed Verwaltungspauschale (#89, step «Einstellungen»)
+ */
 export async function billedContracts(fetch: Fetch, request: Run) {
 	return (await contractsOf(fetch, request)).map(({ buildingId, inPeriod, billed }) => ({
 		buildingId,
 		contracts: inPeriod.length,
-		billed: billed.length
+		billed: billed.length,
+		withoutFee: inPeriod
+			.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
+			.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }))
 	}));
 }
 

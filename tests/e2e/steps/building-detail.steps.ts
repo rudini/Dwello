@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { buildingAddress, listedApartment, yearBuilt } from '../questions/building-detail';
+import { buildingAddress, listedApartment, shownMaps, yearBuilt } from '../questions/building-detail';
 import { emptyListShown, listedBuildingCount } from '../questions/buildings';
 import {
 	deleteBuilding,
@@ -77,6 +77,14 @@ Then('das Gebäude {string} ist nicht mehr in der Liste', async ({ verwalter, na
 
 Then('sieht der Liegenschaftsverwalter das Baujahr {string}', async ({ verwalter }, year: string) => {
 	await verwalter.sees(yearBuilt).toBe(year);
+});
+
+Given('für das Gebäude {string} sind Koordinaten erfasst', async ({ seed }, title: string) => {
+	await seed.buildingCoordinates(title);
+});
+
+Then('sieht der Liegenschaftsverwalter keine Karte des Gebäudes', async ({ verwalter }) => {
+	await verwalter.sees(shownMaps).toBe(0);
 });
 
 Then('sieht der Liegenschaftsverwalter die Adresse {string}', async ({ verwalter }, address: string) => {

@@ -154,9 +154,9 @@ describe('Datenschutzerklärung zu Anmeldung, Dritten und Cookies', () => {
 		);
 	});
 
-	it('nennt die Kartenkacheln von CARTO und die Adresssuche von OpenPLZ, aber kein Google Fonts', () => {
+	it('nennt die Adresssuche von OpenPLZ, aber weder CARTO noch Google Fonts', () => {
 		const text = page(['Google']);
-		expect(text).toContain('CARTO');
+		expect(text).not.toContain('CARTO');
 		expect(text).toContain('OpenPLZ');
 		expect(text).not.toContain('Google Fonts');
 	});

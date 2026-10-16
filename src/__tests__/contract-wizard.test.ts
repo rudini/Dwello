@@ -24,7 +24,9 @@ const empty: ContractFormValues = {
 	isUnlimited: true,
 	baseRent: '',
 	additionalRent: '',
-	advancePayment: ''
+	advancePayment: '',
+	managementFee: '',
+	managementFeeRate: ''
 };
 const filled: ContractFormValues = {
 	...empty,
@@ -32,7 +34,8 @@ const filled: ContractFormValues = {
 	apartmentId: 'a1',
 	startDate: '2025-01-01',
 	baseRent: '950',
-	advancePayment: '180'
+	advancePayment: '180',
+	managementFee: 'run'
 };
 const tenants = [{ id: 't1', name: 'Anna Keller' }];
 const apartments = [{ id: 'a1', unit: '2.01', building: 'Ahornhof' }];
@@ -82,6 +85,12 @@ describe('Mietvertrag Schritt für Schritt', () => {
 			{ label: 'Nettomiete', value: 'CHF\u00a0950.00', step: 4, field: 'baseRent' },
 			{ label: 'Akonto', value: 'CHF\u00a0180.00', step: 4, field: 'advancePayment' },
 			{ label: 'Zusatzmiete', value: 'CHF\u00a00.00', step: 4, field: 'additionalRent' },
+			{
+				label: 'Verwaltungspauschale',
+				value: 'Vereinbart, Satz des Abrechnungslaufs',
+				step: 4,
+				field: 'managementFee'
+			},
 			{ label: 'Monatlich total', value: 'CHF\u00a01’130.00', step: null, field: '' } // a sum, changed through its parts
 		]);
 		const limited = { ...filled, isUnlimited: false, endDate: '2026-12-31' };

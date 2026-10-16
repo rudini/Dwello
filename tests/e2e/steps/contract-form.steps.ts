@@ -28,6 +28,7 @@ import {
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
 import {
+	agreeManagementFee,
 	changeBaseRent,
 	deleteDraftAndSave,
 	openContractEdit,
@@ -318,6 +319,28 @@ Then(
 		await verwalter.sees(partiesHelpText).toContain('mit «Beenden»');
 	}
 );
+
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken ohne Angabe zur Verwaltungspauschale vermieten will',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: null })
+		);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit einer Verwaltungspauschale von {string} % bis zur Prüfung erfasst',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, fee: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: fee })
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
+	await verwalter.attemptsTo(agreeManagementFee);
+});
 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass {string} einen Mietvertrag ohne Vertragsende für die Wohnung {string} hat',

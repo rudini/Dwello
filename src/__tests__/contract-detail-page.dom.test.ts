@@ -79,6 +79,30 @@ const amountOf = (label: string) =>
 		.trim();
 
 describe('Mietvertragsdetail', () => {
+	// #89: whether a Verwaltungspauschale is agreed, and at which rate
+	it.each([
+		[false, null, 'Nicht vereinbart'],
+		[true, null, 'Vereinbart, Satz des Abrechnungslaufs'],
+		[true, '4.00', 'Vereinbart, 4 %']
+	])('nennt die Verwaltungspauschale des Mietvertrags (%s, %s)', (agreed, percent, shown) => {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: null,
+				contract: {
+					...contract('2024-04-01', null),
+					managementFeeAgreed: agreed,
+					managementFeePercent: percent
+				},
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			},
+			form: null
+		} as never);
+		expect(text('contract-management-fee')).toBe(shown);
+	});
+
 	// A-4: nach der Kündigung den Nachmieter erfassen und die neue Adresse eintragen
 	it('nennt nach einer Kündigung die nächsten Schritte', () => {
 		open('2024-04-01', '2099-03-31', null, '2026-10-10', true);
