@@ -65,6 +65,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		statementDate: 'Abrechnungsdatum',
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
 		heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses: {months}',
+		heatingPeriodSums: '; zusammen {tenant}\u00a0%. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen {period}\u00a0%.',
 		months: 'Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez',
 		feeOwn: '{percent} % der Zwischensumme von CHF {base}',
 		sqm: 'm²',
@@ -134,6 +135,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		statementDate: 'Date du décompte',
 		heatingNote: 'Frais de chauffage selon le profil « {profile} » : {percent} % des frais de chauffage de votre logement pour la période de décompte',
 		heatingMonths: 'Parts des mois de votre bail : {months}',
+		heatingPeriodSums: ' ; au total {tenant}\u00a0%. Les mois de la période de décompte totalisent {period}\u00a0% dans le profil de chauffage.',
 		months: 'janv.,févr.,mars,avr.,mai,juin,juil.,août,sept.,oct.,nov.,déc.',
 		feeOwn: '{percent} % du sous-total de CHF {base}',
 		keyColumn: 'Clé de répartition',
@@ -202,6 +204,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		statementDate: 'Data del conteggio',
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
 		heatingMonths: 'Quote dei mesi della sua locazione: {months}',
+		heatingPeriodSums: '; in totale {tenant}\u00a0%. I mesi del periodo di conteggio totalizzano {period}\u00a0% nel profilo di riscaldamento.',
 		months: 'gen,feb,mar,apr,mag,giu,lug,ago,set,ott,nov,dic',
 		feeOwn: '{percent} % del subtotale di CHF {base}',
 		keyColumn: 'Chiave di riparto',
@@ -270,6 +273,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		statementDate: 'Statement date',
 		heatingNote: 'Heating costs by heating profile «{profile}»: {percent} % of the heating costs of your apartment in the billing period',
 		heatingMonths: 'Shares of the months of your tenancy: {months}',
+		heatingPeriodSums: '; in total {tenant}\u00a0%. The months of the billing period total {period}\u00a0% in the heating profile.',
 		months: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
 		feeOwn: '{percent} % of the subtotal of CHF {base}',
 		keyColumn: 'Distribution key',
@@ -365,7 +369,7 @@ export interface StatementPDFData {
 	rentalEnd: string;
 	periodDays: number; // days of the Abrechnungsperiode, the base of the Mietstage
 	// the heating profile and its share; the months of a tenancy over part of the period with their shares
-	heating?: { profile: string; percent: number; months?: { month: number; percentage: number }[] };
+	heating?: { profile: string; percent: number; months?: { month: number; percentage: number }[]; periodPercent?: number };
 	// A tank: the heating costs of its category are opening stock + invoices – closing stock
 	fuel?: { category: string; openingDate: string; opening: number; invoices: number; closingDate: string; closing: number; total: number };
 
@@ -639,12 +643,16 @@ function amountLine(doc: Doc, label: string, amount: string, y: number, bold = f
 // The heating profile's share, with the months of a tenancy over part of the period
 function heatingLines({ t, data }: Page) {
 	if (!data.heating) return [];
-	const { profile, percent, months } = data.heating;
+	const { profile, percent, months, periodPercent } = data.heating;
 	const names = t.months.split(',');
 	const lines = [fill(t.heatingNote, { profile, percent: (Math.round(percent * 100) / 100).toFixed(2) })];
+	if (!months?.length || percent >= 100) return lines;
 	// no line break inside one month («Jun 3.70 %»)
-	if (months?.length && percent < 100)
-		lines.push(fill(t.heatingMonths, { months: months.map((m) => `${names[m.month - 1]}\u00a0${m.percentage.toFixed(2)}\u00a0%`).join(', ') }));
+	const list = months.map((m) => `${names[m.month - 1]}\u00a0${m.percentage.toFixed(2)}\u00a0%`).join(', ');
+	// a period whose months do not carry 100 % (under a year): both sums, from the printed months (#229)
+	const sum = months.reduce((total, m) => total + Math.round(m.percentage * 100), 0) / 100;
+	const sums = periodPercent == null || periodPercent === 100 ? '' : fill(t.heatingPeriodSums, { tenant: sum.toFixed(2), period: periodPercent.toFixed(2) });
+	lines.push(fill(t.heatingMonths, { months: list }) + sums);
 	return lines;
 }
 

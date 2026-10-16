@@ -254,6 +254,11 @@ export function testData(api: CallTheApi) {
 			extras.push(`heating-profiles/${profile.id}`);
 		},
 
+		// The landlord renames an own profile later (#229)
+		async renameHeatingProfile(title: string, newTitle: string) {
+			await put(`heating-profiles/${ids.get(title)}`, { name: unique(newTitle) });
+		},
+
 		// The landlord changes the monthly shares of an own profile later (#209)
 		async changeHeatingProfile(title: string, monthly: number[]) {
 			const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];

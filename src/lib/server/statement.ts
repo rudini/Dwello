@@ -21,6 +21,13 @@ const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0
 });
 
+// The heating profile as the statement stored it when it shares by the profile (#229), else as it is now
+const profileName = (data: BackendStatement): string => {
+	const stored = data.heatingShare?.names;
+	if (stored) return localName(stored);
+	return data.heatingProfile ? localName(data.heatingProfile) : '';
+};
+
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
 export function toStatement(data: BackendStatement): StatementWithDetails {
 	const { tenant = {}, apartment = {}, building = {} } = data;
@@ -53,7 +60,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		apartmentFloor: apartment.floor || '',
 		buildingName: building.name || '',
 		buildingAddress: building.address || '',
-		heatingProfileName: data.heatingProfile ? localName(data.heatingProfile) : '',
+		heatingProfileName: profileName(data),
 		lineItems: (data.lineItems || []).map(toLineItem)
 	};
 }
