@@ -214,6 +214,8 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 
 		expect(mixed).toMatch(/Hauswart Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² 1'206\.52 1'206\.52 51\.66 % /);
 		expect(mixed).not.toContain('Ihre Mietstage darin');
+		expect(mixed).toContain('01.06.2025 – 30.06.2025: 600.00, 16/30 Tage');
+		expect(mixed).toContain('01.07.2025 – 31.08.2025: 606.52, 31/62 Tage');
 	});
 
 	// Mietvertrag über die ganze Periode: der Mieter trägt alle Tage jeder Rechnung, der Anteil ist 92/92 (Regel 5)
