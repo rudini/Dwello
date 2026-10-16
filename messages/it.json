@@ -1269,7 +1269,7 @@
 	"profiles_total_excess": "{excess} % di troppo",
 	"profiles_shares_legend": "Quota delle spese di riscaldamento per mese in %",
 	"profiles_shares_help": "Le quote mensili ripartiscono le spese di riscaldamento di un anno e danno insieme 100 %. D’inverno si riscalda più che d’estate.",
-	"profiles_shares_keep": "I conteggi esistenti mantengono le quote mensili con cui sono stati allestiti. Per ricalcolare delle bozze, elimini le bozze di tutti i contratti di locazione degli appartamenti interessati in questo periodo di conteggio e allestisca di nuovo i conteggi. I conteggi inviati non possono essere ricalcolati.",
+	"profiles_shares_keep": "I conteggi esistenti mantengono le quote mensili con cui sono stati allestiti. Per ricalcolare delle bozze, elimini le bozze di tutti i contratti di locazione degli appartamenti interessati nel periodo di conteggio interessato e allestisca di nuovo i conteggi. I conteggi inviati non possono essere ricalcolati.",
 	"profiles_form_total": "Totale: {total} % – {remainder}",
 	"profiles_chart_caption": "Quota delle spese di riscaldamento per mese",
 	"profiles_monthly_shares": "Quote mensili",

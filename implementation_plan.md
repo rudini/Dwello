@@ -12,5 +12,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - Files: `backend/src/services/{heating-profile,prorating,calculation,statement-pdf,pdf}.service.ts`, `backend/src/db/schema.ts`, `src/lib/server/statement.ts`, `src/routes/config/heating-profiles/HeatingProfileForm.svelte`, `messages/*.json`, `docs/data-model.md`, `docs/api-specification.md`, tests and scenarios
 - [x] Code review round 1 (`docs/reviews/w4-review-1.md`)
 - [x] Persona Helga (`docs/design/personas/helga-w4.md`)
-- [ ] Persona Dr. Weber, fach-reviewer round 2, daten-pruefer
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-w4.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w4-fachreview-2.md`)
+- [ ] daten-pruefer
 - [ ] Workflow review, archive the session, pull request

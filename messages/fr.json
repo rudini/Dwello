@@ -1269,7 +1269,7 @@
 	"profiles_total_excess": "{excess} % de trop",
 	"profiles_shares_legend": "Part des frais de chauffage par mois en %",
 	"profiles_shares_help": "Les parts mensuelles répartissent les frais de chauffage d’une année et totalisent 100 %. On chauffe davantage en hiver qu’en été.",
-	"profiles_shares_keep": "Les décomptes existants conservent les parts mensuelles avec lesquelles ils ont été établis. Pour recalculer des brouillons, supprimez les brouillons de tous les contrats de bail des logements concernés dans cette période de décompte et établissez à nouveau les décomptes. Les décomptes envoyés ne peuvent pas être recalculés.",
+	"profiles_shares_keep": "Les décomptes existants conservent les parts mensuelles avec lesquelles ils ont été établis. Pour recalculer des brouillons, supprimez les brouillons de tous les contrats de bail des logements concernés dans la période de décompte concernée et établissez à nouveau les décomptes. Les décomptes envoyés ne peuvent pas être recalculés.",
 	"profiles_form_total": "Total : {total} % – {remainder}",
 	"profiles_chart_caption": "Part des frais de chauffage par mois",
 	"profiles_monthly_shares": "Parts mensuelles",

@@ -46,7 +46,7 @@ Funktionalität: Heizprofile
   # #230: eine Abrechnung behält die Anteile, mit denen sie erstellt wurde; eine Änderung wirkt erst auf neue
   Szenario: Bearbeitung eines Heizprofils sagt, dass bestehende Abrechnungen ihre Anteile behalten
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Heizprofils "Bergtal"
-    Dann erklärt die Bearbeitungsseite bei den Monatsanteilen "Bestehende Abrechnungen behalten die Monatsanteile, mit denen sie erstellt wurden. Um Entwürfe neu zu berechnen, löschen Sie die Entwürfe aller Mietverträge der betroffenen Wohnungen in dieser Abrechnungsperiode und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen."
+    Dann erklärt die Bearbeitungsseite bei den Monatsanteilen "Bestehende Abrechnungen behalten die Monatsanteile, mit denen sie erstellt wurden. Um Entwürfe neu zu berechnen, löschen Sie die Entwürfe aller Mietverträge der betroffenen Wohnungen in der betroffenen Abrechnungsperiode und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen."
 
   Szenario: Heizprofil löschen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Heizprofils "Bergtal"

@@ -1269,7 +1269,7 @@
 	"profiles_total_excess": "{excess} % too much",
 	"profiles_shares_legend": "Share of the heating costs per month in %",
 	"profiles_shares_help": "The monthly shares spread a year’s heating costs and add up to 100 %. More heating is used in winter than in summer.",
-	"profiles_shares_keep": "Existing statements keep the monthly shares they were created with. To recalculate drafts, delete the drafts of all rental contracts of the affected apartments in this billing period and create the statements again. Sent statements cannot be recalculated.",
+	"profiles_shares_keep": "Existing statements keep the monthly shares they were created with. To recalculate drafts, delete the drafts of all rental contracts of the affected apartments in the billing period concerned and create the statements again. Sent statements cannot be recalculated.",
 	"profiles_form_total": "Total: {total} % – {remainder}",
 	"profiles_chart_caption": "Share of the heating costs per month",
 	"profiles_monthly_shares": "Monthly shares",

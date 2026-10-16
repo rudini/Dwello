@@ -72,6 +72,10 @@ const nameIn = (map: Map<string, Names>, id: string | null, language: Language) 
 	return names && localName(names, language);
 };
 
+// A line shared by the days rented: its own days (#137), or the days of the contract in the period
+const byDaysRented = (item: StatementWithDetails['lineItems'][number], daysShare: number) =>
+	!!item.billedDays || Math.abs(parseFloat(item.periodShare ?? '1') - daysShare) < 0.00005;
+
 // One position as the PDF prints it: names in the language, the key with the apartment's part, the shares
 function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: boolean, names: LineNames, language: Language) {
 	const totalAmount = parseFloat(item.totalAmount);
@@ -103,6 +107,8 @@ export function toPdfData(
 ): StatementPDFData {
 	const managementFee = parseFloat(statement.managementFee || '0');
 	const subtotal = parseFloat(statement.totalCosts) - managementFee;
+	const periodDays = Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1;
+	const legacyProfile = !statement.heatingShare && !!statement.heatingProfileId; // created before #209
 	return {
 		id: statement.id,
 		statementNumber: statement.statementNumber,
@@ -114,9 +120,12 @@ export function toPdfData(
 		apartment: apartmentOf(statement.apartment),
 		building: buildingOf(statement.building),
 		...run,
-		periodDays: Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1,
-		// by the profile only where the calculation shared the heating costs by it (run.heating), not by days (#137)
-		lineItems: statement.lineItems.map((item) => lineItemOf(item, !!run.heating, { categoryNames, keyNames, keyShares }, language)),
+		periodDays,
+		// by the profile only where the calculation shared the heating costs by it (run.heating), not by days (#137); a
+		// statement created before #209 stores no share: by the profile where its line is not the days rented (M-5)
+		lineItems: statement.lineItems.map((item) =>
+			lineItemOf(item, !!run.heating || (legacyProfile && !byDaysRented(item, statement.rentalDays / periodDays)), { categoryNames, keyNames, keyShares }, language)
+		),
 		subtotal,
 		managementFee,
 		managementFeePercent: parseFloat(statement.managementFeePercent ?? '0'), // rate chosen for the generation run

@@ -410,8 +410,8 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 	});
 
 	// Vor #209 erstellt: kein Anteil gespeichert; die Abrechnung wird nicht neu gerechnet, das PDF nennt kein Heizprofil
-	// (#232, C-5)
-	it('nennt bei einer vor #209 erstellten Abrechnung kein Heizprofil', async () => {
+	// mit Anteil und Monaten (#232, C-5), erklärt aber den Prozentwert der Heizposition (Fachprüfung w4-2, M-5)
+	it('nennt bei einer vor #209 erstellten Abrechnung keinen Anteil nach Heizprofil', async () => {
 		const statement = await generateStatement({
 			contractId: moved.contract,
 			buildingId: moved.building,
@@ -426,7 +426,9 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		await deleteStatement(statement.id);
 
 		expect(older).toContain("Heizung Pro Fläche (m²) 70.00 / 70.00 m² 1'000.00 1'000.00 40.00 % 400.00");
-		expect(older).not.toContain('Heizprofil');
+		expect(older).not.toContain('Heizkosten nach Heizprofil');
+		// the position's percent is still the profile's, not the days rented: the explanation says so (Fachprüfung M-5)
+		expect(older).toContain('Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil.');
 	});
 
 	// Unter #209 gespeichert: Anteil auf zwei Stellen gerundet (70.97 %), ohne Summe der Periode; die Erläuterung nimmt den
