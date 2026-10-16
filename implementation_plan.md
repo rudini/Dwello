@@ -11,5 +11,8 @@ Request: fix O-34 (`docs/design/offene-punkte.md`): the axe states `invoices upl
 - [x] Fix: all five upload states upload into the example's own building (`uploadBelege` of `tasks/invoice-upload.ts`); under the same churn 15 of 15 pass (`invoices upload-.* @a11y`, `--repeat-each=3`), axe and language checks of the upload states 10 of 10
 - [x] O-34 removed from `docs/design/offene-punkte.md`
 - [x] Checks: lint, check, backend type-check, `open-work.test.ts`, the a11y and language upload states
-- [ ] code-reviewer round
-- [ ] Push, pull request, CI, merge (CLAUDE.md, Workflow 9)
+- [x] code-reviewer round 1 (docs/reviews/o34-review-1.md)
+- [x] Workflow notes `docs/reviews/workflow-notes-o34.md`
+- [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs/reviews/o34-review-1.md`, `docs/reviews/workflow-notes-o34.md`.
