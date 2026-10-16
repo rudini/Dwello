@@ -522,3 +522,20 @@ Request: fix O-34 (`docs/design/offene-punkte.md`): the axe states `invoices upl
 - [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs/reviews/o34-review-1.md`, `docs/reviews/workflow-notes-o34.md`.
+
+## Session 2026-10-16 W4: Heizprofil on the detail page, help text, rounded months (#247, #230, #232)
+
+- [x] @wip scenarios (statement-detail.feature, heating-profiles.feature), fach-reviewer before implementing (`docs/reviews/w4-fachreview-1.md`)
+- [x] #247: a statement shared by days stores the chosen Heizprofil's names and why it was not applied; the detail page names it «(nicht angewendet: …)»
+- [x] #230: help text at the Monatsanteile of an own profile: existing statements keep their shares (four languages)
+- [x] #232: share from the months rounded to two places; PDF prints the division and the period's months where they do not carry 100 %
+- [x] #232 C-5: no recompute for statements without a stored share (no Heizprofil note)
+- Files: `backend/src/services/{heating-profile,prorating,calculation,statement-pdf,pdf}.service.ts`, `backend/src/db/schema.ts`, `src/lib/server/statement.ts`, `src/routes/config/heating-profiles/HeatingProfileForm.svelte`, `messages/*.json`, `docs/data-model.md`, `docs/api-specification.md`, tests and scenarios
+- [x] Code review round 1 (`docs/reviews/w4-review-1.md`)
+- [x] Persona Helga (`docs/design/personas/helga-w4.md`)
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-w4.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w4-fachreview-2.md`)
+- [x] daten-pruefer (`docs/reviews/w4-datenpruefung-1.md`)
+- [x] Closing code review (`docs/reviews/w4-review-2.md`)
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-247-230-232.md`)
+- [x] Workflow review, archive the session, pull request

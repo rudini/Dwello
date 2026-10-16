@@ -17,3 +17,4 @@ export const profileActions = target('Aktionen des Heizprofils', (page) =>
 export const confirmDeleteButton = target('Löschen des Heizprofils bestätigen', (page) =>
 	page.getByTestId('heating-profile-delete-confirm')
 );
+export const sharesHelp = target('Hilfe zu den Monatsanteilen', (page) => page.getByTestId('heating-profile-shares-help'));
