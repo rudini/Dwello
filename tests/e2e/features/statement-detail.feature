@@ -255,6 +255,24 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
     Und steht im PDF "zusammen 43.00 %. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen 50.00 %."
 
+  # Zwei Hauswart-Rechnungen über verschiedene Leistungszeiträume, Einzug am 15. August: der Zeitanteil ist nach den
+  # Beträgen gewichtet, (900 × 0/91 + 900 × 47/92) / 1800 = 25.54 %; das PDF nennt jede Rechnung mit ihren Tagen (#226)
+  @wip
+  Szenario: PDF nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-07-05" für die Zeit vom "2025-04-01" bis "2025-06-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-07-01" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "25.54 %"
+    Und steht im PDF "01.04.2025 – 30.06.2025: 900.00, 0/91 Tage"
+    Und steht im PDF "01.07.2025 – 30.09.2025: 900.00, 47/92 Tage"
+
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und die Korrespondenz an "Eva Frei" ist auf "Französisch"
