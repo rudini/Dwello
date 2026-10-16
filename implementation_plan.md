@@ -17,5 +17,5 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Slice review round 2: `docs/reviews/w1b-review-2.md`; C-17 scenarios for the Zeitanteil in days and by heating profile
 - [x] daten-pruefer: `docs/reviews/w1b-datenpruefung-1.md`
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-96-104.md`
-- [ ] Closing code-reviewer round (merge with main, C-17)
+- [x] Closing code-reviewer round (merge with main, C-17): `docs/reviews/w1b-review-3.md`
 - [ ] Contracts, lint, check, type-check, affected tests and E2E before the push

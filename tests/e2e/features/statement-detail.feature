@@ -413,7 +413,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann nennt die Position "Heizung" den Wohnungsanteil "CHF 1’000.00", den Zeitanteil "43.00 % nach Heizprofil" und den Betrag "CHF 430.00"
 
-  # C-2: wer die ganze Periode mietet, trägt jeden Tag, auch bei Rechnungen über verschiedene Leistungszeiträume: wie im PDF
+  # #104: wer die ganze Periode mietet, trägt jeden Tag, auch bei Rechnungen über verschiedene Leistungszeiträume: wie im PDF
   # «366/366 Tage» (zwei gleich grosse Wohnungen: Wohnungsanteil 900.00 von 1’800.00)
   Szenario: Kostenposition nennt bei einem Mietvertrag über die ganze Periode den Zeitanteil in Tagen
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
