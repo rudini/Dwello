@@ -1035,7 +1035,7 @@
 	"statements_no_more_reminders_title": "No further reminder possible",
 	"statements_understood": "Understood",
 	"statements_no_more_reminders_text": "3 reminders have already been sent. Dwello cannot create another one. Agree on the next steps directly with the tenant.",
-	"statements_reminder_257d": "A reminder from Dwello is a request for payment. It does not set a time limit for payment with a warning of termination under Art. 257d CO. Further steps, e.g. debt collection proceedings or termination for payment arrears under Art. 257d CO, take place outside Dwello. For this termination, you first set the tenant a payment deadline of at least 30 days in a separate letter, with a warning that you will terminate the lease. Seek advice.",
+	"statements_reminder_257d": "A reminder from Dwello is a request for payment. It does not set a payment deadline with a warning of termination under Art. 257d CO. Further steps, e.g. debt collection proceedings or termination for payment arrears under Art. 257d CO, take place outside Dwello. For this termination, you first set the tenant a payment deadline of at least 30 days in a separate letter, with a warning that you will terminate the lease. Seek advice.",
 	"statements_reminder_undelivered": "The document «{title}» is ready to send under «Documents». {reason}",
 	"statements_reminder_emailed": "The document «{title}» was sent by email.",
 	"statements_reminder_letter": "The document «{title}» is ready to print as a letter under «Documents».",

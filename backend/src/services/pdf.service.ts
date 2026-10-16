@@ -836,7 +836,11 @@ function swissCross(doc: Doc, x: number, y: number) {
 
 // Swiss QR-bill (SIX): receipt 62 mm and payment part 148 mm across the bottom 105 mm of the page; the printed
 // details are those in the QR code
-function paymentPart({ doc, t, config }: Pick<Page, 'doc' | 't' | 'config'>, qr: QRResult, balance: number) {
+function paymentPart(
+	{ doc, t, config }: Pick<Page, 'doc' | 't' | 'config'>,
+	qr: QRResult,
+	balance: number
+) {
 	const top = PAGE.height - PAYMENT_PART;
 	const receiptWidth = 62 * MM;
 	doc.page.margins.bottom = 0; // printing down to the edge, or pdfkit breaks each line onto a new page
@@ -888,7 +892,7 @@ export async function addPaymentPart(
 ) {
 	const t = { ...translations.de, ...translations[language] };
 	const qr = await generateQRBillForStatement({ ...statement, title: t.title }, config);
-	if (doc.y > PAGE.height - PAYMENT_PART - 24) doc.addPage();
+	if (doc.y > PAGE.height - PAYMENT_PART - 16) doc.addPage(); // above the line and «Vor der Einzahlung abzutrennen»
 	paymentPart({ doc, t, config }, qr, Number(statement.balance));
 }
 
