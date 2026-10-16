@@ -522,3 +522,20 @@ Request: fix O-34 (`docs/design/offene-punkte.md`): the axe states `invoices upl
 - [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs/reviews/o34-review-1.md`, `docs/reviews/workflow-notes-o34.md`.
+
+## Session: invoice check hints (#130, #131, #134)
+
+- [ ] #130 rhythm: blocked on the product owner (fach-review V-1 Major: the literal rule hides a missing Q4; proposal in #130, label `entscheiden`)
+- [x] #130 Leistungszeitraum: a `deviation`/`gap` finding names how many invoices count only in part (unit + DOM test, four languages)
+- [ ] #130 scenario (rhythm): waits for the decision; the Leistungszeitraum part has its scenario
+- [x] #131 late invoices without Leistungszeitraum within 90 days after the period end, listed per building with edit link (pg test, scenario, four languages)
+- [x] #134 period under a year: invoices without Leistungszeitraum listed per building with edit link, a hint only (scenario, four languages)
+- [x] a11y/language state `invoice-hints` for the new hints (screens.json, accessibility.feature, sprachen-bildschirme.feature)
+- [x] fach-reviewer round 1 on the scenarios: `docs/reviews/hints-fachreview-1.md`
+- [x] code-reviewer round 1: `docs/reviews/hints-review-1.md` (C-1, C-2 fixed: scenario «Hinweis auf eine Rechnung, die nur teilweise zählt» and pg test, both seen red without the source line)
+- [x] personas round 1: `docs/design/personas/helga-invoice-hints.md`, `marco-invoice-hints-1.md` (no review: all contracts billed), `marco-invoice-hints-2.md`; P-1 (Heizöl listed) fixed with a pg test
+- [x] code-reviewer round 2 on the fixes: `docs/reviews/hints-review-2.md` (C-10 fixed: scenario «Heizöl für den Tank …», seen red without the filter; C-11, C-13 fixed)
+- [x] Helga round 2 on the row text: `docs/design/personas/helga-invoice-hints-2.md` (no findings)
+- Files: `backend/src/services/invoice-completeness.service.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{PreviewChecks,InvoiceHint}.svelte`, `messages/*.json`, tests (`invoice-completeness*.test.ts`, `api-contracts.pg.test.ts`, `statement-wizard*.test.ts`, `tests/contracts/invoice-completeness.json`, `statement-generate.feature` and steps, a11y screens)
+- [x] workflow-review: `docs/reviews/workflow-notes-issue-131.md`; session archived
+- [x] code-reviewer round 3 (closing): `docs/reviews/hints-review-3.md` (no new findings)
