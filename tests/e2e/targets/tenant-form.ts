@@ -11,3 +11,5 @@ export const tenantLanguage = target('Korrespondenzsprache', (page) => page.getB
 export const tenantChannel = target('Korrespondenz', (page) => page.getByTestId('tenant-channel'));
 export const firstNameInput = target('Vorname', (page) => page.getByTestId('tenant-first-name-input'));
 export const lastNameInput = target('Nachname', (page) => page.getByTestId('tenant-last-name-input'));
+export const countrySelect = target('Land', (page) => page.getByTestId('tenant-country-select'));
+export const addressHelp = target('Hilfe zur Korrespondenzadresse', (page) => page.getByTestId('tenant-address-help'));

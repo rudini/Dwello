@@ -40,7 +40,8 @@ import {
 	openStatementDetail,
 	openStatementTenant,
 	resetPayment,
-	sendStatement
+	sendStatement,
+	confirmSending
 } from '../tasks/statement-detail';
 import { inDays } from '../fixtures/dates';
 
@@ -303,5 +304,17 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(resetConfirmation).toContain('gilt dann wieder als nicht bezahlt');
 		await verwalter.sees(resetConfirmation).toContain(`Das Zahlungsdatum ${sendingDay()} wird gelöscht.`);
+	}
+);
+
+When('der Liegenschaftsverwalter den Versand trotzdem bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmSending);
+});
+
+// A-5 (#114): the warning starts with the tenant's full name
+Then(
+	'warnt die Bestätigung, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(sendConfirmation).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );

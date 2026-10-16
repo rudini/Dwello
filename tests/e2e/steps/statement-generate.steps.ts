@@ -25,6 +25,7 @@ import {
 	invoicesOfBuilding,
 	missingInvoicesWarning,
 	missingInvoicesWarnings,
+	oldAddressWarning,
 	noContractsInPeriod,
 	periodChoiceShown,
 	presetNoticeText,
@@ -414,3 +415,10 @@ Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom
 When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
 	await verwalter.attemptsTo(editHintedInvoice(date));
 });
+// A-5 (#114): the warning starts with the tenant's full name
+Then(
+	'warnt die Vorschau, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(oldAddressWarning).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
+	}
+);

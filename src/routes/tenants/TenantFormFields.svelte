@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import type { Tenant } from '$lib/types';
-	import { languageLabels } from '$lib/tenant';
+	import { countryCodes, countryName, languageLabels } from '$lib/tenant';
 	import Select from '$lib/ui/Select.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 
@@ -22,6 +22,9 @@
 		{ value: 'email', label: m.tenants_channel_email() }
 	];
 	const languages = Object.entries(languageLabels).map(([code, label]) => ({ value: code, label }));
+	const countries = countryCodes
+		.map((code) => ({ value: code, label: countryName(code) }))
+		.sort((a, b) => a.label.localeCompare(b.label));
 </script>
 
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -88,8 +91,12 @@
 	testid="tenant-language-select"
 />
 
-<fieldset class="flex flex-col gap-6">
-	<legend class="pb-6 text-xl font-bold text-ink">{m.buildings_address()}</legend>
+<!-- #68: where statements and reminders go; after moving out the new address -->
+<fieldset class="flex flex-col gap-6" aria-describedby="address-help">
+	<legend class="pb-2 text-xl font-bold text-ink">{m.tenants_correspondence_address()}</legend>
+	<p id="address-help" class="text-ink-muted" data-testid="tenant-address-help">
+		{m.tenants_correspondence_address_help()}
+	</p>
 	<TextInput
 		id="address"
 		name="address"
@@ -124,4 +131,13 @@
 			/>
 		</div>
 	</div>
+	<!-- #102: Schweiz unless the tenant lives abroad; the QR-bill and the address block of the PDF name it -->
+	<Select
+		id="country"
+		name="country"
+		label={m.tenants_country()}
+		options={countries}
+		value={tenant.country ?? 'CH'}
+		testid="tenant-country-select"
+	/>
 </fieldset>

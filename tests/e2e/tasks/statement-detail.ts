@@ -30,6 +30,8 @@ export const openStatementDetail = (statementPath: string) =>
 export const openSendConfirmation = Click.on(sendStatementButton);
 
 // The confirmation names the recipient and the PDF; the user confirms having delivered it
+export const confirmSending = Click.on(confirmSendButton);
+
 export const sendStatement: Activity = (actor) =>
 	actor.attemptsTo(Click.on(sendStatementButton), Click.on(confirmSendButton));
 

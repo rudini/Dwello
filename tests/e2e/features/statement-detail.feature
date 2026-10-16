@@ -64,7 +64,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
     Dann warnt die Bestätigung, dass "Eva Frei" ausgezogen ist: "Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein."
-    Wenn der Liegenschaftsverwalter die Abrechnung versendet
+    Wenn der Liegenschaftsverwalter den Versand trotzdem bestätigt
     Dann hat die Abrechnung den Status "Versendet"
 
   Szenario: Vor dem Versand Empfänger und PDF prüfen
@@ -219,8 +219,8 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF
 
-  # Eine Korrespondenzadresse im Ausland: das Land steht im Adressfeld und im Zahlteil der QR-Rechnung (#102)
-  @wip
+  # Eine Korrespondenzadresse im Ausland: das Land steht allein auf der letzten Zeile des Adressfelds und als Ländercode
+  # vor der PLZ im Zahlteil der QR-Rechnung, den die Nachzahlung braucht (ohne Akonto) (#102)
   Szenario: Abrechnung an eine Korrespondenzadresse im Ausland
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und die Korrespondenzadresse von "Eva Frei" ist "Marktstätte 3", "78462 Konstanz" in "Deutschland"
@@ -228,7 +228,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "78462 Konstanz DEUTSCHLAND"
+    Dann steht im PDF "Marktstätte 3 78462 Konstanz DEUTSCHLAND"
     Und steht im PDF "DE-78462 Konstanz"
 
   # TODO(fachlich prüfen, #294): «Abrechnungsnummer» fehlt im Glossar

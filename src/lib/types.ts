@@ -64,6 +64,7 @@ export interface Tenant {
 	address?: string | null;
 	postalCode?: string | null;
 	city?: string | null;
+	country?: string; // ISO 3166 code of the Korrespondenzadresse, CH by default
 	correspondenceChannel?: 'email' | 'letter';
 	createdAt?: Date | string;
 	updatedAt?: Date | string;

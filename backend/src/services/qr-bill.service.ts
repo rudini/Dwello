@@ -72,6 +72,7 @@ export interface StatementForQRBill {
 		address?: string | null;
 		postalCode?: string | null;
 		city?: string | null;
+		country?: string | null;
 	};
 }
 
@@ -356,7 +357,7 @@ export async function generateQRBillForStatement(
 		debtorStreet: statement.tenant.address ?? undefined,
 		debtorPostalCode: statement.tenant.postalCode ?? undefined,
 		debtorCity: statement.tenant.city ?? undefined,
-		debtorCountry: 'CH',
+		debtorCountry: statement.tenant.country ?? 'CH',
 
 		referenceType: useQRReference ? 'QRR' : 'NON',
 		reference,

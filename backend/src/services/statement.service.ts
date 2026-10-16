@@ -231,7 +231,8 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 				language: tenants.language,
 				address: tenants.address,
 				postalCode: tenants.postalCode,
-				city: tenants.city
+				city: tenants.city,
+				country: tenants.country
 			},
 			apartment: {
 				id: apartments.id,

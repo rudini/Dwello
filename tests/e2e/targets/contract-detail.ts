@@ -63,3 +63,4 @@ export const endDialog = target('Dialog «Mietvertrag beenden»', (page) => page
 export const contractNoticeReceived = target('Kündigung erhalten am', (page) =>
 	page.getByTestId('contract-notice-received')
 );
+export const nextSteps = target('Nächste Schritte', (page) => page.getByTestId('contract-next-steps'));

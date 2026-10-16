@@ -18,6 +18,7 @@ import {
 } from './qr-bill.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
+import { countryLine, qrTown } from './postal-address';
 import type { InvoicePart } from '../db/schema';
 
 /**
@@ -378,6 +379,7 @@ export interface StatementPDFData {
 		address?: string | null;
 		postalCode?: string | null;
 		city?: string | null;
+		country?: string | null;
 	};
 
 	// Apartment info
@@ -513,7 +515,8 @@ function addresses({ doc, t, data, language }: Page) {
 	const tenant = [
 		`${data.tenant.firstName} ${data.tenant.lastName}`.trim(),
 		data.tenant.address,
-		[data.tenant.postalCode, data.tenant.city].filter(Boolean).join(' ')
+		[data.tenant.postalCode, data.tenant.city].filter(Boolean).join(' '),
+		countryLine(data.tenant.country)
 	].filter(Boolean) as string[];
 	doc.font('Helvetica').fontSize(10).fillColor(COLORS.ink).text(tenant.join('\n'), 118 * MM, top, { width: 82 * MM });
 	const apartment = `${t.apartment} ${data.apartment.number}, ${formatFloor(data.apartment.floor, language)}, ${data.apartment.area} ${t.sqm}`;
@@ -850,7 +853,7 @@ function paymentPart({ doc, t, data, config }: Page, qr: QRResult) {
 	const { qrData } = qr;
 	const creditor = [formatIBANForDisplay(config.iban), config.companyName, config.address, `${config.postalCode} ${config.city}`];
 	// the QR code names the debtor only with name, postal code and town
-	const debtor = qrData.debtorPostalCode && qrData.debtorCity ? [qrData.debtorName, qrData.debtorStreet, `${qrData.debtorPostalCode} ${qrData.debtorCity}`] : [];
+	const debtor = qrData.debtorPostalCode && qrData.debtorCity ? [qrData.debtorName, qrData.debtorStreet, qrTown(qrData.debtorPostalCode, qrData.debtorCity, qrData.debtorCountry)] : [];
 	const reference = qr.reference ? [formatQRReferenceForDisplay(qr.reference)] : [];
 	const amount = qrAmount(data.balance);
 

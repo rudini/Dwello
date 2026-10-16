@@ -1,6 +1,7 @@
 import { question } from '../screenplay/actor';
 import { ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
+	nextSteps,
 	endDialogDeathHint,
 	endDialog,
 	noticePeriodHint,
@@ -36,3 +37,4 @@ export const noticePeriodHintText = Text.of(noticePeriodHint);
 export const noticePeriodHintShown = Visibility.of(noticePeriodHint);
 export const endDialogText = Text.of(endDialog);
 export const noticeReceivedOn = Text.of(contractNoticeReceived);
+export const nextStepsText = Text.of(nextSteps);

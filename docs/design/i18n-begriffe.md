@@ -19,6 +19,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Vermietet / Wiedervermietet / Leer / Gesperrt | loué / reloué / vacant / bloqué | locato / rilocato / sfitto / bloccato | let / re-let ❓ / vacant / blocked |
 | Mieter | locataire | inquilino | tenant |
 | Korrespondenzkanal | canal de correspondance | canale di corrispondenza | correspondence channel |
+| Korrespondenzadresse | adresse de correspondance | indirizzo di corrispondenza | correspondence address |
 | Brief / E-Mail | lettre / e-mail | lettera / e-mail | letter / email |
 | Vermieter | bailleur | locatore | landlord |
 | Liegenschaftsverwalter | gérant d’immeubles | amministratore di immobili | property manager |

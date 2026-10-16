@@ -99,9 +99,10 @@ last_name              VARCHAR(100) NOT NULL
 email                  VARCHAR(255)
 phone                  VARCHAR(30)
 language               VARCHAR(5)   NOT NULL DEFAULT 'de'
-address                VARCHAR(500)
+address                VARCHAR(500)  -- Korrespondenzadresse: street with house number
 postal_code            VARCHAR(10)
 city                   VARCHAR(100)
+country                VARCHAR(2)   NOT NULL DEFAULT 'CH'      -- ISO 3166 code of the Korrespondenzadresse (#102)
 correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
 CHECK (language IN ('de', 'fr', 'it', 'rm', 'en'))
 ```
