@@ -315,7 +315,7 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass {string} noch einen unbefristeten Mietvertrag für die Wohnung {string} hat',
+	'erfährt der Liegenschaftsverwalter, dass {string} einen Mietvertrag ohne Vertragsende für die Wohnung {string} hat',
 	async ({ verwalter, names }, tenant: string, apartment: string) => {
 		await verwalter.sees(runningContractHintText).toContain(names.get(tenant) ?? tenant);
 		await verwalter.sees(runningContractHintText).toContain(`Wohnung ${apartment}`);
@@ -336,8 +336,7 @@ Then(
 Then(
 	'erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt',
 	async ({ verwalter }) => {
-		await verwalter.sees(partiesHelpText).toContain('Adresse der Erben');
-		await verwalter.sees(partiesHelpText).toContain('Korrespondenzadresse');
+		await verwalter.sees(partiesHelpText).toContain('als Korrespondenzadresse die Adresse ein, an die die Post für die Erben geht');
 	}
 );
 

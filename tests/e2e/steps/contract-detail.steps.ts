@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import {
 	apartmentOfContract,
 	endConfirmationInWindow,
+	endDialogDeathText,
 	endDateProblemShown,
 	endOfContract,
 	missingStatementsText,
@@ -18,6 +19,7 @@ import {
 	deleteDraftAndEndContract,
 	editContractFromDetail,
 	endContract,
+	startEndingContract,
 	endContractOn,
 	openContract,
 	openContractApartment,
@@ -184,5 +186,17 @@ When(
 	'der Liegenschaftsverwalter als nächsten Schritt einen neuen Mietvertrag für {string} erfassen will',
 	async ({ verwalter, names }, tenant: string) => {
 		await verwalter.attemptsTo(chooseNextStep(`Neuen Mietvertrag für ${names.get(tenant) ?? tenant} erfassen`));
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietvertrag beenden will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(startEndingContract);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter im Dialog «Mietvertrag beenden», dass der Mietvertrag beim Tod des Mieters weiterläuft',
+	async ({ verwalter }) => {
+		await verwalter.sees(endDialogDeathText).toContain('Ist der Mieter gestorben, beenden Sie den Mietvertrag nicht');
+		await verwalter.sees(endDialogDeathText).toContain('Erben');
 	}
 );

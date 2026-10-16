@@ -29,6 +29,7 @@ export interface ContractForAvailability {
 	start_date: Date | string;
 	end_date?: Date | string | null;
 	status?: 'Aktiv' | 'Beendet';
+	tenant_id?: string; // the wizard names a tenant's open-ended contract (#156)
 }
 
 /**

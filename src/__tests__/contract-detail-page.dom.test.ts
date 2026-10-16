@@ -169,6 +169,15 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('form-error')).toBeNull();
 	});
 
+	// F-23 (#155), Fachreview W10 M-1: beim Tod des Mieters endet der Mietvertrag nicht
+	it('sagt im Dialog «Beenden», dass der Mietvertrag beim Tod des Mieters auf die Erben übergeht', () => {
+		open();
+		click('contract-end-button');
+		expect(text('contract-end-death')).toContain(
+			'Ist der Mieter gestorben, beenden Sie den Mietvertrag nicht: Er geht auf die Erben über.'
+		);
+	});
+
 	it('bietet bei einer versendeten Abrechnung kein Löschen an', async () => {
 		const sent = refused.statements.map((s) => ({ ...s, status: 'sent' }));
 		open('2024-04-01', null, { endError: 'abgelehnt', refused: sent, refusedDay: '2025-03-31' });

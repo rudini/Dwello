@@ -412,23 +412,26 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		{ ...listed.contracts[0], id: `c-${apartmentId}`, apartmentId, endDate }
 	]; // contracts of Anna Keller (t1)
 
-	it('nennt bei der Wohnung einen unbefristeten Mietvertrag des Mieters und hält nicht auf', async () => {
+	it('nennt bei der Wohnung einen Mietvertrag des Mieters ohne Vertragsende und hält nicht auf', async () => {
 		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
 		await open();
 		select('contract-tenant-select', 't1');
 		next();
 		await settle();
 		const hint = byTestId('tenant-running-contract')!;
-		expect(hint.textContent).toContain('Anna Keller');
-		expect(hint.textContent).toContain('Wohnung 2.02');
+		expect(hint.textContent).toContain('Anna Keller hat einen Mietvertrag ohne Vertragsende');
+		expect(hint.textContent).toContain('für die Wohnung 2.02 (Ahornhof)');
 		expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c-a2');
 		select('apartment-select', 'a1');
 		next();
 		expect(heading()).toBe('Vertragsdauer');
 	});
 
-	it('schweigt bei einem Mietvertrag mit Vertragsende und bei einem anderen Mieter', async () => {
-		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', '2099-03-31') : [] }]);
+	it('schweigt bei einem Mietvertrag mit Vertragsende', async () => {
+		fakeBff(({ path }) => [
+			200,
+			{ contracts: path.endsWith('=a2') ? own('a2', '2099-03-31') : [] }
+		]);
 		await open();
 		select('contract-tenant-select', 't1');
 		next();
