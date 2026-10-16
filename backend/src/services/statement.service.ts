@@ -16,9 +16,11 @@ import {
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
 	type NewUtilityStatementLineItem,
-	type KeyValues
+	type KeyValues,
+	type HeatingShare
 } from '../db/schema';
-import { calculateStatementForContract, generateStatementNumber } from './calculation.service';
+import { calculateStatementForContract, generateStatementNumber, type StatementCalculation } from './calculation.service';
+import { getHeatingProfile } from './heating-profile.service';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
@@ -331,6 +333,7 @@ export async function generateStatement(
 			managementFee: String(calculation.managementFee),
 			managementFeePercent: String(calculation.managementFeePercent),
 			heatingProfileId: input.heatingProfileId || null,
+			heatingShare: await heatingShareWithNames(calculation.heating, input.heatingProfileId),
 			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
 			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
@@ -574,3 +577,10 @@ export async function getStatementCountsByStatus(filters: Omit<StatementFilters,
 	};
 }
 
+
+// The profile's names as they were, so a renamed or deleted own profile still names the share it gave (#209)
+async function heatingShareWithNames(heating: StatementCalculation['heating'], profileId?: string): Promise<HeatingShare | null> {
+	if (!heating || heating.byDays) return heating;
+	const { name, nameDE, nameFR, nameIT, nameEN } = (await getHeatingProfile(profileId!))!;
+	return { ...heating, names: { name, nameDE, nameFR, nameIT, nameEN } };
+}

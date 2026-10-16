@@ -9,7 +9,7 @@ import { categories, fuelStocks, tenants, utilityStatements } from '../db/schema
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createFuelStock } from '../services/fuel-stock.service';
-import { getHeatingProfileByName } from '../services/heating-profile.service';
+import { createHeatingProfile, deleteHeatingProfile, getHeatingProfileByName, updateHeatingProfile } from '../services/heating-profile.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { deleteStatement, generateStatement, updateStatementStatus } from '../services/statement.service';
 import { readPdf } from './helpers/pdf-text';
@@ -233,6 +233,92 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		await whole.remove();
 
 		expect(text).toContain("Hauswart Pro Fläche (m²) 70.00 / 70.00 m² 1'206.52 1'206.52 92/92 Tage 1'206.52");
+	});
+});
+
+// Ein eigenes Heizprofil wird nach dem Erstellen der Abrechnung geändert: Einzug am 1. Juli, Juli bis Dezember
+// 0 + 0 + 0 + 10 + 20 + 20 = 50 % beim Erstellen, nach der Änderung wären es 40 % (#209)
+describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
+	const shares = (pct: number[]) =>
+		Object.fromEntries(['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'].map((month, i) => [`${month}Pct`, String(pct[i])])) as unknown as Omit<Parameters<typeof createHeatingProfile>[0], 'name'>;
+	let moved: Awaited<ReturnType<typeof createRental>>;
+	let profileId: string;
+	let text: string;
+
+	beforeAll(async () => {
+		moved = await createRental(crypto.randomUUID(), { startDate: '2025-07-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(moved.building, { categoryId: heating.id, amount: '1000.00', description: 'Heizöl 2025' });
+		profileId = (await createHeatingProfile({ name: `Eigenes ${crypto.randomUUID()}`, type: 'custom', ...shares([10, 10, 10, 10, 10, 0, 0, 0, 0, 10, 20, 20]) })).id;
+		const statement = await generateStatement({
+			contractId: moved.contract,
+			buildingId: moved.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			heatingProfileId: profileId,
+			managementFeePercent: 0
+		});
+		await updateHeatingProfile(profileId, shares([20, 10, 10, 10, 10, 0, 0, 0, 0, 30, 5, 5]));
+		await generateStatementPdf(statement.id, 'de');
+		text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+	});
+
+	afterAll(async () => {
+		await moved.remove();
+		await deleteHeatingProfile(profileId);
+	});
+
+	it('druckt den Anteil und die Monate, mit denen die Abrechnung gerechnet ist', () => {
+		expect(text).toContain('Heizung Pro Fläche (m²) 70.00 / 70.00 m² 1\'000.00 1\'000.00 50.00 % 500.00');
+		expect(text).toContain('50.00 % der Heizkosten');
+		expect(text).toContain('Okt 10.00 %, Nov 20.00 %, Dez 20.00 %');
+	});
+
+	// F-1: ein eigenes Heizprofil lässt sich umbenennen und löschen, die Abrechnung nennt es weiter
+	it('nennt das Heizprofil auch nach dem Umbenennen und Löschen, wie es beim Erstellen hiess', async () => {
+		const name = `Eigenes ${crypto.randomUUID()}`;
+		const own = (await createHeatingProfile({ name, type: 'custom', ...shares([10, 10, 10, 10, 10, 0, 0, 0, 0, 10, 20, 20]) })).id;
+		const statement = await generateStatement({
+			contractId: moved.contract,
+			buildingId: moved.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			heatingProfileId: own,
+			managementFeePercent: 0
+		});
+		await updateHeatingProfile(own, { name: `Umbenannt ${crypto.randomUUID()}` });
+		await deleteHeatingProfile(own);
+		await generateStatementPdf(statement.id, 'de');
+		const after = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+
+		expect(after).toContain(name);
+		expect(after).toContain('50.00 % der Heizkosten');
+	});
+
+	// F-2: im Sommer tragen die Monate der Periode 0 %, geteilt wird nach Tagen; das bleibt so, wenn das Profil danach dem
+	// Juli einen Anteil gibt (Einzug 1. Juli, Juni bis August: 62/92 Tage)
+	it('bleibt bei den Mietstagen, wenn das Heizprofil später den Monaten der Periode einen Anteil gibt', async () => {
+		const own = (await createHeatingProfile({ name: `Sommer ${crypto.randomUUID()}`, type: 'custom', ...shares([20, 20, 20, 10, 10, 0, 0, 0, 0, 0, 10, 10]) })).id;
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(moved.building, { categoryId: heating.id, amount: '300.00', invoiceDate: '2025-07-15' });
+		const statement = await generateStatement({
+			contractId: moved.contract,
+			buildingId: moved.building,
+			periodStart: '2025-06-01',
+			periodEnd: '2025-08-31',
+			heatingProfileId: own,
+			managementFeePercent: 0
+		});
+		await updateHeatingProfile(own, shares([20, 20, 15, 10, 10, 0, 5, 0, 0, 0, 10, 10]));
+		await generateStatementPdf(statement.id, 'de');
+		const after = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await deleteHeatingProfile(own);
+
+		expect(after).toContain('62/92 Tage');
+		expect(after).not.toContain('Heizprofil');
 	});
 });
 

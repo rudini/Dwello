@@ -316,6 +316,16 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 /** Own value and the building's total by unit: the fraction a simple distribution key gives the apartment */
 export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
 
+// The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
+export type HeatingShare =
+	| { byDays: true }
+	| {
+			byDays: false;
+			percent: number;
+			months: { month: number; percentage: number }[];
+			names: { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+	  };
+
 export const utilityStatements = pgTable(
 	'utility_statements',
 	{
@@ -346,6 +356,7 @@ export const utilityStatements = pgTable(
 		// the Tankbestand readings the statement was created with
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
+		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),

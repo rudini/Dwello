@@ -219,8 +219,7 @@ Funktionalität: Abrechnungsdetail
 
   # Ein eigenes Heizprofil lässt sich nach dem Erstellen der Abrechnung ändern; das PDF zeigt den Anteil und die Monate,
   # mit denen die Abrechnung gerechnet ist: Januar bis März im «Winter» 18 + 14 + 11 = 43 % (#209)
-  @wip
-  Szenario: PDF zeigt den Heizanteil, mit dem die Abrechnung erstellt wurde
+  Szenario: PDF zeigt den Anteil nach dem Heizprofil, mit dem die Abrechnung erstellt wurde
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und das Heizprofil "Winter" verteilt die Heizkosten danach so:
@@ -242,6 +241,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "43.00 % der Heizkosten"
     Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
+    Und steht im PDF "43.00 % 430.00"
 
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

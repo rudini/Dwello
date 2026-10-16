@@ -131,6 +131,9 @@ export function toPdfData(
 
 // The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs
 async function heatingOf(statement: StatementWithDetails, period: { rentalStart: string; rentalEnd: string }, language: Language, hasHeating: boolean) {
+	// as the statement was calculated, also after the profile changed (#209); recomputed only for one created before
+	const stored = hasHeating ? statement.heatingShare : null;
+	if (stored) return stored.byDays ? {} : { heating: { profile: localName(stored.names, language), percent: stored.percent, months: stored.months } };
 	const { rentalStart, rentalEnd } = period;
 	const profile = hasHeating && statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
 	if (!profile) return {};

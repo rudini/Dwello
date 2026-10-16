@@ -245,6 +245,7 @@ management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungs
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
+heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true } or percent, months, profile names
 balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
@@ -262,6 +263,8 @@ CONSTRAINT statements_period_check CHECK (period_end >= period_start)
 Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_period_start_idx`,
 `statements_status_idx`, `statements_tenant_period_idx (tenant_id, period_start)`, unique
 `statements_number_idx (statement_number)`.
+
+`heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }`, or the percent of the period's heating costs, the months with their shares and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF prints them after an own profile was changed, renamed or deleted. Empty without a heating profile and for statements created before; their PDF recomputes it from the profile as it is now.
 
 **Status (Abrechnungsstatus)** — transitions allowed by `updateStatementStatus` in
 `backend/src/services/statement.service.ts`:

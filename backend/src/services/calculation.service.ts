@@ -12,7 +12,7 @@
 
 import { like, max } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements } from '../db/schema';
+import { utilityStatements, type HeatingShare } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -64,6 +64,7 @@ export interface StatementCalculation {
 	totalCosts: number;
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, Negative = refund
+	heating: Omit<Extract<HeatingShare, { byDays: false }>, 'names'> | { byDays: true } | null; // as the heating costs were shared (#209)
 }
 
 /**
@@ -297,6 +298,7 @@ export async function calculateStatementForContract(
 	}));
 
 	// Calculate line items
+	const heating = await heatingOfRun(invoiceGroups, contract, periodStart, periodEnd, heatingProfileId);
 	const lineItems: CalculatedLineItem[] = [];
 	let subtotal = 0;
 
@@ -392,8 +394,25 @@ export async function calculateStatementForContract(
 		managementFeePercent: feePercent,
 		totalCosts,
 		totalAdvancePayments,
-		balance
+		balance,
+		heating
 	};
+}
+
+// What the PDF prints of the heating profile, kept with the statement (#209): the same for every heating position
+async function heatingOfRun(
+	groups: InvoiceGroup[],
+	contract: { startDate: string; endDate: string | null },
+	periodStart: Date,
+	periodEnd: Date,
+	heatingProfileId?: string
+): Promise<StatementCalculation['heating']> {
+	if (!heatingProfileId || !groups.some((group) => group.isHeatingCost)) return null;
+	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
+	const result = await handleMidYearMoves(heatingProfileId, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
+	if (result.byDays) return { byDays: true };
+	const months = result.monthBreakdown.map(({ month, percentage }) => ({ month, percentage: Math.round(percentage * 100) / 100 }));
+	return { byDays: false, percent: result.percentage, months };
 }
 
 /**
