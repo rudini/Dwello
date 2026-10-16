@@ -3,13 +3,20 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 
-	// What a notice asks for next (A-4): the next tenant until one is recorded, always the new address for the
-	// final statement; TODO(fachlich prüfen, #140): «Nachmieter» is not in the glossary
+	// What a notice asks for next (A-4): the next tenant until one is recorded, a new contract for a move within
+	// the house (#156), always the new address for the final statement; TODO(fachlich prüfen, #140): «Nachmieter»
+	// is not in the glossary
 	let {
 		shown,
 		apartmentId,
-		tenantId
-	}: { shown: { successor: boolean } | null; apartmentId: string; tenantId: string } = $props();
+		tenantId,
+		name
+	}: {
+		shown: { successor: boolean } | null;
+		apartmentId: string;
+		tenantId: string;
+		name: string;
+	} = $props();
 </script>
 
 {#if shown}
@@ -24,6 +31,9 @@
 						>{m.contracts_next_successor()}</Button
 					>
 				{/if}
+				<Button href="/contracts/new?tenant={tenantId}" icon="contract"
+					>{m.contracts_new_for_tenant({ name })}</Button
+				>
 				<Button href="/tenants/{tenantId}/edit" icon="edit">{m.contracts_next_address()}</Button>
 			</div>
 		</div>

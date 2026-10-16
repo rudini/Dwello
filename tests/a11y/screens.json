@@ -26,7 +26,7 @@
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
-		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving.",
+		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
 		"category-check": "Statement wizard preview whose check per category reports invoices missing against the year before.",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",

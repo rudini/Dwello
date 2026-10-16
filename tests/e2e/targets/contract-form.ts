@@ -41,3 +41,12 @@ export const reviewItem = (label: string) =>
 export const deleteDraftAndSaveButton = target('Entwurf löschen und speichern', (page) =>
 	page.getByTestId('delete-draft-and-save')
 );
+export const runningContractHint = target('Hinweis auf einen laufenden Mietvertrag des Mieters', (page) =>
+	page.getByTestId('tenant-running-contract')
+);
+export const runningContractLink = target('Laufender Mietvertrag im Hinweis', (page) =>
+	runningContractHint.locate(page).getByRole('link')
+);
+export const newContractAfterEndLink = target('Neuen Mietvertrag erfassen', (page) =>
+	page.getByTestId('contract-parties-new')
+);
