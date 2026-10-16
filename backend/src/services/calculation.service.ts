@@ -124,6 +124,9 @@ function groupInvoicesByCategory(invoices: PeriodCost[]): InvoiceGroup[] {
 
 const isoDay = (date: Date) => date.toISOString().split('T')[0];
 const days = (start: string, end: string) => Math.max(0, (Date.parse(end) - Date.parse(start)) / 86_400_000 + 1);
+// the tenant's days in an invoice's days
+const rentedIn = ({ start, end }: { start: string; end: string }, rentalStart: string, rentalEnd: string) =>
+	days(start > rentalStart ? start : rentalStart, end < rentalEnd ? end : rentalEnd);
 
 /**
  * The tenant's share (0–1) of a group: each invoice weighs with its amount, and the tenant bears the part of the days it
@@ -132,11 +135,10 @@ const days = (start: string, end: string) => Math.max(0, (Date.parse(end) - Date
 function rentalShare(group: InvoiceGroup, rentalStart: string, rentalEnd: string) {
 	// ponytail: a group summing to 0 (invoice and credit over different Leistungszeiträume) bills nothing; per-invoice shares if that occurs
 	if (group.totalAmount === 0) return 0;
-	const rented = group.invoices.reduce((sum, invoice) => {
-		const from = invoice.start > rentalStart ? invoice.start : rentalStart;
-		const to = invoice.end < rentalEnd ? invoice.end : rentalEnd;
-		return sum + (invoice.amount * days(from, to)) / days(invoice.start, invoice.end);
-	}, 0);
+	const rented = group.invoices.reduce(
+		(sum, invoice) => sum + (invoice.amount * rentedIn(invoice, rentalStart, rentalEnd)) / days(invoice.start, invoice.end),
+		0
+	);
 	return rented / group.totalAmount;
 }
 
@@ -145,8 +147,6 @@ function rentalShare(group: InvoiceGroup, rentalStart: string, rentalEnd: string
 // except for a tenant over the whole period (he bears every day: «x/x Tage») and invoices summing to zero (no share)
 type LineDays = Pick<CalculatedLineItem, 'positionRentalDays' | 'billedDays' | 'invoiceParts'>;
 const noDays: LineDays = { positionRentalDays: null, billedDays: null, invoiceParts: null };
-const rentedIn = ({ start, end }: { start: string; end: string }, rentalStart: string, rentalEnd: string) =>
-	days(start > rentalStart ? start : rentalStart, end < rentalEnd ? end : rentalEnd);
 function daysOf(group: InvoiceGroup, rentalStart: string, rentalEnd: string, wholePeriod: boolean): LineDays {
 	const [{ start, end }] = group.invoices;
 	if (group.invoices.every((invoice) => invoice.start === start && invoice.end === end))

@@ -257,7 +257,7 @@ Funktionalität: Abrechnungsdetail
 
   # Zwei Hauswart-Rechnungen über verschiedene Leistungszeiträume, Einzug am 15. August: der Zeitanteil ist nach den
   # Beträgen gewichtet, (600 × 0/91 + 1200 × 47/92) / 1800 = 34.06 % (der Mittelwert der Brüche wäre 25.54 %); das PDF
-  # nennt jede Rechnung mit ihren Tagen und die Rechnung, die den Zeitanteil ergibt (#226)
+  # nennt jede Rechnung mit ihren Tagen und die Berechnung, die den Zeitanteil ergibt (#226)
   Szenario: PDF nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"

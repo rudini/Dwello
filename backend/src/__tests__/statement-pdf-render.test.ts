@@ -259,7 +259,7 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 	// Dr. Weber P-1: die Erläuterung nannte nur die Mietstage in der Periode, der Zeitanteil kam aber aus den Rechnungen
 	it('erklärt die Rechnungen unter der Position und ihre Gewichtung nach den Beträgen', async () => {
 		const text = (await textOf(mixed)).flowing;
-		expect(text).toContain('bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode; bei Rechnungen über verschiedene Leistungszeiträume, unter der Position aufgeführt, nach ihren Beträgen gewichtet.');
+		expect(text).toContain('bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode; bei Rechnungen über verschiedene Tage nach ihren Beträgen gewichtet (Berechnung unter der Abrechnungsposition; Ihr Anteil ist der Wohnungsanteil mal diese Berechnung, der Prozentwert ist gerundet).');
 	});
 
 	it('hält die Rechnungen beim Seitenwechsel bei ihrer Position, unter dem Tabellenkopf', async () => {
@@ -271,4 +271,17 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(pdf.flowing.split('Kategorie Verteilschlüssel').length - 1).toBe(pdf.pages - 1);
 		expect(pdf.flowing).not.toMatch(/Kategorie Verteilschlüssel[^(]*\d{2}\.\d{2}\.2025 – 30\.06\.2025/);
 	});
+
+	// Code-Review C-1: eine Position über mehrere Zeilen am Seitenende, ihre Rechnungen gingen ohne Tabellenkopf weiter
+	// (nach 20, 21 und 62 Positionen brach die Formel auf die nächste Seite)
+	it.each([20, 21, 62])('hält die Rechnungen auch bei einer langen Kategorie nach %i Positionen bei ihr', async (before) => {
+		const long = { ...mixed.lineItems[0], category: 'Allgemeine Betriebskosten Treppenhaus Umgebung Garten Spielplatz Velokeller Waschküche Trocknungsraum' };
+		const plain = (i: number) => ({ category: `Kat ${i}`, key: 'Pro Einheit', totalAmount: 100, apartmentShare: 50, periodShare: 0.3808, tenantShare: 19 });
+
+		const { pageTexts } = await textOf({ ...mixed, lineItems: [...Array.from({ length: before }, (_, i) => plain(i)), long] });
+
+		const pageOf = (text: string) => pageTexts.findIndex((page) => page.includes(text));
+		expect([pageOf('01.04.2025'), pageOf('(600.00')]).toEqual([pageOf('306.52'), pageOf('306.52')]);
+	});
+
 });
