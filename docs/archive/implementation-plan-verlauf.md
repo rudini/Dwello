@@ -817,4 +817,5 @@ The issue's "Done means" is worded for a decision issue; its "Decided (product o
 - [x] Full axe and language suites (the shared a11y seed gained the building Talblick): 332 passed
 - [x] Closing code review before the push: `docs/reviews/a6-review-2.md` (after the merge of `main`; migration renamed to 0013)
 - [x] Workflow review notes: `docs/reviews/workflow-notes-issue-115.md`
+- [x] Second merge of `main` (pull request conflicted): additive test conflicts; the a11y seed tenant renamed «Gina» because main added «Emil», whose expired agreed end now also shows the A-6 panel on `contract-detail-ended` (no cut-off, #115); code review round 3 `docs/reviews/a6-review-3.md`, E2E and the full axe/language suites (346) green
 - [x] Pull request `Fixes #115`, CI green, merged (session archived before the push)
