@@ -42,9 +42,9 @@
 		read?: { unsure: string[]; missing: string[] }; // fields the KI read without being sure, or did not find
 	} = $props();
 
-	// ISO dates compare as text; a Leistungszeitraum decides over the Rechnungsdatum
 	// the year of the date fields' examples (DateInput), so the help names one year (#250)
 	const year = new Date().getFullYear();
+	// ISO dates compare as text; a Leistungszeitraum decides over the Rechnungsdatum
 	const byServicePeriod = $derived(!!servicePeriodStart && !!servicePeriodEnd);
 	const outside = $derived(
 		!!period &&

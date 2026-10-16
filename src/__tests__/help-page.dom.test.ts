@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import HelpPage from '../routes/help/+page.svelte';
 import { navGroups } from '$lib/navigation';
 import { allByTestId, show } from './helpers/dom';
@@ -17,6 +17,21 @@ describe('Hilfe', () => {
 		for (const name of names) expect(text).toContain(`«${name}»`);
 		for (const old of ['«Verträge»', '«Abrechnungen»', '«Konfiguration»'])
 			expect(text).not.toContain(old);
+	});
+
+	// Kosten über mehrere Jahre mit dem Jahr der Beispiele der Datumsfelder (#250, #254)
+	it('erklärt Kosten über mehrere Jahre und den Boiler in der Wohnung', () => {
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(new Date('2027-03-01T10:00:00Z'));
+		try {
+			show(HelpPage, {});
+
+			const invoices = section('Rechnungen erfassen')!.textContent;
+			expect(invoices).toContain('Geben Sie dann 01.04.2027 bis 31.03.2032 ein.');
+			expect(invoices).toContain('Bei einem Boiler in der Wohnung ist das umstritten');
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it('erklärt die Fachbegriffe in einfachen Worten', () => {
