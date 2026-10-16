@@ -12,7 +12,7 @@
 	import RefusedStatements from '../RefusedStatements.svelte';
 
 	// An agreed end has passed: if the tenant stayed with the landlord's consent, the contract continues open-ended
-	// (Art. 266 Abs. 2 OR, A-6); TODO(fachlich prüfen, #308): wording of the question and the objection
+	// (Art. 266 Abs. 2 OR, A-6); TODO(fachlich prüfen, #308): wording of the question, the consequences and the objection
 	let {
 		shown,
 		endDate,
