@@ -461,20 +461,22 @@ describe('Zahlteil der Mahnung', () => {
 
 		expect(text).toContain('Empfangsschein');
 		expect(text).toContain('Zahlteil');
-		expect(text.split('120.00').length - 1).toBe(3); // letter, receipt, payment part
 		// in the letter, on the receipt and on the payment part
+		expect(text.split('120.00').length - 1).toBe(3);
 		expect(text.split(formatQRReferenceForDisplay(statementQRReference(statementId))).length - 1).toBe(3);
 	});
 
-	// Review W6c C-1/V-6: Brief und Zahlteil auf einem Blatt, auch die längste Mahnstufe
+	// Review W6c C-1/V-6/C-13: Brief und Zahlteil auf einem Blatt, jede Mahnstufe in jeder Sprache
 	it('druckt jede Mahnstufe mit dem Zahlteil auf eine Seite', async () => {
-		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
-		const statementId = await statement('sent');
-		for (let level = 1; level <= 3; level++) {
-			const { document } = await remind(statementId);
-			const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${document.id}/pdf`)).arrayBuffer());
-			expect(pdf.toString('latin1').match(/\/Type \/Page\b/g)?.length).toBe(1);
-			await expireReminders(statementId);
+		for (const language of ['de', 'fr', 'it', 'en']) {
+			await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language });
+			const statementId = await statement('sent');
+			for (let level = 1; level <= 3; level++) {
+				const { document } = await remind(statementId);
+				const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${document.id}/pdf`)).arrayBuffer());
+				expect(pdf.toString('latin1').match(/\/Type \/Page\b/g)?.length).toBe(1);
+				await expireReminders(statementId);
+			}
 		}
 	});
 
