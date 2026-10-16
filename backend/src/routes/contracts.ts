@@ -52,6 +52,7 @@ const contractUpdateSchema = t.Partial(
 		startDate: t.String({ format: 'date' }),
 		endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 		terminated: t.Boolean(),
+		noticeReceivedOn: t.Nullable(t.String({ format: 'date' })), // the day the notice arrived (A-3)
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),

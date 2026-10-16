@@ -253,6 +253,24 @@ describe('Gekündigter Mietvertrag', () => {
 		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
 	});
 
+	// A-3 (#112): der Tag, an dem das Kündigungsschreiben ankam, gehört zur Kündigung
+	it('merkt sich, wann die Kündigung eingegangen ist', async () => {
+		expect((await put({ endDate: '2099-03-31', terminated: true, noticeReceivedOn: '2098-12-15' })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2099-03-31', terminated: true, noticeReceivedOn: '2098-12-15' });
+	});
+
+	it('vergisst den Eingang, wenn die Kündigung aufgehoben wird', async () => {
+		expect((await put({ endDate: null })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: null, noticeReceivedOn: null });
+	});
+
+	it('vergisst den Eingang, wenn der Mietvertrag befristet wird', async () => {
+		await put({ endDate: '2099-03-31', terminated: true, noticeReceivedOn: '2098-12-15' });
+		expect((await put({ endDate: '2099-06-30', terminated: false })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2099-06-30', terminated: false, noticeReceivedOn: null });
+		await put({ endDate: null });
+	});
+
 	it('legt keinen neuen Mietvertrag mit Kündigung ohne Vertragsende an', async () => {
 		const response = await sendJson('POST', '/api/v1/contracts', {
 			apartmentId: rental.apartment,

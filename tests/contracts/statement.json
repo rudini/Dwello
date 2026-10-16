@@ -7,6 +7,8 @@
 	"periodEnd": "2024-12-31",
 	"statementDate": "2025-01-15",
 	"rentalDays": 366,
+	"rentalStart": "2024-01-01",
+	"rentalEnd": "2024-12-31",
 	"totalCosts": "1045.00",
 	"totalAdvancePayments": "0.00",
 	"managementFee": "45.00",
