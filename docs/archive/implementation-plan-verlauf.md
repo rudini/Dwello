@@ -507,3 +507,35 @@ Request: make the CI E2E tests faster (follow-up to "axe check only on UI change
 - [x] Push, pull request, CI shows shard times, merge (CLAUDE.md, Workflow 9)
 
 Files: `.github/workflows/ci.yml`, `docs/test-pyramid.md`
+
+## Session: O-34, upload axe states time out in CI
+
+Request: fix O-34 (`docs/design/offene-punkte.md`): the axe states `invoices upload-dialog` and `invoices upload-discard-created` time out in CI. No issue. No scenario: test reliability only, no app behaviour changes.
+
+- [x] Cause: `startUpload` (`tests/e2e/tasks/accessibility.ts`) picks the first building of the select (`index: 1`), in the shared E2E database often a parallel scenario's «Bergsicht …»/«Seeblick …» that its cleanUp deletes while the files are read (extract 404: row «failed», no unsure hint) or created (no result). The KI 503s in the log are the categorization of the «Werke …» files, expected
+- [x] Red: the two states (`--repeat-each=3`) with a parallel churn of buildings «Aarhof …» created and deleted after 4 s: 5 of 6 failed with the CI's timeouts (unsure hint, upload result); without churn, even under CPU load, all pass
+- [x] Fix: all five upload states upload into the example's own building (`uploadBelege` of `tasks/invoice-upload.ts`); under the same churn 15 of 15 pass (`invoices upload-.* @a11y`, `--repeat-each=3`), axe and language checks of the upload states 10 of 10
+- [x] O-34 removed from `docs/design/offene-punkte.md`
+- [x] Checks: lint, check, backend type-check, `open-work.test.ts`, the a11y and language upload states
+- [x] code-reviewer round 1 (docs/reviews/o34-review-1.md)
+- [x] Workflow notes `docs/reviews/workflow-notes-o34.md`
+- [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs/reviews/o34-review-1.md`, `docs/reviews/workflow-notes-o34.md`.
+
+## Session 2026-10-16 W4: Heizprofil on the detail page, help text, rounded months (#247, #230, #232)
+
+- [x] @wip scenarios (statement-detail.feature, heating-profiles.feature), fach-reviewer before implementing (`docs/reviews/w4-fachreview-1.md`)
+- [x] #247: a statement shared by days stores the chosen Heizprofil's names and why it was not applied; the detail page names it «(nicht angewendet: …)»
+- [x] #230: help text at the Monatsanteile of an own profile: existing statements keep their shares (four languages)
+- [x] #232: share from the months rounded to two places; PDF prints the division and the period's months where they do not carry 100 %
+- [x] #232 C-5: no recompute for statements without a stored share (no Heizprofil note)
+- Files: `backend/src/services/{heating-profile,prorating,calculation,statement-pdf,pdf}.service.ts`, `backend/src/db/schema.ts`, `src/lib/server/statement.ts`, `src/routes/config/heating-profiles/HeatingProfileForm.svelte`, `messages/*.json`, `docs/data-model.md`, `docs/api-specification.md`, tests and scenarios
+- [x] Code review round 1 (`docs/reviews/w4-review-1.md`)
+- [x] Persona Helga (`docs/design/personas/helga-w4.md`)
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-w4.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w4-fachreview-2.md`)
+- [x] daten-pruefer (`docs/reviews/w4-datenpruefung-1.md`)
+- [x] Closing code review (`docs/reviews/w4-review-2.md`)
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-247-230-232.md`)
+- [x] Workflow review, archive the session, pull request
