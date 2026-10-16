@@ -55,6 +55,23 @@ export const apartmentStatus = sql<ApartmentStatus>`(case
 	else "apartments"."status"
 end)`;
 
+/** An apartment with its Mietstatus, the dates it is shown with, and its building's name, as list and detail read it */
+const apartmentFields = {
+	id: apartments.id,
+	buildingId: apartments.buildingId,
+	number: apartments.number,
+	floor: apartments.floor,
+	area: apartments.area,
+	rooms: apartments.rooms,
+	status: apartmentStatus,
+	nextContractStart,
+	currentContractEnd,
+	lastContractEnd,
+	createdAt: apartments.createdAt,
+	updatedAt: apartments.updatedAt,
+	buildingName: buildings.name
+};
+
 export interface ApartmentFilters {
 	search?: string;
 	buildingId?: string;
@@ -112,21 +129,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 
 	// Query with building name and current tenant
 	const results = await db
-		.select({
-			id: apartments.id,
-			buildingId: apartments.buildingId,
-			number: apartments.number,
-			floor: apartments.floor,
-			area: apartments.area,
-			rooms: apartments.rooms,
-			status: apartmentStatus,
-			nextContractStart,
-			currentContractEnd,
-			lastContractEnd,
-			createdAt: apartments.createdAt,
-			updatedAt: apartments.updatedAt,
-			buildingName: buildings.name
-		})
+		.select(apartmentFields)
 		.from(apartments)
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(whereClause)
@@ -153,19 +156,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 export async function getApartment(id: string): Promise<ApartmentWithDetails | null> {
 	const [apartment] = await db
 		.select({
-			id: apartments.id,
-			buildingId: apartments.buildingId,
-			number: apartments.number,
-			floor: apartments.floor,
-			area: apartments.area,
-			rooms: apartments.rooms,
-			status: apartmentStatus,
-			nextContractStart,
-			currentContractEnd,
-			lastContractEnd,
-			createdAt: apartments.createdAt,
-			updatedAt: apartments.updatedAt,
-			buildingName: buildings.name,
+			...apartmentFields,
 			buildingAddress: buildings.address,
 			buildingPostalCode: buildings.postalCode,
 			buildingCity: buildings.city

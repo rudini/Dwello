@@ -25,12 +25,12 @@
 		endDate?: string | null;
 		future: boolean;
 		ended: boolean;
-		billedBy: { id: string; statementNumber: string; status: string }[];
+		billedBy: { id: string; statementNumber: string; status: string }[] | null;
 		missingStatements: boolean;
 		error?: string;
 	} = $props();
 
-	const billed = $derived(billedBy.length > 0);
+	const billed = $derived(!!billedBy?.length);
 	// each with its status: a draft can be deleted, a sent or paid one stays (Fachreview V-3)
 	const statusOf = (status: string) =>
 		status === 'draft'
@@ -38,7 +38,17 @@
 			: status === 'paid'
 				? m.contracts_billed_paid()
 				: m.contracts_billed_sent();
-	const locked = $derived(billedBy.some((s) => s.status !== 'draft'));
+	const locked = $derived(!!billedBy?.some((s) => s.status !== 'draft'));
+	// what a started contract's deletion means: with an end there is no «Beenden» (Fachreview V-11); an ended one says
+	// when it has no statement, unknown is not none (A-8, review C-1)
+	const startedNotes = $derived([
+		m.contracts_delete_started_text({ name, date: formatDate(startDate) }),
+		endDate
+			? m.contracts_delete_real_tenancy_ended({ name, date: formatDate(endDate) })
+			: m.contracts_delete_real_tenancy({ name }),
+		...(ended && billedBy ? [m.contracts_delete_no_statements()] : []),
+		...(missingStatements ? [m.contracts_delete_missing_statements()] : [])
+	]);
 	let mistakeConfirmed = $state(false);
 	let mistakeError = $state('');
 	// each opening asks again
@@ -70,7 +80,7 @@
 	{#if billed}
 		<p>{m.contracts_delete_billed()}</p>
 		<ul class="flex flex-col gap-2">
-			{#each billedBy as statement (statement.id)}
+			{#each billedBy ?? [] as statement (statement.id)}
 				<li>
 					<a
 						href="/statements/{statement.id}"
@@ -85,19 +95,7 @@
 	{:else if future}
 		<p>{m.contracts_delete_future_text({ name })}</p>
 	{:else}
-		<p>{m.contracts_delete_started_text({ name, date: formatDate(startDate) })}</p>
-		<!-- with an end there is no «Beenden» (Fachreview V-11) -->
-		<p>
-			{endDate
-				? m.contracts_delete_real_tenancy_ended({ name, date: formatDate(endDate) })
-				: m.contracts_delete_real_tenancy({ name })}
-		</p>
-		{#if ended}
-			<p>{m.contracts_delete_no_statements()}</p>
-		{/if}
-		{#if missingStatements}
-			<p>{m.contracts_delete_missing_statements()}</p>
-		{/if}
+		{#each startedNotes as note (note)}<p>{note}</p>{/each}
 		<Checkbox
 			id="mistakeConfirmed"
 			label={m.contracts_delete_mistake_label()}

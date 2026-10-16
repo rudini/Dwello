@@ -71,7 +71,7 @@ export const statusHelp: Record<ApartmentStatus, string> = {
 /** Relet apartments by the start of their future contract: «2 vermietet ab 01.11.2026» (F-4, #58) */
 export function reletParts(starts: string[] = []) {
 	const counts = new Map<string, number>();
-	for (const start of [...starts].sort()) counts.set(start, (counts.get(start) ?? 0) + 1);
+	for (const start of starts) counts.set(start, (counts.get(start) ?? 0) + 1);
 	return [...counts].map(([start, count]) =>
 		(count === 1 ? m.apartments_count_relet_one : m.apartments_count_relet_many)({
 			count,

@@ -16,6 +16,8 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann ist das Gebäude "Seeblick" zu "50.0 %" belegt
     Und sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
+    # Persona Anna P-1: auch eine nie vermietete leere Wohnung wird genannt
+    Und nennt die Belegung von "Seeblick" "Wohnung 1.02 leer"
 
   # F-4 (#58): dieselben Worte wie Gebäudekarten und Wohnungsseiten
   Szenario: Künftig vermietete Wohnung in der Belegung

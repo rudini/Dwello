@@ -47,17 +47,19 @@
 			testid: 'stat-reserved'
 		}
 	]);
-	// The relet apartments as the building cards count them, and since when the empty ones are empty (#145)
+	// The relet apartments as the building cards count them, and each empty one, since when if it had a contract (#145)
 	const occupancyNotes = (building: DashboardData['buildingOccupancy'][number]) =>
 		[
 			...reletParts(building.reletStarts),
-			...(building.vacantSince ?? []).map(({ number, lastContractEnd }) =>
-				m.dashboard_vacant_since({ number, date: endedSince(lastContractEnd) })
+			...(building.vacant ?? []).map(({ number, lastContractEnd }) =>
+				lastContractEnd
+					? m.dashboard_vacant_since({ number, date: endedSince(lastContractEnd) })
+					: m.dashboard_vacant({ number })
 			)
 		]
 			.map((note) => `, ${note}`)
 			.join('');
-	const anyVacantSince = $derived(data.buildingOccupancy.some((b) => b.vacantSince?.length));
+	const anyVacant = $derived(data.buildingOccupancy.some((b) => b.vacant?.length));
 	const statementFigures = [
 		{ status: 'draft', label: m.statements_status_draft() },
 		{ status: 'sent', label: m.statements_status_sent() },
@@ -145,7 +147,7 @@
 					</li>
 				{/each}
 			</ul>
-			{#if anyVacantSince}
+			{#if anyVacant}
 				<p class="text-ink-muted" data-testid="occupancy-vacancy-help">
 					{m.apartments_vacancy_costs_help()}
 				</p>

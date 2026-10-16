@@ -220,6 +220,7 @@
 	"dashboard_overdue_amounts": "Montants en retard",
 	"dashboard_occupancy_heading": "Appartements loués par immeuble",
 	"dashboard_occupied": "loués",
+	"dashboard_vacant": "Appartement {number} vacant",
 	"dashboard_vacant_since": "Appartement {number} vacant depuis le {date}",
 	"dashboard_task_first_building": "Saisir le premier immeuble",
 	"dashboard_task_first_building_text": "Commencez par l’adresse de votre immeuble. Ensuite, vous saisissez les appartements.",

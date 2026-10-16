@@ -152,11 +152,16 @@ describe('Übersicht', () => {
 	it('nennt die leeren Wohnungen mit dem Tag, seit dem sie leer sind', () => {
 		const building = {
 			...data.buildingOccupancy[0],
-			vacantSince: [{ number: '1.02', lastContractEnd: '2024-03-31' }]
+			vacant: [
+				{ number: '1.01', lastContractEnd: null },
+				{ number: '1.02', lastContractEnd: '2024-03-31' }
+			]
 		};
 		const body = page({ buildingOccupancy: [building] });
 		const row = body.match(/data-testid="occupancy-row"[\s\S]*?<\/li>/)![0];
-		expect(row.replace(/<[^>]*>/g, '')).toContain('3/4 vermietet, Wohnung 1.02 leer seit 01.04.2024');
+		expect(row.replace(/<[^>]*>/g, '')).toContain(
+			'3/4 vermietet, Wohnung 1.01 leer, Wohnung 1.02 leer seit 01.04.2024'
+		);
 		expect(body).toMatch(
 			/data-testid="occupancy-vacancy-help"[^>]*>Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter.</
 		);

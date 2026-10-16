@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { roomsLabel, statusLabels } from '$lib/apartment';
+import { roomsLabel, statusText } from '$lib/apartment';
 import type { ApartmentStatus } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -58,7 +58,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		unit: a.number,
 		building: a.buildingName || m.contracts_unknown_building(),
 		size: `${roomsLabel(String(Number(a.rooms)))}, ${Number(a.area)} m²`, // to judge the rent in the wizard
-		status: statusLabels[a.status]
+		status: statusText(a)
 	}));
 
 	return { tenants, apartments };

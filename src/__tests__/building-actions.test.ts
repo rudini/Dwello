@@ -173,7 +173,7 @@ describe('Gebäudedetail', () => {
 	it('zählt künftig vermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {
 		const apartments = [
 			{ id: 'a1', status: 'relet', nextContractStart: '2099-11-01' },
-			{ id: 'a2', status: 'reserved', nextContractStart: null },
+			{ id: 'a2', status: 'reserved', nextContractStart: null, lastContractEnd: '2024-03-31' },
 			{ id: 'a3', status: 'occupied', nextContractStart: null }
 		];
 		const fetch = (async (url: string) =>
@@ -188,6 +188,8 @@ describe('Gebäudedetail', () => {
 
 		expect(data.building).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 1 });
 		expect(data.apartments[0]).toMatchObject({ status: 'relet', nextContractStart: '2099-11-01' });
+		// «Leer seit» on the floor plan too (#145, review C-2)
+		expect(data.apartments[1]).toMatchObject({ lastContractEnd: '2024-03-31' });
 	});
 });
 

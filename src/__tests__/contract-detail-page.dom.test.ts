@@ -56,7 +56,7 @@ function open(
 	today = '2026-10-10',
 	terminated = false,
 	missingStatements: { start: string; end: string; href: string }[] = [],
-	billedBy: { id?: string; statementNumber: string; status: string }[] = []
+	billedBy: { id?: string; statementNumber: string; status: string }[] | null = []
 ) {
 	show(ContractPage, {
 		data: {
@@ -652,6 +652,16 @@ describe('Mietvertrag löschen', () => {
 			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Sein Vertragsende ist der 31.12.2021, danach bleibt er als Historie der Wohnung erhalten.'
 		);
 		expect(dialog).not.toContain('«Beenden»');
+	});
+
+	// Review C-1: konnten die Abrechnungen nicht geladen werden, behauptet der Dialog keine
+	it('sagt nicht, es gebe keine Abrechnung, wenn sie nicht geladen werden konnten', () => {
+		open('2018-01-01', '2021-12-31', null, '2026-10-10', false, [], null);
+		click('contract-delete-button');
+
+		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain(
+			'keine Nebenkostenabrechnung'
+		);
 	});
 
 	// A-8 (#117): der Dialog sagt, ob es Abrechnungen gibt

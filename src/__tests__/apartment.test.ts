@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { load } from '../routes/apartments/[id]/+page.server';
+import { load as listLoad } from '../routes/apartments/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { grossRent } from '../lib/server/contract-history';
@@ -153,6 +154,23 @@ describe('Wohnungsdetail', () => {
 
 	it('meldet eine unbekannte Wohnung als nicht gefunden', async () => {
 		await expect(loadApartment({})).rejects.toMatchObject({ status: 404 });
+	});
+});
+
+// «Leer seit» in the apartment list too (#145, review C-2)
+describe('Wohnungsliste', () => {
+	it('gibt das Ende des letzten Mietvertrags weiter', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/apartments')
+					? { apartments: [{ ...apartment, status: 'vacant', lastContractEnd: '2024-03-31' }], total: 1 }
+					: { buildings: [] }
+			)) as typeof globalThis.fetch;
+		const data = (await listLoad({ url: new URL('http://localhost/apartments'), fetch } as never)) as {
+			apartments: { lastContractEnd: string | null }[];
+		};
+
+		expect(data.apartments[0].lastContractEnd).toBe('2024-03-31');
 	});
 });
 

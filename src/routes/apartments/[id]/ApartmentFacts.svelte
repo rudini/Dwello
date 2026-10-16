@@ -39,7 +39,7 @@
 					label={statusText(apartment)}
 				/>
 				<span class="text-ink-muted">{statusHelp[apartment.status]}</span>
-				{#if apartment.status === 'vacant' && apartment.lastContractEnd}
+				{#if apartment.status === 'vacant'}
 					<span class="text-ink-muted">{m.apartments_vacancy_costs_help()}</span>
 				{/if}
 			</dd>

@@ -220,6 +220,7 @@
 	"dashboard_overdue_amounts": "Overdue amounts",
 	"dashboard_occupancy_heading": "Let apartments per building",
 	"dashboard_occupied": "let",
+	"dashboard_vacant": "Apartment {number} vacant",
 	"dashboard_vacant_since": "Apartment {number} vacant since {date}",
 	"dashboard_task_first_building": "Add your first building",
 	"dashboard_task_first_building_text": "Start with the address of your property. Then add the apartments.",

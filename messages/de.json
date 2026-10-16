@@ -220,6 +220,7 @@
 	"dashboard_overdue_amounts": "Überfällige Beträge",
 	"dashboard_occupancy_heading": "Vermietete Wohnungen pro Gebäude",
 	"dashboard_occupied": "vermietet",
+	"dashboard_vacant": "Wohnung {number} leer",
 	"dashboard_vacant_since": "Wohnung {number} leer seit {date}",
 	"dashboard_task_first_building": "Erstes Gebäude erfassen",
 	"dashboard_task_first_building_text": "Beginnen Sie mit der Adresse Ihrer Liegenschaft. Danach erfassen Sie die Wohnungen.",

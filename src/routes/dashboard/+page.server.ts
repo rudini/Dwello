@@ -36,7 +36,7 @@ export interface DashboardData {
 		occupiedApartments: number;
 		occupancyRate: number;
 		reletStarts?: string[]; // Vertragsbeginn of each relet apartment, added here
-		vacantSince?: { number: string; lastContractEnd: string }[]; // empty apartments that had a contract (#145)
+		vacant?: { number: string; lastContractEnd: string | null }[]; // empty apartments, with their last Vertragsende (#145)
 	}[];
 }
 
@@ -130,9 +130,12 @@ export const load = async ({
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
 		...b,
 		reletStarts: reletStarts(inBuilding(b.buildingId)),
-		vacantSince: inBuilding(b.buildingId)
-			.filter((a) => a.status === 'vacant' && a.lastContractEnd)
-			.map((a) => ({ number: String(a.number), lastContractEnd: String(a.lastContractEnd) }))
+		vacant: inBuilding(b.buildingId)
+			.filter((a) => a.status === 'vacant')
+			.map((a) => ({
+				number: String(a.number),
+				lastContractEnd: (a.lastContractEnd as string | null) ?? null
+			}))
 	}));
 	const noticedContracts = noticed(allContracts);
 	const input = {

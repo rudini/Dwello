@@ -2,8 +2,19 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { load } from '../routes/dashboard/+page.server';
 import contractList from '../../tests/contracts/contracts.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
+import apartmentList from '../../tests/contracts/apartments.json';
 
 const API = 'http://localhost:3001/api/v1';
+// an apartment of the API contract, without the dates it does not have
+const apartment = (buildingId: string, status: string, fields: Record<string, string> = {}) => ({
+	...apartmentList.apartments[0],
+	nextContractStart: null,
+	currentContractEnd: null,
+	lastContractEnd: null,
+	buildingId,
+	status,
+	...fields
+});
 const figures = {
 	portfolio: { totalBuildings: 1, totalApartments: 2, occupiedApartments: 1, reletApartments: 0 },
 	statements: { draft: 1, sent: 1, paid: 0, overdue: 1 },
@@ -88,19 +99,13 @@ function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both
 		},
 		'/apartments?limit=1000': {
 			apartments: [
-				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-12-01' },
-				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-11-01' },
-				{ buildingId: 'b1', status: 'occupied', nextContractStart: null },
-				{ buildingId: 'b2', status: 'vacant', nextContractStart: null },
-				{
-					buildingId: 'b2',
-					number: '1.02',
-					status: 'vacant',
-					nextContractStart: null,
-					lastContractEnd: '2024-03-31'
-				},
+				apartment('b1', 'relet', { nextContractStart: '2026-12-01' }),
+				apartment('b1', 'relet', { nextContractStart: '2026-11-01' }),
+				apartment('b1', 'occupied'),
+				apartment('b2', 'vacant', { number: '1.01' }),
+				apartment('b2', 'vacant', { number: '1.02', lastContractEnd: '2024-03-31' }),
 				// reserved by hand: not empty to rent, so no «leer seit»
-				{ buildingId: 'b3', status: 'reserved', nextContractStart: null, lastContractEnd: '2024-03-31' }
+				apartment('b3', 'reserved', { lastContractEnd: '2024-03-31' })
 			]
 		}
 	};
@@ -177,13 +182,16 @@ describe('Übersicht laden', () => {
 		]);
 	});
 
-	// P-18 (#145): seit wann eine Wohnung leer ist, nur wenn sie einen Mietvertrag hatte
+	// P-18 (#145): jede leere Wohnung, seit wann nur, wenn sie einen Mietvertrag hatte (Persona Anna P-1)
 	it('nennt pro Gebäude die leeren Wohnungen mit dem Ende ihres letzten Mietvertrags', async () => {
 		const data = await load({ fetch: backend() } as never);
 
-		expect(data.buildingOccupancy.map((b) => b.vacantSince)).toEqual([
+		expect(data.buildingOccupancy.map((b) => b.vacant)).toEqual([
 			[],
-			[{ number: '1.02', lastContractEnd: '2024-03-31' }],
+			[
+				{ number: '1.01', lastContractEnd: null },
+				{ number: '1.02', lastContractEnd: '2024-03-31' }
+			],
 			[]
 		]);
 	});

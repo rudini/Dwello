@@ -326,6 +326,10 @@ describe('Wohnungsdetail', () => {
 
 	it('bietet bei einer leeren Wohnung den Mietvertrag als nächsten Schritt an', () => {
 		open(false);
+		// Persona Anna P-3: auch nie vermietet trägt der Vermieter die Nebenkosten
+		expect(byTestId('apartment-info-status')!.textContent).toContain(
+			'Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter.'
+		);
 		expect(byTestId('apartment-vacant')).not.toBeNull();
 		expect(byTestId('current-tenant-name')).toBeNull();
 		expect(byTestId('contract-history-empty')).not.toBeNull();

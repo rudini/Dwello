@@ -141,6 +141,17 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		]);
 	});
 
+	// Review C-1: unbekannt ist nicht «keine»
+	it('lässt die Abrechnungen offen, wenn sie nicht geladen werden können', async () => {
+		const answer = backend([]);
+		const fetch = (async (url: string) =>
+			url.includes('/statements?')
+				? new Response(null, { status: 500 })
+				: answer(url)) as typeof globalThis.fetch;
+		const data = (await load({ params: { id: 'c1' }, fetch } as never)) as { billedBy: unknown };
+		expect(data.billedBy).toBeNull();
+	});
+
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
 		expect(await missingOf(backend([statementOf('c1', lastYear)], `${lastYear}-03-01`))).toEqual(
 			[]

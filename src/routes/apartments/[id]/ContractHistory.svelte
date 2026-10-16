@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { contractPeriod, statusBadges } from '$lib/contract-status';
+	import { historyPeriod, statusBadges } from '$lib/contract-status';
 	import type { ContractHistory } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -28,14 +28,7 @@
 						data-testid="contract-history-link"
 						>{m.apartments_contract_of({ name: contract.tenantName })}</a
 					>
-					<span class="text-ink-muted"
-						>{contractPeriod(
-							contract.startDate,
-							contract.endDate,
-							contract.status,
-							contract.terminated
-						)}</span
-					>
+					<span class="text-ink-muted">{historyPeriod(contract)}</span>
 					<span class="tabular-nums text-ink"
 						>{formatCurrency(contract.rentBrutto)}
 						<span class="text-ink-muted">{m.common_monthly_total_suffix()}</span></span
@@ -61,7 +54,7 @@
 		{/if}
 		{#if earlier.length}
 			<section class="flex flex-col gap-2" data-testid="contract-history-earlier">
-				<h3 class="text-xl font-bold text-ink">{m.apartments_contracts_earlier()}</h3>
+				<h3 class="text-lg font-semibold text-ink">{m.apartments_contracts_earlier()}</h3>
 				{@render rows(earlier)}
 			</section>
 		{/if}

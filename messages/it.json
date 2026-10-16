@@ -220,6 +220,7 @@
 	"dashboard_overdue_amounts": "Importi scaduti",
 	"dashboard_occupancy_heading": "Appartamenti locati per immobile",
 	"dashboard_occupied": "locati",
+	"dashboard_vacant": "Appartamento {number} sfitto",
 	"dashboard_vacant_since": "Appartamento {number} sfitto dal {date}",
 	"dashboard_task_first_building": "Registrare il primo immobile",
 	"dashboard_task_first_building_text": "Inizi con l’indirizzo del suo immobile. Poi registra gli appartamenti.",

@@ -37,6 +37,29 @@ describe('Neuer Mietvertrag laden', () => {
 		expect(data.apartments[0].size).toBe('2.5 Zimmer, 65 m²');
 	});
 
+	// F-4 (#58), review C-4: «Vermietet ab {Datum}» wie überall
+	it('nennt bei einer künftig vermieteten Wohnung den Vertragsbeginn', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('tenants')
+					? { tenants: [] }
+					: {
+							apartments: [
+								{
+									id: 'a1',
+									number: '2.02',
+									rooms: '2.5',
+									area: '65.00',
+									status: 'relet',
+									nextContractStart: '2099-11-01'
+								}
+							]
+						}
+			)) as typeof globalThis.fetch;
+		const data = (await load({ fetch } as never)) as { apartments: { status: string }[] };
+		expect(data.apartments[0].status).toBe('Vermietet ab 01.11.2099');
+	});
+
 	// B-14 (#147): an empty choice would look like "no tenants yet"; the landlord sees a load error instead
 	it.each(['tenants', 'apartments'])('meldet einen Ladefehler, wenn %s fehlen', async (failing) => {
 		const fetch = (async (url: string) =>
