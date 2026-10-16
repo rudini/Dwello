@@ -8,7 +8,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 |---|---|---|---|---|
 | A-1 | Befristung und Kündigung unterscheiden | umgesetzt | IF-4, Helga | – |
 | A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna | – |
-| A-3 | Hinweis auf die Kündigungsfrist | mittel | IF-2 | #112 |
+| A-3 | Hinweis auf die Kündigungsfrist | umgesetzt | IF-2 | #112 |
 | A-4 | Bevorstehendes Vertragsende sichtbar machen | umgesetzt | IF-5, Anna, Helga | #113 |
 | A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna | #114 |
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 | #115 |
@@ -30,7 +30,7 @@ Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriff
 
 1. **Keine Überschneidung.** Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden; Dwello lehnt einen neuen oder geänderten Vertrag ab, der es täte (`CONTRACT_OVERLAP` in `contract.service.ts`; für neue Verträge belegt durch `contract-new.feature` und `backend/src/__tests__/contract-overlap.pg.test.ts`).
 2. **Kündigungstermin als Vertragsende.** Ist ein unbefristeter Mietvertrag gekündigt, erfasst Dwello den Kündigungstermin als Vertragsende und merkt sich, dass er gekündigt ist (A-1).
-3. **Kündigungsfrist.** Dwello prüft die Kündigungsfrist nicht; der Dialog «Mietvertrag beenden» nennt sie allgemein (3 Monate, sonst nächster Termin); ein Hinweis aus dem Eingangsdatum der Kündigung ist geplant (A-3, #112).
+3. **Kündigungsfrist.** Der Dialog «Mietvertrag beenden» nennt sie allgemein (3 Monate, sonst nächster Termin). Ist «Kündigung erhalten am» ausgefüllt und liegen bis zum Vertragsende weniger als 3 Kalendermonate (Tag auf das Monatsende gekürzt), weist er darauf hin, ohne zu sperren (A-3, #112). Ortsübliche Termine, vertraglich längere Fristen und Formvorschriften prüft Dwello nicht.
 4. **Vertrag, der von Gesetzes wegen weiterläuft** (#155, Entscheid Product Owner: nur beschreiben, kein eigener Grund für das Vertragsende). Stirbt der Mieter, geht der Mietvertrag auf die Erben über (Art. 560 ZGB); sie können ihn mit der gesetzlichen Frist auf den nächsten gesetzlichen Termin kündigen (Art. 266i OR). Der Mietvertrag bleibt erfasst, ohne neues Vertragsende, bis die Erben oder der Vermieter gekündigt haben; erst dann erfasst «Beenden» den Kündigungstermin; beim Mieter steht als Korrespondenzadresse (im Mieterformular «Adresse», bei Post per E-Mail auch «E-Mail») die Adresse, an die die Post für die Erben geht, der Name bleibt. Tritt ein Dritter in den Mietvertrag ein (Übertragung eines Mietvertrags für Geschäftsräume mit schriftlicher Zustimmung des Vermieters, Art. 263 OR; Zuweisung der Wohnung der Familie an einen Ehegatten durch das Scheidungsgericht, Art. 121 ZGB; nicht bei Eheschutzmassnahmen, Art. 176 ZGB, die nur die Benutzung regeln), bleibt es rechtlich derselbe Vertrag; Dwello erfasst ihn als Vertragsende am Tag vor dem Wechsel, ohne Kündigungsfrist, und einen neuen Mietvertrag mit denselben Bedingungen ab dem Tag des Wechsels, damit jeder nach seinen Miettagen abgerechnet wird. Das Vertragsende heisst dann *gekündigt*, obwohl niemand gekündigt hat. Der bisherige Mieter haftet höchstens zwei Jahre solidarisch weiter (Art. 263 Abs. 4 OR, Art. 121 Abs. 2 ZGB); Dwello bildet das nicht ab. Die Hilfe unter «Bearbeiten» (Mieter und Wohnung) und der Dialog «Mietvertrag beenden» sagen es.
 
 ---
@@ -91,7 +91,10 @@ Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga
 
 ---
 
-## A-3 Hinweis auf die Kündigungsfrist
+## A-3 Hinweis auf die Kündigungsfrist – umgesetzt
+
+**Umgesetzt** (Session W7b, #112): Feld «Kündigung erhalten am» im Dialog «Mietvertrag beenden» mit der Formvorschrift in der Hilfe, Hinweis bei weniger als 3 Monaten (`shortNoticePeriod` in `src/lib/contract-status.ts`), Spalte `rental_contracts.notice_received_on`, auf der Detailseite gezeigt; «Kündigung aufheben» und «Befristet» löschen den Tag. Entscheide des Product Owners: nur die bundesrechtliche Mindestfrist von 3 Monaten, kein Feld für vertraglich längere Fristen.
+
 
 **Problem.** Für Wohnungen gilt eine Kündigungsfrist von mindestens 3 Monaten auf einen ortsüblichen Termin (Art. 266c OR). Eine zu späte Kündigung gilt erst auf den nächsten Termin (Art. 266a Abs. 2 OR). Trägt der Verwalter das Datum aus einem zu spät eingegangenen Kündigungsschreiben ein, ist die Wohnung in Dwello zu früh leer: Die Nebenkosten dieser Monate gehen an den Vermieter, das Akonto des Mieters wird nicht mehr gerechnet. Heute steht nur ein allgemeiner Satz im Dialog.
 
@@ -101,7 +104,7 @@ Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga
 2. Ist «Kündigung erhalten am» ausgefüllt und liegen bis zum Vertragsende weniger als 3 Monate, zeigt Dwello einen Hinweis, keine Sperre: «Zwischen Eingang und Vertragsende liegen weniger als 3 Monate. Dann gilt die Kündigung wohl erst auf den nächsten Kündigungstermin. Ausnahme: Ein Ersatzmieter übernimmt den Mietvertrag, oder Sie haben das Ende mit dem Mieter vereinbart.»
 3. Der Verwalter kann trotzdem speichern. Dwello prüft keine ortsüblichen Termine und keine Formvorschriften; das wäre Rechtsberatung und je nach Gemeinde falsch.
 4. «Kündigung erhalten am» wird beim Mietvertrag gespeichert und auf der Detailseite gezeigt.
-5. Die Hilfe nennt die Form: «Die Kündigung des Mieters muss schriftlich sein. Bei einer Familienwohnung braucht es die Unterschrift beider Ehegatten.» (Art. 266l, 266m OR; Wortlaut fachlich prüfen.)
+5. Die Hilfe nennt die Form: «Die Kündigung des Mieters muss schriftlich sein. Bei einer Familienwohnung braucht es die ausdrückliche Zustimmung des Ehegatten oder eingetragenen Partners.» (Art. 266l, Art. 266m Abs. 1 und 3 OR; Fachreview W7b.)
 
 **Akzeptanzkriterien**
 
@@ -120,7 +123,7 @@ Szenario: Kündigung mit genügend Frist
 
 **Nicht dazu:** Liste der ortsüblichen Termine, vertraglich längere Fristen, Kündigung durch den Vermieter (amtliches Formular).
 
-**Offene Fragen:** Gilt die 3-Monats-Regel als Faustregel für alle Kantone genügend genau für einen Hinweis? Soll der Hinweis vertraglich längere Fristen kennen (ein Feld «Kündigungsfrist» beim Mietvertrag)?
+**Entschieden** (#112): Die 3-Monats-Regel genügt für einen Hinweis; kein Feld für vertraglich längere Fristen.
 
 ---
 

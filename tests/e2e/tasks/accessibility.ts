@@ -40,6 +40,7 @@ import {
 	confirmEndContractButton,
 	contractEndInput,
 	contractEndPastConfirm,
+	noticeReceivedInput,
 	deleteContractButton,
 	endContractButton
 } from '../targets/contract-detail';
@@ -215,6 +216,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Check.the(contractEndPastConfirm),
 			Click.on(confirmEndContractButton),
 			Wait.until(on.refusedStatements)
+		),
+	// A-3 (#112): the notice arrived six weeks before the Vertragsende: the hint at the field, saving still possible
+	'end-dialog-notice-hint': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(endContractButton),
+			EnterDate.of('2099-03-31').into(contractEndInput),
+			EnterDate.of('2099-02-15').into(noticeReceivedInput),
+			Wait.until(on.shown('contract-notice-period-hint'))
 		),
 	// the same refusal from the contract form: the 2025 draft bills rent days after 31.03.2025 (A-10)
 	'edit-refused': () => async (actor) => {
