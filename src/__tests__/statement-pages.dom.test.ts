@@ -528,6 +528,76 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-later-invoices')).toBeNull();
 	});
 
+	// #104: dieselben Angaben wie das PDF
+	it('nennt das Mietverhältnis in der Periode', () => {
+		detail({ rentalStart: '2024-01-01', rentalEnd: '2024-03-31', rentalDays: 91 });
+		expect(byTestId('statement-tenancy')!.textContent!.trim()).toBe(
+			'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024'
+		);
+	});
+
+	const line = (overrides = {}) => ({
+		id: 'l1',
+		categoryId: 'c1',
+		categoryName: 'Hauswartung',
+		distributionKeyName: 'Nach Fläche',
+		totalAmount: 1800,
+		apartmentShare: 900,
+		periodShare: 0.1703,
+		shareDays: null,
+		tenantShare: 306.52,
+		percentage: 17.03,
+		invoices: [],
+		...overrides
+	});
+	const rowText = () => byTestId('statement-line-item')!.textContent!.replace(/\s+/g, ' ');
+	const invoicesText = () => allByTestId('statement-line-invoices')[0].textContent!.replace(/\s+/g, ' ');
+
+	it('nennt je Position den Wohnungsanteil und den Zeitanteil in Tagen, wie das PDF', () => {
+		detail({ lineItems: [line({ shareDays: { days: 91, total: 366 } })] });
+		expect(rowText()).toMatch(/CHF 900.00.*91\/366 Tage.*17.03 %.*CHF 306.52/);
+	});
+
+	it('nennt den Zeitanteil in Prozent, wo er nicht in Tagen aufgeht', () => {
+		detail({ lineItems: [line()] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('17.03 %');
+	});
+
+	it('nennt die Summe der Kosten «Ihre Nebenkosten», wie das PDF', () => {
+		detail();
+		expect(byTestId('statement-total-costs-label')!.textContent!.trim()).toBe('Ihre Nebenkosten');
+	});
+
+	it('führt von jeder Position zu ihren Rechnungen', () => {
+		const invoice = { id: 'i1', description: 'Hauswart Q1', amount: 1800, start: '2024-01-01', end: '2024-12-31', part: null };
+		detail({ lineItems: [line({ invoices: [invoice] })] });
+		const link = allByTestId('statement-line-invoice-link')[0] as HTMLAnchorElement;
+		expect(link.getAttribute('href')).toBe('/invoices/i1');
+		expect(link.textContent!.trim()).toBe('Hauswart Q1');
+		expect(invoicesText()).toContain('CHF 1’800.00');
+	});
+
+	// #240: Rechnungen über verschiedene Tage: jede mit ihren Tagen und die Berechnung, wie im PDF (#226)
+	it('nennt bei Rechnungen über verschiedene Tage jede mit ihren Tagen und die Berechnung', () => {
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart Q2', amount: 600, start: '2025-04-01', end: '2025-06-30', part: { days: 0, total: 91 } },
+			{ id: 'i2', description: 'Hauswart Q3', amount: 1200, start: '2025-07-01', end: '2025-09-30', part: { days: 47, total: 92 } },
+			{ id: 'fuel-stock-2025-12-31', description: 'Veränderung Tankbestand', amount: 500, start: '2025-01-01', end: '2025-12-31', fuelStock: true, part: { days: 139, total: 365 } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 2300 })] });
+		expect(invoicesText()).toContain('Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen');
+		expect(invoicesText()).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1’200.00, Ihre Mietstage 47 von 92 Tagen');
+		expect(invoicesText()).toContain('Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(invoicesText()).toContain(
+			'Ihr Anteil: 900.00 × (600.00 × 0/91 + 1’200.00 × 47/92 + 500.00 × 139/365) / 2’300.00 = 306.52'
+		);
+		// the change of the Tankbestand is no invoice: nothing to open
+		expect(allByTestId('statement-line-invoice-link').map((link) => link.getAttribute('href'))).not.toContain(
+			'/invoices/fuel-stock-2025-12-31'
+		);
+	});
+
 	it('sagt, wenn eine Abrechnung keine Positionen hat, statt eine leere Tabelle zu zeigen', () => {
 		detail({ lineItems: [] });
 		expect(text()).toContain(

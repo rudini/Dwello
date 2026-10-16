@@ -7,13 +7,20 @@ import {
 	heatingCostsOfTenant,
 	heatingProfileOfStatement,
 	history,
+	invoiceOfPosition,
+	invoicesOfPosition,
+	laterInvoicesHint,
+	laterInvoicesHints,
 	paidDateInvalid,
 	paidDateProblem,
 	pdfRefusalText,
 	pdfToView,
 	recipient,
 	sendConfirmation,
-	statusOfStatement
+	sharesOfPosition,
+	statusOfStatement,
+	tenancyOfStatement,
+	totalLabelOfStatement
 } from '../questions/statement-detail';
 import { listedStatementsOfYear, pageAddressInApp, statementListEmpty, statementPath } from '../questions/statements';
 import { openStatementList, searchStatements } from '../tasks/statements';
@@ -28,6 +35,7 @@ import {
 	markStatementPaidOn,
 	openSendConfirmation,
 	openStatementApartment,
+	openInvoiceOfPosition,
 	openStatementDetail,
 	openStatementTenant,
 	sendStatement
@@ -242,4 +250,45 @@ When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurück
 
 Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(pdfRefusalText).toBe(text);
+});
+
+Then('nennt die Abrechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(tenancyOfStatement).toBe(text);
+});
+
+Then(
+	'nennt die Position {string} den Wohnungsanteil {string}, den Zeitanteil {string} und den Betrag {string}',
+	async ({ verwalter }, category: string, apartment: string, time: string, amount: string) => {
+		await verwalter.sees(sharesOfPosition(category)).toEqual({ apartment, time, amount });
+	}
+);
+
+Then('heisst die Summe der Kosten der Abrechnung {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(totalLabelOfStatement).toBe(label);
+});
+
+Then(
+	'nennt die Position {string} die Rechnung {string} mit {string}',
+	async ({ verwalter }, category: string, invoice: string, text: string) => {
+		await verwalter.sees(invoiceOfPosition(category, invoice)).toContain(text);
+	}
+);
+
+Then('nennt die Position {string} {string}', async ({ verwalter }, category: string, text: string) => {
+	await verwalter.sees(invoicesOfPosition(category)).toContain(text);
+});
+
+When(
+	'der Liegenschaftsverwalter die Rechnung {string} der Position {string} öffnet',
+	async ({ verwalter }, invoice: string, category: string) => {
+		await verwalter.attemptsTo(openInvoiceOfPosition(category, invoice));
+	}
+);
+
+Then('weist die Abrechnung darauf hin: {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(laterInvoicesHint).toContain(text);
+});
+
+Then('weist die Abrechnung auf keine geänderten Rechnungen hin', async ({ verwalter }) => {
+	await verwalter.sees(laterInvoicesHints).toBe(0);
 });
