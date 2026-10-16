@@ -694,3 +694,21 @@ Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.t
 - [x] Merged origin/main (W6 reminders: a11y lists, seed, `src/lib/statement.ts`; migration renamed to 0010); merge review `docs/reviews/w4b-review-merge.md`: no Blocker/Major, C-2 (reset of a reminded statement untested) left as Minor
 - [x] Workflow notes (`docs/reviews/workflow-notes-issue-138-93-92.md`)
 - [x] Workflow notes, archive the session, pull request
+
+## Session: contract wizard keeps the apartment and takes over the rent (#144)
+
+Request: «Setze #144 um» (coordinator W10). #144's "Done means" still asks for an implementation issue; the decided Option A is the requirement, the pull request says `Fixes #144`.
+
+- [x] The preselected apartment survives the detour to «Neuen Mieter erfassen» (scenario in `contract-new.feature`)
+- [x] Nettomiete, Zusatzmiete and Akonto are preset from the apartment's last Mietvertrag, editable, marked as taken over (scenario in `contract-new.feature`)
+- [x] fach-reviewer on the `@wip` scenarios before implementing (amounts)
+- [x] fach-reviewer round 1 (`docs/reviews/p17-fachreview-1.md`): took V-1, V-2, V-3, V-6, M-1, M-3
+- [x] axe/language state `rent-taken-over` (`tests/a11y/screens.json`)
+- [x] Found: suggested Vertragsbeginn 01.01.2100 refused by the wizard's own check → #296
+- [x] code-reviewer round 1 (`docs/reviews/p17-review-1.md`): fixed C-7, C-8; C-1..C-6 stay in the report
+- [x] persona Helga (`docs/design/personas/helga-p17.md`): fixed P-1 (parking sentence only with a Zusatzmiete) and P-2 (wording)
+- [x] Workflow note: decision issue implemented directly; persona re-run after a rewording (`docs/reviews/workflow-notes-issue-144.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `src/lib/contract-wizard.ts`, `src/routes/contracts/new/{ContractWizard,RentStep,TenantStep}.svelte`, `src/routes/tenants/TenantForm.svelte`, `src/routes/tenants/new/+page.svelte`, `src/lib/server/tenant-form.ts`, `messages/*.json`, `tests/a11y/screens.json`, tests in `src/__tests__/` and `tests/e2e/`.

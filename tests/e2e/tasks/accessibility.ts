@@ -289,6 +289,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
 			Wait.until(on.overlapWarning)
 		),
+	// the amounts of the apartment's last contract filled in, with the note that says so (#144)
+	'rent-taken-over': () => (actor) =>
+		actor.attemptsTo(
+			Click.on(nextButton), // tenant and apartment come from the address
+			Click.on(nextButton),
+			Wait.forValue(startDateInput, '01.04.2099'), // the day after the last contract, suggested
+			Click.on(nextButton),
+			Wait.until(on.shown('contract-rent-taken-over'))
+		),
 	// the apartments' rental contracts cannot be loaded (#143); the wizard shows it from the step "Wohnung"
 	'contracts-unknown': () => async (actor) => {
 		await actor.attemptsTo(FailRequests.to('/api/contracts', {}), Navigate.reload);
