@@ -1,6 +1,6 @@
 ---
 name: workflow-review
-description: Notes on the rules that guided a Dwello task, and the collected review of those notes (CLAUDE.md, Workflow 7). Load at the end of a task that changed the app, its tests or tooling (hooks and scripts included; not a task that changes only docs or rules; also a task that ends blocked), at the end of a request that covered several issues, and when the product owner asks for a workflow review.
+description: Notes on the rules that guided a Dwello task, and the collected review of those notes (CLAUDE.md, Workflow 8). Load at the end of a task that changed the app, its tests or tooling (hooks and scripts included; not a task that changes only docs or rules; also a task that ends blocked), at the end of a request that covered several issues, and when the product owner asks for a workflow review.
 ---
 
 # Workflow review
@@ -13,7 +13,7 @@ Both steps only write: change no rule, skill, agent or hook because of them, and
 
 When: once a feature is done (also a bug fix a user can see, a change only the operator sees such as CI, startup messages or deployment, or a task that ends blocked); not for a task that changes only docs or rules (a change to a hook or script counts as tooling, not as a rule). Write them before the session is archived (Workflow 8), or before the closing report when the task ends blocked.
 
-Start from the plan items «Workflow note: …» (`CLAUDE.md`, Workflow 7). Only where a rule was unclear, contradicted another, was missing, cost effort without benefit, or was worked around: one row per point (rule location, what happened in this task, proposed change) in `docs/reviews/workflow-notes-<task>.md`, `<task>` being the issue (`issue-42`) or, without one, a short name of the task. A point an earlier note or review already names gets «as in <file>» and only what is new. Nothing came up: no file. A note is committed with the task and named under "Found".
+Start from the plan items «Workflow note: …» (`CLAUDE.md`, Workflow 8). Only where a rule was unclear, contradicted another, was missing, cost effort without benefit, or was worked around: one row per point (rule location, what happened in this task, proposed change) in `docs/reviews/workflow-notes-<task>.md`, `<task>` being the issue (`issue-42`) or, without one, a short name of the task. A point an earlier note or review already names gets «as in <file>» and only what is new. Nothing came up: no file. A note is committed with the task and named under "Found".
 
 ## Collected review
 

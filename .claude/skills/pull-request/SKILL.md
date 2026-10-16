@@ -16,7 +16,7 @@ description: Push, open, drive to green and merge the pull request of a finished
 
 ## Before each push
 
-1. "Before marking anything complete" (`CLAUDE.md`): lint, check, type-check, the affected tests and scenarios; CI runs the full suites.
+1. "Before marking anything complete" (`CLAUDE.md`) passes.
 2. Closing review: when code (`src/`, `backend/src/`, `backend/migrations/`, `messages/`, `tests/`, `tools/`, `.claude/hooks/`) changed since the last reviewed commit (Minor/Nit fixes, a conflict resolved in it, a CI fix), one `code-reviewer` round on that delta (skill `slice-review`), its own slice for the round limit. Only a Blocker/Major it reports gets another round.
 
 ## Open and drive
