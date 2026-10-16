@@ -34,5 +34,6 @@
 		}
 	],
 	"heatingProfile": { "id": "h1", "name": "Standard" },
-	"heatingShare": null
+	"heatingShare": null,
+	"paymentResets": []
 }

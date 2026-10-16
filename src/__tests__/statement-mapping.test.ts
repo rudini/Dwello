@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { loadStatement, toStatement } from '../lib/server/statement';
 // What GET /api/v1/statements/:id answers, checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
 import backendStatement from '../../tests/contracts/statement.json';
+import resetStatement from '../../tests/contracts/statement-payment-reset.json';
 
 describe('Abrechnung aus dem Backend', () => {
 	it('zeigt den Satz der Verwaltungspauschale, mit dem die Abrechnung erstellt wurde', () => {
@@ -34,6 +35,14 @@ describe('Abrechnung aus dem Backend', () => {
 		);
 		// stored before #247: no name, no reason; the profile as it is now
 		expect(named({ byDays: true })).toBe('Standard (nicht angewendet)');
+	});
+
+	// #92: der Verlauf nennt jede zurückgesetzte Zahlung
+	it('übernimmt die zurückgesetzten Zahlungen', () => {
+		expect(toStatement(resetStatement).paymentResets).toEqual([
+			{ resetOn: '2025-02-10', paidDate: '2025-02-05', paidAmount: 1045 }
+		]);
+		expect(toStatement(backendStatement).paymentResets).toEqual([]);
 	});
 
 	it('übernimmt Mieter, Wohnung, Bemerkungen und Kostenpositionen', () => {

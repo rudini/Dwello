@@ -1,0 +1,39 @@
+{
+	"id": "s1",
+	"statementNumber": "NK-2024-1",
+	"tenantId": "t1",
+	"apartmentId": "a1",
+	"periodStart": "2024-01-01",
+	"periodEnd": "2024-12-31",
+	"statementDate": "2025-01-15",
+	"rentalDays": 366,
+	"totalCosts": "1045.00",
+	"totalAdvancePayments": "0.00",
+	"managementFee": "45.00",
+	"managementFeePercent": "3.00",
+	"balance": "1045.00",
+	"status": "sent",
+	"paymentDeadline": "2025-02-14",
+	"paidDate": null,
+	"pdfGeneratedAt": null,
+	"reminderSentDate": null,
+	"notes": "Hauswart neu",
+	"createdAt": "2025-01-15T08:00:00.000Z",
+	"tenant": { "firstName": "Eva", "lastName": "Frei", "email": "eva@example.com", "correspondenceChannel": "letter" },
+	"apartment": { "number": "3.01", "floor": 3 },
+	"building": { "id": "b1", "name": "Lindenhof", "address": "Testweg 1" },
+	"lineItems": [
+		{
+			"id": "l1",
+			"categoryId": "c1",
+			"distributionKeyId": "k1",
+			"description": "Heating",
+			"totalAmount": "1000.00",
+			"tenantShare": "1000.00",
+			"sharePercentage": "100.0000"
+		}
+	],
+	"heatingProfile": { "id": "h1", "name": "Standard" },
+	"heatingShare": null,
+	"paymentResets": [{ "resetOn": "2025-02-10", "paidDate": "2025-02-05", "paidAmount": "1045.00" }]
+}

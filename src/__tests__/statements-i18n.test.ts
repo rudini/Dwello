@@ -64,7 +64,7 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 			buildingIds: []
 		};
 		expect(selectionErrors(selection, 2)).toEqual({ buildings: 'Scelga almeno un immobile.' });
-		expect(paidDateError('')).toBe('Inserisca la data di pagamento nel formato GG.MM.AAAA.');
+		expect(paidDateError('', '2025-01-15')).toBe('Inserisca la data di pagamento nel formato GG.MM.AAAA.');
 	});
 
 	it('nennt den fehlenden Monat in der gewählten Sprache', () => {

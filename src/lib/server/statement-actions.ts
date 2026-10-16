@@ -12,15 +12,16 @@ type Fetch = typeof globalThis.fetch;
 type Refusal = { status: number; message: string };
 
 /**
- * Payment received on the given day, today if none was given: checked, then stored in the database.
- * Null when stored, otherwise what to tell the user.
+ * Payment received on the given day, today if none was given: checked against the Abrechnungsdatum the page sent (the
+ * backend checks it again, #138), then stored in the database. Null when stored, otherwise what to tell the user.
  */
 export async function markStatementPaid(
 	fetch: Fetch,
 	id: string,
-	paidDate = localToday()
+	paidDate = localToday(),
+	statementDate = ''
 ): Promise<Refusal | null> {
-	const invalid = paidDateError(paidDate);
+	const invalid = paidDateError(paidDate, statementDate);
 	if (invalid) return { status: 400, message: invalid };
 	const response = await fetch(`${API}/${id}/status`, {
 		method: 'PUT',
@@ -28,10 +29,20 @@ export async function markStatementPaid(
 		body: JSON.stringify({ status: 'paid', paidDate })
 	});
 	if (response.ok) return null;
-	return {
-		status: response.status,
-		message: m.statements_mark_paid_failed()
-	};
+	return { status: response.status, message: await refusalOf(response, m.statements_mark_paid_failed()) };
+}
+
+// A coded refusal in the UI language, never the backend's own text
+async function refusalOf(response: Response, fallback: string) {
+	const { code, params } = await response.json().catch(() => ({}));
+	return backendMessage({ code, params }, fallback);
+}
+
+/** A recorded payment taken back (#92); null when done, otherwise what to tell the user */
+export async function resetStatementPayment(fetch: Fetch, id: string): Promise<Refusal | null> {
+	const response = await fetch(`${API}/${id}/payment-reset`, { method: 'POST' });
+	if (response.ok) return null;
+	return { status: response.status, message: await refusalOf(response, m.statements_reset_payment_failed()) };
 }
 
 type Reminder = { document: StatementDocument; deliveryError?: string };

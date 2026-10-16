@@ -4,7 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { CodedError, codedBody, refusal } from '../services/coded-error';
+import { CodedError, codedBody, errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
 import {
 	listStatements,
@@ -15,7 +15,8 @@ import {
 	addLineItems,
 	getStatementCountsByStatus,
 	calculateStatement,
-	generateStatement
+	generateStatement,
+	resetPayment
 } from '../services/statement.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 
@@ -184,6 +185,20 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		}
 	)
 
+	// Take back a recorded payment (#92)
+	.post(
+		'/:id/payment-reset',
+		async ({ params, set }) => {
+			try {
+				return await resetPayment(params.id);
+			} catch (error) {
+				set.status = error instanceof CodedError && error.code === 'STATEMENT_NOT_FOUND' ? 404 : 400;
+				return errorBody(error, 'Failed to reset the payment');
+			}
+		},
+		{ params: t.Object({ id: t.String() }) }
+	)
+
 	// Update statement status
 	.put(
 		'/:id/status',
@@ -207,7 +222,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				return statement;
 			} catch (error) {
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Failed to update status' };
+				return errorBody(error, 'Failed to update status'); // a refused payment date with its code (#138)
 			}
 		},
 		{

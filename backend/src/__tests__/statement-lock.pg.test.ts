@@ -100,10 +100,65 @@ describe('Abrechnung mit Saldo 0', () => {
 		try {
 			const sent = await (await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' })).json();
 			const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
-			expect(sent).toMatchObject({ status: 'paid', paidDate: today, statementDate: today });
+			// the Saldo stored as the amount paid (#93)
+			expect(sent).toMatchObject({ status: 'paid', paidDate: today, statementDate: today, paidAmount: '0.00' });
 		} finally {
 			await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
 		}
 	});
 });
 
+
+const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+const markPaid = (id: string, paidDate: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate });
+
+// #138: das Zahlungsdatum liegt zwischen dem Abrechnungsdatum (beim Versenden der Tag des Versands) und heute
+describe('Zahlungsdatum', () => {
+	it('ist ein Tag, den es gibt', async () => {
+		await expectRejection(await markPaid(statementId, '2025-02-30'), 400, 'Invalid payment date', 'PAID_DATE_INVALID', { date: '2025-02-30' });
+	});
+
+	it('liegt nicht vor dem Abrechnungsdatum', async () => {
+		await expectRejection(await markPaid(statementId, '2020-01-01'), 400, 'Payment date before the statement date', 'PAID_DATE_BEFORE_STATEMENT', { date: today() });
+	});
+
+	it('liegt nicht in der Zukunft', async () => {
+		await expectRejection(await markPaid(statementId, '2099-01-01'), 400, 'Payment date in the future', 'PAID_DATE_IN_FUTURE', { date: today() });
+		expect(await (await callApi(`/api/v1/statements/${statementId}`)).json()).toMatchObject({ status: 'overdue', paidDate: null });
+	});
+});
+
+// #92: eine erfasste Zahlung lässt sich zurücksetzen; der Verlauf behält das Zurücksetzen
+describe('Zahlung zurücksetzen', () => {
+	const reset = (id: string) => callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+
+	it('macht eine bezahlte Abrechnung wieder versendet, ohne Zahlungsdatum und Betrag', async () => {
+		await markPaid(sentId, today());
+		const response = await reset(sentId);
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: null, statementDate: today() });
+		const stored = (await (await callApi(`/api/v1/statements/${sentId}`)).json()) as { balance: string; paymentResets: unknown[] };
+		expect(stored.paymentResets).toEqual([{ resetOn: today(), paidDate: today(), paidAmount: stored.balance }]);
+	});
+
+	// das PDF einer bezahlten Abrechnung sagt «Bezahlt am …»: nach dem Zurücksetzen gilt es nicht mehr (Fachprüfung V-1)
+	it('verwirft das PDF, das die Zahlung bestätigt', async () => {
+		await markPaid(sentId, today());
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, sentId));
+		await reset(sentId);
+
+		const [row] = await db.select({ pdfBlob: utilityStatements.pdfBlob, pdfGeneratedAt: utilityStatements.pdfGeneratedAt }).from(utilityStatements).where(eq(utilityStatements.id, sentId));
+		expect(row).toEqual({ pdfBlob: null, pdfGeneratedAt: null });
+	});
+
+	it('macht eine Abrechnung mit abgelaufener Zahlungsfrist wieder überfällig', async () => {
+		await markPaid(statementId, today());
+		expect(await (await reset(statementId)).json()).toMatchObject({ status: 'overdue', paidDate: null });
+	});
+
+	it('gibt es nur für eine bezahlte Abrechnung', async () => {
+		await expectRejection(await reset(statementId), 400, 'Statement is not paid', 'STATEMENT_NOT_PAID');
+		await expectRejection(await reset(crypto.randomUUID()), 404, 'Statement not found', 'STATEMENT_NOT_FOUND');
+	});
+});
