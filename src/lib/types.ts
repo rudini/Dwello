@@ -316,6 +316,8 @@ export interface StatementWithDetails extends Statement {
 	apartmentFloor: string;
 	buildingName: string;
 	buildingAddress: string;
+	rentalStart: string; // the Mietvertrag's days within the period, YYYY-MM-DD (#248)
+	rentalEnd: string;
 	lineItems: StatementLineItem[];
 }
 

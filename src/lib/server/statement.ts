@@ -39,7 +39,11 @@ const profileName = (data: BackendStatement): string => {
 
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
 export function toStatement(data: BackendStatement): StatementWithDetails {
-	const { tenant = {}, apartment = {}, building = {} } = data;
+	const [tenant, apartment, building] = [
+		data.tenant ?? {},
+		data.apartment ?? {},
+		data.building ?? {}
+	];
 	return {
 		id: data.id,
 		statementNumber: data.statementNumber,
@@ -70,6 +74,8 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		apartmentFloor: apartment.floor || '',
 		buildingName: building.name || '',
 		buildingAddress: building.address || '',
+		rentalStart: data.rentalStart,
+		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
 		lineItems: (data.lineItems || []).map(toLineItem)
 	};
