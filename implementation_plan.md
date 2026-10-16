@@ -13,6 +13,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] `docs/data-model.md` if it lists descriptions
 - [x] Slice review round 1: `docs/reviews/204-review-1.md` (C-1, C-3 fixed; C-4 rejected)
 - [x] Persona review (Dr. Weber, Marco) of the category edit page: `docs/design/personas/{weber,marco}-204.md`; P-1 of both (description cut off) fixed with a multi-line field (`CategoryForm.svelte`, DOM test); Weber P-2 = fach M-1 (Kehricht text decided in #220) under "Blocked on me"
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-204.md`
 - [ ] Closing review, PR
 
 Files: `backend/migrations/0007_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`
