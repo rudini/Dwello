@@ -208,6 +208,16 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF
 
+  # TODO(fachlich prüfen, #294): «Abrechnungsnummer» fehlt im Glossar
+  # Die Datei heisst wie die Abrechnungsnummer auf dem PDF, damit der Liegenschaftsverwalter die Dateien unterscheidet (#101)
+  Szenario: Das PDF heisst wie die Abrechnungsnummer
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann heisst die Datei wie die Abrechnungsnummer, mit der Endung ".pdf"
+
   # Ein zweiter Tab mit einer Abrechnung, die inzwischen gelöscht ist: ein Satz statt technischer Daten
   Szenario: PDF einer inzwischen gelöschten Abrechnung anfordern
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

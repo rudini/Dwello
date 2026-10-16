@@ -644,22 +644,36 @@ Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts
 
 Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/schema.ts`, `backend/src/routes/contracts.ts`, `backend/src/services/contract.service.ts`, `src/lib/contract-status.ts`, `src/lib/types.ts`, `src/routes/contracts/[id]/{+page.svelte,+page.server.ts,ContractTerms.svelte}`, `src/routes/contracts/new/PeriodStep.svelte`, `messages/*.json`, tests (`contract-status`, `contract-actions`, `contract-end.pg`, `tests/contracts/contract.json`, E2E contract-detail/contract-edit, a11y), docs (`anforderungen-vertragsende.md`, `data-model.md`, `api-specification.md`).
 
+## Session 2026-10-16 (#97, #101: identity of a statement)
+
+- [x] #97: a per-building, per-year number sequence that never gives a number twice; a deleted draft leaves a gap (`*.pg.test.ts`: two drafts, delete the second, generate again → `…-0003`); existing numbers unchanged; `docs/data-model.md` names where the sequence is kept
+- [x] #97: scenario in `statement-generate.feature` (names its heating profile: the wizard's preselection can be a parallel scenario's deleted profile)
+- [x] #101: the PDF download is named after the statement number (safe ASCII), download and inline view; unit test of the BFF route; scenario in `statement-detail.feature`
+- [x] fach-reviewer on the scenarios before implementing: `docs/reviews/w3b-fachreview-1.md`; V-1 → #294
+- [x] code-reviewer round 1: `docs/reviews/w3b-review-1.md`; C-1, C-3, C-7 fixed
+- [x] persona Dr. Weber: `docs/design/personas/weber-w3-abrechnungsnummer.md` (no Blocker/Major); daten-pruefer not run: no amount, PDF content or QR-bill field changed
+- [x] Workflow note: preselected heating profile in parallel E2E, daten-pruefer scope, migration numbers (`docs/reviews/workflow-notes-issue-97-101.md`); the generate scenarios name their heating profile (the flaky preselection, fixed here instead of an `offene-punkte.md` row)
+- [x] closing code-reviewer round: `docs/reviews/w3b-review-2.md`
+- [x] Checks before push green; push, pull request and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.ts`, `backend/src/services/calculation.service.ts`, `backend/src/routes/statements.ts`, `src/lib/server/statement.ts`, `src/routes/statements/[id]/pdf/+server.ts`, `src/routes/api/statements/[id]/pdf/+server.ts`, `docs/data-model.md`, tests (`statement-creation.pg`, `statement.routes.pg`, `statement-endpoints`, `statement-list-load`), E2E (`statement-generate`, `statement-detail` features, steps, tasks, questions), `docs/api-specification.md`, `docs/design/offene-punkte.md` (O-34), `docs/design/personas/weber-w3-abrechnungsnummer.md`, `docs/reviews/w3b-*.md`, `docs/reviews/workflow-notes-issue-97-101.md`
+
 ## Session 2026-10-16 W4b: payment of a statement (#138, #93, #92)
 
 - [x] @wip scenarios (statement-detail.feature), fach-reviewer before implementing (`docs/reviews/w4b-fachreview-1.md`; V-5 and V-3 → #291, V-9 → #290)
 - [x] #138: Zahlungsdatum not before the Abrechnungsdatum, not after today, a real calendar date; backend refuses with codes `PAID_DATE_INVALID`, `PAID_DATE_BEFORE_STATEMENT`, `PAID_DATE_IN_FUTURE` (four languages, api-specification; tests in `statement-lock.pg.test.ts`, where the sent statements are); BFF checks the same with the bound and shows backend refusals with `backendMessage`
 - [x] #93: setting a statement to paid stores its Saldo as `paid_amount` when no amount is given; `paidThisMonth` counts only Nachzahlungen; dashboard.pg.test without hand-written `paid_amount`; demo-data.pg.test adjusted. No scenario: `paid_amount` and `paidThisMonth` appear on no screen
-- [x] #92: «Zahlung zurücksetzen» on a paid statement, confirmed with its consequence; back to Versendet (Überfällig after the Zahlungsfrist), paid date and amount cleared; the reset stored and listed in the Verlauf (JSONB column `payment_resets`, migration 0008)
+- [x] #92: «Zahlung zurücksetzen» on a paid statement, confirmed with its consequence; back to Versendet (Überfällig after the Zahlungsfrist), paid date and amount cleared; the reset stored and listed in the Verlauf (JSONB column `payment_resets`, migration 0010)
 - [x] a11y and language rows for the new dialog state
 - No scenario: a refusal of the backend's paid-date check and a failed reset are failures between the BFF and the backend; the page's own check refuses every date first. Covered in `statement-actions.test.ts`, `statement-status.test.ts` (#138, #92). The stale-page refusal of a reset (`STATEMENT_NOT_PAID`) has its scenario (code review C-13)
 - «Zahlungseingang mit Datum festhalten» enters the Abrechnungsdatum, which for a statement sent in the scenario is today; that the entered day (not the day of entry) is stored is shown in `statement-actions.test.ts` («speichert das gewählte Zahlungsdatum»)
-- Files: `backend/migrations/0008_statement_payment_resets.sql`, `backend/src/db/schema.ts`, `backend/src/services/statement.service.ts`, `backend/src/routes/{statements,dashboard}.ts`, `src/lib/{statement,backend-error,types}.ts`, `src/lib/server/{statement,statement-actions}.ts`, `src/routes/statements/` (detail page, StatusActions, MetadataCard, list, mark-paid), `messages/*.json`, `tests/contracts/`, `docs/{api-specification,data-model,PRD-Dwello}.md`, tests, scenarios and a11y rows
+- Files: `backend/migrations/0010_statement_payment_resets.sql`, `backend/src/db/schema.ts`, `backend/src/services/statement.service.ts`, `backend/src/routes/{statements,dashboard}.ts`, `src/lib/{statement,backend-error,types}.ts`, `src/lib/server/{statement,statement-actions}.ts`, `src/routes/statements/` (detail page, StatusActions, MetadataCard, list, mark-paid), `messages/*.json`, `tests/contracts/`, `docs/{api-specification,data-model,PRD-Dwello}.md`, tests, scenarios and a11y rows
 - [x] Code review round 1 (`docs/reviews/w4b-review-1.md`)
 - [x] fach-reviewer round 2 (`docs/reviews/w4b-fachreview-2.md`)
 - [x] Personas Marco (`docs/design/personas/marco-w4b.md`), Dr. Weber (`docs/design/personas/dr-weber-w4b.md`)
 - [x] Code review round 2 (`docs/reviews/w4b-review-2.md`): C-11/C-12 (PDF kept by the time the payment was recorded, `payment_recorded_at`; scenario), C-13 (scenario), C-14, C-15
 - [x] daten-pruefer (`docs/reviews/w4b-datenpruefung-1.md`)
 - [x] Code review round 3 (closing, `docs/reviews/w4b-review-3.md`): C-17 fixed; C-16, C-18 left as Minor/Nit
-- [x] Merged origin/main (W6 reminders: a11y lists, seed, `src/lib/statement.ts`; migration renamed to 0008); merge review `docs/reviews/w4b-review-merge.md`: no Blocker/Major, C-2 (reset of a reminded statement untested) left as Minor
+- [x] Merged origin/main (W6 reminders: a11y lists, seed, `src/lib/statement.ts`; migration renamed to 0010); merge review `docs/reviews/w4b-review-merge.md`: no Blocker/Major, C-2 (reset of a reminded statement untested) left as Minor
 - [x] Workflow notes (`docs/reviews/workflow-notes-issue-138-93-92.md`)
 - [x] Workflow notes, archive the session, pull request

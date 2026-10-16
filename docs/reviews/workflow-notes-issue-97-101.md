@@ -1,0 +1,7 @@
+# Workflow notes: #97, #101 (identity of a statement)
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `tests/e2e/CLAUDE.md`, «Rules», isolation («A result that depends on a choice the app preselects names that choice») | The #97 scenario passed alone and failed in parallel runs: the wizard preselected a heating profile a parallel scenario had deleted (FK failure, error swallowed into «konnte nicht berechnet werden»). Finding the cause needed a temporary `console.error` in the backend route, because the E2E backend logs no refusal cause. | Let the E2E backend log the cause of a `CALCULATION_FAILED` refusal (stderr reaches the test output), and list «heating profile in the statement wizard» as an example of a preselected choice. |
+| `CLAUDE.md`, Workflow 5 (`daten-pruefer` when «statements … changed») | #97 changes only which number a new statement gets, no amount, PDF content or QR field; skipped `daten-pruefer` with that reason (persona confirmed identical amounts). | Name «amounts, PDF content or QR-bill fields» instead of «statements», so a numbering change is clearly outside. |
+| Migrations numbered by hand across parallel sessions | Another session merged `0007_…` while this branch had its own `0007`; renamed to `0008` before the push (two `0006` files are on `main` already). | `backend/CLAUDE.md`: fetch `main` and pick the next free number right before the push. |

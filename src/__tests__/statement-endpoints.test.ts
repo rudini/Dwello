@@ -104,8 +104,11 @@ describe('POST /api/statements/[id]/generate-pdf', () => {
 	});
 });
 
+// the backend names the file after the statement number
+const NAMED = { 'Content-Disposition': 'attachment; filename="NK-1A2B3C4D-2025-0001.pdf"' };
+
 describe('GET /statements/[id]/pdf', () => {
-	const pdf = () => new Response(new Uint8Array([37, 80, 68, 70]), { status: 200 });
+	const pdf = () => new Response(new Uint8Array([37, 80, 68, 70]), { status: 200, headers: NAMED });
 
 	function backend() {
 		const calls: string[] = [];
@@ -122,9 +125,22 @@ describe('GET /statements/[id]/pdf', () => {
 			url: new URL(`http://localhost/statements/s1/pdf${search}`)
 		} as never);
 
-	it('lädt das PDF herunter', async () => {
+	// the landlord tells the files apart by the number printed on the PDF (#101)
+	it('lädt das PDF unter der Nummer der Abrechnung herunter', async () => {
 		const response = await get(backend().fetch);
-		expect(response.headers.get('Content-Disposition')).toMatch(/^attachment/);
+		expect(response.headers.get('Content-Disposition')).toBe(
+			'attachment; filename="NK-1A2B3C4D-2025-0001.pdf"'
+		);
+	});
+
+	it('lässt im Dateinamen nur Buchstaben, Ziffern, Unterstrich, Punkt und Bindestrich zu', async () => {
+		const fetch = async () =>
+			new Response(new Uint8Array([37]), {
+				headers: { 'Content-Disposition': 'attachment; filename="NK-1/../é\\"x.pdf"' }
+			});
+		expect((await get(fetch)).headers.get('Content-Disposition')).toBe(
+			'attachment; filename="NK-1..x.pdf"'
+		);
 	});
 
 	// Before marking a statement as sent, the user looks at the document the tenant gets
@@ -162,7 +178,9 @@ describe('GET /statements/[id]/pdf', () => {
 		const { calls, fetch } = backend();
 		const response = await get(fetch, '?ansehen');
 		expect(response.status).toBe(200);
-		expect(response.headers.get('Content-Disposition')).toMatch(/^inline/);
+		expect(response.headers.get('Content-Disposition')).toBe(
+			'inline; filename="NK-1A2B3C4D-2025-0001.pdf"'
+		);
 		expect(calls).toEqual([`GET ${API}/pdf`]);
 	});
 });
@@ -171,6 +189,19 @@ describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
 	afterEach(() => vi.unstubAllGlobals());
 	const get = () =>
 		getListPdf({ params: { id: 's1' }, cookies: { get: () => 'jwt' } } as never);
+
+	it('lädt das PDF unter der Nummer der Abrechnung herunter', async () => {
+		vi.stubGlobal(
+			'fetch',
+			async () =>
+				new Response(new Uint8Array([37, 80, 68, 70]), {
+					headers: { ...NAMED, 'Content-Type': 'application/pdf' }
+				})
+		);
+		expect((await get()).headers.get('Content-Disposition')).toBe(
+			'attachment; filename="NK-1A2B3C4D-2025-0001.pdf"'
+		);
+	});
 
 	it('sagt in Worten, dass es die Abrechnung nicht gibt, statt die Antwort als PDF auszugeben', async () => {
 		vi.stubGlobal('fetch', async () => Response.json(refusedPdf, { status: 404 }));

@@ -222,7 +222,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |
 | POST | `/:id/generate-pdf` | Body: optional `language` (`de`\|`fr`\|`it`\|`rm`\|`en`; default tenant language, then `de`). Renders the PDF with Swiss QR-bill and stores it. → `{ success: true, message, qrReference, pdfSize }`. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
-| GET | `/:id/pdf` | → `application/pdf` attachment `statement-<number>.pdf`, made first when missing or (a draft) dated another day. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
+| GET | `/:id/pdf` | → `application/pdf` attachment `<number>.pdf` (#101), made first when missing or (a draft) dated another day. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
 | GET | `/:id/pdf/base64` | → `{ pdfBase64, mimeType: "application/pdf" }`. 404 as above |
 
 **Calculation input:** `contractId`, `periodStart`, `periodEnd` required; optional `heatingProfileId`, `managementFeePercent` (number ≥ 0, overrides `management_fee_pct`). The Verwaltungspauschale is that percentage of the tenant's own utility costs.
