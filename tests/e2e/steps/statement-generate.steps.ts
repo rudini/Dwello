@@ -25,6 +25,7 @@ import {
 	missingInvoicesWarning,
 	missingInvoicesWarnings,
 	noContractsInPeriod,
+	periodRunning,
 	periodChoiceShown,
 	previewHasStatementOf,
 	proposedHeatingProfile,
@@ -33,6 +34,7 @@ import {
 	createdStatements,
 	restoredDraftText,
 	statementsInPreview,
+	tankQuestions,
 	totalCostsOf
 } from '../questions/statement-generate';
 import {
@@ -48,6 +50,7 @@ import {
 	openStatementWizardFor,
 	recalculatePreview,
 	recordInvoiceFromWarning,
+	recordNoTankFromQuestion,
 	reopenStatementWizard,
 	returnToStatementList,
 	setManagementFee,
@@ -363,3 +366,44 @@ Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom
 When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
 	await verwalter.attemptsTo(editHintedInvoice(date));
 });
+
+// Tankbestand checks (#136, #72)
+Given(
+	'im Gebäude {string} war am letzten Tag des Vorjahres Heizöl für {string} Franken im Tank',
+	async ({ seed }, building: string, amount: string) => {
+		await seed.fuelStock(building, `${Number(inDays(0).slice(0, 4)) - 1}-12-31`, amount);
+	}
+);
+
+Given(
+	'im Gebäude {string} gibt es eine Heizkostenrechnung über {string} Franken von heute',
+	async ({ seed }, building: string, amount: string) => {
+		await seed.invoiceOn(building, 'Heizung', amount, inDays(0));
+	}
+);
+
+Given('das Gebäude {string} hat keinen Tank oder der Tank ist stillgelegt', async ({ seed }, building: string) => {
+	await seed.noTank(building);
+});
+
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen des laufenden Jahres für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(openPreview(Number(inDays(0).slice(0, 4)), seed.idOf(building)!));
+	}
+);
+
+Then('warnt die Vorschau, dass die Abrechnungsperiode noch läuft', async ({ verwalter }) => {
+	await verwalter.sees(periodRunning).toContain('Periode läuft noch');
+});
+
+Then('fragt die Vorschau nicht nach dem Heizmaterial', async ({ verwalter }) => {
+	await verwalter.sees(tankQuestions).toBe(0);
+});
+
+When(
+	'der Liegenschaftsverwalter aus der Frage nach dem Heizmaterial festhalten will, dass {string} keinen Tank hat',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(recordNoTankFromQuestion(seed.idOf(building)!));
+	}
+);

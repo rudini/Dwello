@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import {
 	changePostalCode,
 	changeYearBuilt,
+	markNoTank,
 	openBuildingEdit,
 	openNewBuilding,
 	registerBuilding,
@@ -49,3 +50,10 @@ When('der Liegenschaftsverwalter das Baujahr auf {string} ändert', async ({ ver
 When('der Liegenschaftsverwalter die PLZ auf {string} ändert', async ({ verwalter }, postalCode: string) => {
 	await verwalter.attemptsTo(changePostalCode(postalCode));
 });
+
+When(
+	'der Liegenschaftsverwalter festhält, dass das Gebäude keinen Tank hat oder der Tank stillgelegt ist',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(markNoTank);
+	}
+);

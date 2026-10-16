@@ -180,6 +180,71 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom "20.01.2025" über "290.00"
     Und nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode keine Rechnung vom "15.01.2025"
 
+  # Den Endbestand einer laufenden Periode kann es noch nicht geben; die Warnung zur laufenden Periode sagt, warum (#136)
+  @wip
+  Szenario: Laufende Periode verlangt keinen Endbestand
+    Angenommen im Gebäude "Lindenhof" war am letzten Tag des Vorjahres Heizöl für "800" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken von heute
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen des laufenden Jahres für das Gebäude "Lindenhof" öffnet
+    Dann warnt die Vorschau, dass die Abrechnungsperiode noch läuft
+    Und verlangt die Vorschau keine Bestätigung
+
+  # Ein Gebäude mit früheren Tankbeständen braucht auch für diese Periode Anfangs- und Endbestand (#72)
+  @wip
+  Szenario: Ein vergessener Tankbestand fällt auf
+    Angenommen im Gebäude "Lindenhof" war am "2022-12-31" Heizöl für "800" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Tankbestand am 31.12.2023 und am 31.12.2024 fehlen."
+    Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
+
+  @wip
+  Szenario: Ein stillgelegter Tank braucht keinen Tankbestand mehr
+    Angenommen im Gebäude "Lindenhof" war am "2022-12-31" Heizöl für "800" Franken im Tank
+    Und das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt die Vorschau für "Lindenhof" 1 erfasste Rechnung
+    Und verlangt die Vorschau keine Bestätigung
+
+  @wip
+  Szenario: Ohne Tank fragt die Vorschau nicht nach dem Heizmaterial
+    Angenommen das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt die Vorschau für "Lindenhof" 1 erfasste Rechnung
+    Und fragt die Vorschau nicht nach dem Heizmaterial
+
+  @wip
+  Szenario: Von der Frage nach dem Heizmaterial zum Gebäude ohne Tank
+    Angenommen im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter aus der Frage nach dem Heizmaterial festhalten will, dass "Lindenhof" keinen Tank hat
+    Dann ist der Liegenschaftsverwalter auf der Bearbeitungsseite von "Lindenhof"
+
+  # Plausibilität der Tankbestände: ein Hinweis, keine Bestätigung (#73); 100 + 500 − 900 = −300
+  @wip
+  Szenario: Hinweis auf einen Endbestand über Anfangsbestand und Einkauf
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "100" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "900" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "500" Franken für 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Der Endbestand ist CHF 300.00 höher als Anfangsbestand und Einkauf zusammen"
+    Und verlangt die Vorschau keine Bestätigung
+
+  # Verbrauch 500 + 2000 − 500 = 2000 gegen 500 + 1000 − 500 = 1000 im Vorjahr: mehr als 25 % und mindestens CHF 100 (#73, #65)
+  @wip
+  Szenario: Hinweis auf einen Verbrauch, der stark vom Vorjahr abweicht
+    Angenommen im Gebäude "Lindenhof" war am "2022-12-31" Heizöl für "500" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "500" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "500" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2023-02-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "2000" Franken vom "2024-02-15"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Verbrauch CHF 2’000.00, 100 % mehr als im Vorjahr (CHF 1’000.00). Prüfen Sie die Tankbestände."
+    Und verlangt die Vorschau keine Bestätigung
+
   Szenario: Von einer Rechnung nach der Abrechnungsperiode zur Rechnung
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet

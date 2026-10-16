@@ -50,6 +50,10 @@ export const categoryFinding = (category: string) =>
 	target(`Prüfung der Kategorie «${category}»`, (page) =>
 		page.getByTestId('category-finding').filter({ hasText: category })
 	);
+export const periodRunningWarning = target('Warnung laufende Periode', (page) => page.getByTestId('preview-period-warning'));
+export const tankQuestion = target('Frage nach dem Heizmaterial', (page) => page.getByTestId('tank-question'));
+export const noTankLink = (buildingId: string) =>
+	target(`Kein Tank festhalten für ${buildingId}`, (page) => page.getByTestId(`tank-question-no-tank-${buildingId}`));
 export const draftsOnlyNote = target('Hinweis nur Entwürfe', (page) => page.getByTestId('generate-drafts-note'));
 // Invoices the preview names because their Leistungszeitraum is missing: dated shortly after the period, or counted
 // in full in a period under a year

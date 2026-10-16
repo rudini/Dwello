@@ -18,10 +18,12 @@ import {
 	managementFeeInput,
 	missingInvoices,
 	periodStartInput,
+	periodRunningWarning,
 	previewEmpty,
 	previewFee,
 	previewRow,
 	previewRows,
+	tankQuestion,
 	wizardChoices
 } from '../targets/statement-generate';
 import { draftRestored } from '../targets/wizard';
@@ -111,6 +113,8 @@ export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(b
 export const restoredDraftText = Text.of(draftRestored);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
+export const periodRunning = Text.of(periodRunningWarning);
+export const tankQuestions = Count.of(tankQuestion);
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));

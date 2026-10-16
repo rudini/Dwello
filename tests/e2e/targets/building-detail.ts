@@ -12,6 +12,7 @@ export const firstApartmentButton = target('Erste Wohnung erstellen', (page) =>
 	page.getByTestId('apartment-first-create-button')
 );
 export const addressLine = target('Adresse des Gebäudes', (page) => page.getByTestId('building-address'));
+export const noTankValue = target('Tank des Gebäudes', (page) => page.getByTestId('building-no-tank'));
 export const yearBuiltValue = target('Baujahr', (page) => page.getByTestId('building-year-built'));
 export const fuelStockDate = target('Stichtag Tankbestand', (page) => page.getByTestId('fuel-stock-date-input'));
 export const fuelStockAmount = target('Wert Tankbestand', (page) => page.getByTestId('fuel-stock-amount-input'));
