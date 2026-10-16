@@ -708,10 +708,10 @@ BALANCE (refund): CHF 30
 - Payment description: Statement number and period reference
 
 **IBAN Management:**
-- Global IBAN setting (Swiss bank account details)
+- Global IBAN setting (bank account in Switzerland or Liechtenstein)
 - Stored securely in configuration
 - Multiple IBANs per building (future feature)
-- Validation with a valid MOD-97 checksum: the settings form accepts only Swiss IBANs (CH), the QR-bill service also Liechtenstein (LI); which one applies is open (#191)
+- Validation: an IBAN from Switzerland (CH) or Liechtenstein (LI) with a valid MOD-97 checksum, in the settings form and the QR-bill service alike (#191)
 
 **QR Code Generation:**
 - Encodes all necessary payment information
@@ -1101,7 +1101,7 @@ BALANCE (refund): CHF 30
 
 **Tab 7: IBAN Setting**
 - IBAN input field (for QR-bill generation)
-- Format validation (settings form: CH only; QR-bill service: CH or LI, #191; MOD-97 checksum)
+- Format validation: CH or LI with a valid MOD-97 checksum (#191)
 - Test QR-bill preview
 - Help text: "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung."
 - A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference

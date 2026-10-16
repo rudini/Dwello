@@ -126,7 +126,7 @@ describe('Einstellungen speichern', () => {
 			data: {
 				errors: {
 					companyPostalCode: 'PLZ muss 4 Ziffern haben',
-					iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein',
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein',
 					managementFeePercent:
 						'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 				}
@@ -144,9 +144,29 @@ describe('Einstellungen speichern', () => {
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein' } }
+			data: { errors: { iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein' } }
 		});
 		expect(calls).toEqual([]);
+	});
+
+	// Die QR-Rechnung nimmt Konten in der Schweiz und in Liechtenstein an (#191)
+	it('nimmt eine IBAN aus Liechtenstein an', async () => {
+		const { calls, result } = runAction(actions.default, '', 200, {
+			...valid,
+			iban: 'LI21 0881 0000 2324 013A A'
+		});
+
+		expect(await result).toEqual({ saved: true });
+		expect(calls[0].body).toMatchObject({ iban: 'LI21088100002324013AA' });
+	});
+
+	it('lehnt eine IBAN aus Liechtenstein mit falscher Prüfziffer ab', async () => {
+		const { result } = runAction(actions.default, '', 200, {
+			...valid,
+			iban: 'LI22 0881 0000 2324 013A A'
+		});
+
+		expect(await result).toMatchObject({ status: 400 });
 	});
 
 	it('meldet, wenn das Backend die Einstellungen ablehnt, und setzt dann auch nichts zurück', async () => {

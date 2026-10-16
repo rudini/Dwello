@@ -20,9 +20,11 @@ const KEYS = {
 export type Settings = Record<keyof typeof KEYS, string>;
 
 const compact = (iban: string) => iban.replace(/\s/g, '').toUpperCase();
-/** ISO 13616: country (CH = 1217) and check digits moved to the end, the number mod 97 must be 1 */
-const ibanChecksumValid = (iban: string) =>
-	BigInt(iban.slice(4) + '1217' + iban.slice(2, 4)) % 97n === 1n;
+/** ISO 13616: country and check digits moved to the end, letters as numbers (A = 10), the number mod 97 must be 1 */
+const ibanChecksumValid = (iban: string) => {
+	const moved = iban.slice(4) + iban.slice(0, 4);
+	return BigInt(moved.replace(/[A-Z]/g, (c) => String(c.charCodeAt(0) - 55))) % 97n === 1n;
+};
 /** "CH93 0076 2011 6238 5295 7" */
 const groupIban = (iban: string) => compact(iban).replace(/(.{4})(?=.)/g, '$1 ');
 
@@ -39,7 +41,8 @@ function settingsErrors(s: Settings) {
 		errors.companyPostalCode = m.buildings_error_postal_code_digits();
 	}
 	const iban = compact(s.iban);
-	if (iban && !(/^CH\d{19}$/.test(iban) && ibanChecksumValid(iban))) {
+	// Switzerland or Liechtenstein, as the QR-bill takes them (#191)
+	if (iban && !(/^(CH|LI)\d{7}[A-Z0-9]{12}$/.test(iban) && ibanChecksumValid(iban))) {
 		errors.iban = m.settings_error_iban();
 	}
 	if (s.managementFeePercent && Number.isNaN(parsePercent(s.managementFeePercent))) {

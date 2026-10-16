@@ -18,13 +18,11 @@ Funktionalität: Einstellungen
     Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
     Und nach erneutem Öffnen der Einstellungen ist die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
 
-  @wip
   Szenario: Ungültige IBAN
     Wenn der Liegenschaftsverwalter die IBAN "DE89 3704 0044 0532 0130 00" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein"
 
   # Die QR-Rechnung nimmt Konten in der Schweiz und in Liechtenstein an, die Einstellungen auch (#191)
-  @wip
   Szenario: IBAN aus Liechtenstein hinterlegen
     Wenn der Liegenschaftsverwalter die IBAN "LI21 0881 0000 2324 013A A" speichert
     Dann bestätigt die Seite, dass die Einstellungen gespeichert sind

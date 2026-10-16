@@ -1150,7 +1150,7 @@
 	"settings_saved": "Paramètres enregistrés",
 	"settings_saved_text": "Expéditeur, frais de gestion et propositions enregistrés.",
 	"settings_save": "Enregistrer les paramètres",
-	"settings_error_iban": "Veuillez saisir un IBAN suisse valable",
+	"settings_error_iban": "Veuillez saisir un IBAN valable de Suisse ou du Liechtenstein",
 	"settings_save_failed": "Les paramètres n’ont pas pu être enregistrés.",
 	"settings_master_data": "Données de base",
 	"settings_link_categories": "Types de coûts selon lesquels vous classez les factures",

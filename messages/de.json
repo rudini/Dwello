@@ -1150,7 +1150,7 @@
 	"settings_saved": "Einstellungen gespeichert",
 	"settings_saved_text": "Absender, Verwaltungspauschale und Vorschläge gespeichert.",
 	"settings_save": "Einstellungen speichern",
-	"settings_error_iban": "Bitte geben Sie eine gültige Schweizer IBAN ein",
+	"settings_error_iban": "Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein",
 	"settings_save_failed": "Die Einstellungen konnten nicht gespeichert werden.",
 	"settings_master_data": "Stammdaten",
 	"settings_link_categories": "Kostenarten, nach denen Sie Rechnungen einordnen",

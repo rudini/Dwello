@@ -1150,7 +1150,7 @@
 	"settings_saved": "Impostazioni salvate",
 	"settings_saved_text": "Mittente, spese di gestione e proposte salvati.",
 	"settings_save": "Salvare le impostazioni",
-	"settings_error_iban": "Inserisca un IBAN svizzero valido",
+	"settings_error_iban": "Inserisca un IBAN valido della Svizzera o del Liechtenstein",
 	"settings_save_failed": "Non è stato possibile salvare le impostazioni.",
 	"settings_master_data": "Dati di base",
 	"settings_link_categories": "Tipi di costo secondo cui classifica le fatture",
