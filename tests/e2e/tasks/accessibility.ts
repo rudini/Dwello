@@ -36,9 +36,11 @@ import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { userMenuButton } from '../targets/app-frame';
 import {
+	confirmDeleteContractButton,
 	confirmEndContractButton,
 	contractEndInput,
 	contractEndPastConfirm,
+	deleteContractButton,
 	endContractButton
 } from '../targets/contract-detail';
 import {
@@ -196,6 +198,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'busy-dialog-open': () => (actor) =>
 		actor.attemptsTo(Press.theKey('Enter').on(on.galleryBusyDialogButton), Wait.until(on.labelledDialog)),
 	'end-dialog': () => openDialog(endContractButton),
+	// a started contract without statements: the mistake not confirmed (#116)
+	'delete-unconfirmed': () => (actor) =>
+		actor.attemptsTo(openDialog(deleteContractButton), Click.on(confirmDeleteContractButton), Wait.until(on.dialogError)),
 	'end-dialog-error': () => (actor) =>
 		actor.attemptsTo(openDialog(endContractButton), Click.on(confirmEndContractButton), Wait.until(on.dialogError)),
 	// the end dialog on the contract page, the contract form on its edit page

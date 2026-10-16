@@ -63,28 +63,31 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
     Dann hat der Mietvertrag den Status "Künftig"
 
-  Szenario: Aktiver Mietvertrag kann nicht gelöscht werden
+  # A-7 (#116): ein begonnener Mietvertrag wird nur gelöscht, wenn der Liegenschaftsverwalter den Irrtum bestätigt
+  Szenario: Laufender Mietvertrag wird nur mit Bestätigung gelöscht
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
-    Dann kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will, ohne den Irrtum zu bestätigen
+    Dann meldet der Dialog "Bitte bestätigen Sie, dass dieser Mietvertrag irrtümlich erfasst wurde, oder brechen Sie ab."
+    Und ist der Mietvertrag unbefristet
 
-  # Gekündigt, aber noch laufend: er hat schon Mietstage
-  Szenario: Laufender Mietvertrag mit künftigem Vertragsende kann nicht gelöscht werden
+  Szenario: Irrtümlich erfassten Mietvertrag löschen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Bruno Meier" existiert
-    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2099-12-31" für "900" Franken
+    Und "Bruno Meier" mietet die Wohnung "2.02" seit "2024-04-01" für "950" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
-    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
-    Dann kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+    Wenn der Liegenschaftsverwalter den Mietvertrag löscht und bestätigt, dass er irrtümlich erfasst wurde
+    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
+    Und der Mietvertrag von "Bruno Meier" ist nicht mehr auffindbar
 
-  # Beendet, aber für die Nebenkostenabrechnung gebraucht: er bleibt als Historie
-  Szenario: Beendeter Mietvertrag kann nicht gelöscht werden
-    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
-    Und der Mieter "Bruno Meier" existiert
-    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2024-12-31" für "900" Franken
-    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+  # Die Abrechnung braucht seine Mietstage: er bleibt
+  Szenario: Mietvertrag mit Abrechnung kann nicht gelöscht werden
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
-    Dann kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+    Dann nennt der Dialog "Dieser Mietvertrag kann nicht gelöscht werden. Seine Mietstage sind abgerechnet in:"
+    Und nennt der Dialog "Löschen Sie zuerst die Entwürfe, danach lässt sich der Mietvertrag löschen."
+    Und kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+    Und ist der Mietvertrag unbefristet
 
   # Irrtümlich erfasst, noch nicht begonnen: er hat keine Mietstage
   Szenario: Künftigen Mietvertrag löschen
@@ -188,6 +191,18 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
     Und endet der Mietvertrag von "Anna Keller" am "31.03.2025"
     Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
+
+  # #141: lehnt das Backend das Vertragsende trotzdem ab, bleibt der Entwurf erhalten
+  Szenario: Abgelehntes Vertragsende behält den Entwurf
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2024 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2024-06-30" beendet und die Folge bestätigt
+    Dann meldet der Dialog "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
+    Und für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet
+    Dann meldet der Dialog "Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu."
+    Und ist der Mietvertrag unbefristet
+    Und findet die Abrechnungsliste die Abrechnung 2024 von "Anna Keller"
 
   # A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
   Szenario: Fehlende Abrechnung am Mietvertrag
