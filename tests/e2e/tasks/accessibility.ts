@@ -60,7 +60,7 @@ import {
 import { errorToast } from '../targets/form';
 import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
-import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
+import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
 import { type File, uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
@@ -110,6 +110,12 @@ const previewOf =
 const startDraft: Record<string, Activity> = {
 	'/contracts/new': Select.option({ index: 1 }).from(tenantSelect),
 	'/statements/generate': (actor) => actor.attemptsTo(Click.on(nextButton), Check.the(on.firstGenerateBuilding))
+};
+
+// a draft starts with an input; reloaded, the wizard restores it
+const restoreDraft: Activity = async (actor) => {
+	await actor.attemptsTo(startDraft[new URL(await actor.answer(pageAddress)).pathname]);
+	await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Entwurf gespeichert'))), Navigate.reload, Wait.until(draftRestored));
 };
 
 const endWithPastDate: Activity = async (actor) => {
@@ -299,10 +305,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(nextButton),
 			Wait.until(reviewContractsUnknown)
 		),
-	'draft-restored': () => async (actor) => {
-		await actor.attemptsTo(startDraft[new URL(await actor.answer(pageAddress)).pathname]); // a draft starts with an input
-		await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Entwurf gespeichert'))), Navigate.reload, Wait.until(draftRestored));
-	},
+	'draft-restored': () => restoreDraft,
+	'draft-discard-dialog': () => (actor) => actor.attemptsTo(restoreDraft, openDialog(discardDraftButton)),
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (example) => previewOf('2026', 'category-check')(example),
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
