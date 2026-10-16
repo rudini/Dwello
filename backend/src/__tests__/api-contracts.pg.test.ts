@@ -4,7 +4,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
@@ -88,6 +88,23 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /statements/:id liefert die Felder von statement.json', async () => {
 		const actual = await (await callApi(`/api/v1/statements/${statementId}`)).json();
 		expect(drift(await sample('statement'), actual)).toEqual([]);
+	});
+
+	// an invoice of the period recorded after the statement: the statement names it as changed since (#96)
+	it('GET /statements/:id/changed-invoices liefert die Felder von statement-changed-invoices.json', async () => {
+		await insertInvoice(rental.building, { amount: '80.00', invoiceDate: '2024-11-30', description: `Nachzügler ${token}` });
+		try {
+			const actual = await (await callApi(`/api/v1/statements/${statementId}/changed-invoices`)).json();
+			expect(drift(await sample('statement-changed-invoices'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, `Nachzügler ${token}`));
+		}
+	});
+
+	it('GET /invoices/:id/statements liefert die Felder von invoice-statements.json', async () => {
+		const [billed] = await db.select({ id: invoices.id }).from(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.invoiceDate, '2024-03-31')));
+		const actual = await (await callApi(`/api/v1/invoices/${billed.id}/statements`)).json();
+		expect(drift(await sample('invoice-statements'), actual)).toEqual([]);
 	});
 
 	it('GET /contracts?buildingId liefert die Felder von building-contracts.json', async () => {
