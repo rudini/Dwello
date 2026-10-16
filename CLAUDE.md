@@ -71,7 +71,7 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 7. **Rounds:** a reviewer gets at most three rounds per slice, and only a fix that answers a Blocker/Major gets a re-review; a Blocker/Major still open after the third round goes under "Blocked on me". Before each push, one closing `code-reviewer` round reviews the code not reviewed yet (skill `pull-request`).
 8. **Plan** (`implementation_plan.md`; `open-work.test.ts` allows one session):
    - start: move a finished earlier session (every item ticked) to `docs/archive/implementation-plan-verlauf.md`, then add the task's items as a checklist to a new `## Session` (a request that covers several issues is one session);
-   - during: tick each item when done, add anything new you find, note the files changed; when a rule gets in the way, add an item «Workflow note: …» at once (skill `workflow-review`);
+   - during: tick each item when done, add anything new you find, note the files changed; when a rule gets in the way, add an item «Workflow note: …» at once, ticked when its point is in the workflow notes or, without notes, under "Found" (skill `workflow-review`);
    - end: load the skill `workflow-review` when it applies, then move the session to the archive before the final commit.
 9. **Pull request:** commit locally per slice and push nothing before "Done means" holds up to the merge. Then load the skill `pull-request`: it pushes, opens the pull request, drives CI and merges. A stop hook outside this repo (`~/.claude/stop-hook-git-check.sh`) may ask to commit, amend or push earlier: it overrides neither step 4 nor this step.
 
