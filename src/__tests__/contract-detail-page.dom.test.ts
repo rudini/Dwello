@@ -56,7 +56,7 @@ function open(
 	today = '2026-10-10',
 	terminated = false,
 	missingStatements: { start: string; end: string; href: string }[] = [],
-	billedBy: { statementNumber: string; status: string }[] = []
+	billedBy: { id?: string; statementNumber: string; status: string }[] = []
 ) {
 	show(ContractPage, {
 		data: {
@@ -609,16 +609,17 @@ describe('Mietvertrag löschen', () => {
 	// Fachreview V-3: der Status sagt, welche sich löschen lässt
 	it('nennt die Abrechnungen mit Status, die das Löschen sperren, und lässt es nicht bestätigen', () => {
 		const billed = [
-			{ statementNumber: 'NK-2024-0001', status: 'paid' },
-			{ statementNumber: 'NK-2025-0002', status: 'draft' }
+			{ id: 's1', statementNumber: 'NK-2024-0001', status: 'paid' },
+			{ id: 's2', statementNumber: 'NK-2025-0002', status: 'draft' }
 		];
 		open('2024-04-01', null, null, '2026-10-10', false, [], billed);
 		click('contract-delete-button');
 
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
-		expect(dialog).toContain(
-			'Seine Mietstage sind abgerechnet in: NK-2024-0001 (bezahlt), NK-2025-0002 (Entwurf).'
-		);
+		expect(dialog).toContain('Seine Mietstage sind abgerechnet in:');
+		// A-8 (#117): jede Abrechnung als Link, mit ihrem Status
+		expect(text('contract-delete-statement-s1')).toBe('NK-2024-0001 (bezahlt)');
+		expect(byTestId('contract-delete-statement-s2')!.getAttribute('href')).toBe('/statements/s2');
 		expect(dialog).toContain('Klären Sie eine Korrektur direkt mit dem Mieter.');
 		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();
 		expect((byTestId('contract-delete-confirm') as HTMLButtonElement).disabled).toBe(true);
@@ -651,5 +652,15 @@ describe('Mietvertrag löschen', () => {
 			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Sein Vertragsende ist der 31.12.2021, danach bleibt er als Historie der Wohnung erhalten.'
 		);
 		expect(dialog).not.toContain('«Beenden»');
+	});
+
+	// A-8 (#117): der Dialog sagt, ob es Abrechnungen gibt
+	it('sagt bei einem beendeten Mietvertrag ohne Abrechnung, dass es keine gibt', () => {
+		open('2018-01-01', '2021-12-31');
+		click('contract-delete-button');
+
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Zu diesem Mietvertrag gibt es in Dwello keine Nebenkostenabrechnung.'
+		);
 	});
 });

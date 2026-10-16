@@ -170,7 +170,7 @@ describe('Gebäudedetail', () => {
 		});
 	});
 
-	it('zählt wiedervermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {
+	it('zählt künftig vermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {
 		const apartments = [
 			{ id: 'a1', status: 'relet', nextContractStart: '2099-11-01' },
 			{ id: 'a2', status: 'reserved', nextContractStart: null },
@@ -186,7 +186,7 @@ describe('Gebäudedetail', () => {
 			fetch
 		} as never)) as BuildingDetailsData;
 
-		expect(data.building).toMatchObject({ reletCount: 1, reservedCount: 1 });
+		expect(data.building).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 1 });
 		expect(data.apartments[0]).toMatchObject({ status: 'relet', nextContractStart: '2099-11-01' });
 	});
 });
@@ -213,9 +213,9 @@ describe('Gebäudeliste', () => {
 		});
 	});
 
-	it('zählt die wiedervermieteten und gesperrten Wohnungen jedes Gebäudes', async () => {
+	it('zählt die künftig vermieteten und gesperrten Wohnungen jedes Gebäudes', async () => {
 		const apartments = [
-			{ buildingId: 'b1', status: 'relet' },
+			{ buildingId: 'b1', status: 'relet', nextContractStart: '2099-11-01' },
 			{ buildingId: 'b1', status: 'occupied' },
 			{ buildingId: 'b2', status: 'reserved' }
 		];
@@ -228,10 +228,10 @@ describe('Gebäudeliste', () => {
 		const data = (await listLoad({
 			url: new URL('http://localhost/buildings'),
 			fetch
-		} as never)) as { buildings: { reletCount: number; reservedCount: number }[] };
+		} as never)) as { buildings: { reletStarts: string[]; reservedCount: number }[] };
 
 		expect(urls).toContain('http://localhost:3001/api/v1/apartments?limit=1000');
-		expect(data.buildings[0]).toMatchObject({ reletCount: 1, reservedCount: 0 });
+		expect(data.buildings[0]).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 0 });
 	});
 
 	// The counts are an addition: without them the buildings still show
@@ -244,9 +244,9 @@ describe('Gebäudeliste', () => {
 		const data = (await listLoad({
 			url: new URL('http://localhost/buildings'),
 			fetch
-		} as never)) as { buildings: { name: string; reletCount: number }[] };
+		} as never)) as { buildings: { name: string; reletStarts: string[] }[] };
 
-		expect(data.buildings).toMatchObject([{ name: 'Seeblick', reletCount: 0 }]);
+		expect(data.buildings).toMatchObject([{ name: 'Seeblick', reletStarts: [] }]);
 	});
 });
 

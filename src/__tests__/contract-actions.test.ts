@@ -133,7 +133,11 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 			billedBy: unknown;
 		};
 		expect(data.billedBy).toEqual([
-			{ statementNumber: periodStatements.data[0].statementNumber, status: 'paid' }
+			{
+				id: periodStatements.data[0].id,
+				statementNumber: periodStatements.data[0].statementNumber,
+				status: 'paid'
+			}
 		]);
 	});
 

@@ -91,7 +91,16 @@ function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both
 				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-12-01' },
 				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-11-01' },
 				{ buildingId: 'b1', status: 'occupied', nextContractStart: null },
-				{ buildingId: 'b2', status: 'vacant', nextContractStart: null }
+				{ buildingId: 'b2', status: 'vacant', nextContractStart: null },
+				{
+					buildingId: 'b2',
+					number: '1.02',
+					status: 'vacant',
+					nextContractStart: null,
+					lastContractEnd: '2024-03-31'
+				},
+				// reserved by hand: not empty to rent, so no «leer seit»
+				{ buildingId: 'b3', status: 'reserved', nextContractStart: null, lastContractEnd: '2024-03-31' }
 			]
 		}
 	};
@@ -164,6 +173,17 @@ describe('Übersicht laden', () => {
 		expect(data.buildingOccupancy.map((b) => b.reletStarts)).toEqual([
 			['2026-11-01', '2026-12-01'],
 			[],
+			[]
+		]);
+	});
+
+	// P-18 (#145): seit wann eine Wohnung leer ist, nur wenn sie einen Mietvertrag hatte
+	it('nennt pro Gebäude die leeren Wohnungen mit dem Ende ihres letzten Mietvertrags', async () => {
+		const data = await load({ fetch: backend() } as never);
+
+		expect(data.buildingOccupancy.map((b) => b.vacantSince)).toEqual([
+			[],
+			[{ number: '1.02', lastContractEnd: '2024-03-31' }],
 			[]
 		]);
 	});

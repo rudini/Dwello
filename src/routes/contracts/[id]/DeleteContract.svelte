@@ -7,13 +7,14 @@
 	import { formatDate } from '$lib/utils/format';
 
 	// A contract that has started is deleted only when confirmed as entered by mistake; one a statement bills never
-	// (A-7, #116)
+	// (A-7, #116); its statements are linked, an ended one says when it has none (A-8, #117)
 	let {
 		open = $bindable(),
 		name,
 		startDate,
 		endDate,
 		future,
+		ended,
 		billedBy,
 		missingStatements,
 		error
@@ -23,7 +24,8 @@
 		startDate: string;
 		endDate?: string | null;
 		future: boolean;
-		billedBy: { statementNumber: string; status: string }[];
+		ended: boolean;
+		billedBy: { id: string; statementNumber: string; status: string }[];
 		missingStatements: boolean;
 		error?: string;
 	} = $props();
@@ -36,9 +38,6 @@
 			: status === 'paid'
 				? m.contracts_billed_paid()
 				: m.contracts_billed_sent();
-	const numbers = $derived(
-		billedBy.map((s) => `${s.statementNumber} (${statusOf(s.status)})`).join(', ')
-	);
 	const locked = $derived(billedBy.some((s) => s.status !== 'draft'));
 	let mistakeConfirmed = $state(false);
 	let mistakeError = $state('');
@@ -69,7 +68,19 @@
 	onsuccess={() => addToast('success', m.contracts_deleted_toast({ name }))}
 >
 	{#if billed}
-		<p>{m.contracts_delete_billed({ numbers })}</p>
+		<p>{m.contracts_delete_billed()}</p>
+		<ul class="flex flex-col gap-2">
+			{#each billedBy as statement (statement.id)}
+				<li>
+					<a
+						href="/statements/{statement.id}"
+						class="inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4 hover:text-accent-strong"
+						data-testid="contract-delete-statement-{statement.id}"
+						>{statement.statementNumber} ({statusOf(statement.status)})</a
+					>
+				</li>
+			{/each}
+		</ul>
 		<p>{locked ? m.contracts_delete_billed_locked() : m.contracts_delete_billed_drafts()}</p>
 	{:else if future}
 		<p>{m.contracts_delete_future_text({ name })}</p>
@@ -81,6 +92,9 @@
 				? m.contracts_delete_real_tenancy_ended({ name, date: formatDate(endDate) })
 				: m.contracts_delete_real_tenancy({ name })}
 		</p>
+		{#if ended}
+			<p>{m.contracts_delete_no_statements()}</p>
+		{/if}
 		{#if missingStatements}
 			<p>{m.contracts_delete_missing_statements()}</p>
 		{/if}

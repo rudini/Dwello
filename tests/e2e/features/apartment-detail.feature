@@ -30,7 +30,6 @@ Funktionalität: Wohnungsdetail
     Und hat die Wohnung den Status "Leer"
 
   # F-4 (#58): «Vermietet ab», auch wenn die Wohnung vorher leer war
-  @wip
   Szenario: Wohnung mit künftigem Mieter
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Carla Rossi" existiert
@@ -66,7 +65,6 @@ Funktionalität: Wohnungsdetail
     Dann hat die Wohnung den Status "Vermietet bis 31.03.2099"
 
   # P-18 (#145): seit wann die Wohnung leer ist und wer ihre Nebenkosten trägt
-  @wip
   Szenario: Leere Wohnung nach dem Auszug
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Carla Rossi" existiert
@@ -76,7 +74,6 @@ Funktionalität: Wohnungsdetail
     Und erklärt die Wohnungsseite beim Mietstatus "Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter."
 
   # A-8 (#117): ein beendeter Mietvertrag ist die Historie der Wohnung, kein Duplikat
-  @wip
   Szenario: Früherer Mietvertrag auf der Wohnungsseite
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
     Dann steht der Mietvertrag von "Beat Huber" über den früheren Mietverträgen

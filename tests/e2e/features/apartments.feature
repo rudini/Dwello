@@ -20,7 +20,6 @@ Funktionalität: Wohnungsliste
     Und die Wohnungsliste enthält genau 2 Wohnungen
 
   # F-4 (#58): «Vermietet ab» statt «Wiedervermietet»
-  @wip
   Szenario: Künftig vermietete Wohnung
     Angenommen der Mieter "Carla Rossi" existiert
     Und "Carla Rossi" mietet die Wohnung "2.01" seit "2099-11-01" für "900" Franken

@@ -17,7 +17,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
 	missingStatements: { start: string; end: string; href: string }[]; // A-10, #142: newest first
-	billedBy: { statementNumber: string; status: string }[]; // the contract's statements: it cannot be deleted (#116)
+	billedBy: { id: string; statementNumber: string; status: string }[]; // the contract's statements: it cannot be deleted (#116)
 	nextSteps: { successor: boolean } | null; // A-4: a notice still running
 	contract: RentalContract & {
 		tenant: Tenant;
@@ -151,6 +151,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			today: localToday(),
 			missingStatements: await missingStatements(fetch, data, statements),
 			billedBy: (statements ?? []).map((s) => ({
+				id: String(s.id),
 				statementNumber: String(s.statementNumber),
 				status: String(s.status)
 			})),

@@ -43,7 +43,7 @@ describe('Hilfe', () => {
 		expect(glossary?.textContent).toContain('auf 5 Rappen gerundet');
 		expect(glossary?.textContent).toContain('ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %.');
 		expect(glossary?.textContent).not.toContain('Satz und Verteilschlüssel');
-		for (const word of ['Nachzahlung', 'Rückerstattung', 'Wiedervermietet', 'Gesperrt'])
+		for (const word of ['Nachzahlung', 'Rückerstattung', 'Vermietet ab …', 'Gesperrt'])
 			expect(glossary?.textContent).toContain(word);
 	});
 

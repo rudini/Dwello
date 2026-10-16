@@ -134,7 +134,8 @@ describe('Übersicht', () => {
 	});
 
 	// as the building cards count them, with the start of their future contracts
-	it('nennt die wiedervermieteten Wohnungen mit ihrem Vertragsbeginn', () => {
+	// F-4 (#58): «vermietet ab», wie auf den Gebäudekarten
+	it('nennt die künftig vermieteten Wohnungen mit ihrem Vertragsbeginn', () => {
 		const building = {
 			...data.buildingOccupancy[0],
 			reletStarts: ['2026-11-01', '2026-11-01', '2026-12-01']
@@ -142,7 +143,27 @@ describe('Übersicht', () => {
 		const row = page({ buildingOccupancy: [building] }).match(
 			/data-testid="occupancy-row"[\s\S]*?<\/li>/
 		)![0];
-		expect(row.replace(/<[^>]*>/g, '')).toContain('3/4 vermietet, 2 ab 01.11.2026, 1 ab 01.12.2026');
+		expect(row.replace(/<[^>]*>/g, '')).toContain(
+			'3/4 vermietet, 2 vermietet ab 01.11.2026, 1 vermietet ab 01.12.2026'
+		);
+	});
+
+	// P-18 (#145): seit wann leer, und wer die Nebenkosten trägt
+	it('nennt die leeren Wohnungen mit dem Tag, seit dem sie leer sind', () => {
+		const building = {
+			...data.buildingOccupancy[0],
+			vacantSince: [{ number: '1.02', lastContractEnd: '2024-03-31' }]
+		};
+		const body = page({ buildingOccupancy: [building] });
+		const row = body.match(/data-testid="occupancy-row"[\s\S]*?<\/li>/)![0];
+		expect(row.replace(/<[^>]*>/g, '')).toContain('3/4 vermietet, Wohnung 1.02 leer seit 01.04.2024');
+		expect(body).toMatch(
+			/data-testid="occupancy-vacancy-help"[^>]*>Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter.</
+		);
+	});
+
+	it('erklärt die Nebenkosten leerer Wohnungen nur, wenn es eine gibt', () => {
+		expect(page()).not.toContain('occupancy-vacancy-help');
 	});
 
 	it('bietet die häufigen Arbeiten direkt an', () => {

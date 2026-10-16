@@ -31,5 +31,7 @@
 	</span>
 	{#if tenant.isActive}
 		<span><Badge tone="positive" label={m.tenants_active()} testid="tenant-status" /></span>
+	{:else if tenant.isFuture}
+		<span><Badge tone="info" label={m.tenants_future()} testid="tenant-status" /></span>
 	{/if}
 </li>

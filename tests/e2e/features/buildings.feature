@@ -13,7 +13,6 @@ Funktionalität: Gebäudeliste
     Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
 
   # F-4 (#58): dieselben Worte wie Übersicht und Wohnungsseiten
-  @wip
   Szenario: Künftig vermietete Wohnung auf der Gebäudekarte
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "1.01"
     Und der Mieter "Carla Rossi" existiert

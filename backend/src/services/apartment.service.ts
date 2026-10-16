@@ -32,6 +32,12 @@ const currentContractEnd = sql<string | null>`(
 	limit 1
 )`;
 
+/** Last day of the apartment's latest rental contract: an empty apartment is empty from the day after (#145) */
+const lastContractEnd = sql<string | null>`(
+	select max(c.end_date)::text from rental_contracts c
+	where c.apartment_id = "apartments"."id" and c.end_date < ${sqlToday}
+)`;
+
 /**
  * Occupied while a rental contract runs today; relet when only a future contract is signed;
  * otherwise as the property manager set it (vacant or reserved).
@@ -71,6 +77,7 @@ export interface ApartmentWithDetails extends Apartment {
 	currentContractId?: string;
 	nextContractStart?: string | null;
 	currentContractEnd?: string | null;
+	lastContractEnd?: string | null;
 }
 
 /**
@@ -115,6 +122,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 			status: apartmentStatus,
 			nextContractStart,
 			currentContractEnd,
+			lastContractEnd,
 			createdAt: apartments.createdAt,
 			updatedAt: apartments.updatedAt,
 			buildingName: buildings.name
@@ -154,6 +162,7 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 			status: apartmentStatus,
 			nextContractStart,
 			currentContractEnd,
+			lastContractEnd,
 			createdAt: apartments.createdAt,
 			updatedAt: apartments.updatedAt,
 			buildingName: buildings.name,

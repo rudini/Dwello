@@ -14,6 +14,7 @@
 			status: ApartmentStatus;
 			nextContractStart: string | null;
 			currentContractEnd?: string | null;
+			lastContractEnd?: string | null;
 			rooms: string;
 			floor: number;
 			area: string;
@@ -38,6 +39,9 @@
 					label={statusText(apartment)}
 				/>
 				<span class="text-ink-muted">{statusHelp[apartment.status]}</span>
+				{#if apartment.status === 'vacant' && apartment.lastContractEnd}
+					<span class="text-ink-muted">{m.apartments_vacancy_costs_help()}</span>
+				{/if}
 			</dd>
 		</div>
 		{#each facts as fact (fact.key)}

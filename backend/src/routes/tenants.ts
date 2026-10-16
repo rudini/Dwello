@@ -18,7 +18,7 @@ import {
 const tenantQuerySchema = t.Object({
 	search: t.Optional(t.String()),
 	language: t.Optional(t.String()),
-	status: t.Optional(t.Union([t.Literal('active'), t.Literal('inactive')])),
+	status: t.Optional(t.Union([t.Literal('active'), t.Literal('future'), t.Literal('inactive')])),
 	limit: t.Optional(t.String()),
 	offset: t.Optional(t.String())
 });

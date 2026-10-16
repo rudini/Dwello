@@ -38,7 +38,6 @@ Funktionalität: Mieterliste
     Dann sieht der Liegenschaftsverwalter den Mieter "Hans Müller" als aktiven Mieter
 
   # F-4 (#58): wer erst einzieht, ist «Künftig», nicht «Aktiv»
-  @wip
   Szenario: Künftiger Mieter
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
     Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"

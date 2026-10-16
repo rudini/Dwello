@@ -49,7 +49,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 					: null,
 				currentBuilding: (t.currentBuilding as string) || null,
 				nextContractStart: nextStart(t.id),
-				isActive: t.isActive === true
+				isActive: t.isActive === true,
+				isFuture: t.isFuture === true
 			})
 		);
 

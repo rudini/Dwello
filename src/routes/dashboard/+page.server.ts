@@ -3,6 +3,7 @@ import { fetchRecord } from '$lib/server/save-form';
 import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-period';
 import { overviewDeadlines, overviewTasks, type Deadline, type Task } from '$lib/overview';
 import { localToday } from '$lib/contract-status';
+import { reletStarts } from '$lib/apartment';
 
 export interface DashboardData {
 	portfolio: {
@@ -35,6 +36,7 @@ export interface DashboardData {
 		occupiedApartments: number;
 		occupancyRate: number;
 		reletStarts?: string[]; // Vertragsbeginn of each relet apartment, added here
+		vacantSince?: { number: string; lastContractEnd: string }[]; // empty apartments that had a contract (#145)
 	}[];
 }
 
@@ -124,14 +126,13 @@ export const load = async ({
 			list(fetch, 'apartments?limit=1000', 'apartments'),
 			list(fetch, 'contracts?limit=1000', 'contracts')
 		]);
-	const reletStarts = (buildingId: string) =>
-		apartments
-			.filter((a) => a.buildingId === buildingId && a.status === 'relet')
-			.map((a) => String(a.nextContractStart))
-			.sort();
+	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
 		...b,
-		reletStarts: reletStarts(b.buildingId)
+		reletStarts: reletStarts(inBuilding(b.buildingId)),
+		vacantSince: inBuilding(b.buildingId)
+			.filter((a) => a.status === 'vacant' && a.lastContractEnd)
+			.map((a) => ({ number: String(a.number), lastContractEnd: String(a.lastContractEnd) }))
 	}));
 	const noticedContracts = noticed(allContracts);
 	const input = {
