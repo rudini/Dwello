@@ -98,6 +98,8 @@ describe('Neue Kategorie', () => {
 		}) as typeof globalThis.fetch;
 
 		expect(await loadNew({ fetch: fails } as never)).toEqual({ kiEnabled: true });
+		const silent = (async () => Response.json({})) as typeof globalThis.fetch;
+		expect(await loadNew({ fetch: silent } as never)).toEqual({ kiEnabled: true });
 	});
 
 	// Fachreview W5b V-3: der Hinweis einer vordefinierten Kategorie nennt die KI nur, wenn sie eingeschaltet ist

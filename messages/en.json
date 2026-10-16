@@ -1198,7 +1198,7 @@
 	"categories_kind_custom": "Custom",
 	"categories_predefined_note": "Categories «From Dwello» cannot be deleted because Dwello supplies them.",
 	"categories_predefined_title": "Category «From Dwello»",
-	"categories_predefined_hint": "Dwello supplies this category and preset its allocability according to tenancy law. It cannot be deleted.",
+	"categories_predefined_hint": "Dwello supplies this category and has preset its allocability according to tenancy law. It cannot be deleted.",
 	"categories_predefined_allocable": "If you set the category to not allocable, its already recorded invoices no longer go into new utility cost statements; statements already created stay as they are. If you set it back later, you have to set these invoices back to «Allocable» one by one.",
 	"categories_predefined_not_allocable": "If you choose «Allocable», the tenant still does not owe costs the law assigns to the landlord. The choice only applies to new invoices; those already recorded stay not allocable.",
 	"categories_predefined_ki": "If you change the German name or the description, the AI may suggest a different category for new invoices.",
