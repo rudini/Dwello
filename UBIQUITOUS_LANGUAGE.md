@@ -19,8 +19,9 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Stockwerk** | Lage der Wohnung: UG, EG, 1. OG, 2. OG usw. | `floor` Feld (Zahl: -1 = UG, 0 = EG) |
 | **Fläche** | Nettowohnfläche in Quadratmetern (m²). Grundlage für flächenbasierte Verteilschlüssel. | `area` Feld |
 | **Zimmeranzahl** | Anzahl Zimmer (z.B. 3.5 Zimmer). Schweizer Konvention mit halben Zimmern. | `rooms` Feld |
-| **Mietstatus** | Status einer Wohnung: Vermietet (`occupied`, ein Vertrag läuft), Wiedervermietet (`relet`, ein künftiger Vertrag ist abgeschlossen), Leer (`vacant`), Gesperrt (`reserved`). **Leer:** Es gibt keinen laufenden und keinen künftigen Mietvertrag; die Wohnung kann vermietet werden. **Gesperrt:** Der Vermieter hat die Wohnung gesperrt, z.B. während einer Renovation. | `status` Feld |
-| **Mieter** | Person, die eine Wohnung mietet. Enthält Name, Kontaktdaten, Adresse, Korrespondenzkanal und Sprache. Aktiv mit laufendem oder künftigem Mietvertrag, sonst ehemalig. | `tenants` Tabelle |
+| **Mietstatus** | Status einer Wohnung: Vermietet (`occupied`, ein Vertrag läuft), Vermietet ab {Datum} (`relet`, nur ein künftiger Vertrag ist abgeschlossen), Leer (`vacant`), Gesperrt (`reserved`). «Vermietet bis {Datum}» ist kein eigener Mietstatus, sondern zeigt das Vertragsende des laufenden Mietvertrags an, solange kein Mietvertrag ab dem Tag danach erfasst ist. **Leer:** Es gibt keinen laufenden und keinen künftigen Mietvertrag; die Wohnung kann vermietet werden. **Gesperrt:** Der Vermieter hat die Wohnung gesperrt, z.B. während einer Renovation. | `status` Feld |
+| **Mieter** | Person, die eine Wohnung mietet. Enthält Name, Kontaktdaten, Korrespondenzadresse, Korrespondenzkanal und Sprache. Aktiv mit laufendem Mietvertrag, künftig mit nur einem künftigen Mietvertrag, ehemalig, wenn alle seine Mietverträge beendet sind; ein Mieter ohne Mietvertrag hat keinen dieser Status. | `tenants` Tabelle |
+| **Korrespondenzadresse** | Adresse des Mieters (mit Land, Vorgabe Schweiz), an die Abrechnungen und Mahnungen gehen. Nach dem Auszug trägt der Vermieter die neue Adresse ein. | `address`, `postal_code`, `city` Felder; Land geplant (#102) |
 | **Korrespondenzkanal** | Wie der Mieter Post erhält: Brief (`letter`) oder E-Mail (`email`). | `correspondence_channel` Feld |
 | **Vermieter** | Eigentümer oder Liegenschaftsverwalter, der die Wohnung vermietet. | — |
 | **Liegenschaftsverwalter** | Person oder Firma, die Gebäude im Auftrag des Eigentümers verwaltet. Primärer Benutzer von Dwello. | — |
@@ -39,10 +40,14 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Kündigung aufheben** | In Dwello: Der gekündigte Vertrag wird wieder unbefristet ohne Vertragsende, wenn Mieter und Vermieter die Kündigung im Einvernehmen zurücknehmen oder die Schlichtungsbehörde oder ein Gericht sie für ungültig erklärt. Nach dem Eingang kann eine Kündigung nicht einseitig zurückgenommen werden. | `end_date: null` |
 | **Kündigungsfrist** | Zeit zwischen dem Eingang der Kündigung und dem Kündigungstermin. Für Wohnungen mindestens 3 Monate auf einen ortsüblichen Termin, oder länger, wenn der Mietvertrag es vorsieht (Art. 266a, 266c OR). Kommt die Kündigung zu spät, gilt sie auf den nächsten Termin. Für ausserordentliche Kündigungen (z.B. Zahlungsrückstand, Art. 257d OR) gelten andere Fristen. | — |
 | **Vertragsstatus** | Laufend, künftig oder beendet, abgeleitet aus Vertragsbeginn und -ende. | Berechnung |
+| **Nachmieter** | Mieter, dessen Mietvertrag für dieselbe Wohnung nach dem Vertragsende eines gekündigten oder befristeten Mietvertrags beginnt. | — |
+| **Ersatzmieter** | Zumutbarer, zahlungsfähiger neuer Mieter, den der Mieter bei vorzeitiger Rückgabe vorschlägt und der bereit ist, den Mietvertrag zu den gleichen Bedingungen zu übernehmen (Art. 264 Abs. 1 OR). | — |
+| **Mieterwechsel** | Ein Mietvertrag einer Wohnung endet, und ein neuer Mietvertrag mit einem anderen Mieter beginnt. Jeder Mietvertrag erhält seine eigene Nebenkostenabrechnung. | — |
+| **Abgerechnet bis** | Datum am Mietvertrag: Bis zu diesem Tag sind die Nebenkosten ausserhalb von Dwello abgerechnet. Abrechnungsläufe und der Hinweis auf fehlende Abrechnungen übergehen Abrechnungsperioden, die bis dahin enden; reicht eine Abrechnungsperiode darüber hinaus, zählen Mietstage und geleistete Akontobeiträge erst ab dem Tag danach. | geplant (#133) |
 | **Nettomiete** | Monatliche Grundmiete in CHF (ohne Nebenkosten). Auch: Mietzins. | `base_rent` Feld |
 | **Zusatzmiete** | Zusätzliche monatliche Kosten (Garage, Parkplatz, Keller). | `additional_rent` Feld |
 | **Akonto** | Monatlicher Vorschuss des Mieters für Nebenkosten. Wird mit der Nebenkostenabrechnung verrechnet. | `monthly_advance_payment` Feld |
-| **Monatlich total** | Nettomiete + Zusatzmiete + Akonto: der Betrag, den der Mieter laut Mietvertrag jeden Monat bezahlt. Nicht dasselbe wie die Bruttomiete (Nettomiete + Nebenkosten, ohne Zusatzmiete). Das Akonto ist ein Vorschuss, den die Nebenkostenabrechnung abrechnet. | Berechnung |
+| **Monatlich total** | Nettomiete + Zusatzmiete + Akonto: der Betrag, den der Mieter laut Mietvertrag jeden Monat bezahlt. Das Akonto ist ein Vorschuss, den die Nebenkostenabrechnung abrechnet. | Berechnung |
 | **Referenzindex** | Schweizer Referenzzinssatz für die Mietzinsindexierung. | `reference_index` Feld |
 
 ---
@@ -51,7 +56,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 
 | Begriff | Definition | Code / Schema |
 |---------|-----------|---------------|
-| **Rechnung** | Beleg eines Dienstleisters für erbrachte Leistungen am Gebäude (z.B. Hauswartung, Heizöl). | `invoices` Tabelle |
+| **Rechnung** | Forderung eines Rechnungsstellers für Leistungen oder Lieferungen am Gebäude (z.B. Hauswartung, Heizöl); ihre hochgeladene Datei ist der Beleg. | `invoices` Tabelle |
 | **Lieferant / Rechnungssteller** | Firma oder Person, die die Rechnung ausstellt. | `billing_entity_name` Feld |
 | **Rechnungsnummer** | Nummer der Rechnung beim Lieferanten. | `invoice_number` Feld |
 | **Rechnungsdatum** | Datum der Rechnungsstellung. | `invoice_date` Feld |
@@ -61,6 +66,9 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Zahlungsdatum** | Datum der tatsächlichen Bezahlung. | `paid_date` Feld |
 | **Beschreibung** | Beschreibung der erbrachten Leistung auf der Rechnung. | `description` Feld |
 | **Umlagefähige Rechnung** | Die Rechnung fliesst in die Nebenkostenabrechnung ein. | `is_valid_utility_cost` Feld |
+| **Gutschrift (eines Rechnungsstellers)** | Dokument eines Rechnungsstellers, das einen Betrag zurückerstattet oder eine Rechnung mindert. Senkt die tatsächlichen Aufwendungen (Art. 257b Abs. 1 OR); Dwello erfasst sie nicht als eigene Rechnung, sondern zieht sie vom Betrag der zugehörigen Rechnung ab. Ist diese Rechnung schon abgerechnet, braucht es eine berichtigte Abrechnung. Nicht zu verwechseln mit der Rückerstattung an den Mieter. | — |
+| **Akontorechnung (eines Rechnungsstellers)** | Teilrechnung eines Rechnungsstellers über einen Vorschuss auf seine Leistungen; die Schlussrechnung zieht sie ab. In Dwello wird die Schlussrechnung mit dem Total der Leistungen erfasst, die Akontorechnungen nicht zusätzlich. Nicht zu verwechseln mit dem Akonto des Mieters. | — |
+| **Mahnung eines Rechnungsstellers** | Zahlungserinnerung zu einer Rechnung; Mahngebühren und Verzugszinsen sind keine Nebenkosten. Nicht zu verwechseln mit der Mahnung an einen Mieter. | — |
 | **Beleg** | Hochgeladene Datei einer Rechnung (Scan, Foto oder PDF), höchstens eine pro Rechnung. Wird mit der Rechnung gelöscht. Erleichtert die Belegeinsicht des Mieters (Art. 257b Abs. 2 OR); die Originalrechnung bewahrt der Liegenschaftsverwalter auf. | `invoice_documents` Tabelle |
 
 ---
@@ -71,6 +79,11 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 |---------|-----------|---------------|
 | **Kategorie** | Klassifikation der Kostenart. Bestimmt, ob Kosten auf Mieter umgelegt werden dürfen. | `categories` Tabelle (`name_de`, `name`) |
 | **Heizkosten (Kategorie)** | Kategorie für die Kosten der Heizung (z.B. Heizung, Kaminfeger). Separat abgerechnetes Warmwasser gehört nicht dazu. | `is_heating_cost` Feld |
+| **Brennstoff (Kategorie)** | Merkmal einer umlagefähigen Heizkosten-Kategorie: Ihre Rechnungen sind Lieferungen von Heizmaterial (z.B. Heizöl, Pellets). Nur eine solche Kategorie hat einen Tankbestand. | geplant (#100) |
+| **Vordefinierte Kategorie** | Mit Dwello gelieferte Kategorie (die mit Namen genannten Kategorien der Listen unter «Umlagefähig» und «Nicht umlagefähig»); Gegenstück zur eigenen Kategorie des Liegenschaftsverwalters. In der Oberfläche «Von Dwello». | `type = 'predefined'` |
+| **Eigene Kategorie** | Kategorie, die der Liegenschaftsverwalter erfasst hat. | `type = 'custom'` |
+| **Umlagefähigkeit** | Ob die Kosten einer Kategorie in die Nebenkostenabrechnung fliessen können (Art. 257b OR, Art. 4–6c VMWG); bezahlen muss der Mieter sie nur, wenn der Mietvertrag sie vorsieht (Art. 257a Abs. 2 OR). Beim Erfassen Pflichtwahl, ohne Vorgabe. | `is_allowed_utility_cost` Feld |
+| **Grund der Umlagefähigkeit** | Fester Satz einer vordefinierten Kategorie, warum ihre Kosten umlagefähig sind oder nicht, mit dem Gesetzesartikel. Entfällt, sobald der Liegenschaftsverwalter die Umlagefähigkeit ändert. Nicht zu verwechseln mit dem Grund der Änderung. | — |
 
 ### Umlagefähig
 
@@ -88,7 +101,9 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 |---------|-----------|---------------|
 | **Kategorisierung** | Automatischer Vorschlag einer Kategorie für eine Rechnung durch ein Sprachmodell (KI). | `/api/v1/invoices/categorize` |
 | **KI-Kategorie** | Von der KI vorgeschlagene Kategorie. | `llm_category_id` Feld |
-| **Konfidenz** | Vertrauenswert der KI für die vorgeschlagene Kategorie (0-1). | `llm_confidence` Feld |
+| **Konfidenz** | Wie sicher die KI bei einem Vorschlag ist (0–100 %), für die Kategorie und für jede ausgelesene Angabe. | `llm_confidence` Feld (0–1) |
+| **Auslesen** | Die KI liest Rechnungssteller, Rechnungsnummer, Rechnungsdatum, Fälligkeitsdatum, Leistungszeitraum, Beschreibung und Betrag aus einer hochgeladenen Datei; ihre Werte sind Vorschläge. | — |
+| **Vorschlag der KI (Kategorie)** | Einstufung einer neuen Kategorie als umlagefähig oder nicht umlagefähig durch die KI, mit Begründung und Artikel. Nur beim Erfassen; ab Konfidenz 70 %; der Liegenschaftsverwalter entscheidet. | — |
 | **Manuell überschrieben** | Der Liegenschaftsverwalter hat die KI-Kategorie geändert. | `was_manually_overridden` Feld |
 | **Grund der Änderung** | Begründung, warum die KI-Kategorie überschrieben wurde. | `manual_override_reason` Feld |
 
@@ -114,8 +129,10 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | Begriff | Definition | Code / Schema |
 |---------|-----------|---------------|
 | **Heizprofil** | Monatliche Prozentverteilung der Heizkosten über 12 Monate. | `heating_profiles` Tabelle |
-| **Tankbestand** | Wert des Brennstoffs im Tank oder Lager (Öl, Flüssiggas, Pellets, Holz) an einem Stichtag, in CHF. | `fuel_stocks` Tabelle |
+| **Tankbestand** | Wert des Heizmaterials im Tank oder Lager (Öl, Flüssiggas, Pellets, Holz) an einem Stichtag, in CHF. | `fuel_stocks` Tabelle |
 | **Stichtag** | Tag, für den ein Tankbestand erfasst wird. Der Tankbestand am Tag vor Beginn der Abrechnungsperiode heisst Anfangsbestand, der an ihrem letzten Tag Endbestand. | `reading_date` Feld |
+| **Heizmaterial** | Brennstoff der Heizung im Tank oder Lager (Wort aus Art. 8 Abs. 2 VMWG: «Anfangs- und Endbestand von Heizmaterialien»). | — |
+| **Veränderung Tankbestand** | Anfangsbestand minus Endbestand des Heizmaterials im Tank oder Lager. Zusammen mit den Lieferungen der Abrechnungsperiode ergibt sie den Verbrauch, der zu den Heizkosten zählt (Art. 5 Abs. 2 lit. a VMWG). Negativ, wenn der Endbestand höher ist als der Anfangsbestand. | Berechnung |
 | **Vordefinierte Heizprofile** | Mit Dwello gelieferte Heizprofile: Heizung Mittelland, Heizung Bergregion, Heizung Tessin, Heizung + Warmwasser. | `type = 'predefined'` |
 | **Eigenes Heizprofil** | Vom Liegenschaftsverwalter erfasstes Profil. | `type = 'custom'` |
 
@@ -127,14 +144,16 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 |---------|-----------|---------------|
 | **Nebenkostenabrechnung** | Jährliche Abrechnung der tatsächlichen Nebenkosten pro Mietvertrag. Vergleicht geleistete Akontobeiträge mit dem effektiven Kostenanteil. | `utility_statements` Tabelle |
 | **Abrechnungslauf** | Erstellt die Abrechnungen einer Periode für ausgewählte Gebäude, mit Heizprofil und Satz der Verwaltungspauschale. | Wizard „Abrechnungen erstellen“ |
-| **Abrechnungsperiode** | Zeitraum der Abrechnung (z.B. 01.01.-31.12., 01.07.-30.06., 01.11.-31.10.). | `period_start`, `period_end` |
+| **Abrechnungsperiode** | Zeitraum der Abrechnung (z.B. 01.01.-31.12., 01.07.-30.06., 01.11.-31.10.). Die Einstellung «Abrechnungsperiode» (Kalenderjahr, Juli – Juni, November – Oktober) schlägt sie im Abrechnungslauf vor. | `period_start`, `period_end`; Einstellung `accounting_period` (`calendar`, `july-june`, `november-october`) |
 | **Abrechnungsposition** | Einzelne Kostenzeile in der Nebenkostenabrechnung (Kategorie, Gesamtbetrag, Mieteranteil). | `utility_statement_line_items` Tabelle |
 | **Nebenkosten der Liegenschaft** | Summe aller umlagefähigen Rechnungen des Gebäudes in der Abrechnungsperiode. | Berechnung |
 | **Eigene Nebenkosten** | Summe der Mieteranteile aller Abrechnungspositionen einer Abrechnung, vor der Verwaltungspauschale. Auf der Abrechnung: „Zwischensumme“. | Berechnung |
 | **Verwaltungspauschale** | Abgeltung des Aufwands für die Nebenkostenabrechnung: ein Prozentsatz der eigenen Nebenkosten des Mieters. Nur zulässig, wenn im Mietvertrag vereinbart. Üblich sind etwa 3 %. Ein höherer Satz muss dem tatsächlichen Aufwand entsprechen (Art. 4 Abs. 3 VMWG). | `management_fee`, `management_fee_percent` |
 | **Geleistete Akontobeiträge** | Summe der monatlichen Vorauszahlungen des Mieters während der Abrechnungsperiode. | `total_advance_payments` |
-| **Saldo** | Kostenanteil inklusive Verwaltungspauschale minus geleistete Akontobeiträge, gerundet auf 5 Rappen. Positiv = Nachzahlung, negativ = Rückerstattung. | `balance` |
-| **Rundung auf 5 Rappen** | Differenz zwischen dem Saldo und dem Saldo vor Rundung. | Berechnung |
+| **Saldo** | Kostenanteil inklusive Verwaltungspauschale minus geleistete Akontobeiträge, gerundet auf 5 Rappen zugunsten des Mieters. Positiv = Nachzahlung, negativ = Rückerstattung. | `balance` |
+| **Rundung auf 5 Rappen** | Differenz zwischen dem Saldo und dem Saldo vor Rundung. Gerundet wird nur zugunsten des Mieters: eine Nachzahlung ab-, eine Rückerstattung aufgerundet. | Berechnung |
+| **Zeitanteil** | Anteil eines Mietvertrags an einer Abrechnungsposition nach der Zeit: die Mietstage innerhalb der Tage, die die Rechnung in der Abrechnungsperiode abrechnet, geteilt durch diese Tage (ohne Leistungszeitraum die Tage der Abrechnungsperiode); bei mehreren Rechnungen nach ihren Beträgen gewichtet. Heizkosten mit Heizprofil im Abrechnungslauf: der Anteil nach dem Heizprofil. Mieteranteil = Wohnungsanteil × Zeitanteil (im PDF: «Ihr Anteil»). | `period_share` |
+| **Berichtigte Abrechnung** | Neue Nebenkostenabrechnung, die eine versendete oder bezahlte Abrechnung ersetzt («ersetzt NK-…»). Die alte bleibt unverändert erhalten und erhält den Status «Ersetzt». Was Mieter oder Vermieter auf die ersetzte Abrechnung schon bezahlt haben, wird angerechnet. Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt. | geplant (#120) |
 | **Mietstage** | Anzahl Tage, die ein Mietvertrag in der Abrechnungsperiode läuft. Grundlage für die anteilsmässige Berechnung. | `rental_days` |
 | **Proration** | Anteilsmässige Berechnung der Nebenkosten bei unterjährigem Ein-/Auszug. | Berechnung |
 
@@ -146,6 +165,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Versendet** | Abrechnung dem Mieter zugestellt. (`sent`) |
 | **Bezahlt** | Nachzahlung/Rückerstattung abgeschlossen. (`paid`) |
 | **Überfällig** | Versendet und Zahlungsfrist überschritten. (`overdue`) |
+| **Ersetzt** | Durch eine berichtigte Abrechnung ersetzt; wird nicht gemahnt und zählt nicht als Abrechnung der Periode; Zahlungsdatum und Saldo der ersetzten Abrechnung bleiben erhalten. (`replaced`, geplant #120) |
 
 ---
 
@@ -169,6 +189,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 |---------|-----------|---------------|
 | **QR-Rechnung** | Schweizer Standard-Zahlungsbeleg gemäss ISO 20022. Enthält QR-Code mit allen Zahlungsinformationen. | PDF-Generierung |
 | **Zahlteil** | Abtrennbarer Teil der QR-Rechnung mit QR-Code und Zahlungsinformationen. | PDF-Komponente |
+| **Empfangsschein** | Teil der QR-Rechnung links neben dem Zahlteil, den der Zahlende als Quittung behält (Begriff der SIX). | PDF-Komponente |
 | **QR-Referenz** | Eindeutige Referenznummer auf der QR-Rechnung zur Zahlungszuordnung. | `qr_bill_reference` |
 | **IBAN** | Internationale Bankkontonummer des Vermieters/Verwalters. | `iban` Config |
 
@@ -184,11 +205,10 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 
 ---
 
-## Konfiguration
+## Einstellungen
 
 | Begriff | Definition | Code / Schema |
 |---------|-----------|---------------|
-| **Abrechnungsperiode** | Jährliche Abrechnungsperiode (Kalenderjahr, Juli – Juni, November – Oktober). | `accounting_period` Config (`calendar`, `july-june`, `november-october`) |
 | **Verwaltungspauschale** | Einstellung: Satz, den der Abrechnungslauf vorschlägt. | `management_fee_pct` Config |
 | **Standard-Heizprofil** | Vorgeschlagenes Heizprofil für den Abrechnungslauf. | `default_heating_profile_id` Config |
 | **Standard-Verteilschlüssel** | Vorgeschlagener Verteilschlüssel für neue Rechnungen. | `default_distribution_key_id` Config |
@@ -199,12 +219,11 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 
 ## Mehrsprachigkeit
 
-Die Oberfläche gibt es auf Deutsch, Französisch, Italienisch und Englisch (Deutsch ist Standard). Jeder Mieter hat eine **Sprache** (`language`, Standard Deutsch), festgelegt im Mieterformular und auf der Mieterseite angezeigt. Die Nebenkostenabrechnung (PDF) wird in dieser Sprache erstellt; für Rätoromanisch vorerst auf Deutsch.
+Die Oberfläche gibt es auf Deutsch, Französisch, Italienisch und Englisch (Deutsch ist Standard). Jeder Mieter hat eine **Sprache** (`language`, Standard Deutsch), festgelegt im Mieterformular und auf der Mieterseite angezeigt. Die Nebenkostenabrechnung (PDF) wird in dieser Sprache erstellt, die Mahnungen ebenfalls (geplant, #106).
 
 | Kürzel | Sprache |
 |--------|---------|
 | `de` | Deutsch |
 | `fr` | Französisch |
 | `it` | Italienisch |
-| `rm` | Rätoromanisch |
 | `en` | Englisch |
