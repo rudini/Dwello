@@ -887,6 +887,8 @@
 	"documents_download_aria": "Télécharger le PDF : {title}",
 	"documents_mark_sent": "Marquer comme envoyé",
 	"documents_mark_sent_aria": "Marquer comme envoyé : {title} à {name}",
+	"documents_marked_sent": "« {title} » pour {name} est marqué comme envoyé.",
+	"documents_print_now": "La lettre porte maintenant la date du jour et un nouveau délai de paiement. Imprimez-la maintenant et envoyez-la aujourd’hui par la poste.",
 	"documents_reminder_1": "Rappel de paiement",
 	"documents_reminder_2": "2e rappel",
 	"documents_reminder_3": "3e rappel",

@@ -887,6 +887,8 @@
 	"documents_download_aria": "PDF herunterladen: {title}",
 	"documents_mark_sent": "Als versendet markieren",
 	"documents_mark_sent_aria": "Als versendet markieren: {title} an {name}",
+	"documents_marked_sent": "«{title}» an {name} ist als versendet markiert.",
+	"documents_print_now": "Der Brief trägt jetzt das heutige Datum und eine neue Zahlungsfrist. Drucken Sie ihn jetzt aus und schicken Sie ihn heute per Post.",
 	"documents_reminder_1": "Zahlungserinnerung",
 	"documents_reminder_2": "2. Mahnung",
 	"documents_reminder_3": "3. Mahnung",

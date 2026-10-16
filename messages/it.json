@@ -887,6 +887,8 @@
 	"documents_download_aria": "Scaricare il PDF: {title}",
 	"documents_mark_sent": "Segnare come inviato",
 	"documents_mark_sent_aria": "Segnare come inviato: {title} a {name}",
+	"documents_marked_sent": "«{title}» per {name} è segnato come inviato.",
+	"documents_print_now": "La lettera riporta ora la data del giorno e un nuovo termine di pagamento. La stampi ora e la spedisca oggi per posta.",
 	"documents_reminder_1": "Promemoria di pagamento",
 	"documents_reminder_2": "2° sollecito",
 	"documents_reminder_3": "3° sollecito",

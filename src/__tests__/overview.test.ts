@@ -147,6 +147,30 @@ describe('Aufgaben der Übersicht', () => {
 		expect(titles('2026-10-10')).toContain('Überfällige Abrechnungen prüfen');
 		expect(titles(null)).toContain('Überfällige Abrechnungen prüfen');
 	});
+
+	// a statement still within its Zahlungsfrist is not among the overdue ones it counts
+	it('zieht nur überfällige Abrechnungen ab', () => {
+		const tasks = overviewTasks(
+			input({
+				statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 1 },
+				dueStatements: [
+					{
+						id: 's1',
+						tenantName: 'Anna Keller',
+						paymentDeadline: '2026-09-30',
+						nextReminderFrom: null
+					},
+					{
+						id: 's2',
+						tenantName: 'Eva Frei',
+						paymentDeadline: '2026-10-20',
+						nextReminderFrom: '2026-10-25'
+					}
+				]
+			})
+		);
+		expect(tasks.map((task) => task.title)).toContain('Überfällige Abrechnungen prüfen');
+	});
 });
 
 describe('Fristen der Übersicht', () => {

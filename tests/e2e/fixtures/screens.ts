@@ -35,7 +35,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable'].includes(state)) return { path, building: '', tankBuilding: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'marked-sent'].includes(state)) return { path, building: '', tankBuilding: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -94,6 +94,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
+		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
 		heatingProfile: seed.idOf('Standard'),

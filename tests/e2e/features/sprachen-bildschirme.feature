@@ -136,6 +136,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-edit         | submit-cleared      |
       | documents              | default             |
       | documents              | empty               |
+      | documents              | marked-sent         |
       | config                 | default             |
       | categories             | default             |
       | category-new           | default             |

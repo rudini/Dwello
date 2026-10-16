@@ -6,6 +6,7 @@
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import DocumentItem from './DocumentItem.svelte';
 	import MarkSentButton from './MarkSentButton.svelte';
+	import MarkedSentNotice from './MarkedSentNotice.svelte';
 	import type { ActionData } from './$types';
 
 	let {
@@ -14,20 +15,28 @@
 	}: { data: { documents: StatementDocument[]; status: string | null }; form: ActionData } =
 		$props();
 
-	const filters = $derived([
-		{
-			href: '/documents',
-			label: m.documents_all(),
-			testid: 'documents-filter-all',
-			active: !data.status
-		},
-		{
-			href: '/documents?status=to_send',
-			label: m.tenants_document_to_send(),
-			testid: 'documents-filter-to-send',
-			active: data.status === 'to_send'
-		}
-	]);
+	const filters = $derived(
+		[
+			{
+				href: '/documents',
+				label: m.documents_all(),
+				testid: 'documents-filter-all',
+				active: !data.status
+			},
+			{
+				href: '/documents?status=to_send',
+				label: m.tenants_document_to_send(),
+				testid: 'documents-filter-to-send',
+				active: data.status === 'to_send'
+			}
+		].map((filter) => ({
+			...filter,
+			current: filter.active ? ('page' as const) : undefined,
+			look: filter.active
+				? 'border-accent bg-accent-soft text-accent-strong'
+				: 'border-line-strong bg-surface text-accent hover:bg-accent-soft'
+		}))
+	);
 	// under «Zu versenden» only letters can appear, never uploaded documents
 	const empty = $derived(
 		data.status
@@ -49,10 +58,8 @@
 				<li>
 					<a
 						href={filter.href}
-						aria-current={filter.active ? 'page' : undefined}
-						class="inline-flex min-h-12 items-center rounded-control border-2 px-6 font-semibold {filter.active
-							? 'border-accent bg-accent-soft text-accent-strong'
-							: 'border-line-strong bg-surface text-accent hover:bg-accent-soft'}"
+						aria-current={filter.current}
+						class="inline-flex min-h-12 items-center rounded-control border-2 px-6 font-semibold {filter.look}"
 						data-testid={filter.testid}>{filter.label}</a
 					>
 				</li>
@@ -65,6 +72,8 @@
 			<p data-testid="form-error">{form.actionError}</p>
 		</Alert>
 	{/if}
+
+	{#if form?.sent}<MarkedSentNotice sent={form.sent} />{/if}
 
 	{#if data.documents.length}
 		<ul class="divide-y divide-line rounded-panel border border-line bg-surface px-6">

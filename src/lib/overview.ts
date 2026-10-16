@@ -110,7 +110,8 @@ function workTasks({
 	// nothing to do yet while the Zahlungsfrist of the last Mahnung runs (#107)
 	const overdue =
 		statementCounts.overdue -
-		dueStatements.filter((s) => (s.nextReminderFrom ?? '') > today).length;
+		dueStatements.filter((s) => s.paymentDeadline < today && (s.nextReminderFrom ?? '') > today)
+			.length;
 	const tasks: (Task | false)[] = [
 		overdue > 0 && {
 			id: 'overdue',

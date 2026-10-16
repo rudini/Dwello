@@ -887,6 +887,8 @@
 	"documents_download_aria": "Download PDF: {title}",
 	"documents_mark_sent": "Mark as sent",
 	"documents_mark_sent_aria": "Mark as sent: {title} to {name}",
+	"documents_marked_sent": "«{title}» to {name} is marked as sent.",
+	"documents_print_now": "The letter now carries today’s date and a new payment deadline. Print it now and post it today.",
 	"documents_reminder_1": "Payment reminder",
 	"documents_reminder_2": "2nd reminder",
 	"documents_reminder_3": "3rd reminder",

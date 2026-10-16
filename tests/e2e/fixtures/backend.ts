@@ -203,7 +203,8 @@ export function testData(api: CallTheApi) {
 		},
 
 		async remind(tenantTitle: string, year: number) {
-			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/reminders`, {});
+			const { document } = await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/reminders`, {});
+			ids.set(`Mahnung ${tenantTitle} ${year}`, document.id);
 		},
 
 		// Global setting: every scenario that needs one uses the same IBAN, so parallel runs agree
