@@ -1,6 +1,6 @@
 # Working rules for the redesign (resume file)
 
-The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: "Persona runs: how" (the checks before a push are those of `CLAUDE.md`, "Before marking anything complete") (subagent `persona`); the personas are in `docs/design/personas/README.md`.
+The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Nothing here is in use any more: the personas and how they run are in `docs/design/personas/README.md` (subagent `persona`), the checks before a push in `CLAUDE.md`, "Before marking anything complete".
 
 Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
 
@@ -73,7 +73,7 @@ Unknown terms are fixed with better help texts, never by renaming the glossary t
 
 If blocked: record it as open work (`CLAUDE.md`, "Open work"), continue with the next stage. Do not stop early.
 
-## Persona runs: how
+## Persona runs: how (history; today `docs/design/personas/README.md`, "Running a review")
 
 - The subagent `persona` (`.claude/agents/persona.md`) runs one persona; the reviews after the redesign follow `CLAUDE.md`, Workflow steps 4 to 7, run as the skill `slice-review` says.
 - Start the app for personas with `docs/design/tools/persona-stack.sh` (fresh database `dwello_persona` with the demo data, backend on 3301, its own production build in `/tmp/persona-app` on 3300, the KI stand-in on 2528; `--no-build` serves the last persona build again).

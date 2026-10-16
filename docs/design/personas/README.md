@@ -1,6 +1,6 @@
 # Personas
 
-The users Dwello is built for (`CLAUDE.md`, "Design-Regeln"): private landlords with little experience who use Dwello a few times a year. The five personas below stand for them in usability reviews. They were defined in the redesign brief (`docs/archive/redesign/REDESIGN_BRIEF.md`) and are run by the subagent `persona` (`.claude/agents/persona.md`); how a run works: `docs/design/arbeitsregeln.md`, "Persona runs: how".
+The users Dwello is built for (`CLAUDE.md`, "Design-Regeln"): private landlords with little experience who use Dwello a few times a year. The five personas below stand for them in usability reviews. They were defined in the redesign brief (`docs/archive/redesign/REDESIGN_BRIEF.md`) and are run by the subagent `persona` (`.claude/agents/persona.md`); how a run works: "Running a review" below and the agent itself.
 
 Personas are AI agents that operate the running app with the demo data, not real test users. The demo data is invented, so a report may quote its names. The persona stack answers the KI check of a new category and the reading of uploaded invoice files (by the file name: «… ohne KI» fails, «Sammelscan» holds two invoices, «Werke Schlussrechnung» deducts Akonto payments, «… Reparatur» mixes in costs that are not allocable, «… Gutschrift» is a credit note; suppliers «Elektro Blitz …» and «Gartenbau Grün …» get a Kategorie) with the stand-in of the acceptance tests (`backend/scripts/llm-stub.ts`, fixed answers), not a model; other invoices find no KI. A finding about the quality of a KI answer is about the stand-in. Their reports are in this folder as `<persona>-<round>.md`.
 
@@ -25,6 +25,8 @@ A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these ho
 
 ## Running a review
 
+- **The app:** `docs/design/tools/persona-stack.sh` starts it: a fresh database `dwello_persona` with the demo data, backend on 3301, its own production build in `/tmp/persona-app` on 3300, the KI stand-in on 2528; `--no-build` serves the last persona build again.
+- **Reports:** a persona writes only its report into this folder; its scripts and screenshots stay outside the repository. `screens/` keeps only the screenshots of the last redesign and i18n round; earlier ones are in the git history.
 - **Who saves:** personas that run at the same time share one database. Give each persona that needs to save its own building of the demo data, as long as buildings are left, and say in its task that saving in the persona app is part of it (`dwello_persona` is recreated for each run); the others only look. Name records only from `demo-records.md`.
 - **Language:** the interface language is stored on the account, so a persona in another language than German runs alone.
 - **Meanwhile:** personas use their own build, not your tree: keep working while they run, E2E included (`CLAUDE.md`, Gotchas, "One build").
