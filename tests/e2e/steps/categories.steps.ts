@@ -10,6 +10,9 @@ import {
 	descriptionOf,
 	contractHint,
 	formReasonText,
+	kindOf,
+	predefinedHintText,
+	whyNotDeletable,
 	reasonOf,
 	reasonsOf,
 	allowedChosen,
@@ -252,5 +255,44 @@ Then(
 	'erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist und er es später nochmals versuchen kann',
 	async ({ verwalter }) => {
 		await verwalter.sees(proposalText).toContain('Die KI ist nicht erreichbar. Versuchen Sie es später nochmals');
+	}
+);
+
+Then(
+	'ist die vordefinierte Kategorie {string} als {string} gekennzeichnet',
+	async ({ verwalter }, name: string, kind: string) => {
+		await verwalter.sees(kindOf(name)).toBe(kind);
+	}
+);
+
+Then('ist die Kategorie {string} als {string} gekennzeichnet', async ({ verwalter, names }, title: string, kind: string) => {
+	await verwalter.sees(kindOf(names.get(title)!)).toBe(kind);
+});
+
+Then(
+	'kann der Liegenschaftsverwalter die vordefinierte Kategorie {string} nicht löschen',
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(categoryDeletable(name)).toBe(false);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass sich die vordefinierte Kategorie {string} nicht löschen lässt, weil Dwello Rechnungen nach ihr einordnet',
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(whyNotDeletable(name)).toContain('«Von Dwello» lassen sich nicht löschen');
+		await verwalter.sees(whyNotDeletable(name)).toContain('Dwello ordnet Rechnungen nach ihnen ein');
+	}
+);
+
+Then('erfährt der Liegenschaftsverwalter, dass Dwello die Kategorie mitliefert', async ({ verwalter }) => {
+	await verwalter.sees(predefinedHintText).toContain('Dwello liefert diese Kategorie mit');
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass Rechnungen anders eingeordnet werden, wenn er die Namen oder die Umlagefähigkeit ändert',
+	async ({ verwalter }) => {
+		await verwalter.sees(predefinedHintText).toContain(
+			'Wenn Sie die Namen oder die Umlagefähigkeit ändern, werden Rechnungen anders eingeordnet.'
+		);
 	}
 );
