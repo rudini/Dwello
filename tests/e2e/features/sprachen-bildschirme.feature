@@ -131,12 +131,14 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
       | statement-sent-detail  | action-error        |
+      | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
       | statement-pdf-refused  | default             |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |
       | documents              | empty               |
+      | documents              | marked-sent         |
       | config                 | default             |
       | categories             | default             |
       | category-new           | default             |
