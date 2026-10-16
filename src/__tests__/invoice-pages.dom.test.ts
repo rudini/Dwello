@@ -258,21 +258,23 @@ describe('Rechnungsdetail', () => {
 		expect(text()).not.toContain('Bestimmt, in welche Abrechnungsperiode');
 	});
 
-	// Nachzügler: erfasst, nachdem die Abrechnungen der Periode erstellt wurden
-	it('weist darauf hin, wenn die Abrechnungen der Periode ohne diese Rechnung erstellt wurden', () => {
+	// Nachzügler oder danach geändert: die Abrechnungen der Periode rechnen sie nicht so ab, wie sie jetzt ist (#96)
+	it('weist darauf hin, wenn Abrechnungen der Periode diese Rechnung nicht oder mit einem früheren Stand abrechnen', () => {
 		show(InvoicePage, {
 			data: { invoice: invoice(), missedIn: [{ start: '2024-01-01', end: '2024-12-31' }] }
 		});
 
-		const hint = byTestId('invoice-missed-warning')!.textContent!.replace(/\s+/g, ' ');
+		const warning = byTestId('invoice-missed-warning')!;
+		const hint = warning.textContent!.replace(/\s+/g, ' ');
+		expect(hint).toContain('Abrechnungen nicht aktuell');
 		expect(hint).toContain(
-			'Für die Abrechnungsperiode 01.01.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung.'
+			'Für die Abrechnungsperiode 01.01.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon.'
 		);
 		expect(hint).toContain(
-			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann ist sie dabei.'
+			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann rechnen die neuen Abrechnungen die Rechnung so ab, wie sie jetzt ist.'
 		);
 		expect(hint).toContain(
-			'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
+			'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Verlangt die Abrechnung zu viel, schulden Sie dem Mieter die Differenz: Ziehen Sie sie von der Nachzahlung ab oder erstatten Sie sie. Ob Sie zusätzliche Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
 		);
 	});
 

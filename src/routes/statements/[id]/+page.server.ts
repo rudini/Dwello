@@ -8,7 +8,6 @@ import {
 	resetStatementPayment,
 	sendStatementReminder
 } from '$lib/server/statement-actions';
-import type { StatementWithDetails } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -20,14 +19,12 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	return [address, [postalCode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
 }
 
-// A statement lacks the invoices of its period recorded after it was created (only a hint: 0 if they cannot be loaded)
-async function laterInvoices(fetch: typeof globalThis.fetch, statement: StatementWithDetails) {
-	const { buildingId, periodStart, periodEnd, createdAt } = statement;
-	const response = await fetch(
-		`${BACKEND_URL}/api/v1/invoices/for-statement/${buildingId}?periodStart=${periodStart}&periodEnd=${periodEnd}`
-	).catch(() => null);
-	const invoices: { createdAt: string }[] = response?.ok ? await response.json() : [];
-	return invoices.filter((invoice) => invoice.createdAt > String(createdAt)).length;
+// The invoices of its period recorded, changed or deleted since the statement was created (#96; only a hint: 0 if
+// they cannot be loaded)
+async function laterInvoices(fetch: typeof globalThis.fetch, id: string) {
+	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/changed-invoices`).catch(() => null);
+	const changed: { invoiceIds?: string[] } = response?.ok ? await response.json() : {};
+	return changed.invoiceIds?.length ?? 0;
 }
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
@@ -35,7 +32,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const [address, reminders, later] = await Promise.all([
 		tenantAddress(fetch, statement.tenantId),
 		loadDocuments(fetch, `statementId=${params.id}`),
-		laterInvoices(fetch, statement)
+		laterInvoices(fetch, params.id)
 	]);
 	return { statement: { ...statement, tenantAddress: address }, reminders, laterInvoices: later };
 };
