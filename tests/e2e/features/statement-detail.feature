@@ -407,6 +407,24 @@ Funktionalität: Abrechnungsdetail
     Dann nennt die Position "Hauswart" den Wohnungsanteil "CHF 732.00", den Zeitanteil "91/366 Tage" und den Betrag "CHF 182.00"
     Und heisst die Summe der Kosten der Abrechnung "Ihre Nebenkosten"
 
+  # Persona Marco P-1: der Zeitanteil der Heizkosten ist der Anteil nach dem Heizprofil (Januar bis März: 18 + 14 + 11 = 43 %)
+  Szenario: Kostenposition nennt den Zeitanteil der Heizkosten nach dem Heizprofil
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann nennt die Position "Heizung" den Wohnungsanteil "CHF 1’000.00", den Zeitanteil "43.00 % nach Heizprofil" und den Betrag "CHF 430.00"
+
+  # C-2: wer die ganze Periode mietet, trägt jeden Tag, auch bei Rechnungen über verschiedene Leistungszeiträume: wie im PDF
+  # «366/366 Tage» (zwei gleich grosse Wohnungen: Wohnungsanteil 900.00 von 1’800.00)
+  Szenario: Kostenposition nennt bei einem Mietvertrag über die ganze Periode den Zeitanteil in Tagen
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2023-01-01" für "900" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "600" Franken vom "2024-07-05" für die Zeit vom "2024-04-01" bis "2024-06-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "1200" Franken vom "2024-10-05" für die Zeit vom "2024-07-01" bis "2024-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
+    Dann nennt die Position "Hauswart" den Wohnungsanteil "CHF 900.00", den Zeitanteil "366/366 Tage" und den Betrag "CHF 900.00"
+
   # #104 und #240: unter einer Position mit Rechnungen über verschiedene Tage steht jede Rechnung mit ihren Tagen und die
   # Berechnung, wie im PDF (zwei gleich grosse Wohnungen: Wohnungsanteil 900.00 von 1’800.00)
   Szenario: Kostenposition nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
