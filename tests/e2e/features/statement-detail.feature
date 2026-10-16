@@ -381,3 +381,70 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "70.98 % der Heizkosten"
     Und steht im PDF "500.00 70.98 %"
+
+  # #104: die Detailseite zeigt dieselben Angaben wie das PDF: die Mietstage der Abrechnung als Daten
+  @wip
+  Szenario: Abrechnung nennt das Mietverhältnis in der Periode
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann nennt die Abrechnung "Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024"
+
+  # #104: eine einzige Wohnung trägt die ganzen Kosten (Wohnungsanteil 732.00); Eva Frei mietete 91 der 366 Tage,
+  # 732.00 × 91/366 = 182.00; die Summe heisst wie im PDF
+  @wip
+  Szenario: Kostenposition nennt Wohnungsanteil und Zeitanteil wie das PDF
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann nennt die Position "Hauswart" den Wohnungsanteil "CHF 732.00", den Zeitanteil "91/366 Tage" und den Betrag "CHF 182.00"
+    Und heisst die Summe der Kosten der Abrechnung "Ihre Nebenkosten"
+
+  # #104 und #240: unter einer Position mit Rechnungen über verschiedene Tage steht jede Rechnung mit ihren Tagen und die
+  # Berechnung, wie im PDF (zwei gleich grosse Wohnungen: Wohnungsanteil 900.00 von 1'800.00)
+  @wip
+  Szenario: Kostenposition nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "600" Franken vom "2025-07-05" für die Zeit vom "2025-04-01" bis "2025-06-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "1200" Franken vom "2025-10-05" für die Zeit vom "2025-07-01" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Dann nennt die Position "Hauswart" die Rechnung "Hauswart 2025-07-05" mit "Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen"
+    Und nennt die Position "Hauswart" die Rechnung "Hauswart 2025-10-05" mit "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1'200.00, Ihre Mietstage 47 von 92 Tagen"
+    Und nennt die Position "Hauswart" "Ihr Anteil: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52"
+
+  # #104: jede Kostenposition führt zu den Rechnungen, die sie abrechnet
+  @wip
+  Szenario: Rechnung einer Kostenposition öffnen
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Rechnung "Hauswart 2024-12-31" der Position "Hauswart" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung "Hauswart 2024-12-31"
+
+  # #96: die Abrechnung kennt die Rechnungen, die sie abrechnet; eine Rechnung der Periode, die danach erfasst wurde,
+  # fehlt darin
+  @wip
+  Szenario: Abrechnung weist auf eine danach erfasste Rechnung hin
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann meldet die Abrechnung "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht."
+
+  # #96: eine danach geänderte Rechnung zählt wie eine neue
+  @wip
+  Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Rechnung "Hauswart 2024-12-31" kostet danach "800" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann meldet die Abrechnung "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht."
+
+  @wip
+  Szenario: Kein Hinweis, solange die Rechnungen der Periode unverändert sind
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann hat die Abrechnung den Status "Entwurf"
+    Und meldet die Abrechnung keine geänderten Rechnungen
