@@ -88,6 +88,9 @@ describe('parsePercent', () => {
 		expect(parsePercent(' 4.25 ')).toBe(4.25);
 		expect(parsePercent('3')).toBe(3);
 		expect(parsePercent('0')).toBe(0);
+		// persona Helga P-2 (#89): the sign as typed from the contract
+		expect(parsePercent('4 %')).toBe(4);
+		expect(parsePercent('2,5%')).toBe(2.5);
 	});
 
 	it('lehnt Leeres, Negatives, Exponenten und mehr als zwei Nachkommastellen ab', () => {

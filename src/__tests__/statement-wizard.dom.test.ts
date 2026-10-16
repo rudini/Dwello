@@ -254,6 +254,9 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain('Prozentsatz der eigenen Nebenkosten jedes Mieters');
 		fireEvent(byTestId<HTMLInputElement>('management-fee-input')!, 'input', '4.5');
 		expect(byTestId('management-fee-hint')).not.toBeNull();
+		// persona Dr. Weber P-2 (#124): above 10 % the field refuses the rate; a hint on it would contradict that
+		fireEvent(byTestId<HTMLInputElement>('management-fee-input')!, 'input', '12');
+		expect(byTestId('management-fee-hint')).toBeNull();
 	});
 
 	// Ein geleertes Feld ist kein Satz von 0 %: der Assistent fragt nach, statt still keine Pauschale zu verrechnen
@@ -999,7 +1002,9 @@ describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
 
 		const hint = byTestId('management-fee-not-agreed')!;
 		expect(hint.textContent).toContain('Ohne vereinbarte Verwaltungspauschale');
-		expect(hint.textContent).toContain('Ihre Abrechnungen enthalten keine Pauschale (0 %).');
+		expect(hint.textContent).toContain(
+			'Bei diesen Mietverträgen ist keine Verwaltungspauschale vereinbart (Angabe beim Mietvertrag). Ihre Abrechnungen enthalten keine Pauschale (0 %).'
+		);
 		const link = byTestId('management-fee-not-agreed-link-c7')!;
 		expect(link.textContent!.trim()).toBe('Anna Keller, Wohnung 1.01');
 		expect(link.getAttribute('href')).toBe('/contracts/c7');

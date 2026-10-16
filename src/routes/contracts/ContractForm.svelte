@@ -103,8 +103,9 @@
 	}
 
 	function edited(event: Event) {
-		const id = (event.target as HTMLElement).id;
+		const { id, name } = event.target as HTMLInputElement;
 		delete errors[id];
+		if (name) delete errors[name]; // a radio group's error is named after the group (#89)
 		// the offer belongs to the values refused (review K-2); its message points to it below
 		if (refused.length) delete errors.form;
 		refused = [];

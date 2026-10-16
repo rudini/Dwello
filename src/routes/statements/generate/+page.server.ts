@@ -38,14 +38,15 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 		json(fetch, `contracts?buildingId=${id}&limit=1000`)
 	]);
 	const others = (statements.data ?? []) as Row[];
-	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1)
+	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1);
+	// its heating profile comes with it, so the notice says where both come from (code review C-1)
 	const ofBuilding = (contracts.contracts ?? []) as Row[];
-	const runRate = others.find((s) =>
+	const other = others.find((s) =>
 		ofBuilding.some(
 			(c) => c.id === s.contractId && c.managementFeeAgreed && c.managementFeePercent == null
 		)
 	);
-	return { building, period: { start: start!, end: end! }, other: others[0], runRate };
+	return { building, period: { start: start!, end: end! }, other };
 }
 
 export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
@@ -63,7 +64,7 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 		buildings: buildingList,
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
 		defaultManagementFeePercent: Number(
-			pick?.runRate?.managementFeePercent ?? settings.management_fee_pct ?? 3
+			pick?.other?.managementFeePercent ?? settings.management_fee_pct ?? 3
 		),
 		defaultPeriod:
 			pick?.period ??
@@ -76,7 +77,7 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 		preset: pick && {
 			building: String(pick.building.name),
 			...pick.period,
-			fromStatements: !!pick.runRate
+			fromStatements: !!pick.other
 		}
 	};
 };

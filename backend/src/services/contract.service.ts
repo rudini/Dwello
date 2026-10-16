@@ -279,6 +279,10 @@ function checkNotice(terminated: boolean | undefined, endDate: string | null | u
 /**
  * Create a new contract
  */
+// Without an agreed Verwaltungspauschale no own rate is kept: agreeing again later must not bring it back (#89)
+const feeRate = (data: Partial<NewRentalContract>) =>
+	data.managementFeeAgreed === false ? { ...data, managementFeePercent: null } : data;
+
 export async function createContract(data: NewRentalContract): Promise<RentalContract> {
 	checkNotice(data.terminated, data.endDate);
 	// Check for overlapping contracts
@@ -294,7 +298,7 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 		});
 	}
 
-	const [contract] = await db.insert(rentalContracts).values(data).returning();
+	const [contract] = await db.insert(rentalContracts).values(feeRate(data) as NewRentalContract).returning();
 
 
 	return contract;
@@ -364,7 +368,7 @@ export async function updateContract(
 	const [contract] = await db
 		.update(rentalContracts)
 		// without an end there is no notice: withdrawing it makes the contract open-ended again
-		.set({ ...data, ...(data.endDate === null && { terminated: false }), updatedAt: new Date() })
+		.set({ ...feeRate(data), ...(data.endDate === null && { terminated: false }), updatedAt: new Date() })
 		.where(eq(rentalContracts.id, id))
 		.returning();
 

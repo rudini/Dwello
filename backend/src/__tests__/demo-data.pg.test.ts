@@ -148,7 +148,6 @@ describe('Demodaten', () => {
 		]);
 	});
 
-	// Bei einem Mieterwechsel erhält jeder Mietvertrag eine eigene Abrechnung über seine Mietstage
 	// #89: each choice of «Verwaltungspauschale vereinbart» once, and the statements follow it
 	it('vereinbart die Verwaltungspauschale je Mietvertrag: zum Satz des Laufs, mit eigenem Satz und keine', async () => {
 		const rows = await query(
@@ -167,6 +166,7 @@ describe('Demodaten', () => {
 		expect(rows.find((r) => r.first_name === 'Marco')!.rates).toEqual([2.5]);
 	});
 
+	// Bei einem Mieterwechsel erhält jeder Mietvertrag eine eigene Abrechnung über seine Mietstage
 	it('rechnet den Mieterwechsel in Seepark A2 mit zwei Abrechnungen ab', async () => {
 		const rows = await query(
 			name,

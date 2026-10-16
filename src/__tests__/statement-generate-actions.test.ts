@@ -112,12 +112,16 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		const statement = (contractId: string, managementFeePercent: string) => ({
 			...periodStatements.data[0],
 			contractId,
+			heatingProfileId: `hp-${contractId}`,
 			managementFeePercent
 		});
 		const openWith = (statements: unknown[]) =>
 			load({
 				fetch: async (url: string) => {
-					if (url.includes('/config')) return Response.json({ data: { management_fee_pct: '3' } });
+					if (url.includes('/config'))
+						return Response.json({
+							data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
+						});
 					if (url.includes('/contracts?'))
 						return Response.json({
 							contracts: [
@@ -146,6 +150,8 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		// none at the run's rate: the settings' rate, and the notice does not claim the statements' settings
 		expect(await openWith(mixed.slice(0, 2))).toMatchObject({
 			defaultManagementFeePercent: 3,
+			// code review C-1: the heating profile too, so «aus den Einstellungen» holds for both
+			defaultHeatingProfileId: 'hp1',
 			preset: { fromStatements: false }
 		});
 	});

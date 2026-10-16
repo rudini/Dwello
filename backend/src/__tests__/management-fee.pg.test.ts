@@ -196,7 +196,19 @@ describe('Verwaltungspauschale nach Mietvertrag', () => {
 		}
 	});
 
-	it('lehnt einen eigenen Satz über dem Höchstsatz ab', async () => {
+	// code review C-7: «Nein» forgets an own rate; agreeing again later does not bring an old rate back
+	it('vergisst mit «Nein» einen eigenen Satz', async () => {
+		await agree(true, '2');
+		await agree(false, '2');
+		expect(await (await callApi(`/api/v1/contracts/${small.contract}`)).json()).toMatchObject({
+			managementFeeAgreed: false,
+			managementFeePercent: null
+		});
+		await sendJson('PUT', `/api/v1/contracts/${small.contract}`, { managementFeeAgreed: true });
+		expect(await fee(small.contract)).toBe(7.5);
+	});
+
+		it('lehnt einen eigenen Satz über dem Höchstsatz ab', async () => {
 		expect((await agree(true, '10.01')).status).toBe(422);
 	});
 });

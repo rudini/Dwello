@@ -138,9 +138,10 @@
 
 	function edited(event: Event) {
 		touched = true;
-		const id = (event.target as HTMLElement).id;
+		const { id, name } = event.target as HTMLInputElement;
 		if (id === 'startDate') startEdited = true;
 		delete errors[errorKey[id] ?? id];
+		if (name) delete errors[name]; // a radio group's error is named after the group (#89)
 		if (errors.startDate === OVERLAP) delete errors.startDate; // any period change may resolve it
 	}
 

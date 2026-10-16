@@ -47,7 +47,8 @@ const type = (testid: string, value: string) =>
 	fireEvent(byTestId<HTMLInputElement>(testid)!, 'input', value);
 const next = () => submit('wizard-next');
 // «Verwaltungspauschale vereinbart» has no default (#89)
-const chooseFee = (choice: string) => byTestId<HTMLInputElement>(`contract-fee-choice-${choice}`)!.click();
+const chooseFee = (choice: string) =>
+	byTestId<HTMLInputElement>(`contract-fee-choice-${choice}`)!.click();
 
 const UNKNOWN =
 	'Dwello konnte die Mietverträge dieser Wohnung nicht laden. Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.';
@@ -157,6 +158,28 @@ describe('Mietvertrag erfassen', () => {
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’130.00');
 	});
 
+	// #89, persona Helga P-1: the error at the choice goes once an answer is chosen
+	it('nimmt die Meldung zur Verwaltungspauschale zurück, sobald eine Antwort gewählt ist', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		type('contract-base-rent-input', '950');
+		next();
+		await settle();
+		const group = byTestId('contract-fee-choice')!;
+		expect(group.textContent).toContain(
+			'Bitte wählen Sie, ob im Mietvertrag eine Verwaltungspauschale vereinbart ist.'
+		);
+		chooseFee('none');
+		await settle();
+		expect(group.textContent).not.toContain('Bitte wählen Sie');
+		expect(group.getAttribute('aria-invalid')).toBeNull();
+	});
+
 	// #89, fach-review M-2: the guideline of 3 % holds for a rate agreed in the contract too
 	it('weist bei einem eigenen Satz über 3 % auf den üblichen Richtwert hin', async () => {
 		await open();
@@ -167,6 +190,10 @@ describe('Mietvertrag erfassen', () => {
 		type('start-date-input', '01.01.2027');
 		next();
 		expect(byTestId('contract-fee-rate-input')).toBeNull();
+		// fach-review M-3: a new fee holds only from the next Kündigungstermin (Art. 269d Abs. 1 OR)
+		expect(document.body.textContent).toContain(
+			'mit dem amtlichen Formular mitteilen; sie gilt erst ab dem nächsten Kündigungstermin (Art. 269d OR).'
+		);
 		chooseFee('own');
 		await settle();
 		type('contract-fee-rate-input', '3');
@@ -179,7 +206,7 @@ describe('Mietvertrag erfassen', () => {
 		);
 	});
 
-		it('zeigt vor dem Speichern alles in Worten und speichert Akonto als Akonto', async () => {
+	it('zeigt vor dem Speichern alles in Worten und speichert Akonto als Akonto', async () => {
 		await untilReview();
 		expect(heading()).toBe('Prüfen');
 		const items = [...document.querySelectorAll('[data-testid="contract-review-item"]')];

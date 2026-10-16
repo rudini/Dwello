@@ -4,7 +4,7 @@
 	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import type { HeatingProfile } from '$lib/types';
 	import { localName } from '$lib/names';
-	import { parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
+	import { isFeeRate, parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -91,7 +91,7 @@
 />
 <!-- announced while typing: the hint appears without the focus moving -->
 <div role="status">
-	{#if managementFeePercent > USUAL_MAXIMUM}
+	{#if managementFeePercent > USUAL_MAXIMUM && isFeeRate(managementFeePercent)}
 		<Alert tone="caution" title={m.statements_fee_above_title()} testid="management-fee-hint">
 			<p>{m.statements_fee_above_text({ max: USUAL_MAXIMUM })}</p>
 		</Alert>

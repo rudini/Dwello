@@ -64,8 +64,10 @@ export function formatDateTime(isoTimestamp: string): string {
 }
 
 /** A percentage as typed: «2,5» or «2.5», at most two decimals as stored and printed; anything else is NaN */
-export const parsePercent = (text: string) =>
-	/^\d+([.,]\d{1,2})?$/.test(text.trim()) ? Number(text.trim().replace(',', '.')) : NaN;
+export const parsePercent = (text: string) => {
+	const rate = text.trim().replace(/\s*%$/, ''); // «4 %» as written in the contract
+	return /^\d+([.,]\d{1,2})?$/.test(rate) ? Number(rate.replace(',', '.')) : NaN;
+};
 
 // 3 % is the usual guideline of the Verwaltungspauschale (glossary), not a limit; source (#60): Mieterverband leaflet
 // 2026 «2026_merkblatt_unzulaessige_nebenkosten.pdf», at most 3 % usual (cantonal decisions, BWO 32 Nr. 12)

@@ -6,7 +6,7 @@
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
-	import { formatCurrency, parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
+	import { formatCurrency, isFeeRate, parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
 
 	// Step 4: the monthly amounts, each explained with the glossary's words, and their total
 	let {
@@ -22,6 +22,7 @@
 		);
 	});
 	const notice = $derived(advancePaymentNotice(values));
+	const ownRate = $derived(parsePercent(values.managementFeeRate));
 	// «Verwaltungspauschale vereinbart» (#89); TODO(fachlich prüfen, #286): «eigener Satz», «Satz des Abrechnungslaufs»
 	const feeChoices = $derived([
 		{ value: 'run', label: m.contracts_fee_run() },
@@ -87,7 +88,7 @@
 	/>
 	<!-- the guideline holds for an agreed rate too (Art. 4 Abs. 3 VMWG, fach-review M-2) -->
 	<div role="status">
-		{#if parsePercent(values.managementFeeRate) > USUAL_MAXIMUM}
+		{#if ownRate > USUAL_MAXIMUM && isFeeRate(ownRate)}
 			<Alert tone="caution" title={m.statements_fee_above_title()} testid="contract-fee-rate-hint">
 				<p>{m.statements_fee_above_text({ max: USUAL_MAXIMUM })}</p>
 			</Alert>

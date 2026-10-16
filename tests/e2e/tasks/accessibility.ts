@@ -352,7 +352,14 @@ const statementWizardSteps =
 		await nextStep('generate-all-buildings'); // "Gebäude"
 		// this example's building: another example's may still be seeding, without a contract to preview
 		await actor.attemptsTo(Check.the(on.generateBuilding(example.building)));
-		await nextStep('heating-profile-select'); // "Heizprofil und Verwaltungspauschale"
+		// "Heizprofil und Verwaltungspauschale"; the seeded contract of Carla has no fee agreed, and the notice that names it
+		// loads after the step (#89, code review C-3)
+		await actor.attemptsTo(
+			Click.on(nextButton),
+			Wait.until(on.shown('heating-profile-select')),
+			Wait.until(on.shown('management-fee-not-agreed')),
+			look
+		);
 		await nextStep('preview-count'); // "Vorschau", calculated on the server
 		// a building without invoices must be confirmed
 		if (await actor.answer(Visibility.of(on.confirmMissingInvoices))) await actor.attemptsTo(Check.the(on.confirmMissingInvoices));
