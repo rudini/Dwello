@@ -297,6 +297,19 @@ editable; a changed `payment_deadline` clears `pdf_blob` and `pdf_generated_at`.
 **Overdue:** never stored. Reads, filters and counts treat a `sent` statement whose `payment_deadline` has
 passed as `overdue`; the CHECK does not allow it as a stored value.
 
+### statement_numbers (Abrechnungsnummern)
+
+```sql
+prefix       VARCHAR(50)   PRIMARY KEY  -- NK-{first 8 characters of the building id}-{year of the period end}-
+last_number  INTEGER       NOT NULL     -- the last number given with this prefix
+```
+
+Migration `0007` (#97). `generateStatementNumber` (`backend/src/services/calculation.service.ts`) counts `last_number`
+up for every new statement, so a number is never given twice: a deleted draft leaves a gap, because its PDF may already
+have been handed out. A prefix without a row (its first statement since the migration) starts after the highest
+`statement_number` with that prefix; existing numbers stay as they are. A number deleted before the migration that was
+the highest of its prefix is given once more: nothing recorded it.
+
 ### utility_statement_line_items (Abrechnungsposition)
 
 ```sql
@@ -417,6 +430,7 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
+  0003 … 0007           -- later changes, each named in its table above
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in

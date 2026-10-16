@@ -355,6 +355,12 @@ export type HeatingShare =
 			names: HeatingProfileNames;
 	  };
 
+// The last statement number given per prefix NK-{building}-{year}-, so a deleted draft's number is not given again (#97)
+export const statementNumbers = pgTable('statement_numbers', {
+	prefix: varchar('prefix', { length: 50 }).primaryKey(),
+	lastNumber: integer('last_number').notNull()
+});
+
 export const utilityStatements = pgTable(
 	'utility_statements',
 	{

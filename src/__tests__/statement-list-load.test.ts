@@ -84,12 +84,16 @@ describe('PDF einer Abrechnung herunterladen', () => {
 
 	it('liefert das gespeicherte PDF als Download', async () => {
 		const response = await call(
-			() => new Response(new Uint8Array([37, 80, 68, 70]), { status: 200 })
+			() =>
+				new Response(new Uint8Array([37, 80, 68, 70]), {
+					status: 200,
+					headers: { 'Content-Disposition': 'attachment; filename="NK-1A2B3C4D-2025-0001.pdf"' }
+				})
 		);
 
 		expect(response.headers.get('Content-Type')).toBe('application/pdf');
 		expect(response.headers.get('Content-Disposition')).toBe(
-			'attachment; filename="abrechnung-s1.pdf"'
+			'attachment; filename="NK-1A2B3C4D-2025-0001.pdf"'
 		);
 		expect(new TextDecoder().decode(await response.arrayBuffer())).toBe('%PDF');
 	});

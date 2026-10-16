@@ -112,11 +112,12 @@ describe('Nummer einer Nebenkostenabrechnung', () => {
 		});
 
 	it('vergibt die Nummer eines gelöschten Entwurfs nicht wieder', async () => {
-		await draft();
+		// earlier tests of this file already numbered drafts of this building in 2024
+		const first = Number((await draft()).statementNumber.slice(-4));
 		const second = await draft();
 		await deleteStatement(second.id);
 
-		expect((await draft()).statementNumber).toBe(`${prefix()}2024-0003`);
+		expect((await draft()).statementNumber).toBe(`${prefix()}2024-${String(first + 2).padStart(4, '0')}`);
 	});
 
 	// Nummern von vor der Änderung bleiben, wie sie sind; die nächste folgt auf die höchste

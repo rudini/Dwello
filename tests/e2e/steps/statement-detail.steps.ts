@@ -192,11 +192,11 @@ Then('erhält der Liegenschaftsverwalter die Abrechnung als PDF', async ({ verwa
 	await verwalter.sees(downloadedFileHeader).toBe('%PDF-');
 });
 
-Then('heisst die Datei wie die Nummer der Abrechnung, mit der Endung {string}', async ({ verwalter }, ending: string) => {
+Then('heisst die Datei wie die Abrechnungsnummer, mit der Endung {string}', async ({ verwalter }, ending: string) => {
 	await verwalter.sees(downloadedFileNameByNumber).toBe(`<Nummer>${ending}`);
 });
 
-Then('endet die Nummer der Abrechnung von {string} auf {string}', async ({ verwalter, names }, tenant: string, ending: string) => {
+Then('endet die Abrechnungsnummer von {string} auf {string}', async ({ verwalter, names }, tenant: string, ending: string) => {
 	await verwalter.sees(listedStatementNumber(names.get(tenant) ?? tenant)).toMatch(new RegExp(`${ending}$`));
 });
 

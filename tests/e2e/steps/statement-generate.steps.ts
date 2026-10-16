@@ -72,6 +72,14 @@ When(
 	}
 );
 
+When(
+	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} erstellt',
+	async ({ verwalter, seed }, year: number, building: string, profile: string) => {
+		const options = { heatingProfileId: await seed.heatingProfileId(profile) };
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, options));
+	}
+);
+
 Given(
 	'der Liegenschaftsverwalter hat die Abrechnungen {int} für das Gebäude {string} erstellt',
 	async ({ verwalter, seed }, year: number, building: string) => {
