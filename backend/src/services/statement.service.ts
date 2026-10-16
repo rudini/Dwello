@@ -23,6 +23,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import { isRealDate } from './real-date';
 import { daysAfter, swissToday } from './today';
 
 export interface StatementFilters {
@@ -468,7 +469,7 @@ export async function updateStatementStatus(
 		throw new Error(`Invalid status transition from ${existing.status} to ${status}`);
 	}
 
-	if (status === 'paid' && additionalData?.paidDate) checkPaidDate(additionalData.paidDate, existing.statementDate);
+	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.statementDate);
 	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
 	// A Saldo of 0 (often after the rounding to 5 Rappen) is settled once sent: nothing to pay or to pay back
 	const settled = sentToday && parseFloat(existing.balance) === 0 && { status: 'paid', paidDate: sentToday.statementDate };
@@ -486,8 +487,7 @@ export async function updateStatementStatus(
 
 // #138: a day that exists, from the Abrechnungsdatum (for a sent statement the day it was sent) up to today
 function checkPaidDate(paidDate: string, statementDate: string) {
-	const real = /^\d{4}-\d{2}-\d{2}$/.test(paidDate) && new Date(`${paidDate}T00:00:00Z`).toISOString().startsWith(paidDate);
-	if (!real) throw new CodedError('PAID_DATE_INVALID', 'Invalid payment date', { date: paidDate });
+	if (!isRealDate(paidDate)) throw new CodedError('PAID_DATE_INVALID', 'Invalid payment date', { date: paidDate });
 	if (paidDate < statementDate) throw new CodedError('PAID_DATE_BEFORE_STATEMENT', 'Payment date before the statement date', { date: statementDate });
 	const today = swissToday();
 	if (paidDate > today) throw new CodedError('PAID_DATE_IN_FUTURE', 'Payment date in the future', { date: today });
@@ -495,20 +495,22 @@ function checkPaidDate(paidDate: string, statementDate: string) {
 
 /**
  * Take back a recorded payment (#92): back to sent (overdue once the payment deadline has passed), paid date and amount
- * cleared, the reset kept for the Verlauf; the PDF that confirms the payment is discarded and made again as sent
+ * cleared, the reset kept for the Verlauf; a PDF made once paid confirms the payment: it is discarded and made again as sent
  */
 export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	const existing = await getStatement(id);
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (existing.status !== 'paid') throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
 	const reset = { resetOn: swissToday(), paidDate: existing.paidDate, paidAmount: existing.paidAmount };
+	// only a PDF made once paid says so; the one made when sending stays, with its row in the Verlauf
+	const madeOnDay = existing.pdfGeneratedAt?.toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+	const paidPdf = madeOnDay && existing.paidDate && madeOnDay >= existing.paidDate;
 	return (await updateStatement(id, {
 		status: 'sent',
 		paidDate: null,
 		paidAmount: null,
 		paymentResets: [...existing.paymentResets, reset],
-		pdfBlob: null,
-		pdfGeneratedAt: null
+		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
 }
 

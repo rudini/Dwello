@@ -132,9 +132,6 @@ When('der Liegenschaftsverwalter die Abrechnung als am {string} bezahlt markiert
 	await verwalter.attemptsTo(markStatementPaidOn(date));
 });
 
-Then('nennt der Verlauf {string} am {string}', async ({ verwalter }, label: string, date: string) => {
-	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${date.replace(/\./g, '\\.')}`));
-});
 
 Then('meldet das Feld «Bezahlt am» {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(paidDateInvalid).toBe('true');

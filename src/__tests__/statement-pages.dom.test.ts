@@ -865,7 +865,7 @@ describe('Abrechnungsdetail', () => {
 
 	// zweimal dieselbe Zahlung zurückgesetzt: beide Zeilen stehen im Verlauf (Fachprüfung V-11)
 	it('führt im Verlauf jedes Zurücksetzen einer Zahlung', () => {
-		const reset = { resetOn: '2025-02-10', paidDate: '2025-02-05', paidAmount: 363 };
+		const reset = { resetOn: '2025-02-10', paidDate: '2025-02-05' };
 		detail({ status: 'sent', statementDate: '2025-01-15', paymentResets: [reset, reset] });
 
 		expect(text().replace(/\s+/g, ' ').split('Zahlung vom 05.02.2025 zurückgesetzt 10.02.2025')).toHaveLength(3);

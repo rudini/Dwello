@@ -31,7 +31,8 @@ describe('balanceLabel', () => {
 // #138: das Zahlungsdatum ist ein Tag, den es gibt, frühestens das Abrechnungsdatum
 describe('paidDateError', () => {
 	it('lehnt einen Tag ab, den es nicht gibt', () => {
-		expect(paidDateError('2025-02-30', '2025-01-15')).toBe('Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.');
+		for (const day of ['2025-02-30', '2025-13-01', '2025-01-32', '2025-00-10'])
+			expect(paidDateError(day, '2025-01-15'), day).toBe('Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.');
 	});
 
 	it('lehnt einen Tag vor dem Abrechnungsdatum ab', () => {

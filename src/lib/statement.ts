@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import { localToday } from '$lib/contract-status';
+import { isDay, localToday } from '$lib/contract-status';
 import { formatDate } from '$lib/utils/format';
 import type { StatementStatus } from './types';
 import type { Tone } from './ui/tone';
@@ -40,8 +40,7 @@ export const paidHelp = (balance: number) =>
 
 /** Why a payment date cannot be stored: none or a day that does not exist, before the Abrechnungsdatum (#138), or in the future */
 export const paidDateError = (paidDate: string, statementDate: string) =>
-	!/^\d{4}-\d{2}-\d{2}$/.test(paidDate) ||
-	!new Date(`${paidDate}T00:00:00Z`).toISOString().startsWith(paidDate)
+	!isDay(paidDate)
 		? m.statements_paid_date_invalid()
 		: paidDate < statementDate
 			? m.statements_paid_date_before({ date: formatDate(statementDate) })

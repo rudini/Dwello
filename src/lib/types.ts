@@ -298,7 +298,7 @@ export interface Statement {
 	status: StatementStatus;
 	paymentDeadline: string;
 	paidDate?: string;
-	paymentResets?: { resetOn: string; paidDate: string | null; paidAmount: number | null }[]; // payments taken back (#92)
+	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	lastReminderDate?: string;
 	pdfGeneratedAt?: string;
 	notes?: string | null;

@@ -40,7 +40,7 @@ describe('Abrechnung aus dem Backend', () => {
 	// #92: der Verlauf nennt jede zurückgesetzte Zahlung
 	it('übernimmt die zurückgesetzten Zahlungen', () => {
 		expect(toStatement(resetStatement).paymentResets).toEqual([
-			{ resetOn: '2025-02-10', paidDate: '2025-02-05', paidAmount: 1045 }
+			{ resetOn: '2025-02-10', paidDate: '2025-02-05' }
 		]);
 		expect(toStatement(backendStatement).paymentResets).toEqual([]);
 	});

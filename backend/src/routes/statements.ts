@@ -192,7 +192,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			try {
 				return await resetPayment(params.id);
 			} catch (error) {
-				set.status = error instanceof CodedError && error.code === 'STATEMENT_NOT_FOUND' ? 404 : 400;
+				set.status = !(error instanceof CodedError) ? 500 : error.code === 'STATEMENT_NOT_FOUND' ? 404 : 400;
 				return errorBody(error, 'Failed to reset the payment');
 			}
 		},

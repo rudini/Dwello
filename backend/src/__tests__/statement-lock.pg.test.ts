@@ -15,6 +15,8 @@ let rental: Awaited<ReturnType<typeof createRental>>;
 let statementId: string;
 let sentId: string;
 
+const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+
 // A statement of the rental for one year, sent to the tenant
 async function sentStatement(year: number) {
 	const id = await idOf(
@@ -108,14 +110,13 @@ describe('Abrechnung mit Saldo 0', () => {
 	});
 });
 
-
-const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 const markPaid = (id: string, paidDate: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate });
 
 // #138: das Zahlungsdatum liegt zwischen dem Abrechnungsdatum (beim Versenden der Tag des Versands) und heute
 describe('Zahlungsdatum', () => {
 	it('ist ein Tag, den es gibt', async () => {
-		await expectRejection(await markPaid(statementId, '2025-02-30'), 400, 'Invalid payment date', 'PAID_DATE_INVALID', { date: '2025-02-30' });
+		for (const day of ['2025-02-30', '2025-13-01', ''])
+			await expectRejection(await markPaid(statementId, day), 400, 'Invalid payment date', 'PAID_DATE_INVALID', { date: day });
 	});
 
 	it('liegt nicht vor dem Abrechnungsdatum', async () => {
@@ -140,6 +141,17 @@ describe('Zahlung zurücksetzen', () => {
 		expect(await response.json()).toMatchObject({ status: 'sent', paidDate: null, paidAmount: null, statementDate: today() });
 		const stored = (await (await callApi(`/api/v1/statements/${sentId}`)).json()) as { balance: string; paymentResets: unknown[] };
 		expect(stored.paymentResets).toEqual([{ resetOn: today(), paidDate: today(), paidAmount: stored.balance }]);
+	});
+
+	// das PDF beim Versand nennt keine Zahlung: es bleibt, und mit ihm der Eintrag im Verlauf (Persona Dr. Weber P-1)
+	it('behält das PDF, das vor der Zahlung erstellt wurde', async () => {
+		const yesterday = new Date(Date.now() - 86_400_000);
+		await markPaid(sentId, today());
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: yesterday }).where(eq(utilityStatements.id, sentId));
+		await reset(sentId);
+
+		const [row] = await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, sentId));
+		expect(row.pdfBlob).toBe('JVBERi0=');
 	});
 
 	// das PDF einer bezahlten Abrechnung sagt «Bezahlt am …»: nach dem Zurücksetzen gilt es nicht mehr (Fachprüfung V-1)

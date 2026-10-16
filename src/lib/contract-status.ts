@@ -68,7 +68,7 @@ export function contractEnd(endDate: string | null | undefined, terminated = fal
 }
 
 /** A real day as YYYY-MM-DD: not 2025-13-01 or 2025-02-30 */
-function isDay(date: string) {
+export function isDay(date: string) {
 	const day = new Date(`${date}T00:00:00Z`);
 	return (
 		/^\d{4}-\d{2}-\d{2}$/.test(date) && !isNaN(day.getTime()) && day.toISOString().startsWith(date)
