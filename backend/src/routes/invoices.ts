@@ -3,9 +3,9 @@
  * CRUD endpoints for invoice management with LLM categorization
  */
 
-import { isRealDate } from './real-date';
+import { isRealDate } from '../services/real-date';
 import { Elysia, t } from 'elysia';
-import { errorBody, refusal } from '../services/coded-error';
+import { CodedError, errorBody, refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listInvoices,
@@ -16,11 +16,17 @@ import {
 	recategorizeInvoiceById,
 	KI_UNAVAILABLE,
 	validateInvoice,
-	getInvoicesForStatement
+	getInvoicesForStatement,
+	getBeleg,
+	setBeleg,
+	extractFromFile,
+	suggestion
 } from '../services/invoice.service';
+import { fileResponse } from './file-response';
 import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
 import { getUtilityCostRules } from '../services/utility-validation.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
+import { buildingExists } from '../services/building.service';
 
 // Validation schemas
 const invoiceQuerySchema = t.Object({
@@ -56,9 +62,11 @@ const invoiceBodySchema = t.Object({
 	servicePeriodEnd: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 	dueDate: t.Optional(t.Nullable(t.String())),
 	paidDate: t.Optional(t.Nullable(t.String())),
-	invoicePdf: t.Optional(t.Nullable(t.String())),
 	notes: t.Optional(t.Nullable(t.String()))
 });
+
+// The uploaded file of an invoice, Base64 encoded
+const belegSchema = t.Object({ fileName: t.String(), content: t.String() });
 
 const invoiceUpdateSchema = t.Partial(invoiceBodySchema);
 
@@ -119,25 +127,35 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 				amount: body.amount
 			});
 
-			return {
-				category: result.category
-					? {
-							id: result.category.id,
-							name: result.category.name,
-							isAllowedUtilityCost: result.category.isAllowedUtilityCost
-						}
-					: null,
-				confidence: result.confidence,
-				isAllowedUtilityCost: result.isAllowedUtilityCost,
-				reasoning: result.reasoning,
-				source: result.source
-			};
+			return { ...suggestion(result), source: result.source };
 		},
 		{
 			body: t.Object({
 				billingEntityName: t.String({ minLength: 1 }),
 				description: t.String({ minLength: 1 }),
 				amount: t.String()
+			})
+		}
+	)
+	// What the KI reads from an uploaded file (its pages as images): proposals, nothing is saved
+	.post(
+		'/extract',
+		async ({ body, set }) => {
+			if (!(await buildingExists(body.buildingId))) {
+				set.status = 404;
+				return refusal('BUILDING_NOT_FOUND', 'Building not found');
+			}
+			const proposal = await extractFromFile(body.buildingId, body.fileName, body.pages);
+			if (proposal) return proposal;
+			set.status = 503;
+			return refusal('EXTRACTION_UNAVAILABLE', 'The KI is disabled, unreachable or read nothing');
+		},
+		{
+			body: t.Object({
+				buildingId: t.String({ format: 'uuid' }),
+				fileName: t.String({ maxLength: 255 }),
+				// at most a few pages, each an image as a data URL
+				pages: t.Array(t.String({ pattern: '^data:image/(png|jpeg);base64,' }), { minItems: 1, maxItems: 3 })
 			})
 		}
 	)
@@ -179,6 +197,32 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		}
 		return invoice;
 	})
+	// The Beleg of an invoice: its uploaded file
+	.get('/:id/document', async ({ params, set }) => {
+		const beleg = await getBeleg(params.id);
+		if (!beleg) {
+			set.status = 404;
+			return refusal('BELEG_NOT_FOUND', 'Beleg not found');
+		}
+		return fileResponse(set, beleg);
+	})
+	// Adds or replaces the Beleg of an invoice
+	.put(
+		'/:id/document',
+		async ({ params, body, set }) => {
+			try {
+				const invoice = await setBeleg(params.id, body);
+				if (invoice) return invoice;
+				set.status = 404;
+				return refusal('INVOICE_NOT_FOUND', 'Invoice not found');
+			} catch (error) {
+				if (!(error instanceof CodedError)) throw error;
+				set.status = 400;
+				return errorBody(error, '');
+			}
+		},
+		{ body: belegSchema }
+	)
 	// Validate invoice for utility statement
 	.get('/:id/validate', async ({ params, set }) => {
 		const result = await validateInvoice(params.id);
@@ -211,7 +255,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 			}
 		},
 		{
-			body: invoiceBodySchema,
+			body: t.Composite([invoiceBodySchema, t.Object({ beleg: t.Optional(belegSchema) })]),
 			query: t.Object({
 				skipLlm: t.Optional(t.String())
 			})

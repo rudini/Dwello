@@ -30,6 +30,7 @@
 		"jose": "^5.9.6",
 		"leaflet": "^1.9.4",
 		"lucide": "^1.54.0",
+		"pdfjs-dist": "6.3.289",
 		"svelte": "^5.57.1"
 	},
 	"devDependencies": {

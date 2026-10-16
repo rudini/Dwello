@@ -7,6 +7,7 @@
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { formatDate } from '$lib/utils/format';
+	import { fieldNote } from '$lib/invoice-upload';
 
 	// What the invoice says: building, date, amount, supplier and service; shared by "Neue Rechnung" and "Rechnung bearbeiten"
 	let {
@@ -20,7 +21,10 @@
 		buildings,
 		errors,
 		period,
-		onblur
+		onblur,
+		idPrefix = '',
+		chooseBuilding = true,
+		read = { unsure: [], missing: [] }
 	}: {
 		buildingId: string;
 		invoiceDate: string;
@@ -33,6 +37,9 @@
 		errors: Record<string, string>;
 		period?: { start: string; end: string } | null; // opened from the statement wizard
 		onblur?: () => void;
+		idPrefix?: string; // several invoices on one page (the upload dialog) need their own ids
+		chooseBuilding?: boolean; // false where the building is chosen once for all (the upload dialog)
+		read?: { unsure: string[]; missing: string[] }; // fields the KI read without being sure, or did not find
 	} = $props();
 
 	// ISO dates compare as text; a Leistungszeitraum decides over the Rechnungsdatum
@@ -45,22 +52,25 @@
 	);
 </script>
 
-<Select
-	id="building"
-	label={m.apartments_building()}
-	placeholder={m.invoices_choose_building()}
-	options={buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` }))}
-	bind:value={buildingId}
-	error={errors.buildingId}
-	testid="invoice-building-select"
-/>
+{#if chooseBuilding}
+	<Select
+		id="{idPrefix}building"
+		label={m.apartments_building()}
+		placeholder={m.invoices_choose_building()}
+		options={buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` }))}
+		bind:value={buildingId}
+		error={errors.buildingId}
+		testid="invoice-building-select"
+	/>
+{/if}
 
 <DateInput
-	id="invoiceDate"
+	id="{idPrefix}invoiceDate"
 	label={m.invoices_date()}
 	help={m.invoices_date_help()}
 	bind:value={invoiceDate}
 	error={errors.invoiceDate}
+	note={fieldNote(read, 'invoiceDate')}
 	testid="invoice-date-input"
 />
 
@@ -71,15 +81,16 @@
 	<p class="text-ink-muted">{m.invoices_service_period_help()}</p>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<DateInput
-			id="servicePeriodStart"
+			id="{idPrefix}servicePeriodStart"
 			label={m.invoices_start()}
 			optional
 			bind:value={servicePeriodStart}
 			error={errors.servicePeriodStart}
+			note={fieldNote(read, 'servicePeriodStart')}
 			testid="invoice-service-start-input"
 		/>
 		<DateInput
-			id="servicePeriodEnd"
+			id="{idPrefix}servicePeriodEnd"
 			label={m.invoices_end()}
 			optional
 			bind:value={servicePeriodEnd}
@@ -101,27 +112,29 @@
 {/if}
 
 <MoneyInput
-	id="amount"
+	id="{idPrefix}amount"
 	label={m.invoices_amount()}
 	example="450.00"
 	bind:value={amount}
 	error={errors.amount}
+	note={fieldNote(read, 'amount')}
 	testid="invoice-amount-input"
 />
 
 <TextInput
-	id="billingEntity"
+	id="{idPrefix}billingEntity"
 	label={m.invoices_billing_entity()}
 	help={m.invoices_billing_entity_help()}
 	example={m.invoices_example_supplier()}
 	bind:value={billingEntity}
 	{onblur}
 	error={errors.billingEntity}
+	note={fieldNote(read, 'billingEntityName')}
 	testid="invoice-billing-entity-input"
 />
 
 <Textarea
-	id="description"
+	id="{idPrefix}description"
 	label={m.invoices_description()}
 	help={m.invoices_description_help()}
 	example={m.invoices_description_example()}
@@ -129,5 +142,6 @@
 	bind:value={description}
 	{onblur}
 	error={errors.description}
+	note={fieldNote(read, 'description')}
 	testid="invoice-description-input"
 />

@@ -13,6 +13,7 @@ import {
 } from '../services/document.service';
 import { CodedError, errorBody } from '../services/coded-error';
 import { ReminderError, sendReminder } from '../services/reminder.service';
+import { fileResponse } from './file-response';
 
 export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 	.use(authMiddleware)
@@ -57,12 +58,7 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 			set.status = 404;
 			return { error: 'Document not found' };
 		}
-		set.headers['content-type'] = pdf.mimeType;
-		// an ASCII name for old clients, the real one (umlauts, dashes) per RFC 6266 and RFC 5987
-		const ascii = pdf.fileName.replace(/[^\x20-\x7e]|["\\]/g, '_');
-		const utf8 = encodeURIComponent(pdf.fileName).replace(/['()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
-		set.headers['content-disposition'] = `attachment; filename="${ascii}"; filename*=UTF-8''${utf8}`;
-		return pdf.content;
+		return fileResponse(set, pdf);
 	})
 	.delete('/documents/:id', async ({ params, set }) => {
 		try {

@@ -1,3 +1,6 @@
+import { isRealDate } from '../services/real-date';
+import { roundToRappen } from '../services/pdf-format';
+
 /**
  * LLM Configuration
  * Any provider with an OpenAI-compatible API (/chat/completions, /models); by default the local Ollama
@@ -14,8 +17,8 @@ export const llmConfig = {
 	provider: process.env.LLM_PROVIDER || '',
 	providerCountry: process.env.LLM_PROVIDER_COUNTRY || '',
 
-	// Model to use for categorization (qwen2.5:3b is small but accurate for German)
-	model: process.env.LLM_MODEL || 'qwen2.5:3b',
+	// Model for reading uploaded invoices and categorizing them: it must read images (#217)
+	model: process.env.LLM_MODEL || 'qwen2.5vl:7b',
 
 	// Request timeout in milliseconds
 	timeout: parseInt(process.env.LLM_TIMEOUT || '30000', 10),
@@ -253,4 +256,115 @@ export function parseLLMResponse(response: string): LLMCategorizationResult | nu
 		console.error('Failed to parse LLM response:', error);
 		return null;
 	}
+}
+
+// Prompt for reading an uploaded Beleg; the pages follow as images. The fields are proposals the property manager
+// checks before anything is saved (#217); the amount rules follow the domain review (docs/reviews/upload-fachreview-1.md)
+const EXTRACTION_PROMPT = `Du liest eine Rechnung an den Vermieter eines Gebäudes in der Schweiz, z.B. von einem Handwerker, einem Lieferanten, der Gemeinde oder den Werken. Die Bilder sind die Seiten der Datei «{file_name}».
+
+Lies diese Angaben ab, so wie sie auf der Rechnung stehen; erfinde nichts. Fehlt eine Angabe, setze null.
+- invoiceCount: wie viele verschiedene Rechnungen die Datei enthält
+- documentType: "invoice" für eine Rechnung, "reminder" für eine Mahnung, "credit_note" für eine Gutschrift
+- billingEntityName: Firma oder Person, die die Rechnung stellt
+- invoiceNumber: Rechnungsnummer
+- invoiceDate: Rechnungsdatum (JJJJ-MM-TT)
+- totalAmount: Total der Leistungen in CHF inkl. MWST, ohne Mahngebühren und Verzugszinsen, vor dem Abzug bereits bezahlter Beträge, als Zahl mit Punkt (z.B. 1250.00; auf der Rechnung oft 1'250.00 oder 1'250.–); steht kein CHF-Betrag auf der Rechnung, null
+- deductedAmount: Summe der abgezogenen, bereits bezahlten Beträge (Akontozahlungen, Anzahlungen, Teilrechnungen) als Zahl, sonst null
+- servicePeriodStart, servicePeriodEnd: Leistungszeitraum, nur wenn die Rechnung ihn mit Beginn und Ende nennt (JJJJ-MM-TT)
+- dueDate: Fälligkeitsdatum, nur wenn die Rechnung ein Datum nennt (JJJJ-MM-TT); bei «zahlbar innert 30 Tagen» null
+- description: alle erbrachten Leistungen in wenigen Worten auf Deutsch, jede Position genannt
+- nonAllocableItems: true, wenn die Rechnung auch Reparaturen, Erneuerungen oder Anschaffungen enthält, sonst false
+Gib zu jeder Angabe an, wie sicher du bist (0 bis 1).
+
+Antworte NUR im folgenden JSON-Format:
+{
+  "invoiceCount": <Zahl>,
+  "documentType": "invoice",
+  "billingEntityName": <Text oder null>,
+  "invoiceNumber": <Text oder null>,
+  "invoiceDate": <Datum oder null>,
+  "totalAmount": <Zahl oder null>,
+  "deductedAmount": <Zahl oder null>,
+  "servicePeriodStart": <Datum oder null>,
+  "servicePeriodEnd": <Datum oder null>,
+  "dueDate": <Datum oder null>,
+  "description": <Text oder null>,
+  "nonAllocableItems": <true oder false>,
+  "confidence": { "billingEntityName": <0 bis 1>, "invoiceNumber": <0 bis 1>, "invoiceDate": <0 bis 1>, "totalAmount": <0 bis 1>, "servicePeriodStart": <0 bis 1>, "dueDate": <0 bis 1>, "description": <0 bis 1> }
+}`;
+
+export const buildExtractionPrompt = (fileName: string) =>
+	EXTRACTION_PROMPT.replace('{file_name}', () => fileName);
+
+/** What the KI read from a Beleg: the fields as the invoice form takes them, and what the property manager must check */
+export type Extraction = {
+	invoiceCount: number;
+	documentType: 'invoice' | 'reminder' | 'credit_note';
+	fields: {
+		billingEntityName: string | null;
+		invoiceNumber: string | null;
+		invoiceDate: string | null;
+		amount: string | null;
+		servicePeriodStart: string | null;
+		servicePeriodEnd: string | null;
+		dueDate: string | null;
+		description: string | null;
+	};
+	deductedAmount: string | null;
+	nonAllocableItems: boolean;
+	unsure: string[]; // fields the KI read with a confidence below 0.7 or without one
+};
+
+const text = (value: unknown) => (typeof value === 'string' && value.trim() ? value.trim() : null);
+// An existing date in ISO form; anything else is no proposal
+const date = (value: unknown) => {
+	const iso = text(value);
+	return iso && isRealDate(iso) ? iso : null;
+};
+const francs = (value: unknown) => (typeof value === 'number' && value > 0 ? roundToRappen(value).toFixed(2) : null);
+const DOCUMENT_TYPES = ['invoice', 'reminder', 'credit_note'] as const;
+// How many invoices a file holds, also when the KI writes the number as text; anything else counts as one
+const count = (value: unknown) => {
+	const n = typeof value === 'string' || typeof value === 'number' ? Number(value) : NaN;
+	return Number.isInteger(n) && n > 0 ? n : 1;
+};
+// The confidence of a field by its name in the answer
+const ANSWERED_AS: Record<string, string> = { amount: 'totalAmount', servicePeriodEnd: 'servicePeriodStart' };
+
+export function parseExtractionResponse(response: string): Extraction | null {
+	let parsed: Record<string, unknown>;
+	try {
+		parsed = JSON.parse(response.match(/\{[\s\S]*\}/)?.[0] ?? '');
+	} catch {
+		return null;
+	}
+	const start = date(parsed.servicePeriodStart);
+	const end = date(parsed.servicePeriodEnd);
+	const whole = start && end && end >= start; // a Leistungszeitraum has both dates, the end not before the start
+	const fields = {
+		billingEntityName: text(parsed.billingEntityName),
+		invoiceNumber: text(parsed.invoiceNumber),
+		invoiceDate: date(parsed.invoiceDate),
+		amount: francs(parsed.totalAmount),
+		servicePeriodStart: whole ? start : null,
+		servicePeriodEnd: whole ? end : null,
+		dueDate: date(parsed.dueDate),
+		description: text(parsed.description)
+	};
+	const confidence = (parsed.confidence ?? {}) as Record<string, unknown>;
+	const unsure = Object.entries(fields)
+		.filter(([field, value]) => {
+			const sure = confidence[ANSWERED_AS[field] ?? field];
+			// a value without its confidence counts as unsure (domain review V-12)
+			return value !== null && !(typeof sure === 'number' && sure >= 0.7);
+		})
+		.map(([field]) => field);
+	return {
+		invoiceCount: count(parsed.invoiceCount),
+		documentType: DOCUMENT_TYPES.find((type) => type === parsed.documentType) ?? 'invoice',
+		fields,
+		deductedAmount: francs(parsed.deductedAmount),
+		nonAllocableItems: parsed.nonAllocableItems === true,
+		unsure
+	};
 }

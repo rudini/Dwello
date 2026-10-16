@@ -8,7 +8,7 @@ import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { buildings, categories, documents, heatingProfiles, invoices, tenants } from '../db/schema';
+import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
@@ -56,6 +56,8 @@ beforeAll(async () => {
 		.update(tenants)
 		.set({ email: 'anna.keller@example.ch', phone: '+41 44 123 45 67', address: 'Seestrasse 12', postalCode: '8002', city: 'Zürich' })
 		.where(eq(tenants.id, rental.tenant));
+	for (const { id } of await db.select({ id: invoices.id }).from(invoices).where(eq(invoices.buildingId, rental.building)))
+		await db.insert(invoiceDocuments).values({ invoiceId: id, fileName: 'beleg.pdf', mimeType: 'application/pdf', content: 'JVBERi0=' });
 	await db
 		.update(invoices)
 		.set({ llmCategoryId: sql`${invoices.categoryId}`, llmConfidence: '0.86', manualOverrideReason: 'Vertrag geprüft' })
@@ -164,6 +166,22 @@ describe('API-Verträge des Frontends', () => {
 		try {
 			const actual = await (await sendJson('POST', '/api/v1/categories/propose', { name: 'Dachsanierung' })).json();
 			expect(drift(await sample('category-proposal'), actual)).toEqual([]);
+		} finally {
+			llm.stop();
+		}
+	});
+
+	it('POST /invoices/extract liefert die Felder von invoice-extraction.json', async () => {
+		const read = { invoiceCount: 1, documentType: 'invoice', billingEntityName: 'Muster AG', invoiceNumber: 'R-1', invoiceDate: '2026-03-31', totalAmount: 1000, deductedAmount: 500, servicePeriodStart: '2026-01-01', servicePeriodEnd: '2026-03-31', dueDate: '2026-04-30', description: 'Hauswart', nonAllocableItems: false, confidence: { invoiceDate: 0.4 } };
+		const categorized = { category: 'Caretaker', confidence: 0.9, isAllowedUtilityCost: true, reasoning: 'Betrieb' };
+		const llm = openAiCompatible((prompt) => (prompt.includes('Die Bilder sind die Seiten') ? read : categorized));
+		try {
+			const [{ id }] = await db.select({ id: invoices.id }).from(invoices).where(eq(invoices.buildingId, rental.building)).limit(1);
+			await db.update(invoices).set({ billingEntityName: 'Muster AG', invoiceNumber: 'R-1' }).where(eq(invoices.id, id));
+			const actual = await (
+				await sendJson('POST', '/api/v1/invoices/extract', { buildingId: rental.building, fileName: 'r.pdf', pages: ['data:image/png;base64,iVBO'] })
+			).json();
+			expect(drift(await sample('invoice-extraction'), actual)).toEqual([]);
 		} finally {
 			llm.stop();
 		}

@@ -13,7 +13,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 - **Frontend + BFF:** SvelteKit (Svelte 5) + TypeScript + Tailwind CSS
 - **Backend:** ElysiaJS on Bun, Drizzle ORM
 - **Database:** PostgreSQL
-- **LLM:** any OpenAI-compatible API; by default a local Ollama with `qwen2.5:3b`
+- **LLM:** any OpenAI-compatible API; by default a local Ollama with `qwen2.5vl:7b`
 - **Deployment:** Docker Compose
 - **Maps:** Leaflet (CARTO basemap on OpenStreetMap data)
 - **Auth:** OAuth 2.0 (Google, Microsoft), session JWT in HTTPOnly cookies
@@ -77,7 +77,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 ┌───────────────┐    ┌──────────────────────────┐
 │ PostgreSQL    │    │ LLM (OpenAI-compatible)  │
 │ Database      │    │ Default: local Ollama    │
-│               │    │ - qwen2.5:3b             │
+│               │    │ - qwen2.5vl:7b           │
 │ Schema:       │    │ - Port 11434             │
 │ backend/src/  │    │ Or an external provider  │
 │ db/schema.ts  │    │ via LLM_BASE_URL         │
@@ -273,12 +273,12 @@ const allBuildings = await db.select().from(buildings)
 **Deployment:**
 ```bash
 # docker-compose.prod.yml includes the Ollama service
-docker exec dwello-ollama ollama pull qwen2.5:3b
+docker exec dwello-ollama ollama pull qwen2.5vl:7b
 ```
 
-**Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`); configuration in `backend/src/config/llm.ts`. The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen2.5:3b`). Further: `LLM_TIMEOUT` (ms, default 30000), `LLM_ENABLED` (`false` turns categorization off), `LLM_CACHE_TTL` (s, default 3600; in-memory cache of categorization results). With an external provider, the invoice's billing entity, description and amount leave the server; `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` name it in the privacy statement (`GET /api/v1/invoices/llm-recipient`), and the backend refuses to start without them (README, "External LLM provider").
+**Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`); configuration in `backend/src/config/llm.ts`. The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen2.5vl:7b`). Further: `LLM_TIMEOUT` (ms, default 30000), `LLM_ENABLED` (`false` turns categorization off), `LLM_CACHE_TTL` (s, default 3600; in-memory cache of categorization results). With an external provider, the invoice's billing entity, description and amount leave the server, and so do uploaded invoice files (their pages as images, with the file name); `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` name it in the privacy statement (`GET /api/v1/invoices/llm-recipient`), and the backend refuses to start without them (README, "External LLM provider").
 
-**Model Selection:** `qwen2.5:3b` by default (small, accurate for German). With an external provider, use a chat model; requests send no `max_tokens` or `temperature`, so reasoning models work too.
+**Model Selection:** `qwen2.5vl:7b` by default: it reads the pages of uploaded invoices as images and categorizes in German (#217). With an external provider, use a chat model that reads images; requests send no `max_tokens` or `temperature`, so reasoning models work too.
 
 ### PDF Generation: PDFKit + qrcode
 
@@ -336,7 +336,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
-docker exec dwello-ollama ollama pull qwen2.5:3b
+docker exec dwello-ollama ollama pull qwen2.5vl:7b
 ```
 
 ### Environment Configuration
@@ -532,7 +532,7 @@ None of these targets is measured yet (see `docs/migration-mva.md`).
 | Frontend + BFF | SvelteKit | Lightweight, reactive, server routes |
 | Database | PostgreSQL | Reliable, ACID |
 | ORM | Drizzle | Type-safe, lightweight |
-| LLM | OpenAI-compatible API, default local Ollama (`qwen2.5:3b`) | Self-hosted by default, privacy, cost; external provider possible |
+| LLM | OpenAI-compatible API, default local Ollama (`qwen2.5vl:7b`) | Self-hosted by default, privacy, cost; external provider possible |
 | Auth | OAuth 2.0 (Google, Microsoft) + HTTPOnly cookie JWT | Standard, no token in the browser |
 | Maps | Leaflet + CARTO/OSM tiles | Lightweight, free CARTO API key |
 | PDF | PDFKit + qrcode | Pure JS, Swiss QR-bill |

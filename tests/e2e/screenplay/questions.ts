@@ -3,7 +3,7 @@ import type { Download, Locator } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { type Actor, type Question, question } from './actor';
 import { BrowseTheWeb } from './abilities';
-import { DOWNLOAD } from './interactions';
+import { DOWNLOAD, OPENED } from './interactions';
 import type { Target } from './target';
 
 // Web questions: what the page shows, as values. They never wait for the page (`actor.sees` asks again until the
@@ -185,6 +185,14 @@ export const ThePage = {
 			);
 		})
 };
+
+/** The file the actor opened in a new tab last (`OpenInNewTab`): whether it was shown there, its name and bytes */
+export const OpenedFile = question('the file opened in a new tab', async (actor) => {
+	const { newTab, disposition, content } = actor.recall<{ newTab: boolean; disposition: string; content: Buffer }>(OPENED);
+	const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/)?.[1];
+	const name = encoded ? decodeURIComponent(encoded) : (disposition.match(/filename="([^"]*)"/)?.[1] ?? '');
+	return { shown: newTab && disposition.startsWith('inline'), name, content };
+});
 
 /** The file downloaded last (`DownloadFrom`): its name and content */
 export const DownloadedFile: Question<{ name: string; content: Buffer }> = question('the downloaded file', async (actor) => {

@@ -12,6 +12,7 @@
 		example,
 		error,
 		optional = false,
+		note,
 		children
 	}: {
 		id: string;
@@ -20,6 +21,7 @@
 		example?: string;
 		error?: string;
 		optional?: boolean;
+		note?: { text: string; testid: string }; // a caution about the value, e.g. that the KI read it without being sure
 		children: Snippet<[FieldControl]>;
 	} = $props();
 
@@ -42,8 +44,9 @@
 
 	const helpId = $derived(`${id}-help`);
 	const errorId = $derived(`${id}-error`);
+	const noteId = $derived(`${id}-note`);
 	const describedBy = $derived(
-		[(help || example) && helpId, shown && errorId].filter(Boolean).join(' ') || undefined
+		[(help || example) && helpId, note && noteId, shown && errorId].filter(Boolean).join(' ') || undefined
 	);
 </script>
 
@@ -59,6 +62,12 @@
 		</p>
 	{/if}
 	{@render children({ id, describedBy, invalid: !!shown })}
+	{#if note}
+		<p id={noteId} class="flex items-start gap-2 font-semibold text-caution" data-testid={note.testid}>
+			<Icon name="warning" />
+			{note.text}
+		</p>
+	{/if}
 	{#if shown}
 		<p
 			id={errorId}

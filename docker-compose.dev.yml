@@ -42,7 +42,7 @@ services:
     networks:
       - dwello-dev-network
     # After starting, pull the model:
-    # docker exec dwello-ollama-dev ollama pull qwen2.5:3b
+    # docker exec dwello-ollama-dev ollama pull qwen2.5vl:7b
 
   # ============================================
   # Test Database (for running tests)
