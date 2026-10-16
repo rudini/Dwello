@@ -12,6 +12,8 @@ import {
 	lineItemInvoiceLink,
 	markPaidButton,
 	paidDateInput,
+	confirmResetPaymentButton,
+	resetPaymentButton,
 	sendStatementButton,
 	statementApartmentLink,
 	statementEditButton,
@@ -53,3 +55,8 @@ export const requestStatementPdf = Click.on(downloadPdfLink);
 export const leavePdfRefusal = Click.on(pdfRefusalBackLink);
 
 export const openInvoiceOfPosition = (category: string, description: string) => Click.on(lineItemInvoiceLink(category, description));
+export const openResetPaymentConfirmation = Click.on(resetPaymentButton);
+
+// The confirmation names the consequence; the user confirms it (#92)
+export const resetPayment: Activity = (actor) =>
+	actor.attemptsTo(Click.on(resetPaymentButton), Click.on(confirmResetPaymentButton));

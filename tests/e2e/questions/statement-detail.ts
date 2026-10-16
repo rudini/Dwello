@@ -5,6 +5,7 @@ import {
 	deleteStatementButton,
 	paidDateInput,
 	pdfRefusalMessage,
+	resetPaymentDialog,
 	sendDialog,
 	sendPdfLink,
 	sendRecipient,
@@ -28,6 +29,7 @@ export const statusOfStatement = Text.of(statementStatus);
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);
+export const resetConfirmation = Text.of(resetPaymentDialog);
 export const recipient = Text.of(sendRecipient);
 export const pdfToView = Attribute.named('href').of(sendPdfLink);
 export const deleteOffers = Count.of(deleteStatementButton);

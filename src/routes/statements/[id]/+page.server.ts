@@ -3,7 +3,11 @@ import { fail, redirect } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
 import { loadDocuments } from '$lib/server/documents';
-import { markStatementPaid, sendStatementReminder } from '$lib/server/statement-actions';
+import {
+	markStatementPaid,
+	resetStatementPayment,
+	sendStatementReminder
+} from '$lib/server/statement-actions';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -49,12 +53,18 @@ export const actions: Actions = {
 		changeStatus(fetch, params.id, { status: 'sent' }, m.statements_send_failed()),
 	markPaid: async ({ params, fetch, request }) => {
 		// none sent (no dialog field, no JavaScript): today; sent but empty (an invalid date): refused
-		const sent = (await request.formData()).get('paidDate');
+		const form = await request.formData();
+		const sent = form.get('paidDate');
 		const refused = await markStatementPaid(
 			fetch,
 			params.id,
-			sent === null ? undefined : String(sent)
+			sent === null ? undefined : String(sent),
+			String(form.get('statementDate') ?? '')
 		);
+		if (refused) return fail(refused.status, { actionError: refused.message });
+	},
+	resetPayment: async ({ params, fetch }) => {
+		const refused = await resetStatementPayment(fetch, params.id);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
 	remind: async ({ params, fetch }) => {

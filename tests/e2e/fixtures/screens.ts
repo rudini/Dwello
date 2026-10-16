@@ -35,7 +35,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable'].includes(state)) return { path, building: '', tankBuilding: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable'].includes(state)) return { path, building: '', tankBuilding: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -67,6 +67,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
 	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
+	await seed.sendStatement('Anna', 2024);
+	await seed.markPaid('Anna', 2024); // paid: its payment can be reset (#92)
 	// reminded today: the Zahlungsfrist of the Mahnung runs, the next one is possible only later (#107)
 	await seed.sendStatement('Bruno', 2024);
 	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
@@ -76,7 +78,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.building('Bergsicht', 'Winterthur');
 	await seed.apartment('Bergsicht', '2.01', 'vacant');
 	await seed.tenant('Dora');
-	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00' });
+	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00', additionalRent: '80.00' }); // a parking space: the wizard's note after her contract names it (#144)
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
 	// moved in during 2025, invoices over different days and the change of the Tankbestand: the statement lists them
@@ -106,10 +108,12 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
 		partsStatement: seed.idOf('Abrechnung Emil 2025'),
+		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
+		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),
 		// a predefined category shows the reason of its allocability (#186)

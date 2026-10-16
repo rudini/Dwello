@@ -34,6 +34,13 @@ describe('Neuer Mieter', () => {
 		expect(body).toContain('Danach geht es mit dem Mietvertrag weiter.');
 	});
 
+	// P-17 (#144): die vorgewählte Wohnung bleibt, auch beim Abbrechen
+	it('behält die im Mietvertrag vorgewählte Wohnung', () => {
+		const body = page('http://localhost/tenants/new?for=contract&apartment=a1');
+		expect(body).toMatch(/<input[^>]*type="hidden"[^>]*name="apartment"[^>]*value="a1"/);
+		expect(body).toMatch(/href="\/contracts\/new\?apartment=a1"[^>]*data-testid="form-cancel"/);
+	});
+
 	it('erfasst den Mieter mit dem Verb «erfassen»', () => {
 		const body = page();
 		expect(body).toMatch(/data-testid="tenant-submit"[^>]*>[^]*?Mieter erfassen/);

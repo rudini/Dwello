@@ -128,7 +128,7 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 			overdueAmount: await sumStatements(utilityStatements.balance, owed('overdue')),
 			paidThisMonth: await sumStatements(
 				utilityStatements.paidAmount,
-				and(statusCondition('paid'), gte(utilityStatements.paidDate, monthStart))
+				and(owed('paid'), gte(utilityStatements.paidDate, monthStart)) // only Nachzahlungen, not refunds (#93)
 			)
 		},
 		statements,

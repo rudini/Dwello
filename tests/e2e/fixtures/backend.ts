@@ -139,7 +139,13 @@ export function testData(api: CallTheApi) {
 		async contract(
 			tenantTitle: string,
 			apartmentNumber: string,
-			contract: { startDate: string; endDate?: string; baseRent: string; monthlyAdvancePayment?: string }
+			contract: {
+				startDate: string;
+				endDate?: string;
+				baseRent: string;
+				additionalRent?: string;
+				monthlyAdvancePayment?: string;
+			}
 		) {
 			const created = await post('contracts', {
 				tenantId: ids.get(tenantTitle),
@@ -239,6 +245,15 @@ export function testData(api: CallTheApi) {
 
 		async sendStatement(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
+		},
+
+		async resetPayment(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/payment-reset`, {});
+		},
+
+		// paid today, the earliest day a statement sent today allows (#138)
+		async markPaid(tenantTitle: string, year: number) {
+			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
 		},
 
 		// Monthly shares January..December in percent

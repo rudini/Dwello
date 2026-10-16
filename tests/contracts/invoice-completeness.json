@@ -10,7 +10,18 @@
 			"current": { "count": 1, "total": 1500 },
 			"previous": { "count": 1, "total": 1000 },
 			"missingParts": [],
-			"changePercent": 50
+			"changePercent": 50,
+			"partialCount": 0
 		}
-	]
+	],
+	"lateInvoices": [
+		{
+			"id": "d0000000-0000-4000-8000-000000000001",
+			"billingEntityName": "Kaminfeger Keller",
+			"description": "Kaminfeger 2025",
+			"invoiceDate": "2026-01-20",
+			"amount": "290.00"
+		}
+	],
+	"invoicesWithoutServicePeriod": []
 }

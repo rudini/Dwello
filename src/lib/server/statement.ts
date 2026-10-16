@@ -97,6 +97,10 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		rentalStart: data.rentalStart,
 		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
+		paymentResets: (data.paymentResets ?? []).map(({ resetOn, paidDate }: BackendStatement) => ({
+			resetOn,
+			paidDate
+		})),
 		lineItems: (data.lineItems || []).map((item: BackendStatement) =>
 			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
 		)
