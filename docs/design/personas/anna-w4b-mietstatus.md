@@ -74,3 +74,44 @@ Etwa 15 Minuten, rund 25 Schritte (Seiten öffnen, Klicks, Dialoge).
 - Löschen bestätigen, einen Mietvertrag erfassen oder eine Wohnung bearbeiten: Ich sollte nur anschauen.
 - Alpenblick im Detail (welche Wohnung leer ist), weil die Aufgabe Seepark und Musterhaus nannte.
 - Andere Sprachen und Dark Mode.
+
+## Nachprüfung
+
+Kurzer zweiter Durchgang, Desktop 1440 × 900, Maus, nur angeschaut. Skripte und Screenshots: `/tmp/claude-0/-home-user-Dwello/91846713-a6c9-5452-8f2c-4a3754630714/scratchpad/anna-w4b-mietstatus/nach/`
+
+### Was ich gefunden habe
+
+1. **Übersicht, «Vermietete Wohnungen pro Gebäude».** Erwartet: jede leere Wohnung mit Namen. Gesehen (Screenshot `01-uebersicht.png`):
+   - «Musterhaus Zentrum 4/6 vermietet, 1 vermietet ab 01.01.2027, Wohnung 2.02 leer»
+   - «Seepark Residenz 3/4 vermietet, Wohnung B1 leer seit 01.04.2022»
+   - «Alpenblick 2/3 vermietet, Wohnung OG2 leer»
+   - darunter «Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter.»
+
+   Die Kachel sagt «3 Leer», und genau drei leere Wohnungen stehen da: 2.02, B1, OG2. Bei B1 steht seit wann, bei 2.02 und OG2 kein Datum. Das passt, weil beide nie vermietet waren (siehe Punkt 2). **Alle leeren Wohnungen finde ich jetzt allein auf der Übersicht. P-1 ist erledigt.**
+2. **Wohnung OG2 (Alpenblick), leer und nie vermietet.** Erwartet: wer die Nebenkosten zahlt. Gesehen (`og2.png`): «Mietstatus Leer – Es läuft kein Mietvertrag, die Wohnung kann vermietet werden. Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter.»; «Diese Wohnung ist derzeit nicht vermietet.»; «Mietverträge der Wohnung: Noch keine Mietverträge.» **Ja, es steht da.** Bei 2.02 ist es gleich (`w202.png`). Damit ist P-3 für 2.02 erledigt.
+3. **Wohnung 3.02 (künftig vermietet), zum Vergleich.** Gesehen (`w302.png`): «Vermietet ab 01.01.2027 – … auch wenn sie bis dahin leer ist.», «Ab 01.01.2027 vermietet an Lea Frei. Bis dahin läuft kein Mietvertrag.» Ein Satz zu den Nebenkosten bis Ende 2026 fehlt weiterhin. Damit ist P-3 für 3.02 noch offen.
+
+### Befunde der Nachprüfung
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-1 | erledigt | Übersicht | Alle drei leeren Wohnungen stehen mit Namen da, B1 mit «leer seit». |
+| P-3 | Minor (teilweise offen) | Wohnung 3.02 | Bei 2.02 und OG2 steht jetzt, dass ich die Nebenkosten trage. Bei 3.02 steht nicht, wer sie bis 31.12.2026 zahlt, obwohl die Seite selbst sagt, dass die Wohnung bis dahin leer ist. |
+| P-8 | Minor | Übersicht, Musterhaus Zentrum | «1 vermietet ab 01.01.2027» nennt die Wohnung nicht. Die leeren Wohnungen tragen jetzt ihren Namen, die künftig vermietete nicht. Dass 3.02 bis Ende 2026 auch leer steht, sehe ich auf der Übersicht nicht. |
+
+Keine Blocker, kein Major.
+
+### Weiterhin offen (aus dem ersten Durchgang)
+
+- P-7: Die Gebäudeseite sagt immer noch «Leer und Gesperrt setzen Sie beim Bearbeiten der Wohnung.» Dabei steht direkt darüber «Leer: Es läuft kein Mietvertrag». OG2 war nie vermietet, und ich habe sie nie von Hand auf «Leer» gestellt.
+- P-4: Die Kachel heisst weiterhin «Vermietet ab …».
+- Die Nachprüfung galt nur der Übersicht und den leeren Wohnungen. P-2, P-5 und P-6 habe ich nicht erneut geprüft.
+
+### Aufgabe geschafft: ja
+
+Aufwand: etwa 3 Minuten, 4 Seiten (Übersicht, Alpenblick, OG2, 2.02, dazu 3.02 zum Vergleich).
+
+### Vorschläge
+
+- **P-3:** Musterhaus Zentrum > Wohnung 3.02 öffnen. Hilfreich wäre: «Bis 31.12.2026 tragen Sie die Nebenkosten.»
+- **P-8:** Übersicht, Zeile Musterhaus Zentrum. Hilfreich wäre: «Wohnung 3.02 vermietet ab 01.01.2027».
