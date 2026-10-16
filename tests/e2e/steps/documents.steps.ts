@@ -1,7 +1,17 @@
 import { createBdd } from 'playwright-bdd';
 import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { deliveryOf, documentFor, documentsFor, mailsTo, nextReminder, reminderOffers, reminderOutcome } from '../questions/documents';
+import {
+	deliveryOf,
+	documentFor,
+	documentsFor,
+	justMarkedSent,
+	mailsTo,
+	nextReminder,
+	printOffers,
+	reminderOffers,
+	reminderOutcome
+} from '../questions/documents';
 import { listedStatement } from '../questions/statements';
 import { markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from '../tasks/documents';
 import { openStatementList } from '../tasks/statements';
@@ -127,5 +137,14 @@ Then(
 	async ({ verwalter, names }, title: string, tenant: string) => {
 		await verwalter.attemptsTo(openDocuments);
 		await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toMatch(/per Brief.*Versendet/);
+	}
+);
+
+// #193: marked as sent, the letter is remade; the page names it and offers its new PDF to print now
+Then(
+	'bietet die Seite die {string} an {string} zum Ausdrucken an',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.sees(justMarkedSent).toContain(`«${title}» an ${names.get(tenant) ?? tenant} ist als versendet markiert.`);
+		await verwalter.sees(printOffers).toBe(1);
 	}
 );

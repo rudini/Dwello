@@ -73,7 +73,7 @@
 		</Alert>
 	{/if}
 
-	{#if form?.sent}<MarkedSentNotice sent={form.sent} />{/if}
+	<MarkedSentNotice sent={form?.sent} />
 
 	{#if data.documents.length}
 		<ul class="divide-y divide-line rounded-panel border border-line bg-surface px-6">
@@ -83,7 +83,8 @@
 				</DocumentItem>
 			{/each}
 		</ul>
-	{:else}
+	{:else if !form?.sent}
+		<!-- not beside a letter just marked: it is still to be printed and posted today -->
 		<div data-testid="documents-empty">
 			<EmptyState
 				illustration="envelope"
