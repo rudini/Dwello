@@ -25,11 +25,11 @@ export default defineConfig(({ mode }) => {
 		define: { __APP_VERSION__: JSON.stringify(versionFrom(describeVersion()) ?? null) },
 		plugins: [
 			sveltekit(),
-			// UI language from the cookie, German without one (no URL prefix, not the browser language)
+			// UI language from the cookie, else the browser's (de, fr, it, en), else German; no URL prefix
 			paraglideVitePlugin({
 				project: './project.inlang',
 				outdir: './src/lib/paraglide',
-				strategy: ['cookie', 'baseLocale']
+				strategy: ['cookie', 'preferredLanguage', 'baseLocale']
 			})
 		],
 		test: {
