@@ -118,7 +118,7 @@ describe('GET /statements/[id]/pdf', () => {
 		);
 	});
 
-	it('lässt im Dateinamen nur Buchstaben, Ziffern, Punkt und Bindestrich zu', async () => {
+	it('lässt im Dateinamen nur Buchstaben, Ziffern, Unterstrich, Punkt und Bindestrich zu', async () => {
 		const fetch = async () =>
 			new Response(new Uint8Array([37]), {
 				headers: { 'Content-Disposition': 'attachment; filename="NK-1/../é\\"x.pdf"' }
