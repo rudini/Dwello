@@ -1109,7 +1109,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		const open_ =
-			' Mindestens eine dieser Abrechnungen deckt die Mietdauer in dieser Abrechnungsperiode nicht ganz ab. Für die übrigen Tage erstellt dieser Lauf keine Abrechnung.';
+			' Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung.';
 		expect(billedText('b1')).toBe(
 			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.' +
 				open_

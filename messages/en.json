@@ -1054,7 +1054,7 @@
 	"statements_building_billed_all_many": "All rental contracts in this billing period already have a statement that covers all or part of this period. No new statement is created for this building. You do not need to choose it. If you choose it, nothing is created for it.",
 	"statements_building_billed_all_partly_one": "The only rental contract in this billing period already has a statement that covers all or part of this period.",
 	"statements_building_billed_all_partly_many": "All rental contracts in this billing period already have a statement that covers all or part of this period.",
-	"statements_building_billed_open": "At least one of these statements does not cover the whole tenancy in this billing period. This run creates no statement for the remaining days.",
+	"statements_building_billed_open": "At least one of these statements does not cover all days rented in this billing period. This run creates no statement for the other days rented.",
 	"statements_building_recalculate": "To recalculate a draft, delete it and create the statements again. Sent statements cannot be recalculated.",
 	"statements_all_buildings_left_out_one": "“All buildings” leaves out 1 building whose rental contracts all already have a statement in this billing period.",
 	"statements_all_buildings_left_out_many": "“All buildings” leaves out {count} buildings whose rental contracts all already have a statement in this billing period.",

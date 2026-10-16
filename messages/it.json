@@ -1054,7 +1054,7 @@
 	"statements_building_billed_all_many": "Tutti i contratti di locazione di questo periodo di conteggio hanno già un conteggio che copre del tutto o in parte questo periodo. Per questo immobile non viene creato un nuovo conteggio. Non è necessario sceglierlo. Se lo sceglie, non viene allestito alcun conteggio.",
 	"statements_building_billed_all_partly_one": "L’unico contratto di locazione di questo periodo di conteggio ha già un conteggio che copre del tutto o in parte questo periodo.",
 	"statements_building_billed_all_partly_many": "Tutti i contratti di locazione di questo periodo di conteggio hanno già un conteggio che copre del tutto o in parte questo periodo.",
-	"statements_building_billed_open": "Almeno uno di questi conteggi non copre del tutto la durata della locazione in questo periodo di conteggio. Per i giorni restanti questa esecuzione non allestisce alcun conteggio.",
+	"statements_building_billed_open": "Almeno uno di questi conteggi non copre tutti i giorni di locazione di questo periodo di conteggio. Per gli altri giorni di locazione questo allestimento non crea alcun conteggio.",
 	"statements_building_recalculate": "Per ricalcolare una bozza, la elimini e allestisca di nuovo i conteggi. I conteggi inviati non possono essere ricalcolati.",
 	"statements_all_buildings_left_out_one": "«Tutti gli immobili» tralascia 1 immobile i cui contratti di locazione hanno già tutti un conteggio in questo periodo di conteggio.",
 	"statements_all_buildings_left_out_many": "«Tutti gli immobili» tralascia {count} immobili i cui contratti di locazione hanno già tutti un conteggio in questo periodo di conteggio.",
