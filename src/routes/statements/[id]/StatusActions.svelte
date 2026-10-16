@@ -10,7 +10,8 @@
 		waiting,
 		onremind,
 		onmarkpaid,
-		onsend
+		onsend,
+		onresetpayment
 	}: {
 		status: StatementWithDetails['status'];
 		owes: boolean; // an amount due; a refund is owed to the tenant and never reminded
@@ -18,6 +19,7 @@
 		onremind: () => void;
 		onmarkpaid: () => void;
 		onsend: () => void;
+		onresetpayment: () => void;
 	} = $props();
 </script>
 
@@ -30,6 +32,11 @@
 	{/if}
 	<Button variant="primary" onclick={onmarkpaid} icon="success" testid="statement-mark-paid-button"
 		>{m.statements_mark_paid()}</Button
+	>
+{:else if status === 'paid'}
+	<!-- #92: a payment recorded on the wrong statement or with a wrong date is taken back -->
+	<Button onclick={onresetpayment} icon="refresh" testid="statement-reset-payment-button"
+		>{m.statements_reset_payment()}</Button
 	>
 {:else if status === 'draft'}
 	<Button variant="primary" onclick={onsend} icon="send" testid="statement-send-button"

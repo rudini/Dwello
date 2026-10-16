@@ -30,6 +30,7 @@
 	import ReminderFeedback from './ReminderFeedback.svelte';
 	import ReminderHistory from './ReminderHistory.svelte';
 	import ReminderModal from './ReminderModal.svelte';
+	import ResetPaymentDialog from './ResetPaymentDialog.svelte';
 	import SendDialog from './SendDialog.svelte';
 	import StatusActions from './StatusActions.svelte';
 	import type { ActionData } from './$types';
@@ -57,6 +58,7 @@
 	let showReminder = $state(false);
 	let showDelete = $state(false);
 	let showSend = $state(false);
+	let showResetPayment = $state(false);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
 	let paidError = $state('');
@@ -65,7 +67,7 @@
 	function checkPaidDate() {
 		paidError = '';
 		flushSync(); // cleared first: the same error set again shows again
-		paidError = paidDateError(paidDate) ?? '';
+		paidError = paidDateError(paidDate, statement.statementDate) ?? '';
 		if (paidError) focusFirstError(document.querySelector('[role="dialog"]'));
 		return !paidError;
 	}
@@ -133,6 +135,7 @@
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
 				onsend={() => (showSend = true)}
+				onresetpayment={() => (showResetPayment = true)}
 			/>
 		{/snippet}
 	</PageHeader>
@@ -198,6 +201,7 @@
 				{pdfGeneratedAt}
 				sentOn={statement.status === 'draft' ? null : statement.statementDate}
 				paidOn={statement.paidDate}
+				paymentResets={statement.paymentResets}
 			/>
 		</div>
 	</div>
@@ -209,7 +213,7 @@
 	title={m.statements_mark_paid_title()}
 	confirmLabel={m.statements_mark_paid()}
 	confirmTestid="statement-mark-paid-confirm"
-	fields={{ paidDate }}
+	fields={{ paidDate, statementDate: statement.statementDate }}
 	check={checkPaidDate}
 	success={m.statements_marked_paid()}
 >
@@ -240,6 +244,8 @@
 		{m.statements_delete_text({ number: statement.statementNumber, tenant: statement.tenantName })}
 	</p>
 </FormDialog>
+
+<ResetPaymentDialog bind:open={showResetPayment} {statement} />
 
 <SendDialog bind:open={showSend} {statement} />
 

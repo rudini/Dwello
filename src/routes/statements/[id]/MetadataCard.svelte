@@ -8,12 +8,14 @@
 		createdAt,
 		pdfGeneratedAt,
 		sentOn,
-		paidOn
+		paidOn,
+		paymentResets = []
 	}: {
 		createdAt?: string | null;
 		pdfGeneratedAt?: string | null;
 		sentOn?: string | null;
 		paidOn?: string | null;
+		paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	} = $props();
 
 	const dates = $derived(
@@ -24,6 +26,12 @@
 				date: pdfGeneratedAt && formatDateTime(pdfGeneratedAt)
 			},
 			{ label: m.statements_status_sent(), date: sentOn && formatDate(sentOn) },
+			...paymentResets.map((reset) => ({
+				label: m.statements_history_payment_reset({
+					date: reset.paidDate ? formatDate(reset.paidDate) : '–'
+				}),
+				date: formatDate(reset.resetOn)
+			})),
 			{ label: m.statements_status_paid(), date: paidOn && formatDate(paidOn) }
 		].filter((row) => row.date)
 	);
@@ -32,7 +40,7 @@
 {#if dates.length}
 	<Panel title={m.statements_history()} level={2}>
 		<dl class="flex flex-col gap-2">
-			{#each dates as row (row.label)}
+			{#each dates as row, index (index)}
 				<div class="flex justify-between gap-4">
 					<dt class="text-ink-muted">{row.label}</dt>
 					<dd class="text-ink">{row.date}</dd>
