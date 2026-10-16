@@ -69,7 +69,7 @@ describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 
 	it('erklärt den Zeitanteil der Heizkosten nach dem Heizprofil, wenn eine Position danach geteilt ist', async () => {
 		const byProfile = { ...byDays, lineItems: [{ ...byDays.lineItems[0], byProfile: true }], heating: { profile: 'Winter', percent: 52.17, months: [] } };
-		expect((await textOf(byProfile)).flowing).toContain('bei Heizkosten der Anteil nach dem Heizprofil');
+		expect((await textOf(byProfile)).flowing).toContain('; bei Heizkosten der Anteil nach dem Heizprofil');
 	});
 });
 

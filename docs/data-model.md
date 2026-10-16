@@ -293,10 +293,12 @@ tenant_share        DECIMAL(12,2) NOT NULL  -- tenant's portion
 share_percentage    DECIMAL(8,4)
 apartment_share     DECIMAL(12,2)           -- the apartment's part of the total by the key
 period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating profile's share
+position_rental_days INTEGER                -- the tenant's days in the days billed (null: not a ratio of days)
+billed_days         INTEGER                 -- the days the position's invoices bill in the period
 sort_order          INTEGER DEFAULT 0
 ```
 
-`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position.
+`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position. `position_rental_days` and `billed_days` (migration `0003`, #208) hold `period_share` as a fraction of days when all invoices of the position bill the same days and it is not shared by the heating profile; the PDF prints them as «x/y Tage». Statements created before keep them empty.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 
