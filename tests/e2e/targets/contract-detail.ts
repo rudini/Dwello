@@ -16,6 +16,10 @@ export const contractEndError = (message: string) =>
 		page.getByRole('dialog').getByTestId('form-error').filter({ hasText: message })
 	);
 export const deleteDialog = target('Dialog «Mietvertrag löschen?»', (page) => page.getByRole('dialog'));
+export const deleteDialogStatementLink = (statementId: string) =>
+	target('Abrechnung im Dialog «Mietvertrag löschen?»', (page) =>
+		page.getByRole('dialog').getByTestId(`contract-delete-statement-${statementId}`)
+	);
 export const deleteMistakeConfirmation = target('Bestätigung «irrtümlich erfasst»', (page) =>
 	page.getByTestId('contract-delete-mistake-confirm')
 );

@@ -752,3 +752,96 @@ Files: `src/lib/contract-wizard.ts`, `src/routes/contracts/new/{ContractWizard,R
 - [x] Pull request (Fixes #129)
 
 Files changed: `src/routes/buildings/BuildingMiniMap.svelte` (deleted), `src/__tests__/building-mini-map.dom.test.ts` (deleted), `src/routes/buildings/[id]/BuildingFacts.svelte`, building loads, `src/lib/types.ts`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `src/styles/globals.css`, `package.json`, `bun.lock`, privacy and token tests, deployment files and docs, `tests/e2e/features/building-detail.feature`, `tests/e2e/features/privacy.feature`, `tests/e2e/fixtures/backend.ts`, `tests/e2e/{targets,questions,steps}/building-detail*`
+
+## Session W6b: #63, #105 and #106 (the tenant's Sprache)
+
+- [x] #63 `@wip` scenario: the Sprache offers Deutsch, Französisch, Italienisch, Englisch only (`tenant-edit.feature`), seen red
+- [x] #105 `@wip` scenarios: label «Sprache für Abrechnung und Mahnungen» (`tenant-edit.feature`), «PDF auf Französisch» on the statement detail (`statement-detail.feature`), seen red
+- [x] #106 `@wip` scenario: a reminder to a French-speaking tenant has a French title (`statement-reminder.feature`), seen red
+- [x] fach-reviewer on the scenarios and the reminder texts in fr/it/en before implementing
+- [x] #63 migration `0012` (renumbered from 0008 after merging main, C-12) (tenants and `default_language` `rm` → `de`, CHECK without `rm`), backend validators, `Language` type, frontend type and labels, help text in four languages (pg test of the migration)
+- [x] #106 `reminderLetter` per language (unit test per language for all three Mahnstufen), `reminder.service` passes the tenant's Sprache; `statements_reminder_emailed` / `_letter` name the title in quotes
+- [x] #105 label and «PDF auf {Sprache}» in `PdfAction.svelte` (DOM test)
+- [x] docs: `docs/api-specification.md`, `docs/data-model.md`, `docs/tech-stack.md`, `docs/nebenkostenabrechnung-anforderungen.md`
+- [x] fach-reviewer round 1: `docs/reviews/w6b-fachreview-1.md` (V-1 to V-4, V-6 to V-9 fixed; V-5 → new issue; V-10 existed before)
+- [x] code-reviewer round 1: `docs/reviews/w6b-review-1.md` (C-1, C-4, C-6 fixed; others Nit/Minor, stay in the report)
+- [x] fach-reviewer round 2: `docs/reviews/w6b-fachreview-2.md` (V-13, V-14 fixed; V-12 glossary → product owner)
+- [x] persona Helga: `docs/design/personas/helga-w6b.md`
+- [x] persona Dr. Weber: `docs/design/personas/weber-w6b.md` (P-1 → #305)
+- [x] daten-pruefer: `docs/reviews/w6b-datenpruefung-1.md` (D-1 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-63-105-106.md`
+- [x] closing code-reviewer round: `docs/reviews/w6b-review-2.md` (C-10 answered by the E2E run, C-11 fixed)
+- [x] Feature review: persona, fach-reviewer, daten-pruefer (items above) (PDF texts)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+No scenario for the migration of existing `rm` tenants: E2E starts from fresh migrations, so no record with `rm` can exist (`migrations.pg.test.ts`).
+
+Files: `backend/migrations/0012_tenant_language_without_rm.sql`, `backend/src/services/{reminder-letter,reminder.service,pdf.service,statement-pdf.service,config.service}.ts`, `backend/src/routes/{tenants,statements}.ts`, `backend/src/db/schema.ts`, `messages/*.json`, `src/lib/{tenant,types}.ts`, `src/lib/server/{statement,documents,statement-actions}.ts`, `src/routes/statements/[id]/{PdfAction,+page}.svelte`, `src/routes/tenants/+page.server.ts`, tests, `tests/e2e/**`, `tests/contracts/statement.json`, docs (`README.md`, PRD, api-specification, data-model, tech-stack, nebenkostenabrechnung-anforderungen).
+
+## Session W5c: #74 (F-14c) Tankbestand with an allocable invoice in a non-allocable category
+
+- [x] Read #74, #257, #130: neither `entscheiden` issue changes #74's outcome (#257 is how consumption is spread over days, #130 the invoice check)
+- [x] Found: since #25 (merged 2026-10-08, before #74 was written) the backend keeps no invoice of a non-allocable category allocable (`applyCategory` on create and update, the recategorize path, `updateCategory`), so the state Option A answers cannot arise and Option A would be a dead branch in `fuelStockChange`. Followed the code (CLAUDE.md, "Coding guidelines"), said so in the pull request
+- [x] Regression test of #74's case, red with the guard in `applyCategory` taken out (purchase CHF 2000 billed, no stock change)
+- [x] code-reviewer round 1: `docs/reviews/74-review-1.md` (C-1, C-2 fixed; C-3 rejected; C-4 moot after archiving)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-74.md`
+- [x] Checks before push; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+No scenario: the state #74 describes cannot be reached through the UI or the API since #25; the pg test pins it.
+
+Files: `backend/src/__tests__/fuel-stock.pg.test.ts`, `docs/reviews/74-review-1.md`, `docs/reviews/workflow-notes-issue-74.md`
+
+## Session 2026-10-16 W4b-Mietstatus: an apartment's tenancy (#117, #145, #58)
+
+- [x] @wip scenarios: earlier contracts and the delete dialog's statements (#117), «Leer seit» (#145), «Vermietet ab» and Mieter «Künftig» (#58); fach-reviewer before implementing (`docs/reviews/w4bm-fachreview-1.md`: no Blocker/Major; V-2 wording taken, V-3 covered by `tenant-status.pg.test.ts`, V-6 translations taken)
+- [x] #117: apartment page lists contracts by time, ended ones under «Frühere Mietverträge» with the history help; delete dialog of an ended contract says whether statements exist and links them; `docs/anforderungen-vertragsende.md` marks A-8 implemented
+- [x] #145: backend gives the apartment's last Vertragsende; «Leer seit {Datum}» with the help on the apartment page and in the overview
+- [x] #58: Mietstatus `relet` as «Vermietet ab {Datum}» on overview, building cards and apartment pages; Mieter «Künftig» with only a future contract, «Aktiv» only with a running one (backend status filter)
+- [x] a11y and language rows for new states (`apartment-detail-vacant`, `contract-detail-ended`; seed: Emil 2.02 ended 2014, Fritz 2.03 from 2100)
+- Files: `backend/src/services/{apartment,tenant}.service.ts`, `backend/src/routes/tenants.ts`, `src/lib/apartment.ts`, `src/lib/types.ts`, `src/lib/server/apartment.ts`, `src/routes/apartments/{+page.server.ts,[id]/ApartmentFacts.svelte,[id]/ContractHistory.svelte}`, `src/routes/buildings/{+page.server.ts,[id]/+page.server.ts}`, `src/routes/dashboard/{+page.server.ts,BuildingFigures.svelte}`, `src/routes/contracts/[id]/{+page.server.ts,+page.svelte,DeleteContract.svelte}`, `src/routes/tenants/{+page.server.ts,TenantFilters.svelte,TenantRow.svelte}`, `messages/*.json`, `tests/contracts/tenants.json`, `docs/design/i18n-begriffe.md`, `docs/anforderungen-vertragsende.md`
+- [x] Code review round 1 (`docs/reviews/w4bm-review-1.md`): C-1 (Major, «keine Abrechnung» on a failed load) fixed; C-2, C-3 (API contract `apartments.json`), C-5, C-6, C-8 fixed; C-7 left (existing step wording)
+- [x] fach-reviewer round 2 (`docs/reviews/w4bm-fachreview-2.md`): no Blocker/Major; V-9 fixed
+- [x] Personas Anna (`docs/design/personas/anna-w4b-mietstatus.md`), Marco (`docs/design/personas/marco-w4b-mietstatus.md`): Anna P-1 (Major, overview names only empty apartments that had a contract) fixed with «Wohnung {Nr} leer»; P-3 (help on every empty apartment) fixed; Marco P-1 rejected (he typed `status=former`, not a filter value)
+- [x] Fallow gate on the fixes: shared select fields in `apartment.service.ts`, `historyPeriod` for both contract histories (also `TenantContracts.svelte`, no behaviour change), dialog notes as `$derived`
+- [x] Anna re-run (section «Nachprüfung» in her report): P-1 and P-3 (never-rented apartment) fixed; P-8 and the rest of P-3 Minor
+- [x] Code review round 2 (`docs/reviews/w4bm-review-2.md`): C-1 closed; C-9 (Major, help on a never-rented empty apartment untested) fixed with scenario lines and a page test; C-10 (round-1 C-4 was wrong, the wizard never shows the status) reverted; C-11 rejected: the 3.02 part of Anna's P-3 is V-1 of the domain review, a product-owner decision; C-12, C-13 fixed
+- [x] Merged origin/main (no conflicts); lint, check, type-check, vitest (2725), backend pg tests (47), E2E of the affected features
+- [x] Closing code review (`docs/reviews/w4bm-review-3.md`): no Blocker/Major; C-14 (Nit) fixed
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-117-145-58.md`)
+- [x] Archive the session, pull request (one pull request for the three issues, as the coordinator's brief asks)
+
+## Session: Login and header follow the browser language (#110)
+
+Request: «Setze #110 um» (coordinator W9b). #110's "Done means" asks for an implementation issue; none exists, the decided Option 2 is the requirement, the pull request says `Fixes #110`.
+
+- [x] `@wip` scenarios in `sprachen.feature`: login page in French for a French browser without cookie; overview follows the browser; the chosen language wins over the browser; seen red
+- [x] fach-reviewer on the `@wip` scenarios before implementing (privacy text: the cookie is now set from the browser language)
+- [x] fach-reviewer round 1 (`docs/reviews/p14-fachreview-1.md`): took R-1 (privacy sentence, four languages), V-1 (scenario: the first visit's language stays), V-2 (no `@wip` on «Die gewählte Sprache gilt …», its red shown by swapping the strategy order in the unit test)
+- [x] Strategy `cookie, preferredLanguage, baseLocale` in `package.json` (`i18n`), `vite.config.ts`, `vitest.config.ts`; `Vary: Accept-Language` on pages
+- [x] E2E and a11y language tests keep German (Playwright already pins `locale: 'de-CH'`); DOM tests pin `navigator.languages` to de-CH (`tests/mocks/browser-language.ts`)
+- [x] Found: the old step «bevorzugt Englisch» never reached the server (Chromium sends the context locale over an extra header); `Browser.preferLanguages` now changes the request
+- [x] code-reviewer round 1 (`docs/reviews/p14-review-1.md`): fixed C-1, C-3 (Vary on every answer), C-4; C-2, C-5 stay in the report; closing round `docs/reviews/p14-review-2.md` (C-6 already resolved)
+- [x] Feature review: personas Anna (`docs/design/personas/anna-p14.md`) and Dr. Weber (`docs/design/personas/weber-p14.md`); no second `fach-reviewer` (the privacy sentence is the one reviewed before implementing)
+- [x] Workflow note: decision issue implemented directly; personas README «language stored on the account» is outdated (`docs/reviews/workflow-notes-issue-110.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `package.json`, `vite.config.ts`, `vitest.config.ts`, `src/hooks.server.ts`, `messages/*.json`, `tests/mocks/browser-language.ts`, `src/__tests__/{i18n.test.ts,privacy-page.dom.test.ts}`, `tests/e2e/features/sprachen.feature`, `tests/e2e/{screenplay/interactions,tasks/language,steps/language.steps}.ts`, `docs/reviews/p14-{fachreview,review}-1.md`, persona reports, `docs/reviews/workflow-notes-issue-110.md`
+
+## Session 2026-10-16 W2c: help texts (#109, #67, #69)
+
+- [x] #109: `@wip` scenarios in `help.feature` (new terms, contents list to the glossary) and their steps, seen red
+- [x] #67, #69: `fach-reviewer` reads the proposed and listed help texts before implementing (help glossary, `config_help_*`, IBAN help with refunds, category sort order and translations): `docs/reviews/help-fachreview-{1,2}.md`, `docs/reviews/help-review-1.md`, `docs/design/personas/{helga,marco}-help-texts.md`
+- [x] #109: contents list with anchors, glossary anchor `/help#glossary`, four new glossary terms (de, fr, it, en)
+- [x] #67: `glossary_period_text` (same wording as PR #289) and `config_help_distribution_key` follow the glossary
+- [x] #69: fach-reviewer findings fixed in all four languages; IBAN help names refunds; help under «Übersetzungen» (new `categories_translations_help`); product-owner points: #317 (new), #279, #83 (comments)
+- [x] Slice review round 1 (`code-reviewer`): `docs/reviews/help-review-1.md`; C-1 (scenarios for the text fixes of #67/#69), C-2, C-4, C-5 fixed, C-3 left in its report
+- [x] Feature review: `fach-reviewer` round 2 `docs/reviews/help-fachreview-2.md` (V-14 to V-17 fixed); personas `docs/design/personas/helga-help-texts.md`, `marco-help-texts.md` (no Blocker/Major)
+- [x] Closing `code-reviewer` round before the push: `docs/reviews/help-review-2.md` (C-6 Nit left in its report)
+- [x] Checks: lint, check, type-check, unit tests (all), E2E help, settings, categories, distribution keys and the axe/language rows of help, config, category and distribution-key screens
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-109-67-69.md`; collected review left to the coordinator
+- [x] Session to archive; pull request (one for all three issues, as the coordinator asked)
+
+Files: `src/lib/ui/Panel.svelte`, `src/lib/ui/PageHeader.svelte`, `src/routes/help/+page.svelte`, `src/routes/help/Glossary.svelte`, `src/routes/config/categories/CategoryForm.svelte`, `messages/{de,fr,it,en}.json`, `tests/e2e/features/{settings,distribution-keys}.feature`, `tests/e2e/{steps,questions}/settings…`, `tests/e2e/{features/help.feature,steps,questions,targets,tasks}/…app-frame…`, `src/__tests__/{help-page.dom,distribution-keys-pages.dom,categories-page.dom,config-pages}.test.ts`, `docs/reviews/help-fachreview-{1,2}.md`, `docs/reviews/help-review-1.md`, `docs/design/personas/{helga,marco}-help-texts.md`

@@ -45,6 +45,15 @@ const toastTexts = () => get(toasts).map((toast) => toast.message);
 beforeEach(() => toasts.set([]));
 
 describe('Verteilschlüssel', () => {
+	// wie das Glossar «Verteilschlüssel» und «Gleichmässig pro Wohnung» (#67)
+	it('sagt, dass eine Rechnung ohne Verteilschlüssel gleichmässig pro Wohnung verteilt wird', () => {
+		show(KeysPage, { data: { keys }, form: null } as never);
+		expect(text()).toContain(
+			'Jede umlagefähige Rechnung kann einen Verteilschlüssel haben; ohne ihn wird sie gleichmässig pro Wohnung verteilt.'
+		);
+		expect(text()).not.toContain('Jede Rechnung hat einen Verteilschlüssel');
+	});
+
 	it('lässt nur eigene Verteilschlüssel bearbeiten und löschen, und nur ohne Rechnungen', () => {
 		show(KeysPage, { data: { keys }, form: null } as never);
 

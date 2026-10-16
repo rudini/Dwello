@@ -2,7 +2,10 @@ import { question } from '../screenplay/actor';
 import { Text, Visibility } from '../screenplay/questions';
 import {
 	type ApartmentInfo,
+	currentContracts,
 	currentTenantName,
+	earlierContract,
+	earlierContracts,
 	historyRows,
 	infoCard,
 	monthlyTotal,
@@ -16,6 +19,9 @@ export const currentTenant = Text.of(currentTenantName);
 export const grossMonthlyRent = Text.of(monthlyTotal);
 export const vacancyShown = Visibility.of(vacancyNote);
 export const nextTenant = Text.of(nextTenantNote);
+export const currentContractsListed = Text.of(currentContracts);
+export const earlierContractsListed = Text.of(earlierContracts);
+export const earlierContractShown = (name: string) => Text.of(earlierContract(name));
 export const buildingOfApartmentShown = (buildingName: string) => Visibility.of(breadcrumbLink(buildingName));
 
 /** The rows of the contract history, in order: a row naming the expected contract answers that name, any other row its

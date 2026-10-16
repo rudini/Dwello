@@ -19,7 +19,7 @@ import { sqlToday, swissToday } from './today';
 export interface TenantFilters {
 	search?: string;
 	language?: string;
-	status?: 'active' | 'inactive';
+	status?: 'active' | 'future' | 'inactive';
 	limit?: number;
 	offset?: number;
 }
@@ -29,20 +29,26 @@ export interface TenantWithOccupancy extends Tenant {
 	currentBuilding?: string;
 	contractCount: number;
 	isActive: boolean;
+	isFuture: boolean;
 }
 
 // Correlated subqueries name the outer column explicitly: drizzle leaves it unqualified in single-table selects
-/** Active: a rental contract runs today or is signed for later */
+/** Active: a rental contract runs today (F-4, #58) */
 const isActive = sql<boolean>`exists (
 	select 1 from rental_contracts c
-	where c.tenant_id = "tenants"."id" and (c.end_date is null or c.end_date >= ${sqlToday})
+	where c.tenant_id = "tenants"."id" and c.start_date <= ${sqlToday}
+		and (c.end_date is null or c.end_date >= ${sqlToday})
 )`;
+const hasLater = sql`exists (select 1 from rental_contracts c where c.tenant_id = "tenants"."id" and c.start_date > ${sqlToday})`;
+/** Future: none runs today, one is signed for later */
+const isFuture = sql<boolean>`(not ${isActive} and ${hasLater})`;
 const hasContracts = sql`exists (select 1 from rental_contracts c where c.tenant_id = "tenants"."id")`;
 
 // Former tenants had contracts that all ended
 const statusConditions = {
 	active: isActive,
-	inactive: sql`${hasContracts} and not ${isActive}`
+	future: isFuture,
+	inactive: sql`${hasContracts} and not ${isActive} and not ${hasLater}`
 };
 
 /** Tenant with the number of contracts it has */
@@ -98,7 +104,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 
 	// Query with current occupancy
 	const results = await db
-		.select({ ...tenantFields, isActive })
+		.select({ ...tenantFields, isActive, isFuture })
 		.from(tenants)
 		.where(whereClause)
 		.orderBy(tenants.lastName, tenants.firstName, tenants.id)

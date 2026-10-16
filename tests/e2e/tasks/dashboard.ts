@@ -1,12 +1,12 @@
 import { Click, Navigate } from '../screenplay/interactions';
 import { occupancyBuilding, overviewTaskLink, quickAction, statementsTile, statTile } from '../targets/dashboard';
 
-// Labels contain each other ("Vermietet" / "Wiedervermietet"), so tiles are found by their test id
+// Labels contain each other ("Vermietet" / "Vermietet ab …"), so tiles are found by their test id
 const tiles: Record<string, string> = {
 	Gebäude: 'stat-buildings',
 	Wohnungen: 'stat-apartments',
 	Vermietet: 'stat-occupied',
-	Wiedervermietet: 'stat-relet',
+	'Vermietet ab …': 'stat-relet',
 	Leer: 'stat-vacant',
 	Gesperrt: 'stat-reserved',
 	'Überfällige Beträge': 'stat-overdue-amount'

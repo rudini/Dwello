@@ -104,7 +104,7 @@ postal_code            VARCHAR(10)
 city                   VARCHAR(100)
 country                VARCHAR(2)   NOT NULL DEFAULT 'CH'      -- ISO 3166 code of the Korrespondenzadresse (#102)
 correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
-CHECK (language IN ('de', 'fr', 'it', 'rm', 'en'))
+CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0012 (#63)
 ```
 
 No indexes besides the primary key; `email` is not unique. `correspondence_channel` has no CHECK.
@@ -389,7 +389,7 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | `iban` | `''` | CH or LI IBAN, 21 characters, MOD-97 checksum |
 | `payment_deadline_days` | `30` | 7–90 |
 | `reminder_after_days` | `14` | 7–60 |
-| `default_language` | `de` | `de` \| `fr` \| `it` \| `rm` \| `en` |
+| `default_language` | `de` | `de` \| `fr` \| `it` \| `en` |
 
 The IBAN is stored in plain text.
 

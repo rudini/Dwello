@@ -14,9 +14,11 @@ import {
 	managementFeeOfContract,
 	missingStatementsText,
 	nextStepsText,
+	statementLinkedInDeleteDialog,
 	statusOfContract,
 	totalRent
 } from '../questions/contract-detail';
+import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
 import {
@@ -38,6 +40,7 @@ import {
 	scrollToEndConfirmation,
 	showBuildingInvoices,
 	showContractStatements,
+	openStatementFromDeleteDialog,
 	startDeletingContract,
 	useWindowOf
 } from '../tasks/contract-detail';
@@ -281,5 +284,20 @@ Then(
 		await verwalter.sees(nextStepsText).toContain(
 			`Bitten Sie ${names.get(tenant)} um die neue Adresse und tragen Sie sie beim Mieter ein. ${rest}`
 		);
+	}
+);
+
+Then(
+	'verlinkt der Dialog die Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		const id = seed.idOf(`Abrechnung ${tenant} ${year}`)!;
+		await verwalter.sees(statementLinkedInDeleteDialog(id)).toBe(statementPath(seed, tenant, year));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter im Dialog die Abrechnung {int} von {string} öffnet',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(openStatementFromDeleteDialog(seed.idOf(`Abrechnung ${tenant} ${year}`)!));
 	}
 );

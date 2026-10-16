@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { load } from '../routes/apartments/[id]/+page.server';
+import { load as listLoad } from '../routes/apartments/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { grossRent } from '../lib/server/contract-history';
-import { floorLabel, statusHelp, statusText } from '../lib/apartment';
+import { floorLabel, occupancyParts, statusHelp, statusLabels, statusText } from '../lib/apartment';
 import { runAction } from './helpers/action';
 
 const API = 'http://localhost:3001/api/v1';
@@ -156,6 +157,23 @@ describe('Wohnungsdetail', () => {
 	});
 });
 
+// «Leer seit» in the apartment list too (#145, review C-2)
+describe('Wohnungsliste', () => {
+	it('gibt das Ende des letzten Mietvertrags weiter', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/apartments')
+					? { apartments: [{ ...apartment, status: 'vacant', lastContractEnd: '2024-03-31' }], total: 1 }
+					: { buildings: [] }
+			)) as typeof globalThis.fetch;
+		const data = (await listLoad({ url: new URL('http://localhost/apartments'), fetch } as never)) as {
+			apartments: { lastContractEnd: string | null }[];
+		};
+
+		expect(data.apartments[0].lastContractEnd).toBe('2024-03-31');
+	});
+});
+
 describe('Bruttomiete', () => {
 	it('zählt Nettomiete, Zusatzmiete und Akontozahlung zusammen', () => {
 		expect(
@@ -167,7 +185,7 @@ describe('Bruttomiete', () => {
 describe('Wohnungsstatus', () => {
 	it.each([
 		['occupied', null, 'Vermietet'],
-		['relet', '2026-11-01', 'Wiedervermietet ab 01.11.2026'],
+		['relet', '2026-11-01', 'Vermietet ab 01.11.2026'],
 		['vacant', null, 'Leer'],
 		['reserved', null, 'Gesperrt']
 	] as const)('zeigt %s (nächster Vertrag ab %s) als %s', (status, nextContractStart, text) => {
@@ -193,6 +211,19 @@ describe('Wohnungsstatus', () => {
 		).toBe('Vermietet bis 31.03.2099');
 	});
 
+	// F-4 (#58): ohne Datum, etwa im Filter, steht der Mietstatus als «Vermietet ab …»
+	it('nennt den Mietstatus relet ohne Datum «Vermietet ab …»', () => {
+		expect(statusLabels.relet).toBe('Vermietet ab …');
+	});
+
+	// P-18 (#145): leer seit dem Tag nach dem Ende des letzten Mietvertrags
+	it('zeigt bei einer leeren Wohnung, seit wann sie leer ist', () => {
+		expect(statusText({ status: 'vacant', lastContractEnd: '2024-03-31' })).toBe(
+			'Leer seit 01.04.2024'
+		);
+		expect(statusText({ status: 'reserved', lastContractEnd: '2024-03-31' })).toBe('Gesperrt');
+	});
+
 	it('zeigt bei einem Vertrag mit Ende, bis wann die Wohnung vermietet ist', () => {
 		expect(statusText({ status: 'occupied', currentContractEnd: '2099-03-31' })).toBe(
 			'Vermietet bis 31.03.2099'
@@ -209,6 +240,19 @@ describe('Wohnungsstatus', () => {
 		['reserved', 'von Hand gesperrt']
 	] as const)('erklärt %s in Worten des Glossars', (status, words) => {
 		expect(statusHelp[status]).toContain(words);
+	});
+});
+
+// F-4 (#58): Gebäudekarten in denselben Worten wie Übersicht und Wohnungsseite
+describe('Belegung eines Gebäudes', () => {
+	it('nennt künftig vermietete Wohnungen mit ihrem Vertragsbeginn', () => {
+		expect(
+			occupancyParts({
+				occupiedCount: 1,
+				reletStarts: ['2099-11-01', '2099-12-01', '2099-11-01'],
+				vacantCount: 0
+			})
+		).toEqual(['1 vermietet', '2 vermietet ab 01.11.2099', '1 vermietet ab 01.12.2099', '0 leer']);
 	});
 });
 

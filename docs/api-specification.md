@@ -79,7 +79,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/` | Query: `search`, `language`, `status` (`active`\|`inactive`), `limit` (default 50), `offset`. → `{ tenants, total }`; items include `currentApartment`, `currentBuilding`, `isActive` (see `tests/contracts/tenants.json`) |
 | GET | `/:id` | → tenant with `currentApartment`, `currentBuilding`, `contractCount`, `isActive`. 404 |
 | GET | `/:id/history` | → `{ tenant, contracts: [{ id, apartmentNumber, buildingName, startDate, endDate, baseRent, isActive }] }`. 404 |
-| POST | `/` | Body: `firstName`, `lastName` required; optional `email` (email format), `phone`, `language` (`de`\|`fr`\|`it`\|`rm`\|`en`), `address`, `postalCode`, `city` (the Korrespondenzadresse), `country` (ISO 3166 code, default `CH`, #102), `correspondenceChannel` (`email`\|`letter`). → 201 tenant. 400 |
+| POST | `/` | Body: `firstName`, `lastName` required; optional `email` (email format), `phone`, `language` (`de`\|`fr`\|`it`\|`en`), `address`, `postalCode`, `city` (the Korrespondenzadresse), `country` (ISO 3166 code, default `CH`, #102), `correspondenceChannel` (`email`\|`letter`). → 201 tenant. 400 |
 | PUT | `/:id` | Body: any subset of the POST fields. → tenant. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the tenant has an active contract or any contract history |
 
@@ -183,7 +183,7 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 | `iban` | CH or LI IBAN, 21 characters, MOD-97 checksum | `""` |
 | `payment_deadline_days` | 7–90 | `30` |
 | `reminder_after_days` | 7–60 | `14` |
-| `default_language` | `de` \| `fr` \| `it` \| `rm` \| `en` | `de` |
+| `default_language` | `de` \| `fr` \| `it` \| `en` | `de` |
 
 | Method | Path | Notes |
 |---|---|---|
@@ -221,7 +221,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | POST | `/:id/payment-reset` | Takes back the payment of a paid statement (#92): status `sent` (reported `overdue` after the deadline), `paidDate` and `paidAmount` cleared, a stored PDF made after the payment was recorded (it says «Bezahlt am …») discarded, the reset appended to `paymentResets` (`{ resetOn, paidDate, paidAmount }`). → statement (see `tests/contracts/statement-payment-reset.json`). 404 `STATEMENT_NOT_FOUND`; 400 `STATEMENT_NOT_PAID` |
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |
-| POST | `/:id/generate-pdf` | Body: optional `language` (`de`\|`fr`\|`it`\|`rm`\|`en`; default tenant language, then `de`). Renders the PDF with Swiss QR-bill and stores it. → `{ success: true, message, qrReference, pdfSize }`. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
+| POST | `/:id/generate-pdf` | Body: optional `language` (`de`\|`fr`\|`it`\|`en`; default tenant language, then `de`). Renders the PDF with Swiss QR-bill and stores it. → `{ success: true, message, qrReference, pdfSize }`. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
 | GET | `/:id/pdf` | → `application/pdf` attachment `<number>.pdf` (#101), made first when missing, a draft's made afresh each time (the tenant's address and the settings as they are now); sending discards the stored PDF, so the PDF as sent is made at that moment. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
 | GET | `/:id/pdf/base64` | → `{ pdfBase64, mimeType: "application/pdf" }`. 404 as above |
 
@@ -231,7 +231,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/statements/:id/reminders` | No body. Creates the next reminder letter (levels 1–3) as a PDF document and delivers it via the tenant's `correspondenceChannel`: e-mail is sent right away (status `sent`, or `deliveryError` set if sending fails); `letter` stays `to_send` for printing. Sets the statement's `reminderSentDate`. → **201** `{ document, deliveryError? }`. 404 statement; 400 statement not sent/overdue, 3 reminders already sent, or the last reminder's `paymentDeadline` not yet passed |
+| POST | `/statements/:id/reminders` | No body. Creates the next reminder letter (levels 1–3) as a PDF document in the tenant's `language` (title, file name, PDF and e-mail; #106) and delivers it via the tenant's `correspondenceChannel`: e-mail is sent right away (status `sent`, or `deliveryError` set if sending fails); `letter` stays `to_send` for printing. Sets the statement's `reminderSentDate`. → **201** `{ document, deliveryError? }`. 404 statement; 400 statement not sent/overdue, 3 reminders already sent, or the last reminder's `paymentDeadline` not yet passed |
 | POST | `/tenants/:id/documents` | Uploads a file to the tenant (Hochgeladenes Dokument). Body: `title` (empty: the file name without its extension), `fileName`, `content` (Base64). The kind is told by the first bytes: PDF, JPEG or PNG, at most 10 × 1024 × 1024 bytes; title at most 255 characters, a longer file name keeps its last 255. → **201** document (`type: upload`, no `channel`, no `status`). 400 `DOCUMENT_TYPE_NOT_ALLOWED`, `DOCUMENT_TOO_LARGE`, `DOCUMENT_TITLE_TOO_LONG`; 404 `TENANT_NOT_FOUND` |
 | GET | `/documents` | Query: `tenantId`, `statementId`, `status` (`sent`\|`to_send`). → `{ data: [document] }`, newest first; `status` never lists uploads |
 | GET | `/documents/:id/pdf` | → the file as an attachment with its `mimeType` (PDF, JPEG or PNG); `filename*` carries a name outside ASCII. 404 |

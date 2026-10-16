@@ -141,8 +141,23 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 			billedBy: unknown;
 		};
 		expect(data.billedBy).toEqual([
-			{ statementNumber: periodStatements.data[0].statementNumber, status: 'paid' }
+			{
+				id: periodStatements.data[0].id,
+				statementNumber: periodStatements.data[0].statementNumber,
+				status: 'paid'
+			}
 		]);
+	});
+
+	// Review C-1: unbekannt ist nicht «keine»
+	it('lässt die Abrechnungen offen, wenn sie nicht geladen werden können', async () => {
+		const answer = backend([]);
+		const fetch = (async (url: string) =>
+			url.includes('/statements?')
+				? new Response(null, { status: 500 })
+				: answer(url)) as typeof globalThis.fetch;
+		const data = (await load({ params: { id: 'c1' }, fetch } as never)) as { billedBy: unknown };
+		expect(data.billedBy).toBeNull();
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {

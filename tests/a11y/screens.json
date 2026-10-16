@@ -177,6 +177,13 @@
 			]
 		},
 		{
+			"name": "apartment-detail-vacant",
+			"path": "/apartments/{vacantApartment}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "apartment-edit",
 			"path": "/apartments/{apartment}/edit",
 			"states": [
@@ -266,8 +273,8 @@
 			]
 		},
 		{
-			"name": "contract-ended-detail",
-			"path": "/contracts/{endedContract}",
+			"name": "contract-moved-out-detail",
+			"path": "/contracts/{movedOutContract}",
 			"states": [
 				"default"
 			]
@@ -290,6 +297,14 @@
 				"default",
 				"delete-dialog",
 				"delete-unconfirmed"
+			]
+		},
+		{
+			"name": "contract-detail-ended",
+			"path": "/contracts/{endedContract}",
+			"states": [
+				"default",
+				"delete-dialog"
 			]
 		},
 		{

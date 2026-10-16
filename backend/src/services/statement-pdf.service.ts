@@ -48,7 +48,7 @@ const buildingOf = (building: StatementWithDetails['building']) => ({
 
 type Names = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null; isHeatingCost?: boolean };
 
-// A category, key or profile in the PDF's language; Romansh and missing translations fall back to German
+// A category, key or profile in the PDF's language; missing translations fall back to German
 const localName = (names: Names, language: Language) =>
 	({ fr: names.nameFR, it: names.nameIT, en: names.nameEN })[language as 'fr' | 'it' | 'en'] || names.nameDE || names.name;
 

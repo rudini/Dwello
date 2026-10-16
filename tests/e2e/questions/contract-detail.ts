@@ -1,5 +1,5 @@
 import { question } from '../screenplay/actor';
-import { ShareInViewport, Text, Visibility } from '../screenplay/questions';
+import { Attribute, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
 	nextSteps,
 	endDialogDeathHint,
@@ -14,6 +14,7 @@ import {
 	contractStatus,
 	contractTotalRent,
 	deleteDialog,
+	deleteDialogStatementLink,
 	missingStatements
 } from '../targets/contract-detail';
 
@@ -22,6 +23,8 @@ export const totalRent = Text.of(contractTotalRent);
 export const statusOfContract = Text.of(contractStatus);
 export const endOfContract = Text.of(contractEndDate);
 export const deleteDialogText = Text.of(deleteDialog);
+export const statementLinkedInDeleteDialog = (statementId: string) =>
+	Attribute.named('href').of(deleteDialogStatementLink(statementId));
 export const endDateProblemShown = (message: string) => Visibility.of(contractEndError(message));
 // entirely inside the window, as toBeInViewport({ ratio: 1 }) judges it
 export const endConfirmationInWindow = question(
