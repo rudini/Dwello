@@ -35,7 +35,7 @@ The quantities still form a pyramid, with many fast unit tests at the bottom. Th
 Rules:
 
 - No test copies production logic ("mirror test"); every test imports the real code.
-- CI workflows and deploy scripts: branching logic moves into a `tools/<area>/*.mjs` script with a `*.test.ts` next to it (as `tools/open-work`, `tools/release`); for the remaining glue (git, `gh`, docker) a simulation in a scratch repository, recorded in the plan, is the red and green of a fix.
+- CI workflows and deploy scripts: branching logic moves into a `tools/<area>/*.mjs` script with a `*.test.ts` next to it (as `tools/open-work`, `tools/release`); for the remaining glue (git, `gh`, docker) a simulation in a scratch repository, recorded in the commit message (`Red:`, `CLAUDE.md` Workflow 2), is the red and green of a fix.
 - Build-time constants (`__APP_VERSION__`) are read through one small module that DOM tests replace with `vi.mock`, never in the component, so each value has a test.
 - No mocked database: whatever needs SQL is a `*.pg.test.ts`.
 - Negative E2E checks (something is absent) need a positive anchor first (empty-state notice, page title); otherwise they also pass on an error page.
