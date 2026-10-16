@@ -151,7 +151,7 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 function changeFinding(base: Omit<CategoryFinding, 'kind'>, stockNow: boolean, stockBefore: boolean): CategoryFinding | null {
 	const tank = stockNow && stockBefore;
 	if (stockNow && base.current.total <= 0) return null;
-	if (tank && base.previous.total <= 0) return null;
+	if (stockBefore && base.previous.total <= 0) return null;
 	const change = base.current.total - base.previous.total;
 	if (Math.abs(change) < DEVIATION_MINIMUM || Math.abs(change) <= base.previous.total * DEVIATION_SHARE) return null;
 	return { ...base, kind: tank ? 'consumption' : 'deviation', changePercent: Math.round((change / base.previous.total) * 100) };

@@ -129,6 +129,20 @@ describe('Tankbestand', () => {
 		expect(found).toEqual([]);
 	});
 
+	// umgekehrt: ein negativer Verbrauch im Vorjahr taugt nicht als Vergleich für den Einkauf (fach-review V-16)
+	it('vergleicht den Einkauf nicht mit einem negativen Verbrauch im Vorjahr', async () => {
+		const own = await createRental(`${token}-before`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(own.building, { invoiceDate: '2023-01-15' });
+		await record('2022-12-31', '100.00', own.building);
+		await record('2023-12-31', '400.00', own.building);
+		await insertInvoice(own.building, { categoryId: heating, amount: '1000.00', invoiceDate: '2024-05-10' });
+		const found = (await findings(own.building, 2024)).filter((f) => f.categoryId === heating && f.kind !== 'stock');
+		await db.delete(invoices).where(eq(invoices.buildingId, own.building));
+		await own.remove();
+
+		expect(found).toEqual([]);
+	});
+
 	// ohne Tankbestände im Vorjahr ist dessen Betrag der Einkauf, kein Verbrauch: die Prüfung vergleicht die Kosten
 	it('vergleicht den Verbrauch nur mit einem Vorjahr, das Anfangs- und Endbestand hat', async () => {
 		expect((await findings(rental.building, 2024)).filter((f) => f.categoryId === heating).map((f) => f.kind)).not.toContain('consumption');

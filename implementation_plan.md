@@ -14,5 +14,8 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] fach-reviewer round 2: `docs/reviews/w8b-fachreview-2.md` (V-11 Major fixed with pg test and scenario, both seen red; V-12, V-14, V-15 fixed; V-13 with Anna P-1)
 - [x] personas round 1: `docs/design/personas/helga-w8b.md` (P-1 fixed: help names where and in which order; tank question not reached: demo drafts), `docs/design/personas/anna-w8b.md` (P-1 framing fixed with a DOM test; that a negative consumption does not block is #73's decision)
 - No daten-pruefer: no billed amount, statement, PDF or QR-bill changes; the checks only hint
-- [ ] Helga round 2 (tank question with the Seepark drafts removed), fach-reviewer round 3 on V-11, closing code-reviewer round
+- [x] Helga round 2: `docs/design/personas/helga-w8b-2.md` (tank question, link and saving work; no Blocker/Major), Seepark drafts removed by SQL first
+- [x] fach-reviewer round 3: `docs/reviews/w8b-fachreview-3.md` (V-11 resolved; V-16 fixed with a pg test seen red; V-17, V-18 left)
+- [x] Merged origin/main (mini map removed: the shared mapper drops latitude/longitude; migration renamed to 0013)
+- [ ] closing code-reviewer round (incl. the merge commit)
 - [ ] workflow-review, session archived, pull request
