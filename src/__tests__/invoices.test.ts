@@ -135,6 +135,14 @@ describe('Rechnungsdetail', () => {
 		expect(shown.distributionKey?.name).toBe('Pro Fläche (m²)');
 	});
 
+	it('zeigt die Rechnungsnummer des Backends', async () => {
+		const { fetch } = backend({ '/invoices/i1': invoice() });
+		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+			invoice: { invoiceNumber?: string };
+		};
+		expect(shown.invoiceNumber).toBe('R-1001');
+	});
+
 	it('nennt den Beleg mit Dateiname und Art, oder keinen', async () => {
 		for (const [beleg, expected] of [
 			[backendInvoice.beleg, { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' }],

@@ -176,6 +176,7 @@ const MAGIC: Record<string, string> = { PDF: '255044', JPG: 'ffd8ff' };
 
 Then(/^öffnet der Beleg die (PDF|JPG)-Datei "([^"]+)"$/, async ({ verwalter }, kind: string, fileName: string) => {
 	await verwalter.attemptsTo(openBelegOfInvoice);
+	await verwalter.sees(belegShown).toBe(true);
 	await verwalter.sees(openedBelegName).toBe(fileName);
 	await verwalter.sees(openedBelegMagic).toBe(MAGIC[kind]);
 });

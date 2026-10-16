@@ -60,7 +60,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(row.notes).toEqual([
 			'Das ist eine Mahnung. Mahngebühren und Verzugszinsen sind keine Nebenkosten; erfassen Sie die ursprüngliche Rechnung.',
 			'Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen.',
-			'Prüfen Sie: Rechnungsdatum.'
+			'Prüfen Sie: Rechnungsdatum, Kategorie.'
 		]);
 		expect(withProposal(newRow(2, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true })).selected).toBe(false);
 	});
@@ -81,6 +81,29 @@ describe('Vorschlag der KI für eine Datei', () => {
 		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, fields }));
 		expect(row.missing).toEqual(['invoiceNumber', 'dueDate']);
 		expect(row.notes).toContain('Prüfen Sie: Rechnungsnummer, Rechnungsdatum, Fälligkeitsdatum.');
+	});
+
+	it('nennt eine fehlende Kategorie bei dem, was zu prüfen ist (Personas Anna, Helga, Dr. Weber)', () => {
+		const unsure = proposal({ duplicateOf: null, deductedAmount: null, categorization: null });
+		expect(withProposal(newRow(1, pdf, defaults), unsure).notes).toEqual(['Prüfen Sie: Rechnungsdatum, Kategorie.']);
+	});
+
+	it('nennt ein selbst ausgefülltes Feld nach erneutem Lesen nicht mehr als nicht gefunden', () => {
+		const typed = newRow(1, pdf, defaults);
+		typed.values.invoiceNumber = 'X-7';
+		const fields = { ...extraction.fields, invoiceNumber: null };
+		expect(withProposal(typed, proposal({ duplicateOf: null, fields })).missing).not.toContain('invoiceNumber');
+	});
+
+	it('behält mit der gewählten Kategorie auch, ob die Kosten umlagefähig sind', () => {
+		const typed = newRow(1, pdf, defaults);
+		typed.values.categoryId = 'c7';
+		typed.values.isValidUtilityCost = true;
+		const repairs = { ...proposal({ duplicateOf: null }).categorization!, category: { id: 'c2', name: 'Repairs', isAllowedUtilityCost: false } };
+		expect(withProposal(typed, proposal({ duplicateOf: null, categorization: repairs })).values).toMatchObject({
+			categoryId: 'c7',
+			isValidUtilityCost: true
+		});
 	});
 
 	it('behält, was der Liegenschaftsverwalter schon eingetragen hat, wenn die KI die Datei erneut liest', () => {

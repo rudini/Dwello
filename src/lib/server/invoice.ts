@@ -134,6 +134,15 @@ export const formOf = (request: Request) =>
 		throw new ValidationError('Invalid form');
 	});
 
+/** The invoice fields a form sends as JSON; anything else is refused as a bad request */
+export function fieldsOf(value: FormDataEntryValue | null): Record<string, unknown> {
+	try {
+		return JSON.parse(String(value));
+	} catch {
+		throw new ValidationError('Invalid invoice fields', 'invoice');
+	}
+}
+
 /** A file the property manager chose for an invoice, as the backend takes it: its name and its content in Base64 */
 export async function belegOf(file: FormDataEntryValue | null) {
 	if (!(file instanceof File)) throw new ValidationError('A file is required', 'file');

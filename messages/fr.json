@@ -777,7 +777,7 @@
 	"invoices_more_actions": "Autres actions",
 	"invoices_delete": "Supprimer la facture",
 	"invoices_delete_text": "La facture de {name} d’un montant de {amount} sera supprimée. Elle n’entrera plus dans aucun nouveau décompte des charges. Cette action est irréversible.",
-	"invoices_delete_billed_text": "Ne supprimez que les factures saisies par erreur. Les brouillons contiennent toujours cette facture : supprimez ensuite les brouillons et établissez à nouveau les décomptes. Les décomptes envoyés ou payés se corrigent auprès du locataire en dehors de Dwello, en remboursant le trop-perçu. Conservez le justificatif : le locataire peut demander à le consulter.",
+	"invoices_delete_billed_text": "Ne supprimez que les factures saisies par erreur. Les brouillons contiennent toujours cette facture : supprimez ensuite les brouillons et établissez à nouveau les décomptes. Les décomptes envoyés ou payés se corrigent auprès du locataire en dehors de Dwello, en remboursant le trop-perçu. Conservez la facture originale : le locataire peut demander à la consulter.",
 	"invoices_upload_open": "Téléverser des factures",
 	"invoices_upload_purpose": "Choisissez l’immeuble et les fichiers de vos factures. L’IA lit les indications ; vous les vérifiez avant que Dwello crée les factures.",
 	"invoices_upload_building_first": "Choisissez d’abord l’immeuble.",

@@ -777,7 +777,7 @@
 	"invoices_more_actions": "Weitere Aktionen",
 	"invoices_delete": "Rechnung löschen",
 	"invoices_delete_text": "Die Rechnung von {name} über {amount} wird gelöscht. Sie fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen.",
-	"invoices_delete_billed_text": "Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel Bezahltes zurück. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.",
+	"invoices_delete_billed_text": "Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel Bezahltes zurück. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.",
 	"invoices_upload_open": "Rechnungen hochladen",
 	"invoices_upload_purpose": "Wählen Sie das Gebäude und die Dateien Ihrer Rechnungen. Die KI liest die Angaben aus; Sie prüfen sie, bevor Dwello die Rechnungen erstellt.",
 	"invoices_upload_building_first": "Wählen Sie zuerst das Gebäude.",

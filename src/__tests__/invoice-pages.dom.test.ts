@@ -246,7 +246,7 @@ describe('Rechnungsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel Bezahltes zurück. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel Bezahltes zurück. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 
@@ -846,6 +846,17 @@ describe('Beleg einer Rechnung', () => {
 	it('zeigt die Rechnungsnummer', () => {
 		detail({ invoiceNumber: 'R-1001' });
 		expect(byTestId('invoice-number')!.textContent).toContain('R-1001');
+	});
+
+	it('zeigt eine Absage des Backends beim Beleg mit ihrem Text', async () => {
+		fakeBff(() => [400, { error: 'x', code: 'DOCUMENT_TYPE_NOT_ALLOWED', params: {} }]);
+		detail();
+		const input = byTestId<HTMLInputElement>('invoice-document-file-input')!;
+		const pdf = new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d])], 'r.pdf');
+		Object.defineProperty(input, 'files', { value: [pdf], configurable: true });
+		click('invoice-document-upload-button');
+		await settle();
+		expect(text()).toContain('Dwello nimmt nur PDF-, JPG- und PNG-Dateien an.');
 	});
 });
 

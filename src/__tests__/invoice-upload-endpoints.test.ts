@@ -61,6 +61,10 @@ describe('Formular, das kein Formular ist', () => {
 			});
 		expect((await createInvoice({ request: broken(), cookies } as never)).status).toBe(400);
 		expect((await putBeleg({ request: broken(), cookies, params: { id: 'i1' } } as never)).status).toBe(400);
+		const form = new FormData();
+		form.set('invoice', '{kein JSON');
+		form.set('file', new File([pdf], 'r.pdf'));
+		expect((await createInvoice({ request: multipart(form), cookies } as never)).status).toBe(400);
 		expect(calls).toEqual([]);
 	});
 });

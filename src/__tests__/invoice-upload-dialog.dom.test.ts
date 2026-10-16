@@ -12,15 +12,6 @@ import InvoiceUploadDialog from '../routes/invoices/InvoiceUploadDialog.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import extraction from '../../tests/contracts/invoice-extraction.json';
 
-// jsdom's Blob lacks arrayBuffer(), which the browser has and the check of a file's first bytes uses
-Blob.prototype.arrayBuffer ??= function (this: Blob) {
-	return new Promise<ArrayBuffer>((resolve) => {
-		const reader = new FileReader();
-		reader.onload = () => resolve(reader.result as ArrayBuffer);
-		reader.readAsArrayBuffer(this);
-	});
-};
-
 const buildings = [
 	{ id: 'b1', name: 'Seeblick', address: 'Seeweg 1' },
 	{ id: 'b2', name: 'Lindenhof', address: 'Lindenweg 2' }
@@ -260,6 +251,15 @@ describe('Rechnungen hochladen', () => {
 		const link = byTestId('invoice-upload-row-message')!.querySelector('a')!;
 		expect(link.getAttribute('href')).toBe('/invoices/i1');
 		expect(link.hasAttribute('target')).toBe(false);
+	});
+
+	it('gibt nach dem Erstellen dem ersten Feld, das noch fehlt, den Fokus, wenn nichts erstellt wurde', async () => {
+		open(() => [503, { error: 'x', code: 'EXTRACTION_UNAVAILABLE', params: {} }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		expect(document.activeElement?.getAttribute('aria-invalid')).toBe('true');
 	});
 });
 

@@ -312,7 +312,7 @@ export type Extraction = {
 	};
 	deductedAmount: string | null;
 	nonAllocableItems: boolean;
-	unsure: string[]; // fields the KI read with a confidence below 0.7
+	unsure: string[]; // fields the KI read with a confidence below 0.7 or without one
 };
 
 const text = (value: unknown) => (typeof value === 'string' && value.trim() ? value.trim() : null);

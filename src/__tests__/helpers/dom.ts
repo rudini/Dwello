@@ -1,6 +1,16 @@
 import { afterEach } from 'vitest';
 import { flushSync, mount, unmount, type Component } from 'svelte';
 
+// jsdom's Blob lacks arrayBuffer(), which the browser has and the check of a file's first bytes uses
+if (typeof Blob !== 'undefined')
+	Blob.prototype.arrayBuffer ??= function (this: Blob) {
+		return new Promise<ArrayBuffer>((resolve) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(reader.result as ArrayBuffer);
+			reader.readAsArrayBuffer(this);
+		});
+	};
+
 const mounted: ReturnType<typeof mount>[] = [];
 const realFetch = globalThis.fetch;
 afterEach(() => {

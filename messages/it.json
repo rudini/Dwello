@@ -777,7 +777,7 @@
 	"invoices_more_actions": "Altre azioni",
 	"invoices_delete": "Eliminare la fattura",
 	"invoices_delete_text": "La fattura di {name} di {amount} verrà eliminata. Non confluirà più in nessun nuovo conteggio spese accessorie. L’operazione non può essere annullata.",
-	"invoices_delete_billed_text": "Elimini solo le fatture registrate per errore. Le bozze contengono ancora questa fattura: elimini poi le bozze e allestisca di nuovo i conteggi. I conteggi inviati o pagati li corregge nei confronti dell’inquilino al di fuori di Dwello e rimborsa quanto pagato in eccesso. Conservi il giustificativo: l’inquilino può chiedere di consultarlo.",
+	"invoices_delete_billed_text": "Elimini solo le fatture registrate per errore. Le bozze contengono ancora questa fattura: elimini poi le bozze e allestisca di nuovo i conteggi. I conteggi inviati o pagati li corregge nei confronti dell’inquilino al di fuori di Dwello e rimborsa quanto pagato in eccesso. Conservi la fattura originale: l’inquilino può chiedere di consultarla.",
 	"invoices_upload_open": "Caricare fatture",
 	"invoices_upload_purpose": "Scelga l’immobile e i file delle Sue fatture. L’IA legge i dati; Lei li verifica prima che Dwello crei le fatture.",
 	"invoices_upload_building_first": "Scelga prima l’immobile.",

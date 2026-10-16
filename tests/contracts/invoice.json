@@ -1,6 +1,7 @@
 {
 	"id": "i1",
 	"buildingId": "b1",
+	"invoiceNumber": "R-1001",
 	"billingEntityName": "Hauswart Huber",
 	"description": "Treppenhausreinigung Q1",
 	"amount": "450.00",

@@ -100,7 +100,7 @@ Funktionalität: Rechnungsliste
     Dann sagt die Datei von "Lift Service und Reparatur" "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen."
     Und ist die Datei von "Lift Service und Reparatur" nicht zum Erstellen ausgewählt
 
-  Szenario: Eine Gutschrift wird nicht als Rechnung erstellt
+  Szenario: Eine Gutschrift ist nicht zum Erstellen ausgewählt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Gutschrift" hochlädt
     Dann sagt die Datei von "Werke Gutschrift" "Das ist eine Gutschrift. Ziehen Sie sie vom Betrag der Rechnung ab, zu der sie gehört."
     Und ist die Datei von "Werke Gutschrift" nicht zum Erstellen ausgewählt

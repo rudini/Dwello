@@ -186,8 +186,7 @@ export const ThePage = {
 		})
 };
 
-/** The file downloaded last (`DownloadFrom`): its name and content */
-/** The file the actor opened in a new tab last (`OpenInNewTab`): how the browser was told to show it, its name and bytes */
+/** The file the actor opened in a new tab last (`OpenInNewTab`): whether it was shown there, its name and bytes */
 export const OpenedFile = question('the file opened in a new tab', async (actor) => {
 	const { newTab, disposition, content } = actor.recall<{ newTab: boolean; disposition: string; content: Buffer }>(OPENED);
 	const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/)?.[1];
@@ -195,6 +194,7 @@ export const OpenedFile = question('the file opened in a new tab', async (actor)
 	return { shown: newTab && disposition.startsWith('inline'), name, content };
 });
 
+/** The file downloaded last (`DownloadFrom`): its name and content */
 export const DownloadedFile: Question<{ name: string; content: Buffer }> = question('the downloaded file', async (actor) => {
 	const download = actor.recall<Download>(DOWNLOAD);
 	return { name: download.suggestedFilename(), content: await readFile(await download.path()) };

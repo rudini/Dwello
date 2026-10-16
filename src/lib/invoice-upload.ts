@@ -100,7 +100,7 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	selected: true
 });
 
-// The fields the KI reads, in the order the dialog shows them, with their labels
+// The fields the property manager checks, with their labels, in the order «Prüfen Sie: …» names them
 const FIELD_LABELS: [string, () => string][] = [
 	['billingEntityName', m.invoices_billing_entity],
 	['invoiceNumber', m.invoices_invoice_number],
@@ -108,7 +108,8 @@ const FIELD_LABELS: [string, () => string][] = [
 	['servicePeriodStart', m.invoices_service_period],
 	['dueDate', m.invoices_due_date],
 	['amount', m.invoices_amount],
-	['description', m.invoices_description]
+	['description', m.invoices_description],
+	['category', m.buildings_category]
 ];
 
 // What the property manager should know about the proposal, in the order the file raises it, and the fields to check
@@ -126,44 +127,65 @@ function notesOn(proposal: Proposal, morePages: boolean, check: string[]) {
 	].filter((note) => !!note) as string[];
 }
 
+// The values the KI read, under what the property manager typed before (a file read again after a failure); a
+// Kategorie they chose keeps whether its costs are allocable with it (domain review V-15)
+// The fields of the form each value of the KI's answer goes to
+const FORM_FIELD: Record<keyof Proposal['fields'], keyof UploadValues> = {
+	billingEntityName: 'billingEntity',
+	invoiceNumber: 'invoiceNumber',
+	invoiceDate: 'invoiceDate',
+	amount: 'amount',
+	servicePeriodStart: 'servicePeriodStart',
+	servicePeriodEnd: 'servicePeriodEnd',
+	dueDate: 'dueDate',
+	description: 'description'
+};
+
+function valuesOf(row: UploadRow, fields: Proposal['fields'], category: Suggestion['category']): UploadValues {
+	const read = Object.fromEntries(
+		Object.entries(FORM_FIELD).map(([field, formField]) => [formField, fields[field as keyof Proposal['fields']] ?? ''])
+	);
+	const chosen = { categoryId: category?.id ?? '', isValidUtilityCost: category?.isAllowedUtilityCost ?? true };
+	const typed = Object.fromEntries(Object.entries(row.values).filter(([, value]) => value !== '' && value !== true));
+	if (row.values.categoryId) typed.isValidUtilityCost = row.values.isValidUtilityCost;
+	return { ...row.values, ...read, ...chosen, ...typed, distributionKeyId: row.values.distributionKeyId };
+}
+
+// What the KI did not find and the property manager did not fill in before
+function missingIn(row: UploadRow, fields: Proposal['fields']) {
+	const filledIn = (field: string) => !!row.values[FORM_FIELD[field as keyof Proposal['fields']]];
+	return Object.entries(fields)
+		.filter(([field, value]) => value === null && field !== 'servicePeriodEnd' && !filledIn(field))
+		.map(([field]) => field);
+}
+
+// Only an invoice that can be created as it is: not a file with several invoices, one already entered, a Gutschrift,
+// a Mahnung (domain review V-9, V-10) or one mixing in costs that are not allocable, whose amount must be split first
+const preselected = (proposal: Proposal) =>
+	proposal.invoiceCount === 1 &&
+	!proposal.duplicateOf &&
+	proposal.documentType === 'invoice' &&
+	!proposal.nonAllocableItems;
+
 /** The row with what the KI read; a sure Kategorie (70 % and more) is taken, as on «Neue Rechnung» */
 export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
-	const { fields } = proposal;
 	const suggested = proposal.categorization;
 	const category = suggested && suggested.confidence >= 0.7 ? suggested.category : null;
-	const several = proposal.invoiceCount > 1;
-	const missing = Object.entries(fields)
-		.filter(([field, value]) => value === null && field !== 'servicePeriodEnd')
-		.map(([field]) => field);
-	const read: UploadValues = {
-		...row.values,
-		invoiceNumber: fields.invoiceNumber ?? '',
-		invoiceDate: fields.invoiceDate ?? '',
-		servicePeriodStart: fields.servicePeriodStart ?? '',
-		servicePeriodEnd: fields.servicePeriodEnd ?? '',
-		dueDate: fields.dueDate ?? '',
-		amount: fields.amount ?? '',
-		billingEntity: fields.billingEntityName ?? '',
-		description: fields.description ?? '',
-		categoryId: category?.id ?? '',
-		isValidUtilityCost: category?.isAllowedUtilityCost ?? true
-	};
-	// what the property manager typed before (a file read again after a failure) stays
-	const typed = Object.fromEntries(Object.entries(row.values).filter(([, value]) => value !== '' && value !== true));
+	const values = valuesOf(row, proposal.fields, category);
+	const missing = missingIn(row, proposal.fields);
+	// a Kategorie is required here: one the KI could not choose is named with the fields to check
+	const check = [...proposal.unsure, ...missing, ...(values.categoryId ? [] : ['category'])];
 	return {
 		...row,
 		status: 'check',
-		values: { ...read, ...typed, distributionKeyId: row.values.distributionKeyId },
-		suggestion: proposal.categorization,
+		values,
+		suggestion: suggested,
 		unsure: proposal.unsure,
 		missing,
-		notes: notesOn(proposal, row.morePages, [...proposal.unsure, ...missing]),
+		notes: notesOn(proposal, row.morePages, check),
 		duplicateOf: proposal.duplicateOf,
-		several,
-		// only an invoice is preselected, and only one that can be created as it is: not a file with several invoices,
-		// one already entered, a Gutschrift, a Mahnung (domain review V-9, V-10) or one mixing in costs that are not
-		// allocable, whose amount must be split first (product owner, persona review)
-		selected: !several && !proposal.duplicateOf && proposal.documentType === 'invoice' && !proposal.nonAllocableItems
+		several: proposal.invoiceCount > 1,
+		selected: preselected(proposal)
 	};
 }
 
