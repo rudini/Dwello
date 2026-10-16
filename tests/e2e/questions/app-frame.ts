@@ -1,17 +1,19 @@
 import { question } from '../screenplay/actor';
-import { Count, Text, ThePage, Visibility, Width } from '../screenplay/questions';
+import { Attribute, Count, Text, ThePage, Visibility, Width } from '../screenplay/questions';
 import {
 	draftNotice,
 	footerVersion,
 	llmRecipient,
 	operatorNotice,
 	pageSection,
+	sectionLinks,
 	pageTitle,
 	userMenuButton
 } from '../targets/app-frame';
 
 export const sectionShown = (heading: string) => Visibility.of(pageSection(heading));
 export const sectionText = (heading: string) => Text.of(pageSection(heading));
+export const sectionLinkAddresses = (heading: string) => Attribute.named('href').ofAll(sectionLinks(heading));
 export const llmRecipientNotice = (heading: string) => Text.of(llmRecipient(heading));
 export const draftNoticeText = (heading: string) => Text.of(draftNotice(heading));
 export const operatorNoticeText = (heading: string) => Text.of(operatorNotice(heading));
