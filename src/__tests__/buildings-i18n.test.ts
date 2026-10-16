@@ -115,7 +115,8 @@ describe('Übersicht in der gewählten Sprache', () => {
 		endingContracts: [],
 		noticedContracts: [],
 		paymentDeadlineDays: 30,
-		reminderAfterDays: 14
+		reminderAfterDays: 14,
+		expiredContracts: []
 	};
 
 	it('nennt Aufgaben auf Französisch', () => {

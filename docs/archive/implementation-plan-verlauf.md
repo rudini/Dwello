@@ -860,3 +860,25 @@ Files: `src/lib/ui/Panel.svelte`, `src/lib/ui/PageHeader.svelte`, `src/routes/he
 - [x] Workflow note: one pull request for #64 and #87, which refer to each other; No scenario for aggregated counts and global settings (`docs/reviews/workflow-notes-issue-64-87-55.md`)
 - [x] closing code-reviewer round (`docs/reviews/w4c-review-2.md`), session to archive; pull request (one for all three issues, as the coordinator asked)
 - Files: `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/dashboard/BuildingFigures.svelte`, `src/lib/server/settings.ts`, `src/routes/config/+page.svelte`, `src/routes/config/SettingField.svelte`, `messages/*.json`, `tests/contracts/config.json`, `docs/nebenkostenabrechnung-anforderungen.md`, tests
+
+## Session W7c: #115 (A-6) expired fixed-term contract
+
+The issue's "Done means" is worded for a decision issue; its "Decided (product owner)" section (option 2) is the requirement and is implemented here (no implementation issue exists).
+
+- [x] `@wip` scenarios in `dashboard.feature` and `contract-detail.feature`, seen red
+- [x] Fachreview round 1 of the scenarios: `docs/reviews/a6-fachreview-1.md`; issue #308 opened, V-2 added to #120
+- [x] Migration 0013: `rental_contracts.moved_out`, schema, `docs/data-model.md`
+- [x] Backend: PUT accepts `movedOut`; any change of the end clears it; list and detail return it; API contracts (`contract-moved-out.pg.test.ts`)
+- [x] Overview task «Befristeten Mietvertrag prüfen» for every expired, agreed end without successor and without `movedOut` (`overview.ts`, `dashboard/+page.server.ts`)
+- [x] Contract detail: `FixedTermCheck.svelte` with «Unbefristet weiterführen» and «Mieter ist ausgezogen»; draft refusal offers delete, a sent one says it cannot continue (Fachreview V-2)
+- [x] Texts in `messages/{de,fr,it,en}.json`; screen `contract-detail-expired` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
+- [x] `docs/anforderungen-vertragsende.md`: A-6 implemented, A-1 point 5 and the J-1 note; `docs/api-specification.md`
+- [x] Code review round 1: `docs/reviews/a6-review-1.md`
+- [x] Feature review: personas Anna and Dr. Weber (`docs/design/personas/anna-a6.md`, `weber-a6.md`; persona DB seeded by SQL with two expired fixed-term contracts, Lea Huber on Musterhaus 2.02 and Jonas Graf on Seepark B1), Fachreview round 2 `docs/reviews/a6-fachreview-2.md`
+- [x] Fixes: consequence line and move-out dialog (personas P-1/P-2), M-3 wording, V-11/V-12/V-15; M-4 and new texts added to #308
+- [x] Persona re-run on the fixes: `anna-a6-2.md`, `weber-a6-2.md`
+- [x] Full axe and language suites (the shared a11y seed gained the building Talblick): 332 passed
+- [x] Closing code review before the push: `docs/reviews/a6-review-2.md` (after the merge of `main`; migration renamed to 0013)
+- [x] Workflow review notes: `docs/reviews/workflow-notes-issue-115.md`
+- [x] Second merge of `main` (pull request conflicted): additive test conflicts; the a11y seed tenant renamed «Gina» because main added «Emil», whose expired agreed end now also shows the A-6 panel on `contract-detail-ended` (no cut-off, #115); code review round 3 `docs/reviews/a6-review-3.md`, E2E and the full axe/language suites (346) green
+- [x] Pull request `Fixes #115`, CI green, merged (session archived before the push)

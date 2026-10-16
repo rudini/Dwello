@@ -20,7 +20,8 @@ import {
 	openDashboard,
 	openStatementsWithStatus,
 	openTile,
-	startOverviewTask
+	startOverviewTask,
+	startOverviewTaskFor
 } from '../tasks/dashboard';
 import type { TestData } from '../fixtures/backend';
 import { inDays } from '../fixtures/dates';
@@ -186,4 +187,21 @@ Then('nennt die Belegung von {string} {string}', async ({ verwalter, names }, bu
 
 Then('erklärt die Belegung {string}', async ({ verwalter }, help: string) => {
 	await verwalter.sees(occupancyHelp).toBe(help);
+});
+
+// A-6 (#115): «Mieter ist ausgezogen» stored on the contract, as the contract page stores it
+Given('der Liegenschaftsverwalter hat bestätigt, dass {string} ausgezogen ist', async ({ seed }, tenant: string) => {
+	await seed.movedOut(tenant);
+});
+
+When(
+	'der Liegenschaftsverwalter die Aufgabe {string} für {string} beginnt',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(startOverviewTaskFor(title, names.get(tenant)!));
+	}
+);
+
+// after the task for the same tenant: the overview has loaded its tasks
+Then('nicht die Aufgabe {string} für {string}', async ({ verwalter, names }, title: string, tenant: string) => {
+	await verwalter.sees(overviewTaskShownFor(title, names.get(tenant)!)).toBe(false);
 });
