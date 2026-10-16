@@ -56,7 +56,7 @@ function open(
 	today = '2026-10-10',
 	terminated = false,
 	missingStatements: { start: string; end: string; href: string }[] = [],
-	billedBy: string[] = []
+	billedBy: { statementNumber: string; status: string }[] = []
 ) {
 	show(ContractPage, {
 		data: {
@@ -586,19 +586,51 @@ describe('Mietvertrag löschen', () => {
 
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
 		expect(dialog).toContain('Der Mietvertrag von Anna Keller hat am 01.04.2024 begonnen.');
-		expect(dialog).toContain('Zieht der Mieter aus, wählen Sie «Beenden».');
+		expect(dialog).toContain(
+			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Zieht der Mieter aus, wählen Sie «Beenden».'
+		);
 		expect(dialog).toContain('Nach dem Löschen erinnert Dwello nicht mehr daran.');
 		expect(byTestId('contract-delete-mistake-confirm-help')!.textContent).toContain('Leerstand');
 	});
 
-	it('nennt die Abrechnungen, die das Löschen sperren, und lässt es nicht bestätigen', () => {
-		open('2024-04-01', null, null, '2026-10-10', false, [], ['NK-2024-0001', 'NK-2025-0002']);
+	// Fachreview V-3: der Status sagt, welche sich löschen lässt
+	it('nennt die Abrechnungen mit Status, die das Löschen sperren, und lässt es nicht bestätigen', () => {
+		const billed = [
+			{ statementNumber: 'NK-2024-0001', status: 'paid' },
+			{ statementNumber: 'NK-2025-0002', status: 'draft' }
+		];
+		open('2024-04-01', null, null, '2026-10-10', false, [], billed);
+		click('contract-delete-button');
+
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
+		expect(dialog).toContain(
+			'Seine Mietstage sind abgerechnet in: NK-2024-0001 (bezahlt), NK-2025-0002 (Entwurf).'
+		);
+		expect(dialog).toContain('Klären Sie eine Korrektur direkt mit dem Mieter.');
+		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();
+		expect((byTestId('contract-delete-confirm') as HTMLButtonElement).disabled).toBe(true);
+	});
+
+	it('führt bei Entwürfen allein zum Löschen der Entwürfe', () => {
+		open('2024-04-01', null, null, '2026-10-10', false, [], [
+			{ statementNumber: 'NK-2025-0002', status: 'draft' }
+		]);
 		click('contract-delete-button');
 
 		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
-			'Mietstage abrechnen: NK-2024-0001, NK-2025-0002.'
+			'Löschen Sie zuerst die Entwürfe, danach lässt sich der Mietvertrag löschen.'
 		);
-		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();
-		expect((byTestId('contract-delete-confirm') as HTMLButtonElement).disabled).toBe(true);
+	});
+
+	// Fachreview V-11: mit Vertragsende gibt es kein «Beenden»
+	it('nennt bei einem Mietvertrag mit Vertragsende das Ende statt «Beenden»', () => {
+		open('2018-01-01', '2021-12-31');
+		click('contract-delete-button');
+
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
+		expect(dialog).toContain(
+			'Hat Anna Keller die Wohnung wirklich gemietet, löschen Sie den Mietvertrag nicht: Sein Vertragsende ist der 31.12.2021, danach bleibt er als Historie der Wohnung erhalten.'
+		);
+		expect(dialog).not.toContain('«Beenden»');
 	});
 });

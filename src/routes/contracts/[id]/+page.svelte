@@ -230,6 +230,7 @@
 	bind:open={deleting}
 	{name}
 	startDate={contract.startDate}
+	endDate={contract.endDate}
 	future={status === 'future'}
 	billedBy={data.billedBy}
 	missingStatements={data.missingStatements.length > 0}

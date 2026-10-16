@@ -14,6 +14,10 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Test clean-up (`tests/e2e/fixtures/backend.ts`, backend helpers) passes the flag
 - [x] `tests/contracts/*.json`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md` (A-7 implemented), `tests/a11y/screens.json` + `accessibility.feature` + `sprachen-bildschirme.feature` for the dialog state
 - [x] fach-reviewer round 1: `docs/reviews/w7-fachreview-1.md`; glossary «Leerstand» → #279
+- [x] fach-reviewer round 2: `docs/reviews/w7-fachreview-2.md`
+- [x] code-reviewer round 1: `docs/reviews/w7-review-1.md`
+- [x] personas: `docs/design/personas/anna-w7.md`, `docs/design/personas/helga-w7.md`
+- [ ] Helga again on the new text of a billed contract; code-reviewer round 2
 - [ ] Slice reviews, feature review (personas, fach-reviewer), finish checks, PR
 
 Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts.ts`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/contracts/ContractForm.svelte`, `messages/*.json`, tests (`contract-end.pg`, `contract-delete.pg`, `api-contracts.pg`, test clean-ups, `contract-actions`, `contract-detail-page.dom`, `contract-edit.dom`), `tests/e2e/**`, `tests/a11y/screens.json`, `tests/contracts/*`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md`.

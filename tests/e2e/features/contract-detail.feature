@@ -84,7 +84,7 @@ Funktionalität: Mietvertragsdetail
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
-    Dann nennt der Dialog "Dieser Mietvertrag kann nicht gelöscht werden, weil Nebenkostenabrechnungen seine Mietstage abrechnen"
+    Dann nennt der Dialog "Dieser Mietvertrag kann nicht gelöscht werden. Seine Mietstage sind abgerechnet in:"
     Und kann der Liegenschaftsverwalter das Löschen nicht bestätigen
     Und ist der Mietvertrag unbefristet
 
@@ -182,8 +182,9 @@ Funktionalität: Mietvertragsdetail
     Angenommen für "Anna Keller" gibt es die Abrechnung 2024 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2024-06-30" beendet und die Folge bestätigt
-    Und inzwischen gibt es für "Anna Keller" die Abrechnung 2025 im Gebäude "Ahornhof"
-    Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet
+    Dann meldet der Dialog "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
+    Und für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet
     Dann meldet der Dialog "Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu."
     Und ist der Mietvertrag unbefristet
     Und findet die Abrechnungsliste die Abrechnung 2024 von "Anna Keller"

@@ -43,8 +43,6 @@ export const deleteContractEnteredByMistake: Activity = (actor) =>
 		Check.the(deleteMistakeConfirmation),
 		Click.on(confirmDeleteContractButton)
 	);
-export const deleteContractUnconfirmed: Activity = (actor) =>
-	actor.attemptsTo(Click.on(deleteContractButton), Click.on(confirmDeleteContractButton));
 
 export const editContractFromDetail = Click.on(contractEditButton);
 export const openContractTenant = Click.on(contractTenantLink);

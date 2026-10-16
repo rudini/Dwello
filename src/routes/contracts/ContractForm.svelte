@@ -162,7 +162,7 @@
 
 	async function deleteDraftAndSave(draft: RefusedStatement) {
 		if (!valid()) return focusFirstError(form);
-		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2);
+		// an overlap is said here, before the request (review K-2); the backend keeps the draft when it refuses (#141);
 		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
 		if (overlap || contractsState !== 'loaded') {
 			errors = { form: overlap ? m.backend_contract_overlap() : contractsMessage(contractsState) };
@@ -170,10 +170,7 @@
 			if (overlap) refused = [];
 			return focusFirstError(form);
 		}
-		await put(
-			wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd),
-			draft.id
-		);
+		await put(wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd), draft.id);
 	}
 </script>
 

@@ -12,6 +12,7 @@
 		open = $bindable(),
 		name,
 		startDate,
+		endDate,
 		future,
 		billedBy,
 		missingStatements,
@@ -20,13 +21,25 @@
 		open: boolean;
 		name: string;
 		startDate: string;
+		endDate?: string | null;
 		future: boolean;
-		billedBy: string[];
+		billedBy: { statementNumber: string; status: string }[];
 		missingStatements: boolean;
 		error?: string;
 	} = $props();
 
 	const billed = $derived(billedBy.length > 0);
+	// each with its status: a draft can be deleted, a sent or paid one stays (Fachreview V-3)
+	const statusOf = (status: string) =>
+		status === 'draft'
+			? m.statements_status_draft()
+			: status === 'paid'
+				? m.contracts_billed_paid()
+				: m.contracts_billed_sent();
+	const numbers = $derived(
+		billedBy.map((s) => `${s.statementNumber} (${statusOf(s.status)})`).join(', ')
+	);
+	const locked = $derived(billedBy.some((s) => s.status !== 'draft'));
 	let mistakeConfirmed = $state(false);
 	let mistakeError = $state('');
 	// each opening asks again
@@ -56,12 +69,18 @@
 	onsuccess={() => addToast('success', m.contracts_deleted_toast({ name }))}
 >
 	{#if billed}
-		<p>{m.contracts_delete_billed({ numbers: billedBy.join(', ') })}</p>
+		<p>{m.contracts_delete_billed({ numbers })}</p>
+		<p>{locked ? m.contracts_delete_billed_locked() : m.contracts_delete_billed_drafts()}</p>
 	{:else if future}
 		<p>{m.contracts_delete_future_text({ name })}</p>
 	{:else}
 		<p>{m.contracts_delete_started_text({ name, date: formatDate(startDate) })}</p>
-		<p>{m.contracts_delete_real_tenancy({ name })}</p>
+		<!-- with an end there is no «Beenden» (Fachreview V-11) -->
+		<p>
+			{endDate
+				? m.contracts_delete_real_tenancy_ended({ name, date: formatDate(endDate) })
+				: m.contracts_delete_real_tenancy({ name })}
+		</p>
 		{#if missingStatements}
 			<p>{m.contracts_delete_missing_statements()}</p>
 		{/if}

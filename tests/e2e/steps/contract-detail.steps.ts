@@ -17,7 +17,6 @@ import {
 	createMissingStatement,
 	deleteContract,
 	deleteContractEnteredByMistake,
-	deleteContractUnconfirmed,
 	deleteDraftAndEndContract,
 	editContractFromDetail,
 	endContract,
@@ -92,21 +91,13 @@ When('der Liegenschaftsverwalter den Mietvertrag löscht', async ({ verwalter })
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag löschen will, ohne den Irrtum zu bestätigen', async ({ verwalter }) => {
-	await verwalter.attemptsTo(deleteContractUnconfirmed);
+	await verwalter.attemptsTo(deleteContract);
 });
 
 When(
 	'der Liegenschaftsverwalter den Mietvertrag löscht und bestätigt, dass er irrtümlich erfasst wurde',
 	async ({ verwalter }) => {
 		await verwalter.attemptsTo(deleteContractEnteredByMistake);
-	}
-);
-
-// a statement created while the dialog is open, e.g. in another tab (#141)
-When(
-	'inzwischen gibt es für {string} die Abrechnung {int} im Gebäude {string}',
-	async ({ seed }, tenant: string, year: number, building: string) => {
-		await seed.statement(tenant, building, year);
 	}
 );
 

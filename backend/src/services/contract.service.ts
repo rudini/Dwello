@@ -303,7 +303,7 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 }
 
 /** The contract's statements whose billed rent days the new dates would change (fewer or more) */
-async function statementsChanged(contractId: string, startDate: string, endDate: string | null, q: Query = db) {
+async function statementsChanged(contractId: string, startDate: string, endDate: string | null, q: Query) {
 	const from = sql`greatest(${utilityStatements.periodStart}, ${startDate}::date)`;
 	const to = sql`least(${utilityStatements.periodEnd}, coalesce(${endDate}::date, ${utilityStatements.periodEnd}))`;
 	return q

@@ -132,7 +132,9 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		const data = (await load({ params: { id: 'c1' }, fetch: backend(statements) } as never)) as {
 			billedBy: unknown;
 		};
-		expect(data.billedBy).toEqual([periodStatements.data[0].statementNumber]);
+		expect(data.billedBy).toEqual([
+			{ statementNumber: periodStatements.data[0].statementNumber, status: 'paid' }
+		]);
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
