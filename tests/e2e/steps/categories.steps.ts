@@ -8,6 +8,10 @@ import {
 	categoryListed,
 	invoicesOf,
 	descriptionOf,
+	contractHint,
+	formReasonText,
+	reasonOf,
+	reasonsOf,
 	allowedChosen,
 	listedCategoriesNamed,
 	notAllowedChosen,
@@ -15,11 +19,13 @@ import {
 } from '../questions/categories';
 import {
 	askKi,
+	kiFails,
 	createCategory,
 	deleteCategory,
 	openCategories,
 	openCategoryEdit,
 	openNewCategory,
+	openPredefinedCategory,
 	saveAsNotAllowed,
 	saveFormAsNotAllowed,
 	saveWithoutChoice,
@@ -62,6 +68,13 @@ Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Kategorie {string}',
 	async ({ verwalter, seed }, category: string) => {
 		await verwalter.attemptsTo(openCategoryEdit(seed.idOf(category)!));
+	}
+);
+
+Given(
+	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie {string}',
+	async ({ verwalter }, name: string) => {
+		await verwalter.attemptsTo(openPredefinedCategory(name));
 	}
 );
 
@@ -194,3 +207,50 @@ Then('ist weder umlagefähig noch nicht umlagefähig gewählt', async ({ verwalt
 	await verwalter.sees(allowedChosen).toBe(false);
 	await verwalter.sees(notAllowedChosen).toBe(false);
 });
+
+Then(
+	'nennt die vordefinierte Kategorie {string} als Grund {string}',
+	async ({ verwalter }, name: string, text: string) => {
+		await verwalter.sees(reasonOf(name)).toContain(text);
+	}
+);
+
+Then('nennt die Kategorie als Grund {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(formReasonText).toContain(text);
+});
+
+Then(
+	'nennt die vordefinierte Kategorie {string} keinen Grund ihrer Umlagefähigkeit',
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(reasonsOf(name)).toBe(0);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag sie nennt',
+	async ({ verwalter }) => {
+		await verwalter.sees(contractHint).toContain('nur, wenn der Mietvertrag sie als Nebenkosten nennt');
+	}
+);
+
+Given(
+	'die vordefinierte Kategorie {string} ist als nicht umlagefähig gespeichert',
+	async ({ seed }, name: string) => {
+		await seed.predefinedCategoryAllowance(name, false);
+	}
+);
+
+Given('die KI ist nicht erreichbar', async ({ verwalter }) => {
+	await verwalter.attemptsTo(kiFails);
+});
+
+Then('erfährt der Liegenschaftsverwalter, dass die KI sich nicht sicher ist', async ({ verwalter }) => {
+	await verwalter.sees(proposalText).toContain('Die KI ist sich nicht sicher.');
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist und er es später nochmals versuchen kann',
+	async ({ verwalter }) => {
+		await verwalter.sees(proposalText).toContain('Die KI ist nicht erreichbar. Versuchen Sie es später nochmals');
+	}
+);

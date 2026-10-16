@@ -4,6 +4,7 @@
 	import type { CategoryWithUsage } from '$lib/server/category';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import CategoryReason from './CategoryReason.svelte';
 
 	let { category, ondelete }: { category: CategoryWithUsage; ondelete: () => void } = $props();
 
@@ -29,6 +30,7 @@
 		{#if category.description && !category.predefined}
 			<p class="text-ink-muted" data-testid="category-description">{category.description}</p>
 		{/if}
+		<CategoryReason {category} />
 	</div>
 	<div class="flex flex-wrap items-center gap-4">
 		<Badge

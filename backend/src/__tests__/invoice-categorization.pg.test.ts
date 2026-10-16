@@ -243,14 +243,26 @@ describe('Empfänger der Rechnungsdaten für die Datenschutzerklärung', () => {
 	it('nennt keinen, solange das Modell auf dem Server des Betreibers läuft', async () => {
 		const response = await callApi('/api/v1/invoices/llm-recipient');
 
-		expect(await response.json()).toEqual({ recipient: null });
+		expect(await response.json()).toEqual({ recipient: null, enabled: true });
+	});
+
+	// Sonst beschreibt die Datenschutzerklärung eine Bearbeitung, die nicht stattfindet (#216)
+	it('sagt, wenn die KI abgeschaltet ist', async () => {
+		llmConfig.enabled = false;
+		try {
+			const response = await callApi('/api/v1/invoices/llm-recipient');
+
+			expect(await response.json()).toEqual({ recipient: null, enabled: false });
+		} finally {
+			llmConfig.enabled = true;
+		}
 	});
 
 	it('ist ohne Anmeldung lesbar, weil die Datenschutzerklärung öffentlich ist', async () => {
 		const response = await app.handle(new Request('http://localhost/api/v1/invoices/llm-recipient'));
 
 		expect(response.status).toBe(200);
-		expect(await response.json()).toEqual({ recipient: null });
+		expect(await response.json()).toEqual({ recipient: null, enabled: true });
 	});
 
 	it('nennt Anbieter und Land eines externen Anbieters, nie den API-Key', async () => {
@@ -263,7 +275,7 @@ describe('Empfänger der Rechnungsdaten für die Datenschutzerklärung', () => {
 		try {
 			const response = await callApi('/api/v1/invoices/llm-recipient');
 
-			expect(await response.json()).toEqual({ recipient: { provider: 'Beispiel AG', country: 'Schweiz' } });
+			expect(await response.json()).toEqual({ recipient: { provider: 'Beispiel AG', country: 'Schweiz' }, enabled: true });
 		} finally {
 			Object.assign(llmConfig, { baseUrl: 'http://127.0.0.1:9', apiKey: '', provider: '', providerCountry: '' });
 		}

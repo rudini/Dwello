@@ -10,7 +10,9 @@ import { openAiCompatible } from './helpers/llm';
 import { expectRejection } from './helpers/records';
 
 const configured = { ...llmConfig };
-const NO_PROPOSAL = 'Die KI ist nicht erreichbar oder ist sich nicht sicher.';
+// Whether trying again can help (#186)
+const UNAVAILABLE = ['Die KI ist nicht erreichbar.', 'KI_PROPOSAL_UNAVAILABLE'] as const;
+const UNSURE = ['Die KI ist sich nicht sicher.', 'KI_PROPOSAL_UNSURE'] as const;
 const propose = () =>
 	sendJson('POST', '/api/v1/categories/propose', { name: 'Dachsanierung', description: 'Neues Ziegeldach' });
 
@@ -130,20 +132,33 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 	it('schlägt nichts vor, wenn die KI unsicher ist', async () => {
 		const llm = openAiCompatible({ isAllowedUtilityCost: true, confidence: 0.69, reasoning: 'Vielleicht' });
 		try {
-			await expectRejection(await propose(), 503, NO_PROPOSAL, 'KI_NO_PROPOSAL');
+			await expectRejection(await propose(), 503, ...UNSURE);
 		} finally {
 			llm.stop();
 		}
 	});
 
+	// Eine abgeschaltete KI wird nie gefragt (#216), auch wenn ein Anbieter antworten würde
+	it('schlägt nichts vor, wenn die KI abgeschaltet ist', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: true, confidence: 0.9, reasoning: 'Betrieb' });
+		llmConfig.enabled = false;
+		try {
+			await expectRejection(await propose(), 503, ...UNAVAILABLE);
+			expect(llm.prompts).toEqual([]);
+		} finally {
+			llmConfig.enabled = configured.enabled;
+			llm.stop();
+		}
+	});
+
 	it('schlägt nichts vor, wenn die KI nicht erreichbar ist', async () => {
-		await expectRejection(await propose(), 503, NO_PROPOSAL, 'KI_NO_PROPOSAL');
+		await expectRejection(await propose(), 503, ...UNAVAILABLE);
 	});
 
 	it('schlägt nichts vor, wenn die Antwort der KI unbrauchbar ist', async () => {
 		const llm = openAiCompatible({ category: 'Repairs' });
 		try {
-			await expectRejection(await propose(), 503, NO_PROPOSAL, 'KI_NO_PROPOSAL');
+			await expectRejection(await propose(), 503, ...UNSURE);
 		} finally {
 			llm.stop();
 		}

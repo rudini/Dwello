@@ -1,3 +1,4 @@
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
 
@@ -194,6 +195,39 @@ describe('Rechnungsdetail', () => {
 		expect(text()).toContain('Automatisch kategorisiert');
 		expect(text()).toContain('86 %');
 		expect(text()).toContain('Vertrag geprüft');
+	});
+
+	// Auch eine Rechnung, die der Liegenschaftsverwalter selbst ausgeschlossen hat: der Hinweis nennt nicht das Gesetz als
+	// Grund, und nur die Gebäudeversicherung, nicht Versicherungen allgemein (#185, Fachreview H-11)
+	// Das Beispiel heisst wie die vordefinierte Kategorie (Code-Review K-2)
+	// Titel nach der Folge statt nach dem Gesetz (Fachreview H-23), fr-Zitierweise (Code-Review M-7)
+	it.each([
+		['fr', 'assurance bâtiment, impôt foncier', 'Pas dans le décompte des charges', '(art. 256, al. 1, 256b et 257a CO)'],
+		['it', 'assicurazione edificio, imposta immobiliare', 'Non nel conteggio spese accessorie', '(art. 256 cpv. 1, 256b e 257a CO)'],
+		['en', 'building insurance, property tax', 'Not in the utility cost statement', '(Art. 256 para. 1, 256b and 257a CO)']
+	] as const)('nennt auf %s die Gebäudeversicherung mit dem Namen ihrer Kategorie', (locale, example, title, citation) => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(InvoicePage, { data: { invoice: invoice({ isValidUtilityCost: false }) } });
+
+			const note = byTestId('invoice-legal-note')!.textContent;
+			expect(note).toContain(example);
+			expect(note).toContain(title);
+			expect(note).toContain(citation);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	});
+
+	it('erklärt, dass eine nicht umlagefähige Rechnung nicht abgerechnet wird', () => {
+		show(InvoicePage, { data: { invoice: invoice({ isValidUtilityCost: false }) } });
+
+		// Der Titel nennt die Folge, nicht das Gesetz als Grund (Fachreview H-23)
+		expect(byTestId('invoice-legal-note')!.textContent).toContain('Nicht in der Nebenkostenabrechnung');
+		expect(byTestId('invoice-legal-note')!.textContent).not.toContain('Schweizer Mietrecht');
+		expect(byTestId('invoice-legal-note')!.textContent).toContain(
+			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art. 256 Absatz 1, 256b und 257a OR).'
+		);
 	});
 
 	it('zeigt den Leistungszeitraum, der statt des Rechnungsdatums die Periode bestimmt', () => {
@@ -518,6 +552,10 @@ describe('Rechnung erfassen', () => {
 		await settle();
 
 		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.disabled).toBe(true);
+		// Versicherungsprämien der Heizung sind umlagefähig (Art. 5 Abs. 2 Bst. h VMWG), nur die Gebäudeversicherung nicht (#185)
+		expect(byTestId('invoice-category-warning')!.textContent).toContain(
+			'Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.'
+		);
 	});
 
 	it('sagt, dass ohne Leistungszeitraum das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {

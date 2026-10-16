@@ -11,6 +11,7 @@ export function testData(api: CallTheApi) {
 	const put = (path: string, data: object) => api.put(path, data);
 	const remove = (path: string) => api.remove(path);
 	const extras: string[] = []; // invoices and configuration records, removed before their building
+	const restores: (() => Promise<unknown>)[] = []; // predefined records a scenario changed
 	const unique = (title: string) => {
 		const name = `${title} ${randomUUID()}`;
 		names.set(title, name);
@@ -22,6 +23,11 @@ export function testData(api: CallTheApi) {
 		const category = await post('categories', { name, nameDE: name, ...fields(name) });
 		ids.set(title, category.id);
 		extras.push(`categories/${category.id}`);
+	}
+
+	// A predefined category by its German name
+	async function predefinedCategory(categoryName: string): Promise<{ id: string; isAllowedUtilityCost: boolean }> {
+		return (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
 	}
 
 	async function removeContracts(filter: string) {
@@ -262,9 +268,21 @@ export function testData(api: CallTheApi) {
 
 		// Invoice in a predefined category given by its German name, distributed by area; optionally the period it bills
 		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
-			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
+			const category = await predefinedCategory(categoryName);
 			const period = service && { servicePeriodStart: service[0], servicePeriodEnd: service[1] };
 			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+		},
+
+		async predefinedCategoryId(categoryName: string): Promise<string> {
+			return (await predefinedCategory(categoryName)).id;
+		},
+
+		// A predefined category given by its German name, saved with another allocability; restored afterwards. Saving it
+		// as not umlagefähig also marks its invoices so, which the restore does not undo: use a category no scenario bills
+		async predefinedCategoryAllowance(categoryName: string, isAllowedUtilityCost: boolean) {
+			const category = await predefinedCategory(categoryName);
+			await put(`categories/${category.id}`, { isAllowedUtilityCost });
+			restores.push(() => put(`categories/${category.id}`, { isAllowedUtilityCost: category.isAllowedUtilityCost }));
 		},
 
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
@@ -279,7 +297,7 @@ export function testData(api: CallTheApi) {
 
 		// Invoice of a supplier, in a predefined category given by its German name, dated today
 		async supplierInvoice(supplier: string, buildingTitle: string, amount: string, description: string, categoryName: string) {
-			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
+			const category = await predefinedCategory(categoryName);
 			const id = await invoice(
 				buildingTitle,
 				{ categoryId: category.id, billingEntityName: unique(supplier), isValidUtilityCost: category.isAllowedUtilityCost },
@@ -309,6 +327,7 @@ export function testData(api: CallTheApi) {
 		},
 
 		async cleanUp() {
+			for (const restore of restores) await restore();
 			const tokens = [...names.values()].map((name) => name.split(' ').pop()!);
 			for (const token of tokens) await removeTenants(token);
 			for (const path of extras) await remove(path);

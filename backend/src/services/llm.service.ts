@@ -12,6 +12,7 @@ import {
 	type LLMCategorizationResult
 } from '../config/llm';
 import { getCategoryByName, listCategories } from './category.service';
+import { CodedError } from './coded-error';
 import type { Category } from '../db/schema';
 
 // Simple in-memory cache for categorization results
@@ -201,24 +202,26 @@ export async function categorizeInvoice(invoice: {
 	}
 }
 
+const unavailable = () => new CodedError('KI_PROPOSAL_UNAVAILABLE', 'Die KI ist nicht erreichbar.');
+
 /**
- * Whether a new category's costs may be passed on, as the KI judges it with its reasoning;
- * null without a sure answer (no KI, error, unusable answer, confidence below 0.7), so nothing is preset
+ * Whether a new category's costs may be passed on, as the KI judges it with its reasoning. Without a sure answer
+ * nothing is preset; the refusal says whether trying again can help (#186): KI_PROPOSAL_UNAVAILABLE (no KI, error)
+ * or KI_PROPOSAL_UNSURE (unusable answer, confidence below 0.7)
  */
 export async function proposeAllocability(
 	category: Parameters<typeof buildAllocabilityPrompt>[0]
-): Promise<{ isAllowedUtilityCost: boolean; reasoning: string } | null> {
-	if (!llmConfig.enabled) return null;
-	try {
-		const { categories } = await listCategories({ limit: 1000 });
-		const predefined = categories.filter((c) => c.type === 'predefined');
-		const answer = parseAllocabilityResponse(await callLlm(buildAllocabilityPrompt(category, predefined)));
-		if (!answer || answer.confidence < 0.7) return null;
-		return { isAllowedUtilityCost: answer.isAllowedUtilityCost, reasoning: answer.reasoning };
-	} catch (error) {
+): Promise<{ isAllowedUtilityCost: boolean; reasoning: string }> {
+	if (!llmConfig.enabled) throw unavailable();
+	const { categories } = await listCategories({ limit: 1000 });
+	const predefined = categories.filter((c) => c.type === 'predefined');
+	const response = await callLlm(buildAllocabilityPrompt(category, predefined)).catch((error) => {
 		console.warn('KI proposal for a category failed:', error);
-		return null;
-	}
+		throw unavailable();
+	});
+	const answer = parseAllocabilityResponse(response);
+	if (!answer || answer.confidence < 0.7) throw new CodedError('KI_PROPOSAL_UNSURE', 'Die KI ist sich nicht sicher.');
+	return { isAllowedUtilityCost: answer.isAllowedUtilityCost, reasoning: answer.reasoning };
 }
 
 /**

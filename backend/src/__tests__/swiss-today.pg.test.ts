@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it, setSystemTime } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, invoices } from '../db/schema';
+import { documents, invoices, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment, getApartment } from '../services/apartment.service';
 import { createContract, listContracts } from '../services/contract.service';
 import {
@@ -67,8 +67,8 @@ beforeAll(async () => {
 afterAll(async () => {
 	setSystemTime();
 	await db.delete(documents).where(eq(documents.tenantId, rental.tenant));
-	for (const statement of (await listStatements({ tenantId: rental.tenant })).statements)
-		await deleteStatement(statement.id);
+	// Directly: the service deletes only drafts, and a statement left behind blocks the contract and the apartment (#223)
+	await db.delete(utilityStatements).where(eq(utilityStatements.tenantId, rental.tenant));
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
 	await rental.remove();
 });

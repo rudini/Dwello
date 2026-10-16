@@ -185,7 +185,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		),
 	// The KI stand-in (backend/scripts/llm-stub.ts) is sure about a renovation, not about guarding the building
 	'ki-proposal': () => askKi('Dachsanierung'),
-	'ki-no-proposal': () => askKi('Bewachung'),
+	'ki-unsure': () => askKi('Bewachung'),
+	// The KI stand-in fails for a name starting with «KI-Ausfall»
+	'ki-unavailable': () => askKi('KI-Ausfall Fensterreinigung'),
 	// the stand-in answers names with «langsam» after 25 s: the check is still running
 	'ki-checking': () => (actor) =>
 		actor.attemptsTo(

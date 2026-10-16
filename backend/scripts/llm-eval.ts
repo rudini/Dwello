@@ -53,7 +53,7 @@ const cases: [string, boolean][] = [
 
 let hits = 0;
 for (const [name, expected] of cases) {
-	const proposal = await proposeAllocability({ name });
+	const proposal = await proposeAllocability({ name }).catch(() => null);
 	const answer = proposal ? String(proposal.isAllowedUtilityCost) : 'kein Vorschlag';
 	if (proposal?.isAllowedUtilityCost === expected) hits++;
 	console.log(`${proposal?.isAllowedUtilityCost === expected ? 'ok    ' : 'FALSCH'} ${name}: erwartet ${expected}, KI ${answer}`);
