@@ -1,6 +1,7 @@
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
+import { flushSync } from 'svelte';
 
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
@@ -487,6 +488,26 @@ describe('Rechnung erfassen', () => {
 			path: '/invoices',
 			body: { servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' }
 		});
+	});
+
+	// Hilfe und Feldbeispiele nennen dasselbe Jahr, auch im nächsten Jahr (#250, Persona Dr. Weber)
+	it('nennt im Leistungszeitraum dasselbe Jahr wie die Beispiele der Datumsfelder', () => {
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(new Date('2027-03-01T10:00:00Z'));
+		try {
+			show(NewInvoicePage, { data: data(false) } as never);
+			const end = byTestId<HTMLInputElement>('invoice-service-end-input')!;
+			fireEvent(end, 'input', 'Ende März');
+			end.dispatchEvent(new Event('blur'));
+			flushSync();
+
+			expect(text()).toContain('zum Beispiel 31.12.2027.');
+			const help = byTestId('invoice-service-period-help')!.textContent!;
+			expect(help).toContain('Für das 4. Quartal also 01.10.2027 bis 31.12.2027');
+			expect(help.match(/\d{4}/g)).toEqual(['2027', '2027', '2027', '2027', '2032']);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it('verlangt zum Beginn des Leistungszeitraums auch das Ende', () => {

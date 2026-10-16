@@ -77,12 +77,15 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # Kosten, die nur alle paar Jahre anfallen, zählen jedes Jahr mit ihrem Teil (#254): der Boiler wird am 01.04.2026 entkalkt,
   # das nächste Mal in 5 Jahren; von 500 Franken über 1'826 Tage zählen 275 Tage in 2026 (75.30) und 365 Tage in 2027 (99.95)
   @api @wip
-  Szenario: Eine Rechnung über mehrere Jahre zählt in jeder Periode mit ihrem Teil
+  Szenariogrundriss: Eine Rechnung über mehrere Jahre zählt in jeder Periode mit ihrem Teil
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Warmwasser" über "500" Franken vom "2026-04-01" für die Zeit vom "2026-04-01" bis "2031-03-31"
-    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2026 für das Gebäude "Lindenhof" mit 0 % Verwaltungspauschale öffnet
-    Dann kostet die Abrechnung von "Marc Huber" "CHF 75.30"
-    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2027 für das Gebäude "Lindenhof" mit 0 % Verwaltungspauschale öffnet
-    Dann kostet die Abrechnung von "Marc Huber" "CHF 99.95"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen <Periode> für das Gebäude "Lindenhof" mit 0 % Verwaltungspauschale öffnet
+    Dann kostet die Abrechnung von "Marc Huber" "<Betrag>"
+
+    Beispiele:
+      | Periode | Betrag    |
+      | 2026    | CHF 75.30 |
+      | 2027    | CHF 99.95 |
 
   # Eine Abrechnungsperiode nur aus Monaten mit 0 % im Heizprofil (Mittelland: Juni bis August): die Heizkosten gehen nach Mietstagen wie jede andere
   # Rechnung, mit ihrem Leistungszeitraum (#137). 900 Franken für Juli bis September: 900 × 62/92 = 606.52 in der Periode,
