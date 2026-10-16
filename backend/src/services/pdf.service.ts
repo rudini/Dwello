@@ -29,7 +29,6 @@ export type Language = 'de' | 'fr' | 'it' | 'rm' | 'en';
 /**
  * Translation strings for each language; Romansh falls back to German for texts without a translation, and its
  * payment part is German (SIX provides German, French, Italian and English only)
- * TODO(fachlich prüfen, #75): "Zeitanteil" and "Heizmaterial" are not in the glossary
  */
 // Romansh is printed in German until all texts are translated: half-translated sentences read badly
 const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
