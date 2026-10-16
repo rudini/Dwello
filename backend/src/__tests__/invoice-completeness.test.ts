@@ -45,7 +45,8 @@ describe('Prüfung pro Kategorie', () => {
 				current: { count: 0, total: 0 },
 				previous: { count: 1, total: 290 },
 				missingParts: [],
-				changePercent: null
+				changePercent: null,
+				partialCount: 0
 			}
 		]);
 	});
@@ -83,6 +84,17 @@ describe('Prüfung pro Kategorie', () => {
 		expect(findings).toMatchObject([
 			{ categoryName: 'Heizung', kind: 'deviation', changePercent: 37 },
 			{ categoryName: 'Lift', kind: 'deviation', changePercent: -39 }
+		]);
+	});
+
+	// Ein Leistungszeitraum über die Periode hinaus zählt nur mit seinen Tagen darin: das erklärt tiefere Kosten
+	it('nennt bei einer Abweichung, wie viele Rechnungen nur teilweise zählen', () => {
+		const part = { ...invoice('Lift', '2025-12-31', 500), partial: true };
+		const { findings } = checkCategories([part, invoice('Heizung', '2025-09-22', 6565)], [invoice('Lift', '2024-12-31', 1000), invoice('Heizung', '2024-09-18', 4800)], year2025);
+
+		expect(findings).toMatchObject([
+			{ categoryName: 'Heizung', kind: 'deviation', partialCount: 0 },
+			{ categoryName: 'Lift', kind: 'deviation', partialCount: 1 }
 		]);
 	});
 

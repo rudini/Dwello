@@ -186,3 +186,54 @@ export function apartmentChoices(
 		}))
 		.sort((a, b) => Number(a.disabled) - Number(b.disabled));
 }
+
+type Rent = Pick<ContractFormValues, 'baseRent' | 'additionalRent' | 'advancePayment'>;
+/** A contract as the contract list answers it, with what the wizard reads */
+export type ListedContract = {
+	id: string;
+	tenantId?: string;
+	startDate: string;
+	endDate: string | null;
+	terminated?: boolean;
+	baseRent: string;
+	additionalRent?: string | null;
+	monthlyAdvancePayment?: string | null;
+};
+const RENT = ['baseRent', 'additionalRent', 'advancePayment'] as const;
+const kept = (amount?: string | null) => (Number(amount) ? String(amount) : ''); // a zero stays empty
+const rentOf = (rent: Rent): Rent => ({
+	baseRent: rent.baseRent,
+	additionalRent: rent.additionalRent,
+	advancePayment: rent.advancePayment
+});
+
+/** Amounts of the apartment's last contract that starts before `before`, to take over (#144) */
+export function lastRent(
+	response: { data?: { contracts?: ListedContract[] }; error?: unknown },
+	before = ''
+) {
+	const last = (response.error ? [] : (response.data?.contracts ?? []))
+		.filter((c) => !before || c.startDate.slice(0, 10) < before)
+		.sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
+	if (!last) return null;
+	return {
+		baseRent: kept(last.baseRent),
+		additionalRent: kept(last.additionalRent),
+		advancePayment: kept(last.monthlyAdvancePayment),
+		startDate: last.startDate,
+		endDate: last.endDate,
+		terminated: !!last.terminated
+	};
+}
+
+/** True while the three amounts are the taken-over ones, however they are written ("950" or "950.00") */
+export const rentTakenOver = (values: Rent, rent: Rent | null) =>
+	!!rent &&
+	RENT.every((key) => (parseFloat(plainAmount(values[key])) || 0) === (parseFloat(rent[key]) || 0));
+
+/** The amounts to fill in: only into empty fields or ones still holding the amounts filled in before */
+export function rentToPreset(values: Rent, rent: Rent | null, preset: Rent | null): Rent | null {
+	if (!RENT.every((key) => !values[key]) && !rentTakenOver(values, preset)) return null;
+	if (rent) return rentOf(rent);
+	return preset ? { baseRent: '', additionalRent: '', advancePayment: '' } : null;
+}

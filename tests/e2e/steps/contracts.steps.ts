@@ -31,6 +31,21 @@ Given(
 	}
 );
 
+Given(
+	'{string} mietete die Wohnung {string} von {string} bis {string} für {string} Franken mit {string} Franken Akonto',
+	async (
+		{ seed },
+		tenant: string,
+		apartment: string,
+		startDate: string,
+		endDate: string,
+		baseRent: string,
+		monthlyAdvancePayment: string
+	) => {
+		await seed.contract(tenant, apartment, { startDate, endDate, baseRent, monthlyAdvancePayment });
+	}
+);
+
 // the row's period ends with how the contract ends: «…, befristet» or «…, gekündigt»
 Then(
 	'nennt die Mietvertragsliste den Mietvertrag von {string} {string}',
