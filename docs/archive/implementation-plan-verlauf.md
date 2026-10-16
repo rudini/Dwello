@@ -243,3 +243,16 @@ Plan: the line items keep the days of each invoice when any invoice of the posit
 - code-reviewer round 5 (docs/reviews/226-review-5.md, the step fix): no Blocker/Major; fixed C-14 (comment named the removed O-31); rejected C-15: waiting in the step follows `tenants.steps.ts` and `contract-form.steps.ts`
 
 Files: `backend/migrations/0006_line_item_invoice_parts.sql`, `backend/src/db/schema.ts`, `backend/src/services/{calculation,statement,statement-pdf,pdf}.service.ts`, `backend/src/__tests__/{statement-pdf.pg,statement-pdf-render}.test.ts`, `backend/src/__tests__/helpers/pdf-text.ts`, `docs/data-model.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `tests/e2e/features/statement-detail.feature`, reviews in `docs/reviews/226-*.md`, `docs/reviews/workflow-rules-review-issue-226.md`, `docs/design/personas/dr-weber-226{,-2}.md`. Issues opened: #236, #237, #239, #240, #241; comments on #211, #240.
+
+## Session: subagent models (no issue)
+
+Request: pin `code-reviewer` and `fach-reviewer` to Opus, move `persona` and `daten-pruefer` to Sonnet where a benchmark first shows no loss. Changes only agent definitions and docs: no scenario, no `code-reviewer` round (`.claude/agents/` is not code in Workflow 6), no workflow review (Workflow 7: not for a task that changes only rules).
+
+- [x] Benchmark A: `daten-pruefer` Opus vs Sonnet on `cbbaafa` (#137; known D-1 Major, D-2, D-3 Minor): round 1 ran on the wrong app (the old stack script changed to the main tree; both models noticed), round 2 on `cbbaafa`: both found D-1 in data; Opus D-3, Sonnet D-2
+- [x] Benchmark B: persona Dr. Weber Opus vs Sonnet on `cf49fa5` (#226; known P-1 Major, P-2, P-3 Minor, P-4 Nit): both found all four
+- [x] Benchmark C: persona Marco Opus vs Sonnet on `70fbc67` (#233; known P-1..P-5 Minor, P-6, P-7 Nit): Opus 6 of 7, Sonnet 2 of 7 plus 2 partly
+- [x] Benchmark report `docs/reviews/agent-models-benchmark.md` with the runs' reports in `docs/reviews/agent-models/`
+- [x] `model:` in `.claude/agents/*.md` as the benchmark decides: `code-reviewer`, `fach-reviewer`, `persona` `opus`; `daten-pruefer` `sonnet`
+- [x] Before marking complete (CLAUDE.md): `test:coverage`, `lint`, `check`, backend `test` and `type-check` pass; no E2E scenario is affected
+
+Files: `.claude/agents/{code-reviewer,fach-reviewer,persona,daten-pruefer}.md`, `docs/reviews/agent-models-benchmark.md`, `docs/reviews/agent-models/*`.
