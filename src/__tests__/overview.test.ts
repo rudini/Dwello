@@ -126,6 +126,27 @@ describe('Aufgaben der Übersicht', () => {
 		expect(letters.text).toContain('1 Brief ist');
 		expect(drafts.text).toContain('1 Nebenkostenabrechnung ist');
 	});
+
+	// #107: solange die Zahlungsfrist der letzten Mahnung läuft, ist keine Mahnung zu senden
+	it('zählt keine Abrechnung, deren nächste Mahnung erst später möglich ist', () => {
+		const overdue = (nextReminderFrom: string | null) => ({
+			id: 's1',
+			tenantName: 'Anna Keller',
+			paymentDeadline: '2026-09-30',
+			nextReminderFrom
+		});
+		const titles = (nextReminderFrom: string | null) =>
+			overviewTasks(
+				input({
+					statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
+					dueStatements: [overdue(nextReminderFrom)]
+				})
+			).map((task) => task.title);
+
+		expect(titles('2026-10-11')).not.toContain('Überfällige Abrechnungen prüfen');
+		expect(titles('2026-10-10')).toContain('Überfällige Abrechnungen prüfen');
+		expect(titles(null)).toContain('Überfällige Abrechnungen prüfen');
+	});
 });
 
 describe('Fristen der Übersicht', () => {
