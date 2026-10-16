@@ -31,6 +31,7 @@ export const endContractOn = (isoDate: string, { confirmPast = false } = {}): Ac
 // Today as the last day: no day is proposed, it is typed like any other
 export const endContract: Activity = (actor) => actor.attemptsTo(endContractOn(inDays(0)));
 
+export const startEndingContract = Click.on(endContractButton);
 export const startDeletingContract = Click.on(deleteContractButton);
 export const deleteContract: Activity = (actor) =>
 	actor.attemptsTo(Click.on(deleteContractButton), Click.on(confirmDeleteContractButton));

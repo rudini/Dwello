@@ -97,3 +97,16 @@ Funktionalität: Mietvertrag bearbeiten
     Dann nennt der Mietvertrag den Mieter "Anna Keller" und die Wohnung "2.01"
     Und kann der Liegenschaftsverwalter Mieter und Wohnung nicht ändern
     Und erfährt der Liegenschaftsverwalter, dass er bei einem Mieterwechsel einen neuen Mietvertrag erfasst
+
+  # F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über, er endet nicht
+  Szenario: Beim Tod des Mieters läuft der Mietvertrag weiter
+    Dann erfährt der Liegenschaftsverwalter, dass der Mietvertrag beim Tod des Mieters weiterläuft
+    Und erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt
+
+  # B-16 (#156): der neue Mietvertrag desselben Mieters beginnt frühestens am Tag nach dem Vertragsende
+  Szenario: Neuer Mietvertrag nach dem Vertragsende
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erfassen will
+    Dann ist im Mietvertrag der Mieter "Anna Keller" gewählt
+    Und schlägt der neue Mietvertrag den Vertragsbeginn "2099-04-01" vor

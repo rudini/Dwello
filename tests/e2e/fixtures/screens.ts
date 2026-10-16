@@ -84,7 +84,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	const ids: Record<string, string | undefined> = {
 		building: seed.idOf('Seeblick'),
 		apartment: seed.idOf('1.01'),
-		tenant: seed.idOf('Anna'),
+		tenant: seed.idOf('Anna'), // rents 1.01 without an end: the contract wizard's step «Wohnung» names it (#156)
 		contract: seed.idOf('Mietvertrag Anna'),
 		noticedContract: seed.idOf('Mietvertrag Dora'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
