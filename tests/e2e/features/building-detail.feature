@@ -13,6 +13,13 @@ Funktionalität: Gebäudedetail
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann sieht der Liegenschaftsverwalter die Wohnung "1.01" mit dem Status "Leer"
 
+  @wip
+  Szenario: Die Gebäudeseite zeigt die Adresse als Text ohne Karte
+    Angenommen für das Gebäude "Birkenhof" sind Koordinaten erfasst
+    Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
+    Dann sieht der Liegenschaftsverwalter die Adresse "Testweg 1, 8400 Winterthur (ZH)"
+    Und sieht der Liegenschaftsverwalter keine Karte des Gebäudes
+
   Szenario: Gebäude löschen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Wenn der Liegenschaftsverwalter das Gebäude löscht
