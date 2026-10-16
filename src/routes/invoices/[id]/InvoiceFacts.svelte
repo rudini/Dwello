@@ -28,6 +28,12 @@
 				<dd class="text-ink-muted">{m.invoices_service_period_days()}</dd>
 			</div>
 		{/if}
+		{#if invoice.invoiceNumber}
+			<div class="flex flex-col gap-1">
+				<dt class="text-ink-muted">{m.invoices_invoice_number()}</dt>
+				<dd class="text-ink" data-testid="invoice-number">{invoice.invoiceNumber}</dd>
+			</div>
+		{/if}
 		<div class="flex flex-col gap-1">
 			<dt class="text-ink-muted">{m.invoices_amount()}</dt>
 			<dd class="text-xl font-semibold tabular-nums text-ink" data-testid="invoice-amount">

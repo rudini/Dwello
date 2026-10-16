@@ -13,12 +13,12 @@ import {
 	extractQueryParams,
 	parseRequestBody
 } from '$lib/server/api-proxy';
-import { belegOf } from '$lib/server/invoice';
+import { belegOf, formOf } from '$lib/server/invoice';
 
 // A file of up to 10 MB is sent as a form: in JSON its Base64 would be larger than the server reads (BODY_SIZE_LIMIT)
 async function invoiceWithBeleg(request: Request) {
-	const form = await request.formData();
-	return { ...JSON.parse(String(form.get('invoice'))), beleg: await belegOf(form.get('file') as File) };
+	const form = await formOf(request);
+	return { ...JSON.parse(String(form.get('invoice'))), beleg: await belegOf(form.get('file')) };
 }
 
 export const GET: RequestHandler = async ({ url, cookies }) => {

@@ -37,7 +37,7 @@ describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 		} as never);
 
 		const notice = byTestId('llm-recipient')?.textContent;
-		expect(notice).toContain('wird jede sofort mit ihrem Dateinamen übermittelt (PDF-Seiten als Bilder)');
+		expect(notice).toContain('wird jede sofort mit ihrem Dateinamen übermittelt (von PDF-Dateien höchstens die ersten drei Seiten, als Bilder)');
 		expect(notice).toContain('auch wenn Sie das Hochladen danach abbrechen');
 		expect(notice).toContain('auch Namen und Adressen');
 	});
@@ -52,7 +52,7 @@ describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
 		expect(document.body.textContent).toContain(
-			'Die Belege (hochgeladene Dateien der Rechnungen) dienen der Belegeinsicht der Mieter und bleiben gespeichert, bis Sie den Beleg ersetzen oder die Rechnung löschen.'
+			'Die Belege (hochgeladene Dateien der Rechnungen mit allem, was auf ihnen steht, etwa Namen, Adressen und Beträge) erleichtern die Belegeinsicht der Mieter und bleiben gespeichert, bis Sie den Beleg ersetzen oder die Rechnung löschen.'
 		);
 	});
 

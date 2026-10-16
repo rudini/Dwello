@@ -222,6 +222,7 @@ export interface InvoiceWithDetails extends Invoice {
 	llmCategory?: Pick<Category, 'id' | 'name'>; // what the KI suggested
 	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';
 	beleg: { fileName: string; mimeType: string } | null; // the uploaded file of the invoice
+	invoiceNumber?: string;
 }
 
 // Invoices list response

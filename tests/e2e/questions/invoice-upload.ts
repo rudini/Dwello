@@ -1,4 +1,5 @@
-import { Checked, Text, Value } from '../screenplay/questions';
+import { question } from '../screenplay/actor';
+import { Checked, OpenedFile, Text, Value } from '../screenplay/questions';
 import {
 	belegAmount,
 	belegBilledNote,
@@ -24,3 +25,10 @@ export const belegNoteOnDelete = Text.of(deleteBelegNote);
 export const proposedCategory = (fileName: string) => Value.chosenIn(belegCategory(fileName));
 export const keepOriginalNote = Text.of(keepOriginalHint);
 export const belegBilledWarning = Text.of(belegBilledNote);
+
+// The Beleg the actor opened: shown in the browser (not saved), its name, and its first three bytes in hex
+export const belegShown = question('whether the Beleg was shown', async (actor) => (await actor.answer(OpenedFile)).shown);
+export const openedBelegName = question('the name of the opened Beleg', async (actor) => (await actor.answer(OpenedFile)).name);
+export const openedBelegMagic = question('the kind of the opened Beleg', async (actor) =>
+	(await actor.answer(OpenedFile)).content.subarray(0, 3).toString('hex')
+);

@@ -55,6 +55,7 @@ Funktionalität: Rechnungsliste
     Dann erinnert Dwello daran, die Originalrechnungen aufzubewahren
     Und schlägt die KI für die Rechnung von "Elektro Blitz" den Betrag "1250.00", die Rechnungsnummer "R-1001" und die Kategorie "Allgemeinstrom" vor
     Und ist bei der Rechnung von "Elektro Blitz" das Rechnungsdatum als unsicher markiert
+    Und sagt die Datei von "Elektro Blitz" "Prüfen Sie: Rechnungsdatum, Fälligkeitsdatum."
     Wenn der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "2 Rechnungen erstellt"
     Wenn der Liegenschaftsverwalter die Rechnungen nach dem Gebäude "Seeblick" filtert
@@ -92,11 +93,17 @@ Funktionalität: Rechnungsliste
   # Die KI-Ersatzattrappe erkennt am Rechnungssteller, was auf der Rechnung steht (backend/scripts/llm-stub.ts)
   Szenario: Schlussrechnung mit abgezogenen Akontozahlungen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
-    Dann sagt die Datei von "Werke Schlussrechnung" "Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF 1’000.00). Erfassen Sie den Betrag so, dass jede Leistung nur einmal zählt."
+    Dann sagt die Datei von "Werke Schlussrechnung" "Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF 1’000.00). Vorgeschlagen ist das Total der Leistungen vor dem Abzug. Erfassen Sie die Akontozahlungen nicht zusätzlich als eigene Rechnungen, sonst zählen sie doppelt."
 
   Szenario: Rechnung mit Kosten, die nicht umlagefähig sind
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Lift Service und Reparatur" hochlädt
-    Dann sagt die Datei von "Lift Service und Reparatur" "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Erfassen Sie diese als eigene Rechnung."
+    Dann sagt die Datei von "Lift Service und Reparatur" "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen."
+    Und ist die Datei von "Lift Service und Reparatur" nicht zum Erstellen ausgewählt
+
+  Szenario: Eine Gutschrift wird nicht als Rechnung erstellt
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Gutschrift" hochlädt
+    Dann sagt die Datei von "Werke Gutschrift" "Das ist eine Gutschrift. Ziehen Sie sie vom Betrag der Rechnung ab, zu der sie gehört."
+    Und ist die Datei von "Werke Gutschrift" nicht zum Erstellen ausgewählt
 
   Szenario: Hochladen abbrechen verwirft die Dateien
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt

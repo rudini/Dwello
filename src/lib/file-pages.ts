@@ -2,8 +2,9 @@
 // Rendered in the browser, so the file itself is sent only when the invoice is created (BODY_SIZE_LIMIT), and
 // pdf.js comes with the app, not from a CDN (privacy statement, «Weitergabe an Dritte»)
 
+import { MAX_PAGES } from '$lib/invoice-upload';
+
 const LONGEST_SIDE = 1600;
-const MAX_PAGES = 3;
 
 function jpeg(source: CanvasImageSource, width: number, height: number) {
 	const scale = Math.min(1, LONGEST_SIDE / Math.max(width, height));
@@ -30,13 +31,13 @@ async function pdfPages(file: File) {
 		await page.render({ canvas, viewport }).promise;
 		pages.push(canvas.toDataURL('image/jpeg', 0.85));
 	}
-	return pages;
+	return { pages, morePages: document_.numPages > MAX_PAGES };
 }
 
-/** The pages to show the KI; throws when the file cannot be opened */
-export async function pagesOf(file: File): Promise<string[]> {
+/** The pages to show the KI, and whether the file has more; throws when the file cannot be opened */
+export async function pagesOf(file: File): Promise<{ pages: string[]; morePages: boolean }> {
 	// a PDF starts with «%», told by its first byte as Dwello checks files, not by its name
 	if (new Uint8Array(await file.slice(0, 1).arrayBuffer())[0] === 0x25) return pdfPages(file);
 	const image = await createImageBitmap(file);
-	return [jpeg(image, image.width, image.height)];
+	return { pages: [jpeg(image, image.width, image.height)], morePages: false };
 }

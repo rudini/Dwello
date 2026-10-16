@@ -103,7 +103,7 @@
 		if (busy) return;
 		const focusable = [
 			...(panel?.querySelectorAll<HTMLElement>(
-				'button:not([disabled]), [href], input:not([tabindex="-1"]):not([type="hidden"]), select, textarea'
+				'button:not([disabled]), [href], input:not([tabindex="-1"]):not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
 			) ?? [])
 		];
 		const active = document.activeElement as HTMLElement;
@@ -130,7 +130,7 @@
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="{id}-title"
-			aria-describedby="{id}-body"
+			aria-describedby={wide ? undefined : `${id}-body`}
 			tabindex="-1"
 			class="flex max-h-full w-full {wide ? 'max-w-4xl' : 'max-w-lg'} flex-col gap-6 overflow-y-auto rounded-panel bg-surface p-6 text-ink shadow-overlay"
 		>

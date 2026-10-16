@@ -125,11 +125,12 @@ function buildUrl(path: string, params?: Record<string, string>): string {
 function requestInit(method: string, body: unknown, headers: Record<string, string>): RequestInit {
 	// A form (e.g. with a file) goes as multipart; the browser sets its content type with the boundary
 	const form = body instanceof FormData;
-	const { 'Content-Type': json, ...others } = buildRequestHeaders(method, headers);
+	const requestHeaders = buildRequestHeaders(method, headers);
+	if (form) delete requestHeaders['Content-Type'];
 	return {
 		method,
 		// XSRF token for mutations
-		headers: form ? others : { 'Content-Type': json, ...others },
+		headers: requestHeaders,
 		credentials: 'same-origin', // Include cookies
 		// Body only for mutation requests
 		body: body && isMutationMethod(method) ? (form ? body : JSON.stringify(body)) : undefined

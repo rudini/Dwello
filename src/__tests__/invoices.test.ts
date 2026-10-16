@@ -105,6 +105,24 @@ describe('Rechnungsliste', () => {
 	});
 });
 
+describe('Rechnungsliste mit «Rechnungen hochladen»', () => {
+	it('lädt Kategorien einmal, die Verteilschlüssel und den voreingestellten Schlüssel für den Dialog', async () => {
+		const { urls, fetch } = backend({
+			'/invoices': { invoices: [], total: 0 },
+			'/categories': { categories: [caretaker] },
+			'/distribution-keys': { data: [perArea] },
+			'/config/default_distribution_key_id': { value: 'k1' }
+		});
+		const data = (await listLoad({ url: new URL('http://localhost/invoices'), fetch } as never)) as {
+			distributionKeys: { id: string }[];
+			defaultDistributionKeyId: string;
+		};
+		expect(data.distributionKeys.map((key) => key.id)).toEqual(['k1']);
+		expect(data.defaultDistributionKeyId).toBe('k1');
+		expect(urls.filter((url) => url.includes('/categories'))).toHaveLength(1);
+	});
+});
+
 describe('Rechnungsdetail', () => {
 	it('zeigt Kategorie und Verteilschlüssel deutsch', async () => {
 		const { fetch } = backend({ '/invoices/i1': invoice() });

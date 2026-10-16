@@ -67,10 +67,20 @@ describe('Antwort der KI zu einem Beleg', () => {
 			answer({
 				servicePeriodStart: '2026-01-01',
 				servicePeriodEnd: '2026-03-31',
-				confidence: { totalAmount: 0.5, servicePeriodStart: 0.6 }
+				confidence: { billingEntityName: 0.95, invoiceNumber: 0.9, invoiceDate: 0.9, totalAmount: 0.5, servicePeriodStart: 0.6, description: 0.9 }
 			})
 		);
 		expect(parsed?.unsure).toEqual(['amount', 'servicePeriodStart', 'servicePeriodEnd']);
+	});
+
+	it('nennt einen gelesenen Wert ohne Angabe, wie sicher die KI ist, als unsicher', () => {
+		expect(parseExtractionResponse(answer({ confidence: { billingEntityName: 0.95 } }))?.unsure).toEqual([
+			'invoiceNumber',
+			'invoiceDate',
+			'amount',
+			'description'
+		]);
+		expect(parseExtractionResponse(answer({ confidence: undefined }))?.unsure).toContain('billingEntityName');
 	});
 
 	it('verwirft einen Leistungszeitraum, der vor seinem Beginn endet, und liest die Zahl der Rechnungen auch als Text', () => {

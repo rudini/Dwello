@@ -18,11 +18,10 @@ async function get(fetch: typeof globalThis.fetch, path: string) {
 const isoDate = (value: string | null) => (value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '');
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
-	const [buildingsData, choices, llmStatus, defaultKey] = await Promise.all([
+	const [buildingsData, choices, llmStatus] = await Promise.all([
 		get(fetch, 'buildings?limit=100'),
 		invoiceChoices(fetch),
-		get(fetch, 'invoices/llm-status'),
-		get(fetch, 'config/default_distribution_key_id')
+		get(fetch, 'invoices/llm-status')
 	]);
 	const buildings: { id: string }[] = buildingsData.buildings || buildingsData.data || [];
 	const building = url.searchParams.get('building');
@@ -33,8 +32,6 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 		buildings,
 		...choices,
 		llmAvailable: llmStatus.llmAvailable === true,
-		// Preselected as set in the settings
-		defaultDistributionKeyId: (defaultKey.value as string) ?? '',
 		// Opened from a building or from the statement wizard
 		buildingId: buildings.some((b) => b.id === building) ? building! : '',
 		returnTo: localPath(url.searchParams.get('returnTo')),

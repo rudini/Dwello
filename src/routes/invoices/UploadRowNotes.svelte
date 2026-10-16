@@ -4,7 +4,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 
 	// What the property manager should know about a file, then what keeps its invoice from being created
-	let { row, errors, title }: { row: UploadRow; errors: Record<string, string>; title: string } = $props();
+	let { row, errors }: { row: UploadRow; errors: Record<string, string> } = $props();
 
 	const messages = $derived(
 		[
@@ -20,11 +20,11 @@
 
 {#if messages.length}
 	<div data-testid="invoice-upload-row-message">
-		<Alert {tone} {title}>
+		<Alert {tone} title={m.invoices_upload_notes_title()}>
 			{#each messages as message (message)}<p>{message}</p>{/each}
 			{#if row.duplicateOf}
 				<p>
-					<a class="font-semibold text-accent-strong underline" href="/invoices/{row.duplicateOf}" target="_blank"
+					<a class="font-semibold text-accent-strong underline" href="/invoices/{row.duplicateOf}"
 						>{m.invoices_upload_duplicate_link()}</a
 					>
 				</p>

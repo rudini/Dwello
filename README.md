@@ -299,7 +299,7 @@ Before switching, the operator (not Dwello) makes sure that, under the Swiss Dat
 
 This is a checklist, not legal advice.
 
-**OpenRouter (optional):** reading uploaded invoices needs a model that reads images. Through OpenRouter, for example: `LLM_BASE_URL=https://openrouter.ai/api/v1`, `LLM_API_KEY=<key>`, `LLM_MODEL=qwen/qwen2.5-vl-72b-instruct` (or its Qwen3-VL successor), `LLM_PROVIDER=OpenRouter`, `LLM_PROVIDER_COUNTRY=USA`. Check the checklist above first: OpenRouter is based in the USA.
+**OpenRouter (optional):** reading uploaded invoices needs a model that reads images. Through OpenRouter, for example: `LLM_BASE_URL=https://openrouter.ai/api/v1`, `LLM_API_KEY=<key>`, `LLM_MODEL=qwen/qwen2.5-vl-72b-instruct` (or its Qwen3-VL successor), `LLM_PROVIDER=OpenRouter`, `LLM_PROVIDER_COUNTRY=USA`. Check the checklist above first: OpenRouter is based in the USA and passes each request on to a model provider of its own choice. Restrict the routing in the OpenRouter account to providers you have checked, and name all recipients with their countries in `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` (e.g. `LLM_PROVIDER="OpenRouter, Alibaba Cloud"`, `LLM_PROVIDER_COUNTRY="USA, Singapur"`), so the privacy statement names them (Art. 19 DSG).
 
 **Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen2.5vl:7b`; pull it (`docker exec dwello-ollama ollama pull qwen2.5vl:7b`) or set `LLM_MODEL` to the model you have. The old variables are ignored.
 

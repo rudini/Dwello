@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, EnterDate, Enter, FailRequests, Select, Upload, Wait } from '../screenplay/interactions';
+import { Click, EnterDate, Enter, FailRequests, OpenInNewTab, Select, Upload, Wait } from '../screenplay/interactions';
 import { deleteButton } from '../targets/invoice-detail';
 import {
 	belegBillingEntity,
@@ -91,4 +91,4 @@ export const replaceBeleg = (file: File): Activity => (actor) =>
 
 export const startDeletingInvoice = Click.on(deleteButton);
 
-export const openBelegOfInvoice = DownloadFrom(belegLink);
+export const openBelegOfInvoice = OpenInNewTab(belegLink);

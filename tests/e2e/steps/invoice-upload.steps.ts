@@ -1,8 +1,10 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { downloadedFileMagic, downloadedFileName } from '../questions/download';
 import {
 	belegChosenForCreating,
+	belegShown,
+	openedBelegMagic,
+	openedBelegName,
 	belegBilledWarning,
 	belegNoteOnDelete,
 	keepOriginalNote,
@@ -165,7 +167,8 @@ Then('fragt Dwello zurück {string}', async ({ verwalter }, text: string) => {
 
 Then('öffnet der Beleg die PDF-Rechnung von {string}', async ({ verwalter, names }, supplier: string) => {
 	await verwalter.attemptsTo(openBelegOfInvoice);
-	await verwalter.sees(downloadedFileName).toBe(pdfOf(names.get(supplier)!));
+	await verwalter.sees(belegShown).toBe(true);
+	await verwalter.sees(openedBelegName).toBe(pdfOf(names.get(supplier)!));
 });
 
 // The first bytes of each kind, as Dwello checks them
@@ -173,8 +176,8 @@ const MAGIC: Record<string, string> = { PDF: '255044', JPG: 'ffd8ff' };
 
 Then(/^öffnet der Beleg die (PDF|JPG)-Datei "([^"]+)"$/, async ({ verwalter }, kind: string, fileName: string) => {
 	await verwalter.attemptsTo(openBelegOfInvoice);
-	await verwalter.sees(downloadedFileName).toBe(fileName);
-	await verwalter.sees(downloadedFileMagic).toBe(MAGIC[kind]);
+	await verwalter.sees(openedBelegName).toBe(fileName);
+	await verwalter.sees(openedBelegMagic).toBe(MAGIC[kind]);
 });
 
 for (const step of ['erinnert Dwello daran, die Originalrechnungen aufzubewahren', 'erinnert Dwello daran, die Originalrechnung aufzubewahren'])

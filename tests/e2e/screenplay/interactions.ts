@@ -119,6 +119,19 @@ export const DownloadFrom = (target: Target): Activity => async (actor) => {
 };
 export const DOWNLOAD = 'download';
 
+/**
+ * Follows a link that shows a file in a new tab, as that tab would load it (the page's cookies), and keeps the file for
+ * `OpenedFile`; headless Chromium shows no PDF in a tab, so the link is followed by a request instead of a click
+ */
+export const OpenInNewTab = (target: Target): Activity => async (actor) => {
+	const page = pageOf(actor);
+	const link = locate(actor, target);
+	const newTab = (await link.getAttribute('target')) === '_blank';
+	const response = await page.context().request.get(new URL((await link.getAttribute('href'))!, page.url()).toString());
+	actor.remember(OPENED, { newTab, disposition: response.headers()['content-disposition'] ?? '', content: await response.body() });
+};
+export const OPENED = 'opened';
+
 /** Notices the next request the browser sends to a matching URL, for `RequestedUrl` under the same key */
 export const NoticeRequest = (url: RegExp, key: string): Activity => async (actor) => {
 	void pageOf(actor)

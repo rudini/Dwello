@@ -25,6 +25,7 @@ export type Proposal = {
 };
 
 export const MAX_FILES = 20;
+export const MAX_PAGES = 3; // the pages of a PDF the KI reads
 const MAX_MEGABYTES = 10; // as the backend counts them: 10 × 1024 × 1024 bytes
 
 /** The fields of one invoice as the dialog edits them */
@@ -53,6 +54,8 @@ export type UploadRow = {
 	values: UploadValues;
 	suggestion: Suggestion | null;
 	unsure: string[]; // fields the KI read without being sure
+	missing: string[]; // fields the KI did not find in the file
+	morePages: boolean; // the file has more pages than the KI was shown
 	notes: string[]; // what the property manager should know about the file
 	duplicateOf: string | null;
 	several: boolean;
@@ -89,21 +92,37 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	},
 	suggestion: null,
 	unsure: [],
+	missing: [],
+	morePages: false,
 	notes: [],
 	duplicateOf: null,
 	several: false,
 	selected: true
 });
 
-// What the property manager should know about the proposal, in the order the file raises it
-function notesOn(proposal: Proposal) {
+// The fields the KI reads, in the order the dialog shows them, with their labels
+const FIELD_LABELS: [string, () => string][] = [
+	['billingEntityName', m.invoices_billing_entity],
+	['invoiceNumber', m.invoices_invoice_number],
+	['invoiceDate', m.invoices_date],
+	['servicePeriodStart', m.invoices_service_period],
+	['dueDate', m.invoices_due_date],
+	['amount', m.invoices_amount],
+	['description', m.invoices_description]
+];
+
+// What the property manager should know about the proposal, in the order the file raises it, and the fields to check
+function notesOn(proposal: Proposal, morePages: boolean, check: string[]) {
+	const fields = FIELD_LABELS.filter(([field]) => check.includes(field)).map(([, label]) => label());
 	return [
+		morePages && m.invoices_upload_more_pages({ pages: MAX_PAGES }),
 		proposal.invoiceCount > 1 && m.invoices_upload_several(),
 		proposal.duplicateOf && m.invoices_upload_duplicate(),
 		proposal.documentType === 'reminder' && m.invoices_upload_reminder(),
 		proposal.documentType === 'credit_note' && m.invoices_upload_credit_note(),
 		proposal.deductedAmount && m.invoices_upload_deducted({ amount: formatCurrency(Number(proposal.deductedAmount)) }),
-		proposal.nonAllocableItems && m.invoices_upload_mixed()
+		proposal.nonAllocableItems && m.invoices_upload_mixed(),
+		fields.length > 0 && m.invoices_upload_check_these({ fields: fields.join(', ') })
 	].filter((note) => !!note) as string[];
 }
 
@@ -113,29 +132,38 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 	const suggested = proposal.categorization;
 	const category = suggested && suggested.confidence >= 0.7 ? suggested.category : null;
 	const several = proposal.invoiceCount > 1;
+	const missing = Object.entries(fields)
+		.filter(([field, value]) => value === null && field !== 'servicePeriodEnd')
+		.map(([field]) => field);
+	const read: UploadValues = {
+		...row.values,
+		invoiceNumber: fields.invoiceNumber ?? '',
+		invoiceDate: fields.invoiceDate ?? '',
+		servicePeriodStart: fields.servicePeriodStart ?? '',
+		servicePeriodEnd: fields.servicePeriodEnd ?? '',
+		dueDate: fields.dueDate ?? '',
+		amount: fields.amount ?? '',
+		billingEntity: fields.billingEntityName ?? '',
+		description: fields.description ?? '',
+		categoryId: category?.id ?? '',
+		isValidUtilityCost: category?.isAllowedUtilityCost ?? true
+	};
+	// what the property manager typed before (a file read again after a failure) stays
+	const typed = Object.fromEntries(Object.entries(row.values).filter(([, value]) => value !== '' && value !== true));
 	return {
 		...row,
 		status: 'check',
-		values: {
-			...row.values,
-			invoiceNumber: fields.invoiceNumber ?? '',
-			invoiceDate: fields.invoiceDate ?? '',
-			servicePeriodStart: fields.servicePeriodStart ?? '',
-			servicePeriodEnd: fields.servicePeriodEnd ?? '',
-			dueDate: fields.dueDate ?? '',
-			amount: fields.amount ?? '',
-			billingEntity: fields.billingEntityName ?? '',
-			description: fields.description ?? '',
-			categoryId: category?.id ?? '',
-			isValidUtilityCost: category?.isAllowedUtilityCost ?? true
-		},
+		values: { ...read, ...typed, distributionKeyId: row.values.distributionKeyId },
 		suggestion: proposal.categorization,
 		unsure: proposal.unsure,
-		notes: notesOn(proposal),
+		missing,
+		notes: notesOn(proposal, row.morePages, [...proposal.unsure, ...missing]),
 		duplicateOf: proposal.duplicateOf,
 		several,
-		// a file with several invoices or one already entered is not created unless the property manager chooses it
-		selected: !several && !proposal.duplicateOf
+		// only an invoice is preselected, and only one that can be created as it is: not a file with several invoices,
+		// one already entered, a Gutschrift, a Mahnung (domain review V-9, V-10) or one mixing in costs that are not
+		// allocable, whose amount must be split first (product owner, persona review)
+		selected: !several && !proposal.duplicateOf && proposal.documentType === 'invoice' && !proposal.nonAllocableItems
 	};
 }
 
@@ -169,4 +197,11 @@ export function invoiceOf(row: UploadRow, buildingId: string) {
 		isValidUtilityCost: values.isValidUtilityCost,
 		...suggestionProvenance(row.suggestion)
 	};
+}
+
+/** The caution at a field the KI filled without being sure, or left empty because it did not find the value */
+export function fieldNote(read: { unsure: string[]; missing: string[] }, field: string) {
+	if (read.unsure.includes(field)) return { text: m.invoices_upload_unsure(), testid: `invoice-upload-unsure-${field}` };
+	if (read.missing.includes(field))
+		return { text: m.invoices_upload_missing(), testid: `invoice-upload-missing-${field}` };
 }

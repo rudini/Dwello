@@ -29,6 +29,9 @@
 	} = $props();
 
 	let open = $state(false);
+	// every control of the row names its file and its status to a screen reader
+	const about = $derived(`upload-${row.key}`);
+	const describedby = $derived(`${about}-name ${about}-status`);
 	const statuses: Record<UploadRow['status'], { tone: Tone; label: string }> = {
 		reading: { tone: 'info', label: m.invoices_upload_status_reading() },
 		check: { tone: 'caution', label: m.invoices_upload_status_check() },
@@ -46,11 +49,11 @@
 
 <li class="flex flex-col gap-4 py-4" data-testid="invoice-upload-row">
 	<div class="flex flex-wrap items-start justify-between gap-4">
-		<p class="min-w-0 break-all font-semibold text-ink">{row.file.name}</p>
-		<Badge tone={status.tone} label={status.label} />
+		<p id="{about}-name" class="min-w-0 break-all font-semibold text-ink">{row.file.name}</p>
+		<span id="{about}-status"><Badge tone={status.tone} label={status.label} /></span>
 	</div>
 
-	<UploadRowNotes {row} {errors} title={status.label} />
+	<UploadRowNotes {row} {errors} />
 
 	<div class="flex flex-wrap items-center gap-4">
 		{#if editable}
@@ -59,19 +62,29 @@
 				label={m.invoices_upload_select()}
 				bind:checked={row.selected}
 				disabled={row.several}
+				{describedby}
 				testid="invoice-upload-row-select"
 			/>
-			<Button variant="ghost" icon="edit" onclick={() => (open = !open)} testid="invoice-upload-row-toggle">{toggleLabel}</Button>
+			{#if !row.several}
+				<Button
+					variant="ghost"
+					icon="edit"
+					expanded={open}
+					{describedby}
+					onclick={() => (open = !open)}
+					testid="invoice-upload-row-toggle">{toggleLabel}</Button
+				>
+			{/if}
 		{/if}
 		{#if row.status === 'failed'}
-			<Button icon="refresh" onclick={onretry} testid="invoice-upload-row-retry">{m.invoices_upload_retry()}</Button>
+			<Button icon="refresh" {describedby} onclick={onretry} testid="invoice-upload-row-retry">{m.invoices_upload_retry()}</Button>
 		{/if}
-		<Button variant="danger-ghost" icon="delete" onclick={onremove} testid="invoice-upload-row-remove"
+		<Button variant="danger-ghost" icon="delete" {describedby} onclick={onremove} testid="invoice-upload-row-remove"
 			>{m.invoices_upload_remove()}</Button
 		>
 	</div>
 
-	{#if open && editable}
+	{#if open && editable && !row.several}
 		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} />
 	{/if}
 </li>

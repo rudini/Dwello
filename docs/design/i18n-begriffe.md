@@ -34,6 +34,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Referenzindex | taux de référence | tasso di riferimento | reference rate |
 | Rechnung | facture | fattura | invoice |
 | Beleg (hochgeladene Datei einer Rechnung, #217) | pièce justificative | giustificativo | supporting document |
+| Gutschrift (eines Rechnungsstellers) | note de crédit | nota di credito | credit note |
+| Mahngebühr / Verzugszins | frais de rappel / intérêt moratoire | spese di sollecito / interesse di mora | reminder fee / default interest |
 | Rechnungssteller | émetteur de la facture | emittente della fattura | invoice issuer |
 | Lieferant | fournisseur | fornitore | supplier |
 | Rechnungsnummer / Rechnungsdatum | numéro de facture / date de facture | numero di fattura / data della fattura | invoice number / invoice date |

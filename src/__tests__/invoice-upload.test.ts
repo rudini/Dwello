@@ -40,7 +40,8 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(row.unsure).toEqual(['invoiceDate']);
 		expect(row.selected).toBe(true);
 		expect(row.notes).toEqual([
-			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Erfassen Sie den Betrag so, dass jede Leistung nur einmal zählt.'
+			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Vorgeschlagen ist das Total der Leistungen vor dem Abzug. Erfassen Sie die Akontozahlungen nicht zusätzlich als eigene Rechnungen, sonst zählen sie doppelt.',
+			'Prüfen Sie: Rechnungsdatum.'
 		]);
 	});
 
@@ -58,7 +59,41 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(row.values.categoryId).toBe('');
 		expect(row.notes).toEqual([
 			'Das ist eine Mahnung. Mahngebühren und Verzugszinsen sind keine Nebenkosten; erfassen Sie die ursprüngliche Rechnung.',
-			'Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Erfassen Sie diese als eigene Rechnung.'
+			'Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen.',
+			'Prüfen Sie: Rechnungsdatum.'
+		]);
+		expect(withProposal(newRow(2, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true })).selected).toBe(false);
+	});
+
+	it('wählt eine Gutschrift und eine Mahnung nicht zum Erstellen, mit ihrem Hinweis', () => {
+		for (const [documentType, note] of [
+			['credit_note', 'Das ist eine Gutschrift.'],
+			['reminder', 'Das ist eine Mahnung.']
+		]) {
+			const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType }));
+			expect(row.selected).toBe(false);
+			expect(row.notes.join(' ')).toContain(note);
+		}
+	});
+
+	it('nennt die Felder, die die KI nicht gefunden hat', () => {
+		const fields = { ...extraction.fields, invoiceNumber: null, dueDate: null };
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, fields }));
+		expect(row.missing).toEqual(['invoiceNumber', 'dueDate']);
+		expect(row.notes).toContain('Prüfen Sie: Rechnungsnummer, Rechnungsdatum, Fälligkeitsdatum.');
+	});
+
+	it('behält, was der Liegenschaftsverwalter schon eingetragen hat, wenn die KI die Datei erneut liest', () => {
+		const typed = newRow(1, pdf, defaults);
+		typed.values.amount = '99.00';
+		expect(withProposal(typed, proposal({ duplicateOf: null })).values).toMatchObject({ amount: '99.00', invoiceNumber: 'R-1001' });
+	});
+
+	it('sagt, dass die KI nur die ersten 3 Seiten gelesen hat', () => {
+		const row = withProposal({ ...newRow(1, pdf, defaults), morePages: true }, proposal({ duplicateOf: null, deductedAmount: null }));
+		expect(row.notes).toEqual([
+			'Die KI hat nur die ersten 3 Seiten gelesen. Prüfen Sie Betrag und Positionen auf den übrigen Seiten.',
+			'Prüfen Sie: Rechnungsdatum.'
 		]);
 	});
 

@@ -780,9 +780,10 @@ describe('Beleg einer Rechnung', () => {
 	const detail = (overrides = {}, billedIn: { start: string; end: string }[] = []) =>
 		show(InvoicePage, { data: { invoice: invoice(overrides), billedIn } } as never);
 
-	it('zeigt den gespeicherten Beleg zum Herunterladen und bietet an, ihn zu ersetzen', () => {
+	it('zeigt den gespeicherten Beleg in einem neuen Tab und bietet an, ihn zu ersetzen', () => {
 		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } });
 		expect(byTestId('invoice-document-link')!.getAttribute('href')).toBe('/invoices/i1/document');
+		expect(byTestId('invoice-document-link')!.getAttribute('target')).toBe('_blank');
 		expect(byTestId('invoice-document-upload-button')!.textContent).toContain('Beleg ersetzen');
 		expect(byTestId('invoice-keep-original')!.textContent).toContain('Bewahren Sie die Originalrechnung auf');
 	});
@@ -805,6 +806,46 @@ describe('Beleg einer Rechnung', () => {
 		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } });
 		click('invoice-delete-button');
 		expect(byTestId('invoice-delete-document-note')!.textContent).toBe('Der Beleg wird ebenfalls gelöscht.');
+	});
+
+	it('warnt nur bei einer abgerechneten Rechnung mit Beleg', () => {
+		detail({}, [{ start: '2024-01-01', end: '2024-12-31' }]);
+		expect(text()).toContain('Zu dieser Rechnung ist kein Beleg gespeichert.');
+		expect(byTestId('invoice-document-billed')).toBeNull();
+	});
+
+	it('lehnt eine zu grosse Datei ab, bevor sie gesendet wird, und setzt den Fokus auf die Dateiauswahl', async () => {
+		const calls = fakeBff(() => [200, {}]);
+		detail();
+		const input = byTestId<HTMLInputElement>('invoice-document-file-input')!;
+		const big = new File([new Uint8Array(11 * 1024 * 1024)], 'scan.pdf');
+		Object.defineProperty(input, 'files', { value: [big], configurable: true });
+		click('invoice-document-upload-button');
+		await settle();
+		expect(text()).toContain('Die Datei ist grösser als 10 MB.');
+		expect(calls).toEqual([]);
+		expect(document.activeElement).toBe(input);
+	});
+
+	it('setzt den Fokus auf die Dateiauswahl, wenn keine Datei gewählt ist', async () => {
+		detail();
+		click('invoice-document-upload-button');
+		await settle();
+		expect(text()).toContain('Wählen Sie eine Datei.');
+		expect(document.activeElement).toBe(byTestId('invoice-document-file-input'));
+	});
+
+	it('sagt beim Löschen einer abgerechneten Rechnung, dass Mieter den Beleg verlangen können', () => {
+		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } }, [{ start: '2024-01-01', end: '2024-12-31' }]);
+		click('invoice-delete-button');
+		expect(byTestId('invoice-billed-warning')!.textContent).toContain(
+			'Die Rechnung ist abgerechnet; Mieter können den Beleg verlangen.'
+		);
+	});
+
+	it('zeigt die Rechnungsnummer', () => {
+		detail({ invoiceNumber: 'R-1001' });
+		expect(byTestId('invoice-number')!.textContent).toContain('R-1001');
 	});
 });
 

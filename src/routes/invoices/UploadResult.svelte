@@ -9,7 +9,7 @@
 	);
 </script>
 
-<div data-testid="invoice-upload-result">
+<div tabindex="-1" data-testid="invoice-upload-result">
 	<Alert tone="positive" {title}>
 		<ul class="flex flex-col gap-2">
 			{#each created as one (one.id)}

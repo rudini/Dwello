@@ -17,6 +17,7 @@
 		error,
 		optional = false,
 		min,
+		note,
 		testid
 	}: {
 		id: string;
@@ -27,6 +28,7 @@
 		error?: string;
 		optional?: boolean;
 		min?: string; // limits the calendar only; the page checks the date
+		note?: { text: string; testid: string }; // see Field
 		testid: string;
 	} = $props();
 
@@ -111,7 +113,7 @@
 </script>
 
 <div bind:this={frame} class="flex flex-col gap-2">
-	<Field {id} {label} help={helpText} example={EXAMPLE} error={shownError} {optional}>
+	<Field {id} {note} {label} help={helpText} example={EXAMPLE} error={shownError} {optional}>
 		{#snippet children(control)}
 			<div class="flex gap-2">
 				<input

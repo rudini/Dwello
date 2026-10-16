@@ -28,7 +28,7 @@ const read = {
 	dueDate: null,
 	description: 'Allgemeinstrom Q1',
 	nonAllocableItems: false,
-	confidence: { billingEntityName: 0.95, invoiceNumber: 0.9, invoiceDate: 0.4, totalAmount: 0.9 }
+	confidence: { billingEntityName: 0.95, invoiceNumber: 0.9, invoiceDate: 0.4, totalAmount: 0.9, servicePeriodStart: 0.9, description: 0.8 }
 };
 const categorized = { category: 'Electricity Common Areas', confidence: 0.9, isAllowedUtilityCost: true, reasoning: 'Strom' };
 // The stand-in answers the reading of a file and the categorization each with its own answer

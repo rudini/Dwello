@@ -355,7 +355,8 @@ export function parseExtractionResponse(response: string): Extraction | null {
 	const unsure = Object.entries(fields)
 		.filter(([field, value]) => {
 			const sure = confidence[ANSWERED_AS[field] ?? field];
-			return value !== null && typeof sure === 'number' && sure < 0.7;
+			// a value without its confidence counts as unsure (domain review V-12)
+			return value !== null && !(typeof sure === 'number' && sure >= 0.7);
 		})
 		.map(([field]) => field);
 	return {

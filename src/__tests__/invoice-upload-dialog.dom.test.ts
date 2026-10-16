@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
 // The pages the KI reads: rendering needs a canvas, which jsdom lacks
-vi.mock('$lib/file-pages', () => ({ pagesOf: vi.fn(async () => ['data:image/jpeg;base64,/9j/']) }));
+vi.mock('$lib/file-pages', () => ({
+	pagesOf: vi.fn(async () => ({ pages: ['data:image/jpeg;base64,/9j/'], morePages: false }))
+}));
 
 import { pagesOf } from '$lib/file-pages';
 import InvoiceUploadDialog from '../routes/invoices/InvoiceUploadDialog.svelte';
@@ -86,6 +88,24 @@ describe('Rechnungen hochladen', () => {
 		expect(oncreated).toHaveBeenCalledWith([{ id: 'i9', name: 'Elektro Blitz AG' }]);
 	});
 
+	it('markiert unsichere und nicht gefundene Werte mit Text, den der Screenreader beim Feld ansagt', async () => {
+		const fields = { ...extraction.fields, dueDate: null };
+		open(() => [200, { ...read, fields, unsure: ['invoiceNumber', 'invoiceDate'] }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+
+		for (const [testid, field, text] of [
+			['invoice-upload-unsure-invoiceNumber', 'invoice-upload-invoice-number-input', 'Die KI ist unsicher'],
+			['invoice-upload-unsure-invoiceDate', 'invoice-date-input', 'Die KI ist unsicher'],
+			['invoice-upload-missing-dueDate', 'invoice-upload-due-date-input', 'Die KI hat diesen Wert nicht gefunden']
+		]) {
+			const hint = byTestId(testid)!;
+			expect(hint.textContent).toContain(text);
+			expect(byTestId(field)!.getAttribute('aria-describedby')).toContain(hint.id);
+		}
+	});
+
 	it('lehnt eine Datei ab, die weder PDF noch Bild ist, ohne sie der KI zu zeigen', async () => {
 		const { calls } = open(() => [200, read]);
 		chooseBuilding();
@@ -155,4 +175,91 @@ describe('Rechnungen hochladen', () => {
 		await settle();
 		expect(rowText()[0]).toContain('Die Rechnung wurde nicht erstellt, weil Dwello nicht geantwortet hat.');
 	});
+
+	it('nimmt auch bei zwei schnellen Auswahlen höchstens 20 Dateien', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		const input = byTestId<HTMLInputElement>('invoice-upload-file-input')!;
+		for (const offset of [0, 15]) {
+			Object.defineProperty(input, 'files', { value: Array.from({ length: 15 }, (_, i) => pdf(`r${offset + i}.pdf`)), configurable: true });
+			input.dispatchEvent(new Event('change', { bubbles: true }));
+		}
+		for (let i = 0; i < 15; i++) await settle();
+		expect(allByTestId('invoice-upload-row')).toHaveLength(20);
+	});
+
+	it('meldet nichts als erstellt, wenn abgebrochen wird', async () => {
+		const { oncreated } = open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('dialog-cancel');
+		click('invoice-upload-discard-confirm');
+		expect(oncreated).not.toHaveBeenCalled();
+	});
+
+	it('zeigt das Ergebnis und gibt ihm den Fokus, wenn Dateien im Dialog bleiben', async () => {
+		open((call) => (call.path === '/invoices' ? [201, { id: 'i9' }] : [200, read]));
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'), word);
+		click('invoice-upload-create-button');
+		await settle();
+		expect(document.activeElement).toBe(byTestId('invoice-upload-result'));
+		expect(byTestId('invoice-upload-result')!.textContent).toContain('1 Rechnung erstellt');
+	});
+
+	it('sagt an, wie viele Dateien gelesen sind', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('a.pdf'), pdf('b.pdf'));
+		const status = byTestId('invoice-upload-progress')!;
+		expect(status.getAttribute('role')).toBe('status');
+		expect(status.textContent).toContain('2 von 2 Dateien gelesen');
+	});
+
+	it('gibt nach dem Entfernen einer Datei den Fokus der Dateiauswahl', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-remove');
+		await settle();
+		expect(document.activeElement).toBe(byTestId('invoice-upload-file-input'));
+	});
+
+	it('erklärt, warum das Gebäude gesperrt ist, sobald Dateien da sind', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		expect(byTestId<HTMLSelectElement>('invoice-upload-building-select')!.disabled).toBe(true);
+		expect(document.body.textContent).toContain('Das Gebäude gilt für alle Dateien.');
+	});
+
+	it('nennt bei jedem Knopf einer Zeile ihre Datei und ihren Stand', async () => {
+		open(() => [200, { ...read, invoiceCount: 1 }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		const described = (testid: string) =>
+			byTestId(testid)!.getAttribute('aria-describedby')!.split(' ').map((id) => document.getElementById(id)?.textContent?.trim());
+		for (const testid of ['invoice-upload-row-toggle', 'invoice-upload-row-remove'])
+			expect(described(testid)).toEqual(['blitz.pdf', 'Bitte prüfen']);
+		expect(byTestId('invoice-upload-row-toggle')!.getAttribute('aria-expanded')).toBe('false');
+		click('invoice-upload-row-toggle');
+		expect(byTestId('invoice-upload-row-toggle')!.getAttribute('aria-expanded')).toBe('true');
+	});
+
+	it('bietet bei einer Datei mit mehreren Rechnungen keine Angaben zum Prüfen an', async () => {
+		open(() => [200, { ...read, invoiceCount: 2 }]);
+		chooseBuilding();
+		await upload(pdf('sammel.pdf'));
+		expect(byTestId('invoice-upload-row-toggle')).toBeNull();
+	});
+
+	it('verlinkt eine schon erfasste Rechnung im selben Tab', async () => {
+		open(() => [200, { ...read, duplicateOf: 'i1' }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		const link = byTestId('invoice-upload-row-message')!.querySelector('a')!;
+		expect(link.getAttribute('href')).toBe('/invoices/i1');
+		expect(link.hasAttribute('target')).toBe(false);
+	});
 });
+

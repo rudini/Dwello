@@ -15,6 +15,8 @@
 		type UploadRow
 	} from '$lib/invoice-upload';
 	import type { Category } from '$lib/types';
+	import { focusFirstError } from '$lib/ui/focus-error';
+	import { tick } from 'svelte';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import Select from '$lib/ui/Select.svelte';
@@ -59,6 +61,7 @@
 
 	const chosen = $derived(rows.filter((row) => row.selected && row.status !== 'reading' && row.status !== 'refused'));
 	const resultShown = $derived(created.length > 0);
+	const done = $derived(rows.filter((row) => row.status !== 'reading').length);
 	const createLabel = $derived(
 		chosen.length === 1 ? m.invoices_upload_create_one() : m.invoices_upload_create({ count: chosen.length })
 	);
@@ -69,17 +72,19 @@
 	// What the KI reads from a file; without the KI or a readable file the property manager fills in the fields
 	async function read(key: number) {
 		update(key, (row) => ({ ...row, status: 'reading' }));
-		const row = rows.find((one) => one.key === key)!;
+		const { file } = rows.find((one) => one.key === key)!;
 		if (!pages[key]) {
 			try {
-				pages[key] = await pagesOf(row.file);
+				const read = await pagesOf(file);
+				pages[key] = read.pages;
+				update(key, (one) => ({ ...one, morePages: read.morePages }));
 			} catch {
 				return update(key, (one) => withoutKi(one, 'unreadable'));
 			}
 		}
 		const answer = await api.post<Proposal>('/invoices/extract', {
 			buildingId,
-			fileName: row.file.name,
+			fileName: file.name,
 			pages: pages[key]
 		});
 		if (answer.data) update(key, (one) => withProposal(one, answer.data!));
@@ -87,17 +92,28 @@
 		else update(key, (one) => ({ ...one, status: 'failed' }));
 	}
 
+	// The rows are added at once, so a second choice while the first is still checked counts them too
 	async function add(files: File[]) {
 		tooMany = rows.length + files.length > MAX_FILES;
-		for (const file of files.slice(0, MAX_FILES - rows.length)) {
-			const row = newRow(nextKey++, file, { distributionKeyId: defaultDistributionKeyId });
-			const refusal = await fileRefusal(file);
-			rows = [...rows, refusal ? { ...row, status: 'refused', notes: [refusal], selected: false } : row];
-			if (!refusal) void read(row.key);
+		const added = files
+			.slice(0, Math.max(0, MAX_FILES - rows.length))
+			.map((file) => newRow(nextKey++, file, { distributionKeyId: defaultDistributionKeyId }));
+		rows = [...rows, ...added];
+		for (const row of added) {
+			const refusal = await fileRefusal(row.file);
+			if (refusal) update(row.key, (one) => ({ ...one, status: 'refused', notes: [refusal], selected: false }));
+			else void read(row.key);
 		}
 	}
 
 	const remove = (key: number) => (rows = rows.filter((row) => row.key !== key));
+
+	// removed by the property manager: the focus goes to where files are added
+	async function removeRow(key: number) {
+		remove(key);
+		await tick();
+		document.querySelector<HTMLElement>('[data-testid="invoice-upload-file-input"]')?.focus();
+	}
 
 	// One invoice with its Beleg; a refusal or a failed request stays at the row with its reason
 	async function createOne(row: UploadRow) {
@@ -123,11 +139,16 @@
 			await createOne(row);
 		}
 		creating = false;
-		if (!rows.length) finish();
+		if (!rows.length) return finish();
+		// what stays in the dialog: the result first, else the first field to fill in
+		await tick();
+		const result = document.querySelector<HTMLElement>('[data-testid="invoice-upload-result"]');
+		if (result) result.focus();
+		else focusFirstError(document.querySelector('[role=dialog]'));
 	}
 
 	function finish() {
-		oncreated(created);
+		if (created.length) oncreated(created);
 		open = false;
 		buildingId = '';
 		rows = [];
@@ -155,9 +176,10 @@
 	onconfirm={create}
 >
 	<p class="text-ink">{m.invoices_upload_purpose()}</p>
-	<Alert tone="info" title={m.invoices_beleg_title()} testid="invoice-keep-original">
-		<p>{m.invoices_upload_keep_original()}</p>
-	</Alert>
+	<p class="text-ink-muted" data-testid="invoice-keep-original">
+		{m.invoices_upload_kept()}
+		{m.invoices_upload_keep_original()}
+	</p>
 
 	{#if resultShown}<UploadResult {created} />{/if}
 
@@ -168,16 +190,20 @@
 		options={buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` }))}
 		bind:value={buildingId}
 		disabled={rows.length > 0}
+		help={rows.length > 0 ? m.invoices_upload_building_locked() : undefined}
 		testid="invoice-upload-building-select"
 	/>
 
 	<UploadFiles enabled={!!buildingId} onfiles={(files) => void add(files)} />
 
 	{#if tooMany}
-		<Alert tone="caution" title={m.invoices_upload_open()}><p>{m.invoices_upload_too_many()}</p></Alert>
+		<Alert tone="caution" title={m.invoices_upload_too_many_title()}><p>{m.invoices_upload_too_many()}</p></Alert>
 	{/if}
 
 	{#if rows.length}
+		<p role="status" class="text-ink-muted" data-testid="invoice-upload-progress">
+			{m.invoices_upload_progress({ done, count: rows.length })}
+		</p>
 		<ul class="flex flex-col divide-y divide-line">
 			{#each rows as row, i (row.key)}
 				<InvoiceUploadRow
@@ -187,7 +213,7 @@
 					{categories}
 					{distributionKeys}
 					onretry={() => read(row.key)}
-					onremove={() => remove(row.key)}
+					onremove={() => removeRow(row.key)}
 				/>
 			{/each}
 		</ul>

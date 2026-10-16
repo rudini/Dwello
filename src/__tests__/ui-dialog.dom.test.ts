@@ -179,5 +179,19 @@ describe('Dialog', () => {
 		press('Escape');
 		expect(onclose).not.toHaveBeenCalled();
 	});
+
+	it('springt mit Tab über gesperrte Felder hinweg an den Anfang zurück', () => {
+		openDialog({ children: markup('<select data-testid="erstes"></select><input disabled data-testid="gesperrt" />') });
+		byTestId('dialog-confirm')!.focus();
+		press('Tab');
+		expect(document.activeElement).toBe(byTestId('erstes'));
+		press('Tab');
+		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
+	});
+
+	it('beschreibt einen breiten Dialog mit vielen Einträgen nicht mit seinem ganzen Inhalt', () => {
+		openDialog({ wide: true });
+		expect(document.querySelector('[role=dialog]')!.hasAttribute('aria-describedby')).toBe(false);
+	});
 });
 

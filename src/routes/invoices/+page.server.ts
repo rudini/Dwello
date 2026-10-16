@@ -1,5 +1,5 @@
 import type { InvoicesListData } from '$lib/types';
-import { invoiceChoices, localCategory, toInvoice } from '$lib/server/invoice';
+import { invoiceChoices, toInvoice } from '$lib/server/invoice';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -36,19 +36,14 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 	try {
 		const params = invoiceQuery(url, page, pageSize);
 
-		const [invoicesRes, buildingsRes, categoriesRes, { distributionKeys }, defaultKey] = await Promise.all([
+		const [invoicesRes, buildingsRes, choices] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/invoices?${params}`),
 			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
-			fetch(`${BACKEND_URL}/api/v1/categories?limit=100`),
-			invoiceChoices(fetch),
-			fetch(`${BACKEND_URL}/api/v1/config/default_distribution_key_id`)
-				.then((response) => (response.ok ? response.json() : {}))
-				.catch(() => ({})) as Promise<{ value?: string }>
+			invoiceChoices(fetch)
 		]);
 
 		const invoicesData = await invoicesRes.json();
 		const buildingsData = await buildingsRes.json();
-		const categoriesData = await categoriesRes.json();
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
 			(b: Record<string, unknown>) => ({
@@ -58,7 +53,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			})
 		);
 
-		const categories = (categoriesData.categories || categoriesData.data || []).map(localCategory);
+		const { categories } = choices;
 		const invoices = (invoicesData.invoices || invoicesData.data || []).map(
 			(r: Record<string, unknown>) => toInvoice(r, categories)
 		);
@@ -71,8 +66,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			buildings,
 			categories,
 			years,
-			distributionKeys,
-			defaultDistributionKeyId: defaultKey.value ?? ''
+			distributionKeys: choices.distributionKeys,
+			defaultDistributionKeyId: choices.defaultDistributionKeyId
 		};
 	} catch (err) {
 		console.error('Failed to fetch invoices:', err);

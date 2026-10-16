@@ -7,7 +7,7 @@
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { formatDate } from '$lib/utils/format';
-	import UnsureHint from './UnsureHint.svelte';
+	import { fieldNote } from '$lib/invoice-upload';
 
 	// What the invoice says: building, date, amount, supplier and service; shared by "Neue Rechnung" and "Rechnung bearbeiten"
 	let {
@@ -24,7 +24,7 @@
 		onblur,
 		idPrefix = '',
 		chooseBuilding = true,
-		unsure = []
+		read = { unsure: [], missing: [] }
 	}: {
 		buildingId: string;
 		invoiceDate: string;
@@ -39,7 +39,7 @@
 		onblur?: () => void;
 		idPrefix?: string; // several invoices on one page (the upload dialog) need their own ids
 		chooseBuilding?: boolean; // false where the building is chosen once for all (the upload dialog)
-		unsure?: string[]; // fields the KI read without being sure
+		read?: { unsure: string[]; missing: string[] }; // fields the KI read without being sure, or did not find
 	} = $props();
 
 	// ISO dates compare as text; a Leistungszeitraum decides over the Rechnungsdatum
@@ -70,9 +70,9 @@
 	help={m.invoices_date_help()}
 	bind:value={invoiceDate}
 	error={errors.invoiceDate}
+	note={fieldNote(read, 'invoiceDate')}
 	testid="invoice-date-input"
 />
-<UnsureHint field="invoiceDate" {unsure} />
 
 <fieldset class="flex flex-col gap-4">
 	<legend class="font-semibold text-ink">
@@ -86,6 +86,7 @@
 			optional
 			bind:value={servicePeriodStart}
 			error={errors.servicePeriodStart}
+			note={fieldNote(read, 'servicePeriodStart')}
 			testid="invoice-service-start-input"
 		/>
 		<DateInput
@@ -97,7 +98,6 @@
 			testid="invoice-service-end-input"
 		/>
 	</div>
-	<UnsureHint field="servicePeriodStart" {unsure} />
 </fieldset>
 
 {#if outside && period}
@@ -117,9 +117,9 @@
 	example="450.00"
 	bind:value={amount}
 	error={errors.amount}
+	note={fieldNote(read, 'amount')}
 	testid="invoice-amount-input"
 />
-<UnsureHint field="amount" {unsure} />
 
 <TextInput
 	id="{idPrefix}billingEntity"
@@ -129,9 +129,9 @@
 	bind:value={billingEntity}
 	{onblur}
 	error={errors.billingEntity}
+	note={fieldNote(read, 'billingEntityName')}
 	testid="invoice-billing-entity-input"
 />
-<UnsureHint field="billingEntityName" {unsure} />
 
 <Textarea
 	id="{idPrefix}description"
@@ -142,6 +142,6 @@
 	bind:value={description}
 	{onblur}
 	error={errors.description}
+	note={fieldNote(read, 'description')}
 	testid="invoice-description-input"
 />
-<UnsureHint field="description" {unsure} />

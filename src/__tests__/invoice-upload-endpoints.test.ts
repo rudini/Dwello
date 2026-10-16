@@ -50,6 +50,21 @@ describe('Rechnung mit Beleg erstellen', () => {
 	});
 });
 
+describe('Formular, das kein Formular ist', () => {
+	it('lehnt es mit 400 ab, ohne das Backend zu fragen', async () => {
+		const calls = backend({});
+		const broken = () =>
+			new Request('http://localhost/api/x', {
+				method: 'POST',
+				body: 'kein Formular',
+				headers: { 'X-XSRF-TOKEN': 'x1', 'content-type': 'multipart/form-data; boundary=x' }
+			});
+		expect((await createInvoice({ request: broken(), cookies } as never)).status).toBe(400);
+		expect((await putBeleg({ request: broken(), cookies, params: { id: 'i1' } } as never)).status).toBe(400);
+		expect(calls).toEqual([]);
+	});
+});
+
 describe('Beleg einer Rechnung ersetzen', () => {
 	it('schickt die gewählte Datei als Base64 ans Backend', async () => {
 		const calls = backend({ id: 'i1' });
@@ -82,7 +97,7 @@ describe('Datei auslesen', () => {
 });
 
 describe('Beleg anzeigen', () => {
-	it('liefert die Datei des Backends mit Art und Namen', async () => {
+	it('zeigt die Datei des Backends im Browser, mit Art und Namen', async () => {
 		const fetch = async () =>
 			new Response(pdf, {
 				headers: { 'content-type': 'application/pdf', 'content-disposition': 'attachment; filename="blitz.pdf"' }
@@ -91,7 +106,7 @@ describe('Beleg anzeigen', () => {
 		const response = await getBeleg({ params: { id: 'i1' }, fetch } as never);
 
 		expect(response.headers.get('content-type')).toBe('application/pdf');
-		expect(response.headers.get('content-disposition')).toContain('blitz.pdf');
+		expect(response.headers.get('content-disposition')).toBe('inline; filename="blitz.pdf"'); // shown, not saved
 		expect(new Uint8Array(await response.arrayBuffer())).toEqual(pdf);
 	});
 });

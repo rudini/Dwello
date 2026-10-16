@@ -101,23 +101,29 @@ function reply(prompt: string) {
 }
 
 // What the stand-in «reads» from an invoice file, by its name: «… ohne KI» fails, «Sammelscan» holds two invoices,
-// «Werke Schlussrechnung» deducts Akonto payments, «… Reparatur» mixes in costs that are not allocable
+// «Werke Schlussrechnung» deducts Akonto payments, «… Reparatur» mixes in costs that are not allocable, «… Gutschrift» is a
+// credit note
+// What the file name says about the file, as the stand-in «reads» it
+const readsAs = (fileName: string) => ({
+	invoiceCount: fileName.includes('Sammelscan') ? 2 : 1,
+	documentType: fileName.includes('Gutschrift') ? 'credit_note' : 'invoice',
+	deductedAmount: fileName.includes('Werke Schlussrechnung') ? 1000 : null,
+	nonAllocableItems: fileName.includes('Reparatur')
+});
+
 function read(fileName: string) {
 	if (fileName.includes('ohne KI')) return new Response(null, { status: 503 });
 	const answer = {
-		invoiceCount: fileName.includes('Sammelscan') ? 2 : 1,
-		documentType: 'invoice',
+		...readsAs(fileName),
 		billingEntityName: fileName.replace(/\.[^.]*$/, ''),
 		invoiceNumber: 'R-1001',
 		invoiceDate: '2026-03-31',
 		totalAmount: 1250,
-		deductedAmount: fileName.includes('Werke Schlussrechnung') ? 1000 : null,
 		servicePeriodStart: '2026-01-01',
 		servicePeriodEnd: '2026-03-31',
 		dueDate: null,
 		description: 'Allgemeinstrom Q1',
-		nonAllocableItems: fileName.includes('Reparatur'),
-		confidence: { billingEntityName: 0.95, invoiceNumber: 0.9, invoiceDate: 0.4, totalAmount: 0.9, description: 0.8 }
+		confidence: { billingEntityName: 0.95, invoiceNumber: 0.9, invoiceDate: 0.4, totalAmount: 0.9, servicePeriodStart: 0.9, description: 0.8 }
 	};
 	return Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] });
 }
