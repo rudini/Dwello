@@ -111,6 +111,7 @@ Funktionalität: Barrierefreiheit
       | statements             | filtered-empty      |
       | statements             | mark-paid-dialog    |
       | statements             | list-scoped         |
+      | statements             | pdf-missing         |
       | statements-period      | default             |
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |

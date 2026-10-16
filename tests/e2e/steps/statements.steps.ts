@@ -13,6 +13,7 @@ import {
 	downloadStatementPdfFromList,
 	requestStatementPdfFromList,
 	openStatement,
+	openStatementWithoutPdf,
 	openStatementList,
 	searchStatements,
 	showDraftsOfBuilding,
@@ -175,5 +176,26 @@ When(
 	'der Liegenschaftsverwalter in der Liste das PDF der Abrechnung {int} von {string} anfordert',
 	async ({ verwalter, names }, year: number, tenant: string) => {
 		await verwalter.attemptsTo(requestStatementPdfFromList(names.get(tenant) ?? tenant, year));
+	}
+);
+
+Then(
+	'zeigt die Abrechnungsliste bei der Abrechnung von {string} {string}',
+	async ({ verwalter, names }, tenant: string, text: string) => {
+		await verwalter.sees(listedStatement(names.get(tenant) ?? tenant)).toContain(text);
+	}
+);
+
+Then(
+	'die Abrechnungsliste zeigt bei der Abrechnung von {string} nicht {string}',
+	async ({ verwalter, names }, tenant: string, text: string) => {
+		await verwalter.sees(listedStatement(names.get(tenant) ?? tenant)).not.toContain(text);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter beim fehlenden PDF der Abrechnung {int} von {string} weitergeht',
+	async ({ verwalter, names }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(openStatementWithoutPdf(names.get(tenant) ?? tenant, year));
 	}
 );

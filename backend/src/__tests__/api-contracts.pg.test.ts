@@ -316,6 +316,11 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('GET /statements liefert die Felder von statements.json', async () => {
+		const actual = await (await callApi(`/api/v1/statements?contractId=${rental.contract}`)).json();
+		expect(drift(await sample('statements'), actual)).toEqual([]);
+	});
+
 	it('GET /statements einer Periode liefert die Felder von period-statements.json', async () => {
 		const actual = await (await callApi(`/api/v1/statements?periodStart=${period.periodStart}&periodEnd=${period.periodEnd}&limit=1000`)).json();
 		expect(drift(await sample('period-statements'), actual)).toEqual([]);
