@@ -132,7 +132,6 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				endDate: data.endDate || null,
 				terminated: !!data.terminated,
 				noticeReceivedOn: data.noticeReceivedOn ?? null,
-				movedOut: !!data.movedOut,
 				baseRent: data.baseRent || '0',
 				additionalRent: data.additionalRent || null,
 				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
@@ -276,6 +275,17 @@ async function continueOpenEnded(fetch: typeof globalThis.fetch, id: string, dra
 	return response.ok ? null : fail(response.status, { fixedTermError: m.contracts_save_failed() });
 }
 
+// The deleted draft's period in the statement wizard, to create it anew (A-10)
+const toWizard = (draft: Row) =>
+	redirect(
+		303,
+		wizardLink(
+			String((draft.building as Row | undefined)?.id),
+			String(draft.periodStart),
+			String(draft.periodEnd)
+		)
+	);
+
 export const actions: Actions = {
 	// The last day of the tenancy, the Kündigungstermin of an open-ended contract; a past day only confirmed, never before a statement's end
 	end: async ({ params, fetch, request }) => {
@@ -294,8 +304,7 @@ export const actions: Actions = {
 		if (!draft) return fail(409, { endError: m.contracts_end_failed() });
 		const refused = await endOn(fetch, params.id, day, form, String(draft.id));
 		if (refused) return refused;
-		const building = String((draft.building as Row | undefined)?.id);
-		throw redirect(303, wizardLink(building, String(draft.periodStart), String(draft.periodEnd)));
+		throw toWizard(draft);
 	},
 	continueOpenEnded: async ({ params, fetch }) => {
 		const refused = await continueOpenEnded(fetch, params.id);
@@ -308,8 +317,7 @@ export const actions: Actions = {
 		if (!draft) return fail(409, { fixedTermError: m.contracts_save_failed() });
 		const refused = await continueOpenEnded(fetch, params.id, String(draft.id));
 		if (refused) return refused;
-		const building = String((draft.building as Row | undefined)?.id);
-		throw redirect(303, wizardLink(building, String(draft.periodStart), String(draft.periodEnd)));
+		throw toWizard(draft);
 	},
 	// the tenant left on the agreed end: the overview stops asking (A-6)
 	movedOut: async ({ params, fetch }) => {

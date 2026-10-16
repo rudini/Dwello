@@ -41,6 +41,14 @@ describe('Mieter ist ausgezogen', () => {
 		expect((await put({ movedOut: true })).status).toBe(200);
 	});
 
+	// Code review C-2: «Bearbeiten» sends the stored end again; both fields together keep the confirmation
+	it('behält die Bestätigung beim selben Vertragsende und wenn sie mit dem neuen mitkommt', async () => {
+		expect((await put({ endDate: '2026-03-31' })).status).toBe(200);
+		expect(await stored()).toMatchObject({ movedOut: true });
+		expect((await put({ endDate: '2026-04-30', movedOut: true })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2026-04-30', movedOut: true });
+	});
+
 	it('vergisst die Bestätigung, wenn der Mietvertrag unbefristet weiterläuft', async () => {
 		expect((await put({ endDate: null })).status).toBe(200);
 
