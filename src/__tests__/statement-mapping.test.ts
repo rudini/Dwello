@@ -21,6 +21,21 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement({ ...backendStatement, heatingShare }).heatingProfileName).toBe('Winter');
 	});
 
+	// #247: nach Tagen geteilt, das gewählte Heizprofil mit dem Namen beim Erstellen und dem Grund
+	it('nennt das Heizprofil einer nach Tagen geteilten Abrechnung als nicht angewendet, mit dem Grund', () => {
+		const names = { name: 'Winter', nameDE: 'Winter', nameFR: null, nameIT: null, nameEN: null };
+		const named = (heatingShare: object) => toStatement({ ...backendStatement, heatingShare }).heatingProfileName;
+
+		expect(named({ byDays: true, reason: 'wholePeriod', names })).toBe(
+			'Winter (nicht angewendet: Mietvertrag über die ganze Periode)'
+		);
+		expect(named({ byDays: true, reason: 'noHeatingMonths', names })).toBe(
+			'Winter (nicht angewendet: die Monate der Abrechnungsperiode haben im Heizprofil zusammen 0 %)'
+		);
+		// stored before #247: no name, no reason; the profile as it is now
+		expect(named({ byDays: true })).toBe('Standard (nicht angewendet)');
+	});
+
 	// #248: die abgerechneten Mietstage, wie die Abrechnung sie gespeichert hat
 	it('übernimmt die abgerechneten Tage des Mietvertrags', () => {
 		const statement = toStatement({ ...backendStatement, rentalStart: '2024-07-01' });
