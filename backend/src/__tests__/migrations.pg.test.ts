@@ -36,6 +36,22 @@ afterAll(async () => {
 	for (const name of databases) await query('postgres', `DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
 });
 
+// The categories whose description 0007 completes (#204, #220); every KI prompt lists the descriptions
+const described = `'Heating', 'Garden Maintenance', 'Waste Disposal', 'TV/Cable', 'Building Insurance', 'Administration'`;
+
+/** A database with every migration before 0007_category_descriptions.sql */
+async function withoutDescriptions() {
+	const name = await database();
+	const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+	try {
+		await cp(migrations, before, { recursive: true, filter: (file) => !file.endsWith('0007_category_descriptions.sql') });
+		await migrate(`${server}/${name}`, before);
+	} finally {
+		await rm(before, { recursive: true });
+	}
+	return name;
+}
+
 describe('Migrationen anwenden', () => {
 	it('richtet eine leere Datenbank mit allen Migrationen ein und wiederholt nichts', async () => {
 		const name = await database();
@@ -66,32 +82,29 @@ describe('Migrationen anwenden', () => {
 		);
 	});
 
-	// Die Beschreibungen gehen in jeden KI-Prompt; eine vom Vermieter geänderte bleibt (#204, #220)
-	it('ergänzt die Beschreibungen vordefinierter Kategorien nur, wo noch der gelieferte Text steht', async () => {
-		const name = await database();
-		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
-		try {
-			await cp(migrations, before, { recursive: true, filter: (file) => !file.endsWith('0007_category_descriptions.sql') });
-			await migrate(`${server}/${name}`, before);
-		} finally {
-			await rm(before, { recursive: true });
-		}
-		await query(name, `UPDATE categories SET description = 'Unser Gärtner Huber' WHERE name = 'Garden Maintenance'`);
+	it('ergänzt die Beschreibungen vordefinierter Kategorien um das, was nicht dazugehört', async () => {
+		const name = await withoutDescriptions();
 
 		await migrate(`${server}/${name}`, migrations);
 
-		const rows = await query(
-			name,
-			`SELECT name, description FROM categories WHERE name IN ('Heating', 'Garden Maintenance', 'Waste Disposal', 'TV/Cable', 'Building Insurance', 'Administration', 'Elevator') ORDER BY sort_order`
-		);
-		expect(rows).toEqual([
+		expect(await query(name, `SELECT name, description FROM categories WHERE name IN (${described}) ORDER BY sort_order`)).toEqual([
 			{ name: 'Heating', description: 'Brennstoff, Energie, Wartung und Betrieb der Heizung, auch Versicherung nur der Heizungsanlage und Verwaltungsarbeit für den Heizbetrieb; ohne Reparatur, Erneuerung, Verzinsung und Abschreibung der Anlage' },
-			{ name: 'Elevator', description: 'Strom, Notruftelefon und reine Wartung des Lifts; ohne Reparaturen, Ersatzteile und Serviceabos mit Reparaturen' },
-			{ name: 'Garden Maintenance', description: 'Unser Gärtner Huber' },
+			{ name: 'Garden Maintenance', description: 'Laufende Pflege von Garten und Umgebung: Rasenmähen, Rückschnitt von Sträuchern, Laub- und Unkrautentfernung; ohne Neubepflanzung, Baumfällung, Rasensanierung und Anschaffung von Geräten' },
 			{ name: 'Waste Disposal', description: 'Kehrichtgebühren und Grünabfuhr; ohne Räumungen, die der Vermieter bestellt' },
 			{ name: 'TV/Cable', description: 'Laufende Grundgebühr des Kabelnetzes; ohne Installation des Anschlusses' },
 			{ name: 'Building Insurance', description: 'Prämien der Gebäudeversicherung; ohne Prämien, die nur die Heizungsanlage versichern (gehören zur Heizung)' },
 			{ name: 'Administration', description: 'Allgemeine Verwaltungskosten; ohne Verwaltungsarbeit für den Heizbetrieb, z. B. Brennstoff bestellen (gehört zur Heizung), und ohne Verwaltungspauschale' }
 		]);
+	});
+
+	it('lässt eine Beschreibung, die der Vermieter geändert hat, wie sie ist', async () => {
+		const name = await withoutDescriptions();
+		await query(name, `UPDATE categories SET description = 'Eigener Text ' || name WHERE name IN (${described})`);
+
+		await migrate(`${server}/${name}`, migrations);
+
+		const rows = await query(name, `SELECT name, description FROM categories WHERE name IN (${described})`);
+		expect(rows.filter((row) => row.description !== `Eigener Text ${row.name}`)).toEqual([]);
+		expect(rows).toHaveLength(6);
 	});
 });
