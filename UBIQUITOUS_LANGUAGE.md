@@ -41,9 +41,9 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Kündigungsfrist** | Zeit zwischen dem Eingang der Kündigung und dem Kündigungstermin. Für Wohnungen mindestens 3 Monate auf einen ortsüblichen Termin, oder länger, wenn der Mietvertrag es vorsieht (Art. 266a, 266c OR). Kommt die Kündigung zu spät, gilt sie auf den nächsten Termin. Für ausserordentliche Kündigungen (z.B. Zahlungsrückstand, Art. 257d OR) gelten andere Fristen. | — |
 | **Vertragsstatus** | Laufend, künftig oder beendet, abgeleitet aus Vertragsbeginn und -ende. | Berechnung |
 | **Nachmieter** | Mieter, dessen Mietvertrag für dieselbe Wohnung nach dem Vertragsende eines gekündigten oder befristeten Mietvertrags beginnt. | — |
-| **Ersatzmieter** | Neuer Mieter, den der Mieter bei vorzeitiger Rückgabe vorschlägt und der den Mietvertrag zu den gleichen Bedingungen übernimmt (Art. 264 OR). | — |
+| **Ersatzmieter** | Zumutbarer, zahlungsfähiger neuer Mieter, den der Mieter bei vorzeitiger Rückgabe vorschlägt und der bereit ist, den Mietvertrag zu den gleichen Bedingungen zu übernehmen (Art. 264 Abs. 1 OR). | — |
 | **Mieterwechsel** | Ein Mietvertrag einer Wohnung endet, und ein neuer Mietvertrag mit einem anderen Mieter beginnt. Jeder Mietvertrag erhält seine eigene Nebenkostenabrechnung. | — |
-| **Abgerechnet bis** | Datum am Mietvertrag: Bis zu diesem Tag sind die Nebenkosten ausserhalb von Dwello abgerechnet. Abrechnungsläufe und der Hinweis auf fehlende Abrechnungen übergehen Abrechnungsperioden, die bis dahin enden; reicht eine Abrechnungsperiode darüber hinaus, rechnet sie nur die Tage danach ab. | geplant (#133) |
+| **Abgerechnet bis** | Datum am Mietvertrag: Bis zu diesem Tag sind die Nebenkosten ausserhalb von Dwello abgerechnet. Abrechnungsläufe und der Hinweis auf fehlende Abrechnungen übergehen Abrechnungsperioden, die bis dahin enden; reicht eine Abrechnungsperiode darüber hinaus, zählen Mietstage und geleistete Akontobeiträge erst ab dem Tag danach. | geplant (#133) |
 | **Nettomiete** | Monatliche Grundmiete in CHF (ohne Nebenkosten). Auch: Mietzins. | `base_rent` Feld |
 | **Zusatzmiete** | Zusätzliche monatliche Kosten (Garage, Parkplatz, Keller). | `additional_rent` Feld |
 | **Akonto** | Monatlicher Vorschuss des Mieters für Nebenkosten. Wird mit der Nebenkostenabrechnung verrechnet. | `monthly_advance_payment` Feld |
@@ -102,7 +102,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Kategorisierung** | Automatischer Vorschlag einer Kategorie für eine Rechnung durch ein Sprachmodell (KI). | `/api/v1/invoices/categorize` |
 | **KI-Kategorie** | Von der KI vorgeschlagene Kategorie. | `llm_category_id` Feld |
 | **Konfidenz** | Wie sicher die KI bei einem Vorschlag ist (0–100 %), für die Kategorie und für jede ausgelesene Angabe. | `llm_confidence` Feld (0–1) |
-| **Auslesen** | Die KI liest Rechnungssteller, Rechnungsnummer, Rechnungsdatum, Fälligkeitsdatum, Leistungszeitraum und Betrag aus einer hochgeladenen Datei; ihre Werte sind Vorschläge. | — |
+| **Auslesen** | Die KI liest Rechnungssteller, Rechnungsnummer, Rechnungsdatum, Fälligkeitsdatum, Leistungszeitraum, Beschreibung und Betrag aus einer hochgeladenen Datei; ihre Werte sind Vorschläge. | — |
 | **Vorschlag der KI (Kategorie)** | Einstufung einer neuen Kategorie als umlagefähig oder nicht umlagefähig durch die KI, mit Begründung und Artikel. Nur beim Erfassen; ab Konfidenz 70 %; der Liegenschaftsverwalter entscheidet. | — |
 | **Manuell überschrieben** | Der Liegenschaftsverwalter hat die KI-Kategorie geändert. | `was_manually_overridden` Feld |
 | **Grund der Änderung** | Begründung, warum die KI-Kategorie überschrieben wurde. | `manual_override_reason` Feld |
@@ -165,7 +165,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Versendet** | Abrechnung dem Mieter zugestellt. (`sent`) |
 | **Bezahlt** | Nachzahlung/Rückerstattung abgeschlossen. (`paid`) |
 | **Überfällig** | Versendet und Zahlungsfrist überschritten. (`overdue`) |
-| **Ersetzt** | Durch eine berichtigte Abrechnung ersetzt; wird nicht gemahnt und zählt nicht als Abrechnung der Periode. (`replaced`, geplant #120) |
+| **Ersetzt** | Durch eine berichtigte Abrechnung ersetzt; wird nicht gemahnt und zählt nicht als Abrechnung der Periode; Zahlungsdatum und Saldo der ersetzten Abrechnung bleiben erhalten. (`replaced`, geplant #120) |
 
 ---
 
