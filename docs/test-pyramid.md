@@ -27,7 +27,7 @@ The quantities still form a pyramid, with many fast unit tests at the bottom. Th
 
 | Layer | Location | Runner | Against | Test doubles |
 |---|---|---|---|---|
-| Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks, except one: to reach a state that only a failing request produces, a scenario may answer that one endpoint (all its calls, e.g. one per apartment) with an error at the browser boundary (an error status only, e.g. 500, through `FailRequests` in `tests/e2e/screenplay/`), never with invented data; only requests the browser makes, so not in `@api` scenarios; SMTP mail catcher instead of a mail provider, a KI stand-in (`backend/scripts/llm-stub.ts`) that answers only the check of a new category, signed session JWT instead of Google OAuth |
+| Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks except a failing request at the browser boundary (`tests/e2e/CLAUDE.md`, "Failure states"); SMTP mail catcher instead of a mail provider, a KI stand-in (`backend/scripts/llm-stub.ts`) that answers only the check of a new category, signed session JWT instead of Google OAuth |
 | Integration | `backend/src/__tests__/*.pg.test.ts` | `bun run test` or `bun run test:pg` (preload `scripts/test-db.ts`, set in `bunfig.toml`) | Elysia app in process (`app.handle`) → PostgreSQL `dwello_test` (migrated fresh before each run) | none; local SMTP server for mail |
 | Unit backend | `backend/src/__tests__/*.test.ts` | `bun run test` (one run together with the pg tests) | pure functions of the services | none; Resend stand-in via `Bun.serve` in `mail.test.ts` |
 | Unit frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | load functions, actions, BFF, components | fake backend via `fetch` stub / `fakeBff` (from the API contracts in `tests/contracts`; add one when there is none), `vi.mock` for `$app/*` and for the module that reads build-time constants |
@@ -38,7 +38,7 @@ Rules:
 - CI workflows and deploy scripts: branching logic moves into a `tools/<area>/*.mjs` script with a `*.test.ts` next to it (as `tools/open-work`, `tools/release`); for the remaining glue (git, `gh`, docker) a simulation in a scratch repository is the red and green of a fix; its commands and both results go into the commit message of the fix, since no test shows them.
 - Build-time constants (`__APP_VERSION__`) are read through one small module that DOM tests replace with `vi.mock`, never in the component, so each value has a test.
 - No mocked database: whatever needs SQL is a `*.pg.test.ts`.
-- Negative E2E checks (something is absent) need a positive anchor first (empty-state notice, page title); otherwise they also pass on an error page.
+- E2E rules (isolation, negative checks, failure states, `@api`): `tests/e2e/CLAUDE.md`, "Rules".
 - Selectors: `data-testid` (see `CLAUDE.md`).
 - Fake backend responses in frontend tests come from `tests/contracts/*.json`; a test that reads a response without a contract adds one; `backend/src/__tests__/api-contracts.pg.test.ts` checks every field against the real API (see `tests/contracts/README.md`).
 
@@ -73,14 +73,11 @@ A floor applies: today's coverage, rounded down to whole percent. If coverage dr
 
 The same scenario can run through the browser or directly against the backend API. The fixture option `driver` (`ui` | `api`, `fixtures/test.ts`) gives the actor the matching ability; tasks and questions built with `throughUiOrApi` pick their path by it, so steps never branch. Scenarios tagged `@api` additionally run in the Playwright project `api`, without page visits.
 
-- What `@api` is for: business rules and calculations that do not depend on the UI. Today: management fee (`statement-management-fee.feature`), preview, generation and a period without rental contracts (`statement-generate.feature`), heating costs on a tenant change (`statement-detail.feature`).
-- UI only: interaction flows, navigation, forms.
-- A new `@api` step needs both paths; the API path lives in `tasks/<area>-api.ts`.
+What `@api` is for and how to add a step: `tests/e2e/CLAUDE.md`, "Rules". Today it covers the management fee (`statement-management-fee.feature`), preview, generation and a period without rental contracts (`statement-generate.feature`), and heating costs on a tenant change (`statement-detail.feature`).
 
 Isolation as Farley describes it:
 
-- **Functional:** `seed.names` appends a UUID to every business name ("Lindenhof" → "Lindenhof 3f2a…"), so scenarios run in parallel.
-- **Temporal:** every scenario creates its own data and cleans it up.
+- **Functional and temporal:** `tests/e2e/CLAUDE.md`, "Isolation".
 - **System:** external systems are replaced at the boundary (mail catcher, KI stand-in, session JWT; local stand-ins via `Bun.serve` for the OpenAI-compatible LLM provider in `backend/src/__tests__/helpers/llm.ts` and for Resend in `mail.test.ts`).
 
 ## Workflow: one feature with ATDD
