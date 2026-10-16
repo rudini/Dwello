@@ -7,6 +7,7 @@ import {
 	heatingCostsOfTenant,
 	heatingProfileOfStatement,
 	history,
+	languageOfPdf,
 	paidDateInvalid,
 	paidDateProblem,
 	pdfRefusalText,
@@ -242,4 +243,8 @@ When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurück
 
 Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(pdfRefusalText).toBe(text);
+});
+
+Then('nennt die Abrechnung {string}', async ({ verwalter }, language: string) => {
+	await verwalter.sees(languageOfPdf).toBe(language);
 });

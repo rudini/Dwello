@@ -7,6 +7,7 @@ export const postalCodeInput = target('PLZ', (page) => page.getByTestId('tenant-
 export const cityInput = target('Ort', (page) => page.getByTestId('tenant-city-input'));
 export const submitTenantButton = target('Mieter speichern', (page) => page.getByTestId('tenant-submit'));
 export const languageSelect = target('Sprachauswahl', (page) => page.getByTestId('tenant-language-select'));
+export const languageOptions = target('Sprachen zur Wahl', (page) => page.getByTestId('tenant-language-select').locator('option'));
 export const tenantLanguage = target('Korrespondenzsprache', (page) => page.getByTestId('tenant-language'));
 export const tenantChannel = target('Korrespondenz', (page) => page.getByTestId('tenant-channel'));
 export const firstNameInput = target('Vorname', (page) => page.getByTestId('tenant-first-name-input'));

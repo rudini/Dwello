@@ -39,3 +39,4 @@ export const statementHistory = target('Verlauf', (page) =>
 );
 export const pdfRefusalBackLink = target('Zu den Nebenkostenabrechnungen', (page) => page.getByTestId('pdf-refusal-back'));
 export const pdfRefusalMessage = target('Meldung statt des PDF', (page) => page.getByTestId('pdf-refusal-message'));
+export const pdfLanguage = target('Sprache des PDFs', (page) => page.getByTestId('statement-pdf-language'));
