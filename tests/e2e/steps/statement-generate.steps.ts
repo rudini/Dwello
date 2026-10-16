@@ -8,6 +8,11 @@ import {
 	buildingChosen,
 	categoryFindingOf,
 	contractsWithoutFee,
+	confirmationAsked,
+	invoiceWithoutServicePeriodOn,
+	countOfInvoicesWithoutServicePeriodOn,
+	lateInvoiceOn,
+	countOfLateInvoicesOn,
 	draftsOnly,
 	feeAboveGuideline,
 	feeFieldDescription,
@@ -36,6 +41,7 @@ import {
 	chooseBuilding,
 	chooseBuildingsFor,
 	confirmDespiteWarnings,
+	editHintedInvoice,
 	generateMore,
 	openContractWithoutFee,
 	generateStatements,
@@ -57,9 +63,6 @@ import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
 
-// the profile the wizard preselects when no scenario has an own one: the first complete predefined one by name
-const PREDEFINED_PROFILE = 'Heizung + Warmwasser';
-
 Given('der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openStatementWizard);
 });
@@ -72,16 +75,19 @@ When(
 );
 
 When(
-	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} erstellt',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, await seed.heatingProfileId(PREDEFINED_PROFILE)));
+	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} erstellt',
+	async ({ verwalter, seed }, year: number, building: string, profile: string) => {
+		const options = { heatingProfileId: await seed.heatingProfileId(profile) };
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, options));
 	}
 );
 
+// the wizard preselects a heating profile, maybe one a parallel scenario already deleted: name a seeded one
 Given(
-	'der Liegenschaftsverwalter hat die Abrechnungen {int} für das Gebäude {string} erstellt',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, await seed.heatingProfileId(PREDEFINED_PROFILE)));
+	'der Liegenschaftsverwalter hat die Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} erstellt',
+	async ({ verwalter, seed }, year: number, building: string, profile: string) => {
+		const options = { heatingProfileId: await seed.heatingProfileId(profile) };
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, options));
 		await verwalter.sees(generationOutcomeShown).toBe(true);
 	}
 );
@@ -370,4 +376,41 @@ Then('schlägt der Assistent eine Verwaltungspauschale von {string} % vor', asyn
 
 Then('sagt der Assistent {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(presetNoticeText).toContain(text);
+});
+
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, start: string, end: string, building: string) => {
+		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
+	}
+);
+
+Then('verlangt die Vorschau keine Bestätigung', async ({ verwalter }) => {
+	await verwalter.sees(confirmationAsked).toBe(false);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(lateInvoiceOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfLateInvoicesOn(date)).toBe(0);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(invoiceWithoutServicePeriodOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfInvoicesWithoutServicePeriodOn(date)).toBe(0);
+});
+
+When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
+	await verwalter.attemptsTo(editHintedInvoice(date));
 });

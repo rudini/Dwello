@@ -9,6 +9,7 @@ import {
 	confirmMissingInvoices,
 	generateButton,
 	generateMoreButton,
+	hintedInvoiceLink,
 	heatingProfileSelect,
 	managementFeeInput,
 	newInvoiceFromWarning,
@@ -74,13 +75,10 @@ export const goToGeneration: Activity = async (actor) => {
 	await actor.attemptsTo(goToNextStep);
 };
 
-// The UI run names its heating profile: the wizard preselects the first complete one, which can be a parallel
-// scenario's own profile, deleted before the statement is stored (tests/e2e/CLAUDE.md, Isolation)
-export const generateStatements = (year: number, buildingId: string, heatingProfileId: string) =>
+export const generateStatements = (year: number, buildingId: string, options: RunOptions = {}) =>
 	throughUiOrApi(
-		(actor) =>
-			actor.attemptsTo(openPreviewThroughUi(year, buildingId, { heatingProfileId }), goToGeneration, Click.on(generateButton)),
-		generateStatementsViaApi(year, buildingId)
+		(actor) => actor.attemptsTo(openPreviewThroughUi(year, buildingId, options), goToGeneration, Click.on(generateButton)),
+		generateStatementsViaApi(year, buildingId, options)
 	);
 
 export const tryNextWithoutConfirmation = goToNextStep;
@@ -105,3 +103,7 @@ export const recordInvoiceFromWarning: Activity = (actor) =>
 		Wait.forUrl((url) => /\/invoices\/new/.test(url.href))
 	);
 export const openContractWithoutFee = (contractId: string) => Click.on(feeNotAgreedLink(contractId));
+
+// The edit link of an invoice a hint of the preview names
+export const editHintedInvoice = (date: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(hintedInvoiceLink(date)), Wait.forUrl((url) => /\/invoices\/[^/]+\/edit/.test(url.href)));

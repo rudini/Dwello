@@ -1,4 +1,4 @@
-import { target } from '../screenplay/target';
+import { type Target, target } from '../screenplay/target';
 
 export const periodStartInput = target('Beginn der Abrechnungsperiode', (page) => page.getByTestId('period-start-input'));
 export const periodEndInput = target('Ende der Abrechnungsperiode', (page) => page.getByTestId('period-end-input'));
@@ -61,3 +61,16 @@ export const feeNotAgreedLink = (contractId: string) =>
 	);
 // What the link that opened the wizard chose, and where its settings come from (A-10)
 export const wizardPresetNotice = target('Vorgaben aus dem Link', (page) => page.getByTestId('wizard-preset'));
+// Invoices the preview names because their Leistungszeitraum is missing: dated shortly after the period, or counted
+// in full in a period under a year
+export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsperiode', (page) => page.getByTestId('late-invoices'));
+export const invoicesWithoutServicePeriod = target('Hinweis auf Rechnungen ohne Leistungszeitraum', (page) =>
+	page.getByTestId('invoices-without-service-period')
+);
+export const hintedInvoice = (hint: Target, date: string) =>
+	target(`Rechnung vom ${date} in «${hint}»`, (page) => hint.locate(page).getByTestId('hinted-invoice').filter({ hasText: date }));
+// the date names the invoice in either hint
+export const hintedInvoiceLink = (date: string) =>
+	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>
+		page.getByTestId('hinted-invoice').filter({ hasText: date }).getByRole('link')
+	);

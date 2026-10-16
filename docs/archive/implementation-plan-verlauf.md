@@ -663,9 +663,59 @@ Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/s
 - [x] daten-pruefer (`docs/reviews/issue-89-datenpruefung-1.md`): 19 statements match to the Rappen; D-1 fixed, D-2, D-3 existed before
 - [x] E2E isolation: UI runs of the statement wizard name a predefined heating profile (`tests/e2e/{steps,tasks}/statement-generate*`)
 - [x] Workflow note: a notice inside a wizard step vs. a state of `tests/a11y/screens.json`; reviewers cannot run checks in their worktree; stop hook vs. step 9 (`docs/reviews/workflow-notes-issue-89.md`)
-- [x] Merge of main (migration renamed to 0009)
+- [x] Merge of main (migration renamed to 0009, after a second merge 0011)
 - [x] Closing code-reviewer round (`docs/reviews/issue-89-review-2.md`): Major C-1 fixed (heating profile again from the other statements, notice names where the fee comes from), C-2, C-4, C-6, C-7, C-8 fixed; C-9 holds again after the C-1 fix; C-3, C-5 rejected; C-10 noted (dev databases only)
 - [x] Closing re-review (`docs/reviews/issue-89-review-3.md`): C-1 confirmed; Major C-11 fixed (scenario «Neue Abrechnung übernimmt das Heizprofil, die Verwaltungspauschale kommt aus den Einstellungen», red on 7d81829); C-13, C-7, C-14, C-15, C-16 fixed; C-12 left as reported
 - [x] Closing re-review (`docs/reviews/issue-89-review-4.md`): C-11 and the delta confirmed, no Blocker/Major open; C-18 fixed, C-17 left (accessibility targets keep their own module)
 - [x] PR
-- Files: `backend/migrations/0009_contract_management_fee.sql`, `backend/src/{db/schema.ts,routes/contracts.ts,routes/statements.ts,services/calculation.service.ts,services/config.service.ts,services/contract.service.ts}`, `backend/demo/demo-data.sql`, `src/lib/{contract-form.ts,contract-wizard.ts,statement-wizard.ts,types.ts,utils/format.ts,server/settings.ts,server/statement-generation.ts}`, `src/routes/contracts/{new/RentStep.svelte,[id]/*}`, `src/routes/statements/generate/{+page.server.ts,FeeNotAgreed.svelte,SettingsStep.svelte,StatementStep.svelte}`, `messages/*.json`, docs
+- Files: `backend/migrations/0011_contract_management_fee.sql`, `backend/src/{db/schema.ts,routes/contracts.ts,routes/statements.ts,services/calculation.service.ts,services/config.service.ts,services/contract.service.ts}`, `backend/demo/demo-data.sql`, `src/lib/{contract-form.ts,contract-wizard.ts,statement-wizard.ts,types.ts,utils/format.ts,server/settings.ts,server/statement-generation.ts}`, `src/routes/contracts/{new/RentStep.svelte,[id]/*}`, `src/routes/statements/generate/{+page.server.ts,FeeNotAgreed.svelte,SettingsStep.svelte,StatementStep.svelte}`, `messages/*.json`, docs
+## Session 2026-10-16 (#97, #101: identity of a statement)
+
+- [x] #97: a per-building, per-year number sequence that never gives a number twice; a deleted draft leaves a gap (`*.pg.test.ts`: two drafts, delete the second, generate again → `…-0003`); existing numbers unchanged; `docs/data-model.md` names where the sequence is kept
+- [x] #97: scenario in `statement-generate.feature` (names its heating profile: the wizard's preselection can be a parallel scenario's deleted profile)
+- [x] #101: the PDF download is named after the statement number (safe ASCII), download and inline view; unit test of the BFF route; scenario in `statement-detail.feature`
+- [x] fach-reviewer on the scenarios before implementing: `docs/reviews/w3b-fachreview-1.md`; V-1 → #294
+- [x] code-reviewer round 1: `docs/reviews/w3b-review-1.md`; C-1, C-3, C-7 fixed
+- [x] persona Dr. Weber: `docs/design/personas/weber-w3-abrechnungsnummer.md` (no Blocker/Major); daten-pruefer not run: no amount, PDF content or QR-bill field changed
+- [x] Workflow note: preselected heating profile in parallel E2E, daten-pruefer scope, migration numbers (`docs/reviews/workflow-notes-issue-97-101.md`); the generate scenarios name their heating profile (the flaky preselection, fixed here instead of an `offene-punkte.md` row)
+- [x] closing code-reviewer round: `docs/reviews/w3b-review-2.md`
+- [x] Checks before push green; push, pull request and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.ts`, `backend/src/services/calculation.service.ts`, `backend/src/routes/statements.ts`, `src/lib/server/statement.ts`, `src/routes/statements/[id]/pdf/+server.ts`, `src/routes/api/statements/[id]/pdf/+server.ts`, `docs/data-model.md`, tests (`statement-creation.pg`, `statement.routes.pg`, `statement-endpoints`, `statement-list-load`), E2E (`statement-generate`, `statement-detail` features, steps, tasks, questions), `docs/api-specification.md`, `docs/design/offene-punkte.md` (O-34), `docs/design/personas/weber-w3-abrechnungsnummer.md`, `docs/reviews/w3b-*.md`, `docs/reviews/workflow-notes-issue-97-101.md`
+
+## Session: invoice check hints (#130, #131, #134)
+
+- [ ] #130 rhythm: blocked on the product owner (fach-review V-1 Major: the literal rule hides a missing Q4; proposal in #130, label `entscheiden`)
+- [x] #130 Leistungszeitraum: a `deviation`/`gap` finding names how many invoices count only in part (unit + DOM test, four languages)
+- [ ] #130 scenario (rhythm): waits for the decision; the Leistungszeitraum part has its scenario
+- [x] #131 late invoices without Leistungszeitraum within 90 days after the period end, listed per building with edit link (pg test, scenario, four languages)
+- [x] #134 period under a year: invoices without Leistungszeitraum listed per building with edit link, a hint only (scenario, four languages)
+- [x] a11y/language state `invoice-hints` for the new hints (screens.json, accessibility.feature, sprachen-bildschirme.feature)
+- [x] fach-reviewer round 1 on the scenarios: `docs/reviews/hints-fachreview-1.md`
+- [x] code-reviewer round 1: `docs/reviews/hints-review-1.md` (C-1, C-2 fixed: scenario «Hinweis auf eine Rechnung, die nur teilweise zählt» and pg test, both seen red without the source line)
+- [x] personas round 1: `docs/design/personas/helga-invoice-hints.md`, `marco-invoice-hints-1.md` (no review: all contracts billed), `marco-invoice-hints-2.md`; P-1 (Heizöl listed) fixed with a pg test
+- [x] code-reviewer round 2 on the fixes: `docs/reviews/hints-review-2.md` (C-10 fixed: scenario «Heizöl für den Tank …», seen red without the filter; C-11, C-13 fixed)
+- [x] Helga round 2 on the row text: `docs/design/personas/helga-invoice-hints-2.md` (no findings)
+- Files: `backend/src/services/invoice-completeness.service.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{PreviewChecks,InvoiceHint}.svelte`, `messages/*.json`, tests (`invoice-completeness*.test.ts`, `api-contracts.pg.test.ts`, `statement-wizard*.test.ts`, `tests/contracts/invoice-completeness.json`, `statement-generate.feature` and steps, a11y screens)
+- [x] workflow-review: `docs/reviews/workflow-notes-issue-131.md`; session archived
+- [x] code-reviewer round 3 (closing): `docs/reviews/hints-review-3.md` (no new findings)
+
+## Session 2026-10-16 W4b: payment of a statement (#138, #93, #92)
+
+- [x] @wip scenarios (statement-detail.feature), fach-reviewer before implementing (`docs/reviews/w4b-fachreview-1.md`; V-5 and V-3 → #291, V-9 → #290)
+- [x] #138: Zahlungsdatum not before the Abrechnungsdatum, not after today, a real calendar date; backend refuses with codes `PAID_DATE_INVALID`, `PAID_DATE_BEFORE_STATEMENT`, `PAID_DATE_IN_FUTURE` (four languages, api-specification; tests in `statement-lock.pg.test.ts`, where the sent statements are); BFF checks the same with the bound and shows backend refusals with `backendMessage`
+- [x] #93: setting a statement to paid stores its Saldo as `paid_amount` when no amount is given; `paidThisMonth` counts only Nachzahlungen; dashboard.pg.test without hand-written `paid_amount`; demo-data.pg.test adjusted. No scenario: `paid_amount` and `paidThisMonth` appear on no screen
+- [x] #92: «Zahlung zurücksetzen» on a paid statement, confirmed with its consequence; back to Versendet (Überfällig after the Zahlungsfrist), paid date and amount cleared; the reset stored and listed in the Verlauf (JSONB column `payment_resets`, migration 0010)
+- [x] a11y and language rows for the new dialog state
+- No scenario: a refusal of the backend's paid-date check and a failed reset are failures between the BFF and the backend; the page's own check refuses every date first. Covered in `statement-actions.test.ts`, `statement-status.test.ts` (#138, #92). The stale-page refusal of a reset (`STATEMENT_NOT_PAID`) has its scenario (code review C-13)
+- «Zahlungseingang mit Datum festhalten» enters the Abrechnungsdatum, which for a statement sent in the scenario is today; that the entered day (not the day of entry) is stored is shown in `statement-actions.test.ts` («speichert das gewählte Zahlungsdatum»)
+- Files: `backend/migrations/0010_statement_payment_resets.sql`, `backend/src/db/schema.ts`, `backend/src/services/statement.service.ts`, `backend/src/routes/{statements,dashboard}.ts`, `src/lib/{statement,backend-error,types}.ts`, `src/lib/server/{statement,statement-actions}.ts`, `src/routes/statements/` (detail page, StatusActions, MetadataCard, list, mark-paid), `messages/*.json`, `tests/contracts/`, `docs/{api-specification,data-model,PRD-Dwello}.md`, tests, scenarios and a11y rows
+- [x] Code review round 1 (`docs/reviews/w4b-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w4b-fachreview-2.md`)
+- [x] Personas Marco (`docs/design/personas/marco-w4b.md`), Dr. Weber (`docs/design/personas/dr-weber-w4b.md`)
+- [x] Code review round 2 (`docs/reviews/w4b-review-2.md`): C-11/C-12 (PDF kept by the time the payment was recorded, `payment_recorded_at`; scenario), C-13 (scenario), C-14, C-15
+- [x] daten-pruefer (`docs/reviews/w4b-datenpruefung-1.md`)
+- [x] Code review round 3 (closing, `docs/reviews/w4b-review-3.md`): C-17 fixed; C-16, C-18 left as Minor/Nit
+- [x] Merged origin/main (W6 reminders: a11y lists, seed, `src/lib/statement.ts`; migration renamed to 0010); merge review `docs/reviews/w4b-review-merge.md`: no Blocker/Major, C-2 (reset of a reminded statement untested) left as Minor
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-138-93-92.md`)
+- [x] Workflow notes, archive the session, pull request

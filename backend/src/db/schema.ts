@@ -347,6 +347,9 @@ export type InvoicePart = {
 
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+/** A payment taken back (#92): the day of the reset and what it cleared */
+export type PaymentReset = { resetOn: string; paidDate: string | null; paidAmount: string | null };
+
 export type HeatingShare =
 	// the chosen profile and why it was not applied (#247); both absent on statements created before
 	| { byDays: true; reason?: 'wholePeriod' | 'noHeatingMonths'; names?: HeatingProfileNames }
@@ -358,6 +361,12 @@ export type HeatingShare =
 			periodMonths?: { month: number; percentage: number }[]; // where they do not carry 100 % (#232); absent before
 			names: HeatingProfileNames;
 	  };
+
+// The last statement number given per prefix NK-{building}-{year}-, so a deleted draft's number is not given again (#97)
+export const statementNumbers = pgTable('statement_numbers', {
+	prefix: varchar('prefix', { length: 50 }).primaryKey(),
+	lastNumber: integer('last_number').notNull()
+});
 
 export const utilityStatements = pgTable(
 	'utility_statements',
@@ -390,6 +399,8 @@ export const utilityStatements = pgTable(
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
 		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
+		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
+		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),

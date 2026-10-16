@@ -1,5 +1,6 @@
 import { m } from '$lib/paraglide/messages';
-import { localToday } from '$lib/contract-status';
+import { isDay, localToday } from '$lib/contract-status';
+import { formatDate } from '$lib/utils/format';
 import type { StatementStatus } from './types';
 import type { Tone } from './ui/tone';
 
@@ -37,13 +38,15 @@ export function balanceLabel(balance: number): string {
 export const paidHelp = (balance: number) =>
 	balance < 0 ? m.statements_paid_help_refund() : m.statements_paid_help();
 
-/** Why a payment date cannot be stored: none, or a day in the future */
-export const paidDateError = (paidDate: string) =>
-	!/^\d{4}-\d{2}-\d{2}$/.test(paidDate)
+/** Why a payment date cannot be stored: none or a day that does not exist, before the Abrechnungsdatum (#138), or in the future */
+export const paidDateError = (paidDate: string, statementDate: string) =>
+	!isDay(paidDate)
 		? m.statements_paid_date_invalid()
-		: paidDate > localToday()
-			? m.statements_paid_date_future()
-			: null;
+		: paidDate < statementDate
+			? m.statements_paid_date_before({ date: formatDate(statementDate) })
+			: paidDate > localToday()
+				? m.statements_paid_date_future()
+				: null;
 
 /** The day the next Mahnung becomes possible while the last one's Zahlungsfrist runs, else null (#107) */
 export const nextReminderLater = (statement: { nextReminderFrom?: string | null }) =>

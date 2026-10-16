@@ -69,6 +69,16 @@ export interface CategoryFinding {
 	previous: { count: number; total: number };
 	missingParts: { start: string; end: string }[];
 	changePercent: number | null;
+	partialCount?: number; // invoices whose Leistungszeitraum reaches beyond the period
+}
+
+/** An invoice without Leistungszeitraum the preview names: dated shortly after the period, or counted in full */
+export interface HintedInvoice {
+	id: string;
+	billingEntityName: string;
+	description: string;
+	invoiceDate: string;
+	amount: string;
 }
 
 export interface InvoiceCheck {
@@ -76,6 +86,8 @@ export interface InvoiceCheck {
 	comparedWith: { start: string; end: string };
 	hasComparison: boolean;
 	findings: CategoryFinding[];
+	lateInvoices?: HintedInvoice[];
+	invoicesWithoutServicePeriod?: HintedInvoice[];
 }
 
 type Coverage = {
@@ -134,8 +146,17 @@ function stockText(missingDays: { start: string }[], consumption: number) {
 	return `${missing} ${m.statements_finding_stock_tail()}`;
 }
 
+// Lower costs without a gap: an invoice whose Leistungszeitraum reaches beyond the period counts only its days
+const partialNote = (count = 0) =>
+	count === 0
+		? ''
+		: ` ${count === 1 ? m.statements_finding_partial_one() : m.statements_finding_partial_many({ count })}`;
+
 /** One finding of the check per category in plain words, with what to look at */
-export function findingText({
+export const findingText = (finding: CategoryFinding) =>
+	`${findingBody(finding)}${finding.kind === 'gap' || finding.kind === 'deviation' ? partialNote(finding.partialCount) : ''}`;
+
+function findingBody({
 	kind,
 	current,
 	previous,
@@ -228,6 +249,8 @@ export const needsConfirmation = (coverage: Coverage[]) =>
 // Findings per category; missing invoices (not a hint on new or changed costs) need a confirmation
 const categoryCheck = (check?: InvoiceCheck) => ({
 	findings: check?.findings ?? [],
+	lateInvoices: check?.lateInvoices ?? [],
+	invoicesWithoutServicePeriod: check?.invoicesWithoutServicePeriod ?? [],
 	incomplete: lacksInvoices(check),
 	comparedWith: check?.hasComparison ? check.comparedWith : null
 });

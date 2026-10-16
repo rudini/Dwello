@@ -34,14 +34,14 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   @api
   Szenario: Abrechnungen bei Mieterwechsel mit Leerstand erstellen
-    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Dann wurden 2 Nebenkostenabrechnungen erstellt
 
   # Erneut erstellen ergänzt nur: ein Mietvertrag mit einer Abrechnung dieser Periode erhält keine zweite
   @api
   Szenario: Abrechnungen erneut erstellen ergänzt nur die fehlenden
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
-    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Dann wurde 1 Nebenkostenabrechnung erstellt
 
   @api
@@ -73,6 +73,18 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann kostet die Abrechnung von "Marc Huber" "CHF 927.00"
     Und kostet die Abrechnung von "Eva Frei" "CHF 0.00"
+
+  # TODO(fachlich prüfen, #294): «Abrechnungsnummer» fehlt im Glossar
+  # Das PDF eines Entwurfs kann schon weitergegeben sein: die Abrechnungsnummer eines gelöschten Entwurfs wird nicht
+  # wieder vergeben, sie bleibt eine Lücke (#97). Eva Frei erhält -0001, Marc Huber -0002, nach dem Löschen -0003.
+  Szenario: Die Abrechnungsnummer eines gelöschten Entwurfs wird nicht wieder vergeben
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Marc Huber" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Und der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
+    Dann endet die Abrechnungsnummer von "Marc Huber" auf "-2024-0003"
+    Und endet die Abrechnungsnummer von "Eva Frei" auf "-2024-0001"
 
   # Eine Abrechnungsperiode nur aus Monaten mit 0 % im Heizprofil (Mittelland: Juni bis August): die Heizkosten gehen nach Mietstagen wie jede andere
   # Rechnung, mit ihrem Leistungszeitraum (#137). 900 Franken für Juli bis September: 900 × 62/92 = 606.52 in der Periode,
@@ -146,6 +158,48 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
+  Szenario: Hinweis auf eine Rechnung, die nur teilweise zählt
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "1000" Franken vom "2023-01-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "1200" Franken vom "2025-06-30" für die Zeit vom "2024-07-01" bis "2025-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Kaltwasser": "1 Rechnung zählt nur teilweise: ihr Leistungszeitraum reicht über die Abrechnungsperiode hinaus."
+
+  Szenario: Hinweis auf eine Rechnung ohne Leistungszeitraum kurz nach der Abrechnungsperiode
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom "20.01.2025" über "290.00"
+    Und verlangt die Vorschau keine Bestätigung
+
+  # Heizöl zählt über den Tankbestand, nicht über einen Leistungszeitraum
+  Szenario: Heizöl für den Tank steht nicht im Hinweis auf Rechnungen nach der Abrechnungsperiode
+    Angenommen im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "800" Franken im Tank
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "3000" Franken vom "2025-01-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom "20.01.2025" über "290.00"
+    Und nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode keine Rechnung vom "15.01.2025"
+
+  Szenario: Von einer Rechnung nach der Abrechnungsperiode zur Rechnung
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter die Rechnung vom "20.01.2025" aus dem Hinweis bearbeitet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
+
+  Szenario: Hinweis auf Rechnungen ohne Leistungszeitraum in einer Abrechnungsperiode unter einem Jahr
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "1200" Franken vom "2024-02-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "300" Franken vom "2024-03-31" für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-01-01" bis "2024-06-30" für das Gebäude "Lindenhof" öffnet
+    Dann nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom "15.02.2024" über "1’200.00"
+    Und nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom "31.03.2024"
+    Und verlangt die Vorschau keine Bestätigung
+
+  Szenario: Von einer Rechnung ohne Leistungszeitraum zur Rechnung
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Lift" über "1200" Franken vom "2024-02-15"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-01-01" bis "2024-06-30" für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter die Rechnung vom "15.02.2024" aus dem Hinweis bearbeitet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
+
   Szenario: Vor dem Erstellen ist klar, dass nichts verschickt wird
     Angenommen im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
@@ -173,7 +227,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt."
 
   Szenario: Erstellte Abrechnungen anzeigen
-    Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 
@@ -182,7 +236,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Mieter "Lea Graf" existiert
     Und "Lea Graf" mietete die Wohnung "3.02" von "2023-01-01" bis "2023-12-31" für "900" Franken
     Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2023
-    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
     Dann erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen der Abrechnungsperiode "01.01.2024 – 31.12.2024" zeigt
     Und sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Marc Huber"
@@ -193,7 +247,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 
   Szenario: Weitere Abrechnungen erstellen
-    Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Wenn der Liegenschaftsverwalter weitere Abrechnungen erstellen will
     Dann beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode
 
