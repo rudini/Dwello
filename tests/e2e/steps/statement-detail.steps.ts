@@ -187,20 +187,11 @@ Then('erhält der Liegenschaftsverwalter die Abrechnung als PDF', async ({ verwa
 
 // from any page: the list of statements, searched for the tenant
 Then(
-	'findet die Abrechnungsliste keine Abrechnung {int} von {string}',
-	async ({ verwalter, names }, year: number, tenant: string) => {
+	/^findet die Abrechnungsliste (keine|die) Abrechnung (\d+) von "([^"]*)"$/,
+	async ({ verwalter, names }, which: string, year: string, tenant: string) => {
 		const name = names.get(tenant) ?? tenant;
 		await verwalter.attemptsTo(openStatementList, searchStatements(name));
-		await verwalter.sees(listedStatementsOfYear(name, year)).toBe(0);
-	}
-);
-
-Then(
-	'findet die Abrechnungsliste die Abrechnung {int} von {string}',
-	async ({ verwalter, names }, year: number, tenant: string) => {
-		const name = names.get(tenant) ?? tenant;
-		await verwalter.attemptsTo(openStatementList, searchStatements(name));
-		await verwalter.sees(listedStatementsOfYear(name, year)).toBe(1);
+		await verwalter.sees(listedStatementsOfYear(name, Number(year))).toBe(which === 'die' ? 1 : 0);
 	}
 );
 

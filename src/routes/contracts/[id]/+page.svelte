@@ -20,6 +20,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import ContractParties from './ContractParties.svelte';
+	import DeleteContract from './DeleteContract.svelte';
 	import ContractTerms from './ContractTerms.svelte';
 	import MissingStatement from './MissingStatement.svelte';
 	import NextSteps from './NextSteps.svelte';
@@ -225,20 +226,12 @@
 	<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
 </ActionDialog>
 
-<ActionDialog
+<DeleteContract
 	bind:open={deleting}
-	action="?/delete"
-	title={m.contracts_delete_title()}
-	confirmLabel={m.contracts_delete_confirm()}
-	danger
-	disabled={status !== 'future'}
-	confirmTestid="contract-delete-confirm"
+	{name}
+	startDate={contract.startDate}
+	future={status === 'future'}
+	billedBy={data.billedBy}
+	missingStatements={data.missingStatements.length > 0}
 	error={form?.deleteError}
-	onsuccess={() => addToast('success', m.contracts_deleted_toast({ name }))}
->
-	{#if status === 'future'}
-		<p>{m.contracts_delete_future_text({ name })}</p>
-	{:else}
-		<p>{m.contracts_started_not_deletable()} {m.contracts_started_fix_hint()}</p>
-	{/if}
-</ActionDialog>
+/>

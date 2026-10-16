@@ -4,6 +4,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { endedPeriodsSince, type AccountingPeriodType } from '$lib/accounting-period';
 import { wizardLink } from '$lib/statement-wizard';
+import { backendMessage } from '$lib/backend-error';
 import {
 	contractEndError,
 	localToday,
@@ -16,6 +17,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
 	missingStatements: { start: string; end: string; href: string }[]; // A-10, #142: newest first
+	billedBy: string[]; // the numbers of the contract's statements: it cannot be deleted (#116)
 	nextSteps: { successor: boolean } | null; // A-4: a notice still running
 	contract: RentalContract & {
 		tenant: Tenant;
@@ -67,15 +69,17 @@ async function nextStepsDue(fetch: typeof globalThis.fetch, contract: Row) {
 
 // Every ended Abrechnungsperiode from the Vertragsbeginn on in which the contract has rent days but no statement,
 // the newest first (A-10, #142); none when the settings or the statements cannot be read
-async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) {
+async function missingStatements(
+	fetch: typeof globalThis.fetch,
+	contract: Row,
+	statements: Row[] | null
+) {
+	if (!statements) return [];
 	const type = await periodType(fetch);
 	if (!type) return [];
 	const periods = endedPeriodsSince(type, String(contract.startDate).slice(0, 10)).filter(
 		(period) => rentDaysIn(contract, period)
 	);
-	if (!periods.length) return [];
-	const statements = await rows(fetch, `statements?contractId=${contract.id}&limit=1000`);
-	if (!statements) return [];
 	const building = String((contract.building as Row | undefined)?.id);
 	return periods
 		.filter(
@@ -141,9 +145,11 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				}
 			};
 
+		const statements = await rows(fetch, `statements?contractId=${data.id}&limit=1000`);
 		return {
 			today: localToday(),
-			missingStatements: await missingStatements(fetch, data),
+			missingStatements: await missingStatements(fetch, data, statements),
+			billedBy: (statements ?? []).map((s) => String(s.statementNumber)),
 			nextSteps: await nextStepsDue(fetch, data),
 			contract,
 			rentBreakdown: {
@@ -187,12 +193,13 @@ async function endDay(fetch: typeof globalThis.fetch, id: string, form: FormData
 	return endRefusal(await stored.json(), endDate, form.get('pastConfirmed') === 'on') ?? endDate;
 }
 
-// The contract ends by notice (A-1); a stored statement that already bills rent days after that day refuses it
-async function endOn(fetch: typeof globalThis.fetch, id: string, endDate: string) {
+// The contract ends by notice (A-1); a stored statement that already bills rent days after that day refuses it,
+// unless it is the one draft named, which the backend then deletes with the end, or keeps when it refuses (#141)
+async function endOn(fetch: typeof globalThis.fetch, id: string, endDate: string, draft?: string) {
 	const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ endDate, terminated: true })
+		body: JSON.stringify({ endDate, terminated: true, deleteDraft: draft })
 	});
 	const statements =
 		response.status === 409 && (await response.json().catch(() => ({}))).statements;
@@ -221,35 +228,36 @@ export const actions: Actions = {
 		const refused = await endOn(fetch, params.id, day);
 		if (refused) return refused;
 	},
-	// The one draft the end would change is deleted first; the wizard then creates the statement anew (A-10)
+	// The one draft the end would change is deleted with it; the wizard then creates the statement anew (A-10)
 	endDeletingDraft: async ({ params, fetch, request }) => {
 		const form = await request.formData();
 		const day = await endDay(fetch, params.id, form);
 		if (typeof day !== 'string') return day;
 		const draft = await ownDraft(fetch, params.id, String(form.get('statementId') ?? ''));
 		if (!draft) return fail(409, { endError: m.contracts_end_failed() });
-		const deleted = await fetch(`${BACKEND_URL}/api/v1/statements/${draft.id}`, {
-			method: 'DELETE'
-		});
-		if (!deleted.ok) return fail(deleted.status, { endError: m.contracts_end_failed() });
-		const refused = await endOn(fetch, params.id, day);
+		const refused = await endOn(fetch, params.id, day, String(draft.id));
 		if (refused) return refused;
 		const building = String((draft.building as Row | undefined)?.id);
 		throw redirect(303, wizardLink(building, String(draft.periodStart), String(draft.periodEnd)));
 	},
-	// only a contract that has not started: the statement needs the rent days of every other one
-	delete: async ({ params, fetch }) => {
+	// a contract that has started only when confirmed as entered by mistake (A-7, #116); the backend refuses one
+	// that a statement bills
+	delete: async ({ params, fetch, request }) => {
+		const confirmed = (await request.formData()).get('mistakeConfirmed') === 'on';
 		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;
 		const stored = await fetch(url);
 		if (!stored.ok) return fail(stored.status, { deleteError: m.contracts_delete_failed() });
 		const { startDate } = await stored.json();
-		if (String(startDate).slice(0, 10) <= localToday())
-			return fail(409, {
-				deleteError: m.contracts_started_not_deletable()
-			});
-		const response = await fetch(url, { method: 'DELETE' });
+		if (String(startDate).slice(0, 10) <= localToday() && !confirmed)
+			return fail(400, { deleteError: m.contracts_delete_mistake_unconfirmed() });
+		const response = await fetch(confirmed ? `${url}?confirmMistake=true` : url, {
+			method: 'DELETE'
+		});
 		if (!response.ok) {
-			return fail(response.status, { deleteError: m.contracts_delete_failed() });
+			const body = await response.json().catch(() => null);
+			return fail(response.status, {
+				deleteError: backendMessage(body, m.contracts_delete_failed())
+			});
 		}
 		throw redirect(303, '/contracts');
 	}

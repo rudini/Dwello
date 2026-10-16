@@ -15,8 +15,11 @@ import {
 	type NewRentalContract
 } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
-import { CodedError } from './coded-error';
+import { CodedError, refusal, type Refusal } from './coded-error';
 import { swissToday } from './today';
+
+/** The database, or a transaction of it */
+type Query = Pick<typeof db, 'select' | 'delete'>;
 
 /** Contract with the names of its tenant, apartment and building; selected with those three tables joined */
 const contractFields = {
@@ -204,7 +207,8 @@ async function checkContractOverlap(
 	apartmentId: string,
 	startDate: string,
 	endDate: string | null,
-	excludeContractId?: string
+	excludeContractId?: string,
+	q: Query = db
 ): Promise<{ hasOverlap: boolean; overlappingContract?: string }> {
 	// A contract overlaps if:
 	// - Its start date is before the new contract's end date (or new has no end)
@@ -224,7 +228,7 @@ async function checkContractOverlap(
 		conditions.push(sql`${rentalContracts.id} != ${excludeContractId}`);
 	}
 
-	const [overlapping] = await db
+	const [overlapping] = await q
 		.select({ id: rentalContracts.id })
 		.from(rentalContracts)
 		.where(and(...conditions))
@@ -299,10 +303,10 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 }
 
 /** The contract's statements whose billed rent days the new dates would change (fewer or more) */
-async function statementsChanged(contractId: string, startDate: string, endDate: string | null) {
+async function statementsChanged(contractId: string, startDate: string, endDate: string | null, q: Query = db) {
 	const from = sql`greatest(${utilityStatements.periodStart}, ${startDate}::date)`;
 	const to = sql`least(${utilityStatements.periodEnd}, coalesce(${endDate}::date, ${utilityStatements.periodEnd}))`;
-	return db
+	return q
 		.select({
 			id: utilityStatements.id,
 			statementNumber: utilityStatements.statementNumber,
@@ -328,26 +332,35 @@ export class BilledDaysError extends Error {
 	}
 }
 
-/** New dates may neither overlap another contract of the apartment nor change the billed Mietstage of a statement */
-async function checkNewDates(current: RentalContract, data: Partial<NewRentalContract>) {
+/**
+ * New dates may neither overlap another contract of the apartment nor change the billed Mietstage of a statement;
+ * `draft`, a draft of the contract, is deleted when it is the only statement they change (#141)
+ */
+async function checkNewDates(current: RentalContract, data: Partial<NewRentalContract>, q: Query, draft?: string) {
 	if (!data.startDate && data.endDate === undefined) return;
 	const startDate = data.startDate || current.startDate;
 	const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
-	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id);
+	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id, q);
 	if (hasOverlap)
 		throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
 			contract: overlappingContract!
 		});
-	const statements = await statementsChanged(current.id, startDate, endDate);
-	if (statements.length) throw new BilledDaysError(statements);
+	const statements = await statementsChanged(current.id, startDate, endDate, q);
+	if (onlyDraft(statements, draft)) await q.delete(utilityStatements).where(eq(utilityStatements.id, draft!));
+	else if (statements.length) throw new BilledDaysError(statements);
 }
+
+/** The changed statements are just the draft named */
+const onlyDraft = (statements: { id: string; status: string }[], draft?: string) =>
+	statements.length === 1 && statements[0].id === draft && statements[0].status === 'draft';
 
 /**
  * Update an existing contract
  */
 export async function updateContract(
 	id: string,
-	data: Partial<NewRentalContract>
+	data: Partial<NewRentalContract>,
+	deleteDraft?: string
 ): Promise<RentalContract | null> {
 	const current = await getContract(id);
 	if (!current) return null;
@@ -357,50 +370,38 @@ export async function updateContract(
 		throw new CodedError('CONTRACT_PARTIES_FIXED', 'Tenant and apartment of a contract cannot be changed');
 	// removing the end withdraws the notice (below), whatever flag comes with it
 	if (data.endDate !== null) checkNotice(data.terminated, data.endDate ?? current.endDate);
-	await checkNewDates(current, data);
-
-	const [contract] = await db
-		.update(rentalContracts)
-		// without an end there is no notice: withdrawing it makes the contract open-ended again
-		.set({ ...data, ...(data.endDate === null && { terminated: false }), updatedAt: new Date() })
-		.where(eq(rentalContracts.id, id))
-		.returning();
-
+	// the draft delete and the change in one transaction: a refused change keeps the draft (#141)
+	const [contract] = await db.transaction(async (tx) => {
+		await checkNewDates(current, data, tx, deleteDraft);
+		return tx
+			.update(rentalContracts)
+			// without an end there is no notice: withdrawing it makes the contract open-ended again
+			.set({ ...data, ...(data.endDate === null && { terminated: false }), updatedAt: new Date() })
+			.where(eq(rentalContracts.id, id))
+			.returning();
+	});
 
 	return contract || null;
 }
 
 /**
- * Delete a contract
- * Returns false if contract has associated statements
+ * Delete a contract: never one a statement bills (draft, sent or paid), one that has started only when the landlord
+ * confirms it was entered by mistake (A-7, #116)
  */
-export async function deleteContract(id: string): Promise<{ success: boolean; error?: string }> {
-	// Get contract to find apartment
+export async function deleteContract(id: string, confirmMistake = false): Promise<{ success: boolean } & Partial<Refusal>> {
 	const contract = await getContract(id);
-	if (!contract) {
-		return { success: false, error: 'Contract not found' };
-	}
+	if (!contract) return { success: false, error: 'Contract not found' };
 
-	// Check for statements
 	const [statement] = await db
 		.select({ id: utilityStatements.id })
 		.from(utilityStatements)
 		.where(eq(utilityStatements.contractId, id))
 		.limit(1);
+	if (statement)
+		return { success: false, ...refusal('CONTRACT_HAS_STATEMENTS', 'Cannot delete contract with utility statements') };
+	if (contract.startDate <= swissToday() && !confirmMistake)
+		return { success: false, ...refusal('CONTRACT_STARTED', 'A started contract is deleted only when confirmed as entered by mistake') };
 
-	if (statement) {
-		return {
-			success: false,
-			error: 'Cannot delete contract with utility statements'
-		};
-	}
-
-	const result = await db.delete(rentalContracts).where(eq(rentalContracts.id, id)).returning();
-
-	if (result.length === 0) {
-		return { success: false, error: 'Contract not found' };
-	}
-
-
+	await db.delete(rentalContracts).where(eq(rentalContracts.id, id));
 	return { success: true };
 }

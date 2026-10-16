@@ -55,12 +55,14 @@ function open(
 	form: unknown = null,
 	today = '2026-10-10',
 	terminated = false,
-	missingStatements: { start: string; end: string; href: string }[] = []
+	missingStatements: { start: string; end: string; href: string }[] = [],
+	billedBy: string[] = []
 ) {
 	show(ContractPage, {
 		data: {
 			today,
 			missingStatements,
+			billedBy,
 			nextSteps: terminated ? { successor: false } : null, // the loader decides (review K-1)
 			contract: contract(startDate, endDate, terminated),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
@@ -223,6 +225,7 @@ describe('Mietvertragsdetail', () => {
 			data: {
 				today: '2026-10-10',
 				missingStatements: [],
+				billedBy: [],
 				nextSteps: { successor: true },
 				contract: contract('2024-04-01', '2099-03-31', true),
 				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
@@ -537,16 +540,18 @@ describe('Mietvertragsdetail', () => {
 		);
 	});
 
-	// laufend oder beendet: die Nebenkostenabrechnung braucht seine Mietstage
+	// laufend oder beendet: nur als Irrtum bestätigt (A-7, #116)
 	it.each([null, '2027-03-31', '2024-12-31'])(
-		'lässt einen Mietvertrag, der begonnen hat, nicht löschen und sagt, wie er korrigiert wird (Ende %s)',
-		(end) => {
+		'löscht einen Mietvertrag, der begonnen hat, nicht ohne Bestätigung des Irrtums (Ende %s)',
+		async (end) => {
 			open('2024-01-01', end);
 			click('contract-delete-button');
-			expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(true);
-			expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
-				'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage, also die Tage, an denen er gilt. Ist er falsch erfasst, korrigieren Sie ihn unter «Bearbeiten».'
+			click('contract-delete-confirm');
+			await settle();
+			expect(text('form-error')).toBe(
+				'Bitte bestätigen Sie, dass dieser Mietvertrag irrtümlich erfasst wurde, oder brechen Sie ab.'
 			);
+			expect(document.activeElement).toBe(byTestId('contract-delete-mistake-confirm'));
 		}
 	);
 
@@ -568,5 +573,32 @@ describe('Mietvertragsdetail', () => {
 			'Mietvertrag konnte nicht gelöscht werden.'
 		);
 		expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(false);
+	});
+});
+
+// A-7 (#116): ein begonnener Mietvertrag nur als Irrtum, einer mit Abrechnung gar nicht
+describe('Mietvertrag löschen', () => {
+	const missing = [{ start: '2025-01-01', end: '2025-12-31', href: '/statements/generate' }];
+
+	it('nennt bei einem begonnenen Mietvertrag den Weg für eine echte Miete und die fehlende Abrechnung', () => {
+		open('2024-04-01', null, null, '2026-10-10', false, missing);
+		click('contract-delete-button');
+
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
+		expect(dialog).toContain('Der Mietvertrag von Anna Keller hat am 01.04.2024 begonnen.');
+		expect(dialog).toContain('Zieht der Mieter aus, wählen Sie «Beenden».');
+		expect(dialog).toContain('Nach dem Löschen erinnert Dwello nicht mehr daran.');
+		expect(byTestId('contract-delete-mistake-confirm-help')!.textContent).toContain('Leerstand');
+	});
+
+	it('nennt die Abrechnungen, die das Löschen sperren, und lässt es nicht bestätigen', () => {
+		open('2024-04-01', null, null, '2026-10-10', false, [], ['NK-2024-0001', 'NK-2025-0002']);
+		click('contract-delete-button');
+
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Mietstage abrechnen: NK-2024-0001, NK-2025-0002.'
+		);
+		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();
+		expect((byTestId('contract-delete-confirm') as HTMLButtonElement).disabled).toBe(true);
 	});
 });

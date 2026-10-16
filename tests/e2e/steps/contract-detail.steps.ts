@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	apartmentOfContract,
+	deleteDialogText,
 	endConfirmationInWindow,
 	endDateProblemShown,
 	endOfContract,
@@ -150,6 +151,11 @@ Then('endet der Mietvertrag heute', async ({ verwalter }) => {
 // the field's error and a refusal of the server use the same frame: the one with the message counts
 Then('meldet der Dialog {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(endDateProblemShown(message)).toBe(true);
+});
+
+// what the delete dialog says when it opens (#116)
+Then('nennt der Dialog {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(deleteDialogText).toContain(message);
 });
 
 Then('zeigt der Mietvertrag {string}', async ({ verwalter }, end: string) => {

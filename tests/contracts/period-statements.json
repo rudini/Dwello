@@ -3,6 +3,7 @@
 		{
 			"id": "s1",
 			"contractId": "c1",
+			"statementNumber": "NK-2024-0001",
 			"periodStart": "2024-01-01",
 			"periodEnd": "2024-12-31",
 			"heatingProfileId": "hp1",

@@ -35,7 +35,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	await deleteContract(nextContract);
+	await deleteContract(nextContract, true);
 	await deleteTenant(nextTenant);
 	await rental.remove();
 });
