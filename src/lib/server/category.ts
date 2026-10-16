@@ -30,6 +30,13 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 	};
 }
 
+/** Whether the operator switched the KI on; unknown counts as on, so a refusal says why (#219) */
+export const kiEnabled = (fetch: typeof globalThis.fetch) =>
+	fetch(`${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/invoices/llm-recipient`)
+		.then((response) => response.json())
+		.then((answer) => answer.enabled !== false)
+		.catch(() => true);
+
 export const fetchCategory = async (fetch: typeof globalThis.fetch, id: string) =>
 	toCategory(await fetchRecord(fetch, `${API}/${id}`, m.buildings_category()));
 

@@ -67,6 +67,7 @@
 	<div class="flex flex-col gap-4">
 		<p class="text-ink-muted">
 			{m.categories_in_use_note()}
+			<span id="category-predefined-note">{m.categories_predefined_note()}</span>
 		</p>
 		<p class="text-ink-muted" data-testid="category-contract-note">{m.categories_contract_note()}</p>
 		{#if shown.length === 0}

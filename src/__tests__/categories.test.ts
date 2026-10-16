@@ -1,13 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { actions as listActions, load } from '../routes/config/categories/+page.server';
-import { actions as newActions } from '../routes/config/categories/new/+page.server';
-import { actions as editActions } from '../routes/config/categories/[id]/edit/+page.server';
+import {
+	actions as newActions,
+	load as loadNew
+} from '../routes/config/categories/new/+page.server';
+import {
+	actions as editActions,
+	load as loadEdit
+} from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
 import proposal from '../../tests/contracts/category-proposal.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
 import invalid from '../../tests/contracts/validation-refused.json';
 import contract from '../../tests/contracts/category.json';
+import recipient from '../../tests/contracts/llm-recipient.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
@@ -70,6 +77,35 @@ describe('Kategorien anzeigen', () => {
 });
 
 describe('Neue Kategorie', () => {
+	// #219: «Von der KI prüfen lassen» nur, solange der Betreiber die KI eingeschaltet hat
+	it('fragt das Backend, ob die KI eingeschaltet ist', async () => {
+		const urls: string[] = [];
+		const answer = (enabled: boolean) =>
+			(async (url: string) => {
+				urls.push(url);
+				return Response.json({ ...recipient, enabled });
+			}) as typeof globalThis.fetch;
+
+		expect(await loadNew({ fetch: answer(true) } as never)).toEqual({ kiEnabled: true });
+		expect(await loadNew({ fetch: answer(false) } as never)).toEqual({ kiEnabled: false });
+		expect(urls[0]).toMatch(/\/api\/v1\/invoices\/llm-recipient$/);
+	});
+
+	// Fachreview W5b V-3: der Hinweis einer vordefinierten Kategorie nennt die KI nur, wenn sie eingeschaltet ist
+	it('fragt beim Bearbeiten das Backend, ob die KI eingeschaltet ist', async () => {
+		const fetch = (async (url: string) =>
+			url.endsWith('/llm-recipient')
+				? Response.json({ ...recipient, enabled: false })
+				: Response.json(contract)) as typeof globalThis.fetch;
+
+		const data = await loadEdit({ fetch, params: { id: 'c1' } } as never);
+
+		expect(data).toEqual({
+			category: expect.objectContaining({ key: 'Internet' }),
+			kiEnabled: false
+		});
+	});
+
 	it('erfasst die Kategorie unter ihrem deutschen Namen und zeigt die Kategorien', async () => {
 		const { calls, result } = runAction(newActions.save, '', 201, form, { id: 'c9' });
 

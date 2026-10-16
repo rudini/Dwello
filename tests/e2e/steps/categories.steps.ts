@@ -265,7 +265,7 @@ Then(
 	}
 );
 
-Then('ist die Kategorie {string} als {string} gekennzeichnet', async ({ verwalter, names }, title: string, kind: string) => {
+Then('ist die eigene Kategorie {string} als {string} gekennzeichnet', async ({ verwalter, names }, title: string, kind: string) => {
 	await verwalter.sees(kindOf(names.get(title)!)).toBe(kind);
 });
 
@@ -277,22 +277,32 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass sich die vordefinierte Kategorie {string} nicht löschen lässt, weil Dwello Rechnungen nach ihr einordnet',
+	'erfährt der Liegenschaftsverwalter, dass sich die vordefinierte Kategorie {string} nicht löschen lässt, weil Dwello sie mitliefert',
 	async ({ verwalter }, name: string) => {
-		await verwalter.sees(whyNotDeletable(name)).toContain('«Von Dwello» lassen sich nicht löschen');
-		await verwalter.sees(whyNotDeletable(name)).toContain('Dwello ordnet Rechnungen nach ihnen ein');
+		await verwalter
+			.sees(whyNotDeletable(name))
+			.toContain('Kategorien «Von Dwello» lassen sich nicht löschen, weil Dwello sie mitliefert.');
 	}
 );
 
 Then('erfährt der Liegenschaftsverwalter, dass Dwello die Kategorie mitliefert', async ({ verwalter }) => {
-	await verwalter.sees(predefinedHintText).toContain('Dwello liefert diese Kategorie mit');
+	await verwalter.sees(predefinedHintText).toContain('Dwello liefert diese Kategorie mit; sie lässt sich nicht löschen.');
 });
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass Rechnungen anders eingeordnet werden, wenn er die Namen oder die Umlagefähigkeit ändert',
+	'erfährt der Liegenschaftsverwalter, dass schon erfasste Rechnungen nicht mehr in die Nebenkostenabrechnung fliessen, wenn er die Kategorie auf nicht umlagefähig stellt',
 	async ({ verwalter }) => {
-		await verwalter.sees(predefinedHintText).toContain(
-			'Wenn Sie die Namen oder die Umlagefähigkeit ändern, werden Rechnungen anders eingeordnet.'
-		);
+		await verwalter
+			.sees(predefinedHintText)
+			.toContain('Stellen Sie die Kategorie auf nicht umlagefähig, fliessen auch ihre schon erfassten Rechnungen nicht mehr in die Nebenkostenabrechnung.');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den deutschen Namen oder die Beschreibung ändert',
+	async ({ verwalter }) => {
+		await verwalter
+			.sees(predefinedHintText)
+			.toContain('Ändern Sie den deutschen Namen oder die Beschreibung, schlägt die KI für neue Rechnungen womöglich eine andere Kategorie vor.');
 	}
 );

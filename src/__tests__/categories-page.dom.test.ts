@@ -160,7 +160,7 @@ describe('Kategorien', () => {
 
 describe('Kategorie erfassen', () => {
 	it('bestätigt das Speichern mit dem Namen der Kategorie', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
 
 		await answer({ type: 'redirect' });
@@ -170,6 +170,7 @@ describe('Kategorie erfassen', () => {
 
 	it('meldet, warum die Kategorie nicht gespeichert wurde', () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { form: 'Eine Kategorie mit dem Namen "Lift" existiert bereits.' } }
 		} as never);
 
@@ -186,7 +187,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		)!;
 
 	it('wählt nichts vor und bietet die Prüfung durch die KI an', () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
 		expect(choice('Umlagefähig').checked).toBe(false);
 		expect(choice('Nicht umlagefähig').checked).toBe(false);
@@ -195,7 +196,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Art. 257a Absatz 2 OR: umlagefähig heisst noch nicht, dass der Mieter sie schuldet
 	it('erklärt, wann der Mieter umlagefähige Kosten bezahlt', () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
 		expect(text()).toContain('wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR)');
 		expect(text()).toContain('Gebäudeversicherung');
@@ -205,7 +206,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Die KI hat den Namen geprüft, der im Feld steht: so kommt die Antwort nach «Von der KI prüfen lassen»
 	function checked(name: string, proposal: object) {
-		const props = reactiveProps({ form: null as unknown });
+		const props = reactiveProps({ data: { kiEnabled: true }, form: null as unknown });
 		show(NewCategoryPage, props as never);
 		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', name);
 		props.form = { proposal: { name, description: '', ...proposal } };
@@ -271,7 +272,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Sven P-2: eine eigene Wahl überschreibt die KI nicht
 	it('lässt eine eigene Wahl vor der Prüfung stehen und sagt das', () => {
-		const props = reactiveProps({ form: null as unknown });
+		const props = reactiveProps({ data: { kiEnabled: true }, form: null as unknown });
 		show(NewCategoryPage, props as never);
 		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
 		click(choice('Nicht umlagefähig'));
@@ -328,7 +329,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Die KI braucht bis zu 30 s: der Knopf zeigt, dass sie prüft, und lässt sich nicht nochmals drücken (E-4)
 	it('zeigt während der Prüfung, dass die KI arbeitet', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		const button = byTestId<HTMLButtonElement>('category-propose-button')!;
 		const after = server.submit!({ formData: new FormData(server.form!), submitter: button }) as (
 			input: unknown
@@ -345,14 +346,14 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Der Bereich für die Ansage steht schon vor dem ersten Vorschlag, sonst sagt ihn ein Screenreader nicht an (E-13)
 	it('hält den Bereich für den Vorschlag der KI schon vor der Prüfung bereit', () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
 		expect(document.querySelector('[role="status"][data-testid="category-proposal-region"]')).not.toBeNull();
 	});
 
 	// Ein Speichern während der Prüfung bleibt als laufend markiert, wenn die Prüfung zuerst antwortet (E-12)
 	it('zeigt das Speichern weiter als laufend, wenn die Prüfung vorher fertig wird', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		const check = server.submit!({
 			formData: new FormData(server.form!),
 			submitter: byTestId('category-propose-button')
@@ -366,7 +367,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Nach der Prüfung bleibt der Fokus beim Knopf, statt an den Seitenanfang zu fallen (E-15)
 	it('setzt den Fokus nach der Prüfung wieder auf den Knopf', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		const button = byTestId<HTMLButtonElement>('category-propose-button')!;
 		const after = server.submit!({ formData: new FormData(server.form!), submitter: button }) as (
 			input: unknown
@@ -379,7 +380,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Sven P-4: wer während der Prüfung weitergegangen ist, bleibt dort
 	it('lässt den Fokus, wo er während der Prüfung hingegangen ist', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		const after = server.submit!({
 			formData: new FormData(server.form!),
 			submitter: byTestId('category-propose-button')
@@ -396,6 +397,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	// Sven P-6, P-9: die Fehlermeldung kommt zuerst und verschwindet mit der Wahl
 	it('liest die fehlende Wahl zuerst vor und nimmt sie mit der Wahl zurück', () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
 		} as never);
 		expect(choice('Umlagefähig').getAttribute('aria-describedby')!.split(' ')[0]).toBe('isAllowedUtilityCost-error');
@@ -406,6 +408,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	it('meldet die fehlende Wahl an der Wahl', () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
 		} as never);
 
@@ -415,11 +418,20 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	// Nach der Ablehnung führt der Fokus zur Wahl, damit ein Screenreader die Meldung vorliest (E-2)
 	it('setzt den Fokus nach der Ablehnung auf die Wahl', async () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
 		} as never);
 		await focusFirstError(document.querySelector('form')!);
 
 		expect(document.activeElement).toBe(choice('Umlagefähig'));
+	});
+
+	// #219: eine ausgeschaltete KI antwortet nie, also bietet die Seite sie nicht an
+	it('bietet die Prüfung durch die KI nicht an, solange die KI ausgeschaltet ist', () => {
+		show(NewCategoryPage, { data: { kiEnabled: false }, form: null } as never);
+
+		expect(byTestId('category-allowance')).not.toBeNull();
+		expect(byTestId('category-propose-button')).toBeNull();
 	});
 
 	it('zeigt beim Bearbeiten die gespeicherte Wahl, ohne die KI anzubieten', () => {

@@ -6,15 +6,15 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 No implementation issue exists for either decision issue: their "Decided (product owner)" sections are the requirement.
 
-- [ ] #166 `@wip` scenarios (`categories.feature`): badges «Von Dwello» / «Eigene», delete disabled with its reason, hint on the edit page; seen red
-- [ ] fach-reviewer on the scenarios and texts before implementing
-- [ ] #166 backend: `deleteCategory` refuses a predefined category (`CATEGORY_PREDEFINED`), `updateCategory` keeps its key (pg tests)
-- [ ] #166 list: badge, disabled delete button described by its reason; edit page: hint
-- [ ] #219 new-category page loads whether the KI is on and hides «Von der KI prüfen lassen» when it is off (No scenario: the E2E backend always starts with the KI on; `LLM_ENABLED` is read at the backend start)
-- [ ] messages in all four languages; `tests/a11y` states if needed
+- [x] #166 `@wip` scenarios (`categories.feature`): badges «Von Dwello» / «Eigene», delete disabled with its reason, hint on the edit page; seen red
+- [x] fach-reviewer round 1 on the scenarios and texts before implementing (`docs/reviews/w5b-fachreview-1.md`); V-2 → #302
+- [x] #166 backend: `deleteCategory` refuses a predefined category (`CATEGORY_PREDEFINED`), `updateCategory` keeps its key (pg tests)
+- [x] #166 list: badge, disabled delete button described by its reason; edit page: hint (its KI sentence only while the KI is on)
+- [x] #219 new-category page loads whether the KI is on and hides «Von der KI prüfen lassen» when it is off (No scenario: the E2E backend always starts with the KI on; `LLM_ENABLED` is read at the backend start)
+- [x] messages in all four languages; no new `tests/a11y` state (list and `category-edit-predefined` are already checked)
 - [ ] code-reviewer slice review
 - [ ] feature review: persona Helga, fach-reviewer if texts changed
 - [ ] Checks before push; workflow review; archive session
 - [ ] Push, pull request, CI and merge (CLAUDE.md, Workflow 9)
 
-Files:
+Files: `backend/src/services/category.service.ts`, `src/lib/server/category.ts`, `src/routes/config/categories/{+page.svelte,CategoryRow.svelte,CategoryForm.svelte,new/*,[id]/edit/*}`, `messages/*.json`, `docs/api-specification.md`, tests (`category-predefined.pg`, `categories`, `categories-page.dom`, `category-predefined.dom`, `config-pages`, `focus-error.dom`, `tests/e2e/**`).

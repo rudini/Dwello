@@ -1,5 +1,7 @@
-import { createCategory, proposeAllocability } from '$lib/server/category';
-import type { Actions } from './$types';
+import { createCategory, kiEnabled, proposeAllocability } from '$lib/server/category';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ fetch }) => ({ kiEnabled: await kiEnabled(fetch) });
 
 export const actions: Actions = {
 	save: ({ request, fetch }) => createCategory(fetch, request),
