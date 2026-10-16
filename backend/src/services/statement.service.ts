@@ -25,6 +25,7 @@ import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { isRealDate } from './real-date';
+import { oldAddress } from './old-address';
 import { daysAfter, swissToday } from './today';
 
 export interface StatementFilters {
@@ -49,10 +50,11 @@ const nextReminderFrom = sql<string | null>`(
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder'
 )`;
-const statementColumns = { ...tableColumns, nextReminderFrom };
+const statementColumns = { ...tableColumns, nextReminderFrom, oldAddress: oldAddress(utilityStatements.contractId) };
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
 	nextReminderFrom: string | null;
+	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
 	tenant: {
 		id: string;
 		firstName: string;

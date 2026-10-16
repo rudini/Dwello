@@ -162,7 +162,6 @@ Funktionalität: Mietvertragsdetail
     Und gilt der neue Mietvertrag für die Wohnung "2.01"
 
   # A-5 (#114): nach dem Vertragsende fehlt die neue Adresse oft noch; der Schritt bleibt, solange die Adresse die der Wohnung ist
-  @wip
   Szenario: Nach dem Vertragsende bleibt der Schritt zur neuen Adresse
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2024-12-31" gekündigt
     Und die Korrespondenzadresse von "Anna Keller" ist noch die Adresse des Gebäudes "Ahornhof"

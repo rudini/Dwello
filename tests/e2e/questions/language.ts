@@ -62,10 +62,17 @@ const seedValues = [
 	'betrieb@muster-hosting.ch'
 ];
 
+// Country names come from the browser's language data (Intl), not from messages: «Wallis-et-Futuna» is French (#102)
+const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+const countryNames = (language: string) => {
+	const names = new Intl.DisplayNames([language], { type: 'region', fallback: 'none' });
+	return letters.flatMap((a) => letters.map((b) => names.of(a + b) ?? '')).filter(Boolean);
+};
+
 /** The texts on the page that still contain German, with the German words; [] when there are none */
 const germanIn = (texts: string[], language: string, userData: string[]) => {
 	const masked = (text: string) =>
-		[...userData, ...seedValues, ...sameEverywhere]
+		[...userData, ...seedValues, ...sameEverywhere, ...countryNames(language)]
 			.reduce((rest, value) => rest.split(value).join(' '), text)
 			.replace(scenarioRecord, ' ')
 			.replace(seededDescription, ' ');

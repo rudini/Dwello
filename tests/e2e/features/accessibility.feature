@@ -25,6 +25,7 @@ Funktionalität: Barrierefreiheit
       | error-server           | default             |
       | error-server           | server-error        |
       | dashboard              | default             |
+      | dashboard              | old-address-task    |
       | dashboard              | first-use           |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
@@ -81,6 +82,7 @@ Funktionalität: Barrierefreiheit
       | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | delete-dialog       |
       | contract-detail        | missing-statements  |
+      | contract-ended-detail  | default             |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
       | contract-edit          | past-end-error      |
@@ -122,6 +124,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | invoice-hints       |
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
+      | statement-generate     | old-address-preview |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | draft-restored      |
       | statement-generate     | draft-dropped       |
@@ -130,6 +133,8 @@ Funktionalität: Barrierefreiheit
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
+      | statement-old-address-detail | default       |
+      | statement-old-address-detail | send-dialog   |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |

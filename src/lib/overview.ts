@@ -24,6 +24,8 @@ export interface OverviewInput {
 	// ended Abrechnungsperiode with rented buildings that have no statements yet
 	missingPeriod?: { start: string; end: string; buildings: string[] } | null;
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
+	// moved out with a draft statement, still at the building's address (A-5, #114)
+	oldAddresses?: { tenantId: string; tenantName: string }[];
 	// ended by notice, still running and without a following contract (A-4)
 	noticedContracts: {
 		id: string;
@@ -178,10 +180,26 @@ const successorTasks = ({ noticedContracts }: OverviewInput): Task[] =>
 			icon: 'contract'
 		}));
 
+// A draft would go to the apartment the tenant left: the new address first (A-5, #114)
+const addressTasks = ({ oldAddresses = [] }: OverviewInput): Task[] =>
+	oldAddresses.map((t) => ({
+		id: `old-address-${t.tenantId}`,
+		title: m.contracts_next_address(),
+		text: m.statements_old_address({ name: t.tenantName }),
+		href: `/tenants/${t.tenantId}/edit`,
+		action: m.contracts_next_address(),
+		icon: 'edit'
+	}));
+
 /** Tasks in the order they should be done; set-up comes first */
 export function overviewTasks(input: OverviewInput): Task[] {
 	const step = setup.find(({ missing }) => missing(input.portfolio));
-	return [...(step ? [step.task()] : []), ...workTasks(input), ...successorTasks(input)];
+	return [
+		...(step ? [step.task()] : []),
+		...workTasks(input),
+		...addressTasks(input),
+		...successorTasks(input)
+	];
 }
 
 /** A date the landlord should not miss, with how far away it is in words; `kind` is an id, shown via a message */

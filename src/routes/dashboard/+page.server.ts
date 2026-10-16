@@ -99,6 +99,15 @@ function noticed(contracts: Row[]) {
 		}));
 }
 
+// Drafts that would go to the apartment a moved-out tenant left, once per tenant (A-5, #114)
+const oldAddresses = (drafts: Row[]) => [
+	...new Map(
+		drafts
+			.filter((s) => s.oldAddress)
+			.map((s) => [String(s.tenantId), { tenantId: String(s.tenantId), tenantName: tenantOf(s) }])
+	).values()
+];
+
 const tenantOf = (statement: Row) => {
 	const tenant = statement.tenant as Row | null;
 	return tenant ? `${tenant.firstName} ${tenant.lastName}` : '';
@@ -109,7 +118,7 @@ export const load = async ({
 }: {
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
-	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts] =
+	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts, drafts] =
 		await Promise.all([
 			fetchRecord(
 				fetch,
@@ -122,7 +131,8 @@ export const load = async ({
 			list(fetch, 'contracts?status=active&limit=100', 'contracts'),
 			lastPeriod(fetch).catch(() => null),
 			list(fetch, 'apartments?limit=1000', 'apartments'),
-			list(fetch, 'contracts?limit=1000', 'contracts')
+			list(fetch, 'contracts?limit=1000', 'contracts'),
+			list(fetch, 'statements?status=draft&limit=100', 'data')
 		]);
 	const reletStarts = (buildingId: string) =>
 		apartments
@@ -147,6 +157,7 @@ export const load = async ({
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),
 		noticedContracts,
+		oldAddresses: oldAddresses(drafts),
 		// a contract with a task is named by it, not twice (A-4.4); one given notice with a next tenant keeps its
 		// deadline (review K-6)
 		endingContracts: contracts

@@ -79,7 +79,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/` | Query: `search`, `language`, `status` (`active`\|`inactive`), `limit` (default 50), `offset`. → `{ tenants, total }`; items include `currentApartment`, `currentBuilding`, `isActive` (see `tests/contracts/tenants.json`) |
 | GET | `/:id` | → tenant with `currentApartment`, `currentBuilding`, `contractCount`, `isActive`. 404 |
 | GET | `/:id/history` | → `{ tenant, contracts: [{ id, apartmentNumber, buildingName, startDate, endDate, baseRent, isActive }] }`. 404 |
-| POST | `/` | Body: `firstName`, `lastName` required; optional `email` (email format), `phone`, `language` (`de`\|`fr`\|`it`\|`rm`\|`en`), `address`, `postalCode`, `city`, `correspondenceChannel` (`email`\|`letter`). → 201 tenant. 400 |
+| POST | `/` | Body: `firstName`, `lastName` required; optional `email` (email format), `phone`, `language` (`de`\|`fr`\|`it`\|`rm`\|`en`), `address`, `postalCode`, `city` (the Korrespondenzadresse), `country` (ISO 3166 code, default `CH`, #102), `correspondenceChannel` (`email`\|`letter`). → 201 tenant. 400 |
 | PUT | `/:id` | Body: any subset of the POST fields. → tenant. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the tenant has an active contract or any contract history |
 
@@ -87,7 +87,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/` | Query: `apartmentId`, `tenantId`, `buildingId`, `status` (`active`\|`ended`\|`future`), `search`, `limit` (default 50), `offset`. → `{ contracts, total }`; items add `tenantName`, `tenantEmail`, `apartmentNumber`, `buildingName`, `buildingAddress` |
+| GET | `/` | Query: `apartmentId`, `tenantId`, `buildingId`, `status` (`active`\|`ended`\|`future`), `search`, `limit` (default 50), `offset`. → `{ contracts, total }`; items add `tenantName`, `tenantEmail`, `apartmentNumber`, `buildingName`, `buildingAddress`, `oldAddress` (A-5, #114: the tenant moved out and still has the building's street and postal code; also on `GET /:id` and on statements) |
 | GET | `/:id` | → contract with the same added fields. 404 |
 | GET | `/apartment/:apartmentId/active` | Query: `date` (default today). → the contract running on that date. 404 if none |
 | GET | `/apartment/:apartmentId/period` | Query: `periodStart`, `periodEnd` (required). → `{ contracts }` overlapping the period (for prorating) |

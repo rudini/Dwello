@@ -15,11 +15,12 @@ Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (p
 - [x] #191: settings form accepts CH and LI with MOD-97; `settings_error_iban` in four languages; PRD one rule
 - [x] #68: legend «Korrespondenzadresse» and help at the field (four languages); tenant detail label
 - [x] #102: migration `0012_tenant_country.sql` (default CH); form select; BFF and backend validation; QR-bill debtor country; PDF address block of statement and reminder
-- [ ] #114: next-steps text, `nextStepsDue` keeps the address step; warning in wizard preview and send dialog; overview task; `docs/anforderungen-vertragsende.md` A-5 implemented
+- [x] #114: next-steps text, `nextStepsDue` keeps the address step; warning in wizard preview and send dialog; overview task; `docs/anforderungen-vertragsende.md` A-5 implemented
 - [ ] slice reviews (code-reviewer) per slice
   - [x] iban: `docs/reviews/iban-review-1.md` (Nits C-1 to C-3 fixed)
+  - [x] address: `docs/reviews/address-review-1.md` (Major C-1 fixed), round 2 `docs/reviews/address-review-2.md`
 - [ ] feature review: persona(s), fach-reviewer, daten-pruefer (QR-bill, PDF)
-- [ ] a11y and language screens if a new state appears
+- [x] a11y and language screens: `dashboard` `old-address-task`, `statement-generate` `old-address-preview`, new screens `statement-old-address-detail`, `contract-ended-detail`; the language check masks country names from Intl
 - [ ] Blocked on me: glossary changes #68 asks for (`UBIQUITOUS_LANGUAGE.md`, Mieter: «Korrespondenzadresse», country)
 
-Files changed: `src/lib/server/settings.ts`, `messages/*.json`, `docs/PRD-Dwello.md`, `backend/migrations/0012_tenant_country.sql`, `backend/src/db/schema.ts`, `docs/data-model.md`, `backend/src/routes/tenants.ts`, `backend/src/services/{tenant,statement,qr-bill,pdf,reminder-pdf,postal-address}.ts`, `src/lib/{tenant,types}.ts`, `src/lib/server/{tenant,tenant-form}.ts`, `src/routes/tenants/TenantFormFields.svelte`, `src/routes/tenants/[id]/TenantContactCard.svelte`, `docs/design/i18n-begriffe.md`, `docs/anforderungen-vertragsende.md`, `tests/contracts/tenant.json`, E2E features and steps.
+Files changed (#114 too: `backend/src/services/{old-address,contract}.ts`, `src/routes/contracts/[id]/`, `src/routes/statements/[id]/`, `src/routes/statements/generate/`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `tests/a11y/screens.json`, `docs/api-specification.md`): `src/lib/server/settings.ts`, `messages/*.json`, `docs/PRD-Dwello.md`, `backend/migrations/0012_tenant_country.sql`, `backend/src/db/schema.ts`, `docs/data-model.md`, `backend/src/routes/tenants.ts`, `backend/src/services/{tenant,statement,qr-bill,pdf,reminder-pdf,postal-address}.ts`, `src/lib/{tenant,types}.ts`, `src/lib/server/{tenant,tenant-form}.ts`, `src/routes/tenants/TenantFormFields.svelte`, `src/routes/tenants/[id]/TenantContactCard.svelte`, `docs/design/i18n-begriffe.md`, `docs/anforderungen-vertragsende.md`, `tests/contracts/tenant.json`, E2E features and steps.

@@ -4,6 +4,7 @@
 	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import type { StatementWithDetails } from '$lib/types';
+	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 
@@ -60,6 +61,20 @@
 			</dd>
 		</div>
 	</dl>
+	{#if statement.oldAddress}
+		<!-- A-5 (#114): it would go to the apartment the tenant left; sending stays possible -->
+		<Alert
+			tone="caution"
+			title={m.statements_old_address({ name: statement.tenantName })}
+			testid="send-old-address"
+		>
+			<a
+				href="/tenants/{statement.tenantId}/edit"
+				class="text-accent underline underline-offset-4 hover:text-accent-strong"
+				>{m.contracts_next_address()}</a
+			>
+		</Alert>
+	{/if}
 	<div>
 		<Button
 			href="/statements/{statement.id}/pdf?ansehen"

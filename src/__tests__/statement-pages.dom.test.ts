@@ -695,6 +695,23 @@ describe('Abrechnungsdetail', () => {
 		expect(recipient).toContain('Ahornweg 3, 8400 Winterthur');
 	});
 
+	// A-5 (#114): nach dem Auszug ginge die Abrechnung an die verlassene Wohnung; versenden bleibt möglich
+	it('warnt vor dem Versand, wenn der ausgezogene Mieter noch die Adresse der Wohnung hat', () => {
+		detail({ tenantName: 'Eva Frei', oldAddress: true });
+		click('statement-send-button');
+		expect(byTestId('send-old-address')!.textContent).toContain(
+			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
+		);
+		expect(byTestId('statement-send-confirm')).not.toBeNull();
+	});
+
+	it('warnt nicht, solange die Adresse nicht die der Wohnung ist', () => {
+		detail({ oldAddress: false });
+		click('statement-send-button');
+		expect(byTestId('send-recipient')).not.toBeNull();
+		expect(byTestId('send-old-address')).toBeNull();
+	});
+
 	it('bietet eine versendete Abrechnung zum Mahnen und Bezahlen an, aber nicht zum Löschen', () => {
 		detail({ status: 'sent' });
 

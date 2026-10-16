@@ -119,7 +119,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann meldet die Vorschau, dass es in der Periode keine Mietverträge gibt
 
   # A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
-  @wip
   Szenario: Vorschau warnt vor der alten Adresse eines ausgezogenen Mieters
     Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet

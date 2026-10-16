@@ -188,6 +188,26 @@ describe('Abrechnung laden', () => {
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
 	});
 
+	// Eine Korrespondenzadresse im Ausland nennt ihr Land (#102)
+	it('nennt das Land einer Postadresse im Ausland', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const tenantJson = (await import('../../tests/contracts/tenant.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1'))
+				return Response.json({ ...statementJson, tenantId: 't1' });
+			if (url.endsWith('/tenants/t1')) return Response.json({ ...tenantJson, country: 'DE' });
+			if (url.includes('/invoices/for-statement/')) return Response.json([]);
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as {
+			statement: { tenantAddress: string; oldAddress: boolean };
+		};
+		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich, Deutschland');
+		expect(data.statement.oldAddress).toBe(false);
+	});
+
 	// Nachzügler: ein Entwurf ohne die Rechnungen, die nach seinem Erstellen erfasst wurden
 	it('zählt die Rechnungen der Periode, die nach dem Erstellen der Abrechnung erfasst wurden', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');

@@ -57,7 +57,6 @@ Funktionalität: Abrechnungsdetail
     Dann hat die Abrechnung den Status "Versendet"
 
   # A-5 (#114): nach dem Auszug ginge die Abrechnung an die verlassene Wohnung; die Warnung sperrt den Versand nicht
-  @wip
   Szenario: Abrechnung an einen ausgezogenen Mieter mit alter Adresse
     Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

@@ -149,7 +149,6 @@ Funktionalität: Übersicht
     Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Anna Keller"
 
   # A-5 (#114): solange der Entwurf an die verlassene Wohnung ginge, steht die neue Adresse als Aufgabe da
-  @wip
   Szenario: Alte Adresse eines ausgezogenen Mieters als Aufgabe
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2024-06-30" für "900" Franken

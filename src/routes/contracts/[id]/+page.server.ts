@@ -18,7 +18,7 @@ interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
 	missingStatements: { start: string; end: string; href: string }[]; // A-10, #142: newest first
 	billedBy: { statementNumber: string; status: string }[]; // the contract's statements: it cannot be deleted (#116)
-	nextSteps: { successor: boolean } | null; // A-4: a notice still running
+	nextSteps: { successor: boolean; ended: boolean } | null; // A-4: a notice still running; A-5: after it the address
 	contract: RentalContract & {
 		tenant: Tenant;
 		apartment: Apartment;
@@ -58,13 +58,15 @@ const rentDaysIn = (contract: Row, { start, end }: { start: string; end: string 
 // review K-1); null without one, or when the apartment's contracts cannot be read: no hint rather than a wrong one
 async function nextStepsDue(fetch: typeof globalThis.fetch, contract: Row) {
 	const end = contract.endDate ? String(contract.endDate).slice(0, 10) : null;
-	if (!contract.terminated || !end || end < localToday()) return null;
+	if (!contract.terminated || !end) return null;
+	// after the end only the new address, while the moved-out tenant still has the building's (A-5, #114)
+	if (end < localToday()) return contract.oldAddress ? { successor: false, ended: true } : null;
 	const response = await fetch(
 		`${BACKEND_URL}/api/v1/contracts?apartmentId=${contract.apartmentId}`
 	).catch(() => null);
 	if (!response?.ok) return null;
 	const others: Row[] = (await response.json()).contracts ?? [];
-	return { successor: others.some((o) => String(o.startDate).slice(0, 10) > end) };
+	return { successor: others.some((o) => String(o.startDate).slice(0, 10) > end), ended: false };
 }
 
 // Every ended Abrechnungsperiode from the Vertragsbeginn on in which the contract has rent days but no statement,
