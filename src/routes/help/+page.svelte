@@ -4,6 +4,9 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import Glossary from './Glossary.svelte';
 
+	// the year the date fields use in their examples, as at the Leistungszeitraum of an invoice
+	const year = new Date().getFullYear();
+
 	// Area names as in the main navigation (src/lib/navigation.ts), so the help leads to the right place
 	const sections = [
 		{
@@ -22,7 +25,14 @@
 		},
 		{
 			title: m.help_invoices_title(),
-			steps: [m.help_invoices_1(), m.help_invoices_2(), m.help_invoices_3(), m.help_invoices_4()]
+			steps: [
+				m.help_invoices_1(),
+				m.help_invoices_2(),
+				m.help_invoices_3(),
+				m.help_invoices_4(),
+				m.invoices_service_period_years({ year, end: year + 5 }),
+				m.invoices_service_period_boiler()
+			]
 		},
 		{
 			title: m.help_statements_title(),

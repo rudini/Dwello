@@ -43,6 +43,8 @@
 	} = $props();
 
 	// ISO dates compare as text; a Leistungszeitraum decides over the Rechnungsdatum
+	// the year of the date fields' examples (DateInput), so the help names one year (#250)
+	const year = new Date().getFullYear();
 	const byServicePeriod = $derived(!!servicePeriodStart && !!servicePeriodEnd);
 	const outside = $derived(
 		!!period &&
@@ -78,7 +80,11 @@
 	<legend class="font-semibold text-ink">
 		{m.invoices_service_period()} <span class="font-normal text-ink-muted">{m.ui_optional()}</span>
 	</legend>
-	<p class="text-ink-muted">{m.invoices_service_period_help()}</p>
+	<div class="flex flex-col gap-2 text-ink-muted" data-testid="invoice-service-period-help">
+		<p>{m.invoices_service_period_help({ year })}</p>
+		<p>{m.invoices_service_period_years({ year, end: year + 5 })}</p>
+		<p>{m.invoices_service_period_boiler()}</p>
+	</div>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<DateInput
 			id="{idPrefix}servicePeriodStart"

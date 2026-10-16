@@ -38,7 +38,6 @@ Funktionalität: Neue Rechnung erfassen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
 
   # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)
-  @wip
   Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre
     Dann erklärt das Formular beim Leistungszeitraum "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
 

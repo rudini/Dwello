@@ -504,10 +504,24 @@ describe('Rechnung erfassen', () => {
 			expect(text()).toContain('zum Beispiel 31.12.2027.');
 			const help = byTestId('invoice-service-period-help')!.textContent!;
 			expect(help).toContain('Für das 4. Quartal also 01.10.2027 bis 31.12.2027');
+			expect(help).toContain('Geben Sie dann 01.04.2027 bis 31.03.2032 ein.');
 			expect(help.match(/\d{4}/g)).toEqual(['2027', '2027', '2027', '2027', '2032']);
 		} finally {
 			vi.useRealTimers();
 		}
+	});
+
+	// Kosten über mehrere Jahre: das Entkalken eines Boilers in der Wohnung nur, wenn der Mietvertrag es nennt (#254)
+	it('erklärt beim Leistungszeitraum Kosten über mehrere Jahre und den Boiler in der Wohnung', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const help = byTestId('invoice-service-period-help')!.textContent!;
+
+		expect(help).toContain(
+			'Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre.'
+		);
+		expect(help).toContain(
+			'Bei einem Boiler in der Wohnung ist das umstritten: Verrechnen Sie es nur, wenn der Mietvertrag das Entkalken des Boilers ausdrücklich als Nebenkosten nennt. Im Zweifel ist es nicht umlagefähig.'
+		);
 	});
 
 	it('verlangt zum Beginn des Leistungszeitraums auch das Ende', () => {
@@ -677,7 +691,7 @@ describe('Rechnung erfassen', () => {
 		const help = text();
 
 		expect(help).toContain(
-			'Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
+			'Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
 		);
 		expect(help).toContain(
 			'Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'

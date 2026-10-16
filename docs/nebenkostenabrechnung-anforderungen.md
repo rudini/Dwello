@@ -138,7 +138,7 @@
 
 Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriffe bedeuten.
 
-1. **Periode einer Rechnung.** Eine Rechnung ohne Leistungszeitraum zählt in der Abrechnungsperiode, in der ihr Rechnungsdatum liegt. Mit Leistungszeitraum zählt vom Betrag nur der Teil, der nach Tagen in die Periode fällt (Thema 1; `getInvoicesForStatement` in `invoice.service.ts`).
+1. **Periode einer Rechnung.** Eine Rechnung ohne Leistungszeitraum zählt in der Abrechnungsperiode, in der ihr Rechnungsdatum liegt. Mit Leistungszeitraum zählt vom Betrag nur der Teil, der nach Tagen in die Periode fällt (Thema 1; `getInvoicesForStatement` in `invoice.service.ts`). So verteilt der Vermieter auch Kosten, die nur alle paar Jahre anfallen, über diese Jahre: der Leistungszeitraum beginnt am Tag der Arbeit und endet am Tag vor der nächsten (Entkalken des Boilers 01.04.2026 – 31.03.2031: von CHF 500 zählen 75.30 in 2026 und 99.95 in 2027; #254, Szenario `statement-generate.feature`, «Eine Rechnung über mehrere Jahre»).
 2. **Umlagefähige Rechnung.** Sie folgt ihrer Kategorie. Eine Rechnung einer umlagefähigen Kategorie lässt sich von der Abrechnung ausschliessen; eine Rechnung einer nicht umlagefähigen Kategorie ist nie umlagefähig, was auch das Formular oder die KI sendet.
 3. **Verteilschlüssel.** Jede umlagefähige Rechnung kann einen Verteilschlüssel haben; ohne ihn wird sie gleichmässig pro Wohnung verteilt, wie «Pro Einheit». Geteilt wird immer durch alle Wohnungen des Gebäudes, auch die leeren (Thema 4, Leerstand). Die Verwaltungspauschale hat keinen Verteilschlüssel.
 4. **Leerstand.** Den Anteil leerer Wohnungen und leerer Tage trägt immer der Vermieter, ohne die Ausnahme von Art. 7 Abs. 2 VMWG (Themen 3, 4 und 7).
