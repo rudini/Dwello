@@ -47,4 +47,4 @@ Branch `feat/invoice-upload-217`. Issue #217 "Done means" plus `CLAUDE.md`, "Wor
   code-reviewer round 2 (docs/reviews/upload-backend-review-2.md): C-1..C-11 confirmed fixed; fixed C-13 (test), C-14 (`isRealDate` moved to `services/real-date.ts`), C-15 (test red: `-2`, `1.5`, `true` counted); C-12: the texts of the dialog and the privacy statement stay in this branch, their tests come with slice 2 (frontend)
 - [ ] Before marking complete: all checks in `CLAUDE.md`
 - [x] Workflow review `docs/reviews/workflow-rules-review-issue-217.md` (W-1..W-8)
-- Found: `swiss-today.pg.test.ts` fails in its cleanup on `origin/main` too (utility_statements still reference the apartment) → row O-29 in `docs/design/offene-punkte.md`
+- Found: `swiss-today.pg.test.ts` fails in its cleanup on `origin/main` too (utility_statements still reference the apartment) → row O-29 in `docs/design/offene-punkte.md`; fixed on `main` (a7f0dcab) and merged, row removed
