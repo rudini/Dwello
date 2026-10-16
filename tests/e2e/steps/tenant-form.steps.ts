@@ -61,7 +61,7 @@ Then('die Korrespondenzadresse von {string} ist {string}', async ({ verwalter },
 	await verwalter.sees(correspondenceAddress).toBe(address.split(', ').join(' '));
 });
 
-const COUNTRIES: Record<string, string> = { Deutschland: 'DE', Schweiz: 'CH' };
+const COUNTRIES: Record<string, string> = { Deutschland: 'DE' };
 
 Given(
 	'die Korrespondenzadresse von {string} ist {string}, {string} in {string}',

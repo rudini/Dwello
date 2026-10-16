@@ -144,6 +144,7 @@ describe('PDF einer Nachzahlung', () => {
 
 		expect(pdf.text).toContain('Nina Brunner\nMarktstätte 3\n78462 Konstanz\nDEUTSCHLAND');
 		expect(pdf.text).toContain('DE-78462 Konstanz');
+		expect(pdf.pageTexts[0]).not.toContain('DE-'); // the address block keeps the postal code alone
 		expect((await textOf({ ...due, tenant: { ...abroad, country: 'US' } })).text).toContain('78462 Konstanz\nUNITED STATES');
 		expect((await textOf({ ...due, tenant: { ...abroad, country: 'LI' } })).text).toContain('LI-78462 Konstanz');
 		const home = await textOf({ ...due, tenant: { ...abroad, country: 'CH' } });

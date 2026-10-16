@@ -221,7 +221,7 @@ export function testData(api: CallTheApi) {
 		},
 
 		// A Korrespondenzadresse by letter, abroad when a country code is given (#102)
-		async address(tenantTitle: string, address: string, postalCode: string, city: string, country = 'CH') {
+		async address(tenantTitle: string, address: string, postalCode: string, city: string, country: string) {
 			await put(`tenants/${ids.get(tenantTitle)}`, { address, postalCode, city, country, correspondenceChannel: 'letter' });
 		},
 

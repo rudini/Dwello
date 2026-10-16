@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 	import { untrack } from 'svelte';
 	import type { Tenant } from '$lib/types';
 	import { countryCodes, countryName, languageLabels } from '$lib/tenant';
@@ -24,7 +25,7 @@
 	const languages = Object.entries(languageLabels).map(([code, label]) => ({ value: code, label }));
 	const countries = countryCodes
 		.map((code) => ({ value: code, label: countryName(code) }))
-		.sort((a, b) => a.label.localeCompare(b.label));
+		.sort((a, b) => a.label.localeCompare(b.label, getLocale()));
 </script>
 
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -92,9 +93,9 @@
 />
 
 <!-- #68: where statements and reminders go; after moving out the new address -->
-<fieldset class="flex flex-col gap-6" aria-describedby="address-help">
+<fieldset class="flex flex-col gap-6" aria-describedby="correspondence-address-help">
 	<legend class="pb-2 text-xl font-bold text-ink">{m.tenants_correspondence_address()}</legend>
-	<p id="address-help" class="text-ink-muted" data-testid="tenant-address-help">
+	<p id="correspondence-address-help" class="text-ink-muted" data-testid="tenant-address-help">
 		{m.tenants_correspondence_address_help()}
 	</p>
 	<TextInput
@@ -137,6 +138,7 @@
 		name="country"
 		label={m.tenants_country()}
 		options={countries}
+		optional
 		value={tenant.country ?? 'CH'}
 		testid="tenant-country-select"
 	/>

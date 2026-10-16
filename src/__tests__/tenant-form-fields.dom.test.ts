@@ -28,3 +28,16 @@ it('sagt bei der Sprache, dass Rätoromanisch vorerst deutsch erstellt wird', ()
 
 	expect(document.body.textContent).toContain('Auf Rätoromanisch erstellt Dwello die Abrechnung vorerst auf Deutsch.');
 });
+
+// #68: die Hilfe gehört zur ganzen Korrespondenzadresse, das Beispiel der Strasse bleibt bei der Strasse (Review C-1)
+it('beschreibt die Korrespondenzadresse mit ihrer Hilfe, ohne die Beschreibung der Strasse zu verdecken', () => {
+	show(TenantFormFields, {});
+
+	const fieldset = byTestId('tenant-address-help')!.closest('fieldset')!;
+	const help = document.getElementById(fieldset.getAttribute('aria-describedby')!)!;
+	expect(help.textContent).toContain('Hierhin gehen Abrechnungen und Mahnungen');
+	const street = byTestId('tenant-address-input')!;
+	for (const id of street.getAttribute('aria-describedby')!.split(' '))
+		expect(document.querySelectorAll(`[id="${id}"]`)).toHaveLength(1);
+	expect(byTestId('tenant-country-select')!.getAttribute('aria-required')).toBe('false');
+});
