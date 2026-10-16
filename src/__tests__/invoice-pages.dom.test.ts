@@ -271,10 +271,10 @@ describe('Rechnungsdetail', () => {
 			'Für die Abrechnungsperiode 01.01.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon.'
 		);
 		expect(hint).toContain(
-			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann rechnen sie die Rechnung so ab, wie sie jetzt ist.'
+			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann rechnen die neuen Abrechnungen die Rechnung so ab, wie sie jetzt ist.'
 		);
 		expect(hint).toContain(
-			'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Ist der Betrag zu hoch, erstatten Sie ihm die Differenz. Ob Sie zusätzliche Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
+			'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Verlangt die Abrechnung zu viel, schulden Sie dem Mieter die Differenz: Ziehen Sie sie von der Nachzahlung ab oder erstatten Sie sie. Ob Sie zusätzliche Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
 		);
 	});
 

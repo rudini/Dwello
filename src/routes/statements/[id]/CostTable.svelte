@@ -23,12 +23,24 @@
 	type Item = StatementWithDetails['lineItems'][number];
 	const apartmentShare = (item: Item) =>
 		item.apartmentShare == null ? '–' : formatCurrency(item.apartmentShare);
-	const timeShare = (item: Item) =>
-		item.shareDays
-			? m.statements_share_days(item.shareDays)
-			: item.periodShare == null
-				? '–'
-				: `${(Math.round(item.periodShare * 10000) / 100).toFixed(2)} %`;
+	const percent = (share: number) => `${(Math.round(share * 10000) / 100).toFixed(2)} %`;
+	// as the PDF: the days rented of the period where the share is exactly that (a tenant over the whole period)
+	const periodDays = $derived(
+		Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1
+	);
+	const rentedShare = (item: Item) =>
+		!item.byProfile &&
+		!item.invoices.some((invoice) => invoice.part) &&
+		Math.abs(item.periodShare! - statement.rentalDays / periodDays) < 0.00005;
+	const timeShare = (item: Item) => {
+		if (item.shareDays) return m.statements_share_days(item.shareDays);
+		if (item.periodShare == null) return '–';
+		if (rentedShare(item))
+			return m.statements_share_days({ days: statement.rentalDays, total: periodDays });
+		return item.byProfile
+			? m.statements_time_share_profile({ percent: percent(item.periodShare) })
+			: percent(item.periodShare);
+	};
 	const columns = [
 		{ label: m.buildings_category() },
 		{ label: m.glossary_key_term() },
@@ -122,20 +134,19 @@
 		<dd class="whitespace-nowrap text-ink">− {formatCurrency(statement.totalAdvancePayments)}</dd>
 	</div>
 	{#if rounding}
-		<div class="flex flex-col gap-2" data-testid="statement-rounding">
-			<div class="flex justify-between gap-4">
-				<dt class="text-ink-muted">
-					{m.statements_before_rounding({ balance: balanceLabel(unrounded) })}
-				</dt>
-				<dd class="whitespace-nowrap text-ink">{formatCurrency(Math.abs(unrounded))}</dd>
-			</div>
-			<div class="flex justify-between gap-4">
-				<dt class="text-ink-muted">{m.statements_rounding()}</dt>
-				<dd class="whitespace-nowrap text-ink">
-					{rounding > 0 ? '+' : '−'}
-					{formatCurrency(Math.abs(rounding))}
-				</dd>
-			</div>
+		<!-- each pair directly in the list: a <dl> holds only groups of <dt> and <dd> -->
+		<div class="flex justify-between gap-4" data-testid="statement-rounding">
+			<dt class="text-ink-muted">
+				{m.statements_before_rounding({ balance: balanceLabel(unrounded) })}
+			</dt>
+			<dd class="whitespace-nowrap text-ink">{formatCurrency(Math.abs(unrounded))}</dd>
+		</div>
+		<div class="flex justify-between gap-4" data-testid="statement-rounding">
+			<dt class="text-ink-muted">{m.statements_rounding()}</dt>
+			<dd class="whitespace-nowrap text-ink">
+				{rounding > 0 ? '+' : '−'}
+				{formatCurrency(Math.abs(rounding))}
+			</dd>
 		</div>
 	{/if}
 	<div

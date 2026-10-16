@@ -10,7 +10,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 type BackendStatement = Record<string, any>;
 
-const toLineItem = (item: BackendStatement): StatementLineItem => ({
+const toLineItem = (item: BackendStatement, profilePercent?: number): StatementLineItem => ({
 	id: item.id,
 	categoryId: item.categoryId,
 	categoryName: item.categoryName || item.description || m.common_unknown(),
@@ -19,8 +19,13 @@ const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	totalAmount: Number(item.totalAmount),
 	tenantShare: Number(item.tenantShare),
 	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0,
-	...sharesOf(item)
+	...sharesOf(item),
+	byProfile: byProfile(item, profilePercent)
 });
+
+// Shared by the heating profile: its Zeitanteil is the profile's percent the statement stored (#209), not days
+const byProfile = (item: BackendStatement, percent?: number) =>
+	percent != null && !item.billedDays && Math.abs(Number(item.periodShare) * 100 - percent) < 0.005;
 
 const amountOrNull = (value: unknown) => (value == null ? null : Number(value));
 
@@ -92,7 +97,9 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		rentalStart: data.rentalStart,
 		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
-		lineItems: (data.lineItems || []).map(toLineItem)
+		lineItems: (data.lineItems || []).map((item: BackendStatement) =>
+			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
+		)
 	};
 }
 

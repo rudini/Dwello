@@ -7,7 +7,7 @@
 	// and the calculation of the share, as the PDF (#226, #240). The change of the Tankbestand is no invoice: no link
 	let { item }: { item: StatementLineItem } = $props();
 
-	const number = (amount: number) => formatCurrency(amount).replace(/^CHF\s/, '');
+	const number = (amount: number) => formatCurrency(amount).replace(/^CHF\s?/, '');
 	const parted = $derived(item.invoices.filter((invoice) => invoice.part));
 
 	function partText({ part, start, end, amount, fuelStock }: StatementLineInvoice) {

@@ -497,7 +497,7 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. ' +
 				'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. ' +
-				'Ist der Betrag zu hoch, erstatten Sie ihm die Differenz. ' +
+				'Verlangt die Abrechnung zu viel, schulden Sie dem Mieter die Differenz: Ziehen Sie sie von der Nachzahlung ab oder erstatten Sie sie. ' +
 				'Ob Sie zusätzliche Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
 		);
 	});
@@ -566,6 +566,44 @@ describe('Abrechnungsdetail', () => {
 		expect(timeShare.textContent!.trim()).toBe('17.03 %');
 	});
 
+	// Persona Marco P-1: der Zeitanteil der Heizkosten kommt aus dem Heizprofil, nicht aus den Tagen
+	it('nennt beim Zeitanteil nach Heizprofil das Heizprofil', () => {
+		detail({ lineItems: [line({ periodShare: 0.558, byProfile: true })] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('55.80 % nach Heizprofil');
+	});
+
+	// V-16: wer die ganze Periode mietet, trägt jeden Tag: «366/366 Tage», wie das PDF
+	it('nennt den Zeitanteil in Tagen, wo er die Mietstage der Periode sind', () => {
+		detail({ lineItems: [line({ periodShare: 1 })] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('366/366 Tage');
+	});
+
+	// V-12, C-6: eine Rechnung ohne Leistungszeitraum und eine, deren Leistungszeitraum über die Periode reicht, wie im PDF
+	it('nennt Rechnungen ohne Leistungszeitraum und über die Periode hinaus wie das PDF', () => {
+		const whole = { start: '2024-07-01', end: '2025-06-30', amount: 1200 };
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart', amount: 600, start: '2025-01-01', end: '2025-12-31', part: { days: 47, total: 365, noPeriod: true } },
+			{ id: 'i2', description: 'Lift-Abo', amount: 595.07, start: '2025-01-01', end: '2025-06-30', part: { days: 0, total: 181, whole } }
+		];
+		detail({ lineItems: [line({ invoices })] });
+		expect(invoicesText()).toContain('Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 47 von 365 Tagen der Abrechnungsperiode');
+		expect(invoicesText()).toContain(
+			'Leistungszeitraum 01.07.2024 – 30.06.2025 (Rechnung CHF 1’200.00), davon 01.01.2025 – 30.06.2025: CHF 595.07, Ihre Mietstage 0 von 181 Tagen'
+		);
+	});
+
+	// V-14: ein Betrag unter null (sinkender Tankbestand, Gutschrift) steht wie im PDF mit Minus vor der Zahl
+	it('rechnet einen Betrag unter null in der Berechnung mit Minus vor der Zahl', () => {
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart Q2', amount: 600, start: '2025-04-01', end: '2025-06-30', part: { days: 91, total: 91 } },
+			{ id: 'i2', description: 'Gutschrift Q3', amount: -100, start: '2025-07-01', end: '2025-09-30', part: { days: 92, total: 92 } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 500, apartmentShare: 250, tenantShare: 250 })] });
+		expect(invoicesText()).toContain('Ihr Anteil: 250.00 × (600.00 × 91/91 + -100.00 × 92/92) / 500.00 = 250.00');
+	});
+
 	it('nennt die Summe der Kosten «Ihre Nebenkosten», wie das PDF', () => {
 		detail();
 		expect(byTestId('statement-total-costs-label')!.textContent!.trim()).toBe('Ihre Nebenkosten');
@@ -587,12 +625,12 @@ describe('Abrechnungsdetail', () => {
 			{ id: 'i2', description: 'Hauswart Q3', amount: 1200, start: '2025-07-01', end: '2025-09-30', part: { days: 47, total: 92 } },
 			{ id: 'fuel-stock-2025-12-31', description: 'Veränderung Tankbestand', amount: 500, start: '2025-01-01', end: '2025-12-31', fuelStock: true, part: { days: 139, total: 365 } }
 		];
-		detail({ lineItems: [line({ invoices, totalAmount: 2300 })] });
+		detail({ lineItems: [line({ invoices, totalAmount: 2300, tenantShare: 314.4 })] });
 		expect(invoicesText()).toContain('Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen');
 		expect(invoicesText()).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1’200.00, Ihre Mietstage 47 von 92 Tagen');
 		expect(invoicesText()).toContain('Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen');
 		expect(invoicesText()).toContain(
-			'Ihr Anteil: 900.00 × (600.00 × 0/91 + 1’200.00 × 47/92 + 500.00 × 139/365) / 2’300.00 = 306.52'
+			'Ihr Anteil: 900.00 × (600.00 × 0/91 + 1’200.00 × 47/92 + 500.00 × 139/365) / 2’300.00 = 314.40'
 		);
 		// the change of the Tankbestand is no invoice: nothing to open
 		expect(allByTestId('statement-line-invoice-link').map((link) => link.getAttribute('href'))).not.toContain(
@@ -666,21 +704,33 @@ describe('Abrechnungsdetail', () => {
 
 	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
 	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
+		const rounding = () => allByTestId('statement-rounding').map((row) => row.textContent).join(' ').replace(/\s+/g, ' ');
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
-		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+		expect(rounding()).toContain(
 			'Nachzahlung vor Rundung CHF 184.13 Rundung auf 5 Rappen + CHF 0.02'
 		);
 		document.body.innerHTML = '';
 
 		// eine Rückerstattung wird von 93.87 auf 93.85 kleiner: aus ihrer Sicht − 0.02
 		detail({ totalCosts: 784.13, totalAdvancePayments: 878, balance: -93.85 });
-		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+		expect(rounding()).toContain(
 			'Rückerstattung vor Rundung CHF 93.87 Rundung auf 5 Rappen − CHF 0.02'
 		);
 		document.body.innerHTML = '';
 
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600.03, balance: 184.1 });
 		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
+	// axe (definition-list, dlitem): eine Beschreibungsliste enthält nur Gruppen aus <dt> und <dd>, auch mit der Rundung
+	it('gliedert die Summen mit Rundung als gültige Beschreibungsliste', () => {
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
+		for (const list of document.querySelectorAll('dl'))
+			for (const child of list.children) {
+				expect(['DT', 'DD', 'DIV']).toContain(child.tagName);
+				if (child.tagName === 'DIV')
+					expect([...child.children].every((item) => ['DT', 'DD'].includes(item.tagName))).toBe(true);
+			}
 	});
 
 	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {

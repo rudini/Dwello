@@ -10,5 +10,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] #104 Statement detail: tenancy dates in the period (`PartiesPanel.svelte`), Wohnungsanteil and Zeitanteil per line, total «Ihre Nebenkosten» (`CostTable.svelte`), each line links to its invoices, with their days where they differ (`LineInvoices.svelte`, #240); mapper `src/lib/server/statement.ts`, `src/lib/types.ts`
 - [x] Texts in `messages/{de,fr,it,en}.json`; contracts `statement.json`, `statement-changed-invoices.json`, `invoice-statements.json`; `docs/PRD-Dwello.md`
 - [x] fach-reviewer on the @wip scenarios before implementing: `docs/reviews/w1b-fachreview-1.md`
-- [ ] Slice review (code-reviewer), feature review (personas, fach-reviewer, daten-pruefer)
+- [x] Slice review round 1: `docs/reviews/w1b-review-1.md`
+- [x] fach-reviewer round 2: `docs/reviews/w1b-fachreview-2.md`
+- [x] Personas: `docs/design/personas/marco-w1b.md`, `docs/design/personas/dr-weber-w1b.md`
+- [x] Fixes (V-15/C-1 statements before #96 by time as before; V-16/C-2 Zeitanteil in days like the PDF; C-3 screen `statement-parts-detail` in the axe and language checks, and the rounding rows of the cost table as valid `<dl>`; C-4 Tankbestand pg test; C-6, C-8, C-10, C-12; Marco P-1 Zeitanteil «nach Heizprofil»; M-3/Dr. Weber P-1 refund wording; V-14, V-17, P-6); issue #307 for a changed Tankbestand
+- [ ] Slice review round 2, daten-pruefer
 - [ ] Contracts, lint, check, type-check, affected tests and E2E before the push

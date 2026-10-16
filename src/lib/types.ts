@@ -281,6 +281,7 @@ export interface StatementLineItem {
 	apartmentShare: number | null; // Wohnungsanteil: the apartment's part of the total by the key
 	periodShare: number | null; // Zeitanteil, 0–1
 	shareDays: { days: number; total: number } | null; // the Zeitanteil as days, where it is one (#208)
+	byProfile?: boolean; // the Zeitanteil is the heating profile's share
 	invoices: StatementLineInvoice[]; // what the position billed (#96); none before
 }
 

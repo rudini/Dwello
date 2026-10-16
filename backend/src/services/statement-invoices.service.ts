@@ -4,9 +4,9 @@
  * left the period was deleted or made non-allocable
  */
 
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { invoices, utilityStatementLineItems, type UtilityStatementLineItem } from '../db/schema';
+import { invoices, type UtilityStatementLineItem } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { getStatement, listStatements } from './statement.service';
 
@@ -25,16 +25,17 @@ const billedAsIs = (positions: Positions, invoice: PeriodInvoice) =>
 			)
 	);
 
-// A statement created before #96 keeps no invoices: nothing is known about them
+// A statement created before #96 keeps no invoices: for it, as before, an invoice recorded after it is missing (V-15)
 const known = (positions: Positions) => positions.every((position) => position.invoices);
+const recordedAfter = (invoice: { createdAt: Date }, statement: { createdAt: Date }) => invoice.createdAt > statement.createdAt;
 
 /** The invoices of a statement's period recorded, changed or deleted since it was created; null without the statement */
 export async function changedInvoices(statementId: string): Promise<string[] | null> {
 	const statement = await getStatement(statementId);
 	if (!statement?.building) return null;
 	const positions = statement.lineItems;
-	if (!known(positions)) return [];
 	const now = await getInvoicesForStatement(statement.building.id, statement.periodStart, statement.periodEnd);
+	if (!known(positions)) return now.filter((invoice) => recordedAfter(invoice, statement)).map((invoice) => invoice.id);
 	const changed = now.filter((invoice) => !billedAsIs(positions, invoice)).map((invoice) => invoice.id);
 	const gone = positions
 		.flatMap((position) => position.invoices ?? [])
@@ -53,25 +54,22 @@ export async function invoiceStatements(invoiceId: string): Promise<{ billedIn: 
 	const [invoice] = await db.select({ buildingId: invoices.buildingId }).from(invoices).where(eq(invoices.id, invoiceId));
 	if (!invoice) return null;
 	const { statements } = await listStatements({ buildingId: invoice.buildingId, limit: 1000 });
-	const rows = statements.length
-		? await db
-				.select()
-				.from(utilityStatementLineItems)
-				.where(inArray(utilityStatementLineItems.statementId, statements.map((statement) => statement.id)))
-		: [];
 	const billedIn = new Map<string, Period>();
 	const missedIn = new Map<string, Period>();
 	const nowIn = new Map<string, PeriodInvoice | undefined>(); // the invoice as each period bills it now, if at all
 	for (const statement of statements) {
-		const positions = rows.filter((row) => row.statementId === statement.id);
-		if (!known(positions)) continue;
+		const positions = statement.lineItems;
 		const period = { start: statement.periodStart, end: statement.periodEnd };
 		const key = `${period.start}/${period.end}`;
 		if (!nowIn.has(key))
 			nowIn.set(key, (await getInvoicesForStatement(invoice.buildingId, period.start, period.end)).find((one) => one.id === invoiceId));
 		const now = nowIn.get(key);
-		if (positions.some((position) => position.invoices?.some((billed) => billed.id === invoiceId))) billedIn.set(key, period);
-		if (now && !billedAsIs(positions, now)) missedIn.set(key, period);
+		const billed = known(positions)
+			? positions.some((position) => position.invoices?.some((one) => one.id === invoiceId))
+			: !!now && !recordedAfter(now, statement);
+		const missed = !!now && (known(positions) ? !billedAsIs(positions, now) : recordedAfter(now, statement));
+		if (billed) billedIn.set(key, period);
+		if (missed) missedIn.set(key, period);
 	}
 	return { billedIn: [...billedIn.values()], missedIn: [...missedIn.values()] };
 }

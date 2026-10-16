@@ -79,6 +79,18 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00' });
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
+	// moved in during 2025, invoices over different days and the change of the Tankbestand: the statement lists them
+	// with their days and the calculation (#104, #240)
+	await seed.building('Talblick', 'Winterthur');
+	await seed.apartment('Talblick', '3.01', 'vacant');
+	await seed.tenant('Emil');
+	await seed.contract('Emil', '3.01', { startDate: '2025-08-15', baseRent: '1300.00' });
+	await seed.invoiceOn('Talblick', 'Hauswart', '600.00', '2025-07-05', ['2025-04-01', '2025-06-30']);
+	await seed.invoiceOn('Talblick', 'Hauswart', '1200.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
+	await seed.invoiceOn('Talblick', 'Heizung', '900.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
+	await seed.fuelStock('Talblick', '2024-12-31', '600.00');
+	await seed.fuelStock('Talblick', '2025-12-31', '100.00');
+	await seed.statement('Emil', 'Talblick', 2025);
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -93,6 +105,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		statement: seed.idOf('Abrechnung Anna 2025'),
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
+		partsStatement: seed.idOf('Abrechnung Emil 2025'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),

@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, invoices, utilityStatementLineItems } from '../db/schema';
+import { categories, fuelStocks, invoices, utilityStatementLineItems } from '../db/schema';
 import { deleteStatement, generateStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { createRental } from './helpers/rental';
@@ -122,14 +122,43 @@ describe('Geänderte Rechnungen seit der Abrechnung', () => {
 		expect(await changed(id)).toEqual([billed]);
 	});
 
-	// Before #96 a statement kept no invoices: what changed since is not known
-	it('meldet nichts bei einer Abrechnung ohne gespeicherte Rechnungen', async () => {
+	// The change of the Tankbestand is billed like an invoice but is none: it is never «deleted» (C-4)
+	it('meldet nichts bei einer Abrechnung mit der Veränderung des Tankbestands', async () => {
+		await clear();
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		for (const [readingDate, amount] of [['2023-12-31', '600.00'], ['2024-12-31', '100.00']])
+			await sendJson('POST', `/api/v1/buildings/${rental.building}/fuel-stocks`, { readingDate, amount, categoryId: heating.id });
+		try {
+			const { id, lineItems } = await statement();
+			expect(lineItems[0].invoices).toEqual([
+				{ id: 'fuel-stock-2024-12-31', description: 'Veränderung Tankbestand', amount: 500, start: '2024-01-01', end: '2024-12-31', fuelStock: true }
+			]);
+			expect(await changed(id)).toEqual([]);
+		} finally {
+			await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, rental.building));
+		}
+	});
+
+	// Before #96 a statement kept no invoices: as before, the invoices recorded after it count (V-15)
+	it('meldet bei einer Abrechnung ohne gespeicherte Rechnungen die danach erfassten', async () => {
 		await clear();
 		await invoice();
 		const { id, lineItems } = await statement();
-		await db.update(utilityStatementLineItems).set({ invoices: null }).where(eq(utilityStatementLineItems.id, lineItems[0].id));
-		await invoice({ amount: '100.00' });
-		expect(await changed(id)).toEqual([]);
+		await forget(lineItems[0].id);
+		const later = await invoice({ amount: '100.00' });
+		expect(await changed(id)).toEqual([later]);
+	});
+});
+
+// a statement as it was stored before #96: without the invoices of its positions
+const forget = (lineItemId: string) =>
+	db.update(utilityStatementLineItems).set({ invoices: null }).where(eq(utilityStatementLineItems.id, lineItemId));
+
+describe('Unbekannte Abrechnung oder Rechnung', () => {
+	it('antwortet 404', async () => {
+		const unknown = crypto.randomUUID();
+		expect((await callApi(`/api/v1/statements/${unknown}/changed-invoices`)).status).toBe(404);
+		expect((await callApi(`/api/v1/invoices/${unknown}/statements`)).status).toBe(404);
 	});
 });
 
@@ -170,6 +199,17 @@ describe('Abrechnungen einer Rechnung', () => {
 		await db.update(invoices).set({ isValidUtilityCost: false }).where(eq(invoices.id, billed));
 		expect(await periodsOf(billed)).toEqual({ billedIn: [year], missedIn: [] });
 		expect(await changed(id)).toEqual([billed]);
+	});
+
+	// Before #96: as before by the time the invoice was recorded (V-15)
+	it('nennt bei Abrechnungen ohne gespeicherte Rechnungen die Perioden nach dem Zeitpunkt des Erfassens', async () => {
+		await clear();
+		const billed = await invoice();
+		const { lineItems } = await statement();
+		await forget(lineItems[0].id);
+		const later = await invoice({ amount: '100.00' });
+		expect(await periodsOf(billed)).toEqual({ billedIn: [year], missedIn: [] });
+		expect(await periodsOf(later)).toEqual({ billedIn: [], missedIn: [year] });
 	});
 
 	it('nennt bei einer nicht umlagefähigen Rechnung keine verpasste Periode', async () => {

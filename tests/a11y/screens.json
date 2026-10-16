@@ -399,6 +399,13 @@
 			]
 		},
 		{
+			"name": "statement-parts-detail",
+			"path": "/statements/{partsStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-sent-detail",
 			"path": "/statements/{sentStatement}",
 			"states": [

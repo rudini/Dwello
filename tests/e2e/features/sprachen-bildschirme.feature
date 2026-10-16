@@ -128,6 +128,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
+      | statement-parts-detail | default             |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |

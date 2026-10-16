@@ -73,6 +73,17 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement(backendStatement).lineItems[0].invoices[0].part).toBeNull();
 	});
 
+	// Persona Marco P-1: bei Heizkosten nach Heizprofil ist der Zeitanteil der Anteil nach dem Heizprofil, wie das PDF sagt
+	it('erkennt eine Position, deren Zeitanteil der Anteil nach dem Heizprofil ist', () => {
+		const [line] = backendStatement.lineItems;
+		const heatingShare = { byDays: false, percent: 55.8, months: [] };
+		const heating = { ...line, periodShare: '0.5580', positionRentalDays: null, billedDays: null };
+		const items = (statement: object) => toStatement({ ...backendStatement, ...statement }).lineItems;
+
+		expect(items({ heatingShare, lineItems: [heating, line] }).map((item) => item.byProfile)).toEqual([true, false]);
+		expect(items({ heatingShare: { byDays: true }, lineItems: [heating] })[0].byProfile).toBe(false);
+	});
+
 	// Vor #96 kannte eine Position ihre Rechnungen nicht
 	it('nennt bei einer älteren Abrechnung keine Rechnungen der Positionen', () => {
 		const [line] = backendStatement.lineItems;
