@@ -700,4 +700,14 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
 		expect(text).toContain('CH93 0076 2011 6238 5295 7');
 	});
+
+	// Review C-9: sent on the day its PDF was made, the PDF as sent still has the address of today
+	it('versendet das PDF mit der Adresse beim Versand', async () => {
+		await generateStatementPdf(statementId, 'de');
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { address: 'Endgasse 9' });
+		await updateStatementStatus(statementId, 'sent');
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		expect(text).toContain('Endgasse 9');
+	});
 });

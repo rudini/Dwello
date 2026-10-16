@@ -20,11 +20,12 @@ Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (p
   - [x] iban: `docs/reviews/iban-review-1.md` (Nits C-1 to C-3 fixed)
   - [x] address: `docs/reviews/address-review-1.md` (Major C-1 fixed), round 2 `docs/reviews/address-review-2.md`
   - [x] oldaddr: `docs/reviews/oldaddr-review-1.md` (Major C-1: scenario checks the recipient abroad)
-  - [ ] oldaddr round 2 on the fixes
+  - [x] oldaddr round 2 `docs/reviews/oldaddr-review-2.md` (Majors C-9, C-10 fixed)
+  - [ ] oldaddr round 3 (closing review) on the fixes
 - [ ] feature review: persona(s), fach-reviewer, daten-pruefer (QR-bill, PDF)
   - [x] fach-reviewer `docs/reviews/w3c-fachreview-2.md` (V-11, V-12, V-14 fixed)
   - [x] personas `docs/design/personas/anna-w3c.md`, `helga-w3c.md` (P-1 both, Helga P-2: a draft's PDF is made afresh on request)
-  - [ ] daten-pruefer
+  - [x] daten-pruefer `docs/reviews/w3c-datenpruefung-1.md` (no findings)
 - [x] a11y and language screens: `dashboard` `old-address-task`, `statement-generate` `old-address-preview`, new screens `statement-old-address-detail`, `contract-ended-detail`; the language check masks country names from Intl
 - [ ] Blocked on me: glossary changes #68 asks for (`UBIQUITOUS_LANGUAGE.md`, Mieter: «Korrespondenzadresse», country)
 

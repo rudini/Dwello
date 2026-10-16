@@ -124,7 +124,7 @@ Then(
 	}
 );
 
-Then('nennt die Bestätigung die Postadresse {string}', async ({ verwalter }, address: string) => {
+Then('nennt die Bestätigung die Korrespondenzadresse {string}', async ({ verwalter }, address: string) => {
 	await verwalter.sees(recipient).toContain(address);
 });
 

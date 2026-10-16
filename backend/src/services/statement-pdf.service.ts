@@ -284,8 +284,7 @@ const storedPdf = async (id: string) =>
 			.select({
 				pdfBlob: utilityStatements.pdfBlob,
 				statementNumber: utilityStatements.statementNumber,
-				status: utilityStatements.status,
-				statementDate: utilityStatements.statementDate
+				status: utilityStatements.status
 			})
 			.from(utilityStatements)
 			.where(eq(utilityStatements.id, id))
