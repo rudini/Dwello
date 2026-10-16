@@ -90,6 +90,13 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.apartment('Bergsicht', '2.03', 'vacant');
 	await seed.tenant('Fritz');
 	await seed.contract('Fritz', '2.03', { startDate: '2100-01-01', baseRent: '1500.00' });
+	// A-6 (#115): an agreed end in the past, the 2025 statement bills the time after it as Leerstand
+	await seed.building('Talblick', 'Winterthur');
+	await seed.apartment('Talblick', '3.01', 'vacant');
+	await seed.tenant('Gina');
+	await seed.contract('Gina', '3.01', { startDate: '2024-01-01', endDate: '2025-06-30', baseRent: '1300.00' });
+	await seed.heatingInvoice('Talblick', '1200.00', 2025);
+	await seed.statement('Gina', 'Talblick', 2025, 'Standard');
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -100,6 +107,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		noticedContract: seed.idOf('Mietvertrag Dora'),
 		vacantApartment: seed.idOf('2.02'),
 		endedContract: seed.idOf('Mietvertrag Emil'),
+		expiredContract: seed.idOf('Mietvertrag Gina'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
 		lateInvoice,

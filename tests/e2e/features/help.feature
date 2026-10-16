@@ -43,3 +43,8 @@ Funktionalität: Hilfe
     Wenn der Liegenschaftsverwalter im Inhalt der Hilfe "Begriffe kurz erklärt" wählt
     Dann sieht der Liegenschaftsverwalter die Begriffe der Hilfe unter ihrer eigenen Adresse
     Und scrollt die Seite nicht seitwärts
+
+  # #59: drei Mahnungen von Dwello erlauben keine Kündigung wegen Zahlungsrückstand
+  Szenario: Die Hilfe grenzt die Mahnung von der Zahlungsfrist mit Kündigungsandrohung ab
+    Dann erklärt die Hilfe unter "Zahlungen und Mahnungen" "Eine Mahnung von Dwello ist eine Zahlungsaufforderung. Sie ist keine Zahlungsfrist mit Kündigungsandrohung nach Art. 257d OR."
+    Und erklärt die Hilfe unter "Zahlungen und Mahnungen" "Lassen Sie sich beraten."

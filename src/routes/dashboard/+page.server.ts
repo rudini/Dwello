@@ -83,15 +83,15 @@ function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, contracts
 	return buildings.length ? { start: period.start, end: period.end, buildings } : null;
 }
 
+// A later contract for the same apartment
+const later = (contracts: Row[], c: Row) =>
+	contracts.some((o) => o.apartmentId === c.apartmentId && String(o.startDate) > String(c.endDate));
+
 // Given notice and no later contract for the apartment yet: a next tenant is still to find, also after the end
 // (A-4.1, review K-6)
 function noticed(contracts: Row[]) {
-	const later = (c: Row) =>
-		contracts.some(
-			(o) => o.apartmentId === c.apartmentId && String(o.startDate) > String(c.endDate)
-		);
 	return contracts
-		.filter((c) => c.terminated && c.endDate && !later(c))
+		.filter((c) => c.terminated && c.endDate && !later(contracts, c))
 		.map((c) => ({
 			id: String(c.id),
 			tenantName: String(c.tenantName),
@@ -100,6 +100,23 @@ function noticed(contracts: Row[]) {
 			endDate: String(c.endDate)
 		}));
 }
+
+// An agreed end passed, no later contract and no «Mieter ist ausgezogen»: the tenant may have stayed (A-6)
+const expired = (contracts: Row[], today: string) =>
+	contracts
+		.filter(
+			(c) =>
+				c.endDate &&
+				String(c.endDate) < today &&
+				!c.terminated &&
+				!c.movedOut &&
+				!later(contracts, c)
+		)
+		.map((c) => ({
+			id: String(c.id),
+			tenantName: String(c.tenantName),
+			endDate: String(c.endDate)
+		}));
 
 const tenantOf = (statement: Row) => {
 	const tenant = statement.tenant as Row | null;
@@ -138,8 +155,9 @@ export const load = async ({
 			}))
 	}));
 	const noticedContracts = noticed(allContracts);
+	const today = localToday(); // the day in Switzerland
 	const input = {
-		today: localToday(), // the day in Switzerland
+		today,
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
 		dueStatements: [...overdue, ...sent].map((s) => ({
@@ -151,6 +169,7 @@ export const load = async ({
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),
 		noticedContracts,
+		expiredContracts: expired(allContracts, today),
 		// a contract with a task is named by it, not twice (A-4.4); one given notice with a next tenant keeps its
 		// deadline (review K-6)
 		endingContracts: contracts
