@@ -443,7 +443,6 @@ export const utilityStatementLineItems = pgTable(
 		apartmentShare: decimal('apartment_share', { precision: 12, scale: 2 }), // the apartment's part of the total by the key
 		periodShare: decimal('period_share', { precision: 8, scale: 4 }), // 0-1: days rented, or the heating profile's share
 		// the period share as days (#208): the tenant's days in the days billed, and those days; null when not a ratio of days
-		// TODO(fachlich prüfen, #75): glossary terms for both
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
 		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
