@@ -157,7 +157,7 @@
 	"privacy_cookies_1": "Dwello n’utilise que des cookies techniquement nécessaires. Aucun cookie de suivi ou publicitaire n’est utilisé.",
 	"privacy_cookies_2": "« dwello_session » maintient votre session ; JavaScript ne peut pas le lire. « dwello_xsrf » protège contre les requêtes falsifiées.",
 	"privacy_cookies_3": "« dwello_oauth_state » protège la connexion contre les réponses falsifiées, « dwello_login » retient le fournisseur choisi et la page qui s’ouvre ensuite. Les deux ne valent que pendant la connexion, 10 minutes au plus.",
-	"privacy_cookies_4": "« PARAGLIDE_LOCALE » enregistre la langue de l’interface pendant 400 jours ; JavaScript peut le lire.",
+	"privacy_cookies_4": "« PARAGLIDE_LOCALE » enregistre la langue de l’interface pendant 400 jours ; JavaScript peut le lire. Lors de la première visite, Dwello y inscrit la langue de votre navigateur si c’est l’allemand, le français, l’italien ou l’anglais, sinon l’allemand.",
 	"privacy_draft_notice": "Dwello conserve comme brouillon dans ce navigateur les saisies non enregistrées de « Saisir un contrat de bail » et « Établir les décomptes », jusqu’à ce que vous les enregistriez, les supprimiez ou vous déconnectiez. Un brouillon peut contenir des noms et des montants ; il reste sur l’appareil sur lequel vous travaillez.",
 	"demo_notice_title": "Démo publique",
 	"demo_notice_text": "Tous les visiteurs voient et modifient les mêmes données. Chaque nuit, toutes les modifications sont supprimées et les données d’exemple fictives sont rechargées. N’entrez donc que des données inventées, y compris pour les adresses e-mail et les numéros de téléphone.",

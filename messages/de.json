@@ -157,7 +157,7 @@
 	"privacy_cookies_1": "Dwello setzt nur technisch notwendige Cookies. Tracking- oder Werbe-Cookies werden nicht verwendet.",
 	"privacy_cookies_2": "«dwello_session» hält Sie angemeldet; JavaScript kann es nicht lesen. «dwello_xsrf» schützt vor gefälschten Anfragen.",
 	"privacy_cookies_3": "«dwello_oauth_state» schützt die Anmeldung vor gefälschten Antworten, «dwello_login» merkt sich den gewählten Anbieter und die Seite, die danach geöffnet wird. Beide gelten nur während der Anmeldung, höchstens 10 Minuten.",
-	"privacy_cookies_4": "«PARAGLIDE_LOCALE» speichert die Sprache der Oberfläche für 400 Tage; JavaScript kann es lesen.",
+	"privacy_cookies_4": "«PARAGLIDE_LOCALE» speichert die Sprache der Oberfläche für 400 Tage; JavaScript kann es lesen. Beim ersten Besuch setzt Dwello es auf die Sprache Ihres Browsers, wenn sie Deutsch, Französisch, Italienisch oder Englisch ist, sonst auf Deutsch.",
 	"privacy_draft_notice": "Ungespeicherte Eingaben in «Mietvertrag erfassen» und «Abrechnungen erstellen» bewahrt Dwello als Entwurf in diesem Browser auf, bis Sie sie speichern, verwerfen oder sich abmelden. Ein Entwurf kann Namen und Beträge enthalten; er bleibt auf dem Gerät, auf dem Sie arbeiten.",
 	"demo_notice_title": "Öffentliche Demo",
 	"demo_notice_text": "Alle Besucher sehen und ändern dieselben Daten. Jede Nacht werden alle Änderungen gelöscht und die erfundenen Beispieldaten neu geladen. Geben Sie deshalb nur erfundene Daten ein, auch bei E-Mail-Adressen und Telefonnummern.",
