@@ -47,6 +47,8 @@ beforeAll(async () => {
 	await insertInvoice(rental.building, { amount: '1000.00', invoiceDate: '2024-03-31' });
 	// A year later 50 % more: the check for missing invoices reports a deviation with its percentage
 	await insertInvoice(rental.building, { amount: '1500.00', invoiceDate: '2025-06-30' });
+	// Without a Leistungszeitraum, dated shortly after 2025: the check names it as a late invoice
+	await insertInvoice(rental.building, { billingEntityName: 'Kaminfeger Keller', amount: '290.00', invoiceDate: '2026-01-20' });
 	// Optional fields filled, so the contract checks their JSON type too (null is not checked)
 	await db
 		.update(buildings)
