@@ -142,12 +142,16 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 	if (current.length === 0) return { ...base, kind: 'missing' };
 	const parts = missingParts(current, previous, period, yearBefore(period));
 	if (parts.length > 0) return { ...base, kind: 'gap', missingParts: parts };
-	return changeFinding(base, current.some((i) => i.isFuelStock) && previous.some((i) => i.isFuelStock));
+	const stock = (list: CategoryInvoice[]) => list.some((invoice) => invoice.isFuelStock);
+	return changeFinding(base, stock(current), stock(previous));
 }
 
-// Costs far from the year before; with both years' readings (tank) their consumption, only while both are above zero (#73)
-function changeFinding(base: Omit<CategoryFinding, 'kind'>, tank: boolean): CategoryFinding | null {
-	if (tank && (base.current.total <= 0 || base.previous.total <= 0)) return null;
+// Costs far from the year before; with both years' readings their consumption, only while both are above zero (#73);
+// a negative consumption has its own hint
+function changeFinding(base: Omit<CategoryFinding, 'kind'>, stockNow: boolean, stockBefore: boolean): CategoryFinding | null {
+	const tank = stockNow && stockBefore;
+	if (stockNow && base.current.total <= 0) return null;
+	if (tank && base.previous.total <= 0) return null;
 	const change = base.current.total - base.previous.total;
 	if (Math.abs(change) < DEVIATION_MINIMUM || Math.abs(change) <= base.previous.total * DEVIATION_SHARE) return null;
 	return { ...base, kind: tank ? 'consumption' : 'deviation', changePercent: Math.round((change / base.previous.total) * 100) };

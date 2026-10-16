@@ -29,7 +29,8 @@ const dayBefore = (isoDate: string) => new Date(Date.parse(isoDate) - 86_400_000
 
 /**
  * The readings a period needs, at the end of the day before it and of its last day, with the category of the latest
- * reading; covered: a reading lies on or after the day before the period; null for a building that never had one
+ * reading; covered: the period has fuel to bill, a reading after the day before it or an opening stock above zero (the
+ * closing stock 0 of the year a tank is decommissioned opens the next year); null for a building that never had one
  */
 export async function periodReadings(buildingId: string, periodStart: string, periodEnd: string) {
 	const readings = await listFuelStocks(buildingId);
@@ -38,7 +39,7 @@ export async function periodReadings(buildingId: string, periodStart: string, pe
 	const [opening, closing] = [on(dayBefore(periodStart)), on(periodEnd)];
 	const categoryId = (closing ?? readings.at(-1)!).categoryId;
 	const missing = [!opening && dayBefore(periodStart), !closing && periodEnd].filter((date): date is string => !!date);
-	const covered = readings.some((stock) => stock.readingDate >= dayBefore(periodStart));
+	const covered = readings.some((stock) => stock.readingDate > dayBefore(periodStart)) || Number(opening?.amount) > 0;
 	return { opening, closing, categoryId, missing, covered };
 }
 

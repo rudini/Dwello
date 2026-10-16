@@ -216,6 +216,16 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Heizung": "Tankbestand am 31.12.2024 fehlt."
 
+  # Der Endbestand 0 des Stilllegungsjahres ist der Anfangsbestand des nächsten Jahres (fach-review V-11)
+  Szenario: Nach dem Jahr der Stilllegung braucht es keinen Tankbestand mehr
+    Angenommen im Gebäude "Lindenhof" war am "2022-12-31" Heizöl für "800" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "0.00" Franken im Tank
+    Und das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt die Vorschau für "Lindenhof" 1 erfasste Rechnung
+    Und verlangt die Vorschau keine Bestätigung
+
   Szenario: Ohne Tank fragt die Vorschau nicht nach dem Heizmaterial
     Angenommen das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024

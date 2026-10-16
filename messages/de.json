@@ -293,7 +293,7 @@
 	"buildings_type_mixed": "Mischnutzung",
 	"buildings_year_built": "Baujahr",
 	"buildings_no_tank": "Kein Tank oder Tank stillgelegt",
-	"buildings_no_tank_help": "Für Gebäude mit Fernwärme, Erdgas aus der Leitung oder Wärmepumpe, oder wenn der Tank oder das Lager für Heizmaterial stillgelegt ist. Beim Erstellen der Abrechnungen fragt Dwello dann nicht mehr nach dem Tankbestand. Im Jahr der Stilllegung erfassen Sie noch den Endbestand, auch wenn er 0 ist.",
+	"buildings_no_tank_help": "Für Gebäude mit Fernwärme, Erdgas aus der Leitung oder Wärmepumpe, oder wenn der Tank oder das Lager für Heizmaterial stillgelegt ist. Beim Erstellen der Abrechnungen fragt Dwello dann nicht mehr nach dem Tankbestand. Im Jahr der Stilllegung erfassen Sie zuerst auf der Seite des Gebäudes den Endbestand am letzten Tag der Abrechnungsperiode, auch wenn er 0 ist, und setzen dann das Häkchen.",
 	"buildings_tank": "Tank",
 	"buildings_no_tank_fact": "Keiner oder stillgelegt",
 	"buildings_year_built_help": "Jahr, in dem das Gebäude erstellt wurde.",

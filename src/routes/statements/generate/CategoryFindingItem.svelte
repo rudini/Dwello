@@ -6,7 +6,7 @@
 	let { finding, buildingId }: { finding: CategoryFinding; buildingId: string } = $props();
 
 	const tank = $derived(finding.kind === 'stock' || finding.kind === 'consumption');
-	// a missing reading is captured, a negative consumption checked
+	// a missing reading is captured, a negative consumption or one far from the year before checked
 	const capture = $derived(finding.missingParts.length > 0);
 </script>
 

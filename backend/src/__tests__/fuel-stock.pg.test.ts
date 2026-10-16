@@ -181,6 +181,31 @@ describe('Tankbestand', () => {
 		expect(found).toContainEqual(expect.objectContaining({ kind: 'stock', missingParts: [{ start: '2024-12-31', end: '2024-12-31' }] }));
 	});
 
+	// der Endbestand 0 des Stilllegungsjahres ist der Anfangsbestand des nächsten: dort braucht es keinen mehr (fach-review V-11)
+	it('verlangt nach dem Jahr der Stilllegung keinen Tankbestand mehr', async () => {
+		const own = await createRental(`${token}-after`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await record('2023-12-31', '700.00', own.building);
+		await record('2024-12-31', '0.00', own.building);
+		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, own.building));
+		const found = (await findings(own.building, 2025)).map((f) => f.kind);
+		await own.remove();
+
+		expect(found).not.toContain('stock');
+	});
+
+	// ein negativer Verbrauch ist ein eigener Hinweis, auch wenn das Vorjahr nur Einkauf hat (fach-review V-12)
+	it('vergleicht einen negativen Verbrauch nicht mit dem Einkauf des Vorjahres', async () => {
+		const own = await createRental(`${token}-mixed`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(own.building, { categoryId: heating, amount: '1000.00', invoiceDate: '2023-02-10' });
+		await record('2023-12-31', '100.00', own.building);
+		await record('2024-12-31', '400.00', own.building);
+		const found = (await findings(own.building, 2024)).filter((f) => f.categoryId === heating).map((f) => f.kind);
+		await db.delete(invoices).where(eq(invoices.buildingId, own.building));
+		await own.remove();
+
+		expect(found).toEqual(['consumption']);
+	});
+
 	it('fragt nicht nach dem Heizmaterial, wenn das Gebäude ohne Tank festgehalten ist', async () => {
 		const own = await createRental(`${token}-district`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
 		await db.update(buildings).set({ noTank: true }).where(eq(buildings.id, own.building));

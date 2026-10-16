@@ -550,6 +550,38 @@ describe('Abrechnungen erstellen', () => {
 		expect(frame.textContent).not.toContain('Vorjahr');
 	});
 
+	// with the year before as well: a Tankbestand hint alone is no comparison «nicht falsch» (persona Anna P-1, V-13)
+	it('nennt einen negativen Verbrauch auch mit Vorjahr unter «Tankbestände prüfen»', () => {
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'consumption',
+								current: { count: 1, total: -300 },
+								previous: { count: 1, total: 4000 },
+								missingParts: [],
+								changePercent: null
+							}
+						]
+					}
+				}
+			]
+		});
+
+		const frame = byTestId('category-check')!;
+		expect(frame.querySelector('p')!.textContent).toBe('Tankbestände prüfen');
+		expect(frame.textContent).not.toContain('heisst nicht, dass etwas falsch ist');
+	});
+
 	it('bietet bei Heizkosten ohne Tankbestand an, ihn zu erfassen', () => {
 		const sums = (count: number, total: number) => ({ count, total });
 		open({

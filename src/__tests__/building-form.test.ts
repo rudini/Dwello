@@ -106,5 +106,7 @@ describe('Kein Tank oder Tank stillgelegt (#72)', () => {
 		expect(form(true)).toMatch(/name="noTank"[^>]*checked/);
 		expect(form(false)).not.toMatch(/name="noTank"[^>]*checked/);
 		expect(form(false)).toContain('fragt Dwello dann nicht mehr nach dem Tankbestand');
+		// the year of decommissioning: first the closing reading, then the box (persona Helga P-1)
+		expect(form(false)).toContain('erfassen Sie zuerst auf der Seite des Gebäudes den Endbestand');
 	});
 });
