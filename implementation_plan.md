@@ -4,12 +4,15 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 ## Session 2026-10-16 (#250, #254: Leistungszeitraum over several years)
 
-- [ ] #250: help text and field examples of the Leistungszeitraum use one year (the year of the field examples), all four languages; DOM test pins it
-- [ ] #254: help at the Leistungszeitraum (invoice form, upload dialog) and on the help page names a cost over several years (descaling 01.04.2026 – 31.03.2031, CHF 500 ≈ CHF 100 per year; apartment boiler only if the Mietvertrag lists it), all four languages
-- [ ] #254: scenario in `statement-generate.feature`: CHF 500 over 01.04.2026 – 31.03.2031 counts CHF 75.30 in 2026 and CHF 99.95 in 2027
-- [ ] #254: lower-layer test of `inPeriod` over five years if none exists
-- [ ] fach-reviewer on scenarios and help texts before implementing
-- [ ] slice review (code-reviewer), feature review (persona, fach-reviewer)
+- [x] #250: help text and field examples of the Leistungszeitraum use one year (the current year, as the date fields' examples), all four languages; DOM tests pin it (form, help page). No scenario: wording without new behaviour, as #250 says; covered by `sprachen-bildschirme.feature`
+- [x] #254: help at the Leistungszeitraum (invoice form, edit form, upload dialog) and on the help page names a cost over several years, all four languages; scenarios in `invoice-new.feature`, `help.feature`
+- [x] #254: scenario in `statement-generate.feature`: CHF 500 over 01.04.2026 – 31.03.2031 counts CHF 75.30 in 2026 and CHF 99.95 in 2027 (green on the base: the behaviour exists)
+- [x] #254: lower-layer test of `inPeriod` over five years (`service-period.pg.test.ts`, red with the prorating taken out)
+- [x] fach-reviewer round 1 on scenarios and texts: `docs/reviews/w3-fachreview-1.md`; V-2 → #276
+- [x] code-reviewer round 1: `docs/reviews/w3-review-1.md`; C-1 → #282 (decision)
+- [x] personas: `docs/design/personas/weber-w3-leistungszeitraum.md`, `docs/design/personas/helga-w3-leistungszeitraum.md`
+- [ ] fach-reviewer round 2 on the changed texts: `docs/reviews/w3-fachreview-2.md`
+- [ ] closing code-reviewer round
 - [ ] pull request merged
 
-Files:
+Files: `messages/{de,fr,it,en}.json`, `src/routes/invoices/InvoiceDataFields.svelte`, `src/routes/help/+page.svelte`, `src/__tests__/{invoice-pages,invoice-upload-dialog,help-page}.dom.test.ts`, `backend/src/__tests__/service-period.pg.test.ts`, `tests/e2e/features/{statement-generate,help,invoice-new}.feature`, `tests/e2e/{steps,targets,questions}/invoice-form*`, `docs/nebenkostenabrechnung-anforderungen.md`
