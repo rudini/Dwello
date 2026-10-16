@@ -103,7 +103,7 @@ address                VARCHAR(500)
 postal_code            VARCHAR(10)
 city                   VARCHAR(100)
 correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
-CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0008 (#63)
+CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0011 (#63)
 ```
 
 No indexes besides the primary key; `email` is not unique. `correspondence_channel` has no CHECK.
