@@ -167,6 +167,12 @@ Then('sagt die Datei von {string} {string}', async ({ verwalter, names }, suppli
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).toContain(text);
 });
 
+// the row's note is there (its first check), it only lacks this sentence
+Then('sagt die Datei von {string} nicht {string}', async ({ verwalter, names }, supplier: string, text: string) => {
+	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toBeNull();
+	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toContain(text);
+});
+
 Then('ist die Datei von {string} nicht zum Erstellen ausgewählt', async ({ verwalter, names }, supplier: string) => {
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toBeNull();
 	await verwalter.sees(belegChosenForCreating(names.get(supplier)!)).toBe(false);

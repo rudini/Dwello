@@ -83,6 +83,7 @@ Funktionalität: Rechnungsliste
   Szenario: Rechnung ohne KI aus einer Datei erfassen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
     Dann sagt die Datei von "Elektro Blitz" "Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus."
+    Und sagt die Datei von "Elektro Blitz" "Füllen Sie aus: Rechnungssteller, Rechnungsdatum, Betrag, Beschreibung."
     Wenn der Liegenschaftsverwalter bei der Datei den Rechnungssteller "Elektro Blitz", die Beschreibung "Treppenhauslicht", den Betrag "180.00" und das Rechnungsdatum "2026-03-31" erfasst
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt die Datei von "Elektro Blitz" "Wählen Sie eine Kategorie."
@@ -110,11 +111,14 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Lift Service und Reparatur" hochlädt
     Dann sagt die Datei von "Lift Service und Reparatur" "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen."
     Und ist die Datei von "Lift Service und Reparatur" nicht zum Erstellen ausgewählt
+    Wenn der Liegenschaftsverwalter bei der Datei von "Lift Service und Reparatur" die Kategorie "Reparaturen" wählt
+    Dann sagt die Datei von "Lift Service und Reparatur" nicht "nicht umlagefähig sind"
 
   Szenario: Eine Gutschrift ist nicht zum Erstellen ausgewählt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Gutschrift" hochlädt
     Dann sagt die Datei von "Werke Gutschrift" "Das ist eine Gutschrift. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: hier in ihrer Zeile oder, wenn sie schon erfasst ist, mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf."
     Und ist die Datei von "Werke Gutschrift" nicht zum Erstellen ausgewählt
+    Und sagt die Datei von "Werke Gutschrift" nicht "Wählen Sie eine Kategorie."
 
   Szenario: Hochladen abbrechen verwirft die Dateien
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt

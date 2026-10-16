@@ -66,8 +66,10 @@ describe('Formular, das kein Formular ist', () => {
 		form.set('invoice', '{kein JSON');
 		form.set('file', new File([pdf], 'r.pdf'));
 		expect((await createInvoice({ request: multipart(form), cookies } as never)).status).toBe(400);
-		form.set('invoice', 'null'); // JSON, but no fields (C-18)
-		expect((await createInvoice({ request: multipart(form), cookies } as never)).status).toBe(400);
+		for (const notFields of ['null', '[]']) {
+			form.set('invoice', notFields); // JSON, but no fields (C-18, C-24)
+			expect((await createInvoice({ request: multipart(form), cookies } as never)).status).toBe(400);
+		}
 		expect(calls).toEqual([]);
 	});
 });

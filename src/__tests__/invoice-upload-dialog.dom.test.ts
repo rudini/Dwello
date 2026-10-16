@@ -216,6 +216,16 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-progress')!.textContent).toBe('');
 	});
 
+	it('zeigt den Link auf die grosse Datei erst, wenn die Datei bereit ist (Code-Review C-12)', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		expect(byTestId('invoice-upload-file-link')).toBeNull();
+		await settle();
+		expect(byTestId('invoice-upload-file-link')!.getAttribute('href')).toMatch(/^blob:/);
+	});
+
 	it('nennt beim Link auf die grosse Datei, welche Datei er öffnet (Code-Review C-10)', async () => {
 		open(() => [200, read]);
 		chooseBuilding();

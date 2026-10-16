@@ -142,7 +142,7 @@ export function fieldsOf(value: FormDataEntryValue | null): Record<string, unkno
 	} catch {
 		fields = null;
 	}
-	if (typeof fields !== 'object' || fields === null) throw new ValidationError('Invalid invoice fields', 'invoice');
+	if (typeof fields !== 'object' || fields === null || Array.isArray(fields)) throw new ValidationError('Invalid invoice fields', 'invoice');
 	return fields as Record<string, unknown>;
 }
 

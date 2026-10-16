@@ -134,9 +134,9 @@ const named = (fields: string[]) =>
 		.join(', ');
 
 /**
- * What is left to do before creating, from the values as they are now (C-1): the Kategorie, required fields not
- * found, unsure fields, then optional fields not found (personas Anna, Helga; domain review V-5); nothing on a file
- * no invoice is created from
+ * What is left to do before creating, from the values as they are now (C-1): costs not allocable to take out, the
+ * Kategorie, required fields not found, unsure fields, then optional fields not found (personas Anna, Helga; domain
+ * review V-5, V-8); nothing on a file no invoice is created from
  */
 export function toDoOf(row: UploadRow): string[] {
 	// nothing to fill in on a file no invoice is created from: several invoices, a Gutschrift, a Mahnung (persona Dr. Weber)
