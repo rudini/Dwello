@@ -1,6 +1,6 @@
 # Working rules for the redesign (resume file)
 
-The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Nothing here is in use any more: persona runs are in `docs/design/personas/README.md`, "Running a review", the checks before a push in `CLAUDE.md`, "Before marking anything complete" (subagent `persona`); the personas are in `docs/design/personas/README.md`.
+The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Nothing here is in use any more: the personas and how they run are in `docs/design/personas/README.md` (subagent `persona`), the checks before a push in `CLAUDE.md`, "Before marking anything complete".
 
 Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
 

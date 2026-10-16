@@ -1,11 +1,11 @@
 ---
 name: bdd-acceptance
-description: Generate Gherkin acceptance criteria and executable playwright-bdd tests from an existing system (SPA, server-rendered webapp, or API). Use when the user wants to create BDD tests, write acceptance criteria, add Gherkin scenarios, generate playwright-bdd step files, document system behavior as living tests, or set up BDD for an existing project.
+description: Write Gherkin acceptance scenarios and their playwright-bdd steps for Dwello, extending the existing setup in tests/e2e. Use when the user wants BDD tests, acceptance criteria, Gherkin scenarios or playwright-bdd step files.
 ---
 
 # BDD Acceptance Criteria
 
-Turn any running system into **living documentation**: Gherkin `.feature` files that express business intent, backed by executable playwright-bdd step definitions structured with the **Screenplay Pattern**.
+Gherkin `.feature` files that express business intent, backed by executable playwright-bdd steps structured with the Screenplay pattern of `tests/e2e/`.
 
 ## Dwello setup
 
@@ -28,4 +28,5 @@ playwright-bdd is already set up in this repo. **Extend the existing setup; neve
 - Describe what, not how: no button IDs, no CSS selectors, no field names.
 - `Background` holds only the minimum shared state; data preconditions are explicit `Given` steps the product owner can read, not hooks or tags.
 - `Scenario Outline` only for data-driven cases.
+- Every exit from a page (links, buttons, guards, error redirects) gets exactly one navigation scenario that checks only that the move happened («Dann ist der Liegenschaftsverwalter auf der Seite …»), not what the next page shows. Terminal pages (a confirmation, 404) have none.
 - Isolation, negative checks, failure states and `@api`: `tests/e2e/CLAUDE.md`, "Rules".

@@ -12,6 +12,6 @@ Request (chat): «Setze deine Empfehlung um» for `docs/reviews/opus55-guide-rev
 - [x] S-4: the two new facts of `arbeitsregeln.md`, "Persona runs: how", into the personas README; `persona.md` and the README point to the README only
 - [x] S-5: circular pointer in `backend/CLAUDE.md` out
 - [x] S-6: `pull-request` points to "Before marking anything complete" instead of a short copy
-- [ ] `code-reviewer` round
+- [ ] `code-reviewer` round 1 (docs/reviews/s16-review-1.md): C-1 (Major: navigation-scenario rule lost in the cut) restored, C-2..C-4 fixed; round 2 on the delta
 - [x] Checks: lint, check, the tests that read rule files
 - [ ] Archive the session, push after #271 is merged, pull request, CI, merge
