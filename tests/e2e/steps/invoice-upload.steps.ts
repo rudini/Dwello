@@ -114,7 +114,7 @@ When(
 	async ({ verwalter }, replacing?: string, adding?: string) => {
 		const fileName = (replacing ?? adding)!;
 		await verwalter.attemptsTo(replaceBeleg(imageFile(fileName)));
-		// saved only with the confirmation: a Beleg opened before still is the old one (O-31)
+		// saved only with the confirmation: a Beleg opened before still is the old one (#226, CI of #242)
 		await verwalter.sees(confirmation).toContain(`Beleg ${fileName} gespeichert`);
 	}
 );
