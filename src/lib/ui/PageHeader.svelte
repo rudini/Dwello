@@ -43,7 +43,9 @@
 			<h1 tabindex="-1" class="hyphens-auto break-words text-3xl font-bold leading-tight text-ink">
 				{title}
 			</h1>
-			{#if purpose}<p class="max-w-prose text-lg text-ink-muted">{purpose}</p>{/if}
+			{#if purpose}<p class="max-w-prose text-lg text-ink-muted" data-testid="page-purpose">
+					{purpose}
+				</p>{/if}
 		</div>
 		{#if action}<div class="flex flex-wrap gap-4">{@render action()}</div>{/if}
 	</div>

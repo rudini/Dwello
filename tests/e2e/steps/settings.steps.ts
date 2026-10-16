@@ -59,3 +59,7 @@ Then(
 Then('erklärt die Einstellung {string} {string}', async ({ verwalter }, label: string, help: string) => {
 	await verwalter.sees(settingHelp(FIELDS[label])).toContain(help);
 });
+
+Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(settingHelp(FIELDS.IBAN)).toContain(text);
+});
