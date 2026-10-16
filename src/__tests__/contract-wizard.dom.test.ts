@@ -461,6 +461,41 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 	});
 });
 
+// P-17 (#144): die vorgewählte Wohnung bleibt auf dem Umweg, die Beträge des letzten Mietvertrags sind vorgeschlagen
+describe('Vorgewählte Wohnung', () => {
+	it('nimmt die vorgewählte Wohnung auf den Umweg zum neuen Mieter mit', async () => {
+		location.url = new URL('http://localhost/contracts/new?apartment=a1');
+		await open();
+		expect(byTestId('contract-new-tenant')!.getAttribute('href')).toBe(
+			'/tenants/new?for=contract&apartment=a1'
+		);
+	});
+
+	it('schlägt die Beträge des letzten Mietvertrags vor und sagt es, bis einer geändert ist', async () => {
+		const last = { ...listed.contracts[0], id: 'c8', apartmentId: 'a1', startDate: '2015-01-01' };
+		fakeBff(({ path }) => [
+			200,
+			{ contracts: path.endsWith('=a1') ? [{ ...last, endDate: '2019-12-31' }] : [] }
+		]);
+		location.url = new URL('http://localhost/contracts/new?tenant=t1&apartment=a1');
+		await open();
+		next();
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(heading()).toBe('Miete');
+		expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('950.00');
+		expect(byTestId<HTMLInputElement>('contract-advance-payment-input')!.value).toBe('150.00');
+		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('');
+		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
+			'aus dem letzten Mietvertrag dieser Wohnung (Anna Keller, 01.01.2015 bis 31.12.2019)'
+		);
+		type('contract-base-rent-input', '980');
+		await settle();
+		expect(byTestId('contract-rent-taken-over')).toBeNull();
+	});
+});
+
 // «Nina Brunner» und «Rosa Brunner»: der Ort hilft, den richtigen Mieter zu wählen
 it('nennt in der Mieterauswahl den Ort neben dem Namen', async () => {
 	await open();
