@@ -79,6 +79,7 @@ export interface RentalContract {
 	startDate: string;
 	endDate?: string | null;
 	terminated?: boolean; // endDate is a Kündigungstermin of an open-ended contract, not agreed
+	noticeReceivedOn?: string | null; // the day the notice arrived (A-3)
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto
@@ -299,6 +300,7 @@ export interface Statement {
 	paymentDeadline: string;
 	paidDate?: string;
 	lastReminderDate?: string;
+	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
 	pdfGeneratedAt?: string;
 	notes?: string | null;
 	createdAt?: string;
@@ -315,6 +317,8 @@ export interface StatementWithDetails extends Statement {
 	apartmentFloor: string;
 	buildingName: string;
 	buildingAddress: string;
+	rentalStart: string; // the Mietvertrag's days within the period, YYYY-MM-DD (#248)
+	rentalEnd: string;
 	lineItems: StatementLineItem[];
 }
 
@@ -349,6 +353,7 @@ export interface StatementDocument {
 	sentAt: string | null;
 	deliveryError: string | null;
 	deliveryErrorCode?: string | null;
+	paymentDeadline?: string | null; // the Zahlungsfrist a reminder prints
 	createdAt: string;
 	tenantName: string;
 	statementNumber: string | null;

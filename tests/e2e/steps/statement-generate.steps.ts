@@ -66,16 +66,19 @@ When(
 );
 
 When(
-	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} erstellt',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!));
+	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} erstellt',
+	async ({ verwalter, seed }, year: number, building: string, profile: string) => {
+		const options = { heatingProfileId: await seed.heatingProfileId(profile) };
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, options));
 	}
 );
 
+// the wizard preselects a heating profile, maybe one a parallel scenario already deleted: name a seeded one
 Given(
-	'der Liegenschaftsverwalter hat die Abrechnungen {int} für das Gebäude {string} erstellt',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!));
+	'der Liegenschaftsverwalter hat die Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} erstellt',
+	async ({ verwalter, seed }, year: number, building: string, profile: string) => {
+		const options = { heatingProfileId: await seed.heatingProfileId(profile) };
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, options));
 		await verwalter.sees(generationOutcomeShown).toBe(true);
 	}
 );

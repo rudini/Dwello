@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
+	import { nextReminderLater } from '$lib/statement';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	// Who pays whom by when; a refund has no Zahlungsfrist for the tenant
@@ -9,6 +10,7 @@
 
 	const amount = $derived(formatCurrency(Math.abs(statement.balance)));
 	const refund = $derived(statement.balance < 0);
+	const nextReminder = $derived(nextReminderLater(statement));
 	const summary = $derived(
 		refund
 			? m.statements_summary_refund({ amount })
@@ -42,6 +44,14 @@
 				<dd class="font-semibold text-ink">{formatDate(row.date!)}</dd>
 			</div>
 		{/each}
+		{#if nextReminder}
+			<div class="flex flex-col gap-1">
+				<dt class="text-ink-muted">{m.statements_next_reminder()}</dt>
+				<dd class="font-semibold text-ink" data-testid="statement-next-reminder">
+					{formatDate(nextReminder)}
+				</dd>
+			</div>
+		{/if}
 	</dl>
 	{#if statement.notes}
 		<div class="flex flex-col gap-1">

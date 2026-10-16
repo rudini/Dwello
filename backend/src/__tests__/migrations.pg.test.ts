@@ -36,15 +36,15 @@ afterAll(async () => {
 	for (const name of databases) await query('postgres', `DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
 });
 
-// The categories whose description 0007 completes (#204, #220); every KI prompt lists the descriptions
+// The categories whose description 0010 completes (#204, #220); every KI prompt lists the descriptions
 const described = `'Heating', 'Garden Maintenance', 'Waste Disposal', 'TV/Cable', 'Building Insurance', 'Administration'`;
 
-/** A database with every migration before 0007_category_descriptions.sql */
+/** A database with every migration before 0010_category_descriptions.sql */
 async function withoutDescriptions() {
 	const name = await database();
 	const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
 	try {
-		await cp(migrations, before, { recursive: true, filter: (file) => !file.endsWith('0007_category_descriptions.sql') });
+		await cp(migrations, before, { recursive: true, filter: (file) => !file.endsWith('0010_category_descriptions.sql') });
 		await migrate(`${server}/${name}`, before);
 	} finally {
 		await rm(before, { recursive: true });

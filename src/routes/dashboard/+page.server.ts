@@ -141,7 +141,8 @@ export const load = async ({
 		dueStatements: [...overdue, ...sent].map((s) => ({
 			id: String(s.id),
 			tenantName: tenantOf(s),
-			paymentDeadline: String(s.paymentDeadline)
+			paymentDeadline: String(s.paymentDeadline),
+			nextReminderFrom: s.nextReminderFrom as string | null
 		})),
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),

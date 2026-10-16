@@ -40,6 +40,7 @@ import {
 	confirmEndContractButton,
 	contractEndInput,
 	contractEndPastConfirm,
+	noticeReceivedInput,
 	deleteContractButton,
 	endContractButton
 } from '../targets/contract-detail';
@@ -216,6 +217,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(confirmEndContractButton),
 			Wait.until(on.refusedStatements)
 		),
+	// A-3 (#112): the notice arrived six weeks before the Vertragsende: the hint at the field, saving still possible
+	'end-dialog-notice-hint': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(endContractButton),
+			EnterDate.of('2099-03-31').into(contractEndInput),
+			EnterDate.of('2099-02-15').into(noticeReceivedInput),
+			Wait.until(on.shown('contract-notice-period-hint'))
+		),
 	// the same refusal from the contract form: the 2025 draft bills rent days after 31.03.2025 (A-10)
 	'edit-refused': () => async (actor) => {
 		await clickOnShown(actor, 'Befristet', durationChoice);
@@ -229,10 +238,17 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// the link opens the wizard at the settings step with the building and period it names
 	'link-preset': () => Wait.until(on.wizardPreset),
 	'list-scoped': () => Wait.until(on.listScope),
+	'pdf-missing': () => Wait.until(on.shown('statement-pdf-missing')),
 	'send-dialog': () => openDialog(on.sendButton),
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),
+	// the seeded reminder, named in the screen's query; marking it again keeps it as it is, so each viewport can
+	'marked-sent': (example) => (actor) =>
+		actor.attemptsTo(
+			PostFormAction('?/markSent', { id: new URL(example.path, 'http://x').searchParams.get('letter')! }),
+			Wait.until(on.shown('document-marked-sent'))
+		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(

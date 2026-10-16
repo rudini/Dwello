@@ -5,6 +5,8 @@ import { GET as downloadPdf } from '../routes/statements/[id]/pdf/+server';
 import backendContract from '../../tests/contracts/contract.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
+// What GET /api/v1/statements answers, checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
+import listedStatements from '../../tests/contracts/statements.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -60,6 +62,18 @@ describe('Abrechnungsliste laden', () => {
 		expect(data.statements[1]).toMatchObject({ tenantName: 'Unbekannt', buildingId: '' });
 	});
 
+	// #248: wer während der Abrechnungsperiode einzieht oder auszieht, sieht in der Liste seine Mietstage, nicht die ganze Periode
+	it('nennt die abgerechneten Tage des Mietvertrags in der Abrechnungsperiode', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(url.includes('/statements?') ? listedStatements : {})) as typeof globalThis.fetch;
+		const data = (await load({
+			url: new URL('http://localhost/statements'),
+			fetch
+		} as never)) as StatementsListData;
+
+		expect(data.statements[0]).toMatchObject({ rentalStart: '2025-07-01', rentalEnd: '2025-12-31' });
+	});
+
 	it('zeigt eine leere Liste, wenn das Backend nicht erreichbar ist', async () => {
 		const fetch = (async () => {
 			throw new Error('ECONNREFUSED');
@@ -84,12 +98,16 @@ describe('PDF einer Abrechnung herunterladen', () => {
 
 	it('liefert das gespeicherte PDF als Download', async () => {
 		const response = await call(
-			() => new Response(new Uint8Array([37, 80, 68, 70]), { status: 200 })
+			() =>
+				new Response(new Uint8Array([37, 80, 68, 70]), {
+					status: 200,
+					headers: { 'Content-Disposition': 'attachment; filename="NK-1A2B3C4D-2025-0001.pdf"' }
+				})
 		);
 
 		expect(response.headers.get('Content-Type')).toBe('application/pdf');
 		expect(response.headers.get('Content-Disposition')).toBe(
-			'attachment; filename="abrechnung-s1.pdf"'
+			'attachment; filename="NK-1A2B3C4D-2025-0001.pdf"'
 		);
 		expect(new TextDecoder().decode(await response.arrayBuffer())).toBe('%PDF');
 	});

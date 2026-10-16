@@ -39,7 +39,11 @@ const profileName = (data: BackendStatement): string => {
 
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
 export function toStatement(data: BackendStatement): StatementWithDetails {
-	const { tenant = {}, apartment = {}, building = {} } = data;
+	const [tenant, apartment, building] = [
+		data.tenant ?? {},
+		data.apartment ?? {},
+		data.building ?? {}
+	];
 	return {
 		id: data.id,
 		statementNumber: data.statementNumber,
@@ -60,6 +64,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		paidDate: data.paidDate,
 		pdfGeneratedAt: data.pdfGeneratedAt,
 		lastReminderDate: data.reminderSentDate,
+		nextReminderFrom: data.nextReminderFrom,
 		notes: data.notes,
 		createdAt: data.createdAt,
 		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
@@ -69,6 +74,8 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		apartmentFloor: apartment.floor || '',
 		buildingName: building.name || '',
 		buildingAddress: building.address || '',
+		rentalStart: data.rentalStart,
+		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
 		lineItems: (data.lineItems || []).map(toLineItem)
 	};
@@ -104,6 +111,13 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 	}));
 	return { ...statement, lineItems };
 }
+
+/** The backend names a statement PDF after its number (NK-…, #101); in the header only ASCII letters, digits, underscore, dot and dash */
+export const pdfFileName = (headers: Headers) =>
+	headers
+		.get('content-disposition')
+		?.match(/filename="(.*)"/)?.[1]
+		.replace(/[^\w.-]/g, '') || 'statement.pdf';
 
 const escaped = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 

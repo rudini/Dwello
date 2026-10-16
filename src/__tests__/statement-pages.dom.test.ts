@@ -59,6 +59,35 @@ describe('Abrechnungsliste', () => {
 	const contractScope =
 		'Sie sehen die Abrechnungen des Mietvertrags von Anna Keller, Wohnung 2.01 (Ahornhof), Vertragsbeginn 01.04.2024.';
 
+	// #248: eingezogen während der Abrechnungsperiode: die Liste nennt die Mietstage, nicht die ganze Periode
+	it('nennt die Tage des Mietvertrags in der Abrechnungsperiode', () => {
+		list([statement({ rentalStart: '2024-07-01', rentalEnd: '2024-12-31', rentalDays: 184 })]);
+
+		// with the Mietstage, so the dates do not read as the Abrechnungsperiode (persona review of #248)
+		expect(byTestId('statement-row-s1')?.textContent).toContain('01.07.2024 – 31.12.2024, 184 Mietstage');
+		expect(byTestId('statement-row-s1')?.textContent).not.toContain('01.01.2024');
+	});
+
+	// #253: ein neuer Entwurf hat noch kein PDF; die Liste sagt es und führt zur Abrechnung
+	it('sagt bei einer Abrechnung ohne PDF, dass es noch nicht erstellt ist, und führt zu ihr', () => {
+		list([statement({ pdfGeneratedAt: undefined })]);
+
+		const missing = byTestId('statement-pdf-missing');
+		expect(missing?.textContent?.trim()).toBe('PDF noch nicht erstellt');
+		expect(missing?.getAttribute('href')).toBe('/statements/s1');
+		expect(missing?.getAttribute('aria-label')).toBe(
+			'PDF noch nicht erstellt: Abrechnung NK-2024-0001 von Anna Keller öffnen'
+		);
+		expect(byTestId('statement-pdf-link')).toBeNull();
+	});
+
+	it('sagt bei einer Abrechnung mit PDF nichts über ein fehlendes PDF', () => {
+		list([statement({ pdfGeneratedAt: '2025-01-16T08:00:00Z' })]);
+
+		expect(byTestId('statement-pdf-link')).not.toBeNull();
+		expect(byTestId('statement-pdf-missing')).toBeNull();
+	});
+
 	it('sagt über der Liste, wessen Abrechnungen sie zeigt, mit einem Link zu allen', () => {
 		url = new URL('http://localhost/statements?contract=c1');
 		list([statement()], 1, 1, contractScope);
@@ -845,7 +874,7 @@ describe('Abrechnungsdetail', () => {
 		);
 
 		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'Das Dokument «Zahlungserinnerung» liegt unter «Dokumente» zum Versand bereit. Die E-Mail wurde nicht zugestellt. Drucken Sie die Mahnung aus, schicken Sie sie per Post und markieren Sie sie danach unter «Dokumente» als versendet. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
+			'Das Dokument «Zahlungserinnerung» liegt unter «Dokumente» zum Versand bereit. Die E-Mail wurde nicht zugestellt. Markieren Sie die Mahnung unter «Dokumente» am Tag, an dem Sie sie zur Post bringen, als versendet: Erst dann trägt sie das Datum dieses Tages und eine neue Zahlungsfrist. Drucken Sie sie danach aus und schicken Sie sie per Post. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
 		);
 	});
 

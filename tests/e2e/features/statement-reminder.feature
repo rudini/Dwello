@@ -36,9 +36,21 @@ Funktionalität: Mahnungen
     Dann meldet die Abrechnung "Zahlungserinnerung liegt als Brief zum Ausdrucken in den Dokumenten bereit."
     Und die Abrechnung führt die "Zahlungserinnerung" als "Zu versenden"
 
-  Szenario: Zweite Mahnung
+  # Jede Mahnung setzt eine neue Zahlungsfrist; die nächste Mahnstufe erst ab dem Tag danach (#107).
+  # Dass sie danach möglich ist, prüft reminders.pg.test.ts: die Uhr des Backends lässt sich hier nicht vorstellen.
+  Szenario: Nächste Mahnung erst nach der Zahlungsfrist der letzten
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Dann führt die Abrechnung die "Zahlungserinnerung" mit der Zahlungsfrist in 10 Tagen
+    Und bietet die Abrechnung keine Mahnung an
+    Und nennt die Abrechnung die nächste Mahnung ab dem Tag in 11 Tagen
+    Und nennt die Liste der Abrechnungen bei "Anna Keller" die nächste Mahnung ab dem Tag in 11 Tagen
+
+  # Die E-Mail kam nicht an, der Verwalter hat den Brief ausgedruckt und per Post geschickt (#194)
+  Szenario: Nach gescheiterter E-Mail per Post versendete Mahnung gilt als Brief
+    Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter eine Mahnung sendet
-    Dann meldet die Abrechnung "2. Mahnung liegt als Brief zum Ausdrucken in den Dokumenten bereit."
+    Und der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" in den Dokumenten als versendet markiert
+    Dann ist die "Zahlungserinnerung" an "Anna Keller" per Brief versendet festgehalten

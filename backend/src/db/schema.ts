@@ -119,6 +119,7 @@ export const rentalContracts = pgTable(
 		startDate: date('start_date').notNull(),
 		endDate: date('end_date'), // null = ongoing
 		terminated: boolean('terminated').default(false).notNull(), // endDate is a Kündigungstermin, not agreed
+		noticeReceivedOn: date('notice_received_on'), // the day the notice arrived (A-3), only with terminated
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
 		monthlyAdvancePayment: decimal('monthly_advance_payment', { precision: 10, scale: 2 }).notNull(), // Akonto
@@ -355,6 +356,12 @@ export type HeatingShare =
 			names: HeatingProfileNames;
 	  };
 
+// The last statement number given per prefix NK-{building}-{year}-, so a deleted draft's number is not given again (#97)
+export const statementNumbers = pgTable('statement_numbers', {
+	prefix: varchar('prefix', { length: 50 }).primaryKey(),
+	lastNumber: integer('last_number').notNull()
+});
+
 export const utilityStatements = pgTable(
 	'utility_statements',
 	{
@@ -494,6 +501,7 @@ export const documents = pgTable(
 		status: varchar('status', { length: 20 }), // sent, to_send; null for an upload
 		sentAt: timestamp('sent_at'),
 		deliveryError: text('delivery_error'),
+		paymentDeadline: date('payment_deadline'), // the Zahlungsfrist a reminder prints; null for an upload
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
 	(table) => [

@@ -73,10 +73,10 @@ export const goToGeneration: Activity = async (actor) => {
 	await actor.attemptsTo(goToNextStep);
 };
 
-export const generateStatements = (year: number, buildingId: string) =>
+export const generateStatements = (year: number, buildingId: string, options: RunOptions = {}) =>
 	throughUiOrApi(
-		(actor) => actor.attemptsTo(openPreviewThroughUi(year, buildingId, {}), goToGeneration, Click.on(generateButton)),
-		generateStatementsViaApi(year, buildingId)
+		(actor) => actor.attemptsTo(openPreviewThroughUi(year, buildingId, options), goToGeneration, Click.on(generateButton)),
+		generateStatementsViaApi(year, buildingId, options)
 	);
 
 export const tryNextWithoutConfirmation = goToNextStep;
