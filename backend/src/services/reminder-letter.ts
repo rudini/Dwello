@@ -87,7 +87,7 @@ const WORDING = {
 		amount: 'Amount outstanding: ',
 		payBy: (date: string) => `Please transfer the amount by ${date} to the following account:`,
 		reference: (reference: string) => `Reference ${reference} (please quote it with your payment)`,
-		alreadyPaid: 'If you have already made the payment, please disregard this letter.',
+		alreadyPaid: 'If you have already made the payment, please disregard this reminder.',
 		salutation: 'Dear',
 		closing: 'Kind regards'
 	}

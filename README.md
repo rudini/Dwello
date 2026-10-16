@@ -21,7 +21,7 @@ Dwello is a comprehensive web application for managing residential properties in
 3. Invoice Management with LLM-powered categorization
 4. Utility Cost Statement Generation with complex prorating
 5. Swiss QR-bill Generation
-6. Statements for tenants in German, French, Italian and English (Romansh can be chosen, the PDF is then in German); the app in German, French, Italian and English
+6. Statements and reminders for tenants in German, French, Italian and English; the app in German, French, Italian and English
 
 ---
 

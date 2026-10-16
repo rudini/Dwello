@@ -41,7 +41,7 @@
 			testid="statement-generate-pdf-button">{m.statements_create_pdf()}</Button
 		>
 		<p id="statement-pdf-language" class="text-ink-muted" data-testid="statement-pdf-language">
-			{(pdfIn[language] ?? pdfIn.de)()}
+			{pdfIn[language]()}
 		</p>
 	</div>
 {/if}

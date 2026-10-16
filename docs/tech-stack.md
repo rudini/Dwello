@@ -514,7 +514,6 @@ None of these targets is measured yet (see `docs/migration-mva.md`).
 - PKCE in the OAuth flow
 - Rate limiting
 - Swiss eID login
-- Further UI languages (fr, it, rm, en); the UI is German only
 - Shared validation schemas between frontend and backend
 - Background job queue for statement generation (generation loops over the contracts in the BFF, `src/lib/server/statement-generation.ts`)
 - Monitoring stack (metrics, APM, uptime checks)
