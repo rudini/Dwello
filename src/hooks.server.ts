@@ -44,9 +44,8 @@ export const handle: Handle = ({ event, resolve }) =>
 				const response = await resolve(event, {
 					transformPageChunk: ({ html }) => html.replace('%lang%', locale)
 				});
-				// Without a cookie the page depends on the browser language: no cache may hand it to another
-				if (response.headers.get('content-type')?.startsWith('text/html'))
-					response.headers.append('Vary', 'Accept-Language');
+				// Without a cookie the answer depends on the browser language: no cache may hand it to another
+				response.headers.append('Vary', 'Accept-Language');
 				return response;
 			}
 		});
