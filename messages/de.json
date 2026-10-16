@@ -970,6 +970,8 @@
 	"statements_reminded_on": "Gemahnt am {date}",
 	"statements_next_reminder_on": "Nächste Mahnung möglich ab {date}",
 	"statements_pdf_download_of": "PDF herunterladen: {name}",
+	"statements_pdf_missing": "PDF noch nicht erstellt",
+	"statements_pdf_missing_of": "PDF noch nicht erstellt: {name} öffnen",
 	"statements_mark_paid_of": "Als bezahlt markieren: {name}",
 	"statements_search_help": "Mieter, Abrechnungsnummer oder Wohnung",
 	"statements_filter_status": "Nach Status filtern",

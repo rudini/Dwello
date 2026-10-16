@@ -970,6 +970,8 @@
 	"statements_reminded_on": "Rappel envoyé le {date}",
 	"statements_next_reminder_on": "Prochain rappel possible dès le {date}",
 	"statements_pdf_download_of": "Télécharger le PDF : {name}",
+	"statements_pdf_missing": "PDF pas encore créé",
+	"statements_pdf_missing_of": "PDF pas encore créé : ouvrir {name}",
 	"statements_mark_paid_of": "Marquer comme payé : {name}",
 	"statements_search_help": "Locataire, numéro de décompte ou appartement",
 	"statements_filter_status": "Filtrer par statut",

@@ -43,7 +43,9 @@
 				})}</span
 			>
 			<span class="text-ink-muted"
-				>{formatDate(statement.periodStart)} – {formatDate(statement.periodEnd)}</span
+				>{formatDate(statement.rentalStart)} – {formatDate(statement.rentalEnd)}, {m.statements_rental_days(
+					{ days: statement.rentalDays }
+				)}</span
 			>
 		</p>
 	</div>
@@ -74,6 +76,14 @@
 				icon="document-download"
 				ariaLabel={m.statements_pdf_download_of({ name })}
 				testid="statement-pdf-link">PDF</Button
+			>
+		{:else}
+			<!-- A new draft has no PDF until «PDF erstellen» on its detail page (#253) -->
+			<a
+				href="/statements/{statement.id}"
+				class="inline-flex min-h-12 items-center text-accent underline underline-offset-4 hover:text-accent-strong"
+				aria-label={m.statements_pdf_missing_of({ name })}
+				data-testid="statement-pdf-missing">{m.statements_pdf_missing()}</a
 			>
 		{/if}
 		{#if open}
