@@ -969,6 +969,8 @@
 	"statements_reminded_on": "Reminded on {date}",
 	"statements_next_reminder_on": "Next reminder possible from {date}",
 	"statements_pdf_download_of": "Download PDF: {name}",
+	"statements_pdf_missing": "PDF not created yet",
+	"statements_pdf_missing_of": "PDF not created yet: open {name}",
 	"statements_mark_paid_of": "Mark as paid: {name}",
 	"statements_search_help": "Tenant, statement number or apartment",
 	"statements_filter_status": "Filter by status",
