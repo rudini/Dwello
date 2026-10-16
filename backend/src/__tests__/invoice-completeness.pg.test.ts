@@ -131,32 +131,34 @@ describe('Rechnungen ohne Leistungszeitraum', () => {
 	});
 });
 
-// Der Leistungszeitraum reicht ins nächste Jahr: nur ein Teil zählt, die Abweichung sagt warum (#130)
-it('zählt die Rechnungen, deren Leistungszeitraum über die Abrechnungsperiode hinausreicht', async () => {
-	const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
-	const [water] = await db.select().from(categories).where(eq(categories.name, 'Cold Water'));
-	await insertInvoice(own.building, { categoryId: water.id, amount: '1000.00', invoiceDate: '2024-01-31' });
-	const servicePeriod = { servicePeriodStart: '2025-07-01', servicePeriodEnd: '2026-06-30' };
-	await insertInvoice(own.building, { categoryId: water.id, amount: '1200.00', invoiceDate: '2026-06-30', ...servicePeriod });
+describe('Hinweise mit eigenem Gebäude', () => {
+	// Der Leistungszeitraum reicht ins nächste Jahr: nur ein Teil zählt, die Abweichung sagt warum (#130)
+	it('zählt die Rechnungen, deren Leistungszeitraum über die Abrechnungsperiode hinausreicht', async () => {
+		const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
+		const [water] = await db.select().from(categories).where(eq(categories.name, 'Cold Water'));
+		await insertInvoice(own.building, { categoryId: water.id, amount: '1000.00', invoiceDate: '2024-01-31' });
+		const servicePeriod = { servicePeriodStart: '2025-07-01', servicePeriodEnd: '2026-06-30' };
+		await insertInvoice(own.building, { categoryId: water.id, amount: '1200.00', invoiceDate: '2026-06-30', ...servicePeriod });
 
-	const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2025-01-01&periodEnd=2025-12-31`);
-	const { findings } = (await response.json()) as { findings: { categoryName: string }[] };
-	await own.remove();
+		const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2025-01-01&periodEnd=2025-12-31`);
+		const { findings } = (await response.json()) as { findings: { categoryName: string }[] };
+		await own.remove();
 
-	expect(findings.find((f) => f.categoryName === 'Kaltwasser')).toMatchObject({ kind: 'deviation', partialCount: 1 });
-});
+		expect(findings.find((f) => f.categoryName === 'Kaltwasser')).toMatchObject({ kind: 'deviation', partialCount: 1 });
+	});
 
-// Heizöl zählt über den Tankbestand, nie über einen Leistungszeitraum: die Hinweise nennen seine Lieferungen nicht
-it('nennt Lieferungen der Kategorie des Tankbestands nicht', async () => {
-	const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
-	const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-	await db.insert(fuelStocks).values({ buildingId: own.building, readingDate: '2024-12-31', amount: '800.00', categoryId: heating.id });
-	await insertInvoice(own.building, { billingEntityName: 'Heizöl AG', categoryId: heating.id, invoiceDate: '2025-01-20' });
-	await insertInvoice(own.building, { billingEntityName: 'Kaminfeger Keller', invoiceDate: '2025-01-20' });
+	// Heizöl zählt über den Tankbestand, nie über einen Leistungszeitraum: die Hinweise nennen seine Lieferungen nicht
+	it('nennt Lieferungen der Kategorie des Tankbestands nicht', async () => {
+		const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await db.insert(fuelStocks).values({ buildingId: own.building, readingDate: '2024-12-31', amount: '800.00', categoryId: heating.id });
+		await insertInvoice(own.building, { billingEntityName: 'Heizöl AG', categoryId: heating.id, invoiceDate: '2025-01-20' });
+		await insertInvoice(own.building, { billingEntityName: 'Kaminfeger Keller', invoiceDate: '2025-01-20' });
 
-	const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2024-01-01&periodEnd=2024-12-31`);
-	const { lateInvoices } = (await response.json()) as { lateInvoices: { billingEntityName: string }[] };
-	await own.remove();
+		const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2024-01-01&periodEnd=2024-12-31`);
+		const { lateInvoices } = (await response.json()) as { lateInvoices: { billingEntityName: string }[] };
+		await own.remove();
 
-	expect(lateInvoices.map((i) => i.billingEntityName)).toEqual(['Kaminfeger Keller']);
+		expect(lateInvoices.map((i) => i.billingEntityName)).toEqual(['Kaminfeger Keller']);
+	});
 });

@@ -11,6 +11,7 @@ import {
 	invoiceWithoutServicePeriodOn,
 	countOfInvoicesWithoutServicePeriodOn,
 	lateInvoiceOn,
+	countOfLateInvoicesOn,
 	draftsOnly,
 	feeAboveGuideline,
 	feeFieldDescription,
@@ -340,6 +341,10 @@ Then(
 		await verwalter.sees(lateInvoiceOn(date)).toContain(amount);
 	}
 );
+
+Then('nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfLateInvoicesOn(date)).toBe(0);
+});
 
 Then(
 	'nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom {string} über {string}',
