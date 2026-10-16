@@ -560,3 +560,21 @@ Request: «Setze #156 #155 um».
 - [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/routes/contracts/new/OpenContracts.svelte`, `src/lib/contract-form.ts`, `src/lib/contract-wizard.ts`, `src/lib/utils/contract-availability.ts`, `docs/anforderungen-vertragsende.md`, tests in `src/__tests__/` and `tests/e2e/`.
+
+## Session: contract wizard keeps the apartment and takes over the rent (#144)
+
+Request: «Setze #144 um» (coordinator W10). #144's "Done means" still asks for an implementation issue; the decided Option A is the requirement, the pull request says `Fixes #144`.
+
+- [x] The preselected apartment survives the detour to «Neuen Mieter erfassen» (scenario in `contract-new.feature`)
+- [x] Nettomiete, Zusatzmiete and Akonto are preset from the apartment's last Mietvertrag, editable, marked as taken over (scenario in `contract-new.feature`)
+- [x] fach-reviewer on the `@wip` scenarios before implementing (amounts)
+- [x] fach-reviewer round 1 (`docs/reviews/p17-fachreview-1.md`): took V-1, V-2, V-3, V-6, M-1, M-3
+- [x] axe/language state `rent-taken-over` (`tests/a11y/screens.json`)
+- [x] Found: suggested Vertragsbeginn 01.01.2100 refused by the wizard's own check → #296
+- [x] code-reviewer round 1 (`docs/reviews/p17-review-1.md`): fixed C-7, C-8; C-1..C-6 stay in the report
+- [x] persona Helga (`docs/design/personas/helga-p17.md`): fixed P-1 (parking sentence only with a Zusatzmiete) and P-2 (wording)
+- [x] Workflow note: decision issue implemented directly; persona re-run after a rewording (`docs/reviews/workflow-notes-issue-144.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `src/lib/contract-wizard.ts`, `src/routes/contracts/new/{ContractWizard,RentStep,TenantStep}.svelte`, `src/routes/tenants/TenantForm.svelte`, `src/routes/tenants/new/+page.svelte`, `src/lib/server/tenant-form.ts`, `messages/*.json`, `tests/a11y/screens.json`, tests in `src/__tests__/` and `tests/e2e/`.
