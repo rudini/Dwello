@@ -28,6 +28,7 @@ const cases: [string, boolean][] = [
 	['Hauswart Reinigung', true],
 	['Treppenhausreinigung', true],
 	['Rasenmähen und Laubentfernung', true],
+	['Benzin für den Rasenmäher', true],
 	['Schneeräumung', true],
 	['Kabelfernsehen Grundnutzungsgebühr', true],
 	['Versicherung der Heizungsanlage', true],
@@ -51,7 +52,10 @@ const cases: [string, boolean][] = [
 	['Entsorgung von Grümpel', false],
 	['Räumung des Estrichs', false],
 	['Baumfällung', false],
-	['Anschluss ans Kabelnetz', false],
+	['Installation des Kabelanschlusses', false],
+	['Rasensanierung', false],
+	['Kehrichtgrundgebühr nach Gebäudeversicherungswert', false],
+	['Honorar für die Heizkostenabrechnung', false],
 	['Gebühren für die Verwaltungsapp', false],
 	['Honorar für die Nebenkostenabrechnung', false]
 ];

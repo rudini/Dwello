@@ -385,6 +385,10 @@ Hypothekarzinsen, Verwaltung, Renovation, Wertvermehrende Investitionen, Schädl
 Feuerlöscher-Wartung (#176). `allocable-categories.pg.test.ts` pins every seeded category's flag. The management effort is billed
 through the Verwaltungspauschale, not through invoices in Verwaltung.
 
+Every KI prompt lists the categories with their descriptions, so a description names what the category excludes
+(«ohne …»); `0007_category_descriptions.sql` added these to Heizung, Gartenpflege, Kehricht, TV/Kabelanschluss,
+Gebäudeversicherung and Verwaltung where the landlord had not changed the text (#204, #220).
+
 ### Distribution keys (all `predefined`)
 
 | name_de | formula | sort_order |

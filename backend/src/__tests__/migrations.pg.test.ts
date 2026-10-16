@@ -85,13 +85,13 @@ describe('Migrationen anwenden', () => {
 			`SELECT name, description FROM categories WHERE name IN ('Heating', 'Garden Maintenance', 'Waste Disposal', 'TV/Cable', 'Building Insurance', 'Administration', 'Elevator') ORDER BY sort_order`
 		);
 		expect(rows).toEqual([
-			{ name: 'Heating', description: 'Brennstoff, Energie und Betrieb der Heizung; ohne Reparatur und Erneuerung der Anlage' },
+			{ name: 'Heating', description: 'Brennstoff, Energie, Wartung und Betrieb der Heizung, auch Versicherung nur der Heizungsanlage und Verwaltungsarbeit für den Heizbetrieb; ohne Reparatur, Erneuerung, Verzinsung und Abschreibung der Anlage' },
 			{ name: 'Elevator', description: 'Strom, Notruftelefon und reine Wartung des Lifts; ohne Reparaturen, Ersatzteile und Serviceabos mit Reparaturen' },
 			{ name: 'Garden Maintenance', description: 'Unser Gärtner Huber' },
 			{ name: 'Waste Disposal', description: 'Kehrichtgebühren und Grünabfuhr; ohne Räumungen, die der Vermieter bestellt' },
 			{ name: 'TV/Cable', description: 'Laufende Grundgebühr des Kabelnetzes; ohne Installation des Anschlusses' },
-			{ name: 'Building Insurance', description: 'Prämien der Gebäudeversicherung; ohne Prämien, die nur die Heizungsanlage betreffen (Heizung)' },
-			{ name: 'Administration', description: 'Allgemeine Verwaltungskosten; ohne Verwaltung der Heizung (Heizung) und Verwaltungspauschale' }
+			{ name: 'Building Insurance', description: 'Prämien der Gebäudeversicherung; ohne Prämien, die nur die Heizungsanlage versichern (gehören zur Heizung)' },
+			{ name: 'Administration', description: 'Allgemeine Verwaltungskosten; ohne Verwaltungsarbeit für den Heizbetrieb, z. B. Brennstoff bestellen (gehört zur Heizung), und ohne Verwaltungspauschale' }
 		]);
 	});
 });
