@@ -665,7 +665,7 @@ Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.t
 - [x] Remove `BuildingMiniMap.svelte`, its DOM test, `leaflet`, `@types/leaflet`, the `.leaflet-container` rule, the `buildings_map*` messages and the CARTO paragraph `privacy_third_2` (all four languages); the unused `latitude`/`longitude` mapping of the building loads (columns stay)
 - [x] Remove `PUBLIC_CARTO_API_KEY` and the map from `.env.example`, `deploy/demo/.env.example`, `docker-compose.prod.yml`, `docs/tech-stack.md`, README, PRD (marked dropped), U-23 in `offene-punkte.md` (no CSP exists)
 - [x] Comment on #82 that CARTO is no longer a third party (R-1)
-- [x] Slice review (`code-reviewer`): `docs/reviews/map-review-1.md`
+- [x] Slice review (`code-reviewer`): `docs/reviews/map-review-1.md`; closing round `docs/reviews/map-review-2.md`
 - [x] Feature review: personas Dr. Weber (`docs/design/personas/weber-map129.md`) and Marco (`docs/design/personas/marco-map129.md`); no second `fach-reviewer` (the privacy text is the one reviewed before implementing)
 - [x] Workflow review (`docs/reviews/workflow-notes-issue-129.md`), archive session
 - [x] Before marking complete: lint, check, type-check, affected tests and E2E
