@@ -13,7 +13,7 @@ Funktionalität: Gebäudedetail
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann sieht der Liegenschaftsverwalter die Wohnung "1.01" mit dem Status "Leer"
 
-  Szenario: Die Gebäudeseite zeigt die Adresse als Text ohne Karte
+  Szenario: Die Detailseite zeigt die Adresse als Text ohne Karte
     Angenommen für das Gebäude "Birkenhof" sind Koordinaten erfasst
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann sieht der Liegenschaftsverwalter die Adresse "Testweg 1, 8400 Winterthur (ZH)"

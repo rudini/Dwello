@@ -11,7 +11,7 @@ const page = (locale: 'fr' | 'it' | 'en') => {
 	return document.body.textContent ?? '';
 };
 
-describe('Datenschutzerklärung auf Französisch und Italienisch', () => {
+describe('Datenschutzerklärung auf Französisch, Italienisch und Englisch', () => {
 	it('setzt französische Guillemets mit geschütztem Leerzeichen und spricht niemanden mit Geschlecht an', () => {
 		const text = page('fr');
 		expect(text).toContain('Google ou Microsoft');

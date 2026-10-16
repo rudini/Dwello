@@ -87,7 +87,7 @@ describe('Tailwind-Thema', () => {
 describe('Grundstile', () => {
 	const globals = readFileSync('src/styles/globals.css', 'utf8');
 
-	it('färben Platzhalter, und Rahmen ohne Farbangabe mit Tokens', async () => {
+	it('färben Platzhalter und Rahmen ohne Farbangabe mit Tokens', async () => {
 		expect(globals).toMatch(/::placeholder[^{]*\{\s*color: var\(--color-ink-muted\)/);
 		const { default: config } = await import('../../tailwind.config.js');
 		const extend = (config.theme as Record<string, Record<string, object>>).extend;
