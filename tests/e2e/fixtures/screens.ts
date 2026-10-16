@@ -67,6 +67,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
 	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
+	await seed.sendStatement('Anna', 2024);
+	await seed.markPaid('Anna', 2024); // paid: its payment can be reset (#92)
 	// reminded today: the Zahlungsfrist of the Mahnung runs, the next one is possible only later (#107)
 	await seed.sendStatement('Bruno', 2024);
 	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
@@ -93,6 +95,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		statement: seed.idOf('Abrechnung Anna 2025'),
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
+		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),

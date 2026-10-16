@@ -37,6 +37,7 @@ export const wizardPreset = byTestId('Vorgaben aus dem Link', 'wizard-preset');
 export const listScope = byTestId('Auswahl der Liste', 'statements-scope');
 export const sendButton = byTestId('Abrechnung versenden', 'statement-send-button');
 export const reminderButton = byTestId('Mahnung senden', 'statement-reminder-button');
+export const resetPaymentButton = byTestId('Zahlung zurücksetzen', 'statement-reset-payment-button');
 // the detail page's button, or the first one in the list
 export const markPaidButton = bySelector(
 	'Als bezahlt markieren',

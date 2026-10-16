@@ -226,7 +226,11 @@ describe('Abrechnungsliste', () => {
 
 		const today = localToday();
 		expect(calls).toEqual([
-			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: today } }
+			{
+				method: 'POST',
+				path: '/statements/s1/mark-paid',
+				body: { paidDate: today, statementDate: '2025-01-15' }
+			}
 		]);
 		expect(invalidateAll).toHaveBeenCalled();
 	});
@@ -371,12 +375,16 @@ describe('Abrechnungsliste', () => {
 		list([statement({ status: 'sent' })]);
 		click('statement-row-mark-paid');
 		const field = byTestId<HTMLInputElement>('paid-date-input')!;
-		fireEvent(field, 'input', '01.01.25');
+		fireEvent(field, 'input', '20.01.25');
 		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 		await settle();
 
 		expect(calls).toEqual([
-			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-01' } }
+			{
+				method: 'POST',
+				path: '/statements/s1/mark-paid',
+				body: { paidDate: '2025-01-20', statementDate: '2025-01-15' }
+			}
 		]);
 	});
 
@@ -821,6 +829,75 @@ describe('Abrechnungsdetail', () => {
 
 		expect(history).toContain('Versendet 28.09.2026');
 		expect(history).toContain('Bezahlt 05.10.2026');
+	});
+
+	// #138: das Geld kann nicht vor dem Abrechnungsdatum eingegangen sein
+	it('prüft im Dialog, dass das Zahlungsdatum nicht vor dem Abrechnungsdatum liegt', () => {
+		detail({ status: 'sent', statementDate: '2025-01-15' });
+		click('statement-mark-paid-button');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '14.01.2025');
+		click('statement-mark-paid-confirm');
+		flushSync();
+
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+		expect(text()).toContain('Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 15.01.2025.');
+	});
+
+	it('sendet das Abrechnungsdatum mit, damit der Server dieselbe Grenze prüft', () => {
+		detail({ status: 'sent', statementDate: '2025-01-15' });
+		click('statement-mark-paid-button');
+		const formData = new FormData();
+		actions.get('?/markPaid')!({ formData });
+
+		expect(formData.get('statementDate')).toBe('2025-01-15');
+	});
+
+	// #92: eine erfasste Zahlung lässt sich zurücksetzen, nach einer Bestätigung mit der Folge
+	it('bietet nur bei einer bezahlten Abrechnung an, die Zahlung zurückzusetzen', () => {
+		detail({ status: 'sent' });
+		expect(byTestId('statement-reset-payment-button')).toBeNull();
+		document.body.innerHTML = '';
+		detail({ status: 'paid', paidDate: '2025-02-05' });
+		expect(byTestId('statement-reset-payment-button')!.textContent!.trim()).toBe('Zahlung zurücksetzen');
+	});
+
+	// die Folge mit dem Status, der dann gilt: vor Ablauf der Zahlungsfrist «Versendet», danach «Überfällig» (Fachprüfung V-4)
+	it('nennt vor dem Zurücksetzen die Folge mit dem Status, der dann gilt', () => {
+		const dialogText = () => document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		detail({ status: 'paid', paidDate: '2025-02-05', paymentDeadline: '2999-12-31' });
+		click('statement-reset-payment-button');
+
+		expect(dialogText()).toContain('Die Abrechnung NK-2024-0001 gilt dann wieder als nicht bezahlt und hat den Status «Versendet».');
+		expect(dialogText()).toContain('Das Zahlungsdatum 05.02.2025 wird gelöscht.');
+
+		document.body.innerHTML = '';
+		detail({ status: 'paid', paidDate: '2025-02-05', paymentDeadline: '2025-02-14' });
+		click('statement-reset-payment-button');
+		expect(dialogText()).toContain('hat den Status «Überfällig».');
+	});
+
+	it('bestätigt das Zurücksetzen der Zahlung', async () => {
+		toasts.set([]);
+		detail({ status: 'paid', paidDate: '2025-02-05' });
+		click('statement-reset-payment-button');
+		const after = actions.get('?/resetPayment')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Die Zahlung der Abrechnung NK-2024-0001 ist zurückgesetzt.'
+		]);
+	});
+
+	// zweimal dieselbe Zahlung zurückgesetzt: beide Zeilen stehen im Verlauf (Fachprüfung V-11)
+	it('führt im Verlauf jedes Zurücksetzen einer Zahlung', () => {
+		const reset = { resetOn: '2025-02-10', paidDate: '2025-02-05' };
+		detail({ status: 'sent', statementDate: '2025-01-15', paymentResets: [reset, reset] });
+
+		expect(text().replace(/\s+/g, ' ').split('Zahlung vom 05.02.2025 zurückgesetzt 10.02.2025')).toHaveLength(3);
 	});
 
 	it('kündigt die nächste Mahnung mit ihrem Versandweg an', () => {

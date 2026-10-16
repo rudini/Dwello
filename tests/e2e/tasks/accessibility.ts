@@ -250,6 +250,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Wait.until(on.shown('document-marked-sent'))
 		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
+	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('{area}').into(on.formulaInput),
