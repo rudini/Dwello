@@ -225,6 +225,13 @@ Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }
 	await verwalter.sees(heatingProfileOfStatement).toContain(names.get(profile)!);
 });
 
+Then(
+	'nennt die Abrechnung das Heizprofil {string} als nicht angewendet: {string}',
+	async ({ verwalter, names }, profile: string, reason: string) => {
+		await verwalter.sees(heatingProfileOfStatement).toContain(`${names.get(profile)} (nicht angewendet: ${reason})`);
+	}
+);
+
 When('der Liegenschaftsverwalter das PDF der Abrechnung anfordert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(requestStatementPdf);
 });

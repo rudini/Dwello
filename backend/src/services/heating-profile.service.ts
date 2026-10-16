@@ -11,6 +11,7 @@ import { heatingProfiles, type HeatingProfile, type NewHeatingProfile } from '..
 import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error';
 import { Conflict } from './conflict';
 import { isDefaultSetting } from './default-setting';
+import { roundToRappen } from './pdf-format';
 
 export interface HeatingProfileFilters {
 	search?: string;
@@ -362,9 +363,10 @@ export function calculateHeatingShare(
 		const daysInMonth = monthEnd.getDate();
 		const daysInPeriod = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-		// Prorate the monthly percentage based on days
-		const proratedPct = (monthPct * daysInPeriod) / daysInMonth;
-		totalPercentage += proratedPct;
+		// Prorate the monthly percentage based on days, rounded commercially to two places as printed: the share follows from the printed
+		// months (#232)
+		const proratedPct = roundToRappen((monthPct * daysInPeriod) / daysInMonth);
+		totalPercentage = roundToRappen(totalPercentage + proratedPct);
 
 		monthBreakdown.push({ month, percentage: proratedPct });
 
