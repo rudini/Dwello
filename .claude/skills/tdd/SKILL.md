@@ -5,7 +5,7 @@ description: Test-driven development. Use when the user wants to build features 
 
 # Test-Driven Development
 
-Tests verify behavior through public interfaces, not implementation details: a test that breaks on a refactoring that kept the behavior was testing the implementation. Layers, runners and test doubles in Dwello: `docs/test-pyramid.md` (no mocked database, no mocks of Dwello's own modules; outside systems only at the boundary).
+Tests verify behavior through public interfaces, not implementation details: a test that breaks on a refactoring that kept the behavior was testing the implementation. Layers, runners and test doubles in Dwello, with the few allowed mocks: `docs/test-pyramid.md` (never a mocked database; outside systems replaced at the boundary).
 
 ## One test at a time
 
@@ -27,4 +27,4 @@ RIGHT (vertical):
 1. **Plan:** read `UBIQUITOUS_LANGUAGE.md`, so test names and interfaces use the domain's words. Decide the interface changes and the behaviors to test (the ones the scenario and the task or issue name, critical paths, complex logic), and list the behaviors in the checklist of `implementation_plan.md`. Look for deep modules (small interface, deep implementation, `tools/deepcheck/README.md`); the commit hook checks them. Do not wait for approval: the scenario and the task already say what to build (`CLAUDE.md`, "When to ask").
 2. **Tracer bullet:** one test for the first behavior, red, then the least code that turns it green. It proves the path end to end.
 3. **Loop:** for each further behavior, one test, red, then only enough code to pass it; nothing for tests not yet written.
-4. **Refactor:** once all tests pass, remove duplication, deepen shallow modules and fix what the new code reveals about existing code, running the tests after each step. Refactor only while green: with a red test, a failure no longer tells whether the refactoring or the missing code caused it.
+4. **Refactor:** once all tests pass, remove duplication and deepen shallow modules in the code the change touches, running the tests after each step; a problem the new code reveals in code it does not touch is asked first or becomes open work (`CLAUDE.md`, "When to ask"). Refactor only while green: with a red test, a failure no longer tells whether the refactoring or the missing code caused it.

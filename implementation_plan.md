@@ -8,6 +8,6 @@ Request (chat): «Setze G-9 um» from `docs/reviews/opus55-guide-review.md`. Rul
 
 - [x] `CLAUDE.md`, "Coding guidelines": only the Dwello rules stay (issue text wrong in a detail, decided texts, one mapper per response); generic advice goes ("state assumptions", "push back", "Stay in scope", "Surgical changes": the ask list, the formatting gotcha, fallow and `code-reviewer` cover them)
 - [x] `.claude/skills/tdd`: philosophy, SOLID and the checklist per cycle go; `mocking.md`, `tests.md`, `refactoring.md` go, `docs/test-pyramid.md` is the source for test doubles (`mocking.md` allowed mocking the database, which Dwello forbids)
-- [ ] `code-reviewer` round
+- [ ] `code-reviewer` round 1 (docs/reviews/g9-review-1.md): C-1 (Major: refactor step widened to untouched code) and C-2 fixed; round 2 on the delta
 - [x] Checks: lint, the tests that read rule files
 - [ ] Archive the session, push, pull request, CI, merge
