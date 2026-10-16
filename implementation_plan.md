@@ -13,6 +13,12 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] fach-reviewer round 1 on the @wip scenarios: `docs/reviews/reminders-fachreview-1.md`
 - [x] contracts `statement.json`, `documents.json`; axe and language rows `statement-reminded-detail`
 - [x] Workflow note: «failing request» is not the only state E2E cannot reach: `tests/e2e` has no way to age a stored record (a reminder's deadline), so «Zweite Mahnung» had to move to a pg test
-- [ ] code-reviewer round 1
-- [ ] feature review: personas, fach-reviewer, daten-pruefer
+- [x] code-reviewer round 1: `docs/reviews/reminders-review-1.md`
+- [x] persona Helga: `docs/design/personas/helga-issue-107-193-194.md`
+- [x] fach-reviewer round 2: `docs/reviews/reminders-fachreview-2.md`
+- [x] daten-pruefer: `docs/reviews/reminders-datenpruefung-1.md`
+- [x] review fixes: no next reminder date once paid (C-1/V-13), test after the 3rd (C-2), re-marking on a later day (C-4), `docs/api-specification.md` (C-3), one `swissDate` (C-8), «Als versendet markieren» names the letter and offers its remade PDF (V-14, P-4; `documents/+page.server.ts`, `MarkedSentNotice.svelte`, state `documents marked-sent`), overview subtracts only overdue statements (V-16, C-6), «sends a reminder» waits for its outcome (E2E race)
+- [x] code-reviewer round 2: `docs/reviews/reminders-review-2.md`; persona Helga re-run on the notice: `docs/design/personas/helga-issue-107-193-194-2.md`
+- [x] round-2 fixes: scenario step for the notice (C-11), notice in a live region with its button as the Alert action (C-12, C-17), no «Keine Briefe zu versenden» beside it (Helga P-1), `marked-sent` not in the seed list (C-16); the filter links' ternaries moved into `filters` because the fallow gate counted them against the documents template (C-13)
+- [ ] full E2E (chromium, api) on the final commit
 - [ ] plan archived
