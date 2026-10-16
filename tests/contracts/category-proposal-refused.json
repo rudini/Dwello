@@ -1,0 +1,5 @@
+{
+	"error": "Die KI ist sich nicht sicher.",
+	"code": "KI_PROPOSAL_UNSURE",
+	"params": {}
+}

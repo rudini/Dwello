@@ -68,6 +68,7 @@
 		<p class="text-ink-muted">
 			{m.categories_in_use_note()}
 		</p>
+		<p class="text-ink-muted" data-testid="category-contract-note">{m.categories_contract_note()}</p>
 		{#if shown.length === 0}
 			<EmptyState
 				title={m.categories_empty_filter()}

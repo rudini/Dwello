@@ -331,6 +331,7 @@ export async function generateStatement(
 			managementFee: String(calculation.managementFee),
 			managementFeePercent: String(calculation.managementFeePercent),
 			heatingProfileId: input.heatingProfileId || null,
+			heatingShare: calculation.heating,
 			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
 			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
@@ -347,6 +348,8 @@ export async function generateStatement(
 			sharePercentage: item.totalBuildingAmount ? String((item.tenantShare / item.totalBuildingAmount) * 100) : '0',
 			apartmentShare: String(item.apartmentShare),
 			periodShare: String(item.periodShare),
+			positionRentalDays: item.positionRentalDays,
+			billedDays: item.billedDays,
 			sortOrder: index
 		}))
 	);

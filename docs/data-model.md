@@ -208,7 +208,7 @@ content     TEXT NOT NULL           -- Base64 encoded file, at most 10 MB
 created_at  TIMESTAMP NOT NULL DEFAULT NOW()  -- uploaded or last replaced
 ```
 
-Migration `0003_invoice_documents.sql` (#217) also drops the unused column `invoices.invoice_pdf`.
+Migration `0005_invoice_documents.sql` (#217) also drops the unused column `invoices.invoice_pdf`.
 
 ### fuel_stocks (Tankbestand)
 
@@ -256,6 +256,7 @@ management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungs
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
+heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true } or percent, months, profile names
 balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
@@ -273,6 +274,8 @@ CONSTRAINT statements_period_check CHECK (period_end >= period_start)
 Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_period_start_idx`,
 `statements_status_idx`, `statements_tenant_period_idx (tenant_id, period_start)`, unique
 `statements_number_idx (statement_number)`.
+
+`heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }`, or the percent of the period's heating costs, the months with their shares and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF prints them after an own profile was changed, renamed or deleted. Empty without a heating profile, without heating costs and for statements created before; the PDF of one created before recomputes it from the profile as it is now (#229).
 
 **Status (Abrechnungsstatus)** — transitions allowed by `updateStatementStatus` in
 `backend/src/services/statement.service.ts`:
@@ -304,10 +307,12 @@ tenant_share        DECIMAL(12,2) NOT NULL  -- tenant's portion
 share_percentage    DECIMAL(8,4)
 apartment_share     DECIMAL(12,2)           -- the apartment's part of the total by the key
 period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating profile's share
+position_rental_days INTEGER                -- the tenant's days in the days billed (null: not a ratio of days)
+billed_days         INTEGER                 -- the days the position's invoices bill in the period
 sort_order          INTEGER DEFAULT 0
 ```
 
-`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position.
+`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position. `position_rental_days` and `billed_days` (migration `0003`, #208) hold `period_share` as a fraction of days when all invoices of the position bill the same days and it is not shared by the heating profile; the PDF prints them as «x/y Tage». Statements created before keep them empty.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 

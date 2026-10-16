@@ -19,7 +19,7 @@ Funktionalität: Rechnungsdetail
     Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Dachdecker Meier"
     Dann ist die Rechnung nicht umlagefähig
-    Und erklärt ein Hinweis, dass die Kosten nach Mietrecht nicht auf die Mieter umlegbar sind
+    Und erklärt ein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst
 
   Szenario: Neu kategorisieren ohne laufende KI
     Wenn der Liegenschaftsverwalter die Rechnung neu kategorisieren lässt

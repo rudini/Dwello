@@ -187,6 +187,62 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF nicht "Heizprofil"
     Und steht im PDF "detaillierte Abrechnung der Heiz- und Warmwasserkosten"
 
+  # Regel 5: nach dem Heizprofil nur bei Ein- oder Auszug; wer die ganze Periode mietet, trägt die Heizkosten nach
+  # Mietstagen, die er im PDF nachrechnen kann (#208, D-2)
+  Szenario: Heizkosten eines Mietvertrags über die ganze Periode stehen im PDF nach Mietstagen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2023-01-01" für "900" Franken
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "366/366 Tage"
+    Und steht im PDF nicht "Heizprofil"
+    Und steht im PDF "detaillierte Abrechnung der Heiz- und Warmwasserkosten"
+
+  # Eine Rechnung mit Leistungszeitraum zählt mit ihren Tagen in der Periode: Hauswart Juli bis September in der Periode
+  # Juni bis August, Mietvertrag 15. Juni bis 31. Juli: 31 der 62 Tage, als Bruch nachrechenbar (#208, D-3; Thema 6)
+  Szenario: Eine Rechnung mit Leistungszeitraum steht im PDF mit ihren Tagen in der Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietete die Wohnung "3.02" von "2025-06-15" bis "2025-07-31" für "900" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-07-01" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung vom "2025-06-01" bis "2025-08-31" mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "31/62 Tage"
+    Und steht im PDF "Ihre Mietstage darin von dessen Tagen in der Periode"
+
+  # Ein eigenes Heizprofil lässt sich nach dem Erstellen der Abrechnung ändern; das PDF zeigt den Anteil und die Monate,
+  # mit denen die Abrechnung gerechnet ist: Januar bis März im «Winter» 18 + 14 + 11 = 43 % (#209)
+  Szenario: PDF zeigt den Anteil nach dem Heizprofil, mit dem die Abrechnung erstellt wurde
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und das Heizprofil "Winter" verteilt die Heizkosten danach so:
+      | Monat     | Anteil |
+      | Januar    | 30     |
+      | Februar   | 20     |
+      | März      | 10     |
+      | April     | 5      |
+      | Mai       | 2      |
+      | Juni      | 0      |
+      | Juli      | 0      |
+      | August    | 0      |
+      | September | 2      |
+      | Oktober   | 6      |
+      | November  | 10     |
+      | Dezember  | 15     |
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "43.00 % der Heizkosten"
+    Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
+    Und steht im PDF "43.00 % 430.00"
+
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und die Korrespondenz an "Eva Frei" ist auf "Französisch"

@@ -87,6 +87,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		limitedApartment: seed.idOf('1.04'),
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),
+		// a predefined category shows the reason of its allocability (#186)
+		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
 		distributionKey: seed.idOf('Nach Wohnungen')
 	};
 	return {

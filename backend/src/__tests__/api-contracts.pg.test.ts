@@ -6,6 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
+import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
 import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
@@ -149,6 +150,17 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('GET /invoices/llm-recipient eines externen Anbieters liefert die Felder von llm-recipient.json', async () => {
+		const configured = { ...llmConfig };
+		Object.assign(llmConfig, { baseUrl: 'https://llm.example.com/v1', provider: 'Beispiel AG', providerCountry: 'Schweiz' });
+		try {
+			const actual = await (await callApi('/api/v1/invoices/llm-recipient')).json();
+			expect(drift(await sample('llm-recipient'), actual)).toEqual([]);
+		} finally {
+			Object.assign(llmConfig, configured);
+		}
+	});
+
 	it('POST /categories/propose liefert die Felder von category-proposal.json', async () => {
 		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.9, reasoning: 'Erneuerung' });
 		try {
@@ -170,6 +182,16 @@ describe('API-Verträge des Frontends', () => {
 				await sendJson('POST', '/api/v1/invoices/extract', { buildingId: rental.building, fileName: 'r.pdf', pages: ['data:image/png;base64,iVBO'] })
 			).json();
 			expect(drift(await sample('invoice-extraction'), actual)).toEqual([]);
+		} finally {
+			llm.stop();
+		}
+	});
+
+	it('POST /categories/propose ohne sichere Antwort liefert die Felder von category-proposal-refused.json', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.5, reasoning: 'Vielleicht' });
+		try {
+			const actual = await (await sendJson('POST', '/api/v1/categories/propose', { name: 'Bewachung' })).json();
+			expect(drift(await sample('category-proposal-refused'), actual)).toEqual([]);
 		} finally {
 			llm.stop();
 		}

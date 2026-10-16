@@ -98,7 +98,7 @@ Then('lässt sich die Rechnung nicht als umlagefähig markieren', async ({ verwa
 Then(
 	'weist ein Hinweis darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
 	async ({ verwalter }) => {
-		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter übertragen');
+		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter umgelegt');
 	}
 );
 

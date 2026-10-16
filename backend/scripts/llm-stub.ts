@@ -93,7 +93,8 @@ const line = (prompt: string, label: string) => prompt.match(new RegExp(`^${labe
 
 function reply(prompt: string) {
 	const name = line(prompt, 'Kategorie');
-	if (!name) return new Response(null, { status: 503 });
+	// «KI-Ausfall …»: the KI fails, as if it were not reachable (#186)
+	if (!name || name.startsWith('KI-Ausfall')) return new Response(null, { status: 503 });
 	const language = (line(prompt, 'Sprache der Begründung') ?? 'Deutsch') as Language;
 	const { isAllowedUtilityCost, confidence, reasoning, delay = 0 } = answers.find(({ match, when }) => match.test(name) && (when?.(prompt) ?? true))!;
 	const answer = { isAllowedUtilityCost, confidence, reasoning: reasoning[language] };

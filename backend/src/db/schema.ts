@@ -326,6 +326,16 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 /** Own value and the building's total by unit: the fraction a simple distribution key gives the apartment */
 export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
 
+// The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
+export type HeatingShare =
+	| { byDays: true }
+	| {
+			byDays: false;
+			percent: number;
+			months: { month: number; percentage: number }[];
+			names: { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+	  };
+
 export const utilityStatements = pgTable(
 	'utility_statements',
 	{
@@ -356,6 +366,7 @@ export const utilityStatements = pgTable(
 		// the Tankbestand readings the statement was created with
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
+		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
@@ -415,6 +426,10 @@ export const utilityStatementLineItems = pgTable(
 		sharePercentage: decimal('share_percentage', { precision: 8, scale: 4 }), // e.g., 12.5000%
 		apartmentShare: decimal('apartment_share', { precision: 12, scale: 2 }), // the apartment's part of the total by the key
 		periodShare: decimal('period_share', { precision: 8, scale: 4 }), // 0-1: days rented, or the heating profile's share
+		// the period share as days (#208): the tenant's days in the days billed, and those days; null when not a ratio of days
+		// TODO(fachlich prüfen, #75): glossary terms for both
+		positionRentalDays: integer('position_rental_days'),
+		billedDays: integer('billed_days'),
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
