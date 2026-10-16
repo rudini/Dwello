@@ -50,6 +50,21 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
     Dann trägt "Lea Graf" 50 % der Heizkosten, also "CHF 500.00"
 
+  # #71: eine Heizkostenrechnung mit Leistungszeitraum zählt nur die Monate des Heizprofils darin, auf 100 % gebracht.
+  # 1000 Franken für Januar bis März: Eva Frei (Januar bis März) trägt 43 / 43 = 100 % davon, Marc Huber (ab Mai)
+  # nichts. Mit der Rechnung über das ganze Jahr (Eva 43 %, Marc 52 %): (430 + 1000) / 2000 = 71.5 %, 520 / 2000 = 26 %
+  @wip @api
+  Szenariogrundriss: Heizkosten einer Rechnung mit Leistungszeitraum nach den Monaten des Heizprofils darin
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10" für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und für "<Mieter>" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "<Mieter>"
+    Dann trägt "<Mieter>" <Anteil> % der Heizkosten, also "<Betrag>"
+
+    Beispiele:
+      | Mieter     | Anteil | Betrag       |
+      | Eva Frei   | 71.5   | CHF 1'430.00 |
+      | Marc Huber | 26     | CHF 520.00   |
+
   Szenario: Abrechnung versenden
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
@@ -349,6 +364,21 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Jan 15.68 %, Feb 14.00 %"
     Und steht im PDF "Anteil nach Heizprofil: 47.68 % / 50.00 % = 95.36 %."
     Und steht im PDF "95.36 % 953.60"
+
+  # #71: unter den Heizkosten steht jede Rechnung mit ihrem Anteil nach Heizprofil; eine mit Leistungszeitraum mit den
+  # Monaten des Heizprofils darin, den Monaten des Mieters darin und der Teilung (nachrechenbar wie #232). Marc Huber
+  # (ab Mai) trägt nichts von Januar bis März und 52 % der Rechnung über das ganze Jahr
+  @wip
+  Szenario: PDF nennt bei Heizkosten mit Leistungszeitraum die Monate des Heizprofils jeder Rechnung
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10" für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Leistungszeitraum 01.01.2024 – 31.03.2024: CHF 1'000.00, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Ihre Monate darin: keine; zusammen 0.00 %. Anteil nach Heizprofil: 0.00 % / 43.00 % = 0.00 %"
+    Und steht im PDF "Ohne Leistungszeitraum: CHF 1'000.00, Anteil nach Heizprofil 52.00 % (siehe Heiz- und Warmwasserkosten)"
+    Und steht im PDF "Ihr Anteil: 2'000.00 × (1'000.00 × 0.00 % + 1'000.00 × 52.00 %) / 2'000.00 = 520.00"
 
   # Zwei Hauswart-Rechnungen über verschiedene Leistungszeiträume, Einzug am 15. August: der Zeitanteil ist nach den
   # Beträgen gewichtet, (600 × 0/91 + 1200 × 47/92) / 1800 = 34.06 % (der Mittelwert der Brüche wäre 25.54 %); das PDF
