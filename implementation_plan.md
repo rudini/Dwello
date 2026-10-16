@@ -9,7 +9,10 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] `roundTo5Rappen` rounds in the tenant's favour (unit test red first)
 - [x] Help text «Saldo» in all four languages, `docs/nebenkostenabrechnung-anforderungen.md` (lines 94, 148)
 - [x] Fachreview round 1 (`docs/reviews/w2d-fachreview-1.md`): scenario «unter 5 Rappen», float-safe rounding, drafts re-rounded by migration `0013`, PDF/DOM cases, docs
-- [ ] Slice review (code-reviewer), feature review (fach-reviewer, daten-pruefer, persona Dr. Weber)
+- [x] Slice review round 1 (`docs/reviews/w2d-review-1.md`)
+- [x] Feature review: fach round 2 (`docs/reviews/w2d-fachreview-2.md`), daten-pruefer (`docs/reviews/w2d-datenpruefung-1.md`), Dr. Weber (`docs/design/personas/dr-weber-w2d.md`)
+- [ ] Merge `main`, migration renamed to the next free number (C-1)
+- [x] Workflow note (`docs/reviews/workflow-notes-issue-79.md`)
 - [ ] Lint, check, type-check, affected tests and E2E
 - [ ] Session archived, pull request merged (`Fixes #79`)
 
