@@ -298,7 +298,7 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		await deleteHeatingProfile(own);
 
 		expect(half).toContain('60.00 % der Heizkosten');
-		expect(half).toContain('Mär 10.00 %, Apr 10.00 %, Mai 10.00 %, Jun 0.00 %; zusammen 30.00 %. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen 50.00 %');
+		expect(half).toContain('Mär 10.00 %, Apr 10.00 %, Mai 10.00 %, Jun 0.00 %; zusammen 30.00 %. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen 50.00 %.');
 	});
 
 	// Ein Anteil genau auf der Hälfte zwischen zwei Rappen-Prozenten (70.975 %): Erläuterung und Position zeigen denselben
