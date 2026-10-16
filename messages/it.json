@@ -148,7 +148,7 @@
 	"privacy_cookies_1": "Dwello usa solo cookie tecnicamente necessari. Non vengono usati cookie di tracciamento o pubblicitari.",
 	"privacy_cookies_2": "«dwello_session» mantiene la Sua sessione; JavaScript non può leggerlo. «dwello_xsrf» protegge contro richieste falsificate.",
 	"privacy_cookies_3": "«dwello_oauth_state» protegge l’accesso da risposte falsificate, «dwello_login» ricorda il fornitore scelto e la pagina che si apre dopo. Entrambi valgono solo durante l’accesso, al massimo 10 minuti.",
-	"privacy_cookies_4": "«PARAGLIDE_LOCALE» salva la lingua dell’interfaccia per 400 giorni; JavaScript può leggerlo.",
+	"privacy_cookies_4": "«PARAGLIDE_LOCALE» salva la lingua dell’interfaccia per 400 giorni; JavaScript può leggerlo. Alla prima visita Dwello vi registra la lingua del Suo browser, se è tedesco, francese, italiano o inglese, altrimenti il tedesco.",
 	"privacy_draft_notice": "Dwello conserva come bozza in questo browser i dati non salvati di «Registrare un contratto di locazione» e «Allestire i conteggi», finché li salva, li scarta o si disconnette. Una bozza può contenere nomi e importi; rimane sul dispositivo su cui lavora.",
 	"demo_notice_title": "Demo pubblica",
 	"demo_notice_text": "Tutti i visitatori vedono e modificano gli stessi dati. Ogni notte tutte le modifiche vengono cancellate e i dati di esempio fittizi ricaricati. Inserisca quindi solo dati inventati, anche per indirizzi e-mail e numeri di telefono.",
