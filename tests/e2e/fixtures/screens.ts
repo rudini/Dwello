@@ -82,6 +82,14 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00', additionalRent: '80.00' }); // a parking space: the wizard's note after her contract names it (#144)
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
+	// empty since a tenancy ended long before any statement: «Leer seit», «Frühere Mietverträge» (#145, #117)
+	await seed.apartment('Bergsicht', '2.02', 'vacant');
+	await seed.tenant('Emil');
+	await seed.contract('Emil', '2.02', { startDate: '2010-01-01', endDate: '2014-12-31', baseRent: '1500.00' });
+	// a tenant who has not moved in yet: «Vermietet ab», Mieter «Künftig» (#58)
+	await seed.apartment('Bergsicht', '2.03', 'vacant');
+	await seed.tenant('Fritz');
+	await seed.contract('Fritz', '2.03', { startDate: '2100-01-01', baseRent: '1500.00' });
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -90,6 +98,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		tenant: seed.idOf('Anna'), // rents 1.01 without an end: the contract wizard's step «Wohnung» names it (#156)
 		contract: seed.idOf('Mietvertrag Anna'),
 		noticedContract: seed.idOf('Mietvertrag Dora'),
+		vacantApartment: seed.idOf('2.02'),
+		endedContract: seed.idOf('Mietvertrag Emil'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
 		lateInvoice,
