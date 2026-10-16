@@ -8,15 +8,20 @@ Funktionalität: Einstellungen
   Grundlage:
     Angenommen der Liegenschaftsverwalter ist auf den Einstellungen
 
-  Szenario: Absender hinterlegen
-    Wenn der Liegenschaftsverwalter folgenden Absender speichert:
-      | Firmenname | Muster Immobilien AG       |
-      | Adresse    | Bahnhofstrasse 1           |
-      | PLZ        | 8001                       |
-      | Ort        | Zürich                     |
-      | IBAN       | CH9300762011623852957      |
+  # P-2 (#87): Zahlungsfrist und Mahnfrist als Vorgabewerte. Nur dieses Szenario speichert das ganze Formular: die
+  # Einstellungen gelten für alle parallel laufenden Szenarien, und ein leeres Feld setzt den Wert zurück
+  Szenario: Absender und Fristen hinterlegen
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | Firmenname           | Muster Immobilien AG  |
+      | Adresse              | Bahnhofstrasse 1      |
+      | PLZ                  | 8001                  |
+      | Ort                  | Zürich                |
+      | IBAN                 | CH9300762011623852957 |
+      | Zahlungsfrist (Tage) | 30                    |
+      | Mahnfrist (Tage)     | 14                    |
     Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
     Und nach erneutem Öffnen der Einstellungen ist die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und sind die Zahlungsfrist "30" und die Mahnfrist "14" hinterlegt
 
   Szenario: Ungültige IBAN
     Wenn der Liegenschaftsverwalter die IBAN "DE89 3704 0044 0532 0130 00" speichert
@@ -25,15 +30,6 @@ Funktionalität: Einstellungen
   Szenario: Ungültige PLZ
     Wenn der Liegenschaftsverwalter die PLZ "80" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "PLZ muss 4 Ziffern haben"
-
-  # P-2 (#87): Vorgaben für neue Abrechnungen und für die Übersicht; gespeichert werden die Vorgabewerte, denn
-  # die Einstellungen gelten für alle parallel laufenden Szenarien
-  Szenario: Zahlungsfrist und Mahnfrist hinterlegen
-    Wenn der Liegenschaftsverwalter folgende Fristen speichert:
-      | Zahlungsfrist (Tage) | 30 |
-      | Mahnfrist (Tage)     | 14 |
-    Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
-    Und nach erneutem Öffnen der Einstellungen ist die Zahlungsfrist "30" und die Mahnfrist "14" hinterlegt
 
   Szenario: Fristen sind erklärt
     Dann erklärt die Einstellung "Zahlungsfrist (Tage)" "Wie viele Tage nach dem Versand der Mieter eine Nachzahlung bezahlt oder Sie eine Rückerstattung überweisen. Erlaubt sind 7 bis 90 Tage, Vorgabe: 30 Tage. Gilt für Abrechnungen, die Sie ab jetzt versenden; die Frist einer einzelnen Abrechnung ändern Sie dort mit «Frist und Bemerkungen bearbeiten»."

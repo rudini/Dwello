@@ -22,7 +22,7 @@ Given('der Liegenschaftsverwalter ist auf den Einstellungen', async ({ verwalter
 	await verwalter.attemptsTo(openSettings);
 });
 
-When(/^der Liegenschaftsverwalter folgende(?:n Absender| Fristen) speichert:$/, async ({ verwalter }, table: DataTable) => {
+When('der Liegenschaftsverwalter folgende Einstellungen speichert:', async ({ verwalter }, table: DataTable) => {
 	const fields = Object.entries(table.rowsHash()).map(([label, value]) => [FIELDS[label], value]);
 	await verwalter.attemptsTo(saveSettings(Object.fromEntries(fields)));
 });
@@ -48,9 +48,8 @@ Then(
 );
 
 Then(
-	'nach erneutem Öffnen der Einstellungen ist die Zahlungsfrist {string} und die Mahnfrist {string} hinterlegt',
+	'sind die Zahlungsfrist {string} und die Mahnfrist {string} hinterlegt',
 	async ({ verwalter }, paymentDays: string, reminderDays: string) => {
-		await verwalter.attemptsTo(openSettings);
 		await verwalter.sees(storedSetting('paymentDeadlineDays')).toBe(paymentDays);
 		await verwalter.sees(storedSetting('reminderAfterDays')).toBe(reminderDays);
 	}
