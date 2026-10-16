@@ -60,6 +60,7 @@ export type UploadRow = {
 	duplicateOf: string | null;
 	several: boolean;
 	documentType: string; // invoice, reminder or credit_note, as the KI read it
+	byHand: boolean; // the KI read nothing: every field is filled in by hand
 	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
 	selected: boolean;
 	createError?: string; // why the invoice was not created
@@ -109,6 +110,7 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	duplicateOf: null,
 	several: false,
 	documentType: 'invoice',
+	byHand: false,
 	hints: { deductedAmount: null, nonAllocableItems: false },
 	selected: true
 });
@@ -142,7 +144,10 @@ export function toDoOf(row: UploadRow): string[] {
 	// costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also
 	// one the property manager chooses later (domain review V-1, V-8)
 	const mixed = row.hints.nonAllocableItems && row.values.isValidUtilityCost;
-	const missing = row.missing.filter((field) => !row.values[FORM_FIELD[field as keyof Proposal['fields']]]);
+	// without the KI the required fields are named at once, not only after creating (persona Helga)
+	const missing = (row.byHand ? REQUIRED : row.missing).filter(
+		(field) => !row.values[FORM_FIELD[field as keyof Proposal['fields']]]
+	);
 	const required = missing.filter((field) => REQUIRED.includes(field));
 	const optional = missing.filter((field) => !REQUIRED.includes(field));
 	return [
@@ -226,6 +231,7 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 		duplicateOf: proposal.duplicateOf,
 		several,
 		documentType: proposal.documentType,
+		byHand: false,
 		hints: { deductedAmount: proposal.deductedAmount, nonAllocableItems: proposal.nonAllocableItems },
 		selected: preselected(proposal)
 	};
@@ -235,7 +241,8 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 export const withoutKi = (row: UploadRow, reason: 'unavailable' | 'unreadable'): UploadRow => ({
 	...row,
 	status: 'check',
-	notes: [reason === 'unavailable' ? m.backend_extraction_unavailable() : m.invoices_upload_unreadable()]
+	notes: [reason === 'unavailable' ? m.backend_extraction_unavailable() : m.invoices_upload_unreadable()],
+	byHand: true
 });
 
 /** What the invoice still lacks, by field; a Kategorie is required here, unlike on «Neue Rechnung» (#217) */

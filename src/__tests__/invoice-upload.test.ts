@@ -170,6 +170,16 @@ describe('Vorschlag der KI für eine Datei', () => {
 		]);
 	});
 
+	it('nennt ohne KI gleich die Pflichtangaben, die fehlen, und nimmt jede zurück, sobald sie ausgefüllt ist (Persona Helga)', () => {
+		const row = withoutKi(newRow(1, pdf, defaults), 'unavailable');
+		expect(toDoOf(row)).toEqual([
+			'Wählen Sie eine Kategorie.',
+			'Füllen Sie aus: Rechnungssteller, Rechnungsdatum, Betrag, Beschreibung.'
+		]);
+		row.values.amount = '80.00';
+		expect(toDoOf(row)).toContain('Füllen Sie aus: Rechnungssteller, Rechnungsdatum, Beschreibung.');
+	});
+
 	it('lässt die Felder ohne KI leer und sagt, warum', () => {
 		const row = withoutKi(newRow(1, pdf, defaults), 'unavailable');
 		expect(row).toMatchObject({ status: 'check', selected: true, notes: ['Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus.'] });

@@ -933,10 +933,11 @@ describe('Beleg einer Rechnung', () => {
 
 	it('zeigt sichtbar, dass der Beleg in einem neuen Tab aufgeht (Persona Helga)', () => {
 		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } });
-		const hint = [...byTestId('invoice-document-link')!.querySelectorAll('span')].find((span) =>
-			span.textContent?.includes('(öffnet in neuem Tab)')
-		)!;
-		expect(hint.classList.contains('sr-only')).toBe(false);
+		const link = byTestId('invoice-document-link')!;
+		expect(link.querySelector('.sr-only')).toBeNull();
+		// text right beside the label, so both wrap as one, not two columns side by side on a phone (personas Marco, Anna)
+		const text = [...link.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent);
+		expect(text.join('').replace(/\s+/g, ' ').trim()).toBe('Beleg anzeigen (öffnet in neuem Tab)');
 	});
 
 	it('zeigt die Rechnungsnummer', () => {
