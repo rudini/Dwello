@@ -11,6 +11,7 @@
 		startDate,
 		endDate,
 		terminated,
+		noticeReceivedOn,
 		status,
 		rent,
 		fee
@@ -18,6 +19,7 @@
 		startDate: string;
 		endDate?: string | null;
 		terminated?: boolean;
+		noticeReceivedOn?: string | null;
 		status: ContractHistory['status'];
 		rent: { baseRent: number; additionalRent: number; advancePayment: number; total: number };
 		fee: string; // «Verwaltungspauschale» in words (#89)
@@ -45,6 +47,14 @@
 				{contractEnd(endDate, terminated)}
 			</dd>
 		</div>
+		{#if noticeReceivedOn}
+			<div>
+				<dt class="text-ink-muted">{m.contracts_notice_received()}</dt>
+				<dd class="font-semibold text-ink" data-testid="contract-notice-received">
+					{formatDate(noticeReceivedOn)}
+				</dd>
+			</div>
+		{/if}
 		<div>
 			<dt class="text-ink-muted">{m.contracts_fee_label()}</dt>
 			<dd class="font-semibold text-ink" data-testid="contract-management-fee">{fee}</dd>

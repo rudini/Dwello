@@ -132,6 +132,12 @@ describe('Heating Profile Service', () => {
 		const profile = createMockProfile();
 		const totalCost = 10000;
 
+		// #232: jeder Monat kaufmännisch auf zwei Stellen, auch genau auf der Hälfte (2.3 × 7/28 = 0.575)
+		it('rundet einen angebrochenen Monat kaufmännisch auf zwei Stellen', () => {
+			const result = calculateHeatingShare(createMockProfile({ february: 2.3 }), new Date('2025-02-22'), new Date('2025-02-28'), totalCost);
+			expect(result.monthBreakdown).toEqual([{ month: 2, percentage: 0.58 }]);
+		});
+
 		it('should calculate full year share', () => {
 			const result = calculateHeatingShare(
 				profile,

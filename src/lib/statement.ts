@@ -44,3 +44,9 @@ export const paidDateError = (paidDate: string) =>
 		: paidDate > localToday()
 			? m.statements_paid_date_future()
 			: null;
+
+/** The day the next Mahnung becomes possible while the last one's Zahlungsfrist runs, else null (#107) */
+export const nextReminderLater = (statement: { nextReminderFrom?: string | null }) =>
+	statement.nextReminderFrom && statement.nextReminderFrom > localToday()
+		? statement.nextReminderFrom
+		: null;

@@ -117,6 +117,13 @@ describe('Startwerte des Mietvertrags', () => {
 		});
 	});
 
+	// B-16 (#156): «Neuen Mietvertrag erfassen» unter «Bearbeiten» gibt den frühesten Vertragsbeginn mit
+	it('beginnt am Tag aus der Adresse, auch vor dem Entwurf', () => {
+		const params = new URLSearchParams('tenant=t1&start=2099-04-01');
+		expect(startValues(params, null, known).values.startDate).toBe('2099-04-01');
+		expect(startValues(params, filled, known).values.startDate).toBe('2099-04-01');
+	});
+
 	it('lässt Mieter und Wohnungen weg, die es nicht mehr gibt, und sagt es', () => {
 		const start = startValues(
 			new URLSearchParams(),

@@ -8,11 +8,11 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 |---|---|---|---|---|
 | A-1 | Befristung und Kündigung unterscheiden | umgesetzt | IF-4, Helga | – |
 | A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna | – |
-| A-3 | Hinweis auf die Kündigungsfrist | mittel | IF-2 | #112 |
+| A-3 | Hinweis auf die Kündigungsfrist | umgesetzt | IF-2 | #112 |
 | A-4 | Bevorstehendes Vertragsende sichtbar machen | umgesetzt | IF-5, Anna, Helga | #113 |
 | A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna | #114 |
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 | #115 |
-| A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) | #116 |
+| A-7 | Doppelt erfassten Mietvertrag entfernen | umgesetzt | Anna (I2, M2) | #116 |
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) | #117 |
 | A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) | – |
 | A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | umgesetzt | Anna (I2 M1, I3 M1–M3) | #118, #119 |
@@ -30,13 +30,14 @@ Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriff
 
 1. **Keine Überschneidung.** Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden; Dwello lehnt einen neuen oder geänderten Vertrag ab, der es täte (`CONTRACT_OVERLAP` in `contract.service.ts`; für neue Verträge belegt durch `contract-new.feature` und `backend/src/__tests__/contract-overlap.pg.test.ts`).
 2. **Kündigungstermin als Vertragsende.** Ist ein unbefristeter Mietvertrag gekündigt, erfasst Dwello den Kündigungstermin als Vertragsende und merkt sich, dass er gekündigt ist (A-1).
-3. **Kündigungsfrist.** Dwello prüft die Kündigungsfrist nicht; der Dialog «Mietvertrag beenden» nennt sie allgemein (3 Monate, sonst nächster Termin); ein Hinweis aus dem Eingangsdatum der Kündigung ist geplant (A-3, #112).
+3. **Kündigungsfrist.** Der Dialog «Mietvertrag beenden» nennt sie allgemein (3 Monate, sonst nächster Termin). Ist «Kündigung erhalten am» ausgefüllt und liegen bis zum Vertragsende weniger als 3 Kalendermonate (Tag auf das Monatsende gekürzt), weist er darauf hin, ohne zu sperren (A-3, #112). Ortsübliche Termine, vertraglich längere Fristen und Formvorschriften prüft Dwello nicht.
+4. **Vertrag, der von Gesetzes wegen weiterläuft** (#155, Entscheid Product Owner: nur beschreiben, kein eigener Grund für das Vertragsende). Stirbt der Mieter, geht der Mietvertrag auf die Erben über (Art. 560 ZGB); sie können ihn mit der gesetzlichen Frist auf den nächsten gesetzlichen Termin kündigen (Art. 266i OR). Der Mietvertrag bleibt erfasst, ohne neues Vertragsende, bis die Erben oder der Vermieter gekündigt haben; erst dann erfasst «Beenden» den Kündigungstermin; beim Mieter steht als Korrespondenzadresse (im Mieterformular «Adresse», bei Post per E-Mail auch «E-Mail») die Adresse, an die die Post für die Erben geht, der Name bleibt. Tritt ein Dritter in den Mietvertrag ein (Übertragung eines Mietvertrags für Geschäftsräume mit schriftlicher Zustimmung des Vermieters, Art. 263 OR; Zuweisung der Wohnung der Familie an einen Ehegatten durch das Scheidungsgericht, Art. 121 ZGB; nicht bei Eheschutzmassnahmen, Art. 176 ZGB, die nur die Benutzung regeln), bleibt es rechtlich derselbe Vertrag; Dwello erfasst ihn als Vertragsende am Tag vor dem Wechsel, ohne Kündigungsfrist, und einen neuen Mietvertrag mit denselben Bedingungen ab dem Tag des Wechsels, damit jeder nach seinen Miettagen abgerechnet wird. Das Vertragsende heisst dann *gekündigt*, obwohl niemand gekündigt hat. Der bisherige Mieter haftet höchstens zwei Jahre solidarisch weiter (Art. 263 Abs. 4 OR, Art. 121 Abs. 2 ZGB); Dwello bildet das nicht ab. Die Hilfe unter «Bearbeiten» (Mieter und Wohnung) und der Dialog «Mietvertrag beenden» sagen es.
 
 ---
 
 ## A-1 Befristung und Kündigung unterscheiden – umgesetzt
 
-**Umgesetzt** (Session 15): Spalte `rental_contracts.terminated` (*gekündigt*; sonst *vereinbart*), «Mietvertrag beenden» setzt sie. Die Detailseite zeigt «Befristet bis …» oder «Unbefristet, gekündigt auf den …», die Listen (Mietverträge, Wohnung, Mieter) hängen «befristet» oder «gekündigt» an den Zeitraum. Unter «Bearbeiten» bietet die Vertragsdauer bei einem gekündigten Vertrag «Unbefristet, gekündigt auf den …», «Kündigung aufheben» («Der Mietvertrag läuft dann ohne Ende weiter.») und «Befristet» an. Offen bleiben Punkt 6 (Glossar, Product Owner) und die offene Frage zur Aufhebungsvereinbarung. Abweichung von Punkt 3, offen für den Product Owner: Im Assistenten (neuer Mietvertrag und «Bearbeiten») heisst die Option nur «Befristet», das Datum steht im Feld darunter; ein Name, der sich mit dem Datum ändert, wird nicht angesagt (Review J-1 J-7, J-2 J2-4, Sven J1 m1). Die Demo-Daten kennzeichnen die Vormieter als gekündigt; ältere Verträge gelten nach Punkt 5 als befristet.
+**Umgesetzt** (Session 15): Spalte `rental_contracts.terminated` (*gekündigt*; sonst *vereinbart*), «Mietvertrag beenden» setzt sie. Die Detailseite zeigt «Befristet bis …» oder «Unbefristet, gekündigt auf den …», die Listen (Mietverträge, Wohnung, Mieter) hängen «befristet» oder «gekündigt» an den Zeitraum. Unter «Bearbeiten» bietet die Vertragsdauer bei einem gekündigten Vertrag «Unbefristet, gekündigt auf den …», «Kündigung aufheben» und «Befristet» an; die Hilfe bei «Kündigung aufheben» sagt, dass das nur gemeinsam oder durch die Schlichtungsbehörde oder ein Gericht geht (#52). Offen bleiben Punkt 6 (Glossar, Product Owner) und die offene Frage zur Aufhebungsvereinbarung. Abweichung von Punkt 3, offen für den Product Owner: Im Assistenten (neuer Mietvertrag und «Bearbeiten») heisst die Option nur «Befristet», das Datum steht im Feld darunter; ein Name, der sich mit dem Datum ändert, wird nicht angesagt (Review J-1 J-7, J-2 J2-4, Sven J1 m1). Die Demo-Daten kennzeichnen die Vormieter als gekündigt; ältere Verträge gelten nach Punkt 5 als befristet.
 
 
 **Problem.** Ein befristeter Mietvertrag endet am vereinbarten Tag ohne Kündigung. Ein unbefristeter endet erst durch eine Kündigung auf einen Kündigungstermin. Dwello speichert beides im selben Feld «Vertragsende». Nach «Beenden» zeigt der Assistent unter «Bearbeiten» einen gekündigten unbefristeten Vertrag als «Befristet: Der Mietvertrag endet an einem festen Tag, ohne Kündigung». Das ist rechtlich falsch, und wer «befristet» liest, prüft die Kündigung nicht mehr. Ausserdem passt die Definition im Glossar («leer bei unbefristeten Verträgen») nicht mehr.
@@ -90,7 +91,10 @@ Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga
 
 ---
 
-## A-3 Hinweis auf die Kündigungsfrist
+## A-3 Hinweis auf die Kündigungsfrist – umgesetzt
+
+**Umgesetzt** (Session W7b, #112): Feld «Kündigung erhalten am» im Dialog «Mietvertrag beenden» mit der Formvorschrift in der Hilfe, Hinweis bei weniger als 3 Monaten (`shortNoticePeriod` in `src/lib/contract-status.ts`), Spalte `rental_contracts.notice_received_on`, auf der Detailseite gezeigt; «Kündigung aufheben» und «Befristet» löschen den Tag. Entscheide des Product Owners: nur die bundesrechtliche Mindestfrist von 3 Monaten, kein Feld für vertraglich längere Fristen.
+
 
 **Problem.** Für Wohnungen gilt eine Kündigungsfrist von mindestens 3 Monaten auf einen ortsüblichen Termin (Art. 266c OR). Eine zu späte Kündigung gilt erst auf den nächsten Termin (Art. 266a Abs. 2 OR). Trägt der Verwalter das Datum aus einem zu spät eingegangenen Kündigungsschreiben ein, ist die Wohnung in Dwello zu früh leer: Die Nebenkosten dieser Monate gehen an den Vermieter, das Akonto des Mieters wird nicht mehr gerechnet. Heute steht nur ein allgemeiner Satz im Dialog.
 
@@ -100,7 +104,7 @@ Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga
 2. Ist «Kündigung erhalten am» ausgefüllt und liegen bis zum Vertragsende weniger als 3 Monate, zeigt Dwello einen Hinweis, keine Sperre: «Zwischen Eingang und Vertragsende liegen weniger als 3 Monate. Dann gilt die Kündigung wohl erst auf den nächsten Kündigungstermin. Ausnahme: Ein Ersatzmieter übernimmt den Mietvertrag, oder Sie haben das Ende mit dem Mieter vereinbart.»
 3. Der Verwalter kann trotzdem speichern. Dwello prüft keine ortsüblichen Termine und keine Formvorschriften; das wäre Rechtsberatung und je nach Gemeinde falsch.
 4. «Kündigung erhalten am» wird beim Mietvertrag gespeichert und auf der Detailseite gezeigt.
-5. Die Hilfe nennt die Form: «Die Kündigung des Mieters muss schriftlich sein. Bei einer Familienwohnung braucht es die Unterschrift beider Ehegatten.» (Art. 266l, 266m OR; Wortlaut fachlich prüfen.)
+5. Die Hilfe nennt die Form: «Die Kündigung des Mieters muss schriftlich sein. Bei einer Familienwohnung braucht es die ausdrückliche Zustimmung des Ehegatten oder eingetragenen Partners.» (Art. 266l, Art. 266m Abs. 1 und 3 OR; Fachreview W7b.)
 
 **Akzeptanzkriterien**
 
@@ -119,7 +123,7 @@ Szenario: Kündigung mit genügend Frist
 
 **Nicht dazu:** Liste der ortsüblichen Termine, vertraglich längere Fristen, Kündigung durch den Vermieter (amtliches Formular).
 
-**Offene Fragen:** Gilt die 3-Monats-Regel als Faustregel für alle Kantone genügend genau für einen Hinweis? Soll der Hinweis vertraglich längere Fristen kennen (ein Feld «Kündigungsfrist» beim Mietvertrag)?
+**Entschieden** (#112): Die 3-Monats-Regel genügt für einen Hinweis; kein Feld für vertraglich längere Fristen.
 
 ---
 
@@ -216,7 +220,9 @@ Szenario: Befristeten Mietvertrag unbefristet weiterführen
 
 ---
 
-## A-7 Doppelt erfassten Mietvertrag entfernen
+## A-7 Doppelt erfassten Mietvertrag entfernen – umgesetzt
+
+**Umgesetzt** (#116): Ein begonnener Mietvertrag ohne Nebenkostenabrechnung lässt sich jederzeit löschen, wenn der Verwalter im Dialog bestätigt, dass er irrtümlich erfasst wurde (keine Frist, Entscheid des Product Owners). Der Dialog nennt den Weg für eine echte Miete («Beenden») und fehlende Abrechnungen (Fachreview `docs/reviews/w7-fachreview-1.md`, V-1); einen Mietvertrag mit Abrechnung (Entwurf, versendet oder bezahlt) lässt er nicht löschen und nennt die Abrechnungen. Das Backend setzt beides selbst durch (`CONTRACT_STARTED` ohne `confirmMistake=true`, `CONTRACT_HAS_STATEMENTS`). Belegt durch `contract-detail.feature` und `backend/src/__tests__/contract-delete.pg.test.ts`.
 
 **Problem.** Seit der Löschregel lässt sich ein Mietvertrag nur vor seinem Beginn löschen. Ein Vertrag, der irrtümlich doppelt erfasst wurde und schon begonnen hat, bleibt stehen. Anna (I2) fand nur einen Trick: den Vertragsbeginn in die Zukunft schieben und dann löschen.
 

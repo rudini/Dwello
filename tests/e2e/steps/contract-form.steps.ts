@@ -18,10 +18,13 @@ import {
 	partiesHelpText,
 	reviewHint,
 	reviewed,
+	runningContractHintText,
 	startHint,
-	tenantChoices
+	tenantChoices,
+	withdrawNoticeHelp
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
+import { pageAddress } from '../questions/navigation';
 import {
 	agreeManagementFee,
 	changeBaseRent,
@@ -43,6 +46,8 @@ import {
 	discardDraft,
 	goBackToStep,
 	goToNextStep,
+	newContractAfterEnd,
+	openRunningContract,
 	registerContract,
 	rentApartment,
 	reopenNewContract,
@@ -332,3 +337,48 @@ When(
 When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
 	await verwalter.attemptsTo(agreeManagementFee);
 });
+Then(
+	'erfährt der Liegenschaftsverwalter, dass {string} einen Mietvertrag ohne Vertragsende für die Wohnung {string} hat',
+	async ({ verwalter, names }, tenant: string, apartment: string) => {
+		await verwalter.sees(runningContractHintText).toContain(names.get(tenant) ?? tenant);
+		await verwalter.sees(runningContractHintText).toContain(`Wohnung ${apartment}`);
+	}
+);
+
+When('der Liegenschaftsverwalter den laufenden Mietvertrag im Hinweis öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openRunningContract);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass der Mietvertrag beim Tod des Mieters weiterläuft',
+	async ({ verwalter }) => {
+		await verwalter.sees(partiesHelpText).toContain('Stirbt der Mieter, endet der Mietvertrag nicht');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt',
+	async ({ verwalter }) => {
+		await verwalter.sees(partiesHelpText).toContain('unter «Adresse» die Adresse ein, an die die Post für die Erben geht');
+	}
+);
+
+When('der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erfassen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(newContractAfterEnd);
+});
+
+// the link carries the start; that the wizard takes it from `?start=` is tested in contract-wizard.test.ts
+Then('schlägt der neue Mietvertrag den Vertragsbeginn {string} vor', async ({ verwalter }, date: string) => {
+	await verwalter.sees(pageAddress).toMatch(new RegExp(`start=${date}`));
+});
+
+// the help names who can withdraw a notice, after the glossary «Kündigung aufheben»
+Then(
+	'erfährt der Liegenschaftsverwalter bei «Kündigung aufheben», wann sich eine Kündigung aufheben lässt',
+	async ({ verwalter }) => {
+		await verwalter.sees(withdrawNoticeHelp).toContain('gemeinsam zurücknehmen');
+		await verwalter.sees(withdrawNoticeHelp).toContain('die Schlichtungsbehörde oder ein Gericht');
+		await verwalter.sees(withdrawNoticeHelp).toContain('weder der Mieter noch der Vermieter allein');
+		await verwalter.sees(withdrawNoticeHelp).toContain('Der Mietvertrag läuft dann ohne Ende weiter.');
+	}
+);

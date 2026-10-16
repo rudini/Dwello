@@ -13,6 +13,7 @@ import NewContractPage from '../routes/contracts/new/+page.svelte';
 import { toasts } from '$lib/stores';
 import { writeDraft } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
+import listed from '../../tests/contracts/contracts.json';
 
 const data = {
 	tenants: [
@@ -456,6 +457,61 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		expect(byTestId('overlap-warning')).toBeNull();
 		expect(byTestId('form-error')).toBeNull();
+	});
+});
+
+// B-16 (#156): wer «Beenden» beim alten Mietvertrag vergessen hat, erfährt es vor der Prüfung
+describe('Mieter mit einem anderen Mietvertrag', () => {
+	const own = (apartmentId: string, endDate: string | null) => [
+		{ ...listed.contracts[0], id: `c-${apartmentId}`, apartmentId, endDate }
+	]; // contracts of Anna Keller (t1)
+
+	it('nennt bei der Wohnung einen Mietvertrag des Mieters ohne Vertragsende und hält nicht auf', async () => {
+		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		const hint = byTestId('tenant-running-contract')!;
+		expect(hint.textContent).toContain('Anna Keller hat einen Mietvertrag ohne Vertragsende');
+		expect(hint.textContent).toContain('für die Wohnung 2.02 (Ahornhof)');
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c-a2');
+		select('apartment-select', 'a1');
+		next();
+		expect(heading()).toBe('Vertragsdauer');
+	});
+
+	it('schweigt bei einem Mietvertrag mit Vertragsende', async () => {
+		fakeBff(({ path }) => [
+			200,
+			{ contracts: path.endsWith('=a2') ? own('a2', '2099-03-31') : [] }
+		]);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
+		expect(byTestId('tenant-running-contract')).toBeNull();
+	});
+
+	// Code-Review W10 C-2: erscheint der Hinweis erst nach dem Laden, liest ein Screenreader ihn trotzdem vor
+	it('nennt den Mietvertrag in einem Bereich, den Screenreader ansagen', async () => {
+		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('tenant-running-contract')!.closest('[role="status"]')).not.toBeNull();
+	});
+
+	it('schweigt bei einem unbefristeten Mietvertrag eines anderen Mieters', async () => {
+		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
+		await open();
+		select('contract-tenant-select', 't2');
+		next();
+		await settle();
+		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
+		expect(byTestId('tenant-running-contract')).toBeNull();
 	});
 });
 

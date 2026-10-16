@@ -2,7 +2,13 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	apartmentOfContract,
+	deleteDialogText,
 	endConfirmationInWindow,
+	endDialogDeathText,
+	endDialogText,
+	noticePeriodHintShown,
+	noticePeriodHintText,
+	noticeReceivedOn,
 	endDateProblemShown,
 	endOfContract,
 	managementFeeOfContract,
@@ -16,9 +22,13 @@ import {
 	chooseNextStep,
 	createMissingStatement,
 	deleteContract,
+	deleteContractEnteredByMistake,
 	deleteDraftAndEndContract,
 	editContractFromDetail,
 	endContract,
+	confirmEnd,
+	fillEndWithNotice,
+	startEndingContract,
 	endContractOn,
 	openContract,
 	openContractApartment,
@@ -89,6 +99,17 @@ When('der Liegenschaftsverwalter den Mietvertrag löscht', async ({ verwalter })
 	await verwalter.attemptsTo(deleteContract);
 });
 
+When('der Liegenschaftsverwalter den Mietvertrag löschen will, ohne den Irrtum zu bestätigen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(deleteContract);
+});
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag löscht und bestätigt, dass er irrtümlich erfasst wurde',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(deleteContractEnteredByMistake);
+	}
+);
+
 When('der Liegenschaftsverwalter den Mietvertrag bearbeiten will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(editContractFromDetail);
 });
@@ -130,6 +151,11 @@ Then('endet der Mietvertrag heute', async ({ verwalter }) => {
 // the field's error and a refusal of the server use the same frame: the one with the message counts
 Then('meldet der Dialog {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(endDateProblemShown(message)).toBe(true);
+});
+
+// what the delete dialog says when it opens (#116)
+Then('nennt der Dialog {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(deleteDialogText).toContain(message);
 });
 
 Then('zeigt der Mietvertrag {string}', async ({ verwalter }, end: string) => {
@@ -194,4 +220,55 @@ Given(
 
 Then('zeigt der Mietvertrag bei der Verwaltungspauschale {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(managementFeeOfContract).toBe(text);
+});
+
+When(
+	'der Liegenschaftsverwalter als nächsten Schritt einen neuen Mietvertrag für {string} erfassen will',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.attemptsTo(chooseNextStep(`Neuen Mietvertrag für ${names.get(tenant) ?? tenant} erfassen`));
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietvertrag beenden will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(startEndingContract);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter im Dialog «Mietvertrag beenden», dass der Mietvertrag beim Tod des Mieters weiterläuft',
+	async ({ verwalter }) => {
+		await verwalter.sees(endDialogDeathText).toContain('Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst');
+		await verwalter.sees(endDialogDeathText).toContain('erst, wenn die Erben oder Sie gekündigt haben');
+	}
+);
+
+// A-3 (#112): the day the notice arrived gives a hint on a short Kündigungsfrist, never a block
+When(
+	'der Liegenschaftsverwalter den Mietvertrag auf den {string} beenden will und die Kündigung am {string} erhalten hat',
+	async ({ verwalter }, endDate: string, receivedOn: string) => {
+		await verwalter.attemptsTo(fillEndWithNotice(endDate, receivedOn));
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietvertrag trotzdem beendet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmEnd);
+});
+
+Then(
+	'weist der Dialog darauf hin, dass zwischen Eingang und Vertragsende weniger als 3 Monate liegen',
+	async ({ verwalter }) => {
+		await verwalter.sees(noticePeriodHintText).toContain('Zwischen Eingang und Vertragsende liegen weniger als 3 Monate.');
+		await verwalter.sees(noticePeriodHintText).toContain('erst auf den nächsten Kündigungstermin');
+		await verwalter.sees(noticePeriodHintText).toContain('Ein Ersatzmieter übernimmt den Mietvertrag');
+	}
+);
+
+// anchored on the field's help: an empty or broken dialog shows no hint either
+Then('zeigt der Dialog keinen Hinweis auf die Frist', async ({ verwalter }) => {
+	await verwalter.sees(endDialogText).toContain('Der Tag, an dem das Kündigungsschreiben angekommen ist.');
+	await verwalter.sees(endDialogText).toContain('Die Kündigung des Mieters muss schriftlich sein.');
+	await verwalter.sees(noticePeriodHintShown).toBe(false);
+});
+
+Then('zeigt der Mietvertrag die Kündigung als erhalten am {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(noticeReceivedOn).toBe(date);
 });

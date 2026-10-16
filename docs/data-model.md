@@ -116,6 +116,7 @@ tenant_id               UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 start_date              DATE NOT NULL           -- Vertragsbeginn
 end_date                DATE                    -- Vertragsende, NULL = unbefristet
 terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date is the Kündigungstermin of an open-ended contract, not an agreed end
+notice_received_on      DATE              -- the day the notice arrived (A-3, #112), optional; only with terminated
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
@@ -126,6 +127,7 @@ contract_pdf            TEXT
 notes                   TEXT
 CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date)
 CONSTRAINT contracts_terminated_check CHECK (NOT terminated OR end_date IS NOT NULL)
+CONSTRAINT contracts_notice_received_check CHECK (notice_received_on IS NULL OR terminated)
 ```
 
 Indexes: `contracts_apartment_id_idx`, `contracts_tenant_id_idx`, `contracts_end_date_idx (end_date)`,
@@ -260,7 +262,7 @@ management_fee_percent DECIMAL(5,2)            -- rate the statement used: the c
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
-heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true } or percent, months, profile names
+heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true, reason, names } or percent, months, profile names
 balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
@@ -279,7 +281,7 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 `statements_status_idx`, `statements_tenant_period_idx (tenant_id, period_start)`, unique
 `statements_number_idx (statement_number)`.
 
-`heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }`, or the percent of the period's heating costs, the months with their shares and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF prints them after an own profile was changed, renamed or deleted. Empty without a heating profile, without heating costs and for statements created before; the PDF of one created before recomputes it from the profile as it is now (#229).
+`heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }` with the chosen profile's names and why it was not applied (`reason`: `wholePeriod` or `noHeatingMonths`, #247), or the percent of the period's heating costs, the months with their shares (rounded to two places; the percent is their division, #232), for a period whose months do not carry 100 % the period's percent and months (`periodPercent`, `periodMonths`), and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF and the detail page print them after an own profile was changed, renamed or deleted. Empty without a heating profile, without heating costs and for statements created before; the PDF of one created before names no heating profile (#232, C-5).
 
 **Status (Abrechnungsstatus)** — transitions allowed by `updateStatementStatus` in
 `backend/src/services/statement.service.ts`:
@@ -336,8 +338,10 @@ title          VARCHAR(255) NOT NULL
 file_name      VARCHAR(255) NOT NULL
 content        TEXT         NOT NULL   -- the file, Base64
 mime_type      VARCHAR(50)  NOT NULL DEFAULT 'application/pdf'  -- application/pdf | image/jpeg | image/png
-channel        VARCHAR(10)             -- email | letter; NULL for an upload
+channel        VARCHAR(10)             -- email | letter; NULL for an upload; letter once a failed e-mail is posted
 status         VARCHAR(20)             -- Versandstatus: sent | to_send; NULL for an upload
+payment_deadline DATE                  -- the Zahlungsfrist a reminder prints (letter date + 10 days); the next
+                                       -- Mahnstufe is possible from the day after; NULL for an upload
 sent_at        TIMESTAMP
 delivery_error TEXT                    -- why an e-mail could not be sent
 ```

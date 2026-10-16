@@ -55,7 +55,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	await db.delete(invoices).where(eq(invoices.buildingId, small.building));
-	await deleteContract(large.contract);
+	await deleteContract(large.contract, true);
 	await deleteTenant(large.tenant);
 	await deleteApartment(large.apartment);
 	await small.remove();

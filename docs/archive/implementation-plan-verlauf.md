@@ -522,3 +522,124 @@ Request: fix O-34 (`docs/design/offene-punkte.md`): the axe states `invoices upl
 - [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs/reviews/o34-review-1.md`, `docs/reviews/workflow-notes-o34.md`.
+
+## Session 2026-10-16 W4: Heizprofil on the detail page, help text, rounded months (#247, #230, #232)
+
+- [x] @wip scenarios (statement-detail.feature, heating-profiles.feature), fach-reviewer before implementing (`docs/reviews/w4-fachreview-1.md`)
+- [x] #247: a statement shared by days stores the chosen Heizprofil's names and why it was not applied; the detail page names it «(nicht angewendet: …)»
+- [x] #230: help text at the Monatsanteile of an own profile: existing statements keep their shares (four languages)
+- [x] #232: share from the months rounded to two places; PDF prints the division and the period's months where they do not carry 100 %
+- [x] #232 C-5: no recompute for statements without a stored share (no Heizprofil note)
+- Files: `backend/src/services/{heating-profile,prorating,calculation,statement-pdf,pdf}.service.ts`, `backend/src/db/schema.ts`, `src/lib/server/statement.ts`, `src/routes/config/heating-profiles/HeatingProfileForm.svelte`, `messages/*.json`, `docs/data-model.md`, `docs/api-specification.md`, tests and scenarios
+- [x] Code review round 1 (`docs/reviews/w4-review-1.md`)
+- [x] Persona Helga (`docs/design/personas/helga-w4.md`)
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-w4.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w4-fachreview-2.md`)
+- [x] daten-pruefer (`docs/reviews/w4-datenpruefung-1.md`)
+- [x] Closing code review (`docs/reviews/w4-review-2.md`)
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-247-230-232.md`)
+- [x] Workflow review, archive the session, pull request
+
+## Session 2026-10-16 W6: Reminder deadlines and posting (#107, #193, #194)
+
+- [x] #107: scenario «Nächste Mahnung erst nach der Zahlungsfrist der letzten» (`statement-reminder.feature`) replaces «Zweite Mahnung» (the E2E clock cannot age a reminder past its deadline: the allowed 2nd Mahnung is a `reminders.pg.test.ts` case)
+- [x] #107: `documents.payment_deadline` (`0007_reminder_payment_deadline.sql`, backfilled from the Swiss creation day, `schema.ts`, `docs/data-model.md`); statement responses carry `nextReminderFrom` (none after the 3rd)
+- [x] #107: coded refusal `REMINDER_TOO_EARLY`, `backend_reminder_too_early` in all four languages, dates in Swiss format (`backend-error.ts`); pg tests refused and allowed
+- [x] #107: reminder rows show their Zahlungsfrist (`DocumentItem.svelte`, marker #277); detail page hides «Mahnung senden» and shows «Nächste Mahnung möglich ab» (`StatusActions`, `PaymentPanel`); list row (`StatementRow`); the overview leaves out a statement while a Mahnung's Zahlungsfrist runs (`overview.ts`, unit test: the overview count cannot be isolated in E2E)
+- [x] #193: marking a reminder as sent remakes its letter with today's date and deadline (`markDocumentPosted`); No scenario: needs the backend clock to move between creating and posting (`reminders.pg.test.ts` with a set clock). Texts now say: mark as sent on the day of posting, then print (`documents_purpose`, `dashboard_task_letters_text_*`, `backend_mail_delivery_failed`, `help_payments_4`, `statements_reminder_by_letter`)
+- [x] #194: scenario «Nach gescheiterter E-Mail per Post versendete Mahnung gilt als Brief»; pg test
+- [x] fach-reviewer round 1 on the @wip scenarios: `docs/reviews/reminders-fachreview-1.md`
+- [x] contracts `statement.json`, `documents.json`; axe and language rows `statement-reminded-detail`
+- [x] Workflow note: «failing request» is not the only state E2E cannot reach: `tests/e2e` has no way to age a stored record (a reminder's deadline), so «Zweite Mahnung» had to move to a pg test
+- [x] code-reviewer round 1: `docs/reviews/reminders-review-1.md`
+- [x] persona Helga: `docs/design/personas/helga-issue-107-193-194.md`
+- [x] fach-reviewer round 2: `docs/reviews/reminders-fachreview-2.md`
+- [x] daten-pruefer: `docs/reviews/reminders-datenpruefung-1.md`
+- [x] review fixes: no next reminder date once paid (C-1/V-13), test after the 3rd (C-2), re-marking on a later day (C-4), `docs/api-specification.md` (C-3), one `swissDate` (C-8), «Als versendet markieren» names the letter and offers its remade PDF (V-14, P-4; `documents/+page.server.ts`, `MarkedSentNotice.svelte`, state `documents marked-sent`), overview subtracts only overdue statements (V-16, C-6), «sends a reminder» waits for its outcome (E2E race)
+- [x] code-reviewer round 2: `docs/reviews/reminders-review-2.md`; persona Helga re-run on the notice: `docs/design/personas/helga-issue-107-193-194-2.md`
+- [x] round-2 fixes: scenario step for the notice (C-11), notice in a live region with its button as the Alert action (C-12, C-17), no «Keine Briefe zu versenden» beside it (Helga P-1), `marked-sent` not in the seed list (C-16); the filter links' ternaries moved into `filters` because the fallow gate counted them against the documents template (C-13)
+- [x] code-reviewer round 3: `docs/reviews/reminders-review-3.md` (no Blocker/Major); new step seen red without the notice
+- [x] workflow notes: `docs/reviews/workflow-notes-issue-107-193-194.md`
+- [x] full E2E (chromium, api) on the merged commit: 778 passed
+- [x] plan archived; push, pull request (one for the three issues: the changes share `markDocumentPosted` and the deadline), CI, merge
+
+## Session: moves within the house and contracts that continue by law (#156, #155)
+
+Request: «Setze #156 #155 um».
+
+- [x] #156 «Nächste Schritte» get «Neuen Mietvertrag für {name} erfassen» to `/contracts/new?tenant=…` (scenario in `contract-detail.feature`, DOM test `NextSteps.svelte`)
+- [x] #156 «Neuer Mietvertrag» hints when the chosen tenant still has an open-ended Mietvertrag for another apartment (not blocking)
+- [x] #156 «Neuen Mietvertrag erfassen» on «Mietvertrag bearbeiten» fills in the tenant and the earliest start (`?start=`)
+- [x] #155 help text (four languages) and `docs/anforderungen-vertragsende.md`: death keeps the Mietvertrag (heirs' address as Korrespondenzadresse); transfer or court assignment is Vertragsende plus new Mietvertrag
+- [x] fach-reviewer on the `@wip` scenarios before implementing
+- [x] fach-reviewer round 1 (`docs/reviews/w10-fachreview-1.md`)
+- [x] #155 also in the dialog «Mietvertrag beenden» (Fachreview W10 M-1); the edit link names the tenant (V-1)
+- [x] code-reviewer round 1 (`docs/reviews/w10-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w10-fachreview-2.md`)
+- [x] persona Helga (`docs/design/personas/helga-b16.md`), persona Dr. Weber (`docs/design/personas/weber-f23.md`)
+- [x] fach-reviewer round 3 (`docs/reviews/w10-fachreview-3.md`), Dr. Weber re-run (`docs/design/personas/weber-f23-2.md`), closing code-reviewer round 2 (`docs/reviews/w10-review-2.md`)
+- [x] Workflow note: «every new test seen red» for a scenario added after a review; collected review with parallel sessions (`docs/reviews/workflow-notes-issue-156.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/routes/contracts/new/OpenContracts.svelte`, `src/lib/contract-form.ts`, `src/lib/contract-wizard.ts`, `src/lib/utils/contract-availability.ts`, `docs/anforderungen-vertragsende.md`, tests in `src/__tests__/` and `tests/e2e/`.
+
+## Session W7: #141 and #116 (draft delete in one step, delete a started Mietvertrag)
+
+- [x] #141 `@wip` scenario «Abgelehntes Vertragsende behält den Entwurf» (`contract-detail.feature`), seen red
+- [x] #116 `@wip` scenarios «Irrtümlich erfassten Mietvertrag löschen», «… nur mit Bestätigung», «Mietvertrag mit Abrechnung kann nicht gelöscht werden» (`contract-detail.feature`), seen red
+- [x] fach-reviewer on the #116 scenarios and texts before implementing
+- [x] #141 backend: `PUT /contracts/:id` with `deleteDraft` in the body deletes the draft and changes the contract in one transaction (`contract-end.pg.test.ts`: refused → draft kept, accepted → draft gone)
+- [x] #141 BFF end dialog (`endDeletingDraft`) and edit form (`deleteDraftAndSave`) use it (DOM test: no separate DELETE)
+- [x] #116 backend: `DELETE /contracts/:id` refuses a started contract without `?confirmMistake=true` (`CONTRACT_STARTED`) and one with statements (`CONTRACT_HAS_STATEMENTS`); pg tests
+- [x] #116 dialog: confirmation checkbox for a started contract; help text `contracts_parties_fixed_mistake` names started contracts
+- [x] Test clean-up (`tests/e2e/fixtures/backend.ts`, backend helpers) passes the flag
+- [x] `tests/contracts/*.json`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md` (A-7 implemented), `tests/a11y/screens.json` + `accessibility.feature` + `sprachen-bildschirme.feature` for the dialog state
+- [x] fach-reviewer round 1: `docs/reviews/w7-fachreview-1.md`; glossary «Leerstand» → #279
+- [x] fach-reviewer round 2: `docs/reviews/w7-fachreview-2.md`
+- [x] code-reviewer round 1: `docs/reviews/w7-review-1.md`
+- [x] personas: `docs/design/personas/anna-w7.md`, `docs/design/personas/helga-w7.md`
+- [x] Helga again on the new text of a billed contract: `docs/design/personas/helga-w7-2.md`
+- [x] code-reviewer round 2: `docs/reviews/w7-review-2.md` (C-13, C-17 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-116-141.md`
+- [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts.ts`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/contracts/ContractForm.svelte`, `messages/*.json`, tests (`contract-end.pg`, `contract-delete.pg`, `api-contracts.pg`, test clean-ups, `contract-actions`, `contract-detail-page.dom`, `contract-edit.dom`), `tests/e2e/**`, `tests/a11y/screens.json`, `tests/contracts/*`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md`.
+
+## Session: statement list tenancy dates and missing PDF (#248, #253)
+
+- [x] #248 scenario `@wip` in `statements.feature`: list shows the tenancy dates within the period
+- [x] #248 lower-layer test of the list mapping (the stored rent days)
+- [x] #253 scenario `@wip` in `statements.feature`: a draft without PDF says «PDF noch nicht erstellt» and leads to its detail page
+- [x] #253 DOM test of the row; texts in de/fr/it/en
+- [x] #253 new state in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
+- Files: `src/lib/server/statement.ts` (maps the stored `rentalStart`/`rentalEnd`), `docs/api-specification.md`, `src/routes/statements/+page.server.ts` (reuses `toStatement`), `StatementRow.svelte`, `src/lib/types.ts`, `messages/*.json`, `tests/contracts/statements.json`, tests
+- [x] Slice review round 1: `docs/reviews/list-review-1.md`
+- [x] Feature review: `docs/design/personas/dr-weber-list.md`, `marco-list.md`, `dr-weber-list-2.md` (draft without PDF prepared by SQL in `dwello_persona`)
+- [x] Fixes: the list maps the stored `rentalStart`/`rentalEnd` (no contract join); row locator by statement number; the row names the dates with the Mietstage (the detail page's dates stay with #104)
+- [x] Slice review round 2: `docs/reviews/list-review-2.md` (detail change taken out)
+- [x] Closing review round 3: `docs/reviews/list-review-3.md`
+- [x] CI fix: the `statements`/`pdf-missing` example seeded nothing (`?status=draft` has no placeholder, `fixtures/screens.ts` `seedFor`) and relied on other scenarios' drafts; now `?status=draft&building={building}`. Review: `docs/reviews/list-review-4.md`
+- [x] Merge of main with W6 (#193/#194/#107): the list keeps `toStatement`, which maps `nextReminderFrom`; the list contract names it. Review: `docs/reviews/list-review-5.md`
+- [x] Persona re-run on the labelled dates: `docs/design/personas/dr-weber-list-3.md` (the Major P-1 resolved in the list; a Minor, no label word before the dates, stays in the report; its detail-page dates were taken out again in ca4a9d7, see #104)
+- [x] Workflow note: demo PDFs and the collected review in parallel sessions (`docs/reviews/workflow-notes-issue-248-253.md`)
+- [x] Before marking complete: lint, check, type-check, affected tests and E2E
+
+## Session W7b: Kündigungsfrist hint and «Kündigung aufheben» help (#112, #52)
+
+- [x] #112: `@wip` scenarios «Kündigung mit zu kurzer Frist» and «Kündigung mit genügend Frist» in `contract-detail.feature`, seen red; `fach-reviewer` before implementing
+- [x] #112: rule «less than 3 calendar months between receipt and Vertragsende» (day clamped) with the four unit cases of the issue
+- [x] #112: optional field «Kündigung erhalten am» in «Mietvertrag beenden», help with the form, hint (no block)
+- [x] #112: column `notice_received_on` (migration, schema, API, contract, `docs/data-model.md`), shown on the detail page, cleared when the notice is withdrawn
+- [x] #112: dialog state with the hint in `tests/a11y/screens.json`; `docs/anforderungen-vertragsende.md` A-3 implemented
+- [x] #52: `contracts_withdraw_notice_help` per the glossary in four languages, scenario «Kündigung aufheben» checks it, marker removed
+- [x] Fach review round 1: `docs/reviews/w7b-fachreview-1.md` (no Blocker/Major; M-5, V-1, V-3 taken)
+- [x] Code review round 1: `docs/reviews/w7b-review-1.md` (no Blocker/Major; C-6, C-10 fixed; C-9 rejected: both callers hold the form, the field is read once in `endOn`)
+- [x] Fach review round 2: `docs/reviews/w7b-fachreview-2.md` (no Blocker/Major; M-6, M-7, V-4 fixed)
+- [x] Personas: `docs/design/personas/helga-w7b.md`, `docs/design/personas/weber-w7b.md` (no Blocker/Major)
+- [x] Closing code review: `docs/reviews/w7b-review-2.md` (no Blocker/Major; C-11 fixed)
+- [x] Workflow note: one pull request per issue decided only at the push; worktree vitest (`docs/reviews/workflow-notes-issue-112-52.md`)
+- [x] #52 split into its own pull request #301 (branch `claude/w7b-withdraw-help-52`)
+- [x] Plan archived; pull request for #112 opened (merge: see closing report)
+
+Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/schema.ts`, `backend/src/routes/contracts.ts`, `backend/src/services/contract.service.ts`, `src/lib/contract-status.ts`, `src/lib/types.ts`, `src/routes/contracts/[id]/{+page.svelte,+page.server.ts,ContractTerms.svelte}`, `src/routes/contracts/new/PeriodStep.svelte`, `messages/*.json`, tests (`contract-status`, `contract-actions`, `contract-end.pg`, `tests/contracts/contract.json`, E2E contract-detail/contract-edit, a11y), docs (`anforderungen-vertragsende.md`, `data-model.md`, `api-specification.md`).

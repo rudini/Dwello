@@ -165,7 +165,7 @@ export function contractSummary(
 }
 
 /**
- * What the wizard starts with: a draft from this browser, else empty; tenant and apartment given in the
+ * What the wizard starts with: a draft from this browser, else empty; tenant, apartment and start given in the
  * address win (e.g. back from "Neuen Mieter erfassen"). Tenants and apartments deleted meanwhile are dropped.
  */
 export function startValues(
@@ -177,6 +177,7 @@ export function startValues(
 	const values = { ...fromUrl, ...draft };
 	values.tenantId = fromUrl.tenantId || values.tenantId;
 	values.apartmentId = fromUrl.apartmentId || values.apartmentId;
+	values.startDate = fromUrl.startDate || values.startDate;
 	const dropped =
 		(!!values.tenantId && !known.tenantIds.includes(values.tenantId)) ||
 		(!!values.apartmentId && !known.apartmentIds.includes(values.apartmentId));

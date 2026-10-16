@@ -76,9 +76,11 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
     Dann meldet Dwello den Fehler "Die Mietverträge der Wohnung konnten wieder nicht geladen werden."
 
+  # Eine Kündigung lässt sich nur gemeinsam oder durch die Schlichtungsbehörde oder ein Gericht aufheben
   Szenario: Kündigung aufheben
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann erfährt der Liegenschaftsverwalter bei «Kündigung aufheben», wann sich eine Kündigung aufheben lässt
     Wenn der Liegenschaftsverwalter die Kündigung aufhebt
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
     Und ist der Mietvertrag unbefristet
@@ -105,3 +107,15 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist
     Dann zeigt der Mietvertrag bei der Verwaltungspauschale "Vereinbart, Satz des Abrechnungslaufs"
+  # F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über, er endet nicht
+  Szenario: Beim Tod des Mieters läuft der Mietvertrag weiter
+    Dann erfährt der Liegenschaftsverwalter, dass der Mietvertrag beim Tod des Mieters weiterläuft
+    Und erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt
+
+  # B-16 (#156): der neue Mietvertrag desselben Mieters beginnt frühestens am Tag nach dem Vertragsende
+  Szenario: Neuer Mietvertrag nach dem Vertragsende
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erfassen will
+    Dann ist im Mietvertrag der Mieter "Anna Keller" gewählt
+    Und schlägt der neue Mietvertrag den Vertragsbeginn "2099-04-01" vor

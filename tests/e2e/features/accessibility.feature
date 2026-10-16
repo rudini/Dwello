@@ -77,6 +77,7 @@ Funktionalität: Barrierefreiheit
       | contract-detail        | end-dialog-error    |
       | contract-detail        | past-end-error      |
       | contract-detail        | end-dialog-refused  |
+      | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | delete-dialog       |
       | contract-detail        | missing-statements  |
       | contract-edit          | default             |
@@ -85,6 +86,8 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | edit-refused        |
       | contract-edit          | contracts-unknown   |
       | contract-detail-notice | default             |
+      | contract-detail-notice | delete-dialog       |
+      | contract-detail-notice | delete-unconfirmed  |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
@@ -109,6 +112,7 @@ Funktionalität: Barrierefreiheit
       | statements             | filtered-empty      |
       | statements             | mark-paid-dialog    |
       | statements             | list-scoped         |
+      | statements             | pdf-missing         |
       | statements-period      | default             |
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |
@@ -128,12 +132,14 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
       | statement-sent-detail  | action-error        |
+      | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
       | statement-pdf-refused  | default             |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |
       | documents              | empty               |
+      | documents              | marked-sent         |
       | config                 | default             |
       | categories             | default             |
       | category-new           | default             |

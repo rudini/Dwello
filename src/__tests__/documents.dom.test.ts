@@ -23,7 +23,11 @@ const letter = (overrides = {}) => ({
 	statementNumber: 'NK-2024-0001',
 	...overrides
 });
-const documents = (list: ReturnType<typeof letter>[], status: string | null = null, form = null) =>
+const documents = (
+	list: ReturnType<typeof letter>[],
+	status: string | null = null,
+	form: object | null = null
+) =>
 	show(DocumentsPage, { data: { documents: list, status }, form } as never);
 
 describe('Dokumente', () => {
@@ -94,5 +98,26 @@ describe('Dokumente', () => {
 		expect(byTestId('documents-empty')!.textContent).toContain(
 			'Briefe, die Sie ausdrucken und per Post schicken müssen, erscheinen hier.'
 		);
+	});
+
+	// #193: marked as sent, the letter leaves «Zu versenden»; its remade PDF is offered right there
+	it('bietet nach dem Markieren das neue PDF zum Ausdrucken an', () => {
+		documents([], 'to_send', {
+			sent: { id: 'd1', title: 'Zahlungserinnerung', tenantName: 'Anna Keller' }
+		});
+
+		const notice = byTestId('document-marked-sent')!;
+		expect(notice.textContent).toContain('«Zahlungserinnerung» an Anna Keller ist als versendet markiert.');
+		expect(notice.textContent).toContain('Drucken Sie ihn jetzt aus');
+		expect(byTestId('document-marked-sent-pdf')!.getAttribute('href')).toBe('/documents/d1/pdf');
+	});
+
+	// persona Helga: «Keine Briefe zu versenden» beside it reads as if nothing were left to post
+	it('meldet neben dem eben markierten Brief nicht, dass nichts zu versenden ist', () => {
+		documents([], 'to_send', {
+			sent: { id: 'd1', title: 'Zahlungserinnerung', tenantName: 'Anna Keller' }
+		});
+
+		expect(byTestId('documents-empty')).toBeNull();
 	});
 });

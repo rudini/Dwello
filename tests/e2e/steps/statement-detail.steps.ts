@@ -187,11 +187,11 @@ Then('erhält der Liegenschaftsverwalter die Abrechnung als PDF', async ({ verwa
 
 // from any page: the list of statements, searched for the tenant
 Then(
-	'findet die Abrechnungsliste keine Abrechnung {int} von {string}',
-	async ({ verwalter, names }, year: number, tenant: string) => {
+	/^findet die Abrechnungsliste (keine|die) Abrechnung (\d+) von "([^"]*)"$/,
+	async ({ verwalter, names }, which: string, year: string, tenant: string) => {
 		const name = names.get(tenant) ?? tenant;
 		await verwalter.attemptsTo(openStatementList, searchStatements(name));
-		await verwalter.sees(listedStatementsOfYear(name, year)).toBe(0);
+		await verwalter.sees(listedStatementsOfYear(name, Number(year))).toBe(which === 'die' ? 1 : 0);
 	}
 );
 
@@ -224,6 +224,13 @@ Then('steht im PDF nicht {string}', async ({ verwalter }, text: string) => {
 Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }, profile: string) => {
 	await verwalter.sees(heatingProfileOfStatement).toContain(names.get(profile)!);
 });
+
+Then(
+	'nennt die Abrechnung das Heizprofil {string} als nicht angewendet: {string}',
+	async ({ verwalter, names }, profile: string, reason: string) => {
+		await verwalter.sees(heatingProfileOfStatement).toContain(`${names.get(profile)} (nicht angewendet: ${reason})`);
+	}
+);
 
 When('der Liegenschaftsverwalter das PDF der Abrechnung anfordert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(requestStatementPdf);

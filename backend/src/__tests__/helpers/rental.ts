@@ -31,7 +31,7 @@ export async function createRental(token: string, contract: {
 		tenant: tenant.id,
 		contract: rental.id,
 		async remove() {
-			await deleteContract(rental.id);
+			await deleteContract(rental.id, true);
 			await deleteTenant(tenant.id);
 			await deleteApartment(apartment.id);
 			await deleteBuilding(building.id);

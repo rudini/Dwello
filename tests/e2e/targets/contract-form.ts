@@ -45,3 +45,19 @@ export const deleteDraftAndSaveButton = target('Entwurf löschen und speichern',
 export const feeChoice = (choice: 'run' | 'own' | 'none') =>
 	target(`Verwaltungspauschale «${choice}»`, (page) => page.getByTestId(`contract-fee-choice-${choice}`));
 export const feeRateInput = target('Eigener Satz der Verwaltungspauschale', (page) => page.getByTestId('contract-fee-rate-input'));
+export const runningContractHint = target('Hinweis auf einen laufenden Mietvertrag des Mieters', (page) =>
+	page.getByTestId('tenant-running-contract')
+);
+export const runningContractLink = target('Laufender Mietvertrag im Hinweis', (page) =>
+	runningContractHint.locate(page).getByRole('link')
+);
+export const newContractAfterEndLink = target('Neuen Mietvertrag erfassen', (page) =>
+	page.getByTestId('contract-parties-new')
+);
+// the option with its help: the help says when a notice can be withdrawn (glossary «Kündigung aufheben»)
+export const withdrawNoticeOption = target('Option «Kündigung aufheben» mit Hilfe', (page) =>
+	page
+		.getByTestId('contract-duration')
+		.locator('label')
+		.filter({ has: page.getByTestId('contract-duration-unlimited') })
+);

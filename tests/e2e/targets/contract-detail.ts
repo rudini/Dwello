@@ -15,6 +15,10 @@ export const contractEndError = (message: string) =>
 	target(`Meldung im Dialog «${message}»`, (page) =>
 		page.getByRole('dialog').getByTestId('form-error').filter({ hasText: message })
 	);
+export const deleteDialog = target('Dialog «Mietvertrag löschen?»', (page) => page.getByRole('dialog'));
+export const deleteMistakeConfirmation = target('Bestätigung «irrtümlich erfasst»', (page) =>
+	page.getByTestId('contract-delete-mistake-confirm')
+);
 export const deleteContractButton = target('Mietvertrag löschen', (page) => page.getByTestId('contract-delete-button'));
 export const confirmDeleteContractButton = target('Löschen bestätigen', (page) =>
 	page.getByTestId('contract-delete-confirm')
@@ -44,4 +48,18 @@ export const missingStatementLink = (periodStart: string) =>
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
 export const contractManagementFee = target('Verwaltungspauschale des Mietvertrags', (page) =>
 	page.getByTestId('contract-management-fee')
+);
+export const endDialogDeathHint = target('Hinweis zum Tod des Mieters im Dialog «Mietvertrag beenden»', (page) =>
+	page.getByTestId('contract-end-death')
+);
+// A-3 (#112): the day the notice arrived, the hint it gives on a short Kündigungsfrist, and where the contract shows it
+export const noticeReceivedInput = target('Kündigung erhalten am', (page) =>
+	page.getByTestId('contract-notice-received-input')
+);
+export const noticePeriodHint = target('Hinweis auf die Kündigungsfrist', (page) =>
+	page.getByTestId('contract-notice-period-hint')
+);
+export const endDialog = target('Dialog «Mietvertrag beenden»', (page) => page.getByRole('dialog'));
+export const contractNoticeReceived = target('Kündigung erhalten am', (page) =>
+	page.getByTestId('contract-notice-received')
 );

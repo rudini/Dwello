@@ -49,7 +49,7 @@ export function initialContractValues(
 		return {
 			tenantId: params.get('tenant') || '',
 			apartmentId: params.get('apartment') || '',
-			startDate: '',
+			startDate: params.get('start') || '', // the day after the contract it follows (#156)
 			endDate: '',
 			isUnlimited: true,
 			baseRent: '',
@@ -137,12 +137,19 @@ export const contractBody = (values: ContractFormValues) => ({
  * they could not be loaded, also for an answer without a list: the apartment is then not free (#143)
  */
 export function forAvailability(response: {
-	data?: { contracts?: { id: string; startDate: string; endDate: string | null }[] };
+	data?: {
+		contracts?: { id: string; startDate: string; endDate: string | null; tenantId?: string }[];
+	};
 	error?: unknown;
 }): ContractForAvailability[] | null {
 	const list = response.data?.contracts;
 	if (response.error || !Array.isArray(list)) return null;
-	return list.map((c) => ({ id: c.id, start_date: c.startDate, end_date: c.endDate }));
+	return list.map((c) => ({
+		id: c.id,
+		start_date: c.startDate,
+		end_date: c.endDate,
+		tenant_id: c.tenantId
+	}));
 }
 
 /** Warning when the contract overlaps another contract of the apartment */

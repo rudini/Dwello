@@ -10,9 +10,11 @@ import {
 	endDateInput,
 	feeChoice,
 	feeRateInput,
+	newContractAfterEndLink,
 	newTenantLink,
 	pastEndConfirm,
 	retryContractsButton,
+	runningContractLink,
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
@@ -123,3 +125,6 @@ export const saveStartDate = (isoDate: string): Activity => (actor) =>
 // «Bearbeiten»: the fee is agreed at the run's rate
 export const agreeManagementFee: Activity = (actor) =>
 	actor.attemptsTo(Click.on(feeChoice('run')), Click.on(contractSubmitButton));
+
+export const openRunningContract = Click.on(runningContractLink);
+export const newContractAfterEnd = Click.on(newContractAfterEndLink);

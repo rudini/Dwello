@@ -59,13 +59,16 @@ const contractUpdateSchema = t.Partial(
 		startDate: t.String({ format: 'date' }),
 		endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 		terminated: t.Boolean(),
+		noticeReceivedOn: t.Nullable(t.String({ format: 'date' })), // the day the notice arrived (A-3)
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),
 		...managementFee,
 		referenceIndex: t.Optional(t.Nullable(t.String())),
 		contractPdf: t.Optional(t.Nullable(t.String())),
-		notes: t.Optional(t.Nullable(t.String()))
+		notes: t.Optional(t.Nullable(t.String())),
+		// a draft of the contract to delete when it is the only statement the new dates change (#141)
+		deleteDraft: t.String({ format: 'uuid' })
 	})
 );
 
@@ -168,9 +171,9 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 	// Update contract
 	.put(
 		'/:id',
-		async ({ params, body, set }) => {
+		async ({ params, body: { deleteDraft, ...body }, set }) => {
 			try {
-				const contract = await updateContract(params.id, body);
+				const contract = await updateContract(params.id, body, deleteDraft);
 				if (!contract) {
 					set.status = 404;
 					return { error: 'Contract not found' };
@@ -189,13 +192,17 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			body: contractUpdateSchema
 		}
 	)
-	// Delete contract
-	.delete('/:id', async ({ params, set }) => {
-		const result = await deleteContract(params.id);
-		if (!result.success) {
-			set.status = result.error === 'Contract not found' ? 404 : 400;
-			return { error: result.error };
-		}
-		set.status = 204;
-		return null;
-	});
+	// Delete contract; `confirmMistake`: the landlord confirmed a started contract was entered by mistake (#116)
+	.delete(
+		'/:id',
+		async ({ params, query, set }) => {
+			const { success, ...refused } = await deleteContract(params.id, query.confirmMistake === 'true');
+			if (!success) {
+				set.status = refused.code ? 409 : 404;
+				return refused;
+			}
+			set.status = 204;
+			return null;
+		},
+		{ query: t.Object({ confirmMistake: t.Optional(t.String()) }) }
+	);
