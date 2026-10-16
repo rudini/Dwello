@@ -14,7 +14,8 @@ import {
 	reviewItem,
 	runningContractHint,
 	startContractsUnknown,
-	tenantSelect
+	tenantSelect,
+	withdrawNoticeOption
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
 import { draftRestored } from '../targets/wizard';
@@ -41,3 +42,4 @@ export const partiesHelpText = Text.of(partiesHelp);
 export const runningContractHintText = Text.of(runningContractHint);
 export const enteredAdvancePayment = Value.of(advancePaymentInput);
 export const rentTakenOverText = Text.of(rentTakenOver);
+export const withdrawNoticeHelp = Text.of(withdrawNoticeOption);

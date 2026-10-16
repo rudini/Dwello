@@ -51,3 +51,10 @@ export const newContractAfterEndLink = target('Neuen Mietvertrag erfassen', (pag
 	page.getByTestId('contract-parties-new')
 );
 export const rentTakenOver = target('Hinweis auf übernommene Beträge', (page) => page.getByTestId('contract-rent-taken-over'));
+// the option with its help: the help says when a notice can be withdrawn (glossary «Kündigung aufheben»)
+export const withdrawNoticeOption = target('Option «Kündigung aufheben» mit Hilfe', (page) =>
+	page
+		.getByTestId('contract-duration')
+		.locator('label')
+		.filter({ has: page.getByTestId('contract-duration-unlimited') })
+);

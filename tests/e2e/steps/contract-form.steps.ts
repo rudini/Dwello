@@ -22,7 +22,8 @@ import {
 	reviewed,
 	runningContractHintText,
 	startHint,
-	tenantChoices
+	tenantChoices,
+	withdrawNoticeHelp
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
@@ -373,5 +374,16 @@ Then(
 		await verwalter.sees(enteredBaseRent).toBe(baseRent);
 		await verwalter.sees(enteredAdvancePayment).toBe(advancePayment);
 		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
+
+// the help names who can withdraw a notice, after the glossary «Kündigung aufheben»
+Then(
+	'erfährt der Liegenschaftsverwalter bei «Kündigung aufheben», wann sich eine Kündigung aufheben lässt',
+	async ({ verwalter }) => {
+		await verwalter.sees(withdrawNoticeHelp).toContain('gemeinsam zurücknehmen');
+		await verwalter.sees(withdrawNoticeHelp).toContain('die Schlichtungsbehörde oder ein Gericht');
+		await verwalter.sees(withdrawNoticeHelp).toContain('weder der Mieter noch der Vermieter allein');
+		await verwalter.sees(withdrawNoticeHelp).toContain('Der Mietvertrag läuft dann ohne Ende weiter.');
 	}
 );
