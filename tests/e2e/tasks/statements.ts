@@ -7,6 +7,7 @@ import {
 	openStatementLink,
 	statementBuildingFilter,
 	statementPdfLink,
+	statementPdfMissingLink,
 	statementSearchButton,
 	statementSearchInput
 } from '../targets/statements';
@@ -51,6 +52,8 @@ export const showDraftsOfBuilding = (buildingId: string): Activity => (actor) =>
 export const turnToNextPage = Click.on(nextPageLink);
 export const startGeneratingStatements = Click.on(generateStatementsButton);
 export const openStatement = (tenantName: string, year: number) => Click.on(openStatementLink(tenantName, year));
+export const openStatementWithoutPdf = (tenantName: string, year: number) =>
+	Click.on(statementPdfMissingLink(tenantName, year));
 export const downloadStatementPdfFromList = (tenantName: string, year: number) =>
 	DownloadFrom(statementPdfLink(tenantName, year));
 /** Follows the list's PDF link in the tab, as a browser does when the answer is no PDF */
