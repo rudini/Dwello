@@ -59,16 +59,32 @@
 		{
 			term: m.glossary_status_term(),
 			text: m.glossary_status_text()
+		},
+		{
+			term: m.glossary_fixed_term_term(),
+			text: m.glossary_fixed_term_text()
+		},
+		{
+			term: m.glossary_termination_date_term(),
+			text: m.glossary_termination_date_text()
+		},
+		{
+			term: m.glossary_notice_period_term(),
+			text: m.glossary_notice_period_text()
+		},
+		{
+			term: m.glossary_manual_term(),
+			text: m.glossary_manual_text()
 		}
 	];
 </script>
 
-<Panel title={m.glossary_title()} testid="page-section">
+<Panel id="glossary" title={m.glossary_title()} testid="page-section">
 	<dl class="flex flex-col gap-4">
 		{#each terms as { term, text } (term)}
-			<div class="flex flex-col gap-1">
-				<dt class="font-semibold text-ink">{term}</dt>
-				<dd class="text-ink">{text}</dd>
+			<div class="flex flex-col gap-1" data-testid="glossary-entry">
+				<dt class="font-semibold text-ink" data-testid="glossary-term">{term}</dt>
+				<dd class="text-ink" data-testid="glossary-explanation">{text}</dd>
 			</div>
 		{/each}
 	</dl>
