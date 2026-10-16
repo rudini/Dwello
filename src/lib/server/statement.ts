@@ -28,9 +28,23 @@ const profileName = (data: BackendStatement): string => {
 	return data.heatingProfile ? localName(data.heatingProfile) : '';
 };
 
+// The Mietvertrag's days within the period (#248); dates as YYYY-MM-DD compare as text; without a contract
+// (the detail answer) the whole period
+const tenancyInPeriod = ({ periodStart, periodEnd, contract }: BackendStatement) => {
+	const { startDate = '', endDate = null } = contract ?? {};
+	return {
+		rentalStart: startDate > periodStart ? startDate : periodStart,
+		rentalEnd: endDate && endDate < periodEnd ? endDate : periodEnd
+	};
+};
+
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
 export function toStatement(data: BackendStatement): StatementWithDetails {
-	const { tenant = {}, apartment = {}, building = {} } = data;
+	const [tenant, apartment, building] = [
+		data.tenant ?? {},
+		data.apartment ?? {},
+		data.building ?? {}
+	];
 	return {
 		id: data.id,
 		statementNumber: data.statementNumber,
@@ -60,6 +74,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		apartmentFloor: apartment.floor || '',
 		buildingName: building.name || '',
 		buildingAddress: building.address || '',
+		...tenancyInPeriod(data),
 		heatingProfileName: profileName(data),
 		lineItems: (data.lineItems || []).map(toLineItem)
 	};

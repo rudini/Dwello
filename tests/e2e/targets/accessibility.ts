@@ -35,6 +35,7 @@ export const invalidPastEndConfirm = target('Unbestätigtes Vertragsende in der 
 export const refusedStatements = byTestId('Abgelehnte Abrechnungen', 'refused-statements');
 export const wizardPreset = byTestId('Vorgaben aus dem Link', 'wizard-preset');
 export const listScope = byTestId('Auswahl der Liste', 'statements-scope');
+export const pdfMissing = bySelector('Hinweis fehlendes PDF', '[data-testid="statement-pdf-missing"]');
 export const sendButton = byTestId('Abrechnung versenden', 'statement-send-button');
 export const reminderButton = byTestId('Mahnung senden', 'statement-reminder-button');
 // the detail page's button, or the first one in the list

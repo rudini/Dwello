@@ -5,6 +5,8 @@ import { GET as downloadPdf } from '../routes/statements/[id]/pdf/+server';
 import backendContract from '../../tests/contracts/contract.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
+// What GET /api/v1/statements answers, checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
+import listedStatements from '../../tests/contracts/statements.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -58,6 +60,41 @@ describe('Abrechnungsliste laden', () => {
 			lastReminderDate: '2025-03-01'
 		});
 		expect(data.statements[1]).toMatchObject({ tenantName: 'Unbekannt', buildingId: '' });
+	});
+
+	// #248: wer während der Abrechnungsperiode einzieht oder auszieht, sieht in der Liste seine Mietstage, nicht die ganze Periode
+	describe('nennt die Tage des Mietvertrags in der Abrechnungsperiode', () => {
+		const [row] = listedStatements.data;
+		const listed = async (contract: { startDate: string; endDate: string | null }) => {
+			const fetch = (async (url: string) =>
+				Response.json(
+					url.includes('/statements?') ? { ...listedStatements, data: [{ ...row, contract }] } : {}
+				)) as typeof globalThis.fetch;
+			const data = (await load({
+				url: new URL('http://localhost/statements'),
+				fetch
+			} as never)) as StatementsListData;
+			const [{ rentalStart, rentalEnd }] = data.statements;
+			return [rentalStart, rentalEnd];
+		};
+
+		it('ab dem Einzug', async () => {
+			expect(await listed(row.contract)).toEqual(['2025-07-01', '2025-12-31']);
+		});
+
+		it('bis zum Auszug', async () => {
+			expect(await listed({ startDate: '2014-01-01', endDate: '2025-03-31' })).toEqual([
+				'2025-01-01',
+				'2025-03-31'
+			]);
+		});
+
+		it('die ganze Periode, wenn der Mietvertrag sie ganz umfasst', async () => {
+			expect(await listed({ startDate: '2014-01-01', endDate: '2026-06-30' })).toEqual([
+				'2025-01-01',
+				'2025-12-31'
+			]);
+		});
 	});
 
 	it('zeigt eine leere Liste, wenn das Backend nicht erreichbar ist', async () => {

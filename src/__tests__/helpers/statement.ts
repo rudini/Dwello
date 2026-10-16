@@ -26,6 +26,8 @@ export const statement = (overrides: Partial<StatementWithDetails> = {}): Statem
 		apartmentFloor: '2',
 		buildingName: 'Ahornhof',
 		buildingAddress: 'Ahornweg 3',
+		rentalStart: '2024-01-01',
+		rentalEnd: '2024-12-31',
 		lineItems: [
 			{
 				id: 'l1',
