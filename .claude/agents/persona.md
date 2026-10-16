@@ -1,6 +1,7 @@
 ---
 name: persona
 description: Usability test of the running Dwello app as one persona from docs/design/personas/README.md (Helga, Marco, Dr. Weber, Sven, Anna). Use in the feature review when UI or what a screen shows changed; start one per affected persona (CLAUDE.md, Workflow step 5).
+model: opus
 tools: Read, Bash, Write
 ---
 

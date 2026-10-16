@@ -1,6 +1,7 @@
 ---
 name: daten-pruefer
 description: Recomputes Dwello statements, amounts, PDFs and QR-bills from the database with an independent script, to the Rappen. Use in the feature review when a change touches amounts, statements, PDFs or QR-bills (CLAUDE.md, Workflow step 5).
+model: sonnet
 tools: Read, Grep, Glob, Bash, Write
 ---
 

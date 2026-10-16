@@ -260,6 +260,55 @@ Task: add the terms the product owner decided in #243 to `UBIQUITOUS_LANGUAGE.md
 
 Files: `UBIQUITOUS_LANGUAGE.md`, `docs/reviews/glossary-243-{review-1,fachreview-1,fachreview-2}.md`, `backend/src/db/schema.ts`, `backend/src/services/pdf.service.ts`
 
+## Session 2026-10-16 (16): #241 statement PDF: shorter note and labelled invoice lines
+
+Request (chat): work through the open issues one by one; before each, check its related issues and do them too, one pull request each (CLAUDE.md, Workflow 8). Related to #241: #239 and #236 (the same invoice lines, next), #237 (waits for the product owner since 16.10.: the credit case cannot be entered in the app, comment there), #75 (glossary, product owner). Decision issues #240 and #227: their implementation issues to open.
+
+Plan: the decided texts of #241 (P-1 note in short sentences, P-2 labelled lines, P-3 the step to «Ihr Anteil») in `backend/src/services/pdf.service.ts` (`sharesNote`, `partLines`), in de/fr/it/en.
+
+- [x] Scenario «PDF nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung» (`statement-detail.feature`) updated, `@wip`, red
+  Scenario red: `steht im PDF "Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen"` – Expected substring not in the PDF text
+- [x] Decision issues: #227 → implementation issue #247, closed; #240 → #248 to #253, its detail-page point added to #104 and its recalculation point to #132, closed
+- [x] fach-reviewer on the scenario and the fr/it/en wording before implementing
+- fach-reviewer round 1 (docs/reviews/241-fachreview-1.md): V-1 (Major), V-2, V-6, V-7, V-8 asked in the chat and decided by the product owner (16.10.2026, recorded in #241): fixed V-1 (lines «Ohne Leistungszeitraum: …» and «Leistungszeitraum … (Rechnung CHF …), davon …», the latter the first point of #236), V-2 (percentage kept, note «Der Prozentwert ist gerundet; …»), V-6, V-7, V-8 (P-1 corrected); fixed V-3 (pinned old texts: scenario line in «PDF erklärt …», pg and render tests), V-4 (rule 5), V-5 (`t.colon` in the lines), V-10 (word order fr/en), V-11 (row «Leistungszeitraum» in `docs/design/i18n-begriffe.md`); rejected V-9: the lines name the divisor («von 92 Tagen»)
+- [x] Render tests in four languages first (`statement-pdf-render.test.ts`), pg tests updated, then `pdf.service.ts`
+  Test red: «beschriftet jede Rechnung mit ihrem Leistungszeitraum und rechnet bis zu Ihrem Anteil» – Expected to contain "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1'200.00, …"
+  Test red: «erklärt die Rechnungen unter der Position und den gerundeten Prozentwert in kurzen Sätzen» – old note
+  Test red: pg «nennt eine Rechnung ohne Leistungszeitraum …» – Expected "Ohne Leistungszeitraum: CHF 365.00, …"; pg «druckt den Anteil in Prozent, …» – Expected "Leistungszeitraum 01.07.2025 – 30.09.2025 (Rechnung CHF 900.00), davon …"
+  Test red (written after the code, shown by taking it out): render «nennt eine Rechnung ohne und eine über die Periode hinaus auf %s als solche» – 4 fail with `partText` always `partLine`
+  Files: `backend/src/services/{pdf,invoice,calculation}.service.ts`, `backend/src/db/schema.ts` (`InvoicePart.noPeriod`, `whole`, no migration: jsonb), `backend/src/__tests__/{statement-pdf.pg,statement-pdf-render}.test.ts`, `tests/e2e/features/statement-detail.feature`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/data-model.md`, `docs/design/i18n-begriffe.md`
+  Skills: tdd, ponytail, ponytail-review
+- [x] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, affected E2E (on 9cade5b6: backend 680 pass, 94.0 % lines; test:coverage 2606 passed; lint, check, type-check, fallow, deepcheck clean; full E2E chromium+api 769 passed; later commits change docs only)
+- [x] code-reviewer round(s)
+- code-reviewer round 1 (docs/reviews/241-review-1.md): fixed C-1 (Major: the change of the Tankbestand got the label «Leistungszeitraum»; now «Veränderung Tankbestand …», the decided text of #239, so this pull request also closes #239: Workflow 7 asks to fix a Major the change makes worse, CLAUDE.md's one pull request per issue would leave it open), C-2 (test: no rounding sentence without invoice lines), C-5 (row U-37), C-7 (plan); open C-6 (O-33); rejected C-3: pg and render tests show each label, the scenario shows the path; rejected C-4: the PDF's French spacing is U-26/U-37, the same in every text
+- code-reviewer round 2 (docs/reviews/241-review-2.md): C-1 to C-7 confirmed; fixed C-8 (plan: feature review of the #239 line, PR closes #239)
+  Test red: pg «nennt die Veränderung des Tankbestands unter einer Heizposition nach Tagen als solche» – Expected "Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, …", received «Leistungszeitraum 01.01.2025 – 31.12.2025: CHF 500.00»
+  Scenario red (#239, written after the code, shown by taking it out): «PDF nennt die Veränderung des Tankbestands unter den Heizkosten als solche» – Expected substring "Veränderung Tankbestand …" without `partStock`; green with it
+  Test red (written after the code, shown by taking it out): render «nennt die Veränderung des Tankbestands auf %s als solche» (4 fail), pg «erklärt den Bruch …» `not.toContain('Der Prozentwert ist gerundet')` (fails with the sentence always shown)
+- [x] Feature review: fach-reviewer, daten-pruefer (the PDF), persona Dr. Weber (the new texts)
+- persona Dr. Weber (docs/design/personas/dr-weber-241.md; setup: SQL deleted Nina Brunner's draft 2025 in `dwello_persona`; the persona set the Hauswart Leistungszeiträume Q1, Q2, none, 01.10.2025–31.01.2026): could recompute «Ihr Anteil» CHF 245.45 from the PDF; open P-1 (Minor, the line names no receipt: #236, comment), P-2, P-3 (Minor), P-4, P-5 (Nit): #256 (`entscheiden`); Beobachtungen all before #241: wizard time (#252), «Kosten Liegenschaft» (#249), detail page (#104), help text (#250), drafts not recomputed (#132), invoice filter once lost the year (not reproduced, no row)
+- daten-pruefer round 1 (docs/reviews/241-datenpruefung-1.md): no findings; NK-22222222-2025-0005 recomputed to the Rappen (lines, `invoice_parts` with `noPeriod` and `whole`, «Ihr Anteil» line, totals); observation: fr/it/en lines end «sur/su/of {total}» without the word for days (kept: word order of fach-review V-10)
+- fach-reviewer round 2 (docs/reviews/241-fachreview-2.md): round-1 findings confirmed fixed; fixed V-2 (render fixture 0.7338 / 512.08), V-3 (= C-2), V-5 (= C-5); open V-1 (Minor, rounding sentence at heating positions: #256, `entscheiden`); rejected V-4 (= C-4)
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-241.md`
+- [x] Feature review of the #239 line (`partStock`, four languages): fach-reviewer round 3 on the delta; daten-pruefer not again (the line prints the stored part, no amount changes; the pg test shows its amount); no persona (it answers no persona finding)
+- fach-reviewer round 3 (docs/reviews/241-fachreview-3.md, the #239 line): the line meets #239's decision, also for a negative change; fixed V-3 (`fuelStock` in `docs/data-model.md`), V-4 (row «Veränderung Tankbestand» in `docs/design/i18n-begriffe.md`); open V-1 (Major, existed before: tank fuel shared by delivery dates instead of consumption, the same on the base commit since #226; #257, `entscheiden`, under «Blocked on me»: merging waits for the product owner, Workflow 9), V-2 (Nit, «+ -300.00»: in #257)
+- [x] Archive session, push, PR `Fixes #241`, `Fixes #239`, CI, merge (pull request opened after archiving; the merge waits for the product owner because #257, a Major from before, is open)
+
+Issues opened: #247 to #253 (from #227, #240), #256, #257; closed #227, #240; comments on #104, #132, #236, #237.
+
+## Session: subagent models (no issue)
+
+Request: pin `code-reviewer` and `fach-reviewer` to Opus, move `persona` and `daten-pruefer` to Sonnet where a benchmark first shows no loss. Changes only agent definitions and docs: no scenario, no `code-reviewer` round (`.claude/agents/` is not code in Workflow 6), no workflow review (Workflow 7: not for a task that changes only rules).
+
+- [x] Benchmark A: `daten-pruefer` Opus vs Sonnet on `cbbaafa` (#137; known D-1 Major, D-2, D-3 Minor): round 1 ran on the wrong app (the old stack script changed to the main tree; both models noticed), round 2 on `cbbaafa`: both found D-1 in data; Opus D-3, Sonnet D-2
+- [x] Benchmark B: persona Dr. Weber Opus vs Sonnet on `cf49fa5` (#226; known P-1 Major, P-2, P-3 Minor, P-4 Nit): both found all four
+- [x] Benchmark C: persona Marco Opus vs Sonnet on `70fbc67` (#233; known P-1..P-5 Minor, P-6, P-7 Nit): Opus 6 of 7, Sonnet 2 of 7 plus 2 partly
+- [x] Benchmark report `docs/reviews/agent-models-benchmark.md` with the runs' reports in `docs/reviews/agent-models/`
+- [x] `model:` in `.claude/agents/*.md` as the benchmark decides: `code-reviewer`, `fach-reviewer`, `persona` `opus`; `daten-pruefer` `sonnet`
+- [x] Before marking complete (CLAUDE.md): `test:coverage`, `lint`, `check`, backend `test` and `type-check` pass; no E2E scenario is affected
+
+Files: `.claude/agents/{code-reviewer,fach-reviewer,persona,daten-pruefer}.md`, `docs/reviews/agent-models-benchmark.md`, `docs/reviews/agent-models/*`.
+
 ## Session 2026-10-16 (faster local E2E runs)
 
 Task (product owner, in chat): speed up E2E runs during ATDD, not on CI. Measured on `buildings.feature` (7 scenarios): 46 s per run, of which ~40 s the frontend build; recreating `dwello_e2e` 0.26 s, so a file-based database would not help. Proposals 1 and 3 accepted: build the frontend only when its inputs changed since the last E2E build (always on CI), and start the empty instance (3102/3103) and the demo frontend (3104) only when the generated tests need them. No issue (operator-only change); PR with «No scenario: test tooling only, no app behaviour change».
