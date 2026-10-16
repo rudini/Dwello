@@ -8,6 +8,7 @@ import {
 	contractEndError,
 	contractStatus,
 	contractTotalRent,
+	deleteDialog,
 	missingStatements
 } from '../targets/contract-detail';
 
@@ -15,6 +16,7 @@ export const apartmentOfContract = Text.of(contractApartment);
 export const totalRent = Text.of(contractTotalRent);
 export const statusOfContract = Text.of(contractStatus);
 export const endOfContract = Text.of(contractEndDate);
+export const deleteDialogText = Text.of(deleteDialog);
 export const endDateProblemShown = (message: string) => Visibility.of(contractEndError(message));
 // entirely inside the window, as toBeInViewport({ ratio: 1 }) judges it
 export const endConfirmationInWindow = question(

@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	apartmentOfContract,
+	deleteDialogText,
 	endConfirmationInWindow,
 	endDialogDeathText,
 	endDateProblemShown,
@@ -16,6 +17,7 @@ import {
 	chooseNextStep,
 	createMissingStatement,
 	deleteContract,
+	deleteContractEnteredByMistake,
 	deleteDraftAndEndContract,
 	editContractFromDetail,
 	endContract,
@@ -90,6 +92,17 @@ When('der Liegenschaftsverwalter den Mietvertrag löscht', async ({ verwalter })
 	await verwalter.attemptsTo(deleteContract);
 });
 
+When('der Liegenschaftsverwalter den Mietvertrag löschen will, ohne den Irrtum zu bestätigen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(deleteContract);
+});
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag löscht und bestätigt, dass er irrtümlich erfasst wurde',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(deleteContractEnteredByMistake);
+	}
+);
+
 When('der Liegenschaftsverwalter den Mietvertrag bearbeiten will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(editContractFromDetail);
 });
@@ -131,6 +144,11 @@ Then('endet der Mietvertrag heute', async ({ verwalter }) => {
 // the field's error and a refusal of the server use the same frame: the one with the message counts
 Then('meldet der Dialog {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(endDateProblemShown(message)).toBe(true);
+});
+
+// what the delete dialog says when it opens (#116)
+Then('nennt der Dialog {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(deleteDialogText).toContain(message);
 });
 
 Then('zeigt der Mietvertrag {string}', async ({ verwalter }, end: string) => {

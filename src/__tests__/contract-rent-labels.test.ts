@@ -26,7 +26,8 @@ describe('Miete im Mietvertrag', () => {
 				}
 			},
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 },
-			missingStatements: []
+			missingStatements: [],
+			billedBy: []
 		};
 		const body = render(ContractPage, { props: { data, form: null } as never }).body.replace(
 			/\s+/g,

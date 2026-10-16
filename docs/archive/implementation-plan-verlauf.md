@@ -561,6 +561,28 @@ Request: «Setze #156 #155 um».
 
 Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/routes/contracts/new/OpenContracts.svelte`, `src/lib/contract-form.ts`, `src/lib/contract-wizard.ts`, `src/lib/utils/contract-availability.ts`, `docs/anforderungen-vertragsende.md`, tests in `src/__tests__/` and `tests/e2e/`.
 
+## Session W7: #141 and #116 (draft delete in one step, delete a started Mietvertrag)
+
+- [x] #141 `@wip` scenario «Abgelehntes Vertragsende behält den Entwurf» (`contract-detail.feature`), seen red
+- [x] #116 `@wip` scenarios «Irrtümlich erfassten Mietvertrag löschen», «… nur mit Bestätigung», «Mietvertrag mit Abrechnung kann nicht gelöscht werden» (`contract-detail.feature`), seen red
+- [x] fach-reviewer on the #116 scenarios and texts before implementing
+- [x] #141 backend: `PUT /contracts/:id` with `deleteDraft` in the body deletes the draft and changes the contract in one transaction (`contract-end.pg.test.ts`: refused → draft kept, accepted → draft gone)
+- [x] #141 BFF end dialog (`endDeletingDraft`) and edit form (`deleteDraftAndSave`) use it (DOM test: no separate DELETE)
+- [x] #116 backend: `DELETE /contracts/:id` refuses a started contract without `?confirmMistake=true` (`CONTRACT_STARTED`) and one with statements (`CONTRACT_HAS_STATEMENTS`); pg tests
+- [x] #116 dialog: confirmation checkbox for a started contract; help text `contracts_parties_fixed_mistake` names started contracts
+- [x] Test clean-up (`tests/e2e/fixtures/backend.ts`, backend helpers) passes the flag
+- [x] `tests/contracts/*.json`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md` (A-7 implemented), `tests/a11y/screens.json` + `accessibility.feature` + `sprachen-bildschirme.feature` for the dialog state
+- [x] fach-reviewer round 1: `docs/reviews/w7-fachreview-1.md`; glossary «Leerstand» → #279
+- [x] fach-reviewer round 2: `docs/reviews/w7-fachreview-2.md`
+- [x] code-reviewer round 1: `docs/reviews/w7-review-1.md`
+- [x] personas: `docs/design/personas/anna-w7.md`, `docs/design/personas/helga-w7.md`
+- [x] Helga again on the new text of a billed contract: `docs/design/personas/helga-w7-2.md`
+- [x] code-reviewer round 2: `docs/reviews/w7-review-2.md` (C-13, C-17 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-116-141.md`
+- [x] Checks before push green; push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts.ts`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/contracts/ContractForm.svelte`, `messages/*.json`, tests (`contract-end.pg`, `contract-delete.pg`, `api-contracts.pg`, test clean-ups, `contract-actions`, `contract-detail-page.dom`, `contract-edit.dom`), `tests/e2e/**`, `tests/a11y/screens.json`, `tests/contracts/*`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md`.
+
 ## Session 2026-10-16 W5: category descriptions with exclusions (#204, #220, #221)
 
 - [x] Migration `0007_category_descriptions.sql`: new descriptions for Heizung, Gartenpflege, Kehricht, TV/Kabelanschluss, Gebäudeversicherung, Verwaltung, only where a row still holds the seeded text (#204, #220)
