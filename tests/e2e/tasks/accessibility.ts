@@ -229,6 +229,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
+	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('{area}').into(on.formulaInput),

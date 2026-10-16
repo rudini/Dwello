@@ -12,6 +12,7 @@ import {
 	pdfRefusalText,
 	pdfToView,
 	recipient,
+	resetConfirmation,
 	sendConfirmation,
 	statusOfStatement
 } from '../questions/statement-detail';
@@ -26,14 +27,20 @@ import {
 	generateStatementPdf,
 	markStatementPaid,
 	markStatementPaidOn,
+	openResetPaymentConfirmation,
 	openSendConfirmation,
 	openStatementApartment,
 	openStatementDetail,
 	openStatementTenant,
+	resetPayment,
 	sendStatement
 } from '../tasks/statement-detail';
+import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
+
+// The day a statement sent in the scenario is dated, as the page prints it
+const sendingDay = () => inDays(0).split('-').reverse().join('.');
 
 Given('das Heizprofil {string} verteilt die Heizkosten so:', async ({ seed }, title: string, table: DataTable) => {
 	await seed.heatingProfile(title, table.hashes().map((row) => Number(row.Anteil)));
@@ -243,3 +250,43 @@ When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurück
 Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(pdfRefusalText).toBe(text);
 });
+
+Given('die Abrechnung {int} von {string} ist bezahlt', async ({ seed }, year: number, tenant: string) => {
+	await seed.markPaid(tenant, year);
+});
+
+When('der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt markiert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(markStatementPaidOn(inDays(0)));
+});
+
+Then('nennt der Verlauf {string} am Tag des Versands', async ({ verwalter }, label: string) => {
+	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${sendingDay().replace(/\./g, '\\.')}`));
+});
+
+Then(
+	'meldet das Feld «Bezahlt am», dass das Zahlungsdatum vor dem Abrechnungsdatum vom Tag des Versands liegt',
+	async ({ verwalter }) => {
+		await verwalter.sees(paidDateInvalid).toBe('true');
+		await verwalter.sees(paidDateProblem).toContain(`Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom ${sendingDay()}.`);
+	}
+);
+
+When('der Liegenschaftsverwalter die Zahlung zurücksetzt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(resetPayment);
+});
+
+When('der Liegenschaftsverwalter die Zahlung zurücksetzen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openResetPaymentConfirmation);
+});
+
+Then('nennt der Verlauf das Zurücksetzen der Zahlung vom Tag des Versands', async ({ verwalter }) => {
+	await verwalter.sees(history).toContain(`Zahlung vom ${sendingDay()} zurückgesetzt ${sendingDay()}`);
+});
+
+Then(
+	'sagt die Bestätigung, dass die Abrechnung wieder als nicht bezahlt gilt und das Zahlungsdatum gelöscht wird',
+	async ({ verwalter }) => {
+		await verwalter.sees(resetConfirmation).toContain('gilt dann wieder als nicht bezahlt');
+		await verwalter.sees(resetConfirmation).toContain(`Das Zahlungsdatum ${sendingDay()} wird gelöscht.`);
+	}
+);

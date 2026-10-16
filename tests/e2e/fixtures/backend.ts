@@ -236,6 +236,11 @@ export function testData(api: CallTheApi) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
+		// paid today, the earliest day a statement sent today allows (#138)
+		async markPaid(tenantTitle: string, year: number) {
+			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
+		},
+
 		// Monthly shares January..December in percent
 		// A profile of the scenario, or a predefined one by its German name: named explicitly, never the preselection, which
 		// a parallel scenario's own profile can take (own profiles are listed first)

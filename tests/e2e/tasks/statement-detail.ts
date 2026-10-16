@@ -11,6 +11,8 @@ import {
 	generatePdfButton,
 	markPaidButton,
 	paidDateInput,
+	confirmResetPaymentButton,
+	resetPaymentButton,
 	sendStatementButton,
 	statementApartmentLink,
 	statementEditButton,
@@ -50,3 +52,9 @@ export const downloadStatementPdf = DownloadFrom(downloadPdfLink);
 /** Follows the PDF link in the tab, as a browser does when the answer is no PDF */
 export const requestStatementPdf = Click.on(downloadPdfLink);
 export const leavePdfRefusal = Click.on(pdfRefusalBackLink);
+
+export const openResetPaymentConfirmation = Click.on(resetPaymentButton);
+
+// The confirmation names the consequence; the user confirms it (#92)
+export const resetPayment: Activity = (actor) =>
+	actor.attemptsTo(Click.on(resetPaymentButton), Click.on(confirmResetPaymentButton));

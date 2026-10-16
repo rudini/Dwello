@@ -71,14 +71,26 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
 
-  # Das Geld kam vor einigen Tagen: festgehalten wird der Tag des Eingangs, nicht der Tag des Erfassens
+  # Festgehalten wird der eingegebene Tag des Eingangs, frühestens das Abrechnungsdatum; eine versendete Abrechnung trägt
+  # den Tag des Versands als Abrechnungsdatum (#138)
+  @wip
   Szenario: Zahlungseingang mit Datum festhalten
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
-    Wenn der Liegenschaftsverwalter die Abrechnung als am "2026-01-05" bezahlt markiert
+    Wenn der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
-    Und nennt der Verlauf "Bezahlt" am "05.01.2026"
+    Und nennt der Verlauf "Bezahlt" am Tag des Versands
+
+  # #138: das Geld kann nicht vor dem Abrechnungsdatum eingegangen sein
+  @wip
+  Szenario: Kein Zahlungseingang vor dem Abrechnungsdatum
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung als am "2026-01-05" bezahlt markiert
+    Dann meldet das Feld «Bezahlt am», dass das Zahlungsdatum vor dem Abrechnungsdatum vom Tag des Versands liegt
+    Und hat die Abrechnung den Status "Versendet"
 
   Szenario: Kein Zahlungseingang in der Zukunft
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -87,6 +99,40 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als am "2099-01-01" bezahlt markiert
     Dann meldet das Feld «Bezahlt am» "Das Zahlungsdatum liegt in der Zukunft."
     Und hat die Abrechnung den Status "Versendet"
+
+  # #92: eine Zahlung auf der falschen Abrechnung oder mit falschem Datum lässt sich zurücksetzen; der Verlauf hält das
+  # Zurücksetzen mit dem Datum der zurückgesetzten Zahlung fest
+  @wip
+  Szenario: Zahlung zurücksetzen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist bezahlt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Zahlung zurücksetzt
+    Dann hat die Abrechnung den Status "Versendet"
+    Und nennt der Verlauf das Zurücksetzen der Zahlung vom Tag des Versands
+
+  # #92: nach Ablauf der Zahlungsfrist ist die Abrechnung nach dem Zurücksetzen wieder überfällig
+  @wip
+  Szenario: Zahlung einer Abrechnung mit abgelaufener Zahlungsfrist zurücksetzen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Zahlungsfrist der Abrechnung 2024 von "Eva Frei" ist abgelaufen
+    Und die Abrechnung 2024 von "Eva Frei" ist bezahlt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Zahlung zurücksetzt
+    Dann hat die Abrechnung den Status "Überfällig"
+
+  # #92: die Bestätigung nennt die Folge, bevor etwas geändert wird
+  @wip
+  Szenario: Vor dem Zurücksetzen der Zahlung die Folge bestätigen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist bezahlt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Zahlung zurücksetzen will
+    Dann sagt die Bestätigung, dass die Abrechnung wieder als nicht bezahlt gilt und das Zahlungsdatum gelöscht wird
+    Und hat die Abrechnung den Status "Bezahlt"
 
   # Drei Aktionen im Seitenkopf (PDF, Mahnung, Bezahlt) brechen unter den Titel um, statt ihn zusammenzudrücken
   Szenario: Seitentitel einer versendeten Abrechnung im schmalen Fenster
