@@ -1,3 +1,20 @@
+## Session 2026-10-16: second guide review R-1 to R-8
+
+Request (chat): «Setze deine Empfehlung um, R-4 auch» from `docs/reviews/opus55-guide-review-2.md`. Rules only, no app behaviour, so no scenario. Same pull request as the G findings (not pushed yet).
+
+- [x] R-2: one source per rule (rounds, the two exception kinds, Minor/Nit triage, `Refs` in the KI case, one pull request per issue); elsewhere only a pointer
+- [x] R-4: glossary-term merge condition, split issues and a fix that closes two issues to skill `pull-request`; "its own slice for this limit" out of `CLAUDE.md`
+- [x] R-1: cut, not move: the longest lines of `CLAUDE.md` (UI languages, Open work); `CLAUDE.md` 3'229 → 3'146 words, the rule files together 6'095 → 6'005
+- [x] R-3: friction with a rule is noted at once as a plan item «Workflow note: …»
+- [x] R-5: «or a loaded skill says to ask» out of "When to ask"
+- [x] R-6: affected tests include those that read a changed file
+- [x] R-7: descriptions of `slice-review` and `workflow-review` match their text
+- [x] R-8: finish line of an issue is its "Done means" plus the workflow's "Done means"
+- [x] `code-reviewer` round 1 (docs/reviews/r18-review-1.md); its Minors/Nits fixed, no further round
+- [x] Checks: lint, check, type-check, the tests that read rule files
+- [x] Archive the session, push after #266 is merged, pull request, CI, merge
+  Files: `CLAUDE.md`, `.claude/skills/{slice-review,pull-request,workflow-review}/SKILL.md`; report `docs/reviews/r18-review-1.md`
+
 ## Session 2026-10-16: less bookkeeping, findings and checks (guide review G-3, G-4, G-6)
 
 Request (chat): «Setze auch G-3, G-4 und G-6 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Goes into the same pull request as G-1/G-2/G-5/G-8 (not pushed yet).

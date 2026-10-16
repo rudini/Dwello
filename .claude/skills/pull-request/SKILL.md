@@ -21,7 +21,7 @@ description: Push, open, drive to green and merge the pull request of a finished
 
 ## Open and drive
 
-- Push the branch, open the pull request in English with `Fixes #n` (or `Refs #n`, `CLAUDE.md` "Open work"); subscribe to its activity. If the session cannot wait for CI, say under "Blocked on me" that the pull request waits for CI and is not merged.
+- Push the branch, open the pull request in English with `Fixes #n` (or `Refs #n` in the KI case, `backend/CLAUDE.md`); subscribe to its activity. If the session cannot wait for CI, say under "Blocked on me" that the pull request waits for CI and is not merged.
 - A merge conflict: merge `origin/main` (no rebase, no force-push). A conflict in app code gets a `code-reviewer` round on the merge commit.
 - Red CI: fix the cause and push. A fourth round of CI fixes needs the product owner first.
 - Right before merging: read the check runs of the latest commit and the open findings again. Merge with a merge commit (the repository has no auto-merge) once CI is green and the pull request is mergeable; name its CI screenshot comment, or that there is none, in the closing report.
