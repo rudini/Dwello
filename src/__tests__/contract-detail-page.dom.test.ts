@@ -612,9 +612,15 @@ describe('Mietvertrag löschen', () => {
 	});
 
 	it('führt bei Entwürfen allein zum Löschen der Entwürfe', () => {
-		open('2024-04-01', null, null, '2026-10-10', false, [], [
-			{ statementNumber: 'NK-2025-0002', status: 'draft' }
-		]);
+		open(
+			'2024-04-01',
+			null,
+			null,
+			'2026-10-10',
+			false,
+			[],
+			[{ statementNumber: 'NK-2025-0002', status: 'draft' }]
+		);
 		click('contract-delete-button');
 
 		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
