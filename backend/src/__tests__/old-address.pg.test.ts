@@ -84,6 +84,8 @@ describe('Ausgezogener Mieter mit der Adresse der Wohnung', () => {
 	it('warnt nicht, solange der Mietvertrag läuft', async () => {
 		const endOn = (endDate: string) =>
 			db.update(rentalContracts).set({ endDate }).where(eq(rentalContracts.id, rental.contract));
+		await address({ address: 'Testweg 1', postalCode: '8400', city: 'Winterthur' }); // the building's
+		expect(await oldAddress()).toBe(true);
 		await endOn('2099-12-31');
 
 		expect(await oldAddress()).toBe(false);

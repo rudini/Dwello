@@ -124,6 +124,10 @@ Then(
 	}
 );
 
+Then('nennt die Bestätigung die Postadresse {string}', async ({ verwalter }, address: string) => {
+	await verwalter.sees(recipient).toContain(address);
+});
+
 Then('sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt', async ({ verwalter }) => {
 	await verwalter.sees(sendConfirmation).toContain('Dwello verschickt die Abrechnung nicht selbst');
 });

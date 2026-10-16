@@ -150,7 +150,7 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(help).toContain('erfassen Sie eines erst, wenn die Erben oder Sie gekündigt haben');
 			expect(help).toContain(
 				// Persona Weber P-1: das Feld heisst im Mieterformular «Adresse»
-				'unter «Adresse» die Adresse ein, an die die Post für die Erben geht, bei Post per E-Mail auch unter «E-Mail»'
+				'unter «Korrespondenzadresse» die Adresse ein, an die die Post für die Erben geht, bei Post per E-Mail auch unter «E-Mail»'
 			);
 			// Fachreview W10 M-2, M-4: Vertragsende ohne Kündigungsfrist, gleiche Bedingungen, schriftliche Zustimmung
 			expect(help).toContain('mit Ihrer schriftlichen Zustimmung');

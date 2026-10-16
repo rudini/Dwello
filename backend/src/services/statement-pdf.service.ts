@@ -293,14 +293,14 @@ const storedPdf = async (id: string) =>
 	)[0];
 
 /**
- * The PDF the tenant gets (Base64) with the statement number, or why there is none: a draft's as if sent today, and
- * one discarded by sending or paying made again
+ * The PDF the tenant gets (Base64) with the statement number, or why there is none: a draft's made afresh, as if sent
+ * today with the tenant's address and the settings as they are now (personas W3c P-1, P-2), and one discarded by
+ * sending or paying made again
  */
 export async function getStatementPdf(id: string) {
 	let result = await storedPdf(id);
 	if (!result) return { status: 404, refusal: refusal('STATEMENT_NOT_FOUND', 'Statement not found') };
-	const stale = result.status === 'draft' && result.statementDate !== (await datedToday(null)).statementDate;
-	if (!result.pdfBlob || stale) {
+	if (!result.pdfBlob || result.status === 'draft') {
 		if ((await generateStatementPdf(id)) === 'no-iban')
 			return { status: 400, refusal: refusal('IBAN_MISSING', 'IBAN not configured. Please set up company configuration first.') };
 		result = (await storedPdf(id))!;

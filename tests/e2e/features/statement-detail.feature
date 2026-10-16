@@ -229,6 +229,8 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Marktstätte 3 78462 Konstanz DEUTSCHLAND"
     Und steht im PDF "DE-78462 Konstanz"
+    Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
+    Dann nennt die Bestätigung die Postadresse "Marktstätte 3, 78462 Konstanz, Deutschland"
 
   # TODO(fachlich prüfen, #294): «Abrechnungsnummer» fehlt im Glossar
   # Die Datei heisst wie die Abrechnungsnummer auf dem PDF, damit der Liegenschaftsverwalter die Dateien unterscheidet (#101)

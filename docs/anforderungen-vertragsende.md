@@ -186,14 +186,14 @@ Szenario: Wohnung mit gekündigtem Mietvertrag
 ```gherkin
 Szenario: Abrechnung an einen ausgezogenen Mieter mit alter Adresse
   Angenommen "Anna Keller" mietete die Wohnung "2.01" von "2024-04-01" bis "2025-03-31"
-  Und die Adresse von "Anna Keller" ist die Adresse des Gebäudes "Ahornhof"
+  Und die Korrespondenzadresse von "Anna Keller" ist noch die Adresse des Gebäudes "Ahornhof"
   Wenn der Liegenschaftsverwalter die Abrechnung 2025 von "Anna Keller" versenden will
   Dann warnt Dwello, dass die Adresse noch die der Wohnung ist
 ```
 
 **Nicht dazu:** Adressprüfung bei der Post, Weiterleitung.
 
-**Offene Fragen:** Genügt der Vergleich von Strasse und Postleitzahl, oder braucht es ein Feld «Neue Adresse ab» beim Mieter?
+**Offene Fragen:** keine (#114: Strasse und Postleitzahl genügen, kein Feld «Neue Adresse ab»).
 
 ---
 

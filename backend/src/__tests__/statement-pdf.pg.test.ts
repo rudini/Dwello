@@ -13,6 +13,7 @@ import { createHeatingProfile, deleteHeatingProfile, getHeatingProfileByName, up
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { deleteStatement, generateStatement, updateStatementStatus } from '../services/statement.service';
 import { readPdf } from './helpers/pdf-text';
+import { sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -676,5 +677,27 @@ describe('PDF zum Herunterladen', () => {
 
 		expect(text).toContain(`Bezahlt am ${swiss(today)}`);
 		expect(text).not.toContain('Zahlteil');
+	});
+});
+
+// Persona Anna (W3c P-1): the PDF of a draft goes to the Korrespondenzadresse as it is now, also one made before the
+// landlord entered the new address after a move-out (A-5, #114)
+describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen', () => {
+	it('nennt die neue Adresse, auch wenn das PDF vorher erstellt wurde', async () => {
+		await generateStatementPdf(statementId, 'de');
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { address: 'Neugasse 7', postalCode: '8401', city: 'Winterthur' });
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		expect(text).toContain('Neugasse 7\n8401 Winterthur');
+		expect(text).not.toContain('Testgasse 5');
+	});
+
+	// Persona Helga (W3c P-2): a new account in the settings reaches the draft's payment part
+	it('nennt die IBAN, die jetzt in den Einstellungen steht', async () => {
+		await generateStatementPdf(statementId, 'de');
+		await setConfig('iban', 'CH9300762011623852957'); // SIX sample IBAN
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		expect(text).toContain('CH93 0076 2011 6238 5295 7');
 	});
 });
