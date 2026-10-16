@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { settingsSaved, storedSetting } from '../questions/settings';
+import { settingHelp, settingsSaved, storedSetting } from '../questions/settings';
 import { openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -42,3 +42,7 @@ Then(
 		await verwalter.sees(storedSetting('iban')).toBe(iban);
 	}
 );
+
+Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(settingHelp(FIELDS.IBAN)).toContain(text);
+});

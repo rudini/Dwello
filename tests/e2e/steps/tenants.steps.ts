@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { confirmation } from '../questions/contract-form';
 import { pageTitle } from '../questions/navigation';
-import { activeBadges, listedTenant, tenantCount, tenantListed } from '../questions/tenants';
+import { listedTenant, tenantCount, tenantListed, tenantStatus } from '../questions/tenants';
 import {
 	createTenantByEmail,
 	openNewTenant,
@@ -72,7 +72,7 @@ Then('ist der Liegenschaftsverwalter auf der Mieterliste', async ({ verwalter })
 When(
 	'der Liegenschaftsverwalter die {word} Mieter mit dem Namen {string} sucht',
 	async ({ verwalter, names }, kind: string, tenant: string) => {
-		const status = { aktiven: 'active', ehemaligen: 'inactive' }[kind]!;
+		const status = { aktiven: 'active', künftigen: 'future', ehemaligen: 'inactive' }[kind]!;
 		await verwalter.attemptsTo(searchTenant(names.get(tenant) ?? tenant, status));
 	}
 );
@@ -81,7 +81,8 @@ Then(
 	'sieht der Liegenschaftsverwalter den Mieter {string} als {word} Mieter',
 	async ({ verwalter, names }, tenant: string, kind: string) => {
 		await verwalter.sees(tenantListed(names.get(tenant)!)).toBe(true);
-		await verwalter.sees(activeBadges(names.get(tenant)!)).toBe(kind === 'aktiven' ? 1 : 0);
+		const status = { aktiven: 'Aktiv', künftigen: 'Künftig', ehemaligen: null }[kind];
+		await verwalter.sees(tenantStatus(names.get(tenant)!)).toBe(status);
 	}
 );
 

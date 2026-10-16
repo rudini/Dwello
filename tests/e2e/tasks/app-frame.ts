@@ -2,6 +2,7 @@ import type { Activity } from '../screenplay/actor';
 import { Browser, Click } from '../screenplay/interactions';
 import {
 	footerLink,
+	helpContentsLink,
 	logo,
 	mainNavLink,
 	publicHelpLink,
@@ -20,3 +21,4 @@ export const useWindowWidth = (width: number) => Browser.resizeTo({ width, heigh
 export const openTermsFromLogin = Click.on(termsLinkOnLogin);
 export const openLoginFromPublicPage = Click.on(publicLoginLink);
 export const openHelpFromPublicPage = Click.on(publicHelpLink);
+export const chooseInHelpContents = (label: string) => Click.on(helpContentsLink(label));

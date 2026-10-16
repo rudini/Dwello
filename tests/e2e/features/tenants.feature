@@ -33,9 +33,19 @@ Funktionalität: Mieterliste
   Szenario: Aktiver Mieter
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
     Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
-    Und "Hans Müller" mietet die Wohnung "2.01" seit "2099-01-01" für "950" Franken
+    Und "Hans Müller" mietet die Wohnung "2.01" seit "2014-01-01" für "950" Franken
     Wenn der Liegenschaftsverwalter die aktiven Mieter mit dem Namen "Hans Müller" sucht
     Dann sieht der Liegenschaftsverwalter den Mieter "Hans Müller" als aktiven Mieter
+
+  # F-4 (#58): wer erst einzieht, ist «Künftig», nicht «Aktiv»
+  Szenario: Künftiger Mieter
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und "Hans Müller" mietet die Wohnung "2.01" seit "2099-01-01" für "950" Franken
+    Wenn der Liegenschaftsverwalter die künftigen Mieter mit dem Namen "Hans Müller" sucht
+    Dann sieht der Liegenschaftsverwalter den Mieter "Hans Müller" als künftigen Mieter
+    Wenn der Liegenschaftsverwalter die aktiven Mieter mit dem Namen "Hans Müller" sucht
+    Dann die Mieterliste enthält genau 0 Mieter
 
   Szenario: Neuen Mieter erfassen
     Wenn der Liegenschaftsverwalter einen neuen Mieter erfassen will

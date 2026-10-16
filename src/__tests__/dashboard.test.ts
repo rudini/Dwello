@@ -2,8 +2,19 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { load } from '../routes/dashboard/+page.server';
 import contractList from '../../tests/contracts/contracts.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
+import apartmentList from '../../tests/contracts/apartments.json';
 
 const API = 'http://localhost:3001/api/v1';
+// an apartment of the API contract, without the dates it does not have
+const apartment = (buildingId: string, status: string, fields: Record<string, string> = {}) => ({
+	...apartmentList.apartments[0],
+	nextContractStart: null,
+	currentContractEnd: null,
+	lastContractEnd: null,
+	buildingId,
+	status,
+	...fields
+});
 const figures = {
 	portfolio: { totalBuildings: 1, totalApartments: 2, occupiedApartments: 1, reletApartments: 0 },
 	statements: { draft: 1, sent: 1, paid: 0, overdue: 1 },
@@ -42,7 +53,15 @@ const contracts = [
 		contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01', terminated: true })
 	),
 	contract({ id: 'n4', apartmentId: 'a9', startDate: '2027-02-01', endDate: null }),
-	contract({ id: 'n7', apartmentId: 'a6', startDate: '2026-11-21', endDate: null })
+	contract({ id: 'n7', apartmentId: 'a6', startDate: '2026-11-21', endDate: null }),
+	// A-6 (#115), all agreed ends: expired; expired and moved out; expired with a next contract; still running
+	...[
+		{ id: 'f1', apartmentId: 'f1', endDate: '2026-10-09' },
+		{ id: 'f2', apartmentId: 'f2', endDate: '2026-09-30', movedOut: true },
+		{ id: 'f3', apartmentId: 'f3', endDate: '2026-07-31' },
+		{ id: 'f5', apartmentId: 'f5', endDate: '2026-10-10' }
+	].map((c) => contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01' })),
+	contract({ id: 'f4', apartmentId: 'f3', startDate: '2026-08-01', endDate: null })
 ];
 const billed = (...ids: string[]) =>
 	ids.map((contractId) => ({ ...periodStatements.data[0], contractId }));
@@ -88,10 +107,13 @@ function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both
 		},
 		'/apartments?limit=1000': {
 			apartments: [
-				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-12-01' },
-				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-11-01' },
-				{ buildingId: 'b1', status: 'occupied', nextContractStart: null },
-				{ buildingId: 'b2', status: 'vacant', nextContractStart: null }
+				apartment('b1', 'relet', { nextContractStart: '2026-12-01' }),
+				apartment('b1', 'relet', { nextContractStart: '2026-11-01' }),
+				apartment('b1', 'occupied'),
+				apartment('b2', 'vacant', { number: '1.01' }),
+				apartment('b2', 'vacant', { number: '1.02', lastContractEnd: '2024-03-31' }),
+				// reserved by hand: not empty to rent, so no «leer seit»
+				apartment('b3', 'reserved', { lastContractEnd: '2024-03-31' })
 			]
 		}
 	};
@@ -118,7 +140,9 @@ describe('Übersicht laden', () => {
 			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
 			'successor-n2',
 			'successor-n5',
-			'successor-n1'
+			'successor-n1',
+			// A-6 (#115): only the expired agreed end without a next contract and without a move-out
+			'fixed-term-f1'
 		]);
 		expect(data.tasks[1].text).toContain('2 Briefe sind');
 		expect(data.deadlines.map((d) => [d.kind, d.name, d.when])).toEqual([
@@ -141,7 +165,9 @@ describe('Übersicht laden', () => {
 			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
 			'successor-n2',
 			'successor-n5',
-			'successor-n1'
+			'successor-n1',
+			// A-6 (#115): only the expired agreed end without a next contract and without a move-out
+			'fixed-term-f1'
 		]);
 		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');
 		expect(data.tasks[2].text).toContain(
@@ -164,6 +190,20 @@ describe('Übersicht laden', () => {
 		expect(data.buildingOccupancy.map((b) => b.reletStarts)).toEqual([
 			['2026-11-01', '2026-12-01'],
 			[],
+			[]
+		]);
+	});
+
+	// P-18 (#145): jede leere Wohnung, seit wann nur, wenn sie einen Mietvertrag hatte (Persona Anna P-1)
+	it('nennt pro Gebäude die leeren Wohnungen mit dem Ende ihres letzten Mietvertrags', async () => {
+		const data = await load({ fetch: backend() } as never);
+
+		expect(data.buildingOccupancy.map((b) => b.vacant)).toEqual([
+			[],
+			[
+				{ number: '1.01', lastContractEnd: null },
+				{ number: '1.02', lastContractEnd: '2024-03-31' }
+			],
 			[]
 		]);
 	});

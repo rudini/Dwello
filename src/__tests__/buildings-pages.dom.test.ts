@@ -67,16 +67,19 @@ describe('Gebäudeliste', () => {
 		expect(words).toContain('4 Wohnungen');
 		expect(words).toContain('3 vermietet');
 		expect(words).toContain('1 leer');
-		expect(words).not.toContain('wiedervermietet');
+		expect(words).not.toContain('vermietet ab');
 		expect(words).toContain('Baujahr 1985');
 		expect(words).not.toContain('3/4');
 	});
 
-	it('zählt alle Wohnungen, auch wiedervermietete und gesperrte', () => {
-		list([building({ apartmentCount: 6, occupiedCount: 3, reletCount: 1, reservedCount: 1 })]);
+	// F-4 (#58): «vermietet ab», wie in der Übersicht
+	it('zählt alle Wohnungen, auch künftig vermietete und gesperrte', () => {
+		list([
+			building({ apartmentCount: 6, occupiedCount: 3, reletStarts: ['2099-11-01'], reservedCount: 1 })
+		]);
 		const words = byTestId('building-card-b1')!.textContent!.replace(/\s+/g, ' ');
 		expect(words).toContain('3 vermietet');
-		expect(words).toContain('1 wiedervermietet');
+		expect(words).toContain('1 vermietet ab 01.11.2099');
 		expect(words).toContain('1 leer');
 		expect(words).toContain('1 gesperrt');
 	});
@@ -169,11 +172,11 @@ describe('Gebäudedetail', () => {
 		detail([flat('a1', '1.01', 1)], {
 			apartmentCount: 6,
 			occupiedCount: 4,
-			reletCount: 1,
+			reletStarts: ['2099-11-01'],
 			vacantCount: 1,
 			reservedCount: 0
 		});
-		expect(text()).toContain('6, davon 4 vermietet, 1 wiedervermietet und 1 leer');
+		expect(text()).toContain('6, davon 4 vermietet, 1 vermietet ab 01.11.2099 und 1 leer');
 	});
 
 	it('listet die Wohnungen nach Stockwerk, von unten nach oben', () => {

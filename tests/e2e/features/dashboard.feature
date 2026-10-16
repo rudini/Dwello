@@ -16,6 +16,24 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann ist das Gebäude "Seeblick" zu "50.0 %" belegt
     Und sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
+    # Persona Anna P-1: auch eine nie vermietete leere Wohnung wird genannt
+    Und nennt die Belegung von "Seeblick" "Wohnung 1.02 leer"
+    Und erklärt die Belegung "Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter."
+
+  # F-4 (#58): dieselben Worte wie Gebäudekarten und Wohnungsseiten
+  Szenario: Künftig vermietete Wohnung in der Belegung
+    Angenommen der Mieter "Carla Rossi" existiert
+    Und "Carla Rossi" mietet die Wohnung "1.02" seit "2099-11-01" für "900" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Belegung von "Seeblick" "1 vermietet ab 01.11.2099"
+
+  # P-18 (#145): seit wann die Wohnung leer ist und wer ihre Nebenkosten trägt
+  Szenario: Leere Wohnung in der Belegung
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2019-01-01" bis "2024-03-31" für "800" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Belegung von "Seeblick" "Wohnung 1.02 leer seit 01.04.2024"
+    Und erklärt die Belegung "Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter."
 
   Szenario: Gebäude aus der Belegung öffnen
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
@@ -41,7 +59,7 @@ Funktionalität: Übersicht
     Beispiele:
       | Kennzahl            | Seite                   | Status          |
       | Vermietet           | Wohnungen               | Vermietet       |
-      | Wiedervermietet     | Wohnungen               | Wiedervermietet |
+      | Vermietet ab …      | Wohnungen               | Vermietet ab …  |
       | Leer                | Wohnungen               | Leer            |
       | Gesperrt            | Wohnungen               | Gesperrt        |
       | Überfällige Beträge | Nebenkostenabrechnungen | Überfällig      |
@@ -152,3 +170,40 @@ Funktionalität: Übersicht
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Schnellaktion "Rechnungen hochladen" wählt
     Dann kann der Liegenschaftsverwalter das Gebäude und die Dateien der Rechnungen wählen
+
+  # A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag ohne Nachmieter fragt die Übersicht, ob der Mieter
+  # noch in der Wohnung wohnt (Art. 266 Abs. 2 OR)
+  Szenario: Abgelaufener befristeter Mietvertrag ohne Nachmieter
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Bruno Meier"
+
+  Szenario: Aufgabe führt zum abgelaufenen befristeten Mietvertrag
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter öffnet die Übersicht
+    Wenn der Liegenschaftsverwalter die Aufgabe "Befristeten Mietvertrag prüfen" für "Bruno Meier" beginnt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Bruno Meier"
+
+  Szenario: Abgelaufener befristeter Mietvertrag mit Nachmieter
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und der Mieter "Carla Huber" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und "Carla Huber" mietet die Wohnung "1.02" seit "2026-01-01" für "950" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Bruno Meier"
+
+  Szenario: Mieter nach dem befristeten Mietvertrag ausgezogen
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter hat bestätigt, dass "Bruno Meier" ausgezogen ist
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Bruno Meier"
+
+  # gekündigte Mietverträge laufen nicht stillschweigend weiter: nur die Suche nach einem Nachmieter
+  Szenario: Abgelaufener gekündigter Mietvertrag
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2025-12-31" gekündigt
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Nachmieter für Wohnung 1.01 suchen" für "Anna Keller"
+    Aber nicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Anna Keller"

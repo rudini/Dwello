@@ -23,7 +23,7 @@ export interface BuildingWithStats extends Building {
 	apartmentCount: number;
 	occupiedCount: number;
 	vacantCount: number;
-	reletCount?: number; // counted in the BFF: the backend counts only occupied and vacant
+	reletStarts?: string[]; // Vertragsbeginn of each relet apartment, from the BFF: the backend counts only occupied and vacant
 	reservedCount?: number;
 }
 
@@ -50,6 +50,7 @@ export interface Apartment {
 	status: ApartmentStatus;
 	nextContractStart?: string | null;
 	currentContractEnd?: string | null; // last day of the contract running today (A-4)
+	lastContractEnd?: string | null; // last day of the latest ended contract: «Leer seit» the day after (#145)
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }
@@ -133,7 +134,8 @@ export interface TenantWithOccupancy extends Tenant {
 	currentApartment?: string | null;
 	currentBuilding?: string | null;
 	nextContractStart?: string | null; // Vertragsbeginn of a future contract
-	isActive: boolean; // a contract runs today or is signed for later
+	isActive: boolean; // a contract runs today
+	isFuture: boolean; // none runs today, one is signed for later (F-4, #58)
 }
 
 // Tenants list response

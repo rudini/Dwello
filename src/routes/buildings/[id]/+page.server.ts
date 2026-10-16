@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { countStatus } from '$lib/apartment';
+import { countStatus, reletStarts } from '$lib/apartment';
 import { plainAmount } from '$lib/invoice';
 import { localName } from '$lib/names';
 import type { BuildingWithStats, Apartment, ApartmentStatus } from '$lib/types';
@@ -104,11 +104,12 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 					area: a.area || '0',
 					status,
 					nextContractStart: (a.nextContractStart as string | null) ?? null,
-					currentContractEnd: (a.currentContractEnd as string | null) ?? null
+					currentContractEnd: (a.currentContractEnd as string | null) ?? null,
+					lastContractEnd: (a.lastContractEnd as string | null) ?? null
 				};
 			}
 		);
-		building.reletCount = countStatus(apartments, 'relet');
+		building.reletStarts = reletStarts(apartments);
 		building.reservedCount = countStatus(apartments, 'reserved');
 
 		return { building, apartments, ...fuel };
