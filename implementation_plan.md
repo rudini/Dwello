@@ -5,11 +5,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 ## Session: help texts (#109, #67, #69)
 
-- [ ] #109: `@wip` scenarios in `help.feature` (new terms, contents list to the glossary) and their steps, seen red
-- [ ] #67, #69: `fach-reviewer` reads the proposed and listed help texts before implementing (help glossary, `config_help_*`, IBAN help with refunds, category sort order and translations)
-- [ ] #109: contents list with anchors, glossary anchor `/help#glossary`, four new glossary terms (de, fr, it, en)
-- [ ] #67: `glossary_period_text` (same wording as PR #289) and `config_help_distribution_key` follow the glossary
-- [ ] #69: fach-reviewer findings fixed in all four languages; IBAN help names refunds
+- [x] #109: `@wip` scenarios in `help.feature` (new terms, contents list to the glossary) and their steps, seen red
+- [x] #67, #69: `fach-reviewer` reads the proposed and listed help texts before implementing (help glossary, `config_help_*`, IBAN help with refunds, category sort order and translations): `docs/reviews/help-fachreview-1.md`
+- [x] #109: contents list with anchors, glossary anchor `/help#glossary`, four new glossary terms (de, fr, it, en)
+- [x] #67: `glossary_period_text` (same wording as PR #289) and `config_help_distribution_key` follow the glossary
+- [x] #69: fach-reviewer findings fixed in all four languages; IBAN help names refunds; help under «Übersetzungen» (new `categories_translations_help`); product-owner points: #317 (new), #279, #83 (comments)
 - [ ] Slice review (`code-reviewer`), feature review (personas, `fach-reviewer`)
-- [ ] Checks: lint, check, type-check, affected unit tests, help, accessibility and language E2E
+- [x] Checks: lint, check, type-check, unit tests (all), E2E help, settings, categories, distribution keys and the axe/language rows of help, config, category and distribution-key screens
 - [ ] Workflow review, session to archive, pull request
+
+Files: `src/lib/ui/Panel.svelte`, `src/routes/help/+page.svelte`, `src/routes/help/Glossary.svelte`, `src/routes/config/categories/CategoryForm.svelte`, `messages/{de,fr,it,en}.json`, `tests/e2e/{features/help.feature,steps,questions,targets,tasks}/…app-frame…`, `src/__tests__/{help-page.dom,distribution-keys-pages.dom,categories-page.dom,config-pages}.test.ts`, `docs/reviews/help-fachreview-1.md`

@@ -46,7 +46,7 @@ describe('Hilfe', () => {
 		expect(glossary?.textContent).toContain('Ist der Saldo positiv, zahlt der Mieter nach');
 		expect(glossary?.textContent).toContain('auf 5 Rappen gerundet');
 		expect(glossary?.textContent).toContain(
-			'ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Nur zulässig, wenn im Mietvertrag vereinbart; das tragen Sie beim Mietvertrag ein. Üblich sind bis 3 %.'
+			'ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Nur zulässig, wenn im Mietvertrag vereinbart; das tragen Sie beim Mietvertrag ein. Üblich sind etwa 3 %'
 		);
 		expect(glossary?.textContent).not.toContain('Satz und Verteilschlüssel');
 		for (const word of ['Nachzahlung', 'Rückerstattung', 'Wiedervermietet', 'Gesperrt'])
@@ -62,10 +62,29 @@ describe('Hilfe', () => {
 		);
 	});
 
+	// Fachreview #69 (M-1, M-2, V-1 bis V-5): die Begriffe sagen, was Glossar und Gesetz sagen
+	it('erklärt die Begriffe so, wie Glossar und Mietrecht sie verstehen', () => {
+		show(HelpPage, {});
+		const glossary = section('Begriffe kurz erklärt')!.textContent;
+		for (const said of [
+			'Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt.',
+			'eine einzelne Rechnung einer umlagefähigen Kategorie können Sie davon ausnehmen',
+			'zu einer versendeten Abrechnung mit Nachzahlung',
+			'nach einer eigenen schriftlichen Zahlungsfrist von mindestens 30 Tagen',
+			'Zieht ein Mieter während der Abrechnungsperiode ein oder aus, teilt Dwello seine Heizkosten so nach Monaten',
+			'bei Heizkosten mit Heizprofil den Anteil seiner Monate',
+			'Bei einer Rückerstattung ist es das Datum, bis zu dem Sie ihm den Betrag überweisen («Rückerstattung bis»).',
+			'Üblich sind etwa 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen.'
+		])
+			expect(glossary).toContain(said);
+		for (const old of ['Wechselt der Mieter', 'Leerstand', 'lässt sich pro Rechnung anpassen'])
+			expect(glossary).not.toContain(old);
+	});
+
 	// Inhaltsverzeichnis mit eigenem Einstieg in die Begriffe (#109)
 	it('beginnt mit einem Inhalt, der zu jedem Abschnitt und zu den Begriffen führt', () => {
 		show(HelpPage, {});
-		const links = [...byTestId('help-contents').querySelectorAll('a')];
+		const links = [...byTestId('help-contents')!.querySelectorAll('a')];
 		const sections = allByTestId('page-section');
 		expect(links.map((a) => a.textContent?.trim())).toEqual(
 			sections.map((s) => s.querySelector('h2')?.textContent)

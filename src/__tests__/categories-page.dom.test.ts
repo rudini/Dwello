@@ -203,6 +203,18 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(text()).toContain('auch nicht die Gebühr für Regenwasser');
 	});
 
+	// Fachreview #69 (V-8, V-11): wozu die Übersetzungen dienen, was die Reihenfolge ordnet
+	it('erklärt die Übersetzungen und die Reihenfolge', () => {
+		show(NewCategoryPage, { form: null } as never);
+
+		expect(text()).toContain(
+			'Ihn zeigt die Nebenkostenabrechnung eines Mieters mit dieser Sprache, ebenso Dwello in dieser Sprache. Fehlt er, steht der deutsche Name.'
+		);
+		expect(text()).toContain(
+			'Position in den Auswahllisten und in der Liste der Kategorien: kleinere Zahlen stehen weiter oben, bei gleicher Zahl entscheidet der Name.'
+		);
+	});
+
 	// Die KI hat den Namen geprüft, der im Feld steht: so kommt die Antwort nach «Von der KI prüfen lassen»
 	function checked(name: string, proposal: object) {
 		const props = reactiveProps({ form: null as unknown });
