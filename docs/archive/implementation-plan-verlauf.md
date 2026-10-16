@@ -308,3 +308,18 @@ Request: pin `code-reviewer` and `fach-reviewer` to Opus, move `persona` and `da
 - [x] Before marking complete (CLAUDE.md): `test:coverage`, `lint`, `check`, backend `test` and `type-check` pass; no E2E scenario is affected
 
 Files: `.claude/agents/{code-reviewer,fach-reviewer,persona,daten-pruefer}.md`, `docs/reviews/agent-models-benchmark.md`, `docs/reviews/agent-models/*`.
+
+## Session: axe check only on UI changes
+
+Request: the CI accessibility (axe) check runs only when a pull request changes the UI. No issue. No scenario: CI only, no app behaviour changes.
+
+- [x] `changes` job outputs `ui`; job "Accessibility (axe)" skips its steps when it is `false`, so the required check still reports (`.github/workflows/ci.yml`)
+- [x] Filter checked locally with sample change lists (backend only, unit tests only, other feature file, docs/tools: skipped; page, messages, e2e steps, accessibility.feature, bun.lock: runs)
+- [x] `docs/test-pyramid.md` row "Accessibility" updated
+- [x] lint, check, test:coverage, backend test and type-check green on 35c743f (no E2E: no scenario affected)
+- [x] code-reviewer round
+- code-reviewer round 1 (docs/reviews/axe-ui-only-review-1.md): fixed C-1, C-3, C-4 (`--no-renames`, also helps `backend`/`app`), C-6; rejected C-2: the helper under `backend/src/__tests__/` breaks the job "E2E tests" as well, which loads the same steps; C-5: the Postgres service start (~15 s) cannot be skipped per matrix entry without splitting the job. No re-review: the fixes change no code in the sense of Workflow 6
+- [x] Workflow review `docs/reviews/workflow-rules-review-axe-ui-only.md`
+- [x] Checks before push green; push, pull request and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `.github/workflows/ci.yml`, `docs/test-pyramid.md`, `docs/reviews/axe-ui-only-review-1.md`, `docs/reviews/workflow-rules-review-axe-ui-only.md`.

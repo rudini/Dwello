@@ -30,14 +30,14 @@ jobs:
           if [ "${{ github.event_name }}" != pull_request ]; then
             echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
-          git diff --name-only "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
+          git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
           # The API contracts are checked against the backend (api-contracts.pg.test.ts)
           echo "backend=$(grep -qE '^(backend|tests/contracts)/' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|screens/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
-          ui_files=$(grep -vE '(^|/)__tests__/|\.(test|spec)\.ts$|\.md$' changed.txt | grep -E '^(src|messages|static|project\.inlang|tests/a11y)/|^tests/e2e/(fixtures|screenplay|targets|tasks|questions|steps)/|^tests/e2e/features/accessibility\.feature$|^(tailwind|postcss|svelte|vite|playwright)\.config\.(js|ts)$|^(package\.json|bun\.lock|\.github/workflows/ci\.yml)$' || true)
-          echo "ui=$([ -n "$ui_files" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          ui_files=$(grep -vE '(^|/)__tests__/|\.(test|spec)\.ts$|\.md$|^tests/e2e/features/' changed.txt | grep -E '^(src|messages|static|project\.inlang|tests/a11y|tests/e2e)/|^(tailwind|postcss|svelte|vite|playwright)\.config\.(js|ts)$|^(package\.json|bun\.lock|tsconfig\.json|\.github/workflows/ci\.yml)$' || true)
+          echo "ui=$([ -n "$ui_files" ] || grep -qx tests/e2e/features/accessibility.feature changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   build:
     name: Build
