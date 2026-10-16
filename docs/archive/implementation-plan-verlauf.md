@@ -789,7 +789,7 @@ Request: «Setze #110 um» (coordinator W9b). #110's "Done means" asks for an im
 - [x] Strategy `cookie, preferredLanguage, baseLocale` in `package.json` (`i18n`), `vite.config.ts`, `vitest.config.ts`; `Vary: Accept-Language` on pages
 - [x] E2E and a11y language tests keep German (Playwright already pins `locale: 'de-CH'`); DOM tests pin `navigator.languages` to de-CH (`tests/mocks/browser-language.ts`)
 - [x] Found: the old step «bevorzugt Englisch» never reached the server (Chromium sends the context locale over an extra header); `Browser.preferLanguages` now changes the request
-- [x] code-reviewer round 1 (`docs/reviews/p14-review-1.md`): fixed C-1, C-3 (Vary on every answer), C-4; C-2, C-5 stay in the report
+- [x] code-reviewer round 1 (`docs/reviews/p14-review-1.md`): fixed C-1, C-3 (Vary on every answer), C-4; C-2, C-5 stay in the report; closing round `docs/reviews/p14-review-2.md` (C-6 already resolved)
 - [x] Feature review: personas Anna (`docs/design/personas/anna-p14.md`) and Dr. Weber (`docs/design/personas/weber-p14.md`); no second `fach-reviewer` (the privacy sentence is the one reviewed before implementing)
 - [x] Workflow note: decision issue implemented directly; personas README «language stored on the account» is outdated (`docs/reviews/workflow-notes-issue-110.md`)
 - [x] Checks before push; workflow review; archive session
