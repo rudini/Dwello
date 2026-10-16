@@ -10,6 +10,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [ ] Contract list marks a contract «Abrechnung fehlt» (#211)
 - [ ] Wizard step 2: names the existing statement's period and the uncovered days, offers a short Abrechnungsperiode (#199)
 - [ ] Run and preview: already overlap; remove the `#199` marker
-- [ ] Invoice form «Rechnung schon abgerechnet»: already the overlap rule (no change)
-- [ ] fach-reviewer on the @wip scenarios before implementing
+- [x] Invoice form «Rechnung schon abgerechnet»: already the overlap rule (no change; confirmed by the domain review)
+- [x] fach-reviewer on the @wip scenarios before implementing (`docs/reviews/issue-211-fachreview-1.md`: 4 Major, M-1 and V-3 need product decisions; #281 opened, #211 commented and labelled `entscheiden`)
+- [x] Workflow note: readiness check misses «depends on #n»; blocked task cannot keep its branch (`docs/reviews/workflow-notes-issue-211.md`)
 - [ ] Slice reviews, feature review (personas, fach-reviewer), workflow notes, archive session, PR
