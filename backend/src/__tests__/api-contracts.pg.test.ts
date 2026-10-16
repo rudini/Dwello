@@ -294,6 +294,13 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract-end-refused'), await response.json())).toEqual([]);
 	});
 
+	// the 2024 statement bills its rent days: confirmed or not, it stays (#116)
+	it('DELETE /contracts/:id eines Mietvertrags mit Abrechnung liefert die Felder von contract-delete-refused.json', async () => {
+		const response = await callApi(`/api/v1/contracts/${rental.contract}?confirmMistake=true`, { method: 'DELETE' });
+		expect(response.status).toBe(409);
+		expect(drift(await sample('contract-delete-refused'), await response.json())).toEqual([]);
+	});
+
 	// a contract with an end and a notice: null fields are not checked (J2-3)
 	it('GET /contracts liefert die Felder von contracts.json', async () => {
 		const noticed = await createRental(crypto.randomUUID(), { startDate: '2024-04-01', monthlyAdvancePayment: '150' });

@@ -86,6 +86,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit          | edit-refused        |
       | contract-edit          | contracts-unknown   |
       | contract-detail-notice | default             |
+      | contract-detail-notice | delete-dialog       |
+      | contract-detail-notice | delete-unconfirmed  |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
