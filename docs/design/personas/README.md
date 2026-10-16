@@ -16,7 +16,7 @@ The caller of a run gives each persona a task on the change under review instead
 
 ## Which personas
 
-A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these holds. Usually one or two fit; run all five only for a new screen or flow, and when unsure, the two that fit best:
+A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these holds. A change that adds a screen or flow gets every persona named here; any other change at most the two that fit it best (Marco for a phone view counts as one):
 
 - **Screen:** the persona's default task uses the changed screen.
 - **Device:** every changed view is also checked on a phone: Marco.
