@@ -168,7 +168,6 @@ Funktionalität: Mietvertragsdetail
     Dann erfährt der Liegenschaftsverwalter im Dialog «Mietvertrag beenden», dass der Mietvertrag beim Tod des Mieters weiterläuft
 
   # A-3 (#112): aus dem Eingang der Kündigung weist der Dialog auf eine zu kurze Kündigungsfrist hin, ohne zu sperren
-  @wip
   Szenario: Kündigung mit zu kurzer Frist
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beenden will und die Kündigung am "2099-02-15" erhalten hat
@@ -177,7 +176,6 @@ Funktionalität: Mietvertragsdetail
     Dann zeigt der Mietvertrag "Unbefristet, gekündigt auf den 31.03.2099"
     Und zeigt der Mietvertrag die Kündigung als erhalten am "15.02.2099"
 
-  @wip
   Szenario: Kündigung mit genügend Frist
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beenden will und die Kündigung am "2098-12-15" erhalten hat

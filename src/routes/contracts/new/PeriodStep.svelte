@@ -41,8 +41,8 @@
 		label: m.contracts_limited(),
 		description: m.contracts_limited_help()
 	};
-	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence
-	// TODO(fachlich prüfen, #52): the help must say when a notice can be withdrawn
+	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence and when it is
+	// possible (#52)
 	const durations = $derived(
 		noticed
 			? [

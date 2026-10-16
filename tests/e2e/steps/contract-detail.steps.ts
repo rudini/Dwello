@@ -242,12 +242,14 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(noticePeriodHintText).toContain('Zwischen Eingang und Vertragsende liegen weniger als 3 Monate.');
 		await verwalter.sees(noticePeriodHintText).toContain('erst auf den nächsten Kündigungstermin');
+		await verwalter.sees(noticePeriodHintText).toContain('Ein Ersatzmieter übernimmt den Mietvertrag');
 	}
 );
 
 // anchored on the field's help: an empty or broken dialog shows no hint either
 Then('zeigt der Dialog keinen Hinweis auf die Frist', async ({ verwalter }) => {
 	await verwalter.sees(endDialogText).toContain('Der Tag, an dem das Kündigungsschreiben angekommen ist.');
+	await verwalter.sees(endDialogText).toContain('Die Kündigung des Mieters muss schriftlich sein.');
 	await verwalter.sees(noticePeriodHintShown).toBe(false);
 });
 

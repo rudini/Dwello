@@ -356,6 +356,7 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(withdrawNoticeHelp).toContain('gemeinsam zurücknehmen');
 		await verwalter.sees(withdrawNoticeHelp).toContain('die Schlichtungsbehörde oder ein Gericht');
+		await verwalter.sees(withdrawNoticeHelp).toContain('weder der Mieter noch der Vermieter allein');
 		await verwalter.sees(withdrawNoticeHelp).toContain('Der Mietvertrag läuft dann ohne Ende weiter.');
 	}
 );

@@ -115,6 +115,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				startDate: data.startDate,
 				endDate: data.endDate || null,
 				terminated: !!data.terminated,
+				noticeReceivedOn: data.noticeReceivedOn ?? null,
 				baseRent: data.baseRent || '0',
 				additionalRent: data.additionalRent || null,
 				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
@@ -196,13 +197,20 @@ async function endDay(fetch: typeof globalThis.fetch, id: string, form: FormData
 	return endRefusal(await stored.json(), endDate, form.get('pastConfirmed') === 'on') ?? endDate;
 }
 
-// The contract ends by notice (A-1); a stored statement that already bills rent days after that day refuses it,
+// The contract ends by notice (A-1), with the day the notice arrived when known (A-3); a stored statement that already bills rent days after that day refuses it,
 // unless it is the one draft named, which the backend then deletes with the end, or keeps when it refuses (#141)
-async function endOn(fetch: typeof globalThis.fetch, id: string, endDate: string, draft?: string) {
+async function endOn(
+	fetch: typeof globalThis.fetch,
+	id: string,
+	endDate: string,
+	form: FormData,
+	draft?: string
+) {
+	const noticeReceivedOn = String(form.get('noticeReceivedOn') ?? '') || undefined;
 	const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${id}`, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ endDate, terminated: true, deleteDraft: draft })
+		body: JSON.stringify({ endDate, terminated: true, noticeReceivedOn, deleteDraft: draft })
 	});
 	const statements =
 		response.status === 409 && (await response.json().catch(() => ({}))).statements;
@@ -226,9 +234,10 @@ async function ownDraft(fetch: typeof globalThis.fetch, contractId: string, stat
 export const actions: Actions = {
 	// The last day of the tenancy, the Kündigungstermin of an open-ended contract; a past day only confirmed, never before a statement's end
 	end: async ({ params, fetch, request }) => {
-		const day = await endDay(fetch, params.id, await request.formData());
+		const form = await request.formData();
+		const day = await endDay(fetch, params.id, form);
 		if (typeof day !== 'string') return day;
-		const refused = await endOn(fetch, params.id, day);
+		const refused = await endOn(fetch, params.id, day, form);
 		if (refused) return refused;
 	},
 	// The one draft the end would change is deleted with it; the wizard then creates the statement anew (A-10)
@@ -238,7 +247,7 @@ export const actions: Actions = {
 		if (typeof day !== 'string') return day;
 		const draft = await ownDraft(fetch, params.id, String(form.get('statementId') ?? ''));
 		if (!draft) return fail(409, { endError: m.contracts_end_failed() });
-		const refused = await endOn(fetch, params.id, day, String(draft.id));
+		const refused = await endOn(fetch, params.id, day, form, String(draft.id));
 		if (refused) return refused;
 		const building = String((draft.building as Row | undefined)?.id);
 		throw redirect(303, wizardLink(building, String(draft.periodStart), String(draft.periodEnd)));
