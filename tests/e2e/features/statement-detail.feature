@@ -395,6 +395,13 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann trägt das PDF den Titel "Décompte des charges"
 
+  # #105: vor dem Erstellen sagt die Abrechnung, in welcher Sprache das PDF entsteht
+  Szenario: Abrechnung nennt die Sprache ihres PDFs
+    Angenommen die Korrespondenz an "Eva Frei" ist auf "Französisch"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann nennt die Abrechnung "PDF auf Französisch"
+
   # A-10: wer neu abrechnet, sieht, welches Heizprofil die Abrechnung verwendet
   Szenario: Abrechnung nennt ihr Heizprofil
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -461,7 +468,7 @@ Funktionalität: Abrechnungsdetail
   Szenario: Abrechnung nennt das Mietverhältnis in der Periode
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
-    Dann nennt die Abrechnung "Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024"
+    Dann nennt die Abrechnung das Mietverhältnis "Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024"
 
   # #104: eine einzige Wohnung trägt die ganzen Kosten (Wohnungsanteil 732.00); Eva Frei mietete 91 der 366 Tage,
   # 732.00 × 91/366 = 182.00; die Summe heisst wie im PDF

@@ -753,9 +753,35 @@ Files: `src/lib/contract-wizard.ts`, `src/routes/contracts/new/{ContractWizard,R
 
 Files changed: `src/routes/buildings/BuildingMiniMap.svelte` (deleted), `src/__tests__/building-mini-map.dom.test.ts` (deleted), `src/routes/buildings/[id]/BuildingFacts.svelte`, building loads, `src/lib/types.ts`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `src/styles/globals.css`, `package.json`, `bun.lock`, privacy and token tests, deployment files and docs, `tests/e2e/features/building-detail.feature`, `tests/e2e/features/privacy.feature`, `tests/e2e/fixtures/backend.ts`, `tests/e2e/{targets,questions,steps}/building-detail*`
 
+## Session W6b: #63, #105 and #106 (the tenant's Sprache)
+
+- [x] #63 `@wip` scenario: the Sprache offers Deutsch, Französisch, Italienisch, Englisch only (`tenant-edit.feature`), seen red
+- [x] #105 `@wip` scenarios: label «Sprache für Abrechnung und Mahnungen» (`tenant-edit.feature`), «PDF auf Französisch» on the statement detail (`statement-detail.feature`), seen red
+- [x] #106 `@wip` scenario: a reminder to a French-speaking tenant has a French title (`statement-reminder.feature`), seen red
+- [x] fach-reviewer on the scenarios and the reminder texts in fr/it/en before implementing
+- [x] #63 migration `0012` (renumbered from 0008 after merging main, C-12) (tenants and `default_language` `rm` → `de`, CHECK without `rm`), backend validators, `Language` type, frontend type and labels, help text in four languages (pg test of the migration)
+- [x] #106 `reminderLetter` per language (unit test per language for all three Mahnstufen), `reminder.service` passes the tenant's Sprache; `statements_reminder_emailed` / `_letter` name the title in quotes
+- [x] #105 label and «PDF auf {Sprache}» in `PdfAction.svelte` (DOM test)
+- [x] docs: `docs/api-specification.md`, `docs/data-model.md`, `docs/tech-stack.md`, `docs/nebenkostenabrechnung-anforderungen.md`
+- [x] fach-reviewer round 1: `docs/reviews/w6b-fachreview-1.md` (V-1 to V-4, V-6 to V-9 fixed; V-5 → new issue; V-10 existed before)
+- [x] code-reviewer round 1: `docs/reviews/w6b-review-1.md` (C-1, C-4, C-6 fixed; others Nit/Minor, stay in the report)
+- [x] fach-reviewer round 2: `docs/reviews/w6b-fachreview-2.md` (V-13, V-14 fixed; V-12 glossary → product owner)
+- [x] persona Helga: `docs/design/personas/helga-w6b.md`
+- [x] persona Dr. Weber: `docs/design/personas/weber-w6b.md` (P-1 → #305)
+- [x] daten-pruefer: `docs/reviews/w6b-datenpruefung-1.md` (D-1 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-63-105-106.md`
+- [x] closing code-reviewer round: `docs/reviews/w6b-review-2.md` (C-10 answered by the E2E run, C-11 fixed)
+- [x] Feature review: persona, fach-reviewer, daten-pruefer (items above) (PDF texts)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+No scenario for the migration of existing `rm` tenants: E2E starts from fresh migrations, so no record with `rm` can exist (`migrations.pg.test.ts`).
+
+Files: `backend/migrations/0012_tenant_language_without_rm.sql`, `backend/src/services/{reminder-letter,reminder.service,pdf.service,statement-pdf.service,config.service}.ts`, `backend/src/routes/{tenants,statements}.ts`, `backend/src/db/schema.ts`, `messages/*.json`, `src/lib/{tenant,types}.ts`, `src/lib/server/{statement,documents,statement-actions}.ts`, `src/routes/statements/[id]/{PdfAction,+page}.svelte`, `src/routes/tenants/+page.server.ts`, tests, `tests/e2e/**`, `tests/contracts/statement.json`, docs (`README.md`, PRD, api-specification, data-model, tech-stack, nebenkostenabrechnung-anforderungen).
+
 ## Session W1b: statement position ↔ invoices (#96) and statement detail like the PDF (#104)
 
-- [x] #96 Each statement position stores the invoices it billed (id, description, amount and days in the period; the change of the Tankbestand with `fuelStock`): migration `0012_line_item_invoices.sql`, `schema.ts`, `calculation.service.ts`, `statement.service.ts`, `docs/data-model.md`; `statement-invoices.pg.test.ts`
+- [x] #96 Each statement position stores the invoices it billed (id, description, amount and days in the period; the change of the Tankbestand with `fuelStock`): migration `0013_line_item_invoices.sql`, `schema.ts`, `calculation.service.ts`, `statement.service.ts`, `docs/data-model.md`; `statement-invoices.pg.test.ts`
 - [x] #96 The statement detail's hint counts invoices of the period recorded, changed or deleted since, from the stored link (`statement-invoices.service.ts`, `GET /statements/:id/changed-invoices`, `+page.server.ts`); pg tests for new, changed amount, changed category, deleted, made non-allocable, none, statement without stored link
 - [x] #96 «Rechnung schon abgerechnet» / «Abrechnungen nicht aktuell» from the stored link (`GET /invoices/:id/statements`, `src/lib/server/invoice.ts`); scenario «Warnung bei einer nach der Abrechnung geänderten Rechnung»
 - [x] #104 Statement detail: tenancy dates in the period (`PartiesPanel.svelte`), Wohnungsanteil and Zeitanteil per line, total «Ihre Nebenkosten» (`CostTable.svelte`), each line links to its invoices, with their days where they differ (`LineInvoices.svelte`, #240); mapper `src/lib/server/statement.ts`, `src/lib/types.ts`
@@ -771,4 +797,4 @@ Files changed: `src/routes/buildings/BuildingMiniMap.svelte` (deleted), `src/__t
 - [x] Closing code-reviewer round (merge with main, C-17): `docs/reviews/w1b-review-3.md`
 - [x] Contracts, lint, check, type-check, all tests and E2E (chromium + api, 812 passed) before the push
 
-Files: `backend/migrations/0012_line_item_invoices.sql`, `backend/src/db/schema.ts`, `backend/src/services/calculation.service.ts`, `statement.service.ts`, `statement-invoices.service.ts`, `backend/src/routes/statements.ts`, `invoices.ts`, `src/lib/server/statement.ts`, `invoice.ts`, `src/lib/types.ts`, `src/routes/statements/[id]/` (`+page.server.ts`, `CostTable.svelte`, `LineInvoices.svelte`, `PartiesPanel.svelte`), `src/routes/invoices/[id]/` loads, `messages/*.json`, `tests/contracts/`, `tests/e2e/` (features, steps, fixtures, `screens.json`), `docs/data-model.md`, `docs/api-specification.md`, `docs/PRD-Dwello.md`, `docs/reviews/w1b-*`, `docs/reviews/workflow-notes-issue-96-104.md`; issue #307 opened.
+Files: `backend/migrations/0013_line_item_invoices.sql`, `backend/src/db/schema.ts`, `backend/src/services/calculation.service.ts`, `statement.service.ts`, `statement-invoices.service.ts`, `backend/src/routes/statements.ts`, `invoices.ts`, `src/lib/server/statement.ts`, `invoice.ts`, `src/lib/types.ts`, `src/routes/statements/[id]/` (`+page.server.ts`, `CostTable.svelte`, `LineInvoices.svelte`, `PartiesPanel.svelte`), `src/routes/invoices/[id]/` loads, `messages/*.json`, `tests/contracts/`, `tests/e2e/` (features, steps, fixtures, `screens.json`), `docs/data-model.md`, `docs/api-specification.md`, `docs/PRD-Dwello.md`, `docs/reviews/w1b-*`, `docs/reviews/workflow-notes-issue-96-104.md`; issue #307 opened.

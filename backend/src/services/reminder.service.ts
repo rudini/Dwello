@@ -17,6 +17,7 @@ import {
 	markDocumentSent,
 	recordDeliveryError
 } from './document.service';
+import type { Language } from './pdf.service';
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
 import { getStatement, updateStatement } from './statement.service';
@@ -85,7 +86,8 @@ async function reminderOn(statement: Statement, level: number, day: string) {
 		deadline: paymentDeadline,
 		tenant,
 		sender: { name: from.name, iban: from.iban },
-		reference: isQRIBAN(from.iban) ? formatQRReferenceForDisplay(statementQRReference(statement.id)) : undefined
+		reference: isQRIBAN(from.iban) ? formatQRReferenceForDisplay(statementQRReference(statement.id)) : undefined,
+		language: tenant.language as Language
 	});
 	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
 	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(day));
@@ -126,7 +128,7 @@ export async function sendReminder(statementId: string) {
 		type: 'reminder',
 		reminderLevel: level,
 		title: letter.title,
-		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[^\w. -]/g, '_'),
+		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_'),
 		content: pdf.toString('base64'),
 		channel: tenant.correspondenceChannel,
 		status: 'to_send',

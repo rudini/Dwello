@@ -60,7 +60,7 @@ export interface Tenant {
 	lastName: string;
 	email?: string | null;
 	phone?: string | null;
-	language: 'de' | 'fr' | 'it' | 'rm' | 'en';
+	language: 'de' | 'fr' | 'it' | 'en';
 	address?: string | null;
 	postalCode?: string | null;
 	city?: string | null;
@@ -334,6 +334,7 @@ export interface StatementWithDetails extends Statement {
 	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';
+	tenantLanguage?: Tenant['language'];
 	tenantAddress?: string;
 	apartmentUnit: string;
 	apartmentFloor: string;

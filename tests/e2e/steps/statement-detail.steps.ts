@@ -11,6 +11,7 @@ import {
 	invoicesOfPosition,
 	laterInvoicesHint,
 	laterInvoicesHints,
+	languageOfPdf,
 	paidDateInvalid,
 	paidDateProblem,
 	pdfRefusalText,
@@ -270,7 +271,7 @@ Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: st
 	await verwalter.sees(pdfRefusalText).toBe(text);
 });
 
-Then('nennt die Abrechnung {string}', async ({ verwalter }, text: string) => {
+Then('nennt die Abrechnung das Mietverhältnis {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(tenancyOfStatement).toBe(text);
 });
 
@@ -309,6 +310,10 @@ Then('weist die Abrechnung darauf hin: {string}', async ({ verwalter }, text: st
 
 Then('weist die Abrechnung auf keine geänderten Rechnungen hin', async ({ verwalter }) => {
 	await verwalter.sees(laterInvoicesHints).toBe(0);
+});
+
+Then('nennt die Abrechnung {string}', async ({ verwalter }, language: string) => {
+	await verwalter.sees(languageOfPdf).toBe(language);
 });
 
 Given('die Abrechnung {int} von {string} ist bezahlt', async ({ seed }, year: number, tenant: string) => {

@@ -10,7 +10,7 @@ afterEach(() => overwriteGetLocale(() => baseLocale));
 describe('Wohnungen und Mieter in der gewählten Sprache', () => {
 	it('nennt die Sprache des Mieters auf Französisch und speichert den Code', () => {
 		overwriteGetLocale(() => 'fr');
-		expect(languageLabels.rm).toBe('Romanche');
+		expect(languageLabels.it).toBe('Italien');
 		const form = new FormData();
 		form.set('language', 'it');
 		expect(parseTenantForm(form).tenant.language).toBe('it');

@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { correspondence, correspondenceLanguage } from '../questions/tenant-form';
+import { correspondence, correspondenceLanguage, languageLabel, offeredLanguages } from '../questions/tenant-form';
 import { chooseLanguage, correspondByEmailWithoutAddress, correspondByLetter, openTenantEdit } from '../tasks/tenant-form';
 
 const { Given, When, Then } = createBdd(test);
@@ -30,7 +30,7 @@ Then('{string} erhält Korrespondenz {string}', async ({ verwalter }, _tenant: s
 	await verwalter.sees(correspondence).toBe(channel);
 });
 
-const LANGUAGES: Record<string, string> = { Deutsch: 'de', Französisch: 'fr', Italienisch: 'it', Rätoromanisch: 'rm', Englisch: 'en' };
+const LANGUAGES: Record<string, string> = { Deutsch: 'de', Französisch: 'fr', Italienisch: 'it', Englisch: 'en' };
 
 Given('die Korrespondenz an {string} ist auf {string}', async ({ seed }, tenant: string, language: string) => {
 	await seed.language(tenant, LANGUAGES[language]);
@@ -42,4 +42,12 @@ When('der Liegenschaftsverwalter die Sprache {string} festlegt', async ({ verwal
 
 Then('{string} erhält Korrespondenz auf {string}', async ({ verwalter }, _tenant: string, language: string) => {
 	await verwalter.sees(correspondenceLanguage).toBe(language);
+});
+
+Then('heisst die Sprache des Mieters im Formular {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(languageLabel).toBe(label);
+});
+
+Then('bietet das Formular die Sprachen {string} an', async ({ verwalter }, languages: string) => {
+	await verwalter.sees(offeredLanguages).toEqual(languages.split(', '));
 });

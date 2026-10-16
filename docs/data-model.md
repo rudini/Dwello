@@ -103,7 +103,7 @@ address                VARCHAR(500)
 postal_code            VARCHAR(10)
 city                   VARCHAR(100)
 correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
-CHECK (language IN ('de', 'fr', 'it', 'rm', 'en'))
+CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0012 (#63)
 ```
 
 No indexes besides the primary key; `email` is not unique. `correspondence_channel` has no CHECK.
@@ -337,7 +337,7 @@ sort_order          INTEGER DEFAULT 0
 
 `apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position. `position_rental_days` and `billed_days` (migration `0003`, #208) hold `period_share` as a fraction of days when all invoices of the position bill the same days and it is not shared by the heating profile; the PDF prints them as «x/y Tage». Statements created before keep them empty. `invoice_parts` (migration `0006`, #226) holds, for a position whose invoices bill different days, each invoice's days in the period (`start`, `end`, `total`), its amount for them and the tenant's days in them (`days`); the PDF lists them under the position with the weighted share. `noPeriod` marks an invoice without Leistungszeitraum, `whole` holds the whole Leistungszeitraum and the invoice's amount when it reaches beyond the period (#241), `fuelStock` marks the change of the Tankbestand (#239); parts stored before have neither. It stays empty when the tenant rents the whole period or the invoices sum to zero.
 
-`invoices` (migration `0012`, #96) holds every invoice the position billed, in the order of `invoice_parts`: its id, its description, its amount in the period and the days it bills there (`start`, `end`); the change of the Tankbestand is stored with `fuelStock` and the id `fuel-stock-<period end>`, it is no invoice. It is the link from a statement to its invoices: an invoice of the period that no position holds with its current amount, days, category and distribution key, or a held invoice that left the period (deleted, made non-allocable), was recorded or changed after the statement (`GET /statements/:id/changed-invoices`, `GET /invoices/:id/statements`); the statement detail links each position to its invoices. Statements created before keep it empty; for them, as before, an invoice of the period recorded after the statement counts as missing. No foreign key: a deleted invoice stays in the statement that billed it.
+`invoices` (migration `0013`, #96) holds every invoice the position billed, in the order of `invoice_parts`: its id, its description, its amount in the period and the days it bills there (`start`, `end`); the change of the Tankbestand is stored with `fuelStock` and the id `fuel-stock-<period end>`, it is no invoice. It is the link from a statement to its invoices: an invoice of the period that no position holds with its current amount, days, category and distribution key, or a held invoice that left the period (deleted, made non-allocable), was recorded or changed after the statement (`GET /statements/:id/changed-invoices`, `GET /invoices/:id/statements`); the statement detail links each position to its invoices. Statements created before keep it empty; for them, as before, an invoice of the period recorded after the statement counts as missing. No foreign key: a deleted invoice stays in the statement that billed it.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 
@@ -391,7 +391,7 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | `iban` | `''` | CH or LI IBAN, 21 characters, MOD-97 checksum |
 | `payment_deadline_days` | `30` | 7–90 |
 | `reminder_after_days` | `14` | 7–60 |
-| `default_language` | `de` | `de` \| `fr` \| `it` \| `rm` \| `en` |
+| `default_language` | `de` | `de` \| `fr` \| `it` \| `en` |
 
 The IBAN is stored in plain text.
 
