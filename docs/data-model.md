@@ -116,6 +116,7 @@ tenant_id               UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 start_date              DATE NOT NULL           -- Vertragsbeginn
 end_date                DATE                    -- Vertragsende, NULL = unbefristet
 terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date is the Kündigungstermin of an open-ended contract, not an agreed end
+notice_received_on      DATE              -- the day the notice arrived (A-3, #112), optional; only with terminated
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
@@ -124,6 +125,7 @@ contract_pdf            TEXT
 notes                   TEXT
 CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date)
 CONSTRAINT contracts_terminated_check CHECK (NOT terminated OR end_date IS NOT NULL)
+CONSTRAINT contracts_notice_received_check CHECK (notice_received_on IS NULL OR terminated)
 ```
 
 Indexes: `contracts_apartment_id_idx`, `contracts_tenant_id_idx`, `contracts_end_date_idx (end_date)`,
