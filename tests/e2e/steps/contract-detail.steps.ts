@@ -196,7 +196,7 @@ When('der Liegenschaftsverwalter den Mietvertrag beenden will', async ({ verwalt
 Then(
 	'erfährt der Liegenschaftsverwalter im Dialog «Mietvertrag beenden», dass der Mietvertrag beim Tod des Mieters weiterläuft',
 	async ({ verwalter }) => {
-		await verwalter.sees(endDialogDeathText).toContain('Ist der Mieter gestorben, beenden Sie den Mietvertrag nicht');
-		await verwalter.sees(endDialogDeathText).toContain('Erben');
+		await verwalter.sees(endDialogDeathText).toContain('Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst');
+		await verwalter.sees(endDialogDeathText).toContain('erst, wenn die Erben oder Sie gekündigt haben');
 	}
 );

@@ -173,9 +173,11 @@ describe('Mietvertragsdetail', () => {
 	it('sagt im Dialog «Beenden», dass der Mietvertrag beim Tod des Mieters auf die Erben übergeht', () => {
 		open();
 		click('contract-end-button');
+		// Fachreview W10-2 M-1: die Kündigung der Erben wird hier erfasst (Art. 266i OR)
 		expect(text('contract-end-death')).toContain(
-			'Ist der Mieter gestorben, beenden Sie den Mietvertrag nicht: Er geht auf die Erben über.'
+			'Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst: Er geht auf die Erben über. Erfassen Sie das Vertragsende erst, wenn die Erben oder Sie gekündigt haben.'
 		);
+		expect(text('contract-end-death')).toContain('unter «Adresse»'); // Persona Weber P-1
 	});
 
 	it('bietet bei einer versendeten Abrechnung kein Löschen an', async () => {

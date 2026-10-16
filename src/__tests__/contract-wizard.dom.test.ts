@@ -436,7 +436,18 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		select('contract-tenant-select', 't1');
 		next();
 		await settle();
+		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
 		expect(byTestId('tenant-running-contract')).toBeNull();
+	});
+
+	// Code-Review W10 C-2: erscheint der Hinweis erst nach dem Laden, liest ein Screenreader ihn trotzdem vor
+	it('nennt den Mietvertrag in einem Bereich, den Screenreader ansagen', async () => {
+		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('tenant-running-contract')!.closest('[role="status"]')).not.toBeNull();
 	});
 
 	it('schweigt bei einem unbefristeten Mietvertrag eines anderen Mieters', async () => {

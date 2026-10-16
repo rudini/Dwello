@@ -13,7 +13,10 @@ Request: «Setze #156 #155 um».
 - [x] fach-reviewer on the `@wip` scenarios before implementing
 - [x] fach-reviewer round 1 (`docs/reviews/w10-fachreview-1.md`)
 - [x] #155 also in the dialog «Mietvertrag beenden» (Fachreview W10 M-1); the edit link names the tenant (V-1)
-- [ ] Slice review (code-reviewer), feature review (persona, fach-reviewer)
+- [x] code-reviewer round 1 (`docs/reviews/w10-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w10-fachreview-2.md`)
+- [x] persona Helga (`docs/design/personas/helga-b16.md`), persona Dr. Weber (`docs/design/personas/weber-f23.md`)
+- [ ] fach-reviewer round 3, Dr. Weber re-run on the changed texts, closing code-reviewer round
 - [ ] Checks before push; workflow review; archive session; pull request merged
 
-Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/lib/contract-form.ts`, `src/lib/contract-wizard.ts`, `src/lib/utils/contract-availability.ts`, `docs/anforderungen-vertragsende.md`, tests in `src/__tests__/` and `tests/e2e/`.
+Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/routes/contracts/new/OpenContracts.svelte`, `src/lib/contract-form.ts`, `src/lib/contract-wizard.ts`, `src/lib/utils/contract-availability.ts`, `docs/anforderungen-vertragsende.md`, tests in `src/__tests__/` and `tests/e2e/`.

@@ -146,13 +146,15 @@ describe('Mietvertrag bearbeiten', () => {
 		async (endDate) => {
 			await open(endDate);
 			const help = byTestId('contract-parties-help')!.textContent!;
-			expect(help).toContain('Stirbt der Mieter, endet der Mietvertrag nicht');
+			expect(help).toContain('Stirbt der Mieter, endet der Mietvertrag nicht von selbst');
+			expect(help).toContain('erfassen Sie eines erst, wenn die Erben oder Sie gekündigt haben');
 			expect(help).toContain(
-				'als Korrespondenzadresse die Adresse ein, an die die Post für die Erben geht'
+				// Persona Weber P-1: das Feld heisst im Mieterformular «Adresse»
+				'unter «Adresse» die Adresse ein, an die die Post für die Erben geht, bei Post per E-Mail auch unter «E-Mail»'
 			);
 			// Fachreview W10 M-2, M-4: Vertragsende ohne Kündigungsfrist, gleiche Bedingungen, schriftliche Zustimmung
 			expect(help).toContain('mit Ihrer schriftlichen Zustimmung');
-			expect(help).toContain('Wohnung der Familie');
+			expect(help).toContain('bei der Scheidung die Wohnung der Familie'); // Persona Weber P-3
 			expect(help).toContain('am Tag vor dem Wechsel, ohne Kündigungsfrist');
 		}
 	);

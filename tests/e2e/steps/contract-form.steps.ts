@@ -336,7 +336,7 @@ Then(
 Then(
 	'erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt',
 	async ({ verwalter }) => {
-		await verwalter.sees(partiesHelpText).toContain('als Korrespondenzadresse die Adresse ein, an die die Post für die Erben geht');
+		await verwalter.sees(partiesHelpText).toContain('unter «Adresse» die Adresse ein, an die die Post für die Erben geht');
 	}
 );
 
@@ -344,7 +344,7 @@ When('der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erf
 	await verwalter.attemptsTo(newContractAfterEnd);
 });
 
-// the link carries the start; that the wizard takes it from `?start=` is tested in contract-form.test.ts
+// the link carries the start; that the wizard takes it from `?start=` is tested in contract-wizard.test.ts
 Then('schlägt der neue Mietvertrag den Vertragsbeginn {string} vor', async ({ verwalter }, date: string) => {
 	await verwalter.sees(pageAddress).toMatch(new RegExp(`start=${date}`));
 });

@@ -222,6 +222,7 @@
 			</p>
 			<p>{m.contracts_parties_fixed_mistake()}</p>
 			<p>{m.contracts_parties_fixed_by_law()}</p>
+			<p>{m.contracts_parties_fixed_transfer()}</p>
 			<a href={back} class={link} data-testid="contract-parties-link"
 				>{m.contracts_parties_fixed_link({ name: tenant })}</a
 			>
