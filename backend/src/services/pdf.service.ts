@@ -18,6 +18,7 @@ import {
 } from './qr-bill.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
+import type { InvoicePart } from '../db/schema';
 
 /**
  * Supported languages
@@ -322,6 +323,7 @@ export interface LineItem {
 	apartmentShare?: number | null; // the apartment's part of the total by the key; none on older statements
 	periodShare?: number | null; // 0-1: days rented, or the heating profile's share
 	shareDays?: { days: number; total: number }; // the period share as days, when the statement stored them (#208)
+	invoiceParts?: InvoicePart[] | null; // the invoices of a position over different days, with their days (#226)
 	byProfile?: boolean; // shared by the heating profile, not by days
 	heating?: boolean; // a heating cost: the tenant may ask for the detailed heating statement (Art. 8 Abs. 1 VMWG)
 	tenantShare: number;
@@ -440,6 +442,7 @@ const feeBasis = (data: StatementPDFData, t: Record<string, string>) =>
 function timeShare(item: LineItem, data: StatementPDFData, t: Record<string, string>) {
 	if (item.periodShare == null) return '–';
 	if (!item.byProfile && item.shareDays) return fill(t.days, item.shareDays);
+	if (item.invoiceParts) return formatShare(item.periodShare); // the invoices under it give the share (#226, C-5)
 	const byDays = !item.byProfile && Math.abs(item.periodShare - data.rentalDays / data.periodDays) < 0.00005;
 	return byDays ? fill(t.days, { days: data.rentalDays, total: data.periodDays }) : formatShare(item.periodShare);
 }
@@ -592,7 +595,9 @@ function costTable(page: Page, y: number) {
 	for (const item of data.lineItems) {
 		const key = [item.key ?? '–', item.keyShare].filter(Boolean).join('\n');
 		const share = item.apartmentShare == null ? '–' : formatCHF(item.apartmentShare);
-		top = row(doc, [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)], top, { header });
+		const parts = partLines(item, t);
+		top = row(doc, [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)], room(doc, top, parts.length * 11 + 20, header), { header });
+		top = partsBelow(doc, parts, top);
 	}
 	// Subtotal to balance stay on one page: the balance alone on the next page lost its derivation
 	const width = COLUMNS[4].x + COLUMNS[4].width - PAGE.left;
@@ -620,6 +625,26 @@ function costTable(page: Page, y: number) {
 	const height = doc.heightOfString(note, { width: PAGE.right - PAGE.left });
 	doc.fillColor(COLORS.muted).text(note, PAGE.left, room(doc, top + 4, height), { width: PAGE.right - PAGE.left });
 	return doc.y + 18;
+}
+
+// The invoices of a position over different days and the sum that weighs them by amount (#226): the tenant recomputes
+// the Zeitanteil, and «Ihr Anteil» as Wohnungsanteil × that sum
+function partLines(item: LineItem, t: Record<string, string>) {
+	if (!item.invoiceParts || item.periodShare == null) return [];
+	const lines = item.invoiceParts.map(
+		(part) => `${formatDate(part.start)} – ${formatDate(part.end)}: ${formatCHF(part.amount)}, ${fill(t.days, part)}`
+	);
+	const sum = item.invoiceParts.map((part) => `${formatCHF(part.amount)} × ${part.days}/${part.total}`).join(' + ');
+	return [...lines, `(${sum}) / ${formatCHF(item.totalAmount)} = ${formatShare(item.periodShare)}`];
+}
+
+function partsBelow(doc: Doc, lines: string[], y: number) {
+	if (!lines.length) return y;
+	const width = COLUMNS[4].x + COLUMNS[4].width - COLUMNS[0].x - 8;
+	doc.font('Helvetica').fontSize(7.5).fillColor(COLORS.muted);
+	const text = lines.join('\n');
+	doc.text(text, COLUMNS[0].x + 8, y - 3, { width });
+	return y - 3 + doc.heightOfString(text, { width }) + 6;
 }
 
 // How the shares are reached; the heating clause only where a line is shared by the profile, not by days (#137)

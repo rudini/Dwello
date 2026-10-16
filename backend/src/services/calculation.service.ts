@@ -12,7 +12,7 @@
 
 import { like, max } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements, type HeatingShare } from '../db/schema';
+import { utilityStatements, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -42,6 +42,7 @@ export interface CalculatedLineItem {
 	periodShare: number; // share of the period (0-1): days rented / period days, or the heating profile's shares of the months rented
 	positionRentalDays: number | null; // the period share as days, when it is one: the tenant's days in the days billed (#208)
 	billedDays: number | null; // and the days the position's invoices bill in the period
+	invoiceParts: InvoicePart[] | null; // invoices over different days: each with its days, for the weighted share (#226)
 	isHeatingCost: boolean;
 }
 
@@ -140,16 +141,25 @@ function rentalShare(group: InvoiceGroup, rentalStart: string, rentalEnd: string
 }
 
 // The share as days the tenant can check (#208): when every invoice of the group bills the same days, his days in them
-// of those days; invoices over different days give a weighted share without such a fraction
-type LineDays = Pick<CalculatedLineItem, 'positionRentalDays' | 'billedDays'>;
-const noDays: LineDays = { positionRentalDays: null, billedDays: null };
-function daysOf(group: InvoiceGroup, rentalStart: string, rentalEnd: string): LineDays {
+// of those days; invoices over different days give a weighted share, with each invoice's days to recompute it (#226),
+// except for a tenant over the whole period (he bears every day: «x/x Tage») and invoices summing to zero (no share)
+type LineDays = Pick<CalculatedLineItem, 'positionRentalDays' | 'billedDays' | 'invoiceParts'>;
+const noDays: LineDays = { positionRentalDays: null, billedDays: null, invoiceParts: null };
+const rentedIn = ({ start, end }: { start: string; end: string }, rentalStart: string, rentalEnd: string) =>
+	days(start > rentalStart ? start : rentalStart, end < rentalEnd ? end : rentalEnd);
+function daysOf(group: InvoiceGroup, rentalStart: string, rentalEnd: string, wholePeriod: boolean): LineDays {
 	const [{ start, end }] = group.invoices;
-	if (group.invoices.some((invoice) => invoice.start !== start || invoice.end !== end))
-		return noDays;
-	const from = start > rentalStart ? start : rentalStart;
-	const to = end < rentalEnd ? end : rentalEnd;
-	return { positionRentalDays: days(from, to), billedDays: days(start, end) };
+	if (group.invoices.every((invoice) => invoice.start === start && invoice.end === end))
+		return { ...noDays, positionRentalDays: rentedIn({ start, end }, rentalStart, rentalEnd), billedDays: days(start, end) };
+	if (wholePeriod || group.totalAmount === 0) return noDays;
+	const invoiceParts = group.invoices.map((invoice) => ({
+		start: invoice.start,
+		end: invoice.end,
+		amount: invoice.amount,
+		days: rentedIn(invoice, rentalStart, rentalEnd),
+		total: days(invoice.start, invoice.end)
+	}));
+	return { ...noDays, invoiceParts };
 }
 
 /**
@@ -339,7 +349,7 @@ export async function calculateStatementForContract(
 				isoDay(contractOverlap.overlapEnd)
 			];
 			periodShare = rentalShare(group, rentalStart, rentalEnd);
-			shareDays = daysOf(group, rentalStart, rentalEnd);
+			shareDays = daysOf(group, rentalStart, rentalEnd, rentalDays === totalPeriodDays);
 			tenantShare = roundToRappen(apartmentShareResult.share * periodShare);
 		}
 

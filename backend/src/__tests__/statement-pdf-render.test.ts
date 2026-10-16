@@ -237,3 +237,32 @@ describe('Heiz- und Warmwasserkosten im PDF', () => {
 		expect((await textOf(due)).flowing).not.toContain('aus dem Tank');
 	});
 });
+
+// Zwei Rechnungen über verschiedene Leistungszeiträume, Einzug am 15. August: 600 × 0/91 + 1'200 × 47/92 (#226)
+describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
+	const invoiceParts = [
+		{ start: '2025-04-01', end: '2025-06-30', amount: 600, days: 0, total: 91 },
+		{ start: '2025-07-01', end: '2025-09-30', amount: 1200, days: 47, total: 92 }
+	];
+	const mixed = { ...due, lineItems: [{ ...refund.lineItems[0], totalAmount: 1800, apartmentShare: 900, periodShare: 0.3406, invoiceParts, tenantShare: 306.52 }] };
+
+	it.each([
+		['fr', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 jours"],
+		['it', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 giorni"],
+		['en', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 days"]
+	] as const)('nennt die Tage jeder Rechnung auch auf %s', async (language, line) => {
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(mixed, config, language), 'base64')).flowing;
+		expect(text).toContain(line);
+		expect(text).toContain("(600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 34.06 %");
+	});
+
+	it('hält die Rechnungen beim Seitenwechsel bei ihrer Position, unter dem Tabellenkopf', async () => {
+		const many = { ...mixed, lineItems: Array.from({ length: 30 }, (_, i) => ({ ...mixed.lineItems[0], category: `Kategorie ${i + 1}` })) };
+
+		const pdf = await textOf(many);
+
+		expect(pdf.pages).toBeGreaterThanOrEqual(3);
+		expect(pdf.flowing.split('Kategorie Verteilschlüssel').length - 1).toBe(pdf.pages - 1);
+		expect(pdf.flowing).not.toMatch(/Kategorie Verteilschlüssel[^(]*\d{2}\.\d{2}\.2025 – 30\.06\.2025/);
+	});
+});

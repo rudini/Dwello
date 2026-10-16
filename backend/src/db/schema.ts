@@ -316,6 +316,9 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 /** Own value and the building's total by unit: the fraction a simple distribution key gives the apartment */
 export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
 
+// An invoice of a position over different days (#226): its days in the period, its amount for them, the tenant's days
+export type InvoicePart = { start: string; end: string; amount: number; days: number; total: number };
+
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 export type HeatingShare =
 	| { byDays: true }
@@ -421,6 +424,7 @@ export const utilityStatementLineItems = pgTable(
 		// TODO(fachlich prüfen, #75): glossary terms for both
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
+		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
