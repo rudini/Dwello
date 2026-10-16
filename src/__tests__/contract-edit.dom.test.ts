@@ -139,6 +139,19 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('contract-parties-new')).toBeNull();
 	});
 
+	// F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über; ein Eintritt eines Dritten
+	// (Art. 263 OR, Art. 121 ZGB) ist Vertragsende und neuer Mietvertrag
+	it('erklärt, wie Tod, Übertragung und Zuweisung durch ein Gericht erfasst werden', async () => {
+		for (const endDate of [null, '2099-03-31']) {
+			await open(endDate);
+			const help = byTestId('contract-parties-help')!.textContent!;
+			expect(help).toContain('Stirbt der Mieter, endet der Mietvertrag nicht');
+			expect(help).toContain('Adresse der Erben als Korrespondenzadresse');
+			expect(help).toContain('Gericht');
+			document.body.innerHTML = '';
+		}
+	});
+
 	// Fachreview V-2: mit Vertragsende gibt es kein «Beenden» mehr
 	it('nennt bei einem Mietvertrag mit Vertragsende den frühesten Tag des neuen Mietvertrags', async () => {
 		await open('2099-03-31');
@@ -152,8 +165,10 @@ describe('Mietvertrag bearbeiten', () => {
 		);
 		expect(help).toContain('ändern Sie zuerst unten unter «Vertragsdauer» das Vertragsende.');
 		expect(help).not.toContain('«Beenden»');
-		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt
-		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe('/contracts/new');
+		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt; B-16 (#156): mit Mieter und frühestem Beginn
+		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe(
+			'/contracts/new?tenant=t1&start=2099-04-01'
+		);
 	});
 
 	it('kehrt beim Abbrechen zum Mietvertrag zurück', async () => {

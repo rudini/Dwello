@@ -87,6 +87,8 @@ describe('Mietvertragsdetail', () => {
 		]);
 		expect(links).toEqual([
 			['Nachmieter erfassen', '/contracts/new?apartment=a1'],
+			// B-16 (#156): wer innerhalb des Hauses umzieht, braucht einen neuen Mietvertrag
+			['Neuen Mietvertrag für Anna Keller erfassen', '/contracts/new?tenant=t1'],
 			['Neue Adresse eintragen', '/tenants/t1/edit']
 		]);
 	});
@@ -218,7 +220,7 @@ describe('Mietvertragsdetail', () => {
 		);
 	});
 
-	it('nennt mit erfasstem Nachmieter nur noch die neue Adresse', () => {
+	it('bietet mit erfasstem Nachmieter keinen Nachmieter mehr an', () => {
 		show(ContractPage, {
 			data: {
 				today: '2026-10-10',
@@ -232,7 +234,7 @@ describe('Mietvertragsdetail', () => {
 		const links = [...byTestId('contract-next-steps')!.querySelectorAll('a')].map((a) =>
 			a.textContent!.trim()
 		);
-		expect(links).toEqual(['Neue Adresse eintragen']);
+		expect(links).toEqual(['Neuen Mietvertrag für Anna Keller erfassen', 'Neue Adresse eintragen']);
 	});
 
 	it('nennt ohne Kündigung keine nächsten Schritte', () => {
