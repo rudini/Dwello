@@ -172,6 +172,20 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
     Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt."
 
+  # #199: eine Abrechnung aus einer anderen Abrechnungsperiode (z.B. vor einem Wechsel der Einstellung) deckt nur einen Teil
+  @wip
+  Szenario: Tage ohne Abrechnung bei der Wahl der Gebäude
+    Angenommen für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann nennt die Wahl für "Lindenhof" die Lücke "Bestehende Abrechnungen: 01.07.2023 – 30.06.2024. Noch ohne Abrechnung: 01.07.2024 – 31.12.2024."
+
+  @wip
+  Szenario: Kürzere Abrechnungsperiode für die Tage ohne Abrechnung
+    Angenommen für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Und der Liegenschaftsverwalter für "Lindenhof" die Abrechnungsperiode der Tage ohne Abrechnung wählt
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Lindenhof" und die Periode "2024-07-01" bis "2024-12-31"
+
   Szenario: Erstellte Abrechnungen anzeigen
     Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt

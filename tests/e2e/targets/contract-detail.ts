@@ -42,3 +42,8 @@ export const missingStatementLink = (periodStart: string) =>
 		page.getByTestId(`contract-missing-statement-link-${periodStart}`)
 	);
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
+// One link per Abrechnungsperiode without a statement to the building's invoices of that period, by its first day (#211)
+export const missingStatementInvoicesLink = (periodStart: string) =>
+	target(`Rechnungen der fehlenden Abrechnung ab ${periodStart}`, (page) =>
+		page.getByTestId(`contract-missing-statement-invoices-${periodStart}`)
+	);

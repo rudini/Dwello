@@ -112,9 +112,30 @@ Funktionalität: Übersicht
     Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
     Und der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" ist im letzten Jahr aus der Wohnung "2.01" ausgezogen
-    Und "Bruno Meier" hat die Abrechnung des letzten Jahres für das Gebäude "Ahornhof"
+    Und "Bruno Meier" hat die Abrechnungen der letzten beiden Jahre für das Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" das Gebäude "Seeblick", aber nicht das Gebäude "Ahornhof"
+
+  # #211: die Erinnerung prüft jede abgelaufene Abrechnungsperiode seit dem Vertragsbeginn, nicht nur die letzte
+  @wip
+  Szenario: Erinnerung nennt eine ältere Periode ohne Abrechnung
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2023-01-01" bis "2023-12-31" für "900" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "2023"
+
+  # #199: eine Abrechnung, die die Periode teilweise abdeckt, zählt; es fehlen nur die Tage ohne Abrechnung
+  @wip
+  Szenario: Erinnerung nennt nur die Tage ohne Abrechnung
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2023-01-01" bis "2023-12-31" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung vom "2022-07-01" bis "2023-06-30" im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "01.07.2023 – 31.12.2023"
 
   # Eine Abrechnung im Gebäude genügt nicht: jeder Mietvertrag der Periode braucht seine eigene
   Szenario: Erinnerung bleibt, bis jeder Mietvertrag der Periode abgerechnet ist

@@ -51,3 +51,10 @@ export const categoryFinding = (category: string) =>
 		page.getByTestId('category-finding').filter({ hasText: category })
 	);
 export const draftsOnlyNote = target('Hinweis nur Entwürfe', (page) => page.getByTestId('generate-drafts-note'));
+// The days of the period the existing statements leave open, and the shorter period for them (#199, step 2)
+export const buildingGap = (buildingId: string) =>
+	target(`Tage ohne Abrechnung im Gebäude ${buildingId}`, (page) => page.getByTestId(`generate-building-gap-${buildingId}`));
+export const buildingShortPeriodLink = (buildingId: string) =>
+	target(`Abrechnungsperiode der Tage ohne Abrechnung im Gebäude ${buildingId}`, (page) =>
+		page.getByTestId(new RegExp(`^generate-building-short-period-${buildingId}`)).first()
+	);

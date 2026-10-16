@@ -4,6 +4,7 @@ import { Accessible, Checked, Count, Text, Value, Visibility } from '../screenpl
 import {
 	announcement,
 	buildingBilled,
+	buildingGap,
 	buildingCheckbox,
 	buildingInvoices,
 	categoryFinding,
@@ -110,3 +111,4 @@ export const categoryFindingOf = (category: string) => Text.of(categoryFinding(c
 // the option names the profile and its sum, «Winter … (100%)»
 export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
+export const gapOfBuilding = (buildingId: string) => Text.of(buildingGap(buildingId));

@@ -6,6 +6,7 @@ import {
 	balanceOf,
 	billedOfBuilding,
 	buildingChosen,
+	gapOfBuilding,
 	categoryFindingOf,
 	draftsOnly,
 	feeAboveGuideline,
@@ -33,6 +34,7 @@ import {
 import {
 	chooseBuilding,
 	chooseBuildingsFor,
+	chooseShortPeriodOf,
 	confirmDespiteWarnings,
 	generateMore,
 	generateStatements,
@@ -317,3 +319,24 @@ Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text:
 Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
 });
+
+Then('nennt die Wahl für {string} die Lücke {string}', async ({ verwalter, seed }, building: string, text: string) => {
+	await verwalter.sees(gapOfBuilding(seed.idOf(building)!)).toBe(text);
+});
+
+When(
+	'der Liegenschaftsverwalter für {string} die Abrechnungsperiode der Tage ohne Abrechnung wählt',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(chooseShortPeriodOf(seed.idOf(building)!));
+	}
+);
+
+Then(
+	'ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude {string} und die Periode {string} bis {string}',
+	async ({ verwalter, seed }, building: string, start: string, end: string) => {
+		await verwalter
+			.sees(pageAddress)
+			.toMatch(new RegExp(`/statements/generate\\?building=${seed.idOf(building)}&start=${start}&end=${end}`));
+		await verwalter.sees(heatingProfileOffered).toBe(true);
+	}
+);

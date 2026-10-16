@@ -177,3 +177,22 @@ Then(
 		await verwalter.sees(overviewTasksNaming(names.get(tenant)!)).toBe(0);
 	}
 );
+
+Given(
+	'{string} hat die Abrechnungen der letzten beiden Jahre für das Gebäude {string}',
+	async ({ seed }, tenant: string, building: string) => {
+		await seed.statement(tenant, building, lastYear - 1);
+		await seed.statement(tenant, building, lastYear);
+	}
+);
+
+// the task names each building with its periods in brackets: «Ahornhof (2023, 01.07.2024 – 31.12.2024)»
+Then(
+	'nennt die Aufgabe {string} für das Gebäude {string} die Periode {string}',
+	async ({ verwalter, names }, title: string, building: string, period: string) => {
+		const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		await verwalter
+			.sees(overviewTaskText(title))
+			.toMatch(new RegExp(`${escape(names.get(building)!)} \\([^)]*${escape(period)}`));
+	}
+);

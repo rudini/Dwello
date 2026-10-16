@@ -14,6 +14,7 @@ import {
 	deleteContractButton,
 	deleteDraftAndEndButton,
 	endContractButton,
+	missingStatementInvoicesLink,
 	missingStatementLink,
 	nextStep,
 	refusedStatementLink
@@ -48,3 +49,4 @@ export const createMissingStatement = (periodStart: string) => Click.on(missingS
 export const useWindowOf = (width: number, height: number) => Browser.resizeTo({ width, height });
 // the confirm button scrolled into view inside the dialog
 export const scrollToEndConfirmation = Scroll.to(confirmEndContractButton);
+export const showMissingStatementInvoices = (periodStart: string) => Click.on(missingStatementInvoicesLink(periodStart));

@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { listedAmount, listedContract, listedContractCount } from '../questions/contracts';
+import { listedAmount, listedContract, listedContractCount, missingStatementOfContract } from '../questions/contracts';
 import { pageAddress, pageTitle } from '../questions/navigation';
 import {
 	editContract,
@@ -127,3 +127,22 @@ Then(
 Then('ist der Liegenschaftsverwalter auf der Mietvertragsliste', async ({ verwalter }) => {
 	await verwalter.sees(pageAddress).toMatch(/\/contracts$/);
 });
+
+Then(
+	'zeigt die Mietvertragsliste beim Mietvertrag von {string} {string}',
+	async ({ verwalter, names }, tenant: string, note: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await verwalter.attemptsTo(openContractList, searchContracts(name));
+		await verwalter.sees(missingStatementOfContract(name)).toBe(note);
+	}
+);
+
+Then(
+	'zeigt die Mietvertragsliste beim Mietvertrag von {string} keine fehlende Abrechnung',
+	async ({ verwalter, names }, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await verwalter.attemptsTo(openContractList, searchContracts(name));
+		await verwalter.sees(listedContract(name)).toContain(name);
+		await verwalter.sees(missingStatementOfContract(name)).toBeNull();
+	}
+);

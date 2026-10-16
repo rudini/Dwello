@@ -10,6 +10,7 @@ import {
 	totalRent
 } from '../questions/contract-detail';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
+import { chosenInvoiceBuilding, chosenInvoiceYear } from '../questions/invoices';
 import { pageAddress } from '../questions/navigation';
 import {
 	chooseNextStep,
@@ -26,6 +27,7 @@ import {
 	scrollToEndConfirmation,
 	showBuildingInvoices,
 	showContractStatements,
+	showMissingStatementInvoices,
 	startDeletingContract,
 	useWindowOf
 } from '../tasks/contract-detail';
@@ -179,3 +181,29 @@ Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed 
 	await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
 	await verwalter.sees(endOfContract).toContain(date);
 });
+
+Given(
+	'für {string} gibt es die Abrechnung vom {string} bis {string} im Gebäude {string}',
+	async ({ seed }, tenant: string, start: string, end: string, building: string) => {
+		await seed.statement(tenant, building, Number(start.slice(0, 4)), undefined, [start, end]);
+	}
+);
+
+Then('meldet der Mietvertrag die fehlende Abrechnung {string}', async ({ verwalter }, period: string) => {
+	await verwalter.sees(missingStatementsText).toContain(period);
+});
+
+When(
+	'der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung {int} anzeigt',
+	async ({ verwalter }, year: number) => {
+		await verwalter.attemptsTo(showMissingStatementInvoices(`${year}-01-01`));
+	}
+);
+
+Then(
+	'zeigt die Rechnungsliste die Rechnungen des Jahres {int} im Gebäude {string}',
+	async ({ verwalter, names }, year: number, building: string) => {
+		await verwalter.sees(chosenInvoiceBuilding).toBe(names.get(building)!);
+		await verwalter.sees(chosenInvoiceYear).toBe(String(year));
+	}
+);
