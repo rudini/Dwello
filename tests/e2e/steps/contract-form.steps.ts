@@ -11,12 +11,14 @@ import {
 	confirmation,
 	draftRestoredShown,
 	durationChosen,
+	enteredAdvancePayment,
 	enteredBaseRent,
 	failure,
 	fixedApartmentName,
 	fixedTenantName,
 	partiesHelpText,
 	reviewHint,
+	rentTakenOverText,
 	reviewed,
 	runningContractHintText,
 	startHint,
@@ -45,6 +47,8 @@ import {
 	discardDraft,
 	goBackToStep,
 	goToNextStep,
+	goToRentWith,
+	openNewContractFor,
 	newContractAfterEnd,
 	openRunningContract,
 	registerContract,
@@ -349,6 +353,29 @@ When('der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erf
 Then('schlägt der neue Mietvertrag den Vertragsbeginn {string} vor', async ({ verwalter }, date: string) => {
 	await verwalter.sees(pageAddress).toMatch(new RegExp(`start=${date}`));
 });
+
+Given(
+	'der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung {string}',
+	async ({ verwalter, seed }, apartment: string) => {
+		await verwalter.attemptsTo(openNewContractFor(seed.idOf(apartment)!));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter für {string} ab {string} bis zur Miete weitergeht',
+	async ({ verwalter, seed }, tenant: string, startDate: string) => {
+		await verwalter.attemptsTo(goToRentWith(seed.idOf(tenant)!, startDate));
+	}
+);
+
+Then(
+	'schlägt der Schritt "Miete" die Nettomiete {string} und das Akonto {string} aus dem letzten Mietvertrag der Wohnung vor',
+	async ({ verwalter }, baseRent: string, advancePayment: string) => {
+		await verwalter.sees(enteredBaseRent).toBe(baseRent);
+		await verwalter.sees(enteredAdvancePayment).toBe(advancePayment);
+		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
 
 // the help names who can withdraw a notice, after the glossary «Kündigung aufheben»
 Then(

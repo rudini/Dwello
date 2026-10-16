@@ -31,6 +31,8 @@ export type ContractData = {
 
 const NEW_CONTRACT = '/contracts/new';
 export const openNewContract = Navigate.to(NEW_CONTRACT);
+// as «Nachmieter erfassen» opens it, with the apartment preselected
+export const openNewContractFor = (apartmentId: string) => Navigate.to(`${NEW_CONTRACT}?apartment=${apartmentId}`);
 export const openContractEdit = (contractId: string) => Navigate.to(`/contracts/${contractId}/edit`);
 
 export const goToNextStep = Click.on(nextButton);
@@ -115,3 +117,13 @@ export const saveStartDate = (isoDate: string): Activity => (actor) =>
 
 export const openRunningContract = Click.on(runningContractLink);
 export const newContractAfterEnd = Click.on(newContractAfterEndLink);
+
+// From step «Mieter» to step «Miete», the apartment preselected
+export const goToRentWith = (tenantId: string, startDate: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Select.option(tenantId).from(tenantSelect),
+		goToNextStep,
+		goToNextStep,
+		EnterDate.of(startDate).into(startDateInput),
+		goToNextStep
+	);

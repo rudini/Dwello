@@ -1,0 +1,8 @@
+# Workflow notes: invoice check hints (#130, #131, #134)
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| Skill `pull-request`, "Which pull requests" («one pull request per issue») | The coordinator asked for one pull request «with "Fixes #n" per issue» for #131 and #134 (and #130); the two issues share one hint component and backend query, so one pull request was opened. | Allow one pull request for issues that change the same code, each named with `Fixes #n`. |
+| `CLAUDE.md` Workflow 1 (no green test before the `fach-reviewer` reports) vs. skill `tdd` (one test red→green at a time) | Until the domain review came back, only red tests could be written, so several tests of different behaviours were written up front: the horizontal slicing `tdd` warns against. | Say in `tdd` that the wait for `fach-reviewer` is the one allowed exception, or let the review start from the scenario only. |
+| `docs/design/personas/README.md`, "Running a review" | The preview shows no checks when every contract of the period already has a statement; the first persona task picked such a building and period (Musterhaus Zentrum 2024, Alpenblick 2024), so one persona run gave no review. | Name in `demo-records.md` which building and period has unbilled contracts (Alpenblick 2025) for tasks on the preview. |
+| Issue «Done means» prescribing test layers (#130: «unit test plus a DOM test») vs. `tests/e2e/CLAUDE.md`, "No scenario" | The issue named only a unit and a DOM test for a visible text; the code review rated the missing scenario a Major (C-1), costing a round. | Issue template: a visible text always gets a scenario unless one of the "No scenario" cases applies. |
