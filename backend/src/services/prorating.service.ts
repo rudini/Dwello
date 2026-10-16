@@ -220,7 +220,7 @@ export async function handleMidYearMoves(
 	const period = calculateHeatingShare(profile, periodStart, periodEnd, totalHeatingCosts);
 	if (period.percentage <= 0) return { byDays: true, reason: 'noHeatingMonths' };
 	// the division of the printed sums, rounded as printed (#232)
-	const percentage = Math.round((tenant.percentage / period.percentage) * 10000) / 100;
+	const percentage = roundToRappen((tenant.percentage / period.percentage) * 100);
 	// periodPercentage and its months: what the period's months carry in the profile, so the PDF can show the division (#229)
 	return {
 		share: totalHeatingCosts * (percentage / 100),

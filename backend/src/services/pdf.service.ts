@@ -746,11 +746,14 @@ function heatingLines({ t, data }: Page) {
 	// a period whose months do not carry 100 % (under a year): both sums, from the printed months (#229); since #232 the
 	// period's months and the division the share comes from
 	const sum = (months.reduce((total, m) => total + Math.round(m.percentage * 100), 0) / 100).toFixed(2);
-	const sums = (period: number) =>
-		periodMonths
-			? fill(t.heatingPeriodMonths, { tenant: sum, months: list(periodMonths), period: period.toFixed(2), percent: shown })
-			: fill(t.heatingPeriodSums, { tenant: sum, period: period.toFixed(2) });
-	lines.push(fill(t.heatingMonths, { months: list(months) }) + (periodPercent == null || periodPercent === 100 ? '' : sums(periodPercent)));
+	const period = periodPercent?.toFixed(2) ?? '';
+	const sums =
+		periodPercent == null || periodPercent === 100
+			? ''
+			: periodMonths
+				? fill(t.heatingPeriodMonths, { tenant: sum, months: list(periodMonths), period, percent: shown })
+				: fill(t.heatingPeriodSums, { tenant: sum, period });
+	lines.push(fill(t.heatingMonths, { months: list(months) }) + sums);
 	return lines;
 }
 

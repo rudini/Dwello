@@ -10,5 +10,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] #232: share from the months rounded to two places; PDF prints the division and, under a year, the period's months
 - [x] #232 C-5: no recompute for statements without a stored share (no Heizprofil note)
 - Files: `backend/src/services/{heating-profile,prorating,calculation,statement-pdf,pdf}.service.ts`, `backend/src/db/schema.ts`, `src/lib/server/statement.ts`, `src/routes/config/heating-profiles/HeatingProfileForm.svelte`, `messages/*.json`, `docs/data-model.md`, `docs/api-specification.md`, tests and scenarios
-- [ ] Slice reviews, feature review (persona, fach-reviewer, daten-pruefer)
+- [x] Code review round 1 (`docs/reviews/w4-review-1.md`)
+- [x] Persona Helga (`docs/design/personas/helga-w4.md`)
+- [ ] Persona Dr. Weber, fach-reviewer round 2, daten-pruefer
 - [ ] Workflow review, archive the session, pull request

@@ -167,6 +167,19 @@ describe('handleMidYearMoves', () => {
 		expect((result as { monthBreakdown: unknown[] }).monthBreakdown.slice(0, 2)).toEqual([{ month: 1, percentage: 15.68 }, { month: 2, percentage: 14 }]);
 	});
 
+	// Ein Profil darf 100 % ± 0.1 ergeben: bei 100.10 % teilt auch ein ganzes Jahr, 50.10 / 100.10 = 50.05 % (#232, M-2)
+	it('teilt auch über ein ganzes Jahr durch die Summe der Periode, wenn das Profil nicht genau 100 % ergibt', async () => {
+		const pct = [10, 10, 10, 10, 10, 0, 0, 0, 0.1, 10, 20, 20];
+		const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+		const shares = Object.fromEntries(months.map((month, i) => [`${month}Pct`, String(pct[i])]));
+		const near = await createHeatingProfile({ name: `Fast ${crypto.randomUUID()}`, type: 'custom', ...shares } as Parameters<typeof createHeatingProfile>[0]);
+
+		const result = await handleMidYearMoves(near.id, new Date('2024-07-01'), null, year.start, year.end, 1000);
+		await deleteHeatingProfile(near.id);
+
+		expect(result).toMatchObject({ byDays: false, percentage: 50.05, periodPercentage: 100.1 });
+	});
+
 	it('sagt, dass nach Tagen geteilt wird, wenn das Heizprofil nicht existiert', async () => {
 		const result = await handleMidYearMoves(
 			crypto.randomUUID(),
