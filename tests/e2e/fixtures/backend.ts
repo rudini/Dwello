@@ -172,6 +172,10 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
+		async advancePayment(tenantTitle: string, monthlyAdvancePayment: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment });
+		},
+
 		// «Abgerechnet bis»: up to that day the Nebenkosten are billed outside Dwello (#133)
 		async billedUntil(tenantTitle: string, billedUntil: string) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { billedUntil });

@@ -12,6 +12,7 @@ import { generateStatementPDFBase64, type StatementPDFData, type Language } from
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
 import { datedToday, getStatement, keyValuesOf, type StatementWithDetails } from './statement.service';
 import { refusal } from './coded-error';
+import { billingStart, getContract } from './contract.service';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
 async function qrBillConfig(): Promise<QRBillConfig | null> {
@@ -56,6 +57,7 @@ const localName = (names: Names, language: Language) =>
 export interface RunDetails {
 	rentalStart: string;
 	rentalEnd: string;
+	billed?: StatementPDFData['billed'];
 	heating?: StatementPDFData['heating'];
 	fuel?: StatementPDFData['fuel'];
 }
@@ -171,10 +173,18 @@ function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, lang
 	};
 }
 
+// #133: the statement bills from the day after «Abgerechnet bis», the tenancy in the period started before
+async function billedOf(statement: StatementWithDetails) {
+	const contract = statement.contractId ? await getContract(statement.contractId) : null;
+	if (!contract?.billedUntil || billingStart(contract) !== statement.rentalStart) return {};
+	const tenancyStart = [contract.startDate, statement.periodStart].sort()[1];
+	return tenancyStart < statement.rentalStart ? { billed: { until: contract.billedUntil, tenancyStart } } : {};
+}
+
 // What the generation run used, for the PDF: the tenant's dates and the heating profile
 async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
 	// the tenant's part of the period, as billed: from moving in or the period start to moving out or the period end
-	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd };
+	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd, ...(await billedOf(statement)) };
 	const heatingLine = statement.lineItems.find((item) => item.categoryId && names.get(item.categoryId)?.isHeatingCost);
 	return {
 		...rental,

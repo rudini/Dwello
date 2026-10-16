@@ -80,6 +80,7 @@ const translations: Record<Language, Record<string, string>> = {
 		yourCosts: 'Ihre Nebenkosten',
 		pageOf: 'Seite {page} von {pages}',
 		tenancyLine: 'Ihr Mietverhältnis in dieser Periode: {start} – {end} ({days} Mietstage von {total} Tagen)',
+		tenancyBilledLine: 'Ihr Mietverhältnis in dieser Periode: {tenancyStart} – {end}. Abgerechnet bis {billedUntil}; diese Abrechnung umfasst {start} – {end} ({days} Mietstage von {total} Tagen)',
 		payBy: 'Bitte bezahlen Sie den Betrag bis {date} mit dem Zahlteil.',
 		payNoDate: 'Bitte bezahlen Sie den Betrag mit dem Zahlteil.',
 		paidOn: 'Bezahlt am {date}. Vielen Dank.',
@@ -157,6 +158,7 @@ const translations: Record<Language, Record<string, string>> = {
 		yourCosts: 'Vos frais accessoires',
 		pageOf: 'Page {page} sur {pages}',
 		tenancyLine: 'Votre bail pendant la période : {start} – {end} ({days} jours sur {total})',
+		tenancyBilledLine: 'Votre bail pendant la période : {tenancyStart} – {end}. Décompté jusqu’au {billedUntil} ; ce décompte couvre {start} – {end} ({days} jours sur {total})',
 		payBy: 'Veuillez payer le montant jusqu’au {date} avec la section paiement.',
 		payNoDate: 'Veuillez payer le montant avec la section paiement.',
 		paidOn: 'Payé le {date}. Merci.',
@@ -234,6 +236,7 @@ const translations: Record<Language, Record<string, string>> = {
 		yourCosts: 'Le sue spese accessorie',
 		pageOf: 'Pagina {page} di {pages}',
 		tenancyLine: 'La sua locazione in questo periodo: {start} – {end} ({days} giorni su {total})',
+		tenancyBilledLine: 'La sua locazione in questo periodo: {tenancyStart} – {end}. Conteggiato fino al {billedUntil}; questo conteggio comprende {start} – {end} ({days} giorni su {total})',
 		payBy: 'La preghiamo di pagare l’importo entro il {date} con la sezione pagamento.',
 		payNoDate: 'La preghiamo di pagare l’importo con la sezione pagamento.',
 		paidOn: 'Pagato il {date}. Grazie.',
@@ -311,6 +314,7 @@ const translations: Record<Language, Record<string, string>> = {
 		yourCosts: 'Your utility costs',
 		pageOf: 'Page {page} of {pages}',
 		tenancyLine: 'Your tenancy in this period: {start} – {end} ({days} of {total} days)',
+		tenancyBilledLine: 'Your tenancy in this period: {tenancyStart} – {end}. Billed until {billedUntil}; this statement covers {start} – {end} ({days} of {total} days)',
 		payBy: 'Please pay the amount by {date} using the payment part.',
 		payNoDate: 'Please pay the amount using the payment part.',
 		paidOn: 'Paid on {date}. Thank you.',
@@ -398,6 +402,8 @@ export interface StatementPDFData {
 	// The tenant's part of the period and what the generation run used
 	rentalStart: string;
 	rentalEnd: string;
+	// #133: billed outside Dwello up to this day; the tenancy in the period starts earlier, on `tenancyStart`
+	billed?: { until: string; tenancyStart: string };
 	periodDays: number; // days of the Abrechnungsperiode, the base of the Mietstage
 	// the heating profile and its share; the months of a tenancy over part of the period with their shares
 	heating?: {
@@ -536,7 +542,16 @@ function title({ doc, t, data }: Page, y: number) {
 		.fillColor(COLORS.muted)
 		.text(`${t.statementNumber} ${data.statementNumber} · ${t.statementDate} ${formatDate(data.statementDate)}`)
 		.fillColor(COLORS.ink)
-		.text(fill(t.tenancyLine, { start: formatDate(data.rentalStart), end: formatDate(data.rentalEnd), days: data.rentalDays, total: data.periodDays }));
+		.text(
+			// TODO(fachlich prüfen, #325): the line with «Abgerechnet bis» is the domain review's proposal
+			fill(data.billed ? t.tenancyBilledLine : t.tenancyLine, {
+				start: formatDate(data.rentalStart),
+				end: formatDate(data.rentalEnd),
+				days: data.rentalDays,
+				total: data.periodDays,
+				...(data.billed && { billedUntil: formatDate(data.billed.until), tenancyStart: formatDate(data.billed.tenancyStart) })
+			})
+		);
 	return doc.y + 14;
 }
 

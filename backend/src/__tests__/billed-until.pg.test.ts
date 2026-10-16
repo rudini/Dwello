@@ -9,8 +9,12 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, heatingProfiles, invoices } from '../db/schema';
+import { categories, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
+import { generateStatement, updateStatementStatus } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
+import { readPdf } from './helpers/pdf-text';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -90,5 +94,54 @@ describe('Abgerechnet bis', () => {
 		const response = await preview();
 		expect(response.ok).toBe(false);
 		expect(await response.json()).toMatchObject({ code: 'CONTRACT_NOT_IN_PERIOD' });
+	});
+
+	// fach review V-2: a stored statement keeps its Mietstage, whether the dates or «Abgerechnet bis» change
+	describe('mit einer gespeicherten Abrechnung', () => {
+		let statementId: string;
+		beforeAll(async () => {
+			await billedUntil('2024-04-30');
+			const statement = await generateStatement({
+				contractId: rental.contract,
+				buildingId: rental.building,
+				periodStart: '2024-01-01',
+				periodEnd: '2024-12-31',
+				heatingProfileId,
+				managementFeePercent: 3
+			});
+			statementId = statement.id;
+			await updateStatementStatus(statementId, 'sent');
+		});
+		// a sent statement is never deleted through the service
+		afterAll(async () => {
+			await db.delete(utilityStatements).where(eq(utilityStatements.id, statementId));
+		});
+
+		it('nimmt eine Änderung der Vertragsdaten an, die ihre Mietstage nicht ändert', async () => {
+			expect((await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2099-12-31' })).status).toBe(200);
+			expect((await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: null })).status).toBe(200);
+		});
+
+		it('lehnt ein anderes «Abgerechnet bis» ab, das ihre Mietstage ändert, und nennt sie', async () => {
+			for (const date of ['2024-06-30', null]) {
+				const response = await billedUntil(date);
+				expect(response.status).toBe(409);
+				expect(await response.json()).toMatchObject({ statements: [{ id: statementId, status: 'sent' }] });
+			}
+			expect((await billedUntil('2024-04-30')).status).toBe(200);
+		});
+
+		// fach review M-1: the tenancy is the contract's, the statement bills the days after «Abgerechnet bis»
+		it('nennt im PDF das Mietverhältnis und die abgerechneten Tage nach «Abgerechnet bis»', async () => {
+			const iban = await getConfig('iban');
+			await setConfig('iban', 'CH4431999123000889012');
+			await generateStatementPdf(statementId, 'de');
+			if (iban) await setConfig('iban', iban);
+			else await deleteConfig('iban');
+			const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).flowing;
+			expect(text).toContain(
+				'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.12.2024. Abgerechnet bis 30.04.2024; diese Abrechnung umfasst 01.05.2024 – 31.12.2024 (245 Mietstage von 366 Tagen)'
+			);
+		});
 	});
 });

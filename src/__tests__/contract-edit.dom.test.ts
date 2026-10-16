@@ -92,6 +92,20 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
 	});
 
+	// #133: bis zu diesem Tag ausserhalb von Dwello abgerechnet; Hilfe am Feld (fach review V-5)
+	it('erklärt «Abgerechnet bis» und speichert es', async () => {
+		await open();
+		expect(document.querySelector('label[for="billedUntil"]')!.textContent).toContain(
+			'Abgerechnet bis'
+		);
+		expect(byTestId('billed-until-input-help')!.textContent).toContain(
+			'Dwello rechnet erst ab dem Tag danach ab'
+		);
+		type('billed-until-input', '31.12.2025');
+		await save();
+		expect(puts()[0].body).toMatchObject({ billedUntil: '2025-12-31' });
+	});
+
 	it('speichert ohne Nettomiete nicht und nennt den Fehler beim Feld', async () => {
 		await open();
 		type('contract-base-rent-input', '');

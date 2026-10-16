@@ -79,6 +79,7 @@ export interface RentalContract {
 	endDate?: string | null;
 	terminated?: boolean; // endDate is a Kündigungstermin of an open-ended contract, not agreed
 	noticeReceivedOn?: string | null; // the day the notice arrived (A-3)
+	billedUntil?: string | null; // «Abgerechnet bis» (#133): billed outside Dwello up to this day
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto

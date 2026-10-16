@@ -67,6 +67,7 @@ describe('initialContractValues', () => {
 			endDate: '2026-03-31',
 			isUnlimited: false,
 			terminated: false,
+			billedUntil: '',
 			baseRent: '950.00',
 			additionalRent: '',
 			advancePayment: '120.00',

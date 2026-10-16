@@ -62,6 +62,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |
 | Mietstage | jours de location | giorni di locazione | days rented |
+| Abgerechnet bis | décompté jusqu’au ❓ (#325) | conteggiato fino al ❓ (#325) | billed until ❓ (#325) |
 | Leerstand | vacance | sfitto | vacancy |
 | Entwurf / Versendet / Bezahlt / Überfällig | brouillon / envoyé / payé / en retard | bozza / inviato / pagato / scaduto | draft / sent / paid / overdue |
 | Zahlungsfrist | délai de paiement | termine di pagamento | payment deadline |

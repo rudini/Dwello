@@ -25,6 +25,7 @@
 	import type { RentalContract } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { ContractForAvailability } from '$lib/utils/contract-availability';
@@ -251,6 +252,15 @@
 			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
 		/>
 		<NoticeHint shown={noticeHint} href={back} />
+		<!-- #133: billed outside Dwello up to this day; runs bill from the day after -->
+		<DateInput
+			id="billedUntil"
+			label={m.contracts_billed_until()}
+			help={m.contracts_billed_until_help()}
+			bind:value={values.billedUntil}
+			optional
+			testid="billed-until-input"
+		/>
 	</Panel>
 
 	<Panel title={m.contracts_rent()}>

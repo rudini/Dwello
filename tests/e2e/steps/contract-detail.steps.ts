@@ -223,6 +223,17 @@ Then('zeigt der Mietvertrag «Abgerechnet bis» {string}', async ({ verwalter },
 	await verwalter.sees(billedUntilOfContract).toBe(date);
 });
 
+Given('der Mietvertrag von {string} hat {string} Franken Akonto', async ({ seed }, tenant: string, advance: string) => {
+	await seed.advancePayment(tenant, advance);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er eine ausserhalb von Dwello abgerechnete Periode mit «Abgerechnet bis» einträgt',
+	async ({ verwalter }) => {
+		await verwalter.sees(missingStatementsText).toContain('«Abgerechnet bis» ein');
+	}
+);
+
 Then('meldet der Mietvertrag keine fehlende Abrechnung', async ({ verwalter }) => {
 	await verwalter.sees(missingStatementsShown).toBe(false);
 });
