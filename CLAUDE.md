@@ -105,10 +105,8 @@ Before marking anything complete, all of these pass: `bun run lint`, `bun run ch
 
 ## Coding guidelines
 
-- **Before coding:** state assumptions; if a request has several readings, name them instead of picking silently; when two instructions (this file, an issue, a template) disagree, say which you follow and why before starting ("When to ask"); when an issue's text is wrong in a detail that does not change the task (a cause it names wrongly; a prescribed text that sends the landlord to a place the app does not have, shortened by that place only), follow the code and say so in the pull request (and in a comment if the issue stays open); any other change to a decided text or value is mine; push back when a simpler approach exists.
-- **Stay in scope:** do what the request names; work outside it is asked first ("When to ask") or becomes open work.
+- **Before coding:** when two instructions (this file, an issue, a template) disagree, say which you follow and why ("When to ask"). When an issue's text is wrong in a detail that does not change the task (a cause it names wrongly; a prescribed text that sends the landlord to a place the app does not have, shortened by that place only), follow the code and say so in the pull request (and in a comment if the issue stays open); any other change to a decided text or value is mine.
 - **One mapper per response:** a backend response used by several loads gets one mapper in `src/lib/server/<area>.ts`; reuse it instead of copying its fields or passing the response on untyped.
-- **Surgical changes:** touch only what the task needs; match the surrounding style; don't reformat or refactor adjacent code. Remove what your change made unused, leave pre-existing dead code unless asked.
 
 ## Documentation (read when relevant)
 
