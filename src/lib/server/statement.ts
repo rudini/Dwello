@@ -106,7 +106,7 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 	return { ...statement, lineItems };
 }
 
-/** The backend names a statement PDF after its number (NK-…, #101); in the header only ASCII letters, digits, dot and dash */
+/** The backend names a statement PDF after its number (NK-…, #101); in the header only ASCII letters, digits, underscore, dot and dash */
 export const pdfFileName = (headers: Headers) =>
 	headers
 		.get('content-disposition')
