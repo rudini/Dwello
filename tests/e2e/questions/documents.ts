@@ -1,11 +1,22 @@
 import { question } from '../screenplay/actor';
 import { Count, Text } from '../screenplay/questions';
-import { documentRow, documentStatus, reminderButton, reminderFeedback } from '../targets/documents';
+import {
+	documentRow,
+	documentStatus,
+	markedSentNotice,
+	markedSentPdf,
+	nextReminderDate,
+	reminderButton,
+	reminderFeedback
+} from '../targets/documents';
 
 type Mail = { to: string; subject: string; attachments: string[] };
 
 export const reminderOutcome = Text.of(reminderFeedback);
 export const reminderOffers = Count.of(reminderButton);
+export const nextReminder = Text.of(nextReminderDate);
+export const justMarkedSent = Text.of(markedSentNotice);
+export const printOffers = Count.of(markedSentPdf);
 export const deliveryOf = (title: string) => Text.of(documentStatus(title));
 export const documentFor = (title: string, tenantName: string) => Text.of(documentRow(title, tenantName));
 export const documentsFor = (title: string, tenantName: string) => Count.of(documentRow(title, tenantName));

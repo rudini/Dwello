@@ -299,6 +299,7 @@ export interface Statement {
 	paymentDeadline: string;
 	paidDate?: string;
 	lastReminderDate?: string;
+	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
 	pdfGeneratedAt?: string;
 	notes?: string | null;
 	createdAt?: string;
@@ -351,6 +352,7 @@ export interface StatementDocument {
 	sentAt: string | null;
 	deliveryError: string | null;
 	deliveryErrorCode?: string | null;
+	paymentDeadline?: string | null; // the Zahlungsfrist a reminder prints
 	createdAt: string;
 	tenantName: string;
 	statementNumber: string | null;

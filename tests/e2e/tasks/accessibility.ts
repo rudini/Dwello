@@ -234,6 +234,12 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),
+	// the seeded reminder, named in the screen's query; marking it again keeps it as it is, so each viewport can
+	'marked-sent': (example) => (actor) =>
+		actor.attemptsTo(
+			PostFormAction('?/markSent', { id: new URL(example.path, 'http://x').searchParams.get('letter')! }),
+			Wait.until(on.shown('document-marked-sent'))
+		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
