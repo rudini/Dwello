@@ -161,6 +161,16 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Liegenschaftsverwalter auf der Seite "Neuer Mietvertrag"
     Und gilt der neue Mietvertrag für die Wohnung "2.01"
 
+  # A-5 (#114): nach dem Vertragsende fehlt die neue Adresse oft noch; der Schritt bleibt, solange die Adresse die der Wohnung ist
+  @wip
+  Szenario: Nach dem Vertragsende bleibt der Schritt zur neuen Adresse
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2024-12-31" gekündigt
+    Und die Korrespondenzadresse von "Anna Keller" ist noch die Adresse des Gebäudes "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann bitten die nächsten Schritte, die neue Adresse von "Anna Keller" einzutragen: "Dorthin geht die Nebenkostenabrechnung."
+    Wenn der Liegenschaftsverwalter den nächsten Schritt "Neue Adresse eintragen" wählt
+    Dann ist der Liegenschaftsverwalter auf der Bearbeitungsseite von "Anna Keller"
+
   # F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über, «Beenden» sagt es (Fachreview W10 M-1)
   Szenario: Beenden nennt den Tod des Mieters
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
