@@ -144,12 +144,12 @@ export function toDoOf(row: UploadRow): string[] {
 	// costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also
 	// one the property manager chooses later (domain review V-1, V-8)
 	const mixed = row.hints.nonAllocableItems && row.values.isValidUtilityCost;
-	// without the KI the required fields are named at once, not only after creating (persona Helga)
-	const missing = (row.byHand ? REQUIRED : row.missing).filter(
-		(field) => !row.values[FORM_FIELD[field as keyof Proposal['fields']]]
-	);
-	const required = missing.filter((field) => REQUIRED.includes(field));
-	const optional = missing.filter((field) => !REQUIRED.includes(field));
+	// without the KI the required fields are named at once, not only after creating (persona Helga); a required one
+	// counts as done as the create button counts it, an optional one once anything is in it
+	const formField = (field: string) => FORM_FIELD[field as keyof Proposal['fields']];
+	const wrong = validateInvoice({ buildingId: 'chosen in the dialog', ...row.values });
+	const required = REQUIRED.filter((field) => (row.byHand || row.missing.includes(field)) && wrong[formField(field)]);
+	const optional = row.missing.filter((field) => !REQUIRED.includes(field) && !row.values[formField(field)]);
 	return [
 		mixed && m.invoices_upload_mixed(),
 		!row.values.categoryId && m.invoices_upload_category_missing(),

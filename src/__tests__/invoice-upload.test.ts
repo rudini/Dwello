@@ -178,6 +178,9 @@ describe('Vorschlag der KI für eine Datei', () => {
 		]);
 		row.values.amount = '80.00';
 		expect(toDoOf(row)).toContain('Füllen Sie aus: Rechnungssteller, Rechnungsdatum, Beschreibung.');
+		// what does not count as filled in stays named, as the create button counts it (persona Helga, round 2)
+		Object.assign(row.values, { amount: 'abc', billingEntity: '  ', invoiceDate: '2026-03-31', description: 'Hauswartung' });
+		expect(toDoOf(row)).toContain('Füllen Sie aus: Rechnungssteller, Betrag.');
 	});
 
 	it('lässt die Felder ohne KI leer und sagt, warum', () => {
