@@ -217,6 +217,32 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "31/62 Tage"
     Und steht im PDF "Ihre Mietstage darin von dessen Tagen in der Periode"
 
+  # Ein eigenes Heizprofil lässt sich nach dem Erstellen der Abrechnung ändern; das PDF zeigt den Anteil und die Monate,
+  # mit denen die Abrechnung gerechnet ist: Januar bis März im «Winter» 18 + 14 + 11 = 43 % (#209)
+  @wip
+  Szenario: PDF zeigt den Heizanteil, mit dem die Abrechnung erstellt wurde
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und das Heizprofil "Winter" verteilt die Heizkosten danach so:
+      | Monat     | Anteil |
+      | Januar    | 30     |
+      | Februar   | 20     |
+      | März      | 10     |
+      | April     | 5      |
+      | Mai       | 2      |
+      | Juni      | 0      |
+      | Juli      | 0      |
+      | August    | 0      |
+      | September | 2      |
+      | Oktober   | 6      |
+      | November  | 10     |
+      | Dezember  | 15     |
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "43.00 % der Heizkosten"
+    Und steht im PDF "Jan 18.00 %, Feb 14.00 %, Mär 11.00 %"
+
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und die Korrespondenz an "Eva Frei" ist auf "Französisch"

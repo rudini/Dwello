@@ -254,6 +254,12 @@ export function testData(api: CallTheApi) {
 			extras.push(`heating-profiles/${profile.id}`);
 		},
 
+		// The landlord changes the monthly shares of an own profile later (#209)
+		async changeHeatingProfile(title: string, monthly: number[]) {
+			const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+			await put(`heating-profiles/${ids.get(title)}`, Object.fromEntries(months.map((month, i) => [`${month}Pct`, monthly[i]])));
+		},
+
 		// Heating costs of the building, distributed by area
 		async heatingInvoice(buildingTitle: string, amount: string, year: number) {
 			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
