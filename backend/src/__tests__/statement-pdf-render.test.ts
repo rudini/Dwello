@@ -247,12 +247,13 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 	const mixed = { ...due, lineItems: [{ ...refund.lineItems[0], totalAmount: 1800, apartmentShare: 900, periodShare: 0.3406, invoiceParts, tenantShare: 306.52 }] };
 
 	it.each([
-		['fr', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 jours"],
-		['it', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 giorni"],
-		['en', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 days"]
-	] as const)('nennt die Tage jeder Rechnung auch auf %s', async (language, line) => {
+		['fr', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 jours", 'pondérée selon leurs montants (calcul sous le poste du décompte ;'],
+		['it', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 giorni", 'ponderata secondo i loro importi (calcolo sotto la voce del conteggio;'],
+		['en', "01.07.2025 – 30.09.2025: 1'200.00, 47/92 days", 'weighted by their amounts (calculation below the statement line;']
+	] as const)('nennt die Tage jeder Rechnung und ihre Gewichtung auch auf %s', async (language, line, note) => {
 		const text = readPdf(Buffer.from(await generateStatementPDFBase64(mixed, config, language), 'base64')).flowing;
 		expect(text).toContain(line);
+		expect(text).toContain(note); // Code-Review C-8, C-10: the clause in the terms of docs/design/i18n-begriffe.md
 		expect(text).toContain("(600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 34.06 %");
 	});
 
