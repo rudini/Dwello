@@ -17,6 +17,23 @@ Funktionalität: Übersicht
     Dann ist das Gebäude "Seeblick" zu "50.0 %" belegt
     Und sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
 
+  # F-4 (#58): dieselben Worte wie Gebäudekarten und Wohnungsseiten
+  @wip
+  Szenario: Künftig vermietete Wohnung in der Belegung
+    Angenommen der Mieter "Carla Rossi" existiert
+    Und "Carla Rossi" mietet die Wohnung "1.02" seit "2099-11-01" für "900" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Belegung von "Seeblick" "1 vermietet ab 01.11.2099"
+
+  # P-18 (#145): seit wann die Wohnung leer ist und wer ihre Nebenkosten trägt
+  @wip
+  Szenario: Leere Wohnung in der Belegung
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2019-01-01" bis "2024-03-31" für "800" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Belegung von "Seeblick" "Wohnung 1.02 leer seit 01.04.2024"
+    Und erklärt die Belegung "Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter."
+
   Szenario: Gebäude aus der Belegung öffnen
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter in der Belegung das Gebäude "Seeblick" öffnet
@@ -41,7 +58,7 @@ Funktionalität: Übersicht
     Beispiele:
       | Kennzahl            | Seite                   | Status          |
       | Vermietet           | Wohnungen               | Vermietet       |
-      | Wiedervermietet     | Wohnungen               | Wiedervermietet |
+      | Vermietet ab …      | Wohnungen               | Vermietet ab …  |
       | Leer                | Wohnungen               | Leer            |
       | Gesperrt            | Wohnungen               | Gesperrt        |
       | Überfällige Beträge | Nebenkostenabrechnungen | Überfällig      |

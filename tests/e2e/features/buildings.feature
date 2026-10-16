@@ -12,6 +12,15 @@ Funktionalität: Gebäudeliste
   Szenario: Gebäude wird in der Liste angezeigt
     Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
 
+  # F-4 (#58): dieselben Worte wie Übersicht und Wohnungsseiten
+  @wip
+  Szenario: Künftig vermietete Wohnung auf der Gebäudekarte
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Carla Rossi" existiert
+    Und "Carla Rossi" mietet die Wohnung "1.01" seit "2099-11-01" für "900" Franken
+    Wenn der Liegenschaftsverwalter nach "Lindenhof" sucht
+    Dann nennt die Karte des Gebäudes "Lindenhof" "1 vermietet ab 01.11.2099"
+
   Szenario: Gebäude nach Namen suchen
     Wenn der Liegenschaftsverwalter nach "Lindenhof" sucht
     Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste

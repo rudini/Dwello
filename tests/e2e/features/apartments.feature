@@ -19,11 +19,13 @@ Funktionalität: Wohnungsliste
     Und ist die Wohnung "2.02" "Vermietet"
     Und die Wohnungsliste enthält genau 2 Wohnungen
 
-  Szenario: Wiedervermietete Wohnung
+  # F-4 (#58): «Vermietet ab» statt «Wiedervermietet»
+  @wip
+  Szenario: Künftig vermietete Wohnung
     Angenommen der Mieter "Carla Rossi" existiert
     Und "Carla Rossi" mietet die Wohnung "2.01" seit "2099-11-01" für "900" Franken
     Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
-    Dann ist die Wohnung "2.01" "Wiedervermietet ab 01.11.2099"
+    Dann ist die Wohnung "2.01" "Vermietet ab 01.11.2099"
 
   Szenario: Nur leere Wohnungen anzeigen
     Wenn der Liegenschaftsverwalter nur die leeren Wohnungen im Gebäude "Ahornhof" anzeigt
