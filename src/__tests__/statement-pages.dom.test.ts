@@ -487,14 +487,15 @@ describe('Abrechnungsdetail', () => {
 	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
 		later(2);
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
 		);
 	});
 
 	it('spricht bei einer später erfassten Rechnung in der Einzahl', () => {
 		later(1);
+		expect(byTestId('statement-later-invoices')!.textContent).toContain('Rechnungen seit der Abrechnung geändert');
 		expect(byTestId('statement-later-invoices')!.textContent).toContain(
-			'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+			'wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht'
 		);
 	});
 
@@ -502,9 +503,10 @@ describe('Abrechnungsdetail', () => {
 	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
 		later(1, 'sent');
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin. ' +
+			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. ' +
 				'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. ' +
-				'Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
+				'Verlangt die Abrechnung zu viel, schulden Sie dem Mieter die Differenz: Ziehen Sie sie von der Nachzahlung ab oder erstatten Sie sie. ' +
+				'Ob Sie zusätzliche Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
 		);
 	});
 
@@ -534,6 +536,114 @@ describe('Abrechnungsdetail', () => {
 		detail();
 		expect(byTestId('statement-status')).not.toBeNull();
 		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
+	// #104: dieselben Angaben wie das PDF
+	it('nennt das Mietverhältnis in der Periode', () => {
+		detail({ rentalStart: '2024-01-01', rentalEnd: '2024-03-31', rentalDays: 91 });
+		expect(byTestId('statement-tenancy')!.textContent!.trim()).toBe(
+			'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024'
+		);
+	});
+
+	const line = (overrides = {}) => ({
+		id: 'l1',
+		categoryId: 'c1',
+		categoryName: 'Hauswartung',
+		distributionKeyName: 'Nach Fläche',
+		totalAmount: 1800,
+		apartmentShare: 900,
+		periodShare: 0.1703,
+		shareDays: null,
+		tenantShare: 306.52,
+		percentage: 17.03,
+		invoices: [],
+		...overrides
+	});
+	const rowText = () => byTestId('statement-line-item')!.textContent!.replace(/\s+/g, ' ');
+	const invoicesText = () => allByTestId('statement-line-invoices')[0].textContent!.replace(/\s+/g, ' ');
+
+	it('nennt je Position den Wohnungsanteil und den Zeitanteil in Tagen, wie das PDF', () => {
+		detail({ lineItems: [line({ shareDays: { days: 91, total: 366 } })] });
+		expect(rowText()).toMatch(/CHF 900.00.*91\/366 Tage.*17.03 %.*CHF 306.52/);
+	});
+
+	it('nennt den Zeitanteil in Prozent, wo er nicht in Tagen aufgeht', () => {
+		detail({ lineItems: [line()] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('17.03 %');
+	});
+
+	// Persona Marco P-1: der Zeitanteil der Heizkosten kommt aus dem Heizprofil, nicht aus den Tagen
+	it('nennt beim Zeitanteil nach Heizprofil das Heizprofil', () => {
+		detail({ lineItems: [line({ periodShare: 0.558, byProfile: true })] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('55.80 % nach Heizprofil');
+	});
+
+	// V-16: wer die ganze Periode mietet, trägt jeden Tag: «366/366 Tage», wie das PDF
+	it('nennt den Zeitanteil in Tagen, wo er die Mietstage der Periode sind', () => {
+		detail({ lineItems: [line({ periodShare: 1 })] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('366/366 Tage');
+	});
+
+	// V-12, C-6: eine Rechnung ohne Leistungszeitraum und eine, deren Leistungszeitraum über die Periode reicht, wie im PDF
+	it('nennt Rechnungen ohne Leistungszeitraum und über die Periode hinaus wie das PDF', () => {
+		const whole = { start: '2024-07-01', end: '2025-06-30', amount: 1200 };
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart', amount: 600, start: '2025-01-01', end: '2025-12-31', part: { days: 47, total: 365, noPeriod: true } },
+			{ id: 'i2', description: 'Lift-Abo', amount: 595.07, start: '2025-01-01', end: '2025-06-30', part: { days: 0, total: 181, whole } }
+		];
+		detail({ lineItems: [line({ invoices })] });
+		expect(invoicesText()).toContain('Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 47 von 365 Tagen der Abrechnungsperiode');
+		expect(invoicesText()).toContain(
+			'Leistungszeitraum 01.07.2024 – 30.06.2025 (Rechnung CHF 1’200.00), davon 01.01.2025 – 30.06.2025: CHF 595.07, Ihre Mietstage 0 von 181 Tagen'
+		);
+	});
+
+	// V-14: ein Betrag unter null (sinkender Tankbestand, Gutschrift) steht wie im PDF mit Minus vor der Zahl
+	it('rechnet einen Betrag unter null in der Berechnung mit Minus vor der Zahl', () => {
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart Q2', amount: 600, start: '2025-04-01', end: '2025-06-30', part: { days: 91, total: 91 } },
+			{ id: 'i2', description: 'Gutschrift Q3', amount: -100, start: '2025-07-01', end: '2025-09-30', part: { days: 92, total: 92 } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 500, apartmentShare: 250, tenantShare: 250 })] });
+		expect(invoicesText()).toContain('Ihr Anteil: 250.00 × (600.00 × 91/91 + -100.00 × 92/92) / 500.00 = 250.00');
+	});
+
+	it('nennt die Summe der Kosten «Ihre Nebenkosten», wie das PDF', () => {
+		detail();
+		expect(byTestId('statement-total-costs-label')!.textContent!.trim()).toBe('Ihre Nebenkosten');
+	});
+
+	it('führt von jeder Position zu ihren Rechnungen', () => {
+		const invoice = { id: 'i1', description: 'Hauswart Q1', amount: 1800, start: '2024-01-01', end: '2024-12-31', part: null };
+		detail({ lineItems: [line({ invoices: [invoice] })] });
+		const link = allByTestId('statement-line-invoice-link')[0] as HTMLAnchorElement;
+		expect(link.getAttribute('href')).toBe('/invoices/i1');
+		expect(link.textContent!.trim()).toBe('Hauswart Q1');
+		expect(invoicesText()).toContain('CHF 1’800.00');
+	});
+
+	// #240: Rechnungen über verschiedene Tage: jede mit ihren Tagen und die Berechnung, wie im PDF (#226)
+	it('nennt bei Rechnungen über verschiedene Tage jede mit ihren Tagen und die Berechnung', () => {
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart Q2', amount: 600, start: '2025-04-01', end: '2025-06-30', part: { days: 0, total: 91 } },
+			{ id: 'i2', description: 'Hauswart Q3', amount: 1200, start: '2025-07-01', end: '2025-09-30', part: { days: 47, total: 92 } },
+			{ id: 'fuel-stock-2025-12-31', description: 'Veränderung Tankbestand', amount: 500, start: '2025-01-01', end: '2025-12-31', fuelStock: true, part: { days: 139, total: 365 } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 2300, tenantShare: 314.4 })] });
+		expect(invoicesText()).toContain('Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen');
+		expect(invoicesText()).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1’200.00, Ihre Mietstage 47 von 92 Tagen');
+		expect(invoicesText()).toContain('Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(invoicesText()).toContain(
+			'Ihr Anteil: 900.00 × (600.00 × 0/91 + 1’200.00 × 47/92 + 500.00 × 139/365) / 2’300.00 = 314.40'
+		);
+		// the change of the Tankbestand is no invoice: nothing to open
+		expect(allByTestId('statement-line-invoice-link').map((link) => link.getAttribute('href'))).not.toContain(
+			'/invoices/fuel-stock-2025-12-31'
+		);
 	});
 
 	it('sagt, wenn eine Abrechnung keine Positionen hat, statt eine leere Tabelle zu zeigen', () => {
@@ -609,21 +719,33 @@ describe('Abrechnungsdetail', () => {
 
 	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
 	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
+		const rounding = () => allByTestId('statement-rounding').map((row) => row.textContent).join(' ').replace(/\s+/g, ' ');
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
-		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+		expect(rounding()).toContain(
 			'Nachzahlung vor Rundung CHF 184.13 Rundung auf 5 Rappen + CHF 0.02'
 		);
 		document.body.innerHTML = '';
 
 		// eine Rückerstattung wird von 93.87 auf 93.85 kleiner: aus ihrer Sicht − 0.02
 		detail({ totalCosts: 784.13, totalAdvancePayments: 878, balance: -93.85 });
-		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+		expect(rounding()).toContain(
 			'Rückerstattung vor Rundung CHF 93.87 Rundung auf 5 Rappen − CHF 0.02'
 		);
 		document.body.innerHTML = '';
 
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600.03, balance: 184.1 });
 		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
+	// axe (definition-list, dlitem): eine Beschreibungsliste enthält nur Gruppen aus <dt> und <dd>, auch mit der Rundung
+	it('gliedert die Summen mit Rundung als gültige Beschreibungsliste', () => {
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
+		for (const list of document.querySelectorAll('dl'))
+			for (const child of list.children) {
+				expect(['DT', 'DD', 'DIV']).toContain(child.tagName);
+				if (child.tagName === 'DIV')
+					expect([...child.children].every((item) => ['DT', 'DD'].includes(item.tagName))).toBe(true);
+			}
 	});
 
 	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
