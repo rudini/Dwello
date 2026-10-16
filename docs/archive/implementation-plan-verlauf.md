@@ -633,7 +633,7 @@ Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts
 - [x] fach-reviewer on the scenarios before implementing: `docs/reviews/w3b-fachreview-1.md`; V-1 → #294
 - [x] code-reviewer round 1: `docs/reviews/w3b-review-1.md`; C-1, C-3, C-7 fixed
 - [x] persona Dr. Weber: `docs/design/personas/weber-w3-abrechnungsnummer.md` (no Blocker/Major); daten-pruefer not run: no amount, PDF content or QR-bill field changed
-- [x] Workflow note: preselected heating profile in parallel E2E, daten-pruefer scope, migration numbers (`docs/reviews/workflow-notes-issue-97-101.md`); flaky scenario → `offene-punkte.md` O-34
+- [x] Workflow note: preselected heating profile in parallel E2E, daten-pruefer scope, migration numbers (`docs/reviews/workflow-notes-issue-97-101.md`); the generate scenarios name their heating profile (the flaky preselection, fixed here instead of an `offene-punkte.md` row)
 - [x] closing code-reviewer round: `docs/reviews/w3b-review-2.md`
 - [x] Checks before push green; push, pull request and merge follow (CLAUDE.md, Workflow 9)
 
