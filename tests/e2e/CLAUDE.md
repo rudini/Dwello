@@ -58,6 +58,16 @@ Then('ist im Mietvertrag der Mieter {string} gewählt', async ({ verwalter, name
 });
 ```
 
+## No scenario
+
+A state the E2E stack cannot produce gets a lower-layer test and `No scenario: <reason>` in the plan and the pull request instead of a scenario (`CLAUDE.md`, Workflow 1):
+
+- a failure only between server parts (a load function, the BFF calling the backend);
+- the server's clock or time zone (a test with a set clock);
+- the backend start or a CLI script;
+- how the UI shows a refusal its own checks never send to the backend (a DOM test with the body from a contract);
+- the quality of a KI answer.
+
 ## Rules
 
 - **Isolation:** every scenario creates its own data and removes it; `seed.names` appends a UUID to each name ("Lindenhof" becomes "Lindenhof 3f2a…"), so scenarios run in parallel. Never rely on data from another scenario or from the demo data. Enter periods and dates that match the seeded records, never a default of the app that moves with today. A result that depends on a choice the app preselects names that choice: a preselection reads all records, also those of parallel scenarios.

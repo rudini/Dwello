@@ -70,4 +70,11 @@ describe('Offene Arbeit an einem Ort', () => {
 			[];
 		expect(ids.filter((id) => !/^\|\s*\**(U|H|O)-/.test(id))).toEqual([]);
 	});
+
+	it('vergibt jede Zeilennummer in offene-punkte.md nur einmal', () => {
+		const ids = (
+			readFileSync('docs/design/offene-punkte.md', 'utf8').match(/^\|\s*\**[A-Z]+-\d+[a-z]?/gm) ?? []
+		).map((id) => id.replace(/^\|\s*\**/, ''));
+		expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
+	});
 });

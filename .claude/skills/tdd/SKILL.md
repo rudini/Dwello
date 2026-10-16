@@ -50,7 +50,7 @@ Before writing any code:
 
 - [ ] Decide what interface changes are needed
 - [ ] Decide which behaviors to test (prioritize)
-- [ ] Identify opportunities for deep modules (small interface, deep implementation) — see `tools/deepcheck/README.md`; `bun run deepcheck:audit` checks them after each step
+- [ ] Identify opportunities for deep modules (small interface, deep implementation) — see `tools/deepcheck/README.md`; the commit hook checks them (`bun run deepcheck:audit` shows them before committing)
 - [ ] List the behaviors to test (not implementation steps) in the checklist of `implementation_plan.md`
 
 Do not wait for approval of this plan: the scenario and the task or issue already say what to build (`CLAUDE.md`, Workflow). Ask only when the requirement has several readings.

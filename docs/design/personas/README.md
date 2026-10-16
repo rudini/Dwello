@@ -16,11 +16,19 @@ The caller of a run gives each persona a task on the change under review instead
 
 ## Which personas
 
-A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these holds; when unsure, run all five:
+A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these holds. A change that adds a screen or flow gets every persona named here; any other change at most the two that fit it best (Marco for a phone view counts as one):
 
 - **Screen:** the persona's default task uses the changed screen.
 - **Device:** every changed view is also checked on a phone: Marco.
 - **Kind of change:** new claims, texts or anything with legal weight: Dr. Weber; keyboard, focus or what a screen reader announces: Sven; finding the way in, first use or a return after months: Anna; forms and terms for beginners: Helga.
 - **Browser chrome** (tab icon, title, manifest): headless Chromium draws no tab bar, so the persona judges the asset rendered at its real sizes on light and dark backgrounds instead of browsing.
+
+## Running a review
+
+- **A state reached only by a failure:** name how to reach it in the task: the request to fail (the persona simulates it), or for an outside service's result (a refused mail) the SQL that writes it into `dwello_persona`, which the caller runs before starting the persona.
+- **Demo records in the way:** when demo records block the task (a draft overlapping the period to bill), the caller removes them by SQL in `dwello_persona` before starting the persona and names the SQL in the task.
+- **No persona:** a change visible only in a state the persona stack cannot produce (the server's clock, a real KI model instead of the stand-in) needs no persona when a lower-layer test shows it and no persona can reach a new text of it (through a failing request, that SQL or the stand-in's answers); say so in the plan.
+- **Build-time values:** a change that depends on one names it in the task and the start (`APP_VERSION=0.4.0 docs/design/tools/persona-stack.sh`).
+- **PDFs:** a change to what a PDF prints gets Dr. Weber when its texts change; its amounts are `daten-pruefer`'s, which starts after the persona that creates the statement.
 
 Unknown terms are fixed with better help texts, never by renaming the glossary term.

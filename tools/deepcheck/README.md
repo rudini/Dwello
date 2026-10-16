@@ -64,7 +64,7 @@ node tools/deepcheck/src/cli.ts scan --use-baseline   # hide baselined modules t
 | Where | What | Blocks? |
 |---|---|---|
 | Claude Code hook `.claude/hooks/deepcheck-gate.sh`, `PreToolUse` on Bash (`.claude/settings.json`, timeout 60 s) | before every `git commit` / `git push` (same mechanism and fail-open policy as `fallow-gate.sh`): `check --agent`; exit 2 with the findings on stderr when the gate fails, a single notice and exit 0 on a tool error | yes, the Bash call |
-| `CLAUDE.md` | agents run `bun run deepcheck:audit` after each implementation step, `bun run deepcheck:scan` only on request | — |
+| `CLAUDE.md` | the commit hook gates every commit; agents run `bun run deepcheck:audit` by hand to see findings before committing, `bun run deepcheck:scan` only on request | — |
 | CI job "Deep modules" (`.github/workflows/ci.yml`, pull requests) | `bunx svelte-kit sync`, then `bun run deepcheck:ci -- "origin/<base>"`: error annotations and a step summary | yes |
 | `.github/workflows/deepcheck-scan.yml` (`workflow_dispatch`: path, top, min_score; commented weekly `schedule`) | ranked scan to the job summary, JSON and markdown as the `deepcheck-report` artifact | never |
 

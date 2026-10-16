@@ -7,7 +7,7 @@ labels: []
 <!-- Topic label: fachlich, produkt or bug. English; German for UI texts and domain terms (UBIQUITOUS_LANGUAGE.md). -->
 
 ## Problem
-What is wrong or missing today, with evidence (files, behaviour).
+What is wrong or missing today, with evidence (files, behaviour), and how a landlord reaches the state (the screen or data that produces it), or that only the API does.
 
 ## Decided (product owner)
 Decisions this task rests on.
