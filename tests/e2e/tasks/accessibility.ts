@@ -17,7 +17,6 @@ import {
 	PostFormAction,
 	Press,
 	Select,
-	Upload,
 	Wait
 } from '../screenplay/interactions';
 import { randomUUID } from 'crypto';
@@ -28,12 +27,9 @@ import {
 	cancelUploadButton,
 	createInvoicesButton,
 	discardMessage,
-	uploadBuildingSelect,
-	uploadFileInput,
-	uploadInvoicesButton,
 	uploadResult
 } from '../targets/invoice-upload';
-import { invoicePdf } from './invoice-upload';
+import { invoicePdf, uploadBelege } from './invoice-upload';
 import { Visibility } from '../screenplay/questions';
 import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
@@ -64,7 +60,7 @@ import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
-import { type File, uploadDocument, wordFile } from './tenant-documents';
+import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
 import { UPLOADED } from '../fixtures/screens';
 
@@ -128,20 +124,13 @@ const endWithPastDate: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(on.invalidPastEndConfirm));
 };
 
-// «Rechnungen hochladen» for the first building with these files
-const startUpload = (files: File[]): Activity => (actor) =>
-	actor.attemptsTo(
-		Click.on(uploadInvoicesButton),
-		Select.option({ index: 1 }).from(uploadBuildingSelect),
-		Upload.theFile(files).into(uploadFileInput)
-	);
-
-// Two files, one created: the result with the file still open
-const createPartly: Activity = (actor) => {
+// Two files, one created: the result with the file still open. Files go into the example's own building: the first
+// in the list may be a parallel scenario's, deleted by its cleanUp while the files are read
+const createPartly = (building: string): Activity => (actor) => {
 	const complete = `Elektro Blitz ${randomUUID()}.pdf`;
 	const open = `Werke ${randomUUID()}.pdf`;
 	return actor.attemptsTo(
-		startUpload([invoicePdf(complete), invoicePdf(open)]),
+		uploadBelege(building, [invoicePdf(complete), invoicePdf(open)]),
 		Wait.until(belegDetailsToggle(complete)),
 		Wait.until(belegDetailsToggle(open)),
 		Click.on(createInvoicesButton),
@@ -177,28 +166,28 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'upload-refused': () => (actor) =>
 		actor.attemptsTo(uploadDocument(wordFile('notizen.docx'), ''), Wait.until(on.formProblem)),
 	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),
-	'upload-dialog': () => (actor) => {
+	'upload-dialog': (example) => (actor) => {
 		// the stand-in finds deducted amounts and costs that are not allocable in a file so named; the UUID marks it user data
 		const read = `Werke Schlussrechnung Reparatur ${randomUUID()}.pdf`;
 		return actor.attemptsTo(
-			startUpload([invoicePdf(read), wordFile('notes.docx')]),
+			uploadBelege(example.building, [invoicePdf(read), wordFile('notes.docx')]),
 			Click.on(belegDetailsToggle(read)),
 			Wait.until(belegUnsure(read, 'invoiceDate'))
 		);
 	},
 	// one invoice created, the other kept with what it lacks (no Kategorie: the stand-in categorizes only «Elektro Blitz»)
-	'upload-partial': () => (actor) => actor.attemptsTo(createPartly),
-	'upload-discard-created': () => (actor) =>
-		actor.attemptsTo(createPartly, Click.on(cancelUploadButton), Wait.until(discardMessage)),
+	'upload-partial': (example) => (actor) => actor.attemptsTo(createPartly(example.building)),
+	'upload-discard-created': (example) => (actor) =>
+		actor.attemptsTo(createPartly(example.building), Click.on(cancelUploadButton), Wait.until(discardMessage)),
 	// the stand-in answers no JSON for a file so named
-	'upload-unreadable': () => (actor) => {
+	'upload-unreadable': (example) => (actor) => {
 		const read = `Elektro ${randomUUID()} unlesbar.pdf`;
-		return actor.attemptsTo(startUpload([invoicePdf(read)]), Wait.until(belegMessage(read)));
+		return actor.attemptsTo(uploadBelege(example.building, [invoicePdf(read)]), Wait.until(belegMessage(read)));
 	},
-	'upload-discard-dialog': () => (actor) => {
+	'upload-discard-dialog': (example) => (actor) => {
 		const read = `Elektro ${randomUUID()}.pdf`;
 		return actor.attemptsTo(
-			startUpload([invoicePdf(read)]),
+			uploadBelege(example.building, [invoicePdf(read)]),
 			Wait.until(belegDetailsToggle(read)),
 			Click.on(cancelUploadButton),
 			Wait.until(discardMessage)
