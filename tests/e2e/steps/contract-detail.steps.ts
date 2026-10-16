@@ -5,6 +5,10 @@ import {
 	deleteDialogText,
 	endConfirmationInWindow,
 	endDialogDeathText,
+	endDialogText,
+	noticePeriodHintShown,
+	noticePeriodHintText,
+	noticeReceivedOn,
 	endDateProblemShown,
 	endOfContract,
 	missingStatementsText,
@@ -21,6 +25,8 @@ import {
 	deleteDraftAndEndContract,
 	editContractFromDetail,
 	endContract,
+	confirmEnd,
+	fillEndWithNotice,
 	startEndingContract,
 	endContractOn,
 	openContract,
@@ -218,3 +224,33 @@ Then(
 		await verwalter.sees(endDialogDeathText).toContain('erst, wenn die Erben oder Sie gekündigt haben');
 	}
 );
+
+// A-3 (#112): the day the notice arrived gives a hint on a short Kündigungsfrist, never a block
+When(
+	'der Liegenschaftsverwalter den Mietvertrag auf den {string} beenden will und die Kündigung am {string} erhalten hat',
+	async ({ verwalter }, endDate: string, receivedOn: string) => {
+		await verwalter.attemptsTo(fillEndWithNotice(endDate, receivedOn));
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietvertrag trotzdem beendet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmEnd);
+});
+
+Then(
+	'weist der Dialog darauf hin, dass zwischen Eingang und Vertragsende weniger als 3 Monate liegen',
+	async ({ verwalter }) => {
+		await verwalter.sees(noticePeriodHintText).toContain('Zwischen Eingang und Vertragsende liegen weniger als 3 Monate.');
+		await verwalter.sees(noticePeriodHintText).toContain('erst auf den nächsten Kündigungstermin');
+	}
+);
+
+// anchored on the field's help: an empty or broken dialog shows no hint either
+Then('zeigt der Dialog keinen Hinweis auf die Frist', async ({ verwalter }) => {
+	await verwalter.sees(endDialogText).toContain('Der Tag, an dem das Kündigungsschreiben angekommen ist.');
+	await verwalter.sees(noticePeriodHintShown).toBe(false);
+});
+
+Then('zeigt der Mietvertrag die Kündigung als erhalten am {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(noticeReceivedOn).toBe(date);
+});

@@ -20,7 +20,8 @@ import {
 	reviewed,
 	runningContractHintText,
 	startHint,
-	tenantChoices
+	tenantChoices,
+	withdrawNoticeHelp
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
@@ -348,3 +349,13 @@ When('der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erf
 Then('schlägt der neue Mietvertrag den Vertragsbeginn {string} vor', async ({ verwalter }, date: string) => {
 	await verwalter.sees(pageAddress).toMatch(new RegExp(`start=${date}`));
 });
+
+// F-7 (#52): the help names who can withdraw a notice, after the glossary «Kündigung aufheben»
+Then(
+	'erfährt der Liegenschaftsverwalter bei «Kündigung aufheben», wann sich eine Kündigung aufheben lässt',
+	async ({ verwalter }) => {
+		await verwalter.sees(withdrawNoticeHelp).toContain('gemeinsam zurücknehmen');
+		await verwalter.sees(withdrawNoticeHelp).toContain('die Schlichtungsbehörde oder ein Gericht');
+		await verwalter.sees(withdrawNoticeHelp).toContain('Der Mietvertrag läuft dann ohne Ende weiter.');
+	}
+);
