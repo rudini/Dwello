@@ -44,7 +44,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsLi
 				buildingAddress: (a.buildingAddress as string) || '',
 				buildingCity: (a.buildingCity as string) || '',
 				nextContractStart: (a.nextContractStart as string) ?? null,
-				currentContractEnd: (a.currentContractEnd as string) ?? null
+				currentContractEnd: (a.currentContractEnd as string) ?? null,
+				lastContractEnd: (a.lastContractEnd as string) ?? null
 			};
 		});
 

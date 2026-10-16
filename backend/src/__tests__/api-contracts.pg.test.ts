@@ -273,6 +273,11 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('GET /apartments liefert die Felder von apartments.json', async () => {
+		const actual = await (await callApi(`/api/v1/apartments?buildingId=${rental.building}`)).json();
+		expect(drift(await sample('apartments'), actual)).toEqual([]);
+	});
+
 	it('GET /buildings liefert die Felder von buildings.json', async () => {
 		const actual = await (await callApi(`/api/v1/buildings?search=${encodeURIComponent(`Ahornhof ${token}`)}`)).json();
 		expect(drift(await sample('buildings'), actual)).toEqual([]);

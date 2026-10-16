@@ -18,6 +18,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `statement-paid-date-refused.json` | `PUT /api/v1/statements/:id/status` mit einem Zahlungsdatum vor dem Abrechnungsdatum |
 | `building-contracts.json` | `GET /api/v1/contracts?buildingId=…` |
 | `contracts.json` | `GET /api/v1/contracts` (Mietvertragsliste, Übersicht) |
+| `apartments.json` | `GET /api/v1/apartments` (Wohnungsliste, Gebäude, Übersicht) |
 | `period-statements.json` | `GET /api/v1/statements?periodStart=…&periodEnd=…` (Übersicht), `?contractId=…` (fehlende Abrechnungen am Mietvertrag, Abrechnungen, die sein Löschen sperren) |
 | `statement-preview.json` | `POST /api/v1/statements/preview` |
 | `statement-changed-invoices.json` | `GET /api/v1/statements/:id/changed-invoices` (Rechnungen der Periode, die die Abrechnung nicht so abrechnet, wie sie jetzt sind) |

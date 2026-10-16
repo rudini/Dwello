@@ -13,6 +13,7 @@ import {
 	contractStatementsLink,
 	contractTenantLink,
 	deleteContractButton,
+	deleteDialogStatementLink,
 	deleteMistakeConfirmation,
 	deleteDraftAndEndButton,
 	endContractButton,
@@ -68,3 +69,5 @@ export const createMissingStatement = (periodStart: string) => Click.on(missingS
 export const useWindowOf = (width: number, height: number) => Browser.resizeTo({ width, height });
 // the confirm button scrolled into view inside the dialog
 export const scrollToEndConfirmation = Scroll.to(confirmEndContractButton);
+
+export const openStatementFromDeleteDialog = (statementId: string) => Click.on(deleteDialogStatementLink(statementId));

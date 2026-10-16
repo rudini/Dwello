@@ -86,14 +86,22 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	// with their days and the calculation (#104, #240)
 	await seed.building('Talblick', 'Winterthur');
 	await seed.apartment('Talblick', '3.01', 'vacant');
-	await seed.tenant('Emil');
-	await seed.contract('Emil', '3.01', { startDate: '2025-08-15', baseRent: '1300.00' });
+	await seed.tenant('Greta');
+	await seed.contract('Greta', '3.01', { startDate: '2025-08-15', baseRent: '1300.00' });
 	await seed.invoiceOn('Talblick', 'Hauswart', '600.00', '2025-07-05', ['2025-04-01', '2025-06-30']);
 	await seed.invoiceOn('Talblick', 'Hauswart', '1200.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
 	await seed.invoiceOn('Talblick', 'Heizung', '900.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
 	await seed.fuelStock('Talblick', '2024-12-31', '600.00');
 	await seed.fuelStock('Talblick', '2025-12-31', '100.00');
-	await seed.statement('Emil', 'Talblick', 2025);
+	await seed.statement('Greta', 'Talblick', 2025);
+	// empty since a tenancy ended long before any statement: «Leer seit», «Frühere Mietverträge» (#145, #117)
+	await seed.apartment('Bergsicht', '2.02', 'vacant');
+	await seed.tenant('Emil');
+	await seed.contract('Emil', '2.02', { startDate: '2010-01-01', endDate: '2014-12-31', baseRent: '1500.00' });
+	// a tenant who has not moved in yet: «Vermietet ab», Mieter «Künftig» (#58)
+	await seed.apartment('Bergsicht', '2.03', 'vacant');
+	await seed.tenant('Fritz');
+	await seed.contract('Fritz', '2.03', { startDate: '2100-01-01', baseRent: '1500.00' });
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -102,13 +110,15 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		tenant: seed.idOf('Anna'), // rents 1.01 without an end: the contract wizard's step «Wohnung» names it (#156)
 		contract: seed.idOf('Mietvertrag Anna'),
 		noticedContract: seed.idOf('Mietvertrag Dora'),
+		vacantApartment: seed.idOf('2.02'),
+		endedContract: seed.idOf('Mietvertrag Emil'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
 		lateInvoice,
 		statement: seed.idOf('Abrechnung Anna 2025'),
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
-		partsStatement: seed.idOf('Abrechnung Emil 2025'),
+		partsStatement: seed.idOf('Abrechnung Greta 2025'),
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),

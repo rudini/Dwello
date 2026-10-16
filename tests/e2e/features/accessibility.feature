@@ -48,6 +48,7 @@ Funktionalität: Barrierefreiheit
       | apartment-new          | default             |
       | apartment-new          | submit-empty        |
       | apartment-detail       | default             |
+      | apartment-detail-vacant | default            |
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
       | tenants                | default             |
@@ -89,6 +90,8 @@ Funktionalität: Barrierefreiheit
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |
+      | contract-detail-ended  | default             |
+      | contract-detail-ended  | delete-dialog       |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
