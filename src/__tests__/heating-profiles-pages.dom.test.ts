@@ -153,6 +153,20 @@ describe('Heizprofil erfassen und bearbeiten', () => {
 		);
 	});
 
+	// #230: eine Abrechnung behält die Anteile, mit denen sie erstellt wurde; ein neues Profil hat noch keine Abrechnung
+	it('sagt beim Bearbeiten, dass bestehende Abrechnungen ihre Anteile behalten', () => {
+		show(EditProfilePage, { data: { profile: profile('custom') }, form: null } as never);
+		expect(byTestId('heating-profile-shares-help')!.textContent).toContain(
+			'Bestehende Abrechnungen behalten die Monatsanteile, mit denen sie erstellt wurden.'
+		);
+	});
+
+	it('sagt beim Erfassen nichts über bestehende Abrechnungen', () => {
+		show(NewProfilePage, { form: null } as never);
+		expect(byTestId('heating-profile-shares-help')!.textContent).toContain('Die Monatsanteile verteilen');
+		expect(byTestId('heating-profile-shares-help')!.textContent).not.toContain('Bestehende Abrechnungen');
+	});
+
 	it('bestätigt das Speichern mit dem Namen des Heizprofils', async () => {
 		show(NewProfilePage, { form: null } as never);
 		fireEvent(byTestId<HTMLInputElement>('heating-profile-name-input')!, 'input', 'Bergtal');

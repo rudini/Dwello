@@ -426,14 +426,16 @@ async function heatingOfRun(
 	if (!profile) return { byDays: true }; // as the per-group calculation shares without a profile
 	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
 	const result = await handleMidYearMoves(profile.id, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
-	if (result.byDays) return { byDays: true };
-	const twoPlaces = (percent: number) => Math.round(percent * 100) / 100; // as printed
-	// the percent as the heating position's period_share (0-1, four places), so the note shows the line's value (#229)
-	const percent = Math.round((result.percentage / 100) * 10000) / 100;
-	const months = result.monthBreakdown.map(({ month, percentage }) => ({ month, percentage: twoPlaces(percentage) }));
-	// the profile's names as they were, so a renamed or deleted own profile still names the share it gave
+	// the profile's names as they were, so a renamed or deleted own profile still names the share it gave, or the one
+	// chosen but not applied (#247)
 	const { name, nameDE, nameFR, nameIT, nameEN } = profile;
-	return { byDays: false, percent, months, periodPercent: twoPlaces(result.periodPercentage), names: { name, nameDE, nameFR, nameIT, nameEN } };
+	const names = { name, nameDE, nameFR, nameIT, nameEN };
+	if (result.byDays) return { byDays: true, reason: result.reason, names };
+	// months and percent rounded to two places by the calculation, as printed (#232)
+	const { percentage: percent, monthBreakdown: months, periodPercentage: periodPercent } = result;
+	// the period's months where they do not carry 100 %, for the division in the PDF (#232, F-7)
+	const periodMonths = periodPercent === 100 ? undefined : result.periodBreakdown;
+	return { byDays: false, percent, months, periodPercent, periodMonths, names };
 }
 
 /**
