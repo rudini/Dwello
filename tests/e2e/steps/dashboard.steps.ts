@@ -19,7 +19,8 @@ import {
 	openDashboard,
 	openStatementsWithStatus,
 	openTile,
-	startOverviewTask
+	startOverviewTask,
+	startOverviewTaskFor
 } from '../tasks/dashboard';
 import type { TestData } from '../fixtures/backend';
 import { inDays } from '../fixtures/dates';
@@ -175,5 +176,17 @@ Then(
 	async ({ verwalter, names }, tenant: string) => {
 		await verwalter.sees(occupancyShown(names.get('Seeblick')!)).toBe(true);
 		await verwalter.sees(overviewTasksNaming(names.get(tenant)!)).toBe(0);
+	}
+);
+
+// A-6 (#115): «Mieter ist ausgezogen» stored on the contract, as the contract page stores it
+Given('der Liegenschaftsverwalter hat bestätigt, dass {string} ausgezogen ist', async ({ seed }, tenant: string) => {
+	await seed.movedOut(tenant);
+});
+
+When(
+	'der Liegenschaftsverwalter die Aufgabe {string} für {string} beginnt',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(startOverviewTaskFor(title, names.get(tenant)!));
 	}
 );

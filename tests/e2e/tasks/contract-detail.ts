@@ -18,7 +18,10 @@ import {
 	endContractButton,
 	missingStatementLink,
 	nextStep,
-	refusedStatementLink
+	refusedStatementLink,
+	continueOpenEndedButton,
+	movedOutButton,
+	deleteDraftAndContinueButton
 } from '../targets/contract-detail';
 
 export const openContract = (contractId: string) => Navigate.to(`/contracts/${contractId}`);
@@ -68,3 +71,8 @@ export const createMissingStatement = (periodStart: string) => Click.on(missingS
 export const useWindowOf = (width: number, height: number) => Browser.resizeTo({ width, height });
 // the confirm button scrolled into view inside the dialog
 export const scrollToEndConfirmation = Scroll.to(confirmEndContractButton);
+
+// A-6 (#115): after an expired fixed-term contract the tenant either still lives there or has moved out
+export const continueOpenEnded = Click.on(continueOpenEndedButton);
+export const confirmMovedOut = Click.on(movedOutButton);
+export const deleteDraftAndContinue = Click.on(deleteDraftAndContinueButton);

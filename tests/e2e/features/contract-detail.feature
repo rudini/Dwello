@@ -204,7 +204,8 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
     Und endet der Mietvertrag von "Anna Keller" am "31.03.2025"
-    Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
+    Und ist der Mietvertrag von "Bruno Meier" unbefristet
+    Und findet die Abrechnungsliste keine Abrechnung 2025 von "Bruno Meier"
 
   # #141: lehnt das Backend das Vertragsende trotzdem ab, bleibt der Entwurf erhalten
   Szenario: Abgelehntes Vertragsende behält den Entwurf
@@ -243,3 +244,50 @@ Funktionalität: Mietvertragsdetail
     Und sieht der Liegenschaftsverwalter die Abrechnung 2025 von "Anna Keller"
     Aber nicht die Abrechnung 2025 von "Ben Meier"
     Und zählt die Liste 1 Entwurf
+
+  # A-6 (#115): nach dem Ende eines befristeten Mietvertrags fragt der Mietvertrag, ob der Mieter noch in der Wohnung
+  # wohnt; dann läuft er unbefristet weiter (Art. 266 Abs. 2 OR)
+  @wip
+  Szenario: Befristeten Mietvertrag unbefristet weiterführen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
+    Dann ist der Mietvertrag unbefristet
+    Und hat der Mietvertrag den Status "Laufend"
+
+  @wip
+  Szenario: Mieter ist nach dem befristeten Mietvertrag ausgezogen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter bestätigt, dass der Mieter ausgezogen ist
+    Dann zeigt der Mietvertrag "Befristet bis 31.12.2025"
+    Und fragt der Mietvertrag nicht mehr, ob der Mieter noch in der Wohnung wohnt
+
+  # Die Abrechnung 2025 rechnet die Zeit nach dem Vertragsende als Leerstand ab
+  @wip
+  Szenario: Unbefristet weiterführen nach einer Abrechnung mit Leerstand
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-06-30" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
+    Dann meldet der Mietvertrag "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
+    Und zeigt der Mietvertrag "Befristet bis 30.06.2025"
+
+  @wip
+  Szenario: Entwurf löschen und Mietvertrag unbefristet weiterführen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-06-30" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
+    Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag unbefristet weiterführt
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
+    Und ist der Mietvertrag von "Bruno Meier" unbefristet
+    Und findet die Abrechnungsliste keine Abrechnung 2025 von "Bruno Meier"
