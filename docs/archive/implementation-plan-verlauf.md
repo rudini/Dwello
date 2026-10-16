@@ -1,3 +1,14 @@
+## Session 2026-10-16: project rules only (guide review G-9)
+
+Request (chat): «Setze G-9 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario.
+
+- [x] `CLAUDE.md`, "Coding guidelines": only the Dwello rules stay (issue text wrong in a detail, decided texts, one mapper per response); generic advice goes ("state assumptions", "push back", "Stay in scope", "Surgical changes": the ask list, the formatting gotcha, fallow and `code-reviewer` cover them)
+- [x] `.claude/skills/tdd`: philosophy, SOLID and the checklist per cycle go; `mocking.md`, `tests.md`, `refactoring.md` go, `docs/test-pyramid.md` is the source for test doubles (`mocking.md` allowed mocking the database, which Dwello forbids)
+- [x] `code-reviewer` round 1 (docs/reviews/g9-review-1.md): C-1 (Major: refactor step widened to untouched code) and C-2 fixed; round 2 (docs/reviews/g9-review-2.md) confirmed, its Nit C-3 fixed
+- [x] Checks: lint, the tests that read rule files
+- [x] Archive the session, push, pull request, CI, merge
+  Files: `CLAUDE.md`, `.claude/skills/tdd/SKILL.md` (`mocking.md`, `tests.md`, `refactoring.md` removed); reports `docs/reviews/g9-review-{1,2}.md`
+
 ## Session 2026-10-16: third guide review S-1 to S-6
 
 Request (chat): «Setze deine Empfehlung um» for `docs/reviews/opus55-guide-review-3.md` (S-1 to S-6). Rules only, no app behaviour, so no scenario. Own pull request after #271 is merged.
