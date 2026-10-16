@@ -27,7 +27,7 @@ The quantities still form a pyramid, with many fast unit tests at the bottom. Th
 
 | Layer | Location | Runner | Against | Test doubles |
 |---|---|---|---|---|
-| Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks except a failing request at the browser boundary (`tests/e2e/CLAUDE.md`, "Failure states"); SMTP mail catcher instead of a mail provider, a KI stand-in (`backend/scripts/llm-stub.ts`) that answers only the check of a new category, signed session JWT instead of Google OAuth |
+| Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks except a failing request at the browser boundary (`tests/e2e/CLAUDE.md`, "Rules", failure states); SMTP mail catcher instead of a mail provider, a KI stand-in (`backend/scripts/llm-stub.ts`) that answers only the check of a new category, signed session JWT instead of Google OAuth |
 | Integration | `backend/src/__tests__/*.pg.test.ts` | `bun run test` or `bun run test:pg` (preload `scripts/test-db.ts`, set in `bunfig.toml`) | Elysia app in process (`app.handle`) → PostgreSQL `dwello_test` (migrated fresh before each run) | none; local SMTP server for mail |
 | Unit backend | `backend/src/__tests__/*.test.ts` | `bun run test` (one run together with the pg tests) | pure functions of the services | none; Resend stand-in via `Bun.serve` in `mail.test.ts` |
 | Unit frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | load functions, actions, BFF, components | fake backend via `fetch` stub / `fakeBff` (from the API contracts in `tests/contracts`; add one when there is none), `vi.mock` for `$app/*` and for the module that reads build-time constants |
@@ -77,7 +77,7 @@ What `@api` is for and how to add a step: `tests/e2e/CLAUDE.md`, "Rules". Today 
 
 Isolation as Farley describes it:
 
-- **Functional and temporal:** `tests/e2e/CLAUDE.md`, "Isolation".
+- **Functional and temporal:** `tests/e2e/CLAUDE.md`, "Rules", isolation.
 - **System:** external systems are replaced at the boundary (mail catcher, KI stand-in, session JWT; local stand-ins via `Bun.serve` for the OpenAI-compatible LLM provider in `backend/src/__tests__/helpers/llm.ts` and for Resend in `mail.test.ts`).
 
 ## Workflow: one feature with ATDD
