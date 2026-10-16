@@ -53,8 +53,8 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 **Done means:**
 - the scenario passes without `@wip` (or the change has `No scenario: <reason>`), and every new test was seen red (steps 1, 2);
 - no Blocker/Major from `code-reviewer`, personas, `fach-reviewer` or `daten-pruefer` is open, except one that needs a product decision or existed before the change: those go under "Blocked on me" and become open work; a Minor/Nit is fixed when trivial, else it stays in its report (skill `slice-review`, "Triage");
-- "Before marking anything complete" passes, and CI is green before the merge;
-- the session is archived (step 8) and the pull request merged (step 9), or what holds it is under "Blocked on me".
+- "Before marking anything complete" passes;
+- the session is archived (step 8) and the pull request merged on green CI (step 9), or what holds it is under "Blocked on me".
 
 1. **Acceptance test first (ATDD):** every feature or behavior change, including a bug fix a user can see, starts with a German scenario in `tests/e2e/features/*.feature`, tagged `@wip` (excluded from runs). Write its steps before the code and watch it fail at the missing behavior, not at a missing step. A state only a failing request reaches is answered with an error status at the browser boundary (`docs/test-pyramid.md`; so not `@api`); a state the E2E stack cannot produce gets a lower-layer test and `No scenario: <reason>` (`tests/e2e/CLAUDE.md`, "No scenario"). A change to the allocability prompt also runs `bun run llm:eval` before and after (`backend/CLAUDE.md`).
    A change to domain rules (a prompt sent to the KI included), amounts, PDFs, domain terms or legal texts (data that leaves the server in a new way makes the privacy statement one): commit the `@wip` scenario locally and have `fach-reviewer` review it before implementing. Until it reports back, write tests and E2E steps and watch them fail, but turn none green: no production code, no texts in `messages/*.json`; fix its findings before the first test turns green.

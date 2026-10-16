@@ -1,6 +1,6 @@
 # Working rules for the redesign (resume file)
 
-The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: the automated checks and "Persona runs: how" (subagent `persona`); the personas are in `docs/design/personas/README.md`.
+The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: "Persona runs: how" (the checks before a push are those of `CLAUDE.md`, "Before marking anything complete") (subagent `persona`); the personas are in `docs/design/personas/README.md`.
 
 Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
 
@@ -37,7 +37,7 @@ Everything a new session needs to continue the redesign without the original pro
 3. Skill `/ponytail`: the shortest diff that works; check the finished change against it.
 4. Pure styles/assets need no unit test but the automated checks and a visual check.
 
-## Automated checks (all green before every review, from stage 2)
+## Automated checks of the redesign (history; today `CLAUDE.md`, "Before marking anything complete")
 
 ```bash
 bun run test:coverage   # frontend unit + DOM tests with coverage floor

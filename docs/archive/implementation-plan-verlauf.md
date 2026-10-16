@@ -1,3 +1,16 @@
+## Session 2026-10-16: less bookkeeping, findings and checks (guide review G-3, G-4, G-6)
+
+Request (chat): «Setze auch G-3, G-4 und G-6 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Goes into the same pull request as G-1/G-2/G-5/G-8 (not pushed yet).
+
+- [x] G-3: no `Red:` lines, no plan line per reviewer and round, no exit codes handed to reviewers; the checklist stays, a review item names its report (`CLAUDE.md`, `slice-review`, `code-reviewer`, `docs/test-pyramid.md`)
+- [x] G-4: a Minor/Nit is fixed when trivial, else it stays in its report; open work only for a Blocker/Major of the two kinds; persona "Beobachtungen" stay in the report (`CLAUDE.md`, `slice-review`, `pull-request`, `docs/design/arbeitsregeln.md`)
+- [x] G-6: before every push lint, check, type-check, the affected tests and scenarios; CI runs the full suites with the coverage floors (`CLAUDE.md` "Before marking anything complete", `pull-request`)
+- [x] `code-reviewer` round 1 (docs/reviews/g346-review-1.md)
+- [x] Row O-34 in `offene-punkte.md`: the axe upload states that time out in CI (red on `main` and #266)
+- [x] Checks: lint, check, type-check, the rule tests (`open-work`, `commit-msg-gate`, deepcheck `readme`, `check-issues`)
+- [x] Archive the session, push after #266 is merged, pull request, CI, merge
+  Files: `CLAUDE.md`, `.claude/agents/code-reviewer.md`, `.claude/skills/{slice-review,pull-request}/SKILL.md`, `docs/test-pyramid.md`, `docs/design/arbeitsregeln.md`, `docs/design/offene-punkte.md`; report `docs/reviews/g346-review-1.md`
+
 ## Session 2026-10-16: shorter CLAUDE.md (guide review G-1, G-2, G-5, G-8)
 
 Request (chat): «Setze G-1, G-2, G-5 und G-8 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Own pull request after #266 is merged. Step numbers 1–9 stay, since agents, skills and tools cite them.
