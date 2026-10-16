@@ -362,9 +362,10 @@ export function calculateHeatingShare(
 		const daysInMonth = monthEnd.getDate();
 		const daysInPeriod = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-		// Prorate the monthly percentage based on days
-		const proratedPct = (monthPct * daysInPeriod) / daysInMonth;
-		totalPercentage += proratedPct;
+		// Prorate the monthly percentage based on days, rounded to two places as printed: the share follows from the printed
+		// months (#232)
+		const proratedPct = Math.round((monthPct * daysInPeriod * 100) / daysInMonth) / 100;
+		totalPercentage = Math.round((totalPercentage + proratedPct) * 100) / 100;
 
 		monthBreakdown.push({ month, percentage: proratedPct });
 

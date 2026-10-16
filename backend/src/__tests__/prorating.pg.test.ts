@@ -5,7 +5,7 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { createContract, deleteContract } from '../services/contract.service';
-import { getHeatingProfileByName } from '../services/heating-profile.service';
+import { createHeatingProfile, deleteHeatingProfile, getHeatingProfileByName } from '../services/heating-profile.service';
 import { calculateApartmentProrating, handleMidYearMoves } from '../services/prorating.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { createRental } from './helpers/rental';
@@ -122,11 +122,12 @@ describe('handleMidYearMoves', () => {
 			9200
 		);
 
-		expect(result).toEqual({ byDays: true });
+		expect(result).toEqual({ byDays: true, reason: 'noHeatingMonths' });
 	});
 
 	// Periode Juli bis Dezember, Einzug am 1. Oktober, Mittelland: Oktober bis Dezember 10 + 13.5 + 17 = 40.5 % des Jahres,
-	// von den 41.5 % der Periode (Juli 0, August 0, September 1): 97.59 % der Heizkosten der Periode
+	// von den 41.5 % der Periode (Juli 0, August 0, September 1): 97.59 % der Heizkosten der Periode, auf zwei
+	// Stellen wie gedruckt (#232)
 	it('teilt bei einem Einzug in einer Periode unter einem Jahr durch die Anteile der Periode', async () => {
 		const mittelland = (await getHeatingProfileByName('Heating Mittelland'))!;
 
@@ -139,8 +140,7 @@ describe('handleMidYearMoves', () => {
 			10000
 		);
 
-		expect(result).toMatchObject({ byDays: false });
-		expect((result as { share: number }).share).toBeCloseTo(9759.04, 2);
+		expect(result).toMatchObject({ byDays: false, percentage: 97.59, share: 9759 });
 	});
 
 	// Regel 5: das Heizprofil nur bei Ein- oder Auszug; wer die ganze Periode mietet, trägt nach Tagen (#208, D-2)
@@ -149,7 +149,22 @@ describe('handleMidYearMoves', () => {
 
 		const result = await handleMidYearMoves(mittelland.id, new Date('2023-01-01'), null, year.start, year.end, 10000);
 
-		expect(result).toEqual({ byDays: true });
+		expect(result).toEqual({ byDays: true, reason: 'wholePeriod' });
+	});
+
+	// Einzug am 5. Januar, Periode Januar bis Juni, «Winter»: Januar 18 × 27/31 = 15.677… gerundet 15.68 %, zusammen 47.68 %
+	// von 50.00 %; aus den gedruckten Monaten 95.36 % (ungerundet 95.35 %) (#232)
+	it('rechnet den Anteil aus den auf zwei Stellen gerundeten Monatsanteilen', async () => {
+		const pct = [18, 14, 11, 5, 2, 0, 0, 0, 2, 8, 14, 26];
+		const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+		const shares = Object.fromEntries(months.map((month, i) => [`${month}Pct`, String(pct[i])]));
+		const winter = await createHeatingProfile({ name: `Winter ${crypto.randomUUID()}`, type: 'custom', ...shares } as Parameters<typeof createHeatingProfile>[0]);
+
+		const result = await handleMidYearMoves(winter.id, new Date('2024-01-05'), null, year.start, new Date('2024-06-30'), 1000);
+		await deleteHeatingProfile(winter.id);
+
+		expect(result).toMatchObject({ byDays: false, percentage: 95.36, share: 953.6, periodPercentage: 50 });
+		expect((result as { monthBreakdown: unknown[] }).monthBreakdown.slice(0, 2)).toEqual([{ month: 1, percentage: 15.68 }, { month: 2, percentage: 14 }]);
 	});
 
 	it('sagt, dass nach Tagen geteilt wird, wenn das Heizprofil nicht existiert', async () => {
