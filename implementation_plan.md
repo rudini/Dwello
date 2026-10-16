@@ -22,6 +22,8 @@ Branch `feat/glossary-texts-222`. Issue #222 "Decided (product owner)" (the glos
   Skills: ponytail-review (text-only diff, «Lean already»); tdd and ponytail were not loaded for this slice, the tests were changed and shown red before the texts
   code-reviewer round 1 (docs/reviews/222-review-1.md): fixed C-1 (Skills line), C-2 (plan item for the glossary edit), C-3 (issue numbers, 0489f9ab), C-4 (rows and files named), C-5 (brackets in the row «Mahnung eines Rechnungsstellers»)
   Files: `messages/{de,fr,it,en}.json`, `tests/e2e/features/invoices.feature`, `src/__tests__/invoice-upload.test.ts`, `src/__tests__/invoice-pages.dom.test.ts`, `docs/design/i18n-begriffe.md`, `docs/reviews/222-*.md`, `implementation_plan.md`
+  Checks on 017fd97d: `bun run test:coverage` exit 0, `bun run check` exit 0, backend `bun run test` exit 0, `bun run type-check` exit 0, `bun run test:e2e`: chromium 769 passed, 0 failed (incl. invoices and the a11y/language screens); firefox and webkit did not start (browser executables missing in this container), CI runs them
+  Feature review: personas Dr. Weber (texts), Helga (terms for beginners), Marco (phone); `fach-reviewer` round 3 already checked the final texts, and code-reviewer round 1 confirmed the strings in `messages/*.json` equal them, so no separate domain round
 - [ ] Reviews (`code-reviewer`; feature review: personas and `fach-reviewer` where they apply)
 - [ ] Before marking complete: all checks in `CLAUDE.md`
-- [ ] Workflow review `docs/reviews/workflow-rules-review-issue-222.md`
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-222.md`
