@@ -504,6 +504,10 @@ describe('Rechnung erfassen', () => {
 			expect(text()).toContain('zum Beispiel 31.12.2027.');
 			const help = byTestId('invoice-service-period-help')!.textContent!;
 			expect(help).toContain('Für das 4. Quartal also 01.10.2027 bis 31.12.2027');
+			// welcher Boiler gemeint ist und wann der Zeitraum endet (Personas Dr. Weber P-2, Helga P-5)
+			expect(help).toContain(
+				'endet am Tag, bevor die Arbeit das nächste Mal gemacht wird. Ein Beispiel: Der Boiler der zentralen Warmwasseranlage wird am 01.04.2027 entkalkt'
+			);
 			expect(help).toContain('Geben Sie dann 01.04.2027 bis 31.03.2032 ein.');
 			expect(help.match(/\d{4}/g)).toEqual(['2027', '2027', '2027', '2027', '2032']);
 		} finally {

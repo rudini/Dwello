@@ -29,6 +29,10 @@ describe('Hilfe', () => {
 			const invoices = section('Rechnungen erfassen')!.textContent;
 			expect(invoices).toContain('Geben Sie dann 01.04.2027 bis 31.03.2032 ein.');
 			expect(invoices).toContain('Bei einem Boiler in der Wohnung ist das umstritten');
+			// das Glossar widerspricht dem Absatz nicht (Personas Dr. Weber P-1, Helga P-4)
+			expect(section('Begriffe kurz erklärt')!.textContent).toContain(
+				'Ohne Leistungszeitraum bestimmt das Rechnungsdatum, in welche Abrechnungsperiode eine Rechnung fällt.'
+			);
 		} finally {
 			vi.useRealTimers();
 		}
