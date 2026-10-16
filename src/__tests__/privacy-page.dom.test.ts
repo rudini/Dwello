@@ -37,6 +37,32 @@ describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 		expect(byTestId('llm-recipient')?.textContent).toContain('damit die KI vorschlägt, ob ihre Kosten umlagefähig sind');
 	});
 
+	// #217: «Rechnungen hochladen» schickt jede gewählte Datei sofort an die KI, auch wenn danach abgebrochen wird
+	it('nennt hochgeladene Rechnungsdateien mit Dateiname, auch nach einem Abbruch, und ihren Inhalt', () => {
+		show(PrivacyPage, {
+			data: { recipient: { provider: 'Beispiel AG', country: 'Schweiz' }, providers: ['Google'] }
+		} as never);
+
+		const notice = byTestId('llm-recipient')?.textContent;
+		expect(notice).toContain('wird jede sofort mit ihrem Dateinamen übermittelt (von PDF-Dateien höchstens die ersten drei Seiten, als Bilder)');
+		expect(notice).toContain('auch wenn Sie das Hochladen danach abbrechen');
+		expect(notice).toContain('auch Namen und Adressen');
+	});
+
+	it('sagt, dass auch hochgeladene Rechnungsdateien beim Betreiber ausgelesen werden, wenn das Modell dort läuft', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		expect(byTestId('llm-recipient')?.textContent).toContain('hochgeladene Rechnungsdateien liest es aus');
+	});
+
+	it('nennt die gespeicherten Belege, ihren Zweck und wie lange sie bleiben', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		expect(document.body.textContent).toContain(
+			'Die Belege (hochgeladene Dateien der Rechnungen mit allem, was auf ihnen steht, etwa Namen, Adressen und Beträge) erleichtern die Belegeinsicht der Mieter und bleiben gespeichert, bis Sie den Beleg ersetzen oder die Rechnung löschen.'
+		);
+	});
+
 	// Seit #176 bietet jede Kategorisierung einer Rechnung der KI alle Kategorien an (F-12)
 	it('nennt Name und Beschreibung aller Kategorien bei der Kategorisierung einer Rechnung', () => {
 		show(PrivacyPage, {

@@ -13,6 +13,7 @@
 		error,
 		optional = false,
 		onblur,
+		note,
 		testid
 	}: {
 		id: string;
@@ -26,10 +27,11 @@
 		optional?: boolean;
 		onblur?: () => void;
 		testid?: string;
+		note?: { text: string; testid: string }; // see Field
 	} = $props();
 </script>
 
-<Field {id} {label} {help} {example} {error} {optional}>
+<Field {id} {note} {label} {help} {example} {error} {optional}>
 	{#snippet children(control)}
 		<textarea
 			id={control.id}

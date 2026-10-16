@@ -95,20 +95,26 @@ const KINDS = [
 const MAX_NAME = 255; // the columns title and file_name
 const MAX_MEGABYTES = 10; // 10 × 1024 × 1024 bytes, as Windows counts a megabyte
 
-/** A file the property manager adds to a tenant: no channel, no Versandstatus */
-export async function uploadDocument(tenantId: string, upload: { title: string; fileName: string; content: string }) {
+/** An uploaded file as Dwello keeps it: at most 10 MB, a PDF, JPG or PNG by its first bytes, its name cut to the column */
+export function checkedFile(upload: { fileName: string; content: string }) {
 	const file = Buffer.from(upload.content, 'base64');
 	if (file.length > MAX_MEGABYTES * 1024 * 1024)
 		throw new CodedError('DOCUMENT_TOO_LARGE', `The file is larger than ${MAX_MEGABYTES} MB`, { megabytes: MAX_MEGABYTES });
 	const kind = KINDS.find(({ start }) => file.subarray(0, start.length).toString('latin1') === start);
 	if (!kind) throw new CodedError('DOCUMENT_TYPE_NOT_ALLOWED', 'Only PDF, JPG and PNG files are accepted');
+	const fileName = [...upload.fileName].slice(-MAX_NAME).join(''); // in characters; the end keeps the extension
+	return { fileName, mimeType: kind.mimeType, content: upload.content };
+}
+
+/** A file the property manager adds to a tenant: no channel, no Versandstatus */
+export async function uploadDocument(tenantId: string, upload: { title: string; fileName: string; content: string }) {
+	const { fileName, mimeType, content } = checkedFile(upload);
 	if (upload.title.trim().length > MAX_NAME)
 		throw new CodedError('DOCUMENT_TITLE_TOO_LONG', `The title is longer than ${MAX_NAME} characters`, { max: MAX_NAME });
 	if (!(await tenantExists(tenantId))) throw new CodedError('TENANT_NOT_FOUND', 'Tenant not found');
-	const fileName = [...upload.fileName].slice(-MAX_NAME).join(''); // in characters; the end keeps the extension
 	// without a title it is named like its file
 	const title = upload.title.trim() || fileName.replace(/\.[^.]*$/, '');
-	return createDocument({ tenantId, type: 'upload', title, fileName, content: upload.content, mimeType: kind.mimeType });
+	return createDocument({ tenantId, type: 'upload', title, fileName, content, mimeType });
 }
 
 /** Only an upload: a Mahnung stays as proof that the tenant was reminded */

@@ -8,14 +8,14 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import BilledWarning from '../BilledWarning.svelte';
 	import MissedWarning from '../MissedWarning.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
-	import { formatCurrency } from '$lib/utils/format';
 	import CategorizationPanel from './CategorizationPanel.svelte';
 	import InvoiceFacts from './InvoiceFacts.svelte';
+	import InvoiceBeleg from './InvoiceBeleg.svelte';
+	import DeleteConsequences from './DeleteConsequences.svelte';
 
 	let {
 		data
@@ -112,6 +112,7 @@
 					</Alert>
 				</div>
 			{/if}
+			<InvoiceBeleg {invoice} billed={!!data.billedIn?.length} />
 			<Panel title={m.invoices_more_actions()}>
 				<Button
 					variant="danger-ghost"
@@ -134,17 +135,7 @@
 	confirmTestid="invoice-delete-confirm"
 	onconfirm={remove}
 >
-	<p>
-		{m.invoices_delete_text({
-			name: invoice.billingEntity,
-			amount: formatCurrency(invoice.amount)
-		})}
-	</p>
-	{#if data.billedIn?.length}
-		<BilledWarning periods={data.billedIn}>
-			<p>{m.invoices_delete_billed_text()}</p>
-		</BilledWarning>
-	{/if}
+	<DeleteConsequences {invoice} billedIn={data.billedIn} />
 	{#if deleteError}
 		<Alert tone="critical" title={m.buildings_not_deleted()}><p>{deleteError}</p></Alert>
 	{/if}

@@ -105,6 +105,24 @@ describe('Rechnungsliste', () => {
 	});
 });
 
+describe('Rechnungsliste mit «Rechnungen hochladen»', () => {
+	it('lädt Kategorien einmal, die Verteilschlüssel und den voreingestellten Schlüssel für den Dialog', async () => {
+		const { urls, fetch } = backend({
+			'/invoices': { invoices: [], total: 0 },
+			'/categories': { categories: [caretaker] },
+			'/distribution-keys': { data: [perArea] },
+			'/config/default_distribution_key_id': { value: 'k1' }
+		});
+		const data = (await listLoad({ url: new URL('http://localhost/invoices'), fetch } as never)) as {
+			distributionKeys: { id: string }[];
+			defaultDistributionKeyId: string;
+		};
+		expect(data.distributionKeys.map((key) => key.id)).toEqual(['k1']);
+		expect(data.defaultDistributionKeyId).toBe('k1');
+		expect(urls.filter((url) => url.includes('/categories'))).toHaveLength(1);
+	});
+});
+
 describe('Rechnungsdetail', () => {
 	it('zeigt Kategorie und Verteilschlüssel deutsch', async () => {
 		const { fetch } = backend({ '/invoices/i1': invoice() });
@@ -115,6 +133,27 @@ describe('Rechnungsdetail', () => {
 
 		expect(shown.category?.name).toBe('Hauswart');
 		expect(shown.distributionKey?.name).toBe('Pro Fläche (m²)');
+	});
+
+	it('zeigt die Rechnungsnummer des Backends', async () => {
+		const { fetch } = backend({ '/invoices/i1': invoice() });
+		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+			invoice: { invoiceNumber?: string };
+		};
+		expect(shown.invoiceNumber).toBe('R-1001');
+	});
+
+	it('nennt den Beleg mit Dateiname und Art, oder keinen', async () => {
+		for (const [beleg, expected] of [
+			[backendInvoice.beleg, { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' }],
+			[null, null]
+		] as const) {
+			const { fetch } = backend({ '/invoices/i1': invoice({ beleg }) });
+			const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+				invoice: { beleg: unknown };
+			};
+			expect(shown.beleg).toEqual(expected);
+		}
 	});
 });
 

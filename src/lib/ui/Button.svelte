@@ -22,6 +22,7 @@
 		full = false,
 		ariaLabel,
 		describedby,
+		expanded,
 		testid
 	}: {
 		children: Snippet;
@@ -39,6 +40,7 @@
 		full?: boolean;
 		ariaLabel?: string;
 		describedby?: string; // id of a text that says what the button does, e.g. its consequence
+		expanded?: boolean; // the button shows or hides a part of the page
 		testid?: string;
 	} = $props();
 
@@ -89,6 +91,7 @@
 		aria-busy={busy || undefined}
 		aria-label={ariaLabel}
 		aria-describedby={describedby}
+		aria-expanded={expanded}
 		class={classes}
 		data-testid={testid}
 	>

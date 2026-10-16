@@ -7,7 +7,10 @@ import {
 	llmConfig,
 	buildAllocabilityPrompt,
 	buildCategorizationPrompt,
+	buildExtractionPrompt,
 	parseAllocabilityResponse,
+	parseExtractionResponse,
+	type Extraction,
 	parseLLMResponse,
 	type LLMCategorizationResult
 } from '../config/llm';
@@ -64,10 +67,13 @@ function llmHeaders(): Record<string, string> {
 	};
 }
 
+// A prompt, or a prompt followed by images (data URLs) for a model that reads them
+type Content = string | ({ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } })[];
+
 /**
  * Call the OpenAI-compatible chat completions API
  */
-async function callLlm(prompt: string): Promise<string> {
+async function callLlm(prompt: Content): Promise<string> {
 	const controller = new AbortController();
 	const timeoutId = setTimeout(() => controller.abort(), llmConfig.timeout);
 
@@ -222,6 +228,24 @@ export async function proposeAllocability(
 	const answer = parseAllocabilityResponse(response);
 	if (!answer || answer.confidence < 0.7) throw new CodedError('KI_PROPOSAL_UNSURE', 'Die KI ist sich nicht sicher.');
 	return { isAllowedUtilityCost: answer.isAllowedUtilityCost, reasoning: answer.reasoning };
+}
+
+/**
+ * What the KI reads from the pages of an uploaded file (images as data URLs); null when the KI does not run or does
+ * not answer with the fields
+ */
+export async function extractInvoice(fileName: string, pages: string[]): Promise<Extraction | null> {
+	if (!llmConfig.enabled) return null;
+	try {
+		const content: Content = [
+			{ type: 'text', text: buildExtractionPrompt(fileName) },
+			...pages.map((url) => ({ type: 'image_url' as const, image_url: { url } }))
+		];
+		return parseExtractionResponse(await callLlm(content));
+	} catch (error) {
+		console.warn('KI could not read the file:', error);
+		return null;
+	}
 }
 
 /**

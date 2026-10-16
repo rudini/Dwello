@@ -30,7 +30,7 @@ Dwello is a comprehensive web application for managing residential properties in
 - **Frontend:** SvelteKit + TypeScript + TailwindCSS
 - **Backend:** ElysiaJS on Bun + PostgreSQL + Drizzle ORM
 - **Authentication:** BFF Pattern with OAuth 2.0 / SSO
-- **LLM:** any OpenAI-compatible API, by default a self-hosted Ollama (`qwen2.5:3b`)
+- **LLM:** any OpenAI-compatible API, by default a self-hosted Ollama (`qwen2.5vl:7b`)
 - **Deployment:** Docker Compose
 - **Maps:** OpenStreetMap + Leaflet
 - **Language:** UI in German (de-CH, default), French, Italian and English (Paraglide JS)
@@ -289,7 +289,7 @@ The terms of use name the operator of the installation (who runs it and backs up
 
 ### External LLM provider
 
-By default invoices are categorized by the local Ollama and invoice data stays on the server. With an external provider (`LLM_BASE_URL`, `LLM_API_KEY`), the billing entity, description and amount of each invoice and the name and description of every category go to that provider, and so do the name and description of a new category the user lets the KI check (#176); a description may contain a tenant's name. The privacy statement then names the provider from `LLM_PROVIDER` and, from `LLM_PROVIDER_COUNTRY`, the country where the data is processed; the backend refuses to start without them. Only `localhost`, `127.0.0.1`, `[::1]` and the compose service `ollama` count as the operator's server; any other host counts as external, including `host.docker.internal`, LAN addresses and a self-hosted model on another server (e.g. `LLM_PROVIDER="eigener Server des Betreibers"`, `LLM_PROVIDER_COUNTRY=Schweiz`). With `LLM_ENABLED=false` nothing is sent, no provider is named, and the privacy statement says that no language model processes invoices or categories.
+By default invoices are categorized by the local Ollama and invoice data stays on the server. With an external provider (`LLM_BASE_URL`, `LLM_API_KEY`), the billing entity, description and amount of each invoice and the name and description of every category go to that provider, and so do the name and description of a new category the user lets the KI check (#176); a description may contain a tenant's name. An invoice file uploaded in «Rechnungen hochladen» goes to the provider as images of its pages, with its file name, as soon as it is added (#217): it contains everything printed on the invoice, names and addresses included. The privacy statement then names the provider from `LLM_PROVIDER` and, from `LLM_PROVIDER_COUNTRY`, the country where the data is processed; the backend refuses to start without them. Only `localhost`, `127.0.0.1`, `[::1]` and the compose service `ollama` count as the operator's server; any other host counts as external, including `host.docker.internal`, LAN addresses and a self-hosted model on another server (e.g. `LLM_PROVIDER="eigener Server des Betreibers"`, `LLM_PROVIDER_COUNTRY=Schweiz`). With `LLM_ENABLED=false` nothing is sent, no provider is named, and the privacy statement says that no language model processes invoices or categories.
 
 Before switching, the operator (not Dwello) makes sure that, under the Swiss Data Protection Act (DSG):
 
@@ -299,7 +299,9 @@ Before switching, the operator (not Dwello) makes sure that, under the Swiss Dat
 
 This is a checklist, not legal advice.
 
-**Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen2.5:3b`; pull it (`docker exec dwello-ollama ollama pull qwen2.5:3b`) or set `LLM_MODEL` to the model you have. The old variables are ignored.
+**OpenRouter (optional):** reading uploaded invoices needs a model that reads images. Through OpenRouter, for example: `LLM_BASE_URL=https://openrouter.ai/api/v1`, `LLM_API_KEY=<key>`, `LLM_MODEL=qwen/qwen2.5-vl-72b-instruct` (or its Qwen3-VL successor), `LLM_PROVIDER=OpenRouter`, `LLM_PROVIDER_COUNTRY=USA`. Check the checklist above first: OpenRouter is based in the USA and passes each request on to a model provider of its own choice. Restrict the routing in the OpenRouter account to providers you have checked, and name all recipients with their countries in `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` (e.g. `LLM_PROVIDER="OpenRouter, Alibaba Cloud"`, `LLM_PROVIDER_COUNTRY="USA, Singapur"`), so the privacy statement names them (Art. 19 DSG).
+
+**Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen2.5vl:7b`; pull it (`docker exec dwello-ollama ollama pull qwen2.5vl:7b`) or set `LLM_MODEL` to the model you have. The old variables are ignored.
 
 **Upgrading from `BACKEND_API_URL`:** the frontend reads the backend address only from `BACKEND_URL` now. Rename the variable in your `.env`; `docker-compose.prod.yml` sets it already.
 

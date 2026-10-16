@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { page } from '$app/stores';
+	import { invalidateAll } from '$app/navigation';
 	import type { InvoicesListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
@@ -8,8 +9,13 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import InvoiceRow from './InvoiceRow.svelte';
 	import InvoiceSearch from './InvoiceSearch.svelte';
+	import UploadResult from './UploadResult.svelte';
+	import InvoiceUploadDialog, { type Created } from './InvoiceUploadDialog.svelte';
 
 	let { data }: { data: InvoicesListData } = $props();
+
+	let uploading = $state(false);
+	let created = $state<Created[]>([]);
 
 	// Only the year is chosen: an empty list means nothing is recorded yet, not a filter mistake
 	const onlyYear = $derived(
@@ -31,11 +37,28 @@
 <div class="flex flex-col gap-8">
 	<PageHeader title={m.nav_invoices()} purpose={m.invoices_purpose()}>
 		{#snippet action()}
-			<Button href="/invoices/new" variant="primary" icon="add" testid="invoice-new-button"
-				>{m.dashboard_add_invoice()}</Button
-			>
+			<div class="flex flex-wrap gap-4">
+				<Button variant="primary" icon="document" onclick={() => (uploading = true)} testid="invoice-upload-button"
+					>{m.invoices_upload_open()}</Button
+				>
+				<Button href="/invoices/new" icon="add" testid="invoice-new-button">{m.dashboard_add_invoice()}</Button>
+			</div>
 		{/snippet}
 	</PageHeader>
+
+	{#if created.length}<UploadResult {created} />{/if}
+
+	<InvoiceUploadDialog
+		bind:open={uploading}
+		buildings={data.buildings}
+		categories={data.categories}
+		distributionKeys={data.distributionKeys}
+		defaultDistributionKeyId={data.defaultDistributionKeyId}
+		oncreated={(list) => {
+			created = list;
+			invalidateAll();
+		}}
+	/>
 
 	<!-- new for each address: after a link, back or forward the form shows the filters of the list shown (#159) -->
 	{#key $page.url.search}

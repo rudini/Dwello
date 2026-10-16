@@ -1,4 +1,5 @@
 import { localName } from '$lib/names';
+import { ValidationError } from './error-handler';
 import type { InvoiceWithDetails } from '$lib/types';
 import { toCategory } from './category';
 import { toDistributionKey } from './distribution-key';
@@ -10,25 +11,33 @@ type Named = { id: string; name: string };
 type MasterData = Parameters<typeof localName>[0];
 
 /** A category as offered for invoices: named in the UI language */
-export const localCategory = (c: Record<string, unknown>) => ({
+const localCategory = (c: Record<string, unknown>) => ({
 	...toCategory(c),
 	name: localName(c as MasterData)
 });
 
-/** Categories and distribution keys to choose for an invoice, named in the UI language; a failing call offers none */
+/**
+ * Categories and distribution keys to choose for an invoice, named in the UI language, and the key the settings
+ * preselect; a failing call offers none
+ */
 export async function invoiceChoices(fetch: typeof globalThis.fetch) {
-	type List = { categories?: Record<string, unknown>[]; data?: Record<string, unknown>[] };
-	const list = (path: string): Promise<List> =>
-		fetch(`${BACKEND_URL}/api/v1/${path}?limit=100`)
+	type List = { categories?: Record<string, unknown>[]; data?: Record<string, unknown>[]; value?: string };
+	const get = (path: string): Promise<List> =>
+		fetch(`${BACKEND_URL}/api/v1/${path}`)
 			.then((response) => (response.ok ? response.json() : {}))
 			.catch(() => ({}));
-	const [categories, keys] = await Promise.all([list('categories'), list('distribution-keys')]);
+	const [categories, keys, defaultKey] = await Promise.all([
+		get('categories?limit=100'),
+		get('distribution-keys?limit=100'),
+		get('config/default_distribution_key_id')
+	]);
 	return {
 		categories: (categories.categories || categories.data || []).map(localCategory),
 		distributionKeys: (keys.data || []).map((d) => ({
 			...toDistributionKey(d),
 			name: localName(d as MasterData)
-		}))
+		})),
+		defaultDistributionKeyId: defaultKey.value ?? ''
 	};
 }
 
@@ -59,6 +68,7 @@ export function toInvoice(r: Record<string, unknown>, names: Named[] = []): Invo
 		id: r.id as string,
 		buildingId: r.buildingId as string,
 		invoiceDate: r.invoiceDate as string,
+		invoiceNumber: (r.invoiceNumber as string | null) ?? undefined,
 		servicePeriodStart: r.servicePeriodStart as string | undefined,
 		servicePeriodEnd: r.servicePeriodEnd as string | undefined,
 		billingEntity: (r.billingEntityName || r.billingEntity || '') as string,
@@ -80,7 +90,8 @@ export function toInvoice(r: Record<string, unknown>, names: Named[] = []): Invo
 		llmCategory: suggested
 			? named({ id: suggested.id as string, name: toCategory(suggested).name })
 			: undefined,
-		categorizationStatus: categorizationStatus(r)
+		categorizationStatus: categorizationStatus(r),
+		beleg: (r.beleg as { fileName: string; mimeType: string } | null) ?? null
 	};
 }
 
@@ -115,4 +126,25 @@ export async function statementPeriods(
 		billedIn: periodsOf(overlapping.filter((s) => s.createdAt >= recordedAt)),
 		missedIn: periodsOf(overlapping.filter((s) => s.createdAt < recordedAt))
 	};
+}
+
+/** The form a page sent with a file; one that is no form is refused as a bad request */
+export const formOf = (request: Request) =>
+	request.formData().catch(() => {
+		throw new ValidationError('Invalid form');
+	});
+
+/** The invoice fields a form sends as JSON; anything else is refused as a bad request */
+export function fieldsOf(value: FormDataEntryValue | null): Record<string, unknown> {
+	try {
+		return JSON.parse(String(value));
+	} catch {
+		throw new ValidationError('Invalid invoice fields', 'invoice');
+	}
+}
+
+/** A file the property manager chose for an invoice, as the backend takes it: its name and its content in Base64 */
+export async function belegOf(file: FormDataEntryValue | null) {
+	if (!(file instanceof File)) throw new ValidationError('A file is required', 'file');
+	return { fileName: file.name, content: Buffer.from(await file.arrayBuffer()).toString('base64') };
 }

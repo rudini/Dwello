@@ -1,7 +1,9 @@
 /**
- * KI stand-in for the acceptance tests: an OpenAI-compatible /chat/completions that answers only the check of a
- * new category's allocability, by its name and in the language the prompt asks for. Everything else (invoice
- * categorization, /models) fails, so the invoice scenarios still see an unreachable KI.
+ * KI stand-in for the acceptance tests: an OpenAI-compatible /chat/completions that answers the check of a new
+ * category's allocability, by its name and in the language the prompt asks for, and the reading of an uploaded
+ * invoice file, by its file name (the supplier the scenario uploads). Invoice categorization answers only for the
+ * suppliers of the upload scenarios; everything else (/models included) fails, so the other invoice scenarios still
+ * see an unreachable KI.
  *
  *   bun run llm-stub      http://127.0.0.1:2527/v1
  */
@@ -99,6 +101,59 @@ function reply(prompt: string) {
 	return Bun.sleep(delay).then(() => Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] }));
 }
 
+// What the stand-in «reads» from an invoice file, by its name: «… ohne KI» fails, «Sammelscan» holds two invoices,
+// «Werke Schlussrechnung» deducts Akonto payments, «… Reparatur» mixes in costs that are not allocable, «… Gutschrift» is a
+// credit note
+// What the file name says about the file, as the stand-in «reads» it
+const readsAs = (fileName: string) => ({
+	invoiceCount: fileName.includes('Sammelscan') ? 2 : 1,
+	documentType: fileName.includes('Gutschrift') ? 'credit_note' : 'invoice',
+	deductedAmount: fileName.includes('Werke Schlussrechnung') ? 1000 : null,
+	nonAllocableItems: fileName.includes('Reparatur')
+});
+
+function read(fileName: string) {
+	if (fileName.includes('ohne KI')) return new Response(null, { status: 503 });
+	const answer = {
+		...readsAs(fileName),
+		billingEntityName: fileName.replace(/\.[^.]*$/, ''),
+		invoiceNumber: 'R-1001',
+		invoiceDate: '2026-03-31',
+		totalAmount: 1250,
+		servicePeriodStart: '2026-01-01',
+		servicePeriodEnd: '2026-03-31',
+		dueDate: null,
+		description: 'Allgemeinstrom Q1',
+		confidence: { billingEntityName: 0.95, invoiceNumber: 0.9, invoiceDate: 0.4, totalAmount: 0.9, servicePeriodStart: 0.9, description: 0.8 }
+	};
+	return Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] });
+}
+
+// The Kategorie of the upload scenarios' suppliers; any other invoice finds no KI
+const supplierCategories: [RegExp, string][] = [
+	[/^Elektro Blitz/, 'Electricity Common Areas'],
+	[/^Gartenbau Grün/, 'Garden Maintenance']
+];
+
+function categorize(prompt: string) {
+	const supplier = line(prompt, 'Rechnungssteller') ?? '';
+	const category = supplierCategories.find(([match]) => match.test(supplier))?.[1];
+	if (!category) return new Response(null, { status: 503 });
+	const answer = { category, confidence: 0.9, isAllowedUtilityCost: true, reasoning: 'Laufende Betriebskosten.' };
+	return Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] });
+}
+
+type Content = string | { type: string; text?: string }[];
+const textOf = (content: Content) => (typeof content === 'string' ? content : content.map((part) => part.text ?? '').join(''));
+
+function answer(content: Content) {
+	const prompt = textOf(content);
+	const file = prompt.match(/Die Bilder sind die Seiten der Datei «(.*)»/)?.[1];
+	if (file) return read(file);
+	if (prompt.includes('RECHNUNGSDATEN:')) return categorize(prompt);
+	return reply(prompt);
+}
+
 Bun.serve({
 	port: PORT,
 	hostname: '127.0.0.1',
@@ -106,6 +161,6 @@ Bun.serve({
 	idleTimeout: 60,
 	fetch: async (request) =>
 		new URL(request.url).pathname.endsWith('/chat/completions')
-			? reply(((await request.json()) as { messages: { content: string }[] }).messages[0].content)
+			? answer(((await request.json()) as { messages: { content: Content }[] }).messages[0].content)
 			: new Response(null, { status: 503 })
 });

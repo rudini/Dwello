@@ -260,7 +260,6 @@ export const invoices = pgTable(
 		llmConfidence: decimal('llm_confidence', { precision: 5, scale: 4 }), // 0.0000 to 1.0000
 		wasManuallyOverridden: boolean('was_manually_overridden').default(false),
 		manualOverrideReason: text('manual_override_reason'), // why the KI category was overridden
-		invoicePdf: text('invoice_pdf'), // Base64 or URL
 		notes: text('notes'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
@@ -271,6 +270,17 @@ export const invoices = pgTable(
 		index('invoices_category_id_idx').on(table.categoryId)
 	]
 );
+
+// The Beleg of an invoice: its uploaded file, at most one, deleted with the invoice
+export const invoiceDocuments = pgTable('invoice_documents', {
+	invoiceId: uuid('invoice_id')
+		.primaryKey()
+		.references(() => invoices.id, { onDelete: 'cascade' }),
+	fileName: varchar('file_name', { length: 255 }).notNull(),
+	mimeType: varchar('mime_type', { length: 50 }).notNull(),
+	content: text('content').notNull(), // Base64 encoded file
+	createdAt: timestamp('created_at').defaultNow().notNull()
+});
 
 // Heating oil in the tank on a reading day, in CHF; heating costs are stock at the start + purchases − stock at the end
 export const fuelStocks = pgTable(

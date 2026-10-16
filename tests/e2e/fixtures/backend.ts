@@ -319,6 +319,16 @@ export function testData(api: CallTheApi) {
 			ids.set(`Rechnung ${supplier}`, id);
 		},
 
+		async invoiceNumber(supplier: string, invoiceNumber: string) {
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { invoiceNumber });
+		},
+
+		// The original file of the supplier's invoice
+		async beleg(supplier: string, fileName: string) {
+			const content = Buffer.from('%PDF-1.4\n%%EOF\n').toString('base64');
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}/document`, { fileName, content });
+		},
+
 		// The KI suggested the category the supplier's invoice has
 		async kiSuggestion(supplier: string) {
 			const id = ids.get(`Rechnung ${supplier}`);
