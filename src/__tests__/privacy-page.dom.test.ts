@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import PrivacyPage from '../routes/privacy/+page.svelte';
 import { byTestId, show } from './helpers/dom';
+import de from '../../messages/de.json';
+import en from '../../messages/en.json';
+import fr from '../../messages/fr.json';
+import italian from '../../messages/it.json';
 
 describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 	it('sagt, dass Rechnungsdaten den Server nicht verlassen, wenn das Modell beim Betreiber läuft', () => {
@@ -9,11 +13,18 @@ describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 		expect(byTestId('llm-recipient')?.textContent).toContain('verlassen dafür den Server nicht');
 	});
 
-	it('sagt bei abgeschalteter KI, dass kein Sprachmodell Rechnungen oder Kategorien bearbeitet (#216)', () => {
+	it('sagt bei abgeschalteter KI, dass keine KI Rechnungen oder Kategorien bearbeitet (#216)', () => {
 		show(PrivacyPage, { data: { recipient: null, enabled: false, providers: ['Google'] } } as never);
 
 		const notice = byTestId('llm-recipient')?.textContent;
-		expect(notice).toBe('Rechnungen und Kategorien werden nicht von einem Sprachmodell bearbeitet.');
+		expect(notice).toBe('Rechnungen und Kategorien werden nicht von einer KI bearbeitet.');
+	});
+
+	// one word for one thing: the dialog says «KI», so does the privacy statement, in every language (persona Dr. Weber)
+	it('spricht in jeder Sprache und jeder Variante von der KI, nicht von einem Sprachmodell', () => {
+		for (const messages of [de, fr, italian, en])
+			for (const key of ['privacy_llm_external', 'privacy_llm_local', 'privacy_llm_off'] as const)
+				expect(messages[key]).not.toMatch(/Sprachmodell|modèle de langage|modello linguistico|language model/);
 	});
 
 	it('nennt Anbieter, Land und die übermittelten Angaben eines externen Anbieters (DSG Art. 19)', () => {
@@ -52,7 +63,7 @@ describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 	it('sagt, dass auch hochgeladene Rechnungsdateien beim Betreiber ausgelesen werden, wenn das Modell dort läuft', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
-		expect(byTestId('llm-recipient')?.textContent).toContain('hochgeladene Rechnungsdateien liest es aus');
+		expect(byTestId('llm-recipient')?.textContent).toContain('hochgeladene Rechnungsdateien liest sie aus');
 	});
 
 	it('nennt die gespeicherten Belege, ihren Zweck und wie lange sie bleiben', () => {

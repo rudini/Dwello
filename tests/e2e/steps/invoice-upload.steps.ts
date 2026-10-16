@@ -8,6 +8,7 @@ import {
 	createdInvoiceNames,
 	hintsOfUpload,
 	uploadDialogShown,
+	uploadState,
 	belegShown,
 	openedBelegMagic,
 	openedBelegName,
@@ -33,6 +34,8 @@ import {
 	invoicePhoto,
 	openBeleg,
 	openBelegOfInvoice,
+	openFileLarge,
+	removeFile,
 	replaceBeleg,
 	startCancellingUpload,
 	startDeletingInvoice,
@@ -243,4 +246,21 @@ Then('erklärt der Beleg {string}', async ({ verwalter }, text: string) => {
 
 Then('rät die Bestätigung zum Löschen der Rechnung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(billedAdviceOnDelete).toBe(text);
+});
+
+Then('meldet Dwello {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uploadState).toBe(text);
+});
+
+When('der Liegenschaftsverwalter die Datei {string} entfernt', async ({ verwalter }, fileName: string) => {
+	await verwalter.attemptsTo(removeFile(fileName));
+});
+
+When('der Liegenschaftsverwalter die Datei von {string} gross ansieht', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.attemptsTo(openFileLarge(pdfOf(names.get(supplier)!)));
+});
+
+Then('zeigt ein neuer Tab die Datei als PDF', async ({ verwalter }) => {
+	await verwalter.sees(belegShown).toBe(true);
+	await verwalter.sees(openedBelegMagic).toBe(MAGIC.PDF);
 });

@@ -49,7 +49,6 @@ Funktionalität: Rechnung bearbeiten
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"
 
-  @wip
   Szenario: Rechnungsnummer korrigieren
     Angenommen die Rechnung von "Hauswart Huber" hat die Rechnungsnummer "R-1001"
     Und der Liegenschaftsverwalter bearbeitet die Rechnung von "Hauswart Huber"

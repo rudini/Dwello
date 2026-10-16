@@ -69,6 +69,17 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "1 Rechnung erstellt"
 
+  Szenario: Dwello sagt, was nach dem Lesen zu tun ist, und meldet eine entfernte Datei
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" und die Word-Datei "notizen.docx" hochlädt
+    Dann meldet Dwello "2 von 2 Dateien gelesen. Bitte prüfen: 1. Nicht möglich: 1."
+    Wenn der Liegenschaftsverwalter die Datei "notizen.docx" entfernt
+    Dann meldet Dwello "notizen.docx entfernt."
+
+  Szenario: Eine hochgeladene Datei gross ansehen
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
+    Und der Liegenschaftsverwalter die Datei von "Elektro Blitz" gross ansieht
+    Dann zeigt ein neuer Tab die Datei als PDF
+
   Szenario: Rechnung ohne KI aus einer Datei erfassen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
     Dann sagt die Datei von "Elektro Blitz" "Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus."
@@ -144,7 +155,6 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nichts Lesbares antwortet
     Dann sagt die Datei von "Elektro Blitz" "Die KI hat keine lesbare Antwort gegeben. Wählen Sie «Erneut versuchen» oder füllen Sie die Felder aus."
 
-  @wip
   Szenario: Der Hinweis auf abgezogene Akontorechnungen bleibt bei der Rechnung
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
     Und der Liegenschaftsverwalter bei der Datei von "Werke Schlussrechnung" die Kategorie "Allgemeinstrom" wählt

@@ -59,18 +59,28 @@ export type UploadRow = {
 	notes: string[]; // what the property manager should know about the file
 	duplicateOf: string | null;
 	several: boolean;
+	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
 	selected: boolean;
 	createError?: string; // why the invoice was not created
 };
 
 // The kinds of file Dwello keeps, told by their first bytes, as the backend checks them
-const STARTS = [[0x25, 0x50, 0x44, 0x46, 0x2d], [0xff, 0xd8, 0xff], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]];
+const STARTS: [string, number[]][] = [
+	['application/pdf', [0x25, 0x50, 0x44, 0x46, 0x2d]],
+	['image/jpeg', [0xff, 0xd8, 0xff]],
+	['image/png', [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]]
+];
+
+/** The type of the file by its first bytes, never by its name: a file is shown only as what it is (C-7), or null */
+export async function fileType(file: File): Promise<string | null> {
+	const head = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+	return STARTS.find(([, start]) => start.every((byte, i) => head[i] === byte))?.[0] ?? null;
+}
 
 /** Why Dwello does not take the file, or null */
 export async function fileRefusal(file: File): Promise<string | null> {
 	if (file.size > MAX_MEGABYTES * 1024 * 1024) return m.backend_document_too_large({ megabytes: MAX_MEGABYTES });
-	const head = new Uint8Array(await file.slice(0, 8).arrayBuffer());
-	return STARTS.some((start) => start.every((byte, i) => head[i] === byte)) ? null : m.backend_document_type_not_allowed();
+	return (await fileType(file)) ? null : m.backend_document_type_not_allowed();
 }
 
 export const newRow = (key: number, file: File, defaults: { distributionKeyId: string }): UploadRow => ({
@@ -97,6 +107,7 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	notes: [],
 	duplicateOf: null,
 	several: false,
+	hints: { deductedAmount: null, nonAllocableItems: false },
 	selected: true
 });
 
@@ -209,6 +220,7 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 		notes: notes.filter((note) => !!note) as string[],
 		duplicateOf: proposal.duplicateOf,
 		several,
+		hints: { deductedAmount: proposal.deductedAmount, nonAllocableItems: proposal.nonAllocableItems },
 		selected: preselected(proposal)
 	};
 }
@@ -241,7 +253,8 @@ export function invoiceOf(row: UploadRow, buildingId: string) {
 		categoryId: values.categoryId,
 		distributionKeyId: values.distributionKeyId || null,
 		isValidUtilityCost: values.isValidUtilityCost,
-		...suggestionProvenance(row.suggestion)
+		...suggestionProvenance(row.suggestion),
+		beleg: row.hints
 	};
 }
 

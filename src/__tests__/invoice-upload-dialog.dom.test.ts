@@ -10,6 +10,7 @@ vi.mock('$lib/file-pages', () => ({
 import { pagesOf } from '$lib/file-pages';
 import InvoiceUploadDialog from '../routes/invoices/InvoiceUploadDialog.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
+import { reactiveProps } from './helpers/reactive-props.svelte';
 import extraction from '../../tests/contracts/invoice-extraction.json';
 import unreadable from '../../tests/contracts/invoice-extraction-unreadable.json';
 
@@ -149,6 +150,7 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
 		click('invoice-upload-row-toggle');
+		await settle();
 		const link = byTestId<HTMLAnchorElement>('invoice-upload-file-link')!;
 		expect(link.getAttribute('href')).toMatch(/^blob:/);
 		expect(link.getAttribute('target')).toBe('_blank');
@@ -179,6 +181,49 @@ describe('Rechnungen hochladen', () => {
 		click('invoice-upload-create-button');
 		await settle();
 		expect(byTestId('invoice-upload-row-message')!.textContent!.split('Wählen Sie eine Kategorie.').length).toBe(2);
+	});
+
+	it('zeigt eine Datei gross nur als das, was ihre ersten Bytes sagen, nie als Webseite (Code-Review C-7)', async () => {
+		const made = vi.spyOn(URL, 'createObjectURL');
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 1])], 'rechnung.html', { type: 'text/html' }));
+		click('invoice-upload-row-toggle');
+		await settle();
+		expect((made.mock.calls.at(-1)![0] as Blob).type).toBe('application/pdf');
+		made.mockRestore();
+	});
+
+	it('beginnt nach dem Schliessen wieder ohne alte Meldung (Code-Review C-9)', async () => {
+		fakeBff(() => [200, read]);
+		const props = reactiveProps({
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [{ id: 'k1', name: 'Nach Fläche' }],
+			defaultDistributionKeyId: 'k1',
+			oncreated: vi.fn()
+		});
+		show(InvoiceUploadDialog, props);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-remove');
+		await settle();
+		click('dialog-cancel');
+		await settle();
+		props.open = true;
+		await settle();
+		expect(byTestId('invoice-upload-progress')!.textContent).toBe('');
+	});
+
+	it('nennt beim Link auf die grosse Datei, welche Datei er öffnet (Code-Review C-10)', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		await settle();
+		const describedby = byTestId('invoice-upload-file-link')!.getAttribute('aria-describedby') ?? '';
+		expect(document.getElementById(describedby)?.textContent).toBe('blitz.pdf');
 	});
 
 	it('liest jede Datei sofort aus und erstellt die gewählten Rechnungen mit ihrem Beleg', async () => {

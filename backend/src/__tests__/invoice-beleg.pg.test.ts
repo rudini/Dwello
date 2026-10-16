@@ -47,12 +47,23 @@ describe('Beleg einer Rechnung', () => {
 		const response = await newInvoice({ beleg: { fileName: 'elektro-blitz.pdf', content: pdf.toString('base64') } });
 		expect(response.status).toBe(201);
 		const invoice = (await response.json()) as { id: string; beleg: unknown };
-		expect(invoice.beleg).toEqual({ fileName: 'elektro-blitz.pdf', mimeType: 'application/pdf' });
+		expect(invoice.beleg).toEqual({ fileName: 'elektro-blitz.pdf', mimeType: 'application/pdf', deductedAmount: null, nonAllocableItems: false });
 
 		const file = await callApi(`/api/v1/invoices/${invoice.id}/document`);
 		expect(file.headers.get('content-type')).toBe('application/pdf');
 		expect(file.headers.get('content-disposition')).toContain('elektro-blitz.pdf');
 		expect(Buffer.from(await file.arrayBuffer())).toEqual(pdf);
+	});
+
+	// what the KI saw on the file stays with it after creating, and goes with it when it is replaced (persona Anna)
+	it('behält die Hinweise aus dem Hochladen und verliert sie mit einem neuen Beleg', async () => {
+		const beleg = { fileName: 'werke.pdf', content: pdf.toString('base64'), deductedAmount: '1000.00', nonAllocableItems: true };
+		const id = await idOf(await newInvoice({ beleg }));
+		const read = async () => ((await (await callApi(`/api/v1/invoices/${id}`)).json()) as { beleg: unknown }).beleg;
+		expect(await read()).toMatchObject({ deductedAmount: '1000.00', nonAllocableItems: true });
+
+		await sendJson('PUT', `/api/v1/invoices/${id}/document`, { fileName: 'neu.pdf', content: pdf.toString('base64') });
+		expect(await read()).toMatchObject({ fileName: 'neu.pdf', deductedAmount: null, nonAllocableItems: false });
 	});
 
 	it('wird zu einer Rechnung ohne Beleg hinzugefügt und danach ersetzt', async () => {

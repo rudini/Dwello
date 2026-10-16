@@ -14,7 +14,6 @@ Funktionalität: Neue Rechnung erfassen
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
     Und die Rechnung von "Hauswart Huber" über "CHF 450.00" in der Kategorie "Hauswart" ist auffindbar
 
-  @wip
   Szenario: Nicht umlagefähige Kategorie wählen
     Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
     Dann ist die Rechnung nicht als umlagefähig markiert

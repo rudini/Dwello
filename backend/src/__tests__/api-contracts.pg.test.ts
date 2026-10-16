@@ -57,7 +57,9 @@ beforeAll(async () => {
 		.set({ email: 'anna.keller@example.ch', phone: '+41 44 123 45 67', address: 'Seestrasse 12', postalCode: '8002', city: 'Zürich' })
 		.where(eq(tenants.id, rental.tenant));
 	for (const { id } of await db.select({ id: invoices.id }).from(invoices).where(eq(invoices.buildingId, rental.building)))
-		await db.insert(invoiceDocuments).values({ invoiceId: id, fileName: 'beleg.pdf', mimeType: 'application/pdf', content: 'JVBERi0=' });
+		await db
+			.insert(invoiceDocuments)
+			.values({ invoiceId: id, fileName: 'beleg.pdf', mimeType: 'application/pdf', content: 'JVBERi0=', deductedAmount: '1000.00', nonAllocableItems: true });
 	await db
 		.update(invoices)
 		.set({ llmCategoryId: sql`${invoices.categoryId}`, llmConfidence: '0.86', manualOverrideReason: 'Vertrag geprüft' })

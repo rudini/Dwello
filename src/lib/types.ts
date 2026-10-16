@@ -221,7 +221,8 @@ export interface InvoiceWithDetails extends Invoice {
 	distributionKey?: Pick<DistributionKey, 'id' | 'name'>;
 	llmCategory?: Pick<Category, 'id' | 'name'>; // what the KI suggested
 	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';
-	beleg: { fileName: string; mimeType: string } | null; // the uploaded file of the invoice
+	// the uploaded file of the invoice, with what the KI saw on it when it was uploaded (#233)
+	beleg: { fileName: string; mimeType: string; deductedAmount?: string | null; nonAllocableItems?: boolean } | null;
 	invoiceNumber?: string;
 }
 

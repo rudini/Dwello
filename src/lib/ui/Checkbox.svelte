@@ -40,7 +40,7 @@
 		/>
 		{label}
 	</label>
-	{#if help}<p id="{id}-help" class="pl-10 text-ink-muted">{help}</p>{/if}
+	{#if help}<p id="{id}-help" class="pl-10 text-ink-muted" data-testid={testid && `${testid}-help`}>{help}</p>{/if}
 	{#if error}
 		<p id="{id}-error" class="pl-10 font-semibold text-critical" data-testid="form-error">
 			{error}

@@ -191,7 +191,9 @@ describe('Rechnung aus einer Datei erstellen', () => {
 			distributionKeyId: 'k1',
 			isValidUtilityCost: true,
 			llmCategoryId: 'c1',
-			llmConfidence: '0.9'
+			llmConfidence: '0.9',
+			// what the KI saw on the file, kept with its Beleg (persona Anna)
+			beleg: { deductedAmount: '1000.00', nonAllocableItems: false }
 		});
 	});
 });

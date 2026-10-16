@@ -2,12 +2,15 @@ import type { Activity } from '../screenplay/actor';
 import { Click, EnterDate, Enter, FailRequests, OpenInNewTab, Select, Upload, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import { deleteButton } from '../targets/invoice-detail';
+import { successToast } from '../targets/form';
 import {
 	belegBillingEntity,
 	belegDescription,
 	belegDetailsToggle,
 	belegFileInput,
+	belegFileLink,
 	belegLink,
+	belegRemove,
 	belegAmount,
 	belegCategory,
 	belegInvoiceDate,
@@ -90,9 +93,14 @@ export const confirmCancelling = Click.on(discardConfirm);
 export const extractionFails = FailRequests.to('/api/invoices/extract', {});
 export const creatingFails = FailRequests.to('/api/invoices', {});
 
+// saved once the confirmation shows: the Beleg opened right after must be the new one
 export const replaceBeleg = (file: File): Activity => (actor) =>
-	actor.attemptsTo(Upload.theFile(file).into(belegFileInput), Click.on(belegUploadButton));
+	actor.attemptsTo(Upload.theFile(file).into(belegFileInput), Click.on(belegUploadButton), Wait.until(successToast));
 
 export const startDeletingInvoice = Click.on(deleteButton);
 
 export const openBelegOfInvoice = OpenInNewTab(belegLink);
+// the invoice of the file opened, then the whole file in a new tab
+export const openFileLarge = (fileName: string): Activity => (actor) =>
+	actor.attemptsTo(openBeleg(fileName), Wait.until(belegFileLink(fileName)), OpenInNewTab(belegFileLink(fileName)));
+export const removeFile = (fileName: string) => Click.on(belegRemove(fileName));

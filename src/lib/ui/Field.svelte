@@ -13,6 +13,7 @@
 		error,
 		optional = false,
 		note,
+		helpTestid,
 		children
 	}: {
 		id: string;
@@ -22,6 +23,7 @@
 		error?: string;
 		optional?: boolean;
 		note?: { text: string; testid: string }; // a caution about the value, e.g. that the KI read it without being sure
+		helpTestid?: string;
 		children: Snippet<[FieldControl]>;
 	} = $props();
 
@@ -57,7 +59,7 @@
 		{#if optional}<span class="font-normal text-ink-muted">{m.ui_optional()}</span>{/if}
 	</label>
 	{#if help || example}
-		<p id={helpId} class="text-ink-muted">
+		<p id={helpId} class="text-ink-muted" data-testid={helpTestid}>
 			{help ?? ''}
 			{#if example}<span class="whitespace-nowrap">{m.ui_example({ example })}</span>{/if}
 		</p>

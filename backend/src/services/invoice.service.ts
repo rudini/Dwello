@@ -23,7 +23,8 @@ import { CodedError, refusal, type Refusal } from './coded-error';
 import { checkedFile } from './document.service';
 
 /** An uploaded file for an invoice, Base64 encoded */
-export type BelegUpload = { fileName: string; content: string };
+/** A file for an invoice; read by the KI in «Rechnungen hochladen», with what it saw on it (#233) */
+export type BelegUpload = { fileName: string; content: string; deductedAmount?: string | null; nonAllocableItems?: boolean };
 
 export interface InvoiceFilters {
 	search?: string;
@@ -42,7 +43,7 @@ export interface InvoiceWithDetails extends Invoice {
 	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean; isHeatingCost: boolean } | null;
 	distributionKey: { id: string; name: string; nameDE: string | null } | null;
 	llmCategory: { id: string; name: string; nameDE: string | null } | null;
-	beleg: { fileName: string; mimeType: string } | null;
+	beleg: { fileName: string; mimeType: string; deductedAmount: string | null; nonAllocableItems: boolean } | null;
 }
 
 /**
@@ -69,7 +70,12 @@ function selectWithDetails() {
 				name: distributionKeys.name,
 				nameDE: distributionKeys.nameDE
 			},
-			beleg: { fileName: invoiceDocuments.fileName, mimeType: invoiceDocuments.mimeType }
+			beleg: {
+				fileName: invoiceDocuments.fileName,
+				mimeType: invoiceDocuments.mimeType,
+				deductedAmount: invoiceDocuments.deductedAmount,
+				nonAllocableItems: invoiceDocuments.nonAllocableItems
+			}
 		})
 		.from(invoices)
 		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
@@ -254,7 +260,13 @@ export async function createInvoice(
 				wasManuallyOverridden: false
 			})
 			.returning();
-		if (file) await tx.insert(invoiceDocuments).values({ invoiceId: created.id, ...file });
+		if (file)
+			await tx.insert(invoiceDocuments).values({
+				invoiceId: created.id,
+				...file,
+				deductedAmount: beleg.deductedAmount ?? null,
+				nonAllocableItems: beleg.nonAllocableItems ?? false
+			});
 		return created;
 	});
 
@@ -276,7 +288,8 @@ export async function getBeleg(invoiceId: string) {
 /** Adds or replaces the Beleg of an invoice; null when there is no such invoice */
 export async function setBeleg(invoiceId: string, upload: BelegUpload) {
 	if (!(await getInvoice(invoiceId))) return null;
-	const file = checkedFile(upload);
+	// a new file: what the KI saw on the old one does not hold for it
+	const file = { ...checkedFile(upload), deductedAmount: null, nonAllocableItems: false };
 	await db
 		.insert(invoiceDocuments)
 		.values({ invoiceId, ...file })

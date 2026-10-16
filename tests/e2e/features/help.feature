@@ -20,6 +20,5 @@ Funktionalität: Hilfe
       | Zahlungen und Mahnungen            |
       | Begriffe kurz erklärt              |
 
-  @wip
   Szenario: Die Hilfe nennt das Hochladen mehrerer Rechnungen
     Dann erklärt die Hilfe unter "Rechnungen erfassen" "Mehrere Rechnungen auf einmal: Wählen Sie unter «Rechnungen» «Rechnungen hochladen». Die KI liest die Dateien aus, und Sie prüfen die Angaben, bevor Dwello die Rechnungen erstellt."

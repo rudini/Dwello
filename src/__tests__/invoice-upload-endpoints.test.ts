@@ -30,7 +30,8 @@ describe('Rechnung mit Beleg erstellen', () => {
 	it('schickt die Rechnung mit ihrer Datei als Base64 ans Backend', async () => {
 		const calls = backend({ id: 'i1' }, 201);
 		const form = new FormData();
-		form.set('invoice', JSON.stringify({ buildingId: 'b1', billingEntityName: 'Blitz' }));
+		const hints = { deductedAmount: '1000.00', nonAllocableItems: true };
+		form.set('invoice', JSON.stringify({ buildingId: 'b1', billingEntityName: 'Blitz', beleg: hints }));
 		form.set('file', new File([pdf], 'blitz.pdf', { type: 'application/pdf' }));
 
 		const response = await createInvoice({ request: multipart(form), cookies } as never);
@@ -43,7 +44,7 @@ describe('Rechnung mit Beleg erstellen', () => {
 				body: {
 					buildingId: 'b1',
 					billingEntityName: 'Blitz',
-					beleg: { fileName: 'blitz.pdf', content: Buffer.from(pdf).toString('base64') }
+					beleg: { ...hints, fileName: 'blitz.pdf', content: Buffer.from(pdf).toString('base64') }
 				}
 			}
 		]);

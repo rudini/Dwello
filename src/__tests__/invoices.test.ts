@@ -143,9 +143,9 @@ describe('Rechnungsdetail', () => {
 		expect(shown.invoiceNumber).toBe('R-1001');
 	});
 
-	it('nennt den Beleg mit Dateiname und Art, oder keinen', async () => {
+	it('nennt den Beleg mit Dateiname, Art und den Hinweisen aus dem Hochladen, oder keinen', async () => {
 		for (const [beleg, expected] of [
-			[backendInvoice.beleg, { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' }],
+			[backendInvoice.beleg, { fileName: 'huber-q1.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: true }],
 			[null, null]
 		] as const) {
 			const { fetch } = backend({ '/invoices/i1': invoice({ beleg }) });

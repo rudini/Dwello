@@ -97,7 +97,7 @@
 <Checkbox
 	id="{idPrefix}isValidUtilityCost"
 	label={m.glossary_allocable_term()}
-	help={m.invoices_allocable_help()}
+	help={isValidUtilityCost ? m.invoices_allocable_help() : m.invoices_not_allocable_help()}
 	bind:checked={isValidUtilityCost}
 	disabled={nonAllocable}
 	describedby={nonAllocable ? `${idPrefix}invoice-category-warning-text` : undefined}

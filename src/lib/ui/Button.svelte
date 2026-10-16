@@ -74,13 +74,15 @@
 		{href}
 		class={classes}
 		aria-label={ariaLabel}
+		aria-describedby={describedby}
 		data-testid={testid}
 		data-sveltekit-reload={reload || undefined}
 		{target}
 		rel={target ? 'noopener' : undefined}
 	>
 		{@render content()}
-		{#if target}<span class="sr-only">{m.ui_opens_new_tab()}</span>{/if}
+		<!-- visible: a new tab can look as if Dwello had gone (persona Helga) -->
+		{#if target}<span>{m.ui_opens_new_tab()}</span>{/if}
 	</a>
 {:else}
 	<button

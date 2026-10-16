@@ -15,6 +15,8 @@
 		{ label: m.dashboard_add_tenant(), href: '/tenants/new', icon: 'user-add' },
 		{ label: m.dashboard_add_contract(), href: '/contracts/new', icon: 'contract' },
 		{ label: m.dashboard_add_invoice(), href: '/invoices/new', icon: 'invoice' },
+		// several invoices at once, from their files (persona Anna)
+		{ label: m.invoices_upload_open(), href: '/invoices?upload', icon: 'document' },
 		{ label: m.dashboard_create_statements(), href: '/statements/generate', icon: 'statement' }
 	];
 </script>

@@ -148,7 +148,6 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Anna Keller"
 
-  @wip
   Szenario: Rechnungen von der Übersicht aus hochladen
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Schnellaktion "Rechnungen hochladen" wählt

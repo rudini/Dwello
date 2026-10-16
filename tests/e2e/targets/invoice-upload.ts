@@ -47,3 +47,6 @@ export const belegUploadHints = target('Hinweise aus dem Hochladen', (page) => p
 export const deleteBilledNote = target('Rat beim Löschen einer abgerechneten Rechnung', (page) =>
 	page.getByTestId('invoice-delete-billed-document-note')
 );
+export const belegFileLink = (fileName: string) => inRow(fileName, 'Datei gross', 'invoice-upload-file-link');
+export const uploadStatus = target('Stand des Hochladens', (page) => page.getByTestId('invoice-upload-progress'));
+export const belegRemove = (fileName: string) => inRow(fileName, 'Datei entfernen', 'invoice-upload-row-remove');

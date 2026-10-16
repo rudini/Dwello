@@ -151,10 +151,11 @@ describe('Übersicht', () => {
 			'/tenants/new',
 			'/contracts/new',
 			'/invoices/new',
+			'/invoices?upload',
 			'/statements/generate'
 		]) {
 			expect(body).toMatch(
-				new RegExp(`href="${href.replace('/', '\\/')}"[^>]*data-testid="quick-action"`)
+				new RegExp(`href="${href.replace(/[/?]/g, '\\$&')}"[^>]*data-testid="quick-action"`)
 			);
 		}
 	});

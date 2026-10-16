@@ -17,7 +17,8 @@ import {
 	discardMessage,
 	keepOriginalHint,
 	uploadBuildingSelect,
-	uploadResult
+	uploadResult,
+	uploadStatus
 } from '../targets/invoice-upload';
 
 export const proposedAmount = (fileName: string) => Value.of(belegAmount(fileName));
@@ -44,3 +45,4 @@ export const belegHowTo = Text.of(belegHow);
 export const hintsOfUpload = Text.of(belegUploadHints);
 export const billedAdviceOnDelete = Text.of(deleteBilledNote);
 export const uploadDialogShown = Visibility.of(uploadBuildingSelect);
+export const uploadState = Text.of(uploadStatus);

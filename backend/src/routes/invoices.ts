@@ -66,7 +66,13 @@ const invoiceBodySchema = t.Object({
 });
 
 // The uploaded file of an invoice, Base64 encoded
-const belegSchema = t.Object({ fileName: t.String(), content: t.String() });
+const belegSchema = t.Object({
+	fileName: t.String(),
+	content: t.String(),
+	// what the KI saw on the file in «Rechnungen hochladen» (#233)
+	deductedAmount: t.Optional(t.Nullable(t.String({ pattern: '^\\d+(\\.\\d{1,2})?$' }))),
+	nonAllocableItems: t.Optional(t.Boolean())
+});
 
 const invoiceUpdateSchema = t.Partial(invoiceBodySchema);
 

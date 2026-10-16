@@ -202,6 +202,7 @@
 		errors = {};
 		created = [];
 		tooMany = false;
+		removed = '';
 	}
 
 	// Closing loses the files and what was entered: asked first, unless nothing is there yet
