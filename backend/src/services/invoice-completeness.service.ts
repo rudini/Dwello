@@ -146,15 +146,13 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 	return changeFinding(base, stock(current), stock(previous));
 }
 
-// Costs far from the year before; with both years' readings their consumption, only while both are above zero (#73);
-// a negative consumption has its own hint
+// Costs far from the year before; with both years' readings their consumption (#73). No comparison with a year whose
+// readings give a consumption of zero or below: in the period it has its own hint, the year before is no measure
 function changeFinding(base: Omit<CategoryFinding, 'kind'>, stockNow: boolean, stockBefore: boolean): CategoryFinding | null {
-	const tank = stockNow && stockBefore;
-	if (stockNow && base.current.total <= 0) return null;
-	if (stockBefore && base.previous.total <= 0) return null;
+	if ((stockNow && base.current.total <= 0) || (stockBefore && base.previous.total <= 0)) return null;
 	const change = base.current.total - base.previous.total;
 	if (Math.abs(change) < DEVIATION_MINIMUM || Math.abs(change) <= base.previous.total * DEVIATION_SHARE) return null;
-	return { ...base, kind: tank ? 'consumption' : 'deviation', changePercent: Math.round((change / base.previous.total) * 100) };
+	return { ...base, kind: stockNow && stockBefore ? 'consumption' : 'deviation', changePercent: Math.round((change / base.previous.total) * 100) };
 }
 
 const ORDER = { stock: 0, missing: 1, gap: 2, new: 3, consumption: 4, deviation: 5, tank: 6 };
