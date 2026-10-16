@@ -52,6 +52,24 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
     Dann kann der Liegenschaftsverwalter die Wohnung "2.02" nicht auswählen
 
+  # B-16 (#156): wer «Beenden» beim alten Mietvertrag vergessen hat, erfährt es vor der Prüfung
+  @wip
+  Szenario: Mieter hat noch einen unbefristeten Mietvertrag
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und "Anna Keller" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Dann erfährt der Liegenschaftsverwalter, dass "Anna Keller" noch einen unbefristeten Mietvertrag für die Wohnung "2.02" hat
+
+  @wip
+  Szenario: Vom Hinweis zum laufenden Mietvertrag
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und "Anna Keller" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Und der Liegenschaftsverwalter den laufenden Mietvertrag im Hinweis öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+
   # Ohne die Mietverträge der Wohnung ist unbekannt, ab wann sie frei ist (#143)
   Szenario: Mietverträge der Wohnung lassen sich nicht laden
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
