@@ -42,7 +42,7 @@
 		description: m.contracts_limited_help()
 	};
 	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence and when it is
-	// possible (F-7)
+	// possible (glossary «Kündigung aufheben»)
 	const durations = $derived(
 		noticed
 			? [

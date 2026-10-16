@@ -350,7 +350,7 @@ Then('schlägt der neue Mietvertrag den Vertragsbeginn {string} vor', async ({ v
 	await verwalter.sees(pageAddress).toMatch(new RegExp(`start=${date}`));
 });
 
-// F-7: the help names who can withdraw a notice, after the glossary «Kündigung aufheben»
+// the help names who can withdraw a notice, after the glossary «Kündigung aufheben»
 Then(
 	'erfährt der Liegenschaftsverwalter bei «Kündigung aufheben», wann sich eine Kündigung aufheben lässt',
 	async ({ verwalter }) => {
