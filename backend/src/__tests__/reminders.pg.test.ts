@@ -11,6 +11,8 @@ import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
 import { db } from '../db/connection';
 import { documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { formatQRReferenceForDisplay, statementQRReference } from '../services/qr-bill.service';
 import { updateTenant } from '../services/tenant.service';
 import { daysAfter, swissToday } from '../services/today';
 import { formatSwissDate } from '../services/pdf-format';
@@ -429,5 +431,56 @@ describe('Mahnung in der Sprache des Mieters', () => {
 		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
 
 		expect(pdfText(pdf)).toContain('Meilleures salutations');
+	});
+});
+
+// #108: jede Mahnung trägt einen Zahlteil für den offenen Saldo, mit der Referenz der Abrechnung
+describe('Zahlteil der Mahnung', () => {
+	const QR_IBAN = 'CH4431999123000889012'; // the sample QR-IBAN of SIX
+	let iban: string | null;
+
+	beforeAll(async () => {
+		iban = await getConfig('iban');
+		await setConfig('iban', QR_IBAN);
+	});
+
+	afterAll(async () => {
+		if (iban) await setConfig('iban', iban);
+		else await deleteConfig('iban');
+	});
+
+	const reminderPdf = async (statementId: string) => {
+		const { document } = await remind(statementId);
+		return pdfText(Buffer.from(await (await api('GET', `/api/v1/documents/${document.id}/pdf`)).arrayBuffer()));
+	};
+
+	it('druckt den Zahlteil mit dem offenen Saldo und der QR-Referenz der Abrechnung', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const text = await reminderPdf(statementId);
+
+		expect(text).toContain('Empfangsschein');
+		expect(text).toContain('Zahlteil');
+		expect(text).toContain('120.00');
+		// in the letter, on the receipt and on the payment part
+		expect(text.split(formatQRReferenceForDisplay(statementQRReference(statementId))).length - 1).toBe(3);
+	});
+
+	it('beschriftet den Zahlteil in der Sprache des Mieters', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'fr' });
+		const text = await reminderPdf(await statement('sent'));
+
+		expect(text).toContain('Section paiement');
+		expect(text).toContain('Récépissé');
+	});
+
+	it('druckt ohne IBAN keinen Zahlteil', async () => {
+		await deleteConfig('iban');
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const text = await reminderPdf(await statement('sent'));
+		await setConfig('iban', QR_IBAN);
+
+		expect(text).toContain('Freundliche Grüsse');
+		expect(text).not.toContain('Zahlteil');
 	});
 });
