@@ -8,6 +8,7 @@ import {
 	confirmMissingInvoices,
 	generateButton,
 	generateMoreButton,
+	hintedInvoiceLink,
 	heatingProfileSelect,
 	managementFeeInput,
 	newInvoiceFromWarning,
@@ -100,3 +101,7 @@ export const recordInvoiceFromWarning: Activity = (actor) =>
 		Click.on(newInvoiceFromWarning),
 		Wait.forUrl((url) => /\/invoices\/new/.test(url.href))
 	);
+
+// The edit link of an invoice a hint of the preview names
+export const editHintedInvoice = (date: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(hintedInvoiceLink(date)), Wait.forUrl((url) => /\/invoices\/[^/]+\/edit/.test(url.href)));

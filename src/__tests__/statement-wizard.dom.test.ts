@@ -1,4 +1,6 @@
 import PreviewChecks from '../routes/statements/generate/PreviewChecks.svelte';
+import CategoryFindingItem from '../routes/statements/generate/CategoryFindingItem.svelte';
+import completeness from '../../tests/contracts/invoice-completeness.json';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // enhance as SvelteKit wires it: the test can play the server's answer to the last submit
@@ -685,6 +687,67 @@ describe('Abrechnungen erstellen', () => {
 		});
 		expect(byTestId('missing-invoices')).not.toBeNull();
 		expect(byTestId('category-check')).toBeNull();
+	});
+
+	// Ein Leistungszeitraum über die Periode hinaus erklärt tiefere Kosten (#130)
+	it('nennt bei einer Abweichung die Rechnungen, die nur teilweise zählen', () => {
+		const finding = {
+			...completeness.findings[0],
+			kind: 'deviation' as const,
+			partialCount: 1
+		};
+		show(CategoryFindingItem, { finding, buildingId: 'b1' });
+
+		expect(byTestId('category-finding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'1 Rechnung zählt nur teilweise: ihr Leistungszeitraum reicht über die Abrechnungsperiode hinaus.'
+		);
+	});
+
+	const withInvoices = (
+		lists: Partial<Record<'lateInvoices' | 'invoicesWithoutServicePeriod', unknown[]>>
+	) =>
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						...completeness,
+						buildingId: 'b1',
+						findings: [],
+						lateInvoices: [],
+						invoicesWithoutServicePeriod: [],
+						...lists
+					}
+				}
+			]
+		});
+
+	// Eine Rechnung ohne Leistungszeitraum kurz nach dem Ende zählt zur nächsten Periode (#131)
+	it('nennt Rechnungen ohne Leistungszeitraum kurz nach der Abrechnungsperiode, ohne Bestätigung', async () => {
+		withInvoices({ lateInvoices: completeness.lateInvoices });
+		const hint = byTestId('late-invoices')!;
+		const late = completeness.lateInvoices[0];
+
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain('Ahornhof');
+		expect(byTestId('hinted-invoice')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			`${late.billingEntityName}: ${late.description}. Rechnungsdatum 20.01.2026, CHF 290.00`
+		);
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(`/invoices/${late.id}/edit`);
+		expect(byTestId('confirm-missing-invoices')).toBeNull();
+		next();
+		await settle();
+		expect(heading()).toBe('Erstellen');
+	});
+
+	// In einer Periode unter einem Jahr zählt eine Jahresrechnung ohne Leistungszeitraum ganz (#134)
+	it('nennt Rechnungen ohne Leistungszeitraum einer kurzen Abrechnungsperiode', () => {
+		withInvoices({ invoicesWithoutServicePeriod: completeness.lateInvoices });
+
+		expect(byTestId('invoices-without-service-period')!.textContent).toContain(
+			'Die Abrechnungsperiode ist kürzer als ein Jahr.'
+		);
+		expect(byTestId('late-invoices')).toBeNull();
 	});
 
 	it('vergleicht die Kosten jeder Abrechnung mit dem Akonto', () => {
