@@ -168,6 +168,30 @@ describe('Tankbestand über die API', () => {
 		await db.delete(categories).where(eq(categories.id, own.id));
 	});
 
+	// #74: eine von Hand umlagefähig markierte Ölrechnung brächte sonst den Einkauf statt des Verbrauchs in die Abrechnung
+	it('rechnet in einer nicht umlagefähigen Tankkategorie weder Einkauf noch Verbrauch ab, auch wenn das Formular die Rechnung umlagefähig schickt', async () => {
+		const [own] = await db.insert(categories).values({ name: `Öl ${token}`, nameDE: `Öl ${token}`, isHeatingCost: true }).returning();
+		const oil = await createRental(`${token}-oil`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await record('2024-12-31', '900.00', oil.building, own.id);
+		await record('2025-12-31', '300.00', oil.building, own.id);
+		await sendJson('PUT', `/api/v1/categories/${own.id}`, { isAllowedUtilityCost: false });
+		const purchase = await sendJson('POST', '/api/v1/invoices', {
+			buildingId: oil.building,
+			billingEntityName: `Ölhandel ${token}`,
+			description: 'Heizöl',
+			amount: '2000.00',
+			invoiceDate: '2025-06-10',
+			categoryId: own.id,
+			isValidUtilityCost: true
+		});
+
+		expect(purchase.status).toBe(201);
+		expect(await linesOf(oil.contract, 2025)).toEqual([]);
+		await db.delete(invoices).where(eq(invoices.buildingId, oil.building));
+		await oil.remove();
+		await db.delete(categories).where(eq(categories.id, own.id));
+	});
+
 	// Ein Tank, eine Kategorie: sonst landet der Verbrauch still in einer anderen Kategorie (z.B. Kaminfeger)
 	it('lehnt einen Stand in einer anderen Kategorie als die übrigen Stände des Gebäudes ab', async () => {
 		const [pellets] = await db.insert(categories).values({ name: `Pellets B ${token}`, isHeatingCost: true }).returning();

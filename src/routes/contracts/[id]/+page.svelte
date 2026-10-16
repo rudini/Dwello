@@ -13,6 +13,7 @@
 	import PastEndConfirm from '../PastEndConfirm.svelte';
 	import RefusedStatements from '../RefusedStatements.svelte';
 	import { formatDate } from '$lib/utils/format';
+	import { managementFeeText } from '$lib/contract-form';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
@@ -22,6 +23,7 @@
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import ContractParties from './ContractParties.svelte';
 	import DeleteContract from './DeleteContract.svelte';
+	import FixedTermCheck from './FixedTermCheck.svelte';
 	import ContractTerms from './ContractTerms.svelte';
 	import MissingStatement from './MissingStatement.svelte';
 	import NextSteps from './NextSteps.svelte';
@@ -146,6 +148,7 @@
 		tenantId={contract.tenantId}
 		{name}
 	/>
+	<FixedTermCheck shown={data.fixedTermCheck} endDate={contract.endDate} {name} {form} />
 	<MissingStatement missing={data.missingStatements} />
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -161,6 +164,7 @@
 			noticeReceivedOn={contract.noticeReceivedOn}
 			{status}
 			rent={data.rentBreakdown}
+			fee={managementFeeText(contract.managementFeeAgreed, contract.managementFeePercent)}
 		/>
 	</div>
 
@@ -256,6 +260,7 @@
 	startDate={contract.startDate}
 	endDate={contract.endDate}
 	future={status === 'future'}
+	ended={status === 'ended'}
 	billedBy={data.billedBy}
 	missingStatements={data.missingStatements.length > 0}
 	error={form?.deleteError}

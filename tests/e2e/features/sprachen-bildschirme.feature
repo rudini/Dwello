@@ -49,6 +49,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | apartment-new          | default             |
       | apartment-new          | submit-empty        |
       | apartment-detail       | default             |
+      | apartment-detail-vacant | default            |
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
       | tenants                | default             |
@@ -90,6 +91,11 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |
+      | contract-detail-ended  | default             |
+      | contract-detail-ended  | delete-dialog       |
+      | contract-detail-expired | default            |
+      | contract-detail-expired | moved-out-dialog   |
+      | contract-detail-expired | continue-refused   |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |

@@ -46,7 +46,7 @@ Dwello provides:
 - Centralized property, tenant, and contract management
 - LLM-powered invoice categorization with validation
 - Professional PDF statement and QR invoice generation
-- German user interface; tenant-facing statement PDFs in five languages (German, French, Italian, Romansh, English)
+- German user interface; tenant-facing statement PDFs and reminders in four languages (German, French, Italian, English)
 - Secure data storage with automated backups
 
 ### 2.4 Target Market
@@ -469,11 +469,11 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 
 ### 5.8 Management Costs Configuration
 
-**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; a higher agreed percentage is applied as set.
+**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; Dwello accepts at most 10% (#124, against typos). The fee applies only where the rental contract agrees one (#89): at the run's rate, or at the contract's own rate, which takes precedence; a contract without agreement gets 0%.
 
 **Features:**
-- Global management cost percentage (0% or more; default suggestion for new statements, adjustable per statement run)
-- The rate of a statement run applies to every rental contract in it; Dwello does not check whether the fee is agreed in the rental contract
+- Global management cost percentage (0% to 10%; default suggestion for new statements, adjustable per statement run)
+- Per rental contract «Verwaltungspauschale vereinbart»: at the run's rate, with its own rate (0% to 10%, before the run's), or not agreed (0%); the statement wizard names the contracts without agreement
 - No distribution key: the fee is a percentage of each tenant's own costs
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
@@ -493,7 +493,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 **Use Cases:**
 1. Initial setup: Set management fee to agreed percentage (e.g., 2%)
 2. Annual review: Adjust percentage if contract changes
-3. Validation: the percentage may not be negative
+3. Validation: the percentage lies between 0% and 10%
 
 ---
 
@@ -1349,7 +1349,7 @@ BALANCE (refund): CHF 30
 
 **Internationalization:**
 - User interface in German
-- Tenant-facing statement PDFs in German, French, Italian, Romansh, English
+- Tenant-facing statement PDFs and reminders in German, French, Italian, English
 - Consistent translations across application
 - Date/time formatting per locale
 - Currency formatting (CHF with appropriate symbols)
@@ -1519,7 +1519,7 @@ BALANCE (refund): CHF 30
 
 **Library:** `svelte-i18n`
 - **Purpose:** UI texts (German) and tenant-facing statement PDFs
-- **Languages:** UI in German; statement PDFs in German, French, Italian, Romansh, English
+- **Languages:** UI in German; statement PDFs and reminders in German, French, Italian, English
 - **Format:** JSON translation files per language
 - **Cost:** Free
 
@@ -1644,7 +1644,7 @@ An audit log is planned, not implemented.
 - Swiss QR-bill generation with correct encoding
 - IBAN configuration
 - PDF embedding in database
-- Multi-language PDF templates (German, French, Italian, Romansh, English)
+- Multi-language PDF templates (German, French, Italian, English)
 - Statement number generation
 - PDF download and batch download (ZIP; planned, not implemented)
 - QR-bill validation and testing
@@ -1848,7 +1848,7 @@ This PRD complies with the following Swiss regulations:
 
 Key Legal Requirements Addressed (see the status note below for what is implemented):
 - Allowed/disallowed utility cost validation
-- Management fee: customary guideline up to 3% of total costs, not a cap
+- Management fee: customary guideline up to 3% of the tenant's own utility costs, not a legal cap; only where agreed in the rental contract
 - Detailed statement requirements
 - Tenant-facing statement PDFs in five languages
 - Data retention (10 years for financial records)

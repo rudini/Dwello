@@ -4,7 +4,7 @@
  *
  * Supported configuration keys:
  * - accounting_period: 'calendar' | 'july-june' | 'november-october'
- * - management_fee_pct: percentage, 3 is the usual guideline (not a limit)
+ * - management_fee_pct: percentage up to 10 (#124: catches typos); 3 is the usual guideline, not a limit
  * - default_heating_profile_id: UUID of default heating profile
  * - default_distribution_key_id: UUID of default distribution key
  * - company_name: Property management company name
@@ -32,7 +32,7 @@ export const CONFIG_KEYS = {
 	},
 	management_fee_pct: {
 		type: 'number',
-		validator: (v: number) => v >= 0,
+		validator: (v: number) => v >= 0 && v <= 10,
 		default: 3
 	},
 	default_heating_profile_id: {
@@ -83,7 +83,7 @@ export const CONFIG_KEYS = {
 	},
 	default_language: {
 		type: 'string',
-		validator: (v: string) => ['de', 'fr', 'it', 'rm', 'en'].includes(v),
+		validator: (v: string) => ['de', 'fr', 'it', 'en'].includes(v),
 		default: 'de'
 	}
 } as const;

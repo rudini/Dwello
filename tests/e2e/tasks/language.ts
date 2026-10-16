@@ -6,4 +6,10 @@ import { languageButton, languageOption } from '../targets/language';
 export const chooseLanguage = (language: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(languageButton), Click.toReload(languageOption(language)));
 
-export const preferEnglishInTheBrowser = Browser.preferLanguages('en-GB,en;q=0.9');
+const acceptLanguage: Record<string, string> = {
+	Englisch: 'en-GB,en;q=0.9',
+	Französisch: 'fr-CH,fr;q=0.9',
+	Spanisch: 'es-ES,es;q=0.9'
+};
+
+export const preferInTheBrowser = (language: string): Activity => Browser.preferLanguages(acceptLanguage[language]);

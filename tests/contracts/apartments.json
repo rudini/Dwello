@@ -1,0 +1,18 @@
+{
+	"apartments": [
+		{
+			"id": "a1",
+			"buildingId": "b1",
+			"number": "1.02",
+			"floor": 1,
+			"area": "65.00",
+			"rooms": "2.5",
+			"status": "occupied",
+			"nextContractStart": "2099-11-01",
+			"currentContractEnd": "2099-03-31",
+			"lastContractEnd": "2024-03-31",
+			"buildingName": "Seeblick"
+		}
+	],
+	"total": 1
+}

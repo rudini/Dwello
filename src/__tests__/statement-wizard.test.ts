@@ -58,9 +58,14 @@ describe('Abrechnungen Schritt für Schritt', () => {
 			selectionErrors({ ...selection, heatingProfileId: '', managementFeePercent: -1 }, 3)
 		).toEqual({
 			heatingProfileId: 'Bitte wählen Sie ein Heizprofil.',
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		});
 		expect(selectionErrors({ ...selection, managementFeePercent: NaN }, 3)).toHaveProperty(
+			'managementFeePercent'
+		);
+		// #124: höchstens 10 %, so fällt ein Tippfehler wie 1000 statt 10 auf, bevor eine Anfrage ihn ablehnt
+		expect(selectionErrors({ ...selection, managementFeePercent: 10 }, 3)).toEqual({});
+		expect(selectionErrors({ ...selection, managementFeePercent: 10.01 }, 3)).toHaveProperty(
 			'managementFeePercent'
 		);
 		// ein geleertes Feld kommt aus dem gespeicherten Zwischenstand als null zurück, nicht als 0 %

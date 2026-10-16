@@ -35,7 +35,13 @@
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
 			defaultBuildingIds: string[]; // chosen by the link that opened the wizard (A-10)
-			preset?: { building: string; start: string; end: string; fromStatements: boolean } | null;
+			preset?: {
+				building: string;
+				start: string;
+				end: string;
+				fromStatements: boolean;
+				feeFromSettings: boolean;
+			} | null;
 		};
 		form: {
 			preview?: PreviewRow[];

@@ -31,6 +31,12 @@ const contractQuerySchema = t.Object({
 	offset: t.Optional(t.String())
 });
 
+// «Verwaltungspauschale vereinbart» (#89): without it a contract has none; an own rate from 0 to 10 % (#124)
+const managementFee = {
+	managementFeeAgreed: t.Optional(t.Boolean()),
+	managementFeePercent: t.Optional(t.Nullable(t.String({ pattern: '^(10(\\.0{1,2})?|\\d(\\.\\d{1,2})?)$' })))
+};
+
 const contractBodySchema = t.Object({
 	apartmentId: t.String({ format: 'uuid' }),
 	tenantId: t.String({ format: 'uuid' }),
@@ -40,6 +46,7 @@ const contractBodySchema = t.Object({
 	baseRent: t.String(),
 	additionalRent: t.Optional(t.Nullable(t.String())),
 	monthlyAdvancePayment: t.String(),
+	...managementFee,
 	referenceIndex: t.Optional(t.Nullable(t.String())),
 	contractPdf: t.Optional(t.Nullable(t.String())),
 	notes: t.Optional(t.Nullable(t.String()))
@@ -53,9 +60,11 @@ const contractUpdateSchema = t.Partial(
 		endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 		terminated: t.Boolean(),
 		noticeReceivedOn: t.Nullable(t.String({ format: 'date' })), // the day the notice arrived (A-3)
+		movedOut: t.Boolean(), // «Mieter ist ausgezogen» after an agreed end (A-6, #115)
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),
+		...managementFee,
 		referenceIndex: t.Optional(t.Nullable(t.String())),
 		contractPdf: t.Optional(t.Nullable(t.String())),
 		notes: t.Optional(t.Nullable(t.String())),

@@ -16,6 +16,10 @@ export const contractEndError = (message: string) =>
 		page.getByRole('dialog').getByTestId('form-error').filter({ hasText: message })
 	);
 export const deleteDialog = target('Dialog «Mietvertrag löschen?»', (page) => page.getByRole('dialog'));
+export const deleteDialogStatementLink = (statementId: string) =>
+	target('Abrechnung im Dialog «Mietvertrag löschen?»', (page) =>
+		page.getByRole('dialog').getByTestId(`contract-delete-statement-${statementId}`)
+	);
 export const deleteMistakeConfirmation = target('Bestätigung «irrtümlich erfasst»', (page) =>
 	page.getByTestId('contract-delete-mistake-confirm')
 );
@@ -46,6 +50,9 @@ export const missingStatementLink = (periodStart: string) =>
 		page.getByTestId(`contract-missing-statement-link-${periodStart}`)
 	);
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
+export const contractManagementFee = target('Verwaltungspauschale des Mietvertrags', (page) =>
+	page.getByTestId('contract-management-fee')
+);
 export const endDialogDeathHint = target('Hinweis zum Tod des Mieters im Dialog «Mietvertrag beenden»', (page) =>
 	page.getByTestId('contract-end-death')
 );
@@ -59,4 +66,19 @@ export const noticePeriodHint = target('Hinweis auf die Kündigungsfrist', (page
 export const endDialog = target('Dialog «Mietvertrag beenden»', (page) => page.getByRole('dialog'));
 export const contractNoticeReceived = target('Kündigung erhalten am', (page) =>
 	page.getByTestId('contract-notice-received')
+);
+// A-6 (#115): an expired fixed-term contract asks whether the tenant still lives in the apartment
+export const fixedTermCheck = target('Frage «Wohnt der Mieter noch in der Wohnung?»', (page) =>
+	page.getByTestId('contract-fixed-term-check')
+);
+export const continueOpenEndedButton = target('Unbefristet weiterführen', (page) =>
+	page.getByTestId('contract-continue-open-ended')
+);
+export const movedOutButton = target('Mieter ist ausgezogen', (page) => page.getByTestId('contract-moved-out'));
+export const confirmMovedOutButton = target('Auszug bestätigen', (page) => page.getByTestId('contract-moved-out-confirm'));
+export const fixedTermError = target('Meldung zum Weiterführen', (page) =>
+	fixedTermCheck.locate(page).getByTestId('form-error')
+);
+export const deleteDraftAndContinueButton = target('Entwurf löschen und unbefristet weiterführen', (page) =>
+	page.getByTestId('delete-draft-and-continue')
 );

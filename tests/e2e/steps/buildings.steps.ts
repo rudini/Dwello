@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { buildingCount, buildingListed, emptyListHint, routeTo } from '../questions/buildings';
+import { buildingCardText, buildingCount, buildingListed, emptyListHint, routeTo } from '../questions/buildings';
 import { pageAddress } from '../questions/navigation';
 import { filterByCity, openBuilding, openBuildingList, searchBuildings, startNewBuilding } from '../tasks/buildings';
 
@@ -62,3 +62,7 @@ Then(
 			.toBe(`https://www.google.com/maps/dir/?api=1&destination=${destination}`);
 	}
 );
+
+Then('nennt die Karte des Gebäudes {string} {string}', async ({ verwalter, names }, building: string, text: string) => {
+	await verwalter.sees(buildingCardText(names.get(building)!)).toContain(text);
+});

@@ -11,9 +11,9 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-3 | Hinweis auf die Kündigungsfrist | umgesetzt | IF-2 | #112 |
 | A-4 | Bevorstehendes Vertragsende sichtbar machen | umgesetzt | IF-5, Anna, Helga | #113 |
 | A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna | #114 |
-| A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 | #115 |
+| A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | umgesetzt | IF-9 | #115 |
 | A-7 | Doppelt erfassten Mietvertrag entfernen | umgesetzt | Anna (I2, M2) | #116 |
-| A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) | #117 |
+| A-8 | Früheren Mietvertrag als Historie erkennbar machen | umgesetzt | Anna (I2, M3) | #117 |
 | A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) | – |
 | A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | umgesetzt | Anna (I2 M1, I3 M1–M3) | #118, #119 |
 | A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 | #120 |
@@ -50,7 +50,7 @@ Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriff
    - befristet: «Befristet bis TT.MM.JJJJ»,
    - gekündigt: «Unbefristet, gekündigt auf den TT.MM.JJJJ».
 4. Im Assistenten kann man bei einem gekündigten Vertrag die Kündigung zurücknehmen («Kündigung aufheben»). Der Vertrag ist danach wieder unbefristet ohne Vertragsende. Die Aktion nennt ihre Folge: «Der Mietvertrag läuft dann ohne Ende weiter.»
-5. Bestehende Verträge mit Vertragsende gelten als *vereinbart*. Die Spalte kam vor der ersten Installation in `0001_schema.sql`; seither braucht jede solche Änderung eine neue Migration (`backend/CLAUDE.md`). Zu A-6: Die Aufgabe dort gilt nur für Verträge, deren vereinbartes Ende nach der Einführung von A-1 liegt; sonst fragt die Übersicht nach jedem alten befristeten Vertrag.
+5. Bestehende Verträge mit Vertragsende gelten als *vereinbart*. Die Spalte kam vor der ersten Installation in `0001_schema.sql`; seither braucht jede solche Änderung eine neue Migration (`backend/CLAUDE.md`). Zu A-6: Ohne Stichtag fragt die Übersicht nach jedem abgelaufenen befristeten Vertrag, auch nach alten, bis der Verwalter «Mieter ist ausgezogen» oder «Unbefristet weiterführen» wählt (Entscheid des Product Owners in #115).
 6. Der Product Owner passt die Definition von «Vertragsende» im Glossar an. Vorschlag: «Letzter Tag des Mietverhältnisses: bei befristeten Verträgen vereinbart, bei unbefristeten der Kündigungstermin. Leer, solange ein unbefristeter Vertrag nicht gekündigt ist.»
 
 **Akzeptanzkriterien**
@@ -194,13 +194,16 @@ Szenario: Abrechnung an einen ausgezogenen Mieter mit alter Adresse
 
 ---
 
-## A-6 Stillschweigend fortgesetzter befristeter Mietvertrag
+## A-6 Stillschweigend fortgesetzter befristeter Mietvertrag – umgesetzt
 
-**Problem.** Bleibt ein Mieter nach dem Ende eines befristeten Vertrags mit Wissen des Vermieters, gilt der Vertrag als unbefristet fortgesetzt (Art. 266 Abs. 2 OR; im Fachreview als unsicher markiert). Dwello zeigt dann «Beendet» und rechnet Leerstand: Die Nebenkosten gehen an den Vermieter statt an den Mieter.
+**Umgesetzt** (#115, Option 2 des Product Owners): Spalte `rental_contracts.moved_out` («Mieter ist ausgezogen»; jede Änderung des Vertragsendes löscht sie). Jeder Mietvertrag mit *vereinbartem* Vertragsende vor heute, ohne späteren Mietvertrag der Wohnung und ohne diese Bestätigung, erhält in der Übersicht die Aufgabe «Befristeten Mietvertrag prüfen»; sie führt zum Mietvertrag. Dort fragt ein Feld, ob der Mieter noch in der Wohnung wohnt und der Vermieter einverstanden ist (beide Parteien, Art. 266 Abs. 2 OR; Fachreview `docs/reviews/a6-fachreview-1.md`, M-1; Wortlaut offen in #308), nennt, wer danach die Nebenkosten trägt, und bietet «Unbefristet weiterführen» (entfernt das Vertragsende) und «Mieter ist ausgezogen» an; den Auszug bestätigt ein Dialog mit dieser Folge (Personas a6, P-1, P-2). Rechnet eine gespeicherte Abrechnung die Mietstage nur bis zum Vertragsende, lehnt das Backend das Weiterführen ab (A-10): einen einzelnen Entwurf bietet die Seite zum Löschen an, bei einer versendeten oder bezahlten Abrechnung sagt sie, dass Dwello das Vertragsende nicht entfernen kann, der Mietvertrag aber trotzdem weiterläuft (Fachreview `docs/reviews/a6-fachreview-2.md`, M-3; was dann mit der Aufgabe geschieht: #120). Gekündigte Mietverträge erhalten die Aufgabe nie. Belegt durch `dashboard.feature` und `contract-detail.feature`.
+
+
+**Problem.** Bleibt ein Mieter nach dem Ende eines befristeten Vertrags mit Wissen des Vermieters, gilt der Vertrag als unbefristet fortgesetzt (Art. 266 Abs. 2 OR: «Setzen die Parteien das Mietverhältnis stillschweigend fort, so gilt es als unbefristetes Mietverhältnis.»). Dwello zeigt dann «Beendet» und rechnet Leerstand: Die Nebenkosten gehen an den Vermieter statt an den Mieter.
 
 **Anforderungen**
 
-1. Ist ein *vereinbartes* Vertragsende (A-1) vorbei und hat die Wohnung keinen Folgevertrag, nennt die Übersicht eine Aufgabe: «Der befristete Mietvertrag von {Name} ist am TT.MM.JJJJ abgelaufen. Wohnt {Name} noch in der Wohnung? Dann läuft der Mietvertrag unbefristet weiter.» Aktionen: «Unbefristet weiterführen» (entfernt das Vertragsende) oder «Mieter ist ausgezogen» (die Aufgabe verschwindet).
+1. Ist ein *vereinbartes* Vertragsende (A-1) vorbei und hat die Wohnung keinen späteren Mietvertrag, nennt die Übersicht die Aufgabe «Befristeten Mietvertrag prüfen» mit der Frage: «Der befristete Mietvertrag von {Name} ist am TT.MM.JJJJ abgelaufen. Wohnt {Name} noch in der Wohnung und sind Sie damit einverstanden, zum Beispiel weil Sie den Mietzins weiter annehmen? Dann läuft der Mietvertrag unbefristet weiter.» (Wortlaut offen in #308). Sie führt zum Mietvertrag; dort stehen die Aktionen «Unbefristet weiterführen» (entfernt das Vertragsende) und «Mieter ist ausgezogen» (die Aufgabe verschwindet).
 2. Für gekündigte Verträge erscheint diese Aufgabe nicht.
 
 **Akzeptanzkriterien**
@@ -216,7 +219,7 @@ Szenario: Befristeten Mietvertrag unbefristet weiterführen
   Dann ist der Mietvertrag unbefristet
 ```
 
-**Voraussetzung:** A-1. Hinweis (Review J-1): Punkt 5 von A-1 verlangt eine Grenze «vereinbartes Ende nach der Einführung von A-1»; Dwello speichert dafür nichts. A-6 braucht einen festen Stichtag oder ein Datum am Vertrag.
+**Voraussetzung:** A-1. Hinweis (Review J-1): Statt eines Stichtags speichert Dwello die Bestätigung «Mieter ist ausgezogen» am Mietvertrag (#115).
 
 ---
 
@@ -247,7 +250,9 @@ Szenario: Irrtümlich erfassten Mietvertrag löschen
 
 ---
 
-## A-8 Früheren Mietvertrag als Historie erkennbar machen
+## A-8 Früheren Mietvertrag als Historie erkennbar machen – umgesetzt
+
+**Umgesetzt** (#117): Die Wohnungsseite zeigt laufende und künftige Mietverträge oben, beendete unter «Frühere Mietverträge» mit der Hilfe zur Historie. Der Löschdialog verlinkt jede Abrechnung des Vertrags mit ihrem Status; ein beendeter Vertrag ohne Abrechnung sagt «Zu diesem Mietvertrag gibt es in Dwello keine Nebenkostenabrechnung.» (Fachreview V-2, `docs/reviews/w4bm-fachreview-1.md`).
 
 **Problem.** Anna (I2) hielt einen beendeten Mietvertrag von 2018–2021 in derselben Wohnung für ein Duplikat. Nichts zeigt, dass er die Historie der Wohnung ist und für alte Abrechnungen gebraucht wird.
 

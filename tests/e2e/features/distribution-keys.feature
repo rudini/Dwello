@@ -56,3 +56,8 @@ Funktionalität: Verteilschlüssel
   Szenario: Vordefinierte Verteilschlüssel bleiben unverändert
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
     Dann kann der Liegenschaftsverwalter den Verteilschlüssel "Pro Fläche (m²)" weder bearbeiten noch löschen
+
+  # Rechnungen ohne Verteilschlüssel, wie im Glossar (#67)
+  Szenario: Die Seite sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
+    Dann erklärt die Seite "Verteilschlüssel" "Jede umlagefähige Rechnung kann einen Verteilschlüssel haben; ohne ihn wird sie gleichmässig pro Wohnung verteilt."

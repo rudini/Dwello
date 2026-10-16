@@ -24,7 +24,9 @@ const empty: ContractFormValues = {
 	isUnlimited: false,
 	baseRent: '',
 	additionalRent: '',
-	advancePayment: ''
+	advancePayment: '',
+	managementFee: '',
+	managementFeeRate: ''
 };
 
 describe('Mietverträge in der gewählten Sprache', () => {

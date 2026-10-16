@@ -33,7 +33,7 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 		french();
 		expect(statusLabels.vacant).toBe('Vacant');
 		expect(statusText({ status: 'relet', nextContractStart: '2026-11-01' })).toBe(
-			'Reloué dès le 01.11.2026'
+			'Loué dès le 01.11.2026'
 		);
 		expect(occupancyParts({ occupiedCount: 1, vacantCount: 2 })).toEqual(['1 loué', '2 vacants']);
 	});
@@ -113,7 +113,8 @@ describe('Übersicht in der gewählten Sprache', () => {
 		dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-05' }],
 		lettersToSend: 2,
 		endingContracts: [],
-		noticedContracts: []
+		noticedContracts: [],
+		expiredContracts: []
 	};
 
 	it('nennt Aufgaben auf Französisch', () => {
