@@ -14,7 +14,11 @@ The issue's "Done means" is worded for a decision issue; its "Decided (product o
 - [x] Contract detail: `FixedTermCheck.svelte` with «Unbefristet weiterführen» and «Mieter ist ausgezogen»; draft refusal offers delete, a sent one says it cannot continue (Fachreview V-2)
 - [x] Texts in `messages/{de,fr,it,en}.json`; screen `contract-detail-expired` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
 - [x] `docs/anforderungen-vertragsende.md`: A-6 implemented, A-1 point 5 and the J-1 note; `docs/api-specification.md`
-- [ ] Code review round 1: `docs/reviews/a6-review-1.md`
-- [ ] Feature review: personas Anna and Dr. Weber (`docs/design/personas/anna-a6.md`, `weber-a6.md`; persona DB seeded by SQL with two expired fixed-term contracts, Lea Huber on Musterhaus 2.02 and Jonas Graf on Seepark B1), Fachreview round 2 `docs/reviews/a6-fachreview-2.md`
+- [x] Code review round 1: `docs/reviews/a6-review-1.md`
+- [x] Feature review: personas Anna and Dr. Weber (`docs/design/personas/anna-a6.md`, `weber-a6.md`; persona DB seeded by SQL with two expired fixed-term contracts, Lea Huber on Musterhaus 2.02 and Jonas Graf on Seepark B1), Fachreview round 2 `docs/reviews/a6-fachreview-2.md`
+- [x] Fixes: consequence line and move-out dialog (personas P-1/P-2), M-3 wording, V-11/V-12/V-15; M-4 and new texts added to #308
+- [ ] Persona re-run on the fixes: `anna-a6-2.md`, `weber-a6-2.md`
+- [ ] Full axe and language suites (the shared a11y seed gained the building Talblick)
+- [ ] Closing code review before the push: `docs/reviews/a6-review-2.md`
 - [ ] Workflow review notes (skill `workflow-review`)
 - [ ] Pull request `Fixes #115`, CI green, merged
