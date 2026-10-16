@@ -9,8 +9,6 @@ export const toBuilding = (data: Record<string, unknown>): BuildingWithStats => 
 	city: data.city as string,
 	canton: data.canton as string,
 	country: (data.country as string) || 'CH',
-	latitude: data.latitude ? Number(data.latitude) : undefined,
-	longitude: data.longitude ? Number(data.longitude) : undefined,
 	yearBuilt: data.yearBuilt ? Number(data.yearBuilt) : undefined,
 	buildingType: data.buildingType as string | null | undefined,
 	noTank: !!data.noTank,

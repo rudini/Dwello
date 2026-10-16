@@ -55,6 +55,16 @@ export const tankQuestion = target('Frage nach dem Heizmaterial', (page) => page
 export const noTankLink = (buildingId: string) =>
 	target(`Kein Tank festhalten für ${buildingId}`, (page) => page.getByTestId(`tank-question-no-tank-${buildingId}`));
 export const draftsOnlyNote = target('Hinweis nur Entwürfe', (page) => page.getByTestId('generate-drafts-note'));
+// The contracts of the run without an agreed Verwaltungspauschale, each a link to it (#89, step «Einstellungen»)
+export const feeNotAgreed = target('Mietverträge ohne vereinbarte Verwaltungspauschale', (page) =>
+	page.getByTestId('management-fee-not-agreed')
+);
+export const feeNotAgreedLink = (contractId: string) =>
+	target(`Mietvertrag ${contractId} ohne vereinbarte Verwaltungspauschale`, (page) =>
+		page.getByTestId(`management-fee-not-agreed-link-${contractId}`)
+	);
+// What the link that opened the wizard chose, and where its settings come from (A-10)
+export const wizardPresetNotice = target('Vorgaben aus dem Link', (page) => page.getByTestId('wizard-preset'));
 // Invoices the preview names because their Leistungszeitraum is missing: dated shortly after the period, or counted
 // in full in a period under a year
 export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsperiode', (page) => page.getByTestId('late-invoices'));

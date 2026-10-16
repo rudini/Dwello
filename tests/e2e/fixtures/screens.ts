@@ -48,6 +48,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Anna', '1.01', { startDate: '2015-01-01', baseRent: '1800.00', monthlyAdvancePayment: '200.00' });
 	await seed.contract('Bruno', '1.02', { startDate: '2015-01-01', baseRent: '1500.00', monthlyAdvancePayment: '150.00' });
 	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2099-12-31', baseRent: '1400.00' });
+	await seed.managementFee('Carla', false); // step «Einstellungen» of the statement wizard names her contract (#89)
 	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
 	await seed.heatingInvoice('Seeblick', '9000.00', 2025); // Bruno pays more than his Akonto: a reminder can be sent
 	await seed.fuelStock('Seeblick', '2025-12-31', '800.00'); // a Tankbestand to list and to delete
@@ -78,7 +79,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.building('Bergsicht', 'Winterthur');
 	await seed.apartment('Bergsicht', '2.01', 'vacant');
 	await seed.tenant('Dora');
-	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00' });
+	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00', additionalRent: '80.00' }); // a parking space: the wizard's note after her contract names it (#144)
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
 	await seed.category('Gartenpflege', true);
@@ -100,6 +101,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
+		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),
 		// a predefined category shows the reason of its allocability (#186)

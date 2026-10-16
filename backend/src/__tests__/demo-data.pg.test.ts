@@ -148,6 +148,24 @@ describe('Demodaten', () => {
 		]);
 	});
 
+	// #89: each choice of «Verwaltungspauschale vereinbart» once, and the statements follow it
+	it('vereinbart die Verwaltungspauschale je Mietvertrag: zum Satz des Laufs, mit eigenem Satz und keine', async () => {
+		const rows = await query(
+			name,
+			`SELECT t.first_name, c.management_fee_agreed AS agreed, c.management_fee_percent AS own,
+				(SELECT array_agg(DISTINCT s.management_fee_percent) FROM utility_statements s WHERE s.contract_id = c.id) AS rates
+			FROM rental_contracts c JOIN tenants t ON t.id = c.tenant_id
+			WHERE t.first_name IN ('Marco', 'Kevin', 'Thomas') AND c.end_date IS NULL ORDER BY t.first_name`
+		);
+		expect(rows.map((r) => [r.first_name, r.agreed, r.own])).toEqual([
+			['Kevin', false, null],
+			['Marco', true, '2.50'],
+			['Thomas', true, null]
+		]);
+		expect(rows.find((r) => r.first_name === 'Kevin')!.rates).toEqual([0]);
+		expect(rows.find((r) => r.first_name === 'Marco')!.rates).toEqual([2.5]);
+	});
+
 	// Bei einem Mieterwechsel erhält jeder Mietvertrag eine eigene Abrechnung über seine Mietstage
 	it('rechnet den Mieterwechsel in Seepark A2 mit zwei Abrechnungen ab', async () => {
 		const rows = await query(

@@ -3,7 +3,7 @@
  * Generates professional utility statement PDFs with Swiss QR-bills
  *
  * Features:
- * - Multi-language support (DE, FR, IT, RM, EN)
+ * - Multi-language support (DE, FR, IT, EN)
  * - Swiss QR-bill integration
  * - Professional formatting
  * - Cost breakdown by category
@@ -23,15 +23,13 @@ import type { InvoicePart } from '../db/schema';
 /**
  * Supported languages
  */
-export type Language = 'de' | 'fr' | 'it' | 'rm' | 'en';
+export type Language = 'de' | 'fr' | 'it' | 'en';
 
 
 /**
- * Translation strings for each language; Romansh falls back to German for texts without a translation, and its
- * payment part is German (SIX provides German, French, Italian and English only)
+ * Translation strings for each language (the languages SIX provides for the payment part)
  */
-// Romansh is printed in German until all texts are translated: half-translated sentences read badly
-const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
+const translations: Record<Language, Record<string, string>> = {
 	de: {
 		title: 'Nebenkostenabrechnung',
 		period: 'Abrechnungsperiode',
@@ -455,7 +453,6 @@ function winAnsi(text: string) {
 // The floor as tenants write it: ground floor, above, below
 const FLOORS: Record<Language, [string, (n: number) => string, (n: number) => string]> = {
 	de: ['EG', (n) => `${n}. OG`, (n) => `${n}. UG`],
-	rm: ['EG', (n) => `${n}. OG`, (n) => `${n}. UG`],
 	fr: ['rez-de-chaussée', (n) => (n === 1 ? '1er étage' : `${n}e étage`), (n) => `${n}e sous-sol`],
 	it: ['pianterreno', (n) => `${n}° piano`, (n) => `${n}° piano interrato`],
 	en: ['ground floor', (n) => `floor ${n}`, (n) => `basement ${n}`]
@@ -934,7 +931,7 @@ function printableDoc(doc: Doc) {
  * shared, the heating costs and the tenant's rights; the QR-bill at the bottom of the last page for an amount due
  */
 async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig, language: Language = 'de'): Promise<Buffer> {
-	const t = { ...translations.de, ...(language === 'rm' ? {} : translations[language]) };
+	const t = { ...translations.de, ...translations[language] };
 	const qr = await qrCodeFor(data, config, t);
 
 	return new Promise((resolve, reject) => {

@@ -600,6 +600,13 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
 	});
 
+	// #89, persona Dr. Weber P-3: without an agreed fee there is none; like the PDF, no line «0 % der Zwischensumme»
+	it('zeigt ohne Verwaltungspauschale keine Zeile dafür, wie das PDF', () => {
+		detail({ managementFee: '0.00', managementFeePercent: '0.00' });
+		expect(text()).toContain('Zwischensumme');
+		expect(byTestId('statement-management-fee')).toBeNull();
+	});
+
 	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
 	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
@@ -708,6 +715,19 @@ describe('Abrechnungsdetail', () => {
 			{ method: 'POST', path: '/statements/s1/generate-pdf', body: undefined }
 		]);
 		expect(byTestId('statement-pdf-download')!.getAttribute('href')).toBe('/statements/s1/pdf');
+	});
+
+	// #105: wer das PDF erstellt, sieht, in welcher Sprache es entsteht
+	it('nennt beim Erstellen die Sprache des Mieters für das PDF', () => {
+		detail({ tenantLanguage: 'fr' });
+		expect(byTestId('statement-pdf-language')!.textContent).toBe('PDF auf Französisch');
+	});
+
+	// ein erstelltes PDF behält die Sprache, in der es entstand; welche, speichert Dwello nicht
+	it('nennt beim Herunterladen keine Sprache', () => {
+		detail({ tenantLanguage: 'fr', pdfGeneratedAt: '2025-01-16T08:00:00.000Z' });
+		expect(byTestId('statement-pdf-download')).not.toBeNull();
+		expect(byTestId('statement-pdf-language')).toBeNull();
 	});
 
 	it('bleibt beim Erstellen-Button, wenn das PDF nicht erstellt werden kann', async () => {
@@ -961,7 +981,7 @@ describe('Abrechnungsdetail', () => {
 			{ reminder: { document: { title: '2. Mahnung', channel: 'letter' } } }
 		);
 		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'2. Mahnung liegt als Brief zum Ausdrucken in den Dokumenten bereit.'
+			'Das Dokument «2. Mahnung» liegt unter «Dokumente» als Brief zum Ausdrucken bereit.'
 		);
 	});
 });

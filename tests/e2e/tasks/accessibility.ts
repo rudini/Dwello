@@ -51,6 +51,8 @@ import {
 	contractSubmitButton,
 	durationChoice,
 	endDateInput,
+	feeChoice,
+	feeRateInput,
 	retryContractsButton,
 	reviewContractsUnknown,
 	startDateInput,
@@ -289,6 +291,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
 			Wait.until(on.overlapWarning)
 		),
+	// the amounts of the apartment's last contract filled in, with the note that says so (#144)
+	'rent-taken-over': () => (actor) =>
+		actor.attemptsTo(
+			Click.on(nextButton), // tenant and apartment come from the address
+			Click.on(nextButton),
+			Wait.forValue(startDateInput, '01.04.2099'), // the day after the last contract, suggested
+			Click.on(nextButton),
+			Wait.until(on.shown('contract-rent-taken-over'))
+		),
 	// the apartments' rental contracts cannot be loaded (#143); the wizard shows it from the step "Wohnung"
 	'contracts-unknown': () => async (actor) => {
 		await actor.attemptsTo(FailRequests.to('/api/contracts', {}), Navigate.reload);
@@ -307,6 +318,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2030-01-01').into(startDateInput),
 			Click.on(nextButton),
 			Enter.theValue('1500').into(baseRentInput),
+			Click.on(feeChoice('run')),
 			Click.on(nextButton),
 			Wait.until(reviewContractsUnknown)
 		),
@@ -352,8 +364,14 @@ const contractWizardSteps = (look: Activity): Activity => async (actor) => {
 	await nextStep(startDateInput); // "Vertragsdauer", limited: end date and both dates in words
 	await clickOnShown(actor, 'Befristet', durationChoice);
 	await actor.attemptsTo(EnterDate.of('2030-01-01').into(startDateInput), EnterDate.of('2031-12-31').into(endDateInput), look);
-	await nextStep(baseRentInput); // "Miete"
-	await actor.attemptsTo(Enter.theValue('1500').into(baseRentInput), look);
+	await nextStep(baseRentInput); // "Miete", with an own rate of the Verwaltungspauschale above the guideline (#89)
+	await actor.attemptsTo(
+		Enter.theValue('1500').into(baseRentInput),
+		Click.on(feeChoice('own')),
+		Enter.theValue('4').into(feeRateInput),
+		Wait.until(on.shown('contract-fee-rate-hint')),
+		look
+	);
 	await nextStep(on.shown('contract-review-item')); // "Prüfen"
 	await actor.attemptsTo(look);
 };
@@ -367,7 +385,14 @@ const statementWizardSteps =
 		await nextStep('generate-all-buildings'); // "Gebäude"
 		// this example's building: another example's may still be seeding, without a contract to preview
 		await actor.attemptsTo(Check.the(on.generateBuilding(example.building)));
-		await nextStep('heating-profile-select'); // "Heizprofil und Verwaltungspauschale"
+		// "Heizprofil und Verwaltungspauschale"; the seeded contract of Carla has no fee agreed, and the notice that names it
+		// loads after the step (#89, code review C-3)
+		await actor.attemptsTo(
+			Click.on(nextButton),
+			Wait.until(on.shown('heating-profile-select')),
+			Wait.until(on.shown('management-fee-not-agreed')),
+			look
+		);
 		await nextStep('preview-count'); // "Vorschau", calculated on the server
 		// a building without invoices must be confirmed
 		if (await actor.answer(Visibility.of(on.confirmMissingInvoices))) await actor.attemptsTo(Check.the(on.confirmMissingInvoices));

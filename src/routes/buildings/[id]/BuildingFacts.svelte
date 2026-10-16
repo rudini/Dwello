@@ -4,7 +4,6 @@
 	import { occupancyParts } from '$lib/apartment';
 	import { buildingTypeLabel } from '$lib/building-type';
 	import type { BuildingWithStats } from '$lib/types';
-	import BuildingMiniMap from '../BuildingMiniMap.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 
 	// The building's master data and how many of its apartments are rented
@@ -55,11 +54,4 @@
 			</dd>
 		</div>
 	</dl>
-	{#if building.latitude && building.longitude}
-		<BuildingMiniMap
-			latitude={Number(building.latitude)}
-			longitude={Number(building.longitude)}
-			address={place}
-		/>
-	{/if}
 </Panel>

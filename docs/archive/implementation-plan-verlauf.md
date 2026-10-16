@@ -644,6 +644,31 @@ Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts
 
 Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/schema.ts`, `backend/src/routes/contracts.ts`, `backend/src/services/contract.service.ts`, `src/lib/contract-status.ts`, `src/lib/types.ts`, `src/routes/contracts/[id]/{+page.svelte,+page.server.ts,ContractTerms.svelte}`, `src/routes/contracts/new/PeriodStep.svelte`, `messages/*.json`, tests (`contract-status`, `contract-actions`, `contract-end.pg`, `tests/contracts/contract.json`, E2E contract-detail/contract-edit, a11y), docs (`anforderungen-vertragsende.md`, `data-model.md`, `api-specification.md`).
 
+## Session 2026-10-16: #124, #89, #60 Verwaltungspauschale
+
+- [x] #60: remove the marker in `SettingsStep.svelte`, cite the Mieterverband leaflet 2026 in the comment (No scenario: code comment only, no behaviour change)
+- [x] #124: preview and generate refuse a rate above 10 % (route schema), `PUT /api/v1/config` refuses `management_fee_pct` above 10 (validator); `*.pg.test.ts` for 10 accepted and stored, 10.01 refused, no 500
+- [x] #124: wizard step «Einstellungen» and settings page refuse above 10 at the field; `statements_error_fee` «von 0 bis 10» in four languages; unit tests in `statement-wizard.test.ts` and for `saveSettings`; hint above 3 % unchanged
+- [x] #124: scenario in `statement-management-fee.feature`: «1000» shows the field error, the wizard stays on the step
+- [x] #89: Mietvertrag gets «Verwaltungspauschale vereinbart» (ja/nein, optional own rate): migration, schema, `docs/data-model.md`, API contracts
+- [x] #89: new contract: ja or nein must be chosen (no default); existing contracts start with «nein»; edit and detail page show it
+- [x] #89: the run rate applies only to contracts with «ja» (or their own rate); «nein» gets 0 %
+- [x] #89: the statement wizard points out the contracts with «nein»
+- [x] #89: help texts (`statements_fee_help`), requirements doc rule 9, four languages
+- [x] fach-reviewer on the @wip scenarios before implementing (`docs/reviews/issue-89-fachreview-1.md`: M-1, V-1, V-2, V-5, V-6, M-2 fixed; V-3, V-4 rejected; #286 opened for the glossary)
+- [x] code-reviewer round 1 (`docs/reviews/issue-89-review-1.md`): no Blocker/Major; C-1, C-2, C-3, C-7, C-9–C-11 fixed; C-4, C-5, C-6, C-8 left as reported
+- [x] Persona Helga (`docs/design/personas/helga-issue-89.md`): P-1, P-2 fixed; P-3, P-4, P-5 left as reported
+- [x] Persona Dr. Weber (`docs/design/personas/dr-weber-issue-89.md`): P-1, P-2, P-3 fixed; P-4 left as reported
+- [x] fach-reviewer round 2 (`docs/reviews/issue-89-fachreview-2.md`): M-3, M-4, V-5, V-11, V-13, V-15 fixed; V-12, V-14, V-16 left as reported
+- [x] daten-pruefer (`docs/reviews/issue-89-datenpruefung-1.md`): 19 statements match to the Rappen; D-1 fixed, D-2, D-3 existed before
+- [x] E2E isolation: UI runs of the statement wizard name a predefined heating profile (`tests/e2e/{steps,tasks}/statement-generate*`)
+- [x] Workflow note: a notice inside a wizard step vs. a state of `tests/a11y/screens.json`; reviewers cannot run checks in their worktree; stop hook vs. step 9 (`docs/reviews/workflow-notes-issue-89.md`)
+- [x] Merge of main (migration renamed to 0009, after a second merge 0011)
+- [x] Closing code-reviewer round (`docs/reviews/issue-89-review-2.md`): Major C-1 fixed (heating profile again from the other statements, notice names where the fee comes from), C-2, C-4, C-6, C-7, C-8 fixed; C-9 holds again after the C-1 fix; C-3, C-5 rejected; C-10 noted (dev databases only)
+- [x] Closing re-review (`docs/reviews/issue-89-review-3.md`): C-1 confirmed; Major C-11 fixed (scenario «Neue Abrechnung übernimmt das Heizprofil, die Verwaltungspauschale kommt aus den Einstellungen», red on 7d81829); C-13, C-7, C-14, C-15, C-16 fixed; C-12 left as reported
+- [x] Closing re-review (`docs/reviews/issue-89-review-4.md`): C-11 and the delta confirmed, no Blocker/Major open; C-18 fixed, C-17 left (accessibility targets keep their own module)
+- [x] PR
+- Files: `backend/migrations/0011_contract_management_fee.sql`, `backend/src/{db/schema.ts,routes/contracts.ts,routes/statements.ts,services/calculation.service.ts,services/config.service.ts,services/contract.service.ts}`, `backend/demo/demo-data.sql`, `src/lib/{contract-form.ts,contract-wizard.ts,statement-wizard.ts,types.ts,utils/format.ts,server/settings.ts,server/statement-generation.ts}`, `src/routes/contracts/{new/RentStep.svelte,[id]/*}`, `src/routes/statements/generate/{+page.server.ts,FeeNotAgreed.svelte,SettingsStep.svelte,StatementStep.svelte}`, `messages/*.json`, docs
 ## Session 2026-10-16 (#97, #101: identity of a statement)
 
 - [x] #97: a per-building, per-year number sequence that never gives a number twice; a deleted draft leaves a gap (`*.pg.test.ts`: two drafts, delete the second, generate again → `…-0003`); existing numbers unchanged; `docs/data-model.md` names where the sequence is kept
@@ -694,3 +719,62 @@ Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.t
 - [x] Merged origin/main (W6 reminders: a11y lists, seed, `src/lib/statement.ts`; migration renamed to 0010); merge review `docs/reviews/w4b-review-merge.md`: no Blocker/Major, C-2 (reset of a reminded statement untested) left as Minor
 - [x] Workflow notes (`docs/reviews/workflow-notes-issue-138-93-92.md`)
 - [x] Workflow notes, archive the session, pull request
+
+## Session: contract wizard keeps the apartment and takes over the rent (#144)
+
+Request: «Setze #144 um» (coordinator W10). #144's "Done means" still asks for an implementation issue; the decided Option A is the requirement, the pull request says `Fixes #144`.
+
+- [x] The preselected apartment survives the detour to «Neuen Mieter erfassen» (scenario in `contract-new.feature`)
+- [x] Nettomiete, Zusatzmiete and Akonto are preset from the apartment's last Mietvertrag, editable, marked as taken over (scenario in `contract-new.feature`)
+- [x] fach-reviewer on the `@wip` scenarios before implementing (amounts)
+- [x] fach-reviewer round 1 (`docs/reviews/p17-fachreview-1.md`): took V-1, V-2, V-3, V-6, M-1, M-3
+- [x] axe/language state `rent-taken-over` (`tests/a11y/screens.json`)
+- [x] Found: suggested Vertragsbeginn 01.01.2100 refused by the wizard's own check → #296
+- [x] code-reviewer round 1 (`docs/reviews/p17-review-1.md`): fixed C-7, C-8; C-1..C-6 stay in the report
+- [x] persona Helga (`docs/design/personas/helga-p17.md`): fixed P-1 (parking sentence only with a Zusatzmiete) and P-2 (wording)
+- [x] Workflow note: decision issue implemented directly; persona re-run after a rewording (`docs/reviews/workflow-notes-issue-144.md`)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `src/lib/contract-wizard.ts`, `src/routes/contracts/new/{ContractWizard,RentStep,TenantStep}.svelte`, `src/routes/tenants/TenantForm.svelte`, `src/routes/tenants/new/+page.svelte`, `src/lib/server/tenant-form.ts`, `messages/*.json`, `tests/a11y/screens.json`, tests in `src/__tests__/` and `tests/e2e/`.
+
+## Session: Remove the building map (#129)
+
+- [x] `@wip` scenarios: building page shows the address without a map (`building-detail.feature`), privacy page no longer names CARTO (`privacy.feature`); seen red
+- [x] `fach-reviewer` on the scenario before implementing (privacy text): `docs/reviews/map-fachreview-1.md`
+- [x] Remove `BuildingMiniMap.svelte`, its DOM test, `leaflet`, `@types/leaflet`, the `.leaflet-container` rule, the `buildings_map*` messages and the CARTO paragraph `privacy_third_2` (all four languages); the unused `latitude`/`longitude` mapping of the building loads (columns stay)
+- [x] Remove `PUBLIC_CARTO_API_KEY` and the map from `.env.example`, `deploy/demo/.env.example`, `docker-compose.prod.yml`, `docs/tech-stack.md`, README, PRD (marked dropped), U-23 in `offene-punkte.md` (no CSP exists)
+- [x] Comment on #82 that CARTO is no longer a third party (R-1)
+- [x] Slice review (`code-reviewer`): `docs/reviews/map-review-1.md`; closing round `docs/reviews/map-review-2.md`
+- [x] Feature review: personas Dr. Weber (`docs/design/personas/weber-map129.md`) and Marco (`docs/design/personas/marco-map129.md`); no second `fach-reviewer` (the privacy text is the one reviewed before implementing)
+- [x] Workflow review (`docs/reviews/workflow-notes-issue-129.md`), archive session
+- [x] Before marking complete: lint, check, type-check, affected tests and E2E
+- [x] Pull request (Fixes #129)
+
+Files changed: `src/routes/buildings/BuildingMiniMap.svelte` (deleted), `src/__tests__/building-mini-map.dom.test.ts` (deleted), `src/routes/buildings/[id]/BuildingFacts.svelte`, building loads, `src/lib/types.ts`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `src/styles/globals.css`, `package.json`, `bun.lock`, privacy and token tests, deployment files and docs, `tests/e2e/features/building-detail.feature`, `tests/e2e/features/privacy.feature`, `tests/e2e/fixtures/backend.ts`, `tests/e2e/{targets,questions,steps}/building-detail*`
+
+## Session W6b: #63, #105 and #106 (the tenant's Sprache)
+
+- [x] #63 `@wip` scenario: the Sprache offers Deutsch, Französisch, Italienisch, Englisch only (`tenant-edit.feature`), seen red
+- [x] #105 `@wip` scenarios: label «Sprache für Abrechnung und Mahnungen» (`tenant-edit.feature`), «PDF auf Französisch» on the statement detail (`statement-detail.feature`), seen red
+- [x] #106 `@wip` scenario: a reminder to a French-speaking tenant has a French title (`statement-reminder.feature`), seen red
+- [x] fach-reviewer on the scenarios and the reminder texts in fr/it/en before implementing
+- [x] #63 migration `0012` (renumbered from 0008 after merging main, C-12) (tenants and `default_language` `rm` → `de`, CHECK without `rm`), backend validators, `Language` type, frontend type and labels, help text in four languages (pg test of the migration)
+- [x] #106 `reminderLetter` per language (unit test per language for all three Mahnstufen), `reminder.service` passes the tenant's Sprache; `statements_reminder_emailed` / `_letter` name the title in quotes
+- [x] #105 label and «PDF auf {Sprache}» in `PdfAction.svelte` (DOM test)
+- [x] docs: `docs/api-specification.md`, `docs/data-model.md`, `docs/tech-stack.md`, `docs/nebenkostenabrechnung-anforderungen.md`
+- [x] fach-reviewer round 1: `docs/reviews/w6b-fachreview-1.md` (V-1 to V-4, V-6 to V-9 fixed; V-5 → new issue; V-10 existed before)
+- [x] code-reviewer round 1: `docs/reviews/w6b-review-1.md` (C-1, C-4, C-6 fixed; others Nit/Minor, stay in the report)
+- [x] fach-reviewer round 2: `docs/reviews/w6b-fachreview-2.md` (V-13, V-14 fixed; V-12 glossary → product owner)
+- [x] persona Helga: `docs/design/personas/helga-w6b.md`
+- [x] persona Dr. Weber: `docs/design/personas/weber-w6b.md` (P-1 → #305)
+- [x] daten-pruefer: `docs/reviews/w6b-datenpruefung-1.md` (D-1 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-63-105-106.md`
+- [x] closing code-reviewer round: `docs/reviews/w6b-review-2.md` (C-10 answered by the E2E run, C-11 fixed)
+- [x] Feature review: persona, fach-reviewer, daten-pruefer (items above) (PDF texts)
+- [x] Checks before push; workflow review; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+No scenario for the migration of existing `rm` tenants: E2E starts from fresh migrations, so no record with `rm` can exist (`migrations.pg.test.ts`).
+
+Files: `backend/migrations/0012_tenant_language_without_rm.sql`, `backend/src/services/{reminder-letter,reminder.service,pdf.service,statement-pdf.service,config.service}.ts`, `backend/src/routes/{tenants,statements}.ts`, `backend/src/db/schema.ts`, `messages/*.json`, `src/lib/{tenant,types}.ts`, `src/lib/server/{statement,documents,statement-actions}.ts`, `src/routes/statements/[id]/{PdfAction,+page}.svelte`, `src/routes/tenants/+page.server.ts`, tests, `tests/e2e/**`, `tests/contracts/statement.json`, docs (`README.md`, PRD, api-specification, data-model, tech-stack, nebenkostenabrechnung-anforderungen).

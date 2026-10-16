@@ -22,9 +22,13 @@ describe('Mieterformular nach einem abgelehnten Speichern', () => {
 	});
 });
 
-// Das PDF gibt es noch nicht auf Rätoromanisch: wer es wählt, soll wissen, was der Mieter erhält
-it('sagt bei der Sprache, dass Rätoromanisch vorerst deutsch erstellt wird', () => {
+// #63, #105, #106: die Sprache gilt für Abrechnung und Mahnungen; Rätoromanisch gibt es nicht mehr
+it('bietet die Sprache für Abrechnung und Mahnungen auf Deutsch, Französisch, Italienisch und Englisch an', () => {
 	show(TenantFormFields, {});
 
-	expect(document.body.textContent).toContain('Auf Rätoromanisch erstellt Dwello die Abrechnung vorerst auf Deutsch.');
+	const select = byTestId<HTMLSelectElement>('tenant-language-select')!;
+	expect([...select.options].map((option) => option.textContent)).toEqual(['Deutsch', 'Französisch', 'Italienisch', 'Englisch']);
+	expect(select.labels![0].textContent).toContain('Sprache für Abrechnung und Mahnungen');
+	expect(document.body.textContent).toContain('In dieser Sprache erstellt Dwello die Nebenkostenabrechnung und die Mahnungen.');
+	expect(document.body.textContent).not.toContain('Rätoromanisch');
 });

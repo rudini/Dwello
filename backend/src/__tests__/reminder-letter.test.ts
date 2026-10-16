@@ -47,4 +47,43 @@ describe('Mahnschreiben', () => {
 	it('trägt Stufe und Abrechnung im Betreff', () => {
 		expect(reminderLetter({ ...input, level: 2 }).subject).toBe('2. Mahnung – Nebenkostenabrechnung NK-2024-0007');
 	});
+
+	// #106: die Mahnung folgt der Sprache des Mieters wie das PDF der Abrechnung
+	it.each([
+		['de', ['Zahlungserinnerung', '2. Mahnung', '3. Mahnung'], 'Nebenkostenabrechnung NK-2024-0007'],
+		['fr', ['Rappel de paiement', '2e rappel', '3e rappel'], 'Décompte des charges NK-2024-0007'],
+		['it', ['Promemoria di pagamento', '2° sollecito', '3° sollecito'], 'Conteggio spese accessorie NK-2024-0007'],
+		['en', ['Payment reminder', '2nd reminder', '3rd reminder'], 'Utility cost statement NK-2024-0007']
+	] as const)('heisst auf %s je Stufe wie im Glossar der Übersetzungen', (language, titles, statement) => {
+		titles.forEach((title, index) => {
+			const letter = reminderLetter({ ...input, level: index + 1, language });
+			expect(letter.title).toBe(title);
+			expect(letter.subject).toBe(`${title} – ${statement}`);
+		});
+	});
+
+	it.each([
+		['fr', 'Bonjour Anna Keller', 'pour la période du 01.01.2024 au 31.12.2024', 'Montant dû\u00a0: CHF 245.50', 'au plus tard le 31.03.2025', 'Meilleures salutations\nVerwaltung Muster AG'],
+		['it', 'Gentile Anna Keller', 'per il periodo dal 01.01.2024 al 31.12.2024', 'Importo dovuto: CHF 245.50', 'entro il 31.03.2025', 'Cordiali saluti\nVerwaltung Muster AG'],
+		['en', 'Dear Anna Keller', 'for the period 01.01.2024 – 31.12.2024', 'Amount outstanding: CHF 245.50', 'by 31.03.2025', 'Kind regards\nVerwaltung Muster AG']
+	] as const)('schreibt den Brief auf %s', (language, salutation, period, amount, deadline, closing) => {
+		for (const level of [1, 2, 3]) {
+			const { text } = reminderLetter({ ...input, level, language });
+			for (const part of [salutation, period, amount, deadline, closing]) expect(text).toContain(part);
+		}
+	});
+
+	it.each([
+		['fr', 'Référence 21 00000 00003 13947 14300 09017 (à indiquer lors du paiement)'],
+		['it', 'Riferimento 21 00000 00003 13947 14300 09017 (da indicare al momento del pagamento)'],
+		['en', 'Reference 21 00000 00003 13947 14300 09017 (please quote it with your payment)']
+	] as const)('nennt die Referenz auf %s', (language, reference) => {
+		const { text } = reminderLetter({ ...input, language, reference: '21 00000 00003 13947 14300 09017' });
+		expect(text).toContain(reference);
+	});
+
+	// Fachreview W6b V-1: «nulla» hiesse rechtlich nichtig, nicht gegenstandslos
+	it('sagt auf Italienisch, dass eine bereits geleistete Zahlung den Brief erledigt', () => {
+		expect(reminderLetter({ ...input, language: 'it' }).text).toContain('Se ha già effettuato il pagamento, non tenga conto della presente.');
+	});
 });

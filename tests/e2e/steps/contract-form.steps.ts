@@ -11,12 +11,14 @@ import {
 	confirmation,
 	draftRestoredShown,
 	durationChosen,
+	enteredAdvancePayment,
 	enteredBaseRent,
 	failure,
 	fixedApartmentName,
 	fixedTenantName,
 	partiesHelpText,
 	reviewHint,
+	rentTakenOverText,
 	reviewed,
 	runningContractHintText,
 	startHint,
@@ -26,6 +28,7 @@ import {
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
 import {
+	agreeManagementFee,
 	changeBaseRent,
 	deleteDraftAndSave,
 	openContractEdit,
@@ -45,6 +48,8 @@ import {
 	discardDraft,
 	goBackToStep,
 	goToNextStep,
+	goToRentWith,
+	openNewContractFor,
 	newContractAfterEnd,
 	openRunningContract,
 	registerContract,
@@ -315,6 +320,28 @@ Then(
 	}
 );
 
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken ohne Angabe zur Verwaltungspauschale vermieten will',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: null })
+		);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit einer Verwaltungspauschale von {string} % bis zur Prüfung erfasst',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, fee: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: fee })
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
+	await verwalter.attemptsTo(agreeManagementFee);
+});
+
 Then(
 	'erfährt der Liegenschaftsverwalter, dass {string} einen Mietvertrag ohne Vertragsende für die Wohnung {string} hat',
 	async ({ verwalter, names }, tenant: string, apartment: string) => {
@@ -349,6 +376,29 @@ When('der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erf
 Then('schlägt der neue Mietvertrag den Vertragsbeginn {string} vor', async ({ verwalter }, date: string) => {
 	await verwalter.sees(pageAddress).toMatch(new RegExp(`start=${date}`));
 });
+
+Given(
+	'der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung {string}',
+	async ({ verwalter, seed }, apartment: string) => {
+		await verwalter.attemptsTo(openNewContractFor(seed.idOf(apartment)!));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter für {string} ab {string} bis zur Miete weitergeht',
+	async ({ verwalter, seed }, tenant: string, startDate: string) => {
+		await verwalter.attemptsTo(goToRentWith(seed.idOf(tenant)!, startDate));
+	}
+);
+
+Then(
+	'schlägt der Schritt "Miete" die Nettomiete {string} und das Akonto {string} aus dem letzten Mietvertrag der Wohnung vor',
+	async ({ verwalter }, baseRent: string, advancePayment: string) => {
+		await verwalter.sees(enteredBaseRent).toBe(baseRent);
+		await verwalter.sees(enteredAdvancePayment).toBe(advancePayment);
+		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
 
 // the help names who can withdraw a notice, after the glossary «Kündigung aufheben»
 Then(
