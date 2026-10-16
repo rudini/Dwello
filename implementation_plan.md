@@ -9,7 +9,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] pg test: the categorisation prompt carries the new descriptions (`invoice-categorization.pg.test.ts`; #220 names `llm-prompt.test.ts`, which has no database)
 - [x] `llm-eval.ts`: cases Baumfällung, Heizungsversicherung, Verwaltung der Heizung, Anschluss ans Kabelnetz, Räumung (#204, #220); `llm:eval` before and after (MiniMax-M2.5, 47 cases: before 42/47 = 89 %, after 45/47 = 96 %; default model not runnable here)
 - [x] `fach-reviewer` on the wording before the tests turn green: `docs/reviews/204-fachreview-1.md` (V-1 to V-7 applied; M-1, M-2 open)
-- [ ] #221: implementation issue with its own "Done means", then close #221 (decision issue)
+- [x] #221: implementation issue #292 with its own "Done means" (takes M-2 of the domain review), #221 closed (decision issue)
 - [x] `docs/data-model.md` if it lists descriptions
 - [ ] Slice review, closing review, PR
 
