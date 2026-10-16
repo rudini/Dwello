@@ -882,6 +882,7 @@ Request: «Setze #296 um» (coordinator W10b). Chosen fix: suggest nothing outsi
 - [x] Closing code review round 2 (`docs/reviews/296-review-2.md`): no findings
 - [x] Checks: lint, check, type-check, full vitest, axe/language rows of the contract screens
 - [x] Workflow note: session started detached without a branch (`docs/reviews/workflow-notes-issue-296.md`)
+- [x] Merged origin/main (conflicts in `statement-wizard.ts` imports, Carla's contract in `screens.ts` next to #89's management fee, this archive); merge review `docs/reviews/296-review-merge.md`: no Blocker/Major
 - [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `src/lib/{contract-form,contract-wizard,statement-wizard}.ts`, tests in `src/__tests__/{contract-form,contract-wizard.dom,contracts-i18n}.test.ts`, `tests/e2e/fixtures/screens.ts`, `tests/e2e/tasks/accessibility.ts`.
