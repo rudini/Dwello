@@ -19,6 +19,6 @@ Start from the plan items «Workflow note: …» (`CLAUDE.md`, Workflow 7). Only
 
 When: the product owner asks for one, or at the end of a request that covered several issues (in the session of the last one).
 
-Read the notes and the per-task reviews (`workflow-rules-review-issue-*.md`, `workflow-rules-review-migrations-frozen.md`; the numbered `workflow-rules-review-<n>.md` are older reviews or code-review rounds and are left out) that no collected review covers yet, group them by rule, and write `docs/reviews/workflow-rules-review-<YYYY-MM-DD>.md` (`-2` for a second one that day): the files it covers, then one proposal per group with how often it came up. A proposal may also remove or shorten a rule; it names the cost the notes show and what the rule caught in the reports.
+Read the notes and the per-task reviews (`workflow-rules-review-<name>.md` with a task name such as `issue-42` or `axe-ui-only`; the numbered `workflow-rules-review-<n>.md` are older reviews or code-review rounds, the dated ones collected reviews, and both are left out) that no collected review covers yet, group them by rule, and write `docs/reviews/workflow-rules-review-<YYYY-MM-DD>.md` (`-2` for a second one that day): the files it covers, then one proposal per group with how often it came up. A proposal may also remove or shorten a rule; it names the cost the notes show and what the rule caught in the reports.
 
 Done when the note or the collected review is committed, or it is clear that nothing came up.
