@@ -710,6 +710,13 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
 	});
 
+	// #89, persona Dr. Weber P-3: without an agreed fee there is none; like the PDF, no line «0 % der Zwischensumme»
+	it('zeigt ohne Verwaltungspauschale keine Zeile dafür, wie das PDF', () => {
+		detail({ managementFee: '0.00', managementFeePercent: '0.00' });
+		expect(text()).toContain('Zwischensumme');
+		expect(byTestId('statement-management-fee')).toBeNull();
+	});
+
 	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
 	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
 		const rounding = () => allByTestId('statement-rounding').map((row) => row.textContent).join(' ').replace(/\s+/g, ' ');

@@ -254,6 +254,17 @@ export function calculateBalance(totalCosts: number, totalAdvancePayments: numbe
 	return roundTo5Rappen(totalCosts - totalAdvancePayments);
 }
 
+/** Rate of the Verwaltungspauschale: only where the contract agrees one (#89, Art. 257a Abs. 2 OR), its own rate first,
+ * else the run's, else the setting */
+async function feePercentOf(
+	contract: { managementFeeAgreed: boolean; managementFeePercent: string | null },
+	runPercent?: number
+) {
+	if (!contract.managementFeeAgreed) return 0;
+	if (contract.managementFeePercent !== null) return parseFloat(contract.managementFeePercent);
+	return runPercent ?? (await getTypedConfig('management_fee_pct'));
+}
+
 /**
  * Main calculation function for a contract
  */
@@ -384,9 +395,8 @@ export async function calculateStatementForContract(
 
 	subtotal = roundToRappen(subtotal);
 
-	// Management fee: a percentage (chosen per generation run, otherwise the configured default) of the tenant's own
-	// utility costs, so the tenant can check the rate on the statement
-	const feePercent = managementFeePercent ?? (await getTypedConfig('management_fee_pct'));
+	// Management fee: a percentage of the tenant's own utility costs, so the tenant can check the rate on the statement
+	const feePercent = await feePercentOf(contract, managementFeePercent);
 	const managementFee = calculateManagementFee(subtotal, feePercent).fee;
 	const totalCosts = roundToRappen(subtotal + managementFee);
 

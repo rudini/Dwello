@@ -200,14 +200,13 @@ describe('Gebäudeliste', () => {
 			url: new URL('http://localhost/buildings'),
 			fetch
 		} as never)) as {
-			buildings: { name: string; latitude: number; occupiedCount: number; vacantCount: number }[];
+			buildings: { name: string; occupiedCount: number; vacantCount: number }[];
 			total: number;
 		};
 
 		expect(data.total).toBe(1);
 		expect(data.buildings[0]).toMatchObject({
 			name: 'Seeblick',
-			latitude: 47.3769,
 			occupiedCount: 1,
 			vacantCount: 1
 		});

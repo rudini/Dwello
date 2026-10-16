@@ -113,6 +113,25 @@ describe('Einstellungen speichern', () => {
 		expect(await rounded.result).toMatchObject({ status: 400 });
 	});
 
+	// #124: höchstens 10 %, am Feld, bevor etwas gespeichert wird
+	it('lehnt eine Verwaltungspauschale über 10 % am Feld ab', async () => {
+		const { calls, result } = runAction(actions.default, '', 200, {
+			...valid,
+			managementFeePercent: '10,01'
+		});
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				errors: {
+					managementFeePercent:
+						'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+				}
+			}
+		});
+		expect(calls).toEqual([]);
+	});
+
 	it('prüft PLZ, IBAN und Verwaltungspauschale', async () => {
 		const { calls, result } = runAction(actions.default, '', 200, {
 			...valid,
@@ -128,7 +147,7 @@ describe('Einstellungen speichern', () => {
 					companyPostalCode: 'PLZ muss 4 Ziffern haben',
 					iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein',
 					managementFeePercent:
-						'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+						'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 				}
 			}
 		});

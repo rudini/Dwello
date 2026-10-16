@@ -119,6 +119,8 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				baseRent: data.baseRent || '0',
 				additionalRent: data.additionalRent || null,
 				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
+				managementFeeAgreed: !!data.managementFeeAgreed,
+				managementFeePercent: data.managementFeePercent ?? null,
 				tenant: {
 					id: data.tenant?.id || data.tenantId,
 					firstName: data.tenant?.firstName || '',

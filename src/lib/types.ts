@@ -11,8 +11,6 @@ export interface Building {
 	city: string;
 	canton: string;
 	country?: string;
-	latitude?: string | number | null;
-	longitude?: string | number | null;
 	buildingType?: string | null;
 	yearBuilt?: number | null;
 	createdAt?: Date | string;
@@ -83,6 +81,8 @@ export interface RentalContract {
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto
+	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
+	managementFeePercent?: string | null; // own rate, before the run's
 	referenceIndex?: string | number | null;
 	contractPdf?: string | null;
 	notes?: string | null;
