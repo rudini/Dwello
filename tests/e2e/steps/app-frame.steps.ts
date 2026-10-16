@@ -7,7 +7,9 @@ import {
 	llmRecipientNotice,
 	operatorNoticeText,
 	pageAnchor,
+	pagePurposeText,
 	pageOverflowsSideways,
+	pageTitleText,
 	pageTitleWidth,
 	sectionShareInWindow,
 	sectionShown,
@@ -165,4 +167,9 @@ When('der Liegenschaftsverwalter im Inhalt der Hilfe {string} wählt', async ({ 
 Then('sieht der Liegenschaftsverwalter die Begriffe der Hilfe unter ihrer eigenen Adresse', async ({ verwalter }) => {
 	await verwalter.sees(pageAnchor).toBe('#glossary');
 	await verwalter.sees(sectionShareInWindow('Begriffe kurz erklärt')).toBeGreaterThan(0);
+});
+
+Then('erklärt die Seite {string} {string}', async ({ verwalter }, title: string, text: string) => {
+	await verwalter.sees(pageTitleText).toBe(title);
+	await verwalter.sees(pagePurposeText).toContain(text);
 });

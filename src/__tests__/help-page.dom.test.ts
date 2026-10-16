@@ -91,6 +91,11 @@ describe('Hilfe', () => {
 		);
 		expect(links.map((a) => a.getAttribute('href'))).toEqual(sections.map((s) => `#${s.id}`));
 		expect(links.at(-1)?.getAttribute('href')).toBe('#glossary');
+		// der Inhalt steht vor dem ersten Abschnitt
+		expect(
+			byTestId('help-contents')!.compareDocumentPosition(sections[0]) &
+				Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
 	});
 
 	it('erklärt die beiden geführten Abläufe Schritt für Schritt', () => {

@@ -6,6 +6,7 @@ import {
 	glossaryExplanation,
 	llmRecipient,
 	operatorNotice,
+	pagePurpose,
 	pageSection,
 	pageTitle,
 	userMenuButton
@@ -18,6 +19,8 @@ export const draftNoticeText = (heading: string) => Text.of(draftNotice(heading)
 export const operatorNoticeText = (heading: string) => Text.of(operatorNotice(heading));
 /** Width the page title gets on screen, in pixels */
 export const pageTitleWidth = Width.of(pageTitle);
+export const pageTitleText = Text.of(pageTitle);
+export const pagePurposeText = Text.of(pagePurpose);
 export const pageOverflowsSideways = question(
 	'whether the page scrolls sideways',
 	async (actor) => (await actor.answer(ThePage.sidewaysOverflow)) > 0

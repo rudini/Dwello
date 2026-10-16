@@ -23,7 +23,7 @@ Funktionalität: Hilfe
   Szenario: Die Hilfe nennt das Hochladen mehrerer Rechnungen
     Dann erklärt die Hilfe unter "Rechnungen erfassen" "Mehrere Rechnungen auf einmal: Wählen Sie unter «Rechnungen» «Rechnungen hochladen». Die KI liest die Dateien aus, und Sie prüfen die Angaben, bevor Dwello die Rechnungen erstellt."
 
-  # Begriffe zum Mietvertrag und zur KI-Kategorie (#109)
+  # Begriffe zum Mietvertrag und zur KI-Kategorie (#109); Abrechnungsperiode wie im Glossar (#67); Fachreview (#69)
   Szenariogrundriss: Die Hilfe erklärt den Begriff "<Begriff>"
     Dann erklärt die Hilfe den Begriff "<Begriff>" mit "<Erklärung>"
 
@@ -33,6 +33,9 @@ Funktionalität: Hilfe
       | Kündigungstermin        | Tag, auf den ein unbefristeter Mietvertrag gekündigt werden kann |
       | Kündigungsfrist         | Zeit zwischen dem Eingang der Kündigung und dem Kündigungstermin |
       | Manuell überschrieben   | «Manuell»                                                       |
+      | Abrechnungsperiode      | Ohne Leistungszeitraum bestimmt das Rechnungsdatum, in welche Abrechnungsperiode eine Rechnung fällt. |
+      | Umlagefähig             | Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt. |
+      | Mahnung                 | erst nach einer eigenen schriftlichen Zahlungsfrist von mindestens 30 Tagen |
 
   # Inhaltsverzeichnis (#109)
   Szenario: Die Hilfe führt vom Inhalt direkt zu den Begriffen

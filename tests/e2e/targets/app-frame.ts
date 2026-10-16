@@ -27,6 +27,7 @@ export const draftNotice = (heading: string) => inSection(heading, 'Hinweis auf 
 /** Who runs this installation, as the terms of use name them */
 export const operatorNotice = (heading: string) => inSection(heading, 'Betreiber', 'terms-operator');
 export const pageTitle = target('Seitentitel', (page) => page.getByRole('heading', { level: 1 }));
+export const pagePurpose = target('Zweck der Seite unter dem Titel', (page) => page.getByTestId('page-purpose'));
 export const termsLinkOnLogin = target('Nutzungsbedingungen', (page) => page.getByTestId('login-terms-link'));
 export const publicLoginLink = target('Zur Anmeldung', (page) => page.getByTestId('public-login-link'));
 export const publicHelpLink = target('Zur Hilfe', (page) => page.getByTestId('public-help-link'));

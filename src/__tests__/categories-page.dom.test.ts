@@ -213,6 +213,13 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(text()).toContain(
 			'Position in den Auswahllisten und in der Liste der Kategorien: kleinere Zahlen stehen weiter oben, bei gleicher Zahl entscheidet der Name.'
 		);
+		// ein Screenreader liest die Hilfe mit den Feldern der Übersetzungen
+		const fieldset = [...document.querySelectorAll('fieldset')].find(
+			(f) => f.querySelector('legend')?.textContent === 'Übersetzungen'
+		);
+		expect(
+			document.getElementById(fieldset!.getAttribute('aria-describedby') ?? '')?.textContent
+		).toContain('Der Name der Kategorie auf Französisch, Italienisch und Englisch.');
 	});
 
 	// Die KI hat den Namen geprüft, der im Feld steht: so kommt die Antwort nach «Von der KI prüfen lassen»
