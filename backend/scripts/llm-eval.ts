@@ -30,6 +30,8 @@ const cases: [string, boolean][] = [
 	['Rasenmähen und Laubentfernung', true],
 	['Schneeräumung', true],
 	['Kabelfernsehen Grundnutzungsgebühr', true],
+	['Versicherung der Heizungsanlage', true],
+	['Verwaltung des Heizbetriebs', true],
 	['Liftreparatur', false],
 	['Ersatzteile Lift', false],
 	['Heizungsreparatur', false],
@@ -47,6 +49,9 @@ const cases: [string, boolean][] = [
 	['Schädlingsbekämpfung', false],
 	['Wartung der Feuerlöscher', false],
 	['Entsorgung von Grümpel', false],
+	['Räumung des Estrichs', false],
+	['Baumfällung', false],
+	['Anschluss ans Kabelnetz', false],
 	['Gebühren für die Verwaltungsapp', false],
 	['Honorar für die Nebenkostenabrechnung', false]
 ];

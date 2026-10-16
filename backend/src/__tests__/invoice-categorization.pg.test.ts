@@ -217,6 +217,27 @@ describe('Kategorien im Prompt', () => {
 			await sendJson('DELETE', `/api/v1/categories/${category.id}`);
 		}
 	});
+
+	// Eine Installation oder eine Räumung soll die KI nicht als Kabelnetz oder Kehricht umlegen (#220)
+	it('nennt bei TV/Kabelanschluss und Kehricht, was nicht dazugehört', async () => {
+		const llm = openAiCompatible({});
+		try {
+			await sendJson('POST', '/api/v1/invoices/categorize', {
+				billingEntityName: 'Kabelnetz AG',
+				description: `Anschluss ans Kabelnetz ${token}`,
+				amount: '450.00'
+			});
+
+			expect(llm.prompts[0]).toContain(
+				'- TV/Cable (TV/Kabelanschluss): Laufende Grundgebühr des Kabelnetzes; ohne Installation des Anschlusses\n'
+			);
+			expect(llm.prompts[0]).toContain(
+				'- Waste Disposal (Kehricht): Kehrichtgebühren und Grünabfuhr; ohne Räumungen, die der Vermieter bestellt\n'
+			);
+		} finally {
+			llm.stop();
+		}
+	});
 });
 
 describe('Kategorien im Prompt nach einer Änderung', () => {
