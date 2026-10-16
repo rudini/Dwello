@@ -50,3 +50,49 @@ Funktionalität: Datenschutz
   Szenario: Die Datenschutzerklärung spricht wie Dwello von der KI
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "KI"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Sprachmodell"
+
+  @wip
+  Szenario: Der Betreiber ist verantwortlich
+    Dann nennt die Datenschutzerklärung unter "Verantwortlich" "Muster Hosting AG, Bahnhofstrasse 1, 8001 Zürich"
+    Und nennt die Datenschutzerklärung unter "Verantwortlich" "betrieb@muster-hosting.ch"
+    Und erklärt die Datenschutzerklärung unter "Verantwortlich", wer der Betreiber ist
+
+  @wip
+  Szenario: Auskunft über die eigenen Daten
+    Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass jede Person beim Betreiber Auskunft über ihre Daten verlangen kann
+
+  @wip
+  Szenario: Wie lange Dwello Daten aufbewahrt
+    Dann erfährt der Liegenschaftsverwalter unter "Aufbewahrung", dass Dwello nichts von selbst löscht und Geschäftsbücher und Belege 10 Jahre aufzubewahren sind
+
+  @wip
+  Szenario: Was Google bei der Anmeldung erfährt
+    Dann nennt die Datenschutzerklärung unter "Anmeldung" "Google" in "USA" mit seiner Datenschutzerklärung "https://policies.google.com/privacy"
+    Und erfährt der Liegenschaftsverwalter unter "Anmeldung", dass Google erfährt, wann und von welcher IP-Adresse diese Installation genutzt wird
+
+  @wip
+  Szenario: Dwello übernimmt kein Profilbild
+    Dann nennt die Datenschutzerklärung unter "Anmeldung" "E-Mail-Adresse"
+    Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Profilbild"
+
+  @wip
+  Szenario: Wozu das Protokoll des Servers dient
+    Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass nur der Betreiber das Protokoll des Servers zur Sicherheit und Fehlersuche liest und selbst bestimmt, wie lange es aufbewahrt wird
+
+  @wip
+  Szenario: E-Mails über den Mailserver des Betreibers
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Mailserver des Betreibers"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
+
+  @wip
+  Szenario: Länder und Datenschutzerklärungen der Dienste, die der Browser aufruft
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "OpenPLZ" in "Deutschland" mit seiner Datenschutzerklärung "https://legal.stueber.de/privacy.php"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps" in "USA" mit seiner Datenschutzerklärung "https://policies.google.com/privacy"
+
+  @wip
+  Szenario: Wie lange die Anmeldung gilt
+    Dann erfährt der Liegenschaftsverwalter unter "Cookies", dass "dwello_session" und "dwello_xsrf" 7 Tage gelten
+
+  @wip
+  Szenario: Cookies im Browser ablehnen
+    Dann erfährt der Liegenschaftsverwalter unter "Cookies", dass er Cookies im Browser ablehnen kann, sich dann aber nicht anmelden kann
