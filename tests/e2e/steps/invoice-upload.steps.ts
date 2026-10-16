@@ -33,6 +33,7 @@ import {
 	uploadBelege
 } from '../tasks/invoice-upload';
 import { imageFile, wordFile } from '../tasks/tenant-documents';
+import { confirmation } from '../questions/contract-form';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -111,7 +112,10 @@ Given('die Rechnung von {string} hat den Beleg {string}', async ({ seed }, suppl
 When(
 	/^der Liegenschaftsverwalter (?:den Beleg durch das Foto "([^"]+)" ersetzt|das Foto "([^"]+)" als Beleg hinzufügt)$/,
 	async ({ verwalter }, replacing?: string, adding?: string) => {
-		await verwalter.attemptsTo(replaceBeleg(imageFile((replacing ?? adding)!)));
+		const fileName = (replacing ?? adding)!;
+		await verwalter.attemptsTo(replaceBeleg(imageFile(fileName)));
+		// saved only with the confirmation: a Beleg opened before still is the old one (O-31)
+		await verwalter.sees(confirmation).toContain(`Beleg ${fileName} gespeichert`);
 	}
 );
 
