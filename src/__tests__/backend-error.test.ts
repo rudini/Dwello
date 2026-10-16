@@ -124,7 +124,22 @@ describe('Zustellfehler einer Mahnung', () => {
 		});
 
 		expect(text).toBe(
-			'Die E-Mail wurde nicht zugestellt. Drucken Sie die Mahnung aus, schicken Sie sie per Post und markieren Sie sie danach unter «Dokumente» als versendet. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
+			'Die E-Mail wurde nicht zugestellt. Markieren Sie die Mahnung unter «Dokumente» am Tag, an dem Sie sie zur Post bringen, als versendet: Erst dann trägt sie das Datum dieses Tages und eine neue Zahlungsfrist. Drucken Sie sie danach aus und schicken Sie sie per Post. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
+		);
+	});
+});
+
+describe('Mahnung vor Ablauf der Zahlungsfrist der letzten', () => {
+	// #107: the backend names its dates as YYYY-MM-DD
+	it('nennt die Tage im Schweizer Format', () => {
+		const body = {
+			error: 'Die nächste Mahnung ist erst ab 27.10.2026 möglich.',
+			code: 'REMINDER_TOO_EARLY',
+			params: { date: '2026-10-27', deadline: '2026-10-26' }
+		};
+
+		expect(backendMessage(body, '')).toBe(
+			'Die nächste Mahnung ist erst ab 27.10.2026 möglich: Die Zahlungsfrist der letzten Mahnung läuft bis 26.10.2026.'
 		);
 	});
 });

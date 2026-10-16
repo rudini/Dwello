@@ -4,3 +4,6 @@ export const inDays = (days: number) => {
 	day.setUTCDate(day.getUTCDate() + days);
 	return day.toISOString().slice(0, 10);
 };
+
+/** A YYYY-MM-DD date as the app shows it: DD.MM.YYYY */
+export const swissDate = (iso: string) => iso.split('-').reverse().join('.');

@@ -12,7 +12,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-4 | Bevorstehendes Vertragsende sichtbar machen | umgesetzt | IF-5, Anna, Helga | #113 |
 | A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna | #114 |
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 | #115 |
-| A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) | #116 |
+| A-7 | Doppelt erfassten Mietvertrag entfernen | umgesetzt | Anna (I2, M2) | #116 |
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) | #117 |
 | A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) | – |
 | A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | umgesetzt | Anna (I2 M1, I3 M1–M3) | #118, #119 |
@@ -217,7 +217,9 @@ Szenario: Befristeten Mietvertrag unbefristet weiterführen
 
 ---
 
-## A-7 Doppelt erfassten Mietvertrag entfernen
+## A-7 Doppelt erfassten Mietvertrag entfernen – umgesetzt
+
+**Umgesetzt** (#116): Ein begonnener Mietvertrag ohne Nebenkostenabrechnung lässt sich jederzeit löschen, wenn der Verwalter im Dialog bestätigt, dass er irrtümlich erfasst wurde (keine Frist, Entscheid des Product Owners). Der Dialog nennt den Weg für eine echte Miete («Beenden») und fehlende Abrechnungen (Fachreview `docs/reviews/w7-fachreview-1.md`, V-1); einen Mietvertrag mit Abrechnung (Entwurf, versendet oder bezahlt) lässt er nicht löschen und nennt die Abrechnungen. Das Backend setzt beides selbst durch (`CONTRACT_STARTED` ohne `confirmMistake=true`, `CONTRACT_HAS_STATEMENTS`). Belegt durch `contract-detail.feature` und `backend/src/__tests__/contract-delete.pg.test.ts`.
 
 **Problem.** Seit der Löschregel lässt sich ein Mietvertrag nur vor seinem Beginn löschen. Ein Vertrag, der irrtümlich doppelt erfasst wurde und schon begonnen hat, bleibt stehen. Anna (I2) fand nur einen Trick: den Vertragsbeginn in die Zukunft schieben und dann löschen.
 

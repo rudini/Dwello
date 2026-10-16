@@ -82,7 +82,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	await db.delete(utilityStatements).where(inArray(utilityStatements.id, statements));
-	await deleteContract(nextContract);
+	await deleteContract(nextContract, true);
 	await deleteTenant(nextTenant);
 	for (const id of apartments) await deleteApartment(id);
 	await rental.remove();

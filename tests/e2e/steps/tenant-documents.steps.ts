@@ -1,5 +1,5 @@
 import { createBdd } from 'playwright-bdd';
-import { inDays } from '../fixtures/dates';
+import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
 import { documentFor } from '../questions/documents';
 import { downloadedFileMagic, downloadedFileName } from '../questions/download';
@@ -25,8 +25,6 @@ import {
 } from '../tasks/tenant-documents';
 
 const { Given, When, Then } = createBdd(test);
-
-const swissDate = (iso: string) => iso.split('-').reverse().join('.');
 
 Given('{string} hat das hochgeladene Dokument {string}', async ({ seed }, tenant: string, title: string) => {
 	await seed.upload(tenant, title);

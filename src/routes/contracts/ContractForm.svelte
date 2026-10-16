@@ -20,7 +20,6 @@
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
 	import { formatDate } from '$lib/utils/format';
-	import { backendMessage } from '$lib/backend-error';
 	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
@@ -128,10 +127,12 @@
 		return Object.keys(errors).length === 0;
 	}
 
-	// saves and opens `next`; a refusal names the statements it concerns (A-10)
-	async function put(next: string) {
+	// saves and opens `next`; a refusal names the statements it concerns (A-10); `deleteDraft` names a draft the
+	// backend deletes with the change, or keeps when it refuses it (#141)
+	async function put(next: string, deleteDraft?: string) {
 		saving = true;
-		const response = await apiCall(back, { method: 'PUT', body: contractBody(values) });
+		const body = { ...contractBody(values), deleteDraft };
+		const response = await apiCall(back, { method: 'PUT', body });
 		saving = false;
 		if (response.error) {
 			errors = { form: saveError(response.error) };
@@ -154,7 +155,7 @@
 		await put(back);
 	}
 
-	// the one draft the new dates would change goes first; the wizard then creates it anew (A-10)
+	// the one draft the new dates would change goes with the save; the wizard then creates it anew (A-10)
 	const contractsMessage = (state: typeof contractsState) =>
 		state === 'loading'
 			? m.contracts_apartment_contracts_loading()
@@ -162,7 +163,7 @@
 
 	async function deleteDraftAndSave(draft: RefusedStatement) {
 		if (!valid()) return focusFirstError(form);
-		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2);
+		// an overlap is said here, before the request (review K-2); the backend keeps the draft when it refuses (#141);
 		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
 		if (overlap || contractsState !== 'loaded') {
 			errors = { form: overlap ? m.backend_contract_overlap() : contractsMessage(contractsState) };
@@ -170,15 +171,7 @@
 			if (overlap) refused = [];
 			return focusFirstError(form);
 		}
-		saving = true;
-		const deleted = await apiCall(`/statements/${draft.id}`, { method: 'DELETE' });
-		saving = false;
-		if (deleted.error) {
-			errors = { form: backendMessage(deleted.error, m.contracts_save_failed()) };
-			refused = [];
-			return focusFirstError(form);
-		}
-		await put(wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd));
+		await put(wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd), draft.id);
 	}
 </script>
 

@@ -71,6 +71,56 @@ describe('Vertragsende und Nebenkostenabrechnungen', () => {
 	});
 });
 
+// #141: the draft goes in the same transaction as the change, so a refused change keeps it
+describe('Entwurf löschen und Mietvertrag beenden', () => {
+	let own: Awaited<ReturnType<typeof createRental>>;
+	let draft2024: string;
+	let draft2025: string;
+	const generate = async (year: number) =>
+		idOf(
+			await sendJson('POST', '/api/v1/statements/generate', {
+				contractId: own.contract,
+				buildingId: own.building,
+				periodStart: `${year}-01-01`,
+				periodEnd: `${year}-12-31`
+			})
+		);
+	const endDeleting = (statement: string) =>
+		sendJson('PUT', `/api/v1/contracts/${own.contract}`, { endDate: '2024-03-31', terminated: true, deleteDraft: statement });
+	const exists = async (statement: string) => (await callApi(`/api/v1/statements/${statement}`)).status === 200;
+
+	beforeAll(async () => {
+		own = await createRental(crypto.randomUUID(), { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
+		draft2024 = await generate(2024);
+		draft2025 = await generate(2025);
+	});
+
+	afterAll(async () => {
+		await db.delete(utilityStatements).where(eq(utilityStatements.contractId, own.contract));
+		await own.remove();
+	});
+
+	it('behält den Entwurf, wenn eine weitere Abrechnung das Vertragsende ablehnt', async () => {
+		const response = await endDeleting(draft2024);
+
+		expect(response.status).toBe(409);
+		const { statements } = (await response.json()) as { statements: { id: string }[] };
+		expect(statements.map((s) => s.id).sort()).toEqual([draft2024, draft2025].sort());
+		expect(await exists(draft2024)).toBe(true);
+		expect(((await (await callApi(`/api/v1/contracts/${own.contract}`)).json()) as { endDate: string | null }).endDate).toBeNull();
+	});
+
+	it('löscht den Entwurf und beendet den Mietvertrag, wenn nur er das Vertragsende ablehnt', async () => {
+		await callApi(`/api/v1/statements/${draft2025}`, { method: 'DELETE' });
+
+		const response = await endDeleting(draft2024);
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ endDate: '2024-03-31', terminated: true });
+		expect(await exists(draft2024)).toBe(false);
+	});
+});
+
 // the billed rent days, not the statement period: a contract that ended mid-year keeps its final statement
 describe('Beendeter Mietvertrag mit Schlussabrechnung', () => {
 	let ended: Awaited<ReturnType<typeof createRental>>;
