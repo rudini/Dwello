@@ -103,7 +103,7 @@ address                VARCHAR(500)
 postal_code            VARCHAR(10)
 city                   VARCHAR(100)
 correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
-CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0011 (#63)
+CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0012 (#63)
 ```
 
 No indexes besides the primary key; `email` is not unique. `correspondence_channel` has no CHECK.
@@ -120,6 +120,8 @@ notice_received_on      DATE              -- the day the notice arrived (A-3, #1
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
+management_fee_agreed   BOOLEAN NOT NULL DEFAULT FALSE -- Verwaltungspauschale vereinbart (#89)
+management_fee_percent  DECIMAL(5,2)            -- own rate 0–10 %, before the run's; NULL: the run's rate
 reference_index         DECIMAL(6,4)            -- Referenzindex
 contract_pdf            TEXT
 notes                   TEXT
@@ -256,7 +258,7 @@ rental_end             DATE          NOT NULL  -- last billed day: earlier of pe
 total_costs            DECIMAL(12,2) NOT NULL
 total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
-management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
+management_fee_percent DECIMAL(5,2)            -- rate the statement used: the contract's own, the run's, or 0 without agreement (#89)
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
@@ -376,7 +378,7 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | Key | Default | Validation |
 |---|---|---|
 | `accounting_period` | `calendar` | `calendar` \| `july-june` \| `november-october` |
-| `management_fee_pct` | `3` | number >= 0 (3 % is the guideline, not a cap) |
+| `management_fee_pct` | `3` | number 0–10 (3 % is the guideline, not a cap; #124) |
 | `default_heating_profile_id` | none | an existing heating profile |
 | `default_distribution_key_id` | none | an existing distribution key |
 | `company_name` | `''` | <= 255 characters |

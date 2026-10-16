@@ -7,6 +7,7 @@ import {
 	billedOfBuilding,
 	buildingChosen,
 	categoryFindingOf,
+	contractsWithoutFee,
 	confirmationAsked,
 	invoiceWithoutServicePeriodOn,
 	countOfInvoicesWithoutServicePeriodOn,
@@ -26,6 +27,7 @@ import {
 	missingInvoicesWarnings,
 	noContractsInPeriod,
 	periodChoiceShown,
+	presetNoticeText,
 	previewHasStatementOf,
 	proposedHeatingProfile,
 	settingsChoiceCount,
@@ -41,6 +43,7 @@ import {
 	confirmDespiteWarnings,
 	editHintedInvoice,
 	generateMore,
+	openContractWithoutFee,
 	generateStatements,
 	goToGeneration,
 	openPreview,
@@ -325,6 +328,54 @@ Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text:
 
 Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
+});
+
+Then('meldet das Feld der Verwaltungspauschale {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(feeFieldDescription).toContain(message);
+});
+
+Then('bleibt der Assistent beim Schritt mit der Verwaltungspauschale', async ({ verwalter }) => {
+	await verwalter.sees(feeFieldShown).toBe(true);
+});
+
+Given(
+	'der Liegenschaftsverwalter hat für das Gebäude {string} die Verwaltungspauschale auf {float} % gesetzt',
+	async ({ verwalter, seed }, building: string, fee: number) => {
+		await verwalter.attemptsTo(setManagementFee(seed.idOf(building)!, fee));
+	}
+);
+
+Then(
+	'nennt der Assistent den Mietvertrag von {string} ohne vereinbarte Verwaltungspauschale',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.sees(contractsWithoutFee).toContain(names.get(tenant)!);
+	}
+);
+
+Then('nicht den Mietvertrag von {string}', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(contractsWithoutFee).not.toContain(names.get(tenant)!);
+});
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag von {string} ohne vereinbarte Verwaltungspauschale öffnet',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.attemptsTo(openContractWithoutFee(seed.idOf(`Mietvertrag ${tenant}`)!));
+	}
+);
+
+Given(
+	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung {int} mit {float} % Verwaltungspauschale',
+	async ({ seed }, tenant: string, building: string, year: number, fee: number) => {
+		await seed.statement(tenant, building, year, undefined, undefined, fee);
+	}
+);
+
+Then('schlägt der Assistent eine Verwaltungspauschale von {string} % vor', async ({ verwalter }, fee: string) => {
+	await verwalter.sees(feeFieldValue).toBe(fee);
+});
+
+Then('sagt der Assistent {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(presetNoticeText).toContain(text);
 });
 
 When(

@@ -123,6 +123,9 @@ export const rentalContracts = pgTable(
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
 		monthlyAdvancePayment: decimal('monthly_advance_payment', { precision: 10, scale: 2 }).notNull(), // Akonto
+		// #89: the run's rate applies only with a fee agreed; an own rate (0–10 %) takes precedence
+		managementFeeAgreed: boolean('management_fee_agreed').default(false).notNull(),
+		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),
 		referenceIndex: decimal('reference_index', { precision: 6, scale: 4 }), // Swiss rental index
 		contractPdf: text('contract_pdf'), // Base64 or URL
 		notes: text('notes'),

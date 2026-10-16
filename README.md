@@ -32,7 +32,6 @@ Dwello is a comprehensive web application for managing residential properties in
 - **Authentication:** BFF Pattern with OAuth 2.0 / SSO
 - **LLM:** any OpenAI-compatible API, by default a self-hosted Ollama (`qwen2.5vl:7b`)
 - **Deployment:** Docker Compose
-- **Maps:** OpenStreetMap + Leaflet
 - **Language:** UI in German (de-CH, default), French, Italian and English (Paraglide JS)
 
 ---

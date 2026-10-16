@@ -41,7 +41,7 @@ Every `bun test` started in `backend/` itself loads the preload `scripts/test-db
 
 - **Today:** the Swiss day (`swissToday()`, in SQL `sqlToday`, `src/services/today.ts`), never `toISOString()` of now or SQL `current_date`: server and database run in UTC, a day behind between midnight and 01:00/02:00 Swiss time.
 - **Allocable costs (OR 257a):** a category that is not allocable (`categories.is_allowed_utility_cost`, seeded in `0002_stammdaten.sql`) always makes its invoices non-allocable, whatever the form or the LLM sends; an invoice in an allocable category can still be excluded.
-- **Management fee:** 3 % is the customary guideline, not a cap; statements apply the percentage that is set (`management-fee*.test.ts`).
+- **Management fee:** 3 % is the customary guideline, not a cap; at most 10 % (#124). Only a contract with `management_fee_agreed` pays one: its own `management_fee_percent`, else the run's rate; the statement stores the rate it used (#89, `management-fee*.test.ts`).
 - **Prorating:** by days rented; heating costs by the heating profile's monthly shares (`prorating.service.ts`).
 - **QR-bill (SIX):** a QR reference (MOD10) only with a QR-IBAN (IID 30000–31999); with a normal IBAN no reference. The debtor block is written only when name, postal code and town are all present; otherwise it stays empty. IBANs are checked with MOD-97.
 

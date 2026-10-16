@@ -12,6 +12,7 @@ import {
 	invoicesWithoutServicePeriod,
 	lateInvoices,
 	draftsOnlyNote,
+	feeNotAgreed,
 	generationResult,
 	heatingProfileSelect,
 	managementFeeHint,
@@ -22,7 +23,8 @@ import {
 	previewFee,
 	previewRow,
 	previewRows,
-	wizardChoices
+	wizardChoices,
+	wizardPresetNotice
 } from '../targets/statement-generate';
 import { draftRestored } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
@@ -119,3 +121,5 @@ export const countOfInvoicesWithoutServicePeriodOn = (date: string) => Count.of(
 // the option names the profile and its sum, «Winter … (100%)»
 export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
+export const contractsWithoutFee = Text.of(feeNotAgreed);
+export const presetNoticeText = Text.of(wizardPresetNotice);

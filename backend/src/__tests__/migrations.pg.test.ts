@@ -70,7 +70,7 @@ describe('Migrationen anwenden', () => {
 	it('setzt Mieter auf Rätoromanisch auf Deutsch und nimmt die Sprache nicht mehr an', async () => {
 		const name = await database();
 		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
-		for (const file of files.filter((file) => file < '0011_tenant_language_without_rm.sql')) {
+		for (const file of files.filter((file) => file < '0012_tenant_language_without_rm.sql')) {
 			await copyFile(join(migrations, file), join(before, file));
 		}
 		await migrate(`${server}/${name}`, before);
