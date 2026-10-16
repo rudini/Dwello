@@ -83,3 +83,50 @@ describe('Prüfung auf fehlende Rechnungen pro Kategorie', () => {
 		expect(body.findings).toMatchObject([{ categoryName: 'Kaminfeger', kind: 'missing' }]);
 	});
 });
+
+// Invoices without Leistungszeitraum count by their Rechnungsdatum; the preview names those that may belong elsewhere
+describe('Rechnungen ohne Leistungszeitraum', () => {
+	let other: Awaited<ReturnType<typeof createRental>>;
+	const listed = async (start: string, end: string) => {
+		const response = await callApi(`/api/v1/invoices/completeness/${other.building}?periodStart=${start}&periodEnd=${end}`);
+		const body = (await response.json()) as Record<'lateInvoices' | 'invoicesWithoutServicePeriod', { billingEntityName: string; invoiceDate: string; amount: string }[]>;
+		return { late: body.lateInvoices.map((i) => i.billingEntityName), whole: body.invoicesWithoutServicePeriod.map((i) => i.billingEntityName) };
+	};
+
+	beforeAll(async () => {
+		other = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
+		const servicePeriod = { servicePeriodStart: '2024-07-01', servicePeriodEnd: '2024-12-31' };
+		await insertInvoice(other.building, { billingEntityName: 'Kaminfeger Keller', amount: '290.00', invoiceDate: '2025-01-20' });
+		await insertInvoice(other.building, { billingEntityName: 'Werke mit Zeitraum', invoiceDate: '2025-01-20', ...servicePeriod });
+		await insertInvoice(other.building, { billingEntityName: 'Nach dem Fenster', invoiceDate: '2025-04-01' });
+		await insertInvoice(other.building, { billingEntityName: 'Nicht umlagefähig', invoiceDate: '2025-01-20', isValidUtilityCost: false });
+		await insertInvoice(other.building, { billingEntityName: 'Lift Jahresabo', amount: '1200.00', invoiceDate: '2024-02-15' });
+		await insertInvoice(other.building, { billingEntityName: 'Wasser Q1', invoiceDate: '2024-03-31', servicePeriodStart: '2024-01-01', servicePeriodEnd: '2024-03-31' });
+	});
+
+	afterAll(async () => {
+		await other.remove();
+	});
+
+	it('nennt umlagefähige Rechnungen ohne Leistungszeitraum bis 90 Tage nach dem Ende der Abrechnungsperiode', async () => {
+		const response = await callApi(`/api/v1/invoices/completeness/${other.building}?periodStart=2024-01-01&periodEnd=2024-12-31`);
+		const body = (await response.json()) as { lateInvoices: unknown[] };
+
+		expect(body.lateInvoices).toEqual([
+			{ id: expect.any(String), billingEntityName: 'Kaminfeger Keller', invoiceDate: '2025-01-20', amount: '290.00' }
+		]);
+	});
+
+	// the period ends on 1 January: 1 April is its 90th day after, the window's last
+	it('nennt eine Rechnung am letzten Tag des Fensters', async () => {
+		expect((await listed('2024-01-01', '2025-01-01')).late).toEqual(['Kaminfeger Keller', 'Nach dem Fenster']);
+	});
+
+	it('nennt in einer Abrechnungsperiode unter einem Jahr die Rechnungen ohne Leistungszeitraum, die ganz zählen', async () => {
+		expect((await listed('2024-01-01', '2024-06-30')).whole).toEqual(['Lift Jahresabo']);
+	});
+
+	it('nennt in einer Abrechnungsperiode von einem Jahr keine Rechnungen ohne Leistungszeitraum', async () => {
+		expect((await listed('2024-01-01', '2024-12-31')).whole).toEqual([]);
+	});
+});
