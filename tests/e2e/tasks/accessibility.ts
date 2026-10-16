@@ -94,12 +94,12 @@ const askKi = (name: string): Activity => (actor) =>
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
 const previewOf =
-	(year: string, shown: string) =>
+	(year: string, shown: string, end = `${year}-12-31`) =>
 	(example: Example, ...others: string[]): Activity =>
 	async (actor) => {
 		await actor.attemptsTo(
 			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
-			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
+			EnterDate.of(end).into(on.periodEndInput),
 			Click.on(nextButton)
 		);
 		for (const building of [example.building, ...others]) await actor.attemptsTo(Check.the(on.generateBuilding(building)));
@@ -306,6 +306,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (example) => previewOf('2026', 'category-check')(example),
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
+	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
+	'invoice-hints': (example) => previewOf('2025', 'late-invoices', '2025-05-31')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),

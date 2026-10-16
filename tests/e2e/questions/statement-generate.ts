@@ -111,7 +111,6 @@ export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(b
 export const restoredDraftText = Text.of(draftRestored);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
-export const categoryFindingsOf = (category: string) => Count.of(categoryFinding(category));
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const invoiceWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(invoicesWithoutServicePeriod, date));

@@ -114,6 +114,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |
       | statement-generate     | category-check      |
+      | statement-generate     | invoice-hints       |
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
       | statement-generate     | preview-all-billed  |

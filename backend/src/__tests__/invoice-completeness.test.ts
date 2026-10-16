@@ -45,7 +45,8 @@ describe('Prüfung pro Kategorie', () => {
 				current: { count: 0, total: 0 },
 				previous: { count: 1, total: 290 },
 				missingParts: [],
-				changePercent: null
+				changePercent: null,
+				partialCount: 0
 			}
 		]);
 	});

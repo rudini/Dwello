@@ -703,7 +703,9 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
-	const withInvoices = (lists: Partial<Record<'lateInvoices' | 'invoicesWithoutServicePeriod', unknown[]>>) =>
+	const withInvoices = (
+		lists: Partial<Record<'lateInvoices' | 'invoicesWithoutServicePeriod', unknown[]>>
+	) =>
 		open({
 			preview,
 			invoices: [
@@ -729,7 +731,7 @@ describe('Abrechnungen erstellen', () => {
 
 		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain('Ahornhof');
 		expect(byTestId('hinted-invoice')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			`${late.billingEntityName}, 20.01.2026, CHF\u00a0290.00`
+			`${late.billingEntityName}, 20.01.2026, CHF 290.00`
 		);
 		expect(hint.querySelector('a')!.getAttribute('href')).toBe(`/invoices/${late.id}/edit`);
 		expect(byTestId('confirm-missing-invoices')).toBeNull();

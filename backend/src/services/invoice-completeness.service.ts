@@ -4,7 +4,7 @@
  * for the property manager, not a rule: a supplier may bill differently from one year to the next.
  */
 
-import { eq, min } from 'drizzle-orm';
+import { and, asc, eq, gte, isNull, lte, min } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
@@ -22,6 +22,7 @@ export interface CategoryInvoice {
 	invoiceDate: string;
 	isFuelStock?: boolean; // the change of the Tankbestand: consumption, no part of the rhythm
 	isHeatingCost?: boolean;
+	partial?: boolean; // its Leistungszeitraum reaches beyond the period: only its days in the period count
 }
 
 type Sum = { count: number; total: number };
@@ -38,6 +39,7 @@ export interface CategoryFinding {
 	previous: Sum;
 	missingParts: Period[]; // the slices of the rhythm without invoice (gap), the missing readings (stock), otherwise empty
 	changePercent: number | null; // change of the costs against the year before (deviation), otherwise null
+	partialCount: number; // the period's invoices whose Leistungszeitraum reaches beyond it: lower costs without a gap
 }
 
 // TODO(fachlich prüfen, #65): a change of more than 25 % and at least CHF 100 against the year before is worth a look
@@ -45,10 +47,13 @@ const DEVIATION_SHARE = 0.25;
 const DEVIATION_MINIMUM = 100;
 // TODO(fachlich prüfen, #65): the year before counts as recorded when the building's first invoice lies in its first three months
 const RECORDED_FROM_START_DAYS = 92;
+// An invoice without Leistungszeitraum dated up to 90 days after the period end may belong to the period (#131)
+const LATE_INVOICE_DAYS = 90;
 
 const toDate = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00Z`);
 const toIso = (date: Date) => date.toISOString().slice(0, 10);
 const addDays = (iso: string, days: number) => toIso(new Date(toDate(iso).getTime() + days * 86_400_000));
+const yearAfter = (iso: string) => toIso(new Date(toDate(iso).setUTCFullYear(toDate(iso).getUTCFullYear() + 1)));
 
 /** The same dates one year earlier; an end on the last day of February stays the last day of February */
 export function yearBefore({ start, end }: Period): Period {
@@ -127,7 +132,8 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 		current: sum(current),
 		previous: sum(previous),
 		missingParts: [] as Period[],
-		changePercent: null
+		changePercent: null,
+		partialCount: current.filter((invoice) => invoice.partial).length
 	};
 	if (previous.length === 0) return base.current.total > 0 ? { ...base, kind: 'new' } : null;
 	if (base.previous.total === 0) return null;
@@ -155,7 +161,7 @@ export function checkCategories(
 ) {
 	const before = yearBefore(period);
 	// A period over a year would overlap the same dates one year earlier
-	const overAYear = period.end >= toIso(new Date(toDate(period.start).setUTCFullYear(toDate(period.start).getUTCFullYear() + 1)));
+	const overAYear = period.end >= yearAfter(period.start);
 	const partlyRecorded = !!firstInvoiceDate && firstInvoiceDate > addDays(before.start, RECORDED_FROM_START_DAYS);
 	if (overAYear || partlyRecorded || previous.length === 0) return { hasComparison: false, findings: [] };
 	const now = groupByCategory(current);
@@ -176,7 +182,8 @@ async function categoryInvoices(buildingId: string, { start, end }: Period): Pro
 		categoryName: nameOf(invoice.category),
 		amount: invoice.inPeriod.amount,
 		invoiceDate: invoice.servicePeriodEnd ? invoice.inPeriod.end : invoice.invoiceDate,
-		isHeatingCost: !!invoice.category?.isHeatingCost
+		isHeatingCost: !!invoice.category?.isHeatingCost,
+		partial: 'whole' in invoice.inPeriod
 	}));
 	const stock = (await fuelStockChange(buildingId, start, end)).map((change) => ({
 		categoryId: change.categoryId,
@@ -199,7 +206,8 @@ function tankQuestion(current: CategoryInvoice[]): CategoryFinding | null {
 		current: sum(heating),
 		previous: { count: 0, total: 0 },
 		missingParts: [],
-		changePercent: null
+		changePercent: null,
+		partialCount: 0
 	};
 }
 
@@ -216,20 +224,51 @@ async function stockFinding(buildingId: string, period: Period, current: Categor
 		current: sum(costs),
 		previous: { count: 0, total: 0 },
 		missingParts: readings.missing.map((day) => ({ start: day, end: day })),
-		changePercent: null
+		changePercent: null,
+		partialCount: 0
 	};
 	return readings.missing.length > 0 || finding.current.total < 0 ? finding : null;
 }
 
-/** The check for one building and period, with the period it was compared with */
+// The building's allocable invoices without Leistungszeitraum dated in these days: they count where their date lies
+const withoutServicePeriod = (buildingId: string, from: string, to: string) =>
+	db
+		.select({ id: invoices.id, billingEntityName: invoices.billingEntityName, invoiceDate: invoices.invoiceDate, amount: invoices.amount })
+		.from(invoices)
+		.where(
+			and(
+				eq(invoices.buildingId, buildingId),
+				eq(invoices.isValidUtilityCost, true),
+				isNull(invoices.servicePeriodStart),
+				gte(invoices.invoiceDate, from),
+				lte(invoices.invoiceDate, to)
+			)
+		)
+		.orderBy(asc(invoices.invoiceDate));
+
+/**
+ * The check for one building and period, with the period it was compared with; also the invoices without
+ * Leistungszeitraum dated shortly after the period (they may belong to it) and, in a period under a year, those
+ * that count in full (one for a whole year would be billed to the short period alone)
+ */
 export async function checkBuildingInvoices(buildingId: string, period: Period) {
 	const comparedWith = yearBefore(period);
-	const [current, previous, [{ first }]] = await Promise.all([
+	const underAYear = addDays(period.end, 1) < yearAfter(period.start);
+	const [current, previous, [{ first }], lateInvoices, invoicesWithoutServicePeriod] = await Promise.all([
 		categoryInvoices(buildingId, period),
 		categoryInvoices(buildingId, comparedWith),
-		db.select({ first: min(invoices.invoiceDate) }).from(invoices).where(eq(invoices.buildingId, buildingId))
+		db.select({ first: min(invoices.invoiceDate) }).from(invoices).where(eq(invoices.buildingId, buildingId)),
+		withoutServicePeriod(buildingId, addDays(period.end, 1), addDays(period.end, LATE_INVOICE_DAYS)),
+		underAYear ? withoutServicePeriod(buildingId, period.start, period.end) : []
 	]);
 	const { hasComparison, findings } = checkCategories(current, previous, period, first ?? undefined);
 	const stock = await stockFinding(buildingId, period, current);
-	return { buildingId, comparedWith, hasComparison, findings: stock ? [stock, ...findings] : findings };
+	return {
+		buildingId,
+		comparedWith,
+		hasComparison,
+		findings: stock ? [stock, ...findings] : findings,
+		lateInvoices,
+		invoicesWithoutServicePeriod
+	};
 }

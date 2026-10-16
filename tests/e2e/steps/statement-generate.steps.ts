@@ -7,7 +7,6 @@ import {
 	billedOfBuilding,
 	buildingChosen,
 	categoryFindingOf,
-	categoryFindingsOf,
 	confirmationAsked,
 	invoiceWithoutServicePeriodOn,
 	invoicesWithoutServicePeriodOn,
@@ -324,43 +323,12 @@ Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, buildi
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
 });
 
-// Months between two invoices of a regular rhythm, and the last day of each such slice of the year
-const RHYTHM: Record<string, number> = { Monat: 1, Quartal: 3, Halbjahr: 6 };
-
-Given(
-	'im Gebäude {string} gibt es im Jahr {int} {int} Rechnungen der Kategorie {string} über je {string} Franken, je eine pro {word}',
-	async ({ seed }, building: string, year: number, count: number, category: string, amount: string, slice: string) => {
-		for (let k = 1; k <= count; k++) {
-			const lastDay = new Date(Date.UTC(year, k * RHYTHM[slice], 0)).toISOString().slice(0, 10);
-			await seed.invoiceOn(building, category, amount, lastDay);
-		}
-	}
-);
-
 When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} öffnet',
 	async ({ verwalter, seed }, start: string, end: string, building: string) => {
 		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
 	}
 );
-
-Given(
-	'der Liegenschaftsverwalter hat die Vorschau der Abrechnungen {int} für das Gebäude {string} geöffnet',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(openPreview(year, seed.idOf(building)!));
-	}
-);
-
-Given(
-	'der Liegenschaftsverwalter hat die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} geöffnet',
-	async ({ verwalter, seed }, start: string, end: string, building: string) => {
-		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
-	}
-);
-
-Then('meldet die Prüfung der Kategorien nichts für {string}', async ({ verwalter }, category: string) => {
-	await verwalter.sees(categoryFindingsOf(category)).toBe(0);
-});
 
 Then('verlangt die Vorschau keine Bestätigung', async ({ verwalter }) => {
 	await verwalter.sees(confirmationAsked).toBe(false);
