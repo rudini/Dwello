@@ -778,3 +778,17 @@ Files changed: `src/routes/buildings/BuildingMiniMap.svelte` (deleted), `src/__t
 No scenario for the migration of existing `rm` tenants: E2E starts from fresh migrations, so no record with `rm` can exist (`migrations.pg.test.ts`).
 
 Files: `backend/migrations/0012_tenant_language_without_rm.sql`, `backend/src/services/{reminder-letter,reminder.service,pdf.service,statement-pdf.service,config.service}.ts`, `backend/src/routes/{tenants,statements}.ts`, `backend/src/db/schema.ts`, `messages/*.json`, `src/lib/{tenant,types}.ts`, `src/lib/server/{statement,documents,statement-actions}.ts`, `src/routes/statements/[id]/{PdfAction,+page}.svelte`, `src/routes/tenants/+page.server.ts`, tests, `tests/e2e/**`, `tests/contracts/statement.json`, docs (`README.md`, PRD, api-specification, data-model, tech-stack, nebenkostenabrechnung-anforderungen).
+
+## Session W5c: #74 (F-14c) Tankbestand with an allocable invoice in a non-allocable category
+
+- [x] Read #74, #257, #130: neither `entscheiden` issue changes #74's outcome (#257 is how consumption is spread over days, #130 the invoice check)
+- [x] Found: since #25 (merged 2026-10-08, before #74 was written) the backend keeps no invoice of a non-allocable category allocable (`applyCategory` on create and update, the recategorize path, `updateCategory`), so the state Option A answers cannot arise and Option A would be a dead branch in `fuelStockChange`. Followed the code (CLAUDE.md, "Coding guidelines"), said so in the pull request
+- [x] Regression test of #74's case, red with the guard in `applyCategory` taken out (purchase CHF 2000 billed, no stock change)
+- [x] code-reviewer round 1: `docs/reviews/74-review-1.md` (C-1, C-2 fixed; C-3 rejected; C-4 moot after archiving)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-74.md`
+- [x] Checks before push; archive session
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+No scenario: the state #74 describes cannot be reached through the UI or the API since #25; the pg test pins it.
+
+Files: `backend/src/__tests__/fuel-stock.pg.test.ts`, `docs/reviews/74-review-1.md`, `docs/reviews/workflow-notes-issue-74.md`

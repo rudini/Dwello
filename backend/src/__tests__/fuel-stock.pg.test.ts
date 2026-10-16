@@ -175,7 +175,7 @@ describe('Tankbestand über die API', () => {
 		await record('2024-12-31', '900.00', oil.building, own.id);
 		await record('2025-12-31', '300.00', oil.building, own.id);
 		await sendJson('PUT', `/api/v1/categories/${own.id}`, { isAllowedUtilityCost: false });
-		await sendJson('POST', '/api/v1/invoices', {
+		const purchase = await sendJson('POST', '/api/v1/invoices', {
 			buildingId: oil.building,
 			billingEntityName: `Ölhandel ${token}`,
 			description: 'Heizöl',
@@ -185,6 +185,7 @@ describe('Tankbestand über die API', () => {
 			isValidUtilityCost: true
 		});
 
+		expect(purchase.status).toBe(201);
 		expect(await linesOf(oil.contract, 2025)).toEqual([]);
 		await db.delete(invoices).where(eq(invoices.buildingId, oil.building));
 		await oil.remove();
