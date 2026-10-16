@@ -4,6 +4,7 @@ import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
 import {
 	deleteStatementButton,
 	paidDateInput,
+	pdfLanguage,
 	pdfRefusalMessage,
 	resetPaymentDialog,
 	sendDialog,
@@ -49,3 +50,4 @@ export const heatingCostsOfTenant = throughUiOrApi<Question<{ share: unknown; am
 		return { share: Number(heating.sharePercentage), amount: Number(heating.tenantShare) };
 	})
 );
+export const languageOfPdf = Text.of(pdfLanguage);
