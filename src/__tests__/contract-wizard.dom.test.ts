@@ -46,6 +46,8 @@ const select = (testid: string, value: string) =>
 const type = (testid: string, value: string) =>
 	fireEvent(byTestId<HTMLInputElement>(testid)!, 'input', value);
 const next = () => submit('wizard-next');
+// «Verwaltungspauschale vereinbart» has no default (#89)
+const chooseFee = (choice: string) => byTestId<HTMLInputElement>(`contract-fee-choice-${choice}`)!.click();
 
 const UNKNOWN =
 	'Dwello konnte die Mietverträge dieser Wohnung nicht laden. Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.';
@@ -70,6 +72,7 @@ async function untilReview() {
 	next();
 	type('contract-base-rent-input', '950');
 	type('contract-advance-payment-input', '180');
+	chooseFee('run');
 	next();
 }
 
@@ -154,7 +157,29 @@ describe('Mietvertrag erfassen', () => {
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’130.00');
 	});
 
-	it('zeigt vor dem Speichern alles in Worten und speichert Akonto als Akonto', async () => {
+	// #89, fach-review M-2: the guideline of 3 % holds for a rate agreed in the contract too
+	it('weist bei einem eigenen Satz über 3 % auf den üblichen Richtwert hin', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(byTestId('contract-fee-rate-input')).toBeNull();
+		chooseFee('own');
+		await settle();
+		type('contract-fee-rate-input', '3');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')).toBeNull();
+		type('contract-fee-rate-input', '4,5');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')!.textContent).toContain(
+			'Die Verwaltungspauschale ist höher als der übliche Richtwert von 3 %.'
+		);
+	});
+
+		it('zeigt vor dem Speichern alles in Worten und speichert Akonto als Akonto', async () => {
 		await untilReview();
 		expect(heading()).toBe('Prüfen');
 		const items = [...document.querySelectorAll('[data-testid="contract-review-item"]')];
@@ -220,6 +245,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		type('contract-base-rent-input', "1'450");
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’450.00');
+		chooseFee('run');
 		next();
 		const rent = [...document.querySelectorAll('[data-testid="contract-review-item"]')].find((i) =>
 			i.textContent!.includes('Nettomiete')
@@ -326,6 +352,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 		type('contract-base-rent-input', '950');
+		chooseFee('run');
 		next();
 		await settle();
 		expect(heading()).toBe('Prüfen');

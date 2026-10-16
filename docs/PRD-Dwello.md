@@ -469,7 +469,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 
 ### 5.8 Management Costs Configuration
 
-**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; a higher agreed percentage is applied as set.
+**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; Dwello accepts at most 10% (#124, against typos). The fee applies only where the rental contract agrees one (#89): at the run's rate, or at the contract's own rate, which takes precedence; a contract without agreement gets 0%.
 
 **Features:**
 - Global management cost percentage (0% or more; default suggestion for new statements, adjustable per statement run)

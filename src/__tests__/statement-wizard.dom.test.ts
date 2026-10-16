@@ -240,12 +240,12 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain(
 			'Hat Ihr Gebäude in den Wohnungen Wärme- oder Warmwasserzähler oder Heizkostenverteiler (kleine Geräte an den Heizkörpern), müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
 		);
+		// #89: the run's rate applies only where the contract agrees a fee; an own rate in the contract goes first
 		expect(text()).toContain(
-			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
+			'Prozentsatz der eigenen Nebenkosten jedes Mieters, für dessen Mietvertrag eine Verwaltungspauschale vereinbart ist.'
 		);
-		// Ein Lauf rechnet alle Mietverträge eines Gebäudes: andere Sätze über die Entwürfe dieser Mietverträge
 		expect(text()).toContain(
-			'Hat ein Mietvertrag einen anderen Satz, löschen Sie danach seinen Entwurf und erstellen Sie ihn mit diesem Satz neu.'
+			'Steht im Mietvertrag ein eigener Satz, gilt dieser. Ohne vereinbarte Verwaltungspauschale enthält die Abrechnung keine.'
 		);
 	});
 
@@ -263,12 +263,12 @@ describe('Abrechnungen erstellen', () => {
 		fireEvent(fee, 'input', '');
 		await next();
 		expect(text()).toContain(
-			'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		);
 		fireEvent(fee, 'input', '1e2');
 		await next();
 		expect(text()).toContain(
-			'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		);
 		fireEvent(fee, 'input', '2,5');
 		expect(fee.value).toBe('2,5');
@@ -968,6 +968,45 @@ describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 		expect(invoiceCalls[0].path).not.toContain('buildingId');
 		// the list stays inside its panel on phones (a fieldset is as wide as its content by default)
 		expect(document.querySelector('fieldset')!.className).toMatch(/(^| )min-w-0( |$)/);
+	});
+});
+
+// #89: the run's rate applies only where the contract agrees a Verwaltungspauschale; the others are named with a link
+describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
+	it('nennt im Schritt «Einstellungen» die Mietverträge ohne vereinbarte Pauschale, je mit Link', async () => {
+		const calls = fakeBff((call) =>
+			call.path.startsWith('/statements/billed')
+				? [
+						200,
+						[
+							{
+								buildingId: 'b1',
+								contracts: 2,
+								billed: 0,
+								withoutFee: [{ id: 'c7', tenantName: 'Anna Keller', apartmentNumber: '1.01' }]
+							}
+						]
+					]
+				: [200, { invoices: [], total: 0 }]
+		);
+		open();
+		await settle();
+		next();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+
+		const hint = byTestId('management-fee-not-agreed')!;
+		expect(hint.textContent).toContain('Ohne vereinbarte Verwaltungspauschale');
+		expect(hint.textContent).toContain('Ihre Abrechnungen enthalten keine Pauschale (0 %).');
+		const link = byTestId('management-fee-not-agreed-link-c7')!;
+		expect(link.textContent!.trim()).toBe('Anna Keller, Wohnung 1.01');
+		expect(link.getAttribute('href')).toBe('/contracts/c7');
+		// asked for the buildings chosen in step 2 only
+		expect(calls.filter((c) => c.path.startsWith('/statements/billed')).at(-1)!.path).toContain(
+			'buildingIds=b1&'
+		);
 	});
 });
 

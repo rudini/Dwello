@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
 import { impossible, impossibleYear } from './contract-wizard';
-import { formatCurrency, formatDate } from './utils/format';
+import { formatCurrency, formatDate, isFeeRate } from './utils/format';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
 export interface WizardSelection {
@@ -45,7 +45,7 @@ function settingErrors({ heatingProfileId, managementFeePercent }: WizardSelecti
 	return {
 		...(!heatingProfileId && { heatingProfileId: m.statements_error_heating_profile() }),
 		// a rate emptied and restored from the draft is null, not 0 %
-		...(!(Number.isFinite(managementFeePercent) && managementFeePercent >= 0) && {
+		...(!isFeeRate(managementFeePercent) && {
 			managementFeePercent: m.statements_error_fee()
 		})
 	};

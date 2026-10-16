@@ -98,10 +98,10 @@ Funktionalität: Mietvertrag bearbeiten
     Und kann der Liegenschaftsverwalter Mieter und Wohnung nicht ändern
     Und erfährt der Liegenschaftsverwalter, dass er bei einem Mieterwechsel einen neuen Mietvertrag erfasst
 
-  # #89: bestehende Mietverträge haben keine vereinbarte Verwaltungspauschale, bis der Liegenschaftsverwalter sie einträgt
-  @wip
-  Szenario: Verwaltungspauschale nachträglich vereinbaren
+  # #89: bestehende Mietverträge haben keine vereinbarte Verwaltungspauschale, bis der Liegenschaftsverwalter nachträgt,
+  # was im unterschriebenen Mietvertrag steht; eine neue Pauschale braucht das amtliche Formular (Art. 269d Abs. 3 OR)
+  Szenario: Vereinbarte Verwaltungspauschale nachtragen
     Angenommen im Mietvertrag von "Anna Keller" ist keine Verwaltungspauschale vereinbart
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
-    Wenn der Liegenschaftsverwalter die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart
+    Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist
     Dann zeigt der Mietvertrag bei der Verwaltungspauschale "Vereinbart, Satz des Abrechnungslaufs"

@@ -95,7 +95,7 @@ describe('Einstellungen', () => {
 
 		expect(body).toContain('Zeitraum, für den Sie die Nebenkosten abrechnen');
 		expect(body).toContain(
-			'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %.'
+			'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters, für dessen Mietvertrag eine Verwaltungspauschale vereinbart ist. Üblich sind bis 3 %, höchstens 10 %.'
 		);
 		expect(body).toContain('Verteilt die Heizkosten in Prozent auf die 12 Monate');
 		expect(body).toContain('wie die Kosten eines Gebäudes auf die einzelnen Wohnungen');

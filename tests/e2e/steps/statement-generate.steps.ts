@@ -352,3 +352,14 @@ When(
 		await verwalter.attemptsTo(openContractWithoutFee(seed.idOf(`Mietvertrag ${tenant}`)!));
 	}
 );
+
+Given(
+	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung {int} mit {float} % Verwaltungspauschale',
+	async ({ seed }, tenant: string, building: string, year: number, fee: number) => {
+		await seed.statement(tenant, building, year, undefined, undefined, fee);
+	}
+);
+
+Then('schlägt der Assistent eine Verwaltungspauschale von {string} % vor', async ({ verwalter }, fee: string) => {
+	await verwalter.sees(feeFieldValue).toBe(fee);
+});

@@ -4,7 +4,7 @@
 	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import type { HeatingProfile } from '$lib/types';
 	import { localName } from '$lib/names';
-	import { parsePercent } from '$lib/utils/format';
+	import { parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -23,10 +23,6 @@
 		managementFeePercent: number;
 		errors: Record<string, string>;
 	} = $props();
-
-	// 3 % is the usual guideline for Swiss utility statements (glossary), not a limit; source (#60): Mieterverband
-	// leaflet 2026 «2026_merkblatt_unzulaessige_nebenkosten.pdf», at most 3 % usual (cantonal decisions, BWO 32 Nr. 12)
-	const USUAL_MAXIMUM = 3;
 
 	const sum = (profile: HeatingProfile) =>
 		Object.values(profile.monthlyPercentages).reduce((total, value) => total + Number(value), 0);

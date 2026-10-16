@@ -82,6 +82,8 @@ export interface RentalContract {
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto
+	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
+	managementFeePercent?: string | null; // own rate, before the run's
 	referenceIndex?: string | number | null;
 	contractPdf?: string | null;
 	notes?: string | null;

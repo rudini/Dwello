@@ -329,6 +329,6 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart', async ({ verwalter }) => {
+When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
 	await verwalter.attemptsTo(agreeManagementFee);
 });

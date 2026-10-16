@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import type { RentalContract } from './types';
-import { formatDate } from './utils/format';
+import { formatDate, isFeeRate, parsePercent } from './utils/format';
 import {
 	checkDateRangeOverlap,
 	type AvailabilityInfo,
@@ -18,7 +18,24 @@ export interface ContractFormValues {
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
+	// «Verwaltungspauschale vereinbart» (#89): at the run's rate, an own rate, none; '' until chosen (no default)
+	managementFee: '' | 'run' | 'own' | 'none';
+	managementFeeRate: string; // the own rate as typed, comma or point
 }
+
+/** «Verwaltungspauschale» of a contract in words: not agreed, at the run's rate or its own rate (#89) */
+export const managementFeeText = (
+	agreed: boolean | undefined,
+	ownRate: string | null | undefined
+) =>
+	!agreed
+		? m.contracts_fee_shown_none()
+		: ownRate != null
+			? m.contracts_fee_shown_own({ percent: String(parsePercent(ownRate)) })
+			: m.contracts_fee_shown_run();
+
+const feeChoice = (contract: RentalContract): ContractFormValues['managementFee'] =>
+	!contract.managementFeeAgreed ? 'none' : contract.managementFeePercent != null ? 'own' : 'run';
 
 const dateForInput = (date: string | null | undefined) =>
 	date ? new Date(date).toISOString().split('T')[0] : '';
@@ -37,7 +54,9 @@ export function initialContractValues(
 			isUnlimited: true,
 			baseRent: '',
 			additionalRent: '',
-			advancePayment: ''
+			advancePayment: '',
+			managementFee: '',
+			managementFeeRate: ''
 		};
 	}
 	return {
@@ -49,7 +68,9 @@ export function initialContractValues(
 		terminated: !!contract.terminated,
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
-		advancePayment: String(contract.monthlyAdvancePayment || '')
+		advancePayment: String(contract.monthlyAdvancePayment || ''),
+		managementFee: feeChoice(contract),
+		managementFeeRate: contract.managementFeePercent ?? ''
 	};
 }
 
@@ -83,7 +104,12 @@ export function validateContract(values: ContractFormValues): Record<string, str
 		endDate: endDateError(values),
 		baseRent: baseRentError(values.baseRent),
 		additionalRent: amountError(values.additionalRent),
-		advancePayment: amountError(values.advancePayment)
+		advancePayment: amountError(values.advancePayment),
+		managementFee: values.managementFee ? undefined : m.contracts_error_fee_choice(),
+		managementFeeRate:
+			values.managementFee === 'own' && !isFeeRate(parsePercent(values.managementFeeRate))
+				? m.statements_error_fee()
+				: undefined
 	};
 	return Object.fromEntries(Object.entries(errors).filter(([, message]) => message)) as Record<
 		string,
@@ -100,7 +126,10 @@ export const contractBody = (values: ContractFormValues) => ({
 	terminated: !values.isUnlimited && !!values.terminated,
 	baseRent: String(values.baseRent),
 	additionalRent: String(values.additionalRent || 0),
-	monthlyAdvancePayment: String(values.advancePayment || 0)
+	monthlyAdvancePayment: String(values.advancePayment || 0),
+	managementFeeAgreed: values.managementFee !== 'none',
+	managementFeePercent:
+		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null
 });
 
 /**

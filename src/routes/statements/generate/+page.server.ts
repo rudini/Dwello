@@ -33,12 +33,19 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 	const [id, start, end] = ['building', 'start', 'end'].map((key) => url.searchParams.get(key));
 	const building = buildings.find((b) => b.id === id);
 	if (!building || !isDay(start) || !isDay(end) || start! > end!) return null;
-	const statements = await json(
-		fetch,
-		`statements?buildingId=${id}&periodStart=${start}&periodEnd=${end}&limit=1`
+	const [statements, contracts] = await Promise.all([
+		json(fetch, `statements?buildingId=${id}&periodStart=${start}&periodEnd=${end}&limit=1000`),
+		json(fetch, `contracts?buildingId=${id}&limit=1000`)
+	]);
+	const others = (statements.data ?? []) as Row[];
+	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1)
+	const ofBuilding = (contracts.contracts ?? []) as Row[];
+	const runRate = others.find((s) =>
+		ofBuilding.some(
+			(c) => c.id === s.contractId && c.managementFeeAgreed && c.managementFeePercent == null
+		)
 	);
-	const [other] = (statements.data ?? []) as Row[];
-	return { building, period: { start: start!, end: end! }, other };
+	return { building, period: { start: start!, end: end! }, other: others[0], runRate };
 }
 
 export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
@@ -56,7 +63,7 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 		buildings: buildingList,
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
 		defaultManagementFeePercent: Number(
-			pick?.other?.managementFeePercent ?? settings.management_fee_pct ?? 3
+			pick?.runRate?.managementFeePercent ?? settings.management_fee_pct ?? 3
 		),
 		defaultPeriod:
 			pick?.period ??
@@ -69,7 +76,7 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 		preset: pick && {
 			building: String(pick.building.name),
 			...pick.period,
-			fromStatements: !!pick.other
+			fromStatements: !!pick.runRate
 		}
 	};
 };

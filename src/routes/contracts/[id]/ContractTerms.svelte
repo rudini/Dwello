@@ -12,13 +12,15 @@
 		endDate,
 		terminated,
 		status,
-		rent
+		rent,
+		fee
 	}: {
 		startDate: string;
 		endDate?: string | null;
 		terminated?: boolean;
 		status: ContractHistory['status'];
 		rent: { baseRent: number; additionalRent: number; advancePayment: number; total: number };
+		fee: string; // «Verwaltungspauschale» in words (#89)
 	} = $props();
 
 	const amounts = $derived([
@@ -42,6 +44,10 @@
 			<dd class="font-semibold text-ink" data-testid="contract-end-date">
 				{contractEnd(endDate, terminated)}
 			</dd>
+		</div>
+		<div>
+			<dt class="text-ink-muted">{m.contracts_fee_label()}</dt>
+			<dd class="font-semibold text-ink" data-testid="contract-management-fee">{fee}</dd>
 		</div>
 	</dl>
 </Panel>

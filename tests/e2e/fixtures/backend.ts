@@ -163,13 +163,21 @@ export function testData(api: CallTheApi) {
 		},
 
 		// A whole year, or the period given (a statement of a shorter period is still named by its year)
-		async statement(tenantTitle: string, buildingTitle: string, year: number, heatingProfileTitle?: string, period?: [string, string]) {
+		async statement(
+			tenantTitle: string,
+			buildingTitle: string,
+			year: number,
+			heatingProfileTitle?: string,
+			period?: [string, string],
+			managementFeePercent?: number
+		) {
 			const statement = await post('statements/generate', {
 				contractId: ids.get(`Mietvertrag ${tenantTitle}`),
 				buildingId: ids.get(buildingTitle),
 				periodStart: period?.[0] ?? `${year}-01-01`,
 				periodEnd: period?.[1] ?? `${year}-12-31`,
-				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle)
+				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle),
+				managementFeePercent
 			});
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},

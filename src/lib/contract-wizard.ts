@@ -3,6 +3,7 @@ import { plainAmount } from './invoice';
 import {
 	apartmentOption,
 	initialContractValues,
+	managementFeeText,
 	validateContract,
 	type ContractFormValues
 } from './contract-form';
@@ -35,7 +36,7 @@ export const contractSteps: { label: string; fields: Field[] }[] = [
 		get label() {
 			return m.contracts_rent();
 		},
-		fields: ['baseRent', 'additionalRent', 'advancePayment']
+		fields: ['baseRent', 'additionalRent', 'advancePayment', 'managementFee', 'managementFeeRate']
 	},
 	{
 		get label() {
@@ -147,6 +148,17 @@ export function contractSummary(
 			value: formatCurrency(amount(values.additionalRent)),
 			step: 4,
 			field: 'additionalRent'
+		},
+		{
+			label: m.contracts_fee_label(),
+			value: values.managementFee
+				? managementFeeText(
+						values.managementFee !== 'none',
+						values.managementFee === 'own' ? values.managementFeeRate : null
+					)
+				: '',
+			step: 4,
+			field: 'managementFee'
 		},
 		{ label: m.common_monthly_total(), value: formatCurrency(gross), step: null, field: '' }
 	];

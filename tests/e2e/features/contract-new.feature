@@ -98,12 +98,10 @@ Funktionalität: Neuen Mietvertrag erfassen
 
   # #89: ob im Mietvertrag eine Verwaltungspauschale vereinbart ist, wählt der Liegenschaftsverwalter bei jedem neuen
   # Mietvertrag selbst; Dwello schlägt nichts vor
-  @wip
   Szenario: Ohne Angabe zur Verwaltungspauschale geht es nicht weiter
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken ohne Angabe zur Verwaltungspauschale vermieten will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie, ob im Mietvertrag eine Verwaltungspauschale vereinbart ist."
 
-  @wip
   Szenario: Verwaltungspauschale mit eigenem Satz prüfen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit einer Verwaltungspauschale von "4" % bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Verwaltungspauschale" mit "Vereinbart, 4 %"

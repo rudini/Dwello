@@ -48,6 +48,8 @@ import {
 	contractSubmitButton,
 	durationChoice,
 	endDateInput,
+	feeChoice,
+	feeRateInput,
 	retryContractsButton,
 	reviewContractsUnknown,
 	startDateInput,
@@ -285,6 +287,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2030-01-01').into(startDateInput),
 			Click.on(nextButton),
 			Enter.theValue('1500').into(baseRentInput),
+			Click.on(feeChoice('run')),
 			Click.on(nextButton),
 			Wait.until(reviewContractsUnknown)
 		),
@@ -328,8 +331,14 @@ const contractWizardSteps = (look: Activity): Activity => async (actor) => {
 	await nextStep(startDateInput); // "Vertragsdauer", limited: end date and both dates in words
 	await clickOnShown(actor, 'Befristet', durationChoice);
 	await actor.attemptsTo(EnterDate.of('2030-01-01').into(startDateInput), EnterDate.of('2031-12-31').into(endDateInput), look);
-	await nextStep(baseRentInput); // "Miete"
-	await actor.attemptsTo(Enter.theValue('1500').into(baseRentInput), look);
+	await nextStep(baseRentInput); // "Miete", with an own rate of the Verwaltungspauschale above the guideline (#89)
+	await actor.attemptsTo(
+		Enter.theValue('1500').into(baseRentInput),
+		Click.on(feeChoice('own')),
+		Enter.theValue('4').into(feeRateInput),
+		Wait.until(on.shown('contract-fee-rate-hint')),
+		look
+	);
 	await nextStep(on.shown('contract-review-item')); // "Prüfen"
 	await actor.attemptsTo(look);
 };
