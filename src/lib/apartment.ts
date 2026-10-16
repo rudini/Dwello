@@ -2,6 +2,7 @@ import { getLocale } from '$lib/paraglide/runtime';
 import type { ApartmentStatus } from './types';
 import type { IconName } from './ui/icons';
 import type { Tone } from './ui/tone';
+import { endedSince } from './contract-status';
 import { formatDate } from './utils/format';
 import { m } from '$lib/paraglide/messages';
 
@@ -67,20 +68,38 @@ export const statusHelp: Record<ApartmentStatus, string> = {
 	}
 };
 
+/** Relet apartments by the start of their future contract: «2 vermietet ab 01.11.2026» (F-4, #58) */
+export function reletParts(starts: string[] = []) {
+	const counts = new Map<string, number>();
+	for (const start of starts) counts.set(start, (counts.get(start) ?? 0) + 1);
+	return [...counts].map(([start, count]) =>
+		(count === 1 ? m.apartments_count_relet_one : m.apartments_count_relet_many)({
+			count,
+			date: formatDate(start)
+		})
+	);
+}
+
+/** Vertragsbeginn of each relet apartment, for `reletParts` */
+export const reletStarts = (apartments: { status?: unknown; nextContractStart?: unknown }[]) =>
+	apartments
+		.filter((a) => a.status === 'relet')
+		.map((a) => String(a.nextContractStart))
+		.sort();
+
 /** A building's apartments per Mietstatus so that they add up; relet and reserved only when there are any */
 export function occupancyParts(b: {
 	occupiedCount: number;
-	reletCount?: number;
+	reletStarts?: string[];
 	vacantCount: number;
 	reservedCount?: number;
 }) {
 	const count = (n: number, one: typeof m.apartments_count_occupied_one, many: typeof one) =>
 		(n === 1 ? one : many)({ count: n });
 	const parts = [
-		count(b.occupiedCount, m.apartments_count_occupied_one, m.apartments_count_occupied_many)
+		count(b.occupiedCount, m.apartments_count_occupied_one, m.apartments_count_occupied_many),
+		...reletParts(b.reletStarts)
 	];
-	if (b.reletCount)
-		parts.push(count(b.reletCount, m.apartments_count_relet_one, m.apartments_count_relet_many));
 	parts.push(count(b.vacantCount, m.apartments_count_vacant_one, m.apartments_count_vacant_many));
 	if (b.reservedCount)
 		parts.push(
@@ -107,14 +126,18 @@ function followedOn({
 	return next.toISOString().slice(0, 10) === nextContractStart.slice(0, 10);
 }
 
-/** Status with the day a relet apartment's next tenant moves in, or the last day of the running contract (A-4) */
+/** Status with the day a relet apartment's next tenant moves in, the last day of the running contract (A-4), or the
+ * day an empty apartment's last contract ended after (#145) */
 export function statusText(a: {
 	status: ApartmentStatus;
 	nextContractStart?: string | null;
 	currentContractEnd?: string | null;
+	lastContractEnd?: string | null;
 }) {
 	if (a.status === 'relet' && a.nextContractStart)
 		return m.apartments_status_relet_from({ date: formatDate(a.nextContractStart) });
+	if (a.status === 'vacant' && a.lastContractEnd)
+		return m.apartments_status_vacant_since({ date: endedSince(a.lastContractEnd) });
 	// the end matters while a vacancy may follow; a next tenant from the day after closes it (review K-4)
 	if (a.status === 'occupied' && a.currentContractEnd && !followedOn(a))
 		return m.apartments_status_occupied_until({ date: formatDate(a.currentContractEnd) });

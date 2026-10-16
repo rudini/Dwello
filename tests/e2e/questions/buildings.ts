@@ -3,6 +3,7 @@ import { buildingCard, buildingCards, emptyListNotice, routeLink } from '../targ
 
 export const buildingListed = (name: string) => Visibility.of(buildingCard(name));
 export const listedBuildingCount = (name: string) => Count.of(buildingCard(name));
+export const buildingCardText = (name: string) => Text.of(buildingCard(name));
 export const buildingCount = Count.of(buildingCards);
 export const emptyListHint = Text.of(emptyListNotice);
 export const emptyListShown = Visibility.of(emptyListNotice);

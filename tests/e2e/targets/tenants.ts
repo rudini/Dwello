@@ -7,6 +7,6 @@ export const tenantCards = target('Mieterkarten', (page) => page.getByTestId(/^t
 export const tenantCard = (name: string) =>
 	target(`Mieterkarte «${name}»`, (page) => tenantCards.locate(page).filter({ hasText: name }));
 export const tenantStatusFilter = target('Statusfilter Mieter', (page) => page.getByTestId('tenants-status-filter'));
-export const tenantActiveBadge = (name: string) =>
-	target(`Kennzeichen aktiv bei «${name}»`, (page) => tenantCard(name).locate(page).getByTestId('tenant-active'));
+export const tenantStatusBadge = (name: string) =>
+	target(`Mieterstatus bei «${name}»`, (page) => tenantCard(name).locate(page).getByTestId('tenant-status'));
 export const tenantsEmptyNotice = target('Hinweis leere Mieterliste', (page) => page.getByTestId('tenants-empty'));

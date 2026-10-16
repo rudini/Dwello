@@ -88,6 +88,18 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		expect(await statusOf(id)).toBe('vacant');
 	});
 
+	// P-18 (#145): «Leer seit …»: der Tag nach dem Ende des letzten Vertrags
+	it('nennt das Ende des letzten Vertrags einer leeren Wohnung', async () => {
+		const id = await apartment('1.07');
+		await contractFor(id, day(-400), day(-200));
+		await contractFor(id, day(-199), day(-5));
+
+		const vacant = (await getApartment(id))!;
+		expect(vacant.lastContractEnd).toBe(day(-5));
+		const listed = (await listApartments({ buildingId: rental.building })).apartments.find((a) => a.id === id)!;
+		expect(listed.lastContractEnd).toBe(day(-5));
+	});
+
 	it('bleibt gesperrt ohne laufenden Vertrag', async () => {
 		const id = await apartment('1.04', 'reserved');
 		await contractFor(id, day(-60), day(-1));

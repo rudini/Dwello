@@ -4,7 +4,10 @@ import {
 	apartmentInfo,
 	buildingOfApartmentShown,
 	contractHistoryNaming,
+	currentContractsListed,
 	currentTenant,
+	earlierContractShown,
+	earlierContractsListed,
 	grossMonthlyRent,
 	nextTenant,
 	vacancyShown
@@ -83,3 +86,26 @@ Then(
 		await verwalter.sees(contractHistoryNaming(...expected)).toEqual(expected);
 	}
 );
+
+Then('erklärt die Wohnungsseite beim Mietstatus {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(apartmentInfo('status')).toContain(help);
+});
+
+Then(
+	'steht der Mietvertrag von {string} über den früheren Mietverträgen',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.sees(currentContractsListed).toContain(names.get(tenant)!);
+	}
+);
+
+Then(
+	'steht der Mietvertrag von {string} unter {string}',
+	async ({ verwalter, names }, tenant: string, heading: string) => {
+		await verwalter.sees(earlierContractsListed).toContain(heading);
+		await verwalter.sees(earlierContractShown(names.get(tenant)!)).toContain(names.get(tenant)!);
+	}
+);
+
+Then('erklärt der Mietvertrag von {string} {string}', async ({ verwalter, names }, tenant: string, help: string) => {
+	await verwalter.sees(earlierContractShown(names.get(tenant)!)).toContain(help);
+});
