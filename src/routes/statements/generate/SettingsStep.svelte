@@ -24,9 +24,8 @@
 		errors: Record<string, string>;
 	} = $props();
 
-	// 3 % is the usual guideline for Swiss utility statements (glossary), not a limit;
-	// TODO(fachlich prüfen, #60): sources name 3 to 5 % depending on the region (review B, MR2-N2); the MV leaflet 2026 names
-	// at most 3 % as usual (cantonal decisions, BWO 32 Nr. 12)
+	// 3 % is the usual guideline for Swiss utility statements (glossary), not a limit; source (#60): Mieterverband
+	// leaflet 2026 «2026_merkblatt_unzulaessige_nebenkosten.pdf», at most 3 % usual (cantonal decisions, BWO 32 Nr. 12)
 	const USUAL_MAXIMUM = 3;
 
 	const sum = (profile: HeatingProfile) =>
