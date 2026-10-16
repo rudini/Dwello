@@ -49,3 +49,14 @@ export const missingStatements = target('Fehlende Abrechnungen', (page) => page.
 export const endDialogDeathHint = target('Hinweis zum Tod des Mieters im Dialog «Mietvertrag beenden»', (page) =>
 	page.getByTestId('contract-end-death')
 );
+// A-3 (#112): the day the notice arrived, the hint it gives on a short Kündigungsfrist, and where the contract shows it
+export const noticeReceivedInput = target('Kündigung erhalten am', (page) =>
+	page.getByTestId('contract-notice-received-input')
+);
+export const noticePeriodHint = target('Hinweis auf die Kündigungsfrist', (page) =>
+	page.getByTestId('contract-notice-period-hint')
+);
+export const endDialog = target('Dialog «Mietvertrag beenden»', (page) => page.getByRole('dialog'));
+export const contractNoticeReceived = target('Kündigung erhalten am', (page) =>
+	page.getByTestId('contract-notice-received')
+);

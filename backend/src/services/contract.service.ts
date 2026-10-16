@@ -29,6 +29,7 @@ const contractFields = {
 	startDate: rentalContracts.startDate,
 	endDate: rentalContracts.endDate,
 	terminated: rentalContracts.terminated,
+	noticeReceivedOn: rentalContracts.noticeReceivedOn,
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
 	monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
@@ -375,8 +376,14 @@ export async function updateContract(
 		await checkNewDates(current, data, tx, deleteDraft);
 		return tx
 			.update(rentalContracts)
-			// without an end there is no notice: withdrawing it makes the contract open-ended again
-			.set({ ...data, ...(data.endDate === null && { terminated: false }), updatedAt: new Date() })
+			// without an end there is no notice: withdrawing it makes the contract open-ended again; without a notice
+			// there is no day it arrived
+			.set({
+				...data,
+				...(data.endDate === null && { terminated: false }),
+				...((data.endDate === null || data.terminated === false) && { noticeReceivedOn: null }),
+				updatedAt: new Date()
+			})
 			.where(eq(rentalContracts.id, id))
 			.returning();
 	});

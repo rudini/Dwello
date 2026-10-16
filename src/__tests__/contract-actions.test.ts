@@ -166,6 +166,26 @@ describe('Mietvertrag beenden', () => {
 		]);
 	});
 
+	// A-3 (#112): der Tag, an dem die Kündigung eingegangen ist, wird mit dem Vertragsende gespeichert
+	it('speichert den Eingang der Kündigung mit dem Vertragsende', async () => {
+		const { calls, result } = runAction(
+			actions.end,
+			'c1',
+			200,
+			{ endDate: '2099-12-31', noticeReceivedOn: '2099-09-15' },
+			{ startDate: '2024-04-01' }
+		);
+		await result;
+
+		expect(calls.filter((call) => call.method === 'PUT')).toEqual([
+			{
+				method: 'PUT',
+				url: 'http://localhost:3001/api/v1/contracts/c1',
+				body: { endDate: '2099-12-31', terminated: true, noticeReceivedOn: '2099-09-15' }
+			}
+		]);
+	});
+
 	// die Aktion prüft selbst (ein Formular ohne JavaScript): ein nachträglich erfasster Kündigungstermin braucht die Bestätigung seiner Folge
 	it('lehnt ein Vertragsende vor heute ohne Bestätigung ab, ohne den Mietvertrag zu ändern', async () => {
 		const { calls, result } = runAction(
