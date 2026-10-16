@@ -46,6 +46,7 @@ export async function firstPredefined(resource: string) {
 
 type Invoice = {
 	categoryId?: string;
+	billingEntityName?: string;
 	distributionKeyId?: string;
 	description?: string;
 	amount?: string;

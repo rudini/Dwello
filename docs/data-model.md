@@ -120,6 +120,8 @@ notice_received_on      DATE              -- the day the notice arrived (A-3, #1
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
+management_fee_agreed   BOOLEAN NOT NULL DEFAULT FALSE -- Verwaltungspauschale vereinbart (#89)
+management_fee_percent  DECIMAL(5,2)            -- own rate 0–10 %, before the run's; NULL: the run's rate
 reference_index         DECIMAL(6,4)            -- Referenzindex
 contract_pdf            TEXT
 notes                   TEXT
@@ -256,7 +258,7 @@ rental_end             DATE          NOT NULL  -- last billed day: earlier of pe
 total_costs            DECIMAL(12,2) NOT NULL
 total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
-management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
+management_fee_percent DECIMAL(5,2)            -- rate the statement used: the contract's own, the run's, or 0 without agreement (#89)
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
@@ -264,8 +266,10 @@ heating_share          JSONB                   -- heating costs as calculated (#
 balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
-paid_date              DATE
-paid_amount            DECIMAL(12,2)
+paid_date              DATE                    -- from the Abrechnungsdatum up to today (#138)
+paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93)
+payment_resets         JSONB   NOT NULL DEFAULT '[]' -- payments taken back: { resetOn, paidDate, paidAmount } (#92)
+payment_recorded_at    TIMESTAMP               -- when the payment was recorded; a reset discards only a PDF made after it (#92)
 reminder_sent_date     DATE
 pdf_blob               TEXT                    -- Base64 PDF with QR-bill
 pdf_generated_at       TIMESTAMP
@@ -289,7 +293,7 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 | `draft` (Entwurf) | `sent` |
 | `sent` (Versendet) | `paid` |
 | `overdue` (Überfällig, computed) | `paid` |
-| `paid` (Bezahlt) | — |
+| `paid` (Bezahlt) | `sent` only by `resetPayment` (#92): paid date and amount cleared, the reset appended to `payment_resets`, a PDF made after the payment was recorded discarded |
 
 **Lock rule:** only a `draft` can be deleted (`deleteStatement`), get line items (`addLineItems`) or have its
 amounts changed (`updateStatement` rejects `total_costs`, `total_advance_payments`, `management_fee_percent`,
@@ -374,7 +378,7 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | Key | Default | Validation |
 |---|---|---|
 | `accounting_period` | `calendar` | `calendar` \| `july-june` \| `november-october` |
-| `management_fee_pct` | `3` | number >= 0 (3 % is the guideline, not a cap) |
+| `management_fee_pct` | `3` | number 0–10 (3 % is the guideline, not a cap; #124) |
 | `default_heating_profile_id` | none | an existing heating profile |
 | `default_distribution_key_id` | none | an existing distribution key |
 | `company_name` | `''` | <= 255 characters |

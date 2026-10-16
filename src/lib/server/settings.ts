@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
-import { parsePercent } from '$lib/utils/format';
+import { isFeeRate, parsePercent } from '$lib/utils/format';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/config`;
 
@@ -45,7 +45,7 @@ function settingsErrors(s: Settings) {
 	if (iban && !(/^(CH|LI)\d{7}[A-Z0-9]{12}$/.test(iban) && ibanChecksumValid(iban))) {
 		errors.iban = m.settings_error_iban();
 	}
-	if (s.managementFeePercent && Number.isNaN(parsePercent(s.managementFeePercent))) {
+	if (s.managementFeePercent && !isFeeRate(parsePercent(s.managementFeePercent))) {
 		errors.managementFeePercent = m.statements_error_fee();
 	}
 	return errors;

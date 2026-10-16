@@ -118,6 +118,10 @@ export function testData(api: CallTheApi) {
 			ids.set(title, building.id);
 		},
 
+		async buildingCoordinates(title: string) {
+			await put(`buildings/${ids.get(title)}`, { latitude: '47.5000000', longitude: '8.7200000' });
+		},
+
 		async apartment(buildingTitle: string, number: string, status: string, area = '70') {
 			const apartment = await post('apartments', {
 				buildingId: ids.get(buildingTitle),
@@ -139,27 +143,51 @@ export function testData(api: CallTheApi) {
 		async contract(
 			tenantTitle: string,
 			apartmentNumber: string,
-			contract: { startDate: string; endDate?: string; baseRent: string; monthlyAdvancePayment?: string }
+			contract: {
+				startDate: string;
+				endDate?: string;
+				baseRent: string;
+				additionalRent?: string;
+				monthlyAdvancePayment?: string;
+			}
 		) {
 			const created = await post('contracts', {
 				tenantId: ids.get(tenantTitle),
 				apartmentId: ids.get(apartmentNumber),
 				additionalRent: '0',
 				monthlyAdvancePayment: '0',
+				// agreed unless a scenario says otherwise: the amounts of the statement scenarios include the run's fee (#89)
+				managementFeeAgreed: true,
 				...contract
 			});
 			ids.set(`Mietvertrag ${tenantTitle}`, created.id);
 			ids.set(`Wohnung von ${tenantTitle}`, created.apartmentId);
 		},
 
+		// «Verwaltungspauschale vereinbart» on the contract, with its own rate or the run's (#89)
+		async managementFee(tenantTitle: string, agreed: boolean, percent?: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, {
+				managementFeeAgreed: agreed,
+				managementFeePercent: percent ?? null
+			});
+		},
+
 		// A whole year, or the period given (a statement of a shorter period is still named by its year)
-		async statement(tenantTitle: string, buildingTitle: string, year: number, heatingProfileTitle?: string, period?: [string, string]) {
+		async statement(
+			tenantTitle: string,
+			buildingTitle: string,
+			year: number,
+			heatingProfileTitle?: string,
+			period?: [string, string],
+			managementFeePercent?: number
+		) {
 			const statement = await post('statements/generate', {
 				contractId: ids.get(`Mietvertrag ${tenantTitle}`),
 				buildingId: ids.get(buildingTitle),
 				periodStart: period?.[0] ?? `${year}-01-01`,
 				periodEnd: period?.[1] ?? `${year}-12-31`,
-				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle)
+				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle),
+				managementFeePercent
 			});
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},
@@ -239,6 +267,15 @@ export function testData(api: CallTheApi) {
 
 		async sendStatement(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
+		},
+
+		async resetPayment(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/payment-reset`, {});
+		},
+
+		// paid today, the earliest day a statement sent today allows (#138)
+		async markPaid(tenantTitle: string, year: number) {
+			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
 		},
 
 		// Monthly shares January..December in percent

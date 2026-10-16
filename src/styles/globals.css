@@ -26,8 +26,3 @@ input::placeholder,
 textarea::placeholder {
 	color: var(--color-ink-muted);
 }
-
-/* Beats leaflet.css (loaded later with the map): the empty map takes the page's colours */
-:root .leaflet-container {
-	background: var(--color-sunken);
-}

@@ -70,6 +70,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-new           | submit-empty        |
       | contract-new           | every-wizard-step   |
       | contract-new           | overlap-warning     |
+      | contract-new           | rent-taken-over     |
       | contract-new           | draft-restored      |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
@@ -119,6 +120,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |
       | statement-generate     | category-check      |
+      | statement-generate     | invoice-hints       |
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
       | statement-generate     | preview-all-billed  |
@@ -133,6 +135,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
       | statement-sent-detail  | action-error        |
+      | statement-paid-detail  | default             |
+      | statement-paid-detail  | reset-payment-dialog |
       | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
       | statement-pdf-refused  | default             |

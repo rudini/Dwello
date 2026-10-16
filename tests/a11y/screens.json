@@ -29,14 +29,17 @@
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
+		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
 		"category-check": "Statement wizard preview whose check per category reports invoices missing against the year before.",
+		"invoice-hints": "Statement wizard preview of a period under a year (January to May): the invoices without Leistungszeitraum that count in full, and one dated shortly after the period end, each with its edit link (#131, #134).",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
 		"preview-all-billed": "Statement wizard preview of a period in which every contract already has a statement: how to recalculate and the links to the statements.",
 		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
+		"rent-taken-over": "Rental contract wizard at the step «Miete» for an apartment with an earlier contract: its Nettomiete, Zusatzmiete and Akonto filled in, the note naming that contract (#144).",
 		"contracts-unknown": "Rental contract wizard or form whose apartments' rental contracts cannot be loaded (that request answered with an error): the hint at the apartment, in the form also at the start (#143), and the message after «Erneut versuchen» failed again (#151).",
 		"contracts-unknown-review": "Rental contract wizard at the step before saving, the apartment's rental contracts not loaded (that request answered with an error): the hint above the review (#143).",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
@@ -231,6 +234,7 @@
 				"submit-empty",
 				"every-wizard-step",
 				"overlap-warning",
+				"rent-taken-over",
 				"draft-restored",
 				"contracts-unknown",
 				"contracts-unknown-review"
@@ -240,6 +244,7 @@
 				"contracts-unknown": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown-review": "?tenant={tenant}&apartment={freeApartment}",
 				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
+				"rent-taken-over": "?tenant={tenant}&apartment={noticedApartment}",
 				"draft-restored": "?tenant={tenant}"
 			}
 		},
@@ -379,6 +384,7 @@
 				"every-wizard-step",
 				"preview-empty",
 				"category-check",
+				"invoice-hints",
 				"period-not-over",
 				"tank-question",
 				"preview-all-billed",
@@ -408,6 +414,14 @@
 				"reminder-dialog",
 				"mark-paid-dialog",
 				"action-error"
+			]
+		},
+		{
+			"name": "statement-paid-detail",
+			"path": "/statements/{paidStatement}",
+			"states": [
+				"default",
+				"reset-payment-dialog"
 			]
 		},
 		{

@@ -1,6 +1,6 @@
 import { Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
-	withdrawNoticeOption,
+	advancePaymentInput,
 	apartmentContractsUnknown,
 	apartmentOption,
 	apartmentSelect,
@@ -9,11 +9,13 @@ import {
 	fixedApartment,
 	fixedTenant,
 	partiesHelp,
+	rentTakenOver,
 	reviewContractsUnknown,
 	reviewItem,
 	runningContractHint,
 	startContractsUnknown,
-	tenantSelect
+	tenantSelect,
+	withdrawNoticeOption
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
 import { draftRestored } from '../targets/wizard';
@@ -38,4 +40,6 @@ export const tenantChoices = Count.of(tenantSelect);
 export const apartmentChoices = Count.of(apartmentSelect);
 export const partiesHelpText = Text.of(partiesHelp);
 export const runningContractHintText = Text.of(runningContractHint);
+export const enteredAdvancePayment = Value.of(advancePaymentInput);
+export const rentTakenOverText = Text.of(rentTakenOver);
 export const withdrawNoticeHelp = Text.of(withdrawNoticeOption);

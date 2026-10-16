@@ -77,7 +77,10 @@ export async function saveTenant(fetch: typeof globalThis.fetch, request: Reques
 	}
 	const saved = await response.json();
 	// Created from the rental contract wizard: back there, with the new tenant chosen
-	if (formData.get('for') === 'contract')
-		throw redirect(303, `/contracts/new?tenant=${saved.id}&created=1`);
+	if (formData.get('for') === 'contract') {
+		const apartment = String(formData.get('apartment') ?? ''); // chosen before the detour (#144)
+		const kept = apartment ? `&apartment=${encodeURIComponent(apartment)}` : '';
+		throw redirect(303, `/contracts/new?tenant=${saved.id}&created=1${kept}`);
+	}
 	throw redirect(303, `/tenants/${id ?? saved.id}`);
 }
