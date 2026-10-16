@@ -98,6 +98,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 				paidDate: s.paidDate,
 				pdfGeneratedAt: s.pdfGeneratedAt,
 				lastReminderDate: s.reminderSentDate,
+				nextReminderFrom: s.nextReminderFrom as string | null,
 				tenantName: tenant
 					? `${tenant.firstName} ${tenant.lastName}`
 					: m.common_unknown(),

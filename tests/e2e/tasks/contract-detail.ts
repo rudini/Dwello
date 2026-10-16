@@ -12,6 +12,7 @@ import {
 	contractStatementsLink,
 	contractTenantLink,
 	deleteContractButton,
+	deleteMistakeConfirmation,
 	deleteDraftAndEndButton,
 	endContractButton,
 	missingStatementLink,
@@ -31,9 +32,18 @@ export const endContractOn = (isoDate: string, { confirmPast = false } = {}): Ac
 // Today as the last day: no day is proposed, it is typed like any other
 export const endContract: Activity = (actor) => actor.attemptsTo(endContractOn(inDays(0)));
 
+export const startEndingContract = Click.on(endContractButton);
 export const startDeletingContract = Click.on(deleteContractButton);
 export const deleteContract: Activity = (actor) =>
 	actor.attemptsTo(Click.on(deleteContractButton), Click.on(confirmDeleteContractButton));
+
+// a started contract: the mistake confirmed in the dialog first (A-7, #116)
+export const deleteContractEnteredByMistake: Activity = (actor) =>
+	actor.attemptsTo(
+		Click.on(deleteContractButton),
+		Check.the(deleteMistakeConfirmation),
+		Click.on(confirmDeleteContractButton)
+	);
 
 export const editContractFromDetail = Click.on(contractEditButton);
 export const openContractTenant = Click.on(contractTenantLink);

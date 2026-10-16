@@ -10,6 +10,7 @@ import {
 	partiesHelp,
 	reviewContractsUnknown,
 	reviewItem,
+	runningContractHint,
 	startContractsUnknown,
 	tenantSelect
 } from '../targets/contract-form';
@@ -35,3 +36,4 @@ export const fixedApartmentName = Text.of(fixedApartment);
 export const tenantChoices = Count.of(tenantSelect);
 export const apartmentChoices = Count.of(apartmentSelect);
 export const partiesHelpText = Text.of(partiesHelp);
+export const runningContractHintText = Text.of(runningContractHint);

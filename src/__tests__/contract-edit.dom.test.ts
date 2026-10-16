@@ -126,9 +126,9 @@ describe('Mietvertrag bearbeiten', () => {
 		const help = byTestId('contract-parties-help')!.textContent!;
 		expect(help).toContain('Mieter und Wohnung lassen sich nicht ändern.');
 		expect(help).toContain('mit «Beenden»');
-		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel
+		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel; auch ein begonnener wird gelöscht (#116)
 		expect(help).toContain(
-			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt und hat der Mietvertrag noch nicht begonnen'
+			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt, löschen Sie den Mietvertrag auf seiner Seite und erfassen Sie ihn neu. Gibt es dazu schon den Entwurf einer Nebenkostenabrechnung, löschen Sie zuerst den Entwurf.'
 		);
 		// Persona Sven N-2: der Link nennt den Mietvertrag wie die anderen Links zur selben Seite
 		expect(byTestId('contract-parties-link')!.textContent).toBe(
@@ -138,6 +138,26 @@ describe('Mietvertrag bearbeiten', () => {
 		// Code-Review m-6: zuerst «Beenden», dann der neue Mietvertrag (dazu #156)
 		expect(byTestId('contract-parties-new')).toBeNull();
 	});
+
+	// F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über; ein Eintritt eines Dritten
+	// (Art. 263 OR, Art. 121 ZGB) ist Vertragsende und neuer Mietvertrag
+	it.each([null, '2099-03-31'])(
+		'erklärt, wie Tod, Übertragung und Zuweisung durch ein Gericht erfasst werden (Vertragsende %s)',
+		async (endDate) => {
+			await open(endDate);
+			const help = byTestId('contract-parties-help')!.textContent!;
+			expect(help).toContain('Stirbt der Mieter, endet der Mietvertrag nicht von selbst');
+			expect(help).toContain('erfassen Sie eines erst, wenn die Erben oder Sie gekündigt haben');
+			expect(help).toContain(
+				// Persona Weber P-1: das Feld heisst im Mieterformular «Adresse»
+				'unter «Adresse» die Adresse ein, an die die Post für die Erben geht, bei Post per E-Mail auch unter «E-Mail»'
+			);
+			// Fachreview W10 M-2, M-4: Vertragsende ohne Kündigungsfrist, gleiche Bedingungen, schriftliche Zustimmung
+			expect(help).toContain('mit Ihrer schriftlichen Zustimmung');
+			expect(help).toContain('bei der Scheidung die Wohnung der Familie'); // Persona Weber P-3
+			expect(help).toContain('am Tag vor dem Wechsel, ohne Kündigungsfrist');
+		}
+	);
 
 	// Fachreview V-2: mit Vertragsende gibt es kein «Beenden» mehr
 	it('nennt bei einem Mietvertrag mit Vertragsende den frühesten Tag des neuen Mietvertrags', async () => {
@@ -152,8 +172,14 @@ describe('Mietvertrag bearbeiten', () => {
 		);
 		expect(help).toContain('ändern Sie zuerst unten unter «Vertragsdauer» das Vertragsende.');
 		expect(help).not.toContain('«Beenden»');
-		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt
-		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe('/contracts/new');
+		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt; B-16 (#156): mit Mieter und frühestem Beginn,
+		// den der Link nennt, damit ihn niemand für den Nachmieter nimmt (Fachreview W10 V-1)
+		expect(byTestId('contract-parties-new')!.textContent).toBe(
+			'Neuen Mietvertrag für Anna Keller erfassen'
+		);
+		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe(
+			'/contracts/new?tenant=t1&start=2099-04-01'
+		);
 	});
 
 	it('kehrt beim Abbrechen zum Mietvertrag zurück', async () => {
@@ -446,12 +472,12 @@ describe('Mietvertrag bearbeiten', () => {
 			);
 		});
 
-		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot
-		it('nennt den Grund, wenn der Entwurf nicht gelöscht werden kann', async () => {
-			calls = fakeBff(({ method }) => {
-				if (method === 'PUT') return [409, refused];
-				if (method === 'DELETE')
-					return [400, { error: 'not a draft', code: 'STATEMENT_NOT_DRAFT' }];
+		// Review K-7, #141: ein inzwischen versendeter Entwurf; das Backend lehnt ab und behält ihn, kein zweites Angebot
+		it('nennt den Grund, wenn der Entwurf nicht mehr gelöscht werden kann', async () => {
+			const drafted = (body: unknown) => !!(body as { deleteDraft?: string }).deleteDraft;
+			const sent = { ...refused, statements: [{ ...refused.statements[0], status: 'sent' }] };
+			calls = fakeBff(({ method, body }) => {
+				if (method === 'PUT') return [409, drafted(body) ? sent : refused];
 				return [200, { contracts: [] }];
 			});
 			await open();
@@ -461,18 +487,18 @@ describe('Mietvertrag bearbeiten', () => {
 			await save();
 			click('delete-draft-and-save');
 			await settle();
+			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Die Abrechnung ist kein Entwurf mehr und kann nicht gelöscht werden.'
+				'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet.'
 			);
 			expect(byTestId('delete-draft-and-save')).toBeNull();
 		});
 
-		// A-10: der einzige Entwurf wird gelöscht, der Mietvertrag gespeichert, danach geht es in den Assistenten
+		// A-10: der einzige Entwurf wird mit dem Speichern gelöscht (#141: in einem Schritt), danach geht es in den Assistenten
 		it('löscht den Entwurf, speichert und öffnet den Assistenten für Gebäude und Periode', async () => {
-			let refuse = true;
-			calls = fakeBff(({ method }) => {
-				if (method === 'PUT') return refuse ? [409, refused] : [200, {}];
-				if (method === 'DELETE') return ((refuse = false), [204]);
+			calls = fakeBff(({ method, body }) => {
+				if (method === 'PUT')
+					return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, refused];
 				return [200, { contracts: [] }];
 			});
 			await open();
@@ -483,10 +509,13 @@ describe('Mietvertrag bearbeiten', () => {
 			click('delete-draft-and-save');
 			await settle();
 
-			expect(calls.filter((c) => c.method !== 'GET').map((c) => [c.method, c.path])).toEqual([
-				['PUT', '/contracts/c1'],
-				['DELETE', '/statements/s1'],
-				['PUT', '/contracts/c1']
+			expect(
+				calls
+					.filter((c) => c.method !== 'GET')
+					.map((c) => [c.method, c.path, (c.body as { deleteDraft?: string }).deleteDraft])
+			).toEqual([
+				['PUT', '/contracts/c1', undefined],
+				['PUT', '/contracts/c1', 's1']
 			]);
 			expect(goto).toHaveBeenCalledWith(
 				'/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'

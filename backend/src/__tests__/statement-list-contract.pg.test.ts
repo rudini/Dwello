@@ -37,7 +37,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	for (const id of generated) await deleteStatement(id);
-	await deleteContract(other.contract);
+	await deleteContract(other.contract, true);
 	await deleteTenant(other.tenant);
 	await deleteApartment(other.apartment);
 	await rental.remove();

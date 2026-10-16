@@ -18,7 +18,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `statement-paid-date-refused.json` | `PUT /api/v1/statements/:id/status` mit einem Zahlungsdatum vor dem Abrechnungsdatum |
 | `building-contracts.json` | `GET /api/v1/contracts?buildingId=…` |
 | `contracts.json` | `GET /api/v1/contracts` (Mietvertragsliste, Übersicht) |
-| `period-statements.json` | `GET /api/v1/statements?periodStart=…&periodEnd=…` (Übersicht), `?contractId=…` (fehlende Abrechnungen am Mietvertrag) |
+| `period-statements.json` | `GET /api/v1/statements?periodStart=…&periodEnd=…` (Übersicht), `?contractId=…` (fehlende Abrechnungen am Mietvertrag, Abrechnungen, die sein Löschen sperren) |
 | `statement-preview.json` | `POST /api/v1/statements/preview` |
 | `invoice-completeness.json` | `GET /api/v1/invoices/completeness/:buildingId` |
 | `invoice.json` | `GET /api/v1/invoices/:id` |
@@ -35,6 +35,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `document-uploaded.json` | `POST /api/v1/tenants/:id/documents` (Dokument hochladen) |
 | `document-refused.json` | `POST /api/v1/tenants/:id/documents` mit einer zu grossen Datei (400) |
 | `contract-end-refused.json` | `PUT /api/v1/contracts/:id` mit Vertragsdaten, die die abgerechneten Tage einer Abrechnung ändern (409) |
+| `contract-delete-refused.json` | `DELETE /api/v1/contracts/:id?confirmMistake=true` eines Mietvertrags mit Abrechnung (409) |
 | `statement-pdf-refused.json` | `GET /api/v1/statements/:id/pdf` einer Abrechnung, die es nicht gibt (404) |
 | `statement-calculation-refused.json` | `POST /api/v1/statements/preview` für einen Mietvertrag, den die Berechnung nicht lesen kann (400) |
 | `statement-pdf-failed.json` | `POST /api/v1/statements/:id/generate-pdf`, die aus einem unerwarteten Grund scheitert (500) |

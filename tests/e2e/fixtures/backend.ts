@@ -32,7 +32,7 @@ export function testData(api: CallTheApi) {
 
 	async function removeContracts(filter: string) {
 		for (const contract of (await get(`contracts?${filter}&limit=100`)).contracts) {
-			await remove(`contracts/${contract.id}`);
+			await remove(`contracts/${contract.id}?confirmMistake=true`); // a started one too (#116)
 		}
 	}
 
@@ -192,6 +192,10 @@ export function testData(api: CallTheApi) {
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
 
+		async noEmail(tenantTitle: string) {
+			await put(`tenants/${ids.get(tenantTitle)}`, { email: null });
+		},
+
 		// A PDF the Liegenschaftsverwalter uploaded to the tenant
 		async upload(tenantTitle: string, title: string) {
 			const content = Buffer.from('%PDF-1.4\n%%EOF\n').toString('base64');
@@ -199,7 +203,8 @@ export function testData(api: CallTheApi) {
 		},
 
 		async remind(tenantTitle: string, year: number) {
-			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/reminders`, {});
+			const { document } = await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/reminders`, {});
+			ids.set(`Mahnung ${tenantTitle} ${year}`, document.id);
 		},
 
 		// Global setting: every scenario that needs one uses the same IBAN, so parallel runs agree

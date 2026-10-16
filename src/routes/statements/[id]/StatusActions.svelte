@@ -7,6 +7,7 @@
 	let {
 		status,
 		owes,
+		waiting,
 		onremind,
 		onmarkpaid,
 		onsend,
@@ -14,6 +15,7 @@
 	}: {
 		status: StatementWithDetails['status'];
 		owes: boolean; // an amount due; a refund is owed to the tenant and never reminded
+		waiting: boolean; // the Zahlungsfrist of the last Mahnung still runs (#107)
 		onremind: () => void;
 		onmarkpaid: () => void;
 		onsend: () => void;
@@ -22,8 +24,8 @@
 </script>
 
 {#if status === 'sent' || status === 'overdue'}
-	<!-- a reminder only once the payment deadline has passed, and only for an amount due -->
-	{#if status === 'overdue' && owes}
+	<!-- a reminder only once the payment deadline (and the last reminder's) has passed, and only for an amount due -->
+	{#if status === 'overdue' && owes && !waiting}
 		<Button onclick={onremind} icon="mail" testid="statement-reminder-button"
 			>{m.statements_send_reminder()}</Button
 		>

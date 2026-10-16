@@ -336,8 +336,10 @@ title          VARCHAR(255) NOT NULL
 file_name      VARCHAR(255) NOT NULL
 content        TEXT         NOT NULL   -- the file, Base64
 mime_type      VARCHAR(50)  NOT NULL DEFAULT 'application/pdf'  -- application/pdf | image/jpeg | image/png
-channel        VARCHAR(10)             -- email | letter; NULL for an upload
+channel        VARCHAR(10)             -- email | letter; NULL for an upload; letter once a failed e-mail is posted
 status         VARCHAR(20)             -- Versandstatus: sent | to_send; NULL for an upload
+payment_deadline DATE                  -- the Zahlungsfrist a reminder prints (letter date + 10 days); the next
+                                       -- Mahnstufe is possible from the day after; NULL for an upload
 sent_at        TIMESTAMP
 delivery_error TEXT                    -- why an e-mail could not be sent
 ```

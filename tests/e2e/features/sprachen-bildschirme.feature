@@ -86,6 +86,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit          | edit-refused        |
       | contract-edit          | contracts-unknown   |
       | contract-detail-notice | default             |
+      | contract-detail-notice | delete-dialog       |
+      | contract-detail-notice | delete-unconfirmed  |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
@@ -131,12 +133,14 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | action-error        |
       | statement-paid-detail  | default             |
       | statement-paid-detail  | reset-payment-dialog |
+      | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
       | statement-pdf-refused  | default             |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |
       | documents              | empty               |
+      | documents              | marked-sent         |
       | config                 | default             |
       | categories             | default             |
       | category-new           | default             |
