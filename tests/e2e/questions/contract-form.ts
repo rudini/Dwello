@@ -1,5 +1,6 @@
 import { Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
+	advancePaymentInput,
 	apartmentContractsUnknown,
 	apartmentOption,
 	apartmentSelect,
@@ -8,9 +9,8 @@ import {
 	fixedApartment,
 	fixedTenant,
 	partiesHelp,
-	reviewContractsUnknown,
-	advancePaymentInput,
 	rentTakenOver,
+	reviewContractsUnknown,
 	reviewItem,
 	runningContractHint,
 	startContractsUnknown,
