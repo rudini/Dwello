@@ -34,7 +34,6 @@ Funktionalität: Datenschutz
     Dann nennt die Datenschutzerklärung unter "Anmeldung" "Google"
     Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Microsoft"
 
-  @wip
   Szenario: Dienste Dritter, die der Browser aufruft
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "CARTO"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "OpenPLZ"

@@ -11,8 +11,6 @@ export interface Building {
 	city: string;
 	canton: string;
 	country?: string;
-	latitude?: string | number | null;
-	longitude?: string | number | null;
 	buildingType?: string | null;
 	yearBuilt?: number | null;
 	createdAt?: Date | string;

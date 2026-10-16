@@ -5,7 +5,7 @@ import { show } from './helpers/dom';
 
 afterEach(() => overwriteGetLocale(() => baseLocale));
 
-const page = (locale: 'fr' | 'it') => {
+const page = (locale: 'fr' | 'it' | 'en') => {
 	overwriteGetLocale(() => locale);
 	show(PrivacyPage, { data: { recipient: null, providers: ['Google', 'Microsoft'] } } as never);
 	return document.body.textContent ?? '';
@@ -25,7 +25,12 @@ describe('Datenschutzerklärung auf Französisch und Italienisch', () => {
 		expect(document.body.textContent).toContain('(voir «\u00a0Connexion\u00a0»)');
 	});
 
-	it('verwendet die festgelegten italienischen Begriffe für Gebäude und Karte', () => {
+	// The building map is gone (#129), so CARTO receives nothing
+	it('nennt CARTO in keiner Sprache', () => {
+		for (const locale of ['fr', 'it', 'en'] as const) expect(page(locale)).not.toContain('CARTO');
+	});
+
+	it('verwendet die festgelegten italienischen Begriffe für Gebäude', () => {
 		const text = page('it');
 		expect(text).toContain('Google o Microsoft');
 		expect(text).toContain('immobile');
