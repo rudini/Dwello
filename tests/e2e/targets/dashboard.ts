@@ -32,3 +32,5 @@ export const overviewDeadline = (kind: string, name: string) =>
 	target(`Frist ${kind} ${name}`, (page) =>
 		page.getByTestId('overview-deadline').filter({ hasText: kind }).filter({ hasText: name })
 	);
+export const overviewTaskLinkFor = (title: string, name: string) =>
+	target(`Aufgabe «${title}» für ${name} beginnen`, (page) => overviewTaskFor(title, name).locate(page).getByRole('link'));

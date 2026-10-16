@@ -32,6 +32,8 @@ export interface OverviewInput {
 		apartmentNumber: string;
 		endDate: string;
 	}[];
+	// agreed end passed, without a following contract and without «Mieter ist ausgezogen» (A-6)
+	expiredContracts: { id: string; tenantName: string; endDate: string }[];
 }
 
 /** One thing the landlord should do now, with the page where it is done */
@@ -178,10 +180,29 @@ const successorTasks = ({ noticedContracts }: OverviewInput): Task[] =>
 			icon: 'contract'
 		}));
 
+// The tenant who stayed after an agreed end continues the contract open-ended (Art. 266 Abs. 2 OR, A-6);
+// TODO(fachlich prüfen, #308): wording of the question
+const fixedTermTasks = ({ expiredContracts }: OverviewInput): Task[] =>
+	[...expiredContracts]
+		.sort((a, b) => a.endDate.localeCompare(b.endDate))
+		.map((c) => ({
+			id: `fixed-term-${c.id}`,
+			title: m.dashboard_task_fixed_term(),
+			text: m.contracts_fixed_term_question({ name: c.tenantName, date: formatDate(c.endDate) }),
+			href: `/contracts/${c.id}`,
+			action: m.dashboard_task_fixed_term_action(),
+			icon: 'contract'
+		}));
+
 /** Tasks in the order they should be done; set-up comes first */
 export function overviewTasks(input: OverviewInput): Task[] {
 	const step = setup.find(({ missing }) => missing(input.portfolio));
-	return [...(step ? [step.task()] : []), ...workTasks(input), ...successorTasks(input)];
+	return [
+		...(step ? [step.task()] : []),
+		...workTasks(input),
+		...successorTasks(input),
+		...fixedTermTasks(input)
+	];
 }
 
 /** A date the landlord should not miss, with how far away it is in words; `kind` is an id, shown via a message */

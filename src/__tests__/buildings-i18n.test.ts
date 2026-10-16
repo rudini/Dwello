@@ -113,7 +113,8 @@ describe('Übersicht in der gewählten Sprache', () => {
 		dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-05' }],
 		lettersToSend: 2,
 		endingContracts: [],
-		noticedContracts: []
+		noticedContracts: [],
+		expiredContracts: []
 	};
 
 	it('nennt Aufgaben auf Französisch', () => {

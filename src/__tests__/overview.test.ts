@@ -18,6 +18,7 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 	lettersToSend: 0,
 	endingContracts: [],
 	noticedContracts: [],
+	expiredContracts: [],
 	...overrides
 });
 
@@ -45,6 +46,28 @@ describe('Aufgaben der Übersicht', () => {
 				href: '/contracts/new?apartment=a1'
 			})
 		);
+	});
+
+	// A-6 (#115): ein abgelaufener befristeter Mietvertrag läuft unbefristet weiter, wenn der Mieter geblieben ist
+	it('fragt nach jedem abgelaufenen befristeten Mietvertrag, ob der Mieter noch in der Wohnung wohnt', () => {
+		const tasks = overviewTasks(
+			input({
+				expiredContracts: [
+					{ id: 'c2', tenantName: 'Bruno Meier', endDate: '2025-12-31' },
+					{ id: 'c1', tenantName: 'Eva Frei', endDate: '2024-03-31' }
+				]
+			})
+		);
+		expect(tasks).toEqual([
+			expect.objectContaining({
+				id: 'fixed-term-c1',
+				title: 'Befristeten Mietvertrag prüfen',
+				text: 'Der befristete Mietvertrag von Eva Frei ist am 31.03.2024 abgelaufen. Wohnt Eva Frei noch in der Wohnung und sind Sie damit einverstanden, zum Beispiel weil Sie den Mietzins weiter annehmen? Dann läuft der Mietvertrag unbefristet weiter.',
+				href: '/contracts/c1',
+				action: 'Mietvertrag öffnen'
+			}),
+			expect.objectContaining({ id: 'fixed-term-c2' })
+		]);
 	});
 
 	it('beginnt ohne Gebäude mit dem ersten Gebäude', () => {

@@ -265,6 +265,11 @@ export function testData(api: CallTheApi) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate, terminated: true });
 		},
 
+		// the tenant left after an agreed end, as «Mieter ist ausgezogen» stores it (A-6, #115)
+		async movedOut(tenantTitle: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { movedOut: true });
+		},
+
 		async sendStatement(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
