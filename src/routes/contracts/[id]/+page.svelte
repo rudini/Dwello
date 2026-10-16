@@ -13,6 +13,7 @@
 	import PastEndConfirm from '../PastEndConfirm.svelte';
 	import RefusedStatements from '../RefusedStatements.svelte';
 	import { formatDate } from '$lib/utils/format';
+	import { managementFeeText } from '$lib/contract-form';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
@@ -163,6 +164,7 @@
 			noticeReceivedOn={contract.noticeReceivedOn}
 			{status}
 			rent={data.rentBreakdown}
+			fee={managementFeeText(contract.managementFeeAgreed, contract.managementFeePercent)}
 		/>
 	</div>
 

@@ -4,7 +4,9 @@ import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
 import {
 	deleteStatementButton,
 	paidDateInput,
+	pdfLanguage,
 	pdfRefusalMessage,
+	resetPaymentDialog,
 	sendDialog,
 	sendPdfLink,
 	sendRecipient,
@@ -21,6 +23,7 @@ export const statusOfStatement = Text.of(statementStatus);
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);
+export const resetConfirmation = Text.of(resetPaymentDialog);
 export const recipient = Text.of(sendRecipient);
 export const pdfToView = Attribute.named('href').of(sendPdfLink);
 export const deleteOffers = Count.of(deleteStatementButton);
@@ -47,3 +50,4 @@ export const heatingCostsOfTenant = throughUiOrApi<Question<{ share: unknown; am
 		return { share: Number(heating.sharePercentage), amount: Number(heating.tenantShare) };
 	})
 );
+export const languageOfPdf = Text.of(pdfLanguage);

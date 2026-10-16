@@ -53,6 +53,8 @@ import {
 	contractSubmitButton,
 	durationChoice,
 	endDateInput,
+	feeChoice,
+	feeRateInput,
 	retryContractsButton,
 	reviewContractsUnknown,
 	startDateInput,
@@ -95,12 +97,12 @@ const askKi = (name: string): Activity => (actor) =>
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
 const previewOf =
-	(year: string, shown: string) =>
+	(year: string, shown: string, end = `${year}-12-31`) =>
 	(example: Example, ...others: string[]): Activity =>
 	async (actor) => {
 		await actor.attemptsTo(
 			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
-			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
+			EnterDate.of(end).into(on.periodEndInput),
 			Click.on(nextButton)
 		);
 		for (const building of [example.building, ...others]) await actor.attemptsTo(Check.the(on.generateBuilding(building)));
@@ -257,6 +259,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Wait.until(on.shown('document-marked-sent'))
 		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
+	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('{area}').into(on.formulaInput),
@@ -295,6 +298,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
 			Wait.until(on.overlapWarning)
 		),
+	// the amounts of the apartment's last contract filled in, with the note that says so (#144)
+	'rent-taken-over': () => (actor) =>
+		actor.attemptsTo(
+			Click.on(nextButton), // tenant and apartment come from the address
+			Click.on(nextButton),
+			Wait.forValue(startDateInput, '01.04.2099'), // the day after the last contract, suggested
+			Click.on(nextButton),
+			Wait.until(on.shown('contract-rent-taken-over'))
+		),
 	// the apartments' rental contracts cannot be loaded (#143); the wizard shows it from the step "Wohnung"
 	'contracts-unknown': () => async (actor) => {
 		await actor.attemptsTo(FailRequests.to('/api/contracts', {}), Navigate.reload);
@@ -313,6 +325,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2030-01-01').into(startDateInput),
 			Click.on(nextButton),
 			Enter.theValue('1500').into(baseRentInput),
+			Click.on(feeChoice('run')),
 			Click.on(nextButton),
 			Wait.until(reviewContractsUnknown)
 		),
@@ -323,6 +336,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (example) => previewOf('2026', 'category-check')(example),
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
+	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
+	'invoice-hints': (example) => previewOf('2025', 'late-invoices', '2025-05-31')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
@@ -356,8 +371,14 @@ const contractWizardSteps = (look: Activity): Activity => async (actor) => {
 	await nextStep(startDateInput); // "Vertragsdauer", limited: end date and both dates in words
 	await clickOnShown(actor, 'Befristet', durationChoice);
 	await actor.attemptsTo(EnterDate.of('2030-01-01').into(startDateInput), EnterDate.of('2031-12-31').into(endDateInput), look);
-	await nextStep(baseRentInput); // "Miete"
-	await actor.attemptsTo(Enter.theValue('1500').into(baseRentInput), look);
+	await nextStep(baseRentInput); // "Miete", with an own rate of the Verwaltungspauschale above the guideline (#89)
+	await actor.attemptsTo(
+		Enter.theValue('1500').into(baseRentInput),
+		Click.on(feeChoice('own')),
+		Enter.theValue('4').into(feeRateInput),
+		Wait.until(on.shown('contract-fee-rate-hint')),
+		look
+	);
 	await nextStep(on.shown('contract-review-item')); // "Prüfen"
 	await actor.attemptsTo(look);
 };
@@ -371,7 +392,14 @@ const statementWizardSteps =
 		await nextStep('generate-all-buildings'); // "Gebäude"
 		// this example's building: another example's may still be seeding, without a contract to preview
 		await actor.attemptsTo(Check.the(on.generateBuilding(example.building)));
-		await nextStep('heating-profile-select'); // "Heizprofil und Verwaltungspauschale"
+		// "Heizprofil und Verwaltungspauschale"; the seeded contract of Carla has no fee agreed, and the notice that names it
+		// loads after the step (#89, code review C-3)
+		await actor.attemptsTo(
+			Click.on(nextButton),
+			Wait.until(on.shown('heating-profile-select')),
+			Wait.until(on.shown('management-fee-not-agreed')),
+			look
+		);
 		await nextStep('preview-count'); // "Vorschau", calculated on the server
 		// a building without invoices must be confirmed
 		if (await actor.answer(Visibility.of(on.confirmMissingInvoices))) await actor.attemptsTo(Check.the(on.confirmMissingInvoices));

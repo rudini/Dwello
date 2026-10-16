@@ -89,7 +89,7 @@ export const tenants = pgTable('tenants', {
 	lastName: varchar('last_name', { length: 100 }).notNull(),
 	email: varchar('email', { length: 255 }),
 	phone: varchar('phone', { length: 30 }),
-	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, rm, en
+	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, en
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),
@@ -124,6 +124,9 @@ export const rentalContracts = pgTable(
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
 		monthlyAdvancePayment: decimal('monthly_advance_payment', { precision: 10, scale: 2 }).notNull(), // Akonto
+		// #89: the run's rate applies only with a fee agreed; an own rate (0–10 %) takes precedence
+		managementFeeAgreed: boolean('management_fee_agreed').default(false).notNull(),
+		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),
 		referenceIndex: decimal('reference_index', { precision: 6, scale: 4 }), // Swiss rental index
 		contractPdf: text('contract_pdf'), // Base64 or URL
 		notes: text('notes'),
@@ -345,6 +348,9 @@ export type InvoicePart = {
 
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+/** A payment taken back (#92): the day of the reset and what it cleared */
+export type PaymentReset = { resetOn: string; paidDate: string | null; paidAmount: string | null };
+
 export type HeatingShare =
 	// the chosen profile and why it was not applied (#247); both absent on statements created before
 	| { byDays: true; reason?: 'wholePeriod' | 'noHeatingMonths'; names?: HeatingProfileNames }
@@ -394,6 +400,8 @@ export const utilityStatements = pgTable(
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
 		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
+		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
+		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),

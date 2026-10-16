@@ -7,6 +7,12 @@ import {
 	billedOfBuilding,
 	buildingChosen,
 	categoryFindingOf,
+	contractsWithoutFee,
+	confirmationAsked,
+	invoiceWithoutServicePeriodOn,
+	countOfInvoicesWithoutServicePeriodOn,
+	lateInvoiceOn,
+	countOfLateInvoicesOn,
 	draftsOnly,
 	feeAboveGuideline,
 	feeFieldDescription,
@@ -21,6 +27,7 @@ import {
 	missingInvoicesWarnings,
 	noContractsInPeriod,
 	periodChoiceShown,
+	presetNoticeText,
 	previewHasStatementOf,
 	proposedHeatingProfile,
 	settingsChoiceCount,
@@ -34,7 +41,9 @@ import {
 	chooseBuilding,
 	chooseBuildingsFor,
 	confirmDespiteWarnings,
+	editHintedInvoice,
 	generateMore,
+	openContractWithoutFee,
 	generateStatements,
 	goToGeneration,
 	openPreview,
@@ -319,4 +328,89 @@ Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text:
 
 Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
+});
+
+Then('meldet das Feld der Verwaltungspauschale {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(feeFieldDescription).toContain(message);
+});
+
+Then('bleibt der Assistent beim Schritt mit der Verwaltungspauschale', async ({ verwalter }) => {
+	await verwalter.sees(feeFieldShown).toBe(true);
+});
+
+Given(
+	'der Liegenschaftsverwalter hat für das Gebäude {string} die Verwaltungspauschale auf {float} % gesetzt',
+	async ({ verwalter, seed }, building: string, fee: number) => {
+		await verwalter.attemptsTo(setManagementFee(seed.idOf(building)!, fee));
+	}
+);
+
+Then(
+	'nennt der Assistent den Mietvertrag von {string} ohne vereinbarte Verwaltungspauschale',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.sees(contractsWithoutFee).toContain(names.get(tenant)!);
+	}
+);
+
+Then('nicht den Mietvertrag von {string}', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(contractsWithoutFee).not.toContain(names.get(tenant)!);
+});
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag von {string} ohne vereinbarte Verwaltungspauschale öffnet',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.attemptsTo(openContractWithoutFee(seed.idOf(`Mietvertrag ${tenant}`)!));
+	}
+);
+
+Given(
+	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung {int} mit {float} % Verwaltungspauschale',
+	async ({ seed }, tenant: string, building: string, year: number, fee: number) => {
+		await seed.statement(tenant, building, year, undefined, undefined, fee);
+	}
+);
+
+Then('schlägt der Assistent eine Verwaltungspauschale von {string} % vor', async ({ verwalter }, fee: string) => {
+	await verwalter.sees(feeFieldValue).toBe(fee);
+});
+
+Then('sagt der Assistent {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(presetNoticeText).toContain(text);
+});
+
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, start: string, end: string, building: string) => {
+		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
+	}
+);
+
+Then('verlangt die Vorschau keine Bestätigung', async ({ verwalter }) => {
+	await verwalter.sees(confirmationAsked).toBe(false);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(lateInvoiceOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfLateInvoicesOn(date)).toBe(0);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(invoiceWithoutServicePeriodOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfInvoicesWithoutServicePeriodOn(date)).toBe(0);
+});
+
+When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
+	await verwalter.attemptsTo(editHintedInvoice(date));
 });

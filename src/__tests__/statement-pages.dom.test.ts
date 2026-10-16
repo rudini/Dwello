@@ -226,7 +226,11 @@ describe('Abrechnungsliste', () => {
 
 		const today = localToday();
 		expect(calls).toEqual([
-			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: today } }
+			{
+				method: 'POST',
+				path: '/statements/s1/mark-paid',
+				body: { paidDate: today, statementDate: '2025-01-15' }
+			}
 		]);
 		expect(invalidateAll).toHaveBeenCalled();
 	});
@@ -371,12 +375,16 @@ describe('Abrechnungsliste', () => {
 		list([statement({ status: 'sent' })]);
 		click('statement-row-mark-paid');
 		const field = byTestId<HTMLInputElement>('paid-date-input')!;
-		fireEvent(field, 'input', '01.01.25');
+		fireEvent(field, 'input', '20.01.25');
 		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 		await settle();
 
 		expect(calls).toEqual([
-			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-01' } }
+			{
+				method: 'POST',
+				path: '/statements/s1/mark-paid',
+				body: { paidDate: '2025-01-20', statementDate: '2025-01-15' }
+			}
 		]);
 	});
 
@@ -592,6 +600,13 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
 	});
 
+	// #89, persona Dr. Weber P-3: without an agreed fee there is none; like the PDF, no line «0 % der Zwischensumme»
+	it('zeigt ohne Verwaltungspauschale keine Zeile dafür, wie das PDF', () => {
+		detail({ managementFee: '0.00', managementFeePercent: '0.00' });
+		expect(text()).toContain('Zwischensumme');
+		expect(byTestId('statement-management-fee')).toBeNull();
+	});
+
 	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
 	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
@@ -700,6 +715,19 @@ describe('Abrechnungsdetail', () => {
 			{ method: 'POST', path: '/statements/s1/generate-pdf', body: undefined }
 		]);
 		expect(byTestId('statement-pdf-download')!.getAttribute('href')).toBe('/statements/s1/pdf');
+	});
+
+	// #105: wer das PDF erstellt, sieht, in welcher Sprache es entsteht
+	it('nennt beim Erstellen die Sprache des Mieters für das PDF', () => {
+		detail({ tenantLanguage: 'fr' });
+		expect(byTestId('statement-pdf-language')!.textContent).toBe('PDF auf Französisch');
+	});
+
+	// ein erstelltes PDF behält die Sprache, in der es entstand; welche, speichert Dwello nicht
+	it('nennt beim Herunterladen keine Sprache', () => {
+		detail({ tenantLanguage: 'fr', pdfGeneratedAt: '2025-01-16T08:00:00.000Z' });
+		expect(byTestId('statement-pdf-download')).not.toBeNull();
+		expect(byTestId('statement-pdf-language')).toBeNull();
 	});
 
 	it('bleibt beim Erstellen-Button, wenn das PDF nicht erstellt werden kann', async () => {
@@ -823,6 +851,75 @@ describe('Abrechnungsdetail', () => {
 		expect(history).toContain('Bezahlt 05.10.2026');
 	});
 
+	// #138: das Geld kann nicht vor dem Abrechnungsdatum eingegangen sein
+	it('prüft im Dialog, dass das Zahlungsdatum nicht vor dem Abrechnungsdatum liegt', () => {
+		detail({ status: 'sent', statementDate: '2025-01-15' });
+		click('statement-mark-paid-button');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '14.01.2025');
+		click('statement-mark-paid-confirm');
+		flushSync();
+
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+		expect(text()).toContain('Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 15.01.2025.');
+	});
+
+	it('sendet das Abrechnungsdatum mit, damit der Server dieselbe Grenze prüft', () => {
+		detail({ status: 'sent', statementDate: '2025-01-15' });
+		click('statement-mark-paid-button');
+		const formData = new FormData();
+		actions.get('?/markPaid')!({ formData });
+
+		expect(formData.get('statementDate')).toBe('2025-01-15');
+	});
+
+	// #92: eine erfasste Zahlung lässt sich zurücksetzen, nach einer Bestätigung mit der Folge
+	it('bietet nur bei einer bezahlten Abrechnung an, die Zahlung zurückzusetzen', () => {
+		detail({ status: 'sent' });
+		expect(byTestId('statement-reset-payment-button')).toBeNull();
+		document.body.innerHTML = '';
+		detail({ status: 'paid', paidDate: '2025-02-05' });
+		expect(byTestId('statement-reset-payment-button')!.textContent!.trim()).toBe('Zahlung zurücksetzen');
+	});
+
+	// die Folge mit dem Status, der dann gilt: vor Ablauf der Zahlungsfrist «Versendet», danach «Überfällig» (Fachprüfung V-4)
+	it('nennt vor dem Zurücksetzen die Folge mit dem Status, der dann gilt', () => {
+		const dialogText = () => document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		detail({ status: 'paid', paidDate: '2025-02-05', paymentDeadline: '2999-12-31' });
+		click('statement-reset-payment-button');
+
+		expect(dialogText()).toContain('Die Abrechnung NK-2024-0001 gilt dann wieder als nicht bezahlt und hat den Status «Versendet».');
+		expect(dialogText()).toContain('Das Zahlungsdatum 05.02.2025 wird gelöscht.');
+
+		document.body.innerHTML = '';
+		detail({ status: 'paid', paidDate: '2025-02-05', paymentDeadline: '2025-02-14' });
+		click('statement-reset-payment-button');
+		expect(dialogText()).toContain('hat den Status «Überfällig».');
+	});
+
+	it('bestätigt das Zurücksetzen der Zahlung', async () => {
+		toasts.set([]);
+		detail({ status: 'paid', paidDate: '2025-02-05' });
+		click('statement-reset-payment-button');
+		const after = actions.get('?/resetPayment')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Die Zahlung der Abrechnung NK-2024-0001 ist zurückgesetzt.'
+		]);
+	});
+
+	// zweimal dieselbe Zahlung zurückgesetzt: beide Zeilen stehen im Verlauf (Fachprüfung V-11)
+	it('führt im Verlauf jedes Zurücksetzen einer Zahlung', () => {
+		const reset = { resetOn: '2025-02-10', paidDate: '2025-02-05' };
+		detail({ status: 'sent', statementDate: '2025-01-15', paymentResets: [reset, reset] });
+
+		expect(text().replace(/\s+/g, ' ').split('Zahlung vom 05.02.2025 zurückgesetzt 10.02.2025')).toHaveLength(3);
+	});
+
 	it('kündigt die nächste Mahnung mit ihrem Versandweg an', () => {
 		detail({ status: 'overdue' });
 		click('statement-reminder-button');
@@ -884,7 +981,7 @@ describe('Abrechnungsdetail', () => {
 			{ reminder: { document: { title: '2. Mahnung', channel: 'letter' } } }
 		);
 		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'2. Mahnung liegt als Brief zum Ausdrucken in den Dokumenten bereit.'
+			'Das Dokument «2. Mahnung» liegt unter «Dokumente» als Brief zum Ausdrucken bereit.'
 		);
 	});
 });

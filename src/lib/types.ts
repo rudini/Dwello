@@ -11,8 +11,6 @@ export interface Building {
 	city: string;
 	canton: string;
 	country?: string;
-	latitude?: string | number | null;
-	longitude?: string | number | null;
 	buildingType?: string | null;
 	yearBuilt?: number | null;
 	createdAt?: Date | string;
@@ -62,7 +60,7 @@ export interface Tenant {
 	lastName: string;
 	email?: string | null;
 	phone?: string | null;
-	language: 'de' | 'fr' | 'it' | 'rm' | 'en';
+	language: 'de' | 'fr' | 'it' | 'en';
 	address?: string | null;
 	postalCode?: string | null;
 	city?: string | null;
@@ -83,6 +81,8 @@ export interface RentalContract {
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto
+	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
+	managementFeePercent?: string | null; // own rate, before the run's
 	referenceIndex?: string | number | null;
 	contractPdf?: string | null;
 	notes?: string | null;
@@ -299,6 +299,7 @@ export interface Statement {
 	status: StatementStatus;
 	paymentDeadline: string;
 	paidDate?: string;
+	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	lastReminderDate?: string;
 	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
 	pdfGeneratedAt?: string;
@@ -312,6 +313,7 @@ export interface StatementWithDetails extends Statement {
 	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';
+	tenantLanguage?: Tenant['language'];
 	tenantAddress?: string;
 	apartmentUnit: string;
 	apartmentFloor: string;

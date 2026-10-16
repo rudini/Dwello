@@ -8,7 +8,7 @@ The issue's "Done means" is worded for a decision issue; its "Decided (product o
 
 - [x] `@wip` scenarios in `dashboard.feature` and `contract-detail.feature`, seen red
 - [x] Fachreview round 1 of the scenarios: `docs/reviews/a6-fachreview-1.md`; issue #308 opened, V-2 added to #120
-- [x] Migration 0010: `rental_contracts.moved_out`, schema, `docs/data-model.md`
+- [x] Migration 0013: `rental_contracts.moved_out`, schema, `docs/data-model.md`
 - [x] Backend: PUT accepts `movedOut`; any change of the end clears it; list and detail return it; API contracts (`contract-moved-out.pg.test.ts`)
 - [x] Overview task «Befristeten Mietvertrag prüfen» for every expired, agreed end without successor and without `movedOut` (`overview.ts`, `dashboard/+page.server.ts`)
 - [x] Contract detail: `FixedTermCheck.svelte` with «Unbefristet weiterführen» and «Mieter ist ausgezogen»; draft refusal offers delete, a sent one says it cannot continue (Fachreview V-2)

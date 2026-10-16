@@ -10,6 +10,8 @@
 	"baseRent": "950.00",
 	"additionalRent": "0.00",
 	"monthlyAdvancePayment": "150.00",
+	"managementFeeAgreed": true,
+	"managementFeePercent": null,
 	"tenant": { "id": "t1", "firstName": "Anna", "lastName": "Keller" },
 	"apartment": { "id": "a1", "number": "2.01" },
 	"building": { "id": "b1", "name": "Ahornhof", "address": "Ahornweg 1" }

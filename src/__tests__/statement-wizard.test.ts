@@ -58,9 +58,14 @@ describe('Abrechnungen Schritt für Schritt', () => {
 			selectionErrors({ ...selection, heatingProfileId: '', managementFeePercent: -1 }, 3)
 		).toEqual({
 			heatingProfileId: 'Bitte wählen Sie ein Heizprofil.',
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		});
 		expect(selectionErrors({ ...selection, managementFeePercent: NaN }, 3)).toHaveProperty(
+			'managementFeePercent'
+		);
+		// #124: höchstens 10 %, so fällt ein Tippfehler wie 1000 statt 10 auf, bevor eine Anfrage ihn ablehnt
+		expect(selectionErrors({ ...selection, managementFeePercent: 10 }, 3)).toEqual({});
+		expect(selectionErrors({ ...selection, managementFeePercent: 10.01 }, 3)).toHaveProperty(
 			'managementFeePercent'
 		);
 		// ein geleertes Feld kommt aus dem gespeicherten Zwischenstand als null zurück, nicht als 0 %
@@ -89,6 +94,8 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: false,
 				partial: true, // nothing after June
 				existing: 0,
+				lateInvoices: [],
+				invoicesWithoutServicePeriod: [],
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -100,6 +107,8 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: true,
 				partial: false,
 				existing: 0,
+				lateInvoices: [],
+				invoicesWithoutServicePeriod: [],
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -150,6 +159,19 @@ describe('Rechnungen pro Kategorie', () => {
 				finding('missing', { current: { count: 0, total: 0 }, previous: { count: 1, total: 290 } })
 			)
 		).toBe('Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF\u00a0290.00.');
+	});
+
+	// Nur eine Lücke oder Abweichung lässt sich durch einen Teil der Kosten erklären (#130)
+	it('nennt bei Lücke und Abweichung die Rechnungen, die nur teilweise zählen', () => {
+		const parts = { missingParts: [{ start: '2025-07-01', end: '2025-12-31' }], partialCount: 2 };
+
+		expect(findingText(finding('gap', parts))).toContain(
+			'2 Rechnungen zählen nur teilweise: ihre Leistungszeiträume reichen über die Abrechnungsperiode hinaus.'
+		);
+		expect(findingText(finding('deviation', { changePercent: -40, partialCount: 2 }))).toContain(
+			'2 Rechnungen zählen nur teilweise'
+		);
+		expect(findingText(finding('new', { partialCount: 2 }))).not.toContain('teilweise');
 	});
 
 	it('nennt den Teil des Jahres, für den die Rechnung fehlt', () => {

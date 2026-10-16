@@ -97,8 +97,6 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 			city: buildingData.city,
 			canton: buildingData.canton,
 			country: buildingData.country || 'CH',
-			latitude: buildingData.latitude ? Number(buildingData.latitude) : undefined,
-			longitude: buildingData.longitude ? Number(buildingData.longitude) : undefined,
 			yearBuilt: buildingData.yearBuilt ? Number(buildingData.yearBuilt) : undefined,
 			buildingType: buildingData.buildingType,
 			apartmentCount: Number(buildingData.apartmentCount) || 0,

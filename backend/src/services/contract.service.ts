@@ -34,6 +34,8 @@ const contractFields = {
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
 	monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
+	managementFeeAgreed: rentalContracts.managementFeeAgreed,
+	managementFeePercent: rentalContracts.managementFeePercent,
 	referenceIndex: rentalContracts.referenceIndex,
 	contractPdf: rentalContracts.contractPdf,
 	notes: rentalContracts.notes,
@@ -280,6 +282,10 @@ function checkNotice(terminated: boolean | undefined, endDate: string | null | u
 	if (terminated && !endDate) throw new CodedError('CONTRACT_NOTICE_WITHOUT_END', 'A notice needs an end date');
 }
 
+// Without an agreed Verwaltungspauschale no own rate is kept: agreeing again later must not bring it back (#89)
+const feeRate = <T extends Partial<NewRentalContract>>(data: T, agreed = data.managementFeeAgreed): T =>
+	agreed ? data : { ...data, managementFeePercent: null };
+
 /**
  * Create a new contract
  */
@@ -298,7 +304,7 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 		});
 	}
 
-	const [contract] = await db.insert(rentalContracts).values(data).returning();
+	const [contract] = await db.insert(rentalContracts).values(feeRate(data)).returning();
 
 
 	return contract;
@@ -381,7 +387,7 @@ export async function updateContract(
 			// there is no day it arrived; a move-out belongs to the end it was confirmed for (A-6)
 			.set({
 				...(data.endDate !== undefined && data.endDate !== current.endDate && { movedOut: false }),
-				...data,
+				...feeRate(data, data.managementFeeAgreed ?? current.managementFeeAgreed),
 				...(data.endDate === null && { terminated: false }),
 				...((data.endDate === null || data.terminated === false) && { noticeReceivedOn: null }),
 				updatedAt: new Date()

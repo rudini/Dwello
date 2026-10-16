@@ -8,8 +8,7 @@ import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants } from '../db/schema';
-import { deleteStatement } from '../services/statement.service';
+import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
 import { insertInvoice } from './helpers/records';
@@ -47,6 +46,8 @@ beforeAll(async () => {
 	await insertInvoice(rental.building, { amount: '1000.00', invoiceDate: '2024-03-31' });
 	// A year later 50 % more: the check for missing invoices reports a deviation with its percentage
 	await insertInvoice(rental.building, { amount: '1500.00', invoiceDate: '2025-06-30' });
+	// Without a Leistungszeitraum, dated shortly after 2025: the check names it as a late invoice
+	await insertInvoice(rental.building, { billingEntityName: 'Kaminfeger Keller', amount: '290.00', invoiceDate: '2026-01-20' });
 	// Optional fields filled, so the contract checks their JSON type too (null is not checked)
 	await db
 		.update(buildings)
@@ -77,7 +78,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	await deleteStatement(statementId);
+	// sent and paid at the end of the file: no longer a draft the API deletes
+	await db.delete(utilityStatements).where(eq(utilityStatements.id, statementId));
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
 	await rental.remove();
 });
@@ -327,5 +329,22 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /tenants liefert die Felder von tenants.json', async () => {
 		const actual = await (await callApi(`/api/v1/tenants?search=${encodeURIComponent(`Keller ${token}`)}`)).json();
 		expect(drift(await sample('tenants'), actual)).toEqual([]);
+	});
+});
+
+// Last: they send and pay the statement the tests above read as a draft
+describe('API-Verträge der Zahlung', () => {
+	it('PUT /statements/:id/status mit einem Zahlungsdatum vor dem Abrechnungsdatum liefert die Felder von statement-paid-date-refused.json', async () => {
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
+		const response = await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: '2020-01-01' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('statement-paid-date-refused'), await response.json())).toEqual([]);
+	});
+
+	it('POST /statements/:id/payment-reset liefert die Felder von statement-payment-reset.json', async () => {
+		const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: today });
+		const actual = await (await callApi(`/api/v1/statements/${statementId}/payment-reset`, { method: 'POST' })).json();
+		expect(drift(await sample('statement-payment-reset'), actual)).toEqual([]);
 	});
 });

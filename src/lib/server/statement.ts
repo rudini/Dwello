@@ -70,6 +70,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
 		tenantEmail: tenant.email || '',
 		tenantCorrespondenceChannel: tenant.correspondenceChannel,
+		tenantLanguage: tenant.language,
 		apartmentUnit: apartment.number || '',
 		apartmentFloor: apartment.floor || '',
 		buildingName: building.name || '',
@@ -77,6 +78,10 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		rentalStart: data.rentalStart,
 		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
+		paymentResets: (data.paymentResets ?? []).map(({ resetOn, paidDate }: BackendStatement) => ({
+			resetOn,
+			paidDate
+		})),
 		lineItems: (data.lineItems || []).map(toLineItem)
 	};
 }

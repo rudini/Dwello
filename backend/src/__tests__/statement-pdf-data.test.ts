@@ -72,7 +72,6 @@ describe('Daten der Abrechnung im PDF', () => {
 
 	it('nennt die Kategorie in der Sprache des Mieters, sonst deutsch', () => {
 		expect(toPdfData(statement, categories, 'fr').lineItems[0].category).toBe('Chauffage');
-		expect(toPdfData(statement, categories, 'rm').lineItems[0].category).toBe('Heizung');
 		expect(toPdfData(statement, categories, 'de').lineItems[1].category).toBe('Nicht kategorisiert');
 	});
 });

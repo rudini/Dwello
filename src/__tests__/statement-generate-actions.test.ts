@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/statements/generate/+page.server';
 import periodStatements from '../../tests/contracts/period-statements.json';
+import buildingContracts from '../../tests/contracts/building-contracts.json';
 
 const run = {
 	buildingIds: 'b1',
@@ -57,6 +58,9 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 	const urls: string[] = [];
 	const fetch = async (url: string) => {
 		urls.push(url);
+		// the statement's contract has the fee agreed at the run's rate (#89)
+		if (url.includes('/contracts?'))
+			return Response.json({ contracts: [{ ...buildingContracts.contracts[0], id: 'c1' }] });
 		if (url.includes('/config'))
 			return Response.json({
 				data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
@@ -91,6 +95,65 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 				'/statements?buildingId=b1&periodStart=2025-01-01&periodEnd=2025-12-31'
 			)
 		);
+	});
+
+	// #89, fach-review V-1: a statement stores its contract's rate; only one at the run's rate tells the run's rate
+	it('übernimmt den Satz nur von einer Abrechnung zum Satz des Abrechnungslaufs', async () => {
+		const contract = (
+			id: string,
+			managementFeeAgreed: boolean,
+			managementFeePercent: string | null
+		) => ({
+			...buildingContracts.contracts[0],
+			id,
+			managementFeeAgreed,
+			managementFeePercent
+		});
+		const statement = (contractId: string, managementFeePercent: string) => ({
+			...periodStatements.data[0],
+			contractId,
+			heatingProfileId: `hp-${contractId}`,
+			managementFeePercent
+		});
+		const openWith = (statements: unknown[]) =>
+			load({
+				fetch: async (url: string) => {
+					if (url.includes('/config'))
+						return Response.json({
+							data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
+						});
+					if (url.includes('/contracts?'))
+						return Response.json({
+							contracts: [
+								contract('nein', false, null),
+								contract('eigen', true, '2.00'),
+								contract('lauf', true, null)
+							]
+						});
+					if (url.includes('/statements?')) return Response.json({ data: statements });
+					return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
+				},
+				url: new URL(
+					'http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+				)
+			} as never);
+
+		const mixed = [
+			statement('nein', '0.00'),
+			statement('eigen', '2.00'),
+			statement('lauf', '4.50')
+		];
+		expect(await openWith(mixed)).toMatchObject({
+			defaultManagementFeePercent: 4.5,
+			preset: { fromStatements: true, feeFromSettings: false }
+		});
+		// none at the run's rate: the settings' rate; the heating profile still comes from the other statements, so
+		// a recreated statement shares it (A-10, closing review C-1), and the notice says where each comes from
+		expect(await openWith(mixed.slice(0, 2))).toMatchObject({
+			defaultManagementFeePercent: 3,
+			defaultHeatingProfileId: 'hp-nein',
+			preset: { fromStatements: true, feeFromSettings: true }
+		});
 	});
 
 	// Review K-5: ein abgeschnittener Link oder ein gelöschtes Gebäude führt zum Anfang, nicht zu einem Fehler

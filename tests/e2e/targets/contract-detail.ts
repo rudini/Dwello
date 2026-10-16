@@ -46,6 +46,9 @@ export const missingStatementLink = (periodStart: string) =>
 		page.getByTestId(`contract-missing-statement-link-${periodStart}`)
 	);
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
+export const contractManagementFee = target('Verwaltungspauschale des Mietvertrags', (page) =>
+	page.getByTestId('contract-management-fee')
+);
 export const endDialogDeathHint = target('Hinweis zum Tod des Mieters im Dialog «Mietvertrag beenden»', (page) =>
 	page.getByTestId('contract-end-death')
 );
