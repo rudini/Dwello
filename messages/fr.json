@@ -1098,6 +1098,7 @@
 	"statements_confirm_label": "Établir tout de même les décomptes",
 	"statements_preview_empty": "Dans cette période de décompte, il n’y a pas de contrats de bail sans décompte dans les immeubles choisis.",
 	"statements_all_billed": "Tous les contrats de bail ont déjà un décompte dans cette période. Pour recalculer un brouillon, supprimez-le et établissez à nouveau les décomptes. Les décomptes envoyés ne peuvent pas être recalculés.",
+	"statements_all_billed_lead": "Tous les contrats de bail ont déjà un décompte dans cette période.",
 	"statements_maybe_missing_title": "Il manque peut-être des factures",
 	"statements_compared_title": "Coûts par rapport à l’année précédente",
 	"statements_compared_text": "Dwello compare chaque catégorie avec la même période de l’année précédente{compared}. Une remarque ne signifie pas que quelque chose est faux : la facture arrive peut-être plus tard, ou le fournisseur facture autrement.",

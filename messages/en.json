@@ -1098,6 +1098,7 @@
 	"statements_confirm_label": "Create the statements anyway",
 	"statements_preview_empty": "In this billing period there are no rental contracts without a statement in the chosen buildings.",
 	"statements_all_billed": "All rental contracts already have a statement in this period. To recalculate a draft, delete it and create the statements again. Sent statements cannot be recalculated.",
+	"statements_all_billed_lead": "All rental contracts already have a statement in this period.",
 	"statements_maybe_missing_title": "Invoices may be missing",
 	"statements_compared_title": "Costs compared with the previous year",
 	"statements_compared_text": "Dwello compares each category with the same period of the previous year{compared}. A hint does not mean that something is wrong: perhaps the invoice comes later, or the supplier bills differently.",

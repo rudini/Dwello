@@ -21,7 +21,10 @@ Request: «Setze #251 #252 #201 um». Branch `claude/statement-wizard-251-252-20
 - [x] Persona Anna (`docs/design/personas/anna-issue-201.md`), persona Dr. Weber (`docs/design/personas/dr-weber-issue-251.md`); no daten-pruefer: no amounts, PDFs or QR-bills change
 - [x] Fixes from the reviews: discard button «Angaben verwerfen» as in the dialog (#57's word; Anna P-1 in part); focus on the step heading after closing the notice (Anna, C-5); step 2 says that a run leaves days open instead of «Sie müssen es nicht wählen» and the delete advice when a statement covers only part of the period (V-9, C-3, Dr. Weber P-1/P-2); «Alle Gebäude» stays empty when every building is left out (C-1); scenario waits for the note (C-2); contracts from `tests/contracts` (C-7); C-8; fr/it wording (V-10, V-11, C-9)
 - [x] E2E full suite (chromium, api) on b881ac0: 779 passed; after the fixes `statement-generate.feature`, `contract-new.feature` and their axe and language rows again green
-- [ ] Closing code-reviewer round, fach-reviewer round 3 on the new step-2 texts
+- [x] fach-reviewer round 3 (`docs/reviews/wizard-fachreview-3.md`): V-12, V-13 wording applied («Mietstage», fr/it word for the run)
+- [x] Closing code-reviewer round (`docs/reviews/wizard-review-2.md`): fixed Major C-1 (empty preview with open days no longer advises deleting drafts, `PreviewEmpty.svelte`), C-2 (test), C-3 in part, C-6
+- [ ] Re-review of the C-1 fix (code-reviewer round 3)
+- [x] Workflow note `docs/reviews/workflow-notes-issue-201.md`
 - [ ] Feature review (personas, fach-reviewer)
 - [ ] Checks before push; archive session; pull request, CI, merge
 

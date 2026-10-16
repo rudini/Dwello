@@ -432,6 +432,22 @@ describe('Abrechnungen erstellen', () => {
 		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
 	});
 
+	// code review C-1 (round 2), persona Dr. Weber P-1: löscht er den Entwurf und erstellt ihn in dieser Periode neu,
+	// bleiben die Tage, die der Entwurf abrechnete, ohne Abrechnung
+	it('rät bei einer leeren Vorschau mit offenen Tagen nicht, Entwürfe zu löschen', () => {
+		open({
+			preview: [],
+			invoices: [{ ...invoices[0], buildingId: 'b1', statements: 1, partlyBilled: 1 }]
+		});
+
+		const empty = byTestId('preview-empty')!.parentElement!.textContent!.replace(/\s+/g, ' ');
+		expect(empty).toContain(
+			'Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung.'
+		);
+		expect(empty).not.toContain('löschen Sie ihn');
+		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
+	});
+
 	it('nennt Gebäude, deren Rechnungen nur einen Teil der Periode abdecken', () => {
 		open({
 			preview,
@@ -1117,6 +1133,18 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		expect(billedText('b2')).toBe(
 			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.' +
 				open_
+		);
+	});
+
+	it('lässt den Rat zum Neuberechnen weg, wenn bei einigen Mietverträgen Tage offen bleiben', async () => {
+		billed([{ buildingId: 'b1', contracts: 3, billed: 2, partly: 1 }]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung.'
 		);
 	});
 

@@ -450,7 +450,7 @@ describe('Entwurf des Mietvertrags', () => {
 		expect(localStorage.length).toBe(0);
 	});
 
-	// Nach «Entwurf verwerfen» beginnt der Assistent neu: der Vorschlag für den Vertragsbeginn kommt wieder
+	// Nach «Angaben verwerfen» beginnt der Assistent neu: der Vorschlag für den Vertragsbeginn kommt wieder
 	it('schlägt nach dem Verwerfen des Entwurfs den Vertragsbeginn wieder vor', async () => {
 		writeDraft(localStorage, 'contract', { tenantId: 't1' }, new Date());
 		await open();

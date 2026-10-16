@@ -1098,6 +1098,7 @@
 	"statements_confirm_label": "Allestire comunque i conteggi",
 	"statements_preview_empty": "In questo periodo di conteggio non ci sono contratti di locazione senza conteggio negli immobili scelti.",
 	"statements_all_billed": "Tutti i contratti di locazione hanno già un conteggio in questo periodo. Per ricalcolare una bozza, la elimini e allestisca di nuovo i conteggi. I conteggi inviati non possono essere ricalcolati.",
+	"statements_all_billed_lead": "Tutti i contratti di locazione hanno già un conteggio in questo periodo.",
 	"statements_maybe_missing_title": "Forse mancano fatture",
 	"statements_compared_title": "Costi rispetto all’anno precedente",
 	"statements_compared_text": "Dwello confronta ogni categoria con lo stesso periodo dell’anno precedente{compared}. Un’avvertenza non significa che qualcosa sia sbagliato: forse la fattura arriva più tardi, o il fornitore fattura diversamente.",

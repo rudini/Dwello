@@ -46,7 +46,7 @@ describe('Vorschau der Abrechnungen', () => {
 		}))
 			form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		// Marc moved in on 01.05.2024; his statement 2024 leaves 01.01.–30.06.2025 open
+		// moved in on 01.05.2024: the statement 2024 leaves 01.01.–30.06.2025 open
 		const contract = {
 			...buildingContracts.contracts[0],
 			id: 'c1',
