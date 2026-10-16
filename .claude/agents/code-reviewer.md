@@ -14,8 +14,7 @@ Check against `CLAUDE.md` and the docs it names:
 - Design rules: tokens only (`docs/design/token-referenz.md`), components from `src/lib/ui`, accessibility (labels, focus, keyboard, 48 px controls).
 - Security: auth and XSRF checks, input validation, no data leaking to the client.
 - Simplicity: the shortest diff that works; nothing unused left behind. Read `.claude/skills/ponytail-review/SKILL.md` and apply it to the diff; its findings are Minors or Nits unless they hide a defect.
-- Plan (Minor): `implementation_plan.md` holds only the current session.
-- Red notes (Minor when missing, never more): the commit messages of the range (`git log <range>`) carry a `Red: <test or scenario> – <message>` line for each new test of a behavior and each new or changed scenario (a test written after the code: red shown by taking the code out). Judge whether a test can fail by reading it, not by its note.
+- Red tests: judge by reading whether each new test and scenario fails without the change (the caller keeps no notes of it).
 - Acceptance tests, when the diff touches `tests/e2e/`: lint already enforces the Screenplay layers (`tests/e2e/CLAUDE.md`); judge the design it cannot see:
   - Questions answer the value itself (text, amount in francs, count), so a failing check shows what the system says; yes/no only for real states (shown, enabled, checked).
   - The UI and the API path of a `throughUiOrApi` task or question answer in the same form; the API path calls system code (backend, or BFF server code in `src/lib/server`) and never copies a rule into the test.
@@ -26,7 +25,7 @@ Check against `CLAUDE.md` and the docs it names:
   - The same scenarios and the same strictness as before, unless the requirement changes them.
 
 Always check these, and report a missing one as Major:
-- A behavior change (a bug fix a user can see included) has a scenario in `tests/e2e/features`, without `@wip` (its `Red:` line is a red note, above).
+- A behavior change (a bug fix a user can see included) has a scenario in `tests/e2e/features`, without `@wip`.
 - New screens or UI states are in `tests/a11y/screens.json`, `accessibility.feature` and `sprachen-bildschirme.feature`.
 - Every new or changed text is in all four `messages/*.json`.
 - E2E code keeps the layer rules of `tests/e2e/CLAUDE.md` (Screenplay): steps call only tasks and questions, never the page or its locators directly.

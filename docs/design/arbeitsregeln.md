@@ -1,6 +1,6 @@
 # Working rules for the redesign (resume file)
 
-The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: the automated checks and "Persona runs: how" (subagent `persona`); the personas are in `docs/design/personas/README.md`.
+The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: "Persona runs: how" (the checks before a push are those of `CLAUDE.md`, "Before marking anything complete") (subagent `persona`); the personas are in `docs/design/personas/README.md`.
 
 Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
 
@@ -37,7 +37,7 @@ Everything a new session needs to continue the redesign without the original pro
 3. Skill `/ponytail`: the shortest diff that works; check the finished change against it.
 4. Pure styles/assets need no unit test but the automated checks and a visual check.
 
-## Automated checks (all green before every review, from stage 2)
+## Automated checks of the redesign (history; today `CLAUDE.md`, "Before marking anything complete")
 
 ```bash
 bun run test:coverage   # frontend unit + DOM tests with coverage floor
@@ -56,7 +56,7 @@ Axe: `@axe-core/playwright`, tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`
 
 1. Finish, checks green, commit, push, wait for `ui-screenshots`, update `docs/archive/redesign/progress.md`.
 2. Start an independent read-only reviewer agent with fresh context (Plan for analysis/plan, general-purpose for code/design, Explore for remnant searches). Give it: stage goal, changed files/diff, brief requirements, glossary, axe result, ui-screenshots result, review criteria (correctness, tests, readability, tokens only, a11y incl. contrast/focus/roles/keyboard/touch size, consistency, no logic changes, old-design remnants, terminology).
-3. Wait for it. Findings: Blocker / Major / Minor. Fix all Blockers and Majors (with /tdd + /ponytail), Minors if cheap, else open work (`CLAUDE.md`, "Open work": functional points as issues, non-functional ones in `offene-punkte.md`). Rerun checks. Follow-up review after large changes, max. 3 rounds.
+3. Wait for it. Findings: Blocker / Major / Minor. Fix all Blockers and Majors (with /tdd + /ponytail), Minors if cheap, else they stay in the review report (`CLAUDE.md`, "Open work"). Rerun checks. Follow-up review after large changes, max. 3 rounds.
 4. Write `docs/archive/redesign/reviews/<stage>-review-<n>.md`: findings, changes, deliberate non-changes.
 
 ## Personas (from stage 4, after every stage with operable UI)

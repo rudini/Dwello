@@ -1,3 +1,49 @@
+## Session 2026-10-16: second guide review R-1 to R-8
+
+Request (chat): «Setze deine Empfehlung um, R-4 auch» from `docs/reviews/opus55-guide-review-2.md`. Rules only, no app behaviour, so no scenario. Same pull request as the G findings (not pushed yet).
+
+- [x] R-2: one source per rule (rounds, the two exception kinds, Minor/Nit triage, `Refs` in the KI case, one pull request per issue); elsewhere only a pointer
+- [x] R-4: glossary-term merge condition, split issues and a fix that closes two issues to skill `pull-request`; "its own slice for this limit" out of `CLAUDE.md`
+- [x] R-1: cut, not move: the longest lines of `CLAUDE.md` (UI languages, Open work); `CLAUDE.md` 3'229 → 3'146 words, the rule files together 6'095 → 6'005
+- [x] R-3: friction with a rule is noted at once as a plan item «Workflow note: …»
+- [x] R-5: «or a loaded skill says to ask» out of "When to ask"
+- [x] R-6: affected tests include those that read a changed file
+- [x] R-7: descriptions of `slice-review` and `workflow-review` match their text
+- [x] R-8: finish line of an issue is its "Done means" plus the workflow's "Done means"
+- [x] `code-reviewer` round 1 (docs/reviews/r18-review-1.md); its Minors/Nits fixed, no further round
+- [x] Checks: lint, check, type-check, the tests that read rule files
+- [x] Archive the session, push after #266 is merged, pull request, CI, merge
+  Files: `CLAUDE.md`, `.claude/skills/{slice-review,pull-request,workflow-review}/SKILL.md`; report `docs/reviews/r18-review-1.md`
+
+## Session 2026-10-16: less bookkeeping, findings and checks (guide review G-3, G-4, G-6)
+
+Request (chat): «Setze auch G-3, G-4 und G-6 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Goes into the same pull request as G-1/G-2/G-5/G-8 (not pushed yet).
+
+- [x] G-3: no `Red:` lines, no plan line per reviewer and round, no exit codes handed to reviewers; the checklist stays, a review item names its report (`CLAUDE.md`, `slice-review`, `code-reviewer`, `docs/test-pyramid.md`)
+- [x] G-4: a Minor/Nit is fixed when trivial, else it stays in its report; open work only for a Blocker/Major of the two kinds; persona "Beobachtungen" stay in the report (`CLAUDE.md`, `slice-review`, `pull-request`, `docs/design/arbeitsregeln.md`)
+- [x] G-6: before every push lint, check, type-check, the affected tests and scenarios; CI runs the full suites with the coverage floors (`CLAUDE.md` "Before marking anything complete", `pull-request`)
+- [x] `code-reviewer` round 1 (docs/reviews/g346-review-1.md)
+- [x] Row O-34 in `offene-punkte.md`: the axe upload states that time out in CI (red on `main` and #266)
+- [x] Checks: lint, check, type-check, the rule tests (`open-work`, `commit-msg-gate`, deepcheck `readme`, `check-issues`)
+- [x] Archive the session, push after #266 is merged, pull request, CI, merge
+  Files: `CLAUDE.md`, `.claude/agents/code-reviewer.md`, `.claude/skills/{slice-review,pull-request}/SKILL.md`, `docs/test-pyramid.md`, `docs/design/arbeitsregeln.md`, `docs/design/offene-punkte.md`; report `docs/reviews/g346-review-1.md`
+
+## Session 2026-10-16: shorter CLAUDE.md (guide review G-1, G-2, G-5, G-8)
+
+Request (chat): «Setze G-1, G-2, G-5 und G-8 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Own pull request after #266 is merged. Step numbers 1–9 stay, since agents, skills and tools cite them.
+
+- [x] G-1 (4'955 → about 3'200 words; the rest are daily rules: conventions, design, gotchas, so the 2'000 of the proposal is not reached): rare procedures out of `CLAUDE.md` into what loads on demand: skills `pull-request`, `workflow-review`, `commit-gates`; findings and rounds to `slice-review`; feature-review details to `docs/design/personas/README.md`; the KI eval case to `backend/CLAUDE.md`; target about 2'000 words
+- [x] G-2: round limit and closing round in one sentence each
+- [x] G-5: every point where to ask in one list
+- [x] G-8: a short "Done means" list at the start of "Workflow"
+- [x] Nothing lost: every rule that left `CLAUDE.md` exists at its new place, `CLAUDE.md` points there
+- [x] `code-reviewer` round
+  code-reviewer round 1 (docs/reviews/shorter-review-1.md): fixed C-1 (Major: check for open `entscheiden` issues back in "Open work"), C-2 (Major: stop hook rule back in step 9), C-3..C-13, C-15, C-16; rejected C-14: «or that there is none» names the case of a pull request without UI changes, where CI posts no screenshot comment (#264)
+- [x] Checks (exit 0 each, frontend 2619, backend 683): `bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`
+- [x] Archive the session, push after #266 is merged, pull request, CI, merge
+  code-reviewer round 2 (docs/reviews/shorter-review-2.md): C-1..C-16 confirmed fixed, C-14 rejection accepted, no Blocker/Major; fixed the rest of C-5 (Nit: a skill that says to ask, e.g. `bdd-acceptance`), no further round
+  Files: `CLAUDE.md`, `backend/CLAUDE.md`, `.claude/skills/{pull-request,workflow-review,commit-gates}/SKILL.md` (new), `.claude/skills/slice-review/SKILL.md`, `docs/design/personas/README.md`; reports `docs/reviews/shorter-review-{1,2}.md`
+
 ## Session 2026-10-16: the other proposals of the guardrail analysis
 
 Request (chat): «setze alle Vorschläge um», the proposals of the guardrail analysis not in PR #264. Rules, hooks, tooling and one test; no app behaviour, so no scenario. Own pull request after #264 is merged. Not in the repository: the stop hook `~/.claude/stop-hook-git-check.sh` (Blocked on me).
