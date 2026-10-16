@@ -65,7 +65,12 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.sendStatement('Bruno', 2025);
 	await seed.paymentDeadline('Bruno', 2025, '2026-01-31'); // overdue: only then a reminder can be sent
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
+	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
+	// reminded today: the Zahlungsfrist of the Mahnung runs, the next one is possible only later (#107)
+	await seed.sendStatement('Bruno', 2024);
+	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
+	await seed.remind('Bruno', 2024);
 	const lateInvoice = await seed.invoiceOn('Seeblick', 'Lift', '200.00', '2025-06-30'); // recorded after the 2025 statements
 	// heating costs without any Tankbestand: the wizard asks about a tank; rented, so its preview has a row too
 	await seed.building('Bergsicht', 'Winterthur');
@@ -88,6 +93,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		statement: seed.idOf('Abrechnung Anna 2025'),
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
+		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
+		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
 		heatingProfile: seed.idOf('Standard'),

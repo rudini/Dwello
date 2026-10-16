@@ -126,9 +126,9 @@ describe('Mietvertrag bearbeiten', () => {
 		const help = byTestId('contract-parties-help')!.textContent!;
 		expect(help).toContain('Mieter und Wohnung lassen sich nicht ändern.');
 		expect(help).toContain('mit «Beenden»');
-		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel
+		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel; auch ein begonnener wird gelöscht (#116)
 		expect(help).toContain(
-			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt und hat der Mietvertrag noch nicht begonnen'
+			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt, löschen Sie den Mietvertrag auf seiner Seite und erfassen Sie ihn neu. Gibt es dazu schon den Entwurf einer Nebenkostenabrechnung, löschen Sie zuerst den Entwurf.'
 		);
 		// Persona Sven N-2: der Link nennt den Mietvertrag wie die anderen Links zur selben Seite
 		expect(byTestId('contract-parties-link')!.textContent).toBe(
@@ -472,12 +472,12 @@ describe('Mietvertrag bearbeiten', () => {
 			);
 		});
 
-		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot
-		it('nennt den Grund, wenn der Entwurf nicht gelöscht werden kann', async () => {
-			calls = fakeBff(({ method }) => {
-				if (method === 'PUT') return [409, refused];
-				if (method === 'DELETE')
-					return [400, { error: 'not a draft', code: 'STATEMENT_NOT_DRAFT' }];
+		// Review K-7, #141: ein inzwischen versendeter Entwurf; das Backend lehnt ab und behält ihn, kein zweites Angebot
+		it('nennt den Grund, wenn der Entwurf nicht mehr gelöscht werden kann', async () => {
+			const drafted = (body: unknown) => !!(body as { deleteDraft?: string }).deleteDraft;
+			const sent = { ...refused, statements: [{ ...refused.statements[0], status: 'sent' }] };
+			calls = fakeBff(({ method, body }) => {
+				if (method === 'PUT') return [409, drafted(body) ? sent : refused];
 				return [200, { contracts: [] }];
 			});
 			await open();
@@ -487,18 +487,18 @@ describe('Mietvertrag bearbeiten', () => {
 			await save();
 			click('delete-draft-and-save');
 			await settle();
+			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Die Abrechnung ist kein Entwurf mehr und kann nicht gelöscht werden.'
+				'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet.'
 			);
 			expect(byTestId('delete-draft-and-save')).toBeNull();
 		});
 
-		// A-10: der einzige Entwurf wird gelöscht, der Mietvertrag gespeichert, danach geht es in den Assistenten
+		// A-10: der einzige Entwurf wird mit dem Speichern gelöscht (#141: in einem Schritt), danach geht es in den Assistenten
 		it('löscht den Entwurf, speichert und öffnet den Assistenten für Gebäude und Periode', async () => {
-			let refuse = true;
-			calls = fakeBff(({ method }) => {
-				if (method === 'PUT') return refuse ? [409, refused] : [200, {}];
-				if (method === 'DELETE') return ((refuse = false), [204]);
+			calls = fakeBff(({ method, body }) => {
+				if (method === 'PUT')
+					return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, refused];
 				return [200, { contracts: [] }];
 			});
 			await open();
@@ -509,10 +509,13 @@ describe('Mietvertrag bearbeiten', () => {
 			click('delete-draft-and-save');
 			await settle();
 
-			expect(calls.filter((c) => c.method !== 'GET').map((c) => [c.method, c.path])).toEqual([
-				['PUT', '/contracts/c1'],
-				['DELETE', '/statements/s1'],
-				['PUT', '/contracts/c1']
+			expect(
+				calls
+					.filter((c) => c.method !== 'GET')
+					.map((c) => [c.method, c.path, (c.body as { deleteDraft?: string }).deleteDraft])
+			).toEqual([
+				['PUT', '/contracts/c1', undefined],
+				['PUT', '/contracts/c1', 's1']
 			]);
 			expect(goto).toHaveBeenCalledWith(
 				'/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'

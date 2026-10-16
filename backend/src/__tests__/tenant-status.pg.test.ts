@@ -49,7 +49,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	for (const id of contracts) await deleteContract(id);
+	for (const id of contracts) await deleteContract(id, true);
 	for (const id of Object.values(tenants)) await deleteTenant(id);
 	await deleteApartment(otherApartment);
 	await rental.remove();

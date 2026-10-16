@@ -845,7 +845,7 @@ describe('Abrechnungsdetail', () => {
 		);
 
 		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'Das Dokument «Zahlungserinnerung» liegt unter «Dokumente» zum Versand bereit. Die E-Mail wurde nicht zugestellt. Drucken Sie die Mahnung aus, schicken Sie sie per Post und markieren Sie sie danach unter «Dokumente» als versendet. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
+			'Das Dokument «Zahlungserinnerung» liegt unter «Dokumente» zum Versand bereit. Die E-Mail wurde nicht zugestellt. Markieren Sie die Mahnung unter «Dokumente» am Tag, an dem Sie sie zur Post bringen, als versendet: Erst dann trägt sie das Datum dieses Tages und eine neue Zahlungsfrist. Drucken Sie sie danach aus und schicken Sie sie per Post. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
 		);
 	});
 

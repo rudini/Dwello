@@ -29,6 +29,7 @@ const summary = {
 	status: documents.status,
 	sentAt: documents.sentAt,
 	deliveryError: documents.deliveryError,
+	paymentDeadline: documents.paymentDeadline,
 	createdAt: documents.createdAt,
 	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
 	statementNumber: utilityStatements.statementNumber
@@ -67,7 +68,7 @@ export async function listDocuments(filters: DocumentFilters = {}) {
 	return selectSummaries(and(...conditions));
 }
 
-async function getDocument(id: string) {
+export async function getDocument(id: string) {
 	const [document] = await selectSummaries(eq(documents.id, id));
 	return document ?? null;
 }
@@ -136,11 +137,14 @@ export async function countReminders(statementId: string) {
 	return result.value;
 }
 
-/** E-mailed, or printed and posted by the property manager; an upload has no Versandstatus: null */
-export async function markDocumentSent(id: string) {
+/**
+ * E-mailed, or printed and posted by the property manager with the letter remade on that day; an upload has no
+ * Versandstatus: null
+ */
+export async function markDocumentSent(id: string, posted?: { content: string; paymentDeadline: string }) {
 	const [sent] = await db
 		.update(documents)
-		.set({ status: 'sent', sentAt: new Date(), deliveryError: null })
+		.set({ status: 'sent', sentAt: new Date(), deliveryError: null, ...(posted && { ...posted, channel: 'letter' }) })
 		.where(and(eq(documents.id, id), ne(documents.type, 'upload')))
 		.returning({ id: documents.id });
 	return sent ? getDocument(id) : null;

@@ -304,7 +304,7 @@ prefix       VARCHAR(50)   PRIMARY KEY  -- NK-{first 8 characters of the buildin
 last_number  INTEGER       NOT NULL     -- the last number given with this prefix
 ```
 
-Migration `0007` (#97). `generateStatementNumber` (`backend/src/services/calculation.service.ts`) counts `last_number`
+Migration `0008` (#97). `generateStatementNumber` (`backend/src/services/calculation.service.ts`) counts `last_number`
 up for every new statement, so a number is never given twice: a deleted draft leaves a gap, because its PDF may already
 have been handed out. A prefix without a row (its first statement since the migration) starts after the highest
 `statement_number` with that prefix; existing numbers stay as they are. A number deleted before the migration that was
@@ -347,8 +347,10 @@ title          VARCHAR(255) NOT NULL
 file_name      VARCHAR(255) NOT NULL
 content        TEXT         NOT NULL   -- the file, Base64
 mime_type      VARCHAR(50)  NOT NULL DEFAULT 'application/pdf'  -- application/pdf | image/jpeg | image/png
-channel        VARCHAR(10)             -- email | letter; NULL for an upload
+channel        VARCHAR(10)             -- email | letter; NULL for an upload; letter once a failed e-mail is posted
 status         VARCHAR(20)             -- Versandstatus: sent | to_send; NULL for an upload
+payment_deadline DATE                  -- the Zahlungsfrist a reminder prints (letter date + 10 days); the next
+                                       -- Mahnstufe is possible from the day after; NULL for an upload
 sent_at        TIMESTAMP
 delivery_error TEXT                    -- why an e-mail could not be sent
 ```
@@ -430,7 +432,7 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
-  0003 … 0007           -- later changes, each named in its table above
+  0003 … 0008           -- later changes, each named in its table above
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in

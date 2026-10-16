@@ -11,6 +11,7 @@ import {
 	tenants,
 	apartments,
 	buildings,
+	documents,
 	heatingProfiles,
 	type UtilityStatement,
 	type NewUtilityStatement,
@@ -39,9 +40,18 @@ export interface StatementFilters {
 }
 
 // The base64 PDF is only served by the /pdf routes, never with list or detail data
-const { pdfBlob: _pdfBlob, ...statementColumns } = getTableColumns(utilityStatements);
+const { pdfBlob: _pdfBlob, ...tableColumns } = getTableColumns(utilityStatements);
+// The day after the last reminder's Zahlungsfrist, from which the next Mahnstufe is possible (#107); none after the 3rd
+// and none once paid
+const nextReminderFrom = sql<string | null>`(
+	select case when count(*) < 3 and ${utilityStatements.status} = 'sent' then (max(${documents.paymentDeadline}) + 1)::text end
+	from ${documents}
+	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder'
+)`;
+const statementColumns = { ...tableColumns, nextReminderFrom };
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
+	nextReminderFrom: string | null;
 	tenant: {
 		id: string;
 		firstName: string;
