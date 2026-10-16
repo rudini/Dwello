@@ -256,6 +256,12 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(text).toContain("(600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 34.06 %");
 	});
 
+	// Dr. Weber P-1: die Erläuterung nannte nur die Mietstage in der Periode, der Zeitanteil kam aber aus den Rechnungen
+	it('erklärt die Rechnungen unter der Position und ihre Gewichtung nach den Beträgen', async () => {
+		const text = (await textOf(mixed)).flowing;
+		expect(text).toContain('bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode; bei Rechnungen über verschiedene Leistungszeiträume, unter der Position aufgeführt, nach ihren Beträgen gewichtet.');
+	});
+
 	it('hält die Rechnungen beim Seitenwechsel bei ihrer Position, unter dem Tabellenkopf', async () => {
 		const many = { ...mixed, lineItems: Array.from({ length: 30 }, (_, i) => ({ ...mixed.lineItems[0], category: `Kategorie ${i + 1}` })) };
 
