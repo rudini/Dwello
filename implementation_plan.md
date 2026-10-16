@@ -17,7 +17,11 @@ Branch `feat/glossary-texts-222`. Issue #222 "Decided (product owner)" (the glos
 - [x] `invoices_upload_deducted` in de/fr/it/en as decided (one way, «Akontorechnung»)
 - [x] `invoices_beleg_deducted` in de/fr/it/en as decided (V-3)
   Scenario green (chromium): both scenarios, `@wip` removed; unit and DOM tests green
-- [x] `docs/design/i18n-begriffe.md`: «Akontorechnung (eines Rechnungsstellers)» facture d’acompte / fattura d’acconto / advance invoice
+- [x] `docs/design/i18n-begriffe.md`: rows «Akontorechnung (eines Rechnungsstellers)» facture d’acompte / fattura d’acconto / advance invoice, «Mahnung eines Rechnungsstellers» and «Auslesen»
+- [ ] Blocked on the product owner: the sentence on billed advance invoices (variant A) in «Akontorechnung», `UBIQUITOUS_LANGUAGE.md`; the pull request is merged only after that edit (`CLAUDE.md`, Design-Regeln)
+  Skills: ponytail-review (text-only diff, «Lean already»); tdd and ponytail were not loaded for this slice, the tests were changed and shown red before the texts
+  code-reviewer round 1 (docs/reviews/222-review-1.md): fixed C-1 (Skills line), C-2 (plan item for the glossary edit), C-3 (issue numbers, 0489f9ab), C-4 (rows and files named), C-5 (brackets in the row «Mahnung eines Rechnungsstellers»)
+  Files: `messages/{de,fr,it,en}.json`, `tests/e2e/features/invoices.feature`, `src/__tests__/invoice-upload.test.ts`, `src/__tests__/invoice-pages.dom.test.ts`, `docs/design/i18n-begriffe.md`, `docs/reviews/222-*.md`, `implementation_plan.md`
 - [ ] Reviews (`code-reviewer`; feature review: personas and `fach-reviewer` where they apply)
 - [ ] Before marking complete: all checks in `CLAUDE.md`
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-222.md`
