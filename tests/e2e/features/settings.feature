@@ -35,3 +35,7 @@ Funktionalität: Einstellungen
       | Kategorien       | Kategorien       |
       | Heizprofile      | Heizprofile      |
       | Verteilschlüssel | Verteilschlüssel |
+
+  # Rückerstattung (#69)
+  Szenario: Die Einstellungen sagen, wer eine Rückerstattung überweist
+    Dann erklären die Einstellungen bei der IBAN "Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters"
