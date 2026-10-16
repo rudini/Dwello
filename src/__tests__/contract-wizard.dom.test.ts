@@ -490,9 +490,33 @@ describe('Vorgewählte Wohnung', () => {
 		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
 			'aus dem letzten Mietvertrag dieser Wohnung (01.01.2015 – 31.12.2019, gekündigt)'
 		);
+		// Persona Helga P17 P-1: ohne Zusatzmiete gibt es keinen Parkplatz zu leeren
+		expect(byTestId('contract-rent-taken-over')!.textContent).not.toContain('Parkplatz');
 		type('contract-base-rent-input', '980');
 		await settle();
 		expect(byTestId('contract-rent-taken-over')).toBeNull();
+	});
+
+	it('nennt den Parkplatz nur, wenn eine Zusatzmiete übernommen ist', async () => {
+		const last = { ...listed.contracts[0], apartmentId: 'a1', startDate: '2015-01-01' };
+		fakeBff(({ path }) => [
+			200,
+			{
+				contracts: path.endsWith('=a1')
+					? [{ ...last, endDate: '2019-12-31', additionalRent: '120.00' }]
+					: []
+			}
+		]);
+		location.url = new URL('http://localhost/contracts/new?tenant=t1&apartment=a1');
+		await open();
+		next();
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('120.00');
+		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
+			'Mietet der neue Mieter zum Beispiel den Parkplatz nicht, leeren Sie die Zusatzmiete.'
+		);
 	});
 });
 

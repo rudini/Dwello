@@ -30,6 +30,7 @@
 {#if takenFrom}
 	<Alert title={m.contracts_rent_taken_over_title()} testid="contract-rent-taken-over">
 		<p>{m.contracts_rent_taken_over_text({ period: takenFrom })}</p>
+		{#if values.additionalRent}<p>{m.contracts_rent_taken_over_additional()}</p>{/if}
 	</Alert>
 {/if}
 
