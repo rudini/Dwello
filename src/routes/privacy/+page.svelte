@@ -38,7 +38,6 @@
 			title: m.privacy_third_title(),
 			paragraphs: [
 				m.privacy_third_1(),
-				m.privacy_third_2(),
 				m.privacy_third_3(),
 				m.privacy_third_4(),
 				m.privacy_third_5()

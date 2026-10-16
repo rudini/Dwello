@@ -111,6 +111,23 @@ describe('Mieter speichern', () => {
 		expect(calls[0].body).not.toHaveProperty('for');
 	});
 
+	// P-17 (#144): die im Mietvertrag vorgewählte Wohnung geht auf dem Umweg nicht verloren
+	it('gibt dem Mietvertrag die vorgewählte Wohnung zurück', async () => {
+		const { calls, result } = runAction(
+			newActions.default,
+			'',
+			201,
+			{ ...anna, for: 'contract', apartment: 'a1' },
+			{ id: 't9' }
+		);
+
+		await expect(result).rejects.toMatchObject({
+			status: 303,
+			location: '/contracts/new?tenant=t9&created=1&apartment=a1'
+		});
+		expect(calls[0].body).not.toHaveProperty('apartment');
+	});
+
 	it('speichert Änderungen und kehrt zur Detailseite zurück', async () => {
 		const { calls, result } = runAction(editActions.default, 't1', 200, anna);
 

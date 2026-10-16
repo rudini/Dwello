@@ -47,6 +47,9 @@ const select = (testid: string, value: string) =>
 const type = (testid: string, value: string) =>
 	fireEvent(byTestId<HTMLInputElement>(testid)!, 'input', value);
 const next = () => submit('wizard-next');
+// «Verwaltungspauschale vereinbart» has no default (#89)
+const chooseFee = (choice: string) =>
+	byTestId<HTMLInputElement>(`contract-fee-choice-${choice}`)!.click();
 
 const UNKNOWN =
 	'Dwello konnte die Mietverträge dieser Wohnung nicht laden. Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.';
@@ -71,6 +74,7 @@ async function untilReview() {
 	next();
 	type('contract-base-rent-input', '950');
 	type('contract-advance-payment-input', '180');
+	chooseFee('run');
 	next();
 }
 
@@ -155,6 +159,58 @@ describe('Mietvertrag erfassen', () => {
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’130.00');
 	});
 
+	// #89, persona Helga P-1: the error at the choice goes once an answer is chosen
+	it('nimmt die Meldung zur Verwaltungspauschale zurück, sobald eine Antwort gewählt ist', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		type('contract-base-rent-input', '950');
+		next();
+		await settle();
+		const group = byTestId('contract-fee-choice')!;
+		expect(group.textContent).toContain(
+			'Bitte wählen Sie, ob im Mietvertrag eine Verwaltungspauschale vereinbart ist.'
+		);
+		chooseFee('none');
+		await settle();
+		expect(group.textContent).not.toContain('Bitte wählen Sie');
+		expect(group.getAttribute('aria-invalid')).toBeNull();
+	});
+
+	// #89, fach-review M-2: the guideline of 3 % holds for a rate agreed in the contract too
+	it('weist bei einem eigenen Satz über 3 % auf den üblichen Richtwert hin', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(byTestId('contract-fee-rate-input')).toBeNull();
+		// fach-review M-3: a new fee holds only from the next Kündigungstermin (Art. 269d Abs. 1 OR)
+		expect(document.body.textContent).toContain(
+			'mit dem amtlichen Formular mitteilen; sie gilt erst ab dem nächsten Kündigungstermin (Art. 269d OR).'
+		);
+		chooseFee('own');
+		await settle();
+		type('contract-fee-rate-input', '3');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')).toBeNull();
+		type('contract-fee-rate-input', '4,5');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')!.textContent).toContain(
+			'Die Verwaltungspauschale ist höher als der übliche Richtwert von 3 %.'
+		);
+		// closing review C-4: above 10 % the field refuses the rate; no hint on a rate it does not take
+		type('contract-fee-rate-input', '12');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')).toBeNull();
+	});
+
 	it('zeigt vor dem Speichern alles in Worten und speichert Akonto als Akonto', async () => {
 		await untilReview();
 		expect(heading()).toBe('Prüfen');
@@ -221,6 +277,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		type('contract-base-rent-input', "1'450");
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’450.00');
+		chooseFee('run');
 		next();
 		const rent = [...document.querySelectorAll('[data-testid="contract-review-item"]')].find((i) =>
 			i.textContent!.includes('Nettomiete')
@@ -327,6 +384,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 		type('contract-base-rent-input', '950');
+		chooseFee('run');
 		next();
 		await settle();
 		expect(heading()).toBe('Prüfen');
@@ -458,6 +516,65 @@ describe('Mieter mit einem anderen Mietvertrag', () => {
 		await settle();
 		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
 		expect(byTestId('tenant-running-contract')).toBeNull();
+	});
+});
+
+// P-17 (#144): die vorgewählte Wohnung bleibt auf dem Umweg, die Beträge des letzten Mietvertrags sind vorgeschlagen
+describe('Vorgewählte Wohnung', () => {
+	it('nimmt die vorgewählte Wohnung auf den Umweg zum neuen Mieter mit', async () => {
+		location.url = new URL('http://localhost/contracts/new?apartment=a1');
+		await open();
+		expect(byTestId('contract-new-tenant')!.getAttribute('href')).toBe(
+			'/tenants/new?for=contract&apartment=a1'
+		);
+	});
+
+	it('schlägt die Beträge des letzten Mietvertrags vor und sagt es, bis einer geändert ist', async () => {
+		const last = { ...listed.contracts[0], id: 'c8', apartmentId: 'a1', startDate: '2015-01-01' };
+		fakeBff(({ path }) => [
+			200,
+			{ contracts: path.endsWith('=a1') ? [{ ...last, endDate: '2019-12-31' }] : [] }
+		]);
+		location.url = new URL('http://localhost/contracts/new?tenant=t1&apartment=a1');
+		await open();
+		next();
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(heading()).toBe('Miete');
+		expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('950.00');
+		expect(byTestId<HTMLInputElement>('contract-advance-payment-input')!.value).toBe('150.00');
+		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('');
+		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
+			'aus dem letzten Mietvertrag dieser Wohnung (01.01.2015 – 31.12.2019, gekündigt)'
+		);
+		// Persona Helga P17 P-1: ohne Zusatzmiete gibt es keinen Parkplatz zu leeren
+		expect(byTestId('contract-rent-taken-over')!.textContent).not.toContain('Parkplatz');
+		type('contract-base-rent-input', '980');
+		await settle();
+		expect(byTestId('contract-rent-taken-over')).toBeNull();
+	});
+
+	it('nennt den Parkplatz nur, wenn eine Zusatzmiete übernommen ist', async () => {
+		const last = { ...listed.contracts[0], apartmentId: 'a1', startDate: '2015-01-01' };
+		fakeBff(({ path }) => [
+			200,
+			{
+				contracts: path.endsWith('=a1')
+					? [{ ...last, endDate: '2019-12-31', additionalRent: '120.00' }]
+					: []
+			}
+		]);
+		location.url = new URL('http://localhost/contracts/new?tenant=t1&apartment=a1');
+		await open();
+		next();
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('120.00');
+		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
+			'Mietet der neue Mieter zum Beispiel den Parkplatz nicht, leeren Sie die Zusatzmiete.'
+		);
 	});
 });
 

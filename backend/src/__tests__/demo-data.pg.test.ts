@@ -77,11 +77,11 @@ describe('Demodaten', () => {
 		expect({ paid: count('paid'), sent: count('sent'), draft: count('draft') }).toEqual({ paid: 9, sent: 1, draft: 7 });
 	});
 
-	// Wie "Als bezahlt markieren" der App: nur das Datum; der Betrag zählte sonst im Dashboard als bezahlt
-	it('markiert die bezahlte Abrechnung wie die App, mit Datum und ohne Betrag', async () => {
-		const paid = await query(name, `SELECT paid_date IS NOT NULL AS dated, paid_amount FROM utility_statements WHERE status = 'paid'`);
+	// Wie "Als bezahlt markieren" der App: das Datum und der Saldo als bezahlter Betrag (#93)
+	it('markiert die bezahlte Abrechnung wie die App, mit Datum und dem Saldo als Betrag', async () => {
+		const paid = await query(name, `SELECT paid_date IS NOT NULL AS dated, paid_amount = balance AS settled FROM utility_statements WHERE status = 'paid'`);
 
-		expect(paid).toEqual(Array(9).fill({ dated: true, paid_amount: null }));
+		expect(paid).toEqual(Array(9).fill({ dated: true, settled: true }));
 	});
 
 	// Nur bei einer Nachzahlung trägt das PDF einen Einzahlungsschein
@@ -146,6 +146,24 @@ describe('Demodaten', () => {
 			{ end_date: '2021-02-28', terminated: true },
 			{ end_date: '2025-06-30', terminated: true }
 		]);
+	});
+
+	// #89: each choice of «Verwaltungspauschale vereinbart» once, and the statements follow it
+	it('vereinbart die Verwaltungspauschale je Mietvertrag: zum Satz des Laufs, mit eigenem Satz und keine', async () => {
+		const rows = await query(
+			name,
+			`SELECT t.first_name, c.management_fee_agreed AS agreed, c.management_fee_percent AS own,
+				(SELECT array_agg(DISTINCT s.management_fee_percent) FROM utility_statements s WHERE s.contract_id = c.id) AS rates
+			FROM rental_contracts c JOIN tenants t ON t.id = c.tenant_id
+			WHERE t.first_name IN ('Marco', 'Kevin', 'Thomas') AND c.end_date IS NULL ORDER BY t.first_name`
+		);
+		expect(rows.map((r) => [r.first_name, r.agreed, r.own])).toEqual([
+			['Kevin', false, null],
+			['Marco', true, '2.50'],
+			['Thomas', true, null]
+		]);
+		expect(rows.find((r) => r.first_name === 'Kevin')!.rates).toEqual([0]);
+		expect(rows.find((r) => r.first_name === 'Marco')!.rates).toEqual([2.5]);
 	});
 
 	// Bei einem Mieterwechsel erhält jeder Mietvertrag eine eigene Abrechnung über seine Mietstage

@@ -54,7 +54,7 @@
 		// a wrong date is said at the field, which gets the focus; nothing is sent
 		paidError = '';
 		flushSync(); // cleared first: the same error set again shows again
-		paidError = paidDateError(paidDate) ?? '';
+		paidError = paidDateError(paidDate, paying!.statementDate) ?? '';
 		if (paidError) return focusFirstError(document.querySelector('[role="dialog"]'));
 		saving = true;
 		payError = '';
@@ -62,7 +62,7 @@
 		try {
 			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
 				method: 'POST',
-				body: JSON.stringify({ paidDate })
+				body: JSON.stringify({ paidDate, statementDate: paying!.statementDate })
 			});
 			if (!response.ok) {
 				// the date check says what to do; any other refusal gets the general sentence
