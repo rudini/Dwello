@@ -100,7 +100,8 @@ async function rent(
 		startDate,
 		endDate,
 		baseRent: '1500',
-		monthlyAdvancePayment
+		monthlyAdvancePayment,
+		managementFeeAgreed: true // the amounts below include the run's 3 % (#89)
 	});
 }
 

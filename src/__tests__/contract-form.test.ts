@@ -19,7 +19,9 @@ const filled: ContractFormValues = {
 	isUnlimited: true,
 	baseRent: '950',
 	additionalRent: '',
-	advancePayment: ''
+	advancePayment: '',
+	managementFee: 'run',
+	managementFeeRate: ''
 };
 
 const freeFrom = (date: string): AvailabilityInfo => ({
@@ -38,7 +40,9 @@ describe('initialContractValues', () => {
 			{
 				...filled,
 				startDate: '',
-				baseRent: ''
+				baseRent: '',
+				// #89: no default, the landlord chooses
+				managementFee: ''
 			}
 		);
 	});
@@ -52,7 +56,9 @@ describe('initialContractValues', () => {
 			endDate: '2026-03-31',
 			baseRent: '950.00',
 			additionalRent: null,
-			monthlyAdvancePayment: '120.00'
+			monthlyAdvancePayment: '120.00',
+			managementFeeAgreed: true,
+			managementFeePercent: '4.00'
 		};
 		expect(initialContractValues(contract, new URLSearchParams('tenant=t2'))).toEqual({
 			tenantId: 't1',
@@ -63,8 +69,18 @@ describe('initialContractValues', () => {
 			terminated: false,
 			baseRent: '950.00',
 			additionalRent: '',
-			advancePayment: '120.00'
+			advancePayment: '120.00',
+			managementFee: 'own',
+			managementFeeRate: '4.00'
 		});
+		// #89: an existing contract without agreement, or agreed at the run's rate
+		const values = (agreed: boolean) =>
+			initialContractValues(
+				{ ...contract, managementFeeAgreed: agreed, managementFeePercent: null },
+				new URLSearchParams()
+			);
+		expect(values(false)).toMatchObject({ managementFee: 'none', managementFeeRate: '' });
+		expect(values(true)).toMatchObject({ managementFee: 'run', managementFeeRate: '' });
 	});
 });
 
@@ -103,6 +119,28 @@ describe('validateContract', () => {
 		});
 	});
 
+	// #89: «Verwaltungspauschale vereinbart» has no default; an own rate is a percentage from 0 to 10 (#124)
+	it('verlangt eine Angabe zur Verwaltungspauschale und einen eigenen Satz von 0 bis 10', () => {
+		expect(validateContract({ ...filled, managementFee: '' })).toEqual({
+			managementFee: 'Bitte wählen Sie, ob im Mietvertrag eine Verwaltungspauschale vereinbart ist.'
+		});
+		for (const rate of ['', '10.01', '-1', '2,555', 'x']) {
+			expect(
+				validateContract({ ...filled, managementFee: 'own', managementFeeRate: rate })
+					.managementFeeRate,
+				rate
+			).toBe(
+				'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			);
+		}
+		for (const rate of ['0', '2,5', '10']) {
+			expect(
+				validateContract({ ...filled, managementFee: 'own', managementFeeRate: rate }),
+				rate
+			).toEqual({});
+		}
+	});
+
 	// "1.450" or "1,450.00" must not silently become CHF 1.45
 	it('nimmt nur Beträge in Franken und Rappen an', () => {
 		for (const amount of ['1.450', '1,450.00', '1.450,50', '12.345', '1e3']) {
@@ -124,7 +162,24 @@ describe('contractBody', () => {
 			terminated: false,
 			baseRent: '950',
 			additionalRent: '0',
-			monthlyAdvancePayment: '120'
+			monthlyAdvancePayment: '120',
+			managementFeeAgreed: true,
+			managementFeePercent: null
+		});
+	});
+
+	it('sendet die Verwaltungspauschale: vereinbart mit eigenem Satz, zum Satz des Laufs oder nicht', () => {
+		const fee = (values: Partial<ContractFormValues>) => {
+			const { managementFeeAgreed, managementFeePercent } = contractBody({ ...filled, ...values });
+			return { managementFeeAgreed, managementFeePercent };
+		};
+		expect(fee({ managementFee: 'own', managementFeeRate: '2,5' })).toEqual({
+			managementFeeAgreed: true,
+			managementFeePercent: '2.5'
+		});
+		expect(fee({ managementFee: 'none', managementFeeRate: '2,5' })).toEqual({
+			managementFeeAgreed: false,
+			managementFeePercent: null
 		});
 	});
 });
