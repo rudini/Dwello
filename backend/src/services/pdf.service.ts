@@ -3,7 +3,7 @@
  * Generates professional utility statement PDFs with Swiss QR-bills
  *
  * Features:
- * - Multi-language support (DE, FR, IT, RM, EN)
+ * - Multi-language support (DE, FR, IT, EN)
  * - Swiss QR-bill integration
  * - Professional formatting
  * - Cost breakdown by category
