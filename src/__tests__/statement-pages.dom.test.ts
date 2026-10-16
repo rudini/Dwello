@@ -607,7 +607,7 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-management-fee')).toBeNull();
 	});
 
-	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
+	// Der Saldo ist auf 5 Rappen gerundet (hier kaufmännisch, wie vor #79); wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
 	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
 		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
@@ -624,6 +624,20 @@ describe('Abrechnungsdetail', () => {
 
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600.03, balance: 184.1 });
 		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
+	// Nur zugunsten des Mieters (#79): die Nachzahlung wird kleiner, die Rückerstattung grösser (+), um bis 4 Rappen
+	it('zeigt die Rundung zugunsten des Mieters vom gezeigten Betrag aus', () => {
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.1 });
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nachzahlung vor Rundung CHF 184.13 Rundung auf 5 Rappen − CHF 0.03'
+		);
+		document.body.innerHTML = '';
+
+		detail({ totalCosts: 877.99, totalAdvancePayments: 878, balance: -0.05 });
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Rückerstattung vor Rundung CHF 0.01 Rundung auf 5 Rappen + CHF 0.04'
+		);
 	});
 
 	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {

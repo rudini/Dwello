@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { generateStatementPDFBase64, type StatementPDFData } from '../services/pdf.service';
+import { calculateBalance } from '../services/calculation.service';
 import { generateQRBillForStatement } from '../services/qr-bill.service';
 import { readPdf } from './helpers/pdf-text';
 
@@ -28,7 +29,7 @@ const refund: StatementPDFData = {
 	managementFeePercent: 0,
 	totalCosts: 784.13,
 	totalAdvancePayments: 878,
-	balance: -93.85 // 784.13 − 878.00 = −93.87, to 5 Rappen
+	balance: -93.85 // 784.13 − 878.00 = −93.87, commercially to 5 Rappen: a statement made before #79 keeps it
 };
 
 const textOf = async (data: StatementPDFData) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
@@ -90,6 +91,17 @@ describe('Rundung des Saldos im PDF', () => {
 		expect((await textOf(due)).flowing).toContain('Nachzahlung vor Rundung 184.13 Rundung auf 5 Rappen + 0.02 Nachzahlung 184.15');
 		expect((await textOf(refund)).flowing).toContain('Rückerstattung vor Rundung 93.87 Rundung auf 5 Rappen – 0.02 Rückerstattung 93.85');
 		expect((await textOf(refund)).flowing).toContain('auf 5 Rappen gerundet');
+	});
+
+	// Nur zugunsten des Mieters (#79): die Nachzahlung wird kleiner (–), die Rückerstattung grösser (+), um bis 4 Rappen
+	it('zeigt die Rundung zugunsten des Mieters vom gezeigten Betrag aus', async () => {
+		const rounded = (data: StatementPDFData) => ({ ...data, balance: calculateBalance(data.totalCosts, data.totalAdvancePayments) });
+		expect((await textOf(rounded(due))).flowing).toContain('Nachzahlung vor Rundung 184.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 184.10');
+		expect((await textOf(rounded(refund))).flowing).toContain('Rückerstattung vor Rundung 93.87 Rundung auf 5 Rappen + 0.03 Rückerstattung 93.90');
+		const smallest = rounded({ ...refund, totalCosts: 877.99 });
+		expect((await textOf(smallest)).flowing).toContain('Rückerstattung vor Rundung 0.01 Rundung auf 5 Rappen + 0.04 Rückerstattung 0.05');
+		const evened = rounded({ ...due, totalCosts: 600.03 });
+		expect((await textOf(evened)).flowing).toContain('Nachzahlung vor Rundung 0.03 Rundung auf 5 Rappen – 0.03 Ausgeglichen 0.00');
 	});
 
 	// 1000.02 − 1000.00 gibt nach der Rundung 0: der Text sagt, dass nach der Rundung nichts zu bezahlen ist

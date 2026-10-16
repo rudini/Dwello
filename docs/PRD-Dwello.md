@@ -477,7 +477,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - No distribution key: the fee is a percentage of each tenant's own costs
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
-- The Saldo (costs minus Akonto) is rounded commercially to 5 Rappen; the statement shows the amount before rounding and the rounding
+- The Saldo (costs minus Akonto) is rounded to 5 Rappen only in the tenant's favour, a Nachzahlung down and a Rückerstattung up (#79); the statement shows the amount before rounding and the rounding
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**

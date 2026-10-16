@@ -263,7 +263,7 @@ heating_profile_id     UUID                    -- Heizprofil of the Abrechnungsl
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
 heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true, reason, names } or percent, months, profile names
-balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
+balance                DECIMAL(12,2) NOT NULL  -- Saldo, to 5 Rappen in the tenant's favour (#79; sent before: commercially): positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
 paid_date              DATE                    -- from the Abrechnungsdatum up to today (#138)
