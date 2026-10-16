@@ -83,6 +83,18 @@ export function contractEndError(endDate: string, startDate: string, today: stri
 	return null;
 }
 
+/**
+ * Less than the 3 months between the day the notice arrived and the Vertragsende (Art. 266c OR, A-3): the day of
+ * the month after 3 months, clamped to that month's last day (Art. 77 OR); false while either day is missing
+ */
+export function shortNoticePeriod(receivedOn: string, endDate: string) {
+	if (!receivedOn || !endDate) return false;
+	const [year, month, day] = receivedOn.split('-').map(Number);
+	const lastDay = new Date(Date.UTC(year, month + 3, 0)).getUTCDate();
+	const due = new Date(Date.UTC(year, month + 2, Math.min(day, lastDay)));
+	return endDate < due.toISOString().slice(0, 10);
+}
+
 /** The day a contract counts as ended: the day after its last day */
 export function endedSince(endDate: string) {
 	const day = new Date(`${endDate}T00:00:00Z`);

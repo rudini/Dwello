@@ -332,7 +332,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 
 				// Set response headers
 				set.headers['content-type'] = 'application/pdf';
-				set.headers['content-disposition'] = `attachment; filename="statement-${result.statementNumber}.pdf"`;
+				set.headers['content-disposition'] = `attachment; filename="${result.statementNumber}.pdf"`;
 
 				return pdfBuffer;
 			} catch (error) {
