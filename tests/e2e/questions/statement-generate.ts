@@ -4,12 +4,11 @@ import { Accessible, Checked, Count, Text, Value, Visibility } from '../screenpl
 import {
 	announcement,
 	buildingBilled,
-	wizardPresetNotice,
-	feeNotAgreed,
 	buildingCheckbox,
 	buildingInvoices,
 	categoryFinding,
 	draftsOnlyNote,
+	feeNotAgreed,
 	generationResult,
 	heatingProfileSelect,
 	managementFeeHint,
@@ -20,7 +19,8 @@ import {
 	previewFee,
 	previewRow,
 	previewRows,
-	wizardChoices
+	wizardChoices,
+	wizardPresetNotice
 } from '../targets/statement-generate';
 import { draftRestored } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
