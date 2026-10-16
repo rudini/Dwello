@@ -269,3 +269,39 @@ Funktionalität: Abrechnungsdetail
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann nennt die Abrechnung das Heizprofil "Winter"
+
+  # #229 (F-7): ein eigenes Heizprofil lässt sich umbenennen; die Abrechnung nennt es, wie sie es gespeichert hat
+  Szenario: Abrechnung nennt ihr Heizprofil auch nach dem Umbenennen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und das Heizprofil "Winter" heisst danach "Sommer"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann nennt die Abrechnung das Heizprofil "Winter"
+
+  # #229 (Rundung): Einzug am 22. Februar, ein Anteil genau zwischen zwei Hundertsteln (70.975 %); Erläuterung und
+  # Position im PDF nennen denselben Wert
+  Szenario: PDF nennt in der Erläuterung denselben Anteil nach dem Heizprofil wie in der Position
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und das Heizprofil "Halbwert" verteilt die Heizkosten so:
+      | Monat     | Anteil |
+      | Januar    | 18.6   |
+      | Februar   | 13.9   |
+      | März      | 11.2   |
+      | April     | 6.1    |
+      | Mai       | 2.3    |
+      | Juni      | 0      |
+      | Juli      | 0      |
+      | August    | 0.08   |
+      | September | 1.8    |
+      | Oktober   | 7.7    |
+      | November  | 13.4   |
+      | Dezember  | 24.92  |
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2025
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-02-22" für "900" Franken
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Halbwert"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "70.98 % der Heizkosten"
+    Und steht im PDF "500.00 70.98 %"

@@ -317,13 +317,13 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 			managementFeePercent: 0
 		});
 		await generateStatementPdf(statement.id, 'de');
-		const half = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		const rounded = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
 		await deleteStatement(statement.id);
 		await feb.remove();
 		await deleteHeatingProfile(own);
 
-		expect(half).toContain("1'000.00 1'000.00 70.98 %");
-		expect(half).toContain('70.98 % der Heizkosten');
+		expect(rounded).toContain("1'000.00 1'000.00 70.98 %");
+		expect(rounded).toContain('70.98 % der Heizkosten');
 	});
 
 	// Gespeichert wie gedruckt, auf zwei Stellen: «Heizung + Warmwasser» Juli bis Dezember 3.7 + 3.6 + 3.7 + 9.5 + 10.7 + 13
@@ -382,6 +382,29 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 
 		expect(older).toContain('50.00 % der Heizkosten');
 		expect(older).not.toContain('Anteile der Monate');
+	});
+
+	// Vor #209 erstellt, Profil unverändert: die Monate passen zur Position, auch bei einem Anteil auf der Hälfte (70.975 %),
+	// und bei einer Periode unter einem Jahr stehen die Summen dabei (#229, Code-Review C-2, C-3)
+	it('nennt bei einer früher erstellten Abrechnung die Monate und Summen, solange sie zur Position passen', async () => {
+		const feb = await createRental(crypto.randomUUID(), { startDate: '2025-02-22', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(feb.building, { categoryId: heating.id, amount: '1000.00', description: 'Heizöl 2025', invoiceDate: '2025-04-30' });
+		const own = (await createHeatingProfile({ name: `Halb ${crypto.randomUUID()}`, type: 'custom', ...shares([18.6, 13.9, 11.2, 6.1, 2.3, 0, 0, 0.08, 1.8, 7.7, 13.4, 24.92]) })).id;
+		const texts: string[] = [];
+		for (const periodEnd of ['2025-12-31', '2025-06-30']) {
+			const statement = await generateStatement({ contractId: feb.contract, buildingId: feb.building, periodStart: '2025-01-01', periodEnd, heatingProfileId: own, managementFeePercent: 0 });
+			await db.update(utilityStatements).set({ heatingShare: null }).where(eq(utilityStatements.id, statement.id));
+			await generateStatementPdf(statement.id, 'de');
+			texts.push(readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing);
+			await deleteStatement(statement.id);
+		}
+		await feb.remove();
+		await deleteHeatingProfile(own);
+
+		expect(texts[0]).toContain('70.98 % der Heizkosten');
+		expect(texts[0]).toContain('Anteile der Monate');
+		expect(texts[1]).toContain('Die Monate der Abrechnungsperiode haben im Heizprofil zusammen 52.10 %');
 	});
 
 	// F-1: ein eigenes Heizprofil lässt sich umbenennen und löschen, die Abrechnung nennt es weiter

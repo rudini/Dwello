@@ -158,8 +158,10 @@ async function recomputedHeating(statement: StatementWithDetails, period: { rent
 	// the share of the heating position, as its amount was calculated; the months only while they still give it (#229)
 	const share = lineShare == null ? null : parseFloat(lineShare);
 	if (share == null) return { heating: { profile: localName(profile, language), percent: percentage, months } };
-	const same = Math.round(percentage * 100) === Math.round(share * 10000);
-	return { heating: { profile: localName(profile, language), percent: share * 100, months: same ? months : undefined } };
+	// rounded as the calculation rounds period_share, so an unchanged profile keeps its months
+	if (Math.round((percentage / 100) * 10000) !== Math.round(share * 10000)) return { heating: { profile: localName(profile, language), percent: share * 100 } };
+	const periodPercent = Math.round(shared.periodPercentage * 100) / 100;
+	return { heating: { profile: localName(profile, language), percent: share * 100, months, periodPercent } };
 }
 
 // A tank in the period: its category's costs are opening stock + the invoices – closing stock (Art. 5 Abs. 2 lit. a VMWG),
