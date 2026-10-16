@@ -5,6 +5,7 @@
 		contractEndError,
 		contractStatusOn,
 		pastEndConfirmation,
+		shortNoticePeriod,
 		type RefusedStatement
 	} from '$lib/contract-status';
 	import { enhance } from '$app/forms';
@@ -36,12 +37,21 @@
 	// end the contract today); a past day, e.g. a notice recorded late, is confirmed with its consequence
 	let endDate = $state('');
 	let endError = $state('');
+	// the day the notice arrived (A-3): optional, no day proposed; a Kündigungsfrist under 3 months is pointed out,
+	// never refused (a Ersatzmieter or an agreed end are allowed)
+	let noticeReceivedOn = $state('');
+	const noticeNote = $derived(
+		shortNoticePeriod(noticeReceivedOn, endDate)
+			? { text: m.contracts_notice_period_short(), testid: 'contract-notice-period-hint' }
+			: undefined
+	);
 	let confirmedDay = $state('');
 	const pastConfirmed = $derived(confirmedDay !== '' && confirmedDay === endDate);
 	let pastError = $state('');
 	const pastEnd = $derived(pastEndConfirmation(endDate, data.today) !== null);
 	function startEnding() {
 		endDate = '';
+		noticeReceivedOn = '';
 		endError = '';
 		confirmedDay = '';
 		pastError = '';
@@ -148,6 +158,7 @@
 			startDate={contract.startDate}
 			endDate={contract.endDate}
 			terminated={contract.terminated}
+			noticeReceivedOn={contract.noticeReceivedOn}
 			{status}
 			rent={data.rentBreakdown}
 		/>
@@ -176,7 +187,7 @@
 	confirmLabel={m.contracts_end_confirm()}
 	confirmTestid="contract-end-confirm"
 	error={refusal}
-	fields={{ endDate, pastConfirmed: pastConfirmed ? 'on' : '' }}
+	fields={{ endDate, noticeReceivedOn, pastConfirmed: pastConfirmed ? 'on' : '' }}
 	check={checkEndDate}
 	onsuccess={() => addToast('success', endedMessage())}
 >
@@ -194,6 +205,7 @@
 					)}
 				>
 					<input type="hidden" name="endDate" value={endDate} />
+					<input type="hidden" name="noticeReceivedOn" value={noticeReceivedOn} />
 					<input type="hidden" name="pastConfirmed" value={pastConfirmed ? 'on' : ''} />
 					<input type="hidden" name="statementId" value={draft.id} />
 					<Button
@@ -223,6 +235,15 @@
 		today={data.today}
 		bind:confirmedDay
 		bind:error={pastError}
+	/>
+	<DateInput
+		id="noticeReceivedOn"
+		label={m.contracts_notice_received()}
+		help={m.contracts_notice_received_help()}
+		optional
+		note={noticeNote}
+		bind:value={noticeReceivedOn}
+		testid="contract-notice-received-input"
 	/>
 	<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
 	<!-- the contract passes to the heirs (#155): ending it would count the time after as Leerstand -->

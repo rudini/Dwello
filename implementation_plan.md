@@ -12,8 +12,9 @@ No implementation issue exists for either decision issue: their "Decided (produc
 - [x] #166 list: badge, disabled delete button described by its reason; edit page: hint (its KI sentence only while the KI is on)
 - [x] #219 new-category page loads whether the KI is on and hides «Von der KI prüfen lassen» when it is off (No scenario: the E2E backend always starts with the KI on; `LLM_ENABLED` is read at the backend start)
 - [x] messages in all four languages; no new `tests/a11y` state (list and `category-edit-predefined` are already checked)
-- [ ] code-reviewer slice review
-- [ ] feature review: persona Helga, fach-reviewer if texts changed
+- [x] code-reviewer round 1 (`docs/reviews/w5b-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w5b-fachreview-2.md`), personas Helga (`docs/design/personas/helga-w5b.md`) and Dr. Weber (`docs/design/personas/weber-w5b.md`)
+- [ ] Fix slice: hint reworded (P-1 Helga/Weber), allocability sentence follows the saved choice (V-8, V-9), translations (V-10), fallback test (C-2), shared backend URL (C-3), term table (C-6); confirmation on save → `entscheiden` issue (Weber P-2)
 - [ ] Checks before push; workflow review; archive session
 - [ ] Push, pull request, CI and merge (CLAUDE.md, Workflow 9)
 
