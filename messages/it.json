@@ -967,6 +967,8 @@
 	"statements_reminded_on": "Sollecitato il {date}",
 	"statements_next_reminder_on": "Prossimo sollecito possibile dal {date}",
 	"statements_pdf_download_of": "Scaricare il PDF: {name}",
+	"statements_pdf_missing": "PDF non ancora creato",
+	"statements_pdf_missing_of": "PDF non ancora creato: aprire {name}",
 	"statements_mark_paid_of": "Segnare come pagato: {name}",
 	"statements_search_help": "Inquilino, numero di conteggio o appartamento",
 	"statements_filter_status": "Filtrare per stato",

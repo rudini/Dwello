@@ -1,5 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { formatDate } from '$lib/utils/format';
+import { toStatement } from '$lib/server/statement';
 import type { StatementsListData } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -74,42 +75,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 		const countsData = await countsRes.json();
 		const buildingsData = await buildingsRes.json();
 
-		// Transform backend data to match frontend types
-		const statements = (statementsData.data || []).map((s: Record<string, unknown>) => {
-			const tenant = s.tenant as Record<string, unknown> | null;
-			const apartment = s.apartment as Record<string, unknown> | null;
-			const building = s.building as Record<string, unknown> | null;
-			return {
-				id: s.id,
-				statementNumber: s.statementNumber,
-				tenantId: s.tenantId,
-				apartmentId: s.apartmentId,
-				buildingId: building?.id || '',
-				periodStart: s.periodStart,
-				periodEnd: s.periodEnd,
-				statementDate: s.statementDate,
-				rentalDays: s.rentalDays,
-				totalCosts: Number(s.totalCosts),
-				totalAdvancePayments: Number(s.totalAdvancePayments),
-				managementFee: Number(s.managementFee),
-				balance: Number(s.balance),
-				status: s.status,
-				paymentDeadline: s.paymentDeadline,
-				paidDate: s.paidDate,
-				pdfGeneratedAt: s.pdfGeneratedAt,
-				lastReminderDate: s.reminderSentDate,
-				nextReminderFrom: s.nextReminderFrom as string | null,
-				tenantName: tenant
-					? `${tenant.firstName} ${tenant.lastName}`
-					: m.common_unknown(),
-				tenantEmail: (tenant?.email as string) || '',
-				apartmentUnit: (apartment?.number as string) || '',
-				apartmentFloor: apartment?.floor || '',
-				buildingName: (building?.name as string) || '',
-				buildingAddress: (building?.address as string) || '',
-				lineItems: s.lineItems || []
-			};
-		});
+		const statements = (statementsData.data || []).map(toStatement);
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
 			(b: Record<string, unknown>) => ({
