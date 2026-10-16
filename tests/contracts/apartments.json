@@ -7,7 +7,7 @@
 			"floor": 1,
 			"area": "65.00",
 			"rooms": "2.5",
-			"status": "vacant",
+			"status": "occupied",
 			"nextContractStart": "2099-11-01",
 			"currentContractEnd": "2099-03-31",
 			"lastContractEnd": "2024-03-31",

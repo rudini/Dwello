@@ -28,6 +28,7 @@ Funktionalität: Wohnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
     Dann ist die Wohnung nicht vermietet
     Und hat die Wohnung den Status "Leer"
+    Und erklärt die Wohnungsseite beim Mietstatus "Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter."
 
   # F-4 (#58): «Vermietet ab», auch wenn die Wohnung vorher leer war
   Szenario: Wohnung mit künftigem Mieter

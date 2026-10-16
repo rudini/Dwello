@@ -167,6 +167,15 @@ describe('Übersicht', () => {
 		);
 	});
 
+	// review C-9: auch eine nie vermietete leere Wohnung trägt der Vermieter
+	it('erklärt die Nebenkosten auch, wenn die leere Wohnung nie vermietet war', () => {
+		const building = {
+			...data.buildingOccupancy[0],
+			vacant: [{ number: '1.01', lastContractEnd: null }]
+		};
+		expect(page({ buildingOccupancy: [building] })).toContain('occupancy-vacancy-help');
+	});
+
 	it('erklärt die Nebenkosten leerer Wohnungen nur, wenn es eine gibt', () => {
 		expect(page()).not.toContain('occupancy-vacancy-help');
 	});

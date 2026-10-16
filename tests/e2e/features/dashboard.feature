@@ -18,6 +18,7 @@ Funktionalität: Übersicht
     Und sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
     # Persona Anna P-1: auch eine nie vermietete leere Wohnung wird genannt
     Und nennt die Belegung von "Seeblick" "Wohnung 1.02 leer"
+    Und erklärt die Belegung "Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter."
 
   # F-4 (#58): dieselben Worte wie Gebäudekarten und Wohnungsseiten
   Szenario: Künftig vermietete Wohnung in der Belegung
