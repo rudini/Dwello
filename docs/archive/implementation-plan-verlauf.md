@@ -606,6 +606,25 @@ Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelt
 
 Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts.ts`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/contracts/ContractForm.svelte`, `messages/*.json`, tests (`contract-end.pg`, `contract-delete.pg`, `api-contracts.pg`, test clean-ups, `contract-actions`, `contract-detail-page.dom`, `contract-edit.dom`), `tests/e2e/**`, `tests/a11y/screens.json`, `tests/contracts/*`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md`.
 
+## Session: statement list tenancy dates and missing PDF (#248, #253)
+
+- [x] #248 scenario `@wip` in `statements.feature`: list shows the tenancy dates within the period
+- [x] #248 lower-layer test of the list mapping (the stored rent days)
+- [x] #253 scenario `@wip` in `statements.feature`: a draft without PDF says «PDF noch nicht erstellt» and leads to its detail page
+- [x] #253 DOM test of the row; texts in de/fr/it/en
+- [x] #253 new state in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
+- Files: `src/lib/server/statement.ts` (maps the stored `rentalStart`/`rentalEnd`), `docs/api-specification.md`, `src/routes/statements/+page.server.ts` (reuses `toStatement`), `StatementRow.svelte`, `src/lib/types.ts`, `messages/*.json`, `tests/contracts/statements.json`, tests
+- [x] Slice review round 1: `docs/reviews/list-review-1.md`
+- [x] Feature review: `docs/design/personas/dr-weber-list.md`, `marco-list.md`, `dr-weber-list-2.md` (draft without PDF prepared by SQL in `dwello_persona`)
+- [x] Fixes: the list maps the stored `rentalStart`/`rentalEnd` (no contract join); row locator by statement number; the row names the dates with the Mietstage (the detail page's dates stay with #104)
+- [x] Slice review round 2: `docs/reviews/list-review-2.md` (detail change taken out)
+- [x] Closing review round 3: `docs/reviews/list-review-3.md`
+- [x] CI fix: the `statements`/`pdf-missing` example seeded nothing (`?status=draft` has no placeholder, `fixtures/screens.ts` `seedFor`) and relied on other scenarios' drafts; now `?status=draft&building={building}`. Review: `docs/reviews/list-review-4.md`
+- [x] Merge of main with W6 (#193/#194/#107): the list keeps `toStatement`, which maps `nextReminderFrom`; the list contract names it. Review: `docs/reviews/list-review-5.md`
+- [x] Persona re-run on the labelled dates: `docs/design/personas/dr-weber-list-3.md` (the Major P-1 resolved in the list; a Minor, no label word before the dates, stays in the report; its detail-page dates were taken out again in ca4a9d7, see #104)
+- [x] Workflow note: demo PDFs and the collected review in parallel sessions (`docs/reviews/workflow-notes-issue-248-253.md`)
+- [x] Before marking complete: lint, check, type-check, affected tests and E2E
+
 ## Session W7b: Kündigungsfrist hint and «Kündigung aufheben» help (#112, #52)
 
 - [x] #112: `@wip` scenarios «Kündigung mit zu kurzer Frist» and «Kündigung mit genügend Frist» in `contract-detail.feature`, seen red; `fach-reviewer` before implementing
