@@ -143,6 +143,16 @@ describe('Zahlung zurücksetzen', () => {
 		expect(stored.paymentResets).toEqual([{ resetOn: today(), paidDate: today(), paidAmount: stored.balance }]);
 	});
 
+	// erstellt, als die Abrechnung versendet war, das Geld kam aber am selben Tag: das PDF nennt keine Zahlung (Code-Review C-11)
+	it('behält das PDF, das vor dem Erfassen der Zahlung erstellt wurde, auch am Tag der Zahlung', async () => {
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, sentId));
+		await markPaid(sentId, today());
+		await reset(sentId);
+
+		const [row] = await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, sentId));
+		expect(row.pdfBlob).toBe('JVBERi0=');
+	});
+
 	// das PDF beim Versand nennt keine Zahlung: es bleibt, und mit ihm der Eintrag im Verlauf (Persona Dr. Weber P-1)
 	it('behält das PDF, das vor der Zahlung erstellt wurde', async () => {
 		const yesterday = new Date(Date.now() - 86_400_000);

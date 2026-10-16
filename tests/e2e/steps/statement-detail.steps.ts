@@ -1,6 +1,7 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { francs } from '../questions/amounts';
+import { errorMessageShown } from '../questions/form';
 import { downloadedFileHeader, downloadedFileName, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
 import {
 	deleteOffers,
@@ -132,7 +133,6 @@ When('der Liegenschaftsverwalter die Abrechnung als am {string} bezahlt markiert
 	await verwalter.attemptsTo(markStatementPaidOn(date));
 });
 
-
 Then('meldet das Feld «Bezahlt am» {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(paidDateInvalid).toBe('true');
 	await verwalter.sees(paidDateProblem).toMatch(new RegExp(message.replace(/\./g, '\\.')));
@@ -250,6 +250,14 @@ Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: st
 
 Given('die Abrechnung {int} von {string} ist bezahlt', async ({ seed }, year: number, tenant: string) => {
 	await seed.markPaid(tenant, year);
+});
+
+Then('meldet die Detailseite der Abrechnung {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(errorMessageShown(message)).toBe(true);
+});
+
+Given('die Zahlung der Abrechnung {int} von {string} ist inzwischen zurückgesetzt', async ({ seed }, year: number, tenant: string) => {
+	await seed.resetPayment(tenant, year);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt markiert', async ({ verwalter }) => {

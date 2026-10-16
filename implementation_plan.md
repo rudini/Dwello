@@ -10,11 +10,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] #93: setting a statement to paid stores its Saldo as `paid_amount` when no amount is given; `paidThisMonth` counts only Nachzahlungen; dashboard.pg.test without hand-written `paid_amount`; demo-data.pg.test adjusted. No scenario: `paid_amount` and `paidThisMonth` appear on no screen
 - [x] #92: «Zahlung zurücksetzen» on a paid statement, confirmed with its consequence; back to Versendet (Überfällig after the Zahlungsfrist), paid date and amount cleared; the reset stored and listed in the Verlauf (JSONB column `payment_resets`, migration 0007)
 - [x] a11y and language rows for the new dialog state
-- No scenario: a refusal of the backend (a paid date, a failed reset) is a failure between the BFF and the backend; the page's own check refuses every date first. Covered in `statement-actions.test.ts`, `statement-status.test.ts` (#138, #92)
+- No scenario: a refusal of the backend's paid-date check and a failed reset are failures between the BFF and the backend; the page's own check refuses every date first. Covered in `statement-actions.test.ts`, `statement-status.test.ts` (#138, #92). The stale-page refusal of a reset (`STATEMENT_NOT_PAID`) has its scenario (code review C-13)
 - «Zahlungseingang mit Datum festhalten» enters the Abrechnungsdatum, which for a statement sent in the scenario is today; that the entered day (not the day of entry) is stored is shown in `statement-actions.test.ts` («speichert das gewählte Zahlungsdatum»)
 - Files: `backend/migrations/0007_statement_payment_resets.sql`, `backend/src/db/schema.ts`, `backend/src/services/statement.service.ts`, `backend/src/routes/{statements,dashboard}.ts`, `src/lib/{statement,backend-error,types}.ts`, `src/lib/server/{statement,statement-actions}.ts`, `src/routes/statements/` (detail page, StatusActions, MetadataCard, list, mark-paid), `messages/*.json`, `tests/contracts/`, `docs/{api-specification,data-model,PRD-Dwello}.md`, tests, scenarios and a11y rows
 - [x] Code review round 1 (`docs/reviews/w4b-review-1.md`)
 - [x] fach-reviewer round 2 (`docs/reviews/w4b-fachreview-2.md`)
 - [x] Personas Marco (`docs/design/personas/marco-w4b.md`), Dr. Weber (`docs/design/personas/dr-weber-w4b.md`)
-- [ ] daten-pruefer, closing code review
+- [x] Code review round 2 (`docs/reviews/w4b-review-2.md`): C-11/C-12 (PDF kept by the time the payment was recorded, `payment_recorded_at`; scenario), C-13 (scenario), C-14, C-15
+- [x] daten-pruefer (`docs/reviews/w4b-datenpruefung-1.md`)
+- [ ] Code review round 3 (closing)
 - [ ] Workflow notes, archive the session, pull request

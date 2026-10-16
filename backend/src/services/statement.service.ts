@@ -480,7 +480,7 @@ export async function updateStatementStatus(
 		...settled
 	};
 	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93)
-	if (updateData.status === 'paid') updateData.paidAmount ??= existing.balance;
+	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? existing.balance, paymentRecordedAt: new Date() });
 
 	return updateStatement(id, updateData);
 }
@@ -495,20 +495,21 @@ function checkPaidDate(paidDate: string, statementDate: string) {
 
 /**
  * Take back a recorded payment (#92): back to sent (overdue once the payment deadline has passed), paid date and amount
- * cleared, the reset kept for the Verlauf; a PDF made once paid confirms the payment: it is discarded and made again as sent
+ * cleared, the reset kept for the Verlauf; a PDF made after the payment was recorded confirms it: it is discarded and made again as sent
  */
 export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	const existing = await getStatement(id);
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (existing.status !== 'paid') throw new CodedError('STATEMENT_NOT_PAID', 'Statement is not paid');
 	const reset = { resetOn: swissToday(), paidDate: existing.paidDate, paidAmount: existing.paidAmount };
-	// only a PDF made once paid says so; the one made when sending stays, with its row in the Verlauf
-	const madeOnDay = existing.pdfGeneratedAt?.toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
-	const paidPdf = madeOnDay && existing.paidDate && madeOnDay >= existing.paidDate;
+	// only a PDF made after the payment was recorded says so; the one made before stays, with its row in the Verlauf
+	const { pdfGeneratedAt, paymentRecordedAt } = existing;
+	const paidPdf = pdfGeneratedAt && paymentRecordedAt && pdfGeneratedAt >= paymentRecordedAt;
 	return (await updateStatement(id, {
 		status: 'sent',
 		paidDate: null,
 		paidAmount: null,
+		paymentRecordedAt: null,
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;

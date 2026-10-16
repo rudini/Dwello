@@ -236,6 +236,10 @@ export function testData(api: CallTheApi) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
+		async resetPayment(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/payment-reset`, {});
+		},
+
 		// paid today, the earliest day a statement sent today allows (#138)
 		async markPaid(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });

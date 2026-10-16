@@ -110,6 +110,29 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
 
+  # #92 (Persona Dr. Weber P-1): das PDF des Versands nennt keine Zahlung; es bleibt nach dem Zurücksetzen, mit seinem
+  # Eintrag im Verlauf
+  Szenario: Zahlung zurücksetzen behält das PDF des Versands
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und die Abrechnung 2024 von "Eva Frei" ist bezahlt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Zahlung zurücksetzt
+    Dann hat die Abrechnung den Status "Versendet"
+    Und nennt der Verlauf "PDF erstellt" am Tag des Versands
+
+  # #92: in einem zweiten Fenster wurde die Zahlung schon zurückgesetzt; die Seite ist veraltet
+  Szenario: Zahlung zurücksetzen, die inzwischen schon zurückgesetzt ist
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist bezahlt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und die Zahlung der Abrechnung 2024 von "Eva Frei" ist inzwischen zurückgesetzt
+    Wenn der Liegenschaftsverwalter die Zahlung zurücksetzt
+    Dann meldet die Detailseite der Abrechnung "Die Abrechnung ist nicht als bezahlt erfasst. Laden Sie die Seite neu."
+
   # #92: nach Ablauf der Zahlungsfrist ist die Abrechnung nach dem Zurücksetzen wieder überfällig
   Szenario: Zahlung einer Abrechnung mit abgelaufener Zahlungsfrist zurücksetzen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

@@ -390,6 +390,7 @@ export const utilityStatements = pgTable(
 		keyValues: jsonb('key_values').$type<KeyValues>(),
 		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
 		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
+		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
