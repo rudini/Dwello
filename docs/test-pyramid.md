@@ -102,7 +102,7 @@ UI behavior that is not business behavior lives in its own features: `breadcrumb
 | Acceptance | `bun run test:e2e` (API driver only: `-- --project=api`) | job "E2E tests" (without `@a11y`) in 2 shards ("E2E tests (1/2)", "(2/2)"), reported together as the check "E2E tests"; PRs Chromium and `api`, `main` all browsers and `api` |
 | Accessibility | `bun run test:e2e -- --project=chromium --grep @a11y` | job "Accessibility (axe)": every screen and state of `tests/a11y/screens.json` with axe-core in Chromium, light and dark, in 3 shards reported together as the check "Accessibility (axe)"; its own check so it can be required; on a pull request that changes nothing it sees (frontend code other than unit tests, `messages/`, `static/`, `project.inlang/`, styles and build config, dependencies, `tests/a11y/`, the E2E code and `accessibility.feature`, `ci.yml`; a backend-only change, demo and E2E seed data included, does not count) its steps are skipped and it passes; pushes to `main` always run it |
 
-Local prerequisite: PostgreSQL on port 5432 with user `dwello`. The test databases `dwello_test` and `dwello_e2e` are set up fresh automatically; the development database stays untouched because every `bun test` started in `backend/` itself loads the preload (`backend/bunfig.toml`; Bun reads it only from the working directory).
+Local prerequisite: PostgreSQL on port 5432 with user `dwello`; how the test databases are recreated and the development database stays untouched: `backend/CLAUDE.md` (`dwello_test`) and `tests/e2e/CLAUDE.md`, "Run" (`dwello_e2e`).
 
 ## Open
 
