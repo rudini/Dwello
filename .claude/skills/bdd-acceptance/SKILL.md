@@ -176,7 +176,7 @@ Feature: Thesis List
 **Gherkin rules**:
 - Role tag (`@student`, `@lecturer`) on every feature — drives auth, never put `Given [Actor] is authenticated` in Background
 - Actor names in steps, not "user" or "I" generically
-- Describe WHAT, never HOW — no button IDs, no CSS selectors, no field names
+- Describe what, not how: no button IDs, no CSS selectors, no field names
 - `Background` holds minimum shared state only — use explicit `Given` steps, not hooks/tags, for data preconditions (PO must be able to read them)
 - **Every exit from a page** (links, buttons, guards, error redirects) gets exactly one navigation scenario — assert only that the transition occurred (URL check), not destination content
 - Terminal pages (confirmation, 404) have no navigation scenarios

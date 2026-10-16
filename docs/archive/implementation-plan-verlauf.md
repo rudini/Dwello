@@ -1,3 +1,13 @@
+## Session 2026-10-16: no shouting in the tdd skill (guide review G-11)
+
+Request (chat): «Setze G-11 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Own pull request after #270 is merged.
+
+- [x] `.claude/skills/tdd/SKILL.md`: «DO NOT», «ONE … ONE» and «Never refactor while RED» in plain words with their reason; labels in examples (WRONG/RIGHT, GOOD/BAD) stay
+- [x] `code-reviewer` round 1 (docs/reviews/g11-review-1.md): C-1 fixed («WHAT, not HOW» in `tdd/tests.md` and `bdd-acceptance`), C-2 left: the `ponytail` skills are a third-party plugin
+- [x] Checks: lint, the tests that read rule files
+- [x] Archive the session, push after #270 is merged, pull request, CI, merge
+  Files: `.claude/skills/tdd/SKILL.md`, `.claude/skills/tdd/tests.md`, `.claude/skills/bdd-acceptance/SKILL.md`; report `docs/reviews/g11-review-1.md`
+
 ## Session 2026-10-16: one source for the E2E rules (guide review G-10)
 
 Request (chat): «Setze G-10 um» from `docs/reviews/opus55-guide-review.md`. Rules only, no app behaviour, so no scenario. Own pull request after #269 is merged.
