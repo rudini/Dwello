@@ -1042,6 +1042,7 @@
 	"statements_no_more_reminders_title": "Keine weitere Mahnung möglich",
 	"statements_understood": "Verstanden",
 	"statements_no_more_reminders_text": "Es wurden bereits 3 Mahnungen versendet. Dwello erstellt keine weitere. Klären Sie das weitere Vorgehen direkt mit dem Mieter.",
+	"statements_reminder_257d": "Eine Mahnung von Dwello ist eine Zahlungsaufforderung. Sie ist keine Zahlungsfrist mit Kündigungsandrohung nach Art. 257d OR. Weitere Schritte, z. B. eine Betreibung oder eine Kündigung wegen Zahlungsrückstand nach Art. 257d OR, liegen ausserhalb von Dwello. Für diese Kündigung setzen Sie dem Mieter zuerst in einem eigenen Brief eine Zahlungsfrist von mindestens 30 Tagen und drohen ihm die Kündigung an. Lassen Sie sich beraten.",
 	"statements_reminder_undelivered": "Das Dokument «{title}» liegt unter «Dokumente» zum Versand bereit. {reason}",
 	"statements_reminder_emailed": "Das Dokument «{title}» wurde per E-Mail versendet.",
 	"statements_reminder_letter": "Das Dokument «{title}» liegt unter «Dokumente» als Brief zum Ausdrucken bereit.",
