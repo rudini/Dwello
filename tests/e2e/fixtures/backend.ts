@@ -139,7 +139,13 @@ export function testData(api: CallTheApi) {
 		async contract(
 			tenantTitle: string,
 			apartmentNumber: string,
-			contract: { startDate: string; endDate?: string; baseRent: string; monthlyAdvancePayment?: string }
+			contract: {
+				startDate: string;
+				endDate?: string;
+				baseRent: string;
+				additionalRent?: string;
+				monthlyAdvancePayment?: string;
+			}
 		) {
 			const created = await post('contracts', {
 				tenantId: ids.get(tenantTitle),
