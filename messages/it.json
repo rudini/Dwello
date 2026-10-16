@@ -178,7 +178,7 @@
 	"apartments_status_reserved": "Bloccato",
 	"apartments_status_relet_from": "Locato dal {date}",
 	"apartments_status_vacant_since": "Sfitto dal {date}",
-	"apartments_vacancy_costs_help": "Le spese accessorie di un appartamento sfitto sono a Suo carico in quanto locatore.",
+	"apartments_vacancy_costs_help": "Le spese accessorie di un appartamento sfitto sono a suo carico in quanto locatore.",
 	"apartments_status_help_occupied": "Un contratto di locazione è in corso.",
 	"apartments_status_help_relet": "È stato concluso un futuro contratto di locazione; l’appartamento è locato dall’inizio del contratto, anche se fino ad allora è sfitto.",
 	"apartments_status_help_vacant": "Non è in corso alcun contratto di locazione, l’appartamento può essere locato.",
