@@ -172,6 +172,11 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
+		// «Abgerechnet bis»: up to that day the Nebenkosten are billed outside Dwello (#133)
+		async billedUntil(tenantTitle: string, billedUntil: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { billedUntil });
+		},
+
 		// A whole year, or the period given (a statement of a shorter period is still named by its year)
 		async statement(
 			tenantTitle: string,

@@ -108,6 +108,16 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist
     Dann zeigt der Mietvertrag bei der Verwaltungspauschale "Vereinbart, Satz des Abrechnungslaufs"
 
+  # #133: vor dem Wechsel zu Dwello hat der Liegenschaftsverwalter die Nebenkosten selbst abgerechnet
+  @wip
+  Szenario: Ausserhalb von Dwello abgerechnete Zeit eintragen
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-12-31" ausserhalb von Dwello abgerechnet sind
+    Dann zeigt der Mietvertrag «Abgerechnet bis» "31.12.2025"
+
+  @wip
+  Szenario: Hilfe zu «Abgerechnet bis»
+    Dann erfährt der Liegenschaftsverwalter, dass Dwello die Nebenkosten erst ab dem Tag nach «Abgerechnet bis» abrechnet
+
   # F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über, er endet nicht
   Szenario: Beim Tod des Mieters läuft der Mietvertrag weiter
     Dann erfährt der Liegenschaftsverwalter, dass der Mietvertrag beim Tod des Mieters weiterläuft

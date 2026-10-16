@@ -16,6 +16,7 @@ import {
 	failure,
 	fixedApartmentName,
 	fixedTenantName,
+	billedUntilHelpText,
 	partiesHelpText,
 	reviewHint,
 	rentTakenOverText,
@@ -29,6 +30,7 @@ import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
 import {
 	agreeManagementFee,
+	enterBilledUntil,
 	changeBaseRent,
 	deleteDraftAndSave,
 	openContractEdit,
@@ -335,6 +337,20 @@ When(
 		await verwalter.attemptsTo(
 			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: fee })
 		);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis {string} ausserhalb von Dwello abgerechnet sind',
+	async ({ verwalter }, date: string) => {
+		await verwalter.attemptsTo(enterBilledUntil(date));
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass Dwello die Nebenkosten erst ab dem Tag nach «Abgerechnet bis» abrechnet',
+	async ({ verwalter }) => {
+		await verwalter.sees(billedUntilHelpText).toContain('erst ab dem Tag danach');
 	}
 );
 

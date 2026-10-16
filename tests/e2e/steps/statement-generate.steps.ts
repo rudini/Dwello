@@ -108,6 +108,10 @@ Then('die Vorschau enthält genau {int} Abrechnungen', async ({ verwalter }, cou
 	await verwalter.sees(statementsInPreview).toBe(count);
 });
 
+Then('die Vorschau enthält genau 1 Abrechnung', async ({ verwalter }) => {
+	await verwalter.sees(statementsInPreview).toBe(1);
+});
+
 Then('meldet die Vorschau, dass es in der Periode keine Mietverträge gibt', async ({ verwalter }) => {
 	await verwalter.sees(noContractsInPeriod).toBe(true);
 });

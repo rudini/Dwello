@@ -13,6 +13,8 @@ import {
 	endOfContract,
 	managementFeeOfContract,
 	missingStatementsText,
+	missingStatementsShown,
+	billedUntilOfContract,
 	statementLinkedInDeleteDialog,
 	statusOfContract,
 	totalRent
@@ -208,6 +210,21 @@ Then('meldet der Mietvertrag keine fehlende Abrechnung des letzten Jahres', asyn
 Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed }, tenant: string, date: string) => {
 	await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
 	await verwalter.sees(endOfContract).toContain(date);
+});
+
+Given(
+	'der Mietvertrag von {string} ist bis {string} ausserhalb von Dwello abgerechnet',
+	async ({ seed }, tenant: string, date: string) => {
+		await seed.billedUntil(tenant, date);
+	}
+);
+
+Then('zeigt der Mietvertrag «Abgerechnet bis» {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(billedUntilOfContract).toBe(date);
+});
+
+Then('meldet der Mietvertrag keine fehlende Abrechnung', async ({ verwalter }) => {
+	await verwalter.sees(missingStatementsShown).toBe(false);
 });
 
 Given('im Mietvertrag von {string} ist keine Verwaltungspauschale vereinbart', async ({ seed }, tenant: string) => {

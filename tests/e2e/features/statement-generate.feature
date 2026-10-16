@@ -118,6 +118,23 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2023 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Vorschau, dass es in der Periode keine Mietverträge gibt
 
+  # #133: bis «Abgerechnet bis» sind die Nebenkosten ausserhalb von Dwello abgerechnet
+  @api @wip
+  Szenario: Ein ausserhalb von Dwello abgerechneter Mietvertrag erhält keine Abrechnung
+    Angenommen der Mietvertrag von "Eva Frei" ist bis "2024-03-31" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann enthält die Vorschau die Abrechnung von "Marc Huber"
+    Und die Vorschau enthält genau 1 Abrechnung
+
+  # #133: reicht die Abrechnungsperiode über «Abgerechnet bis» hinaus, zählen die Mietstage erst ab dem Tag danach.
+  # Hauswart 732.00 für 366 Tage = 2.00 pro Tag; Eva Frei vom 01.03. bis 31.03.2024: 31 Tage = 62.00 + 3 % = 63.86
+  @api @wip
+  Szenario: Nach «Abgerechnet bis» zählen die Mietstage ab dem Tag danach
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und der Mietvertrag von "Eva Frei" ist bis "2024-02-29" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Eva Frei" "CHF 63.86"
+
   Szenario: Warnung, wenn für ein Gebäude keine Rechnungen erfasst sind
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann warnt die Vorschau, dass für "Lindenhof" in der Abrechnungsperiode keine Rechnungen erfasst sind

@@ -8,6 +8,7 @@ import {
 	durationOption,
 	fixedApartment,
 	fixedTenant,
+	billedUntilHelp,
 	partiesHelp,
 	rentTakenOver,
 	reviewContractsUnknown,
@@ -39,6 +40,7 @@ export const fixedApartmentName = Text.of(fixedApartment);
 export const tenantChoices = Count.of(tenantSelect);
 export const apartmentChoices = Count.of(apartmentSelect);
 export const partiesHelpText = Text.of(partiesHelp);
+export const billedUntilHelpText = Text.of(billedUntilHelp);
 export const runningContractHintText = Text.of(runningContractHint);
 export const enteredAdvancePayment = Value.of(advancePaymentInput);
 export const rentTakenOverText = Text.of(rentTakenOver);

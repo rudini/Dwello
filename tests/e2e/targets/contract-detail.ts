@@ -50,6 +50,7 @@ export const missingStatementLink = (periodStart: string) =>
 		page.getByTestId(`contract-missing-statement-link-${periodStart}`)
 	);
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
+export const contractBilledUntil = target('Abgerechnet bis des Mietvertrags', (page) => page.getByTestId('contract-billed-until'));
 export const contractManagementFee = target('Verwaltungspauschale des Mietvertrags', (page) =>
 	page.getByTestId('contract-management-fee')
 );
