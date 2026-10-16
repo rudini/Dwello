@@ -13,7 +13,6 @@ Funktionalität: Übersicht
     Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "900" Franken
 
   # F-1 (#55): nur «x/y vermietet», ohne Anteil in Prozent
-  @wip
   Szenario: Belegung pro Gebäude
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
@@ -91,23 +90,15 @@ Funktionalität: Übersicht
       | Rechnung erfassen      | Neue Rechnung          |
       | Abrechnungen erstellen | Abrechnungen erstellen |
 
-  # F-10a (#64): eine Mahnung schlägt die Übersicht erst nach der Mahnfrist vor (Vorgabe 14 Tage nach der Zahlungsfrist)
-  @wip
+  # F-10a (#64): eine Mahnung schlägt die Übersicht erst nach der Mahnfrist vor (Vorgabe 14 Tage nach der Zahlungsfrist);
+  # dass sie es vorher nicht tut, prüft src/__tests__/overview.test.ts: die Aufgabe zählt auch die Abrechnungen
+  # parallel laufender Szenarien
   Szenario: Überfällige Abrechnung als nächste Aufgabe
     Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 15 Tagen abgelaufen ist
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht die Aufgabe "Überfällige Abrechnungen prüfen"
     Und die Frist "Zahlungsfrist Anna Keller" ist "seit 15 Tagen abgelaufen"
 
-  # F-10a (#64): «Überfällig» ab dem Tag nach der Zahlungsfrist, die Mahnung erst nach der Mahnfrist
-  @wip
-  Szenario: Keine Mahnung vorgeschlagen, solange die Mahnfrist läuft
-    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 14 Tagen abgelaufen ist
-    Wenn der Liegenschaftsverwalter die Übersicht öffnet
-    Dann ist die Frist "Zahlungsfrist Anna Keller" "seit 14 Tagen abgelaufen"
-    Und nennt die Übersicht die Aufgabe "Überfällige Abrechnungen prüfen" nicht
-
-  @wip
   Szenario: Aufgabe führt zu den betroffenen Abrechnungen
     Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 15 Tagen abgelaufen ist
     Und der Liegenschaftsverwalter öffnet die Übersicht

@@ -84,12 +84,6 @@ Then('nennt die Übersicht die Aufgabe {string}', async ({ verwalter }, title: s
 	await verwalter.sees(overviewTaskShown(title)).toBe(true);
 });
 
-// anchored on the occupancy of the scenario's building: the overview has loaded its data
-Then('nennt die Übersicht die Aufgabe {string} nicht', async ({ verwalter, names }, title: string) => {
-	await verwalter.sees(occupancyShown(names.get('Seeblick')!)).toBe(true);
-	await verwalter.sees(overviewTaskShown(title)).toBe(false);
-});
-
 Then(
 	'nennt die Aufgabe {string} das Gebäude {string}',
 	async ({ verwalter, names }, title: string, building: string) => {
