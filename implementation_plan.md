@@ -16,7 +16,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] code-reviewer round 1: `docs/reviews/w6b-review-1.md` (C-1, C-4, C-6 fixed; others Nit/Minor, stay in the report)
 - [x] fach-reviewer round 2: `docs/reviews/w6b-fachreview-2.md` (V-13, V-14 fixed; V-12 glossary → product owner)
 - [x] persona Helga: `docs/design/personas/helga-w6b.md`
-- [ ] persona Dr. Weber, daten-pruefer
+- [x] persona Dr. Weber: `docs/design/personas/weber-w6b.md` (P-1 → #305)
+- [ ] daten-pruefer
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-63-105-106.md`
 - [ ] closing code-reviewer round
 - [ ] Feature review: persona, fach-reviewer, daten-pruefer (PDF texts)
 - [ ] Checks before push; workflow review; archive session
