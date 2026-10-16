@@ -22,3 +22,8 @@ Funktionalität: Hilfe
 
   Szenario: Die Hilfe nennt das Hochladen mehrerer Rechnungen
     Dann erklärt die Hilfe unter "Rechnungen erfassen" "Mehrere Rechnungen auf einmal: Wählen Sie unter «Rechnungen» «Rechnungen hochladen». Die KI liest die Dateien aus, und Sie prüfen die Angaben, bevor Dwello die Rechnungen erstellt."
+
+  # Kosten über mehrere Jahre (#254)
+  @wip
+  Szenario: Die Hilfe erklärt Kosten über mehrere Jahre
+    Dann erklärt die Hilfe unter "Rechnungen erfassen" "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
