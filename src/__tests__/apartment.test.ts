@@ -3,7 +3,7 @@ import { load } from '../routes/apartments/[id]/+page.server';
 import { load as listLoad } from '../routes/apartments/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
-import { grossRent } from '../lib/server/contract-history';
+import { monthlyTotal } from '../lib/server/contract-history';
 import { floorLabel, occupancyParts, statusHelp, statusLabels, statusText } from '../lib/apartment';
 import { runAction } from './helpers/action';
 
@@ -83,7 +83,7 @@ describe('Wohnungsdetail', () => {
 			baseRent: 1200,
 			additionalRent: 50,
 			advancePayment: 180,
-			totalBrutto: 1430
+			monthlyTotal: 1430
 		});
 	});
 
@@ -94,13 +94,13 @@ describe('Wohnungsdetail', () => {
 			expect.objectContaining({
 				id: 'c2',
 				tenantName: 'Beat Huber',
-				rentBrutto: 1430,
+				monthlyTotal: 1430,
 				status: 'active'
 			}),
 			expect.objectContaining({
 				id: 'c1',
 				tenantName: 'Eva Graf',
-				rentBrutto: 1250,
+				monthlyTotal: 1250,
 				status: 'ended'
 			})
 		]);
@@ -140,7 +140,7 @@ describe('Wohnungsdetail', () => {
 			baseRent: 0,
 			additionalRent: 0,
 			advancePayment: 0,
-			totalBrutto: 0
+			monthlyTotal: 0
 		});
 	});
 
@@ -174,10 +174,14 @@ describe('Wohnungsliste', () => {
 	});
 });
 
-describe('Bruttomiete', () => {
-	it('zählt Nettomiete, Zusatzmiete und Akontozahlung zusammen', () => {
+describe('Monatlich total', () => {
+	it('zählt Nettomiete, Zusatzmiete und Akonto zusammen', () => {
 		expect(
-			grossRent({ baseRent: '1200.00', additionalRent: '50.00', monthlyAdvancePayment: '180.00' })
+			monthlyTotal({
+				baseRent: '1200.00',
+				additionalRent: '50.00',
+				monthlyAdvancePayment: '180.00'
+			})
 		).toBe(1430);
 	});
 });

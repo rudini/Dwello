@@ -339,7 +339,7 @@
 	"buildings_delete_text_before": "The building",
 	"buildings_delete_text_after": "and all its invoices will be deleted permanently. This cannot be undone.",
 	"buildings_delete_impossible": "Cannot delete",
-	"buildings_fuel_title": "Fuel in the tank or storage",
+	"buildings_fuel_title": "Fuel stock",
 	"buildings_fuel_intro": "Only for buildings heated with oil, LPG, pellets or wood. What was consumed is billed: opening stock + purchases − closing stock. To do this, on the last day of each billing period, for example on 31.12., add the value in the tank or storage in francs. The value of 31.12.2024 is the closing stock 2024 and the opening stock 2025. Calculate the value like this: quantity in the tank or storage times the price per unit (litre, kg or stere, a cubic metre of stacked wood) of the last delivery. If the tank or storage holds more than the last delivery, calculate the rest at the price of the delivery before. If you only read the level at the beginning of January, still add the value as at 31.12.",
 	"buildings_not_loaded": "Not loaded",
 	"buildings_fuel_load_failed": "The fuel stocks could not be loaded. Reload the page.",

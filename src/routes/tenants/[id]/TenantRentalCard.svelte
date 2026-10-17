@@ -25,7 +25,7 @@
 			<div>
 				<dt class="text-ink-muted">{m.common_monthly_total()}</dt>
 				<dd class="text-lg font-semibold text-ink" data-testid="tenant-rental-rent">
-					{formatCurrency(rental.rent)}
+					{formatCurrency(rental.monthlyTotal)}
 				</dd>
 			</div>
 			<div>
