@@ -159,6 +159,17 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" für das Gebäude "Ahornhof" die Periode "01.07.2023 – 31.12.2023"
 
+  # #133: eine Periode bis «Abgerechnet bis» ist ausserhalb von Dwello abgerechnet
+  @wip
+  Szenario: Erinnerung übergeht ausserhalb von Dwello abgerechnete Perioden
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2023-01-01" bis "2023-12-31" für "900" Franken
+    Und der Mietvertrag von "Bruno Meier" ist bis "2023-12-31" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" das Gebäude "Seeblick", aber nicht das Gebäude "Ahornhof"
+
   # Eine Abrechnung im Gebäude genügt nicht: jeder Mietvertrag der Periode braucht seine eigene
   Szenario: Erinnerung bleibt, bis jeder Mietvertrag der Periode abgerechnet ist
     Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
@@ -168,7 +179,8 @@ Funktionalität: Übersicht
     Und der Mieter "Carla Huber" existiert
     Und "Bruno Meier" ist im letzten Jahr aus der Wohnung "2.01" ausgezogen
     Und "Carla Huber" ist im letzten Jahr aus der Wohnung "2.02" ausgezogen
-    Und "Bruno Meier" hat die Abrechnung des letzten Jahres für das Gebäude "Ahornhof"
+    Und "Bruno Meier" hat die Abrechnungen der letzten beiden Jahre für das Gebäude "Ahornhof"
+    Und "Carla Huber" hat die Abrechnung des vorletzten Jahres für das Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" das Gebäude "Ahornhof"
 

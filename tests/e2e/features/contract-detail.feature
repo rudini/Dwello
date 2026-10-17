@@ -256,6 +256,9 @@ Funktionalität: Mietvertragsdetail
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann meldet der Mietvertrag die fehlende Abrechnung "01.10.2024 – 31.12.2024"
+    # #281: eine kürzere Abrechnungsperiode für diese Tage ist noch nicht entschieden
+    Und erfährt der Liegenschaftsverwalter, dass Dwello für diese Tage noch keine Abrechnung erstellt
+    Und bietet der Mietvertrag für die Tage ab "2024-10-01" keine Abrechnung zum Erstellen an
 
   # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode
   @wip

@@ -14,6 +14,7 @@ import {
 	managementFeeOfContract,
 	missingStatementsText,
 	missingStatementsShown,
+	missingStatementOffered,
 	billedUntilOfContract,
 	nextStepsText,
 	statementLinkedInDeleteDialog,
@@ -238,6 +239,21 @@ Given(
 Then('meldet der Mietvertrag die fehlende Abrechnung {string}', async ({ verwalter }, period: string) => {
 	await verwalter.sees(missingStatementsText).toContain(period);
 });
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass Dwello für diese Tage noch keine Abrechnung erstellt',
+	async ({ verwalter }) => {
+		await verwalter.sees(missingStatementsText).toContain('Für die übrigen Tage erstellt Dwello noch keine Abrechnung');
+	}
+);
+
+Then(
+	'bietet der Mietvertrag für die Tage ab {string} keine Abrechnung zum Erstellen an',
+	async ({ verwalter }, periodStart: string) => {
+		await verwalter.sees(missingStatementsShown).toBe(true);
+		await verwalter.sees(missingStatementOffered(periodStart)).toBe(false);
+	}
+);
 
 When(
 	'der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung {int} anzeigt',
