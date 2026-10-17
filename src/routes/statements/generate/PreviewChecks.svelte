@@ -11,7 +11,8 @@
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 
 	// Plausibility checks of the preview: no invoices, missing invoices or statements that leave days of a contract
-	// unbilled need a confirmation; statements that cover their contracts are only named (#251), a gap is a hint
+	// unbilled need a confirmation; statements that cover their contracts are named (#251), as a warning when the list
+	// names one outdated or made otherwise (#132), a gap is a hint
 	let {
 		rows,
 		period,
