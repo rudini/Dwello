@@ -34,6 +34,7 @@ import {
 	partialInvoicesHints,
 	oldAddressWarning,
 	noContractsInPeriod,
+	notesOnExistingStatement,
 	periodRunning,
 	missingStockFindings,
 	periodChoiceShown,
@@ -61,6 +62,7 @@ import {
 	editHintedInvoice,
 	generateMore,
 	openContractWithoutFee,
+	openExistingStatement,
 	generateStatements,
 	goToGeneration,
 	openPreview,
@@ -160,7 +162,7 @@ When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} und {float} % Verwaltungspauschale öffnet',
 	async ({ verwalter, seed }, year: number, building: string, profile: string, fee: number) => {
 		await verwalter.attemptsTo(
-			openPreview(year, seed.idOf(building)!, { heatingProfileId: seed.idOf(profile), managementFeePercent: fee })
+			openPreview(year, seed.idOf(building)!, { heatingProfileId: await seed.heatingProfileId(profile), managementFeePercent: fee })
 		);
 	}
 );
@@ -501,6 +503,39 @@ Then(
 	'warnt die Vorschau, dass {string} ausgezogen ist: {string}',
 	async ({ verwalter, names }, tenant: string, rest: string) => {
 		await verwalter.sees(oldAddressWarning).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
+	}
+);
+
+Given(
+	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung {int} mit dem Heizprofil {string} und {float} % Verwaltungspauschale',
+	async ({ seed }, tenant: string, building: string, year: number, profile: string, fee: number) => {
+		await seed.statement(tenant, building, year, profile, undefined, fee);
+	}
+);
+
+Then('sagt die Vorschau {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(existingStatementsText).toContain(text);
+});
+
+// a seeded Heizprofil «Winter» is named «Winter <id>»
+const withNames = (text: string, names: Map<string, string>) =>
+	text.replace(/«([^»]+)»/g, (quoted, name: string) => (names.has(name) ? `«${names.get(name)}»` : quoted));
+
+Then(
+	'sagt die Vorschau zur Abrechnung {int} von {string} {string}',
+	async ({ verwalter, seed, names }, year: number, tenant: string, text: string) => {
+		await verwalter.sees(notesOnExistingStatement(seed.idOf(`Abrechnung ${tenant} ${year}`)!)).toContain(withNames(text, names));
+	}
+);
+
+Then('zur Abrechnung {int} von {string} sagt die Vorschau nichts', async ({ verwalter, seed }, year: number, tenant: string) => {
+	await verwalter.sees(notesOnExistingStatement(seed.idOf(`Abrechnung ${tenant} ${year}`)!)).toBeNull();
+});
+
+When(
+	'der Liegenschaftsverwalter in der Vorschau die Abrechnung {int} von {string} öffnet',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(openExistingStatement(seed.idOf(`Abrechnung ${tenant} ${year}`)!));
 	}
 );
 

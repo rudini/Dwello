@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { invoiceRows } from '$lib/statement-wizard';
+	import { sameSettingsNote, type invoiceRows } from '$lib/statement-wizard';
+	import ChangedStatements from './ChangedStatements.svelte';
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
 	import InvoiceHint from './InvoiceHint.svelte';
@@ -10,7 +11,8 @@
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 
 	// Plausibility checks of the preview: no invoices, missing invoices or statements that leave days of a contract
-	// unbilled need a confirmation; statements that cover their contracts are only named (#251), a gap is a hint
+	// unbilled need a confirmation; statements that cover their contracts are named (#251), as a warning when the list
+	// names one outdated or made otherwise (#132), a gap is a hint
 	let {
 		rows,
 		period,
@@ -27,8 +29,17 @@
 	const notOver = $derived(period.periodEnd >= localToday());
 	const missing = $derived(rows.filter((row) => row.missing));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
+	// where to choose the existing statements' settings, when they differ in one the run chooses (#132)
+	const existingNote = $derived(
+		[sameSettingsNote(existing.flatMap((row) => row.changed)), m.statements_existing_note()]
+			.filter(Boolean)
+			.join(' ')
+	);
 	const unbilledDays = $derived(rows.some((row) => row.partlyBilled > 0));
-	const existingTone = $derived(unbilledDays ? 'caution' : 'info'); // only then a finding to confirm
+	// days left unbilled are a finding to confirm; a statement named as outdated or other is a warning (#132, V-6)
+	const existingTone = $derived(
+		unbilledDays || existing.some((row) => row.changed.length) ? 'caution' : 'info'
+	);
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
 	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
@@ -113,8 +124,9 @@
 						>{m.statements_view_of({ name: row.name })}</a
 					>
 				</p>
+				<ChangedStatements buildingId={row.buildingId} statements={row.changed} />
 			{/each}
-			<p>{m.statements_existing_note()}</p>
+			<p>{existingNote}</p>
 		</div>
 	</Alert>
 {/if}
