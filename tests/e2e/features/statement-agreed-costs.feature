@@ -92,6 +92,7 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietzins auf "980" Franken ändert
+    Und sieht der Liegenschaftsverwalter die Bestätigung, dass der Mietvertrag von "Anna Keller" gespeichert ist
     Und der Liegenschaftsverwalter die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
     Dann fragt der Assistent, ob "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
 

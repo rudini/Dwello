@@ -68,6 +68,3 @@ export const confirmMissingInvoices = byTestId('Fehlende Rechnungen bestätigen'
 export const shown = (testId: string) => bySelector(testId, `[data-testid="${testId}"]`);
 // #91: the first answer «Vereinbart» in the statement wizard's step 3
 export const firstAgreementYes = target('Erste Antwort «Vereinbart»', (page) => page.getByTestId(/^agreement-.+-yes$/).first());
-export const agreedCategoryBox = target('Kästchen der vereinbarten Nebenkosten', (page) => page.getByTestId(/^contract-category-/));
-export const agreedCategoryBoxAt = (index: number) =>
-	target(`Kästchen ${index + 1} der vereinbarten Nebenkosten`, (page) => page.getByTestId(/^contract-category-/).nth(index));

@@ -17,7 +17,6 @@ import {
 	PostFormAction,
 	Press,
 	Select,
-	Uncheck,
 	Wait
 } from '../screenplay/interactions';
 import { randomUUID } from 'crypto';
@@ -31,7 +30,7 @@ import {
 	uploadResult
 } from '../targets/invoice-upload';
 import { invoicePdf, uploadBelege } from './invoice-upload';
-import { Count, Visibility } from '../screenplay/questions';
+import { Visibility } from '../screenplay/questions';
 import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
@@ -67,6 +66,8 @@ import { demoNotice } from '../targets/demo';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
 import { leaveSettings } from './statement-generate';
+import { untickAllCategories } from './contract-form';
+import { agreedCategoryBoxes } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
 import { UPLOADED } from '../fixtures/screens';
@@ -251,17 +252,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// every box of the agreed Nebenkosten unticked, not saved: the note that no Nebenkosten are billed
 	'agreed-costs-none': () => async (actor) => {
 		// «Neuer Mietvertrag» (tenant and apartment from the address): the boxes are on the step «Miete»
-		if ((await actor.answer(Count.of(on.agreedCategoryBox))) === 0)
+		if ((await actor.answer(pageAddress)).includes('/contracts/new'))
 			await actor.attemptsTo(
 				Click.on(nextButton),
 				Click.on(nextButton),
 				EnterDate.of('2030-01-01').into(startDateInput),
 				Click.on(nextButton),
-				Wait.until(on.agreedCategoryBox)
+				Wait.until(agreedCategoryBoxes)
 			);
-		const boxes = await actor.answer(Count.of(on.agreedCategoryBox));
-		for (let box = 0; box < boxes; box++) await actor.attemptsTo(Uncheck.the(on.agreedCategoryBoxAt(box)));
-		await actor.attemptsTo(Wait.until(on.shown('contract-agreed-costs-none')));
+		await actor.attemptsTo(untickAllCategories, Wait.until(on.shown('contract-agreed-costs-none')));
 	},
 	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen»
 	'agreements-failed': () => (actor) =>

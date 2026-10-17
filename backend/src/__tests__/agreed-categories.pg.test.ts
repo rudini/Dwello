@@ -282,21 +282,26 @@ describe('Neuer Mietvertrag', () => {
 		expect((await contract(fresh.contract)).agreedCategoryIds).toEqual([]);
 	});
 
-		// code review W10c close C-5: the form shows only umlagefähige categories; one agreed while it is not umlagefähig
+	// code review W10c close C-5: the form shows only umlagefähige categories; one agreed while it is not umlagefähig
 	// keeps its answer when the form is saved
 	it('lässt eine vereinbarte, nicht mehr umlagefähige Kategorie beim Speichern vereinbart', async () => {
-		await db.update(categories).set({ isAllowedUtilityCost: true }).where(eq(categories.id, ownId));
-		await sendJson('PUT', `/api/v1/contracts/${fresh.contract}/agreements`, { categoryId: ownId, agreed: true });
-		await db.update(categories).set({ isAllowedUtilityCost: false }).where(eq(categories.id, ownId));
+		const umlagefaehig = (allowed: boolean) =>
+			db.update(categories).set({ isAllowedUtilityCost: allowed }).where(eq(categories.id, ownId));
+		try {
+			await umlagefaehig(true);
+			const answered = await sendJson('PUT', `/api/v1/contracts/${fresh.contract}/agreements`, { categoryId: ownId, agreed: true });
+			await umlagefaehig(false);
+			const saved = await sendJson('PUT', `/api/v1/contracts/${fresh.contract}`, { agreedCategoryIds: [ids.Caretaker] });
+			await umlagefaehig(true);
 
-		await sendJson('PUT', `/api/v1/contracts/${fresh.contract}`, { agreedCategoryIds: [ids.Caretaker] });
-		await db.update(categories).set({ isAllowedUtilityCost: true }).where(eq(categories.id, ownId));
-
-		expect((await contract(fresh.contract)).agreedCategoryIds).toContain(ownId);
-		await db.update(categories).set({ isAllowedUtilityCost: false }).where(eq(categories.id, ownId));
+			expect([answered.status, saved.status]).toEqual([200, 200]);
+			expect((await contract(fresh.contract)).agreedCategoryIds).toContain(ownId);
+		} finally {
+			await umlagefaehig(false);
+		}
 	});
 
-		it('vereinbart nur, was das Formular angekreuzt hat', async () => {
+	it('vereinbart nur, was das Formular angekreuzt hat', async () => {
 		expect((await contract(listed.contract)).agreedCategoryIds).toEqual([ids.Caretaker]);
 	});
 });
