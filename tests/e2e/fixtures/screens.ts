@@ -91,7 +91,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.tenant('Fritz');
 	await seed.contract('Fritz', '2.03', { startDate: '2100-01-01', baseRent: '1500.00' });
 	// A-5 (#114): moved out in 2024, still at the building's address: Gina with a draft (send dialog, overview task, the
-	// next steps of his ended contract), Hugo without one (the wizard's preview of 2024)
+	// next steps of her ended contract), Hugo without one (the wizard's preview of 2024)
 	for (const [tenant, apartment] of [['Gina', '2.04'], ['Hugo', '2.05']]) {
 		await seed.apartment('Bergsicht', apartment, 'vacant');
 		await seed.tenant(tenant);
