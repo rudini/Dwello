@@ -246,7 +246,7 @@ describe('Datenschutzerklärung nach #82', () => {
 
 		const text = section('Aufbewahrung')?.textContent;
 		expect(text).toContain('Ausser in der öffentlichen Demo löscht Dwello keine gespeicherten Daten von selbst.');
-		expect(text).toContain('Versendete Abrechnungen und Mahnungen lassen sich nicht löschen');
+		expect(text).toContain('Abrechnungen lassen sich nach dem Versand nicht mehr löschen, Mahnungen gar nicht');
 		expect(text).toContain('Wer zur Buchführung verpflichtet ist');
 		expect(text).toContain('10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art. 958f OR)');
 		expect(text).toContain('Hat der letzte Mietvertrag eines Mieters geendet');
@@ -256,7 +256,7 @@ describe('Datenschutzerklärung nach #82', () => {
 		page();
 
 		const text = section('Anmeldung')?.textContent;
-		expect(text).toContain('nur Name und E-Mail-Adresse');
+		expect(text).toContain('nur Name, E-Mail-Adresse und die Kennung des Kontos beim Anbieter');
 		expect(text).not.toContain('Profilbild');
 		expect(text).toContain('Google (Google Ireland Limited, Irland, und Google LLC, USA) erfährt bei jeder Anmeldung');
 		expect(text).toContain('Swiss-U.S. Data Privacy Framework');
@@ -283,6 +283,8 @@ describe('Datenschutzerklärung nach #82', () => {
 		page({ mail: 'resend' });
 
 		expect(section('Weitergabe an Dritte')?.textContent).toContain('über Resend (Resend, Inc., USA) zugestellt');
+		// the safeguard itself, not a referral (Art. 19 Abs. 4 DSG, review W9c-2 R-5)
+		expect(section('Weitergabe an Dritte')?.textContent).toContain('(Art. 16 Abs. 2 Bst. d DSG)');
 		expect(links('Weitergabe an Dritte')).toContain('https://resend.com/legal/privacy-policy');
 	});
 
@@ -308,12 +310,12 @@ describe('Datenschutzerklärung nach #82', () => {
 
 	it('nennt die Gültigkeit der Anmelde-Cookies aus der Konfiguration', () => {
 		page();
-		expect(section('Cookies')?.textContent).toContain('Beide gelten 7 Tage ab der letzten Verlängerung der Sitzung.');
+		expect(section('Cookies')?.textContent).toContain('Beide gelten 7 Tage ab der Anmeldung oder der letzten Verlängerung der Sitzung.');
 	});
 
 	it('nennt eine Gültigkeit in Stunden, wenn sie nicht ganze Tage dauert', () => {
 		page({ sessionSeconds: 12 * 3600 });
-		expect(section('Cookies')?.textContent).toContain('Beide gelten 12 Stunden ab der letzten Verlängerung der Sitzung.');
+		expect(section('Cookies')?.textContent).toContain('Beide gelten 12 Stunden ab der Anmeldung oder der letzten Verlängerung der Sitzung.');
 	});
 
 	it('sagt, dass Cookies im Browser abgelehnt werden können (Art. 45c FMG)', () => {

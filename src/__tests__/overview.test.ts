@@ -36,7 +36,7 @@ describe('Aufgaben der Übersicht', () => {
 			expect.objectContaining({
 				id: 'former-documents-t1',
 				title: 'Dokumente von Ida Alt prüfen',
-				text: 'Der letzte Mietvertrag endete am 31.03.2026. 1 hochgeladenes Dokument stammt aus der Zeit davor. Löschen Sie, was Sie nicht mehr brauchen; behalten Sie Übergabeprotokolle, bis das Mietzinsdepot zurückgegeben ist.',
+				text: 'Der letzte Mietvertrag endete am 31.03.2026. 1 hochgeladenes Dokument stammt aus der Zeit davor. Löschen Sie, was Sie nicht mehr brauchen; behalten Sie Übergabeprotokolle, bis das Mietzinsdepot freigegeben ist.',
 				href: '/tenants/t1',
 				action: 'Dokumente ansehen'
 			})

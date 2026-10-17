@@ -76,7 +76,7 @@ Funktionalität: Datenschutz
     Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass nur der Betreiber das Protokoll des Servers zur Sicherheit und Fehlersuche liest und selbst bestimmt, wie lange es aufbewahrt wird
 
   Szenario: E-Mails über den Mailserver, den der Betreiber eingerichtet hat
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Mailserver, den der Betreiber eingerichtet hat"
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "über den Mailserver zugestellt, den der Betreiber eingerichtet hat"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
 
   Szenario: Länder und Datenschutzerklärungen der Dienste, die der Browser aufruft

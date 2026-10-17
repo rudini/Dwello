@@ -297,12 +297,12 @@ describe('Mieterdetail', () => {
 	it('nennt bei einem ehemaligen Mieter die Dokumente von vor dem Vertragsende und was zu behalten ist', () => {
 		open([], null, [upload], false, { endDate: '2026-03-31', documents: [upload] });
 
-		expect(text('tenant-former-documents')).toContain('Dokumente aus der Mietzeit prüfen');
+		expect(text('tenant-former-documents')).toContain('Hochgeladene Dokumente prüfen');
 		expect(text('tenant-former-documents')).toContain(
-			'Der letzte Mietvertrag von Lea Frei endete am 31.03.2026. Vor diesem Tag haben Sie diese Dokumente hochgeladen: Ausweiskopie.'
+			'Der letzte Mietvertrag von Lea Frei endete am 31.03.2026. Vor diesem Tag haben Sie hochgeladen: Ausweiskopie.'
 		);
 		expect(text('tenant-former-documents')).toContain(
-			'Behalten Sie Übergabeprotokolle, bis das Mietzinsdepot zurückgegeben ist.'
+			'Behalten Sie Übergabeprotokolle, bis das Mietzinsdepot freigegeben ist.'
 		);
 	});
 
