@@ -1,0 +1,15 @@
+{
+	"data": {
+		"accounting_period": "july-june",
+		"management_fee_pct": "2.5",
+		"default_heating_profile_id": "hp1",
+		"default_distribution_key_id": "dk1",
+		"company_name": "Muster Immobilien AG",
+		"company_address": "Bahnhofstrasse 1",
+		"company_postal_code": "8001",
+		"company_city": "Zürich",
+		"iban": "CH9300762011623852957",
+		"payment_deadline_days": "45",
+		"reminder_after_days": "10"
+	}
+}
