@@ -35,19 +35,19 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable'].includes(state)) return { path, building: '', tankBuilding: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview'].includes(state)) return { path, building: '', tankBuilding: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
 	await seed.apartment('Seeblick', '1.03', 'vacant'); // free: never rented
-	await seed.apartment('Seeblick', '1.04', 'vacant'); // free only from 2100
+	await seed.apartment('Seeblick', '1.04', 'vacant'); // free only from 2099
 	await seed.tenant('Anna');
 	await seed.tenant('Bruno');
 	await seed.tenant('Carla');
 	await seed.upload('Anna', UPLOADED);
 	await seed.contract('Anna', '1.01', { startDate: '2015-01-01', baseRent: '1800.00', monthlyAdvancePayment: '200.00' });
 	await seed.contract('Bruno', '1.02', { startDate: '2015-01-01', baseRent: '1500.00', monthlyAdvancePayment: '150.00' });
-	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2099-12-31', baseRent: '1400.00' });
+	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2098-12-31', baseRent: '1400.00' });
 	await seed.managementFee('Carla', false); // step «Einstellungen» of the statement wizard names her contract (#89)
 	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
 	await seed.heatingInvoice('Seeblick', '9000.00', 2025); // Bruno pays more than his Akonto: a reminder can be sent
@@ -66,6 +66,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.sendStatement('Bruno', 2025);
 	await seed.paymentDeadline('Bruno', 2025, '2026-01-31'); // overdue: only then a reminder can be sent
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
+	// wants e-mail without an address: her draft is sent by e-mail, and sending it is refused (#86)
+	await seed.correspondence('Carla', 'email');
+	await seed.noEmail('Carla');
 	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	await seed.sendStatement('Anna', 2024);
@@ -82,6 +85,43 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00', additionalRent: '80.00' }); // a parking space: the wizard's note after her contract names it (#144)
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
+	// moved in during 2025, invoices over different days and the change of the Tankbestand: the statement lists them
+	// with their days and the calculation (#104, #240)
+	await seed.building('Talblick', 'Winterthur');
+	await seed.apartment('Talblick', '3.01', 'vacant');
+	await seed.tenant('Greta');
+	await seed.contract('Greta', '3.01', { startDate: '2025-08-15', baseRent: '1300.00' });
+	await seed.invoiceOn('Talblick', 'Hauswart', '600.00', '2025-07-05', ['2025-04-01', '2025-06-30']);
+	await seed.invoiceOn('Talblick', 'Hauswart', '1200.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
+	await seed.invoiceOn('Talblick', 'Heizung', '900.00', '2025-10-05', ['2025-07-01', '2025-09-30']);
+	await seed.fuelStock('Talblick', '2024-12-31', '600.00');
+	await seed.fuelStock('Talblick', '2025-12-31', '100.00');
+	await seed.statement('Greta', 'Talblick', 2025);
+	// empty since a tenancy ended long before any statement: «Leer seit», «Frühere Mietverträge» (#145, #117)
+	await seed.apartment('Bergsicht', '2.02', 'vacant');
+	await seed.tenant('Emil');
+	await seed.contract('Emil', '2.02', { startDate: '2010-01-01', endDate: '2014-12-31', baseRent: '1500.00' });
+	// a tenant who has not moved in yet: «Vermietet ab», Mieter «Künftig» (#58)
+	await seed.apartment('Bergsicht', '2.03', 'vacant');
+	await seed.tenant('Fritz');
+	await seed.contract('Fritz', '2.03', { startDate: '2100-01-01', baseRent: '1500.00' });
+	// A-5 (#114): moved out in 2024, still at the building's address: Ida with a draft (send dialog, overview task, the
+	// next steps of her ended contract), Kurt without one (the wizard's preview of 2024)
+	for (const [tenant, apartment] of [['Ida', '2.04'], ['Kurt', '2.05']]) {
+		await seed.apartment('Bergsicht', apartment, 'vacant');
+		await seed.tenant(tenant);
+		await seed.contract(tenant, apartment, { startDate: '2024-01-01', endDate: '2024-06-30', baseRent: '1200.00' });
+		await seed.notice(tenant, '2024-06-30');
+		await seed.buildingAddress(tenant, 'Bergsicht');
+	}
+	await seed.statement('Ida', 'Bergsicht', 2024, 'Standard');
+	// A-6 (#115): an agreed end in the past, the 2025 statement bills the time after it as Leerstand
+	await seed.building('Talblick', 'Winterthur');
+	await seed.apartment('Talblick', '3.01', 'vacant');
+	await seed.tenant('Gina');
+	await seed.contract('Gina', '3.01', { startDate: '2024-01-01', endDate: '2025-06-30', baseRent: '1300.00' });
+	await seed.heatingInvoice('Talblick', '1200.00', 2025);
+	await seed.statement('Gina', 'Talblick', 2025, 'Standard');
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -90,12 +130,18 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		tenant: seed.idOf('Anna'), // rents 1.01 without an end: the contract wizard's step «Wohnung» names it (#156)
 		contract: seed.idOf('Mietvertrag Anna'),
 		noticedContract: seed.idOf('Mietvertrag Dora'),
+		vacantApartment: seed.idOf('2.02'),
+		endedContract: seed.idOf('Mietvertrag Emil'),
+		expiredContract: seed.idOf('Mietvertrag Gina'),
+		movedOutContract: seed.idOf('Mietvertrag Ida'),
+		oldAddressStatement: seed.idOf('Abrechnung Ida 2024'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
 		lateInvoice,
 		statement: seed.idOf('Abrechnung Anna 2025'),
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
+		partsStatement: seed.idOf('Abrechnung Greta 2025'),
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),

@@ -67,16 +67,19 @@ describe('Gebäudeliste', () => {
 		expect(words).toContain('4 Wohnungen');
 		expect(words).toContain('3 vermietet');
 		expect(words).toContain('1 leer');
-		expect(words).not.toContain('wiedervermietet');
+		expect(words).not.toContain('vermietet ab');
 		expect(words).toContain('Baujahr 1985');
 		expect(words).not.toContain('3/4');
 	});
 
-	it('zählt alle Wohnungen, auch wiedervermietete und gesperrte', () => {
-		list([building({ apartmentCount: 6, occupiedCount: 3, reletCount: 1, reservedCount: 1 })]);
+	// F-4 (#58): «vermietet ab», wie in der Übersicht
+	it('zählt alle Wohnungen, auch künftig vermietete und gesperrte', () => {
+		list([
+			building({ apartmentCount: 6, occupiedCount: 3, reletStarts: ['2099-11-01'], reservedCount: 1 })
+		]);
 		const words = byTestId('building-card-b1')!.textContent!.replace(/\s+/g, ' ');
 		expect(words).toContain('3 vermietet');
-		expect(words).toContain('1 wiedervermietet');
+		expect(words).toContain('1 vermietet ab 01.11.2099');
 		expect(words).toContain('1 leer');
 		expect(words).toContain('1 gesperrt');
 	});
@@ -150,6 +153,13 @@ describe('Gebäudedetail', () => {
 			form: null
 		} as never);
 
+	it('nennt ein Gebäude ohne Tank oder mit stillgelegtem Tank als solches (#72)', () => {
+		detail([]);
+		expect(byTestId('building-no-tank')).toBeNull();
+		detail([], { noTank: true });
+		expect(byTestId('building-no-tank')!.textContent!.trim()).toBe('Keiner oder stillgelegt');
+	});
+
 	it('nennt Gebäude, Adresse und Baujahr mit dem Weg zurück zur Liste', () => {
 		detail([]);
 		expect(document.querySelector('h1')!.textContent).toBe('Lindenhof');
@@ -162,11 +172,11 @@ describe('Gebäudedetail', () => {
 		detail([flat('a1', '1.01', 1)], {
 			apartmentCount: 6,
 			occupiedCount: 4,
-			reletCount: 1,
+			reletStarts: ['2099-11-01'],
 			vacantCount: 1,
 			reservedCount: 0
 		});
-		expect(text()).toContain('6, davon 4 vermietet, 1 wiedervermietet und 1 leer');
+		expect(text()).toContain('6, davon 4 vermietet, 1 vermietet ab 01.11.2099 und 1 leer');
 	});
 
 	it('listet die Wohnungen nach Stockwerk, von unten nach oben', () => {
@@ -254,7 +264,7 @@ describe('Tankbestand', () => {
 			}
 		]);
 
-		expect(section()).toContain('Brennstoff im Tank oder Lager');
+		expect(byTestId('fuel-stocks')!.querySelector('h2')!.textContent).toBe('Tankbestand'); // #75
 		expect(section()).toContain('den Wert im Tank oder Lager in Franken'); // Pellets und Holz liegen im Lager
 		expect(section()).toContain(
 			'Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen.'

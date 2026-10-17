@@ -41,6 +41,8 @@ import {
 	contractEndInput,
 	contractEndPastConfirm,
 	noticeReceivedInput,
+	continueOpenEndedButton,
+	movedOutButton,
 	deleteContractButton,
 	endContractButton
 } from '../targets/contract-detail';
@@ -227,6 +229,11 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2099-02-15').into(noticeReceivedInput),
 			Wait.until(on.shown('contract-notice-period-hint'))
 		),
+	// A-6 (#115): the 2025 draft bills the time after the agreed end as Leerstand: continuing is refused, the draft offered
+	// personas a6 P-1: «Mieter ist ausgezogen» asks for confirmation with its consequence
+	'moved-out-dialog': () => openDialog(movedOutButton),
+	'continue-refused': () => (actor) =>
+		actor.attemptsTo(Click.on(continueOpenEndedButton), Wait.until(on.refusedStatements)),
 	// the same refusal from the contract form: the 2025 draft bills rent days after 31.03.2025 (A-10)
 	'edit-refused': () => async (actor) => {
 		await clickOnShown(actor, 'Befristet', durationChoice);
@@ -242,6 +249,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'list-scoped': () => Wait.until(on.listScope),
 	'pdf-missing': () => Wait.until(on.shown('statement-pdf-missing')),
 	'send-dialog': () => openDialog(on.sendButton),
+	// refused, so the draft stays one and each viewport can send it again
+	'send-refused': () => (actor) => actor.attemptsTo(PostFormAction('?/send'), Wait.until(on.shown('send-feedback'))),
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),
@@ -287,8 +296,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address
 			Click.on(nextButton),
-			Wait.forValue(startDateInput, '01.01.2100'), // the suggestion arrived, it cannot land in the typed date
-			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
+			Wait.forValue(startDateInput, '01.01.2099'), // the suggestion arrived, it cannot land in the typed date
+			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2098
 			Wait.until(on.overlapWarning)
 		),
 	// the amounts of the apartment's last contract filled in, with the note that says so (#144)
@@ -334,6 +343,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
+	// 2024 with the second building, where Fritz moved out and still has its address (A-5, #114)
+	'old-address-preview': (example) => previewOf('2024', 'preview-old-address')(example, example.tankBuilding),
+	'old-address-task': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Neue Adresse eintragen')))),
 	// a draft from an earlier visit whose building and heating profile were deleted since
 	'draft-dropped': () => (actor) =>
 		actor.attemptsTo(

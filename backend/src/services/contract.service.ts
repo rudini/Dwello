@@ -16,6 +16,7 @@ import {
 } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import { oldAddress } from './old-address';
 import { swissToday } from './today';
 
 /** The database, or a transaction of it */
@@ -30,6 +31,7 @@ const contractFields = {
 	endDate: rentalContracts.endDate,
 	terminated: rentalContracts.terminated,
 	noticeReceivedOn: rentalContracts.noticeReceivedOn,
+	movedOut: rentalContracts.movedOut,
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
 	monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
@@ -44,7 +46,8 @@ const contractFields = {
 	tenantEmail: tenants.email,
 	apartmentNumber: apartments.number,
 	buildingName: buildings.name,
-	buildingAddress: buildings.address
+	buildingAddress: buildings.address,
+	oldAddress: oldAddress(rentalContracts.id) // A-5: a moved-out tenant still has the building's address
 };
 
 /** Contracts with their tenant, apartment and building, as contractFields */
@@ -82,6 +85,7 @@ export interface ContractWithDetails extends RentalContract {
 	apartmentNumber: string;
 	buildingName: string;
 	buildingAddress: string;
+	oldAddress: boolean;
 }
 
 /**
@@ -383,8 +387,9 @@ export async function updateContract(
 		return tx
 			.update(rentalContracts)
 			// without an end there is no notice: withdrawing it makes the contract open-ended again; without a notice
-			// there is no day it arrived
+			// there is no day it arrived; a move-out belongs to the end it was confirmed for (A-6)
 			.set({
+				...(data.endDate !== undefined && data.endDate !== current.endDate && { movedOut: false }),
 				...feeRate(data, data.managementFeeAgreed ?? current.managementFeeAgreed),
 				...(data.endDate === null && { terminated: false }),
 				...((data.endDate === null || data.terminated === false) && { noticeReceivedOn: null }),

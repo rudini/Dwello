@@ -11,6 +11,8 @@ import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
 import { db } from '../db/connection';
 import { documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { formatQRReferenceForDisplay, statementQRReference } from '../services/qr-bill.service';
 import { updateTenant } from '../services/tenant.service';
 import { daysAfter, swissToday } from '../services/today';
 import { formatSwissDate } from '../services/pdf-format';
@@ -400,5 +402,112 @@ describe('Mahnung nach gescheiterter E-Mail per Post versendet', () => {
 
 		expect(document.channel).toBe('email');
 		expect(sent).toMatchObject({ channel: 'letter', status: 'sent' });
+	});
+});
+
+// #106: die Mahnung folgt der Sprache des Mieters, auch der später ausgedruckte Brief
+describe('Mahnung in der Sprache des Mieters', () => {
+	it('schreibt E-Mail und PDF auf Italienisch', async () => {
+		await updateTenant(rental.tenant, { email: 'anna.keller@example.com', correspondenceChannel: 'email', language: 'it' });
+		const statementId = await statement('sent');
+		const result = await remind(statementId);
+
+		expect(result.document.title).toBe('Promemoria di pagamento');
+		const mail = mails.at(-1)!;
+		expect(mail.subject).toStartWith('Promemoria di pagamento – Conteggio spese accessorie');
+		expect(mail.text).toContain('Gentile');
+		expect(pdfText(mail.attachments[0].content)).toContain('Cordiali saluti');
+
+		// Fachreview W6b V-4: «2° sollecito» bleibt im Dateinamen lesbar
+		await expireReminders(statementId);
+		await remind(statementId);
+		expect(mails.at(-1)!.attachments[0].filename).toStartWith('2° sollecito ');
+	});
+
+	it('macht den Brief beim Versand wieder auf Französisch', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'fr' });
+		const letter = (await remind(await statement('sent'))).document;
+		await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
+
+		expect(pdfText(pdf)).toContain('Meilleures salutations');
+	});
+});
+
+// #108: jede Mahnung trägt einen Zahlteil für den offenen Saldo, mit der Referenz der Abrechnung
+describe('Zahlteil der Mahnung', () => {
+	const QR_IBAN = 'CH4431999123000889012'; // the sample QR-IBAN of SIX
+	let iban: string | null;
+
+	beforeAll(async () => {
+		iban = await getConfig('iban');
+		await setConfig('iban', QR_IBAN);
+	});
+
+	afterAll(async () => {
+		if (iban) await setConfig('iban', iban);
+		else await deleteConfig('iban');
+	});
+
+	const reminderPdf = async (statementId: string) => {
+		const { document } = await remind(statementId);
+		return pdfText(Buffer.from(await (await api('GET', `/api/v1/documents/${document.id}/pdf`)).arrayBuffer()));
+	};
+
+	it('druckt den Zahlteil mit dem offenen Saldo und der QR-Referenz der Abrechnung', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const text = await reminderPdf(statementId);
+
+		expect(text).toContain('Empfangsschein');
+		expect(text).toContain('Zahlteil');
+		// in the letter, on the receipt and on the payment part
+		expect(text.split('120.00').length - 1).toBe(3);
+		expect(text.split(formatQRReferenceForDisplay(statementQRReference(statementId))).length - 1).toBe(3);
+	});
+
+	// Review W6c C-1/V-6/C-13: Brief und Zahlteil auf einem Blatt, jede Mahnstufe in jeder Sprache
+	it('druckt jede Mahnstufe mit dem Zahlteil auf eine Seite', async () => {
+		for (const language of ['de', 'fr', 'it', 'en']) {
+			await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language });
+			const statementId = await statement('sent');
+			for (let level = 1; level <= 3; level++) {
+				const { document } = await remind(statementId);
+				const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${document.id}/pdf`)).arrayBuffer());
+				expect(pdf.toString('latin1').match(/\/Type \/Page\b/g)?.length).toBe(1);
+				await expireReminders(statementId);
+			}
+		}
+	});
+
+	it('beschriftet den Zahlteil in der Sprache des Mieters', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'fr' });
+		const text = await reminderPdf(await statement('sent'));
+
+		expect(text).toContain('Section paiement');
+		expect(text).toContain('Récépissé');
+	});
+
+	// Fachreview W6c V-1: sonst bezahlt der Mieter mit einem Scan ein zweites Mal
+	it('druckt keinen Zahlteil in den Brief, der erst nach der Zahlung versendet wird', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const letter = (await remind(statementId)).document;
+		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
+
+		expect(pdfText(pdf)).toContain('Freundliche Grüsse');
+		expect(pdfText(pdf)).not.toContain('Zahlteil');
+	});
+
+	it('druckt ohne IBAN keinen Zahlteil', async () => {
+		await deleteConfig('iban');
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const text = await reminderPdf(await statement('sent'));
+		await setConfig('iban', QR_IBAN);
+
+		expect(text).toContain('Freundliche Grüsse');
+		expect(text).not.toContain('Zahlteil');
 	});
 });

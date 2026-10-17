@@ -98,6 +98,25 @@
 			/>
 		</Panel>
 
+		<Panel title={m.settings_deadlines()}>
+			<SettingField
+				type="number"
+				name="paymentDeadlineDays"
+				label={m.settings_payment_days_label()}
+				value={settings.paymentDeadlineDays}
+				error={errors.paymentDeadlineDays}
+				help={m.settings_payment_days_help()}
+			/>
+			<SettingField
+				type="number"
+				name="reminderAfterDays"
+				label={m.settings_reminder_days_label()}
+				value={settings.reminderAfterDays}
+				error={errors.reminderAfterDays}
+				help={m.settings_reminder_days_help()}
+			/>
+		</Panel>
+
 		<DefaultsSection
 			{settings}
 			heatingProfiles={data.heatingProfiles}

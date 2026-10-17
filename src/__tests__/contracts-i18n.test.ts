@@ -1,11 +1,15 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
-import { apartmentOption, validateContract, type ContractFormValues } from '$lib/contract-form';
+import {
+	apartmentOption,
+	impossibleYear,
+	validateContract,
+	type ContractFormValues
+} from '$lib/contract-form';
 import {
 	advancePaymentNotice,
 	contractSteps,
 	contractSummary,
-	impossibleYear,
 	startDateNotice
 } from '$lib/contract-wizard';
 import { load as newContractLoad } from '../routes/contracts/new/+page.server';

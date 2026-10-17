@@ -10,7 +10,6 @@ import {
 	listStatements,
 	getStatement,
 	updateStatement,
-	updateStatementStatus,
 	deleteStatement,
 	addLineItems,
 	getStatementCountsByStatus,
@@ -18,7 +17,9 @@ import {
 	generateStatement,
 	resetPayment
 } from '../services/statement.service';
-import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
+import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
+import { changedInvoices } from '../services/statement-invoices.service';
+import { sendStatement } from '../services/statement-send.service';
 
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
 function pdfFailure(error: unknown, set: { status?: number | string }) {
@@ -153,6 +154,16 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		}
 	)
 
+	// The invoices of its period recorded, changed or deleted since the statement was created (#96)
+	.get('/:id/changed-invoices', async ({ params, set }) => {
+		const invoiceIds = await changedInvoices(params.id);
+		if (!invoiceIds) {
+			set.status = 404;
+			return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
+		}
+		return { invoiceIds };
+	})
+
 	// Update a statement
 	.put(
 		'/:id',
@@ -199,12 +210,26 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		{ params: t.Object({ id: t.String() }) }
 	)
 
+	// Send a draft: by e-mail to a tenant who wants e-mail, else (or byLetter) only recorded as sent (#86)
+	.post(
+		'/:id/send',
+		async ({ params, body, set }) => {
+			try {
+				return await sendStatement(params.id, body.byLetter);
+			} catch (error) {
+				set.status = !(error instanceof CodedError) ? 500 : error.code === 'STATEMENT_NOT_FOUND' ? 404 : 400;
+				return errorBody(error, 'Failed to send the statement');
+			}
+		},
+		{ params: t.Object({ id: t.String() }), body: t.Object({ byLetter: t.Optional(t.Boolean()) }) }
+	)
+
 	// Update statement status
 	.put(
 		'/:id/status',
 		async ({ params, body, set }) => {
 			try {
-				const statement = await updateStatementStatus(
+				const statement = await changeStatementStatus(
 					params.id,
 					body.status as 'draft' | 'sent' | 'paid' | 'overdue',
 					{
@@ -304,7 +329,8 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				return {
 					success: true,
 					message: 'PDF generated and stored successfully',
-					...result
+					qrReference: result.qrReference,
+					pdfSize: result.pdfSize
 				};
 			} catch (error) {
 				return pdfFailure(error, set);
@@ -315,7 +341,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				id: t.String()
 			}),
 			body: t.Object({
-				language: t.Optional(t.String()) // de, fr, it, rm, en
+				language: t.Optional(t.String()) // de, fr, it, en
 			})
 		}
 	)

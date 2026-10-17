@@ -3,10 +3,15 @@ import { test } from '../fixtures/test';
 import {
 	draftNoticeText,
 	footerVersionText,
+	glossaryExplanationText,
 	llmRecipientNotice,
 	operatorNoticeText,
+	pageAnchor,
+	pagePurposeText,
 	pageOverflowsSideways,
+	pageTitleText,
 	pageTitleWidth,
+	sectionShareInWindow,
 	sectionShown,
 	sectionText,
 	tabIcon
@@ -14,6 +19,7 @@ import {
 import { openPage } from '../tasks/navigation';
 import {
 	chooseInFooter,
+	chooseInHelpContents,
 	chooseInMainNav,
 	chooseLogo,
 	openSettingsFromUserMenu,
@@ -144,4 +150,26 @@ Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: 
 
 Then('erklärt die Hilfe unter {string} {string}', async ({ verwalter }, heading: string, text: string) => {
 	await verwalter.sees(sectionText(heading)).toContain(text);
+});
+
+Then(
+	'erklärt die Hilfe den Begriff {string} mit {string}',
+	async ({ verwalter }, term: string, explanation: string) => {
+		await verwalter.sees(glossaryExplanationText(term)).toContain(explanation);
+	}
+);
+
+When('der Liegenschaftsverwalter im Inhalt der Hilfe {string} wählt', async ({ verwalter }, label: string) => {
+	await verwalter.attemptsTo(chooseInHelpContents(label));
+});
+
+// The glossary has its own address, so a link can lead straight to it (#109)
+Then('sieht der Liegenschaftsverwalter die Begriffe der Hilfe unter ihrer eigenen Adresse', async ({ verwalter }) => {
+	await verwalter.sees(pageAnchor).toBe('#glossary');
+	await verwalter.sees(sectionShareInWindow('Begriffe kurz erklärt')).toBeGreaterThan(0);
+});
+
+Then('erklärt die Seite {string} {string}', async ({ verwalter }, title: string, text: string) => {
+	await verwalter.sees(pageTitleText).toBe(title);
+	await verwalter.sees(pagePurposeText).toContain(text);
 });

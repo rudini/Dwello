@@ -192,9 +192,10 @@ export function testData(api: CallTheApi) {
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},
 
-		// Unique per scenario: tenants of parallel scenarios must not share an address
-		async email(tenantTitle: string) {
-			const email = `${ids.get(tenantTitle)}@dwello.test`;
+		// Unique per scenario: tenants of parallel scenarios must not share an address; the mail catcher refuses
+		// abgewiesen.dwello.test
+		async email(tenantTitle: string, domain = 'dwello.test') {
+			const email = `${ids.get(tenantTitle)}@${domain}`;
 			await put(`tenants/${ids.get(tenantTitle)}`, { email });
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
@@ -218,6 +219,22 @@ export function testData(api: CallTheApi) {
 				correspondenceChannel: channel
 			});
 			names.set(`E-Mail ${tenantTitle}`, email);
+		},
+
+		// A Korrespondenzadresse by letter, abroad when a country code is given (#102)
+		async address(tenantTitle: string, address: string, postalCode: string, city: string, country: string) {
+			await put(`tenants/${ids.get(tenantTitle)}`, { address, postalCode, city, country, correspondenceChannel: 'letter' });
+		},
+
+		// The building's address still stored as the tenant's, written differently, as a landlord types it (A-5, #114)
+		async buildingAddress(tenantTitle: string, buildingTitle: string) {
+			const building = await get(`buildings/${ids.get(buildingTitle)}`);
+			await put(`tenants/${ids.get(tenantTitle)}`, {
+				address: ` ${building.address.toUpperCase()}  `,
+				postalCode: building.postalCode,
+				city: building.city,
+				correspondenceChannel: 'letter'
+			});
 		},
 
 		async noEmail(tenantTitle: string) {
@@ -263,6 +280,11 @@ export function testData(api: CallTheApi) {
 		// an open-ended contract ended by notice, as «Mietvertrag beenden» stores it
 		async notice(tenantTitle: string, endDate: string) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate, terminated: true });
+		},
+
+		// the tenant left after an agreed end, as «Mieter ist ausgezogen» stores it (A-6, #115)
+		async movedOut(tenantTitle: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { movedOut: true });
 		},
 
 		async sendStatement(tenantTitle: string, year: number) {
@@ -313,6 +335,11 @@ export function testData(api: CallTheApi) {
 			await invoice(buildingTitle, { categoryId: heating.id }, `Heizöl ${year}`, amount, `${year}-06-30`);
 		},
 
+		// The landlord records that the building has no tank or that its tank is decommissioned (#72)
+		async noTank(buildingTitle: string) {
+			await put(`buildings/${ids.get(buildingTitle)}`, { noTank: true });
+		},
+
 		// Value of the heating oil in the building's tank on a reading day (removed with the building)
 		async fuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
@@ -323,7 +350,14 @@ export function testData(api: CallTheApi) {
 		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
 			const category = await predefinedCategory(categoryName);
 			const period = service && { servicePeriodStart: service[0], servicePeriodEnd: service[1] };
-			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+			const id = await invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+			ids.set(`Rechnung ${categoryName} ${date}`, id);
+			return id;
+		},
+
+		// A recorded invoice that costs another amount afterwards
+		async invoiceAmount(key: string, amount: string) {
+			await put(`invoices/${ids.get(key)}`, { amount });
 		},
 
 		async predefinedCategoryId(categoryName: string): Promise<string> {

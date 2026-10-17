@@ -70,6 +70,7 @@ latitude      DECIMAL(10,7)
 longitude     DECIMAL(10,7)
 building_type VARCHAR(50)            -- Gebäudetyp
 year_built    INTEGER                -- Baujahr
+no_tank       BOOLEAN      NOT NULL DEFAULT false -- kein Tank oder Tank stillgelegt: no Tankbestand asked for periods without readings (#72)
 ```
 
 Index: `buildings_city_idx (city)`.
@@ -99,11 +100,12 @@ last_name              VARCHAR(100) NOT NULL
 email                  VARCHAR(255)
 phone                  VARCHAR(30)
 language               VARCHAR(5)   NOT NULL DEFAULT 'de'
-address                VARCHAR(500)
+address                VARCHAR(500)  -- Korrespondenzadresse: street with house number
 postal_code            VARCHAR(10)
 city                   VARCHAR(100)
+country                VARCHAR(2)   NOT NULL DEFAULT 'CH'      -- ISO 3166 code of the Korrespondenzadresse (#102)
 correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
-CHECK (language IN ('de', 'fr', 'it', 'rm', 'en'))
+CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0012 (#63)
 ```
 
 No indexes besides the primary key; `email` is not unique. `correspondence_channel` has no CHECK.
@@ -117,6 +119,7 @@ start_date              DATE NOT NULL           -- Vertragsbeginn
 end_date                DATE                    -- Vertragsende, NULL = unbefristet
 terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date is the Kündigungstermin of an open-ended contract, not an agreed end
 notice_received_on      DATE              -- the day the notice arrived (A-3, #112), optional; only with terminated
+moved_out               BOOLEAN NOT NULL DEFAULT FALSE -- «Mieter ist ausgezogen» after an agreed end (A-6, #115); cleared when end_date changes
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
@@ -263,7 +266,7 @@ heating_profile_id     UUID                    -- Heizprofil of the Abrechnungsl
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
 heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true, reason, names } or percent, months, profile names
-balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
+balance                DECIMAL(12,2) NOT NULL  -- Saldo, to 5 Rappen in the tenant's favour (#79; sent before: commercially): positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
 paid_date              DATE                    -- from the Abrechnungsdatum up to today (#138)
@@ -331,10 +334,13 @@ period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating 
 position_rental_days INTEGER                -- the tenant's days in the days billed (null: not a ratio of days)
 billed_days         INTEGER                 -- the days the position's invoices bill in the period
 invoice_parts       JSONB                   -- invoices over different days: [{start, end, amount, days, total, noPeriod?, whole?, fuelStock?}] (null: none)
+invoices            JSONB                   -- the invoices it billed: [{id, description, amount, start, end, fuelStock?}] (null: created before #96)
 sort_order          INTEGER DEFAULT 0
 ```
 
 `apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position. `position_rental_days` and `billed_days` (migration `0003`, #208) hold `period_share` as a fraction of days when all invoices of the position bill the same days and it is not shared by the heating profile; the PDF prints them as «x/y Tage». Statements created before keep them empty. `invoice_parts` (migration `0006`, #226) holds, for a position whose invoices bill different days, each invoice's days in the period (`start`, `end`, `total`), its amount for them and the tenant's days in them (`days`); the PDF lists them under the position with the weighted share. `noPeriod` marks an invoice without Leistungszeitraum, `whole` holds the whole Leistungszeitraum and the invoice's amount when it reaches beyond the period (#241), `fuelStock` marks the change of the Tankbestand (#239); parts stored before have neither. It stays empty when the tenant rents the whole period or the invoices sum to zero.
+
+`invoices` (migration `0014`, #96) holds every invoice the position billed, in the order of `invoice_parts`: its id, its description, its amount in the period and the days it bills there (`start`, `end`); the change of the Tankbestand is stored with `fuelStock` and the id `fuel-stock-<period end>`, it is no invoice. It is the link from a statement to its invoices: an invoice of the period that no position holds with its current amount, days, category and distribution key, or a held invoice that left the period (deleted, made non-allocable), was recorded or changed after the statement (`GET /statements/:id/changed-invoices`, `GET /invoices/:id/statements`); the statement detail links each position to its invoices. Statements created before keep it empty; for them, as before, an invoice of the period recorded after the statement counts as missing. No foreign key: a deleted invoice stays in the statement that billed it.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 
@@ -347,7 +353,7 @@ with a tenant who has no contracts).
 ```sql
 tenant_id      UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 statement_id   UUID REFERENCES utility_statements ON DELETE RESTRICT
-type           VARCHAR(30)  NOT NULL   -- reminder | upload
+type           VARCHAR(30)  NOT NULL   -- reminder | statement (sent by e-mail, #86) | upload
 reminder_level INTEGER                 -- Mahnstufe: 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 title          VARCHAR(255) NOT NULL
 file_name      VARCHAR(255) NOT NULL
@@ -388,7 +394,7 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | `iban` | `''` | CH or LI IBAN, 21 characters, MOD-97 checksum |
 | `payment_deadline_days` | `30` | 7–90 |
 | `reminder_after_days` | `14` | 7–60 |
-| `default_language` | `de` | `de` \| `fr` \| `it` \| `rm` \| `en` |
+| `default_language` | `de` | `de` \| `fr` \| `it` \| `en` |
 
 The IBAN is stored in plain text.
 
@@ -407,7 +413,7 @@ Feuerlöscher-Wartung (#176). `allocable-categories.pg.test.ts` pins every seede
 through the Verwaltungspauschale, not through invoices in Verwaltung.
 
 Every KI prompt lists the categories with their descriptions, so a description names what the category excludes
-(«ohne …»); `0012_category_descriptions.sql` added these to Heizung, Gartenpflege, Kehricht, TV/Kabelanschluss,
+(«ohne …»); `0018_category_descriptions.sql` added these to Heizung, Gartenpflege, Kehricht, TV/Kabelanschluss,
 Gebäudeversicherung and Verwaltung where the landlord had not changed the text (#204, #220).
 
 ### Distribution keys (all `predefined`)

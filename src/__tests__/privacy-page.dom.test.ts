@@ -199,4 +199,21 @@ describe('Datenschutzerklärung: Grenzen der genannten Dienste', () => {
 	it('sagt nicht, das Sprach-Cookie entstehe erst mit einer Wahl', () => {
 		expect(text()).toContain('«PARAGLIDE_LOCALE» speichert die Sprache der Oberfläche');
 	});
+
+	it('sagt, dass das Sprach-Cookie beim ersten Besuch der Sprache des Browsers folgt', () => {
+		expect(text()).toContain(
+			'Beim ersten Besuch setzt Dwello es auf die Sprache Ihres Browsers, wenn sie Deutsch, Französisch, Italienisch oder Englisch ist, sonst auf Deutsch.'
+		);
+	});
+});
+
+// #86: Dwello sendet auch Nebenkostenabrechnungen per E-Mail, mit dem PDF und allem, was darin steht
+describe('Datenschutzerklärung zum E-Mail-Versand', () => {
+	it('nennt Abrechnungen per E-Mail und was mit ihrem PDF den Server verlässt', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		const text = document.body.textContent!.replace(/\s+/g, ' ');
+		expect(text).toContain('Nebenkostenabrechnungen, Zahlungserinnerungen und Mahnungen per E-Mail');
+		expect(text).toContain('die Kosten und ihre Verteilung, der Saldo sowie IBAN und Zahlungsreferenz');
+	});
 });

@@ -16,10 +16,14 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `statement.json` | `GET /api/v1/statements/:id` |
 | `statement-payment-reset.json` | `POST /api/v1/statements/:id/payment-reset` (die Abrechnung mit dem Zurücksetzen im Verlauf) |
 | `statement-paid-date-refused.json` | `PUT /api/v1/statements/:id/status` mit einem Zahlungsdatum vor dem Abrechnungsdatum |
+| `statement-send-refused.json` | `POST /api/v1/statements/:id/send`, wenn die E-Mail an einen Mieter mit Korrespondenzkanal E-Mail nicht hinausgeht (400) |
 | `building-contracts.json` | `GET /api/v1/contracts?buildingId=…` |
 | `contracts.json` | `GET /api/v1/contracts` (Mietvertragsliste, Übersicht) |
+| `apartments.json` | `GET /api/v1/apartments` (Wohnungsliste, Gebäude, Übersicht) |
 | `period-statements.json` | `GET /api/v1/statements?periodStart=…&periodEnd=…` (Übersicht), `?contractId=…` (fehlende Abrechnungen am Mietvertrag, Abrechnungen, die sein Löschen sperren) |
 | `statement-preview.json` | `POST /api/v1/statements/preview` |
+| `statement-changed-invoices.json` | `GET /api/v1/statements/:id/changed-invoices` (Rechnungen der Periode, die die Abrechnung nicht so abrechnet, wie sie jetzt sind) |
+| `invoice-statements.json` | `GET /api/v1/invoices/:id/statements` (Perioden mit Abrechnungen mit und ohne diese Rechnung) |
 | `invoice-completeness.json` | `GET /api/v1/invoices/completeness/:buildingId` |
 | `invoice.json` | `GET /api/v1/invoices/:id` |
 | `invoice-extraction.json` | `POST /api/v1/invoices/extract` (was die KI aus einer hochgeladenen Datei liest) |
@@ -28,6 +32,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `tenant.json` | `GET /api/v1/tenants/:id` |
 | `buildings.json` | `GET /api/v1/buildings` |
 | `tenants.json` | `GET /api/v1/tenants` |
+| `config.json` | `GET /api/v1/config` (Einstellungen, Übersicht) |
 | `category.json` | `GET /api/v1/categories/:id` (eigene Kategorie) |
 | `category-proposal.json` | `POST /api/v1/categories/propose` (Vorschlag der KI für eine neue Kategorie) |
 | `documents.json` | `GET /api/v1/documents` (Dokumente eines Mieters, Dokumentenliste) |

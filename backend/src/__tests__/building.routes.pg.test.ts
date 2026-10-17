@@ -37,4 +37,14 @@ describe('PUT /api/v1/buildings/:id', () => {
 
 		expect(response.status).toBe(422);
 	});
+
+	// kein Tank oder Tank stillgelegt (#72)
+	it('hält fest, dass das Gebäude keinen Tank hat, und liest es wieder', async () => {
+		const id = await typedBuilding();
+
+		const response = await sendJson('PUT', `/api/v1/buildings/${id}`, { noTank: true });
+
+		expect(response.status).toBe(200);
+		expect(await (await sendJson('GET', `/api/v1/buildings/${id}`)).json()).toMatchObject({ noTank: true });
+	});
 });

@@ -34,6 +34,8 @@ Funktionalität: Mietvertragsdetail
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
     Dann zeigt der Mietvertrag "Unbefristet, gekündigt auf den 31.03.2025"
     Und hat der Mietvertrag den Status "Beendet"
+    # A-6 (#115): ein gekündigter Mietvertrag läuft nicht stillschweigend weiter
+    Und fragt der Mietvertrag nicht, ob der Mieter noch in der Wohnung wohnt
 
   Szenario: Vergangenes Vertragsende ohne Bestätigung
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
@@ -161,6 +163,15 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Liegenschaftsverwalter auf der Seite "Neuer Mietvertrag"
     Und gilt der neue Mietvertrag für die Wohnung "2.01"
 
+  # A-5 (#114): nach dem Vertragsende fehlt die neue Adresse oft noch; der Schritt bleibt, solange die Adresse die der Wohnung ist
+  Szenario: Nach dem Vertragsende bleibt der Schritt zur neuen Adresse
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2024-12-31" gekündigt
+    Und die Korrespondenzadresse von "Anna Keller" ist noch die Adresse des Gebäudes "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann bitten die nächsten Schritte, die neue Adresse von "Anna Keller" einzutragen: "Dorthin geht die Nebenkostenabrechnung."
+    Wenn der Liegenschaftsverwalter den nächsten Schritt "Neue Adresse eintragen" wählt
+    Dann ist der Liegenschaftsverwalter auf der Bearbeitungsseite von "Anna Keller"
+
   # F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über, «Beenden» sagt es (Fachreview W10 M-1)
   Szenario: Beenden nennt den Tod des Mieters
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
@@ -243,3 +254,86 @@ Funktionalität: Mietvertragsdetail
     Und sieht der Liegenschaftsverwalter die Abrechnung 2025 von "Anna Keller"
     Aber nicht die Abrechnung 2025 von "Ben Meier"
     Und zählt die Liste 1 Entwurf
+
+  # A-8 (#117): der Löschdialog eines beendeten Mietvertrags führt zu seinen Abrechnungen
+  Szenario: Löschdialog eines beendeten Mietvertrags nennt seine Abrechnungen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2018-01-01" bis "2025-12-31" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
+    Dann nennt der Dialog "Dieser Mietvertrag kann nicht gelöscht werden. Seine Mietstage sind abgerechnet in:"
+    Und verlinkt der Dialog die Abrechnung 2025 von "Bruno Meier"
+
+  Szenario: Abrechnung aus dem Löschdialog öffnen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2018-01-01" bis "2025-12-31" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
+    Und der Liegenschaftsverwalter im Dialog die Abrechnung 2025 von "Bruno Meier" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2025 von "Bruno Meier"
+
+  Szenario: Löschdialog eines beendeten Mietvertrags ohne Abrechnung
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2018-01-01" bis "2021-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
+    Dann nennt der Dialog "Zu diesem Mietvertrag gibt es in Dwello keine Nebenkostenabrechnung."
+
+  # A-6 (#115): nach dem Ende eines befristeten Mietvertrags fragt der Mietvertrag, ob der Mieter noch in der Wohnung
+  # wohnt; dann läuft er unbefristet weiter (Art. 266 Abs. 2 OR)
+  Szenario: Befristeten Mietvertrag unbefristet weiterführen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
+    Dann ist der Mietvertrag unbefristet
+    Und hat der Mietvertrag den Status "Laufend"
+
+  Szenario: Mieter ist nach dem befristeten Mietvertrag ausgezogen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter bestätigt, dass der Mieter ausgezogen ist
+    Dann zeigt der Mietvertrag "Befristet bis 31.12.2025"
+    Und fragt der Mietvertrag nicht mehr, ob der Mieter noch in der Wohnung wohnt
+
+  # Die Abrechnung 2025 rechnet die Mietstage nur bis zum Vertragsende
+  Szenario: Unbefristet weiterführen nach einem Entwurf bis zum Vertragsende
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-06-30" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
+    Dann meldet der Mietvertrag "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
+    Und zeigt der Mietvertrag "Befristet bis 30.06.2025"
+
+  Szenario: Entwurf löschen und Mietvertrag unbefristet weiterführen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-06-30" für "900" Franken
+    Und für "Bruno Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
+    Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag unbefristet weiterführt
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
+    Und ist der Mietvertrag von "Bruno Meier" unbefristet
+    Und findet die Abrechnungsliste keine Abrechnung 2025 von "Bruno Meier"
+
+  # Eine versendete Abrechnung ändert Dwello nicht: der Mietvertrag läuft hier nicht unbefristet weiter
+  Szenario: Unbefristet weiterführen nach einer versendeten Abrechnung
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-06-30" für "900" Franken
+    Und für "Bruno Meier" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
+    Dann meldet der Mietvertrag "Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter."
+    Und zeigt der Mietvertrag "Befristet bis 30.06.2025"

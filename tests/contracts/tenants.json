@@ -12,7 +12,8 @@
 			"city": "Zürich",
 			"currentApartment": "2.01",
 			"currentBuilding": "Seeblick",
-			"isActive": true
+			"isActive": true,
+			"isFuture": false
 		}
 	],
 	"total": 1

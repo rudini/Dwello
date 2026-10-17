@@ -10,3 +10,4 @@ export const deleteTenantButton = target('Mieter löschen', (page) => page.getBy
 export const confirmDeleteTenantButton = target('Mieter löschen bestätigen', (page) =>
 	page.getByTestId('tenant-delete-confirm')
 );
+export const tenantAddress = target('Korrespondenzadresse', (page) => page.getByTestId('tenant-address'));

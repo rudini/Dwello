@@ -4,6 +4,7 @@ import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
 import {
 	deleteStatementButton,
 	paidDateInput,
+	pdfLanguage,
 	pdfRefusalMessage,
 	resetPaymentDialog,
 	sendDialog,
@@ -12,8 +13,16 @@ import {
 	statementHeatingProfile,
 	statementHistory,
 	lineItemAmount,
+	lineItemApartmentShare,
+	lineItemInvoice,
+	lineItemInvoices,
 	lineItemShare,
-	statementStatus
+	lineItemTimeShare,
+	statementLaterInvoices,
+	statementTenancy,
+	statementTotalLabel,
+	statementStatus,
+	oldAddressWarning
 } from '../targets/statement-detail';
 import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
@@ -30,6 +39,20 @@ export const history = Text.of(statementHistory);
 export const paidDateInvalid = Attribute.named('aria-invalid').of(paidDateInput);
 export const paidDateProblem = Accessible.descriptionOf(paidDateInput);
 export const heatingProfileOfStatement = Text.of(statementHeatingProfile);
+export const tenancyOfStatement = Text.of(statementTenancy);
+export const totalLabelOfStatement = Text.of(statementTotalLabel);
+export const laterInvoicesHint = Text.of(statementLaterInvoices);
+export const laterInvoicesHints = Count.of(statementLaterInvoices);
+export const invoicesOfPosition = (category: string) => Text.of(lineItemInvoices(category));
+export const invoiceOfPosition = (category: string, description: string) => Text.of(lineItemInvoice(category, description));
+
+/** Wohnungsanteil, Zeitanteil and amount of a position as the page shows them */
+export const sharesOfPosition = (category: string) =>
+	question(`the shares of the position «${category}»`, async (actor) => ({
+		apartment: await actor.answer(Text.of(lineItemApartmentShare(category))),
+		time: await actor.answer(Text.of(lineItemTimeShare(category))),
+		amount: await actor.answer(Text.of(lineItemAmount(category)))
+	}));
 
 type LineItem = { description: string; sharePercentage: string; tenantShare: string };
 
@@ -49,3 +72,5 @@ export const heatingCostsOfTenant = throughUiOrApi<Question<{ share: unknown; am
 		return { share: Number(heating.sharePercentage), amount: Number(heating.tenantShare) };
 	})
 );
+export const languageOfPdf = Text.of(pdfLanguage);
+export const oldAddressWarningText = Text.of(oldAddressWarning);

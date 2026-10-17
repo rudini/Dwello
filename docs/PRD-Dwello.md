@@ -46,7 +46,7 @@ Dwello provides:
 - Centralized property, tenant, and contract management
 - LLM-powered invoice categorization with validation
 - Professional PDF statement and QR invoice generation
-- German user interface; tenant-facing statement PDFs in five languages (German, French, Italian, Romansh, English)
+- German user interface; tenant-facing statement PDFs and reminders in four languages (German, French, Italian, English)
 - Secure data storage with automated backups
 
 ### 2.4 Target Market
@@ -477,7 +477,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - No distribution key: the fee is a percentage of each tenant's own costs
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
-- The Saldo (costs minus Akonto) is rounded commercially to 5 Rappen; the statement shows the amount before rounding and the rounding
+- The Saldo (costs minus Akonto) is rounded to 5 Rappen only in the tenant's favour, a Nachzahlung down and a Rückerstattung up (#79); the statement shows the amount before rounding and the rounding
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**
@@ -537,7 +537,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
   - Total costs and advance payments
   - Balance (refund or additional payment)
 - Ability to adjust individual statement amounts if needed (drafts only)
-- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a draft names invoices recorded after it was created
+- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a statement names the invoices of its period recorded, changed or deleted since it was created (each position keeps the invoices it billed, #96)
 
 **Step 4: Generate PDFs**
 - Generate statement PDF for each rental contract, one per contract and period; at a tenant change each contract gets its own (requirements and sources: `docs/nebenkostenabrechnung-anforderungen.md`):
@@ -556,7 +556,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 **Header Section:**
 - Statement number (auto-generated, unique identifier)
 - Statement date (date statement was issued)
-- Tenant name and address
+- Tenant name and Korrespondenzadresse; abroad the country alone on the last line, in capitals, a neighbouring country in its language, any other in English (Swiss Post, #102)
 - Apartment identification (floor, size, room count)
 - Apartment address (building address + unit number)
 - Accounting period (from - to dates)
@@ -621,6 +621,12 @@ BALANCE (refund): CHF 30
 4. **Bezahlt** (`paid`) - Settled; «Zahlung zurücksetzen» takes a wrong payment back to Versendet or Überfällig, recorded in the Verlauf (#92)
 5. **Partial** (future) - If multiple transactions needed
 
+**Sending (#86):**
+- Tenant with Korrespondenzkanal E-Mail: «Per E-Mail senden» e-mails the PDF (with QR-bill) in the tenant's Sprache and stores it as a Dokument; no batch sending
+- Korrespondenzkanal Brief: the property manager delivers the PDF and marks the statement as sent
+- A failed e-mail (no address, not set up, refused) leaves the statement Entwurf and says what to do: send again, or deliver it by letter («Per Brief zustellen»)
+- The statement is dated, and the Zahlungsfrist counted, from the day it goes out (scenarios in `statement-send.feature`)
+
 **Status Management:**
 - Mark statement as paid when tenant pays
 - Record payment date and amount
@@ -639,7 +645,7 @@ BALANCE (refund): CHF 30
 **Reminder Content:**
 - Reference statement number
 - Reference tenant name
-- Outstanding balance
+- Outstanding balance, with a QR payment part (Zahlteil) for it and the statement's QR reference (#108); none once the statement is paid
 - Deadline for payment
 - Building/property manager contact info
 
@@ -704,14 +710,14 @@ BALANCE (refund): CHF 30
 - IBAN: Configured in settings
 - Reference number: QR reference (QRR) only when the configured IBAN is a QR-IBAN; with a normal IBAN no reference
 - Amount: Total balance due (CHF)
-- Debtor: Tenant name and address
+- Debtor: Tenant name and Korrespondenzadresse with its country (ISO code); printed with the country code before the postal code outside Switzerland, e.g. «DE-78462 Konstanz» (#102)
 - Payment description: Statement number and period reference
 
 **IBAN Management:**
-- Global IBAN setting (Swiss bank account details)
+- Global IBAN setting (bank account in Switzerland or Liechtenstein)
 - Stored securely in configuration
 - Multiple IBANs per building (future feature)
-- Validation with a valid MOD-97 checksum: the settings form accepts only Swiss IBANs (CH), the QR-bill service also Liechtenstein (LI); which one applies is open (#191)
+- Validation: an IBAN from Switzerland (CH) or Liechtenstein (LI) with a valid MOD-97 checksum, in the settings form and the QR-bill service alike (#191)
 
 **QR Code Generation:**
 - Encodes all necessary payment information
@@ -954,7 +960,7 @@ BALANCE (refund): CHF 30
 - Email (required only when the Korrespondenzkanal is e-mail)
 - Phone (optional)
 - Korrespondenzkanal: letter (default) or e-mail
-- Address (street, postal code, city)
+- Korrespondenzadresse (street with house number, postal code, city, country; country Schweiz unless chosen, #102), with the help «Hierhin gehen Abrechnungen und Mahnungen; nach dem Auszug die neue Adresse eintragen» (#68); a 4-digit postal code is checked only in Switzerland and Liechtenstein
 - Notes (optional)
 - Submit/Cancel
 
@@ -1099,7 +1105,7 @@ BALANCE (refund): CHF 30
 
 **Tab 7: IBAN Setting**
 - IBAN input field (for QR-bill generation)
-- Format validation (settings form: CH only; QR-bill service: CH or LI, #191; MOD-97 checksum)
+- Format validation: CH or LI with a valid MOD-97 checksum (#191)
 - Test QR-bill preview
 - Help text: "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung."
 - A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference
@@ -1349,7 +1355,7 @@ BALANCE (refund): CHF 30
 
 **Internationalization:**
 - User interface in German
-- Tenant-facing statement PDFs in German, French, Italian, Romansh, English
+- Tenant-facing statement PDFs and reminders in German, French, Italian, English
 - Consistent translations across application
 - Date/time formatting per locale
 - Currency formatting (CHF with appropriate symbols)
@@ -1519,7 +1525,7 @@ BALANCE (refund): CHF 30
 
 **Library:** `svelte-i18n`
 - **Purpose:** UI texts (German) and tenant-facing statement PDFs
-- **Languages:** UI in German; statement PDFs in German, French, Italian, Romansh, English
+- **Languages:** UI in German; statement PDFs and reminders in German, French, Italian, English
 - **Format:** JSON translation files per language
 - **Cost:** Free
 
@@ -1644,7 +1650,7 @@ An audit log is planned, not implemented.
 - Swiss QR-bill generation with correct encoding
 - IBAN configuration
 - PDF embedding in database
-- Multi-language PDF templates (German, French, Italian, Romansh, English)
+- Multi-language PDF templates (German, French, Italian, English)
 - Statement number generation
 - PDF download and batch download (ZIP; planned, not implemented)
 - QR-bill validation and testing

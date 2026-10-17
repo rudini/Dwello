@@ -3,8 +3,8 @@ import { Count, Text, Visibility } from '../screenplay/questions';
 import { currentNavItem } from '../targets/app-frame';
 import {
 	occupancyCount,
-	occupancyRate,
 	occupancyRow,
+	occupancyVacancyHelp,
 	overviewDeadline,
 	overviewTask,
 	overviewTaskFor,
@@ -15,7 +15,7 @@ import { pageAddress } from './navigation';
 // The status a list page was opened with, in the words of the dashboard
 const statuses: Record<string, string> = {
 	Vermietet: 'occupied',
-	Wiedervermietet: 'relet',
+	'Vermietet ab …': 'relet',
 	Leer: 'vacant',
 	Gesperrt: 'reserved',
 	Entwürfe: 'draft',
@@ -24,8 +24,9 @@ const statuses: Record<string, string> = {
 	Überfällig: 'overdue'
 };
 
-export const occupancyOf = (building: string) => Text.of(occupancyRate(building));
 export const rentedApartmentsOf = (building: string) => Text.of(occupancyCount(building));
+export const occupancyText = (building: string) => Text.of(occupancyRow(building));
+export const occupancyHelp = Text.of(occupancyVacancyHelp);
 export const occupancyShown = (building: string) => Visibility.of(occupancyRow(building));
 export const overviewTaskShown = (title: string) => Visibility.of(overviewTask(title));
 export const overviewTaskText = (title: string) => Text.of(overviewTask(title));

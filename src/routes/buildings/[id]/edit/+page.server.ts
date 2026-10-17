@@ -2,6 +2,7 @@ import { m } from '$lib/paraglide/messages';
 import { backendMessage } from '$lib/backend-error';
 import { error, redirect } from '@sveltejs/kit';
 import type { BuildingWithStats } from '$lib/types';
+import { toBuilding } from '$lib/server/building';
 import { formError, parseBuildingForm } from '$lib/server/building-form';
 import type { Actions } from './$types';
 
@@ -26,20 +27,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingE
 
 		const data = await response.json();
 
-		const building: BuildingWithStats = {
-			id: data.id,
-			name: data.name || '',
-			address: data.address,
-			postalCode: data.postalCode,
-			city: data.city,
-			canton: data.canton,
-			country: data.country || 'CH',
-			yearBuilt: data.yearBuilt ? Number(data.yearBuilt) : undefined,
-			buildingType: data.buildingType,
-			apartmentCount: Number(data.apartmentCount) || 0,
-			occupiedCount: Number(data.occupiedCount) || 0,
-			vacantCount: Number(data.vacantCount) || 0
-		};
+		const building = toBuilding(data);
 
 		return { building };
 	} catch (err) {

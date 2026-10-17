@@ -4,7 +4,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
@@ -88,6 +88,23 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /statements/:id liefert die Felder von statement.json', async () => {
 		const actual = await (await callApi(`/api/v1/statements/${statementId}`)).json();
 		expect(drift(await sample('statement'), actual)).toEqual([]);
+	});
+
+	// an invoice of the period recorded after the statement: the statement names it as changed since (#96)
+	it('GET /statements/:id/changed-invoices liefert die Felder von statement-changed-invoices.json', async () => {
+		await insertInvoice(rental.building, { amount: '80.00', invoiceDate: '2024-11-30', description: `Nachzügler ${token}` });
+		try {
+			const actual = await (await callApi(`/api/v1/statements/${statementId}/changed-invoices`)).json();
+			expect(drift(await sample('statement-changed-invoices'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, `Nachzügler ${token}`));
+		}
+	});
+
+	it('GET /invoices/:id/statements liefert die Felder von invoice-statements.json', async () => {
+		const [billed] = await db.select({ id: invoices.id }).from(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.invoiceDate, '2024-03-31')));
+		const actual = await (await callApi(`/api/v1/invoices/${billed.id}/statements`)).json();
+		expect(drift(await sample('invoice-statements'), actual)).toEqual([]);
 	});
 
 	it('GET /contracts?buildingId liefert die Felder von building-contracts.json', async () => {
@@ -256,6 +273,11 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('GET /apartments liefert die Felder von apartments.json', async () => {
+		const actual = await (await callApi(`/api/v1/apartments?buildingId=${rental.building}`)).json();
+		expect(drift(await sample('apartments'), actual)).toEqual([]);
+	});
+
 	it('GET /buildings liefert die Felder von buildings.json', async () => {
 		const actual = await (await callApi(`/api/v1/buildings?search=${encodeURIComponent(`Ahornhof ${token}`)}`)).json();
 		expect(drift(await sample('buildings'), actual)).toEqual([]);
@@ -330,10 +352,23 @@ describe('API-Verträge des Frontends', () => {
 		const actual = await (await callApi(`/api/v1/tenants?search=${encodeURIComponent(`Keller ${token}`)}`)).json();
 		expect(drift(await sample('tenants'), actual)).toEqual([]);
 	});
+
+	it('GET /config liefert die Felder von config.json', async () => {
+		const actual = await (await callApi('/api/v1/config')).json();
+		expect(drift(await sample('config'), actual)).toEqual([]);
+	});
 });
 
 // Last: they send and pay the statement the tests above read as a draft
 describe('API-Verträge der Zahlung', () => {
+	it('POST /statements/:id/send an einen Mieter ohne E-Mail-Adresse liefert die Felder von statement-send-refused.json', async () => {
+		await db.update(tenants).set({ correspondenceChannel: 'email', email: null }).where(eq(tenants.id, rental.tenant));
+		const response = await sendJson('POST', `/api/v1/statements/${statementId}/send`, {});
+		await db.update(tenants).set({ correspondenceChannel: 'letter', email: 'anna.keller@example.ch' }).where(eq(tenants.id, rental.tenant));
+		expect(response.status).toBe(400);
+		expect(drift(await sample('statement-send-refused'), await response.json())).toEqual([]);
+	});
+
 	it('PUT /statements/:id/status mit einem Zahlungsdatum vor dem Abrechnungsdatum liefert die Felder von statement-paid-date-refused.json', async () => {
 		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
 		const response = await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: '2020-01-01' });

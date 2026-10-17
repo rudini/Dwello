@@ -9,7 +9,7 @@
  * - default_distribution_key_id: UUID of default distribution key
  * - company_name: Property management company name
  * - company_address: Company address
- * - iban: Swiss IBAN for QR-bill generation
+ * - iban: IBAN from Switzerland or Liechtenstein for QR-bill generation
  * - payment_deadline_days: Days until payment is due (default 30)
  * - reminder_after_days: Days after deadline to send reminder (default 14)
  */
@@ -83,7 +83,7 @@ export const CONFIG_KEYS = {
 	},
 	default_language: {
 		type: 'string',
-		validator: (v: string) => ['de', 'fr', 'it', 'rm', 'en'].includes(v),
+		validator: (v: string) => ['de', 'fr', 'it', 'en'].includes(v),
 		default: 'de'
 	}
 } as const;

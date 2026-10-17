@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { generateStatementPDFBase64, type StatementPDFData } from '../services/pdf.service';
+import { calculateBalance } from '../services/calculation.service';
 import { generateQRBillForStatement } from '../services/qr-bill.service';
 import { readPdf } from './helpers/pdf-text';
 
@@ -28,7 +29,7 @@ const refund: StatementPDFData = {
 	managementFeePercent: 0,
 	totalCosts: 784.13,
 	totalAdvancePayments: 878,
-	balance: -93.85 // 784.13 − 878.00 = −93.87, to 5 Rappen
+	balance: -93.85 // 784.13 − 878.00 = −93.87, commercially to 5 Rappen: a statement made before #79 keeps it
 };
 
 const textOf = async (data: StatementPDFData) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
@@ -48,6 +49,19 @@ describe('PDF einer Rückerstattung', () => {
 		const older = { ...refund, lineItems: [{ ...refund.lineItems[0], apartmentShare: null, periodShare: null }] };
 
 		expect((await textOf(older)).flowing).toContain("Hauswart Pro Fläche (m²) 3'060.00 – – 784.13");
+	});
+});
+
+// #84 FR-7: «1er», not «1e»
+describe('Stockwerk im französischen PDF', () => {
+	it.each([
+		[-1, 'A2, 1er sous-sol'],
+		[-2, 'A2, 2e sous-sol']
+	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'fr'), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
 	});
 });
 
@@ -92,6 +106,17 @@ describe('Rundung des Saldos im PDF', () => {
 		expect((await textOf(refund)).flowing).toContain('auf 5 Rappen gerundet');
 	});
 
+	// Nur zugunsten des Mieters (#79): die Nachzahlung wird kleiner (–), die Rückerstattung grösser (+), um bis 4 Rappen
+	it('zeigt die Rundung zugunsten des Mieters vom gezeigten Betrag aus', async () => {
+		const rounded = (data: StatementPDFData) => ({ ...data, balance: calculateBalance(data.totalCosts, data.totalAdvancePayments) });
+		expect((await textOf(rounded(due))).flowing).toContain('Nachzahlung vor Rundung 184.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 184.10');
+		expect((await textOf(rounded(refund))).flowing).toContain('Rückerstattung vor Rundung 93.87 Rundung auf 5 Rappen + 0.03 Rückerstattung 93.90');
+		const smallest = rounded({ ...refund, totalCosts: 877.99 });
+		expect((await textOf(smallest)).flowing).toContain('Rückerstattung vor Rundung 0.01 Rundung auf 5 Rappen + 0.04 Rückerstattung 0.05');
+		const evened = rounded({ ...due, totalCosts: 600.03 });
+		expect((await textOf(evened)).flowing).toContain('Nachzahlung vor Rundung 0.03 Rundung auf 5 Rappen – 0.03 Ausgeglichen 0.00');
+	});
+
 	// 1000.02 − 1000.00 gibt nach der Rundung 0: der Text sagt, dass nach der Rundung nichts zu bezahlen ist
 	it('nennt bei einem Saldo von 0 nach der Rundung die Rundung statt gleich hoher Beträge', async () => {
 		const evened = { ...due, totalCosts: 1000.02, totalAdvancePayments: 1000, balance: 0 };
@@ -106,7 +131,7 @@ describe('Rundung des Saldos im PDF', () => {
 	// Die Zeile passt in allen Sprachen auf eine Zeile, sonst kann der Saldo allein auf die nächste Seite rutschen
 	it('nennt die Rundung auf Italienisch in einer Zeile mit ihrem Betrag', async () => {
 		const it = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'it'), 'base64')).flowing;
-		expect(it).toContain('Arrotondamento + 0.02');
+		expect(it).toContain('Arrotondamento a 5 centesimi + 0.02');
 		expect(it).toContain('prima dell’arrotondamento 184.13');
 	});
 
@@ -116,16 +141,10 @@ describe('Rundung des Saldos im PDF', () => {
 });
 
 describe('PDF einer Nachzahlung', () => {
-	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code; Rätoromanisch sieht der Zahlteil nicht vor
-	it('druckt den Zahlteil auf Rätoromanisch deutsch und die Mitteilung wie im QR-Code', async () => {
-		const rm = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'rm'), 'base64')).flowing;
+	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code
+	it('druckt die Mitteilung im Zahlteil wie im QR-Code', async () => {
 		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'fr'), 'base64')).flowing;
 
-		expect(rm).toContain('Empfangsschein');
-		expect(rm).toContain('Zahlteil');
-		// Halb übersetzte Sätze wirkten unprofessionell: bis alles übersetzt ist, das ganze PDF deutsch
-		expect(rm).toContain('Nebenkostenabrechnung 01.01.2025 – 31.12.2025');
-		expect(rm).not.toContain('Rendaquint');
 		expect(fr).toContain('Informations supplémentaires Décompte des charges NK-1-2025-0001');
 	});
 
@@ -134,6 +153,24 @@ describe('PDF einer Nachzahlung', () => {
 		const pdf = await textOf({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } });
 
 		expect(pdf.flowing).not.toContain('Zahlbar durch');
+	});
+
+	// Post ins Ausland: das Land in Grossbuchstaben allein auf der letzten Zeile der Adresse, ein Nachbarland in seiner
+	// Sprache, jedes andere englisch; im Zahlteil der Ländercode vor der Postleitzahl, ausser in der Schweiz (#102)
+	it('nennt bei einer Korrespondenzadresse im Ausland das Land in der Adresse und im Zahlteil', async () => {
+		const abroad = { firstName: 'Nina', lastName: 'Brunner', address: 'Marktstätte 3', postalCode: '78462', city: 'Konstanz', country: 'DE' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant: abroad }, config, 'fr'), 'base64'));
+
+		expect(pdf.text).toContain('Nina Brunner\nMarktstätte 3\n78462 Konstanz\nDEUTSCHLAND');
+		expect(pdf.text).toContain('DE-78462 Konstanz');
+		expect(pdf.pages).toBe(2); // the payment part on a page of its own
+		expect(pdf.pageTexts[0]).not.toContain('DE-'); // the address block keeps the postal code alone
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'US' } })).text).toContain('78462 Konstanz\nUNITED STATES');
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'LI' } })).text).toContain('LI-78462 Konstanz');
+		const home = await textOf({ ...due, tenant: { ...abroad, country: 'CH' } });
+		expect(home.text).toContain('78462 Konstanz\n');
+		expect(home.text).not.toContain('SCHWEIZ');
+		expect(home.text).not.toContain('CH-78462');
 	});
 
 	it('wiederholt den Tabellenkopf auf jeder Seite der Kostenübersicht', async () => {

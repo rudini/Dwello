@@ -3,19 +3,40 @@ import { runAction } from './helpers/action';
 import { actions } from '../routes/statements/[id]/+page.server';
 import { localToday } from '$lib/contract-status';
 import paidDateRefused from '../../tests/contracts/statement-paid-date-refused.json';
+import sendRefused from '../../tests/contracts/statement-send-refused.json';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 const today = localToday(); // the day in Switzerland, as the app takes it
 
+// #86: das Backend sendet sie per E-Mail oder markiert sie als versendet, je nach Korrespondenzkanal des Mieters
 describe('Abrechnung versenden', () => {
-	it('setzt den Status im Backend auf versendet', async () => {
+	it('lässt das Backend die Abrechnung versenden', async () => {
 		const { calls, result } = runAction(actions.send, 's1');
 		await result;
 
-		expect(calls).toEqual([{ method: 'PUT', url: `${API}/status`, body: { status: 'sent' } }]);
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/send`, body: {} }]);
 	});
 
-	it('meldet einen Fehler, wenn das Backend den Statuswechsel ablehnt', async () => {
+	it('stellt sie nach einer gescheiterten E-Mail per Brief zu', async () => {
+		const { calls, result } = runAction(actions.send, 's1', 200, { byLetter: 'true' });
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/send`, body: { byLetter: true } }]);
+	});
+
+	it('sagt, was schiefging und was zu tun ist, wenn die E-Mail nicht hinausgeht', async () => {
+		const { result } = runAction(actions.send, 's1', 400, {}, sendRefused);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				sendError:
+					'Der Mieter hat keine E-Mail-Adresse. Erfassen Sie sie beim Mieter und senden Sie die Abrechnung erneut, oder stellen Sie sie per Brief zu.'
+			}
+		});
+	});
+
+	it('meldet einen Fehler, wenn das Backend den Versand ohne Grund ablehnt', async () => {
 		const { result } = runAction(actions.send, 's1', 400);
 
 		expect(await result).toMatchObject({
@@ -169,6 +190,23 @@ describe('Mahnung senden', () => {
 });
 
 describe('Abrechnung laden', () => {
+	// #86: die per E-Mail versendete Abrechnung liegt unter «Dokumente», ist aber keine Mahnung (die nächste Mahnstufe zählt die Mahnungen)
+	it('führt nur die Mahnungen der Abrechnung als Mahnungen', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const [upload] = (await import('../../tests/contracts/documents.json')).default.data;
+		const reminder = { ...upload, id: 'd1', type: 'reminder', reminderLevel: 1 };
+		const sent = { ...upload, id: 'd2', type: 'statement', title: 'Nebenkostenabrechnung' };
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1')) return Response.json(statementJson);
+			if (url.includes('/documents?')) return Response.json({ data: [sent, reminder] });
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { reminders: { id: string }[] };
+		expect(data.reminders.map((document) => document.id)).toEqual(['d1']);
+	});
+
 	// The statement carries no tenant address; the send confirmation needs it for a letter
 	it('ergänzt die Postadresse des Mieters aus den Mieterdaten', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');
@@ -178,7 +216,6 @@ describe('Abrechnung laden', () => {
 			if (url.endsWith('/statements/s1'))
 				return Response.json({ ...statementJson, tenantId: 't1' });
 			if (url.endsWith('/tenants/t1')) return Response.json(tenantJson);
-			if (url.includes('/invoices/for-statement/')) return Response.json([]);
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
@@ -188,33 +225,54 @@ describe('Abrechnung laden', () => {
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
 	});
 
-	// Nachzügler: ein Entwurf ohne die Rechnungen, die nach seinem Erstellen erfasst wurden
-	it('zählt die Rechnungen der Periode, die nach dem Erstellen der Abrechnung erfasst wurden', async () => {
+	// Eine Korrespondenzadresse im Ausland nennt ihr Land (#102)
+	it('nennt das Land einer Postadresse im Ausland', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');
 		const statementJson = (await import('../../tests/contracts/statement.json')).default;
-		const later = (status: string) => {
-			const urls: string[] = [];
-			const fetch = (async (url: string) => {
-				urls.push(url);
-				if (url.endsWith('/statements/s1')) return Response.json({ ...statementJson, status });
-				if (url.includes('/invoices/for-statement/b1'))
-					return Response.json([
-						{ createdAt: '2025-01-10T08:00:00.000Z' }, // before the draft (2025-01-15)
-						{ createdAt: '2025-02-01T08:00:00.000Z' }
-					]);
-				return Response.json({ data: [] });
-			}) as typeof globalThis.fetch;
-			return {
-				urls,
-				data: load({ params: { id: 's1' }, fetch } as never) as Promise<{ laterInvoices: number }>
-			};
-		};
+		const tenantJson = (await import('../../tests/contracts/tenant.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1'))
+				return Response.json({ ...statementJson, tenantId: 't1' });
+			if (url.endsWith('/tenants/t1')) return Response.json({ ...tenantJson, country: 'DE' });
+			if (url.includes('/invoices/for-statement/')) return Response.json([]);
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
 
-		const draft = later('draft');
-		expect((await draft.data).laterInvoices).toBe(1);
-		expect(draft.urls).toContain(
-			'http://localhost:3001/api/v1/invoices/for-statement/b1?periodStart=2024-01-01&periodEnd=2024-12-31'
-		);
-		expect((await later('sent').data).laterInvoices).toBe(1);
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as {
+			statement: { tenantAddress: string; oldAddress: boolean };
+		};
+		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich, Deutschland');
+		expect(data.statement.oldAddress).toBe(false);
+	});
+
+	// #96: die Abrechnung kennt die Rechnungen, die sie abrechnet; das Backend nennt die neuen, geänderten und gelöschten
+	it('zählt die Rechnungen der Periode, die seit dem Erstellen der Abrechnung erfasst, geändert oder gelöscht wurden', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const changed = (await import('../../tests/contracts/statement-changed-invoices.json')).default;
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			if (url.endsWith('/statements/s1')) return Response.json(statementJson);
+			if (url.endsWith('/statements/s1/changed-invoices')) return Response.json(changed);
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { laterInvoices: number };
+		expect(data.laterInvoices).toBe(1);
+		expect(urls).toContain('http://localhost:3001/api/v1/statements/s1/changed-invoices');
+	});
+
+	it('zählt keine Rechnungen, wenn das Backend sie nicht nennen kann', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1')) return Response.json(statementJson);
+			if (url.endsWith('/changed-invoices')) return new Response(null, { status: 500 });
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { laterInvoices: number };
+		expect(data.laterInvoices).toBe(0);
 	});
 });

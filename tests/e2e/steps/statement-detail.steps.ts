@@ -7,6 +7,11 @@ import {
 	heatingCostsOfTenant,
 	heatingProfileOfStatement,
 	history,
+	invoiceOfPosition,
+	invoicesOfPosition,
+	laterInvoicesHint,
+	laterInvoicesHints,
+	languageOfPdf,
 	paidDateInvalid,
 	paidDateProblem,
 	pdfRefusalText,
@@ -14,7 +19,11 @@ import {
 	recipient,
 	resetConfirmation,
 	sendConfirmation,
-	statusOfStatement
+	sharesOfPosition,
+	statusOfStatement,
+	tenancyOfStatement,
+	totalLabelOfStatement,
+	oldAddressWarningText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -37,10 +46,12 @@ import {
 	openResetPaymentConfirmation,
 	openSendConfirmation,
 	openStatementApartment,
+	openInvoiceOfPosition,
 	openStatementDetail,
 	openStatementTenant,
 	resetPayment,
-	sendStatement
+	sendStatement,
+	confirmSending
 } from '../tasks/statement-detail';
 import { inDays } from '../fixtures/dates';
 
@@ -122,6 +133,10 @@ Then(
 		await verwalter.sees(recipient).toContain(channel);
 	}
 );
+
+Then('nennt die Bestätigung die Korrespondenzadresse {string}', async ({ verwalter }, address: string) => {
+	await verwalter.sees(recipient).toContain(address);
+});
 
 Then('sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt', async ({ verwalter }) => {
 	await verwalter.sees(sendConfirmation).toContain('Dwello verschickt die Abrechnung nicht selbst');
@@ -262,6 +277,51 @@ Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: st
 	await verwalter.sees(pdfRefusalText).toBe(text);
 });
 
+Then('nennt die Abrechnung das Mietverhältnis {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(tenancyOfStatement).toBe(text);
+});
+
+Then(
+	'nennt die Position {string} den Wohnungsanteil {string}, den Zeitanteil {string} und den Betrag {string}',
+	async ({ verwalter }, category: string, apartment: string, time: string, amount: string) => {
+		await verwalter.sees(sharesOfPosition(category)).toEqual({ apartment, time, amount });
+	}
+);
+
+Then('heisst die Summe der Kosten der Abrechnung {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(totalLabelOfStatement).toBe(label);
+});
+
+Then(
+	'nennt die Position {string} die Rechnung {string} mit {string}',
+	async ({ verwalter }, category: string, invoice: string, text: string) => {
+		await verwalter.sees(invoiceOfPosition(category, invoice)).toContain(text);
+	}
+);
+
+Then('nennt die Position {string} {string}', async ({ verwalter }, category: string, text: string) => {
+	await verwalter.sees(invoicesOfPosition(category)).toContain(text);
+});
+
+When(
+	'der Liegenschaftsverwalter die Rechnung {string} der Position {string} öffnet',
+	async ({ verwalter }, invoice: string, category: string) => {
+		await verwalter.attemptsTo(openInvoiceOfPosition(category, invoice));
+	}
+);
+
+Then('weist die Abrechnung darauf hin: {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(laterInvoicesHint).toContain(text);
+});
+
+Then('weist die Abrechnung auf keine geänderten Rechnungen hin', async ({ verwalter }) => {
+	await verwalter.sees(laterInvoicesHints).toBe(0);
+});
+
+Then('nennt die Abrechnung {string}', async ({ verwalter }, language: string) => {
+	await verwalter.sees(languageOfPdf).toBe(language);
+});
+
 Given('die Abrechnung {int} von {string} ist bezahlt', async ({ seed }, year: number, tenant: string) => {
 	await seed.markPaid(tenant, year);
 });
@@ -303,5 +363,25 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(resetConfirmation).toContain('gilt dann wieder als nicht bezahlt');
 		await verwalter.sees(resetConfirmation).toContain(`Das Zahlungsdatum ${sendingDay()} wird gelöscht.`);
+	}
+);
+
+When('der Liegenschaftsverwalter den Versand trotzdem bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmSending);
+});
+
+// A-5 (#114): the warning starts with the tenant's full name
+Then(
+	'warnt die Bestätigung, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(sendConfirmation).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
+	}
+);
+
+// Persona W3c Anna P-2: on the page itself, before the dialog
+Then(
+	'warnt die Detailseite der Abrechnung, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(oldAddressWarningText).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );

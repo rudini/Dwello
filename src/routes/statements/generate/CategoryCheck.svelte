@@ -23,19 +23,30 @@
 		checked.some((row) => row.findings.some((f) => f.kind === 'missing' || f.kind === 'gap'))
 	);
 
+	// only Tankbestand findings (always so without the year before): no word about a comparison
+	const compared = $derived(
+		!!comparedWith &&
+			checked.some((row) =>
+				row.findings.some((f) => f.kind !== 'stock' && f.kind !== 'consumption')
+			)
+	);
+	const title = $derived(
+		confirm
+			? m.statements_maybe_missing_title()
+			: compared
+				? m.statements_compared_title()
+				: m.statements_check_stocks()
+	);
+
 	const comparedText = $derived(
 		comparedWith ? ` (${formatDate(comparedWith.start)} – ${formatDate(comparedWith.end)})` : ''
 	);
 </script>
 
-<!-- TODO(fachlich prüfen, #65, #130): a hint against the year before; a supplier may bill differently -->
-<Alert
-	tone="caution"
-	title={confirm ? m.statements_maybe_missing_title() : m.statements_compared_title()}
-	testid="category-check"
->
+<!-- TODO(fachlich prüfen, #130): a hint against the year before; a supplier may bill differently -->
+<Alert tone="caution" {title} testid="category-check">
 	<div id="category-check-text" class="flex flex-col gap-2">
-		<p>{m.statements_compared_text({ compared: comparedText })}</p>
+		{#if compared}<p>{m.statements_compared_text({ compared: comparedText })}</p>{/if}
 		{#each checked as row (row.buildingId)}
 			<p class="font-semibold" aria-hidden="true">{row.name}</p>
 			<ul class="flex list-disc flex-col gap-2 pl-6" aria-label={row.name}>

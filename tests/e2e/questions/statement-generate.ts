@@ -18,11 +18,14 @@ import {
 	managementFeeHint,
 	managementFeeInput,
 	missingInvoices,
+	oldAddress,
 	periodStartInput,
+	periodRunningWarning,
 	previewEmpty,
 	previewFee,
 	previewRow,
 	previewRows,
+	tankQuestion,
 	wizardChoices,
 	wizardPresetNotice
 } from '../targets/statement-generate';
@@ -113,6 +116,9 @@ export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(b
 export const restoredDraftText = Text.of(draftRestored);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
+export const periodRunning = Text.of(periodRunningWarning);
+export const tankQuestions = Count.of(tankQuestion);
+export const missingStockFindings = Count.of(categoryFinding('Tankbestand am'));
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));
@@ -123,3 +129,4 @@ export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const presetNoticeText = Text.of(wizardPresetNotice);
+export const oldAddressWarning = Text.of(oldAddress);

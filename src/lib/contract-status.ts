@@ -60,6 +60,10 @@ export function contractPeriod(
 		: m.contracts_period_since({ date: start });
 }
 
+/** The period of a row in a contract history (apartment or tenant page) */
+export const historyPeriod = (c: ContractHistory) =>
+	contractPeriod(c.startDate, c.endDate, c.status, c.terminated);
+
 /** The Vertragsende in words: agreed in a fixed-term contract, or the Kündigungstermin of an open-ended one */
 export function contractEnd(endDate: string | null | undefined, terminated = false) {
 	if (!endDate) return m.contracts_unlimited();
@@ -123,8 +127,14 @@ export type RefusedStatement = {
 	buildingId: string;
 };
 
-/** New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json) */
-export function billedDaysError(statements: { statementNumber: string; status: string }[]): string {
+/**
+ * New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json);
+ * `lockedRest` says why a sent or paid one blocks them
+ */
+export function billedDaysError(
+	statements: { statementNumber: string; status: string }[],
+	lockedRest = m.contracts_billed_locked_rest
+): string {
 	const drafts = statements
 		.filter((statement) => statement.status === 'draft')
 		.map((s) => s.statementNumber);
@@ -140,7 +150,7 @@ export function billedDaysError(statements: { statementNumber: string; status: s
 			(one ? m.contracts_billed_locked_one : m.contracts_billed_locked_many)({
 				numbers: listed(locked)
 			}),
-			m.contracts_billed_locked_rest(),
+			lockedRest(),
 			...(drafts.length ? [m.contracts_billed_also_draft({ numbers: listed(drafts) })] : [])
 		].join(' ');
 	return one

@@ -36,6 +36,7 @@ export const buildings = pgTable(
 		longitude: decimal('longitude', { precision: 10, scale: 7 }),
 		buildingType: varchar('building_type', { length: 50 }),
 		yearBuilt: integer('year_built'),
+		noTank: boolean('no_tank').notNull().default(false), // no tank or decommissioned: no Tankbestand asked (#72)
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -89,10 +90,11 @@ export const tenants = pgTable('tenants', {
 	lastName: varchar('last_name', { length: 100 }).notNull(),
 	email: varchar('email', { length: 255 }),
 	phone: varchar('phone', { length: 30 }),
-	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, rm, en
+	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, en
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),
+	country: varchar('country', { length: 2 }).notNull().default('CH'), // ISO 3166 code of the Korrespondenzadresse
 	correspondenceChannel: varchar('correspondence_channel', { length: 10 }).notNull().default('letter'), // email, letter
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
@@ -120,6 +122,7 @@ export const rentalContracts = pgTable(
 		endDate: date('end_date'), // null = ongoing
 		terminated: boolean('terminated').default(false).notNull(), // endDate is a Kündigungstermin, not agreed
 		noticeReceivedOn: date('notice_received_on'), // the day the notice arrived (A-3), only with terminated
+		movedOut: boolean('moved_out').default(false).notNull(), // «Mieter ist ausgezogen» after this end (A-6)
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
 		monthlyAdvancePayment: decimal('monthly_advance_payment', { precision: 10, scale: 2 }).notNull(), // Akonto
@@ -345,6 +348,10 @@ export type InvoicePart = {
 	fuelStock?: true; // the change of the Tankbestand, not an invoice (#239)
 };
 
+// An invoice a position billed (#96): its amount in the period and the days it bills there; the change of the
+// Tankbestand is billed like one (#239) under the id fuel-stock-<period end>
+export type BilledInvoice = { id: string; description: string; amount: number; start: string; end: string; fuelStock?: true };
+
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
 /** A payment taken back (#92): the day of the reset and what it cleared */
@@ -464,6 +471,7 @@ export const utilityStatementLineItems = pgTable(
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
 		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
+		invoices: jsonb('invoices').$type<BilledInvoice[]>(), // the invoices it billed (#96); null: created before
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
@@ -499,7 +507,7 @@ export const documents = pgTable(
 			.notNull()
 			.references(() => tenants.id, { onDelete: 'restrict' }),
 		statementId: uuid('statement_id').references(() => utilityStatements.id, { onDelete: 'restrict' }),
-		type: varchar('type', { length: 30 }).notNull(), // reminder, upload
+		type: varchar('type', { length: 30 }).notNull(), // reminder, statement (e-mailed, #86), upload
 		reminderLevel: integer('reminder_level'), // 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 		title: varchar('title', { length: 255 }).notNull(),
 		fileName: varchar('file_name', { length: 255 }).notNull(),

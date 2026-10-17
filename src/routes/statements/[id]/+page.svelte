@@ -24,6 +24,7 @@
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { localToday } from '$lib/contract-status';
 	import MetadataCard from './MetadataCard.svelte';
+	import OldAddressWarning from './OldAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
 	import PdfAction from './PdfAction.svelte';
@@ -32,6 +33,7 @@
 	import ReminderModal from './ReminderModal.svelte';
 	import ResetPaymentDialog from './ResetPaymentDialog.svelte';
 	import SendDialog from './SendDialog.svelte';
+	import SendFeedback from './SendFeedback.svelte';
 	import StatusActions from './StatusActions.svelte';
 	import type { ActionData } from './$types';
 
@@ -58,6 +60,9 @@
 	let showReminder = $state(false);
 	let showDelete = $state(false);
 	let showSend = $state(false);
+	let sendByLetter = $state(false); // after a failed e-mail (#86)
+	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
+	const sendError = $derived(form?.sendError);
 	let showResetPayment = $state(false);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
@@ -126,15 +131,17 @@
 				id={statement.id}
 				generated={!!pdfGeneratedAt}
 				generating={generatingPdf}
+				language={statement.tenantLanguage}
 				ongenerate={generatePdf}
 			/>
 			<StatusActions
 				status={statement.status}
+				{byEmail}
 				owes={statement.balance > 0}
 				waiting={!!nextReminderLater(statement)}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
-				onsend={() => (showSend = true)}
+				onsend={() => ((sendByLetter = false), (showSend = true))}
 				onresetpayment={() => (showResetPayment = true)}
 			/>
 		{/snippet}
@@ -148,6 +155,8 @@
 			testid="statement-status"
 		/>
 	</p>
+
+	<OldAddressWarning {statement} testid="statement-old-address" />
 
 	{#if data.laterInvoices}
 		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->
@@ -166,6 +175,10 @@
 		</Alert>
 	{/if}
 	<ReminderFeedback reminder={form?.reminder} />
+	<SendFeedback
+		error={sendError}
+		onletter={() => ((sendByLetter = true), (showSend = true))}
+	/>
 
 	<!-- Full width so every amount is visible; min-w-0: if still too wide it scrolls inside, not the page -->
 	<div class="min-w-0">
@@ -247,6 +260,6 @@
 
 <ResetPaymentDialog bind:open={showResetPayment} {statement} />
 
-<SendDialog bind:open={showSend} {statement} />
+<SendDialog bind:open={showSend} {statement} byLetter={sendByLetter} />
 
 <ReminderModal bind:open={showReminder} {statement} sentReminders={data.reminders.length} />
