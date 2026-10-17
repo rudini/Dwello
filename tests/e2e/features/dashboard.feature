@@ -12,10 +12,11 @@ Funktionalität: Übersicht
     Und der Mieter "Anna Keller" existiert
     Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "900" Franken
 
+  # F-1 (#55): nur «x/y vermietet», ohne Anteil in Prozent
   Szenario: Belegung pro Gebäude
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
-    Dann ist das Gebäude "Seeblick" zu "50.0 %" belegt
-    Und sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
+    Dann sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
+    Und nennt die Belegung von "Seeblick" keinen Anteil in Prozent
     # Persona Anna P-1: auch eine nie vermietete leere Wohnung wird genannt
     Und nennt die Belegung von "Seeblick" "Wohnung 1.02 leer"
     Und erklärt die Belegung "Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter."
@@ -89,14 +90,17 @@ Funktionalität: Übersicht
       | Rechnung erfassen      | Neue Rechnung          |
       | Abrechnungen erstellen | Abrechnungen erstellen |
 
+  # F-10a (#64): eine Mahnung schlägt die Übersicht erst nach der Mahnfrist vor (Vorgabe 14 Tage nach der Zahlungsfrist);
+  # dass sie es vorher nicht tut, prüft src/__tests__/overview.test.ts: die Aufgabe zählt auch die Abrechnungen
+  # parallel laufender Szenarien
   Szenario: Überfällige Abrechnung als nächste Aufgabe
-    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 5 Tagen abgelaufen ist
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 15 Tagen abgelaufen ist
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht die Aufgabe "Überfällige Abrechnungen prüfen"
-    Und die Frist "Zahlungsfrist Anna Keller" ist "seit 5 Tagen abgelaufen"
+    Und die Frist "Zahlungsfrist Anna Keller" ist "seit 15 Tagen abgelaufen"
 
   Szenario: Aufgabe führt zu den betroffenen Abrechnungen
-    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 5 Tagen abgelaufen ist
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 15 Tagen abgelaufen ist
     Und der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Aufgabe "Überfällige Abrechnungen prüfen" beginnt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
@@ -170,3 +174,40 @@ Funktionalität: Übersicht
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Schnellaktion "Rechnungen hochladen" wählt
     Dann kann der Liegenschaftsverwalter das Gebäude und die Dateien der Rechnungen wählen
+
+  # A-6 (#115): nach einem abgelaufenen befristeten Mietvertrag ohne Nachmieter fragt die Übersicht, ob der Mieter
+  # noch in der Wohnung wohnt (Art. 266 Abs. 2 OR)
+  Szenario: Abgelaufener befristeter Mietvertrag ohne Nachmieter
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Bruno Meier"
+
+  Szenario: Aufgabe führt zum abgelaufenen befristeten Mietvertrag
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter öffnet die Übersicht
+    Wenn der Liegenschaftsverwalter die Aufgabe "Befristeten Mietvertrag prüfen" für "Bruno Meier" beginnt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Bruno Meier"
+
+  Szenario: Abgelaufener befristeter Mietvertrag mit Nachmieter
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und der Mieter "Carla Huber" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und "Carla Huber" mietet die Wohnung "1.02" seit "2026-01-01" für "950" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Bruno Meier"
+
+  Szenario: Mieter nach dem befristeten Mietvertrag ausgezogen
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter hat bestätigt, dass "Bruno Meier" ausgezogen ist
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Bruno Meier"
+
+  # gekündigte Mietverträge laufen nicht stillschweigend weiter: nur die Suche nach einem Nachmieter
+  Szenario: Abgelaufener gekündigter Mietvertrag
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2025-12-31" gekündigt
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Nachmieter für Wohnung 1.01 suchen" für "Anna Keller"
+    Aber nicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Anna Keller"

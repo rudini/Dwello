@@ -23,6 +23,7 @@
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import ContractParties from './ContractParties.svelte';
 	import DeleteContract from './DeleteContract.svelte';
+	import FixedTermCheck from './FixedTermCheck.svelte';
 	import ContractTerms from './ContractTerms.svelte';
 	import MissingStatement from './MissingStatement.svelte';
 	import NextSteps from './NextSteps.svelte';
@@ -147,6 +148,7 @@
 		tenantId={contract.tenantId}
 		{name}
 	/>
+	<FixedTermCheck shown={data.fixedTermCheck} endDate={contract.endDate} {name} {form} />
 	<MissingStatement missing={data.missingStatements} />
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

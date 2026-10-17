@@ -34,7 +34,6 @@ export interface DashboardData {
 		buildingName: string;
 		totalApartments: number;
 		occupiedApartments: number;
-		occupancyRate: number;
 		reletStarts?: string[]; // Vertragsbeginn of each relet apartment, added here
 		vacant?: { number: string; lastContractEnd: string | null }[]; // empty apartments, with their last Vertragsende (#145)
 	}[];
@@ -53,13 +52,17 @@ async function list(fetch: typeof globalThis.fetch, path: string, key: string): 
 	return response?.ok ? ((await response.json())[key] ?? []) : [];
 }
 
+// The settings the overview reads; a failed load leaves the defaults of the backend
+async function settings(fetch: typeof globalThis.fetch): Promise<Record<string, string>> {
+	const response = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
+	return response?.ok ? ((await response.json()).data ?? {}) : {};
+}
+
 // The last ended Abrechnungsperiode and the Mietverträge that already have a Nebenkostenabrechnung for it
-async function lastPeriod(fetch: typeof globalThis.fetch) {
-	const config = await fetch(`${BACKEND_URL}/api/v1/config`);
-	if (!config.ok) return null;
-	const type = ((await config.json()).data?.accounting_period ??
-		'calendar') as AccountingPeriodType;
-	const period = lastCompletedPeriod(type);
+async function lastPeriod(fetch: typeof globalThis.fetch, config: Promise<Record<string, string>>) {
+	const stored = await config;
+	if (!stored.accounting_period) return null;
+	const period = lastCompletedPeriod(stored.accounting_period as AccountingPeriodType);
 	const response = await fetch(
 		`${BACKEND_URL}/api/v1/statements?periodStart=${period.start}&periodEnd=${period.end}&limit=1000`
 	);
@@ -83,15 +86,15 @@ function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, contracts
 	return buildings.length ? { start: period.start, end: period.end, buildings } : null;
 }
 
+// A later contract for the same apartment
+const later = (contracts: Row[], c: Row) =>
+	contracts.some((o) => o.apartmentId === c.apartmentId && String(o.startDate) > String(c.endDate));
+
 // Given notice and no later contract for the apartment yet: a next tenant is still to find, also after the end
 // (A-4.1, review K-6)
 function noticed(contracts: Row[]) {
-	const later = (c: Row) =>
-		contracts.some(
-			(o) => o.apartmentId === c.apartmentId && String(o.startDate) > String(c.endDate)
-		);
 	return contracts
-		.filter((c) => c.terminated && c.endDate && !later(c))
+		.filter((c) => c.terminated && c.endDate && !later(contracts, c))
 		.map((c) => ({
 			id: String(c.id),
 			tenantName: String(c.tenantName),
@@ -100,6 +103,23 @@ function noticed(contracts: Row[]) {
 			endDate: String(c.endDate)
 		}));
 }
+
+// An agreed end passed, no later contract and no «Mieter ist ausgezogen»: the tenant may have stayed (A-6)
+const expired = (contracts: Row[], today: string) =>
+	contracts
+		.filter(
+			(c) =>
+				c.endDate &&
+				String(c.endDate) < today &&
+				!c.terminated &&
+				!c.movedOut &&
+				!later(contracts, c)
+		)
+		.map((c) => ({
+			id: String(c.id),
+			tenantName: String(c.tenantName),
+			endDate: String(c.endDate)
+		}));
 
 const tenantOf = (statement: Row) => {
 	const tenant = statement.tenant as Row | null;
@@ -111,7 +131,8 @@ export const load = async ({
 }: {
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
-	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts] =
+	const config = settings(fetch).catch(() => ({}) as Record<string, string>);
+	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts, stored] =
 		await Promise.all([
 			fetchRecord(
 				fetch,
@@ -122,9 +143,10 @@ export const load = async ({
 			list(fetch, 'statements?status=sent&limit=100', 'data'),
 			list(fetch, 'documents?status=to_send', 'data'),
 			list(fetch, 'contracts?status=active&limit=100', 'contracts'),
-			lastPeriod(fetch).catch(() => null),
+			lastPeriod(fetch, config).catch(() => null),
 			list(fetch, 'apartments?limit=1000', 'apartments'),
-			list(fetch, 'contracts?limit=1000', 'contracts')
+			list(fetch, 'contracts?limit=1000', 'contracts'),
+			config
 		]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
@@ -138,19 +160,24 @@ export const load = async ({
 			}))
 	}));
 	const noticedContracts = noticed(allContracts);
+	const today = localToday(); // the day in Switzerland
 	const input = {
-		today: localToday(), // the day in Switzerland
+		today,
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
 		dueStatements: [...overdue, ...sent].map((s) => ({
 			id: String(s.id),
 			tenantName: tenantOf(s),
 			paymentDeadline: String(s.paymentDeadline),
-			nextReminderFrom: s.nextReminderFrom as string | null
+			nextReminderFrom: s.nextReminderFrom as string | null,
+			refund: Number(s.balance) < 0
 		})),
+		paymentDeadlineDays: Number(stored.payment_deadline_days ?? 30),
+		reminderAfterDays: Number(stored.reminder_after_days ?? 14),
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),
 		noticedContracts,
+		expiredContracts: expired(allContracts, today),
 		// a contract with a task is named by it, not twice (A-4.4); one given notice with a next tenant keeps its
 		// deadline (review K-6)
 		endingContracts: contracts

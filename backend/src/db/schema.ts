@@ -121,6 +121,7 @@ export const rentalContracts = pgTable(
 		terminated: boolean('terminated').default(false).notNull(), // endDate is a Kündigungstermin, not agreed
 		noticeReceivedOn: date('notice_received_on'), // the day the notice arrived (A-3), only with terminated
 		billedUntil: date('billed_until'), // «Abgerechnet bis» (#133): billed outside Dwello up to this day
+		movedOut: boolean('moved_out').default(false).notNull(), // «Mieter ist ausgezogen» after this end (A-6)
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
 		monthlyAdvancePayment: decimal('monthly_advance_payment', { precision: 10, scale: 2 }).notNull(), // Akonto
@@ -346,6 +347,10 @@ export type InvoicePart = {
 	fuelStock?: true; // the change of the Tankbestand, not an invoice (#239)
 };
 
+// An invoice a position billed (#96): its amount in the period and the days it bills there; the change of the
+// Tankbestand is billed like one (#239) under the id fuel-stock-<period end>
+export type BilledInvoice = { id: string; description: string; amount: number; start: string; end: string; fuelStock?: true };
+
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
 /** A payment taken back (#92): the day of the reset and what it cleared */
@@ -465,6 +470,7 @@ export const utilityStatementLineItems = pgTable(
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
 		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
+		invoices: jsonb('invoices').$type<BilledInvoice[]>(), // the invoices it billed (#96); null: created before
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},

@@ -113,7 +113,10 @@ describe('Übersicht in der gewählten Sprache', () => {
 		dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-05' }],
 		lettersToSend: 2,
 		endingContracts: [],
-		noticedContracts: []
+		noticedContracts: [],
+		paymentDeadlineDays: 30,
+		reminderAfterDays: 14,
+		expiredContracts: []
 	};
 
 	it('nennt Aufgaben auf Französisch', () => {
@@ -176,8 +179,7 @@ describe('Belegung auf der Übersicht', () => {
 								buildingId: 'b1',
 								buildingName: 'Seeblick',
 								totalApartments: 4,
-								occupiedApartments,
-								occupancyRate: 25
+								occupiedApartments
 							}
 						]
 					}

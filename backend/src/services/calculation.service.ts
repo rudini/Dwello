@@ -12,7 +12,7 @@
 
 import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { statementNumbers, utilityStatements, type HeatingShare, type InvoicePart } from '../db/schema';
+import { statementNumbers, utilityStatements, type BilledInvoice, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -43,6 +43,7 @@ export interface CalculatedLineItem {
 	positionRentalDays: number | null; // the period share as days, when it is one: the tenant's days in the days billed (#208)
 	billedDays: number | null; // and the days the position's invoices bill in the period
 	invoiceParts: InvoicePart[] | null; // invoices over different days: each with its days, for the weighted share (#226)
+	invoices: BilledInvoice[]; // the invoices it bills (#96)
 	isHeatingCost: boolean;
 }
 
@@ -378,6 +379,14 @@ export async function calculateStatementForContract(
 			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			...shareDays,
+			invoices: group.invoices.map(({ id, description, amount, start, end, fuelStock }) => ({
+				id,
+				description,
+				amount,
+				start,
+				end,
+				...(fuelStock && { fuelStock })
+			})),
 			isHeatingCost: group.isHeatingCost
 		});
 

@@ -282,6 +282,27 @@ export interface StatementLineItem {
 	totalAmount: number;
 	tenantShare: number;
 	percentage: number;
+	apartmentShare: number | null; // Wohnungsanteil: the apartment's part of the total by the key
+	periodShare: number | null; // Zeitanteil, 0–1
+	shareDays: { days: number; total: number } | null; // the Zeitanteil as days, where it is one (#208)
+	byProfile?: boolean; // the Zeitanteil is the heating profile's share
+	invoices: StatementLineInvoice[]; // what the position billed (#96); none before
+}
+
+/** An invoice a position billed, or the change of the Tankbestand; with its days where its invoices bill different days (#226) */
+export interface StatementLineInvoice {
+	id: string;
+	description: string;
+	amount: number;
+	start: string;
+	end: string;
+	fuelStock?: true;
+	part: {
+		days: number;
+		total: number;
+		noPeriod?: true;
+		whole?: { start: string; end: string; amount: number };
+	} | null;
 }
 
 export interface Statement {

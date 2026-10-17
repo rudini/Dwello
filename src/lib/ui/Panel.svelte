@@ -6,12 +6,15 @@
 		title,
 		level = 2,
 		children,
-		testid
-	}: { title?: string; level?: 2 | 3; children: Snippet; testid?: string } = $props();
+		testid,
+		id
+	}: { title?: string; level?: 2 | 3; children: Snippet; testid?: string; id?: string } = $props();
 </script>
 
+<!-- scroll-mt keeps a section reached by its anchor clear of the sticky header -->
 <section
-	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6"
+	{id}
+	class="flex scroll-mt-24 flex-col gap-4 rounded-panel border border-line bg-surface p-6"
 	data-testid={testid}
 >
 	{#if title}

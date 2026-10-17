@@ -95,37 +95,16 @@ export function toInvoice(r: Record<string, unknown>, names: Named[] = []): Invo
 	};
 }
 
-type StatementPeriod = { periodStart: string; periodEnd: string; createdAt: string };
-
-const periodsOf = (statements: StatementPeriod[]) =>
-	[...new Set(statements.map((s) => `${s.periodStart}/${s.periodEnd}`))].map((period) => {
-		const [start, end] = period.split('/');
-		return { start, end };
-	});
+type Period = { start: string; end: string };
 
 /**
- * The periods with statements for this allocable invoice (its Leistungszeitraum, else its Rechnungsdatum, overlaps
- * them): billedIn took it (created after it was recorded), missedIn were created before and lack it
+ * The periods with statements that bill this invoice (billedIn) and that lack it as it is now (missedIn: recorded or
+ * changed after them), from the invoices the statements keep (#96); none if they cannot be loaded
  */
-export async function statementPeriods(
-	fetch: typeof globalThis.fetch,
-	backendUrl: string,
-	invoice: Record<string, unknown>
-) {
-	if (invoice.isValidUtilityCost === false) return { billedIn: [], missedIn: [] };
-	const response = await fetch(
-		`${backendUrl}/api/v1/statements?buildingId=${invoice.buildingId}&limit=1000`
-	).catch(() => null);
-	const statements: StatementPeriod[] = response?.ok ? ((await response.json()).data ?? []) : [];
-	const start = (invoice.servicePeriodStart ?? invoice.invoiceDate) as string;
-	const end = (invoice.servicePeriodEnd ?? invoice.invoiceDate) as string;
-	const overlapping = statements.filter((s) => s.periodStart <= end && s.periodEnd >= start);
-	// a period can be in both: drafts created again do not replace the older ones
-	const recordedAt = String(invoice.createdAt);
-	return {
-		billedIn: periodsOf(overlapping.filter((s) => s.createdAt >= recordedAt)),
-		missedIn: periodsOf(overlapping.filter((s) => s.createdAt < recordedAt))
-	};
+export async function statementPeriods(fetch: typeof globalThis.fetch, backendUrl: string, invoiceId: string) {
+	const response = await fetch(`${backendUrl}/api/v1/invoices/${invoiceId}/statements`).catch(() => null);
+	const periods: { billedIn?: Period[]; missedIn?: Period[] } = response?.ok ? await response.json() : {};
+	return { billedIn: periods.billedIn ?? [], missedIn: periods.missedIn ?? [] };
 }
 
 /** The form a page sent with a file; one that is no form is refused as a bad request */
