@@ -4,11 +4,12 @@ import type { Actions, PageServerLoad } from './$types';
 import { agreeableCategories } from '$lib/server/category';
 import { agreedNames } from '$lib/contract-form';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { endedPeriodsSince, type AccountingPeriodType } from '$lib/accounting-period';
+import { endedPeriodsSince, missingPeriods } from '$lib/accounting-period';
+import { periodType } from '$lib/server/missing-statements';
+import { invoicesOf } from '$lib/overview';
 import { wizardLink } from '$lib/statement-wizard';
 import { backendMessage } from '$lib/backend-error';
 import {
-	billsIn,
 	contractEndError,
 	localToday,
 	pastEndConfirmation,
@@ -20,7 +21,13 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
-	missingStatements: { start: string; end: string; href: string }[]; // A-10, #142: newest first
+	// A-10, #142: the latest first; href into the wizard only for a whole period (#199, #281)
+	missingStatements: {
+		start: string;
+		end: string;
+		href: string | null;
+		invoices: { href: string; label: string };
+	}[];
 	// the contract's statements: it cannot be deleted (#116); null when they cannot be read (review C-1)
 	billedBy: { id: string; statementNumber: string; status: string }[] | null;
 	nextSteps: { successor: boolean; ended: boolean } | null; // A-4: a notice still running; A-5: after it the address
@@ -40,16 +47,6 @@ interface ContractDetailsData {
 }
 
 type Row = Record<string, unknown>;
-
-// The kind of Abrechnungsperiode the settings define; null when they cannot be read
-async function periodType(fetch: typeof globalThis.fetch) {
-	const config = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
-	if (!config?.ok) return null;
-	return (
-		((await config.json()).data?.accounting_period as AccountingPeriodType | undefined) ??
-		'calendar'
-	);
-}
 
 // The rows the backend lists, or null when it cannot answer: better no hint than a wrong one
 async function rows(fetch: typeof globalThis.fetch, path: string): Promise<Row[] | null> {
@@ -86,29 +83,30 @@ async function fixedTermCheckDue(fetch: typeof globalThis.fetch, contract: Row) 
 	return (await successorAfter(fetch, contract, end)) === false;
 }
 
-// Every ended Abrechnungsperiode from the Vertragsbeginn on in which the contract has rent days but no statement,
-// the newest first (A-10, #142); none when the settings or the statements cannot be read
+// The parts of ended Abrechnungsperioden since the Vertragsbeginn with rent days but no statement, the latest first
+// (A-10, #142, #199): a whole period leads into the wizard, a part a statement leaves does not until #281 decides how;
+// each to the building's invoices (#211). None when the settings or the statements cannot be read
 async function missingStatements(
 	fetch: typeof globalThis.fetch,
 	contract: Row,
 	statements: Row[] | null
 ) {
-	if (!statements) return [];
+	if (!statements || !contract.startDate) return [];
 	const type = await periodType(fetch);
 	if (!type) return [];
-	const periods = endedPeriodsSince(type, String(contract.startDate).slice(0, 10)).filter(
-		(period) => billsIn(contract as Parameters<typeof billsIn>[0], period)
-	);
 	const building = String((contract.building as Row | undefined)?.id);
-	return periods
-		.filter(
-			({ start, end }) =>
-				!statements.some(
-					// a replaced statement no longer bills the period (#120)
-					(s) => s.status !== 'replaced' && String(s.periodStart) >= start && String(s.periodEnd) <= end
-				)
-		)
-		.map(({ start, end }) => ({ start, end, href: wizardLink(building, start, end) }));
+	const whole = endedPeriodsSince(type, String(contract.startDate).slice(0, 10));
+	const dated = contract as Parameters<typeof missingPeriods>[1];
+	return missingPeriods(type, dated, statements as Parameters<typeof missingPeriods>[2]).map(
+		({ start, end }) => ({
+			start,
+			end,
+			href: whole.some((p) => p.start === start && p.end === end)
+				? wizardLink(building, start, end)
+				: null,
+			invoices: invoicesOf({ start, end }, building)
+		})
+	);
 }
 
 export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractDetailsData> => {

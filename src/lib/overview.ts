@@ -1,6 +1,7 @@
 import type { IconName } from './ui/icons';
 import type { IllustrationName } from './ui/illustrations';
 import { formatDate } from './utils/format';
+import { periodName } from './accounting-period';
 import { m } from '$lib/paraglide/messages';
 
 /** What the overview knows: the dashboard counts plus the statements, letters and contracts with a date ahead */
@@ -25,8 +26,8 @@ export interface OverviewInput {
 	paymentDeadlineDays: number;
 	reminderAfterDays: number;
 	lettersToSend: number;
-	// ended Abrechnungsperiode with rented buildings that have no statements yet
-	missingPeriod?: { start: string; end: string; buildings: string[] } | null;
+	// per building the parts of ended Abrechnungsperioden without a statement, the latest first (#211)
+	missingStatements?: { building: string; periods: { start: string; end: string }[] }[];
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
 	// moved out with a draft statement, still at the building's address (A-5, #114)
 	oldAddresses?: { tenantId: string; tenantName: string }[];
@@ -101,13 +102,32 @@ type CountMessage = (inputs: { count: number }) => string;
 const count = (n: number, one: CountMessage, many: CountMessage) =>
 	(n === 1 ? one : many)({ count: n });
 
-// The invoices of a period: one calendar year can be filtered, a period across the turn of the year cannot
-function invoicesOf({ start, end }: { start: string; end: string }) {
+/**
+ * The invoices of a period, of one building or all: the list filters the Rechnungsdatum by calendar year, so a period
+ * across the turn of the year has none (#211)
+ */
+export function invoicesOf({ start, end }: { start: string; end: string }, building?: string) {
 	const year = start.slice(0, 4);
-	return start === `${year}-01-01` && end === `${year}-12-31`
-		? { href: `/invoices?year=${year}`, label: m.dashboard_invoices_of_year({ year }) }
-		: { href: '/invoices', label: m.dashboard_invoices() };
+	const filter = new URLSearchParams(building ? { building } : {});
+	if (end.startsWith(year)) filter.set('year', year);
+	return {
+		href: `/invoices${filter.size ? `?${filter}` : ''}`,
+		label: filter.has('year') ? m.dashboard_invoices_of_year({ year }) : m.dashboard_invoices()
+	};
 }
+
+type Missing = NonNullable<OverviewInput['missingStatements']>;
+// «Ahornhof (2025, 01.07.2024 – 31.12.2024), Seeblick (2023)»
+function missingText(missing: Missing) {
+	const buildings = missing
+		.map(({ building, periods }) => `${building} (${periods.map(periodName).join(', ')})`)
+		.join(', ');
+	return missing.flatMap((b) => b.periods).length === 1
+		? m.dashboard_task_missing_period_text({ buildings })
+		: m.dashboard_task_missing_periods_text({ buildings });
+}
+const newest = (missing: Missing) =>
+	missing.flatMap((b) => b.periods).sort((a, b) => b.start.localeCompare(a.start))[0];
 
 // Recurring work, most urgent first: money already late, letters waiting at home, statements not yet sent
 function workTasks({
@@ -115,7 +135,7 @@ function workTasks({
 	statementCounts,
 	dueStatements,
 	lettersToSend,
-	missingPeriod,
+	missingStatements = [],
 	reminderAfterDays
 }: OverviewInput): Task[] {
 	// «Überfällig» from the day after the Zahlungsfrist, but a Mahnung is proposed only after the Mahnfrist (#64), the
@@ -148,19 +168,15 @@ function workTasks({
 			action: m.dashboard_task_letters_action(),
 			icon: 'mail'
 		},
-		!!missingPeriod && {
+		missingStatements.length > 0 && {
 			// right after the Abrechnungsperiode, without a legal deadline: a UX choice (#64)
 			id: 'missing-period',
 			title: m.dashboard_task_missing_period(),
-			text: m.dashboard_task_missing_period_text({
-				start: formatDate(missingPeriod.start),
-				end: formatDate(missingPeriod.end),
-				buildings: missingPeriod.buildings.join(', ')
-			}),
+			text: missingText(missingStatements),
 			href: '/statements/generate',
 			action: m.dashboard_create_statements(),
 			icon: 'calculate',
-			link: invoicesOf(missingPeriod)
+			link: invoicesOf(newest(missingStatements))
 		},
 		statementCounts.draft > 0 && {
 			id: 'drafts',

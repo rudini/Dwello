@@ -241,9 +241,9 @@ Then('meldet der Mietvertrag die fehlende Abrechnung {string}', async ({ verwalt
 });
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass Dwello für diese Tage noch keine Abrechnung erstellt',
+	'erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt',
 	async ({ verwalter }) => {
-		await verwalter.sees(missingStatementsText).toContain('Für die übrigen Tage erstellt Dwello noch keine Abrechnung');
+		await verwalter.sees(missingStatementsText).toMatch(/deckt nur einen Teil der Abrechnungsperiode ab; für .+ gibt es noch keine Abrechnung/);
 	}
 );
 
@@ -252,8 +252,15 @@ Then(
 	async ({ verwalter }, periodStart: string) => {
 		await verwalter.sees(missingStatementsShown).toBe(true);
 		await verwalter.sees(missingStatementOffered(periodStart)).toBe(false);
+		// nor the whole period it lies in (Fachreview 2 V-12)
+		await verwalter.sees(missingStatementOffered(`${periodStart.slice(0, 4)}-01-01`)).toBe(false);
 	}
 );
+
+Then('nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg', async ({ verwalter }) => {
+	await verwalter.sees(missingStatementsShown).toBe(true);
+	await verwalter.sees(missingStatementsText).not.toContain('Abgerechnet bis');
+});
 
 When(
 	'der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung {int} anzeigt',

@@ -27,7 +27,7 @@ const contract = (id: string, tenantName: string, startDate: string, endDate: st
 });
 
 const list = (
-	contracts: ReturnType<typeof contract>[],
+	contracts: (ReturnType<typeof contract> & { missingStatement?: boolean })[],
 	url = 'http://localhost/contracts',
 	today = '2026-10-10'
 ) => {

@@ -29,6 +29,13 @@
 	</div>
 	<div class="flex flex-col items-start gap-1 md:flex-1">
 		<Badge tone={badge.tone} label={badge.label} />
+		{#if contract.missingStatement}
+			<Badge
+				tone="caution"
+				label={m.contracts_missing_statement_badge()}
+				testid="contract-missing-statement-badge"
+			/>
+		{/if}
 		<span class="tabular-nums text-ink"
 			>{contractPeriod(contract.startDate, contract.endDate, status, contract.terminated)}</span
 		>
