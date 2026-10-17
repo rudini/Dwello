@@ -302,7 +302,7 @@ This is a checklist, not legal advice.
 
 **Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen3-vl:8b-instruct` (Ollama 0.12.7 or later); pull it (`docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct`) or set `LLM_MODEL` to the model you have. The old variables are ignored.
 
-**Upgrading from the default model `qwen2.5vl:7b`** (#419): an installation without `LLM_MODEL` now asks Ollama for `qwen3-vl:8b-instruct`. Pull it (command above), or keep the old model with `LLM_MODEL=qwen2.5vl:7b`; until one of them is done, the KI suggests nothing. Ollama's plain `qwen3-vl:8b` is the thinking variant, a different and slower model.
+**Upgrading from the default model `qwen2.5vl:7b`** (#419): an installation without `LLM_MODEL` now asks Ollama for `qwen3-vl:8b-instruct`. Update the Ollama image first (`docker compose -f docker-compose.prod.yml pull ollama`, then `up -d`), pull the model (command above), or keep the old model with `LLM_MODEL=qwen2.5vl:7b`; until one of them is done, the KI suggests nothing. Ollama's plain `qwen3-vl:8b` is the thinking variant, a different and slower model.
 
 **Upgrading from `BACKEND_API_URL`:** the frontend reads the backend address only from `BACKEND_URL` now. Rename the variable in your `.env`; `docker-compose.prod.yml` sets it already.
 

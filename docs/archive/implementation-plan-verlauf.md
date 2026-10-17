@@ -1508,3 +1508,15 @@ No scenario: CI configuration only, no app behaviour changes.
 - [x] Plan archived, pull request, CI
 
 Files: `.github/workflows/ci.yml`, `docs/test-pyramid.md`
+
+## Session 2026-10-17: default KI model qwen3-vl:8b-instruct (#419)
+
+- [x] Default model `qwen3-vl:8b-instruct` in `backend/src/config/llm.ts`, `.env.example`, Compose files, README, demo README, `docs/tech-stack.md`, `docs/PRD-Dwello.md`
+- [x] README: upgrade note for installations that relied on the old default
+- [x] `backend/CLAUDE.md`: `llm:eval` through OpenRouter counts as the default model's run
+- [x] `llm:eval` with the new default through OpenRouter (baseline 43/47, #415): the run of #415 measured this model on unchanged prompts; no new run
+- [x] Manual check: reading of a sample invoice through OpenRouter with the new model: a quarterly invoice and a Schlussrechnung with two deducted Akontorechnungen, every field right (amount 1'250.00 before the deduction, deducted 500.00), about 7 s each
+- [x] Lint, check, type-check, affected tests; `code-reviewer` round 1 (`docs/reviews/419-review-1.md`)
+- [x] Session to the archive; pull request
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-419.md`
+- Files: `backend/src/config/llm.ts`, `.env.example`, `docker-compose.dev.yml`, `docker-compose.prod.yml`, `README.md`, `deploy/demo/README.md`, `docs/tech-stack.md`, `docs/PRD-Dwello.md`, `backend/CLAUDE.md`
