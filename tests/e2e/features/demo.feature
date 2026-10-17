@@ -18,6 +18,10 @@ Funktionalität: Öffentliche Demo
     Wenn der Liegenschaftsverwalter die Datenschutzerklärung der Demo liest
     Dann erfährt der Liegenschaftsverwalter unter "Öffentliche Demo", dass alle Besucher dieselben Daten sehen, jede Nacht alles gelöscht wird und andere Besucher seinen Namen und seine E-Mail-Adresse nicht sehen
 
+  Szenario: Nutzungsbedingungen der Demo
+    Wenn der Liegenschaftsverwalter die Nutzungsbedingungen der Demo liest
+    Dann erfährt der Liegenschaftsverwalter unter "Öffentliche Demo", dass alle Besucher dieselben Daten sehen, jede Nacht alles gelöscht wird und er keine echten Daten eingeben soll
+
   Szenario: Kein Demo-Hinweis in einer eigenen Installation
     Wenn ein Besucher die Anmeldeseite öffnet
     Dann ist der Besucher auf der Seite "Anmelden"

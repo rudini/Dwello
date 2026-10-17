@@ -40,6 +40,8 @@ export interface OverviewInput {
 	}[];
 	// agreed end passed, without a following contract and without «Mieter ist ausgezogen» (A-6)
 	expiredContracts: { id: string; tenantName: string; endDate: string }[];
+	// ehemalige Mieter with uploads from before their last Vertragsende (#178)
+	formerTenants?: { tenantId: string; tenantName: string; endDate: string; count: number }[];
 }
 
 /** One thing the landlord should do now, with the page where it is done */
@@ -214,6 +216,19 @@ const fixedTermTasks = ({ expiredContracts }: OverviewInput): Task[] =>
 			action: m.dashboard_task_fixed_term_action(),
 			icon: 'contract'
 		}));
+// TODO(fachlich prüfen, #331): the task stays while the landlord rightly keeps a document
+// TODO(fachlich prüfen, #334): «Mietzinsdepot» is not in the glossary
+const formerDocumentTasks = ({ formerTenants = [] }: OverviewInput): Task[] =>
+	formerTenants.map((t) => ({
+		id: `former-documents-${t.tenantId}`,
+		title: m.dashboard_task_former_documents({ name: t.tenantName }),
+		text: (t.count === 1
+			? m.dashboard_task_former_documents_text_one
+			: m.dashboard_task_former_documents_text_many)({ count: t.count, date: formatDate(t.endDate) }),
+		href: `/tenants/${t.tenantId}`,
+		action: m.dashboard_task_former_documents_action(),
+		icon: 'document'
+	}));
 
 /** Tasks in the order they should be done; set-up comes first */
 export function overviewTasks(input: OverviewInput): Task[] {
@@ -223,7 +238,8 @@ export function overviewTasks(input: OverviewInput): Task[] {
 		...workTasks(input),
 		...addressTasks(input),
 		...successorTasks(input),
-		...fixedTermTasks(input)
+		...fixedTermTasks(input),
+		...formerDocumentTasks(input)
 	];
 }
 

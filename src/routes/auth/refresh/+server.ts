@@ -46,8 +46,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			sub: payload.sub,
 			email: payload.email,
 			name: payload.name,
-			provider: payload.provider,
-			picture: payload.picture
+			provider: payload.provider
 		});
 
 		// Set new session cookie

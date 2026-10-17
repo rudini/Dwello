@@ -7,6 +7,19 @@
 
 	let { data }: { data: PageData } = $props();
 
+	// A paragraph, with the privacy policy of the provider it names (DSG Art. 19)
+	type Paragraph = { text: string; policy?: { provider: string; href: string } };
+
+	const GOOGLE = { provider: 'Google', href: 'https://policies.google.com/privacy' };
+	// What each sign-in provider learns, and its policy; only configured providers are named (#82)
+	const signIn: Record<string, () => Paragraph> = {
+		Google: () => ({ text: m.privacy_login_google(), policy: GOOGLE }),
+		Microsoft: () => ({
+			text: m.privacy_login_microsoft(),
+			policy: { provider: 'Microsoft', href: 'https://privacy.microsoft.com/privacystatement' }
+		})
+	};
+
 	// Who receives invoice data for the KI categorization (DSG Art. 19: recipient and country)
 	const llmNotice = $derived(
 		data.enabled === false
@@ -16,31 +29,83 @@
 				: m.privacy_llm_local()
 	);
 
-	const sections = $derived([
+	// TODO(fachlich prüfen, #333): the SMTP provider and its country are only known to the operator
+	const mailNotice = $derived<Paragraph>(
+		data.mail === 'resend'
+			? {
+					text: m.privacy_mail_resend(),
+					policy: { provider: 'Resend', href: 'https://resend.com/legal/privacy-policy' }
+				}
+			: { text: data.mail === 'smtp' ? m.privacy_mail_smtp() : m.privacy_mail_none() }
+	);
+
+	// JWT_EXPIRY in its largest whole unit, e.g. «7 Tage» or «12 Stunden»
+	const lifetime = (seconds: number) => {
+		const [unit, size] = (
+			[
+				['day', 86400],
+				['hour', 3600],
+				['minute', 60]
+			] as const
+		).find(([, size]) => seconds % size === 0) ?? ['second', 1];
+		return new Intl.NumberFormat(getLocale(), { style: 'unit', unit, unitDisplay: 'long' }).format(
+			seconds / size
+		);
+	};
+
+	const operator = $derived(
+		data.operator
+			? m.privacy_controller_1({
+					operator: [data.operator.name, data.operator.address].filter(Boolean).join(', ')
+				}) + (data.operator.contact ? ` ${m.terms_contact({ contact: data.operator.contact })}` : '')
+			: m.privacy_controller_none()
+	);
+
+	const sections = $derived<{ id: string; title: string; paragraphs: Paragraph[] }[]>([
+		{
+			id: 'controller',
+			title: m.privacy_controller_title(),
+			// TODO(fachlich prüfen, #330): the operator as controller also when a provider hosts Dwello
+			paragraphs: [operator, m.privacy_controller_2(), m.privacy_controller_3()].map((text) => ({ text }))
+		},
 		{
 			id: 'stored',
 			title: m.privacy_stored_title(),
-			paragraphs: [m.privacy_stored_1(), m.privacy_stored_2(), m.audit_privacy()]
+			paragraphs: [m.privacy_stored_1(), m.privacy_stored_2(), m.audit_privacy()].map((text) => ({ text }))
+		},
+		{
+			id: 'retention',
+			title: m.privacy_retention_title(),
+			paragraphs: [m.privacy_retention_1(), m.privacy_retention_2(), m.privacy_retention_3()].map(
+				(text) => ({ text })
+			)
 		},
 		{
 			id: 'login',
 			title: m.privacy_login_title(),
 			paragraphs: [
-				m.privacy_login_1({
-					providers: new Intl.ListFormat(getLocale(), { type: 'disjunction' }).format(
-						data.providers
-					)
-				})
+				{
+					text: m.privacy_login_1({
+						providers: new Intl.ListFormat(getLocale(), { type: 'disjunction' }).format(
+							data.providers
+						)
+					})
+				},
+				...data.providers.flatMap((provider) => signIn[provider]?.() ?? []),
+				{ text: m.privacy_login_log() }
 			]
 		},
 		{
 			id: 'third',
 			title: m.privacy_third_title(),
 			paragraphs: [
-				m.privacy_third_1(),
-				m.privacy_third_3(),
-				m.privacy_third_4(),
-				m.privacy_third_5()
+				mailNotice,
+				{
+					text: m.privacy_third_3(),
+					policy: { provider: 'OpenPLZ', href: 'https://legal.stueber.de/privacy.php' }
+				},
+				{ text: m.privacy_third_4(), policy: GOOGLE },
+				{ text: m.privacy_third_5() }
 			]
 		},
 		{
@@ -48,15 +113,13 @@
 			title: m.privacy_cookies_title(),
 			paragraphs: [
 				m.privacy_cookies_1(),
-				m.privacy_cookies_2(),
+				m.privacy_cookies_2({ lifetime: lifetime(data.sessionSeconds) }),
 				m.privacy_cookies_3(),
-				m.privacy_cookies_4()
-			]
+				m.privacy_cookies_4(),
+				m.privacy_cookies_5()
+			].map((text) => ({ text }))
 		}
 	]);
-
-	// TODO(fachlich prüfen, #82): legal wording of the draft notice
-	const draftNotice = m.privacy_draft_notice();
 </script>
 
 <svelte:head>
@@ -78,11 +141,21 @@
 			{#if section.id === 'third'}
 				<p class="text-ink" data-testid="llm-recipient">{llmNotice}</p>
 			{/if}
-			{#each section.paragraphs as paragraph (paragraph)}
-				<p class="text-ink">{paragraph}</p>
+			{#each section.paragraphs as paragraph (paragraph.text)}
+				<p class="text-ink">
+					{paragraph.text}
+					{#if paragraph.policy}
+						<a
+							href={paragraph.policy.href}
+							rel="noopener noreferrer"
+							class="text-accent underline underline-offset-4"
+							>{m.privacy_policy_link({ provider: paragraph.policy.provider })}</a
+						>
+					{/if}
+				</p>
 			{/each}
 			{#if section.id === 'stored'}
-				<p class="text-ink" data-testid="draft-notice">{draftNotice}</p>
+				<p class="text-ink" data-testid="draft-notice">{m.privacy_draft_notice()}</p>
 			{/if}
 		</Panel>
 	{/each}
