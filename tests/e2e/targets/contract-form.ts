@@ -62,3 +62,10 @@ export const withdrawNoticeOption = target('Option «Kündigung aufheben» mit H
 		.locator('label')
 		.filter({ has: page.getByTestId('contract-duration-unlimited') })
 );
+// #91: one box per umlagefähige category, ticked when the contract agrees it
+export const agreedCategory = (categoryId: string) =>
+	target(`Vereinbarte Nebenkosten ${categoryId}`, (page) => page.getByTestId(`contract-category-${categoryId}`));
+export const agreedCategoryBoxes = target('Kästchen der vereinbarten Nebenkosten', (page) => page.getByTestId(/^contract-category-/));
+export const agreedCategoryBoxAt = (index: number) =>
+	target(`Kästchen ${index + 1} der vereinbarten Nebenkosten`, (page) => page.getByTestId(/^contract-category-/).nth(index));
+export const noAgreedCostsNote = target('Hinweis ohne vereinbarte Nebenkosten', (page) => page.getByTestId('contract-agreed-costs-none'));

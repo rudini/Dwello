@@ -134,6 +134,12 @@ export function toPdfData(
 		balance: parseFloat(statement.balance),
 		paymentDeadline: statement.paymentDeadline || undefined,
 		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined,
+		// the agreed categories it bills, as its positions name them (#91, domain review M-2); not next to a position
+		// without a category, which no contract agrees (round 2 M-1)
+		agreedCosts:
+			statement.agreedCategoryIds && statement.lineItems.every((item) => item.categoryId)
+				? [...new Set(statement.lineItems.flatMap((item) => nameIn(categoryNames, item.categoryId, language) ?? []))]
+				: undefined,
 		...(statement.replaces && {
 			replaces: {
 				statementNumber: statement.replaces.statementNumber,

@@ -6,6 +6,7 @@
 import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, isNull, getTableColumns } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
+import { recordAudit, recordStatementCorrection } from './audit-log.service';
 import {
 	utilityStatements,
 	utilityStatementLineItems,
@@ -18,8 +19,11 @@ import {
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
 	type NewUtilityStatementLineItem,
-	type KeyValues
+	type KeyValues,
+	categories,
+	rentalContracts
 } from '../db/schema';
+import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
 import { formatCHF, roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
@@ -374,6 +378,12 @@ async function openReplaced({ contractId, periodStart, periodEnd }: StatementInp
 	return replaced;
 }
 
+// The Tankbestand readings the statement bills by, only when the contract agrees the tank's category (#91, V-3)
+const agreedStock = async (input: StatementInput & { buildingId: string }, agreedCategoryIds: string[]) => {
+	const [change] = await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd);
+	return change && agreedCategoryIds.includes(change.categoryId) ? change.stock : null;
+};
+
 /** Calculate a contract's statement and store it as a draft with its line items */
 export async function generateStatement(
 	input: StatementInput & { buildingId: string }
@@ -405,7 +415,8 @@ export async function generateStatement(
 			managementFeePercent: String(calculation.managementFeePercent),
 			heatingProfileId: input.heatingProfileId || null,
 			heatingShare: calculation.heating,
-			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
+			fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
+			agreedCategoryIds: calculation.agreedCategoryIds,
 			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
 			replacesId: calculation.replacesId,
@@ -586,7 +597,7 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	// only a PDF made after the payment was recorded says so; the one made before stays, with its row in the Verlauf
 	const { pdfGeneratedAt, paymentRecordedAt } = existing;
 	const paidPdf = pdfGeneratedAt && paymentRecordedAt && pdfGeneratedAt >= paymentRecordedAt;
-	return (await updateStatement(id, {
+	const updated = (await updateStatement(id, {
 		status: 'sent',
 		paidDate: null,
 		paidAmount: null,
@@ -594,6 +605,8 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
+	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: existing.paidDate }); // #357
+	return updated;
 }
 
 /**
@@ -605,9 +618,29 @@ export async function replaceStatement(id: string): Promise<StatementWithDetails
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (!['sent', 'overdue', 'paid'].includes(existing.status))
 		throw new CodedError('STATEMENT_NOT_REPLACEABLE', 'Only a sent or paid statement can be replaced');
-	// the audit log (#111) records the replacement once it exists
-	await db.update(utilityStatements).set({ status: 'replaced', updatedAt: new Date() }).where(eq(utilityStatements.id, id));
+	await db.transaction(async (tx) => {
+		await tx.update(utilityStatements).set({ status: 'replaced', updatedAt: new Date() }).where(eq(utilityStatements.id, id));
+		await recordStatementCorrection(existing, tx); // the Protokoll (#357)
+	});
 	return (await getStatement(id))!;
+}
+
+// The correction is made without the wizard, which asks whether a category with costs and no answer is agreed (#91):
+// it would drop out unasked, so the landlord answers in the wizard first (merge review W10c-2 C-1)
+async function refuseOpenAgreements(contractId: string, buildingId: string, periodStart: string, periodEnd: string) {
+	const [contract] = await db
+		.select({ id: rentalContracts.id, startDate: rentalContracts.startDate, endDate: rentalContracts.endDate })
+		.from(rentalContracts)
+		.where(eq(rentalContracts.id, contractId));
+	const open = (await agreementsInPeriod({ ...contract, buildingId }, periodStart, periodEnd)).filter((answer) => answer.agreed === null);
+	if (!open.length) return;
+	const named = await db
+		.select({ name: categories.name, nameDE: categories.nameDE })
+		.from(categories)
+		.where(inArray(categories.id, open.map((answer) => answer.categoryId)));
+	throw new CodedError('STATEMENT_AGREEMENTS_OPEN', 'Whether the contract agrees these categories is not answered', {
+		categories: named.map((category) => category.nameDE || category.name).join(', ')
+	});
 }
 
 /**
@@ -622,6 +655,7 @@ export async function correctStatement(id: string): Promise<StatementWithDetails
 		throw new CodedError('STATEMENT_ALREADY_CORRECTED', 'Statement already has a berichtigte Abrechnung', {
 			number: replaced.replacedBy.statementNumber
 		});
+	await refuseOpenAgreements(replaced.contractId, replaced.building!.id, replaced.periodStart, replaced.periodEnd);
 	try {
 		return await generateStatement({
 			contractId: replaced.contractId,

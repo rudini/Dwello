@@ -8,6 +8,7 @@
 	import PreviewStep from './PreviewStep.svelte';
 	import SettingsStep from './SettingsStep.svelte';
 	import FeeNotAgreed from './FeeNotAgreed.svelte';
+	import AgreedCosts from './AgreedCosts.svelte';
 	import type { PreviewRow } from './preview';
 
 	// The content of the current step of "Abrechnungen erstellen"
@@ -16,6 +17,7 @@
 		data,
 		selection = $bindable(),
 		confirmed = $bindable(),
+		agreementsBlocking = $bindable(false),
 		errors,
 		previewRows,
 		invoices,
@@ -29,6 +31,7 @@
 		};
 		selection: WizardSelection;
 		confirmed: boolean;
+		agreementsBlocking?: boolean;
 		errors: Record<string, string>;
 		previewRows: PreviewRow[];
 		invoices: Parameters<typeof invoiceRows>[0];
@@ -64,6 +67,12 @@
 	<FeeNotAgreed
 		buildingIds={selection.buildingIds}
 		period={{ start: selection.periodStart, end: selection.periodEnd }}
+	/>
+	<AgreedCosts
+		buildingIds={selection.buildingIds}
+		period={{ start: selection.periodStart, end: selection.periodEnd }}
+		bind:blocking={agreementsBlocking}
+		error={errors.agreements}
 	/>
 {:else if step === 4}
 	<PreviewStep

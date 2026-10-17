@@ -149,7 +149,15 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract'), actual)).toEqual([]);
 	});
 
-	it('GET /categories/:id liefert die Felder von category.json', async () => {
+	it('GET /contracts/:id/agreements liefert die Felder von contract-agreements.json', async () => {
+		const actual = (await (
+			await callApi(`/api/v1/contracts/${rental.contract}/agreements?periodStart=2020-01-01&periodEnd=2030-12-31`)
+		).json()) as unknown[];
+		expect(actual.length).toBeGreaterThan(0);
+		expect(drift(await sample('contract-agreements'), actual)).toEqual([]);
+	});
+
+		it('GET /categories/:id liefert die Felder von category.json', async () => {
 		const name = `Internet ${token}`;
 		const own = (await (
 			await sendJson('POST', '/api/v1/categories', {
@@ -356,6 +364,13 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /config liefert die Felder von config.json', async () => {
 		const actual = await (await callApi('/api/v1/config')).json();
 		expect(drift(await sample('config'), actual)).toEqual([]);
+	});
+
+	it('GET /audit-log liefert die Felder von audit-log.json', async () => {
+		await sendJson('POST', '/api/v1/audit-log/logins', { provider: 'google' });
+		const actual = (await (await callApi('/api/v1/audit-log')).json()) as { data: { id: string }[] };
+		expect(drift(await sample('audit-log'), actual)).toEqual([]);
+		await callApi(`/api/v1/audit-log/${actual.data[0].id}`, { method: 'DELETE' });
 	});
 });
 

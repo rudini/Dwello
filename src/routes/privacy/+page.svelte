@@ -20,7 +20,7 @@
 		{
 			id: 'stored',
 			title: m.privacy_stored_title(),
-			paragraphs: [m.privacy_stored_1(), m.privacy_stored_2()]
+			paragraphs: [m.privacy_stored_1(), m.privacy_stored_2(), m.audit_privacy()]
 		},
 		{
 			id: 'login',
@@ -69,6 +69,7 @@
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">
 			<p class="text-ink">{m.privacy_demo_1()}</p>
+			<p class="text-ink">{m.audit_privacy_demo()}</p>
 		</Panel>
 	{/if}
 
