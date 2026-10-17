@@ -483,6 +483,10 @@ export function testData(api: CallTheApi) {
 			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { isValidUtilityCost });
 		},
 
+		async invoiceWithoutKey(supplier: string) {
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { distributionKeyId: null });
+		},
+
 		async invoiceNumber(supplier: string, invoiceNumber: string) {
 			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { invoiceNumber });
 		},

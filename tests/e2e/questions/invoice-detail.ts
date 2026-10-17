@@ -4,6 +4,7 @@ import {
 	amount,
 	category,
 	categoryReason,
+	distributionKeyRow,
 	distributionKey,
 	legalNote,
 	missedWarning,
@@ -24,3 +25,4 @@ export const missedWarningText = Text.of(missedWarning);
 export const reasonOfCategory = Text.of(categoryReason);
 export const reasonsOfCategory = Count.of(categoryReason);
 export const tenancyLawNotes = Count.of(legalNote);
+export const distributionKeyRows = Count.of(distributionKeyRow);

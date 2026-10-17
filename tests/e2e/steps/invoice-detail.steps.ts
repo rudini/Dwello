@@ -5,6 +5,7 @@ import {
 	numberOfInvoice,
 	categoryOfInvoice,
 	distributionKeyOfInvoice,
+	distributionKeyRows,
 	missedWarningText,
 	reasonForOverride,
 	reasonOfCategory,
@@ -32,6 +33,10 @@ Given(
 		await verwalter.attemptsTo(openInvoice(seed.idOf(`Rechnung ${supplier}`)!));
 	}
 );
+
+Given('die Rechnung von {string} hat keinen Verteilschlüssel', async ({ seed }, supplier: string) => {
+	await seed.invoiceWithoutKey(supplier);
+});
 
 When('der Liegenschaftsverwalter die Rechnung löscht', async ({ verwalter }) => {
 	await verwalter.attemptsTo(deleteInvoice);
@@ -85,6 +90,11 @@ Then(
 
 Then('nennt die Rechnung keinen Grund der Umlagefähigkeit', async ({ verwalter }) => {
 	await verwalter.sees(reasonsOfCategory).toBe(0);
+});
+
+// After the reason that anchors it: no «Keiner – … pro Wohnung verteilt» for an invoice nobody pays (#292, Helga P-1)
+Then('sagt die Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde', async ({ verwalter }) => {
+	await verwalter.sees(distributionKeyRows).toBe(0);
 });
 
 // After the reason that anchors it: the general note gives way to the category's reason (#292, Fachreview V-6)

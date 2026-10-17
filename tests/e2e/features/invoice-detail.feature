@@ -21,10 +21,12 @@ Funktionalität: Rechnungsdetail
 
   Szenario: Nicht umlagefähige Rechnung nennt den Grund ihrer Kategorie
     Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung
+    Und die Rechnung von "Dachdecker Meier" hat keinen Verteilschlüssel
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Dachdecker Meier"
     Dann ist die Rechnung nicht umlagefähig
     Und nennt die Rechnung als Grund der Umlagefähigkeit ihrer Kategorie "Reparaturen sind mit dem Mietzins abgegolten, also nicht umlagefähig."
     Und erklärt kein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst
+    Und sagt die Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde
 
   # Die Rechnung weicht von ihrer Kategorie ab: kein Grund, der ihr widerspricht (Fachreview 292 V-3)
   Szenario: Ausgeschlossene Rechnung einer umlagefähigen Kategorie nennt keinen Grund

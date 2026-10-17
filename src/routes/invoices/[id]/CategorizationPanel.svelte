@@ -22,7 +22,8 @@
 		onrecategorize: () => void;
 	} = $props();
 
-	// Not distributed at all: no «Keiner – … pro Wohnung verteilt» next to the reason (#292, Helga P-1)
+	// A non-allocable invoice without a key says nothing about distributing it: «Keiner – … pro Wohnung verteilt»
+	// contradicts «Nicht umlagefähig» (#292, Helga P-1); a chosen key stays, as it applies once the invoice counts again
 	const showsKey = $derived(!!invoice.distributionKey || invoice.isValidUtilityCost);
 
 	// The KI may take half a minute: its failure shows at the button and takes the focus, so it is in view
@@ -45,7 +46,7 @@
 			{/if}
 		</div>
 		{#if showsKey}
-			<div class="flex flex-col gap-1">
+			<div class="flex flex-col gap-1" data-testid="invoice-key-row">
 				<dt class="text-ink-muted">{m.glossary_key_term()}</dt>
 				{#if invoice.distributionKey}
 					<dd class="font-semibold text-ink" data-testid="invoice-distribution-key">

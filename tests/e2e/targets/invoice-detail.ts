@@ -22,3 +22,4 @@ export const missedStatementsLink = target('Abrechnungen ohne diese Rechnung', (
 	page.getByTestId('invoice-missed-statements-link')
 );
 export const categoryReason = target('Grund der Umlagefähigkeit der Kategorie', (page) => page.getByTestId('category-reason'));
+export const distributionKeyRow = target('Verteilschlüssel der Rechnung', (page) => page.getByTestId('invoice-key-row'));
