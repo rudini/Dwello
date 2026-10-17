@@ -45,6 +45,17 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement(backendStatement).paymentResets).toEqual([]);
 	});
 
+	// #120: die berichtigte Abrechnung nennt die ersetzte und rechnet an, was darauf bezahlt ist
+	it('übernimmt ersetzte und berichtigte Abrechnung und das schon Bezahlte', () => {
+		const replaces = { id: 's0', statementNumber: 'NK-A', statementDate: '2025-01-15' };
+		expect(
+			toStatement({ ...backendStatement, replaces, replacedBy: { id: 's9', statementNumber: 'NK-C' }, priorPayments: '442.90', priorPaidOn: ['NK-A'] })
+		).toMatchObject({ replaces, replacedBy: { id: 's9', statementNumber: 'NK-C' }, priorPayments: 442.9, priorPaidOn: ['NK-A'] });
+		expect(toStatement(backendStatement)).toMatchObject({ replaces: null, replacedBy: null, priorPayments: 0, priorPaidOn: [] });
+		// the dialog offsets what was paid; the replaced statement leads to its contract
+		expect(toStatement({ ...backendStatement, paidAmount: '442.90' })).toMatchObject({ paidAmount: 442.9, contractId: 'c1' });
+	});
+
 	// #248: die abgerechneten Mietstage, wie die Abrechnung sie gespeichert hat
 	it('übernimmt die abgerechneten Tage des Mietvertrags', () => {
 		const statement = toStatement({ ...backendStatement, rentalStart: '2024-07-01' });

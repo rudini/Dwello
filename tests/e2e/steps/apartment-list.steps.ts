@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentCount, apartmentEmptyHint, apartmentSearchTerm, occupancyOf } from '../questions/apartments';
+import { apartmentCount, apartmentEmptyHint, apartmentSearchHelp, apartmentSearchTerm, occupancyOf } from '../questions/apartments';
 import {
 	openApartment,
 	openApartmentList,
@@ -61,8 +61,8 @@ Then('die Wohnungsliste enthält genau {int} Wohnung(en)', async ({ verwalter },
 	await verwalter.sees(apartmentCount).toBe(count);
 });
 
-When('der Liegenschaftsverwalter nach Wohnungen mit {string} sucht', async ({ verwalter, names }, term: string) => {
-	await verwalter.attemptsTo(searchApartments(names.get(term) ?? term));
+When('der Liegenschaftsverwalter nach Wohnungen mit {string} sucht', async ({ verwalter, seed }, term: string) => {
+	await verwalter.attemptsTo(searchApartments(seed.withNames(term)));
 });
 
 When('der Liegenschaftsverwalter wieder alle Wohnungen anzeigt', async ({ verwalter }) => {
@@ -76,8 +76,12 @@ When(
 	}
 );
 
-Then('sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(apartmentEmptyHint).toContain(text);
+Then('sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis {string}', async ({ verwalter, seed }, text: string) => {
+	await verwalter.sees(apartmentEmptyHint).toContain(seed.withNames(text));
+});
+
+Then('erfährt der Liegenschaftsverwalter bei der Wohnungssuche {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(apartmentSearchHelp).toContain(text);
 });
 
 // other scenarios add apartments in parallel: the unfiltered list is only known to be not empty

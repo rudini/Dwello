@@ -10,6 +10,7 @@
 		values,
 		tenants,
 		apartments,
+		categories,
 		unknown = false,
 		onretry,
 		onedit
@@ -17,6 +18,7 @@
 		values: ContractFormValues;
 		tenants: { id: string; name: string }[];
 		apartments: { id: string; unit: string; building: string }[];
+		categories: { id: string; name: string }[];
 		unknown?: boolean; // the apartment's contracts could not be loaded: whether it is free is not checked
 		onretry: () => void; // loads them again
 		onedit: (step: number, field: string) => void;
@@ -30,7 +32,7 @@
 {/if}
 
 <dl class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
-	{#each contractSummary(values, tenants, apartments) as item (item.label)}
+	{#each contractSummary(values, tenants, apartments, categories) as item (item.label)}
 		<!-- phones: label above value, "Ändern" beside; from sm one line -->
 		<div
 			class="grid grid-cols-value-action items-center gap-x-4 px-4 py-2 sm:grid-cols-label-value-action"

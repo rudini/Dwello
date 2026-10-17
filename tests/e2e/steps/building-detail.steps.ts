@@ -1,6 +1,13 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { buildingAddress, listedApartment, shownMaps, tankOfBuilding, yearBuilt } from '../questions/building-detail';
+import {
+	buildingAddress,
+	fuelStocksTitle,
+	listedApartment,
+	shownMaps,
+	tankOfBuilding,
+	yearBuilt
+} from '../questions/building-detail';
 import { emptyListShown, listedBuildingCount } from '../questions/buildings';
 import {
 	deleteBuilding,
@@ -100,4 +107,8 @@ When(
 
 Then('nennt die Gebäudeseite zum Tank {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(tankOfBuilding).toContain(text);
+});
+
+Then('heisst der Abschnitt zum Heizmaterial auf der Gebäudeseite {string}', async ({ verwalter }, title: string) => {
+	await verwalter.sees(fuelStocksTitle).toBe(title);
 });

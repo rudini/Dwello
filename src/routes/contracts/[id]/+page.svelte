@@ -162,9 +162,11 @@
 			endDate={contract.endDate}
 			terminated={contract.terminated}
 			noticeReceivedOn={contract.noticeReceivedOn}
+			billedUntil={contract.billedUntil}
 			{status}
 			rent={data.rentBreakdown}
 			fee={managementFeeText(contract.managementFeeAgreed, contract.managementFeePercent)}
+			agreedCosts={data.agreedCosts}
 		/>
 	</div>
 

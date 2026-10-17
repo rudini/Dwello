@@ -1,5 +1,5 @@
 /**
- * Apartment list search by number or building name (real PostgreSQL database)
+ * Apartment list search, word by word in number, building name, street and place (real PostgreSQL database)
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
@@ -8,6 +8,8 @@ import { createBuilding, deleteBuilding } from '../services/building.service';
 import { callApi } from './helpers/auth';
 
 const name = `Ahornhof ${crypto.randomUUID()}`;
+const street = `Seestrasse-${crypto.randomUUID()} 5`;
+const place = `Uster-${crypto.randomUUID()}`;
 let buildingId: string;
 let otherId: string;
 
@@ -21,9 +23,9 @@ beforeAll(async () => {
 	buildingId = (
 		await createBuilding({
 			name,
-			address: 'Testweg 1',
-			postalCode: '8400',
-			city: 'Winterthur',
+			address: street,
+			postalCode: '8610',
+			city: place,
 			canton: 'ZH'
 		})
 	).id;
@@ -68,6 +70,25 @@ describe('Wohnungssuche', () => {
 	it('findet Wohnungen nach Gebäudename, ohne Gross- und Kleinschreibung', async () => {
 		const result = await search(`search=${encodeURIComponent(name.toUpperCase())}`);
 		expect(result.apartments.map((a) => a.number)).toEqual(['2.01', '2.02', '3.01']);
+	});
+
+	it('findet Wohnungen, wenn jedes Wort zur Wohnungsnummer oder zum Gebäudenamen passt', async () => {
+		const result = await search(`search=${encodeURIComponent(`${name} 2.01`)}`);
+		expect(result.apartments.map((a) => a.number)).toEqual(['2.01']);
+	});
+
+	it('findet Wohnungen nach Strasse und Ort des Gebäudes', async () => {
+		const byStreet = await search(`search=${encodeURIComponent(`${street} 2.01`)}`);
+		expect(byStreet.apartments.map((a) => a.number)).toEqual(['2.01']);
+		const byPlace = await search(`search=${encodeURIComponent(`${place} 2.0`)}`);
+		expect(byPlace.apartments.map((a) => a.number)).toEqual(['2.01', '2.02']);
+	});
+
+	it('übergeht das Wort «Wohnung», wie es auf der Karte steht', async () => {
+		const result = await search(`search=${encodeURIComponent(`${name} Wohnung 2.01`)}`);
+		expect(result.apartments.map((a) => a.number)).toEqual(['2.01']);
+		const onlyTheWord = await search(`buildingId=${buildingId}&search=wohnung`);
+		expect(onlyTheWord.total).toBe(3);
 	});
 
 	it('lässt sich mit dem Statusfilter kombinieren', async () => {

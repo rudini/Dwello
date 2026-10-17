@@ -22,9 +22,14 @@ export const previewFee = target('Verwaltungspauschale der Vorschau', (page) => 
 export const previewRows = target('Zeilen der Vorschau', (page) => page.getByTestId('preview-row'));
 export const previewRow = (tenantName: string) =>
 	target(`Zeile von «${tenantName}» in der Vorschau`, (page) => previewRows.locate(page).filter({ hasText: tenantName }));
+export const previewAkontoHint = (tenantName: string) =>
+	target(`Akonto-Hinweis von «${tenantName}» in der Vorschau`, (page) =>
+		previewRow(tenantName).locate(page).getByTestId('preview-akonto-hint')
+	);
 export const previewEmpty = target('Hinweis keine Mietverträge in der Periode', (page) => page.getByTestId('preview-empty'));
 export const generationResult = target('Ergebnis der Erstellung', (page) => page.getByTestId('generation-result'));
 export const showStatementsButton = target('Abrechnungen anzeigen', (page) => page.getByTestId('show-statements-button'));
+export const downloadZipButton = target('Alle als ZIP herunterladen', (page) => page.getByTestId('download-zip-button'));
 // "Abbrechen" in the wizard's first step (after its breadcrumb), or the statement page's breadcrumb to the list
 export const backLink = target('Zurück zur Abrechnungsliste', (page) =>
 	page
@@ -84,4 +89,28 @@ export const existingStatementNotes = (statementId: string) =>
 	target(`Hinweis zur Abrechnung ${statementId}`, (page) => page.getByTestId(`existing-statement-notes-${statementId}`));
 export const existingStatementLink = (statementId: string) =>
 	target(`Abrechnung ${statementId} in der Vorschau`, (page) => page.getByTestId(`existing-statement-${statementId}`));
+// #91, step «Einstellungen»: per contract of the run, whether a category with costs in the period is agreed
+export const agreementQuestions = target('Fragen nach vereinbarten Nebenkosten', (page) => page.getByTestId('agreement-questions'));
+export const agreementsOf = (contractId: string) =>
+	target(`Fragen zum Mietvertrag ${contractId}`, (page) => page.getByTestId(`agreement-contract-${contractId}`));
+export const agreementChoice = (contractId: string, categoryId: string, agreed: boolean) =>
+	target(`Antwort ${agreed ? 'vereinbart' : 'nicht vereinbart'} für ${categoryId} im Mietvertrag ${contractId}`, (page) =>
+		page.getByTestId(`agreement-${contractId}-${categoryId}-${agreed ? 'yes' : 'no'}`)
+	);
+// the answer stored («Beim Mietvertrag gespeichert.») or refused (the question's error)
+export const agreementAnswered = (contractId: string, categoryId: string) =>
+	target(`Antwort für ${categoryId} im Mietvertrag ${contractId} gespeichert oder abgelehnt`, (page) =>
+		page
+			.getByTestId(`agreement-saved-${contractId}-${categoryId}`)
+			.filter({ hasText: /./ })
+			.or(page.getByTestId(`agreement-${contractId}-${categoryId}`).getByTestId('form-error'))
+	);
+// the run's contracts with categories answered «nicht vereinbart» and costs in the period, each a link to it
+export const notAgreedCostsLink = (contractId: string) =>
+	target(`Mietvertrag ${contractId} mit nicht vereinbarten Nebenkosten`, (page) =>
+		page.getByTestId(`not-agreed-costs-link-${contractId}`)
+	);
 export const oldAddress = target('Warnung vor der alten Adresse', (page) => page.getByTestId('preview-old-address'));
+// while the questions load, and when they cannot be loaded
+export const agreementsLoading = target('Vereinbarte Nebenkosten werden geprüft', (page) => page.getByTestId('agreements-loading'));
+export const agreementsFailed = target('Vereinbarte Nebenkosten nicht geprüft', (page) => page.getByTestId('agreements-failed'));

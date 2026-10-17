@@ -65,7 +65,7 @@ describe('Neues Heizprofil', () => {
 			status: 400,
 			data: {
 				errors: {
-					name: 'Name ist erforderlich',
+					name: 'Name ist erforderlich.',
 					total: 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).'
 				}
 			}

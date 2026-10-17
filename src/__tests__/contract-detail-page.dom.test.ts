@@ -103,6 +103,25 @@ describe('Mietvertragsdetail', () => {
 		expect(text('contract-management-fee')).toBe(shown);
 	});
 
+	// #133: nur wenn eingetragen
+	it.each([
+		['2024-12-31', '31.12.2024'],
+		[null, undefined]
+	])('nennt «Abgerechnet bis», wenn es eingetragen ist (%s)', (billedUntil, shown) => {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: null,
+				contract: { ...contract('2024-04-01', null), billedUntil },
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			},
+			form: null
+		} as never);
+		expect(byTestId('contract-billed-until')?.textContent?.trim()).toBe(shown);
+	});
+
 	// A-4: nach der Kündigung den Nachmieter erfassen und die neue Adresse eintragen
 	it('nennt nach einer Kündigung die nächsten Schritte', () => {
 		open('2024-04-01', '2099-03-31', null, '2026-10-10', true);
@@ -228,6 +247,10 @@ describe('Mietvertragsdetail', () => {
 			'Der Assistent erstellt die Abrechnungen für alle Mietverträge des Gebäudes. Erfassen Sie zuerst die Rechnungen der Periode.'
 		);
 		expect(byTestId('contract-missing-statement-link-2025-01-01')!.getAttribute('href')).toBe(href);
+		// #133: the way to «Abgerechnet bis» (fach review V-7)
+		expect(text('contract-missing-statement')).toContain(
+			'Haben Sie diese Periode ausserhalb von Dwello abgerechnet? Tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
+		);
 	});
 
 	// #142: every ended period without a statement, the newest first, each with its own way to the wizard
@@ -247,6 +270,9 @@ describe('Mietvertragsdetail', () => {
 		const links = [...byTestId('contract-missing-statement')!.querySelectorAll('a')];
 		expect(links.map((a) => a.textContent!.trim())).toEqual(['2025 abrechnen', '2023 abrechnen']);
 		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href));
+		expect(text('contract-missing-statement')).toContain(
+			'Haben Sie eine dieser Perioden ausserhalb von Dwello abgerechnet? Tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
+		);
 	});
 
 	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {
@@ -654,7 +680,8 @@ describe('Mietvertrag löschen', () => {
 	it('nennt die Abrechnungen mit Status, die das Löschen sperren, und lässt es nicht bestätigen', () => {
 		const billed = [
 			{ id: 's1', statementNumber: 'NK-2024-0001', status: 'paid' },
-			{ id: 's2', statementNumber: 'NK-2025-0002', status: 'draft' }
+			{ id: 's2', statementNumber: 'NK-2025-0002', status: 'draft' },
+			{ id: 's3', statementNumber: 'NK-2023-0003', status: 'replaced' }
 		];
 		open('2024-04-01', null, null, '2026-10-10', false, [], billed);
 		click('contract-delete-button');
@@ -664,7 +691,9 @@ describe('Mietvertrag löschen', () => {
 		// A-8 (#117): jede Abrechnung als Link, mit ihrem Status
 		expect(text('contract-delete-statement-s1')).toBe('NK-2024-0001 (bezahlt)');
 		expect(byTestId('contract-delete-statement-s2')!.getAttribute('href')).toBe('/statements/s2');
-		expect(dialog).toContain('Klären Sie eine Korrektur direkt mit dem Mieter.');
+		expect(text('contract-delete-statement-s3')).toBe('NK-2023-0003 (ersetzt)');
+		// #120: eine Abrechnung, die nicht stimmt, wird berichtigt, nicht ausserhalb von Dwello
+		expect(dialog).toContain('Stimmt eine Abrechnung nicht, öffnen Sie sie und wählen Sie «Abrechnung berichtigen».');
 		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();
 		expect((byTestId('contract-delete-confirm') as HTMLButtonElement).disabled).toBe(true);
 	});

@@ -60,11 +60,16 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnungsperiode | période de décompte | periodo di conteggio | billing period |
 | Abrechnungsposition | poste du décompte | voce del conteggio | statement line |
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |
-| Kosten Liegenschaft | coûts de l’immeuble | costi immobile | building costs |
+| Kosten des Gebäudes | coûts de l’immeuble | costi immobile | building costs |
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |
+| Berichtigte Abrechnung (#120) | décompte rectificatif | conteggio rettificato | corrected statement |
+| Ersetzt (Abrechnungsstatus, #120) | remplacé | sostituito | replaced |
+| Abrechnung berichtigen / Berichtigte Abrechnung erstellen | Rectifier le décompte / Établir le décompte rectificatif | Rettificare il conteggio / Allestire il conteggio rettificato | Correct statement / Create corrected statement |
+| Bereits bezahlt / Bereits zurückerstattet auf NK-… (#362, glossary open) | déjà payé / déjà remboursé sur NK-… | già pagato / già rimborsato su NK-… | already paid / already refunded on NK-… |
 | Ausgeglichen (Saldo 0) | solde nul | in pareggio | nil balance |
 | Mietstage | jours de location | giorni di locazione | days rented |
+| Abgerechnet bis | décompté jusqu’au ❓ (#325) | conteggiato fino al ❓ (#325) | billed until ❓ (#325) |
 | Leerstand | vacance | sfitto | vacancy |
 | Entwurf / Versendet / Bezahlt / Überfällig | brouillon / envoyé / payé / en retard | bozza / inviato / pagato / scaduto | draft / sent / paid / overdue |
 | Zahlungsfrist | délai de paiement | termine di pagamento | payment deadline |

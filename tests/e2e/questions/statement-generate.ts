@@ -15,6 +15,10 @@ import {
 	lateInvoices,
 	draftsOnlyNote,
 	feeNotAgreed,
+	agreementQuestions,
+	agreementsFailed,
+	agreementsOf,
+	notAgreedCostsLink,
 	generationResult,
 	heatingProfileSelect,
 	managementFeeHint,
@@ -25,6 +29,7 @@ import {
 	periodRunningWarning,
 	previewEmpty,
 	previewFee,
+	previewAkontoHint,
 	previewRow,
 	previewRows,
 	tankQuestion,
@@ -75,6 +80,7 @@ export const createdStatements = throughUiOrApi<Question<number | string | null>
 );
 
 const rowOf = (tenantName: string) => Text.of(previewRow(tenantName));
+export const akontoHintOf = (tenantName: string) => Text.of(previewAkontoHint(tenantName));
 
 /** The Saldo of the tenant's statement in the preview, in francs (a refund negative) */
 export const balanceOf = (tenantName: string) =>
@@ -120,7 +126,7 @@ export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbo
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
 export const periodRunning = Text.of(periodRunningWarning);
 export const tankQuestions = Count.of(tankQuestion);
-export const missingStockFindings = Count.of(categoryFinding('Tankbestand am'));
+export const missingStockFindings = Count.of(categoryFinding('Ohne Anfangs- und Endbestand'));
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));
@@ -133,4 +139,10 @@ export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const presetNoticeText = Text.of(wizardPresetNotice);
 export const existingStatementsText = Text.of(existingStatements);
 export const notesOnExistingStatement = (statementId: string) => Text.of(existingStatementNotes(statementId));
+
+// #91: what the step «Einstellungen» asks or says about the agreed Nebenkosten of one contract
+export const agreementQuestionsOf = (contractId: string) => Text.of(agreementsOf(contractId));
+export const agreementQuestionsShown = Visibility.of(agreementQuestions);
+export const notAgreedCostsOf = (contractId: string) => Text.of(notAgreedCostsLink(contractId));
 export const oldAddressWarning = Text.of(oldAddress);
+export const agreementsFailure = Text.of(agreementsFailed);

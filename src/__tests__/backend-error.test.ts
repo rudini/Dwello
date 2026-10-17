@@ -10,7 +10,7 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 	it('zeigt einen Fehler mit Code in der gewählten Sprache', () => {
 		french();
 		const body = {
-			error: 'Eine Kategorie mit dem Namen "Lift" existiert bereits.',
+			error: 'Eine Kategorie mit dem Namen «Lift» existiert bereits.',
 			code: 'CATEGORY_NAME_TAKEN',
 			params: { name: 'Lift' }
 		};
@@ -81,7 +81,7 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 
 	it('setzt Benutzerdaten nie als Code ein', () => {
 		const body = {
-			error: 'Eine Kategorie mit dem Namen "KI_UNAVAILABLE" existiert bereits.',
+			error: 'Eine Kategorie mit dem Namen «KI_UNAVAILABLE» existiert bereits.',
 			code: 'CATEGORY_NAME_TAKEN',
 			params: { name: 'KI_UNAVAILABLE' }
 		};

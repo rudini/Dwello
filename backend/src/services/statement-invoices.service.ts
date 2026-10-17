@@ -25,6 +25,10 @@ const billedAsIs = (positions: Positions, invoice: PeriodInvoice) =>
 			)
 	);
 
+// The invoices of the categories its contract agreed when it was created; a statement before #91 billed every one
+const agreedIn = <T extends { categoryId: string | null }>(statement: { agreedCategoryIds: string[] | null }, list: T[]) =>
+	list.filter((invoice) => !statement.agreedCategoryIds || !invoice.categoryId || statement.agreedCategoryIds.includes(invoice.categoryId));
+
 // A statement created before #96 keeps no invoices: for it, as before, an invoice recorded after it is missing (V-15)
 const known = (positions: Positions) => positions.every((position) => position.invoices);
 const recordedAfter = (invoice: { createdAt: Date }, statement: { createdAt: Date }) => invoice.createdAt > statement.createdAt;
@@ -34,7 +38,7 @@ export async function changedInvoices(statementId: string): Promise<string[] | n
 	const statement = await getStatement(statementId);
 	if (!statement?.building) return null;
 	const positions = statement.lineItems;
-	const now = await getInvoicesForStatement(statement.building.id, statement.periodStart, statement.periodEnd);
+	const now = agreedIn(statement, await getInvoicesForStatement(statement.building.id, statement.periodStart, statement.periodEnd));
 	if (!known(positions)) return now.filter((invoice) => recordedAfter(invoice, statement)).map((invoice) => invoice.id);
 	const changed = now.filter((invoice) => !billedAsIs(positions, invoice)).map((invoice) => invoice.id);
 	const gone = positions
@@ -45,6 +49,20 @@ export async function changedInvoices(statementId: string): Promise<string[] | n
 }
 
 type Period = { start: string; end: string };
+type Statement = { lineItems: Positions; agreedCategoryIds: string[] | null; createdAt: Date };
+
+// Whether a statement bills the invoice, and whether it lacks the invoice as it is now (now: the invoice as the
+// statement's period bills it, if at all); missing only where the contract agreed its category (#91, V-2), billed
+// stays billed in another category (code review C-1)
+function stateIn(statement: Statement, now: PeriodInvoice | undefined, invoiceId: string) {
+	const positions = statement.lineItems;
+	const billed = known(positions)
+		? positions.some((position) => position.invoices?.some((one) => one.id === invoiceId))
+		: !!now && !recordedAfter(now, statement);
+	const missable = agreedIn(statement, now ? [now] : [])[0];
+	const missed = !!missable && (known(positions) ? !billedAsIs(positions, missable) : recordedAfter(missable, statement));
+	return { billed, missed };
+}
 
 /**
  * The periods with statements of the invoice's building that bill it (in any state: billedIn) and that lack it as it
@@ -58,16 +76,11 @@ export async function invoiceStatements(invoiceId: string): Promise<{ billedIn: 
 	const missedIn = new Map<string, Period>();
 	const nowIn = new Map<string, PeriodInvoice | undefined>(); // the invoice as each period bills it now, if at all
 	for (const statement of statements) {
-		const positions = statement.lineItems;
 		const period = { start: statement.periodStart, end: statement.periodEnd };
 		const key = `${period.start}/${period.end}`;
 		if (!nowIn.has(key))
 			nowIn.set(key, (await getInvoicesForStatement(invoice.buildingId, period.start, period.end)).find((one) => one.id === invoiceId));
-		const now = nowIn.get(key);
-		const billed = known(positions)
-			? positions.some((position) => position.invoices?.some((one) => one.id === invoiceId))
-			: !!now && !recordedAfter(now, statement);
-		const missed = !!now && (known(positions) ? !billedAsIs(positions, now) : recordedAfter(now, statement));
+		const { billed, missed } = stateIn(statement, nowIn.get(key), invoiceId);
 		if (billed) billedIn.set(key, period);
 		if (missed) missedIn.set(key, period);
 	}

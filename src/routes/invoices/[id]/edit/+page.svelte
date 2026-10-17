@@ -112,7 +112,7 @@
 		]}
 	/>
 
-	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} />{/if}
+	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} invoice={data.invoice} />{/if}
 
 	{#if data.billedIn?.length}
 		<BilledWarning periods={data.billedIn}>
