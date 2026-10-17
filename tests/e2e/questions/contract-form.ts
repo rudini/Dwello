@@ -18,7 +18,10 @@ import {
 	startContractsUnknown,
 	tenantSelect,
 	withdrawNoticeOption,
-	noAgreedCostsNote
+	noAgreedCostsNote,
+	advancePaymentHelp,
+	noAdvanceNotice,
+	runningContractEditHint
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
 
@@ -47,3 +50,6 @@ export const enteredAdvancePayment = Value.of(advancePaymentInput);
 export const rentTakenOverText = Text.of(rentTakenOver);
 export const withdrawNoticeHelp = Text.of(withdrawNoticeOption);
 export const noAgreedCostsWarning = Text.of(noAgreedCostsNote);
+export const advancePaymentHelpText = Text.of(advancePaymentHelp);
+export const noAdvanceNoticeText = Text.of(noAdvanceNotice);
+export const runningContractEditHintText = Text.of(runningContractEditHint);

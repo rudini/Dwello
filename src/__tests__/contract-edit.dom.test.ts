@@ -151,10 +151,32 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(document.activeElement).toBe(byTestId('contract-base-rent-input'));
 	});
 
-	it('weist bei einem laufenden Mietvertrag darauf hin, dass Änderungen sofort gelten', async () => {
+	it('weist auf einen laufenden Mietvertrag hin', async () => {
 		await open();
 		expect(document.body.textContent).toContain('Laufender Mietvertrag');
 	});
+
+	// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
+	const onTermination = 'frühestens auf den nächsten Kündigungstermin';
+	const afterEnd = 'erst nach dem Vertragsende möglich';
+	// #388: the befristet hint names the form rule too
+	const afterEndWithForm = `${afterEnd}, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.`;
+	it.each([
+		['unbefristet', null, false, onTermination, afterEnd],
+		['gekündigt', '2099-03-31', true, onTermination, afterEnd],
+		['befristet', '2099-03-31', false, afterEndWithForm, 'Kündigungstermin']
+	])(
+		'nennt bei einem laufenden %s Mietvertrag die Regel einer Mietzinserhöhung',
+		async (_kind, endDate, terminated, rule, otherRule) => {
+			await open(endDate, terminated);
+			const hint = byTestId('contract-running-hint')!.textContent;
+			expect(hint).toContain(rule);
+			expect(hint).not.toContain(otherRule);
+			// personas Weber and Helga 66 P-1: what Dwello does, and when to enter an increase
+			expect(hint).toContain('Dwello übernimmt Änderungen sofort');
+			expect(hint).toContain('Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt.');
+		}
+	);
 
 	// B-15 (#152): eine Änderung ging still verloren; ein Mieterwechsel oder Umzug ist ein neuer Mietvertrag
 	it('nennt Mieter und Wohnung, ohne sie zur Auswahl anzubieten', async () => {

@@ -162,3 +162,17 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken ohne die Nebenkosten "Lift" bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"
     Aber zeigt die Prüfung "Vereinbarte Nebenkosten" ohne "Lift"
+
+  # #66: nur im Mietvertrag vereinbarte Nebenkosten darf der Liegenschaftsverwalter abrechnen (Art. 257a Abs. 2 OR)
+  Szenario: Die Hilfe zum Akonto nennt die vereinbarten Nebenkosten
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann erfährt der Liegenschaftsverwalter, dass das Akonto ein Vorschuss für die im Mietvertrag vereinbarten Nebenkosten ist
+
+  # #66: ohne Akonto bezahlt der Mieter meist eine Nebenkostenpauschale, oder es sind keine Nebenkosten vereinbart
+  Szenario: Ohne Akonto erfährt der Liegenschaftsverwalter, was für Nebenkostenpauschale und vereinbarte Nebenkosten gilt
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann erfährt der Liegenschaftsverwalter, dass der Mieter ohne Akonto meist eine Nebenkostenpauschale bezahlt
+    Und erfährt der Liegenschaftsverwalter, dass er sonst alle Häkchen bei «Vereinbarte Nebenkosten» entfernt
+    Und erfährt der Liegenschaftsverwalter, dass vereinbarte Nebenkosten ohne Akonto ganz mit der Nebenkostenabrechnung bezahlt werden

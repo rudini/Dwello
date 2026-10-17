@@ -68,10 +68,12 @@ describe('Mietvertrag Schritt für Schritt', () => {
 		expect(firstStepWithError({})).toBeNull();
 	});
 
+	// #66: meist eine Nebenkostenpauschale, oder keine Nebenkosten vereinbart; dann bleibt kein Häkchen
 	it('erklärt, was ein Mietvertrag ohne Akonto bedeutet', () => {
-		expect(advancePaymentNotice({ ...filled, advancePayment: '' })).toBe(
-			'Ohne Akonto bezahlt der Mieter alle Nebenkosten erst mit der Nebenkostenabrechnung.'
-		);
+		const notice = advancePaymentNotice({ ...filled, advancePayment: '' });
+		expect(notice).toContain('Ohne Akonto bezahlt der Mieter meist eine Nebenkostenpauschale');
+		expect(notice).toContain('entfernen Sie unten bei «Vereinbarte Nebenkosten» alle Häkchen');
+		expect(notice).toContain('bezahlt der Mieter sie ganz mit der Nebenkostenabrechnung');
 		expect(advancePaymentNotice({ ...filled, advancePayment: '0' })).not.toBeNull();
 		expect(advancePaymentNotice(filled)).toBeNull();
 	});

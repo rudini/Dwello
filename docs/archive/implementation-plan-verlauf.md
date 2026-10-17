@@ -1649,6 +1649,41 @@ Files: `.github/workflows/ci.yml`
 - Measured on 4 CPU cores without GPU, model loaded: qwen3-vl:8b-instruct categorize 37 s, read 77–90 s; qwen2.5vl:7b 21 s and 75 s
 - Files (round 2): `tests/e2e/features/invoices.feature`, `tests/e2e/steps/invoice-upload.steps.ts`, `tests/e2e/tasks/invoice-upload.ts`, `tests/e2e/screenplay/interactions.ts` (`Wait.until` timeout), `backend/scripts/llm-stub.ts`
 
+## Session W15: Akonto and rent hints in the contract forms (#66)
+
+Branch `claude/w15-akonto-hints-66`. The pull request says `Refs #66`: one of the three decided parts waits on the product owner.
+
+- [x] @wip scenarios in `contract-new.feature` (Akonto help) and `contract-edit.feature` (running contract: Art. 269d OR, befristet)
+- [x] fach-reviewer round 1 on the scenarios and texts before implementing (`docs/reviews/66-fachreview-1.md`)
+- [x] Akonto help names the Nebenkosten agreed in the Mietvertrag, examples stay (option A)
+- [x] Hint for a contract without Akonto: not built; fach-review M-1 contradicts the decided text, question to the product owner in #66 (label `entscheiden`)
+- [x] Running-contract hint names Art. 269d OR (befristet: #76's sentence, `TODO(fachlich prüfen, #388)`)
+- [x] `TODO(fachlich prüfen, #66)` markers removed; all four languages
+- Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/RentStep.svelte`, `src/lib/ui/MoneyInput.svelte` (help testid), `src/__tests__/contract-edit.dom.test.ts`, `src/__tests__/contract-wizard.dom.test.ts`, `tests/e2e/{features,steps,questions,targets}`
+- [x] Code review round 1 (`docs/reviews/66-review-1.md`)
+- [x] Fach review round 2 (`docs/reviews/66-fachreview-2.md`)
+- [x] Feature review round 1: personas `docs/design/personas/weber-66.md`, `helga-66.md`; P-1 fix (hint says what Dwello does and when to enter an increase)
+- [x] Persona round 2 on the P-1 fix (same reports, «Runde 2»)
+- [x] Code review round 2 (`docs/reviews/66-review-2.md`)
+- [x] Fach review round 3 on the P-1 fix (`docs/reviews/66-fachreview-3.md`)
+- [x] Workflow note: split of a decided issue and the fach round limit (`docs/reviews/workflow-notes-issue-66.md`)
+- [x] Push and pull request follow (CLAUDE.md, Workflow 9)
+
+## Session W15b: hint without Akonto, Nebenkostenpauschale, form rule for befristet (#66, #388)
+
+Branch `claude/w15-akonto-hints-66` (PR #401). Product owner 2026-10-17: #66 option A of the comment plus the glossary term «Nebenkostenpauschale», #388 option A.
+
+- [x] @wip scenarios: hint without Akonto (`contract-new.feature`), form rule in the befristet running-contract hint (`contract-edit.feature`) and in the Akonto hint of the statement preview (`statement-generate.feature`)
+- [x] fach-reviewer round 1 before implementing (`docs/reviews/66b-fachreview-1.md`)
+- [x] `contracts_no_advance_text` per #66 (all four languages)
+- [x] Form rule appended to `contracts_running_text_fixed_term` and `statements_akonto_raise_fixed_term`; `TODO(fachlich prüfen, #388)` removed
+- [x] «Nebenkostenpauschale» in `UBIQUITOUS_LANGUAGE.md` (product owner's instruction, against CLAUDE.md «never edit it») and `docs/design/i18n-begriffe.md`
+- Files: `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `src/routes/contracts/ContractForm.svelte` (marker), tests `contract-wizard`, `contracts-i18n`, `contract-edit.dom`, `statement-wizard`, E2E `contract-new`, `contract-edit`, `statement-generate`
+- [x] Code review rounds 1 and 2 (`docs/reviews/66b-review-{1,2}.md`); fach-review rounds 2 and 3 (`docs/reviews/66b-fachreview-{2,3}.md`)
+- [x] Personas `docs/design/personas/{helga,weber}-66b.md`: Helga P-2 fixed (`contracts_agreed_costs_none_text`), Helga P-1 → #428 (product decision)
+- [x] Workflow note: glossary edit on the product owner's instruction, round limit (`docs/reviews/workflow-notes-issue-66.md`)
+- [x] Push and pull request follow (PR #401 says `Fixes #66`, `Fixes #388`)
+
 ## Session 2026-10-17 CI: readable E2E logs, no archive conflicts
 
 No scenario: CI and repository configuration only, no app behaviour changes.

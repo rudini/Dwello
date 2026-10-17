@@ -24,7 +24,10 @@ import {
 	runningContractHintText,
 	startHint,
 	tenantChoices,
-	withdrawNoticeHelp
+	withdrawNoticeHelp,
+	advancePaymentHelpText,
+	noAdvanceNoticeText,
+	runningContractEditHintText
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
@@ -444,5 +447,59 @@ Then(
 		await verwalter.sees(withdrawNoticeHelp).toContain('die Schlichtungsbehörde oder ein Gericht');
 		await verwalter.sees(withdrawNoticeHelp).toContain('weder der Mieter noch der Vermieter allein');
 		await verwalter.sees(withdrawNoticeHelp).toContain('Der Mietvertrag läuft dann ohne Ende weiter.');
+	}
+);
+
+// #66: the Akonto covers only the Nebenkosten agreed in the Mietvertrag (Art. 257a Abs. 2 OR)
+Then(
+	'erfährt der Liegenschaftsverwalter, dass das Akonto ein Vorschuss für die im Mietvertrag vereinbarten Nebenkosten ist',
+	async ({ verwalter }) => {
+		await verwalter.sees(advancePaymentHelpText).toContain('für die im Mietvertrag vereinbarten Nebenkosten');
+	}
+);
+
+// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
+Then(
+	'erfährt der Liegenschaftsverwalter, dass eine Mietzinserhöhung das amtliche Formular braucht und frühestens auf den nächsten Kündigungstermin gilt',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('frühestens auf den nächsten Kündigungstermin');
+		await verwalter.sees(runningContractEditHintText).toContain('mit dem amtlichen Formular');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass bei einem befristeten Mietvertrag eine Mietzinserhöhung erst nach dem Vertragsende möglich ist',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('erst nach dem Vertragsende möglich');
+	}
+);
+
+// #66: without Akonto usually a Nebenkostenpauschale, or no Nebenkosten agreed; then no box stays ticked
+Then(
+	'erfährt der Liegenschaftsverwalter, dass der Mieter ohne Akonto meist eine Nebenkostenpauschale bezahlt',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('meist eine Nebenkostenpauschale');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er sonst alle Häkchen bei «Vereinbarte Nebenkosten» entfernt',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('bei «Vereinbarte Nebenkosten» alle Häkchen');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass vereinbarte Nebenkosten ohne Akonto ganz mit der Nebenkostenabrechnung bezahlt werden',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('bezahlt der Mieter sie ganz mit der Nebenkostenabrechnung');
+	}
+);
+
+// #388: an increase the contract provides for still needs the official form
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er eine Erhöhung begründet und mit dem amtlichen Formular mitteilt',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig');
 	}
 );
