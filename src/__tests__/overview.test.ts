@@ -18,6 +18,7 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 	lettersToSend: 0,
 	endingContracts: [],
 	noticedContracts: [],
+	oldAddresses: [],
 	paymentDeadlineDays: 30,
 	reminderAfterDays: 14,
 	expiredContracts: [],
@@ -70,6 +71,20 @@ describe('Aufgaben der Übersicht', () => {
 				title: 'Nachmieter für Wohnung 2.01 suchen',
 				text: 'Der Mietvertrag von Eva Frei endet am 31.03.2099. Suchen Sie einen Nachmieter und erfassen Sie seinen Mietvertrag.',
 				href: '/contracts/new?apartment=a1'
+			})
+		);
+	});
+
+	// A-5 (#114): solange ein Entwurf an die verlassene Wohnung ginge
+	it('nennt die neue Adresse eines ausgezogenen Mieters, dessen Adresse noch die der Wohnung ist', () => {
+		const tasks = overviewTasks(input({ oldAddresses: [{ tenantId: 't1', tenantName: 'Eva Frei' }] }));
+
+		expect(tasks).toContainEqual(
+			expect.objectContaining({
+				id: 'old-address-t1',
+				title: 'Neue Adresse eintragen',
+				text: 'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.',
+				href: '/tenants/t1/edit'
 			})
 		);
 	});

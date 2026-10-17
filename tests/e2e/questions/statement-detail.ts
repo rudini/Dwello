@@ -21,7 +21,8 @@ import {
 	statementLaterInvoices,
 	statementTenancy,
 	statementTotalLabel,
-	statementStatus
+	statementStatus,
+	oldAddressWarning
 } from '../targets/statement-detail';
 import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
@@ -72,3 +73,4 @@ export const heatingCostsOfTenant = throughUiOrApi<Question<{ share: unknown; am
 	})
 );
 export const languageOfPdf = Text.of(pdfLanguage);
+export const oldAddressWarningText = Text.of(oldAddressWarning);

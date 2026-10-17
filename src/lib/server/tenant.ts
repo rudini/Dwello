@@ -25,5 +25,6 @@ const toTenant = (data: BackendTenant): Tenant => ({
 	address: data.address,
 	postalCode: data.postalCode,
 	city: data.city,
+	country: data.country,
 	correspondenceChannel: data.correspondenceChannel
 });

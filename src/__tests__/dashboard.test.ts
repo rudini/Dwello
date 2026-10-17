@@ -109,6 +109,14 @@ function backend(
 			]
 		},
 		'/contracts?limit=1000': { contracts, total: contracts.length },
+		// A-5 (#114): drafts for moved-out tenants, one still with the building's address (twice: two periods)
+		'/statements?status=draft&limit=100': {
+			data: [
+				{ ...statementList.data[0], id: 's3', tenantId: 't9', oldAddress: true },
+				{ ...statementList.data[0], id: 's4', tenantId: 't9', oldAddress: true },
+				{ ...statementList.data[0], id: 's5', tenantId: 't8', oldAddress: false }
+			]
+		},
 		'/documents?status=to_send': { data: [{ id: 'd1' }, { id: 'd2' }] },
 		'/contracts?status=active&limit=100': {
 			contracts: [
@@ -177,6 +185,7 @@ describe('Übersicht laden', () => {
 			'overdue',
 			'letters',
 			'drafts',
+			'old-address-t9',
 			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
 			'successor-n2',
 			'successor-n5',
@@ -220,6 +229,7 @@ describe('Übersicht laden', () => {
 			'letters',
 			'missing-period',
 			'drafts',
+			'old-address-t9',
 			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
 			'successor-n2',
 			'successor-n5',
