@@ -12,6 +12,8 @@ Branch `claude/w6e-invoice-hints-378-379`. #379 is not ready: the code has no ru
 - [x] feature review: personas `docs/design/personas/anna-w6e.md`, `docs/design/personas/marco-w6e.md`
 - [x] fixes: in the statement wizard (returnTo) the save goes back to the wizard; «Speichern» stays busy until the page changes; a failed check opens the invoice's page; the warning links the building's statements of each period («Abrechnungen von … ansehen», existing text); DOM tests seen red, scenario «Von der Warnung zu den Abrechnungen der Periode» seen red
 - [ ] re-review (code-reviewer) of the fixes
-- [ ] #379: under "Blocked on me" with the two options
+- [x] #379: under "Blocked on me" with the two options; what the code shows commented on #379
+- [x] persona Majors not fixed here: Anna P-1 (Übersicht) → #386 (existed before); Marco P-2 / Anna P-4 (order of the warning's sentences) → comment on #338, which rewrites them
+- [ ] merge `main` once PR #385 (wording «Abrechnung berichtigen») is in, before the push
 - [ ] Workflow note; archive the session
 - [ ] PR `Fixes #378`, CI, merge
