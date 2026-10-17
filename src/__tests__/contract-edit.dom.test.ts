@@ -170,6 +170,9 @@ describe('Mietvertrag bearbeiten', () => {
 			const hint = byTestId('contract-running-hint')!.textContent;
 			expect(hint).toContain(rule);
 			expect(hint).not.toContain(otherRule);
+			// personas Weber and Helga 66 P-1: what Dwello does, and when to enter an increase
+			expect(hint).toContain('Dwello übernimmt Änderungen sofort');
+			expect(hint).toContain('Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt.');
 		}
 	);
 
