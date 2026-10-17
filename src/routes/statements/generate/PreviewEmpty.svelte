@@ -1,8 +1,20 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import type { ChangedStatement } from '$lib/statement-wizard';
+	import ChangedStatements from './ChangedStatements.svelte';
 	// No contract to bill in the period: either none at all, or every contract already has a statement
-	let { billed, error }: { billed: { buildingId: string; name: string }[]; error?: string } =
-		$props();
+	let {
+		billed,
+		error
+	}: {
+		billed: { buildingId: string; name: string; changed: ChangedStatement[] }[];
+		error?: string;
+	} = $props();
+	// the run creates nothing: only drafts missing invoices matter, not settings of new statements (#132)
+	const outdated = (changed: ChangedStatement[]) =>
+		changed
+			.filter((s) => s.outdated)
+			.map((s) => ({ ...s, profile: null, profileEdited: null, fee: null }));
 </script>
 
 <p class="text-ink-muted" data-testid="preview-empty">{m.statements_preview_empty()}</p>
@@ -17,6 +29,7 @@
 					class="inline-flex min-h-12 items-center text-accent underline underline-offset-4"
 					>{m.statements_view_of({ name: row.name })}</a
 				>
+				<ChangedStatements buildingId={row.buildingId} statements={outdated(row.changed)} />
 			</li>
 		{/each}
 	</ul>

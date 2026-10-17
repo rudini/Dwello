@@ -456,6 +456,19 @@ describe('Abrechnungen erstellen', () => {
 		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
 	});
 
+	// #132: der übliche Nachzügler; ohne neue Abrechnung zählen nur die Entwürfe, denen Rechnungen fehlen
+	it('nennt bei einer leeren Vorschau die Entwürfe, denen Rechnungen fehlen, nicht die Einstellungen', () => {
+		const draft = { id: '1', statementNumber: 'NK-2024-0001', tenantName: 'Nina Brunner', outdated: true, profile: null, profileEdited: null, fee: null };
+		const other = { ...draft, id: '2', outdated: false, profile: { used: 'Winter', run: 'Heizung Mittelland' } };
+		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2, changed: [draft, other] }] });
+
+		expect(byTestId('existing-statement-1')!.getAttribute('href')).toBe('/statements/1');
+		expect(byTestId('existing-statement-notes-1')!.textContent!.trim()).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurden Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht.'
+		);
+		expect(byTestId('existing-statement-2')).toBeNull();
+	});
+
 	it('nennt Gebäude, deren Rechnungen nur einen Teil der Periode abdecken', () => {
 		open({
 			preview,
