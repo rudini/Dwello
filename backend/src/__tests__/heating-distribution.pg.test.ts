@@ -295,8 +295,10 @@ describe('Heizkosten einer Rechnung mit Leistungszeitraum nach dem Heizprofil', 
 
 		const line = await heatingOf(await rent('Ab Juli', apartment, '2024-07-01'));
 
-		expect(line.invoiceParts![0]).toMatchObject({ days: 62, total: 92 });
-		expect(line.invoiceParts![0].profile).toBeUndefined();
+		// both invoices carry the same date: the order of the parts is not fixed
+		const summer = line.invoiceParts!.find((part) => part.start === '2024-06-01')!;
+		expect(summer).toMatchObject({ days: 62, total: 92 });
+		expect(summer.profile).toBeUndefined();
 		expect(line).toMatchObject({ tenantShare: 1120 });
 	});
 
