@@ -1,6 +1,7 @@
 import { localToday } from '$lib/contract-status';
 import type { ContractsListData, ContractWithDetails } from '$lib/types';
 import type { PageServerLoad } from './$types';
+import { missingByContract } from '$lib/server/missing-statements';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -26,14 +27,13 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 		]);
 
 		const contractsData = await contractsRes.json();
+		const rows: Record<string, unknown>[] = contractsData.contracts || contractsData.data || [];
+		// #211: the same rule as the contract page; no mark when it cannot be checked
+		const missing = await missingByContract(fetch, rows);
 		const buildingsData = await buildingsRes.json();
 		const apartmentsData = await apartmentsRes.json();
 
-		const contracts: ContractWithDetails[] = (
-			contractsData.contracts ||
-			contractsData.data ||
-			[]
-		).map((c: Record<string, unknown>) => ({
+		const contracts: ContractWithDetails[] = rows.map((c) => ({
 			id: c.id as string,
 			apartmentId: c.apartmentId as string,
 			tenantId: c.tenantId as string,
@@ -52,7 +52,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 			totalRent:
 				Number(c.baseRent || 0) +
 				Number(c.additionalRent || 0) +
-				Number(c.monthlyAdvancePayment || 0)
+				Number(c.monthlyAdvancePayment || 0),
+			missingStatement: !!missing?.get(String(c.id))?.length
 		}));
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map(

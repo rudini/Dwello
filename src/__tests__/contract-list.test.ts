@@ -27,7 +27,7 @@ const contract = (id: string, tenantName: string, startDate: string, endDate: st
 });
 
 const list = (
-	contracts: ReturnType<typeof contract>[],
+	contracts: (ReturnType<typeof contract> & { missingStatement?: boolean })[],
 	url = 'http://localhost/contracts',
 	today = '2026-10-10'
 ) => {
@@ -104,6 +104,21 @@ describe('Mietvertragsliste', () => {
 			/<a[^>]*href="\/contracts\/c1"[^>]*data-testid="contract-view-button"[^>]*>Anna Keller<\/a>/
 		);
 		expect(body).toMatch(/aria-label="Mietvertrag von Anna Keller bearbeiten"/);
+	});
+
+	// #211: a missing statement shows in the list, not only on the contract page; in words, not colour alone
+	it('kennzeichnet einen Mietvertrag mit fehlender Abrechnung', () => {
+		const body = list([
+			{ ...contract('c1', 'Anna Keller', '2024-04-01', null), missingStatement: true },
+			contract('c2', 'Ben Meier', '2024-04-01', null)
+		]);
+
+		expect(row(body, 'c1')).toMatch(
+			/data-testid="contract-missing-statement-badge"[\s\S]*?Abrechnung fehlt/
+		);
+		expect(row(body, 'c2')).not.toContain('contract-missing-statement-badge');
+		// after the Vertragsdauer: «Abrechnung fehlt seit 01.04.2024» would read as one sentence (persona Helga)
+		expect(row(body, 'c1')).toMatch(/seit 01\.04\.2024[\s\S]*contract-missing-statement-badge/);
 	});
 
 	it('meldet den Status nicht als Live-Region', () => {

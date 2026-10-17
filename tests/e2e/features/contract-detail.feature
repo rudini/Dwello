@@ -250,6 +250,24 @@ Funktionalität: Mietvertragsdetail
     Dann zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres
     Und meldet der Mietvertrag keine fehlende Abrechnung
 
+  # #199: eine Abrechnung, die die Periode teilweise abdeckt, zählt; es fehlen nur die Mietstage ohne Abrechnung
+  Szenario: Teilweise abgerechnete Periode am Mietvertrag
+    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann meldet der Mietvertrag die fehlende Abrechnung "01.10.2024 – 31.12.2024"
+    # #408: eine kürzere Abrechnungsperiode für diese Tage ist noch nicht entschieden
+    Und erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt
+    Und bietet der Mietvertrag für die Tage ab "2024-10-01" keine Abrechnung zum Erstellen an
+    # Fachreview 2 V-9: «Abgerechnet bis» würde die bestehende Abrechnung ändern
+    Und nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg
+
+  # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode
+  Szenario: Rechnungen der fehlenden Periode anzeigen
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung 2024 anzeigt
+    Dann zeigt die Rechnungsliste die Rechnungen des Jahres 2024 im Gebäude "Ahornhof"
+
   Szenario: Abrechnungen eines Mietvertrags anzeigen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Ben Meier" existiert
