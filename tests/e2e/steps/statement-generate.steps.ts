@@ -60,10 +60,13 @@ import {
 	returnToStatementList,
 	setManagementFee,
 	showCreatedStatements,
+	downloadCreatedStatementsZip,
+	requestCreatedStatementsZip,
 	tryNextWithoutConfirmation,
 	typeManagementFee
 } from '../tasks/statement-generate';
 import { francs, signedFrancs } from '../questions/amounts';
+import { filesInDownloadedZip } from '../questions/download';
 import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
@@ -100,6 +103,21 @@ Given(
 When('der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(showCreatedStatements);
 });
+
+When('der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP herunterlädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(downloadCreatedStatementsZip);
+});
+
+When('der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP anfordert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(requestCreatedStatementsZip);
+});
+
+Then(
+	'enthält die ZIP-Datei nur das PDF der Abrechnung {int} von {string}, benannt nach ihrer Abrechnungsnummer',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(filesInDownloadedZip).toEqual([`${await seed.statementNumber(tenant, year)}.pdf %PDF-`]);
+	}
+);
 
 When('der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(returnToStatementList);

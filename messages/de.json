@@ -1210,6 +1210,7 @@
 	"statements_check_drafts": "Prüfen Sie die Entwürfe und versenden Sie sie dann.",
 	"statements_view_drafts": "Entwürfe ansehen",
 	"statements_create_more": "Weitere Abrechnungen erstellen",
+	"statements_download_zip": "Alle als ZIP herunterladen",
 	"common_unknown": "Unbekannt",
 	"backend_unauthorized": "Ihre Anmeldung ist abgelaufen. Bitte melden Sie sich erneut an.",
 	"backend_jwt_error": "Ihre Anmeldung ist abgelaufen. Bitte melden Sie sich erneut an.",

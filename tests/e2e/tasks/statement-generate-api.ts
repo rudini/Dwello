@@ -35,5 +35,5 @@ export const generateStatementsViaApi =
 	async (actor) =>
 		actor.remember(
 			CREATED_STATEMENTS,
-			await generateStatements(actor.abilityTo(CallTheApi).fetch, run(year, buildingId, options))
+			(await generateStatements(actor.abilityTo(CallTheApi).fetch, run(year, buildingId, options))).length
 		);
