@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
+	import { formatDate } from '$lib/utils/format';
 
 	// Whose statement for which apartment, each a way to its own page
 	let { statement }: { statement: StatementWithDetails } = $props();
@@ -38,7 +39,18 @@
 		</div>
 		<div class="flex flex-col">
 			<dt class="text-ink-muted">{m.statements_rental_days_label()}</dt>
-			<dd class="text-ink">{m.statements_rental_days({ days: statement.rentalDays })}</dd>
+			<dd class="flex flex-col text-ink">
+				{#if statement.rentalStart && statement.rentalEnd}
+					<!-- as the PDF says it (#104) -->
+					<span data-testid="statement-tenancy"
+						>{m.statements_tenancy({
+							start: formatDate(statement.rentalStart),
+							end: formatDate(statement.rentalEnd)
+						})}</span
+					>
+				{/if}
+				<span>{m.statements_rental_days({ days: statement.rentalDays })}</span>
+			</dd>
 		</div>
 	</dl>
 </Panel>

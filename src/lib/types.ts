@@ -13,6 +13,7 @@ export interface Building {
 	country?: string;
 	buildingType?: string | null;
 	yearBuilt?: number | null;
+	noTank?: boolean; // no tank or decommissioned (#72)
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }
@@ -22,7 +23,7 @@ export interface BuildingWithStats extends Building {
 	apartmentCount: number;
 	occupiedCount: number;
 	vacantCount: number;
-	reletCount?: number; // counted in the BFF: the backend counts only occupied and vacant
+	reletStarts?: string[]; // Vertragsbeginn of each relet apartment, from the BFF: the backend counts only occupied and vacant
 	reservedCount?: number;
 }
 
@@ -49,6 +50,7 @@ export interface Apartment {
 	status: ApartmentStatus;
 	nextContractStart?: string | null;
 	currentContractEnd?: string | null; // last day of the contract running today (A-4)
+	lastContractEnd?: string | null; // last day of the latest ended contract: «Leer seit» the day after (#145)
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }
@@ -60,10 +62,11 @@ export interface Tenant {
 	lastName: string;
 	email?: string | null;
 	phone?: string | null;
-	language: 'de' | 'fr' | 'it' | 'rm' | 'en';
+	language: 'de' | 'fr' | 'it' | 'en';
 	address?: string | null;
 	postalCode?: string | null;
 	city?: string | null;
+	country?: string; // ISO 3166 code of the Korrespondenzadresse, CH by default
 	correspondenceChannel?: 'email' | 'letter';
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -78,11 +81,13 @@ export interface RentalContract {
 	endDate?: string | null;
 	terminated?: boolean; // endDate is a Kündigungstermin of an open-ended contract, not agreed
 	noticeReceivedOn?: string | null; // the day the notice arrived (A-3)
+	billedUntil?: string | null; // «Abgerechnet bis» (#133): billed outside Dwello up to this day
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto
 	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
 	managementFeePercent?: string | null; // own rate, before the run's
+	agreedCategoryIds?: string[]; // #91: the umlagefähige categories it agrees
 	referenceIndex?: string | number | null;
 	contractPdf?: string | null;
 	notes?: string | null;
@@ -94,7 +99,7 @@ export interface RentalContract {
 export interface ContractHistory {
 	id: string;
 	tenantName: string;
-	rentBrutto: number; // in CHF
+	monthlyTotal: number; // in CHF
 	status: 'active' | 'ended' | 'future';
 	apartment?: string;
 	startDate: string;
@@ -107,7 +112,7 @@ export interface MonthlyCosts {
 	baseRent: number;
 	advancePayment?: number;
 	additionalRent?: number;
-	totalBrutto: number;
+	monthlyTotal: number;
 }
 
 // Apartment with building info for list view
@@ -132,7 +137,8 @@ export interface TenantWithOccupancy extends Tenant {
 	currentApartment?: string | null;
 	currentBuilding?: string | null;
 	nextContractStart?: string | null; // Vertragsbeginn of a future contract
-	isActive: boolean; // a contract runs today or is signed for later
+	isActive: boolean; // a contract runs today
+	isFuture: boolean; // none runs today, one is signed for later (F-4, #58)
 }
 
 // Tenants list response
@@ -268,7 +274,7 @@ export interface HeatingProfile {
 }
 
 // Statement types
-export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue';
+export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'replaced';
 
 export interface StatementLineItem {
 	id: string;
@@ -279,6 +285,27 @@ export interface StatementLineItem {
 	totalAmount: number;
 	tenantShare: number;
 	percentage: number;
+	apartmentShare: number | null; // Wohnungsanteil: the apartment's part of the total by the key
+	periodShare: number | null; // Zeitanteil, 0–1
+	shareDays: { days: number; total: number } | null; // the Zeitanteil as days, where it is one (#208)
+	byProfile?: boolean; // the Zeitanteil is the heating profile's share
+	invoices: StatementLineInvoice[]; // what the position billed (#96); none before
+}
+
+/** An invoice a position billed, or the change of the Tankbestand; with its days where its invoices bill different days (#226) */
+export interface StatementLineInvoice {
+	id: string;
+	description: string;
+	amount: number;
+	start: string;
+	end: string;
+	fuelStock?: true;
+	part: {
+		days: number;
+		total: number;
+		noPeriod?: true;
+		whole?: { start: string; end: string; amount: number };
+	} | null;
 }
 
 export interface Statement {
@@ -299,9 +326,12 @@ export interface Statement {
 	status: StatementStatus;
 	paymentDeadline: string;
 	paidDate?: string;
+	paidAmount?: number | null; // what was paid; a refund paid to the tenant negative (#93)
+	contractId?: string;
 	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	lastReminderDate?: string;
 	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
+	oldAddress?: boolean; // A-5 (#114): the moved-out tenant still has the building's address
 	pdfGeneratedAt?: string;
 	notes?: string | null;
 	createdAt?: string;
@@ -313,6 +343,7 @@ export interface StatementWithDetails extends Statement {
 	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';
+	tenantLanguage?: Tenant['language'];
 	tenantAddress?: string;
 	apartmentUnit: string;
 	apartmentFloor: string;
@@ -321,6 +352,11 @@ export interface StatementWithDetails extends Statement {
 	rentalStart: string; // the Mietvertrag's days within the period, YYYY-MM-DD (#248)
 	rentalEnd: string;
 	lineItems: StatementLineItem[];
+	// a berichtigte Abrechnung: the statement it replaces, what was paid on the replaced ones and where (#120)
+	replaces?: { id: string; statementNumber: string; statementDate: string } | null;
+	replacedBy?: { id: string; statementNumber: string } | null;
+	priorPayments?: number;
+	priorPaidOn?: string[];
 }
 
 export interface StatementsListData {
@@ -344,7 +380,7 @@ export interface StatementDocument {
 	id: string;
 	tenantId: string;
 	statementId: string | null;
-	type: 'reminder' | 'upload'; // an upload has no channel and no Versandstatus
+	type: 'reminder' | 'statement' | 'upload'; // an upload has no channel and no Versandstatus
 	reminderLevel: number | null;
 	title: string;
 	fileName: string;

@@ -5,6 +5,7 @@ import {
 	category,
 	distributionKey,
 	legalNote,
+	missedWarning,
 	overrideReason,
 	recategorizeError,
 	utilityCost
@@ -18,3 +19,4 @@ export const tenancyLawNote = Text.of(legalNote);
 export const recategorizationFailure = Text.of(recategorizeError);
 export const reasonForOverride = Text.of(overrideReason);
 export const numberOfInvoice = Text.of(invoiceNumber);
+export const missedWarningText = Text.of(missedWarning);

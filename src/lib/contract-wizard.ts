@@ -2,7 +2,10 @@ import { m } from '$lib/paraglide/messages';
 import { plainAmount } from './invoice';
 import {
 	apartmentOption,
+	impossible,
+	impossibleYear,
 	initialContractValues,
+	agreedNames,
 	managementFeeText,
 	validateContract,
 	type ContractFormValues
@@ -56,10 +59,6 @@ export function stepErrors(values: ContractFormValues, step: number): Record<str
 	);
 }
 
-// A date field typed over can end up in year 12026; such a date is surely a typing mistake
-export const impossibleYear = () => m.common_error_impossible_year();
-export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
-
 function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
 	return {
 		...(impossible(startDate) && { startDate: impossibleYear() }),
@@ -99,7 +98,8 @@ export function startDateNotice(startDate: string, today: string): string | null
 export function contractSummary(
 	values: ContractFormValues,
 	tenants: { id: string; name: string }[],
-	apartments: { id: string; unit: string; building: string }[]
+	apartments: { id: string; unit: string; building: string }[],
+	categories: { id: string; name: string }[] = [] // the umlagefähige ones the contract can agree (#91)
 ) {
 	const apartment = apartments.find((a) => a.id === values.apartmentId);
 	const gross =
@@ -159,6 +159,12 @@ export function contractSummary(
 				: '',
 			step: 4,
 			field: 'managementFee'
+		},
+		{
+			label: m.contracts_agreed_costs_label(),
+			value: agreedNames(values.agreedCategoryIds, categories).join(', ') || m.contracts_agreed_costs_none(),
+			step: 4,
+			field: 'agreedCosts'
 		},
 		{ label: m.common_monthly_total(), value: formatCurrency(gross), step: null, field: '' }
 	];

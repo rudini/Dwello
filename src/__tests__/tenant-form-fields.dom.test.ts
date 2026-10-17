@@ -7,9 +7,9 @@ describe('Mieterformular nach einem abgelehnten Speichern', () => {
 	it('nimmt die Fehler der Adresse weg, wenn der Korrespondenzkanal wechselt', () => {
 		show(TenantFormFields, {
 			errors: {
-				firstName: 'Vorname ist erforderlich',
-				address: 'Für Briefe ist eine Adresse erforderlich',
-				city: 'Für Briefe ist ein Ort erforderlich'
+				firstName: 'Vorname ist erforderlich.',
+				address: 'Für Briefe ist eine Adresse erforderlich.',
+				city: 'Für Briefe ist ein Ort erforderlich.'
 			}
 		});
 
@@ -22,9 +22,26 @@ describe('Mieterformular nach einem abgelehnten Speichern', () => {
 	});
 });
 
-// Das PDF gibt es noch nicht auf Rätoromanisch: wer es wählt, soll wissen, was der Mieter erhält
-it('sagt bei der Sprache, dass Rätoromanisch vorerst deutsch erstellt wird', () => {
+// #63, #105, #106: die Sprache gilt für Abrechnung und Mahnungen; Rätoromanisch gibt es nicht mehr
+it('bietet die Sprache für Abrechnung und Mahnungen auf Deutsch, Französisch, Italienisch und Englisch an', () => {
 	show(TenantFormFields, {});
 
-	expect(document.body.textContent).toContain('Auf Rätoromanisch erstellt Dwello die Abrechnung vorerst auf Deutsch.');
+	const select = byTestId<HTMLSelectElement>('tenant-language-select')!;
+	expect([...select.options].map((option) => option.textContent)).toEqual(['Deutsch', 'Französisch', 'Italienisch', 'Englisch']);
+	expect(select.labels![0].textContent).toContain('Sprache für Abrechnung und Mahnungen');
+	expect(document.body.textContent).toContain('In dieser Sprache erstellt Dwello die Nebenkostenabrechnung und die Mahnungen.');
+	expect(document.body.textContent).not.toContain('Rätoromanisch');
+});
+
+// #68: die Hilfe gehört zur ganzen Korrespondenzadresse, das Beispiel der Strasse bleibt bei der Strasse (Review C-1)
+it('beschreibt die Korrespondenzadresse mit ihrer Hilfe, ohne die Beschreibung der Strasse zu verdecken', () => {
+	show(TenantFormFields, {});
+
+	const fieldset = byTestId('tenant-address-help')!.closest('fieldset')!;
+	const help = document.getElementById(fieldset.getAttribute('aria-describedby')!)!;
+	expect(help.textContent).toContain('Hierhin gehen Abrechnungen und Mahnungen');
+	const street = byTestId('tenant-address-input')!;
+	for (const id of street.getAttribute('aria-describedby')!.split(' '))
+		expect(document.querySelectorAll(`[id="${id}"]`)).toHaveLength(1);
+	expect(byTestId('tenant-country-select')!.getAttribute('aria-required')).toBe('false');
 });

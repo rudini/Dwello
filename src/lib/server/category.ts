@@ -1,7 +1,8 @@
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import { backendMessage, type BackendError } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
+import { localName } from '$lib/names';
 import type { Category } from '$lib/types';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
@@ -37,6 +38,22 @@ export const kiEnabled = (fetch: typeof globalThis.fetch) =>
 		.then((response) => response.json())
 		.then((answer) => answer.enabled !== false)
 		.catch(() => true);
+
+/**
+ * The umlagefähige categories a Mietvertrag can agree (#91), named in the UI language; a list that failed to load
+ * would save every category as not agreed, so the page fails instead
+ */
+export async function agreeableCategories(fetch: typeof globalThis.fetch) {
+	const response = await fetch(`${API}?limit=100`);
+	if (!response.ok) throw error(response.status, m.buildings_categories_load_failed());
+	const { categories } = (await response.json()) as { categories: Record<string, unknown>[] };
+	return categories
+		.filter((category) => category.isAllowedUtilityCost)
+		.map((category) => ({
+			id: category.id as string,
+			name: localName(category as Parameters<typeof localName>[0])
+		}));
+}
 
 export const fetchCategory = async (fetch: typeof globalThis.fetch, id: string) =>
 	toCategory(await fetchRecord(fetch, `${API}/${id}`, m.buildings_category()));

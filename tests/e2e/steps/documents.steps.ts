@@ -13,7 +13,7 @@ import {
 	reminderOutcome
 } from '../questions/documents';
 import { listedStatement } from '../questions/statements';
-import { markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from '../tasks/documents';
+import { downloadDocument, markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from '../tasks/documents';
 import { openStatementList } from '../tasks/statements';
 
 const { Given, When, Then } = createBdd(test);
@@ -55,17 +55,21 @@ When(
 	}
 );
 
+When(
+	'der Liegenschaftsverwalter das PDF der {string} an {string} in den Dokumenten herunterlädt',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(downloadDocument(title, names.get(tenant) ?? tenant));
+	}
+);
+
 Then('meldet die Abrechnung {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(reminderOutcome).toBe(message);
 });
 
-// one mail «Zahlungserinnerung – …» with one PDF attached
-Then(
-	'{string} hat die Zahlungserinnerung per E-Mail mit PDF erhalten',
-	async ({ verwalter, names }, tenant: string) => {
-		await verwalter.sees(mailsTo(names.get(`E-Mail ${tenant}`)!)).toEqual([['Zahlungserinnerung', [true]]]);
-	}
-);
+// one mail «<title> – …» with one PDF attached
+Then('hat {string} per E-Mail {string} mit PDF erhalten', async ({ verwalter, names }, tenant: string, title: string) => {
+	await verwalter.sees(mailsTo(names.get(`E-Mail ${tenant}`)!)).toEqual([[title, [true]]]);
+});
 
 Then('die Abrechnung führt die {string} als {string}', async ({ verwalter }, title: string, delivery: string) => {
 	await verwalter.sees(deliveryOf(title)).toBe(delivery);

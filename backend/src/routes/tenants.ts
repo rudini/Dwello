@@ -18,7 +18,7 @@ import {
 const tenantQuerySchema = t.Object({
 	search: t.Optional(t.String()),
 	language: t.Optional(t.String()),
-	status: t.Optional(t.Union([t.Literal('active'), t.Literal('inactive')])),
+	status: t.Optional(t.Union([t.Literal('active'), t.Literal('future'), t.Literal('inactive')])),
 	limit: t.Optional(t.String()),
 	offset: t.Optional(t.String())
 });
@@ -28,10 +28,11 @@ const tenantBodySchema = t.Object({
 	lastName: t.String({ minLength: 1 }),
 	email: t.Optional(t.Nullable(t.String({ format: 'email' }))),
 	phone: t.Optional(t.Nullable(t.String())),
-	language: t.Optional(t.Union(['de', 'fr', 'it', 'rm', 'en'].map((l) => t.Literal(l)))),
+	language: t.Optional(t.Union(['de', 'fr', 'it', 'en'].map((l) => t.Literal(l)))),
 	address: t.Optional(t.Nullable(t.String())),
 	postalCode: t.Optional(t.Nullable(t.String())),
 	city: t.Optional(t.Nullable(t.String())),
+	country: t.Optional(t.String({ pattern: '^[A-Z]{2}$' })), // ISO 3166 code, Schweiz by default
 	correspondenceChannel: t.Optional(t.Union([t.Literal('email'), t.Literal('letter')]))
 });
 

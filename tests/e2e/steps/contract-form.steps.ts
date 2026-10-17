@@ -16,6 +16,7 @@ import {
 	failure,
 	fixedApartmentName,
 	fixedTenantName,
+	billedUntilHelpText,
 	partiesHelpText,
 	reviewHint,
 	rentTakenOverText,
@@ -29,6 +30,7 @@ import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
 import {
 	agreeManagementFee,
+	enterBilledUntil,
 	changeBaseRent,
 	deleteDraftAndSave,
 	openContractEdit,
@@ -338,6 +340,20 @@ When(
 	}
 );
 
+When(
+	'der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis {string} ausserhalb von Dwello abgerechnet sind',
+	async ({ verwalter }, date: string) => {
+		await verwalter.attemptsTo(enterBilledUntil(date));
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass Dwello die Nebenkosten erst ab dem Tag nach «Abgerechnet bis» abrechnet',
+	async ({ verwalter }) => {
+		await verwalter.sees(billedUntilHelpText).toContain('erst ab dem Tag danach');
+	}
+);
+
 When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
 	await verwalter.attemptsTo(agreeManagementFee);
 });
@@ -364,7 +380,7 @@ Then(
 Then(
 	'erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt',
 	async ({ verwalter }) => {
-		await verwalter.sees(partiesHelpText).toContain('unter «Adresse» die Adresse ein, an die die Post für die Erben geht');
+		await verwalter.sees(partiesHelpText).toContain('unter «Korrespondenzadresse» die Adresse ein, an die die Post für die Erben geht');
 	}
 );
 

@@ -477,6 +477,29 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('366 Mietstage');
 	});
 
+	// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt; ab CHF 5.00 wie bisher
+	it.each([
+		[4.95, 'Der Betrag ist kleiner als CHF 5.00. Sie verzichten darauf.'],
+		[-0.05, 'Der Betrag ist kleiner als CHF 5.00. Sie zahlen ihn nicht aus.'],
+		[5, 'Der Mieter bezahlt die Nachzahlung von CHF 5.00.'],
+		[-5, 'Sie erstatten dem Mieter CHF 5.00 zurück.']
+	])('sagt bei einem Saldo von %s, was mit dem Betrag geschieht', (balance, summary) => {
+		detail({ balance });
+		expect(byTestId('statement-payment-summary')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(summary);
+	});
+
+	// Fachprüfung V-4: ohne Zahlung keine Zahlungsfrist und kein «Bezahlt am»
+	it('nennt bei einem Saldo unter CHF 5 weder Zahlungsfrist noch Zahlungsdatum', () => {
+		detail({ balance: 4.95, status: 'paid', paidDate: '2026-02-01' });
+		expect(byTestId('statement-payment-summary')).not.toBeNull();
+		expect(byTestId('statement-payment-deadline')).toBeNull();
+		expect(text()).not.toContain('Bezahlt am');
+		document.body.innerHTML = '';
+		detail({ balance: 5, status: 'paid', paidDate: '2026-02-01' });
+		expect(byTestId('statement-payment-deadline')).not.toBeNull();
+		expect(text()).toContain('Bezahlt am');
+	});
+
 	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
 	const later = (laterInvoices: number, status: 'draft' | 'sent' = 'draft') =>
 		show(StatementPage, {
@@ -487,14 +510,15 @@ describe('Abrechnungsdetail', () => {
 	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
 		later(2);
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
 		);
 	});
 
 	it('spricht bei einer später erfassten Rechnung in der Einzahl', () => {
 		later(1);
+		expect(byTestId('statement-later-invoices')!.textContent).toContain('Rechnungen seit der Abrechnung geändert');
 		expect(byTestId('statement-later-invoices')!.textContent).toContain(
-			'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+			'wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht'
 		);
 	});
 
@@ -502,10 +526,169 @@ describe('Abrechnungsdetail', () => {
 	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
 		later(1, 'sent');
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin. ' +
-				'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. ' +
-				'Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
+			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. ' +
+				'Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung. Die berichtigte Abrechnung rechnet an, was schon bezahlt ist. ' +
+				'Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt. ' +
+				'Lassen Sie sich im Zweifel beraten.'
 		);
+	});
+
+	// #120, #358: berichtigte Abrechnung
+	const correctDialog = () => document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+
+	it('bietet bei einer versendeten Abrechnung das Berichtigen an und bestätigt die Folge', () => {
+		detail({ status: 'sent' });
+		click('statement-correct-button');
+
+		expect(correctDialog()).toContain(
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten, wird nicht mehr gemahnt und lässt sich nicht mehr als bezahlt markieren. Hat der Mieter schon bezahlt, markieren Sie sie zuerst als bezahlt.'
+		);
+		// Personas W2e: the dialog confirms with the word of the button that opened it; the consequence before the help
+		expect(byTestId('statement-correct-confirm')!.textContent).toContain('Abrechnung berichtigen');
+		expect(correctDialog().indexOf('Das lässt sich nicht rückgängig machen.')).toBeLessThan(correctDialog().indexOf('verjähren'));
+		expect(correctDialog()).toContain('Danach können Sie Vertragsdaten und Rechnungen korrigieren, falls nötig, und die berichtigte Abrechnung erstellen.');
+		expect(correctDialog()).toContain(
+			'Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt.'
+		);
+		expect(correctDialog()).toContain('Das lässt sich nicht rückgängig machen.');
+	});
+
+	it('nennt beim Berichtigen einer bezahlten Abrechnung den Betrag, der angerechnet wird', () => {
+		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 363 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('Die berichtigte Abrechnung rechnet die CHF 363.00 an, die am 01.02.2025 bezahlt wurden.');
+	});
+
+	// Fachreview W2e V-12: angerechnet wird die Zahlung und was die Abrechnung selbst schon angerechnet hat
+	it('nennt beim Berichtigen einer berichtigten Abrechnung alles, was angerechnet wird', () => {
+		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 187.45, priorPayments: 442.9, balance: 187.45 });
+		click('statement-correct-button');
+		// Code-Review W2e3 C-3: bezahlt wurde auch auf den ersetzten Abrechnungen, nicht nur an diesem Tag
+		expect(correctDialog()).toContain(
+			'Die berichtigte Abrechnung rechnet die CHF 630.35 an, die auf diese und die ersetzten Abrechnungen bezahlt wurden.'
+		);
+	});
+
+	// Code-Review W2e3 C-2: nach dem Ersetzen eine Bestätigung, der Fokus auf dem Titel
+	it('bestätigt das Ersetzen und setzt den Fokus auf den Titel', async () => {
+		toasts.set([]);
+		detail({ status: 'sent' });
+		click('statement-correct-button');
+		const after = actions.get('?/replace')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Die Abrechnung ist ersetzt.']);
+		expect(document.activeElement).toBe(document.querySelector('h1'));
+	});
+
+	it('nennt bei einer bezahlten Abrechnung ohne Zahlung keinen Betrag', () => {
+		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 0, balance: 0 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('Die bisherige bleibt unverändert erhalten.');
+		expect(correctDialog()).not.toContain('rechnet die');
+	});
+
+	// Fachreview W2e V-13: bei einer Rückerstattung zahlt der Vermieter
+	it('sagt bei einer versendeten Rückerstattung, die überwiesene Rückerstattung zuerst zu erfassen', () => {
+		detail({ status: 'sent', balance: -40 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('Haben Sie die Rückerstattung schon überwiesen, markieren Sie sie zuerst als bezahlt.');
+		expect(correctDialog()).not.toContain('gemahnt');
+	});
+
+	it('bietet auch bei einer überfälligen Abrechnung das Berichtigen an', () => {
+		detail({ status: 'overdue' });
+		expect(byTestId('statement-correct-button')).not.toBeNull();
+	});
+
+	it('nennt beim Berichtigen einer bezahlten Rückerstattung, was Sie zurückerstattet haben', () => {
+		detail({ status: 'paid', paidDate: '2025-02-01', balance: -40, paidAmount: -40 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('Die berichtigte Abrechnung rechnet die CHF 40.00 an, die Sie am 01.02.2025 zurückerstattet haben.');
+	});
+
+	it('bietet beim Entwurf kein Berichtigen an', () => {
+		detail();
+		expect(byTestId('statement-send-button')).not.toBeNull();
+		expect(byTestId('statement-correct-button')).toBeNull();
+	});
+
+	it('führt bei einer ersetzten Abrechnung ohne berichtigte zum Erstellen und bietet nichts anderes an', () => {
+		detail({ status: 'replaced', replacedBy: null });
+
+		expect(byTestId('statement-status')!.textContent).toContain('Ersetzt');
+		expect(byTestId('statement-create-correction-button')).not.toBeNull();
+		expect(byTestId('statement-replaced')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Stimmen Vertragsdaten oder Rechnungen nicht, korrigieren Sie sie jetzt. Erstellen Sie danach die berichtigte Abrechnung.'
+		);
+		for (const offer of ['statement-edit-button', 'statement-correct-button', 'statement-mark-paid-button', 'statement-delete-button'])
+			expect(byTestId(offer)).toBeNull();
+	});
+
+	// Personas W2e (Sven, Helga, Dr. Weber): die ersetzte Abrechnung verlangt nichts mehr und lässt keine leere Karte stehen
+	it('sagt bei einer ersetzten Abrechnung, dass sie nicht mehr gilt, ohne Zahlung und ohne leere Aktionen', () => {
+		detail({ status: 'replaced', replacedBy: { id: 's2', statementNumber: 'NK-2024-0007' }, balance: -40, paidDate: '2025-02-01' });
+
+		expect(text()).toContain('Diese Abrechnung ist ersetzt und gilt nicht mehr.');
+		expect(text()).not.toContain('Sie erstatten dem Mieter');
+		// Code-Review W2e3 C-6: keine Frist mehr
+		expect(byTestId('statement-payment-deadline')).toBeNull();
+		expect(text()).not.toContain('Weitere Aktionen');
+	});
+
+	it('weist bei einer ersetzten Abrechnung nicht mehr auf später erfasste Rechnungen hin', () => {
+		show(StatementPage, { data: { statement: statement({ status: 'replaced' }), reminders: [], laterInvoices: 1 }, form: null } as never);
+		expect(byTestId('statement-replaced')).not.toBeNull();
+		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
+	// Persona Helga P-1: die Vertragsdaten korrigiert man im Mietvertrag
+	it('führt von der ersetzten Abrechnung zum Mietvertrag', () => {
+		detail({ status: 'replaced', replacedBy: null, contractId: 'c1' });
+		expect(byTestId('statement-replaced-contract-link')!.getAttribute('href')).toBe('/contracts/c1');
+	});
+
+	// Code-Review W2e2 C-4: ein Doppelklick erstellt keine zweite berichtigte Abrechnung
+	it('lässt die berichtigte Abrechnung nur einmal erstellen, solange sie entsteht', async () => {
+		detail({ status: 'replaced', replacedBy: null });
+		actions.get('?/correct')!();
+		flushSync();
+		expect((byTestId('statement-create-correction-button') as HTMLButtonElement).disabled).toBe(true);
+	});
+
+	it('nennt bei einer ersetzten Abrechnung die berichtigte', () => {
+		detail({ status: 'replaced', replacedBy: { id: 's2', statementNumber: 'NK-2024-0007' } });
+
+		expect(byTestId('statement-replaced-by-link')!.textContent).toContain('NK-2024-0007');
+		expect(byTestId('statement-replaced-by-link')!.getAttribute('href')).toBe('/statements/s2');
+		expect(byTestId('statement-create-correction-button')).toBeNull();
+	});
+
+	it('nennt bei der berichtigten Abrechnung die ersetzte und zieht das schon Bezahlte ab', () => {
+		detail({
+			replaces: { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' },
+			priorPayments: 200,
+			priorPaidOn: ['NK-2024-0001'],
+			balance: 100
+		});
+
+		expect(byTestId('statement-replaces-link')!.getAttribute('href')).toBe('/statements/s0');
+		expect(byTestId('statement-replaces')!.textContent!.replace(/\s+/g, ' ')).toContain('Ersetzt die Abrechnung NK-2024-0001 vom 15.01.2025');
+		expect(byTestId('statement-prior-payments')!.textContent).toMatch(/Bereits bezahlt auf NK-2024-0001\s*−\s*CHF\s200.00/);
+		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
+	// Fachreview W2e V-4, V-11: jede Abrechnung der Kette, auf die bezahlt wurde; eine Rückerstattung zählt dazu
+	it('nennt jede Abrechnung, auf die schon bezahlt oder zurückerstattet wurde', () => {
+		detail({
+			replaces: { id: 's1b', statementNumber: 'NK-B', statementDate: '2025-03-01' },
+			priorPayments: -20,
+			priorPaidOn: ['NK-A', 'NK-B'],
+			balance: 320
+		});
+
+		expect(byTestId('statement-prior-payments')!.textContent).toMatch(/Bereits zurückerstattet auf NK-A und NK-B\s*\+\s*CHF\s20.00/);
 	});
 
 	// Versenden oder Bezahlen verwirft ein älteres PDF: die Seite zeigt danach den Stand des Servers
@@ -534,6 +717,115 @@ describe('Abrechnungsdetail', () => {
 		detail();
 		expect(byTestId('statement-status')).not.toBeNull();
 		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
+	// #104: dieselben Angaben wie das PDF
+	it('nennt das Mietverhältnis in der Periode', () => {
+		detail({ rentalStart: '2024-01-01', rentalEnd: '2024-03-31', rentalDays: 91 });
+		expect(byTestId('statement-tenancy')!.textContent!.trim()).toBe(
+			'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024'
+		);
+	});
+
+	const line = (overrides = {}) => ({
+		id: 'l1',
+		categoryId: 'c1',
+		categoryName: 'Hauswartung',
+		distributionKeyName: 'Nach Fläche',
+		totalAmount: 1800,
+		apartmentShare: 900,
+		periodShare: 0.1703,
+		shareDays: null,
+		tenantShare: 306.52,
+		percentage: 17.03,
+		invoices: [],
+		...overrides
+	});
+	const rowText = () => byTestId('statement-line-item')!.textContent!.replace(/\s+/g, ' ');
+	const invoicesText = () => allByTestId('statement-line-invoices')[0].textContent!.replace(/\s+/g, ' ');
+	const rounding = () => allByTestId('statement-rounding').map((row) => row.textContent).join(' ').replace(/\s+/g, ' ');
+
+	it('nennt je Position den Wohnungsanteil und den Zeitanteil in Tagen, wie das PDF', () => {
+		detail({ lineItems: [line({ shareDays: { days: 91, total: 366 } })] });
+		expect(rowText()).toMatch(/CHF 900.00.*91\/366 Tage.*17.03 %.*CHF 306.52/);
+	});
+
+	it('nennt den Zeitanteil in Prozent, wo er nicht in Tagen aufgeht', () => {
+		detail({ lineItems: [line()] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('17.03 %');
+	});
+
+	// Persona Marco P-1: der Zeitanteil der Heizkosten kommt aus dem Heizprofil, nicht aus den Tagen
+	it('nennt beim Zeitanteil nach Heizprofil das Heizprofil', () => {
+		detail({ lineItems: [line({ periodShare: 0.558, byProfile: true })] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('55.80 % nach Heizprofil');
+	});
+
+	// V-16: wer die ganze Periode mietet, trägt jeden Tag: «366/366 Tage», wie das PDF
+	it('nennt den Zeitanteil in Tagen, wo er die Mietstage der Periode sind', () => {
+		detail({ lineItems: [line({ periodShare: 1 })] });
+		const timeShare = byTestId('statement-line-item')!.querySelectorAll('td')[4];
+		expect(timeShare.textContent!.trim()).toBe('366/366 Tage');
+	});
+
+	// V-12, C-6: eine Rechnung ohne Leistungszeitraum und eine, deren Leistungszeitraum über die Periode reicht, wie im PDF
+	it('nennt Rechnungen ohne Leistungszeitraum und über die Periode hinaus wie das PDF', () => {
+		const whole = { start: '2024-07-01', end: '2025-06-30', amount: 1200 };
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart', amount: 600, start: '2025-01-01', end: '2025-12-31', part: { days: 47, total: 365, noPeriod: true } },
+			{ id: 'i2', description: 'Lift-Abo', amount: 595.07, start: '2025-01-01', end: '2025-06-30', part: { days: 0, total: 181, whole } }
+		];
+		detail({ lineItems: [line({ invoices })] });
+		expect(invoicesText()).toContain('Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 47 von 365 Tagen der Abrechnungsperiode');
+		expect(invoicesText()).toContain(
+			'Leistungszeitraum 01.07.2024 – 30.06.2025 (Rechnung CHF 1’200.00), davon 01.01.2025 – 30.06.2025: CHF 595.07, Ihre Mietstage 0 von 181 Tagen'
+		);
+	});
+
+	// V-14: ein Betrag unter null (sinkender Tankbestand, Gutschrift) steht wie im PDF mit Minus vor der Zahl
+	it('rechnet einen Betrag unter null in der Berechnung mit Minus vor der Zahl', () => {
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart Q2', amount: 600, start: '2025-04-01', end: '2025-06-30', part: { days: 91, total: 91 } },
+			{ id: 'i2', description: 'Gutschrift Q3', amount: -100, start: '2025-07-01', end: '2025-09-30', part: { days: 92, total: 92 } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 500, apartmentShare: 250, tenantShare: 250 })] });
+		expect(invoicesText()).toContain('Ihr Anteil: 250.00 × (600.00 × 91/91 + -100.00 × 92/92) / 500.00 = 250.00');
+	});
+
+	it('nennt die Summe der Kosten «Ihre Nebenkosten», wie das PDF', () => {
+		detail();
+		expect(byTestId('statement-total-costs-label')!.textContent!.trim()).toBe('Ihre Nebenkosten');
+	});
+
+	it('führt von jeder Position zu ihren Rechnungen', () => {
+		const invoice = { id: 'i1', description: 'Hauswart Q1', amount: 1800, start: '2024-01-01', end: '2024-12-31', part: null };
+		detail({ lineItems: [line({ invoices: [invoice] })] });
+		const link = allByTestId('statement-line-invoice-link')[0] as HTMLAnchorElement;
+		expect(link.getAttribute('href')).toBe('/invoices/i1');
+		expect(link.textContent!.trim()).toBe('Hauswart Q1');
+		expect(invoicesText()).toContain('CHF 1’800.00');
+	});
+
+	// #240: Rechnungen über verschiedene Tage: jede mit ihren Tagen und die Berechnung, wie im PDF (#226)
+	it('nennt bei Rechnungen über verschiedene Tage jede mit ihren Tagen und die Berechnung', () => {
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart Q2', amount: 600, start: '2025-04-01', end: '2025-06-30', part: { days: 0, total: 91 } },
+			{ id: 'i2', description: 'Hauswart Q3', amount: 1200, start: '2025-07-01', end: '2025-09-30', part: { days: 47, total: 92 } },
+			{ id: 'fuel-stock-2025-12-31', description: 'Veränderung Tankbestand', amount: 500, start: '2025-01-01', end: '2025-12-31', fuelStock: true, part: { days: 139, total: 365 } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 2300, tenantShare: 314.4 })] });
+		expect(invoicesText()).toContain('Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen');
+		expect(invoicesText()).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1’200.00, Ihre Mietstage 47 von 92 Tagen');
+		expect(invoicesText()).toContain('Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(invoicesText()).toContain(
+			'Ihr Anteil: 900.00 × (600.00 × 0/91 + 1’200.00 × 47/92 + 500.00 × 139/365) / 2’300.00 = 314.40'
+		);
+		// the change of the Tankbestand is no invoice: nothing to open
+		expect(allByTestId('statement-line-invoice-link').map((link) => link.getAttribute('href'))).not.toContain(
+			'/invoices/fuel-stock-2025-12-31'
+		);
 	});
 
 	it('sagt, wenn eine Abrechnung keine Positionen hat, statt eine leere Tabelle zu zeigen', () => {
@@ -607,23 +899,48 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-management-fee')).toBeNull();
 	});
 
-	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
+	// Der Saldo ist auf 5 Rappen gerundet (hier kaufmännisch, wie vor #79); wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
 	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
-		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+		expect(rounding()).toContain(
 			'Nachzahlung vor Rundung CHF 184.13 Rundung auf 5 Rappen + CHF 0.02'
 		);
 		document.body.innerHTML = '';
 
 		// eine Rückerstattung wird von 93.87 auf 93.85 kleiner: aus ihrer Sicht − 0.02
 		detail({ totalCosts: 784.13, totalAdvancePayments: 878, balance: -93.85 });
-		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+		expect(rounding()).toContain(
 			'Rückerstattung vor Rundung CHF 93.87 Rundung auf 5 Rappen − CHF 0.02'
 		);
 		document.body.innerHTML = '';
 
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600.03, balance: 184.1 });
 		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
+	// Nur zugunsten des Mieters (#79): die Nachzahlung wird kleiner, die Rückerstattung grösser (+), um bis 4 Rappen
+	it('zeigt die Rundung zugunsten des Mieters vom gezeigten Betrag aus', () => {
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.1 });
+		expect(rounding()).toContain(
+			'Nachzahlung vor Rundung CHF 184.13 Rundung auf 5 Rappen − CHF 0.03'
+		);
+		document.body.innerHTML = '';
+
+		detail({ totalCosts: 877.99, totalAdvancePayments: 878, balance: -0.05 });
+		expect(rounding()).toContain(
+			'Rückerstattung vor Rundung CHF 0.01 Rundung auf 5 Rappen + CHF 0.04'
+		);
+	});
+
+	// axe (definition-list, dlitem): eine Beschreibungsliste enthält nur Gruppen aus <dt> und <dd>, auch mit der Rundung
+	it('gliedert die Summen mit Rundung als gültige Beschreibungsliste', () => {
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
+		for (const list of document.querySelectorAll('dl'))
+			for (const child of list.children) {
+				expect(['DT', 'DD', 'DIV']).toContain(child.tagName);
+				if (child.tagName === 'DIV')
+					expect([...child.children].every((item) => ['DT', 'DD'].includes(item.tagName))).toBe(true);
+			}
 	});
 
 	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
@@ -656,24 +973,56 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('fragt vor dem Versenden nach und nennt Empfänger, Korrespondenzweg und PDF', () => {
-		detail();
+		detail({ tenantCorrespondenceChannel: 'letter', tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
 		click('statement-send-button');
 		const dialog = document.querySelector('[role="dialog"]')!;
 		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
 		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
 		expect(recipient).toContain('Anna Keller');
 		expect(recipient).toContain('Korrespondenzkanal');
-		expect(recipient).toContain('Per E-Mail');
-		expect(recipient).toContain('anna@example.ch');
 		const pdf = byTestId('send-pdf-view')!;
 		expect(pdf.getAttribute('href')).toBe('/statements/s1/pdf?ansehen');
 		expect(pdf.getAttribute('target')).toBe('_blank');
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
 	});
 
+	// #86: wünscht der Mieter E-Mail, sendet Dwello das PDF selbst
+	it('fragt vor dem Senden per E-Mail nach und nennt die E-Mail-Adresse', () => {
+		detail();
+		expect(byTestId('statement-send-button')!.textContent!.trim()).toBe('Per E-Mail senden');
+		click('statement-send-button');
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		expect(dialog).toContain('Abrechnung per E-Mail senden');
+		expect(dialog).toContain(
+			'Dwello sendet die Abrechnung als PDF per E-Mail an den Mieter und legt sie unter «Dokumente» ab. Dwello datiert die Abrechnung auf den Tag des Versands. Die Zahlungsfrist ist so viele Tage danach, wie in den Einstellungen festgelegt; eine spätere Zahlungsfrist, die Sie bei der Abrechnung eingetragen haben, bleibt.'
+		);
+		expect(dialog).not.toContain('nicht selbst');
+		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
+		expect(recipient).toContain('Per E-Mail');
+		expect(recipient).toContain('anna@example.ch');
+		expect(byTestId('statement-send-confirm')!.textContent).toContain('Per E-Mail senden');
+	});
+
+	it('sagt nach einer gescheiterten E-Mail, was schiefging, und bietet den Brief an', () => {
+		detail({ tenantAddress: 'Ahornweg 3, 8400 Winterthur' }, { sendError: 'Die E-Mail wurde nicht zugestellt.' });
+		expect(text()).toContain('Abrechnung nicht versendet');
+		expect(byTestId('send-feedback')!.textContent).toBe('Die E-Mail wurde nicht zugestellt.');
+
+		expect(byTestId('statement-send-by-letter')!.textContent!.trim()).toBe('Selbst per Brief zustellen');
+		click('statement-send-by-letter');
+		const dialog = document.querySelector('[role="dialog"]')!;
+		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
+		// the letter goes to the postal address (code review C-1)
+		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
+		expect(recipient).toContain('Per Brief, Ahornweg 3, 8400 Winterthur');
+		expect(recipient).not.toContain('anna@example.ch');
+		expect(dialog.closest('body')!.querySelector<HTMLInputElement>('input[name="byLetter"]')!.value).toBe('true');
+		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
+	});
+
 	// Datum und Zahlungsfrist gelten ab dem Tag des Versands: ein früher erstelltes PDF trüge eine abgelaufene Frist
 	it('sagt vor dem Versand, ab wann die Zahlungsfrist läuft', () => {
-		detail();
+		detail({ tenantCorrespondenceChannel: 'letter' });
 		click('statement-send-button');
 
 		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
@@ -693,6 +1042,38 @@ describe('Abrechnungsdetail', () => {
 		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
 		expect(recipient).toContain('Per Brief');
 		expect(recipient).toContain('Ahornweg 3, 8400 Winterthur');
+	});
+
+	// A-5 (#114): nach dem Auszug ginge die Abrechnung an die verlassene Wohnung; versenden bleibt möglich
+	it('warnt vor dem Versand, wenn der ausgezogene Mieter noch die Adresse der Wohnung hat', () => {
+		detail({ tenantName: 'Eva Frei', oldAddress: true });
+		click('statement-send-button');
+		expect(byTestId('send-old-address')!.textContent).toContain(
+			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
+		);
+		expect(byTestId('statement-send-confirm')).not.toBeNull();
+	});
+
+	// Persona W3c Anna P-2: schon auf der Seite des Entwurfs, nicht erst im Dialog; nach dem Versand nicht mehr
+	it('warnt auf der Seite eines Entwurfs, wenn der ausgezogene Mieter noch die Adresse der Wohnung hat', () => {
+		detail({ tenantName: 'Eva Frei', tenantId: 't1', oldAddress: true, status: 'draft' });
+		const warning = byTestId('statement-old-address')!;
+		expect(warning.textContent).toContain(
+			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
+		);
+		expect(warning.querySelector('a')!.getAttribute('href')).toBe('/tenants/t1/edit');
+	});
+
+	it('warnt auf der Seite einer versendeten Abrechnung nicht mehr', () => {
+		detail({ oldAddress: true, status: 'sent' });
+		expect(byTestId('statement-old-address')).toBeNull();
+	});
+
+	it('warnt nicht, solange die Adresse nicht die der Wohnung ist', () => {
+		detail({ oldAddress: false });
+		click('statement-send-button');
+		expect(byTestId('send-recipient')).not.toBeNull();
+		expect(byTestId('send-old-address')).toBeNull();
 	});
 
 	it('bietet eine versendete Abrechnung zum Mahnen und Bezahlen an, aber nicht zum Löschen', () => {
@@ -715,6 +1096,19 @@ describe('Abrechnungsdetail', () => {
 			{ method: 'POST', path: '/statements/s1/generate-pdf', body: undefined }
 		]);
 		expect(byTestId('statement-pdf-download')!.getAttribute('href')).toBe('/statements/s1/pdf');
+	});
+
+	// #105: wer das PDF erstellt, sieht, in welcher Sprache es entsteht
+	it('nennt beim Erstellen die Sprache des Mieters für das PDF', () => {
+		detail({ tenantLanguage: 'fr' });
+		expect(byTestId('statement-pdf-language')!.textContent).toBe('PDF auf Französisch');
+	});
+
+	// ein erstelltes PDF behält die Sprache, in der es entstand; welche, speichert Dwello nicht
+	it('nennt beim Herunterladen keine Sprache', () => {
+		detail({ tenantLanguage: 'fr', pdfGeneratedAt: '2025-01-16T08:00:00.000Z' });
+		expect(byTestId('statement-pdf-download')).not.toBeNull();
+		expect(byTestId('statement-pdf-language')).toBeNull();
 	});
 
 	it('bleibt beim Erstellen-Button, wenn das PDF nicht erstellt werden kann', async () => {
@@ -823,9 +1217,23 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
 	});
 
+	// #94: ein Saldo unter CHF 5 wird nicht eingefordert, auch überfällig nach dem Zurücksetzen der Zahlung nicht
+	it('bietet bei einem Saldo unter CHF 5 keine Mahnung an', () => {
+		detail({ status: 'overdue', balance: 4.95 });
+		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+		expect(byTestId('statement-reminder-button')).toBeNull();
+	});
+
+	// Code-Review C-3: das Bezahlt-Markieren verspricht nicht, dass danach keine Mahnung mehr möglich ist
+	it('sagt beim Bezahlt-Markieren eines Saldos unter CHF 5 nichts über Mahnungen', () => {
+		detail({ status: 'overdue', balance: 4.95 });
+		click('statement-mark-paid-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain('Mahnung');
+	});
+
 	// Der Knopf sagt, was er tut: Dwello verschickt nichts selbst
 	it('nennt den Knopf «Als versendet markieren»', () => {
-		detail();
+		detail({ tenantCorrespondenceChannel: 'letter' });
 		expect(byTestId('statement-send-button')!.textContent!.trim()).toBe('Als versendet markieren');
 	});
 
@@ -942,6 +1350,9 @@ describe('Abrechnungsdetail', () => {
 
 		click('statement-reminder-button');
 		expect(text()).toContain('Es wurden bereits 3 Mahnungen versendet.');
+		// #59: what follows is outside Dwello, a termination for arrears needs its own notice
+		expect(text()).toContain('Eine Mahnung von Dwello ist eine Zahlungsaufforderung. Sie ist keine Zahlungsfrist mit Kündigungsandrohung nach Art. 257d OR.');
+		expect(text()).toContain('Lassen Sie sich beraten.');
 		click('statement-reminder-confirm');
 		expect(document.querySelector('[role="dialog"]')).toBeNull();
 	});
@@ -968,7 +1379,7 @@ describe('Abrechnungsdetail', () => {
 			{ reminder: { document: { title: '2. Mahnung', channel: 'letter' } } }
 		);
 		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'2. Mahnung liegt als Brief zum Ausdrucken in den Dokumenten bereit.'
+			'Das Dokument «2. Mahnung» liegt unter «Dokumente» als Brief zum Ausdrucken bereit.'
 		);
 	});
 });
@@ -993,6 +1404,14 @@ describe('Abrechnung bearbeiten', () => {
 		expect(document.querySelector('label[for="paymentDeadline"]')!.textContent).toContain(
 			'Rückerstattung bis'
 		);
+	});
+
+	// #94 (Persona Marco P-1): ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt, also keine Frist
+	it('fragt bei einem Saldo unter CHF 5 nach keiner Frist', () => {
+		edit({ balance: -2.5 });
+
+		expect(byTestId('statement-notes-input')).not.toBeNull();
+		expect(byTestId('payment-deadline-input')).toBeNull();
 	});
 
 	it('meldet eine fehlende Frist am Feld', () => {

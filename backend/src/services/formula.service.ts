@@ -407,7 +407,7 @@ export function validateFormulaForDistribution(formula: string): {
 			const { code, params } = testResult.result.errorCode!;
 			fail(coded('FORMULA_SAMPLE_FAILED', `${label}: ${testResult.result.error}`, { ...params, sample, reason: code }));
 		} else if (testResult.result.value < 0) {
-			fail(coded('FORMULA_SAMPLE_NEGATIVE', `Die Formel ergibt für die ${label} einen negativen Wert.`, { sample }));
+			fail(coded('FORMULA_SAMPLE_NEGATIVE', `Die Formel ergibt für das Beispiel «${label}» einen negativen Wert.`, { sample }));
 		} else if (testResult.result.value === 0) {
 			warnings.push(`Die Formel ergibt für die ${testResult.testCase.label} null.`);
 		}

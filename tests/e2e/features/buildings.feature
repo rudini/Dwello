@@ -12,6 +12,14 @@ Funktionalität: Gebäudeliste
   Szenario: Gebäude wird in der Liste angezeigt
     Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
 
+  # F-4 (#58): dieselben Worte wie Übersicht und Wohnungsseiten
+  Szenario: Künftig vermietete Wohnung auf der Gebäudekarte
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Carla Rossi" existiert
+    Und "Carla Rossi" mietet die Wohnung "1.01" seit "2099-11-01" für "900" Franken
+    Wenn der Liegenschaftsverwalter nach "Lindenhof" sucht
+    Dann nennt die Karte des Gebäudes "Lindenhof" "1 vermietet ab 01.11.2099"
+
   Szenario: Gebäude nach Namen suchen
     Wenn der Liegenschaftsverwalter nach "Lindenhof" sucht
     Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
@@ -19,6 +27,14 @@ Funktionalität: Gebäudeliste
 
   Szenario: Suche ohne Treffer
     Wenn der Liegenschaftsverwalter nach "Gibt es nicht" sucht
+    Dann sieht der Liegenschaftsverwalter den Hinweis "Keine Gebäude gefunden"
+
+  # #160, #373: jedes Wort muss zum Namen, zur Strasse oder zum Ort passen
+  Szenario: Gebäude wortweise nach Name und Ort suchen
+    Wenn der Liegenschaftsverwalter nach "Lindenhof Winterthur" sucht
+    Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
+    Und die Liste enthält genau 1 Gebäude
+    Wenn der Liegenschaftsverwalter nach "Lindenhof Uster" sucht
     Dann sieht der Liegenschaftsverwalter den Hinweis "Keine Gebäude gefunden"
 
   Szenario: Gebäude nach Ort filtern

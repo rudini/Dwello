@@ -10,7 +10,7 @@ afterEach(() => overwriteGetLocale(() => baseLocale));
 describe('Wohnungen und Mieter in der gewählten Sprache', () => {
 	it('nennt die Sprache des Mieters auf Französisch und speichert den Code', () => {
 		overwriteGetLocale(() => 'fr');
-		expect(languageLabels.rm).toBe('Romanche');
+		expect(languageLabels.it).toBe('Italien');
 		const form = new FormData();
 		form.set('language', 'it');
 		expect(parseTenantForm(form).tenant.language).toBe('it');
@@ -19,8 +19,8 @@ describe('Wohnungen und Mieter in der gewählten Sprache', () => {
 	it('meldet fehlende Angaben im Mieterformular auf Italienisch', () => {
 		overwriteGetLocale(() => 'it');
 		const { errors } = parseTenantForm(new FormData());
-		expect(errors.firstName).toBe('Il nome è obbligatorio');
-		expect(errors.address).toBe('Per le lettere è obbligatorio un indirizzo');
+		expect(errors.firstName).toBe('Il nome è obbligatorio.');
+		expect(errors.address).toBe('Per le lettere è obbligatorio un indirizzo.');
 	});
 
 	it('nennt Überschneidung und Verfügbarkeit auf Englisch', () => {

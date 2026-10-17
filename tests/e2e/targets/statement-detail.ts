@@ -5,13 +5,35 @@ export const statementLineItem = (category: string) =>
 	target(`Position «${category}» der Abrechnung`, (page) =>
 		page.getByTestId('statement-line-item').filter({ hasText: category })
 	);
-// Columns of a position: Kategorie, Schlüssel, Kosten Gebäude, Anteil, Betrag
+// Columns of a position: Kategorie, Schlüssel, Kosten Gebäude, Wohnungsanteil, Zeitanteil, Anteil, Betrag
 const lineItemCell = (category: string, column: number, name: string) =>
 	target(`${name} der Position «${category}»`, (page) =>
 		statementLineItem(category).locate(page).locator('td').nth(column)
 	);
-export const lineItemShare = (category: string) => lineItemCell(category, 3, 'Anteil');
-export const lineItemAmount = (category: string) => lineItemCell(category, 4, 'Betrag');
+export const lineItemApartmentShare = (category: string) => lineItemCell(category, 3, 'Wohnungsanteil');
+export const lineItemTimeShare = (category: string) => lineItemCell(category, 4, 'Zeitanteil');
+export const lineItemShare = (category: string) => lineItemCell(category, 5, 'Anteil');
+export const lineItemAmount = (category: string) => lineItemCell(category, 6, 'Betrag');
+// The invoices of a position, in the row below it
+export const lineItemInvoices = (category: string) =>
+	target(`Rechnungen der Position «${category}»`, (page) =>
+		statementLineItem(category).locate(page).locator('xpath=following-sibling::tr[1]').getByTestId('statement-line-invoices')
+	);
+export const lineItemInvoice = (category: string, description: string) =>
+	target(`Rechnung «${description}» der Position «${category}»`, (page) =>
+		lineItemInvoices(category).locate(page).getByTestId('statement-line-invoice').filter({ hasText: description })
+	);
+export const lineItemInvoiceLink = (category: string, description: string) =>
+	target(`Link zur Rechnung «${description}» der Position «${category}»`, (page) =>
+		lineItemInvoice(category, description).locate(page).getByTestId('statement-line-invoice-link')
+	);
+export const statementTenancy = target('Mietverhältnis in der Periode', (page) => page.getByTestId('statement-tenancy'));
+export const statementTotalLabel = target('Bezeichnung der Summe der Kosten', (page) =>
+	page.getByTestId('statement-total-costs-label')
+);
+export const statementLaterInvoices = target('Hinweis auf geänderte Rechnungen', (page) =>
+	page.getByTestId('statement-later-invoices')
+);
 export const statementHeatingProfile = target('Heizprofil der Abrechnung', (page) =>
 	page.getByTestId('statement-heating-profile')
 );
@@ -31,6 +53,7 @@ export const generatePdfButton = target('PDF erstellen', (page) => page.getByTes
 export const downloadPdfLink = target('PDF herunterladen', (page) => page.getByTestId('statement-pdf-download'));
 export const sendDialog = target('Bestätigung des Versands', (page) => page.getByRole('dialog'));
 export const confirmSendButton = target('Versand bestätigen', (page) => page.getByTestId('statement-send-confirm'));
+export const deliverByLetterButton = target('Selbst per Brief zustellen', (page) => page.getByTestId('statement-send-by-letter'));
 export const sendRecipient = target('Empfänger', (page) => page.getByTestId('send-recipient'));
 export const sendPdfLink = target('PDF ansehen', (page) => page.getByTestId('send-pdf-view'));
 export const paidDateInput = target('Bezahlt am', (page) => page.getByTestId('paid-date-input'));
@@ -39,8 +62,29 @@ export const statementHistory = target('Verlauf', (page) =>
 );
 export const pdfRefusalBackLink = target('Zu den Nebenkostenabrechnungen', (page) => page.getByTestId('pdf-refusal-back'));
 export const pdfRefusalMessage = target('Meldung statt des PDF', (page) => page.getByTestId('pdf-refusal-message'));
+export const pdfLanguage = target('Sprache des PDFs', (page) => page.getByTestId('statement-pdf-language'));
+
 export const resetPaymentButton = target('Zahlung zurücksetzen', (page) => page.getByTestId('statement-reset-payment-button'));
 export const confirmResetPaymentButton = target('Zurücksetzen bestätigen', (page) =>
 	page.getByTestId('statement-reset-payment-confirm')
 );
 export const resetPaymentDialog = target('Bestätigung des Zurücksetzens', (page) => page.getByRole('dialog'));
+
+// #120: the correction of a sent statement
+export const correctStatementButton = target('Abrechnung berichtigen', (page) => page.getByTestId('statement-correct-button'));
+export const correctDialog = target('Bestätigung des Berichtigens', (page) => page.getByRole('dialog'));
+export const confirmCorrectButton = target('Ersetzen bestätigen', (page) => page.getByTestId('statement-correct-confirm'));
+export const createCorrectionButton = target('Berichtigte Abrechnung erstellen', (page) =>
+	page.getByTestId('statement-create-correction-button')
+);
+export const replacesLink = target('Ersetzte Abrechnung', (page) => page.getByTestId('statement-replaces-link'));
+export const replacedByLink = target('Berichtigte Abrechnung', (page) => page.getByTestId('statement-replaced-by-link'));
+export const priorPayments = target('Bereits bezahlt', (page) => page.getByTestId('statement-prior-payments'));
+export const statementBalance = target('Saldo der Abrechnung', (page) => page.getByTestId('statement-balance'));
+export const replacedContractLink = target('Mietvertrag der ersetzten Abrechnung', (page) =>
+	page.getByTestId('statement-replaced-contract-link')
+);
+export const paymentSummary = target('Zahlung der Abrechnung', (page) => page.getByTestId('statement-payment-summary'));
+export const paymentDeadline = target('Zahlungsfrist der Abrechnung', (page) => page.getByTestId('statement-payment-deadline'));
+export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
+export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));

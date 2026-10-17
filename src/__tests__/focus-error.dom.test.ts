@@ -83,7 +83,7 @@ describe('Fokus nach einem abgelehnten Speichern', () => {
 describe('Formulare nach einem abgelehnten Speichern', () => {
 	it('Mieter: der Fokus steht auf dem ersten Feld mit Fehler', async () => {
 		show(TenantForm, {
-			errors: { firstName: 'Vorname ist erforderlich', email: 'E-Mail ist erforderlich' },
+			errors: { firstName: 'Vorname ist erforderlich.', email: 'E-Mail ist erforderlich' },
 			cancelHref: '/tenants',
 			submitLabel: 'Mieter speichern',
 			submitIcon: 'save'

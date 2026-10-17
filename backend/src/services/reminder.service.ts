@@ -17,11 +17,13 @@ import {
 	markDocumentSent,
 	recordDeliveryError
 } from './document.service';
+import type { Language } from './pdf.service';
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
+import { qrBillConfig } from './statement-pdf.service';
 import { getStatement, updateStatement } from './statement.service';
 import { getTenant } from './tenant.service';
-import { formatSwissDate } from './pdf-format';
+import { belowMinimum, formatSwissDate } from './pdf-format';
 import { daysAfter, swissToday } from './today';
 
 const MAX_REMINDER_LEVEL = 3;
@@ -58,6 +60,8 @@ async function nextLevel(statement: Statement) {
 	}
 	if (statement.status !== 'overdue') throw new ReminderError('REMINDER_NOT_OVERDUE', 'Gemahnt wird erst nach Ablauf der Zahlungsfrist.');
 	if (!(Number(statement.balance) > 0)) throw new ReminderError('REMINDER_REFUND', 'Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
+	// also after «Zahlung zurücksetzen»: a Saldo below CHF 5 is not claimed (#94)
+	if (belowMinimum(Number(statement.balance))) throw new ReminderError('REMINDER_BELOW_MINIMUM', 'Ein Saldo unter CHF 5.00 wird nicht eingefordert.');
 	const level = (await countReminders(statement.id)) + 1;
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('REMINDER_LIMIT', 'Es wurden bereits 3 Mahnungen versendet.');
 	// the next Mahnstufe from the day after the last reminder's Zahlungsfrist (#107)
@@ -75,6 +79,7 @@ async function nextLevel(statement: Statement) {
 async function reminderOn(statement: Statement, level: number, day: string) {
 	const tenant = (await getTenant(statement.tenantId))!;
 	const from = await sender();
+	const language = tenant.language as Language;
 	const paymentDeadline = daysAfter(day, PAYMENT_DAYS);
 	const letter = reminderLetter({
 		level,
@@ -85,10 +90,14 @@ async function reminderOn(statement: Statement, level: number, day: string) {
 		deadline: paymentDeadline,
 		tenant,
 		sender: { name: from.name, iban: from.iban },
-		reference: isQRIBAN(from.iban) ? formatQRReferenceForDisplay(statementQRReference(statement.id)) : undefined
+		reference: isQRIBAN(from.iban) ? formatQRReferenceForDisplay(statementQRReference(statement.id)) : undefined,
+		language
 	});
 	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
-	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(day));
+	// a statement paid since then gets no payment part, or the tenant pays twice (as on the statement)
+	const config = statement.status === 'paid' ? null : await qrBillConfig();
+	const payment = config ? { statement: { ...statement, tenant }, config, language } : undefined;
+	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(day), payment);
 	return { tenant, letter, pdf, paymentDeadline };
 }
 
@@ -126,7 +135,7 @@ export async function sendReminder(statementId: string) {
 		type: 'reminder',
 		reminderLevel: level,
 		title: letter.title,
-		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[^\w. -]/g, '_'),
+		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_'),
 		content: pdf.toString('base64'),
 		channel: tenant.correspondenceChannel,
 		status: 'to_send',

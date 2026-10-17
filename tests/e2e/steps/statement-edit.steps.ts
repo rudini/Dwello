@@ -2,13 +2,15 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	costsAreRecalculated,
+	deadlineFields,
 	notes,
+	notesField,
 	paymentDeadline,
 	paymentDeadlineInvalid,
 	paymentDeadlineProblem
 } from '../questions/statement-edit';
 import { statementPath } from '../questions/statements';
-import { clearPaymentDeadline, extendPaymentDeadline, openStatementEdit } from '../tasks/statement-edit';
+import { clearPaymentDeadline, extendPaymentDeadline, keepNote, openStatementEdit } from '../tasks/statement-edit';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -33,6 +35,15 @@ When('der Liegenschaftsverwalter die Zahlungsfrist leert und speichert', async (
 Then('meldet das Feld «Zahlungsfrist» {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(paymentDeadlineInvalid).toBe('true');
 	await verwalter.sees(paymentDeadlineProblem).toMatch(new RegExp(message.replace(/\./g, '\\.')));
+});
+
+When('der Liegenschaftsverwalter nur die Bemerkung {string} festhält', async ({ verwalter }, note: string) => {
+	await verwalter.attemptsTo(keepNote(note));
+});
+
+Then('fragt die Bearbeitungsseite nur nach einer Bemerkung', async ({ verwalter }) => {
+	await verwalter.sees(notesField).toBe(true);
+	await verwalter.sees(deadlineFields).toBe(0);
 });
 
 Then('die Abrechnung ist zahlbar bis {string}', async ({ verwalter }, date: string) => {

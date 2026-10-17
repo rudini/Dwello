@@ -10,6 +10,7 @@ import {
 	load as loadEdit
 } from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
+import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
 import invalid from '../../tests/contracts/validation-refused.json';
@@ -158,7 +159,7 @@ describe('Neue Kategorie', () => {
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { name: 'Name ist erforderlich' } }
+			data: { errors: { name: 'Name ist erforderlich.' } }
 		});
 		expect(calls).toEqual([]);
 	});
@@ -267,7 +268,7 @@ describe('Vorschlag der KI', () => {
 	it('verlangt zuerst einen Namen', async () => {
 		const { calls, result } = runAction(newActions.propose, '', 200, { ...form, name: ' ' });
 
-		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich' } } });
+		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich.' } } });
 		expect(calls).toEqual([]);
 	});
 });
@@ -296,5 +297,34 @@ describe('Kategorie löschen', () => {
 		const { result } = runAction(listActions.delete, '', 409, { id: 'c1' }, { error: message });
 
 		expect(await result).toMatchObject({ status: 409, data: { error: message } });
+	});
+});
+
+// #91: the categories a Mietvertrag can agree, named in the UI language
+describe('Kategorien, die ein Mietvertrag vereinbaren kann', () => {
+	const answer = (status = 200) =>
+		(async (url: string) =>
+			url === `${API}?limit=100`
+				? Response.json(
+						{
+							categories: [
+								{ ...contract, id: 'c1', nameDE: 'Internet' },
+								{ ...contract, id: 'c2', nameDE: 'Verwaltung', isAllowedUtilityCost: false }
+							]
+						},
+						{ status }
+					)
+				: Response.json({}, { status: 404 })) as typeof globalThis.fetch;
+
+	it('nennt nur die umlagefähigen', async () => {
+		expect(await agreeableCategories(answer())).toEqual([{ id: 'c1', name: 'Internet' }]);
+	});
+
+	// a list that failed to load would save every category as not agreed
+	it('scheitert, wenn die Kategorien nicht geladen werden können', async () => {
+		await expect(agreeableCategories(answer(500))).rejects.toMatchObject({
+			status: 500,
+			body: { message: 'Die Kategorien konnten nicht geladen werden. Laden Sie die Seite neu.' }
+		});
 	});
 });

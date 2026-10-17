@@ -12,7 +12,7 @@
 
 import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { statementNumbers, utilityStatements, type HeatingShare, type InvoicePart } from '../db/schema';
+import { statementNumbers, utilityStatements, type BilledInvoice, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -22,7 +22,8 @@ import {
 	handleMidYearMoves
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
-import { getContract } from './contract.service';
+import { billingStart, getContract } from './contract.service';
+import { agreedCategoryIds } from './agreed-category.service';
 import { getHeatingProfile } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
@@ -43,6 +44,7 @@ export interface CalculatedLineItem {
 	positionRentalDays: number | null; // the period share as days, when it is one: the tenant's days in the days billed (#208)
 	billedDays: number | null; // and the days the position's invoices bill in the period
 	invoiceParts: InvoicePart[] | null; // invoices over different days: each with its days, for the weighted share (#226)
+	invoices: BilledInvoice[]; // the invoices it bills (#96)
 	isHeatingCost: boolean;
 }
 
@@ -67,6 +69,7 @@ export interface StatementCalculation {
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, Negative = refund
 	heating: HeatingShare | null; // as the heating costs were shared (#209)
+	agreedCategoryIds: string[]; // the categories the contract agreed (#91)
 }
 
 /**
@@ -311,8 +314,10 @@ export async function calculateStatementForContract(
 		...(await fuelStockChange(buildingId, start, end))
 	];
 
-	// Group invoices by category
-	const invoiceGroups = groupInvoicesByCategory(invoices);
+	// Group invoices by category; only the categories the contract agrees (#91, Art. 257a Abs. 2 OR): the share of its
+	// apartment in the others is the landlord's. An invoice without a Kategorie has nothing to agree and is billed
+	const agreed = await agreedCategoryIds(contractId);
+	const invoiceGroups = groupInvoicesByCategory(invoices).filter((group) => !group.categoryId || agreed.includes(group.categoryId));
 
 	// All apartments of the building share its costs according to the distribution key
 	const { apartments: buildingApartmentRows } = await listApartments({ buildingId, limit: 1000 });
@@ -346,7 +351,7 @@ export async function calculateStatementForContract(
 			group.isHeatingCost && heatingProfileId
 				? await handleMidYearMoves(
 						heatingProfileId,
-						new Date(contract.startDate),
+						new Date(billingStart(contract)),
 						contract.endDate ? new Date(contract.endDate) : null,
 						periodStart,
 						periodEnd,
@@ -378,6 +383,14 @@ export async function calculateStatementForContract(
 			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			...shareDays,
+			invoices: group.invoices.map(({ id, description, amount, start, end, fuelStock }) => ({
+				id,
+				description,
+				amount,
+				start,
+				end,
+				...(fuelStock && { fuelStock })
+			})),
 			isHeatingCost: group.isHeatingCost
 		});
 
@@ -419,14 +432,15 @@ export async function calculateStatementForContract(
 		totalCosts,
 		totalAdvancePayments,
 		balance,
-		heating
+		heating,
+		agreedCategoryIds: agreed
 	};
 }
 
 // What the PDF prints of the heating profile, kept with the statement (#209): the same for every heating position
 async function heatingOfRun(
 	groups: InvoiceGroup[],
-	contract: { startDate: string; endDate: string | null },
+	contract: { startDate: string; endDate: string | null; billedUntil: string | null },
 	periodStart: Date,
 	periodEnd: Date,
 	heatingProfileId?: string
@@ -435,7 +449,7 @@ async function heatingOfRun(
 	const profile = await getHeatingProfile(heatingProfileId);
 	if (!profile) return { byDays: true }; // as the per-group calculation shares without a profile
 	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
-	const result = await handleMidYearMoves(profile.id, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
+	const result = await handleMidYearMoves(profile.id, new Date(billingStart(contract)), contractEnd, periodStart, periodEnd, 100);
 	// the profile's names as they were, so a renamed or deleted own profile still names the share it gave, or the one
 	// chosen but not applied (#247)
 	const { name, nameDE, nameFR, nameIT, nameEN } = profile;

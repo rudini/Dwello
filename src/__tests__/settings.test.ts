@@ -3,20 +3,12 @@ import { actions, load } from '../routes/config/+page.server';
 import { load as loadWizard } from '../routes/statements/generate/+page.server';
 import { endedPeriodsSince, lastCompletedPeriod } from '../lib/accounting-period';
 import { runAction } from './helpers/action';
+import config from '../../tests/contracts/config.json';
 
 const API = 'http://localhost:3001/api/v1';
 
-const stored = {
-	accounting_period: 'july-june',
-	management_fee_pct: '2.5',
-	default_heating_profile_id: 'hp1',
-	default_distribution_key_id: null,
-	company_name: 'Muster Immobilien AG',
-	company_address: 'Bahnhofstrasse 1',
-	company_postal_code: '8001',
-	company_city: 'Zürich',
-	iban: 'CH9300762011623852957'
-};
+// as the backend answers; the distribution key emptied (null)
+const stored = { ...config.data, default_distribution_key_id: null };
 
 const valid = {
 	companyName: 'Muster Immobilien AG',
@@ -27,7 +19,9 @@ const valid = {
 	accountingPeriod: 'calendar',
 	managementFeePercent: '3',
 	defaultHeatingProfileId: 'hp1',
-	defaultDistributionKeyId: ''
+	defaultDistributionKeyId: '',
+	paymentDeadlineDays: '30',
+	reminderAfterDays: '14'
 };
 
 describe('Einstellungen laden', () => {
@@ -48,7 +42,9 @@ describe('Einstellungen laden', () => {
 			accountingPeriod: 'july-june',
 			managementFeePercent: '2.5',
 			defaultHeatingProfileId: 'hp1',
-			defaultDistributionKeyId: ''
+			defaultDistributionKeyId: '',
+			paymentDeadlineDays: '45',
+			reminderAfterDays: '10'
 		});
 	});
 
@@ -90,7 +86,9 @@ describe('Einstellungen speichern', () => {
 					iban: 'CH9300762011623852957',
 					accounting_period: 'calendar',
 					management_fee_pct: '3',
-					default_heating_profile_id: 'hp1'
+					default_heating_profile_id: 'hp1',
+					payment_deadline_days: '30',
+					reminder_after_days: '14'
 				}
 			},
 			{ method: 'DELETE', url: `${API}/config/default_distribution_key_id`, body: undefined }
@@ -144,14 +142,37 @@ describe('Einstellungen speichern', () => {
 			status: 400,
 			data: {
 				errors: {
-					companyPostalCode: 'PLZ muss 4 Ziffern haben',
-					iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein',
+					companyPostalCode: 'PLZ muss 4 Ziffern haben.',
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.',
 					managementFeePercent:
 						'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 				}
 			}
 		});
 		expect(calls).toEqual([]);
+	});
+
+	// #87: dieselben Grenzen wie das Backend, am Feld statt «nicht gespeichert»
+	it('lehnt Zahlungsfrist und Mahnfrist ausserhalb der erlaubten Tage am Feld ab', async () => {
+		const errors = async (paymentDeadlineDays: string, reminderAfterDays: string) => {
+			const { calls, result } = runAction(actions.default, '', 200, {
+				...valid,
+				paymentDeadlineDays,
+				reminderAfterDays
+			});
+			const answer = (await result) as { data?: { errors: Record<string, string> } };
+			return { errors: answer.data?.errors ?? {}, saved: calls.length > 0 };
+		};
+		const both = {
+			paymentDeadlineDays: 'Geben Sie für die Zahlungsfrist 7 bis 90 Tage ein.',
+			reminderAfterDays: 'Geben Sie für die Mahnfrist 7 bis 60 Tage ein.'
+		};
+
+		expect(await errors('6', '61')).toEqual({ errors: both, saved: false });
+		expect(await errors('91', '6')).toEqual({ errors: both, saved: false });
+		expect(await errors('30,5', '1e1')).toEqual({ errors: both, saved: false });
+		expect(await errors('7', '60')).toEqual({ errors: {}, saved: true });
+		expect(await errors('90', '7')).toEqual({ errors: {}, saved: true });
 	});
 
 	// Ein Tippfehler in der IBAN zeigt sich an der Prüfziffer; ohne sie entstünde kein Einzahlungsschein
@@ -163,7 +184,39 @@ describe('Einstellungen speichern', () => {
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein' } }
+			data: {
+				errors: {
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.'
+				}
+			}
+		});
+		expect(calls).toEqual([]);
+	});
+
+	// Die QR-Rechnung nimmt Konten in der Schweiz und in Liechtenstein an (#191)
+	it('nimmt eine IBAN aus Liechtenstein an', async () => {
+		const { calls, result } = runAction(actions.default, '', 200, {
+			...valid,
+			iban: 'LI21 0881 0000 2324 013A A'
+		});
+
+		expect(await result).toEqual({ saved: true });
+		expect(calls[0].body).toMatchObject({ iban: 'LI21088100002324013AA' });
+	});
+
+	it('lehnt eine IBAN aus Liechtenstein mit falscher Prüfziffer ab', async () => {
+		const { calls, result } = runAction(actions.default, '', 200, {
+			...valid,
+			iban: 'LI22 0881 0000 2324 013A A'
+		});
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				errors: {
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.'
+				}
+			}
 		});
 		expect(calls).toEqual([]);
 	});

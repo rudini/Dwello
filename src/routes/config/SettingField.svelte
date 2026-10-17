@@ -17,7 +17,7 @@
 		error?: string;
 		help?: string;
 		example?: string;
-		type?: 'text' | 'decimal'; // decimal: a text field with the decimal keypad, takes a comma
+		type?: 'text' | 'decimal' | 'number'; // decimal: a text field with the decimal keypad, takes a comma; number: whole numbers
 	} = $props();
 </script>
 
@@ -26,7 +26,7 @@
 	{name}
 	{label}
 	type="text"
-	inputmode={type === 'decimal' ? 'decimal' : undefined}
+	inputmode={type === 'text' ? undefined : type === 'decimal' ? 'decimal' : 'numeric'}
 	{value}
 	{error}
 	{help}

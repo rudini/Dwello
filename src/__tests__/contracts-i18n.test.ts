@@ -1,11 +1,15 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
-import { apartmentOption, validateContract, type ContractFormValues } from '$lib/contract-form';
+import {
+	apartmentOption,
+	impossibleYear,
+	validateContract,
+	type ContractFormValues
+} from '$lib/contract-form';
 import {
 	advancePaymentNotice,
 	contractSteps,
 	contractSummary,
-	impossibleYear,
 	startDateNotice
 } from '$lib/contract-wizard';
 import { load as newContractLoad } from '../routes/contracts/new/+page.server';
@@ -40,9 +44,9 @@ describe('Mietverträge in der gewählten Sprache', () => {
 	it('meldet fehlende Angaben auf Italienisch', () => {
 		overwriteGetLocale(() => 'it');
 		const errors = validateContract({ ...empty, baseRent: '1,450' });
-		expect(errors.tenantId).toBe('Scelga un inquilino');
+		expect(errors.tenantId).toBe('Scelga un inquilino.');
 		expect(errors.endDate).toBe(
-			'La fine del contratto è obbligatoria per un contratto a tempo determinato'
+			'La fine del contratto è obbligatoria per un contratto di locazione a tempo determinato.'
 		);
 		expect(errors.baseRent).toBe("Inserisca un importo valido, per esempio 1450.00 o 1'450.");
 		expect(impossibleYear()).toBe('Verifichi la data: l’anno non è possibile.');
@@ -74,7 +78,7 @@ describe('Mietverträge in der gewählten Sprache', () => {
 		const apartment = { id: 'a1', number: '1', rooms: '1', area: '40', status: 'vacant' };
 		const fetch = (async (url: string) =>
 			Response.json(
-				url.includes('tenants') ? { tenants: [] } : { apartments: [apartment] }
+				url.includes('tenants') ? { tenants: [] } : { apartments: [apartment], categories: [] }
 			)) as typeof globalThis.fetch;
 		const data = (await newContractLoad({ fetch } as never)) as {
 			apartments: { size: string; building: string }[];

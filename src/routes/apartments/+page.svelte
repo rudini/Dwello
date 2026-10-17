@@ -15,6 +15,7 @@
 	const filtered = $derived(
 		['search', 'building', 'status'].some((key) => $page.url.searchParams.get(key))
 	);
+	const search = $derived($page.url.searchParams.get('search')?.trim());
 </script>
 
 <svelte:head>
@@ -40,7 +41,9 @@
 			{#if filtered}
 				<EmptyState
 					title={m.apartments_none_found()}
-					text={m.apartments_none_found_text()}
+					text={search
+						? m.apartments_none_found_search_text({ search })
+						: m.apartments_none_found_text()}
 					illustration="no-results"
 					actionLabel={m.buildings_reset_filters()}
 					actionHref="/apartments"

@@ -15,6 +15,25 @@ export function contractStatusOn(
 	return endDate && endDate.slice(0, 10) < today ? 'ended' : 'active';
 }
 
+/**
+ * Whether Dwello bills Mietstage of the contract in the period (dates YYYY-MM-DD): from its Vertragsbeginn, or from the
+ * day after «Abgerechnet bis» when that is later (#133), to its Vertragsende. Runs and the hint on missing statements
+ * ask it; the backend has the same rule (`billingStart`)
+ */
+export function billsIn(
+	contract: { startDate: string; endDate?: string | null; billedUntil?: string | null },
+	{ start, end }: { start: string; end: string }
+): boolean {
+	const begin = contract.startDate.slice(0, 10);
+	const until = contract.billedUntil;
+	const from =
+		until && until >= begin
+			? new Date(Date.parse(until) + 86_400_000).toISOString().slice(0, 10)
+			: begin;
+	const to = contract.endDate ? contract.endDate.slice(0, 10) : end;
+	return [from, start].sort()[1] <= [to, end].sort()[0];
+}
+
 /** Today in Switzerland, as YYYY-MM-DD: the server runs in UTC, two hours behind in summer */
 export const localToday = () =>
 	new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
@@ -59,6 +78,10 @@ export function contractPeriod(
 		? m.contracts_period_from({ date: start })
 		: m.contracts_period_since({ date: start });
 }
+
+/** The period of a row in a contract history (apartment or tenant page) */
+export const historyPeriod = (c: ContractHistory) =>
+	contractPeriod(c.startDate, c.endDate, c.status, c.terminated);
 
 /** The Vertragsende in words: agreed in a fixed-term contract, or the Kündigungstermin of an open-ended one */
 export function contractEnd(endDate: string | null | undefined, terminated = false) {
@@ -123,8 +146,14 @@ export type RefusedStatement = {
 	buildingId: string;
 };
 
-/** New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json) */
-export function billedDaysError(statements: { statementNumber: string; status: string }[]): string {
+/**
+ * New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json);
+ * `lockedRest` says why a sent or paid one blocks them
+ */
+export function billedDaysError(
+	statements: { statementNumber: string; status: string }[],
+	lockedRest = m.contracts_billed_locked_rest
+): string {
 	const drafts = statements
 		.filter((statement) => statement.status === 'draft')
 		.map((s) => s.statementNumber);
@@ -140,7 +169,7 @@ export function billedDaysError(statements: { statementNumber: string; status: s
 			(one ? m.contracts_billed_locked_one : m.contracts_billed_locked_many)({
 				numbers: listed(locked)
 			}),
-			m.contracts_billed_locked_rest(),
+			lockedRest(),
 			...(drafts.length ? [m.contracts_billed_also_draft({ numbers: listed(drafts) })] : [])
 		].join(' ');
 	return one

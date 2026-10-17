@@ -2,13 +2,21 @@ import { CallTheApi, throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
 import { Click, DownloadFrom, EnterDate, Navigate } from '../screenplay/interactions';
 import {
+	confirmCorrectButton,
+	correctStatementButton,
+	createCorrectionButton,
+	replacedByLink,
+	replacedContractLink,
+	replacesLink,
 	confirmDeleteStatementButton,
 	confirmMarkPaidButton,
 	confirmSendButton,
+	deliverByLetterButton,
 	deleteStatementButton,
 	downloadPdfLink,
 	pdfRefusalBackLink,
 	generatePdfButton,
+	lineItemInvoiceLink,
 	markPaidButton,
 	paidDateInput,
 	confirmResetPaymentButton,
@@ -30,8 +38,13 @@ export const openStatementDetail = (statementPath: string) =>
 export const openSendConfirmation = Click.on(sendStatementButton);
 
 // The confirmation names the recipient and the PDF; the user confirms having delivered it
-export const sendStatement: Activity = (actor) =>
-	actor.attemptsTo(Click.on(sendStatementButton), Click.on(confirmSendButton));
+export const confirmSending = Click.on(confirmSendButton);
+
+export const sendStatement: Activity = (actor) => actor.attemptsTo(openSendConfirmation, confirmSending);
+
+// After a failed e-mail: the PDF goes by letter, confirmed as for a tenant who wants letters
+export const deliverByLetter: Activity = (actor) =>
+	actor.attemptsTo(Click.on(deliverByLetterButton), Click.on(confirmSendButton));
 
 export const markStatementPaid: Activity = (actor) =>
 	actor.attemptsTo(Click.on(markPaidButton), Click.on(confirmMarkPaidButton));
@@ -53,8 +66,18 @@ export const downloadStatementPdf = DownloadFrom(downloadPdfLink);
 export const requestStatementPdf = Click.on(downloadPdfLink);
 export const leavePdfRefusal = Click.on(pdfRefusalBackLink);
 
+export const openInvoiceOfPosition = (category: string, description: string) => Click.on(lineItemInvoiceLink(category, description));
 export const openResetPaymentConfirmation = Click.on(resetPaymentButton);
 
 // The confirmation names the consequence; the user confirms it (#92)
 export const resetPayment: Activity = (actor) =>
 	actor.attemptsTo(Click.on(resetPaymentButton), Click.on(confirmResetPaymentButton));
+
+// #120: replacing names its consequence first; the berichtigte Abrechnung is created on the replaced one
+export const openCorrectConfirmation = Click.on(correctStatementButton);
+export const correctStatement: Activity = (actor) =>
+	actor.attemptsTo(Click.on(correctStatementButton), Click.on(confirmCorrectButton));
+export const createCorrection = Click.on(createCorrectionButton);
+export const openReplacedStatement = Click.on(replacesLink);
+export const openCorrection = Click.on(replacedByLink);
+export const openReplacedContract = Click.on(replacedContractLink);
