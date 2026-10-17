@@ -662,7 +662,7 @@
 	"contracts_period": "Contract term",
 	"contracts_rent": "Rent",
 	"contracts_step_review": "Review",
-	"contracts_no_advance_text": "Without an advance payment, the tenant usually pays a flat-rate utility charge, or the rental contract provides for no utility costs. If the signed rental contract has an advance payment, enter it. Otherwise untick all boxes under “Agreed utility costs”: Dwello then bills this tenant no utility costs. If utility costs are agreed without an advance payment, the tenant pays them in full with the utility cost statement.",
+	"contracts_no_advance_text": "Without an advance payment, the tenant usually pays a flat-rate utility charge, or the rental contract provides for no utility costs. If the signed rental contract has an advance payment, enter it. Otherwise untick all boxes under «Agreed utility costs»: Dwello then bills this tenant no utility costs. If utility costs are agreed without an advance payment, the tenant pays them in full with the utility cost statement.",
 	"contracts_start_in_past": "The contract start {date} is in the past. Is the date correct?",
 	"contracts_unlimited": "Open-ended",
 	"contracts_limited": "Fixed-term",
