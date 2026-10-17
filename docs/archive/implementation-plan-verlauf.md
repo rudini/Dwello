@@ -964,6 +964,27 @@ Files: `backend/src/services/{pdf.service,reminder-pdf,reminder.service,statemen
 
 Files: `backend/src/services/pdf-format.ts`, `backend/migrations/0016_statement_balance_tenant_favour.sql`, `messages/*.json`, `tests/e2e/features/statement-rounding.feature`, tests (`statement-pdf-data`, `statement-pdf-render`, `statement-generation.pg`, `migrations.pg`, `help-page.dom`, `statement-pages.dom`), docs (`PRD-Dwello.md`, `data-model.md`, `design-decisions.md`, `nebenkostenabrechnung-anforderungen.md`)
 
+## Session: no Vertragsbeginn the wizard's own check refuses (#296)
+
+Request: «Setze #296 um» (coordinator W10b). Chosen fix: suggest nothing outside the accepted years 19xx/20xx; widening the range would weaken the typo check for a case only test data reaches.
+
+#296: the contract wizard never suggests a Vertragsbeginn its own date check refuses.
+
+- [x] Unit test: `suggestedStartDate` suggests nothing when the day the apartment becomes free lies in a year `impossible` refuses (red first)
+- [x] Fix: `impossible` moves to `contract-form.ts`, `suggestedStartDate` uses it (no import cycle); `statement-wizard.ts` imports it from there
+- [x] Test data that meant "free in the future" with a contract ending 2099-12-31 now ends 2098-12-31 (free from 2099): `contract-wizard.dom.test.ts`, `tests/e2e/fixtures/screens.ts`, axe state `overlap-warning` in `tests/e2e/tasks/accessibility.ts`
+- [x] Slice review round 1 (`code-reviewer`): `docs/reviews/296-review-1.md`
+- [x] Same check for the start taken over from the URL (`initialContractValues`, «Neuen Mietvertrag … erfassen» after a contract ending 2099); `impossibleYear` moves with `impossible`
+- [x] Closing code review round 2 (`docs/reviews/296-review-2.md`): no findings
+- [x] Checks: lint, check, type-check, full vitest, axe/language rows of the contract screens
+- [x] Workflow note: session started detached without a branch (`docs/reviews/workflow-notes-issue-296.md`)
+- [x] Merged origin/main (conflicts in `statement-wizard.ts` imports, Carla's contract in `screens.ts` next to #89's management fee, this archive); merge review `docs/reviews/296-review-merge.md`: no Blocker/Major
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `src/lib/{contract-form,contract-wizard,statement-wizard}.ts`, tests in `src/__tests__/{contract-form,contract-wizard.dom,contracts-i18n}.test.ts`, `tests/e2e/fixtures/screens.ts`, `tests/e2e/tasks/accessibility.ts`.
+
+No scenario: the E2E data would need a contract that ends in 2099 (issue #296).
+
 ## Session 2026-10-17 W4d: #83 #84 (W4d) fr/it/en terms from Fedlex, AI native read of tenant texts
 
 Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/ZGB, VMWG in fr/it) where one exists, a native speaker only for the rest, English plain words. #84 Option B: an AI model reads the texts a tenant sees (statement PDF, reminder letters, e-mails) as a native speaker; the landlord UI later. Both "Done means" are worded as decision issues: the decision is the requirement. Fedlex read with single `curl` downloads (WebFetch got 503): SR 220 of 1.10.2026, SR 221.213.11 of 1.10.2025, fr and it.
