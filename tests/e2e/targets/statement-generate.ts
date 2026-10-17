@@ -50,6 +50,10 @@ export const categoryFinding = (category: string) =>
 	target(`Prüfung der Kategorie «${category}»`, (page) =>
 		page.getByTestId('category-finding').filter({ hasText: category })
 	);
+export const periodRunningWarning = target('Warnung laufende Periode', (page) => page.getByTestId('preview-period-warning'));
+export const tankQuestion = target('Frage nach dem Heizmaterial', (page) => page.getByTestId('tank-question'));
+export const noTankLink = (buildingId: string) =>
+	target(`Kein Tank festhalten für ${buildingId}`, (page) => page.getByTestId(`tank-question-no-tank-${buildingId}`));
 export const draftsOnlyNote = target('Hinweis nur Entwürfe', (page) => page.getByTestId('generate-drafts-note'));
 // The contracts of the run without an agreed Verwaltungspauschale, each a link to it (#89, step «Einstellungen»)
 export const feeNotAgreed = target('Mietverträge ohne vereinbarte Verwaltungspauschale', (page) =>

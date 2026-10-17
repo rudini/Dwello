@@ -153,6 +153,13 @@ describe('Gebäudedetail', () => {
 			form: null
 		} as never);
 
+	it('nennt ein Gebäude ohne Tank oder mit stillgelegtem Tank als solches (#72)', () => {
+		detail([]);
+		expect(byTestId('building-no-tank')).toBeNull();
+		detail([], { noTank: true });
+		expect(byTestId('building-no-tank')!.textContent!.trim()).toBe('Keiner oder stillgelegt');
+	});
+
 	it('nennt Gebäude, Adresse und Baujahr mit dem Weg zurück zur Liste', () => {
 		detail([]);
 		expect(document.querySelector('h1')!.textContent).toBe('Lindenhof');

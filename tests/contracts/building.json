@@ -10,6 +10,7 @@
 	"longitude": "8.5417000",
 	"yearBuilt": 1965,
 	"buildingType": "residential",
+	"noTank": true,
 	"apartmentCount": 2,
 	"occupiedCount": 1,
 	"vacantCount": 1

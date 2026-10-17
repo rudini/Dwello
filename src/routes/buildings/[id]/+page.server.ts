@@ -4,6 +4,7 @@ import { countStatus, reletStarts } from '$lib/apartment';
 import { plainAmount } from '$lib/invoice';
 import { localName } from '$lib/names';
 import type { BuildingWithStats, Apartment, ApartmentStatus } from '$lib/types';
+import { toBuilding } from '$lib/server/building';
 import type { Actions, PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -89,20 +90,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 		const buildingData = await buildingRes.json();
 		const apartmentsData = await apartmentsRes.json();
 
-		const building: BuildingWithStats = {
-			id: buildingData.id,
-			name: buildingData.name || '',
-			address: buildingData.address,
-			postalCode: buildingData.postalCode,
-			city: buildingData.city,
-			canton: buildingData.canton,
-			country: buildingData.country || 'CH',
-			yearBuilt: buildingData.yearBuilt ? Number(buildingData.yearBuilt) : undefined,
-			buildingType: buildingData.buildingType,
-			apartmentCount: Number(buildingData.apartmentCount) || 0,
-			occupiedCount: Number(buildingData.occupiedCount) || 0,
-			vacantCount: Number(buildingData.vacantCount) || 0
-		};
+		const building = toBuilding(buildingData);
 
 		const apartments: Apartment[] = (apartmentsData.apartments || apartmentsData.data || []).map(
 			(a: Record<string, unknown>) => {

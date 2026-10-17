@@ -357,6 +357,11 @@ describe('API-Verträge des Frontends', () => {
 		const actual = await (await callApi(`/api/v1/tenants?search=${encodeURIComponent(`Keller ${token}`)}`)).json();
 		expect(drift(await sample('tenants'), actual)).toEqual([]);
 	});
+
+	it('GET /config liefert die Felder von config.json', async () => {
+		const actual = await (await callApi('/api/v1/config')).json();
+		expect(drift(await sample('config'), actual)).toEqual([]);
+	});
 });
 
 // Last: they send and pay the statement the tests above read as a draft

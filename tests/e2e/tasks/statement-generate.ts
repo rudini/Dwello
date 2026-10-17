@@ -13,6 +13,7 @@ import {
 	heatingProfileSelect,
 	managementFeeInput,
 	newInvoiceFromWarning,
+	noTankLink,
 	periodEndInput,
 	existingStatementLink,
 	periodStartInput,
@@ -111,3 +112,7 @@ export const editHintedInvoice = (date: string): Activity => (actor) =>
 
 export const openExistingStatement = (statementId: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(existingStatementLink(statementId)), Wait.forUrl((url) => url.pathname === `/statements/${statementId}`));
+
+// From the question about the Heizmaterial to the building's form, to record that it has no tank
+export const recordNoTankFromQuestion = (buildingId: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(noTankLink(buildingId)), Wait.forUrl((url) => url.pathname.endsWith(`/buildings/${buildingId}/edit`)));

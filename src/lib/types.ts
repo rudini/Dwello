@@ -13,6 +13,7 @@ export interface Building {
 	country?: string;
 	buildingType?: string | null;
 	yearBuilt?: number | null;
+	noTank?: boolean; // no tank or decommissioned (#72)
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }

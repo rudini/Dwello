@@ -639,7 +639,7 @@ BALANCE (refund): CHF 30
 **Reminder Content:**
 - Reference statement number
 - Reference tenant name
-- Outstanding balance
+- Outstanding balance, with a QR payment part (Zahlteil) for it and the statement's QR reference (#108); none once the statement is paid
 - Deadline for payment
 - Building/property manager contact info
 

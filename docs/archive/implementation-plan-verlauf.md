@@ -846,6 +846,21 @@ Files: `package.json`, `vite.config.ts`, `vitest.config.ts`, `src/hooks.server.t
 
 Files: `src/lib/ui/Panel.svelte`, `src/lib/ui/PageHeader.svelte`, `src/routes/help/+page.svelte`, `src/routes/help/Glossary.svelte`, `src/routes/config/categories/CategoryForm.svelte`, `messages/{de,fr,it,en}.json`, `tests/e2e/features/{settings,distribution-keys}.feature`, `tests/e2e/{steps,questions}/settings…`, `tests/e2e/{features/help.feature,steps,questions,targets,tasks}/…app-frame…`, `src/__tests__/{help-page.dom,distribution-keys-pages.dom,categories-page.dom,config-pages}.test.ts`, `docs/reviews/help-fachreview-{1,2}.md`, `docs/reviews/help-review-1.md`, `docs/design/personas/{helga,marco}-help-texts.md`
 
+## Session 2026-10-16 W4c: Fristen und Belegung (#64, #87, #55)
+
+- [x] @wip scenarios: Mahnung task after the Mahnfrist (#64), Zahlungsfrist and Mahnfrist in the settings (#87), Belegung without percentage (#55)
+- [x] fach-reviewer on the scenarios before implementing (`docs/reviews/w4c-fachreview-1.md`; V-1: a Rückerstattung stays a task from the day after its Zahlungsfrist)
+- [x] #55: drop the percentage and its marker in `BuildingFigures.svelte`
+- [x] #64: overview proposes a Mahnung only after Zahlungsfrist + Mahnfrist; markers in `src/lib/overview.ts` replaced. No scenario for the task's absence during the Mahnfrist: the task counts the statements of every parallel scenario (unit tests in `overview.test.ts`, `dashboard.test.ts`)
+- [x] #87: settings «Zahlungsfrist (Tage)» and «Mahnfrist (Tage)» with help and range errors; overview window follows the configured Zahlungsfrist (No scenario for a value other than the default: settings are global to parallel scenarios; unit tests); contract `tests/contracts/config.json`
+- [x] slice review 1 (code-reviewer, `docs/reviews/w4c-review-1.md`)
+- [x] feature review: persona Helga (`docs/design/personas/helga-w4c-fristen.md`), Dr. Weber (`docs/design/personas/weber-w4c-fristen.md`), fach-reviewer round 2 (`docs/reviews/w4c-fachreview-2.md`)
+- [x] findings: help texts with the allowed range, the Mahnfrist only for a Nachzahlung, «vue d'ensemble» (Helga P-2/P-3/P-5, Weber P-1, V-10–V-12); config load that is not JSON keeps the defaults (C-6); step «erklärt die Einstellung» (C-1)
+- No scenario for an overdue Rückerstattung shown before the Mahnfrist ends (C-5): the task counts statements of all parallel scenarios; unit tests in `overview.test.ts` and `dashboard.test.ts`
+- [x] Workflow note: one pull request for #64 and #87, which refer to each other; No scenario for aggregated counts and global settings (`docs/reviews/workflow-notes-issue-64-87-55.md`)
+- [x] closing code-reviewer round (`docs/reviews/w4c-review-2.md`), session to archive; pull request (one for all three issues, as the coordinator asked)
+- Files: `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/dashboard/BuildingFigures.svelte`, `src/lib/server/settings.ts`, `src/routes/config/+page.svelte`, `src/routes/config/SettingField.svelte`, `messages/*.json`, `tests/contracts/config.json`, `docs/nebenkostenabrechnung-anforderungen.md`, tests
+
 ## Session W7c: #115 (A-6) expired fixed-term contract
 
 The issue's "Done means" is worded for a decision issue; its "Decided (product owner)" section (option 2) is the requirement and is implemented here (no implementation issue exists).
@@ -887,3 +902,37 @@ The issue's "Done means" is worded for a decision issue; its "Decided (product o
 - [x] Contracts, lint, check, type-check, all tests and E2E (chromium + api, 812 passed) before the push
 
 Files: `backend/migrations/0014_line_item_invoices.sql`, `backend/src/db/schema.ts`, `backend/src/services/calculation.service.ts`, `statement.service.ts`, `statement-invoices.service.ts`, `backend/src/routes/statements.ts`, `invoices.ts`, `src/lib/server/statement.ts`, `invoice.ts`, `src/lib/types.ts`, `src/routes/statements/[id]/` (`+page.server.ts`, `CostTable.svelte`, `LineInvoices.svelte`, `PartiesPanel.svelte`), `src/routes/invoices/[id]/` loads, `messages/*.json`, `tests/contracts/`, `tests/e2e/` (features, steps, fixtures, `screens.json`), `docs/data-model.md`, `docs/api-specification.md`, `docs/PRD-Dwello.md`, `docs/reviews/w1b-*`, `docs/reviews/workflow-notes-issue-96-104.md`; issue #307 opened.
+
+## Session 2026-10-16 W8b: Tankbestand checks in the statement wizard (#136, #72, #73, #61)
+
+- [x] @wip scenarios (statement-generate.feature, building-edit.feature), fach-reviewer before implementing (`docs/reviews/w8b-fachreview-1.md`; V-1, V-2, V-3, V-4, V-5, V-7, V-10, M-1 fixed; V-6, V-8, V-9 recorded)
+- [x] #136: a missing reading whose Stichtag lies after today (Swiss day) is no finding
+- [x] #72: building property «Kein Tank oder Tank stillgelegt» (migration, edit form, building page); with it the tank question stops; earlier readings without it give the missing-reading finding
+- [x] #73: plausibility hint on the readings, never blocking: closing above opening + purchases, consumption ±25 % and CHF 100 against the year before
+- [x] #61: valuation marker removed from `FuelStocks.svelte` (No scenario: a code comment only)
+- Files: `backend/migrations/0015_building_no_tank.sql`, `backend/src/db/schema.ts`, `backend/src/routes/buildings.ts`, `backend/src/services/{fuel-stock,invoice-completeness}.service.ts`, `src/lib/{statement-wizard,types}.ts`, `src/lib/server/{building,building-form}.ts` (one mapper for the building of detail and edit), `src/routes/buildings/` (BuildingForm, BuildingFacts, FuelStocks, loads), `src/routes/statements/generate/{TankQuestion,CategoryCheck,CategoryFindingItem,PreviewChecks}.svelte`, `messages/*.json`, `docs/{data-model,api-specification}.md`, `tests/contracts/building.json`, tests and scenarios
+- [x] code-reviewer round 1: `docs/reviews/w8b-review-1.md` (C-1, C-3, C-4, C-5, C-7 fixed; C-2, C-6 left)
+- [x] fach-reviewer round 2: `docs/reviews/w8b-fachreview-2.md` (V-11 Major fixed with pg test and scenario, both seen red; V-12, V-14, V-15 fixed; V-13 with Anna P-1)
+- [x] personas round 1: `docs/design/personas/helga-w8b.md` (P-1 fixed: help names where and in which order; tank question not reached: demo drafts), `docs/design/personas/anna-w8b.md` (P-1 framing fixed with a DOM test; that a negative consumption does not block is #73's decision)
+- No daten-pruefer: no billed amount, statement, PDF or QR-bill changes; the checks only hint
+- [x] Helga round 2: `docs/design/personas/helga-w8b-2.md` (tank question, link and saving work; no Blocker/Major), Seepark drafts removed by SQL first
+- [x] fach-reviewer round 3: `docs/reviews/w8b-fachreview-3.md` (V-11 resolved; V-16 fixed with a pg test seen red; V-17, V-18 left)
+- [x] Merged origin/main (mini map removed: the shared mapper drops latitude/longitude; migration renamed to 0013); second merge (conflict in this archive only; main had taken 0013): migration renamed to 0014, review `docs/reviews/w8b-review-4.md`; third merge (main had taken 0014): renamed to 0015
+- [x] closing code-reviewer round (incl. the merge commit): `docs/reviews/w8b-review-2.md` (C-8, C-9 Nits fixed; one more round on that delta: `docs/reviews/w8b-review-3.md`)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-136-72-73-61.md` (collected review left to the coordinator, see the note)
+- Open, needs the product owner: glossary #315; that a negative consumption needs no confirmation (#73) although Anna P-1 asked for one
+- [x] workflow-review, session archived, pull request
+
+## Session W6c: QR payment part on reminders (#108), Art. 257d OR hint (#59)
+
+- [x] @wip scenarios: reminder PDF with payment part (statement-reminder.feature), help hint (help.feature); dialog after the 3rd Mahnung: DOM test (`No scenario`: the E2E stack cannot age three reminders)
+- [x] fach-reviewer on the scenarios and texts before implementing (`docs/reviews/w6c-fachreview-1.md`; V-1 open question: #322)
+- [x] #108: payment part for the open Saldo on every reminder PDF, reference of the statement (`reminder-pdf.ts`, `reminder.service.ts`, `pdf.service.ts`, `statement-pdf.service.ts`); none for a statement paid since (V-1)
+- [x] #59: hint in the help «Zahlungen und Mahnungen» and the dialog after the 3rd Mahnung, four languages; TODO marker in `ReminderModal.svelte` removed (`messages/*.json` `statements_reminder_257d`, `help/+page.svelte`)
+- [x] slice review (code-reviewer): `docs/reviews/w6c-review-1.md`
+- [x] feature review: personas `docs/design/personas/helga-w6c.md`, `dr-weber-w6c.md`; `docs/reviews/w6c-fachreview-2.md`, `w6c-datenpruefung-1.md`
+- [x] fixes: reminder with payment part on one page (D-1, C-1, V-6, C-13), tests C-2/V-9, scenario title C-7, PRD C-8, M-4; re-reviews `docs/reviews/w6c-datenpruefung-2.md`, `w6c-review-2.md` (no Blocker/Major)
+- [x] Workflow note: one pull request per issue found only at the push (`docs/reviews/workflow-notes-issue-108-59.md`)
+- [x] workflow-review, session archived; two pull requests: #59 (branch `claude/w6c-reminder-hint-59`), then #108 (this branch)
+
+Files: `backend/src/services/{pdf.service,reminder-pdf,reminder.service,statement-pdf.service}.ts`, `backend/src/__tests__/reminders.pg.test.ts`, `messages/*.json`, `src/routes/help/+page.svelte`, `src/routes/statements/[id]/ReminderModal.svelte`, `src/__tests__/statement-pages.dom.test.ts`, `tests/e2e/features/{statement-reminder,help}.feature`, `tests/e2e/{steps/documents.steps,tasks/documents,targets/documents}.ts`, `docs/PRD-Dwello.md`, reviews `docs/reviews/w6c-*.md`, persona reports `helga-w6c.md`, `dr-weber-w6c.md`

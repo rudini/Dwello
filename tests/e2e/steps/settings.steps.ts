@@ -11,14 +11,18 @@ const FIELDS: Record<string, string> = {
 	Adresse: 'companyAddress',
 	PLZ: 'companyPostalCode',
 	Ort: 'companyCity',
-	IBAN: 'iban'
+	IBAN: 'iban',
+	Zahlungsfrist: 'paymentDeadlineDays',
+	'Zahlungsfrist (Tage)': 'paymentDeadlineDays',
+	Mahnfrist: 'reminderAfterDays',
+	'Mahnfrist (Tage)': 'reminderAfterDays'
 };
 
 Given('der Liegenschaftsverwalter ist auf den Einstellungen', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openSettings);
 });
 
-When('der Liegenschaftsverwalter folgenden Absender speichert:', async ({ verwalter }, table: DataTable) => {
+When('der Liegenschaftsverwalter folgende Einstellungen speichert:', async ({ verwalter }, table: DataTable) => {
 	const fields = Object.entries(table.rowsHash()).map(([label, value]) => [FIELDS[label], value]);
 	await verwalter.attemptsTo(saveSettings(Object.fromEntries(fields)));
 });
@@ -42,6 +46,18 @@ Then(
 		await verwalter.sees(storedSetting('iban')).toBe(iban);
 	}
 );
+
+Then(
+	'sind die Zahlungsfrist {string} und die Mahnfrist {string} hinterlegt',
+	async ({ verwalter }, paymentDays: string, reminderDays: string) => {
+		await verwalter.sees(storedSetting('paymentDeadlineDays')).toBe(paymentDays);
+		await verwalter.sees(storedSetting('reminderAfterDays')).toBe(reminderDays);
+	}
+);
+
+Then('erklärt die Einstellung {string} {string}', async ({ verwalter }, label: string, help: string) => {
+	await verwalter.sees(settingHelp(FIELDS[label])).toContain(help);
+});
 
 Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(settingHelp(FIELDS.IBAN)).toContain(text);
