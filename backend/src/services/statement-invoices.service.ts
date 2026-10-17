@@ -25,6 +25,10 @@ const billedAsIs = (positions: Positions, invoice: PeriodInvoice) =>
 			)
 	);
 
+// The invoices of the categories its contract agreed when it was created; a statement before #91 billed every one
+const agreedIn = <T extends { categoryId: string | null }>(statement: { agreedCategoryIds: string[] | null }, list: T[]) =>
+	list.filter((invoice) => !statement.agreedCategoryIds || !invoice.categoryId || statement.agreedCategoryIds.includes(invoice.categoryId));
+
 // A statement created before #96 keeps no invoices: for it, as before, an invoice recorded after it is missing (V-15)
 const known = (positions: Positions) => positions.every((position) => position.invoices);
 const recordedAfter = (invoice: { createdAt: Date }, statement: { createdAt: Date }) => invoice.createdAt > statement.createdAt;
@@ -34,7 +38,7 @@ export async function changedInvoices(statementId: string): Promise<string[] | n
 	const statement = await getStatement(statementId);
 	if (!statement?.building) return null;
 	const positions = statement.lineItems;
-	const now = await getInvoicesForStatement(statement.building.id, statement.periodStart, statement.periodEnd);
+	const now = agreedIn(statement, await getInvoicesForStatement(statement.building.id, statement.periodStart, statement.periodEnd));
 	if (!known(positions)) return now.filter((invoice) => recordedAfter(invoice, statement)).map((invoice) => invoice.id);
 	const changed = now.filter((invoice) => !billedAsIs(positions, invoice)).map((invoice) => invoice.id);
 	const gone = positions
@@ -51,9 +55,13 @@ type Period = { start: string; end: string };
  * is now (missedIn: created before it was recorded or changed); a period can be in both. Null without the invoice
  */
 export async function invoiceStatements(invoiceId: string): Promise<{ billedIn: Period[]; missedIn: Period[] } | null> {
-	const [invoice] = await db.select({ buildingId: invoices.buildingId }).from(invoices).where(eq(invoices.id, invoiceId));
+	const [invoice] = await db
+		.select({ buildingId: invoices.buildingId, categoryId: invoices.categoryId })
+		.from(invoices)
+		.where(eq(invoices.id, invoiceId));
 	if (!invoice) return null;
-	const { statements } = await listStatements({ buildingId: invoice.buildingId, limit: 1000 });
+	const { statements: all } = await listStatements({ buildingId: invoice.buildingId, limit: 1000 });
+	const statements = all.filter((statement) => agreedIn(statement, [invoice]).length > 0);
 	const billedIn = new Map<string, Period>();
 	const missedIn = new Map<string, Period>();
 	const nowIn = new Map<string, PeriodInvoice | undefined>(); // the invoice as each period bills it now, if at all

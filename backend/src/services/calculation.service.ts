@@ -23,6 +23,7 @@ import {
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
+import { agreedCategoryIds as agreedCategoryIdsOf } from './agreed-category.service';
 import { getHeatingProfile } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
@@ -68,6 +69,7 @@ export interface StatementCalculation {
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, Negative = refund
 	heating: HeatingShare | null; // as the heating costs were shared (#209)
+	agreedCategoryIds: string[]; // the categories the contract agreed (#91)
 }
 
 /**
@@ -312,8 +314,12 @@ export async function calculateStatementForContract(
 		...(await fuelStockChange(buildingId, start, end))
 	];
 
-	// Group invoices by category
-	const invoiceGroups = groupInvoicesByCategory(invoices);
+	// Group invoices by category; only the categories the contract agrees (#91, Art. 257a Abs. 2 OR): the share of its
+	// apartment in the others is the landlord's. An invoice without a Kategorie has nothing to agree and is billed
+	const agreedCategoryIds = await agreedCategoryIdsOf(contractId);
+	const invoiceGroups = groupInvoicesByCategory(invoices).filter(
+		(group) => !group.categoryId || agreedCategoryIds.includes(group.categoryId)
+	);
 
 	// All apartments of the building share its costs according to the distribution key
 	const { apartments: buildingApartmentRows } = await listApartments({ buildingId, limit: 1000 });
@@ -428,7 +434,8 @@ export async function calculateStatementForContract(
 		totalCosts,
 		totalAdvancePayments,
 		balance,
-		heating
+		heating,
+		agreedCategoryIds
 	};
 }
 

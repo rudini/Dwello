@@ -1,5 +1,5 @@
 # language: de
-@statements @wip
+@statements
 Funktionalität: Nur vereinbarte Nebenkosten abrechnen
   Als Liegenschaftsverwalter
   möchte ich jedem Mieter nur die Nebenkosten abrechnen, die sein Mietvertrag vorsieht
@@ -26,71 +26,79 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Dann kostet die Abrechnung von "Anna Keller" "CHF 250.00"
     Und kostet die Abrechnung von "Beat Huber" "CHF 1’050.00"
 
-  # Eine Kategorie, die es beim Abschluss des Mietvertrags noch nicht gab, ist nicht vereinbart, bis der
+  # Eine Kategorie, die es beim Erfassen des Mietvertrags noch nicht gab, ist nicht vereinbart, bis der
   # Liegenschaftsverwalter es angibt
+  @wip
   Szenario: Der Assistent fragt nach einer Kategorie, die für den Mietvertrag neu ist
-    Angenommen es gibt die umlagefähige Kategorie "Dachreinigung"
-    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Dachreinigung" über "200" Franken vom "2024-05-31"
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
     Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % setzt
-    Dann fragt der Assistent, ob "Dachreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
-    Und fragt der Assistent, ob "Dachreinigung" im Mietvertrag von "Beat Huber" vereinbart ist
+    Dann fragt der Assistent, ob "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
+    Und fragt der Assistent, ob "Treppenhausreinigung" im Mietvertrag von "Beat Huber" vereinbart ist
 
+  @wip
   Szenario: Ohne Antwort geht der Assistent nicht weiter
-    Angenommen es gibt die umlagefähige Kategorie "Dachreinigung"
-    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Dachreinigung" über "200" Franken vom "2024-05-31"
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
     Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
     Wenn der Liegenschaftsverwalter weitergeht
     Dann meldet die Frage zum Mietvertrag von "Anna Keller" "Bitte wählen Sie, ob diese Nebenkosten im Mietvertrag vereinbart sind."
     Und bleibt der Assistent beim Schritt mit der Verwaltungspauschale
 
-  # Dachreinigung nach Fläche: 50 und 150 Franken
+  # Treppenhausreinigung nach Fläche: 50 und 150 Franken
+  @wip
   Szenario: Die Antwort gilt für die Abrechnung
-    Angenommen es gibt die umlagefähige Kategorie "Dachreinigung"
-    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Dachreinigung" über "200" Franken vom "2024-05-31"
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
     Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
-    Wenn der Liegenschaftsverwalter angibt, dass "Dachreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
-    Und der Liegenschaftsverwalter angibt, dass "Dachreinigung" im Mietvertrag von "Beat Huber" nicht vereinbart ist
+    Wenn der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
+    Und der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Beat Huber" nicht vereinbart ist
     Und der Liegenschaftsverwalter weitergeht
     Dann kostet die Abrechnung von "Anna Keller" "CHF 400.00"
     Und kostet die Abrechnung von "Beat Huber" "CHF 1’050.00"
 
+  @wip
   Szenario: Die Antwort bleibt beim Mietvertrag
-    Angenommen es gibt die umlagefähige Kategorie "Dachreinigung"
-    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Dachreinigung" über "200" Franken vom "2024-05-31"
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
     Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
-    Wenn der Liegenschaftsverwalter angibt, dass "Dachreinigung" im Mietvertrag von "Anna Keller" nicht vereinbart ist
+    Wenn der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Anna Keller" nicht vereinbart ist
     Und der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" öffnet
     Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Lift"
-    Aber nicht die Nebenkosten "Dachreinigung"
+    Aber nicht die Nebenkosten "Treppenhausreinigung"
 
+  @wip
   Szenario: Der Assistent nennt nicht vereinbarte Nebenkosten der Periode, statt wieder zu fragen
-    Angenommen es gibt die umlagefähige Kategorie "Dachreinigung"
-    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Dachreinigung" über "200" Franken vom "2024-05-31"
-    Und im Mietvertrag von "Anna Keller" ist "Dachreinigung" nicht vereinbart
-    Und im Mietvertrag von "Beat Huber" ist "Dachreinigung" vereinbart
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
+    Und im Mietvertrag von "Anna Keller" ist "Treppenhausreinigung" nicht vereinbart
+    Und im Mietvertrag von "Beat Huber" ist "Treppenhausreinigung" vereinbart
     Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % setzt
-    Dann nennt der Assistent "Dachreinigung" im Mietvertrag von "Anna Keller" als nicht vereinbart
+    Dann nennt der Assistent "Treppenhausreinigung" im Mietvertrag von "Anna Keller" als nicht vereinbart
     Und fragt der Assistent nicht, ob Nebenkosten vereinbart sind
 
+  @wip
   Szenario: Mietvertrag mit nicht vereinbarten Nebenkosten öffnen
     Angenommen im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart
     Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
     Wenn der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit nicht vereinbarten Nebenkosten öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
 
+  @wip
   Szenario: Die Antwort lässt sich nicht speichern
-    Angenommen es gibt die umlagefähige Kategorie "Dachreinigung"
-    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Dachreinigung" über "200" Franken vom "2024-05-31"
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
     Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
     Und das Speichern der Antworten zum Mietvertrag von "Anna Keller" ist gestört
-    Wenn der Liegenschaftsverwalter angibt, dass "Dachreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
+    Wenn der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
     Dann meldet die Frage zum Mietvertrag von "Anna Keller" "Ihre Antwort wurde nicht gespeichert. Bitte versuchen Sie es nochmals."
 
+  # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
+  @wip
   Szenario: Das PDF nennt die vereinbarten Nebenkosten
     Angenommen im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart
     Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
-    Dann steht im PDF "Im Mietvertrag vereinbarte Nebenkosten:"
-    Und steht im PDF "Heizung"
+    Dann steht im PDF "Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: Heizung."
     Aber steht im PDF nicht "Lift"

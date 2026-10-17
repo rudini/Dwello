@@ -22,6 +22,7 @@ sync with the migrations by hand. Domain terms follow `UBIQUITOUS_LANGUAGE.md`.
 
 ```
 buildings 1─n apartments 1─n rental_contracts n─1 tenants
+rental_contracts 1─n contract_categories n─1 categories
 buildings 1─n invoices ──> categories (category_id, llm_category_id), distribution_keys
 buildings 1─n fuel_stocks
 
@@ -40,6 +41,7 @@ heating_profiles, configuration: no foreign keys
 | `invoices.building_id` → `buildings` | CASCADE |
 | `invoices.category_id`, `invoices.llm_category_id` → `categories` | SET NULL |
 | `invoices.distribution_key_id` → `distribution_keys` | SET NULL |
+| `contract_categories.contract_id` → `rental_contracts`, `.category_id` → `categories` | CASCADE |
 | `fuel_stocks.building_id` → `buildings` | CASCADE |
 | `fuel_stocks.category_id` → `categories` | RESTRICT (deleting such a category answers 409) |
 | `utility_statements.tenant_id` / `apartment_id` / `contract_id` | RESTRICT |
@@ -137,6 +139,22 @@ Indexes: `contracts_apartment_id_idx`, `contracts_tenant_id_idx`, `contracts_end
 `contracts_dates_idx (start_date, end_date)`.
 
 That contracts of one apartment must not overlap is enforced in the application, not in the database.
+
+### contract_categories (Vereinbarte Nebenkosten, #91)
+
+```sql
+contract_id  UUID    NOT NULL  -- rental_contracts (CASCADE)
+category_id  UUID    NOT NULL  -- categories (CASCADE)
+agreed       BOOLEAN NOT NULL  -- true: the contract agrees the category; false: answered «nicht vereinbart»
+PRIMARY KEY (contract_id, category_id)
+```
+
+A statement bills a contract only the categories with `agreed` (Art. 257a Abs. 2 OR); an invoice without a category
+is billed as before. A category without a row is not answered yet: not billed, and the statement wizard asks when it
+has costs in the period. A new contract gets a row for every umlagefähige category (agreed unless the form unticks
+it); a category created or made umlagefähig later has no row. Migration `0018` gave a contract with statements the
+categories its statements billed and those of the building's umlagefähige invoices over its tenancy up to its last
+statement, and a contract without statements every umlagefähige category.
 
 ### categories (Kategorie)
 
@@ -266,6 +284,7 @@ heating_profile_id     UUID                    -- Heizprofil of the Abrechnungsl
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
 heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true, reason, names } or percent, months, profile names
+agreed_category_ids    JSONB                   -- ids of the categories the contract agreed at creation (#91); NULL: created before, billed every category
 balance                DECIMAL(12,2) NOT NULL  -- Saldo, to 5 Rappen in the tenant's favour (#79; sent before: commercially): positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
@@ -444,7 +463,7 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
-  0003 … 0009           -- later changes, each named in its table above
+  0003 … 0018           -- later changes, each named in its table above
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in

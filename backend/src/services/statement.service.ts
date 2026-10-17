@@ -315,6 +315,12 @@ export const calculateStatement = (input: StatementInput) =>
 		input.managementFeePercent
 	);
 
+// The Tankbestand readings the statement bills by, only when the contract agrees the tank's category (#91, V-3)
+const agreedStock = async (input: StatementInput & { buildingId: string }, agreedCategoryIds: string[]) => {
+	const [change] = await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd);
+	return change && agreedCategoryIds.includes(change.categoryId) ? change.stock : null;
+};
+
 /** Calculate a contract's statement and store it as a draft with its line items */
 export async function generateStatement(
 	input: StatementInput & { buildingId: string }
@@ -346,7 +352,8 @@ export async function generateStatement(
 			managementFeePercent: String(calculation.managementFeePercent),
 			heatingProfileId: input.heatingProfileId || null,
 			heatingShare: calculation.heating,
-			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
+			fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
+			agreedCategoryIds: calculation.agreedCategoryIds,
 			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
 			status: 'draft',
