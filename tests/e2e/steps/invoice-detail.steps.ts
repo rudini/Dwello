@@ -16,6 +16,7 @@ import {
 	deleteInvoice,
 	openBuildingOfInvoice,
 	openInvoice,
+	openMissedStatements,
 	recategorizeInvoice,
 	startEditingInvoice
 } from '../tasks/invoice-detail';
@@ -106,4 +107,8 @@ Then('ist der Liegenschaftsverwalter auf der Detailseite der Rechnung {string}',
 
 Then('warnt die Rechnung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(missedWarningText).toContain(text);
+});
+
+When('der Liegenschaftsverwalter die Abrechnungen ohne diese Rechnung öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openMissedStatements);
 });
