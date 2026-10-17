@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { actions } from '../routes/config/audit-log/+page.server';
+import { actions, load } from '../routes/config/audit-log/+page.server';
 import { runAction } from './helpers/action';
 
 const API = 'http://localhost:3001/api/v1/audit-log';
@@ -41,5 +41,17 @@ describe('Eintrag im Protokoll löschen', () => {
 
 		await result.catch(() => {});
 		expect(calls[0].url).toBe(`${API}/a%2F1`);
+	});
+});
+
+// Code-Review C-24: jede Ablehnung beim Laden zeigt die übersetzte Meldung
+describe('Protokoll laden', () => {
+	it('meldet, dass das Protokoll nicht geladen werden konnte', async () => {
+		const fetch = async () => new Response(JSON.stringify({}), { status: 404 });
+
+		await expect(load({ fetch } as never)).rejects.toMatchObject({
+			status: 404,
+			body: { message: 'Protokoll konnte nicht geladen werden' }
+		});
 	});
 });
