@@ -5,11 +5,13 @@ import {
 	numberOfInvoice,
 	categoryOfInvoice,
 	distributionKeyOfInvoice,
+	missedWarningText,
 	reasonForOverride,
 	recategorizationFailure,
 	tenancyLawNote,
 	utilityCostOfInvoice
 } from '../questions/invoice-detail';
+import { pageAddressInApp } from '../questions/statements';
 import {
 	deleteInvoice,
 	openBuildingOfInvoice,
@@ -88,4 +90,20 @@ Then(
 
 Then('sieht der Liegenschaftsverwalter die Rechnungsnummer {string}', async ({ verwalter }, number: string) => {
 	await verwalter.sees(numberOfInvoice).toBe(number);
+});
+
+Given('die Rechnung von {string} kostet danach {string} Franken', async ({ seed }, supplier: string, amount: string) => {
+	await seed.invoiceAmount(`Rechnung ${supplier}`, amount);
+});
+
+Given('die Rechnung {string} kostet danach {string} Franken', async ({ seed }, invoice: string, amount: string) => {
+	await seed.invoiceAmount(`Rechnung ${invoice}`, amount);
+});
+
+Then('ist der Liegenschaftsverwalter auf der Detailseite der Rechnung {string}', async ({ verwalter, seed }, invoice: string) => {
+	await verwalter.sees(pageAddressInApp).toBe(`/invoices/${seed.idOf(`Rechnung ${invoice}`)}`);
+});
+
+Then('warnt die Rechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(missedWarningText).toContain(text);
 });

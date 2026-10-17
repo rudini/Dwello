@@ -318,6 +318,11 @@ export function testData(api: CallTheApi) {
 			await invoice(buildingTitle, { categoryId: heating.id }, `Heizöl ${year}`, amount, `${year}-06-30`);
 		},
 
+		// The landlord records that the building has no tank or that its tank is decommissioned (#72)
+		async noTank(buildingTitle: string) {
+			await put(`buildings/${ids.get(buildingTitle)}`, { noTank: true });
+		},
+
 		// Value of the heating oil in the building's tank on a reading day (removed with the building)
 		async fuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
@@ -328,7 +333,14 @@ export function testData(api: CallTheApi) {
 		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
 			const category = await predefinedCategory(categoryName);
 			const period = service && { servicePeriodStart: service[0], servicePeriodEnd: service[1] };
-			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+			const id = await invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+			ids.set(`Rechnung ${categoryName} ${date}`, id);
+			return id;
+		},
+
+		// A recorded invoice that costs another amount afterwards
+		async invoiceAmount(key: string, amount: string) {
+			await put(`invoices/${ids.get(key)}`, { amount });
 		},
 
 		async predefinedCategoryId(categoryName: string): Promise<string> {

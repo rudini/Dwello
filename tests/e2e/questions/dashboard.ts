@@ -3,7 +3,6 @@ import { Count, Text, Visibility } from '../screenplay/questions';
 import { currentNavItem } from '../targets/app-frame';
 import {
 	occupancyCount,
-	occupancyRate,
 	occupancyRow,
 	occupancyVacancyHelp,
 	overviewDeadline,
@@ -25,7 +24,6 @@ const statuses: Record<string, string> = {
 	Überfällig: 'overdue'
 };
 
-export const occupancyOf = (building: string) => Text.of(occupancyRate(building));
 export const rentedApartmentsOf = (building: string) => Text.of(occupancyCount(building));
 export const occupancyText = (building: string) => Text.of(occupancyRow(building));
 export const occupancyHelp = Text.of(occupancyVacancyHelp);

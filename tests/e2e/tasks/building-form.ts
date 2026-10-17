@@ -1,10 +1,11 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Enter, Navigate, Select } from '../screenplay/interactions';
+import { Check, Click, Enter, Navigate, Select } from '../screenplay/interactions';
 import {
 	addressInput,
 	cantonSelect,
 	cityInput,
 	nameInput,
+	noTankCheckbox,
 	postalCodeInput,
 	submitButton,
 	yearBuiltInput
@@ -32,3 +33,5 @@ export const changeYearBuilt = (year: string): Activity => (actor) =>
 
 export const changePostalCode = (postalCode: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(postalCode).into(postalCodeInput), saveBuilding);
+
+export const markNoTank: Activity = (actor) => actor.attemptsTo(Check.the(noTankCheckbox), saveBuilding);

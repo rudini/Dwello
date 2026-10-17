@@ -5,7 +5,6 @@ import {
 	deadlines,
 	markedNavItems,
 	occupancyHelp,
-	occupancyOf,
 	occupancyText,
 	occupancyShown,
 	overviewTaskShown,
@@ -139,8 +138,9 @@ When('der Liegenschaftsverwalter die Schnellaktion {string} wählt', async ({ ve
 	await verwalter.attemptsTo(chooseQuickAction(label));
 });
 
-Then('ist das Gebäude {string} zu {string} belegt', async ({ verwalter, names }, building: string, rate: string) => {
-	await verwalter.sees(occupancyOf(names.get(building)!)).toBe(rate);
+Then('nennt die Belegung von {string} keinen Anteil in Prozent', async ({ verwalter, names }, building: string) => {
+	await verwalter.sees(occupancyShown(names.get(building)!)).toBe(true);
+	await verwalter.sees(occupancyText(names.get(building)!)).not.toContain('%');
 });
 
 Then(

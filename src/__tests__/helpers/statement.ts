@@ -36,7 +36,11 @@ export const statement = (overrides: Partial<StatementWithDetails> = {}): Statem
 				distributionKeyName: 'Nach Fläche',
 				totalAmount: 6000,
 				tenantShare: 1500,
-				percentage: 25
+				percentage: 25,
+				apartmentShare: 1500,
+				periodShare: 1,
+				shareDays: { days: 366, total: 366 },
+				invoices: []
 			},
 			{
 				id: 'l2',
@@ -45,7 +49,11 @@ export const statement = (overrides: Partial<StatementWithDetails> = {}): Statem
 				distributionKeyName: 'Pro Wohnung',
 				totalAmount: 2400,
 				tenantShare: 600,
-				percentage: 25
+				percentage: 25,
+				apartmentShare: 600,
+				periodShare: 1,
+				shareDays: { days: 366, total: 366 },
+				invoices: []
 			}
 		],
 		createdAt: '2025-01-15T09:00:00Z',

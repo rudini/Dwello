@@ -52,6 +52,13 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 		expect(buildingTypeLabel('Eigener Typ')).toBe('Eigener Typ');
 	});
 
+	it('liest aus dem Gebäudeformular, ob das Gebäude ohne Tank ist', () => {
+		const form = new FormData();
+		expect(parseBuildingForm(form).building.noTank).toBe(false);
+		form.set('noTank', 'on');
+		expect(parseBuildingForm(form).building.noTank).toBe(true);
+	});
+
 	it('meldet fehlende Angaben im Gebäudeformular auf Französisch', () => {
 		french();
 		const { errors } = parseBuildingForm(new FormData());
@@ -95,6 +102,7 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 			fetch
 		} as never)) as BuildingDetailsData;
 		expect(data.fuelStocks![0].categoryName).toBe('Chauffage');
+		expect(data.building.noTank).toBe(true);
 		expect(data.heatingCategories).toEqual([{ id: 'c1', name: 'Chauffage' }]);
 	});
 });
@@ -114,6 +122,8 @@ describe('Übersicht in der gewählten Sprache', () => {
 		lettersToSend: 2,
 		endingContracts: [],
 		noticedContracts: [],
+		paymentDeadlineDays: 30,
+		reminderAfterDays: 14,
 		expiredContracts: []
 	};
 
@@ -177,8 +187,7 @@ describe('Belegung auf der Übersicht', () => {
 								buildingId: 'b1',
 								buildingName: 'Seeblick',
 								totalApartments: 4,
-								occupiedApartments,
-								occupancyRate: 25
+								occupiedApartments
 							}
 						]
 					}

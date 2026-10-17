@@ -36,6 +36,7 @@ export const buildings = pgTable(
 		longitude: decimal('longitude', { precision: 10, scale: 7 }),
 		buildingType: varchar('building_type', { length: 50 }),
 		yearBuilt: integer('year_built'),
+		noTank: boolean('no_tank').notNull().default(false), // no tank or decommissioned: no Tankbestand asked (#72)
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -348,6 +349,10 @@ export type InvoicePart = {
 	profile?: { percent: number; months: { month: number; percentage: number }[]; periodMonths: { month: number; percentage: number }[] };
 };
 
+// An invoice a position billed (#96): its amount in the period and the days it bills there; the change of the
+// Tankbestand is billed like one (#239) under the id fuel-stock-<period end>
+export type BilledInvoice = { id: string; description: string; amount: number; start: string; end: string; fuelStock?: true };
+
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
 /** A payment taken back (#92): the day of the reset and what it cleared */
@@ -467,6 +472,7 @@ export const utilityStatementLineItems = pgTable(
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
 		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
+		invoices: jsonb('invoices').$type<BilledInvoice[]>(), // the invoices it billed (#96); null: created before
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},

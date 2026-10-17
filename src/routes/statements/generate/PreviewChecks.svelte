@@ -32,11 +32,13 @@
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
 	const late = $derived(hinted('lateInvoices'));
 	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
-	// a building without any invoice has its own warning above, only its Tankbestand hints are listed;
+	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
 	const shown = (row: (typeof rows)[number]) => ({
 		...row,
-		findings: row.findings.filter((f) => f.kind !== 'tank' && (!row.missing || f.kind === 'stock'))
+		findings: row.findings.filter(
+			(f) => f.kind !== 'tank' && (!row.missing || f.kind === 'stock' || f.kind === 'consumption')
+		)
 	});
 	const checked = $derived(rows.map(shown).filter((row) => row.findings.length > 0));
 	const tankQuestions = $derived(rows.filter((row) => row.findings.some((f) => f.kind === 'tank')));
