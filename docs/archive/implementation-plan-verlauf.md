@@ -1627,3 +1627,16 @@ Branch `claude/w15-akonto-hints-66` (PR #401). Product owner 2026-10-17: #66 opt
 - [x] Personas `docs/design/personas/{helga,weber}-66b.md`: Helga P-2 fixed (`contracts_agreed_costs_none_text`), Helga P-1 → #428 (product decision)
 - [x] Workflow note: glossary edit on the product owner's instruction, round limit (`docs/reviews/workflow-notes-issue-66.md`)
 - [x] Push and pull request follow (PR #401 says `Fixes #66`, `Fixes #388`)
+
+## Session W16b: E2E races O-36 and O-37 (product owner's choice for PR #417)
+
+Branch `claude/w16b-e2e-races`. Non-functional (rows in `docs/design/offene-punkte.md`); no issue. No scenario: it fixes a race between test data and a backend write, not a behaviour the Liegenschaftsverwalter sees.
+
+- [x] O-37 root cause: the whole E2E database had no building while «draft-dropped» and «draft-discard-dialog» ran first; `restoreDraft` ticks the first building (or tenant) but the two draft states seeded nothing. Fix: `seedFor` seeds the screen records for `draft-restored` and `draft-discard-dialog` (the failing pair seen red, then green; all 8 draft rows green)
+- [x] O-36: `saveConfig` upserts on `key`; pg test with ten parallel first writes (red with a warmed pool, then green)
+- [x] rows moved to `docs/archive/offene-punkte-verlauf.md`
+- [x] code-reviewer round 1 (`docs/reviews/w16b-review-1.md`): no Blocker/Major; C-1 (draft state ticks its own building) and C-2 (select only for the audited rate) fixed; C-3 accepted (a race test), C-4 done at the merge into #417
+- [x] closing code-reviewer round 2 (`docs/reviews/w16b-review-2.md`): no Blocker/Major; C-5 (lost line break) fixed, C-6 Nit left
+- [x] session archived; pull request and merge, then main merged into #417 (O-37 row removed there)
+
+Files: `backend/src/services/config.service.ts`, `backend/src/__tests__/config.pg.test.ts`, `tests/e2e/fixtures/screens.ts`, `docs/design/offene-punkte.md`, `docs/archive/offene-punkte-verlauf.md`.
