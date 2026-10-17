@@ -173,10 +173,13 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Der laufende Mietvertrag nennt die Regeln einer Mietzinserhöhung
     Dann erfährt der Liegenschaftsverwalter, dass eine Mietzinserhöhung das amtliche Formular braucht und frühestens auf den nächsten Kündigungstermin gilt
 
-  # #66, #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin
+  # #66, #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin; #388: auch eine vorgesehene
+  # Erhöhung braucht das amtliche Formular
+  @wip
   Szenario: Der laufende befristete Mietvertrag nennt die Regel einer Mietzinserhöhung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Lea Graf" existiert
     Und "Lea Graf" mietet die Wohnung "2.02" befristet von "2024-01-01" bis "2099-12-31" für "900" Franken mit "20" Franken Akonto
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Lea Graf"
     Dann erfährt der Liegenschaftsverwalter, dass bei einem befristeten Mietvertrag eine Mietzinserhöhung erst nach dem Vertragsende möglich ist
+    Und erfährt der Liegenschaftsverwalter, dass er eine Erhöhung begründet und mit dem amtlichen Formular mitteilt
