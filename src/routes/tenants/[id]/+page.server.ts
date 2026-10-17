@@ -41,6 +41,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	).json();
 	const name = `${tenant.firstName} ${tenant.lastName}`;
 	const documents = await loadDocuments(fetch, `tenantId=${tenant.id}`);
+	// A-6: whether another tenant moved into the apartment of the last contract after it ended
+	const last = contracts.length
+		? contracts.reduce((a: BackendContract, b: BackendContract) => (a.endDate > b.endDate ? a : b))
+		: null;
+	const apartmentContracts = last?.endDate
+		? (await (await fetch(`${API}/contracts?apartmentId=${last.apartmentId}&limit=100`)).json()).contracts
+		: [];
 
 	return {
 		tenant,
@@ -50,7 +57,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			apartment: apartmentOf(c)
 		})),
 		documents,
-		formerDocuments: formerTenantDocuments(contracts, documents, localToday())
+		formerDocuments: formerTenantDocuments(contracts, documents, localToday(), apartmentContracts)
 	};
 };
 

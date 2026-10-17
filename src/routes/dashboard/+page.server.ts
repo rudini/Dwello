@@ -123,13 +123,15 @@ const expired = (contracts: Row[], today: string) =>
 		}));
 
 // Ehemalige Mieter with uploads from before their last Vertragsende (#178)
+type Contracts = Parameters<typeof formerTenantDocuments>[0];
 function formerTenants(contracts: Row[], documents: Row[], today: string) {
-	const of = <T extends Row>(rows: T[], tenantId: unknown) => rows.filter((r) => r.tenantId === tenantId);
+	const of = (rows: Row[], tenantId: unknown) => rows.filter((r) => r.tenantId === tenantId);
 	return [...new Set(contracts.map((c) => c.tenantId))].flatMap((tenantId) => {
 		const former = formerTenantDocuments(
-			of(contracts, tenantId) as { startDate: string; endDate: string | null }[],
+			of(contracts, tenantId) as Contracts,
 			of(documents, tenantId) as { type: string; createdAt: string }[],
-			today
+			today,
+			contracts as Contracts
 		);
 		const tenantName = String(contracts.find((c) => c.tenantId === tenantId)?.tenantName);
 		return former

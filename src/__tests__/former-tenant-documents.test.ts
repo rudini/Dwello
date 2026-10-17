@@ -10,6 +10,7 @@ const contract = (
 	endDate: string | null,
 	flags = { terminated: true, movedOut: false }
 ) => ({
+	apartmentId: 'a1',
 	startDate,
 	endDate,
 	...flags
@@ -92,5 +93,19 @@ describe('Dokumente eines ehemaligen Mieters (#178)', () => {
 			endDate: '2026-03-31',
 			documents
 		});
+	});
+
+	// A-6: a later contract for the apartment shows that the tenant moved out after the fixed term
+	it('nennt die Dokumente, wenn nach dem befristeten Mietvertrag ein anderer Mieter eingezogen ist', () => {
+		const documents = [uploadedOn('2025-03-10T09:00:00.000Z')];
+		const ended = [contract('2025-04-01', '2026-03-31', { terminated: false, movedOut: false })];
+		const successor = { ...contract('2026-04-01', null), apartmentId: 'a1' };
+		const elsewhere = { ...contract('2026-04-01', null), apartmentId: 'a2' };
+
+		expect(formerTenantDocuments(ended, documents, '2026-10-16', [successor])).toEqual({
+			endDate: '2026-03-31',
+			documents
+		});
+		expect(formerTenantDocuments(ended, documents, '2026-10-16', [elsewhere])).toBeNull();
 	});
 });

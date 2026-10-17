@@ -62,6 +62,24 @@ describe('Mieterdetail', () => {
 		expect(data.formerDocuments).toMatchObject({ endDate: day(-1), documents: [{ id: upload.id }] });
 	});
 
+	// A-6: after a fixed term without notice, the next tenant's contract shows that she moved out
+	it('nennt die Dokumente nach einem befristeten Mietvertrag, wenn ein anderer Mieter eingezogen ist', async () => {
+		const [upload] = documentList.data;
+		const ended = contract('c1', '2020-01-01', day(-2), '2.01');
+		const fetch = (async (url: string) =>
+			url === `${API}/tenants/t1`
+				? Response.json(tenant)
+				: url === `${API}/contracts?apartmentId=a-c1&limit=100`
+					? Response.json({ contracts: [ended, { ...contract('c2', day(-1), null, '2.01'), apartmentId: 'a-c1' }] })
+					: url.startsWith(`${API}/contracts`)
+						? Response.json({ contracts: [ended] })
+						: Response.json({ data: [{ ...upload, createdAt: '2024-05-01T09:00:00.000Z' }] })) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;
+
+		expect(data.formerDocuments).toMatchObject({ endDate: day(-2) });
+	});
+
 	it('lädt die Mietverträge des Mieters', async () => {
 		const { urls, fetch } = backend([]);
 
