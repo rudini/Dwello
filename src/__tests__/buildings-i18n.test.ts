@@ -114,6 +114,8 @@ describe('Übersicht in der gewählten Sprache', () => {
 		lettersToSend: 2,
 		endingContracts: [],
 		noticedContracts: [],
+		paymentDeadlineDays: 30,
+		reminderAfterDays: 14,
 		expiredContracts: []
 	};
 
@@ -177,8 +179,7 @@ describe('Belegung auf der Übersicht', () => {
 								buildingId: 'b1',
 								buildingName: 'Seeblick',
 								totalApartments: 4,
-								occupiedApartments,
-								occupancyRate: 25
+								occupiedApartments
 							}
 						]
 					}

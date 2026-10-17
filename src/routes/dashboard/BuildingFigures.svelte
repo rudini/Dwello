@@ -122,7 +122,6 @@
 
 	{#if data.buildingOccupancy.length}
 		<Panel title={m.dashboard_occupancy_heading()} level={3}>
-			<!-- TODO(fachlich prüfen, #55): share of rented apartments has no glossary term ("Belegungsrate") -->
 			<ul class="flex flex-col divide-y divide-line">
 				{#each data.buildingOccupancy as building (building.buildingId)}
 					<li data-testid="occupancy-row" class="flex min-h-12 flex-wrap items-center gap-4 py-2">
@@ -139,10 +138,6 @@
 							{building.occupiedApartments === 1
 								? m.dashboard_occupied_one()
 								: m.dashboard_occupied()}{occupancyNotes(building)}</span
-						>
-						<span
-							class="w-20 whitespace-nowrap text-right font-semibold tabular-nums text-ink"
-							data-testid="occupancy-rate">{building.occupancyRate.toFixed(1)} %</span
 						>
 					</li>
 				{/each}
