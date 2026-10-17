@@ -947,6 +947,23 @@ Files: `backend/migrations/0014_line_item_invoices.sql`, `backend/src/db/schema.
 
 Files: `backend/src/services/{pdf.service,reminder-pdf,reminder.service,statement-pdf.service}.ts`, `backend/src/__tests__/reminders.pg.test.ts`, `messages/*.json`, `src/routes/help/+page.svelte`, `src/routes/statements/[id]/ReminderModal.svelte`, `src/__tests__/statement-pages.dom.test.ts`, `tests/e2e/features/{statement-reminder,help}.feature`, `tests/e2e/{steps/documents.steps,tasks/documents,targets/documents}.ts`, `docs/PRD-Dwello.md`, reviews `docs/reviews/w6c-*.md`, persona reports `helga-w6c.md`, `dr-weber-w6c.md`
 
+## Session W2d: Saldo rounded in the tenant's favour (#79)
+
+- [x] `statement-rounding.feature`: Nachzahlung rounded down, Rückerstattung up (`@wip`, seen red)
+- [x] fach-reviewer on the scenario and on stored statements (old rounding kept)
+- [x] `roundTo5Rappen` rounds in the tenant's favour (unit test red first)
+- [x] Help text «Saldo» in all four languages, `docs/nebenkostenabrechnung-anforderungen.md` (lines 94, 148)
+- [x] Fachreview round 1 (`docs/reviews/w2d-fachreview-1.md`): scenario «unter 5 Rappen», float-safe rounding, drafts re-rounded by migration `0014`, PDF/DOM cases, docs
+- [x] Slice review round 1 (`docs/reviews/w2d-review-1.md`)
+- [x] Feature review: fach round 2 (`docs/reviews/w2d-fachreview-2.md`), daten-pruefer (`docs/reviews/w2d-datenpruefung-1.md`), Dr. Weber (`docs/design/personas/dr-weber-w2d.md`)
+- [x] Merge `main`, migration renamed to the next free number (C-1)
+- [x] Workflow note (`docs/reviews/workflow-notes-issue-79.md`)
+- [x] Lint, check, type-check, affected tests and E2E
+- [x] Closing code review before the push: `docs/reviews/w2d-review-2.md` (after the merge of `main`; migration renamed to 0014, then 0016 after two more merges)
+- [x] Pull request `Fixes #79` (session archived before the push)
+
+Files: `backend/src/services/pdf-format.ts`, `backend/migrations/0016_statement_balance_tenant_favour.sql`, `messages/*.json`, `tests/e2e/features/statement-rounding.feature`, tests (`statement-pdf-data`, `statement-pdf-render`, `statement-generation.pg`, `migrations.pg`, `help-page.dom`, `statement-pages.dom`), docs (`PRD-Dwello.md`, `data-model.md`, `design-decisions.md`, `nebenkostenabrechnung-anforderungen.md`)
+
 ## Session 2026-10-17 W4d: #83 #84 (W4d) fr/it/en terms from Fedlex, AI native read of tenant texts
 
 Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/ZGB, VMWG in fr/it) where one exists, a native speaker only for the rest, English plain words. #84 Option B: an AI model reads the texts a tenant sees (statement PDF, reminder letters, e-mails) as a native speaker; the landlord UI later. Both "Done means" are worded as decision issues: the decision is the requirement. Fedlex read with single `curl` downloads (WebFetch got 503): SR 220 of 1.10.2026, SR 221.213.11 of 1.10.2025, fr and it.

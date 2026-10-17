@@ -102,7 +102,7 @@
 	"glossary_allocable_term": "Allocable",
 	"glossary_allocable_text": "An allocable invoice goes into the utility cost statement, for example heating, water, caretaker or refuse. Whether an invoice is allocable follows from its category; you can exclude a single invoice of an allocable category. The tenant only has to pay these costs if the rental contract lists them as utility costs.",
 	"glossary_balance_term": "Balance",
-	"glossary_balance_text": "The tenant’s share of the costs including the management fee, minus their advance payments made, rounded to 5 centimes. If the balance is positive, the tenant pays the difference (amount due); if it is negative, they get money back (refund).",
+	"glossary_balance_text": "The tenant’s share of the costs including the management fee, minus their advance payments made, rounded to 5 centimes, only in the tenant’s favour: an amount due is rounded down, a refund up. If the balance is positive, the tenant pays the difference (amount due); if it is negative, they get money back (refund).",
 	"glossary_deadline_term": "Payment deadline",
 	"glossary_deadline_text": "The date by which the tenant must have paid an amount due. For a refund, it is the date by which you transfer the amount to them («Refund by»).",
 	"glossary_reminder_term": "Reminder",
