@@ -1603,6 +1603,7 @@ No scenario: CI and repository configuration only, no app behaviour changes.
 - [x] Plan archived, pull request, CI
 
 Files: `.gitattributes`, `playwright.config.ts`
+
 ## Session W16b: E2E races O-36 and O-37 (product owner's choice for PR #417)
 
 Branch `claude/w16b-e2e-races`. Non-functional (rows in `docs/design/offene-punkte.md`); no issue. No scenario: it fixes a race between test data and a backend write, not a behaviour the Liegenschaftsverwalter sees.
