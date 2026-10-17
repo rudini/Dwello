@@ -30,6 +30,12 @@ export function testData(api: CallTheApi) {
 		return (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
 	}
 
+	// The tenant's statement of the year, also one a run created
+	async function statementOf(tenantTitle: string, year: number) {
+		const { data } = await get(`statements?tenantId=${ids.get(tenantTitle)}&limit=100`);
+		return data.find((s: { periodStart: string }) => s.periodStart.startsWith(`${year}`));
+	}
+
 	async function removeContracts(filter: string) {
 		for (const contract of (await get(`contracts?${filter}&limit=100`)).contracts) {
 			await remove(`contracts/${contract.id}?confirmMistake=true`); // a started one too (#116)
@@ -192,9 +198,10 @@ export function testData(api: CallTheApi) {
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},
 
-		// Unique per scenario: tenants of parallel scenarios must not share an address
-		async email(tenantTitle: string) {
-			const email = `${ids.get(tenantTitle)}@dwello.test`;
+		// Unique per scenario: tenants of parallel scenarios must not share an address; the mail catcher refuses
+		// abgewiesen.dwello.test
+		async email(tenantTitle: string, domain = 'dwello.test') {
+			const email = `${ids.get(tenantTitle)}@${domain}`;
 			await put(`tenants/${ids.get(tenantTitle)}`, { email });
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
@@ -260,8 +267,13 @@ export function testData(api: CallTheApi) {
 			await remove(`buildings/${ids.get(title)}`);
 		},
 
+		// a statement seeded here, or one a run created
 		async removeStatement(tenantTitle: string, year: number) {
-			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}`);
+			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`) ?? (await statementOf(tenantTitle, year)).id}`);
+		},
+
+		async statementNumber(tenantTitle: string, year: number): Promise<string> {
+			return (await statementOf(tenantTitle, year)).statementNumber;
 		},
 
 		async statementPdf(tenantTitle: string, year: number) {

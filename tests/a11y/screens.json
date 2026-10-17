@@ -27,11 +27,13 @@
 		"pdf-missing": "Statement list of the seeded building's drafts, whose PDF is not created yet: each row says «PDF noch nicht erstellt» with a link to its statement (#253).",
 		"list-scoped": "List opened from a link that names a Mietvertrag or an Abrechnungsperiode: a sentence above the list says which statements it shows and links to all.",
 		"link-preset": "Statement wizard opened from a link that names a building and a period (after a changed Vertragsende): it starts at the settings step and says what the link chose.",
-		"send-dialog": "The confirmation before marking a statement as sent open.",
+		"send-dialog": "The confirmation before sending a statement open: marking it as sent for a letter, sending it by e-mail for a tenant who wants e-mail (#86).",
+		"send-refused": "A draft statement whose tenant wants e-mail but has no address, sent: it stays a draft, the alert says why and offers to deliver it by letter (#86).",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
 		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
+		"generation-result": "«Abrechnungen erstellen» after creating the drafts of a year without invoices: how many were created, «Entwürfe ansehen», «Alle als ZIP herunterladen» (#356) and «Weitere Abrechnungen erstellen».",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
@@ -428,7 +430,8 @@
 				"draft-restored",
 				"draft-dropped",
 				"buildings-billed",
-				"link-preset"
+				"link-preset",
+				"generation-result"
 			],
 			"queries": {
 				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31"
@@ -487,12 +490,21 @@
 			"name": "statement-empty-detail",
 			"path": "/statements/{emptyStatement}",
 			"states": [
-				"default"
+				"default",
+				"send-dialog",
+				"send-refused"
 			]
 		},
 		{
 			"name": "statement-pdf-refused",
 			"path": "/statements/00000000-0000-4000-8000-000000000000/pdf",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-zip-refused",
+			"path": "/statements/zip?ids=00000000-0000-4000-8000-000000000000&periodStart=2024-01-01&periodEnd=2024-12-31",
 			"states": [
 				"default"
 			]

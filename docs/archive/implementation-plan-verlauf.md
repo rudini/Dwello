@@ -1020,6 +1020,28 @@ Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (p
 
 Files changed (#114 too: `backend/src/services/{old-address,contract}.ts`, `src/routes/contracts/[id]/`, `src/routes/statements/[id]/`, `src/routes/statements/generate/`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `tests/a11y/screens.json`, `docs/api-specification.md`): `src/lib/server/settings.ts`, `messages/*.json`, `docs/PRD-Dwello.md`, `backend/migrations/0017_tenant_country.sql`, `backend/src/db/schema.ts`, `docs/data-model.md`, `backend/src/routes/tenants.ts`, `backend/src/services/{tenant,statement,qr-bill,pdf,reminder-pdf,postal-address}.ts`, `src/lib/{tenant,types}.ts`, `src/lib/server/{tenant,tenant-form}.ts`, `src/routes/tenants/TenantFormFields.svelte`, `src/routes/tenants/[id]/TenantContactCard.svelte`, `docs/design/i18n-begriffe.md`, `docs/anforderungen-vertragsende.md`, `tests/contracts/tenant.json`, E2E features and steps.
 
+## Session 2026-10-17 W8d: e-mail statements (#86, Option 2)
+
+- [x] #86 read (no comments, no implementation issue): the decision is the requirement; #283, #305, #322 do not change its outcome
+- [x] @wip scenarios `tests/e2e/features/statement-send.feature` incl. failure states (no e-mail address, mail refused; «not set up»: `No scenario`, the E2E stack always sends to the mail catcher, covered by `statement-mail.pg.test.ts`), seen red at the missing behaviour
+- [x] fach-reviewer round 1 before implementing: `docs/reviews/w8d-fachreview-1.md` (V-1 Major fixed: Zahlungsfrist step and pg check; R-1 Major: the provider's country is #82's decision, done by W9c; V-2, V-3, V-7, V-8, V-9, R-2 fixed; V-4, V-5, V-6 to an issue)
+- [x] backend: `POST /statements/:id/send` (`statement-send.service.ts`): e-mail with the PDF dated today in the tenant's Sprache, Dokument `type: statement`; letter or `byLetter` only marks sent; a failed e-mail is a coded refusal and leaves «Entwurf»
+- [x] frontend: send dialog per channel, failure alert with «Per Brief zustellen», Dokument title in the UI language, the statement's Dokument not counted as Mahnung; help text `help_statements_4`; texts in four languages
+- [x] privacy statement: `privacy_third_1` names statements by e-mail and what their PDF holds (country of the provider: #82, W9c)
+- [x] screens.json / accessibility.feature / sprachen-bildschirme.feature: `statement-empty-detail` `send-dialog`, `send-refused` (Carla wants e-mail without an address)
+- [x] code-reviewer round 1: `docs/reviews/w8d-review-1.md` (C-1 Major fixed with a DOM test seen red; C-3, C-4, C-10 fixed; C-2, C-5 to C-9, C-11 left, reasons in the report summary)
+- [x] personas round 1: `docs/design/personas/helga-w8d.md` (P-1 = C-1; P-2 to #366; P-5 button wording fixed), `docs/design/personas/dr-weber-w8d.md` (P-1, P-2, P-6 wording fixed with tests seen red; P-3 to #366; P-4 is #82's)
+- [x] fach-reviewer round 2: `docs/reviews/w8d-fachreview-2.md` (no Blocker/Major; V-11 = C-1; V-13, V-14 fixed; V-10, V-12, V-15, V-16 left)
+- [x] new issues: #364 (letter offered up front, missing address before sending, later bounces), #366 (record how and when a statement was sent)
+- No daten-pruefer: no amount, statement PDF or QR-bill changes; the e-mail attaches the PDF as stored (byte comparison in `statement-mail.pg.test.ts`), the Zahlungsfrist recomputed by fach-reviewer in both rounds
+- [x] persona-stack sends e-mail to the mail catcher (`docs/design/tools/persona-stack.sh`: MAIL_FROM and the catcher were missing, every e-mail failed as «not set up»)
+- [x] personas round 2: `docs/design/personas/helga-w8d-2.md` (P-1, P-5 fixed, nothing new), `docs/design/personas/dr-weber-w8d-2.md` (P-1, P-2 fixed; Minors and Nits left: the letter dialog not naming the Zahlungsfrist, the help calling it a period; in the report)
+- [x] Merged origin/main (W3c: the PDF as sent made at sending, `changeStatementStatus`): conflicts only in `messages/*.json` (both sides kept); the send service now uses `changeStatementStatus` (pg test seen red)
+- [x] closing code-reviewer round: `docs/reviews/w8d-review-2.md` (no Blocker/Major; C-14 fixed; C-12, C-13, C-15 left)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-86.md`
+- [x] workflow-review, session archived, pull request `Fixes #86`
+- Files: `backend/src/services/{statement-send,pdf,reminder-letter,statement-pdf}.service.ts` (`reminder-letter.ts`), `backend/src/routes/statements.ts`, `backend/src/db/schema.ts` (comment), `backend/scripts/mail-catcher.ts`, `src/lib/server/{statement-actions,documents}.ts`, `src/lib/types.ts`, `src/routes/statements/[id]/{+page.svelte,+page.server.ts,SendDialog.svelte,SendFeedback.svelte,StatusActions.svelte}`, `messages/*.json`, `docs/{PRD-Dwello,api-specification,data-model}.md`, `tests/contracts/statement-send-refused.json`, tests and scenarios
+
 ## Session 2026-10-17 W4d: #83 #84 (W4d) fr/it/en terms from Fedlex, AI native read of tenant texts
 
 Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/ZGB, VMWG in fr/it) where one exists, a native speaker only for the rest, English plain words. #84 Option B: an AI model reads the texts a tenant sees (statement PDF, reminder letters, e-mails) as a native speaker; the landlord UI later. Both "Done means" are worded as decision issues: the decision is the requirement. Fedlex read with single `curl` downloads (WebFetch got 503): SR 220 of 1.10.2026, SR 221.213.11 of 1.10.2025, fr and it.
@@ -1052,6 +1074,22 @@ Branch `claude/w3d-monatlich-total-tankbestand-62-75`. Both issues have "Done me
 - [x] Blocked on me: none for the glossary; «Monatlich total» without «Bruttomiete» and the entries «Zeitanteil», «Heizmaterial», «Empfangsschein» are already in `UBIQUITOUS_LANGUAGE.md`
 
 Files: `src/lib/server/{contract-history,apartment}.ts`, `src/lib/types.ts`, `src/routes/apartments/[id]/{ContractHistory,MonthlyCostsCard}.svelte`, `src/routes/tenants/[id]/{+page.server.ts,TenantContracts.svelte,TenantRentalCard.svelte}`, `messages/*.json`, tests in `src/__tests__/{apartment,apartments-pages.dom,tenant-detail,tenant-detail-page.dom,buildings-pages.dom}.test.ts`, E2E `building-detail` and `apartment-detail` features, steps, questions, targets.
+
+## Session 2026-10-17: #111 (P-16) planned PRD features, ZIP of a run (#356)
+
+- [x] Search open issues; create #356 (ZIP of a run) and #357 (audit log)
+- [x] PRD: ZIP and audit point to #356 / #357; automatic reminders and Swiss eID «Vision, nicht geplant»; database SSL and field encryption vision with O-3 / O-6
+- [x] @wip scenarios «Alle Abrechnungen eines Laufs als ZIP herunterladen» and «ZIP eines Laufs mit einer inzwischen gelöschten Abrechnung anfordern», seen red at the missing button
+- [x] `generateStatements` returns the created statements; BFF route zips their PDFs (fflate, already in the lockfile)
+- [x] Result step: button «Alle als ZIP herunterladen» (full page load: the client router took `/statements/zip` for `/statements/[id]`), texts in four languages
+- Files: `src/routes/statements/zip/+server.ts`, `src/lib/server/statement-generation.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{StatementWizard,StatementStep,GenerationStep}.svelte`, `messages/*.json`, `package.json`/`bun.lock` (fflate as devDependency, already in the lockfile), tests in `src/__tests__/` and `tests/e2e/`, `docs/PRD-Dwello.md`
+- [x] Code review round 1: `docs/reviews/zip-review-1.md`
+- [x] Personas Helga and Marco: `docs/design/personas/helga-zip.md`, `docs/design/personas/marco-zip.md`
+- [x] Review fixes: axe and language states `statement-generate` `generation-result` and `statement-zip-refused`; ids encoded; generate answer from its contract
+- [x] Code review round 2: `docs/reviews/zip-review-2.md`; C-11 fixed (year per look counted per worker)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-356.md`
+- [x] Code review round 3: `docs/reviews/zip-review-3.md` (Nits C-13, C-14 fixed)
+- [x] Session archived, PR (Fixes #356, Fixes #111; #357 stays open: large, its correction entry depends on #120's implementation)
 
 ## Session W3e: German wording findings of the native read (#348)
 

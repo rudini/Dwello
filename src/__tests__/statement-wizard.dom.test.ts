@@ -943,7 +943,7 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	it('meldet die erstellten Entwürfe und führt zu ihnen', () => {
-		open({ created: 2 });
+		open({ created: ['s1', 's2'] });
 		expect(byTestId('generation-result')!.textContent).toContain(
 			'2 Nebenkostenabrechnungen sind als Entwurf erstellt'
 		);
@@ -951,6 +951,17 @@ describe('Abrechnungen erstellen', () => {
 			'/statements?status=draft&periodStart=2024-01-01&periodEnd=2024-12-31'
 		);
 		expect(byTestId('wizard-next')).toBeNull();
+	});
+
+	// the PDFs of this run only, e.g. to print them in one go (#356)
+	it('bietet die PDFs der erstellten Entwürfe als eine ZIP-Datei an', () => {
+		open({ created: ['s1', 's2'] });
+		expect(byTestId('download-zip-button')!.getAttribute('href')).toBe(
+			'/statements/zip?ids=s1%2Cs2&periodStart=2024-01-01&periodEnd=2024-12-31'
+		);
+		expect(byTestId('download-zip-button')!.textContent).toContain('Alle als ZIP herunterladen');
+		// not to the page of a statement «zip»: the browser itself follows the link to the file
+		expect(byTestId('download-zip-button')!.hasAttribute('data-sveltekit-reload')).toBe(true);
 	});
 });
 

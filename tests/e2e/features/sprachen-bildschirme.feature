@@ -137,6 +137,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
+      | statement-generate     | generation-result   |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
@@ -151,7 +152,10 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-paid-detail  | reset-payment-dialog |
       | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
+      | statement-empty-detail | send-dialog         |
+      | statement-empty-detail | send-refused        |
       | statement-pdf-refused  | default             |
+      | statement-zip-refused  | default             |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |
