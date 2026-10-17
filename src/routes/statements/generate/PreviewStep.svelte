@@ -32,7 +32,7 @@
 	} = $props();
 
 	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
-	const rows = $derived(invoiceRows(invoices, buildings, period));
+	const rows = $derived(invoiceRows(invoices, buildings));
 	const billed = $derived(rows.filter((row) => row.existing > 0));
 	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back, 0: Ausgeglichen
 	const saldo = (balance: number) =>
