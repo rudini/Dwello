@@ -147,6 +147,23 @@ describe('Wohnungsliste', () => {
 		expect(reset.getAttribute('href')).toBe('/apartments');
 	});
 
+	// #160: what the search finds stays visible while typing, not only in the placeholder
+	it('sagt am Suchfeld, wonach es sucht', () => {
+		list([apartment()]);
+		const input = byTestId('apartments-search-input')!;
+		const help = document.getElementById(input.getAttribute('aria-describedby')!)!;
+		expect(help.textContent).toContain('Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort.');
+		expect(input.getAttribute('placeholder')).toBeNull();
+	});
+
+	it('nennt ohne Treffer den Suchbegriff und wonach gesucht wird', () => {
+		url = new URL('http://localhost/apartments?search=Seepark%20B9');
+		list([]);
+		expect(byTestId('apartments-empty')!.textContent).toContain(
+			'Keine Wohnung passt zu «Seepark B9». Gesucht wird in Wohnungsnummer, Gebäudename, Strasse und Ort.'
+		);
+	});
+
 	it('blättert mit den Filtern zur nächsten Seite', () => {
 		url = new URL('http://localhost/apartments?building=b1');
 		list([apartment()], 30);

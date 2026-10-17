@@ -107,10 +107,16 @@ export function testData(api: CallTheApi) {
 		backend: api, // the backend API as the signed-in Liegenschaftsverwalter (API protocol driver)
 		unique,
 
-		async building(title: string, city: string) {
+		// a search term with Gherkin names in it: each name becomes the scenario's name ("Seepark B1")
+		withNames: (text: string) =>
+			[...names.keys()]
+				.sort((a, b) => b.length - a.length)
+				.reduce((term, title) => term.replace(title, names.get(title)!), text),
+
+		async building(title: string, city: string, street?: string) {
 			const building = await post('buildings', {
 				name: unique(title),
-				address: 'Testweg 1',
+				address: street ? unique(street) : 'Testweg 1',
 				postalCode: '8400',
 				city,
 				canton: 'ZH'

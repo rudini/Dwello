@@ -3,7 +3,7 @@
  * Business logic for apartment operations
  */
 
-import { eq, and, ilike, or, sql, desc } from 'drizzle-orm';
+import { eq, and, sql, desc } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	apartments,
@@ -13,6 +13,7 @@ import {
 	type Apartment,
 	type NewApartment
 } from '../db/schema';
+import { everyWordIn } from './word-search';
 import { sqlToday, swissToday } from './today';
 
 export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
@@ -110,7 +111,12 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 	const conditions = [];
 
 	if (search) {
-		conditions.push(or(ilike(apartments.number, `%${search}%`), ilike(buildings.name, `%${search}%`)));
+		// «Wohnung 3.02», as the card names it, finds 3.02
+		const words = search
+			.split(/\s+/)
+			.filter((word) => word.toLowerCase() !== 'wohnung')
+			.join(' ');
+		conditions.push(everyWordIn(words, [apartments.number, buildings.name, buildings.address, buildings.city]));
 	}
 
 	if (buildingId) {

@@ -42,6 +42,26 @@ Funktionalität: Wohnungsliste
     Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
     Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnungen gefunden"
 
+  # Wohnungsnummern ohne die Buchstaben a bis f: sonst passen sie in die UUID der Testnamen
+  # #160, #373: jedes Wort muss zur Wohnungsnummer, zum Gebäudenamen oder zur Adresse des Gebäudes passen
+  Szenario: Wohnungen wortweise nach Gebäude, Adresse und Wohnungsnummer suchen
+    Angenommen das Gebäude "Seepark" an der "Seestrasse 5" in "Uster" existiert
+    Und im Gebäude "Seepark" gibt es die leere Wohnung "H1"
+    Und im Gebäude "Seepark" gibt es die leere Wohnung "H2"
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Seepark H1" sucht
+    Dann ist die Wohnung "H1" "Leer"
+    Und die Wohnungsliste enthält genau 1 Wohnung
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Wohnung Seestrasse 5 H2" sucht
+    Dann ist die Wohnung "H2" "Leer"
+    Und die Wohnungsliste enthält genau 1 Wohnung
+
+  Szenario: Wohnungssuche ohne Treffer nennt den Suchbegriff
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Ahornhof 9.99" sucht
+    Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnung passt zu «Ahornhof 9.99». Gesucht wird in Wohnungsnummer, Gebäudename, Strasse und Ort."
+
+  Szenario: Die Wohnungssuche sagt, wonach sie sucht
+    Dann erfährt der Liegenschaftsverwalter bei der Wohnungssuche "Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort. Mehrere Wörter grenzen die Suche ein, zum Beispiel «Seepark 3.02»."
+
   Szenario: Filter nach dem Zurücksetzen leer
     Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
     Und der Liegenschaftsverwalter wieder alle Wohnungen anzeigt
