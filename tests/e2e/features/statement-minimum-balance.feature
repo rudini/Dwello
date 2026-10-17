@@ -55,6 +55,17 @@ Funktionalität: Saldo unter CHF 5
       | 1203     | Der Betrag ist kleiner als CHF 5.00. Sie verzichten darauf.    |
       | 1197     | Der Betrag ist kleiner als CHF 5.00. Sie zahlen ihn nicht aus. |
 
+  # Auch nach dem Zurücksetzen der Zahlung (#92) fordert Dwello den kleinen Saldo nicht ein (Fachprüfung V-2)
+  Szenario: Saldo unter CHF 5 wird auch nach dem Zurücksetzen der Zahlung nicht gemahnt
+    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und die Zahlung der Abrechnung 2024 von "Anna Keller" ist inzwischen zurückgesetzt
+    Und die Zahlungsfrist der Abrechnung 2024 von "Anna Keller" ist abgelaufen
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Dann hat die Abrechnung den Status "Überfällig"
+    Und bietet die Abrechnung keine Mahnung an
+
   # Verglichen wird der gerundete Saldo: 5.02 und –4.98 sind gerundet CHF 5.00 und bleiben offen
   Szenariogrundriss: Saldo an der Grenze von CHF 5
     Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "<Rechnung>" Franken für 2024

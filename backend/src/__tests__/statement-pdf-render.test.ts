@@ -227,11 +227,11 @@ describe('PDF mit einem Saldo unter CHF 5', () => {
 
 	// nach dem Versand ist sie bezahlt, aber ohne Zahlung: kein «Bezahlt am», kein «Überwiesen am»
 	it('sagt auch nach dem Versand, dass der Betrag nicht eingefordert oder ausbezahlt wird', async () => {
-		const due = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.15, paidDate: '2026-02-15' });
+		const waived = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.1, paidDate: '2026-02-15' });
 		const back = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paidDate: '2026-02-15' });
 
-		expect(due.flowing).toContain('Wir verzichten darauf; Sie müssen nichts bezahlen.');
-		expect(due.flowing).not.toContain('Bezahlt am');
+		expect(waived.flowing).toContain('Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(waived.flowing).not.toContain('Bezahlt am');
 		expect(back.flowing).toContain('Wir zahlen ihn nicht aus.');
 		expect(back.flowing).not.toContain('Überwiesen am');
 	});

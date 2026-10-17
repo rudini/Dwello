@@ -109,6 +109,7 @@ describe('Abrechnung mit Saldo 0', () => {
 		}
 	});
 });
+
 // #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt; die Abrechnung ist mit dem Versenden erledigt,
 // ohne dass Geld fliesst (bezahlter Betrag 0); ab CHF 5.00 bleibt sie offen
 describe('Abrechnung mit kleinem Saldo (#94)', () => {
@@ -138,7 +139,6 @@ describe('Abrechnung mit kleinem Saldo (#94)', () => {
 		expect(await sentWith(balance)).toMatchObject({ status: 'sent', paidDate: null });
 	});
 });
-
 
 const markPaid = (id: string, paidDate: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate });
 

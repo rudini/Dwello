@@ -219,7 +219,7 @@
 	check={checkPaidDate}
 	success={m.statements_marked_paid()}
 >
-	{#if statement.balance > 0}<p>{m.statements_no_reminder_after()}</p>{/if}
+	{#if claimed(statement.balance)}<p>{m.statements_no_reminder_after()}</p>{/if}
 	<DateInput
 		id="paidDate"
 		label={m.statements_paid_on()}
