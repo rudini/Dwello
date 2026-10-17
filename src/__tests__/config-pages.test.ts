@@ -124,6 +124,15 @@ describe('Einstellungen', () => {
 			expect(body).toMatch(new RegExp(`<a href="${href}"[^>]*>${label}</a>`));
 		}
 	});
+
+	// Personas on #357 (Anna P-1, Helga P-3, Marco P-2): at the end of the long form nobody found it
+	it('führt gleich nach den Stammdaten zum Protokoll, vor dem Formular', () => {
+		const body = settingsPage();
+
+		const protokoll = body.search(/<a href="\/config\/audit-log"[^>]*>Protokoll<\/a>/);
+		expect(protokoll).toBeGreaterThan(body.indexOf('href="/config/heating-profiles"'));
+		expect(protokoll).toBeLessThan(body.indexOf('<form'));
+	});
 });
 
 // The values of the checked choices «umlagefähig» ('true') and «nicht umlagefähig» ('false')

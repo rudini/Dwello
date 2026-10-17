@@ -18,7 +18,7 @@ import {
 import { exchangeCodeForToken, fetchUserProfile } from '$lib/server/oauth';
 import { logAuthError, logOAuthEvent } from '$lib/server/error-handler';
 import { cookieConfig } from '$lib/server/jwt-config';
-import { loginPage, takeLoginFlow } from '$lib/server/login-flow';
+import { loginPage, recordLogin, takeLoginFlow } from '$lib/server/login-flow';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const code = url.searchParams.get('code');
@@ -58,6 +58,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		path: cookieConfig.path,
 		domain: cookieConfig.domain
 	});
+	await recordLogin(jwt, flow.provider);
 	setSessionCookie(cookies, jwt);
 	setXsrfToken(cookies);
 	throw redirect(303, flow.redirectTo);

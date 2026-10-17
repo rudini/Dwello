@@ -146,6 +146,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	}
 	await seed.agreement('Ines', 'Internet', false);
 	await seed.agreement('Ines', 'Video', true);
+	// a change the Protokoll lists and whose entry can be deleted (#357)
+	await seed.category('Rasenpflege', true);
+	await seed.categoryAllowance('Rasenpflege', false);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
 		building: seed.idOf('Seeblick'),

@@ -196,6 +196,27 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 | PUT | `/:key` | Body: `{ value }`. → `{ message, key, value }`. 404 unknown key; 400 invalid value |
 | DELETE | `/:key` | Resets to default. → `{ message, key, value }` (the default). 404 unknown key |
 
+A changed `management_fee_pct` (also a reset to the default; «4.250» equals «4.25») writes a Protokoll entry (#357).
+
+## 11a. Protokoll `/api/v1/audit-log`
+
+Logins and changes that affect statements (#357), each `{ id, occurredAt, action, details }`; `details` is a snapshot of what the entry names (contract `tests/contracts/audit-log.json`):
+
+| `action` | Written by | `details` |
+|---|---|---|
+| `login` | the BFF after the OAuth callback | `provider` (`google` \| `microsoft`) |
+| `management_fee_changed` | `PUT /config`, `PUT`/`DELETE /config/management_fee_pct` | `from`, `to` |
+| `category_allocability_changed` | `PUT /categories/:id` | `categoryId`, `name`, `nameDE`…`nameEN`, `allocable`; when not allocable `invoices` (how many it made not allocable) |
+| `invoice_allocability_changed` | `PUT /invoices/:id`, `POST /invoices/:id/recategorize` | `invoiceId`, `description`, `supplier`, `invoiceDate`, `amount`, `building`, `allocable` |
+| `payment_reset` | `POST /statements/:id/payment-reset` | `statementId`, `number`, `paidDate` |
+| `statement_corrected` | `POST /statements/:id/replace` («Abrechnung berichtigen», #358) | `statementId`, `number` |
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/` | → `{ data: [entry] }`, newest first |
+| POST | `/logins` | Body: `{ provider }`. 201; 422 other provider |
+| DELETE | `/:id` | 204. 404 |
+
 ## 12. Utility statements `/api/v1/statements`
 
 ### Status
@@ -224,7 +245,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | POST | `/:id/send` | Sends a draft (#86). Tenant with `correspondenceChannel: email`: the PDF, dated today with the Zahlungsfrist from today, is e-mailed in the tenant's language and stored as a document (`type: statement`, `channel: email`, `status: sent`); otherwise, or with body `byLetter: true`, the statement is only marked sent as with `PUT /:id/status`. → `{ statement, document? }`. A failed e-mail leaves it a draft without a document (its PDF re-dated today, as viewing a draft's PDF does): 400 `STATEMENT_TENANT_NO_EMAIL`, `STATEMENT_MAIL_NOT_CONFIGURED`, `STATEMENT_MAIL_FAILED`; 400 `STATEMENT_ALREADY_SENT`, `IBAN_MISSING`; 404 `STATEMENT_NOT_FOUND` |
 | PUT | `/:id/status` | Body: `status` required; optional `paidDate`, `paidAmount`, `reminderSentDate`. Paid without `paidAmount` stores the Saldo (#93). `paidDate` is a real day from the Abrechnungsdatum (`statementDate`) up to today (Swiss day), else 400 `PAID_DATE_INVALID {date}`, `PAID_DATE_BEFORE_STATEMENT {date}` (the Abrechnungsdatum), `PAID_DATE_IN_FUTURE {date}` (today) (#138). → statement. 404; 400 invalid transition |
 | POST | `/:id/replace` | Replaces a sent, overdue or paid statement (#120): status `replaced`, nothing else changes. → statement. 404 `STATEMENT_NOT_FOUND`; 409 `STATEMENT_NOT_REPLACEABLE` |
-| POST | `/:id/correction` | Creates the berichtigte Abrechnung of a replaced statement (#120): a draft of the same contract and period with its heating profile and fee rate, `replaces`, `priorPayments`. → 201 statement. 404 `STATEMENT_NOT_FOUND`; 409 `STATEMENT_NOT_REPLACED`, `STATEMENT_ALREADY_CORRECTED` (`number`), `STATEMENT_NO_RENTAL_DAYS_PAID` / `_REFUNDED` / `_SENT` (`number`, `amount`) |
+| POST | `/:id/correction` | Creates the berichtigte Abrechnung of a replaced statement (#120): a draft of the same contract and period with its heating profile and fee rate, `replaces`, `priorPayments`. → 201 statement. 404 `STATEMENT_NOT_FOUND`; 409 `STATEMENT_NOT_REPLACED`, `STATEMENT_ALREADY_CORRECTED` (`number`), `STATEMENT_NO_RENTAL_DAYS_PAID` / `_REFUNDED` / `_SENT` (`number`, `amount`), `STATEMENT_AGREEMENTS_OPEN` (`categories`: a category with costs whose agreement the contract has not answered, #91) |
 | POST | `/:id/payment-reset` | Takes back the payment of a paid statement (#92): status `sent` (reported `overdue` after the deadline), `paidDate` and `paidAmount` cleared, a stored PDF made after the payment was recorded (it says «Bezahlt am …») discarded, the reset appended to `paymentResets` (`{ resetOn, paidDate, paidAmount }`). → statement (see `tests/contracts/statement-payment-reset.json`). 404 `STATEMENT_NOT_FOUND`; 400 `STATEMENT_NOT_PAID` |
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |

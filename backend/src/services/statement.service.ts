@@ -6,6 +6,7 @@
 import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, isNull, getTableColumns } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
+import { recordAudit, recordStatementCorrection } from './audit-log.service';
 import {
 	utilityStatements,
 	utilityStatementLineItems,
@@ -593,7 +594,7 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	// only a PDF made after the payment was recorded says so; the one made before stays, with its row in the Verlauf
 	const { pdfGeneratedAt, paymentRecordedAt } = existing;
 	const paidPdf = pdfGeneratedAt && paymentRecordedAt && pdfGeneratedAt >= paymentRecordedAt;
-	return (await updateStatement(id, {
+	const updated = (await updateStatement(id, {
 		status: 'sent',
 		paidDate: null,
 		paidAmount: null,
@@ -601,6 +602,8 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
+	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: existing.paidDate }); // #357
+	return updated;
 }
 
 /**
@@ -612,8 +615,10 @@ export async function replaceStatement(id: string): Promise<StatementWithDetails
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (!['sent', 'overdue', 'paid'].includes(existing.status))
 		throw new CodedError('STATEMENT_NOT_REPLACEABLE', 'Only a sent or paid statement can be replaced');
-	// the audit log (#111) records the replacement once it exists
-	await db.update(utilityStatements).set({ status: 'replaced', updatedAt: new Date() }).where(eq(utilityStatements.id, id));
+	await db.transaction(async (tx) => {
+		await tx.update(utilityStatements).set({ status: 'replaced', updatedAt: new Date() }).where(eq(utilityStatements.id, id));
+		await recordStatementCorrection(existing, tx); // the Protokoll (#357)
+	});
 	return (await getStatement(id))!;
 }
 

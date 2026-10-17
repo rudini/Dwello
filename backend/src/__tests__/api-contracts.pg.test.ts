@@ -365,6 +365,13 @@ describe('API-Verträge des Frontends', () => {
 		const actual = await (await callApi('/api/v1/config')).json();
 		expect(drift(await sample('config'), actual)).toEqual([]);
 	});
+
+	it('GET /audit-log liefert die Felder von audit-log.json', async () => {
+		await sendJson('POST', '/api/v1/audit-log/logins', { provider: 'google' });
+		const actual = (await (await callApi('/api/v1/audit-log')).json()) as { data: { id: string }[] };
+		expect(drift(await sample('audit-log'), actual)).toEqual([]);
+		await callApi(`/api/v1/audit-log/${actual.data[0].id}`, { method: 'DELETE' });
+	});
 });
 
 // Last: they send and pay the statement the tests above read as a draft

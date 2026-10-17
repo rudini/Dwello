@@ -565,6 +565,14 @@ export const configuration = pgTable(
 	(table) => [uniqueIndex('config_key_idx').on(table.key)]
 );
 
+// The Protokoll under «Einstellungen» (#357): logins and changes, each with its time and a snapshot of what it names
+export const auditLog = pgTable('audit_log', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	occurredAt: timestamp('occurred_at', { withTimezone: true }).defaultNow().notNull(),
+	action: varchar('action', { length: 50 }).notNull(),
+	details: jsonb('details').$type<Record<string, unknown>>().notNull()
+});
+
 // ============================================================================
 // Type Exports for Use in Application
 // ============================================================================
