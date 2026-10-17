@@ -20,14 +20,12 @@ import {
 	noAgreedCostsNote
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
-import { saveStatusLine } from '../targets/wizard';
 
 export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
 export const chosenApartmentId = Value.of(apartmentSelect);
 export const chosenTenantId = Value.of(tenantSelect);
 export const chosenTenantName = Value.chosenIn(tenantSelect);
 export const reviewed = (label: string) => Text.of(reviewItem(label));
-export const saveStatusText = Text.of(saveStatusLine);
 export const confirmation = Text.of(successToast);
 export const durationChosen = (label: string) => Checked.of(durationOption(label));
 export const apartmentHint = Text.of(apartmentContractsUnknown);

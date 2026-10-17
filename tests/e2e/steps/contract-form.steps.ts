@@ -21,14 +21,13 @@ import {
 	rentTakenOverText,
 	reviewed,
 	runningContractHintText,
-	saveStatusText,
 	startHint,
 	tenantChoices,
 	withdrawNoticeHelp
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
-import { restoredDraftText } from '../questions/statement-generate';
+import { restoredDraftText, saveStatusText } from '../questions/wizard';
 import {
 	agreeManagementFee,
 	enterBilledUntil,

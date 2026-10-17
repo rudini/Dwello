@@ -44,12 +44,11 @@ import {
 	settingsChoiceName,
 	createdStatements,
 	discardQuestion,
-	restoredDraftShown,
-	restoredDraftText,
 	statementsInPreview,
 	tankQuestions,
 	totalCostsOf
 } from '../questions/statement-generate';
+import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
 	chooseAllBuildings,
 	chooseBuilding,
