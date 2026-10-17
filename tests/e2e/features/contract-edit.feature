@@ -165,9 +165,11 @@ Funktionalität: Mietvertrag bearbeiten
     Aber nicht die Nebenkosten "Lift"
 
   # Persona Marco W10c P-1: ohne Häkchen rechnet Dwello keine Nebenkosten ab, das soll nicht unbemerkt geschehen
+  # Persona Helga 66b P-2: bei einer Nebenkostenpauschale bleiben die Häkchen leer (#66)
   Szenario: Das Formular warnt, wenn keine Nebenkosten vereinbart sind
     Wenn der Liegenschaftsverwalter alle Nebenkosten abwählt
     Dann warnt das Formular "Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab."
+    Und warnt das Formular "Bezahlt der Mieter alle Nebenkosten mit einer Nebenkostenpauschale, lassen Sie die Häkchen leer."
 
   # #66: eine Mietzinserhöhung folgt Art. 269d OR, nicht nur den Kündigungsfristen
   Szenario: Der laufende Mietvertrag nennt die Regeln einer Mietzinserhöhung

@@ -756,7 +756,7 @@
 	"contracts_agreed_costs_label": "Frais accessoires convenus",
 	"contracts_agreed_costs_none": "Aucun",
 	"contracts_agreed_costs_none_title": "Aucuns frais accessoires convenus",
-	"contracts_agreed_costs_none_text": "Si aucune case n’est cochée, Dwello ne décompte aucuns frais accessoires à ce locataire. Si le contrat de bail signé prévoit des frais accessoires, cochez-les.",
+	"contracts_agreed_costs_none_text": "Si aucune case n’est cochée, Dwello ne décompte aucuns frais accessoires à ce locataire. Si le contrat de bail signé prévoit des frais accessoires, cochez-les. Si le locataire paie tous les frais accessoires par un forfait de frais accessoires, laissez les cases décochées.",
 	"contracts_agreed_costs_help": "Dwello a coché toutes les catégories imputables. Décochez chacune qui ne figure pas dans le contrat de bail signé. Dwello ne décompte au locataire que les frais accessoires cochés. Une formule générale comme « autres frais accessoires » ne suffit pas. Si le contrat de bail mentionne « frais de chauffage », le ramoneur et les autres catégories de frais de chauffage en font partie.",
 	"contracts_agreed_costs_help_edit": "Dwello ne décompte au locataire que les frais accessoires cochés. Une formule générale comme « autres frais accessoires » ne suffit pas. Si le contrat de bail mentionne « frais de chauffage », le ramoneur et les autres catégories de frais de chauffage en font partie. Les décomptes existants ne changent pas. Vous n’introduisez de nouveaux frais accessoires qu’avec la formule officielle, au plus tôt pour le prochain terme de congé ; Dwello ne peut pas encore les décompter à partir d’une date.",
 	"statements_fee_not_agreed_title": "Sans frais de gestion convenus",

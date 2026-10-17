@@ -44,5 +44,9 @@ describe('Vereinbarte Nebenkosten im Mietvertrag', () => {
 		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain(
 			'Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab.'
 		);
+		// persona Helga 66b P-2: a Nebenkostenpauschale leaves every box empty (#66)
+		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain(
+			'Bezahlt der Mieter alle Nebenkosten mit einer Nebenkostenpauschale, lassen Sie die Häkchen leer.'
+		);
 	});
 });

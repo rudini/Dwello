@@ -756,7 +756,7 @@
 	"contracts_agreed_costs_label": "Vereinbarte Nebenkosten",
 	"contracts_agreed_costs_none": "Keine",
 	"contracts_agreed_costs_none_title": "Keine Nebenkosten vereinbart",
-	"contracts_agreed_costs_none_text": "Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab. Stehen im unterschriebenen Mietvertrag Nebenkosten, kreuzen Sie sie an.",
+	"contracts_agreed_costs_none_text": "Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab. Stehen im unterschriebenen Mietvertrag Nebenkosten, kreuzen Sie sie an. Bezahlt der Mieter alle Nebenkosten mit einer Nebenkostenpauschale, lassen Sie die Häkchen leer.",
 	"contracts_agreed_costs_help": "Dwello hat alle umlagefähigen Kategorien angekreuzt. Entfernen Sie das Häkchen bei jeder, die im unterschriebenen Mietvertrag nicht steht. Nur angekreuzte Nebenkosten rechnet Dwello dem Mieter ab. Ein allgemeiner Satz wie «übrige Nebenkosten» genügt nicht. Steht im Mietvertrag «Heizkosten», gehören Kaminfeger und die anderen Heizkosten-Kategorien dazu.",
 	"contracts_agreed_costs_help_edit": "Nur angekreuzte Nebenkosten rechnet Dwello dem Mieter ab. Ein allgemeiner Satz wie «übrige Nebenkosten» genügt nicht. Steht im Mietvertrag «Heizkosten», gehören Kaminfeger und die anderen Heizkosten-Kategorien dazu. Bestehende Abrechnungen ändern sich dadurch nicht. Neue Nebenkosten führen Sie nur mit dem amtlichen Formular ein, frühestens auf den nächsten Kündigungstermin; ab einem Datum abrechnen kann Dwello sie noch nicht.",
 	"statements_fee_not_agreed_title": "Ohne vereinbarte Verwaltungspauschale",
