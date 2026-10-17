@@ -206,7 +206,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Fachreview #69 (V-8, V-11): wozu die Übersetzungen dienen, was die Reihenfolge ordnet
 	it('erklärt die Übersetzungen und die Reihenfolge', () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
 		expect(text()).toContain(
 			'Ihn zeigt die Nebenkostenabrechnung eines Mieters mit dieser Sprache, ebenso Dwello in dieser Sprache. Fehlt er, steht der deutsche Name.'
