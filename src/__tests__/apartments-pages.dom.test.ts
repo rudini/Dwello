@@ -181,7 +181,7 @@ describe('Wohnungsdetail', () => {
 		{
 			id: 'c2',
 			tenantName: 'Beat Huber',
-			rentBrutto: 1430,
+			monthlyTotal: 1430,
 			status: 'active',
 			startDate: '2022-04-01',
 			endDate: null
@@ -189,7 +189,7 @@ describe('Wohnungsdetail', () => {
 		{
 			id: 'c1',
 			tenantName: 'Eva Graf',
-			rentBrutto: 750,
+			monthlyTotal: 750,
 			status: 'ended',
 			startDate: '2018-01-01',
 			endDate: '2022-03-31'
@@ -224,8 +224,8 @@ describe('Wohnungsdetail', () => {
 				}
 			: null,
 		monthlyCosts: rented
-			? { baseRent: 1200, additionalRent: 50, advancePayment: 180, totalBrutto: 1430 }
-			: { baseRent: 0, additionalRent: 0, advancePayment: 0, totalBrutto: 0 },
+			? { baseRent: 1200, additionalRent: 50, advancePayment: 180, monthlyTotal: 1430 }
+			: { baseRent: 0, additionalRent: 0, advancePayment: 0, monthlyTotal: 0 },
 		nextContract: null as null | { tenantId: string; tenantName: string; startDate: string },
 		contractHistory: rented ? history : []
 	});
@@ -324,7 +324,7 @@ describe('Wohnungsdetail', () => {
 			{
 				id: 'c3',
 				tenantName: 'Ruth Meier',
-				rentBrutto: 1630,
+				monthlyTotal: 1630,
 				status: 'future',
 				startDate: '2099-11-01',
 				endDate: null

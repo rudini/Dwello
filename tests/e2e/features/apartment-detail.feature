@@ -16,7 +16,7 @@ Funktionalität: Wohnungsdetail
   Szenario: Aktueller Mieter und monatliche Kosten
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
     Dann wohnt "Beat Huber" in der Wohnung
-    Und kostet die Wohnung monatlich "CHF 950.00" brutto
+    Und beträgt das Monatlich total der Wohnung "CHF 950.00"
     Und hat die Wohnung den Status "Vermietet"
 
   Szenario: Alle Mietverträge der Wohnung

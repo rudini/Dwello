@@ -264,7 +264,7 @@ describe('Tankbestand', () => {
 			}
 		]);
 
-		expect(section()).toContain('Brennstoff im Tank oder Lager');
+		expect(byTestId('fuel-stocks')!.querySelector('h2')!.textContent).toBe('Tankbestand'); // #75
 		expect(section()).toContain('den Wert im Tank oder Lager in Franken'); // Pellets und Holz liegen im Lager
 		expect(section()).toContain(
 			'Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen.'
