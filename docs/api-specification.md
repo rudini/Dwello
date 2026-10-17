@@ -88,10 +88,12 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/` | Query: `apartmentId`, `tenantId`, `buildingId`, `status` (`active`\|`ended`\|`future`), `search`, `limit` (default 50), `offset`. → `{ contracts, total }`; items add `tenantName`, `tenantEmail`, `apartmentNumber`, `buildingName`, `buildingAddress`, `oldAddress` (A-5, #114: the tenant moved out and still has the building's street and postal code; also on `GET /:id` and on statements) |
-| GET | `/:id` | → contract with the same added fields. 404 |
+| GET | `/:id` | → contract with the same added fields and `agreedCategoryIds` (#91: the umlagefähige categories the contract agrees; see `tests/contracts/contract.json`). 404 |
+| GET | `/:id/agreements` | Query: `periodStart`, `periodEnd` (required). → `[{ categoryId, agreed }]` (#91): the categories with costs for the contract in the period (amounts not summing to 0 over days it rents), `agreed` true, false («nicht vereinbart») or null (not answered; not billed) (see `tests/contracts/contract-agreements.json`). 404 `CONTRACT_NOT_FOUND` |
+| PUT | `/:id/agreements` | Body: `categoryId` (uuid), `agreed` (boolean): the landlord's answer, stored on the contract. → the body. 404 `CONTRACT_NOT_FOUND`; 422 without `agreed` |
 | GET | `/apartment/:apartmentId/active` | Query: `date` (default today). → the contract running on that date. 404 if none |
 | GET | `/apartment/:apartmentId/period` | Query: `periodStart`, `periodEnd` (required). → `{ contracts }` overlapping the period (for prorating) |
-| POST | `/` | Body: `apartmentId`, `tenantId` (uuid), `startDate`, `baseRent`, `monthlyAdvancePayment` required; optional `endDate`, `terminated` (boolean: `endDate` is the Kündigungstermin of an open-ended contract; default false), `additionalRent`, `referenceIndex`, `contractPdf`, `notes`. → 201 contract. 400 apartment/tenant not found or overlap with another contract of the apartment |
+| POST | `/` | Body: `apartmentId`, `tenantId` (uuid), `startDate`, `baseRent`, `monthlyAdvancePayment` required; optional `endDate`, `terminated` (boolean: `endDate` is the Kündigungstermin of an open-ended contract; default false), `agreedCategoryIds` (#91: the categories the contract agrees, every other umlagefähige one is stored as not agreed; without it every umlagefähige category is agreed; on PUT the categories it agrees, every other one the contract had answered becomes not agreed, one not answered yet stays so), `additionalRent`, `referenceIndex`, `contractPdf`, `notes`. → 201 contract. 400 apartment/tenant not found or overlap with another contract of the apartment |
 | PUT | `/:id` | Body: any subset of the POST fields; `apartmentId`/`tenantId` only with the stored values, another one is refused with 400 code `CONTRACT_PARTIES_FIXED` (a move or a Mieterwechsel is a new contract); `terminated: true` needs an end date (stored or sent), else 400 code `CONTRACT_NOTICE_WITHOUT_END` (also on POST); `endDate: null` clears `terminated`, even if `terminated: true` is sent; a new `endDate` without `terminated` keeps the stored flag. `noticeReceivedOn` (date or null, A-3): the day the notice arrived, only with a notice; `endDate: null` or `terminated: false` clears it. `movedOut` (boolean, A-6, #115): «Mieter ist ausgezogen» after an agreed end; any change of `endDate` clears it unless it is sent too. → contract (list and detail carry `movedOut`). 404; 400 overlap; 409 `{ error, statements: [{ id, statementNumber, status, periodStart, periodEnd, buildingId }] }` if the new `startDate`/`endDate` change the rent days billed by a utility statement of the contract (stored as `rental_start`/`rental_end` on the statement) (see `tests/contracts/contract-end-refused.json`). Body `deleteDraft` (uuid, #141): a draft of the contract that is deleted in the same transaction when it is the only statement the new dates change; any other refusal keeps it |
 | DELETE | `/:id` | Query `confirmMistake=true`: the landlord confirmed a contract that has started (`startDate` ≤ today) was entered by mistake (A-7, #116). 204. 404; 409 code `CONTRACT_HAS_STATEMENTS` if a utility statement (any status) bills the contract (see `tests/contracts/contract-delete-refused.json`); 409 code `CONTRACT_STARTED` for a started contract without the confirmation |
 
@@ -194,6 +196,27 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 | PUT | `/:key` | Body: `{ value }`. → `{ message, key, value }`. 404 unknown key; 400 invalid value |
 | DELETE | `/:key` | Resets to default. → `{ message, key, value }` (the default). 404 unknown key |
 
+A changed `management_fee_pct` (also a reset to the default; «4.250» equals «4.25») writes a Protokoll entry (#357).
+
+## 11a. Protokoll `/api/v1/audit-log`
+
+Logins and changes that affect statements (#357), each `{ id, occurredAt, action, details }`; `details` is a snapshot of what the entry names (contract `tests/contracts/audit-log.json`):
+
+| `action` | Written by | `details` |
+|---|---|---|
+| `login` | the BFF after the OAuth callback | `provider` (`google` \| `microsoft`) |
+| `management_fee_changed` | `PUT /config`, `PUT`/`DELETE /config/management_fee_pct` | `from`, `to` |
+| `category_allocability_changed` | `PUT /categories/:id` | `categoryId`, `name`, `nameDE`…`nameEN`, `allocable`; when not allocable `invoices` (how many it made not allocable) |
+| `invoice_allocability_changed` | `PUT /invoices/:id`, `POST /invoices/:id/recategorize` | `invoiceId`, `description`, `supplier`, `invoiceDate`, `amount`, `building`, `allocable` |
+| `payment_reset` | `POST /statements/:id/payment-reset` | `statementId`, `number`, `paidDate` |
+| `statement_corrected` | `POST /statements/:id/replace` («Abrechnung berichtigen», #358) | `statementId`, `number` |
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/` | → `{ data: [entry] }`, newest first |
+| POST | `/logins` | Body: `{ provider }`. 201; 422 other provider |
+| DELETE | `/:id` | 204. 404 |
+
 ## 12. Utility statements `/api/v1/statements`
 
 ### Status
@@ -222,7 +245,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | POST | `/:id/send` | Sends a draft (#86). Tenant with `correspondenceChannel: email`: the PDF, dated today with the Zahlungsfrist from today, is e-mailed in the tenant's language and stored as a document (`type: statement`, `channel: email`, `status: sent`); otherwise, or with body `byLetter: true`, the statement is only marked sent as with `PUT /:id/status`. → `{ statement, document? }`. A failed e-mail leaves it a draft without a document (its PDF re-dated today, as viewing a draft's PDF does): 400 `STATEMENT_TENANT_NO_EMAIL`, `STATEMENT_MAIL_NOT_CONFIGURED`, `STATEMENT_MAIL_FAILED`; 400 `STATEMENT_ALREADY_SENT`, `IBAN_MISSING`; 404 `STATEMENT_NOT_FOUND` |
 | PUT | `/:id/status` | Body: `status` required; optional `paidDate`, `paidAmount`, `reminderSentDate`. Paid without `paidAmount` stores the Saldo (#93). `paidDate` is a real day from the Abrechnungsdatum (`statementDate`) up to today (Swiss day), else 400 `PAID_DATE_INVALID {date}`, `PAID_DATE_BEFORE_STATEMENT {date}` (the Abrechnungsdatum), `PAID_DATE_IN_FUTURE {date}` (today) (#138). → statement. 404; 400 invalid transition |
 | POST | `/:id/replace` | Replaces a sent, overdue or paid statement (#120): status `replaced`, nothing else changes. → statement. 404 `STATEMENT_NOT_FOUND`; 409 `STATEMENT_NOT_REPLACEABLE` |
-| POST | `/:id/correction` | Creates the berichtigte Abrechnung of a replaced statement (#120): a draft of the same contract and period with its heating profile and fee rate, `replaces`, `priorPayments`. → 201 statement. 404 `STATEMENT_NOT_FOUND`; 409 `STATEMENT_NOT_REPLACED`, `STATEMENT_ALREADY_CORRECTED` (`number`), `STATEMENT_NO_RENTAL_DAYS_PAID` / `_REFUNDED` / `_SENT` (`number`, `amount`) |
+| POST | `/:id/correction` | Creates the berichtigte Abrechnung of a replaced statement (#120): a draft of the same contract and period with its heating profile and fee rate, `replaces`, `priorPayments`. → 201 statement. 404 `STATEMENT_NOT_FOUND`; 409 `STATEMENT_NOT_REPLACED`, `STATEMENT_ALREADY_CORRECTED` (`number`), `STATEMENT_NO_RENTAL_DAYS_PAID` / `_REFUNDED` / `_SENT` (`number`, `amount`), `STATEMENT_AGREEMENTS_OPEN` (`categories`: a category with costs whose agreement the contract has not answered, #91) |
 | POST | `/:id/payment-reset` | Takes back the payment of a paid statement (#92): status `sent` (reported `overdue` after the deadline), `paidDate` and `paidAmount` cleared, a stored PDF made after the payment was recorded (it says «Bezahlt am …») discarded, the reset appended to `paymentResets` (`{ resetOn, paidDate, paidAmount }`). → statement (see `tests/contracts/statement-payment-reset.json`). 404 `STATEMENT_NOT_FOUND`; 400 `STATEMENT_NOT_PAID` |
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |
@@ -296,7 +319,7 @@ HS256 signed with `JWT_SECRET` (≥ 32 chars). Claims: `sub`, `email`, `name`, `
 
 - Double-submit: `POST`/`PUT`/`DELETE`/`PATCH` to the BFF must send header `X-XSRF-TOKEN` equal to the `dwello_xsrf` cookie; otherwise 400. `apiCall()` in `src/lib/api.ts` adds it.
 - `hooks.server.ts`: without a valid session, pages redirect to `/login?redirectTo=…` and `/api/*` returns 401. Server-side `fetch` to the backend origin gets the JWT added as `Authorization` header.
-- `/api/<resource>` routes forward to `/api/v1/<resource>` with the same query/body and return the backend's status and body unchanged. Proxied: `buildings`, `apartments`, `tenants`, `contracts`, `categories`, `invoices` (incl. `categorize`, `:id/recategorize`), `distribution-keys`, `statements` (incl. `:id/generate-pdf`; `:id/pdf` answers a refusal as a sentence in the UI language, `text/plain`, like `/statements/:id/pdf`), `config`, `dashboard`; plus `GET /api/apartments/check-number?buildingId&number[&excludeId]` → `{ exists, apartmentId?, number? }`. Everything else is called from `+page.server.ts` loads and actions via `src/lib/server/*.ts`.
+- `/api/<resource>` routes forward to `/api/v1/<resource>` with the same query/body and return the backend's status and body unchanged. Proxied: `buildings`, `apartments`, `tenants`, `contracts`, `categories`, `invoices` (incl. `categorize`, `:id/recategorize`), `distribution-keys`, `contracts/:id/agreements` (PUT), `statements` (incl. `:id/generate-pdf`; `:id/pdf` answers a refusal as a sentence in the UI language, `text/plain`, like `/statements/:id/pdf`), `config`, `dashboard`; plus `GET /api/apartments/check-number?buildingId&number[&excludeId]` → `{ exists, apartmentId?, number? }` and `GET /api/statements/agreements?buildingIds&periodStart&periodEnd` → per contract of the run `{ contractId, tenantName, apartmentNumber, open, notAgreed }` (#91, wizard step 3). Everything else is called from `+page.server.ts` loads and actions via `src/lib/server/*.ts`.
 - Errors raised in the BFF itself (auth, XSRF, backend unreachable) have the shape `{ error: { code, message } }` (e.g. `JWT_ERROR`, `VALIDATION_ERROR`), unlike the backend's `{ error: "<message>" }`.
 
 ---

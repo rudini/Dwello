@@ -72,7 +72,7 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 
 // Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two
 // statements); a contract that already has one in the period gets none, so a deleted draft can be created again
-async function contractsInPeriod(fetch: Fetch, request: GenerationRequest) {
+async function contractsInPeriod(fetch: Fetch, request: Run) {
 	return (await contractsOf(fetch, request)).flatMap(({ buildingId, inPeriod, billed }) =>
 		inPeriod.filter((c) => !billed.includes(c)).map((contract) => ({ buildingId, contract }))
 	);
@@ -91,6 +91,32 @@ export async function billedContracts(fetch: Fetch, request: Run) {
 			.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
 			.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }))
 	}));
+}
+
+/**
+ * #91, step «Einstellungen»: per contract this run bills, the categories with costs in the period it has no answer for
+ * (open) and those it does not agree (notAgreed), named in the UI language
+ */
+export async function contractAgreements(fetch: Fetch, request: Run) {
+	const { periodStart, periodEnd } = request;
+	const [contracts, names] = await Promise.all([
+		contractsInPeriod(fetch, request),
+		namesById(fetch, 'categories')
+	]);
+	const rows = await Promise.all(
+		contracts.map(async ({ contract: { id, tenantName, apartmentNumber } }) => {
+			const answers: { categoryId: string; agreed: boolean | null }[] = await call(
+				fetch,
+				`contracts/${id}/agreements?periodStart=${periodStart}&periodEnd=${periodEnd}`
+			);
+			const named = (agreed: boolean | null) =>
+				answers
+					.filter((answer) => answer.agreed === agreed)
+					.map(({ categoryId }) => ({ categoryId, name: names.get(categoryId) ?? categoryId }));
+			return { contractId: id, tenantName, apartmentNumber, open: named(null), notAgreed: named(false) };
+		})
+	);
+	return rows.filter((row) => row.open.length || row.notAgreed.length);
 }
 
 export async function previewStatements(fetch: Fetch, request: GenerationRequest) {

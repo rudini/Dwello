@@ -75,6 +75,7 @@ Funktionalität: Barrierefreiheit
       | contract-new           | draft-restored      |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
+      | contract-new           | agreed-costs-none        |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
       | contract-detail        | end-dialog-error    |
@@ -89,6 +90,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | past-end-error      |
       | contract-edit          | edit-refused        |
       | contract-edit          | contracts-unknown   |
+      | contract-edit          | agreed-costs-none   |
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |
@@ -136,6 +138,9 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
+      | statement-generate     | agreed-costs        |
+      | statement-generate     | agreement-save-failed |
+      | statement-generate     | agreements-failed     |
       | statement-generate     | generation-result   |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
@@ -166,6 +171,9 @@ Funktionalität: Barrierefreiheit
       | documents              | empty               |
       | documents              | marked-sent         |
       | config                 | default             |
+      | audit-log              | default             |
+      | audit-log              | empty               |
+      | audit-log              | delete-dialog       |
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |

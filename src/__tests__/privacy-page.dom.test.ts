@@ -101,6 +101,17 @@ describe('Datenschutzerklärung zu Entwürfen im Browser', () => {
 	});
 });
 
+// Protokoll (#357), Fachprüfung R-1/R-4/R-6: die Erklärung nennt alles, was das Protokoll festhält
+describe('Datenschutzerklärung zum Protokoll', () => {
+	it('nennt auch Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		expect(document.body.textContent).toContain(
+			'sowie zurückgesetzte Zahlungen (mit Abrechnungsnummer und Zahlungsdatum) und Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden (mit ihrer Nummer).'
+		);
+	});
+});
+
 describe('Datenschutzerklärung der öffentlichen Demo', () => {
 	const demoSection = () =>
 		[...document.querySelectorAll('[data-testid="page-section"]')].find((section) =>
@@ -115,6 +126,15 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 		expect(text).toContain('jede Nacht werden alle Änderungen gelöscht');
 		expect(text).toContain(
 			'Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht, nur der Betreiber im Protokoll des Servers'
+		);
+	});
+
+	// Fachprüfung R-3 (#357): das Protokoll unter den Einstellungen teilen sich alle Besucher der Demo
+	it('sagt, dass alle Besucher die Anmeldungen der anderen im Protokoll sehen', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: true, providers: ['Google'] } } as never);
+
+		expect(demoSection()?.textContent).toContain(
+			'In der Demo sehen alle Besucher das Protokoll mit den Anmeldungen der anderen, ohne Namen und E-Mail-Adresse, und können Einträge löschen.'
 		);
 	});
 

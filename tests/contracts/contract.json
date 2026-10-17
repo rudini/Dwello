@@ -13,6 +13,7 @@
 	"monthlyAdvancePayment": "150.00",
 	"managementFeeAgreed": true,
 	"managementFeePercent": null,
+	"agreedCategoryIds": ["5f0c2a7e-3b1d-4c8e-9a6f-2d4e8b1c7a90"],
 	"tenant": { "id": "t1", "firstName": "Anna", "lastName": "Keller" },
 	"apartment": { "id": "a1", "number": "2.01" },
 	"building": { "id": "b1", "name": "Ahornhof", "address": "Ahornweg 1" }
