@@ -33,6 +33,11 @@
 		<CategoryReason {category} />
 	</div>
 	<div class="flex flex-wrap items-center gap-4">
+		<!-- Dwello's own categories stay: the list says which ones (#166) -->
+		<Badge
+			label={category.predefined ? m.categories_kind_predefined() : m.categories_kind_custom()}
+			testid="category-kind"
+		/>
 		<Badge
 			tone={category.isAllowedUtilityCost ? 'positive' : 'neutral'}
 			label={category.isAllowedUtilityCost
@@ -47,7 +52,8 @@
 				variant="danger-ghost"
 				icon="delete"
 				onclick={ondelete}
-				disabled={count > 0}
+				disabled={count > 0 || category.predefined}
+				describedby={category.predefined ? 'category-predefined-note' : undefined}
 				ariaLabel={m.categories_delete_aria({ name })}
 				testid="category-delete-button">{m.buildings_delete()}</Button
 			>
