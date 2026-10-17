@@ -5,6 +5,7 @@ import {
 	confirmDeleteStatementButton,
 	confirmMarkPaidButton,
 	confirmSendButton,
+	deliverByLetterButton,
 	deleteStatementButton,
 	downloadPdfLink,
 	pdfRefusalBackLink,
@@ -34,6 +35,10 @@ export const openSendConfirmation = Click.on(sendStatementButton);
 export const confirmSending = Click.on(confirmSendButton);
 
 export const sendStatement: Activity = (actor) => actor.attemptsTo(openSendConfirmation, confirmSending);
+
+// After a failed e-mail: the PDF goes by letter, confirmed as for a tenant who wants letters
+export const deliverByLetter: Activity = (actor) =>
+	actor.attemptsTo(Click.on(deliverByLetterButton), Click.on(confirmSendButton));
 
 export const markStatementPaid: Activity = (actor) =>
 	actor.attemptsTo(Click.on(markPaidButton), Click.on(confirmMarkPaidButton));

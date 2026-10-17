@@ -368,6 +368,14 @@ describe('API-Verträge des Frontends', () => {
 
 // Last: they send and pay the statement the tests above read as a draft
 describe('API-Verträge der Zahlung', () => {
+	it('POST /statements/:id/send an einen Mieter ohne E-Mail-Adresse liefert die Felder von statement-send-refused.json', async () => {
+		await db.update(tenants).set({ correspondenceChannel: 'email', email: null }).where(eq(tenants.id, rental.tenant));
+		const response = await sendJson('POST', `/api/v1/statements/${statementId}/send`, {});
+		await db.update(tenants).set({ correspondenceChannel: 'letter', email: 'anna.keller@example.ch' }).where(eq(tenants.id, rental.tenant));
+		expect(response.status).toBe(400);
+		expect(drift(await sample('statement-send-refused'), await response.json())).toEqual([]);
+	});
+
 	it('PUT /statements/:id/status mit einem Zahlungsdatum vor dem Abrechnungsdatum liefert die Felder von statement-paid-date-refused.json', async () => {
 		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
 		const response = await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: '2020-01-01' });
