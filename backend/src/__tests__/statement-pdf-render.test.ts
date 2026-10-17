@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { generateStatementPDFBase64, type StatementPDFData } from '../services/pdf.service';
+import { calculateBalance } from '../services/calculation.service';
 import { generateQRBillForStatement } from '../services/qr-bill.service';
 import { readPdf } from './helpers/pdf-text';
 
@@ -28,7 +29,7 @@ const refund: StatementPDFData = {
 	managementFeePercent: 0,
 	totalCosts: 784.13,
 	totalAdvancePayments: 878,
-	balance: -93.85 // 784.13 − 878.00 = −93.87, to 5 Rappen
+	balance: -93.85 // 784.13 − 878.00 = −93.87, commercially to 5 Rappen: a statement made before #79 keeps it
 };
 
 const textOf = async (data: StatementPDFData) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
@@ -92,6 +93,17 @@ describe('Rundung des Saldos im PDF', () => {
 		expect((await textOf(refund)).flowing).toContain('auf 5 Rappen gerundet');
 	});
 
+	// Nur zugunsten des Mieters (#79): die Nachzahlung wird kleiner (–), die Rückerstattung grösser (+), um bis 4 Rappen
+	it('zeigt die Rundung zugunsten des Mieters vom gezeigten Betrag aus', async () => {
+		const rounded = (data: StatementPDFData) => ({ ...data, balance: calculateBalance(data.totalCosts, data.totalAdvancePayments) });
+		expect((await textOf(rounded(due))).flowing).toContain('Nachzahlung vor Rundung 184.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 184.10');
+		expect((await textOf(rounded(refund))).flowing).toContain('Rückerstattung vor Rundung 93.87 Rundung auf 5 Rappen + 0.03 Rückerstattung 93.90');
+		const smallest = rounded({ ...refund, totalCosts: 877.99 });
+		expect((await textOf(smallest)).flowing).toContain('Rückerstattung vor Rundung 0.01 Rundung auf 5 Rappen + 0.04 Rückerstattung 0.05');
+		const evened = rounded({ ...due, totalCosts: 600.03 });
+		expect((await textOf(evened)).flowing).toContain('Nachzahlung vor Rundung 0.03 Rundung auf 5 Rappen – 0.03 Ausgeglichen 0.00');
+	});
+
 	// 1000.02 − 1000.00 gibt nach der Rundung 0: der Text sagt, dass nach der Rundung nichts zu bezahlen ist
 	it('nennt bei einem Saldo von 0 nach der Rundung die Rundung statt gleich hoher Beträge', async () => {
 		const evened = { ...due, totalCosts: 1000.02, totalAdvancePayments: 1000, balance: 0 };
@@ -128,6 +140,24 @@ describe('PDF einer Nachzahlung', () => {
 		const pdf = await textOf({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } });
 
 		expect(pdf.flowing).not.toContain('Zahlbar durch');
+	});
+
+	// Post ins Ausland: das Land in Grossbuchstaben allein auf der letzten Zeile der Adresse, ein Nachbarland in seiner
+	// Sprache, jedes andere englisch; im Zahlteil der Ländercode vor der Postleitzahl, ausser in der Schweiz (#102)
+	it('nennt bei einer Korrespondenzadresse im Ausland das Land in der Adresse und im Zahlteil', async () => {
+		const abroad = { firstName: 'Nina', lastName: 'Brunner', address: 'Marktstätte 3', postalCode: '78462', city: 'Konstanz', country: 'DE' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant: abroad }, config, 'fr'), 'base64'));
+
+		expect(pdf.text).toContain('Nina Brunner\nMarktstätte 3\n78462 Konstanz\nDEUTSCHLAND');
+		expect(pdf.text).toContain('DE-78462 Konstanz');
+		expect(pdf.pages).toBe(2); // the payment part on a page of its own
+		expect(pdf.pageTexts[0]).not.toContain('DE-'); // the address block keeps the postal code alone
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'US' } })).text).toContain('78462 Konstanz\nUNITED STATES');
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'LI' } })).text).toContain('LI-78462 Konstanz');
+		const home = await textOf({ ...due, tenant: { ...abroad, country: 'CH' } });
+		expect(home.text).toContain('78462 Konstanz\n');
+		expect(home.text).not.toContain('SCHWEIZ');
+		expect(home.text).not.toContain('CH-78462');
 	});
 
 	it('wiederholt den Tabellenkopf auf jeder Seite der Kostenübersicht', async () => {

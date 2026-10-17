@@ -72,6 +72,7 @@ export interface StatementForQRBill {
 		address?: string | null;
 		postalCode?: string | null;
 		city?: string | null;
+		country?: string | null;
 	};
 }
 
@@ -88,7 +89,7 @@ export interface QRBillConfig {
 }
 
 /**
- * Validate Swiss IBAN format
+ * Validate a Swiss or Liechtenstein IBAN
  * Swiss IBANs: CH + 2 check digits + 5 bank code + 12 account number = 21 chars
  * Liechtenstein: LI + 2 check digits + 5 bank code + 12 account number = 21 chars
  */
@@ -356,7 +357,7 @@ export async function generateQRBillForStatement(
 		debtorStreet: statement.tenant.address ?? undefined,
 		debtorPostalCode: statement.tenant.postalCode ?? undefined,
 		debtorCity: statement.tenant.city ?? undefined,
-		debtorCountry: 'CH',
+		debtorCountry: statement.tenant.country ?? 'CH',
 
 		referenceType: useQRReference ? 'QRR' : 'NON',
 		reference,

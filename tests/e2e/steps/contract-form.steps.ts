@@ -364,7 +364,7 @@ Then(
 Then(
 	'erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt',
 	async ({ verwalter }) => {
-		await verwalter.sees(partiesHelpText).toContain('unter «Adresse» die Adresse ein, an die die Post für die Erben geht');
+		await verwalter.sees(partiesHelpText).toContain('unter «Korrespondenzadresse» die Adresse ein, an die die Post für die Erben geht');
 	}
 );
 

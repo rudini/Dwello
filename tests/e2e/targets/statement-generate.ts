@@ -79,3 +79,4 @@ export const hintedInvoiceLink = (date: string) =>
 	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>
 		page.getByTestId('hinted-invoice').filter({ hasText: date }).getByRole('link')
 	);
+export const oldAddress = target('Warnung vor der alten Adresse', (page) => page.getByTestId('preview-old-address'));

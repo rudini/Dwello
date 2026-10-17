@@ -300,8 +300,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address
 			Click.on(nextButton),
-			Wait.forValue(startDateInput, '01.01.2100'), // the suggestion arrived, it cannot land in the typed date
-			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
+			Wait.forValue(startDateInput, '01.01.2099'), // the suggestion arrived, it cannot land in the typed date
+			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2098
 			Wait.until(on.overlapWarning)
 		),
 	// the amounts of the apartment's last contract filled in, with the note that says so (#144)
@@ -365,6 +365,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
+	// 2024 with the second building, where Fritz moved out and still has its address (A-5, #114)
+	'old-address-preview': (example) => previewOf('2024', 'preview-old-address')(example, example.tankBuilding),
+	'old-address-task': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Neue Adresse eintragen')))),
 	// a draft from an earlier visit whose building and heating profile were deleted since
 	'draft-dropped': () => (actor) =>
 		actor.attemptsTo(
