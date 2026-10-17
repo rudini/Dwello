@@ -437,6 +437,13 @@ describe('Mietvertrag bearbeiten', () => {
 			await settle();
 			await save();
 			expect(byTestId('form-error')!.textContent).not.toContain('ausserhalb von Dwello');
+			// code review C-13: the button still leads to the wizard
+			calls = fakeBff(({ method }) => (method === 'PUT' ? [200, {}] : [200, { contracts: [] }]));
+			click('delete-draft-and-save');
+			await settle();
+			expect(goto).toHaveBeenCalledWith(
+				'/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+			);
 		});
 
 		// Haiku-Review R5: ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen
