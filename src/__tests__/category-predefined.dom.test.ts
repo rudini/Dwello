@@ -41,6 +41,12 @@ describe('Vordefinierte und eigene Kategorien', () => {
 		show(CategoryForm, { category: seeded, submitLabel: 'Speichern' });
 		expect(pageText()).toContain(PREDEFINED_HELP);
 	});
+
+	// Die Beschreibung nennt, was nicht dazugehört («ohne …», #204); ein einzeiliges Feld schnitt das auf dem Telefon ab
+	it('zeigt die Beschreibung in einem mehrzeiligen Feld', () => {
+		show(CategoryForm, { category: seeded, submitLabel: 'Speichern' });
+		expect(byTestId('category-description-input')?.tagName).toBe('TEXTAREA');
+	});
 });
 
 // #166: Dwello ordnet Rechnungen nach den vordefinierten Kategorien ein; sie sind gekennzeichnet und bleiben

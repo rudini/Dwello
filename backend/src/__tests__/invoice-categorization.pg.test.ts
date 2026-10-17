@@ -217,6 +217,28 @@ describe('Kategorien im Prompt', () => {
 			await sendJson('DELETE', `/api/v1/categories/${category.id}`);
 		}
 	});
+
+	// Eine Installation, eine Räumung oder eine Baumfällung soll die KI nicht umlegen (#204, #220)
+	it('nennt bei Gartenpflege, TV/Kabelanschluss und Kehricht, was nicht dazugehört', async () => {
+		const llm = openAiCompatible({});
+		try {
+			await sendJson('POST', '/api/v1/invoices/categorize', {
+				billingEntityName: 'Kabelnetz AG',
+				description: `Anschluss ans Kabelnetz ${token}`,
+				amount: '450.00'
+			});
+
+			expect(llm.prompts[0]).toContain(`- Garden Maintenance (Gartenpflege): Laufende Pflege von Garten und Umgebung: Rasenmähen, Rückschnitt von Sträuchern, Laub- und Unkrautentfernung; ohne Neubepflanzung, Baumfällung, Rasensanierung und Anschaffung von Geräten\n`);
+			expect(llm.prompts[0]).toContain(
+				'- TV/Cable (TV/Kabelanschluss): Laufende Grundgebühr des Kabelnetzes; ohne Installation des Anschlusses\n'
+			);
+			expect(llm.prompts[0]).toContain(
+				'- Waste Disposal (Kehricht): Kehrichtgebühren und Grünabfuhr; ohne Räumungen, die der Vermieter bestellt\n'
+			);
+		} finally {
+			llm.stop();
+		}
+	});
 });
 
 describe('Kategorien im Prompt nach einer Änderung', () => {
