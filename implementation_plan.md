@@ -10,7 +10,7 @@ Branch `claude/w3d-monatlich-total-tankbestand-62-75`. Both issues have "Done me
 - [x] #75: scenario «Die Gebäudeseite nennt den Bestand im Tank oder Lager Tankbestand» in `building-detail.feature`, `@wip`, seen red
 - [ ] fach-reviewer on the `@wip` scenario and the fr/it/en words before implementing
 - [ ] #75: `buildings_fuel_title` «Tankbestand» in four languages (fr/it/en from `docs/design/i18n-begriffe.md`, not the «citerne / serbatoio» of #315)
-- [ ] #62: rename `grossRent`, `rentBrutto`, `totalBrutto` and the test «Bruttomiete» to Monatlich total names (No scenario: internal names only, no behaviour change; no API field involved)
+- [x] #62: rename `grossRent`, `rentBrutto`, `totalBrutto` and the test «Bruttomiete» to Monatlich total names (No scenario: internal names only, no behaviour change; no API field involved); `grossRent`, `rentBrutto`, `totalBrutto` → `monthlyTotal`
 - [ ] slice review (code-reviewer)
 - [ ] feature review: persona (building page title), fach-reviewer if words changed after round 1
 - [ ] Workflow note / workflow-review if it applies

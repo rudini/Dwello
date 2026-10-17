@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { error } from '@sveltejs/kit';
 import type { ApartmentStatus } from '$lib/types';
-import { contractStatus, grossRent, toContractHistory } from './contract-history';
+import { contractStatus, monthlyTotal, toContractHistory } from './contract-history';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
@@ -65,7 +65,7 @@ export async function loadApartmentDetails(fetch: typeof globalThis.fetch, id: s
 			baseRent: Number(current?.baseRent ?? 0),
 			additionalRent: Number(current?.additionalRent ?? 0),
 			advancePayment: Number(current?.monthlyAdvancePayment ?? 0),
-			totalBrutto: current ? grossRent(current) : 0
+			monthlyTotal: current ? monthlyTotal(current) : 0
 		},
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 		contractHistory: contracts.map((c: Record<string, any>) => toContractHistory(c, c.tenantName))

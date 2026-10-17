@@ -43,7 +43,7 @@ const history = (
 	tenantName: 'Lea Frei',
 	apartment,
 	period: 'alt',
-	rentBrutto: 950,
+	monthlyTotal: 950,
 	status,
 	startDate,
 	endDate

@@ -93,7 +93,7 @@ describe('Mieterdetail', () => {
 				id: 'c1',
 				apartment: 'Wohnung 2.01',
 				status: 'active',
-				rentBrutto: 1050
+				monthlyTotal: 1050
 			}),
 			expect.objectContaining({ id: 'c0', apartment: 'Wohnung 1.01', status: 'ended' })
 		]);
