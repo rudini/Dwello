@@ -72,6 +72,26 @@ export async function resetStatementPayment(fetch: Fetch, id: string): Promise<R
 	return { status: response.status, message: await refusalOf(response, m.statements_reset_payment_failed()) };
 }
 
+/** The statement replaced by a berichtigte Abrechnung to come (#120); null when done, otherwise what to tell the user */
+export async function replaceStatement(fetch: Fetch, id: string): Promise<Refusal | null> {
+	const response = await fetch(`${API}/${id}/replace`, { method: 'POST' });
+	if (response.ok) return null;
+	return {
+		status: response.status,
+		message: await refusalOf(response, m.statements_correct_failed())
+	};
+}
+
+/** The berichtigte Abrechnung of a replaced statement (#120): its id, or what to tell the user */
+export async function correctStatement(fetch: Fetch, id: string): Promise<{ id: string } | Refusal> {
+	const response = await fetch(`${API}/${id}/correction`, { method: 'POST' });
+	if (response.ok) return { id: (await response.json()).id };
+	return {
+		status: response.status,
+		message: await refusalOf(response, m.statements_create_correction_failed())
+	};
+}
+
 type Reminder = { document: StatementDocument; deliveryError?: string };
 
 /** Next reminder (1 to 3), stored as document and sent by e-mail or kept for the letter post */
