@@ -15,4 +15,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Slice review round 1: `docs/reviews/w1c-review-1.md` (C-1, C-5, C-8 fixed)
 - [x] Feature review: personas Marco (`docs/design/personas/marco-w1c.md`, P-3 fixed, P-1 added to #338) and Dr. Weber (`weber-w1c.md`, P-2 fixed, P-1 under "Blocked on me"), Fachreview round 2 `docs/reviews/w1c-fachreview-2.md` (V-14, V-15 fixed)
 - [x] `docs/PRD-Dwello.md`, wizard step «Review & Calculate»
-- [ ] Closing review, workflow review, session archived, pull request `Fixes #132`, merged
+- [x] Workflow review notes: `docs/reviews/workflow-notes-issue-132.md`
+- [x] Second merge of `main` (no conflicts)
+- [ ] Closing code review before the push
+- [ ] Pull request `Fixes #132`, CI green, merged (session archived before the push)
