@@ -139,7 +139,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
-    # main runs every browser, about three times the tests of a pull request (Chromium only)
+    # main runs every browser, about three times the tests of a pull request (Chromium and the API driver)
     timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 60 }}
     strategy:
       fail-fast: false
