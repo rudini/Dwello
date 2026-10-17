@@ -387,6 +387,22 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		expect(summer).toContain('Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
 	});
 
+	// Code-Review 2, C-1: eine Heizposition mit eigenen Tagen, die zusammen null ergibt, gibt den Satz zum Heizprofil
+	// nicht vor; er nennt den Anteil des Laufs, Mai bis Dezember im geänderten Profil 10 + 0 + 0 + 0 + 0 + 30 + 5 + 5 = 50 %
+	it('nennt bei einer Heizposition, die zusammen null ergibt, den Anteil nach Heizprofil des Laufs', async () => {
+		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', description: 'Fernwärme Q1', invoiceDate: '2025-03-31', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-03-31' });
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '-1000.00', description: 'Gutschrift', invoiceDate: '2025-04-30' });
+		const statement = await generateStatement({ contractId: may.contract, buildingId: may.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId: profileId, managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const zero = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await may.remove();
+
+		expect(zero).toContain('50.00 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
+	});
+
 	// Februar 13.9 × 7/28 = 3.475 % genau auf der Hälfte, gerundet 3.48 % (#232): Erläuterung und Position zeigen denselben
 	// Wert (#229, Rundung)
 	it('nennt in der Erläuterung denselben Anteil wie in der Position', async () => {

@@ -720,7 +720,7 @@ const monthList = (shares: { month: number; percentage: number }[], t: Record<st
 	shares.map((m) => `${t.months.split(',')[m.month - 1]}\u00a0${m.percentage.toFixed(2)}\u00a0%`).join(', ');
 const monthSum = (shares: { month: number; percentage: number }[]) =>
 	(shares.reduce((total, m) => total + Math.round(m.percentage * 100), 0) / 100).toFixed(2);
-// a heating position with invoices by the Heizprofil's months in their own days: the run's share is not theirs (#71)
+// a heating position with invoices by their own days (the Heizprofil's months in them, or days): the run's share is not theirs (#71)
 const ownProfileDays = (data: StatementPDFData) => data.lineItems.some((item) => item.byProfile && item.invoiceParts);
 
 // An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241);
