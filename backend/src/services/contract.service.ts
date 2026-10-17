@@ -389,7 +389,7 @@ export async function updateContract(
 	// the draft delete and the change in one transaction: a refused change keeps the draft (#141)
 	const [contract] = await db.transaction(async (tx) => {
 		await checkNewDates(current, data, tx, deleteDraft);
-		if (agreedCategoryIds) await setAgreedCategories(id, agreedCategoryIds, tx);
+		if (agreedCategoryIds) await setAgreedCategories(id, agreedCategoryIds, tx, { answeredOnly: true });
 		return tx
 			.update(rentalContracts)
 			// without an end there is no notice: withdrawing it makes the contract open-ended again; without a notice

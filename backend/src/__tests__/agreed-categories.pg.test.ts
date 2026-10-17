@@ -96,6 +96,10 @@ describe('Vereinbarte Nebenkosten des Mietvertrags', () => {
 		expect(await answers(rental.contract)).toContainEqual({ categoryId: roof, agreed: null });
 		expect((await preview(rental.contract)).totalCosts).toBe(1000);
 
+		// code review W10c S3 C-1: saving the form (it sends the list it shows) leaves an unanswered category unanswered
+		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { agreedCategoryIds: [ids.Caretaker] });
+		expect(await answers(rental.contract)).toContainEqual({ categoryId: roof, agreed: null });
+
 		await sendJson('PUT', `/api/v1/contracts/${rental.contract}/agreements`, { categoryId: roof, agreed: true });
 
 		expect(await answers(rental.contract)).toContainEqual({ categoryId: roof, agreed: true });

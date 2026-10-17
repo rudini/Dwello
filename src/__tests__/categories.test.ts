@@ -275,6 +275,9 @@ describe('Kategorien, die ein Mietvertrag vereinbaren kann', () => {
 
 	// a list that failed to load would save every category as not agreed
 	it('scheitert, wenn die Kategorien nicht geladen werden können', async () => {
-		await expect(agreeableCategories(answer(500))).rejects.toMatchObject({ status: 500 });
+		await expect(agreeableCategories(answer(500))).rejects.toMatchObject({
+			status: 500,
+			body: { message: 'Die Kategorien konnten nicht geladen werden. Laden Sie die Seite neu.' }
+		});
 	});
 });

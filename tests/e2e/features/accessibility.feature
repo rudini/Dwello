@@ -89,6 +89,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | past-end-error      |
       | contract-edit          | edit-refused        |
       | contract-edit          | contracts-unknown   |
+      | contract-edit          | agreed-costs-none   |
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |
@@ -138,6 +139,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | link-preset         |
       | statement-generate     | agreed-costs        |
       | statement-generate     | agreement-save-failed |
+      | statement-generate     | agreements-failed     |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |

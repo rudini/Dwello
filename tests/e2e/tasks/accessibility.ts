@@ -17,6 +17,7 @@ import {
 	PostFormAction,
 	Press,
 	Select,
+	Uncheck,
 	Wait
 } from '../screenplay/interactions';
 import { randomUUID } from 'crypto';
@@ -30,7 +31,7 @@ import {
 	uploadResult
 } from '../targets/invoice-upload';
 import { invoicePdf, uploadBelege } from './invoice-upload';
-import { Visibility } from '../screenplay/questions';
+import { Count, Visibility } from '../screenplay/questions';
 import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
@@ -247,8 +248,19 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	// the link opens the wizard at the settings step with the building and period it names
 	'link-preset': () => Wait.until(on.wizardPreset),
-	// «Weiter» with the questions open: their errors; and the contract not agreeing a category. No answer: it would be
-	// stored, and the next viewport would not be asked any more
+	// every box of the agreed Nebenkosten unticked, not saved: the note that no Nebenkosten are billed
+	'agreed-costs-none': () => async (actor) => {
+		const boxes = await actor.answer(Count.of(on.agreedCategoryBox));
+		for (let box = 0; box < boxes; box++) await actor.attemptsTo(Uncheck.the(on.agreedCategoryBoxAt(box)));
+		await actor.attemptsTo(Wait.until(on.shown('contract-agreed-costs-none')));
+	},
+	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen»
+	'agreements-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/statements/agreements', {}),
+			Navigate.reload,
+			Wait.until(on.shown('agreements-failed'))
+		),
 	// an answer that cannot be saved: the question's error (idempotent, nothing is stored)
 	'agreement-save-failed': () => (actor) =>
 		actor.attemptsTo(
@@ -256,6 +268,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(on.firstAgreementYes),
 			Wait.until(on.formProblem)
 		),
+	// «Weiter» with the questions open: their errors; and the contract not agreeing a category. No answer: it would be
+	// stored, and the next viewport would not be asked any more
 	'agreed-costs': () => (actor) =>
 		actor.attemptsTo(Wait.until(on.shown('not-agreed-costs')), Click.on(nextButton), Wait.until(on.formProblem)),
 	'list-scoped': () => Wait.until(on.listScope),

@@ -37,7 +37,7 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
  */
 export async function agreeableCategories(fetch: typeof globalThis.fetch) {
 	const response = await fetch(`${API}?limit=100`);
-	if (!response.ok) throw error(response.status, m.categories_load_failed());
+	if (!response.ok) throw error(response.status, m.buildings_categories_load_failed());
 	const { categories } = (await response.json()) as { categories: Record<string, unknown>[] };
 	return categories
 		.filter((category) => category.isAllowedUtilityCost)

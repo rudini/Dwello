@@ -86,7 +86,6 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Wenn der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
     Dann meldet die Frage zum Mietvertrag von "Anna Keller" "Ihre Antwort wurde nicht gespeichert. Bitte versuchen Sie es nochmals."
 
-  # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
   # Code-Review W10c C-1: ohne die Prüfung entstünden Abrechnungen ohne die neue Kategorie, ohne dass jemand fragt
   Szenario: Die vereinbarten Nebenkosten lassen sich nicht prüfen
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
@@ -97,6 +96,7 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Dann meldet der Assistent bei den vereinbarten Nebenkosten "Dwello konnte nicht prüfen, ob die Mietverträge alle Nebenkosten dieser Periode vereinbaren."
     Und bleibt der Assistent beim Schritt mit der Verwaltungspauschale
 
+  # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
   Szenario: Das PDF nennt die vereinbarten Nebenkosten
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart

@@ -76,6 +76,22 @@ describe('Daten der Abrechnung im PDF', () => {
 	});
 });
 
+// #91: the PDF names the agreed categories it bills; fach-review W10c round 2 M-1: a position without a category is no
+// agreed category, so the sentence «Abgerechnet sind nur …» would be false next to it
+describe('Vereinbarte Nebenkosten im PDF', () => {
+	const agreed = { ...statement, agreedCategoryIds: ['heating'] } as unknown as StatementWithDetails;
+	const categorised = { ...agreed, lineItems: agreed.lineItems.filter((item) => item.categoryId) } as StatementWithDetails;
+
+	it('nennt die vereinbarten Kategorien, die die Abrechnung abrechnet', () => {
+		expect(toPdfData(categorised, categories, 'de').agreedCosts).toEqual(['Heizung']);
+	});
+
+	it('nennt sie nicht neben einer Position ohne Kategorie, und nicht vor #91', () => {
+		expect(toPdfData(agreed, categories, 'de').agreedCosts).toBeUndefined();
+		expect(toPdfData({ ...categorised, agreedCategoryIds: null } as StatementWithDetails, categories, 'de').agreedCosts).toBeUndefined();
+	});
+});
+
 describe('Heizkosten im PDF', () => {
 	const withProfile = { ...statement, heatingProfileId: 'hp1' } as StatementWithDetails;
 	const run = { rentalStart: '2024-07-15', rentalEnd: '2024-08-31' };
