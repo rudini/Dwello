@@ -57,7 +57,7 @@ describe('Rechnungen in der gewählten Sprache', () => {
 			amount: '',
 			servicePeriodStart: '2026-01-01'
 		});
-		expect(errors.buildingId).toBe('Veuillez choisir un immeuble');
+		expect(errors.buildingId).toBe('Veuillez choisir un immeuble.');
 		expect(errors.servicePeriodEnd).toBe(
 			'Veuillez saisir aussi la fin de la période de prestation.'
 		);

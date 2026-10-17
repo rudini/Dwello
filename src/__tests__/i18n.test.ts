@@ -28,6 +28,23 @@ describe('Sprachdateien', () => {
 		expect(wrong).toEqual([]);
 	});
 
+	// #348: names in «», as everywhere else
+	it.each(languages)('%s setzt Guillemets, keine geraden Anführungszeichen', (language) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && text.includes('"')
+		);
+		expect(wrong).toEqual([]);
+	});
+
+	it.each(languages)('%s schliesst jede Fehlermeldung eines Felds mit einem Punkt', (language) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([key, text]) => key.includes('_error_') && !/[.?!]$/.test(String(text))
+		);
+		expect(wrong).toEqual([]);
+	});
+
 	it('Italienisch sagt «immobile», nicht «stabile»', () => {
 		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
 		const wrong = Object.entries(messages).filter(

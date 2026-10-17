@@ -306,8 +306,32 @@ describe('Heiz- und Warmwasserkosten im PDF', () => {
 
 	// Beim Tank zählt nicht die Rechnung, sondern der Verbrauch
 	it('erklärt in der Fussnote, dass beim Tank der Verbrauch zählt', async () => {
-		expect((await textOf(heated)).flowing).toContain('Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch');
+		expect((await textOf(heated)).flowing).toContain('Kosten des Gebäudes bei Heizmaterial aus dem Tank: der Verbrauch');
 		expect((await textOf(due)).flowing).not.toContain('aus dem Tank');
+	});
+});
+
+// Das PDF nennt das Gebäude und seine Kosten mit den Worten der App (statements_building_costs), nicht «Liegenschaft» (#249)
+describe('Gebäude im PDF', () => {
+	it('sagt «Gebäude» und «Kosten des Gebäudes»', async () => {
+		const { flowing } = await textOf(due);
+
+		expect(flowing).toContain('Gebäude Seepark');
+		expect(flowing).toContain('Kosten des Gebäudes: die Rechnungen der Abrechnungsperiode');
+		expect(flowing).toContain('Wohnungsanteil: der Anteil Ihrer Wohnung an den Kosten des Gebäudes nach dem Verteilschlüssel');
+		expect(flowing).not.toContain('Liegenschaft');
+	});
+
+	it.each([
+		['fr', 'Immeuble Seepark', 'Coûts de l’immeuble', 'la part des coûts de l’immeuble qui revient à votre logement'],
+		['it', 'Immobile Seepark', 'Costi immobile', 'la quota dei costi dell’immobile a carico del suo appartamento'],
+		['en', 'Building Seepark', 'Building costs', 'your apartment’s part of the building costs']
+	] as const)('sagt auf %s die Worte der App', async (language, building, costs, apartmentShare) => {
+		const { flowing } = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, language), 'base64'));
+
+		expect(flowing).toContain(building);
+		expect(flowing).toContain(costs);
+		expect(flowing).toContain(apartmentShare);
 	});
 });
 
