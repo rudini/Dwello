@@ -112,16 +112,17 @@ export async function forwardRequest<T = unknown>(
 	};
 
 	// Prepare fetch options
+	const verb = method.toUpperCase();
 	const fetchOptions: RequestInit = {
-		method: method.toUpperCase(),
+		method: verb,
 		headers,
 		signal: AbortSignal.timeout(
-			method.toUpperCase() === 'POST' && KI_PATH.test(path) ? KI_TIMEOUT : getBackendTimeout()
+			verb === 'POST' && KI_PATH.test(path) ? KI_TIMEOUT : getBackendTimeout()
 		)
 	};
 
 	// Add body for mutation requests
-	if (options.body && MUTATION_METHODS.includes(method.toUpperCase())) {
+	if (options.body && MUTATION_METHODS.includes(verb)) {
 		fetchOptions.body = JSON.stringify(options.body);
 	}
 

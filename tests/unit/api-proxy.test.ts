@@ -202,7 +202,7 @@ describe('API Proxy Helper Functions', () => {
 			['POST', '/invoices/abc-123/recategorize', 300_000],
 			['GET', '/invoices', 30_000],
 			['POST', '/buildings', 30_000]
-		])('wartet bei %s %s auf die KI so lange, wie sie braucht (%i ms)', async (method, path, ms) => {
+		])('bricht %s %s erst nach %i ms ab', async (method, path, ms) => {
 			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 			fetchSpy.mockResolvedValue(new Response('{}', { headers: { 'Content-Type': 'application/json' } }));
 			const timeout = vi.spyOn(AbortSignal, 'timeout');
