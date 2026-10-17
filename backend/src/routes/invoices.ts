@@ -27,6 +27,7 @@ import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/ll
 import { getUtilityCostRules } from '../services/utility-validation.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { buildingExists } from '../services/building.service';
+import { invoiceStatements } from '../services/statement-invoices.service';
 
 // Validation schemas
 const invoiceQuerySchema = t.Object({
@@ -206,6 +207,15 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 			return refusal('INVOICE_NOT_FOUND', 'Invoice not found');
 		}
 		return invoice;
+	})
+	// The periods with statements that bill this invoice, and that lack it as it is now (#96)
+	.get('/:id/statements', async ({ params, set }) => {
+		const periods = await invoiceStatements(params.id);
+		if (!periods) {
+			set.status = 404;
+			return refusal('INVOICE_NOT_FOUND', 'Invoice not found');
+		}
+		return periods;
 	})
 	// The Beleg of an invoice: its uploaded file
 	.get('/:id/document', async ({ params, set }) => {

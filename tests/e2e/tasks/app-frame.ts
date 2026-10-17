@@ -2,6 +2,7 @@ import type { Activity } from '../screenplay/actor';
 import { Browser, Click } from '../screenplay/interactions';
 import {
 	footerLink,
+	helpContentsLink,
 	logo,
 	mainNavLink,
 	privacyLinkOnLogin,
@@ -22,3 +23,4 @@ export const openTermsFromLogin = Click.on(termsLinkOnLogin);
 export const openPrivacyFromLogin = Click.on(privacyLinkOnLogin);
 export const openLoginFromPublicPage = Click.on(publicLoginLink);
 export const openHelpFromPublicPage = Click.on(publicHelpLink);
+export const chooseInHelpContents = (label: string) => Click.on(helpContentsLink(label));

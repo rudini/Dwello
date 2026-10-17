@@ -92,6 +92,9 @@ Funktionalität: Barrierefreiheit
       | contract-detail-notice | delete-unconfirmed  |
       | contract-detail-ended  | default             |
       | contract-detail-ended  | delete-dialog       |
+      | contract-detail-expired | default            |
+      | contract-detail-expired | moved-out-dialog   |
+      | contract-detail-expired | continue-refused   |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
@@ -133,6 +136,7 @@ Funktionalität: Barrierefreiheit
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
+      | statement-parts-detail | default             |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |

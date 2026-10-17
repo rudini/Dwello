@@ -22,7 +22,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	return {
 		invoice: toInvoice(invoice, [...choices.categories, ...choices.distributionKeys]),
-		...(await statementPeriods(fetch, BACKEND_URL, invoice)),
+		...(await statementPeriods(fetch, BACKEND_URL, params.id)),
 		buildings,
 		...choices
 	};

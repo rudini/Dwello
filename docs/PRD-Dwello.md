@@ -537,7 +537,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
   - Total costs and advance payments
   - Balance (refund or additional payment)
 - Ability to adjust individual statement amounts if needed (drafts only)
-- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a draft names invoices recorded after it was created
+- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a statement names the invoices of its period recorded, changed or deleted since it was created (each position keeps the invoices it billed, #96)
 
 **Step 4: Generate PDFs**
 - Generate statement PDF for each rental contract, one per contract and period; at a tenant change each contract gets its own (requirements and sources: `docs/nebenkostenabrechnung-anforderungen.md`):
@@ -639,7 +639,7 @@ BALANCE (refund): CHF 30
 **Reminder Content:**
 - Reference statement number
 - Reference tenant name
-- Outstanding balance
+- Outstanding balance, with a QR payment part (Zahlteil) for it and the statement's QR reference (#108); none once the statement is paid
 - Deadline for payment
 - Building/property manager contact info
 

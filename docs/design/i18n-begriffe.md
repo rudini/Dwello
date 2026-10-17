@@ -76,6 +76,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Tankbestand / Heizmaterial | stock de combustible / combustible | scorta di combustibile / combustibile | fuel stock / fuel |
 | Veränderung Tankbestand | variation du stock de combustible | variazione della scorta di combustibile | change in fuel stock |
 | Anfangsbestand / Endbestand | stock initial / stock final | scorta iniziale / scorta finale | opening stock / closing stock |
+| Tank / Tank stillgelegt (Glossar offen, #315) | citerne / citerne désaffectée | serbatoio / serbatoio dismesso | tank / tank decommissioned |
 | Zeitanteil | part temporelle | quota temporale | time share |
 | Firmenname / Firmenadresse | nom de l’entreprise / adresse de l’entreprise | nome dell’azienda / indirizzo dell’azienda | company name / company address |
 | Übersicht | vue d’ensemble | panoramica | overview |

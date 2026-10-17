@@ -26,6 +26,8 @@ import {
 	missingInvoicesWarning,
 	missingInvoicesWarnings,
 	noContractsInPeriod,
+	periodRunning,
+	missingStockFindings,
 	periodChoiceShown,
 	presetNoticeText,
 	previewHasStatementOf,
@@ -35,6 +37,7 @@ import {
 	createdStatements,
 	restoredDraftText,
 	statementsInPreview,
+	tankQuestions,
 	totalCostsOf
 } from '../questions/statement-generate';
 import {
@@ -51,6 +54,7 @@ import {
 	openStatementWizardFor,
 	recalculatePreview,
 	recordInvoiceFromWarning,
+	recordNoTankFromQuestion,
 	reopenStatementWizard,
 	returnToStatementList,
 	setManagementFee,
@@ -414,3 +418,50 @@ Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom
 When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
 	await verwalter.attemptsTo(editHintedInvoice(date));
 });
+
+// Tankbestand checks (#136, #72)
+Given(
+	'im Gebäude {string} war vor {int} Tagen Heizöl für {string} Franken im Tank',
+	async ({ seed }, building: string, days: number, amount: string) => {
+		await seed.fuelStock(building, inDays(-days), amount);
+	}
+);
+
+Given(
+	'im Gebäude {string} gibt es eine Heizkostenrechnung über {string} Franken von heute',
+	async ({ seed }, building: string, amount: string) => {
+		await seed.invoiceOn(building, 'Heizung', amount, inDays(0));
+	}
+);
+
+Given('das Gebäude {string} hat keinen Tank oder der Tank ist stillgelegt', async ({ seed }, building: string) => {
+	await seed.noTank(building);
+});
+
+// A period relative to today: running whatever day today is
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen von vor {int} Tagen bis in {int} Tagen für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, ago: number, ahead: number, building: string) => {
+		const [periodStart, periodEnd] = [inDays(-ago), inDays(ahead)];
+		await verwalter.attemptsTo(openPreview(Number(periodStart.slice(0, 4)), seed.idOf(building)!, { periodStart, periodEnd }));
+	}
+);
+
+Then('nennt die Prüfung der Kategorien keinen fehlenden Tankbestand', async ({ verwalter }) => {
+	await verwalter.sees(missingStockFindings).toBe(0);
+});
+
+Then('warnt die Vorschau, dass die Abrechnungsperiode noch läuft', async ({ verwalter }) => {
+	await verwalter.sees(periodRunning).toContain('Periode läuft noch');
+});
+
+Then('fragt die Vorschau nicht nach dem Heizmaterial', async ({ verwalter }) => {
+	await verwalter.sees(tankQuestions).toBe(0);
+});
+
+When(
+	'der Liegenschaftsverwalter aus der Frage nach dem Heizmaterial festhalten will, dass {string} keinen Tank hat',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(recordNoTankFromQuestion(seed.idOf(building)!));
+	}
+);

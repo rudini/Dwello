@@ -5,13 +5,35 @@ export const statementLineItem = (category: string) =>
 	target(`Position «${category}» der Abrechnung`, (page) =>
 		page.getByTestId('statement-line-item').filter({ hasText: category })
 	);
-// Columns of a position: Kategorie, Schlüssel, Kosten Gebäude, Anteil, Betrag
+// Columns of a position: Kategorie, Schlüssel, Kosten Gebäude, Wohnungsanteil, Zeitanteil, Anteil, Betrag
 const lineItemCell = (category: string, column: number, name: string) =>
 	target(`${name} der Position «${category}»`, (page) =>
 		statementLineItem(category).locate(page).locator('td').nth(column)
 	);
-export const lineItemShare = (category: string) => lineItemCell(category, 3, 'Anteil');
-export const lineItemAmount = (category: string) => lineItemCell(category, 4, 'Betrag');
+export const lineItemApartmentShare = (category: string) => lineItemCell(category, 3, 'Wohnungsanteil');
+export const lineItemTimeShare = (category: string) => lineItemCell(category, 4, 'Zeitanteil');
+export const lineItemShare = (category: string) => lineItemCell(category, 5, 'Anteil');
+export const lineItemAmount = (category: string) => lineItemCell(category, 6, 'Betrag');
+// The invoices of a position, in the row below it
+export const lineItemInvoices = (category: string) =>
+	target(`Rechnungen der Position «${category}»`, (page) =>
+		statementLineItem(category).locate(page).locator('xpath=following-sibling::tr[1]').getByTestId('statement-line-invoices')
+	);
+export const lineItemInvoice = (category: string, description: string) =>
+	target(`Rechnung «${description}» der Position «${category}»`, (page) =>
+		lineItemInvoices(category).locate(page).getByTestId('statement-line-invoice').filter({ hasText: description })
+	);
+export const lineItemInvoiceLink = (category: string, description: string) =>
+	target(`Link zur Rechnung «${description}» der Position «${category}»`, (page) =>
+		lineItemInvoice(category, description).locate(page).getByTestId('statement-line-invoice-link')
+	);
+export const statementTenancy = target('Mietverhältnis in der Periode', (page) => page.getByTestId('statement-tenancy'));
+export const statementTotalLabel = target('Bezeichnung der Summe der Kosten', (page) =>
+	page.getByTestId('statement-total-costs-label')
+);
+export const statementLaterInvoices = target('Hinweis auf geänderte Rechnungen', (page) =>
+	page.getByTestId('statement-later-invoices')
+);
 export const statementHeatingProfile = target('Heizprofil der Abrechnung', (page) =>
 	page.getByTestId('statement-heating-profile')
 );

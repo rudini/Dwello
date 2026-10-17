@@ -33,7 +33,13 @@
 			"description": "Heating",
 			"totalAmount": "1000.00",
 			"tenantShare": "1000.00",
-			"sharePercentage": "100.0000"
+			"sharePercentage": "100.0000",
+			"apartmentShare": "1000.00",
+			"periodShare": "1.0000",
+			"positionRentalDays": 366,
+			"billedDays": 366,
+			"invoiceParts": null,
+			"invoices": [{ "id": "i1", "description": "Heizöl 2024", "amount": 1000, "start": "2024-01-01", "end": "2024-12-31" }]
 		}
 	],
 	"heatingProfile": { "id": "h1", "name": "Standard" },
