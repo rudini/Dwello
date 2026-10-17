@@ -19,6 +19,10 @@ export function draftsLink({ periodStart, periodEnd, buildingIds }: WizardSelect
 	return `/statements?${params}`;
 }
 
+/** The PDFs of the statements a run created, as one ZIP named after the period (#356) */
+export const zipLink = (ids: string[], { periodStart, periodEnd }: WizardSelection) =>
+	`/statements/zip?${new URLSearchParams({ ids: ids.join(','), periodStart, periodEnd })}`;
+
 // Getters: read when shown, in the language of the request
 const stepNames = [
 	m.statements_step_period,
