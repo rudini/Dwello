@@ -122,8 +122,10 @@ export const chooseTenantWhileLoading = (tenantId: string): Activity => (actor) 
 export const changeBaseRent = (baseRent: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(baseRent).into(baseRentInput), Click.on(contractSubmitButton));
 
+export const enterFlatRateUtilityCharge = (amount: string) => Enter.theValue(amount).into(flatRateInput);
+
 export const changeFlatRateUtilityCharge = (amount: string): Activity => (actor) =>
-	actor.attemptsTo(Enter.theValue(amount).into(flatRateInput), Click.on(contractSubmitButton));
+	actor.attemptsTo(enterFlatRateUtilityCharge(amount), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: the contract ends on a fixed day; a past day is confirmed with its consequence
 export const saveEndDate = (isoDate: string, { confirmPast = false } = {}): Activity => async (actor) => {

@@ -183,3 +183,23 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "120" Franken Nebenkostenpauschale bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Nebenkostenpauschale" mit "CHF 120.00"
     Und zeigt die Prüfung "Monatlich total" mit "CHF 1’070.00"
+
+  # #429 (fach-review V-2): auch die Nebenkostenpauschale des letzten Mietvertrags ist vorgeschlagen (#144)
+  @wip
+  Szenario: Nebenkostenpauschale des letzten Mietvertrags übernehmen
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2024-01-01" bis "2025-12-31" für "900" Franken mit "0" Franken Akonto
+    Und der Mietvertrag von "Bruno Meier" hat "80" Franken Nebenkostenpauschale
+    Und der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann schlägt der Schritt "Miete" die Nebenkostenpauschale "80.00" aus dem letzten Mietvertrag der Wohnung vor
+
+  # #429: ohne Akonto sagt der Hinweis, wo die Nebenkostenpauschale steht; mit Pauschale und Häkchen warnt das Formular,
+  # dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet
+  @wip
+  Szenario: Mit Nebenkostenpauschale warnt das Formular vor angekreuzten Nebenkosten
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann erfährt der Liegenschaftsverwalter, wo er eine Nebenkostenpauschale einträgt
+    Wenn der Liegenschaftsverwalter eine Nebenkostenpauschale von "120" Franken einträgt
+    Dann warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet

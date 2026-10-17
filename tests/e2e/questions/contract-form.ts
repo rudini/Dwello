@@ -21,6 +21,8 @@ import {
 	noAgreedCostsNote,
 	advancePaymentHelp,
 	noAdvanceNotice,
+	flatRateInput,
+	flatRateWarning,
 	runningContractEditHint
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
@@ -52,4 +54,6 @@ export const withdrawNoticeHelp = Text.of(withdrawNoticeOption);
 export const noAgreedCostsWarning = Text.of(noAgreedCostsNote);
 export const advancePaymentHelpText = Text.of(advancePaymentHelp);
 export const noAdvanceNoticeText = Text.of(noAdvanceNotice);
+export const enteredFlatRate = Value.of(flatRateInput);
+export const flatRateWarningText = Text.of(flatRateWarning);
 export const runningContractEditHintText = Text.of(runningContractEditHint);

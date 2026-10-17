@@ -191,4 +191,4 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Nebenkostenpauschale auf "120" Franken setzt
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
     Und zeigt der Mietvertrag die Nebenkostenpauschale "CHF 120.00"
-    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 1’070.00"
+    Und zeigt der Mietvertrag das Monatlich total "CHF 1’070.00"

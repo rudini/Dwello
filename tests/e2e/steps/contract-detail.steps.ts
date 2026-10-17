@@ -315,6 +315,10 @@ Then('zeigt der Mietvertrag die Nebenkostenpauschale {string}', async ({ verwalt
 	await verwalter.sees(flatRateUtilityCharge).toBe(amount);
 });
 
+Then('zeigt der Mietvertrag das Monatlich total {string}', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(totalRent).toBe(amount);
+});
+
 Then(
 	'erfährt der Liegenschaftsverwalter, dass er eine ausserhalb von Dwello abgerechnete Periode mit «Abgerechnet bis» einträgt',
 	async ({ verwalter }) => {

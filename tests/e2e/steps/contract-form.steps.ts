@@ -27,7 +27,9 @@ import {
 	withdrawNoticeHelp,
 	advancePaymentHelpText,
 	noAdvanceNoticeText,
-	runningContractEditHintText
+	runningContractEditHintText,
+	enteredFlatRate,
+	flatRateWarningText
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
@@ -37,6 +39,7 @@ import {
 	enterBilledUntil,
 	changeBaseRent,
 	changeFlatRateUtilityCharge,
+	enterFlatRateUtilityCharge,
 	deleteDraftAndSave,
 	openContractEdit,
 	openNewContract,
@@ -524,3 +527,23 @@ When(
 When('der Liegenschaftsverwalter die Nebenkostenpauschale auf {string} Franken setzt', async ({ verwalter }, amount: string) => {
 	await verwalter.attemptsTo(changeFlatRateUtilityCharge(amount));
 });
+
+When('der Liegenschaftsverwalter eine Nebenkostenpauschale von {string} Franken einträgt', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(enterFlatRateUtilityCharge(amount));
+});
+
+Then('erfährt der Liegenschaftsverwalter, wo er eine Nebenkostenpauschale einträgt', async ({ verwalter }) => {
+	await verwalter.sees(noAdvanceNoticeText).toContain('bei «Nebenkostenpauschale pro Monat» ein');
+});
+
+Then('warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet', async ({ verwalter }) => {
+	await verwalter.sees(flatRateWarningText).toContain('rechnet ihm trotzdem alle angekreuzten Nebenkosten ab');
+});
+
+Then(
+	'schlägt der Schritt "Miete" die Nebenkostenpauschale {string} aus dem letzten Mietvertrag der Wohnung vor',
+	async ({ verwalter }, amount: string) => {
+		await verwalter.sees(enteredFlatRate).toBe(amount);
+		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
