@@ -85,6 +85,7 @@ Funktionalität: Rechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Wenn der Liegenschaftsverwalter die Abrechnungen ohne diese Rechnung öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
+    Und erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen der Abrechnungsperiode des laufenden Jahres zeigt
 
   Szenario: Rechnung mit Beleg löschen
     Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"

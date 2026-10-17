@@ -270,6 +270,10 @@ describe('Rechnungsdetail', () => {
 		const link = byTestId('invoice-missed-warning')!.querySelector('a')!;
 		expect(link.textContent).toBe('Abrechnungen von Seeblick ansehen');
 		expect(link.getAttribute('href')).toBe('/statements?building=b1&periodStart=2024-01-01&periodEnd=2024-12-31');
+		// several periods give links of the same name: each is described by its period's sentence (C-8)
+		expect(document.getElementById(link.getAttribute('aria-describedby')!)!.textContent).toContain(
+			'Abrechnungsperiode 01.01.2024 – 31.12.2024'
+		);
 	});
 
 	it('weist darauf hin, wenn Abrechnungen der Periode diese Rechnung nicht oder mit einem früheren Stand abrechnen', () => {

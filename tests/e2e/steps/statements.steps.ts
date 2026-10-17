@@ -163,6 +163,14 @@ Then(
 	}
 );
 
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen der Abrechnungsperiode des laufenden Jahres zeigt',
+	async ({ verwalter }) => {
+		const year = inDays(0).slice(0, 4);
+		await verwalter.sees(listScope).toContain(`Abrechnungsperiode 01.01.${year} – 31.12.${year}`);
+	}
+);
+
 // the status tabs count what the list can show, not every statement
 Then('zählt die Liste {int} Entwurf/Entwürfe', async ({ verwalter }, count: number) => {
 	await verwalter.sees(countedStatements('draft')).toBe(String(count));
