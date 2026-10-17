@@ -30,6 +30,9 @@ describe('Monatsanteile der vordefinierten Heizprofile', () => {
 
 		expect(shares['Heating Mittelland']).toEqual([17.5, 14.5, 13.5, 9.5, 3.5, 0, 0, 0, 1, 10, 13.5, 17]);
 		expect(shares['Heating + Hot Water']).toEqual([13.6, 12.1, 11.5, 9.3, 5.6, 3.7, 3.7, 3.6, 3.7, 9.5, 10.7, 13]);
+		// Bergregion incl. the July dip to 1.0 %: Mieterverband, «Merkblatt Nebenkostenabrechnung beim Umzug während der
+		// Abrechnungsperiode» (2023), page 2, table «Verteilungsschlüssel in Bergebieten und im Tessin», row «Berggebiete»,
+		// https://www.mieterverband.ch/site/assets/files/2884/merkblatt_nebenkostenabrechnung_waehrend_periode.pdf (#80)
 		expect(shares['Heating Mountain']).toEqual([14, 11.5, 11.5, 9, 7, 4.5, 1, 4, 5.5, 8.5, 10.5, 13]);
 		expect(shares['Heating Tessin']).toEqual([21.5, 17, 15.5, 5, 0, 0, 0, 0, 0, 6, 15, 20]);
 	});
