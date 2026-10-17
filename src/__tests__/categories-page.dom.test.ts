@@ -541,7 +541,7 @@ describe('Grund der Umlagefähigkeit', () => {
 		for (const reason of allReasons(locale))
 			for (const law of laws) {
 				const short = law.split(', ')[1];
-				if (reason.includes(short)) expect([reason, reason.indexOf(short)]).toEqual([reason, reason.indexOf(law) + law.length - short.length]);
+				if (reason.includes(short)) expect(reason.indexOf(short), reason).toBe(reason.indexOf(law) + law.length - short.length);
 			}
 	});
 

@@ -275,6 +275,14 @@ describe('Rechnungsdetail', () => {
 			expect(byTestId('invoice-legal-note')).toBeNull();
 		});
 
+		// «Keiner – … pro Wohnung verteilt» neben «also nicht umlagefähig» widerspräche dem Grund (Personas Helga P-1, Weber P-5)
+		it('sagt bei einer nicht umlagefähigen Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde', () => {
+			show(InvoicePage, { data: { invoice: toInvoice({ ...repairs, distributionKey: null, distributionKeyId: null }) } });
+
+			expect(text()).not.toContain(m.invoices_no_key());
+			expect(text()).not.toContain(m.glossary_key_term());
+		});
+
 		it('nennt keinen Grund, wenn der Liegenschaftsverwalter die Rechnung ausgeschlossen hat', () => {
 			show(InvoicePage, { data: { invoice: toInvoice({ ...invoiceContract, isValidUtilityCost: false }) } });
 

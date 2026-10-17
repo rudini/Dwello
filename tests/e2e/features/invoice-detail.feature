@@ -17,7 +17,7 @@ Funktionalität: Rechnungsdetail
 
   Szenario: Umlagefähige Rechnung nennt den Grund ihrer Kategorie
     Dann ist die Rechnung umlagefähig
-    Und nennt die Rechnung als Grund der Umlagefähigkeit ihrer Kategorie "also umlagefähig."
+    Und nennt die Rechnung als Grund der Umlagefähigkeit ihrer Kategorie "Die Hauswartung ist also umlagefähig."
 
   Szenario: Nicht umlagefähige Rechnung nennt den Grund ihrer Kategorie
     Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung

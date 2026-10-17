@@ -88,7 +88,8 @@ describe('Hilfe', () => {
 		show(HelpPage, {});
 		const glossary = section('Begriffe kurz erklärt')!.textContent;
 		for (const said of [
-			'Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt.',
+			// Wie der Vertragshinweis der Kategorien (#292, Code-Review C-1)
+			'Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt.',
 			'eine einzelne Rechnung einer umlagefähigen Kategorie können Sie davon ausnehmen',
 			'zu einer versendeten Abrechnung mit Nachzahlung',
 			'nach einer eigenen schriftlichen Zahlungsfrist von mindestens 30 Tagen',

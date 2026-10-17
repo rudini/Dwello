@@ -103,7 +103,7 @@
 	"glossary_days_term": "Giorni di locazione",
 	"glossary_days_text": "Il numero di giorni in cui un contratto di locazione è in corso nel periodo di conteggio. Se un inquilino entra o esce durante il periodo di conteggio, paga solo la quota dei suoi giorni di locazione e, per le spese di riscaldamento con un profilo di riscaldamento, la quota dei suoi mesi. I costi dei giorni in cui un appartamento è sfitto sono a carico del locatore.",
 	"glossary_allocable_term": "Addebitabile",
-	"glossary_allocable_text": "Una fattura addebitabile confluisce nel conteggio spese accessorie, per esempio riscaldamento, acqua, custode o rifiuti. Se una fattura è addebitabile dipende dalla sua categoria; può escludere una singola fattura di una categoria addebitabile. L’inquilino deve pagare questi costi solo se il contratto di locazione li indica come spese accessorie.",
+	"glossary_allocable_text": "Una fattura addebitabile confluisce nel conteggio spese accessorie, per esempio riscaldamento, acqua, custode o rifiuti. Se una fattura è addebitabile dipende dalla sua categoria; può escludere una singola fattura di una categoria addebitabile. L’inquilino deve pagare questi costi solo se il contratto di locazione indica singolarmente ciascuno di questi tipi di costi.",
 	"glossary_balance_term": "Saldo",
 	"glossary_balance_text": "La quota dei costi dell’inquilino, spese di gestione comprese, meno i suoi acconti versati, arrotondata a 5 centesimi, solo a favore dell’inquilino: un importo dovuto è arrotondato per difetto, un rimborso per eccesso. Se il saldo è positivo, l’inquilino paga la differenza (importo dovuto); se è negativo, la differenza gli viene rimborsata (rimborso).",
 	"glossary_deadline_term": "Termine di pagamento",

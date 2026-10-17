@@ -38,7 +38,7 @@ Funktionalität: Hilfe
       | Kündigungsfrist         | Zeit zwischen dem Eingang der Kündigung und dem Kündigungstermin |
       | Manuell überschrieben   | «Manuell»                                                       |
       | Abrechnungsperiode      | Ohne Leistungszeitraum bestimmt das Rechnungsdatum, in welche Abrechnungsperiode eine Rechnung fällt. |
-      | Umlagefähig             | Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt. |
+      | Umlagefähig             | Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt. |
       | Mahnung                 | erst nach einer eigenen schriftlichen Zahlungsfrist von mindestens 30 Tagen |
 
   # Inhaltsverzeichnis (#109)

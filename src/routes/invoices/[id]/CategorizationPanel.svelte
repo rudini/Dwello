@@ -22,6 +22,9 @@
 		onrecategorize: () => void;
 	} = $props();
 
+	// Not distributed at all: no «Keiner – … pro Wohnung verteilt» next to the reason (#292, Helga P-1)
+	const showsKey = $derived(!!invoice.distributionKey || invoice.isValidUtilityCost);
+
 	// The KI may take half a minute: its failure shows at the button and takes the focus, so it is in view
 	let feedback: HTMLElement | undefined = $state();
 	$effect(() => {
@@ -41,16 +44,18 @@
 				<dd class="text-ink-muted">{m.invoices_not_categorised()}</dd>
 			{/if}
 		</div>
-		<div class="flex flex-col gap-1">
-			<dt class="text-ink-muted">{m.glossary_key_term()}</dt>
-			{#if invoice.distributionKey}
-				<dd class="font-semibold text-ink" data-testid="invoice-distribution-key">
-					{invoice.distributionKey.name}
-				</dd>
-			{:else}
-				<dd class="text-ink-muted">{m.invoices_no_key()}</dd>
-			{/if}
-		</div>
+		{#if showsKey}
+			<div class="flex flex-col gap-1">
+				<dt class="text-ink-muted">{m.glossary_key_term()}</dt>
+				{#if invoice.distributionKey}
+					<dd class="font-semibold text-ink" data-testid="invoice-distribution-key">
+						{invoice.distributionKey.name}
+					</dd>
+				{:else}
+					<dd class="text-ink-muted">{m.invoices_no_key()}</dd>
+				{/if}
+			</div>
+		{/if}
 		<div class="flex flex-col gap-1">
 			<dt class="text-ink-muted">{m.invoices_allocability()}</dt>
 			<dd data-testid="invoice-utility-cost">
