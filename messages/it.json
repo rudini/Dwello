@@ -1273,8 +1273,6 @@
 	"statements_utility_many": "{count} conteggi spese accessorie",
 	"statements_view_of": "Visualizzare i conteggi di {name}",
 	"statements_existing_note": "I contratti di locazione con un conteggio in questo periodo non ne ricevono uno nuovo. Per ricalcolare una bozza, la elimini e allestisca di nuovo i conteggi.",
-	"statements_partial_title": "Fatture solo per una parte del periodo",
-	"statements_partial_text": "Per {names} ci sono più di tre mesi senza fattura all’inizio o alla fine del periodo di conteggio. Verifichi se mancano ancora fatture.",
 	"statements_confirm_label": "Allestire comunque i conteggi",
 	"statements_preview_empty": "In questo periodo di conteggio non ci sono contratti di locazione senza conteggio negli immobili scelti.",
 	"statements_all_billed_lead": "Tutti i contratti di locazione hanno già un conteggio in questo periodo.",
