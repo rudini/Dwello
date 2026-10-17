@@ -86,6 +86,7 @@ describe('Mietvertrag Schritt für Schritt', () => {
 			{ label: 'Vertragsende', value: 'Unbefristet', step: 3, field: 'duration' },
 			{ label: 'Nettomiete', value: 'CHF\u00a0950.00', step: 4, field: 'baseRent' },
 			{ label: 'Akonto', value: 'CHF\u00a0180.00', step: 4, field: 'advancePayment' },
+			{ label: 'Nebenkostenpauschale', value: 'CHF\u00a00.00', step: 4, field: 'flatRateUtilityCharge' },
 			{ label: 'Zusatzmiete', value: 'CHF\u00a00.00', step: 4, field: 'additionalRent' },
 			{
 				label: 'Verwaltungspauschale',
@@ -100,6 +101,13 @@ describe('Mietvertrag Schritt für Schritt', () => {
 		expect(contractSummary(limited, tenants, apartments)[3].value).toBe(
 			'Donnerstag, 31. Dezember 2026'
 		);
+	});
+
+	// #429: die Nebenkostenpauschale zählt im Monatlich total
+	it('zählt die Nebenkostenpauschale im Monatlich total', () => {
+		const summary = contractSummary({ ...filled, flatRateUtilityCharge: '120' }, tenants, apartments);
+		expect(summary.find((item) => item.field === 'flatRateUtilityCharge')?.value).toBe('CHF 120.00');
+		expect(summary.at(-1)?.value).toBe('CHF 1’250.00');
 	});
 });
 

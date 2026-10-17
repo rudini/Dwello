@@ -171,9 +171,17 @@ describe('contractBody', () => {
 			baseRent: '950',
 			additionalRent: '0',
 			monthlyAdvancePayment: '120',
+			flatRateUtilityCharge: '0',
 			managementFeeAgreed: true,
 			managementFeePercent: null
 		});
+	});
+
+	// #429: die Nebenkostenpauschale geht mit, leer als 0, und kommt beim Bearbeiten zurück ins Formular
+	it('sendet die Nebenkostenpauschale und liest sie beim Bearbeiten', () => {
+		expect(contractBody({ ...filled, flatRateUtilityCharge: '120' }).flatRateUtilityCharge).toBe('120');
+		const contract = { ...filled, id: 'c1', monthlyAdvancePayment: '0', flatRateUtilityCharge: '120.00' };
+		expect(initialContractValues(contract as never, new URLSearchParams()).flatRateUtilityCharge).toBe('120.00');
 	});
 
 	// #133: only the edit form has «Abgerechnet bis»; emptied, it is forgotten

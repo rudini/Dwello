@@ -184,6 +184,18 @@ describe('Monatlich total', () => {
 			})
 		).toBe(1430);
 	});
+
+	// #429: die Nebenkostenpauschale bezahlt der Mieter jeden Monat, abgerechnet wird sie nicht
+	it('zählt die Nebenkostenpauschale dazu', () => {
+		expect(
+			monthlyTotal({
+				baseRent: '1200.00',
+				additionalRent: '50.00',
+				monthlyAdvancePayment: '180.00',
+				flatRateUtilityCharge: '100.00'
+			})
+		).toBe(1530);
+	});
 });
 
 describe('Wohnungsstatus', () => {
