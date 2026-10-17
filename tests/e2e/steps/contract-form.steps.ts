@@ -9,7 +9,6 @@ import {
 	chosenTenantId,
 	chosenTenantName,
 	confirmation,
-	draftRestoredShown,
 	durationChosen,
 	enteredAdvancePayment,
 	enteredBaseRent,
@@ -29,6 +28,7 @@ import {
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
+import { restoredDraftText, saveStatusText } from '../questions/wizard';
 import {
 	agreeManagementFee,
 	enterBilledUntil,
@@ -145,7 +145,7 @@ When('der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder ö
 	await verwalter.attemptsTo(reopenNewContract);
 });
 
-When('der Liegenschaftsverwalter den Entwurf verwirft', async ({ verwalter }) => {
+When('der Liegenschaftsverwalter seine Angaben verwirft', async ({ verwalter }) => {
 	await verwalter.attemptsTo(discardDraft);
 });
 
@@ -179,9 +179,19 @@ Then('ist im Mietvertrag kein Mieter gewählt', async ({ verwalter }) => {
 	await verwalter.sees(chosenTenantId).toBe('');
 });
 
-Then('sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist', async ({ verwalter }) => {
-	await verwalter.sees(draftRestoredShown).toBe(true);
+// Both wizards (#57): the input is «Ihre Angaben», «Entwurf» is only the statement status
+Then('sieht der Liegenschaftsverwalter, dass seine Angaben wiederhergestellt sind', async ({ verwalter }) => {
+	await verwalter.sees(restoredDraftText).toContain('Angaben wiederhergestellt');
 });
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass seine Angaben nur in diesem Browser aufbewahrt und noch nicht gespeichert sind',
+	async ({ verwalter }) => {
+		await verwalter.sees(saveStatusText).toContain(
+			'Noch nicht gespeichert: Dwello bewahrt Ihre Angaben nur in diesem Browser auf.'
+		);
+	}
+);
 
 Then('der Mietvertrag von {string} ist in der Liste auffindbar', async ({ verwalter, names }, tenant: string) => {
 	const name = names.get(tenant) ?? tenant;

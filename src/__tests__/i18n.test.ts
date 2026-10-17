@@ -28,6 +28,15 @@ describe('Sprachdateien', () => {
 		expect(wrong).toEqual([]);
 	});
 
+	// «de« Saisir» once lost its space before « (review #57, C-1)
+	it('Französisch setzt vor « ein Leerzeichen', () => {
+		const messages = JSON.parse(readFileSync('messages/fr.json', 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && /[\p{L}\d]«/u.test(text)
+		);
+		expect(wrong).toEqual([]);
+	});
+
 	// #348: names in «», as everywhere else
 	it.each(languages)('%s setzt Guillemets, keine geraden Anführungszeichen', (language) => {
 		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));

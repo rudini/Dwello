@@ -45,12 +45,11 @@ import {
 	settingsChoiceName,
 	createdStatements,
 	discardQuestion,
-	restoredDraftShown,
-	restoredDraftText,
 	statementsInPreview,
 	tankQuestions,
 	totalCostsOf
 } from '../questions/statement-generate';
+import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
 	chooseAllBuildings,
 	chooseBuilding,
@@ -369,7 +368,7 @@ When('der Liegenschaftsverwalter die Gebäude für die Abrechnungen {int} wähle
 	await verwalter.attemptsTo(chooseBuildingsFor(year));
 });
 
-Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text: string) => {
+Then('sagt der Hinweis auf die wiederhergestellten Angaben {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(restoredDraftText).toContain(text);
 });
 

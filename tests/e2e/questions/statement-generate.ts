@@ -40,7 +40,7 @@ import {
 	wizardChoices,
 	wizardPresetNotice
 } from '../targets/statement-generate';
-import { discardDraftMessage, draftRestored } from '../targets/wizard';
+import { discardDraftMessage } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
 import { amountAfter, signedFrancs } from './amounts';
 
@@ -126,8 +126,6 @@ export const partialInvoicesHints = Count.of(partialInvoices);
 export const invoicesOfBuilding = (buildingName: string) => Text.of(buildingInvoices(buildingName));
 export const draftsOnly = Text.of(draftsOnlyNote);
 export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(buildingId));
-export const restoredDraftText = Text.of(draftRestored);
-export const restoredDraftShown = Visibility.of(draftRestored);
 export const discardQuestion = Text.of(discardDraftMessage);
 export const allBuildingsNoteText = Text.of(allBuildingsNote);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));

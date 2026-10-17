@@ -20,6 +20,9 @@ Funktionalität: Hilfe
       | Zahlungen und Mahnungen            |
       | Begriffe kurz erklärt              |
 
+  Szenario: Die Hilfe sagt, wo ein angefangener Mietvertrag bleibt
+    Dann erklärt die Hilfe unter "Mieter und Mietverträge verwalten" "Erst «Mietvertrag speichern» im letzten Schritt legt den Mietvertrag an. Bis Sie speichern, Ihre Angaben verwerfen oder sich abmelden, bewahrt Dwello sie nur in diesem Browser auf."
+
   Szenario: Die Hilfe nennt das Hochladen mehrerer Rechnungen
     Dann erklärt die Hilfe unter "Rechnungen erfassen" "Mehrere Rechnungen auf einmal: Wählen Sie unter «Rechnungen» «Rechnungen hochladen». Die KI liest die Dateien aus, und Sie prüfen die Angaben, bevor Dwello die Rechnungen erstellt."
 
