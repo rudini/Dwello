@@ -58,24 +58,32 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 	const nextSteps = async (contract: Record<string, unknown>, others: unknown[] | null = []) =>
 		(
 			(await load({ params: { id: 'c1' }, fetch: backend(contract, others) } as never)) as {
-				nextSteps: { successor: boolean } | null;
+				nextSteps: { successor: boolean; ended: boolean } | null;
 			}
 		).nextSteps;
 	const notice = { endDate: '2099-03-31', terminated: true };
 
 	it('nennt sie bei einer laufenden Kündigung ohne Nachmieter', async () => {
-		expect(await nextSteps(notice)).toEqual({ successor: false });
+		expect(await nextSteps(notice)).toEqual({ successor: false, ended: false });
 	});
 
 	// Haiku-Review R2: die neue Adresse braucht es auch, wenn der Nachmieter schon erfasst ist
 	it('nennt mit erfasstem Nachmieter nur noch die neue Adresse', async () => {
 		const successor = { id: 'c2', startDate: '2099-04-01', endDate: null };
-		expect(await nextSteps(notice, [successor])).toEqual({ successor: true });
+		expect(await nextSteps(notice, [successor])).toEqual({ successor: true, ended: false });
 	});
 
 	it('nennt sie nicht nach dem Auszug und nicht ohne Kündigung', async () => {
 		expect(await nextSteps({ endDate: '2021-02-28', terminated: true })).toBeNull();
 		expect(await nextSteps({ endDate: '2099-03-31', terminated: false })).toBeNull();
+	});
+
+	// A-5 (#114): nach dem Auszug geht die Abrechnung sonst an die verlassene Wohnung
+	it('nennt nach dem Vertragsende nur noch die neue Adresse, solange es die Adresse der Wohnung ist', async () => {
+		expect(await nextSteps({ endDate: '2021-02-28', terminated: true, oldAddress: true })).toEqual({
+			successor: false,
+			ended: true
+		});
 	});
 
 	// Haiku-Review R6: lieber kein Hinweis als ein falscher

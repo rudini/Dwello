@@ -95,6 +95,7 @@ export const tenants = pgTable('tenants', {
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),
+	country: varchar('country', { length: 2 }).notNull().default('CH'), // ISO 3166 code of the Korrespondenzadresse
 	correspondenceChannel: varchar('correspondence_channel', { length: 10 }).notNull().default('letter'), // email, letter
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()

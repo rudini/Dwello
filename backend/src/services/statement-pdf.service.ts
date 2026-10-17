@@ -10,7 +10,7 @@ import { roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
-import { datedToday, getStatement, keyValuesOf, type StatementWithDetails } from './statement.service';
+import { datedToday, getStatement, keyValuesOf, updateStatementStatus, type StatementWithDetails } from './statement.service';
 import { refusal } from './coded-error';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
@@ -292,8 +292,7 @@ const storedPdf = async (id: string) =>
 			.select({
 				pdfBlob: utilityStatements.pdfBlob,
 				statementNumber: utilityStatements.statementNumber,
-				status: utilityStatements.status,
-				statementDate: utilityStatements.statementDate
+				status: utilityStatements.status
 			})
 			.from(utilityStatements)
 			.where(eq(utilityStatements.id, id))
@@ -301,17 +300,27 @@ const storedPdf = async (id: string) =>
 	)[0];
 
 /**
- * The PDF the tenant gets (Base64) with the statement number, or why there is none: a draft's as if sent today, and
- * one discarded by sending or paying made again
+ * The PDF the tenant gets (Base64) with the statement number, or why there is none: a draft's made afresh, as if sent
+ * today with the tenant's address and the settings as they are now (personas W3c P-1, P-2), and one discarded by
+ * sending or paying made again
  */
 export async function getStatementPdf(id: string) {
 	let result = await storedPdf(id);
 	if (!result) return { status: 404, refusal: refusal('STATEMENT_NOT_FOUND', 'Statement not found') };
-	const stale = result.status === 'draft' && result.statementDate !== (await datedToday(null)).statementDate;
-	if (!result.pdfBlob || stale) {
+	if (!result.pdfBlob || result.status === 'draft') {
 		if ((await generateStatementPdf(id)) === 'no-iban')
 			return { status: 400, refusal: refusal('IBAN_MISSING', 'IBAN not configured. Please set up company configuration first.') };
 		result = (await storedPdf(id))!;
 	}
 	return { pdfBlob: result.pdfBlob!, statementNumber: result.statementNumber };
+}
+
+/** A status change; when sent, the PDF as sent is made at that moment and kept (closing review C-1) */
+export async function changeStatementStatus(...[id, status, data]: Parameters<typeof updateStatementStatus>) {
+	const statement = await updateStatementStatus(id, status, data);
+	// also when a Saldo of 0 makes it paid at once (review C-3); sent stays sent when the PDF cannot be made now (no
+	// IBAN, a failure): it is made on its first request then
+	if (statement && status === 'sent')
+		await generateStatementPdf(id).catch((error) => console.warn('PDF as sent not made:', error));
+	return statement;
 }

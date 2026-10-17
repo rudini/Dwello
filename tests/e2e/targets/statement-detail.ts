@@ -81,3 +81,4 @@ export const replacedByLink = target('Berichtigte Abrechnung', (page) => page.ge
 export const priorPayments = target('Bereits bezahlt', (page) => page.getByTestId('statement-prior-payments'));
 export const statementBalance = target('Saldo der Abrechnung', (page) => page.getByTestId('statement-balance'));
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
+export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));

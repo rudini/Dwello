@@ -9,4 +9,5 @@ export interface PreviewRow {
 	rentalDays?: number;
 	totalPeriodDays?: number;
 	movedOut?: boolean;
+	oldAddress?: boolean; // A-5 (#114): moved out, still with the building's address
 }

@@ -52,6 +52,19 @@ describe('PDF einer Rückerstattung', () => {
 	});
 });
 
+// #84 FR-7: «1er», not «1e»
+describe('Stockwerk im französischen PDF', () => {
+	it.each([
+		[-1, 'A2, 1er sous-sol'],
+		[-2, 'A2, 2e sous-sol']
+	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'fr'), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
+	});
+});
+
 describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 	// a period whose months carry 0 % in the profile: the calculation shared the heating costs by days
 	const byDays: StatementPDFData = {
@@ -118,7 +131,7 @@ describe('Rundung des Saldos im PDF', () => {
 	// Die Zeile passt in allen Sprachen auf eine Zeile, sonst kann der Saldo allein auf die nächste Seite rutschen
 	it('nennt die Rundung auf Italienisch in einer Zeile mit ihrem Betrag', async () => {
 		const it = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'it'), 'base64')).flowing;
-		expect(it).toContain('Arrotondamento + 0.02');
+		expect(it).toContain('Arrotondamento a 5 centesimi + 0.02');
 		expect(it).toContain('prima dell’arrotondamento 184.13');
 	});
 
@@ -140,6 +153,24 @@ describe('PDF einer Nachzahlung', () => {
 		const pdf = await textOf({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } });
 
 		expect(pdf.flowing).not.toContain('Zahlbar durch');
+	});
+
+	// Post ins Ausland: das Land in Grossbuchstaben allein auf der letzten Zeile der Adresse, ein Nachbarland in seiner
+	// Sprache, jedes andere englisch; im Zahlteil der Ländercode vor der Postleitzahl, ausser in der Schweiz (#102)
+	it('nennt bei einer Korrespondenzadresse im Ausland das Land in der Adresse und im Zahlteil', async () => {
+		const abroad = { firstName: 'Nina', lastName: 'Brunner', address: 'Marktstätte 3', postalCode: '78462', city: 'Konstanz', country: 'DE' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant: abroad }, config, 'fr'), 'base64'));
+
+		expect(pdf.text).toContain('Nina Brunner\nMarktstätte 3\n78462 Konstanz\nDEUTSCHLAND');
+		expect(pdf.text).toContain('DE-78462 Konstanz');
+		expect(pdf.pages).toBe(2); // the payment part on a page of its own
+		expect(pdf.pageTexts[0]).not.toContain('DE-'); // the address block keeps the postal code alone
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'US' } })).text).toContain('78462 Konstanz\nUNITED STATES');
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'LI' } })).text).toContain('LI-78462 Konstanz');
+		const home = await textOf({ ...due, tenant: { ...abroad, country: 'CH' } });
+		expect(home.text).toContain('78462 Konstanz\n');
+		expect(home.text).not.toContain('SCHWEIZ');
+		expect(home.text).not.toContain('CH-78462');
 	});
 
 	it('wiederholt den Tabellenkopf auf jeder Seite der Kostenübersicht', async () => {

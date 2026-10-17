@@ -72,6 +72,24 @@ describe('QR-Rechnung einer Abrechnung', () => {
 		]);
 	});
 
+	// Eine Korrespondenzadresse im Ausland: das Land des Mieters, nicht immer CH (#102)
+	it('schreibt das Land der Korrespondenzadresse in den Zahler', async () => {
+		const tenant = {
+			firstName: 'Eva',
+			lastName: 'Frei',
+			address: 'Marktstätte 3',
+			postalCode: '78462',
+			city: 'Konstanz',
+			country: 'DE'
+		};
+		const { qrDataString } = await generateQRBillForStatement(
+			{ ...statement('a1111111-1111-4111-8111-111111111111'), tenant },
+			config
+		);
+
+		expect(qrDataString.split('\n').slice(20, 27)).toEqual(['S', 'Eva Frei', 'Marktstätte 3', '', '78462', 'Konstanz', 'DE']);
+	});
+
 	// Beispielwerte aus den SIX Implementation Guidelines; eine falsche Prüfziffer lehnt die Bank ab
 	it('prüft IBAN und QR-Referenz mit ihren Prüfziffern', () => {
 		expect(validateIBAN('CH93 0076 2011 6238 5295 7').valid).toBe(true);

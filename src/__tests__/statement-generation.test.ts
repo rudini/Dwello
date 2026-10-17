@@ -119,7 +119,8 @@ describe('Abrechnungen erstellen', () => {
 				balance: -50,
 				rentalDays: 366,
 				totalPeriodDays: 366,
-				movedOut: true
+				movedOut: true,
+				oldAddress: false
 			},
 			{
 				contractId: 'einzug',
@@ -130,7 +131,8 @@ describe('Abrechnungen erstellen', () => {
 				balance: -50,
 				rentalDays: 366,
 				totalPeriodDays: 366,
-				movedOut: false
+				movedOut: false,
+				oldAddress: false
 			}
 		]);
 	});
@@ -143,6 +145,13 @@ describe('Abrechnungen erstellen', () => {
 			['spaeter', true],
 			['bleibt', false]
 		]);
+	});
+
+	// A-5 (#114): der Mietvertrag sagt, ob der ausgezogene Mieter noch die Adresse der Wohnung hat
+	it('übernimmt die alte Adresse eines ausgezogenen Mieters aus dem Mietvertrag', async () => {
+		const { fetch } = backend([], [{ ...contract('auszug', '2020-01-01', '2024-03-31'), oldAddress: true }]);
+
+		expect((await previewStatements(fetch, period)).map((row) => row.oldAddress)).toEqual([true]);
 	});
 
 	it('berechnet die Vorschau mit Periode, Heizprofil und Verwaltungspauschale', async () => {

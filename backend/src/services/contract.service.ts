@@ -16,6 +16,7 @@ import {
 } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import { oldAddress } from './old-address';
 import { swissToday } from './today';
 
 /** The database, or a transaction of it */
@@ -45,7 +46,8 @@ const contractFields = {
 	tenantEmail: tenants.email,
 	apartmentNumber: apartments.number,
 	buildingName: buildings.name,
-	buildingAddress: buildings.address
+	buildingAddress: buildings.address,
+	oldAddress: oldAddress(rentalContracts.id) // A-5: a moved-out tenant still has the building's address
 };
 
 /** Contracts with their tenant, apartment and building, as contractFields */
@@ -83,6 +85,7 @@ export interface ContractWithDetails extends RentalContract {
 	apartmentNumber: string;
 	buildingName: string;
 	buildingAddress: string;
+	oldAddress: boolean;
 }
 
 /**

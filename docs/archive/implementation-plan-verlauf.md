@@ -963,3 +963,74 @@ Files: `backend/src/services/{pdf.service,reminder-pdf,reminder.service,statemen
 - [x] Pull request `Fixes #79` (session archived before the push)
 
 Files: `backend/src/services/pdf-format.ts`, `backend/migrations/0016_statement_balance_tenant_favour.sql`, `messages/*.json`, `tests/e2e/features/statement-rounding.feature`, tests (`statement-pdf-data`, `statement-pdf-render`, `statement-generation.pg`, `migrations.pg`, `help-page.dom`, `statement-pages.dom`), docs (`PRD-Dwello.md`, `data-model.md`, `design-decisions.md`, `nebenkostenabrechnung-anforderungen.md`)
+
+## Session: no Vertragsbeginn the wizard's own check refuses (#296)
+
+Request: «Setze #296 um» (coordinator W10b). Chosen fix: suggest nothing outside the accepted years 19xx/20xx; widening the range would weaken the typo check for a case only test data reaches.
+
+#296: the contract wizard never suggests a Vertragsbeginn its own date check refuses.
+
+- [x] Unit test: `suggestedStartDate` suggests nothing when the day the apartment becomes free lies in a year `impossible` refuses (red first)
+- [x] Fix: `impossible` moves to `contract-form.ts`, `suggestedStartDate` uses it (no import cycle); `statement-wizard.ts` imports it from there
+- [x] Test data that meant "free in the future" with a contract ending 2099-12-31 now ends 2098-12-31 (free from 2099): `contract-wizard.dom.test.ts`, `tests/e2e/fixtures/screens.ts`, axe state `overlap-warning` in `tests/e2e/tasks/accessibility.ts`
+- [x] Slice review round 1 (`code-reviewer`): `docs/reviews/296-review-1.md`
+- [x] Same check for the start taken over from the URL (`initialContractValues`, «Neuen Mietvertrag … erfassen» after a contract ending 2099); `impossibleYear` moves with `impossible`
+- [x] Closing code review round 2 (`docs/reviews/296-review-2.md`): no findings
+- [x] Checks: lint, check, type-check, full vitest, axe/language rows of the contract screens
+- [x] Workflow note: session started detached without a branch (`docs/reviews/workflow-notes-issue-296.md`)
+- [x] Merged origin/main (conflicts in `statement-wizard.ts` imports, Carla's contract in `screens.ts` next to #89's management fee, this archive); merge review `docs/reviews/296-review-merge.md`: no Blocker/Major
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `src/lib/{contract-form,contract-wizard,statement-wizard}.ts`, tests in `src/__tests__/{contract-form,contract-wizard.dom,contracts-i18n}.test.ts`, `tests/e2e/fixtures/screens.ts`, `tests/e2e/tasks/accessibility.ts`.
+
+No scenario: the E2E data would need a contract that ends in 2099 (issue #296).
+
+## Session: Korrespondenzadresse, country and IBAN (#68, #102, #191, #114)
+
+Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (product owner)" sections are the requirement (#68, #102, #191); #114 has its own "Done means".
+
+- [x] #191: scenarios in `settings.feature` (Liechtenstein IBAN saved; error names CH and LI), `@wip`
+- [x] #68: scenario in `tenant-new.feature` (field «Korrespondenzadresse» with its help), `@wip`
+- [x] #102: scenarios for a Korrespondenzadresse abroad (tenant detail; statement PDF address block and payment part), `@wip`
+- [x] #114: scenario «Abrechnung an einen ausgezogenen Mieter mit alter Adresse» in `statement-detail.feature`, `@wip`
+- [x] fach-reviewer on the `@wip` scenarios before implementing: `docs/reviews/w3c-fachreview-1.md`
+- [x] #191: settings form accepts CH and LI with MOD-97; `settings_error_iban` in four languages; PRD one rule
+- [x] #68: legend «Korrespondenzadresse» and help at the field (four languages); tenant detail label
+- [x] #102: migration `0017_tenant_country.sql` (default CH); form select; BFF and backend validation; QR-bill debtor country; PDF address block of statement and reminder
+- [x] #114: next-steps text, `nextStepsDue` keeps the address step; warning in wizard preview and send dialog; overview task; `docs/anforderungen-vertragsende.md` A-5 implemented
+- [x] slice reviews (code-reviewer) per slice
+  - [x] iban: `docs/reviews/iban-review-1.md` (Nits C-1 to C-3 fixed)
+  - [x] address: `docs/reviews/address-review-1.md` (Major C-1 fixed), round 2 `docs/reviews/address-review-2.md`
+  - [x] oldaddr: `docs/reviews/oldaddr-review-1.md` (Major C-1: scenario checks the recipient abroad)
+  - [x] oldaddr round 2 `docs/reviews/oldaddr-review-2.md` (Majors C-9, C-10 fixed)
+  - [x] oldaddr round 3 `docs/reviews/oldaddr-review-3.md` (Major C-16 fixed)
+  - [x] closing review `docs/reviews/closing-review-1.md` (merge resolution confirmed; Minor C-1 fixed: the PDF as sent is made when sending)
+  - [x] closing review round 2 `docs/reviews/closing-review-2.md` (Minors C-3 to C-5 fixed)
+  - [x] closing review round 3 `docs/reviews/closing-review-3.md` (C-8 to C-10 fixed; stay: C-4 test of a PDF failure on sending, C-6, C-7 — the parties panel showing the building's address predates this change and is not part of #114)
+  - [x] merge with main (A-6 #115): `docs/reviews/merge-review-2.md` (Major C-1 fixed: an agreed end counts for A-5 as A-6 sees it), round 2 `docs/reviews/merge-review-3.md` (Major C-4 fixed: a later contract in the apartment counts too)
+- [x] feature review: persona(s), fach-reviewer, daten-pruefer (QR-bill, PDF)
+  - [x] fach-reviewer `docs/reviews/w3c-fachreview-2.md` (V-11, V-12, V-14 fixed)
+  - [x] personas `docs/design/personas/anna-w3c.md`, `helga-w3c.md` (P-1 both, Helga P-2: a draft's PDF is made afresh on request; Anna P-2: the draft's page warns too)
+  - [x] daten-pruefer `docs/reviews/w3c-datenpruefung-1.md` (no findings)
+  - [x] Anna re-run `docs/design/personas/anna-w3c-2.md` (P-2 fixed; her new Minors stay: sending despite the warning was decided in #114); daten-pruefer round 2 `docs/reviews/w3c-datenpruefung-2.md` (Minor D-1 stays: only the API reaches it, named in the API specification)
+- [x] a11y and language screens: `dashboard` `old-address-task`, `statement-generate` `old-address-preview`, new screens `statement-old-address-detail`, `contract-moved-out-detail`; the language check masks country names from Intl
+- [x] Blocked on me: the glossary already has «Korrespondenzadresse» with country; only its code column («Land geplant (#102)») is the product owner's
+
+- [x] Workflow note: `docs/reviews/workflow-notes-w3c.md`
+
+Files changed (#114 too: `backend/src/services/{old-address,contract}.ts`, `src/routes/contracts/[id]/`, `src/routes/statements/[id]/`, `src/routes/statements/generate/`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `tests/a11y/screens.json`, `docs/api-specification.md`): `src/lib/server/settings.ts`, `messages/*.json`, `docs/PRD-Dwello.md`, `backend/migrations/0017_tenant_country.sql`, `backend/src/db/schema.ts`, `docs/data-model.md`, `backend/src/routes/tenants.ts`, `backend/src/services/{tenant,statement,qr-bill,pdf,reminder-pdf,postal-address}.ts`, `src/lib/{tenant,types}.ts`, `src/lib/server/{tenant,tenant-form}.ts`, `src/routes/tenants/TenantFormFields.svelte`, `src/routes/tenants/[id]/TenantContactCard.svelte`, `docs/design/i18n-begriffe.md`, `docs/anforderungen-vertragsende.md`, `tests/contracts/tenant.json`, E2E features and steps.
+
+## Session 2026-10-17 W4d: #83 #84 (W4d) fr/it/en terms from Fedlex, AI native read of tenant texts
+
+Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/ZGB, VMWG in fr/it) where one exists, a native speaker only for the rest, English plain words. #84 Option B: an AI model reads the texts a tenant sees (statement PDF, reminder letters, e-mails) as a native speaker; the landlord UI later. Both "Done means" are worded as decision issues: the decision is the requirement. Fedlex read with single `curl` downloads (WebFetch got 503): SR 220 of 1.10.2026, SR 221.213.11 of 1.10.2025, fr and it.
+
+- [x] fach-reviewer on the term proposal (Fedlex words for the ❓ terms and «Kündigungsfrist»), before any text changes: `docs/reviews/w4d-terms-fachreview-1.md`
+- [x] #83: terms with a Fedlex word in `docs/design/i18n-begriffe.md`, `messages/{fr,it,en}.json`, PDF and letter texts; terms pinned in `src/__tests__/i18n.test.ts` (red first). Kündigungsfrist fr «délai de congé», it «termine di preavviso»; Kündigungstermin fr «terme de congé»; it «addebitabile» settled; English ❓ removed. Files: `messages/{fr,it}.json`, `docs/design/i18n-begriffe.md`, `src/__tests__/i18n.test.ts`. No scenario: wording of existing texts only, pinned by `i18n.test.ts`; `sprachen-bildschirme.feature` checks the screens
+- [x] #83: remaining ❓ terms (no Fedlex word: Umlagefähig fr, Mahnung family, Abrechnungslauf, Konfidenz, Kündigung aufheben) for a native speaker: #342; scope of Option B for «inquilino»/«pigione»: #343
+- [x] #84: AI native reads (fr, it, en) of statement PDF, reminder letters and e-mail: `docs/reviews/w4d-native-{fr,it,en}.md`; triage reviewed by fach-reviewer (`docs/reviews/w4d-tenanttexts-fachreview-1.md`), applied as text changes in `backend/src/services/pdf.service.ts`, `backend/src/services/reminder-letter.ts`, `messages/{fr,en}.json` (`statements_balance_settled`, V-1), `docs/design/i18n-begriffe.md` (row «Ausgeglichen»); pinned tests updated (`statements-i18n.test.ts`, `statement-pdf-render.test.ts`). Deferred: invoice lines to #256, tenancy line to #325, salutation, «umgehend» with a deadline and English floors to #344, master-data names to #345. No scenario: reviewed translation wording (skill slice-review, Triage)
+- [x] code-reviewer slice 1: `docs/reviews/w4d-s1-review-1.md`
+- [x] code-reviewer slice 2: `docs/reviews/w4d-s2-review-1.md`
+- [x] #84: German findings of `i18n-native-de.md` still open listed in the issue (comment on #84) and in implementation issue #348; landlord UI read later: #349
+- [x] code-reviewer per slice; feature review: persona Dr. Weber on the fr/it/en PDFs and letters, 2 rounds (`docs/design/personas/dr-weber-w4d.md`; round 1 read German refund PDFs cached before the SQL language change → bug #351); fach-reviewer covered by the two reviews before implementation (no domain change since); no daten-pruefer (no amounts changed)
+- [x] Workflow review: `docs/reviews/workflow-notes-issue-83-84.md`; E2E: language and axe rows of contract, statement and help screens and `statement-reminder.feature` (148 passed); archive the session
+- [ ] PR `Fixes #83` `Fixes #84`, CI, merge

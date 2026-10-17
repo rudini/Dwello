@@ -66,6 +66,7 @@ export interface Tenant {
 	address?: string | null;
 	postalCode?: string | null;
 	city?: string | null;
+	country?: string; // ISO 3166 code of the Korrespondenzadresse, CH by default
 	correspondenceChannel?: 'email' | 'letter';
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -326,6 +327,7 @@ export interface Statement {
 	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	lastReminderDate?: string;
 	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
+	oldAddress?: boolean; // A-5 (#114): the moved-out tenant still has the building's address
 	pdfGeneratedAt?: string;
 	notes?: string | null;
 	createdAt?: string;

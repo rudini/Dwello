@@ -30,7 +30,8 @@ import {
 	statementLaterInvoices,
 	statementTenancy,
 	statementTotalLabel,
-	statementStatus
+	statementStatus,
+	oldAddressWarning
 } from '../targets/statement-detail';
 import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
@@ -98,3 +99,4 @@ export const changeOffers = question('the offers to pay, remind, edit or correct
 		Promise.resolve(0)
 	)
 );
+export const oldAddressWarningText = Text.of(oldAddressWarning);

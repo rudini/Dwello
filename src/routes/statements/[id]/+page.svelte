@@ -25,6 +25,7 @@
 	import { localToday } from '$lib/contract-status';
 	import MetadataCard from './MetadataCard.svelte';
 	import MoreActions from './MoreActions.svelte';
+	import OldAddressWarning from './OldAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
 	import PdfAction from './PdfAction.svelte';
@@ -153,6 +154,7 @@
 	</p>
 
 	<Correction {statement} bind:open={showCorrect} />
+	<OldAddressWarning {statement} testid="statement-old-address" />
 
 	{#if data.laterInvoices}
 		<!-- a draft is created again; a sent statement is corrected by a berichtigte Abrechnung (it cannot be deleted) -->
