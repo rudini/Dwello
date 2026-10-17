@@ -86,6 +86,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Veränderung Tankbestand {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partShare: 'Ihr Anteil{colon}{apartment} × ({sum}) / {costs} = {share}',
+		partNamed: '{line} (Rechnung «{description}»)',
 		yourCosts: 'Ihre Nebenkosten',
 		pageOf: 'Seite {page} von {pages}',
 		tenancyLine: 'Ihr Mietverhältnis in dieser Periode: {start} – {end} ({days} Mietstage von {total} Tagen)',
@@ -172,6 +173,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Variation du stock de combustible {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
 		partLine: 'Période de prestation {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
 		partShare: 'Votre part{colon}{apartment} × ({sum}) / {costs} = {share}',
+		partNamed: '{line} (facture « {description} »)',
 		yourCosts: 'Vos frais accessoires',
 		pageOf: 'Page {page} sur {pages}',
 		tenancyLine: 'Votre bail pendant la période : {start} – {end} ({days} jours sur {total})',
@@ -258,6 +260,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Variazione della scorta di combustibile {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
 		partLine: 'Periodo di prestazione {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
 		partShare: 'La sua quota{colon}{apartment} × ({sum}) / {costs} = {share}',
+		partNamed: '{line} (fattura «{description}»)',
 		yourCosts: 'Le sue spese accessorie',
 		pageOf: 'Pagina {page} di {pages}',
 		tenancyLine: 'La sua locazione in questo periodo: {start} – {end} ({days} giorni su {total})',
@@ -344,6 +347,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Change in fuel stock {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
 		partLine: 'Service period {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
 		partShare: 'Your share{colon}{apartment} × ({sum}) / {costs} = {share}',
+		partNamed: '{line} (invoice ‘{description}’)',
 		yourCosts: 'Your utility costs',
 		pageOf: 'Page {page} of {pages}',
 		tenancyLine: 'Your tenancy in this period: {start} – {end} ({days} of {total} days)',
@@ -379,6 +383,8 @@ const translations: Record<Language, Record<string, string>> = {
 	}
 };
 
+type Part = InvoicePart & { description?: string }; // the invoice's description, not on statements before #96
+
 /**
  * Statement line item
  */
@@ -390,7 +396,7 @@ export interface LineItem {
 	apartmentShare?: number | null; // the apartment's part of the total by the key; none on older statements
 	periodShare?: number | null; // 0-1: days rented, or the heating profile's share
 	shareDays?: { days: number; total: number }; // the period share as days, when the statement stored them (#208)
-	invoiceParts?: InvoicePart[] | null; // the invoices of a position over different days, with their days (#226)
+	invoiceParts?: Part[] | null; // the invoices of a position over different days, with their days (#226)
 	byProfile?: boolean; // shared by the heating profile, not by days
 	heating?: boolean; // a heating cost: the tenant may ask for the detailed heating statement (Art. 8 Abs. 1 VMWG)
 	tenantShare: number;
@@ -749,9 +755,14 @@ function costTable(page: Page, y: number) {
 // The invoices of a position over different days and the sum that weighs them by amount (#226): the tenant recomputes
 // the Zeitanteil, and «Ihr Anteil» as Wohnungsanteil × that sum
 function partLines(item: LineItem, t: Record<string, string>) {
-	if (!item.invoiceParts || item.apartmentShare == null) return [];
-	const lines = item.invoiceParts.map((part) => fill(t[partText(part)], partValues(part, t.colon)));
-	const sum = item.invoiceParts.map((part) => `${formatCHF(part.amount)} × ${part.days}/${part.total}`).join(' + ');
+	const parts = item.invoiceParts;
+	if (!parts || item.apartmentShare == null) return [];
+	const texts = parts.map((part) => fill(t[partText(part)], partValues(part, t.colon)));
+	const lines = texts.map((line, i) => {
+		const description = nameOf(parts[i], texts.filter((text) => text === line).length);
+		return description ? fill(t.partNamed, { line, description }) : line;
+	});
+	const sum = parts.map((part) => `${formatCHF(part.amount)} × ${part.days}/${part.total}`).join(' + ');
 	const share = { apartment: formatCHF(item.apartmentShare), sum, costs: formatCHF(item.totalAmount), share: formatCHF(item.tenantShare), colon: t.colon };
 	return [...lines, fill(t.partShare, share)];
 }
@@ -760,6 +771,9 @@ function partLines(item: LineItem, t: Record<string, string>) {
 // the change of the Tankbestand is no invoice and says so (#239)
 const partText = (part: InvoicePart) =>
 	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.whole ? 'partBeyond' : 'partLine';
+// A line names its invoice where dates and amount match no single receipt: without a Leistungszeitraum (its dates are
+// the period's) or the same as another line's (#236); the Tankbestand, once per position, never is
+const nameOf = (part: Part, same: number) => (part.noPeriod || same > 1 ? part.description : undefined);
 const partValues = ({ start, end, amount, days, total, whole }: InvoicePart, colon: string) => ({
 	start: formatDate(start),
 	end: formatDate(end),

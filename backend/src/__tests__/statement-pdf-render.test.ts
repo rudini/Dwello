@@ -342,6 +342,20 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(text).toContain(beyond);
 	});
 
+	// #236: eine Zeile ohne Leistungszeitraum nennt ihre Rechnung, in jeder Sprache; die eindeutige nicht
+	it.each([
+		['de', 'Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode (Rechnung «Hauswartung Q3»)'],
+		['fr', 'Sans période de prestation : CHF 600.00, vos jours de location 139 sur 365 jours de la période de décompte (facture « Hauswartung Q3 »)'],
+		['it', 'Senza periodo di prestazione: CHF 600.00, i suoi giorni di locazione 139 su 365 giorni del periodo di conteggio (fattura «Hauswartung Q3»)'],
+		['en', 'Without a service period: CHF 600.00, your days rented 139 of 365 days of the billing period (invoice ‘Hauswartung Q3’)']
+	] as const)('nennt die Rechnung einer Zeile ohne Leistungszeitraum auf %s', async (language, line) => {
+		const named = [{ ...special[0], description: 'Hauswartung Q3' }, { ...special[1], description: 'Hauswartung Winter' }];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: named, tenantShare: 512.08 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+		expect(text).toContain(line);
+		expect(text).not.toContain('Hauswartung Winter');
+	});
+
 	// #239: die Veränderung des Tankbestands ist keine Rechnung, in jeder Sprache
 	it.each([
 		['de', 'Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen'],
