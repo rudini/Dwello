@@ -60,7 +60,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnungsperiode | période de décompte | periodo di conteggio | billing period |
 | Abrechnungsposition | poste du décompte | voce del conteggio | statement line |
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |
-| Kosten Liegenschaft | coûts de l’immeuble | costi immobile | building costs |
+| Kosten des Gebäudes | coûts de l’immeuble | costi immobile | building costs |
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |
 | Ausgeglichen (Saldo 0) | solde nul | in pareggio | nil balance |
