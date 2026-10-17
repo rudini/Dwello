@@ -42,7 +42,7 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 		expect([balanceLabel(120), balanceLabel(-80), balanceLabel(0)]).toEqual([
 			'Montant à payer',
 			'Remboursement',
-			'Soldé'
+			'Solde nul'
 		]);
 	});
 

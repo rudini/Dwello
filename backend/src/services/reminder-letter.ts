@@ -49,15 +49,15 @@ const WORDING = {
 		subject: (number: string) => `Décompte des charges ${number}`,
 		statement: ({ number, start, end }: Dates) => `décompte des charges ${number} pour la période du ${start} au ${end}`,
 		openings: [
-			(s: string) => `Sauf erreur de notre part, le ${s} n’est pas encore payé. Ce paiement vous a peut-être échappé.`,
-			(s: string) => `Malgré notre rappel de paiement, le ${s} n’est toujours pas payé.`,
+			(s: string) => `Sauf erreur de notre part, le ${s} n’a pas encore été réglé. Ce paiement vous a peut-être échappé.`,
+			(s: string) => `Malgré notre rappel de paiement, le ${s} n’a toujours pas été réglé.`,
 			(s: string) =>
-				`Malgré deux rappels, le ${s} n’est toujours pas payé. Veuillez régler le montant immédiatement, faute de quoi nous devrons entreprendre d’autres démarches.`
+				`Malgré deux rappels, le ${s} n’a toujours pas été réglé. Veuillez régler le montant sans délai, faute de quoi nous nous verrons contraints d’entreprendre d’autres démarches.`
 		],
 		amount: `Montant dû${NBSP}: `,
 		payBy: (date: string) => `Veuillez virer le montant au plus tard le ${date} sur le compte suivant${NBSP}:`,
 		reference: (reference: string) => `Référence ${reference} (à indiquer lors du paiement)`,
-		alreadyPaid: 'Si vous avez déjà effectué le paiement, veuillez considérer ce courrier comme sans objet.',
+		alreadyPaid: 'Si vous avez déjà effectué le paiement, veuillez considérer ce rappel comme sans objet.',
 		salutation: 'Bonjour',
 		closing: 'Meilleures salutations'
 	},
@@ -71,7 +71,7 @@ const WORDING = {
 			(s: string) => `Secondo la nostra contabilità, il ${s} non è ancora stato pagato. Forse il pagamento le è sfuggito.`,
 			(s: string) => `Nonostante il nostro promemoria di pagamento, il ${s} non è ancora stato pagato.`,
 			(s: string) =>
-				`Nonostante due solleciti, il ${s} non è ancora stato pagato. La preghiamo di saldare l’importo immediatamente, altrimenti dovremo avviare ulteriori provvedimenti.`
+				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non pagato. Le chiediamo di saldare l’importo senza indugio, altrimenti dovremo adottare ulteriori provvedimenti.`
 		],
 		amount: 'Importo dovuto: ',
 		payBy: (date: string) => `La preghiamo di versare l’importo entro il ${date} sul seguente conto:`,
@@ -88,7 +88,7 @@ const WORDING = {
 		statement: ({ number, start, end }: Dates) => `utility cost statement ${number} for the period ${start} – ${end}`,
 		openings: [
 			(s: string) => `According to our records, the ${s} is still unpaid. You may have overlooked the payment.`,
-			(s: string) => `Despite our payment reminder, the ${s} has not yet been paid.`,
+			(s: string) => `Despite our payment reminder, the ${s} has still not been paid.`,
 			(s: string) =>
 				`Despite two reminders, the ${s} has still not been paid. Please settle the amount immediately; otherwise we will have to take further steps.`
 		],
