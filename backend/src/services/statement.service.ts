@@ -24,6 +24,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import { belowMinimum } from './pdf-format';
 import { isRealDate } from './real-date';
 import { daysAfter, swissToday } from './today';
 
@@ -482,8 +483,8 @@ export async function updateStatementStatus(
 
 	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.statementDate);
 	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
-	// A Saldo of 0 (often after the rounding to 5 Rappen) is settled once sent: nothing to pay or to pay back
-	const settled = sentToday && parseFloat(existing.balance) === 0 && { status: 'paid', paidDate: sentToday.statementDate };
+	// A Saldo below CHF 5, 0 included, is settled once sent: neither claimed nor paid out, so no money moves (#94)
+	const settled = sentToday && belowMinimum(parseFloat(existing.balance)) && { status: 'paid', paidDate: sentToday.statementDate, paidAmount: '0.00' };
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
 		...additionalData,

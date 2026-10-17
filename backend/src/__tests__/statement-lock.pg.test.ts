@@ -109,6 +109,36 @@ describe('Abrechnung mit Saldo 0', () => {
 		}
 	});
 });
+// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt; die Abrechnung ist mit dem Versenden erledigt,
+// ohne dass Geld fliesst (bezahlter Betrag 0); ab CHF 5.00 bleibt sie offen
+describe('Abrechnung mit kleinem Saldo (#94)', () => {
+	const sentWith = async (balance: string) => {
+		const id = await idOf(
+			await sendJson('POST', '/api/v1/statements/generate', {
+				contractId: rental.contract,
+				buildingId: rental.building,
+				periodStart: '2025-01-01',
+				periodEnd: '2025-12-31'
+			})
+		);
+		await db.update(utilityStatements).set({ balance }).where(eq(utilityStatements.id, id));
+		try {
+			return await (await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' })).json();
+		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+		}
+	};
+
+	it.each(['4.95', '-4.95', '0.05'])('ist bei einem Saldo von %s mit dem Versenden erledigt, ohne Zahlung', async (balance) => {
+		const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+		expect(await sentWith(balance)).toMatchObject({ status: 'paid', paidDate: today, paidAmount: '0.00' });
+	});
+
+	it.each(['5.00', '-5.00'])('bleibt bei einem Saldo von %s offen', async (balance) => {
+		expect(await sentWith(balance)).toMatchObject({ status: 'sent', paidDate: null });
+	});
+});
+
 
 const markPaid = (id: string, paidDate: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate });
 

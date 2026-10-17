@@ -477,6 +477,17 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('366 Mietstage');
 	});
 
+	// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt; ab CHF 5.00 wie bisher
+	it.each([
+		[4.95, 'Der Betrag ist kleiner als CHF 5.00. Sie verzichten darauf.'],
+		[-0.05, 'Der Betrag ist kleiner als CHF 5.00. Sie zahlen ihn nicht aus.'],
+		[5, 'Der Mieter bezahlt die Nachzahlung von CHF 5.00.'],
+		[-5, 'Sie erstatten dem Mieter CHF 5.00 zurück.']
+	])('sagt bei einem Saldo von %s, was mit dem Betrag geschieht', (balance, summary) => {
+		detail({ balance });
+		expect(byTestId('statement-payment-summary')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(summary);
+	});
+
 	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
 	const later = (laterInvoices: number, status: 'draft' | 'sent' = 'draft') =>
 		show(StatementPage, {
@@ -956,6 +967,13 @@ describe('Abrechnungsdetail', () => {
 		detail({ status: 'overdue', balance: -45 });
 		expect(byTestId('statement-reminder-button')).toBeNull();
 		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+	});
+
+	// #94: ein Saldo unter CHF 5 wird nicht eingefordert, auch überfällig nach dem Zurücksetzen der Zahlung nicht
+	it('bietet bei einem Saldo unter CHF 5 keine Mahnung an', () => {
+		detail({ status: 'overdue', balance: 4.95 });
+		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+		expect(byTestId('statement-reminder-button')).toBeNull();
 	});
 
 	// Der Knopf sagt, was er tut: Dwello verschickt nichts selbst

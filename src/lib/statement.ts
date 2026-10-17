@@ -34,6 +34,11 @@ export function balanceLabel(balance: number): string {
 	return m.statements_balance_settled();
 }
 
+/** A Saldo below CHF 5, 0 included, is neither claimed nor paid out: settled on sending, never gemahnt (#94) */
+export const belowMinimum = (balance: number) => Math.abs(balance) < 5;
+/** A Nachzahlung the landlord claims and may remind of: CHF 5 and more */
+export const claimed = (balance: number) => balance > 0 && !belowMinimum(balance);
+
 /** The day the help of «Bezahlt am» asks for: the tenant's payment, or for a refund the landlord's transfer */
 export const paidHelp = (balance: number) =>
 	balance < 0 ? m.statements_paid_help_refund() : m.statements_paid_help();
