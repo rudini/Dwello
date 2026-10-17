@@ -5,10 +5,11 @@ import { akontoHint, findingText, selectionErrors, statementSteps } from '$lib/s
 import { formatCurrency } from '$lib/utils/format';
 import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
-import { sendStatementReminder } from '$lib/server/statement-actions';
+import { sendStatement, sendStatementReminder } from '$lib/server/statement-actions';
 import { invoicesInPeriod } from '$lib/server/statement-generation';
 import backendStatement from '../../tests/contracts/statement.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
+import sendRefused from '../../tests/contracts/statement-send-refused.json';
 
 afterEach(() => overwriteGetLocale(() => baseLocale));
 
@@ -154,5 +155,16 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 		const result = await sendStatementReminder(fetch, 's1');
 
 		expect(result).toMatchObject({ reminder: { document: { title: 'Rappel de paiement' } } });
+	});
+
+	// #86: what went wrong and what to do, never the backend's own text
+	it('sagt in der gewählten Sprache, warum die Abrechnung nicht per E-Mail hinausging', async () => {
+		overwriteGetLocale(() => 'fr');
+		const fetch = (async () => Response.json(sendRefused, { status: 400 })) as typeof globalThis.fetch;
+
+		const refused = await sendStatement(fetch, 's1', false);
+
+		expect(refused).toEqual({ status: 400, message: m.backend_statement_tenant_no_email({}, { locale: 'fr' }) });
+		expect(refused?.message).not.toBe(m.backend_statement_tenant_no_email({}, { locale: 'de' }));
 	});
 });
