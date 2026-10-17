@@ -8,6 +8,7 @@
 	"terminated": true,
 	"movedOut": false,
 	"noticeReceivedOn": "2098-12-15",
+	"billedUntil": "2023-12-31",
 	"baseRent": "950.00",
 	"additionalRent": "0.00",
 	"monthlyAdvancePayment": "150.00",

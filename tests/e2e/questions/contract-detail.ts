@@ -10,6 +10,7 @@ import {
 	contractApartment,
 	contractEndDate,
 	contractEndError,
+	contractBilledUntil,
 	contractManagementFee,
 	contractAgreedCosts,
 	contractStatus,
@@ -37,7 +38,9 @@ export const endConfirmationInWindow = question(
 
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
+export const missingStatementsShown = Visibility.of(missingStatements);
 export const managementFeeOfContract = Text.of(contractManagementFee);
+export const billedUntilOfContract = Text.of(contractBilledUntil); // #133
 export const endDialogDeathText = Text.of(endDialogDeathHint);
 export const noticePeriodHintText = Text.of(noticePeriodHint);
 export const noticePeriodHintShown = Visibility.of(noticePeriodHint);

@@ -107,7 +107,8 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 	});
 	const backend = (
 		statements: ReturnType<typeof statementOf>[],
-		startDate = `${lastYear - 2}-04-01`
+		startDate = `${lastYear - 2}-04-01`,
+		billedUntil: string | null = null
 	) =>
 		(async (url: string) => {
 			if (url.endsWith('/config'))
@@ -117,7 +118,13 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 				const data = statements.filter((s) => !contractId || s.contractId === contractId);
 				return Response.json({ data, total: data.length });
 			}
-			return Response.json({ ...contractDetail, startDate, endDate: null, terminated: false });
+			return Response.json({
+				...contractDetail,
+				startDate,
+				endDate: null,
+				terminated: false,
+				billedUntil
+			});
 		}) as typeof globalThis.fetch;
 	const missingOf = async (fetch: typeof globalThis.fetch) =>
 		((await load({ params: { id: 'c1' }, fetch } as never)) as { missingStatements: unknown })
@@ -159,6 +166,17 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 				: answer(url)) as typeof globalThis.fetch;
 		const data = (await load({ params: { id: 'c1' }, fetch } as never)) as { billedBy: unknown };
 		expect(data.billedBy).toBeNull();
+	});
+
+	// #133: bis «Abgerechnet bis» ausserhalb von Dwello abgerechnet; eine Periode, die darüber hinausreicht, fehlt noch
+	it('übergeht Perioden, die bis «Abgerechnet bis» enden', async () => {
+		const missing = await missingOf(backend([], `${lastYear - 2}-04-01`, `${lastYear - 1}-06-30`));
+		expect(missing).toEqual(
+			[lastYear, lastYear - 1].map((y) => ({
+				...year(y),
+				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
+			}))
+		);
 	});
 
 	// #120, Fachreview W2e: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode

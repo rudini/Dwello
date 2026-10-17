@@ -40,7 +40,7 @@ const contracts = [
 	contract('nachher', '2025-01-01', null)
 ];
 
-function backend(statements: { contractId: string; periodStart: string; periodEnd: string; status?: string }[] = [], inBuilding = contracts) {
+function backend(statements: { contractId: string; periodStart: string; periodEnd: string; status?: string }[] = [], inBuilding: object[] = contracts) {
 	const posts: { url: string; body: Record<string, string> }[] = [];
 	const fetch = async (url: string, init?: RequestInit) => {
 		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: statements });
@@ -142,6 +142,21 @@ describe('Abrechnungen erstellen', () => {
 				oldAddress: false,
 				buildingId: 'b1'
 			}
+		]);
+	});
+
+	// #133: bis «Abgerechnet bis» ausserhalb von Dwello abgerechnet; ohne Mietstage danach erhält er keine Abrechnung
+	it('übergeht einen Mietvertrag, der in der Periode nach «Abgerechnet bis» keine Mietstage hat', async () => {
+		const inBuilding = [
+			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-03-31' },
+			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' }
+		];
+		const { fetch, posts } = backend([], inBuilding);
+
+		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
+		expect(await billedContracts(fetch, period)).toEqual([
+			{ buildingId: 'b1', contracts: 1, billed: 0, withoutFee: [] }
 		]);
 	});
 

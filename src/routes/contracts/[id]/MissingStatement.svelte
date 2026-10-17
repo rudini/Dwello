@@ -28,6 +28,12 @@
 		testid="contract-missing-statement"
 	>
 		<p>{single ? m.contracts_statement_missing_text() : m.contracts_statements_missing_text()}</p>
+		<!-- #133: a period billed outside Dwello is entered as «Abgerechnet bis» -->
+		<p>
+			{single
+				? m.contracts_statement_missing_billed_elsewhere()
+				: m.contracts_statements_missing_billed_elsewhere()}
+		</p>
 		<div class="flex flex-wrap gap-2">
 			{#each missing as period (period.start)}
 				<!-- several: short labels side by side, each with its verb (#142 personas, code review C-8) -->

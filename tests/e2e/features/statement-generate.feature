@@ -128,6 +128,28 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2023 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Vorschau, dass es in der Periode keine Mietverträge gibt
 
+  # #133: bis «Abgerechnet bis» sind die Nebenkosten ausserhalb von Dwello abgerechnet; eine Periode, die bis dahin
+  # endet, erhält keine Abrechnung
+  @api
+  Szenario: Ein ausserhalb von Dwello abgerechneter Mietvertrag erhält keine Abrechnung
+    Angenommen der Mietvertrag von "Marc Huber" ist bis "2024-12-31" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann enthält die Vorschau die Abrechnung von "Eva Frei"
+    Und die Vorschau enthält genau 1 Abrechnung
+
+  # #133: reicht die Abrechnungsperiode über «Abgerechnet bis» hinaus, zählen Mietstage und geleistete Akontobeiträge
+  # erst ab dem Tag danach. Hauswart 732.00 für 366 Tage = 2.00 pro Tag; Eva Frei vom 01.03. bis 31.03.2024: 31 Tage
+  # = 62.00 + 3 % = 63.86, Akonto nur für März 120.00; Marc Huber bleibt bei 245 Tagen = 490.00 + 3 % = 504.70
+  @api
+  Szenario: Nach «Abgerechnet bis» zählen Mietstage und Akonto ab dem Tag danach
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und der Mietvertrag von "Eva Frei" hat "120" Franken Akonto
+    Und der Mietvertrag von "Eva Frei" ist bis "2024-02-29" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Eva Frei" "CHF 63.86"
+    Und beträgt der Saldo von "Eva Frei" "Rückerstattung CHF 56.15"
+    Und kostet die Abrechnung von "Marc Huber" "CHF 504.70"
+
   # A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
   Szenario: Vorschau warnt vor der alten Adresse eines ausgezogenen Mieters
     Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"

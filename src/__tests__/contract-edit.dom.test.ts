@@ -92,6 +92,55 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
 	});
 
+	// #133: bis zu diesem Tag ausserhalb von Dwello abgerechnet; Hilfe am Feld (fach review V-5)
+	it('erklärt «Abgerechnet bis» und speichert es', async () => {
+		await open();
+		expect(document.querySelector('label[for="billedUntil"]')!.textContent).toContain(
+			'Abgerechnet bis'
+		);
+		expect(byTestId('billed-until-input-help')!.textContent).toContain(
+			'Dwello rechnet erst ab dem Tag danach ab'
+		);
+		type('billed-until-input', '31.12.2025');
+		await save();
+		expect(puts()[0].body).toMatchObject({ billedUntil: '2025-12-31' });
+	});
+
+	// fach review V-10: «Abgerechnet bis» covers the draft's whole period: Dwello creates no statement for it again
+	it('löscht einen Entwurf, den «Abgerechnet bis» ganz abdeckt, und sagt, dass keiner neu entsteht', async () => {
+		calls = fakeBff(({ method, body }) => {
+			if (method === 'PUT')
+				return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, refused];
+			return [200, { contracts: [] }];
+		});
+		await open();
+		type('billed-until-input', '31.12.2025');
+		await save();
+		const covered =
+			'Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung.';
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Der Entwurf NK-2025-0003 rechnet Tage ab, die Sie jetzt als ausserhalb von Dwello abgerechnet eintragen.'
+		);
+		const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
+		expect(document.getElementById(described)!.textContent).toContain(covered);
+		expect(document.body.textContent).not.toContain('neu erstellen');
+		click('delete-draft-and-save');
+		await settle();
+		expect(goto).toHaveBeenCalledWith('/contracts/c1');
+	});
+
+	// code review C-2: a mistyped date must not clear the stored «Abgerechnet bis»
+	it('speichert ein falsch getipptes «Abgerechnet bis» nicht als kein Datum', async () => {
+		show(EditPage, {
+			data: { ...data(), contract: { ...contract(), billedUntil: '2024-12-31' } }
+		} as never);
+		await settle();
+		type('billed-until-input', '31.06.2024');
+		await save();
+		expect(puts()).toEqual([]);
+		expect(document.body.textContent).toContain('Dieses Datum gibt es nicht.');
+	});
+
 	it('speichert ohne Nettomiete nicht und nennt den Fehler beim Feld', async () => {
 		await open();
 		type('contract-base-rent-input', '');
@@ -375,6 +424,26 @@ describe('Mietvertrag bearbeiten', () => {
 			// Haiku-Review R1: der Knopf nennt seine Folge auch unter «Bearbeiten»
 			const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
 			expect(document.getElementById(described)!.textContent).toContain('wird gelöscht');
+		});
+
+		// fach review V-15: new contract dates that leave the period out are not «Abgerechnet bis»
+		it('nennt bei einem Vertragsende vor der Periode des Entwurfs nicht «Abgerechnet bis» als Grund', async () => {
+			calls = fakeBff(({ method }) =>
+				method === 'PUT' ? [409, refused] : [200, { contracts: [] }]
+			);
+			await open();
+			await endOn('31.12.2024');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			expect(byTestId('form-error')!.textContent).not.toContain('ausserhalb von Dwello');
+			// code review C-13: the button still leads to the wizard
+			calls = fakeBff(({ method }) => (method === 'PUT' ? [200, {}] : [200, { contracts: [] }]));
+			click('delete-draft-and-save');
+			await settle();
+			expect(goto).toHaveBeenCalledWith(
+				'/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+			);
 		});
 
 		// Haiku-Review R5: ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen

@@ -4,6 +4,7 @@
 			"id": "c1",
 			"startDate": "2020-01-01",
 			"endDate": null,
+			"billedUntil": null,
 			"terminated": false,
 			"oldAddress": false,
 			"tenantName": "Eva Frei",

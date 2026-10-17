@@ -241,6 +241,14 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann meldet der Mietvertrag die fehlende Abrechnung 2024
     Und meldet der Mietvertrag keine fehlende Abrechnung des letzten Jahres
+    Und erfährt der Liegenschaftsverwalter, dass er eine ausserhalb von Dwello abgerechnete Periode mit «Abgerechnet bis» einträgt
+
+  # #133: eine Periode, die bis «Abgerechnet bis» endet, ist ausserhalb von Dwello abgerechnet und fehlt nicht
+  Szenario: Ausserhalb von Dwello abgerechnete Perioden fehlen nicht
+    Angenommen der Mietvertrag von "Anna Keller" ist bis Ende des letzten Jahres ausserhalb von Dwello abgerechnet
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres
+    Und meldet der Mietvertrag keine fehlende Abrechnung
 
   Szenario: Abrechnungen eines Mietvertrags anzeigen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"

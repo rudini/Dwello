@@ -1,5 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
-import { localToday } from '$lib/contract-status';
+import { billsIn, localToday } from '$lib/contract-status';
 import { m } from '$lib/paraglide/messages';
 import { namesById } from '$lib/server/statement';
 import type { InvoiceCheck } from '$lib/statement-wizard';
@@ -11,6 +11,7 @@ type Contract = {
 	id: string;
 	startDate: string;
 	endDate: string | null;
+	billedUntil?: string | null;
 	terminated?: boolean;
 	tenantName: string;
 	apartmentNumber: string;
@@ -46,7 +47,8 @@ async function call(fetch: Fetch, path: string, body?: object) {
 
 type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
 
-// Per building: its contracts that overlap the period, and those of them with a statement in the period already
+// Per building: its contracts with Mietstage in the period (from the day after «Abgerechnet bis», #133), and those of
+// them with a statement in the period already
 // TODO(fachlich prüfen, #199): an overlapping statement counts as billed, the dashboard counts only one inside the period
 async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }: Run) {
 	return Promise.all(
@@ -63,8 +65,8 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 					.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s))
 					.map((s) => s.contractId)
 			);
-			const inPeriod = (contracts as Contract[]).filter(
-				(c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart)
+			const inPeriod = (contracts as Contract[]).filter((c) =>
+				billsIn(c, { start: periodStart, end: periodEnd })
 			);
 			return { buildingId, inPeriod, billed: inPeriod.filter((c) => billed.has(c.id)) };
 		})

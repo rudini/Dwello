@@ -11,7 +11,7 @@
 
 import { roundToRappen } from './pdf-format';
 import { getHeatingProfile, calculateHeatingShare } from './heating-profile.service';
-import { getContractsByPeriod, type ContractWithDetails } from './contract.service';
+import { billingStart, getContractsByPeriod, type ContractWithDetails } from './contract.service';
 
 /**
  * Period definition
@@ -157,7 +157,7 @@ async function handleMultipleContracts(
 	const overlaps: ContractPeriodOverlap[] = [];
 
 	for (const contract of contracts) {
-		const contractStart = new Date(contract.startDate);
+		const contractStart = new Date(billingStart(contract)); // #133: from the day after «Abgerechnet bis»
 		const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
 
 		const proration = calculateProrationDays(

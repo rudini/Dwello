@@ -22,7 +22,7 @@ import {
 	handleMidYearMoves
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
-import { getContract } from './contract.service';
+import { billingStart, getContract } from './contract.service';
 import { agreedCategoryIds } from './agreed-category.service';
 import { getHeatingProfile } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
@@ -351,7 +351,7 @@ export async function calculateStatementForContract(
 			group.isHeatingCost && heatingProfileId
 				? await handleMidYearMoves(
 						heatingProfileId,
-						new Date(contract.startDate),
+						new Date(billingStart(contract)),
 						contract.endDate ? new Date(contract.endDate) : null,
 						periodStart,
 						periodEnd,
@@ -440,7 +440,7 @@ export async function calculateStatementForContract(
 // What the PDF prints of the heating profile, kept with the statement (#209): the same for every heating position
 async function heatingOfRun(
 	groups: InvoiceGroup[],
-	contract: { startDate: string; endDate: string | null },
+	contract: { startDate: string; endDate: string | null; billedUntil: string | null },
 	periodStart: Date,
 	periodEnd: Date,
 	heatingProfileId?: string
@@ -449,7 +449,7 @@ async function heatingOfRun(
 	const profile = await getHeatingProfile(heatingProfileId);
 	if (!profile) return { byDays: true }; // as the per-group calculation shares without a profile
 	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
-	const result = await handleMidYearMoves(profile.id, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
+	const result = await handleMidYearMoves(profile.id, new Date(billingStart(contract)), contractEnd, periodStart, periodEnd, 100);
 	// the profile's names as they were, so a renamed or deleted own profile still names the share it gave, or the one
 	// chosen but not applied (#247)
 	const { name, nameDE, nameFR, nameIT, nameEN } = profile;

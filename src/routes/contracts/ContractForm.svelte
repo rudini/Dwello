@@ -12,6 +12,7 @@
 		validateContract
 	} from '$lib/contract-form';
 	import {
+		billsIn,
 		contractStatusOn,
 		localToday,
 		pastEndConfirmation,
@@ -25,6 +26,7 @@
 	import type { RentalContract } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { ContractForAvailability } from '$lib/utils/contract-availability';
@@ -117,9 +119,33 @@
 		refused = [];
 	}
 
+	// a draft whose whole period «Abgerechnet bis» now covers, not the contract dates: no statement is created for it
+	// again (fach review V-10, V-15)
+	function covered(draft: RefusedStatement) {
+		const dates = {
+			startDate: values.startDate,
+			endDate: values.isUnlimited ? null : values.endDate
+		};
+		const period = { start: draft.periodStart, end: draft.periodEnd };
+		return (
+			billsIn(dates, period) && !billsIn({ ...dates, billedUntil: values.billedUntil }, period)
+		);
+	}
+	const onlyCovered = (statements: RefusedStatement[]) =>
+		statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);
+
+	const coveredConsequence = $derived(
+		onlyCovered(refused)
+			? m.contracts_delete_draft_covered_consequence({ number: refused[0].statementNumber })
+			: undefined
+	);
+
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
 	function saveError({ message, details }: { message: string; details?: Record<string, unknown> }) {
-		if (Array.isArray(details?.statements)) return billedDaysError(details.statements);
+		const statements = details?.statements;
+		if (Array.isArray(statements) && onlyCovered(statements))
+			return m.contracts_billed_draft_covered({ number: statements[0].statementNumber });
+		if (Array.isArray(statements)) return billedDaysError(statements);
 		if (/overlap/i.test(message)) return m.backend_contract_overlap();
 		return m.contracts_save_failed();
 	}
@@ -131,6 +157,10 @@
 		const unconfirmed = endChanged && confirmedDay !== values.endDate;
 		const pastConfirmed = unconfirmed && pastEndConfirmation(values.endDate, today);
 		if (pastConfirmed) errors.pastConfirmed = pastConfirmed;
+		// a typed «Abgerechnet bis» that is no date is not sent as none (code review C-2); the field says why
+		const billedText = form?.querySelector<HTMLInputElement>('#billedUntil')?.value.trim();
+		if (billedText && !values.billedUntil)
+			errors.billedUntil = m.ui_date_not_a_date({ example: '31.12.2024' });
 		return Object.keys(errors).length === 0;
 	}
 
@@ -178,7 +208,10 @@
 			if (overlap) refused = [];
 			return focusFirstError(form);
 		}
-		await put(wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd), draft.id);
+		const next = covered(draft)
+			? back
+			: wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd);
+		await put(next, draft.id);
 	}
 </script>
 
@@ -257,6 +290,16 @@
 			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
 		/>
 		<NoticeHint shown={noticeHint} href={back} />
+		<!-- #133: billed outside Dwello up to this day; runs bill from the day after -->
+		<DateInput
+			id="billedUntil"
+			label={m.contracts_billed_until()}
+			help={m.contracts_billed_until_help()}
+			bind:value={values.billedUntil}
+			optional
+			error={errors.billedUntil}
+			testid="billed-until-input"
+		/>
 	</Panel>
 
 	<Panel title={m.contracts_rent()}>
@@ -268,7 +311,7 @@
 			<p>{errors.form}</p>
 		</Alert>
 		{#if refused.length}
-			<RefusedStatements statements={refused}>
+			<RefusedStatements statements={refused} consequence={coveredConsequence}>
 				{#snippet action(draft, consequence)}
 					<div>
 						<Button

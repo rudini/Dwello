@@ -8,6 +8,7 @@ import { endedPeriodsSince, type AccountingPeriodType } from '$lib/accounting-pe
 import { wizardLink } from '$lib/statement-wizard';
 import { backendMessage } from '$lib/backend-error';
 import {
+	billsIn,
 	contractEndError,
 	localToday,
 	pastEndConfirmation,
@@ -56,10 +57,6 @@ async function rows(fetch: typeof globalThis.fetch, path: string): Promise<Row[]
 	return response?.ok ? ((await response.json()).data ?? []) : null;
 }
 
-const rentDaysIn = (contract: Row, { start, end }: { start: string; end: string }) =>
-	String(contract.startDate).slice(0, 10) <= end &&
-	(!contract.endDate || String(contract.endDate).slice(0, 10) >= start);
-
 // Whether the apartment has a contract starting after the end; null when its contracts cannot be read
 async function successorAfter(fetch: typeof globalThis.fetch, contract: Row, end: string) {
 	const response = await fetch(
@@ -100,7 +97,7 @@ async function missingStatements(
 	const type = await periodType(fetch);
 	if (!type) return [];
 	const periods = endedPeriodsSince(type, String(contract.startDate).slice(0, 10)).filter(
-		(period) => rentDaysIn(contract, period)
+		(period) => billsIn(contract as Parameters<typeof billsIn>[0], period)
 	);
 	const building = String((contract.building as Row | undefined)?.id);
 	return periods
@@ -141,6 +138,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				endDate: data.endDate || null,
 				terminated: !!data.terminated,
 				noticeReceivedOn: data.noticeReceivedOn ?? null,
+				billedUntil: data.billedUntil ?? null,
 				baseRent: data.baseRent || '0',
 				additionalRent: data.additionalRent || null,
 				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
