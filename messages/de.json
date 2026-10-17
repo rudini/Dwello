@@ -997,7 +997,7 @@
 	"statements_hinted_invoice": "{supplier}: {description}. Rechnungsdatum {date}, {amount}",
 	"statements_akonto_above": "Kosten {amount} ({percent} %) über dem Akonto.",
 	"statements_akonto_raise": "Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig.",
-	"statements_akonto_raise_fixed_term": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.",
+	"statements_akonto_raise_fixed_term": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor.",
 	"statements_finding_new_fixed_term": "Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor.",
 	"statements_akonto_below": "Kosten {amount} ({percent} %) unter dem Akonto. Fehlen Rechnungen?",
 	"statements_coverage_none": "Keine Rechnungen erfasst",

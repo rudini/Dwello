@@ -416,10 +416,11 @@ describe('Abweichung zum Akonto', () => {
 		);
 	});
 
-	// #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin; das Formular gilt weiter (fach-review M-1)
+	// #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin (Text des Product Owners; das
+	// Formular dazu ist #388, fach-review M-1)
 	it('nennt bei einem laufenden befristeten Mietvertrag das Vertragsende statt des Kündigungstermins', () => {
 		expect(akontoHint({ ...row(2800, 2400), fixedTerm: true })).toBe(
-			'Kosten CHF 400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.'
+			'Kosten CHF 400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor.'
 		);
 	});
 

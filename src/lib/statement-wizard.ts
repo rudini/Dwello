@@ -223,6 +223,7 @@ export function akontoHint({
 	const percent = Math.round(Math.abs(change) * 100);
 	const above = m.statements_akonto_above({ amount, percent });
 	if (change > AKONTO_ABOVE && movedOut) return above;
+	// TODO(fachlich prüfen, #388): the befristet text does not name the official form a raise still needs
 	if (change > AKONTO_ABOVE)
 		return `${above} ${fixedTerm ? m.statements_akonto_raise_fixed_term() : m.statements_akonto_raise()}`;
 	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices

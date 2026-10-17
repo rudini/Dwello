@@ -997,7 +997,7 @@
 	"statements_hinted_invoice": "{supplier}: {description}. Invoice date {date}, {amount}",
 	"statements_akonto_above": "Costs are {amount} ({percent} %) above the advance payments.",
 	"statements_akonto_raise": "Check whether to raise the advance payment. An increase takes effect at the earliest from the next termination date: with reasons, on the official form, received by the tenant at least 10 days before the notice period begins. Without the form or reasons it is void.",
-	"statements_akonto_raise_fixed_term": "Check whether to raise the advance payment. For a fixed-term rental contract, an increase is only possible after the contract end, unless the rental contract provides for it. Give notice of an increase with reasons and on the official form, otherwise it is void.",
+	"statements_akonto_raise_fixed_term": "Check whether to raise the advance payment. For a fixed-term rental contract, an increase is only possible after the contract end, unless the rental contract provides for it.",
 	"statements_finding_new_fixed_term": "For a fixed-term rental contract, an increase is only possible after the contract end, unless the rental contract provides for it.",
 	"statements_akonto_below": "Costs are {amount} ({percent} %) below the advance payments. Are invoices missing?",
 	"statements_coverage_none": "No invoices added",

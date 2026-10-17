@@ -997,7 +997,7 @@
 	"statements_hinted_invoice": "{supplier} : {description}. Date de facture {date}, {amount}",
 	"statements_akonto_above": "Coûts supérieurs de {amount} ({percent} %) à l’acompte.",
 	"statements_akonto_raise": "Vérifiez s’il faut augmenter l’acompte. Une augmentation prend effet au plus tôt pour le prochain terme de congé : motivée, avec la formule officielle, reçue par le locataire au moins 10 jours avant le début du délai de congé. Sans formule ni motif, elle est nulle.",
-	"statements_akonto_raise_fixed_term": "Vérifiez s’il faut augmenter l’acompte. Pour un contrat de bail de durée déterminée, une augmentation n’est possible qu’après la fin du contrat, sauf si le contrat de bail la prévoit. Communiquez une augmentation motivée et avec la formule officielle, sinon elle est nulle.",
+	"statements_akonto_raise_fixed_term": "Vérifiez s’il faut augmenter l’acompte. Pour un contrat de bail de durée déterminée, une augmentation n’est possible qu’après la fin du contrat, sauf si le contrat de bail la prévoit.",
 	"statements_finding_new_fixed_term": "Pour un contrat de bail de durée déterminée, une augmentation n’est possible qu’après la fin du contrat, sauf si le contrat de bail la prévoit.",
 	"statements_akonto_below": "Coûts inférieurs de {amount} ({percent} %) à l’acompte. Manque-t-il des factures ?",
 	"statements_coverage_none": "Aucune facture saisie",

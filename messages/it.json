@@ -997,7 +997,7 @@
 	"statements_hinted_invoice": "{supplier}: {description}. Data della fattura {date}, {amount}",
 	"statements_akonto_above": "Costi superiori di {amount} ({percent} %) all’acconto.",
 	"statements_akonto_raise": "Verifichi se aumentare l’acconto. Un aumento vale al più presto per la prossima scadenza di disdetta: motivato, con il modulo ufficiale, recapitato all’inquilino almeno 10 giorni prima dell’inizio del termine di preavviso. Senza modulo o motivazione è nullo.",
-	"statements_akonto_raise_fixed_term": "Verifichi se aumentare l’acconto. Per un contratto di locazione a tempo determinato un aumento è possibile solo dopo la fine del contratto, salvo che il contratto di locazione lo preveda. Comunichi un aumento motivato e con il modulo ufficiale, altrimenti è nullo.",
+	"statements_akonto_raise_fixed_term": "Verifichi se aumentare l’acconto. Per un contratto di locazione a tempo determinato un aumento è possibile solo dopo la fine del contratto, salvo che il contratto di locazione lo preveda.",
 	"statements_finding_new_fixed_term": "Per un contratto di locazione a tempo determinato un aumento è possibile solo dopo la fine del contratto, salvo che il contratto di locazione lo preveda.",
 	"statements_akonto_below": "Costi inferiori di {amount} ({percent} %) all’acconto. Mancano fatture?",
 	"statements_coverage_none": "Nessuna fattura registrata",

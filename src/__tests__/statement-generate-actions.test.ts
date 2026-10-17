@@ -166,6 +166,13 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		});
 	});
 
+	// fach-review V-5: a statement whose Heizprofil was deleted has none; it differs from no other
+	it('übergeht eine übrige Abrechnung ohne Heizprofil', async () => {
+		expect(
+			await openWith([statement('lauf', '4.50', null as never), statement('lauf2', '4.50')])
+		).toMatchObject({ defaultHeatingProfileId: 'hp9', preset: { differing: false } });
+	});
+
 	it('übernimmt gleich eingestellte übrige Abrechnungen', async () => {
 		expect(await openWith([statement('lauf', '4.50'), statement('lauf2', '4.50')])).toMatchObject({
 			defaultHeatingProfileId: 'hp9',

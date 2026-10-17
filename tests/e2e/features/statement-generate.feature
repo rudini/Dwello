@@ -179,7 +179,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2023-01-15"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "2000" Franken vom "2024-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Dann rät die Vorschau für "Lea Graf": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig."
+    Dann rät die Vorschau für "Lea Graf": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
     Und meldet die Prüfung der Kategorien für "Kaltwasser": "frühestens auf den nächsten Kündigungstermin"
     Und meldet die Prüfung der Kategorien für "Kaltwasser": "Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
 
