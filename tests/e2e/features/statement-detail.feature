@@ -279,6 +279,7 @@ Funktionalität: Abrechnungsdetail
 
   # Der Mieter prüft die Abrechnung nach: Verteilschlüssel und Anteile je Position, Heizöl nach Verbrauch
   # (Art. 5 VMWG), Recht auf Belegeinsicht und detaillierte Heizkostenabrechnung (Art. 257b OR, Art. 8 VMWG)
+  # #249: das PDF sagt «Gebäude» wie die App
   Szenario: Das PDF erklärt die Verteilung und den Heizölverbrauch
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
@@ -288,6 +289,8 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Pro Fläche (m²) 70.00 / 70.00 m²"
+    Und steht im PDF "Kosten des Gebäudes"
+    Und steht im PDF nicht "Liegenschaft"
     Und steht im PDF "Anfangsbestand am 31.12.2023 CHF 600.00"
     Und steht im PDF "Verbrauch CHF 1'500.00"
     Und steht im PDF "Seite 1 von"
@@ -440,6 +443,16 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann trägt das PDF den Titel "Décompte des charges"
+
+  # #351: ein schon auf Deutsch erstelltes PDF eines Entwurfs bleibt nicht in der alten Sprache, auch am selben Tag
+  Szenario: PDF eines Entwurfs folgt der geänderten Sprache des Mieters
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und die Korrespondenz an "Eva Frei" ist auf "Französisch"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann trägt das PDF den Titel "Décompte des charges"
 
   # #105: vor dem Erstellen sagt die Abrechnung, in welcher Sprache das PDF entsteht
