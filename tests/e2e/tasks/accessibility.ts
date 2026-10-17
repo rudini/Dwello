@@ -221,8 +221,6 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'past-end-error': () => endWithPastDate,
 	// the seeded contract runs since 2015 with statements only for 2024 and 2025: several periods are missing (#142)
 	'missing-statements': () => Wait.until(on.shown('contract-missing-statement')),
-	// #199: a statement covers part of 2024, 2025 has none: the rest named, no way into the wizard for it
-	'partly-billed': () => Wait.until(on.shown('contract-missing-statement')),
 	// the 2025 draft already bills rent days after 31.03.2025: the dialog links it and offers to delete it (A-10)
 	'end-dialog-refused': () => (actor) =>
 		actor.attemptsTo(
