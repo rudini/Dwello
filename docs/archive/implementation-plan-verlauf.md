@@ -1142,6 +1142,21 @@ Branch `claude/w3e-de-wording-348`. All findings of the issue checked against `m
 
 Files: `messages/*.json`, `src/lib/statement-wizard.ts`, `backend/src/services/{category,heating-profile,distribution-key,formula}.service.ts`, tests in `src/__tests__/`, `src/lib/utils/__tests__/contract-availability.test.ts`, `backend/src/__tests__/`, E2E features, steps and questions that pin the texts.
 
+## Session W3f: #76 Akonto and new-cost hints for a befristeter Mietvertrag, #119 preset with differing statements
+
+- [x] #76: `@wip` scenario (Akonto-raise and new-cost hints of a running befristeter Mietvertrag), fach-reviewer before implementing
+- [x] Fach review round 1 of both scenarios: `docs/reviews/w3f-fachreview-1.md` (V-1 to issue #387; M-1 to issue #388 after code review C-3)
+- [x] #76: befristeter Mietvertrag gets the decided text (option A) in `akontoHint` and the new-cost finding (after the form rule, V-4); unbefristete keep today's text; F-10b thresholds stay
+- [x] #76: `TODO(fachlich prüfen, #76)` marker removed from `src/lib/statement-wizard.ts`
+- [x] #119: scenario (other statements of the period with different Heizprofile)
+- [x] #119: `chosen()` keeps the settings' defaults when the other statements differ in Heizprofil or Verwaltungspauschale (null profiles skipped, V-5), `PresetNotice.svelte` says so (four languages); tests in `statement-generate-actions.test.ts`
+- [x] code-reviewer slice: `docs/reviews/w3f-review-1.md`, round 2 `docs/reviews/w3f-review-2.md` (no Blocker/Major open)
+- [x] Feature review: fach-reviewer round 2 `docs/reviews/w3f-fachreview-2.md`; personas `docs/design/personas/weber-w3f.md` (P-1 to #388), `docs/design/personas/anna-w3f.md` (P-1, P-2 to #387)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-76-119.md`
+- [ ] PR `Fixes #76`, `Fixes #119`, CI; merge waits for the product owner (Majors needing a decision: #387, #388)
+
+Files: `src/lib/statement-wizard.ts`, `src/lib/server/statement-generation.ts`, `src/routes/statements/generate/{+page.server.ts,preview.ts,PresetNotice.svelte,CategoryCheck.svelte,CategoryFindingItem.svelte}`, `messages/*.json`, tests in `src/__tests__/statement-{wizard,generation,generate-actions}*.ts`, `tests/contracts/building-contracts.json`, `tests/e2e/{features/statement-generate.feature,steps,targets,questions}`
+
 ## Session W4e: word-wise search (#160, #373)
 
 Branch `claude/w4e-search-160`.

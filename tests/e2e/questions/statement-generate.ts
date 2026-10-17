@@ -27,6 +27,7 @@ import {
 	periodRunningWarning,
 	previewEmpty,
 	previewFee,
+	previewAkontoHint,
 	previewRow,
 	previewRows,
 	tankQuestion,
@@ -77,6 +78,7 @@ export const createdStatements = throughUiOrApi<Question<number | string | null>
 );
 
 const rowOf = (tenantName: string) => Text.of(previewRow(tenantName));
+export const akontoHintOf = (tenantName: string) => Text.of(previewAkontoHint(tenantName));
 
 /** The Saldo of the tenant's statement in the preview, in francs (a refund negative) */
 export const balanceOf = (tenantName: string) =>
