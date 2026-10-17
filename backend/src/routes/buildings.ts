@@ -45,7 +45,8 @@ const buildingBodySchema = t.Object({
 	latitude: t.Optional(t.Nullable(t.String())),
 	longitude: t.Optional(t.Nullable(t.String())),
 	buildingType: t.Optional(t.Nullable(t.String())),
-	yearBuilt: t.Optional(t.Nullable(t.Number()))
+	yearBuilt: t.Optional(t.Nullable(t.Number())),
+	noTank: t.Optional(t.Boolean())
 });
 
 const buildingUpdateSchema = t.Partial(buildingBodySchema);
