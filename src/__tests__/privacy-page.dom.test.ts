@@ -246,7 +246,7 @@ describe('Datenschutzerklärung nach #82', () => {
 
 		const text = section('Aufbewahrung')?.textContent;
 		expect(text).toContain('Ausser in der öffentlichen Demo löscht Dwello keine gespeicherten Daten von selbst.');
-		expect(text).toContain('Abrechnungen lassen sich nach dem Versand nicht mehr löschen, Mahnungen gar nicht');
+		expect(text).toContain('Nicht löschen lassen sich versendete Abrechnungen, alle Mahnungen sowie Mieter und Mietverträge, zu denen es Abrechnungen gibt.');
 		expect(text).toContain('Wer zur Buchführung verpflichtet ist');
 		expect(text).toContain('10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art. 958f OR)');
 		expect(text).toContain('Hat der letzte Mietvertrag eines Mieters geendet');

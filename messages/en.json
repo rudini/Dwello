@@ -155,7 +155,7 @@
 	"privacy_controller_2": "The operator is whoever sets up and runs this Dwello installation on a server: you, if you set up Dwello for your properties yourself, or a provider who runs Dwello for you.",
 	"privacy_controller_3": "Anyone whose data is processed in Dwello, including every tenant, can ask the operator free of charge whether and which data about them is processed (Art. 25 FADP).",
 	"privacy_retention_title": "Retention",
-	"privacy_retention_1": "Except in the public demo, Dwello deletes no stored data by itself. What you enter stays stored until you delete it. Statements can no longer be deleted once sent, reminders never, nor can tenants and rental contracts that have statements.",
+	"privacy_retention_1": "Except in the public demo, Dwello deletes no stored data by itself. What you enter stays stored until you delete it. What cannot be deleted: statements that were sent, all reminders, and tenants and rental contracts that have statements.",
 	"privacy_retention_2": "Anyone required to keep accounts, such as a property management company, must keep the accounting records and vouchers, such as invoices and statements, for 10 years from the end of the financial year (Art. 958f CO).",
 	"privacy_retention_3": "Once a tenant’s last rental contract has ended, Dwello names the documents you uploaded for them before that day, so that you can delete what you no longer need.",
 	"privacy_login_google": "Google (Google Ireland Limited, Ireland, and Google LLC, USA) learns at every sign-in that you use this Dwello installation, when and from which IP address. The data may reach the USA; Google LLC is certified under the Swiss-U.S. Data Privacy Framework, which the Federal Council recognises as providing adequate data protection.",
