@@ -29,7 +29,7 @@ describe('Sprachdateien', () => {
 	});
 
 	// #348: names in «», as everywhere else
-	it.each(['de', 'en'])('%s setzt Guillemets, keine geraden Anführungszeichen', (language) => {
+	it.each(languages)('%s setzt Guillemets, keine geraden Anführungszeichen', (language) => {
 		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
 		const wrong = Object.entries(messages).filter(
 			([, text]) => typeof text === 'string' && text.includes('"')

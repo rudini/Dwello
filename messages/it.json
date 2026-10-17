@@ -608,7 +608,7 @@
 	"contracts_error_tenant_required": "Scelga un inquilino.",
 	"contracts_error_apartment_required": "Scelga un appartamento.",
 	"contracts_error_start_required": "L’inizio del contratto è obbligatorio.",
-	"contracts_error_end_required": "La fine del contratto è obbligatoria per un contratto a tempo determinato.",
+	"contracts_error_end_required": "La fine del contratto è obbligatoria per un contratto di locazione a tempo determinato.",
 	"contracts_error_end_before_start": "La fine del contratto deve essere successiva all’inizio del contratto.",
 	"contracts_error_amount": "Inserisca un importo valido, per esempio 1450.00 o 1'450.",
 	"contracts_error_base_rent_required": "La pigione netta è obbligatoria.",

@@ -608,7 +608,7 @@
 	"contracts_error_tenant_required": "Please choose a tenant.",
 	"contracts_error_apartment_required": "Please choose an apartment.",
 	"contracts_error_start_required": "Contract start is required.",
-	"contracts_error_end_required": "Contract end is required for a fixed-term contract.",
+	"contracts_error_end_required": "Contract end is required for a fixed-term rental contract.",
 	"contracts_error_end_before_start": "Contract end must be after contract start.",
 	"contracts_error_amount": "Please enter a valid amount, for example 1450.00 or 1'450.",
 	"contracts_error_base_rent_required": "Net rent is required.",

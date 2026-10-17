@@ -102,10 +102,6 @@ type Coverage = {
 const invoices = (count: number) =>
 	count === 1 ? m.statements_invoices_one() : m.statements_invoices_many({ count });
 
-// "a und am b", the stock dates
-const joined = (parts: string[], and: (pair: { first: string; second: string }) => string) =>
-	parts.reduce((first, second) => and({ first, second }));
-
 // A whole calendar month, quarter or half-year by its name; null for other slices
 function calendarName({ start, end }: { start: string; end: string }) {
 	const from = new Date(`${start}T00:00:00Z`);
@@ -130,10 +126,10 @@ const partLabel = (slice: { start: string; end: string }) =>
 	m.statements_part_dates({ start: formatDate(slice.start), end: formatDate(slice.end) });
 
 function stockText(missingDays: { start: string }[]) {
-	const dates = joined(
-		missingDays.map((day) => formatDate(day.start)),
-		m.statements_stock_dates_and
-	);
+	// "a und am b"
+	const dates = missingDays
+		.map((day) => formatDate(day.start))
+		.reduce((first, second) => m.statements_stock_dates_and({ first, second }));
 	const missing =
 		missingDays.length > 1
 			? m.statements_finding_stock_missing_many({ dates })

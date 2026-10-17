@@ -608,7 +608,7 @@
 	"contracts_error_tenant_required": "Veuillez choisir un locataire.",
 	"contracts_error_apartment_required": "Veuillez choisir un appartement.",
 	"contracts_error_start_required": "Le début du contrat est obligatoire.",
-	"contracts_error_end_required": "La fin du contrat est obligatoire pour un contrat de durée déterminée.",
+	"contracts_error_end_required": "La fin du contrat est obligatoire pour un contrat de bail de durée déterminée.",
 	"contracts_error_end_before_start": "La fin du contrat doit être postérieure au début du contrat.",
 	"contracts_error_amount": "Veuillez saisir un montant valable, par exemple 1450.00 ou 1'450.",
 	"contracts_error_base_rent_required": "Le loyer net est obligatoire.",
