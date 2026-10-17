@@ -62,6 +62,8 @@ export default defineConfig<{ driver: Driver }>({
 		timeout: 5000
 	},
 	reporter: [
+		// On CI the log names each failed test and its error; the HTML reports keep the details
+		...(process.env.CI ? [['list'] as const] : []),
 		['html', { open: 'never' }],
 		cucumberReporter('html', { outputFile: 'cucumber-report/report.html' })
 	],

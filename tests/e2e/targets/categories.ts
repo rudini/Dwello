@@ -10,6 +10,10 @@ export const nameInput = target('Name', (page) => page.getByTestId('category-nam
 // The radio's name starts with its label and goes on with its description
 export const allowanceOption = (label: 'Umlagefähig' | 'Nicht umlagefähig') =>
 	target(`Wahl ${label}`, (page) => page.getByTestId('category-allowance').getByRole('radio', { name: new RegExp(`^${label} `) }));
+export const heatingCheckbox = target('Heizkosten nach dem Heizprofil verteilen', (page) =>
+	page.getByTestId('category-heating-checkbox')
+);
+export const fuelCheckbox = target('Brennstoff', (page) => page.getByTestId('category-fuel-checkbox'));
 export const proposeButton = target('Von der KI prüfen lassen', (page) => page.getByTestId('category-propose-button'));
 export const proposal = target('Vorschlag der KI', (page) => page.getByTestId('category-proposal'));
 export const submitButton = target('Kategorie speichern', (page) => page.getByTestId('category-submit'));

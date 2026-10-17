@@ -318,14 +318,15 @@ describe('Tankbestand', () => {
 		expect(byTestId<HTMLSelectElement>('fuel-stock-category-select')!.value).toBe('c3');
 	});
 
-	it('sagt ohne Kategorie der Heizkosten, wo man eine anlegt', () => {
+	// #100 (Fachreview V-4, V-11): sagt auch, was zu tun ist; «Brennstoff» erscheint erst mit den Heizkosten
+	it('sagt ohne Kategorie für Brennstoff, wo man eine markiert', () => {
 		show(BuildingPage, {
 			data: { building: building(), apartments: [], fuelStocks: [], heatingCategories: [] },
 			form: null
 		} as never);
 
 		expect(section()).toContain(
-			'Es gibt keine Kategorie, die Heizkosten nach dem Heizprofil verteilt.'
+			'Keine umlagefähige Kategorie ist als Brennstoff markiert. Setzen Sie bei der Kategorie für Ihr Heizmaterial die Häkchen «Heizkosten nach dem Heizprofil verteilen» und «Brennstoff».'
 		);
 		expect(byTestId('fuel-stock-categories-link')!.getAttribute('href')).toBe('/config/categories');
 	});

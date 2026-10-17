@@ -316,3 +316,8 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 ## #129 – building map removed
 
 U-23 lost its map parts when the building map was removed: the map said nothing about CARTO and showed no attribution (P-7), and without `PUBLIC_CARTO_API_KEY` it requested tiles with `?key=undefined` (P-12).
+
+## W16b – E2E races O-36 and O-37 fixed
+
+- O-36 (setting a configuration key the first time was check-then-insert, so parallel first writes failed with 500 on `config_key_idx`): `saveConfig` in `backend/src/services/config.service.ts` upserts on `key`; `config.pg.test.ts` writes one key ten times at once (seen red with a warmed pool).
+- O-37 (the axe rows «statement-generate draft-discard-dialog» and «draft-restored» found no building when no earlier row of the run had seeded one, e.g. next to «draft-dropped» at the start of a shard): the states `draft-restored` and `draft-discard-dialog` now seed the screen records themselves (`seedFor` in `tests/e2e/fixtures/screens.ts`); the pair that failed passes.

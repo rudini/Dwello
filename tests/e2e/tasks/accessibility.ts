@@ -17,6 +17,7 @@ import {
 	PostFormAction,
 	Press,
 	Select,
+	Uncheck,
 	Wait
 } from '../screenplay/interactions';
 import { randomUUID } from 'crypto';
@@ -33,7 +34,7 @@ import { invoicePdf, uploadBelege } from './invoice-upload';
 import { goToGeneration } from './statement-generate';
 import { generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
-import { nameInput, proposal, proposeButton } from '../targets/categories';
+import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { userMenuButton } from '../targets/app-frame';
@@ -118,15 +119,17 @@ const previewOf =
 		await actor.attemptsTo(Click.on(nextButton), leaveSettings, Wait.until(on.shown(shown)));
 	};
 
-// The first input of each wizard, which starts its draft
-const startDraft: Record<string, Activity> = {
-	'/contracts/new': Select.option({ index: 1 }).from(tenantSelect),
-	'/statements/generate': (actor) => actor.attemptsTo(Click.on(nextButton), Check.the(on.firstGenerateBuilding))
+// The first input of each wizard, which starts its draft; the example's own building, as another scenario's may be gone
+const startDraft: Record<string, (example: Example) => Activity> = {
+	'/contracts/new': () => Select.option({ index: 1 }).from(tenantSelect),
+	'/statements/generate': (example) => (actor) =>
+		actor.attemptsTo(Click.on(nextButton), Check.the(on.generateBuilding(example.building)))
 };
 
 // a draft starts with an input; reloaded, the wizard restores it
-const restoreDraft: Activity = async (actor) => {
-	await actor.attemptsTo(startDraft[new URL(await actor.answer(pageAddress)).pathname]);
+const restoreDraft = (example: Example): Activity => async (actor) => {
+	const start = startDraft[new URL(await actor.answer(pageAddress)).pathname];
+	await actor.attemptsTo(start(example));
 	await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Noch nicht gespeichert'))), Navigate.reload, Wait.until(draftRestored));
 };
 
@@ -330,6 +333,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// chosen first: the stand-in finds stairwell cleaning umlagefähig, the own choice stays
 	'ki-proposal-kept': () => (actor) =>
 		actor.attemptsTo(Check.the(on.notAllowedOption), askKi('Treppenhausreinigung')),
+	// #100: «Brennstoff» is asked only for a heating cost
+	fuel: () => (actor) => actor.attemptsTo(Check.the(heatingCheckbox), Wait.until(fuelCheckbox)),
+	'fuel-refused': () => (actor) =>
+		actor.attemptsTo(Uncheck.the(fuelCheckbox), Click.on(on.saveButton), Wait.until(on.formProblem)),
 	'profile-sum-invalid': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('50').into(on.januaryShare), Wait.until(on.invalidProfileTotal)),
 	'mobile-menu-open': (_, viewport) => async (actor) => {
@@ -378,8 +385,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(nextButton),
 			Wait.until(reviewContractsUnknown)
 		),
-	'draft-restored': () => restoreDraft,
-	'draft-discard-dialog': () => (actor) => actor.attemptsTo(restoreDraft, openDialog(discardDraftButton)),
+	'draft-restored': (example) => restoreDraft(example),
+	'draft-discard-dialog': (example) => (actor) => actor.attemptsTo(restoreDraft(example), openDialog(discardDraftButton)),
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (example) => previewOf('2026', 'category-check')(example),
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),

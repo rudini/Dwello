@@ -3,6 +3,7 @@ import {
 	addressLine,
 	buildingMap,
 	apartmentRow,
+	fuelStockCategories,
 	fuelStocksHeading,
 	noTankValue,
 	yearBuiltValue
@@ -14,3 +15,5 @@ export const buildingAddress = Text.of(addressLine);
 export const shownMaps = Count.of(buildingMap);
 export const tankOfBuilding = Text.of(noTankValue);
 export const fuelStocksTitle = Text.of(fuelStocksHeading);
+// the categories a Tankbestand can be recorded in (#100)
+export const fuelStockCategoryNames = Text.ofAll(fuelStockCategories);

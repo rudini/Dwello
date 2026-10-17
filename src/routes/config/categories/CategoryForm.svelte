@@ -4,13 +4,13 @@
 	import type { Proposal } from '$lib/server/category';
 	import type { Category } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
-	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 	import SaveForm from '../SaveForm.svelte';
 	import CategoryProposal from './CategoryProposal.svelte';
 	import CategoryReason from './CategoryReason.svelte';
+	import HeatingChoice from './HeatingChoice.svelte';
 
 	// `ki` and `proposal` only on a new category: whether the KI is on (#219), its answer to «Von der KI prüfen lassen»
 	let {
@@ -42,7 +42,8 @@
 			sortOrder: String(category?.sortOrder || ''),
 			// A new category starts without a choice (#176)
 			allowed: category ? String(category.isAllowedUtilityCost) : '',
-			heating: category?.isHeatingCost ?? false
+			heating: category?.isHeatingCost ?? false,
+			fuel: category?.isFuel ?? false
 		}))
 	);
 	// The reason of a predefined category follows the choice in the form, not the saved one
@@ -154,14 +155,7 @@
 			</div>
 		{/if}
 	</div>
-	<Checkbox
-		id="isHeatingCost"
-		name="isHeatingCost"
-		label={m.categories_heating()}
-		help={m.categories_heating_help()}
-		bind:checked={values.heating}
-		testid="category-heating-checkbox"
-	/>
+	<HeatingChoice bind:heating={values.heating} bind:fuel={values.fuel} />
 	<TextInput
 		id="sortOrder"
 		name="sortOrder"

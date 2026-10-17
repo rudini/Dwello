@@ -58,3 +58,10 @@ Funktionalität: Gebäudedetail
   Szenario: Der Abschnitt zum Heizmaterial heisst Tankbestand
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann heisst der Abschnitt zum Heizmaterial auf der Gebäudeseite "Tankbestand"
+
+  # Nur eine Kategorie für Brennstoff hat einen Tankbestand (#100); ein Heizungsservice und der Kaminfeger werden
+  # wie Heizkosten verteilt, sind aber kein Brennstoff
+  Szenario: Der Tankbestand bietet nur Kategorien für Brennstoff an
+    Angenommen es gibt die umlagefähige Heizkosten-Kategorie "Heizungsservice"
+    Dann bietet der Tankbestand des Gebäudes "Birkenhof" die Kategorie "Heizung" an
+    Aber weder die Kategorie "Heizungsservice" noch die Kategorie "Kaminfeger"

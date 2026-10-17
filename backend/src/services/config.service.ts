@@ -198,35 +198,20 @@ async function saveConfig(
 	key: ConfigKey,
 	value: string
 ): Promise<Configuration> {
-	// Check if config exists
-	const [existing] = await tx
-		.select()
-		.from(configuration)
-		.where(eq(configuration.key, key))
-		.limit(1);
-
 	// #357: a changed rate goes into the Protokoll; «4.250» is the same rate as «4.25»
-	const before = existing?.value ?? String(CONFIG_KEYS.management_fee_pct.default);
-	if (key === 'management_fee_pct' && Number(before) !== Number(value)) {
-		await recordAudit('management_fee_changed', { from: before, to: value }, tx);
+	if (key === 'management_fee_pct') {
+		const [existing] = await tx.select().from(configuration).where(eq(configuration.key, key)).limit(1);
+		const before = existing?.value ?? String(CONFIG_KEYS.management_fee_pct.default);
+		if (Number(before) !== Number(value)) await recordAudit('management_fee_changed', { from: before, to: value }, tx);
 	}
 
-	if (existing) {
-		// Update existing
-		const [updated] = await tx
-			.update(configuration)
-			.set({ value, updatedAt: new Date() })
-			.where(eq(configuration.key, key))
-			.returning();
-		return updated;
-	} else {
-		// Insert new
-		const [created] = await tx
-			.insert(configuration)
-			.values({ key, value })
-			.returning();
-		return created;
-	}
+	// An upsert: two first writes of one key at once would both insert (O-36)
+	const [saved] = await tx
+		.insert(configuration)
+		.values({ key, value })
+		.onConflictDoUpdate({ target: configuration.key, set: { value, updatedAt: new Date() } })
+		.returning();
+	return saved;
 }
 
 /**

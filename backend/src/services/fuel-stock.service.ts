@@ -102,13 +102,13 @@ export async function fuelStockChange(buildingId: string, periodStart: string, p
 	];
 }
 
-/** An allocable heating cost category may hold a Tankbestand; the chimney sweep is shared like heating but is no fuel */
-export async function isHeatingCategory(categoryId: string) {
+/** An allocable category marked Brennstoff may hold a Tankbestand (#100); the chimney sweep is shared like heating but is no fuel */
+export async function isFuelCategory(categoryId: string) {
 	const [category] = await db
-		.select({ name: categories.name, heating: categories.isHeatingCost, allowed: categories.isAllowedUtilityCost })
+		.select({ fuel: categories.isFuel, allowed: categories.isAllowedUtilityCost })
 		.from(categories)
 		.where(eq(categories.id, categoryId));
-	return !!category?.heating && category.allowed && category.name !== 'Chimney Sweep';
+	return !!category?.fuel && category.allowed;
 }
 
 /** One tank per building: a reading in another category than the building's other readings would bill it elsewhere */

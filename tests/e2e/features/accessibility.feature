@@ -186,10 +186,13 @@ Funktionalität: Barrierefreiheit
       | category-new           | ki-unavailable      |
       | category-new           | ki-proposal-kept    |
       | category-new           | ki-checking         |
+      | category-new           | fuel                |
       | category-edit          | default             |
       | category-edit          | submit-cleared      |
       | category-edit          | saved-toast         |
       | category-edit-predefined | default           |
+      | category-edit-fuel     | default             |
+      | category-edit-fuel     | fuel-refused        |
       | categories             | delete-dialog       |
       | distribution-keys      | default             |
       | distribution-key-new   | default             |
