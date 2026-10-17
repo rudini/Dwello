@@ -1280,8 +1280,6 @@
 	"statements_existing_fee_contract": "Erstellt mit {used} % Verwaltungspauschale; im Mietvertrag ist heute ein Satz von {now} % vereinbart.",
 	"statements_existing_fee_none": "Erstellt mit {used} % Verwaltungspauschale; im Mietvertrag ist heute keine Verwaltungspauschale vereinbart.",
 	"statements_existing_same_settings": "Damit alle Abrechnungen dieser Abrechnungsperiode gleich gerechnet sind, wählen Sie im Schritt {number} «{step}» dasselbe Heizprofil und denselben Satz wie bei den bestehenden Abrechnungen.",
-	"statements_partial_title": "Rechnungen nur für einen Teil der Periode",
-	"statements_partial_text": "Für {names} gibt es am Anfang oder Ende der Abrechnungsperiode mehr als drei Monate ohne Rechnung. Prüfen Sie, ob noch Rechnungen fehlen.",
 	"statements_confirm_label": "Die Abrechnungen trotzdem erstellen",
 	"statements_preview_empty": "In dieser Abrechnungsperiode gibt es keine Mietverträge ohne Abrechnung in den gewählten Gebäuden.",
 	"statements_all_billed_lead": "Alle Mietverträge haben in dieser Periode schon eine Abrechnung.",

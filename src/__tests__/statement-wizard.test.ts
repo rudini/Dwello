@@ -18,7 +18,6 @@ const selection = {
 	managementFeePercent: 3,
 	buildingIds: ['b1']
 };
-const period = { periodStart: '2024-01-01', periodEnd: '2024-12-31' };
 const buildings = [
 	{ id: 'b1', name: 'Ahornhof' },
 	{ id: 'b2', name: 'Lindenhof' }
@@ -84,8 +83,7 @@ describe('Rechnungen pro Gebäude', () => {
 					{ buildingId: 'b1', count: 3, first: '2024-01-15', last: '2024-06-30' },
 					{ buildingId: 'b2', count: 0, first: null, last: null }
 				],
-				buildings,
-				period
+				buildings
 			)
 		).toEqual([
 			{
@@ -93,7 +91,6 @@ describe('Rechnungen pro Gebäude', () => {
 				name: 'Ahornhof',
 				text: '3 Rechnungen vom 15.01.2024 bis 30.06.2024',
 				missing: false,
-				partial: true, // nothing after June
 				existing: 0,
 				changed: [],
 				partlyBilled: 0,
@@ -109,7 +106,6 @@ describe('Rechnungen pro Gebäude', () => {
 				name: 'Lindenhof',
 				text: 'Keine Rechnungen erfasst',
 				missing: true,
-				partial: false,
 				existing: 0,
 				changed: [],
 				partlyBilled: 0,
@@ -124,21 +120,9 @@ describe('Rechnungen pro Gebäude', () => {
 		expect(
 			invoiceRows(
 				[{ buildingId: 'b1', count: 1, first: '2024-03-15', last: '2024-03-15' }],
-				buildings,
-				period
+				buildings
 			)[0].text
 		).toBe('1 Rechnung vom 15.03.2024');
-	});
-});
-
-describe('Rechnungen über die ganze Periode', () => {
-	// More than three months at the start or end without any invoice: worth a second look, not a stop
-	it('weist auf Rechnungen hin, die nur einen Teil der Periode abdecken', () => {
-		const rows = (first: string, last: string) =>
-			invoiceRows([{ buildingId: 'b1', count: 4, first, last }], buildings, period)[0].partial;
-		expect(rows('2024-01-10', '2024-12-20')).toBe(false);
-		expect(rows('2024-01-10', '2024-03-31')).toBe(true); // only Q1
-		expect(rows('2024-06-01', '2024-12-20')).toBe(true); // nothing in the first five months
 	});
 });
 
@@ -324,8 +308,7 @@ describe('Rechnungen pro Kategorie', () => {
 						check: check(findings)
 					}
 				],
-				buildings,
-				period
+				buildings
 			)[0];
 
 		expect(
@@ -336,27 +319,6 @@ describe('Rechnungen pro Kategorie', () => {
 		expect(row([finding('missing')]).incomplete).toBe(true);
 		expect(row([finding('deviation', { changePercent: 30 })]).incomplete).toBe(false);
 		expect(row([]).comparedWith).toEqual({ start: '2023-01-01', end: '2023-12-31' });
-	});
-
-	// Mit Vorjahr ersetzt der Vergleich pro Kategorie die grobe Prüfung von Anfang und Ende der Periode
-	it('prüft Anfang und Ende der Periode nur, wenn es kein Vorjahr zum Vergleich gibt', () => {
-		const partial = (hasComparison: boolean) =>
-			invoiceRows(
-				[
-					{
-						buildingId: 'b1',
-						count: 2,
-						first: '2024-01-15',
-						last: '2024-03-31',
-						check: check([], hasComparison)
-					}
-				],
-				buildings,
-				period
-			)[0].partial;
-
-		expect(partial(true)).toBe(false);
-		expect(partial(false)).toBe(true);
 	});
 });
 

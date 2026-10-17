@@ -1280,8 +1280,6 @@
 	"statements_existing_fee_contract": "Allestito con il {used} % di spese di gestione; nel contratto di locazione oggi è pattuita un’aliquota del {now} %.",
 	"statements_existing_fee_none": "Allestito con il {used} % di spese di gestione; nel contratto di locazione oggi non sono pattuite spese di gestione.",
 	"statements_existing_same_settings": "Affinché tutti i conteggi di questo periodo di conteggio siano calcolati allo stesso modo, scelga nel passo {number} «{step}» lo stesso profilo di riscaldamento e la stessa aliquota dei conteggi esistenti.",
-	"statements_partial_title": "Fatture solo per una parte del periodo",
-	"statements_partial_text": "Per {names} ci sono più di tre mesi senza fattura all’inizio o alla fine del periodo di conteggio. Verifichi se mancano ancora fatture.",
 	"statements_confirm_label": "Allestire comunque i conteggi",
 	"statements_preview_empty": "In questo periodo di conteggio non ci sono contratti di locazione senza conteggio negli immobili scelti.",
 	"statements_all_billed_lead": "Tutti i contratti di locazione hanno già un conteggio in questo periodo.",

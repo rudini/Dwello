@@ -27,6 +27,7 @@ import {
 	managementFeeHint,
 	managementFeeInput,
 	missingInvoices,
+	partialInvoices,
 	oldAddress,
 	periodStartInput,
 	periodRunningWarning,
@@ -121,6 +122,7 @@ export const settingsChoiceName = Accessible.nameOf(wizardChoices);
 export const periodChoiceShown = Visibility.of(periodStartInput);
 export const missingInvoicesWarning = Text.of(missingInvoices);
 export const missingInvoicesWarnings = Count.of(missingInvoices);
+export const partialInvoicesHints = Count.of(partialInvoices);
 export const invoicesOfBuilding = (buildingName: string) => Text.of(buildingInvoices(buildingName));
 export const draftsOnly = Text.of(draftsOnlyNote);
 export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(buildingId));

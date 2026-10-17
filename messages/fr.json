@@ -1280,8 +1280,6 @@
 	"statements_existing_fee_contract": "Établi avec {used} % de frais de gestion ; le contrat de bail prévoit aujourd’hui un taux de {now} %.",
 	"statements_existing_fee_none": "Établi avec {used} % de frais de gestion ; le contrat de bail ne prévoit aujourd’hui aucuns frais de gestion.",
 	"statements_existing_same_settings": "Pour que tous les décomptes de cette période de décompte soient calculés de la même manière, choisissez à l’étape {number} « {step} » le même profil de chauffage et le même taux que pour les décomptes existants.",
-	"statements_partial_title": "Factures pour une partie de la période seulement",
-	"statements_partial_text": "Pour {names}, il y a plus de trois mois sans facture au début ou à la fin de la période de décompte. Vérifiez s’il manque encore des factures.",
 	"statements_confirm_label": "Établir tout de même les décomptes",
 	"statements_preview_empty": "Dans cette période de décompte, il n’y a pas de contrats de bail sans décompte dans les immeubles choisis.",
 	"statements_all_billed_lead": "Tous les contrats de bail ont déjà un décompte dans cette période.",

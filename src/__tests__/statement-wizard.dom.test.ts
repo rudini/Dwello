@@ -533,12 +533,14 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
-	it('nennt Gebäude, deren Rechnungen nur einen Teil der Periode abdecken', () => {
+	// #65: ohne Vorjahr kein Hinweis auf Monate ohne Rechnung; eine Rechnung im Jahr kann vollständig sein
+	it('weist nicht auf Monate ohne Rechnung am Anfang oder Ende der Periode hin', () => {
 		open({
 			preview,
 			invoices: [{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-03-31' }]
 		});
-		expect(byTestId('partial-invoices')!.textContent).toContain('Ahornhof');
+		expect(byTestId('preview-invoices')!.textContent).toContain('Ahornhof');
+		expect(document.body.textContent).not.toContain('Teil der Periode');
 		expect(byTestId('missing-invoices')).toBeNull();
 	});
 
