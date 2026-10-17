@@ -1403,6 +1403,17 @@ Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.sve
 
 Files: `backend/src/__tests__/heating-profiles.pg.test.ts` (comment), `implementation_plan.md`, this file, `docs/reviews/w14-review-{1,2}.md`.
 
+## Session 2026-10-17 W8c-2: remove the 3-month hint (#65, option A)
+
+- [x] Decision recorded in #65 (option A, label `entscheiden` removed)
+- [x] @wip scenario «Ohne Vorjahr weist die Vorschau nicht auf Monate ohne Rechnung hin» (statement-generate.feature), seen red at the hint
+- [x] fach-reviewer round 1: `docs/reviews/w8c2-fachreview-1.md` (V-2 fixed: Kaminfeger as the yearly invoice; V-1 Minor left in the report)
+- [x] Remove the hint: `partly`/`GAP_DAYS`/`partial` and the unused `period` parameter of `invoiceRows` in `src/lib/statement-wizard.ts` (callers `PreviewStep.svelte`, `StatementStep.svelte`), the alert and its marker in `PreviewChecks.svelte`, `statements_partial_*` in `messages/*.json`; unit and DOM tests turned red first
+- Files: those above, `src/__tests__/statement-wizard{,.dom}.test.ts`, `tests/e2e/{features/statement-generate.feature,steps/statement-generate.steps.ts,questions/statement-generate.ts,targets/statement-generate.ts}`
+- [x] code-reviewer round 1: `docs/reviews/w8c2-review-1.md` (C-1 fixed: the DOM test checks the text «Teil der Periode», seen red on the old code; C-2 fixed)
+- [x] workflow-review: no new point (the two of W8c are in `docs/reviews/workflow-notes-issue-65.md`)
+- [x] session archived, pull request (`Fixes #65`)
+
 ## Session 2026-10-16 W5: category descriptions with exclusions (#204, #220, #221)
 
 - [x] Migration `0021_category_descriptions.sql`: new descriptions for Heizung, Gartenpflege, Kehricht, TV/Kabelanschluss, Gebäudeversicherung, Verwaltung, only where a row still holds the seeded text (#204, #220)
