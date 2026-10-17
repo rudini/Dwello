@@ -5,6 +5,7 @@ import {
 	impossible,
 	impossibleYear,
 	initialContractValues,
+	agreedNames,
 	managementFeeText,
 	validateContract,
 	type ContractFormValues
@@ -97,7 +98,8 @@ export function startDateNotice(startDate: string, today: string): string | null
 export function contractSummary(
 	values: ContractFormValues,
 	tenants: { id: string; name: string }[],
-	apartments: { id: string; unit: string; building: string }[]
+	apartments: { id: string; unit: string; building: string }[],
+	categories: { id: string; name: string }[] = [] // the umlagefähige ones the contract can agree (#91)
 ) {
 	const apartment = apartments.find((a) => a.id === values.apartmentId);
 	const gross =
@@ -157,6 +159,12 @@ export function contractSummary(
 				: '',
 			step: 4,
 			field: 'managementFee'
+		},
+		{
+			label: m.contracts_agreed_costs_label(),
+			value: agreedNames(values.agreedCategoryIds, categories).join(', ') || m.contracts_agreed_costs_none(),
+			step: 4,
+			field: 'agreedCosts'
 		},
 		{ label: m.common_monthly_total(), value: formatCurrency(gross), step: null, field: '' }
 	];

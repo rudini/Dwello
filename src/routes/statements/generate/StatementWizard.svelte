@@ -74,7 +74,7 @@
 	);
 	let errors = $state<Record<string, string>>({});
 	let confirmed = $state(false); // statements despite buildings without invoices, for this preview only
-	let unansweredAgreements = $state(0); // step 3: categories not answered whether the contract agrees them (#91)
+	let agreementsBlocking = $state(false); // step 3: whether the contracts agree the period's costs is open (#91)
 	let busy = $state(false); // the server is calculating the preview or creating the drafts
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
@@ -160,7 +160,7 @@
 		};
 		errors = {
 			...selectionErrors(selection, step),
-			...(step === 3 && unansweredAgreements ? { agreements: m.statements_agreement_error() } : {}),
+			...(step === 3 && agreementsBlocking ? { agreements: m.statements_agreement_error() } : {}),
 			...(step === 4 ? previewErrors() : {})
 		};
 		if (Object.keys(errors).length > 0) return (stay(), showErrors());
@@ -250,7 +250,7 @@
 			{data}
 			bind:selection
 			bind:confirmed
-			bind:unansweredAgreements
+			bind:agreementsBlocking
 			{errors}
 			{previewRows}
 			{invoices}

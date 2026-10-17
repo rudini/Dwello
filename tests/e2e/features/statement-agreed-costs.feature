@@ -54,7 +54,6 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Dann kostet die Abrechnung von "Anna Keller" "CHF 400.00"
     Und kostet die Abrechnung von "Beat Huber" "CHF 1’050.00"
 
-  @wip
   Szenario: Die Antwort bleibt beim Mietvertrag
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
@@ -88,6 +87,16 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Dann meldet die Frage zum Mietvertrag von "Anna Keller" "Ihre Antwort wurde nicht gespeichert. Bitte versuchen Sie es nochmals."
 
   # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
+  # Code-Review W10c C-1: ohne die Prüfung entstünden Abrechnungen ohne die neue Kategorie, ohne dass jemand fragt
+  Szenario: Die vereinbarten Nebenkosten lassen sich nicht prüfen
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
+    Und das Prüfen der vereinbarten Nebenkosten ist gestört
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
+    Wenn der Liegenschaftsverwalter weitergeht
+    Dann meldet der Assistent bei den vereinbarten Nebenkosten "Dwello konnte nicht prüfen, ob die Mietverträge alle Nebenkosten dieser Periode vereinbaren."
+    Und bleibt der Assistent beim Schritt mit der Verwaltungspauschale
+
   Szenario: Das PDF nennt die vereinbarten Nebenkosten
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart

@@ -130,7 +130,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Hanna', '4.01', { startDate: '2015-01-01', baseRent: '1500.00' });
 	await seed.contract('Ines', '4.02', { startDate: '2015-01-01', baseRent: '1500.00' });
 	for (const [category, date] of [['Internet', '2025-03-31'], ['Video', '2025-09-30']]) {
-		await seed.categoryNamedAlikeInEnglish(category, 'Glasfaser');
+		await seed.categoryNamedAlikeInEnglish(category, 'FTTH');
 		await seed.invoiceInOwnCategory('Waldblick', category, '240.00', date);
 	}
 	await seed.agreement('Ines', 'Internet', false);

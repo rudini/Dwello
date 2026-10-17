@@ -86,6 +86,7 @@ export interface RentalContract {
 	monthlyAdvancePayment: string | number; // Akonto
 	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
 	managementFeePercent?: string | null; // own rate, before the run's
+	agreedCategoryIds?: string[]; // #91: the umlagefähige categories it agrees
 	referenceIndex?: string | number | null;
 	contractPdf?: string | null;
 	notes?: string | null;

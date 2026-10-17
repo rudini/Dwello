@@ -289,18 +289,13 @@ export async function parseRequestBody<T = unknown>(request: Request): Promise<T
 	}
 }
 
-/** A change forwarded as it came: the XSRF token checked, the body passed on, the backend's answer returned */
-export async function forwardMutation(
-	path: string,
-	method: 'PUT' | 'POST',
-	request: Request,
-	cookies: Cookies
-) {
+/** A PUT forwarded as it came: the XSRF token checked, the body passed on, the backend's answer returned */
+export async function forwardPut(path: string, request: Request, cookies: Cookies) {
 	try {
-		validateXsrfForMutation(request, cookies, method);
+		validateXsrfForMutation(request, cookies, 'PUT');
 		const body = await parseRequestBody(request);
-		return createProxyResponse(await forwardRequest(path, method, cookies, { body }));
+		return createProxyResponse(await forwardRequest(path, 'PUT', cookies, { body }));
 	} catch (error) {
-		return handleProxyError(error, `${method} ${path}`);
+		return handleProxyError(error, `PUT ${path}`);
 	}
 }

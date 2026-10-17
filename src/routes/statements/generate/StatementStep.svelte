@@ -17,7 +17,7 @@
 		data,
 		selection = $bindable(),
 		confirmed = $bindable(),
-		unansweredAgreements = $bindable(0),
+		agreementsBlocking = $bindable(false),
 		errors,
 		previewRows,
 		invoices,
@@ -31,7 +31,7 @@
 		};
 		selection: WizardSelection;
 		confirmed: boolean;
-		unansweredAgreements?: number;
+		agreementsBlocking?: boolean;
 		errors: Record<string, string>;
 		previewRows: PreviewRow[];
 		invoices: Parameters<typeof invoiceRows>[0];
@@ -71,7 +71,7 @@
 	<AgreedCosts
 		buildingIds={selection.buildingIds}
 		period={{ start: selection.periodStart, end: selection.periodEnd }}
-		bind:unanswered={unansweredAgreements}
+		bind:blocking={agreementsBlocking}
 		error={errors.agreements}
 	/>
 {:else if step === 4}

@@ -65,6 +65,7 @@ import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
+import { leaveSettings } from './statement-generate';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
 import { UPLOADED } from '../fixtures/screens';
@@ -106,7 +107,7 @@ const previewOf =
 			Click.on(nextButton)
 		);
 		for (const building of [example.building, ...others]) await actor.attemptsTo(Check.the(on.generateBuilding(building)));
-		await actor.attemptsTo(Click.on(nextButton), Click.on(nextButton), Wait.until(on.shown(shown)));
+		await actor.attemptsTo(Click.on(nextButton), leaveSettings, Wait.until(on.shown(shown)));
 	};
 
 // The first input of each wizard, which starts its draft
@@ -248,6 +249,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'link-preset': () => Wait.until(on.wizardPreset),
 	// «Weiter» with the questions open: their errors; and the contract not agreeing a category. No answer: it would be
 	// stored, and the next viewport would not be asked any more
+	// an answer that cannot be saved: the question's error (idempotent, nothing is stored)
+	'agreement-save-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.toPathsMatching(/^\/api\/contracts\/[^/]+\/agreements$/),
+			Click.on(on.firstAgreementYes),
+			Wait.until(on.formProblem)
+		),
 	'agreed-costs': () => (actor) =>
 		actor.attemptsTo(Wait.until(on.shown('not-agreed-costs')), Click.on(nextButton), Wait.until(on.formProblem)),
 	'list-scoped': () => Wait.until(on.listScope),
@@ -407,7 +415,7 @@ const statementWizardSteps =
 			Wait.until(on.shown('management-fee-not-agreed')),
 			look
 		);
-		await nextStep('preview-count'); // "Vorschau", calculated on the server
+		await actor.attemptsTo(leaveSettings, Wait.until(on.shown('preview-count')), look); // "Vorschau", calculated on the server
 		// a building without invoices must be confirmed
 		if (await actor.answer(Visibility.of(on.confirmMissingInvoices))) await actor.attemptsTo(Check.the(on.confirmMissingInvoices));
 		await nextStep('generate-drafts-note'); // "Erstellen"

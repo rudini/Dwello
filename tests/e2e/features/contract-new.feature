@@ -139,14 +139,12 @@ Funktionalität: Neuen Mietvertrag erfassen
 
   # #91: ein neuer Mietvertrag beginnt mit allen umlagefähigen Kategorien; nur vereinbarte Nebenkosten darf der
   # Liegenschaftsverwalter abrechnen (Art. 257a Abs. 2 OR)
-  @wip
   Szenario: Ein neuer Mietvertrag vereinbart alle umlagefähigen Nebenkosten
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"
     Und zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Lift"
     Aber zeigt die Prüfung "Vereinbarte Nebenkosten" ohne "Verwaltung"
 
-  @wip
   Szenario: Nicht vereinbarte Nebenkosten beim neuen Mietvertrag weglassen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken ohne die Nebenkosten "Lift" bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"

@@ -7,6 +7,7 @@ import {
 	buildingCheckbox,
 	feeNotAgreedLink,
 	agreementAnswered,
+	agreementsLoading,
 	agreementChoice,
 	notAgreedCostsLink,
 	confirmMissingInvoices,
@@ -27,6 +28,8 @@ import { generateStatementsViaApi, openPreviewViaApi, type RunOptions } from './
 
 const WIZARD = '/statements/generate';
 const goToNextStep = Click.on(nextButton);
+// From step 3 once it has checked whether the contracts agree the period's Nebenkosten (#91): «Weiter» waits for it
+export const leaveSettings: Activity = (actor) => actor.attemptsTo(Wait.forCount(agreementsLoading, 0), goToNextStep);
 
 // The wizard is the UI's way to a run; the API driver needs no page for it
 export const openStatementWizard = throughUiOrApi(Navigate.to(WIZARD), async () => {});
@@ -52,8 +55,13 @@ export const setManagementFee = (buildingId: string, percent: number): Activity 
 	actor.attemptsTo(chooseBuilding(buildingId), goToNextStep, Enter.theValue(String(percent)).into(managementFeeInput));
 
 // The settings step of a year's run, opened from a link that chose building and period (A-10)
+// it waits until the questions about the agreed Nebenkosten are loaded (code review W10c C-1)
 export const openSettingsFor = (year: number, buildingId: string, percent: number): Activity => (actor) =>
-	actor.attemptsTo(openStatementWizardFor(buildingId, year), Enter.theValue(String(percent)).into(managementFeeInput));
+	actor.attemptsTo(
+		openStatementWizardFor(buildingId, year),
+		Enter.theValue(String(percent)).into(managementFeeInput),
+		Wait.forCount(agreementsLoading, 0)
+	);
 
 // Typed key by key, as a user does: what the field keeps while typing matters
 export const typeManagementFee = (buildingId: string, text: string): Activity => (actor) =>
@@ -71,7 +79,7 @@ const openPreviewThroughUi =
 		if (options.heatingProfileId) await actor.attemptsTo(Select.option(options.heatingProfileId).from(heatingProfileSelect));
 		if (options.managementFeePercent !== undefined)
 			await actor.attemptsTo(Enter.theValue(String(options.managementFeePercent)).into(managementFeeInput));
-		await actor.attemptsTo(goToNextStep, Wait.until(previewCount)); // the preview is calculated on the server
+		await actor.attemptsTo(leaveSettings, Wait.until(previewCount)); // the preview is calculated on the server
 	};
 
 export const openPreview = (year: number, buildingId: string, options: RunOptions = {}) =>
@@ -102,7 +110,7 @@ export const confirmDespiteWarnings = Check.the(confirmMissingInvoices);
 
 // Back to step "Heizprofil und Verwaltungspauschale" and "Weiter": the server calculates a new preview
 export const recalculatePreview: Activity = (actor) =>
-	actor.attemptsTo(Click.on(finishedStep('Heizprofil')), goToNextStep, Wait.until(previewCount));
+	actor.attemptsTo(Click.on(finishedStep('Heizprofil')), leaveSettings, Wait.until(previewCount));
 
 // "Rechnung erfassen" in the preview's warning about missing invoices
 export const recordInvoiceFromWarning: Activity = (actor) =>
@@ -125,4 +133,5 @@ export const answerAgreement = (contractId: string, categoryId: string, agreed: 
 	actor.attemptsTo(Click.on(agreementChoice(contractId, categoryId, agreed)), Wait.until(agreementAnswered(contractId, categoryId)));
 export const openContractWithNotAgreedCosts = (contractId: string) => Click.on(notAgreedCostsLink(contractId));
 // saving an answer fails (the BFF route the browser calls)
+export const agreementsCannotBeChecked = FailRequests.to('/api/statements/agreements', {});
 export const agreementsCannotBeSaved = (contractId: string) => FailRequests.to(`/api/contracts/${contractId}/agreements`, {});

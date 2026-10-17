@@ -137,6 +137,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
       | statement-generate     | agreed-costs        |
+      | statement-generate     | agreement-save-failed |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |

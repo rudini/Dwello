@@ -6,6 +6,7 @@ import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
+import category from '../../tests/contracts/category.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import contractHasStatements from '../../tests/contracts/contract-delete-refused.json';
 
@@ -675,5 +676,36 @@ describe('Entwurf löschen und Mietvertrag unbefristet weiterführen', () => {
 			expect(await result).toMatchObject({ status: 409 });
 			expect(calls.filter((call) => call.method)).toEqual([]);
 		}
+	});
+});
+
+// #91: the contract's page names its agreed Nebenkosten; without the categories it still shows the rest
+describe('Vereinbarte Nebenkosten am Mietvertrag', () => {
+	const backend = (categories: Response) =>
+		(async (url: string) =>
+			url.endsWith('/categories?limit=100')
+				? categories
+				: url.endsWith('/contracts/c1')
+					? Response.json(contractDetail)
+					: Response.json({ data: [], contracts: [] })) as typeof globalThis.fetch;
+	const agreedCosts = async (categories: Response) =>
+		(
+			(await load({ params: { id: 'c1' }, fetch: backend(categories) } as never)) as {
+				agreedCosts: unknown;
+			}
+		).agreedCosts;
+
+	it('nennt die vereinbarten Kategorien beim Namen', async () => {
+		const listed = Response.json({
+			categories: [
+				{ ...category, id: contractDetail.agreedCategoryIds[0], nameDE: 'Internet' },
+				{ ...category, id: 'other', nameDE: 'Lift' }
+			]
+		});
+		expect(await agreedCosts(listed)).toEqual(['Internet']);
+	});
+
+	it('zeigt den Mietvertrag ohne sie, wenn die Kategorien nicht geladen werden können', async () => {
+		expect(await agreedCosts(new Response(null, { status: 500 }))).toBeNull();
 	});
 });

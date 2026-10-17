@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { api } from '$lib/api';
 	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
 	import AgreementQuestion from './AgreementQuestion.svelte';
 
 	// Step 3 (#91, Art. 257a Abs. 2 OR): per contract of the run, whether a category with costs in the period and no
@@ -10,12 +11,12 @@
 	let {
 		buildingIds,
 		period,
-		unanswered = $bindable(0),
+		blocking = $bindable(false),
 		error
 	}: {
 		buildingIds: string[];
 		period: { start: string; end: string };
-		unanswered?: number;
+		blocking?: boolean; // «Weiter» waits: questions loading, not loaded or not answered (code review W10c C-1)
 		error?: string; // «Weiter» with questions not answered
 	} = $props();
 
@@ -28,27 +29,51 @@
 		notAgreed: Category[];
 	};
 	let contracts = $state<Contract[]>([]);
+	let status = $state<'loading' | 'loaded' | 'failed'>('loading');
+	let attempt = $state(0); // «Erneut versuchen» loads again
 	let saved = $state<Record<string, boolean>>({}); // per contract and category: the answer is stored
 	const key = (contractId: string, categoryId: string) => `${contractId}-${categoryId}`;
 
 	$effect(() => {
+		void attempt;
+		status = 'loading';
 		api
 			.get<Contract[]>('/statements/agreements', {
 				buildingIds: buildingIds.join(','),
 				periodStart: period.start,
 				periodEnd: period.end
 			})
-			.then(({ data }) => (contracts = data ?? []));
+			.then(({ data }) => {
+				contracts = Array.isArray(data) ? data : [];
+				status = Array.isArray(data) ? 'loaded' : 'failed';
+			});
 	});
 
 	const asked = $derived(contracts.filter((contract) => contract.open.length));
 	const notAgreed = $derived(contracts.filter((contract) => contract.notAgreed.length));
 	$effect(() => {
-		unanswered = asked
-			.flatMap((contract) => contract.open.map((c) => key(contract.contractId, c.categoryId)))
-			.filter((k) => !saved[k]).length;
+		blocking =
+			status !== 'loaded' ||
+			asked.some((contract) =>
+				contract.open.some((c) => !saved[key(contract.contractId, c.categoryId)])
+			);
 	});
 </script>
+
+{#if status === 'loading'}
+	<p role="status" class="text-ink-muted" data-testid="agreements-loading">
+		{m.statements_agreements_loading()}
+	</p>
+{:else if status === 'failed'}
+	<Alert tone="critical" title={m.statements_agreements_failed_title()} testid="agreements-failed">
+		<p>{m.statements_agreements_failed_text()}</p>
+		{#snippet action()}
+			<Button variant="secondary" onclick={() => attempt++}
+				>{m.statements_agreements_retry()}</Button
+			>
+		{/snippet}
+	</Alert>
+{/if}
 
 {#if asked.length}
 	<!-- TODO(fachlich prüfen, #369): the term «Vereinbarte Nebenkosten» -->

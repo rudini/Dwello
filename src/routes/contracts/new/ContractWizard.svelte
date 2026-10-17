@@ -50,10 +50,12 @@
 	// "Mietvertrag erfassen" in five steps; the input is kept as a draft in this browser until it is saved
 	let {
 		tenants,
-		apartments
+		apartments,
+		categories
 	}: {
 		tenants: { id: string; name: string; place?: string }[];
 		apartments: { id: string; unit: string; building: string; size?: string }[];
+		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
 	} = $props();
 
 	const DRAFT = 'contract';
@@ -326,9 +328,17 @@
 				{errors}
 			/>
 		{:else if step === 4}
-			<RentStep bind:values {errors} {takenFrom} />
+			<RentStep bind:values {errors} {takenFrom} {categories} />
 		{:else}
-			<ReviewStep {values} {tenants} {apartments} {unknown} onretry={retry} onedit={editField} />
+			<ReviewStep
+				{values}
+				{tenants}
+				{apartments}
+				{categories}
+				{unknown}
+				onretry={retry}
+				onedit={editField}
+			/>
 			{#if errors.form}
 				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>

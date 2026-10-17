@@ -4,6 +4,7 @@ import { actions as listActions, load } from '../routes/config/categories/+page.
 import { actions as newActions } from '../routes/config/categories/new/+page.server';
 import { actions as editActions } from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
+import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
 import invalid from '../../tests/contracts/validation-refused.json';
@@ -249,5 +250,31 @@ describe('Kategorie löschen', () => {
 		const { result } = runAction(listActions.delete, '', 409, { id: 'c1' }, { error: message });
 
 		expect(await result).toMatchObject({ status: 409, data: { error: message } });
+	});
+});
+
+// #91: the categories a Mietvertrag can agree, named in the UI language
+describe('Kategorien, die ein Mietvertrag vereinbaren kann', () => {
+	const answer = (status = 200) =>
+		(async (url: string) =>
+			url === `${API}?limit=100`
+				? Response.json(
+						{
+							categories: [
+								{ ...contract, id: 'c1', nameDE: 'Internet' },
+								{ ...contract, id: 'c2', nameDE: 'Verwaltung', isAllowedUtilityCost: false }
+							]
+						},
+						{ status }
+					)
+				: Response.json({}, { status: 404 })) as typeof globalThis.fetch;
+
+	it('nennt nur die umlagefähigen', async () => {
+		expect(await agreeableCategories(answer())).toEqual([{ id: 'c1', name: 'Internet' }]);
+	});
+
+	// a list that failed to load would save every category as not agreed
+	it('scheitert, wenn die Kategorien nicht geladen werden können', async () => {
+		await expect(agreeableCategories(answer(500))).rejects.toMatchObject({ status: 500 });
 	});
 });

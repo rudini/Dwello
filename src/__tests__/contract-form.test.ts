@@ -175,7 +175,13 @@ describe('contractBody', () => {
 		});
 	});
 
-	it('sendet die Verwaltungspauschale: vereinbart mit eigenem Satz, zum Satz des Laufs oder nicht', () => {
+	// #91: ohne Auswahl vereinbart das Backend alle umlagefähigen Kategorien
+	it('sendet die vereinbarten Nebenkosten nur, wenn sie gewählt sind', () => {
+		expect(contractBody(filled)).not.toHaveProperty('agreedCategoryIds');
+		expect(contractBody({ ...filled, agreedCategoryIds: [] })).toHaveProperty('agreedCategoryIds', []);
+	});
+
+		it('sendet die Verwaltungspauschale: vereinbart mit eigenem Satz, zum Satz des Laufs oder nicht', () => {
 		const fee = (values: Partial<ContractFormValues>) => {
 			const { managementFeeAgreed, managementFeePercent } = contractBody({ ...filled, ...values });
 			return { managementFeeAgreed, managementFeePercent };

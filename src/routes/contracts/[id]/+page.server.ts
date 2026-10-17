@@ -1,6 +1,8 @@
 import { m } from '$lib/paraglide/messages';
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
+import { agreeableCategories } from '$lib/server/category';
+import { agreedNames } from '$lib/contract-form';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { endedPeriodsSince, type AccountingPeriodType } from '$lib/accounting-period';
 import { wizardLink } from '$lib/statement-wizard';
@@ -22,6 +24,7 @@ interface ContractDetailsData {
 	billedBy: { id: string; statementNumber: string; status: string }[] | null;
 	nextSteps: { successor: boolean; ended: boolean } | null; // A-4: a notice still running; A-5: after it the address
 	fixedTermCheck: boolean; // A-6: an agreed end passed, the tenant may have stayed
+	agreedCosts: string[] | null; // #91: the agreed Nebenkosten by name; null when the categories cannot be read
 	contract: RentalContract & {
 		tenant: Tenant;
 		apartment: Apartment;
@@ -180,6 +183,11 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			nextSteps: await nextStepsDue(fetch, data),
 			fixedTermCheck: await fixedTermCheckDue(fetch, data),
 			contract,
+			// the agreed Nebenkosten (#91); without the categories the page still shows the rest
+			agreedCosts: await agreeableCategories(fetch).then(
+				(categories) => agreedNames(data.agreedCategoryIds ?? [], categories),
+				() => null
+			),
 			rentBreakdown: {
 				baseRent,
 				additionalRent,

@@ -100,3 +100,6 @@ export const notAgreedCostsLink = (contractId: string) =>
 		page.getByTestId(`not-agreed-costs-link-${contractId}`)
 	);
 export const oldAddress = target('Warnung vor der alten Adresse', (page) => page.getByTestId('preview-old-address'));
+// while the questions load, and when they cannot be loaded
+export const agreementsLoading = target('Vereinbarte Nebenkosten werden geprüft', (page) => page.getByTestId('agreements-loading'));
+export const agreementsFailed = target('Vereinbarte Nebenkosten nicht geprüft', (page) => page.getByTestId('agreements-failed'));

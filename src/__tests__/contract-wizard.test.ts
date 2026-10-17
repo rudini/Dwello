@@ -91,6 +91,7 @@ describe('Mietvertrag Schritt für Schritt', () => {
 				step: 4,
 				field: 'managementFee'
 			},
+			{ label: 'Vereinbarte Nebenkosten', value: 'Keine', step: 4, field: 'agreedCosts' },
 			{ label: 'Monatlich total', value: 'CHF\u00a01’130.00', step: null, field: '' } // a sum, changed through its parts
 		]);
 		const limited = { ...filled, isUnlimited: false, endDate: '2026-12-31' };
@@ -98,6 +99,20 @@ describe('Mietvertrag Schritt für Schritt', () => {
 			'Donnerstag, 31. Dezember 2026'
 		);
 	});
+});
+
+// #91: ein neuer Mietvertrag vereinbart alle umlagefähigen Kategorien, bis der Liegenschaftsverwalter eine abwählt
+it('nennt bei der Prüfung die vereinbarten Nebenkosten', () => {
+	const categories = [
+		{ id: 'c1', name: 'Heizung' },
+		{ id: 'c2', name: 'Lift' }
+	];
+	const agreed = (values: ContractFormValues) =>
+		contractSummary(values, tenants, apartments, categories).find((item) => item.field === 'agreedCosts')?.value;
+
+	expect(agreed(filled)).toBe('Heizung, Lift');
+	expect(agreed({ ...filled, agreedCategoryIds: ['c2'] })).toBe('Lift');
+	expect(agreed({ ...filled, agreedCategoryIds: [] })).toBe('Keine');
 });
 
 describe('Startwerte des Mietvertrags', () => {

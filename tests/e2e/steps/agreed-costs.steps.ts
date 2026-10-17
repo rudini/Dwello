@@ -2,10 +2,10 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { agreedCostsOfContract } from '../questions/contract-detail';
 import { reviewed } from '../questions/contract-form';
-import { agreementQuestionsOf, agreementQuestionsShown, notAgreedCostsOf } from '../questions/statement-generate';
+import { agreementQuestionsOf, agreementQuestionsShown, agreementsFailure, notAgreedCostsOf } from '../questions/statement-generate';
 import { openContract } from '../tasks/contract-detail';
 import { leaveOutCategory, reviewContract } from '../tasks/contract-form';
-import { agreementsCannotBeSaved, answerAgreement, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
+import { agreementsCannotBeChecked, agreementsCannotBeSaved, answerAgreement, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -44,6 +44,14 @@ When(
 		await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
 	}
 );
+
+Given('das Prüfen der vereinbarten Nebenkosten ist gestört', async ({ verwalter }) => {
+	await verwalter.attemptsTo(agreementsCannotBeChecked);
+});
+
+Then('meldet der Assistent bei den vereinbarten Nebenkosten {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(agreementsFailure).toContain(message);
+});
 
 Given('das Speichern der Antworten zum Mietvertrag von {string} ist gestört', async ({ verwalter, seed }, tenant: string) => {
 	await verwalter.attemptsTo(agreementsCannotBeSaved(contractOf(seed, tenant)));

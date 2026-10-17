@@ -232,6 +232,8 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	async function toSettings() {
+		// step 3 asks whether the contracts agree the period's Nebenkosten (#91): none open here
+		fakeBff((call) => (call.path.startsWith('/statements/agreements') ? [200, []] : [200, {}]));
 		open();
 		next();
 		await settle();
