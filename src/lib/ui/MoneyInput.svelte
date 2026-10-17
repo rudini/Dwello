@@ -30,7 +30,7 @@
 	} = $props();
 </script>
 
-<Field {id} {note} {label} {help} {example} {error} {optional}>
+<Field {id} {note} {label} {help} {example} {error} {optional} helpTestid={testid && `${testid}-help`}>
 	{#snippet children(control)}
 		<div class="relative">
 			<span

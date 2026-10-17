@@ -225,7 +225,7 @@
 >
 	{#if running}
 		<!-- TODO(fachlich prüfen, #66): the hint on legal notice periods is not from the glossary -->
-		<Alert tone="caution" title={m.contracts_running_title()}>
+		<Alert tone="caution" title={m.contracts_running_title()} testid="contract-running-hint">
 			<p>{m.contracts_running_text()}</p>
 		</Alert>
 	{/if}
