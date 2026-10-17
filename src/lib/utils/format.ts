@@ -63,6 +63,10 @@ export function formatDateTime(isoTimestamp: string): string {
 	});
 }
 
+/** Time of day in Switzerland, e.g. "10:05" */
+export const formatTime = (at: Date) =>
+	at.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' });
+
 /** A percentage as typed: «2,5» or «2.5», at most two decimals as stored and printed; anything else is NaN */
 export const parsePercent = (text: string) => {
 	const rate = text.trim().replace(/\s*%$/, ''); // «4 %» as written in the contract
