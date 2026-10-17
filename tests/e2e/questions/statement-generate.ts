@@ -8,6 +8,8 @@ import {
 	buildingInvoices,
 	categoryFinding,
 	confirmMissingInvoices,
+	existingStatementNotes,
+	existingStatements,
 	hintedInvoice,
 	invoicesWithoutServicePeriod,
 	lateInvoices,
@@ -123,3 +125,5 @@ export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const presetNoticeText = Text.of(wizardPresetNotice);
+export const existingStatementsText = Text.of(existingStatements);
+export const notesOnExistingStatement = (statementId: string) => Text.of(existingStatementNotes(statementId));

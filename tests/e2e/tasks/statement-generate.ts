@@ -14,6 +14,7 @@ import {
 	managementFeeInput,
 	newInvoiceFromWarning,
 	periodEndInput,
+	existingStatementLink,
 	periodStartInput,
 	previewCount,
 	showStatementsButton
@@ -107,3 +108,6 @@ export const openContractWithoutFee = (contractId: string) => Click.on(feeNotAgr
 // The edit link of an invoice a hint of the preview names
 export const editHintedInvoice = (date: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(hintedInvoiceLink(date)), Wait.forUrl((url) => /\/invoices\/[^/]+\/edit/.test(url.href)));
+
+export const openExistingStatement = (statementId: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(existingStatementLink(statementId)), Wait.forUrl((url) => url.pathname === `/statements/${statementId}`));

@@ -74,3 +74,9 @@ export const hintedInvoiceLink = (date: string) =>
 	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>
 		page.getByTestId('hinted-invoice').filter({ hasText: date }).getByRole('link')
 	);
+// The preview's hint on statements that exist already, and per statement what changed since or differs (#132)
+export const existingStatements = target('Bestehende Abrechnungen', (page) => page.getByTestId('existing-statements'));
+export const existingStatementNotes = (statementId: string) =>
+	target(`Hinweis zur Abrechnung ${statementId}`, (page) => page.getByTestId(`existing-statement-notes-${statementId}`));
+export const existingStatementLink = (statementId: string) =>
+	target(`Abrechnung ${statementId} in der Vorschau`, (page) => page.getByTestId(`existing-statement-${statementId}`));
