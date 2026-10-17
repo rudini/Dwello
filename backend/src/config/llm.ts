@@ -18,7 +18,7 @@ export const llmConfig = {
 	providerCountry: process.env.LLM_PROVIDER_COUNTRY || '',
 
 	// Model for reading uploaded invoices and categorizing them: it must read images (#217)
-	model: process.env.LLM_MODEL || 'qwen2.5vl:7b',
+	model: process.env.LLM_MODEL || 'qwen3-vl:8b-instruct',
 
 	// Request timeout in milliseconds
 	timeout: parseInt(process.env.LLM_TIMEOUT || '30000', 10),
