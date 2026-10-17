@@ -119,7 +119,11 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		managementFeeAgreed,
 		managementFeePercent
 	});
-	const statement = (contractId: string, managementFeePercent: string, heatingProfileId = 'hp9') => ({
+	const statement = (
+		contractId: string,
+		managementFeePercent: string,
+		heatingProfileId: string | null = 'hp9'
+	) => ({
 		...periodStatements.data[0],
 		contractId,
 		heatingProfileId,
@@ -169,7 +173,7 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 	// fach-review V-5: a statement whose Heizprofil was deleted has none; it differs from no other
 	it('übergeht eine übrige Abrechnung ohne Heizprofil', async () => {
 		expect(
-			await openWith([statement('lauf', '4.50', null as never), statement('lauf2', '4.50')])
+			await openWith([statement('lauf', '4.50', null), statement('lauf2', '4.50')])
 		).toMatchObject({ defaultHeatingProfileId: 'hp9', preset: { differing: false } });
 	});
 
