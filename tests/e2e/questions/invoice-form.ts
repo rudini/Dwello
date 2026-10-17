@@ -5,6 +5,7 @@ import {
 	invoiceDateInput,
 	invoiceDateWords,
 	periodWarning,
+	servicePeriodHelp,
 	utilityCostCheckbox,
 	utilityCostHelp
 } from '../targets/invoice-form';
@@ -19,3 +20,4 @@ export const billedWarningText = Text.of(billedWarning);
 export const dateOutsidePeriodWarning = Text.of(periodWarning);
 export const dateOutsidePeriodWarnings = Count.of(periodWarning);
 export const utilityCostHelpText = Text.of(utilityCostHelp);
+export const servicePeriodHelpText = Text.of(servicePeriodHelp);

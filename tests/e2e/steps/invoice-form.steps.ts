@@ -9,6 +9,7 @@ import {
 	invoiceDateShown,
 	markedAsUtilityCost,
 	nonAllocableCategoryWarning,
+	servicePeriodHelpText,
 	utilityCostHelpText,
 	utilityCostMarkable
 } from '../questions/invoice-form';
@@ -152,4 +153,8 @@ When('der Liegenschaftsverwalter die Rechnungsnummer auf {string} korrigiert', a
 
 Then('erklärt das Formular {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(utilityCostHelpText).toBe(text);
+});
+
+Then('erklärt das Formular beim Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodHelpText).toContain(text);
 });
