@@ -12,6 +12,9 @@ import { db } from '../db/connection';
 import { categories, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
+import { readPdf } from './helpers/pdf-text';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { deleteContract } from '../services/contract.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
@@ -85,7 +88,7 @@ describe('Vereinbarte Nebenkosten des Mietvertrags', () => {
 		expect(await answers(rental.contract)).toContainEqual({ categoryId: ids.Elevator, agreed: false });
 	});
 
-	// Eine Kategorie, die es beim Abschluss noch nicht gab, ist nicht vereinbart, bis der Liegenschaftsverwalter es angibt
+	// A category created after the contract was recorded is not agreed until the landlord says so
 	it('rechnet eine neue Kategorie erst ab, wenn sie als vereinbart angegeben ist', async () => {
 		const roof = await ownCategory('Dachreinigung');
 		await insertInvoice(rental.building, { categoryId: roof, description: 'Dach 2024', amount: '200.00', invoiceDate: '2024-05-31' });
@@ -105,7 +108,7 @@ describe('Vereinbarte Nebenkosten des Mietvertrags', () => {
 		expect((await answers(rental.contract)).map((answer) => answer.categoryId)).not.toContain(unused);
 	});
 
-	// Fachreview V-15, Code-Review C-3: nichts zu fragen ohne Betrag oder ohne Mietstage in den abgerechneten Tagen
+	// Domain review V-15, code review C-3: nothing to ask without an amount or without Mietstage in the days billed
 	it('nennt keine Kategorie, deren Rechnungen sich aufheben oder vor dem Mietvertrag liegen', async () => {
 		const cancelled = await ownCategory('Gutschrift');
 		const before = await ownCategory('Vorher');
@@ -137,7 +140,7 @@ describe('Vereinbarte Nebenkosten des Mietvertrags', () => {
 	});
 });
 
-// Fachreview W10c V-2, V-3: a statement without the categories its contract does not agree keeps nothing of them
+// Domain review W10c V-2, V-3: a statement without the categories its contract does not agree keeps nothing of them
 describe('Abrechnung ohne nicht vereinbarte Nebenkosten', () => {
 	const other = crypto.randomUUID();
 	let heated: Awaited<ReturnType<typeof createRental>>;
@@ -192,20 +195,39 @@ describe('Abrechnung ohne nicht vereinbarte Nebenkosten', () => {
 		expect(periods.missedIn).toEqual([]);
 	});
 
-	// Code-Review C-1: eine abgerechnete Rechnung bleibt abgerechnet, auch in einer Kategorie, die nicht vereinbart ist
+	// Domain review M-2: the PDF names the agreed categories it bills; one created before #91 billed every category
+	it('nennt im PDF die vereinbarten Nebenkosten, die es abrechnet', async () => {
+		const iban = await getConfig('iban');
+		await setConfig('iban', 'CH4431999123000889012');
+		const text = async () => {
+			await generateStatementPdf(statementId, 'de');
+			return readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).flowing;
+		};
+		expect(await text()).toContain('Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: Hauswart.');
+
+		await db.update(utilityStatements).set({ agreedCategoryIds: null }).where(eq(utilityStatements.id, statementId));
+
+		const before = await text();
+		await (iban ? setConfig('iban', iban) : deleteConfig('iban'));
+
+		expect(before).not.toContain('vereinbarten Nebenkosten');
+	});
+
+		// Code review C-1: a billed invoice stays billed, also in a category the contract does not agree
 	it('nennt die Abrechnung weiter, wenn eine abgerechnete Rechnung in eine nicht vereinbarte Kategorie wechselt', async () => {
 		const [caretaker] = await db
 			.select({ id: invoices.id })
 			.from(invoices)
 			.where(and(eq(invoices.buildingId, heated.building), eq(invoices.categoryId, ids.Caretaker)));
-		await sendJson('PUT', `/api/v1/invoices/${caretaker.id}`, { categoryId: ids.Elevator });
+		const moved = await sendJson('PUT', `/api/v1/invoices/${caretaker.id}`, { categoryId: ids.Elevator });
+		expect(moved.status).toBe(200);
 		const periods = (await (await callApi(`/api/v1/invoices/${caretaker.id}/statements`)).json()) as { billedIn: unknown[] };
 
 		expect(periods.billedIn).toEqual([{ start: '2024-01-01', end: '2024-12-31' }]);
 	});
 });
 
-// Code-Review C-5: was ein neuer Mietvertrag vereinbart, mit und ohne Liste aus dem Formular
+// Code review C-5: what a new contract agrees, with and without a list from the form
 describe('Neuer Mietvertrag', () => {
 	const other = crypto.randomUUID();
 	let fresh: Awaited<ReturnType<typeof createRental>>;
@@ -239,12 +261,21 @@ describe('Neuer Mietvertrag', () => {
 		expect((await contract(fresh.contract)).agreedCategoryIds).toContain(ownId);
 	});
 
-	// Code-Review C-11: eine Kategorie, die nicht mehr umlagefähig ist, nennt der Mietvertrag nicht mehr
+	// Code review C-11: a category no longer umlagefähig is no longer named by the contract
 	it('nennt keine Kategorie mehr, die nicht mehr umlagefähig ist', async () => {
 		await db.update(categories).set({ isAllowedUtilityCost: false }).where(eq(categories.id, ownId));
 
 		expect((await contract(fresh.contract)).agreedCategoryIds).not.toContain(ownId);
 		expect((await contract(fresh.contract)).agreedCategoryIds).toContain(ids.Caretaker);
+	});
+
+		// E2E run: a category deleted meanwhile, or an unknown id, is left out instead of refusing the contract
+	it('übergeht eine unbekannte Kategorie und speichert eine leere Liste', async () => {
+		const unknown = await sendJson('PUT', `/api/v1/contracts/${fresh.contract}`, { agreedCategoryIds: [crypto.randomUUID()] });
+		const empty = await sendJson('PUT', `/api/v1/contracts/${fresh.contract}`, { agreedCategoryIds: [] });
+
+		expect([unknown.status, empty.status]).toEqual([200, 200]);
+		expect((await contract(fresh.contract)).agreedCategoryIds).toEqual([]);
 	});
 
 		it('vereinbart nur, was das Formular angekreuzt hat', async () => {

@@ -5,7 +5,7 @@ import { reviewed } from '../questions/contract-form';
 import { agreementQuestionsOf, agreementQuestionsShown, notAgreedCostsOf } from '../questions/statement-generate';
 import { openContract } from '../tasks/contract-detail';
 import { leaveOutCategory, reviewContract } from '../tasks/contract-form';
-import { agreementsCannotBeSaved, answerAgreement, openContractWithNotAgreedCosts } from '../tasks/statement-generate';
+import { agreementsCannotBeSaved, answerAgreement, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -28,6 +28,20 @@ Given(
 	'im Gebäude {string} gibt es eine Rechnung der eigenen Kategorie {string} über {string} Franken vom {string}',
 	async ({ seed }, building: string, category: string, amount: string, date: string) => {
 		await seed.invoiceInOwnCategory(building, category, amount, date);
+	}
+);
+
+Given(
+	'der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale geöffnet',
+	async ({ verwalter, seed }, year: number, building: string, fee: number) => {
+		await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Einstellungen der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale öffnet',
+	async ({ verwalter, seed }, year: number, building: string, fee: number) => {
+		await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
 	}
 );
 

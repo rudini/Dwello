@@ -137,6 +137,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
+      | statement-generate     | agreed-costs        |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |

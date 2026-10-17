@@ -6,6 +6,7 @@ import {
 	backLink,
 	buildingCheckbox,
 	feeNotAgreedLink,
+	agreementAnswered,
 	agreementChoice,
 	notAgreedCostsLink,
 	confirmMissingInvoices,
@@ -49,6 +50,10 @@ export const chooseBuildingsFor = (year: number): Activity => (actor) =>
 // Step "Heizprofil und Verwaltungspauschale"
 export const setManagementFee = (buildingId: string, percent: number): Activity => (actor) =>
 	actor.attemptsTo(chooseBuilding(buildingId), goToNextStep, Enter.theValue(String(percent)).into(managementFeeInput));
+
+// The settings step of a year's run, opened from a link that chose building and period (A-10)
+export const openSettingsFor = (year: number, buildingId: string, percent: number): Activity => (actor) =>
+	actor.attemptsTo(openStatementWizardFor(buildingId, year), Enter.theValue(String(percent)).into(managementFeeInput));
 
 // Typed key by key, as a user does: what the field keeps while typing matters
 export const typeManagementFee = (buildingId: string, text: string): Activity => (actor) =>
@@ -116,8 +121,8 @@ export const recordNoTankFromQuestion = (buildingId: string): Activity => (actor
 	actor.attemptsTo(Click.on(noTankLink(buildingId)), Wait.forUrl((url) => url.pathname.endsWith(`/buildings/${buildingId}/edit`)));
 
 // #91, step «Einstellungen»: the answer whether the contract agrees a category; stored at once
-export const answerAgreement = (contractId: string, categoryId: string, agreed: boolean) =>
-	Click.on(agreementChoice(contractId, categoryId, agreed));
+export const answerAgreement = (contractId: string, categoryId: string, agreed: boolean): Activity => (actor) =>
+	actor.attemptsTo(Click.on(agreementChoice(contractId, categoryId, agreed)), Wait.until(agreementAnswered(contractId, categoryId)));
 export const openContractWithNotAgreedCosts = (contractId: string) => Click.on(notAgreedCostsLink(contractId));
 // saving an answer fails (the BFF route the browser calls)
 export const agreementsCannotBeSaved = (contractId: string) => FailRequests.to(`/api/contracts/${contractId}/agreements`, {});

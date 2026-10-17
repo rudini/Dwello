@@ -149,7 +149,15 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract'), actual)).toEqual([]);
 	});
 
-	it('GET /categories/:id liefert die Felder von category.json', async () => {
+	it('GET /contracts/:id/agreements liefert die Felder von contract-agreements.json', async () => {
+		const actual = (await (
+			await callApi(`/api/v1/contracts/${rental.contract}/agreements?periodStart=2020-01-01&periodEnd=2030-12-31`)
+		).json()) as unknown[];
+		expect(actual.length).toBeGreaterThan(0);
+		expect(drift(await sample('contract-agreements'), actual)).toEqual([]);
+	});
+
+		it('GET /categories/:id liefert die Felder von category.json', async () => {
 		const name = `Internet ${token}`;
 		const own = (await (
 			await sendJson('POST', '/api/v1/categories', {

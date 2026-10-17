@@ -246,6 +246,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	// the link opens the wizard at the settings step with the building and period it names
 	'link-preset': () => Wait.until(on.wizardPreset),
+	// «Weiter» with the questions open: their errors; and the contract not agreeing a category. No answer: it would be
+	// stored, and the next viewport would not be asked any more
+	'agreed-costs': () => (actor) =>
+		actor.attemptsTo(Wait.until(on.shown('not-agreed-costs')), Click.on(nextButton), Wait.until(on.formProblem)),
 	'list-scoped': () => Wait.until(on.listScope),
 	'pdf-missing': () => Wait.until(on.shown('statement-pdf-missing')),
 	'send-dialog': () => openDialog(on.sendButton),

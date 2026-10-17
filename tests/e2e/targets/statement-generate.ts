@@ -86,6 +86,14 @@ export const agreementChoice = (contractId: string, categoryId: string, agreed: 
 	target(`Antwort ${agreed ? 'vereinbart' : 'nicht vereinbart'} für ${categoryId} im Mietvertrag ${contractId}`, (page) =>
 		page.getByTestId(`agreement-${contractId}-${categoryId}-${agreed ? 'yes' : 'no'}`)
 	);
+// the answer stored («Beim Mietvertrag gespeichert.») or refused (the question's error)
+export const agreementAnswered = (contractId: string, categoryId: string) =>
+	target(`Antwort für ${categoryId} im Mietvertrag ${contractId} gespeichert oder abgelehnt`, (page) =>
+		page
+			.getByTestId(`agreement-saved-${contractId}-${categoryId}`)
+			.filter({ hasText: /./ })
+			.or(page.getByTestId(`agreement-${contractId}-${categoryId}`).getByTestId('form-error'))
+	);
 // the run's contracts with categories answered «nicht vereinbart» and costs in the period, each a link to it
 export const notAgreedCostsLink = (contractId: string) =>
 	target(`Mietvertrag ${contractId} mit nicht vereinbarten Nebenkosten`, (page) =>

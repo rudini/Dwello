@@ -28,29 +28,26 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
 
   # Eine Kategorie, die es beim Erfassen des Mietvertrags noch nicht gab, ist nicht vereinbart, bis der
   # Liegenschaftsverwalter es angibt
-  @wip
   Szenario: Der Assistent fragt nach einer Kategorie, die für den Mietvertrag neu ist
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
-    Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % setzt
+    Wenn der Liegenschaftsverwalter die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
     Dann fragt der Assistent, ob "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
     Und fragt der Assistent, ob "Treppenhausreinigung" im Mietvertrag von "Beat Huber" vereinbart ist
 
-  @wip
   Szenario: Ohne Antwort geht der Assistent nicht weiter
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
-    Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
     Wenn der Liegenschaftsverwalter weitergeht
     Dann meldet die Frage zum Mietvertrag von "Anna Keller" "Bitte wählen Sie, ob diese Nebenkosten im Mietvertrag vereinbart sind."
     Und bleibt der Assistent beim Schritt mit der Verwaltungspauschale
 
   # Treppenhausreinigung nach Fläche: 50 und 150 Franken
-  @wip
   Szenario: Die Antwort gilt für die Abrechnung
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
-    Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
     Wenn der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
     Und der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Beat Huber" nicht vereinbart ist
     Und der Liegenschaftsverwalter weitergeht
@@ -61,44 +58,42 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
   Szenario: Die Antwort bleibt beim Mietvertrag
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
-    Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
     Wenn der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Anna Keller" nicht vereinbart ist
     Und der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" öffnet
     Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Lift"
     Aber nicht die Nebenkosten "Treppenhausreinigung"
 
-  @wip
   Szenario: Der Assistent nennt nicht vereinbarte Nebenkosten der Periode, statt wieder zu fragen
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
     Und im Mietvertrag von "Anna Keller" ist "Treppenhausreinigung" nicht vereinbart
     Und im Mietvertrag von "Beat Huber" ist "Treppenhausreinigung" vereinbart
-    Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % setzt
+    Wenn der Liegenschaftsverwalter die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
     Dann nennt der Assistent "Treppenhausreinigung" im Mietvertrag von "Anna Keller" als nicht vereinbart
     Und fragt der Assistent nicht, ob Nebenkosten vereinbart sind
 
-  @wip
   Szenario: Mietvertrag mit nicht vereinbarten Nebenkosten öffnen
     Angenommen im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart
-    Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
     Wenn der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit nicht vereinbarten Nebenkosten öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
 
-  @wip
   Szenario: Die Antwort lässt sich nicht speichern
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
-    Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
     Und das Speichern der Antworten zum Mietvertrag von "Anna Keller" ist gestört
     Wenn der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
     Dann meldet die Frage zum Mietvertrag von "Anna Keller" "Ihre Antwort wurde nicht gespeichert. Bitte versuchen Sie es nochmals."
 
   # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
-  @wip
   Szenario: Das PDF nennt die vereinbarten Nebenkosten
-    Angenommen im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart
     Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: Heizung."
     Aber steht im PDF nicht "Lift"

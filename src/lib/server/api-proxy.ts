@@ -288,3 +288,19 @@ export async function parseRequestBody<T = unknown>(request: Request): Promise<T
 		throw new ValidationError('Invalid JSON body');
 	}
 }
+
+/** A change forwarded as it came: the XSRF token checked, the body passed on, the backend's answer returned */
+export async function forwardMutation(
+	path: string,
+	method: 'PUT' | 'POST',
+	request: Request,
+	cookies: Cookies
+) {
+	try {
+		validateXsrfForMutation(request, cookies, method);
+		const body = await parseRequestBody(request);
+		return createProxyResponse(await forwardRequest(path, method, cookies, { body }));
+	} catch (error) {
+		return handleProxyError(error, `${method} ${path}`);
+	}
+}

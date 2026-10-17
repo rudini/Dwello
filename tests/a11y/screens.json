@@ -39,6 +39,7 @@
 		"invoice-hints": "Statement wizard preview of a period under a year (January to May): the invoices without Leistungszeitraum that count in full, and one dated shortly after the period end, each with its edit link (#131, #134).",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
 		"preview-all-billed": "Statement wizard preview of a period in which every contract already has a statement: how to recalculate and the links to the statements.",
+		"agreed-costs": "Statement wizard at the settings step (#91): «Weiter» with the questions whether a category is agreed not answered (their errors), and the contract whose answered «nicht vereinbart» category has costs in the period.",
 		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
 		"rent-taken-over": "Rental contract wizard at the step «Miete» for an apartment with an earlier contract: its Nettomiete, Zusatzmiete and Akonto filled in, the note naming that contract (#144).",
@@ -428,10 +429,12 @@
 				"draft-restored",
 				"draft-dropped",
 				"buildings-billed",
-				"link-preset"
+				"link-preset",
+				"agreed-costs"
 			],
 			"queries": {
-				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31"
+				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31",
+				"agreed-costs": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31"
 			}
 		},
 		{

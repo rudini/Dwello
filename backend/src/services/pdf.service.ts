@@ -104,6 +104,7 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelClosing: '– Endbestand am {date}',
 		fuelTotal: '= Heizkosten nach Verbrauch',
 		notes: 'Hinweise',
+		agreedCosts: 'Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: {categories}.',
 		noteReceipts: 'Sie oder eine bevollmächtigte Person können die Belege einsehen. Melden Sie sich dafür bei {contact} (Art. 257b Abs. 2 OR).',
 		noteHeating: 'Sie können eine detaillierte Abrechnung der Heiz- und Warmwasserkosten verlangen (Art. 8 Abs. 1 VMWG).',
 		noteStock: 'Über den Anfangs- und Endbestand des Heizmaterials erhalten Sie Auskunft (Art. 8 Abs. 2 VMWG).',
@@ -181,6 +182,7 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelClosing: '– Stock final au {date}',
 		fuelTotal: '= Frais de chauffage selon la consommation',
 		notes: 'Remarques',
+		agreedCosts: 'Seuls les frais accessoires convenus dans le contrat de bail sont décomptés : {categories}.',
 		noteReceipts: 'Vous-même ou une personne mandatée pouvez consulter les pièces justificatives. Adressez-vous à {contact} (art. 257b al. 2 CO).',
 		noteHeating: 'Vous pouvez demander un décompte détaillé des frais de chauffage et d’eau chaude (art. 8 al. 1 OBLF).',
 		noteStock: 'Vous pouvez obtenir des renseignements sur le stock initial et final de combustible (art. 8 al. 2 OBLF).',
@@ -258,6 +260,7 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelClosing: '– Scorta finale al {date}',
 		fuelTotal: '= Spese di riscaldamento secondo il consumo',
 		notes: 'Avvertenze',
+		agreedCosts: 'Sono conteggiate solo le spese accessorie pattuite nel contratto di locazione: {categories}.',
 		noteReceipts: 'Lei o una persona da lei incaricata può consultare i giustificativi. Si rivolga a {contact} (art. 257b cpv. 2 CO).',
 		noteHeating: 'Può chiedere un conteggio dettagliato delle spese di riscaldamento e acqua calda (art. 8 cpv. 1 OLAL).',
 		noteStock: 'Può ottenere informazioni sulla scorta iniziale e finale di combustibile (art. 8 cpv. 2 OLAL).',
@@ -335,6 +338,7 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelClosing: '– Closing stock on {date}',
 		fuelTotal: '= Heating costs by consumption',
 		notes: 'Notes',
+		agreedCosts: 'Only the utility costs agreed in the rental contract are billed: {categories}.',
 		noteReceipts: 'You or a person you authorise may inspect the receipts. Please contact {contact} (Art. 257b para. 2 CO).',
 		noteHeating: 'You may request a detailed statement of the heating and hot water costs (Art. 8 para. 1 VMWG).',
 		noteStock: 'You may ask for information on the opening and closing stock of fuel (Art. 8 para. 2 VMWG).',
@@ -424,6 +428,7 @@ export interface StatementPDFData {
 	// Payment info
 	paymentDeadline?: string;
 	paidDate?: string; // paid: no payment part, or the tenant pays twice
+	agreedCosts?: string[]; // the agreed categories it bills (#91); absent on a statement created before
 }
 
 /** CHF 1'234.56 */
@@ -794,7 +799,9 @@ function heatingSection(page: Page, y: number) {
 // (Art. 8 VMWG); kept on one page
 function notes({ doc, t, data, config }: Page, y: number) {
 	const contact = `${config.companyName}, ${config.address}, ${config.postalCode} ${config.city}`;
-	const lines = [fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
+	// TODO(fachlich prüfen, #369): «vereinbarte Nebenkosten»
+	const agreed = data.agreedCosts?.length ? [fill(t.agreedCosts, { categories: data.agreedCosts.join(', ') })] : [];
+	const lines = [...agreed, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
 	const width = PAGE.right - PAGE.left;
 	doc.font('Helvetica').fontSize(9);
 	const height = lines.reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 6, 0);

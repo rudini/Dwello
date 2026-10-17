@@ -133,7 +133,11 @@ export function toPdfData(
 		totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
 		balance: parseFloat(statement.balance),
 		paymentDeadline: statement.paymentDeadline || undefined,
-		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined
+		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined,
+		// the agreed categories it bills, as its positions name them (#91, domain review M-2)
+		agreedCosts: statement.agreedCategoryIds
+			? [...new Set(statement.lineItems.flatMap((item) => nameIn(categoryNames, item.categoryId, language) ?? []))]
+			: undefined
 	};
 }
 
