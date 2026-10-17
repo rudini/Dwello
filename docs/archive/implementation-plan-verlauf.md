@@ -1,3 +1,24 @@
+## Session 2026-10-17 W2e: berichtigte Abrechnung (#120, #358)
+
+- [x] Implementation issue #358 created (A-11, «Done means» from #120)
+- [x] @wip scenarios: statement-detail.feature (berichtigen, Bestätigung, Anrechnung, ersetzte bleibt unverändert, ohne Mietstage, Navigation), contract-edit.feature and contract-detail.feature (Vertragsdaten nach dem Berichtigen)
+- [x] fach-reviewer on the scenarios and planned texts before implementing (`docs/reviews/w2e-fachreview-1.md`; new issues #360 partial payments, #362 glossary)
+- [x] Slice 1 backend: migration 0018 (`replaces_id`, `prior_payments`, status `replaced`), `replaceStatement`, `correctStatement`, offset in `calculateStatement`/`generateStatement`, contract dates ignore replaced statements; BFF run and missing statements ignore them (files: `backend/migrations/0018_statement_correction.sql`, `backend/src/db/schema.ts`, `backend/src/services/statement.service.ts`, `contract.service.ts`, `backend/src/routes/statements.ts`, `src/lib/server/statement-generation.ts`, `src/routes/contracts/[id]/+page.server.ts`, `tests/contracts/statement.json`)
+- [x] Code review slice 1 (`docs/reviews/w2e1-review-1.md`): dashboard counts replaced statements (C-2), codes without messages (C-1), literal codes, `STATEMENT_REPLACED` from `PUT /:id`, tests for the period rule and the chain order, API docs
+- [x] Slice 2 UI: «Abrechnung berichtigen» with confirmation per status, status «Ersetzt», «Ersetzt durch» / «Ersetzt die Abrechnung», row «Bereits bezahlt auf …», «Berichtigte Abrechnung erstellen», texts that sent the landlord outside Dwello, four languages; a11y and language rows for the new states (files: `src/routes/statements/[id]/*`, `src/lib/statement.ts`, `src/lib/types.ts`, `src/lib/server/statement*.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/statements/StatusFilter.svelte`, `messages/*.json`, `tests/a11y/screens.json`, `tests/e2e/fixtures/screens.ts`)
+- [x] Slice 3 PDF: «Diese Abrechnung ersetzt …», the row «Bereits bezahlt auf …» and the derivation line (`backend/src/services/pdf.service.ts`, `statement-pdf.service.ts`)
+- [x] Docs: A-11 implemented, data-model.md, api-specification.md; markers #120 removed
+- [x] Code review slices 2, 3 and the merge (`docs/reviews/w2e2-review-1.md`): scenario for the statement run (C-1), success and focus after replacing, amount offset in the dialog, busy button, empty card, replaced summary, overdue test, #362 marker in the PDF
+- [x] Feature review: fach-reviewer round 2 (`docs/reviews/w2e-fachreview-2.md`), personas Anna, Helga, Dr. Weber, Marco, Sven (`docs/design/personas/*-w2e.md`), daten-pruefer (`docs/reviews/w2e-datenpruefung-1.md`); pre-existing Majors of Anna as #378, #379, #380
+- [x] Fixes of the feature review: dialog wording per status (sent refund, settled, offset of the chain), confirm button «Abrechnung berichtigen», replaced statement says it no longer applies, no hint on later invoices, link to the contract, PDF «Die Abrechnung NK-… gilt nicht mehr.», English terms, francs format in refusals, «Bezahlt diesen Monat» keeps a payment of a replaced statement, `i18n-begriffe.md` rows
+- [x] Full E2E after the fixes: 948 passed, 8 failed; `statement-generate invoice-hints` (a11y, i18n) came from the a11y seed (Carla's replaced 2025 statement counted as billed for January–May 2025, moved to 2022); the 5 others (contract-new, settings) passed on a rerun
+- [x] Closing code review (`docs/reviews/w2e3-review-1.md`): steps for the visible fixes in «Versendete Abrechnung berichtigen» and «Ersetzte Abrechnung bleibt unverändert», navigation scenario to the Mietvertrag, DOM test for the success message, chain wording, no Zahlungsfrist on a replaced statement, `busy` button, 48 px links; dashboard «Bezahlt diesen Monat»: No scenario: the figure sums every statement of the database, which parallel scenarios change; `dashboard.pg.test.ts` compares before and after
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-358.md`
+- [x] Re-review of the closing fixes (`docs/reviews/w2e3-review-2.md`): no Blocker/Major
+- [x] Merge of origin/main: `generateStatements` returns the ids now (#356), two tests follow; E2E of the statement and contract features after the merge: 295 passed, `statement-generate preview-all-billed` (a11y) flaky under load, passed on a rerun
+- [x] Archive the session, push, pull request, CI, merge
+- [x] Audit log (#111) pointer left for the correction (`replaceStatement`)
+
 ## Session 2026-10-16: fourth guide review T-1 to T-6
 
 Request (chat): «Setze deine Empfehlung um» for `docs/reviews/opus55-guide-review-4.md` (T-1 to T-6). Rules only, no app behaviour, so no scenario.
@@ -1120,3 +1141,41 @@ Branch `claude/w3e-de-wording-348`. All findings of the issue checked against `m
 - [ ] PR `Fixes #348`, CI, merge
 
 Files: `messages/*.json`, `src/lib/statement-wizard.ts`, `backend/src/services/{category,heating-profile,distribution-key,formula}.service.ts`, tests in `src/__tests__/`, `src/lib/utils/__tests__/contract-availability.test.ts`, `backend/src/__tests__/`, E2E features, steps and questions that pin the texts.
+
+## Session W4e: word-wise search (#160, #373)
+
+Branch `claude/w4e-search-160`.
+
+- [x] Implementation issue for #160 created: #373
+- [x] Scenarios `@wip` (apartments.feature, buildings.feature) seen red
+- [x] Word-wise apartment search (number, building name, street, place; «Wohnung» ignored), pg test
+- [x] Word-wise building search, pg test
+- [x] Help text at the apartment search field, empty state names the term (de/fr/it/en)
+- [x] Code review round 1: `docs/reviews/search-review-1.md`
+- [x] Personas: `docs/design/personas/helga-search-160.md`, `marco-search-160.md`
+- [x] Fix Helga P-1 (Major): help text shows a pattern instead of the example «Seepark 3.02», which found nothing
+- [x] Helga round 2 on the new help text: P-1 closed (same report)
+- [x] Closing code review: `docs/reviews/search-review-2.md` (C-1 rejected: the wording was this session's own proposal in #373, not a decided text; C-2, C-3 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-160.md`
+- [x] Found: fr/it/en card word («Appartement 3.02») not ignored, decision issue #376
+- [ ] Session archived, pull request merged (Fixes #160, Fixes #373)
+
+Files: `backend/src/services/{word-search,apartment.service,building.service}.ts`, `backend/src/__tests__/{apartment,building}-search.pg.test.ts`, `src/routes/apartments/{+page,ApartmentFilters}.svelte`, `src/lib/ui/TextInput.svelte` (`helpTestid`), `src/__tests__/apartments-pages.dom.test.ts`, `messages/*.json`, `tests/e2e/features/{apartments,buildings}.feature`, steps, targets, questions, `tests/e2e/fixtures/{backend,screens}.ts` (`withNames`; a11y search term without German, since the empty state repeats it)
+
+## Session W11: PDF invoice line names the invoice (#236)
+
+Branch `claude/w11-pdf-rechnung-236`. The issue's first point (whole Leistungszeitraum and amount) is done in #241; left: V-8 of #226.
+
+- [x] Scenario «PDF nennt die Rechnung, wenn Daten und Betrag sie nicht unterscheiden» in `statement-detail.feature`, seen red at the missing name
+- [x] fach-reviewer on the `@wip` scenario before implementing: `docs/reviews/w11-fachreview-1.md` (V-1 taken: a line without Leistungszeitraum always names its invoice; V-2 description vs Rechnungsdatum: the issue decided «description or Rechnungssteller», proposal added to #256; V-3 name as a suffix, no capital after a dash; V-4 scenario covers both cases)
+- [x] Tests red first: `statement-pdf.pg.test.ts` (de, real statement), `statement-pdf-render.test.ts` (four languages); the PDF takes each part's description from the statement's stored `invoices` (same order, no migration), `partNamed` in four languages
+- [x] slice review (code-reviewer): `docs/reviews/w11-review-1.md` (C-1 fixed, C-2 Nit stays: the Edit tool could not match the invisible U+00A0, output correct; C-3 Minor stays)
+- [x] feature review
+  - [x] fach-reviewer round 2: `docs/reviews/w11-fachreview-2.md` (V-5 added to #256, V-6 doc half-sentence)
+  - [x] persona Dr. Weber `docs/design/personas/dr-weber-w11.md` (round 1 blocked by the demo draft NK-22222222-2025-0003, removed by SQL; rerun: #241 P-1 resolved; P-1 to P-3 Minor/Nit stay, wording belongs to #256)
+  - [x] daten-pruefer `docs/reviews/w11-datenpruefung-1.md` (no findings)
+- [x] Workflow note: nothing came up
+- [x] closing review (code-reviewer) of e59119b and the merge of main: `docs/reviews/w11-review-2.md`
+- [ ] PR `Fixes #236`, CI, merge
+
+Files changed: `backend/src/services/pdf.service.ts`, `backend/src/services/statement-pdf.service.ts`, `backend/src/__tests__/statement-pdf.pg.test.ts`, `backend/src/__tests__/statement-pdf-render.test.ts`, `tests/e2e/features/statement-detail.feature`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/reviews/w11-*.md`, `docs/design/personas/dr-weber-w11.md`

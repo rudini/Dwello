@@ -63,6 +63,13 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Annahmestelle',
 		statementNumber: 'Abrechnungsnr.',
 		statementDate: 'Abrechnungsdatum',
+		replacesNote: 'Diese Abrechnung ersetzt die Abrechnung {number} vom {date}. Die Abrechnung {number} gilt nicht mehr.',
+		replacesPay: ' Bezahlen Sie nur noch den Saldo dieser Abrechnung.',
+		priorPaid: 'Bereits bezahlt auf {numbers}',
+		priorRefunded: 'Bereits zurückerstattet auf {numbers}',
+		priorPaidShort: 'bereits bezahlt',
+		priorRefundedShort: 'bereits zurückerstattet',
+		and: 'und',
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
 		heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses: {months}',
 		heatingPeriodSums: '; zusammen {tenant}\u00a0%. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen {period}\u00a0%.',
@@ -142,6 +149,13 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Point de dépôt',
 		statementNumber: 'N° de décompte',
 		statementDate: 'Date du décompte',
+		replacesNote: 'Ce décompte remplace le décompte {number} du {date}. Le décompte {number} n’est plus valable.',
+		replacesPay: ' Payez uniquement le solde du présent décompte.',
+		priorPaid: 'Déjà payé sur {numbers}',
+		priorRefunded: 'Déjà remboursé sur {numbers}',
+		priorPaidShort: 'déjà payé',
+		priorRefundedShort: 'déjà remboursé',
+		and: 'et',
 		heatingNote: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% des frais de chauffage de votre logement pour la période de décompte',
 		heatingMonths: 'Parts des mois de votre bail\u00a0: {months}',
 		heatingPeriodSums: '\u00a0; au total {tenant}\u00a0%. Les mois de la période de décompte totalisent {period}\u00a0% dans le profil de chauffage.',
@@ -220,6 +234,13 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Punto di accettazione',
 		statementNumber: 'N. conteggio',
 		statementDate: 'Data del conteggio',
+		replacesNote: 'Questo conteggio sostituisce il conteggio {number} del {date}. Il conteggio {number} non è più valido.',
+		replacesPay: ' Paghi solo il saldo di questo conteggio.',
+		priorPaid: 'Già pagato su {numbers}',
+		priorRefunded: 'Già rimborsato su {numbers}',
+		priorPaidShort: 'già pagato',
+		priorRefundedShort: 'già rimborsato',
+		and: 'e',
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
 		heatingMonths: 'Quote dei mesi della sua locazione: {months}',
 		heatingPeriodSums: '; in totale {tenant}\u00a0%. I mesi del periodo di conteggio totalizzano {period}\u00a0% nel profilo di riscaldamento.',
@@ -298,6 +319,13 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Acceptance point',
 		statementNumber: 'Statement no.',
 		statementDate: 'Statement date',
+		replacesNote: 'This statement replaces statement {number} of {date}. Statement {number} no longer applies.',
+		replacesPay: ' Pay only the balance of this statement.',
+		priorPaid: 'Already paid on {numbers}',
+		priorRefunded: 'Already refunded on {numbers}',
+		priorPaidShort: 'already paid',
+		priorRefundedShort: 'already refunded',
+		and: 'and',
 		heatingNote: 'Heating costs under the heating profile ‘{profile}’: {percent} % of your apartment’s heating costs for the billing period',
 		heatingMonths: 'Monthly shares during your tenancy: {months}',
 		heatingPeriodSums: '; in total {tenant}\u00a0%. The months of the billing period total {period}\u00a0% in the heating profile.',
@@ -426,6 +454,8 @@ export interface StatementPDFData {
 	totalCosts: number;
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, negative = refund
+	// a berichtigte Abrechnung: the statement it replaces and what was paid on the replaced ones, a refund negative (#120)
+	replaces?: { statementNumber: string; statementDate: string; paidOn: string[]; priorPayments: number };
 
 	// Payment info
 	paymentDeadline?: string;
@@ -547,6 +577,12 @@ function title({ doc, t, data }: Page, y: number) {
 		.text(`${t.statementNumber} ${data.statementNumber} · ${t.statementDate} ${formatDate(data.statementDate)}`)
 		.fillColor(COLORS.ink)
 		.text(fill(t.tenancyLine, { start: formatDate(data.rentalStart), end: formatDate(data.rentalEnd), days: data.rentalDays, total: data.periodDays }));
+	// the tenant still has the replaced statement and its payment part: it no longer applies (Fachreview W2e V-2)
+	if (data.replaces) {
+		const note = fill(t.replacesNote, { number: data.replaces.statementNumber, date: formatDate(data.replaces.statementDate) });
+		const pay = data.balance > 0 && !data.paidDate;
+		doc.font('Helvetica-Bold').text(pay ? note + t.replacesPay : note).font('Helvetica');
+	}
 	return doc.y + 14;
 }
 
@@ -562,7 +598,24 @@ export function balanceText(data: StatementPDFData, language: Language) {
 
 // The Saldo is rounded to 5 Rappen. Read top to bottom: the amount before rounding, its rounding as «+ 0.02» or
 // «– 0.02» (seen from the amount shown, so a refund that grows gets +), the Saldo; only a real rounding is shown
-const unrounded = (data: StatementPDFData) => roundToRappen(data.totalCosts - data.totalAdvancePayments);
+const priorOf = (data: StatementPDFData) => data.replaces?.priorPayments ?? 0;
+const unrounded = (data: StatementPDFData) => roundToRappen(data.totalCosts - data.totalAdvancePayments - priorOf(data));
+// Rows from the subtotal to the Saldo, kept on one page
+const totalRows = (data: StatementPDFData, t: Record<string, string>) => (rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0);
+const priorRow = (doc: Doc, prior: ReturnType<typeof priorLine>, top: number) => (prior ? row(doc, total(prior.label, prior.amount), top) : top);
+// «Bereits bezahlt auf NK-… und NK-…», or what the landlord already refunded
+// TODO(fachlich prüfen, #362): «Bereits bezahlt» / «Bereits zurückerstattet» are not in the glossary yet
+function priorLine(data: StatementPDFData, t: Record<string, string>) {
+	const prior = priorOf(data);
+	if (!prior) return null;
+	const paidOn = data.replaces!.paidOn;
+	const numbers = paidOn.length > 1 ? `${paidOn.slice(0, -1).join(', ')} ${t.and} ${paidOn.at(-1)}` : paidOn.join('');
+	return {
+		label: fill(prior > 0 ? t.priorPaid : t.priorRefunded, { numbers }),
+		short: `${prior > 0 ? '–' : '+'} ${prior > 0 ? t.priorPaidShort : t.priorRefundedShort} ${formatCurrency(prior)}`,
+		amount: `${prior > 0 ? '–' : '+'} ${formatCHF(Math.abs(prior))}`
+	};
+}
 function rounding(data: StatementPDFData) {
 	const difference = roundToRappen(Math.abs(data.balance) - Math.abs(unrounded(data)));
 	return Math.abs(data.balance - unrounded(data)) < 0.05 ? difference : 0;
@@ -578,7 +631,8 @@ function balanceBox(page: Page, y: number) {
 	const width = PAGE.right - PAGE.left;
 	const what = balanceText(page.data, page.language);
 	const rounded = rounding(data) ? `, ${t.roundedNote}` : '';
-	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${rounded}`;
+	const prior = priorLine(data, t);
+	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${prior ? ` ${prior.short}` : ''}${rounded}`;
 	doc.font('Helvetica').fontSize(9);
 	const height = 46 + doc.heightOfString(what, { width: width - 24 }) + doc.heightOfString(how, { width: width - 24 });
 	doc.lineWidth(1.5).strokeColor(COLORS.ink).rect(PAGE.left, y, width, height).stroke();
@@ -654,7 +708,7 @@ function costTable(page: Page, y: number) {
 	const fee = `${t.managementFee}${t.colon}${feeBasis(data, t)}`;
 	doc.font('Helvetica-Bold').fontSize(8.5);
 	const feeHeight = data.managementFee > 0 ? doc.heightOfString(fee, { width }) + 6 : 0;
-	top = room(doc, top, (rounding(data) ? 6 : 4) * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
+	top = room(doc, top, totalRows(data, t) * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
 	top = row(doc, total(t.subtotal, formatCHF(data.subtotal)), top + 2, { bold: true, above: 0.5 });
 	if (feeHeight) {
 		doc.font('Helvetica').fontSize(8.5);
@@ -664,6 +718,7 @@ function costTable(page: Page, y: number) {
 	}
 	top = row(doc, total(t.yourCosts, formatCHF(data.totalCosts)), top + 2, { bold: true, above: 1 });
 	top = row(doc, total(t.advancePayments, `– ${formatCHF(data.totalAdvancePayments)}`), top);
+	top = priorRow(doc, priorLine(data, t), top);
 	if (rounding(data)) {
 		const before = `${labelOf(unrounded(data), t)} ${t.beforeRounding}`;
 		top = row(doc, total(before, formatCHF(Math.abs(unrounded(data)))), top + 2, { above: 1 });

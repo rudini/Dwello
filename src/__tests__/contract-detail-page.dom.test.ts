@@ -654,7 +654,8 @@ describe('Mietvertrag löschen', () => {
 	it('nennt die Abrechnungen mit Status, die das Löschen sperren, und lässt es nicht bestätigen', () => {
 		const billed = [
 			{ id: 's1', statementNumber: 'NK-2024-0001', status: 'paid' },
-			{ id: 's2', statementNumber: 'NK-2025-0002', status: 'draft' }
+			{ id: 's2', statementNumber: 'NK-2025-0002', status: 'draft' },
+			{ id: 's3', statementNumber: 'NK-2023-0003', status: 'replaced' }
 		];
 		open('2024-04-01', null, null, '2026-10-10', false, [], billed);
 		click('contract-delete-button');
@@ -664,7 +665,9 @@ describe('Mietvertrag löschen', () => {
 		// A-8 (#117): jede Abrechnung als Link, mit ihrem Status
 		expect(text('contract-delete-statement-s1')).toBe('NK-2024-0001 (bezahlt)');
 		expect(byTestId('contract-delete-statement-s2')!.getAttribute('href')).toBe('/statements/s2');
-		expect(dialog).toContain('Klären Sie eine Korrektur direkt mit dem Mieter.');
+		expect(text('contract-delete-statement-s3')).toBe('NK-2023-0003 (ersetzt)');
+		// #120: eine Abrechnung, die nicht stimmt, wird berichtigt, nicht ausserhalb von Dwello
+		expect(dialog).toContain('Stimmt eine Abrechnung nicht, öffnen Sie sie und wählen Sie «Abrechnung berichtigen».');
 		expect(byTestId('contract-delete-mistake-confirm')).toBeNull();
 		expect((byTestId('contract-delete-confirm') as HTMLButtonElement).disabled).toBe(true);
 	});
