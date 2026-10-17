@@ -17,12 +17,19 @@ const answer = (rows: { contractId: string; categoryId: string; agreed: boolean 
 		.values(rows)
 		.onConflictDoUpdate({ target: [contractCategories.contractId, contractCategories.categoryId], set: { agreed: sql`excluded.agreed` } });
 
-/** The ids of the categories the contract agrees */
+/** The ids of the umlagefähige categories the contract agrees; one no longer umlagefähig bills nothing anyway */
 export async function agreedCategoryIds(contractId: string): Promise<string[]> {
 	const rows = await db
 		.select({ id: contractCategories.categoryId })
 		.from(contractCategories)
-		.where(and(eq(contractCategories.contractId, contractId), eq(contractCategories.agreed, true)));
+		.innerJoin(categories, eq(categories.id, contractCategories.categoryId))
+		.where(
+			and(
+				eq(contractCategories.contractId, contractId),
+				eq(contractCategories.agreed, true),
+				eq(categories.isAllowedUtilityCost, true)
+			)
+		);
 	return rows.map((row) => row.id);
 }
 

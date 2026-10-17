@@ -5,7 +5,7 @@
 
 import { Elysia, t } from 'elysia';
 import { errorBody, refusal } from '../services/coded-error';
-import { agreedCategoryIds as agreedOf, agreementsInPeriod, answerAgreement } from '../services/agreed-category.service';
+import { agreedCategoryIds, agreementsInPeriod, answerAgreement } from '../services/agreed-category.service';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listContracts,
@@ -39,7 +39,7 @@ const managementFee = {
 };
 
 // #91: the categories the contract agrees; every other umlagefähige one is not agreed
-const agreedCategoryIds = t.Optional(t.Array(t.String({ format: 'uuid' })));
+const agreedList = t.Optional(t.Array(t.String({ format: 'uuid' })));
 
 const contractBodySchema = t.Object({
 	apartmentId: t.String({ format: 'uuid' }),
@@ -51,7 +51,7 @@ const contractBodySchema = t.Object({
 	additionalRent: t.Optional(t.Nullable(t.String())),
 	monthlyAdvancePayment: t.String(),
 	...managementFee,
-	agreedCategoryIds,
+	agreedCategoryIds: agreedList,
 	referenceIndex: t.Optional(t.Nullable(t.String())),
 	contractPdf: t.Optional(t.Nullable(t.String())),
 	notes: t.Optional(t.Nullable(t.String()))
@@ -70,7 +70,7 @@ const contractUpdateSchema = t.Partial(
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),
 		...managementFee,
-		agreedCategoryIds,
+		agreedCategoryIds: agreedList,
 		referenceIndex: t.Optional(t.Nullable(t.String())),
 		contractPdf: t.Optional(t.Nullable(t.String())),
 		notes: t.Optional(t.Nullable(t.String())),
@@ -112,7 +112,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			set.status = 404;
 			return { error: 'Contract not found' };
 		}
-		return { ...contract, agreedCategoryIds: await agreedOf(params.id) };
+		return { ...contract, agreedCategoryIds: await agreedCategoryIds(params.id) };
 	})
 	// The categories with costs for the contract in the period and whether it agrees each (#91)
 	.get(

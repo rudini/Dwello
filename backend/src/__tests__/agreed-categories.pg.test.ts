@@ -12,6 +12,9 @@ import { db } from '../db/connection';
 import { categories, fuelStocks, heatingProfiles, invoices, utilityStatements } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
+import { createApartment, deleteApartment } from '../services/apartment.service';
+import { deleteContract } from '../services/contract.service';
+import { createTenant, deleteTenant } from '../services/tenant.service';
 import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
@@ -102,7 +105,32 @@ describe('Vereinbarte Nebenkosten des Mietvertrags', () => {
 		expect((await answers(rental.contract)).map((answer) => answer.categoryId)).not.toContain(unused);
 	});
 
-	it('lehnt eine Antwort ohne Ja oder Nein ab', async () => {
+	// Fachreview V-15, Code-Review C-3: nichts zu fragen ohne Betrag oder ohne Mietstage in den abgerechneten Tagen
+	it('nennt keine Kategorie, deren Rechnungen sich aufheben oder vor dem Mietvertrag liegen', async () => {
+		const cancelled = await ownCategory('Gutschrift');
+		const before = await ownCategory('Vorher');
+		await insertInvoice(rental.building, { amount: '300.00', invoiceDate: '2020-03-31' });
+		await insertInvoice(rental.building, { categoryId: cancelled, amount: '80.00', invoiceDate: '2020-02-29' });
+		await insertInvoice(rental.building, { categoryId: cancelled, amount: '-80.00', invoiceDate: '2020-04-30' });
+		await insertInvoice(rental.building, {
+			categoryId: before,
+			amount: '90.00',
+			invoiceDate: '2019-12-31',
+			servicePeriodStart: '2019-07-01',
+			servicePeriodEnd: '2019-12-31'
+		});
+		const listed = (
+			(await (
+				await callApi(`/api/v1/contracts/${rental.contract}/agreements?periodStart=2019-07-01&periodEnd=2020-06-30`)
+			).json()) as { categoryId: string }[]
+		).map((answer) => answer.categoryId);
+
+		expect(listed).toContain(ids.Caretaker);
+		expect(listed).not.toContain(cancelled);
+		expect(listed).not.toContain(before);
+	});
+
+		it('lehnt eine Antwort ohne Ja oder Nein ab', async () => {
 		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}/agreements`, { categoryId: ids.Elevator });
 
 		expect(response.status).toBe(422);
@@ -162,5 +190,64 @@ describe('Abrechnung ohne nicht vereinbarte Nebenkosten', () => {
 		const periods = (await (await callApi(`/api/v1/invoices/${lift.id}/statements`)).json()) as { missedIn: unknown[] };
 
 		expect(periods.missedIn).toEqual([]);
+	});
+
+	// Code-Review C-1: eine abgerechnete Rechnung bleibt abgerechnet, auch in einer Kategorie, die nicht vereinbart ist
+	it('nennt die Abrechnung weiter, wenn eine abgerechnete Rechnung in eine nicht vereinbarte Kategorie wechselt', async () => {
+		const [caretaker] = await db
+			.select({ id: invoices.id })
+			.from(invoices)
+			.where(and(eq(invoices.buildingId, heated.building), eq(invoices.categoryId, ids.Caretaker)));
+		await sendJson('PUT', `/api/v1/invoices/${caretaker.id}`, { categoryId: ids.Elevator });
+		const periods = (await (await callApi(`/api/v1/invoices/${caretaker.id}/statements`)).json()) as { billedIn: unknown[] };
+
+		expect(periods.billedIn).toEqual([{ start: '2024-01-01', end: '2024-12-31' }]);
+	});
+});
+
+// Code-Review C-5: was ein neuer Mietvertrag vereinbart, mit und ohne Liste aus dem Formular
+describe('Neuer Mietvertrag', () => {
+	const other = crypto.randomUUID();
+	let fresh: Awaited<ReturnType<typeof createRental>>;
+	let listed: { apartment: string; tenant: string; contract: string };
+	let ownId: string;
+
+	beforeAll(async () => {
+		ownId = await ownCategory('Treppenhausreinigung');
+		fresh = await createRental(other, { startDate: '2020-01-01', monthlyAdvancePayment: '0' });
+		const apartment = await createApartment({ buildingId: fresh.building, number: '1.02', floor: 1, area: '50', rooms: '2' });
+		const tenant = await createTenant({ firstName: 'Beat', lastName: `Huber ${other}` });
+		const response = await sendJson('POST', '/api/v1/contracts', {
+			apartmentId: apartment.id,
+			tenantId: tenant.id,
+			startDate: '2024-01-01',
+			baseRent: '900',
+			monthlyAdvancePayment: '0',
+			agreedCategoryIds: [ids.Caretaker]
+		});
+		listed = { apartment: apartment.id, tenant: tenant.id, contract: ((await response.json()) as { id: string }).id };
+	});
+
+	afterAll(async () => {
+		await deleteContract(listed.contract, true);
+		await deleteTenant(listed.tenant);
+		await deleteApartment(listed.apartment);
+		await fresh.remove();
+	});
+
+	it('vereinbart auch eine eigene umlagefähige Kategorie', async () => {
+		expect((await contract(fresh.contract)).agreedCategoryIds).toContain(ownId);
+	});
+
+	// Code-Review C-11: eine Kategorie, die nicht mehr umlagefähig ist, nennt der Mietvertrag nicht mehr
+	it('nennt keine Kategorie mehr, die nicht mehr umlagefähig ist', async () => {
+		await db.update(categories).set({ isAllowedUtilityCost: false }).where(eq(categories.id, ownId));
+
+		expect((await contract(fresh.contract)).agreedCategoryIds).not.toContain(ownId);
+		expect((await contract(fresh.contract)).agreedCategoryIds).toContain(ids.Caretaker);
+	});
+
+		it('vereinbart nur, was das Formular angekreuzt hat', async () => {
+		expect((await contract(listed.contract)).agreedCategoryIds).toEqual([ids.Caretaker]);
 	});
 });

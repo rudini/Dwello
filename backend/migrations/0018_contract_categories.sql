@@ -17,7 +17,7 @@ INSERT INTO contract_categories (contract_id, category_id, agreed)
 SELECT DISTINCT s.contract_id, li.category_id, true
 FROM utility_statements s
 JOIN utility_statement_line_items li ON li.statement_id = s.id
-WHERE li.category_id IS NOT NULL;
+JOIN categories cat ON cat.id = li.category_id AND cat.is_allowed_utility_cost;
 
 INSERT INTO contract_categories (contract_id, category_id, agreed)
 SELECT DISTINCT c.id, i.category_id, true

@@ -142,14 +142,15 @@ describe('Migrationen anwenden', () => {
 				SELECT c.tenant_id, c.apartment_id, c.id, 'S-1', '2024-01-01', '2024-12-31', '2025-01-15', 366, '2024-01-01', '2024-12-31', 500, 240, 260, 'sent'
 				FROM c JOIN t ON t.id = c.tenant_id WHERE t.first_name = 'Billed' RETURNING id)
 			INSERT INTO utility_statement_line_items (statement_id, category_id, description, total_amount, tenant_share)
-			SELECT s.id, categories.id, 'Hauswart', 1000, 500 FROM s, categories WHERE categories.name = 'Caretaker'`
+			SELECT s.id, categories.id, categories.name, 1000, 500 FROM s, categories WHERE categories.name IN ('Caretaker', 'Administration')`
 		);
-		// recorded after the statement, in its period: it could have been billed; one after the last period could not
+		// a position of a category no longer umlagefähig gives no agreement (code review C-2); recorded after the statement,
+		// in its period: it could have been billed; one after the last period or before the contract could not
 		await query(
 			name,
 			`INSERT INTO invoices (building_id, category_id, billing_entity_name, description, amount, invoice_date, is_valid_utility_cost)
 			SELECT buildings.id, categories.id, 'Muster AG', categories.name, 400, d::date, true FROM buildings, categories,
-				(VALUES ('Elevator', '2024-06-30'), ('Garden Maintenance', '2025-03-31')) AS x (category, d) WHERE categories.name = x.category`
+				(VALUES ('Elevator', '2024-06-30'), ('Garden Maintenance', '2025-03-31'), ('Snow Removal', '2019-12-31')) AS x (category, d) WHERE categories.name = x.category`
 		);
 
 		await migrate(`${server}/${name}`, migrations);
