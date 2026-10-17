@@ -47,22 +47,28 @@
 	<Alert tone="caution" {title} testid="contract-missing-statement">
 		{#if text}<p>{text}</p>{/if}
 		<p>{hint}</p>
-		<div class="flex flex-wrap gap-2">
+		<!-- each period's links on their own row (personas Helga P-4, Anna P-5 #211) -->
+		<div class="flex flex-col gap-2">
 			{#each missing as period (period.start)}
-				{#if period.href}
-					<Button
-						href={period.href}
-						icon="calculate"
-						testid="contract-missing-statement-link-{period.start}">{createLabel(period)}</Button
-					>
-				{/if}
-				<Button
-					href={period.invoices.href}
-					variant="ghost"
-					icon="invoice"
-					testid="contract-missing-statement-invoices-{period.start}"
-					>{period.invoices.label}</Button
+				<div
+					class="flex flex-wrap gap-2"
+					data-testid="contract-missing-statement-period-{period.start}"
 				>
+					{#if period.href}
+						<Button
+							href={period.href}
+							icon="calculate"
+							testid="contract-missing-statement-link-{period.start}">{createLabel(period)}</Button
+						>
+					{/if}
+					<Button
+						href={period.invoices.href}
+						variant="ghost"
+						icon="invoice"
+						testid="contract-missing-statement-invoices-{period.start}"
+						>{period.invoices.label}</Button
+					>
+				</div>
 			{/each}
 		</div>
 	</Alert>

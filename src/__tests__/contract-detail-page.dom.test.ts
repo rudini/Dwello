@@ -283,6 +283,12 @@ describe('Mietvertragsdetail', () => {
 		];
 		expect(links.map((a) => a.textContent!.trim())).toEqual(['2025 abrechnen', '2023 abrechnen']);
 		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href));
+		// each period's links together, on their own row (personas Helga P-4, Anna P-5 #211)
+		const row = byTestId('contract-missing-statement-period-2023-01-01')!;
+		expect([...row.querySelectorAll('a')].map((a) => a.textContent!.trim())).toEqual([
+			'2023 abrechnen',
+			'Rechnungen ansehen'
+		]);
 		expect(text('contract-missing-statement')).toContain(
 			'Haben Sie eine dieser Perioden ausserhalb von Dwello abgerechnet? Tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
 		);

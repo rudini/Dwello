@@ -29,6 +29,10 @@
 	</div>
 	<div class="flex flex-col items-start gap-1 md:flex-1">
 		<Badge tone={badge.tone} label={badge.label} />
+		<span class="tabular-nums text-ink"
+			>{contractPeriod(contract.startDate, contract.endDate, status, contract.terminated)}</span
+		>
+		<!-- after the Vertragsdauer, not read as one phrase with it (persona Helga #211) -->
 		{#if contract.missingStatement}
 			<Badge
 				tone="caution"
@@ -36,9 +40,6 @@
 				testid="contract-missing-statement-badge"
 			/>
 		{/if}
-		<span class="tabular-nums text-ink"
-			>{contractPeriod(contract.startDate, contract.endDate, status, contract.terminated)}</span
-		>
 	</div>
 	<dl class="flex flex-col gap-1 tabular-nums md:items-end">
 		<div class="flex gap-2">

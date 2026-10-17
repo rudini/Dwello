@@ -117,6 +117,8 @@ describe('Mietvertragsliste', () => {
 			/data-testid="contract-missing-statement-badge"[\s\S]*?Abrechnung fehlt/
 		);
 		expect(row(body, 'c2')).not.toContain('contract-missing-statement-badge');
+		// after the Vertragsdauer: «Abrechnung fehlt seit 01.04.2024» would read as one sentence (persona Helga)
+		expect(row(body, 'c1')).toMatch(/seit 01\.04\.2024[\s\S]*contract-missing-statement-badge/);
 	});
 
 	it('meldet den Status nicht als Live-Region', () => {
