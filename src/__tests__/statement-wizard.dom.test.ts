@@ -506,7 +506,7 @@ describe('Abrechnungen erstellen', () => {
 			invoices: [{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-03-31' }]
 		});
 		expect(byTestId('preview-invoices')!.textContent).toContain('Ahornhof');
-		expect(byTestId('partial-invoices')).toBeNull();
+		expect(document.body.textContent).not.toContain('Teil der Periode');
 		expect(byTestId('missing-invoices')).toBeNull();
 	});
 
