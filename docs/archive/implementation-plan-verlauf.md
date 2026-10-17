@@ -1316,5 +1316,6 @@ Files: `backend/src/services/{pdf-format,pdf.service,reminder.service,statement.
 - [x] `daten-pruefer` on Seepark Residenz A2 and controls: `docs/reviews/71-datenpruefung-1.md` (no findings)
 - [x] Merge `origin/main` (conflict in the schema import of `calculation.service.ts` only)
 - [x] Closing code review round 3: `docs/reviews/71-review-3.md` (C-1 Major: a decommissioned tank no longer keeps the exception, `periodReadings().covered`, test first; C-2 settled by it); re-review round 4: `docs/reviews/71-review-4.md` (C-1, C-2 closed; C-3 Minor stays in the report)
+- [x] Merge of main after the product owner's go (conflicts in calculation, PDF texts, render test, rule 5): review of the merge commit `docs/reviews/71-review-5.md` (no Blocker/Major; C-1, C-2 stay in the report)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
 - [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
