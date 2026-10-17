@@ -68,3 +68,4 @@ export const confirmResetPaymentButton = target('Zurücksetzen bestätigen', (pa
 	page.getByTestId('statement-reset-payment-confirm')
 );
 export const resetPaymentDialog = target('Bestätigung des Zurücksetzens', (page) => page.getByRole('dialog'));
+export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));

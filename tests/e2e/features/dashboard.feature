@@ -170,6 +170,27 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Anna Keller"
 
+  # A-5 (#114): solange der Entwurf an die verlassene Wohnung ginge, steht die neue Adresse als Aufgabe da
+  Szenario: Alte Adresse eines ausgezogenen Mieters als Aufgabe
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2024-06-30" für "900" Franken
+    Und der Mietvertrag von "Bruno Meier" ist auf den "2024-06-30" gekündigt
+    Und die Korrespondenzadresse von "Bruno Meier" ist noch die Adresse des Gebäudes "Seeblick"
+    Und für "Bruno Meier" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Neue Adresse eintragen" für "Bruno Meier"
+
+  # A-5 mit A-6 (#114, #115): nach einem vereinbarten Ende ist der Mieter vielleicht geblieben; die Übersicht fragt
+  # danach, statt eine neue Adresse zu verlangen
+  Szenario: Abgelaufener befristeter Mietvertrag ohne bestätigten Auszug verlangt keine neue Adresse
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "1.02" von "2024-01-01" bis "2024-06-30" für "900" Franken
+    Und die Korrespondenzadresse von "Bruno Meier" ist noch die Adresse des Gebäudes "Seeblick"
+    Und für "Bruno Meier" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Befristeten Mietvertrag prüfen" für "Bruno Meier"
+    Und nennt die Übersicht keine Aufgabe "Neue Adresse eintragen" für "Bruno Meier"
+
   Szenario: Rechnungen von der Übersicht aus hochladen
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Schnellaktion "Rechnungen hochladen" wählt

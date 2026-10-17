@@ -10,7 +10,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna | – |
 | A-3 | Hinweis auf die Kündigungsfrist | umgesetzt | IF-2 | #112 |
 | A-4 | Bevorstehendes Vertragsende sichtbar machen | umgesetzt | IF-5, Anna, Helga | #113 |
-| A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna | #114 |
+| A-5 | Neue Adresse für die Schlussabrechnung | umgesetzt | IF-6, Anna | #114 |
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | umgesetzt | IF-9 | #115 |
 | A-7 | Doppelt erfassten Mietvertrag entfernen | umgesetzt | Anna (I2, M2) | #116 |
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | umgesetzt | Anna (I2, M3) | #117 |
@@ -31,7 +31,7 @@ Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriff
 1. **Keine Überschneidung.** Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden; Dwello lehnt einen neuen oder geänderten Vertrag ab, der es täte (`CONTRACT_OVERLAP` in `contract.service.ts`; für neue Verträge belegt durch `contract-new.feature` und `backend/src/__tests__/contract-overlap.pg.test.ts`).
 2. **Kündigungstermin als Vertragsende.** Ist ein unbefristeter Mietvertrag gekündigt, erfasst Dwello den Kündigungstermin als Vertragsende und merkt sich, dass er gekündigt ist (A-1).
 3. **Kündigungsfrist.** Der Dialog «Mietvertrag beenden» nennt sie allgemein (3 Monate, sonst nächster Termin). Ist «Kündigung erhalten am» ausgefüllt und liegen bis zum Vertragsende weniger als 3 Kalendermonate (Tag auf das Monatsende gekürzt), weist er darauf hin, ohne zu sperren (A-3, #112). Ortsübliche Termine, vertraglich längere Fristen und Formvorschriften prüft Dwello nicht.
-4. **Vertrag, der von Gesetzes wegen weiterläuft** (#155, Entscheid Product Owner: nur beschreiben, kein eigener Grund für das Vertragsende). Stirbt der Mieter, geht der Mietvertrag auf die Erben über (Art. 560 ZGB); sie können ihn mit der gesetzlichen Frist auf den nächsten gesetzlichen Termin kündigen (Art. 266i OR). Der Mietvertrag bleibt erfasst, ohne neues Vertragsende, bis die Erben oder der Vermieter gekündigt haben; erst dann erfasst «Beenden» den Kündigungstermin; beim Mieter steht als Korrespondenzadresse (im Mieterformular «Adresse», bei Post per E-Mail auch «E-Mail») die Adresse, an die die Post für die Erben geht, der Name bleibt. Tritt ein Dritter in den Mietvertrag ein (Übertragung eines Mietvertrags für Geschäftsräume mit schriftlicher Zustimmung des Vermieters, Art. 263 OR; Zuweisung der Wohnung der Familie an einen Ehegatten durch das Scheidungsgericht, Art. 121 ZGB; nicht bei Eheschutzmassnahmen, Art. 176 ZGB, die nur die Benutzung regeln), bleibt es rechtlich derselbe Vertrag; Dwello erfasst ihn als Vertragsende am Tag vor dem Wechsel, ohne Kündigungsfrist, und einen neuen Mietvertrag mit denselben Bedingungen ab dem Tag des Wechsels, damit jeder nach seinen Miettagen abgerechnet wird. Das Vertragsende heisst dann *gekündigt*, obwohl niemand gekündigt hat. Der bisherige Mieter haftet höchstens zwei Jahre solidarisch weiter (Art. 263 Abs. 4 OR, Art. 121 Abs. 2 ZGB); Dwello bildet das nicht ab. Die Hilfe unter «Bearbeiten» (Mieter und Wohnung) und der Dialog «Mietvertrag beenden» sagen es.
+4. **Vertrag, der von Gesetzes wegen weiterläuft** (#155, Entscheid Product Owner: nur beschreiben, kein eigener Grund für das Vertragsende). Stirbt der Mieter, geht der Mietvertrag auf die Erben über (Art. 560 ZGB); sie können ihn mit der gesetzlichen Frist auf den nächsten gesetzlichen Termin kündigen (Art. 266i OR). Der Mietvertrag bleibt erfasst, ohne neues Vertragsende, bis die Erben oder der Vermieter gekündigt haben; erst dann erfasst «Beenden» den Kündigungstermin; beim Mieter steht als Korrespondenzadresse (im Mieterformular «Korrespondenzadresse», bei Post per E-Mail auch «E-Mail») die Adresse, an die die Post für die Erben geht, der Name bleibt. Tritt ein Dritter in den Mietvertrag ein (Übertragung eines Mietvertrags für Geschäftsräume mit schriftlicher Zustimmung des Vermieters, Art. 263 OR; Zuweisung der Wohnung der Familie an einen Ehegatten durch das Scheidungsgericht, Art. 121 ZGB; nicht bei Eheschutzmassnahmen, Art. 176 ZGB, die nur die Benutzung regeln), bleibt es rechtlich derselbe Vertrag; Dwello erfasst ihn als Vertragsende am Tag vor dem Wechsel, ohne Kündigungsfrist, und einen neuen Mietvertrag mit denselben Bedingungen ab dem Tag des Wechsels, damit jeder nach seinen Miettagen abgerechnet wird. Das Vertragsende heisst dann *gekündigt*, obwohl niemand gekündigt hat. Der bisherige Mieter haftet höchstens zwei Jahre solidarisch weiter (Art. 263 Abs. 4 OR, Art. 121 Abs. 2 ZGB); Dwello bildet das nicht ab. Die Hilfe unter «Bearbeiten» (Mieter und Wohnung) und der Dialog «Mietvertrag beenden» sagen es.
 
 ---
 
@@ -129,7 +129,7 @@ Szenario: Kündigung mit genügend Frist
 
 ## A-4 Bevorstehendes Vertragsende sichtbar machen – umgesetzt
 
-**Umgesetzt** (Session 17, nach Review K-1): Die Übersicht nennt für jeden gekündigten Mietvertrag ohne späteren Vertrag derselben Wohnung die Aufgabe «Nachmieter für Wohnung {Nr} suchen», auch nach dem Vertragsende, solange die Wohnung leer steht (nach den übrigen Aufgaben, das früheste Ende zuerst; «Mietvertrag erfassen» mit vorgewählter Wohnung). Die Frist «Vertragsende» nennt befristete Verträge und gekündigte, für die schon ein Nachmieter erfasst ist (Wohnungsabnahme, Depot). Der Mietstatus heisst «Vermietet bis TT.MM.JJJJ», sobald der laufende Vertrag ein Ende hat (Wohnungsliste, Wohnungs- und Gebäudeseite; auch bei befristeten Verträgen); beginnt der nächste Vertrag am Tag danach, bleibt es bei «Vermietet». Wer unter «Bearbeiten» einem unbefristeten Vertrag ein Ende gibt, sieht den Hinweis auf «Beenden» (Personas K1). Abweichungen: Statt Links in der Meldung (die nach Sekunden verschwindet) zeigt die Seite eines gekündigten Mietvertrags, solange kein Nachmieter erfasst ist, den Abschnitt «Nächste Schritte» mit «Nachmieter erfassen» und «Neue Adresse eintragen» (bis A-5: die Bearbeitung des Mieters); die Meldung nach dem Beenden weist darauf hin. Die Mieterseite nennt das Ende in der Zeile des Mietvertrags («…, gekündigt»), nicht als Mietstatus.
+**Umgesetzt** (Session 17, nach Review K-1): Die Übersicht nennt für jeden gekündigten Mietvertrag ohne späteren Vertrag derselben Wohnung die Aufgabe «Nachmieter für Wohnung {Nr} suchen», auch nach dem Vertragsende, solange die Wohnung leer steht (nach den übrigen Aufgaben, das früheste Ende zuerst; «Mietvertrag erfassen» mit vorgewählter Wohnung). Die Frist «Vertragsende» nennt befristete Verträge und gekündigte, für die schon ein Nachmieter erfasst ist (Wohnungsabnahme, Depot). Der Mietstatus heisst «Vermietet bis TT.MM.JJJJ», sobald der laufende Vertrag ein Ende hat (Wohnungsliste, Wohnungs- und Gebäudeseite; auch bei befristeten Verträgen); beginnt der nächste Vertrag am Tag danach, bleibt es bei «Vermietet». Wer unter «Bearbeiten» einem unbefristeten Vertrag ein Ende gibt, sieht den Hinweis auf «Beenden» (Personas K1). Abweichungen: Statt Links in der Meldung (die nach Sekunden verschwindet) zeigt die Seite eines gekündigten Mietvertrags, solange kein Nachmieter erfasst ist, den Abschnitt «Nächste Schritte» mit «Nachmieter erfassen» und «Neue Adresse eintragen» (die Bearbeitung des Mieters, A-5); die Meldung nach dem Beenden weist darauf hin. Die Mieterseite nennt das Ende in der Zeile des Mietvertrags («…, gekündigt»), nicht als Mietstatus.
 
 
 **Voraussetzung:** A-1 (nur *gekündigte* Verträge).
@@ -168,7 +168,10 @@ Szenario: Wohnung mit gekündigtem Mietvertrag
 
 ---
 
-## A-5 Neue Adresse für die Schlussabrechnung
+## A-5 Neue Adresse für die Schlussabrechnung – umgesetzt
+
+**Umgesetzt** (#114): Der Text der «Nächsten Schritte» eines gekündigten Mietvertrags bittet um die neue Adresse («Bitten Sie {Name} um die neue Adresse und tragen Sie sie beim Mieter ein. Dorthin geht die Nebenkostenabrechnung.»); nach dem Vertragsende bleibt nur dieser Schritt, solange der Mieter ausgezogen ist und seine Korrespondenzadresse noch die des Gebäudes ist. Ausgezogen heisst: der Mietvertrag endete vor heute, und kein Mietvertrag des Mieters läuft heute (ein Umzug im Haus warnt nicht); ein vereinbartes Ende zählt wie bei A-6 (#115): gekündigt, «Mieter ist ausgezogen» erfasst oder die Wohnung danach wieder vermietet; vorher läuft der Mietvertrag vielleicht unbefristet weiter. Verglichen werden Strasse und PLZ ohne Rücksicht auf Gross- und Kleinschreibung und Leerzeichen; ohne Adresse des Mieters keine Warnung (`backend/src/services/old-address.ts`, Feld `oldAddress` an Mietverträgen und Abrechnungen). Die Warnung steht in der Vorschau des Assistenten, im Dialog «Als versendet markieren» (der Versand bleibt möglich) und, solange eine solche Abrechnung ein Entwurf ist, als Aufgabe «Neue Adresse eintragen» in der Übersicht. Die offene Frage ist entschieden: Strasse und PLZ genügen, kein Feld «Neue Adresse ab». Abweichung von Anforderung 1: Die Meldung nach dem Beenden verweist weiter auf die «Nächsten Schritte», die den Satz und den Link tragen.
+
 
 **Problem.** Die Nebenkostenabrechnung geht an die Adresse des Mieters. Nach dem Auszug ist das meist die verlassene Wohnung. Die Abrechnung kommt Monate später, geht zurück oder an den Nachmieter (Datenschutz). Eine Nachzahlung wird nicht bezahlt, eine Rückerstattung nicht ausbezahlt.
 
@@ -183,14 +186,14 @@ Szenario: Wohnung mit gekündigtem Mietvertrag
 ```gherkin
 Szenario: Abrechnung an einen ausgezogenen Mieter mit alter Adresse
   Angenommen "Anna Keller" mietete die Wohnung "2.01" von "2024-04-01" bis "2025-03-31"
-  Und die Adresse von "Anna Keller" ist die Adresse des Gebäudes "Ahornhof"
+  Und die Korrespondenzadresse von "Anna Keller" ist noch die Adresse des Gebäudes "Ahornhof"
   Wenn der Liegenschaftsverwalter die Abrechnung 2025 von "Anna Keller" versenden will
   Dann warnt Dwello, dass die Adresse noch die der Wohnung ist
 ```
 
 **Nicht dazu:** Adressprüfung bei der Post, Weiterleitung.
 
-**Offene Fragen:** Genügt der Vergleich von Strasse und Postleitzahl, oder braucht es ein Feld «Neue Adresse ab» beim Mieter?
+**Offene Fragen:** keine (#114: Strasse und Postleitzahl genügen, kein Feld «Neue Adresse ab»).
 
 ---
 

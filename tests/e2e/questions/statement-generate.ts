@@ -18,6 +18,7 @@ import {
 	managementFeeHint,
 	managementFeeInput,
 	missingInvoices,
+	oldAddress,
 	periodStartInput,
 	periodRunningWarning,
 	previewEmpty,
@@ -128,3 +129,4 @@ export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const presetNoticeText = Text.of(wizardPresetNotice);
+export const oldAddressWarning = Text.of(oldAddress);

@@ -13,6 +13,7 @@ import {
 	endOfContract,
 	managementFeeOfContract,
 	missingStatementsText,
+	nextStepsText,
 	statementLinkedInDeleteDialog,
 	statusOfContract,
 	totalRent,
@@ -288,6 +289,16 @@ Then('zeigt der Dialog keinen Hinweis auf die Frist', async ({ verwalter }) => {
 Then('zeigt der Mietvertrag die Kündigung als erhalten am {string}', async ({ verwalter }, date: string) => {
 	await verwalter.sees(noticeReceivedOn).toBe(date);
 });
+
+// A-5 (#114): the address step names the tenant
+Then(
+	'bitten die nächsten Schritte, die neue Adresse von {string} einzutragen: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(nextStepsText).toContain(
+			`Bitten Sie ${names.get(tenant)} um die neue Adresse und tragen Sie sie beim Mieter ein. ${rest}`
+		);
+	}
+);
 
 Then(
 	'verlinkt der Dialog die Abrechnung {int} von {string}',

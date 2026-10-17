@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { correspondence, correspondenceLanguage, languageLabel, offeredLanguages } from '../questions/tenant-form';
+import { addressHelpText, correspondence, correspondenceLanguage, languageLabel, offeredLanguages } from '../questions/tenant-form';
+import { correspondenceAddress } from '../questions/tenant-detail';
 import { chooseLanguage, correspondByEmailWithoutAddress, correspondByLetter, openTenantEdit } from '../tasks/tenant-form';
 
 const { Given, When, Then } = createBdd(test);
@@ -51,3 +52,36 @@ Then('heisst die Sprache des Mieters im Formular {string}', async ({ verwalter }
 Then('bietet das Formular die Sprachen {string} an', async ({ verwalter }, languages: string) => {
 	await verwalter.sees(offeredLanguages).toEqual(languages.split(', '));
 });
+
+When(
+	'der Liegenschaftsverwalter die Korrespondenz per Brief an {string}, {string} in {string} festlegt',
+	async ({ verwalter }, address: string, place: string, country: string) => {
+		await verwalter.attemptsTo(correspondByLetter(address, place, country));
+	}
+);
+
+Then('erklärt die Seite bei der Korrespondenzadresse {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(addressHelpText).toBe(help);
+});
+
+// the lines of the address, written with commas in the scenario
+Then('die Korrespondenzadresse von {string} ist {string}', async ({ verwalter }, _tenant: string, address: string) => {
+	await verwalter.sees(correspondenceAddress).toBe(address.split(', ').join(' '));
+});
+
+const COUNTRIES: Record<string, string> = { Deutschland: 'DE' };
+
+Given(
+	'die Korrespondenzadresse von {string} ist {string}, {string} in {string}',
+	async ({ seed }, tenant: string, address: string, place: string, country: string) => {
+		const [postalCode, city] = place.split(' ');
+		await seed.address(tenant, address, postalCode, city, COUNTRIES[country]);
+	}
+);
+
+Given(
+	'die Korrespondenzadresse von {string} ist noch die Adresse des Gebäudes {string}',
+	async ({ seed }, tenant: string, building: string) => {
+		await seed.buildingAddress(tenant, building);
+	}
+);
