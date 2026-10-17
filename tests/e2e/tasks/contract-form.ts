@@ -97,9 +97,9 @@ export const chooseTenantAndApartment = (tenantId: string, apartmentId: string):
 
 export const goBackToStep = (label: string) => Click.on(finishedStep(label));
 
-// The draft is kept in the browser; the wizard says when it is saved
+// The input is kept in the browser; the wizard says when
 export const reopenNewContract: Activity = (actor) =>
-	actor.attemptsTo(Wait.until(saveStatus('Entwurf gespeichert')), openNewContract);
+	actor.attemptsTo(Wait.until(saveStatus('Noch nicht gespeichert')), openNewContract);
 
 export const discardDraft: Activity = (actor) => actor.attemptsTo(Click.on(discardDraftButton), Click.on(discardDraftConfirm));
 export const deleteDraftAndSave = Click.on(deleteDraftAndSaveButton);

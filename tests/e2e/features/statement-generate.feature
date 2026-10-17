@@ -382,11 +382,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter zum Erstellen weitergeht
     Dann erfährt der Liegenschaftsverwalter, dass die Abrechnungen als Entwurf entstehen und nichts verschickt wird
 
+  # #57: «Entwurf» heisst nur der Abrechnungsstatus; die Eingaben im Assistenten sind «Ihre Angaben»
+  Szenario: Angefangene Abrechnungen sind noch nicht gespeichert
+    Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
+    Dann erfährt der Liegenschaftsverwalter, dass seine Angaben nur in diesem Browser aufbewahrt und noch nicht gespeichert sind
+
   # #201: der Assistent öffnet im Schritt, in dem der Liegenschaftsverwalter aufgehört hat
   Szenario: Angefangene Abrechnungen später fortsetzen
     Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
-    Dann sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist
+    Dann sieht der Liegenschaftsverwalter, dass seine Angaben wiederhergestellt sind
+    Und sagt der Hinweis auf die wiederhergestellten Angaben "Sie sind nur in diesem Browser aufbewahrt und noch nicht gespeichert."
     Und ist der Assistent im Schritt "Gebäude"
     Und ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
 
@@ -411,7 +417,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter das Gebäude "Ahornhof" für die Abrechnungen wählt
     Und das Gebäude "Ahornhof" wird inzwischen gelöscht
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
-    Dann sagt der wiederhergestellte Entwurf "Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt 2 «Gebäude»."
+    Dann sagt der Hinweis auf die wiederhergestellten Angaben "Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt 2 «Gebäude»."
 
   Szenario: Schon abgerechnete Mietverträge zeigen sich bei der Wahl der Gebäude
     Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024

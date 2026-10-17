@@ -88,16 +88,22 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
     Dann steht bei der Wohnung "2.01" in der Auswahl "(nicht geprüft)"
 
+  # #57: «Entwurf» heisst nur der Abrechnungsstatus; die Eingaben im Assistenten sind «Ihre Angaben»
+  Szenario: Angefangener Mietvertrag ist noch nicht gespeichert
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Dann erfährt der Liegenschaftsverwalter, dass seine Angaben nur in diesem Browser aufbewahrt und noch nicht gespeichert sind
+
   Szenario: Angefangenen Mietvertrag später fortsetzen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Und der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet
-    Dann sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist
+    Dann sieht der Liegenschaftsverwalter, dass seine Angaben wiederhergestellt sind
+    Und sagt der Hinweis auf die wiederhergestellten Angaben "Sie sind nur in diesem Browser aufbewahrt und noch nicht gespeichert."
     Und ist im Mietvertrag der Mieter "Anna Keller" gewählt
 
-  Szenario: Entwurf verwerfen
+  Szenario: Angaben verwerfen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Und der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet
-    Und der Liegenschaftsverwalter den Entwurf verwirft
+    Und der Liegenschaftsverwalter seine Angaben verwirft
     Dann ist im Mietvertrag kein Mieter gewählt
 
   Szenario: Neuen Mieter direkt im Mietvertrag erfassen
@@ -136,6 +142,13 @@ Funktionalität: Neuen Mietvertrag erfassen
   Szenario: Verwaltungspauschale mit eigenem Satz prüfen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit einer Verwaltungspauschale von "4" % bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Verwaltungspauschale" mit "Vereinbart, 4 %"
+
+  # #77: eine neue Verwaltungspauschale während der Mietdauer ist eine einseitige Vertragsänderung (Art. 269d Abs. 1
+  # und 3 OR): Formular, Begründung, mindestens zehn Tage vor Beginn der Kündigungsfrist, nächstmöglicher Kündigungstermin
+  Szenario: Hilfe zu einer neuen Verwaltungspauschale während der Mietdauer
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann erfährt der Liegenschaftsverwalter, dass er eine neue Verwaltungspauschale mindestens zehn Tage vor Beginn der Kündigungsfrist begründet mitteilt
 
   # #91: ein neuer Mietvertrag beginnt mit allen umlagefähigen Kategorien; nur vereinbarte Nebenkosten darf der
   # Liegenschaftsverwalter abrechnen (Art. 257a Abs. 2 OR)
