@@ -9,7 +9,6 @@ import {
 	chosenTenantId,
 	chosenTenantName,
 	confirmation,
-	draftRestoredText,
 	durationChosen,
 	enteredAdvancePayment,
 	enteredBaseRent,
@@ -29,6 +28,7 @@ import {
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
+import { restoredDraftText } from '../questions/statement-generate';
 import {
 	agreeManagementFee,
 	enterBilledUntil,
@@ -181,13 +181,15 @@ Then('ist im Mietvertrag kein Mieter gewählt', async ({ verwalter }) => {
 
 // Both wizards (#57): the input is «Ihre Angaben», «Entwurf» is only the statement status
 Then('sieht der Liegenschaftsverwalter, dass seine Angaben wiederhergestellt sind', async ({ verwalter }) => {
-	await verwalter.sees(draftRestoredText).toContain('Angaben wiederhergestellt');
+	await verwalter.sees(restoredDraftText).toContain('Angaben wiederhergestellt');
 });
 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass seine Angaben nur in diesem Browser aufbewahrt und noch nicht gespeichert sind',
 	async ({ verwalter }) => {
-		await verwalter.sees(saveStatusText).toContain('Ihre Angaben sind nur in diesem Browser aufbewahrt, noch nicht gespeichert.');
+		await verwalter.sees(saveStatusText).toContain(
+			'Noch nicht gespeichert: Dwello bewahrt Ihre Angaben nur in diesem Browser auf.'
+		);
 	}
 );
 

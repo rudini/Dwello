@@ -89,19 +89,17 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann steht bei der Wohnung "2.01" in der Auswahl "(nicht geprüft)"
 
   # #57: «Entwurf» heisst nur der Abrechnungsstatus; die Eingaben im Assistenten sind «Ihre Angaben»
-  @wip
   Szenario: Angefangener Mietvertrag ist noch nicht gespeichert
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Dann erfährt der Liegenschaftsverwalter, dass seine Angaben nur in diesem Browser aufbewahrt und noch nicht gespeichert sind
 
-  @wip
   Szenario: Angefangenen Mietvertrag später fortsetzen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Und der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet
     Dann sieht der Liegenschaftsverwalter, dass seine Angaben wiederhergestellt sind
+    Und sagt der Hinweis auf die wiederhergestellten Angaben "Sie sind nur in diesem Browser aufbewahrt und noch nicht gespeichert."
     Und ist im Mietvertrag der Mieter "Anna Keller" gewählt
 
-  @wip
   Szenario: Angaben verwerfen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Und der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet

@@ -100,7 +100,7 @@ export const tryNextWithoutConfirmation = goToNextStep;
 
 // The input is kept in the browser; the wizard says when
 export const reopenStatementWizard: Activity = (actor) =>
-	actor.attemptsTo(Wait.until(saveStatus('Ihre Angaben sind nur in diesem Browser aufbewahrt')), Navigate.to(WIZARD));
+	actor.attemptsTo(Wait.until(saveStatus('Noch nicht gespeichert')), Navigate.to(WIZARD));
 
 export const generateMore = Click.on(generateMoreButton);
 export const showCreatedStatements = Click.on(showStatementsButton);

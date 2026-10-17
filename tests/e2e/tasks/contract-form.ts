@@ -99,7 +99,7 @@ export const goBackToStep = (label: string) => Click.on(finishedStep(label));
 
 // The input is kept in the browser; the wizard says when
 export const reopenNewContract: Activity = (actor) =>
-	actor.attemptsTo(Wait.until(saveStatus('Ihre Angaben sind nur in diesem Browser aufbewahrt')), openNewContract);
+	actor.attemptsTo(Wait.until(saveStatus('Noch nicht gespeichert')), openNewContract);
 
 export const discardDraft: Activity = (actor) => actor.attemptsTo(Click.on(discardDraftButton), Click.on(discardDraftConfirm));
 export const deleteDraftAndSave = Click.on(deleteDraftAndSaveButton);

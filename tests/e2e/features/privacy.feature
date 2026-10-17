@@ -23,7 +23,6 @@ Funktionalität: Datenschutz
   Szenario: KI auf dem Server des Betreibers
     Dann erfährt der Liegenschaftsverwalter unter "Weitergabe an Dritte", dass Rechnungen und neue Kategorien für die KI den Server nicht verlassen
 
-  @wip
   Szenario: Ungespeicherte Angaben bleiben nur im Browser
     Dann erfährt der Liegenschaftsverwalter unter "Welche Daten Dwello speichert", dass ungespeicherte Angaben bis zum Speichern, Verwerfen oder Abmelden nur in diesem Browser bleiben
 

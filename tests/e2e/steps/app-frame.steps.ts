@@ -109,7 +109,7 @@ Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass ungespeicherte Angaben bis zum Speichern, Verwerfen oder Abmelden nur in diesem Browser bleiben',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(draftNoticeText(heading)).toContain(
-			'nur in diesem Browser auf, bis Sie sie speichern, verwerfen oder sich mit «Abmelden» abmelden'
+			'nur in diesem Browser auf, damit Sie später weitermachen können: bis Sie den Mietvertrag speichern oder die Abrechnungen erstellen, Ihre Angaben verwerfen oder sich mit «Abmelden» abmelden.'
 		);
 	}
 );

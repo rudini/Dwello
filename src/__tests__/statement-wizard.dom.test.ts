@@ -1060,7 +1060,7 @@ describe('Entwurf der Abrechnungen', () => {
 		await settle();
 		click('generate-building-b2');
 		await settle();
-		expect(byTestId('save-status')!.textContent).toContain('Entwurf gespeichert');
+		expect(byTestId('save-status')!.textContent).toContain('Noch nicht gespeichert');
 
 		document.body.innerHTML = '';
 		open();
