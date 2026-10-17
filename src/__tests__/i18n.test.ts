@@ -49,7 +49,7 @@ describe('Sprachdateien', () => {
 	it('Italienisch sagt «termine di preavviso» und «ricevimento della disdetta»', () => {
 		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
 		const wrong = Object.entries(messages).filter(
-			([, text]) => typeof text === 'string' && /termin[ei] di disdetta|ricezione della disdetta/i.test(text)
+			([, text]) => typeof text === 'string' && /termin[ei] di disdetta|\bricezione\b/i.test(text)
 		);
 		expect(wrong).toEqual([]);
 	});
