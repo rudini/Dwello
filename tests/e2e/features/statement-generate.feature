@@ -327,6 +327,24 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Marc Huber"
     Aber nicht die Abrechnung 2023 von "Lea Graf"
 
+  # #356: ein Lauf als eine Datei, z.B. um alle Abrechnungen auf einmal zu drucken; frühere Abrechnungen gehören nicht dazu
+  Szenario: Alle Abrechnungen eines Laufs als ZIP herunterladen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Wenn der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP herunterlädt
+    Dann enthält die ZIP-Datei nur das PDF der Abrechnung 2024 von "Marc Huber", benannt nach ihrer Abrechnungsnummer
+
+  # Eine Abrechnung des Laufs ist inzwischen gelöscht (z.B. in einem zweiten Tab): ein Satz statt einer kaputten Datei
+  Szenario: ZIP eines Laufs mit einer inzwischen gelöschten Abrechnung anfordern
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Und die Abrechnung 2024 von "Marc Huber" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP anfordert
+    Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
+    Wenn der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
+
   Szenario: Zurück zur Abrechnungsliste
     Wenn der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"

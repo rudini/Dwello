@@ -10,11 +10,13 @@
 		createdCount,
 		withoutInvoices = [],
 		incomplete = [],
-		draftsHref
+		draftsHref,
+		zipHref
 	}: {
 		count: number;
 		createdCount: number | null;
 		draftsHref: string;
+		zipHref: string;
 		withoutInvoices?: string[];
 		incomplete?: string[];
 	} = $props();
@@ -51,6 +53,9 @@
 		<div class="flex flex-wrap justify-center gap-4">
 			<Button href={draftsHref} variant="primary" icon="statement" testid="show-statements-button"
 				>{m.statements_view_drafts()}</Button
+			>
+			<Button href={zipHref} reload icon="document-download" testid="download-zip-button"
+				>{m.statements_download_zip()}</Button
 			>
 			<Button href="/statements/generate" reload icon="add" testid="generate-more-button"
 				>{m.statements_create_more()}</Button
