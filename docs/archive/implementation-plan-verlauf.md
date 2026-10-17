@@ -1443,3 +1443,13 @@ Files: `backend/migrations/0021_category_descriptions.sql`, `backend/scripts/llm
 - [x] Further merge of main and test fix (part order of two invoices with one date): review round 6 `docs/reviews/71-review-6.md` (no Blocker/Major; C-1 pre-existing, C-2 stay in the report)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
 - [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
+
+## Session 2026-10-17: fewer review rounds (T1, T4 of `docs/reviews/workflow-rules-review-2026-10-17-2.md`)
+
+- [x] Collected review on token cost: `docs/reviews/workflow-rules-review-2026-10-17-2.md`
+- [x] T1: fixes of feature-review Minors/Nits form no slice; the closing round reviews them (`.claude/skills/slice-review/SKILL.md`, "Rounds")
+- [x] T4: no closing round for a delta of reports, personas, plan or archive; the round's range leaves them out (`.claude/skills/pull-request/SKILL.md`, `CLAUDE.md` Workflow 7)
+- [x] code-reviewer round 1: `docs/reviews/t1t4-review-1.md` (C-1 fixed: the range keeps `docs/design/personas/README.md` and `demo-records.md`; C-4 fixed; C-2, C-3 stay in the report)
+- [x] session archived, pull request
+
+Files: `CLAUDE.md`, `.claude/skills/{slice-review,pull-request}/SKILL.md`, `docs/reviews/workflow-rules-review-2026-10-17-2.md`, `docs/reviews/t1t4-review-1.md`
