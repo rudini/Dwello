@@ -142,6 +142,24 @@ describe('PDF einer Nachzahlung', () => {
 		expect(pdf.flowing).not.toContain('Zahlbar durch');
 	});
 
+	// Post ins Ausland: das Land in Grossbuchstaben allein auf der letzten Zeile der Adresse, ein Nachbarland in seiner
+	// Sprache, jedes andere englisch; im Zahlteil der Ländercode vor der Postleitzahl, ausser in der Schweiz (#102)
+	it('nennt bei einer Korrespondenzadresse im Ausland das Land in der Adresse und im Zahlteil', async () => {
+		const abroad = { firstName: 'Nina', lastName: 'Brunner', address: 'Marktstätte 3', postalCode: '78462', city: 'Konstanz', country: 'DE' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant: abroad }, config, 'fr'), 'base64'));
+
+		expect(pdf.text).toContain('Nina Brunner\nMarktstätte 3\n78462 Konstanz\nDEUTSCHLAND');
+		expect(pdf.text).toContain('DE-78462 Konstanz');
+		expect(pdf.pages).toBe(2); // the payment part on a page of its own
+		expect(pdf.pageTexts[0]).not.toContain('DE-'); // the address block keeps the postal code alone
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'US' } })).text).toContain('78462 Konstanz\nUNITED STATES');
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'LI' } })).text).toContain('LI-78462 Konstanz');
+		const home = await textOf({ ...due, tenant: { ...abroad, country: 'CH' } });
+		expect(home.text).toContain('78462 Konstanz\n');
+		expect(home.text).not.toContain('SCHWEIZ');
+		expect(home.text).not.toContain('CH-78462');
+	});
+
 	it('wiederholt den Tabellenkopf auf jeder Seite der Kostenübersicht', async () => {
 		const many = { ...due, lineItems: Array.from({ length: 45 }, (_, i) => ({ ...refund.lineItems[0], category: `Kategorie ${i + 1}` })) };
 

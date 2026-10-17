@@ -26,6 +26,7 @@ import { listApartments } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { belowMinimum } from './pdf-format';
 import { isRealDate } from './real-date';
+import { oldAddress } from './old-address';
 import { daysAfter, swissToday } from './today';
 
 export interface StatementFilters {
@@ -50,10 +51,11 @@ const nextReminderFrom = sql<string | null>`(
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder'
 )`;
-const statementColumns = { ...tableColumns, nextReminderFrom };
+const statementColumns = { ...tableColumns, nextReminderFrom, oldAddress: oldAddress(utilityStatements.contractId) };
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
 	nextReminderFrom: string | null;
+	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
 	tenant: {
 		id: string;
 		firstName: string;
@@ -232,7 +234,8 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 				language: tenants.language,
 				address: tenants.address,
 				postalCode: tenants.postalCode,
-				city: tenants.city
+				city: tenants.city,
+				country: tenants.country
 			},
 			apartment: {
 				id: apartments.id,
@@ -490,7 +493,9 @@ export async function updateStatementStatus(
 		status,
 		...additionalData,
 		...sentToday,
-		...settled
+		...settled,
+		// the PDF as sent is made anew after sending, with the tenant and settings then, not a draft's of earlier (review C-9)
+		...(sentToday && { pdfBlob: null, pdfGeneratedAt: null })
 	};
 	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94)
 	const moved = waived ? '0.00' : existing.balance;

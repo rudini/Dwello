@@ -28,6 +28,8 @@ export interface OverviewInput {
 	// ended Abrechnungsperiode with rented buildings that have no statements yet
 	missingPeriod?: { start: string; end: string; buildings: string[] } | null;
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
+	// moved out with a draft statement, still at the building's address (A-5, #114)
+	oldAddresses?: { tenantId: string; tenantName: string }[];
 	// ended by notice, still running and without a following contract (A-4)
 	noticedContracts: {
 		id: string;
@@ -188,6 +190,17 @@ const successorTasks = ({ noticedContracts }: OverviewInput): Task[] =>
 			icon: 'contract'
 		}));
 
+// A draft would go to the apartment the tenant left: the new address first (A-5, #114)
+const addressTasks = ({ oldAddresses = [] }: OverviewInput): Task[] =>
+	oldAddresses.map((t) => ({
+		id: `old-address-${t.tenantId}`,
+		title: m.contracts_next_address(),
+		text: m.statements_old_address({ name: t.tenantName }),
+		href: `/tenants/${t.tenantId}/edit`,
+		action: m.contracts_next_address(),
+		icon: 'edit'
+	}));
+
 // The tenant who stayed after an agreed end continues the contract open-ended (Art. 266 Abs. 2 OR, A-6);
 // TODO(fachlich prüfen, #308): wording of the question
 const fixedTermTasks = ({ expiredContracts }: OverviewInput): Task[] =>
@@ -208,6 +221,7 @@ export function overviewTasks(input: OverviewInput): Task[] {
 	return [
 		...(step ? [step.task()] : []),
 		...workTasks(input),
+		...addressTasks(input),
 		...successorTasks(input),
 		...fixedTermTasks(input)
 	];

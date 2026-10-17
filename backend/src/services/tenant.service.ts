@@ -62,6 +62,7 @@ const tenantFields = {
 	address: tenants.address,
 	postalCode: tenants.postalCode,
 	city: tenants.city,
+	country: tenants.country,
 	correspondenceChannel: tenants.correspondenceChannel,
 	createdAt: tenants.createdAt,
 	updatedAt: tenants.updatedAt,

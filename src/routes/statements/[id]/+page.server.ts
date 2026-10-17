@@ -8,15 +8,17 @@ import {
 	resetStatementPayment,
 	sendStatementReminder
 } from '$lib/server/statement-actions';
+import { countryName } from '$lib/tenant';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-// "Ahornweg 3, 8400 Winterthur": the statement carries no address, the tenant does
+// "Ahornweg 3, 8400 Winterthur": the statement carries no address, the tenant does; abroad with its country (#102)
 async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	const response = await fetch(`${BACKEND_URL}/api/v1/tenants/${tenantId}`).catch(() => null);
 	if (!response?.ok) return '';
-	const { address, postalCode, city } = await response.json();
-	return [address, [postalCode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+	const { address, postalCode, city, country } = await response.json();
+	const abroad = country && country !== 'CH' && countryName(country);
+	return [address, [postalCode, city].filter(Boolean).join(' '), abroad].filter(Boolean).join(', ');
 }
 
 // The invoices of its period recorded, changed or deleted since the statement was created (#96; only a hint: 0 if

@@ -25,6 +25,7 @@
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { localToday } from '$lib/contract-status';
 	import MetadataCard from './MetadataCard.svelte';
+	import OldAddressWarning from './OldAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
 	import PdfAction from './PdfAction.svelte';
@@ -150,6 +151,8 @@
 			testid="statement-status"
 		/>
 	</p>
+
+	<OldAddressWarning {statement} testid="statement-old-address" />
 
 	{#if data.laterInvoices}
 		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->

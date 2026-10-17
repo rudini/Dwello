@@ -104,6 +104,14 @@ function noticed(contracts: Row[]) {
 		}));
 }
 
+// Drafts that would go to the apartment a moved-out tenant left, once per tenant (A-5, #114)
+const oldAddresses = (drafts: Row[]) => [
+	...new Map(
+		drafts
+			.filter((s) => s.oldAddress)
+			.map((s) => [String(s.tenantId), { tenantId: String(s.tenantId), tenantName: tenantOf(s) }])
+	).values()
+];
 // An agreed end passed, no later contract and no «Mieter ist ausgezogen»: the tenant may have stayed (A-6)
 const expired = (contracts: Row[], today: string) =>
 	contracts
@@ -132,22 +140,33 @@ export const load = async ({
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
 	const config = settings(fetch).catch(() => ({}) as Record<string, string>);
-	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts, stored] =
-		await Promise.all([
-			fetchRecord(
-				fetch,
-				`${BACKEND_URL}/api/v1/dashboard`,
-				m.nav_overview()
-			) as Promise<DashboardData>,
-			list(fetch, 'statements?status=overdue&limit=100', 'data'),
-			list(fetch, 'statements?status=sent&limit=100', 'data'),
-			list(fetch, 'documents?status=to_send', 'data'),
-			list(fetch, 'contracts?status=active&limit=100', 'contracts'),
-			lastPeriod(fetch, config).catch(() => null),
-			list(fetch, 'apartments?limit=1000', 'apartments'),
-			list(fetch, 'contracts?limit=1000', 'contracts'),
-			config
-		]);
+	const [
+		figures,
+		overdue,
+		sent,
+		letters,
+		contracts,
+		period,
+		apartments,
+		allContracts,
+		stored,
+		drafts
+	] = await Promise.all([
+		fetchRecord(
+			fetch,
+			`${BACKEND_URL}/api/v1/dashboard`,
+			m.nav_overview()
+		) as Promise<DashboardData>,
+		list(fetch, 'statements?status=overdue&limit=100', 'data'),
+		list(fetch, 'statements?status=sent&limit=100', 'data'),
+		list(fetch, 'documents?status=to_send', 'data'),
+		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
+		lastPeriod(fetch, config).catch(() => null),
+		list(fetch, 'apartments?limit=1000', 'apartments'),
+		list(fetch, 'contracts?limit=1000', 'contracts'),
+		config,
+		list(fetch, 'statements?status=draft&limit=100', 'data')
+	]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
 		...b,
@@ -177,6 +196,7 @@ export const load = async ({
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),
 		noticedContracts,
+		oldAddresses: oldAddresses(drafts),
 		expiredContracts: expired(allContracts, today),
 		// a contract with a task is named by it, not twice (A-4.4); one given notice with a next tenant keeps its
 		// deadline (review K-6)

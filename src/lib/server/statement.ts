@@ -85,6 +85,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		pdfGeneratedAt: data.pdfGeneratedAt,
 		lastReminderDate: data.reminderSentDate,
 		nextReminderFrom: data.nextReminderFrom,
+		oldAddress: !!data.oldAddress, // A-5: the moved-out tenant still has the building's address
 		notes: data.notes,
 		createdAt: data.createdAt,
 		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),

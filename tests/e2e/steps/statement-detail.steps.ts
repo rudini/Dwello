@@ -23,7 +23,8 @@ import {
 	sharesOfPosition,
 	statusOfStatement,
 	tenancyOfStatement,
-	totalLabelOfStatement
+	totalLabelOfStatement,
+	oldAddressWarningText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -50,7 +51,8 @@ import {
 	openStatementDetail,
 	openStatementTenant,
 	resetPayment,
-	sendStatement
+	sendStatement,
+	confirmSending
 } from '../tasks/statement-detail';
 import { inDays } from '../fixtures/dates';
 
@@ -132,6 +134,10 @@ Then(
 		await verwalter.sees(recipient).toContain(channel);
 	}
 );
+
+Then('nennt die Bestätigung die Korrespondenzadresse {string}', async ({ verwalter }, address: string) => {
+	await verwalter.sees(recipient).toContain(address);
+});
 
 Then('sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt', async ({ verwalter }) => {
 	await verwalter.sees(sendConfirmation).toContain('Dwello verschickt die Abrechnung nicht selbst');
@@ -362,5 +368,25 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(resetConfirmation).toContain('gilt dann wieder als nicht bezahlt');
 		await verwalter.sees(resetConfirmation).toContain(`Das Zahlungsdatum ${sendingDay()} wird gelöscht.`);
+	}
+);
+
+When('der Liegenschaftsverwalter den Versand trotzdem bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmSending);
+});
+
+// A-5 (#114): the warning starts with the tenant's full name
+Then(
+	'warnt die Bestätigung, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(sendConfirmation).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
+	}
+);
+
+// Persona W3c Anna P-2: on the page itself, before the dialog
+Then(
+	'warnt die Detailseite der Abrechnung, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(oldAddressWarningText).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );
