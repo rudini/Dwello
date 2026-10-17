@@ -11,6 +11,10 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] BFF: `billsIn` (`src/lib/contract-status.ts`) for the run and `missingStatements`; #211 reuses it
 - [x] UI: field and help in the edit form, «Abgerechnet bis» on the contract page, hint in the missing-statements warning; texts in four languages; term row in `i18n-begriffe.md` (❓, #325); a11y seed Dora with «Abgerechnet bis»
 - Files: `backend/migrations/0013_contract_billed_until.sql`, `backend/src/db/schema.ts`, `backend/src/routes/contracts.ts`, `backend/src/services/{contract,calculation,prorating,statement-pdf,pdf}.service.ts`, `src/lib/{contract-status,contract-form,types}.ts`, `src/lib/server/statement-generation.ts`, `src/lib/ui/DateInput.svelte`, `src/routes/contracts/{ContractForm.svelte,[id]/+page.server.ts,[id]/+page.svelte,[id]/ContractTerms.svelte,[id]/MissingStatement.svelte}`, `messages/*.json`, `tests/contracts/{contract,building-contracts}.json`, `tests/e2e/**`, `docs/{data-model,api-specification}.md`, `docs/design/i18n-begriffe.md`
-- [ ] Slice review, feature review (personas, fach-reviewer, daten-pruefer)
+- [x] Code review round 1 (`docs/reviews/w5d-review-1.md`): C-1 (scenario moved with today), C-2 (mistyped date cleared «Abgerechnet bis»), C-3 (refusal scenario), C-6, C-7 fixed; C-4 covered by the part-month test; C-5 → #325; C-8 left
+- [x] Persona Helga (`docs/design/personas/helga-w5d-abgerechnet-bis.md`): no Blocker/Major; P-1 to P-5 stay in the report
+- [x] Persona Dr. Weber (`docs/design/personas/weber-w5d-abgerechnet-bis.md`): P-1 (Major, preview names no days or «Abgerechnet bis») → #327, P-2 (Major, Akonto row without derivation) → #325, both need the product owner's decision; P-3, P-4 → #325; P-6 → #337
+- [x] fach-reviewer round 2 (`docs/reviews/w5d-fachreview-2.md`): V-10 (Major, a draft «Abgerechnet bis» covers promised a new statement) fixed; V-14 fixed; V-11 left in the report; V-12 → #337; V-13 → #327
+- [x] daten-pruefer (`docs/reviews/w5d-datenpruefung-1.md`): no discrepancy
 - [ ] Checks before push; workflow notes; archive the session
 - [ ] Push, pull request, CI and merge (CLAUDE.md, Workflow 9)

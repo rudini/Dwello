@@ -223,6 +223,17 @@ Then('zeigt der Mietvertrag «Abgerechnet bis» {string}', async ({ verwalter },
 	await verwalter.sees(billedUntilOfContract).toBe(date);
 });
 
+Given(
+	'der Mietvertrag von {string} ist bis Ende des letzten Jahres ausserhalb von Dwello abgerechnet',
+	async ({ seed }, tenant: string) => {
+		await seed.billedUntil(tenant, `${lastYear}-12-31`);
+	}
+);
+
+Then('zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres', async ({ verwalter }) => {
+	await verwalter.sees(billedUntilOfContract).toBe(`31.12.${lastYear}`);
+});
+
 Given('der Mietvertrag von {string} hat {string} Franken Akonto', async ({ seed }, tenant: string, advance: string) => {
 	await seed.advancePayment(tenant, advance);
 });

@@ -106,6 +106,40 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(puts()[0].body).toMatchObject({ billedUntil: '2025-12-31' });
 	});
 
+	// fach review V-10: «Abgerechnet bis» covers the draft's whole period: Dwello creates no statement for it again
+	it('löscht einen Entwurf, den «Abgerechnet bis» ganz abdeckt, und sagt, dass keiner neu entsteht', async () => {
+		calls = fakeBff(({ method, body }) => {
+			if (method === 'PUT')
+				return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, refused];
+			return [200, { contracts: [] }];
+		});
+		await open();
+		type('billed-until-input', '31.12.2025');
+		await save();
+		const covered = 'Für diese Abrechnungsperiode erstellt Dwello keine Abrechnung.';
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Der Entwurf NK-2025-0003 rechnet Tage ab, die Sie jetzt als ausserhalb von Dwello abgerechnet eintragen.'
+		);
+		const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
+		expect(document.getElementById(described)!.textContent).toContain(covered);
+		expect(document.body.textContent).not.toContain('neu erstellen');
+		click('delete-draft-and-save');
+		await settle();
+		expect(goto).toHaveBeenCalledWith('/contracts/c1');
+	});
+
+	// code review C-2: a mistyped date must not clear the stored «Abgerechnet bis»
+	it('speichert ein falsch getipptes «Abgerechnet bis» nicht als kein Datum', async () => {
+		show(EditPage, {
+			data: { ...data(), contract: { ...contract(), billedUntil: '2024-12-31' } }
+		} as never);
+		await settle();
+		type('billed-until-input', '31.06.2024');
+		await save();
+		expect(puts()).toEqual([]);
+		expect(document.body.textContent).toContain('Dieses Datum gibt es nicht.');
+	});
+
 	it('speichert ohne Nettomiete nicht und nennt den Fehler beim Feld', async () => {
 		await open();
 		type('contract-base-rent-input', '');

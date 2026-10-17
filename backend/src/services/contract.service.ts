@@ -312,7 +312,7 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 
 /**
  * The first day Dwello bills the contract: its Vertragsbeginn, or the day after «Abgerechnet bis» when that is later
- * (#133); the BFF has the same rule as `billedFrom` (src/lib/contract-status.ts)
+ * (#133); the BFF has the same rule in `billsIn` (src/lib/contract-status.ts)
  */
 export const billingStart = ({ startDate, billedUntil }: { startDate: string; billedUntil: string | null }) =>
 	billedUntil && billedUntil >= startDate ? daysAfter(billedUntil, 1) : startDate;

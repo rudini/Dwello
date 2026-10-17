@@ -52,6 +52,12 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
 
+  # #133: die Abrechnung 2025 rechnet ab dem 01.01.2025; «Abgerechnet bis» darin änderte ihre Mietstage
+  Szenario: «Abgerechnet bis» nach dem Beginn einer Abrechnung
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-06-30" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
+
   # Ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen (#143)
   Szenario: Mietverträge der Wohnung lassen sich nicht laden
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
@@ -93,6 +99,15 @@ Funktionalität: Mietvertrag bearbeiten
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
     Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
     Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
+
+  # #133 (Fachreview V-10): deckt «Abgerechnet bis» die ganze Periode des Entwurfs ab, entsteht keine neue Abrechnung
+  Szenario: Entwurf löschen, den «Abgerechnet bis» ganz abdeckt
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-12-31" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Für diese Abrechnungsperiode erstellt Dwello keine Abrechnung."
+    Wenn der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und zeigt der Mietvertrag «Abgerechnet bis» "31.12.2025"
 
   # B-15 (#152): ein Mieterwechsel oder ein Wechsel der Wohnung ist ein neuer Mietvertrag
   Szenario: Mieter und Wohnung stehen im Mietvertrag fest

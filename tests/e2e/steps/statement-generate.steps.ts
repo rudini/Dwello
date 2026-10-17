@@ -104,12 +104,8 @@ Then('enthält die Vorschau die Abrechnung von {string}', async ({ verwalter, na
 	await verwalter.sees(previewHasStatementOf(names.get(tenant) ?? tenant)).toBe(true);
 });
 
-Then('die Vorschau enthält genau {int} Abrechnungen', async ({ verwalter }, count: number) => {
+Then('die Vorschau enthält genau {int} Abrechnung(en)', async ({ verwalter }, count: number) => {
 	await verwalter.sees(statementsInPreview).toBe(count);
-});
-
-Then('die Vorschau enthält genau 1 Abrechnung', async ({ verwalter }) => {
-	await verwalter.sees(statementsInPreview).toBe(1);
 });
 
 Then('meldet die Vorschau, dass es in der Periode keine Mietverträge gibt', async ({ verwalter }) => {

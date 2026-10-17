@@ -89,6 +89,13 @@ describe('Abgerechnet bis', () => {
 		expect(statement.lineItems.find((line) => line.isHeatingCost)).toMatchObject({ periodShare: 0.52, tenantShare: 520 });
 	});
 
+	// fach review V-14: a part month counts by its days, 16 of 31 in May
+	it('zählt das Akonto eines angebrochenen Monats nach Tagen', async () => {
+		await billedUntil('2024-05-15');
+		const statement = (await (await preview()).json()) as { rentalStart: string; totalAdvancePayments: number };
+		expect(statement).toMatchObject({ rentalStart: '2024-05-16', totalAdvancePayments: 751.61 });
+	});
+
 	it('rechnet eine Abrechnungsperiode, die bis «Abgerechnet bis» endet, nicht ab', async () => {
 		await billedUntil('2024-12-31');
 		const response = await preview();
