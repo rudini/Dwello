@@ -1,3 +1,19 @@
+## Session 2026-10-17 W12: Fedlex check of the statement requirements (#77)
+
+- [x] Read Art. 67, 128, 257a, 257b, 269d, 270b OR (Fedlex, SR 220, as of 1.10.2026, de/fr/it) and Art. 4–8 VMWG (SR 221.213.11, as of 1.10.2025, de/fr/it) on fedlex.data.admin.ch
+- [x] Compare the PDF notes in `pdf.service.ts` (de/fr/it/en): all match Fedlex, no change
+- [x] Compare the help texts in `messages/*.json` that cite these articles: `contracts_fee_help` (Art. 269d OR) lacked the ten-day lead time, the reasons and «nächstmöglichen»; fixed in all four languages, `contract-wizard.dom.test.ts` red first
+- [x] `docs/nebenkostenabrechnung-anforderungen.md`: Fedlex link and version per requirement, «Sicherheit» checked on Fedlex, wrong statements corrected (Art. 269d nullity, Art. 6 VMWG scope, Art. 5 Abs. 2 lit. a–i wording)
+- [x] Glossary deviations listed in #77 (glossary not edited; the three the issue named were already gone, none left)
+- [x] `fach-reviewer` round 1: `docs/reviews/fedlex77-fachreview-1.md`
+- [x] `code-reviewer` round 1: `docs/reviews/fedlex77-review-1.md`
+- [x] Scenario «Hilfe zu einer neuen Verwaltungspauschale während der Mietdauer» (`contract-new.feature`), red against the old text, green; help paragraph of `RadioGroup` gets `data-testid="<testid>-help"`
+- [x] `code-reviewer` round 2 on the scenario: `docs/reviews/fedlex77-review-2.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-77.md`
+- [x] Pull request (opened after archiving this session)
+
+Files: `docs/nebenkostenabrechnung-anforderungen.md`, `messages/{de,fr,it,en}.json`, `src/__tests__/contract-wizard.dom.test.ts`, `src/lib/ui/RadioGroup.svelte`, `tests/e2e/{features/contract-new.feature,steps/contract-form.steps.ts,targets/contract-form.ts,questions/contract-form.ts}`, `docs/reviews/fedlex77-{fachreview-1,review-1,review-2}.md`, `docs/reviews/workflow-notes-issue-77.md`
+
 ## Session 2026-10-17 W2e: berichtigte Abrechnung (#120, #358)
 
 - [x] Implementation issue #358 created (A-11, «Done means» from #120)
