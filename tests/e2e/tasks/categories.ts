@@ -1,5 +1,6 @@
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, Enter, Navigate, Wait } from '../screenplay/interactions';
+import { Browser, Check, Click, Enter, Navigate, Wait } from '../screenplay/interactions';
+import { viewports } from '../fixtures/screens';
 import {
 	allowanceOption,
 	allowedFilter,
@@ -17,6 +18,8 @@ export const openCategoryEdit = (categoryId: string) => Navigate.to(`/config/cat
 // A predefined category has no seeded id: open it from the list
 export const openPredefinedCategory = (name: string): Activity => (actor) =>
 	actor.attemptsTo(openCategories, Click.on(editButton(name)), Wait.until(nameInput));
+
+export const usePhone = Browser.resizeTo(viewports.mobile);
 
 export const showAllowedCategories = Click.on(allowedFilter);
 
