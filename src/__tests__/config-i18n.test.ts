@@ -62,14 +62,14 @@ describe('Einstellungen und Stammdaten in der gewählten Sprache', () => {
 		french();
 		const result = await saveSettings(fetch, form({ companyPostalCode: '80' }));
 		expect(result).toMatchObject({
-			data: { errors: { companyPostalCode: 'Le NPA doit comporter 4 chiffres' } }
+			data: { errors: { companyPostalCode: 'Le NPA doit comporter 4 chiffres.' } }
 		});
 	});
 
 	it('meldet einen fehlenden Namen des Verteilschlüssels auf Französisch', async () => {
 		french();
 		const result = await createDistributionKey(fetch, form({ name: '', formula: '{area}' }));
-		expect(result).toMatchObject({ data: { errors: { name: 'Le nom est obligatoire' } } });
+		expect(result).toMatchObject({ data: { errors: { name: 'Le nom est obligatoire.' } } });
 	});
 
 	it('beschreibt die Beispielwohnungen des Formeltests auf Französisch', async () => {

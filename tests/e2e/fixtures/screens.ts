@@ -22,7 +22,7 @@ const address = (screen: { path: string; queries?: object }, state: string) =>
 	screen.path + ((screen.queries as Record<string, string> | undefined)?.[state] ?? query[state] ?? '');
 
 /** The example's address with its ids filled in, and the buildings the statement wizard checks */
-export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string };
+export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string; heatingProfile: string };
 
 /** A screen in a state, with the records it needs */
 export async function exampleOf(seed: TestData, name: string, state: string): Promise<Example> {
@@ -35,7 +35,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview'].includes(state)) return { path, building: '', tankBuilding: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -173,7 +173,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	return {
 		path: path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!),
 		building: ids.building!,
-		tankBuilding: seed.idOf('Bergsicht')!
+		tankBuilding: seed.idOf('Bergsicht')!,
+		heatingProfile: ids.heatingProfile!
 	};
 }
 

@@ -20,7 +20,7 @@ Funktionalität: Mietvertrag bearbeiten
 
   Szenario: Mietzins fehlt
     Wenn der Liegenschaftsverwalter den Mietzins leert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich."
 
   Szenario: Mietzins in Schweizer Schreibweise
     Wenn der Liegenschaftsverwalter den Mietzins auf "1'450" Franken ändert

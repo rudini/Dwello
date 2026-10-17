@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { localName } from '$lib/names';
-	import { draftsLink, invoiceRows, type WizardSelection } from '$lib/statement-wizard';
+	import { draftsLink, invoiceRows, zipLink, type WizardSelection } from '$lib/statement-wizard';
 	import type { Building, HeatingProfile } from '$lib/types';
 	import BuildingStep from './BuildingStep.svelte';
 	import GenerationStep from './GenerationStep.svelte';
@@ -22,7 +22,7 @@
 		previewRows,
 		invoices,
 		periodLabel,
-		createdCount
+		created
 	}: {
 		step: number;
 		data: {
@@ -36,7 +36,7 @@
 		previewRows: PreviewRow[];
 		invoices: Parameters<typeof invoiceRows>[0];
 		periodLabel: string;
-		createdCount: number | null;
+		created: string[] | null;
 	} = $props();
 
 	const heatingProfile = $derived(
@@ -89,8 +89,9 @@
 {:else}
 	<GenerationStep
 		count={previewRows.length}
-		{createdCount}
+		createdCount={created?.length ?? null}
 		draftsHref={draftsLink(selection)}
+		zipHref={zipLink(created ?? [], selection)}
 		withoutInvoices={invoiceRows(invoices, data.buildings, selection)
 			.filter((row) => row.missing)
 			.map((row) => row.name)}

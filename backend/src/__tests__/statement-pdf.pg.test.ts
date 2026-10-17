@@ -701,6 +701,28 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 		expect(text).toContain('CH93 0076 2011 6238 5295 7');
 	});
 
+	// #351: switched to French on the day its German PDF was made, the draft's next PDF is French
+	it('folgt der geänderten Sprache des Mieters, auch am selben Tag', async () => {
+		await generateStatementPdf(statementId);
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { language: 'fr' });
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { language: 'de' });
+		expect(text).toContain('Décompte des charges');
+	});
+
+	// #351: the PDF as sent follows the same rule
+	it('versendet das PDF in der Sprache des Mieters beim Versand', async () => {
+		await generateStatementPdf(statementId);
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { language: 'fr' });
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId));
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { language: 'de' });
+		expect(text).toContain('Décompte des charges');
+	});
+
 	// Review C-9: sent on the day its PDF was made, the PDF as sent still has the address of today
 	it('versendet das PDF mit der Adresse beim Versand', async () => {
 		await generateStatementPdf(statementId, 'de');

@@ -180,7 +180,7 @@ describe('Rechnungen pro Kategorie', () => {
 	it('nennt den Teil des Jahres, für den die Rechnung fehlt', () => {
 		const part = (start: string, end: string) => ({ start, end });
 		expect(findingText(finding('gap', { missingParts: [part('2025-07-01', '2025-12-31')] }))).toBe(
-			'Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.'
+			'Die Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.'
 		);
 		expect(
 			findingText(
@@ -189,11 +189,23 @@ describe('Rechnungen pro Kategorie', () => {
 					previous: { count: 4, total: 3600 }
 				})
 			)
-		).toBe('Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
-		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('für den März fehlt');
+		).toBe('Die Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
+		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('Die Rechnung für März fehlt.');
 		expect(findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))).toContain(
 			'für die Zeit vom 14.01.2026 bis 15.07.2026 fehlt'
 		);
+		// a list says each month once, without «den» before each (#348)
+		expect(
+			findingText(
+				finding('gap', {
+					missingParts: [
+						part('2025-01-01', '2025-01-31'),
+						part('2025-02-01', '2025-02-28'),
+						part('2025-03-01', '2025-03-31')
+					]
+				})
+			)
+		).toContain('Die Rechnungen für Januar, Februar und März fehlen.');
 	});
 
 	it('nennt Kosten, die deutlich vom Vorjahr abweichen, mit dem nächsten Schritt', () => {
@@ -230,7 +242,7 @@ describe('Rechnungen pro Kategorie', () => {
 		expect(
 			findingText(finding('stock', { missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] }))
 		).toBe(
-			'Tankbestand am 31.12.2025 fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.'
+			'Der Tankbestand am 31.12.2025 fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.'
 		);
 		expect(
 			findingText(
@@ -241,7 +253,7 @@ describe('Rechnungen pro Kategorie', () => {
 					]
 				})
 			)
-		).toContain('Tankbestand am 31.12.2024 und am 31.12.2025 fehlen.');
+		).toContain('Die Tankbestände am 31.12.2024 und am 31.12.2025 fehlen.');
 	});
 
 	// Erste Abrechnung: ob das Gebäude einen Tank hat, weiss Dwello nicht

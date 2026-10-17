@@ -46,7 +46,7 @@
 		form: {
 			preview?: PreviewRow[];
 			invoices?: Parameters<typeof invoiceRows>[0];
-			created?: number;
+			created?: string[];
 			error?: string;
 		} | null;
 	} = $props();
@@ -255,7 +255,7 @@
 			{previewRows}
 			{invoices}
 			{periodLabel}
-			createdCount={form?.created ?? null}
+			created={form?.created ?? null}
 		/>
 	</section>
 

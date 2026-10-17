@@ -160,7 +160,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Kaminfeger": "Keine Rechnung in dieser Kategorie erfasst"
-    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Rechnung für das 2. Halbjahr fehlt"
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Die Rechnung für das 2. Halbjahr fehlt"
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
@@ -202,7 +202,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Angenommen im Gebäude "Lindenhof" war am "2022-12-31" Heizöl für "800" Franken im Tank
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Dann meldet die Prüfung der Kategorien für "Heizung": "Tankbestand am 31.12.2023 und am 31.12.2024 fehlen."
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Die Tankbestände am 31.12.2023 und am 31.12.2024 fehlen."
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
@@ -220,7 +220,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Dann meldet die Prüfung der Kategorien für "Heizung": "Tankbestand am 31.12.2024 fehlt."
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Der Tankbestand am 31.12.2024 fehlt."
 
   # Der Endbestand 0 des Stilllegungsjahres ist der Anfangsbestand des nächsten Jahres (fach-review V-11)
   Szenario: Nach dem Jahr der Stilllegung braucht es keinen Tankbestand mehr
@@ -326,6 +326,24 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen der Abrechnungsperiode "01.01.2024 – 31.12.2024" zeigt
     Und sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Marc Huber"
     Aber nicht die Abrechnung 2023 von "Lea Graf"
+
+  # #356: ein Lauf als eine Datei, z.B. um alle Abrechnungen auf einmal zu drucken; frühere Abrechnungen gehören nicht dazu
+  Szenario: Alle Abrechnungen eines Laufs als ZIP herunterladen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Wenn der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP herunterlädt
+    Dann enthält die ZIP-Datei nur das PDF der Abrechnung 2024 von "Marc Huber", benannt nach ihrer Abrechnungsnummer
+
+  # Eine Abrechnung des Laufs ist inzwischen gelöscht (z.B. in einem zweiten Tab): ein Satz statt einer kaputten Datei
+  Szenario: ZIP eines Laufs mit einer inzwischen gelöschten Abrechnung anfordern
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Und die Abrechnung 2024 von "Marc Huber" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP anfordert
+    Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
+    Wenn der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 
   Szenario: Zurück zur Abrechnungsliste
     Wenn der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt

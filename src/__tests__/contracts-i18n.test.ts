@@ -44,9 +44,9 @@ describe('Mietverträge in der gewählten Sprache', () => {
 	it('meldet fehlende Angaben auf Italienisch', () => {
 		overwriteGetLocale(() => 'it');
 		const errors = validateContract({ ...empty, baseRent: '1,450' });
-		expect(errors.tenantId).toBe('Scelga un inquilino');
+		expect(errors.tenantId).toBe('Scelga un inquilino.');
 		expect(errors.endDate).toBe(
-			'La fine del contratto è obbligatoria per un contratto a tempo determinato'
+			'La fine del contratto è obbligatoria per un contratto di locazione a tempo determinato.'
 		);
 		expect(errors.baseRent).toBe("Inserisca un importo valido, per esempio 1450.00 o 1'450.");
 		expect(impossibleYear()).toBe('Verifichi la data: l’anno non è possibile.');

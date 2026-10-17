@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
+import { Check, Click, DownloadFrom, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import {
 	backLink,
@@ -21,7 +21,8 @@ import {
 	periodEndInput,
 	periodStartInput,
 	previewCount,
-	showStatementsButton
+	showStatementsButton,
+	downloadZipButton
 } from '../targets/statement-generate';
 import { finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { generateStatementsViaApi, openPreviewViaApi, type RunOptions } from './statement-generate-api';
@@ -105,6 +106,9 @@ export const reopenStatementWizard: Activity = (actor) =>
 
 export const generateMore = Click.on(generateMoreButton);
 export const showCreatedStatements = Click.on(showStatementsButton);
+export const downloadCreatedStatementsZip = DownloadFrom(downloadZipButton);
+/** Follows the ZIP link in the tab, as a browser does when the answer is no file */
+export const requestCreatedStatementsZip = Click.on(downloadZipButton);
 export const returnToStatementList = Click.on(backLink);
 export const confirmDespiteWarnings = Check.the(confirmMissingInvoices);
 

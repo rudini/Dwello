@@ -1074,3 +1074,49 @@ Branch `claude/w3d-monatlich-total-tankbestand-62-75`. Both issues have "Done me
 - [x] Blocked on me: none for the glossary; «Monatlich total» without «Bruttomiete» and the entries «Zeitanteil», «Heizmaterial», «Empfangsschein» are already in `UBIQUITOUS_LANGUAGE.md`
 
 Files: `src/lib/server/{contract-history,apartment}.ts`, `src/lib/types.ts`, `src/routes/apartments/[id]/{ContractHistory,MonthlyCostsCard}.svelte`, `src/routes/tenants/[id]/{+page.server.ts,TenantContracts.svelte,TenantRentalCard.svelte}`, `messages/*.json`, tests in `src/__tests__/{apartment,apartments-pages.dom,tenant-detail,tenant-detail-page.dom,buildings-pages.dom}.test.ts`, E2E `building-detail` and `apartment-detail` features, steps, questions, targets.
+
+## Session 2026-10-17: #111 (P-16) planned PRD features, ZIP of a run (#356)
+
+- [x] Search open issues; create #356 (ZIP of a run) and #357 (audit log)
+- [x] PRD: ZIP and audit point to #356 / #357; automatic reminders and Swiss eID «Vision, nicht geplant»; database SSL and field encryption vision with O-3 / O-6
+- [x] @wip scenarios «Alle Abrechnungen eines Laufs als ZIP herunterladen» and «ZIP eines Laufs mit einer inzwischen gelöschten Abrechnung anfordern», seen red at the missing button
+- [x] `generateStatements` returns the created statements; BFF route zips their PDFs (fflate, already in the lockfile)
+- [x] Result step: button «Alle als ZIP herunterladen» (full page load: the client router took `/statements/zip` for `/statements/[id]`), texts in four languages
+- Files: `src/routes/statements/zip/+server.ts`, `src/lib/server/statement-generation.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{StatementWizard,StatementStep,GenerationStep}.svelte`, `messages/*.json`, `package.json`/`bun.lock` (fflate as devDependency, already in the lockfile), tests in `src/__tests__/` and `tests/e2e/`, `docs/PRD-Dwello.md`
+- [x] Code review round 1: `docs/reviews/zip-review-1.md`
+- [x] Personas Helga and Marco: `docs/design/personas/helga-zip.md`, `docs/design/personas/marco-zip.md`
+- [x] Review fixes: axe and language states `statement-generate` `generation-result` and `statement-zip-refused`; ids encoded; generate answer from its contract
+- [x] Code review round 2: `docs/reviews/zip-review-2.md`; C-11 fixed (year per look counted per worker)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-356.md`
+- [x] Code review round 3: `docs/reviews/zip-review-3.md` (Nits C-13, C-14 fixed)
+- [x] Session archived, PR (Fixes #356, Fixes #111; #357 stays open: large, its correction entry depends on #120's implementation)
+
+## Session W9d: statement PDF language and «Gebäude» (#351, #249)
+
+- [x] #351: main already makes a draft's PDF afresh on every request and the PDF as sent when sending (PR #361); scenario «PDF eines Entwurfs folgt der geänderten Sprache des Mieters» and two tests in `statement-pdf.pg.test.ts` (draft, sent): green on main, the draft cases red with the old `getStatementPdf` (stored PDF reused on the same day)
+- [x] #249: scenario «Das PDF erklärt die Verteilung und den Heizölverbrauch» reads «Kosten des Gebäudes» and no «Liegenschaft», `@wip`
+- [x] fach-reviewer on the `@wip` scenarios before implementing: `docs/reviews/w9d-fachreview-1.md`
+- [x] #249: German PDF texts say «Gebäude» / «Kosten des Gebäudes», the Wohnungsanteil note «der Anteil Ihrer Wohnung an den Kosten des Gebäudes» (fr/it/en already say the app's words, pinned by render tests, seen red by changing those words for a moment); render tests; `docs/nebenkostenabrechnung-anforderungen.md`, `docs/design/i18n-begriffe.md`
+- [x] slice review (code-reviewer): `docs/reviews/w9d-review-1.md`
+- [x] feature review: fach-reviewer, daten-pruefer (PDF), persona
+  - [x] persona Dr. Weber `docs/design/personas/dr-weber-w9d.md` (P-1 fixed: fr/it Wohnungsanteil note in the wording of fach-reviewer V-1; P-2 to P-4 predate the change and stay)
+  - [x] fach-reviewer: no new round, the only wording changed after round 1 is its own proposal (V-1)
+  - [x] daten-pruefer `docs/reviews/w9d-datenpruefung-1.md` (no findings)
+- [x] closing review (code-reviewer) of the merge and the fr/it fix: `docs/reviews/w9d-review-2.md` (C-3 fr/it wording and C-4 its render test fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-351-249.md`
+- [x] Blocked on me: `UBIQUITOUS_LANGUAGE.md` lists «Liegenschaft» as a synonym of Gebäude and lacks «Kosten des Gebäudes» (product owner's edit): #374
+
+Files changed: `tests/e2e/features/statement-detail.feature`, `backend/src/__tests__/statement-pdf.pg.test.ts`, `backend/src/__tests__/statement-pdf-render.test.ts`, `backend/src/services/pdf.service.ts`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/design/i18n-begriffe.md`, `docs/reviews/w9d-fachreview-1.md`, `docs/reviews/w9d-review-1.md`, `docs/design/personas/dr-weber-w9d.md`, `docs/reviews/w9d-datenpruefung-1.md`, `docs/reviews/w9d-review-2.md`, `docs/reviews/workflow-notes-issue-351-249.md`
+
+## Session W3e: German wording findings of the native read (#348)
+
+Branch `claude/w3e-de-wording-348`. All findings of the issue checked against `main` (74f223f): all still open. No scenario: wording of existing texts only; rules pinned in `src/__tests__/i18n.test.ts`, pinned texts in unit tests and E2E features updated (red first).
+
+- [x] Rule tests (red first) in `src/__tests__/i18n.test.ts`: no straight quotes in de/en, every `*_error_*` ends with a period; pinned texts in unit tests and E2E updated
+- [x] fach-reviewer on the proposed wording before any text turns green: `docs/reviews/w3e-fachreview-1.md` (V-1 «2,5» stays: rejected the finding; V-2, V-3, V-4, V-6 taken; V-5, V-7 stay)
+- [x] Texts in `messages/{de,fr,it,en}.json`; gap list with `Intl.ListFormat` («Januar, Februar und März»), keys `statements_part_month`, `statements_list_and` removed; backend German texts of the coded refusals follow de.json («») in `backend/src/services/{category,heating-profile,distribution-key,formula}.service.ts`
+- [x] code-reviewer slice: `docs/reviews/w3e-review-1.md` (no Blocker/Major; C-2, C-5, C-6 fixed; C-1 reviewed wording, C-3, C-4 stay); closing round `docs/reviews/w3e-review-2.md` (C-7 Nit stays)
+- [x] Workflow note: nothing came up; E2E of the affected features and `sprachen-bildschirme` (187 + 242 passed); archive the session
+- [ ] PR `Fixes #348`, CI, merge
+
+Files: `messages/*.json`, `src/lib/statement-wizard.ts`, `backend/src/services/{category,heating-profile,distribution-key,formula}.service.ts`, tests in `src/__tests__/`, `src/lib/utils/__tests__/contract-availability.test.ts`, `backend/src/__tests__/`, E2E features, steps and questions that pin the texts.

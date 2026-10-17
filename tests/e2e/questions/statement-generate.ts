@@ -122,7 +122,7 @@ export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbo
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
 export const periodRunning = Text.of(periodRunningWarning);
 export const tankQuestions = Count.of(tankQuestion);
-export const missingStockFindings = Count.of(categoryFinding('Tankbestand am'));
+export const missingStockFindings = Count.of(categoryFinding('Ohne Anfangs- und Endbestand'));
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));

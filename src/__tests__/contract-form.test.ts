@@ -100,19 +100,19 @@ describe('validateContract', () => {
 		expect(
 			validateContract({ ...filled, tenantId: '', apartmentId: '', startDate: '', baseRent: '' })
 		).toEqual({
-			tenantId: 'Bitte wählen Sie einen Mieter aus',
-			apartmentId: 'Bitte wählen Sie eine Wohnung aus',
-			startDate: 'Vertragsbeginn ist erforderlich',
-			baseRent: 'Nettomiete ist erforderlich'
+			tenantId: 'Bitte wählen Sie einen Mieter aus.',
+			apartmentId: 'Bitte wählen Sie eine Wohnung aus.',
+			startDate: 'Vertragsbeginn ist erforderlich.',
+			baseRent: 'Nettomiete ist erforderlich.'
 		});
 	});
 
 	it('requires an end after the start for a limited contract', () => {
 		expect(validateContract({ ...filled, isUnlimited: false }).endDate).toBe(
-			'Vertragsende ist erforderlich bei befristetem Vertrag'
+			'Bei einem befristeten Mietvertrag ist das Vertragsende erforderlich.'
 		);
 		expect(validateContract({ ...filled, isUnlimited: false, endDate: '2024-12-31' }).endDate).toBe(
-			'Vertragsende muss nach Vertragsbeginn liegen'
+			'Vertragsende muss nach Vertragsbeginn liegen.'
 		);
 	});
 
@@ -120,7 +120,7 @@ describe('validateContract', () => {
 		expect(
 			validateContract({ ...filled, baseRent: '0', additionalRent: '-1', advancePayment: 'x' })
 		).toEqual({
-			baseRent: 'Bitte geben Sie eine gültige Miete ein',
+			baseRent: 'Bitte geben Sie eine gültige Miete ein.',
 			additionalRent: AMOUNT_HINT,
 			advancePayment: AMOUNT_HINT
 		});

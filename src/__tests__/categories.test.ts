@@ -112,7 +112,7 @@ describe('Neue Kategorie', () => {
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { name: 'Name ist erforderlich' } }
+			data: { errors: { name: 'Name ist erforderlich.' } }
 		});
 		expect(calls).toEqual([]);
 	});
@@ -221,7 +221,7 @@ describe('Vorschlag der KI', () => {
 	it('verlangt zuerst einen Namen', async () => {
 		const { calls, result } = runAction(newActions.propose, '', 200, { ...form, name: ' ' });
 
-		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich' } } });
+		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich.' } } });
 		expect(calls).toEqual([]);
 	});
 });

@@ -5,6 +5,8 @@ import { POST as generatePdf } from '../routes/api/statements/[id]/generate-pdf/
 import { GET as getPdf } from '../routes/statements/[id]/pdf/+server';
 import { GET as getListPdf } from '../routes/api/statements/[id]/pdf/+server';
 import { GET as getBilled } from '../routes/api/statements/billed/+server';
+import { GET as getZip } from '../routes/statements/zip/+server';
+import { unzipSync } from 'fflate';
 import buildingContracts from '../../tests/contracts/building-contracts.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 import { localToday } from '$lib/contract-status';
@@ -182,6 +184,65 @@ describe('GET /statements/[id]/pdf', () => {
 			'inline; filename="NK-1A2B3C4D-2025-0001.pdf"'
 		);
 		expect(calls).toEqual([`GET ${API}/pdf`]);
+	});
+});
+
+// All PDFs of an Abrechnungslauf as one download, e.g. to print them in one go (#356)
+describe('GET /statements/zip', () => {
+	const pdfOf = (id: string) =>
+		new Response(new TextEncoder().encode(`%PDF-${id}`), {
+			headers: {
+				'Content-Disposition': `attachment; filename="NK-1A2B3C4D-2024-000${id.slice(1)}.pdf"`
+			}
+		});
+	const get = (fetch: unknown, ids = 's1,s2') =>
+		getZip({
+			fetch,
+			url: new URL(
+				`http://localhost/statements/zip?ids=${ids}&periodStart=2024-01-01&periodEnd=2024-12-31`
+			)
+		} as never);
+
+	it('packt die PDFs der Abrechnungen unter ihrer Nummer in eine ZIP-Datei der Periode', async () => {
+		const calls: string[] = [];
+		const response = await get(async (url: string) => {
+			calls.push(url);
+			return pdfOf(url.split('/').at(-2)!);
+		});
+		expect(response.headers.get('Content-Type')).toBe('application/zip');
+		expect(response.headers.get('Content-Disposition')).toBe(
+			'attachment; filename="NK-2024-01-01-2024-12-31.zip"'
+		);
+		const files = unzipSync(new Uint8Array(await response.arrayBuffer()));
+		expect(
+			Object.entries(files).map(([name, pdf]) => [name, new TextDecoder().decode(pdf)])
+		).toEqual([
+			['NK-1A2B3C4D-2024-0001.pdf', '%PDF-s1'],
+			['NK-1A2B3C4D-2024-0002.pdf', '%PDF-s2']
+		]);
+		expect(calls).toEqual([
+			'http://localhost:3001/api/v1/statements/s1/pdf',
+			'http://localhost:3001/api/v1/statements/s2/pdf'
+		]);
+	});
+
+	// a statement of the run deleted in the meantime: the refusal page of a single PDF, not a broken ZIP
+	it('sagt in Worten, wenn es eine Abrechnung des Laufs nicht mehr gibt', async () => {
+		const response = await get(async (url: string) =>
+			url.includes('/s2/') ? Response.json(refusedPdf, { status: 404 }) : pdfOf('s1')
+		);
+		expect(response.status).toBe(404);
+		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
+	});
+
+	// an id from the address stays one path segment: it cannot reach another backend route
+	it('fragt nur PDFs von Abrechnungen ab', async () => {
+		const calls: string[] = [];
+		await get(async (url: string) => {
+			calls.push(url);
+			return pdfOf('s1');
+		}, '..%2Fconfig%3F');
+		expect(calls).toEqual(['http://localhost:3001/api/v1/statements/..%2Fconfig%3F/pdf']);
 	});
 });
 

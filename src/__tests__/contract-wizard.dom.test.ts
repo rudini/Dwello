@@ -93,7 +93,7 @@ describe('Mietvertrag erfassen', () => {
 		expect(document.querySelector('h2')!.textContent).toMatch(/Schritt 1 von 5:\s*Mieter/);
 		next();
 		await settle();
-		expect(byTestId('form-error')!.textContent).toContain('Bitte wählen Sie einen Mieter aus');
+		expect(byTestId('form-error')!.textContent).toContain('Bitte wählen Sie einen Mieter aus.');
 		expect(heading()).toBe('Mieter');
 		// the field with the error gets the focus, so its error is read out
 		expect(document.activeElement).toBe(byTestId('contract-tenant-select'));
@@ -439,7 +439,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('');
-		expect(byTestId('form-error')!.textContent).toContain('Vertragsbeginn ist erforderlich');
+		expect(byTestId('form-error')!.textContent).toContain('Vertragsbeginn ist erforderlich.');
 	});
 
 	it('geht bei einer Überschneidung nicht weiter', async () => {
