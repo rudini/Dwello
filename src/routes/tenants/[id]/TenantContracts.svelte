@@ -29,7 +29,7 @@
 					<span><Badge {...statusBadges[contract.status]} /></span>
 					<span class="tabular-nums text-ink sm:flex-1">{historyPeriod(contract)}</span>
 					<span class="tabular-nums text-ink"
-						>{formatCurrency(contract.rentBrutto)}
+						>{formatCurrency(contract.monthlyTotal)}
 						<span class="text-ink-muted">{m.common_monthly_total_suffix()}</span></span
 					>
 				</li>

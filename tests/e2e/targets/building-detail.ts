@@ -19,3 +19,6 @@ export const fuelStockDate = target('Stichtag Tankbestand', (page) => page.getBy
 export const fuelStockAmount = target('Wert Tankbestand', (page) => page.getByTestId('fuel-stock-amount-input'));
 export const saveFuelStockButton = target('Tankbestand speichern', (page) => page.getByTestId('fuel-stock-save-button'));
 export const fuelStockRows = target('Tankbestände', (page) => page.getByTestId(/^fuel-stock-[0-9a-f-]{36}$/));
+export const fuelStocksHeading = target('Titel Tankbestand', (page) =>
+	page.getByTestId('fuel-stocks').getByRole('heading', { level: 2 })
+);

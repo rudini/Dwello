@@ -122,9 +122,9 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 
 export async function generateStatements(fetch: Fetch, request: GenerationRequest) {
 	const { periodStart, periodEnd, heatingProfileId, managementFeePercent } = request;
-	const contracts = await contractsInPeriod(fetch, request);
-	for (const { buildingId, contract } of contracts) {
-		await call(fetch, 'statements/generate', {
+	const ids: string[] = [];
+	for (const { buildingId, contract } of await contractsInPeriod(fetch, request)) {
+		const statement = await call(fetch, 'statements/generate', {
 			contractId: contract.id,
 			buildingId,
 			periodStart,
@@ -132,8 +132,9 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 			heatingProfileId,
 			managementFeePercent
 		});
+		ids.push(statement.id);
 	}
-	return contracts.length;
+	return ids;
 }
 
 type Period = { periodStart: string; periodEnd: string };

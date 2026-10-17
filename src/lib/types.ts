@@ -97,7 +97,7 @@ export interface RentalContract {
 export interface ContractHistory {
 	id: string;
 	tenantName: string;
-	rentBrutto: number; // in CHF
+	monthlyTotal: number; // in CHF
 	status: 'active' | 'ended' | 'future';
 	apartment?: string;
 	startDate: string;
@@ -110,7 +110,7 @@ export interface MonthlyCosts {
 	baseRent: number;
 	advancePayment?: number;
 	additionalRent?: number;
-	totalBrutto: number;
+	monthlyTotal: number;
 }
 
 // Apartment with building info for list view
@@ -378,7 +378,7 @@ export interface StatementDocument {
 	id: string;
 	tenantId: string;
 	statementId: string | null;
-	type: 'reminder' | 'upload'; // an upload has no channel and no Versandstatus
+	type: 'reminder' | 'statement' | 'upload'; // an upload has no channel and no Versandstatus
 	reminderLevel: number | null;
 	title: string;
 	fileName: string;

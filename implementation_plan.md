@@ -1,22 +1,3 @@
 # Dwello implementation plan
 
 Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when the task starts, tick them as they are done, note the files changed. Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session W2e: berichtigte Abrechnung (#120, #358)
-
-- [x] Implementation issue #358 created (A-11, «Done means» from #120)
-- [x] @wip scenarios: statement-detail.feature (berichtigen, Bestätigung, Anrechnung, ersetzte bleibt unverändert, ohne Mietstage, Navigation), contract-edit.feature and contract-detail.feature (Vertragsdaten nach dem Berichtigen)
-- [x] fach-reviewer on the scenarios and planned texts before implementing (`docs/reviews/w2e-fachreview-1.md`; new issues #360 partial payments, #362 glossary)
-- [x] Slice 1 backend: migration 0018 (`replaces_id`, `prior_payments`, status `replaced`), `replaceStatement`, `correctStatement`, offset in `calculateStatement`/`generateStatement`, contract dates ignore replaced statements; BFF run and missing statements ignore them (files: `backend/migrations/0018_statement_correction.sql`, `backend/src/db/schema.ts`, `backend/src/services/statement.service.ts`, `contract.service.ts`, `backend/src/routes/statements.ts`, `src/lib/server/statement-generation.ts`, `src/routes/contracts/[id]/+page.server.ts`, `tests/contracts/statement.json`)
-- [x] Code review slice 1 (`docs/reviews/w2e1-review-1.md`): dashboard counts replaced statements (C-2), codes without messages (C-1), literal codes, `STATEMENT_REPLACED` from `PUT /:id`, tests for the period rule and the chain order, API docs
-- [x] Slice 2 UI: «Abrechnung berichtigen» with confirmation per status, status «Ersetzt», «Ersetzt durch» / «Ersetzt die Abrechnung», row «Bereits bezahlt auf …», «Berichtigte Abrechnung erstellen», texts that sent the landlord outside Dwello, four languages; a11y and language rows for the new states (files: `src/routes/statements/[id]/*`, `src/lib/statement.ts`, `src/lib/types.ts`, `src/lib/server/statement*.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/statements/StatusFilter.svelte`, `messages/*.json`, `tests/a11y/screens.json`, `tests/e2e/fixtures/screens.ts`)
-- [x] Slice 3 PDF: «Diese Abrechnung ersetzt …», the row «Bereits bezahlt auf …» and the derivation line (`backend/src/services/pdf.service.ts`, `statement-pdf.service.ts`)
-- [x] Docs: A-11 implemented, data-model.md, api-specification.md; markers #120 removed
-- [x] Code review slices 2, 3 and the merge (`docs/reviews/w2e2-review-1.md`): scenario for the statement run (C-1), success and focus after replacing, amount offset in the dialog, busy button, empty card, replaced summary, overdue test, #362 marker in the PDF
-- [x] Feature review: fach-reviewer round 2 (`docs/reviews/w2e-fachreview-2.md`), personas Anna, Helga, Dr. Weber, Marco, Sven (`docs/design/personas/*-w2e.md`), daten-pruefer (`docs/reviews/w2e-datenpruefung-1.md`); pre-existing Majors of Anna as #378, #379, #380
-- [x] Fixes of the feature review: dialog wording per status (sent refund, settled, offset of the chain), confirm button «Abrechnung berichtigen», replaced statement says it no longer applies, no hint on later invoices, link to the contract, PDF «Die Abrechnung NK-… gilt nicht mehr.», English terms, francs format in refusals, «Bezahlt diesen Monat» keeps a payment of a replaced statement, `i18n-begriffe.md` rows
-- [x] Full E2E after the fixes: 948 passed, 8 failed; `statement-generate invoice-hints` (a11y, i18n) came from the a11y seed (Carla's replaced 2025 statement counted as billed for January–May 2025, moved to 2022); the 5 others (contract-new, settings) passed on a rerun
-- [x] Closing code review (`docs/reviews/w2e3-review-1.md`): steps for the visible fixes in «Versendete Abrechnung berichtigen» and «Ersetzte Abrechnung bleibt unverändert», navigation scenario to the Mietvertrag, DOM test for the success message, chain wording, no Zahlungsfrist on a replaced statement, `busy` button, 48 px links; dashboard «Bezahlt diesen Monat»: No scenario: the figure sums every statement of the database, which parallel scenarios change; `dashboard.pg.test.ts` compares before and after
-- [x] Workflow note: `docs/reviews/workflow-notes-issue-358.md`
-- [ ] Re-review of the closing fixes
-- [x] Audit log (#111) pointer left for the correction (`replaceStatement`)

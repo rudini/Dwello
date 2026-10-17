@@ -1,3 +1,24 @@
+## Session 2026-10-17 W2e: berichtigte Abrechnung (#120, #358)
+
+- [x] Implementation issue #358 created (A-11, «Done means» from #120)
+- [x] @wip scenarios: statement-detail.feature (berichtigen, Bestätigung, Anrechnung, ersetzte bleibt unverändert, ohne Mietstage, Navigation), contract-edit.feature and contract-detail.feature (Vertragsdaten nach dem Berichtigen)
+- [x] fach-reviewer on the scenarios and planned texts before implementing (`docs/reviews/w2e-fachreview-1.md`; new issues #360 partial payments, #362 glossary)
+- [x] Slice 1 backend: migration 0018 (`replaces_id`, `prior_payments`, status `replaced`), `replaceStatement`, `correctStatement`, offset in `calculateStatement`/`generateStatement`, contract dates ignore replaced statements; BFF run and missing statements ignore them (files: `backend/migrations/0018_statement_correction.sql`, `backend/src/db/schema.ts`, `backend/src/services/statement.service.ts`, `contract.service.ts`, `backend/src/routes/statements.ts`, `src/lib/server/statement-generation.ts`, `src/routes/contracts/[id]/+page.server.ts`, `tests/contracts/statement.json`)
+- [x] Code review slice 1 (`docs/reviews/w2e1-review-1.md`): dashboard counts replaced statements (C-2), codes without messages (C-1), literal codes, `STATEMENT_REPLACED` from `PUT /:id`, tests for the period rule and the chain order, API docs
+- [x] Slice 2 UI: «Abrechnung berichtigen» with confirmation per status, status «Ersetzt», «Ersetzt durch» / «Ersetzt die Abrechnung», row «Bereits bezahlt auf …», «Berichtigte Abrechnung erstellen», texts that sent the landlord outside Dwello, four languages; a11y and language rows for the new states (files: `src/routes/statements/[id]/*`, `src/lib/statement.ts`, `src/lib/types.ts`, `src/lib/server/statement*.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/statements/StatusFilter.svelte`, `messages/*.json`, `tests/a11y/screens.json`, `tests/e2e/fixtures/screens.ts`)
+- [x] Slice 3 PDF: «Diese Abrechnung ersetzt …», the row «Bereits bezahlt auf …» and the derivation line (`backend/src/services/pdf.service.ts`, `statement-pdf.service.ts`)
+- [x] Docs: A-11 implemented, data-model.md, api-specification.md; markers #120 removed
+- [x] Code review slices 2, 3 and the merge (`docs/reviews/w2e2-review-1.md`): scenario for the statement run (C-1), success and focus after replacing, amount offset in the dialog, busy button, empty card, replaced summary, overdue test, #362 marker in the PDF
+- [x] Feature review: fach-reviewer round 2 (`docs/reviews/w2e-fachreview-2.md`), personas Anna, Helga, Dr. Weber, Marco, Sven (`docs/design/personas/*-w2e.md`), daten-pruefer (`docs/reviews/w2e-datenpruefung-1.md`); pre-existing Majors of Anna as #378, #379, #380
+- [x] Fixes of the feature review: dialog wording per status (sent refund, settled, offset of the chain), confirm button «Abrechnung berichtigen», replaced statement says it no longer applies, no hint on later invoices, link to the contract, PDF «Die Abrechnung NK-… gilt nicht mehr.», English terms, francs format in refusals, «Bezahlt diesen Monat» keeps a payment of a replaced statement, `i18n-begriffe.md` rows
+- [x] Full E2E after the fixes: 948 passed, 8 failed; `statement-generate invoice-hints` (a11y, i18n) came from the a11y seed (Carla's replaced 2025 statement counted as billed for January–May 2025, moved to 2022); the 5 others (contract-new, settings) passed on a rerun
+- [x] Closing code review (`docs/reviews/w2e3-review-1.md`): steps for the visible fixes in «Versendete Abrechnung berichtigen» and «Ersetzte Abrechnung bleibt unverändert», navigation scenario to the Mietvertrag, DOM test for the success message, chain wording, no Zahlungsfrist on a replaced statement, `busy` button, 48 px links; dashboard «Bezahlt diesen Monat»: No scenario: the figure sums every statement of the database, which parallel scenarios change; `dashboard.pg.test.ts` compares before and after
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-358.md`
+- [x] Re-review of the closing fixes (`docs/reviews/w2e3-review-2.md`): no Blocker/Major
+- [x] Merge of origin/main: `generateStatements` returns the ids now (#356), two tests follow; E2E of the statement and contract features after the merge: 295 passed, `statement-generate preview-all-billed` (a11y) flaky under load, passed on a rerun
+- [x] Archive the session, push, pull request, CI, merge
+- [x] Audit log (#111) pointer left for the correction (`replaceStatement`)
+
 ## Session 2026-10-16: fourth guide review T-1 to T-6
 
 Request (chat): «Setze deine Empfehlung um» for `docs/reviews/opus55-guide-review-4.md` (T-1 to T-6). Rules only, no app behaviour, so no scenario.
@@ -1020,6 +1041,28 @@ Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (p
 
 Files changed (#114 too: `backend/src/services/{old-address,contract}.ts`, `src/routes/contracts/[id]/`, `src/routes/statements/[id]/`, `src/routes/statements/generate/`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `tests/a11y/screens.json`, `docs/api-specification.md`): `src/lib/server/settings.ts`, `messages/*.json`, `docs/PRD-Dwello.md`, `backend/migrations/0017_tenant_country.sql`, `backend/src/db/schema.ts`, `docs/data-model.md`, `backend/src/routes/tenants.ts`, `backend/src/services/{tenant,statement,qr-bill,pdf,reminder-pdf,postal-address}.ts`, `src/lib/{tenant,types}.ts`, `src/lib/server/{tenant,tenant-form}.ts`, `src/routes/tenants/TenantFormFields.svelte`, `src/routes/tenants/[id]/TenantContactCard.svelte`, `docs/design/i18n-begriffe.md`, `docs/anforderungen-vertragsende.md`, `tests/contracts/tenant.json`, E2E features and steps.
 
+## Session 2026-10-17 W8d: e-mail statements (#86, Option 2)
+
+- [x] #86 read (no comments, no implementation issue): the decision is the requirement; #283, #305, #322 do not change its outcome
+- [x] @wip scenarios `tests/e2e/features/statement-send.feature` incl. failure states (no e-mail address, mail refused; «not set up»: `No scenario`, the E2E stack always sends to the mail catcher, covered by `statement-mail.pg.test.ts`), seen red at the missing behaviour
+- [x] fach-reviewer round 1 before implementing: `docs/reviews/w8d-fachreview-1.md` (V-1 Major fixed: Zahlungsfrist step and pg check; R-1 Major: the provider's country is #82's decision, done by W9c; V-2, V-3, V-7, V-8, V-9, R-2 fixed; V-4, V-5, V-6 to an issue)
+- [x] backend: `POST /statements/:id/send` (`statement-send.service.ts`): e-mail with the PDF dated today in the tenant's Sprache, Dokument `type: statement`; letter or `byLetter` only marks sent; a failed e-mail is a coded refusal and leaves «Entwurf»
+- [x] frontend: send dialog per channel, failure alert with «Per Brief zustellen», Dokument title in the UI language, the statement's Dokument not counted as Mahnung; help text `help_statements_4`; texts in four languages
+- [x] privacy statement: `privacy_third_1` names statements by e-mail and what their PDF holds (country of the provider: #82, W9c)
+- [x] screens.json / accessibility.feature / sprachen-bildschirme.feature: `statement-empty-detail` `send-dialog`, `send-refused` (Carla wants e-mail without an address)
+- [x] code-reviewer round 1: `docs/reviews/w8d-review-1.md` (C-1 Major fixed with a DOM test seen red; C-3, C-4, C-10 fixed; C-2, C-5 to C-9, C-11 left, reasons in the report summary)
+- [x] personas round 1: `docs/design/personas/helga-w8d.md` (P-1 = C-1; P-2 to #366; P-5 button wording fixed), `docs/design/personas/dr-weber-w8d.md` (P-1, P-2, P-6 wording fixed with tests seen red; P-3 to #366; P-4 is #82's)
+- [x] fach-reviewer round 2: `docs/reviews/w8d-fachreview-2.md` (no Blocker/Major; V-11 = C-1; V-13, V-14 fixed; V-10, V-12, V-15, V-16 left)
+- [x] new issues: #364 (letter offered up front, missing address before sending, later bounces), #366 (record how and when a statement was sent)
+- No daten-pruefer: no amount, statement PDF or QR-bill changes; the e-mail attaches the PDF as stored (byte comparison in `statement-mail.pg.test.ts`), the Zahlungsfrist recomputed by fach-reviewer in both rounds
+- [x] persona-stack sends e-mail to the mail catcher (`docs/design/tools/persona-stack.sh`: MAIL_FROM and the catcher were missing, every e-mail failed as «not set up»)
+- [x] personas round 2: `docs/design/personas/helga-w8d-2.md` (P-1, P-5 fixed, nothing new), `docs/design/personas/dr-weber-w8d-2.md` (P-1, P-2 fixed; Minors and Nits left: the letter dialog not naming the Zahlungsfrist, the help calling it a period; in the report)
+- [x] Merged origin/main (W3c: the PDF as sent made at sending, `changeStatementStatus`): conflicts only in `messages/*.json` (both sides kept); the send service now uses `changeStatementStatus` (pg test seen red)
+- [x] closing code-reviewer round: `docs/reviews/w8d-review-2.md` (no Blocker/Major; C-14 fixed; C-12, C-13, C-15 left)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-86.md`
+- [x] workflow-review, session archived, pull request `Fixes #86`
+- Files: `backend/src/services/{statement-send,pdf,reminder-letter,statement-pdf}.service.ts` (`reminder-letter.ts`), `backend/src/routes/statements.ts`, `backend/src/db/schema.ts` (comment), `backend/scripts/mail-catcher.ts`, `src/lib/server/{statement-actions,documents}.ts`, `src/lib/types.ts`, `src/routes/statements/[id]/{+page.svelte,+page.server.ts,SendDialog.svelte,SendFeedback.svelte,StatusActions.svelte}`, `messages/*.json`, `docs/{PRD-Dwello,api-specification,data-model}.md`, `tests/contracts/statement-send-refused.json`, tests and scenarios
+
 ## Session 2026-10-17 W4d: #83 #84 (W4d) fr/it/en terms from Fedlex, AI native read of tenant texts
 
 Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/ZGB, VMWG in fr/it) where one exists, a native speaker only for the rest, English plain words. #84 Option B: an AI model reads the texts a tenant sees (statement PDF, reminder letters, e-mails) as a native speaker; the landlord UI later. Both "Done means" are worded as decision issues: the decision is the requirement. Fedlex read with single `curl` downloads (WebFetch got 503): SR 220 of 1.10.2026, SR 221.213.11 of 1.10.2025, fr and it.
@@ -1034,3 +1077,54 @@ Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/Z
 - [x] code-reviewer per slice; feature review: persona Dr. Weber on the fr/it/en PDFs and letters, 2 rounds (`docs/design/personas/dr-weber-w4d.md`; round 1 read German refund PDFs cached before the SQL language change → bug #351); fach-reviewer covered by the two reviews before implementation (no domain change since); no daten-pruefer (no amounts changed)
 - [x] Workflow review: `docs/reviews/workflow-notes-issue-83-84.md`; E2E: language and axe rows of contract, statement and help screens and `statement-reminder.feature` (148 passed); archive the session
 - [ ] PR `Fixes #83` `Fixes #84`, CI, merge
+
+## Session W3d: Monatlich total names and «Tankbestand» title (#62, #75)
+
+Branch `claude/w3d-monatlich-total-tankbestand-62-75`. Both issues have "Done means" worded like decision issues; their "Decided (product owner)" sections are the requirement.
+
+- [x] #62, #75: glossary checked: «Monatlich total» no longer compares with «Bruttomiete»; «Zeitanteil», «Heizmaterial», «Empfangsschein» are entries; no `TODO(fachlich prüfen, #62|#75)` markers left
+- [x] #75: scenario «Der Abschnitt zum Heizmaterial heisst Tankbestand» in `building-detail.feature`, seen red, green
+- [x] fach-reviewer on the `@wip` scenario and the fr/it/en words before implementing: `docs/reviews/w3d-fachreview-1.md`
+- [x] #75: `buildings_fuel_title` «Tankbestand» in four languages (fr/it/en from `docs/design/i18n-begriffe.md`, not the «citerne / serbatoio» of #315); fr intro «le dépôt» (V-1)
+- [x] #62: rename `grossRent`, `rentBrutto`, `totalBrutto` and the test «Bruttomiete» to Monatlich total names (No scenario: internal names only, no behaviour change; no API field involved); `grossRent`, `rentBrutto`, `totalBrutto` → `monthlyTotal`
+- [x] slice review rename (code-reviewer): `docs/reviews/rename-review-1.md`
+- [x] #62 after review: tenant rental `rent` → `monthlyTotal` (V-5), E2E step «beträgt das Monatlich total der Wohnung» (V-6, C-1)
+- [x] slice review title (code-reviewer): `docs/reviews/title-review-1.md` (Nits stay)
+- [x] feature review: persona `docs/design/personas/helga-w3d.md` (no Blocker/Major; P-1 to P-5 stay in the report); fach-reviewer not again: no words changed after round 1 apart from its own V-1
+- [x] Workflow note: `docs/reviews/workflow-notes-w3d.md`
+- [x] Blocked on me: none for the glossary; «Monatlich total» without «Bruttomiete» and the entries «Zeitanteil», «Heizmaterial», «Empfangsschein» are already in `UBIQUITOUS_LANGUAGE.md`
+
+Files: `src/lib/server/{contract-history,apartment}.ts`, `src/lib/types.ts`, `src/routes/apartments/[id]/{ContractHistory,MonthlyCostsCard}.svelte`, `src/routes/tenants/[id]/{+page.server.ts,TenantContracts.svelte,TenantRentalCard.svelte}`, `messages/*.json`, tests in `src/__tests__/{apartment,apartments-pages.dom,tenant-detail,tenant-detail-page.dom,buildings-pages.dom}.test.ts`, E2E `building-detail` and `apartment-detail` features, steps, questions, targets.
+
+## Session 2026-10-17: #111 (P-16) planned PRD features, ZIP of a run (#356)
+
+- [x] Search open issues; create #356 (ZIP of a run) and #357 (audit log)
+- [x] PRD: ZIP and audit point to #356 / #357; automatic reminders and Swiss eID «Vision, nicht geplant»; database SSL and field encryption vision with O-3 / O-6
+- [x] @wip scenarios «Alle Abrechnungen eines Laufs als ZIP herunterladen» and «ZIP eines Laufs mit einer inzwischen gelöschten Abrechnung anfordern», seen red at the missing button
+- [x] `generateStatements` returns the created statements; BFF route zips their PDFs (fflate, already in the lockfile)
+- [x] Result step: button «Alle als ZIP herunterladen» (full page load: the client router took `/statements/zip` for `/statements/[id]`), texts in four languages
+- Files: `src/routes/statements/zip/+server.ts`, `src/lib/server/statement-generation.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{StatementWizard,StatementStep,GenerationStep}.svelte`, `messages/*.json`, `package.json`/`bun.lock` (fflate as devDependency, already in the lockfile), tests in `src/__tests__/` and `tests/e2e/`, `docs/PRD-Dwello.md`
+- [x] Code review round 1: `docs/reviews/zip-review-1.md`
+- [x] Personas Helga and Marco: `docs/design/personas/helga-zip.md`, `docs/design/personas/marco-zip.md`
+- [x] Review fixes: axe and language states `statement-generate` `generation-result` and `statement-zip-refused`; ids encoded; generate answer from its contract
+- [x] Code review round 2: `docs/reviews/zip-review-2.md`; C-11 fixed (year per look counted per worker)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-356.md`
+- [x] Code review round 3: `docs/reviews/zip-review-3.md` (Nits C-13, C-14 fixed)
+- [x] Session archived, PR (Fixes #356, Fixes #111; #357 stays open: large, its correction entry depends on #120's implementation)
+
+## Session W9d: statement PDF language and «Gebäude» (#351, #249)
+
+- [x] #351: main already makes a draft's PDF afresh on every request and the PDF as sent when sending (PR #361); scenario «PDF eines Entwurfs folgt der geänderten Sprache des Mieters» and two tests in `statement-pdf.pg.test.ts` (draft, sent): green on main, the draft cases red with the old `getStatementPdf` (stored PDF reused on the same day)
+- [x] #249: scenario «Das PDF erklärt die Verteilung und den Heizölverbrauch» reads «Kosten des Gebäudes» and no «Liegenschaft», `@wip`
+- [x] fach-reviewer on the `@wip` scenarios before implementing: `docs/reviews/w9d-fachreview-1.md`
+- [x] #249: German PDF texts say «Gebäude» / «Kosten des Gebäudes», the Wohnungsanteil note «der Anteil Ihrer Wohnung an den Kosten des Gebäudes» (fr/it/en already say the app's words, pinned by render tests, seen red by changing those words for a moment); render tests; `docs/nebenkostenabrechnung-anforderungen.md`, `docs/design/i18n-begriffe.md`
+- [x] slice review (code-reviewer): `docs/reviews/w9d-review-1.md`
+- [x] feature review: fach-reviewer, daten-pruefer (PDF), persona
+  - [x] persona Dr. Weber `docs/design/personas/dr-weber-w9d.md` (P-1 fixed: fr/it Wohnungsanteil note in the wording of fach-reviewer V-1; P-2 to P-4 predate the change and stay)
+  - [x] fach-reviewer: no new round, the only wording changed after round 1 is its own proposal (V-1)
+  - [x] daten-pruefer `docs/reviews/w9d-datenpruefung-1.md` (no findings)
+- [x] closing review (code-reviewer) of the merge and the fr/it fix: `docs/reviews/w9d-review-2.md` (C-3 fr/it wording and C-4 its render test fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-351-249.md`
+- [x] Blocked on me: `UBIQUITOUS_LANGUAGE.md` lists «Liegenschaft» as a synonym of Gebäude and lacks «Kosten des Gebäudes» (product owner's edit): #374
+
+Files changed: `tests/e2e/features/statement-detail.feature`, `backend/src/__tests__/statement-pdf.pg.test.ts`, `backend/src/__tests__/statement-pdf-render.test.ts`, `backend/src/services/pdf.service.ts`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/design/i18n-begriffe.md`, `docs/reviews/w9d-fachreview-1.md`, `docs/reviews/w9d-review-1.md`, `docs/design/personas/dr-weber-w9d.md`, `docs/reviews/w9d-datenpruefung-1.md`, `docs/reviews/w9d-review-2.md`, `docs/reviews/workflow-notes-issue-351-249.md`

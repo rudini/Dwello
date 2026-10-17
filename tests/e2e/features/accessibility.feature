@@ -136,6 +136,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
+      | statement-generate     | generation-result   |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
@@ -155,7 +156,10 @@ Funktionalität: Barrierefreiheit
       | statement-correction-detail | default        |
       | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
+      | statement-empty-detail | send-dialog         |
+      | statement-empty-detail | send-refused        |
       | statement-pdf-refused  | default             |
+      | statement-zip-refused  | default             |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |
