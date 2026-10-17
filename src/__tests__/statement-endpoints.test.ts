@@ -195,11 +195,11 @@ describe('GET /statements/zip', () => {
 				'Content-Disposition': `attachment; filename="NK-1A2B3C4D-2024-000${id.slice(1)}.pdf"`
 			}
 		});
-	const get = (fetch: unknown) =>
+	const get = (fetch: unknown, ids = 's1,s2') =>
 		getZip({
 			fetch,
 			url: new URL(
-				'http://localhost/statements/zip?ids=s1,s2&periodStart=2024-01-01&periodEnd=2024-12-31'
+				`http://localhost/statements/zip?ids=${ids}&periodStart=2024-01-01&periodEnd=2024-12-31`
 			)
 		} as never);
 
@@ -214,7 +214,9 @@ describe('GET /statements/zip', () => {
 			'attachment; filename="NK-2024-01-01-2024-12-31.zip"'
 		);
 		const files = unzipSync(new Uint8Array(await response.arrayBuffer()));
-		expect(Object.entries(files).map(([name, pdf]) => [name, new TextDecoder().decode(pdf)])).toEqual([
+		expect(
+			Object.entries(files).map(([name, pdf]) => [name, new TextDecoder().decode(pdf)])
+		).toEqual([
 			['NK-1A2B3C4D-2024-0001.pdf', '%PDF-s1'],
 			['NK-1A2B3C4D-2024-0002.pdf', '%PDF-s2']
 		]);
@@ -231,6 +233,16 @@ describe('GET /statements/zip', () => {
 		);
 		expect(response.status).toBe(404);
 		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
+	});
+
+	// an id from the address stays one path segment: it cannot reach another backend route
+	it('fragt nur PDFs von Abrechnungen ab', async () => {
+		const calls: string[] = [];
+		await get(async (url: string) => {
+			calls.push(url);
+			return pdfOf('s1');
+		}, '..%2Fconfig%3F');
+		expect(calls).toEqual(['http://localhost:3001/api/v1/statements/..%2Fconfig%3F/pdf']);
 	});
 });
 

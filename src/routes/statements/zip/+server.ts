@@ -10,7 +10,9 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	try {
 		for (const id of (url.searchParams.get('ids') ?? '').split(',').filter(Boolean)) {
 			// the backend makes a missing PDF first
-			const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/pdf`);
+			const response = await fetch(
+				`${BACKEND_URL}/api/v1/statements/${encodeURIComponent(id)}/pdf`
+			);
 			if (!response.ok) return pdfRefusal(response.status, await response.json().catch(() => null));
 			files[pdfFileName(response.headers)] = new Uint8Array(await response.arrayBuffer());
 		}

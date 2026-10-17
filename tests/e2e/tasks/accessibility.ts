@@ -30,6 +30,8 @@ import {
 	uploadResult
 } from '../targets/invoice-upload';
 import { invoicePdf, uploadBelege } from './invoice-upload';
+import { goToGeneration } from './statement-generate';
+import { generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
 import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
@@ -96,6 +98,8 @@ const askKi = (name: string): Activity => (actor) =>
 
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
+let resultRuns = 0; // 'generation-result' bills its contracts once per year
+
 const previewOf =
 	(year: string, shown: string, end = `${year}-12-31`) =>
 	(example: Example, ...others: string[]): Activity =>
@@ -339,6 +343,24 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
 	'invoice-hints': (example) => previewOf('2025', 'late-invoices', '2025-05-31')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
+	// a year without invoices, another one on every look: the drafts of the last stay (#356)
+	// the seeded heating profile: the preselected one may be deleted by a parallel scenario
+	'generation-result': (example) => async (actor) => {
+		const year = 2016 + (resultRuns++ % 9);
+		await actor.attemptsTo(
+			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
+			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
+			Click.on(nextButton),
+			Check.the(on.generateBuilding(example.building)),
+			Click.on(nextButton),
+			Select.option(example.heatingProfile).from(heatingProfileSelect),
+			Click.on(nextButton),
+			Wait.until(on.shown('confirm-missing-invoices')),
+			goToGeneration,
+			Click.on(generateButton),
+			Wait.until(on.shown('generation-result'))
+		);
+	},
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
 	// a draft from an earlier visit whose building and heating profile were deleted since

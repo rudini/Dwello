@@ -1259,7 +1259,7 @@ BALANCE (refund): CHF 30
 
 **Data at Rest:**
 - No passwords or OAuth tokens are stored
-- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): vision, not planned; an operations decision of the installation (#111; O-3, O-6 in `docs/design/offene-punkte.md`)
+- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): «Vision, nicht geplant»; an operations decision of the installation (#111; O-3, O-6 in `docs/design/offene-punkte.md`)
 
 **Audit Logging (#357):**
 - Records, each with its date: changes of the Verwaltungspauschale rate, of a category's allocability, excluded costs, a reset payment, a correction of a sent statement, logins (decision in #111)

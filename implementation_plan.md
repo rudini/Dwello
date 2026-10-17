@@ -11,5 +11,8 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Result step: button «Alle als ZIP herunterladen» (full page load: the client router took `/statements/zip` for `/statements/[id]`), texts in four languages
 - Not in `tests/a11y/screens.json`: the result step was never an axe state (the wizard check stops before saving); the change adds one button to it
 - Files: `src/routes/statements/zip/+server.ts`, `src/lib/server/statement-generation.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{StatementWizard,StatementStep,GenerationStep}.svelte`, `messages/*.json`, `package.json`/`bun.lock` (fflate as devDependency, already in the lockfile), tests in `src/__tests__/` and `tests/e2e/`, `docs/PRD-Dwello.md`
-- [ ] Slice review (code-reviewer), persona review
+- [x] Code review round 1: `docs/reviews/zip-review-1.md`
+- [x] Personas Helga and Marco: `docs/design/personas/helga-zip.md`, `docs/design/personas/marco-zip.md`
+- [x] Review fixes: axe and language states `statement-generate` `generation-result` and `statement-zip-refused`; ids encoded; generate answer from its contract
+- [ ] Code review round 2 (Major fixes)
 - [ ] Session archived, PR (Fixes #356, Fixes #111; #357 stays open)
