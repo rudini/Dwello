@@ -152,7 +152,7 @@ PRIMARY KEY (contract_id, category_id)
 A statement bills a contract only the categories with `agreed` (Art. 257a Abs. 2 OR); an invoice without a category
 is billed as before. A category without a row is not answered yet: not billed, and the statement wizard asks when it
 has costs in the period. A new contract gets a row for every umlagefähige category (agreed unless the form unticks
-it); a category created or made umlagefähig later has no row. Migration `0019` gave a contract with statements the
+it); a category created or made umlagefähig later has no row. Migration `0020` gave a contract with statements the
 categories its statements billed and those of the building's umlagefähige invoices over its tenancy up to its last
 statement, and a contract without statements every umlagefähige category.
 
@@ -481,7 +481,7 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
-  0003 … 0019           -- later changes, each named in its table above
+  0003 … 0020           -- later changes, each named in its table above
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in
