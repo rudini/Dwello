@@ -167,6 +167,9 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | documents              | empty               |
       | documents              | marked-sent         |
       | config                 | default             |
+      | audit-log              | default             |
+      | audit-log              | empty               |
+      | audit-log              | delete-dialog       |
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |

@@ -131,6 +131,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.heatingInvoice('Talblick', '1200.00', 2025);
 	await seed.statement('Gina', 'Talblick', 2025, 'Standard');
 	await seed.category('Gartenpflege', true);
+	// a change the Protokoll lists and whose entry can be deleted (#357)
+	await seed.category('Rasenpflege', true);
+	await seed.categoryAllowance('Rasenpflege', false);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
 		building: seed.idOf('Seeblick'),

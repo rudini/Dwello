@@ -1161,3 +1161,22 @@ Branch `claude/w4e-search-160`.
 - [ ] Session archived, pull request merged (Fixes #160, Fixes #373)
 
 Files: `backend/src/services/{word-search,apartment.service,building.service}.ts`, `backend/src/__tests__/{apartment,building}-search.pg.test.ts`, `src/routes/apartments/{+page,ApartmentFilters}.svelte`, `src/lib/ui/TextInput.svelte` (`helpTestid`), `src/__tests__/apartments-pages.dom.test.ts`, `messages/*.json`, `tests/e2e/features/{apartments,buildings}.feature`, steps, targets, questions, `tests/e2e/fixtures/{backend,screens}.ts` (`withNames`; a11y search term without German, since the empty state repeats it)
+
+## Session 2026-10-17 W7e: audit log (#357)
+
+- [x] Scenarios in `settings.feature` («Protokoll öffnen», «Änderungen im Protokoll sehen», «Eintrag im Protokoll löschen»), breadcrumb example, `privacy.feature`; fach-reviewer before implementing: `docs/reviews/w7e-fachreview-1.md` (R-1, R-2, V-1 Major fixed; V-2–V-9, R-3 fixed or answered)
+- [x] Migration `0019_audit_log.sql`, `schema.ts`, `docs/data-model.md`, `docs/api-specification.md` (11a)
+- [x] Backend: `audit-log.service.ts` and route; entries for the Verwaltungspauschale rate, a category's Umlagefähigkeit (with the invoices it excluded), an invoice that becomes (not) umlagefähig (form, category, KI), a reset payment, logins; `recordStatementCorrection` for #358 (W2e); `audit-log.pg.test.ts`, contract `audit-log.json`
+- [x] BFF: login entry from `src/routes/auth/callback` (`recordLogin` in `login-flow.ts`, fails open)
+- [x] Page `/config/audit-log` with delete confirmation; link under «Einstellungen»; texts in four languages, term `TODO(fachlich prüfen, #370)`
+- [x] a11y: `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature` (default, empty, delete-dialog)
+- [x] Privacy statement names the log (PR #359 not merged: paragraph `audit_privacy` under «Welche Daten Dwello speichert», demo note)
+- [x] `docs/PRD-Dwello.md` audit lines point to what is built
+- [x] Code review round 1: `docs/reviews/w7e-review-1.md`
+- [x] Fach review round 2 (feature review): `docs/reviews/w7e-fachreview-2.md`
+- [x] Personas: `docs/design/personas/{helga,marco,weber,sven,anna}-w7e.md`
+- [x] Re-reviews of the Major fixes, closing code-reviewer round: `docs/reviews/w7e-review-2.md` (C-1 closed); personas `anna-w7e-2.md`, `sven-w7e-2.md`
+- [x] Workflow note: commit gate refuses red tests that import a missing module; detached session start; CRAP of a new page template (`docs/reviews/workflow-notes-issue-357.md`)
+- [x] Code review rounds 3 and 4 (closing): `docs/reviews/w7e-review-3.md` (C-24 Major fixed), `-4`
+- [x] Full E2E (chromium + api): 950 passed; 5 failed under load (contract-new, the IBAN race O-34), green alone; archive the session
+- [x] #358 merged first (PR #385): «Abrechnung berichtigen» (`replaceStatement`) records the replacement in its transaction; `recordStatementCorrection(replaced)`; privacy paragraph names it (R-4); migration renumbered to `0019_audit_log.sql` after `0018_statement_correction.sql`

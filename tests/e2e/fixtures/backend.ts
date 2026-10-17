@@ -402,6 +402,10 @@ export function testData(api: CallTheApi) {
 
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
 
+		async categoryAllowance(title: string, isAllowedUtilityCost: boolean) {
+			await put(`categories/${ids.get(title)}`, { isAllowedUtilityCost });
+		},
+
 		// An own category whose English name is its German one, as an own «Internet» would have
 		categoryNamedAlikeInEnglish: (title: string, description: string) =>
 			addCategory(title, (name) => ({ nameEN: name, description, isAllowedUtilityCost: true })),
@@ -435,6 +439,21 @@ export function testData(api: CallTheApi) {
 				inDays(0)
 			);
 			ids.set(`Rechnung ${supplier}`, id);
+		},
+
+		// The Protokoll's entries about the category, deleted as another tab or visitor would (#357)
+		async removeAuditEntriesOfCategory(title: string) {
+			for (const entry of (await get('audit-log')).data) {
+				if (entry.details.categoryId === ids.get(title)) await remove(`audit-log/${entry.id}`);
+			}
+		},
+
+		async invoiceDate(supplier: string, invoiceDate: string) {
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { invoiceDate });
+		},
+
+		async invoiceAllocable(supplier: string, isValidUtilityCost: boolean) {
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { isValidUtilityCost });
 		},
 
 		async invoiceNumber(supplier: string, invoiceNumber: string) {
