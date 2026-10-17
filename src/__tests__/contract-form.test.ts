@@ -109,7 +109,7 @@ describe('validateContract', () => {
 
 	it('requires an end after the start for a limited contract', () => {
 		expect(validateContract({ ...filled, isUnlimited: false }).endDate).toBe(
-			'Vertragsende ist erforderlich bei befristetem Vertrag.'
+			'Bei einem befristeten Mietvertrag ist das Vertragsende erforderlich.'
 		);
 		expect(validateContract({ ...filled, isUnlimited: false, endDate: '2024-12-31' }).endDate).toBe(
 			'Vertragsende muss nach Vertragsbeginn liegen.'

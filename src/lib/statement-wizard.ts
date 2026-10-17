@@ -102,7 +102,7 @@ type Coverage = {
 const invoices = (count: number) =>
 	count === 1 ? m.statements_invoices_one() : m.statements_invoices_many({ count });
 
-// "a und b und c", as German said it
+// "a und am b", the stock dates
 const joined = (parts: string[], and: (pair: { first: string; second: string }) => string) =>
 	parts.reduce((first, second) => and({ first, second }));
 
@@ -117,10 +117,7 @@ function calendarName({ start, end }: { start: string; end: string }) {
 	const month = from.getUTCMonth();
 	if (from.getUTCDate() !== 1 || after.getUTCDate() !== 1 || month % months !== 0) return null;
 	const names: Record<number, () => string> = {
-		1: () =>
-			m.statements_part_month({
-				month: from.toLocaleDateString(`${getLocale()}-CH`, { month: 'long', timeZone: 'UTC' })
-			}),
+		1: () => from.toLocaleDateString(`${getLocale()}-CH`, { month: 'long', timeZone: 'UTC' }),
 		3: () => m.statements_part_quarter({ number: month / 3 + 1 }),
 		6: () => m.statements_part_half({ number: month / 6 + 1 })
 	};
@@ -170,7 +167,7 @@ function findingBody({
 	if (kind === 'new') return m.statements_finding_new({ amount: formatCurrency(current.total) });
 	if (kind === 'gap') {
 		const gap = {
-			parts: joined(missingParts.map(partLabel), m.statements_list_and),
+			parts: new Intl.ListFormat(`${getLocale()}-CH`).format(missingParts.map(partLabel)),
 			invoices: invoices(previous.count)
 		};
 		return missingParts.length === 1

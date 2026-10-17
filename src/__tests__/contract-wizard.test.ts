@@ -56,7 +56,7 @@ describe('Mietvertrag Schritt für Schritt', () => {
 		expect(stepErrors({ ...empty, tenantId: 't1' }, 1)).toEqual({});
 		expect(stepErrors(empty, 3)).toEqual({ startDate: 'Vertragsbeginn ist erforderlich.' });
 		expect(stepErrors({ ...filled, isUnlimited: false }, 3)).toEqual({
-			endDate: 'Vertragsende ist erforderlich bei befristetem Vertrag.'
+			endDate: 'Bei einem befristeten Mietvertrag ist das Vertragsende erforderlich.'
 		});
 		expect(stepErrors({ ...filled, baseRent: '' }, 4)).toEqual({
 			baseRent: 'Nettomiete ist erforderlich.'
