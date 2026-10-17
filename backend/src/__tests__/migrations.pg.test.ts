@@ -217,9 +217,9 @@ describe('Migrationen anwenden', () => {
 		]);
 	});
 
-	// #100: Brennstoff ist die Heizung und jede Kategorie, die schon einen Tankbestand hat; sonst liesse sich ihr
-	// nächster Endbestand nicht mehr erfassen
-	it('kennzeichnet die Heizung und Kategorien mit Tankbestand als Brennstoff', async () => {
+	// #100: Brennstoff ist die Heizung und jede Heizkosten-Kategorie, die schon einen Tankbestand hat; sonst liesse sich
+	// ihr nächster Endbestand nicht mehr erfassen
+	it('kennzeichnet die Heizung und Heizkosten-Kategorien mit Tankbestand als Brennstoff', async () => {
 		const name = await database();
 		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
 		for (const file of files.filter((file) => file < '0024_category_fuel.sql')) {

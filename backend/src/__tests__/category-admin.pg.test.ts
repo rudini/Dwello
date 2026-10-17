@@ -70,6 +70,21 @@ describe('Kostenkategorien', () => {
 		expect((await fuel())[`Stückholz ${token}`]).toBe(true);
 	});
 
+	// #100 (Code-Review C-12): Brennstoff ist ein Merkmal von Heizkosten
+	it('speichert «Brennstoff» nur zusammen mit Heizkosten', async () => {
+		const withoutHeating = await idOf(
+			await categories.create({ name: `Gas ${token}`, nameDE: `Gas ${token}`, isAllowedUtilityCost: true, isFuel: true })
+		);
+		const unticked = await idOf(
+			await categories.create({ name: `Pellets B ${token}`, nameDE: `Pellets B ${token}`, isAllowedUtilityCost: true, isHeatingCost: true, isFuel: true })
+		);
+		await categories.send('PUT', `/${unticked}`, { isHeatingCost: false });
+
+		for (const id of [withoutHeating, unticked]) {
+			expect(((await (await callApi(`/api/v1/categories/${id}`)).json()) as { isFuel: boolean }).isFuel).toBe(false);
+		}
+	});
+
 	it('findet Kategorien über den deutschen Namen', async () => {
 		await categories.create({ name: `Stairs ${token}`, nameDE: `Treppenlift ${token}`, isAllowedUtilityCost: true });
 

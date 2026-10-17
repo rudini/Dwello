@@ -1410,3 +1410,23 @@ Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.sve
 - [x] Merge reviews after main took the migration number: `docs/reviews/204-review-4.md`, `204-review-5.md` (migration now `0021`, after main took 0018 to 0020)
 
 Files: `backend/migrations/0021_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`, `tests/e2e/{features/categories.feature,steps/categories.steps.ts,tasks/categories.ts,questions/categories.ts,targets/categories.ts,screenplay/questions.ts}`
+
+## Session W16: categories marked «Brennstoff» hold a Tankbestand (#100)
+
+Branch `claude/w16-brennstoff-100`. #100's "Decided" section (option 2) is the requirement; implemented directly, no separate implementation issue. The glossary already has «Brennstoff (Kategorie)» (an attribute of an allocable heating cost category), so no marker.
+
+- [x] `@wip` scenarios (building-detail.feature: own heating category and the chimney sweep are not offered; categories.feature: an own category marked Brennstoff is offered), committed and reviewed by `fach-reviewer` before implementing
+- [x] fach-reviewer round 1 (`docs/reviews/w16-fachreview-1.md`)
+- [x] migration `0024_category_fuel.sql`: `categories.is_fuel`, set for the predefined «Heating» and every category that already has a Tankbestand; schema, data-model.md, PRD, contracts
+- [x] backend: `isFuelCategory` reads the flag (no name check); create/update take `isFuel`, stored only with `isHeatingCost`; a category with a Tankbestand stays Brennstoff (`CATEGORY_FUEL_HAS_STOCK`); `*.pg.test.ts` for the predefined chimney sweep and an own heating category
+- [x] frontend: building page filters by the flag; category form checkbox «Brennstoff» with help (only with «Heizkosten nach dem Heizprofil verteilen»); texts in four languages
+- [x] a11y state `category-new` `fuel` (screens.json, accessibility.feature, sprachen-bildschirme.feature)
+- [x] code-reviewer round 1 (`docs/reviews/w16-review-1.md`)
+- [x] personas (`docs/design/personas/helga-w16.md`, `docs/design/personas/marco-w16.md`); fach-reviewer round 2 (`docs/reviews/w16-fachreview-2.md`)
+- [x] fixes of the review findings: refusal scenario and a11y screen `category-edit-fuel`, texts naming both checkboxes, migration only for heating costs, api-specification, translation terms
+- [x] Workflow note: auto mode refuses running a test with the code taken out to show its red (the E2E scenario of the refusal was written after the backend rule; its pg test was seen red)
+- [x] Helga round 2 (`docs/design/personas/helga-w16.md`, «Runde 2»): P-1 fixed; P-2, P-3, P-6 Minor/Nit stay in the report
+- [x] closing code-reviewer round (`docs/reviews/w16-review-2.md`): C-12, C-13 fixed; C-4, C-9, C-14 Nits left
+- [x] workflow notes (`docs/reviews/workflow-notes-issue-100.md`); archive the session; pull request (Fixes #100)
+
+Files: `backend/migrations/0024_category_fuel.sql`, `backend/src/db/schema.ts`, `backend/src/services/{category,fuel-stock}.service.ts`, `backend/src/routes/{categories,buildings}.ts`, `src/lib/{types.ts,server/category.ts}`, `src/routes/buildings/[id]/+page.server.ts`, `src/routes/config/categories/{CategoryForm,HeatingChoice}.svelte`, `messages/*.json`, `tests/contracts/category{,-fuel-refused}.json`, `docs/{data-model,PRD-Dwello,api-specification}.md`, tests and features.

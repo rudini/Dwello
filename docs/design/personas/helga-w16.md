@@ -66,3 +66,60 @@ Etwa 15 Minuten, 11 kleine Durchgänge: Menü, Einstellungen, Kategorien, Formul
 - Das Löschen des Tankbestands und danach das Entfernen von Brennstoff: Der Bestand bleibt für spätere Prüfungen stehen.
 - 200 % Zoom und andere Sprachen.
 - Die Kategorie «Heizung» habe ich nicht verändert (vordefiniert, nicht meine).
+
+## Runde 2
+
+Nachprüfung der geänderten Texte zu P-1 bis P-3. Persona-Stack http://localhost:3300 (Deutsch, frisch aufgesetzt), Desktop 1440 × 900 bei 150 % Zoom, Maus. Gespeichert nur im Gebäude «Seepark Residenz» und in meiner neuen Kategorie «Stückholz».
+Skripte und Screenshots: `/tmp/claude-0/-home-user-Dwello/6a612fe5-db6f-5ef4-85c5-983800bc9434/scratchpad/helga-w16-r2/`
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-1 | erledigt | Kategorie bearbeiten (Stückholz) | Die Ablehnung nennt jetzt beide Häkchen und den Grund: «Die Kategorie hat Tankbestände. Deshalb bleiben die Häkchen «Heizkosten nach dem Heizprofil verteilen» und «Brennstoff» gesetzt. Wenn Sie sie entfernen möchten, löschen Sie zuerst die Tankbestände auf der Seite des Gebäudes.» Ich verstehe, was passiert ist und was ich tun muss. |
+| P-6 | Minor | Kategorie bearbeiten (Stückholz), nach der Ablehnung | Die Meldung sagt «bleiben … gesetzt», aber darunter ist «Heizkosten nach dem Heizprofil verteilen» leer und «Brennstoff» gar nicht zu sehen. Erst nach dem Neuladen sind beide wieder angekreuzt. Ich weiss nicht, ob ich der Meldung oder dem Kästchen glauben soll, und drücke vielleicht nochmals auf Speichern. |
+| P-2 | Minor (bleibt, gemildert) | Kategorie bearbeiten (Neu, Heizung) | Der Brennstoff-Hilfetext sagt jetzt: «Eine Kategorie nur für Service, Wartung oder den Kaminfeger ist kein Brennstoff.» Das Wort «nur» lässt mich ahnen, dass «Heizung» trotz Wartung Brennstoff sein darf. Wohin meine Wartungsrechnung für die Heizung gehört, sagt aber noch immer kein Satz. Und weil auf der Gebäudeseite «Einkauf» in der Brennstoff-Kategorie abgerechnet wird, frage ich mich, ob die Wartung dann als «Einkauf» Heizmaterial zählt. |
+| P-3 | Nit | Gebäudeseite, Hinweis ohne Brennstoff-Kategorie (nur Text beurteilt) | Der Hinweis sagt klar, was fehlt und welche zwei Häkchen ich setzen muss, und in welcher Reihenfolge. Es fehlt, wo ich die Kategorie finde (Einstellungen > Kategorien). Im Formular «Neue Kategorie» selbst sagt der Hilfetext beim Heizprofil weiterhin nichts vom Brennstoff-Feld, das erst danach erscheint. |
+
+### Beobachtungen
+
+- Das Formular «Neue Kategorie» zeigt ohne Heizprofil-Häkchen weiterhin kein «Brennstoff» (Screenshot `01-neu-leer.png`). Weil ich es aus Runde 1 kannte, habe ich es gefunden.
+- Der Heizprofil-Hilfetext nennt «Kaminfeger» als Beispiel, der Brennstoff-Hilfetext direkt darunter sagt, der Kaminfeger sei kein Brennstoff. Mit Überlegen passt das (Heizprofil ja, Brennstoff nein), aber nebeneinander liest es sich zuerst wie ein Widerspruch.
+- «Stückholz» speichern ging ohne Meldung zurück zur Liste, Stückholz steht zuoberst mit «Eigene» und «Umlagefähig». Wie in Runde 1.
+- Tankbestand 31.12.2025, CHF 1320.00, Kategorie Stückholz: «Bestand gespeichert.» und die Zeile «31.12.2025 Stückholz CHF 1’320.00» mit «Löschen» (Screenshot `06-tank-nach.png`). Die Auswahl bietet wieder «Stückholz» und «Heizung», Stückholz vorausgewählt.
+- Die Kategorie «Heizung» trägt weiterhin «Brennstoff», ihre Beschreibung nennt «Brennstoff, Energie, Wartung und Betrieb der Heizung» (Screenshot `04-heizung.png`).
+
+### Aufgabe geschafft: ja
+
+### Aufwand
+
+Etwa 6 Minuten, 3 Durchgänge: Kategorie anlegen, Heizung ansehen und Tankbestand speichern, Heizprofil-Häkchen entfernen und speichern.
+
+### Ablauf
+
+1. **Einstellungen > Kategorien > «Kategorie erfassen».** Name «Stückholz», Umlagefähig, Heizprofil angekreuzt, dann erscheint «Brennstoff», angekreuzt (Screenshot `02-neu-ausgefuellt.png`). Erwartet: ein Satz, wohin Wartung gehört. Gesehen: «Eine Kategorie nur für Service, Wartung oder den Kaminfeger ist kein Brennstoff.» Hilft halb (P-2). Gespeichert, Stückholz erscheint in der Liste.
+2. **Gebäude Seepark Residenz, Tankbestand.** 31.12.2025, 1320.00, Stückholz, «Bestand speichern». Erwartet und gesehen: Bestätigung und neue Zeile.
+3. **Stückholz bearbeiten, nur «Heizkosten nach dem Heizprofil verteilen» abhaken.** Das Feld «Brennstoff» verschwindet (Screenshot `07-heizprofil-abgehakt.png`). «Änderungen speichern». Erwartet: eine Meldung, die von meinem Heizprofil-Häkchen spricht. Gesehen: rote Box «Kategorie wurde nicht gespeichert» mit beiden Häkchen, Grund und Ausweg (Screenshot `08-meldung.png`). Gut (P-1 erledigt). Aber das Kästchen darunter ist leer (P-6). Nach dem Neuladen: beide Häkchen gesetzt, also nichts geändert.
+4. **Hinweis ohne Brennstoff-Kategorie (zitierter Text).** Verständlich, sagt was und wie. Ich würde aber erst suchen, wo die «Kategorie für Ihr Heizmaterial» ist (P-3).
+
+### Verwirrung
+
+- «bleiben gesetzt» gegenüber dem leeren Kästchen (P-6).
+- Kaminfeger als Beispiel beim Heizprofil und als Gegenbeispiel beim Brennstoff.
+- Wartung in der Brennstoff-Kategorie «Heizung»: zählt sie dann als Einkauf von Heizmaterial? (P-2)
+
+### Fehlerrisiken
+
+- Nach der Ablehnung nochmals speichern, weil das Formular das Häkchen leer zeigt, und denken, beim zweiten Mal habe es geklappt.
+- Wartungsrechnungen unter «Heizung» erfassen und unsicher sein, ob sie richtig abgerechnet werden.
+- Den Hinweis auf der Gebäudeseite lesen und die Kategorien nicht finden.
+
+### Vorschläge
+
+- **P-6:** Stückholz mit Tankbestand bearbeiten, nur das Heizprofil-Häkchen abhaken, speichern. Die Meldung sagt «bleiben gesetzt», das Kästchen ist leer und «Brennstoff» versteckt. Hilfreich: nach der Ablehnung die gespeicherten Häkchen wieder anzeigen (beide angekreuzt), oder die Meldung sagen lassen «Ihre Änderung wurde nicht übernommen; die Häkchen sind weiterhin gesetzt».
+- **P-2:** «Kategorie erfassen» oder «Heizung» öffnen, Brennstoff-Hilfetext lesen. Hilfreich: ein Satz wie «Wartung und Service der Heizung können Sie in derselben Kategorie erfassen; sie zählen nicht zum Tankbestand» oder «… erfassen Sie in einer eigenen Kategorie», je nachdem, wie Dwello rechnet.
+- **P-3:** Im Hinweis den Weg nennen («unter Einstellungen > Kategorien») oder einen Link zur Kategorie-Liste setzen; im Heizprofil-Hilfetext einen Satz ergänzen, dass für Heizmaterial im Tank oder Lager danach das Häkchen «Brennstoff» erscheint.
+
+### Nicht geprüft
+
+- Den Hinweis ohne Brennstoff-Kategorie auf der Gebäudeseite selbst: Dafür hätte ich «Heizung» (vordefiniert, nicht meine) ändern müssen. Beurteilt nur der zitierte Text; ob er einen Link hat und wo er steht, weiss ich nicht.
+- Das Löschen des Tankbestands und danach das Entfernen der Häkchen.
+- 200 % Zoom und andere Sprachen.
