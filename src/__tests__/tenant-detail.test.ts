@@ -54,7 +54,7 @@ describe('Mieterdetail', () => {
 			url === `${API}/tenants/t1`
 				? Response.json(tenant)
 				: url.startsWith(`${API}/contracts`)
-					? Response.json({ contracts: [contract('c1', '2020-01-01', day(-1), '2.01')] })
+					? Response.json({ contracts: [{ ...contract('c1', '2020-01-01', day(-1), '2.01'), terminated: true }] })
 					: Response.json({ data: [{ ...upload, createdAt: '2024-05-01T09:00:00.000Z' }] })) as typeof globalThis.fetch;
 
 		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;

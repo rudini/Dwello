@@ -1,6 +1,11 @@
 import { contractStatusOn } from './contract-status';
 
-type Contract = { startDate: string; endDate: string | null };
+type Contract = {
+	startDate: string;
+	endDate: string | null;
+	terminated?: boolean;
+	movedOut?: boolean;
+};
 type Document = { type: string; createdAt: string };
 
 // The day in Switzerland a document was uploaded; the server stores UTC
@@ -16,9 +21,15 @@ export function formerTenantDocuments<D extends Document>(
 	documents: D[],
 	today: string
 ) {
-	if (!contracts.length || contracts.some((c) => contractStatusOn(c.startDate, c.endDate, today) !== 'ended'))
+	if (
+		!contracts.length ||
+		contracts.some((c) => contractStatusOn(c.startDate, c.endDate, today) !== 'ended')
+	)
 		return null;
-	const endDate = contracts.map((c) => c.endDate!.slice(0, 10)).sort().at(-1)!;
+	const last = contracts.reduce((a, b) => (a.endDate! > b.endDate! ? a : b));
+	// after an agreed end without notice the tenant may have stayed until «Mieter ist ausgezogen» (A-6)
+	if (!last.terminated && !last.movedOut) return null;
+	const endDate = last.endDate!.slice(0, 10);
 	const before = documents.filter((d) => d.type === 'upload' && swissDay(d.createdAt) < endDate);
 	return before.length ? { endDate, documents: before } : null;
 }

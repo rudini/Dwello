@@ -148,7 +148,8 @@ describe('Übersicht laden', () => {
 	it('nennt ehemalige Mieter mit Dokumenten von vor dem Ende ihres letzten Mietvertrags', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
 		const [upload] = documentList.data;
-		const former = { ...contracts[0], id: 'k9', tenantId: 't9', tenantName: 'Ida Alt', startDate: '2020-01-01', endDate: '2026-03-31' };
+		// given notice: she has left, so no question whether she stayed after a fixed term (A-6)
+		const former = { ...contracts[0], id: 'k9', tenantId: 't9', tenantName: 'Ida Alt', startDate: '2020-01-01', endDate: '2026-03-31', terminated: true };
 		const base = backend();
 		const fetch = (async (url: string) => {
 			const path = url.replace(API, '');
@@ -163,6 +164,7 @@ describe('Übersicht laden', () => {
 		expect(data.tasks).toContainEqual(
 			expect.objectContaining({ id: 'former-documents-t9', title: 'Dokumente von Ida Alt prüfen', href: '/tenants/t9' })
 		);
+		expect(data.tasks.map((task) => task.id)).not.toContain('fixed-term-k9');
 	});
 
 	it('liefert die Kennzahlen und daraus die Aufgaben und Fristen von heute', async () => {
