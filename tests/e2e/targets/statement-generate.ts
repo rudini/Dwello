@@ -41,6 +41,7 @@ export const generateMoreButton = target('Weitere Abrechnungen erstellen', (page
 	page.getByTestId('generate-more-button')
 );
 export const missingInvoices = target('Warnung fehlende Rechnungen', (page) => page.getByTestId('missing-invoices'));
+export const partialInvoices = target('Hinweis auf Monate ohne Rechnung', (page) => page.getByTestId('partial-invoices'));
 export const newInvoiceFromWarning = target('Rechnung erfassen in der Warnung', (page) =>
 	missingInvoices.locate(page).getByRole('link', { name: 'Rechnung erfassen' })
 );

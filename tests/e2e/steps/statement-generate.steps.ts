@@ -26,6 +26,7 @@ import {
 	invoicesOfBuilding,
 	missingInvoicesWarning,
 	missingInvoicesWarnings,
+	partialInvoicesHints,
 	oldAddressWarning,
 	noContractsInPeriod,
 	periodRunning,
@@ -237,6 +238,10 @@ Then(
 
 Then('warnt die Vorschau nicht vor fehlenden Rechnungen', async ({ verwalter }) => {
 	await verwalter.sees(missingInvoicesWarnings).toBe(0);
+});
+
+Then('weist die Vorschau nicht auf Monate ohne Rechnung hin', async ({ verwalter }) => {
+	await verwalter.sees(partialInvoicesHints).toBe(0);
 });
 
 When('der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will', async ({ verwalter }) => {
