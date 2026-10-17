@@ -5,6 +5,9 @@ export const nextButton = target('Weiter', (page) => page.getByTestId('wizard-ne
 export const finishedStep = (label: string) =>
 	target(`Schritt «${label}»`, (page) => page.getByTestId('wizard-step').filter({ hasText: label }));
 export const draftRestored = target('Hinweis Entwurf wiederhergestellt', (page) => page.getByTestId('draft-restored'));
-export const discardDraftButton = target('Entwurf verwerfen', (page) => page.getByTestId('draft-discard'));
+export const discardDraftButton = target('Angaben verwerfen', (page) => page.getByTestId('draft-discard'));
+export const discardDraftMessage = target('Rückfrage Verwerfen', (page) => page.getByTestId('draft-discard-message'));
+export const discardDraftConfirm = target('Verwerfen bestätigen', (page) => page.getByTestId('draft-discard-confirm'));
+export const closeDraftNotice = target('Hinweis schliessen', (page) => page.getByTestId('draft-close'));
 export const saveStatus = (text: string) =>
 	target(`Speicherstatus «${text}»`, (page) => page.getByTestId('save-status').getByText(text));

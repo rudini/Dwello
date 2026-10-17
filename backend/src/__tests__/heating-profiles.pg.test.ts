@@ -60,6 +60,6 @@ describe('Beschreibungen der Stammdaten', () => {
 			SELECT (SELECT description FROM categories WHERE name = 'Heating') AS category,
 				(SELECT description FROM distribution_keys WHERE name = 'Per Unit') AS key`);
 
-		expect(result.rows).toEqual([{ category: 'Kosten für das Heizen des Gebäudes', key: 'Gleichmässig pro Wohnung' }]);
+		expect(result.rows).toEqual([{ category: 'Brennstoff, Energie, Wartung und Betrieb der Heizung, auch Versicherung nur der Heizungsanlage und Verwaltungsarbeit für den Heizbetrieb; ohne Reparatur, Erneuerung, Verzinsung und Abschreibung der Anlage', key: 'Gleichmässig pro Wohnung' }]);
 	});
 });
