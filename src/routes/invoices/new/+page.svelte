@@ -109,16 +109,17 @@
 			isValidUtilityCost,
 			...suggestionProvenance(suggestion)
 		});
-		saving = false;
 		if (response.error) {
+			saving = false;
 			addToast('error', m.invoices_save_failed());
 			return;
 		}
 		addToast('success', m.invoices_saved({ name: billingEntity.trim() }));
-		// Statements of its period made before it lack it (#378): its page says what to do
+		if (data.returnTo) return goto(back);
+		// Statements of its period made before it lack it (#378): its page says what to do, and checks it itself
 		const id = response.data!.id;
 		const periods = await api.get<{ missedIn?: unknown[] }>(`/invoices/${id}/statements`);
-		goto(periods.data?.missedIn?.length ? `/invoices/${id}` : back);
+		goto(periods.error || periods.data?.missedIn?.length ? `/invoices/${id}` : back);
 	}
 </script>
 
