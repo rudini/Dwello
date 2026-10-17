@@ -121,7 +121,9 @@ describe('Abrechnungen erstellen', () => {
 				rentalDays: 366,
 				totalPeriodDays: 366,
 				movedOut: true,
-				oldAddress: false
+				fixedTerm: false,
+				oldAddress: false,
+				buildingId: 'b1'
 			},
 			{
 				contractId: 'einzug',
@@ -133,7 +135,9 @@ describe('Abrechnungen erstellen', () => {
 				rentalDays: 366,
 				totalPeriodDays: 366,
 				movedOut: false,
-				oldAddress: false
+				fixedTerm: false,
+				oldAddress: false,
+				buildingId: 'b1'
 			}
 		]);
 	});
@@ -145,6 +149,26 @@ describe('Abrechnungen erstellen', () => {
 		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.movedOut])).toEqual([
 			['spaeter', true],
 			['bleibt', false]
+		]);
+	});
+
+	// #76: ein befristeter Mietvertrag läuft ohne Kündigungstermin bis zum vereinbarten Vertragsende
+	it('erkennt einen laufenden befristeten Mietvertrag', async () => {
+		const { fetch } = backend(
+			[],
+			[
+				contract('befristet', '2020-01-01', '2099-12-31'),
+				{ ...contract('gekuendigt', '2020-01-01', '2099-12-31'), terminated: true },
+				contract('unbefristet', '2020-01-01', null),
+				contract('beendet', '2020-01-01', '2024-03-31')
+			]
+		);
+
+		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.fixedTerm])).toEqual([
+			['befristet', true],
+			['gekuendigt', false],
+			['unbefristet', false],
+			['beendet', false]
 		]);
 	});
 

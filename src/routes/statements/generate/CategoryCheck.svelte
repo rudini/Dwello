@@ -51,7 +51,7 @@
 			<p class="font-semibold" aria-hidden="true">{row.name}</p>
 			<ul class="flex list-disc flex-col gap-2 pl-6" aria-label={row.name}>
 				{#each row.findings as finding (`${finding.kind}-${finding.categoryId ?? finding.categoryName}`)}
-					<CategoryFindingItem {finding} buildingId={row.buildingId} />
+					<CategoryFindingItem {finding} buildingId={row.buildingId} fixedTerm={row.fixedTerm} />
 				{/each}
 			</ul>
 		{/each}

@@ -169,6 +169,26 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
+	// #119: verschieden eingestellte übrige Abrechnungen: beides aus den Einstellungen
+	it('sagt, wenn die übrigen Abrechnungen verschieden eingestellt sind', async () => {
+		const preset = {
+			building: 'Seeblick',
+			start: '2025-01-01',
+			end: '2025-12-31',
+			fromStatements: false,
+			feeFromSettings: true,
+			differing: true
+		};
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b1'], preset },
+			form: null
+		} as never);
+		await settle();
+		expect(byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen.'
+		);
+	});
+
 	it('beginnt mit der vorgeschlagenen Abrechnungsperiode, in Worten wiederholt', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');
@@ -386,6 +406,27 @@ describe('Abrechnungen erstellen', () => {
 		expect(findings[0]).toContain('Tankbestand am 31.12.2024 fehlt');
 		expect(byTestId('missing-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Ohne Rechnungen fehlen deren Kosten in den Abrechnungen, und die Mieter erhalten ihr Akonto weitgehend zurück.'
+		);
+	});
+
+	// #76: neue Nebenkosten in einem Gebäude mit einem laufenden befristeten Mietvertrag
+	it('nennt bei neuen Nebenkosten das Vertragsende eines befristeten Mietvertrags im Gebäude', () => {
+		const added = {
+			categoryId: 'w',
+			categoryName: 'Hauswart',
+			kind: 'new',
+			current: { count: 1, total: 900 },
+			previous: { count: 0, total: 0 },
+			missingParts: [],
+			changePercent: null
+		};
+		const check = { buildingId: 'b1', comparedWith: { start: '2023-01-01', end: '2023-12-31' }, hasComparison: true };
+		open({
+			preview,
+			invoices: [{ ...invoices[0], fixedTerm: true, check: { ...check, findings: [added] } }]
+		});
+		expect(byTestId('category-finding')!.textContent).toContain(
+			'Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich'
 		);
 	});
 

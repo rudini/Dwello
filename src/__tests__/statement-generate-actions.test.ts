@@ -29,10 +29,26 @@ describe('Vorschau der Abrechnungen', () => {
 					first: null,
 					last: null,
 					statements: 0,
-					check: expect.anything()
+					check: expect.anything(),
+					fixedTerm: false
 				}
 			]
 		});
+	});
+
+	// #76: neue Nebenkosten gelten für das ganze Gebäude; ein laufender befristeter Mietvertrag darin ändert den Hinweis
+	it('sagt pro Gebäude, ob ein laufender befristeter Mietvertrag abgerechnet wird', async () => {
+		const form = new FormData();
+		for (const [name, value] of Object.entries(run)) form.append(name, value);
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		const befristet = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: '2099-12-31' };
+		const fetch = async (url: string) =>
+			Response.json(url.includes('/for-statement/') ? [] : { contracts: [befristet], data: [], total: 0 });
+		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
+			fetch,
+			request
+		})) as { invoices: { fixedTerm: boolean }[] };
+		expect(result.invoices.map((row) => row.fixedTerm)).toEqual([true]);
 	});
 });
 
@@ -97,47 +113,69 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		);
 	});
 
+	const contract = (id: string, managementFeeAgreed: boolean, managementFeePercent: string | null) => ({
+		...buildingContracts.contracts[0],
+		id,
+		managementFeeAgreed,
+		managementFeePercent
+	});
+	const statement = (contractId: string, managementFeePercent: string, heatingProfileId = 'hp9') => ({
+		...periodStatements.data[0],
+		contractId,
+		heatingProfileId,
+		managementFeePercent
+	});
+	const openWith = (statements: unknown[]) =>
+		load({
+			fetch: async (url: string) => {
+				if (url.includes('/config'))
+					return Response.json({
+						data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
+					});
+				if (url.includes('/contracts?'))
+					return Response.json({
+						contracts: [
+							contract('nein', false, null),
+							contract('eigen', true, '2.00'),
+							contract('lauf', true, null),
+							contract('lauf2', true, null)
+						]
+					});
+				if (url.includes('/statements?')) return Response.json({ data: statements });
+				return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
+			},
+			url: new URL('http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31')
+		} as never);
+
+	// #119: verschieden eingestellte übrige Abrechnungen geben keine Vorlage; beides kommt aus den Einstellungen
+	it('nimmt die Einstellungen, wenn die übrigen Abrechnungen verschiedene Heizprofile haben', async () => {
+		expect(
+			await openWith([statement('lauf', '4.50', 'hp8'), statement('lauf2', '4.50', 'hp9')])
+		).toMatchObject({
+			defaultHeatingProfileId: 'hp1',
+			defaultManagementFeePercent: 3,
+			preset: { differing: true }
+		});
+	});
+
+	it('nimmt die Einstellungen, wenn die übrigen Abrechnungen zum Satz des Laufs verschiedene Sätze haben', async () => {
+		expect(await openWith([statement('lauf', '4.50'), statement('lauf2', '2.50')])).toMatchObject({
+			defaultHeatingProfileId: 'hp1',
+			defaultManagementFeePercent: 3,
+			preset: { differing: true }
+		});
+	});
+
+	it('übernimmt gleich eingestellte übrige Abrechnungen', async () => {
+		expect(await openWith([statement('lauf', '4.50'), statement('lauf2', '4.50')])).toMatchObject({
+			defaultHeatingProfileId: 'hp9',
+			defaultManagementFeePercent: 4.5,
+			preset: { differing: false, fromStatements: true, feeFromSettings: false }
+		});
+	});
+
 	// #89, fach-review V-1: a statement stores its contract's rate; only one at the run's rate tells the run's rate
 	it('übernimmt den Satz nur von einer Abrechnung zum Satz des Abrechnungslaufs', async () => {
-		const contract = (
-			id: string,
-			managementFeeAgreed: boolean,
-			managementFeePercent: string | null
-		) => ({
-			...buildingContracts.contracts[0],
-			id,
-			managementFeeAgreed,
-			managementFeePercent
-		});
-		const statement = (contractId: string, managementFeePercent: string) => ({
-			...periodStatements.data[0],
-			contractId,
-			heatingProfileId: `hp-${contractId}`,
-			managementFeePercent
-		});
-		const openWith = (statements: unknown[]) =>
-			load({
-				fetch: async (url: string) => {
-					if (url.includes('/config'))
-						return Response.json({
-							data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
-						});
-					if (url.includes('/contracts?'))
-						return Response.json({
-							contracts: [
-								contract('nein', false, null),
-								contract('eigen', true, '2.00'),
-								contract('lauf', true, null)
-							]
-						});
-					if (url.includes('/statements?')) return Response.json({ data: statements });
-					return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
-				},
-				url: new URL(
-					'http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
-				)
-			} as never);
-
 		const mixed = [
 			statement('nein', '0.00'),
 			statement('eigen', '2.00'),
@@ -151,7 +189,7 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		// a recreated statement shares it (A-10, closing review C-1), and the notice says where each comes from
 		expect(await openWith(mixed.slice(0, 2))).toMatchObject({
 			defaultManagementFeePercent: 3,
-			defaultHeatingProfileId: 'hp-nein',
+			defaultHeatingProfileId: 'hp9',
 			preset: { fromStatements: true, feeFromSettings: true }
 		});
 	});

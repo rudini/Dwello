@@ -101,6 +101,7 @@ type Coverage = {
 	last: string | null;
 	statements?: number; // already created for this period
 	check?: InvoiceCheck;
+	fixedTerm?: boolean; // the run bills a running befristeter Mietvertrag here (#76)
 };
 
 const invoices = (count: number) =>
@@ -147,24 +148,21 @@ const partialNote = (count = 0) =>
 		? ''
 		: ` ${count === 1 ? m.statements_finding_partial_one() : m.statements_finding_partial_many({ count })}`;
 
-/** One finding of the check per category in plain words, with what to look at */
-export const findingText = (finding: CategoryFinding) =>
-	`${findingBody(finding)}${finding.kind === 'gap' || finding.kind === 'deviation' ? partialNote(finding.partialCount) : ''}`;
+/** One finding of the check per category in plain words, with what to look at; fixedTerm: the building bills a running befristeter Mietvertrag (#76) */
+export const findingText = (finding: CategoryFinding, fixedTerm = false) =>
+	`${findingBody(finding, fixedTerm)}${finding.kind === 'gap' || finding.kind === 'deviation' ? partialNote(finding.partialCount) : ''}`;
 
-function findingBody({
-	kind,
-	current,
-	previous,
-	missingParts,
-	changePercent
-}: CategoryFinding): string {
+function findingBody(
+	{ kind, current, previous, missingParts, changePercent }: CategoryFinding,
+	fixedTerm: boolean
+): string {
 	if (kind === 'stock') return stockText(missingParts);
 	// a hint on the readings: a negative consumption, or one far from the year before (#73)
 	if (kind === 'consumption' && changePercent === null)
 		return m.statements_finding_stock_negative({ amount: formatCurrency(-current.total) });
 	if (kind === 'missing')
 		return m.statements_finding_missing({ amount: formatCurrency(previous.total) });
-	if (kind === 'new') return m.statements_finding_new({ amount: formatCurrency(current.total) });
+	if (kind === 'new') return newCostsText(current.total, fixedTerm);
 	if (kind === 'gap') {
 		const gap = {
 			parts: new Intl.ListFormat(`${getLocale()}-CH`).format(missingParts.map(partLabel)),
@@ -176,6 +174,13 @@ function findingBody({
 	}
 	return changeText(kind === 'consumption', current.total, previous.total, changePercent ?? 0);
 }
+
+// The category is the building's: the unbefristete contracts keep the Kündigungstermin, a befristeter waits for its end
+const newCostsText = (total: number, fixedTerm: boolean) =>
+	m.statements_finding_new({
+		amount: formatCurrency(total),
+		fixedTerm: fixedTerm ? ` ${m.statements_finding_new_fixed_term()}` : ''
+	});
 
 // Costs, or the consumption of the Tankbestand (#73), far from the year before
 function changeText(consumption: boolean, total: number, previous: number, percent: number) {
@@ -191,7 +196,6 @@ function changeText(consumption: boolean, total: number, previous: number, perce
 }
 
 // Costs more than 15 % above the Akonto suggest raising it, more than 30 % below suggest missing invoices: UX choices, hints only (#65)
-// TODO(fachlich prüfen, #76): a fixed-term contract has no termination date before its end, for the Akonto and new costs alike (review B, MR4-4, MR5-2)
 const AKONTO_ABOVE = 0.15;
 const AKONTO_BELOW = 0.3;
 
@@ -201,6 +205,7 @@ type AkontoRow = {
 	rentalDays?: number;
 	totalPeriodDays?: number;
 	movedOut?: boolean; // the contract ends in the period: no Akonto left to raise
+	fixedTerm?: boolean; // befristet, its end not reached: no Kündigungstermin before it (#76)
 };
 
 /** A statement whose costs are far from the Akonto paid: missing invoices, or an Akonto to raise */
@@ -209,7 +214,8 @@ export function akontoHint({
 	totalAdvancePayments,
 	rentalDays,
 	totalPeriodDays,
-	movedOut
+	movedOut,
+	fixedTerm
 }: AkontoRow) {
 	if (!(totalAdvancePayments > 0)) return null;
 	const change = (totalCosts - totalAdvancePayments) / totalAdvancePayments;
@@ -217,7 +223,8 @@ export function akontoHint({
 	const percent = Math.round(Math.abs(change) * 100);
 	const above = m.statements_akonto_above({ amount, percent });
 	if (change > AKONTO_ABOVE && movedOut) return above;
-	if (change > AKONTO_ABOVE) return `${above} ${m.statements_akonto_raise()}`;
+	if (change > AKONTO_ABOVE)
+		return `${above} ${fixedTerm ? m.statements_akonto_raise_fixed_term() : m.statements_akonto_raise()}`;
 	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices
 	const wholePeriod = !rentalDays || !totalPeriodDays || rentalDays >= totalPeriodDays;
 	if (change < -AKONTO_BELOW && wholePeriod) return m.statements_akonto_below({ amount, percent });
@@ -273,6 +280,7 @@ export const invoiceRows = (
 		// With the year before to compare, the check per category replaces the look at start and end of the period
 		partial: !c.check?.hasComparison && partly(c, period),
 		existing: c.statements ?? 0,
+		fixedTerm: !!c.fixedTerm,
 		...categoryCheck(c.check)
 	}));
 
