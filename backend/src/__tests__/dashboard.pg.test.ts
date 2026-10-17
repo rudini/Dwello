@@ -80,6 +80,8 @@ beforeAll(async () => {
 	await statement(6, { status: 'sent', balance: '80', paymentDeadline: day(30) });
 	await statement(7, { status: 'sent', balance: '-60', paymentDeadline: day(30) });
 	for (const id of statements.slice(-3)) await updateStatementStatus(id, 'paid', { paidDate: day(0) });
+	// #120, Fachreview W2e V-15: a payment received stays received when its statement is replaced afterwards
+	await statement(8, { status: 'replaced', balance: '40', paidAmount: '40', paidDate: day(0) });
 
 	after = await dashboard();
 });
@@ -117,12 +119,12 @@ describe('Dashboard', () => {
 
 	// #93: «Als bezahlt markieren» ohne Betrag speichert den Saldo als bezahlten Betrag
 	it('speichert beim Bezahlen den Saldo als bezahlten Betrag', async () => {
-		const paid = await db.select({ paidAmount: utilityStatements.paidAmount }).from(utilityStatements).where(inArray(utilityStatements.id, statements.slice(-3)));
+		const paid = await db.select({ paidAmount: utilityStatements.paidAmount }).from(utilityStatements).where(inArray(utilityStatements.id, statements.slice(4, 7)));
 		expect(paid.map((row) => row.paidAmount).sort()).toEqual(['-60.00', '150.00', '80.00']);
 	});
 
 	it('summiert ausstehende Nachzahlungen der Mieter ohne Guthaben', () => {
-		expect(added('financial')).toMatchObject({ totalPending: 500, overdueAmount: 300, paidThisMonth: 230 });
+		expect(added('financial')).toMatchObject({ totalPending: 500, overdueAmount: 300, paidThisMonth: 270 });
 	});
 
 	it('zeigt die Belegung des Gebäudes', () => {

@@ -308,6 +308,17 @@ export function testData(api: CallTheApi) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
+		async contractStart(tenantTitle: string, startDate: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { startDate });
+		},
+
+		// #120: the statement is replaced; `correct` also creates its berichtigte Abrechnung
+		async replaceStatement(tenantTitle: string, year: number, correct = false) {
+			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
+			await post(`statements/${id}/replace`, {});
+			if (correct) ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
+		},
+
 		async resetPayment(tenantTitle: string, year: number) {
 			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/payment-reset`, {});
 		},

@@ -101,7 +101,7 @@ describe('Vertragsdaten, die die Mietstage einer Abrechnung ändern', () => {
 		expect(
 			billedDaysError([of('NK-2025-0003'), of('NK-2024-0003', 'paid'), of('NK-2023-0001', 'sent')])
 		).toBe(
-			'Die Nebenkostenabrechnungen NK-2024-0003 (bezahlt) und NK-2023-0001 (versendet) wurden mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum lässt sich das Datum nicht speichern. Prüfen Sie das Datum. Stimmt es, klären Sie die Korrektur der Abrechnung direkt mit dem Mieter. Betroffen ist auch der Entwurf NK-2025-0003.'
+			'Die Nebenkostenabrechnungen NK-2024-0003 (bezahlt) und NK-2023-0001 (versendet) wurden mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum lässt sich das Datum noch nicht speichern. Prüfen Sie das Datum. Stimmt es, berichtigen Sie zuerst jede dieser Abrechnungen. Öffnen Sie sie dazu und wählen Sie «Abrechnung berichtigen». Betroffen ist auch der Entwurf NK-2025-0003.'
 		);
 	});
 });

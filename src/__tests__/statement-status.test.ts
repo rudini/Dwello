@@ -9,13 +9,15 @@ describe('statement status', () => {
 			draft: 'Entwurf',
 			sent: 'Versendet',
 			paid: 'Bezahlt',
-			overdue: 'Überfällig'
+			overdue: 'Überfällig',
+			replaced: 'Ersetzt'
 		});
 		expect(statusTones).toEqual({
 			draft: 'neutral',
 			sent: 'info',
 			paid: 'positive',
-			overdue: 'critical'
+			overdue: 'critical',
+			replaced: 'neutral'
 		});
 	});
 });

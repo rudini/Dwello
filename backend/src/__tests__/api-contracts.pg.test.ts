@@ -79,7 +79,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	// sent and paid at the end of the file: no longer a draft the API deletes
-	await db.delete(utilityStatements).where(eq(utilityStatements.id, statementId));
+	await db.delete(utilityStatements).where(eq(utilityStatements.contractId, rental.contract));
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
 	await rental.remove();
 });
@@ -388,5 +388,23 @@ describe('API-Verträge der Zahlung', () => {
 		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: today });
 		const actual = await (await callApi(`/api/v1/statements/${statementId}/payment-reset`, { method: 'POST' })).json();
 		expect(drift(await sample('statement-payment-reset'), actual)).toEqual([]);
+	});
+});
+
+// After the payment: the paid statement is replaced (#120)
+describe('API-Verträge der Berichtigung', () => {
+	it('POST /statements/:id/correction liefert die Felder von statement.json, ohne Mietstage die von statement-correction-refused.json', async () => {
+		await callApi(`/api/v1/statements/${statementId}/replace`, { method: 'POST' });
+		const corrected = await callApi(`/api/v1/statements/${statementId}/correction`, { method: 'POST' });
+		expect(corrected.status).toBe(201);
+		const { id } = (await corrected.json()) as { id: string };
+		expect(drift(await sample('statement'), await (await callApi(`/api/v1/statements/${id}`)).json())).toEqual([]);
+		await callApi(`/api/v1/statements/${id}`, { method: 'DELETE' });
+		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2025-02-01' });
+
+		const refused = await callApi(`/api/v1/statements/${statementId}/correction`, { method: 'POST' });
+
+		expect(refused.status).toBe(409);
+		expect(drift(await sample('statement-correction-refused'), await refused.json())).toEqual([]);
 	});
 });

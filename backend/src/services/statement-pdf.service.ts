@@ -133,7 +133,15 @@ export function toPdfData(
 		totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
 		balance: parseFloat(statement.balance),
 		paymentDeadline: statement.paymentDeadline || undefined,
-		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined
+		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined,
+		...(statement.replaces && {
+			replaces: {
+				statementNumber: statement.replaces.statementNumber,
+				statementDate: statement.replaces.statementDate,
+				paidOn: statement.priorPaidOn ?? [],
+				priorPayments: parseFloat(statement.priorPayments)
+			}
+		})
 	};
 }
 

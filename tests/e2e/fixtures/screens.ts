@@ -73,6 +73,14 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	await seed.sendStatement('Anna', 2024);
 	await seed.markPaid('Anna', 2024); // paid: its payment can be reset (#92)
+	// #120: Carla's 2024 statement paid, replaced and corrected; her 2022 one replaced, its correction not created yet
+	// (2022: a replaced statement of a whole year would count as billed for the shorter periods of 2025 the wizard shows)
+	await seed.sendStatement('Carla', 2024);
+	await seed.markPaid('Carla', 2024);
+	await seed.replaceStatement('Carla', 2024, true);
+	await seed.statement('Carla', 'Seeblick', 2022, 'Standard');
+	await seed.sendStatement('Carla', 2022);
+	await seed.replaceStatement('Carla', 2022);
 	// reminded today: the Zahlungsfrist of the Mahnung runs, the next one is possible only later (#107)
 	await seed.sendStatement('Bruno', 2024);
 	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
@@ -147,6 +155,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		partsStatement: seed.idOf('Abrechnung Greta 2025'),
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
+		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
+		correctedStatement: seed.idOf('Abrechnung Carla 2024'),
+		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
