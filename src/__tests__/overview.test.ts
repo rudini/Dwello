@@ -26,6 +26,30 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 });
 
 describe('Aufgaben der Übersicht', () => {
+	// #178: a former tenant's uploads from before the last Vertragsende, to look at and delete
+	it('nennt für jeden ehemaligen Mieter die Dokumente von vor dem Vertragsende', () => {
+		const tasks = overviewTasks(
+			input({
+				formerTenants: [
+					{ tenantId: 't1', tenantName: 'Ida Alt', endDate: '2026-03-31', count: 1 },
+					{ tenantId: 't2', tenantName: 'Ugo Vecchio', endDate: '2026-05-31', count: 2 }
+				]
+			})
+		);
+		expect(tasks).toContainEqual(
+			expect.objectContaining({
+				id: 'former-documents-t1',
+				title: 'Dokumente von Ida Alt prüfen',
+				text: 'Der letzte Mietvertrag endete am 31.03.2026. 1 hochgeladenes Dokument stammt aus der Zeit davor. Löschen Sie, was Sie nicht mehr brauchen; behalten Sie Übergabeprotokolle, bis das Mietzinsdepot freigegeben ist.',
+				href: '/tenants/t1',
+				action: 'Dokumente ansehen'
+			})
+		);
+		expect(tasks).toContainEqual(
+			expect.objectContaining({ id: 'former-documents-t2', text: expect.stringContaining('2 hochgeladene Dokumente stammen') })
+		);
+	});
+
 	// A-4: in der Kündigungszeit einen Nachmieter suchen, ab dem Tag, an dem die Kündigung erfasst ist
 	it('nennt für jede Kündigung die Suche nach einem Nachmieter', () => {
 		const tasks = overviewTasks(

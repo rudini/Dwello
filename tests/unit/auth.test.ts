@@ -40,8 +40,7 @@ const testUser: JwtPayload = {
 	sub: 'user-123',
 	email: 'test@example.com',
 	name: 'Test User',
-	provider: 'google',
-	picture: 'https://example.com/photo.jpg'
+	provider: 'google'
 };
 
 describe('JWT Generation and Verification', () => {
@@ -62,7 +61,6 @@ describe('JWT Generation and Verification', () => {
 			expect(decoded.email).toBe(testUser.email);
 			expect(decoded.name).toBe(testUser.name);
 			expect(decoded.provider).toBe(testUser.provider);
-			expect(decoded.picture).toBe(testUser.picture);
 		});
 
 		it('should set correct issuer and audience', async () => {
@@ -82,20 +80,6 @@ describe('JWT Generation and Verification', () => {
 			expect(decoded.iat).toBeGreaterThanOrEqual(before);
 			expect(decoded.iat).toBeLessThanOrEqual(after);
 			expect(decoded.exp).toBeGreaterThan(decoded.iat);
-		});
-
-		it('should handle missing optional picture field', async () => {
-			const userWithoutPicture: JwtPayload = {
-				sub: 'user-456',
-				email: 'nopic@example.com',
-				name: 'No Picture',
-				provider: 'microsoft'
-			};
-
-			const token = await generateJwt(userWithoutPicture);
-			const decoded = await verifyJwt(token);
-
-			expect(decoded.picture).toBeUndefined();
 		});
 	});
 

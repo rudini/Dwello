@@ -1,6 +1,7 @@
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
+import { flushSync } from 'svelte';
 
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
@@ -508,6 +509,44 @@ describe('Rechnung erfassen', () => {
 		});
 	});
 
+	// Hilfe und Feldbeispiele nennen dasselbe Jahr, auch im nächsten Jahr (#250, Persona Dr. Weber)
+	it('nennt im Leistungszeitraum dasselbe Jahr wie die Beispiele der Datumsfelder', () => {
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(new Date('2027-03-01T10:00:00Z'));
+		try {
+			show(NewInvoicePage, { data: data(false) } as never);
+			const end = byTestId<HTMLInputElement>('invoice-service-end-input')!;
+			fireEvent(end, 'input', 'Ende März');
+			end.dispatchEvent(new Event('blur'));
+			flushSync();
+
+			expect(text()).toContain('zum Beispiel 31.12.2027.');
+			const help = byTestId('invoice-service-period-help')!.textContent!;
+			expect(help).toContain('Für das 4. Quartal also 01.10.2027 bis 31.12.2027');
+			// welcher Boiler gemeint ist und wann der Zeitraum endet (Personas Dr. Weber P-2, Helga P-5)
+			expect(help).toContain(
+				'endet am Tag, bevor die Arbeit das nächste Mal gemacht wird. Ein Beispiel: Der Boiler der zentralen Warmwasseranlage wird am 01.04.2027 entkalkt'
+			);
+			expect(help).toContain('Geben Sie dann 01.04.2027 bis 31.03.2032 ein.');
+			expect(help.match(/\d{4}/g)).toEqual(['2027', '2027', '2027', '2027', '2032']);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	// Kosten über mehrere Jahre: das Entkalken eines Boilers in der Wohnung nur, wenn der Mietvertrag es nennt (#254)
+	it('erklärt beim Leistungszeitraum Kosten über mehrere Jahre und den Boiler in der Wohnung', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const help = byTestId('invoice-service-period-help')!.textContent!;
+
+		expect(help).toContain(
+			'Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre.'
+		);
+		expect(help).toContain(
+			'Bei einem Boiler in der Wohnung ist das umstritten: Verrechnen Sie es nur, wenn der Mietvertrag das Entkalken des Boilers ausdrücklich als Nebenkosten nennt. Im Zweifel ist es nicht umlagefähig.'
+		);
+	});
+
 	it('verlangt zum Beginn des Leistungszeitraums auch das Ende', () => {
 		const calls = fakeBff();
 		show(NewInvoicePage, { data: data(false) } as never);
@@ -720,7 +759,7 @@ describe('Rechnung erfassen', () => {
 		const help = text();
 
 		expect(help).toContain(
-			'Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
+			'Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
 		);
 		expect(help).toContain(
 			'Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'

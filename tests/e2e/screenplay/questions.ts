@@ -62,7 +62,11 @@ export const Checked = {
 export const Attribute = {
 	named: (name: string) => ({
 		of: (target: Target) =>
-			about(target, `the attribute ${name} of`, (element) => single(element, (one) => one.getAttribute(name, quick)))
+			about(target, `the attribute ${name} of`, (element) => single(element, (one) => one.getAttribute(name, quick))),
+		ofAll: (target: Target) =>
+			about(target, `the attributes ${name} of`, (element) =>
+				element.evaluateAll((all, attribute) => all.map((one) => one.getAttribute(attribute)), name)
+			)
 	})
 };
 

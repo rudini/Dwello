@@ -144,7 +144,9 @@ const chosenAllowance = (body: string) =>
 describe('Kategorie erfassen und bearbeiten', () => {
 	// Eine Kategorie ist nie umlagefähig, nur weil niemand hingeschaut hat (#176)
 	it('beginnt eine neue Kategorie ohne Wahl der Umlagefähigkeit', () => {
-		const body = render(NewCategoryPage, { props: { form: null } as never }).body;
+		const body = render(NewCategoryPage, {
+			props: { data: { kiEnabled: true }, form: null } as never
+		}).body;
 
 		expect(chosenAllowance(body)).toEqual([]);
 		expect(body).toContain('Kategorie speichern');

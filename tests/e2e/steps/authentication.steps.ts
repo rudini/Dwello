@@ -61,6 +61,12 @@ Then('leitet Dwello den Besucher zur Anmeldung bei Google weiter', async ({ besu
 	await besucher.sees(googleSignInParameter('state')).toMatch(/^[0-9a-f]{64}$/);
 });
 
+Then('bittet Dwello Google nicht um dauerhaften Zugriff auf das Konto', async ({ besucher }) => {
+	await besucher.sees(googleSignInParameter('client_id')).toBe('e2e-google-client');
+	await besucher.sees(googleSignInParameter('access_type')).toBeNull();
+	await besucher.sees(googleSignInParameter('prompt')).toBeNull();
+});
+
 Then(
 	'sieht der Liegenschaftsverwalter seinen Namen {string} in der Kopfzeile',
 	async ({ verwalter }, name: string) => {

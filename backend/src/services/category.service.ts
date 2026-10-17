@@ -173,7 +173,11 @@ export async function createCategory(data: NewCategory): Promise<Category> {
 /**
  * Update an existing category
  */
-export async function updateCategory(id: string, data: Partial<NewCategory>): Promise<Category | null> {
+export async function updateCategory(id: string, changes: Partial<NewCategory>): Promise<Category | null> {
+	// A predefined category keeps its key: the KI and its reason know it by that (#166)
+	const [stored] = await db.select({ type: categories.type }).from(categories).where(eq(categories.id, id));
+	const { name: _key, ...names } = changes;
+	const data: Partial<NewCategory> = stored?.type === 'predefined' ? names : changes;
 	if (data.name) await ensureNameIsFree(data.name, id);
 	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
 
@@ -207,6 +211,10 @@ export async function updateCategory(id: string, data: Partial<NewCategory>): Pr
  * Returns false if category is used by invoices
  */
 export async function deleteCategory(id: string): Promise<{ success: boolean; conflict?: boolean } & Partial<Refusal>> {
+	const [predefined] = await db.select({ id: categories.id }).from(categories).where(and(eq(categories.id, id), eq(categories.type, 'predefined')));
+	if (predefined) {
+		return { success: false, conflict: true, ...refusal('CATEGORY_PREDEFINED', 'Vordefinierte Kategorien können nicht gelöscht werden.') };
+	}
 	// Check for invoices using this category
 	const [invoiceCount] = await db
 		.select({ count: sql<number>`count(*)` })

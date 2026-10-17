@@ -10,6 +10,7 @@ import {
 	chooseInFooter,
 	openHelpFromPublicPage,
 	openLoginFromPublicPage,
+	openPrivacyFromLogin,
 	openTermsFromLogin
 } from '../tasks/app-frame';
 import { loseSession, signInAgain } from '../tasks/authentication';
@@ -80,6 +81,10 @@ Given('ein Besucher hat die Seite {string} geöffnet', async ({ besucher }, path
 
 When('der Besucher den Link zu den Nutzungsbedingungen öffnet', async ({ besucher }) => {
 	await besucher.attemptsTo(openTermsFromLogin);
+});
+
+When('der Besucher den Link zur Datenschutzerklärung öffnet', async ({ besucher }) => {
+	await besucher.attemptsTo(openPrivacyFromLogin);
 });
 
 When('der Besucher den Link zur Anmeldung öffnet', async ({ besucher }) => {

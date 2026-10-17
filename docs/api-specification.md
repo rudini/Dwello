@@ -20,13 +20,13 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 
 ## 2. Conventions (backend)
 
-- **Base path:** `/api/v1`. All endpoints except `GET /health`, `GET /api/v1/invoices/llm-recipient` (provider and country for the public privacy notice) and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
+- **Base path:** `/api/v1`. All endpoints except `GET /health`, `GET /api/v1/invoices/llm-recipient` (provider and country for the public privacy notice), `GET /api/v1/mail-transport` (`{ transport: "smtp" | "resend" | null }`, the configured mail provider for the same notice) and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
 - **No envelope:** successful responses are the bare resource or a plain object, with **camelCase** field names (e.g. `{ "buildings": [...], "total": 1 }`). The list key differs per router (see each section).
 - **Errors:** `{ "error": "<message>", "code"?: "<CODE>", "params"?: { … }, "causes"?: [{ "code", "params" }] }`. `error` is free text (some English, some German). A refusal that can reach the UI also carries a stable `code` and the values in its text as `params` (`backend/src/services/coded-error.ts`); the BFF shows the message `backend_<code in lower case>` from `messages/*.json` in the UI language (`src/lib/backend-error.ts`), otherwise the `error` text. Unexpected errors have no code. Codes:
   - Payment: `PAID_DATE_INVALID {date}`, `PAID_DATE_BEFORE_STATEMENT {date}`, `PAID_DATE_IN_FUTURE {date}`, `STATEMENT_NOT_PAID`
   - Not found: `APARTMENT_NOT_FOUND`, `BUILDING_NOT_FOUND`, `CATEGORY_NOT_FOUND`, `CONTRACT_NOT_FOUND`, `DISTRIBUTION_KEY_NOT_FOUND`, `HEATING_PROFILE_NOT_FOUND`, `INVOICE_NOT_FOUND`, `STATEMENT_NOT_FOUND`
   - Names and numbers taken (409): `APARTMENT_NUMBER_TAKEN {number}`, `CATEGORY_NAME_TAKEN {name}`, `DISTRIBUTION_KEY_NAME_TAKEN {name}`, `HEATING_PROFILE_NAME_TAKEN {name}`
-  - Delete refusals: `CATEGORY_HAS_FUEL_STOCK`, `CATEGORY_IN_USE_ONE` / `CATEGORY_IN_USE {count}`, `DISTRIBUTION_KEY_PREDEFINED`, `DISTRIBUTION_KEY_IN_USE_ONE` / `DISTRIBUTION_KEY_IN_USE {count}`, `DISTRIBUTION_KEY_IS_DEFAULT`, `HEATING_PROFILE_PREDEFINED`, `HEATING_PROFILE_IS_DEFAULT`, `STATEMENT_NOT_DRAFT`
+  - Delete refusals: `CATEGORY_PREDEFINED`, `CATEGORY_HAS_FUEL_STOCK`, `CATEGORY_IN_USE_ONE` / `CATEGORY_IN_USE {count}`, `DISTRIBUTION_KEY_PREDEFINED`, `DISTRIBUTION_KEY_IN_USE_ONE` / `DISTRIBUTION_KEY_IN_USE {count}`, `DISTRIBUTION_KEY_IS_DEFAULT`, `HEATING_PROFILE_PREDEFINED`, `HEATING_PROFILE_IS_DEFAULT`, `STATEMENT_NOT_DRAFT`
   - Distribution keys and formulas: `DISTRIBUTION_KEY_TYPE_FIXED`, `DISTRIBUTION_KEY_FORMULA_FIXED`, `FORMULA_INVALID` (every formula error in `causes`: `[{ code, params }]`, in the order of the text), `FORMULA_REQUIRED`, `FORMULA_UNKNOWN_VARIABLE {variable}`, `FORMULA_NO_VARIABLE`, `FORMULA_INVALID_CHARACTERS {characters}`, `FORMULA_UNOPENED_PARENTHESIS`, `FORMULA_UNCLOSED_PARENTHESIS`, `FORMULA_CONSECUTIVE_OPERATORS`, `FORMULA_DIVISION_BY_ZERO`, `FORMULA_VALUE_MISSING {variable}`, `FORMULA_NOT_A_NUMBER`, `FORMULA_NOT_COMPUTABLE` (the engine's own text only in `error`, for the log), `FORMULA_SAMPLE_FAILED {sample, reason, …}`, `FORMULA_SAMPLE_NEGATIVE {sample}` (`sample`: `FORMULA_SAMPLE_SMALL`, `_MEDIUM`, `_LARGE`), `FORMULA_APARTMENT_FAILED {reason, …}`, `FORMULA_NEGATIVE`, `FORMULA_ALL_ZERO`. The params `cause`, `reason` and `sample` may hold a code, shown as that code's message
   - Heating profiles: `HEATING_PROFILE_SHARES_SUM {sum}`, `HEATING_PROFILE_SHARE_NEGATIVE {month}`, `HEATING_PROFILE_TYPE_FIXED`, `HEATING_PROFILE_SHARES_FIXED`
   - Contracts and statements: `CONTRACT_OVERLAP {contract}`, `CONTRACT_NOTICE_WITHOUT_END`, `CONTRACT_PARTIES_FIXED`, `CONTRACT_STARTED`, `CONTRACT_HAS_STATEMENTS`, `CONTRACT_NOT_IN_PERIOD`, `IBAN_MISSING`, `IBAN_INVALID` (the stored IBAN fails its check when a PDF needs the QR-bill), `CALCULATION_FAILED` (preview or generation failed for another reason, logged), `PDF_FAILED` (500: a PDF could not be made for another reason, logged)
@@ -294,7 +294,7 @@ Document fields: `id, tenantId, statementId, type ("reminder" | "statement" | "u
 |---|---|---|
 | GET | `/auth/login?provider=google\|microsoft[&redirectTo=/path]` | Sets the OAuth state cookie and redirects (302) to the provider. Invalid or missing provider: 400; provider not configured: 303 to `/login?error=unavailable` |
 | GET | `/auth/callback?code&state` | Validates `state`, exchanges the code, issues the JWT, sets session and XSRF cookies, 303 to `redirectTo` (default the dashboard). Any failure: 303 to `/login?error=failed` (or `cancelled`) |
-| GET | `/auth/me` | → `{ user: { sub, email, name, provider, picture? } }`. 401 |
+| GET | `/auth/me` | → `{ user: { sub, email, name, provider } }`. 401 |
 | POST | `/auth/refresh` | Requires `X-XSRF-TOKEN`. Issues a new JWT and XSRF token. → `{ success: true, xsrfToken }`. 400 bad XSRF; 401 |
 | POST | `/auth/logout` | Clears the auth cookies (also without a valid XSRF token). → `{ success: true }` |
 
@@ -313,7 +313,7 @@ All on path `/`; `Secure` from `COOKIE_SECURE`, `SameSite` from `COOKIE_SAME_SIT
 
 ### JWT
 
-HS256 signed with `JWT_SECRET` (≥ 32 chars). Claims: `sub`, `email`, `name`, `provider`, `picture?`, `iat`, `exp`, `iss: "dwello"`, `aud: "dwello-app"`. Lifetime `JWT_EXPIRY` (`<n>s|m|h|d`, default `7d`). The BFF and the backend both verify signature, expiry, issuer and audience; the backend also checks the claim shape.
+HS256 signed with `JWT_SECRET` (≥ 32 chars). Claims: `sub`, `email`, `name`, `provider`, `iat`, `exp`, `iss: "dwello"`, `aud: "dwello-app"`. Lifetime `JWT_EXPIRY` (`<n>s|m|h|d`, default `7d`). The BFF and the backend both verify signature, expiry, issuer and audience; the backend also checks the claim shape.
 
 ### XSRF and proxy
 

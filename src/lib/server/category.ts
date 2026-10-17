@@ -6,7 +6,8 @@ import { localName } from '$lib/names';
 import type { Category } from '$lib/types';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
-const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/categories`;
+const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
+const API = `${BACKEND}/categories`;
 const LIST = '/config/categories';
 
 export type CategoryWithUsage = Category & { key: string; usageCount: number; predefined: boolean };
@@ -30,6 +31,13 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 		predefined: c.type === 'predefined'
 	};
 }
+
+/** Whether the operator switched the KI on; unknown counts as on, so a refusal says why (#219) */
+export const kiEnabled = (fetch: typeof globalThis.fetch) =>
+	fetch(`${BACKEND}/invoices/llm-recipient`)
+		.then((response) => response.json())
+		.then((answer) => answer.enabled !== false)
+		.catch(() => true);
 
 /**
  * The umlagefähige categories a Mietvertrag can agree (#91), named in the UI language; a list that failed to load

@@ -561,6 +561,22 @@ Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs
 - [x] Workflow notes (`docs/reviews/workflow-notes-issue-247-230-232.md`)
 - [x] Workflow review, archive the session, pull request
 
+## Session 2026-10-16 (#250, #254: Leistungszeitraum over several years)
+
+- [x] #250: help text and field examples of the Leistungszeitraum use one year (the current year, as the date fields' examples), all four languages; DOM tests pin it (form, help page). No scenario: wording without new behaviour, as #250 says; covered by `sprachen-bildschirme.feature`
+- [x] #254: help at the Leistungszeitraum (invoice form, edit form, upload dialog) and on the help page names a cost over several years, all four languages; scenarios in `invoice-new.feature`, `help.feature`
+- [x] #254: scenario in `statement-generate.feature`: CHF 500 over 01.04.2026 – 31.03.2031 counts CHF 75.30 in 2026 and CHF 99.95 in 2027 (green on the base: the behaviour exists)
+- [x] #254: lower-layer test of `inPeriod` over five years (`service-period.pg.test.ts`, red with the prorating taken out)
+- [x] fach-reviewer round 1 on scenarios and texts: `docs/reviews/w3-fachreview-1.md`; V-2 → #276
+- [x] code-reviewer round 1: `docs/reviews/w3-review-1.md`; C-1 → #282 (decision)
+- [x] personas: `docs/design/personas/weber-w3-leistungszeitraum.md`, `docs/design/personas/helga-w3-leistungszeitraum.md`
+- [x] fach-reviewer round 2 on the changed texts: `docs/reviews/w3-fachreview-2.md`
+- [x] Workflow note: scenario of existing behaviour, one pull request for two issues, contradicting decisions block the merge (`docs/reviews/workflow-notes-issue-250-254.md`)
+- [x] closing code-reviewer round: `docs/reviews/w3-review-2.md`
+- [x] Checks before push green; push and pull request follow (CLAUDE.md, Workflow 9); the merge waits for the product owner's decision in #282
+
+Files: `messages/{de,fr,it,en}.json`, `src/routes/invoices/InvoiceDataFields.svelte`, `src/routes/help/+page.svelte`, `src/__tests__/{invoice-pages,invoice-upload-dialog,help-page}.dom.test.ts`, `backend/src/__tests__/service-period.pg.test.ts`, `tests/e2e/features/{statement-generate,help,invoice-new}.feature`, `tests/e2e/{steps,targets,questions}/invoice-form*`, `docs/nebenkostenabrechnung-anforderungen.md`
+
 ## Session 2026-10-16 W6: Reminder deadlines and posting (#107, #193, #194)
 
 - [x] #107: scenario «Nächste Mahnung erst nach der Zahlungsfrist der letzten» (`statement-reminder.feature`) replaces «Zweite Mahnung» (the E2E clock cannot age a reminder past its deadline: the allowed 2nd Mahnung is a `reminders.pg.test.ts` case)
@@ -690,6 +706,7 @@ Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/s
 - [x] Closing re-review (`docs/reviews/issue-89-review-4.md`): C-11 and the delta confirmed, no Blocker/Major open; C-18 fixed, C-17 left (accessibility targets keep their own module)
 - [x] PR
 - Files: `backend/migrations/0011_contract_management_fee.sql`, `backend/src/{db/schema.ts,routes/contracts.ts,routes/statements.ts,services/calculation.service.ts,services/config.service.ts,services/contract.service.ts}`, `backend/demo/demo-data.sql`, `src/lib/{contract-form.ts,contract-wizard.ts,statement-wizard.ts,types.ts,utils/format.ts,server/settings.ts,server/statement-generation.ts}`, `src/routes/contracts/{new/RentStep.svelte,[id]/*}`, `src/routes/statements/generate/{+page.server.ts,FeeNotAgreed.svelte,SettingsStep.svelte,StatementStep.svelte}`, `messages/*.json`, docs
+
 ## Session 2026-10-16 (#97, #101: identity of a statement)
 
 - [x] #97: a per-building, per-year number sequence that never gives a number twice; a deleted draft leaves a gap (`*.pg.test.ts`: two drafts, delete the second, generate again → `…-0003`); existing numbers unchanged; `docs/data-model.md` names where the sequence is kept
@@ -703,6 +720,27 @@ Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/s
 - [x] Checks before push green; push, pull request and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.ts`, `backend/src/services/calculation.service.ts`, `backend/src/routes/statements.ts`, `src/lib/server/statement.ts`, `src/routes/statements/[id]/pdf/+server.ts`, `src/routes/api/statements/[id]/pdf/+server.ts`, `docs/data-model.md`, tests (`statement-creation.pg`, `statement.routes.pg`, `statement-endpoints`, `statement-list-load`), E2E (`statement-generate`, `statement-detail` features, steps, tasks, questions), `docs/api-specification.md`, `docs/design/offene-punkte.md` (O-34), `docs/design/personas/weber-w3-abrechnungsnummer.md`, `docs/reviews/w3b-*.md`, `docs/reviews/workflow-notes-issue-97-101.md`
+
+## Session W5b: #166 and #219 (predefined categories marked and protected, no KI check while the KI is off)
+
+No implementation issue exists for either decision issue: their "Decided (product owner)" sections are the requirement.
+
+- [x] #166 `@wip` scenarios (`categories.feature`): badges «Von Dwello» / «Eigene», delete disabled with its reason, hint on the edit page; seen red
+- [x] fach-reviewer round 1 on the scenarios and texts before implementing (`docs/reviews/w5b-fachreview-1.md`); V-2 → #302
+- [x] #166 backend: `deleteCategory` refuses a predefined category (`CATEGORY_PREDEFINED`), `updateCategory` keeps its key (pg tests)
+- [x] #166 list: badge, disabled delete button described by its reason; edit page: hint (its KI sentence only while the KI is on)
+- [x] #219 new-category page loads whether the KI is on and hides «Von der KI prüfen lassen» when it is off (No scenario: the E2E backend always starts with the KI on; `LLM_ENABLED` is read at the backend start)
+- [x] messages in all four languages; no new `tests/a11y` state (list and `category-edit-predefined` are already checked)
+- [x] code-reviewer round 1 (`docs/reviews/w5b-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w5b-fachreview-2.md`), personas Helga (`docs/design/personas/helga-w5b.md`) and Dr. Weber (`docs/design/personas/weber-w5b.md`)
+- [x] Fix slice: hint reworded (P-1 Helga/Weber), allocability sentence follows the saved choice (V-8, V-9), translations (V-10), fallback test (C-2), shared backend URL (C-3), term table (C-6); confirmation on save → #309 (Weber P-2)
+- [x] code-reviewer round 2 (`docs/reviews/w5b-review-2.md`; C-10 fixed), fach-reviewer round 3 (`docs/reviews/w5b-fachreview-3.md`; M-3 added to #309), Helga and Dr. Weber again on the new hint (`docs/design/personas/helga-w5b-2.md`, `weber-w5b-2.md`; Weber P-12 fixed)
+- [x] Workflow note: decision issue without implementation issue, how to show a test-after red without a prompt (`docs/reviews/workflow-notes-issue-166-219.md`)
+- [x] closing code-reviewer round (`docs/reviews/w5b-review-3.md`)
+- [x] Checks before push; archive session
+- [x] Push, pull request and CI follow (CLAUDE.md, Workflow 9); merge waits for the product owner on #302 and #309
+
+Files: `backend/src/services/category.service.ts`, `src/lib/server/category.ts`, `src/routes/config/categories/{+page.svelte,CategoryRow.svelte,CategoryForm.svelte,new/*,[id]/edit/*}`, `messages/*.json`, `docs/api-specification.md`, `docs/design/i18n-begriffe.md`, reviews (`docs/reviews/w5b-*.md`, `docs/design/personas/*-w5b*.md`, `docs/reviews/workflow-notes-issue-166-219.md`), tests (`category-predefined.pg`, `categories`, `categories-page.dom`, `category-predefined.dom`, `config-pages`, `focus-error.dom`, `tests/e2e/**`).
 
 ## Session: invoice check hints (#130, #131, #134)
 
@@ -1277,6 +1315,7 @@ Files changed: `backend/migrations/0020_contract_categories.sql`, `backend/src/d
 - [x] workflow-review, session archived, pull request (waits for the product owner on #352 / #353 before the merge)
 
 Files: `backend/src/services/{pdf-format,pdf.service,reminder.service,statement.service}.ts`, `backend/src/__tests__/{statement-lock.pg,reminders.pg,statement-pdf-render}.test.ts`, `src/lib/statement.ts`, `src/routes/statements/+page.svelte`, `src/routes/statements/[id]/{+page,PaymentPanel}.svelte`, `src/routes/statements/[id]/edit/{+page.svelte,+page.server.ts}`, `src/__tests__/{statement-pages.dom,statement-edit-actions}.test.ts`, `messages/*.json`, `tests/e2e/features/statement-minimum-balance.feature`, `tests/e2e/{steps,questions,targets,tasks}/statement-{detail,edit}*.ts`, `docs/{data-model,PRD-Dwello,nebenkostenabrechnung-anforderungen}.md`, `docs/design/offene-punkte.md` (O-36), reviews `docs/reviews/w6d-*.md`, persona reports `dr-weber-w6d.md`, `marco-w6d.md`
+
 ## Session 2026-10-16 W5d: «Abgerechnet bis» on the Mietvertrag (#133)
 
 - [x] Read #133 and its comments (Option 3; a period past «Abgerechnet bis» bills Mietstage and Akonto from the day after); #281 and #130 do not change its outcome; no implementation issue exists, the decision is the requirement
@@ -1298,6 +1337,30 @@ Files: `backend/src/services/{pdf-format,pdf.service,reminder.service,statement.
 - [x] Code review round 3, closing (`docs/reviews/w5d-review-3.md`): C-9 closed; C-13 fixed; no Blocker/Major
 - [x] Checks before push; archive the session
 - [x] Push and pull request follow (CLAUDE.md, Workflow 9); the merge waits on the product owner (open Majors that need a decision: #327, #325; glossary row of «Abgerechnet bis»)
+
+## Session W9c: privacy statement (#82) and documents of former tenants (#178)
+
+Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requirement (no separate implementation issues exist).
+
+- [x] #82 `@wip` scenarios (privacy.feature, authentication.feature, sprachen.feature, demo.feature), committed and reviewed by `fach-reviewer` before implementing (round 1: `docs/reviews/w9c-fachreview-1.md`)
+- [x] #82 controller from `OPERATOR_*`, «Betreiber» explained, right of access (DSG) (R-1 open: #330)
+- [x] #82 retention: kept until the landlord deletes, 10 years (Art. 958f OR, only for those required to keep books), no automatic deletion (R-2 follow-up: #332)
+- [x] #82 third parties per configured provider (sign-in, mail transport via `GET /api/v1/mail-transport`, OpenPLZ, Google Maps): country, disclosure abroad, link; what the sign-in provider learns (SMTP provider and server country: #333)
+- [x] #82 Google sign-in without `access_type=offline`/`prompt=consent`, no profile picture taken over (JWT, refresh, `/auth/me`)
+- [x] #82 server log: purpose, reader, retention set by the operator
+- [x] #82 cookie lifetime from `JWT_EXPIRY`; cookies can be refused (Art. 45c lit. b FMG, fach-reviewer agreed, R-9)
+- [x] #82 sign-in page links the privacy statement
+- [x] #82 terms: demo paragraph (screens.json `terms`/`demo`); «Liegenschaftsverwalter»; FR «rappels de paiement et les rappels»; draft notice reviewed, `TODO(fachlich prüfen, #82)` removed
+- [x] #178 tenant page and overview name uploaded documents older than the end of the tenant's last Mietvertrag (No scenario: the upload API stamps the current time, so a document from before a past Vertragsende cannot be seeded; unit and DOM tests). Overview task that never ends: #331; glossary terms: #334
+- [x] code-reviewer round 1 (`docs/reviews/w9c-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w9c-fachreview-2.md`)
+- [x] personas (`docs/design/personas/helga-w9c.md`, `docs/design/personas/dr-weber-w9c.md`)
+- [x] closing code-reviewer round (`docs/reviews/w9c-review-2.md`)
+- [x] workflow notes (`docs/reviews/workflow-notes-issue-82-178.md`)
+- [x] merge of main reviewed (`docs/reviews/w9c-review-merge.md`, `-2`, `-3`): A-6 and #178 agree
+- [x] plan archived; pull request open, merge waits for the product decisions (#330, #331)
+
+Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.
 
 ## Session W7d: #71 Heizprofil within the Leistungszeitraum
 
