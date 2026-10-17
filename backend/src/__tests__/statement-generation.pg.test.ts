@@ -239,8 +239,8 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 			totalCosts: '933.03',
 			// January to April, 4 × 200
 			totalAdvancePayments: '800.00',
-			// 133.03 to 5 Rappen
-			balance: '133.05'
+			// 133.03 down to 5 Rappen
+			balance: '133.00'
 		});
 	});
 
@@ -260,7 +260,7 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 			totalCosts: '1534.47',
 			// 16.–30. June = 15 / 30 × 180, plus July to December 6 × 180
 			totalAdvancePayments: '1170.00',
-			// 364.47 to 5 Rappen
+			// 364.47 down to 5 Rappen
 			balance: '364.45'
 		});
 	});
@@ -311,8 +311,8 @@ describe('Heizprofil', () => {
 			managementFee: '33.54',
 			totalCosts: '1151.54',
 			totalAdvancePayments: '800.00',
-			// 351.54 to 5 Rappen
-			balance: '351.55'
+			// 351.54 down to 5 Rappen
+			balance: '351.50'
 		});
 	});
 
@@ -331,8 +331,8 @@ describe('Heizprofil', () => {
 			managementFee: '43.04',
 			totalCosts: '1477.84',
 			totalAdvancePayments: '1170.00',
-			// 307.84 to 5 Rappen
-			balance: '307.85'
+			// 307.84 down to 5 Rappen
+			balance: '307.80'
 		});
 	});
 
