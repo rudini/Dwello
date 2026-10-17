@@ -69,6 +69,12 @@ Funktionalität: Kostenkategorien
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
     Dann nennt die Kategorie als Grund "nicht mit dem Gebrauch zusammen"
 
+  # Die Beschreibung nennt, was nicht dazugehört («ohne …», #204); die längste ist die der Heizung
+  Szenario: Ganze Beschreibung einer vordefinierten Kategorie auf dem Telefon
+    Angenommen der Liegenschaftsverwalter benutzt ein Telefon
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Heizung"
+    Dann zeigt das Feld «Beschreibung» seinen ganzen Text
+
   Szenario: Geänderte vordefinierte Kategorie nennt keinen festen Grund
     Angenommen die vordefinierte Kategorie "Schneeräumung" ist als nicht umlagefähig gespeichert
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
