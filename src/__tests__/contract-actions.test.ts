@@ -97,6 +97,12 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 describe('Fehlende Abrechnungen am Mietvertrag', () => {
 	const lastYear = new Date().getFullYear() - 1;
 	const year = (y: number) => ({ start: `${y}-01-01`, end: `${y}-12-31` });
+	// a whole period leads into the wizard; each range to the building's invoices of its year (#211)
+	const missingYear = (y: number) => ({
+		...year(y),
+		href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`,
+		invoices: { href: `/invoices?building=b1&year=${y}`, label: `Rechnungen ${y} ansehen` }
+	});
 	// backend answers as checked against the real API (tests/contracts); the statements filter by contractId as the
 	// backend does: a previous tenant's statement in the same apartment comes back only without that filter
 	const statementOf = (contractId: string, y: number) => ({
@@ -134,12 +140,7 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		// three ended years with rent days; the middle one has its statement, the previous tenant's of the last year
 		// does not count
 		const statements = [statementOf('c1', lastYear - 1), statementOf('c0', lastYear)];
-		expect(await missingOf(backend(statements))).toEqual(
-			[lastYear, lastYear - 2].map((y) => ({
-				...year(y),
-				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
-			}))
-		);
+		expect(await missingOf(backend(statements))).toEqual([lastYear, lastYear - 2].map(missingYear));
 	});
 
 	// #116: the delete dialog names them, a Mietvertrag they bill is not deleted
@@ -171,20 +172,73 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 	// #133: bis «Abgerechnet bis» ausserhalb von Dwello abgerechnet; eine Periode, die darüber hinausreicht, fehlt noch
 	it('übergeht Perioden, die bis «Abgerechnet bis» enden', async () => {
 		const missing = await missingOf(backend([], `${lastYear - 2}-04-01`, `${lastYear - 1}-06-30`));
-		expect(missing).toEqual(
-			[lastYear, lastYear - 1].map((y) => ({
-				...year(y),
-				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
-			}))
-		);
+		expect(missing).toEqual([lastYear, lastYear - 1].map(missingYear));
 	});
 
 	// #120, Fachreview W2e: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode
 	it('nennt die Periode einer ersetzten Abrechnung ohne berichtigte', async () => {
 		const replaced = { ...statementOf('c1', lastYear), status: 'replaced' };
 		expect(await missingOf(backend([replaced], `${lastYear}-03-01`))).toEqual([
-			{ ...year(lastYear), href: `/statements/generate?building=b1&start=${lastYear}-01-01&end=${lastYear}-12-31` }
+			missingYear(lastYear)
 		]);
+	});
+
+	// #199: an overlapping statement counts; the days it leaves have no way into the wizard until #408 decides one
+	it('nennt nur die Tage, die keine Abrechnung abdeckt, ohne Weg in den Assistenten', async () => {
+		const overlapping = {
+			...statementOf('c1', lastYear),
+			periodStart: `${lastYear - 1}-07-01`,
+			periodEnd: `${lastYear}-06-30`
+		};
+		expect(await missingOf(backend([overlapping], `${lastYear}-01-01`))).toEqual([
+			{
+				start: `${lastYear}-07-01`,
+				end: `${lastYear}-12-31`,
+				href: null,
+				invoices: {
+					href: `/invoices?building=b1&year=${lastYear}`,
+					label: `Rechnungen ${lastYear} ansehen`
+				}
+			}
+		]);
+	});
+
+	// #211: the list marks each contract with the same rule, without opening it
+	const listed = async (statements: unknown[] | null) => {
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/config'))
+				return Response.json({ data: { accounting_period: 'calendar' } });
+			if (url.includes('/statements?'))
+				return statements
+					? Response.json({ data: statements })
+					: new Response(null, { status: 500 });
+			return Response.json(contractList);
+		}) as typeof globalThis.fetch;
+		const list = (await listLoad({
+			url: new URL('http://localhost/contracts'),
+			fetch
+		} as never)) as {
+			contracts: { missingStatement?: boolean }[];
+		};
+		return list.contracts[0].missingStatement;
+	};
+
+	it('kennzeichnet in der Liste einen Mietvertrag mit fehlender Abrechnung', async () => {
+		expect(await listed([statementOf('c1', lastYear)])).toBe(true);
+	});
+
+	it('kennzeichnet in der Liste keinen Mietvertrag, dessen Abrechnungen jeden Mietstag abdecken', async () => {
+		const all = {
+			...statementOf('c1', lastYear),
+			periodStart: '2024-04-01',
+			periodEnd: `${lastYear}-12-31`
+		};
+		expect(await listed([all, statementOf('c0', lastYear)])).toBe(false);
+	});
+
+	// better no mark than a wrong one
+	it('kennzeichnet nichts, wenn die Abrechnungen nicht geladen werden können', async () => {
+		expect(await listed(null)).toBe(false);
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {

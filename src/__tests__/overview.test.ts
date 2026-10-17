@@ -151,7 +151,9 @@ describe('Aufgaben der Übersicht', () => {
 		const tasks = overviewTasks(
 			input({
 				statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 1 },
-				missingPeriod: { start: '2025-01-01', end: '2025-12-31', buildings: ['Seeblick'] }
+				missingStatements: [
+					{ building: 'Seeblick', periods: [{ start: '2025-01-01', end: '2025-12-31' }] }
+				]
 			})
 		);
 		expect(tasks.map((task) => task.id)).toEqual(['overdue', 'missing-period', 'drafts']);
@@ -163,8 +165,7 @@ describe('Aufgaben der Übersicht', () => {
 			title: 'Nebenkostenabrechnungen erstellen',
 			href: '/statements/generate'
 		});
-		expect(tasks[1].text).toContain('01.01.2025 – 31.12.2025');
-		expect(tasks[1].text).toContain('Seeblick');
+		expect(tasks[1].text).toContain('Noch nicht abgerechnet: Seeblick (2025).');
 		// the invoices come first, so the task leads to them as well
 		expect(tasks[1].link).toEqual({
 			href: '/invoices?year=2025',
@@ -172,9 +173,42 @@ describe('Aufgaben der Übersicht', () => {
 		});
 	});
 
+	// #211: every ended period since the Vertragsbeginn, by building; only the days without a statement (#199)
+	it('nennt jedes Gebäude mit seinen Perioden ohne Abrechnung', () => {
+		const tasks = overviewTasks(
+			input({
+				missingStatements: [
+					{
+						building: 'Ahornhof',
+						periods: [
+							{ start: '2025-01-01', end: '2025-12-31' },
+							{ start: '2024-07-01', end: '2024-12-31' }
+						]
+					},
+					{ building: 'Seeblick', periods: [{ start: '2023-01-01', end: '2023-12-31' }] }
+				]
+			})
+		);
+		const task = tasks.find((one) => one.id === 'missing-period')!;
+		expect(task.text).toContain(
+			'Noch nicht abgerechnet: Ahornhof (2025, 01.07.2024 – 31.12.2024), Seeblick (2023).'
+		);
+		// the invoices of the newest period come first
+		expect(task.link).toEqual({ href: '/invoices?year=2025', label: 'Rechnungen 2025 ansehen' });
+	});
+
+	it('erinnert nicht, wenn jeder Mietvertrag abgerechnet ist', () => {
+		const tasks = overviewTasks(input({ missingStatements: [] }));
+		expect(tasks.map((task) => task.id)).not.toContain('missing-period');
+	});
+
 	it('führt bei einer Abrechnungsperiode über den Jahreswechsel zu allen Rechnungen', () => {
 		const tasks = overviewTasks(
-			input({ missingPeriod: { start: '2024-07-01', end: '2025-06-30', buildings: ['Seeblick'] } })
+			input({
+				missingStatements: [
+					{ building: 'Seeblick', periods: [{ start: '2024-07-01', end: '2025-06-30' }] }
+				]
+			})
 		);
 		expect(tasks.find((task) => task.id === 'missing-period')!.link).toEqual({
 			href: '/invoices',

@@ -14,6 +14,7 @@ import {
 	managementFeeOfContract,
 	missingStatementsText,
 	missingStatementsShown,
+	missingStatementOffered,
 	billedUntilOfContract,
 	nextStepsText,
 	statementLinkedInDeleteDialog,
@@ -24,6 +25,7 @@ import {
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
+import { chosenInvoiceBuilding, chosenInvoiceYear } from '../questions/invoices';
 import { pageAddress } from '../questions/navigation';
 import {
 	chooseNextStep,
@@ -44,6 +46,7 @@ import {
 	scrollToEndConfirmation,
 	showBuildingInvoices,
 	showContractStatements,
+	showMissingStatementInvoices,
 	openStatementFromDeleteDialog,
 	startDeletingContract,
 	useWindowOf,
@@ -225,6 +228,54 @@ Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed 
 	await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
 	await verwalter.sees(endOfContract).toContain(date);
 });
+
+Given(
+	'für {string} gibt es die Abrechnung vom {string} bis {string} im Gebäude {string}',
+	async ({ seed }, tenant: string, start: string, end: string, building: string) => {
+		await seed.statement(tenant, building, Number(start.slice(0, 4)), undefined, [start, end]);
+	}
+);
+
+Then('meldet der Mietvertrag die fehlende Abrechnung {string}', async ({ verwalter }, period: string) => {
+	await verwalter.sees(missingStatementsText).toContain(period);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt',
+	async ({ verwalter }) => {
+		await verwalter.sees(missingStatementsText).toMatch(/deckt nur einen Teil der Abrechnungsperiode ab; für .+ gibt es noch keine Abrechnung/);
+	}
+);
+
+Then(
+	'bietet der Mietvertrag für die Tage ab {string} keine Abrechnung zum Erstellen an',
+	async ({ verwalter }, periodStart: string) => {
+		await verwalter.sees(missingStatementsShown).toBe(true);
+		await verwalter.sees(missingStatementOffered(periodStart)).toBe(false);
+		// nor the whole period it lies in (Fachreview 2 V-12)
+		await verwalter.sees(missingStatementOffered(`${periodStart.slice(0, 4)}-01-01`)).toBe(false);
+	}
+);
+
+Then('nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg', async ({ verwalter }) => {
+	await verwalter.sees(missingStatementsShown).toBe(true);
+	await verwalter.sees(missingStatementsText).not.toContain('Abgerechnet bis');
+});
+
+When(
+	'der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung {int} anzeigt',
+	async ({ verwalter }, year: number) => {
+		await verwalter.attemptsTo(showMissingStatementInvoices(`${year}-01-01`));
+	}
+);
+
+Then(
+	'zeigt die Rechnungsliste die Rechnungen des Jahres {int} im Gebäude {string}',
+	async ({ verwalter, names }, year: number, building: string) => {
+		await verwalter.sees(chosenInvoiceBuilding).toBe(names.get(building)!);
+		await verwalter.sees(chosenInvoiceYear).toBe(String(year));
+	}
+);
 
 Given(
 	'der Mietvertrag von {string} ist bis {string} ausserhalb von Dwello abgerechnet',
