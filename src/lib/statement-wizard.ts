@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
-import { impossible, impossibleYear } from './contract-wizard';
+import { impossible, impossibleYear } from './contract-form';
 import { formatCurrency, formatDate, isFeeRate } from './utils/format';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
@@ -193,8 +193,8 @@ function changeText(consumption: boolean, total: number, previous: number, perce
 	return percent > 0 ? more(change) : less(change);
 }
 
-// TODO(fachlich prüfen, #65, #76): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices;
-// a fixed-term contract has no termination date before its end, for the Akonto and new costs alike (review B, MR4-4, MR5-2)
+// Costs more than 15 % above the Akonto suggest raising it, more than 30 % below suggest missing invoices: UX choices, hints only (#65)
+// TODO(fachlich prüfen, #76): a fixed-term contract has no termination date before its end, for the Akonto and new costs alike (review B, MR4-4, MR5-2)
 const AKONTO_ABOVE = 0.15;
 const AKONTO_BELOW = 0.3;
 

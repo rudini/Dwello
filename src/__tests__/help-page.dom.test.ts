@@ -44,7 +44,9 @@ describe('Hilfe', () => {
 			'Manuell überschrieben'
 		]);
 		expect(glossary?.textContent).toContain('Ist der Saldo positiv, zahlt der Mieter nach');
-		expect(glossary?.textContent).toContain('auf 5 Rappen gerundet');
+		expect(glossary?.textContent).toContain(
+			'auf 5 Rappen gerundet, nur zugunsten des Mieters: Eine Nachzahlung wird ab-, eine Rückerstattung aufgerundet.'
+		);
 		expect(glossary?.textContent).toContain(
 			'ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Nur zulässig, wenn im Mietvertrag vereinbart; das tragen Sie beim Mietvertrag ein. Üblich sind etwa 3 %'
 		);

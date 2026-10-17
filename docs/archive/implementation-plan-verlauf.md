@@ -923,6 +923,16 @@ Files: `backend/migrations/0014_line_item_invoices.sql`, `backend/src/db/schema.
 - Open, needs the product owner: glossary #315; that a negative consumption needs no confirmation (#73) although Anna P-1 asked for one
 - [x] workflow-review, session archived, pull request
 
+## Session 2026-10-17 W8c: statement wizard check thresholds (#65)
+
+- [x] #130 read: its open rhythm question refines `missingParts` only with a year before, which already needs at least 2 invoices; the two rules stay apart
+- [x] Thresholds confirmed as UX choices (15 % / 30 % Akonto, 25 % and CHF 100, 92 days): `#65` markers replaced by comments naming the issue (No scenario: code comments only); the F-16 half (#76) and the #130 marker in `CategoryCheck.svelte` stay
+- [ ] 3-month gap only for categories with more than one invoice the year before: blocked, the hint runs per building and only without a year before; options A/B/C asked in #65 (label `entscheiden`); its markers in `statement-wizard.ts` (`GAP_DAYS`) and `PreviewChecks.svelte` stay
+- Files: `src/lib/statement-wizard.ts`, `src/routes/statements/generate/CategoryCheck.svelte`, `backend/src/services/invoice-completeness.service.ts`, `implementation_plan.md`, this archive, `docs/reviews/{w8c-review-1,workflow-notes-issue-65}.md`
+- [x] code-reviewer round 1: `docs/reviews/w8c-review-1.md` (C-1, C-2, C-3 Nits fixed)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-65.md`
+- [x] workflow-review, session archived, pull request (`Refs #65`)
+
 ## Session W6c: QR payment part on reminders (#108), Art. 257d OR hint (#59)
 
 - [x] @wip scenarios: reminder PDF with payment part (statement-reminder.feature), help hint (help.feature); dialog after the 3rd Mahnung: DOM test (`No scenario`: the E2E stack cannot age three reminders)
@@ -937,6 +947,44 @@ Files: `backend/migrations/0014_line_item_invoices.sql`, `backend/src/db/schema.
 
 Files: `backend/src/services/{pdf.service,reminder-pdf,reminder.service,statement-pdf.service}.ts`, `backend/src/__tests__/reminders.pg.test.ts`, `messages/*.json`, `src/routes/help/+page.svelte`, `src/routes/statements/[id]/ReminderModal.svelte`, `src/__tests__/statement-pages.dom.test.ts`, `tests/e2e/features/{statement-reminder,help}.feature`, `tests/e2e/{steps/documents.steps,tasks/documents,targets/documents}.ts`, `docs/PRD-Dwello.md`, reviews `docs/reviews/w6c-*.md`, persona reports `helga-w6c.md`, `dr-weber-w6c.md`
 
+## Session W2d: Saldo rounded in the tenant's favour (#79)
+
+- [x] `statement-rounding.feature`: Nachzahlung rounded down, Rückerstattung up (`@wip`, seen red)
+- [x] fach-reviewer on the scenario and on stored statements (old rounding kept)
+- [x] `roundTo5Rappen` rounds in the tenant's favour (unit test red first)
+- [x] Help text «Saldo» in all four languages, `docs/nebenkostenabrechnung-anforderungen.md` (lines 94, 148)
+- [x] Fachreview round 1 (`docs/reviews/w2d-fachreview-1.md`): scenario «unter 5 Rappen», float-safe rounding, drafts re-rounded by migration `0014`, PDF/DOM cases, docs
+- [x] Slice review round 1 (`docs/reviews/w2d-review-1.md`)
+- [x] Feature review: fach round 2 (`docs/reviews/w2d-fachreview-2.md`), daten-pruefer (`docs/reviews/w2d-datenpruefung-1.md`), Dr. Weber (`docs/design/personas/dr-weber-w2d.md`)
+- [x] Merge `main`, migration renamed to the next free number (C-1)
+- [x] Workflow note (`docs/reviews/workflow-notes-issue-79.md`)
+- [x] Lint, check, type-check, affected tests and E2E
+- [x] Closing code review before the push: `docs/reviews/w2d-review-2.md` (after the merge of `main`; migration renamed to 0014, then 0016 after two more merges)
+- [x] Pull request `Fixes #79` (session archived before the push)
+
+Files: `backend/src/services/pdf-format.ts`, `backend/migrations/0016_statement_balance_tenant_favour.sql`, `messages/*.json`, `tests/e2e/features/statement-rounding.feature`, tests (`statement-pdf-data`, `statement-pdf-render`, `statement-generation.pg`, `migrations.pg`, `help-page.dom`, `statement-pages.dom`), docs (`PRD-Dwello.md`, `data-model.md`, `design-decisions.md`, `nebenkostenabrechnung-anforderungen.md`)
+
+## Session: no Vertragsbeginn the wizard's own check refuses (#296)
+
+Request: «Setze #296 um» (coordinator W10b). Chosen fix: suggest nothing outside the accepted years 19xx/20xx; widening the range would weaken the typo check for a case only test data reaches.
+
+#296: the contract wizard never suggests a Vertragsbeginn its own date check refuses.
+
+- [x] Unit test: `suggestedStartDate` suggests nothing when the day the apartment becomes free lies in a year `impossible` refuses (red first)
+- [x] Fix: `impossible` moves to `contract-form.ts`, `suggestedStartDate` uses it (no import cycle); `statement-wizard.ts` imports it from there
+- [x] Test data that meant "free in the future" with a contract ending 2099-12-31 now ends 2098-12-31 (free from 2099): `contract-wizard.dom.test.ts`, `tests/e2e/fixtures/screens.ts`, axe state `overlap-warning` in `tests/e2e/tasks/accessibility.ts`
+- [x] Slice review round 1 (`code-reviewer`): `docs/reviews/296-review-1.md`
+- [x] Same check for the start taken over from the URL (`initialContractValues`, «Neuen Mietvertrag … erfassen» after a contract ending 2099); `impossibleYear` moves with `impossible`
+- [x] Closing code review round 2 (`docs/reviews/296-review-2.md`): no findings
+- [x] Checks: lint, check, type-check, full vitest, axe/language rows of the contract screens
+- [x] Workflow note: session started detached without a branch (`docs/reviews/workflow-notes-issue-296.md`)
+- [x] Merged origin/main (conflicts in `statement-wizard.ts` imports, Carla's contract in `screens.ts` next to #89's management fee, this archive); merge review `docs/reviews/296-review-merge.md`: no Blocker/Major
+- [x] Push, pull request, CI and merge follow (CLAUDE.md, Workflow 9)
+
+Files: `src/lib/{contract-form,contract-wizard,statement-wizard}.ts`, tests in `src/__tests__/{contract-form,contract-wizard.dom,contracts-i18n}.test.ts`, `tests/e2e/fixtures/screens.ts`, `tests/e2e/tasks/accessibility.ts`.
+
+No scenario: the E2E data would need a contract that ends in 2099 (issue #296).
+
 ## Session: Korrespondenzadresse, country and IBAN (#68, #102, #191, #114)
 
 Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (product owner)" sections are the requirement (#68, #102, #191); #114 has its own "Done means".
@@ -948,7 +996,7 @@ Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (p
 - [x] fach-reviewer on the `@wip` scenarios before implementing: `docs/reviews/w3c-fachreview-1.md`
 - [x] #191: settings form accepts CH and LI with MOD-97; `settings_error_iban` in four languages; PRD one rule
 - [x] #68: legend «Korrespondenzadresse» and help at the field (four languages); tenant detail label
-- [x] #102: migration `0016_tenant_country.sql` (default CH); form select; BFF and backend validation; QR-bill debtor country; PDF address block of statement and reminder
+- [x] #102: migration `0017_tenant_country.sql` (default CH); form select; BFF and backend validation; QR-bill debtor country; PDF address block of statement and reminder
 - [x] #114: next-steps text, `nextStepsDue` keeps the address step; warning in wizard preview and send dialog; overview task; `docs/anforderungen-vertragsende.md` A-5 implemented
 - [x] slice reviews (code-reviewer) per slice
   - [x] iban: `docs/reviews/iban-review-1.md` (Nits C-1 to C-3 fixed)
@@ -970,4 +1018,4 @@ Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (p
 
 - [x] Workflow note: `docs/reviews/workflow-notes-w3c.md`
 
-Files changed (#114 too: `backend/src/services/{old-address,contract}.ts`, `src/routes/contracts/[id]/`, `src/routes/statements/[id]/`, `src/routes/statements/generate/`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `tests/a11y/screens.json`, `docs/api-specification.md`): `src/lib/server/settings.ts`, `messages/*.json`, `docs/PRD-Dwello.md`, `backend/migrations/0016_tenant_country.sql`, `backend/src/db/schema.ts`, `docs/data-model.md`, `backend/src/routes/tenants.ts`, `backend/src/services/{tenant,statement,qr-bill,pdf,reminder-pdf,postal-address}.ts`, `src/lib/{tenant,types}.ts`, `src/lib/server/{tenant,tenant-form}.ts`, `src/routes/tenants/TenantFormFields.svelte`, `src/routes/tenants/[id]/TenantContactCard.svelte`, `docs/design/i18n-begriffe.md`, `docs/anforderungen-vertragsende.md`, `tests/contracts/tenant.json`, E2E features and steps.
+Files changed (#114 too: `backend/src/services/{old-address,contract}.ts`, `src/routes/contracts/[id]/`, `src/routes/statements/[id]/`, `src/routes/statements/generate/`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `tests/a11y/screens.json`, `docs/api-specification.md`): `src/lib/server/settings.ts`, `messages/*.json`, `docs/PRD-Dwello.md`, `backend/migrations/0017_tenant_country.sql`, `backend/src/db/schema.ts`, `docs/data-model.md`, `backend/src/routes/tenants.ts`, `backend/src/services/{tenant,statement,qr-bill,pdf,reminder-pdf,postal-address}.ts`, `src/lib/{tenant,types}.ts`, `src/lib/server/{tenant,tenant-form}.ts`, `src/routes/tenants/TenantFormFields.svelte`, `src/routes/tenants/[id]/TenantContactCard.svelte`, `docs/design/i18n-begriffe.md`, `docs/anforderungen-vertragsende.md`, `tests/contracts/tenant.json`, E2E features and steps.
