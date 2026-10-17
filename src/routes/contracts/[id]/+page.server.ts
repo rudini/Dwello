@@ -21,7 +21,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
-	// A-10, #142: the latest first; href into the wizard only for a whole period (#199, #281)
+	// A-10, #142: the latest first; href into the wizard only for a whole period (#199, #408)
 	missingStatements: {
 		start: string;
 		end: string;
@@ -84,7 +84,7 @@ async function fixedTermCheckDue(fetch: typeof globalThis.fetch, contract: Row) 
 }
 
 // The parts of ended Abrechnungsperioden since the Vertragsbeginn with rent days but no statement, the latest first
-// (A-10, #142, #199): a whole period leads into the wizard, a part a statement leaves does not until #281 decides how;
+// (A-10, #142, #199): a whole period leads into the wizard, a part a statement leaves does not until #408 decides how;
 // each to the building's invoices (#211). None when the settings or the statements cannot be read
 async function missingStatements(
 	fetch: typeof globalThis.fetch,

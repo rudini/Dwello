@@ -27,7 +27,7 @@
 			? !parts.length && m.contracts_statement_missing_text()
 			: m.contracts_statements_missing_text()
 	);
-	// TODO(fachlich prüfen, #281): what the landlord does with these days
+	// TODO(fachlich prüfen, #408): what the landlord does with these days
 	// «Abgerechnet bis» (#133) would change the statement that covers the rest (Fachreview 2 V-9)
 	const hint = $derived(
 		parts.length

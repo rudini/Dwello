@@ -255,7 +255,7 @@ Funktionalität: Mietvertragsdetail
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann meldet der Mietvertrag die fehlende Abrechnung "01.10.2024 – 31.12.2024"
-    # #281: eine kürzere Abrechnungsperiode für diese Tage ist noch nicht entschieden
+    # #408: eine kürzere Abrechnungsperiode für diese Tage ist noch nicht entschieden
     Und erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt
     Und bietet der Mietvertrag für die Tage ab "2024-10-01" keine Abrechnung zum Erstellen an
     # Fachreview 2 V-9: «Abgerechnet bis» würde die bestehende Abrechnung ändern

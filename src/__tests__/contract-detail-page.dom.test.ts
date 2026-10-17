@@ -299,7 +299,7 @@ describe('Mietvertragsdetail', () => {
 		expect(link.textContent!.trim()).toBe('Rechnungen 2025 ansehen');
 	});
 
-	// #199: a statement covers part of the period; a run for the days it leaves waits on #281
+	// #199: a statement covers part of the period; a run for the days it leaves waits on #408
 	it('nennt Tage, die eine Abrechnung nicht abdeckt, ohne Weg in den Assistenten', () => {
 		const invoices = { href: '/invoices?building=b1&year=2025', label: 'Rechnungen 2025 ansehen' };
 		open('2024-04-01', null, null, '2026-10-10', false, [
