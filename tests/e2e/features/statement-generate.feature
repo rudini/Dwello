@@ -44,6 +44,16 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Dann wurde 1 Nebenkostenabrechnung erstellt
 
+  # #120, #358: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode; der Lauf erstellt ihre berichtigte
+  @api
+  Szenario: Der Abrechnungslauf rechnet einen Mietvertrag mit ersetzter Abrechnung wieder ab
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Dann wurde 1 Nebenkostenabrechnung erstellt
+
   @api
   Szenario: Erhöhte Verwaltungspauschale gilt für alle Mieter der Liegenschaft
     Angenommen das Heizprofil "Winter" verteilt die Heizkosten so:

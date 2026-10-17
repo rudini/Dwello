@@ -16,7 +16,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | umgesetzt | Anna (I2, M3) | #117 |
 | A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) | – |
 | A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | umgesetzt | Anna (I2 M1, I3 M1–M3) | #118, #119 |
-| A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 | #120 |
+| A-11 | Versendete Abrechnung korrigieren (umgesetzt) | mittel | Anna (I4 M1), Review I-6 | #120, #358 |
 
 Die offenen Fragen jeder Anforderung werden in ihrem Issue entschieden; dieses Dokument bleibt die ausführliche Beschreibung.
 
@@ -83,7 +83,7 @@ Szenario: Kündigung aufheben
 Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga (I3, M4):
 
 - Ein geändertes Vertragsende in der Vergangenheit verlangt im Formular dieselbe Bestätigung wie im Dialog «Beenden» (`src/routes/contracts/PastEndConfirm.svelte`). Ein unverändertes Vertragsende wird nicht nochmals bestätigt.
-- Jede Abrechnung speichert ihre abgerechneten Tage (`rental_start`, `rental_end`). Das Backend lehnt neue Vertragsdaten ab, die diese Tage ändern würden, kürzer oder länger (`updateContract`, 409 mit den Abrechnungen; Entscheid des Product Owners nach Review I Runde 6). Bei einem Entwurf sagt Dwello: «Die Nebenkostenabrechnung … (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.» Bei einer versendeten oder bezahlten Abrechnung sagt Dwello, dass sie bleibt und das Datum sich darum nicht speichern lässt; stimmt es, klärt der Verwalter die Korrektur direkt mit dem Mieter (siehe A-11).
+- Jede Abrechnung speichert ihre abgerechneten Tage (`rental_start`, `rental_end`). Das Backend lehnt neue Vertragsdaten ab, die diese Tage ändern würden, kürzer oder länger (`updateContract`, 409 mit den Abrechnungen; Entscheid des Product Owners nach Review I Runde 6). Bei einem Entwurf sagt Dwello: «Die Nebenkostenabrechnung … (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.» Bei einer versendeten oder bezahlten Abrechnung sagt Dwello, dass sie bleibt und das Datum sich darum noch nicht speichern lässt; stimmt es, berichtigt der Verwalter zuerst die Abrechnung (A-11), dann lässt es sich speichern.
 - Die Bestätigung unter «Bearbeiten» prüft nur der Browser: Das Formular speichert über die BFF-Weiterleitung `PUT /api/contracts/[id]`, nicht über eine Server-Aktion. Die Prüfung gegen die Abrechnungen macht das Backend.
 - Szenarien in `tests/e2e/features/contract-edit.feature` und `contract-detail.feature`, Backend-Test `contract-end.pg.test.ts`.
 
@@ -334,17 +334,17 @@ Szenario: Unter «Bearbeiten» einen Vertragsbeginn nach dem Beginn eines Entwur
 
 ---
 
-## A-11 Versendete Abrechnung korrigieren
+## A-11 Versendete Abrechnung korrigieren – umgesetzt
 
-**Problem.** Eine versendete oder bezahlte Abrechnung ändert Dwello nicht. Stellt sich danach heraus, dass Vertragsbeginn oder -ende falsch waren (Anna, I4: Der Mieter zog erst am 01.05.2025 ein, die Abrechnung 2024 ist bezahlt), lässt sich das Datum nicht speichern. Die Meldung sagt, die Korrektur direkt mit dem Mieter zu klären; in Dwello bleibt der Fehler.
+**Umgesetzt** (Session W2e, #120, #358): Entscheid des Product Owners in #120: berichtigte Abrechnung statt Storno, keine Gutschrift an den Mieter, keine Nachtragsabrechnung. Auf einer versendeten, überfälligen oder bezahlten Abrechnung führt «Abrechnung berichtigen» nach einer Bestätigung zum Status «Ersetzt» (`replaced`, `replaceStatement`); die Abrechnung bleibt unverändert, mit Zahlungsdatum und Saldo, wird nicht mehr gemahnt und sperrt die Vertragsdaten nicht mehr. «Berichtigte Abrechnung erstellen» (`correctStatement`) oder ein Abrechnungslauf derselben Abrechnungsperiode erstellt einen Entwurf mit neuer Nummer, der «Ersetzt die Abrechnung NK-…» nennt und anrechnet, was auf die ersetzte Abrechnung (und deren ersetzte) bezahlt ist (`prior_payments`, Migration `0018`); der Saldo wird wie jeder auf 5 Rappen zugunsten des Mieters gerundet. Das PDF sagt, dass die ersetzte Abrechnung nicht mehr gilt. Die Hilfe nennt die Verjährung: «in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt». Hat der Mietvertrag in der Periode keine Mietstage mehr (Anna, I4), gibt es keine berichtigte Abrechnung; Dwello sagt, was zurückzuerstatten oder dem Mieter mitzuteilen ist. Szenarien in `statement-detail.feature`, `contract-edit.feature`, `contract-detail.feature`; Backend-Test `statement-correction.pg.test.ts`. Offen: Teilzahlungen (#360), Glossar «Bereits bezahlt» (#362); das Protokoll (#111) hält die Berichtigung fest, sobald es besteht.
 
-**Anforderungen**
+**Problem.** Eine versendete oder bezahlte Abrechnung ändert Dwello nicht. Stellt sich danach heraus, dass Vertragsbeginn oder -ende falsch waren (Anna, I4: Der Mieter zog erst am 01.05.2025 ein, die Abrechnung 2024 ist bezahlt), lässt sich das Datum nicht speichern. Die Meldung sagte, die Korrektur direkt mit dem Mieter zu klären; in Dwello blieb der Fehler.
 
-1. Eine versendete oder bezahlte Abrechnung lässt sich stornieren: Dwello erstellt eine Gutschrift (Gegenbuchung mit eigener Nummer) und markiert die Abrechnung als storniert. Erst danach lassen sich die Vertragsdaten ändern.
-2. Die neue Abrechnung verrechnet, was der Mieter schon bezahlt hat.
-3. Der Verwalter bestätigt die Folge: «Die Abrechnung NK-… wird storniert. Senden Sie dem Mieter die Gutschrift und die neue Abrechnung.»
+**Anforderungen** (nach dem Entscheid in #120)
 
-**Offene Fragen (fachlich prüfen):** Ist eine Gutschrift mit Gegenbuchung in der Schweizer Praxis üblich, oder genügt eine korrigierte Abrechnung mit Hinweis? Wie lange nach dem Versand ist eine Korrektur zulässig (Verjährung, Art. 128 OR)?
+1. Eine versendete oder bezahlte Abrechnung lässt sich durch eine berichtigte Abrechnung ersetzen («ersetzt NK-…»). Die alte bleibt unverändert erhalten und hat den Status «Ersetzt». Erst danach lassen sich die Vertragsdaten ändern, die ihre Mietstage ändern.
+2. Die berichtigte Abrechnung verrechnet, was Mieter oder Vermieter auf die ersetzte Abrechnung schon bezahlt haben.
+3. Der Verwalter bestätigt die Folge: «Die Abrechnung NK-… wird ersetzt. Sie bleibt unverändert erhalten …», mit dem angerechneten Betrag und der Verjährung.
 
 ---
 

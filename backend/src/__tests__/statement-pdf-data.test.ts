@@ -70,6 +70,24 @@ describe('Daten der Abrechnung im PDF', () => {
 		});
 	});
 
+	// #120: die berichtigte Abrechnung nennt die ersetzte und was darauf schon bezahlt ist
+	it('übernimmt die ersetzte Abrechnung und das schon Bezahlte', () => {
+		const corrected = {
+			...statement,
+			replaces: { id: 's0', statementNumber: 'NK-0', statementDate: '2026-02-01' },
+			priorPayments: '100.00',
+			priorPaidOn: ['NK-0']
+		} as StatementWithDetails;
+
+		expect(toPdfData(corrected, categories, 'de').replaces).toEqual({
+			statementNumber: 'NK-0',
+			statementDate: '2026-02-01',
+			paidOn: ['NK-0'],
+			priorPayments: 100
+		});
+		expect(toPdfData(statement, categories, 'de').replaces).toBeUndefined();
+	});
+
 	it('nennt die Kategorie in der Sprache des Mieters, sonst deutsch', () => {
 		expect(toPdfData(statement, categories, 'fr').lineItems[0].category).toBe('Chauffage');
 		expect(toPdfData(statement, categories, 'de').lineItems[1].category).toBe('Nicht kategorisiert');
