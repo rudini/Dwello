@@ -6,14 +6,18 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requirement (no separate implementation issues exist).
 
-- [ ] #82 `@wip` scenarios (privacy.feature, authentication.feature, sprachen.feature, demo.feature), committed and reviewed by `fach-reviewer` before implementing
-- [ ] #82 controller from `OPERATOR_*`, «Betreiber» explained, right of access (DSG)
-- [ ] #82 retention: kept until the landlord deletes, 10 years (Art. 958f OR), no automatic deletion
-- [ ] #82 third parties per configured provider (sign-in, mail transport, OpenPLZ, Google Maps): country, disclosure abroad, link; what the sign-in provider learns
-- [ ] #82 Google sign-in without `access_type=offline`/`prompt=consent`, no profile picture taken over
-- [ ] #82 server log: purpose, reader, retention set by the operator
-- [ ] #82 cookie lifetime from `JWT_EXPIRY`; cookies can be refused (Art. 45c lit. b FMG, if fach-reviewer agrees)
-- [ ] #82 sign-in page links the privacy statement
-- [ ] #82 terms: demo paragraph; «die Verwaltung» wording; FR «rappels»; draft notice reviewed, `TODO(fachlich prüfen, #82)` removed
-- [ ] #178 tenant page and overview name uploaded documents older than the end of the tenant's last Mietvertrag and offer to delete them (No scenario: needs a document uploaded before a past date; unit and DOM tests)
-- [ ] slice reviews, feature review (persona, fach-reviewer), plan archived, PR merged
+- [x] #82 `@wip` scenarios (privacy.feature, authentication.feature, sprachen.feature, demo.feature), committed and reviewed by `fach-reviewer` before implementing (round 1: `docs/reviews/w9c-fachreview-1.md`)
+- [x] #82 controller from `OPERATOR_*`, «Betreiber» explained, right of access (DSG) (R-1 open: #330)
+- [x] #82 retention: kept until the landlord deletes, 10 years (Art. 958f OR, only for those required to keep books), no automatic deletion (R-2 follow-up: #332)
+- [x] #82 third parties per configured provider (sign-in, mail transport via `GET /api/v1/mail-transport`, OpenPLZ, Google Maps): country, disclosure abroad, link; what the sign-in provider learns (SMTP provider and server country: #333)
+- [x] #82 Google sign-in without `access_type=offline`/`prompt=consent`, no profile picture taken over (JWT, refresh, `/auth/me`)
+- [x] #82 server log: purpose, reader, retention set by the operator
+- [x] #82 cookie lifetime from `JWT_EXPIRY`; cookies can be refused (Art. 45c lit. b FMG, fach-reviewer agreed, R-9)
+- [x] #82 sign-in page links the privacy statement
+- [x] #82 terms: demo paragraph (screens.json `terms`/`demo`); «Liegenschaftsverwalter»; FR «rappels de paiement et les rappels»; draft notice reviewed, `TODO(fachlich prüfen, #82)` removed
+- [x] #178 tenant page and overview name uploaded documents older than the end of the tenant's last Mietvertrag (No scenario: the upload API stamps the current time, so a document from before a past Vertragsende cannot be seeded; unit and DOM tests). Overview task that never ends: #331; glossary terms: #334
+- [ ] code-reviewer round 1 (`docs/reviews/w9c-review-1.md`)
+- [ ] feature review: personas, fach-reviewer round 2 on the implemented texts
+- [ ] plan archived, PR merged
+
+Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.
