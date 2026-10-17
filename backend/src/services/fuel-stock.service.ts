@@ -29,16 +29,18 @@ const dayBefore = (isoDate: string) => new Date(Date.parse(isoDate) - 86_400_000
 
 /**
  * The readings a period needs, at the end of the day before it and of its last day, with the category of the latest
- * reading; null for a building without a tank in the period (no reading from the day before it on)
+ * reading; covered: the period has fuel to bill, a reading after the day before it or an opening stock above zero (the
+ * closing stock 0 of the year a tank is decommissioned opens the next year); null for a building that never had one
  */
 export async function periodReadings(buildingId: string, periodStart: string, periodEnd: string) {
 	const readings = await listFuelStocks(buildingId);
-	if (!readings.some((stock) => stock.readingDate >= dayBefore(periodStart))) return null;
+	if (readings.length === 0) return null;
 	const on = (date: string) => readings.find((stock) => stock.readingDate === date);
 	const [opening, closing] = [on(dayBefore(periodStart)), on(periodEnd)];
 	const categoryId = (closing ?? readings.at(-1)!).categoryId;
 	const missing = [!opening && dayBefore(periodStart), !closing && periodEnd].filter((date): date is string => !!date);
-	return { opening, closing, categoryId, missing };
+	const covered = readings.some((stock) => stock.readingDate > dayBefore(periodStart)) || Number(opening?.amount) > 0;
+	return { opening, closing, categoryId, missing, covered };
 }
 
 // The distribution key of the category's latest allocable invoice up to the period end (else any later one), else
@@ -114,8 +116,6 @@ export async function otherTankCategory(buildingId: string, categoryId: string) 
 	const readings = await listFuelStocks(buildingId);
 	return readings.some((stock) => stock.categoryId !== categoryId);
 }
-
-export const hasFuelStocks = async (buildingId: string) => (await listFuelStocks(buildingId)).length > 0;
 
 /** Whether a category still has Tankbestand readings (it cannot be deleted then) */
 export async function categoryHasFuelStocks(categoryId: string) {

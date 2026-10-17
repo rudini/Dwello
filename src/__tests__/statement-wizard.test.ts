@@ -135,7 +135,10 @@ describe('Rechnungen über die ganze Periode', () => {
 	});
 });
 
-const finding = (kind: 'stock' | 'tank' | 'missing' | 'gap' | 'new' | 'deviation', extra = {}) => ({
+const finding = (
+	kind: 'stock' | 'tank' | 'consumption' | 'missing' | 'gap' | 'new' | 'deviation',
+	extra = {}
+) => ({
 	categoryId: 'c1',
 	categoryName: 'Kaltwasser',
 	kind,
@@ -256,8 +259,26 @@ describe('Rechnungen pro Kategorie', () => {
 	});
 
 	it('meldet einen negativen Verbrauch aus dem Tank', () => {
-		expect(findingText(finding('stock', { current: { count: 1, total: -4900 } }))).toBe(
-			'Der Endbestand ist CHF\u00a04’900.00 höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände.'
+		expect(findingText(finding('consumption', { current: { count: 1, total: -4900 } }))).toBe(
+			'Der Endbestand ist CHF\u00a04’900.00 höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände und ob eine Lieferung fehlt oder ihre Rechnung erst nach dem Ende der Periode datiert ist.'
+		);
+	});
+
+	// Plausibilität der Tankbestände gegen das Vorjahr (#73)
+	it('vergleicht den Verbrauch an Heizmaterial mit dem Vorjahr', () => {
+		const consumption = (total: number, changePercent: number) =>
+			findingText(
+				finding('consumption', {
+					current: { count: 1, total },
+					previous: { count: 1, total: 1000 },
+					changePercent
+				})
+			);
+		expect(consumption(2000, 100)).toBe(
+			'Verbrauch CHF\u00a02’000.00, 100 % mehr als im Vorjahr (CHF\u00a01’000.00). Prüfen Sie die Tankbestände.'
+		);
+		expect(consumption(600, -40)).toBe(
+			'Verbrauch CHF\u00a0600.00, 40 % weniger als im Vorjahr (CHF\u00a01’000.00). Prüfen Sie die Tankbestände.'
 		);
 	});
 
@@ -323,6 +344,11 @@ describe('Bestätigung vor dem Erstellen', () => {
 		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(true);
 		expect(needsConfirmation([coverage({ check: check([finding('gap')]) })])).toBe(true);
 		expect(needsConfirmation([coverage({ check: check([finding('stock')]) })])).toBe(true);
+	});
+
+	// ein Hinweis auf die Tankbestände, nie eine Bestätigung (#73)
+	it('verlangt sie nicht für einen unplausiblen Verbrauch an Heizmaterial', () => {
+		expect(needsConfirmation([coverage({ check: check([finding('consumption')]) })])).toBe(false);
 	});
 
 	it('verlangt sie nicht für Hinweise auf neue Kategorien oder Abweichungen', () => {

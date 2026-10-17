@@ -11,11 +11,18 @@
 	<p>{m.statements_tank_text()}</p>
 	<ul class="flex flex-col gap-2">
 		{#each buildings as building (building.buildingId)}
-			<li>
+			<li class="flex flex-col">
 				<a
 					href="/buildings/{building.buildingId}"
 					class="inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4"
 					>{m.statements_add_stock_for({ name: building.name })}</a
+				>
+				<!-- recorded on the building, the question stops (#72) -->
+				<a
+					href="/buildings/{building.buildingId}/edit"
+					class="inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4"
+					data-testid="tank-question-no-tank-{building.buildingId}"
+					>{m.statements_no_tank_for({ name: building.name })}</a
 				>
 			</li>
 		{/each}
