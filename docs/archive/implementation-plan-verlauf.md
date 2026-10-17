@@ -946,3 +946,19 @@ Files: `backend/migrations/0014_line_item_invoices.sql`, `backend/src/db/schema.
 - [x] workflow-review, session archived; two pull requests: #59 (branch `claude/w6c-reminder-hint-59`), then #108 (this branch)
 
 Files: `backend/src/services/{pdf.service,reminder-pdf,reminder.service,statement-pdf.service}.ts`, `backend/src/__tests__/reminders.pg.test.ts`, `messages/*.json`, `src/routes/help/+page.svelte`, `src/routes/statements/[id]/ReminderModal.svelte`, `src/__tests__/statement-pages.dom.test.ts`, `tests/e2e/features/{statement-reminder,help}.feature`, `tests/e2e/{steps/documents.steps,tasks/documents,targets/documents}.ts`, `docs/PRD-Dwello.md`, reviews `docs/reviews/w6c-*.md`, persona reports `helga-w6c.md`, `dr-weber-w6c.md`
+
+## Session 2026-10-17: #111 (P-16) planned PRD features, ZIP of a run (#356)
+
+- [x] Search open issues; create #356 (ZIP of a run) and #357 (audit log)
+- [x] PRD: ZIP and audit point to #356 / #357; automatic reminders and Swiss eID «Vision, nicht geplant»; database SSL and field encryption vision with O-3 / O-6
+- [x] @wip scenarios «Alle Abrechnungen eines Laufs als ZIP herunterladen» and «ZIP eines Laufs mit einer inzwischen gelöschten Abrechnung anfordern», seen red at the missing button
+- [x] `generateStatements` returns the created statements; BFF route zips their PDFs (fflate, already in the lockfile)
+- [x] Result step: button «Alle als ZIP herunterladen» (full page load: the client router took `/statements/zip` for `/statements/[id]`), texts in four languages
+- Files: `src/routes/statements/zip/+server.ts`, `src/lib/server/statement-generation.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{StatementWizard,StatementStep,GenerationStep}.svelte`, `messages/*.json`, `package.json`/`bun.lock` (fflate as devDependency, already in the lockfile), tests in `src/__tests__/` and `tests/e2e/`, `docs/PRD-Dwello.md`
+- [x] Code review round 1: `docs/reviews/zip-review-1.md`
+- [x] Personas Helga and Marco: `docs/design/personas/helga-zip.md`, `docs/design/personas/marco-zip.md`
+- [x] Review fixes: axe and language states `statement-generate` `generation-result` and `statement-zip-refused`; ids encoded; generate answer from its contract
+- [x] Code review round 2: `docs/reviews/zip-review-2.md`; C-11 fixed (year per look counted per worker)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-356.md`
+- [x] Code review round 3: `docs/reviews/zip-review-3.md` (Nits C-13, C-14 fixed)
+- [x] Session archived, PR (Fixes #356, Fixes #111; #357 stays open: large, its correction entry depends on #120's implementation)

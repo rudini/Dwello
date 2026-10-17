@@ -96,12 +96,12 @@ const askKi = (name: string): Activity => (actor) =>
 		Wait.until(proposal)
 	);
 
-// The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
-// as proposed
 // 'generation-result' bills its contracts once per year; counted per worker, over all its scenarios: 2016-2022 have
 // neither statements nor invoices in the seed (2023 to 2025 do)
 let resultRuns = 0;
 
+// The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
+// as proposed
 const previewOf =
 	(year: string, shown: string, end = `${year}-12-31`) =>
 	(example: Example, ...others: string[]): Activity =>
