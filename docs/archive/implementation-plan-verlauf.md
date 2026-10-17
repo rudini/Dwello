@@ -1183,6 +1183,24 @@ Branch `claude/w6e-invoice-hints-378-379`. #379 is not ready: the code has no ru
 
 Files: `src/routes/invoices/new/+page.svelte`, `src/routes/invoices/MissedWarning.svelte`, `src/routes/invoices/[id]/+page.svelte`, `src/routes/invoices/[id]/edit/+page.svelte`, `src/routes/api/invoices/[id]/statements/+server.ts` (new), `src/__tests__/invoice-pages.dom.test.ts`, `tests/e2e/features/{invoice-new,invoice-detail}.feature`, `tests/e2e/steps/{invoice-detail,statements}.steps.ts`, `tests/e2e/{targets,tasks}/invoice-detail.ts`, reviews `docs/reviews/w6e-review-{1,2,3}.md`, personas `docs/design/personas/{anna-w6e,marco-w6e,marco-w6e-2}.md`, `docs/reviews/workflow-notes-issue-378-379.md`
 
+## Session W11: PDF invoice line names the invoice (#236)
+
+Branch `claude/w11-pdf-rechnung-236`. The issue's first point (whole Leistungszeitraum and amount) is done in #241; left: V-8 of #226.
+
+- [x] Scenario «PDF nennt die Rechnung, wenn Daten und Betrag sie nicht unterscheiden» in `statement-detail.feature`, seen red at the missing name
+- [x] fach-reviewer on the `@wip` scenario before implementing: `docs/reviews/w11-fachreview-1.md` (V-1 taken: a line without Leistungszeitraum always names its invoice; V-2 description vs Rechnungsdatum: the issue decided «description or Rechnungssteller», proposal added to #256; V-3 name as a suffix, no capital after a dash; V-4 scenario covers both cases)
+- [x] Tests red first: `statement-pdf.pg.test.ts` (de, real statement), `statement-pdf-render.test.ts` (four languages); the PDF takes each part's description from the statement's stored `invoices` (same order, no migration), `partNamed` in four languages
+- [x] slice review (code-reviewer): `docs/reviews/w11-review-1.md` (C-1 fixed, C-2 Nit stays: the Edit tool could not match the invisible U+00A0, output correct; C-3 Minor stays)
+- [x] feature review
+  - [x] fach-reviewer round 2: `docs/reviews/w11-fachreview-2.md` (V-5 added to #256, V-6 doc half-sentence)
+  - [x] persona Dr. Weber `docs/design/personas/dr-weber-w11.md` (round 1 blocked by the demo draft NK-22222222-2025-0003, removed by SQL; rerun: #241 P-1 resolved; P-1 to P-3 Minor/Nit stay, wording belongs to #256)
+  - [x] daten-pruefer `docs/reviews/w11-datenpruefung-1.md` (no findings)
+- [x] Workflow note: nothing came up
+- [x] closing review (code-reviewer) of e59119b and the merge of main: `docs/reviews/w11-review-2.md`
+- [ ] PR `Fixes #236`, CI, merge
+
+Files changed: `backend/src/services/pdf.service.ts`, `backend/src/services/statement-pdf.service.ts`, `backend/src/__tests__/statement-pdf.pg.test.ts`, `backend/src/__tests__/statement-pdf-render.test.ts`, `tests/e2e/features/statement-detail.feature`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/reviews/w11-*.md`, `docs/design/personas/dr-weber-w11.md`
+
 ## Session W10c: agreed Nebenkosten per Mietvertrag (#91)
 
 - [x] Implementation issue for #91 created (own "Done means"): #363; decision issues #368 (agreed from a date, follow-up contract), #369 (glossary)
