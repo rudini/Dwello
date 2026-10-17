@@ -1,6 +1,10 @@
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
+import { Count } from '../screenplay/questions';
+import { Check, Click, Enter, EnterDate, FailRequests, Navigate, Select, Uncheck, Wait } from '../screenplay/interactions';
 import {
+	agreedCategory,
+	agreedCategoryBoxAt,
+	agreedCategoryBoxes,
 	advancePaymentInput,
 	apartmentSelect,
 	baseRentInput,
@@ -31,6 +35,7 @@ export type ContractData = {
 	advancePayment?: string;
 	confirmPastStart?: boolean; // the wizard asks once about a start in the past
 	managementFee?: string | null; // own rate in percent, 'run' for the run's rate (default), null for no choice (#89)
+	notAgreed?: string[]; // categories the lease does not agree, unticked (#91)
 };
 
 // «Verwaltungspauschale vereinbart»: the run's rate, an own rate or, with no choice, nothing
@@ -72,7 +77,9 @@ const fillContract = (contract: Omit<ContractData, 'tenantId'>): Activity => asy
 	if (contract.confirmPastStart) await actor.attemptsTo(goToNextStep);
 	await actor.attemptsTo(Enter.theValue(contract.baseRent).into(baseRentInput));
 	if (contract.advancePayment) await actor.attemptsTo(Enter.theValue(contract.advancePayment).into(advancePaymentInput));
-	await actor.attemptsTo(chooseManagementFee(contract.managementFee === undefined ? 'run' : contract.managementFee), goToNextStep);
+	await actor.attemptsTo(chooseManagementFee(contract.managementFee === undefined ? 'run' : contract.managementFee));
+	for (const categoryId of contract.notAgreed ?? []) await actor.attemptsTo(Uncheck.the(agreedCategory(categoryId)));
+	await actor.attemptsTo(goToNextStep);
 };
 
 // The tenant chosen before, still on step "Mieter"
@@ -133,6 +140,10 @@ export const agreeManagementFee: Activity = (actor) =>
 export const enterBilledUntil = (isoDate: string): Activity => (actor) =>
 	actor.attemptsTo(EnterDate.of(isoDate).into(billedUntilInput), Click.on(contractSubmitButton));
 
+// «Bearbeiten»: the lease does not agree this category (#91)
+export const leaveOutCategory = (categoryId: string): Activity => (actor) =>
+	actor.attemptsTo(Uncheck.the(agreedCategory(categoryId)), Click.on(contractSubmitButton));
+
 export const openRunningContract = Click.on(runningContractLink);
 export const newContractAfterEnd = Click.on(newContractAfterEndLink);
 
@@ -145,3 +156,9 @@ export const goToRentWith = (tenantId: string, startDate: string): Activity => (
 		EnterDate.of(startDate).into(startDateInput),
 		goToNextStep
 	);
+
+// «Vereinbarte Nebenkosten»: every box unticked, not saved (persona Marco W10c P-1)
+export const untickAllCategories: Activity = async (actor) => {
+	const boxes = await actor.answer(Count.of(agreedCategoryBoxes));
+	for (let box = 0; box < boxes; box++) await actor.attemptsTo(Uncheck.the(agreedCategoryBoxAt(box)));
+};

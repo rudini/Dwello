@@ -37,7 +37,9 @@
 			? m.statements_status_draft()
 			: status === 'paid'
 				? m.contracts_billed_paid()
-				: m.contracts_billed_sent();
+				: status === 'replaced'
+					? m.contracts_billed_replaced()
+					: m.contracts_billed_sent();
 	const locked = $derived(!!billedBy?.some((s) => s.status !== 'draft'));
 	// what a started contract's deletion means: with an end there is no «Beenden» (Fachreview V-11); an ended one says
 	// when it has no statement, unknown is not none (A-8, review C-1)

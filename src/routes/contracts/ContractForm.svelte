@@ -42,8 +42,14 @@
 	let {
 		contract,
 		tenant,
-		apartment
-	}: { contract: RentalContract; tenant: string; apartment: string } = $props();
+		apartment,
+		categories
+	}: {
+		contract: RentalContract;
+		tenant: string;
+		apartment: string;
+		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
+	} = $props();
 
 	let values = $state(untrack(() => initialContractValues(contract, $page.url.searchParams)));
 	let errors = $state<Record<string, string>>({});
@@ -297,7 +303,7 @@
 	</Panel>
 
 	<Panel title={m.contracts_rent()}>
-		<RentStep bind:values {errors} />
+		<RentStep bind:values {errors} {categories} agreedHelp={m.contracts_agreed_costs_help_edit()} />
 	</Panel>
 
 	{#if errors.form}

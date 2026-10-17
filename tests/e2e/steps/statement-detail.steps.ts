@@ -3,6 +3,14 @@ import { test } from '../fixtures/test';
 import { francs } from '../questions/amounts';
 import { downloadedFileHeader, downloadedFileName, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
 import {
+	balanceAmount,
+	changeOffers,
+	correctConfirmation,
+	deadlineShown,
+	paymentText,
+	replacedDone,
+	priorPaymentsAmount,
+	replacedStatementLink,
 	deleteOffers,
 	heatingCostsOfTenant,
 	heatingProfileOfStatement,
@@ -22,7 +30,8 @@ import {
 	sharesOfPosition,
 	statusOfStatement,
 	tenancyOfStatement,
-	totalLabelOfStatement
+	totalLabelOfStatement,
+	oldAddressWarningText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -34,6 +43,12 @@ import {
 } from '../questions/statements';
 import { openStatementList, searchStatements } from '../tasks/statements';
 import {
+	correctStatement,
+	createCorrection,
+	openCorrectConfirmation,
+	openCorrection,
+	openReplacedContract,
+	openReplacedStatement,
 	deleteStatement,
 	downloadStatementPdf,
 	requestStatementPdf,
@@ -49,7 +64,8 @@ import {
 	openStatementDetail,
 	openStatementTenant,
 	resetPayment,
-	sendStatement
+	sendStatement,
+	confirmSending
 } from '../tasks/statement-detail';
 import { inDays } from '../fixtures/dates';
 
@@ -131,6 +147,10 @@ Then(
 		await verwalter.sees(recipient).toContain(channel);
 	}
 );
+
+Then('nennt die Bestätigung die Korrespondenzadresse {string}', async ({ verwalter }, address: string) => {
+	await verwalter.sees(recipient).toContain(address);
+});
 
 Then('sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt', async ({ verwalter }) => {
 	await verwalter.sees(sendConfirmation).toContain('Dwello verschickt die Abrechnung nicht selbst');
@@ -357,5 +377,116 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(resetConfirmation).toContain('gilt dann wieder als nicht bezahlt');
 		await verwalter.sees(resetConfirmation).toContain(`Das Zahlungsdatum ${sendingDay()} wird gelöscht.`);
+	}
+);
+
+// #120, #358: berichtigte Abrechnung
+Given('die Abrechnung {int} von {string} ist ersetzt', async ({ seed }, year: number, tenant: string) => {
+	await seed.replaceStatement(tenant, year);
+});
+
+Given('der Mietvertrag von {string} beginnt danach am {string}', async ({ seed }, tenant: string, date: string) => {
+	await seed.contractStart(tenant, date);
+});
+
+Given('die Abrechnung {int} von {string} ist berichtigt', async ({ seed }, year: number, tenant: string) => {
+	await seed.replaceStatement(tenant, year, true);
+});
+
+Given(
+	'der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(openStatementDetail(`/statements/${seed.idOf(`Berichtigte Abrechnung ${tenant} ${year}`)}`));
+	}
+);
+
+When('der Liegenschaftsverwalter die Abrechnung berichtigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(correctStatement);
+});
+
+When('der Liegenschaftsverwalter die Abrechnung berichtigen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openCorrectConfirmation);
+});
+
+When('der Liegenschaftsverwalter die berichtigte Abrechnung erstellt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(createCorrection);
+});
+
+When('der Liegenschaftsverwalter die berichtigte Abrechnung öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openCorrection);
+});
+
+When('der Liegenschaftsverwalter den Mietvertrag der ersetzten Abrechnung öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openReplacedContract);
+});
+
+Then('bestätigt Dwello {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(replacedDone).toContain(text);
+});
+
+Then('sagt die Abrechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(paymentText).toContain(text);
+});
+
+Then('nennt die Abrechnung keine Zahlungsfrist', async ({ verwalter }) => {
+	await verwalter.sees(deadlineShown).toBe(0);
+});
+
+When('der Liegenschaftsverwalter die ersetzte Abrechnung öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openReplacedStatement);
+});
+
+Then(
+	'nennt die Abrechnung, dass sie die Abrechnung {int} von {string} ersetzt',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(replacedStatementLink).toBe(statementPath(seed, tenant, year));
+	}
+);
+
+Then('sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt', async ({ verwalter }) => {
+	await verwalter.sees(correctConfirmation).toContain('durch eine berichtigte Abrechnung ersetzt');
+	await verwalter.sees(correctConfirmation).toContain('bleibt unverändert erhalten');
+});
+
+Then('nennt die Bestätigung die Verjährung nach fünf Jahren', async ({ verwalter }) => {
+	await verwalter.sees(correctConfirmation).toContain('fünf Jahren (Art. 128 Ziff. 1 OR)');
+});
+
+Then('rechnet die Abrechnung {string} als bereits bezahlt an', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(priorPaymentsAmount).toBe(francs(amount));
+});
+
+Then('beträgt der Saldo der Abrechnung {string}', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(balanceAmount).toBe(francs(amount));
+});
+
+Then('bietet die Detailseite weder Zahlung noch Mahnung noch Bearbeitung noch Berichtigung der Abrechnung an', async ({ verwalter }) => {
+	await verwalter.sees(changeOffers).toBe(0);
+});
+
+Then(
+	'ist der Liegenschaftsverwalter auf der Detailseite der berichtigten Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(pageAddressInApp).toBe(`/statements/${seed.idOf(`Berichtigte Abrechnung ${tenant} ${year}`)}`);
+	}
+);
+
+When('der Liegenschaftsverwalter den Versand trotzdem bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmSending);
+});
+
+// A-5 (#114): the warning starts with the tenant's full name
+Then(
+	'warnt die Bestätigung, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(sendConfirmation).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
+	}
+);
+
+// Persona W3c Anna P-2: on the page itself, before the dialog
+Then(
+	'warnt die Detailseite der Abrechnung, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(oldAddressWarningText).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );

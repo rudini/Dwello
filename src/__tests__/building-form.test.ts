@@ -68,18 +68,18 @@ describe('BuildingForm', () => {
 			props: {
 				mode: 'edit',
 				errors: {
-					name: 'Gebäudename ist erforderlich',
-					postalCode: 'PLZ muss 4 Ziffern haben',
-					canton: 'Kanton ist erforderlich',
+					name: 'Gebäudename ist erforderlich.',
+					postalCode: 'PLZ muss 4 Ziffern haben.',
+					canton: 'Kanton ist erforderlich.',
 					form: 'Fehler beim Speichern'
 				},
 				cancelHref: '/buildings/42'
 			}
 		});
 
-		expect(body).toContain('Gebäudename ist erforderlich');
-		expect(body).toContain('PLZ muss 4 Ziffern haben');
-		expect(body).toContain('Kanton ist erforderlich');
+		expect(body).toContain('Gebäudename ist erforderlich.');
+		expect(body).toContain('PLZ muss 4 Ziffern haben.');
+		expect(body).toContain('Kanton ist erforderlich.');
 		expect(body).toContain('Fehler beim Speichern');
 		expect(body.match(/data-testid="form-error"/g)).toHaveLength(4);
 	});

@@ -6,6 +6,7 @@ import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
+import category from '../../tests/contracts/category.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import contractHasStatements from '../../tests/contracts/contract-delete-refused.json';
 
@@ -58,24 +59,32 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 	const nextSteps = async (contract: Record<string, unknown>, others: unknown[] | null = []) =>
 		(
 			(await load({ params: { id: 'c1' }, fetch: backend(contract, others) } as never)) as {
-				nextSteps: { successor: boolean } | null;
+				nextSteps: { successor: boolean; ended: boolean } | null;
 			}
 		).nextSteps;
 	const notice = { endDate: '2099-03-31', terminated: true };
 
 	it('nennt sie bei einer laufenden Kündigung ohne Nachmieter', async () => {
-		expect(await nextSteps(notice)).toEqual({ successor: false });
+		expect(await nextSteps(notice)).toEqual({ successor: false, ended: false });
 	});
 
 	// Haiku-Review R2: die neue Adresse braucht es auch, wenn der Nachmieter schon erfasst ist
 	it('nennt mit erfasstem Nachmieter nur noch die neue Adresse', async () => {
 		const successor = { id: 'c2', startDate: '2099-04-01', endDate: null };
-		expect(await nextSteps(notice, [successor])).toEqual({ successor: true });
+		expect(await nextSteps(notice, [successor])).toEqual({ successor: true, ended: false });
 	});
 
 	it('nennt sie nicht nach dem Auszug und nicht ohne Kündigung', async () => {
 		expect(await nextSteps({ endDate: '2021-02-28', terminated: true })).toBeNull();
 		expect(await nextSteps({ endDate: '2099-03-31', terminated: false })).toBeNull();
+	});
+
+	// A-5 (#114): nach dem Auszug geht die Abrechnung sonst an die verlassene Wohnung
+	it('nennt nach dem Vertragsende nur noch die neue Adresse, solange es die Adresse der Wohnung ist', async () => {
+		expect(await nextSteps({ endDate: '2021-02-28', terminated: true, oldAddress: true })).toEqual({
+			successor: false,
+			ended: true
+		});
 	});
 
 	// Haiku-Review R6: lieber kein Hinweis als ein falscher
@@ -168,6 +177,14 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
 			}))
 		);
+	});
+
+	// #120, Fachreview W2e: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode
+	it('nennt die Periode einer ersetzten Abrechnung ohne berichtigte', async () => {
+		const replaced = { ...statementOf('c1', lastYear), status: 'replaced' };
+		expect(await missingOf(backend([replaced], `${lastYear}-03-01`))).toEqual([
+			{ ...year(lastYear), href: `/statements/generate?building=b1&start=${lastYear}-01-01&end=${lastYear}-12-31` }
+		]);
 	});
 
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
@@ -598,7 +615,7 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 			status: 409,
 			data: {
 				fixedTermError:
-					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann Dwello das Vertragsende nicht entfernen. Für Sie und den Mieter läuft der Mietvertrag trotzdem unbefristet weiter. Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.'
+					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann Dwello das Vertragsende noch nicht entfernen. Für Sie und den Mieter läuft der Mietvertrag trotzdem unbefristet weiter. Berichtigen Sie zuerst jede dieser Abrechnungen. Öffnen Sie sie dazu und wählen Sie «Abrechnung berichtigen».'
 			}
 		});
 	});
@@ -685,5 +702,36 @@ describe('Entwurf löschen und Mietvertrag unbefristet weiterführen', () => {
 			expect(await result).toMatchObject({ status: 409 });
 			expect(calls.filter((call) => call.method)).toEqual([]);
 		}
+	});
+});
+
+// #91: the contract's page names its agreed Nebenkosten; without the categories it still shows the rest
+describe('Vereinbarte Nebenkosten am Mietvertrag', () => {
+	const backend = (categories: Response) =>
+		(async (url: string) =>
+			url.endsWith('/categories?limit=100')
+				? categories
+				: url.endsWith('/contracts/c1')
+					? Response.json(contractDetail)
+					: Response.json({ data: [], contracts: [] })) as typeof globalThis.fetch;
+	const agreedCosts = async (categories: Response) =>
+		(
+			(await load({ params: { id: 'c1' }, fetch: backend(categories) } as never)) as {
+				agreedCosts: unknown;
+			}
+		).agreedCosts;
+
+	it('nennt die vereinbarten Kategorien beim Namen', async () => {
+		const listed = Response.json({
+			categories: [
+				{ ...category, id: contractDetail.agreedCategoryIds[0], nameDE: 'Internet' },
+				{ ...category, id: 'other', nameDE: 'Lift' }
+			]
+		});
+		expect(await agreedCosts(listed)).toEqual(['Internet']);
+	});
+
+	it('zeigt den Mietvertrag ohne sie, wenn die Kategorien nicht geladen werden können', async () => {
+		expect(await agreedCosts(new Response(null, { status: 500 }))).toBeNull();
 	});
 });

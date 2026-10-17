@@ -7,12 +7,13 @@ describe('Neuer Mietvertrag laden', () => {
 		const urls: string[] = [];
 		const fetch = (async (url: string) => {
 			urls.push(url);
-			return Response.json(url.includes('tenants') ? { tenants: [] } : { apartments: [] });
+			return Response.json({ tenants: [], apartments: [], categories: [] });
 		}) as typeof globalThis.fetch;
 		await load({ fetch } as never);
 		expect(urls).toEqual([
 			'http://localhost:3001/api/v1/tenants?limit=1000',
-			'http://localhost:3001/api/v1/apartments?limit=1000'
+			'http://localhost:3001/api/v1/apartments?limit=1000',
+			'http://localhost:3001/api/v1/categories?limit=100' // the boxes of the agreed Nebenkosten (#91)
 		]);
 	});
 
@@ -22,6 +23,7 @@ describe('Neuer Mietvertrag laden', () => {
 				url.includes('tenants')
 					? { tenants: [] }
 					: {
+							categories: [],
 							apartments: [
 								{
 									id: 'a1',

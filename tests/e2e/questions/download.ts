@@ -1,3 +1,4 @@
+import { unzipSync } from 'fflate';
 import { question } from '../screenplay/actor';
 import { DownloadedFile } from '../screenplay/questions';
 import { readPdf } from '../../../backend/src/__tests__/helpers/pdf-text';
@@ -9,6 +10,13 @@ export const downloadedFileName = question(
 );
 export const downloadedFileHeader = question('the first bytes of the downloaded file', async (actor) =>
 	(await actor.answer(DownloadedFile)).content.subarray(0, 5).toString()
+);
+
+// The files in the downloaded ZIP: each name with its first bytes («NK-….pdf %PDF-»)
+export const filesInDownloadedZip = question('the files in the downloaded ZIP', async (actor) =>
+	Object.entries(unzipSync((await actor.answer(DownloadedFile)).content)).map(
+		([name, content]) => `${name} ${Buffer.from(content.subarray(0, 5)).toString()}`
+	)
 );
 
 // Title in the document information of the downloaded PDF (PDFKit keeps it in an object of its own)

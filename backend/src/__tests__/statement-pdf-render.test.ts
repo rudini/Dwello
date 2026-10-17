@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { generateStatementPDFBase64, type StatementPDFData } from '../services/pdf.service';
+import { calculateBalance } from '../services/calculation.service';
 import { generateQRBillForStatement } from '../services/qr-bill.service';
 import { readPdf } from './helpers/pdf-text';
 
@@ -28,7 +29,7 @@ const refund: StatementPDFData = {
 	managementFeePercent: 0,
 	totalCosts: 784.13,
 	totalAdvancePayments: 878,
-	balance: -93.85 // 784.13 − 878.00 = −93.87, to 5 Rappen
+	balance: -93.85 // 784.13 − 878.00 = −93.87, commercially to 5 Rappen: a statement made before #79 keeps it
 };
 
 const textOf = async (data: StatementPDFData) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
@@ -48,6 +49,19 @@ describe('PDF einer Rückerstattung', () => {
 		const older = { ...refund, lineItems: [{ ...refund.lineItems[0], apartmentShare: null, periodShare: null }] };
 
 		expect((await textOf(older)).flowing).toContain("Hauswart Pro Fläche (m²) 3'060.00 – – 784.13");
+	});
+});
+
+// #84 FR-7: «1er», not «1e»
+describe('Stockwerk im französischen PDF', () => {
+	it.each([
+		[-1, 'A2, 1er sous-sol'],
+		[-2, 'A2, 2e sous-sol']
+	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'fr'), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
 	});
 });
 
@@ -92,6 +106,17 @@ describe('Rundung des Saldos im PDF', () => {
 		expect((await textOf(refund)).flowing).toContain('auf 5 Rappen gerundet');
 	});
 
+	// Nur zugunsten des Mieters (#79): die Nachzahlung wird kleiner (–), die Rückerstattung grösser (+), um bis 4 Rappen
+	it('zeigt die Rundung zugunsten des Mieters vom gezeigten Betrag aus', async () => {
+		const rounded = (data: StatementPDFData) => ({ ...data, balance: calculateBalance(data.totalCosts, data.totalAdvancePayments) });
+		expect((await textOf(rounded(due))).flowing).toContain('Nachzahlung vor Rundung 184.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 184.10');
+		expect((await textOf(rounded(refund))).flowing).toContain('Rückerstattung vor Rundung 93.87 Rundung auf 5 Rappen + 0.03 Rückerstattung 93.90');
+		const smallest = rounded({ ...refund, totalCosts: 877.99 });
+		expect((await textOf(smallest)).flowing).toContain('Rückerstattung vor Rundung 0.01 Rundung auf 5 Rappen + 0.04 Rückerstattung 0.05');
+		const evened = rounded({ ...due, totalCosts: 600.03 });
+		expect((await textOf(evened)).flowing).toContain('Nachzahlung vor Rundung 0.03 Rundung auf 5 Rappen – 0.03 Ausgeglichen 0.00');
+	});
+
 	// 1000.02 − 1000.00 gibt nach der Rundung 0: der Text sagt, dass nach der Rundung nichts zu bezahlen ist
 	it('nennt bei einem Saldo von 0 nach der Rundung die Rundung statt gleich hoher Beträge', async () => {
 		const evened = { ...due, totalCosts: 1000.02, totalAdvancePayments: 1000, balance: 0 };
@@ -106,7 +131,7 @@ describe('Rundung des Saldos im PDF', () => {
 	// Die Zeile passt in allen Sprachen auf eine Zeile, sonst kann der Saldo allein auf die nächste Seite rutschen
 	it('nennt die Rundung auf Italienisch in einer Zeile mit ihrem Betrag', async () => {
 		const it = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'it'), 'base64')).flowing;
-		expect(it).toContain('Arrotondamento + 0.02');
+		expect(it).toContain('Arrotondamento a 5 centesimi + 0.02');
 		expect(it).toContain('prima dell’arrotondamento 184.13');
 	});
 
@@ -128,6 +153,24 @@ describe('PDF einer Nachzahlung', () => {
 		const pdf = await textOf({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } });
 
 		expect(pdf.flowing).not.toContain('Zahlbar durch');
+	});
+
+	// Post ins Ausland: das Land in Grossbuchstaben allein auf der letzten Zeile der Adresse, ein Nachbarland in seiner
+	// Sprache, jedes andere englisch; im Zahlteil der Ländercode vor der Postleitzahl, ausser in der Schweiz (#102)
+	it('nennt bei einer Korrespondenzadresse im Ausland das Land in der Adresse und im Zahlteil', async () => {
+		const abroad = { firstName: 'Nina', lastName: 'Brunner', address: 'Marktstätte 3', postalCode: '78462', city: 'Konstanz', country: 'DE' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant: abroad }, config, 'fr'), 'base64'));
+
+		expect(pdf.text).toContain('Nina Brunner\nMarktstätte 3\n78462 Konstanz\nDEUTSCHLAND');
+		expect(pdf.text).toContain('DE-78462 Konstanz');
+		expect(pdf.pages).toBe(2); // the payment part on a page of its own
+		expect(pdf.pageTexts[0]).not.toContain('DE-'); // the address block keeps the postal code alone
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'US' } })).text).toContain('78462 Konstanz\nUNITED STATES');
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'LI' } })).text).toContain('LI-78462 Konstanz');
+		const home = await textOf({ ...due, tenant: { ...abroad, country: 'CH' } });
+		expect(home.text).toContain('78462 Konstanz\n');
+		expect(home.text).not.toContain('SCHWEIZ');
+		expect(home.text).not.toContain('CH-78462');
 	});
 
 	it('wiederholt den Tabellenkopf auf jeder Seite der Kostenübersicht', async () => {
@@ -227,8 +270,32 @@ describe('Heiz- und Warmwasserkosten im PDF', () => {
 
 	// Beim Tank zählt nicht die Rechnung, sondern der Verbrauch
 	it('erklärt in der Fussnote, dass beim Tank der Verbrauch zählt', async () => {
-		expect((await textOf(heated)).flowing).toContain('Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch');
+		expect((await textOf(heated)).flowing).toContain('Kosten des Gebäudes bei Heizmaterial aus dem Tank: der Verbrauch');
 		expect((await textOf(due)).flowing).not.toContain('aus dem Tank');
+	});
+});
+
+// Das PDF nennt das Gebäude und seine Kosten mit den Worten der App (statements_building_costs), nicht «Liegenschaft» (#249)
+describe('Gebäude im PDF', () => {
+	it('sagt «Gebäude» und «Kosten des Gebäudes»', async () => {
+		const { flowing } = await textOf(due);
+
+		expect(flowing).toContain('Gebäude Seepark');
+		expect(flowing).toContain('Kosten des Gebäudes: die Rechnungen der Abrechnungsperiode');
+		expect(flowing).toContain('Wohnungsanteil: der Anteil Ihrer Wohnung an den Kosten des Gebäudes nach dem Verteilschlüssel');
+		expect(flowing).not.toContain('Liegenschaft');
+	});
+
+	it.each([
+		['fr', 'Immeuble Seepark', 'Coûts de l’immeuble', 'la part des coûts de l’immeuble qui revient à votre logement'],
+		['it', 'Immobile Seepark', 'Costi immobile', 'la quota dei costi dell’immobile a carico del suo appartamento'],
+		['en', 'Building Seepark', 'Building costs', 'your apartment’s part of the building costs']
+	] as const)('sagt auf %s die Worte der App', async (language, building, costs, apartmentShare) => {
+		const { flowing } = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, language), 'base64'));
+
+		expect(flowing).toContain(building);
+		expect(flowing).toContain(costs);
+		expect(flowing).toContain(apartmentShare);
 	});
 });
 
@@ -319,4 +386,50 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect([pageOf('01.04.2025'), pageOf('(600.00')]).toEqual([pageOf('306.52'), pageOf('306.52')]);
 	});
 
+});
+
+// #120, #358: die berichtigte Abrechnung nennt die ersetzte und rechnet an, was darauf schon bezahlt ist
+describe('PDF einer berichtigten Abrechnung', () => {
+	// bezahlt 100.00 auf NK-1-2025-0001: 784.13 − 600.00 − 100.00 = 84.13, auf 5 Rappen zugunsten des Mieters 84.10
+	const corrected: StatementPDFData = {
+		...due,
+		statementNumber: 'NK-1-2025-0002',
+		balance: 84.1,
+		replaces: { statementNumber: 'NK-1-2025-0001', statementDate: '2026-02-01', paidOn: ['NK-1-2025-0001'], priorPayments: 100 }
+	};
+
+	// Fachreview W2e V-2: der Mieter hat die alte Abrechnung mit ihrem Zahlteil noch
+	it('sagt, dass die ersetzte Abrechnung nicht mehr gilt und nur noch dieser Saldo zu bezahlen ist', async () => {
+		expect((await textOf(corrected)).flowing).toContain(
+			'Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Die Abrechnung NK-1-2025-0001 gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung.'
+		);
+	});
+
+	it('verlangt bei einer Rückerstattung keine Zahlung', async () => {
+		const flowing = (await textOf({ ...corrected, balance: -20 })).flowing;
+		expect(flowing).toContain('Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Die Abrechnung NK-1-2025-0001 gilt nicht mehr.');
+		expect(flowing).not.toContain('Bezahlen Sie nur noch');
+	});
+
+	it('zieht das schon Bezahlte vor der Rundung ab', async () => {
+		const flowing = (await textOf(corrected)).flowing;
+		expect(flowing).toContain('Geleistete Akontobeiträge – 600.00 Bereits bezahlt auf NK-1-2025-0001 – 100.00');
+		expect(flowing).toContain('Nachzahlung vor Rundung 84.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 84.10');
+		expect(flowing).toContain('bereits bezahlt CHF 100.00');
+	});
+
+	// Fachreview W2e V-4, V-11: jede Abrechnung der Kette; eine schon bezahlte Rückerstattung zählt dazu
+	it('nennt jede Abrechnung, auf die zurückerstattet wurde, und zählt den Betrag dazu', async () => {
+		const flowing = (
+			await textOf({ ...corrected, balance: 204.1, replaces: { ...corrected.replaces!, paidOn: ['NK-1-2025-0001', 'NK-1-2025-0002'], priorPayments: -20 } })
+		).flowing;
+		expect(flowing).toContain('Bereits zurückerstattet auf NK-1-2025-0001 und NK-1-2025-0002 + 20.00');
+		expect(flowing).toContain('bereits zurückerstattet CHF 20.00');
+	});
+
+	it('nennt die ersetzte Abrechnung auf Französisch', async () => {
+		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(corrected, config, 'fr'), 'base64')).flowing;
+		expect(fr).toContain('Ce décompte remplace le décompte NK-1-2025-0001 du 01.02.2026.');
+		expect(fr).toContain('Déjà payé sur NK-1-2025-0001');
+	});
 });

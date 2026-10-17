@@ -47,6 +47,13 @@ describe('initialContractValues', () => {
 		);
 	});
 
+	it('takes over no start from the URL the date check would refuse (#296)', () => {
+		const start = (date: string) =>
+			initialContractValues(undefined, new URLSearchParams({ start: date })).startDate;
+		expect(start('2100-01-01')).toBe('');
+		expect(start('2026-04-01')).toBe('2026-04-01');
+	});
+
 	it('takes the values of the contract being edited', () => {
 		const contract = {
 			id: 'c1',
@@ -94,19 +101,19 @@ describe('validateContract', () => {
 		expect(
 			validateContract({ ...filled, tenantId: '', apartmentId: '', startDate: '', baseRent: '' })
 		).toEqual({
-			tenantId: 'Bitte wählen Sie einen Mieter aus',
-			apartmentId: 'Bitte wählen Sie eine Wohnung aus',
-			startDate: 'Vertragsbeginn ist erforderlich',
-			baseRent: 'Nettomiete ist erforderlich'
+			tenantId: 'Bitte wählen Sie einen Mieter aus.',
+			apartmentId: 'Bitte wählen Sie eine Wohnung aus.',
+			startDate: 'Vertragsbeginn ist erforderlich.',
+			baseRent: 'Nettomiete ist erforderlich.'
 		});
 	});
 
 	it('requires an end after the start for a limited contract', () => {
 		expect(validateContract({ ...filled, isUnlimited: false }).endDate).toBe(
-			'Vertragsende ist erforderlich bei befristetem Vertrag'
+			'Bei einem befristeten Mietvertrag ist das Vertragsende erforderlich.'
 		);
 		expect(validateContract({ ...filled, isUnlimited: false, endDate: '2024-12-31' }).endDate).toBe(
-			'Vertragsende muss nach Vertragsbeginn liegen'
+			'Vertragsende muss nach Vertragsbeginn liegen.'
 		);
 	});
 
@@ -114,7 +121,7 @@ describe('validateContract', () => {
 		expect(
 			validateContract({ ...filled, baseRent: '0', additionalRent: '-1', advancePayment: 'x' })
 		).toEqual({
-			baseRent: 'Bitte geben Sie eine gültige Miete ein',
+			baseRent: 'Bitte geben Sie eine gültige Miete ein.',
 			additionalRent: AMOUNT_HINT,
 			advancePayment: AMOUNT_HINT
 		});
@@ -180,7 +187,13 @@ describe('contractBody', () => {
 		);
 	});
 
-	it('sendet die Verwaltungspauschale: vereinbart mit eigenem Satz, zum Satz des Laufs oder nicht', () => {
+	// #91: ohne Auswahl vereinbart das Backend alle umlagefähigen Kategorien
+	it('sendet die vereinbarten Nebenkosten nur, wenn sie gewählt sind', () => {
+		expect(contractBody(filled)).not.toHaveProperty('agreedCategoryIds');
+		expect(contractBody({ ...filled, agreedCategoryIds: [] })).toHaveProperty('agreedCategoryIds', []);
+	});
+
+		it('sendet die Verwaltungspauschale: vereinbart mit eigenem Satz, zum Satz des Laufs oder nicht', () => {
 		const fee = (values: Partial<ContractFormValues>) => {
 			const { managementFeeAgreed, managementFeePercent } = contractBody({ ...filled, ...values });
 			return { managementFeeAgreed, managementFeePercent };
@@ -253,5 +266,9 @@ describe('suggestedStartDate', () => {
 	it('suggests the day the apartment becomes free for a new contract without start', () => {
 		expect(suggestedStartDate('', freeFrom('2025-04-01'))).toBe('2025-04-01');
 		expect(suggestedStartDate('2025-05-01', freeFrom('2025-04-01'))).toBeNull();
+	});
+
+	it('suggests nothing the date check would refuse (#296)', () => {
+		expect(suggestedStartDate('', freeFrom('2100-01-01'))).toBeNull();
 	});
 });

@@ -25,6 +25,7 @@ import {
 	invoicesOfBuilding,
 	missingInvoicesWarning,
 	missingInvoicesWarnings,
+	oldAddressWarning,
 	noContractsInPeriod,
 	periodRunning,
 	missingStockFindings,
@@ -59,10 +60,13 @@ import {
 	returnToStatementList,
 	setManagementFee,
 	showCreatedStatements,
+	downloadCreatedStatementsZip,
+	requestCreatedStatementsZip,
 	tryNextWithoutConfirmation,
 	typeManagementFee
 } from '../tasks/statement-generate';
 import { francs, signedFrancs } from '../questions/amounts';
+import { filesInDownloadedZip } from '../questions/download';
 import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
@@ -99,6 +103,21 @@ Given(
 When('der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(showCreatedStatements);
 });
+
+When('der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP herunterlädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(downloadCreatedStatementsZip);
+});
+
+When('der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP anfordert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(requestCreatedStatementsZip);
+});
+
+Then(
+	'enthält die ZIP-Datei nur das PDF der Abrechnung {int} von {string}, benannt nach ihrer Abrechnungsnummer',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(filesInDownloadedZip).toEqual([`${await seed.statementNumber(tenant, year)}.pdf %PDF-`]);
+	}
+);
 
 When('der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(returnToStatementList);
@@ -418,6 +437,13 @@ Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom
 When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
 	await verwalter.attemptsTo(editHintedInvoice(date));
 });
+// A-5 (#114): the warning starts with the tenant's full name
+Then(
+	'warnt die Vorschau, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(oldAddressWarning).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
+	}
+);
 
 // Tankbestand checks (#136, #72)
 Given(

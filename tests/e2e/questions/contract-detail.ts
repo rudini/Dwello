@@ -1,6 +1,7 @@
 import { question } from '../screenplay/actor';
 import { Attribute, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
+	nextSteps,
 	endDialogDeathHint,
 	endDialog,
 	noticePeriodHint,
@@ -11,6 +12,7 @@ import {
 	contractEndError,
 	contractBilledUntil,
 	contractManagementFee,
+	contractAgreedCosts,
 	contractStatus,
 	contractTotalRent,
 	deleteDialog,
@@ -44,5 +46,8 @@ export const noticePeriodHintText = Text.of(noticePeriodHint);
 export const noticePeriodHintShown = Visibility.of(noticePeriodHint);
 export const endDialogText = Text.of(endDialog);
 export const noticeReceivedOn = Text.of(contractNoticeReceived);
+export const nextStepsText = Text.of(nextSteps);
 export const fixedTermCheckShown = Visibility.of(fixedTermCheck);
 export const fixedTermErrorText = Text.of(fixedTermError);
+
+export const agreedCostsOfContract = Text.of(contractAgreedCosts);

@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { roomsLabel, statusLabels } from '$lib/apartment';
 import type { ApartmentStatus } from '$lib/types';
+import { agreeableCategories } from '$lib/server/category';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -61,5 +62,5 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		status: statusLabels[a.status]
 	}));
 
-	return { tenants, apartments };
+	return { tenants, apartments, categories: await agreeableCategories(fetch) };
 };

@@ -70,9 +70,43 @@ describe('Daten der Abrechnung im PDF', () => {
 		});
 	});
 
+	// #120: die berichtigte Abrechnung nennt die ersetzte und was darauf schon bezahlt ist
+	it('übernimmt die ersetzte Abrechnung und das schon Bezahlte', () => {
+		const corrected = {
+			...statement,
+			replaces: { id: 's0', statementNumber: 'NK-0', statementDate: '2026-02-01' },
+			priorPayments: '100.00',
+			priorPaidOn: ['NK-0']
+		} as StatementWithDetails;
+
+		expect(toPdfData(corrected, categories, 'de').replaces).toEqual({
+			statementNumber: 'NK-0',
+			statementDate: '2026-02-01',
+			paidOn: ['NK-0'],
+			priorPayments: 100
+		});
+		expect(toPdfData(statement, categories, 'de').replaces).toBeUndefined();
+	});
+
 	it('nennt die Kategorie in der Sprache des Mieters, sonst deutsch', () => {
 		expect(toPdfData(statement, categories, 'fr').lineItems[0].category).toBe('Chauffage');
 		expect(toPdfData(statement, categories, 'de').lineItems[1].category).toBe('Nicht kategorisiert');
+	});
+});
+
+// #91: the PDF names the agreed categories it bills; fach-review W10c round 2 M-1: a position without a category is no
+// agreed category, so the sentence «Abgerechnet sind nur …» would be false next to it
+describe('Vereinbarte Nebenkosten im PDF', () => {
+	const agreed = { ...statement, agreedCategoryIds: ['heating'] } as unknown as StatementWithDetails;
+	const categorised = { ...agreed, lineItems: agreed.lineItems.filter((item) => item.categoryId) } as StatementWithDetails;
+
+	it('nennt die vereinbarten Kategorien, die die Abrechnung abrechnet', () => {
+		expect(toPdfData(categorised, categories, 'de').agreedCosts).toEqual(['Heizung']);
+	});
+
+	it('nennt sie nicht neben einer Position ohne Kategorie, und nicht vor #91', () => {
+		expect(toPdfData(agreed, categories, 'de').agreedCosts).toBeUndefined();
+		expect(toPdfData({ ...categorised, agreedCategoryIds: null } as StatementWithDetails, categories, 'de').agreedCosts).toBeUndefined();
 	});
 });
 
@@ -100,28 +134,42 @@ describe('Rundung auf Rappen', () => {
 });
 
 describe('Saldo auf 5 Rappen', () => {
-	// Kaufmännisch: ab 2.5 Rappen auf, darunter ab; Nachzahlung und Rückerstattung gleich
-	it('rundet kaufmännisch auf 5 Rappen, eine Rückerstattung wie eine Nachzahlung', () => {
-		expect(roundTo5Rappen(791.03)).toBe(791.05);
-		expect(roundTo5Rappen(791.02)).toBe(791.0);
-		expect(roundTo5Rappen(0.025)).toBe(0.05);
-		expect(roundTo5Rappen(-0.025)).toBe(-0.05);
-		expect(roundTo5Rappen(-48.97)).toBe(-48.95);
-		expect(roundTo5Rappen(-48.98)).toBe(-49.0);
-		// ein Rest unter 2.5 Rappen ist 0, nicht −0 (sonst «Rückerstattung CHF 0.00»)
-		expect(Object.is(roundTo5Rappen(-0.01), 0)).toBe(true);
+	// Nur zugunsten des Mieters (#79): eine Nachzahlung abgerundet, eine Rückerstattung aufgerundet, um höchstens 4 Rappen
+	it('rundet eine Nachzahlung ab und eine Rückerstattung auf', () => {
+		expect(roundTo5Rappen(791.03)).toBe(791.0);
+		expect(roundTo5Rappen(791.04)).toBe(791.0);
+		expect(roundTo5Rappen(791.05)).toBe(791.05);
+		expect(roundTo5Rappen(-48.97)).toBe(-49.0);
+		expect(roundTo5Rappen(-48.96)).toBe(-49.0);
+		expect(roundTo5Rappen(-48.95)).toBe(-48.95);
 	});
 
-	// Schweizer Rappenrundung: …1, …2 → …0; …3 bis …7 → …5; …8, …9 → nächste …0
-	it('rundet jede Endziffer nach der Schweizer Rappenrundung', () => {
-		const endings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((cent) => roundTo5Rappen(10 + cent / 100));
-		expect(endings).toEqual([10, 10, 10, 10.05, 10.05, 10.05, 10.05, 10.05, 10.1, 10.1]);
-		expect([1, 2, 3, 7, 8].map((cent) => roundTo5Rappen(-(10 + cent / 100)))).toEqual([-10, -10, -10.05, -10.05, -10.1]);
+	it('jede Endziffer: Nachzahlung auf …0 oder …5 ab, Rückerstattung auf …0 oder …5 auf', () => {
+		const due = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((cent) => roundTo5Rappen(10 + cent / 100));
+		expect(due).toEqual([10, 10, 10, 10, 10, 10.05, 10.05, 10.05, 10.05, 10.05]);
+		const refund = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((cent) => roundTo5Rappen(-(10 + cent / 100)));
+		expect(refund).toEqual([-10, -10.05, -10.05, -10.05, -10.05, -10.05, -10.1, -10.1, -10.1, -10.1]);
+	});
+
+	// Fliesskomma: 784.13 − 878.00 ist −93.87000000000001, und 0.1 + 0.2 ist 0.30000000000000004; beides kein Rest
+	it('zählt das Rauschen der Fliesskommazahl nicht als Rest', () => {
+		expect(roundTo5Rappen(0.1 + 0.2)).toBe(0.3);
+		expect(roundTo5Rappen(-(0.1 + 0.2))).toBe(-0.3);
+		expect(roundTo5Rappen(784.13 - 878)).toBe(-93.9);
+		expect(roundTo5Rappen(1.15)).toBe(1.15);
+		expect(roundTo5Rappen(-1.15)).toBe(-1.15);
+	});
+
+	// Ein Saldo von +0.01 bis +0.04 wird 0.00, nicht −0 (sonst «Rückerstattung CHF 0.00»)
+	it('macht aus einer Nachzahlung unter 5 Rappen 0', () => {
+		expect(Object.is(roundTo5Rappen(0.04), 0)).toBe(true);
+		expect(Object.is(roundTo5Rappen(-0), 0)).toBe(true);
+		expect(roundTo5Rappen(-0.01)).toBe(-0.05);
 	});
 
 	it('rundet den Saldo aus Nebenkosten und Akonto', () => {
-		expect(calculateBalance(1031.03, 240)).toBe(791.05);
-		expect(calculateBalance(1031.03, 1080)).toBe(-48.95);
+		expect(calculateBalance(1031.03, 240)).toBe(791.0);
+		expect(calculateBalance(1031.03, 1080)).toBe(-49.0);
 	});
 });
 

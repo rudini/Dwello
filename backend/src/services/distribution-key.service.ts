@@ -196,7 +196,7 @@ export async function getDistributionKeyByName(name: string): Promise<Distributi
 async function ensureNameIsFree(name: string, id?: string) {
 	const existing = await getDistributionKeyByName(name);
 	if (existing && existing.id !== id) {
-		throw new Conflict('DISTRIBUTION_KEY_NAME_TAKEN', `Ein Verteilschlüssel mit dem Namen "${name}" existiert bereits.`, { name });
+		throw new Conflict('DISTRIBUTION_KEY_NAME_TAKEN', `Ein Verteilschlüssel mit dem Namen «${name}» existiert bereits.`, { name });
 	}
 }
 
