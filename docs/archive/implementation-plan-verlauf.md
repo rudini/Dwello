@@ -643,6 +643,36 @@ Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/[id]/NextSteps.svelt
 
 Files: `backend/src/services/contract.service.ts`, `backend/src/routes/contracts.ts`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/DeleteContract.svelte`, `src/routes/contracts/ContractForm.svelte`, `messages/*.json`, tests (`contract-end.pg`, `contract-delete.pg`, `api-contracts.pg`, test clean-ups, `contract-actions`, `contract-detail-page.dom`, `contract-edit.dom`), `tests/e2e/**`, `tests/a11y/screens.json`, `tests/contracts/*`, `docs/api-specification.md`, `docs/anforderungen-vertragsende.md`.
 
+## Session: statement wizard (#251, #252, #201)
+
+Request: «Setze #251 #252 #201 um». Branch `claude/statement-wizard-251-252-201`.
+
+- [x] #251: step 4 asks «trotzdem erstellen» only for real findings, not for existing statements alone (scenario, unit test of `needsConfirmation`)
+- [x] #252: the wizard's saved time in Swiss time (`DraftNotice`, `SaveStatus`). No scenario: the E2E browser runs in the machine's time zone and the stack sets none per scenario; DOM test with a set time zone
+- [x] #201 a: «Alle Gebäude» leaves out buildings whose Mietverträge all have a statement in the period, said next to the counter (scenario)
+- [x] #201 b: step 2 adds «Wenn Sie es wählen, wird dafür nichts erstellt.» and how an existing draft is recalculated (today: delete it and create again; «Neu berechnen» of #132 does not exist yet) (scenario)
+- [x] #201 c: a restored wizard opens in the step it was left in, if still valid (scenario)
+- [x] #201 d: discarding the input asks first («Ihre Angaben werden gelöscht.»); the notice can be closed (scenarios; new dialog state in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`)
+- [x] fach-reviewer on the scenarios before the first test turns green
+- [x] fach-reviewer round 1 (`docs/reviews/wizard-fachreview-1.md`)
+- [x] Fachreview M-1: a statement that covers only part of a contract's days in the period stays a finding (confirmation in step 4, kept by «Alle Gebäude»); `billedContracts` counts such contracts (`partly`), the preview passes them on (`partlyBilled`)
+- [x] Checks on the slice: lint, check, backend type-check, all vitest, E2E `statement-generate.feature`, `contract-new.feature`, axe and language rows of both wizards
+- [x] code-reviewer round 1 (`docs/reviews/wizard-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/wizard-fachreview-2.md`)
+- [x] Persona Anna (`docs/design/personas/anna-issue-201.md`), persona Dr. Weber (`docs/design/personas/dr-weber-issue-251.md`); no daten-pruefer: no amounts, PDFs or QR-bills change
+- [x] Fixes from the reviews: discard button «Angaben verwerfen» as in the dialog (#57's word; Anna P-1 in part); focus on the step heading after closing the notice (Anna, C-5); step 2 says that a run leaves days open instead of «Sie müssen es nicht wählen» and the delete advice when a statement covers only part of the period (V-9, C-3, Dr. Weber P-1/P-2); «Alle Gebäude» stays empty when every building is left out (C-1); scenario waits for the note (C-2); contracts from `tests/contracts` (C-7); C-8; fr/it wording (V-10, V-11, C-9)
+- [x] E2E full suite (chromium, api) on b881ac0: 779 passed; after the fixes `statement-generate.feature`, `contract-new.feature` and their axe and language rows again green
+- [x] fach-reviewer round 3 (`docs/reviews/wizard-fachreview-3.md`): V-12, V-13 wording applied («Mietstage», fr/it word for the run)
+- [x] Closing code-reviewer round (`docs/reviews/wizard-review-2.md`): fixed Major C-1 (empty preview with open days no longer advises deleting drafts, `PreviewEmpty.svelte`), C-2 (test), C-3 in part, C-6
+- [x] Re-review of the C-1 fix (code-reviewer round 3, `docs/reviews/wizard-review-3.md`): fixed the rest of C-1 (the error after «Weiter» on an empty preview with open days no longer advises deleting drafts) and C-10 (scenario «Eine leere Vorschau mit offenen Mietstagen rät nicht, Entwürfe zu löschen»), C-12 (`statements_all_billed` composed from its two sentences), C-13; C-11 left (Minor)
+- [x] Workflow note `docs/reviews/workflow-notes-issue-201.md`
+- [x] Feature review (personas, fach-reviewer)
+- [x] Closing code-reviewer round before push (`docs/reviews/wizard-review-4.md`): no Blocker/Major; C-11, C-14 left (Minor/Nit)
+- [x] Merge of origin/main (plan only); checks before push: lint, check, backend type-check, vitest 2659, full E2E chromium + api
+- [x] Archive session; pull request, CI (merge waits for the product owner: open Majors from before the change, see the pull request)
+
+Files: `src/lib/ui/{DraftNotice,SaveStatus}.svelte`, `src/lib/utils/format.ts`, `src/lib/statement-wizard.ts`, `src/lib/server/statement-generation.ts`, `src/routes/statements/generate/{+page.server.ts,StatementWizard,BuildingStep,BuildingChoice,PreviewChecks}.svelte`, `messages/{de,fr,it,en}.json`, tests in `src/__tests__/`, `tests/e2e/` (features, steps, tasks, questions, targets), `tests/a11y/screens.json`, `docs/reviews/wizard-fachreview-1.md`
+
 ## Session: statement list tenancy dates and missing PDF (#248, #253)
 
 - [x] #248 scenario `@wip` in `statements.feature`: list shows the tenancy dates within the period
@@ -1362,6 +1392,17 @@ Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requ
 
 Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.
 
+## Session 2026-10-17 W8c-2: remove the 3-month hint (#65, option A)
+
+- [x] Decision recorded in #65 (option A, label `entscheiden` removed)
+- [x] @wip scenario «Ohne Vorjahr weist die Vorschau nicht auf Monate ohne Rechnung hin» (statement-generate.feature), seen red at the hint
+- [x] fach-reviewer round 1: `docs/reviews/w8c2-fachreview-1.md` (V-2 fixed: Kaminfeger as the yearly invoice; V-1 Minor left in the report)
+- [x] Remove the hint: `partly`/`GAP_DAYS`/`partial` and the unused `period` parameter of `invoiceRows` in `src/lib/statement-wizard.ts` (callers `PreviewStep.svelte`, `StatementStep.svelte`), the alert and its marker in `PreviewChecks.svelte`, `statements_partial_*` in `messages/*.json`; unit and DOM tests turned red first
+- Files: those above, `src/__tests__/statement-wizard{,.dom}.test.ts`, `tests/e2e/{features/statement-generate.feature,steps/statement-generate.steps.ts,questions/statement-generate.ts,targets/statement-generate.ts}`
+- [x] code-reviewer round 1: `docs/reviews/w8c2-review-1.md` (C-1 fixed: the DOM test checks the text «Teil der Periode», seen red on the old code; C-2 fixed)
+- [x] workflow-review: no new point (the two of W8c are in `docs/reviews/workflow-notes-issue-65.md`)
+- [x] session archived, pull request (`Fixes #65`)
+
 ## Session 2026-10-16 W5: category descriptions with exclusions (#204, #220, #221)
 
 - [x] Migration `0021_category_descriptions.sql`: new descriptions for Heizung, Gartenpflege, Kehricht, TV/Kabelanschluss, Gebäudeversicherung, Verwaltung, only where a row still holds the seeded text (#204, #220)
@@ -1380,3 +1421,25 @@ Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.sve
 - [x] Merge reviews after main took the migration number: `docs/reviews/204-review-4.md`, `204-review-5.md` (migration now `0021`, after main took 0018 to 0020)
 
 Files: `backend/migrations/0021_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`, `tests/e2e/{features/categories.feature,steps/categories.steps.ts,tasks/categories.ts,questions/categories.ts,targets/categories.ts,screenplay/questions.ts}`
+
+## Session W7d: #71 Heizprofil within the Leistungszeitraum
+
+- [x] Read #71 and the open `entscheiden` issues on the same calculation (#257, #256, #280, #237); #257 (Tankbestand) proposes that a delivery's Leistungszeitraum does not count in a tank category: tank categories keep today's sharing until #257 is decided
+- [x] Scenario `@wip` in `tests/e2e/features/statement-detail.feature` (amount and PDF), seen red
+- [x] `fach-reviewer` on the scenario before implementing (amounts change): `docs/reviews/71-fachreview-1.md`; M-2 → #335 (entscheiden), V-7 → #336 (entscheiden), V-6 → comment on #237
+- [x] Calculation: a heating invoice with a Leistungszeitraum is shared by the Heizprofil's months inside it, normalised to 100 % (tdd, `calculation.service.ts`)
+- [x] PDF: each invoice of such a position with its months and the division, recomputable from the printed values (#232)
+- [x] `docs/nebenkostenabrechnung-anforderungen.md` rule 5, `docs/data-model.md` (CR2-N2)
+- Files: `backend/src/services/{calculation,pdf,statement-pdf}.service.ts`, `backend/src/db/schema.ts` (`InvoicePart.profile`, jsonb, no migration), tests `heating-distribution.pg.test.ts`, `statement-pdf-render.test.ts`, `statement-pdf.pg.test.ts`, `statement-detail.feature` + step, docs rule 5 and `data-model.md`
+- [x] Slice review round 1: `docs/reviews/71-review-1.md` (C-1, C-5 to C-8 fixed; C-2 answered by the domain review; C-3, C-4, C-9, C-10 stay in the report; C-11: V-3 stated in rule 5, V-4 stays in report 1)
+- [x] Domain review round 2: `docs/reviews/71-fachreview-2.md` (M-4, V-9 to V-13 fixed)
+- [x] Persona Dr. Weber: `docs/design/personas/dr-weber-71.md` (P-1 → #339 entscheiden; P-3 fixed; P-2, P-4 stay in the report)
+- [x] Domain review round 3: `docs/reviews/71-fachreview-3.md` (M-4 closed; V-14 fixed)
+- [x] Closing `code-reviewer` round 2: `docs/reviews/71-review-2.md` (C-1 fixed with a test, C-2 and C-4 fixed, C-3 accepted: reviewed wording)
+- [x] `daten-pruefer` on Seepark Residenz A2 and controls: `docs/reviews/71-datenpruefung-1.md` (no findings)
+- [x] Merge `origin/main` (conflict in the schema import of `calculation.service.ts` only)
+- [x] Closing code review round 3: `docs/reviews/71-review-3.md` (C-1 Major: a decommissioned tank no longer keeps the exception, `periodReadings().covered`, test first; C-2 settled by it); re-review round 4: `docs/reviews/71-review-4.md` (C-1, C-2 closed; C-3 Minor stays in the report)
+- [x] Merge of main after the product owner's go (conflicts in calculation, PDF texts, render test, rule 5): review of the merge commit `docs/reviews/71-review-5.md` (no Blocker/Major; C-1, C-2 stay in the report)
+- [x] Further merge of main and test fix (part order of two invoices with one date): review round 6 `docs/reviews/71-review-6.md` (no Blocker/Major; C-1 pre-existing, C-2 stay in the report)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
+- [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
