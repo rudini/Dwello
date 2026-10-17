@@ -458,7 +458,7 @@ describe('Abrechnungen erstellen', () => {
 
 	// #132: der übliche Nachzügler; ohne neue Abrechnung zählen nur die Entwürfe, denen Rechnungen fehlen
 	it('nennt bei einer leeren Vorschau die Entwürfe, denen Rechnungen fehlen, nicht die Einstellungen', () => {
-		const draft = { id: '1', statementNumber: 'NK-2024-0001', tenantName: 'Nina Brunner', outdated: true, profile: null, profileEdited: null, fee: null };
+		const draft = { id: '1', statementNumber: 'NK-2024-0001', tenantName: 'Nina Brunner', outdated: true, profile: null, profileEdited: 'Winter', fee: { used: 3, now: 4.5, source: 'run' as const } };
 		const other = { ...draft, id: '2', outdated: false, profile: { used: 'Winter', run: 'Heizung Mittelland' } };
 		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2, changed: [draft, other] }] });
 
@@ -937,7 +937,7 @@ describe('Abrechnungen erstellen', () => {
 			'Erstellt mit 3 % Verwaltungspauschale; im Mietvertrag ist heute keine Verwaltungspauschale vereinbart.'
 		);
 		expect(notesOf('3')).toBe(
-			'Das Heizprofil «Winter» wurde nach dem Erstellen dieser Abrechnung bearbeitet. Sie rechnet mit den Monatsanteilen von damals.'
+			'Das Heizprofil «Winter» wurde nach dem Erstellen dieser Abrechnung bearbeitet. Die Abrechnung rechnet mit den Monatsanteilen von damals.'
 		);
 		expect(byTestId('existing-statements')!.textContent).not.toContain('Damit alle Abrechnungen');
 	});

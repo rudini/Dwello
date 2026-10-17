@@ -397,7 +397,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
       | Dezember  | 15     |
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
-    Dann sagt die Vorschau zur Abrechnung 2024 von "Eva Frei" "Das Heizprofil «Winter» wurde nach dem Erstellen dieser Abrechnung bearbeitet. Sie rechnet mit den Monatsanteilen von damals."
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Eva Frei" "Das Heizprofil «Winter» wurde nach dem Erstellen dieser Abrechnung bearbeitet. Die Abrechnung rechnet mit den Monatsanteilen von damals."
 
   Szenario: Vorschau nennt eine Abrechnung mit einer anderen Verwaltungspauschale
     Angenommen es gibt das Heizprofil "Winter"

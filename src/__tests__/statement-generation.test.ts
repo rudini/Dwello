@@ -344,9 +344,16 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 	// a deleted Heizprofil is stored as none; the statement keeps its name since #209
 	it('nennt ein gelöschtes Heizprofil mit dem Namen, den die Abrechnung gespeichert hat', async () => {
 		const names = { name: 'Alt', nameDE: 'Alt', nameFR: null, nameIT: null, nameEN: null };
-		const fetch = fetchWith([{ ...statement('1', c1, 'sent', null, '4.50'), heatingShare: { byDays: true, names } }]);
+		const fetch = fetchWith([{ ...statement('1', c1, 'sent', null, '4.50'), heatingShare: { byDays: false, percent: 43, months: [], names } }]);
 
 		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Alt', run: 'Heizung Mittelland' } })]);
+	});
+
+	// persona Dr. Weber P-2, Fachreview V-8: by days (a contract over the whole period) the Heizprofil changes nothing
+	it('nennt kein anderes Heizprofil, wenn die Abrechnung die Heizkosten nach Tagen verteilt hat', async () => {
+		const fetch = fetchWith([{ ...statement('1', c1, 'sent', 'hp2', '4.50'), heatingShare: { byDays: true, reason: 'wholePeriod' } }]);
+
+		expect(await changedOf(fetch)).toEqual([]);
 	});
 
 	// Fachreview V-1: the statement keeps the Monatsanteile of its time, the run takes the profile as it is now
@@ -394,6 +401,16 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		const before = { ...statement('1', c1, 'draft', 'hp2', '1.00'), periodStart: '2023-01-01', periodEnd: '2023-12-31' };
 
 		expect(await changedOf(fetchWith([before], { '1': ['i2'] }))).toEqual([]);
+	});
+
+	// code review C-1: the settings are only a hint; without contracts or Heizprofile the preview still shows
+	it('zeigt die Vorschau auch, wenn Mietverträge oder Heizprofile nicht laden', async () => {
+		const fetch = (async (url: string) =>
+			url.includes('/heating-profiles?') || url.includes('/contracts?')
+				? Response.json({ error: 'kaputt' }, { status: 500 })
+				: fetchWith([statement('1', c1, 'draft', 'hp2', '1.00')], { '1': ['i2'] })(url)) as typeof globalThis.fetch;
+
+		expect(await changedOf(fetch)).toEqual([named('1', { outdated: true })]);
 	});
 
 	// only a hint: without the answer the draft is not named outdated, and the preview still shows

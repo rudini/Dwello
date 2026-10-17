@@ -310,7 +310,6 @@ export const restoredSelection = (
 	};
 };
 
-/** What the restored draft named and is gone meanwhile, in words for the draft notice */
 // a step by its number and name, both from the list of steps (code review C-12, C-13)
 const step = (name: (typeof stepNames)[number]) => ({
 	number: stepNames.indexOf(name) + 1,
@@ -338,6 +337,7 @@ export const sameSettingsNote = (changed: ChangedStatement[]) =>
 		? m.statements_existing_same_settings(step(m.statements_step_settings))
 		: null;
 
+/** What the restored draft named and is gone meanwhile, in words for the draft notice */
 export const droppedNotes = (dropped: { buildings: number; heatingProfile: boolean }) => {
 	const buildings = step(m.statements_step_buildings);
 	return [

@@ -143,18 +143,23 @@ const nameOf = (profiles: Profile[], id: string | null) => {
 	return profile ? localName(profile) : m.common_unknown();
 };
 
-// Another Heizprofil, named as the statement stored it (#209), or its own one edited since it was made (Fachreview V-1);
-// by days, the profile's shares do not count
+// The statement's own profile edited since it was made: it keeps the Monatsanteile of its time (Fachreview V-1)
+const editedSince = (listed: Listed, profiles: Profile[]) => {
+	const edited = profiles.find((p) => p.id === listed.heatingProfileId)?.updatedAt;
+	return !!edited && Date.parse(edited) > Date.parse(listed.createdAt);
+};
+
+// Another Heizprofil, named as the statement stored it (#209), or its own one edited since; neither counts where the
+// statement shared the heating costs by days, as for a contract over the whole period (Dr. Weber P-2, Fachreview V-8)
 function profileDifference(listed: Listed, run: GenerationRequest, profiles: Profile[]) {
-	const id: string | null = listed.heatingProfileId;
 	const share = listed.heatingShare;
+	const id: string | null = listed.heatingProfileId;
+	if (share?.byDays === true) return { profile: null, profileEdited: null };
 	if (id !== run.heatingProfileId) {
 		const used = share?.names ? localName(share.names) : nameOf(profiles, id);
 		return { profile: { used, run: nameOf(profiles, run.heatingProfileId) }, profileEdited: null };
 	}
-	const edited = profiles.find((p) => p.id === id)?.updatedAt;
-	const since =
-		share?.byDays === false && !!edited && Date.parse(edited) > Date.parse(listed.createdAt);
+	const since = share?.byDays === false && editedSince(listed, profiles);
 	return { profile: null, profileEdited: since ? nameOf(profiles, id) : null };
 }
 
@@ -184,15 +189,16 @@ async function changedStatements(
 	const same = overlapping.filter(
 		(s) => s.periodStart === run.periodStart && s.periodEnd === run.periodEnd
 	);
-	const [{ contracts = [] }, known] = same.length
+	// only a hint (code review C-1): without contracts or Heizprofile no settings are compared
+	const [{ contracts = [] }, known]: [{ contracts?: Contract[] }, Profile[]] = same.length
 		? await Promise.all([
 				call(fetch, `contracts?buildingId=${encodeURIComponent(buildingId)}&limit=1000`),
 				profiles()
-			])
+			]).catch(() => [{}, []])
 		: [{}, []];
 	const settings = (listed: Listed) => {
-		const contract = (contracts as Contract[]).find((c) => c.id === listed.contractId);
-		return same.includes(listed) && contract
+		const contract = contracts.find((c) => c.id === listed.contractId);
+		return same.includes(listed) && contract && known.length
 			? { ...profileDifference(listed, run, known), fee: feeDifference(listed, contract, run) }
 			: { profile: null, profileEdited: null, fee: null };
 	};
