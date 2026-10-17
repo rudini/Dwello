@@ -5,10 +5,11 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 ## Session: #66 Akonto and rent hints in the contract forms (W15)
 
-- [ ] @wip scenarios in `contract-new.feature` (Akonto help, no Akonto) and `contract-edit.feature` (running contract: Art. 269d OR, befristet)
-- [ ] fach-reviewer on the scenarios and texts before implementing
-- [ ] Akonto help names the Nebenkosten agreed in the Mietvertrag, examples stay (option A)
-- [ ] Hint for a contract without Akonto: no Nebenkosten can be billed (none agreed, or a Pauschale); does not block
-- [ ] Running-contract hint names Art. 269d OR (befristet: increase only after the end unless agreed, as #76)
-- [ ] `TODO(fachlich prüfen, #66)` markers removed; all four languages
+- [x] @wip scenarios in `contract-new.feature` (Akonto help) and `contract-edit.feature` (running contract: Art. 269d OR, befristet)
+- [x] fach-reviewer round 1 on the scenarios and texts before implementing (`docs/reviews/66-fachreview-1.md`)
+- [x] Akonto help names the Nebenkosten agreed in the Mietvertrag, examples stay (option A)
+- [ ] Hint for a contract without Akonto: blocked, fach-review M-1 contradicts the decided text (question in #66)
+- [x] Running-contract hint names Art. 269d OR (befristet: #76's sentence, `TODO(fachlich prüfen, #388)`)
+- [x] `TODO(fachlich prüfen, #66)` markers removed; all four languages
+- Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/RentStep.svelte`, `src/lib/ui/MoneyInput.svelte` (help testid), `src/__tests__/contract-edit.dom.test.ts`, `src/__tests__/contract-wizard.dom.test.ts`, `tests/e2e/{features,steps,questions,targets}`
 - [ ] Slice review, feature review (persona), PR "Fixes #66"

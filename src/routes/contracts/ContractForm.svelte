@@ -67,6 +67,11 @@
 	const running = $derived(
 		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
 	);
+	const runningText = $derived(
+		contract.endDate && !contract.terminated
+			? m.contracts_running_text_fixed_term()
+			: m.contracts_running_text()
+	);
 	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
 	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)
 	let unknown = $state(false);
@@ -224,9 +229,10 @@
 	class="flex flex-col gap-6"
 >
 	{#if running}
-		<!-- TODO(fachlich prüfen, #66): the hint on legal notice periods is not from the glossary -->
+		<!-- a rent increase per Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#66, #76);
+		     TODO(fachlich prüfen, #388): the befristet text without the form rule -->
 		<Alert tone="caution" title={m.contracts_running_title()} testid="contract-running-hint">
-			<p>{m.contracts_running_text()}</p>
+			<p>{runningText}</p>
 		</Alert>
 	{/if}
 

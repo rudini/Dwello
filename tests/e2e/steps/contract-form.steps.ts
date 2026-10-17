@@ -26,7 +26,6 @@ import {
 	tenantChoices,
 	withdrawNoticeHelp,
 	advancePaymentHelpText,
-	noAdvanceNoticeText,
 	runningContractEditHintText
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
@@ -437,11 +436,6 @@ Then(
 		await verwalter.sees(advancePaymentHelpText).toContain('für die im Mietvertrag vereinbarten Nebenkosten');
 	}
 );
-
-Then('erfährt der Liegenschaftsverwalter, dass er ohne Akonto keine Nebenkosten abrechnen kann', async ({ verwalter }) => {
-	await verwalter.sees(noAdvanceNoticeText).toContain('keine Nebenkosten abrechnen');
-	await verwalter.sees(noAdvanceNoticeText).toContain('Pauschale');
-});
 
 // #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
 Then(

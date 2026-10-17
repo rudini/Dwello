@@ -58,7 +58,6 @@
 	testid="contract-base-rent-input"
 />
 
-<!-- TODO(fachlich prüfen, #66): the examples "Heizung, Wasser usw." go beyond the glossary definition -->
 <MoneyInput
 	id="advancePayment"
 	label={m.contracts_advance_label()}

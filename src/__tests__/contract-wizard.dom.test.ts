@@ -150,7 +150,7 @@ describe('Mietvertrag erfassen', () => {
 		type('start-date-input', '01.01.2027');
 		next();
 		expect(document.body.textContent).toContain(
-			'Monatlicher Vorschuss des Mieters für Nebenkosten'
+			'Monatlicher Vorschuss des Mieters für die im Mietvertrag vereinbarten Nebenkosten'
 		);
 		type('contract-base-rent-input', '950');
 		expect(byTestId('advance-payment-notice')).not.toBeNull();

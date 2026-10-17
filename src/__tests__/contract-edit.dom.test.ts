@@ -156,6 +156,23 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(document.body.textContent).toContain('Laufender Mietvertrag');
 	});
 
+	// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
+	const onTermination = 'frühestens auf den nächsten Kündigungstermin';
+	const afterEnd = 'erst nach dem Vertragsende möglich';
+	it.each([
+		['unbefristet', null, false, onTermination, afterEnd],
+		['gekündigt', '2099-03-31', true, onTermination, afterEnd],
+		['befristet', '2099-03-31', false, afterEnd, 'Kündigungstermin']
+	])(
+		'nennt bei einem laufenden %s Mietvertrag die Regel einer Mietzinserhöhung',
+		async (_kind, endDate, terminated, rule, otherRule) => {
+			await open(endDate, terminated);
+			const hint = byTestId('contract-running-hint')!.textContent;
+			expect(hint).toContain(rule);
+			expect(hint).not.toContain(otherRule);
+		}
+	);
+
 	// B-15 (#152): eine Änderung ging still verloren; ein Mieterwechsel oder Umzug ist ein neuer Mietvertrag
 	it('nennt Mieter und Wohnung, ohne sie zur Auswahl anzubieten', async () => {
 		await open();

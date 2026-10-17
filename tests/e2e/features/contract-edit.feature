@@ -170,12 +170,10 @@ Funktionalität: Mietvertrag bearbeiten
     Dann warnt das Formular "Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab."
 
   # #66: eine Mietzinserhöhung folgt Art. 269d OR, nicht nur den Kündigungsfristen
-  @wip
   Szenario: Der laufende Mietvertrag nennt die Regeln einer Mietzinserhöhung
     Dann erfährt der Liegenschaftsverwalter, dass eine Mietzinserhöhung das amtliche Formular braucht und frühestens auf den nächsten Kündigungstermin gilt
 
   # #66, #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin
-  @wip
   Szenario: Der laufende befristete Mietvertrag nennt die Regel einer Mietzinserhöhung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Lea Graf" existiert
