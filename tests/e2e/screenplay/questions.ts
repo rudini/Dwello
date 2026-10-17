@@ -50,6 +50,15 @@ export const Value = {
 		)
 };
 
+/** How many pixels of a field's text its box hides (scrolled away inside it); 0 when the whole text shows */
+export const HiddenText = {
+	of: (target: Target) =>
+		about(target, 'the hidden part of', (element) =>
+			single(element, (one) =>
+				one.evaluate((field) => Math.max(field.scrollHeight - field.clientHeight, field.scrollWidth - field.clientWidth), undefined, quick)
+			)
+		)
+};
 export const Visibility = { of: (target: Target) => about(target, 'whether shown:', (element) => element.isVisible()) };
 export const Count = { of: (target: Target) => about(target, 'how many of', (element) => element.count()) };
 export const Enabled = {

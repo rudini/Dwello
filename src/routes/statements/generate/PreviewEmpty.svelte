@@ -1,14 +1,23 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	// No contract to bill in the period: either none at all, or every contract already has a statement
-	let { billed, error }: { billed: { buildingId: string; name: string }[]; error?: string } =
+	let {
+		billed,
+		error
+	}: { billed: { buildingId: string; name: string; partlyBilled: number }[]; error?: string } =
 		$props();
+	// days a statement leaves open: deleting a draft to create it anew in this period would leave the days it billed
+	// without a statement (code review C-1, persona Dr. Weber P-1)
+	const open = $derived(billed.some((row) => row.partlyBilled > 0));
 </script>
 
 <p class="text-ink-muted" data-testid="preview-empty">{m.statements_preview_empty()}</p>
 <!-- all contracts already billed (e.g. after a late invoice): how to recalculate, and where the statements are -->
 {#if billed.length}
-	<p class="text-ink" data-testid="preview-all-billed">{m.statements_all_billed()}</p>
+	<p class="text-ink" data-testid="preview-all-billed">
+		{m.statements_all_billed_lead()}
+		{open ? m.statements_building_billed_open() : m.statements_building_recalculate()}
+	</p>
 	<ul class="flex flex-col">
 		{#each billed as row (row.buildingId)}
 			<li>
