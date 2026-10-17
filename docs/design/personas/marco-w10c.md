@@ -66,3 +66,43 @@ Etwa 10 Minuten. Teil 1: Mieter erfassen (1 Formular), dann 5 Schritte im Assist
 - Ob der bestehende Abrechnungsentwurf von Anna Schmidt sich durch das Abwählen von Gartenpflege ändert: Abrechnungen habe ich nicht geöffnet.
 - «Ja, mit eigenem Satz» habe ich nicht ausprobiert, weil die Aufgabe den Satz des Abrechnungslaufs verlangte.
 - Den Querformat-Modus und andere Sprachen habe ich nicht angeschaut.
+
+## Nachprüfung P-1
+
+Marco, Handy 390 × 844, Touch, frische Demodaten. Skripte `n1.mjs` bis `n5.mjs` und Screenshots `n*.png` in `/tmp/claude-0/-home-user-Dwello/e60c0fa6-2a4d-5c91-b5be-bcf2af1f206b/scratchpad/marco-w10c/`. Gespeichert nur bei Anna Schmidt (Musterhaus Zentrum); der neue Vertrag für 3.02 wurde nicht gespeichert.
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-1 | behoben (früher Major) | Mietvertrag bearbeiten, Assistent Schritt 4 | Sobald kein Häkchen mehr gesetzt ist, steht direkt unter der Liste ein gelber Hinweiskasten mit Warndreieck: «Keine Nebenkosten vereinbart. Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab. Stehen im unterschriebenen Mietvertrag Nebenkosten, kreuzen Sie sie an.» Das gilt beim Bearbeiten und im Assistenten. Den Fall «alle vergessen» würde ich jetzt bemerken. |
+| P-5 | Minor | Assistent Schritt 5 «Prüfen», Vertragsseite | Auf der Prüfseite und nach dem Speichern auf der Vertragsseite steht nur «Vereinbarte Nebenkosten: Keine», ohne Hinweis, obwohl ein Akonto von CHF 150.00 (bzw. CHF 300.00 bei Anna) bleibt. Wer in Schritt 4 nicht ganz nach unten gescrollt hat, sieht den gelben Kasten nie. |
+
+### Ablauf
+
+1. **Anna Schmidt → Mietvertrag bearbeiten.** In den frischen Demodaten sind alle 12 Kategorien angekreuzt (Treppenhausreinigung steht nicht mehr in der Liste). Kein Hinweis zu sehen, wie erwartet.
+2. **Alle 12 Häkchen weg.** Erwartet: ein Hinweis. Gesehen: Nach dem letzten Tippen (Kaminfeger, ganz unten im Bild) liegt der Kasten knapp unter dem Bildschirmrand, bei y ≈ 868 auf einem 844 px hohen Bildschirm (Screenshot `n1-untick-viewport.png`: nur leere Kästchen zu sehen). Sobald ich zum Speichern-Knopf weiterscrolle, sehe ich ihn zwischen «Kaminfeger» und «Monatlich total», direkt über «Änderungen speichern» (Screenshot `n2-at-save.png`). Weil ich zum Speichern sowieso dort vorbei muss, übersehe ich ihn nicht. Der Kasten wird auch vorgelesen (er steht in einem Statusbereich).
+3. **Ein Häkchen wieder gesetzt (Heizung).** Der Kasten verschwindet sofort, nach dem erneuten Abwählen ist er wieder da. Gut.
+4. **Trotzdem «Änderungen speichern».** Erwartet: ein Hinweis oder eine Rückfrage. Gesehen: Dwello speichert ohne Rückfrage, die Vertragsseite zeigt «Vereinbarte Nebenkosten: Keine» und weiter «Akonto CHF 300.00». Das finde ich in Ordnung: Ein Vertrag ohne Nebenkosten kann ja stimmen, und gewarnt wurde ich vorher.
+5. **Neuer Mietvertrag: Pierre Dubois, Wohnung 3.02, Beginn 01.01.2027, 1400 / 150 Akonto, Verwaltungspauschale Satz des Abrechnungslaufs, alle Häkchen weg.** Derselbe gelbe Kasten unter der Liste, direkt über «Weiter» (Screenshot `n4-wiz-at-weiter.png`). Gleicher Text wie beim Bearbeiten.
+6. **«Weiter» zu Schritt 5.** Erwartet: Der Hinweis wird hier noch einmal gezeigt. Gesehen: nur «Vereinbarte Nebenkosten: Keine» mit «Ändern», keine Farbe, kein Hinweis (Screenshot `n4-wiz-step5.png`) (P-5). Nicht gespeichert, abgebrochen.
+7. **Anna wiederhergestellt.** Beim erneuten Öffnen von «Bearbeiten» stand der gelbe Kasten schon beim Laden da. Gut: So sehe ich auch später, dass etwas fehlt. Alle 12 wieder angekreuzt, gespeichert. Die Vertragsseite zeigt wieder alle 12 Kategorien, Gartenpflege eingeschlossen. Das ist der Stand der frischen Demodaten.
+
+### Urteil
+
+- **Alle vergessen:** Das würde ich jetzt merken. Der Kasten steht da, wo ich hinschaue, wenn ich speichern will. Der Text ist kurz, sagt, was passiert («rechnet keine Nebenkosten ab»), und was ich tun soll («kreuzen Sie sie an»).
+- **Zu viele entfernt (aber nicht alle):** Dazu sagt Dwello weiterhin nichts. Wenn noch ein Häkchen gesetzt ist, verschwindet der Kasten. Das kann Dwello auch nicht wissen; dafür bleibt nur der Vergleich mit dem Papiervertrag (siehe P-2).
+- Der Hinweis erwähnt das Akonto nicht. Bei CHF 300.00 Akonto und «keine Nebenkosten» hätte ich gern gelesen, dass das ganze Akonto zurückgeht. So muss ich es mir selbst zusammenreimen.
+
+### Beobachtungen
+
+- Im Assistenten steht «Entwurf gespeichert, 03:12». Ob dieser Entwurf von Pierre Dubois / 3.02 jetzt irgendwo liegen bleibt, habe ich nicht geprüft.
+- Die Einleitung «Ändern Sie Vertragsdauer oder Miete dieses Mietvertrags.» ist unverändert (P-4).
+
+### Vorschläge
+
+- **P-5:** Assistent bis Schritt 4, alle Häkchen weg, «Weiter». Hilfreich wäre derselbe gelbe Hinweis auf der Prüfseite neben «Vereinbarte Nebenkosten: Keine», und auf der Vertragsseite ein kurzer Satz, wenn Akonto vereinbart ist und keine Nebenkosten. Wenn Akonto > 0: im Hinweis ergänzen «Das Akonto von CHF … geht mit der Abrechnung ganz an den Mieter zurück.»
+
+### Nicht geprüft
+
+- Ob eine Abrechnung bei einem Vertrag ohne Nebenkosten das ganze Akonto zurückgibt: keine Abrechnung erstellt.
+- Ob der Entwurf des Assistenten auf dem Server gespeichert wird und für andere sichtbar ist.
+- Querformat und andere Sprachen.
