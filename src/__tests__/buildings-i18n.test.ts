@@ -62,7 +62,7 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 	it('meldet fehlende Angaben im Gebäudeformular auf Französisch', () => {
 		french();
 		const { errors } = parseBuildingForm(new FormData());
-		expect(errors.postalCode).toBe('Le NPA est obligatoire');
+		expect(errors.postalCode).toBe('Le NPA est obligatoire.');
 	});
 
 	it('nennt Stammdaten mit ihrem Namen in der gewählten Sprache', () => {

@@ -19,8 +19,8 @@ describe('Wohnungen und Mieter in der gewählten Sprache', () => {
 	it('meldet fehlende Angaben im Mieterformular auf Italienisch', () => {
 		overwriteGetLocale(() => 'it');
 		const { errors } = parseTenantForm(new FormData());
-		expect(errors.firstName).toBe('Il nome è obbligatorio');
-		expect(errors.address).toBe('Per le lettere è obbligatorio un indirizzo');
+		expect(errors.firstName).toBe('Il nome è obbligatorio.');
+		expect(errors.address).toBe('Per le lettere è obbligatorio un indirizzo.');
 	});
 
 	it('nennt Überschneidung und Verfügbarkeit auf Englisch', () => {

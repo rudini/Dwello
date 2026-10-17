@@ -20,7 +20,7 @@ Funktionalität: Neuer Mieter
 
   Szenario: Name ist erforderlich
     Wenn der Liegenschaftsverwalter den Mieter ohne Namen erfassen will
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nachname ist erforderlich"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nachname ist erforderlich."
 
   Szenario: Erfassen abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

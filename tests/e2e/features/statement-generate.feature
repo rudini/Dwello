@@ -160,7 +160,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Kaminfeger": "Keine Rechnung in dieser Kategorie erfasst"
-    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Rechnung für das 2. Halbjahr fehlt"
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Die Rechnung für das 2. Halbjahr fehlt"
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
@@ -202,7 +202,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Angenommen im Gebäude "Lindenhof" war am "2022-12-31" Heizöl für "800" Franken im Tank
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Dann meldet die Prüfung der Kategorien für "Heizung": "Tankbestand am 31.12.2023 und am 31.12.2024 fehlen."
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Die Tankbestände am 31.12.2023 und am 31.12.2024 fehlen."
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
@@ -220,7 +220,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Dann meldet die Prüfung der Kategorien für "Heizung": "Tankbestand am 31.12.2024 fehlt."
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Der Tankbestand am 31.12.2024 fehlt."
 
   # Der Endbestand 0 des Stilllegungsjahres ist der Anfangsbestand des nächsten Jahres (fach-review V-11)
   Szenario: Nach dem Jahr der Stilllegung braucht es keinen Tankbestand mehr

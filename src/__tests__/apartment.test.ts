@@ -300,11 +300,11 @@ describe('Neue Wohnung', () => {
 			status: 400,
 			data: {
 				errors: {
-					buildingId: 'Bitte wählen Sie ein Gebäude aus',
-					number: 'Wohnungsnummer ist erforderlich',
-					floor: 'Stockwerk ist erforderlich',
-					area: 'Fläche ist erforderlich',
-					rooms: 'Zimmeranzahl ist erforderlich'
+					buildingId: 'Bitte wählen Sie ein Gebäude aus.',
+					number: 'Wohnungsnummer ist erforderlich.',
+					floor: 'Stockwerk ist erforderlich.',
+					area: 'Fläche ist erforderlich.',
+					rooms: 'Zimmeranzahl ist erforderlich.'
 				}
 			}
 		});
