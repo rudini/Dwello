@@ -3,7 +3,8 @@
  * Business logic for utility statement operations
  */
 
-import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, getTableColumns } from 'drizzle-orm';
+import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, isNull, getTableColumns } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
 import {
 	utilityStatements,
@@ -19,7 +20,8 @@ import {
 	type NewUtilityStatementLineItem,
 	type KeyValues
 } from '../db/schema';
-import { calculateStatementForContract, generateStatementNumber } from './calculation.service';
+import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
+import { roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
@@ -66,6 +68,11 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	apartment: { id: string; number: string; floor: number; area: string } | null;
 	building: { id: string; name: string; address: string; postalCode?: string; city?: string } | null;
 	lineItems: UtilityStatementLineItem[];
+	// a berichtigte Abrechnung and the statement it replaces, and the replaced ones of its chain paid on (#120); only
+	// in the detail
+	replaces?: { id: string; statementNumber: string; statementDate: string } | null;
+	replacedBy?: { id: string; statementNumber: string } | null;
+	priorPaidOn?: string[];
 	heatingProfile?: {
 		id: string;
 		name: string;
@@ -289,8 +296,27 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		apartment: result.apartment,
 		building: result.building,
 		heatingProfile: result.heatingProfile,
-		lineItems
+		lineItems,
+		...(await correctionsOf(result.statement))
 	};
+}
+
+/** The statement a berichtigte Abrechnung replaces, the replaced ones of its chain paid on, and its own replacement */
+async function correctionsOf(statement: { id: string; replacesId: string | null }) {
+	const columns = { id: utilityStatements.id, statementNumber: utilityStatements.statementNumber };
+	const chain = [];
+	for (let next = statement.replacesId; next; ) {
+		const [replaced] = await db
+			.select({ ...columns, statementDate: utilityStatements.statementDate, paidAmount: utilityStatements.paidAmount, replacesId: utilityStatements.replacesId })
+			.from(utilityStatements)
+			.where(eq(utilityStatements.id, next));
+		chain.push(replaced);
+		next = replaced.replacesId;
+	}
+	const [replacedBy] = await db.select(columns).from(utilityStatements).where(eq(utilityStatements.replacesId, statement.id));
+	const replaces = chain[0] && { id: chain[0].id, statementNumber: chain[0].statementNumber, statementDate: chain[0].statementDate };
+	const priorPaidOn = chain.filter((s) => Number(s.paidAmount ?? 0) !== 0).map((s) => s.statementNumber).reverse();
+	return { replaces: replaces ?? null, replacedBy: replacedBy ?? null, priorPaidOn };
 }
 
 /** Parameters of a statement calculation; the management fee overrides the configured default */
@@ -302,15 +328,46 @@ export interface StatementInput {
 	managementFeePercent?: number;
 }
 
-/** Calculate a contract's statement for a period without storing it */
-export const calculateStatement = (input: StatementInput) =>
-	calculateStatementForContract(
+/**
+ * Calculate a contract's statement for a period without storing it; a statement of the contract and the same period
+ * replaced without a berichtigte Abrechnung yet is replaced by it, which offsets what was paid on it (#120)
+ */
+export async function calculateStatement(input: StatementInput) {
+	const calculation = await calculateStatementForContract(
 		input.contractId,
 		new Date(input.periodStart),
 		new Date(input.periodEnd),
 		input.heatingProfileId,
 		input.managementFeePercent
 	);
+	const replaced = await openReplaced(input);
+	const priorPayments = replaced ? paidSoFar(replaced) : 0;
+	const balance = calculateBalance(calculation.totalCosts, calculation.totalAdvancePayments + priorPayments);
+	return { ...calculation, balance, priorPayments, replacesId: replaced?.id ?? null };
+}
+
+/** What was paid on a replaced statement and on the ones it replaced itself; a refund paid to the tenant counts negative */
+const paidSoFar = (replaced: { paidAmount: string | null; priorPayments: string }) =>
+	roundToRappen(Number(replaced.paidAmount ?? 0) + Number(replaced.priorPayments));
+
+async function openReplaced({ contractId, periodStart, periodEnd }: StatementInput) {
+	const successor = alias(utilityStatements, 'successor');
+	const [replaced] = await db
+		.select({ id: utilityStatements.id, paidAmount: utilityStatements.paidAmount, priorPayments: utilityStatements.priorPayments })
+		.from(utilityStatements)
+		.leftJoin(successor, eq(successor.replacesId, utilityStatements.id))
+		.where(
+			and(
+				eq(utilityStatements.contractId, contractId),
+				eq(utilityStatements.status, 'replaced'),
+				eq(utilityStatements.periodStart, periodStart),
+				eq(utilityStatements.periodEnd, periodEnd),
+				isNull(successor.id)
+			)
+		)
+		.limit(1);
+	return replaced;
+}
 
 /** Calculate a contract's statement and store it as a draft with its line items */
 export async function generateStatement(
@@ -346,6 +403,8 @@ export async function generateStatement(
 			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
 			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
+			replacesId: calculation.replacesId,
+			priorPayments: String(calculation.priorPayments),
 			status: 'draft',
 			paymentDeadline: daysAfter(statementDate, paymentDeadlineDays)
 		},
@@ -410,6 +469,8 @@ export async function updateStatement(
 	const existing = await getStatement(id);
 	if (!existing) return null;
 
+	// A replaced statement stays as it was (#120)
+	if (existing.status === 'replaced') throw new CodedError('STATEMENT_REPLACED', 'A replaced statement cannot be changed');
 	// Once sent, the amounts stay as the tenant received them
 	if (existing.status !== 'draft') {
 		const protectedFields = ['totalCosts', 'totalAdvancePayments', 'managementFeePercent', 'managementFee', 'balance'];
@@ -524,6 +585,53 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
+}
+
+/**
+ * Replace a sent, overdue or paid statement (#120): it gets the status «Ersetzt» and stays as it was, its Zahlungsdatum
+ * and Saldo included; it is no longer gemahnt and no longer blocks contract dates that change its Mietstage
+ */
+export async function replaceStatement(id: string): Promise<StatementWithDetails> {
+	const existing = await getStatement(id);
+	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
+	if (!['sent', 'overdue', 'paid'].includes(existing.status))
+		throw new CodedError('STATEMENT_NOT_REPLACEABLE', 'Only a sent or paid statement can be replaced');
+	// the audit log (#111) records the replacement once it exists
+	await db.update(utilityStatements).set({ status: 'replaced', updatedAt: new Date() }).where(eq(utilityStatements.id, id));
+	return (await getStatement(id))!;
+}
+
+/**
+ * The berichtigte Abrechnung of a replaced statement: a draft of the same Mietvertrag and Abrechnungsperiode with the
+ * same Heizprofil and Verwaltungspauschale, from today's data, with a new number; none without Mietstage in the period
+ */
+export async function correctStatement(id: string): Promise<StatementWithDetails> {
+	const replaced = await getStatement(id);
+	if (!replaced) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
+	if (replaced.status !== 'replaced') throw new CodedError('STATEMENT_NOT_REPLACED', 'Statement is not replaced');
+	if (replaced.replacedBy)
+		throw new CodedError('STATEMENT_ALREADY_CORRECTED', 'Statement already has a berichtigte Abrechnung', {
+			number: replaced.replacedBy.statementNumber
+		});
+	try {
+		return await generateStatement({
+			contractId: replaced.contractId,
+			buildingId: replaced.building!.id,
+			periodStart: replaced.periodStart,
+			periodEnd: replaced.periodEnd,
+			heatingProfileId: replaced.heatingProfileId ?? undefined,
+			managementFeePercent: replaced.managementFeePercent === null ? undefined : Number(replaced.managementFeePercent)
+		});
+	} catch (error) {
+		if (!(error instanceof CodedError && error.code === 'CONTRACT_NOT_IN_PERIOD')) throw error;
+		// what the tenant paid comes back to him, a refund paid to him goes back to the landlord; only sent: nothing
+		const paid = paidSoFar(replaced);
+		const code = paid > 0 ? 'STATEMENT_NO_RENTAL_DAYS_PAID' : paid < 0 ? 'STATEMENT_NO_RENTAL_DAYS_REFUNDED' : 'STATEMENT_NO_RENTAL_DAYS_SENT';
+		throw new CodedError(code, 'The contract has no rent days in the period', {
+			number: replaced.statementNumber,
+			amount: Math.abs(paid).toFixed(2)
+		});
+	}
 }
 
 /**

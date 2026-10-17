@@ -16,7 +16,9 @@ import {
 	getStatementCountsByStatus,
 	calculateStatement,
 	generateStatement,
-	resetPayment
+	resetPayment,
+	replaceStatement,
+	correctStatement
 } from '../services/statement.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { changedInvoices } from '../services/statement-invoices.service';
@@ -26,6 +28,10 @@ function pdfFailure(error: unknown, set: { status?: number | string }) {
 	set.status = error instanceof CodedError ? 400 : 500;
 	return codedBody(error, 'PDF_FAILED', 'PDF generation failed');
 }
+
+// A refused replacement or correction: the statement is missing, or its state does not allow it
+const correctionStatus = (error: unknown) =>
+	!(error instanceof CodedError) ? 500 : error.code === 'STATEMENT_NOT_FOUND' ? 404 : 409;
 
 // Calculation parameters shared by preview and generate; the management fee overrides the configured default
 const calculationBody = t.Object({
@@ -194,6 +200,34 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				paymentDeadline: t.Optional(t.String({ format: 'date' }))
 			})
 		}
+	)
+
+	// Replace a sent or paid statement, and create its berichtigte Abrechnung (#120)
+	.post(
+		'/:id/replace',
+		async ({ params, set }) => {
+			try {
+				return await replaceStatement(params.id);
+			} catch (error) {
+				set.status = correctionStatus(error);
+				return errorBody(error, 'Failed to replace the statement');
+			}
+		},
+		{ params: t.Object({ id: t.String() }) }
+	)
+	.post(
+		'/:id/correction',
+		async ({ params, set }) => {
+			try {
+				const statement = await correctStatement(params.id);
+				set.status = 201;
+				return statement;
+			} catch (error) {
+				set.status = correctionStatus(error);
+				return codedBody(error, 'CALCULATION_FAILED', 'Statement generation failed');
+			}
+		},
+		{ params: t.Object({ id: t.String() }) }
 	)
 
 	// Take back a recorded payment (#92)

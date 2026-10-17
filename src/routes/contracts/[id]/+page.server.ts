@@ -101,7 +101,10 @@ async function missingStatements(
 	return periods
 		.filter(
 			({ start, end }) =>
-				!statements.some((s) => String(s.periodStart) >= start && String(s.periodEnd) <= end)
+				!statements.some(
+					// a replaced statement no longer bills the period (#120)
+					(s) => s.status !== 'replaced' && String(s.periodStart) >= start && String(s.periodEnd) <= end
+				)
 		)
 		.map(({ start, end }) => ({ start, end, href: wizardLink(building, start, end) }));
 }

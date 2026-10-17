@@ -14,6 +14,7 @@ type Statement = {
 	id: string;
 	status: string;
 	statementNumber: string;
+	statementDate: string;
 	balance: string;
 	totalCosts: string;
 	totalAdvancePayments: string;

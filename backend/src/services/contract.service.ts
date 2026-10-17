@@ -3,7 +3,7 @@
  * Business logic for rental contract operations
  */
 
-import { eq, and, or, sql, desc, gte, lte, isNull, ilike } from 'drizzle-orm';
+import { eq, and, or, sql, desc, gte, lte, isNull, ilike, ne } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	rentalContracts,
@@ -328,6 +328,7 @@ async function statementsChanged(contractId: string, startDate: string, endDate:
 		.where(
 			and(
 				eq(utilityStatements.contractId, contractId),
+				ne(utilityStatements.status, 'replaced'), // a replaced statement stays as it was, its days included (#120)
 				or(sql`${from} <> ${utilityStatements.rentalStart}`, sql`${to} <> ${utilityStatements.rentalEnd}`)
 			)
 		);
