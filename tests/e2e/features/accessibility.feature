@@ -189,6 +189,8 @@ Funktionalität: Barrierefreiheit
       | category-edit          | submit-cleared      |
       | category-edit          | saved-toast         |
       | category-edit-predefined | default           |
+      | category-edit-fuel     | default             |
+      | category-edit-fuel     | fuel-refused        |
       | categories             | delete-dialog       |
       | distribution-keys      | default             |
       | distribution-key-new   | default             |

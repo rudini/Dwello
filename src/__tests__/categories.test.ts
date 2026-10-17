@@ -156,20 +156,17 @@ describe('Neue Kategorie', () => {
 		expect(calls[0].body).toMatchObject({ isHeatingCost: true });
 	});
 
-	// #100: Brennstoff ist ein Merkmal von Heizkosten; ohne Heizkosten bleibt es aus
-	it.each([
-		['on', true],
-		['', false]
-	])('übernimmt «Brennstoff» nur bei Heizkosten (Heizkosten: %j)', async (heating, isFuel) => {
+	// #100: Brennstoff ist ein Merkmal von Heizkosten (das Backend speichert es nur mit ihnen)
+	it('übernimmt «Brennstoff»', async () => {
 		const { calls, result } = runAction(newActions.save, '', 201, {
 			name: 'Pellets',
 			isAllowedUtilityCost: 'true',
-			isHeatingCost: heating,
+			isHeatingCost: 'on',
 			isFuel: 'on'
 		});
 		await result.catch(() => {});
 
-		expect(calls[0].body).toMatchObject({ isFuel });
+		expect(calls[0].body).toMatchObject({ isFuel: true });
 	});
 
 	it('verlangt einen Namen', async () => {
@@ -318,7 +315,8 @@ describe('Kategorie löschen', () => {
 			status: 400,
 			data: {
 				errors: {
-					form: 'Die Kategorie hat Tankbestände und bleibt deshalb Brennstoff. Soll sie kein Brennstoff sein, löschen Sie zuerst ihre Tankbestände auf der Seite des Gebäudes.'
+					// names both checkboxes: removing the heating cost alone is refused too (Fachreview V-10)
+					form: 'Die Kategorie hat Tankbestände. Deshalb bleiben die Häkchen «Heizkosten nach dem Heizprofil verteilen» und «Brennstoff» gesetzt. Wenn Sie sie entfernen möchten, löschen Sie zuerst die Tankbestände auf der Seite des Gebäudes.'
 				}
 			}
 		});

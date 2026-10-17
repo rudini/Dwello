@@ -14,7 +14,7 @@ export const heatingCheckbox = target('Heizkosten nach dem Heizprofil verteilen'
 	page.getByTestId('category-heating-checkbox')
 );
 export const fuelCheckbox = target('Brennstoff', (page) => page.getByTestId('category-fuel-checkbox'));
-export const proposeButton =target('Von der KI prüfen lassen', (page) => page.getByTestId('category-propose-button'));
+export const proposeButton = target('Von der KI prüfen lassen', (page) => page.getByTestId('category-propose-button'));
 export const proposal = target('Vorschlag der KI', (page) => page.getByTestId('category-proposal'));
 export const submitButton = target('Kategorie speichern', (page) => page.getByTestId('category-submit'));
 export const editButton = (name: string) =>

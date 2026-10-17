@@ -135,3 +135,10 @@ Funktionalität: Kostenkategorien
     Und der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die umlagefähige Heizkosten-Kategorie "Stückholz" als Brennstoff erfasst
     Dann bietet der Tankbestand des Gebäudes "Birkenhof" die Kategorie "Stückholz" an
+
+  # Ohne Brennstoff liesse sich der nächste Endbestand nicht erfassen, die Abrechnung nähme den Einkauf (#100)
+  Szenario: Eine Kategorie mit Tankbestand bleibt Brennstoff
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und das Gebäude "Birkenhof" hat einen Tankbestand in der Kategorie für Brennstoff "Stückholz"
+    Wenn der Liegenschaftsverwalter die Kategorie "Stückholz" nicht mehr als Brennstoff speichert
+    Dann erfährt der Liegenschaftsverwalter, dass die Kategorie wegen ihrer Tankbestände Brennstoff bleibt

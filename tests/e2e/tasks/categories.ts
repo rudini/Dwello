@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Check, Click, Enter, Navigate, Wait } from '../screenplay/interactions';
+import { Browser, Check, Click, Enter, Navigate, Uncheck, Wait } from '../screenplay/interactions';
 import { viewports } from '../fixtures/screens';
 import {
 	allowanceOption,
@@ -48,6 +48,9 @@ export const saveFormAsNotAllowed: Activity = (actor) =>
 
 export const saveAsNotAllowed = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(editButton(name)), saveFormAsNotAllowed);
+
+export const saveWithoutFuel = (categoryId: string): Activity => (actor) =>
+	actor.attemptsTo(openCategoryEdit(categoryId), Uncheck.the(fuelCheckbox), Click.on(submitButton));
 
 export const deleteCategory = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));

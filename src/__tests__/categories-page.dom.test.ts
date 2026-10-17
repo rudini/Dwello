@@ -603,7 +603,10 @@ describe('Kategorie bearbeiten', () => {
 		expect(box.checked).toBe(true);
 		expect(box.name).toBe('isFuel');
 		expect(box.labels![0].textContent!.trim()).toBe('Brennstoff');
-		expect(byTestId('category-fuel-checkbox-help')).not.toBeNull();
+		// the predefined «Heizung» also holds servicing invoices: only a category for nothing else is no fuel (personas)
+		expect(byTestId('category-fuel-checkbox-help')!.textContent).toContain(
+			'Eine Kategorie nur für Service, Wartung oder den Kaminfeger ist kein Brennstoff.'
+		);
 	});
 
 	it('fragt nach Brennstoff erst bei Heizkosten und wählt ihn bei einer neuen Kategorie nicht vor', () => {

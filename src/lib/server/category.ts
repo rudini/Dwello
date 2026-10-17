@@ -72,8 +72,8 @@ function parseCategory(formData: FormData) {
 		description: field('description'),
 		isAllowedUtilityCost: allowed === 'true',
 		isHeatingCost: formData.get('isHeatingCost') === 'on',
-		// Brennstoff is a mark of a heating cost (#100)
-		isFuel: formData.get('isHeatingCost') === 'on' && formData.get('isFuel') === 'on',
+		// only with heating costs, which the backend keeps (#100)
+		isFuel: formData.get('isFuel') === 'on',
 		...(field('sortOrder') && { sortOrder: Number(field('sortOrder')) }),
 		nameFR: field('nameFR') || null,
 		nameIT: field('nameIT') || null,

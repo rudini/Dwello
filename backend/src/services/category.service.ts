@@ -190,7 +190,7 @@ export async function updateCategory(id: string, changes: Partial<NewCategory>):
 	// be recorded and the statement would bill the purchases
 	if (stored) data.isFuel = (data.isHeatingCost ?? stored.heating) && (data.isFuel ?? stored.fuel);
 	if (stored?.fuel && !data.isFuel && (await categoryHasFuelStocks(id))) {
-		throw new CodedError('CATEGORY_FUEL_HAS_STOCK','Die Kategorie hat Tankbestände und bleibt Brennstoff.');
+		throw new CodedError('CATEGORY_FUEL_HAS_STOCK', 'Die Kategorie hat Tankbestände und bleibt Brennstoff.');
 	}
 	if (data.name) await ensureNameIsFree(data.name, id);
 	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);

@@ -132,6 +132,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.heatingInvoice('Talblick', '1200.00', 2025);
 	await seed.statement('Gina', 'Talblick', 2025, 'Standard');
 	await seed.category('Gartenpflege', true);
+	// #100: a fuel category with a Tankbestand stays Brennstoff; «Pellets» reads alike in every language
+	await seed.building('Holzhof', 'Winterthur');
+	await seed.fuelCategoryWithStock('Holzhof', 'Pellets');
 	// #91: own categories created after the contracts, with costs in 2025: the wizard asks for Hanna's, names Ines' as not
 	// agreed; names alike in every language, so the language check sees only the wizard's texts
 	await seed.building('Waldblick', 'Winterthur');
@@ -180,6 +183,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		noticedApartment: seed.idOf('2.01'), // free from 01.04.2099, after Dora's contract
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),
+		fuelCategory: seed.idOf('Pellets'),
 		// a predefined category shows the reason of its allocability (#186)
 		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
 		distributionKey: seed.idOf('Nach Wohnungen'),

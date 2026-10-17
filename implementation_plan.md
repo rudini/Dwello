@@ -13,8 +13,11 @@ Branch `claude/w16-brennstoff-100`. #100's "Decided" section (option 2) is the r
 - [x] backend: `isFuelCategory` reads the flag (no name check); create/update take `isFuel`, stored only with `isHeatingCost`; a category with a Tankbestand stays Brennstoff (`CATEGORY_FUEL_HAS_STOCK`); `*.pg.test.ts` for the predefined chimney sweep and an own heating category
 - [x] frontend: building page filters by the flag; category form checkbox «Brennstoff» with help (only with «Heizkosten nach dem Heizprofil verteilen»); texts in four languages
 - [x] a11y state `category-new` `fuel` (screens.json, accessibility.feature, sprachen-bildschirme.feature)
-- [ ] code-reviewer round 1
-- [ ] personas; fach-reviewer feature review
+- [x] code-reviewer round 1 (`docs/reviews/w16-review-1.md`)
+- [x] personas (`docs/design/personas/helga-w16.md`, `docs/design/personas/marco-w16.md`); fach-reviewer round 2 (`docs/reviews/w16-fachreview-2.md`)
+- [x] fixes of the review findings: refusal scenario and a11y screen `category-edit-fuel`, texts naming both checkboxes, migration only for heating costs, api-specification, translation terms
+- [ ] Workflow note: auto mode refuses running a test with the code taken out to show its red (the E2E scenario of the refusal was written after the backend rule; its pg test was seen red)
+- [ ] closing code-reviewer round
 - [ ] workflow notes; archive the session; pull request (Fixes #100)
 
-Files: `backend/migrations/0024_category_fuel.sql`, `backend/src/db/schema.ts`, `backend/src/services/{category,fuel-stock}.service.ts`, `backend/src/routes/{categories,buildings}.ts`, `src/lib/{types.ts,server/category.ts}`, `src/routes/buildings/[id]/+page.server.ts`, `src/routes/config/categories/CategoryForm.svelte`, `messages/*.json`, `tests/contracts/category{,-fuel-refused}.json`, `docs/{data-model,PRD-Dwello}.md`, tests and features.
+Files: `backend/migrations/0024_category_fuel.sql`, `backend/src/db/schema.ts`, `backend/src/services/{category,fuel-stock}.service.ts`, `backend/src/routes/{categories,buildings}.ts`, `src/lib/{types.ts,server/category.ts}`, `src/routes/buildings/[id]/+page.server.ts`, `src/routes/config/categories/{CategoryForm,HeatingChoice}.svelte`, `messages/*.json`, `tests/contracts/category{,-fuel-refused}.json`, `docs/{data-model,PRD-Dwello,api-specification}.md`, tests and features.
