@@ -743,7 +743,7 @@
 	"contracts_advance_label": "Akonto pro Monat",
 	"contracts_advance_help": "Monatlicher Vorschuss des Mieters für die im Mietvertrag vereinbarten Nebenkosten (zum Beispiel Heizung, Wasser). Wird mit der Nebenkostenabrechnung verrechnet.",
 	"contracts_fee_label": "Verwaltungspauschale",
-	"contracts_fee_help": "Wählen Sie, was im unterschriebenen Mietvertrag steht. Steht dort ein Prozentsatz, wählen Sie «Ja, mit eigenem Satz» und tragen ihn ein. Steht dort nur, dass Verwaltungskosten verrechnet werden, wählen Sie «Ja, zum Satz des Abrechnungslaufs»: Den Satz wählen Sie dann beim Erstellen der Abrechnungen. Steht nichts dazu, wählen Sie «Nein». Eine neue Verwaltungspauschale während der Mietdauer müssen Sie dem Mieter mit dem amtlichen Formular mitteilen; sie gilt erst ab dem nächsten Kündigungstermin (Art. 269d OR).",
+	"contracts_fee_help": "Wählen Sie, was im unterschriebenen Mietvertrag steht. Steht dort ein Prozentsatz, wählen Sie «Ja, mit eigenem Satz» und tragen ihn ein. Steht dort nur, dass Verwaltungskosten verrechnet werden, wählen Sie «Ja, zum Satz des Abrechnungslaufs»: Den Satz wählen Sie dann beim Erstellen der Abrechnungen. Steht nichts dazu, wählen Sie «Nein». Eine neue Verwaltungspauschale während der Mietdauer müssen Sie dem Mieter mit dem amtlichen Formular mitteilen und begründen, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR).",
 	"contracts_fee_run": "Ja, zum Satz des Abrechnungslaufs",
 	"contracts_fee_own": "Ja, mit eigenem Satz",
 	"contracts_fee_none": "Nein",

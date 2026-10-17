@@ -137,6 +137,13 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit einer Verwaltungspauschale von "4" % bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Verwaltungspauschale" mit "Vereinbart, 4 %"
 
+  # #77: eine neue Verwaltungspauschale während der Mietdauer ist eine einseitige Vertragsänderung (Art. 269d Abs. 1
+  # und 3 OR): Formular, Begründung, mindestens zehn Tage vor Beginn der Kündigungsfrist, nächstmöglicher Kündigungstermin
+  Szenario: Hilfe zu einer neuen Verwaltungspauschale während der Mietdauer
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann erfährt der Liegenschaftsverwalter, dass er eine neue Verwaltungspauschale mindestens zehn Tage vor Beginn der Kündigungsfrist begründet mitteilt
+
   # #91: ein neuer Mietvertrag beginnt mit allen umlagefähigen Kategorien; nur vereinbarte Nebenkosten darf der
   # Liegenschaftsverwalter abrechnen (Art. 257a Abs. 2 OR)
   Szenario: Ein neuer Mietvertrag vereinbart alle umlagefähigen Nebenkosten

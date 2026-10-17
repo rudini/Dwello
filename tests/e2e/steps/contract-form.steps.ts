@@ -17,6 +17,7 @@ import {
 	fixedApartmentName,
 	fixedTenantName,
 	billedUntilHelpText,
+	feeHelpText,
 	partiesHelpText,
 	reviewHint,
 	rentTakenOverText,
@@ -415,6 +416,15 @@ Then(
 		await verwalter.sees(enteredBaseRent).toBe(baseRent);
 		await verwalter.sees(enteredAdvancePayment).toBe(advancePayment);
 		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
+
+// a new fee during the tenancy is a one-sided change of the contract (Art. 269d Abs. 1 and 3 OR, #77)
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er eine neue Verwaltungspauschale mindestens zehn Tage vor Beginn der Kündigungsfrist begründet mitteilt',
+	async ({ verwalter }) => {
+		await verwalter.sees(feeHelpText).toContain('mitteilen und begründen, mindestens zehn Tage vor Beginn der Kündigungsfrist');
+		await verwalter.sees(feeHelpText).toContain('frühestens ab dem nächstmöglichen Kündigungstermin');
 	}
 );
 
