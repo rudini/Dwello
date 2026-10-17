@@ -1361,3 +1361,23 @@ Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requ
 - [x] plan archived; pull request open, merge waits for the product decisions (#330, #331)
 
 Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.
+
+## Session W15: Akonto and rent hints in the contract forms (#66)
+
+Branch `claude/w15-akonto-hints-66`. The pull request says `Refs #66`: one of the three decided parts waits on the product owner.
+
+- [x] @wip scenarios in `contract-new.feature` (Akonto help) and `contract-edit.feature` (running contract: Art. 269d OR, befristet)
+- [x] fach-reviewer round 1 on the scenarios and texts before implementing (`docs/reviews/66-fachreview-1.md`)
+- [x] Akonto help names the Nebenkosten agreed in the Mietvertrag, examples stay (option A)
+- [x] Hint for a contract without Akonto: not built; fach-review M-1 contradicts the decided text, question to the product owner in #66 (label `entscheiden`)
+- [x] Running-contract hint names Art. 269d OR (befristet: #76's sentence, `TODO(fachlich prüfen, #388)`)
+- [x] `TODO(fachlich prüfen, #66)` markers removed; all four languages
+- Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/RentStep.svelte`, `src/lib/ui/MoneyInput.svelte` (help testid), `src/__tests__/contract-edit.dom.test.ts`, `src/__tests__/contract-wizard.dom.test.ts`, `tests/e2e/{features,steps,questions,targets}`
+- [x] Code review round 1 (`docs/reviews/66-review-1.md`)
+- [x] Fach review round 2 (`docs/reviews/66-fachreview-2.md`)
+- [x] Feature review round 1: personas `docs/design/personas/weber-66.md`, `helga-66.md`; P-1 fix (hint says what Dwello does and when to enter an increase)
+- [x] Persona round 2 on the P-1 fix (same reports, «Runde 2»)
+- [x] Code review round 2 (`docs/reviews/66-review-2.md`)
+- [x] Fach review round 3 on the P-1 fix (`docs/reviews/66-fachreview-3.md`)
+- [x] Workflow note: split of a decided issue and the fach round limit (`docs/reviews/workflow-notes-issue-66.md`)
+- [x] Push and pull request follow (CLAUDE.md, Workflow 9)
