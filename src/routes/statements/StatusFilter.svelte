@@ -14,7 +14,8 @@
 		href: (status: string) => string;
 	} = $props();
 
-	const statuses: StatementStatus[] = ['draft', 'sent', 'paid', 'overdue'];
+	// a replaced statement has no tab of its own: «Alle» lists it (#120)
+	const statuses: Exclude<StatementStatus, 'replaced'>[] = ['draft', 'sent', 'paid', 'overdue'];
 </script>
 
 <nav aria-label={m.statements_filter_status()}>

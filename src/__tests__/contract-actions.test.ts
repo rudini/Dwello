@@ -161,6 +161,14 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		expect(data.billedBy).toBeNull();
 	});
 
+	// #120, Fachreview W2e: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode
+	it('nennt die Periode einer ersetzten Abrechnung ohne berichtigte', async () => {
+		const replaced = { ...statementOf('c1', lastYear), status: 'replaced' };
+		expect(await missingOf(backend([replaced], `${lastYear}-03-01`))).toEqual([
+			{ ...year(lastYear), href: `/statements/generate?building=b1&start=${lastYear}-01-01&end=${lastYear}-12-31` }
+		]);
+	});
+
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
 		expect(await missingOf(backend([statementOf('c1', lastYear)], `${lastYear}-03-01`))).toEqual(
 			[]
@@ -589,7 +597,7 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 			status: 409,
 			data: {
 				fixedTermError:
-					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann Dwello das Vertragsende nicht entfernen. Für Sie und den Mieter läuft der Mietvertrag trotzdem unbefristet weiter. Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.'
+					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann Dwello das Vertragsende noch nicht entfernen. Für Sie und den Mieter läuft der Mietvertrag trotzdem unbefristet weiter. Berichtigen Sie zuerst jede dieser Abrechnungen. Öffnen Sie sie dazu und wählen Sie «Abrechnung berichtigen».'
 			}
 		});
 	});

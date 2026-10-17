@@ -52,6 +52,19 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
 
+  # #120, #358: eine versendete Abrechnung sperrt das Datum, bis sie ersetzt ist
+  Szenario: Vertragsbeginn nach dem Beginn einer versendeten Abrechnung
+    Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Stimmt es, berichtigen Sie zuerst jede dieser Abrechnungen."
+
+  Szenario: Vertragsbeginn nach dem Berichtigen der Abrechnung ändern
+    Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Und die Abrechnung 2025 von "Anna Keller" ist ersetzt
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
+
   # Ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen (#143)
   Szenario: Mietverträge der Wohnung lassen sich nicht laden
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden

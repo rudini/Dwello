@@ -139,7 +139,15 @@ export function toPdfData(
 		agreedCosts:
 			statement.agreedCategoryIds && statement.lineItems.every((item) => item.categoryId)
 				? [...new Set(statement.lineItems.flatMap((item) => nameIn(categoryNames, item.categoryId, language) ?? []))]
-				: undefined
+				: undefined,
+		...(statement.replaces && {
+			replaces: {
+				statementNumber: statement.replaces.statementNumber,
+				statementDate: statement.replaces.statementDate,
+				paidOn: statement.priorPaidOn ?? [],
+				priorPayments: parseFloat(statement.priorPayments)
+			}
+		})
 	};
 }
 

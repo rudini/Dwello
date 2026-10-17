@@ -16,7 +16,8 @@ import {
 	index,
 	uniqueIndex,
 	primaryKey,
-	jsonb
+	jsonb,
+	type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -425,8 +426,11 @@ export const utilityStatements = pgTable(
 		agreedCategoryIds: jsonb('agreed_category_ids').$type<string[]>(), // agreed when created (#91); null: before
 		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
 		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
+		// a berichtigte Abrechnung: the statement it replaces and what was already paid on that one and its own (#120)
+		replacesId: uuid('replaces_id').references((): AnyPgColumn => utilityStatements.id),
+		priorPayments: decimal('prior_payments', { precision: 12, scale: 2 }).notNull().default('0'),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
-		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
+		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid, replaced; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
 		paidDate: date('paid_date'),
 		paidAmount: decimal('paid_amount', { precision: 12, scale: 2 }),
@@ -444,7 +448,8 @@ export const utilityStatements = pgTable(
 		index('statements_period_start_idx').on(table.periodStart),
 		index('statements_status_idx').on(table.status),
 		index('statements_tenant_period_idx').on(table.tenantId, table.periodStart),
-		uniqueIndex('statements_number_idx').on(table.statementNumber)
+		uniqueIndex('statements_number_idx').on(table.statementNumber),
+		uniqueIndex('statements_replaces_idx').on(table.replacesId)
 	]
 );
 

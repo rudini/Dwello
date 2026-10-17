@@ -273,7 +273,7 @@ export interface HeatingProfile {
 }
 
 // Statement types
-export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue';
+export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'replaced';
 
 export interface StatementLineItem {
 	id: string;
@@ -325,6 +325,8 @@ export interface Statement {
 	status: StatementStatus;
 	paymentDeadline: string;
 	paidDate?: string;
+	paidAmount?: number | null; // what was paid; a refund paid to the tenant negative (#93)
+	contractId?: string;
 	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	lastReminderDate?: string;
 	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
@@ -349,6 +351,11 @@ export interface StatementWithDetails extends Statement {
 	rentalStart: string; // the Mietvertrag's days within the period, YYYY-MM-DD (#248)
 	rentalEnd: string;
 	lineItems: StatementLineItem[];
+	// a berichtigte Abrechnung: the statement it replaces, what was paid on the replaced ones and where (#120)
+	replaces?: { id: string; statementNumber: string; statementDate: string } | null;
+	replacedBy?: { id: string; statementNumber: string } | null;
+	priorPayments?: number;
+	priorPaidOn?: string[];
 }
 
 export interface StatementsListData {

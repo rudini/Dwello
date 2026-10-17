@@ -57,7 +57,6 @@
 		{/each}
 		{#if confirm && invoicesMissing}
 			<p>
-				<!-- TODO(fachlich prüfen, #120): whether a paid statement can be corrected later is not settled -->
 				{m.statements_missing_consequence()}
 			</p>
 			<p>{m.statements_add_missing()}</p>

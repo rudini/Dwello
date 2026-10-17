@@ -152,7 +152,7 @@ PRIMARY KEY (contract_id, category_id)
 A statement bills a contract only the categories with `agreed` (Art. 257a Abs. 2 OR); an invoice without a category
 is billed as before. A category without a row is not answered yet: not billed, and the statement wizard asks when it
 has costs in the period. A new contract gets a row for every umlagefähige category (agreed unless the form unticks
-it); a category created or made umlagefähig later has no row. Migration `0018` gave a contract with statements the
+it); a category created or made umlagefähig later has no row. Migration `0019` gave a contract with statements the
 categories its statements billed and those of the building's umlagefähige invoices over its tenancy up to its last
 statement, and a contract without statements every umlagefähige category.
 
@@ -292,18 +292,20 @@ paid_date              DATE                    -- from the Abrechnungsdatum up t
 paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93)
 payment_resets         JSONB   NOT NULL DEFAULT '[]' -- payments taken back: { resetOn, paidDate, paidAmount } (#92)
 payment_recorded_at    TIMESTAMP               -- when the payment was recorded; a reset discards only a PDF made after it (#92)
+replaces_id            UUID → utility_statements(id) -- a berichtigte Abrechnung: the statement it replaces (#120, unique)
+prior_payments         DECIMAL(12,2) NOT NULL DEFAULT 0 -- paid on the replaced statement and its own replaced ones; a refund paid negative (#120)
 reminder_sent_date     DATE
 pdf_blob               TEXT                    -- Base64 PDF with QR-bill
 pdf_generated_at       TIMESTAMP
 qr_bill_reference      VARCHAR(27)             -- QR reference (only with a QR-IBAN)
 notes                  TEXT
-CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid'))
+CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid', 'replaced'))
 CONSTRAINT statements_period_check CHECK (period_end >= period_start)
 ```
 
 Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_period_start_idx`,
 `statements_status_idx`, `statements_tenant_period_idx (tenant_id, period_start)`, unique
-`statements_number_idx (statement_number)`.
+`statements_number_idx (statement_number)`, unique `statements_replaces_idx (replaces_id)`.
 
 `heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }` with the chosen profile's names and why it was not applied (`reason`: `wholePeriod` or `noHeatingMonths`, #247), or the percent of the period's heating costs, the months with their shares (rounded to two places; the percent is their division, #232), for a period whose months do not carry 100 % the period's percent and months (`periodPercent`, `periodMonths`), and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF and the detail page print them after an own profile was changed, renamed or deleted. Empty without a heating profile, without heating costs and for statements created before; the PDF of one created before names no heating profile (#232, C-5).
 
@@ -316,6 +318,9 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 | `sent` (Versendet) | `paid` |
 | `overdue` (Überfällig, computed) | `paid` |
 | `paid` (Bezahlt) | `sent` only by `resetPayment` (#92): paid date and amount cleared, the reset appended to `payment_resets`, a PDF made after the payment was recorded discarded |
+| `sent`, `overdue`, `paid` | `replaced` (Ersetzt) only by `replaceStatement` (#120): nothing else changes; never back |
+
+**Berichtigte Abrechnung (#120, #358):** `correctStatement` (or a statement run of the same contract and the same Abrechnungsperiode) creates a draft from today's data with a new number from the counter, `replaces_id` set to the replaced statement without a replacement, `prior_payments` = its `paid_amount` + its own `prior_payments`, and `balance` = Saldo of costs − Akonto − `prior_payments`, rounded as every Saldo. A replaced statement does not count as the statement of its period (statement run, missing statements) and no longer locks the contract dates.
 
 **Lock rule:** only a `draft` can be deleted (`deleteStatement`), get line items (`addLineItems`) or have its
 amounts changed (`updateStatement` rejects `total_costs`, `total_advance_payments`, `management_fee_percent`,
@@ -463,7 +468,7 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
-  0003 … 0018           -- later changes, each named in its table above
+  0003 … 0019           -- later changes, each named in its table above
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in

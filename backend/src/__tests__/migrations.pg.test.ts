@@ -126,7 +126,7 @@ describe('Migrationen anwenden', () => {
 	it('übernimmt die vereinbarten Nebenkosten bestehender Mietverträge aus ihren Abrechnungen', async () => {
 		const name = await database();
 		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
-		for (const file of files.filter((file) => file < '0018_contract_categories.sql')) {
+		for (const file of files.filter((file) => file < '0019_contract_categories.sql')) {
 			await copyFile(join(migrations, file), join(before, file));
 		}
 		await migrate(`${server}/${name}`, before);

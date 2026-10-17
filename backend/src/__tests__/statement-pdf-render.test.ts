@@ -387,3 +387,49 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 	});
 
 });
+
+// #120, #358: die berichtigte Abrechnung nennt die ersetzte und rechnet an, was darauf schon bezahlt ist
+describe('PDF einer berichtigten Abrechnung', () => {
+	// bezahlt 100.00 auf NK-1-2025-0001: 784.13 − 600.00 − 100.00 = 84.13, auf 5 Rappen zugunsten des Mieters 84.10
+	const corrected: StatementPDFData = {
+		...due,
+		statementNumber: 'NK-1-2025-0002',
+		balance: 84.1,
+		replaces: { statementNumber: 'NK-1-2025-0001', statementDate: '2026-02-01', paidOn: ['NK-1-2025-0001'], priorPayments: 100 }
+	};
+
+	// Fachreview W2e V-2: der Mieter hat die alte Abrechnung mit ihrem Zahlteil noch
+	it('sagt, dass die ersetzte Abrechnung nicht mehr gilt und nur noch dieser Saldo zu bezahlen ist', async () => {
+		expect((await textOf(corrected)).flowing).toContain(
+			'Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Die Abrechnung NK-1-2025-0001 gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung.'
+		);
+	});
+
+	it('verlangt bei einer Rückerstattung keine Zahlung', async () => {
+		const flowing = (await textOf({ ...corrected, balance: -20 })).flowing;
+		expect(flowing).toContain('Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Die Abrechnung NK-1-2025-0001 gilt nicht mehr.');
+		expect(flowing).not.toContain('Bezahlen Sie nur noch');
+	});
+
+	it('zieht das schon Bezahlte vor der Rundung ab', async () => {
+		const flowing = (await textOf(corrected)).flowing;
+		expect(flowing).toContain('Geleistete Akontobeiträge – 600.00 Bereits bezahlt auf NK-1-2025-0001 – 100.00');
+		expect(flowing).toContain('Nachzahlung vor Rundung 84.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 84.10');
+		expect(flowing).toContain('bereits bezahlt CHF 100.00');
+	});
+
+	// Fachreview W2e V-4, V-11: jede Abrechnung der Kette; eine schon bezahlte Rückerstattung zählt dazu
+	it('nennt jede Abrechnung, auf die zurückerstattet wurde, und zählt den Betrag dazu', async () => {
+		const flowing = (
+			await textOf({ ...corrected, balance: 204.1, replaces: { ...corrected.replaces!, paidOn: ['NK-1-2025-0001', 'NK-1-2025-0002'], priorPayments: -20 } })
+		).flowing;
+		expect(flowing).toContain('Bereits zurückerstattet auf NK-1-2025-0001 und NK-1-2025-0002 + 20.00');
+		expect(flowing).toContain('bereits zurückerstattet CHF 20.00');
+	});
+
+	it('nennt die ersetzte Abrechnung auf Französisch', async () => {
+		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(corrected, config, 'fr'), 'base64')).flowing;
+		expect(fr).toContain('Ce décompte remplace le décompte NK-1-2025-0001 du 01.02.2026.');
+		expect(fr).toContain('Déjà payé sur NK-1-2025-0001');
+	});
+});
