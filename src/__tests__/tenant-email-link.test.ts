@@ -10,6 +10,7 @@ const contractPage = (email: string | null) =>
 		props: {
 			data: {
 				missingStatements: [],
+				billedBy: [],
 				contract: {
 					id: 'c1',
 					apartmentId: 'a1',

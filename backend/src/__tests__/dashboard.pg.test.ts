@@ -9,6 +9,7 @@ import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
+import { updateStatementStatus } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
@@ -74,15 +75,20 @@ beforeAll(async () => {
 	await statement(2, { status: 'sent', balance: '300', paymentDeadline: day(-1) }); // overdue
 	await statement(3, { status: 'sent', balance: '200', paymentDeadline: day(30) });
 	await statement(4, { status: 'sent', balance: '-100', paymentDeadline: day(30) }); // refund to the tenant
-	await statement(5, { status: 'paid', balance: '150', paidAmount: '150', paidDate: day(0) });
-	await statement(6, { status: 'paid', balance: '80', paidAmount: '80', paidDate: day(0) });
+	// paid through the service, which stores the Saldo as the amount paid (#93); a refund paid does not count
+	await statement(5, { status: 'sent', balance: '150', paymentDeadline: day(30) });
+	await statement(6, { status: 'sent', balance: '80', paymentDeadline: day(30) });
+	await statement(7, { status: 'sent', balance: '-60', paymentDeadline: day(30) });
+	for (const id of statements.slice(-3)) await updateStatementStatus(id, 'paid', { paidDate: day(0) });
+	// #120, Fachreview W2e V-15: a payment received stays received when its statement is replaced afterwards
+	await statement(8, { status: 'replaced', balance: '40', paidAmount: '40', paidDate: day(0) });
 
 	after = await dashboard();
 });
 
 afterAll(async () => {
 	await db.delete(utilityStatements).where(inArray(utilityStatements.id, statements));
-	await deleteContract(nextContract);
+	await deleteContract(nextContract, true);
 	await deleteTenant(nextTenant);
 	for (const id of apartments) await deleteApartment(id);
 	await rental.remove();
@@ -104,15 +110,21 @@ describe('Dashboard', () => {
 	});
 
 	it('zählt Abrechnungen nach Status, überfällige getrennt von versendeten', () => {
-		expect(added('statements')).toEqual({ draft: 1, sent: 2, overdue: 1, paid: 2 });
+		expect(added('statements')).toEqual({ draft: 1, sent: 2, overdue: 1, paid: 3 });
 	});
 
 	it('zählt versendete und überfällige Abrechnungen als offen', () => {
 		expect(added('financial').outstandingStatements).toBe(3);
 	});
 
+	// #93: «Als bezahlt markieren» ohne Betrag speichert den Saldo als bezahlten Betrag
+	it('speichert beim Bezahlen den Saldo als bezahlten Betrag', async () => {
+		const paid = await db.select({ paidAmount: utilityStatements.paidAmount }).from(utilityStatements).where(inArray(utilityStatements.id, statements.slice(4, 7)));
+		expect(paid.map((row) => row.paidAmount).sort()).toEqual(['-60.00', '150.00', '80.00']);
+	});
+
 	it('summiert ausstehende Nachzahlungen der Mieter ohne Guthaben', () => {
-		expect(added('financial')).toMatchObject({ totalPending: 500, overdueAmount: 300, paidThisMonth: 230 });
+		expect(added('financial')).toMatchObject({ totalPending: 500, overdueAmount: 300, paidThisMonth: 270 });
 	});
 
 	it('zeigt die Belegung des Gebäudes', () => {

@@ -18,26 +18,44 @@
 		"end-dialog": "The dialog that ends a rental contract open.",
 		"end-dialog-error": "The dialog that ends a rental contract confirmed without a Vertragsende: the error at the field.",
 		"past-end-error": "A Vertragsende before today (end dialog or contract form) saved without the confirmation: the checkbox with its error.",
+		"delete-unconfirmed": "The delete dialog of a rental contract that has started, confirmed without confirming it was entered by mistake: the checkbox with its error (#116).",
+		"end-dialog-notice-hint": "The end dialog with a Vertragsende less than 3 months after the day the notice arrived: the hint on the Kündigungsfrist at the field (A-3, #112).",
+		"moved-out-dialog": "Contract page of an expired fixed-term contract: the dialog that confirms «Mieter ist ausgezogen» with its consequence (A-6, #115).",
+		"continue-refused": "Contract page of an expired fixed-term contract: «Unbefristet weiterführen» refused because a draft statement bills the time after the end as Leerstand; the message, the link to the draft and the offer to delete it (A-6, #115).",
 		"end-dialog-refused": "The end dialog refused because a draft statement already bills later rent days: the link to the draft and the offer to delete it.",
 		"edit-refused": "The contract form saved with a Vertragsende before rent days a draft statement already bills: the refusal, the link to the draft and the offer to delete it.",
+		"pdf-missing": "Statement list of the seeded building's drafts, whose PDF is not created yet: each row says «PDF noch nicht erstellt» with a link to its statement (#253).",
 		"list-scoped": "List opened from a link that names a Mietvertrag or an Abrechnungsperiode: a sentence above the list says which statements it shows and links to all.",
 		"link-preset": "Statement wizard opened from a link that names a building and a period (after a changed Vertragsende): it starts at the settings step and says what the link chose.",
-		"send-dialog": "The confirmation before marking a statement as sent open.",
+		"send-dialog": "The confirmation before sending a statement open: marking it as sent for a letter, sending it by e-mail for a tenant who wants e-mail (#86).",
+		"send-refused": "A draft statement whose tenant wants e-mail but has no address, sent: it stays a draft, the alert says why and offers to deliver it by letter (#86).",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
+		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
+		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
+		"correct-dialog": "The confirmation before a sent or paid statement is replaced by a berichtigte Abrechnung open, with the amount it offsets and the limitation (#120).",
+		"generation-result": "«Abrechnungen erstellen» after creating the drafts of a year without invoices: how many were created, «Entwürfe ansehen», «Alle als ZIP herunterladen» (#356) and «Weitere Abrechnungen erstellen».",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
-		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving.",
+		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
 		"category-check": "Statement wizard preview whose check per category reports invoices missing against the year before.",
+		"invoice-hints": "Statement wizard preview of a period under a year (January to May): the invoices without Leistungszeitraum that count in full, and one dated shortly after the period end, each with its edit link (#131, #134).",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
 		"preview-all-billed": "Statement wizard preview of a period in which every contract already has a statement: how to recalculate and the links to the statements.",
+		"agreed-costs-none": "Contract form with every box of the agreed Nebenkosten unticked (#91): the note that the tenant is then billed no Nebenkosten (not saved).",
+		"agreed-costs": "Statement wizard at the settings step (#91): «Weiter» with the questions whether a category is agreed not answered (their errors), and the contract whose answered «nicht vereinbart» category has costs in the period.",
+		"agreements-failed": "Statement wizard at the settings step (#91) when whether the contracts agree the period's Nebenkosten cannot be checked (that request answers an error): the alert with «Erneut versuchen».",
+		"agreement-save-failed": "Statement wizard at the settings step (#91): an answer whether a category is agreed that could not be saved (the save answers an error): the question's error.",
 		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
+		"rent-taken-over": "Rental contract wizard at the step «Miete» for an apartment with an earlier contract: its Nettomiete, Zusatzmiete and Akonto filled in, the note naming that contract (#144).",
 		"contracts-unknown": "Rental contract wizard or form whose apartments' rental contracts cannot be loaded (that request answered with an error): the hint at the apartment, in the form also at the start (#143), and the message after «Erneut versuchen» failed again (#151).",
 		"contracts-unknown-review": "Rental contract wizard at the step before saving, the apartment's rental contracts not loaded (that request answered with an error): the hint above the review (#143).",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
 		"missing-statements": "Contract page of a contract with several ended Abrechnungsperioden without a statement (the seeded contract runs since 2015, statements only for 2024 and 2025): the warning with one button per period (#142).",
 		"draft-dropped": "Statement wizard reopened with a draft whose building and heating profile were deleted since: the restore notice says so (#135).",
+		"old-address-preview": "Statement wizard preview of 2024 with a tenant who moved out and still has the building's address: the warning at his row (A-5, #114).",
+		"old-address-task": "Overview with a draft statement of a tenant who moved out and still has the building's address: the task «Neue Adresse eintragen» (A-5, #114).",
 		"buildings-billed": "Statement wizard step «Gebäude» with a building whose rental contracts partly have a statement in the period: the count at the building (#135).",
 		"formula-tested": "Distribution key form after testing a formula.",
 		"ki-proposal": "New category form after «Von der KI prüfen lassen»: the KI's proposal with its reasoning, the choice preset (#176).",
@@ -56,7 +74,7 @@
 		"server-error": "The error page for a failed load (not 404): message and the hint to try again.",
 		"other-language": "The page in French, chosen with the language selection (it reloads in French).",
 		"language-menu-open": "The language menu in the header open.",
-		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement also its section on the demo."
+		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement and the terms also their section on the demo."
 	},
 	"screens": [
 		{
@@ -99,6 +117,7 @@
 			"path": "/dashboard",
 			"states": [
 				"default",
+				"old-address-task",
 				"first-use",
 				"mobile-menu-open",
 				"user-menu-open",
@@ -167,6 +186,13 @@
 			]
 		},
 		{
+			"name": "apartment-detail-vacant",
+			"path": "/apartments/{vacantApartment}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "apartment-edit",
 			"path": "/apartments/{apartment}/edit",
 			"states": [
@@ -227,15 +253,19 @@
 				"submit-empty",
 				"every-wizard-step",
 				"overlap-warning",
+				"rent-taken-over",
 				"draft-restored",
 				"contracts-unknown",
-				"contracts-unknown-review"
+				"contracts-unknown-review",
+				"agreed-costs-none"
 			],
 			"queries": {
 				"every-wizard-step": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown-review": "?tenant={tenant}&apartment={freeApartment}",
+				"agreed-costs-none": "?tenant={tenant}&apartment={freeApartment}",
 				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
+				"rent-taken-over": "?tenant={tenant}&apartment={noticedApartment}",
 				"draft-restored": "?tenant={tenant}"
 			}
 		},
@@ -248,8 +278,16 @@
 				"end-dialog-error",
 				"past-end-error",
 				"end-dialog-refused",
+				"end-dialog-notice-hint",
 				"delete-dialog",
 				"missing-statements"
+			]
+		},
+		{
+			"name": "contract-moved-out-detail",
+			"path": "/contracts/{movedOutContract}",
+			"states": [
+				"default"
 			]
 		},
 		{
@@ -260,14 +298,34 @@
 				"submit-cleared",
 				"past-end-error",
 				"edit-refused",
-				"contracts-unknown"
+				"contracts-unknown",
+				"agreed-costs-none"
 			]
 		},
 		{
 			"name": "contract-detail-notice",
 			"path": "/contracts/{noticedContract}",
 			"states": [
-				"default"
+				"default",
+				"delete-dialog",
+				"delete-unconfirmed"
+			]
+		},
+		{
+			"name": "contract-detail-ended",
+			"path": "/contracts/{endedContract}",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "contract-detail-expired",
+			"path": "/contracts/{expiredContract}",
+			"states": [
+				"default",
+				"moved-out-dialog",
+				"continue-refused"
 			]
 		},
 		{
@@ -342,14 +400,16 @@
 			"path": "/statements",
 			"queries": {
 				"mark-paid-dialog": "?status=open",
-				"list-scoped": "?contract={contract}"
+				"list-scoped": "?contract={contract}",
+				"pdf-missing": "?status=draft&building={building}"
 			},
 			"states": [
 				"default",
 				"empty",
 				"filtered-empty",
 				"mark-paid-dialog",
-				"list-scoped"
+				"list-scoped",
+				"pdf-missing"
 			]
 		},
 		{
@@ -370,16 +430,25 @@
 				"every-wizard-step",
 				"preview-empty",
 				"category-check",
+				"invoice-hints",
 				"period-not-over",
 				"tank-question",
+				"old-address-preview",
 				"preview-all-billed",
 				"draft-restored",
 				"draft-dropped",
 				"buildings-billed",
-				"link-preset"
+				"link-preset",
+				"agreed-costs",
+				"agreement-save-failed",
+				"agreements-failed",
+				"generation-result"
 			],
 			"queries": {
-				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31"
+				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31",
+				"agreed-costs": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
+				"agreement-save-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
+				"agreements-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31"
 			}
 		},
 		{
@@ -392,25 +461,87 @@
 			]
 		},
 		{
+			"name": "statement-old-address-detail",
+			"path": "/statements/{oldAddressStatement}",
+			"states": [
+				"default",
+				"send-dialog"
+			]
+		},
+		{
+			"name": "statement-parts-detail",
+			"path": "/statements/{partsStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-sent-detail",
 			"path": "/statements/{sentStatement}",
 			"states": [
 				"default",
 				"reminder-dialog",
 				"mark-paid-dialog",
-				"action-error"
+				"action-error",
+				"correct-dialog"
+			]
+		},
+		{
+			"name": "statement-paid-detail",
+			"path": "/statements/{paidStatement}",
+			"states": [
+				"default",
+				"reset-payment-dialog",
+				"correct-dialog"
+			]
+		},
+		{
+			"name": "statement-replaced-detail",
+			"path": "/statements/{replacedStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-corrected-detail",
+			"path": "/statements/{correctedStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-correction-detail",
+			"path": "/statements/{correctionStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-reminded-detail",
+			"path": "/statements/{remindedStatement}",
+			"states": [
+				"default"
 			]
 		},
 		{
 			"name": "statement-empty-detail",
 			"path": "/statements/{emptyStatement}",
 			"states": [
-				"default"
+				"default",
+				"send-dialog",
+				"send-refused"
 			]
 		},
 		{
 			"name": "statement-pdf-refused",
 			"path": "/statements/00000000-0000-4000-8000-000000000000/pdf",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-zip-refused",
+			"path": "/statements/zip?ids=00000000-0000-4000-8000-000000000000&periodStart=2024-01-01&periodEnd=2024-12-31",
 			"states": [
 				"default"
 			]
@@ -428,14 +559,27 @@
 			"path": "/documents",
 			"states": [
 				"default",
-				"empty"
-			]
+				"empty",
+				"marked-sent"
+			],
+			"queries": {
+				"marked-sent": "?letter={remindedLetter}"
+			}
 		},
 		{
 			"name": "config",
 			"path": "/config",
 			"states": [
 				"default"
+			]
+		},
+		{
+			"name": "audit-log",
+			"path": "/config/audit-log",
+			"states": [
+				"default",
+				"empty",
+				"delete-dialog"
 			]
 		},
 		{
@@ -550,7 +694,8 @@
 			"name": "terms",
 			"path": "/terms",
 			"states": [
-				"default"
+				"default",
+				"demo"
 			]
 		},
 		{

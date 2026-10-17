@@ -2,8 +2,22 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { load } from '../routes/dashboard/+page.server';
 import contractList from '../../tests/contracts/contracts.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
+import apartmentList from '../../tests/contracts/apartments.json';
+import config from '../../tests/contracts/config.json';
+import statementList from '../../tests/contracts/statements.json';
+import documentList from '../../tests/contracts/documents.json';
 
 const API = 'http://localhost:3001/api/v1';
+// an apartment of the API contract, without the dates it does not have
+const apartment = (buildingId: string, status: string, fields: Record<string, string> = {}) => ({
+	...apartmentList.apartments[0],
+	nextContractStart: null,
+	currentContractEnd: null,
+	lastContractEnd: null,
+	buildingId,
+	status,
+	...fields
+});
 const figures = {
 	portfolio: { totalBuildings: 1, totalApartments: 2, occupiedApartments: 1, reletApartments: 0 },
 	statements: { draft: 1, sent: 1, paid: 0, overdue: 1 },
@@ -42,27 +56,39 @@ const contracts = [
 		contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01', terminated: true })
 	),
 	contract({ id: 'n4', apartmentId: 'a9', startDate: '2027-02-01', endDate: null }),
-	contract({ id: 'n7', apartmentId: 'a6', startDate: '2026-11-21', endDate: null })
+	contract({ id: 'n7', apartmentId: 'a6', startDate: '2026-11-21', endDate: null }),
+	// A-6 (#115), all agreed ends: expired; expired and moved out; expired with a next contract; still running
+	...[
+		{ id: 'f1', apartmentId: 'f1', endDate: '2026-10-09' },
+		{ id: 'f2', apartmentId: 'f2', endDate: '2026-09-30', movedOut: true },
+		{ id: 'f3', apartmentId: 'f3', endDate: '2026-07-31' },
+		{ id: 'f5', apartmentId: 'f5', endDate: '2026-10-10' }
+	].map((c) => contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01' })),
+	contract({ id: 'f4', apartmentId: 'f3', startDate: '2026-08-01', endDate: null })
 ];
-// a statement of the contract over the days given, by default every day of all its periods
-const billed = (contractId: string, periodStart = '2019-07-01', periodEnd = '2026-06-30') => ({
-	...periodStatements.data[0],
-	contractId,
-	periodStart,
-	periodEnd
-});
-const all = ['k1', 'k2', 'k3', 'k4', 'k5', 'k7', 'k8'].map((id) => billed(id));
+const billed = (...ids: string[]) =>
+	ids.map((contractId) => ({ ...periodStatements.data[0], contractId }));
+const both = billed('k1', 'k2', 'k3', 'k4', 'k7', 'k8');
 
 // The backend as the overview reads it: counts, plus the lists that carry dates
-function backend(dashboardStatus = 200, statements: unknown[] = all) {
+function backend(
+	dashboardStatus = 200,
+	statementsOfLastPeriod: unknown[] = both,
+	overrides: Record<string, unknown> = {}
+) {
 	const answers: Record<string, unknown> = {
-		'/config': { data: { accounting_period: 'july-june' } },
-		'/statements?limit=1000': { data: statements, total: statements.length },
+		// Zahlungsfrist 45 and Mahnfrist 10 days (#87)
+		'/config': config,
+		'/statements?periodStart=2025-07-01&periodEnd=2026-06-30&limit=1000': {
+			data: statementsOfLastPeriod,
+			total: statementsOfLastPeriod.length
+		},
 		'/statements?status=overdue&limit=100': {
 			data: [
 				{
 					id: 's1',
-					paymentDeadline: '2026-10-05',
+					// 12 days ago: after the Mahnfrist of 10 days, a Mahnung is proposed (#64)
+					paymentDeadline: '2026-09-28',
 					tenant: { firstName: 'Anna', lastName: 'Keller' }
 				}
 			]
@@ -73,10 +99,24 @@ function backend(dashboardStatus = 200, statements: unknown[] = all) {
 					id: 's2',
 					paymentDeadline: '2026-10-20',
 					tenant: { firstName: 'Bruno', lastName: 'Meier' }
+				},
+				// within the Zahlungsfrist of 45 days, so still shown (#87)
+				{
+					id: 's3',
+					paymentDeadline: '2026-11-20',
+					tenant: { firstName: 'Hans', lastName: 'Müller' }
 				}
 			]
 		},
 		'/contracts?limit=1000': { contracts, total: contracts.length },
+		// A-5 (#114): drafts for moved-out tenants, one still with the building's address (twice: two periods)
+		'/statements?status=draft&limit=100': {
+			data: [
+				{ ...statementList.data[0], id: 's3', tenantId: 't9', oldAddress: true },
+				{ ...statementList.data[0], id: 's4', tenantId: 't9', oldAddress: true },
+				{ ...statementList.data[0], id: 's5', tenantId: 't8', oldAddress: false }
+			]
+		},
 		'/documents?status=to_send': { data: [{ id: 'd1' }, { id: 'd2' }] },
 		'/contracts?status=active&limit=100': {
 			contracts: [
@@ -90,12 +130,16 @@ function backend(dashboardStatus = 200, statements: unknown[] = all) {
 		},
 		'/apartments?limit=1000': {
 			apartments: [
-				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-12-01' },
-				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-11-01' },
-				{ buildingId: 'b1', status: 'occupied', nextContractStart: null },
-				{ buildingId: 'b2', status: 'vacant', nextContractStart: null }
+				apartment('b1', 'relet', { nextContractStart: '2026-12-01' }),
+				apartment('b1', 'relet', { nextContractStart: '2026-11-01' }),
+				apartment('b1', 'occupied'),
+				apartment('b2', 'vacant', { number: '1.01' }),
+				apartment('b2', 'vacant', { number: '1.02', lastContractEnd: '2024-03-31' }),
+				// reserved by hand: not empty to rent, so no «leer seit»
+				apartment('b3', 'reserved', { lastContractEnd: '2024-03-31' })
 			]
-		}
+		},
+		...overrides
 	};
 	return (async (url: string) => {
 		const path = url.replace(API, '');
@@ -108,6 +152,30 @@ function backend(dashboardStatus = 200, statements: unknown[] = all) {
 describe('Übersicht laden', () => {
 	afterEach(() => vi.useRealTimers());
 
+	// #178: an ehemaliger Mieter whose uploads date from before the last Vertragsende
+	it('nennt ehemalige Mieter mit Dokumenten von vor dem Ende ihres letzten Mietvertrags', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const [upload] = documentList.data;
+		// a fixed term without notice, then the next tenant: she has left, no question whether she stayed (A-6)
+		const former = { ...contracts[0], id: 'k9', tenantId: 't9', tenantName: 'Ida Alt', apartmentId: 'a9', startDate: '2020-01-01', endDate: '2026-03-31', terminated: false, movedOut: false };
+		const next = { ...former, id: 'k10', tenantId: 't10', tenantName: 'Ugo Nuovo', startDate: '2026-04-01', endDate: null };
+		const base = backend();
+		const fetch = (async (url: string) => {
+			const path = url.replace(API, '');
+			if (path === '/documents')
+				return Response.json({ data: [{ ...upload, tenantId: 't9', createdAt: '2024-05-01T09:00:00.000Z' }] });
+			if (path === '/contracts?limit=1000') return Response.json({ contracts: [...contracts, former, next] });
+			return base(url);
+		}) as typeof globalThis.fetch;
+
+		const data = await load({ fetch } as never);
+
+		expect(data.tasks).toContainEqual(
+			expect.objectContaining({ id: 'former-documents-t9', title: 'Dokumente von Ida Alt prüfen', href: '/tenants/t9' })
+		);
+		expect(data.tasks.map((task) => task.id)).not.toContain('fixed-term-k9');
+	});
+
 	it('liefert die Kennzahlen und daraus die Aufgaben und Fristen von heute', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
 		const data = await load({ fetch: backend() } as never);
@@ -117,18 +185,39 @@ describe('Übersicht laden', () => {
 			'overdue',
 			'letters',
 			'drafts',
+			'old-address-t9',
 			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
 			'successor-n2',
 			'successor-n5',
-			'successor-n1'
+			'successor-n1',
+			// A-6 (#115): only the expired agreed end without a next contract and without a move-out
+			'fixed-term-f1'
 		]);
 		expect(data.tasks[1].text).toContain('2 Briefe sind');
 		expect(data.deadlines.map((d) => [d.kind, d.name, d.when])).toEqual([
-			['Zahlungsfrist', 'Anna Keller', 'seit 5 Tagen abgelaufen'],
+			['Zahlungsfrist', 'Anna Keller', 'seit 12 Tagen abgelaufen'],
 			['Zahlungsfrist', 'Bruno Meier', 'in 10 Tagen'],
 			['Vertragsende', 'Eva Frei', 'in 22 Tagen'],
+			['Zahlungsfrist', 'Hans Müller', 'in 41 Tagen'],
 			['Vertragsende', 'Mieter n6', 'in 41 Tagen']
 		]);
+	});
+
+	// #64, Fachreview V-1: die Mahnfrist gilt nur, wo gemahnt wird; eine Rückerstattung ist ab dem Tag danach zu überweisen
+	it('nennt eine überfällige Rückerstattung gleich nach der Zahlungsfrist, eine Nachzahlung erst nach der Mahnfrist', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const overdue = (balance: string) =>
+			backend(200, both, {
+				'/statements?status=overdue&limit=100': {
+					data: [{ ...statementList.data[0], paymentDeadline: '2026-10-05', balance }]
+				}
+			});
+
+		const refund = await load({ fetch: overdue('-40.00') } as never);
+		const payment = await load({ fetch: overdue('40.00') } as never);
+
+		expect(refund.tasks.map((task) => task.id)).toContain('overdue');
+		expect(payment.tasks.map((task) => task.id)).not.toContain('overdue');
 	});
 
 	it('erinnert an die abgelaufene Abrechnungsperiode, für die es noch keine Abrechnung gibt', async () => {
@@ -140,33 +229,35 @@ describe('Übersicht laden', () => {
 			'letters',
 			'missing-period',
 			'drafts',
+			'old-address-t9',
 			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
 			'successor-n2',
 			'successor-n5',
-			'successor-n1'
+			'successor-n1',
+			// A-6 (#115): only the expired agreed end without a next contract and without a move-out
+			'fixed-term-f1'
 		]);
-		// #211: every ended period since the Vertragsbeginn, not only the last one
+		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');
 		expect(data.tasks[2].text).toContain(
-			'Lindenhof (01.07.2025 – 30.06.2026, 01.07.2024 – 30.06.2025, 01.07.2023 – 30.06.2024)'
-		);
-		expect(data.tasks[2].text).toMatch(
-			/Noch nicht abgerechnet: Ahornhof \(.*\), Birkenhof \(.*\), Erlenhof \(.*\), Leerbau \(.*\), Lindenhof \(.*\), Seeblick \(.*\)\./
+			'Noch nicht abgerechnet: Ahornhof, Birkenhof, Erlenhof, Lindenhof, Seeblick.'
 		);
 	});
 
-	// The tenant who moved out still gets a statement for the days of the period (A-9); a statement that overlaps a
-	// period counts, only the days no statement covers are missing (#199)
-	it('nennt jedes Gebäude mit den Tagen, die keine Abrechnung seiner Mietverträge abdeckt', async () => {
+	// The tenant who moved out still gets a statement for the days of the period (A-9)
+	it('nennt jedes Gebäude, das in der Periode einen Mietvertrag ohne Abrechnung hatte', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const statements = [
-			...all.filter((s) => s.contractId !== 'k4'),
-			billed('k4', '2023-01-01', '2024-12-31')
-		];
-		const data = await load({ fetch: backend(200, statements) } as never);
+		const data = await load({ fetch: backend(200, billed('k1', 'k2', 'k7', 'k8')) } as never);
 		const task = data.tasks.find((t) => t.id === 'missing-period')!;
-		expect(task.text).toContain(
-			'Noch nicht abgerechnet: Ahornhof (01.07.2025 – 30.06.2026, 01.01.2025 – 30.06.2025).'
-		);
+		expect(task.text).toContain('Noch nicht abgerechnet: Ahornhof, Lindenhof.');
+	});
+
+	// #120: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode, bis es die berichtigte gibt
+	it('nennt das Gebäude einer ersetzten Abrechnung ohne berichtigte', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const [seeblick, ...others] = billed('k1', 'k2', 'k7', 'k8');
+		const data = await load({ fetch: backend(200, [{ ...seeblick, status: 'replaced' }, ...others]) } as never);
+		const task = data.tasks.find((t) => t.id === 'missing-period')!;
+		expect(task.text).toContain('Noch nicht abgerechnet: Ahornhof, Lindenhof, Seeblick.');
 	});
 
 	// The building cards count them too; the overview names when they will be rented
@@ -176,6 +267,20 @@ describe('Übersicht laden', () => {
 		expect(data.buildingOccupancy.map((b) => b.reletStarts)).toEqual([
 			['2026-11-01', '2026-12-01'],
 			[],
+			[]
+		]);
+	});
+
+	// P-18 (#145): jede leere Wohnung, seit wann nur, wenn sie einen Mietvertrag hatte (Persona Anna P-1)
+	it('nennt pro Gebäude die leeren Wohnungen mit dem Ende ihres letzten Mietvertrags', async () => {
+		const data = await load({ fetch: backend() } as never);
+
+		expect(data.buildingOccupancy.map((b) => b.vacant)).toEqual([
+			[],
+			[
+				{ number: '1.01', lastContractEnd: null },
+				{ number: '1.02', lastContractEnd: '2024-03-31' }
+			],
 			[]
 		]);
 	});
@@ -191,6 +296,17 @@ describe('Übersicht laden', () => {
 		expect(data.portfolio).toEqual(figures.portfolio);
 		expect(data.tasks.map((task) => task.id)).toEqual(['overdue', 'drafts']);
 		expect(data.deadlines).toEqual([]);
+	});
+
+	// code review C-6: a broken answer of the settings leaves their defaults, not an error page
+	it('zeigt die Übersicht auch, wenn die Einstellungen kein JSON liefern', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const answer = backend();
+		const fetch = (async (url: string) =>
+			url.endsWith('/config') ? new Response('<html>') : answer(url)) as typeof globalThis.fetch;
+		const data = await load({ fetch } as never);
+
+		expect(data.deadlines.map((d) => d.name)).toContain('Bruno Meier');
 	});
 
 	// Zeros would look like an empty portfolio

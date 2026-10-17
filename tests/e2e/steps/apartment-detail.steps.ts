@@ -4,8 +4,11 @@ import {
 	apartmentInfo,
 	buildingOfApartmentShown,
 	contractHistoryNaming,
+	currentContractsListed,
 	currentTenant,
-	grossMonthlyRent,
+	earlierContractShown,
+	earlierContractsListed,
+	monthlyTotalOfApartment,
 	nextTenant,
 	vacancyShown
 } from '../questions/apartment-detail';
@@ -44,8 +47,8 @@ Then('wohnt {string} in der Wohnung', async ({ verwalter, names }, tenant: strin
 	await verwalter.sees(currentTenant).toBe(names.get(tenant)!);
 });
 
-Then('kostet die Wohnung monatlich {string} brutto', async ({ verwalter }, amount: string) => {
-	await verwalter.sees(grossMonthlyRent).toBe(amount);
+Then('beträgt das Monatlich total der Wohnung {string}', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(monthlyTotalOfApartment).toBe(amount);
 });
 
 Then('hat die Wohnung den Status {string}', async ({ verwalter }, status: string) => {
@@ -83,3 +86,26 @@ Then(
 		await verwalter.sees(contractHistoryNaming(...expected)).toEqual(expected);
 	}
 );
+
+Then('erklärt die Wohnungsseite beim Mietstatus {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(apartmentInfo('status')).toContain(help);
+});
+
+Then(
+	'steht der Mietvertrag von {string} über den früheren Mietverträgen',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.sees(currentContractsListed).toContain(names.get(tenant)!);
+	}
+);
+
+Then(
+	'steht der Mietvertrag von {string} unter {string}',
+	async ({ verwalter, names }, tenant: string, heading: string) => {
+		await verwalter.sees(earlierContractsListed).toContain(heading);
+		await verwalter.sees(earlierContractShown(names.get(tenant)!)).toContain(names.get(tenant)!);
+	}
+);
+
+Then('erklärt der Mietvertrag von {string} {string}', async ({ verwalter, names }, tenant: string, help: string) => {
+	await verwalter.sees(earlierContractShown(names.get(tenant)!)).toContain(help);
+});

@@ -11,17 +11,19 @@
 	import CategoryProposal from './CategoryProposal.svelte';
 	import CategoryReason from './CategoryReason.svelte';
 
-	// `proposal` only on a new category: the KI's answer to «Von der KI prüfen lassen»
+	// `ki` and `proposal` only on a new category: whether the KI is on (#219), its answer to «Von der KI prüfen lassen»
 	let {
 		action,
 		category,
 		errors = {},
+		ki = false,
 		proposal,
 		submitLabel
 	}: {
 		action?: string;
 		category?: Category & { key?: string; predefined?: boolean };
 		errors?: Record<string, string>;
+		ki?: boolean;
 		proposal?: Proposal | null;
 		submitLabel: string;
 	} = $props();
@@ -120,7 +122,7 @@
 			testid="category-allowance"
 		/>
 		<CategoryReason category={chosen} />
-		{#if action}
+		{#if ki}
 			<div>
 				<div>
 					<Button
@@ -169,8 +171,9 @@
 		bind:value={values.sortOrder}
 	/>
 
-	<fieldset class="flex flex-col gap-4">
+	<fieldset class="flex flex-col gap-4" aria-describedby="translations-help">
 		<legend class="text-lg font-semibold text-ink">{m.categories_translations()}</legend>
+		<p id="translations-help" class="text-ink-muted">{m.categories_translations_help()}</p>
 		<div class="grid gap-6 md:grid-cols-3">
 			{#each translations as { key, label } (key)}
 				<TextInput id={key} name={key} {label} optional bind:value={values[key]} />

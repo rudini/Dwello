@@ -37,6 +37,8 @@ export const wizardPreset = byTestId('Vorgaben aus dem Link', 'wizard-preset');
 export const listScope = byTestId('Auswahl der Liste', 'statements-scope');
 export const sendButton = byTestId('Abrechnung versenden', 'statement-send-button');
 export const reminderButton = byTestId('Mahnung senden', 'statement-reminder-button');
+export const resetPaymentButton = byTestId('Zahlung zurücksetzen', 'statement-reset-payment-button');
+export const correctButton = byTestId('Abrechnung berichtigen', 'statement-correct-button');
 // the detail page's button, or the first one in the list
 export const markPaidButton = bySelector(
 	'Als bezahlt markieren',
@@ -65,3 +67,5 @@ export const firstGenerateBuilding = bySelector('Erstes Gebäude abrechnen', '[d
 export const confirmMissingInvoices = byTestId('Fehlende Rechnungen bestätigen', 'confirm-missing-invoices');
 /** What shows that a state or a wizard step is reached, by its test id */
 export const shown = (testId: string) => bySelector(testId, `[data-testid="${testId}"]`);
+// #91: the first answer «Vereinbart» in the statement wizard's step 3
+export const firstAgreementYes = target('Erste Antwort «Vereinbart»', (page) => page.getByTestId(/^agreement-.+-yes$/).first());

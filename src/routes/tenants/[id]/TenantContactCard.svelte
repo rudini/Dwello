@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { Tenant } from '$lib/types';
-	import { languageLabels } from '$lib/tenant';
+	import { countryName, languageLabels } from '$lib/tenant';
 	import Panel from '$lib/ui/Panel.svelte';
 
 	let { tenant }: { tenant: Tenant } = $props();
@@ -11,8 +11,13 @@
 			? m.tenants_channel_email()
 			: m.tenants_channel_letter()
 	);
+	// the country only abroad (#102)
 	const address = $derived(
-		[tenant.address, [tenant.postalCode, tenant.city].filter(Boolean).join(' ')].filter(Boolean)
+		[
+			tenant.address,
+			[tenant.postalCode, tenant.city].filter(Boolean).join(' '),
+			tenant.country && tenant.country !== 'CH' && countryName(tenant.country)
+		].filter(Boolean)
 	);
 </script>
 
@@ -47,8 +52,10 @@
 			<dd class="text-ink">{tenant.phone ?? m.tenants_no_phone()}</dd>
 		</div>
 		<div>
-			<dt class="text-ink-muted">{m.buildings_address()}</dt>
-			<dd class="whitespace-pre-line text-ink">{address.join('\n') || m.tenants_no_address()}</dd>
+			<dt class="text-ink-muted">{m.tenants_correspondence_address()}</dt>
+			<dd class="whitespace-pre-line text-ink" data-testid="tenant-address">
+				{address.join('\n') || m.tenants_no_address()}
+			</dd>
 		</div>
 	</dl>
 </Panel>

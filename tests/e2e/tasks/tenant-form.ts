@@ -4,6 +4,7 @@ import {
 	addressInput,
 	channelSelect,
 	cityInput,
+	countrySelect,
 	emailInput,
 	languageSelect,
 	postalCodeInput,
@@ -12,13 +13,14 @@ import {
 
 export const openTenantEdit = (tenantId: string) => Navigate.to(`/tenants/${tenantId}/edit`);
 
-export const correspondByLetter = (address: string, place: string): Activity => (actor) => {
+export const correspondByLetter = (address: string, place: string, country?: string): Activity => (actor) => {
 	const [postalCode, city] = place.split(' ');
 	return actor.attemptsTo(
 		Select.option('letter').from(channelSelect),
 		Enter.theValue(address).into(addressInput),
 		Enter.theValue(postalCode).into(postalCodeInput),
 		Enter.theValue(city).into(cityInput),
+		...(country ? [Select.option({ label: country }).from(countrySelect)] : []),
 		Click.on(submitTenantButton)
 	);
 };

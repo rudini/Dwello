@@ -13,11 +13,23 @@ export interface OverviewInput {
 		reletApartments: number;
 	};
 	statementCounts: { draft: number; sent: number; paid: number; overdue: number };
-	dueStatements: { id: string; tenantName: string; paymentDeadline: string }[];
+	// with the day from which the next Mahnung is possible, after the last reminder's Zahlungsfrist (#107)
+	dueStatements: {
+		id: string;
+		tenantName: string;
+		paymentDeadline: string;
+		nextReminderFrom?: string | null;
+		refund?: boolean; // never gemahnt: the landlord pays it
+	}[];
+	// the settings: Zahlungsfrist and Mahnfrist in days (#87)
+	paymentDeadlineDays: number;
+	reminderAfterDays: number;
 	lettersToSend: number;
 	// ended Abrechnungsperiode with rented buildings that have no statements yet
 	missingPeriod?: { start: string; end: string; buildings: string[] } | null;
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
+	// moved out with a draft statement, still at the building's address (A-5, #114)
+	oldAddresses?: { tenantId: string; tenantName: string }[];
 	// ended by notice, still running and without a following contract (A-4)
 	noticedContracts: {
 		id: string;
@@ -26,6 +38,10 @@ export interface OverviewInput {
 		apartmentNumber: string;
 		endDate: string;
 	}[];
+	// agreed end passed, without a following contract and without «Mieter ist ausgezogen» (A-6)
+	expiredContracts: { id: string; tenantName: string; endDate: string }[];
+	// ehemalige Mieter with uploads from before their last Vertragsende (#178)
+	formerTenants?: { tenantId: string; tenantName: string; endDate: string; count: number }[];
 }
 
 /** One thing the landlord should do now, with the page where it is done */
@@ -94,17 +110,28 @@ function invoicesOf({ start, end }: { start: string; end: string }) {
 }
 
 // Recurring work, most urgent first: money already late, letters waiting at home, statements not yet sent
-function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewInput): Task[] {
+function workTasks({
+	today,
+	statementCounts,
+	dueStatements,
+	lettersToSend,
+	missingPeriod,
+	reminderAfterDays
+}: OverviewInput): Task[] {
+	// «Überfällig» from the day after the Zahlungsfrist, but a Mahnung is proposed only after the Mahnfrist (#64), the
+	// next one after the Zahlungsfrist of the last Mahnung (#107); a Rückerstattung is due at once (Fachreview V-1)
+	const waiting = (s: OverviewInput['dueStatements'][number]) =>
+		s.nextReminderFrom
+			? s.nextReminderFrom > today
+			: !s.refund && daysFrom(today, s.paymentDeadline) >= -reminderAfterDays;
+	const overdue =
+		statementCounts.overdue -
+		dueStatements.filter((s) => s.paymentDeadline < today && waiting(s)).length;
 	const tasks: (Task | false)[] = [
-		statementCounts.overdue > 0 && {
+		overdue > 0 && {
 			id: 'overdue',
-			// TODO(fachlich prüfen, #64): shown from the Zahlungsfrist on; a Mahnung is customary only after the Mahnfrist
 			title: m.dashboard_task_overdue(),
-			text: count(
-				statementCounts.overdue,
-				m.dashboard_task_overdue_text_one,
-				m.dashboard_task_overdue_text_many
-			),
+			text: count(overdue, m.dashboard_task_overdue_text_one, m.dashboard_task_overdue_text_many),
 			href: '/statements?status=overdue',
 			action: m.dashboard_task_overdue_action(),
 			icon: 'reminder'
@@ -122,7 +149,7 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 			icon: 'mail'
 		},
 		!!missingPeriod && {
-			// TODO(fachlich prüfen, #64): suggestion without legal deadline
+			// right after the Abrechnungsperiode, without a legal deadline: a UX choice (#64)
 			id: 'missing-period',
 			title: m.dashboard_task_missing_period(),
 			text: m.dashboard_task_missing_period_text({
@@ -165,10 +192,55 @@ const successorTasks = ({ noticedContracts }: OverviewInput): Task[] =>
 			icon: 'contract'
 		}));
 
+// A draft would go to the apartment the tenant left: the new address first (A-5, #114)
+const addressTasks = ({ oldAddresses = [] }: OverviewInput): Task[] =>
+	oldAddresses.map((t) => ({
+		id: `old-address-${t.tenantId}`,
+		title: m.contracts_next_address(),
+		text: m.statements_old_address({ name: t.tenantName }),
+		href: `/tenants/${t.tenantId}/edit`,
+		action: m.contracts_next_address(),
+		icon: 'edit'
+	}));
+
+// The tenant who stayed after an agreed end continues the contract open-ended (Art. 266 Abs. 2 OR, A-6);
+// TODO(fachlich prüfen, #308): wording of the question
+const fixedTermTasks = ({ expiredContracts }: OverviewInput): Task[] =>
+	[...expiredContracts]
+		.sort((a, b) => a.endDate.localeCompare(b.endDate))
+		.map((c) => ({
+			id: `fixed-term-${c.id}`,
+			title: m.dashboard_task_fixed_term(),
+			text: m.contracts_fixed_term_question({ name: c.tenantName, date: formatDate(c.endDate) }),
+			href: `/contracts/${c.id}`,
+			action: m.dashboard_task_fixed_term_action(),
+			icon: 'contract'
+		}));
+// TODO(fachlich prüfen, #331): the task stays while the landlord rightly keeps a document
+// TODO(fachlich prüfen, #334): «Mietzinsdepot» is not in the glossary
+const formerDocumentTasks = ({ formerTenants = [] }: OverviewInput): Task[] =>
+	formerTenants.map((t) => ({
+		id: `former-documents-${t.tenantId}`,
+		title: m.dashboard_task_former_documents({ name: t.tenantName }),
+		text: (t.count === 1
+			? m.dashboard_task_former_documents_text_one
+			: m.dashboard_task_former_documents_text_many)({ count: t.count, date: formatDate(t.endDate) }),
+		href: `/tenants/${t.tenantId}`,
+		action: m.dashboard_task_former_documents_action(),
+		icon: 'document'
+	}));
+
 /** Tasks in the order they should be done; set-up comes first */
 export function overviewTasks(input: OverviewInput): Task[] {
 	const step = setup.find(({ missing }) => missing(input.portfolio));
-	return [...(step ? [step.task()] : []), ...workTasks(input), ...successorTasks(input)];
+	return [
+		...(step ? [step.task()] : []),
+		...workTasks(input),
+		...addressTasks(input),
+		...successorTasks(input),
+		...fixedTermTasks(input),
+		...formerDocumentTasks(input)
+	];
 }
 
 /** A date the landlord should not miss, with how far away it is in words; `kind` is an id, shown via a message */
@@ -182,8 +254,7 @@ export interface Deadline {
 	href: string;
 }
 
-// How far ahead the overview looks – TODO(fachlich prüfen, #64): windows chosen for usability, no legal basis
-const PAYMENT_WINDOW_DAYS = 30; // the payment deadline the app gives: every open one shows
+// How far ahead the overview looks at contract ends: a UX choice (#64); payments within the Zahlungsfrist (#87)
 const CONTRACT_END_WINDOW_DAYS = 60;
 
 const daysFrom = (today: string, date: string) =>
@@ -203,7 +274,8 @@ function when(days: number) {
 export function overviewDeadlines({
 	today,
 	dueStatements,
-	endingContracts
+	endingContracts,
+	paymentDeadlineDays
 }: OverviewInput): Deadline[] {
 	const payments = dueStatements.map((s) => ({
 		id: s.id,
@@ -222,7 +294,7 @@ export function overviewDeadlines({
 		href: `/contracts/${c.id}`
 	}));
 	return [
-		...payments.filter((d) => d.days <= PAYMENT_WINDOW_DAYS),
+		...payments.filter((d) => d.days <= paymentDeadlineDays),
 		...ends.filter((d) => d.days >= 0 && d.days <= CONTRACT_END_WINDOW_DAYS)
 	]
 		.sort((a, b) => a.days - b.days)

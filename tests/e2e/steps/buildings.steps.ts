@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { buildingCount, buildingListed, emptyListHint, routeTo } from '../questions/buildings';
+import { buildingCardText, buildingCount, buildingListed, emptyListHint, routeTo } from '../questions/buildings';
 import { pageAddress } from '../questions/navigation';
 import { filterByCity, openBuilding, openBuildingList, searchBuildings, startNewBuilding } from '../tasks/buildings';
 
@@ -9,6 +9,13 @@ const { Given, When, Then } = createBdd(test);
 Given('das Gebäude {string} in {string} existiert', async ({ seed }, title: string, city: string) => {
 	await seed.building(title, city);
 });
+
+Given(
+	'das Gebäude {string} an der {string} in {string} existiert',
+	async ({ seed }, title: string, street: string, city: string) => {
+		await seed.building(title, city, street);
+	}
+);
 
 Given('der Liegenschaftsverwalter ist auf der Gebäudeliste', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openBuildingList);
@@ -21,8 +28,8 @@ Then(
 	}
 );
 
-When('der Liegenschaftsverwalter nach {string} sucht', async ({ verwalter, names }, term: string) => {
-	await verwalter.attemptsTo(searchBuildings(names.get(term) ?? term));
+When('der Liegenschaftsverwalter nach {string} sucht', async ({ verwalter, seed }, term: string) => {
+	await verwalter.attemptsTo(searchBuildings(seed.withNames(term)));
 });
 
 Then('die Liste enthält genau {int} Gebäude', async ({ verwalter }, count: number) => {
@@ -62,3 +69,7 @@ Then(
 			.toBe(`https://www.google.com/maps/dir/?api=1&destination=${destination}`);
 	}
 );
+
+Then('nennt die Karte des Gebäudes {string} {string}', async ({ verwalter, names }, building: string, text: string) => {
+	await verwalter.sees(buildingCardText(names.get(building)!)).toContain(text);
+});

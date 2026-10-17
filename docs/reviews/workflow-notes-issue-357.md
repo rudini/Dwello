@@ -1,0 +1,7 @@
+# Workflow notes: #357 (Protokoll under «Einstellungen»)
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 1 and 2, with skill `commit-gates` (fallow, unresolved imports) | Workflow 1 has the tests written and seen red while the fach-reviewer reviews, before any production code. The pg, mapping and BFF tests import modules that do not exist yet (`audit-log.service`, `$lib/server/audit-log`), so fallow refused the commit of the red tests («unresolved_imports», introduced). They stayed staged until the first production code and went in with it, so no commit shows them red. | Say in Workflow 1 that red tests importing a missing module stay uncommitted until the module exists, or let the fallow gate skip unresolved imports in `__tests__`. |
+| `CLAUDE.md`, Gotchas, "Branches" | As in `workflow-notes-issue-129.md`: the session started on a detached HEAD, and its task said «your branch is the one this session was created with», which had none; the name `claude/w7e-audit-log-357` was made up. | As there. |
+| Skill `commit-gates`, fallow complexity (CRAP) of a new page template | The new page's `<template>` exceeded the CRAP threshold because no unit test imported it; the E2E scenarios that cover it do not count. A DOM test was added after the code and seen red by taking parts of the page out. Later, three `?? ''` fallbacks raised it again and were moved into a `$derived`. | Name in `commit-gates` that a new page needs a DOM test (or a unit test importing it) for the gate, so it is written first with the page. |

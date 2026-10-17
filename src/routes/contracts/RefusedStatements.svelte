@@ -4,10 +4,16 @@
 	import type { RefusedStatement } from '$lib/contract-status';
 
 	// The statements that refused new contract dates, each a link (A-10); the only one, a draft, can be deleted first
+	// `consequence` replaces the default one of deleting the draft
 	let {
 		statements,
-		action
-	}: { statements: RefusedStatement[]; action?: Snippet<[RefusedStatement, string]> } = $props();
+		action,
+		consequence
+	}: {
+		statements: RefusedStatement[];
+		action?: Snippet<[RefusedStatement, string]>;
+		consequence?: string;
+	} = $props();
 
 	const draft = $derived(
 		statements.length === 1 && statements[0].status === 'draft' ? statements[0] : null
@@ -29,7 +35,7 @@
 		{#if draft && action}
 			<!-- the button names this consequence as its description -->
 			<p class="text-ink" id="delete-draft-consequence">
-				{m.contracts_delete_draft_consequence({ number: draft.statementNumber })}
+				{consequence ?? m.contracts_delete_draft_consequence({ number: draft.statementNumber })}
 			</p>
 			{@render action(draft, 'delete-draft-consequence')}
 		{/if}

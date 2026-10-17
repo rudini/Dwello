@@ -45,8 +45,7 @@ vi.mock('$lib/server/oauth', async () => {
 			sub: 'user-123',
 			email: 'test@example.com',
 			name: 'Test User',
-			provider: 'google' as const,
-			picture: 'https://example.com/photo.jpg'
+			provider: 'google' as const
 		}))
 	};
 });
@@ -264,6 +263,46 @@ describe('Auth Routes Integration Tests', () => {
 			expect(authModule.clearAuthCookies).toHaveBeenCalled();
 		});
 
+		// Protokoll (#357): nur der Anbieter, keine weiteren Angaben über den Liegenschaftsverwalter
+		it('hält die Anmeldung mit ihrem Anbieter im Protokoll fest', async () => {
+			mockFetch.mockResolvedValue(new Response(null, { status: 201 }));
+
+			await callback('code=auth-code-123&state=mock-state-abc123');
+
+			const [url, init] = mockFetch.mock.calls[0];
+			expect(url).toBe('http://localhost:3001/api/v1/audit-log/logins');
+			expect(init).toMatchObject({ method: 'POST', body: JSON.stringify({ provider: 'microsoft' }) });
+			expect(new Headers(init.headers).get('authorization')).toMatch(/^Bearer .+/);
+		});
+
+		it('meldet auch an, wenn das Protokoll die Anmeldung nicht festhalten kann', async () => {
+			mockFetch.mockRejectedValue(new Error('backend down'));
+
+			const redirect = await callback('code=auth-code-123&state=mock-state-abc123');
+
+			expect(redirect).toMatchObject({ status: 303, location: '/statements?status=overdue' });
+			expect(authModule.setSessionCookie).toHaveBeenCalled();
+		});
+
+		// Code-Review C-4: ein hängendes Backend hält die Anmeldung nicht auf
+		it('wartet höchstens 5 Sekunden darauf, dass das Protokoll die Anmeldung festhält', async () => {
+			vi.useFakeTimers();
+			mockFetch.mockImplementation(
+				(_url: string, init: RequestInit) =>
+					new Promise((_resolve, reject) =>
+						init.signal?.addEventListener('abort', () => reject(new Error('timeout')))
+					)
+			);
+			try {
+				const redirect = callback('code=auth-code-123&state=mock-state-abc123');
+				await vi.advanceTimersByTimeAsync(5000);
+
+				expect(await redirect).toMatchObject({ status: 303, location: '/statements?status=overdue' });
+			} finally {
+				vi.useRealTimers();
+			}
+		});
+
 		it('lehnt den Rückruf ohne begonnene Anmeldung ab', async () => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_oauth_state', 'mock-state-abc123');
@@ -286,12 +325,13 @@ describe('Auth Routes Integration Tests', () => {
 				email: 'test@example.com',
 				name: 'Test User',
 				provider: 'google',
+				// a token issued before #82 still carries the profile picture
 				picture: 'https://example.com/photo.jpg',
 				iss: 'dwello',
 				aud: 'dwello-app',
 				iat: Math.floor(Date.now() / 1000),
 				exp: Math.floor(Date.now() / 1000) + 3600
-			});
+			} as Awaited<ReturnType<typeof authModule.verifyJwt>>);
 
 			const { GET } = await import('$lib/../routes/auth/me/+server');
 			const event = createMockRequestEvent({
@@ -305,6 +345,7 @@ describe('Auth Routes Integration Tests', () => {
 			expect(data.user.sub).toBe('user-123');
 			expect(data.user.email).toBe('test@example.com');
 			expect(data.user.name).toBe('Test User');
+			expect(data.user).not.toHaveProperty('picture');
 		});
 
 		it('should return 401 for missing session', async () => {
@@ -346,11 +387,13 @@ describe('Auth Routes Integration Tests', () => {
 				email: 'test@example.com',
 				name: 'Test User',
 				provider: 'google',
+				// a token issued before #82 still carries the profile picture
+				picture: 'https://example.com/photo.jpg',
 				iss: 'dwello',
 				aud: 'dwello-app',
 				iat: Math.floor(Date.now() / 1000),
 				exp: Math.floor(Date.now() / 1000) + 3600
-			});
+			} as Awaited<ReturnType<typeof authModule.verifyJwt>>);
 
 			const mockGenerateJwt = vi.spyOn(authModule, 'generateJwt');
 			mockGenerateJwt.mockResolvedValue('new-jwt-token');
@@ -369,6 +412,7 @@ describe('Auth Routes Integration Tests', () => {
 			expect(data.success).toBe(true);
 			expect(authModule.setSessionCookie).toHaveBeenCalled();
 			expect(authModule.setXsrfToken).toHaveBeenCalled();
+			expect(mockGenerateJwt.mock.calls[0][0]).not.toHaveProperty('picture');
 		});
 
 		it('should return 400 for invalid XSRF token', async () => {
@@ -410,11 +454,13 @@ describe('Auth Routes Integration Tests', () => {
 				email: 'test@example.com',
 				name: 'Test User',
 				provider: 'google',
+				// a token issued before #82 still carries the profile picture
+				picture: 'https://example.com/photo.jpg',
 				iss: 'dwello',
 				aud: 'dwello-app',
 				iat: Math.floor(Date.now() / 1000),
 				exp: Math.floor(Date.now() / 1000) + 3600
-			});
+			} as Awaited<ReturnType<typeof authModule.verifyJwt>>);
 
 			const { POST } = await import('$lib/../routes/auth/logout/+server');
 			const event = createMockRequestEvent({

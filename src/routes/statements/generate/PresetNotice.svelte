@@ -8,7 +8,14 @@
 		preset,
 		step
 	}: {
-		preset?: { building: string; start: string; end: string; fromStatements: boolean } | null;
+		preset?: {
+			building: string;
+			start: string;
+			end: string;
+			fromStatements: boolean;
+			feeFromSettings: boolean; // no other statement at the run's rate (#89)
+			differing?: boolean; // the other statements are set differently: both from the settings (#119)
+		} | null;
 		step: number; // said on the settings step, where the link opens the wizard
 	} = $props();
 </script>
@@ -23,9 +30,13 @@
 		testid="wizard-preset"
 	>
 		<p>
-			{preset.fromStatements
-				? m.statements_preset_from_statements()
-				: m.statements_preset_from_settings()}
+			{preset.differing
+				? m.statements_preset_differing()
+				: !preset.fromStatements
+					? m.statements_preset_from_settings()
+					: preset.feeFromSettings
+						? m.statements_preset_profile_from_statements()
+						: m.statements_preset_from_statements()}
 		</p>
 	</Alert>
 {/if}

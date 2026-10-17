@@ -35,4 +35,14 @@ describe('Abrechnung bearbeiten', () => {
 		});
 		expect(calls).toEqual([]);
 	});
+
+	// #94 (Persona Marco P-1): unter CHF 5 zeigt die Seite keine Frist; gespeichert werden nur die Bemerkungen
+	it('speichert ohne Fristfeld nur die Bemerkungen', async () => {
+		const { calls, result } = runAction(actions.default, 's1', 200, { notes: fields.notes });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: '/statements/s1' });
+		expect(calls).toEqual([
+			{ method: 'PUT', url: 'http://localhost:3001/api/v1/statements/s1', body: { notes: fields.notes } }
+		]);
+	});
 });

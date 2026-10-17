@@ -17,11 +17,16 @@
 	import {
 		contractSteps,
 		firstStepWithError,
+		lastRent,
 		normalizeAmounts,
+		rentTakenOver,
+		rentToPreset,
+		type ListedContract,
 		startDateNotice,
 		startValues,
 		stepErrors
 	} from '$lib/contract-wizard';
+	import { contractPeriod, contractStatusOn } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -35,6 +40,7 @@
 	} from '$lib/utils/contract-availability';
 	import { browserStorage, clearDraft, readDraft, writeDraft } from '$lib/wizard-draft';
 	import ApartmentStep from './ApartmentStep.svelte';
+	import OpenContracts from './OpenContracts.svelte';
 	import { retried } from './ContractsUnknown.svelte';
 	import PeriodStep from './PeriodStep.svelte';
 	import RentStep from './RentStep.svelte';
@@ -44,10 +50,12 @@
 	// "Mietvertrag erfassen" in five steps; the input is kept as a draft in this browser until it is saved
 	let {
 		tenants,
-		apartments
+		apartments,
+		categories
 	}: {
 		tenants: { id: string; name: string; place?: string }[];
 		apartments: { id: string; unit: string; building: string; size?: string }[];
+		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
 	} = $props();
 
 	const DRAFT = 'contract';
@@ -68,6 +76,8 @@
 	let section = $state<HTMLElement>();
 	// per apartment; null for an apartment whose contracts could not be loaded: it is not shown as free (#143)
 	let contracts = $state<Map<string, ContractForAvailability[] | null> | null>(null);
+	let listed = $state(new Map<string, Parameters<typeof lastRent>[0]>()); // the answers, for their amounts (#144)
+	let preset: ReturnType<typeof lastRent> = null; // the amounts filled in last
 
 	const availability = $derived(
 		new Map([...(contracts ?? [])].map(([id, list]) => [id, list && computeAvailability(list)]))
@@ -75,9 +85,34 @@
 	const unknown = $derived(contracts?.get(values.apartmentId) === null);
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId)));
 	const overlap = $derived(overlapWarning(values, contracts?.get(values.apartmentId) ?? []));
+	// contracts of the chosen tenant without a Vertragsende (#156)
+	const openContracts = $derived(
+		apartments.flatMap((apartment) =>
+			(contracts?.get(apartment.id) ?? [])
+				.filter((c) => c.tenant_id === values.tenantId && !c.end_date)
+				.map((c) => ({ id: c.id, apartment }))
+		)
+	);
+	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
-	const contractsOf = async (apartmentId: string) =>
-		[apartmentId, forAvailability(await apiCall(`/contracts?apartmentId=${apartmentId}`))] as const;
+	const contractsOf = async (apartmentId: string) => {
+		const response = await apiCall<{ contracts: ListedContract[] }>(
+			`/contracts?apartmentId=${apartmentId}`
+		);
+		return [apartmentId, forAvailability(response), response] as const;
+	};
+	// the amounts of the apartment's contract before this one, while the fields still hold them (#144)
+	const taken = $derived(lastRent(listed.get(values.apartmentId) ?? {}, values.startDate));
+	const takenFrom = $derived(
+		taken && rentTakenOver(values, taken)
+			? contractPeriod(
+					taken.startDate,
+					taken.endDate,
+					contractStatusOn(taken.startDate, taken.endDate, today),
+					taken.terminated
+				)
+			: null
+	);
 
 	function restoreDraft() {
 		const draft = readDraft<ContractFormValues>(browserStorage(), DRAFT);
@@ -99,7 +134,10 @@
 	async function loadContracts() {
 		const load = ++loads;
 		const entries = await Promise.all(apartments.map((a) => contractsOf(a.id)));
-		if (load === loads) contracts = new Map(entries);
+		if (load === loads) {
+			contracts = new Map(entries.map(([id, list]) => [id, list]));
+			listed = new Map(entries.map(([id, , response]) => [id, response]));
+		}
 		return load === loads;
 	}
 
@@ -136,11 +174,24 @@
 		});
 	});
 
+	// On the step «Miete», the amounts of the apartment's last contract, never over typed ones (#144)
+	$effect(() => {
+		if (step !== 4) return;
+		const rent = taken;
+		untrack(() => {
+			const next = rentToPreset(values, rent, preset);
+			if (!next) return;
+			Object.assign(values, next); // in place: a new object would rerun the effects
+			preset = rent;
+		});
+	});
+
 	function edited(event: Event) {
 		touched = true;
-		const id = (event.target as HTMLElement).id;
+		const { id, name } = event.target as HTMLInputElement;
 		if (id === 'startDate') startEdited = true;
 		delete errors[errorKey[id] ?? id];
+		if (name) delete errors[name]; // a radio group's error is named after the group (#89)
 		if (errors.startDate === OVERLAP) delete errors.startDate; // any period change may resolve it
 	}
 
@@ -247,11 +298,13 @@
 		{#if step === 1}
 			<TenantStep
 				bind:tenantId={values.tenantId}
+				apartmentId={values.apartmentId}
 				{tenants}
 				createdId={params.has('created') ? params.get('tenant') : null}
 				error={errors.tenantId}
 			/>
 		{:else if step === 2}
+			<OpenContracts name={tenantName} contracts={openContracts} />
 			<ApartmentStep
 				bind:apartmentId={values.apartmentId}
 				{apartments}
@@ -275,9 +328,17 @@
 				{errors}
 			/>
 		{:else if step === 4}
-			<RentStep bind:values {errors} />
+			<RentStep bind:values {errors} {takenFrom} {categories} />
 		{:else}
-			<ReviewStep {values} {tenants} {apartments} {unknown} onretry={retry} onedit={editField} />
+			<ReviewStep
+				{values}
+				{tenants}
+				{apartments}
+				{categories}
+				{unknown}
+				onretry={retry}
+				onedit={editField}
+			/>
 			{#if errors.form}
 				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>

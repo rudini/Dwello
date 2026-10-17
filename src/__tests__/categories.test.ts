@@ -1,13 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { actions as listActions, load } from '../routes/config/categories/+page.server';
-import { actions as newActions } from '../routes/config/categories/new/+page.server';
-import { actions as editActions } from '../routes/config/categories/[id]/edit/+page.server';
+import {
+	actions as newActions,
+	load as loadNew
+} from '../routes/config/categories/new/+page.server';
+import {
+	actions as editActions,
+	load as loadEdit
+} from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
+import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
 import invalid from '../../tests/contracts/validation-refused.json';
 import contract from '../../tests/contracts/category.json';
+import recipient from '../../tests/contracts/llm-recipient.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
@@ -70,6 +78,46 @@ describe('Kategorien anzeigen', () => {
 });
 
 describe('Neue Kategorie', () => {
+	// #219: «Von der KI prüfen lassen» nur, solange der Betreiber die KI eingeschaltet hat
+	it('fragt das Backend, ob die KI eingeschaltet ist', async () => {
+		const urls: string[] = [];
+		const answer = (enabled: boolean) =>
+			(async (url: string) => {
+				urls.push(url);
+				return Response.json({ ...recipient, enabled });
+			}) as typeof globalThis.fetch;
+
+		expect(await loadNew({ fetch: answer(true) } as never)).toEqual({ kiEnabled: true });
+		expect(await loadNew({ fetch: answer(false) } as never)).toEqual({ kiEnabled: false });
+		expect(urls[0]).toMatch(/\/api\/v1\/invoices\/llm-recipient$/);
+	});
+
+	// Code-Review W5b C-2: ohne Antwort bleibt die Prüfung angeboten; eine Ablehnung sagt dann, warum
+	it('bietet die KI an, wenn das Backend nicht sagt, ob sie eingeschaltet ist', async () => {
+		const fails = (async () => {
+			throw new Error('offline');
+		}) as typeof globalThis.fetch;
+
+		expect(await loadNew({ fetch: fails } as never)).toEqual({ kiEnabled: true });
+		const silent = (async () => Response.json({})) as typeof globalThis.fetch;
+		expect(await loadNew({ fetch: silent } as never)).toEqual({ kiEnabled: true });
+	});
+
+	// Fachreview W5b V-3: der Hinweis einer vordefinierten Kategorie nennt die KI nur, wenn sie eingeschaltet ist
+	it('fragt beim Bearbeiten das Backend, ob die KI eingeschaltet ist', async () => {
+		const fetch = (async (url: string) =>
+			url.endsWith('/llm-recipient')
+				? Response.json({ ...recipient, enabled: false })
+				: Response.json(contract)) as typeof globalThis.fetch;
+
+		const data = await loadEdit({ fetch, params: { id: 'c1' } } as never);
+
+		expect(data).toEqual({
+			category: expect.objectContaining({ key: 'Internet' }),
+			kiEnabled: false
+		});
+	});
+
 	it('erfasst die Kategorie unter ihrem deutschen Namen und zeigt die Kategorien', async () => {
 		const { calls, result } = runAction(newActions.save, '', 201, form, { id: 'c9' });
 
@@ -111,7 +159,7 @@ describe('Neue Kategorie', () => {
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { name: 'Name ist erforderlich' } }
+			data: { errors: { name: 'Name ist erforderlich.' } }
 		});
 		expect(calls).toEqual([]);
 	});
@@ -220,7 +268,7 @@ describe('Vorschlag der KI', () => {
 	it('verlangt zuerst einen Namen', async () => {
 		const { calls, result } = runAction(newActions.propose, '', 200, { ...form, name: ' ' });
 
-		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich' } } });
+		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich.' } } });
 		expect(calls).toEqual([]);
 	});
 });
@@ -249,5 +297,34 @@ describe('Kategorie löschen', () => {
 		const { result } = runAction(listActions.delete, '', 409, { id: 'c1' }, { error: message });
 
 		expect(await result).toMatchObject({ status: 409, data: { error: message } });
+	});
+});
+
+// #91: the categories a Mietvertrag can agree, named in the UI language
+describe('Kategorien, die ein Mietvertrag vereinbaren kann', () => {
+	const answer = (status = 200) =>
+		(async (url: string) =>
+			url === `${API}?limit=100`
+				? Response.json(
+						{
+							categories: [
+								{ ...contract, id: 'c1', nameDE: 'Internet' },
+								{ ...contract, id: 'c2', nameDE: 'Verwaltung', isAllowedUtilityCost: false }
+							]
+						},
+						{ status }
+					)
+				: Response.json({}, { status: 404 })) as typeof globalThis.fetch;
+
+	it('nennt nur die umlagefähigen', async () => {
+		expect(await agreeableCategories(answer())).toEqual([{ id: 'c1', name: 'Internet' }]);
+	});
+
+	// a list that failed to load would save every category as not agreed
+	it('scheitert, wenn die Kategorien nicht geladen werden können', async () => {
+		await expect(agreeableCategories(answer(500))).rejects.toMatchObject({
+			status: 500,
+			body: { message: 'Die Kategorien konnten nicht geladen werden. Laden Sie die Seite neu.' }
+		});
 	});
 });

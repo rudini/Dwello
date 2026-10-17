@@ -1,5 +1,5 @@
 import { m } from '$lib/paraglide/messages';
-import { pdfRefusal } from '$lib/server/statement';
+import { pdfFileName, pdfRefusal } from '$lib/server/statement';
 import type { RequestHandler } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -22,7 +22,7 @@ export const GET: RequestHandler = async ({ params, fetch, url }) => {
 			status: 200,
 			headers: {
 				'Content-Type': 'application/pdf',
-				'Content-Disposition': `${view ? 'inline' : 'attachment'}; filename="abrechnung-${id}.pdf"`
+				'Content-Disposition': `${view ? 'inline' : 'attachment'}; filename="${pdfFileName(response.headers)}"`
 			}
 		});
 	} catch (error) {

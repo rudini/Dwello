@@ -43,7 +43,7 @@ const history = (
 	tenantName: 'Lea Frei',
 	apartment,
 	period: 'alt',
-	rentBrutto: 950,
+	monthlyTotal: 950,
 	status,
 	startDate,
 	endDate
@@ -61,7 +61,13 @@ const document_ = {
 // as the backend lists it (00:30 on 14.10. in Switzerland)
 const [upload] = documentList.data;
 
-function open(contracts: unknown[] = [], form: unknown = null, documents: unknown[] = [document_], demo = false) {
+function open(
+	contracts: unknown[] = [],
+	form: unknown = null,
+	documents: unknown[] = [document_],
+	demo = false,
+	formerDocuments: unknown = null
+) {
 	show(TenantPage, {
 		data: {
 			tenant,
@@ -70,13 +76,14 @@ function open(contracts: unknown[] = [], form: unknown = null, documents: unknow
 				apartmentId: 'a2',
 				apartment: 'Wohnung 2.01',
 				building: 'Ulmenhof',
-				rent: 950,
+				monthlyTotal: 950,
 				startDate: '2099-11-01',
 				upcoming: true
 			},
 			contractHistory: contracts,
 			documents,
-			demo
+			demo,
+			formerDocuments
 		},
 		form
 	} as never);
@@ -284,5 +291,25 @@ describe('Mieterdetail', () => {
 		const after = actions.get('?/upload')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'failure', status: 400, data: {} } });
 		await vi.waitFor(() => expect(document.activeElement).toBe(title));
+	});
+
+	// #178: once the last Mietvertrag ended, the documents from before name themselves and what to keep
+	it('nennt bei einem ehemaligen Mieter die Dokumente von vor dem Vertragsende und was zu behalten ist', () => {
+		open([], null, [upload], false, { endDate: '2026-03-31', documents: [upload] });
+
+		expect(text('tenant-former-documents')).toContain('Hochgeladene Dokumente prüfen');
+		expect(text('tenant-former-documents')).toContain(
+			'Der letzte Mietvertrag von Lea Frei endete am 31.03.2026. Vor diesem Tag haben Sie hochgeladen: Ausweiskopie.'
+		);
+		expect(text('tenant-former-documents')).toContain(
+			'Behalten Sie Übergabeprotokolle, bis das Mietzinsdepot freigegeben ist.'
+		);
+	});
+
+	it('zeigt den Hinweis nicht, solange es keine solchen Dokumente gibt', () => {
+		open([], null, [upload]);
+
+		expect(byTestId('tenant-documents')).not.toBeNull();
+		expect(byTestId('tenant-former-documents')).toBeNull();
 	});
 });

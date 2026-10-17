@@ -10,6 +10,9 @@ import {
 	descriptionOf,
 	contractHint,
 	formReasonText,
+	kindOf,
+	predefinedHintText,
+	whyNotDeletable,
 	reasonOf,
 	reasonsOf,
 	allowedChosen,
@@ -131,7 +134,7 @@ Then('ist die Kategorie {string} nicht umlagefähig', async ({ verwalter, names 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass es die Kategorie {string} schon gibt',
 	async ({ verwalter, names }, title: string) => {
-		const message = `Eine Kategorie mit dem Namen "${names.get(title)}" existiert bereits.`;
+		const message = `Eine Kategorie mit dem Namen «${names.get(title)}» existiert bereits.`;
 		await verwalter.sees(errorMessageShown(message)).toBe(true);
 	}
 );
@@ -252,5 +255,55 @@ Then(
 	'erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist und er es später nochmals versuchen kann',
 	async ({ verwalter }) => {
 		await verwalter.sees(proposalText).toContain('Die KI ist nicht erreichbar. Versuchen Sie es später nochmals');
+	}
+);
+
+Then(
+	'ist die vordefinierte Kategorie {string} als {string} gekennzeichnet',
+	async ({ verwalter }, name: string, kind: string) => {
+		await verwalter.sees(kindOf(name)).toBe(kind);
+	}
+);
+
+Then('ist die eigene Kategorie {string} als {string} gekennzeichnet', async ({ verwalter, names }, title: string, kind: string) => {
+	await verwalter.sees(kindOf(names.get(title)!)).toBe(kind);
+});
+
+Then(
+	'kann der Liegenschaftsverwalter die vordefinierte Kategorie {string} nicht löschen',
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(categoryDeletable(name)).toBe(false);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass sich die vordefinierte Kategorie {string} nicht löschen lässt, weil Dwello sie mitliefert',
+	async ({ verwalter }, name: string) => {
+		await verwalter
+			.sees(whyNotDeletable(name))
+			.toContain('Kategorien «Von Dwello» lassen sich nicht löschen, weil Dwello sie mitliefert.');
+	}
+);
+
+Then('erfährt der Liegenschaftsverwalter, dass Dwello die Kategorie mitliefert', async ({ verwalter }) => {
+	await verwalter.sees(predefinedHintText).toContain('Dwello liefert diese Kategorie mit');
+	await verwalter.sees(predefinedHintText).toContain('Sie lässt sich nicht löschen.');
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass der Mieter Kosten des Vermieters nicht schuldet, auch wenn er die Kategorie auf umlagefähig stellt',
+	async ({ verwalter }) => {
+		await verwalter
+			.sees(predefinedHintText)
+			.toContain('Wählen Sie «Umlagefähig», schuldet der Mieter Kosten, die das Gesetz dem Vermieter zuweist, trotzdem nicht.');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den Namen oder die Beschreibung ändert',
+	async ({ verwalter }) => {
+		await verwalter
+			.sees(predefinedHintText)
+			.toContain('Ändern Sie den Namen oder die Beschreibung, schlägt die KI für neue Rechnungen womöglich eine andere Kategorie vor.');
 	}
 );

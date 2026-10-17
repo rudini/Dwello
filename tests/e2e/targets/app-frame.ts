@@ -22,11 +22,27 @@ const inSection = (heading: string, description: string, testId: string) =>
 	target(`${description} im Abschnitt «${heading}»`, (page) => pageSection(heading).locate(page).getByTestId(testId));
 /** Who receives invoice data for the KI categorization, as the privacy statement names it */
 export const llmRecipient = (heading: string) => inSection(heading, 'Empfänger der Rechnungsdaten', 'llm-recipient');
+/** The links of a section, e.g. to a provider's privacy policy */
+export const sectionLinks = (heading: string) =>
+	target(`Links im Abschnitt «${heading}»`, (page) => pageSection(heading).locate(page).getByRole('link'));
 /** Where unsaved wizard input stays, as the privacy statement says */
 export const draftNotice = (heading: string) => inSection(heading, 'Hinweis auf Entwürfe', 'draft-notice');
 /** Who runs this installation, as the terms of use name them */
 export const operatorNotice = (heading: string) => inSection(heading, 'Betreiber', 'terms-operator');
 export const pageTitle = target('Seitentitel', (page) => page.getByRole('heading', { level: 1 }));
+export const pagePurpose = target('Zweck der Seite unter dem Titel', (page) => page.getByTestId('page-purpose'));
 export const termsLinkOnLogin = target('Nutzungsbedingungen', (page) => page.getByTestId('login-terms-link'));
+export const privacyLinkOnLogin = target('Datenschutz', (page) => page.getByTestId('login-privacy-link'));
 export const publicLoginLink = target('Zur Anmeldung', (page) => page.getByTestId('public-login-link'));
 export const publicHelpLink = target('Zur Hilfe', (page) => page.getByTestId('public-help-link'));
+export const helpContentsLink = (label: string) =>
+	target(`Inhalt der Hilfe «${label}»`, (page) =>
+		page.getByTestId('help-contents').getByRole('link', { name: label, exact: true })
+	);
+export const glossaryExplanation = (term: string) =>
+	target(`Erklärung von «${term}» in den Begriffen`, (page) =>
+		page
+			.getByTestId('glossary-entry')
+			.filter({ has: page.getByTestId('glossary-term').getByText(term, { exact: true }) })
+			.getByTestId('glossary-explanation')
+	);

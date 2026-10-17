@@ -17,7 +17,6 @@ import {
 	PostFormAction,
 	Press,
 	Select,
-	Upload,
 	Wait
 } from '../screenplay/interactions';
 import { randomUUID } from 'crypto';
@@ -28,21 +27,25 @@ import {
 	cancelUploadButton,
 	createInvoicesButton,
 	discardMessage,
-	uploadBuildingSelect,
-	uploadFileInput,
-	uploadInvoicesButton,
 	uploadResult
 } from '../targets/invoice-upload';
-import { invoicePdf } from './invoice-upload';
+import { invoicePdf, uploadBelege } from './invoice-upload';
+import { goToGeneration } from './statement-generate';
+import { generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
 import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { userMenuButton } from '../targets/app-frame';
 import {
+	confirmDeleteContractButton,
 	confirmEndContractButton,
 	contractEndInput,
 	contractEndPastConfirm,
+	noticeReceivedInput,
+	continueOpenEndedButton,
+	movedOutButton,
+	deleteContractButton,
 	endContractButton
 } from '../targets/contract-detail';
 import {
@@ -52,6 +55,8 @@ import {
 	contractSubmitButton,
 	durationChoice,
 	endDateInput,
+	feeChoice,
+	feeRateInput,
 	retryContractsButton,
 	reviewContractsUnknown,
 	startDateInput,
@@ -62,7 +67,10 @@ import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
-import { type File, uploadDocument, wordFile } from './tenant-documents';
+import { leaveSettings } from './statement-generate';
+import { untickAllCategories } from './contract-form';
+import { agreedCategoryBoxes } from '../targets/contract-form';
+import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
 import { UPLOADED } from '../fixtures/screens';
 
@@ -91,19 +99,23 @@ const askKi = (name: string): Activity => (actor) =>
 		Wait.until(proposal)
 	);
 
+// 'generation-result' bills its contracts once per year; counted per worker, over all its scenarios: 2016-2022 have
+// neither statements nor invoices in the seed (2023 to 2025 do)
+let resultRuns = 0;
+
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
 const previewOf =
-	(year: string, shown: string) =>
+	(year: string, shown: string, end = `${year}-12-31`) =>
 	(example: Example, ...others: string[]): Activity =>
 	async (actor) => {
 		await actor.attemptsTo(
 			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
-			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
+			EnterDate.of(end).into(on.periodEndInput),
 			Click.on(nextButton)
 		);
 		for (const building of [example.building, ...others]) await actor.attemptsTo(Check.the(on.generateBuilding(building)));
-		await actor.attemptsTo(Click.on(nextButton), Click.on(nextButton), Wait.until(on.shown(shown)));
+		await actor.attemptsTo(Click.on(nextButton), leaveSettings, Wait.until(on.shown(shown)));
 	};
 
 // The first input of each wizard, which starts its draft
@@ -126,20 +138,13 @@ const endWithPastDate: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(on.invalidPastEndConfirm));
 };
 
-// «Rechnungen hochladen» for the first building with these files
-const startUpload = (files: File[]): Activity => (actor) =>
-	actor.attemptsTo(
-		Click.on(uploadInvoicesButton),
-		Select.option({ index: 1 }).from(uploadBuildingSelect),
-		Upload.theFile(files).into(uploadFileInput)
-	);
-
-// Two files, one created: the result with the file still open
-const createPartly: Activity = (actor) => {
+// Two files, one created: the result with the file still open. Files go into the example's own building: the first
+// in the list may be a parallel scenario's, deleted by its cleanUp while the files are read
+const createPartly = (building: string): Activity => (actor) => {
 	const complete = `Elektro Blitz ${randomUUID()}.pdf`;
 	const open = `Werke ${randomUUID()}.pdf`;
 	return actor.attemptsTo(
-		startUpload([invoicePdf(complete), invoicePdf(open)]),
+		uploadBelege(building, [invoicePdf(complete), invoicePdf(open)]),
 		Wait.until(belegDetailsToggle(complete)),
 		Wait.until(belegDetailsToggle(open)),
 		Click.on(createInvoicesButton),
@@ -175,28 +180,28 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'upload-refused': () => (actor) =>
 		actor.attemptsTo(uploadDocument(wordFile('notizen.docx'), ''), Wait.until(on.formProblem)),
 	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),
-	'upload-dialog': () => (actor) => {
+	'upload-dialog': (example) => (actor) => {
 		// the stand-in finds deducted amounts and costs that are not allocable in a file so named; the UUID marks it user data
 		const read = `Werke Schlussrechnung Reparatur ${randomUUID()}.pdf`;
 		return actor.attemptsTo(
-			startUpload([invoicePdf(read), wordFile('notes.docx')]),
+			uploadBelege(example.building, [invoicePdf(read), wordFile('notes.docx')]),
 			Click.on(belegDetailsToggle(read)),
 			Wait.until(belegUnsure(read, 'invoiceDate'))
 		);
 	},
 	// one invoice created, the other kept with what it lacks (no Kategorie: the stand-in categorizes only «Elektro Blitz»)
-	'upload-partial': () => (actor) => actor.attemptsTo(createPartly),
-	'upload-discard-created': () => (actor) =>
-		actor.attemptsTo(createPartly, Click.on(cancelUploadButton), Wait.until(discardMessage)),
+	'upload-partial': (example) => (actor) => actor.attemptsTo(createPartly(example.building)),
+	'upload-discard-created': (example) => (actor) =>
+		actor.attemptsTo(createPartly(example.building), Click.on(cancelUploadButton), Wait.until(discardMessage)),
 	// the stand-in answers no JSON for a file so named
-	'upload-unreadable': () => (actor) => {
+	'upload-unreadable': (example) => (actor) => {
 		const read = `Elektro ${randomUUID()} unlesbar.pdf`;
-		return actor.attemptsTo(startUpload([invoicePdf(read)]), Wait.until(belegMessage(read)));
+		return actor.attemptsTo(uploadBelege(example.building, [invoicePdf(read)]), Wait.until(belegMessage(read)));
 	},
-	'upload-discard-dialog': () => (actor) => {
+	'upload-discard-dialog': (example) => (actor) => {
 		const read = `Elektro ${randomUUID()}.pdf`;
 		return actor.attemptsTo(
-			startUpload([invoicePdf(read)]),
+			uploadBelege(example.building, [invoicePdf(read)]),
 			Wait.until(belegDetailsToggle(read)),
 			Click.on(cancelUploadButton),
 			Wait.until(discardMessage)
@@ -207,6 +212,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'busy-dialog-open': () => (actor) =>
 		actor.attemptsTo(Press.theKey('Enter').on(on.galleryBusyDialogButton), Wait.until(on.labelledDialog)),
 	'end-dialog': () => openDialog(endContractButton),
+	// a started contract without statements: the mistake not confirmed (#116)
+	'delete-unconfirmed': () => (actor) =>
+		actor.attemptsTo(openDialog(deleteContractButton), Click.on(confirmDeleteContractButton), Wait.until(on.dialogError)),
 	'end-dialog-error': () => (actor) =>
 		actor.attemptsTo(openDialog(endContractButton), Click.on(confirmEndContractButton), Wait.until(on.dialogError)),
 	// the end dialog on the contract page, the contract form on its edit page
@@ -222,6 +230,19 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(confirmEndContractButton),
 			Wait.until(on.refusedStatements)
 		),
+	// A-3 (#112): the notice arrived six weeks before the Vertragsende: the hint at the field, saving still possible
+	'end-dialog-notice-hint': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(endContractButton),
+			EnterDate.of('2099-03-31').into(contractEndInput),
+			EnterDate.of('2099-02-15').into(noticeReceivedInput),
+			Wait.until(on.shown('contract-notice-period-hint'))
+		),
+	// A-6 (#115): the 2025 draft bills the time after the agreed end as Leerstand: continuing is refused, the draft offered
+	// personas a6 P-1: «Mieter ist ausgezogen» asks for confirmation with its consequence
+	'moved-out-dialog': () => openDialog(movedOutButton),
+	'continue-refused': () => (actor) =>
+		actor.attemptsTo(Click.on(continueOpenEndedButton), Wait.until(on.refusedStatements)),
 	// the same refusal from the contract form: the 2025 draft bills rent days after 31.03.2025 (A-10)
 	'edit-refused': () => async (actor) => {
 		await clickOnShown(actor, 'Befristet', durationChoice);
@@ -234,12 +255,54 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	// the link opens the wizard at the settings step with the building and period it names
 	'link-preset': () => Wait.until(on.wizardPreset),
+	// every box of the agreed Nebenkosten unticked, not saved: the note that no Nebenkosten are billed
+	'agreed-costs-none': () => async (actor) => {
+		// «Neuer Mietvertrag» (tenant and apartment from the address): the boxes are on the step «Miete»
+		if ((await actor.answer(pageAddress)).includes('/contracts/new'))
+			await actor.attemptsTo(
+				Click.on(nextButton),
+				Click.on(nextButton),
+				EnterDate.of('2030-01-01').into(startDateInput),
+				Click.on(nextButton),
+				Wait.until(agreedCategoryBoxes)
+			);
+		await actor.attemptsTo(untickAllCategories, Wait.until(on.shown('contract-agreed-costs-none')));
+	},
+	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen»
+	'agreements-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/statements/agreements', {}),
+			Navigate.reload,
+			Wait.until(on.shown('agreements-failed'))
+		),
+	// an answer that cannot be saved: the question's error (idempotent, nothing is stored)
+	'agreement-save-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.toPathsMatching(/^\/api\/contracts\/[^/]+\/agreements$/),
+			Click.on(on.firstAgreementYes),
+			Wait.until(on.formProblem)
+		),
+	// «Weiter» with the questions open: their errors; and the contract not agreeing a category. No answer: it would be
+	// stored, and the next viewport would not be asked any more
+	'agreed-costs': () => (actor) =>
+		actor.attemptsTo(Wait.until(on.shown('not-agreed-costs')), Click.on(nextButton), Wait.until(on.formProblem)),
 	'list-scoped': () => Wait.until(on.listScope),
+	'pdf-missing': () => Wait.until(on.shown('statement-pdf-missing')),
 	'send-dialog': () => openDialog(on.sendButton),
+	// refused, so the draft stays one and each viewport can send it again
+	'send-refused': () => (actor) => actor.attemptsTo(PostFormAction('?/send'), Wait.until(on.shown('send-feedback'))),
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),
+	// the seeded reminder, named in the screen's query; marking it again keeps it as it is, so each viewport can
+	'marked-sent': (example) => (actor) =>
+		actor.attemptsTo(
+			PostFormAction('?/markSent', { id: new URL(example.path, 'http://x').searchParams.get('letter')! }),
+			Wait.until(on.shown('document-marked-sent'))
+		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
+	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
+	'correct-dialog': () => openDialog(on.correctButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('{area}').into(on.formulaInput),
@@ -274,9 +337,18 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address
 			Click.on(nextButton),
-			Wait.forValue(startDateInput, '01.01.2100'), // the suggestion arrived, it cannot land in the typed date
-			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
+			Wait.forValue(startDateInput, '01.01.2099'), // the suggestion arrived, it cannot land in the typed date
+			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2098
 			Wait.until(on.overlapWarning)
+		),
+	// the amounts of the apartment's last contract filled in, with the note that says so (#144)
+	'rent-taken-over': () => (actor) =>
+		actor.attemptsTo(
+			Click.on(nextButton), // tenant and apartment come from the address
+			Click.on(nextButton),
+			Wait.forValue(startDateInput, '01.04.2099'), // the day after the last contract, suggested
+			Click.on(nextButton),
+			Wait.until(on.shown('contract-rent-taken-over'))
 		),
 	// the apartments' rental contracts cannot be loaded (#143); the wizard shows it from the step "Wohnung"
 	'contracts-unknown': () => async (actor) => {
@@ -296,6 +368,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2030-01-01').into(startDateInput),
 			Click.on(nextButton),
 			Enter.theValue('1500').into(baseRentInput),
+			Click.on(feeChoice('run')),
 			Click.on(nextButton),
 			Wait.until(reviewContractsUnknown)
 		),
@@ -306,9 +379,32 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (example) => previewOf('2026', 'category-check')(example),
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
+	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
+	'invoice-hints': (example) => previewOf('2025', 'late-invoices', '2025-05-31')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
+	// a year without invoices, another one on every look: the drafts of the last stay (#356)
+	// the seeded heating profile: the preselected one may be deleted by a parallel scenario
+	'generation-result': (example) => async (actor) => {
+		const year = 2016 + (resultRuns++ % 7);
+		await actor.attemptsTo(
+			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
+			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
+			Click.on(nextButton),
+			Check.the(on.generateBuilding(example.building)),
+			Click.on(nextButton),
+			Select.option(example.heatingProfile).from(heatingProfileSelect),
+			leaveSettings, // step 3 waits for the question whether the contracts agree the costs (#91)
+			Wait.until(on.shown('confirm-missing-invoices')),
+			goToGeneration,
+			Click.on(generateButton),
+			Wait.until(on.shown('generation-result'))
+		);
+	},
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
+	// 2024 with the second building, where Fritz moved out and still has its address (A-5, #114)
+	'old-address-preview': (example) => previewOf('2024', 'preview-old-address')(example, example.tankBuilding),
+	'old-address-task': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Neue Adresse eintragen')))),
 	// a draft from an earlier visit whose building and heating profile were deleted since
 	'draft-dropped': () => (actor) =>
 		actor.attemptsTo(
@@ -339,8 +435,14 @@ const contractWizardSteps = (look: Activity): Activity => async (actor) => {
 	await nextStep(startDateInput); // "Vertragsdauer", limited: end date and both dates in words
 	await clickOnShown(actor, 'Befristet', durationChoice);
 	await actor.attemptsTo(EnterDate.of('2030-01-01').into(startDateInput), EnterDate.of('2031-12-31').into(endDateInput), look);
-	await nextStep(baseRentInput); // "Miete"
-	await actor.attemptsTo(Enter.theValue('1500').into(baseRentInput), look);
+	await nextStep(baseRentInput); // "Miete", with an own rate of the Verwaltungspauschale above the guideline (#89)
+	await actor.attemptsTo(
+		Enter.theValue('1500').into(baseRentInput),
+		Click.on(feeChoice('own')),
+		Enter.theValue('4').into(feeRateInput),
+		Wait.until(on.shown('contract-fee-rate-hint')),
+		look
+	);
 	await nextStep(on.shown('contract-review-item')); // "Prüfen"
 	await actor.attemptsTo(look);
 };
@@ -354,8 +456,15 @@ const statementWizardSteps =
 		await nextStep('generate-all-buildings'); // "Gebäude"
 		// this example's building: another example's may still be seeding, without a contract to preview
 		await actor.attemptsTo(Check.the(on.generateBuilding(example.building)));
-		await nextStep('heating-profile-select'); // "Heizprofil und Verwaltungspauschale"
-		await nextStep('preview-count'); // "Vorschau", calculated on the server
+		// "Heizprofil und Verwaltungspauschale"; the seeded contract of Carla has no fee agreed, and the notice that names it
+		// loads after the step (#89, code review C-3)
+		await actor.attemptsTo(
+			Click.on(nextButton),
+			Wait.until(on.shown('heating-profile-select')),
+			Wait.until(on.shown('management-fee-not-agreed')),
+			look
+		);
+		await actor.attemptsTo(leaveSettings, Wait.until(on.shown('preview-count')), look); // "Vorschau", calculated on the server
 		// a building without invoices must be confirmed
 		if (await actor.answer(Visibility.of(on.confirmMissingInvoices))) await actor.attemptsTo(Check.the(on.confirmMissingInvoices));
 		await nextStep('generate-drafts-note'); // "Erstellen"

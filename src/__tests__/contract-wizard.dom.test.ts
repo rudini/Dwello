@@ -13,6 +13,7 @@ import NewContractPage from '../routes/contracts/new/+page.svelte';
 import { toasts } from '$lib/stores';
 import { writeDraft } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
+import listed from '../../tests/contracts/contracts.json';
 
 const data = {
 	tenants: [
@@ -29,7 +30,7 @@ const data = {
 const contractsOf: Record<string, unknown[]> = {
 	a1: [{ id: 'c8', startDate: '2015-01-01', endDate: '2019-12-31', tenantName: 'Ueli Graf' }],
 	a2: [{ id: 'c9', startDate: '2024-04-01', endDate: null, tenantName: 'Eva Frei' }],
-	a3: [{ id: 'c7', startDate: '2015-01-01', endDate: '2099-12-31', tenantName: 'Ida Roth' }] // free from 2100
+	a3: [{ id: 'c7', startDate: '2015-01-01', endDate: '2098-12-31', tenantName: 'Ida Roth' }] // free from 2099
 };
 
 function backend() {
@@ -46,6 +47,9 @@ const select = (testid: string, value: string) =>
 const type = (testid: string, value: string) =>
 	fireEvent(byTestId<HTMLInputElement>(testid)!, 'input', value);
 const next = () => submit('wizard-next');
+// «Verwaltungspauschale vereinbart» has no default (#89)
+const chooseFee = (choice: string) =>
+	byTestId<HTMLInputElement>(`contract-fee-choice-${choice}`)!.click();
 
 const UNKNOWN =
 	'Dwello konnte die Mietverträge dieser Wohnung nicht laden. Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.';
@@ -70,6 +74,7 @@ async function untilReview() {
 	next();
 	type('contract-base-rent-input', '950');
 	type('contract-advance-payment-input', '180');
+	chooseFee('run');
 	next();
 }
 
@@ -88,7 +93,7 @@ describe('Mietvertrag erfassen', () => {
 		expect(document.querySelector('h2')!.textContent).toMatch(/Schritt 1 von 5:\s*Mieter/);
 		next();
 		await settle();
-		expect(byTestId('form-error')!.textContent).toContain('Bitte wählen Sie einen Mieter aus');
+		expect(byTestId('form-error')!.textContent).toContain('Bitte wählen Sie einen Mieter aus.');
 		expect(heading()).toBe('Mieter');
 		// the field with the error gets the focus, so its error is read out
 		expect(document.activeElement).toBe(byTestId('contract-tenant-select'));
@@ -152,6 +157,58 @@ describe('Mietvertrag erfassen', () => {
 		type('contract-advance-payment-input', '180');
 		expect(byTestId('advance-payment-notice')).toBeNull();
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’130.00');
+	});
+
+	// #89, persona Helga P-1: the error at the choice goes once an answer is chosen
+	it('nimmt die Meldung zur Verwaltungspauschale zurück, sobald eine Antwort gewählt ist', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		type('contract-base-rent-input', '950');
+		next();
+		await settle();
+		const group = byTestId('contract-fee-choice')!;
+		expect(group.textContent).toContain(
+			'Bitte wählen Sie, ob im Mietvertrag eine Verwaltungspauschale vereinbart ist.'
+		);
+		chooseFee('none');
+		await settle();
+		expect(group.textContent).not.toContain('Bitte wählen Sie');
+		expect(group.getAttribute('aria-invalid')).toBeNull();
+	});
+
+	// #89, fach-review M-2: the guideline of 3 % holds for a rate agreed in the contract too
+	it('weist bei einem eigenen Satz über 3 % auf den üblichen Richtwert hin', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(byTestId('contract-fee-rate-input')).toBeNull();
+		// fach-review M-3: a new fee holds only from the next Kündigungstermin (Art. 269d Abs. 1 OR)
+		expect(document.body.textContent).toContain(
+			'mit dem amtlichen Formular mitteilen; sie gilt erst ab dem nächsten Kündigungstermin (Art. 269d OR).'
+		);
+		chooseFee('own');
+		await settle();
+		type('contract-fee-rate-input', '3');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')).toBeNull();
+		type('contract-fee-rate-input', '4,5');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')!.textContent).toContain(
+			'Die Verwaltungspauschale ist höher als der übliche Richtwert von 3 %.'
+		);
+		// closing review C-4: above 10 % the field refuses the rate; no hint on a rate it does not take
+		type('contract-fee-rate-input', '12');
+		await settle();
+		expect(byTestId('contract-fee-rate-hint')).toBeNull();
 	});
 
 	it('zeigt vor dem Speichern alles in Worten und speichert Akonto als Akonto', async () => {
@@ -220,6 +277,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		type('contract-base-rent-input', "1'450");
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’450.00');
+		chooseFee('run');
 		next();
 		const rent = [...document.querySelectorAll('[data-testid="contract-review-item"]')].find((i) =>
 			i.textContent!.includes('Nettomiete')
@@ -242,7 +300,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		fakeBff(({ path }) =>
 			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
 		);
-		await toPeriod('a3'); // a3 is free only from 2100
+		await toPeriod('a3'); // a3 is free only from 2099
 		expect(byTestId('start-contracts-unknown')!.textContent).toContain(UNKNOWN);
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe(''); // no start suggested
 		expect(minOfStart()).toBe('');
@@ -270,7 +328,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		expect(byTestId('start-contracts-unknown')).toBeNull();
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2101');
-		expect(minOfStart()).toBe('2100-01-01'); // a3 is free from 2100
+		expect(minOfStart()).toBe('2099-01-01'); // a3 is free from 2099
 		// Sven #151: said, and the focus goes to the step, not to the page
 		expect(get(toasts).map((t) => t.message)).toContain(
 			'Die Mietverträge der Wohnung sind geladen.'
@@ -326,6 +384,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 		type('contract-base-rent-input', '950');
+		chooseFee('run');
 		next();
 		await settle();
 		expect(heading()).toBe('Prüfen');
@@ -369,18 +428,18 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		type('start-date-input', '01');
 		release();
-		await settle(); // a3 is free from 1.1.2100
+		await settle(); // a3 is free from 1.1.2099
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.');
 	});
 
 	it('füllt einen geleerten Vertragsbeginn nicht wieder aus', async () => {
 		await toPeriod('a3');
-		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2100'); // suggested
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2099'); // suggested
 		type('start-date-input', '');
 		next();
 		await settle();
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('');
-		expect(byTestId('form-error')!.textContent).toContain('Vertragsbeginn ist erforderlich');
+		expect(byTestId('form-error')!.textContent).toContain('Vertragsbeginn ist erforderlich.');
 	});
 
 	it('geht bei einer Überschneidung nicht weiter', async () => {
@@ -402,6 +461,120 @@ describe('Prüfungen im Mietvertrag', () => {
 		await settle();
 		expect(byTestId('overlap-warning')).toBeNull();
 		expect(byTestId('form-error')).toBeNull();
+	});
+});
+
+// B-16 (#156): wer «Beenden» beim alten Mietvertrag vergessen hat, erfährt es vor der Prüfung
+describe('Mieter mit einem anderen Mietvertrag', () => {
+	const own = (apartmentId: string, endDate: string | null) => [
+		{ ...listed.contracts[0], id: `c-${apartmentId}`, apartmentId, endDate }
+	]; // contracts of Anna Keller (t1)
+
+	it('nennt bei der Wohnung einen Mietvertrag des Mieters ohne Vertragsende und hält nicht auf', async () => {
+		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		const hint = byTestId('tenant-running-contract')!;
+		expect(hint.textContent).toContain('Anna Keller hat einen Mietvertrag ohne Vertragsende');
+		expect(hint.textContent).toContain('für die Wohnung 2.02 (Ahornhof)');
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c-a2');
+		select('apartment-select', 'a1');
+		next();
+		expect(heading()).toBe('Vertragsdauer');
+	});
+
+	it('schweigt bei einem Mietvertrag mit Vertragsende', async () => {
+		fakeBff(({ path }) => [
+			200,
+			{ contracts: path.endsWith('=a2') ? own('a2', '2099-03-31') : [] }
+		]);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
+		expect(byTestId('tenant-running-contract')).toBeNull();
+	});
+
+	// Code-Review W10 C-2: erscheint der Hinweis erst nach dem Laden, liest ein Screenreader ihn trotzdem vor
+	it('nennt den Mietvertrag in einem Bereich, den Screenreader ansagen', async () => {
+		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		expect(byTestId('tenant-running-contract')!.closest('[role="status"]')).not.toBeNull();
+	});
+
+	it('schweigt bei einem unbefristeten Mietvertrag eines anderen Mieters', async () => {
+		fakeBff(({ path }) => [200, { contracts: path.endsWith('=a2') ? own('a2', null) : [] }]);
+		await open();
+		select('contract-tenant-select', 't2');
+		next();
+		await settle();
+		expect(byTestId('apartment-select')).not.toBeNull(); // on the step «Wohnung»
+		expect(byTestId('tenant-running-contract')).toBeNull();
+	});
+});
+
+// P-17 (#144): die vorgewählte Wohnung bleibt auf dem Umweg, die Beträge des letzten Mietvertrags sind vorgeschlagen
+describe('Vorgewählte Wohnung', () => {
+	it('nimmt die vorgewählte Wohnung auf den Umweg zum neuen Mieter mit', async () => {
+		location.url = new URL('http://localhost/contracts/new?apartment=a1');
+		await open();
+		expect(byTestId('contract-new-tenant')!.getAttribute('href')).toBe(
+			'/tenants/new?for=contract&apartment=a1'
+		);
+	});
+
+	it('schlägt die Beträge des letzten Mietvertrags vor und sagt es, bis einer geändert ist', async () => {
+		const last = { ...listed.contracts[0], id: 'c8', apartmentId: 'a1', startDate: '2015-01-01' };
+		fakeBff(({ path }) => [
+			200,
+			{ contracts: path.endsWith('=a1') ? [{ ...last, endDate: '2019-12-31' }] : [] }
+		]);
+		location.url = new URL('http://localhost/contracts/new?tenant=t1&apartment=a1');
+		await open();
+		next();
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(heading()).toBe('Miete');
+		expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('950.00');
+		expect(byTestId<HTMLInputElement>('contract-advance-payment-input')!.value).toBe('150.00');
+		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('');
+		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
+			'aus dem letzten Mietvertrag dieser Wohnung (01.01.2015 – 31.12.2019, gekündigt)'
+		);
+		// Persona Helga P17 P-1: ohne Zusatzmiete gibt es keinen Parkplatz zu leeren
+		expect(byTestId('contract-rent-taken-over')!.textContent).not.toContain('Parkplatz');
+		type('contract-base-rent-input', '980');
+		await settle();
+		expect(byTestId('contract-rent-taken-over')).toBeNull();
+	});
+
+	it('nennt den Parkplatz nur, wenn eine Zusatzmiete übernommen ist', async () => {
+		const last = { ...listed.contracts[0], apartmentId: 'a1', startDate: '2015-01-01' };
+		fakeBff(({ path }) => [
+			200,
+			{
+				contracts: path.endsWith('=a1')
+					? [{ ...last, endDate: '2019-12-31', additionalRent: '120.00' }]
+					: []
+			}
+		]);
+		location.url = new URL('http://localhost/contracts/new?tenant=t1&apartment=a1');
+		await open();
+		next();
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+		expect(byTestId<HTMLInputElement>('contract-additional-rent-input')!.value).toBe('120.00');
+		expect(byTestId('contract-rent-taken-over')!.textContent).toContain(
+			'Mietet der neue Mieter zum Beispiel den Parkplatz nicht, leeren Sie die Zusatzmiete.'
+		);
 	});
 });
 
@@ -468,7 +641,7 @@ describe('Entwurf des Mietvertrags', () => {
 		next();
 		await settle();
 
-		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2100');
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2099');
 	});
 
 	it('übernimmt einen eben erfassten Mieter und bestätigt ihn', async () => {

@@ -16,7 +16,13 @@
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
 			defaultBuildingIds: string[];
-			preset: { building: string; start: string; end: string; fromStatements: boolean } | null;
+			preset: {
+				building: string;
+				start: string;
+				end: string;
+				fromStatements: boolean;
+				feeFromSettings: boolean;
+			} | null;
 		};
 		form: ActionData;
 	} = $props();

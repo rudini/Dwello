@@ -1,8 +1,9 @@
-import { fetchCategory, updateCategory } from '$lib/server/category';
+import { fetchCategory, kiEnabled, updateCategory } from '$lib/server/category';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => ({
-	category: await fetchCategory(fetch, params.id)
+	category: await fetchCategory(fetch, params.id),
+	kiEnabled: await kiEnabled(fetch)
 });
 
 export const actions: Actions = {

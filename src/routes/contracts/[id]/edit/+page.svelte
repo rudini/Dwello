@@ -8,6 +8,7 @@
 		contract: RentalContract;
 		tenant: string;
 		apartment: string;
+		categories: { id: string; name: string }[];
 	}
 
 	let { data }: { data: PageData } = $props();
@@ -29,5 +30,10 @@
 			}
 		]}
 	/>
-	<ContractForm contract={data.contract} tenant={data.tenant} apartment={data.apartment} />
+	<ContractForm
+		contract={data.contract}
+		tenant={data.tenant}
+		apartment={data.apartment}
+		categories={data.categories}
+	/>
 </div>

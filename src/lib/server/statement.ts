@@ -10,7 +10,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 type BackendStatement = Record<string, any>;
 
-const toLineItem = (item: BackendStatement): StatementLineItem => ({
+const toLineItem = (item: BackendStatement, profilePercent?: number): StatementLineItem => ({
 	id: item.id,
 	categoryId: item.categoryId,
 	categoryName: item.categoryName || item.description || m.common_unknown(),
@@ -18,19 +18,62 @@ const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	distributionKeyName: item.distributionKeyName || '',
 	totalAmount: Number(item.totalAmount),
 	tenantShare: Number(item.tenantShare),
-	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0
+	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0,
+	...sharesOf(item),
+	byProfile: byProfile(item, profilePercent)
 });
 
-// The heating profile as the statement stored it when it shares by the profile (#229), else as it is now
-const profileName = (data: BackendStatement): string => {
-	const stored = data.heatingShare?.names;
-	if (stored) return localName(stored);
-	return data.heatingProfile ? localName(data.heatingProfile) : '';
+// Shared by the heating profile: its Zeitanteil is the profile's percent the statement stored (#209), not days
+const byProfile = (item: BackendStatement, percent?: number) =>
+	percent != null && !item.billedDays && Math.abs(Number(item.periodShare) * 100 - percent) < 0.005;
+
+const amountOrNull = (value: unknown) => (value == null ? null : Number(value));
+
+// Wohnungsanteil, Zeitanteil (as days where it is one) and the invoices the position billed, in the order of
+// invoiceParts, which hold each one's days where they differ (#96, #104)
+const sharesOf = (item: BackendStatement) => ({
+	apartmentShare: amountOrNull(item.apartmentShare),
+	periodShare: amountOrNull(item.periodShare),
+	shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : null,
+	invoices: (item.invoices ?? []).map((invoice: BackendStatement, index: number) => ({
+		...invoice,
+		part: item.invoiceParts?.[index] ?? null
+	}))
+});
+
+const notApplied: Record<string, () => string> = {
+	wholePeriod: m.statements_profile_reason_whole_period,
+	noHeatingMonths: m.statements_profile_reason_no_heating_months
 };
+
+// The heating profile as the statement stored it (#229), else as it is now; shared by days, not applied and why (#247)
+const profileName = (data: BackendStatement): string => {
+	const share = data.heatingShare;
+	const name = share?.names ? localName(share.names) : data.heatingProfile ? localName(data.heatingProfile) : '';
+	if (!name || !share?.byDays) return name;
+	const reason = notApplied[share.reason];
+	return reason
+		? m.statements_profile_not_applied({ profile: name, reason: reason() })
+		: m.statements_profile_not_applied_unknown({ profile: name });
+};
+
+// A berichtigte Abrechnung and the statement it replaces, and what was paid on the replaced ones (#120)
+const correctionOf = (data: BackendStatement) => ({
+	contractId: data.contractId,
+	paidAmount: amountOrNull(data.paidAmount),
+	replaces: data.replaces ?? null,
+	replacedBy: data.replacedBy ?? null,
+	priorPayments: Number(data.priorPayments ?? 0),
+	priorPaidOn: data.priorPaidOn ?? []
+});
 
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
 export function toStatement(data: BackendStatement): StatementWithDetails {
-	const { tenant = {}, apartment = {}, building = {} } = data;
+	const [tenant, apartment, building] = [
+		data.tenant ?? {},
+		data.apartment ?? {},
+		data.building ?? {}
+	];
 	return {
 		id: data.id,
 		statementNumber: data.statementNumber,
@@ -51,17 +94,29 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		paidDate: data.paidDate,
 		pdfGeneratedAt: data.pdfGeneratedAt,
 		lastReminderDate: data.reminderSentDate,
+		nextReminderFrom: data.nextReminderFrom,
+		oldAddress: !!data.oldAddress, // A-5: the moved-out tenant still has the building's address
 		notes: data.notes,
 		createdAt: data.createdAt,
 		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
 		tenantEmail: tenant.email || '',
 		tenantCorrespondenceChannel: tenant.correspondenceChannel,
+		tenantLanguage: tenant.language,
 		apartmentUnit: apartment.number || '',
 		apartmentFloor: apartment.floor || '',
 		buildingName: building.name || '',
 		buildingAddress: building.address || '',
+		rentalStart: data.rentalStart,
+		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
-		lineItems: (data.lineItems || []).map(toLineItem)
+		...correctionOf(data),
+		paymentResets: (data.paymentResets ?? []).map(({ resetOn, paidDate }: BackendStatement) => ({
+			resetOn,
+			paidDate
+		})),
+		lineItems: (data.lineItems || []).map((item: BackendStatement) =>
+			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
+		)
 	};
 }
 
@@ -95,6 +150,13 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 	}));
 	return { ...statement, lineItems };
 }
+
+/** The backend names a statement PDF after its number (NK-…, #101); in the header only ASCII letters, digits, underscore, dot and dash */
+export const pdfFileName = (headers: Headers) =>
+	headers
+		.get('content-disposition')
+		?.match(/filename="(.*)"/)?.[1]
+		.replace(/[^\w.-]/g, '') || 'statement.pdf';
 
 const escaped = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 

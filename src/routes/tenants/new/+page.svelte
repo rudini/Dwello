@@ -8,6 +8,8 @@
 	let { form }: { form: ActionData } = $props();
 	// Opened from the rental contract wizard, which continues with the new tenant
 	const forContract = $derived($page.url.searchParams.get('for') === 'contract');
+	// the apartment chosen there, kept on the detour (#144)
+	const apartment = $derived(forContract ? ($page.url.searchParams.get('apartment') ?? '') : '');
 </script>
 
 <svelte:head>
@@ -23,7 +25,10 @@
 	<TenantForm
 		errors={form?.errors}
 		{forContract}
-		cancelHref={forContract ? '/contracts/new' : '/tenants'}
+		{apartment}
+		cancelHref={forContract
+			? `/contracts/new${apartment ? `?apartment=${encodeURIComponent(apartment)}` : ''}`
+			: '/tenants'}
 		submitLabel={m.dashboard_add_tenant()}
 		submitIcon="user-add"
 	/>

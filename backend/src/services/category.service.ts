@@ -7,6 +7,7 @@ import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, type Category, type NewCategory } from '../db/schema';
 import { refusal, type Refusal } from './coded-error';
+import { recordAudit } from './audit-log.service';
 import { Conflict } from './conflict';
 import { categoryHasFuelStocks } from './fuel-stock.service';
 
@@ -154,7 +155,7 @@ export async function getAllowedCategories(): Promise<Category[]> {
 async function ensureNameIsFree(name: string, id?: string) {
 	const existing = await getCategoryByName(name);
 	if (existing && existing.id !== id) {
-		throw new Conflict('CATEGORY_NAME_TAKEN', `Eine Kategorie mit dem Namen "${name}" existiert bereits.`, { name });
+		throw new Conflict('CATEGORY_NAME_TAKEN', `Eine Kategorie mit dem Namen «${name}» existiert bereits.`, { name });
 	}
 }
 
@@ -172,19 +173,34 @@ export async function createCategory(data: NewCategory): Promise<Category> {
 /**
  * Update an existing category
  */
-export async function updateCategory(id: string, data: Partial<NewCategory>): Promise<Category | null> {
+export async function updateCategory(id: string, changes: Partial<NewCategory>): Promise<Category | null> {
+	// A predefined category keeps its key: the KI and its reason know it by that (#166)
+	const [stored] = await db.select({ type: categories.type }).from(categories).where(eq(categories.id, id));
+	const { name: _key, ...names } = changes;
+	const data: Partial<NewCategory> = stored?.type === 'predefined' ? names : changes;
 	if (data.name) await ensureNameIsFree(data.name, id);
 	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
 
 	return db.transaction(async (tx) => {
+		const [before] = await tx.select({ allocable: categories.isAllowedUtilityCost }).from(categories).where(eq(categories.id, id));
 		const [category] = await tx
 			.update(categories)
 			.set({ ...data, updatedAt: new Date() })
 			.where(eq(categories.id, id))
 			.returning();
 		// Costs no longer allocable leave its invoices too, else statements would still pass them on (OR 257a)
-		if (category && data.isAllowedUtilityCost === false) {
-			await tx.update(invoices).set({ isValidUtilityCost: false, updatedAt: new Date() }).where(and(eq(invoices.categoryId, id), eq(invoices.isValidUtilityCost, true)));
+		const excluded =
+			category && data.isAllowedUtilityCost === false
+				? await tx.update(invoices).set({ isValidUtilityCost: false, updatedAt: new Date() }).where(and(eq(invoices.categoryId, id), eq(invoices.isValidUtilityCost, true))).returning({ id: invoices.id })
+				: [];
+		// #357: the Protokoll names the change and, when it excludes costs, how many invoices
+		if (category && before.allocable !== category.isAllowedUtilityCost) {
+			const { name, nameDE, nameFR, nameIT, nameEN, isAllowedUtilityCost: allocable } = category;
+			await recordAudit(
+				'category_allocability_changed',
+				{ categoryId: id, name, nameDE, nameFR, nameIT, nameEN, allocable, ...(!allocable && { invoices: excluded.length }) },
+				tx
+			);
 		}
 		return category || null;
 	});
@@ -195,6 +211,10 @@ export async function updateCategory(id: string, data: Partial<NewCategory>): Pr
  * Returns false if category is used by invoices
  */
 export async function deleteCategory(id: string): Promise<{ success: boolean; conflict?: boolean } & Partial<Refusal>> {
+	const [predefined] = await db.select({ id: categories.id }).from(categories).where(and(eq(categories.id, id), eq(categories.type, 'predefined')));
+	if (predefined) {
+		return { success: false, conflict: true, ...refusal('CATEGORY_PREDEFINED', 'Vordefinierte Kategorien können nicht gelöscht werden.') };
+	}
 	// Check for invoices using this category
 	const [invoiceCount] = await db
 		.select({ count: sql<number>`count(*)` })

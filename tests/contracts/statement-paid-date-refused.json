@@ -1,0 +1,5 @@
+{
+	"error": "Payment date before the statement date",
+	"code": "PAID_DATE_BEFORE_STATEMENT",
+	"params": { "date": "2026-01-05" }
+}

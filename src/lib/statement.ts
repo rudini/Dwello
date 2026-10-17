@@ -1,5 +1,6 @@
 import { m } from '$lib/paraglide/messages';
-import { localToday } from '$lib/contract-status';
+import { isDay, localToday } from '$lib/contract-status';
+import { formatDate } from '$lib/utils/format';
 import type { StatementStatus } from './types';
 import type { Tone } from './ui/tone';
 
@@ -16,6 +17,9 @@ export const statusLabels: Record<StatementStatus, string> = {
 	},
 	get overdue() {
 		return m.statements_status_overdue();
+	},
+	get replaced() {
+		return m.statements_status_replaced();
 	}
 };
 
@@ -23,7 +27,8 @@ export const statusTones: Record<StatementStatus, Tone> = {
 	draft: 'neutral',
 	sent: 'info',
 	paid: 'positive',
-	overdue: 'critical'
+	overdue: 'critical',
+	replaced: 'neutral'
 };
 
 /** The Saldo in words: positive, the tenant pays; negative, the tenant gets money back */
@@ -33,14 +38,27 @@ export function balanceLabel(balance: number): string {
 	return m.statements_balance_settled();
 }
 
+/** A Saldo below CHF 5, 0 included, is neither claimed nor paid out: settled on sending, never gemahnt (#94) */
+export const belowMinimum = (balance: number) => Math.abs(balance) < 5;
+/** A Nachzahlung the landlord claims and may remind of: CHF 5 and more */
+export const claimed = (balance: number) => balance > 0 && !belowMinimum(balance);
+
 /** The day the help of «Bezahlt am» asks for: the tenant's payment, or for a refund the landlord's transfer */
 export const paidHelp = (balance: number) =>
 	balance < 0 ? m.statements_paid_help_refund() : m.statements_paid_help();
 
-/** Why a payment date cannot be stored: none, or a day in the future */
-export const paidDateError = (paidDate: string) =>
-	!/^\d{4}-\d{2}-\d{2}$/.test(paidDate)
+/** Why a payment date cannot be stored: none or a day that does not exist, before the Abrechnungsdatum (#138), or in the future */
+export const paidDateError = (paidDate: string, statementDate: string) =>
+	!isDay(paidDate)
 		? m.statements_paid_date_invalid()
-		: paidDate > localToday()
-			? m.statements_paid_date_future()
-			: null;
+		: paidDate < statementDate
+			? m.statements_paid_date_before({ date: formatDate(statementDate) })
+			: paidDate > localToday()
+				? m.statements_paid_date_future()
+				: null;
+
+/** The day the next Mahnung becomes possible while the last one's Zahlungsfrist runs, else null (#107) */
+export const nextReminderLater = (statement: { nextReminderFrom?: string | null }) =>
+	statement.nextReminderFrom && statement.nextReminderFrom > localToday()
+		? statement.nextReminderFrom
+		: null;

@@ -9,4 +9,6 @@ export interface PreviewRow {
 	rentalDays?: number;
 	totalPeriodDays?: number;
 	movedOut?: boolean;
+	fixedTerm?: boolean; // #76: befristet, its end not reached
+	oldAddress?: boolean; // A-5 (#114): moved out, still with the building's address
 }

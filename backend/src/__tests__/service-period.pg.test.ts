@@ -41,7 +41,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
-	await deleteContract(next.contract);
+	await deleteContract(next.contract, true);
 	await deleteTenant(next.tenant);
 	await rental.remove();
 });
@@ -74,6 +74,22 @@ describe('Leistungszeitraum einer Rechnung', () => {
 		// one line per category: 900 + 1200 × 182/366 = 900 + 596.72; tenant B: all of Q4, May and June of the annual invoice
 		expect(lines[0].totalBuildingAmount).toBe(1496.72);
 		expect(lines[0].tenantShare).toBe(roundRappen(900 + (1200 * 61) / 366));
+	});
+
+	// Entkalken des Boilers am 1.4.2026, das nächste Mal in 5 Jahren: 1.4.2026–31.3.2031 (1'826 Tage), jedes Jahr sein Teil (#254)
+	it('verteilt eine Rechnung über fünf Jahre nach Tagen auf jede Periode', async () => {
+		await insertInvoice(rental.building, {
+			amount: '500.00',
+			invoiceDate: '2026-04-01',
+			servicePeriodStart: '2026-04-01',
+			servicePeriodEnd: '2031-03-31',
+			description: 'Boiler entkalken'
+		});
+		const share = async (year: number) =>
+			(await statement(next.contract, `${year}-01-01`, `${year}-12-31`)).lineItems[0].tenantShare;
+
+		// 275, 365, 366 und 90 Tage von 1'826
+		expect([await share(2026), await share(2027), await share(2028), await share(2031)]).toEqual([75.3, 99.95, 100.22, 24.64]);
 	});
 });
 

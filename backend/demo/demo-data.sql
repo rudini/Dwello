@@ -85,6 +85,18 @@ INSERT INTO rental_contracts (id, apartment_id, tenant_id, start_date, end_date,
 UPDATE rental_contracts SET terminated = TRUE
 WHERE id IN ('b0000001-0001-0001-0001-000000000099', 'b0000002-0002-0002-0002-000000000002');
 
+-- «Verwaltungspauschale vereinbart» (#89): most contracts agree one at the run's rate, Marco Bernasconi's his own
+-- 2.5 %, and Kevin Fischer's none, so the statement wizard has a contract to point out
+UPDATE rental_contracts SET management_fee_agreed = TRUE
+WHERE id <> 'b0000003-0003-0003-0003-000000000002';
+UPDATE rental_contracts SET management_fee_percent = 2.50 WHERE id = 'b0000002-0002-0002-0002-000000000004';
+
+-- Vereinbarte Nebenkosten (#91): every contract agrees every umlagefähige category, as a new contract does
+INSERT INTO contract_categories (contract_id, category_id, agreed)
+SELECT c.id, cat.id, TRUE FROM rental_contracts c CROSS JOIN categories cat
+WHERE cat.is_allowed_utility_cost AND c.id::text LIKE 'b000000_-000_-000_-000_-0000000000__'
+ON CONFLICT DO NOTHING;
+
 -- ============================================================================
 -- Invoices, dated at the end of the period they cover (the Rechnungsdatum decides the Abrechnungsperiode).
 -- Alpenblick lacks, on purpose, the chimney sweep and the water of the second half of 2025, so the check for

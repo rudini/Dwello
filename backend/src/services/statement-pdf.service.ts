@@ -6,17 +6,16 @@
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, utilityStatements, type KeyValues } from '../db/schema';
-import { getHeatingProfile } from './heating-profile.service';
 import { roundToRappen } from './pdf-format';
-import { handleMidYearMoves } from './prorating.service';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
-import { datedToday, getStatement, keyValuesOf, type StatementWithDetails } from './statement.service';
+import { datedToday, getStatement, keyValuesOf, updateStatementStatus, type StatementWithDetails } from './statement.service';
 import { refusal } from './coded-error';
+import { billingStart, getContract } from './contract.service';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
-async function qrBillConfig(): Promise<QRBillConfig | null> {
+export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const companyName = await getTypedConfig('company_name');
 	const companyAddress = await getTypedConfig('company_address');
 	const companyPostalCode = await getTypedConfig('company_postal_code');
@@ -50,7 +49,7 @@ const buildingOf = (building: StatementWithDetails['building']) => ({
 
 type Names = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null; isHeatingCost?: boolean };
 
-// A category, key or profile in the PDF's language; Romansh and missing translations fall back to German
+// A category, key or profile in the PDF's language; missing translations fall back to German
 const localName = (names: Names, language: Language) =>
 	({ fr: names.nameFR, it: names.nameIT, en: names.nameEN })[language as 'fr' | 'it' | 'en'] || names.nameDE || names.name;
 
@@ -58,6 +57,7 @@ const localName = (names: Names, language: Language) =>
 export interface RunDetails {
 	rentalStart: string;
 	rentalEnd: string;
+	billed?: StatementPDFData['billed'];
 	heating?: StatementPDFData['heating'];
 	fuel?: StatementPDFData['fuel'];
 }
@@ -74,6 +74,10 @@ const nameIn = (map: Map<string, Names>, id: string | null, language: Language) 
 	return names && localName(names, language);
 };
 
+// A line shared by the days rented: its own days (#137), or the days of the contract in the period
+const byDaysRented = (item: StatementWithDetails['lineItems'][number], daysShare: number) =>
+	!!item.billedDays || Math.abs(parseFloat(item.periodShare ?? '1') - daysShare) < 0.00005;
+
 // One position as the PDF prints it: names in the language, the key with the apartment's part, the shares
 function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: boolean, names: LineNames, language: Language) {
 	const totalAmount = parseFloat(item.totalAmount);
@@ -87,7 +91,8 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: 
 		apartmentShare,
 		periodShare: amountOf(item.periodShare),
 		shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : undefined,
-		invoiceParts: item.invoiceParts,
+		// each part with the description of its invoice, in the same order (#236)
+		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, description: item.invoices?.[i]?.description })),
 		byProfile: heating && byProfile,
 		heating,
 		tenantShare: parseFloat(item.tenantShare)
@@ -105,6 +110,8 @@ export function toPdfData(
 ): StatementPDFData {
 	const managementFee = parseFloat(statement.managementFee || '0');
 	const subtotal = parseFloat(statement.totalCosts) - managementFee;
+	const periodDays = Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1;
+	const legacyProfile = !statement.heatingShare && !!statement.heatingProfileId; // created before #209
 	return {
 		id: statement.id,
 		statementNumber: statement.statementNumber,
@@ -116,9 +123,12 @@ export function toPdfData(
 		apartment: apartmentOf(statement.apartment),
 		building: buildingOf(statement.building),
 		...run,
-		periodDays: Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1,
-		// by the profile only where the calculation shared the heating costs by it (run.heating), not by days (#137)
-		lineItems: statement.lineItems.map((item) => lineItemOf(item, !!run.heating, { categoryNames, keyNames, keyShares }, language)),
+		periodDays,
+		// by the profile only where the calculation shared the heating costs by it (run.heating), not by days (#137); a
+		// statement created before #209 stores no share: by the profile where its line is not the days rented (M-5)
+		lineItems: statement.lineItems.map((item) =>
+			lineItemOf(item, !!run.heating || (legacyProfile && !byDaysRented(item, statement.rentalDays / periodDays)), { categoryNames, keyNames, keyShares }, language)
+		),
 		subtotal,
 		managementFee,
 		managementFeePercent: parseFloat(statement.managementFeePercent ?? '0'), // rate chosen for the generation run
@@ -126,45 +136,33 @@ export function toPdfData(
 		totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
 		balance: parseFloat(statement.balance),
 		paymentDeadline: statement.paymentDeadline || undefined,
-		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined
+		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined,
+		// the agreed categories it bills, as its positions name them (#91, domain review M-2); not next to a position
+		// without a category, which no contract agrees (round 2 M-1)
+		agreedCosts:
+			statement.agreedCategoryIds && statement.lineItems.every((item) => item.categoryId)
+				? [...new Set(statement.lineItems.flatMap((item) => nameIn(categoryNames, item.categoryId, language) ?? []))]
+				: undefined,
+		...(statement.replaces && {
+			replaces: {
+				statementNumber: statement.replaces.statementNumber,
+				statementDate: statement.replaces.statementDate,
+				paidOn: statement.priorPaidOn ?? [],
+				priorPayments: parseFloat(statement.priorPayments)
+			}
+		})
 	};
 }
 
 // The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs
-async function heatingOf(statement: StatementWithDetails, period: { rentalStart: string; rentalEnd: string }, language: Language, hasHeating: boolean, lineShare?: string | null) {
-	if (!hasHeating) return {};
-	// as the statement was calculated, also after the profile changed (#209); recomputed only for one created before
+function heatingOf(statement: StatementWithDetails, language: Language, hasHeating: boolean, lineShare?: string | null) {
+	// as the statement was calculated, also after the profile changed (#209); one created before gets no note (#232, C-5)
 	const stored = statement.heatingShare;
-	if (!stored) return recomputedHeating(statement, period, language, lineShare);
-	if (stored.byDays) return {};
+	if (!hasHeating || !stored || stored.byDays) return {};
 	// the heating position's share where there is one: shares stored under #209 were rounded differently (#229)
 	const percent = lineShare == null ? stored.percent : parseFloat(lineShare) * 100;
-	return { heating: { profile: localName(stored.names, language), percent, months: stored.months, periodPercent: stored.periodPercent } };
-}
-
-// A statement created before #209: the share from the profile as it is now
-async function recomputedHeating(statement: StatementWithDetails, period: { rentalStart: string; rentalEnd: string }, language: Language, lineShare?: string | null) {
-	const profile = statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
-	if (!profile) return {};
-	// the same share the calculation takes: the months rented against the months of the period
-	const shared = await handleMidYearMoves(
-		profile.id,
-		new Date(period.rentalStart),
-		new Date(period.rentalEnd),
-		new Date(statement.periodStart),
-		new Date(statement.periodEnd),
-		100
-	);
-	if (shared.byDays) return {}; // the months of the period carry 0 % in the profile: shared by days, no profile note
-	const { percentage, monthBreakdown } = shared;
-	const months = monthBreakdown.map(({ month, percentage }) => ({ month, percentage: Math.round(percentage * 100) / 100 }));
-	// the share of the heating position, as its amount was calculated; the months only while they still give it (#229)
-	const share = lineShare == null ? null : parseFloat(lineShare);
-	if (share == null) return { heating: { profile: localName(profile, language), percent: percentage, months } };
-	// rounded as the calculation rounds period_share, so an unchanged profile keeps its months
-	if (Math.round((percentage / 100) * 10000) !== Math.round(share * 10000)) return { heating: { profile: localName(profile, language), percent: share * 100 } };
-	const periodPercent = Math.round(shared.periodPercentage * 100) / 100;
-	return { heating: { profile: localName(profile, language), percent: share * 100, months, periodPercent } };
+	const { months, periodPercent, periodMonths } = stored;
+	return { heating: { profile: localName(stored.names, language), percent, months, periodPercent, periodMonths } };
 }
 
 // A tank in the period: its category's costs are opening stock + the invoices – closing stock (Art. 5 Abs. 2 lit. a VMWG),
@@ -190,14 +188,22 @@ function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, lang
 	};
 }
 
+// #133: the statement bills from the day after «Abgerechnet bis», the tenancy in the period started before
+async function billedOf(statement: StatementWithDetails) {
+	const contract = statement.contractId ? await getContract(statement.contractId) : null;
+	if (!contract?.billedUntil || billingStart(contract) !== statement.rentalStart) return {};
+	const tenancyStart = [contract.startDate, statement.periodStart].sort()[1];
+	return tenancyStart < statement.rentalStart ? { billed: { until: contract.billedUntil, tenancyStart } } : {};
+}
+
 // What the generation run used, for the PDF: the tenant's dates and the heating profile
 async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
 	// the tenant's part of the period, as billed: from moving in or the period start to moving out or the period end
-	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd };
+	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd, ...(await billedOf(statement)) };
 	const heatingLine = statement.lineItems.find((item) => item.categoryId && names.get(item.categoryId)?.isHeatingCost);
 	return {
 		...rental,
-		...(await heatingOf(statement, rental, language, hasHeating, heatingLine?.periodShare)),
+		...heatingOf(statement, language, hasHeating, heatingLine?.periodShare),
 		...fuelOf(statement, names, language)
 	};
 }
@@ -262,7 +268,7 @@ async function keySharesOf(statement: StatementWithDetails, keys: Map<string, Na
 	return shares;
 }
 
-/** Render and store the PDF in the language asked for, otherwise the tenant's */
+/** Render and store the PDF in the language asked for, otherwise the tenant's; the PDF and what it prints for e-mailing it */
 export async function generateStatementPdf(id: string, language?: string) {
 	const found = await getStatement(id);
 	if (!found) return 'not-found';
@@ -294,7 +300,7 @@ export async function generateStatementPdf(id: string, language?: string) {
 		})
 		.where(eq(utilityStatements.id, id));
 
-	return { qrReference, pdfSize: pdfBase64.length };
+	return { qrReference, pdfSize: pdfBase64.length, pdf: pdfBase64, data: pdfData, language: pdfLanguage };
 }
 
 const storedPdf = async (id: string) =>
@@ -303,8 +309,7 @@ const storedPdf = async (id: string) =>
 			.select({
 				pdfBlob: utilityStatements.pdfBlob,
 				statementNumber: utilityStatements.statementNumber,
-				status: utilityStatements.status,
-				statementDate: utilityStatements.statementDate
+				status: utilityStatements.status
 			})
 			.from(utilityStatements)
 			.where(eq(utilityStatements.id, id))
@@ -312,17 +317,27 @@ const storedPdf = async (id: string) =>
 	)[0];
 
 /**
- * The PDF the tenant gets (Base64) with the statement number, or why there is none: a draft's as if sent today, and
- * one discarded by sending or paying made again
+ * The PDF the tenant gets (Base64) with the statement number, or why there is none: a draft's made afresh, as if sent
+ * today with the tenant's address and the settings as they are now (personas W3c P-1, P-2), and one discarded by
+ * sending or paying made again
  */
 export async function getStatementPdf(id: string) {
 	let result = await storedPdf(id);
 	if (!result) return { status: 404, refusal: refusal('STATEMENT_NOT_FOUND', 'Statement not found') };
-	const stale = result.status === 'draft' && result.statementDate !== (await datedToday(null)).statementDate;
-	if (!result.pdfBlob || stale) {
+	if (!result.pdfBlob || result.status === 'draft') {
 		if ((await generateStatementPdf(id)) === 'no-iban')
 			return { status: 400, refusal: refusal('IBAN_MISSING', 'IBAN not configured. Please set up company configuration first.') };
 		result = (await storedPdf(id))!;
 	}
 	return { pdfBlob: result.pdfBlob!, statementNumber: result.statementNumber };
+}
+
+/** A status change; when sent, the PDF as sent is made at that moment and kept (closing review C-1) */
+export async function changeStatementStatus(...[id, status, data]: Parameters<typeof updateStatementStatus>) {
+	const statement = await updateStatementStatus(id, status, data);
+	// also when a Saldo of 0 makes it paid at once (review C-3); sent stays sent when the PDF cannot be made now (no
+	// IBAN, a failure): it is made on its first request then
+	if (statement && status === 'sent')
+		await generateStatementPdf(id).catch((error) => console.warn('PDF as sent not made:', error));
+	return statement;
 }

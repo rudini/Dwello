@@ -17,7 +17,6 @@ interface UserResponse {
 	email: string;
 	name: string;
 	provider: string;
-	picture?: string;
 }
 
 export const GET: RequestHandler = async ({ cookies }) => {
@@ -45,8 +44,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 			sub: payload.sub,
 			email: payload.email,
 			name: payload.name,
-			provider: payload.provider,
-			picture: payload.picture
+			provider: payload.provider
 		};
 
 		return json({ user });
