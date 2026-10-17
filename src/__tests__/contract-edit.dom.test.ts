@@ -116,7 +116,8 @@ describe('Mietvertrag bearbeiten', () => {
 		await open();
 		type('billed-until-input', '31.12.2025');
 		await save();
-		const covered = 'Für diese Abrechnungsperiode erstellt Dwello keine Abrechnung.';
+		const covered =
+			'Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung.';
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Der Entwurf NK-2025-0003 rechnet Tage ab, die Sie jetzt als ausserhalb von Dwello abgerechnet eintragen.'
 		);
@@ -423,6 +424,19 @@ describe('Mietvertrag bearbeiten', () => {
 			// Haiku-Review R1: der Knopf nennt seine Folge auch unter «Bearbeiten»
 			const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
 			expect(document.getElementById(described)!.textContent).toContain('wird gelöscht');
+		});
+
+		// fach review V-15: new contract dates that leave the period out are not «Abgerechnet bis»
+		it('nennt bei einem Vertragsende vor der Periode des Entwurfs nicht «Abgerechnet bis» als Grund', async () => {
+			calls = fakeBff(({ method }) =>
+				method === 'PUT' ? [409, refused] : [200, { contracts: [] }]
+			);
+			await open();
+			await endOn('31.12.2024');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			expect(byTestId('form-error')!.textContent).not.toContain('ausserhalb von Dwello');
 		});
 
 		// Haiku-Review R5: ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen

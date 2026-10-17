@@ -16,5 +16,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Persona Dr. Weber (`docs/design/personas/weber-w5d-abgerechnet-bis.md`): P-1 (Major, preview names no days or «Abgerechnet bis») → #327, P-2 (Major, Akonto row without derivation) → #325, both need the product owner's decision; P-3, P-4 → #325; P-6 → #337
 - [x] fach-reviewer round 2 (`docs/reviews/w5d-fachreview-2.md`): V-10 (Major, a draft «Abgerechnet bis» covers promised a new statement) fixed; V-14 fixed; V-11 left in the report; V-12 → #337; V-13 → #327
 - [x] daten-pruefer (`docs/reviews/w5d-datenpruefung-1.md`): no discrepancy
+- [x] Merged origin/main (conflicts in schema, contract route and service, contract page loader, docs; migration renumbered to 0015)
+- [x] Code review round 2 (`docs/reviews/w5d-review-2.md`): C-1, C-2, C-3 closed; C-9 (Major, = V-15) fixed; C-12 fixed; C-10, C-11 left (Minor, Nit)
+- [x] fach-reviewer round 3 (`docs/reviews/w5d-fachreview-3.md`): V-10 closed; V-15 fixed (test seen red), V-16 wording taken, V-18 step added; V-17 existed before (left in the report)
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-133.md`)
 - [ ] Checks before push; workflow notes; archive the session
 - [ ] Push, pull request, CI and merge (CLAUDE.md, Workflow 9)

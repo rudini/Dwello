@@ -113,17 +113,18 @@
 		refused = [];
 	}
 
-	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
-	// a draft whose whole period «Abgerechnet bis» now covers: no statement is created for it again (fach review V-10)
-	const covered = (draft: RefusedStatement) =>
-		!billsIn(
-			{
-				startDate: values.startDate,
-				endDate: values.isUnlimited ? null : values.endDate,
-				billedUntil: values.billedUntil
-			},
-			{ start: draft.periodStart, end: draft.periodEnd }
+	// a draft whose whole period «Abgerechnet bis» now covers, not the contract dates: no statement is created for it
+	// again (fach review V-10, V-15)
+	function covered(draft: RefusedStatement) {
+		const dates = {
+			startDate: values.startDate,
+			endDate: values.isUnlimited ? null : values.endDate
+		};
+		const period = { start: draft.periodStart, end: draft.periodEnd };
+		return (
+			billsIn(dates, period) && !billsIn({ ...dates, billedUntil: values.billedUntil }, period)
 		);
+	}
 	const onlyCovered = (statements: RefusedStatement[]) =>
 		statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);
 
@@ -133,6 +134,7 @@
 			: undefined
 	);
 
+	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
 	function saveError({ message, details }: { message: string; details?: Record<string, unknown> }) {
 		const statements = details?.statements;
 		if (Array.isArray(statements) && onlyCovered(statements))

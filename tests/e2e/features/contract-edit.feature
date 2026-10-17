@@ -104,10 +104,11 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Entwurf löschen, den «Abgerechnet bis» ganz abdeckt
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-12-31" ausserhalb von Dwello abgerechnet sind
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Für diese Abrechnungsperiode erstellt Dwello keine Abrechnung."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung."
     Wenn der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
     Und zeigt der Mietvertrag «Abgerechnet bis» "31.12.2025"
+    Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
 
   # B-15 (#152): ein Mieterwechsel oder ein Wechsel der Wohnung ist ein neuer Mietvertrag
   Szenario: Mieter und Wohnung stehen im Mietvertrag fest
