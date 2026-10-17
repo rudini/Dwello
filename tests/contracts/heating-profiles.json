@@ -1,0 +1,13 @@
+{
+	"data": [
+		{
+			"id": "hp1",
+			"name": "Heizung Mittelland",
+			"nameDE": "Heizung Mittelland",
+			"nameFR": "Chauffage Plateau",
+			"nameIT": "Riscaldamento Altopiano",
+			"nameEN": "Heating Central Plateau",
+			"updatedAt": "2024-01-01T00:00:00.000Z"
+		}
+	]
+}

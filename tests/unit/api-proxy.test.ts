@@ -194,6 +194,26 @@ describe('API Proxy Helper Functions', () => {
 			expect(result.data).toBe('Hello World');
 		});
 
+		// Ohne Grafikkarte liest und kategorisiert die KI über eine Minute lang (#419); andere Anfragen brechen weiter nach 30 s ab
+		it.each([
+			['POST', '/invoices', 300_000],
+			['POST', '/invoices/extract', 300_000],
+			['POST', '/invoices/categorize', 300_000],
+			['POST', '/invoices/abc-123/recategorize', 300_000],
+			['GET', '/invoices', 30_000],
+			['POST', '/buildings', 30_000]
+		])('bricht %s %s erst nach %i ms ab', async (method, path, ms) => {
+			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
+			fetchSpy.mockResolvedValue(new Response('{}', { headers: { 'Content-Type': 'application/json' } }));
+			const timeout = vi.spyOn(AbortSignal, 'timeout');
+			try {
+				await forwardRequest(path, method, mockCookies, { body: {} });
+				expect(timeout).toHaveBeenCalledWith(ms);
+			} finally {
+				timeout.mockRestore();
+			}
+		});
+
 		it('should throw AppError on timeout', async () => {
 			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 

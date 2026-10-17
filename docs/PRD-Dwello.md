@@ -73,7 +73,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 | **Backend** | ElysiaJS on Bun | High performance, modern TypeScript framework, Bun's speed |
 | **Database** | PostgreSQL | Robust, ACID transactions, JSON support, proven reliability |
 | **Authentication** | BFF + OAuth 2.0 / SSO | Backend for Frontend pattern with OAuth 2.0, HTTPOnly cookies, XSRF protection |
-| **LLM** | Any OpenAI-compatible API (default: local Ollama with `qwen2.5vl:7b`) | Self-hosted by default, no vendor lock-in; configured through `.env` |
+| **LLM** | Any OpenAI-compatible API (default: local Ollama with `qwen3-vl:8b-instruct`) | Self-hosted by default, no vendor lock-in; configured through `.env` |
 | **Deployment** | Docker / Docker Compose | Containerized, portable, easy to run anywhere |
 | **Maps** | none (map dropped, #129) | Address shown as text |
 | **Internationalization** | i18n library | German UI; statement PDFs in five languages |
@@ -538,7 +538,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
   - Total costs and advance payments
   - Balance (refund or additional payment)
 - Ability to adjust individual statement amounts if needed (drafts only)
-- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a statement names the invoices of its period recorded, changed or deleted since it was created (each position keeps the invoices it billed, #96)
+- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a statement names the invoices of its period recorded, changed or deleted since it was created (each position keeps the invoices it billed, #96); the preview keeps existing statements as they are and names, each with its link, the drafts that miss invoices of the period as they are now and the statements of the same period made with another Heizprofil, a Heizprofil edited since, or another Verwaltungspauschale than the run would store for the contract (#132; «Neu berechnen» on a draft: #338)
 
 **Step 4: Generate PDFs**
 - Generate statement PDF for each rental contract, one per contract and period; at a tenant change each contract gets its own (requirements and sources: `docs/nebenkostenabrechnung-anforderungen.md`):
@@ -1473,7 +1473,7 @@ BALANCE (refund): CHF 30
 
 **Provider:** any OpenAI-compatible API, configured through `.env`:
 - `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`
-- Default: local **Ollama** with `qwen2.5vl:7b` (Docker container); invoice data stays on the server
+- Default: local **Ollama** with `qwen3-vl:8b-instruct` (Docker container); invoice data stays on the server
 - External provider (e.g. OpenAI): `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` are required and named in the privacy statement (Swiss DSG Art. 19); see README section "External LLM provider"
 - `LLM_ENABLED=false` turns categorization off
 

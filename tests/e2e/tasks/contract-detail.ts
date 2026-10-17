@@ -17,6 +17,7 @@ import {
 	deleteMistakeConfirmation,
 	deleteDraftAndEndButton,
 	endContractButton,
+	missingStatementInvoicesLink,
 	missingStatementLink,
 	nextStep,
 	refusedStatementLink,
@@ -73,6 +74,7 @@ export const createMissingStatement = (periodStart: string) => Click.on(missingS
 export const useWindowOf = (width: number, height: number) => Browser.resizeTo({ width, height });
 // the confirm button scrolled into view inside the dialog
 export const scrollToEndConfirmation = Scroll.to(confirmEndContractButton);
+export const showMissingStatementInvoices = (periodStart: string) => Click.on(missingStatementInvoicesLink(periodStart));
 
 export const openStatementFromDeleteDialog = (statementId: string) => Click.on(deleteDialogStatementLink(statementId));
 // A-6 (#115): after an expired fixed-term contract the tenant either still lives there or has moved out

@@ -102,8 +102,8 @@ export const Upload = {
 };
 
 export const Wait = {
-	/** until the target is shown: a state reached before the next step looks */
-	until: (target: Target) => on(target, (element) => element.first().waitFor()),
+	/** until the target is shown: a state reached before the next step looks; a slow state names its own timeout */
+	until: (target: Target, timeout?: number) => on(target, (element) => element.first().waitFor({ timeout })),
 	/** until a field shows the value, e.g. a suggestion that arrives after the page */
 	forValue: (target: Target, value: string) => on(target, (element) => expect(element).toHaveValue(value)),
 	/** until the target finds exactly that many elements */

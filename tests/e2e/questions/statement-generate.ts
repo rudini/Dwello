@@ -12,6 +12,7 @@ import {
 	buildingCheckbox,
 	buildingInvoices,
 	categoryFinding,
+	existingStatementNotes,
 	hintedInvoice,
 	invoicesWithoutServicePeriod,
 	lateInvoices,
@@ -147,6 +148,7 @@ export const currentStep = Text.of(stepLabel);
 export const allBilledText = Text.of(previewAllBilled);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const presetNoticeText = Text.of(wizardPresetNotice);
+export const notesOnExistingStatement = (statementId: string) => Text.of(existingStatementNotes(statementId));
 
 // #91: what the step «Einstellungen» asks or says about the agreed Nebenkosten of one contract
 export const agreementQuestionsOf = (contractId: string) => Text.of(agreementsOf(contractId));
