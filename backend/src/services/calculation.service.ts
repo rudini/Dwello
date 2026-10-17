@@ -14,7 +14,7 @@ import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { statementNumbers, utilityStatements, type BilledInvoice, type HeatingProfile, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
-import { fuelStockChange, listFuelStocks } from './fuel-stock.service';
+import { fuelStockChange, periodReadings } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
 import {
@@ -203,7 +203,7 @@ async function byRunProfile(group: InvoiceGroup, apartmentShare: number, run: Gr
 	return result.byDays ? null : result;
 }
 
-type GroupRun = { contract: { startDate: string; endDate: string | null }; periodStart: Date; periodEnd: Date; heatingProfileId?: string; tankCategories: Set<string | null>; wholePeriod: boolean };
+type GroupRun = { contract: { startDate: string; endDate: string | null }; periodStart: Date; periodEnd: Date; heatingProfileId?: string; tankCategory: string | null; wholePeriod: boolean };
 
 // The tenant's part of a group: heating costs by the Heizprofil if available, where it shares by days (no heating
 // months in the period) by days like any other invoice's, with its Leistungszeitraum (#137); a heating invoice with its
@@ -216,7 +216,7 @@ async function shareOfGroup(
 ): Promise<{ tenantShare: number; periodShare: number; shareDays: LineDays }> {
 	const heating = await byRunProfile(group, apartmentShare, run);
 	const [start, end] = [isoDay(run.periodStart), isoDay(run.periodEnd)];
-	const ownDays = group.invoices.some((invoice) => invoice.start !== start || invoice.end !== end) && !run.tankCategories.has(group.categoryId);
+	const ownDays = group.invoices.some((invoice) => invoice.start !== start || invoice.end !== end) && (!run.tankCategory || group.categoryId !== run.tankCategory);
 	// shared by the profile over the period: no days
 	if (heating && !ownDays) return { tenantShare: roundToRappen(heating.share), periodShare: heating.percentage / 100, shareDays: noDays };
 	// by days, or by the profile's months: the tenant's part of the days each invoice bills in the period
@@ -382,14 +382,16 @@ export async function calculateStatementForContract(
 		rooms: parseFloat(a.rooms)
 	}));
 
-	// a delivery into the building's tank counts by consumption over the period, not by its Leistungszeitraum (#257)
-	const tankCategories = new Set<string | null>((await listFuelStocks(buildingId)).map((stock) => stock.categoryId));
+	// a delivery into the building's tank counts by consumption over the period, not by its Leistungszeitraum (#257);
+	// not after the tank was decommissioned (#72)
+	const tank = await periodReadings(buildingId, start, end);
+	const tankCategory = tank?.covered ? tank.categoryId : null;
 
 	// Calculate line items
 	const heating = await heatingOfRun(invoiceGroups, contract, periodStart, periodEnd, heatingProfileId);
 	const lineItems: CalculatedLineItem[] = [];
 	let subtotal = 0;
-	const run = { contract, periodStart, periodEnd, heatingProfileId, tankCategories, wholePeriod: rentalDays === totalPeriodDays };
+	const run = { contract, periodStart, periodEnd, heatingProfileId, tankCategory, wholePeriod: rentalDays === totalPeriodDays };
 	const rental = { start: isoDay(contractOverlap.overlapStart), end: isoDay(contractOverlap.overlapEnd) };
 
 	for (const group of invoiceGroups) {

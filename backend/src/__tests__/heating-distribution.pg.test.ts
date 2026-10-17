@@ -323,6 +323,20 @@ describe('Heizkosten einer Rechnung mit Leistungszeitraum nach dem Heizprofil', 
 		expect(line).toMatchObject({ tenantShare: 0, invoiceParts: null });
 	});
 
+	// Tank Ende 2023 stillgelegt (Endbestand 0, Wechsel auf Fernwärme): 2024 gilt #71 wieder (#72; Code-Review 3, C-1)
+	it('teilt nach der Stilllegung des Tanks eine Heizrechnung mit Leistungszeitraum nach den Monaten darin', async () => {
+		await db.insert(fuelStocks).values([
+			{ buildingId: building, categoryId: heatingId, readingDate: '2022-12-31', amount: '700.00' },
+			{ buildingId: building, categoryId: heatingId, readingDate: '2023-12-31', amount: '0.00' }
+		]);
+		await invoice('1000.00', '2024-01-01', '2024-03-31');
+
+		const line = await heatingOf(await rent('Ab Mai', apartment, '2024-05-01'));
+
+		expect(line).toMatchObject({ tenantShare: 0 });
+		expect(line.invoiceParts![0].profile!.percent).toBe(0);
+	});
+
 	// Heizöl aus dem Tank zählt nach Verbrauch über die ganze Periode, auch ohne Endbestand (#257; Fachreview 1, V-2)
 	it('teilt eine Lieferung in den Tank des Gebäudes weiter nach dem Heizprofil über die ganze Periode', async () => {
 		await db.insert(fuelStocks).values({ buildingId: building, categoryId: heatingId, readingDate: '2023-12-31', amount: '500.00' });

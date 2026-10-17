@@ -939,5 +939,6 @@ Files: `backend/migrations/0014_line_item_invoices.sql`, `backend/src/db/schema.
 - [x] Closing `code-reviewer` round 2: `docs/reviews/71-review-2.md` (C-1 fixed with a test, C-2 and C-4 fixed, C-3 accepted: reviewed wording)
 - [x] `daten-pruefer` on Seepark Residenz A2 and controls: `docs/reviews/71-datenpruefung-1.md` (no findings)
 - [x] Merge `origin/main` (conflict in the schema import of `calculation.service.ts` only)
+- [x] Closing code review round 3: `docs/reviews/71-review-3.md` (C-1 Major: a decommissioned tank no longer keeps the exception, `periodReadings().covered`, test first; C-2 settled by it)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
 - [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
