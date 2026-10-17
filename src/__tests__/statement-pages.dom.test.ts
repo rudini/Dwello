@@ -823,13 +823,17 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('sagt nach einer gescheiterten E-Mail, was schiefging, und bietet den Brief an', () => {
-		detail({}, { sendError: 'Die E-Mail wurde nicht zugestellt.' });
+		detail({ tenantAddress: 'Ahornweg 3, 8400 Winterthur' }, { sendError: 'Die E-Mail wurde nicht zugestellt.' });
 		expect(text()).toContain('Abrechnung nicht versendet');
 		expect(byTestId('send-feedback')!.textContent).toBe('Die E-Mail wurde nicht zugestellt.');
 
 		click('statement-send-by-letter');
 		const dialog = document.querySelector('[role="dialog"]')!;
 		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
+		// the letter goes to the postal address (code review C-1)
+		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
+		expect(recipient).toContain('Per Brief, Ahornweg 3, 8400 Winterthur');
+		expect(recipient).not.toContain('anna@example.ch');
 		expect(dialog.closest('body')!.querySelector<HTMLInputElement>('input[name="byLetter"]')!.value).toBe('true');
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
 	});

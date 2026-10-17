@@ -185,6 +185,24 @@ describe('Abrechnung per E-Mail, die nicht versendet werden kann', () => {
 	});
 });
 
+describe('Abrechnung, die nicht gesendet werden kann (code review C-4)', () => {
+	it('kennt keine Abrechnung mit dieser ID', async () => {
+		expect(await send(crypto.randomUUID())).toMatchObject({ status: 404, code: 'STATEMENT_NOT_FOUND' });
+	});
+
+	it('bleibt ein Entwurf ohne IBAN: ohne sie gibt es keine QR-Rechnung', async () => {
+		const id = await draft();
+		await deleteConfig('iban');
+		const before = mails.length;
+
+		const result = await send(id).finally(() => setConfig('iban', 'CH93 0076 2011 6238 5295 7'));
+
+		expect(result).toMatchObject({ status: 400, code: 'IBAN_MISSING' });
+		expect(await statusOf(id)).toBe('draft');
+		expect(mails.length).toBe(before);
+	});
+});
+
 describe('Abrechnung per Brief', () => {
 	it('markiert sie nur als versendet, ohne E-Mail und ohne Dokument', async () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });

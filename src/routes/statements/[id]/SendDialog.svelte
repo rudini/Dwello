@@ -17,11 +17,10 @@
 
 	let form = $state<HTMLFormElement>();
 	let sending = $state(false);
-	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
-	const emails = $derived(byEmail && !byLetter);
+	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email' && !byLetter);
 	// the dialog's words: sending by e-mail, or recording a letter as sent
 	const words = $derived(
-		emails
+		byEmail
 			? {
 					title: m.statements_send_email_title(),
 					confirm: m.statements_send_email(),
@@ -71,7 +70,7 @@
 	confirmTestid="statement-send-confirm"
 	onconfirm={() => form?.requestSubmit()}
 >
-	{#if emails}
+	{#if byEmail}
 		<p>{m.statements_send_email_text()}</p>
 	{:else}
 		<p>{m.statements_send_text_1()}</p>

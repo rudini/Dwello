@@ -146,12 +146,12 @@ export interface StatementMailInput {
 	tenant: { firstName: string; lastName: string };
 	sender: string; // the Firmenname
 	balance: string; // what the Saldo asks the tenant to do, as the PDF says it
-	language?: Language;
+	language: Language;
 }
 
 /** The e-mail that sends a statement's PDF: its title also names the stored Dokument */
 export function statementMail(input: StatementMailInput) {
-	const w = WORDING[input.language ?? 'de'];
+	const w = WORDING[input.language];
 	const statement = w.statement({
 		number: input.statementNumber,
 		start: swissDate(input.periodStart),
