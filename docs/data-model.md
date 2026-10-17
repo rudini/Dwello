@@ -70,6 +70,7 @@ latitude      DECIMAL(10,7)
 longitude     DECIMAL(10,7)
 building_type VARCHAR(50)            -- Gebäudetyp
 year_built    INTEGER                -- Baujahr
+no_tank       BOOLEAN      NOT NULL DEFAULT false -- kein Tank oder Tank stillgelegt: no Tankbestand asked for periods without readings (#72)
 ```
 
 Index: `buildings_city_idx (city)`.

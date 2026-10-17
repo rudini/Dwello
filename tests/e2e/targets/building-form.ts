@@ -6,4 +6,5 @@ export const postalCodeInput = target('PLZ', (page) => page.getByTestId('buildin
 export const cityInput = target('Ort', (page) => page.getByTestId('building-city-input'));
 export const cantonSelect = target('Kanton', (page) => page.getByTestId('building-canton-select'));
 export const yearBuiltInput = target('Baujahr', (page) => page.getByTestId('building-year-built-input'));
+export const noTankCheckbox = target('Kein Tank oder Tank stillgelegt', (page) => page.getByTestId('building-no-tank-checkbox'));
 export const submitButton = target('Gebäude speichern', (page) => page.getByTestId('building-form-submit'));
