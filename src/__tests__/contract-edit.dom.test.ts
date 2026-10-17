@@ -158,12 +158,13 @@ describe('Mietvertrag bearbeiten', () => {
 
 	// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
 	const onTermination = 'frühestens auf den nächsten Kündigungstermin';
+	const afterEnd = 'erst nach dem Vertragsende möglich';
 	// #388: the befristet hint names the form rule too
-	const afterEnd = 'erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.';
+	const afterEndWithForm = `${afterEnd}, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.`;
 	it.each([
 		['unbefristet', null, false, onTermination, afterEnd],
 		['gekündigt', '2099-03-31', true, onTermination, afterEnd],
-		['befristet', '2099-03-31', false, afterEnd, 'Kündigungstermin']
+		['befristet', '2099-03-31', false, afterEndWithForm, 'Kündigungstermin']
 	])(
 		'nennt bei einem laufenden %s Mietvertrag die Regel einer Mietzinserhöhung',
 		async (_kind, endDate, terminated, rule, otherRule) => {

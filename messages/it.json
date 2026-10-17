@@ -662,7 +662,7 @@
 	"contracts_period": "Durata del contratto",
 	"contracts_rent": "Pigione",
 	"contracts_step_review": "Verifica",
-	"contracts_no_advance_text": "Senza acconto, l’inquilino paga per lo più un forfait per le spese accessorie, oppure il contratto di locazione non prevede spese accessorie. Se il contratto di locazione firmato prevede un acconto, lo inserisca. Altrimenti tolga tutte le spunte sotto «Spese accessorie pattuite»: Dwello non conteggia allora spese accessorie a questo inquilino. Se le spese accessorie sono pattuite senza acconto, l’inquilino le paga interamente con il conteggio spese accessorie.",
+	"contracts_no_advance_text": "Senza acconto, l’inquilino paga per lo più un forfait per le spese accessorie, oppure il contratto di locazione non prevede spese accessorie. Se il contratto di locazione firmato prevede un acconto, lo inserisca. Altrimenti tolga la selezione da tutte le categorie sotto «Spese accessorie pattuite»: Dwello non conteggia allora spese accessorie a questo inquilino. Se le spese accessorie sono pattuite senza acconto, l’inquilino le paga interamente con il conteggio spese accessorie.",
 	"contracts_start_in_past": "L’inizio del contratto, {date}, è nel passato. La data è corretta?",
 	"contracts_unlimited": "A tempo indeterminato",
 	"contracts_limited": "A tempo determinato",
