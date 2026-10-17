@@ -375,6 +375,10 @@ Given('die Abrechnung {int} von {string} ist ersetzt', async ({ seed }, year: nu
 	await seed.replaceStatement(tenant, year);
 });
 
+Given('der Mietvertrag von {string} beginnt danach am {string}', async ({ seed }, tenant: string, date: string) => {
+	await seed.contractStart(tenant, date);
+});
+
 Given('die Abrechnung {int} von {string} ist berichtigt', async ({ seed }, year: number, tenant: string) => {
 	await seed.replaceStatement(tenant, year, true);
 });
@@ -430,7 +434,7 @@ Then('beträgt der Saldo der Abrechnung {string}', async ({ verwalter }, amount:
 	await verwalter.sees(balanceAmount).toBe(francs(amount));
 });
 
-Then('bietet die Detailseite weder Zahlung noch Mahnung noch Bearbeitung der Abrechnung an', async ({ verwalter }) => {
+Then('bietet die Detailseite weder Zahlung noch Mahnung noch Bearbeitung noch Berichtigung der Abrechnung an', async ({ verwalter }) => {
 	await verwalter.sees(changeOffers).toBe(0);
 });
 

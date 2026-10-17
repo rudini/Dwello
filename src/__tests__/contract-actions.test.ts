@@ -152,6 +152,14 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		expect(data.billedBy).toBeNull();
 	});
 
+	// #120, Fachreview W2e: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode
+	it('nennt die Periode einer ersetzten Abrechnung ohne berichtigte', async () => {
+		const replaced = { ...statementOf('c1', lastYear), status: 'replaced' };
+		expect(await missingOf(backend([replaced], `${lastYear}-03-01`))).toEqual([
+			{ ...year(lastYear), href: `/statements/generate?building=b1&start=${lastYear}-01-01&end=${lastYear}-12-31` }
+		]);
+	});
+
 	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
 		expect(await missingOf(backend([statementOf('c1', lastYear)], `${lastYear}-03-01`))).toEqual(
 			[]

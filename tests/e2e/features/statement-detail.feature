@@ -581,15 +581,30 @@ Funktionalität: Abrechnungsdetail
     Dann rechnet die Abrechnung "CHF 442.90" als bereits bezahlt an
     Und beträgt der Saldo der Abrechnung "CHF 187.45"
 
-  # #120: die ersetzte Abrechnung wird nicht mehr gemahnt, nicht bezahlt und nicht bearbeitet
+  # #120: die ersetzte Abrechnung wird nicht mehr gemahnt (auch nach Ablauf der Zahlungsfrist), nicht bezahlt, nicht
+  # bearbeitet und nicht noch einmal ersetzt
   @wip
   Szenario: Ersetzte Abrechnung bleibt unverändert
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Zahlungsfrist der Abrechnung 2024 von "Eva Frei" ist abgelaufen
     Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann hat die Abrechnung den Status "Ersetzt"
-    Und bietet die Detailseite weder Zahlung noch Mahnung noch Bearbeitung der Abrechnung an
+    Und bietet die Detailseite weder Zahlung noch Mahnung noch Bearbeitung noch Berichtigung der Abrechnung an
+
+  # Persona Anna I4: der Mieter zog erst 2025 ein; die versendete Abrechnung 2024 ist ersetzt, eine berichtigte gibt es
+  # nicht (Fachreview W2e V-5)
+  @wip
+  Szenario: Keine berichtigte Abrechnung ohne Mietstage in der Periode
+    Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Abrechnung 2024 von "Marc Huber" ist ersetzt
+    Und der Mietvertrag von "Marc Huber" beginnt danach am "2025-05-01"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Teilen Sie dem Mieter mit, dass die Abrechnung"
+    Und hat die Abrechnung den Status "Ersetzt"
 
   @wip
   Szenario: Von der ersetzten Abrechnung zur berichtigten wechseln

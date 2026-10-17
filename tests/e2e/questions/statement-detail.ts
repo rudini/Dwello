@@ -3,6 +3,7 @@ import { type Question, question } from '../screenplay/actor';
 import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
 import {
 	correctDialog,
+	correctStatementButton,
 	markPaidButton,
 	priorPayments,
 	reminderButton,
@@ -90,9 +91,9 @@ export const priorPaymentsAmount = question('the amount already paid on the repl
 export const balanceAmount = question('the Saldo of the statement', async (actor) =>
 	amountAfter('', await actor.answer(Text.of(statementBalance)))
 );
-/** The actions a replaced statement must no longer offer: mark paid, reset the payment, remind, edit */
-export const changeOffers = question('the offers to pay, remind or edit', async (actor) =>
-	[markPaidButton, resetPaymentButton, reminderButton, statementEditButton].reduce(
+/** The actions a replaced statement must no longer offer: mark paid, reset the payment, remind, edit, correct */
+export const changeOffers = question('the offers to pay, remind, edit or correct', async (actor) =>
+	[markPaidButton, resetPaymentButton, reminderButton, statementEditButton, correctStatementButton].reduce(
 		async (sum, button) => (await sum) + (await actor.answer(Count.of(button))),
 		Promise.resolve(0)
 	)

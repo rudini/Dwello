@@ -328,7 +328,7 @@ Funktionalität: Mietvertragsdetail
     Und für "Bruno Meier" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
     Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
-    Dann meldet der Mietvertrag "Berichtigen Sie zuerst die Abrechnung."
+    Dann meldet der Mietvertrag "Berichtigen Sie zuerst jede dieser Abrechnungen."
     Und zeigt der Mietvertrag "Befristet bis 30.06.2025"
 
   @wip

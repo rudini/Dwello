@@ -184,6 +184,33 @@ describe('Berichtigte Abrechnung', () => {
 		expect((await correct(id)).status).toBe(201);
 	});
 
+	it('rechnet eine schon bezahlte Rückerstattung dazu', async () => {
+		const id = await sentStatement();
+		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount: '-20.00' });
+		await replace(id);
+
+		const corrected = (await (await correct(id)).json()) as Statement;
+
+		expect(corrected.priorPayments).toBe('-20.00');
+		const unrounded = Number(corrected.totalCosts) - Number(corrected.totalAdvancePayments) + 20;
+		expect(Number(corrected.balance)).toBe(Math.floor(Math.round(unrounded * 100) / 5) / 20);
+	});
+
+	// Fachreview W2e V-4: der Betrag enthält die Zahlungen der ganzen Kette, die Abrechnung nennt jede davon
+	it('nennt jede ersetzte Abrechnung, auf die schon bezahlt wurde', async () => {
+		const first = await sentStatement();
+		await sendJson('PUT', `/api/v1/statements/${first}/status`, { status: 'paid', paidDate: today(), paidAmount: '200.00' });
+		await replace(first);
+		const second = ((await (await correct(first)).json()) as Statement).id;
+		await sendJson('PUT', `/api/v1/statements/${second}/status`, { status: 'sent' });
+		await replace(second);
+
+		const third = (await (await correct(second)).json()) as Statement & { priorPaidOn: string[] };
+
+		expect(third.priorPayments).toBe('200.00');
+		expect(third.priorPaidOn).toEqual([(await statement(first)).statementNumber]);
+	});
+
 	it('entsteht auch im Abrechnungslauf der Periode', async () => {
 		const id = await sentStatement();
 		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today(), paidAmount: '80.00' });
@@ -202,6 +229,24 @@ describe('Berichtigte Abrechnung', () => {
 	});
 });
 
+// Fachreview W2e V-3: eine Abrechnung einer anderen, nur überlappenden Periode rechnet keine Zahlung an
+it('verknüpft im Abrechnungslauf keine Abrechnung einer anderen Periode', async () => {
+	const id = await sentStatement();
+	await replace(id);
+
+	const generated = (await (
+		await sendJson('POST', '/api/v1/statements/generate', {
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: '2025-07-01',
+			periodEnd: '2026-06-30'
+		})
+	).json()) as Statement;
+
+	expect(generated).toMatchObject({ priorPayments: '0.00', replaces: null });
+	await callApi(`/api/v1/statements/${generated.id}`, { method: 'DELETE' });
+});
+
 describe('Vertragsdaten nach dem Ersetzen', () => {
 	it('lassen sich ändern, auch wenn sie die Mietstage der ersetzten Abrechnung ändern', async () => {
 		await removeStatements();
@@ -211,5 +256,34 @@ describe('Vertragsdaten nach dem Ersetzen', () => {
 		await replace(id);
 
 		expect((await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2025-05-01' })).status).toBe(200);
+	});
+});
+
+// Persona Anna I4, Fachreview W2e V-5: ohne Mietstage in der Periode gibt es keine berichtigte Abrechnung
+describe('Ohne Mietstage in der Periode', () => {
+	it('sagt je nach Zahlung, was zu tun ist', async () => {
+		await removeStatements();
+		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2025-01-01' });
+		const paid = await sentStatement();
+		await sendJson('PUT', `/api/v1/statements/${paid}/status`, { status: 'paid', paidDate: today(), paidAmount: '36.00' });
+		const refunded = await sentStatement();
+		await sendJson('PUT', `/api/v1/statements/${refunded}/status`, { status: 'paid', paidDate: today(), paidAmount: '-20.00' });
+		const sent = await sentStatement();
+		for (const id of [paid, refunded, sent]) await replace(id);
+		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2026-02-01' });
+		const number = async (id: string) => (await statement(id)).statementNumber;
+
+		await expectRejection(await correct(paid), 409, 'The contract has no rent days in the period', 'STATEMENT_NO_RENTAL_DAYS_PAID', {
+			number: await number(paid),
+			amount: '36.00'
+		});
+		await expectRejection(await correct(refunded), 409, 'The contract has no rent days in the period', 'STATEMENT_NO_RENTAL_DAYS_REFUNDED', {
+			number: await number(refunded),
+			amount: '20.00'
+		});
+		await expectRejection(await correct(sent), 409, 'The contract has no rent days in the period', 'STATEMENT_NO_RENTAL_DAYS_SENT', {
+			number: await number(sent),
+			amount: '0.00'
+		});
 	});
 });

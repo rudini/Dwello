@@ -57,7 +57,7 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Vertragsbeginn nach dem Beginn einer versendeten Abrechnung
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Stimmt es, berichtigen Sie zuerst die Abrechnung."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Stimmt es, berichtigen Sie zuerst jede dieser Abrechnungen."
 
   @wip
   Szenario: Vertragsbeginn nach dem Berichtigen der Abrechnung ändern
