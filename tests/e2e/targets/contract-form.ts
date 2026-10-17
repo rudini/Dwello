@@ -47,6 +47,7 @@ export const deleteDraftAndSaveButton = target('Entwurf löschen und speichern',
 // «Verwaltungspauschale vereinbart»: Satz des Abrechnungslaufs, eigener Satz or nein (#89)
 export const feeChoice = (choice: 'run' | 'own' | 'none') =>
 	target(`Verwaltungspauschale «${choice}»`, (page) => page.getByTestId(`contract-fee-choice-${choice}`));
+export const feeHelp = target('Hilfe zur Verwaltungspauschale', (page) => page.getByTestId('contract-fee-choice-help'));
 export const feeRateInput = target('Eigener Satz der Verwaltungspauschale', (page) => page.getByTestId('contract-fee-rate-input'));
 export const runningContractHint = target('Hinweis auf einen laufenden Mietvertrag des Mieters', (page) =>
 	page.getByTestId('tenant-running-contract')

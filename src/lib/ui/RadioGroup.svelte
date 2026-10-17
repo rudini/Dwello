@@ -41,7 +41,9 @@
 	data-testid={testid}
 >
 	<legend id="{name}-legend" class="mb-2 font-semibold text-ink">{legend}</legend>
-	{#if help}<p id="{name}-help" class="text-ink-muted">{help}</p>{/if}
+	{#if help}<p id="{name}-help" class="text-ink-muted" data-testid={testid && `${testid}-help`}>
+			{help}
+		</p>{/if}
 	{#each options as option, i (option.value)}
 		{@const id = `${name}-${i}`}
 		<label
