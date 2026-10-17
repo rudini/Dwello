@@ -26,6 +26,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | error-server           | default             |
       | error-server           | server-error        |
       | dashboard              | default             |
+      | dashboard              | old-address-task    |
       | dashboard              | first-use           |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
@@ -49,6 +50,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | apartment-new          | default             |
       | apartment-new          | submit-empty        |
       | apartment-detail       | default             |
+      | apartment-detail-vacant | default            |
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
       | tenants                | default             |
@@ -70,25 +72,35 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-new           | submit-empty        |
       | contract-new           | every-wizard-step   |
       | contract-new           | overlap-warning     |
+      | contract-new           | rent-taken-over     |
       | contract-new           | draft-restored      |
       | contract-new           | draft-discard-dialog |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
+      | contract-new           | agreed-costs-none        |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
       | contract-detail        | end-dialog-error    |
       | contract-detail        | past-end-error      |
       | contract-detail        | end-dialog-refused  |
+      | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | delete-dialog       |
       | contract-detail        | missing-statements  |
+      | contract-moved-out-detail | default          |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
       | contract-edit          | past-end-error      |
       | contract-edit          | edit-refused        |
       | contract-edit          | contracts-unknown   |
+      | contract-edit          | agreed-costs-none   |
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |
+      | contract-detail-ended  | default             |
+      | contract-detail-ended  | delete-dialog       |
+      | contract-detail-expired | default            |
+      | contract-detail-expired | moved-out-dialog   |
+      | contract-detail-expired | continue-refused   |
       | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
@@ -119,30 +131,52 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |
       | statement-generate     | category-check      |
+      | statement-generate     | invoice-hints       |
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
+      | statement-generate     | old-address-preview |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | draft-restored      |
       | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
+      | statement-generate     | agreed-costs        |
+      | statement-generate     | agreement-save-failed |
+      | statement-generate     | agreements-failed     |
+      | statement-generate     | generation-result   |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
+      | statement-old-address-detail | default       |
+      | statement-old-address-detail | send-dialog   |
+      | statement-parts-detail | default             |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
       | statement-sent-detail  | action-error        |
+      | statement-sent-detail  | correct-dialog      |
+      | statement-paid-detail  | default             |
+      | statement-paid-detail  | reset-payment-dialog |
+      | statement-paid-detail  | correct-dialog      |
+      | statement-replaced-detail | default          |
+      | statement-corrected-detail | default         |
+      | statement-correction-detail | default        |
       | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
+      | statement-empty-detail | send-dialog         |
+      | statement-empty-detail | send-refused        |
       | statement-pdf-refused  | default             |
+      | statement-zip-refused  | default             |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |
       | documents              | empty               |
       | documents              | marked-sent         |
       | config                 | default             |
+      | audit-log              | default             |
+      | audit-log              | empty               |
+      | audit-log              | delete-dialog       |
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |

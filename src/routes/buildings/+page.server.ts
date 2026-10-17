@@ -1,4 +1,4 @@
-import { countStatus } from '$lib/apartment';
+import { countStatus, reletStarts } from '$lib/apartment';
 import type { BuildingsListData } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -36,14 +36,12 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<BuildingsLis
 			city: b.city,
 			canton: b.canton,
 			country: b.country || 'CH',
-			latitude: b.latitude ? Number(b.latitude) : undefined,
-			longitude: b.longitude ? Number(b.longitude) : undefined,
 			yearBuilt: b.yearBuilt ? Number(b.yearBuilt) : undefined,
 			buildingType: b.buildingType,
 			apartmentCount: Number(b.apartmentCount) || 0,
 			occupiedCount: Number(b.occupiedCount) || 0,
 			vacantCount: Number(b.vacantCount) || 0,
-			reletCount: countStatus(inBuilding(b.id), 'relet'),
+			reletStarts: reletStarts(inBuilding(b.id)),
 			reservedCount: countStatus(inBuilding(b.id), 'reserved')
 		}));
 

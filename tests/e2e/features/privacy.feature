@@ -30,12 +30,17 @@ Funktionalität: Datenschutz
   Szenario: Anmeldungen im Protokoll des Servers
     Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird
 
+  # Protokoll unter den Einstellungen (#357, Fachprüfung R-1, R-2): Zweck, Inhalt und Aufbewahrung, getrennt vom Protokoll des Servers
+  Szenario: Anmeldungen und Änderungen im Protokoll unter den Einstellungen
+    Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "jede Anmeldung mit dem gewählten Anbieter (ohne Namen und E-Mail-Adresse)"
+    Und nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Die Einträge bleiben, auch wenn Sie die Rechnung löschen, bis Sie sie im Protokoll löschen."
+
   Szenario: Anmeldung nur über die eingerichteten Anbieter
     Dann nennt die Datenschutzerklärung unter "Anmeldung" "Google"
     Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Microsoft"
 
   Szenario: Dienste Dritter, die der Browser aufruft
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "CARTO"
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "CARTO"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "OpenPLZ"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Google Fonts"

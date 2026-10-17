@@ -19,11 +19,12 @@ Funktionalität: Wohnungsliste
     Und ist die Wohnung "2.02" "Vermietet"
     Und die Wohnungsliste enthält genau 2 Wohnungen
 
-  Szenario: Wiedervermietete Wohnung
+  # F-4 (#58): «Vermietet ab» statt «Wiedervermietet»
+  Szenario: Künftig vermietete Wohnung
     Angenommen der Mieter "Carla Rossi" existiert
     Und "Carla Rossi" mietet die Wohnung "2.01" seit "2099-11-01" für "900" Franken
     Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
-    Dann ist die Wohnung "2.01" "Wiedervermietet ab 01.11.2099"
+    Dann ist die Wohnung "2.01" "Vermietet ab 01.11.2099"
 
   Szenario: Nur leere Wohnungen anzeigen
     Wenn der Liegenschaftsverwalter nur die leeren Wohnungen im Gebäude "Ahornhof" anzeigt
@@ -40,6 +41,26 @@ Funktionalität: Wohnungsliste
   Szenario: Wohnungssuche ohne Treffer
     Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
     Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnungen gefunden"
+
+  # Wohnungsnummern ohne die Buchstaben a bis f: sonst passen sie in die UUID der Testnamen
+  # #160, #373: jedes Wort muss zur Wohnungsnummer, zum Gebäudenamen oder zur Adresse des Gebäudes passen
+  Szenario: Wohnungen wortweise nach Gebäude, Adresse und Wohnungsnummer suchen
+    Angenommen das Gebäude "Seepark" an der "Seestrasse 5" in "Uster" existiert
+    Und im Gebäude "Seepark" gibt es die leere Wohnung "H1"
+    Und im Gebäude "Seepark" gibt es die leere Wohnung "H2"
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Seepark H1" sucht
+    Dann ist die Wohnung "H1" "Leer"
+    Und die Wohnungsliste enthält genau 1 Wohnung
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Wohnung Seestrasse 5 H2" sucht
+    Dann ist die Wohnung "H2" "Leer"
+    Und die Wohnungsliste enthält genau 1 Wohnung
+
+  Szenario: Wohnungssuche ohne Treffer nennt den Suchbegriff
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Ahornhof 9.99" sucht
+    Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnung passt zu «Ahornhof 9.99». Gesucht wird in Wohnungsnummer, Gebäudename, Strasse und Ort."
+
+  Szenario: Die Wohnungssuche sagt, wonach sie sucht
+    Dann erfährt der Liegenschaftsverwalter bei der Wohnungssuche "Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort. Mehrere Wörter grenzen die Suche ein, zum Beispiel Gebäudename und Wohnungsnummer."
 
   Szenario: Filter nach dem Zurücksetzen leer
     Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht

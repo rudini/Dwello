@@ -30,6 +30,20 @@
 
 	<ConfigLinks />
 
+	<ConfigLinks
+		title={m.audit_title()}
+		testid="audit-log-links"
+		links={[
+			{
+				key: 'audit-log',
+				href: '/config/audit-log',
+				label: m.audit_title(),
+				text: m.audit_link(),
+				icon: 'calendar'
+			}
+		]}
+	/>
+
 	<form
 		method="POST"
 		use:enhance={() => {
@@ -95,6 +109,25 @@
 				error={errors.managementFeePercent}
 				help="{help.managementFee} {m.settings_fee_suggestion()}"
 				example="3"
+			/>
+		</Panel>
+
+		<Panel title={m.settings_deadlines()}>
+			<SettingField
+				type="number"
+				name="paymentDeadlineDays"
+				label={m.settings_payment_days_label()}
+				value={settings.paymentDeadlineDays}
+				error={errors.paymentDeadlineDays}
+				help={m.settings_payment_days_help()}
+			/>
+			<SettingField
+				type="number"
+				name="reminderAfterDays"
+				label={m.settings_reminder_days_label()}
+				value={settings.reminderAfterDays}
+				error={errors.reminderAfterDays}
+				help={m.settings_reminder_days_help()}
 			/>
 		</Panel>
 

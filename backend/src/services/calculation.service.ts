@@ -10,9 +10,9 @@
  * - Balance calculation
  */
 
-import { like, max } from 'drizzle-orm';
+import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements, type HeatingShare, type InvoicePart } from '../db/schema';
+import { statementNumbers, utilityStatements, type BilledInvoice, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -22,7 +22,8 @@ import {
 	handleMidYearMoves
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
-import { getContract } from './contract.service';
+import { billingStart, getContract } from './contract.service';
+import { agreedCategoryIds } from './agreed-category.service';
 import { getHeatingProfile } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
@@ -43,6 +44,7 @@ export interface CalculatedLineItem {
 	positionRentalDays: number | null; // the period share as days, when it is one: the tenant's days in the days billed (#208)
 	billedDays: number | null; // and the days the position's invoices bill in the period
 	invoiceParts: InvoicePart[] | null; // invoices over different days: each with its days, for the weighted share (#226)
+	invoices: BilledInvoice[]; // the invoices it bills (#96)
 	isHeatingCost: boolean;
 }
 
@@ -67,6 +69,7 @@ export interface StatementCalculation {
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, Negative = refund
 	heating: HeatingShare | null; // as the heating costs were shared (#209)
+	agreedCategoryIds: string[]; // the categories the contract agreed (#91)
 }
 
 /**
@@ -253,6 +256,17 @@ export function calculateBalance(totalCosts: number, totalAdvancePayments: numbe
 	return roundTo5Rappen(totalCosts - totalAdvancePayments);
 }
 
+/** Rate of the Verwaltungspauschale: only where the contract agrees one (#89, Art. 257a Abs. 2 OR), its own rate first,
+ * else the run's, else the setting */
+async function feePercentOf(
+	contract: { managementFeeAgreed: boolean; managementFeePercent: string | null },
+	runPercent?: number
+) {
+	if (!contract.managementFeeAgreed) return 0;
+	if (contract.managementFeePercent !== null) return parseFloat(contract.managementFeePercent);
+	return runPercent ?? (await getTypedConfig('management_fee_pct'));
+}
+
 /**
  * Main calculation function for a contract
  */
@@ -300,8 +314,10 @@ export async function calculateStatementForContract(
 		...(await fuelStockChange(buildingId, start, end))
 	];
 
-	// Group invoices by category
-	const invoiceGroups = groupInvoicesByCategory(invoices);
+	// Group invoices by category; only the categories the contract agrees (#91, Art. 257a Abs. 2 OR): the share of its
+	// apartment in the others is the landlord's. An invoice without a Kategorie has nothing to agree and is billed
+	const agreed = await agreedCategoryIds(contractId);
+	const invoiceGroups = groupInvoicesByCategory(invoices).filter((group) => !group.categoryId || agreed.includes(group.categoryId));
 
 	// All apartments of the building share its costs according to the distribution key
 	const { apartments: buildingApartmentRows } = await listApartments({ buildingId, limit: 1000 });
@@ -335,7 +351,7 @@ export async function calculateStatementForContract(
 			group.isHeatingCost && heatingProfileId
 				? await handleMidYearMoves(
 						heatingProfileId,
-						new Date(contract.startDate),
+						new Date(billingStart(contract)),
 						contract.endDate ? new Date(contract.endDate) : null,
 						periodStart,
 						periodEnd,
@@ -367,6 +383,14 @@ export async function calculateStatementForContract(
 			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			...shareDays,
+			invoices: group.invoices.map(({ id, description, amount, start, end, fuelStock }) => ({
+				id,
+				description,
+				amount,
+				start,
+				end,
+				...(fuelStock && { fuelStock })
+			})),
 			isHeatingCost: group.isHeatingCost
 		});
 
@@ -375,9 +399,8 @@ export async function calculateStatementForContract(
 
 	subtotal = roundToRappen(subtotal);
 
-	// Management fee: a percentage (chosen per generation run, otherwise the configured default) of the tenant's own
-	// utility costs, so the tenant can check the rate on the statement
-	const feePercent = managementFeePercent ?? (await getTypedConfig('management_fee_pct'));
+	// Management fee: a percentage of the tenant's own utility costs, so the tenant can check the rate on the statement
+	const feePercent = await feePercentOf(contract, managementFeePercent);
 	const managementFee = calculateManagementFee(subtotal, feePercent).fee;
 	const totalCosts = roundToRappen(subtotal + managementFee);
 
@@ -409,14 +432,15 @@ export async function calculateStatementForContract(
 		totalCosts,
 		totalAdvancePayments,
 		balance,
-		heating
+		heating,
+		agreedCategoryIds: agreed
 	};
 }
 
 // What the PDF prints of the heating profile, kept with the statement (#209): the same for every heating position
 async function heatingOfRun(
 	groups: InvoiceGroup[],
-	contract: { startDate: string; endDate: string | null },
+	contract: { startDate: string; endDate: string | null; billedUntil: string | null },
 	periodStart: Date,
 	periodEnd: Date,
 	heatingProfileId?: string
@@ -425,7 +449,7 @@ async function heatingOfRun(
 	const profile = await getHeatingProfile(heatingProfileId);
 	if (!profile) return { byDays: true }; // as the per-group calculation shares without a profile
 	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
-	const result = await handleMidYearMoves(profile.id, new Date(contract.startDate), contractEnd, periodStart, periodEnd, 100);
+	const result = await handleMidYearMoves(profile.id, new Date(billingStart(contract)), contractEnd, periodStart, periodEnd, 100);
 	// the profile's names as they were, so a renamed or deleted own profile still names the share it gave, or the one
 	// chosen but not applied (#247)
 	const { name, nameDE, nameFR, nameIT, nameEN } = profile;
@@ -440,7 +464,7 @@ async function heatingOfRun(
 
 /**
  * Next statement number of a building and year: NK-<building>-<year>-0001, 0002, …
- * Counts on from the highest one, so a deleted statement's number does not come back while later ones exist
+ * Never gives a number twice, also after its draft was deleted: the gap stays (#97)
  */
 export async function generateStatementNumber(buildingId: string, periodEnd: Date): Promise<string> {
 	const prefix = `NK-${buildingId.substring(0, 8).toUpperCase()}-${periodEnd.getUTCFullYear()}-`;
@@ -448,7 +472,12 @@ export async function generateStatementNumber(buildingId: string, periodEnd: Dat
 		.select({ highest: max(utilityStatements.statementNumber) })
 		.from(utilityStatements)
 		.where(like(utilityStatements.statementNumber, `${prefix}%`));
-	const sequence = highest ? Number(highest.slice(prefix.length)) + 1 : 1;
+	// the first number of a prefix follows the highest existing one; after that the counter alone decides (#97)
+	const [{ lastNumber }] = await db
+		.insert(statementNumbers)
+		.values({ prefix, lastNumber: highest ? Number(highest.slice(prefix.length)) + 1 : 1 })
+		.onConflictDoUpdate({ target: statementNumbers.prefix, set: { lastNumber: sql`${statementNumbers.lastNumber} + 1` } })
+		.returning({ lastNumber: statementNumbers.lastNumber });
 
-	return `${prefix}${String(sequence).padStart(4, '0')}`;
+	return `${prefix}${String(lastNumber).padStart(4, '0')}`;
 }

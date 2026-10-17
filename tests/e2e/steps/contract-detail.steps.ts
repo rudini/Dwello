@@ -5,12 +5,24 @@ import {
 	deleteDialogText,
 	endConfirmationInWindow,
 	endDialogDeathText,
+	endDialogText,
+	noticePeriodHintShown,
+	noticePeriodHintText,
+	noticeReceivedOn,
 	endDateProblemShown,
 	endOfContract,
+	managementFeeOfContract,
 	missingStatementsText,
+	missingStatementsShown,
+	billedUntilOfContract,
+	nextStepsText,
+	statementLinkedInDeleteDialog,
 	statusOfContract,
-	totalRent
+	totalRent,
+	fixedTermCheckShown,
+	fixedTermErrorText
 } from '../questions/contract-detail';
+import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
 import {
@@ -21,6 +33,8 @@ import {
 	deleteDraftAndEndContract,
 	editContractFromDetail,
 	endContract,
+	confirmEnd,
+	fillEndWithNotice,
 	startEndingContract,
 	endContractOn,
 	openContract,
@@ -30,8 +44,12 @@ import {
 	scrollToEndConfirmation,
 	showBuildingInvoices,
 	showContractStatements,
+	openStatementFromDeleteDialog,
 	startDeletingContract,
-	useWindowOf
+	useWindowOf,
+	continueOpenEnded,
+	confirmMovedOut,
+	deleteDraftAndContinue
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 import { inDays } from '../fixtures/dates';
@@ -44,6 +62,14 @@ Given(
 	'für {string} gibt es die Abrechnung {int} im Gebäude {string}',
 	async ({ seed }, tenant: string, year: number, building: string) => {
 		await seed.statement(tenant, building, year);
+	}
+);
+
+Given(
+	'für {string} gibt es die versendete Abrechnung {int} im Gebäude {string}',
+	async ({ seed }, tenant: string, year: number, building: string) => {
+		await seed.statement(tenant, building, year);
+		await seed.sendStatement(tenant, year);
 	}
 );
 
@@ -200,6 +226,58 @@ Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed 
 	await verwalter.sees(endOfContract).toContain(date);
 });
 
+Given(
+	'der Mietvertrag von {string} ist bis {string} ausserhalb von Dwello abgerechnet',
+	async ({ seed }, tenant: string, date: string) => {
+		await seed.billedUntil(tenant, date);
+	}
+);
+
+Then('zeigt der Mietvertrag «Abgerechnet bis» {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(billedUntilOfContract).toBe(date);
+});
+
+Given(
+	'der Mietvertrag von {string} ist bis Ende des letzten Jahres ausserhalb von Dwello abgerechnet',
+	async ({ seed }, tenant: string) => {
+		await seed.billedUntil(tenant, `${lastYear}-12-31`);
+	}
+);
+
+Then('zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres', async ({ verwalter }) => {
+	await verwalter.sees(billedUntilOfContract).toBe(`31.12.${lastYear}`);
+});
+
+Given('der Mietvertrag von {string} hat {string} Franken Akonto', async ({ seed }, tenant: string, advance: string) => {
+	await seed.advancePayment(tenant, advance);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er eine ausserhalb von Dwello abgerechnete Periode mit «Abgerechnet bis» einträgt',
+	async ({ verwalter }) => {
+		await verwalter.sees(missingStatementsText).toContain('«Abgerechnet bis» ein');
+	}
+);
+
+Then('meldet der Mietvertrag keine fehlende Abrechnung', async ({ verwalter }) => {
+	await verwalter.sees(missingStatementsShown).toBe(false);
+});
+
+Given('im Mietvertrag von {string} ist keine Verwaltungspauschale vereinbart', async ({ seed }, tenant: string) => {
+	await seed.managementFee(tenant, false);
+});
+
+Given(
+	'im Mietvertrag von {string} ist eine Verwaltungspauschale von {int} % vereinbart',
+	async ({ seed }, tenant: string, percent: number) => {
+		await seed.managementFee(tenant, true, String(percent));
+	}
+);
+
+Then('zeigt der Mietvertrag bei der Verwaltungspauschale {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(managementFeeOfContract).toBe(text);
+});
+
 When(
 	'der Liegenschaftsverwalter als nächsten Schritt einen neuen Mietvertrag für {string} erfassen will',
 	async ({ verwalter, names }, tenant: string) => {
@@ -218,3 +296,89 @@ Then(
 		await verwalter.sees(endDialogDeathText).toContain('erst, wenn die Erben oder Sie gekündigt haben');
 	}
 );
+
+// A-3 (#112): the day the notice arrived gives a hint on a short Kündigungsfrist, never a block
+When(
+	'der Liegenschaftsverwalter den Mietvertrag auf den {string} beenden will und die Kündigung am {string} erhalten hat',
+	async ({ verwalter }, endDate: string, receivedOn: string) => {
+		await verwalter.attemptsTo(fillEndWithNotice(endDate, receivedOn));
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietvertrag trotzdem beendet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmEnd);
+});
+
+Then(
+	'weist der Dialog darauf hin, dass zwischen Eingang und Vertragsende weniger als 3 Monate liegen',
+	async ({ verwalter }) => {
+		await verwalter.sees(noticePeriodHintText).toContain('Zwischen Eingang und Vertragsende liegen weniger als 3 Monate.');
+		await verwalter.sees(noticePeriodHintText).toContain('erst auf den nächsten Kündigungstermin');
+		await verwalter.sees(noticePeriodHintText).toContain('Ein Ersatzmieter übernimmt den Mietvertrag');
+	}
+);
+
+// anchored on the field's help: an empty or broken dialog shows no hint either
+Then('zeigt der Dialog keinen Hinweis auf die Frist', async ({ verwalter }) => {
+	await verwalter.sees(endDialogText).toContain('Der Tag, an dem das Kündigungsschreiben angekommen ist.');
+	await verwalter.sees(endDialogText).toContain('Die Kündigung des Mieters muss schriftlich sein.');
+	await verwalter.sees(noticePeriodHintShown).toBe(false);
+});
+
+Then('zeigt der Mietvertrag die Kündigung als erhalten am {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(noticeReceivedOn).toBe(date);
+});
+
+// A-5 (#114): the address step names the tenant
+Then(
+	'bitten die nächsten Schritte, die neue Adresse von {string} einzutragen: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(nextStepsText).toContain(
+			`Bitten Sie ${names.get(tenant)} um die neue Adresse und tragen Sie sie beim Mieter ein. ${rest}`
+		);
+	}
+);
+
+Then(
+	'verlinkt der Dialog die Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		const id = seed.idOf(`Abrechnung ${tenant} ${year}`)!;
+		await verwalter.sees(statementLinkedInDeleteDialog(id)).toBe(statementPath(seed, tenant, year));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter im Dialog die Abrechnung {int} von {string} öffnet',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(openStatementFromDeleteDialog(seed.idOf(`Abrechnung ${tenant} ${year}`)!));
+	}
+);
+
+// A-6 (#115): an expired fixed-term contract continues open-ended, or the tenant has moved out
+When('der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(continueOpenEnded);
+});
+
+When('der Liegenschaftsverwalter bestätigt, dass der Mieter ausgezogen ist', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmMovedOut);
+});
+
+When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag unbefristet weiterführt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(deleteDraftAndContinue);
+});
+
+Then(
+	/^fragt der Mietvertrag nicht(?: mehr)?, ob der Mieter noch in der Wohnung wohnt$/,
+	async ({ verwalter }) => {
+		await verwalter.sees(fixedTermCheckShown).toBe(false);
+	}
+);
+
+Then('meldet der Mietvertrag {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(fixedTermErrorText).toContain(message);
+});
+
+Then('ist der Mietvertrag von {string} unbefristet', async ({ verwalter, seed }, tenant: string) => {
+	await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
+	await verwalter.sees(endOfContract).toBe('Unbefristet');
+});

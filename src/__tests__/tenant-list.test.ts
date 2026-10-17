@@ -21,7 +21,8 @@ const tenant = (id: string, isActive: boolean, currentApartment: string | null =
 	currentApartment,
 	currentBuilding: currentApartment ? 'Ahornhof' : null,
 	nextContractStart: null as string | null,
-	isActive
+	isActive,
+	isFuture: false
 });
 
 const list = (tenants: ReturnType<typeof tenant>[], url = 'http://localhost/tenants') => {
@@ -52,22 +53,42 @@ describe('Mieterliste', () => {
 		const body = row(list([tenant('t1', true, 'Wohnung 2.01')]), 't1');
 
 		expect(body).toContain('Wohnung 2.01 - Ahornhof');
-		expect(body).toMatch(/data-testid="tenant-active"[^>]*>[^]*Aktiv/);
+		expect(body).toMatch(/data-testid="tenant-status"[^>]*>[^]*Aktiv/);
 		expect(body).not.toContain('role="status"');
 	});
 
-	it('nennt bei einem aktiven Mieter ohne laufende Miete den künftigen Mietvertrag', () => {
-		const body = row(list([{ ...tenant('t1', true), nextContractStart: '2026-11-01' }]), 't1');
+	// F-4 (#58): wer erst einzieht, ist «Künftig», nicht «Aktiv»
+	it('nennt bei einem künftigen Mieter den künftigen Mietvertrag und kennzeichnet ihn als künftig', () => {
+		const body = row(
+			list([{ ...tenant('t1', false), isFuture: true, nextContractStart: '2026-11-01' }]),
+			't1'
+		);
 
 		expect(body).toContain('Mietvertrag ab 01.11.2026');
 		expect(body).not.toContain('Keine laufende Miete');
+		expect(body).toMatch(/data-testid="tenant-status"[^>]*>[^]*Künftig/);
+		expect(body).not.toContain('Aktiv');
 	});
 
 	it('zeigt bei ehemaligen Mietern weder Wohnung noch Aktiv', () => {
 		const body = row(list([tenant('t1', false)]), 't1');
 
 		expect(body).toContain('Keine laufende Miete');
-		expect(body).not.toContain('tenant-active');
+		expect(body).not.toContain('tenant-status');
+	});
+
+	// F-4 (#58): aktive, künftige und ehemalige Mieter
+	it('filtert nach aktiven, künftigen und ehemaligen Mietern', () => {
+		const options = [...list([]).matchAll(/<option value="(\w+)"[^>]*>([^<]*)</g)].map((o) => [
+			o[1],
+			o[2].trim()
+		]);
+
+		expect(options).toEqual([
+			['active', 'Aktive Mieter'],
+			['future', 'Künftige Mieter'],
+			['inactive', 'Ehemalige Mieter']
+		]);
 	});
 
 	it('schlägt ohne Mieter vor, den ersten zu erfassen', () => {

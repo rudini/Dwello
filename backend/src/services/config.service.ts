@@ -4,12 +4,12 @@
  *
  * Supported configuration keys:
  * - accounting_period: 'calendar' | 'july-june' | 'november-october'
- * - management_fee_pct: percentage, 3 is the usual guideline (not a limit)
+ * - management_fee_pct: percentage up to 10 (#124: catches typos); 3 is the usual guideline, not a limit
  * - default_heating_profile_id: UUID of default heating profile
  * - default_distribution_key_id: UUID of default distribution key
  * - company_name: Property management company name
  * - company_address: Company address
- * - iban: Swiss IBAN for QR-bill generation
+ * - iban: IBAN from Switzerland or Liechtenstein for QR-bill generation
  * - payment_deadline_days: Days until payment is due (default 30)
  * - reminder_after_days: Days after deadline to send reminder (default 14)
  */
@@ -20,6 +20,7 @@ import { validateIBAN } from './qr-bill.service';
 import { configuration, type Configuration } from '../db/schema';
 import { heatingProfileExists } from './heating-profile.service';
 import { distributionKeyExists } from './distribution-key.service';
+import { recordAudit } from './audit-log.service';
 
 /**
  * Configuration keys with their types and validators
@@ -32,7 +33,7 @@ export const CONFIG_KEYS = {
 	},
 	management_fee_pct: {
 		type: 'number',
-		validator: (v: number) => v >= 0,
+		validator: (v: number) => v >= 0 && v <= 10,
 		default: 3
 	},
 	default_heating_profile_id: {
@@ -83,7 +84,7 @@ export const CONFIG_KEYS = {
 	},
 	default_language: {
 		type: 'string',
-		validator: (v: string) => ['de', 'fr', 'it', 'rm', 'en'].includes(v),
+		validator: (v: string) => ['de', 'fr', 'it', 'en'].includes(v),
 		default: 'de'
 	}
 } as const;
@@ -204,6 +205,12 @@ async function saveConfig(
 		.where(eq(configuration.key, key))
 		.limit(1);
 
+	// #357: a changed rate goes into the Protokoll; «4.250» is the same rate as «4.25»
+	const before = existing?.value ?? String(CONFIG_KEYS.management_fee_pct.default);
+	if (key === 'management_fee_pct' && Number(before) !== Number(value)) {
+		await recordAudit('management_fee_changed', { from: before, to: value }, tx);
+	}
+
 	if (existing) {
 		// Update existing
 		const [updated] = await tx
@@ -259,10 +266,12 @@ export async function setMultipleConfig(
  * Delete a configuration value (reset to default)
  */
 export async function deleteConfig(key: ConfigKey): Promise<boolean> {
-	const result = await db
-		.delete(configuration)
-		.where(eq(configuration.key, key))
-		.returning();
-
-	return result.length > 0;
+	return db.transaction(async (tx) => {
+		const [deleted] = await tx.delete(configuration).where(eq(configuration.key, key)).returning();
+		const to = String(CONFIG_KEYS.management_fee_pct.default);
+		if (key === 'management_fee_pct' && deleted && Number(deleted.value) !== Number(to)) {
+			await recordAudit('management_fee_changed', { from: deleted.value, to }, tx);
+		}
+		return !!deleted;
+	});
 }

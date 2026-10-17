@@ -33,11 +33,11 @@ Funktionalität: Neuen Mietvertrag erfassen
 
   Szenario: Ohne Mieter geht es nicht weiter
     Wenn der Liegenschaftsverwalter ohne Angaben weitergeht
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus."
 
   Szenario: Nettomiete fehlt
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" ohne Nettomiete vermieten will
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich."
 
   Szenario: Zurück verliert keine Angaben
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
@@ -108,6 +108,44 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter weitergeht
     Und ist im Mietvertrag die Wohnung "2.01" gewählt
 
+  # P-17 (#144): die vorgewählte Wohnung bleibt auf dem Umweg über einen neuen Mieter
+  Szenario: Vorgewählte Wohnung bleibt beim Erfassen eines neuen Mieters
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter im Mietvertrag den neuen Mieter "Peter Brunner" erfasst
+    Und der Liegenschaftsverwalter weitergeht
+    Dann ist im Mietvertrag die Wohnung "2.01" gewählt
+
+  # P-17 (#144): die Beträge des letzten Mietvertrags der Wohnung sind vorgeschlagen und änderbar
+  Szenario: Beträge des letzten Mietvertrags der Wohnung übernehmen
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2024-01-01" bis "2025-12-31" für "900" Franken mit "150" Franken Akonto
+    Und der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann schlägt der Schritt "Miete" die Nettomiete "900.00" und das Akonto "150.00" aus dem letzten Mietvertrag der Wohnung vor
+
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
+
+  # #89: ob im Mietvertrag eine Verwaltungspauschale vereinbart ist, wählt der Liegenschaftsverwalter bei jedem neuen
+  # Mietvertrag selbst; Dwello schlägt nichts vor
+  Szenario: Ohne Angabe zur Verwaltungspauschale geht es nicht weiter
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken ohne Angabe zur Verwaltungspauschale vermieten will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie, ob im Mietvertrag eine Verwaltungspauschale vereinbart ist."
+
+  Szenario: Verwaltungspauschale mit eigenem Satz prüfen
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit einer Verwaltungspauschale von "4" % bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Verwaltungspauschale" mit "Vereinbart, 4 %"
+
+  # #91: ein neuer Mietvertrag beginnt mit allen umlagefähigen Kategorien; nur vereinbarte Nebenkosten darf der
+  # Liegenschaftsverwalter abrechnen (Art. 257a Abs. 2 OR)
+  Szenario: Ein neuer Mietvertrag vereinbart alle umlagefähigen Nebenkosten
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"
+    Und zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Lift"
+    Aber zeigt die Prüfung "Vereinbarte Nebenkosten" ohne "Verwaltung"
+
+  Szenario: Nicht vereinbarte Nebenkosten beim neuen Mietvertrag weglassen
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken ohne die Nebenkosten "Lift" bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"
+    Aber zeigt die Prüfung "Vereinbarte Nebenkosten" ohne "Lift"

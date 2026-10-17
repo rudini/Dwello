@@ -4,7 +4,8 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { errorBody } from '../services/coded-error';
+import { errorBody, refusal } from '../services/coded-error';
+import { agreedCategoryIds, agreementsInPeriod, answerAgreement } from '../services/agreed-category.service';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listContracts,
@@ -16,7 +17,7 @@ import {
 	getActiveContract,
 	getContractsByPeriod
 } from '../services/contract.service';
-import { apartmentExists } from '../services/apartment.service';
+import { apartmentExists, getApartment } from '../services/apartment.service';
 import { tenantExists } from '../services/tenant.service';
 import { swissToday } from '../services/today';
 
@@ -31,6 +32,15 @@ const contractQuerySchema = t.Object({
 	offset: t.Optional(t.String())
 });
 
+// «Verwaltungspauschale vereinbart» (#89): without it a contract has none; an own rate from 0 to 10 % (#124)
+const managementFee = {
+	managementFeeAgreed: t.Optional(t.Boolean()),
+	managementFeePercent: t.Optional(t.Nullable(t.String({ pattern: '^(10(\\.0{1,2})?|\\d(\\.\\d{1,2})?)$' })))
+};
+
+// #91: the categories the contract agrees; every other umlagefähige one is not agreed
+const agreedList = t.Optional(t.Array(t.String({ format: 'uuid' })));
+
 const contractBodySchema = t.Object({
 	apartmentId: t.String({ format: 'uuid' }),
 	tenantId: t.String({ format: 'uuid' }),
@@ -40,6 +50,8 @@ const contractBodySchema = t.Object({
 	baseRent: t.String(),
 	additionalRent: t.Optional(t.Nullable(t.String())),
 	monthlyAdvancePayment: t.String(),
+	...managementFee,
+	agreedCategoryIds: agreedList,
 	referenceIndex: t.Optional(t.Nullable(t.String())),
 	contractPdf: t.Optional(t.Nullable(t.String())),
 	notes: t.Optional(t.Nullable(t.String()))
@@ -52,9 +64,14 @@ const contractUpdateSchema = t.Partial(
 		startDate: t.String({ format: 'date' }),
 		endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 		terminated: t.Boolean(),
+		noticeReceivedOn: t.Nullable(t.String({ format: 'date' })), // the day the notice arrived (A-3)
+		billedUntil: t.Nullable(t.String({ format: 'date' })), // «Abgerechnet bis» (#133)
+		movedOut: t.Boolean(), // «Mieter ist ausgezogen» after an agreed end (A-6, #115)
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),
+		...managementFee,
+		agreedCategoryIds: agreedList,
 		referenceIndex: t.Optional(t.Nullable(t.String())),
 		contractPdf: t.Optional(t.Nullable(t.String())),
 		notes: t.Optional(t.Nullable(t.String())),
@@ -96,8 +113,35 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			set.status = 404;
 			return { error: 'Contract not found' };
 		}
-		return contract;
+		return { ...contract, agreedCategoryIds: await agreedCategoryIds(params.id) };
 	})
+	// The categories with costs for the contract in the period and whether it agrees each (#91)
+	.get(
+		'/:id/agreements',
+		async ({ params, query, set }) => {
+			const contract = await getContract(params.id);
+			if (!contract) {
+				set.status = 404;
+				return refusal('CONTRACT_NOT_FOUND', 'Contract not found');
+			}
+			const { buildingId } = (await getApartment(contract.apartmentId))!;
+			return agreementsInPeriod({ ...contract, buildingId }, query.periodStart, query.periodEnd);
+		},
+		{ query: periodQuerySchema }
+	)
+	// The landlord's answer whether the contract agrees a category (#91)
+	.put(
+		'/:id/agreements',
+		async ({ params, body, set }) => {
+			if (!(await getContract(params.id))) {
+				set.status = 404;
+				return refusal('CONTRACT_NOT_FOUND', 'Contract not found');
+			}
+			await answerAgreement(params.id, body.categoryId, body.agreed);
+			return body;
+		},
+		{ body: t.Object({ categoryId: t.String({ format: 'uuid' }), agreed: t.Boolean() }) }
+	)
 	// Get active contract for apartment at date
 	.get(
 		'/apartment/:apartmentId/active',

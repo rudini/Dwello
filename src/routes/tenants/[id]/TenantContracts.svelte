@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { contractPeriod, statusBadges } from '$lib/contract-status';
+	import { historyPeriod, statusBadges } from '$lib/contract-status';
 	import type { ContractHistory } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -27,16 +27,9 @@
 						>{m.tenants_contract_of({ apartment: contract.apartment ?? '' })}</a
 					>
 					<span><Badge {...statusBadges[contract.status]} /></span>
-					<span class="tabular-nums text-ink sm:flex-1"
-						>{contractPeriod(
-							contract.startDate,
-							contract.endDate,
-							contract.status,
-							contract.terminated
-						)}</span
-					>
+					<span class="tabular-nums text-ink sm:flex-1">{historyPeriod(contract)}</span>
 					<span class="tabular-nums text-ink"
-						>{formatCurrency(contract.rentBrutto)}
+						>{formatCurrency(contract.monthlyTotal)}
 						<span class="text-ink-muted">{m.common_monthly_total_suffix()}</span></span
 					>
 				</li>

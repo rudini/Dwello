@@ -3,7 +3,7 @@
  * Business logic for rental contract operations
  */
 
-import { eq, and, or, sql, desc, gte, lte, isNull, ilike } from 'drizzle-orm';
+import { eq, and, or, sql, desc, gte, lte, isNull, ilike, ne } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	rentalContracts,
@@ -14,12 +14,16 @@ import {
 	type RentalContract,
 	type NewRentalContract
 } from '../db/schema';
+import { setAgreedCategories } from './agreed-category.service';
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
-import { swissToday } from './today';
+import { oldAddress } from './old-address';
+import { daysAfter, swissToday } from './today';
 
 /** The database, or a transaction of it */
 type Query = Pick<typeof db, 'select' | 'delete'>;
+// the categories the form names as agreed (#91); every other umlagefähige one is not
+type AgreedList = { agreedCategoryIds?: string[] };
 
 /** Contract with the names of its tenant, apartment and building; selected with those three tables joined */
 const contractFields = {
@@ -29,9 +33,14 @@ const contractFields = {
 	startDate: rentalContracts.startDate,
 	endDate: rentalContracts.endDate,
 	terminated: rentalContracts.terminated,
+	noticeReceivedOn: rentalContracts.noticeReceivedOn,
+	billedUntil: rentalContracts.billedUntil,
+	movedOut: rentalContracts.movedOut,
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
 	monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
+	managementFeeAgreed: rentalContracts.managementFeeAgreed,
+	managementFeePercent: rentalContracts.managementFeePercent,
 	referenceIndex: rentalContracts.referenceIndex,
 	contractPdf: rentalContracts.contractPdf,
 	notes: rentalContracts.notes,
@@ -41,7 +50,8 @@ const contractFields = {
 	tenantEmail: tenants.email,
 	apartmentNumber: apartments.number,
 	buildingName: buildings.name,
-	buildingAddress: buildings.address
+	buildingAddress: buildings.address,
+	oldAddress: oldAddress(rentalContracts.id) // A-5: a moved-out tenant still has the building's address
 };
 
 /** Contracts with their tenant, apartment and building, as contractFields */
@@ -79,6 +89,7 @@ export interface ContractWithDetails extends RentalContract {
 	apartmentNumber: string;
 	buildingName: string;
 	buildingAddress: string;
+	oldAddress: boolean;
 }
 
 /**
@@ -278,10 +289,14 @@ function checkNotice(terminated: boolean | undefined, endDate: string | null | u
 	if (terminated && !endDate) throw new CodedError('CONTRACT_NOTICE_WITHOUT_END', 'A notice needs an end date');
 }
 
+// Without an agreed Verwaltungspauschale no own rate is kept: agreeing again later must not bring it back (#89)
+const feeRate = <T extends Partial<NewRentalContract>>(data: T, agreed = data.managementFeeAgreed): T =>
+	agreed ? data : { ...data, managementFeePercent: null };
+
 /**
  * Create a new contract
  */
-export async function createContract(data: NewRentalContract): Promise<RentalContract> {
+export async function createContract({ agreedCategoryIds, ...data }: NewRentalContract & AgreedList): Promise<RentalContract> {
 	checkNotice(data.terminated, data.endDate);
 	// Check for overlapping contracts
 	const { hasOverlap, overlappingContract } = await checkContractOverlap(
@@ -296,11 +311,20 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 		});
 	}
 
-	const [contract] = await db.insert(rentalContracts).values(data).returning();
-
-
-	return contract;
+	// a new contract agrees every umlagefähige category unless the form names the agreed ones (#91)
+	return db.transaction(async (tx) => {
+		const [contract] = await tx.insert(rentalContracts).values(feeRate(data)).returning();
+		await setAgreedCategories(contract.id, agreedCategoryIds, tx);
+		return contract;
+	});
 }
+
+/**
+ * The first day Dwello bills the contract: its Vertragsbeginn, or the day after «Abgerechnet bis» when that is later
+ * (#133); the BFF has the same rule in `billsIn` (src/lib/contract-status.ts)
+ */
+export const billingStart = ({ startDate, billedUntil }: { startDate: string; billedUntil: string | null }) =>
+	billedUntil && billedUntil >= startDate ? daysAfter(billedUntil, 1) : startDate;
 
 /** The contract's statements whose billed rent days the new dates would change (fewer or more) */
 async function statementsChanged(contractId: string, startDate: string, endDate: string | null, q: Query) {
@@ -320,6 +344,7 @@ async function statementsChanged(contractId: string, startDate: string, endDate:
 		.where(
 			and(
 				eq(utilityStatements.contractId, contractId),
+				ne(utilityStatements.status, 'replaced'), // a replaced statement stays as it was, its days included (#120)
 				or(sql`${from} <> ${utilityStatements.rentalStart}`, sql`${to} <> ${utilityStatements.rentalEnd}`)
 			)
 		);
@@ -332,20 +357,25 @@ export class BilledDaysError extends Error {
 	}
 }
 
+/** The dates the change sends; an empty Vertragsbeginn keeps the stored one */
+const newDates = ({ startDate, endDate, billedUntil }: Partial<NewRentalContract>) =>
+	Object.fromEntries(
+		Object.entries({ startDate: startDate || undefined, endDate, billedUntil }).filter(([, value]) => value !== undefined)
+	) as Partial<Pick<RentalContract, 'startDate' | 'endDate' | 'billedUntil'>>;
+
 /**
  * New dates may neither overlap another contract of the apartment nor change the billed Mietstage of a statement;
  * `draft`, a draft of the contract, is deleted when it is the only statement they change (#141)
  */
 async function checkNewDates(current: RentalContract, data: Partial<NewRentalContract>, q: Query, draft?: string) {
-	if (!data.startDate && data.endDate === undefined) return;
-	const startDate = data.startDate || current.startDate;
-	const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
+	if (!data.startDate && data.endDate === undefined && data.billedUntil === undefined) return;
+	const { startDate, endDate, billedUntil } = { ...current, ...newDates(data) };
 	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id, q);
 	if (hasOverlap)
 		throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
 			contract: overlappingContract!
 		});
-	const statements = await statementsChanged(current.id, startDate, endDate, q);
+	const statements = await statementsChanged(current.id, billingStart({ startDate, billedUntil }), endDate, q);
 	if (onlyDraft(statements, draft)) await q.delete(utilityStatements).where(eq(utilityStatements.id, draft!));
 	else if (statements.length) throw new BilledDaysError(statements);
 }
@@ -359,7 +389,7 @@ const onlyDraft = (statements: { id: string; status: string }[], draft?: string)
  */
 export async function updateContract(
 	id: string,
-	data: Partial<NewRentalContract>,
+	{ agreedCategoryIds, ...data }: Partial<NewRentalContract> & AgreedList,
 	deleteDraft?: string
 ): Promise<RentalContract | null> {
 	const current = await getContract(id);
@@ -373,10 +403,18 @@ export async function updateContract(
 	// the draft delete and the change in one transaction: a refused change keeps the draft (#141)
 	const [contract] = await db.transaction(async (tx) => {
 		await checkNewDates(current, data, tx, deleteDraft);
+		if (agreedCategoryIds) await setAgreedCategories(id, agreedCategoryIds, tx, { answeredOnly: true });
 		return tx
 			.update(rentalContracts)
-			// without an end there is no notice: withdrawing it makes the contract open-ended again
-			.set({ ...data, ...(data.endDate === null && { terminated: false }), updatedAt: new Date() })
+			// without an end there is no notice: withdrawing it makes the contract open-ended again; without a notice
+			// there is no day it arrived; a move-out belongs to the end it was confirmed for (A-6)
+			.set({
+				...(data.endDate !== undefined && data.endDate !== current.endDate && { movedOut: false }),
+				...feeRate(data, data.managementFeeAgreed ?? current.managementFeeAgreed),
+				...(data.endDate === null && { terminated: false }),
+				...((data.endDate === null || data.terminated === false) && { noticeReceivedOn: null }),
+				updatedAt: new Date()
+			})
 			.where(eq(rentalContracts.id, id))
 			.returning();
 	});

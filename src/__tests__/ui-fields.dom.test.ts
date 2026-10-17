@@ -58,13 +58,13 @@ describe('Eingabefeld', () => {
 		form.addEventListener('submit', (event) => event.preventDefault());
 		const field = mount(TextInput, {
 			target: form,
-			props: { id: 'firstName', label: 'Vorname', error: 'Vorname ist erforderlich', value: '' }
+			props: { id: 'firstName', label: 'Vorname', error: 'Vorname ist erforderlich.', value: '' }
 		});
 		flushSync();
 
 		fireEvent(input(), 'input', 'Anna');
 		expect(input().getAttribute('aria-invalid')).toBeNull();
-		expect(document.body.textContent).not.toContain('Vorname ist erforderlich');
+		expect(document.body.textContent).not.toContain('Vorname ist erforderlich.');
 
 		form.dispatchEvent(new Event('submit', { cancelable: true }));
 		flushSync();

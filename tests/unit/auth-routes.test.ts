@@ -264,6 +264,46 @@ describe('Auth Routes Integration Tests', () => {
 			expect(authModule.clearAuthCookies).toHaveBeenCalled();
 		});
 
+		// Protokoll (#357): nur der Anbieter, keine weiteren Angaben über den Liegenschaftsverwalter
+		it('hält die Anmeldung mit ihrem Anbieter im Protokoll fest', async () => {
+			mockFetch.mockResolvedValue(new Response(null, { status: 201 }));
+
+			await callback('code=auth-code-123&state=mock-state-abc123');
+
+			const [url, init] = mockFetch.mock.calls[0];
+			expect(url).toBe('http://localhost:3001/api/v1/audit-log/logins');
+			expect(init).toMatchObject({ method: 'POST', body: JSON.stringify({ provider: 'microsoft' }) });
+			expect(new Headers(init.headers).get('authorization')).toMatch(/^Bearer .+/);
+		});
+
+		it('meldet auch an, wenn das Protokoll die Anmeldung nicht festhalten kann', async () => {
+			mockFetch.mockRejectedValue(new Error('backend down'));
+
+			const redirect = await callback('code=auth-code-123&state=mock-state-abc123');
+
+			expect(redirect).toMatchObject({ status: 303, location: '/statements?status=overdue' });
+			expect(authModule.setSessionCookie).toHaveBeenCalled();
+		});
+
+		// Code-Review C-4: ein hängendes Backend hält die Anmeldung nicht auf
+		it('wartet höchstens 5 Sekunden darauf, dass das Protokoll die Anmeldung festhält', async () => {
+			vi.useFakeTimers();
+			mockFetch.mockImplementation(
+				(_url: string, init: RequestInit) =>
+					new Promise((_resolve, reject) =>
+						init.signal?.addEventListener('abort', () => reject(new Error('timeout')))
+					)
+			);
+			try {
+				const redirect = callback('code=auth-code-123&state=mock-state-abc123');
+				await vi.advanceTimersByTimeAsync(5000);
+
+				expect(await redirect).toMatchObject({ status: 303, location: '/statements?status=overdue' });
+			} finally {
+				vi.useRealTimers();
+			}
+		});
+
 		it('lehnt den Rückruf ohne begonnene Anmeldung ab', async () => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_oauth_state', 'mock-state-abc123');

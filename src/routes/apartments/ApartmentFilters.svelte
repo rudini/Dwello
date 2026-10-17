@@ -42,7 +42,8 @@
 			id="search"
 			label={m.buildings_search()}
 			bind:value={filters.search}
-			placeholder={m.apartments_search_placeholder()}
+			help={m.apartments_search_help()}
+			helpTestid="apartments-search-help"
 			optional
 			testid="apartments-search-input"
 		/>

@@ -20,7 +20,7 @@ Funktionalität: Mietvertrag bearbeiten
 
   Szenario: Mietzins fehlt
     Wenn der Liegenschaftsverwalter den Mietzins leert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich."
 
   Szenario: Mietzins in Schweizer Schreibweise
     Wenn der Liegenschaftsverwalter den Mietzins auf "1'450" Franken ändert
@@ -52,6 +52,25 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
 
+  # #133: die Abrechnung 2025 rechnet ab dem 01.01.2025; «Abgerechnet bis» darin änderte ihre Mietstage
+  Szenario: «Abgerechnet bis» nach dem Beginn einer Abrechnung
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-06-30" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
+
+  # #120, #358: eine versendete Abrechnung sperrt das Datum, bis sie ersetzt ist
+  Szenario: Vertragsbeginn nach dem Beginn einer versendeten Abrechnung
+    Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Stimmt es, berichtigen Sie zuerst jede dieser Abrechnungen."
+
+  Szenario: Vertragsbeginn nach dem Berichtigen der Abrechnung ändern
+    Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Und die Abrechnung 2025 von "Anna Keller" ist ersetzt
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
+
   # Ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen (#143)
   Szenario: Mietverträge der Wohnung lassen sich nicht laden
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
@@ -76,9 +95,11 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
     Dann meldet Dwello den Fehler "Die Mietverträge der Wohnung konnten wieder nicht geladen werden."
 
+  # Eine Kündigung lässt sich nur gemeinsam oder durch die Schlichtungsbehörde oder ein Gericht aufheben
   Szenario: Kündigung aufheben
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann erfährt der Liegenschaftsverwalter bei «Kündigung aufheben», wann sich eine Kündigung aufheben lässt
     Wenn der Liegenschaftsverwalter die Kündigung aufhebt
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
     Und ist der Mietvertrag unbefristet
@@ -92,11 +113,37 @@ Funktionalität: Mietvertrag bearbeiten
     Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
     Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
 
+  # #133 (Fachreview V-10): deckt «Abgerechnet bis» die ganze Periode des Entwurfs ab, entsteht keine neue Abrechnung
+  Szenario: Entwurf löschen, den «Abgerechnet bis» ganz abdeckt
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-12-31" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung."
+    Wenn der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und zeigt der Mietvertrag «Abgerechnet bis» "31.12.2025"
+    Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
+
   # B-15 (#152): ein Mieterwechsel oder ein Wechsel der Wohnung ist ein neuer Mietvertrag
   Szenario: Mieter und Wohnung stehen im Mietvertrag fest
     Dann nennt der Mietvertrag den Mieter "Anna Keller" und die Wohnung "2.01"
     Und kann der Liegenschaftsverwalter Mieter und Wohnung nicht ändern
     Und erfährt der Liegenschaftsverwalter, dass er bei einem Mieterwechsel einen neuen Mietvertrag erfasst
+
+  # #89: bestehende Mietverträge haben keine vereinbarte Verwaltungspauschale, bis der Liegenschaftsverwalter nachträgt,
+  # was im unterschriebenen Mietvertrag steht; eine neue Pauschale braucht das amtliche Formular (Art. 269d Abs. 3 OR)
+  Szenario: Vereinbarte Verwaltungspauschale nachtragen
+    Angenommen im Mietvertrag von "Anna Keller" ist keine Verwaltungspauschale vereinbart
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist
+    Dann zeigt der Mietvertrag bei der Verwaltungspauschale "Vereinbart, Satz des Abrechnungslaufs"
+
+  # #133: vor dem Wechsel zu Dwello hat der Liegenschaftsverwalter die Nebenkosten selbst abgerechnet
+  Szenario: Ausserhalb von Dwello abgerechnete Zeit eintragen
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-12-31" ausserhalb von Dwello abgerechnet sind
+    Dann zeigt der Mietvertrag «Abgerechnet bis» "31.12.2025"
+
+  Szenario: Hilfe zu «Abgerechnet bis»
+    Dann erfährt der Liegenschaftsverwalter, dass Dwello die Nebenkosten erst ab dem Tag nach «Abgerechnet bis» abrechnet
 
   # F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über, er endet nicht
   Szenario: Beim Tod des Mieters läuft der Mietvertrag weiter
@@ -110,3 +157,14 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erfassen will
     Dann ist im Mietvertrag der Mieter "Anna Keller" gewählt
     Und schlägt der neue Mietvertrag den Vertragsbeginn "2099-04-01" vor
+
+  # #91: die vereinbarten Nebenkosten stehen beim Mietvertrag; nicht vereinbarte rechnet Dwello nicht ab
+  Szenario: Nebenkosten als nicht vereinbart eintragen
+    Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag "Lift" nicht vereinbart ist
+    Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Heizung"
+    Aber nicht die Nebenkosten "Lift"
+
+  # Persona Marco W10c P-1: ohne Häkchen rechnet Dwello keine Nebenkosten ab, das soll nicht unbemerkt geschehen
+  Szenario: Das Formular warnt, wenn keine Nebenkosten vereinbart sind
+    Wenn der Liegenschaftsverwalter alle Nebenkosten abwählt
+    Dann warnt das Formular "Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab."

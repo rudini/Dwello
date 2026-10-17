@@ -36,12 +36,18 @@
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
 			defaultBuildingIds: string[]; // chosen by the link that opened the wizard (A-10)
-			preset?: { building: string; start: string; end: string; fromStatements: boolean } | null;
+			preset?: {
+				building: string;
+				start: string;
+				end: string;
+				fromStatements: boolean;
+				feeFromSettings: boolean;
+			} | null;
 		};
 		form: {
 			preview?: PreviewRow[];
 			invoices?: Parameters<typeof invoiceRows>[0];
-			created?: number;
+			created?: string[];
 			error?: string;
 		} | null;
 	} = $props();
@@ -70,6 +76,7 @@
 	);
 	let errors = $state<Record<string, string>>({});
 	let confirmed = $state(false); // statements despite buildings without invoices, for this preview only
+	let agreementsBlocking = $state(false); // step 3: whether the contracts agree the period's costs is open (#91)
 	let busy = $state(false); // the server is calculating the preview or creating the drafts
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
@@ -125,7 +132,7 @@
 		await tick();
 		section
 			?.querySelector<HTMLElement>(
-				':is(input, select, textarea)[aria-invalid="true"], [data-testid="confirm-missing-invoices"]'
+				':is(input, select, textarea)[aria-invalid="true"], [role="radiogroup"][aria-invalid="true"] input, [data-testid="confirm-missing-invoices"]'
 			)
 			?.focus();
 	}
@@ -151,7 +158,11 @@
 			event.preventDefault();
 			event.stopImmediatePropagation();
 		};
-		errors = { ...selectionErrors(selection, step), ...(step === 4 ? previewErrors() : {}) };
+		errors = {
+			...selectionErrors(selection, step),
+			...(step === 3 && agreementsBlocking ? { agreements: m.statements_agreement_error() } : {}),
+			...(step === 4 ? previewErrors() : {})
+		};
 		if (Object.keys(errors).length > 0) return (stay(), showErrors());
 		if (step === 3 || step === 5) return void (busy = true); // to the server through `enhance`
 		stay();
@@ -241,11 +252,12 @@
 			{data}
 			bind:selection
 			bind:confirmed
+			bind:agreementsBlocking
 			{errors}
 			{previewRows}
 			{invoices}
 			{periodLabel}
-			createdCount={form?.created ?? null}
+			created={form?.created ?? null}
 		/>
 	</section>
 

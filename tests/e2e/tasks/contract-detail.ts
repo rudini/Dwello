@@ -8,16 +8,22 @@ import {
 	contractEditButton,
 	contractEndInput,
 	contractEndPastConfirm,
+	noticeReceivedInput,
 	contractInvoicesLink,
 	contractStatementsLink,
 	contractTenantLink,
 	deleteContractButton,
+	deleteDialogStatementLink,
 	deleteMistakeConfirmation,
 	deleteDraftAndEndButton,
 	endContractButton,
 	missingStatementLink,
 	nextStep,
-	refusedStatementLink
+	refusedStatementLink,
+	continueOpenEndedButton,
+	movedOutButton,
+	confirmMovedOutButton,
+	deleteDraftAndContinueButton
 } from '../targets/contract-detail';
 
 export const openContract = (contractId: string) => Navigate.to(`/contracts/${contractId}`);
@@ -31,6 +37,15 @@ export const endContractOn = (isoDate: string, { confirmPast = false } = {}): Ac
 
 // Today as the last day: no day is proposed, it is typed like any other
 export const endContract: Activity = (actor) => actor.attemptsTo(endContractOn(inDays(0)));
+
+// the dialog filled, not confirmed yet: the day of the end and the day the notice arrived (A-3, #112)
+export const fillEndWithNotice = (endDate: string, receivedOn: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(endContractButton),
+		EnterDate.of(endDate).into(contractEndInput),
+		EnterDate.of(receivedOn).into(noticeReceivedInput)
+	);
+export const confirmEnd = Click.on(confirmEndContractButton);
 
 export const startEndingContract = Click.on(endContractButton);
 export const startDeletingContract = Click.on(deleteContractButton);
@@ -58,3 +73,11 @@ export const createMissingStatement = (periodStart: string) => Click.on(missingS
 export const useWindowOf = (width: number, height: number) => Browser.resizeTo({ width, height });
 // the confirm button scrolled into view inside the dialog
 export const scrollToEndConfirmation = Scroll.to(confirmEndContractButton);
+
+export const openStatementFromDeleteDialog = (statementId: string) => Click.on(deleteDialogStatementLink(statementId));
+// A-6 (#115): after an expired fixed-term contract the tenant either still lives there or has moved out
+export const continueOpenEnded = Click.on(continueOpenEndedButton);
+// the move-out is confirmed with its consequence in a dialog (personas a6 P-1)
+export const confirmMovedOut: Activity = (actor) =>
+	actor.attemptsTo(Click.on(movedOutButton), Click.on(confirmMovedOutButton));
+export const deleteDraftAndContinue = Click.on(deleteDraftAndContinueButton);

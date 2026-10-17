@@ -9,7 +9,7 @@ export default defineConfig({
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
-			strategy: ['cookie', 'baseLocale']
+			strategy: ['cookie', 'preferredLanguage', 'baseLocale']
 		})
 	],
 	// The version the build bakes in (vite.config.ts); tests see a fixed one
@@ -42,7 +42,8 @@ export default defineConfig({
 				test: {
 					name: 'dom',
 					include: ['src/**/*.dom.test.ts'],
-					environment: 'jsdom'
+					environment: 'jsdom',
+					setupFiles: ['tests/mocks/browser-language.ts']
 				}
 			}
 		],

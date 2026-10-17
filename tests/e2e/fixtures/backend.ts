@@ -30,6 +30,12 @@ export function testData(api: CallTheApi) {
 		return (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
 	}
 
+	// The tenant's statement of the year, also one a run created
+	async function statementOf(tenantTitle: string, year: number) {
+		const { data } = await get(`statements?tenantId=${ids.get(tenantTitle)}&limit=100`);
+		return data.find((s: { periodStart: string }) => s.periodStart.startsWith(`${year}`));
+	}
+
 	async function removeContracts(filter: string) {
 		for (const contract of (await get(`contracts?${filter}&limit=100`)).contracts) {
 			await remove(`contracts/${contract.id}?confirmMistake=true`); // a started one too (#116)
@@ -107,15 +113,25 @@ export function testData(api: CallTheApi) {
 		backend: api, // the backend API as the signed-in Liegenschaftsverwalter (API protocol driver)
 		unique,
 
-		async building(title: string, city: string) {
+		// a search term with Gherkin names in it: each name becomes the scenario's name ("Seepark B1")
+		withNames: (text: string) =>
+			[...names.keys()]
+				.sort((a, b) => b.length - a.length)
+				.reduce((term, title) => term.replace(title, names.get(title)!), text),
+
+		async building(title: string, city: string, street?: string) {
 			const building = await post('buildings', {
 				name: unique(title),
-				address: 'Testweg 1',
+				address: street ? unique(street) : 'Testweg 1',
 				postalCode: '8400',
 				city,
 				canton: 'ZH'
 			});
 			ids.set(title, building.id);
+		},
+
+		async buildingCoordinates(title: string) {
+			await put(`buildings/${ids.get(title)}`, { latitude: '47.5000000', longitude: '8.7200000' });
 		},
 
 		async apartment(buildingTitle: string, number: string, status: string, area = '70') {
@@ -139,34 +155,74 @@ export function testData(api: CallTheApi) {
 		async contract(
 			tenantTitle: string,
 			apartmentNumber: string,
-			contract: { startDate: string; endDate?: string; baseRent: string; monthlyAdvancePayment?: string }
+			contract: {
+				startDate: string;
+				endDate?: string;
+				baseRent: string;
+				additionalRent?: string;
+				monthlyAdvancePayment?: string;
+			}
 		) {
 			const created = await post('contracts', {
 				tenantId: ids.get(tenantTitle),
 				apartmentId: ids.get(apartmentNumber),
 				additionalRent: '0',
 				monthlyAdvancePayment: '0',
+				// agreed unless a scenario says otherwise: the amounts of the statement scenarios include the run's fee (#89)
+				managementFeeAgreed: true,
 				...contract
 			});
 			ids.set(`Mietvertrag ${tenantTitle}`, created.id);
 			ids.set(`Wohnung von ${tenantTitle}`, created.apartmentId);
 		},
 
+		// «Verwaltungspauschale vereinbart» on the contract, with its own rate or the run's (#89)
+		async managementFee(tenantTitle: string, agreed: boolean, percent?: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, {
+				managementFeeAgreed: agreed,
+				managementFeePercent: percent ?? null
+			});
+		},
+
+		async advancePayment(tenantTitle: string, monthlyAdvancePayment: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment });
+		},
+
+		// «Abgerechnet bis»: up to that day the Nebenkosten are billed outside Dwello (#133)
+		async billedUntil(tenantTitle: string, billedUntil: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { billedUntil });
+		},
+
+		// Whether the contract agrees a category (#91): an own category by its title, else a predefined one by its German name
+		async agreement(tenantTitle: string, categoryTitle: string, agreed: boolean) {
+			const categoryId = ids.get(categoryTitle) ?? (await predefinedCategory(categoryTitle)).id;
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}/agreements`, { categoryId, agreed });
+		},
+
 		// A whole year, or the period given (a statement of a shorter period is still named by its year)
-		async statement(tenantTitle: string, buildingTitle: string, year: number, heatingProfileTitle?: string, period?: [string, string]) {
+		async statement(
+			tenantTitle: string,
+			buildingTitle: string,
+			year: number,
+			heatingProfileTitle?: string,
+			period?: [string, string],
+			managementFeePercent?: number
+		) {
 			const statement = await post('statements/generate', {
 				contractId: ids.get(`Mietvertrag ${tenantTitle}`),
 				buildingId: ids.get(buildingTitle),
 				periodStart: period?.[0] ?? `${year}-01-01`,
 				periodEnd: period?.[1] ?? `${year}-12-31`,
-				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle)
+				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle),
+				managementFeePercent
 			});
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},
 
-		// Unique per scenario: tenants of parallel scenarios must not share an address
-		async email(tenantTitle: string) {
-			const email = `${ids.get(tenantTitle)}@dwello.test`;
+		// Unique per scenario: tenants of parallel scenarios must not share an address; the mail catcher refuses
+		// abgewiesen.dwello.test
+		async email(tenantTitle: string, domain = 'dwello.test') {
+			const email = `${ids.get(tenantTitle)}@${domain}`;
 			await put(`tenants/${ids.get(tenantTitle)}`, { email });
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
@@ -190,6 +246,22 @@ export function testData(api: CallTheApi) {
 				correspondenceChannel: channel
 			});
 			names.set(`E-Mail ${tenantTitle}`, email);
+		},
+
+		// A Korrespondenzadresse by letter, abroad when a country code is given (#102)
+		async address(tenantTitle: string, address: string, postalCode: string, city: string, country: string) {
+			await put(`tenants/${ids.get(tenantTitle)}`, { address, postalCode, city, country, correspondenceChannel: 'letter' });
+		},
+
+		// The building's address still stored as the tenant's, written differently, as a landlord types it (A-5, #114)
+		async buildingAddress(tenantTitle: string, buildingTitle: string) {
+			const building = await get(`buildings/${ids.get(buildingTitle)}`);
+			await put(`tenants/${ids.get(tenantTitle)}`, {
+				address: ` ${building.address.toUpperCase()}  `,
+				postalCode: building.postalCode,
+				city: building.city,
+				correspondenceChannel: 'letter'
+			});
 		},
 
 		async noEmail(tenantTitle: string) {
@@ -216,8 +288,13 @@ export function testData(api: CallTheApi) {
 			await remove(`buildings/${ids.get(title)}`);
 		},
 
+		// a statement seeded here, or one a run created
 		async removeStatement(tenantTitle: string, year: number) {
-			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}`);
+			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`) ?? (await statementOf(tenantTitle, year)).id}`);
+		},
+
+		async statementNumber(tenantTitle: string, year: number): Promise<string> {
+			return (await statementOf(tenantTitle, year)).statementNumber;
 		},
 
 		async statementPdf(tenantTitle: string, year: number) {
@@ -237,8 +314,33 @@ export function testData(api: CallTheApi) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate, terminated: true });
 		},
 
+		// the tenant left after an agreed end, as «Mieter ist ausgezogen» stores it (A-6, #115)
+		async movedOut(tenantTitle: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { movedOut: true });
+		},
+
 		async sendStatement(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
+		},
+
+		async contractStart(tenantTitle: string, startDate: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { startDate });
+		},
+
+		// #120: the statement is replaced; `correct` also creates its berichtigte Abrechnung
+		async replaceStatement(tenantTitle: string, year: number, correct = false) {
+			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
+			await post(`statements/${id}/replace`, {});
+			if (correct) ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
+		},
+
+		async resetPayment(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/payment-reset`, {});
+		},
+
+		// paid today, the earliest day a statement sent today allows (#138)
+		async markPaid(tenantTitle: string, year: number) {
+			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
 		},
 
 		// Monthly shares January..December in percent
@@ -276,6 +378,11 @@ export function testData(api: CallTheApi) {
 			await invoice(buildingTitle, { categoryId: heating.id }, `Heizöl ${year}`, amount, `${year}-06-30`);
 		},
 
+		// The landlord records that the building has no tank or that its tank is decommissioned (#72)
+		async noTank(buildingTitle: string) {
+			await put(`buildings/${ids.get(buildingTitle)}`, { noTank: true });
+		},
+
 		// Value of the heating oil in the building's tank on a reading day (removed with the building)
 		async fuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
@@ -286,7 +393,14 @@ export function testData(api: CallTheApi) {
 		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
 			const category = await predefinedCategory(categoryName);
 			const period = service && { servicePeriodStart: service[0], servicePeriodEnd: service[1] };
-			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+			const id = await invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+			ids.set(`Rechnung ${categoryName} ${date}`, id);
+			return id;
+		},
+
+		// A recorded invoice that costs another amount afterwards
+		async invoiceAmount(key: string, amount: string) {
+			await put(`invoices/${ids.get(key)}`, { amount });
 		},
 
 		async predefinedCategoryId(categoryName: string): Promise<string> {
@@ -303,12 +417,26 @@ export function testData(api: CallTheApi) {
 
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
 
+		async categoryAllowance(title: string, isAllowedUtilityCost: boolean) {
+			await put(`categories/${ids.get(title)}`, { isAllowedUtilityCost });
+		},
+
 		// An own category whose English name is its German one, as an own «Internet» would have
 		categoryNamedAlikeInEnglish: (title: string, description: string) =>
 			addCategory(title, (name) => ({ nameEN: name, description, isAllowedUtilityCost: true })),
 
 		async invoiceInCategory(buildingTitle: string, categoryTitle: string) {
 			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, 'Reinigung Q1', '450.00', '2026-03-31');
+		},
+
+		// Invoice without a Kategorie, distributed by area: billed as «Nicht kategorisiert»
+		async invoiceWithoutCategory(buildingTitle: string, amount: string, date: string) {
+			await invoice(buildingTitle, {}, `Ohne Kategorie ${date}`, amount, date).then((id) => put(`invoices/${id}`, { categoryId: null }));
+		},
+
+		// Invoice in an own category, distributed by area
+		async invoiceInOwnCategory(buildingTitle: string, categoryTitle: string, amount: string, date: string) {
+			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, `${categoryTitle} ${date}`, amount, date);
 		},
 
 		// Invoice of a supplier, in a predefined category given by its German name, dated today
@@ -336,6 +464,21 @@ export function testData(api: CallTheApi) {
 				inDays(0)
 			);
 			ids.set(`Rechnung ${supplier}`, id);
+		},
+
+		// The Protokoll's entries about the category, deleted as another tab or visitor would (#357)
+		async removeAuditEntriesOfCategory(title: string) {
+			for (const entry of (await get('audit-log')).data) {
+				if (entry.details.categoryId === ids.get(title)) await remove(`audit-log/${entry.id}`);
+			}
+		},
+
+		async invoiceDate(supplier: string, invoiceDate: string) {
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { invoiceDate });
+		},
+
+		async invoiceAllocable(supplier: string, isValidUtilityCost: boolean) {
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { isValidUtilityCost });
 		},
 
 		async invoiceNumber(supplier: string, invoiceNumber: string) {

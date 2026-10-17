@@ -33,7 +33,7 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 		french();
 		expect(statusLabels.vacant).toBe('Vacant');
 		expect(statusText({ status: 'relet', nextContractStart: '2026-11-01' })).toBe(
-			'Reloué dès le 01.11.2026'
+			'Loué dès le 01.11.2026'
 		);
 		expect(occupancyParts({ occupiedCount: 1, vacantCount: 2 })).toEqual(['1 loué', '2 vacants']);
 	});
@@ -52,10 +52,17 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 		expect(buildingTypeLabel('Eigener Typ')).toBe('Eigener Typ');
 	});
 
+	it('liest aus dem Gebäudeformular, ob das Gebäude ohne Tank ist', () => {
+		const form = new FormData();
+		expect(parseBuildingForm(form).building.noTank).toBe(false);
+		form.set('noTank', 'on');
+		expect(parseBuildingForm(form).building.noTank).toBe(true);
+	});
+
 	it('meldet fehlende Angaben im Gebäudeformular auf Französisch', () => {
 		french();
 		const { errors } = parseBuildingForm(new FormData());
-		expect(errors.postalCode).toBe('Le NPA est obligatoire');
+		expect(errors.postalCode).toBe('Le NPA est obligatoire.');
 	});
 
 	it('nennt Stammdaten mit ihrem Namen in der gewählten Sprache', () => {
@@ -95,6 +102,7 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 			fetch
 		} as never)) as BuildingDetailsData;
 		expect(data.fuelStocks![0].categoryName).toBe('Chauffage');
+		expect(data.building.noTank).toBe(true);
 		expect(data.heatingCategories).toEqual([{ id: 'c1', name: 'Chauffage' }]);
 	});
 });
@@ -113,7 +121,10 @@ describe('Übersicht in der gewählten Sprache', () => {
 		dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-05' }],
 		lettersToSend: 2,
 		endingContracts: [],
-		noticedContracts: []
+		noticedContracts: [],
+		paymentDeadlineDays: 30,
+		reminderAfterDays: 14,
+		expiredContracts: []
 	};
 
 	it('nennt Aufgaben auf Französisch', () => {
@@ -142,7 +153,8 @@ describe('Abrechnungsstatus auf der Übersicht', () => {
 			draft: 'Draft',
 			sent: 'Sent',
 			paid: 'Paid',
-			overdue: 'Overdue'
+			overdue: 'Overdue',
+			replaced: 'Replaced'
 		});
 	});
 });
@@ -176,8 +188,7 @@ describe('Belegung auf der Übersicht', () => {
 								buildingId: 'b1',
 								buildingName: 'Seeblick',
 								totalApartments: 4,
-								occupiedApartments,
-								occupancyRate: 25
+								occupiedApartments
 							}
 						]
 					}

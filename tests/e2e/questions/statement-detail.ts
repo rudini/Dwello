@@ -1,18 +1,40 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
 import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
+import { successToast } from '../targets/form';
 import {
+	correctDialog,
+	paymentDeadline,
+	paymentSummary,
+	correctStatementButton,
+	markPaidButton,
+	priorPayments,
+	reminderButton,
+	replacesLink,
+	resetPaymentButton,
+	statementBalance,
+	statementEditButton,
 	deleteStatementButton,
 	paidDateInput,
+	pdfLanguage,
 	pdfRefusalMessage,
+	resetPaymentDialog,
 	sendDialog,
 	sendPdfLink,
 	sendRecipient,
 	statementHeatingProfile,
 	statementHistory,
 	lineItemAmount,
+	lineItemApartmentShare,
+	lineItemInvoice,
+	lineItemInvoices,
 	lineItemShare,
-	statementStatus
+	lineItemTimeShare,
+	statementLaterInvoices,
+	statementTenancy,
+	statementTotalLabel,
+	statementStatus,
+	oldAddressWarning
 } from '../targets/statement-detail';
 import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
@@ -21,6 +43,7 @@ export const statusOfStatement = Text.of(statementStatus);
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);
+export const resetConfirmation = Text.of(resetPaymentDialog);
 export const recipient = Text.of(sendRecipient);
 export const pdfToView = Attribute.named('href').of(sendPdfLink);
 export const deleteOffers = Count.of(deleteStatementButton);
@@ -28,6 +51,20 @@ export const history = Text.of(statementHistory);
 export const paidDateInvalid = Attribute.named('aria-invalid').of(paidDateInput);
 export const paidDateProblem = Accessible.descriptionOf(paidDateInput);
 export const heatingProfileOfStatement = Text.of(statementHeatingProfile);
+export const tenancyOfStatement = Text.of(statementTenancy);
+export const totalLabelOfStatement = Text.of(statementTotalLabel);
+export const laterInvoicesHint = Text.of(statementLaterInvoices);
+export const laterInvoicesHints = Count.of(statementLaterInvoices);
+export const invoicesOfPosition = (category: string) => Text.of(lineItemInvoices(category));
+export const invoiceOfPosition = (category: string, description: string) => Text.of(lineItemInvoice(category, description));
+
+/** Wohnungsanteil, Zeitanteil and amount of a position as the page shows them */
+export const sharesOfPosition = (category: string) =>
+	question(`the shares of the position «${category}»`, async (actor) => ({
+		apartment: await actor.answer(Text.of(lineItemApartmentShare(category))),
+		time: await actor.answer(Text.of(lineItemTimeShare(category))),
+		amount: await actor.answer(Text.of(lineItemAmount(category)))
+	}));
 
 type LineItem = { description: string; sharePercentage: string; tenantShare: string };
 
@@ -47,3 +84,25 @@ export const heatingCostsOfTenant = throughUiOrApi<Question<{ share: unknown; am
 		return { share: Number(heating.sharePercentage), amount: Number(heating.tenantShare) };
 	})
 );
+export const languageOfPdf = Text.of(pdfLanguage);
+
+// #120
+export const correctConfirmation = Text.of(correctDialog);
+export const replacedDone = Text.of(successToast);
+export const deadlineShown = Count.of(paymentDeadline);
+export const paymentText = Text.of(paymentSummary);
+export const replacedStatementLink = Attribute.named('href').of(replacesLink);
+export const priorPaymentsAmount = question('the amount already paid on the replaced statement', async (actor) =>
+	amountAfter('', await actor.answer(Text.of(priorPayments)))
+);
+export const balanceAmount = question('the Saldo of the statement', async (actor) =>
+	amountAfter('', await actor.answer(Text.of(statementBalance)))
+);
+/** The actions a replaced statement must no longer offer: mark paid, reset the payment, remind, edit, correct */
+export const changeOffers = question('the offers to pay, remind, edit or correct', async (actor) =>
+	[markPaidButton, resetPaymentButton, reminderButton, statementEditButton, correctStatementButton].reduce(
+		async (sum, button) => (await sum) + (await actor.answer(Count.of(button))),
+		Promise.resolve(0)
+	)
+);
+export const oldAddressWarningText = Text.of(oldAddressWarning);

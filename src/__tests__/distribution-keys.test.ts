@@ -82,7 +82,7 @@ describe('Neuer Verteilschlüssel', () => {
 		expect(await result).toMatchObject({
 			status: 400,
 			data: {
-				errors: { name: 'Name ist erforderlich', formula: 'Bitte geben Sie eine Formel ein.' }
+				errors: { name: 'Name ist erforderlich.', formula: 'Bitte geben Sie eine Formel ein.' }
 			}
 		});
 		expect(calls).toEqual([]);

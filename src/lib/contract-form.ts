@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import type { RentalContract } from './types';
-import { formatDate } from './utils/format';
+import { formatDate, isFeeRate, parsePercent } from './utils/format';
 import {
 	checkDateRangeOverlap,
 	type AvailabilityInfo,
@@ -15,13 +15,36 @@ export interface ContractFormValues {
 	endDate: string;
 	isUnlimited: boolean;
 	terminated?: boolean; // the end is a Kündigungstermin of an open-ended contract (A-1), only when editing
+	billedUntil?: string; // «Abgerechnet bis» (#133), only when editing; '' for none
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
+	// «Verwaltungspauschale vereinbart» (#89): at the run's rate, an own rate, none; '' until chosen (no default)
+	managementFee: '' | 'run' | 'own' | 'none';
+	managementFeeRate: string; // the own rate as typed, comma or point
+	agreedCategoryIds?: string[]; // #91: the agreed Nebenkosten; absent on a new contract: every umlagefähige category
 }
+
+/** «Verwaltungspauschale» of a contract in words: not agreed, at the run's rate or its own rate (#89) */
+export const managementFeeText = (
+	agreed: boolean | undefined,
+	ownRate: string | null | undefined
+) =>
+	!agreed
+		? m.contracts_fee_shown_none()
+		: ownRate != null
+			? m.contracts_fee_shown_own({ percent: String(parsePercent(ownRate)) })
+			: m.contracts_fee_shown_run();
+
+const feeChoice = (contract: RentalContract): ContractFormValues['managementFee'] =>
+	!contract.managementFeeAgreed ? 'none' : contract.managementFeePercent != null ? 'own' : 'run';
 
 const dateForInput = (date: string | null | undefined) =>
 	date ? new Date(date).toISOString().split('T')[0] : '';
+
+// A date field typed over can end up in year 12026; such a date is surely a typing mistake
+export const impossibleYear = () => m.common_error_impossible_year();
+export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
 
 /** Values of the contract being edited, or of a new contract for the tenant and apartment given in the URL */
 export function initialContractValues(
@@ -29,15 +52,18 @@ export function initialContractValues(
 	params: URLSearchParams
 ): ContractFormValues {
 	if (!contract) {
+		const start = params.get('start') || '';
 		return {
 			tenantId: params.get('tenant') || '',
 			apartmentId: params.get('apartment') || '',
-			startDate: params.get('start') || '', // the day after the contract it follows (#156)
+			startDate: impossible(start) ? '' : start, // the day after the contract it follows (#156), never one the date check refuses (#296)
 			endDate: '',
 			isUnlimited: true,
 			baseRent: '',
 			additionalRent: '',
-			advancePayment: ''
+			advancePayment: '',
+			managementFee: '',
+			managementFeeRate: ''
 		};
 	}
 	return {
@@ -47,9 +73,13 @@ export function initialContractValues(
 		endDate: dateForInput(contract.endDate),
 		isUnlimited: !contract.endDate,
 		terminated: !!contract.terminated,
+		billedUntil: dateForInput(contract.billedUntil),
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
-		advancePayment: String(contract.monthlyAdvancePayment || '')
+		advancePayment: String(contract.monthlyAdvancePayment || ''),
+		managementFee: feeChoice(contract),
+		managementFeeRate: contract.managementFeePercent ?? '',
+		agreedCategoryIds: contract.agreedCategoryIds
 	};
 }
 
@@ -83,7 +113,12 @@ export function validateContract(values: ContractFormValues): Record<string, str
 		endDate: endDateError(values),
 		baseRent: baseRentError(values.baseRent),
 		additionalRent: amountError(values.additionalRent),
-		advancePayment: amountError(values.advancePayment)
+		advancePayment: amountError(values.advancePayment),
+		managementFee: values.managementFee ? undefined : m.contracts_error_fee_choice(),
+		managementFeeRate:
+			values.managementFee === 'own' && !isFeeRate(parsePercent(values.managementFeeRate))
+				? m.statements_error_fee()
+				: undefined
 	};
 	return Object.fromEntries(Object.entries(errors).filter(([, message]) => message)) as Record<
 		string,
@@ -100,8 +135,17 @@ export const contractBody = (values: ContractFormValues) => ({
 	terminated: !values.isUnlimited && !!values.terminated,
 	baseRent: String(values.baseRent),
 	additionalRent: String(values.additionalRent || 0),
-	monthlyAdvancePayment: String(values.advancePayment || 0)
+	monthlyAdvancePayment: String(values.advancePayment || 0),
+	managementFeeAgreed: values.managementFee !== 'none',
+	managementFeePercent:
+		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null,
+	...(values.billedUntil !== undefined && { billedUntil: values.billedUntil || null }),
+	...(values.agreedCategoryIds && { agreedCategoryIds: values.agreedCategoryIds })
 });
+
+/** The names of the agreed Nebenkosten among the categories shown; without a choice every one (#91) */
+export const agreedNames = (agreed: string[] | undefined, categories: { id: string; name: string }[]) =>
+	categories.filter((category) => agreed?.includes(category.id) ?? true).map((category) => category.name);
 
 /**
  * An apartment's contracts as the contract list answers them, in the shape the availability check reads; null when
@@ -170,11 +214,11 @@ export function availableFrom(availability: AvailabilityInfo | null | undefined)
 	};
 }
 
-/** Start date a new contract gets once its apartment is chosen: the day the apartment becomes free */
+/** Start date a new contract gets once its apartment is chosen: the day the apartment becomes free, never one the date check refuses (#296) */
 export function suggestedStartDate(
 	startDate: string,
 	availability: AvailabilityInfo | null | undefined
 ) {
-	if (startDate) return null;
-	return availability?.availableFrom || null;
+	const free = availability?.availableFrom;
+	return startDate || !free || impossible(free) ? null : free;
 }

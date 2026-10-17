@@ -81,7 +81,7 @@ describe('Wohnungsliste', () => {
 		expect(card.textContent).not.toContain('·');
 	});
 
-	it('zeigt den Mietstatus als Wort, bei Wiedervermietung mit dem Einzugstag', () => {
+	it('zeigt den Mietstatus als Wort, bei künftigem Vertrag mit dem Einzugstag', () => {
 		list([
 			apartment(),
 			apartment({ id: 'a2', number: '2.02', status: 'relet', nextContractStart: '2099-11-01' })
@@ -91,7 +91,7 @@ describe('Wohnungsliste', () => {
 				.querySelector('[data-testid="apartment-status"]')!
 				.textContent!.trim();
 		expect(status('a1')).toBe('Leer');
-		expect(status('a2')).toBe('Wiedervermietet ab 01.11.2099');
+		expect(status('a2')).toBe('Vermietet ab 01.11.2099');
 	});
 
 	it('zeigt Leer mit einer offenen Tür statt einem Warndreieck', () => {
@@ -112,7 +112,7 @@ describe('Wohnungsliste', () => {
 		for (const words of [
 			'Leer',
 			'Vermietet',
-			'Wiedervermietet',
+			'Vermietet ab …',
 			'Gesperrt',
 			'Ein künftiger Mietvertrag ist abgeschlossen; die Wohnung ist ab seinem Vertragsbeginn vermietet'
 		]) {
@@ -147,6 +147,26 @@ describe('Wohnungsliste', () => {
 		expect(reset.getAttribute('href')).toBe('/apartments');
 	});
 
+	// #160: what the search finds stays visible while typing, not only in the placeholder
+	it('sagt am Suchfeld, wonach es sucht', () => {
+		list([apartment()]);
+		const input = byTestId('apartments-search-input')!;
+		const help = document.getElementById(input.getAttribute('aria-describedby')!)!;
+		// a pattern, not a literal example: a typed example would find nothing in the landlord's data (persona Helga)
+		expect(help.textContent!.trim()).toBe(
+			'Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort. Mehrere Wörter grenzen die Suche ein, zum Beispiel Gebäudename und Wohnungsnummer.'
+		);
+		expect(input.getAttribute('placeholder')).toBeNull();
+	});
+
+	it('nennt ohne Treffer den Suchbegriff und wonach gesucht wird', () => {
+		url = new URL('http://localhost/apartments?search=Seepark%20B9');
+		list([]);
+		expect(byTestId('apartments-empty')!.textContent).toContain(
+			'Keine Wohnung passt zu «Seepark B9». Gesucht wird in Wohnungsnummer, Gebäudename, Strasse und Ort.'
+		);
+	});
+
 	it('blättert mit den Filtern zur nächsten Seite', () => {
 		url = new URL('http://localhost/apartments?building=b1');
 		list([apartment()], 30);
@@ -161,7 +181,7 @@ describe('Wohnungsdetail', () => {
 		{
 			id: 'c2',
 			tenantName: 'Beat Huber',
-			rentBrutto: 1430,
+			monthlyTotal: 1430,
 			status: 'active',
 			startDate: '2022-04-01',
 			endDate: null
@@ -169,7 +189,7 @@ describe('Wohnungsdetail', () => {
 		{
 			id: 'c1',
 			tenantName: 'Eva Graf',
-			rentBrutto: 750,
+			monthlyTotal: 750,
 			status: 'ended',
 			startDate: '2018-01-01',
 			endDate: '2022-03-31'
@@ -204,8 +224,8 @@ describe('Wohnungsdetail', () => {
 				}
 			: null,
 		monthlyCosts: rented
-			? { baseRent: 1200, additionalRent: 50, advancePayment: 180, totalBrutto: 1430 }
-			: { baseRent: 0, additionalRent: 0, advancePayment: 0, totalBrutto: 0 },
+			? { baseRent: 1200, additionalRent: 50, advancePayment: 180, monthlyTotal: 1430 }
+			: { baseRent: 0, additionalRent: 0, advancePayment: 0, monthlyTotal: 0 },
 		nextContract: null as null | { tenantId: string; tenantName: string; startDate: string },
 		contractHistory: rented ? history : []
 	});
@@ -271,6 +291,30 @@ describe('Wohnungsdetail', () => {
 		expect(text()).not.toContain('heute');
 	});
 
+	// A-8 (#117): der beendete Mietvertrag ist Historie, kein Duplikat
+	it('listet beendete Mietverträge unter «Frühere Mietverträge» mit dem Grund, warum sie bleiben', () => {
+		open();
+		const current = byTestId('contract-history-current')!.textContent!;
+		expect(current).toContain('Beat Huber');
+		expect(current).not.toContain('Eva Graf');
+		const earlier = byTestId('contract-history-earlier')!;
+		expect(earlier.querySelector('h3')!.textContent).toBe('Frühere Mietverträge');
+		expect(earlier.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Mietvertrag von Eva Graf 01.01.2018 – 31.03.2022, befristet CHF 750.00 monatlich total Beendet Bleibt als Historie erhalten: Nebenkostenabrechnungen brauchen seine Mietstage.'
+		);
+	});
+
+	// P-18 (#145): seit wann leer und wer die Nebenkosten trägt
+	it('nennt bei einer leeren Wohnung, seit wann sie leer ist und wer ihre Nebenkosten trägt', () => {
+		const data = details(false);
+		Object.assign(data.apartment, { lastContractEnd: '2024-03-31' });
+		show(ApartmentPage, { data } as never);
+
+		const status = byTestId('apartment-info-status')!.textContent!;
+		expect(status).toContain('Leer seit 01.04.2024');
+		expect(status).toContain('Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter.');
+	});
+
 	it('nennt bei einer wiedervermieteten Wohnung, wer ab wann einzieht', () => {
 		const data = details(false);
 		data.apartment.status = 'relet';
@@ -280,7 +324,7 @@ describe('Wohnungsdetail', () => {
 			{
 				id: 'c3',
 				tenantName: 'Ruth Meier',
-				rentBrutto: 1630,
+				monthlyTotal: 1630,
 				status: 'future',
 				startDate: '2099-11-01',
 				endDate: null
@@ -288,9 +332,7 @@ describe('Wohnungsdetail', () => {
 		];
 		show(ApartmentPage, { data } as never);
 
-		expect(byTestId('apartment-info-status')!.textContent).toContain(
-			'Wiedervermietet ab 01.11.2099'
-		);
+		expect(byTestId('apartment-info-status')!.textContent).toContain('Vermietet ab 01.11.2099');
 		expect(byTestId('apartment-vacant')).toBeNull();
 		const next = byTestId('apartment-next-tenant')!;
 		expect(next.textContent!.replace(/\s+/g, ' ').trim()).toBe(
@@ -304,6 +346,10 @@ describe('Wohnungsdetail', () => {
 
 	it('bietet bei einer leeren Wohnung den Mietvertrag als nächsten Schritt an', () => {
 		open(false);
+		// Persona Anna P-3: auch nie vermietet trägt der Vermieter die Nebenkosten
+		expect(byTestId('apartment-info-status')!.textContent).toContain(
+			'Die Nebenkosten einer leeren Wohnung tragen Sie als Vermieter.'
+		);
 		expect(byTestId('apartment-vacant')).not.toBeNull();
 		expect(byTestId('current-tenant-name')).toBeNull();
 		expect(byTestId('contract-history-empty')).not.toBeNull();
