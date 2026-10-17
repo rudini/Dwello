@@ -269,7 +269,7 @@ balance                DECIMAL(12,2) NOT NULL  -- Saldo, to 5 Rappen in the tena
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
 paid_date              DATE                    -- from the Abrechnungsdatum up to today (#138)
-paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93); 0.00 when a Saldo below CHF 5 is settled on sending (#94)
+paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93); 0.00 for a Saldo below CHF 5, settled on sending or marked paid without an amount (#94)
 payment_resets         JSONB   NOT NULL DEFAULT '[]' -- payments taken back: { resetOn, paidDate, paidAmount } (#92)
 payment_recorded_at    TIMESTAMP               -- when the payment was recorded; a reset discards only a PDF made after it (#92)
 reminder_sent_date     DATE

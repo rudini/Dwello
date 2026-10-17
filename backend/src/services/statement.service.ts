@@ -493,8 +493,8 @@ export async function updateStatementStatus(
 		...settled
 	};
 	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94)
-	const saldo = waived ? '0.00' : existing.balance;
-	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? saldo, paymentRecordedAt: new Date() });
+	const moved = waived ? '0.00' : existing.balance;
+	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? moved, paymentRecordedAt: new Date() });
 
 	return updateStatement(id, updateData);
 }
