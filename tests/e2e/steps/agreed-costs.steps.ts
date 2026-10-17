@@ -1,10 +1,10 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { agreedCostsOfContract } from '../questions/contract-detail';
-import { reviewed } from '../questions/contract-form';
+import { noAgreedCostsWarning, reviewed } from '../questions/contract-form';
 import { agreementQuestionsOf, agreementQuestionsShown, agreementsFailure, notAgreedCostsOf } from '../questions/statement-generate';
 import { openContract } from '../tasks/contract-detail';
-import { leaveOutCategory, reviewContract } from '../tasks/contract-form';
+import { leaveOutCategory, reviewContract, untickAllCategories } from '../tasks/contract-form';
 import { agreementsCannotBeChecked, agreementsCannotBeSaved, answerAgreement, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
 
 const { Given, When, Then } = createBdd(test);
@@ -136,4 +136,19 @@ Then('nicht die Nebenkosten {string}', async ({ verwalter, names }, category: st
 
 Then('zeigt die Prüfung {string} ohne {string}', async ({ verwalter }, label: string, value: string) => {
 	await verwalter.sees(reviewed(label)).not.toContain(value);
+});
+
+Given(
+	'im Gebäude {string} gibt es eine Rechnung ohne Kategorie über {string} Franken vom {string}',
+	async ({ seed }, building: string, amount: string, date: string) => {
+		await seed.invoiceWithoutCategory(building, amount, date);
+	}
+);
+
+When('der Liegenschaftsverwalter alle Nebenkosten abwählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(untickAllCategories);
+});
+
+Then('warnt das Formular {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(noAgreedCostsWarning).toContain(message);
 });

@@ -36,8 +36,8 @@ export async function agreedCategoryIds(contractId: string): Promise<string[]> {
 /**
  * The contract's list as the form shows it: the categories given are agreed, the others it answers are not. A new
  * contract answers every umlagefähige category (without a list: all agreed); a saved one only those it had answered,
- * so a category not answered yet stays a question for the wizard (code review W10c S3 C-1). One statement, so a
- * category deleted meanwhile is no foreign key error, and an unknown id is left out
+ * so a category not answered yet stays a question for the wizard (code review W10c S3 C-1). One statement that locks
+ * the categories it reads, so one deleted meanwhile is no foreign key error, and an unknown id is left out
  */
 export async function setAgreedCategories(
 	contractId: string,
@@ -48,12 +48,13 @@ export async function setAgreedCategories(
 	const ids = agreedIds?.map((id) => sql`${id}::uuid`);
 	const agreed = !ids ? categories.isAllowedUtilityCost : ids.length ? sql`${categories.id} IN (${sql.join(ids, sql`, `)})` : sql`false`;
 	const answered = answeredOnly
-		? sql`${categories.id} IN (SELECT category_id FROM contract_categories WHERE contract_id = ${contractId}::uuid)`
+		? sql`${categories.isAllowedUtilityCost} AND ${categories.id} IN (SELECT category_id FROM contract_categories WHERE contract_id = ${contractId}::uuid)`
 		: categories.isAllowedUtilityCost;
 	await q.execute(sql`
 		INSERT INTO contract_categories (contract_id, category_id, agreed)
 		SELECT ${contractId}::uuid, ${categories.id}, coalesce(${agreed}, false) FROM ${categories}
 		WHERE ${answered} OR ${agreed}
+		FOR KEY SHARE
 		ON CONFLICT (contract_id, category_id) DO UPDATE SET agreed = excluded.agreed`);
 }
 

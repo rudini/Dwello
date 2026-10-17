@@ -11,7 +11,8 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Slice 2, statement wizard: question for unanswered categories in the step «Einstellungen», answer stored on the Mietvertrag (saved note); notice of not agreed costs; text of the «Neu» finding; a11y/language state `agreed-costs`
 - [x] Code review slice 2 and 4: `docs/reviews/w10c-s2-review-1.md` (C-1 questions loading/failing block «Weiter», C-2 state `agreement-save-failed`, C-6, C-7, C-9 fixed)
 - [x] Re-review slice 2 fixes and review slice 3: `docs/reviews/w10c-s3-review-1.md` (C-1 saving the form keeps unanswered categories unanswered, C-2, C-3 state `agreements-failed`, C-6, C-9, C-14, C-15 fixed)
-- [ ] Closing code review (slice 3 fixes, merge a9bd54a, feature review fixes)
+- [x] Closing code review (slice 3 fixes, merge a9bd54a, feature review fixes): `docs/reviews/w10c-close-review-1.md` (C-1 to C-4 scenarios and state, C-5 fixed); `fach-reviewer` round 3 `w10c-fachreview-3.md` (V-12 = C-5, V-11, V-14 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-363.md`
 - [x] Slice 3, contract: checkboxes in «Neuer Mietvertrag» and «Mietvertrag bearbeiten» (help texts per domain review V-6), list in «Prüfen» and on the detail page
 - [x] Slice 4, PDF names the agreed categories it bills (domain review M-2), only on statements created since (agreed_category_ids)
 - [x] a11y screens and languages for the new states (`statement-generate` `agreed-costs`, `agreement-save-failed`; the contract screens show the boxes in their existing states)

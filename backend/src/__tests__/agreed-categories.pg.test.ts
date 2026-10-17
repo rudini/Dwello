@@ -282,6 +282,20 @@ describe('Neuer Mietvertrag', () => {
 		expect((await contract(fresh.contract)).agreedCategoryIds).toEqual([]);
 	});
 
+		// code review W10c close C-5: the form shows only umlagefähige categories; one agreed while it is not umlagefähig
+	// keeps its answer when the form is saved
+	it('lässt eine vereinbarte, nicht mehr umlagefähige Kategorie beim Speichern vereinbart', async () => {
+		await db.update(categories).set({ isAllowedUtilityCost: true }).where(eq(categories.id, ownId));
+		await sendJson('PUT', `/api/v1/contracts/${fresh.contract}/agreements`, { categoryId: ownId, agreed: true });
+		await db.update(categories).set({ isAllowedUtilityCost: false }).where(eq(categories.id, ownId));
+
+		await sendJson('PUT', `/api/v1/contracts/${fresh.contract}`, { agreedCategoryIds: [ids.Caretaker] });
+		await db.update(categories).set({ isAllowedUtilityCost: true }).where(eq(categories.id, ownId));
+
+		expect((await contract(fresh.contract)).agreedCategoryIds).toContain(ownId);
+		await db.update(categories).set({ isAllowedUtilityCost: false }).where(eq(categories.id, ownId));
+	});
+
 		it('vereinbart nur, was das Formular angekreuzt hat', async () => {
 		expect((await contract(listed.contract)).agreedCategoryIds).toEqual([ids.Caretaker]);
 	});

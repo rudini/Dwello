@@ -388,6 +388,11 @@ export function testData(api: CallTheApi) {
 			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, 'Reinigung Q1', '450.00', '2026-03-31');
 		},
 
+		// Invoice without a Kategorie, distributed by area: billed as «Nicht kategorisiert»
+		async invoiceWithoutCategory(buildingTitle: string, amount: string, date: string) {
+			await invoice(buildingTitle, {}, `Ohne Kategorie ${date}`, amount, date).then((id) => put(`invoices/${id}`, { categoryId: null }));
+		},
+
 		// Invoice in an own category, distributed by area
 		async invoiceInOwnCategory(buildingTitle: string, categoryTitle: string, amount: string, date: string) {
 			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, `${categoryTitle} ${date}`, amount, date);

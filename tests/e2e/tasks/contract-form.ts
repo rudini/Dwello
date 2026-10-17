@@ -1,7 +1,10 @@
 import type { Activity } from '../screenplay/actor';
+import { Count } from '../screenplay/questions';
 import { Check, Click, Enter, EnterDate, FailRequests, Navigate, Select, Uncheck, Wait } from '../screenplay/interactions';
 import {
 	agreedCategory,
+	agreedCategoryBoxAt,
+	agreedCategoryBoxes,
 	advancePaymentInput,
 	apartmentSelect,
 	baseRentInput,
@@ -148,3 +151,9 @@ export const goToRentWith = (tenantId: string, startDate: string): Activity => (
 		EnterDate.of(startDate).into(startDateInput),
 		goToNextStep
 	);
+
+// «Vereinbarte Nebenkosten»: every box unticked, not saved (persona Marco W10c P-1)
+export const untickAllCategories: Activity = async (actor) => {
+	const boxes = await actor.answer(Count.of(agreedCategoryBoxes));
+	for (let box = 0; box < boxes; box++) await actor.attemptsTo(Uncheck.the(agreedCategoryBoxAt(box)));
+};

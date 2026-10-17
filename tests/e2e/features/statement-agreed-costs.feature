@@ -86,6 +86,15 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Wenn der Liegenschaftsverwalter angibt, dass "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
     Dann meldet die Frage zum Mietvertrag von "Anna Keller" "Ihre Antwort wurde nicht gespeichert. Bitte versuchen Sie es nochmals."
 
+  # Code-Review W10c S3 C-1: wer den Mietvertrag nur speichert, beantwortet die Frage nicht
+  Szenario: Eine offene Frage bleibt nach dem Bearbeiten des Mietvertrags offen
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietzins auf "980" Franken ändert
+    Und der Liegenschaftsverwalter die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
+    Dann fragt der Assistent, ob "Treppenhausreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
+
   # Code-Review W10c C-1: ohne die Prüfung entstünden Abrechnungen ohne die neue Kategorie, ohne dass jemand fragt
   Szenario: Die vereinbarten Nebenkosten lassen sich nicht prüfen
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
@@ -106,3 +115,14 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: Heizung."
     Aber steht im PDF nicht "Lift"
+
+  # Fachreview W10c Runde 2 M-1: eine Rechnung ohne Kategorie vereinbart kein Mietvertrag (#382)
+  Szenario: Neben einer Rechnung ohne Kategorie nennt das PDF keine vereinbarten Nebenkosten
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Nicht kategorisiert"
+    Aber steht im PDF nicht "vereinbarten Nebenkosten"

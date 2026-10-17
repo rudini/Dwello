@@ -75,6 +75,7 @@ Funktionalität: Barrierefreiheit
       | contract-new           | draft-restored      |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
+      | contract-new           | agreed-costs-none        |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
       | contract-detail        | end-dialog-error    |

@@ -126,3 +126,8 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag "Lift" nicht vereinbart ist
     Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Heizung"
     Aber nicht die Nebenkosten "Lift"
+
+  # Persona Marco W10c P-1: ohne Häkchen rechnet Dwello keine Nebenkosten ab, das soll nicht unbemerkt geschehen
+  Szenario: Das Formular warnt, wenn keine Nebenkosten vereinbart sind
+    Wenn der Liegenschaftsverwalter alle Nebenkosten abwählt
+    Dann warnt das Formular "Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab."

@@ -250,6 +250,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'link-preset': () => Wait.until(on.wizardPreset),
 	// every box of the agreed Nebenkosten unticked, not saved: the note that no Nebenkosten are billed
 	'agreed-costs-none': () => async (actor) => {
+		// «Neuer Mietvertrag» (tenant and apartment from the address): the boxes are on the step «Miete»
+		if ((await actor.answer(Count.of(on.agreedCategoryBox))) === 0)
+			await actor.attemptsTo(
+				Click.on(nextButton),
+				Click.on(nextButton),
+				EnterDate.of('2030-01-01').into(startDateInput),
+				Click.on(nextButton),
+				Wait.until(on.agreedCategoryBox)
+			);
 		const boxes = await actor.answer(Count.of(on.agreedCategoryBox));
 		for (let box = 0; box < boxes; box++) await actor.attemptsTo(Uncheck.the(on.agreedCategoryBoxAt(box)));
 		await actor.attemptsTo(Wait.until(on.shown('contract-agreed-costs-none')));

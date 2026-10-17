@@ -254,12 +254,14 @@
 				"rent-taken-over",
 				"draft-restored",
 				"contracts-unknown",
-				"contracts-unknown-review"
+				"contracts-unknown-review",
+				"agreed-costs-none"
 			],
 			"queries": {
 				"every-wizard-step": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown-review": "?tenant={tenant}&apartment={freeApartment}",
+				"agreed-costs-none": "?tenant={tenant}&apartment={freeApartment}",
 				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
 				"rent-taken-over": "?tenant={tenant}&apartment={noticedApartment}",
 				"draft-restored": "?tenant={tenant}"
