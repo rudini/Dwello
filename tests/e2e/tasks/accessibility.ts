@@ -98,7 +98,9 @@ const askKi = (name: string): Activity => (actor) =>
 
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
-let resultRuns = 0; // 'generation-result' bills its contracts once per year
+// 'generation-result' bills its contracts once per year; counted per worker, over all its scenarios: 2016-2022 have
+// neither statements nor invoices in the seed (2023 to 2025 do)
+let resultRuns = 0;
 
 const previewOf =
 	(year: string, shown: string, end = `${year}-12-31`) =>
@@ -346,7 +348,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// a year without invoices, another one on every look: the drafts of the last stay (#356)
 	// the seeded heating profile: the preselected one may be deleted by a parallel scenario
 	'generation-result': (example) => async (actor) => {
-		const year = 2016 + (resultRuns++ % 9);
+		const year = 2016 + (resultRuns++ % 7);
 		await actor.attemptsTo(
 			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
 			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
