@@ -47,6 +47,13 @@ describe('initialContractValues', () => {
 		);
 	});
 
+	it('takes over no start from the URL the date check would refuse (#296)', () => {
+		const start = (date: string) =>
+			initialContractValues(undefined, new URLSearchParams({ start: date })).startDate;
+		expect(start('2100-01-01')).toBe('');
+		expect(start('2026-04-01')).toBe('2026-04-01');
+	});
+
 	it('takes the values of the contract being edited', () => {
 		const contract = {
 			id: 'c1',
@@ -241,5 +248,9 @@ describe('suggestedStartDate', () => {
 	it('suggests the day the apartment becomes free for a new contract without start', () => {
 		expect(suggestedStartDate('', freeFrom('2025-04-01'))).toBe('2025-04-01');
 		expect(suggestedStartDate('2025-05-01', freeFrom('2025-04-01'))).toBeNull();
+	});
+
+	it('suggests nothing the date check would refuse (#296)', () => {
+		expect(suggestedStartDate('', freeFrom('2100-01-01'))).toBeNull();
 	});
 });
