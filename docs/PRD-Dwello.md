@@ -478,6 +478,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
 - The Saldo (costs minus Akonto) is rounded to 5 Rappen only in the tenant's favour, a Nachzahlung down and a Rückerstattung up (#79); the statement shows the amount before rounding and the rounding
+- A Saldo below CHF 5.00 (Nachzahlung or Rückerstattung, the rounded one) is neither claimed nor paid out: the PDF says so, without payment part or IBAN request; the statement is paid on sending (amount paid 0.00) and cannot be gemahnt; nothing is carried forward (#94)
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**

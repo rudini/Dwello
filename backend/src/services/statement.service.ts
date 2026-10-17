@@ -30,6 +30,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import { belowMinimum } from './pdf-format';
 import { isRealDate } from './real-date';
 import { oldAddress } from './old-address';
 import { daysAfter, swissToday } from './today';
@@ -558,8 +559,9 @@ export async function updateStatementStatus(
 
 	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.statementDate);
 	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
-	// A Saldo of 0 (often after the rounding to 5 Rappen) is settled once sent: nothing to pay or to pay back
-	const settled = sentToday && parseFloat(existing.balance) === 0 && { status: 'paid', paidDate: sentToday.statementDate };
+	// A Saldo below CHF 5, 0 included, is settled once sent: neither claimed nor paid out (#94)
+	const waived = belowMinimum(parseFloat(existing.balance));
+	const settled = sentToday && waived && { status: 'paid', paidDate: sentToday.statementDate };
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
 		...additionalData,
@@ -568,8 +570,9 @@ export async function updateStatementStatus(
 		// the PDF as sent is made anew after sending, with the tenant and settings then, not a draft's of earlier (review C-9)
 		...(sentToday && { pdfBlob: null, pdfGeneratedAt: null })
 	};
-	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93)
-	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? existing.balance, paymentRecordedAt: new Date() });
+	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94)
+	const moved = waived ? '0.00' : existing.balance;
+	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? moved, paymentRecordedAt: new Date() });
 
 	return updateStatement(id, updateData);
 }

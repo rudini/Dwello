@@ -1222,3 +1222,22 @@ Files changed: `backend/migrations/0020_contract_categories.sql`, `backend/src/d
 - [x] Code review rounds 3 and 4 (closing): `docs/reviews/w7e-review-3.md` (C-24 Major fixed), `-4`
 - [x] Full E2E (chromium + api): 950 passed; 5 failed under load (contract-new, the IBAN race O-34), green alone; archive the session
 - [x] #358 merged first (PR #385): «Abrechnung berichtigen» (`replaceStatement`) records the replacement in its transaction; `recordStatementCorrection(replaced)`; privacy paragraph names it (R-4); migration renumbered to `0019_audit_log.sql` after `0018_statement_correction.sql`
+
+## Session W6d: minimum Saldo of CHF 5 (#94)
+
+- [x] @wip scenarios: Nachzahlung and Rückerstattung below CHF 5 in the PDF sent to the tenant (no payment part, no IBAN request), settled on sending with the detail page's text, boundary with rounded examples (`statement-minimum-balance.feature`)
+- [x] fach-reviewer round 1 on the scenarios and texts before implementing: `docs/reviews/w6d-fachreview-1.md` (M-1 needs the product owner: #352; glossary: #353; small Saldo noted in #291)
+- [x] merged main with #341 (Saldo rounded in the tenant's favour); the threshold reads the stored, rounded `balance`
+- [x] backend: settled on sending below CHF 5 with amount paid 0.00 (`updateStatementStatus`), PDF text without payment part or IBAN request (`pdf.service.ts`), Mahnung refused `REMINDER_BELOW_MINIMUM` also after a payment reset (`reminder.service.ts`), `belowMinimum` in `pdf-format.ts`
+- [x] detail page: the payment panel says the amount is waived or not paid out, without Zahlungsfrist and «Bezahlt am»; no Mahnung offered (`PaymentPanel.svelte`, `+page.svelte`, `$lib/statement.ts`, `messages/*.json`)
+- [x] docs: `data-model.md`, `nebenkostenabrechnung-anforderungen.md`, `PRD-Dwello.md`; O-36 (config insert race seen in E2E) in `offene-punkte.md`
+- [x] slice review (code-reviewer) round 1: `docs/reviews/w6d-review-1.md` (C-1, C-2 Major fixed with a DOM test and a scenario, both seen red; C-3, C-8, C-9 fixed; C-7 rejected; C-4 to #291, C-5, C-6 left)
+- [x] personas: `docs/design/personas/marco-w6d.md` (P-1 Major fixed: no deadline field below CHF 5, DOM and action test seen red), `docs/design/personas/dr-weber-w6d.md` (P-1 to #353, P-2 = M-1 #352, P-3 fixed with Marco P-1, P-4 #291); staged by SQL `stage-w6d.sql` (Seepark Weber/Brunner, Musterhaus Schmidt)
+- [x] fach-reviewer round 2: `docs/reviews/w6d-fachreview-2.md` (no new Blocker/Major; M-1 open in #352; V-12 fixed; V-10, V-11 left: V-11 to #291)
+- [x] daten-pruefer round 1: `docs/reviews/w6d-datenpruefung-1.md` (D-1 Major fixed: paid amount 0.00 also when marked paid after a reset, pg test seen red; D-2 to #291, D-3 to D-5 left)
+- [x] closing code-reviewer round: `docs/reviews/w6d-review-2.md` (C-10 Major fixed with a scenario seen red; C-15 fixed; C-14 rejected: the object keeps the template under the complexity gate; C-11 to C-13 left)
+- [x] closing code-reviewer round on the fixes since 4e7bad1: `docs/reviews/w6d-review-3.md` (no Blocker/Major; C-16, C-17 fixed; C-18 left)
+- [x] Workflow note: a product-decision Major and the merge; fallow gate vs. ponytail (`docs/reviews/workflow-notes-issue-94.md`)
+- [x] workflow-review, session archived, pull request (waits for the product owner on #352 / #353 before the merge)
+
+Files: `backend/src/services/{pdf-format,pdf.service,reminder.service,statement.service}.ts`, `backend/src/__tests__/{statement-lock.pg,reminders.pg,statement-pdf-render}.test.ts`, `src/lib/statement.ts`, `src/routes/statements/+page.svelte`, `src/routes/statements/[id]/{+page,PaymentPanel}.svelte`, `src/routes/statements/[id]/edit/{+page.svelte,+page.server.ts}`, `src/__tests__/{statement-pages.dom,statement-edit-actions}.test.ts`, `messages/*.json`, `tests/e2e/features/statement-minimum-balance.feature`, `tests/e2e/{steps,questions,targets,tasks}/statement-{detail,edit}*.ts`, `docs/{data-model,PRD-Dwello,nebenkostenabrechnung-anforderungen}.md`, `docs/design/offene-punkte.md` (O-36), reviews `docs/reviews/w6d-*.md`, persona reports `dr-weber-w6d.md`, `marco-w6d.md`

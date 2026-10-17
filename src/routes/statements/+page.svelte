@@ -4,7 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { StatementsListData, StatementWithDetails } from '$lib/types';
-	import { balanceLabel, paidDateError, paidHelp } from '$lib/statement';
+	import { balanceLabel, claimed, paidDateError, paidHelp } from '$lib/statement';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -182,7 +182,7 @@
 	}}
 >
 	{#if paying}
-		{#if paying.balance > 0}<p>{m.statements_no_reminder_after()}</p>{/if}
+		{#if claimed(paying.balance)}<p>{m.statements_no_reminder_after()}</p>{/if}
 		<DateInput
 			id="paidDate"
 			label={m.statements_paid_on()}

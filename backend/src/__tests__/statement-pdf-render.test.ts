@@ -238,6 +238,42 @@ describe('PDF ohne Saldo und einer bezahlten Abrechnung', () => {
 	});
 });
 
+// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt: kein Zahlteil, keine Bitte um die IBAN
+describe('PDF mit einem Saldo unter CHF 5', () => {
+	it('fordert eine kleine Nachzahlung nicht ein und druckt keinen Zahlteil', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.95, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Nachzahlung CHF 4.95');
+		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(pdf.flowing).not.toContain('Zahlteil');
+	});
+
+	it('zahlt eine kleine Rückerstattung nicht aus und fragt nicht nach der IBAN', async () => {
+		const pdf = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir zahlen ihn nicht aus.');
+		expect(pdf.flowing).not.toContain('IBAN');
+		expect(pdf.flowing).not.toContain('überweisen');
+	});
+
+	// nach dem Versand ist sie bezahlt, aber ohne Zahlung: kein «Bezahlt am», kein «Überwiesen am»
+	it('sagt auch nach dem Versand, dass der Betrag nicht eingefordert oder ausbezahlt wird', async () => {
+		const waived = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.1, paidDate: '2026-02-15' });
+		const back = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paidDate: '2026-02-15' });
+
+		expect(waived.flowing).toContain('Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(waived.flowing).not.toContain('Bezahlt am');
+		expect(back.flowing).toContain('Wir zahlen ihn nicht aus.');
+		expect(back.flowing).not.toContain('Überwiesen am');
+	});
+
+	it('fordert CHF 5.00 mit dem Zahlteil ein', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 779.15, balance: 5 });
+
+		expect(pdf.flowing).toContain('Zahlteil');
+	});
+});
+
 describe('QR-Code im Zahlteil', () => {
 	// 46 mm gedruckt: mit 166 Pixeln waren die Module ungleich breit; jetzt ganze Pixel je Modul, scharf auch beim Druck
 	it('bettet den QR-Code mit ganzen Pixeln je Modul in Druckauflösung ein', async () => {

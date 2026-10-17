@@ -200,6 +200,10 @@ Then(
 	}
 );
 
+Then('sagt die Zahlung der Abrechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(paymentText).toBe(text);
+});
+
 Then('hat die Abrechnung den Status {string}', async ({ verwalter }, status: string) => {
 	await verwalter.sees(statusOfStatement).toBe(status);
 });
