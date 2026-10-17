@@ -15,5 +15,6 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Code review round 1: `docs/reviews/w7e-review-1.md`
 - [x] Fach review round 2 (feature review): `docs/reviews/w7e-fachreview-2.md`
 - [x] Personas: `docs/design/personas/{helga,marco,weber,sven,anna}-w7e.md`
-- [ ] Re-reviews of the Major fixes (code-reviewer C-1; Anna P-1/P-2, Sven P-1), closing code-reviewer round
-- [ ] Workflow review, archive the session
+- [x] Re-reviews of the Major fixes, closing code-reviewer round: `docs/reviews/w7e-review-2.md` (C-1 closed); personas `anna-w7e-2.md`, `sven-w7e-2.md`
+- [x] Workflow note: commit gate refuses red tests that import a missing module; detached session start; CRAP of a new page template (`docs/reviews/workflow-notes-issue-357.md`)
+- [ ] Full E2E (chromium + api), archive the session

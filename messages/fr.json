@@ -1610,7 +1610,7 @@
 	"audit_category_excluded": "Catégorie « {name} » : passée d’imputable à non imputable",
 	"audit_category_excluded_invoice": "Catégorie « {name} » : passée d’imputable à non imputable ; 1 facture n’est donc plus imputable",
 	"audit_category_excluded_invoices": "Catégorie « {name} » : passée d’imputable à non imputable ; {count} factures ne sont donc plus imputables",
-	"audit_category_included": "Catégorie « {name} » : passée de non imputable à imputable ; ses factures non imputables le restent",
+	"audit_category_included": "Catégorie « {name} » : passée de non imputable à imputable ; les factures non imputables de la catégorie restent non imputables",
 	"audit_invoice_excluded": "Facture « {description} » de {supplier} du {date} de {amount} ({building}) : marquée comme non imputable",
 	"audit_invoice_included": "Facture « {description} » de {supplier} du {date} de {amount} ({building}) : de nouveau marquée comme imputable",
 	"audit_payment_reset": "Paiement du {date} du décompte {number} retiré",

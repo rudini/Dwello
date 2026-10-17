@@ -1610,7 +1610,7 @@
 	"audit_category_excluded": "Categoria «{name}»: modificata da addebitabile a non addebitabile",
 	"audit_category_excluded_invoice": "Categoria «{name}»: modificata da addebitabile a non addebitabile; 1 fattura non è quindi più addebitabile",
 	"audit_category_excluded_invoices": "Categoria «{name}»: modificata da addebitabile a non addebitabile; {count} fatture non sono quindi più addebitabili",
-	"audit_category_included": "Categoria «{name}»: modificata da non addebitabile ad addebitabile; le sue fatture non addebitabili restano tali",
+	"audit_category_included": "Categoria «{name}»: modificata da non addebitabile ad addebitabile; le fatture non addebitabili della categoria restano non addebitabili",
 	"audit_invoice_excluded": "Fattura «{description}» di {supplier} del {date} di {amount} ({building}): segnata come non addebitabile",
 	"audit_invoice_included": "Fattura «{description}» di {supplier} del {date} di {amount} ({building}): di nuovo segnata come addebitabile",
 	"audit_payment_reset": "Pagamento del {date} del conteggio {number} rimosso",
@@ -1622,6 +1622,6 @@
 	"audit_deleted": "La voce è eliminata.",
 	"audit_delete_failed": "Non è stato possibile eliminare la voce. Riprovi.",
 	"audit_privacy": "Affinché Lei possa ricostruire in seguito che cosa è cambiato, Dwello registra nel registro sotto «Impostazioni», con data e ora: ogni accesso con il fornitore scelto (senza nome né indirizzo e-mail), le modifiche delle spese di gestione e dell’addebitabilità delle categorie, le fatture che non sono più o sono di nuovo addebitabili (con emittente, descrizione, data, importo e immobile), nonché i pagamenti rimossi. Le voci restano, anche se elimina la fattura, finché Lei non le elimina nel registro. Il registro del server (vedi «Accesso») è separato.",
-	"audit_privacy_demo": "Nella demo tutti i visitatori vedono il registro con gli accessi degli altri, senza nome né indirizzo e-mail, e possono eliminarne voci.",
+	"audit_privacy_demo": "Nella demo tutti i visitatori vedono il registro con gli accessi degli altri, senza nome né indirizzo e-mail, e possono eliminare voci.",
 	"audit_not_deleted": "Voce non eliminata"
 }

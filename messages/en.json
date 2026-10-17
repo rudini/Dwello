@@ -1610,7 +1610,7 @@
 	"audit_category_excluded": "Category “{name}”: changed from allocable to not allocable",
 	"audit_category_excluded_invoice": "Category “{name}”: changed from allocable to not allocable; 1 invoice is therefore no longer allocable",
 	"audit_category_excluded_invoices": "Category “{name}”: changed from allocable to not allocable; {count} invoices are therefore no longer allocable",
-	"audit_category_included": "Category “{name}”: changed from not allocable to allocable; its invoices that are not allocable stay so",
+	"audit_category_included": "Category “{name}”: changed from not allocable to allocable; invoices of the category that are not allocable stay not allocable",
 	"audit_invoice_excluded": "Invoice “{description}” from {supplier} of {date} for {amount} ({building}): marked as not allocable",
 	"audit_invoice_included": "Invoice “{description}” from {supplier} of {date} for {amount} ({building}): marked as allocable again",
 	"audit_payment_reset": "Payment of {date} on statement {number} reset",

@@ -32,9 +32,9 @@ describe('Protokoll aus dem Backend', () => {
 	});
 
 	it('nennt die Gegenrichtung: wieder umlagefähig', () => {
-		// Persona Anna P-2: die Rechnungen, die mit der Kategorie nicht umlagefähig wurden, kommen nicht zurück
+		// Persona Anna P-2 (Runde 2: verständlicher): die Rechnungen, die mit der Kategorie nicht umlagefähig wurden, kommen nicht zurück
 		expect(textOf(category, { allocable: true, invoices: undefined })).toBe(
-			'Kategorie «Gartenpflege»: von nicht umlagefähig auf umlagefähig geändert; ihre nicht umlagefähigen Rechnungen bleiben es'
+			'Kategorie «Gartenpflege»: von nicht umlagefähig auf umlagefähig geändert; nicht umlagefähige Rechnungen der Kategorie bleiben nicht umlagefähig'
 		);
 		expect(textOf(invoice, { allocable: true })).toBe(
 			'Rechnung «Treppenhausreinigung» von Hauswart Meier vom 31.03.2026 über CHF\u00a0450.00 (Lindenhof): wieder als umlagefähig markiert'
@@ -71,7 +71,7 @@ describe('Protokoll aus dem Backend', () => {
 	// Fachprüfung V-3: eine früher erfasste Zahlung ohne Datum
 	it('nennt eine zurückgesetzte Zahlung ohne Datum', () => {
 		expect(textOf(reset, { paidDate: null })).toBe(
-			'Zahlung der Abrechnung NK-2025-0001 zurückgesetzt'
+			'Zahlung zur Abrechnung NK-2025-0001 zurückgesetzt'
 		);
 	});
 });
