@@ -1,0 +1,35 @@
+# Code-Review 4 (Abschlussrunde vor dem ersten Push): Assistent «Abrechnungen erstellen» (#251, #252, #201)
+
+Geprüft im Worktree `review-wizard-code4` (detached auf e42d3b7):
+
+- `git diff 4e73838 079222e`: die Behebung von C-1, C-10, C-12 und C-13 aus `docs/reviews/wizard-review-3.md`. Gelesen habe ich alle 14 geänderten Dateien.
+- Merge e42d3b7 (origin/main 5d5038e): Ich habe nur geprüft, ob er mit diesem Zweig zusammenwirkt. Merge-Basis ist 87dda97. Beide Seiten ändern `messages/*.json`, `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`, `tests/e2e/tasks/accessibility.ts`, `tests/e2e/tasks/contract-form.ts` und `contract-wizard.dom.test.ts`. Diese Dateien habe ich mit ihren beiden Seiten verglichen.
+
+Zum Umfeld habe ich gelesen: `PreviewEmpty.svelte` (ganz), `StatementWizard.svelte` (`NOTHING`, `previewErrors`, `invoices`), `PreviewStep.svelte` (`rows`, `billed`), `invoiceRows` und `needsConfirmation` in `src/lib/statement-wizard.ts`, die Aktion `preview` in `+page.server.ts`, `billedContracts` und `invoicesInPeriod` in `src/lib/server/statement-generation.ts`, die Steps `tryNextWithoutConfirmation` und `errorMessageShown` sowie `Text.of`.
+
+Ergebnis: C-1, C-10, C-12 und C-13 sind behoben. Der Merge wirkt nicht ungewollt mit dem Zweig zusammen. Keine Blocker, keine Majors.
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| C-14 | Nit | src/routes/statements/generate/StatementWizard.svelte:163; PreviewEmpty.svelte:11 | ponytail `dup:` Die Frage «bleiben Mietstage offen?» steht zweimal. Der Assistent prüft `invoices.some(row => row.partlyBilled)`, `PreviewEmpty` prüft `billed.some(row => row.partlyBilled > 0)`. Fachlich ergeben beide dasselbe: `partly` setzt eine Abrechnung voraus, die die Periode überschneidet, also gilt `existing > 0`. Ändert jemand später nur eine Stelle, widersprechen sich der Absatz und die Fehlermeldung wieder. |
+| C-11 | Minor (aus Runde 3, offen gelassen) | tests/a11y/screens.json; accessibility.feature; sprachen-bildschirme.feature | Die Variante mit offenen Mietstagen (Absatz und neue Meldung `statements_nothing_open`) hat weiter keinen eigenen a11y- oder Sprachzustand. Dass fr/it/en in diesem Fall kein Deutsch zeigen, belegt kein Test. |
+
+## Bestätigt durch Code und Test
+
+- **C-1 (Meldung nach «Weiter»):** `previewErrors()` gibt bei leerer Vorschau `statements_nothing_open` zurück, sobald eine Zeile `partlyBilled` hat, sonst wie bisher `statements_nothing`. `partlyBilled` setzt die Aktion `preview` für jedes gewählte Gebäude (`+page.server.ts:101`). Der DOM-Test «rät bei einer leeren Vorschau mit offenen Tagen nicht, Entwürfe zu löschen» klickt jetzt auf «Weiter» und prüft `form-error` mit `toBe` auf den ganzen Satz. Auf 4e73838 stand dort `statements_nothing` mit «…, oder löschen Sie zuerst …», der Test wäre dort also rot. Der Fall ohne offene Tage behält die alte Meldung, das sichert der Test «meldet eine Periode ohne Mietverträge und geht dann nicht weiter».
+- **Neuer Schlüssel:** `statements_nothing_open` steht in allen vier Sprachen. Er ist jeweils wörtlich der erste Teilsatz von `statements_nothing`, mit Punkt statt Komma. Der Text hat keine Guillemets und keine Satzzeichen, vor denen im Französischen ein Leerzeichen stehen müsste.
+- **C-10 (Szenario):** «Eine leere Vorschau mit offenen Mietstagen rät nicht, Entwürfe zu löschen» ist ohne `@wip`. Es nutzt bestehende Steps (die Abrechnung 2024 für Marc Huber, die Vorschau 2024-07-01 bis 2025-06-30, «ohne Bestätigung … weitergehen», die Fehlermeldung) und einen neuen Step «sagt die leere Vorschau {string}». Dieser fragt nach dem Text selbst (`Text.of(previewAllBilled)`, `toBe`). Die Schichten stimmen: Step → Question → Target. Die Formulierung beschreibt, was der Verwalter will. Rot wäre das Szenario auf f323923 beim Absatz und auf 4e73838 bei der Meldung: `getByText` findet «… Gebäude.» nicht in «… Gebäude, oder …».
+- **C-12:** `statements_all_billed` ist in allen vier Sprachen entfernt. Kein Verweis darauf ist übrig (grep in `src`, `tests`, `messages`). `PreviewEmpty` setzt den Text aus `statements_all_billed_lead` und `statements_building_billed_open` bzw. `statements_building_recalculate` zusammen. Der DOM-Test für den Fall ohne offene Tage erwartet weiter den ganzen alten Satz und sichert so, dass das Zusammensetzen dasselbe ergibt. Das Leerzeichen dazwischen kommt aus dem Zeilenumbruch zwischen den beiden Ausdrücken.
+- **C-13:** `id: 'c1'` ist entfernt. `tests/contracts/building-contracts.json` hat als ersten Mietvertrag schon `"id": "c1"`, der Test ändert sich also nicht.
+- **Merge:**
+  - `tests/e2e/tasks/contract-form.ts`: Unser `discardDraft` (mit Bestätigung im Dialog) und die neuen Tasks von main (`openRunningContract`, `newContractAfterEnd`) liegen in getrennten Teilen der Datei. `discardDraft` wird weiter nur in `contract-form.steps.ts:140` benutzt.
+  - `tests/e2e/tasks/accessibility.ts`: Die Version im Merge ist die von main plus `restoreDraft` und `draft-discard-dialog`. Der Import `discardDraftButton` ist erhalten, `type File` ist nach main entfernt (nur main hatte ihn gebraucht).
+  - `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`: Die Zeilen beider Seiten sind vollständig da, ohne Überschneidung (`draft-discard-dialog` bei contract-new und statement-generate, `delete-dialog` und `delete-unconfirmed` bei contract-detail-notice).
+  - `messages/*.json`: keine doppelten Schlüssel, in de/fr/it/en dieselben Schlüssel. Alle 100 französischen Guillemets haben innen ein geschütztes Leerzeichen (U+00A0). Die vier normalen Leerzeichen vor «?» (`contracts_end_title` und andere) gab es schon auf der Merge-Basis.
+- Es gibt keine neuen Klassen, keine rohen Werte, keine neue Route und keine neuen Daten im Client. Plan und Bericht gehören zum Auftrag. Kein Teil des Diffs liegt ausserhalb davon.
+
+## Nicht bestätigt
+
+- `bun run lint`, `bun run check`, Backend-Type-Check und `bunx vitest run` (2659) auf e42d3b7, E2E `statement-generate.feature` + `contract-new.feature` (46) und die axe- und Sprachzeilen beider Assistenten (40) auf 079222e: vom Aufrufer gemeldet. Mein Versuch, `statement-wizard.dom.test.ts` und `statement-generate-actions.test.ts` im Worktree laufen zu lassen, wurde blockiert, weil eine Regel den Zugriff auf `/home/user/Dwello/node_modules` verweigert. Dass die neuen Tests ohne die Änderung rot wären, habe ich nur durch Lesen beurteilt.
+- Die axe- und Sprachzeilen nach dem Merge (e42d3b7) sind nicht gelaufen. Das gilt vor allem für `contract-new | draft-discard-dialog`, weil main das Verhalten des Mietvertrags-Assistenten bei einem Mieter mit laufendem Mietvertrag ändert (OpenContracts, #156). Gelesen habe ich `startDraft` und `restoreDraft`. Einen Konflikt sehe ich nicht. Der Aufrufer will die ganze E2E-Suite nach diesem Review laufen lassen.
+- Ob «Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.» als einziger Rat fachlich genügt, wenn ein anderes gewähltes Gebäude ganz abgerechnet ist (gemischter Fall), entscheidet der fach-reviewer in der Feature-Review. Der Wortlaut übernimmt nur einen bestehenden Teilsatz.

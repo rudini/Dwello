@@ -9,7 +9,8 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 
-	// Plausibility checks of the preview: no invoices or existing statements need a confirmation, a gap is a hint
+	// Plausibility checks of the preview: no invoices, missing invoices or statements that leave days of a contract
+	// unbilled need a confirmation; statements that cover their contracts are only named (#251), a gap is a hint
 	let {
 		rows,
 		period,
@@ -27,6 +28,8 @@
 	const missing = $derived(rows.filter((row) => row.missing));
 	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
+	const unbilledDays = $derived(rows.some((row) => row.partlyBilled > 0));
+	const existingTone = $derived(unbilledDays ? 'caution' : 'info'); // only then a finding to confirm
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
 	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
@@ -49,7 +52,7 @@
 		[
 			missing.length && 'missing-invoices-text',
 			incomplete.length && 'category-check-text',
-			existing.length && 'existing-statements-text'
+			unbilledDays && 'existing-statements-text'
 		].filter((id): id is string => !!id)
 	);
 	const statements = (count: number) =>
@@ -100,7 +103,7 @@
 />
 
 {#if existing.length}
-	<Alert tone="caution" title={m.statements_existing_title()} testid="existing-statements">
+	<Alert tone={existingTone} title={m.statements_existing_title()} testid="existing-statements">
 		<div id="existing-statements-text" class="flex flex-col gap-2">
 			{#each existing as row (row.buildingId)}
 				<p>
