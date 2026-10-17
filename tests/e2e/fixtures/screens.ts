@@ -35,7 +35,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable'].includes(state)) return { path, building: '', tankBuilding: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview'].includes(state)) return { path, building: '', tankBuilding: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -102,6 +102,16 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.apartment('Bergsicht', '2.03', 'vacant');
 	await seed.tenant('Fritz');
 	await seed.contract('Fritz', '2.03', { startDate: '2100-01-01', baseRent: '1500.00' });
+	// A-5 (#114): moved out in 2024, still at the building's address: Ida with a draft (send dialog, overview task, the
+	// next steps of her ended contract), Kurt without one (the wizard's preview of 2024)
+	for (const [tenant, apartment] of [['Ida', '2.04'], ['Kurt', '2.05']]) {
+		await seed.apartment('Bergsicht', apartment, 'vacant');
+		await seed.tenant(tenant);
+		await seed.contract(tenant, apartment, { startDate: '2024-01-01', endDate: '2024-06-30', baseRent: '1200.00' });
+		await seed.notice(tenant, '2024-06-30');
+		await seed.buildingAddress(tenant, 'Bergsicht');
+	}
+	await seed.statement('Ida', 'Bergsicht', 2024, 'Standard');
 	// A-6 (#115): an agreed end in the past, the 2025 statement bills the time after it as Leerstand
 	await seed.building('Talblick', 'Winterthur');
 	await seed.apartment('Talblick', '3.01', 'vacant');
@@ -120,6 +130,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		vacantApartment: seed.idOf('2.02'),
 		endedContract: seed.idOf('Mietvertrag Emil'),
 		expiredContract: seed.idOf('Mietvertrag Gina'),
+		movedOutContract: seed.idOf('Mietvertrag Ida'),
+		oldAddressStatement: seed.idOf('Abrechnung Ida 2024'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
 		lateInvoice,

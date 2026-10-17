@@ -2,6 +2,7 @@ import { once } from 'events';
 import PDFDocument from 'pdfkit';
 import { addPaymentPart, type Language } from './pdf.service';
 import type { QRBillConfig } from './qr-bill.service';
+import { countryLine } from './postal-address';
 import type { reminderLetter } from './reminder-letter';
 
 type Letter = ReturnType<typeof reminderLetter>;
@@ -11,10 +12,11 @@ export interface PostalAddress {
 	address?: string | null;
 	postalCode?: string | null;
 	city?: string | null;
+	country?: string | null;
 }
 
 const lines = (a: PostalAddress) =>
-	[a.name, a.address, [a.postalCode, a.city].filter(Boolean).join(' ')].filter(Boolean).join('\n');
+	[a.name, a.address, [a.postalCode, a.city].filter(Boolean).join(' '), countryLine(a.country)].filter(Boolean).join('\n');
 
 /**
  * A4 letter with the recipient in the window position of a Swiss C5 envelope (right), and the QR-bill of the open

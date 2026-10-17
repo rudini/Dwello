@@ -14,6 +14,10 @@ Funktionalität: Neuer Mieter
     Und sieht der Liegenschaftsverwalter die Bestätigung, dass "Lea Graf" gespeichert ist
     Und "Lea Graf" erhält Korrespondenz "Per E-Mail"
 
+  # Die Adresse des Mieters heisst Korrespondenzadresse: dorthin geht die Post, nach dem Auszug nicht mehr die Wohnung (#68)
+  Szenario: Die Korrespondenzadresse sagt, wohin die Post geht
+    Dann erklärt die Seite bei der Korrespondenzadresse "Hierhin gehen Abrechnungen und Mahnungen; nach dem Auszug die neue Adresse eintragen"
+
   Szenario: Name ist erforderlich
     Wenn der Liegenschaftsverwalter den Mieter ohne Namen erfassen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nachname ist erforderlich"

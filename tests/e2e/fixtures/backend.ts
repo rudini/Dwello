@@ -220,6 +220,22 @@ export function testData(api: CallTheApi) {
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
 
+		// A Korrespondenzadresse by letter, abroad when a country code is given (#102)
+		async address(tenantTitle: string, address: string, postalCode: string, city: string, country: string) {
+			await put(`tenants/${ids.get(tenantTitle)}`, { address, postalCode, city, country, correspondenceChannel: 'letter' });
+		},
+
+		// The building's address still stored as the tenant's, written differently, as a landlord types it (A-5, #114)
+		async buildingAddress(tenantTitle: string, buildingTitle: string) {
+			const building = await get(`buildings/${ids.get(buildingTitle)}`);
+			await put(`tenants/${ids.get(tenantTitle)}`, {
+				address: ` ${building.address.toUpperCase()}  `,
+				postalCode: building.postalCode,
+				city: building.city,
+				correspondenceChannel: 'letter'
+			});
+		},
+
 		async noEmail(tenantTitle: string) {
 			await put(`tenants/${ids.get(tenantTitle)}`, { email: null });
 		},

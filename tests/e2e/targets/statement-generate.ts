@@ -84,3 +84,4 @@ export const existingStatementNotes = (statementId: string) =>
 	target(`Hinweis zur Abrechnung ${statementId}`, (page) => page.getByTestId(`existing-statement-notes-${statementId}`));
 export const existingStatementLink = (statementId: string) =>
 	target(`Abrechnung ${statementId} in der Vorschau`, (page) => page.getByTestId(`existing-statement-${statementId}`));
+export const oldAddress = target('Warnung vor der alten Adresse', (page) => page.getByTestId('preview-old-address'));

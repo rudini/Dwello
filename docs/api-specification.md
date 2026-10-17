@@ -79,7 +79,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/` | Query: `search`, `language`, `status` (`active`\|`inactive`), `limit` (default 50), `offset`. → `{ tenants, total }`; items include `currentApartment`, `currentBuilding`, `isActive` (see `tests/contracts/tenants.json`) |
 | GET | `/:id` | → tenant with `currentApartment`, `currentBuilding`, `contractCount`, `isActive`. 404 |
 | GET | `/:id/history` | → `{ tenant, contracts: [{ id, apartmentNumber, buildingName, startDate, endDate, baseRent, isActive }] }`. 404 |
-| POST | `/` | Body: `firstName`, `lastName` required; optional `email` (email format), `phone`, `language` (`de`\|`fr`\|`it`\|`en`), `address`, `postalCode`, `city`, `correspondenceChannel` (`email`\|`letter`). → 201 tenant. 400 |
+| POST | `/` | Body: `firstName`, `lastName` required; optional `email` (email format), `phone`, `language` (`de`\|`fr`\|`it`\|`en`), `address`, `postalCode`, `city` (the Korrespondenzadresse), `country` (ISO 3166 code, default `CH`, #102), `correspondenceChannel` (`email`\|`letter`). → 201 tenant. 400 |
 | PUT | `/:id` | Body: any subset of the POST fields. → tenant. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the tenant has an active contract or any contract history |
 
@@ -87,7 +87,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/` | Query: `apartmentId`, `tenantId`, `buildingId`, `status` (`active`\|`ended`\|`future`), `search`, `limit` (default 50), `offset`. → `{ contracts, total }`; items add `tenantName`, `tenantEmail`, `apartmentNumber`, `buildingName`, `buildingAddress` |
+| GET | `/` | Query: `apartmentId`, `tenantId`, `buildingId`, `status` (`active`\|`ended`\|`future`), `search`, `limit` (default 50), `offset`. → `{ contracts, total }`; items add `tenantName`, `tenantEmail`, `apartmentNumber`, `buildingName`, `buildingAddress`, `oldAddress` (A-5, #114: the tenant moved out and still has the building's street and postal code; also on `GET /:id` and on statements) |
 | GET | `/:id` | → contract with the same added fields. 404 |
 | GET | `/apartment/:apartmentId/active` | Query: `date` (default today). → the contract running on that date. 404 if none |
 | GET | `/apartment/:apartmentId/period` | Query: `periodStart`, `periodEnd` (required). → `{ contracts }` overlapping the period (for prorating) |
@@ -200,7 +200,7 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 
 Stored status is `draft`, `sent` or `paid`; `overdue` is never stored. Responses report an **effective status**: a `sent` statement whose `paymentDeadline` is past is returned as `overdue`.
 
-Transitions (`PUT /:id/status`, checked against the effective status): `draft → sent`, `sent → paid`, `overdue → paid`. Anything else is 400 `Invalid status transition from X to Y`. A payment is taken back with `POST /:id/payment-reset` (#92).
+Transitions (`PUT /:id/status`, checked against the effective status): `draft → sent`, `sent → paid`, `overdue → paid`. Anything else is 400 `Invalid status transition from X to Y`. Sending makes and stores the PDF as sent, also when a Saldo of 0 makes the statement `paid` at once. A payment is taken back with `POST /:id/payment-reset` (#92).
 
 Only **drafts** can be deleted or get line items; amounts (`totalCosts`, `totalAdvancePayments`, `managementFeePercent`, `managementFee`, `balance`) of non-drafts cannot change; no route accepts them, `updateStatement` rejects them in the service.
 
@@ -224,7 +224,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |
 | POST | `/:id/generate-pdf` | Body: optional `language` (`de`\|`fr`\|`it`\|`en`; default tenant language, then `de`). Renders the PDF with Swiss QR-bill and stores it. → `{ success: true, message, qrReference, pdfSize }`. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
-| GET | `/:id/pdf` | → `application/pdf` attachment `<number>.pdf` (#101), made first when missing or (a draft) dated another day. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
+| GET | `/:id/pdf` | → `application/pdf` attachment `<number>.pdf` (#101), made first when missing, a draft's made afresh each time (the tenant's address and the settings as they are now); sending makes the PDF as sent at that moment and keeps it (made on the first request instead if it fails then); `POST /:id/generate-pdf` makes it again with today's data (the UI does not offer that for a stored PDF; daten-pruefer D-1). 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
 | GET | `/:id/pdf/base64` | → `{ pdfBase64, mimeType: "application/pdf" }`. 404 as above |
 
 **Calculation input:** `contractId`, `periodStart`, `periodEnd` required; optional `heatingProfileId`, `managementFeePercent` (number ≥ 0, overrides `management_fee_pct`). The Verwaltungspauschale is that percentage of the tenant's own utility costs.

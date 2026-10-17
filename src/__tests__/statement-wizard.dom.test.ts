@@ -866,6 +866,18 @@ describe('Abrechnungen erstellen', () => {
 		expect(hints).toEqual(['Kosten CHF\u00a01’800.00 (60 %) unter dem Akonto. Fehlen Rechnungen?']);
 	});
 
+	// A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
+	it('warnt bei einem ausgezogenen Mieter, der noch die Adresse der Wohnung hat', () => {
+		open({
+			preview: [{ ...preview[0], tenantName: 'Eva Frei', oldAddress: true }, preview[1]],
+			invoices: [invoices[0]]
+		});
+		const warnings = [...document.querySelectorAll('[data-testid="preview-old-address"]')];
+		expect(warnings.map((w) => w.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
+			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
+		]);
+	});
+
 	it('warnt, wenn es für ein Gebäude in der Periode schon Abrechnungen gibt, und verlangt eine Bestätigung', async () => {
 		open({
 			preview,

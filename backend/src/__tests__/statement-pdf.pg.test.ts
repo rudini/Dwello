@@ -13,6 +13,7 @@ import { createHeatingProfile, deleteHeatingProfile, getHeatingProfileByName, up
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { deleteStatement, generateStatement, updateStatementStatus } from '../services/statement.service';
 import { readPdf } from './helpers/pdf-text';
+import { sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -676,5 +677,63 @@ describe('PDF zum Herunterladen', () => {
 
 		expect(text).toContain(`Bezahlt am ${swiss(today)}`);
 		expect(text).not.toContain('Zahlteil');
+	});
+});
+
+// Persona Anna (W3c P-1): the PDF of a draft goes to the Korrespondenzadresse as it is now, also one made before the
+// landlord entered the new address after a move-out (A-5, #114)
+describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen', () => {
+	it('nennt die neue Adresse, auch wenn das PDF vorher erstellt wurde', async () => {
+		await generateStatementPdf(statementId, 'de');
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { address: 'Neugasse 7', postalCode: '8401', city: 'Winterthur' });
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		expect(text).toContain('Neugasse 7\n8401 Winterthur');
+		expect(text).not.toContain('Testgasse 5');
+	});
+
+	// Persona Helga (W3c P-2): a new account in the settings reaches the draft's payment part
+	it('nennt die IBAN, die jetzt in den Einstellungen steht', async () => {
+		await generateStatementPdf(statementId, 'de');
+		await setConfig('iban', 'CH9300762011623852957'); // SIX sample IBAN
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		expect(text).toContain('CH93 0076 2011 6238 5295 7');
+	});
+
+	// Review C-9: sent on the day its PDF was made, the PDF as sent still has the address of today
+	it('versendet das PDF mit der Adresse beim Versand', async () => {
+		await generateStatementPdf(statementId, 'de');
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { address: 'Endgasse 9' });
+		await updateStatementStatus(statementId, 'sent');
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId)); // removable again (review C-17)
+		expect(text).toContain('Endgasse 9');
+	});
+
+	// Closing review C-1: the PDF as sent is made when sending, so later changes do not reach it and it stays to download
+	it('erstellt das PDF beim Versand', async () => {
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { address: 'Versandweg 2' });
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
+		const [sent] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { address: 'Spaeterweg 3' });
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId));
+		expect(sent.pdfGeneratedAt).not.toBeNull();
+		expect(text).toContain('Versandweg 2');
+	});
+
+	// Closing review C-3: a Saldo of 0 is settled when sent; its PDF as sent is made then too
+	it('erstellt das PDF auch beim Versand einer Abrechnung mit Saldo 0', async () => {
+		const [{ balance }] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		await db.update(utilityStatements).set({ balance: '0.00' }).where(eq(utilityStatements.id, statementId));
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
+		const [settled] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		await db.update(utilityStatements).set({ status: 'draft', balance, paidDate: null, paidAmount: null, paymentRecordedAt: null }).where(eq(utilityStatements.id, statementId));
+
+		expect(settled.status).toBe('paid');
+		expect(settled.pdfGeneratedAt).not.toBeNull();
 	});
 });

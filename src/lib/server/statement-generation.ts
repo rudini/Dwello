@@ -16,6 +16,7 @@ type Contract = {
 	apartmentNumber: string;
 	managementFeeAgreed?: boolean;
 	managementFeePercent?: string | null; // its own rate, before the run's (#89)
+	oldAddress?: boolean; // A-5 (#114): moved out, still with the building's address
 };
 
 export interface GenerationRequest {
@@ -111,7 +112,8 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			balance: Number(preview.balance),
 			rentalDays: Number(preview.rentalDays),
 			totalPeriodDays: Number(preview.totalPeriodDays),
-			movedOut: !!contract.endDate && contract.endDate <= [periodEnd, localToday()].sort()[1] // ended by now
+			movedOut: !!contract.endDate && contract.endDate <= [periodEnd, localToday()].sort()[1], // ended by now
+			oldAddress: !!contract.oldAddress // A-5: moved out, still with the building's address
 		});
 	}
 	return rows;
