@@ -15,5 +15,6 @@ Branch `claude/w6e-invoice-hints-378-379`. #379 is not ready: the code has no ru
 - [x] #379: under "Blocked on me" with the two options; what the code shows commented on #379
 - [x] persona Majors not fixed here: Anna P-1 (Übersicht) → #386 (existed before); Marco P-2 / Anna P-4 (order of the warning's sentences) → comment on #338, which rewrites them
 - [ ] merge `main` once PR #385 (wording «Abrechnung berichtigen») is in, before the push, and check «Abrechnung berichtigen» in the scenario (review C-1); if #385 is not merged by then, the PR says `Refs #378` and #378 goes under "Blocked on me"
-- [ ] Workflow note; archive the session
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-378-379.md` (dependency on an open PR; collected review with parallel sessions left to the coordinator)
+- [ ] archive the session
 - [ ] PR `Fixes #378` (or `Refs #378`, see above), CI, merge
