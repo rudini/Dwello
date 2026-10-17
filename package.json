@@ -51,6 +51,7 @@
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.46.1",
 		"fallow": "^2.102.0",
+		"fflate": "^0.8.3",
 		"globals": "^17.1.0",
 		"jsdom": "^27.4.0",
 		"playwright-bdd": "^9.2.1",

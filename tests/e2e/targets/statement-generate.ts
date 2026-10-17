@@ -25,6 +25,7 @@ export const previewRow = (tenantName: string) =>
 export const previewEmpty = target('Hinweis keine Mietverträge in der Periode', (page) => page.getByTestId('preview-empty'));
 export const generationResult = target('Ergebnis der Erstellung', (page) => page.getByTestId('generation-result'));
 export const showStatementsButton = target('Abrechnungen anzeigen', (page) => page.getByTestId('show-statements-button'));
+export const downloadZipButton = target('Alle als ZIP herunterladen', (page) => page.getByTestId('download-zip-button'));
 // "Abbrechen" in the wizard's first step (after its breadcrumb), or the statement page's breadcrumb to the list
 export const backLink = target('Zurück zur Abrechnungsliste', (page) =>
 	page

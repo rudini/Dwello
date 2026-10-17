@@ -1194,6 +1194,7 @@
 	"statements_check_drafts": "Vérifiez les brouillons, puis envoyez-les.",
 	"statements_view_drafts": "Voir les brouillons",
 	"statements_create_more": "Établir d’autres décomptes",
+	"statements_download_zip": "Tout télécharger en ZIP",
 	"common_unknown": "Inconnu",
 	"backend_unauthorized": "Votre session a expiré. Veuillez vous reconnecter.",
 	"backend_jwt_error": "Votre session a expiré. Veuillez vous reconnecter.",
