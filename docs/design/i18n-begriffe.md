@@ -20,6 +20,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Mieter | locataire | inquilino | tenant |
 | Mieter: aktiv / künftig / ehemalig | actif / futur / ancien | attivo / futuro / ex | active / future / former |
 | Korrespondenzkanal | canal de correspondance | canale di corrispondenza | correspondence channel |
+| Korrespondenzadresse | adresse de correspondance | indirizzo di corrispondenza | correspondence address |
 | Brief / E-Mail | lettre / e-mail | lettera / e-mail | letter / email |
 | Vermieter | bailleur | locatore | landlord |
 | Liegenschaftsverwalter | gérant d’immeubles | amministratore di immobili | property manager |
