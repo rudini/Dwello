@@ -43,8 +43,7 @@ const data = {
 			buildingId: 'b1',
 			buildingName: 'Seeblick',
 			totalApartments: 4,
-			occupiedApartments: 3,
-			occupancyRate: 75
+			occupiedApartments: 3
 		}
 	],
 	tasks: [
@@ -126,10 +125,11 @@ describe('Übersicht', () => {
 		expect(body).toMatch(/data-testid="statements-draft-count"[^>]*>4</);
 	});
 
+	// F-1 (#55): nur «x/y vermietet», ohne Anteil in Prozent
 	it('zeigt die Belegung pro Gebäude', () => {
 		const row = page().match(/data-testid="occupancy-row"[\s\S]*?<\/li>/)![0];
 		expect(row).toContain('href="/buildings/b1"');
-		expect(row).toMatch(/data-testid="occupancy-rate"[^>]*>75.0 %</);
+		expect(row).not.toContain('%');
 		expect(row).toMatch(/data-testid="occupancy-count"[^>]*>3\/4</);
 	});
 

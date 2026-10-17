@@ -19,6 +19,8 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 	endingContracts: [],
 	noticedContracts: [],
 	oldAddresses: [],
+	paymentDeadlineDays: 30,
+	reminderAfterDays: 14,
 	expiredContracts: [],
 	...overrides
 });
@@ -170,7 +172,7 @@ describe('Aufgaben der Übersicht', () => {
 		const overdue = (nextReminderFrom: string | null) => ({
 			id: 's1',
 			tenantName: 'Anna Keller',
-			paymentDeadline: '2026-09-30',
+			paymentDeadline: '2026-09-20',
 			nextReminderFrom
 		});
 		const titles = (nextReminderFrom: string | null) =>
@@ -186,6 +188,35 @@ describe('Aufgaben der Übersicht', () => {
 		expect(titles(null)).toContain('Überfällige Abrechnungen prüfen');
 	});
 
+	// #64: «Überfällig» ab dem Tag nach der Zahlungsfrist, eine Mahnung schlägt die Übersicht erst nach der Mahnfrist vor
+	it('schlägt eine Mahnung erst nach der Mahnfrist vor', () => {
+		const titles = (paymentDeadline: string, reminderAfterDays: number) =>
+			overviewTasks(
+				input({
+					statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
+					dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline }],
+					reminderAfterDays
+				})
+			).map((task) => task.title);
+
+		expect(titles('2026-09-26', 14)).not.toContain('Überfällige Abrechnungen prüfen');
+		expect(titles('2026-09-25', 14)).toContain('Überfällige Abrechnungen prüfen');
+		expect(titles('2026-09-26', 7)).toContain('Überfällige Abrechnungen prüfen');
+	});
+
+	// #64, Fachreview V-1: eine Rückerstattung wird nie gemahnt, der Vermieter schuldet sie ab dem Tag nach der Zahlungsfrist
+	it('nennt eine überfällige Rückerstattung ohne Mahnfrist', () => {
+		const tasks = overviewTasks(
+			input({
+				statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
+				dueStatements: [
+					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-09', refund: true }
+				]
+			})
+		);
+		expect(tasks.map((task) => task.title)).toContain('Überfällige Abrechnungen prüfen');
+	});
+
 	// a statement still within its Zahlungsfrist is not among the overdue ones it counts
 	it('zieht nur überfällige Abrechnungen ab', () => {
 		const tasks = overviewTasks(
@@ -195,7 +226,7 @@ describe('Aufgaben der Übersicht', () => {
 					{
 						id: 's1',
 						tenantName: 'Anna Keller',
-						paymentDeadline: '2026-09-30',
+						paymentDeadline: '2026-09-20',
 						nextReminderFrom: null
 					},
 					{
@@ -229,8 +260,8 @@ describe('Fristen der Übersicht', () => {
 		]);
 	});
 
-	// Die Zahlungsfrist beträgt 30 Tage: eine eben versendete Abrechnung steht gleich in den Fristen
-	it('lässt ferne Termine weg: Zahlungsfrist nach 30, Vertragsende nach 60 Tagen', () => {
+	// Die Zahlungsfrist beträgt hier 30 Tage: eine eben versendete Abrechnung steht gleich in den Fristen
+	it('lässt ferne Termine weg: Zahlungsfrist nach den eingestellten 30, Vertragsende nach 60 Tagen', () => {
 		const deadlines = overviewDeadlines(
 			input({
 				dueStatements: [
@@ -245,6 +276,20 @@ describe('Fristen der Übersicht', () => {
 			})
 		);
 		expect(deadlines.map((d) => d.name)).toEqual(['Hans Müller', 'Ueli Graf']);
+	});
+
+	// #87: eine eben versendete Abrechnung steht mit jeder eingestellten Zahlungsfrist gleich in den Fristen
+	it('zeigt jede offene Zahlungsfrist innerhalb der eingestellten Tage', () => {
+		const deadlines = overviewDeadlines(
+			input({
+				paymentDeadlineDays: 60,
+				dueStatements: [
+					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-12-10' },
+					{ id: 's2', tenantName: 'Hans Müller', paymentDeadline: '2026-12-09' }
+				]
+			})
+		);
+		expect(deadlines.map((d) => d.name)).toEqual(['Hans Müller']);
 	});
 
 	it('sagt heute und ein Tag in der Einzahl', () => {

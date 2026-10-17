@@ -334,6 +334,11 @@ export function testData(api: CallTheApi) {
 			await invoice(buildingTitle, { categoryId: heating.id }, `Heizöl ${year}`, amount, `${year}-06-30`);
 		},
 
+		// The landlord records that the building has no tank or that its tank is decommissioned (#72)
+		async noTank(buildingTitle: string) {
+			await put(`buildings/${ids.get(buildingTitle)}`, { noTank: true });
+		},
+
 		// Value of the heating oil in the building's tank on a reading day (removed with the building)
 		async fuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');

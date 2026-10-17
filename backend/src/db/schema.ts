@@ -36,6 +36,7 @@ export const buildings = pgTable(
 		longitude: decimal('longitude', { precision: 10, scale: 7 }),
 		buildingType: varchar('building_type', { length: 50 }),
 		yearBuilt: integer('year_built'),
+		noTank: boolean('no_tank').notNull().default(false), // no tank or decommissioned: no Tankbestand asked (#72)
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},

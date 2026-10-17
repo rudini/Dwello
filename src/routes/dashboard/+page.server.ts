@@ -34,7 +34,6 @@ export interface DashboardData {
 		buildingName: string;
 		totalApartments: number;
 		occupiedApartments: number;
-		occupancyRate: number;
 		reletStarts?: string[]; // Vertragsbeginn of each relet apartment, added here
 		vacant?: { number: string; lastContractEnd: string | null }[]; // empty apartments, with their last Vertragsende (#145)
 	}[];
@@ -53,13 +52,17 @@ async function list(fetch: typeof globalThis.fetch, path: string, key: string): 
 	return response?.ok ? ((await response.json())[key] ?? []) : [];
 }
 
+// The settings the overview reads; a failed load leaves the defaults of the backend
+async function settings(fetch: typeof globalThis.fetch): Promise<Record<string, string>> {
+	const response = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
+	return response?.ok ? ((await response.json()).data ?? {}) : {};
+}
+
 // The last ended Abrechnungsperiode and the Mietverträge that already have a Nebenkostenabrechnung for it
-async function lastPeriod(fetch: typeof globalThis.fetch) {
-	const config = await fetch(`${BACKEND_URL}/api/v1/config`);
-	if (!config.ok) return null;
-	const type = ((await config.json()).data?.accounting_period ??
-		'calendar') as AccountingPeriodType;
-	const period = lastCompletedPeriod(type);
+async function lastPeriod(fetch: typeof globalThis.fetch, config: Promise<Record<string, string>>) {
+	const stored = await config;
+	if (!stored.accounting_period) return null;
+	const period = lastCompletedPeriod(stored.accounting_period as AccountingPeriodType);
 	const response = await fetch(
 		`${BACKEND_URL}/api/v1/statements?periodStart=${period.start}&periodEnd=${period.end}&limit=1000`
 	);
@@ -136,7 +139,8 @@ export const load = async ({
 }: {
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
-	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts, drafts] =
+	const config = settings(fetch).catch(() => ({}) as Record<string, string>);
+	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts, stored, drafts] =
 		await Promise.all([
 			fetchRecord(
 				fetch,
@@ -147,9 +151,10 @@ export const load = async ({
 			list(fetch, 'statements?status=sent&limit=100', 'data'),
 			list(fetch, 'documents?status=to_send', 'data'),
 			list(fetch, 'contracts?status=active&limit=100', 'contracts'),
-			lastPeriod(fetch).catch(() => null),
+			lastPeriod(fetch, config).catch(() => null),
 			list(fetch, 'apartments?limit=1000', 'apartments'),
 			list(fetch, 'contracts?limit=1000', 'contracts'),
+			config,
 			list(fetch, 'statements?status=draft&limit=100', 'data')
 		]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
@@ -173,8 +178,11 @@ export const load = async ({
 			id: String(s.id),
 			tenantName: tenantOf(s),
 			paymentDeadline: String(s.paymentDeadline),
-			nextReminderFrom: s.nextReminderFrom as string | null
+			nextReminderFrom: s.nextReminderFrom as string | null,
+			refund: Number(s.balance) < 0
 		})),
+		paymentDeadlineDays: Number(stored.payment_deadline_days ?? 30),
+		reminderAfterDays: Number(stored.reminder_after_days ?? 14),
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),
 		noticedContracts,

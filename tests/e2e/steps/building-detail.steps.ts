@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { buildingAddress, listedApartment, shownMaps, yearBuilt } from '../questions/building-detail';
+import { buildingAddress, listedApartment, shownMaps, tankOfBuilding, yearBuilt } from '../questions/building-detail';
 import { emptyListShown, listedBuildingCount } from '../questions/buildings';
 import {
 	deleteBuilding,
@@ -97,3 +97,7 @@ When(
 		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!), recordFuelStock(date, amount));
 	}
 );
+
+Then('nennt die Gebäudeseite zum Tank {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(tankOfBuilding).toContain(text);
+});

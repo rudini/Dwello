@@ -13,7 +13,7 @@ import {
 	reminderOutcome
 } from '../questions/documents';
 import { listedStatement } from '../questions/statements';
-import { markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from '../tasks/documents';
+import { downloadDocument, markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from '../tasks/documents';
 import { openStatementList } from '../tasks/statements';
 
 const { Given, When, Then } = createBdd(test);
@@ -52,6 +52,13 @@ When(
 	'der Liegenschaftsverwalter die {string} an {string} als versendet markiert',
 	async ({ verwalter, names }, title: string, tenant: string) => {
 		await verwalter.attemptsTo(markLetterSent(title, names.get(tenant) ?? tenant));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter das PDF der {string} an {string} in den Dokumenten herunterlädt',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(downloadDocument(title, names.get(tenant) ?? tenant));
 	}
 );
 
