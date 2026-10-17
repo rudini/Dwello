@@ -711,4 +711,17 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId)); // removable again (review C-17)
 		expect(text).toContain('Endgasse 9');
 	});
+
+	// Closing review C-1: the PDF as sent is made when sending, so later changes do not reach it and it stays to download
+	it('erstellt das PDF beim Versand', async () => {
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { address: 'Versandweg 2' });
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
+		const [sent] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { address: 'Spaeterweg 3' });
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId));
+		expect(sent.pdfGeneratedAt).not.toBeNull();
+		expect(text).toContain('Versandweg 2');
+	});
 });

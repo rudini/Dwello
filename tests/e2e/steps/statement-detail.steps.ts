@@ -15,7 +15,8 @@ import {
 	recipient,
 	resetConfirmation,
 	sendConfirmation,
-	statusOfStatement
+	statusOfStatement,
+	oldAddressWarningText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -325,5 +326,13 @@ Then(
 	'warnt die Bestätigung, dass {string} ausgezogen ist: {string}',
 	async ({ verwalter, names }, tenant: string, rest: string) => {
 		await verwalter.sees(sendConfirmation).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
+	}
+);
+
+// Persona W3c Anna P-2: on the page itself, before the dialog
+Then(
+	'warnt die Detailseite der Abrechnung, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(oldAddressWarningText).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );

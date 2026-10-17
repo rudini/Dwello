@@ -10,7 +10,7 @@ import { roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
-import { datedToday, getStatement, keyValuesOf, type StatementWithDetails } from './statement.service';
+import { datedToday, getStatement, keyValuesOf, updateStatementStatus, type StatementWithDetails } from './statement.service';
 import { refusal } from './coded-error';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
@@ -305,4 +305,12 @@ export async function getStatementPdf(id: string) {
 		result = (await storedPdf(id))!;
 	}
 	return { pdfBlob: result.pdfBlob!, statementNumber: result.statementNumber };
+}
+
+/** A status change; when sent, the PDF as sent is made at that moment and kept (closing review C-1) */
+export async function changeStatementStatus(...[id, status, data]: Parameters<typeof updateStatementStatus>) {
+	const statement = await updateStatementStatus(id, status, data);
+	// sent stays sent when the PDF cannot be made now (no IBAN, a failure): it is made on its first request then
+	if (statement?.status === 'sent') await generateStatementPdf(id).catch(() => null);
+	return statement;
 }

@@ -61,6 +61,7 @@ Funktionalität: Abrechnungsdetail
     Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann warnt die Detailseite der Abrechnung, dass "Eva Frei" ausgezogen ist: "Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein."
     Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
     Dann warnt die Bestätigung, dass "Eva Frei" ausgezogen ist: "Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein."
     Wenn der Liegenschaftsverwalter den Versand trotzdem bestätigt
@@ -251,7 +252,6 @@ Funktionalität: Abrechnungsdetail
     Und die Korrespondenzadresse von "Eva Frei" ist "Marktstätte 3", "78462 Konstanz" in "Deutschland"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung versendet
-    Und der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Marktstätte 3 78462 Konstanz DEUTSCHLAND"
 
