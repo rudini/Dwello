@@ -51,6 +51,25 @@ describe('Kostenkategorien', () => {
 		expect(category.isHeatingCost).toBe(true);
 	});
 
+	// #100: nur die Heizung bringt Dwello als Brennstoff mit; eine eigene Kategorie ist es erst, wenn der
+	// Liegenschaftsverwalter sie so markiert
+	it('kennzeichnet die Heizung als Brennstoff, eigene Kategorien erst auf Wunsch', async () => {
+		const id = await idOf(
+			await categories.create({ name: `Stückholz ${token}`, nameDE: `Stückholz ${token}`, isAllowedUtilityCost: true, isHeatingCost: true })
+		);
+		const fuel = async () => {
+			const { categories: all } = (await (await callApi('/api/v1/categories?limit=100')).json()) as {
+				categories: { id: string; name: string; isFuel: boolean }[];
+			};
+			return Object.fromEntries(all.filter((c) => ['Heating', 'Chimney Sweep'].includes(c.name) || c.id === id).map((c) => [c.name, c.isFuel]));
+		};
+		expect(await fuel()).toEqual({ Heating: true, 'Chimney Sweep': false, [`Stückholz ${token}`]: false });
+
+		await categories.send('PUT', `/${id}`, { isFuel: true });
+
+		expect((await fuel())[`Stückholz ${token}`]).toBe(true);
+	});
+
 	it('findet Kategorien über den deutschen Namen', async () => {
 		await categories.create({ name: `Stairs ${token}`, nameDE: `Treppenlift ${token}`, isAllowedUtilityCost: true });
 

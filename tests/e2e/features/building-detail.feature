@@ -61,7 +61,6 @@ Funktionalität: Gebäudedetail
 
   # Nur eine Kategorie für Brennstoff hat einen Tankbestand (#100); ein Heizungsservice und der Kaminfeger werden
   # wie Heizkosten verteilt, sind aber kein Brennstoff
-  @wip
   Szenario: Der Tankbestand bietet nur Kategorien für Brennstoff an
     Angenommen es gibt die umlagefähige Heizkosten-Kategorie "Heizungsservice"
     Dann bietet der Tankbestand des Gebäudes "Birkenhof" die Kategorie "Heizung" an

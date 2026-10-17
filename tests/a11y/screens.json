@@ -63,6 +63,7 @@
 		"ki-unavailable": "New category form after the KI could not be reached: the hint to try later or choose oneself, nothing preset (#186).",
 		"ki-checking": "New category form while the KI checks: the button busy, «Die KI prüft die Kategorie …» in the status region (#176, code review G-3).",
 		"ki-proposal-kept": "New category form where the Liegenschaftsverwalter chose before «Von der KI prüfen lassen»: the proposal says the own choice stays (#176, persona review).",
+		"fuel": "New category form with «Heizkosten nach dem Heizprofil verteilen» ticked: the checkbox «Brennstoff» with its help (#100).",
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
 		"login-error": "Login page showing a sign-in error (?error=failed).",
 		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
@@ -600,7 +601,8 @@
 				"ki-unsure",
 				"ki-unavailable",
 				"ki-proposal-kept",
-				"ki-checking"
+				"ki-checking",
+				"fuel"
 			]
 		},
 		{

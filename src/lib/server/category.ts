@@ -24,6 +24,7 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 		nameEN: (c.nameEN || '') as string,
 		isAllowedUtilityCost: (c.isAllowedUtilityCost ?? true) as boolean,
 		isHeatingCost: (c.isHeatingCost ?? false) as boolean,
+		isFuel: (c.isFuel ?? false) as boolean,
 		description: (c.description || '') as string,
 		sortOrder: Number(c.sortOrder) || 0,
 		usageCount: Number(c.invoiceCount) || 0,
@@ -71,6 +72,8 @@ function parseCategory(formData: FormData) {
 		description: field('description'),
 		isAllowedUtilityCost: allowed === 'true',
 		isHeatingCost: formData.get('isHeatingCost') === 'on',
+		// Brennstoff is a mark of a heating cost (#100)
+		isFuel: formData.get('isHeatingCost') === 'on' && formData.get('isFuel') === 'on',
 		...(field('sortOrder') && { sortOrder: Number(field('sortOrder')) }),
 		nameFR: field('nameFR') || null,
 		nameIT: field('nameIT') || null,

@@ -1097,6 +1097,8 @@ BALANCE (refund): CHF 30
   - Name (text field)
   - Description (text area)
   - Allowed/Not Allowed (radio)
+  - «Heizkosten nach dem Heizprofil verteilen» (checkbox); once ticked, «Brennstoff» (checkbox, off for a new category;
+    only an allocable category with it holds a Tankbestand, and it stays set while the category has one, #100)
   - Reason/Notes (text area, for reference)
   - Submit/Cancel
 

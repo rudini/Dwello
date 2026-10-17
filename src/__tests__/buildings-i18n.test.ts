@@ -89,6 +89,7 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 										nameDE: 'Heizung',
 										nameFR: 'Chauffage',
 										isHeatingCost: true,
+										isFuel: true,
 										isAllowedUtilityCost: true
 									}
 								]

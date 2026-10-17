@@ -194,6 +194,8 @@ export const categories = pgTable('categories', {
 	isAllowedUtilityCost: boolean('is_allowed_utility_cost').notNull().default(true),
 	// Heating costs (Art. 5 VMWG): shared by the heating profile at a tenant change; separate hot water by days
 	isHeatingCost: boolean('is_heating_cost').notNull().default(false),
+	// Brennstoff (#100): its invoices are deliveries of Heizmaterial; only such a heating cost category has a Tankbestand
+	isFuel: boolean('is_fuel').notNull().default(false),
 	type: varchar('type', { length: 20 }).notNull().default('predefined'), // predefined, custom
 	...describedAndOrdered()
 });

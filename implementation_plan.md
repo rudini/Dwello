@@ -7,10 +7,14 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 Branch `claude/w16-brennstoff-100`. #100's "Decided" section (option 2) is the requirement; implemented directly, no separate implementation issue. The glossary already has «Brennstoff (Kategorie)» (an attribute of an allocable heating cost category), so no marker.
 
-- [ ] `@wip` scenarios (building-detail.feature: own heating category and the chimney sweep are not offered; categories.feature: an own category marked Brennstoff is offered), committed and reviewed by `fach-reviewer` before implementing
-- [ ] migration `0024_category_fuel.sql`: `categories.is_fuel`, set for the predefined «Heating»; schema, data-model.md, contract
-- [ ] backend: `isHeatingCategory` reads the flag (no name check); create/update take `isFuel`; `*.pg.test.ts` for the predefined chimney sweep and an own heating category
-- [ ] frontend: building page filters by the flag; category form checkbox «Brennstoff» with help (only with «Heizkosten nach dem Heizprofil verteilen»); texts in four languages
-- [ ] a11y state `category-new` `fuel` (screens.json, accessibility.feature, sprachen-bildschirme.feature)
-- [ ] code-reviewer per slice; personas; fach-reviewer feature review
+- [x] `@wip` scenarios (building-detail.feature: own heating category and the chimney sweep are not offered; categories.feature: an own category marked Brennstoff is offered), committed and reviewed by `fach-reviewer` before implementing
+- [x] fach-reviewer round 1 (`docs/reviews/w16-fachreview-1.md`)
+- [x] migration `0024_category_fuel.sql`: `categories.is_fuel`, set for the predefined «Heating» and every category that already has a Tankbestand; schema, data-model.md, PRD, contracts
+- [x] backend: `isFuelCategory` reads the flag (no name check); create/update take `isFuel`, stored only with `isHeatingCost`; a category with a Tankbestand stays Brennstoff (`CATEGORY_FUEL_HAS_STOCK`); `*.pg.test.ts` for the predefined chimney sweep and an own heating category
+- [x] frontend: building page filters by the flag; category form checkbox «Brennstoff» with help (only with «Heizkosten nach dem Heizprofil verteilen»); texts in four languages
+- [x] a11y state `category-new` `fuel` (screens.json, accessibility.feature, sprachen-bildschirme.feature)
+- [ ] code-reviewer round 1
+- [ ] personas; fach-reviewer feature review
 - [ ] workflow notes; archive the session; pull request (Fixes #100)
+
+Files: `backend/migrations/0024_category_fuel.sql`, `backend/src/db/schema.ts`, `backend/src/services/{category,fuel-stock}.service.ts`, `backend/src/routes/{categories,buildings}.ts`, `src/lib/{types.ts,server/category.ts}`, `src/routes/buildings/[id]/+page.server.ts`, `src/routes/config/categories/CategoryForm.svelte`, `messages/*.json`, `tests/contracts/category{,-fuel-refused}.json`, `docs/{data-model,PRD-Dwello}.md`, tests and features.

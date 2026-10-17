@@ -124,7 +124,6 @@ Funktionalität: Kostenkategorien
     Und erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den Namen oder die Beschreibung ändert
 
   # Ein eigener Brennstoff wie Stückholz hat einen Tankbestand (#100)
-  @wip
   Szenario: Eigene Kategorie für Brennstoff erfassen
     Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
     Und der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"

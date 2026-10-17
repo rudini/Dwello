@@ -6,7 +6,7 @@
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, type Category, type NewCategory } from '../db/schema';
-import { refusal, type Refusal } from './coded-error';
+import { CodedError, refusal, type Refusal } from './coded-error';
 import { recordAudit } from './audit-log.service';
 import { Conflict } from './conflict';
 import { categoryHasFuelStocks } from './fuel-stock.service';
@@ -53,6 +53,7 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 			nameEN: categories.nameEN,
 			isAllowedUtilityCost: categories.isAllowedUtilityCost,
 			isHeatingCost: categories.isHeatingCost,
+			isFuel: categories.isFuel,
 			type: categories.type,
 			description: categories.description,
 			sortOrder: categories.sortOrder,
@@ -100,6 +101,7 @@ export async function getCategory(id: string): Promise<CategoryWithUsage | null>
 			nameEN: categories.nameEN,
 			isAllowedUtilityCost: categories.isAllowedUtilityCost,
 			isHeatingCost: categories.isHeatingCost,
+			isFuel: categories.isFuel,
 			type: categories.type,
 			description: categories.description,
 			sortOrder: categories.sortOrder,
@@ -166,7 +168,10 @@ export async function createCategory(data: NewCategory): Promise<Category> {
 	await ensureNameIsFree(data.name);
 	if (data.nameDE) await ensureNameIsFree(data.nameDE);
 
-	const [category] = await db.insert(categories).values({ ...data, type: 'custom' }).returning();
+	const [category] = await db
+		.insert(categories)
+		.values({ ...data, isFuel: !!(data.isHeatingCost && data.isFuel), type: 'custom' })
+		.returning();
 	return category;
 }
 
@@ -175,9 +180,18 @@ export async function createCategory(data: NewCategory): Promise<Category> {
  */
 export async function updateCategory(id: string, changes: Partial<NewCategory>): Promise<Category | null> {
 	// A predefined category keeps its key: the KI and its reason know it by that (#166)
-	const [stored] = await db.select({ type: categories.type }).from(categories).where(eq(categories.id, id));
+	const [stored] = await db
+		.select({ type: categories.type, heating: categories.isHeatingCost, fuel: categories.isFuel })
+		.from(categories)
+		.where(eq(categories.id, id));
 	const { name: _key, ...names } = changes;
 	const data: Partial<NewCategory> = stored?.type === 'predefined' ? names : changes;
+	// Brennstoff is a mark of a heating cost (#100); one with a Tankbestand keeps it, else its next Endbestand could not
+	// be recorded and the statement would bill the purchases
+	if (stored) data.isFuel = (data.isHeatingCost ?? stored.heating) && (data.isFuel ?? stored.fuel);
+	if (stored?.fuel && !data.isFuel && (await categoryHasFuelStocks(id))) {
+		throw new CodedError('CATEGORY_FUEL_HAS_STOCK','Die Kategorie hat Tankbestände und bleibt Brennstoff.');
+	}
 	if (data.name) await ensureNameIsFree(data.name, id);
 	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
 

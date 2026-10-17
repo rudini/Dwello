@@ -18,7 +18,7 @@ import {
 import {
 	createFuelStock,
 	deleteFuelStock,
-	isHeatingCategory,
+	isFuelCategory,
 	listFuelStocks,
 	otherTankCategory
 } from '../services/fuel-stock.service';
@@ -139,9 +139,9 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 				set.status = 404;
 				return refusal('BUILDING_NOT_FOUND', 'Building not found');
 			}
-			if (!isRealDate(body.readingDate) || !(await isHeatingCategory(body.categoryId))) {
+			if (!isRealDate(body.readingDate) || !(await isFuelCategory(body.categoryId))) {
 				set.status = 400;
-				return { error: 'readingDate must exist and categoryId must be an allocable heating cost category' };
+				return { error: 'readingDate must exist and categoryId must be an allocable fuel category' };
 			}
 			if (await otherTankCategory(params.id, body.categoryId)) {
 				set.status = 409;

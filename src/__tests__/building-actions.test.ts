@@ -325,6 +325,15 @@ describe('Tankbestand', () => {
 											name: 'Heating',
 											nameDE: 'Heizung',
 											isHeatingCost: true,
+											isFuel: true,
+											isAllowedUtilityCost: true
+										},
+										{
+											id: 'c5',
+											name: 'Heizungsservice',
+											nameDE: 'Heizungsservice',
+											isHeatingCost: true,
+											isFuel: false,
 											isAllowedUtilityCost: true
 										},
 										{
@@ -346,6 +355,7 @@ describe('Tankbestand', () => {
 											name: 'Owner heating',
 											nameDE: 'Heizung Eigentümer',
 											isHeatingCost: true,
+											isFuel: true,
 											isAllowedUtilityCost: false
 										}
 									]
@@ -355,7 +365,7 @@ describe('Tankbestand', () => {
 								: backendBuilding
 					)) as typeof globalThis.fetch;
 
-	// only allocable fuel: the chimney sweep is shared like heating but is no fuel
+	// only allocable fuel (#100): the chimney sweep and a heating service are shared like heating but are no fuel
 	it('lädt die Stichtage des Gebäudes und die umlagefähigen Kategorien für den Brennstoff', async () => {
 		const data = (await detailLoad({
 			params: { id: 'b1' },
