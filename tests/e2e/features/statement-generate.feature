@@ -198,9 +198,8 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und warnt die Vorschau nicht vor fehlenden Rechnungen
 
   # #65: ohne Vorjahr zum Vergleich kein Hinweis auf Monate ohne Rechnung; eine Rechnung im Jahr kann vollständig sein
-  @wip
   Szenario: Ohne Vorjahr weist die Vorschau nicht auf Monate ohne Rechnung hin
-    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "800" Franken vom "2024-03-15"
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2024-03-15"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann nennt die Vorschau für "Lindenhof" 1 erfasste Rechnung
     Und weist die Vorschau nicht auf Monate ohne Rechnung hin

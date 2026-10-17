@@ -25,7 +25,6 @@
 	// ISO dates compare as text; repeated from step 1, where it may have been overlooked
 	const notOver = $derived(period.periodEnd >= localToday());
 	const missing = $derived(rows.filter((row) => row.missing));
-	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
 	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
@@ -114,13 +113,6 @@
 			{/each}
 			<p>{m.statements_existing_note()}</p>
 		</div>
-	</Alert>
-{/if}
-
-{#if partial.length}
-	<!-- TODO(fachlich prüfen, #65): a hint only; one oil delivery a year can be complete -->
-	<Alert tone="caution" title={m.statements_partial_title()} testid="partial-invoices">
-		<p>{m.statements_partial_text({ names: partial.map((row) => row.name).join(', ') })}</p>
 	</Alert>
 {/if}
 

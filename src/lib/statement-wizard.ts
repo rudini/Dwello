@@ -238,19 +238,6 @@ const coverageText = ({ count, first, last }: Coverage) => {
 	return m.statements_coverage_many({ count, first: formatDate(first), last: formatDate(last) });
 };
 
-// TODO(fachlich prüfen, #65): three months without any invoice at the start or end of the period is a hint, not a rule
-const GAP_DAYS = 90;
-const daysBetween = (from: string, to: string) =>
-	(new Date(to).getTime() - new Date(from).getTime()) / 86_400_000;
-
-const partly = ({ count, first, last }: Coverage, { periodStart, periodEnd }: Period) =>
-	count > 0 &&
-	!!first &&
-	!!last &&
-	(daysBetween(periodStart, first) > GAP_DAYS || daysBetween(last, periodEnd) > GAP_DAYS);
-
-type Period = { periodStart: string; periodEnd: string };
-
 const lacksInvoices = (check?: InvoiceCheck) =>
 	!!check?.findings.some((f) => f.kind === 'missing' || f.kind === 'gap' || f.kind === 'stock');
 
@@ -267,19 +254,13 @@ const categoryCheck = (check?: InvoiceCheck) => ({
 	comparedWith: check?.hasComparison ? check.comparedWith : null
 });
 
-/** The invoices each building brings into the statements, in words; none or only part of the period is flagged */
-export const invoiceRows = (
-	coverage: Coverage[],
-	buildings: { id: string; name: string }[],
-	period: Period
-) =>
+/** The invoices each building brings into the statements, in words; a building without any is flagged */
+export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name: string }[]) =>
 	coverage.map((c) => ({
 		buildingId: c.buildingId,
 		name: buildings.find((b) => b.id === c.buildingId)?.name ?? '',
 		text: coverageText(c),
 		missing: c.count === 0,
-		// With the year before to compare, the check per category replaces the look at start and end of the period
-		partial: !c.check?.hasComparison && partly(c, period),
 		existing: c.statements ?? 0,
 		fixedTerm: !!c.fixedTerm,
 		...categoryCheck(c.check)

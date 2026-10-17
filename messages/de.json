@@ -1264,8 +1264,6 @@
 	"statements_utility_many": "{count} Nebenkostenabrechnungen",
 	"statements_view_of": "Abrechnungen von {name} ansehen",
 	"statements_existing_note": "Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.",
-	"statements_partial_title": "Rechnungen nur für einen Teil der Periode",
-	"statements_partial_text": "Für {names} gibt es am Anfang oder Ende der Abrechnungsperiode mehr als drei Monate ohne Rechnung. Prüfen Sie, ob noch Rechnungen fehlen.",
 	"statements_confirm_label": "Die Abrechnungen trotzdem erstellen",
 	"statements_preview_empty": "In dieser Abrechnungsperiode gibt es keine Mietverträge ohne Abrechnung in den gewählten Gebäuden.",
 	"statements_all_billed": "Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.",
