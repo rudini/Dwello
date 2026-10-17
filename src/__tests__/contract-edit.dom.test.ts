@@ -151,7 +151,7 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(document.activeElement).toBe(byTestId('contract-base-rent-input'));
 	});
 
-	it('weist bei einem laufenden Mietvertrag darauf hin, dass Änderungen sofort gelten', async () => {
+	it('weist auf einen laufenden Mietvertrag hin', async () => {
 		await open();
 		expect(document.body.textContent).toContain('Laufender Mietvertrag');
 	});

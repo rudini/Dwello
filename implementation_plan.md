@@ -13,4 +13,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] `TODO(fachlich prüfen, #66)` markers removed; all four languages
 - Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/RentStep.svelte`, `src/lib/ui/MoneyInput.svelte` (help testid), `src/__tests__/contract-edit.dom.test.ts`, `src/__tests__/contract-wizard.dom.test.ts`, `tests/e2e/{features,steps,questions,targets}`
 - [x] Code review round 1 (`docs/reviews/66-review-1.md`)
-- [ ] Fach review round 2, feature review (personas Dr. Weber, Helga), PR "Refs #66"
+- [x] Fach review round 2 (`docs/reviews/66-fachreview-2.md`)
+- [x] Feature review round 1: personas `docs/design/personas/weber-66.md`, `helga-66.md`; P-1 fix (hint says what Dwello does and when to enter an increase)
+- [x] Persona round 2 on the P-1 fix (same reports, «Runde 2»)
+- [x] Code review round 2 (`docs/reviews/66-review-2.md`)
+- [ ] Fach review round 3 on the P-1 fix (`docs/reviews/66-fachreview-3.md`)
+- [ ] PR "Refs #66"
