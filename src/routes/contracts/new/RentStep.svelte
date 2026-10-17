@@ -6,17 +6,22 @@
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import AgreedCategories from '../AgreedCategories.svelte';
 	import { formatCurrency, isFeeRate, parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
 
 	// Step 4: the monthly amounts, each explained with the glossary's words, and their total
 	let {
 		values = $bindable(),
 		errors,
-		takenFrom = null
+		takenFrom = null,
+		categories,
+		agreedHelp = m.contracts_agreed_costs_help()
 	}: {
 		values: ContractFormValues;
 		errors: Record<string, string>;
 		takenFrom?: string | null; // the period of the contract whose amounts are filled in (#144)
+		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
+		agreedHelp?: string; // editing: existing statements stay, new Nebenkosten need the form
 	} = $props();
 
 	const total = $derived.by(() => {
@@ -107,6 +112,12 @@
 		{/if}
 	</div>
 {/if}
+
+<AgreedCategories
+	{categories}
+	bind:agreed={values.agreedCategoryIds}
+	help={agreedHelp}
+/>
 
 <p class="flex items-baseline justify-between gap-4 border-t border-line pt-4 text-lg">
 	<span class="font-semibold text-ink">{m.common_monthly_total()}</span>

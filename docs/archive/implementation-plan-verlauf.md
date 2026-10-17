@@ -1182,3 +1182,46 @@ Branch `claude/w6e-invoice-hints-378-379`. #379 is not ready: the code has no ru
 - [ ] PR `Fixes #378`, CI, merge
 
 Files: `src/routes/invoices/new/+page.svelte`, `src/routes/invoices/MissedWarning.svelte`, `src/routes/invoices/[id]/+page.svelte`, `src/routes/invoices/[id]/edit/+page.svelte`, `src/routes/api/invoices/[id]/statements/+server.ts` (new), `src/__tests__/invoice-pages.dom.test.ts`, `tests/e2e/features/{invoice-new,invoice-detail}.feature`, `tests/e2e/steps/{invoice-detail,statements}.steps.ts`, `tests/e2e/{targets,tasks}/invoice-detail.ts`, reviews `docs/reviews/w6e-review-{1,2,3}.md`, personas `docs/design/personas/{anna-w6e,marco-w6e,marco-w6e-2}.md`, `docs/reviews/workflow-notes-issue-378-379.md`
+
+## Session W10c: agreed Nebenkosten per Mietvertrag (#91)
+
+- [x] Implementation issue for #91 created (own "Done means"): #363; decision issues #368 (agreed from a date, follow-up contract), #369 (glossary)
+- [x] `@wip` scenarios (`statement-agreed-costs.feature`, `contract-new.feature`, `contract-edit.feature`) committed, `fach-reviewer` before implementing: `docs/reviews/w10c-fachreview-1.md`
+- [x] Slice 1, backend: `contract_categories` (migration 0020, after main took 0018 and 0019; schema, `docs/data-model.md`), new contract with all umlagefähige categories, existing contracts from their statements, calculation bills only agreed categories, API to read and answer; heating profile and Tankbestand only when agreed (V-3), no «Rechnung geändert» for not agreed categories (V-2), demo contracts agree everything
+- [x] Code review slice 1: `docs/reviews/w10c-s1-review-1.md`, re-review `w10c-s1-review-2.md`
+- [x] Slice 2, statement wizard: question for unanswered categories in the step «Einstellungen», answer stored on the Mietvertrag (saved note); notice of not agreed costs; text of the «Neu» finding; a11y/language state `agreed-costs`
+- [x] Code review slice 2 and 4: `docs/reviews/w10c-s2-review-1.md` (C-1 questions loading/failing block «Weiter», C-2 state `agreement-save-failed`, C-6, C-7, C-9 fixed)
+- [x] Re-review slice 2 fixes and review slice 3: `docs/reviews/w10c-s3-review-1.md` (C-1 saving the form keeps unanswered categories unanswered, C-2, C-3 state `agreements-failed`, C-6, C-9, C-14, C-15 fixed)
+- [x] Closing code review (slice 3 fixes, merge a9bd54a, feature review fixes): `docs/reviews/w10c-close-review-1.md` (C-1 to C-4 scenarios and state, C-5 fixed); `fach-reviewer` round 3 `w10c-fachreview-3.md` (V-12 = C-5, V-11, V-14 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-363.md`
+- [x] Slice 3, contract: checkboxes in «Neuer Mietvertrag» and «Mietvertrag bearbeiten» (help texts per domain review V-6), list in «Prüfen» and on the detail page
+- [x] Slice 4, PDF names the agreed categories it bills (domain review M-2), only on statements created since (agreed_category_ids)
+- [x] a11y screens and languages for the new states (`statement-generate` `agreed-costs`, `agreement-save-failed`; the contract screens show the boxes in their existing states)
+- [x] Feature review: personas `docs/design/personas/marco-w10c.md` (P-1 note when nothing is agreed, P-3 fixed), `weber-w10c.md`; `docs/reviews/w10c-fachreview-2.md` (M-1 PDF line only without uncategorised positions, V-1, V-2 fixed; #382 opened, M-2 added to #368); `docs/reviews/w10c-datenpruefung-1.md` (no findings)
+- [x] Marco re-run on the note (P-1 fixed, P-5 Minor stays), `fach-reviewer` round 3 on M-1 (`w10c-fachreview-3.md`)
+- [x] Closing re-review round 2: `docs/reviews/w10c-close-review-2.md` (C-11 scenario waits for the save, shown red without the fix; C-12, C-13, C-17 fixed)
+- [x] Closing review of the merge of main (ced8426) and the `generation-result` fix: `docs/reviews/w10c-merge-review-1.md`
+- [x] Merge of main with migration 0018 of #120: this migration renamed to 0019, and to 0020 after main took 0019 (#357); merge review `docs/reviews/w10c-merge-review-2.md` (C-1: the berichtigte Abrechnung refuses while a category with costs is unanswered, `STATEMENT_AGREEMENTS_OPEN`, scenario and pg test red before)
+- [x] Re-review of the correction refusal: `docs/reviews/w10c-merge-review-3.md` (no Blocker/Major; C-5 fr «rectificatif» and C-7 API spec fixed, C-6, C-8, C-9 stay); merge of main with `0019_audit_log.sql` of #357: this migration renamed to 0020, merge review `docs/reviews/w10c-merge-review-4.md`
+- [x] Session archived, push, pull request, CI, merge
+
+Files changed: `backend/migrations/0020_contract_categories.sql`, `backend/src/db/schema.ts`, `backend/src/services/agreed-category.service.ts`, `contract.service.ts`, `calculation.service.ts`, `statement.service.ts`, `statement-invoices.service.ts`, `backend/src/routes/contracts.ts`, `backend/demo/demo-data.sql`, `docs/data-model.md`, `docs/api-specification.md`, `backend/src/services/pdf.service.ts`, `statement-pdf.service.ts`, `src/lib/server/statement-generation.ts`, `src/lib/server/api-proxy.ts`, `src/routes/api/statements/agreements/`, `src/routes/api/contracts/[id]/agreements/`, `src/routes/statements/generate/AgreedCosts.svelte`, `AgreementQuestion.svelte`, `StatementStep.svelte`, `StatementWizard.svelte`, `messages/*.json`, `tests/a11y/screens.json`, `tests/contracts/contract-agreements.json`, `tests/contracts/contract.json`, `src/lib/contract-form.ts`, `src/lib/contract-wizard.ts`, `src/lib/server/category.ts`, `src/lib/types.ts`, `src/routes/contracts/AgreedCategories.svelte`, `ContractForm.svelte`, `new/` (load, wizard, rent and review step), `[id]/` (load, terms, edit), tests (`agreed-categories.pg.test.ts`, `migrations.pg.test.ts`, `tests/e2e/…`)
+
+## Session 2026-10-17 W7e: audit log (#357)
+
+- [x] Scenarios in `settings.feature` («Protokoll öffnen», «Änderungen im Protokoll sehen», «Eintrag im Protokoll löschen»), breadcrumb example, `privacy.feature`; fach-reviewer before implementing: `docs/reviews/w7e-fachreview-1.md` (R-1, R-2, V-1 Major fixed; V-2–V-9, R-3 fixed or answered)
+- [x] Migration `0019_audit_log.sql`, `schema.ts`, `docs/data-model.md`, `docs/api-specification.md` (11a)
+- [x] Backend: `audit-log.service.ts` and route; entries for the Verwaltungspauschale rate, a category's Umlagefähigkeit (with the invoices it excluded), an invoice that becomes (not) umlagefähig (form, category, KI), a reset payment, logins; `recordStatementCorrection` for #358 (W2e); `audit-log.pg.test.ts`, contract `audit-log.json`
+- [x] BFF: login entry from `src/routes/auth/callback` (`recordLogin` in `login-flow.ts`, fails open)
+- [x] Page `/config/audit-log` with delete confirmation; link under «Einstellungen»; texts in four languages, term `TODO(fachlich prüfen, #370)`
+- [x] a11y: `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature` (default, empty, delete-dialog)
+- [x] Privacy statement names the log (PR #359 not merged: paragraph `audit_privacy` under «Welche Daten Dwello speichert», demo note)
+- [x] `docs/PRD-Dwello.md` audit lines point to what is built
+- [x] Code review round 1: `docs/reviews/w7e-review-1.md`
+- [x] Fach review round 2 (feature review): `docs/reviews/w7e-fachreview-2.md`
+- [x] Personas: `docs/design/personas/{helga,marco,weber,sven,anna}-w7e.md`
+- [x] Re-reviews of the Major fixes, closing code-reviewer round: `docs/reviews/w7e-review-2.md` (C-1 closed); personas `anna-w7e-2.md`, `sven-w7e-2.md`
+- [x] Workflow note: commit gate refuses red tests that import a missing module; detached session start; CRAP of a new page template (`docs/reviews/workflow-notes-issue-357.md`)
+- [x] Code review rounds 3 and 4 (closing): `docs/reviews/w7e-review-3.md` (C-24 Major fixed), `-4`
+- [x] Full E2E (chromium + api): 950 passed; 5 failed under load (contract-new, the IBAN race O-34), green alone; archive the session
+- [x] #358 merged first (PR #385): «Abrechnung berichtigen» (`replaceStatement`) records the replacement in its transaction; `recordStatementCorrection(replaced)`; privacy paragraph names it (R-4); migration renumbered to `0019_audit_log.sql` after `0018_statement_correction.sql`

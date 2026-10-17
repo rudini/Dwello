@@ -18,6 +18,7 @@ import { heatingProfileRoutes } from './routes/heating-profiles';
 import { configRoutes } from './routes/config';
 import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
+import { auditLogRoutes } from './routes/audit-log';
 import { authMiddleware } from './middleware/auth';
 import { refusal } from './services/coded-error';
 
@@ -81,4 +82,5 @@ export const app = new Elysia()
 	.use(heatingProfileRoutes)
 	.use(configRoutes)
 	.use(statementRoutes)
-	.use(documentRoutes);
+	.use(documentRoutes)
+	.use(auditLogRoutes);

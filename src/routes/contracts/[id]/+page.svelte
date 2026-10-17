@@ -165,6 +165,7 @@
 			{status}
 			rent={data.rentBreakdown}
 			fee={managementFeeText(contract.managementFeeAgreed, contract.managementFeePercent)}
+			agreedCosts={data.agreedCosts}
 		/>
 	</div>
 

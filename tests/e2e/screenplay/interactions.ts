@@ -159,6 +159,9 @@ export const FailRequests = {
 			(url) => url.pathname === path && Object.entries(query).every(([key, value]) => url.searchParams.get(key) === value),
 			(route) => route.fulfill({ status: 500 })
 		),
+	/** Every request whose path matches, whatever its query (a record's id in the path) */
+	toPathsMatching: (pattern: RegExp): Activity => (actor) =>
+		pageOf(actor).route((url) => pattern.test(url.pathname), (route) => route.fulfill({ status: 500 })),
 	/** The requests answer again as the system does */
 	noLonger: (async (actor) => pageOf(actor).unrouteAll()) as Activity
 };
