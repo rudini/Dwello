@@ -90,7 +90,7 @@ describe('Migrationen anwenden', () => {
 	it('rundet den Saldo der Entwürfe neu und lässt versendete Abrechnungen, wie sie sind', async () => {
 		const name = await database();
 		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
-		for (const file of files.filter((file) => file < '0013_statement_balance_tenant_favour.sql')) {
+		for (const file of files.filter((file) => file < '0014_statement_balance_tenant_favour.sql')) {
 			await copyFile(join(migrations, file), join(before, file));
 		}
 		await migrate(`${server}/${name}`, before);
