@@ -1613,6 +1613,17 @@ Files: `.github/workflows/ci.yml`
 - Measured on 4 CPU cores without GPU, model loaded: qwen3-vl:8b-instruct categorize 37 s, read 77–90 s; qwen2.5vl:7b 21 s and 75 s
 - Files (round 2): `tests/e2e/features/invoices.feature`, `tests/e2e/steps/invoice-upload.steps.ts`, `tests/e2e/tasks/invoice-upload.ts`, `tests/e2e/screenplay/interactions.ts` (`Wait.until` timeout), `backend/scripts/llm-stub.ts`
 
+## Session 2026-10-17 CI: readable E2E logs, no archive conflicts
+
+No scenario: CI and repository configuration only, no app behaviour changes.
+
+- [x] Reporter `list` on CI, so the log names each failed test (run #540 named none)
+- [x] `.gitattributes`: `merge=union` for `docs/archive/implementation-plan-verlauf.md` (every task appends there; four conflicts in one session; a simulated merge of two appended sessions conflicts without it and keeps both with it)
+- [x] Slice review round 1: `docs/reviews/ci3-review-1.md` (no Blocker/Major; C-1 fixed in the commit message; C-2 to C-4 stay)
+- [x] Plan archived, pull request, CI
+
+Files: `.gitattributes`, `playwright.config.ts`
+
 ## Session W16b: E2E races O-36 and O-37 (product owner's choice for PR #417)
 
 Branch `claude/w16b-e2e-races`. Non-functional (rows in `docs/design/offene-punkte.md`); no issue. No scenario: it fixes a race between test data and a backend write, not a behaviour the Liegenschaftsverwalter sees.
