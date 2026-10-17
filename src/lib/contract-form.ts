@@ -15,6 +15,7 @@ export interface ContractFormValues {
 	endDate: string;
 	isUnlimited: boolean;
 	terminated?: boolean; // the end is a Kündigungstermin of an open-ended contract (A-1), only when editing
+	billedUntil?: string; // «Abgerechnet bis» (#133), only when editing; '' for none
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
@@ -72,6 +73,7 @@ export function initialContractValues(
 		endDate: dateForInput(contract.endDate),
 		isUnlimited: !contract.endDate,
 		terminated: !!contract.terminated,
+		billedUntil: dateForInput(contract.billedUntil),
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
 		advancePayment: String(contract.monthlyAdvancePayment || ''),
@@ -137,6 +139,7 @@ export const contractBody = (values: ContractFormValues) => ({
 	managementFeeAgreed: values.managementFee !== 'none',
 	managementFeePercent:
 		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null,
+	...(values.billedUntil !== undefined && { billedUntil: values.billedUntil || null }),
 	...(values.agreedCategoryIds && { agreedCategoryIds: values.agreedCategoryIds })
 });
 

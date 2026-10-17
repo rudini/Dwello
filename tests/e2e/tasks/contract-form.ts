@@ -19,6 +19,7 @@ import {
 	pastEndConfirm,
 	retryContractsButton,
 	runningContractLink,
+	billedUntilInput,
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
@@ -134,6 +135,10 @@ export const saveStartDate = (isoDate: string): Activity => (actor) =>
 // «Bearbeiten»: the fee is agreed at the run's rate
 export const agreeManagementFee: Activity = (actor) =>
 	actor.attemptsTo(Click.on(feeChoice('run')), Click.on(contractSubmitButton));
+
+// «Bearbeiten»: the Nebenkosten are billed outside Dwello up to the day given (#133)
+export const enterBilledUntil = (isoDate: string): Activity => (actor) =>
+	actor.attemptsTo(EnterDate.of(isoDate).into(billedUntilInput), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: the lease does not agree this category (#91)
 export const leaveOutCategory = (categoryId: string): Activity => (actor) =>

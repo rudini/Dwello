@@ -238,6 +238,42 @@ describe('PDF ohne Saldo und einer bezahlten Abrechnung', () => {
 	});
 });
 
+// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt: kein Zahlteil, keine Bitte um die IBAN
+describe('PDF mit einem Saldo unter CHF 5', () => {
+	it('fordert eine kleine Nachzahlung nicht ein und druckt keinen Zahlteil', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.95, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Nachzahlung CHF 4.95');
+		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(pdf.flowing).not.toContain('Zahlteil');
+	});
+
+	it('zahlt eine kleine Rückerstattung nicht aus und fragt nicht nach der IBAN', async () => {
+		const pdf = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir zahlen ihn nicht aus.');
+		expect(pdf.flowing).not.toContain('IBAN');
+		expect(pdf.flowing).not.toContain('überweisen');
+	});
+
+	// nach dem Versand ist sie bezahlt, aber ohne Zahlung: kein «Bezahlt am», kein «Überwiesen am»
+	it('sagt auch nach dem Versand, dass der Betrag nicht eingefordert oder ausbezahlt wird', async () => {
+		const waived = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.1, paidDate: '2026-02-15' });
+		const back = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paidDate: '2026-02-15' });
+
+		expect(waived.flowing).toContain('Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(waived.flowing).not.toContain('Bezahlt am');
+		expect(back.flowing).toContain('Wir zahlen ihn nicht aus.');
+		expect(back.flowing).not.toContain('Überwiesen am');
+	});
+
+	it('fordert CHF 5.00 mit dem Zahlteil ein', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 779.15, balance: 5 });
+
+		expect(pdf.flowing).toContain('Zahlteil');
+	});
+});
+
 describe('QR-Code im Zahlteil', () => {
 	// 46 mm gedruckt: mit 166 Pixeln waren die Module ungleich breit; jetzt ganze Pixel je Modul, scharf auch beim Druck
 	it('bettet den QR-Code mit ganzen Pixeln je Modul in Druckauflösung ein', async () => {
@@ -340,6 +376,20 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
 		expect(text).toContain(without);
 		expect(text).toContain(beyond);
+	});
+
+	// #236: eine Zeile ohne Leistungszeitraum nennt ihre Rechnung, in jeder Sprache; die eindeutige nicht
+	it.each([
+		['de', 'Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode (Rechnung «Hauswartung Q3»)'],
+		['fr', 'Sans période de prestation : CHF 600.00, vos jours de location 139 sur 365 jours de la période de décompte (facture « Hauswartung Q3 »)'],
+		['it', 'Senza periodo di prestazione: CHF 600.00, i suoi giorni di locazione 139 su 365 giorni del periodo di conteggio (fattura «Hauswartung Q3»)'],
+		['en', 'Without a service period: CHF 600.00, your days rented 139 of 365 days of the billing period (invoice ‘Hauswartung Q3’)']
+	] as const)('nennt die Rechnung einer Zeile ohne Leistungszeitraum auf %s', async (language, line) => {
+		const named = [{ ...special[0], description: 'Hauswartung Q3' }, { ...special[1], description: 'Hauswartung Winter' }];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: named, tenantShare: 512.08 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+		expect(text).toContain(line);
+		expect(text).not.toContain('Hauswartung Winter');
 	});
 
 	// #239: die Veränderung des Tankbestands ist keine Rechnung, in jeder Sprache

@@ -18,7 +18,7 @@ import { setAgreedCategories } from './agreed-category.service';
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { oldAddress } from './old-address';
-import { swissToday } from './today';
+import { daysAfter, swissToday } from './today';
 
 /** The database, or a transaction of it */
 type Query = Pick<typeof db, 'select' | 'delete'>;
@@ -34,6 +34,7 @@ const contractFields = {
 	endDate: rentalContracts.endDate,
 	terminated: rentalContracts.terminated,
 	noticeReceivedOn: rentalContracts.noticeReceivedOn,
+	billedUntil: rentalContracts.billedUntil,
 	movedOut: rentalContracts.movedOut,
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
@@ -318,6 +319,13 @@ export async function createContract({ agreedCategoryIds, ...data }: NewRentalCo
 	});
 }
 
+/**
+ * The first day Dwello bills the contract: its Vertragsbeginn, or the day after «Abgerechnet bis» when that is later
+ * (#133); the BFF has the same rule in `billsIn` (src/lib/contract-status.ts)
+ */
+export const billingStart = ({ startDate, billedUntil }: { startDate: string; billedUntil: string | null }) =>
+	billedUntil && billedUntil >= startDate ? daysAfter(billedUntil, 1) : startDate;
+
 /** The contract's statements whose billed rent days the new dates would change (fewer or more) */
 async function statementsChanged(contractId: string, startDate: string, endDate: string | null, q: Query) {
 	const from = sql`greatest(${utilityStatements.periodStart}, ${startDate}::date)`;
@@ -349,20 +357,25 @@ export class BilledDaysError extends Error {
 	}
 }
 
+/** The dates the change sends; an empty Vertragsbeginn keeps the stored one */
+const newDates = ({ startDate, endDate, billedUntil }: Partial<NewRentalContract>) =>
+	Object.fromEntries(
+		Object.entries({ startDate: startDate || undefined, endDate, billedUntil }).filter(([, value]) => value !== undefined)
+	) as Partial<Pick<RentalContract, 'startDate' | 'endDate' | 'billedUntil'>>;
+
 /**
  * New dates may neither overlap another contract of the apartment nor change the billed Mietstage of a statement;
  * `draft`, a draft of the contract, is deleted when it is the only statement they change (#141)
  */
 async function checkNewDates(current: RentalContract, data: Partial<NewRentalContract>, q: Query, draft?: string) {
-	if (!data.startDate && data.endDate === undefined) return;
-	const startDate = data.startDate || current.startDate;
-	const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
+	if (!data.startDate && data.endDate === undefined && data.billedUntil === undefined) return;
+	const { startDate, endDate, billedUntil } = { ...current, ...newDates(data) };
 	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id, q);
 	if (hasOverlap)
 		throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
 			contract: overlappingContract!
 		});
-	const statements = await statementsChanged(current.id, startDate, endDate, q);
+	const statements = await statementsChanged(current.id, billingStart({ startDate, billedUntil }), endDate, q);
 	if (onlyDraft(statements, draft)) await q.delete(utilityStatements).where(eq(utilityStatements.id, draft!));
 	else if (statements.length) throw new BilledDaysError(statements);
 }

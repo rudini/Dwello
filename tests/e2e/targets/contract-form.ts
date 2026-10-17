@@ -22,6 +22,9 @@ export const reviewContractsUnknown = target('Hinweis in der Prüfung', (page) =
 	page.getByTestId('review-contracts-unknown')
 );
 export const startDateInput = target('Vertragsbeginn', (page) => page.getByTestId('start-date-input'));
+// #133: the day up to which the Nebenkosten are billed outside Dwello, and its help
+export const billedUntilInput = target('Abgerechnet bis', (page) => page.getByTestId('billed-until-input'));
+export const billedUntilHelp = target('Hilfe zu «Abgerechnet bis»', (page) => page.getByTestId('billed-until-input-help'));
 export const durationChoice = (label: string) =>
 	target(`Vertragsdauer «${label}»`, (page) => page.getByTestId('contract-duration').getByText(label, { exact: true }));
 export const durationOption = (label: string) =>

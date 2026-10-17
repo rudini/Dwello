@@ -74,6 +74,7 @@ describe('initialContractValues', () => {
 			endDate: '2026-03-31',
 			isUnlimited: false,
 			terminated: false,
+			billedUntil: '',
 			baseRent: '950.00',
 			additionalRent: '',
 			advancePayment: '120.00',
@@ -173,6 +174,17 @@ describe('contractBody', () => {
 			managementFeeAgreed: true,
 			managementFeePercent: null
 		});
+	});
+
+	// #133: only the edit form has «Abgerechnet bis»; emptied, it is forgotten
+	it('sendet «Abgerechnet bis» beim Bearbeiten, leer als kein Datum', () => {
+		expect(contractBody({ ...filled, billedUntil: '2024-12-31' }).billedUntil).toBe('2024-12-31');
+		expect(contractBody({ ...filled, billedUntil: '' }).billedUntil).toBeNull();
+		expect(contractBody(filled)).not.toHaveProperty('billedUntil');
+		const contract = { ...filled, id: 'c1', billedUntil: '2024-12-31', monthlyAdvancePayment: '0' };
+		expect(initialContractValues(contract as never, new URLSearchParams()).billedUntil).toBe(
+			'2024-12-31'
+		);
 	});
 
 	// #91: ohne Auswahl vereinbart das Backend alle umlagefähigen Kategorien

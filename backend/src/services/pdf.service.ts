@@ -17,7 +17,7 @@ import {
 	type QRBillConfig,
 	type StatementForQRBill
 } from './qr-bill.service';
-import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { belowMinimum, formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { countryLine, qrTown } from './postal-address';
 import type { InvoicePart } from '../db/schema';
@@ -86,9 +86,11 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Veränderung Tankbestand {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partShare: 'Ihr Anteil{colon}{apartment} × ({sum}) / {costs} = {share}',
+		partNamed: '{line} (Rechnung «{description}»)',
 		yourCosts: 'Ihre Nebenkosten',
 		pageOf: 'Seite {page} von {pages}',
 		tenancyLine: 'Ihr Mietverhältnis in dieser Periode: {start} – {end} ({days} Mietstage von {total} Tagen)',
+		tenancyBilledLine: 'Ihr Mietverhältnis in dieser Periode: {tenancyStart} – {end}. Abgerechnet bis {billedUntil}; diese Abrechnung umfasst {start} – {end} ({days} Mietstage von {total} Tagen)',
 		payBy: 'Bitte bezahlen Sie den Betrag bis {date} mit dem Zahlteil.',
 		payNoDate: 'Bitte bezahlen Sie den Betrag mit dem Zahlteil.',
 		paidOn: 'Bezahlt am {date}. Vielen Dank.',
@@ -98,6 +100,8 @@ const translations: Record<Language, Record<string, string>> = {
 		refundAccount: 'Teilen Sie uns dafür Ihre IBAN mit, falls Sie das noch nicht getan haben.',
 		balancedNote: 'Ihre Nebenkosten und Ihre Akontobeiträge sind gleich hoch. Sie müssen nichts bezahlen.',
 		balancedRounded: 'Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen und erhalten nichts zurück.',
+		waivedDue: 'Der Betrag ist kleiner als CHF 5.00. Wir verzichten darauf; Sie müssen nichts bezahlen.',
+		waivedRefund: 'Der Betrag ist kleiner als CHF 5.00. Wir zahlen ihn nicht aus.',
 		sharesNote: 'Kosten des Gebäudes: die Rechnungen der Abrechnungsperiode; eine Rechnung mit Leistungszeitraum zählt mit den Tagen, die in die Periode fallen. Wohnungsanteil: der Anteil Ihrer Wohnung an den Kosten des Gebäudes nach dem Verteilschlüssel. Zeitanteil: Ihre Mietstage in der Abrechnungsperiode.{days}{parts} Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil.{rounded}{heating}',
 		sharesNoteDays: ' Bei einer Rechnung mit Leistungszeitraum zählen Ihre Mietstage in diesem Zeitraum.',
 		sharesNoteParts: ' Hat eine Abrechnungsposition Rechnungen über verschiedene Tage, steht die Berechnung darunter.',
@@ -171,9 +175,11 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Variation du stock de combustible {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
 		partLine: 'Période de prestation {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
 		partShare: 'Votre part{colon}{apartment} × ({sum}) / {costs} = {share}',
+		partNamed: '{line} (facture « {description} »)',
 		yourCosts: 'Vos frais accessoires',
 		pageOf: 'Page {page} sur {pages}',
 		tenancyLine: 'Votre bail pendant la période : {start} – {end} ({days} jours sur {total})',
+		tenancyBilledLine: 'Votre bail pendant la période : {tenancyStart} – {end}. Décompté jusqu’au {billedUntil} ; ce décompte couvre {start} – {end} ({days} jours sur {total})',
 		payBy: 'Veuillez payer le montant au plus tard le {date} au moyen de la section paiement.',
 		payNoDate: 'Veuillez payer le montant au moyen de la section paiement.',
 		paidOn: 'Payé le {date}. Merci.',
@@ -183,6 +189,8 @@ const translations: Record<Language, Record<string, string>> = {
 		refundAccount: 'Pour ce faire, veuillez nous communiquer votre IBAN si vous ne l’avez pas encore fait.',
 		balancedNote: 'Vos frais accessoires et vos acomptes sont égaux. Vous n’avez rien à payer.',
 		balancedRounded: 'Après l’arrondi à 5 centimes, vous n’avez rien à payer et ne recevez rien.',
+		waivedDue: 'Le montant est inférieur à CHF 5.00. Nous y renonçons\u00a0; vous n’avez rien à payer.',
+		waivedRefund: 'Le montant est inférieur à CHF 5.00. Nous ne vous le versons pas.',
 		sharesNote: 'Coûts de l’immeuble\u00a0: les factures de la période de décompte\u00a0; une facture avec période de prestation compte pour les jours compris dans la période. Part du logement\u00a0: la part des coûts de l’immeuble qui revient à votre logement selon la clé de répartition. Part temporelle\u00a0: vos jours de location dans la période de décompte.{days}{parts} Votre part est la part du logement multipliée par la part temporelle.{rounded}{heating}',
 		sharesNoteDays: ' Pour une facture avec période de prestation, ce sont vos jours de location dans cette période qui comptent.',
 		sharesNoteParts: ' Si un poste du décompte comporte des factures sur des jours différents, le calcul figure en dessous.',
@@ -256,9 +264,11 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Variazione della scorta di combustibile {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
 		partLine: 'Periodo di prestazione {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
 		partShare: 'La sua quota{colon}{apartment} × ({sum}) / {costs} = {share}',
+		partNamed: '{line} (fattura «{description}»)',
 		yourCosts: 'Le sue spese accessorie',
 		pageOf: 'Pagina {page} di {pages}',
 		tenancyLine: 'La sua locazione in questo periodo: {start} – {end} ({days} giorni su {total})',
+		tenancyBilledLine: 'La sua locazione in questo periodo: {tenancyStart} – {end}. Conteggiato fino al {billedUntil}; questo conteggio comprende {start} – {end} ({days} giorni su {total})',
 		payBy: 'La preghiamo di pagare l’importo entro il {date} tramite la sezione pagamento.',
 		payNoDate: 'La preghiamo di pagare l’importo tramite la sezione pagamento.',
 		paidOn: 'Pagato il {date}. Grazie.',
@@ -268,6 +278,8 @@ const translations: Record<Language, Record<string, string>> = {
 		refundAccount: 'Ci comunichi il suo IBAN, se non l’ha già fatto.',
 		balancedNote: 'Le sue spese accessorie corrispondono ai suoi acconti. Non deve pagare nulla.',
 		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla né riceve alcun rimborso.',
+		waivedDue: 'L’importo è inferiore a CHF 5.00. Vi rinunciamo; non deve pagare nulla.',
+		waivedRefund: 'L’importo è inferiore a CHF 5.00. Non glielo bonifichiamo.',
 		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: la quota dei costi dell’immobile a carico del suo appartamento secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio.{days}{parts} La sua quota è la quota appartamento moltiplicata per la quota temporale.{rounded}{heating}',
 		sharesNoteDays: ' Per una fattura con periodo di prestazione contano i suoi giorni di locazione in tale periodo.',
 		sharesNoteParts: ' Se una voce del conteggio comprende fatture su giorni diversi, il calcolo figura sotto.',
@@ -341,9 +353,11 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Change in fuel stock {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
 		partLine: 'Service period {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
 		partShare: 'Your share{colon}{apartment} × ({sum}) / {costs} = {share}',
+		partNamed: '{line} (invoice ‘{description}’)',
 		yourCosts: 'Your utility costs',
 		pageOf: 'Page {page} of {pages}',
 		tenancyLine: 'Your tenancy in this period: {start} – {end} ({days} of {total} days)',
+		tenancyBilledLine: 'Your tenancy in this period: {tenancyStart} – {end}. Billed until {billedUntil}; this statement covers {start} – {end} ({days} of {total} days)',
 		payBy: 'Please pay the amount by {date} using the payment part.',
 		payNoDate: 'Please pay the amount using the payment part.',
 		paidOn: 'Paid on {date}. Thank you.',
@@ -353,6 +367,8 @@ const translations: Record<Language, Record<string, string>> = {
 		refundAccount: 'Please send us your IBAN if you have not already done so.',
 		balancedNote: 'Your utility costs equal your advance payments. You do not need to pay anything.',
 		balancedRounded: 'After rounding to 5 centimes, you have nothing to pay and nothing will be refunded.',
+		waivedDue: 'The amount is less than CHF 5.00. We waive it; you do not need to pay anything.',
+		waivedRefund: 'The amount is less than CHF 5.00. We will not pay it out.',
 		sharesNote: 'Building costs: the invoices for the billing period; an invoice with a service period counts only for its days within the period. Apartment share: your apartment’s part of the building costs under the distribution key. Time share: your days rented in the billing period.{days}{parts} Your share is the apartment share multiplied by the time share.{rounded}{heating}',
 		sharesNoteDays: ' For an invoice with a service period, your days rented within that period count.',
 		sharesNoteParts: ' If a statement line has invoices over different days, the calculation is shown below it.',
@@ -375,6 +391,8 @@ const translations: Record<Language, Record<string, string>> = {
 	}
 };
 
+type Part = InvoicePart & { description?: string }; // the invoice's description, not on statements before #96
+
 /**
  * Statement line item
  */
@@ -386,7 +404,7 @@ export interface LineItem {
 	apartmentShare?: number | null; // the apartment's part of the total by the key; none on older statements
 	periodShare?: number | null; // 0-1: days rented, or the heating profile's share
 	shareDays?: { days: number; total: number }; // the period share as days, when the statement stored them (#208)
-	invoiceParts?: InvoicePart[] | null; // the invoices of a position over different days, with their days (#226)
+	invoiceParts?: Part[] | null; // the invoices of a position over different days, with their days (#226)
 	byProfile?: boolean; // shared by the heating profile, not by days
 	heating?: boolean; // a heating cost: the tenant may ask for the detailed heating statement (Art. 8 Abs. 1 VMWG)
 	tenantShare: number;
@@ -433,6 +451,8 @@ export interface StatementPDFData {
 	// The tenant's part of the period and what the generation run used
 	rentalStart: string;
 	rentalEnd: string;
+	// #133: billed outside Dwello up to this day; the tenancy in the period starts earlier, on `tenancyStart`
+	billed?: { until: string; tenancyStart: string };
 	periodDays: number; // days of the Abrechnungsperiode, the base of the Mietstage
 	// the heating profile and its share; the months of a tenancy over part of the period with their shares
 	heating?: {
@@ -575,7 +595,16 @@ function title({ doc, t, data }: Page, y: number) {
 		.fillColor(COLORS.muted)
 		.text(`${t.statementNumber} ${data.statementNumber} · ${t.statementDate} ${formatDate(data.statementDate)}`)
 		.fillColor(COLORS.ink)
-		.text(fill(t.tenancyLine, { start: formatDate(data.rentalStart), end: formatDate(data.rentalEnd), days: data.rentalDays, total: data.periodDays }));
+		.text(
+			// TODO(fachlich prüfen, #325): the line with «Abgerechnet bis» is the domain review's proposal
+			fill(data.billed ? t.tenancyBilledLine : t.tenancyLine, {
+				start: formatDate(data.rentalStart),
+				end: formatDate(data.rentalEnd),
+				days: data.rentalDays,
+				total: data.periodDays,
+				...(data.billed && { billedUntil: formatDate(data.billed.until), tenancyStart: formatDate(data.billed.tenancyStart) })
+			})
+		);
 	// the tenant still has the replaced statement and its payment part: it no longer applies (Fachreview W2e V-2)
 	if (data.replaces) {
 		const note = fill(t.replacesNote, { number: data.replaces.statementNumber, date: formatDate(data.replaces.statementDate) });
@@ -585,11 +614,17 @@ function title({ doc, t, data }: Page, y: number) {
 	return doc.y + 14;
 }
 
+// Settled when sent: a Saldo of 0, or one below CHF 5 that is neither claimed nor paid out (#94)
+function settledText(t: Record<string, string>, data: StatementPDFData) {
+	if (data.balance === 0) return rounding(data) ? t.balancedRounded : t.balancedNote;
+	return data.balance < 0 ? t.waivedRefund : t.waivedDue;
+}
+
 // What the balance asks the tenant to do: pay with the payment part, wait for the refund, or nothing (also the e-mail, #86)
 export function balanceText(data: StatementPDFData, language: Language) {
 	const t = translations[language];
 	const date = data.paymentDeadline && formatDate(data.paymentDeadline);
-	if (data.balance === 0) return rounding(data) ? t.balancedRounded : t.balancedNote; // settled when sent
+	if (belowMinimum(data.balance)) return settledText(t, data);
 	if (data.paidDate) return fill(data.balance < 0 ? t.refundPaidOn : t.paidOn, { date: formatDate(data.paidDate) });
 	if (data.balance < 0) return `${date ? fill(t.refundBy, { date }) : t.refundNoDate} ${t.refundAccount}`;
 	return date ? fill(t.payBy, { date }) : t.payNoDate;
@@ -734,9 +769,14 @@ function costTable(page: Page, y: number) {
 // The invoices of a position over different days and the sum that weighs them by amount (#226): the tenant recomputes
 // the Zeitanteil, and «Ihr Anteil» as Wohnungsanteil × that sum
 function partLines(item: LineItem, t: Record<string, string>) {
-	if (!item.invoiceParts || item.apartmentShare == null) return [];
-	const lines = item.invoiceParts.map((part) => fill(t[partText(part)], partValues(part, t.colon)));
-	const sum = item.invoiceParts.map((part) => `${formatCHF(part.amount)} × ${part.days}/${part.total}`).join(' + ');
+	const parts = item.invoiceParts;
+	if (!parts || item.apartmentShare == null) return [];
+	const texts = parts.map((part) => fill(t[partText(part)], partValues(part, t.colon)));
+	const lines = texts.map((line, i) => {
+		const description = nameOf(parts[i], texts.filter((text) => text === line).length);
+		return description ? fill(t.partNamed, { line, description }) : line;
+	});
+	const sum = parts.map((part) => `${formatCHF(part.amount)} × ${part.days}/${part.total}`).join(' + ');
 	const share = { apartment: formatCHF(item.apartmentShare), sum, costs: formatCHF(item.totalAmount), share: formatCHF(item.tenantShare), colon: t.colon };
 	return [...lines, fill(t.partShare, share)];
 }
@@ -745,6 +785,9 @@ function partLines(item: LineItem, t: Record<string, string>) {
 // the change of the Tankbestand is no invoice and says so (#239)
 const partText = (part: InvoicePart) =>
 	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.whole ? 'partBeyond' : 'partLine';
+// A line names its invoice where dates and amount match no single receipt: without a Leistungszeitraum (its dates are
+// the period's) or the same as another line's (#236); the Tankbestand, once per position, never is
+const nameOf = (part: Part, same: number) => (part.noPeriod || same > 1 ? part.description : undefined);
 const partValues = ({ start, end, amount, days, total, whole }: InvoicePart, colon: string) => ({
 	start: formatDate(start),
 	end: formatDate(end),
@@ -988,9 +1031,10 @@ function frame({ doc, t, data, config }: Page, qrPage: number | null) {
 	}
 }
 
-// Only an amount still due gets a payment part: not a refund, not a balance of 0, not a statement already paid
+// Only an amount still due gets a payment part: not a refund, not a balance below CHF 5 (#94), not a statement already paid
+const owed = (data: StatementPDFData) => data.balance > 0 && !belowMinimum(data.balance) && !data.paidDate;
 async function qrCodeFor(data: StatementPDFData, config: QRBillConfig, t: Record<string, string>): Promise<QRResult | null> {
-	if (data.balance <= 0 || data.paidDate) return null;
+	if (!owed(data)) return null;
 	try {
 		return await generateQRBillForStatement(
 			{ id: data.id, statementNumber: data.statementNumber, balance: data.balance.toString(), tenant: data.tenant, title: t.title },
@@ -1047,7 +1091,7 @@ async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig
 				if (y > PAGE.height - PAYMENT_PART - 24) doc.addPage();
 				qrPage = doc.bufferedPageRange().count - 1;
 				paymentPart(page, qr, data.balance);
-			} else if (data.balance > 0 && !data.paidDate) {
+			} else if (owed(data)) {
 				paymentInfo(page, y);
 			}
 			frame(page, qrPage);

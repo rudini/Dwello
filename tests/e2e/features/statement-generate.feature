@@ -128,6 +128,28 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2023 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Vorschau, dass es in der Periode keine Mietverträge gibt
 
+  # #133: bis «Abgerechnet bis» sind die Nebenkosten ausserhalb von Dwello abgerechnet; eine Periode, die bis dahin
+  # endet, erhält keine Abrechnung
+  @api
+  Szenario: Ein ausserhalb von Dwello abgerechneter Mietvertrag erhält keine Abrechnung
+    Angenommen der Mietvertrag von "Marc Huber" ist bis "2024-12-31" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann enthält die Vorschau die Abrechnung von "Eva Frei"
+    Und die Vorschau enthält genau 1 Abrechnung
+
+  # #133: reicht die Abrechnungsperiode über «Abgerechnet bis» hinaus, zählen Mietstage und geleistete Akontobeiträge
+  # erst ab dem Tag danach. Hauswart 732.00 für 366 Tage = 2.00 pro Tag; Eva Frei vom 01.03. bis 31.03.2024: 31 Tage
+  # = 62.00 + 3 % = 63.86, Akonto nur für März 120.00; Marc Huber bleibt bei 245 Tagen = 490.00 + 3 % = 504.70
+  @api
+  Szenario: Nach «Abgerechnet bis» zählen Mietstage und Akonto ab dem Tag danach
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und der Mietvertrag von "Eva Frei" hat "120" Franken Akonto
+    Und der Mietvertrag von "Eva Frei" ist bis "2024-02-29" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Eva Frei" "CHF 63.86"
+    Und beträgt der Saldo von "Eva Frei" "Rückerstattung CHF 56.15"
+    Und kostet die Abrechnung von "Marc Huber" "CHF 504.70"
+
   # A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
   Szenario: Vorschau warnt vor der alten Adresse eines ausgezogenen Mieters
     Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"
@@ -179,6 +201,19 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "1200" Franken vom "2025-06-30" für die Zeit vom "2024-07-01" bis "2025-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Kaltwasser": "1 Rechnung zählt nur teilweise: ihr Leistungszeitraum reicht über die Abrechnungsperiode hinaus."
+
+  # #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin, auf den Akonto oder neue Nebenkosten
+  # steigen könnten; ein unbefristeter behält den Hinweis auf den nächsten Kündigungstermin
+  Szenario: Hinweise zu Akonto und neuen Nebenkosten bei einem befristeten Mietvertrag
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" befristet von "2024-01-01" bis "2099-12-31" für "900" Franken mit "20" Franken Akonto
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2023-01-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "2000" Franken vom "2024-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann rät die Vorschau für "Lea Graf": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "frühestens auf den nächsten Kündigungstermin"
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
 
   Szenario: Hinweis auf eine Rechnung ohne Leistungszeitraum kurz nach der Abrechnungsperiode
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
@@ -379,3 +414,12 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann schlägt der Assistent das Heizprofil "Winter" vor
     Und sagt der Assistent "Das Heizprofil ist wie bei den übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode eingestellt, die Verwaltungspauschale kommt aus den Einstellungen."
+
+  # #119: sind die übrigen Abrechnungen der Periode verschieden eingestellt, gibt es keine Vorlage: beides kommt aus den Einstellungen
+  Szenario: Übrige Abrechnungen der Periode mit verschiedenen Heizprofilen
+    Angenommen es gibt das Heizprofil "Winter"
+    Und es gibt das Heizprofil "Sommer"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Sommer"
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann sagt der Assistent "Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen."

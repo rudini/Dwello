@@ -69,6 +69,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Bereits bezahlt / Bereits zurückerstattet auf NK-… (#362, glossary open) | déjà payé / déjà remboursé sur NK-… | già pagato / già rimborsato su NK-… | already paid / already refunded on NK-… |
 | Ausgeglichen (Saldo 0) | solde nul | in pareggio | nil balance |
 | Mietstage | jours de location | giorni di locazione | days rented |
+| Abgerechnet bis | décompté jusqu’au ❓ (#325) | conteggiato fino al ❓ (#325) | billed until ❓ (#325) |
 | Leerstand | vacance | sfitto | vacancy |
 | Entwurf / Versendet / Bezahlt / Überfällig | brouillon / envoyé / payé / en retard | bozza / inviato / pagato / scaduto | draft / sent / paid / overdue |
 | Zahlungsfrist | délai de paiement | termine di pagamento | payment deadline |

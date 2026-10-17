@@ -40,7 +40,7 @@ const contracts = [
 	contract('nachher', '2025-01-01', null)
 ];
 
-function backend(statements: { contractId: string; periodStart: string; periodEnd: string; status?: string }[] = [], inBuilding = contracts) {
+function backend(statements: { contractId: string; periodStart: string; periodEnd: string; status?: string }[] = [], inBuilding: object[] = contracts) {
 	const posts: { url: string; body: Record<string, string> }[] = [];
 	const fetch = async (url: string, init?: RequestInit) => {
 		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: statements });
@@ -124,7 +124,9 @@ describe('Abrechnungen erstellen', () => {
 				rentalDays: 366,
 				totalPeriodDays: 366,
 				movedOut: true,
-				oldAddress: false
+				fixedTerm: false,
+				oldAddress: false,
+				buildingId: 'b1'
 			},
 			{
 				contractId: 'einzug',
@@ -136,8 +138,25 @@ describe('Abrechnungen erstellen', () => {
 				rentalDays: 366,
 				totalPeriodDays: 366,
 				movedOut: false,
-				oldAddress: false
+				fixedTerm: false,
+				oldAddress: false,
+				buildingId: 'b1'
 			}
+		]);
+	});
+
+	// #133: bis «Abgerechnet bis» ausserhalb von Dwello abgerechnet; ohne Mietstage danach erhält er keine Abrechnung
+	it('übergeht einen Mietvertrag, der in der Periode nach «Abgerechnet bis» keine Mietstage hat', async () => {
+		const inBuilding = [
+			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-03-31' },
+			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' }
+		];
+		const { fetch, posts } = backend([], inBuilding);
+
+		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
+		expect(await billedContracts(fetch, period)).toEqual([
+			{ buildingId: 'b1', contracts: 1, billed: 0, withoutFee: [] }
 		]);
 	});
 
@@ -148,6 +167,26 @@ describe('Abrechnungen erstellen', () => {
 		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.movedOut])).toEqual([
 			['spaeter', true],
 			['bleibt', false]
+		]);
+	});
+
+	// #76: ein befristeter Mietvertrag läuft ohne Kündigungstermin bis zum vereinbarten Vertragsende
+	it('erkennt einen laufenden befristeten Mietvertrag', async () => {
+		const { fetch } = backend(
+			[],
+			[
+				contract('befristet', '2020-01-01', '2099-12-31'),
+				{ ...contract('gekuendigt', '2020-01-01', '2099-12-31'), terminated: true },
+				contract('unbefristet', '2020-01-01', null),
+				contract('beendet', '2020-01-01', '2024-03-31')
+			]
+		);
+
+		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.fixedTerm])).toEqual([
+			['befristet', true],
+			['gekuendigt', false],
+			['unbefristet', false],
+			['beendet', false]
 		]);
 	});
 

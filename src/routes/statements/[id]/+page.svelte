@@ -6,6 +6,7 @@
 	import { addToast } from '$lib/stores';
 	import {
 		balanceLabel,
+		claimed,
 		nextReminderLater,
 		paidDateError,
 		paidHelp,
@@ -141,7 +142,7 @@
 			<StatusActions
 				status={statement.status}
 				{byEmail}
-				owes={statement.balance > 0}
+				owes={claimed(statement.balance)}
 				waiting={!!nextReminderLater(statement)}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
@@ -224,7 +225,7 @@
 	check={checkPaidDate}
 	success={m.statements_marked_paid()}
 >
-	{#if statement.balance > 0}<p>{m.statements_no_reminder_after()}</p>{/if}
+	{#if claimed(statement.balance)}<p>{m.statements_no_reminder_after()}</p>{/if}
 	<DateInput
 		id="paidDate"
 		label={m.statements_paid_on()}

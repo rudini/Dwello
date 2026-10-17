@@ -94,6 +94,7 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: false,
 				partial: true, // nothing after June
 				existing: 0,
+				fixedTerm: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
 				findings: [],
@@ -107,6 +108,7 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: true,
 				partial: false,
 				existing: 0,
+				fixedTerm: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
 				findings: [],
@@ -175,6 +177,16 @@ describe('Rechnungen pro Kategorie', () => {
 			'2 Rechnungen zählen nur teilweise'
 		);
 		expect(findingText(finding('new', { partialCount: 2 }))).not.toContain('teilweise');
+	});
+
+	// #76: die Kategorie gilt für das ganze Gebäude; mit einem laufenden befristeten Mietvertrag gilt für ihn das Vertragsende
+	it('ergänzt neue Nebenkosten um das Vertragsende, wenn das Gebäude einen laufenden befristeten Mietvertrag hat', () => {
+		const fixedTerm =
+			'Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor.';
+		// after the form rule, which holds for both (fach-review V-4), not after the net rent
+		expect(findingText(finding('new'), true)).toContain(`ist die Änderung nichtig. ${fixedTerm} Waren die Kosten`);
+		expect(findingText(finding('new'))).not.toContain('befristet');
+		expect(findingText(finding('missing'), true)).not.toContain('befristet');
 	});
 
 	it('nennt den Teil des Jahres, für den die Rechnung fehlt', () => {
@@ -402,6 +414,14 @@ describe('Abweichung zum Akonto', () => {
 	it('schlägt bei einem beendeten Mietvertrag keine Erhöhung vor', () => {
 		expect(akontoHint({ ...row(2800, 2400), movedOut: true })).toBe(
 			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto.'
+		);
+	});
+
+	// #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin (Text des Product Owners; das
+	// Formular dazu ist #388, fach-review M-1)
+	it('nennt bei einem laufenden befristeten Mietvertrag das Vertragsende statt des Kündigungstermins', () => {
+		expect(akontoHint({ ...row(2800, 2400), fixedTerm: true })).toBe(
+			'Kosten CHF 400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor.'
 		);
 	});
 

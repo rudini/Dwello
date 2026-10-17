@@ -31,8 +31,9 @@ Given(
 	}
 );
 
+// «mietet … befristet»: an agreed end not reached yet, not terminated (#76)
 Given(
-	'{string} mietete die Wohnung {string} von {string} bis {string} für {string} Franken mit {string} Franken Akonto',
+	'{string} mietete/mietet die Wohnung {string} (befristet )von {string} bis {string} für {string} Franken mit {string} Franken Akonto',
 	async (
 		{ seed },
 		tenant: string,

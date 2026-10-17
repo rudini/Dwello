@@ -121,6 +121,7 @@ start_date              DATE NOT NULL           -- Vertragsbeginn
 end_date                DATE                    -- Vertragsende, NULL = unbefristet
 terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date is the Kündigungstermin of an open-ended contract, not an agreed end
 notice_received_on      DATE              -- the day the notice arrived (A-3, #112), optional; only with terminated
+billed_until            DATE              -- «Abgerechnet bis» (#133), optional: billed outside Dwello up to this day; Mietstage and Akonto count from the day after
 moved_out               BOOLEAN NOT NULL DEFAULT FALSE -- «Mieter ist ausgezogen» after an agreed end (A-6, #115); cleared when end_date changes
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
@@ -289,7 +290,7 @@ balance                DECIMAL(12,2) NOT NULL  -- Saldo, to 5 Rappen in the tena
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
 paid_date              DATE                    -- from the Abrechnungsdatum up to today (#138)
-paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93)
+paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93); 0.00 for a Saldo below CHF 5, settled on sending or marked paid without an amount (#94)
 payment_resets         JSONB   NOT NULL DEFAULT '[]' -- payments taken back: { resetOn, paidDate, paidAmount } (#92)
 payment_recorded_at    TIMESTAMP               -- when the payment was recorded; a reset discards only a PDF made after it (#92)
 replaces_id            UUID → utility_statements(id) -- a berichtigte Abrechnung: the statement it replaces (#120, unique)
