@@ -26,7 +26,7 @@ function currentRental(contracts: BackendContract[]) {
 		apartmentId: contract.apartmentId as string,
 		apartment: apartmentOf(contract),
 		building: contract.buildingName as string,
-		rent: monthlyTotal(contract),
+		monthlyTotal: monthlyTotal(contract),
 		startDate: contract.startDate as string,
 		upcoming: contractStatus(contract) === 'future'
 	};

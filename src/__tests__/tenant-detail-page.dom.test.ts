@@ -70,7 +70,7 @@ function open(contracts: unknown[] = [], form: unknown = null, documents: unknow
 				apartmentId: 'a2',
 				apartment: 'Wohnung 2.01',
 				building: 'Ulmenhof',
-				rent: 950,
+				monthlyTotal: 950,
 				startDate: '2099-11-01',
 				upcoming: true
 			},

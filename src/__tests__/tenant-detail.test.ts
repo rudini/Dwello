@@ -62,7 +62,7 @@ describe('Mieterdetail', () => {
 			apartmentId: 'a-c1',
 			apartment: 'Wohnung 2.01',
 			building: 'Ahornhof',
-			rent: 1050,
+			monthlyTotal: 1050,
 			startDate: day(-400),
 			upcoming: false
 		});

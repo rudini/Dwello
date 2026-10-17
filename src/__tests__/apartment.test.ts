@@ -175,9 +175,13 @@ describe('Wohnungsliste', () => {
 });
 
 describe('Monatlich total', () => {
-	it('zählt Nettomiete, Zusatzmiete und Akontozahlung zusammen', () => {
+	it('zählt Nettomiete, Zusatzmiete und Akonto zusammen', () => {
 		expect(
-			monthlyTotal({ baseRent: '1200.00', additionalRent: '50.00', monthlyAdvancePayment: '180.00' })
+			monthlyTotal({
+				baseRent: '1200.00',
+				additionalRent: '50.00',
+				monthlyAdvancePayment: '180.00'
+			})
 		).toBe(1430);
 	});
 });

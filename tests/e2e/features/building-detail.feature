@@ -54,8 +54,7 @@ Funktionalität: Gebäudedetail
     Wenn der Liegenschaftsverwalter die Wohnung "1.01" öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 1.01"
 
-  # Wizard und Rechnung sagen «Tankbestand»; das Feld der Gebäudeseite heisst gleich (#75)
-  @wip
-  Szenario: Die Gebäudeseite nennt den Bestand im Tank oder Lager Tankbestand
+  # Wizard und Rechnung sagen «Tankbestand»; der Abschnitt der Gebäudeseite heisst gleich (#75)
+  Szenario: Der Abschnitt zum Heizmaterial heisst Tankbestand
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann heisst der Abschnitt zum Heizmaterial auf der Gebäudeseite "Tankbestand"
