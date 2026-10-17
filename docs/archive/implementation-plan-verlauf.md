@@ -1,3 +1,19 @@
+## Session 2026-10-17 W12: Fedlex check of the statement requirements (#77)
+
+- [x] Read Art. 67, 128, 257a, 257b, 269d, 270b OR (Fedlex, SR 220, as of 1.10.2026, de/fr/it) and Art. 4–8 VMWG (SR 221.213.11, as of 1.10.2025, de/fr/it) on fedlex.data.admin.ch
+- [x] Compare the PDF notes in `pdf.service.ts` (de/fr/it/en): all match Fedlex, no change
+- [x] Compare the help texts in `messages/*.json` that cite these articles: `contracts_fee_help` (Art. 269d OR) lacked the ten-day lead time, the reasons and «nächstmöglichen»; fixed in all four languages, `contract-wizard.dom.test.ts` red first
+- [x] `docs/nebenkostenabrechnung-anforderungen.md`: Fedlex link and version per requirement, «Sicherheit» checked on Fedlex, wrong statements corrected (Art. 269d nullity, Art. 6 VMWG scope, Art. 5 Abs. 2 lit. a–i wording)
+- [x] Glossary deviations listed in #77 (glossary not edited; the three the issue named were already gone, none left)
+- [x] `fach-reviewer` round 1: `docs/reviews/fedlex77-fachreview-1.md`
+- [x] `code-reviewer` round 1: `docs/reviews/fedlex77-review-1.md`
+- [x] Scenario «Hilfe zu einer neuen Verwaltungspauschale während der Mietdauer» (`contract-new.feature`), red against the old text, green; help paragraph of `RadioGroup` gets `data-testid="<testid>-help"`
+- [x] `code-reviewer` round 2 on the scenario: `docs/reviews/fedlex77-review-2.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-77.md`
+- [x] Pull request (opened after archiving this session)
+
+Files: `docs/nebenkostenabrechnung-anforderungen.md`, `messages/{de,fr,it,en}.json`, `src/__tests__/contract-wizard.dom.test.ts`, `src/lib/ui/RadioGroup.svelte`, `tests/e2e/{features/contract-new.feature,steps/contract-form.steps.ts,targets/contract-form.ts,questions/contract-form.ts}`, `docs/reviews/fedlex77-{fachreview-1,review-1,review-2}.md`, `docs/reviews/workflow-notes-issue-77.md`
+
 ## Session 2026-10-17 W2e: berichtigte Abrechnung (#120, #358)
 
 - [x] Implementation issue #358 created (A-11, «Done means» from #120)
@@ -1463,3 +1479,13 @@ Files: `backend/migrations/0024_category_fuel.sql`, `backend/src/db/schema.ts`, 
 - [x] Further merge of main and test fix (part order of two invoices with one date): review round 6 `docs/reviews/71-review-6.md` (no Blocker/Major; C-1 pre-existing, C-2 stay in the report)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
 - [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
+
+## Session 2026-10-17: fewer review rounds (T1, T4 of `docs/reviews/workflow-rules-review-2026-10-17-2.md`)
+
+- [x] Collected review on token cost: `docs/reviews/workflow-rules-review-2026-10-17-2.md`
+- [x] T1: fixes of feature-review Minors/Nits form no slice; the closing round reviews them (`.claude/skills/slice-review/SKILL.md`, "Rounds")
+- [x] T4: no closing round for a delta of reports, personas, plan or archive; the round's range leaves them out (`.claude/skills/pull-request/SKILL.md`, `CLAUDE.md` Workflow 7)
+- [x] code-reviewer round 1: `docs/reviews/t1t4-review-1.md` (C-1 fixed: the range keeps `docs/design/personas/README.md` and `demo-records.md`; C-4 fixed; C-2, C-3 stay in the report)
+- [x] session archived, pull request
+
+Files: `CLAUDE.md`, `.claude/skills/{slice-review,pull-request}/SKILL.md`, `docs/reviews/workflow-rules-review-2026-10-17-2.md`, `docs/reviews/t1t4-review-1.md`
