@@ -133,7 +133,7 @@ describe.each([
 		);
 
 		expect(result).toMatchObject({
-			errors: { name: 'Gebäudename ist erforderlich', canton: 'Kanton ist erforderlich' }
+			errors: { name: 'Gebäudename ist erforderlich.', canton: 'Kanton ist erforderlich.' }
 		});
 	});
 
@@ -145,7 +145,7 @@ describe.each([
 			{ ...validBuilding, city: '' }
 		);
 
-		expect(result).toMatchObject({ errors: { city: 'Ort ist erforderlich' } });
+		expect(result).toMatchObject({ errors: { city: 'Ort ist erforderlich.' } });
 	});
 });
 

@@ -51,7 +51,7 @@ describe('Mieterformular', () => {
 	it('prüft die vier Ziffern der PLZ nur in der Schweiz und in Liechtenstein', () => {
 		expect(parseTenantForm(form({ ...anna, country: 'DE', postalCode: '78462' })).errors).toEqual({});
 		expect(parseTenantForm(form({ ...anna, country: 'LI', postalCode: '949' })).errors).toEqual({
-			postalCode: 'PLZ muss 4 Ziffern haben'
+			postalCode: 'PLZ muss 4 Ziffern haben.'
 		});
 	});
 
@@ -63,7 +63,7 @@ describe('Mieterformular', () => {
 		const { errors } = parseTenantForm(form({ ...anna, email: '' }));
 
 		expect(errors.email).toBe(
-			'Für die Korrespondenz per E-Mail ist eine E-Mail-Adresse erforderlich'
+			'Für die Korrespondenz per E-Mail ist eine E-Mail-Adresse erforderlich.'
 		);
 	});
 
@@ -81,9 +81,9 @@ describe('Mieterformular', () => {
 
 		// ohne PLZ kommt ein Brief kaum an, und die QR-Rechnung nennt den Mieter nur mit PLZ und Ort
 		expect(errors).toEqual({
-			address: 'Für Briefe ist eine Adresse erforderlich',
-			postalCode: 'Für Briefe ist eine PLZ erforderlich',
-			city: 'Für Briefe ist ein Ort erforderlich'
+			address: 'Für Briefe ist eine Adresse erforderlich.',
+			postalCode: 'Für Briefe ist eine PLZ erforderlich.',
+			city: 'Für Briefe ist ein Ort erforderlich.'
 		});
 	});
 
@@ -93,10 +93,10 @@ describe('Mieterformular', () => {
 		);
 
 		expect(errors).toEqual({
-			firstName: 'Vorname ist erforderlich',
-			lastName: 'Nachname ist erforderlich',
-			email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein',
-			postalCode: 'PLZ muss 4 Ziffern haben'
+			firstName: 'Vorname ist erforderlich.',
+			lastName: 'Nachname ist erforderlich.',
+			email: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+			postalCode: 'PLZ muss 4 Ziffern haben.'
 		});
 	});
 });
@@ -157,7 +157,7 @@ describe('Mieter speichern', () => {
 		const { calls, result } = runAction(editActions.default, 't1', 200, { ...anna, lastName: '' });
 
 		expect(await result).toMatchObject({
-			data: { errors: { lastName: 'Nachname ist erforderlich' } }
+			data: { errors: { lastName: 'Nachname ist erforderlich.' } }
 		});
 		expect(calls).toEqual([]);
 	});

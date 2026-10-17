@@ -466,9 +466,9 @@ describe('Rechnung erfassen', () => {
 
 		submit('submit-button');
 
-		expect(text()).toContain('Bitte wählen Sie ein Gebäude');
-		expect(text()).toContain('Bitte geben Sie einen Rechnungssteller ein');
-		expect(text()).toContain('Bitte geben Sie einen gültigen Betrag ein');
+		expect(text()).toContain('Bitte wählen Sie ein Gebäude.');
+		expect(text()).toContain('Bitte geben Sie einen Rechnungssteller ein.');
+		expect(text()).toContain('Bitte geben Sie einen gültigen Betrag ein.');
 		expect(calls).toEqual([]);
 	});
 
@@ -798,7 +798,7 @@ describe('Rechnung bearbeiten', () => {
 
 		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c2');
 		submit('submit-button');
-		expect(text()).toContain('Bitte geben Sie einen Grund für die Änderung an');
+		expect(text()).toContain('Bitte geben Sie einen Grund für die Änderung an.');
 		expect(calls).toEqual([]);
 
 		fireEvent(

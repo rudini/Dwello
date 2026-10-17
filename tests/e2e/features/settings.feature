@@ -25,7 +25,7 @@ Funktionalität: Einstellungen
 
   Szenario: Ungültige IBAN
     Wenn der Liegenschaftsverwalter die IBAN "DE89 3704 0044 0532 0130 00" speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein."
 
   # Die QR-Rechnung nimmt Konten in der Schweiz und in Liechtenstein an, die Einstellungen auch (#191)
   Szenario: IBAN aus Liechtenstein hinterlegen
@@ -35,7 +35,7 @@ Funktionalität: Einstellungen
 
   Szenario: Ungültige PLZ
     Wenn der Liegenschaftsverwalter die PLZ "80" speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "PLZ muss 4 Ziffern haben"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "PLZ muss 4 Ziffern haben."
 
   Szenario: Fristen sind erklärt
     Dann erklärt die Einstellung "Zahlungsfrist (Tage)" "Wie viele Tage nach dem Versand der Mieter eine Nachzahlung bezahlt oder Sie eine Rückerstattung überweisen. Erlaubt sind 7 bis 90 Tage, Vorgabe: 30 Tage. Gilt für Abrechnungen, die Sie ab jetzt versenden; die Frist einer einzelnen Abrechnung ändern Sie dort mit «Frist und Bemerkungen bearbeiten»."

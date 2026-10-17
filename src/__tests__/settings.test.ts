@@ -142,8 +142,8 @@ describe('Einstellungen speichern', () => {
 			status: 400,
 			data: {
 				errors: {
-					companyPostalCode: 'PLZ muss 4 Ziffern haben',
-					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein',
+					companyPostalCode: 'PLZ muss 4 Ziffern haben.',
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.',
 					managementFeePercent:
 						'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 				}
@@ -186,7 +186,7 @@ describe('Einstellungen speichern', () => {
 			status: 400,
 			data: {
 				errors: {
-					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein'
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.'
 				}
 			}
 		});
@@ -214,7 +214,7 @@ describe('Einstellungen speichern', () => {
 			status: 400,
 			data: {
 				errors: {
-					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein'
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.'
 				}
 			}
 		});
