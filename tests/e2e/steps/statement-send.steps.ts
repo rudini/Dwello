@@ -31,10 +31,10 @@ When('der Liegenschaftsverwalter die Abrechnung stattdessen per Brief zustellt',
 });
 
 Then(
-	'sagt die Bestätigung, dass Dwello die Abrechnung per E-Mail sendet und die Zahlungsfrist am Tag des Versands beginnt',
+	'sagt die Bestätigung, dass Dwello die Abrechnung per E-Mail sendet und die Zahlungsfrist ab dem Tag des Versands rechnet',
 	async ({ verwalter }) => {
 		await verwalter.sees(sendConfirmation).toContain('Dwello sendet die Abrechnung als PDF per E-Mail');
-		await verwalter.sees(sendConfirmation).toContain('rechnet die Zahlungsfrist ab diesem Tag');
+		await verwalter.sees(sendConfirmation).toContain('Die Zahlungsfrist ist so viele Tage danach, wie in den Einstellungen festgelegt');
 	}
 );
 
@@ -48,6 +48,6 @@ Then(
 );
 
 // the Zahlungsfrist of the default settings (30 days), counted from the day the statement went out (#86)
-Then('läuft die Zahlungsfrist {int} Tage ab dem Tag des Versands', async ({ verwalter }, days: number) => {
+Then('ist die Zahlungsfrist {int} Tage nach dem Tag des Versands', async ({ verwalter }, days: number) => {
 	await verwalter.sees(paymentDeadline).toBe(swissDate(inDays(days)));
 });

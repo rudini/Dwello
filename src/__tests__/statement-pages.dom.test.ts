@@ -813,7 +813,7 @@ describe('Abrechnungsdetail', () => {
 		const dialog = document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnung per E-Mail senden');
 		expect(dialog).toContain(
-			'Dwello sendet die Abrechnung als PDF per E-Mail an den Mieter und legt sie unter «Dokumente» ab. Dwello datiert die Abrechnung auf den Tag des Versands und rechnet die Zahlungsfrist ab diesem Tag.'
+			'Dwello sendet die Abrechnung als PDF per E-Mail an den Mieter und legt sie unter «Dokumente» ab. Dwello datiert die Abrechnung auf den Tag des Versands. Die Zahlungsfrist ist so viele Tage danach, wie in den Einstellungen festgelegt; eine spätere Zahlungsfrist, die Sie bei der Abrechnung eingetragen haben, bleibt.'
 		);
 		expect(dialog).not.toContain('nicht selbst');
 		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
@@ -827,6 +827,7 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('Abrechnung nicht versendet');
 		expect(byTestId('send-feedback')!.textContent).toBe('Die E-Mail wurde nicht zugestellt.');
 
+		expect(byTestId('statement-send-by-letter')!.textContent!.trim()).toBe('Selbst per Brief zustellen');
 		click('statement-send-by-letter');
 		const dialog = document.querySelector('[role="dialog"]')!;
 		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');

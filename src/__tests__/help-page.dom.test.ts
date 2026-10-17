@@ -130,7 +130,7 @@ describe('Hilfe', () => {
 			'Wünscht der Mieter Korrespondenz per E-Mail, sendet Dwello die Abrechnung mit «Per E-Mail senden» als PDF und legt sie unter «Dokumente» ab.'
 		);
 		expect(text).toContain(
-			'Für einen Brief stellen Sie dem Mieter das PDF selbst zu und wählen danach «Als versendet markieren».'
+			'Für einen Brief stellen Sie dem Mieter das PDF selbst zu und wählen am selben Tag «Als versendet markieren».'
 		);
 		expect(text).not.toContain('nicht selbst');
 	});

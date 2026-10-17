@@ -3,7 +3,7 @@
 Funktionalität: Abrechnung per E-Mail senden
   Als Liegenschaftsverwalter
   möchte ich die Nebenkostenabrechnung einem Mieter, der Korrespondenz per E-Mail wünscht, direkt aus Dwello senden
-  damit er sie mit der QR-Rechnung erhält, sie unter «Dokumente» liegt und die Zahlungsfrist am Tag des Versands beginnt
+  damit er sie mit der QR-Rechnung erhält, sie unter «Dokumente» liegt und die Zahlungsfrist ab dem Tag des Versands zählt
 
   # #86: per Brief bleibt der Versand manuell (statement-detail.feature, «Abrechnung versenden»)
   Grundlage:
@@ -19,7 +19,7 @@ Funktionalität: Abrechnung per E-Mail senden
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Nora Beispiel"
     Wenn der Liegenschaftsverwalter die Abrechnung per E-Mail senden will
     Dann nennt die Bestätigung den Empfänger "Nora Beispiel" mit dem Korrespondenzkanal "Per E-Mail"
-    Und sagt die Bestätigung, dass Dwello die Abrechnung per E-Mail sendet und die Zahlungsfrist am Tag des Versands beginnt
+    Und sagt die Bestätigung, dass Dwello die Abrechnung per E-Mail sendet und die Zahlungsfrist ab dem Tag des Versands rechnet
 
   Szenario: Abrechnung per E-Mail senden
     Angenommen "Nora Beispiel" wünscht Korrespondenz per E-Mail
@@ -27,7 +27,7 @@ Funktionalität: Abrechnung per E-Mail senden
     Wenn der Liegenschaftsverwalter die Abrechnung per E-Mail sendet
     Dann hat die Abrechnung den Status "Versendet"
     Und nennt der Verlauf "Versendet" am Tag des Versands
-    Und läuft die Zahlungsfrist 30 Tage ab dem Tag des Versands
+    Und ist die Zahlungsfrist 30 Tage nach dem Tag des Versands
     Und hat "Nora Beispiel" per E-Mail "Nebenkostenabrechnung" mit PDF erhalten
     Und ist die "Nebenkostenabrechnung" an "Nora Beispiel" als versendet festgehalten
 
@@ -57,4 +57,4 @@ Funktionalität: Abrechnung per E-Mail senden
     Und der Liegenschaftsverwalter die Abrechnung stattdessen per Brief zustellt
     Dann hat die Abrechnung den Status "Versendet"
     Und nennt der Verlauf "Versendet" am Tag des Versands
-    Und läuft die Zahlungsfrist 30 Tage ab dem Tag des Versands
+    Und ist die Zahlungsfrist 30 Tage nach dem Tag des Versands
