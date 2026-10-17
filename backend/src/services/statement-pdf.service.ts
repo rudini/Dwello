@@ -175,7 +175,8 @@ function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, lang
 async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
 	// the tenant's part of the period, as billed: from moving in or the period start to moving out or the period end
 	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd };
-	const heatingLine = statement.lineItems.find((item) => item.categoryId && names.get(item.categoryId)?.isHeatingCost);
+	// a position with invoices by the Heizprofil's months in their own days has its own share, not the run's (#71)
+	const heatingLine = statement.lineItems.find((item) => item.categoryId && names.get(item.categoryId)?.isHeatingCost && !item.invoiceParts?.some((part) => part.profile));
 	return {
 		...rental,
 		...heatingOf(statement, language, hasHeating, heatingLine?.periodShare),

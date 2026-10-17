@@ -12,9 +12,9 @@
 
 import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { statementNumbers, utilityStatements, type HeatingShare, type InvoicePart } from '../db/schema';
+import { statementNumbers, utilityStatements, type HeatingProfile, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
-import { fuelStockChange } from './fuel-stock.service';
+import { fuelStockChange, listFuelStocks } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
 import {
@@ -23,7 +23,7 @@ import {
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
-import { getHeatingProfile } from './heating-profile.service';
+import { calculateHeatingShare, getHeatingProfile } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 
@@ -163,6 +163,64 @@ function daysOf(group: InvoiceGroup, rentalStart: string, rentalEnd: string, who
 		...(invoice.fuelStock && { fuelStock: invoice.fuelStock })
 	}));
 	return { ...noDays, invoiceParts };
+}
+
+// #71: a heating invoice counts the Heizprofil's months in its days in the period, normalised to 100 %, from the
+// rounded months as printed (#232); days whose months carry 0 % in the profile are shared by days (#137)
+const toDate = (day: string) => new Date(day);
+function byProfile(group: InvoiceGroup, profile: HeatingProfile, rentalStart: string, rentalEnd: string): InvoicePart[] {
+	return group.invoices.map((invoice) => {
+		const rented = rentedIn(invoice, rentalStart, rentalEnd);
+		const part: InvoicePart = { start: invoice.start, end: invoice.end, amount: invoice.amount, days: rented, total: days(invoice.start, invoice.end), ...(invoice.noPeriod && { noPeriod: invoice.noPeriod }), ...(invoice.whole && { whole: invoice.whole }) };
+		const billed = calculateHeatingShare(profile, toDate(invoice.start), toDate(invoice.end), 100);
+		if (billed.percentage <= 0) return part;
+		const tenant = rented
+			? calculateHeatingShare(profile, toDate(invoice.start > rentalStart ? invoice.start : rentalStart), toDate(invoice.end < rentalEnd ? invoice.end : rentalEnd), 100)
+			: { percentage: 0, monthBreakdown: [] };
+		const percent = roundToRappen((tenant.percentage / billed.percentage) * 100);
+		return { ...part, profile: { percent, months: tenant.monthBreakdown, periodMonths: billed.monthBreakdown } };
+	});
+}
+const partShare = (part: InvoicePart) => (part.profile ? part.profile.percent / 100 : part.days / part.total);
+
+// The tenant's share (0–1) of a group and what it comes from: by days, or with a profile by its months in each
+// invoice's days (#71), weighted by amount like days (#226)
+function sharedByInvoices(group: InvoiceGroup, rentalStart: string, rentalEnd: string, wholePeriod: boolean, profile: HeatingProfile | null) {
+	if (!profile) return { periodShare: rentalShare(group, rentalStart, rentalEnd), shareDays: daysOf(group, rentalStart, rentalEnd, wholePeriod) };
+	const invoiceParts = byProfile(group, profile, rentalStart, rentalEnd);
+	const rented = invoiceParts.reduce((sum, part) => sum + part.amount * partShare(part), 0);
+	return { periodShare: group.totalAmount === 0 ? 0 : rented / group.totalAmount, shareDays: { ...noDays, invoiceParts } };
+}
+
+// The run's Heizprofil share of a heating group; none where it shares by days (#137, #208)
+async function byRunProfile(group: InvoiceGroup, apartmentShare: number, run: GroupRun) {
+	const { contract, periodStart, periodEnd, heatingProfileId } = run;
+	if (!group.isHeatingCost || !heatingProfileId) return null;
+	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
+	const result = await handleMidYearMoves(heatingProfileId, new Date(contract.startDate), contractEnd, periodStart, periodEnd, apartmentShare);
+	return result.byDays ? null : result;
+}
+
+type GroupRun = { contract: { startDate: string; endDate: string | null }; periodStart: Date; periodEnd: Date; heatingProfileId?: string; tankCategories: Set<string | null>; wholePeriod: boolean };
+
+// The tenant's part of a group: heating costs by the Heizprofil if available, where it shares by days (no heating
+// months in the period) by days like any other invoice's, with its Leistungszeitraum (#137); a heating invoice with its
+// own days counts the profile's months in them, not in the period (#71), except a delivery into the tank (#257)
+async function shareOfGroup(
+	group: InvoiceGroup,
+	apartmentShare: number,
+	run: GroupRun,
+	rental: { start: string; end: string }
+): Promise<{ tenantShare: number; periodShare: number; shareDays: LineDays }> {
+	const heating = await byRunProfile(group, apartmentShare, run);
+	const [start, end] = [isoDay(run.periodStart), isoDay(run.periodEnd)];
+	const ownDays = group.invoices.some((invoice) => invoice.start !== start || invoice.end !== end) && !run.tankCategories.has(group.categoryId);
+	// shared by the profile over the period: no days
+	if (heating && !ownDays) return { tenantShare: roundToRappen(heating.share), periodShare: heating.percentage / 100, shareDays: noDays };
+	// by days, or by the profile's months: the tenant's part of the days each invoice bills in the period
+	const profile = heating ? await getHeatingProfile(run.heatingProfileId!) : null;
+	const { periodShare, shareDays } = sharedByInvoices(group, rental.start, rental.end, run.wholePeriod, profile);
+	return { tenantShare: roundToRappen(apartmentShare * periodShare), periodShare, shareDays };
 }
 
 /**
@@ -322,10 +380,15 @@ export async function calculateStatementForContract(
 		rooms: parseFloat(a.rooms)
 	}));
 
+	// a delivery into the building's tank counts by consumption over the period, not by its Leistungszeitraum (#257)
+	const tankCategories = new Set<string | null>((await listFuelStocks(buildingId)).map((stock) => stock.categoryId));
+
 	// Calculate line items
 	const heating = await heatingOfRun(invoiceGroups, contract, periodStart, periodEnd, heatingProfileId);
 	const lineItems: CalculatedLineItem[] = [];
 	let subtotal = 0;
+	const run = { contract, periodStart, periodEnd, heatingProfileId, tankCategories, wholePeriod: rentalDays === totalPeriodDays };
+	const rental = { start: isoDay(contractOverlap.overlapStart), end: isoDay(contractOverlap.overlapEnd) };
 
 	for (const group of invoiceGroups) {
 		// Calculate apartment's share of building costs
@@ -336,36 +399,7 @@ export async function calculateStatementForContract(
 			group.distributionKeyId
 		);
 
-		let tenantShare: number;
-		let periodShare: number;
-		let shareDays: LineDays = noDays; // shared by the profile: no days
-
-		// For heating costs, use heating profile if available; where it shares by days (no heating months in the
-		// period), the days count like any other invoice's, with its Leistungszeitraum (#137)
-		const heatingResult =
-			group.isHeatingCost && heatingProfileId
-				? await handleMidYearMoves(
-						heatingProfileId,
-						new Date(contract.startDate),
-						contract.endDate ? new Date(contract.endDate) : null,
-						periodStart,
-						periodEnd,
-						apartmentShareResult.share
-					)
-				: null;
-		if (heatingResult && !heatingResult.byDays) {
-			tenantShare = roundToRappen(heatingResult.share);
-			periodShare = heatingResult.percentage / 100;
-		} else {
-			// By days: the tenant's days within the days each invoice bills in the period
-			const [rentalStart, rentalEnd] = [
-				isoDay(contractOverlap.overlapStart),
-				isoDay(contractOverlap.overlapEnd)
-			];
-			periodShare = rentalShare(group, rentalStart, rentalEnd);
-			shareDays = daysOf(group, rentalStart, rentalEnd, rentalDays === totalPeriodDays);
-			tenantShare = roundToRappen(apartmentShareResult.share * periodShare);
-		}
+		const { tenantShare, periodShare, shareDays } = await shareOfGroup(group, apartmentShareResult.share, run, rental);
 
 		lineItems.push({
 			categoryId: group.categoryId,
