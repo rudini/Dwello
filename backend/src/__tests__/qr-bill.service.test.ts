@@ -96,7 +96,7 @@ describe('QR-Rechnung einer Abrechnung', () => {
 		const tenant = {
 			firstName: 'Zoe\u0308', // «e» und Trema getrennt, wie macOS es speichern kann
 			lastName: 'D’Angelo–Țîrlea Nguyễn Ωmega',
-			address: '„Seehof“\n5\t€',
+			address: '„Seehof“\n5\t€…',
 			postalCode: '8002',
 			city: 'Zürich'
 		};
@@ -105,7 +105,18 @@ describe('QR-Rechnung einer Abrechnung', () => {
 			config
 		);
 
-		expect(qrDataString.split('\n').slice(21, 23)).toEqual(["Zoë D'Angelo-Țîrlea Nguyen .mega", '"Seehof".5.€']);
+		expect(qrDataString.split('\n').slice(21, 23)).toEqual(["Zoë D'Angelo-Țîrlea Nguyen .mega", '"Seehof" 5 €...']);
+	});
+
+	// Der Zahlteil druckt die Angaben aus dem QR-Code: schon dort auf die Länge der SIX gekürzt (#78)
+	it('kürzt Name und Ort auf die Länge der SIX', async () => {
+		const tenant = { firstName: 'Eva', lastName: 'Frei'.repeat(20), address: 'Seestrasse 5', postalCode: '8002', city: 'Z'.repeat(40) };
+		const { qrData } = await generateQRBillForStatement(
+			{ ...statement('a1111111-1111-4111-8111-111111111111'), tenant },
+			{ ...config, companyName: 'V'.repeat(80) }
+		);
+
+		expect([qrData.debtorName?.length, qrData.debtorCity?.length, qrData.creditorName.length]).toEqual([70, 35, 70]);
 	});
 
 	// SIX IG 4.1: die IBAN ohne Leerzeichen in Grossbuchstaben; das letzte Element endet ohne Zeilenumbruch (#78)

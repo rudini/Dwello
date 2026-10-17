@@ -32,6 +32,16 @@ const refund: StatementPDFData = {
 	balance: -93.85 // 784.13 − 878.00 = −93.87, commercially to 5 Rappen: a statement made before #79 keeps it
 };
 
+// Width and height in mm of each field drawn with 0.75 pt corner marks (pdfkit: «0.75 w», then «x y m/l» lines, «S»)
+const blankFields = (streams: string[]) =>
+	streams.flatMap((content) =>
+		[...content.matchAll(/0\.75 w\n(?:.*\n)*?((?:[\d.]+ [\d.]+ [ml]\n)+)S/g)].map(([, path]) => {
+			const points = [...path.matchAll(/([\d.]+) ([\d.]+) [ml]/g)].map(([, x, y]) => [Number(x), Number(y)]);
+			const extent = (i: number) => Math.round((Math.max(...points.map((p) => p[i])) - Math.min(...points.map((p) => p[i]))) / (72 / 25.4));
+			return [extent(0), extent(1)];
+		})
+	);
+
 const textOf = async (data: StatementPDFData) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
 
 describe('PDF einer Rückerstattung', () => {
@@ -168,6 +178,16 @@ describe('PDF einer Nachzahlung', () => {
 		expect(pdf.flowing.match(/Zahlbar durch \(Name\/Adresse\)/g)).toHaveLength(2);
 		expect(pdf.flowing).not.toContain('Zahlbar durch Nina');
 		expect(fr.match(/Payable par \(nom\/adresse\)/g)).toHaveLength(2);
+		expect(blankFields(pdf.streams)).toEqual([[52, 20], [65, 25]]); // Empfangsschein, Zahlteil
+		expect(blankFields((await textOf(due)).streams)).toEqual([]);
+	});
+
+	// Ein langer Zahlungsempfänger braucht im Empfangsschein mehr Zeilen: das Feld endet über «Währung» und «Betrag»
+	it('lässt das Feld im Empfangsschein nicht in den Betrag reichen', async () => {
+		const long = { ...config, companyName: 'Immobilienverwaltung Muster & Partner GmbH Winterthur', address: 'Hauptstrasse der Gemeinde Oberwinterthur 125b' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } }, long, 'de'), 'base64'));
+
+		expect(blankFields(pdf.streams)[0][1]).toBeLessThan(20);
 	});
 
 	// Post ins Ausland: das Land in Grossbuchstaben allein auf der letzten Zeile der Adresse, ein Nachbarland in seiner

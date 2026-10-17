@@ -938,11 +938,11 @@ function qrBlocks(doc: Doc, blocks: [string, (string | null | undefined)[]][], x
 }
 
 // SIX: without a debtor in the QR code, «Zahlbar durch (Name/Adresse)» over a blank field with corner marks
-// (3 mm, 0.75 pt) for the payer to write in
-function blankField(doc: Doc, label: string, x: number, y: number, size: number, [width, height]: [number, number]) {
+// (3 mm, 0.75 pt) for the payer to write in; it ends above `limit` when long details above it leave less room
+function blankField(doc: Doc, label: string, x: number, y: number, size: number, [width, height]: [number, number], limit = Infinity) {
 	doc.font('Helvetica-Bold').fontSize(size).text(label, x, y, { width });
 	const [top, right, mark] = [doc.y + 1, x + width, 3 * MM];
-	const bottom = top + height;
+	const bottom = Math.min(top + height, limit);
 	doc.lineWidth(0.75).strokeColor(COLORS.ink)
 		.moveTo(x, top + mark).lineTo(x, top).lineTo(x + mark, top)
 		.moveTo(right - mark, top).lineTo(right, top).lineTo(right, top + mark)
@@ -988,7 +988,7 @@ function paymentPart(
 	const left = 5 * MM;
 	doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.ink).text(t.receiptSection, left, top + 5 * MM, { lineBreak: false });
 	const receiptEnd = qrBlocks(doc, [[`${t.account} / ${t.payableTo}`, creditor], [t.reference, reference], [t.payableBy, debtor]], left, top + 12 * MM, [6, 8], 52 * MM);
-	if (debtor.length === 0) blankField(doc, t.payableByName, left, receiptEnd, 6, [52 * MM, 20 * MM]);
+	if (debtor.length === 0) blankField(doc, t.payableByName, left, receiptEnd, 6, [52 * MM, 20 * MM], top + 66 * MM);
 	doc.font('Helvetica-Bold').fontSize(6).text(t.currency, left, top + 68 * MM).text(t.amount, left + 12 * MM, top + 68 * MM);
 	doc.font('Helvetica').fontSize(8).text('CHF', left, top + 71 * MM).text(amount, left + 12 * MM, top + 71 * MM, { lineBreak: false });
 	doc.font('Helvetica-Bold').fontSize(6).text(t.acceptancePoint, left, top + 82 * MM, { width: 52 * MM, align: 'right' });

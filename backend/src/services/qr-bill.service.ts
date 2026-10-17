@@ -228,15 +228,18 @@ function formatAmount(amount: number): string {
 }
 
 // SIX IG 4.1.1: only Basic Latin, Latin-1 Supplement, Latin Extended-A, Ș ș Ț ț and €; typographic quotes and dashes
-// become their plain form, another letter loses its accents, anything else (a line break, a tab) becomes «.»
+// become their plain form, a line break or tab a space, another letter loses its accents, anything else becomes «.»
 const PERMITTED = /^[\u{20}-\u{7E}\u{A0}-\u{17F}\u{218}-\u{21B}\u{20AC}]*$/u;
-const PLAIN: Record<string, string> = { '‘': "'", '’': "'", '‚': "'", '“': '"', '”': '"', '„': '"', '–': '-', '—': '-' };
+const PLAIN: Record<string, string> = {
+	'‘': "'", '’': "'", '‚': "'", '“': '"', '”': '"', '„': '"', '–': '-', '—': '-', '…': '...', '\n': ' ', '\t': ' ', '\r': ''
+};
 const permitted = (value: string) =>
 	value.normalize('NFC').replace(/./gsu, (c) => {
 		const bare = PLAIN[c] ?? c.normalize('NFD').replace(/\p{M}/gu, '');
 		return PERMITTED.test(c) ? c : PERMITTED.test(bare) ? bare : '.';
 	});
-const text = (value: string | null | undefined) => (value ? permitted(value) : undefined);
+// cut here already, so the payment part prints what the QR code holds
+const text = (value: string | null | undefined, max: number) => (value ? permitted(value).slice(0, max) : undefined);
 
 // An optional field of the payload, cut to its length (empty if not given)
 const field = (value: string | undefined, max = Infinity) => (value ?? '').slice(0, max);
@@ -356,25 +359,25 @@ export async function generateQRBillForStatement(
 		coding: '1',
 
 		creditorIBAN: config.iban,
-		creditorName: permitted(config.companyName),
-		creditorStreet: text(config.address),
-		creditorPostalCode: config.postalCode,
-		creditorCity: permitted(config.city),
+		creditorName: permitted(config.companyName).slice(0, 70),
+		creditorStreet: text(config.address, 70),
+		creditorPostalCode: permitted(config.postalCode).slice(0, 16),
+		creditorCity: permitted(config.city).slice(0, 35),
 		creditorCountry: config.country || 'CH',
 
 		amount,
 		currency: 'CHF',
 
-		debtorName: permitted(`${statement.tenant.firstName} ${statement.tenant.lastName}`),
-		debtorStreet: text(statement.tenant.address),
-		debtorPostalCode: text(statement.tenant.postalCode),
-		debtorCity: text(statement.tenant.city),
+		debtorName: text(`${statement.tenant.firstName} ${statement.tenant.lastName}`, 70),
+		debtorStreet: text(statement.tenant.address, 70),
+		debtorPostalCode: text(statement.tenant.postalCode, 16),
+		debtorCity: text(statement.tenant.city, 35),
 		debtorCountry: statement.tenant.country ?? 'CH',
 
 		referenceType: useQRReference ? 'QRR' : 'NON',
 		reference,
 
-		unstructuredMessage: permitted(`${statement.title ?? 'Nebenkostenabrechnung'} ${statement.statementNumber}`),
+		unstructuredMessage: text(`${statement.title ?? 'Nebenkostenabrechnung'} ${statement.statementNumber}`, 140),
 		trailer: 'EPD'
 	};
 
