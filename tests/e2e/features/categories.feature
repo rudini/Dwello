@@ -112,3 +112,19 @@ Funktionalität: Kostenkategorien
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die Kategorie "Fassadenreinigung" speichert, ohne zu wählen, ob sie umlagefähig ist
     Dann erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten umlagefähig sind
+
+  Szenario: Vordefinierte und eigene Kategorien sind gekennzeichnet
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann ist die vordefinierte Kategorie "Liegenschaftssteuer" als "Von Dwello" gekennzeichnet
+    Und ist die eigene Kategorie "Treppenhausreinigung" als "Eigene" gekennzeichnet
+
+  Szenario: Vordefinierte Kategorien lassen sich nicht löschen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann kann der Liegenschaftsverwalter die vordefinierte Kategorie "Liegenschaftssteuer" nicht löschen
+    Und erfährt der Liegenschaftsverwalter, dass sich die vordefinierte Kategorie "Liegenschaftssteuer" nicht löschen lässt, weil Dwello sie mitliefert
+
+  Szenario: Bearbeiten einer vordefinierten Kategorie
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Liegenschaftssteuer"
+    Dann erfährt der Liegenschaftsverwalter, dass Dwello die Kategorie mitliefert
+    Und erfährt der Liegenschaftsverwalter, dass der Mieter Kosten des Vermieters nicht schuldet, auch wenn er die Kategorie auf umlagefähig stellt
+    Und erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den Namen oder die Beschreibung ändert

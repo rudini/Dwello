@@ -47,6 +47,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Umlagefähig | imputable ❓ | addebitabile | allocable |
 | Wartung (umlagefähig, Art. 5 Abs. 2 lit. g VMWG; nicht «Unterhalt» nach Art. 256 OR) | maintenance (nicht «entretien») | manutenzione | servicing (nicht «maintenance») |
 | Kategorie / Kategorisierung | catégorie / catégorisation | categoria / categorizzazione | category / categorisation |
+| Vordefinierte Kategorie «Von Dwello» / Eigene Kategorie «Eigene» (#166, #205) | «De Dwello» / «Personnalisée» | «Da Dwello» / «Personalizzata» | «From Dwello» / «Custom» |
 | KI / KI-Kategorie | IA / catégorie proposée par l’IA | IA / categoria proposta dall’IA | AI / AI category |
 | Konfidenz | fiabilité ❓ | affidabilità ❓ | confidence |
 | Manuell überschrieben / Grund der Änderung | modifié manuellement / motif de la modification | modificato manualmente / motivo della modifica | manually overridden / reason for the change |

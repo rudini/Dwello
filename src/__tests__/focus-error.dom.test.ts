@@ -96,6 +96,7 @@ describe('Formulare nach einem abgelehnten Speichern', () => {
 
 	it('Kategorie: ohne Feldfehler steht der Fokus auf der Meldung', async () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { form: 'Kategorie konnte nicht gespeichert werden.' } }
 		} as never);
 

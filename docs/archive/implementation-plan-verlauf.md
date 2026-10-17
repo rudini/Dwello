@@ -561,6 +561,22 @@ Files: `tests/e2e/tasks/accessibility.ts`, `docs/design/offene-punkte.md`, `docs
 - [x] Workflow notes (`docs/reviews/workflow-notes-issue-247-230-232.md`)
 - [x] Workflow review, archive the session, pull request
 
+## Session 2026-10-16 (#250, #254: Leistungszeitraum over several years)
+
+- [x] #250: help text and field examples of the Leistungszeitraum use one year (the current year, as the date fields' examples), all four languages; DOM tests pin it (form, help page). No scenario: wording without new behaviour, as #250 says; covered by `sprachen-bildschirme.feature`
+- [x] #254: help at the Leistungszeitraum (invoice form, edit form, upload dialog) and on the help page names a cost over several years, all four languages; scenarios in `invoice-new.feature`, `help.feature`
+- [x] #254: scenario in `statement-generate.feature`: CHF 500 over 01.04.2026 – 31.03.2031 counts CHF 75.30 in 2026 and CHF 99.95 in 2027 (green on the base: the behaviour exists)
+- [x] #254: lower-layer test of `inPeriod` over five years (`service-period.pg.test.ts`, red with the prorating taken out)
+- [x] fach-reviewer round 1 on scenarios and texts: `docs/reviews/w3-fachreview-1.md`; V-2 → #276
+- [x] code-reviewer round 1: `docs/reviews/w3-review-1.md`; C-1 → #282 (decision)
+- [x] personas: `docs/design/personas/weber-w3-leistungszeitraum.md`, `docs/design/personas/helga-w3-leistungszeitraum.md`
+- [x] fach-reviewer round 2 on the changed texts: `docs/reviews/w3-fachreview-2.md`
+- [x] Workflow note: scenario of existing behaviour, one pull request for two issues, contradicting decisions block the merge (`docs/reviews/workflow-notes-issue-250-254.md`)
+- [x] closing code-reviewer round: `docs/reviews/w3-review-2.md`
+- [x] Checks before push green; push and pull request follow (CLAUDE.md, Workflow 9); the merge waits for the product owner's decision in #282
+
+Files: `messages/{de,fr,it,en}.json`, `src/routes/invoices/InvoiceDataFields.svelte`, `src/routes/help/+page.svelte`, `src/__tests__/{invoice-pages,invoice-upload-dialog,help-page}.dom.test.ts`, `backend/src/__tests__/service-period.pg.test.ts`, `tests/e2e/features/{statement-generate,help,invoice-new}.feature`, `tests/e2e/{steps,targets,questions}/invoice-form*`, `docs/nebenkostenabrechnung-anforderungen.md`
+
 ## Session 2026-10-16 W6: Reminder deadlines and posting (#107, #193, #194)
 
 - [x] #107: scenario «Nächste Mahnung erst nach der Zahlungsfrist der letzten» (`statement-reminder.feature`) replaces «Zweite Mahnung» (the E2E clock cannot age a reminder past its deadline: the allowed 2nd Mahnung is a `reminders.pg.test.ts` case)
@@ -704,6 +720,27 @@ Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/s
 - [x] Checks before push green; push, pull request and merge follow (CLAUDE.md, Workflow 9)
 
 Files: `backend/migrations/0009_statement_numbers.sql`, `backend/src/db/schema.ts`, `backend/src/services/calculation.service.ts`, `backend/src/routes/statements.ts`, `src/lib/server/statement.ts`, `src/routes/statements/[id]/pdf/+server.ts`, `src/routes/api/statements/[id]/pdf/+server.ts`, `docs/data-model.md`, tests (`statement-creation.pg`, `statement.routes.pg`, `statement-endpoints`, `statement-list-load`), E2E (`statement-generate`, `statement-detail` features, steps, tasks, questions), `docs/api-specification.md`, `docs/design/offene-punkte.md` (O-34), `docs/design/personas/weber-w3-abrechnungsnummer.md`, `docs/reviews/w3b-*.md`, `docs/reviews/workflow-notes-issue-97-101.md`
+
+## Session W5b: #166 and #219 (predefined categories marked and protected, no KI check while the KI is off)
+
+No implementation issue exists for either decision issue: their "Decided (product owner)" sections are the requirement.
+
+- [x] #166 `@wip` scenarios (`categories.feature`): badges «Von Dwello» / «Eigene», delete disabled with its reason, hint on the edit page; seen red
+- [x] fach-reviewer round 1 on the scenarios and texts before implementing (`docs/reviews/w5b-fachreview-1.md`); V-2 → #302
+- [x] #166 backend: `deleteCategory` refuses a predefined category (`CATEGORY_PREDEFINED`), `updateCategory` keeps its key (pg tests)
+- [x] #166 list: badge, disabled delete button described by its reason; edit page: hint (its KI sentence only while the KI is on)
+- [x] #219 new-category page loads whether the KI is on and hides «Von der KI prüfen lassen» when it is off (No scenario: the E2E backend always starts with the KI on; `LLM_ENABLED` is read at the backend start)
+- [x] messages in all four languages; no new `tests/a11y` state (list and `category-edit-predefined` are already checked)
+- [x] code-reviewer round 1 (`docs/reviews/w5b-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w5b-fachreview-2.md`), personas Helga (`docs/design/personas/helga-w5b.md`) and Dr. Weber (`docs/design/personas/weber-w5b.md`)
+- [x] Fix slice: hint reworded (P-1 Helga/Weber), allocability sentence follows the saved choice (V-8, V-9), translations (V-10), fallback test (C-2), shared backend URL (C-3), term table (C-6); confirmation on save → #309 (Weber P-2)
+- [x] code-reviewer round 2 (`docs/reviews/w5b-review-2.md`; C-10 fixed), fach-reviewer round 3 (`docs/reviews/w5b-fachreview-3.md`; M-3 added to #309), Helga and Dr. Weber again on the new hint (`docs/design/personas/helga-w5b-2.md`, `weber-w5b-2.md`; Weber P-12 fixed)
+- [x] Workflow note: decision issue without implementation issue, how to show a test-after red without a prompt (`docs/reviews/workflow-notes-issue-166-219.md`)
+- [x] closing code-reviewer round (`docs/reviews/w5b-review-3.md`)
+- [x] Checks before push; archive session
+- [x] Push, pull request and CI follow (CLAUDE.md, Workflow 9); merge waits for the product owner on #302 and #309
+
+Files: `backend/src/services/category.service.ts`, `src/lib/server/category.ts`, `src/routes/config/categories/{+page.svelte,CategoryRow.svelte,CategoryForm.svelte,new/*,[id]/edit/*}`, `messages/*.json`, `docs/api-specification.md`, `docs/design/i18n-begriffe.md`, reviews (`docs/reviews/w5b-*.md`, `docs/design/personas/*-w5b*.md`, `docs/reviews/workflow-notes-issue-166-219.md`), tests (`category-predefined.pg`, `categories`, `categories-page.dom`, `category-predefined.dom`, `config-pages`, `focus-error.dom`, `tests/e2e/**`).
 
 ## Session: invoice check hints (#130, #131, #134)
 

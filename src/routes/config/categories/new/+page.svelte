@@ -2,9 +2,9 @@
 	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import CategoryForm from '../CategoryForm.svelte';
-	import type { ActionData } from './$types';
+	import type { ActionData, PageData } from './$types';
 
-	let { form }: { form: ActionData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 </script>
 
 <svelte:head>
@@ -22,6 +22,7 @@
 	/>
 	<CategoryForm
 		action="?/save"
+		ki={data.kiEnabled}
 		errors={form && 'errors' in form ? form.errors : undefined}
 		proposal={form && 'proposal' in form ? form.proposal : undefined}
 		submitLabel={m.categories_save()}
