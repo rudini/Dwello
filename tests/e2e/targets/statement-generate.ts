@@ -78,3 +78,16 @@ export const hintedInvoiceLink = (date: string) =>
 	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>
 		page.getByTestId('hinted-invoice').filter({ hasText: date }).getByRole('link')
 	);
+// #91, step «Einstellungen»: per contract of the run, whether a category with costs in the period is agreed
+export const agreementQuestions = target('Fragen nach vereinbarten Nebenkosten', (page) => page.getByTestId('agreement-questions'));
+export const agreementsOf = (contractId: string) =>
+	target(`Fragen zum Mietvertrag ${contractId}`, (page) => page.getByTestId(`agreement-contract-${contractId}`));
+export const agreementChoice = (contractId: string, categoryId: string, agreed: boolean) =>
+	target(`Antwort ${agreed ? 'vereinbart' : 'nicht vereinbart'} für ${categoryId} im Mietvertrag ${contractId}`, (page) =>
+		page.getByTestId(`agreement-${contractId}-${categoryId}-${agreed ? 'yes' : 'no'}`)
+	);
+// the run's contracts with categories answered «nicht vereinbart» and costs in the period, each a link to it
+export const notAgreedCostsLink = (contractId: string) =>
+	target(`Mietvertrag ${contractId} mit nicht vereinbarten Nebenkosten`, (page) =>
+		page.getByTestId(`not-agreed-costs-link-${contractId}`)
+	);

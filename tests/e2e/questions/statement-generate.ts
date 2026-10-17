@@ -13,6 +13,9 @@ import {
 	lateInvoices,
 	draftsOnlyNote,
 	feeNotAgreed,
+	agreementQuestions,
+	agreementsOf,
+	notAgreedCostsLink,
 	generationResult,
 	heatingProfileSelect,
 	managementFeeHint,
@@ -128,3 +131,8 @@ export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const presetNoticeText = Text.of(wizardPresetNotice);
+
+// #91: what the step «Einstellungen» asks or says about the agreed Nebenkosten of one contract
+export const agreementQuestionsOf = (contractId: string) => Text.of(agreementsOf(contractId));
+export const agreementQuestionsShown = Visibility.of(agreementQuestions);
+export const notAgreedCostsOf = (contractId: string) => Text.of(notAgreedCostsLink(contractId));

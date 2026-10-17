@@ -126,4 +126,4 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Nebenkosten als nicht vereinbart eintragen
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag "Lift" nicht vereinbart ist
     Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Heizung"
-    Aber nicht "Lift"
+    Aber nicht die Nebenkosten "Lift"

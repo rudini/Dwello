@@ -61,7 +61,7 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Wenn der Liegenschaftsverwalter angibt, dass "Dachreinigung" im Mietvertrag von "Anna Keller" nicht vereinbart ist
     Und der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" öffnet
     Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Lift"
-    Aber nicht "Dachreinigung"
+    Aber nicht die Nebenkosten "Dachreinigung"
 
   Szenario: Der Assistent nennt nicht vereinbarte Nebenkosten der Periode, statt wieder zu fragen
     Angenommen es gibt die umlagefähige Kategorie "Dachreinigung"
@@ -82,7 +82,7 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Angenommen es gibt die umlagefähige Kategorie "Dachreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Dachreinigung" über "200" Franken vom "2024-05-31"
     Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 0 % gesetzt
-    Und das Speichern vereinbarter Nebenkosten ist gestört
+    Und das Speichern der Antworten zum Mietvertrag von "Anna Keller" ist gestört
     Wenn der Liegenschaftsverwalter angibt, dass "Dachreinigung" im Mietvertrag von "Anna Keller" vereinbart ist
     Dann meldet die Frage zum Mietvertrag von "Anna Keller" "Ihre Antwort wurde nicht gespeichert. Bitte versuchen Sie es nochmals."
 

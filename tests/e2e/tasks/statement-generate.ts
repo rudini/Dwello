@@ -1,11 +1,13 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, Enter, EnterDate, Navigate, Select, Wait } from '../screenplay/interactions';
+import { Check, Click, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import {
 	backLink,
 	buildingCheckbox,
 	feeNotAgreedLink,
+	agreementChoice,
+	notAgreedCostsLink,
 	confirmMissingInvoices,
 	generateButton,
 	generateMoreButton,
@@ -112,3 +114,10 @@ export const editHintedInvoice = (date: string): Activity => (actor) =>
 // From the question about the Heizmaterial to the building's form, to record that it has no tank
 export const recordNoTankFromQuestion = (buildingId: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(noTankLink(buildingId)), Wait.forUrl((url) => url.pathname.endsWith(`/buildings/${buildingId}/edit`)));
+
+// #91, step «Einstellungen»: the answer whether the contract agrees a category; stored at once
+export const answerAgreement = (contractId: string, categoryId: string, agreed: boolean) =>
+	Click.on(agreementChoice(contractId, categoryId, agreed));
+export const openContractWithNotAgreedCosts = (contractId: string) => Click.on(notAgreedCostsLink(contractId));
+// saving an answer fails (the BFF route the browser calls)
+export const agreementsCannotBeSaved = (contractId: string) => FailRequests.to(`/api/contracts/${contractId}/agreements`, {});

@@ -10,6 +10,7 @@ import {
 	contractEndDate,
 	contractEndError,
 	contractManagementFee,
+	contractAgreedCosts,
 	contractStatus,
 	contractTotalRent,
 	deleteDialog,
@@ -43,3 +44,5 @@ export const endDialogText = Text.of(endDialog);
 export const noticeReceivedOn = Text.of(contractNoticeReceived);
 export const fixedTermCheckShown = Visibility.of(fixedTermCheck);
 export const fixedTermErrorText = Text.of(fixedTermError);
+
+export const agreedCostsOfContract = Text.of(contractAgreedCosts);
