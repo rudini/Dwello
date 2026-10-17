@@ -21,6 +21,7 @@ export interface ContractFormValues {
 	// «Verwaltungspauschale vereinbart» (#89): at the run's rate, an own rate, none; '' until chosen (no default)
 	managementFee: '' | 'run' | 'own' | 'none';
 	managementFeeRate: string; // the own rate as typed, comma or point
+	agreedCategoryIds?: string[]; // #91: the agreed Nebenkosten; absent on a new contract: every umlagefähige category
 }
 
 /** «Verwaltungspauschale» of a contract in words: not agreed, at the run's rate or its own rate (#89) */
@@ -75,7 +76,8 @@ export function initialContractValues(
 		additionalRent: String(contract.additionalRent || ''),
 		advancePayment: String(contract.monthlyAdvancePayment || ''),
 		managementFee: feeChoice(contract),
-		managementFeeRate: contract.managementFeePercent ?? ''
+		managementFeeRate: contract.managementFeePercent ?? '',
+		agreedCategoryIds: contract.agreedCategoryIds
 	};
 }
 
@@ -134,8 +136,13 @@ export const contractBody = (values: ContractFormValues) => ({
 	monthlyAdvancePayment: String(values.advancePayment || 0),
 	managementFeeAgreed: values.managementFee !== 'none',
 	managementFeePercent:
-		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null
+		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null,
+	...(values.agreedCategoryIds && { agreedCategoryIds: values.agreedCategoryIds })
 });
+
+/** The names of the agreed Nebenkosten among the categories shown; without a choice every one (#91) */
+export const agreedNames = (agreed: string[] | undefined, categories: { id: string; name: string }[]) =>
+	categories.filter((category) => agreed?.includes(category.id) ?? true).map((category) => category.name);
 
 /**
  * An apartment's contracts as the contract list answers them, in the shape the availability check reads; null when

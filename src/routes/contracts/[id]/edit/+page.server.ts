@@ -2,6 +2,7 @@ import { m } from '$lib/paraglide/messages';
 import type { RentalContract } from '$lib/types';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
+import { agreeableCategories } from '$lib/server/category';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -9,6 +10,7 @@ interface ContractEditData {
 	contract: RentalContract;
 	tenant: string; // tenant and apartment are fixed (#152): the form only names them
 	apartment: string;
+	categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
 }
 
 export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractEditData> => {
@@ -26,6 +28,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractE
 
 		return {
 			contract,
+			categories: await agreeableCategories(fetch),
 			tenant: `${tenant.firstName} ${tenant.lastName}`,
 			apartment: `${m.buildings_apartment_number({ number: apartment.number })} · ${building.name || building.address}`
 		};

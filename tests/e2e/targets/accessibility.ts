@@ -67,3 +67,5 @@ export const firstGenerateBuilding = bySelector('Erstes Gebäude abrechnen', '[d
 export const confirmMissingInvoices = byTestId('Fehlende Rechnungen bestätigen', 'confirm-missing-invoices');
 /** What shows that a state or a wizard step is reached, by its test id */
 export const shown = (testId: string) => bySelector(testId, `[data-testid="${testId}"]`);
+// #91: the first answer «Vereinbart» in the statement wizard's step 3
+export const firstAgreementYes = target('Erste Antwort «Vereinbart»', (page) => page.getByTestId(/^agreement-.+-yes$/).first());

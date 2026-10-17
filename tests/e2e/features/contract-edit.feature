@@ -133,3 +133,14 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erfassen will
     Dann ist im Mietvertrag der Mieter "Anna Keller" gewählt
     Und schlägt der neue Mietvertrag den Vertragsbeginn "2099-04-01" vor
+
+  # #91: die vereinbarten Nebenkosten stehen beim Mietvertrag; nicht vereinbarte rechnet Dwello nicht ab
+  Szenario: Nebenkosten als nicht vereinbart eintragen
+    Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag "Lift" nicht vereinbart ist
+    Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Heizung"
+    Aber nicht die Nebenkosten "Lift"
+
+  # Persona Marco W10c P-1: ohne Häkchen rechnet Dwello keine Nebenkosten ab, das soll nicht unbemerkt geschehen
+  Szenario: Das Formular warnt, wenn keine Nebenkosten vereinbart sind
+    Wenn der Liegenschaftsverwalter alle Nebenkosten abwählt
+    Dann warnt das Formular "Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab."
