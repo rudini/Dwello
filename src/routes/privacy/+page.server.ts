@@ -19,10 +19,17 @@ export const load: PageServerLoad = async ({
 	mail: 'smtp' | 'resend' | null;
 	operator: ReturnType<typeof loadOperator>;
 	sessionSeconds: number;
-}> => ({
-	...(await fetchRecord(fetch, `${BACKEND_URL}/api/v1/invoices/llm-recipient`, m.privacy_record())),
-	providers: getConfiguredProviders().map((id) => PROVIDER_NAMES[id]),
-	mail: (await fetchRecord(fetch, `${BACKEND_URL}/api/v1/mail-transport`, m.privacy_record())).transport,
-	operator: loadOperator(),
-	sessionSeconds: jwtConfig.expirySeconds
-});
+}> => {
+	const [llm, mail] = await Promise.all(
+		['invoices/llm-recipient', 'mail-transport'].map((path) =>
+			fetchRecord(fetch, `${BACKEND_URL}/api/v1/${path}`, m.privacy_record())
+		)
+	);
+	return {
+		...llm,
+		providers: getConfiguredProviders().map((id) => PROVIDER_NAMES[id]),
+		mail: mail.transport,
+		operator: loadOperator(),
+		sessionSeconds: jwtConfig.expirySeconds
+	};
+};

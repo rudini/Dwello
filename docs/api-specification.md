@@ -20,7 +20,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 
 ## 2. Conventions (backend)
 
-- **Base path:** `/api/v1`. All endpoints except `GET /health`, `GET /api/v1/invoices/llm-recipient` (provider and country for the public privacy notice) and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
+- **Base path:** `/api/v1`. All endpoints except `GET /health`, `GET /api/v1/invoices/llm-recipient` (provider and country for the public privacy notice), `GET /api/v1/mail-transport` (`{ transport: "smtp" | "resend" | null }`, the configured mail provider for the same notice) and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
 - **No envelope:** successful responses are the bare resource or a plain object, with **camelCase** field names (e.g. `{ "buildings": [...], "total": 1 }`). The list key differs per router (see each section).
 - **Errors:** `{ "error": "<message>", "code"?: "<CODE>", "params"?: { … }, "causes"?: [{ "code", "params" }] }`. `error` is free text (some English, some German). A refusal that can reach the UI also carries a stable `code` and the values in its text as `params` (`backend/src/services/coded-error.ts`); the BFF shows the message `backend_<code in lower case>` from `messages/*.json` in the UI language (`src/lib/backend-error.ts`), otherwise the `error` text. Unexpected errors have no code. Codes:
   - Payment: `PAID_DATE_INVALID {date}`, `PAID_DATE_BEFORE_STATEMENT {date}`, `PAID_DATE_IN_FUTURE {date}`, `STATEMENT_NOT_PAID`
@@ -266,7 +266,7 @@ Document fields: `id, tenantId, statementId, type ("reminder" | "upload"), remin
 |---|---|---|
 | GET | `/auth/login?provider=google\|microsoft[&redirectTo=/path]` | Sets the OAuth state cookie and redirects (302) to the provider. Invalid or missing provider: 400; provider not configured: 303 to `/login?error=unavailable` |
 | GET | `/auth/callback?code&state` | Validates `state`, exchanges the code, issues the JWT, sets session and XSRF cookies, 303 to `redirectTo` (default the dashboard). Any failure: 303 to `/login?error=failed` (or `cancelled`) |
-| GET | `/auth/me` | → `{ user: { sub, email, name, provider, picture? } }`. 401 |
+| GET | `/auth/me` | → `{ user: { sub, email, name, provider } }`. 401 |
 | POST | `/auth/refresh` | Requires `X-XSRF-TOKEN`. Issues a new JWT and XSRF token. → `{ success: true, xsrfToken }`. 400 bad XSRF; 401 |
 | POST | `/auth/logout` | Clears the auth cookies (also without a valid XSRF token). → `{ success: true }` |
 
@@ -285,7 +285,7 @@ All on path `/`; `Secure` from `COOKIE_SECURE`, `SameSite` from `COOKIE_SAME_SIT
 
 ### JWT
 
-HS256 signed with `JWT_SECRET` (≥ 32 chars). Claims: `sub`, `email`, `name`, `provider`, `picture?`, `iat`, `exp`, `iss: "dwello"`, `aud: "dwello-app"`. Lifetime `JWT_EXPIRY` (`<n>s|m|h|d`, default `7d`). The BFF and the backend both verify signature, expiry, issuer and audience; the backend also checks the claim shape.
+HS256 signed with `JWT_SECRET` (≥ 32 chars). Claims: `sub`, `email`, `name`, `provider`, `iat`, `exp`, `iss: "dwello"`, `aud: "dwello-app"`. Lifetime `JWT_EXPIRY` (`<n>s|m|h|d`, default `7d`). The BFF and the backend both verify signature, expiry, issuer and audience; the backend also checks the claim shape.
 
 ### XSRF and proxy
 

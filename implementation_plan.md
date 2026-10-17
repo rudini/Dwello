@@ -16,7 +16,7 @@ Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requ
 - [x] #82 sign-in page links the privacy statement
 - [x] #82 terms: demo paragraph (screens.json `terms`/`demo`); «Liegenschaftsverwalter»; FR «rappels de paiement et les rappels»; draft notice reviewed, `TODO(fachlich prüfen, #82)` removed
 - [x] #178 tenant page and overview name uploaded documents older than the end of the tenant's last Mietvertrag (No scenario: the upload API stamps the current time, so a document from before a past Vertragsende cannot be seeded; unit and DOM tests). Overview task that never ends: #331; glossary terms: #334
-- [ ] code-reviewer round 1 (`docs/reviews/w9c-review-1.md`)
+- [x] code-reviewer round 1 (`docs/reviews/w9c-review-1.md`): no Blocker/Major; C-1, C-2, C-4 fixed
 - [ ] feature review: personas, fach-reviewer round 2 on the implemented texts
 - [ ] plan archived, PR merged
 

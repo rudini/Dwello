@@ -285,11 +285,13 @@ describe('Auth Routes Integration Tests', () => {
 				email: 'test@example.com',
 				name: 'Test User',
 				provider: 'google',
+				// a token issued before #82 still carries the profile picture
+				picture: 'https://example.com/photo.jpg',
 				iss: 'dwello',
 				aud: 'dwello-app',
 				iat: Math.floor(Date.now() / 1000),
 				exp: Math.floor(Date.now() / 1000) + 3600
-			});
+			} as Awaited<ReturnType<typeof authModule.verifyJwt>>);
 
 			const { GET } = await import('$lib/../routes/auth/me/+server');
 			const event = createMockRequestEvent({
@@ -303,6 +305,7 @@ describe('Auth Routes Integration Tests', () => {
 			expect(data.user.sub).toBe('user-123');
 			expect(data.user.email).toBe('test@example.com');
 			expect(data.user.name).toBe('Test User');
+			expect(data.user).not.toHaveProperty('picture');
 		});
 
 		it('should return 401 for missing session', async () => {
@@ -344,11 +347,13 @@ describe('Auth Routes Integration Tests', () => {
 				email: 'test@example.com',
 				name: 'Test User',
 				provider: 'google',
+				// a token issued before #82 still carries the profile picture
+				picture: 'https://example.com/photo.jpg',
 				iss: 'dwello',
 				aud: 'dwello-app',
 				iat: Math.floor(Date.now() / 1000),
 				exp: Math.floor(Date.now() / 1000) + 3600
-			});
+			} as Awaited<ReturnType<typeof authModule.verifyJwt>>);
 
 			const mockGenerateJwt = vi.spyOn(authModule, 'generateJwt');
 			mockGenerateJwt.mockResolvedValue('new-jwt-token');
@@ -367,6 +372,7 @@ describe('Auth Routes Integration Tests', () => {
 			expect(data.success).toBe(true);
 			expect(authModule.setSessionCookie).toHaveBeenCalled();
 			expect(authModule.setXsrfToken).toHaveBeenCalled();
+			expect(mockGenerateJwt.mock.calls[0][0]).not.toHaveProperty('picture');
 		});
 
 		it('should return 400 for invalid XSRF token', async () => {
@@ -408,11 +414,13 @@ describe('Auth Routes Integration Tests', () => {
 				email: 'test@example.com',
 				name: 'Test User',
 				provider: 'google',
+				// a token issued before #82 still carries the profile picture
+				picture: 'https://example.com/photo.jpg',
 				iss: 'dwello',
 				aud: 'dwello-app',
 				iat: Math.floor(Date.now() / 1000),
 				exp: Math.floor(Date.now() / 1000) + 3600
-			});
+			} as Awaited<ReturnType<typeof authModule.verifyJwt>>);
 
 			const { POST } = await import('$lib/../routes/auth/logout/+server');
 			const event = createMockRequestEvent({
