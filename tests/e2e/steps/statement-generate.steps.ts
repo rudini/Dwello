@@ -429,10 +429,14 @@ Then('sagt die Vorschau {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(existingStatementsText).toContain(text);
 });
 
+// a seeded Heizprofil «Winter» is named «Winter <id>»
+const withNames = (text: string, names: Map<string, string>) =>
+	text.replace(/«([^»]+)»/g, (quoted, name: string) => (names.has(name) ? `«${names.get(name)}»` : quoted));
+
 Then(
 	'sagt die Vorschau zur Abrechnung {int} von {string} {string}',
-	async ({ verwalter, seed }, year: number, tenant: string, text: string) => {
-		await verwalter.sees(notesOnExistingStatement(seed.idOf(`Abrechnung ${tenant} ${year}`)!)).toContain(text);
+	async ({ verwalter, seed, names }, year: number, tenant: string, text: string) => {
+		await verwalter.sees(notesOnExistingStatement(seed.idOf(`Abrechnung ${tenant} ${year}`)!)).toContain(withNames(text, names));
 	}
 );
 

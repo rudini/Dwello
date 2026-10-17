@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { invoiceRows } from '$lib/statement-wizard';
+	import { sameSettingsNote, type invoiceRows } from '$lib/statement-wizard';
+	import ChangedStatements from './ChangedStatements.svelte';
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
 	import InvoiceHint from './InvoiceHint.svelte';
@@ -27,6 +28,12 @@
 	const missing = $derived(rows.filter((row) => row.missing));
 	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
+	// where to choose the existing statements' settings, when they differ in one the run chooses (#132)
+	const existingNote = $derived(
+		[sameSettingsNote(existing.flatMap((row) => row.changed)), m.statements_existing_note()]
+			.filter(Boolean)
+			.join(' ')
+	);
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
 	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
@@ -109,8 +116,9 @@
 						>{m.statements_view_of({ name: row.name })}</a
 					>
 				</p>
+				<ChangedStatements buildingId={row.buildingId} statements={row.changed} />
 			{/each}
-			<p>{m.statements_existing_note()}</p>
+			<p>{existingNote}</p>
 		</div>
 	</Alert>
 {/if}

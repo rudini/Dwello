@@ -90,6 +90,17 @@ export interface InvoiceCheck {
 	invoicesWithoutServicePeriod?: HintedInvoice[];
 }
 
+/** An existing statement of the run's period that misses invoices or was made with other settings (#132) */
+export interface ChangedStatement {
+	id: string;
+	statementNumber: string;
+	tenantName: string;
+	outdated: boolean; // a draft that misses invoices of its period as they are now (#96)
+	profile: { used: string; run: string } | null;
+	profileEdited: string | null; // its Heizprofil, edited after it was created
+	fee: { used: number; now: number; source: 'run' | 'contract' | 'none' } | null;
+}
+
 type Coverage = {
 	buildingId: string;
 	count: number;
@@ -97,6 +108,7 @@ type Coverage = {
 	last: string | null;
 	statements?: number; // already created for this period
 	check?: InvoiceCheck;
+	changed?: ChangedStatement[];
 };
 
 const invoices = (count: number) =>
@@ -269,6 +281,7 @@ export const invoiceRows = (
 		// With the year before to compare, the check per category replaces the look at start and end of the period
 		partial: !c.check?.hasComparison && partly(c, period),
 		existing: c.statements ?? 0,
+		changed: c.changed ?? [],
 		...categoryCheck(c.check)
 	}));
 
@@ -291,12 +304,34 @@ export const restoredSelection = (
 };
 
 /** What the restored draft named and is gone meanwhile, in words for the draft notice */
+// a step by its number and name, both from the list of steps (code review C-12, C-13)
+const step = (name: (typeof stepNames)[number]) => ({
+	number: stepNames.indexOf(name) + 1,
+	step: name()
+});
+
+const feeNotes = {
+	run: m.statements_existing_fee_run,
+	contract: m.statements_existing_fee_contract,
+	none: m.statements_existing_fee_none
+};
+
+/** What changed since an existing statement was made, or what it does differently from the run, in words (#132) */
+export const changedNotes = ({ outdated, profile, profileEdited, fee }: ChangedStatement) =>
+	[
+		outdated && m.statements_existing_outdated(),
+		profile && m.statements_existing_profile(profile),
+		profileEdited && m.statements_existing_profile_edited({ profile: profileEdited }),
+		fee && feeNotes[fee.source](fee)
+	].filter(Boolean) as string[];
+
+/** Where the run can choose the settings of the existing statements, when it differs from them in one it chooses */
+export const sameSettingsNote = (changed: ChangedStatement[]) =>
+	changed.some((s) => s.profile || s.fee?.source === 'run')
+		? m.statements_existing_same_settings(step(m.statements_step_settings))
+		: null;
+
 export const droppedNotes = (dropped: { buildings: number; heatingProfile: boolean }) => {
-	// a step by its number and name, both from the list of steps (code review C-12, C-13)
-	const step = (name: (typeof stepNames)[number]) => ({
-		number: stepNames.indexOf(name) + 1,
-		step: name()
-	});
 	const buildings = step(m.statements_step_buildings);
 	return [
 		dropped.buildings > 0 &&

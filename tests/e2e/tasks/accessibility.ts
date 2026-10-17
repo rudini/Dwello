@@ -339,6 +339,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
 	'invoice-hints': (example) => previewOf('2025', 'late-invoices', '2025-05-31')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
+	// 2025: Anna's draft misses the Lift invoice recorded after it; the run's heating profile is not «Standard» (#132)
+	'preview-outdated': (example) => previewOf('2025', `existing-statements-changed-${example.building}`)(example),
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
 	// a draft from an earlier visit whose building and heating profile were deleted since

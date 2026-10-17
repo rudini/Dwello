@@ -1,7 +1,7 @@
 import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
-import { loadStatement } from '$lib/server/statement';
+import { changedInvoiceCount, loadStatement } from '$lib/server/statement';
 import { loadDocuments } from '$lib/server/documents';
 import {
 	markStatementPaid,
@@ -19,20 +19,12 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	return [address, [postalCode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
 }
 
-// The invoices of its period recorded, changed or deleted since the statement was created (#96; only a hint: 0 if
-// they cannot be loaded)
-async function laterInvoices(fetch: typeof globalThis.fetch, id: string) {
-	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/changed-invoices`).catch(() => null);
-	const changed: { invoiceIds?: string[] } = response?.ok ? await response.json() : {};
-	return changed.invoiceIds?.length ?? 0;
-}
-
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const statement = await loadStatement(fetch, params.id);
 	const [address, reminders, later] = await Promise.all([
 		tenantAddress(fetch, statement.tenantId),
 		loadDocuments(fetch, `statementId=${params.id}`),
-		laterInvoices(fetch, params.id)
+		changedInvoiceCount(fetch, params.id)
 	]);
 	return { statement: { ...statement, tenantAddress: address }, reminders, laterInvoices: later };
 };

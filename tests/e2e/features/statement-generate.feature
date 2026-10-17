@@ -269,7 +269,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #132: ein neuer Lauf behält die bestehenden Entwürfe; die Vorschau nennt einen Entwurf, der eine danach erfasste
   # Rechnung nicht enthält (gespeicherte Rechnungen der Positionen, #96)
-  @wip
   Szenario: Vorschau nennt einen Entwurf, dem eine danach erfasste Rechnung fehlt
     Angenommen es gibt das Heizprofil "Winter"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
@@ -280,15 +279,37 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und sagt die Vorschau "Bestehende Abrechnungen bleiben, wie sie sind, auch Entwürfe."
 
   # #132: Abrechnungen derselben Periode mit verschiedenen Einstellungen fallen vor dem Erstellen auf
-  @wip
   Szenario: Vorschau nennt eine Abrechnung mit einem anderen Heizprofil
     Angenommen es gibt das Heizprofil "Winter"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" und 3 % Verwaltungspauschale öffnet
-    Dann sagt die Vorschau zur Abrechnung 2024 von "Eva Frei" "Erstellt mit einem anderen Heizprofil als die neuen Abrechnungen."
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Eva Frei" "Erstellt mit dem Heizprofil «Winter», die neuen Abrechnungen mit «Heizung Mittelland»."
+    Und sagt die Vorschau "Damit alle Abrechnungen dieser Abrechnungsperiode gleich gerechnet sind, wählen Sie im Schritt 3 «Heizprofil und Verwaltungspauschale» dasselbe Heizprofil und denselben Satz wie bei den bestehenden Abrechnungen."
 
-  @wip
+  # Fachreview V-1: ein eigenes Heizprofil lässt sich nach dem Erstellen ändern, die Abrechnung behält die Anteile von damals
+  Szenario: Vorschau nennt eine Abrechnung, deren Heizprofil danach bearbeitet wurde
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und das Heizprofil "Winter" verteilt die Heizkosten danach so:
+      | Monat     | Anteil |
+      | Januar    | 30     |
+      | Februar   | 20     |
+      | März      | 10     |
+      | April     | 5      |
+      | Mai       | 2      |
+      | Juni      | 0      |
+      | Juli      | 0      |
+      | August    | 0      |
+      | September | 2      |
+      | Oktober   | 6      |
+      | November  | 10     |
+      | Dezember  | 15     |
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Eva Frei" "Das Heizprofil «Winter» wurde nach dem Erstellen dieser Abrechnung bearbeitet. Sie rechnet mit den Monatsanteilen von damals."
+
   Szenario: Vorschau nennt eine Abrechnung mit einer anderen Verwaltungspauschale
     Angenommen es gibt das Heizprofil "Winter"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
@@ -296,7 +317,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 4.5 % Verwaltungspauschale öffnet
     Dann sagt die Vorschau zur Abrechnung 2024 von "Eva Frei" "Erstellt mit 3 % Verwaltungspauschale, die neuen Abrechnungen mit 4.5 %."
 
-  @wip
   Szenario: Vorschau nennt eine unveränderte Abrechnung mit denselben Einstellungen nicht
     Angenommen es gibt das Heizprofil "Winter"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
@@ -306,8 +326,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann sagt die Vorschau "Bestehende Abrechnungen bleiben, wie sie sind, auch Entwürfe."
     Aber zur Abrechnung 2024 von "Eva Frei" sagt die Vorschau nichts
 
-  @wip
-  Szenario: Von der Vorschau zu einem veralteten Entwurf
+  Szenario: Von der Vorschau zu einem Entwurf, dem Rechnungen fehlen
     Angenommen es gibt das Heizprofil "Winter"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"

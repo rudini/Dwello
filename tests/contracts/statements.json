@@ -2,6 +2,7 @@
 	"data": [
 		{
 			"id": "s1",
+			"contractId": "c1",
 			"statementNumber": "NK-2025-1",
 			"tenantId": "t1",
 			"apartmentId": "a1",
@@ -13,12 +14,15 @@
 			"rentalEnd": "2025-12-31",
 			"totalCosts": "2100.50",
 			"totalAdvancePayments": "0.00",
+			"managementFeePercent": "3.00",
 			"managementFee": "45.00",
+			"heatingProfileId": "hp1",
 			"balance": "-40.00",
 			"status": "draft",
 			"paymentDeadline": "2026-02-14",
 			"paidDate": null,
 			"pdfGeneratedAt": null,
+			"createdAt": "2026-01-15T08:00:00.000Z",
 			"reminderSentDate": null,
 			"nextReminderFrom": null,
 			"tenant": { "firstName": "Nina", "lastName": "Brunner", "email": "nina@example.ch" },

@@ -29,7 +29,8 @@ describe('Vorschau der Abrechnungen', () => {
 					first: null,
 					last: null,
 					statements: 0,
-					check: expect.anything()
+					check: expect.anything(),
+					changed: []
 				}
 			]
 		});

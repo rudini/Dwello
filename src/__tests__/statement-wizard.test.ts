@@ -94,6 +94,7 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: false,
 				partial: true, // nothing after June
 				existing: 0,
+				changed: [],
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
 				findings: [],
@@ -107,6 +108,7 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: true,
 				partial: false,
 				existing: 0,
+				changed: [],
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
 				findings: [],

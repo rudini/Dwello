@@ -20,6 +20,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `contracts.json` | `GET /api/v1/contracts` (Mietvertragsliste, Übersicht) |
 | `apartments.json` | `GET /api/v1/apartments` (Wohnungsliste, Gebäude, Übersicht) |
 | `period-statements.json` | `GET /api/v1/statements?periodStart=…&periodEnd=…` (Übersicht), `?contractId=…` (fehlende Abrechnungen am Mietvertrag, Abrechnungen, die sein Löschen sperren) |
+| `heating-profiles.json` | `GET /api/v1/heating-profiles` (Namen der Heizprofile und wann sie zuletzt bearbeitet wurden, Vorschau des Assistenten) |
 | `statement-preview.json` | `POST /api/v1/statements/preview` |
 | `statement-changed-invoices.json` | `GET /api/v1/statements/:id/changed-invoices` (Rechnungen der Periode, die die Abrechnung nicht so abrechnet, wie sie jetzt sind) |
 | `invoice-statements.json` | `GET /api/v1/invoices/:id/statements` (Perioden mit Abrechnungen mit und ohne diese Rechnung) |

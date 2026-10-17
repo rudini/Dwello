@@ -108,6 +108,16 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 	};
 }
 
+/** How many invoices of its period were recorded, changed or deleted since the statement was created (#96); only a
+ *  hint: 0 if they cannot be loaded */
+export async function changedInvoiceCount(fetch: typeof globalThis.fetch, id: string) {
+	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/changed-invoices`).catch(
+		() => null
+	);
+	const changed: { invoiceIds?: string[] } = response?.ok ? await response.json() : {};
+	return changed.invoiceIds?.length ?? 0;
+}
+
 /** Names of categories or distribution keys in the UI language by id; the backend's lists only carry ids and the English or German name */
 export async function namesById(fetch: typeof globalThis.fetch, list: string) {
 	const response = await fetch(`${BACKEND_URL}/api/v1/${list}?limit=100`).catch(() => null);

@@ -129,6 +129,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
       | statement-generate     | preview-all-billed  |
+      | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |

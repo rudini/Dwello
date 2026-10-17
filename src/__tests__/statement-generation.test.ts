@@ -10,6 +10,9 @@ import buildingContracts from '../../tests/contracts/building-contracts.json';
 import statementPreview from '../../tests/contracts/statement-preview.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
 import calculationRefused from '../../tests/contracts/statement-calculation-refused.json';
+import statements from '../../tests/contracts/statements.json';
+import statementChangedInvoices from '../../tests/contracts/statement-changed-invoices.json';
+import heatingProfiles from '../../tests/contracts/heating-profiles.json';
 
 const API = 'http://localhost:3001/api/v1';
 const period = {
@@ -230,8 +233,8 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		}) as typeof globalThis.fetch;
 
 		expect(await invoicesInPeriod(fetch, { ...period, buildingIds: ['b1', 'b2'] })).toEqual([
-			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1' } },
-			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2' } }
+			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1' }, changed: [] },
+			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2' }, changed: [] }
 		]);
 		// each category compared with the same dates one year earlier
 		expect(urls).toContain(`${API}/invoices/completeness/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
@@ -268,7 +271,138 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 					: Response.json({ data: [], total: 0 })) as typeof globalThis.fetch;
 
 		expect(await invoicesInPeriod(fetch, period)).toEqual([
-			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined }
+			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined, changed: [] }
 		]);
+	});
+});
+
+// #132: a new run keeps the existing statements; the preview names drafts that miss invoices of the period as they
+// are now (#96's stored link) and statements of the period made with another Heizprofil or rate than the run's
+describe('Bestehende Abrechnungen in der Vorschau', () => {
+	const listed = statements.data[0];
+	const statement = (id: string, contractId: string, status: string, heatingProfileId: string | null, managementFeePercent: string | null) => ({
+		...listed,
+		id,
+		statementNumber: `NK-2024-${id}`,
+		contractId,
+		status,
+		heatingProfileId,
+		managementFeePercent,
+		periodStart: '2024-01-01',
+		periodEnd: '2024-12-31'
+	});
+	const c1 = buildingContracts.contracts[0].id;
+	const ownRate = { ...buildingContracts.contracts[0], id: 'eigen', managementFeePercent: '2.50' };
+	const notAgreed = { ...buildingContracts.contracts[0], id: 'ohne', managementFeeAgreed: false };
+	const profile = (id: string, nameDE: string, updatedAt = '2024-01-01T00:00:00.000Z') => ({ ...heatingProfiles.data[0], id, nameDE, updatedAt });
+	const profiles = [profile('hp1', 'Heizung Mittelland'), profile('hp2', 'Winter')];
+	const fetchWith = (data: object[], changed: Record<string, string[]> = {}, asked: string[] = [], known = profiles) =>
+		(async (url: string) => {
+			const id = url.match(/statements\/([^/]+)\/changed-invoices/)?.[1];
+			if (id) {
+				asked.push(id);
+				return Response.json({ ...statementChangedInvoices, invoiceIds: changed[id] ?? [] });
+			}
+			if (url.includes('/statements?')) return Response.json({ ...statements, data });
+			if (url.includes('/contracts?')) return Response.json({ contracts: [...buildingContracts.contracts, ownRate, notAgreed] });
+			if (url.includes('/heating-profiles?')) return Response.json({ ...heatingProfiles, data: known });
+			if (url.includes('/invoices/completeness/')) return Response.json(invoiceCompleteness);
+			return Response.json([]);
+		}) as typeof globalThis.fetch;
+	const named = (id: string, more: object) => ({
+		id,
+		statementNumber: `NK-2024-${id}`,
+		tenantName: 'Nina Brunner',
+		outdated: false,
+		profile: null,
+		profileEdited: null,
+		fee: null,
+		...more
+	});
+	const changedOf = async (fetch: typeof globalThis.fetch) => (await invoicesInPeriod(fetch, period))[0].changed;
+
+	it('nennt einen Entwurf, dem Rechnungen der Periode fehlen, wie sie jetzt sind', async () => {
+		const fetch = fetchWith([statement('1', c1, 'draft', 'hp1', '4.50'), statement('2', c1, 'draft', 'hp1', '4.50')], { '1': ['i2'] });
+
+		expect(await changedOf(fetch)).toEqual([named('1', { outdated: true })]);
+	});
+
+	// sent and paid statements are corrected by a berichtigte Abrechnung (#120), not by a new run
+	it('fragt nur bei Entwürfen nach geänderten Rechnungen', async () => {
+		const asked: string[] = [];
+
+		expect(await changedOf(fetchWith([statement('1', c1, 'sent', 'hp1', '4.50')], { '1': ['i2'] }, asked))).toEqual([]);
+		expect(asked).toEqual([]);
+	});
+
+	it('nennt Abrechnungen mit einem anderen Heizprofil, auch versendete, mit beiden Namen', async () => {
+		const fetch = fetchWith([statement('1', c1, 'paid', 'hp2', '4.50')]);
+
+		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Winter', run: 'Heizung Mittelland' } })]);
+	});
+
+	// a deleted Heizprofil is stored as none; the statement keeps its name since #209
+	it('nennt ein gelöschtes Heizprofil mit dem Namen, den die Abrechnung gespeichert hat', async () => {
+		const names = { name: 'Alt', nameDE: 'Alt', nameFR: null, nameIT: null, nameEN: null };
+		const fetch = fetchWith([{ ...statement('1', c1, 'sent', null, '4.50'), heatingShare: { byDays: true, names } }]);
+
+		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Alt', run: 'Heizung Mittelland' } })]);
+	});
+
+	// Fachreview V-1: the statement keeps the Monatsanteile of its time, the run takes the profile as it is now
+	it('nennt eine Abrechnung, deren Heizprofil nach dem Erstellen bearbeitet wurde', async () => {
+		const share = { byDays: false, percent: 43, months: [], names: { name: 'Heizung Mittelland', nameDE: 'Heizung Mittelland', nameFR: null, nameIT: null, nameEN: null } };
+		const made = { ...statement('1', c1, 'sent', 'hp1', '4.50'), heatingShare: share, createdAt: '2025-01-10T08:00:00.000Z' };
+		const later = [profile('hp1', 'Heizung Mittelland', '2025-02-01T08:00:00.000Z')];
+
+		expect(await changedOf(fetchWith([made], {}, [], later))).toEqual([named('1', { profileEdited: 'Heizung Mittelland' })]);
+		expect(await changedOf(fetchWith([made]))).toEqual([]); // edited before
+		// by days, the profile's shares do not count
+		expect(await changedOf(fetchWith([{ ...made, heatingShare: { byDays: true } }], {}, [], later))).toEqual([]);
+	});
+
+	// Fachreview M-1: the rate the run would store for the contract: its own rate before the run's, 0 without an agreed
+	// fee (#89); each case says where the rate comes from
+	it('vergleicht die Verwaltungspauschale mit dem Satz, den der Lauf für den Mietvertrag speichern würde', async () => {
+		const fetch = fetchWith([
+			statement('1', c1, 'sent', 'hp1', '3.00'),
+			statement('2', 'eigen', 'sent', 'hp1', '2.50'),
+			statement('3', 'eigen', 'sent', 'hp1', '3.00'),
+			statement('4', 'ohne', 'sent', 'hp1', '0.00'),
+			statement('5', 'ohne', 'sent', 'hp1', '3.00'),
+			statement('6', c1, 'sent', 'hp1', null)
+		]);
+
+		expect(await changedOf(fetch)).toEqual([
+			named('1', { fee: { used: 3, now: 4.5, source: 'run' } }),
+			named('3', { fee: { used: 3, now: 2.5, source: 'contract' } }),
+			named('5', { fee: { used: 3, now: 0, source: 'none' } }),
+			named('6', { fee: { used: 0, now: 4.5, source: 'run' } })
+		]);
+	});
+
+	// Fachreview V-4: settings only compare within the same Abrechnungsperiode; a draft of an overlapping one still
+	// misses invoices
+	it('vergleicht die Einstellungen nur mit Abrechnungen derselben Abrechnungsperiode', async () => {
+		const other = { ...statement('1', c1, 'draft', 'hp2', '1.00'), periodStart: '2023-07-01', periodEnd: '2024-06-30' };
+
+		expect(await changedOf(fetchWith([other]))).toEqual([]);
+		expect(await changedOf(fetchWith([other], { '1': ['i2'] }))).toEqual([named('1', { outdated: true })]);
+	});
+
+	it('übergeht Abrechnungen ausserhalb der Abrechnungsperiode', async () => {
+		const before = { ...statement('1', c1, 'draft', 'hp2', '1.00'), periodStart: '2023-01-01', periodEnd: '2023-12-31' };
+
+		expect(await changedOf(fetchWith([before], { '1': ['i2'] }))).toEqual([]);
+	});
+
+	// only a hint: without the answer the draft is not named outdated, and the preview still shows
+	it('zeigt die Vorschau auch, wenn die geänderten Rechnungen nicht laden', async () => {
+		const fetch = (async (url: string) =>
+			url.includes('/changed-invoices')
+				? Response.json({ error: 'kaputt' }, { status: 500 })
+				: fetchWith([statement('1', c1, 'draft', 'hp1', '4.50')])(url)) as typeof globalThis.fetch;
+
+		expect(await changedOf(fetch)).toEqual([]);
 	});
 });

@@ -1,8 +1,9 @@
 import { backendMessage } from '$lib/backend-error';
 import { localToday } from '$lib/contract-status';
 import { m } from '$lib/paraglide/messages';
-import { namesById } from '$lib/server/statement';
-import type { InvoiceCheck } from '$lib/statement-wizard';
+import { localName } from '$lib/names';
+import { changedInvoiceCount, namesById, toStatement } from '$lib/server/statement';
+import type { ChangedStatement, InvoiceCheck } from '$lib/statement-wizard';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
@@ -14,6 +15,7 @@ type Contract = {
 	tenantName: string;
 	apartmentNumber: string;
 	managementFeeAgreed?: boolean;
+	managementFeePercent?: string | null; // its own rate, before the run's (#89)
 };
 
 export interface GenerationRequest {
@@ -132,13 +134,89 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 }
 
 type Period = { periodStart: string; periodEnd: string };
+type Profile = Parameters<typeof localName>[0] & { id: string; updatedAt: string };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON, mapped by toStatement
+type Listed = Record<string, any>;
+
+const nameOf = (profiles: Profile[], id: string | null) => {
+	const profile = profiles.find((p) => p.id === id);
+	return profile ? localName(profile) : m.common_unknown();
+};
+
+// Another Heizprofil, named as the statement stored it (#209), or its own one edited since it was made (Fachreview V-1);
+// by days, the profile's shares do not count
+function profileDifference(listed: Listed, run: GenerationRequest, profiles: Profile[]) {
+	const id: string | null = listed.heatingProfileId;
+	const share = listed.heatingShare;
+	if (id !== run.heatingProfileId) {
+		const used = share?.names ? localName(share.names) : nameOf(profiles, id);
+		return { profile: { used, run: nameOf(profiles, run.heatingProfileId) }, profileEdited: null };
+	}
+	const edited = profiles.find((p) => p.id === id)?.updatedAt;
+	const since =
+		share?.byDays === false && !!edited && Date.parse(edited) > Date.parse(listed.createdAt);
+	return { profile: null, profileEdited: since ? nameOf(profiles, id) : null };
+}
+
+// The rate the run stores for the contract: 0 without an agreed fee, its own rate before the run's (#89, Fachreview M-1)
+function feeDifference(listed: Listed, contract: Contract, run: GenerationRequest) {
+	const used = Number(listed.managementFeePercent ?? 0);
+	const now = !contract.managementFeeAgreed
+		? { now: 0, source: 'none' as const }
+		: contract.managementFeePercent != null
+			? { now: Number(contract.managementFeePercent), source: 'contract' as const }
+			: { now: run.managementFeePercent, source: 'run' as const };
+	return Math.abs(now.now - used) > 0.001 ? { used, ...now } : null;
+}
+
+/**
+ * The building's statements of the run's period that a new run keeps although they differ from it (#132): a draft that
+ * misses invoices of the period as they are now (#96's stored link), and, in the same Abrechnungsperiode only
+ * (Fachreview V-4), another Heizprofil, one edited since the statement was made, or another rate
+ */
+async function changedStatements(
+	fetch: Fetch,
+	buildingId: string,
+	run: GenerationRequest,
+	overlapping: Listed[],
+	profiles: () => Promise<Profile[]>
+): Promise<ChangedStatement[]> {
+	const same = overlapping.filter(
+		(s) => s.periodStart === run.periodStart && s.periodEnd === run.periodEnd
+	);
+	const [{ contracts = [] }, known] = same.length
+		? await Promise.all([
+				call(fetch, `contracts?buildingId=${encodeURIComponent(buildingId)}&limit=1000`),
+				profiles()
+			])
+		: [{}, []];
+	const settings = (listed: Listed) => {
+		const contract = (contracts as Contract[]).find((c) => c.id === listed.contractId);
+		return same.includes(listed) && contract
+			? { ...profileDifference(listed, run, known), fee: feeDifference(listed, contract, run) }
+			: { profile: null, profileEdited: null, fee: null };
+	};
+	const changed = await Promise.all(
+		overlapping.map(async (listed) => {
+			const { id, statementNumber, tenantName, status } = toStatement(listed);
+			const outdated = status === 'draft' && (await changedInvoiceCount(fetch, id)) > 0;
+			const differs = settings(listed);
+			return outdated || differs.profile || differs.profileEdited || differs.fee
+				? { id, statementNumber, tenantName, outdated, ...differs }
+				: null;
+		})
+	);
+	return changed.filter((one) => one !== null);
+}
 
 /** Per building: the utility invoices of the period, the statements whose period overlaps it and the check per category */
-export async function invoicesInPeriod(
-	fetch: Fetch,
-	{ buildingIds, periodStart, periodEnd }: GenerationRequest
-) {
+export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
+	const { buildingIds, periodStart, periodEnd } = run;
 	const overlaps = (s: Period) => s.periodStart <= periodEnd && s.periodEnd >= periodStart;
+	// loaded once, only when a building has statements of the period to compare (#132)
+	let profiles: Promise<Profile[]> | undefined;
+	const loadProfiles = () =>
+		(profiles ??= call(fetch, 'heating-profiles?limit=100').then((body) => body.data ?? []));
 	const [rows, categories] = await Promise.all([
 		Promise.all(
 			buildingIds.map(async (buildingId) => {
@@ -173,7 +251,14 @@ export async function invoicesInPeriod(
 					first: dates[0] ?? null,
 					last: dates.at(-1) ?? null,
 					statements: (statements as Period[]).filter(overlaps).length,
-					check: check as InvoiceCheck | undefined
+					check: check as InvoiceCheck | undefined,
+					changed: await changedStatements(
+						fetch,
+						buildingId,
+						run,
+						(statements as Listed[]).filter((s) => overlaps(s as Period)),
+						loadProfiles
+					)
 				};
 			})
 		),
