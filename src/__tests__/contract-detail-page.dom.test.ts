@@ -55,7 +55,12 @@ function open(
 	form: unknown = null,
 	today = '2026-10-10',
 	terminated = false,
-	missingStatements: { start: string; end: string; href: string }[] = [],
+	missingStatements: {
+		start: string;
+		end: string;
+		href: string | null;
+		invoices?: { href: string; label: string };
+	}[] = [],
 	billedBy: { id?: string; statementNumber: string; status: string }[] | null = []
 ) {
 	show(ContractPage, {
@@ -267,12 +272,44 @@ describe('Mietvertragsdetail', () => {
 			'Jede Schaltfläche öffnet den Assistenten für alle Mietverträge des Gebäudes in dieser Periode. Erfassen Sie zuerst die Rechnungen der Periode; mit welcher Periode Sie beginnen, spielt keine Rolle.'
 		);
 		// short labels side by side, each with its verb (personas Marco P-4, Helga P-6, code review C-8)
-		const links = [...byTestId('contract-missing-statement')!.querySelectorAll('a')];
+		const links = [
+			...byTestId('contract-missing-statement')!.querySelectorAll(
+				'[data-testid^="contract-missing-statement-link-"]'
+			)
+		];
 		expect(links.map((a) => a.textContent!.trim())).toEqual(['2025 abrechnen', '2023 abrechnen']);
 		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href));
 		expect(text('contract-missing-statement')).toContain(
 			'Haben Sie eine dieser Perioden ausserhalb von Dwello abgerechnet? Tragen Sie beim Bearbeiten des Mietvertrags «Abgerechnet bis» ein.'
 		);
+	});
+
+	// #211: each range leads to the building's invoices
+	it('führt zu den Rechnungen des Gebäudes in der fehlenden Periode', () => {
+		const invoices = { href: '/invoices?building=b1&year=2025', label: 'Rechnungen 2025 ansehen' };
+		open('2024-04-01', null, null, '2026-10-10', false, [
+			{ start: '2025-01-01', end: '2025-12-31', href: '/statements/generate', invoices }
+		]);
+		const link = byTestId('contract-missing-statement-invoices-2025-01-01')!;
+		expect(link.getAttribute('href')).toBe(invoices.href);
+		expect(link.textContent!.trim()).toBe('Rechnungen 2025 ansehen');
+	});
+
+	// #199: a statement covers part of the period; a run for the days it leaves waits on #281
+	it('nennt Tage, die eine Abrechnung nicht abdeckt, ohne Weg in den Assistenten', () => {
+		const invoices = { href: '/invoices?building=b1&year=2025', label: 'Rechnungen 2025 ansehen' };
+		open('2024-04-01', null, null, '2026-10-10', false, [
+			{ start: '2025-10-01', end: '2025-12-31', href: null, invoices }
+		]);
+		expect(text('contract-missing-statement')).toContain(
+			'Abrechnung 01.10.2025 – 31.12.2025 fehlt'
+		);
+		expect(text('contract-missing-statement')).toContain(
+			'Eine Abrechnung deckt nur einen Teil dieser Abrechnungsperiode ab. Für die übrigen Tage erstellt Dwello noch keine Abrechnung'
+		);
+		expect(text('contract-missing-statement')).not.toContain('noch keine Nebenkostenabrechnung');
+		expect(byTestId('contract-missing-statement-link-2025-10-01')).toBeNull();
+		expect(byTestId('contract-missing-statement-invoices-2025-10-01')).not.toBeNull();
 	});
 
 	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {

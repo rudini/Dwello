@@ -51,4 +51,21 @@ describe('Fehlende Abrechnungen eines Mietvertrags', () => {
 		];
 		expect(missingPeriods('calendar', contract, statements, today)).toEqual([]);
 	});
+
+	// #133: the days up to «Abgerechnet bis» were billed outside Dwello
+	it('übergeht die Tage bis «Abgerechnet bis»', () => {
+		const contract = { startDate: '2023-01-01', endDate: null, billedUntil: '2024-12-31' };
+		expect(missingPeriods('calendar', contract, [], today)).toEqual([
+			{ start: '2025-01-01', end: '2025-12-31' }
+		]);
+	});
+
+	// #120: a replaced statement no longer bills its days
+	it('zählt eine ersetzte Abrechnung nicht', () => {
+		const contract = { startDate: '2025-01-01', endDate: '2025-12-31' };
+		const replaced = { ...statement('2025-01-01', '2025-12-31'), status: 'replaced' };
+		expect(missingPeriods('calendar', contract, [replaced], today)).toEqual([
+			{ start: '2025-01-01', end: '2025-12-31' }
+		]);
+	});
 });
