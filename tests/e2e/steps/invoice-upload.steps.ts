@@ -33,6 +33,7 @@ import {
 	invoicePdf,
 	invoicePhoto,
 	openBeleg,
+	openBelegOnceRead,
 	openBelegOfInvoice,
 	openFileLarge,
 	removeFile,
@@ -149,6 +150,16 @@ Then(
 		await verwalter.sees(proposedAmount(file)).toBe(amount);
 		await verwalter.sees(proposedInvoiceNumber(file)).toBe(number);
 		await verwalter.sees(proposedCategory(file)).toBe(category);
+	}
+);
+
+Then(
+	'schlägt die KI nach dem langen Lesen für die Rechnung von {string} den Betrag {string} vor',
+	async ({ verwalter, names, $testInfo }, supplier: string, amount: string) => {
+		$testInfo.setTimeout(120_000); // the stand-in reads for 35 s
+		const file = pdfOf(names.get(supplier)!);
+		await verwalter.attemptsTo(openBelegOnceRead(file, 90_000));
+		await verwalter.sees(proposedAmount(file)).toBe(amount);
 	}
 );
 
