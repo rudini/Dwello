@@ -6,6 +6,9 @@ import {
 	balanceAmount,
 	changeOffers,
 	correctConfirmation,
+	deadlineShown,
+	paymentText,
+	replacedDone,
 	priorPaymentsAmount,
 	replacedStatementLink,
 	deleteOffers,
@@ -44,6 +47,7 @@ import {
 	createCorrection,
 	openCorrectConfirmation,
 	openCorrection,
+	openReplacedContract,
 	openReplacedStatement,
 	deleteStatement,
 	downloadStatementPdf,
@@ -410,6 +414,22 @@ When('der Liegenschaftsverwalter die berichtigte Abrechnung erstellt', async ({ 
 
 When('der Liegenschaftsverwalter die berichtigte Abrechnung öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openCorrection);
+});
+
+When('der Liegenschaftsverwalter den Mietvertrag der ersetzten Abrechnung öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openReplacedContract);
+});
+
+Then('bestätigt Dwello {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(replacedDone).toContain(text);
+});
+
+Then('sagt die Abrechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(paymentText).toContain(text);
+});
+
+Then('nennt die Abrechnung keine Zahlungsfrist', async ({ verwalter }) => {
+	await verwalter.sees(deadlineShown).toBe(0);
 });
 
 When('der Liegenschaftsverwalter die ersetzte Abrechnung öffnet', async ({ verwalter }) => {

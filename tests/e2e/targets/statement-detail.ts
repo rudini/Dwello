@@ -80,5 +80,10 @@ export const replacesLink = target('Ersetzte Abrechnung', (page) => page.getByTe
 export const replacedByLink = target('Berichtigte Abrechnung', (page) => page.getByTestId('statement-replaced-by-link'));
 export const priorPayments = target('Bereits bezahlt', (page) => page.getByTestId('statement-prior-payments'));
 export const statementBalance = target('Saldo der Abrechnung', (page) => page.getByTestId('statement-balance'));
+export const replacedContractLink = target('Mietvertrag der ersetzten Abrechnung', (page) =>
+	page.getByTestId('statement-replaced-contract-link')
+);
+export const paymentSummary = target('Zahlung der Abrechnung', (page) => page.getByTestId('statement-payment-summary'));
+export const paymentDeadline = target('Zahlungsfrist der Abrechnung', (page) => page.getByTestId('statement-payment-deadline'));
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));

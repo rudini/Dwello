@@ -961,6 +961,7 @@
 	"statements_correct_open_refund": "Il conteggio {number} viene sostituito da un conteggio rettificato. Il precedente resta conservato invariato e non può più essere segnato come pagato. Se ha già versato il rimborso, lo segni prima come pagato.",
 	"statements_correct_paid": "Il conteggio {number} viene sostituito da un conteggio rettificato. Il precedente resta conservato invariato. Il conteggio rettificato computa i {amount} pagati il {date}.",
 	"statements_correct_refunded": "Il conteggio {number} viene sostituito da un conteggio rettificato. Il precedente resta conservato invariato. Il conteggio rettificato computa i {amount} che Lei ha rimborsato il {date}.",
+	"statements_correct_paid_chain": "Il conteggio {number} viene sostituito da un conteggio rettificato. Il precedente resta conservato invariato. Il conteggio rettificato computa i {amount} pagati su questo e sui conteggi sostituiti.",
 	"statements_correct_settled": "Il conteggio {number} viene sostituito da un conteggio rettificato. Il precedente resta conservato invariato.",
 	"statements_correct_next": "In seguito può correggere le date del contratto e le fatture, se necessario, e allestire il conteggio rettificato. Lo invii all’inquilino.",
 	"statements_correct_limit": "I crediti derivanti dal conteggio delle spese accessorie si prescrivono di regola in cinque anni (art. 128 n. 1 CO); da quando decorre il termine non è chiarito in modo uniforme. In caso di dubbio si faccia consigliare.",

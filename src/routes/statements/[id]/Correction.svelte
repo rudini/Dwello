@@ -27,6 +27,8 @@
 			amount: formatCurrency(Math.abs(offset)),
 			date: formatDate(statement.paidDate)
 		};
+		// in a chain, part of it was paid on the statements this one replaced, on other days
+		if (statement.priorPayments) return m.statements_correct_paid_chain(paid);
 		return offset < 0 ? m.statements_correct_refunded(paid) : m.statements_correct_paid(paid);
 	});
 	let creating = $state(false); // a second click would create a second berichtigte Abrechnung
@@ -45,7 +47,7 @@
 		{#if statement.replacedBy}
 			<p>
 				<a
-					class="font-semibold text-ink underline"
+					class="inline-flex min-h-12 items-center font-semibold text-ink underline"
 					href="/statements/{statement.replacedBy.id}"
 					data-testid="statement-replaced-by-link"
 					>{m.statements_replaced_by({ number: statement.replacedBy.statementNumber })}</a
@@ -55,7 +57,7 @@
 			<p>{m.statements_replaced_todo()}</p>
 			<p>
 				<a
-					class="font-semibold text-ink underline"
+					class="inline-flex min-h-12 items-center font-semibold text-ink underline"
 					href="/contracts/{statement.contractId}"
 					data-testid="statement-replaced-contract-link">{m.statements_replaced_contract()}</a
 				>
@@ -75,7 +77,7 @@
 					type="submit"
 					variant="primary"
 					icon="statement"
-					disabled={creating}
+					busy={creating}
 					testid="statement-create-correction-button">{m.statements_create_correction()}</Button
 				>
 			</form>
@@ -85,7 +87,7 @@
 {#if statement.replaces}
 	<p class="text-ink" data-testid="statement-replaces">
 		<a
-			class="font-semibold underline"
+			class="inline-flex min-h-12 items-center font-semibold underline"
 			href="/statements/{statement.replaces.id}"
 			data-testid="statement-replaces-link">{replaces}</a
 		>

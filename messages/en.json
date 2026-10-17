@@ -961,6 +961,7 @@
 	"statements_correct_open_refund": "Statement {number} is replaced by a corrected statement. The previous one is kept unchanged and can no longer be marked as paid. If you have already transferred the refund, mark it as paid first.",
 	"statements_correct_paid": "Statement {number} is replaced by a corrected statement. The previous one is kept unchanged. The corrected statement offsets the {amount} paid on {date}.",
 	"statements_correct_refunded": "Statement {number} is replaced by a corrected statement. The previous one is kept unchanged. The corrected statement offsets the {amount} you refunded on {date}.",
+	"statements_correct_paid_chain": "Statement {number} is replaced by a corrected statement. The previous one is kept unchanged. The corrected statement offsets the {amount} paid on it and on the statements it replaced.",
 	"statements_correct_settled": "Statement {number} is replaced by a corrected statement. The previous one is kept unchanged.",
 	"statements_correct_next": "Then you can correct the contract dates and invoices if needed and create the corrected statement. Send it to the tenant.",
 	"statements_correct_limit": "Claims from the utility cost statement are usually time-barred after five years (Art. 128 No. 1 CO); when the period starts is not settled uniformly. If in doubt, get advice.",

@@ -1,8 +1,11 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
 import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
+import { successToast } from '../targets/form';
 import {
 	correctDialog,
+	paymentDeadline,
+	paymentSummary,
 	correctStatementButton,
 	markPaidButton,
 	priorPayments,
@@ -85,6 +88,9 @@ export const languageOfPdf = Text.of(pdfLanguage);
 
 // #120
 export const correctConfirmation = Text.of(correctDialog);
+export const replacedDone = Text.of(successToast);
+export const deadlineShown = Count.of(paymentDeadline);
+export const paymentText = Text.of(paymentSummary);
 export const replacedStatementLink = Attribute.named('href').of(replacesLink);
 export const priorPaymentsAmount = question('the amount already paid on the replaced statement', async (actor) =>
 	amountAfter('', await actor.answer(Text.of(priorPayments)))

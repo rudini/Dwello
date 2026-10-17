@@ -540,7 +540,23 @@ describe('Abrechnungsdetail', () => {
 	it('nennt beim Berichtigen einer berichtigten Abrechnung alles, was angerechnet wird', () => {
 		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 187.45, priorPayments: 442.9, balance: 187.45 });
 		click('statement-correct-button');
-		expect(correctDialog()).toContain('rechnet die CHF 630.35 an');
+		// Code-Review W2e3 C-3: bezahlt wurde auch auf den ersetzten Abrechnungen, nicht nur an diesem Tag
+		expect(correctDialog()).toContain(
+			'Die berichtigte Abrechnung rechnet die CHF 630.35 an, die auf diese und die ersetzten Abrechnungen bezahlt wurden.'
+		);
+	});
+
+	// Code-Review W2e3 C-2: nach dem Ersetzen eine Bestätigung, der Fokus auf dem Titel
+	it('bestätigt das Ersetzen und setzt den Fokus auf den Titel', async () => {
+		toasts.set([]);
+		detail({ status: 'sent' });
+		click('statement-correct-button');
+		const after = actions.get('?/replace')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Die Abrechnung ist ersetzt.']);
+		expect(document.activeElement).toBe(document.querySelector('h1'));
 	});
 
 	it('nennt bei einer bezahlten Abrechnung ohne Zahlung keinen Betrag', () => {
@@ -593,6 +609,8 @@ describe('Abrechnungsdetail', () => {
 
 		expect(text()).toContain('Diese Abrechnung ist ersetzt und gilt nicht mehr.');
 		expect(text()).not.toContain('Sie erstatten dem Mieter');
+		// Code-Review W2e3 C-6: keine Frist mehr
+		expect(byTestId('statement-payment-deadline')).toBeNull();
 		expect(text()).not.toContain('Weitere Aktionen');
 	});
 

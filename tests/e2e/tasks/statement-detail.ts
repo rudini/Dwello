@@ -6,6 +6,7 @@ import {
 	correctStatementButton,
 	createCorrectionButton,
 	replacedByLink,
+	replacedContractLink,
 	replacesLink,
 	confirmDeleteStatementButton,
 	confirmMarkPaidButton,
@@ -74,3 +75,4 @@ export const correctStatement: Activity = (actor) =>
 export const createCorrection = Click.on(createCorrectionButton);
 export const openReplacedStatement = Click.on(replacesLink);
 export const openCorrection = Click.on(replacedByLink);
+export const openReplacedContract = Click.on(replacedContractLink);

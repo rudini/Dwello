@@ -961,6 +961,7 @@
 	"statements_correct_open_refund": "Le décompte {number} est remplacé par un décompte rectificatif. L’ancien reste conservé tel quel et ne peut plus être marqué comme payé. Si vous avez déjà versé le remboursement, marquez-le d’abord comme payé.",
 	"statements_correct_paid": "Le décompte {number} est remplacé par un décompte rectificatif. L’ancien reste conservé tel quel. Le décompte rectificatif prend en compte les {amount} payés le {date}.",
 	"statements_correct_refunded": "Le décompte {number} est remplacé par un décompte rectificatif. L’ancien reste conservé tel quel. Le décompte rectificatif prend en compte les {amount} que vous avez remboursés le {date}.",
+	"statements_correct_paid_chain": "Le décompte {number} est remplacé par un décompte rectificatif. L’ancien reste conservé tel quel. Le décompte rectificatif prend en compte les {amount} payés sur celui-ci et sur les décomptes remplacés.",
 	"statements_correct_settled": "Le décompte {number} est remplacé par un décompte rectificatif. L’ancien reste conservé tel quel.",
 	"statements_correct_next": "Vous pouvez ensuite corriger les dates du contrat et les factures si nécessaire, puis établir le décompte rectificatif. Envoyez-le au locataire.",
 	"statements_correct_limit": "Les créances issues du décompte des charges se prescrivent en règle générale par cinq ans (art. 128 ch. 1 CO) ; le point de départ du délai n’est pas clarifié de manière uniforme. En cas de doute, faites-vous conseiller.",

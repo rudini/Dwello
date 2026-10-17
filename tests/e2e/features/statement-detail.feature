@@ -596,7 +596,8 @@ Funktionalität: Abrechnungsdetail
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung berichtigt
-    Dann hat die Abrechnung den Status "Ersetzt"
+    Dann bestätigt Dwello "Die Abrechnung ist ersetzt."
+    Und hat die Abrechnung den Status "Ersetzt"
     Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
     Dann hat die Abrechnung den Status "Entwurf"
     Und nennt die Abrechnung, dass sie die Abrechnung 2024 von "Eva Frei" ersetzt
@@ -632,9 +633,21 @@ Funktionalität: Abrechnungsdetail
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und die Zahlungsfrist der Abrechnung 2024 von "Eva Frei" ist abgelaufen
     Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann hat die Abrechnung den Status "Ersetzt"
     Und bietet die Detailseite weder Zahlung noch Mahnung noch Bearbeitung noch Berichtigung der Abrechnung an
+    Und sagt die Abrechnung "Diese Abrechnung ist ersetzt und gilt nicht mehr."
+    Und nennt die Abrechnung keine Zahlungsfrist
+    Und weist die Abrechnung auf keine geänderten Rechnungen hin
+
+  Szenario: Von der ersetzten Abrechnung zum Mietvertrag wechseln
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter den Mietvertrag der ersetzten Abrechnung öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Eva Frei"
 
   # Persona Anna I4: der Mieter zog erst 2025 ein; die versendete Abrechnung 2024 ist ersetzt, eine berichtigte gibt es
   # nicht (Fachreview W2e V-5)
