@@ -1165,7 +1165,7 @@ Files: `backend/src/services/{word-search,apartment.service,building.service}.ts
 ## Session 2026-10-17 W7e: audit log (#357)
 
 - [x] Scenarios in `settings.feature` («Protokoll öffnen», «Änderungen im Protokoll sehen», «Eintrag im Protokoll löschen»), breadcrumb example, `privacy.feature`; fach-reviewer before implementing: `docs/reviews/w7e-fachreview-1.md` (R-1, R-2, V-1 Major fixed; V-2–V-9, R-3 fixed or answered)
-- [x] Migration `0018_audit_log.sql`, `schema.ts`, `docs/data-model.md`, `docs/api-specification.md` (11a)
+- [x] Migration `0019_audit_log.sql`, `schema.ts`, `docs/data-model.md`, `docs/api-specification.md` (11a)
 - [x] Backend: `audit-log.service.ts` and route; entries for the Verwaltungspauschale rate, a category's Umlagefähigkeit (with the invoices it excluded), an invoice that becomes (not) umlagefähig (form, category, KI), a reset payment, logins; `recordStatementCorrection(replaced, replacement)` for #358 (W2e); `audit-log.pg.test.ts`, contract `audit-log.json`
 - [x] BFF: login entry from `src/routes/auth/callback` (`recordLogin` in `login-flow.ts`, fails open)
 - [x] Page `/config/audit-log` with delete confirmation; link under «Einstellungen»; texts in four languages, term `TODO(fachlich prüfen, #370)`
@@ -1179,3 +1179,4 @@ Files: `backend/src/services/{word-search,apartment.service,building.service}.ts
 - [x] Workflow note: commit gate refuses red tests that import a missing module; detached session start; CRAP of a new page template (`docs/reviews/workflow-notes-issue-357.md`)
 - [x] Code review rounds 3 and 4 (closing): `docs/reviews/w7e-review-3.md` (C-24 Major fixed), `-4`
 - [x] Full E2E (chromium + api): 950 passed; 5 failed under load (contract-new, the IBAN race O-34), green alone; archive the session
+- [x] #358 merged first (PR #385): «Abrechnung berichtigen» (`replaceStatement`) records the replacement in its transaction; `recordStatementCorrection(replaced)`; privacy paragraph names it (R-4); migration renumbered to `0019_audit_log.sql` after `0018_statement_correction.sql`

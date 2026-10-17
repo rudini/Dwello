@@ -414,7 +414,7 @@ details     JSONB NOT NULL         -- snapshot of what the entry names (API: doc
 ```
 
 No foreign keys: an entry stays readable after its record changed or was deleted, and stays until the landlord
-deletes it under «Einstellungen» › «Protokoll». A login stores only the provider. Migration `0018_audit_log.sql`.
+deletes it under «Einstellungen» › «Protokoll». A login stores only the provider. Migration `0019_audit_log.sql`.
 
 ---
 

@@ -6,7 +6,7 @@
 import { afterAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories as categoriesTable, invoices } from '../db/schema';
+import { categories as categoriesTable, invoices, utilityStatements } from '../db/schema';
 import { recordStatementCorrection } from '../services/audit-log.service';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
@@ -188,20 +188,28 @@ describe('Protokoll einer zurückgesetzten Zahlung', () => {
 	});
 });
 
-// #120: the correction of a sent statement is built in #358, which calls recordStatementCorrection
+// #120 (#358): «Abrechnung berichtigen» replaces the sent statement; its berichtigte Abrechnung follows as a draft
 describe('Protokoll einer berichtigten Abrechnung', () => {
-	it('hält die ersetzte und die berichtigte Abrechnung mit ihren Nummern fest', async () => {
-		const replaced = { id: crypto.randomUUID(), statementNumber: `NK-alt-${token}` };
-		const replacement = { id: crypto.randomUUID(), statementNumber: `NK-neu-${token}` };
-		await recordStatementCorrection(replaced, replacement);
+	it('hält die ersetzte Abrechnung mit ihrer Nummer fest', async () => {
+		const rental = await createRental(`${token}-b`, { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
+		cleanUps.push(() => rental.remove());
+		const id = await idOf(
+			await sendJson('POST', '/api/v1/statements/generate', {
+				contractId: rental.contract,
+				buildingId: rental.building,
+				periodStart: '2023-01-01',
+				periodEnd: '2023-12-31'
+			})
+		);
+		cleanUps.unshift(() => db.delete(utilityStatements).where(eq(utilityStatements.id, id)));
+		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
 
-		const [entry] = await entriesOf('statement_corrected', (details) => details.statementId === replaced.id);
-		expect(entry.details).toEqual({
-			statementId: replaced.id,
-			number: replaced.statementNumber,
-			replacementId: replacement.id,
-			replacementNumber: replacement.statementNumber
-		});
+		const response = await callApi(`/api/v1/statements/${id}/replace`, { method: 'POST' });
+
+		expect(response.status).toBe(200);
+		const statement = (await (await callApi(`/api/v1/statements/${id}`)).json()) as { statementNumber: string };
+		const [entry] = await entriesOf('statement_corrected', (details) => details.statementId === id);
+		expect(entry.details).toEqual({ statementId: id, number: statement.statementNumber });
 	});
 });
 
@@ -228,8 +236,8 @@ describe('Protokoll der Anmeldungen', () => {
 describe('Einträge löschen', () => {
 	it('löscht nur den gewählten Eintrag; die übrigen bleiben', async () => {
 		const statement = (statementNumber: string) => ({ id: crypto.randomUUID(), statementNumber });
-		await recordStatementCorrection(statement(`NK-1-${token}`), statement(`NK-1b-${token}`));
-		await recordStatementCorrection(statement(`NK-2-${token}`), statement(`NK-2b-${token}`));
+		await recordStatementCorrection(statement(`NK-1-${token}`));
+		await recordStatementCorrection(statement(`NK-2-${token}`));
 		const ours = () => entriesOf('statement_corrected', (details) => [`NK-1-${token}`, `NK-2-${token}`].includes(String(details.number)));
 		const [newest, older] = await ours();
 

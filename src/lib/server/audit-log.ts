@@ -42,11 +42,7 @@ const TEXTS: Record<string, (d: Details) => string> = {
 		d.paidDate
 			? m.audit_payment_reset({ number: String(d.number), date: formatDate(String(d.paidDate)) })
 			: m.audit_payment_reset_undated({ number: String(d.number) }),
-	statement_corrected: (d) =>
-		m.audit_statement_corrected({
-			number: String(d.number),
-			replacement: String(d.replacementNumber)
-		})
+	statement_corrected: (d) => m.audit_statement_corrected({ number: String(d.number) })
 };
 
 export const toAuditEntries = (entries: BackendEntry[]): AuditEntry[] =>

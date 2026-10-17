@@ -1646,13 +1646,13 @@
 	"audit_invoice_included": "Fattura «{description}» di {supplier} del {date} di {amount} ({building}): di nuovo segnata come addebitabile",
 	"audit_payment_reset": "Pagamento del {date} del conteggio {number} rimosso",
 	"audit_payment_reset_undated": "Pagamento del conteggio {number} rimosso",
-	"audit_statement_corrected": "Conteggio {number} sostituito dal conteggio rettificato {replacement}",
+	"audit_statement_corrected": "Conteggio {number} sostituito da un conteggio rettificato",
 	"audit_delete_label": "Eliminare la voce del {when}: {text}",
 	"audit_delete_title": "Eliminare la voce?",
 	"audit_delete_text": "La voce del {when} sarà eliminata definitivamente dal registro: {text}. Viene eliminata solo la voce, non ciò che registra. L’operazione non può essere annullata.",
 	"audit_deleted": "La voce è eliminata.",
 	"audit_delete_failed": "Non è stato possibile eliminare la voce. Riprovi.",
-	"audit_privacy": "Affinché Lei possa ricostruire in seguito che cosa è cambiato, Dwello registra nel registro sotto «Impostazioni», con data e ora: ogni accesso con il fornitore scelto (senza nome né indirizzo e-mail), le modifiche delle spese di gestione e dell’addebitabilità delle categorie, le fatture che non sono più o sono di nuovo addebitabili (con emittente, descrizione, data, importo e immobile), nonché i pagamenti rimossi. Le voci restano, anche se elimina la fattura, finché Lei non le elimina nel registro. Il registro del server (vedi «Accesso») è separato.",
+	"audit_privacy": "Affinché Lei possa ricostruire in seguito che cosa è cambiato, Dwello registra nel registro sotto «Impostazioni», con data e ora: ogni accesso con il fornitore scelto (senza nome né indirizzo e-mail), le modifiche delle spese di gestione e dell’addebitabilità delle categorie, le fatture che non sono più o sono di nuovo addebitabili (con emittente, descrizione, data, importo e immobile), nonché i pagamenti rimossi e i conteggi sostituiti da un conteggio rettificato (con il loro numero). Le voci restano, anche se elimina la fattura, finché Lei non le elimina nel registro. Il registro del server (vedi «Accesso») è separato.",
 	"audit_privacy_demo": "Nella demo tutti i visitatori vedono il registro con gli accessi degli altri, senza nome né indirizzo e-mail, e possono eliminare voci.",
 	"audit_not_deleted": "Voce non eliminata"
 }

@@ -207,7 +207,7 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 | `category_allocability_changed` | `PUT /categories/:id` | `categoryId`, `name`, `nameDE`…`nameEN`, `allocable`; when not allocable `invoices` (how many it made not allocable) |
 | `invoice_allocability_changed` | `PUT /invoices/:id`, `POST /invoices/:id/recategorize` | `invoiceId`, `description`, `supplier`, `invoiceDate`, `amount`, `building`, `allocable` |
 | `payment_reset` | `POST /statements/:id/payment-reset` | `statementId`, `number`, `paidDate` |
-| `statement_corrected` | `recordStatementCorrection` (the correction of #358) | `statementId`, `number`, `replacementId`, `replacementNumber` |
+| `statement_corrected` | `POST /statements/:id/replace` («Abrechnung berichtigen», #358) | `statementId`, `number` |
 
 | Method | Path | Notes |
 |---|---|---|

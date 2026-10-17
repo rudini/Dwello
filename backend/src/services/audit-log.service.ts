@@ -23,17 +23,6 @@ export async function deleteAuditEntry(id: string) {
 	return (await db.delete(auditLog).where(eq(auditLog.id, id)).returning()).length > 0;
 }
 
-type Statement = { id: string; statementNumber: string };
-
-/** #120: a sent statement replaced by its berichtigte Abrechnung; called by the correction (#358) */
-export const recordStatementCorrection = (replaced: Statement, replacement: Statement, tx?: Writer) =>
-	recordAudit(
-		'statement_corrected',
-		{
-			statementId: replaced.id,
-			number: replaced.statementNumber,
-			replacementId: replacement.id,
-			replacementNumber: replacement.statementNumber
-		},
-		tx
-	);
+/** #120: a sent statement replaced by a berichtigte Abrechnung («Abrechnung berichtigen», #358) */
+export const recordStatementCorrection = (replaced: { id: string; statementNumber: string }, tx?: Writer) =>
+	recordAudit('statement_corrected', { statementId: replaced.id, number: replaced.statementNumber }, tx);

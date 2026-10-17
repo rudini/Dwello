@@ -27,7 +27,7 @@ describe('Protokoll aus dem Backend', () => {
 			'Kategorie «Gartenpflege»: von umlagefähig auf nicht umlagefähig geändert; 2 Rechnungen sind damit nicht mehr umlagefähig',
 			'Rechnung «Treppenhausreinigung» von Hauswart Meier vom 31.03.2026 über CHF\u00a0450.00 (Lindenhof): als nicht umlagefähig markiert',
 			'Zahlung vom 02.03.2026 zur Abrechnung NK-2025-0001 zurückgesetzt',
-			'Abrechnung NK-2025-0002 durch die berichtigte Abrechnung NK-2025-0007 ersetzt'
+			'Abrechnung NK-2025-0002 durch eine berichtigte Abrechnung ersetzt'
 		]);
 	});
 

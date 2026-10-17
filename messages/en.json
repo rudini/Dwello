@@ -1646,13 +1646,13 @@
 	"audit_invoice_included": "Invoice “{description}” from {supplier} of {date} for {amount} ({building}): marked as allocable again",
 	"audit_payment_reset": "Payment of {date} on statement {number} reset",
 	"audit_payment_reset_undated": "Payment on statement {number} reset",
-	"audit_statement_corrected": "Statement {number} replaced by the corrected statement {replacement}",
+	"audit_statement_corrected": "Statement {number} replaced by a corrected statement",
 	"audit_delete_label": "Delete entry of {when}: {text}",
 	"audit_delete_title": "Delete entry?",
 	"audit_delete_text": "The entry of {when} will be deleted from the log for good: {text}. Only the entry is deleted, not what it records. This cannot be undone.",
 	"audit_deleted": "The entry is deleted.",
 	"audit_delete_failed": "The entry could not be deleted. Please try again.",
-	"audit_privacy": "So that you can later trace what changed, Dwello records in the log under “Settings”, with date and time: each sign-in with the chosen provider (without name or email address), changes of the management fee and of whether categories are allocable, invoices that are no longer or again allocable (with invoice issuer, description, date, amount and building), and reset payments. The entries stay, even if you delete the invoice, until you delete them in the log. The server log (see “Sign-in”) is separate from it.",
+	"audit_privacy": "So that you can later trace what changed, Dwello records in the log under “Settings”, with date and time: each sign-in with the chosen provider (without name or email address), changes of the management fee and of whether categories are allocable, invoices that are no longer or again allocable (with invoice issuer, description, date, amount and building), reset payments, and statements replaced by a corrected statement (with their number). The entries stay, even if you delete the invoice, until you delete them in the log. The server log (see “Sign-in”) is separate from it.",
 	"audit_privacy_demo": "In the demo, all visitors see the log with the others’ sign-ins, without name or email address, and can delete entries.",
 	"audit_not_deleted": "Entry not deleted"
 }
