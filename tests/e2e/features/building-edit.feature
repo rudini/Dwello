@@ -22,7 +22,7 @@ Funktionalität: Gebäude bearbeiten
 
   Szenario: Ungültige PLZ
     Wenn der Liegenschaftsverwalter die PLZ auf "84" ändert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "PLZ muss 4 Ziffern haben"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "PLZ muss 4 Ziffern haben."
 
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

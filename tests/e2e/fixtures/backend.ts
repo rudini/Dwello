@@ -30,6 +30,12 @@ export function testData(api: CallTheApi) {
 		return (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
 	}
 
+	// The tenant's statement of the year, also one a run created
+	async function statementOf(tenantTitle: string, year: number) {
+		const { data } = await get(`statements?tenantId=${ids.get(tenantTitle)}&limit=100`);
+		return data.find((s: { periodStart: string }) => s.periodStart.startsWith(`${year}`));
+	}
+
 	async function removeContracts(filter: string) {
 		for (const contract of (await get(`contracts?${filter}&limit=100`)).contracts) {
 			await remove(`contracts/${contract.id}?confirmMistake=true`); // a started one too (#116)
@@ -107,10 +113,16 @@ export function testData(api: CallTheApi) {
 		backend: api, // the backend API as the signed-in Liegenschaftsverwalter (API protocol driver)
 		unique,
 
-		async building(title: string, city: string) {
+		// a search term with Gherkin names in it: each name becomes the scenario's name ("Seepark B1")
+		withNames: (text: string) =>
+			[...names.keys()]
+				.sort((a, b) => b.length - a.length)
+				.reduce((term, title) => term.replace(title, names.get(title)!), text),
+
+		async building(title: string, city: string, street?: string) {
 			const building = await post('buildings', {
 				name: unique(title),
-				address: 'Testweg 1',
+				address: street ? unique(street) : 'Testweg 1',
 				postalCode: '8400',
 				city,
 				canton: 'ZH'
@@ -261,8 +273,13 @@ export function testData(api: CallTheApi) {
 			await remove(`buildings/${ids.get(title)}`);
 		},
 
+		// a statement seeded here, or one a run created
 		async removeStatement(tenantTitle: string, year: number) {
-			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}`);
+			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`) ?? (await statementOf(tenantTitle, year)).id}`);
+		},
+
+		async statementNumber(tenantTitle: string, year: number): Promise<string> {
+			return (await statementOf(tenantTitle, year)).statementNumber;
 		},
 
 		async statementPdf(tenantTitle: string, year: number) {
@@ -289,6 +306,17 @@ export function testData(api: CallTheApi) {
 
 		async sendStatement(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
+		},
+
+		async contractStart(tenantTitle: string, startDate: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { startDate });
+		},
+
+		// #120: the statement is replaced; `correct` also creates its berichtigte Abrechnung
+		async replaceStatement(tenantTitle: string, year: number, correct = false) {
+			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
+			await post(`statements/${id}/replace`, {});
+			if (correct) ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
 		},
 
 		async resetPayment(tenantTitle: string, year: number) {

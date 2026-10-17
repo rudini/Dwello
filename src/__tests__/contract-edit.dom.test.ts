@@ -98,7 +98,7 @@ describe('Mietvertrag bearbeiten', () => {
 		await save();
 
 		expect(puts()).toEqual([]);
-		expect(byTestId('form-error')!.textContent).toContain('Nettomiete ist erforderlich');
+		expect(byTestId('form-error')!.textContent).toContain('Nettomiete ist erforderlich.');
 		expect(document.activeElement).toBe(byTestId('contract-base-rent-input'));
 	});
 

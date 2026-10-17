@@ -141,7 +141,7 @@ Then('ist die Kategorie {string} nicht umlagefähig', async ({ verwalter, names 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass es die Kategorie {string} schon gibt',
 	async ({ verwalter, names }, title: string) => {
-		const message = `Eine Kategorie mit dem Namen "${names.get(title)}" existiert bereits.`;
+		const message = `Eine Kategorie mit dem Namen «${names.get(title)}» existiert bereits.`;
 		await verwalter.sees(errorMessageShown(message)).toBe(true);
 	}
 );

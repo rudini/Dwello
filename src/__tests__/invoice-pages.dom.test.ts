@@ -274,7 +274,7 @@ describe('Rechnungsdetail', () => {
 			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann rechnen die neuen Abrechnungen die Rechnung so ab, wie sie jetzt ist.'
 		);
 		expect(hint).toContain(
-			'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Verlangt die Abrechnung zu viel, schulden Sie dem Mieter die Differenz: Ziehen Sie sie von der Nachzahlung ab oder erstatten Sie sie. Ob Sie zusätzliche Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
+			'Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung. Die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt. Lassen Sie sich im Zweifel beraten.'
 		);
 	});
 
@@ -289,7 +289,7 @@ describe('Rechnungsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel Bezahltes zurück. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 
@@ -466,9 +466,9 @@ describe('Rechnung erfassen', () => {
 
 		submit('submit-button');
 
-		expect(text()).toContain('Bitte wählen Sie ein Gebäude');
-		expect(text()).toContain('Bitte geben Sie einen Rechnungssteller ein');
-		expect(text()).toContain('Bitte geben Sie einen gültigen Betrag ein');
+		expect(text()).toContain('Bitte wählen Sie ein Gebäude.');
+		expect(text()).toContain('Bitte geben Sie einen Rechnungssteller ein.');
+		expect(text()).toContain('Bitte geben Sie einen gültigen Betrag ein.');
 		expect(calls).toEqual([]);
 	});
 
@@ -716,7 +716,7 @@ describe('Rechnung bearbeiten', () => {
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 30.06.2024');
 		expect(warning).toContain(
-			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter; zu viel Bezahltes zahlen Sie zurück.'
+			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist.'
 		);
 	});
 
@@ -798,7 +798,7 @@ describe('Rechnung bearbeiten', () => {
 
 		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c2');
 		submit('submit-button');
-		expect(text()).toContain('Bitte geben Sie einen Grund für die Änderung an');
+		expect(text()).toContain('Bitte geben Sie einen Grund für die Änderung an.');
 		expect(calls).toEqual([]);
 
 		fireEvent(

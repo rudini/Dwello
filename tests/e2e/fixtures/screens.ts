@@ -13,7 +13,7 @@ export const variants = Object.keys(screenList.viewports).flatMap((viewport) =>
 
 // Query strings that put a screen into a state before it loads; a screen may override them in screens.json
 const query: Record<string, string> = {
-	'filtered-empty': '?search=keine-treffer-a11y',
+	'filtered-empty': '?search=xq-a11y-0', // no German word: the apartment list repeats the term (#160)
 	'login-error': '?error=failed'
 };
 
@@ -22,7 +22,7 @@ const address = (screen: { path: string; queries?: object }, state: string) =>
 	screen.path + ((screen.queries as Record<string, string> | undefined)?.[state] ?? query[state] ?? '');
 
 /** The example's address with its ids filled in, and the buildings the statement wizard checks */
-export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string };
+export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string; heatingProfile: string };
 
 /** A screen in a state, with the records it needs */
 export async function exampleOf(seed: TestData, name: string, state: string): Promise<Example> {
@@ -35,7 +35,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview'].includes(state)) return { path, building: '', tankBuilding: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -73,6 +73,14 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	await seed.sendStatement('Anna', 2024);
 	await seed.markPaid('Anna', 2024); // paid: its payment can be reset (#92)
+	// #120: Carla's 2024 statement paid, replaced and corrected; her 2022 one replaced, its correction not created yet
+	// (2022: a replaced statement of a whole year would count as billed for the shorter periods of 2025 the wizard shows)
+	await seed.sendStatement('Carla', 2024);
+	await seed.markPaid('Carla', 2024);
+	await seed.replaceStatement('Carla', 2024, true);
+	await seed.statement('Carla', 'Seeblick', 2022, 'Standard');
+	await seed.sendStatement('Carla', 2022);
+	await seed.replaceStatement('Carla', 2022);
 	// reminded today: the Zahlungsfrist of the Mahnung runs, the next one is possible only later (#107)
 	await seed.sendStatement('Bruno', 2024);
 	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
@@ -144,6 +152,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		partsStatement: seed.idOf('Abrechnung Greta 2025'),
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
+		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
+		correctedStatement: seed.idOf('Abrechnung Carla 2024'),
+		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
@@ -157,7 +168,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	return {
 		path: path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!),
 		building: ids.building!,
-		tankBuilding: seed.idOf('Bergsicht')!
+		tankBuilding: seed.idOf('Bergsicht')!,
+		heatingProfile: ids.heatingProfile!
 	};
 }
 

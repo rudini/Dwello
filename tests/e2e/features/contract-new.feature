@@ -33,11 +33,11 @@ Funktionalität: Neuen Mietvertrag erfassen
 
   Szenario: Ohne Mieter geht es nicht weiter
     Wenn der Liegenschaftsverwalter ohne Angaben weitergeht
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus."
 
   Szenario: Nettomiete fehlt
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" ohne Nettomiete vermieten will
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich."
 
   Szenario: Zurück verliert keine Angaben
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt

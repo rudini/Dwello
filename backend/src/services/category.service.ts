@@ -154,7 +154,7 @@ export async function getAllowedCategories(): Promise<Category[]> {
 async function ensureNameIsFree(name: string, id?: string) {
 	const existing = await getCategoryByName(name);
 	if (existing && existing.id !== id) {
-		throw new Conflict('CATEGORY_NAME_TAKEN', `Eine Kategorie mit dem Namen "${name}" existiert bereits.`, { name });
+		throw new Conflict('CATEGORY_NAME_TAKEN', `Eine Kategorie mit dem Namen «${name}» existiert bereits.`, { name });
 	}
 }
 

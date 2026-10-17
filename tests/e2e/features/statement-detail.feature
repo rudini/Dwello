@@ -279,6 +279,7 @@ Funktionalität: Abrechnungsdetail
 
   # Der Mieter prüft die Abrechnung nach: Verteilschlüssel und Anteile je Position, Heizöl nach Verbrauch
   # (Art. 5 VMWG), Recht auf Belegeinsicht und detaillierte Heizkostenabrechnung (Art. 257b OR, Art. 8 VMWG)
+  # #249: das PDF sagt «Gebäude» wie die App
   Szenario: Das PDF erklärt die Verteilung und den Heizölverbrauch
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
@@ -288,6 +289,8 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Pro Fläche (m²) 70.00 / 70.00 m²"
+    Und steht im PDF "Kosten des Gebäudes"
+    Und steht im PDF nicht "Liegenschaft"
     Und steht im PDF "Anfangsbestand am 31.12.2023 CHF 600.00"
     Und steht im PDF "Verbrauch CHF 1'500.00"
     Und steht im PDF "Seite 1 von"
@@ -442,6 +445,16 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann trägt das PDF den Titel "Décompte des charges"
 
+  # #351: ein schon auf Deutsch erstelltes PDF eines Entwurfs bleibt nicht in der alten Sprache, auch am selben Tag
+  Szenario: PDF eines Entwurfs folgt der geänderten Sprache des Mieters
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und die Korrespondenz an "Eva Frei" ist auf "Französisch"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann trägt das PDF den Titel "Décompte des charges"
+
   # #105: vor dem Erstellen sagt die Abrechnung, in welcher Sprache das PDF entsteht
   Szenario: Abrechnung nennt die Sprache ihres PDFs
     Angenommen die Korrespondenz an "Eva Frei" ist auf "Französisch"
@@ -588,3 +601,107 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann hat die Abrechnung den Status "Entwurf"
     Und weist die Abrechnung auf keine geänderten Rechnungen hin
+
+  # #120, #358 (A-11): eine versendete Abrechnung wird ersetzt und bleibt unverändert; die berichtigte Abrechnung
+  # bekommt eine neue Nummer und nennt die ersetzte
+  Szenario: Versendete Abrechnung berichtigen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigt
+    Dann bestätigt Dwello "Die Abrechnung ist ersetzt."
+    Und hat die Abrechnung den Status "Ersetzt"
+    Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann hat die Abrechnung den Status "Entwurf"
+    Und nennt die Abrechnung, dass sie die Abrechnung 2024 von "Eva Frei" ersetzt
+
+  # #120: die Bestätigung nennt die Folge und die Verjährung, bevor etwas geändert wird
+  Szenario: Vor dem Berichtigen die Folge bestätigen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigen will
+    Dann sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt
+    Und nennt die Bestätigung die Verjährung nach fünf Jahren
+    Und hat die Abrechnung den Status "Versendet"
+
+  # #120: eine später erfasste Rechnung wird mit der berichtigten Abrechnung nachverlangt; bezahlt sind 430.00 + 3 %
+  # Verwaltungspauschale = 442.90. Neu: 430.00 + 182.00 (Hauswart 732.00 × 91/366) + 3 % = 630.36, abzüglich 442.90
+  # = 187.46, auf 5 Rappen zugunsten des Mieters 187.45
+  Szenario: Berichtigte Abrechnung rechnet die Zahlung an
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist bezahlt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigt
+    Und der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann rechnet die Abrechnung "CHF 442.90" als bereits bezahlt an
+    Und beträgt der Saldo der Abrechnung "CHF 187.45"
+
+  # #120: die ersetzte Abrechnung wird nicht mehr gemahnt (auch nach Ablauf der Zahlungsfrist), nicht bezahlt, nicht
+  # bearbeitet und nicht noch einmal ersetzt
+  Szenario: Ersetzte Abrechnung bleibt unverändert
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Zahlungsfrist der Abrechnung 2024 von "Eva Frei" ist abgelaufen
+    Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann hat die Abrechnung den Status "Ersetzt"
+    Und bietet die Detailseite weder Zahlung noch Mahnung noch Bearbeitung noch Berichtigung der Abrechnung an
+    Und sagt die Abrechnung "Diese Abrechnung ist ersetzt und gilt nicht mehr."
+    Und nennt die Abrechnung keine Zahlungsfrist
+    Und weist die Abrechnung auf keine geänderten Rechnungen hin
+
+  Szenario: Von der ersetzten Abrechnung zum Mietvertrag wechseln
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter den Mietvertrag der ersetzten Abrechnung öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Eva Frei"
+
+  # Persona Anna I4: der Mieter zog erst 2025 ein; die versendete Abrechnung 2024 ist ersetzt, eine berichtigte gibt es
+  # nicht (Fachreview W2e V-5)
+  Szenario: Keine berichtigte Abrechnung ohne Mietstage in der Periode
+    Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Abrechnung 2024 von "Marc Huber" ist ersetzt
+    Und der Mietvertrag von "Marc Huber" beginnt danach am "2025-05-01"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Teilen Sie dem Mieter mit, dass die Abrechnung"
+    Und hat die Abrechnung den Status "Ersetzt"
+
+  Szenario: Von der ersetzten Abrechnung zur berichtigten wechseln
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist berichtigt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die berichtigte Abrechnung öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der berichtigten Abrechnung 2024 von "Eva Frei"
+
+  Szenario: Von der berichtigten Abrechnung zur ersetzten wechseln
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist berichtigt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die ersetzte Abrechnung öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+
+  # #120, Fachreview W2e V-2: der Mieter hat die ersetzte Abrechnung mit ihrem Zahlteil noch; das PDF sagt, dass sie
+  # nicht mehr gilt, und rechnet die 442.90 an, die darauf bezahlt sind
+  Szenario: PDF der berichtigten Abrechnung nennt die ersetzte und das schon Bezahlte
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist bezahlt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und die Abrechnung 2024 von "Eva Frei" ist berichtigt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung."
+    Und steht im PDF "bereits bezahlt CHF 442.90"
+    Und steht im PDF "Nachzahlung 187.45"

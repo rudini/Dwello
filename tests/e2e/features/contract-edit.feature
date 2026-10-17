@@ -20,7 +20,7 @@ Funktionalität: Mietvertrag bearbeiten
 
   Szenario: Mietzins fehlt
     Wenn der Liegenschaftsverwalter den Mietzins leert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich."
 
   Szenario: Mietzins in Schweizer Schreibweise
     Wenn der Liegenschaftsverwalter den Mietzins auf "1'450" Franken ändert
@@ -51,6 +51,19 @@ Funktionalität: Mietvertrag bearbeiten
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
+
+  # #120, #358: eine versendete Abrechnung sperrt das Datum, bis sie ersetzt ist
+  Szenario: Vertragsbeginn nach dem Beginn einer versendeten Abrechnung
+    Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Stimmt es, berichtigen Sie zuerst jede dieser Abrechnungen."
+
+  Szenario: Vertragsbeginn nach dem Berichtigen der Abrechnung ändern
+    Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Und die Abrechnung 2025 von "Anna Keller" ist ersetzt
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
 
   # Ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen (#143)
   Szenario: Mietverträge der Wohnung lassen sich nicht laden
