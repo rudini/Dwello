@@ -5,6 +5,7 @@
 
 import { eq, sql, desc, and, gte, lte, ilike, isNull, or } from 'drizzle-orm';
 import { db } from '../db/connection';
+import { recordAudit } from './audit-log.service';
 import {
 	invoices,
 	buildings,
@@ -338,7 +339,24 @@ export async function updateInvoice(
 
 	if (!updated) return null;
 
-	return await getInvoice(id);
+	return recordAllocability(existing, await getInvoice(id));
+}
+
+/** #357: an invoice that leaves the statements or comes back into them goes into the Protokoll; returns it */
+async function recordAllocability(before: InvoiceWithDetails, after: InvoiceWithDetails | null) {
+	if (after && after.isValidUtilityCost !== before.isValidUtilityCost) {
+		const { id, description, billingEntityName, invoiceDate, amount, building, isValidUtilityCost } = after;
+		await recordAudit('invoice_allocability_changed', {
+			invoiceId: id,
+			description,
+			supplier: billingEntityName,
+			invoiceDate,
+			amount,
+			building: building?.name,
+			allocable: isValidUtilityCost
+		});
+	}
+	return after;
 }
 
 /**
@@ -452,7 +470,7 @@ export async function recategorizeInvoiceById(id: string): Promise<{
 			})
 			.where(eq(invoices.id, id));
 
-		const updatedInvoice = await getInvoice(id);
+		const updatedInvoice = await recordAllocability(invoice, await getInvoice(id));
 
 		return {
 			success: true,

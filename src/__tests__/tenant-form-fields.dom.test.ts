@@ -7,9 +7,9 @@ describe('Mieterformular nach einem abgelehnten Speichern', () => {
 	it('nimmt die Fehler der Adresse weg, wenn der Korrespondenzkanal wechselt', () => {
 		show(TenantFormFields, {
 			errors: {
-				firstName: 'Vorname ist erforderlich',
-				address: 'Für Briefe ist eine Adresse erforderlich',
-				city: 'Für Briefe ist ein Ort erforderlich'
+				firstName: 'Vorname ist erforderlich.',
+				address: 'Für Briefe ist eine Adresse erforderlich.',
+				city: 'Für Briefe ist ein Ort erforderlich.'
 			}
 		});
 
@@ -31,4 +31,17 @@ it('bietet die Sprache für Abrechnung und Mahnungen auf Deutsch, Französisch, 
 	expect(select.labels![0].textContent).toContain('Sprache für Abrechnung und Mahnungen');
 	expect(document.body.textContent).toContain('In dieser Sprache erstellt Dwello die Nebenkostenabrechnung und die Mahnungen.');
 	expect(document.body.textContent).not.toContain('Rätoromanisch');
+});
+
+// #68: die Hilfe gehört zur ganzen Korrespondenzadresse, das Beispiel der Strasse bleibt bei der Strasse (Review C-1)
+it('beschreibt die Korrespondenzadresse mit ihrer Hilfe, ohne die Beschreibung der Strasse zu verdecken', () => {
+	show(TenantFormFields, {});
+
+	const fieldset = byTestId('tenant-address-help')!.closest('fieldset')!;
+	const help = document.getElementById(fieldset.getAttribute('aria-describedby')!)!;
+	expect(help.textContent).toContain('Hierhin gehen Abrechnungen und Mahnungen');
+	const street = byTestId('tenant-address-input')!;
+	for (const id of street.getAttribute('aria-describedby')!.split(' '))
+		expect(document.querySelectorAll(`[id="${id}"]`)).toHaveLength(1);
+	expect(byTestId('tenant-country-select')!.getAttribute('aria-required')).toBe('false');
 });

@@ -1,6 +1,6 @@
 /**
- * Wording of payment reminders (Zahlungserinnerung, 2. and 3. Mahnung), shared by the PDF and the e-mail, in the
- * tenant's Sprache (#106); terms as in docs/design/i18n-begriffe.md
+ * Wording of payment reminders (Zahlungserinnerung, 2. and 3. Mahnung), shared by the PDF and the e-mail, and of the
+ * e-mail that sends a statement (#86), in the tenant's Sprache (#106); terms as in docs/design/i18n-begriffe.md
  */
 
 import type { Language } from './pdf.service';
@@ -24,6 +24,8 @@ const NBSP = ' '; // French puts it before «:»
 
 const WORDING = {
 	de: {
+		statementTitle: 'Nebenkostenabrechnung',
+		attached: (s: string) => `im Anhang erhalten Sie die ${s}.`,
 		titles: ['Zahlungserinnerung', '2. Mahnung', '3. Mahnung'],
 		subject: (number: string) => `Nebenkostenabrechnung ${number}`,
 		statement: ({ number, start, end }: Dates) => `Nebenkostenabrechnung ${number} für die Periode ${start} – ${end}`,
@@ -41,23 +43,27 @@ const WORDING = {
 		closing: 'Freundliche Grüsse'
 	},
 	fr: {
+		statementTitle: 'Décompte des charges',
+		attached: (s: string) => `Vous trouverez ci-joint le ${s}.`,
 		titles: ['Rappel de paiement', '2e rappel', '3e rappel'],
 		subject: (number: string) => `Décompte des charges ${number}`,
 		statement: ({ number, start, end }: Dates) => `décompte des charges ${number} pour la période du ${start} au ${end}`,
 		openings: [
-			(s: string) => `Sauf erreur de notre part, le ${s} n’est pas encore payé. Ce paiement vous a peut-être échappé.`,
-			(s: string) => `Malgré notre rappel de paiement, le ${s} n’est toujours pas payé.`,
+			(s: string) => `Sauf erreur de notre part, le ${s} n’a pas encore été réglé. Ce paiement vous a peut-être échappé.`,
+			(s: string) => `Malgré notre rappel de paiement, le ${s} n’a toujours pas été réglé.`,
 			(s: string) =>
-				`Malgré deux rappels, le ${s} n’est toujours pas payé. Veuillez régler le montant immédiatement, faute de quoi nous devrons entreprendre d’autres démarches.`
+				`Malgré deux rappels, le ${s} n’a toujours pas été réglé. Veuillez régler le montant sans délai, faute de quoi nous nous verrons contraints d’entreprendre d’autres démarches.`
 		],
 		amount: `Montant dû${NBSP}: `,
 		payBy: (date: string) => `Veuillez virer le montant au plus tard le ${date} sur le compte suivant${NBSP}:`,
 		reference: (reference: string) => `Référence ${reference} (à indiquer lors du paiement)`,
-		alreadyPaid: 'Si vous avez déjà effectué le paiement, veuillez considérer ce courrier comme sans objet.',
+		alreadyPaid: 'Si vous avez déjà effectué le paiement, veuillez considérer ce rappel comme sans objet.',
 		salutation: 'Bonjour',
 		closing: 'Meilleures salutations'
 	},
 	it: {
+		statementTitle: 'Conteggio spese accessorie',
+		attached: (s: string) => `In allegato le inviamo il ${s}.`,
 		titles: ['Promemoria di pagamento', '2° sollecito', '3° sollecito'],
 		subject: (number: string) => `Conteggio spese accessorie ${number}`,
 		statement: ({ number, start, end }: Dates) => `conteggio spese accessorie ${number} per il periodo dal ${start} al ${end}`,
@@ -65,7 +71,7 @@ const WORDING = {
 			(s: string) => `Secondo la nostra contabilità, il ${s} non è ancora stato pagato. Forse il pagamento le è sfuggito.`,
 			(s: string) => `Nonostante il nostro promemoria di pagamento, il ${s} non è ancora stato pagato.`,
 			(s: string) =>
-				`Nonostante due solleciti, il ${s} non è ancora stato pagato. La preghiamo di saldare l’importo immediatamente, altrimenti dovremo avviare ulteriori provvedimenti.`
+				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non pagato. Le chiediamo di saldare l’importo senza indugio, altrimenti dovremo adottare ulteriori provvedimenti.`
 		],
 		amount: 'Importo dovuto: ',
 		payBy: (date: string) => `La preghiamo di versare l’importo entro il ${date} sul seguente conto:`,
@@ -75,12 +81,14 @@ const WORDING = {
 		closing: 'Cordiali saluti'
 	},
 	en: {
+		statementTitle: 'Utility cost statement',
+		attached: (s: string) => `Please find attached the ${s}.`,
 		titles: ['Payment reminder', '2nd reminder', '3rd reminder'],
 		subject: (number: string) => `Utility cost statement ${number}`,
 		statement: ({ number, start, end }: Dates) => `utility cost statement ${number} for the period ${start} – ${end}`,
 		openings: [
 			(s: string) => `According to our records, the ${s} is still unpaid. You may have overlooked the payment.`,
-			(s: string) => `Despite our payment reminder, the ${s} has not yet been paid.`,
+			(s: string) => `Despite our payment reminder, the ${s} has still not been paid.`,
 			(s: string) =>
 				`Despite two reminders, the ${s} has still not been paid. Please settle the amount immediately; otherwise we will have to take further steps.`
 		],
@@ -128,5 +136,31 @@ export function reminderLetter(input: ReminderLetterInput) {
 		paragraphs,
 		closing,
 		text: [`${salutation},`, ...paragraphs, closing].join('\n\n')
+	};
+}
+
+export interface StatementMailInput {
+	statementNumber: string;
+	periodStart: string;
+	periodEnd: string;
+	tenant: { firstName: string; lastName: string };
+	sender: string; // the Firmenname
+	balance: string; // what the Saldo asks the tenant to do, as the PDF says it
+	language: Language;
+}
+
+/** The e-mail that sends a statement's PDF: its title also names the stored Dokument */
+export function statementMail(input: StatementMailInput) {
+	const w = WORDING[input.language];
+	const statement = w.statement({
+		number: input.statementNumber,
+		start: swissDate(input.periodStart),
+		end: swissDate(input.periodEnd)
+	});
+	const salutation = `${w.salutation} ${input.tenant.firstName} ${input.tenant.lastName}`;
+	return {
+		title: w.statementTitle,
+		subject: `${w.statementTitle} – ${input.statementNumber}`,
+		text: [`${salutation},`, `${w.attached(statement)} ${input.balance}`, `${w.closing}\n${input.sender}`].join('\n\n')
 	};
 }

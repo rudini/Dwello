@@ -121,7 +121,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 │  - Contracts, Invoices, Statements                       │
 │  - Configuration, Categories, Distribution Keys          │
 │  - Blob storage for PDFs and contracts                   │
-│  - Audit logs (planned)                                  │
+│  - Protokoll (audit log, #357)                           │
 └──────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────┐
@@ -478,12 +478,13 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
 - The Saldo (costs minus Akonto) is rounded to 5 Rappen only in the tenant's favour, a Nachzahlung down and a Rückerstattung up (#79); the statement shows the amount before rounding and the rounding
+- A Saldo below CHF 5.00 (Nachzahlung or Rückerstattung, the rounded one) is neither claimed nor paid out: the PDF says so, without payment part or IBAN request; the statement is paid on sending (amount paid 0.00) and cannot be gemahnt; nothing is carried forward (#94)
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**
 - Simple percentage input field
 - Help text naming the customary guideline (up to 3%)
-- Audit trail showing when percentage was last changed (planned, not implemented)
+- The Protokoll under «Einstellungen» lists each change of the percentage with the old and the new rate and its date (#357)
 
 **Statement Impact:**
 - Automatically calculated per apartment
@@ -549,14 +550,14 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - Append Swiss QR-bill to each statement with an amount due (SIX layout: receipt 62 mm, payment part, 105 mm high at
   the bottom of the last page)
 - Store PDFs in database
-- Option to download all as ZIP (planned, not implemented)
+- Option to download all PDFs of the run as one ZIP (#356)
 
 **Statement Details:**
 
 **Header Section:**
 - Statement number (auto-generated, unique identifier)
 - Statement date (date statement was issued)
-- Tenant name and address
+- Tenant name and Korrespondenzadresse; abroad the country alone on the last line, in capitals, a neighbouring country in its language, any other in English (Swiss Post, #102)
 - Apartment identification (floor, size, room count)
 - Apartment address (building address + unit number)
 - Accounting period (from - to dates)
@@ -621,6 +622,12 @@ BALANCE (refund): CHF 30
 4. **Bezahlt** (`paid`) - Settled; «Zahlung zurücksetzen» takes a wrong payment back to Versendet or Überfällig, recorded in the Verlauf (#92)
 5. **Partial** (future) - If multiple transactions needed
 
+**Sending (#86):**
+- Tenant with Korrespondenzkanal E-Mail: «Per E-Mail senden» e-mails the PDF (with QR-bill) in the tenant's Sprache and stores it as a Dokument; no batch sending
+- Korrespondenzkanal Brief: the property manager delivers the PDF and marks the statement as sent
+- A failed e-mail (no address, not set up, refused) leaves the statement Entwurf and says what to do: send again, or deliver it by letter («Per Brief zustellen»)
+- The statement is dated, and the Zahlungsfrist counted, from the day it goes out (scenarios in `statement-send.feature`)
+
 **Status Management:**
 - Mark statement as paid when tenant pays
 - Record payment date and amount
@@ -631,7 +638,7 @@ BALANCE (refund): CHF 30
 
 **Reminders (manual, levels 1–3):**
 - The property manager creates a reminder for an overdue statement: Zahlungserinnerung (level 1), 2. Mahnung, 3. Mahnung; a fourth is not possible
-- A reminder is possible as soon as the payment deadline has passed; the setting «Reminder period» (`reminder_after_days`, default 14 days) is not applied; automatic reminders are planned, not implemented
+- A reminder is possible as soon as the payment deadline has passed; the setting «Reminder period» (`reminder_after_days`, default 14 days) is not applied; automatic reminders: «Vision, nicht geplant» (#111)
 - Each reminder is a PDF in the tenant's documents and goes out by e-mail or letter according to the tenant's Korrespondenzkanal (scenarios in `statement-reminder.feature`)
 - Show reminder status on statement detail view
 - Log of all reminders sent (for audit trail)
@@ -704,14 +711,14 @@ BALANCE (refund): CHF 30
 - IBAN: Configured in settings
 - Reference number: QR reference (QRR) only when the configured IBAN is a QR-IBAN; with a normal IBAN no reference
 - Amount: Total balance due (CHF)
-- Debtor: Tenant name and address
+- Debtor: Tenant name and Korrespondenzadresse with its country (ISO code); printed with the country code before the postal code outside Switzerland, e.g. «DE-78462 Konstanz» (#102)
 - Payment description: Statement number and period reference
 
 **IBAN Management:**
-- Global IBAN setting (Swiss bank account details)
+- Global IBAN setting (bank account in Switzerland or Liechtenstein)
 - Stored securely in configuration
 - Multiple IBANs per building (future feature)
-- Validation with a valid MOD-97 checksum: the settings form accepts only Swiss IBANs (CH), the QR-bill service also Liechtenstein (LI); which one applies is open (#191)
+- Validation: an IBAN from Switzerland (CH) or Liechtenstein (LI) with a valid MOD-97 checksum, in the settings form and the QR-bill service alike (#191)
 
 **QR Code Generation:**
 - Encodes all necessary payment information
@@ -763,7 +770,7 @@ BALANCE (refund): CHF 30
 
 **Manual Override:**
 - An invoice of an allocable category can be excluded from statements; an invoice of a non-allocable category is never allocable, whatever the form or the LLM sends
-- Override creates audit log entry (planned, not implemented)
+- An exclusion, and taking it back, goes into the Protokoll under «Einstellungen» (#357)
 
 **Reporting:**
 - Statistics on % of invalid costs by category
@@ -954,7 +961,7 @@ BALANCE (refund): CHF 30
 - Email (required only when the Korrespondenzkanal is e-mail)
 - Phone (optional)
 - Korrespondenzkanal: letter (default) or e-mail
-- Address (street, postal code, city)
+- Korrespondenzadresse (street with house number, postal code, city, country; country Schweiz unless chosen, #102), with the help «Hierhin gehen Abrechnungen und Mahnungen; nach dem Auszug die neue Adresse eintragen» (#68); a 4-digit postal code is checked only in Switzerland and Liechtenstein
 - Notes (optional)
 - Submit/Cancel
 
@@ -1020,7 +1027,7 @@ BALANCE (refund): CHF 30
 - Invalid invoices highlighted in list
 - When added to statement, system warns user
 - Option to exclude from statement distribution
-- Audit log shows which invalid costs were excluded (planned, not implemented)
+- The Protokoll lists each invoice that becomes not allocable or allocable again, also through its category or the KI, and how many invoices a category change excluded (#357)
 
 ---
 
@@ -1099,7 +1106,7 @@ BALANCE (refund): CHF 30
 
 **Tab 7: IBAN Setting**
 - IBAN input field (for QR-bill generation)
-- Format validation (settings form: CH only; QR-bill service: CH or LI, #191; MOD-97 checksum)
+- Format validation: CH or LI with a valid MOD-97 checksum (#191)
 - Test QR-bill preview
 - Help text: "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung."
 - A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference
@@ -1150,7 +1157,7 @@ BALANCE (refund): CHF 30
 - "Save but don't generate" (for review later)
 - Progress bar showing generation status
 - Result: "Successfully generated X statements"
-  - Button: "Download all as ZIP" (planned, not implemented)
+  - Button: "Download all as ZIP" (#356)
   - Button: "View statements list"
 
 **Statement List View:**
@@ -1239,7 +1246,7 @@ BALANCE (refund): CHF 30
 ### 7.2 Security
 
 **Authentication:**
-- OAuth 2.0 / SSO integration (Google, Microsoft; Swiss eID planned, not implemented)
+- OAuth 2.0 / SSO integration (Google, Microsoft; Swiss eID: «Vision, nicht geplant», #111)
 - No direct password storage
 - Secure session tokens with expiration
 - HTTPS/TLS 1.2+ for all communication
@@ -1248,7 +1255,7 @@ BALANCE (refund): CHF 30
 - Role-based access control (future: multi-user support)
 - Single user in MVP has full access
 - Session: the session JWT expires after `JWT_EXPIRY` (default 7 days); the open app refreshes it periodically (every 50 minutes). No inactivity timeout is implemented
-- Login audit logging (planned, not implemented)
+- Each login goes into the Protokoll with its time and provider (#357)
 
 **Data Protection:**
 - SQL injection prevention (parameterized queries, ORM)
@@ -1259,13 +1266,12 @@ BALANCE (refund): CHF 30
 
 **Data at Rest:**
 - No passwords or OAuth tokens are stored
-- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): planned, not implemented; depends on deployment
+- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): «Vision, nicht geplant»; an operations decision of the installation (#111; O-3, O-6 in `docs/design/offene-punkte.md`)
 
-**Audit Logging (planned, not implemented):**
-- Log all sensitive operations (invoice changes, statement generation)
-- Log invalid access attempts
-- Retention: 1 year of logs
-- Admin dashboard for log review (future feature)
+**Audit Logging (Protokoll, #357, decided in #111):**
+- The Protokoll under «Einstellungen» records, each with its time: logins (provider only), changes of the Verwaltungspauschale rate, of a category's allocability, invoices that become not allocable or allocable again, reset payments and corrections of sent statements (#358)
+- Entries stay until the landlord deletes them (one at a time, confirmed); no automatic retention
+- Not part of the decision: other invoice changes, statement generation, failed access attempts
 
 ---
 
@@ -1455,7 +1461,7 @@ BALANCE (refund): CHF 30
 - **Cost:** Free (open source)
 
 **OAuth Provider**
-- **Options:** Google OAuth, Microsoft Azure AD, Swiss eID (future)
+- **Options:** Google OAuth, Microsoft Azure AD; Swiss eID: «Vision, nicht geplant» (#111)
 - **Purpose:** Secure user authentication (SSO)
 - **Integration:** Callback to `/auth/callback` endpoint
 - **Tokens:** Access token stored securely, refresh token for session extension
@@ -1548,7 +1554,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 - **Document** (`documents`)
 - **Configuration** (`configuration`, key/value; keys and defaults in `backend/src/services/config.service.ts`: `accounting_period`, `management_fee_pct`, `default_heating_profile_id`, `default_distribution_key_id`, `company_name`, `company_address`, `company_postal_code`, `company_city`, `iban`, `payment_deadline_days` (default 30), `reminder_after_days` (default 14), `default_language`)
 
-An audit log is planned, not implemented.
+- **Protokoll** (`audit_log`, #357): logins and changes, each with its time and a snapshot of what it names (`docs/data-model.md`)
 
 ---
 
@@ -1646,7 +1652,7 @@ An audit log is planned, not implemented.
 - PDF embedding in database
 - Multi-language PDF templates (German, French, Italian, English)
 - Statement number generation
-- PDF download and batch download (ZIP; planned, not implemented)
+- PDF download and batch download (ZIP of a run: #356)
 - QR-bill validation and testing
 - PDF preview in browser
 
@@ -1708,7 +1714,7 @@ An audit log is planned, not implemented.
 - LLM categorization aligned with allowed/disallowed costs
 - Data retention policies implemented (10 years for financial records)
 - GDPR compliance for EU tenants verified
-- Audit logs capturing all sensitive operations
+- Protokoll of logins and changes that affect statements (#357)
 
 ---
 

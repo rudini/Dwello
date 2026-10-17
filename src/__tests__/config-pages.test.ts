@@ -79,8 +79,12 @@ describe('Einstellungen', () => {
 
 	it('meldet Fehler pro Feld', () => {
 		expect(
-			settingsPage({ errors: { iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein' } })
-		).toContain('Bitte geben Sie eine gültige Schweizer IBAN ein');
+			settingsPage({
+				errors: {
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.'
+				}
+			})
+		).toContain('Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.');
 	});
 
 	it('bestätigt das Speichern und nennt, was gespeichert ist', () => {
@@ -119,6 +123,15 @@ describe('Einstellungen', () => {
 		]) {
 			expect(body).toMatch(new RegExp(`<a href="${href}"[^>]*>${label}</a>`));
 		}
+	});
+
+	// Personas on #357 (Anna P-1, Helga P-3, Marco P-2): at the end of the long form nobody found it
+	it('führt gleich nach den Stammdaten zum Protokoll, vor dem Formular', () => {
+		const body = settingsPage();
+
+		const protokoll = body.search(/<a href="\/config\/audit-log"[^>]*>Protokoll<\/a>/);
+		expect(protokoll).toBeGreaterThan(body.indexOf('href="/config/heating-profiles"'));
+		expect(protokoll).toBeLessThan(body.indexOf('<form'));
 	});
 });
 

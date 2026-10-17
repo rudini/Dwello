@@ -36,7 +36,7 @@ describe('Fehlercodes der Formel', () => {
 	it('nennt einen negativen Anteil', () => {
 		const result = validateFormulaForDistribution('{area} - 100');
 
-		expect(result.errors).toContain('Die Formel ergibt für die Kleine Wohnung (50 m², 2 Zimmer) einen negativen Wert.');
+		expect(result.errors).toContain('Die Formel ergibt für das Beispiel «Kleine Wohnung (50 m², 2 Zimmer)» einen negativen Wert.');
 		expect(result.errorCodes).toContainEqual({
 			code: 'FORMULA_SAMPLE_NEGATIVE',
 			params: { sample: 'FORMULA_SAMPLE_SMALL' }

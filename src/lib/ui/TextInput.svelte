@@ -20,6 +20,7 @@
 		disabled = false,
 		onblur,
 		note,
+		helpTestid,
 		testid
 	}: {
 		id: string;
@@ -40,10 +41,11 @@
 		onblur?: () => void;
 		testid?: string;
 		note?: { text: string; testid: string }; // see Field
+		helpTestid?: string;
 	} = $props();
 </script>
 
-<Field {id} {note} {label} {help} {example} {error} {optional}>
+<Field {id} {note} {label} {help} {example} {error} {optional} {helpTestid}>
 	{#snippet children(control)}
 		<input
 			id={control.id}

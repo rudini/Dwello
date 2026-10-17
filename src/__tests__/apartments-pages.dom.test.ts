@@ -147,6 +147,26 @@ describe('Wohnungsliste', () => {
 		expect(reset.getAttribute('href')).toBe('/apartments');
 	});
 
+	// #160: what the search finds stays visible while typing, not only in the placeholder
+	it('sagt am Suchfeld, wonach es sucht', () => {
+		list([apartment()]);
+		const input = byTestId('apartments-search-input')!;
+		const help = document.getElementById(input.getAttribute('aria-describedby')!)!;
+		// a pattern, not a literal example: a typed example would find nothing in the landlord's data (persona Helga)
+		expect(help.textContent!.trim()).toBe(
+			'Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort. Mehrere Wörter grenzen die Suche ein, zum Beispiel Gebäudename und Wohnungsnummer.'
+		);
+		expect(input.getAttribute('placeholder')).toBeNull();
+	});
+
+	it('nennt ohne Treffer den Suchbegriff und wonach gesucht wird', () => {
+		url = new URL('http://localhost/apartments?search=Seepark%20B9');
+		list([]);
+		expect(byTestId('apartments-empty')!.textContent).toContain(
+			'Keine Wohnung passt zu «Seepark B9». Gesucht wird in Wohnungsnummer, Gebäudename, Strasse und Ort.'
+		);
+	});
+
 	it('blättert mit den Filtern zur nächsten Seite', () => {
 		url = new URL('http://localhost/apartments?building=b1');
 		list([apartment()], 30);
@@ -161,7 +181,7 @@ describe('Wohnungsdetail', () => {
 		{
 			id: 'c2',
 			tenantName: 'Beat Huber',
-			rentBrutto: 1430,
+			monthlyTotal: 1430,
 			status: 'active',
 			startDate: '2022-04-01',
 			endDate: null
@@ -169,7 +189,7 @@ describe('Wohnungsdetail', () => {
 		{
 			id: 'c1',
 			tenantName: 'Eva Graf',
-			rentBrutto: 750,
+			monthlyTotal: 750,
 			status: 'ended',
 			startDate: '2018-01-01',
 			endDate: '2022-03-31'
@@ -204,8 +224,8 @@ describe('Wohnungsdetail', () => {
 				}
 			: null,
 		monthlyCosts: rented
-			? { baseRent: 1200, additionalRent: 50, advancePayment: 180, totalBrutto: 1430 }
-			: { baseRent: 0, additionalRent: 0, advancePayment: 0, totalBrutto: 0 },
+			? { baseRent: 1200, additionalRent: 50, advancePayment: 180, monthlyTotal: 1430 }
+			: { baseRent: 0, additionalRent: 0, advancePayment: 0, monthlyTotal: 0 },
 		nextContract: null as null | { tenantId: string; tenantName: string; startDate: string },
 		contractHistory: rented ? history : []
 	});
@@ -304,7 +324,7 @@ describe('Wohnungsdetail', () => {
 			{
 				id: 'c3',
 				tenantName: 'Ruth Meier',
-				rentBrutto: 1630,
+				monthlyTotal: 1630,
 				status: 'future',
 				startDate: '2099-11-01',
 				endDate: null

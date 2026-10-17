@@ -13,6 +13,9 @@ import {
 	endOfContract,
 	managementFeeOfContract,
 	missingStatementsText,
+	missingStatementsShown,
+	billedUntilOfContract,
+	nextStepsText,
 	statementLinkedInDeleteDialog,
 	statusOfContract,
 	totalRent,
@@ -223,6 +226,43 @@ Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed 
 	await verwalter.sees(endOfContract).toContain(date);
 });
 
+Given(
+	'der Mietvertrag von {string} ist bis {string} ausserhalb von Dwello abgerechnet',
+	async ({ seed }, tenant: string, date: string) => {
+		await seed.billedUntil(tenant, date);
+	}
+);
+
+Then('zeigt der Mietvertrag «Abgerechnet bis» {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(billedUntilOfContract).toBe(date);
+});
+
+Given(
+	'der Mietvertrag von {string} ist bis Ende des letzten Jahres ausserhalb von Dwello abgerechnet',
+	async ({ seed }, tenant: string) => {
+		await seed.billedUntil(tenant, `${lastYear}-12-31`);
+	}
+);
+
+Then('zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres', async ({ verwalter }) => {
+	await verwalter.sees(billedUntilOfContract).toBe(`31.12.${lastYear}`);
+});
+
+Given('der Mietvertrag von {string} hat {string} Franken Akonto', async ({ seed }, tenant: string, advance: string) => {
+	await seed.advancePayment(tenant, advance);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er eine ausserhalb von Dwello abgerechnete Periode mit «Abgerechnet bis» einträgt',
+	async ({ verwalter }) => {
+		await verwalter.sees(missingStatementsText).toContain('«Abgerechnet bis» ein');
+	}
+);
+
+Then('meldet der Mietvertrag keine fehlende Abrechnung', async ({ verwalter }) => {
+	await verwalter.sees(missingStatementsShown).toBe(false);
+});
+
 Given('im Mietvertrag von {string} ist keine Verwaltungspauschale vereinbart', async ({ seed }, tenant: string) => {
 	await seed.managementFee(tenant, false);
 });
@@ -288,6 +328,16 @@ Then('zeigt der Dialog keinen Hinweis auf die Frist', async ({ verwalter }) => {
 Then('zeigt der Mietvertrag die Kündigung als erhalten am {string}', async ({ verwalter }, date: string) => {
 	await verwalter.sees(noticeReceivedOn).toBe(date);
 });
+
+// A-5 (#114): the address step names the tenant
+Then(
+	'bitten die nächsten Schritte, die neue Adresse von {string} einzutragen: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(nextStepsText).toContain(
+			`Bitten Sie ${names.get(tenant)} um die neue Adresse und tragen Sie sie beim Mieter ein. ${rest}`
+		);
+	}
+);
 
 Then(
 	'verlinkt der Dialog die Abrechnung {int} von {string}',

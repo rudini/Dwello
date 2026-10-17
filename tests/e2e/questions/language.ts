@@ -62,6 +62,14 @@ const seedValues = [
 	'betrieb@muster-hosting.ch'
 ];
 
+// Country names come from the browser's language data (Intl), not from messages: «Wallis-et-Futuna» is French. Only a
+// text that is a country name and nothing else, an option of the country select (#102, review C-4)
+const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+const countryNames = (language: string) => {
+	const names = new Intl.DisplayNames([language], { type: 'region', fallback: 'none' });
+	return new Set(letters.flatMap((a) => letters.map((b) => names.of(a + b) ?? '')));
+};
+
 /** The texts on the page that still contain German, with the German words; [] when there are none */
 const germanIn = (texts: string[], language: string, userData: string[]) => {
 	const masked = (text: string) =>
@@ -69,7 +77,9 @@ const germanIn = (texts: string[], language: string, userData: string[]) => {
 			.reduce((rest, value) => rest.split(value).join(' '), text)
 			.replace(scenarioRecord, ' ')
 			.replace(seededDescription, ' ');
+	const countries = countryNames(language);
 	return texts.flatMap((text) => {
+		if (countries.has(text.trim())) return [];
 		// a German word, or one with ä, ö, ü or ß, which French, Italian and English never use
 		// English names the canton Graubünden as German does
 		const left = words(masked(language === 'en' ? text.split('Graubünden').join(' ') : text)).filter(

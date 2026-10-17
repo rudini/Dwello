@@ -8,6 +8,7 @@ import {
 	durationOption,
 	fixedApartment,
 	fixedTenant,
+	billedUntilHelp,
 	partiesHelp,
 	rentTakenOver,
 	reviewContractsUnknown,
@@ -15,7 +16,8 @@ import {
 	runningContractHint,
 	startContractsUnknown,
 	tenantSelect,
-	withdrawNoticeOption
+	withdrawNoticeOption,
+	noAgreedCostsNote
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
 import { draftRestored } from '../targets/wizard';
@@ -39,7 +41,9 @@ export const fixedApartmentName = Text.of(fixedApartment);
 export const tenantChoices = Count.of(tenantSelect);
 export const apartmentChoices = Count.of(apartmentSelect);
 export const partiesHelpText = Text.of(partiesHelp);
+export const billedUntilHelpText = Text.of(billedUntilHelp);
 export const runningContractHintText = Text.of(runningContractHint);
 export const enteredAdvancePayment = Value.of(advancePaymentInput);
 export const rentTakenOverText = Text.of(rentTakenOver);
 export const withdrawNoticeHelp = Text.of(withdrawNoticeOption);
+export const noAgreedCostsWarning = Text.of(noAgreedCostsNote);

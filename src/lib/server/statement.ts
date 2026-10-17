@@ -57,6 +57,16 @@ const profileName = (data: BackendStatement): string => {
 		: m.statements_profile_not_applied_unknown({ profile: name });
 };
 
+// A berichtigte Abrechnung and the statement it replaces, and what was paid on the replaced ones (#120)
+const correctionOf = (data: BackendStatement) => ({
+	contractId: data.contractId,
+	paidAmount: amountOrNull(data.paidAmount),
+	replaces: data.replaces ?? null,
+	replacedBy: data.replacedBy ?? null,
+	priorPayments: Number(data.priorPayments ?? 0),
+	priorPaidOn: data.priorPaidOn ?? []
+});
+
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
 export function toStatement(data: BackendStatement): StatementWithDetails {
 	const [tenant, apartment, building] = [
@@ -85,6 +95,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		pdfGeneratedAt: data.pdfGeneratedAt,
 		lastReminderDate: data.reminderSentDate,
 		nextReminderFrom: data.nextReminderFrom,
+		oldAddress: !!data.oldAddress, // A-5: the moved-out tenant still has the building's address
 		notes: data.notes,
 		createdAt: data.createdAt,
 		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
@@ -98,6 +109,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		rentalStart: data.rentalStart,
 		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
+		...correctionOf(data),
 		paymentResets: (data.paymentResets ?? []).map(({ resetOn, paidDate }: BackendStatement) => ({
 			resetOn,
 			paidDate

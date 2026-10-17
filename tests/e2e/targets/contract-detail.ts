@@ -50,6 +50,7 @@ export const missingStatementLink = (periodStart: string) =>
 		page.getByTestId(`contract-missing-statement-link-${periodStart}`)
 	);
 export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));
+export const contractBilledUntil = target('Abgerechnet bis des Mietvertrags', (page) => page.getByTestId('contract-billed-until'));
 export const contractManagementFee = target('Verwaltungspauschale des Mietvertrags', (page) =>
 	page.getByTestId('contract-management-fee')
 );
@@ -67,6 +68,7 @@ export const endDialog = target('Dialog «Mietvertrag beenden»', (page) => page
 export const contractNoticeReceived = target('Kündigung erhalten am', (page) =>
 	page.getByTestId('contract-notice-received')
 );
+export const nextSteps = target('Nächste Schritte', (page) => page.getByTestId('contract-next-steps'));
 // A-6 (#115): an expired fixed-term contract asks whether the tenant still lives in the apartment
 export const fixedTermCheck = target('Frage «Wohnt der Mieter noch in der Wohnung?»', (page) =>
 	page.getByTestId('contract-fixed-term-check')
@@ -81,4 +83,7 @@ export const fixedTermError = target('Meldung zum Weiterführen', (page) =>
 );
 export const deleteDraftAndContinueButton = target('Entwurf löschen und unbefristet weiterführen', (page) =>
 	page.getByTestId('delete-draft-and-continue')
+);
+export const contractAgreedCosts = target('Vereinbarte Nebenkosten des Mietvertrags', (page) =>
+	page.getByTestId('contract-agreed-costs')
 );

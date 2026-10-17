@@ -8,5 +8,6 @@
 	"address": "Seestrasse 12",
 	"postalCode": "8002",
 	"city": "Zürich",
+	"country": "CH",
 	"correspondenceChannel": "email"
 }

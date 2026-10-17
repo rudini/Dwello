@@ -1,6 +1,7 @@
 import { question } from '../screenplay/actor';
 import { Attribute, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
+	nextSteps,
 	endDialogDeathHint,
 	endDialog,
 	noticePeriodHint,
@@ -9,7 +10,9 @@ import {
 	contractApartment,
 	contractEndDate,
 	contractEndError,
+	contractBilledUntil,
 	contractManagementFee,
+	contractAgreedCosts,
 	contractStatus,
 	contractTotalRent,
 	deleteDialog,
@@ -35,11 +38,16 @@ export const endConfirmationInWindow = question(
 
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
+export const missingStatementsShown = Visibility.of(missingStatements);
 export const managementFeeOfContract = Text.of(contractManagementFee);
+export const billedUntilOfContract = Text.of(contractBilledUntil); // #133
 export const endDialogDeathText = Text.of(endDialogDeathHint);
 export const noticePeriodHintText = Text.of(noticePeriodHint);
 export const noticePeriodHintShown = Visibility.of(noticePeriodHint);
 export const endDialogText = Text.of(endDialog);
 export const noticeReceivedOn = Text.of(contractNoticeReceived);
+export const nextStepsText = Text.of(nextSteps);
 export const fixedTermCheckShown = Visibility.of(fixedTermCheck);
 export const fixedTermErrorText = Text.of(fixedTermError);
+
+export const agreedCostsOfContract = Text.of(contractAgreedCosts);

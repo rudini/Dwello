@@ -169,6 +169,26 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
+	// #119: verschieden eingestellte übrige Abrechnungen: beides aus den Einstellungen
+	it('sagt, wenn die übrigen Abrechnungen verschieden eingestellt sind', async () => {
+		const preset = {
+			building: 'Seeblick',
+			start: '2025-01-01',
+			end: '2025-12-31',
+			fromStatements: false,
+			feeFromSettings: true,
+			differing: true
+		};
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b1'], preset },
+			form: null
+		} as never);
+		await settle();
+		expect(byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen.'
+		);
+	});
+
 	it('beginnt mit der vorgeschlagenen Abrechnungsperiode, in Worten wiederholt', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');
@@ -232,6 +252,8 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	async function toSettings() {
+		// step 3 asks whether the contracts agree the period's Nebenkosten (#91): none open here
+		fakeBff((call) => (call.path.startsWith('/statements/agreements') ? [200, []] : [500]));
 		open();
 		next();
 		await settle();
@@ -386,6 +408,27 @@ describe('Abrechnungen erstellen', () => {
 		expect(findings[0]).toContain('Tankbestand am 31.12.2024 fehlt');
 		expect(byTestId('missing-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Ohne Rechnungen fehlen deren Kosten in den Abrechnungen, und die Mieter erhalten ihr Akonto weitgehend zurück.'
+		);
+	});
+
+	// #76: neue Nebenkosten in einem Gebäude mit einem laufenden befristeten Mietvertrag
+	it('nennt bei neuen Nebenkosten das Vertragsende eines befristeten Mietvertrags im Gebäude', () => {
+		const added = {
+			categoryId: 'w',
+			categoryName: 'Hauswart',
+			kind: 'new',
+			current: { count: 1, total: 900 },
+			previous: { count: 0, total: 0 },
+			missingParts: [],
+			changePercent: null
+		};
+		const check = { buildingId: 'b1', comparedWith: { start: '2023-01-01', end: '2023-12-31' }, hasComparison: true };
+		open({
+			preview,
+			invoices: [{ ...invoices[0], fixedTerm: true, check: { ...check, findings: [added] } }]
+		});
+		expect(byTestId('category-finding')!.textContent).toContain(
+			'Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich'
 		);
 	});
 
@@ -695,7 +738,7 @@ describe('Abrechnungen erstellen', () => {
 		);
 		expect(findings).toEqual([
 			'Kaminfeger: Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF 290.00.',
-			'Kaltwasser: Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
+			'Kaltwasser: Die Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
 			'Heizung: CHF 6’565.00, 37 % mehr als im Vorjahr (CHF 4’800.00). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.'
 		]);
 		expect(check.querySelector('p')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
@@ -853,6 +896,18 @@ describe('Abrechnungen erstellen', () => {
 		expect(hints).toEqual(['Kosten CHF\u00a01’800.00 (60 %) unter dem Akonto. Fehlen Rechnungen?']);
 	});
 
+	// A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
+	it('warnt bei einem ausgezogenen Mieter, der noch die Adresse der Wohnung hat', () => {
+		open({
+			preview: [{ ...preview[0], tenantName: 'Eva Frei', oldAddress: true }, preview[1]],
+			invoices: [invoices[0]]
+		});
+		const warnings = [...document.querySelectorAll('[data-testid="preview-old-address"]')];
+		expect(warnings.map((w) => w.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
+			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
+		]);
+	});
+
 	it('warnt, wenn es für ein Gebäude in der Periode schon Abrechnungen gibt, und verlangt eine Bestätigung', async () => {
 		open({
 			preview,
@@ -931,7 +986,7 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	it('meldet die erstellten Entwürfe und führt zu ihnen', () => {
-		open({ created: 2 });
+		open({ created: ['s1', 's2'] });
 		expect(byTestId('generation-result')!.textContent).toContain(
 			'2 Nebenkostenabrechnungen sind als Entwurf erstellt'
 		);
@@ -939,6 +994,17 @@ describe('Abrechnungen erstellen', () => {
 			'/statements?status=draft&periodStart=2024-01-01&periodEnd=2024-12-31'
 		);
 		expect(byTestId('wizard-next')).toBeNull();
+	});
+
+	// the PDFs of this run only, e.g. to print them in one go (#356)
+	it('bietet die PDFs der erstellten Entwürfe als eine ZIP-Datei an', () => {
+		open({ created: ['s1', 's2'] });
+		expect(byTestId('download-zip-button')!.getAttribute('href')).toBe(
+			'/statements/zip?ids=s1%2Cs2&periodStart=2024-01-01&periodEnd=2024-12-31'
+		);
+		expect(byTestId('download-zip-button')!.textContent).toContain('Alle als ZIP herunterladen');
+		// not to the page of a statement «zip»: the browser itself follows the link to the file
+		expect(byTestId('download-zip-button')!.hasAttribute('data-sveltekit-reload')).toBe(true);
 	});
 });
 

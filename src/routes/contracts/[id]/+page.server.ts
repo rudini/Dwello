@@ -1,11 +1,14 @@
 import { m } from '$lib/paraglide/messages';
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
+import { agreeableCategories } from '$lib/server/category';
+import { agreedNames } from '$lib/contract-form';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { endedPeriodsSince, type AccountingPeriodType } from '$lib/accounting-period';
 import { wizardLink } from '$lib/statement-wizard';
 import { backendMessage } from '$lib/backend-error';
 import {
+	billsIn,
 	contractEndError,
 	localToday,
 	pastEndConfirmation,
@@ -20,8 +23,9 @@ interface ContractDetailsData {
 	missingStatements: { start: string; end: string; href: string }[]; // A-10, #142: newest first
 	// the contract's statements: it cannot be deleted (#116); null when they cannot be read (review C-1)
 	billedBy: { id: string; statementNumber: string; status: string }[] | null;
-	nextSteps: { successor: boolean } | null; // A-4: a notice still running
+	nextSteps: { successor: boolean; ended: boolean } | null; // A-4: a notice still running; A-5: after it the address
 	fixedTermCheck: boolean; // A-6: an agreed end passed, the tenant may have stayed
+	agreedCosts: string[] | null; // #91: the agreed Nebenkosten by name; null when the categories cannot be read
 	contract: RentalContract & {
 		tenant: Tenant;
 		apartment: Apartment;
@@ -53,10 +57,6 @@ async function rows(fetch: typeof globalThis.fetch, path: string): Promise<Row[]
 	return response?.ok ? ((await response.json()).data ?? []) : null;
 }
 
-const rentDaysIn = (contract: Row, { start, end }: { start: string; end: string }) =>
-	String(contract.startDate).slice(0, 10) <= end &&
-	(!contract.endDate || String(contract.endDate).slice(0, 10) >= start);
-
 // Whether the apartment has a contract starting after the end; null when its contracts cannot be read
 async function successorAfter(fetch: typeof globalThis.fetch, contract: Row, end: string) {
 	const response = await fetch(
@@ -71,9 +71,11 @@ async function successorAfter(fetch: typeof globalThis.fetch, contract: Row, end
 // review K-1); null without one, or when the apartment's contracts cannot be read: no hint rather than a wrong one
 async function nextStepsDue(fetch: typeof globalThis.fetch, contract: Row) {
 	const end = contract.endDate ? String(contract.endDate).slice(0, 10) : null;
-	if (!contract.terminated || !end || end < localToday()) return null;
+	if (!contract.terminated || !end) return null;
+	// after the end only the new address, while the moved-out tenant still has the building's (A-5, #114)
+	if (end < localToday()) return contract.oldAddress ? { successor: false, ended: true } : null;
 	const successor = await successorAfter(fetch, contract, end);
-	return successor === null ? null : { successor };
+	return successor === null ? null : { successor, ended: false };
 }
 
 // An agreed end passed without a later contract or «Mieter ist ausgezogen»: the tenant may have stayed, and then
@@ -95,13 +97,16 @@ async function missingStatements(
 	const type = await periodType(fetch);
 	if (!type) return [];
 	const periods = endedPeriodsSince(type, String(contract.startDate).slice(0, 10)).filter(
-		(period) => rentDaysIn(contract, period)
+		(period) => billsIn(contract as Parameters<typeof billsIn>[0], period)
 	);
 	const building = String((contract.building as Row | undefined)?.id);
 	return periods
 		.filter(
 			({ start, end }) =>
-				!statements.some((s) => String(s.periodStart) >= start && String(s.periodEnd) <= end)
+				!statements.some(
+					// a replaced statement no longer bills the period (#120)
+					(s) => s.status !== 'replaced' && String(s.periodStart) >= start && String(s.periodEnd) <= end
+				)
 		)
 		.map(({ start, end }) => ({ start, end, href: wizardLink(building, start, end) }));
 }
@@ -133,6 +138,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				endDate: data.endDate || null,
 				terminated: !!data.terminated,
 				noticeReceivedOn: data.noticeReceivedOn ?? null,
+				billedUntil: data.billedUntil ?? null,
 				baseRent: data.baseRent || '0',
 				additionalRent: data.additionalRent || null,
 				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
@@ -178,6 +184,11 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			nextSteps: await nextStepsDue(fetch, data),
 			fixedTermCheck: await fixedTermCheckDue(fetch, data),
 			contract,
+			// the agreed Nebenkosten (#91); without the categories the page still shows the rest
+			agreedCosts: await agreeableCategories(fetch).then(
+				(categories) => agreedNames(data.agreedCategoryIds ?? [], categories),
+				() => null
+			),
 			rentBreakdown: {
 				baseRent,
 				additionalRent,

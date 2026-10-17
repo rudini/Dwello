@@ -3,19 +3,41 @@ import { runAction } from './helpers/action';
 import { actions } from '../routes/statements/[id]/+page.server';
 import { localToday } from '$lib/contract-status';
 import paidDateRefused from '../../tests/contracts/statement-paid-date-refused.json';
+import correctionRefused from '../../tests/contracts/statement-correction-refused.json';
+import sendRefused from '../../tests/contracts/statement-send-refused.json';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 const today = localToday(); // the day in Switzerland, as the app takes it
 
+// #86: das Backend sendet sie per E-Mail oder markiert sie als versendet, je nach Korrespondenzkanal des Mieters
 describe('Abrechnung versenden', () => {
-	it('setzt den Status im Backend auf versendet', async () => {
+	it('lässt das Backend die Abrechnung versenden', async () => {
 		const { calls, result } = runAction(actions.send, 's1');
 		await result;
 
-		expect(calls).toEqual([{ method: 'PUT', url: `${API}/status`, body: { status: 'sent' } }]);
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/send`, body: {} }]);
 	});
 
-	it('meldet einen Fehler, wenn das Backend den Statuswechsel ablehnt', async () => {
+	it('stellt sie nach einer gescheiterten E-Mail per Brief zu', async () => {
+		const { calls, result } = runAction(actions.send, 's1', 200, { byLetter: 'true' });
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/send`, body: { byLetter: true } }]);
+	});
+
+	it('sagt, was schiefging und was zu tun ist, wenn die E-Mail nicht hinausgeht', async () => {
+		const { result } = runAction(actions.send, 's1', 400, {}, sendRefused);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				sendError:
+					'Der Mieter hat keine E-Mail-Adresse. Erfassen Sie sie beim Mieter und senden Sie die Abrechnung erneut, oder stellen Sie sie per Brief zu.'
+			}
+		});
+	});
+
+	it('meldet einen Fehler, wenn das Backend den Versand ohne Grund ablehnt', async () => {
 		const { result } = runAction(actions.send, 's1', 400);
 
 		expect(await result).toMatchObject({
@@ -169,6 +191,23 @@ describe('Mahnung senden', () => {
 });
 
 describe('Abrechnung laden', () => {
+	// #86: die per E-Mail versendete Abrechnung liegt unter «Dokumente», ist aber keine Mahnung (die nächste Mahnstufe zählt die Mahnungen)
+	it('führt nur die Mahnungen der Abrechnung als Mahnungen', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const [upload] = (await import('../../tests/contracts/documents.json')).default.data;
+		const reminder = { ...upload, id: 'd1', type: 'reminder', reminderLevel: 1 };
+		const sent = { ...upload, id: 'd2', type: 'statement', title: 'Nebenkostenabrechnung' };
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1')) return Response.json(statementJson);
+			if (url.includes('/documents?')) return Response.json({ data: [sent, reminder] });
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { reminders: { id: string }[] };
+		expect(data.reminders.map((document) => document.id)).toEqual(['d1']);
+	});
+
 	// The statement carries no tenant address; the send confirmation needs it for a letter
 	it('ergänzt die Postadresse des Mieters aus den Mieterdaten', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');
@@ -185,6 +224,26 @@ describe('Abrechnung laden', () => {
 			statement: { tenantAddress: string };
 		};
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
+	});
+
+	// Eine Korrespondenzadresse im Ausland nennt ihr Land (#102)
+	it('nennt das Land einer Postadresse im Ausland', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const tenantJson = (await import('../../tests/contracts/tenant.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1'))
+				return Response.json({ ...statementJson, tenantId: 't1' });
+			if (url.endsWith('/tenants/t1')) return Response.json({ ...tenantJson, country: 'DE' });
+			if (url.includes('/invoices/for-statement/')) return Response.json([]);
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as {
+			statement: { tenantAddress: string; oldAddress: boolean };
+		};
+		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich, Deutschland');
+		expect(data.statement.oldAddress).toBe(false);
 	});
 
 	// #96: die Abrechnung kennt die Rechnungen, die sie abrechnet; das Backend nennt die neuen, geänderten und gelöschten
@@ -216,5 +275,43 @@ describe('Abrechnung laden', () => {
 
 		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { laterInvoices: number };
 		expect(data.laterInvoices).toBe(0);
+	});
+});
+
+// #120, #358: berichtigte Abrechnung
+describe('Abrechnung berichtigen', () => {
+	it('ersetzt die Abrechnung im Backend', async () => {
+		const { calls, result } = runAction(actions.replace, 's1');
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/replace`, body: undefined }]);
+	});
+
+	it('meldet, wenn das Backend das Ersetzen ablehnt', async () => {
+		const { result } = runAction(actions.replace, 's1', 409, {}, { code: 'STATEMENT_NOT_REPLACEABLE', params: {} });
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { actionError: 'Nur eine versendete oder bezahlte Abrechnung lässt sich berichtigen. Laden Sie die Seite neu.' }
+		});
+	});
+
+	it('erstellt die berichtigte Abrechnung und öffnet sie', async () => {
+		const { calls, result } = runAction(actions.correct, 's1', 201, {}, { id: 's2' });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: '/statements/s2' });
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/correction`, body: undefined }]);
+	});
+
+	it('sagt ohne Mietstage in der Periode, was zu tun ist', async () => {
+		const { result } = runAction(actions.correct, 's1', 409, {}, correctionRefused);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				actionError:
+					'Der Mietvertrag hat in dieser Abrechnungsperiode keine Mietstage mehr. Darum gibt es keine berichtigte Abrechnung. Teilen Sie dem Mieter mit, dass die Abrechnung NK-AB12CD34-2024-0001 nicht mehr gilt.'
+			}
+		});
 	});
 });

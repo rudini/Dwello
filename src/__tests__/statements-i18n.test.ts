@@ -5,10 +5,13 @@ import { akontoHint, findingText, selectionErrors, statementSteps } from '$lib/s
 import { formatCurrency } from '$lib/utils/format';
 import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
-import { sendStatementReminder } from '$lib/server/statement-actions';
+import { sendStatement, sendStatementReminder } from '$lib/server/statement-actions';
+import { loadDocuments } from '$lib/server/documents';
 import { invoicesInPeriod } from '$lib/server/statement-generation';
 import backendStatement from '../../tests/contracts/statement.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
+import sendRefused from '../../tests/contracts/statement-send-refused.json';
+import documentsJson from '../../tests/contracts/documents.json';
 
 afterEach(() => overwriteGetLocale(() => baseLocale));
 
@@ -39,7 +42,7 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 		expect([balanceLabel(120), balanceLabel(-80), balanceLabel(0)]).toEqual([
 			'Montant à payer',
 			'Remboursement',
-			'Soldé'
+			'Solde nul'
 		]);
 	});
 
@@ -79,7 +82,7 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 			changePercent: null
 		};
 		expect(findingText(finding)).toBe(
-			'La facture pour le mois de mars manque. L’année précédente\u00a0: 2 factures.'
+			'La facture pour mars manque. L’année précédente\u00a0: 2 factures.'
 		);
 	});
 
@@ -154,5 +157,32 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 		const result = await sendStatementReminder(fetch, 's1');
 
 		expect(result).toMatchObject({ reminder: { document: { title: 'Rappel de paiement' } } });
+	});
+
+	// #86: what went wrong and what to do, never the backend's own text
+	it('sagt in der gewählten Sprache, warum die Abrechnung nicht per E-Mail hinausging', async () => {
+		overwriteGetLocale(() => 'fr');
+		const fetch = (async () =>
+			Response.json(sendRefused, { status: 400 })) as typeof globalThis.fetch;
+
+		const refused = await sendStatement(fetch, 's1', false);
+
+		expect(refused).toEqual({
+			status: 400,
+			message: m.backend_statement_tenant_no_email({}, { locale: 'fr' }),
+			undelivered: true
+		});
+		expect(refused?.message).not.toBe(m.backend_statement_tenant_no_email({}, { locale: 'de' }));
+	});
+
+	it('nennt die per E-Mail versendete Abrechnung unter «Dokumente» in der gewählten Sprache', async () => {
+		overwriteGetLocale(() => 'it');
+		const [upload] = documentsJson.data;
+		const fetch = (async () =>
+			Response.json({ data: [{ ...upload, type: 'statement', title: 'Nebenkostenabrechnung' }] })) as typeof globalThis.fetch;
+
+		const [document] = await loadDocuments(fetch, 'statementId=s1');
+
+		expect(document.title).toBe('Conteggio spese accessorie');
 	});
 });

@@ -15,7 +15,9 @@ import {
 	date,
 	index,
 	uniqueIndex,
-	jsonb
+	primaryKey,
+	jsonb,
+	type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -94,6 +96,7 @@ export const tenants = pgTable('tenants', {
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),
+	country: varchar('country', { length: 2 }).notNull().default('CH'), // ISO 3166 code of the Korrespondenzadresse
 	correspondenceChannel: varchar('correspondence_channel', { length: 10 }).notNull().default('letter'), // email, letter
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
@@ -121,6 +124,7 @@ export const rentalContracts = pgTable(
 		endDate: date('end_date'), // null = ongoing
 		terminated: boolean('terminated').default(false).notNull(), // endDate is a Kündigungstermin, not agreed
 		noticeReceivedOn: date('notice_received_on'), // the day the notice arrived (A-3), only with terminated
+		billedUntil: date('billed_until'), // «Abgerechnet bis» (#133): billed outside Dwello up to this day
 		movedOut: boolean('moved_out').default(false).notNull(), // «Mieter ist ausgezogen» after this end (A-6)
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
@@ -153,6 +157,21 @@ export const rentalContractsRelations = relations(rentalContracts, ({ one, many 
 	}),
 	statements: many(utilityStatements)
 }));
+
+// #91: the Nebenkosten a contract agrees, or answered «nicht vereinbart»; no row: not answered, not billed
+export const contractCategories = pgTable(
+	'contract_categories',
+	{
+		contractId: uuid('contract_id')
+			.notNull()
+			.references(() => rentalContracts.id, { onDelete: 'cascade' }),
+		categoryId: uuid('category_id')
+			.notNull()
+			.references(() => categories.id, { onDelete: 'cascade' }),
+		agreed: boolean('agreed').notNull()
+	},
+	(table) => [primaryKey({ columns: [table.contractId, table.categoryId] })]
+);
 
 // ============================================================================
 // Categories Table (Utility Cost Categories)
@@ -407,10 +426,14 @@ export const utilityStatements = pgTable(
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
 		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
+		agreedCategoryIds: jsonb('agreed_category_ids').$type<string[]>(), // agreed when created (#91); null: before
 		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
 		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
+		// a berichtigte Abrechnung: the statement it replaces and what was already paid on that one and its own (#120)
+		replacesId: uuid('replaces_id').references((): AnyPgColumn => utilityStatements.id),
+		priorPayments: decimal('prior_payments', { precision: 12, scale: 2 }).notNull().default('0'),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
-		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
+		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid, replaced; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
 		paidDate: date('paid_date'),
 		paidAmount: decimal('paid_amount', { precision: 12, scale: 2 }),
@@ -428,7 +451,8 @@ export const utilityStatements = pgTable(
 		index('statements_period_start_idx').on(table.periodStart),
 		index('statements_status_idx').on(table.status),
 		index('statements_tenant_period_idx').on(table.tenantId, table.periodStart),
-		uniqueIndex('statements_number_idx').on(table.statementNumber)
+		uniqueIndex('statements_number_idx').on(table.statementNumber),
+		uniqueIndex('statements_replaces_idx').on(table.replacesId)
 	]
 );
 
@@ -508,7 +532,7 @@ export const documents = pgTable(
 			.notNull()
 			.references(() => tenants.id, { onDelete: 'restrict' }),
 		statementId: uuid('statement_id').references(() => utilityStatements.id, { onDelete: 'restrict' }),
-		type: varchar('type', { length: 30 }).notNull(), // reminder, upload
+		type: varchar('type', { length: 30 }).notNull(), // reminder, statement (e-mailed, #86), upload
 		reminderLevel: integer('reminder_level'), // 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 		title: varchar('title', { length: 255 }).notNull(),
 		fileName: varchar('file_name', { length: 255 }).notNull(),
@@ -543,6 +567,14 @@ export const configuration = pgTable(
 	},
 	(table) => [uniqueIndex('config_key_idx').on(table.key)]
 );
+
+// The Protokoll under «Einstellungen» (#357): logins and changes, each with its time and a snapshot of what it names
+export const auditLog = pgTable('audit_log', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	occurredAt: timestamp('occurred_at', { withTimezone: true }).defaultNow().notNull(),
+	action: varchar('action', { length: 50 }).notNull(),
+	details: jsonb('details').$type<Record<string, unknown>>().notNull()
+});
 
 // ============================================================================
 // Type Exports for Use in Application
