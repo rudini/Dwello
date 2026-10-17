@@ -140,23 +140,33 @@ export const load = async ({
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
 	const config = settings(fetch).catch(() => ({}) as Record<string, string>);
-	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts, stored, drafts] =
-		await Promise.all([
-			fetchRecord(
-				fetch,
-				`${BACKEND_URL}/api/v1/dashboard`,
-				m.nav_overview()
-			) as Promise<DashboardData>,
-			list(fetch, 'statements?status=overdue&limit=100', 'data'),
-			list(fetch, 'statements?status=sent&limit=100', 'data'),
-			list(fetch, 'documents?status=to_send', 'data'),
-			list(fetch, 'contracts?status=active&limit=100', 'contracts'),
-			lastPeriod(fetch, config).catch(() => null),
-			list(fetch, 'apartments?limit=1000', 'apartments'),
-			list(fetch, 'contracts?limit=1000', 'contracts'),
-			config,
-			list(fetch, 'statements?status=draft&limit=100', 'data')
-		]);
+	const [
+		figures,
+		overdue,
+		sent,
+		letters,
+		contracts,
+		period,
+		apartments,
+		allContracts,
+		stored,
+		drafts
+	] = await Promise.all([
+		fetchRecord(
+			fetch,
+			`${BACKEND_URL}/api/v1/dashboard`,
+			m.nav_overview()
+		) as Promise<DashboardData>,
+		list(fetch, 'statements?status=overdue&limit=100', 'data'),
+		list(fetch, 'statements?status=sent&limit=100', 'data'),
+		list(fetch, 'documents?status=to_send', 'data'),
+		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
+		lastPeriod(fetch, config).catch(() => null),
+		list(fetch, 'apartments?limit=1000', 'apartments'),
+		list(fetch, 'contracts?limit=1000', 'contracts'),
+		config,
+		list(fetch, 'statements?status=draft&limit=100', 'data')
+	]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
 		...b,
