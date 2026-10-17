@@ -74,7 +74,7 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 		]);
 
 		expect(await billedContracts(fetch, period)).toEqual([
-			{ buildingId: 'b1', contracts: 2, billed: 1, withoutFee: [] }
+			{ buildingId: 'b1', contracts: 2, billed: 1, partly: 0, withoutFee: [] }
 		]);
 	});
 
@@ -87,7 +87,43 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 		const shifted = { ...period, periodStart: '2024-10-01', periodEnd: '2025-09-30' };
 
 		expect(await billedContracts(fetch, shifted)).toEqual([
-			{ buildingId: 'b1', contracts: 2, billed: 1, withoutFee: [] }
+			{ buildingId: 'b1', contracts: 2, billed: 1, partly: 0, withoutFee: [] }
+		]);
+	});
+});
+
+describe('Mietverträge, deren Abrechnung nur einen Teil der Periode abdeckt', () => {
+	// Fachreview M-1: the run bills them no more, the days their statements leave open stay unbilled
+	it('zählt einen Mietvertrag, dessen Abrechnungen Tage seiner Mietdauer in der Periode offen lassen', async () => {
+		const { fetch } = backend([
+			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31' }
+		]);
+		const shifted = { ...period, periodStart: '2024-07-01', periodEnd: '2025-06-30' };
+
+		expect(await billedContracts(fetch, shifted)).toEqual([
+			{ buildingId: 'b1', contracts: 2, billed: 1, partly: 1, withoutFee: [] }
+		]);
+	});
+
+	// #133: Mietstage beginnen nach «Abgerechnet bis»; die Tage davor rechnete jemand anders ab
+	it('zählt die Tage bis «Abgerechnet bis» nicht als offen', async () => {
+		const { fetch } = backend(
+			[{ contractId: 'einzug', periodStart: '2024-07-01', periodEnd: '2024-12-31' }],
+			[{ ...contract('einzug', '2024-05-01', null), billedUntil: '2024-06-30' }]
+		);
+
+		expect((await billedContracts(fetch, period))[0].partly).toBe(0);
+	});
+
+	it('zählt ihn nicht, wenn seine Abrechnungen zusammen seine Tage in der Periode abdecken', async () => {
+		// moved out on 31.03.2024: two statements up to then cover his days of 2024
+		const { fetch } = backend([
+			{ contractId: 'auszug', periodStart: '2024-02-01', periodEnd: '2024-03-31' },
+			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-01-31' }
+		]);
+
+		expect(await billedContracts(fetch, period)).toEqual([
+			{ buildingId: 'b1', contracts: 2, billed: 1, partly: 0, withoutFee: [] }
 		]);
 	});
 });
@@ -159,7 +195,7 @@ describe('Abrechnungen erstellen', () => {
 		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
 		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
 		expect(await billedContracts(fetch, period)).toEqual([
-			{ buildingId: 'b1', contracts: 1, billed: 0, withoutFee: [] }
+			{ buildingId: 'b1', contracts: 1, billed: 0, partly: 0, withoutFee: [] }
 		]);
 	});
 

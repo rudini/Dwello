@@ -29,12 +29,45 @@ describe('Vorschau der Abrechnungen', () => {
 					first: null,
 					last: null,
 					statements: 0,
+					partlyBilled: 0,
 					check: expect.anything(),
 					changed: [],
 					fixedTerm: false
 				}
 			]
 		});
+	});
+
+	// Fachreview M-1: a statement that leaves days of the contract open is a finding of the preview
+	it('nennt pro Gebäude die Mietverträge, deren Abrechnung nur einen Teil der Periode abdeckt', async () => {
+		const form = new FormData();
+		for (const [name, value] of Object.entries({
+			...run,
+			periodStart: '2024-07-01',
+			periodEnd: '2025-06-30'
+		}))
+			form.append(name, value);
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		// moved in on 01.05.2024: the statement 2024 leaves 01.01.–30.06.2025 open
+		const contract = {
+			...buildingContracts.contracts[0],
+			startDate: '2024-05-01',
+			endDate: null
+		};
+		const statement = periodStatements.data[0];
+		const fetch = async (url: string) =>
+			Response.json(
+				url.includes('/for-statement/')
+					? []
+					: { ...periodStatements, contracts: [contract], data: [statement] }
+			);
+		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
+			fetch,
+			request
+		})) as {
+			invoices: { partlyBilled: number }[];
+		};
+		expect(result.invoices[0].partlyBilled).toBe(1);
 	});
 
 	// #76: neue Nebenkosten gelten für das ganze Gebäude; ein laufender befristeter Mietvertrag darin ändert den Hinweis

@@ -1,5 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
-import { billsIn, localToday } from '$lib/contract-status';
+import { billingStart, billsIn, localToday } from '$lib/contract-status';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { changedInvoiceCount, namesById, toStatement } from '$lib/server/statement';
@@ -47,6 +47,17 @@ async function call(fetch: Fetch, path: string, body?: object) {
 	return data;
 }
 
+const nextDay = (date: string) =>
+	new Date(Date.parse(`${date}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+
+// Whether the periods together cover every day from `from` to `to` (ISO dates compare as text)
+function covers(periods: Period[], from: string, to: string) {
+	let next = from;
+	for (const p of [...periods].sort((a, b) => a.periodStart.localeCompare(b.periodStart)))
+		if (p.periodStart <= next && p.periodEnd >= next) next = nextDay(p.periodEnd);
+	return next > to;
+}
+
 type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
 
 // Per building: its contracts with Mietstage in the period (from the day after «Abgerechnet bis», #133), and those of
@@ -62,15 +73,23 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 			// a statement replaced in this very period does not count: the run creates its berichtigte Abrechnung (#120)
 			const replacedHere = (s: Period & { status?: string }) =>
 				s.status === 'replaced' && s.periodStart === periodStart && s.periodEnd === periodEnd;
-			const billed = new Set(
-				(statements as (Period & { contractId: string; status?: string })[])
-					.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s))
-					.map((s) => s.contractId)
-			);
+			const overlapping = (
+				statements as (Period & { contractId: string; status?: string })[]
+			).filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s));
 			const inPeriod = (contracts as Contract[]).filter((c) =>
 				billsIn(c, { start: periodStart, end: periodEnd })
 			);
-			return { buildingId, inPeriod, billed: inPeriod.filter((c) => billed.has(c.id)) };
+			const billed = inPeriod.filter((c) => overlapping.some((s) => s.contractId === c.id));
+			// its days in the period that none of its statements covers stay unbilled (Fachreview M-1, #199)
+			const partly = billed.filter(
+				(c) =>
+					!covers(
+						overlapping.filter((s) => s.contractId === c.id),
+						[billingStart(c), periodStart].sort()[1],
+						c.endDate && c.endDate < periodEnd ? c.endDate : periodEnd
+					)
+			);
+			return { buildingId, inPeriod, billed, partly };
 		})
 	);
 }
@@ -84,14 +103,16 @@ async function contractsInPeriod(fetch: Fetch, request: Run) {
 }
 
 /**
- * Per building: its contracts in the period and how many of them have a statement there already (wizard step 2), and
- * those this run bills without an agreed Verwaltungspauschale (#89, step «Einstellungen»)
+ * Per building: its contracts in the period, how many of them have a statement there already and how many of these
+ * leave days unbilled (wizard steps 2 and 4), and those this run bills without an agreed Verwaltungspauschale (#89,
+ * step «Einstellungen»)
  */
 export async function billedContracts(fetch: Fetch, request: Run) {
-	return (await contractsOf(fetch, request)).map(({ buildingId, inPeriod, billed }) => ({
+	return (await contractsOf(fetch, request)).map(({ buildingId, inPeriod, billed, partly }) => ({
 		buildingId,
 		contracts: inPeriod.length,
 		billed: billed.length,
+		partly: partly.length,
 		withoutFee: inPeriod
 			.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
 			.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }))

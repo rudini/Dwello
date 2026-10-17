@@ -74,6 +74,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-new           | overlap-warning     |
       | contract-new           | rent-taken-over     |
       | contract-new           | draft-restored      |
+      | contract-new           | draft-discard-dialog |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
       | contract-new           | agreed-costs-none        |
@@ -137,6 +138,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | preview-all-billed  |
       | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |
+      | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
