@@ -1636,3 +1636,12 @@ Branch `claude/w16b-e2e-races`. Non-functional (rows in `docs/design/offene-punk
 - [x] session archived; pull request and merge, then main merged into #417 (O-37 row removed there)
 
 Files: `backend/src/services/config.service.ts`, `backend/src/__tests__/config.pg.test.ts`, `tests/e2e/fixtures/screens.ts`, `docs/design/offene-punkte.md`, `docs/archive/offene-punkte-verlauf.md`.
+
+## Session 2026-10-17: related issues together, decision issues implemented directly (G2, G1 of `docs/reviews/workflow-rules-review-2026-10-17.md`)
+
+- [x] G2: related issues of one request go into one pull request with one `Fixes #n` each (`.claude/skills/pull-request/SKILL.md`, `CLAUDE.md` "Open work")
+- [x] G1: a decision implemented in the same task closes the decision issue directly, no implementation issue (`.github/ISSUE_TEMPLATE/decision.md`, `CLAUDE.md` "Open work")
+- [x] code-reviewer round 1: `docs/reviews/g2g1-review-1.md` (no Blocker/Major; C-1 to C-4 fixed: `entscheiden` removed once the decision is recorded, each issue's scenario named, markers removed on direct implementation, `Fixes #n` per issue)
+- [x] session archived, pull request
+
+Files: `CLAUDE.md`, `.claude/skills/pull-request/SKILL.md`, `.github/ISSUE_TEMPLATE/decision.md`, `docs/reviews/g2g1-review-1.md`
