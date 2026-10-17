@@ -6,6 +6,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import Textarea from '$lib/ui/Textarea.svelte';
 	import SaveForm from '../SaveForm.svelte';
 	import CategoryProposal from './CategoryProposal.svelte';
 	import CategoryReason from './CategoryReason.svelte';
@@ -104,9 +105,11 @@
 		error={errors.name}
 		testid="category-name-input"
 	/>
-	<TextInput
+	<Textarea
 		id="description"
 		name="description"
+		rows={6}
+		testid="category-description-input"
 		label={m.invoices_description()}
 		help={category?.predefined ? m.categories_description_predefined() : undefined}
 		optional

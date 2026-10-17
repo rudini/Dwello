@@ -1,12 +1,21 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import Alert from '$lib/ui/Alert.svelte';
 import Badge from '$lib/ui/Badge.svelte';
 import EmptyState from '$lib/ui/EmptyState.svelte';
 import SaveStatus from '$lib/ui/SaveStatus.svelte';
 import DraftNotice from '$lib/ui/DraftNotice.svelte';
 import ProgressBar from '$lib/ui/ProgressBar.svelte';
+import { tick } from 'svelte';
 import { byTestId, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
+
+// #252: the browser may run in UTC; the wizard names the time in Switzerland like the rest of the app
+const zone = process.env.TZ;
+const inUtc = () => (process.env.TZ = 'UTC');
+afterEach(() => {
+	if (zone === undefined) delete process.env.TZ;
+	else process.env.TZ = zone;
+});
 
 describe('Hinweis', () => {
 	it('trägt Titel, Text und ein Symbol, damit die Farbe nicht allein spricht', () => {
@@ -68,8 +77,9 @@ describe('Leerer Zustand', () => {
 });
 
 describe('Speicherstatus', () => {
-	it('sagt, wann der Entwurf gespeichert wurde, und wird vorgelesen', () => {
-		show(SaveStatus, { savedAt: new Date('2026-10-09T14:32:00') });
+	it('sagt, wann der Entwurf gespeichert wurde, in Schweizer Zeit, und wird vorgelesen', () => {
+		inUtc();
+		show(SaveStatus, { savedAt: new Date('2026-10-09T12:32:00Z') });
 		const status = document.querySelector('[role=status]')!;
 		expect(status.textContent).toContain('Entwurf gespeichert, 14:32');
 		expect(status.getAttribute('data-testid')).toBe('save-status');
@@ -92,13 +102,34 @@ describe('Fortschrittsbalken', () => {
 });
 
 describe('Wiederhergestellter Entwurf', () => {
-	it('sagt, wann der Entwurf zuletzt bearbeitet wurde, und lässt ihn verwerfen', () => {
-		const ondiscard = vi.fn();
-		show(DraftNotice, { savedAt: new Date('2026-10-09T14:32:00'), ondiscard });
+	it('sagt, wann der Entwurf zuletzt bearbeitet wurde, in Schweizer Zeit', () => {
+		inUtc();
+		show(DraftNotice, { savedAt: new Date('2026-10-09T22:32:00Z'), ondiscard: vi.fn() });
 		expect(byTestId('draft-restored')!.textContent).toContain(
-			'zuletzt am 09.10.2026 um 14:32 bearbeitet'
+			'zuletzt am 10.10.2026 um 00:32 bearbeitet'
 		);
+	});
+
+	// #201: verworfen wird erst nach der Rückfrage
+	it('fragt vor dem Verwerfen, was es löscht', async () => {
+		const ondiscard = vi.fn();
+		show(DraftNotice, { savedAt: new Date('2026-10-09T14:32:00Z'), ondiscard });
+		// «Angaben», as in the dialog: «Entwurf» is the Abrechnungsstatus (#57, persona Anna P-1)
+		expect(byTestId('draft-discard')!.textContent!.trim()).toBe('Angaben verwerfen');
 		byTestId('draft-discard')!.click();
+		await tick();
+		expect(ondiscard).not.toHaveBeenCalled();
+		expect(byTestId('draft-discard-message')!.textContent).toBe('Ihre Angaben werden gelöscht.');
+		byTestId('draft-discard-confirm')!.click();
 		expect(ondiscard).toHaveBeenCalled();
+	});
+
+	it('lässt sich schliessen, ohne die Angaben zu verwerfen', async () => {
+		const ondiscard = vi.fn();
+		show(DraftNotice, { savedAt: new Date('2026-10-09T14:32:00Z'), ondiscard });
+		byTestId('draft-close')!.click();
+		await tick();
+		expect(byTestId('draft-restored')).toBeNull();
+		expect(ondiscard).not.toHaveBeenCalled();
 	});
 });

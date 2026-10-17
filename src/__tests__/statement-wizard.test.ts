@@ -6,6 +6,7 @@ import {
 	needsConfirmation,
 	invoiceRows,
 	restoredSelection,
+	restoredStep,
 	selectionErrors,
 	statementSteps
 } from '../lib/statement-wizard';
@@ -94,6 +95,7 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: false,
 				partial: true, // nothing after June
 				existing: 0,
+				partlyBilled: 0,
 				fixedTerm: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
@@ -108,6 +110,7 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: true,
 				partial: false,
 				existing: 0,
+				partlyBilled: 0,
 				fixedTerm: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
@@ -364,11 +367,20 @@ describe('Bestätigung vor dem Erstellen', () => {
 		...extra
 	});
 
-	it('verlangt sie ohne Rechnungen, bei bestehenden Abrechnungen und bei fehlenden Rechnungen einer Kategorie', () => {
+	it('verlangt sie ohne Rechnungen und bei fehlenden Rechnungen einer Kategorie', () => {
 		expect(needsConfirmation([coverage({ count: 0 })])).toBe(true);
-		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(true);
 		expect(needsConfirmation([coverage({ check: check([finding('gap')]) })])).toBe(true);
 		expect(needsConfirmation([coverage({ check: check([finding('stock')]) })])).toBe(true);
+	});
+
+	// #251: Mietverträge mit einer Abrechnung erhalten keine neue; das allein ist kein Befund
+	it('verlangt sie nicht, nur weil es schon Abrechnungen gibt', () => {
+		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(false);
+	});
+
+	// Fachreview M-1: Tage der Mietdauer, die keine Abrechnung abdeckt, werden in diesem Lauf nicht abgerechnet
+	it('verlangt sie, wenn eine Abrechnung nur einen Teil der Mietdauer in der Periode abdeckt', () => {
+		expect(needsConfirmation([coverage({ statements: 1, partlyBilled: 1 })])).toBe(true);
 	});
 
 	// ein Hinweis auf die Tankbestände, nie eine Bestätigung (#73)
@@ -474,5 +486,30 @@ describe('Entwürfe nach dem Abrechnungslauf ansehen', () => {
 		expect(draftsLink({ ...selection, buildingIds: ['b1', 'b2'] })).toBe(
 			'/statements?status=draft&periodStart=2024-07-01&periodEnd=2025-06-30'
 		);
+	});
+});
+
+// #201: der Assistent öffnet im Schritt, in dem er verlassen wurde, wenn dieser noch gilt
+describe('Wiederhergestellter Schritt', () => {
+	const none = { buildings: 0, heatingProfile: false };
+
+	it('öffnet den Schritt, in dem der Liegenschaftsverwalter aufgehört hat', () => {
+		expect(restoredStep(2, selection, none)).toBe(2);
+		expect(restoredStep(3, selection, none)).toBe(3);
+	});
+
+	it('öffnet nach der Vorschau den Schritt davor, denn die Vorschau rechnet der Server neu', () => {
+		expect(restoredStep(4, selection, none)).toBe(3);
+		expect(restoredStep(5, selection, none)).toBe(3);
+	});
+
+	it('öffnet den ersten Schritt, der nicht mehr gilt', () => {
+		expect(restoredStep(3, { ...selection, periodStart: '' }, none)).toBe(1);
+		expect(restoredStep(3, { ...selection, buildingIds: [] }, none)).toBe(2);
+		expect(restoredStep(3, selection, { ...none, buildings: 1 })).toBe(2);
+	});
+
+	it('öffnet einen Entwurf ohne gespeicherten Schritt im ersten Schritt', () => {
+		expect(restoredStep(undefined, selection, none)).toBe(1);
 	});
 });

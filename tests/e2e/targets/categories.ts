@@ -1,7 +1,10 @@
 import { target } from '../screenplay/target';
 
 export const categoryRow = (name: string) =>
-	target(`Kategorie ${name} in der Liste`, (page) => page.getByTestId('category-row').filter({ hasText: name }));
+	target(`Kategorie ${name} in der Liste`, (page) => page
+		.getByTestId('category-row')
+		.filter({ has: page.getByTestId('category-name').getByText(name, { exact: true }) })
+);
 export const allowedFilter = target('Filter umlagefähig', (page) => page.getByTestId('category-filter-allowed'));
 export const nameInput = target('Name', (page) => page.getByTestId('category-name-input'));
 // The radio's name starts with its label and goes on with its description
@@ -27,6 +30,7 @@ export const description = (name: string) =>
 // Why a predefined category is or is not umlagefähig (#186), in its row and on its edit page
 export const reason = (name: string) =>
 	target(`Grund der Umlagefähigkeit von ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-reason'));
+export const descriptionInput = target('Beschreibung', (page) => page.getByTestId('category-description-input'));
 export const formReason = target('Grund der Umlagefähigkeit', (page) => page.getByTestId('category-reason'));
 export const contractNote = target('Hinweis auf den Mietvertrag', (page) => page.getByTestId('category-contract-note'));
 // Whether Dwello supplies the category or the Liegenschaftsverwalter recorded it (#166)
