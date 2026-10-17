@@ -3,8 +3,10 @@
  * Business logic for utility statement operations
  */
 
-import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, getTableColumns } from 'drizzle-orm';
+import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, isNull, getTableColumns } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
+import { recordAudit, recordStatementCorrection } from './audit-log.service';
 import {
 	utilityStatements,
 	utilityStatementLineItems,
@@ -17,13 +19,18 @@ import {
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
 	type NewUtilityStatementLineItem,
-	type KeyValues
+	type KeyValues,
+	categories,
+	rentalContracts
 } from '../db/schema';
-import { calculateStatementForContract, generateStatementNumber } from './calculation.service';
+import { agreementsInPeriod } from './agreed-category.service';
+import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
+import { formatCHF, roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import { belowMinimum } from './pdf-format';
 import { isRealDate } from './real-date';
 import { oldAddress } from './old-address';
 import { daysAfter, swissToday } from './today';
@@ -68,6 +75,11 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	apartment: { id: string; number: string; floor: number; area: string } | null;
 	building: { id: string; name: string; address: string; postalCode?: string; city?: string } | null;
 	lineItems: UtilityStatementLineItem[];
+	// a berichtigte Abrechnung and the statement it replaces, and the replaced ones of its chain paid on (#120); only
+	// in the detail
+	replaces?: { id: string; statementNumber: string; statementDate: string } | null;
+	replacedBy?: { id: string; statementNumber: string } | null;
+	priorPaidOn?: string[];
 	heatingProfile?: {
 		id: string;
 		name: string;
@@ -292,8 +304,28 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		apartment: result.apartment,
 		building: result.building,
 		heatingProfile: result.heatingProfile,
-		lineItems
+		lineItems,
+		...(await correctionsOf(result.statement))
 	};
+}
+
+/** The statement a berichtigte Abrechnung replaces, the replaced ones of its chain paid on, and its own replacement */
+async function correctionsOf(statement: { id: string; replacesId: string | null }) {
+	const columns = { id: utilityStatements.id, statementNumber: utilityStatements.statementNumber };
+	const chain = [];
+	for (let next = statement.replacesId; next; ) {
+		const [replaced] = await db
+			.select({ ...columns, statementDate: utilityStatements.statementDate, paidAmount: utilityStatements.paidAmount, replacesId: utilityStatements.replacesId })
+			.from(utilityStatements)
+			.where(eq(utilityStatements.id, next));
+		chain.push(replaced);
+		next = replaced.replacesId;
+	}
+	const [replacedBy] = await db.select(columns).from(utilityStatements).where(eq(utilityStatements.replacesId, statement.id));
+	const [first] = chain;
+	const replaces = first ? { id: first.id, statementNumber: first.statementNumber, statementDate: first.statementDate } : null;
+	const priorPaidOn = chain.filter((s) => Number(s.paidAmount ?? 0) !== 0).map((s) => s.statementNumber).reverse();
+	return { replaces, replacedBy: replacedBy ?? null, priorPaidOn };
 }
 
 /** Parameters of a statement calculation; the management fee overrides the configured default */
@@ -305,15 +337,52 @@ export interface StatementInput {
 	managementFeePercent?: number;
 }
 
-/** Calculate a contract's statement for a period without storing it */
-export const calculateStatement = (input: StatementInput) =>
-	calculateStatementForContract(
+/**
+ * Calculate a contract's statement for a period without storing it; a statement of the contract and the same period
+ * replaced without a berichtigte Abrechnung yet is replaced by it, which offsets what was paid on it (#120)
+ */
+export async function calculateStatement(input: StatementInput) {
+	const calculation = await calculateStatementForContract(
 		input.contractId,
 		new Date(input.periodStart),
 		new Date(input.periodEnd),
 		input.heatingProfileId,
 		input.managementFeePercent
 	);
+	const replaced = await openReplaced(input);
+	const priorPayments = replaced ? paidSoFar(replaced) : 0;
+	const balance = calculateBalance(calculation.totalCosts, calculation.totalAdvancePayments + priorPayments);
+	return { ...calculation, balance, priorPayments, replacesId: replaced?.id ?? null };
+}
+
+/** What was paid on a replaced statement and on the ones it replaced itself; a refund paid to the tenant counts negative */
+const paidSoFar = (replaced: { paidAmount: string | null; priorPayments: string }) =>
+	roundToRappen(Number(replaced.paidAmount ?? 0) + Number(replaced.priorPayments));
+
+async function openReplaced({ contractId, periodStart, periodEnd }: StatementInput) {
+	const successor = alias(utilityStatements, 'successor');
+	const [replaced] = await db
+		.select({ id: utilityStatements.id, paidAmount: utilityStatements.paidAmount, priorPayments: utilityStatements.priorPayments })
+		.from(utilityStatements)
+		.leftJoin(successor, eq(successor.replacesId, utilityStatements.id))
+		.where(
+			and(
+				eq(utilityStatements.contractId, contractId),
+				eq(utilityStatements.status, 'replaced'),
+				eq(utilityStatements.periodStart, periodStart),
+				eq(utilityStatements.periodEnd, periodEnd),
+				isNull(successor.id)
+			)
+		)
+		.limit(1);
+	return replaced;
+}
+
+// The Tankbestand readings the statement bills by, only when the contract agrees the tank's category (#91, V-3)
+const agreedStock = async (input: StatementInput & { buildingId: string }, agreedCategoryIds: string[]) => {
+	const [change] = await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd);
+	return change && agreedCategoryIds.includes(change.categoryId) ? change.stock : null;
+};
 
 /** Calculate a contract's statement and store it as a draft with its line items */
 export async function generateStatement(
@@ -346,9 +415,12 @@ export async function generateStatement(
 			managementFeePercent: String(calculation.managementFeePercent),
 			heatingProfileId: input.heatingProfileId || null,
 			heatingShare: calculation.heating,
-			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
+			fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
+			agreedCategoryIds: calculation.agreedCategoryIds,
 			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
+			replacesId: calculation.replacesId,
+			priorPayments: String(calculation.priorPayments),
 			status: 'draft',
 			paymentDeadline: daysAfter(statementDate, paymentDeadlineDays)
 		},
@@ -413,6 +485,8 @@ export async function updateStatement(
 	const existing = await getStatement(id);
 	if (!existing) return null;
 
+	// A replaced statement stays as it was (#120)
+	if (existing.status === 'replaced') throw new CodedError('STATEMENT_REPLACED', 'A replaced statement cannot be changed');
 	// Once sent, the amounts stay as the tenant received them
 	if (existing.status !== 'draft') {
 		const protectedFields = ['totalCosts', 'totalAdvancePayments', 'managementFeePercent', 'managementFee', 'balance'];
@@ -485,8 +559,9 @@ export async function updateStatementStatus(
 
 	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.statementDate);
 	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
-	// A Saldo of 0 (often after the rounding to 5 Rappen) is settled once sent: nothing to pay or to pay back
-	const settled = sentToday && parseFloat(existing.balance) === 0 && { status: 'paid', paidDate: sentToday.statementDate };
+	// A Saldo below CHF 5, 0 included, is settled once sent: neither claimed nor paid out (#94)
+	const waived = belowMinimum(parseFloat(existing.balance));
+	const settled = sentToday && waived && { status: 'paid', paidDate: sentToday.statementDate };
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
 		...additionalData,
@@ -495,8 +570,9 @@ export async function updateStatementStatus(
 		// the PDF as sent is made anew after sending, with the tenant and settings then, not a draft's of earlier (review C-9)
 		...(sentToday && { pdfBlob: null, pdfGeneratedAt: null })
 	};
-	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93)
-	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? existing.balance, paymentRecordedAt: new Date() });
+	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94)
+	const moved = waived ? '0.00' : existing.balance;
+	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? moved, paymentRecordedAt: new Date() });
 
 	return updateStatement(id, updateData);
 }
@@ -521,7 +597,7 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 	// only a PDF made after the payment was recorded says so; the one made before stays, with its row in the Verlauf
 	const { pdfGeneratedAt, paymentRecordedAt } = existing;
 	const paidPdf = pdfGeneratedAt && paymentRecordedAt && pdfGeneratedAt >= paymentRecordedAt;
-	return (await updateStatement(id, {
+	const updated = (await updateStatement(id, {
 		status: 'sent',
 		paidDate: null,
 		paidAmount: null,
@@ -529,6 +605,76 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 		paymentResets: [...existing.paymentResets, reset],
 		...(paidPdf && { pdfBlob: null, pdfGeneratedAt: null })
 	}))!;
+	await recordAudit('payment_reset', { statementId: id, number: existing.statementNumber, paidDate: existing.paidDate }); // #357
+	return updated;
+}
+
+/**
+ * Replace a sent, overdue or paid statement (#120): it gets the status «Ersetzt» and stays as it was, its Zahlungsdatum
+ * and Saldo included; it is no longer gemahnt and no longer blocks contract dates that change its Mietstage
+ */
+export async function replaceStatement(id: string): Promise<StatementWithDetails> {
+	const existing = await getStatement(id);
+	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
+	if (!['sent', 'overdue', 'paid'].includes(existing.status))
+		throw new CodedError('STATEMENT_NOT_REPLACEABLE', 'Only a sent or paid statement can be replaced');
+	await db.transaction(async (tx) => {
+		await tx.update(utilityStatements).set({ status: 'replaced', updatedAt: new Date() }).where(eq(utilityStatements.id, id));
+		await recordStatementCorrection(existing, tx); // the Protokoll (#357)
+	});
+	return (await getStatement(id))!;
+}
+
+// The correction is made without the wizard, which asks whether a category with costs and no answer is agreed (#91):
+// it would drop out unasked, so the landlord answers in the wizard first (merge review W10c-2 C-1)
+async function refuseOpenAgreements(contractId: string, buildingId: string, periodStart: string, periodEnd: string) {
+	const [contract] = await db
+		.select({ id: rentalContracts.id, startDate: rentalContracts.startDate, endDate: rentalContracts.endDate })
+		.from(rentalContracts)
+		.where(eq(rentalContracts.id, contractId));
+	const open = (await agreementsInPeriod({ ...contract, buildingId }, periodStart, periodEnd)).filter((answer) => answer.agreed === null);
+	if (!open.length) return;
+	const named = await db
+		.select({ name: categories.name, nameDE: categories.nameDE })
+		.from(categories)
+		.where(inArray(categories.id, open.map((answer) => answer.categoryId)));
+	throw new CodedError('STATEMENT_AGREEMENTS_OPEN', 'Whether the contract agrees these categories is not answered', {
+		categories: named.map((category) => category.nameDE || category.name).join(', ')
+	});
+}
+
+/**
+ * The berichtigte Abrechnung of a replaced statement: a draft of the same Mietvertrag and Abrechnungsperiode with the
+ * same Heizprofil and Verwaltungspauschale, from today's data, with a new number; none without Mietstage in the period
+ */
+export async function correctStatement(id: string): Promise<StatementWithDetails> {
+	const replaced = await getStatement(id);
+	if (!replaced) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
+	if (replaced.status !== 'replaced') throw new CodedError('STATEMENT_NOT_REPLACED', 'Statement is not replaced');
+	if (replaced.replacedBy)
+		throw new CodedError('STATEMENT_ALREADY_CORRECTED', 'Statement already has a berichtigte Abrechnung', {
+			number: replaced.replacedBy.statementNumber
+		});
+	await refuseOpenAgreements(replaced.contractId, replaced.building!.id, replaced.periodStart, replaced.periodEnd);
+	try {
+		return await generateStatement({
+			contractId: replaced.contractId,
+			buildingId: replaced.building!.id,
+			periodStart: replaced.periodStart,
+			periodEnd: replaced.periodEnd,
+			heatingProfileId: replaced.heatingProfileId ?? undefined,
+			managementFeePercent: replaced.managementFeePercent === null ? undefined : Number(replaced.managementFeePercent)
+		});
+	} catch (error) {
+		if (!(error instanceof CodedError && error.code === 'CONTRACT_NOT_IN_PERIOD')) throw error;
+		// what the tenant paid comes back to him, a refund paid to him goes back to the landlord; only sent: nothing
+		const paid = paidSoFar(replaced);
+		const params = { number: replaced.statementNumber, amount: formatCHF(Math.abs(paid)) };
+		const message = 'The contract has no rent days in the period';
+		if (paid > 0) throw new CodedError('STATEMENT_NO_RENTAL_DAYS_PAID', message, params);
+		if (paid < 0) throw new CodedError('STATEMENT_NO_RENTAL_DAYS_REFUNDED', message, params);
+		throw new CodedError('STATEMENT_NO_RENTAL_DAYS_SENT', message, params);
+	}
 }
 
 /**

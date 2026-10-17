@@ -12,6 +12,7 @@ import { generateStatementPDFBase64, type StatementPDFData, type Language } from
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
 import { datedToday, getStatement, keyValuesOf, updateStatementStatus, type StatementWithDetails } from './statement.service';
 import { refusal } from './coded-error';
+import { billingStart, getContract } from './contract.service';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
 export async function qrBillConfig(): Promise<QRBillConfig | null> {
@@ -56,6 +57,7 @@ const localName = (names: Names, language: Language) =>
 export interface RunDetails {
 	rentalStart: string;
 	rentalEnd: string;
+	billed?: StatementPDFData['billed'];
 	heating?: StatementPDFData['heating'];
 	fuel?: StatementPDFData['fuel'];
 }
@@ -89,7 +91,8 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: 
 		apartmentShare,
 		periodShare: amountOf(item.periodShare),
 		shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : undefined,
-		invoiceParts: item.invoiceParts,
+		// each part with the description of its invoice, in the same order (#236)
+		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, description: item.invoices?.[i]?.description })),
 		byProfile: heating && byProfile,
 		heating,
 		tenantShare: parseFloat(item.tenantShare)
@@ -133,7 +136,21 @@ export function toPdfData(
 		totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
 		balance: parseFloat(statement.balance),
 		paymentDeadline: statement.paymentDeadline || undefined,
-		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined
+		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined,
+		// the agreed categories it bills, as its positions name them (#91, domain review M-2); not next to a position
+		// without a category, which no contract agrees (round 2 M-1)
+		agreedCosts:
+			statement.agreedCategoryIds && statement.lineItems.every((item) => item.categoryId)
+				? [...new Set(statement.lineItems.flatMap((item) => nameIn(categoryNames, item.categoryId, language) ?? []))]
+				: undefined,
+		...(statement.replaces && {
+			replaces: {
+				statementNumber: statement.replaces.statementNumber,
+				statementDate: statement.replaces.statementDate,
+				paidOn: statement.priorPaidOn ?? [],
+				priorPayments: parseFloat(statement.priorPayments)
+			}
+		})
 	};
 }
 
@@ -171,10 +188,18 @@ function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, lang
 	};
 }
 
+// #133: the statement bills from the day after «Abgerechnet bis», the tenancy in the period started before
+async function billedOf(statement: StatementWithDetails) {
+	const contract = statement.contractId ? await getContract(statement.contractId) : null;
+	if (!contract?.billedUntil || billingStart(contract) !== statement.rentalStart) return {};
+	const tenancyStart = [contract.startDate, statement.periodStart].sort()[1];
+	return tenancyStart < statement.rentalStart ? { billed: { until: contract.billedUntil, tenancyStart } } : {};
+}
+
 // What the generation run used, for the PDF: the tenant's dates and the heating profile
 async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
 	// the tenant's part of the period, as billed: from moving in or the period start to moving out or the period end
-	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd };
+	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd, ...(await billedOf(statement)) };
 	const heatingLine = statement.lineItems.find((item) => item.categoryId && names.get(item.categoryId)?.isHeatingCost);
 	return {
 		...rental,
@@ -243,7 +268,7 @@ async function keySharesOf(statement: StatementWithDetails, keys: Map<string, Na
 	return shares;
 }
 
-/** Render and store the PDF in the language asked for, otherwise the tenant's */
+/** Render and store the PDF in the language asked for, otherwise the tenant's; the PDF and what it prints for e-mailing it */
 export async function generateStatementPdf(id: string, language?: string) {
 	const found = await getStatement(id);
 	if (!found) return 'not-found';
@@ -275,7 +300,7 @@ export async function generateStatementPdf(id: string, language?: string) {
 		})
 		.where(eq(utilityStatements.id, id));
 
-	return { qrReference, pdfSize: pdfBase64.length };
+	return { qrReference, pdfSize: pdfBase64.length, pdf: pdfBase64, data: pdfData, language: pdfLanguage };
 }
 
 const storedPdf = async (id: string) =>

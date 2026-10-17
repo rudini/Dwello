@@ -5,7 +5,7 @@ export const confirmReminderButton = target('Mahnung bestätigen', (page) => pag
 export const nextReminderDate = target('Nächste Mahnung möglich ab', (page) => page.getByTestId('statement-next-reminder'));
 export const markedSentNotice = target('Hinweis Brief versendet', (page) => page.getByTestId('document-marked-sent'));
 export const markedSentPdf = target('PDF des versendeten Briefs', (page) => page.getByTestId('document-marked-sent-pdf'));
-export const reminderFeedback = target('Rückmeldung Mahnung', (page) => page.getByTestId('reminder-feedback'));
+export const reminderFeedback = target('Rückmeldung Mahnung oder Versand', (page) => page.getByTestId('reminder-feedback').or(page.getByTestId('send-feedback')));
 export const documentRow = (title: string, tenantName = '') =>
 	target(`Dokument «${title}» ${tenantName}`.trim(), (page) =>
 		page.getByTestId('document-row').filter({ hasText: title }).filter({ hasText: tenantName })

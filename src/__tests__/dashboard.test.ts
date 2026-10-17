@@ -251,6 +251,15 @@ describe('Übersicht laden', () => {
 		expect(task.text).toContain('Noch nicht abgerechnet: Ahornhof, Lindenhof.');
 	});
 
+	// #120: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode, bis es die berichtigte gibt
+	it('nennt das Gebäude einer ersetzten Abrechnung ohne berichtigte', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const [seeblick, ...others] = billed('k1', 'k2', 'k7', 'k8');
+		const data = await load({ fetch: backend(200, [{ ...seeblick, status: 'replaced' }, ...others]) } as never);
+		const task = data.tasks.find((t) => t.id === 'missing-period')!;
+		expect(task.text).toContain('Noch nicht abgerechnet: Ahornhof, Lindenhof, Seeblick.');
+	});
+
 	// The building cards count them too; the overview names when they will be rented
 	it('nennt pro Gebäude den Vertragsbeginn der wiedervermieteten Wohnungen', async () => {
 		const data = await load({ fetch: backend() } as never);

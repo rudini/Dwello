@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	billedContracts,
+	contractAgreements as contractAgreement,
 	generateStatements,
 	invoicesInPeriod,
 	previewStatements
@@ -8,8 +9,11 @@ import {
 // Backend answers as checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
 import buildingContracts from '../../tests/contracts/building-contracts.json';
 import statementPreview from '../../tests/contracts/statement-preview.json';
+import statement from '../../tests/contracts/statement.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
 import calculationRefused from '../../tests/contracts/statement-calculation-refused.json';
+import contractAgreements from '../../tests/contracts/contract-agreements.json';
+import category from '../../tests/contracts/category.json';
 
 const API = 'http://localhost:3001/api/v1';
 const period = {
@@ -36,7 +40,7 @@ const contracts = [
 	contract('nachher', '2025-01-01', null)
 ];
 
-function backend(statements: { contractId: string; periodStart: string; periodEnd: string }[] = [], inBuilding = contracts) {
+function backend(statements: { contractId: string; periodStart: string; periodEnd: string; status?: string }[] = [], inBuilding: object[] = contracts) {
 	const posts: { url: string; body: Record<string, string> }[] = [];
 	const fetch = async (url: string, init?: RequestInit) => {
 		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: statements });
@@ -52,7 +56,7 @@ function backend(statements: { contractId: string; periodStart: string; periodEn
 				balance: -50
 			});
 		}
-		return Response.json({ id: `s-${body.contractId}` }, { status: 201 });
+		return Response.json({ ...statement, id: `s-${body.contractId}` }, { status: 201 });
 	};
 	return { posts, fetch: fetch as typeof globalThis.fetch };
 }
@@ -120,7 +124,9 @@ describe('Abrechnungen erstellen', () => {
 				rentalDays: 366,
 				totalPeriodDays: 366,
 				movedOut: true,
-				oldAddress: false
+				fixedTerm: false,
+				oldAddress: false,
+				buildingId: 'b1'
 			},
 			{
 				contractId: 'einzug',
@@ -132,8 +138,25 @@ describe('Abrechnungen erstellen', () => {
 				rentalDays: 366,
 				totalPeriodDays: 366,
 				movedOut: false,
-				oldAddress: false
+				fixedTerm: false,
+				oldAddress: false,
+				buildingId: 'b1'
 			}
+		]);
+	});
+
+	// #133: bis «Abgerechnet bis» ausserhalb von Dwello abgerechnet; ohne Mietstage danach erhält er keine Abrechnung
+	it('übergeht einen Mietvertrag, der in der Periode nach «Abgerechnet bis» keine Mietstage hat', async () => {
+		const inBuilding = [
+			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-03-31' },
+			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' }
+		];
+		const { fetch, posts } = backend([], inBuilding);
+
+		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
+		expect(await billedContracts(fetch, period)).toEqual([
+			{ buildingId: 'b1', contracts: 1, billed: 0, withoutFee: [] }
 		]);
 	});
 
@@ -144,6 +167,26 @@ describe('Abrechnungen erstellen', () => {
 		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.movedOut])).toEqual([
 			['spaeter', true],
 			['bleibt', false]
+		]);
+	});
+
+	// #76: ein befristeter Mietvertrag läuft ohne Kündigungstermin bis zum vereinbarten Vertragsende
+	it('erkennt einen laufenden befristeten Mietvertrag', async () => {
+		const { fetch } = backend(
+			[],
+			[
+				contract('befristet', '2020-01-01', '2099-12-31'),
+				{ ...contract('gekuendigt', '2020-01-01', '2099-12-31'), terminated: true },
+				contract('unbefristet', '2020-01-01', null),
+				contract('beendet', '2020-01-01', '2024-03-31')
+			]
+		);
+
+		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.fixedTerm])).toEqual([
+			['befristet', true],
+			['gekuendigt', false],
+			['unbefristet', false],
+			['beendet', false]
 		]);
 	});
 
@@ -170,10 +213,11 @@ describe('Abrechnungen erstellen', () => {
 		});
 	});
 
-	it('erstellt für jeden Mietvertrag der Periode eine Abrechnung', async () => {
+	// the run's statements, e.g. for the ZIP of their PDFs (#356)
+	it('erstellt für jeden Mietvertrag der Periode eine Abrechnung und nennt sie', async () => {
 		const { fetch, posts } = backend();
 
-		expect(await generateStatements(fetch, period)).toBe(2);
+		expect(await generateStatements(fetch, period)).toEqual(['s-auszug', 's-einzug']);
 		expect(posts.map((post) => post.url)).toEqual([
 			`${API}/statements/generate`,
 			`${API}/statements/generate`
@@ -198,8 +242,29 @@ describe('Abrechnungen erstellen', () => {
 		expect((await previewStatements(fetch, period)).map((row) => row.contractId)).toEqual([
 			'einzug'
 		]);
-		expect(await generateStatements(fetch, period)).toBe(1);
+		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
 		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug', 'einzug']);
+	});
+
+	// #120: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode; der Lauf erstellt die berichtigte
+	it('erstellt für einen Mietvertrag mit einer ersetzten Abrechnung die berichtigte', async () => {
+		const { fetch, posts } = backend([
+			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'replaced' },
+			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'paid' }
+		]);
+
+		expect(await generateStatements(fetch, period)).toEqual(['s-auszug']);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['auszug']);
+	});
+
+	// Fachreview W2e V-3: eine ersetzte Abrechnung einer anderen, nur überlappenden Periode bleibt abgerechnet
+	it('übergeht einen Mietvertrag, dessen ersetzte Abrechnung eine andere Periode hat', async () => {
+		const { fetch, posts } = backend([
+			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' }
+		]);
+
+		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
 	});
 
 	it('meldet in Worten, wenn das Backend die Berechnung ablehnt', async () => {
@@ -279,5 +344,35 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		expect(await invoicesInPeriod(fetch, period)).toEqual([
 			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined }
 		]);
+	});
+});
+
+// #91, step «Einstellungen»: what the run's contracts have not answered, and what they do not agree
+describe('Vereinbarte Nebenkosten der Mietverträge des Laufs', () => {
+	const [, open, notAgreed] = contractAgreements;
+	const names = [
+		{ ...category, id: open.categoryId, nameDE: 'Internet' },
+		{ ...category, id: notAgreed.categoryId, nameDE: 'Lift' }
+	];
+	const asked: string[] = [];
+	const fetch = (async (url: string) => {
+		asked.push(url);
+		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: [] });
+		if (url === `${API}/contracts?buildingId=b1&limit=1000`) return Response.json({ contracts: [contracts[2]] });
+		if (url === `${API}/categories?limit=100`) return Response.json({ categories: names });
+		return Response.json(contractAgreements);
+	}) as typeof globalThis.fetch;
+
+	it('nennt je Mietvertrag die unbeantworteten und die nicht vereinbarten Kategorien der Periode', async () => {
+		expect(await contractAgreement(fetch, period)).toEqual([
+			{
+				contractId: 'einzug',
+				tenantName: 'Mieter einzug',
+				apartmentNumber: '2.01',
+				open: [{ categoryId: open.categoryId, name: 'Internet' }],
+				notAgreed: [{ categoryId: notAgreed.categoryId, name: 'Lift' }]
+			}
+		]);
+		expect(asked).toContain(`${API}/contracts/einzug/agreements?periodStart=2024-01-01&periodEnd=2024-12-31`);
 	});
 });

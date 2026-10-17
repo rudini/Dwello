@@ -293,6 +293,16 @@ describe('Mahnbare Abrechnungen', () => {
 		expect(result.error).toBe('Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
 		expect(result.code).toBe('REMINDER_REFUND');
 	});
+
+	// #94: ein Saldo unter CHF 5 wird nicht eingefordert, auch nicht nach dem Zurücksetzen der Zahlung (Fachprüfung V-2)
+	it('mahnt keinen Saldo unter CHF 5', async () => {
+		const id = await statement('sent');
+		await db.update(utilityStatements).set({ balance: '4.95' }).where(eq(utilityStatements.id, id));
+		const result = await remind(id);
+
+		expect(result.status).toBe(400);
+		expect(result.code).toBe('REMINDER_BELOW_MINIMUM');
+	});
 });
 
 // Each reminder sets a new payment deadline; the next Mahnstufe only from the day after it (#107)

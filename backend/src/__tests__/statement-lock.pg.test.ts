@@ -110,6 +110,46 @@ describe('Abrechnung mit Saldo 0', () => {
 	});
 });
 
+// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt; die Abrechnung ist mit dem Versenden erledigt,
+// ohne dass Geld fliesst (bezahlter Betrag 0); ab CHF 5.00 bleibt sie offen
+describe('Abrechnung mit kleinem Saldo (#94)', () => {
+	// sent, then optionally a further step on it; the answer of the last call
+	const sentWith = async (balance: string, then?: (id: string) => Promise<Response>) => {
+		const id = await idOf(
+			await sendJson('POST', '/api/v1/statements/generate', {
+				contractId: rental.contract,
+				buildingId: rental.building,
+				periodStart: '2025-01-01',
+				periodEnd: '2025-12-31'
+			})
+		);
+		await db.update(utilityStatements).set({ balance }).where(eq(utilityStatements.id, id));
+		try {
+			const sent = await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+			return await (then ? await then(id) : sent).json();
+		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+		}
+	};
+
+	it.each(['4.95', '-4.95', '0.05'])('ist bei einem Saldo von %s mit dem Versenden erledigt, ohne Zahlung', async (balance) => {
+		expect(await sentWith(balance)).toMatchObject({ status: 'paid', paidDate: today(), paidAmount: '0.00' });
+	});
+
+	// Datenprüfung D-1: nach «Zahlung zurücksetzen» (#92) wieder als bezahlt markiert, zählt der Betrag nicht als Einnahme
+	it('hält auch nach dem Zurücksetzen der Zahlung keinen bezahlten Betrag fest', async () => {
+		const paidAgain = await sentWith('3.40', async (id) => {
+			await callApi(`/api/v1/statements/${id}/payment-reset`, { method: 'POST' });
+			return sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today() });
+		});
+		expect(paidAgain).toMatchObject({ status: 'paid', paidAmount: '0.00' });
+	});
+
+	it.each(['5.00', '-5.00'])('bleibt bei einem Saldo von %s offen', async (balance) => {
+		expect(await sentWith(balance)).toMatchObject({ status: 'sent', paidDate: null });
+	});
+});
+
 const markPaid = (id: string, paidDate: string) => sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate });
 
 // #138: das Zahlungsdatum liegt zwischen dem Abrechnungsdatum (beim Versenden der Tag des Versands) und heute

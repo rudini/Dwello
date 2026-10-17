@@ -2,7 +2,7 @@ import { m } from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
 import { deleteDocument, loadDocuments, uploadDocument } from '$lib/server/documents';
 import { loadTenant } from '$lib/server/tenant';
-import { contractStatus, grossRent, toContractHistory } from '$lib/server/contract-history';
+import { contractStatus, monthlyTotal, toContractHistory } from '$lib/server/contract-history';
 import { localToday } from '$lib/contract-status';
 import { formerTenantDocuments } from '$lib/former-tenant-documents';
 import type { Actions, PageServerLoad } from './$types';
@@ -28,7 +28,7 @@ function currentRental(contracts: BackendContract[]) {
 		apartmentId: contract.apartmentId as string,
 		apartment: apartmentOf(contract),
 		building: contract.buildingName as string,
-		rent: grossRent(contract),
+		monthlyTotal: monthlyTotal(contract),
 		startDate: contract.startDate as string,
 		upcoming: contractStatus(contract) === 'future'
 	};

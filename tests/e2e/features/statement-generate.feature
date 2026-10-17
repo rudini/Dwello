@@ -44,6 +44,16 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
     Dann wurde 1 Nebenkostenabrechnung erstellt
 
+  # #120, #358: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode; der Lauf erstellt ihre berichtigte
+  @api
+  Szenario: Der Abrechnungslauf rechnet einen Mietvertrag mit ersetzter Abrechnung wieder ab
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Dann wurde 1 Nebenkostenabrechnung erstellt
+
   @api
   Szenario: Erhöhte Verwaltungspauschale gilt für alle Mieter der Liegenschaft
     Angenommen das Heizprofil "Winter" verteilt die Heizkosten so:
@@ -118,6 +128,28 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2023 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Vorschau, dass es in der Periode keine Mietverträge gibt
 
+  # #133: bis «Abgerechnet bis» sind die Nebenkosten ausserhalb von Dwello abgerechnet; eine Periode, die bis dahin
+  # endet, erhält keine Abrechnung
+  @api
+  Szenario: Ein ausserhalb von Dwello abgerechneter Mietvertrag erhält keine Abrechnung
+    Angenommen der Mietvertrag von "Marc Huber" ist bis "2024-12-31" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann enthält die Vorschau die Abrechnung von "Eva Frei"
+    Und die Vorschau enthält genau 1 Abrechnung
+
+  # #133: reicht die Abrechnungsperiode über «Abgerechnet bis» hinaus, zählen Mietstage und geleistete Akontobeiträge
+  # erst ab dem Tag danach. Hauswart 732.00 für 366 Tage = 2.00 pro Tag; Eva Frei vom 01.03. bis 31.03.2024: 31 Tage
+  # = 62.00 + 3 % = 63.86, Akonto nur für März 120.00; Marc Huber bleibt bei 245 Tagen = 490.00 + 3 % = 504.70
+  @api
+  Szenario: Nach «Abgerechnet bis» zählen Mietstage und Akonto ab dem Tag danach
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und der Mietvertrag von "Eva Frei" hat "120" Franken Akonto
+    Und der Mietvertrag von "Eva Frei" ist bis "2024-02-29" ausserhalb von Dwello abgerechnet
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Eva Frei" "CHF 63.86"
+    Und beträgt der Saldo von "Eva Frei" "Rückerstattung CHF 56.15"
+    Und kostet die Abrechnung von "Marc Huber" "CHF 504.70"
+
   # A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
   Szenario: Vorschau warnt vor der alten Adresse eines ausgezogenen Mieters
     Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"
@@ -160,7 +192,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Kaminfeger": "Keine Rechnung in dieser Kategorie erfasst"
-    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Rechnung für das 2. Halbjahr fehlt"
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Die Rechnung für das 2. Halbjahr fehlt"
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
@@ -169,6 +201,19 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "1200" Franken vom "2025-06-30" für die Zeit vom "2024-07-01" bis "2025-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Kaltwasser": "1 Rechnung zählt nur teilweise: ihr Leistungszeitraum reicht über die Abrechnungsperiode hinaus."
+
+  # #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin, auf den Akonto oder neue Nebenkosten
+  # steigen könnten; ein unbefristeter behält den Hinweis auf den nächsten Kündigungstermin
+  Szenario: Hinweise zu Akonto und neuen Nebenkosten bei einem befristeten Mietvertrag
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" befristet von "2024-01-01" bis "2099-12-31" für "900" Franken mit "20" Franken Akonto
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2023-01-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "2000" Franken vom "2024-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann rät die Vorschau für "Lea Graf": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "frühestens auf den nächsten Kündigungstermin"
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
 
   Szenario: Hinweis auf eine Rechnung ohne Leistungszeitraum kurz nach der Abrechnungsperiode
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
@@ -202,7 +247,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Angenommen im Gebäude "Lindenhof" war am "2022-12-31" Heizöl für "800" Franken im Tank
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Dann meldet die Prüfung der Kategorien für "Heizung": "Tankbestand am 31.12.2023 und am 31.12.2024 fehlen."
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Die Tankbestände am 31.12.2023 und am 31.12.2024 fehlen."
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
@@ -220,7 +265,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und das Gebäude "Lindenhof" hat keinen Tank oder der Tank ist stillgelegt
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Dann meldet die Prüfung der Kategorien für "Heizung": "Tankbestand am 31.12.2024 fehlt."
+    Dann meldet die Prüfung der Kategorien für "Heizung": "Der Tankbestand am 31.12.2024 fehlt."
 
   # Der Endbestand 0 des Stilllegungsjahres ist der Anfangsbestand des nächsten Jahres (fach-review V-11)
   Szenario: Nach dem Jahr der Stilllegung braucht es keinen Tankbestand mehr
@@ -327,6 +372,24 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Marc Huber"
     Aber nicht die Abrechnung 2023 von "Lea Graf"
 
+  # #356: ein Lauf als eine Datei, z.B. um alle Abrechnungen auf einmal zu drucken; frühere Abrechnungen gehören nicht dazu
+  Szenario: Alle Abrechnungen eines Laufs als ZIP herunterladen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Wenn der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP herunterlädt
+    Dann enthält die ZIP-Datei nur das PDF der Abrechnung 2024 von "Marc Huber", benannt nach ihrer Abrechnungsnummer
+
+  # Eine Abrechnung des Laufs ist inzwischen gelöscht (z.B. in einem zweiten Tab): ein Satz statt einer kaputten Datei
+  Szenario: ZIP eines Laufs mit einer inzwischen gelöschten Abrechnung anfordern
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt
+    Und die Abrechnung 2024 von "Marc Huber" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP anfordert
+    Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
+    Wenn der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
+
   Szenario: Zurück zur Abrechnungsliste
     Wenn der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
@@ -351,3 +414,12 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann schlägt der Assistent das Heizprofil "Winter" vor
     Und sagt der Assistent "Das Heizprofil ist wie bei den übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode eingestellt, die Verwaltungspauschale kommt aus den Einstellungen."
+
+  # #119: sind die übrigen Abrechnungen der Periode verschieden eingestellt, gibt es keine Vorlage: beides kommt aus den Einstellungen
+  Szenario: Übrige Abrechnungen der Periode mit verschiedenen Heizprofilen
+    Angenommen es gibt das Heizprofil "Winter"
+    Und es gibt das Heizprofil "Sommer"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Sommer"
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann sagt der Assistent "Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen."

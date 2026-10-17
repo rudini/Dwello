@@ -259,6 +259,26 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		expect(text).toContain("Ihr Anteil: 1'265.00 × (365.00 × 139/365 + 900.00 × 47/92) / 1'265.00 = 598.78");
 	});
 
+	// Daten und Betrag ordnen eine Zeile keinem Beleg zu: eine Rechnung ohne Leistungszeitraum (ihre Daten sind die der
+	// Periode) und zwei über denselben Leistungszeitraum und Betrag nennen ihre Rechnung, die eindeutige nicht (#236)
+	it('nennt die Rechnung, wenn Daten und Betrag ihre Zeile keinem Beleg zuordnen', async () => {
+		const twins = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
+		await insertInvoice(twins.building, { amount: '765.00', invoiceDate: '2025-09-30', description: 'Hauswartung Q3' });
+		await insertInvoice(twins.building, { amount: '600.00', invoiceDate: '2025-07-05', servicePeriodStart: '2025-04-01', servicePeriodEnd: '2025-06-30', description: 'Hauswartung Q2' });
+		await insertInvoice(twins.building, { amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30', description: 'Gartenpflege' });
+		await insertInvoice(twins.building, { amount: '900.00', invoiceDate: '2025-10-06', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30', description: 'Treppenhausreinigung' });
+		const statement = await generateStatement({ contractId: twins.contract, buildingId: twins.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await twins.remove();
+
+		expect(text).toContain('Ohne Leistungszeitraum: CHF 765.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode (Rechnung «Hauswartung Q3»)');
+		expect(text).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen (Rechnung «Gartenpflege»)');
+		expect(text).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen (Rechnung «Treppenhausreinigung»)');
+		expect(text).not.toContain('Hauswartung Q2');
+	});
+
 	// Eine Gutschrift hebt die Rechnung auf: die Position hat keinen Anteil, den die Rechnungen ergeben könnten (#226, V-6)
 	it('druckt keine Rechnungen unter einer Position, deren Rechnungen zusammen null ergeben', async () => {
 		const credit = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
@@ -699,6 +719,28 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 
 		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
 		expect(text).toContain('CH93 0076 2011 6238 5295 7');
+	});
+
+	// #351: switched to French on the day its German PDF was made, the draft's next PDF is French
+	it('folgt der geänderten Sprache des Mieters, auch am selben Tag', async () => {
+		await generateStatementPdf(statementId);
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { language: 'fr' });
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { language: 'de' });
+		expect(text).toContain('Décompte des charges');
+	});
+
+	// #351: the PDF as sent follows the same rule
+	it('versendet das PDF in der Sprache des Mieters beim Versand', async () => {
+		await generateStatementPdf(statementId);
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { language: 'fr' });
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
+
+		const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).text;
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statementId));
+		await sendJson('PUT', `/api/v1/tenants/${rental.tenant}`, { language: 'de' });
+		expect(text).toContain('Décompte des charges');
 	});
 
 	// Review C-9: sent on the day its PDF was made, the PDF as sent still has the address of today

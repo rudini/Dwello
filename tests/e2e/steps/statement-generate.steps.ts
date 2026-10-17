@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { pageAddress } from '../questions/navigation';
 import {
+	akontoHintOf,
 	announcedFeeHint,
 	balanceOf,
 	billedOfBuilding,
@@ -60,10 +61,13 @@ import {
 	returnToStatementList,
 	setManagementFee,
 	showCreatedStatements,
+	downloadCreatedStatementsZip,
+	requestCreatedStatementsZip,
 	tryNextWithoutConfirmation,
 	typeManagementFee
 } from '../tasks/statement-generate';
 import { francs, signedFrancs } from '../questions/amounts';
+import { filesInDownloadedZip } from '../questions/download';
 import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
@@ -101,6 +105,21 @@ When('der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt', async ({ 
 	await verwalter.attemptsTo(showCreatedStatements);
 });
 
+When('der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP herunterlädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(downloadCreatedStatementsZip);
+});
+
+When('der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP anfordert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(requestCreatedStatementsZip);
+});
+
+Then(
+	'enthält die ZIP-Datei nur das PDF der Abrechnung {int} von {string}, benannt nach ihrer Abrechnungsnummer',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(filesInDownloadedZip).toEqual([`${await seed.statementNumber(tenant, year)}.pdf %PDF-`]);
+	}
+);
+
 When('der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(returnToStatementList);
 });
@@ -109,7 +128,7 @@ Then('enthält die Vorschau die Abrechnung von {string}', async ({ verwalter, na
 	await verwalter.sees(previewHasStatementOf(names.get(tenant) ?? tenant)).toBe(true);
 });
 
-Then('die Vorschau enthält genau {int} Abrechnungen', async ({ verwalter }, count: number) => {
+Then('die Vorschau enthält genau {int} Abrechnung(en)', async ({ verwalter }, count: number) => {
 	await verwalter.sees(statementsInPreview).toBe(count);
 });
 
@@ -297,6 +316,10 @@ When(
 
 Then('schlägt der Assistent das Heizprofil {string} vor', async ({ verwalter, names }, profile: string) => {
 	await verwalter.sees(proposedHeatingProfile).toContain(names.get(profile)!);
+});
+
+Then('rät die Vorschau für {string}: {string}', async ({ verwalter, names }, tenant: string, hint: string) => {
+	await verwalter.sees(akontoHintOf(names.get(tenant)!)).toContain(hint);
 });
 
 const lastYear = Number(inDays(0).slice(0, 4)) - 1;

@@ -7,6 +7,7 @@ import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, type Category, type NewCategory } from '../db/schema';
 import { refusal, type Refusal } from './coded-error';
+import { recordAudit } from './audit-log.service';
 import { Conflict } from './conflict';
 import { categoryHasFuelStocks } from './fuel-stock.service';
 
@@ -154,7 +155,7 @@ export async function getAllowedCategories(): Promise<Category[]> {
 async function ensureNameIsFree(name: string, id?: string) {
 	const existing = await getCategoryByName(name);
 	if (existing && existing.id !== id) {
-		throw new Conflict('CATEGORY_NAME_TAKEN', `Eine Kategorie mit dem Namen "${name}" existiert bereits.`, { name });
+		throw new Conflict('CATEGORY_NAME_TAKEN', `Eine Kategorie mit dem Namen «${name}» existiert bereits.`, { name });
 	}
 }
 
@@ -177,14 +178,25 @@ export async function updateCategory(id: string, data: Partial<NewCategory>): Pr
 	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
 
 	return db.transaction(async (tx) => {
+		const [before] = await tx.select({ allocable: categories.isAllowedUtilityCost }).from(categories).where(eq(categories.id, id));
 		const [category] = await tx
 			.update(categories)
 			.set({ ...data, updatedAt: new Date() })
 			.where(eq(categories.id, id))
 			.returning();
 		// Costs no longer allocable leave its invoices too, else statements would still pass them on (OR 257a)
-		if (category && data.isAllowedUtilityCost === false) {
-			await tx.update(invoices).set({ isValidUtilityCost: false, updatedAt: new Date() }).where(and(eq(invoices.categoryId, id), eq(invoices.isValidUtilityCost, true)));
+		const excluded =
+			category && data.isAllowedUtilityCost === false
+				? await tx.update(invoices).set({ isValidUtilityCost: false, updatedAt: new Date() }).where(and(eq(invoices.categoryId, id), eq(invoices.isValidUtilityCost, true))).returning({ id: invoices.id })
+				: [];
+		// #357: the Protokoll names the change and, when it excludes costs, how many invoices
+		if (category && before.allocable !== category.isAllowedUtilityCost) {
+			const { name, nameDE, nameFR, nameIT, nameEN, isAllowedUtilityCost: allocable } = category;
+			await recordAudit(
+				'category_allocability_changed',
+				{ categoryId: id, name, nameDE, nameFR, nameIT, nameEN, allocable, ...(!allocable && { invoices: excluded.length }) },
+				tx
+			);
 		}
 		return category || null;
 	});

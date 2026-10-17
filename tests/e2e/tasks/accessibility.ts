@@ -30,6 +30,8 @@ import {
 	uploadResult
 } from '../targets/invoice-upload';
 import { invoicePdf, uploadBelege } from './invoice-upload';
+import { goToGeneration } from './statement-generate';
+import { generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
 import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
@@ -65,6 +67,9 @@ import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
+import { leaveSettings } from './statement-generate';
+import { untickAllCategories } from './contract-form';
+import { agreedCategoryBoxes } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
 import { UPLOADED } from '../fixtures/screens';
@@ -94,6 +99,10 @@ const askKi = (name: string): Activity => (actor) =>
 		Wait.until(proposal)
 	);
 
+// 'generation-result' bills its contracts once per year; counted per worker, over all its scenarios: 2016-2022 have
+// neither statements nor invoices in the seed (2023 to 2025 do)
+let resultRuns = 0;
+
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
 const previewOf =
@@ -106,7 +115,7 @@ const previewOf =
 			Click.on(nextButton)
 		);
 		for (const building of [example.building, ...others]) await actor.attemptsTo(Check.the(on.generateBuilding(building)));
-		await actor.attemptsTo(Click.on(nextButton), Click.on(nextButton), Wait.until(on.shown(shown)));
+		await actor.attemptsTo(Click.on(nextButton), leaveSettings, Wait.until(on.shown(shown)));
 	};
 
 // The first input of each wizard, which starts its draft
@@ -246,9 +255,42 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	// the link opens the wizard at the settings step with the building and period it names
 	'link-preset': () => Wait.until(on.wizardPreset),
+	// every box of the agreed Nebenkosten unticked, not saved: the note that no Nebenkosten are billed
+	'agreed-costs-none': () => async (actor) => {
+		// «Neuer Mietvertrag» (tenant and apartment from the address): the boxes are on the step «Miete»
+		if ((await actor.answer(pageAddress)).includes('/contracts/new'))
+			await actor.attemptsTo(
+				Click.on(nextButton),
+				Click.on(nextButton),
+				EnterDate.of('2030-01-01').into(startDateInput),
+				Click.on(nextButton),
+				Wait.until(agreedCategoryBoxes)
+			);
+		await actor.attemptsTo(untickAllCategories, Wait.until(on.shown('contract-agreed-costs-none')));
+	},
+	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen»
+	'agreements-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/statements/agreements', {}),
+			Navigate.reload,
+			Wait.until(on.shown('agreements-failed'))
+		),
+	// an answer that cannot be saved: the question's error (idempotent, nothing is stored)
+	'agreement-save-failed': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.toPathsMatching(/^\/api\/contracts\/[^/]+\/agreements$/),
+			Click.on(on.firstAgreementYes),
+			Wait.until(on.formProblem)
+		),
+	// «Weiter» with the questions open: their errors; and the contract not agreeing a category. No answer: it would be
+	// stored, and the next viewport would not be asked any more
+	'agreed-costs': () => (actor) =>
+		actor.attemptsTo(Wait.until(on.shown('not-agreed-costs')), Click.on(nextButton), Wait.until(on.formProblem)),
 	'list-scoped': () => Wait.until(on.listScope),
 	'pdf-missing': () => Wait.until(on.shown('statement-pdf-missing')),
 	'send-dialog': () => openDialog(on.sendButton),
+	// refused, so the draft stays one and each viewport can send it again
+	'send-refused': () => (actor) => actor.attemptsTo(PostFormAction('?/send'), Wait.until(on.shown('send-feedback'))),
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),
@@ -260,6 +302,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
 	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
+	'correct-dialog': () => openDialog(on.correctButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('{area}').into(on.formulaInput),
@@ -339,6 +382,24 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
 	'invoice-hints': (example) => previewOf('2025', 'late-invoices', '2025-05-31')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
+	// a year without invoices, another one on every look: the drafts of the last stay (#356)
+	// the seeded heating profile: the preselected one may be deleted by a parallel scenario
+	'generation-result': (example) => async (actor) => {
+		const year = 2016 + (resultRuns++ % 7);
+		await actor.attemptsTo(
+			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
+			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
+			Click.on(nextButton),
+			Check.the(on.generateBuilding(example.building)),
+			Click.on(nextButton),
+			Select.option(example.heatingProfile).from(heatingProfileSelect),
+			leaveSettings, // step 3 waits for the question whether the contracts agree the costs (#91)
+			Wait.until(on.shown('confirm-missing-invoices')),
+			goToGeneration,
+			Click.on(generateButton),
+			Wait.until(on.shown('generation-result'))
+		);
+	},
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
 	// 2024 with the second building, where Fritz moved out and still has its address (A-5, #114)
@@ -403,7 +464,7 @@ const statementWizardSteps =
 			Wait.until(on.shown('management-fee-not-agreed')),
 			look
 		);
-		await nextStep('preview-count'); // "Vorschau", calculated on the server
+		await actor.attemptsTo(leaveSettings, Wait.until(on.shown('preview-count')), look); // "Vorschau", calculated on the server
 		// a building without invoices must be confirmed
 		if (await actor.answer(Visibility.of(on.confirmMissingInvoices))) await actor.attemptsTo(Check.the(on.confirmMissingInvoices));
 		await nextStep('generate-drafts-note'); // "Erstellen"

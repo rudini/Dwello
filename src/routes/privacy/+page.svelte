@@ -71,7 +71,7 @@
 		{
 			id: 'stored',
 			title: m.privacy_stored_title(),
-			paragraphs: [{ text: m.privacy_stored_1() }, { text: m.privacy_stored_2() }]
+			paragraphs: [m.privacy_stored_1(), m.privacy_stored_2(), m.audit_privacy()].map((text) => ({ text }))
 		},
 		{
 			id: 'retention',
@@ -132,6 +132,7 @@
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">
 			<p class="text-ink">{m.privacy_demo_1()}</p>
+			<p class="text-ink">{m.audit_privacy_demo()}</p>
 		</Panel>
 	{/if}
 

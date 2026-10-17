@@ -13,7 +13,7 @@ export const variants = Object.keys(screenList.viewports).flatMap((viewport) =>
 
 // Query strings that put a screen into a state before it loads; a screen may override them in screens.json
 const query: Record<string, string> = {
-	'filtered-empty': '?search=keine-treffer-a11y',
+	'filtered-empty': '?search=xq-a11y-0', // no German word: the apartment list repeats the term (#160)
 	'login-error': '?error=failed'
 };
 
@@ -22,7 +22,7 @@ const address = (screen: { path: string; queries?: object }, state: string) =>
 	screen.path + ((screen.queries as Record<string, string> | undefined)?.[state] ?? query[state] ?? '');
 
 /** The example's address with its ids filled in, and the buildings the statement wizard checks */
-export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string };
+export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string; heatingProfile: string };
 
 /** A screen in a state, with the records it needs */
 export async function exampleOf(seed: TestData, name: string, state: string): Promise<Example> {
@@ -35,7 +35,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview'].includes(state)) return { path, building: '', tankBuilding: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'buildings-billed', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -66,10 +66,21 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.sendStatement('Bruno', 2025);
 	await seed.paymentDeadline('Bruno', 2025, '2026-01-31'); // overdue: only then a reminder can be sent
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
+	// wants e-mail without an address: her draft is sent by e-mail, and sending it is refused (#86)
+	await seed.correspondence('Carla', 'email');
+	await seed.noEmail('Carla');
 	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	await seed.sendStatement('Anna', 2024);
 	await seed.markPaid('Anna', 2024); // paid: its payment can be reset (#92)
+	// #120: Carla's 2024 statement paid, replaced and corrected; her 2022 one replaced, its correction not created yet
+	// (2022: a replaced statement of a whole year would count as billed for the shorter periods of 2025 the wizard shows)
+	await seed.sendStatement('Carla', 2024);
+	await seed.markPaid('Carla', 2024);
+	await seed.replaceStatement('Carla', 2024, true);
+	await seed.statement('Carla', 'Seeblick', 2022, 'Standard');
+	await seed.sendStatement('Carla', 2022);
+	await seed.replaceStatement('Carla', 2022);
 	// reminded today: the Zahlungsfrist of the Mahnung runs, the next one is possible only later (#107)
 	await seed.sendStatement('Bruno', 2024);
 	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
@@ -81,6 +92,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.tenant('Dora');
 	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00', additionalRent: '80.00' }); // a parking space: the wizard's note after her contract names it (#144)
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
+	await seed.billedUntil('Dora', '2014-12-31'); // «Abgerechnet bis» on her page and in the form (#133)
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
 	// moved in during 2025, invoices over different days and the change of the Tankbestand: the statement lists them
 	// with their days and the calculation (#104, #240)
@@ -120,6 +132,24 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.heatingInvoice('Talblick', '1200.00', 2025);
 	await seed.statement('Gina', 'Talblick', 2025, 'Standard');
 	await seed.category('Gartenpflege', true);
+	// #91: own categories created after the contracts, with costs in 2025: the wizard asks for Hanna's, names Ines' as not
+	// agreed; names alike in every language, so the language check sees only the wizard's texts
+	await seed.building('Waldblick', 'Winterthur');
+	await seed.apartment('Waldblick', '4.01', 'vacant');
+	await seed.apartment('Waldblick', '4.02', 'vacant');
+	await seed.tenant('Hanna');
+	await seed.tenant('Ines');
+	await seed.contract('Hanna', '4.01', { startDate: '2015-01-01', baseRent: '1500.00' });
+	await seed.contract('Ines', '4.02', { startDate: '2015-01-01', baseRent: '1500.00' });
+	for (const [category, date] of [['Internet', '2025-03-31'], ['Video', '2025-09-30']]) {
+		await seed.categoryNamedAlikeInEnglish(category, 'FTTH');
+		await seed.invoiceInOwnCategory('Waldblick', category, '240.00', date);
+	}
+	await seed.agreement('Ines', 'Internet', false);
+	await seed.agreement('Ines', 'Video', true);
+	// a change the Protokoll lists and whose entry can be deleted (#357)
+	await seed.category('Rasenpflege', true);
+	await seed.categoryAllowance('Rasenpflege', false);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
 		building: seed.idOf('Seeblick'),
@@ -141,6 +171,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		partsStatement: seed.idOf('Abrechnung Greta 2025'),
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
+		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
+		correctedStatement: seed.idOf('Abrechnung Carla 2024'),
+		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
@@ -149,12 +182,14 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		category: seed.idOf('Gartenpflege'),
 		// a predefined category shows the reason of its allocability (#186)
 		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
-		distributionKey: seed.idOf('Nach Wohnungen')
+		distributionKey: seed.idOf('Nach Wohnungen'),
+		agreedBuilding: seed.idOf('Waldblick')
 	};
 	return {
 		path: path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!),
 		building: ids.building!,
-		tankBuilding: seed.idOf('Bergsicht')!
+		tankBuilding: seed.idOf('Bergsicht')!,
+		heatingProfile: ids.heatingProfile!
 	};
 }
 

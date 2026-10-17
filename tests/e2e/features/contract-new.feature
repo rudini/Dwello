@@ -33,11 +33,11 @@ Funktionalität: Neuen Mietvertrag erfassen
 
   Szenario: Ohne Mieter geht es nicht weiter
     Wenn der Liegenschaftsverwalter ohne Angaben weitergeht
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus."
 
   Szenario: Nettomiete fehlt
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" ohne Nettomiete vermieten will
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich."
 
   Szenario: Zurück verliert keine Angaben
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
@@ -136,3 +136,16 @@ Funktionalität: Neuen Mietvertrag erfassen
   Szenario: Verwaltungspauschale mit eigenem Satz prüfen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit einer Verwaltungspauschale von "4" % bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Verwaltungspauschale" mit "Vereinbart, 4 %"
+
+  # #91: ein neuer Mietvertrag beginnt mit allen umlagefähigen Kategorien; nur vereinbarte Nebenkosten darf der
+  # Liegenschaftsverwalter abrechnen (Art. 257a Abs. 2 OR)
+  Szenario: Ein neuer Mietvertrag vereinbart alle umlagefähigen Nebenkosten
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"
+    Und zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Lift"
+    Aber zeigt die Prüfung "Vereinbarte Nebenkosten" ohne "Verwaltung"
+
+  Szenario: Nicht vereinbarte Nebenkosten beim neuen Mietvertrag weglassen
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken ohne die Nebenkosten "Lift" bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"
+    Aber zeigt die Prüfung "Vereinbarte Nebenkosten" ohne "Lift"

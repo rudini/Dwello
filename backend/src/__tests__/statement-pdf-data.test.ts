@@ -70,9 +70,43 @@ describe('Daten der Abrechnung im PDF', () => {
 		});
 	});
 
+	// #120: die berichtigte Abrechnung nennt die ersetzte und was darauf schon bezahlt ist
+	it('übernimmt die ersetzte Abrechnung und das schon Bezahlte', () => {
+		const corrected = {
+			...statement,
+			replaces: { id: 's0', statementNumber: 'NK-0', statementDate: '2026-02-01' },
+			priorPayments: '100.00',
+			priorPaidOn: ['NK-0']
+		} as StatementWithDetails;
+
+		expect(toPdfData(corrected, categories, 'de').replaces).toEqual({
+			statementNumber: 'NK-0',
+			statementDate: '2026-02-01',
+			paidOn: ['NK-0'],
+			priorPayments: 100
+		});
+		expect(toPdfData(statement, categories, 'de').replaces).toBeUndefined();
+	});
+
 	it('nennt die Kategorie in der Sprache des Mieters, sonst deutsch', () => {
 		expect(toPdfData(statement, categories, 'fr').lineItems[0].category).toBe('Chauffage');
 		expect(toPdfData(statement, categories, 'de').lineItems[1].category).toBe('Nicht kategorisiert');
+	});
+});
+
+// #91: the PDF names the agreed categories it bills; fach-review W10c round 2 M-1: a position without a category is no
+// agreed category, so the sentence «Abgerechnet sind nur …» would be false next to it
+describe('Vereinbarte Nebenkosten im PDF', () => {
+	const agreed = { ...statement, agreedCategoryIds: ['heating'] } as unknown as StatementWithDetails;
+	const categorised = { ...agreed, lineItems: agreed.lineItems.filter((item) => item.categoryId) } as StatementWithDetails;
+
+	it('nennt die vereinbarten Kategorien, die die Abrechnung abrechnet', () => {
+		expect(toPdfData(categorised, categories, 'de').agreedCosts).toEqual(['Heizung']);
+	});
+
+	it('nennt sie nicht neben einer Position ohne Kategorie, und nicht vor #91', () => {
+		expect(toPdfData(agreed, categories, 'de').agreedCosts).toBeUndefined();
+		expect(toPdfData({ ...categorised, agreedCategoryIds: null } as StatementWithDetails, categories, 'de').agreedCosts).toBeUndefined();
 	});
 });
 

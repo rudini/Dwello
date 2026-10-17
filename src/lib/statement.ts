@@ -17,6 +17,9 @@ export const statusLabels: Record<StatementStatus, string> = {
 	},
 	get overdue() {
 		return m.statements_status_overdue();
+	},
+	get replaced() {
+		return m.statements_status_replaced();
 	}
 };
 
@@ -24,7 +27,8 @@ export const statusTones: Record<StatementStatus, Tone> = {
 	draft: 'neutral',
 	sent: 'info',
 	paid: 'positive',
-	overdue: 'critical'
+	overdue: 'critical',
+	replaced: 'neutral'
 };
 
 /** The Saldo in words: positive, the tenant pays; negative, the tenant gets money back */
@@ -33,6 +37,11 @@ export function balanceLabel(balance: number): string {
 	if (balance < 0) return m.statements_balance_refund();
 	return m.statements_balance_settled();
 }
+
+/** A Saldo below CHF 5, 0 included, is neither claimed nor paid out: settled on sending, never gemahnt (#94) */
+export const belowMinimum = (balance: number) => Math.abs(balance) < 5;
+/** A Nachzahlung the landlord claims and may remind of: CHF 5 and more */
+export const claimed = (balance: number) => balance > 0 && !belowMinimum(balance);
 
 /** The day the help of «Bezahlt am» asks for: the tenant's payment, or for a refund the landlord's transfer */
 export const paidHelp = (balance: number) =>

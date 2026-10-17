@@ -43,7 +43,7 @@ const history = (
 	tenantName: 'Lea Frei',
 	apartment,
 	period: 'alt',
-	rentBrutto: 950,
+	monthlyTotal: 950,
 	status,
 	startDate,
 	endDate
@@ -76,7 +76,7 @@ function open(
 				apartmentId: 'a2',
 				apartment: 'Wohnung 2.01',
 				building: 'Ulmenhof',
-				rent: 950,
+				monthlyTotal: 950,
 				startDate: '2099-11-01',
 				upcoming: true
 			},

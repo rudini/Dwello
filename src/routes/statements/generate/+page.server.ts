@@ -41,12 +41,19 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1);
 	// the heating profile comes from any of them, as before #89 (closing review C-1)
 	const ofBuilding = (contracts.contracts ?? []) as Row[];
-	const runRate = others.find((s) =>
+	const runRates = others.filter((s) =>
 		ofBuilding.some(
 			(c) => c.id === s.contractId && c.managementFeeAgreed && c.managementFeePercent == null
 		)
 	);
-	return { building, period: { start: start!, end: end! }, other: others[0], runRate };
+	// set differently, they tell nothing: both from the settings (#119); a deleted profile is no setting (fach-review V-5)
+	// TODO(fachlich prüfen, #387): at a tenant change the settings' Heizprofil may differ from the other tenant's
+	const profiles = others.filter((s) => s.heatingProfileId);
+	const differing =
+		new Set(profiles.map((s) => s.heatingProfileId)).size > 1 ||
+		new Set(runRates.map((s) => Number(s.managementFeePercent))).size > 1;
+	const [other, runRate] = differing ? [] : [profiles[0], runRates[0]];
+	return { building, period: { start: start!, end: end! }, other, runRate, differing };
 }
 
 export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
@@ -78,7 +85,8 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 			building: String(pick.building.name),
 			...pick.period,
 			fromStatements: !!pick.other,
-			feeFromSettings: !pick.runRate
+			feeFromSettings: !pick.runRate,
+			differing: pick.differing
 		}
 	};
 };
@@ -102,7 +110,13 @@ export const actions: Actions = {
 				previewStatements(fetch, run),
 				invoicesInPeriod(fetch, run)
 			]);
-			return { preview, invoices };
+			// new costs are the building's: say whether it bills a running befristeter Mietvertrag (#76)
+			const fixedTerm = (id: string) =>
+				preview.some((row) => row.buildingId === id && row.fixedTerm);
+			return {
+				preview,
+				invoices: invoices.map((row) => ({ ...row, fixedTerm: fixedTerm(row.buildingId) }))
+			};
 		} catch (err) {
 			return failed(err);
 		}

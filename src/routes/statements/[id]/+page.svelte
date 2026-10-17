@@ -6,6 +6,7 @@
 	import { addToast } from '$lib/stores';
 	import {
 		balanceLabel,
+		claimed,
 		nextReminderLater,
 		paidDateError,
 		paidHelp,
@@ -15,15 +16,16 @@
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
-	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import CostTable from './CostTable.svelte';
+	import Correction from './Correction.svelte';
 	import FormDialog from './FormDialog.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { localToday } from '$lib/contract-status';
 	import MetadataCard from './MetadataCard.svelte';
+	import MoreActions from './MoreActions.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
@@ -33,6 +35,7 @@
 	import ReminderModal from './ReminderModal.svelte';
 	import ResetPaymentDialog from './ResetPaymentDialog.svelte';
 	import SendDialog from './SendDialog.svelte';
+	import SendFeedback from './SendFeedback.svelte';
 	import StatusActions from './StatusActions.svelte';
 	import type { ActionData } from './$types';
 
@@ -59,7 +62,13 @@
 	let showReminder = $state(false);
 	let showDelete = $state(false);
 	let showSend = $state(false);
+	let sendByLetter = $state(false); // after a failed e-mail (#86)
+	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
+	const sendError = $derived(form?.sendError);
 	let showResetPayment = $state(false);
+	let showCorrect = $state(false);
+	// a replaced statement is corrected by its berichtigte Abrechnung: no hint on it (#120)
+	const laterHint = $derived(statement.status === 'replaced' ? 0 : data.laterInvoices);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
 	let paidError = $state('');
@@ -132,11 +141,12 @@
 			/>
 			<StatusActions
 				status={statement.status}
-				owes={statement.balance > 0}
+				{byEmail}
+				owes={claimed(statement.balance)}
 				waiting={!!nextReminderLater(statement)}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
-				onsend={() => (showSend = true)}
+				onsend={() => ((sendByLetter = false), (showSend = true))}
 				onresetpayment={() => (showResetPayment = true)}
 			/>
 		{/snippet}
@@ -151,10 +161,11 @@
 		/>
 	</p>
 
+	<Correction {statement} bind:open={showCorrect} />
 	<OldAddressWarning {statement} testid="statement-old-address" />
 
-	{#if data.laterInvoices}
-		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->
+	{#if laterHint}
+		<!-- a draft is created again; a sent statement is corrected by a berichtigte Abrechnung (it cannot be deleted) -->
 		<Alert tone="caution" title={m.statements_later_title()} testid="statement-later-invoices">
 			{#if statement.status === 'draft'}
 				<p>{m.statements_later_draft({ later: laterInvoices })}</p>
@@ -170,6 +181,10 @@
 		</Alert>
 	{/if}
 	<ReminderFeedback reminder={form?.reminder} />
+	<SendFeedback
+		error={sendError}
+		onletter={() => ((sendByLetter = true), (showSend = true))}
+	/>
 
 	<!-- Full width so every amount is visible; min-w-0: if still too wide it scrolls inside, not the page -->
 	<div class="min-w-0">
@@ -184,22 +199,11 @@
 		</div>
 		<div class="flex min-w-0 flex-col gap-8">
 			<PartiesPanel {statement} />
-			<Panel title={m.statements_more_actions()}>
-				<div class="flex flex-col gap-4">
-					<Button href="/statements/{statement.id}/edit" icon="edit" testid="statement-edit-button"
-						>{m.statements_edit_button()}</Button
-					>
-					<!-- Only a draft can be deleted; once sent, the statement stays as the tenant received it -->
-					{#if statement.status === 'draft'}
-						<Button
-							variant="danger-ghost"
-							icon="delete"
-							onclick={() => (showDelete = true)}
-							testid="statement-delete-button">{m.statements_delete()}</Button
-						>
-					{/if}
-				</div>
-			</Panel>
+			<MoreActions
+				{statement}
+				oncorrect={() => (showCorrect = true)}
+				ondelete={() => (showDelete = true)}
+			/>
 			<MetadataCard
 				createdAt={statement.createdAt}
 				{pdfGeneratedAt}
@@ -221,7 +225,7 @@
 	check={checkPaidDate}
 	success={m.statements_marked_paid()}
 >
-	{#if statement.balance > 0}<p>{m.statements_no_reminder_after()}</p>{/if}
+	{#if claimed(statement.balance)}<p>{m.statements_no_reminder_after()}</p>{/if}
 	<DateInput
 		id="paidDate"
 		label={m.statements_paid_on()}
@@ -251,6 +255,6 @@
 
 <ResetPaymentDialog bind:open={showResetPayment} {statement} />
 
-<SendDialog bind:open={showSend} {statement} />
+<SendDialog bind:open={showSend} {statement} byLetter={sendByLetter} />
 
 <ReminderModal bind:open={showReminder} {statement} sentReminders={data.reminders.length} />

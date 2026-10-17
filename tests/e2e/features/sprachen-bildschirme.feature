@@ -76,6 +76,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-new           | draft-restored      |
       | contract-new           | contracts-unknown   |
       | contract-new           | contracts-unknown-review |
+      | contract-new           | agreed-costs-none        |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
       | contract-detail        | end-dialog-error    |
@@ -90,6 +91,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit          | past-end-error      |
       | contract-edit          | edit-refused        |
       | contract-edit          | contracts-unknown   |
+      | contract-edit          | agreed-costs-none   |
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |
@@ -137,6 +139,10 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
+      | statement-generate     | agreed-costs        |
+      | statement-generate     | agreement-save-failed |
+      | statement-generate     | agreements-failed     |
+      | statement-generate     | generation-result   |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
@@ -147,17 +153,28 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
       | statement-sent-detail  | action-error        |
+      | statement-sent-detail  | correct-dialog      |
       | statement-paid-detail  | default             |
       | statement-paid-detail  | reset-payment-dialog |
+      | statement-paid-detail  | correct-dialog      |
+      | statement-replaced-detail | default          |
+      | statement-corrected-detail | default         |
+      | statement-correction-detail | default        |
       | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
+      | statement-empty-detail | send-dialog         |
+      | statement-empty-detail | send-refused        |
       | statement-pdf-refused  | default             |
+      | statement-zip-refused  | default             |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |
       | documents              | empty               |
       | documents              | marked-sent         |
       | config                 | default             |
+      | audit-log              | default             |
+      | audit-log              | empty               |
+      | audit-log              | delete-dialog       |
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |

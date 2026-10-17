@@ -43,7 +43,7 @@ describe('computeAvailability', () => {
 		expect(result.isAvailable).toBe(false);
 		expect(result.hasOngoingContract).toBe(true);
 		expect(result.statusType).toBe('blocked');
-		expect(result.message).toContain('unbefristeter Vertrag');
+		expect(result.message).toContain('unbefristeter Mietvertrag, nicht gekündigt');
 	});
 
 	it('returns available now when the last contract has ended', () => {

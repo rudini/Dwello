@@ -9,6 +9,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
+	import { belowMinimum } from '$lib/statement';
 	import CostTable from '../CostTable.svelte';
 	import type { ActionData } from './$types';
 
@@ -17,6 +18,11 @@
 
 	const statement = $derived(data.statement);
 	const refund = $derived(statement.balance < 0);
+	const deadlineField = $derived(
+		refund
+			? { label: m.statements_refund_by(), help: m.statements_refund_by_help() }
+			: { label: m.glossary_deadline_term(), help: m.statements_deadline_help() }
+	);
 	let saving = $state(false);
 	// Shown in words below the field: the browser may show the date in a foreign format
 	let deadline = $derived(statement.paymentDeadline);
@@ -62,15 +68,17 @@
 	{/if}
 
 	<Panel title={m.statements_deadline_notes()}>
-		<DateInput
-			id="paymentDeadline"
-			name="paymentDeadline"
-			label={refund ? m.statements_refund_by() : m.glossary_deadline_term()}
-			help={refund ? m.statements_refund_by_help() : m.statements_deadline_help()}
-			bind:value={deadline}
-			error={form?.errors?.paymentDeadline}
-			testid="payment-deadline-input"
-		/>
+		{#if !belowMinimum(statement.balance)}
+			<DateInput
+				id="paymentDeadline"
+				name="paymentDeadline"
+				label={deadlineField.label}
+				help={deadlineField.help}
+				bind:value={deadline}
+				error={form?.errors?.paymentDeadline}
+				testid="payment-deadline-input"
+			/>
+		{/if}
 		<Textarea
 			id="notes"
 			name="notes"
