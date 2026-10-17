@@ -83,3 +83,6 @@ export const fixedTermError = target('Meldung zum Weiterführen', (page) =>
 export const deleteDraftAndContinueButton = target('Entwurf löschen und unbefristet weiterführen', (page) =>
 	page.getByTestId('delete-draft-and-continue')
 );
+export const contractAgreedCosts = target('Vereinbarte Nebenkosten des Mietvertrags', (page) =>
+	page.getByTestId('contract-agreed-costs')
+);

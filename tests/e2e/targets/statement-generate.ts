@@ -83,4 +83,28 @@ export const hintedInvoiceLink = (date: string) =>
 	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>
 		page.getByTestId('hinted-invoice').filter({ hasText: date }).getByRole('link')
 	);
+// #91, step «Einstellungen»: per contract of the run, whether a category with costs in the period is agreed
+export const agreementQuestions = target('Fragen nach vereinbarten Nebenkosten', (page) => page.getByTestId('agreement-questions'));
+export const agreementsOf = (contractId: string) =>
+	target(`Fragen zum Mietvertrag ${contractId}`, (page) => page.getByTestId(`agreement-contract-${contractId}`));
+export const agreementChoice = (contractId: string, categoryId: string, agreed: boolean) =>
+	target(`Antwort ${agreed ? 'vereinbart' : 'nicht vereinbart'} für ${categoryId} im Mietvertrag ${contractId}`, (page) =>
+		page.getByTestId(`agreement-${contractId}-${categoryId}-${agreed ? 'yes' : 'no'}`)
+	);
+// the answer stored («Beim Mietvertrag gespeichert.») or refused (the question's error)
+export const agreementAnswered = (contractId: string, categoryId: string) =>
+	target(`Antwort für ${categoryId} im Mietvertrag ${contractId} gespeichert oder abgelehnt`, (page) =>
+		page
+			.getByTestId(`agreement-saved-${contractId}-${categoryId}`)
+			.filter({ hasText: /./ })
+			.or(page.getByTestId(`agreement-${contractId}-${categoryId}`).getByTestId('form-error'))
+	);
+// the run's contracts with categories answered «nicht vereinbart» and costs in the period, each a link to it
+export const notAgreedCostsLink = (contractId: string) =>
+	target(`Mietvertrag ${contractId} mit nicht vereinbarten Nebenkosten`, (page) =>
+		page.getByTestId(`not-agreed-costs-link-${contractId}`)
+	);
 export const oldAddress = target('Warnung vor der alten Adresse', (page) => page.getByTestId('preview-old-address'));
+// while the questions load, and when they cannot be loaded
+export const agreementsLoading = target('Vereinbarte Nebenkosten werden geprüft', (page) => page.getByTestId('agreements-loading'));
+export const agreementsFailed = target('Vereinbarte Nebenkosten nicht geprüft', (page) => page.getByTestId('agreements-failed'));

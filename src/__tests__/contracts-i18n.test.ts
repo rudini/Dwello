@@ -78,7 +78,7 @@ describe('Mietverträge in der gewählten Sprache', () => {
 		const apartment = { id: 'a1', number: '1', rooms: '1', area: '40', status: 'vacant' };
 		const fetch = (async (url: string) =>
 			Response.json(
-				url.includes('tenants') ? { tenants: [] } : { apartments: [apartment] }
+				url.includes('tenants') ? { tenants: [] } : { apartments: [apartment], categories: [] }
 			)) as typeof globalThis.fetch;
 		const data = (await newContractLoad({ fetch } as never)) as {
 			apartments: { size: string; building: string }[];

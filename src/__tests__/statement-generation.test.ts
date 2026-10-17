@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	billedContracts,
+	contractAgreements as contractAgreement,
 	generateStatements,
 	invoicesInPeriod,
 	previewStatements
@@ -11,6 +12,8 @@ import statementPreview from '../../tests/contracts/statement-preview.json';
 import statement from '../../tests/contracts/statement.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
 import calculationRefused from '../../tests/contracts/statement-calculation-refused.json';
+import contractAgreements from '../../tests/contracts/contract-agreements.json';
+import category from '../../tests/contracts/category.json';
 
 const API = 'http://localhost:3001/api/v1';
 const period = {
@@ -326,5 +329,35 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		expect(await invoicesInPeriod(fetch, period)).toEqual([
 			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined }
 		]);
+	});
+});
+
+// #91, step «Einstellungen»: what the run's contracts have not answered, and what they do not agree
+describe('Vereinbarte Nebenkosten der Mietverträge des Laufs', () => {
+	const [, open, notAgreed] = contractAgreements;
+	const names = [
+		{ ...category, id: open.categoryId, nameDE: 'Internet' },
+		{ ...category, id: notAgreed.categoryId, nameDE: 'Lift' }
+	];
+	const asked: string[] = [];
+	const fetch = (async (url: string) => {
+		asked.push(url);
+		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: [] });
+		if (url === `${API}/contracts?buildingId=b1&limit=1000`) return Response.json({ contracts: [contracts[2]] });
+		if (url === `${API}/categories?limit=100`) return Response.json({ categories: names });
+		return Response.json(contractAgreements);
+	}) as typeof globalThis.fetch;
+
+	it('nennt je Mietvertrag die unbeantworteten und die nicht vereinbarten Kategorien der Periode', async () => {
+		expect(await contractAgreement(fetch, period)).toEqual([
+			{
+				contractId: 'einzug',
+				tenantName: 'Mieter einzug',
+				apartmentNumber: '2.01',
+				open: [{ categoryId: open.categoryId, name: 'Internet' }],
+				notAgreed: [{ categoryId: notAgreed.categoryId, name: 'Lift' }]
+			}
+		]);
+		expect(asked).toContain(`${API}/contracts/einzug/agreements?periodStart=2024-01-01&periodEnd=2024-12-31`);
 	});
 });
