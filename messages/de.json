@@ -102,7 +102,7 @@
 	"glossary_allocable_term": "Umlagefähig",
 	"glossary_allocable_text": "Eine umlagefähige Rechnung fliesst in die Nebenkostenabrechnung ein, zum Beispiel Heizung, Wasser, Hauswart oder Kehricht. Ob eine Rechnung umlagefähig ist, folgt ihrer Kategorie; eine einzelne Rechnung einer umlagefähigen Kategorie können Sie davon ausnehmen. Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt.",
 	"glossary_balance_term": "Saldo",
-	"glossary_balance_text": "Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge, auf 5 Rappen gerundet. Ist der Saldo positiv, zahlt der Mieter nach (Nachzahlung); ist er negativ, erhält er Geld zurück (Rückerstattung).",
+	"glossary_balance_text": "Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge, auf 5 Rappen gerundet, nur zugunsten des Mieters: Eine Nachzahlung wird ab-, eine Rückerstattung aufgerundet. Ist der Saldo positiv, zahlt der Mieter nach (Nachzahlung); ist er negativ, erhält er Geld zurück (Rückerstattung).",
 	"glossary_deadline_term": "Zahlungsfrist",
 	"glossary_deadline_text": "Das Datum, bis zu dem der Mieter eine Nachzahlung bezahlt haben muss. Bei einer Rückerstattung ist es das Datum, bis zu dem Sie ihm den Betrag überweisen («Rückerstattung bis»).",
 	"glossary_reminder_term": "Mahnung",
