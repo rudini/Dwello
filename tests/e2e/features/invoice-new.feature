@@ -23,6 +23,7 @@ Funktionalität: Neue Rechnung erfassen
     Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "450.00" Franken für "Treppenhausreinigung Q1" im Gebäude "Seeblick" in der Kategorie "Hauswart" erfasst
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"
     Und warnt die Rechnung "gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon"
+    Und warnt die Rechnung "Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung."
 
   Szenario: Nicht umlagefähige Kategorie wählen
     Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt

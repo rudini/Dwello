@@ -13,7 +13,6 @@
 	} = $props();
 </script>
 
-<!-- TODO(fachlich prüfen, #120): how far costs can still be claimed after a statement was sent is not settled -->
 <Alert tone="caution" title={m.invoices_missed_title()} testid="invoice-missed-warning">
 	{#each periods as period (`${period.start}-${period.end}`)}
 		<p id="missed-{period.start}-{period.end}">
