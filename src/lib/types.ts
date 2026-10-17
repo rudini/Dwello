@@ -227,7 +227,7 @@ export interface Invoice {
 export interface InvoiceWithDetails extends Invoice {
 	buildingName?: string;
 	buildingAddress: string;
-	category?: Category;
+	category?: Category & { key?: string; predefined?: boolean }; // key and predefined name its reason (#292)
 	distributionKey?: Pick<DistributionKey, 'id' | 'name'>;
 	llmCategory?: Pick<Category, 'id' | 'name'>; // what the KI suggested
 	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';

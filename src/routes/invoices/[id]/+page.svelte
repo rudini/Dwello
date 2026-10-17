@@ -16,6 +16,7 @@
 	import InvoiceFacts from './InvoiceFacts.svelte';
 	import InvoiceBeleg from './InvoiceBeleg.svelte';
 	import DeleteConsequences from './DeleteConsequences.svelte';
+	import { reasonCategory, reasonOf } from '../../config/categories/CategoryReason.svelte';
 
 	let {
 		data
@@ -105,7 +106,8 @@
 			/>
 		</div>
 		<div class="flex flex-col gap-8">
-			{#if !invoice.isValidUtilityCost}
+			<!-- Only where the categorisation names no reason: an own category, or an invoice excluded from its category -->
+			{#if !invoice.isValidUtilityCost && !reasonOf(reasonCategory(invoice))}
 				<div data-testid="invoice-legal-note">
 					<Alert tone="caution" title={m.invoices_legal_title()}>
 						<p>{m.invoices_legal_text()}</p>

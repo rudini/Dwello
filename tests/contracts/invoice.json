@@ -26,7 +26,8 @@
 		"id": "c1",
 		"name": "Caretaker",
 		"nameDE": "Hauswart",
-		"isAllowedUtilityCost": true
+		"isAllowedUtilityCost": true,
+		"type": "predefined"
 	},
 	"distributionKey": {
 		"id": "k1",

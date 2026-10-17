@@ -41,7 +41,14 @@ export interface InvoiceFilters {
 
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
-	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean; isHeatingCost: boolean } | null;
+	category: {
+		id: string;
+		name: string;
+		nameDE: string | null;
+		isAllowedUtilityCost: boolean;
+		isHeatingCost: boolean;
+		type: string;
+	} | null;
 	distributionKey: { id: string; name: string; nameDE: string | null } | null;
 	llmCategory: { id: string; name: string; nameDE: string | null } | null;
 	beleg: { fileName: string; mimeType: string; deductedAmount: string | null; nonAllocableItems: boolean } | null;
@@ -64,7 +71,8 @@ function selectWithDetails() {
 				name: categories.name,
 				nameDE: categories.nameDE,
 				isAllowedUtilityCost: categories.isAllowedUtilityCost,
-				isHeatingCost: categories.isHeatingCost
+				isHeatingCost: categories.isHeatingCost,
+				type: categories.type
 			},
 			distributionKey: {
 				id: distributionKeys.id,

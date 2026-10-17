@@ -248,7 +248,7 @@ Then('erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten u
 Then(
 	'erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind',
 	async ({ verwalter }) => {
-		await verwalter.sees(proposalText).toContain('Wählen Sie selbst, ob die Kosten umlagefähig sind.');
+		await verwalter.sees(proposalText).toContain('Wählen Sie selbst, ob die Kosten umlagefähig sind');
 	}
 );
 
@@ -276,9 +276,9 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag sie nennt',
+	'erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt',
 	async ({ verwalter }) => {
-		await verwalter.sees(contractHint).toContain('nur, wenn der Mietvertrag sie als Nebenkosten nennt');
+		await verwalter.sees(contractHint).toContain('nur, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt');
 	}
 );
 
@@ -295,6 +295,10 @@ Given('die KI ist nicht erreichbar', async ({ verwalter }) => {
 
 Then('erfährt der Liegenschaftsverwalter, dass die KI sich nicht sicher ist', async ({ verwalter }) => {
 	await verwalter.sees(proposalText).toContain('Die KI ist sich nicht sicher.');
+});
+
+Then('erfährt der Liegenschaftsverwalter, dass Kosten im Zweifel nicht umlagefähig sind', async ({ verwalter }) => {
+	await verwalter.sees(proposalText).toContain('Im Zweifel: nicht umlagefähig.');
 });
 
 Then(

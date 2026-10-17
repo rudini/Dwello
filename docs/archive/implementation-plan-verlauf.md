@@ -1525,6 +1525,23 @@ Files: `messages/{de,fr,it,en}.json`, `src/lib/ui/SaveStatus.svelte`, `src/__tes
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
 - [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
 
+## Session: #292 reasons of predefined categories on the invoice (W17)
+
+- [x] `@wip` scenarios: invoice detail (reason of a predefined category, excluded invoice, own non-allocable category), changed texts in `categories.feature`
+- [x] Draft texts (de, fr, it, en) and domain review by `fach-reviewer` before implementing: `docs/reviews/292-fachreview-1.md`; terms #397 (VMWG), #398 (Vollservicevertrag), Lift description #399 (now #407, point 5)
+- [x] Reasons end with their conclusion; OR and VMWG spelled out per reason; Feuerlöscher and Schädlingsbekämpfung «umstritten» with the leaflet; lift with full-service contract; Gebäudeversicherung with the heating exception (204 M-2); help text and `invoices_legal_text` with OR spelled out
+- [x] Contract note and unsure-KI hint with the decided wording
+- [x] Invoice detail shows the category's reason in the categorisation panel, not as a warning; the general note only without a reason (backend: category `type` in the invoice response, contract `invoice.json`)
+- [x] Demo invoices «Wartungsabonnement Lift 2024/2025»
+- [x] Existing tests pinning the old texts updated
+- [x] Slice review by `code-reviewer`: `docs/reviews/292-review-1.md` (C-1, C-4 to C-6 fixed; C-7 rejected)
+- [x] Feature review: personas `docs/design/personas/{weber,helga}-292.md`; key row of a non-allocable invoice without a key removed (Helga P-1, Weber P-5); badge tone and the rest to `offene-punkte.md` U-39, Lift description in #407
+- [x] Closing `code-reviewer` rounds on the fixes: `docs/reviews/292-review-2.md` (C-1 step «sagt die Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde» with its own precondition, seen red; C-2, C-3 comment; C-4), `docs/reviews/292-review-3.md`
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-292.md`
+- [ ] Pull request `Fixes #292`, CI green, merge (session archived before the push)
+
+Files: `messages/{de,fr,it,en}.json`, `src/routes/config/categories/CategoryReason.svelte`, `src/routes/invoices/[id]/{+page,CategorizationPanel}.svelte`, `src/lib/types.ts`, `backend/src/services/invoice.service.ts`, `backend/demo/demo-data.sql`, `tests/contracts/invoice.json`, `tests/e2e/{features,steps,questions,targets,fixtures}`, `src/__tests__/{categories-page.dom,categories,invoice-pages.dom,help-page.dom}.test.ts`, `docs/design/offene-punkte.md` (U-39)
+
 ## Session 2026-10-17: fewer review rounds (T1, T4 of `docs/reviews/workflow-rules-review-2026-10-17-2.md`)
 
 - [x] Collected review on token cost: `docs/reviews/workflow-rules-review-2026-10-17-2.md`

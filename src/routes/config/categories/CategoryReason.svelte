@@ -3,7 +3,9 @@
 
 	type Shown = { key?: string; predefined?: boolean; isAllowedUtilityCost: boolean };
 	// Each predefined category by its key, with the allocability its fixed sentence explains (#186, wording from the
-	// domain review docs/reviews/186-fachreview-1.md)
+	// domain review docs/reviews/186-fachreview-1.md); each writes out the laws it cites and ends with its conclusion
+	// (#292, docs/reviews/292-fachreview-1.md)
+	// TODO(fachlich prüfen, #397) «Verordnung über die Miete (VMWG)», TODO(fachlich prüfen, #398) «Vollservicevertrag»
 	const REASONS: Record<string, [allowed: boolean, reason: () => string]> = {
 		Heating: [true, m.categories_reason_heating],
 		'Hot Water': [true, m.categories_reason_hot_water],
@@ -32,10 +34,16 @@
 	 * Why a predefined category's costs are or are not umlagefähig; none for an own category, and none once the
 	 * Liegenschaftsverwalter changed its allocability, so no sentence argues against the choice next to it
 	 */
-	function reasonOf(category?: Shown) {
+	export function reasonOf(category?: Shown) {
 		const known = category?.predefined ? REASONS[category.key ?? ''] : undefined;
 		return known?.[0] === category?.isAllowedUtilityCost ? known?.[1]() : undefined;
 	}
+
+	/** The category whose reason an invoice shows: none when the invoice's allocability differs from its category's */
+	export const reasonCategory = (invoice: { isValidUtilityCost: boolean; category?: Shown }) =>
+		invoice.isValidUtilityCost === invoice.category?.isAllowedUtilityCost
+			? invoice.category
+			: undefined;
 </script>
 
 <script lang="ts">
