@@ -31,6 +31,7 @@ describe('Vorschau der Abrechnungen', () => {
 					statements: 0,
 					partlyBilled: 0,
 					check: expect.anything(),
+					changed: [],
 					fixedTerm: false
 				}
 			]
