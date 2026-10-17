@@ -128,7 +128,7 @@ const startDraft: Record<string, Activity> = {
 // a draft starts with an input; reloaded, the wizard restores it
 const restoreDraft: Activity = async (actor) => {
 	await actor.attemptsTo(startDraft[new URL(await actor.answer(pageAddress)).pathname]);
-	await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Entwurf gespeichert'))), Navigate.reload, Wait.until(draftRestored));
+	await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Noch nicht gespeichert'))), Navigate.reload, Wait.until(draftRestored));
 };
 
 const endWithPastDate: Activity = async (actor) => {

@@ -5,6 +5,7 @@ import EmptyState from '$lib/ui/EmptyState.svelte';
 import SaveStatus from '$lib/ui/SaveStatus.svelte';
 import DraftNotice from '$lib/ui/DraftNotice.svelte';
 import ProgressBar from '$lib/ui/ProgressBar.svelte';
+import { icons } from '$lib/ui/icons';
 import { tick } from 'svelte';
 import { byTestId, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
@@ -77,11 +78,18 @@ describe('Leerer Zustand', () => {
 });
 
 describe('Speicherstatus', () => {
-	it('sagt, wann der Entwurf gespeichert wurde, in Schweizer Zeit, und wird vorgelesen', () => {
+	// #57: «Entwurf» ist nur der Abrechnungsstatus; die Angaben sind noch nicht gespeichert
+	it('sagt, dass die Angaben nur in diesem Browser liegen, seit wann, in Schweizer Zeit, und wird vorgelesen', () => {
 		inUtc();
 		show(SaveStatus, { savedAt: new Date('2026-10-09T12:32:00Z') });
 		const status = document.querySelector('[role=status]')!;
-		expect(status.textContent).toContain('Entwurf gespeichert, 14:32');
+		expect(status.textContent).toContain(
+			'Noch nicht gespeichert: Dwello bewahrt Ihre Angaben nur in diesem Browser auf. Stand: 14:32'
+		);
+		expect(status.textContent).not.toContain('Entwurf');
+		// no success mark next to «noch nicht gespeichert» (Fachprüfung #57, V-1)
+		const successMark = icons.success.map(([, attributes]) => attributes.d).find(Boolean)!;
+		expect(status.innerHTML).not.toContain(successMark);
 		expect(status.getAttribute('data-testid')).toBe('save-status');
 	});
 
@@ -101,10 +109,16 @@ describe('Fortschrittsbalken', () => {
 	});
 });
 
-describe('Wiederhergestellter Entwurf', () => {
-	it('sagt, wann der Entwurf zuletzt bearbeitet wurde, in Schweizer Zeit', () => {
+describe('Wiederhergestellte Angaben', () => {
+	it('sagt, dass die Angaben wiederhergestellt sind und wann sie zuletzt bearbeitet wurden, in Schweizer Zeit', () => {
 		inUtc();
 		show(DraftNotice, { savedAt: new Date('2026-10-09T22:32:00Z'), ondiscard: vi.fn() });
+		expect(byTestId('draft-restored')!.textContent).toContain('Angaben wiederhergestellt');
+		expect(byTestId('draft-restored')!.textContent).not.toContain('Entwurf');
+		// also after reopening, the input is not saved yet (Fachprüfung #57, V-2)
+		expect(byTestId('draft-restored')!.textContent).toContain(
+			'Sie sind nur in diesem Browser aufbewahrt und noch nicht gespeichert.'
+		);
 		expect(byTestId('draft-restored')!.textContent).toContain(
 			'zuletzt am 10.10.2026 um 00:32 bearbeitet'
 		);
