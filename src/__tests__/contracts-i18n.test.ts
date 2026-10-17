@@ -67,7 +67,7 @@ describe('Mietverträge in der gewählten Sprache', () => {
 			'Apartment 2.02 - Musterhaus'
 		);
 		expect(summary.find((item) => item.field === 'duration')?.value).toBe('Open-ended');
-		expect(advancePaymentNotice(empty)).toMatch(/^Without an advance payment/);
+		expect(advancePaymentNotice(empty)).toMatch(/^Without an advance payment, the tenant usually pays a flat-rate/);
 		expect(startDateNotice('2020-01-01', '2026-01-01')).toBe(
 			'The contract start Wednesday, 1 January 2020 is in the past. Is the date correct?'
 		);

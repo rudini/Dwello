@@ -483,9 +483,16 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass er ohne vereinbarte Nebenkosten alle Häkchen entfernt',
+	'erfährt der Liegenschaftsverwalter, dass er sonst alle Häkchen bei «Vereinbarte Nebenkosten» entfernt',
 	async ({ verwalter }) => {
 		await verwalter.sees(noAdvanceNoticeText).toContain('bei «Vereinbarte Nebenkosten» alle Häkchen');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass vereinbarte Nebenkosten ohne Akonto ganz mit der Nebenkostenabrechnung bezahlt werden',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('bezahlt der Mieter sie ganz mit der Nebenkostenabrechnung');
 	}
 );
 

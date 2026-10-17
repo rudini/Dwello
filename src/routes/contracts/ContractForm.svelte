@@ -229,8 +229,8 @@
 	class="flex flex-col gap-6"
 >
 	{#if running}
-		<!-- a rent increase per Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#66, #76);
-		     TODO(fachlich prüfen, #388): the befristet text without the form rule -->
+		<!-- a rent increase per Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#66, #76),
+		     an increase it provides for still needs the official form (#388) -->
 		<Alert tone="caution" title={m.contracts_running_title()} testid="contract-running-hint">
 			<p>{runningText}</p>
 		</Alert>

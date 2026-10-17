@@ -171,9 +171,9 @@ Funktionalität: Neuen Mietvertrag erfassen
 
   # #66: ohne Akonto bezahlt der Mieter meist eine Nebenkostenpauschale, oder es sind keine Nebenkosten vereinbart;
   # der Hinweis hält nicht auf
-  @wip
-  Szenario: Ohne Akonto fragt das Formular nach Nebenkostenpauschale oder Vereinbarung
+  Szenario: Ohne Akonto erklärt das Formular Nebenkostenpauschale und vereinbarte Nebenkosten
     Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
     Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
     Dann erfährt der Liegenschaftsverwalter, dass der Mieter ohne Akonto meist eine Nebenkostenpauschale bezahlt
-    Und erfährt der Liegenschaftsverwalter, dass er ohne vereinbarte Nebenkosten alle Häkchen entfernt
+    Und erfährt der Liegenschaftsverwalter, dass er sonst alle Häkchen bei «Vereinbarte Nebenkosten» entfernt
+    Und erfährt der Liegenschaftsverwalter, dass vereinbarte Nebenkosten ohne Akonto ganz mit der Nebenkostenabrechnung bezahlt werden

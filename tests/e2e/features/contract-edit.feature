@@ -175,7 +175,6 @@ Funktionalität: Mietvertrag bearbeiten
 
   # #66, #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin; #388: auch eine vorgesehene
   # Erhöhung braucht das amtliche Formular
-  @wip
   Szenario: Der laufende befristete Mietvertrag nennt die Regel einer Mietzinserhöhung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Lea Graf" existiert

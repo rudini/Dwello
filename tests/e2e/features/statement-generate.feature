@@ -251,7 +251,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin, auf den Akonto oder neue Nebenkosten
   # steigen könnten; ein unbefristeter behält den Hinweis auf den nächsten Kündigungstermin
   # #388: auch eine Erhöhung, die der Mietvertrag vorsieht, braucht das amtliche Formular
-  @wip
   Szenario: Hinweise zu Akonto und neuen Nebenkosten bei einem befristeten Mietvertrag
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert

@@ -63,6 +63,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |
 | Kosten des Gebäudes | coûts de l’immeuble | costi immobile | building costs |
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
+| Nebenkostenpauschale (#66) | forfait de frais accessoires ❓ | forfait per le spese accessorie ❓ | flat-rate utility charge |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |
 | Berichtigte Abrechnung (#120) | décompte rectificatif | conteggio rettificato | corrected statement |
 | Ersetzt (Abrechnungsstatus, #120) | remplacé | sostituito | replaced |
