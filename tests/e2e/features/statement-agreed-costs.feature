@@ -127,3 +127,16 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Nicht kategorisiert"
     Aber steht im PDF nicht "vereinbarten Nebenkosten"
+
+  # Merge-Review W10c-2 C-1: die berichtigte Abrechnung (#120) entsteht ohne den Assistenten, der nach offenen
+  # Kategorien fragt; sie entsteht erst, wenn die Frage beantwortet ist
+  Szenario: Keine berichtigte Abrechnung, solange eine Kategorie nicht beantwortet ist
+    Angenommen für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und die Abrechnung 2024 von "Anna Keller" ist ersetzt
+    Und es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Beim Mietvertrag ist noch nicht angegeben, ob diese Nebenkosten vereinbart sind"
+    Und hat die Abrechnung den Status "Ersetzt"

@@ -412,6 +412,7 @@
 	"backend_statement_not_replaceable": "Seul un décompte envoyé ou payé peut être rectifié. Rechargez la page.",
 	"backend_statement_not_replaced": "Le décompte n’est pas remplacé. Rechargez la page.",
 	"backend_statement_already_corrected": "Le décompte a déjà un décompte rectificatif : {number}. Rechargez la page.",
+	"backend_statement_agreements_open": "Le contrat de bail n’indique pas encore si ces frais accessoires sont convenus : {categories}. Choisissez « Établir les décomptes » pour cette période de décompte : Dwello vous le demande et établit le décompte rectifié.",
 	"backend_statement_replaced": "Un décompte remplacé ne peut pas être modifié.",
 	"backend_statement_no_rental_days_paid": "Le contrat de bail n’a plus de jours de location dans cette période de décompte. Il n’y a donc pas de décompte rectificatif. Remboursez au locataire les CHF {amount} qu’il a payés sur {number}.",
 	"backend_statement_no_rental_days_refunded": "Le contrat de bail n’a plus de jours de location dans cette période de décompte. Il n’y a donc pas de décompte rectificatif. Le locataire vous doit les CHF {amount} que vous lui avez remboursés sur {number}.",

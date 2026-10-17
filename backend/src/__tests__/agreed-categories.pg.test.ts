@@ -305,3 +305,44 @@ describe('Neuer Mietvertrag', () => {
 		expect((await contract(listed.contract)).agreedCategoryIds).toEqual([ids.Caretaker]);
 	});
 });
+
+// Merge review W10c-2 C-1: the berichtigte Abrechnung (#120) is created without the wizard; a category with costs and no
+// answer would drop out of it unasked, so the direct correction refuses until the question is answered
+describe('Berichtigte Abrechnung mit offener Frage', () => {
+	const other = crypto.randomUUID();
+	let corrected: Awaited<ReturnType<typeof createRental>>;
+	let statementId: string;
+
+	beforeAll(async () => {
+		corrected = await createRental(other, { startDate: '2020-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(corrected.building, { amount: '1000.00', invoiceDate: '2024-06-30' });
+		const generated = await sendJson('POST', '/api/v1/statements/generate', { contractId: corrected.contract, buildingId: corrected.building, ...period, managementFeePercent: 0 });
+		statementId = ((await generated.json()) as { id: string }).id;
+		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
+		await sendJson('POST', `/api/v1/statements/${statementId}/replace`, {});
+	});
+
+	afterAll(async () => {
+		await db.delete(utilityStatements).where(eq(utilityStatements.contractId, corrected.contract));
+		await db.delete(invoices).where(eq(invoices.buildingId, corrected.building));
+		await corrected.remove();
+	});
+
+	it('lehnt sie ab, solange eine Kategorie mit Kosten nicht beantwortet ist, und rechnet sie danach ab', async () => {
+		const stairs = await ownCategory('Treppenhausreinigung');
+		await insertInvoice(corrected.building, { categoryId: stairs, description: 'Treppenhaus 2024', amount: '300.00', invoiceDate: '2024-09-30' });
+
+		const refused = await sendJson('POST', `/api/v1/statements/${statementId}/correction`, {});
+		const body = (await refused.json()) as { code: string; params: { categories: string } };
+
+		expect(refused.status).toBe(409);
+		expect(body.code).toBe('STATEMENT_AGREEMENTS_OPEN');
+		expect(body.params.categories).toContain('Treppenhausreinigung');
+
+		await sendJson('PUT', `/api/v1/contracts/${corrected.contract}/agreements`, { categoryId: stairs, agreed: true });
+		const created = await sendJson('POST', `/api/v1/statements/${statementId}/correction`, {});
+
+		expect(created.status).toBe(201);
+		expect(((await created.json()) as { totalCosts: string }).totalCosts).toBe('1300.00');
+	});
+});

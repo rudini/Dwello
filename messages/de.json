@@ -412,6 +412,7 @@
 	"backend_statement_not_replaceable": "Nur eine versendete oder bezahlte Abrechnung lässt sich berichtigen. Laden Sie die Seite neu.",
 	"backend_statement_not_replaced": "Die Abrechnung ist nicht ersetzt. Laden Sie die Seite neu.",
 	"backend_statement_already_corrected": "Die Abrechnung hat schon eine berichtigte Abrechnung: {number}. Laden Sie die Seite neu.",
+	"backend_statement_agreements_open": "Beim Mietvertrag ist noch nicht angegeben, ob diese Nebenkosten vereinbart sind: {categories}. Wählen Sie «Abrechnungen erstellen» für diese Abrechnungsperiode: Dort fragt Dwello danach und erstellt die berichtigte Abrechnung.",
 	"backend_statement_replaced": "Eine ersetzte Abrechnung lässt sich nicht ändern.",
 	"backend_statement_no_rental_days_paid": "Der Mietvertrag hat in dieser Abrechnungsperiode keine Mietstage mehr. Darum gibt es keine berichtigte Abrechnung. Erstatten Sie dem Mieter die CHF {amount} zurück, die er auf {number} bezahlt hat.",
 	"backend_statement_no_rental_days_refunded": "Der Mietvertrag hat in dieser Abrechnungsperiode keine Mietstage mehr. Darum gibt es keine berichtigte Abrechnung. Der Mieter schuldet Ihnen die CHF {amount}, die Sie ihm auf {number} zurückerstattet haben.",

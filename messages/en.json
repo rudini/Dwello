@@ -412,6 +412,7 @@
 	"backend_statement_not_replaceable": "Only a sent or paid statement can be corrected. Reload the page.",
 	"backend_statement_not_replaced": "The statement is not replaced. Reload the page.",
 	"backend_statement_already_corrected": "The statement already has a corrected statement: {number}. Reload the page.",
+	"backend_statement_agreements_open": "The rental contract does not say yet whether these utility costs are agreed: {categories}. Choose «Create statements» for this billing period: Dwello asks there and creates the corrected statement.",
 	"backend_statement_replaced": "A replaced statement cannot be changed.",
 	"backend_statement_no_rental_days_paid": "The rental contract no longer has days rented in this billing period. So there is no corrected statement. Refund the tenant the CHF {amount} paid on {number}.",
 	"backend_statement_no_rental_days_refunded": "The rental contract no longer has days rented in this billing period. So there is no corrected statement. The tenant owes you the CHF {amount} you refunded on {number}.",

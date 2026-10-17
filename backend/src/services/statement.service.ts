@@ -18,8 +18,11 @@ import {
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
 	type NewUtilityStatementLineItem,
-	type KeyValues
+	type KeyValues,
+	categories,
+	rentalContracts
 } from '../db/schema';
+import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
 import { formatCHF, roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
@@ -614,6 +617,24 @@ export async function replaceStatement(id: string): Promise<StatementWithDetails
 	return (await getStatement(id))!;
 }
 
+// The correction is made without the wizard, which asks whether a category with costs and no answer is agreed (#91):
+// it would drop out unasked, so the landlord answers in the wizard first (merge review W10c-2 C-1)
+async function refuseOpenAgreements(contractId: string, buildingId: string, periodStart: string, periodEnd: string) {
+	const [contract] = await db
+		.select({ id: rentalContracts.id, startDate: rentalContracts.startDate, endDate: rentalContracts.endDate })
+		.from(rentalContracts)
+		.where(eq(rentalContracts.id, contractId));
+	const open = (await agreementsInPeriod({ ...contract, buildingId }, periodStart, periodEnd)).filter((answer) => answer.agreed === null);
+	if (!open.length) return;
+	const named = await db
+		.select({ name: categories.name, nameDE: categories.nameDE })
+		.from(categories)
+		.where(inArray(categories.id, open.map((answer) => answer.categoryId)));
+	throw new CodedError('STATEMENT_AGREEMENTS_OPEN', 'Whether the contract agrees these categories is not answered', {
+		categories: named.map((category) => category.nameDE || category.name).join(', ')
+	});
+}
+
 /**
  * The berichtigte Abrechnung of a replaced statement: a draft of the same Mietvertrag and Abrechnungsperiode with the
  * same Heizprofil and Verwaltungspauschale, from today's data, with a new number; none without Mietstage in the period
@@ -626,6 +647,7 @@ export async function correctStatement(id: string): Promise<StatementWithDetails
 		throw new CodedError('STATEMENT_ALREADY_CORRECTED', 'Statement already has a berichtigte Abrechnung', {
 			number: replaced.replacedBy.statementNumber
 		});
+	await refuseOpenAgreements(replaced.contractId, replaced.building!.id, replaced.periodStart, replaced.periodEnd);
 	try {
 		return await generateStatement({
 			contractId: replaced.contractId,

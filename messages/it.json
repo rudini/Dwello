@@ -412,6 +412,7 @@
 	"backend_statement_not_replaceable": "Solo un conteggio inviato o pagato può essere rettificato. Ricarichi la pagina.",
 	"backend_statement_not_replaced": "Il conteggio non è sostituito. Ricarichi la pagina.",
 	"backend_statement_already_corrected": "Il conteggio ha già un conteggio rettificato: {number}. Ricarichi la pagina.",
+	"backend_statement_agreements_open": "Nel contratto di locazione non è ancora indicato se queste spese accessorie sono pattuite: {categories}. Scelga «Allestire i conteggi» per questo periodo di conteggio: Dwello lo chiede e allestisce il conteggio rettificato.",
 	"backend_statement_replaced": "Un conteggio sostituito non può essere modificato.",
 	"backend_statement_no_rental_days_paid": "Il contratto di locazione non ha più giorni di locazione in questo periodo di conteggio. Perciò non c’è un conteggio rettificato. Rimborsi all’inquilino i CHF {amount} che ha pagato su {number}.",
 	"backend_statement_no_rental_days_refunded": "Il contratto di locazione non ha più giorni di locazione in questo periodo di conteggio. Perciò non c’è un conteggio rettificato. L’inquilino Le deve i CHF {amount} che Lei gli ha rimborsato su {number}.",
