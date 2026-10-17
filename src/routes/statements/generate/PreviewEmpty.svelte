@@ -23,7 +23,7 @@
 	<p class="text-ink" data-testid="preview-all-billed">{m.statements_all_billed()}</p>
 	<ul class="flex flex-col">
 		{#each billed as row (row.buildingId)}
-			<li>
+			<li class="flex flex-col gap-2">
 				<a
 					href="/statements?building={row.buildingId}"
 					class="inline-flex min-h-12 items-center text-accent underline underline-offset-4"
