@@ -1213,6 +1213,7 @@
 	"statements_check_drafts": "Verifichi le bozze e poi le invii.",
 	"statements_view_drafts": "Visualizzare le bozze",
 	"statements_create_more": "Allestire altri conteggi",
+	"statements_download_zip": "Scaricare tutto come ZIP",
 	"common_unknown": "Sconosciuto",
 	"backend_unauthorized": "La sua sessione è scaduta. Effettui di nuovo l’accesso.",
 	"backend_jwt_error": "La sua sessione è scaduta. Effettui di nuovo l’accesso.",

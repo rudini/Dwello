@@ -1213,6 +1213,7 @@
 	"statements_check_drafts": "Check the drafts and then send them.",
 	"statements_view_drafts": "View drafts",
 	"statements_create_more": "Create more statements",
+	"statements_download_zip": "Download all as ZIP",
 	"common_unknown": "Unknown",
 	"backend_unauthorized": "Your session has expired. Please sign in again.",
 	"backend_jwt_error": "Your session has expired. Please sign in again.",
