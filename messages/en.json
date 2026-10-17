@@ -1274,8 +1274,6 @@
 	"statements_utility_many": "{count} utility cost statements",
 	"statements_view_of": "View statements of {name}",
 	"statements_existing_note": "Rental contracts with a statement in this period do not get a new one. To recalculate a draft, delete it and create the statements again.",
-	"statements_partial_title": "Invoices for only part of the period",
-	"statements_partial_text": "For {names} there are more than three months without an invoice at the start or end of the billing period. Check whether invoices are still missing.",
 	"statements_confirm_label": "Create the statements anyway",
 	"statements_preview_empty": "In this billing period there are no rental contracts without a statement in the chosen buildings.",
 	"statements_all_billed_lead": "All rental contracts already have a statement in this period.",

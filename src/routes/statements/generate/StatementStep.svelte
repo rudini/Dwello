@@ -92,10 +92,10 @@
 		createdCount={created?.length ?? null}
 		draftsHref={draftsLink(selection)}
 		zipHref={zipLink(created ?? [], selection)}
-		withoutInvoices={invoiceRows(invoices, data.buildings, selection)
+		withoutInvoices={invoiceRows(invoices, data.buildings)
 			.filter((row) => row.missing)
 			.map((row) => row.name)}
-		incomplete={invoiceRows(invoices, data.buildings, selection)
+		incomplete={invoiceRows(invoices, data.buildings)
 			.filter((row) => row.incomplete)
 			.map((row) => row.name)}
 	/>

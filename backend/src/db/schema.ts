@@ -366,6 +366,8 @@ export type InvoicePart = {
 	noPeriod?: true; // an invoice without Leistungszeitraum: it bills the period (#241)
 	whole?: { start: string; end: string; amount: number }; // a Leistungszeitraum beyond the period, with the invoice's amount
 	fuelStock?: true; // the change of the Tankbestand, not an invoice (#239)
+	// a heating invoice shared by the Heizprofil's months in its days (#71): the tenant's months, those days' months
+	profile?: { percent: number; months: { month: number; percentage: number }[]; periodMonths: { month: number; percentage: number }[] };
 };
 
 // An invoice a position billed (#96): its amount in the period and the days it bills there; the change of the

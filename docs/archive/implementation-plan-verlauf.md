@@ -1392,6 +1392,17 @@ Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requ
 
 Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.
 
+## Session 2026-10-17 W8c-2: remove the 3-month hint (#65, option A)
+
+- [x] Decision recorded in #65 (option A, label `entscheiden` removed)
+- [x] @wip scenario «Ohne Vorjahr weist die Vorschau nicht auf Monate ohne Rechnung hin» (statement-generate.feature), seen red at the hint
+- [x] fach-reviewer round 1: `docs/reviews/w8c2-fachreview-1.md` (V-2 fixed: Kaminfeger as the yearly invoice; V-1 Minor left in the report)
+- [x] Remove the hint: `partly`/`GAP_DAYS`/`partial` and the unused `period` parameter of `invoiceRows` in `src/lib/statement-wizard.ts` (callers `PreviewStep.svelte`, `StatementStep.svelte`), the alert and its marker in `PreviewChecks.svelte`, `statements_partial_*` in `messages/*.json`; unit and DOM tests turned red first
+- Files: those above, `src/__tests__/statement-wizard{,.dom}.test.ts`, `tests/e2e/{features/statement-generate.feature,steps/statement-generate.steps.ts,questions/statement-generate.ts,targets/statement-generate.ts}`
+- [x] code-reviewer round 1: `docs/reviews/w8c2-review-1.md` (C-1 fixed: the DOM test checks the text «Teil der Periode», seen red on the old code; C-2 fixed)
+- [x] workflow-review: no new point (the two of W8c are in `docs/reviews/workflow-notes-issue-65.md`)
+- [x] session archived, pull request (`Fixes #65`)
+
 ## Session 2026-10-16 W5: category descriptions with exclusions (#204, #220, #221)
 
 - [x] Migration `0021_category_descriptions.sql`: new descriptions for Heizung, Gartenpflege, Kehricht, TV/Kabelanschluss, Gebäudeversicherung, Verwaltung, only where a row still holds the seeded text (#204, #220)
@@ -1417,7 +1428,7 @@ Branch `claude/w16-brennstoff-100`. #100's "Decided" section (option 2) is the r
 
 - [x] `@wip` scenarios (building-detail.feature: own heating category and the chimney sweep are not offered; categories.feature: an own category marked Brennstoff is offered), committed and reviewed by `fach-reviewer` before implementing
 - [x] fach-reviewer round 1 (`docs/reviews/w16-fachreview-1.md`)
-- [x] migration `0024_category_fuel.sql`: `categories.is_fuel`, set for the predefined «Heating» and every category that already has a Tankbestand; schema, data-model.md, PRD, contracts
+- [x] migration `0024_category_fuel.sql`: `categories.is_fuel`, set for the predefined «Heating» and every heating cost category that already has a Tankbestand; schema, data-model.md, PRD, contracts
 - [x] backend: `isFuelCategory` reads the flag (no name check); create/update take `isFuel`, stored only with `isHeatingCost`; a category with a Tankbestand stays Brennstoff (`CATEGORY_FUEL_HAS_STOCK`); `*.pg.test.ts` for the predefined chimney sweep and an own heating category
 - [x] frontend: building page filters by the flag; category form checkbox «Brennstoff» with help (only with «Heizkosten nach dem Heizprofil verteilen»); texts in four languages
 - [x] a11y state `category-new` `fuel` (screens.json, accessibility.feature, sprachen-bildschirme.feature)
@@ -1430,3 +1441,25 @@ Branch `claude/w16-brennstoff-100`. #100's "Decided" section (option 2) is the r
 - [x] workflow notes (`docs/reviews/workflow-notes-issue-100.md`); archive the session; pull request (Fixes #100)
 
 Files: `backend/migrations/0024_category_fuel.sql`, `backend/src/db/schema.ts`, `backend/src/services/{category,fuel-stock}.service.ts`, `backend/src/routes/{categories,buildings}.ts`, `src/lib/{types.ts,server/category.ts}`, `src/routes/buildings/[id]/+page.server.ts`, `src/routes/config/categories/{CategoryForm,HeatingChoice}.svelte`, `messages/*.json`, `tests/contracts/category{,-fuel-refused}.json`, `docs/{data-model,PRD-Dwello,api-specification}.md`, tests and features.
+
+## Session W7d: #71 Heizprofil within the Leistungszeitraum
+
+- [x] Read #71 and the open `entscheiden` issues on the same calculation (#257, #256, #280, #237); #257 (Tankbestand) proposes that a delivery's Leistungszeitraum does not count in a tank category: tank categories keep today's sharing until #257 is decided
+- [x] Scenario `@wip` in `tests/e2e/features/statement-detail.feature` (amount and PDF), seen red
+- [x] `fach-reviewer` on the scenario before implementing (amounts change): `docs/reviews/71-fachreview-1.md`; M-2 → #335 (entscheiden), V-7 → #336 (entscheiden), V-6 → comment on #237
+- [x] Calculation: a heating invoice with a Leistungszeitraum is shared by the Heizprofil's months inside it, normalised to 100 % (tdd, `calculation.service.ts`)
+- [x] PDF: each invoice of such a position with its months and the division, recomputable from the printed values (#232)
+- [x] `docs/nebenkostenabrechnung-anforderungen.md` rule 5, `docs/data-model.md` (CR2-N2)
+- Files: `backend/src/services/{calculation,pdf,statement-pdf}.service.ts`, `backend/src/db/schema.ts` (`InvoicePart.profile`, jsonb, no migration), tests `heating-distribution.pg.test.ts`, `statement-pdf-render.test.ts`, `statement-pdf.pg.test.ts`, `statement-detail.feature` + step, docs rule 5 and `data-model.md`
+- [x] Slice review round 1: `docs/reviews/71-review-1.md` (C-1, C-5 to C-8 fixed; C-2 answered by the domain review; C-3, C-4, C-9, C-10 stay in the report; C-11: V-3 stated in rule 5, V-4 stays in report 1)
+- [x] Domain review round 2: `docs/reviews/71-fachreview-2.md` (M-4, V-9 to V-13 fixed)
+- [x] Persona Dr. Weber: `docs/design/personas/dr-weber-71.md` (P-1 → #339 entscheiden; P-3 fixed; P-2, P-4 stay in the report)
+- [x] Domain review round 3: `docs/reviews/71-fachreview-3.md` (M-4 closed; V-14 fixed)
+- [x] Closing `code-reviewer` round 2: `docs/reviews/71-review-2.md` (C-1 fixed with a test, C-2 and C-4 fixed, C-3 accepted: reviewed wording)
+- [x] `daten-pruefer` on Seepark Residenz A2 and controls: `docs/reviews/71-datenpruefung-1.md` (no findings)
+- [x] Merge `origin/main` (conflict in the schema import of `calculation.service.ts` only)
+- [x] Closing code review round 3: `docs/reviews/71-review-3.md` (C-1 Major: a decommissioned tank no longer keeps the exception, `periodReadings().covered`, test first; C-2 settled by it); re-review round 4: `docs/reviews/71-review-4.md` (C-1, C-2 closed; C-3 Minor stays in the report)
+- [x] Merge of main after the product owner's go (conflicts in calculation, PDF texts, render test, rule 5): review of the merge commit `docs/reviews/71-review-5.md` (no Blocker/Major; C-1, C-2 stay in the report)
+- [x] Further merge of main and test fix (part order of two invoices with one date): review round 6 `docs/reviews/71-review-6.md` (no Blocker/Major; C-1 pre-existing, C-2 stay in the report)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
+- [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
