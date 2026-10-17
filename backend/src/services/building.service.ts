@@ -3,10 +3,11 @@
  * Business logic for building operations
  */
 
-import { eq, ilike, or, sql, desc, and, inArray } from 'drizzle-orm';
+import { eq, ilike, sql, desc, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, apartments, type Building, type NewBuilding } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
+import { everyWordIn } from './word-search';
 
 export interface BuildingFilters {
 	search?: string;
@@ -35,13 +36,7 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 	const conditions = [];
 
 	if (search) {
-		conditions.push(
-			or(
-				ilike(buildings.name, `%${search}%`),
-				ilike(buildings.address, `%${search}%`),
-				ilike(buildings.city, `%${search}%`)
-			)
-		);
+		conditions.push(everyWordIn(search, [buildings.name, buildings.address, buildings.city]));
 	}
 
 	if (city) {
