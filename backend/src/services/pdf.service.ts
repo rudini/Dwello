@@ -541,8 +541,9 @@ function title({ doc, t, data }: Page, y: number) {
 	return doc.y + 14;
 }
 
-// What the balance asks the tenant to do: pay with the payment part, wait for the refund, or nothing
-function balanceText({ t, data }: Page) {
+// What the balance asks the tenant to do: pay with the payment part, wait for the refund, or nothing (also the e-mail, #86)
+export function balanceText(data: StatementPDFData, language: Language) {
+	const t = translations[language];
 	const date = data.paymentDeadline && formatDate(data.paymentDeadline);
 	if (data.balance === 0) return rounding(data) ? t.balancedRounded : t.balancedNote; // settled when sent
 	if (data.paidDate) return fill(data.balance < 0 ? t.refundPaidOn : t.paidOn, { date: formatDate(data.paidDate) });
@@ -566,7 +567,7 @@ const balanceLabel = ({ t, data }: Page) => labelOf(data.balance, t);
 function balanceBox(page: Page, y: number) {
 	const { doc, t, data } = page;
 	const width = PAGE.right - PAGE.left;
-	const what = balanceText(page);
+	const what = balanceText(page.data, page.language);
 	const rounded = rounding(data) ? `, ${t.roundedNote}` : '';
 	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${rounded}`;
 	doc.font('Helvetica').fontSize(9);

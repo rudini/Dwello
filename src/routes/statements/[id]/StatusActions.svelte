@@ -6,6 +6,7 @@
 	// What the statement's status allows next: a draft is sent; a sent one is marked paid, an overdue one also reminded
 	let {
 		status,
+		byEmail,
 		owes,
 		waiting,
 		onremind,
@@ -14,6 +15,7 @@
 		onresetpayment
 	}: {
 		status: StatementWithDetails['status'];
+		byEmail: boolean; // the tenant wants e-mail: Dwello sends a draft itself (#86)
 		owes: boolean; // an amount due; a refund is owed to the tenant and never reminded
 		waiting: boolean; // the Zahlungsfrist of the last Mahnung still runs (#107)
 		onremind: () => void;
@@ -40,6 +42,6 @@
 	>
 {:else if status === 'draft'}
 	<Button variant="primary" onclick={onsend} icon="send" testid="statement-send-button"
-		>{m.statements_mark_sent()}</Button
+		>{byEmail ? m.statements_send_email() : m.statements_mark_sent()}</Button
 	>
 {/if}

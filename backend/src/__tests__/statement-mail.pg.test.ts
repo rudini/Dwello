@@ -10,9 +10,10 @@ import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
 import { db } from '../db/connection';
 import { documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
-import { getTypedConfig } from '../services/config.service';
+import { deleteConfig, getConfig, getTypedConfig, setConfig } from '../services/config.service';
 import { updateTenant } from '../services/tenant.service';
 import { daysAfter, swissToday } from '../services/today';
+import { formatSwissDate } from '../services/pdf-format';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
@@ -28,6 +29,7 @@ const mails: ParsedMail[] = [];
 const statementIds: string[] = [];
 let smtp: SMTPServer;
 let rental: Awaited<ReturnType<typeof createRental>>;
+let iban: Awaited<ReturnType<typeof getConfig>>; // as configured before, restored afterwards
 
 const api = async (method: string, path: string, body?: object) =>
 	callApi(path, { method, headers: { 'Content-Type': 'application/json' }, body: body && JSON.stringify(body) });
@@ -77,6 +79,8 @@ beforeAll(async () => {
 	});
 	await new Promise<void>((resolve) => smtp.listen(0, '127.0.0.1', resolve));
 	rental = await createRental(token, { startDate: '2010-01-01', monthlyAdvancePayment: '0' });
+	iban = await getConfig('iban');
+	await setConfig('iban', 'CH93 0076 2011 6238 5295 7'); // the PDF needs one for its QR-bill
 });
 
 beforeEach(async () => {
@@ -91,6 +95,8 @@ beforeEach(async () => {
 
 afterAll(async () => {
 	delete process.env.MAIL_TRANSPORT;
+	if (iban) await setConfig('iban', iban);
+	else await deleteConfig('iban');
 	await db.delete(documents).where(eq(documents.tenantId, rental.tenant));
 	if (statementIds.length) {
 		await db.delete(utilityStatementLineItems).where(inArray(utilityStatementLineItems.statementId, statementIds));
@@ -116,6 +122,8 @@ describe('Abrechnung per E-Mail versenden', () => {
 		const mail = mails.at(-1)!;
 		expect(mail.to).toMatchObject({ text: 'nora.beispiel@dwello.test' });
 		expect(mail.subject).toStartWith('Nebenkostenabrechnung – ');
+		// what the Saldo asks for, as the PDF says it (fach-review V-3)
+		expect(mail.text).toContain(`Bitte bezahlen Sie den Betrag bis ${formatSwissDate(result.statement!.paymentDeadline)} mit dem Zahlteil.`);
 		expect(mail.attachments[0].contentType).toBe('application/pdf');
 		expect(mail.attachments[0].content.subarray(0, 4).toString()).toBe('%PDF');
 		expect(result.document).toMatchObject({ type: 'statement', channel: 'email', status: 'sent', title: 'Nebenkostenabrechnung', paymentDeadline: null });
@@ -199,7 +207,13 @@ describe('Abrechnung per Brief', () => {
 
 		const result = await send(id, { byLetter: true });
 
-		expect(result.statement).toMatchObject({ status: 'sent', statementDate: swissToday() });
+		// the Zahlungsfrist from the day it went out (fach-review V-1)
+		const today = swissToday();
+		expect(result.statement).toMatchObject({
+			status: 'sent',
+			statementDate: today,
+			paymentDeadline: daysAfter(today, await getTypedConfig('payment_deadline_days'))
+		});
 		expect(await storedFor(id)).toHaveLength(0);
 	});
 

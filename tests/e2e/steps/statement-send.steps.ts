@@ -1,8 +1,10 @@
 import { createBdd } from 'playwright-bdd';
+import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
 import { pageTitleText } from '../questions/app-frame';
 import { documentsFor } from '../questions/documents';
 import { sendConfirmation } from '../questions/statement-detail';
+import { paymentDeadline } from '../questions/statement-edit';
 import { openDocuments } from '../tasks/documents';
 import { deliverByLetter, openSendConfirmation, sendStatement } from '../tasks/statement-detail';
 
@@ -32,7 +34,7 @@ Then(
 	'sagt die Bestätigung, dass Dwello die Abrechnung per E-Mail sendet und die Zahlungsfrist am Tag des Versands beginnt',
 	async ({ verwalter }) => {
 		await verwalter.sees(sendConfirmation).toContain('Dwello sendet die Abrechnung als PDF per E-Mail');
-		await verwalter.sees(sendConfirmation).toContain('die Zahlungsfrist beginnt an diesem Tag');
+		await verwalter.sees(sendConfirmation).toContain('rechnet die Zahlungsfrist ab diesem Tag');
 	}
 );
 
@@ -44,3 +46,8 @@ Then(
 		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(0);
 	}
 );
+
+// the Zahlungsfrist of the default settings (30 days), counted from the day the statement went out (#86)
+Then('läuft die Zahlungsfrist {int} Tage ab dem Tag des Versands', async ({ verwalter }, days: number) => {
+	await verwalter.sees(paymentDeadline).toBe(swissDate(inDays(days)));
+});

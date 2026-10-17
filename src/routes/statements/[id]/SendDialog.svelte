@@ -7,13 +7,38 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 
-	// Before "Versendet": Dwello sends nothing itself; the user delivers the PDF and then records it here
-	let { open = $bindable(), statement }: { open: boolean; statement: StatementWithDetails } =
-		$props();
+	// Before "Versendet": to a tenant who wants e-mail Dwello sends the PDF itself (#86); for a letter, also instead of a
+	// failed e-mail (byLetter), the user delivers the PDF and then records it here
+	let {
+		open = $bindable(),
+		statement,
+		byLetter = false
+	}: { open: boolean; statement: StatementWithDetails; byLetter?: boolean } = $props();
 
 	let form = $state<HTMLFormElement>();
 	let sending = $state(false);
 	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
+	const emails = $derived(byEmail && !byLetter);
+	// the dialog's words: sending by e-mail, or recording a letter as sent
+	const words = $derived(
+		emails
+			? {
+					title: m.statements_send_email_title(),
+					confirm: m.statements_send_email(),
+					busy: m.ui_sending(),
+					done: m.statements_emailed()
+				}
+			: {
+					title: m.statements_mark_sent_title(),
+					confirm: m.statements_mark_sent(),
+					busy: m.ui_saving(),
+					done: m.statements_marked_sent()
+				}
+	);
+	const address = $derived(
+		(byEmail ? statement.tenantEmail : statement.tenantAddress) ||
+			(byEmail ? m.statements_no_email() : m.statements_no_address())
+	);
 </script>
 
 <form
@@ -27,25 +52,31 @@
 			sending = false;
 			open = false;
 			if (result.type === 'success') {
-				addToast('success', m.statements_marked_sent());
+				addToast('success', words.done);
 				await tick(); // after the dialog has handed the focus back
 				document.querySelector<HTMLElement>('h1')?.focus(); // "Als versendet markieren" is gone now
 			}
 		};
 	}}
-></form>
+>
+	{#if byLetter}<input type="hidden" name="byLetter" value="true" />{/if}
+</form>
 
 <Dialog
 	bind:open
-	title={m.statements_mark_sent_title()}
-	confirmLabel={m.statements_mark_sent()}
+	title={words.title}
+	confirmLabel={words.confirm}
 	busy={sending}
-	busyLabel={m.ui_saving()}
+	busyLabel={words.busy}
 	confirmTestid="statement-send-confirm"
 	onconfirm={() => form?.requestSubmit()}
 >
-	<p>{m.statements_send_text_1()}</p>
-	<p>{m.statements_send_text_2()}</p>
+	{#if emails}
+		<p>{m.statements_send_email_text()}</p>
+	{:else}
+		<p>{m.statements_send_text_1()}</p>
+		<p>{m.statements_send_text_2()}</p>
+	{/if}
 	<dl class="flex flex-col gap-2 rounded-panel bg-sunken p-4" data-testid="send-recipient">
 		<div class="flex flex-wrap gap-x-2">
 			<dt class="text-ink-muted">{m.statements_recipient()}</dt>
@@ -55,8 +86,7 @@
 			<dt class="text-ink-muted">{m.statements_channel()}</dt>
 			<dd class="text-ink">
 				{byEmail ? m.tenants_channel_email() : m.tenants_channel_letter()},
-				{(byEmail ? statement.tenantEmail : statement.tenantAddress) ||
-					(byEmail ? m.statements_no_email() : m.statements_no_address())}
+				{address}
 			</dd>
 		</div>
 	</dl>

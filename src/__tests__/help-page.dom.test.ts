@@ -121,11 +121,17 @@ describe('Hilfe', () => {
 		);
 	});
 
-	it('sagt, dass Dwello Abrechnungen nicht selbst verschickt', () => {
+	// #86: per E-Mail sendet Dwello selbst, per Brief stellt der Verwalter das PDF zu
+	it('sagt, wie eine Abrechnung je nach Korrespondenzkanal zum Mieter kommt', () => {
 		show(HelpPage, {});
 
 		const text = section('Nebenkostenabrechnungen erstellen')?.textContent;
-		expect(text).toContain('Dwello verschickt die Abrechnungen nicht selbst');
-		expect(text).toContain('«Als versendet markieren»');
+		expect(text).toContain(
+			'Wünscht der Mieter Korrespondenz per E-Mail, sendet Dwello die Abrechnung mit «Per E-Mail senden» als PDF und legt sie unter «Dokumente» ab.'
+		);
+		expect(text).toContain(
+			'Für einen Brief stellen Sie dem Mieter das PDF selbst zu und wählen danach «Als versendet markieren».'
+		);
+		expect(text).not.toContain('nicht selbst');
 	});
 });

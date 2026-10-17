@@ -6,10 +6,12 @@ import { formatCurrency } from '$lib/utils/format';
 import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
 import { sendStatement, sendStatementReminder } from '$lib/server/statement-actions';
+import { loadDocuments } from '$lib/server/documents';
 import { invoicesInPeriod } from '$lib/server/statement-generation';
 import backendStatement from '../../tests/contracts/statement.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
 import sendRefused from '../../tests/contracts/statement-send-refused.json';
+import documentsJson from '../../tests/contracts/documents.json';
 
 afterEach(() => overwriteGetLocale(() => baseLocale));
 
@@ -160,11 +162,27 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 	// #86: what went wrong and what to do, never the backend's own text
 	it('sagt in der gewählten Sprache, warum die Abrechnung nicht per E-Mail hinausging', async () => {
 		overwriteGetLocale(() => 'fr');
-		const fetch = (async () => Response.json(sendRefused, { status: 400 })) as typeof globalThis.fetch;
+		const fetch = (async () =>
+			Response.json(sendRefused, { status: 400 })) as typeof globalThis.fetch;
 
 		const refused = await sendStatement(fetch, 's1', false);
 
-		expect(refused).toEqual({ status: 400, message: m.backend_statement_tenant_no_email({}, { locale: 'fr' }) });
+		expect(refused).toEqual({
+			status: 400,
+			message: m.backend_statement_tenant_no_email({}, { locale: 'fr' }),
+			undelivered: true
+		});
 		expect(refused?.message).not.toBe(m.backend_statement_tenant_no_email({}, { locale: 'de' }));
+	});
+
+	it('nennt die per E-Mail versendete Abrechnung unter «Dokumente» in der gewählten Sprache', async () => {
+		overwriteGetLocale(() => 'it');
+		const [upload] = documentsJson.data;
+		const fetch = (async () =>
+			Response.json({ data: [{ ...upload, type: 'statement', title: 'Nebenkostenabrechnung' }] })) as typeof globalThis.fetch;
+
+		const [document] = await loadDocuments(fetch, 'statementId=s1');
+
+		expect(document.title).toBe('Conteggio spese accessorie');
 	});
 });

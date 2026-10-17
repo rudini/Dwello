@@ -369,7 +369,7 @@ export interface StatementDocument {
 	id: string;
 	tenantId: string;
 	statementId: string | null;
-	type: 'reminder' | 'upload'; // an upload has no channel and no Versandstatus
+	type: 'reminder' | 'statement' | 'upload'; // an upload has no channel and no Versandstatus
 	reminderLevel: number | null;
 	title: string;
 	fileName: string;

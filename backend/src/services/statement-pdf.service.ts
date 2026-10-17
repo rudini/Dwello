@@ -243,7 +243,7 @@ async function keySharesOf(statement: StatementWithDetails, keys: Map<string, Na
 	return shares;
 }
 
-/** Render and store the PDF in the language asked for, otherwise the tenant's */
+/** Render and store the PDF in the language asked for, otherwise the tenant's; the PDF and what it prints for e-mailing it */
 export async function generateStatementPdf(id: string, language?: string) {
 	const found = await getStatement(id);
 	if (!found) return 'not-found';
@@ -275,7 +275,7 @@ export async function generateStatementPdf(id: string, language?: string) {
 		})
 		.where(eq(utilityStatements.id, id));
 
-	return { qrReference, pdfSize: pdfBase64.length };
+	return { qrReference, pdfSize: pdfBase64.length, pdf: pdfBase64, data: pdfData, language: pdfLanguage };
 }
 
 const storedPdf = async (id: string) =>
