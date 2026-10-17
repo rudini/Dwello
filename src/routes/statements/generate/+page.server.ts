@@ -47,6 +47,7 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 		)
 	);
 	// set differently, they tell nothing: both from the settings (#119); a deleted profile is no setting (fach-review V-5)
+	// TODO(fachlich prüfen, #387): at a tenant change the settings' Heizprofil may differ from the other tenant's
 	const profiles = others.filter((s) => s.heatingProfileId);
 	const differing =
 		new Set(profiles.map((s) => s.heatingProfileId)).size > 1 ||
