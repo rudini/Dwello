@@ -199,7 +199,7 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 
 Stored status is `draft`, `sent` or `paid`; `overdue` is never stored. Responses report an **effective status**: a `sent` statement whose `paymentDeadline` is past is returned as `overdue`.
 
-Transitions (`PUT /:id/status`, checked against the effective status): `draft → sent`, `sent → paid`, `overdue → paid`. Anything else is 400 `Invalid status transition from X to Y`. A payment is taken back with `POST /:id/payment-reset` (#92).
+Transitions (`PUT /:id/status`, checked against the effective status): `draft → sent`, `sent → paid`, `overdue → paid`. Anything else is 400 `Invalid status transition from X to Y`. Sending makes and stores the PDF as sent, also when a Saldo of 0 makes the statement `paid` at once. A payment is taken back with `POST /:id/payment-reset` (#92).
 
 Only **drafts** can be deleted or get line items; amounts (`totalCosts`, `totalAdvancePayments`, `managementFeePercent`, `managementFee`, `balance`) of non-drafts cannot change; no route accepts them, `updateStatement` rejects them in the service.
 
@@ -222,7 +222,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |
 | POST | `/:id/generate-pdf` | Body: optional `language` (`de`\|`fr`\|`it`\|`en`; default tenant language, then `de`). Renders the PDF with Swiss QR-bill and stores it. → `{ success: true, message, qrReference, pdfSize }`. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
-| GET | `/:id/pdf` | → `application/pdf` attachment `<number>.pdf` (#101), made first when missing, a draft's made afresh each time (the tenant's address and the settings as they are now); sending discards the stored PDF, so the PDF as sent is made on its first request after sending and then kept. 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
+| GET | `/:id/pdf` | → `application/pdf` attachment `<number>.pdf` (#101), made first when missing, a draft's made afresh each time (the tenant's address and the settings as they are now); sending makes the PDF as sent at that moment and keeps it (made on the first request instead if it fails then). 404 `STATEMENT_NOT_FOUND`; 400 `IBAN_MISSING`, `IBAN_INVALID`; 500 `PDF_FAILED` |
 | GET | `/:id/pdf/base64` | → `{ pdfBase64, mimeType: "application/pdf" }`. 404 as above |
 
 **Calculation input:** `contractId`, `periodStart`, `periodEnd` required; optional `heatingProfileId`, `managementFeePercent` (number ≥ 0, overrides `management_fee_pct`). The Verwaltungspauschale is that percentage of the tenant's own utility costs.

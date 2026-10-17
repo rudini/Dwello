@@ -310,7 +310,9 @@ export async function getStatementPdf(id: string) {
 /** A status change; when sent, the PDF as sent is made at that moment and kept (closing review C-1) */
 export async function changeStatementStatus(...[id, status, data]: Parameters<typeof updateStatementStatus>) {
 	const statement = await updateStatementStatus(id, status, data);
-	// sent stays sent when the PDF cannot be made now (no IBAN, a failure): it is made on its first request then
-	if (statement?.status === 'sent') await generateStatementPdf(id).catch(() => null);
+	// also when a Saldo of 0 makes it paid at once (review C-3); sent stays sent when the PDF cannot be made now (no
+	// IBAN, a failure): it is made on its first request then
+	if (statement && status === 'sent')
+		await generateStatementPdf(id).catch((error) => console.warn('PDF as sent not made:', error));
 	return statement;
 }
