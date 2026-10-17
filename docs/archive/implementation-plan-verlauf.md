@@ -1449,6 +1449,21 @@ Files: `backend/src/__tests__/heating-profiles.pg.test.ts` (comment), `implement
 
 Files: `backend/migrations/0021_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`, `tests/e2e/{features/categories.feature,steps/categories.steps.ts,tasks/categories.ts,questions/categories.ts,targets/categories.ts,screenplay/questions.ts}`
 
+## Session 2026-10-17 W18: «Ihre Angaben» instead of «Entwurf» for the wizard input (#57)
+
+- [x] `@wip` scenarios: both wizards say the input is kept only in this browser and not saved yet, and «Angaben wiederhergestellt»; «Angaben verwerfen» (contract wizard); privacy notice; help `help_tenants_3`
+- [x] `fach-reviewer` on the scenarios and the proposed texts before implementing (`docs/reviews/57-fachreview-1.md`; all Minors and Nits adopted)
+- [x] Texts in `messages/{de,fr,it,en}.json`: `ui_draft_saved`, `ui_draft_restored`, `ui_draft_back` (V-2), `help_tenants_3`, `privacy_draft_notice`, `gallery_toast_info`; no success icon in the save status (V-1)
+- [x] Unit/DOM tests updated red first (`ui-feedback`, `contract-wizard`, `statement-wizard`, `privacy-page`)
+- [x] Scenarios green without `@wip`; a11y/language rows of both wizards still green
+- [x] Slice review: `docs/reviews/57-review-1.md` (C-1 to C-4 fixed)
+- [x] Feature review: `docs/design/personas/anna-57.md`, `docs/design/personas/dr-weber-57.md` (no Blocker/Major; Minors stay in the reports)
+- [x] Closing review: `docs/reviews/57-review-2.md` (Nit C-1: fr guard for a space before «, `i18n.test.ts`)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-57.md`
+- [x] Archive the session, pull request `Fixes #57`
+
+Files: `messages/{de,fr,it,en}.json`, `src/lib/ui/SaveStatus.svelte`, `src/__tests__/{ui-feedback,contract-wizard,statement-wizard,privacy-page}.dom.test.ts`, `src/__tests__/i18n.test.ts`, `tests/e2e/features/{contract-new,statement-generate,privacy,help}.feature`, `tests/e2e/{steps/{contract-form,statement-generate,app-frame}.steps.ts,tasks/{contract-form,statement-generate,accessibility}.ts,questions/{contract-form,statement-generate,wizard}.ts,targets/wizard.ts}`, `tests/a11y/screens.json`, `docs/design/offene-punkte.md`, `docs/reviews/57-*.md`, `docs/reviews/workflow-notes-issue-57.md`, `docs/design/personas/{anna,dr-weber}-57.md`
+
 ## Session W7d: #71 Heizprofil within the Leistungszeitraum
 
 - [x] Read #71 and the open `entscheiden` issues on the same calculation (#257, #256, #280, #237); #257 (Tankbestand) proposes that a delivery's Leistungszeitraum does not count in a tank category: tank categories keep today's sharing until #257 is decided
