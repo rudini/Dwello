@@ -106,7 +106,7 @@ describe('Rundung des Saldos im PDF', () => {
 	// Die Zeile passt in allen Sprachen auf eine Zeile, sonst kann der Saldo allein auf die nächste Seite rutschen
 	it('nennt die Rundung auf Italienisch in einer Zeile mit ihrem Betrag', async () => {
 		const it = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'it'), 'base64')).flowing;
-		expect(it).toContain('Arrotondamento + 0.02');
+		expect(it).toContain('Arrotondamento a 5 centesimi + 0.02');
 		expect(it).toContain('prima dell’arrotondamento 184.13');
 	});
 

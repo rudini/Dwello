@@ -934,7 +934,7 @@
 	"invoices_example_supplier": "Zurich Energy AG",
 	"statements_balance_due": "Amount due",
 	"statements_balance_refund": "Refund",
-	"statements_balance_settled": "Settled",
+	"statements_balance_settled": "Nil balance",
 	"statements_paid_help_refund": "The day you transferred the amount.",
 	"statements_paid_help": "The day the money arrived.",
 	"statements_paid_date_invalid": "Please enter the payment date as DD.MM.YYYY.",

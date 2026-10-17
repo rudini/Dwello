@@ -62,6 +62,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Kosten Liegenschaft | coûts de l’immeuble | costi immobile | building costs |
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |
+| Ausgeglichen (Saldo 0) | solde nul | in pareggio | nil balance |
 | Mietstage | jours de location | giorni di locazione | days rented |
 | Leerstand | vacance | sfitto | vacancy |
 | Entwurf / Versendet / Bezahlt / Überfällig | brouillon / envoyé / payé / en retard | bozza / inviato / pagato / scaduto | draft / sent / paid / overdue |
