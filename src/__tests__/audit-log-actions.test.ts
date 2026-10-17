@@ -15,13 +15,7 @@ describe('Eintrag im Protokoll löschen', () => {
 
 	// Code-Review C-1: in einem anderen Tab schon gelöscht
 	it('zeigt das Protokoll ohne den Eintrag, den es nicht mehr gibt', async () => {
-		const { result } = runAction(
-			actions.delete,
-			'',
-			404,
-			{ id: 'a1' },
-			{ error: 'Audit log entry not found' }
-		);
+		const { result } = runAction(actions.delete, '', 404, { id: 'a1' });
 
 		await expect(result).rejects.toMatchObject({ status: 303, location: '/config/audit-log' });
 	});
