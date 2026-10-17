@@ -1559,3 +1559,13 @@ Files: `CLAUDE.md`, `.claude/agents/{fach-reviewer,code-reviewer}.md`, `.claude/
 - [x] Plan archived, pull request (Refs #408, #199; #211 closed into #408), CI
 
 Files: `src/lib/accounting-period.ts`, `src/lib/server/missing-statements.ts`, `src/lib/overview.ts`, `src/lib/types.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/contracts/+page.server.ts`, `src/routes/contracts/ContractRow.svelte`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/MissingStatement.svelte`, `src/lib/server/statement-generation.ts` (marker), `messages/*.json`, tests and scenarios
+
+## Session 2026-10-17 CI: E2E shards on main within their time limit
+
+No scenario: CI configuration only, no app behaviour changes.
+
+- [x] E2E shards on main get 60 minutes instead of 30 (run #534 on main: both E2E shards cancelled at 30:20 with every browser; pull requests keep 30)
+- [x] Slice review round 1: `docs/reviews/ci2-review-1.md` (no Blocker/Major; C-1, C-2 fixed)
+- [x] Plan archived, pull request, CI
+
+Files: `.github/workflows/ci.yml`
