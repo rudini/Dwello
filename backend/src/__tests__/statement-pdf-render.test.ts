@@ -51,6 +51,19 @@ describe('PDF einer Rückerstattung', () => {
 	});
 });
 
+// #84 FR-7: «1er», not «1e»
+describe('Stockwerk im französischen PDF', () => {
+	it.each([
+		[-1, 'A2, 1er sous-sol'],
+		[-2, 'A2, 2e sous-sol']
+	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'fr'), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
+	});
+});
+
 describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 	// a period whose months carry 0 % in the profile: the calculation shared the heating costs by days
 	const byDays: StatementPDFData = {

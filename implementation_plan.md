@@ -11,6 +11,7 @@ Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/Z
 - [x] #83: remaining ❓ terms (no Fedlex word: Umlagefähig fr, Mahnung family, Abrechnungslauf, Konfidenz, Kündigung aufheben) for a native speaker: #342; scope of Option B for «inquilino»/«pigione»: #343
 - [x] #84: AI native reads (fr, it, en) of statement PDF, reminder letters and e-mail: `docs/reviews/w4d-native-{fr,it,en}.md`; triage reviewed by fach-reviewer (`docs/reviews/w4d-tenanttexts-fachreview-1.md`), applied as text changes in `backend/src/services/pdf.service.ts`, `backend/src/services/reminder-letter.ts`, `messages/{fr,en}.json` (`statements_balance_settled`, V-1), `docs/design/i18n-begriffe.md` (row «Ausgeglichen»); pinned tests updated (`statements-i18n.test.ts`, `statement-pdf-render.test.ts`). Deferred: invoice lines to #256, tenancy line to #325, salutation, «umgehend» with a deadline and English floors to #344, master-data names to #345. No scenario: reviewed translation wording (skill slice-review, Triage)
 - [x] code-reviewer slice 1: `docs/reviews/w4d-s1-review-1.md`
+- [x] code-reviewer slice 2: `docs/reviews/w4d-s2-review-1.md`
 - [ ] #84: German findings of `i18n-native-de.md` still open listed in the issue
 - [ ] code-reviewer per slice; feature review (persona on the fr/it PDF and letters, fach-reviewer)
 - [ ] Workflow review, archive the session, PR `Fixes #83` `Fixes #84`, CI, merge
