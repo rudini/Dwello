@@ -1090,5 +1090,6 @@ Files: `src/lib/server/{contract-history,apartment}.ts`, `src/lib/types.ts`, `sr
 - [x] Closing review round 2: `docs/reviews/204-review-2.md`; C-5 (Major, three rows still hid the text at 390 px) fixed with six rows and scenario «Ganze Beschreibung einer vordefinierten Kategorie auf dem Telefon» (seen red: 72 px hidden; the category row target now matches the exact name, since «Heizung» appears in other descriptions); C-6, C-7 fixed
 - [x] Re-review of C-5: `docs/reviews/204-review-3.md` (C-5 to C-7 fixed; Nits C-8, C-9 stay in the report)
 - [x] Archive the session, push, pull request, CI; the merge waits on the product owner (Weber P-2 / fach M-1 on the Kehricht text decided in #220)
+- [x] Merge reviews after main took the migration number: `docs/reviews/204-review-4.md`, `204-review-5.md` (migration now `0018`)
 
 Files: `backend/migrations/0018_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`, `tests/e2e/{features/categories.feature,steps/categories.steps.ts,tasks/categories.ts,questions/categories.ts,targets/categories.ts,screenplay/questions.ts}`
