@@ -8,7 +8,7 @@ import {
 	currentTenant,
 	earlierContractShown,
 	earlierContractsListed,
-	grossMonthlyRent,
+	monthlyTotalOfApartment,
 	nextTenant,
 	vacancyShown
 } from '../questions/apartment-detail';
@@ -47,8 +47,8 @@ Then('wohnt {string} in der Wohnung', async ({ verwalter, names }, tenant: strin
 	await verwalter.sees(currentTenant).toBe(names.get(tenant)!);
 });
 
-Then('kostet die Wohnung monatlich {string} brutto', async ({ verwalter }, amount: string) => {
-	await verwalter.sees(grossMonthlyRent).toBe(amount);
+Then('beträgt das Monatlich total der Wohnung {string}', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(monthlyTotalOfApartment).toBe(amount);
 });
 
 Then('hat die Wohnung den Status {string}', async ({ verwalter }, status: string) => {
