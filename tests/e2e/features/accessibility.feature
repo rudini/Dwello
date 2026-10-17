@@ -136,6 +136,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | tank-question       |
       | statement-generate     | old-address-preview |
       | statement-generate     | preview-all-billed  |
+      | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |
       | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |
