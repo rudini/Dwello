@@ -9,6 +9,7 @@ import { db } from '../db/connection';
 import { rentalContracts, utilityStatements } from '../db/schema';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createContract, deleteContract } from '../services/contract.service';
+import { createTenant, deleteTenant } from '../services/tenant.service';
 import { callApi, sendJson } from './helpers/auth';
 import { idOf } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -92,6 +93,21 @@ describe('Ausgezogener Mieter mit der Adresse der Wohnung', () => {
 		await contract({ movedOut: true });
 		expect(await oldAddress()).toBe(true);
 		await contract({ terminated: true, movedOut: false });
+	});
+
+	// merge review C-4: with a later contract in the apartment the tenant has left, as A-6 sees it too
+	it('warnt nach einem abgelaufenen befristeten Mietvertrag, wenn die Wohnung wieder vermietet ist', async () => {
+		await address({ address: 'Testweg 1', postalCode: '8400', city: 'Winterthur' }); // the building's
+		await db.update(rentalContracts).set({ terminated: false }).where(eq(rentalContracts.id, rental.contract));
+		const next = await createTenant({ firstName: 'Nina', lastName: `Nachmieter ${crypto.randomUUID()}` });
+		const later = await createContract({ apartmentId: rental.apartment, tenantId: next.id, baseRent: '950', monthlyAdvancePayment: '0', startDate: '2024-05-01' });
+
+		const relet = await oldAddress();
+		await deleteContract(later.id, true);
+		await deleteTenant(next.id);
+		await db.update(rentalContracts).set({ terminated: true }).where(eq(rentalContracts.id, rental.contract));
+
+		expect(relet).toBe(true);
 	});
 
 	// directly: the draft of 2024 refuses a later Vertragsende through the API

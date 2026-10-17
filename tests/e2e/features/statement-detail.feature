@@ -58,8 +58,7 @@ Funktionalität: Abrechnungsdetail
 
   # A-5 (#114): nach dem Auszug ginge die Abrechnung an die verlassene Wohnung; die Warnung sperrt den Versand nicht
   Szenario: Abrechnung an einen ausgezogenen Mieter mit alter Adresse
-    Angenommen der Mietvertrag von "Eva Frei" ist auf den "2024-03-31" gekündigt
-    Und die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"
+    Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann warnt die Detailseite der Abrechnung, dass "Eva Frei" ausgezogen ist: "Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein."

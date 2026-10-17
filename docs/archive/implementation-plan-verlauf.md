@@ -910,7 +910,7 @@ Branch `claude/w3c-korrespondenzadresse-68-102-191-114`. The issues' "Decided (p
   - [x] closing review `docs/reviews/closing-review-1.md` (merge resolution confirmed; Minor C-1 fixed: the PDF as sent is made when sending)
   - [x] closing review round 2 `docs/reviews/closing-review-2.md` (Minors C-3 to C-5 fixed)
   - [x] closing review round 3 `docs/reviews/closing-review-3.md` (C-8 to C-10 fixed; stay: C-4 test of a PDF failure on sending, C-6, C-7 — the parties panel showing the building's address predates this change and is not part of #114)
-  - [x] merge with main (A-6 #115): `docs/reviews/merge-review-2.md` (Major C-1 fixed: an agreed end counts for A-5 once given notice or «Mieter ist ausgezogen»), round 2 `docs/reviews/merge-review-3.md`
+  - [x] merge with main (A-6 #115): `docs/reviews/merge-review-2.md` (Major C-1 fixed: an agreed end counts for A-5 as A-6 sees it), round 2 `docs/reviews/merge-review-3.md` (Major C-4 fixed: a later contract in the apartment counts too)
 - [x] feature review: persona(s), fach-reviewer, daten-pruefer (QR-bill, PDF)
   - [x] fach-reviewer `docs/reviews/w3c-fachreview-2.md` (V-11, V-12, V-14 fixed)
   - [x] personas `docs/design/personas/anna-w3c.md`, `helga-w3c.md` (P-1 both, Helga P-2: a draft's PDF is made afresh on request; Anna P-2: the draft's page warns too)

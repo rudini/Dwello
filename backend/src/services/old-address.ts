@@ -7,15 +7,17 @@ const normalized = (column: string) => sql.raw(`lower(regexp_replace(btrim(${col
 /**
  * A-5 (#114): the contract's tenant has moved out (the contract ended before today and no contract of the tenant runs
  * today) and his Korrespondenzadresse is still the building's, so a statement would go to the apartment he left. An
- * agreed end counts once given notice or «Mieter ist ausgezogen» (A-6, #115): before, the tenant may have stayed and
- * the contract run on
+ * agreed end counts as A-6 (#115) sees it: given notice, «Mieter ist ausgezogen» or a later contract in the apartment;
+ * before, the tenant may have stayed and the contract run on
  */
 export const oldAddress = (contractId: SQLWrapper) => sql<boolean>`exists (
 	select 1 from rental_contracts c
 	join tenants t on t.id = c.tenant_id
 	join apartments a on a.id = c.apartment_id
 	join buildings b on b.id = a.building_id
-	where c.id = ${contractId} and c.end_date < ${sqlToday} and (c.terminated or c.moved_out)
+	where c.id = ${contractId} and c.end_date < ${sqlToday}
+		and (c.terminated or c.moved_out
+			or exists (select 1 from rental_contracts n where n.apartment_id = c.apartment_id and n.start_date > c.end_date))
 		and not exists (
 			select 1 from rental_contracts r
 			where r.tenant_id = c.tenant_id and r.start_date <= ${sqlToday} and (r.end_date is null or r.end_date >= ${sqlToday})
