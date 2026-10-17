@@ -62,6 +62,8 @@
 	let showSend = $state(false);
 	let showResetPayment = $state(false);
 	let showCorrect = $state(false);
+	// a replaced statement is corrected by its berichtigte Abrechnung: no hint on it (#120)
+	const laterHint = $derived(statement.status === 'replaced' ? 0 : data.laterInvoices);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
 	let paidError = $state('');
@@ -156,7 +158,7 @@
 	<Correction {statement} bind:open={showCorrect} />
 	<OldAddressWarning {statement} testid="statement-old-address" />
 
-	{#if data.laterInvoices}
+	{#if laterHint}
 		<!-- a draft is created again; a sent statement is corrected by a berichtigte Abrechnung (it cannot be deleted) -->
 		<Alert tone="caution" title={m.statements_later_title()} testid="statement-later-invoices">
 			{#if statement.status === 'draft'}
@@ -187,13 +189,11 @@
 		</div>
 		<div class="flex min-w-0 flex-col gap-8">
 			<PartiesPanel {statement} />
-			<Panel title={m.statements_more_actions()}>
-				<MoreActions
-					{statement}
-					oncorrect={() => (showCorrect = true)}
-					ondelete={() => (showDelete = true)}
-				/>
-			</Panel>
+			<MoreActions
+				{statement}
+				oncorrect={() => (showCorrect = true)}
+				ondelete={() => (showDelete = true)}
+			/>
 			<MetadataCard
 				createdAt={statement.createdAt}
 				{pdfGeneratedAt}

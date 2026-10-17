@@ -377,13 +377,13 @@ describe('PDF einer berichtigten Abrechnung', () => {
 	// Fachreview W2e V-2: der Mieter hat die alte Abrechnung mit ihrem Zahlteil noch
 	it('sagt, dass die ersetzte Abrechnung nicht mehr gilt und nur noch dieser Saldo zu bezahlen ist', async () => {
 		expect((await textOf(corrected)).flowing).toContain(
-			'Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Diese gilt nicht mehr: Bezahlen Sie nur noch den Saldo dieser Abrechnung.'
+			'Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Die Abrechnung NK-1-2025-0001 gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung.'
 		);
 	});
 
 	it('verlangt bei einer Rückerstattung keine Zahlung', async () => {
 		const flowing = (await textOf({ ...corrected, balance: -20 })).flowing;
-		expect(flowing).toContain('Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Diese gilt nicht mehr.');
+		expect(flowing).toContain('Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Die Abrechnung NK-1-2025-0001 gilt nicht mehr.');
 		expect(flowing).not.toContain('Bezahlen Sie nur noch');
 	});
 

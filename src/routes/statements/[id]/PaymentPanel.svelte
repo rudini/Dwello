@@ -12,7 +12,9 @@
 	const refund = $derived(statement.balance < 0);
 	const nextReminder = $derived(nextReminderLater(statement));
 	const summary = $derived(
-		refund
+		statement.status === 'replaced'
+			? m.statements_summary_replaced() // the berichtigte Abrechnung says what is still due (#120)
+			: refund
 			? m.statements_summary_refund({ amount })
 			: statement.balance > 0
 				? m.statements_summary_due({ amount })

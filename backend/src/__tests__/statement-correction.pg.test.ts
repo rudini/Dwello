@@ -282,7 +282,7 @@ describe('Ohne Mietstage in der Periode', () => {
 		await removeStatements();
 		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2025-01-01' });
 		const paid = await sentStatement();
-		await sendJson('PUT', `/api/v1/statements/${paid}/status`, { status: 'paid', paidDate: today(), paidAmount: '36.00' });
+		await sendJson('PUT', `/api/v1/statements/${paid}/status`, { status: 'paid', paidDate: today(), paidAmount: '1036.00' });
 		const refunded = await sentStatement();
 		await sendJson('PUT', `/api/v1/statements/${refunded}/status`, { status: 'paid', paidDate: today(), paidAmount: '-20.00' });
 		const sent = await sentStatement();
@@ -292,7 +292,7 @@ describe('Ohne Mietstage in der Periode', () => {
 
 		await expectRejection(await correct(paid), 409, 'The contract has no rent days in the period', 'STATEMENT_NO_RENTAL_DAYS_PAID', {
 			number: await number(paid),
-			amount: '36.00'
+			amount: "1'036.00" // as the UI shows francs (Fachreview W2e V-19)
 		});
 		await expectRejection(await correct(refunded), 409, 'The contract has no rent days in the period', 'STATEMENT_NO_RENTAL_DAYS_REFUNDED', {
 			number: await number(refunded),

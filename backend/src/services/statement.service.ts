@@ -21,7 +21,7 @@ import {
 	type KeyValues
 } from '../db/schema';
 import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
-import { roundToRappen } from './pdf-format';
+import { formatCHF, roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
@@ -632,7 +632,7 @@ export async function correctStatement(id: string): Promise<StatementWithDetails
 		if (!(error instanceof CodedError && error.code === 'CONTRACT_NOT_IN_PERIOD')) throw error;
 		// what the tenant paid comes back to him, a refund paid to him goes back to the landlord; only sent: nothing
 		const paid = paidSoFar(replaced);
-		const params = { number: replaced.statementNumber, amount: Math.abs(paid).toFixed(2) };
+		const params = { number: replaced.statementNumber, amount: formatCHF(Math.abs(paid)) };
 		const message = 'The contract has no rent days in the period';
 		if (paid > 0) throw new CodedError('STATEMENT_NO_RENTAL_DAYS_PAID', message, params);
 		if (paid < 0) throw new CodedError('STATEMENT_NO_RENTAL_DAYS_REFUNDED', message, params);

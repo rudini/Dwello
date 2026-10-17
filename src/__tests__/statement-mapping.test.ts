@@ -52,6 +52,8 @@ describe('Abrechnung aus dem Backend', () => {
 			toStatement({ ...backendStatement, replaces, replacedBy: { id: 's9', statementNumber: 'NK-C' }, priorPayments: '442.90', priorPaidOn: ['NK-A'] })
 		).toMatchObject({ replaces, replacedBy: { id: 's9', statementNumber: 'NK-C' }, priorPayments: 442.9, priorPaidOn: ['NK-A'] });
 		expect(toStatement(backendStatement)).toMatchObject({ replaces: null, replacedBy: null, priorPayments: 0, priorPaidOn: [] });
+		// the dialog offsets what was paid; the replaced statement leads to its contract
+		expect(toStatement({ ...backendStatement, paidAmount: '442.90' })).toMatchObject({ paidAmount: 442.9, contractId: 'c1' });
 	});
 
 	// #248: die abgerechneten Mietstage, wie die Abrechnung sie gespeichert hat

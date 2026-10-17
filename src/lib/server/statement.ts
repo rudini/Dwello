@@ -59,6 +59,8 @@ const profileName = (data: BackendStatement): string => {
 
 // A berichtigte Abrechnung and the statement it replaces, and what was paid on the replaced ones (#120)
 const correctionOf = (data: BackendStatement) => ({
+	contractId: data.contractId,
+	paidAmount: amountOrNull(data.paidAmount),
 	replaces: data.replaces ?? null,
 	replacedBy: data.replacedBy ?? null,
 	priorPayments: Number(data.priorPayments ?? 0),

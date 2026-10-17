@@ -12,20 +12,24 @@
 	let { statement, open = $bindable() }: { statement: StatementWithDetails; open: boolean } =
 		$props();
 
-	// what the berichtigte Abrechnung will offset: the payment recorded, or nothing yet (Fachreview W2e V-1, V-6)
+	// what the berichtigte Abrechnung will offset: the payment recorded and what this one offset itself, or nothing
+	// yet; a refund is paid by the landlord (Fachreview W2e V-1, V-6, V-12, V-13)
 	const consequence = $derived.by(() => {
 		const number = statement.statementNumber;
 		if (statement.status !== 'paid' || !statement.paidDate)
-			return m.statements_correct_open({ number });
+			return statement.balance < 0
+				? m.statements_correct_open_refund({ number })
+				: m.statements_correct_open({ number });
+		const offset = (statement.paidAmount ?? 0) + (statement.priorPayments ?? 0);
+		if (Math.abs(offset) < 0.005) return m.statements_correct_settled({ number });
 		const paid = {
 			number,
-			amount: formatCurrency(Math.abs(statement.balance)),
+			amount: formatCurrency(Math.abs(offset)),
 			date: formatDate(statement.paidDate)
 		};
-		return statement.balance < 0
-			? m.statements_correct_refunded(paid)
-			: m.statements_correct_paid(paid);
+		return offset < 0 ? m.statements_correct_refunded(paid) : m.statements_correct_paid(paid);
 	});
+	let creating = $state(false); // a second click would create a second berichtigte Abrechnung
 	const replaces = $derived(
 		statement.replaces &&
 			m.statements_replaces({
@@ -49,11 +53,29 @@
 			</p>
 		{:else}
 			<p>{m.statements_replaced_todo()}</p>
-			<form method="POST" action="?/correct" use:enhance>
+			<p>
+				<a
+					class="font-semibold text-ink underline"
+					href="/contracts/{statement.contractId}"
+					data-testid="statement-replaced-contract-link">{m.statements_replaced_contract()}</a
+				>
+			</p>
+			<form
+				method="POST"
+				action="?/correct"
+				use:enhance={() => {
+					creating = true;
+					return async ({ update }) => {
+						await update();
+						creating = false;
+					};
+				}}
+			>
 				<Button
 					type="submit"
 					variant="primary"
 					icon="statement"
+					disabled={creating}
 					testid="statement-create-correction-button">{m.statements_create_correction()}</Button
 				>
 			</form>
@@ -74,13 +96,14 @@
 	bind:open
 	action="?/replace"
 	title={m.statements_correct()}
-	confirmLabel={m.statements_correct_confirm()}
+	confirmLabel={m.statements_correct()}
 	confirmTestid="statement-correct-confirm"
+	success={m.statements_replaced_done()}
 	danger
 >
 	<!-- the real consequence, what is offset, and the limitation -->
 	<p>{consequence}</p>
 	<p>{m.statements_correct_next()}</p>
-	<p>{m.statements_correct_limit()}</p>
 	<p class="font-semibold">{m.statements_correct_final()}</p>
+	<p>{m.statements_correct_limit()}</p>
 </FormDialog>

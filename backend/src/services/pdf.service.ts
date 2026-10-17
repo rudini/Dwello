@@ -63,8 +63,8 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Annahmestelle',
 		statementNumber: 'Abrechnungsnr.',
 		statementDate: 'Abrechnungsdatum',
-		replacesNote: 'Diese Abrechnung ersetzt die Abrechnung {number} vom {date}. Diese gilt nicht mehr.',
-		replacesPay: ': Bezahlen Sie nur noch den Saldo dieser Abrechnung.',
+		replacesNote: 'Diese Abrechnung ersetzt die Abrechnung {number} vom {date}. Die Abrechnung {number} gilt nicht mehr.',
+		replacesPay: ' Bezahlen Sie nur noch den Saldo dieser Abrechnung.',
 		priorPaid: 'Bereits bezahlt auf {numbers}',
 		priorRefunded: 'Bereits zurückerstattet auf {numbers}',
 		priorPaidShort: 'bereits bezahlt',
@@ -148,8 +148,8 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Point de dépôt',
 		statementNumber: 'N° de décompte',
 		statementDate: 'Date du décompte',
-		replacesNote: 'Ce décompte remplace le décompte {number} du {date}. Celui-ci n’est plus valable.',
-		replacesPay: '\u00a0: payez uniquement le solde du présent décompte.',
+		replacesNote: 'Ce décompte remplace le décompte {number} du {date}. Le décompte {number} n’est plus valable.',
+		replacesPay: ' Payez uniquement le solde du présent décompte.',
 		priorPaid: 'Déjà payé sur {numbers}',
 		priorRefunded: 'Déjà remboursé sur {numbers}',
 		priorPaidShort: 'déjà payé',
@@ -232,8 +232,8 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Punto di accettazione',
 		statementNumber: 'N. conteggio',
 		statementDate: 'Data del conteggio',
-		replacesNote: 'Questo conteggio sostituisce il conteggio {number} del {date}. Quest’ultimo non è più valido.',
-		replacesPay: ': paghi solo il saldo di questo conteggio.',
+		replacesNote: 'Questo conteggio sostituisce il conteggio {number} del {date}. Il conteggio {number} non è più valido.',
+		replacesPay: ' Paghi solo il saldo di questo conteggio.',
 		priorPaid: 'Già pagato su {numbers}',
 		priorRefunded: 'Già rimborsato su {numbers}',
 		priorPaidShort: 'già pagato',
@@ -316,8 +316,8 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Acceptance point',
 		statementNumber: 'Statement no.',
 		statementDate: 'Statement date',
-		replacesNote: 'This statement replaces statement {number} of {date}. That statement no longer applies.',
-		replacesPay: ': pay only the balance of this statement.',
+		replacesNote: 'This statement replaces statement {number} of {date}. Statement {number} no longer applies.',
+		replacesPay: ' Pay only the balance of this statement.',
 		priorPaid: 'Already paid on {numbers}',
 		priorRefunded: 'Already refunded on {numbers}',
 		priorPaidShort: 'already paid',
@@ -575,7 +575,7 @@ function title({ doc, t, data }: Page, y: number) {
 	if (data.replaces) {
 		const note = fill(t.replacesNote, { number: data.replaces.statementNumber, date: formatDate(data.replaces.statementDate) });
 		const pay = data.balance > 0 && !data.paidDate;
-		doc.font('Helvetica-Bold').text(pay ? note.replace(/\.$/, t.replacesPay) : note).font('Helvetica');
+		doc.font('Helvetica-Bold').text(pay ? note + t.replacesPay : note).font('Helvetica');
 	}
 	return doc.y + 14;
 }
@@ -597,6 +597,7 @@ const unrounded = (data: StatementPDFData) => roundToRappen(data.totalCosts - da
 const totalRows = (data: StatementPDFData, t: Record<string, string>) => (rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0);
 const priorRow = (doc: Doc, prior: ReturnType<typeof priorLine>, top: number) => (prior ? row(doc, total(prior.label, prior.amount), top) : top);
 // «Bereits bezahlt auf NK-… und NK-…», or what the landlord already refunded
+// TODO(fachlich prüfen, #362): «Bereits bezahlt» / «Bereits zurückerstattet» are not in the glossary yet
 function priorLine(data: StatementPDFData, t: Record<string, string>) {
 	const prior = priorOf(data);
 	if (!prior) return null;

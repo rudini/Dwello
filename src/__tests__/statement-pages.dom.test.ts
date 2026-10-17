@@ -518,9 +518,12 @@ describe('Abrechnungsdetail', () => {
 		click('statement-correct-button');
 
 		expect(correctDialog()).toContain(
-			'Die Abrechnung NK-2024-0001 wird ersetzt. Sie bleibt unverändert erhalten, wird nicht mehr gemahnt und lässt sich nicht mehr als bezahlt markieren. Hat der Mieter schon bezahlt, markieren Sie sie zuerst als bezahlt.'
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten, wird nicht mehr gemahnt und lässt sich nicht mehr als bezahlt markieren. Hat der Mieter schon bezahlt, markieren Sie sie zuerst als bezahlt.'
 		);
-		expect(correctDialog()).toContain('Danach können Sie Vertragsdaten und Rechnungen korrigieren und die berichtigte Abrechnung erstellen.');
+		// Personas W2e: the dialog confirms with the word of the button that opened it; the consequence before the help
+		expect(byTestId('statement-correct-confirm')!.textContent).toContain('Abrechnung berichtigen');
+		expect(correctDialog().indexOf('Das lässt sich nicht rückgängig machen.')).toBeLessThan(correctDialog().indexOf('verjähren'));
+		expect(correctDialog()).toContain('Danach können Sie Vertragsdaten und Rechnungen korrigieren, falls nötig, und die berichtigte Abrechnung erstellen.');
 		expect(correctDialog()).toContain(
 			'Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt.'
 		);
@@ -528,13 +531,40 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('nennt beim Berichtigen einer bezahlten Abrechnung den Betrag, der angerechnet wird', () => {
-		detail({ status: 'paid', paidDate: '2025-02-01' });
+		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 363 });
 		click('statement-correct-button');
 		expect(correctDialog()).toContain('Die berichtigte Abrechnung rechnet die CHF 363.00 an, die am 01.02.2025 bezahlt wurden.');
 	});
 
+	// Fachreview W2e V-12: angerechnet wird die Zahlung und was die Abrechnung selbst schon angerechnet hat
+	it('nennt beim Berichtigen einer berichtigten Abrechnung alles, was angerechnet wird', () => {
+		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 187.45, priorPayments: 442.9, balance: 187.45 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('rechnet die CHF 630.35 an');
+	});
+
+	it('nennt bei einer bezahlten Abrechnung ohne Zahlung keinen Betrag', () => {
+		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 0, balance: 0 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('Die bisherige bleibt unverändert erhalten.');
+		expect(correctDialog()).not.toContain('rechnet die');
+	});
+
+	// Fachreview W2e V-13: bei einer Rückerstattung zahlt der Vermieter
+	it('sagt bei einer versendeten Rückerstattung, die überwiesene Rückerstattung zuerst zu erfassen', () => {
+		detail({ status: 'sent', balance: -40 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('Haben Sie die Rückerstattung schon überwiesen, markieren Sie sie zuerst als bezahlt.');
+		expect(correctDialog()).not.toContain('gemahnt');
+	});
+
+	it('bietet auch bei einer überfälligen Abrechnung das Berichtigen an', () => {
+		detail({ status: 'overdue' });
+		expect(byTestId('statement-correct-button')).not.toBeNull();
+	});
+
 	it('nennt beim Berichtigen einer bezahlten Rückerstattung, was Sie zurückerstattet haben', () => {
-		detail({ status: 'paid', paidDate: '2025-02-01', balance: -40 });
+		detail({ status: 'paid', paidDate: '2025-02-01', balance: -40, paidAmount: -40 });
 		click('statement-correct-button');
 		expect(correctDialog()).toContain('Die berichtigte Abrechnung rechnet die CHF 40.00 an, die Sie am 01.02.2025 zurückerstattet haben.');
 	});
@@ -555,6 +585,35 @@ describe('Abrechnungsdetail', () => {
 		);
 		for (const offer of ['statement-edit-button', 'statement-correct-button', 'statement-mark-paid-button', 'statement-delete-button'])
 			expect(byTestId(offer)).toBeNull();
+	});
+
+	// Personas W2e (Sven, Helga, Dr. Weber): die ersetzte Abrechnung verlangt nichts mehr und lässt keine leere Karte stehen
+	it('sagt bei einer ersetzten Abrechnung, dass sie nicht mehr gilt, ohne Zahlung und ohne leere Aktionen', () => {
+		detail({ status: 'replaced', replacedBy: { id: 's2', statementNumber: 'NK-2024-0007' }, balance: -40, paidDate: '2025-02-01' });
+
+		expect(text()).toContain('Diese Abrechnung ist ersetzt und gilt nicht mehr.');
+		expect(text()).not.toContain('Sie erstatten dem Mieter');
+		expect(text()).not.toContain('Weitere Aktionen');
+	});
+
+	it('weist bei einer ersetzten Abrechnung nicht mehr auf später erfasste Rechnungen hin', () => {
+		show(StatementPage, { data: { statement: statement({ status: 'replaced' }), reminders: [], laterInvoices: 1 }, form: null } as never);
+		expect(byTestId('statement-replaced')).not.toBeNull();
+		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
+	// Persona Helga P-1: die Vertragsdaten korrigiert man im Mietvertrag
+	it('führt von der ersetzten Abrechnung zum Mietvertrag', () => {
+		detail({ status: 'replaced', replacedBy: null, contractId: 'c1' });
+		expect(byTestId('statement-replaced-contract-link')!.getAttribute('href')).toBe('/contracts/c1');
+	});
+
+	// Code-Review W2e2 C-4: ein Doppelklick erstellt keine zweite berichtigte Abrechnung
+	it('lässt die berichtigte Abrechnung nur einmal erstellen, solange sie entsteht', async () => {
+		detail({ status: 'replaced', replacedBy: null });
+		actions.get('?/correct')!();
+		flushSync();
+		expect((byTestId('statement-create-correction-button') as HTMLButtonElement).disabled).toBe(true);
 	});
 
 	it('nennt bei einer ersetzten Abrechnung die berichtigte', () => {

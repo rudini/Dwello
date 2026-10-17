@@ -424,7 +424,7 @@ Then(
 );
 
 Then('sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt', async ({ verwalter }) => {
-	await verwalter.sees(correctConfirmation).toContain('wird ersetzt');
+	await verwalter.sees(correctConfirmation).toContain('durch eine berichtigte Abrechnung ersetzt');
 	await verwalter.sees(correctConfirmation).toContain('bleibt unverändert erhalten');
 });
 
