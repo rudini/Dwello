@@ -9,6 +9,7 @@ import {
 	downloadPdfLink,
 	pdfRefusalBackLink,
 	generatePdfButton,
+	lineItemInvoiceLink,
 	markPaidButton,
 	paidDateInput,
 	confirmResetPaymentButton,
@@ -54,6 +55,7 @@ export const downloadStatementPdf = DownloadFrom(downloadPdfLink);
 export const requestStatementPdf = Click.on(downloadPdfLink);
 export const leavePdfRefusal = Click.on(pdfRefusalBackLink);
 
+export const openInvoiceOfPosition = (category: string, description: string) => Click.on(lineItemInvoiceLink(category, description));
 export const openResetPaymentConfirmation = Click.on(resetPaymentButton);
 
 // The confirmation names the consequence; the user confirms it (#92)

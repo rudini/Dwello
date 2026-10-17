@@ -726,7 +726,7 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 	});
 
 	// Closing review C-3: a Saldo of 0 is settled when sent; its PDF as sent is made then too
-	it('erstellt das PDF auch beim Versand einer Abrechnung ohne Saldo', async () => {
+	it('erstellt das PDF auch beim Versand einer Abrechnung mit Saldo 0', async () => {
 		const [{ balance }] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
 		await db.update(utilityStatements).set({ balance: '0.00' }).where(eq(utilityStatements.id, statementId));
 		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });

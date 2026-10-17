@@ -38,7 +38,6 @@
 		</p>
 	</FormDialog>
 {:else}
-	<!-- TODO(fachlich prüfen, #59): what follows after the 3rd Mahnung (e.g. Betreibung) is not part of Dwello -->
 	<Dialog
 		bind:open
 		title={m.statements_no_more_reminders_title()}
@@ -47,5 +46,6 @@
 		onconfirm={() => (open = false)}
 	>
 		<p>{m.statements_no_more_reminders_text()}</p>
+		<p>{m.statements_reminder_257d()}</p>
 	</Dialog>
 {/if}

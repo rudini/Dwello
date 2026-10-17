@@ -20,6 +20,8 @@
 		"past-end-error": "A Vertragsende before today (end dialog or contract form) saved without the confirmation: the checkbox with its error.",
 		"delete-unconfirmed": "The delete dialog of a rental contract that has started, confirmed without confirming it was entered by mistake: the checkbox with its error (#116).",
 		"end-dialog-notice-hint": "The end dialog with a Vertragsende less than 3 months after the day the notice arrived: the hint on the Kündigungsfrist at the field (A-3, #112).",
+		"moved-out-dialog": "Contract page of an expired fixed-term contract: the dialog that confirms «Mieter ist ausgezogen» with its consequence (A-6, #115).",
+		"continue-refused": "Contract page of an expired fixed-term contract: «Unbefristet weiterführen» refused because a draft statement bills the time after the end as Leerstand; the message, the link to the draft and the offer to delete it (A-6, #115).",
 		"end-dialog-refused": "The end dialog refused because a draft statement already bills later rent days: the link to the draft and the offer to delete it.",
 		"edit-refused": "The contract form saved with a Vertragsende before rent days a draft statement already bills: the refusal, the link to the draft and the offer to delete it.",
 		"pdf-missing": "Statement list of the seeded building's drafts, whose PDF is not created yet: each row says «PDF noch nicht erstellt» with a link to its statement (#253).",
@@ -308,6 +310,15 @@
 			]
 		},
 		{
+			"name": "contract-detail-expired",
+			"path": "/contracts/{expiredContract}",
+			"states": [
+				"default",
+				"moved-out-dialog",
+				"continue-refused"
+			]
+		},
+		{
 			"name": "contract-edit-notice",
 			"path": "/contracts/{noticedContract}/edit",
 			"states": [
@@ -438,6 +449,13 @@
 			"states": [
 				"default",
 				"send-dialog"
+			]
+		},
+		{
+			"name": "statement-parts-detail",
+			"path": "/statements/{partsStatement}",
+			"states": [
+				"default"
 			]
 		},
 		{

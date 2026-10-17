@@ -15,7 +15,9 @@ import {
 	contractTotalRent,
 	deleteDialog,
 	deleteDialogStatementLink,
-	missingStatements
+	missingStatements,
+	fixedTermCheck,
+	fixedTermError
 } from '../targets/contract-detail';
 
 export const apartmentOfContract = Text.of(contractApartment);
@@ -41,3 +43,5 @@ export const noticePeriodHintShown = Visibility.of(noticePeriodHint);
 export const endDialogText = Text.of(endDialog);
 export const noticeReceivedOn = Text.of(contractNoticeReceived);
 export const nextStepsText = Text.of(nextSteps);
+export const fixedTermCheckShown = Visibility.of(fixedTermCheck);
+export const fixedTermErrorText = Text.of(fixedTermError);
