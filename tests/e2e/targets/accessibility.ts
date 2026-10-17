@@ -63,7 +63,6 @@ export const periodEndInput = byTestId('Periodenende', 'period-end-input');
 export const periodFutureWarning = byTestId('Periode nicht vorbei', 'period-future-warning');
 export const generateBuilding = (buildingId: string) =>
 	byTestId(`Gebäude ${buildingId} abrechnen`, `generate-building-${buildingId}`);
-export const firstGenerateBuilding = bySelector('Erstes Gebäude abrechnen', '[data-testid^="generate-building-"]');
 export const confirmMissingInvoices = byTestId('Fehlende Rechnungen bestätigen', 'confirm-missing-invoices');
 /** What shows that a state or a wizard step is reached, by its test id */
 export const shown = (testId: string) => bySelector(testId, `[data-testid="${testId}"]`);
