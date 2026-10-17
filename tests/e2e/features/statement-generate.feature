@@ -375,11 +375,18 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter zum Erstellen weitergeht
     Dann erfährt der Liegenschaftsverwalter, dass die Abrechnungen als Entwurf entstehen und nichts verschickt wird
 
+  # #57: «Entwurf» heisst nur der Abrechnungsstatus; die Eingaben im Assistenten sind «Ihre Angaben»
+  @wip
+  Szenario: Angefangene Abrechnungen sind noch nicht gespeichert
+    Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
+    Dann erfährt der Liegenschaftsverwalter, dass seine Angaben nur in diesem Browser aufbewahrt und noch nicht gespeichert sind
+
   # #201: der Assistent öffnet im Schritt, in dem der Liegenschaftsverwalter aufgehört hat
+  @wip
   Szenario: Angefangene Abrechnungen später fortsetzen
     Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
-    Dann sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist
+    Dann sieht der Liegenschaftsverwalter, dass seine Angaben wiederhergestellt sind
     Und ist der Assistent im Schritt "Gebäude"
     Und ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
 
