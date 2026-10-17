@@ -13,5 +13,5 @@ Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/Z
 - [x] code-reviewer slice 1: `docs/reviews/w4d-s1-review-1.md`
 - [x] code-reviewer slice 2: `docs/reviews/w4d-s2-review-1.md`
 - [ ] #84: German findings of `i18n-native-de.md` still open listed in the issue
-- [ ] code-reviewer per slice; feature review (persona on the fr/it PDF and letters, fach-reviewer)
+- [x] code-reviewer per slice; feature review: persona Dr. Weber on the fr/it/en PDFs and letters, 2 rounds (`docs/design/personas/dr-weber-w4d.md`; round 1 read German refund PDFs cached before the SQL language change → bug #351); fach-reviewer covered by the two reviews before implementation (no domain change since); no daten-pruefer (no amounts changed)
 - [ ] Workflow review, archive the session, PR `Fixes #83` `Fixes #84`, CI, merge
