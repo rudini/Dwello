@@ -21,3 +21,4 @@ export const missedWarning = target('Warnung nicht in den Abrechnungen', (page) 
 export const missedStatementsLink = target('Abrechnungen ohne diese Rechnung', (page) =>
 	page.getByTestId('invoice-missed-statements-link')
 );
+export const categoryReason = target('Grund der Umlagefähigkeit der Kategorie', (page) => page.getByTestId('category-reason'));

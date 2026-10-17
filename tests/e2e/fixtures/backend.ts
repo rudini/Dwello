@@ -439,8 +439,8 @@ export function testData(api: CallTheApi) {
 			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, `${categoryTitle} ${date}`, amount, date);
 		},
 
-		// Invoice of a supplier, in a predefined category given by its German name, dated today
-		// with a Beleg as «Rechnungen hochladen» creates it: the file and what the KI saw on it
+		// Invoice of a supplier, in an own category the scenario created or a predefined one given by its German name,
+		// dated today with a Beleg as «Rechnungen hochladen» creates it: the file and what the KI saw on it
 		async supplierInvoice(
 			supplier: string,
 			buildingTitle: string,
@@ -449,7 +449,9 @@ export function testData(api: CallTheApi) {
 			categoryName: string,
 			beleg?: { fileName: string; deductedAmount: string; nonAllocableItems: boolean }
 		) {
-			const category = await predefinedCategory(categoryName);
+			const category: { id: string; isAllowedUtilityCost: boolean } = ids.has(categoryName)
+				? await get(`categories/${ids.get(categoryName)}`)
+				: await predefinedCategory(categoryName);
 			const content = Buffer.from('%PDF-1.4\n%%EOF\n').toString('base64');
 			const id = await invoice(
 				buildingTitle,

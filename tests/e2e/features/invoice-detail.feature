@@ -15,11 +15,26 @@ Funktionalität: Rechnungsdetail
     Und sieht der Liegenschaftsverwalter die Kategorie "Hauswart" und den Verteilschlüssel "Pro Fläche (m²)"
     Und ist die Rechnung umlagefähig
 
-  Szenario: Nicht umlagefähige Rechnung
+  @wip
+  Szenario: Umlagefähige Rechnung nennt den Grund ihrer Kategorie
+    Dann ist die Rechnung umlagefähig
+    Und nennt die Rechnung als Grund ihrer Kategorie "also umlagefähig"
+
+  @wip
+  Szenario: Nicht umlagefähige Rechnung nennt den Grund ihrer Kategorie
     Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Dachdecker Meier"
     Dann ist die Rechnung nicht umlagefähig
-    Und erklärt ein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst
+    Und nennt die Rechnung als Grund ihrer Kategorie "Reparaturen sind mit dem Mietzins abgegolten, also nicht umlagefähig."
+
+  # Eine eigene Kategorie hat keinen festen Grund: der allgemeine Hinweis bleibt (#292)
+  @wip
+  Szenario: Nicht umlagefähige Rechnung einer eigenen Kategorie
+    Angenommen es gibt die nicht umlagefähige Kategorie "Dachsanierung"
+    Und "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dach Nord" in der Kategorie "Dachsanierung" in Rechnung
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Dachdecker Meier"
+    Dann erklärt ein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst
+    Und nennt die Rechnung keinen Grund ihrer Kategorie
 
   Szenario: Neu kategorisieren ohne laufende KI
     Wenn der Liegenschaftsverwalter die Rechnung neu kategorisieren lässt

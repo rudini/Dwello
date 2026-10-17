@@ -7,6 +7,8 @@ import {
 	distributionKeyOfInvoice,
 	missedWarningText,
 	reasonForOverride,
+	reasonOfCategory,
+	reasonsOfCategory,
 	recategorizationFailure,
 	tenancyLawNote,
 	utilityCostOfInvoice
@@ -72,6 +74,14 @@ Then(
 		await verwalter.sees(tenancyLawNote).toContain('Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein.');
 	}
 );
+
+Then('nennt die Rechnung als Grund ihrer Kategorie {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(reasonOfCategory).toContain(text);
+});
+
+Then('nennt die Rechnung keinen Grund ihrer Kategorie', async ({ verwalter }) => {
+	await verwalter.sees(reasonsOfCategory).toBe(0);
+});
 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist oder keine passende Kategorie geliefert hat',
