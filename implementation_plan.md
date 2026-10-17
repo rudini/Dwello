@@ -12,7 +12,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Dashboard: every ended period since the Vertragsbeginn, by building
 - [x] Contract list: badge «Abrechnung fehlt»
 - [x] Texts in de/fr/it/en
-- [ ] Slice review (code-reviewer), feature review (personas Anna, Helga; fach-reviewer)
+- [x] Slice review (code-reviewer): `docs/reviews/issue-211-review-1.md`
+- [x] Feature review: personas `docs/design/personas/anna-211.md`, `helga-211.md`; fach-reviewer `docs/reviews/issue-211-fachreview-3.md`
+- [x] Workflow note: issues closed into #408 during the task (markers and «Fixes» line), persona state set up by SQL (`docs/reviews/workflow-notes-issue-211.md`)
 - [ ] Workflow notes, archive the session, pull request (Refs #408, #199; #211 closed into #408)
 
 Files: `src/lib/accounting-period.ts`, `src/lib/server/missing-statements.ts`, `src/lib/overview.ts`, `src/lib/types.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/contracts/+page.server.ts`, `src/routes/contracts/ContractRow.svelte`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/MissingStatement.svelte`, `src/lib/server/statement-generation.ts` (marker), `messages/*.json`, tests and scenarios

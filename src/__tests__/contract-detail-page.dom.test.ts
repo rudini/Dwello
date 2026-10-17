@@ -273,7 +273,7 @@ describe('Mietvertragsdetail', () => {
 		expect(text('contract-missing-statement')).toContain('2 Abrechnungen fehlen');
 		// the wizard bills the whole building, the invoices come first, any order (personas Helga, Anna, Marco #142)
 		expect(text('contract-missing-statement')).toContain(
-			'Jede Schaltfläche öffnet den Assistenten für alle Mietverträge des Gebäudes in dieser Periode. Erfassen Sie zuerst die Rechnungen der Periode; mit welcher Periode Sie beginnen, spielt keine Rolle.'
+			'Der Mietvertrag hat in diesen Abrechnungsperioden Mietstage ohne Nebenkostenabrechnung in Dwello. Jede Schaltfläche mit «abrechnen» öffnet den Assistenten für alle Mietverträge des Gebäudes in dieser Periode. Erfassen Sie zuerst die Rechnungen der Periode; mit welcher Periode Sie beginnen, spielt keine Rolle.'
 		);
 		// short labels side by side, each with its verb (personas Marco P-4, Helga P-6, code review C-8)
 		const links = [

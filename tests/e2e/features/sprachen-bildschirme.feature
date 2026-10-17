@@ -85,6 +85,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | delete-dialog       |
       | contract-detail        | missing-statements  |
+      | contract-partly-billed-detail | partly-billed |
       | contract-moved-out-detail | default          |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
