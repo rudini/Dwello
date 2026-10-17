@@ -740,7 +740,7 @@
 	"contracts_advance_label": "Advance payment per month",
 	"contracts_advance_help": "The tenant’s monthly advance for utility costs (heating, water, etc.). It is offset in the utility cost statement.",
 	"contracts_fee_label": "Management fee",
-	"contracts_fee_help": "Choose what the signed rental contract says. If it states a percentage, choose “Yes, with its own rate” and enter it. If it only says that management costs are charged, choose “Yes, at the rate of the statement run”: you then choose the rate when you create the statements. If it says nothing about it, choose “No”. A new management fee during the tenancy must be notified to the tenant with the official form; it applies only from the next termination date (Art. 269d CO).",
+	"contracts_fee_help": "Choose what the signed rental contract says. If it states a percentage, choose “Yes, with its own rate” and enter it. If it only says that management costs are charged, choose “Yes, at the rate of the statement run”: you then choose the rate when you create the statements. If it says nothing about it, choose “No”. A new management fee during the tenancy must be notified to the tenant with the official form, with reasons, at least ten days before the notice period begins; it applies at the earliest from the next possible termination date (Art. 269d CO).",
 	"contracts_fee_run": "Yes, at the rate of the statement run",
 	"contracts_fee_own": "Yes, with its own rate",
 	"contracts_fee_none": "No",
