@@ -697,8 +697,8 @@ function partLines(item: LineItem, t: Record<string, string>) {
 const partText = (part: InvoicePart) =>
 	part.fuelStock ? 'partStock' : part.noPeriod ? 'partNoPeriod' : part.whole ? 'partBeyond' : 'partLine';
 // A line names its invoice where dates and amount match no single receipt: without a Leistungszeitraum (its dates are
-// the period's) or the same as another line's (#236); the Tankbestand is no invoice
-const nameOf = (part: Part, same: number) => (!part.fuelStock && (part.noPeriod || same > 1) ? part.description : undefined);
+// the period's) or the same as another line's (#236); the Tankbestand, once per position, never is
+const nameOf = (part: Part, same: number) => (part.noPeriod || same > 1 ? part.description : undefined);
 const partValues = ({ start, end, amount, days, total, whole }: InvoicePart, colon: string) => ({
 	start: formatDate(start),
 	end: formatDate(end),
