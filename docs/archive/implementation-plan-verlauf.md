@@ -922,3 +922,17 @@ Files: `backend/migrations/0014_line_item_invoices.sql`, `backend/src/db/schema.
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-136-72-73-61.md` (collected review left to the coordinator, see the note)
 - Open, needs the product owner: glossary #315; that a negative consumption needs no confirmation (#73) although Anna P-1 asked for one
 - [x] workflow-review, session archived, pull request
+
+## Session W6c: QR payment part on reminders (#108), Art. 257d OR hint (#59)
+
+- [x] @wip scenarios: reminder PDF with payment part (statement-reminder.feature), help hint (help.feature); dialog after the 3rd Mahnung: DOM test (`No scenario`: the E2E stack cannot age three reminders)
+- [x] fach-reviewer on the scenarios and texts before implementing (`docs/reviews/w6c-fachreview-1.md`; V-1 open question: #322)
+- [x] #108: payment part for the open Saldo on every reminder PDF, reference of the statement (`reminder-pdf.ts`, `reminder.service.ts`, `pdf.service.ts`, `statement-pdf.service.ts`); none for a statement paid since (V-1)
+- [x] #59: hint in the help «Zahlungen und Mahnungen» and the dialog after the 3rd Mahnung, four languages; TODO marker in `ReminderModal.svelte` removed (`messages/*.json` `statements_reminder_257d`, `help/+page.svelte`)
+- [x] slice review (code-reviewer): `docs/reviews/w6c-review-1.md`
+- [x] feature review: personas `docs/design/personas/helga-w6c.md`, `dr-weber-w6c.md`; `docs/reviews/w6c-fachreview-2.md`, `w6c-datenpruefung-1.md`
+- [x] fixes: reminder with payment part on one page (D-1, C-1, V-6, C-13), tests C-2/V-9, scenario title C-7, PRD C-8, M-4; re-reviews `docs/reviews/w6c-datenpruefung-2.md`, `w6c-review-2.md` (no Blocker/Major)
+- [x] Workflow note: one pull request per issue found only at the push (`docs/reviews/workflow-notes-issue-108-59.md`)
+- [x] workflow-review, session archived; two pull requests: #59 (branch `claude/w6c-reminder-hint-59`), then #108 (this branch)
+
+Files: `backend/src/services/{pdf.service,reminder-pdf,reminder.service,statement-pdf.service}.ts`, `backend/src/__tests__/reminders.pg.test.ts`, `messages/*.json`, `src/routes/help/+page.svelte`, `src/routes/statements/[id]/ReminderModal.svelte`, `src/__tests__/statement-pages.dom.test.ts`, `tests/e2e/features/{statement-reminder,help}.feature`, `tests/e2e/{steps/documents.steps,tasks/documents,targets/documents}.ts`, `docs/PRD-Dwello.md`, reviews `docs/reviews/w6c-*.md`, persona reports `helga-w6c.md`, `dr-weber-w6c.md`
