@@ -198,7 +198,9 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	it('erklärt, wann der Mieter umlagefähige Kosten bezahlt', () => {
 		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
-		expect(text()).toContain('wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR)');
+		// Wie der Vertragshinweis der Liste, OR ausgeschrieben (#292, Fachreview M-4)
+		expect(text()).toContain('(Art. 257a–257b Obligationenrecht, OR)');
+		expect(text()).toContain('wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art. 257a Absatz 2 OR)');
 		expect(text()).toContain('Gebäudeversicherung');
 		// Wasser und Abwasser: Merkblatt des Mieterverbands, «Unzulässig» (C-8)
 		expect(text()).toContain('auch nicht die Gebühr für Regenwasser');
@@ -473,10 +475,74 @@ describe('Grund der Umlagefähigkeit', () => {
 	it('nennt in der Liste den Grund jeder vordefinierten Kategorie', () => {
 		show(CategoriesPage, { data: { categories: [fireExtinguisher, lift] }, form: null } as never);
 
+		// «umstritten» mit dem Merkblatt als Quelle, der Wartungsanteil eines Vollservicevertrags (#292, Fachreview M-1, M-2)
 		expect(reasons()).toEqual([
-			'Brandschutz ist auch nötig, wenn das Gebäude leer steht; die Wartung hängt nicht mit dem Gebrauch zusammen.',
-			'Strom, Notruftelefon und Wartung des Lifts hängen mit dem Gebrauch zusammen; Reparaturen, Ersatzteile und Serviceabos mit Reparaturen trägt der Vermieter.'
+			'Ob die Wartung von Feuerlöschern mit dem Gebrauch zusammenhängt (Art. 257a Absatz 1 Obligationenrecht, OR), ist umstritten (Mieterinnen- und Mieterverband, Merkblatt «Zulässige und unzulässige Nebenkosten»). Nach dem Merkblatt gehört Brandschutz, der auch bei leerem Gebäude nötig ist, nicht zu den Nebenkosten. Dwello folgt dem Merkblatt: Die Wartung ist also nicht umlagefähig.',
+			'Strom, Notruftelefon und Wartung des Lifts hängen mit dem Gebrauch zusammen (Art. 257a Absatz 1 Obligationenrecht, OR); Reparaturen und Ersatzteile trägt der Vermieter. Deckt ein Vollservicevertrag auch Reparaturen, ist nur sein Anteil für die Wartung umlagefähig: Erfassen Sie unter «Lift» nur diesen Anteil. Strom, Notruftelefon und Wartung sind also umlagefähig.'
 		]);
+	});
+
+	// Each reason stands alone (also on an invoice): it ends with its conclusion and writes out the laws it cites
+	// before their abbreviation (#292, Entscheid #221 A)
+	const PREDEFINED = [
+		['Heating', true],
+		['Hot Water', true],
+		['Cold Water', true],
+		['Wastewater', true],
+		['Electricity Common Areas', true],
+		['Elevator', true],
+		['Caretaker', true],
+		['Garden Maintenance', true],
+		['Snow Removal', true],
+		['Waste Disposal', true],
+		['TV/Cable', true],
+		['Chimney Sweep', true],
+		['Repairs', false],
+		['Building Insurance', false],
+		['Property Tax', false],
+		['Mortgage Interest', false],
+		['Administration', false],
+		['Renovation', false],
+		['Capital Improvements', false],
+		['Pest Control', false],
+		['Fire Extinguisher Maintenance', false]
+	] as const;
+	const allReasons = (locale: 'de' | 'fr' | 'it' | 'en') => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(CategoriesPage, {
+				data: {
+					categories: PREDEFINED.map(([key, allowed], i) => category(`p${i}`, key, allowed, 0, { key, predefined: true }))
+				},
+				form: null
+			} as never);
+			return reasons();
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	};
+
+	it('schliesst jeden Grund mit seiner Folgerung', () => {
+		const shown = allReasons('de');
+
+		expect(shown).toHaveLength(PREDEFINED.length);
+		shown.forEach((reason, i) =>
+			expect(reason).toMatch(PREDEFINED[i][1] ? /also umlagefähig\.$/ : /also nicht umlagefähig\.$/)
+		);
+	});
+
+	// The first abbreviation in a reason is the one its spelled-out name introduces
+	it.each([
+		['de', 'Obligationenrecht, OR', 'Verordnung über die Miete, VMWG'],
+		['fr', 'Code des obligations, CO', 'ordonnance sur le bail, OBLF'],
+		['it', 'Codice delle obbligazioni, CO', 'ordinanza concernente la locazione, OLAL'],
+		['en', 'Code of Obligations, CO', 'Tenancy Ordinance, VMWG']
+	] as const)('schreibt auf %s Gesetz und Verordnung in jedem Grund aus', (locale, ...laws) => {
+		for (const reason of allReasons(locale))
+			for (const law of laws) {
+				const short = law.split(', ')[1];
+				if (reason.includes(short)) expect([reason, reason.indexOf(short)]).toEqual([reason, reason.indexOf(law) + law.length - short.length]);
+			}
 	});
 
 	// Sonst stünde neben «Umlagefähig» ein Satz, der das Gegenteil begründet (Fachreview H-4)
@@ -497,7 +563,7 @@ describe('Grund der Umlagefähigkeit', () => {
 		show(CategoriesPage, { data: { categories: [lift] }, form: null } as never);
 
 		expect(byTestId('category-contract-note')!.textContent).toContain(
-			'Der Mieter bezahlt umlagefähige Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR).'
+			'Der Mieter bezahlt umlagefähige Kosten nur, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art. 257a Absatz 2 Obligationenrecht, OR).'
 		);
 	});
 
@@ -513,12 +579,12 @@ describe('Grund der Umlagefähigkeit', () => {
 
 	// Fachreview Runde 2 (H-25 bis H-27) und Dr. Weber P-7: die Vereinbarung verlangt Art. 257a Abs. 2 OR
 	it.each([
-		['de', 'Administration', false, 'wenn der Mietvertrag sie nennt (Art. 257a Absatz 2 OR)'],
-		['it', 'Pest Control', false, 'è necessario anche quando è vuoto'],
+		['de', 'Administration', false, 'wenn der Mietvertrag sie nennt (Art. 257a Absatz 2 Obligationenrecht, OR)'],
+		['it', 'Pest Control', false, 'è controverso'],
 		['it', 'Caretaker', true, 'piccoli lavori di conservazione'],
-		['fr', 'Administration', false, 'si le contrat de bail les mentionne (art. 257a, al. 2, CO)'],
-		['it', 'Administration', false, 'se il contratto di locazione le indica (art. 257a cpv. 2 CO)'],
-		['en', 'Administration', false, 'if the rental contract names it (Art. 257a para. 2 CO)']
+		['fr', 'Administration', false, 'si le contrat de bail les mentionne (art. 257a, al. 2, du Code des obligations, CO)'],
+		['it', 'Administration', false, 'se il contratto di locazione le indica (art. 257a cpv. 2 del Codice delle obbligazioni, CO)'],
+		['en', 'Administration', false, 'if the rental contract names it (Art. 257a para. 2 Code of Obligations, CO)']
 	] as const)('nennt auf %s den Grund von %s im geprüften Wortlaut', (locale, key, allowed, wording) => {
 		overwriteGetLocale(() => locale);
 		try {
@@ -551,7 +617,7 @@ describe('Grund der Umlagefähigkeit', () => {
 	it('nennt den Grund beim Bearbeiten einer vordefinierten Kategorie', () => {
 		show(EditCategoryPage, { data: { category: fireExtinguisher }, form: null } as never);
 
-		expect(byTestId('category-reason')!.textContent).toContain('die Wartung hängt nicht mit dem Gebrauch zusammen');
+		expect(byTestId('category-reason')!.textContent).toContain('Die Wartung ist also nicht umlagefähig.');
 	});
 
 	// Wartung zählt nicht allgemein; Kehricht wie Wasser und Abwasser (#186, Fachreview H-16)

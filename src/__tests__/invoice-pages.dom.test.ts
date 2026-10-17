@@ -13,6 +13,8 @@ vi.mock('$app/stores', () => ({
 import { goto, invalidateAll } from '$app/navigation';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
+import { m } from '$lib/paraglide/messages';
+import { toInvoice } from '$lib/server/invoice';
 import InvoicesPage from '../routes/invoices/+page.svelte';
 import InvoicePage from '../routes/invoices/[id]/+page.svelte';
 import NewInvoicePage from '../routes/invoices/new/+page.svelte';
@@ -221,10 +223,11 @@ describe('Rechnungsdetail', () => {
 	// Grund, und nur die Gebäudeversicherung, nicht Versicherungen allgemein (#185, Fachreview H-11)
 	// Das Beispiel heisst wie die vordefinierte Kategorie (Code-Review K-2)
 	// Titel nach der Folge statt nach dem Gesetz (Fachreview H-23), fr-Zitierweise (Code-Review M-7)
+	// OR ausgeschrieben: die Rechnung zeigt den Hinweis allein (#292, Fachreview V-10)
 	it.each([
-		['fr', 'assurance bâtiment, impôt foncier', 'Pas dans le décompte des charges', '(art. 256, al. 1, 256b et 257a CO)'],
-		['it', 'assicurazione edificio, imposta immobiliare', 'Non nel conteggio spese accessorie', '(art. 256 cpv. 1, 256b e 257a CO)'],
-		['en', 'building insurance, property tax', 'Not in the utility cost statement', '(Art. 256 para. 1, 256b and 257a CO)']
+		['fr', 'assurance bâtiment, impôt foncier', 'Pas dans le décompte des charges', '(art. 256, al. 1, 256b et 257a du Code des obligations, CO)'],
+		['it', 'assicurazione edificio, imposta immobiliare', 'Non nel conteggio spese accessorie', '(art. 256 cpv. 1, 256b e 257a del Codice delle obbligazioni, CO)'],
+		['en', 'building insurance, property tax', 'Not in the utility cost statement', '(Art. 256 para. 1, 256b and 257a Code of Obligations, CO)']
 	] as const)('nennt auf %s die Gebäudeversicherung mit dem Namen ihrer Kategorie', (locale, example, title, citation) => {
 		overwriteGetLocale(() => locale);
 		try {
@@ -246,8 +249,47 @@ describe('Rechnungsdetail', () => {
 		expect(byTestId('invoice-legal-note')!.textContent).toContain('Nicht in der Nebenkostenabrechnung');
 		expect(byTestId('invoice-legal-note')!.textContent).not.toContain('Schweizer Mietrecht');
 		expect(byTestId('invoice-legal-note')!.textContent).toContain(
-			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art. 256 Absatz 1, 256b und 257a OR).'
+			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art. 256 Absatz 1, 256b und 257a Obligationenrecht, OR).'
 		);
+	});
+
+	// Der Grund der eigenen Kategorie statt der allgemeinen Liste, nicht als Warnung (#292, Entscheid #221 B)
+	describe('Grund der vordefinierten Kategorie', () => {
+		const repairs = {
+			...invoiceContract,
+			isValidUtilityCost: false,
+			category: { ...invoiceContract.category, name: 'Repairs', nameDE: 'Reparaturen', isAllowedUtilityCost: false }
+		};
+		const reason = () => byTestId('category-reason')?.textContent?.trim();
+
+		it('nennt bei einer umlagefähigen Rechnung den Grund ihrer Kategorie', () => {
+			show(InvoicePage, { data: { invoice: toInvoice(invoiceContract) } });
+
+			expect(reason()).toBe(m.categories_reason_caretaker());
+		});
+
+		it('nennt bei einer nicht umlagefähigen Rechnung den Grund statt der Warnung', () => {
+			show(InvoicePage, { data: { invoice: toInvoice(repairs) } });
+
+			expect(reason()).toBe(m.categories_reason_repairs());
+			expect(byTestId('invoice-legal-note')).toBeNull();
+		});
+
+		it('nennt keinen Grund, wenn der Liegenschaftsverwalter die Rechnung ausgeschlossen hat', () => {
+			show(InvoicePage, { data: { invoice: toInvoice({ ...invoiceContract, isValidUtilityCost: false }) } });
+
+			expect(reason()).toBeUndefined();
+			expect(byTestId('invoice-legal-note')!.textContent).toContain(m.invoices_legal_text());
+		});
+
+		it('nennt keinen Grund, wenn die vordefinierte Kategorie umgestellt ist', () => {
+			const changed = { ...repairs, isValidUtilityCost: true };
+			show(InvoicePage, {
+				data: { invoice: toInvoice({ ...changed, category: { ...changed.category, isAllowedUtilityCost: true } }) }
+			});
+
+			expect(reason()).toBeUndefined();
+		});
 	});
 
 	it('zeigt den Leistungszeitraum, der statt des Rechnungsdatums die Periode bestimmt', () => {

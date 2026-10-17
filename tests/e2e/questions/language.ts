@@ -44,8 +44,22 @@ const germanOnly = Object.fromEntries(
 	})
 );
 
-// Names and places, the same in every language
-const sameEverywhere = ['Dwello', 'Google', 'Microsoft', 'Resend', 'PostgreSQL', 'IBAN', 'CHF', 'PDF', 'XSRF', 'SMTP', 'STÜBER SYSTEMS GmbH'];
+// Names and places, the same in every language; the German leaflet the reasons cite by its title (#292)
+const sameEverywhere = [
+	'Dwello',
+	'Google',
+	'Microsoft',
+	'Resend',
+	'PostgreSQL',
+	'IBAN',
+	'CHF',
+	'PDF',
+	'XSRF',
+	'SMTP',
+	'STÜBER SYSTEMS GmbH',
+	'Mieterinnen- und Mieterverband',
+	'Zulässige und unzulässige Nebenkosten'
+];
 // A record named by a scenario: up to three words, then a UUID (fixtures/backend.ts)
 const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gu;
 // Invoice descriptions the seeds write (fixtures/backend.ts): «Heizöl 2025», «<category> 2025-01-31»

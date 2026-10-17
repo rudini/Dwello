@@ -23,3 +23,4 @@ export const numberOfInvoice = Text.of(invoiceNumber);
 export const missedWarningText = Text.of(missedWarning);
 export const reasonOfCategory = Text.of(categoryReason);
 export const reasonsOfCategory = Count.of(categoryReason);
+export const tenancyLawNotes = Count.of(legalNote);

@@ -212,7 +212,7 @@ Then('erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten u
 Then(
 	'erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind',
 	async ({ verwalter }) => {
-		await verwalter.sees(proposalText).toContain('Wählen Sie selbst, ob die Kosten umlagefähig sind.');
+		await verwalter.sees(proposalText).toContain('Wählen Sie selbst, ob die Kosten umlagefähig sind');
 	}
 );
 

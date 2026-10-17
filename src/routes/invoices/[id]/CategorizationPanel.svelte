@@ -7,6 +7,7 @@
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Panel from '$lib/ui/Panel.svelte';
 	import KiAssessment from '../KiAssessment.svelte';
+	import CategoryReason, { reasonCategory } from '../../config/categories/CategoryReason.svelte';
 
 	// How the invoice is distributed: category, distribution key, whether tenants pay it, and what the KI said
 	let {
@@ -62,6 +63,8 @@
 			</dd>
 		</div>
 	</dl>
+	<!-- Why the category is umlagefähig or not, in place of the general note (#292) -->
+	<CategoryReason category={reasonCategory(invoice)} />
 
 	{#if invoice.llmConfidence}
 		<section class="flex flex-col gap-2 rounded-panel bg-sunken p-4">

@@ -11,6 +11,7 @@ import {
 	reasonsOfCategory,
 	recategorizationFailure,
 	tenancyLawNote,
+	tenancyLawNotes,
 	utilityCostOfInvoice
 } from '../questions/invoice-detail';
 import { pageAddressInApp } from '../questions/statements';
@@ -75,12 +76,20 @@ Then(
 	}
 );
 
-Then('nennt die Rechnung als Grund ihrer Kategorie {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(reasonOfCategory).toContain(text);
+Then(
+	'nennt die Rechnung als Grund der Umlagefähigkeit ihrer Kategorie {string}',
+	async ({ verwalter }, text: string) => {
+		await verwalter.sees(reasonOfCategory).toContain(text);
+	}
+);
+
+Then('nennt die Rechnung keinen Grund der Umlagefähigkeit', async ({ verwalter }) => {
+	await verwalter.sees(reasonsOfCategory).toBe(0);
 });
 
-Then('nennt die Rechnung keinen Grund ihrer Kategorie', async ({ verwalter }) => {
-	await verwalter.sees(reasonsOfCategory).toBe(0);
+// After the reason that anchors it: the general note gives way to the category's reason (#292, Fachreview V-6)
+Then('erklärt kein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst', async ({ verwalter }) => {
+	await verwalter.sees(tenancyLawNotes).toBe(0);
 });
 
 Then(

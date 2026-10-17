@@ -60,7 +60,6 @@ Funktionalität: Kostenkategorien
     Und ist die vordefinierte Kategorie "Feuerlöscher-Wartung" nicht umlagefähig
 
   # Jeder Grund endet mit seiner Folgerung und schreibt OR und VMWG aus (#292)
-  @wip
   Szenario: Vordefinierte Kategorien nennen den Grund ihrer Umlagefähigkeit
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Dann nennt die vordefinierte Kategorie "Feuerlöscher-Wartung" als Grund "umstritten"
@@ -68,11 +67,10 @@ Funktionalität: Kostenkategorien
     Und nennt die vordefinierte Kategorie "Lift" als Grund "Vollservicevertrag"
     Und nennt die vordefinierte Kategorie "Lift" als Grund "also umlagefähig."
     Und nennt die vordefinierte Kategorie "Gebäudeversicherung" als Grund "nur die Heizungsanlage"
-    Und nennt die vordefinierte Kategorie "Liegenschaftssteuer" als Grund "Obligationenrecht (OR)"
+    Und nennt die vordefinierte Kategorie "Liegenschaftssteuer" als Grund "Obligationenrecht, OR"
     Und nennt die vordefinierte Kategorie "Liegenschaftssteuer" als Grund "also nicht umlagefähig."
     Und erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt
 
-  @wip
   Szenario: Grund der Umlagefähigkeit beim Bearbeiten einer vordefinierten Kategorie
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
     Dann nennt die Kategorie als Grund "umstritten"
@@ -102,7 +100,6 @@ Funktionalität: Kostenkategorien
     Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
     Und ist die Kategorie "Fassadenreinigung" nicht umlagefähig
 
-  @wip
   Szenario: Ohne sichere Antwort der KI wählt der Liegenschaftsverwalter selbst
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Bewachung" umlagefähig ist
