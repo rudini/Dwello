@@ -170,6 +170,19 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Prüfung der Kategorien für "Kaltwasser": "1 Rechnung zählt nur teilweise: ihr Leistungszeitraum reicht über die Abrechnungsperiode hinaus."
 
+  # #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin, auf den Akonto oder neue Nebenkosten
+  # steigen könnten; ein unbefristeter behält den Hinweis auf den nächsten Kündigungstermin
+  @wip
+  Szenario: Hinweise zu Akonto und neuen Nebenkosten bei einem befristeten Mietvertrag
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" befristet von "2024-01-01" bis "2035-12-31" für "900" Franken mit "20" Franken Akonto
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2023-10-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "2000" Franken vom "2024-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann rät die Vorschau für "Lea Graf": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
+
   Szenario: Hinweis auf eine Rechnung ohne Leistungszeitraum kurz nach der Abrechnungsperiode
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2025-01-20"
@@ -369,3 +382,15 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann schlägt der Assistent das Heizprofil "Winter" vor
     Und sagt der Assistent "Das Heizprofil ist wie bei den übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode eingestellt, die Verwaltungspauschale kommt aus den Einstellungen."
+
+  # #119: sind die übrigen Abrechnungen der Periode verschieden eingestellt, gibt es keine Vorlage: beides kommt aus den Einstellungen
+  @wip
+  Szenario: Übrige Abrechnungen der Periode mit verschiedenen Heizprofilen
+    Angenommen es gibt das Heizprofil "Winter"
+    Und es gibt das Heizprofil "Sommer"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Sommer"
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann sagt der Assistent "Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen."
+    Und schlägt der Assistent das Heizprofil "Winter" nicht vor
+    Und schlägt der Assistent das Heizprofil "Sommer" nicht vor

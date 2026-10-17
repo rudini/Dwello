@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { pageAddress } from '../questions/navigation';
 import {
+	akontoHintOf,
 	announcedFeeHint,
 	balanceOf,
 	billedOfBuilding,
@@ -315,6 +316,14 @@ When(
 
 Then('schlägt der Assistent das Heizprofil {string} vor', async ({ verwalter, names }, profile: string) => {
 	await verwalter.sees(proposedHeatingProfile).toContain(names.get(profile)!);
+});
+
+Then('schlägt der Assistent das Heizprofil {string} nicht vor', async ({ verwalter, names }, profile: string) => {
+	await verwalter.sees(proposedHeatingProfile).not.toContain(names.get(profile)!);
+});
+
+Then('rät die Vorschau für {string}: {string}', async ({ verwalter, names }, tenant: string, hint: string) => {
+	await verwalter.sees(akontoHintOf(names.get(tenant)!)).toContain(hint);
 });
 
 const lastYear = Number(inDays(0).slice(0, 4)) - 1;
