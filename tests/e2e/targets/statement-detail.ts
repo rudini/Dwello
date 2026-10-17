@@ -1,6 +1,7 @@
 import { target } from '../screenplay/target';
 
 export const statementStatus = target('Status der Abrechnung', (page) => page.getByTestId('statement-status'));
+export const statementPaymentSummary = target('Zahlung der Abrechnung', (page) => page.getByTestId('statement-payment-summary'));
 export const statementLineItem = (category: string) =>
 	target(`Position «${category}» der Abrechnung`, (page) =>
 		page.getByTestId('statement-line-item').filter({ hasText: category })

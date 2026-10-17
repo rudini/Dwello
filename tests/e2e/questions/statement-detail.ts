@@ -19,6 +19,7 @@ import {
 	lineItemShare,
 	lineItemTimeShare,
 	statementLaterInvoices,
+	statementPaymentSummary,
 	statementTenancy,
 	statementTotalLabel,
 	statementStatus
@@ -27,6 +28,7 @@ import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
 
 export const statusOfStatement = Text.of(statementStatus);
+export const paymentSummary = Text.of(statementPaymentSummary);
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);

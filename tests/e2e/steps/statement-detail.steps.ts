@@ -14,6 +14,7 @@ import {
 	languageOfPdf,
 	paidDateInvalid,
 	paidDateProblem,
+	paymentSummary,
 	pdfRefusalText,
 	pdfToView,
 	recipient,
@@ -179,6 +180,10 @@ Then(
 		await verwalter.sees(heatingCostsOfTenant).toEqual({ share, amount: francs(amount) });
 	}
 );
+
+Then('sagt die Zahlung der Abrechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(paymentSummary).toBe(text);
+});
 
 Then('hat die Abrechnung den Status {string}', async ({ verwalter }, status: string) => {
 	await verwalter.sees(statusOfStatement).toBe(status);
