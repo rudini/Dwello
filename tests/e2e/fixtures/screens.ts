@@ -131,6 +131,21 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.heatingInvoice('Talblick', '1200.00', 2025);
 	await seed.statement('Gina', 'Talblick', 2025, 'Standard');
 	await seed.category('Gartenpflege', true);
+	// #91: own categories created after the contracts, with costs in 2025: the wizard asks for Hanna's, names Ines' as not
+	// agreed; names alike in every language, so the language check sees only the wizard's texts
+	await seed.building('Waldblick', 'Winterthur');
+	await seed.apartment('Waldblick', '4.01', 'vacant');
+	await seed.apartment('Waldblick', '4.02', 'vacant');
+	await seed.tenant('Hanna');
+	await seed.tenant('Ines');
+	await seed.contract('Hanna', '4.01', { startDate: '2015-01-01', baseRent: '1500.00' });
+	await seed.contract('Ines', '4.02', { startDate: '2015-01-01', baseRent: '1500.00' });
+	for (const [category, date] of [['Internet', '2025-03-31'], ['Video', '2025-09-30']]) {
+		await seed.categoryNamedAlikeInEnglish(category, 'FTTH');
+		await seed.invoiceInOwnCategory('Waldblick', category, '240.00', date);
+	}
+	await seed.agreement('Ines', 'Internet', false);
+	await seed.agreement('Ines', 'Video', true);
 	// a change the Protokoll lists and whose entry can be deleted (#357)
 	await seed.category('Rasenpflege', true);
 	await seed.categoryAllowance('Rasenpflege', false);
@@ -166,7 +181,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		category: seed.idOf('Gartenpflege'),
 		// a predefined category shows the reason of its allocability (#186)
 		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
-		distributionKey: seed.idOf('Nach Wohnungen')
+		distributionKey: seed.idOf('Nach Wohnungen'),
+		agreedBuilding: seed.idOf('Waldblick')
 	};
 	return {
 		path: path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!),

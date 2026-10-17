@@ -226,13 +226,14 @@ describe('Rechnungen pro Kategorie', () => {
 	});
 
 	// Nebenkosten dürfen nur abgerechnet werden, wenn sie im Mietvertrag vereinbart sind
-	it('fragt bei einer neuen Kategorie, ob sie im Mietvertrag vereinbart ist', () => {
+	// #91: ob vereinbart, sagt der Mietvertrag; der Hinweis zeigt auf die Mietverträge, nicht auf die Rechnungen
+	it('weist bei einer neuen Kategorie darauf hin, dass nur Mietverträge mit Vereinbarung sie bezahlen', () => {
 		expect(
 			findingText(
 				finding('new', { current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } })
 			)
 		).toBe(
-			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein, frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist die Änderung nichtig. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.'
+			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Dwello rechnet diese Kosten nur bei Mietverträgen ab, die sie vereinbaren (Angabe beim Mietvertrag). Prüfen Sie, ob sie in den unterschriebenen Mietverträgen stehen. Neue Nebenkosten führen Sie nur für die Zukunft ein, frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist die Änderung nichtig. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.'
 		);
 	});
 

@@ -15,6 +15,7 @@ import {
 	date,
 	index,
 	uniqueIndex,
+	primaryKey,
 	jsonb,
 	type AnyPgColumn
 } from 'drizzle-orm/pg-core';
@@ -155,6 +156,21 @@ export const rentalContractsRelations = relations(rentalContracts, ({ one, many 
 	}),
 	statements: many(utilityStatements)
 }));
+
+// #91: the Nebenkosten a contract agrees, or answered «nicht vereinbart»; no row: not answered, not billed
+export const contractCategories = pgTable(
+	'contract_categories',
+	{
+		contractId: uuid('contract_id')
+			.notNull()
+			.references(() => rentalContracts.id, { onDelete: 'cascade' }),
+		categoryId: uuid('category_id')
+			.notNull()
+			.references(() => categories.id, { onDelete: 'cascade' }),
+		agreed: boolean('agreed').notNull()
+	},
+	(table) => [primaryKey({ columns: [table.contractId, table.categoryId] })]
+);
 
 // ============================================================================
 // Categories Table (Utility Cost Categories)
@@ -407,6 +423,7 @@ export const utilityStatements = pgTable(
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
 		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
+		agreedCategoryIds: jsonb('agreed_category_ids').$type<string[]>(), // agreed when created (#91); null: before
 		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
 		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
 		// a berichtigte Abrechnung: the statement it replaces and what was already paid on that one and its own (#120)

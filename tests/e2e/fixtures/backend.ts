@@ -184,6 +184,12 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
+		// Whether the contract agrees a category (#91): an own category by its title, else a predefined one by its German name
+		async agreement(tenantTitle: string, categoryTitle: string, agreed: boolean) {
+			const categoryId = ids.get(categoryTitle) ?? (await predefinedCategory(categoryTitle)).id;
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}/agreements`, { categoryId, agreed });
+		},
+
 		// A whole year, or the period given (a statement of a shorter period is still named by its year)
 		async statement(
 			tenantTitle: string,
@@ -412,6 +418,16 @@ export function testData(api: CallTheApi) {
 
 		async invoiceInCategory(buildingTitle: string, categoryTitle: string) {
 			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, 'Reinigung Q1', '450.00', '2026-03-31');
+		},
+
+		// Invoice without a Kategorie, distributed by area: billed as «Nicht kategorisiert»
+		async invoiceWithoutCategory(buildingTitle: string, amount: string, date: string) {
+			await invoice(buildingTitle, {}, `Ohne Kategorie ${date}`, amount, date).then((id) => put(`invoices/${id}`, { categoryId: null }));
+		},
+
+		// Invoice in an own category, distributed by area
+		async invoiceInOwnCategory(buildingTitle: string, categoryTitle: string, amount: string, date: string) {
+			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, `${categoryTitle} ${date}`, amount, date);
 		},
 
 		// Invoice of a supplier, in a predefined category given by its German name, dated today

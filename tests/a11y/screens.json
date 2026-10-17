@@ -42,6 +42,10 @@
 		"invoice-hints": "Statement wizard preview of a period under a year (January to May): the invoices without Leistungszeitraum that count in full, and one dated shortly after the period end, each with its edit link (#131, #134).",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
 		"preview-all-billed": "Statement wizard preview of a period in which every contract already has a statement: how to recalculate and the links to the statements.",
+		"agreed-costs-none": "Contract form with every box of the agreed Nebenkosten unticked (#91): the note that the tenant is then billed no Nebenkosten (not saved).",
+		"agreed-costs": "Statement wizard at the settings step (#91): «Weiter» with the questions whether a category is agreed not answered (their errors), and the contract whose answered «nicht vereinbart» category has costs in the period.",
+		"agreements-failed": "Statement wizard at the settings step (#91) when whether the contracts agree the period's Nebenkosten cannot be checked (that request answers an error): the alert with «Erneut versuchen».",
+		"agreement-save-failed": "Statement wizard at the settings step (#91): an answer whether a category is agreed that could not be saved (the save answers an error): the question's error.",
 		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
 		"rent-taken-over": "Rental contract wizard at the step «Miete» for an apartment with an earlier contract: its Nettomiete, Zusatzmiete and Akonto filled in, the note naming that contract (#144).",
@@ -252,12 +256,14 @@
 				"rent-taken-over",
 				"draft-restored",
 				"contracts-unknown",
-				"contracts-unknown-review"
+				"contracts-unknown-review",
+				"agreed-costs-none"
 			],
 			"queries": {
 				"every-wizard-step": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown-review": "?tenant={tenant}&apartment={freeApartment}",
+				"agreed-costs-none": "?tenant={tenant}&apartment={freeApartment}",
 				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
 				"rent-taken-over": "?tenant={tenant}&apartment={noticedApartment}",
 				"draft-restored": "?tenant={tenant}"
@@ -292,7 +298,8 @@
 				"submit-cleared",
 				"past-end-error",
 				"edit-refused",
-				"contracts-unknown"
+				"contracts-unknown",
+				"agreed-costs-none"
 			]
 		},
 		{
@@ -432,10 +439,16 @@
 				"draft-dropped",
 				"buildings-billed",
 				"link-preset",
+				"agreed-costs",
+				"agreement-save-failed",
+				"agreements-failed",
 				"generation-result"
 			],
 			"queries": {
-				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31"
+				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31",
+				"agreed-costs": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
+				"agreement-save-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
+				"agreements-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31"
 			}
 		},
 		{
