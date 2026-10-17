@@ -146,4 +146,19 @@
 			>
 		</div>
 	</form>
+
+	<ConfigLinks
+		title={m.audit_title()}
+		testid="audit-log-links"
+		links={[
+			{
+				key: 'audit-log',
+				href: '/config/audit-log',
+				label: m.audit_title(),
+				text: m.audit_link(),
+				icon: 'calendar',
+				testid: 'audit-log-link'
+			}
+		]}
+	/>
 </div>

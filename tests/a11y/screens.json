@@ -525,6 +525,15 @@
 			]
 		},
 		{
+			"name": "audit-log",
+			"path": "/config/audit-log",
+			"states": [
+				"default",
+				"empty",
+				"delete-dialog"
+			]
+		},
+		{
 			"name": "categories",
 			"path": "/config/categories",
 			"states": [

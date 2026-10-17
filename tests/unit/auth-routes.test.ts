@@ -264,6 +264,27 @@ describe('Auth Routes Integration Tests', () => {
 			expect(authModule.clearAuthCookies).toHaveBeenCalled();
 		});
 
+		// Protokoll (#357): nur der Anbieter, keine weiteren Angaben über den Liegenschaftsverwalter
+		it('hält die Anmeldung mit ihrem Anbieter im Protokoll fest', async () => {
+			mockFetch.mockResolvedValue(new Response(null, { status: 201 }));
+
+			await callback('code=auth-code-123&state=mock-state-abc123');
+
+			const [url, init] = mockFetch.mock.calls[0];
+			expect(url).toBe('http://localhost:3001/api/v1/audit-log/logins');
+			expect(init).toMatchObject({ method: 'POST', body: JSON.stringify({ provider: 'microsoft' }) });
+			expect(new Headers(init.headers).get('authorization')).toMatch(/^Bearer .+/);
+		});
+
+		it('meldet auch an, wenn das Protokoll die Anmeldung nicht festhalten kann', async () => {
+			mockFetch.mockRejectedValue(new Error('backend down'));
+
+			const redirect = await callback('code=auth-code-123&state=mock-state-abc123');
+
+			expect(redirect).toMatchObject({ status: 303, location: '/statements?status=overdue' });
+			expect(authModule.setSessionCookie).toHaveBeenCalled();
+		});
+
 		it('lehnt den Rückruf ohne begonnene Anmeldung ab', async () => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_oauth_state', 'mock-state-abc123');

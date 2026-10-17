@@ -69,28 +69,26 @@ Funktionalität: Einstellungen
   # prüfen die Backend-Tests (audit-log*.pg.test.ts): die Anmeldung läuft hier nicht über Google, und die
   # Verwaltungspauschale gilt für alle parallel laufenden Szenarien.
   # TODO(fachlich prüfen, #370): Begriff «Protokoll» fehlt im Glossar
-  @wip
   Szenario: Protokoll öffnen
     Wenn der Liegenschaftsverwalter das Protokoll öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Protokoll"
 
-  @wip
   Szenario: Änderungen im Protokoll sehen
     Angenommen es gibt die umlagefähige Kategorie "Gartenpflege Nord"
     Und die Kategorie "Gartenpflege Nord" ist inzwischen nicht umlagefähig
     Und das Gebäude "Lindenhof" in "Bern" existiert
     Und "Hauswart Meier" stellt dem Gebäude "Lindenhof" "450.00" Franken für "Treppenhausreinigung" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Meier" ist vom "2026-03-31"
     Und die Rechnung von "Hauswart Meier" ist inzwischen als nicht umlagefähig markiert
     Wenn der Liegenschaftsverwalter das Protokoll öffnet
-    Dann nennt das Protokoll mit heutigem Datum "Kategorie «Gartenpflege Nord»: jetzt nicht umlagefähig"
-    Und nennt das Protokoll mit heutigem Datum "Rechnung «Treppenhausreinigung» von Hauswart Meier über CHF 450.00: als nicht umlagefähig markiert"
+    Dann nennt das Protokoll mit heutigem Datum "Kategorie «Gartenpflege Nord»: von umlagefähig auf nicht umlagefähig geändert"
+    Und nennt das Protokoll mit heutigem Datum "Rechnung «Treppenhausreinigung» von Hauswart Meier vom 31.03.2026 über CHF 450.00 (Lindenhof): als nicht umlagefähig markiert"
 
-  @wip
   Szenario: Eintrag im Protokoll löschen
     Angenommen es gibt die umlagefähige Kategorie "Gartenpflege Süd"
     Und die Kategorie "Gartenpflege Süd" ist inzwischen nicht umlagefähig
     Und der Liegenschaftsverwalter ist auf der Seite "Protokoll"
-    Wenn der Liegenschaftsverwalter den Eintrag "Kategorie «Gartenpflege Süd»: jetzt nicht umlagefähig" löschen will
-    Dann warnt das Protokoll "Der Eintrag wird endgültig aus dem Protokoll gelöscht. Das lässt sich nicht rückgängig machen."
+    Wenn der Liegenschaftsverwalter den Eintrag "Kategorie «Gartenpflege Süd»: von umlagefähig auf nicht umlagefähig geändert" löschen will
+    Dann warnt das Protokoll "Dieser Eintrag wird endgültig aus dem Protokoll gelöscht: Kategorie «Gartenpflege Süd»: von umlagefähig auf nicht umlagefähig geändert. Die Änderung selbst bleibt bestehen. Das lässt sich nicht rückgängig machen."
     Wenn der Liegenschaftsverwalter das Löschen bestätigt
-    Dann nennt das Protokoll "Kategorie «Gartenpflege Süd»: jetzt nicht umlagefähig" nicht mehr
+    Dann nennt das Protokoll "Kategorie «Gartenpflege Süd»: von umlagefähig auf nicht umlagefähig geändert" nicht mehr

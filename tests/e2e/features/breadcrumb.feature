@@ -43,7 +43,6 @@ Funktionalität: Breadcrumb
       | ist auf der Seite "Heizprofile"                                | Einstellungen  | der Seite "Einstellungen"                          |
 
     # Protokoll (#357)
-    @wip
     Beispiele:
       | Ausgangslage                  | Breadcrumb    | Ziel                      |
       | ist auf der Seite "Protokoll" | Einstellungen | der Seite "Einstellungen" |

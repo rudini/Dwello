@@ -194,6 +194,27 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 | PUT | `/:key` | Body: `{ value }`. → `{ message, key, value }`. 404 unknown key; 400 invalid value |
 | DELETE | `/:key` | Resets to default. → `{ message, key, value }` (the default). 404 unknown key |
 
+A changed `management_fee_pct` (also a reset to the default; «4.250» equals «4.25») writes a Protokoll entry (#357).
+
+## 11a. Protokoll `/api/v1/audit-log`
+
+Logins and changes that affect statements (#357), each `{ id, occurredAt, action, details }`; `details` is a snapshot of what the entry names (contract `tests/contracts/audit-log.json`):
+
+| `action` | Written by | `details` |
+|---|---|---|
+| `login` | the BFF after the OAuth callback | `provider` (`google` \| `microsoft`) |
+| `management_fee_changed` | `PUT /config`, `PUT`/`DELETE /config/management_fee_pct` | `from`, `to` |
+| `category_allocability_changed` | `PUT /categories/:id` | `categoryId`, `name`, `nameDE`…`nameEN`, `allocable`; when not allocable `invoices` (how many it made not allocable) |
+| `invoice_allocability_changed` | `PUT /invoices/:id`, `POST /invoices/:id/recategorize` | `invoiceId`, `description`, `supplier`, `invoiceDate`, `amount`, `building`, `allocable` |
+| `payment_reset` | `POST /statements/:id/payment-reset` | `statementId`, `number`, `paidDate` |
+| `statement_corrected` | `recordStatementCorrection` (the correction of #358) | `statementId`, `number`, `replacementId`, `replacementNumber` |
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/` | → `{ data: [entry] }`, newest first |
+| POST | `/logins` | Body: `{ provider }`. 201; 422 other provider |
+| DELETE | `/:id` | 204. 404 |
+
 ## 12. Utility statements `/api/v1/statements`
 
 ### Status

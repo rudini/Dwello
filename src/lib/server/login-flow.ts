@@ -1,6 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import type { Cookies } from '@sveltejs/kit';
 import { cookieConfig } from './jwt-config';
+import { logAuthError } from './error-handler';
 import { isValidProvider, type OAuthProvider } from './oauth';
 
 // Remembers, during the OAuth round trip, which provider was chosen and which page to open afterwards
@@ -50,5 +51,23 @@ export function takeLoginFlow(
 		return isValidProvider(provider) ? { provider, redirectTo: safeTarget(redirectTo) } : null;
 	} catch {
 		return null;
+	}
+}
+
+/**
+ * The login goes into the Protokoll under «Einstellungen» (#357), with its provider only; a backend that cannot record
+ * it does not stop the login
+ */
+export async function recordLogin(jwt: string, provider: OAuthProvider) {
+	try {
+		await fetch(`${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/audit-log/logins`, {
+			method: 'POST',
+			headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+			body: JSON.stringify({ provider })
+		});
+	} catch (error) {
+		logAuthError(error instanceof Error ? error : new Error(String(error)), {
+			operation: 'record_login'
+		});
 	}
 }

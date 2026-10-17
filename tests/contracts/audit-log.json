@@ -1,0 +1,40 @@
+{
+	"data": [
+		{
+			"id": "a1",
+			"occurredAt": "2026-10-17T12:05:00.000Z",
+			"action": "login",
+			"details": { "provider": "google" }
+		},
+		{
+			"id": "a2",
+			"occurredAt": "2026-10-16T08:30:00.000Z",
+			"action": "management_fee_changed",
+			"details": { "from": "3", "to": "4.5" }
+		},
+		{
+			"id": "a3",
+			"occurredAt": "2026-10-15T09:00:00.000Z",
+			"action": "category_allocability_changed",
+			"details": { "categoryId": "c1", "name": "Garden care", "nameDE": "Gartenpflege", "nameFR": "Entretien du jardin", "nameIT": "Giardinaggio", "nameEN": "Garden care", "allocable": false, "invoices": 2 }
+		},
+		{
+			"id": "a4",
+			"occurredAt": "2026-10-14T09:00:00.000Z",
+			"action": "invoice_allocability_changed",
+			"details": { "invoiceId": "i1", "description": "Treppenhausreinigung", "supplier": "Hauswart Meier", "invoiceDate": "2026-03-31", "amount": "450.00", "building": "Lindenhof", "allocable": false }
+		},
+		{
+			"id": "a5",
+			"occurredAt": "2026-10-13T09:00:00.000Z",
+			"action": "payment_reset",
+			"details": { "statementId": "s1", "number": "NK-2025-0001", "paidDate": "2026-03-02" }
+		},
+		{
+			"id": "a6",
+			"occurredAt": "2026-10-12T09:00:00.000Z",
+			"action": "statement_corrected",
+			"details": { "statementId": "s2", "number": "NK-2025-0002", "replacementId": "s3", "replacementNumber": "NK-2025-0007" }
+		}
+	]
+}

@@ -121,7 +121,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 │  - Contracts, Invoices, Statements                       │
 │  - Configuration, Categories, Distribution Keys          │
 │  - Blob storage for PDFs and contracts                   │
-│  - Audit logs (planned)                                  │
+│  - Protokoll (audit log, #357)                           │
 └──────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────┐
@@ -483,7 +483,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 **Configuration:**
 - Simple percentage input field
 - Help text naming the customary guideline (up to 3%)
-- Audit trail showing when percentage was last changed (planned, not implemented)
+- The Protokoll under «Einstellungen» lists each change of the percentage with the old and the new rate and its date (#357)
 
 **Statement Impact:**
 - Automatically calculated per apartment
@@ -763,7 +763,7 @@ BALANCE (refund): CHF 30
 
 **Manual Override:**
 - An invoice of an allocable category can be excluded from statements; an invoice of a non-allocable category is never allocable, whatever the form or the LLM sends
-- Override creates audit log entry (planned, not implemented)
+- An exclusion, and taking it back, goes into the Protokoll under «Einstellungen» (#357)
 
 **Reporting:**
 - Statistics on % of invalid costs by category
@@ -1020,7 +1020,7 @@ BALANCE (refund): CHF 30
 - Invalid invoices highlighted in list
 - When added to statement, system warns user
 - Option to exclude from statement distribution
-- Audit log shows which invalid costs were excluded (planned, not implemented)
+- The Protokoll lists each invoice that becomes not allocable or allocable again, also through its category or the KI, and how many invoices a category change excluded (#357)
 
 ---
 
@@ -1248,7 +1248,7 @@ BALANCE (refund): CHF 30
 - Role-based access control (future: multi-user support)
 - Single user in MVP has full access
 - Session: the session JWT expires after `JWT_EXPIRY` (default 7 days); the open app refreshes it periodically (every 50 minutes). No inactivity timeout is implemented
-- Login audit logging (planned, not implemented)
+- Each login goes into the Protokoll with its time and provider (#357)
 
 **Data Protection:**
 - SQL injection prevention (parameterized queries, ORM)
@@ -1261,11 +1261,10 @@ BALANCE (refund): CHF 30
 - No passwords or OAuth tokens are stored
 - PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): planned, not implemented; depends on deployment
 
-**Audit Logging (planned, not implemented):**
-- Log all sensitive operations (invoice changes, statement generation)
-- Log invalid access attempts
-- Retention: 1 year of logs
-- Admin dashboard for log review (future feature)
+**Audit Logging (Protokoll, #357, decided in #111):**
+- The Protokoll under «Einstellungen» records, each with its time: logins (provider only), changes of the Verwaltungspauschale rate, of a category's allocability, invoices that become not allocable or allocable again, reset payments and corrections of sent statements (#358)
+- Entries stay until the landlord deletes them (one at a time, confirmed); no automatic retention
+- Not part of the decision: other invoice changes, statement generation, failed access attempts
 
 ---
 
@@ -1548,7 +1547,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 - **Document** (`documents`)
 - **Configuration** (`configuration`, key/value; keys and defaults in `backend/src/services/config.service.ts`: `accounting_period`, `management_fee_pct`, `default_heating_profile_id`, `default_distribution_key_id`, `company_name`, `company_address`, `company_postal_code`, `company_city`, `iban`, `payment_deadline_days` (default 30), `reminder_after_days` (default 14), `default_language`)
 
-An audit log is planned, not implemented.
+- **Protokoll** (`audit_log`, #357): logins and changes, each with its time and a snapshot of what it names (`docs/data-model.md`)
 
 ---
 
@@ -1708,7 +1707,7 @@ An audit log is planned, not implemented.
 - LLM categorization aligned with allowed/disallowed costs
 - Data retention policies implemented (10 years for financial records)
 - GDPR compliance for EU tenants verified
-- Audit logs capturing all sensitive operations
+- Protokoll of logins and changes that affect statements (#357)
 
 ---
 

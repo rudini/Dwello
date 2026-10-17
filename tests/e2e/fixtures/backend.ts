@@ -412,6 +412,10 @@ export function testData(api: CallTheApi) {
 			ids.set(`Rechnung ${supplier}`, id);
 		},
 
+		async invoiceDate(supplier: string, invoiceDate: string) {
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { invoiceDate });
+		},
+
 		async invoiceAllocable(supplier: string, isValidUtilityCost: boolean) {
 			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { isValidUtilityCost });
 		},

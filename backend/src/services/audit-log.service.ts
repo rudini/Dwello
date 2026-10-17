@@ -1,0 +1,39 @@
+/**
+ * Protokoll under «Einstellungen» (#357, decided in #111): logins and changes that affect statements, each with its
+ * time. The details are a snapshot of what the entry names, so it stays readable after the record changed or was
+ * deleted; the UI words them in its language. Entries stay until the landlord deletes one.
+ */
+
+import { desc, eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { auditLog } from '../db/schema';
+
+type Writer = Pick<typeof db, 'insert'>;
+
+/** Writes one entry, inside the transaction of the change when one is given */
+export async function recordAudit(action: string, details: Record<string, unknown>, tx: Writer = db) {
+	await tx.insert(auditLog).values({ action, details });
+}
+
+/** All entries, newest first */
+export const listAuditLog = () => db.select().from(auditLog).orderBy(desc(auditLog.occurredAt));
+
+/** False when there is no such entry */
+export async function deleteAuditEntry(id: string) {
+	return (await db.delete(auditLog).where(eq(auditLog.id, id)).returning()).length > 0;
+}
+
+type Statement = { id: string; statementNumber: string };
+
+/** #120: a sent statement replaced by its berichtigte Abrechnung; called by the correction (#358) */
+export const recordStatementCorrection = (replaced: Statement, replacement: Statement, tx?: Writer) =>
+	recordAudit(
+		'statement_corrected',
+		{
+			statementId: replaced.id,
+			number: replaced.statementNumber,
+			replacementId: replacement.id,
+			replacementNumber: replacement.statementNumber
+		},
+		tx
+	);

@@ -118,6 +118,15 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 		);
 	});
 
+	// Fachprüfung R-3 (#357): das Protokoll unter den Einstellungen teilen sich alle Besucher der Demo
+	it('sagt, dass alle Besucher die Anmeldungen der anderen im Protokoll sehen', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: true, providers: ['Google'] } } as never);
+
+		expect(demoSection()?.textContent).toContain(
+			'In der Demo sehen alle Besucher das Protokoll mit den Anmeldungen der anderen, ohne Name und E-Mail-Adresse.'
+		);
+	});
+
 	it('hat in einer eigenen Installation keinen Abschnitt zur Demo', () => {
 		show(PrivacyPage, { data: { recipient: null, demo: false, providers: ['Google'] } } as never);
 

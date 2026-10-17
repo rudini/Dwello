@@ -15,6 +15,10 @@ Given('die Kategorie {string} ist inzwischen nicht umlagefähig', async ({ seed 
 	await seed.categoryAllowance(title, false);
 });
 
+Given('die Rechnung von {string} ist vom {string}', async ({ seed }, supplier: string, date: string) => {
+	await seed.invoiceDate(supplier, date);
+});
+
 Given('die Rechnung von {string} ist inzwischen als nicht umlagefähig markiert', async ({ seed }, supplier: string) => {
 	await seed.invoiceAllocable(supplier, false);
 });
@@ -35,8 +39,8 @@ Then('nennt das Protokoll mit heutigem Datum {string}', async ({ verwalter, name
 	await verwalter.sees(auditEntryDay(named(names, text))).toContain(swissDate(inDays(0)));
 });
 
-Then('warnt das Protokoll {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(deleteAuditEntryConsequence).toBe(text);
+Then('warnt das Protokoll {string}', async ({ verwalter, names }, text: string) => {
+	await verwalter.sees(deleteAuditEntryConsequence).toBe(named(names, text));
 });
 
 Then('nennt das Protokoll {string} nicht mehr', async ({ verwalter, names }, text: string) => {

@@ -7,7 +7,7 @@ export const auditEntries = (text: string) => target(`Protokolleintrag «${text}
 export const auditEntryDate = (text: string) =>
 	target(`Datum des Protokolleintrags «${text}»`, (page) => entry(text)(page).getByTestId('audit-entry-date'));
 export const deleteAuditEntryButton = (text: string) =>
-	target(`Protokolleintrag «${text}» löschen`, (page) => entry(text)(page).getByTestId('audit-entry-delete'));
+	target(`Protokolleintrag «${text}» löschen`, (page) => entry(text)(page).getByTestId('audit-entry-delete-button'));
 export const deleteAuditEntryMessage = target('Bestätigung Protokolleintrag löschen', (page) =>
 	page.getByTestId('audit-entry-delete-message')
 );

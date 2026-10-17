@@ -29,7 +29,7 @@ utility_statements ──> tenants, apartments, rental_contracts (contract_id)
 utility_statements 1─n utility_statement_line_items ──> categories, distribution_keys
 documents ──> tenants, utility_statements (optional)
 
-heating_profiles, configuration: no foreign keys
+heating_profiles, configuration, audit_log: no foreign keys
 ```
 
 | Foreign key | On delete |
@@ -398,6 +398,19 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 
 The IBAN is stored in plain text.
 
+### audit_log (Protokoll, #357)
+
+```sql
+id          UUID PRIMARY KEY
+occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
+action      VARCHAR(50) NOT NULL   -- login, management_fee_changed, category_allocability_changed,
+                                   -- invoice_allocability_changed, payment_reset, statement_corrected
+details     JSONB NOT NULL         -- snapshot of what the entry names (API: docs/api-specification.md, 11a)
+```
+
+No foreign keys: an entry stays readable after its record changed or was deleted, and stays until the landlord
+deletes it under «Einstellungen» › «Protokoll». A login stores only the provider. Migration `0018_audit_log.sql`.
+
 ---
 
 ## Seed data (`0002_stammdaten.sql`)
@@ -473,7 +486,6 @@ document. Do not use `db:generate` (Drizzle Kit has no snapshots and would emit 
 
 ## Not implemented
 
-- Audit log (no `audit_logs` table; only invoices record a manual category override).
 - Database views.
 - Backups (scenario R2 in `docs/migration-mva.md`).
 - Encryption of individual columns (e.g. the IBAN).
