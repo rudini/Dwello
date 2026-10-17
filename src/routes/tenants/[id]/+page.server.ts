@@ -46,7 +46,9 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		? contracts.reduce((a: BackendContract, b: BackendContract) => (a.endDate > b.endDate ? a : b))
 		: null;
 	const apartmentContracts = last?.endDate
-		? (await (await fetch(`${API}/contracts?apartmentId=${last.apartmentId}&limit=100`)).json()).contracts
+		? await fetch(`${API}/contracts?apartmentId=${last.apartmentId}&limit=100`)
+				.then(async (response) => (await response.json()).contracts)
+				.catch(() => [])
 		: [];
 
 	return {

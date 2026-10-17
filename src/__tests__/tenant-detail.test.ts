@@ -80,6 +80,21 @@ describe('Mieterdetail', () => {
 		expect(data.formerDocuments).toMatchObject({ endDate: day(-2) });
 	});
 
+	// the apartment's contracts only feed the notice: without them the page still loads, without a notice
+	it('zeigt die Seite ohne Hinweis, wenn die Mietverträge der Wohnung nicht laden', async () => {
+		const fetch = (async (url: string) => {
+			if (url === `${API}/tenants/t1`) return Response.json(tenant);
+			if (url.includes('apartmentId=')) throw new TypeError('fetch failed');
+			if (url.startsWith(`${API}/contracts`))
+				return Response.json({ contracts: [contract('c1', '2020-01-01', day(-2), '2.01')] });
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;
+
+		expect(data.formerDocuments).toBeNull();
+	});
+
 	it('lädt die Mietverträge des Mieters', async () => {
 		const { urls, fetch } = backend([]);
 
