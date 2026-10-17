@@ -2,6 +2,11 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { pageAddress } from '../questions/navigation';
 import {
+	allBilledText,
+	allBuildingsNoteText,
+	confirmationReason,
+	currentStep,
+	existingStatementsText,
 	akontoHintOf,
 	announcedFeeHint,
 	balanceOf,
@@ -26,6 +31,7 @@ import {
 	invoicesOfBuilding,
 	missingInvoicesWarning,
 	missingInvoicesWarnings,
+	partialInvoicesHints,
 	oldAddressWarning,
 	noContractsInPeriod,
 	periodRunning,
@@ -37,15 +43,21 @@ import {
 	settingsChoiceCount,
 	settingsChoiceName,
 	createdStatements,
-	restoredDraftText,
+	discardQuestion,
 	statementsInPreview,
 	tankQuestions,
 	totalCostsOf
 } from '../questions/statement-generate';
+import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
+	chooseAllBuildings,
 	chooseBuilding,
 	chooseBuildingsFor,
+	chooseBuildingsForPeriod,
+	closeRestoredNotice,
 	confirmDespiteWarnings,
+	confirmDiscarding,
+	discardInput,
 	editHintedInvoice,
 	generateMore,
 	openContractWithoutFee,
@@ -239,6 +251,10 @@ Then('warnt die Vorschau nicht vor fehlenden Rechnungen', async ({ verwalter }) 
 	await verwalter.sees(missingInvoicesWarnings).toBe(0);
 });
 
+Then('weist die Vorschau nicht auf Monate ohne Rechnung hin', async ({ verwalter }) => {
+	await verwalter.sees(partialInvoicesHints).toBe(0);
+});
+
 When('der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(tryNextWithoutConfirmation);
 });
@@ -350,12 +366,50 @@ When('der Liegenschaftsverwalter die Gebäude für die Abrechnungen {int} wähle
 	await verwalter.attemptsTo(chooseBuildingsFor(year));
 });
 
-Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text: string) => {
+Then('sagt der Hinweis auf die wiederhergestellten Angaben {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(restoredDraftText).toContain(text);
 });
 
 Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
+});
+
+When('der Liegenschaftsverwalter alle Gebäude wählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseAllBuildings);
+});
+
+Then('nicht das Gebäude {string}', async ({ verwalter, seed }, building: string) => {
+	await verwalter.sees(buildingChosen(seed.idOf(building)!)).toBe(false);
+});
+
+Then(
+	'sagt die Wahl der Gebäude, dass «Alle Gebäude» die Gebäude auslässt, deren Mietverträge alle schon eine Abrechnung haben',
+	async ({ verwalter }) => {
+		// other scenarios add fully billed buildings too: the count is not checked
+		await verwalter.sees(allBuildingsNoteText).toMatch(
+			/^«Alle Gebäude» lässt \d+ Gebäude aus, (dessen|deren) Mietverträge in dieser Abrechnungsperiode alle schon eine Abrechnung haben\.$/
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter seine Angaben verwerfen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(discardInput);
+});
+
+Then('fragt der Assistent zuerst {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(discardQuestion).toContain(text);
+});
+
+When('der Liegenschaftsverwalter das Verwerfen bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmDiscarding);
+});
+
+When('der Liegenschaftsverwalter den Hinweis auf seine wiederhergestellten Angaben schliesst', async ({ verwalter }) => {
+	await verwalter.attemptsTo(closeRestoredNotice);
+});
+
+Then('sieht der Liegenschaftsverwalter keinen Hinweis auf wiederhergestellte Angaben', async ({ verwalter }) => {
+	await verwalter.sees(restoredDraftShown).toBe(false);
 });
 
 Then('meldet das Feld der Verwaltungspauschale {string}', async ({ verwalter }, message: string) => {
@@ -477,6 +531,32 @@ When(
 		await verwalter.attemptsTo(openPreview(Number(periodStart.slice(0, 4)), seed.idOf(building)!, { periodStart, periodEnd }));
 	}
 );
+
+When(
+	'der Liegenschaftsverwalter die Gebäude für die Abrechnungen vom {string} bis {string} wählen will',
+	async ({ verwalter }, periodStart: string, periodEnd: string) => {
+		await verwalter.attemptsTo(chooseBuildingsForPeriod(periodStart, periodEnd));
+	}
+);
+
+Then('nennt die Vorschau die bestehenden Abrechnungen von {string}', async ({ verwalter, names }, building: string) => {
+	await verwalter.sees(existingStatementsText).toContain(`Für ${names.get(building) ?? building} gibt es in dieser Abrechnungsperiode schon`);
+});
+
+Then(
+	'verlangt die Vorschau eine Bestätigung, weil es für {string} schon Abrechnungen gibt',
+	async ({ verwalter, names }, building: string) => {
+		await verwalter.sees(confirmationReason).toContain(`Für ${names.get(building) ?? building} gibt es in dieser Abrechnungsperiode schon`);
+	}
+);
+
+Then('ist der Assistent im Schritt {string}', async ({ verwalter }, step: string) => {
+	await verwalter.sees(currentStep).toBe(step);
+});
+
+Then('sagt die leere Vorschau {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(allBilledText).toBe(text);
+});
 
 Then('nennt die Prüfung der Kategorien keinen fehlenden Tankbestand', async ({ verwalter }) => {
 	await verwalter.sees(missingStockFindings).toBe(0);

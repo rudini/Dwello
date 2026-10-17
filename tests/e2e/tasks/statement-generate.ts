@@ -3,6 +3,7 @@ import type { Activity } from '../screenplay/actor';
 import { Check, Click, DownloadFrom, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import {
+	allBuildingsCheckbox,
 	backLink,
 	buildingCheckbox,
 	feeNotAgreedLink,
@@ -24,7 +25,7 @@ import {
 	showStatementsButton,
 	downloadZipButton
 } from '../targets/statement-generate';
-import { finishedStep, nextButton, saveStatus } from '../targets/wizard';
+import { closeDraftNotice, discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { generateStatementsViaApi, openPreviewViaApi, type RunOptions } from './statement-generate-api';
 
 const WIZARD = '/statements/generate';
@@ -43,13 +44,10 @@ export const openStatementWizardFor = (buildingId: string, year: number) =>
 export const chooseBuilding = (buildingId: string): Activity => (actor) =>
 	actor.attemptsTo(goToNextStep, Check.the(buildingCheckbox(buildingId)));
 
-// Step "Abrechnungsperiode" with a whole year, on to step "Gebäude"
-export const chooseBuildingsFor = (year: number): Activity => (actor) =>
-	actor.attemptsTo(
-		EnterDate.of(`${year}-01-01`).into(periodStartInput),
-		EnterDate.of(`${year}-12-31`).into(periodEndInput),
-		goToNextStep
-	);
+// Step "Abrechnungsperiode", on to step "Gebäude"
+export const chooseBuildingsForPeriod = (start: string, end: string): Activity => (actor) =>
+	actor.attemptsTo(EnterDate.of(start).into(periodStartInput), EnterDate.of(end).into(periodEndInput), goToNextStep);
+export const chooseBuildingsFor = (year: number) => chooseBuildingsForPeriod(`${year}-01-01`, `${year}-12-31`);
 
 // Step "Heizprofil und Verwaltungspauschale"
 export const setManagementFee = (buildingId: string, percent: number): Activity => (actor) =>
@@ -100,9 +98,9 @@ export const generateStatements = (year: number, buildingId: string, options: Ru
 
 export const tryNextWithoutConfirmation = goToNextStep;
 
-// The draft is kept in the browser; the wizard says when it is saved
+// The input is kept in the browser; the wizard says when
 export const reopenStatementWizard: Activity = (actor) =>
-	actor.attemptsTo(Wait.until(saveStatus('Entwurf gespeichert')), Navigate.to(WIZARD));
+	actor.attemptsTo(Wait.until(saveStatus('Noch nicht gespeichert')), Navigate.to(WIZARD));
 
 export const generateMore = Click.on(generateMoreButton);
 export const showCreatedStatements = Click.on(showStatementsButton);
@@ -139,3 +137,8 @@ export const openContractWithNotAgreedCosts = (contractId: string) => Click.on(n
 // saving an answer fails (the BFF route the browser calls)
 export const agreementsCannotBeChecked = FailRequests.to('/api/statements/agreements', {});
 export const agreementsCannotBeSaved = (contractId: string) => FailRequests.to(`/api/contracts/${contractId}/agreements`, {});
+
+export const chooseAllBuildings = Check.the(allBuildingsCheckbox);
+export const discardInput = Click.on(discardDraftButton);
+export const confirmDiscarding = Click.on(discardDraftConfirm);
+export const closeRestoredNotice = Click.on(closeDraftNotice);

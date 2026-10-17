@@ -2,12 +2,16 @@ import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
 import { Accessible, Checked, Count, Text, Value, Visibility } from '../screenplay/questions';
 import {
+	allBuildingsNote,
+	previewAllBilled,
+	confirmMissingInvoices,
+	existingStatements,
+	stepLabel,
 	announcement,
 	buildingBilled,
 	buildingCheckbox,
 	buildingInvoices,
 	categoryFinding,
-	confirmMissingInvoices,
 	hintedInvoice,
 	invoicesWithoutServicePeriod,
 	lateInvoices,
@@ -22,6 +26,7 @@ import {
 	managementFeeHint,
 	managementFeeInput,
 	missingInvoices,
+	partialInvoices,
 	oldAddress,
 	periodStartInput,
 	periodRunningWarning,
@@ -34,7 +39,7 @@ import {
 	wizardChoices,
 	wizardPresetNotice
 } from '../targets/statement-generate';
-import { draftRestored } from '../targets/wizard';
+import { discardDraftMessage } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
 import { amountAfter, signedFrancs } from './amounts';
 
@@ -116,10 +121,12 @@ export const settingsChoiceName = Accessible.nameOf(wizardChoices);
 export const periodChoiceShown = Visibility.of(periodStartInput);
 export const missingInvoicesWarning = Text.of(missingInvoices);
 export const missingInvoicesWarnings = Count.of(missingInvoices);
+export const partialInvoicesHints = Count.of(partialInvoices);
 export const invoicesOfBuilding = (buildingName: string) => Text.of(buildingInvoices(buildingName));
 export const draftsOnly = Text.of(draftsOnlyNote);
 export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(buildingId));
-export const restoredDraftText = Text.of(draftRestored);
+export const discardQuestion = Text.of(discardDraftMessage);
+export const allBuildingsNoteText = Text.of(allBuildingsNote);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
 export const periodRunning = Text.of(periodRunningWarning);
@@ -133,6 +140,11 @@ export const countOfInvoicesWithoutServicePeriodOn = (date: string) => Count.of(
 // the option names the profile and its sum, «Winter … (100%)»
 export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
+export const existingStatementsText = Text.of(existingStatements);
+// the warnings the confirmation confirms, read with its checkbox
+export const confirmationReason = Accessible.descriptionOf(confirmMissingInvoices);
+export const currentStep = Text.of(stepLabel);
+export const allBilledText = Text.of(previewAllBilled);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const presetNoticeText = Text.of(wizardPresetNotice);
 

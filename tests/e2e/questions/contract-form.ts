@@ -1,4 +1,4 @@
-import { Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { Checked, Count, Enabled, Text, Value } from '../screenplay/questions';
 import {
 	advancePaymentInput,
 	apartmentContractsUnknown,
@@ -9,6 +9,7 @@ import {
 	fixedApartment,
 	fixedTenant,
 	billedUntilHelp,
+	feeHelp,
 	partiesHelp,
 	rentTakenOver,
 	reviewContractsUnknown,
@@ -20,14 +21,12 @@ import {
 	noAgreedCostsNote
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
-import { draftRestored } from '../targets/wizard';
 
 export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
 export const chosenApartmentId = Value.of(apartmentSelect);
 export const chosenTenantId = Value.of(tenantSelect);
 export const chosenTenantName = Value.chosenIn(tenantSelect);
 export const reviewed = (label: string) => Text.of(reviewItem(label));
-export const draftRestoredShown = Visibility.of(draftRestored);
 export const confirmation = Text.of(successToast);
 export const durationChosen = (label: string) => Checked.of(durationOption(label));
 export const apartmentHint = Text.of(apartmentContractsUnknown);
@@ -42,6 +41,7 @@ export const tenantChoices = Count.of(tenantSelect);
 export const apartmentChoices = Count.of(apartmentSelect);
 export const partiesHelpText = Text.of(partiesHelp);
 export const billedUntilHelpText = Text.of(billedUntilHelp);
+export const feeHelpText = Text.of(feeHelp);
 export const runningContractHintText = Text.of(runningContractHint);
 export const enteredAdvancePayment = Value.of(advancePaymentInput);
 export const rentTakenOverText = Text.of(rentTakenOver);

@@ -15,6 +15,15 @@ export function contractStatusOn(
 	return endDate && endDate.slice(0, 10) < today ? 'ended' : 'active';
 }
 
+/** Its first day to bill: the day after «Abgerechnet bis» (#133), otherwise the Vertragsbeginn */
+export function billingStart(contract: { startDate: string; billedUntil?: string | null }) {
+	const begin = contract.startDate.slice(0, 10);
+	const until = contract.billedUntil;
+	return until && until >= begin
+		? new Date(Date.parse(until) + 86_400_000).toISOString().slice(0, 10)
+		: begin;
+}
+
 /**
  * Whether Dwello bills Mietstage of the contract in the period (dates YYYY-MM-DD): from its Vertragsbeginn, or from the
  * day after «Abgerechnet bis» when that is later (#133), to its Vertragsende. Runs and the hint on missing statements
@@ -24,12 +33,7 @@ export function billsIn(
 	contract: { startDate: string; endDate?: string | null; billedUntil?: string | null },
 	{ start, end }: { start: string; end: string }
 ): boolean {
-	const begin = contract.startDate.slice(0, 10);
-	const until = contract.billedUntil;
-	const from =
-		until && until >= begin
-			? new Date(Date.parse(until) + 86_400_000).toISOString().slice(0, 10)
-			: begin;
+	const from = billingStart(contract);
 	const to = contract.endDate ? contract.endDate.slice(0, 10) : end;
 	return [from, start].sort()[1] <= [to, end].sort()[0];
 }
