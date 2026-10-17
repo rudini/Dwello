@@ -549,7 +549,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - Append Swiss QR-bill to each statement with an amount due (SIX layout: receipt 62 mm, payment part, 105 mm high at
   the bottom of the last page)
 - Store PDFs in database
-- Option to download all as ZIP (planned, not implemented)
+- Option to download all PDFs of the run as one ZIP (#356)
 
 **Statement Details:**
 
@@ -637,7 +637,7 @@ BALANCE (refund): CHF 30
 
 **Reminders (manual, levels 1–3):**
 - The property manager creates a reminder for an overdue statement: Zahlungserinnerung (level 1), 2. Mahnung, 3. Mahnung; a fourth is not possible
-- A reminder is possible as soon as the payment deadline has passed; the setting «Reminder period» (`reminder_after_days`, default 14 days) is not applied; automatic reminders are planned, not implemented
+- A reminder is possible as soon as the payment deadline has passed; the setting «Reminder period» (`reminder_after_days`, default 14 days) is not applied; automatic reminders: «Vision, nicht geplant» (#111)
 - Each reminder is a PDF in the tenant's documents and goes out by e-mail or letter according to the tenant's Korrespondenzkanal (scenarios in `statement-reminder.feature`)
 - Show reminder status on statement detail view
 - Log of all reminders sent (for audit trail)
@@ -1156,7 +1156,7 @@ BALANCE (refund): CHF 30
 - "Save but don't generate" (for review later)
 - Progress bar showing generation status
 - Result: "Successfully generated X statements"
-  - Button: "Download all as ZIP" (planned, not implemented)
+  - Button: "Download all as ZIP" (#356)
   - Button: "View statements list"
 
 **Statement List View:**
@@ -1245,7 +1245,7 @@ BALANCE (refund): CHF 30
 ### 7.2 Security
 
 **Authentication:**
-- OAuth 2.0 / SSO integration (Google, Microsoft; Swiss eID planned, not implemented)
+- OAuth 2.0 / SSO integration (Google, Microsoft; Swiss eID: «Vision, nicht geplant», #111)
 - No direct password storage
 - Secure session tokens with expiration
 - HTTPS/TLS 1.2+ for all communication
@@ -1265,7 +1265,7 @@ BALANCE (refund): CHF 30
 
 **Data at Rest:**
 - No passwords or OAuth tokens are stored
-- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): planned, not implemented; depends on deployment
+- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): «Vision, nicht geplant»; an operations decision of the installation (#111; O-3, O-6 in `docs/design/offene-punkte.md`)
 
 **Audit Logging (Protokoll, #357, decided in #111):**
 - The Protokoll under «Einstellungen» records, each with its time: logins (provider only), changes of the Verwaltungspauschale rate, of a category's allocability, invoices that become not allocable or allocable again, reset payments and corrections of sent statements (#358)
@@ -1460,7 +1460,7 @@ BALANCE (refund): CHF 30
 - **Cost:** Free (open source)
 
 **OAuth Provider**
-- **Options:** Google OAuth, Microsoft Azure AD, Swiss eID (future)
+- **Options:** Google OAuth, Microsoft Azure AD; Swiss eID: «Vision, nicht geplant» (#111)
 - **Purpose:** Secure user authentication (SSO)
 - **Integration:** Callback to `/auth/callback` endpoint
 - **Tokens:** Access token stored securely, refresh token for session extension
@@ -1651,7 +1651,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 - PDF embedding in database
 - Multi-language PDF templates (German, French, Italian, English)
 - Statement number generation
-- PDF download and batch download (ZIP; planned, not implemented)
+- PDF download and batch download (ZIP of a run: #356)
 - QR-bill validation and testing
 - PDF preview in browser
 
