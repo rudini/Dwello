@@ -1,0 +1,5 @@
+{
+	"error": "Die Kategorie hat Tankbestände und bleibt Brennstoff.",
+	"code": "CATEGORY_FUEL_HAS_STOCK",
+	"params": {}
+}

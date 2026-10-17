@@ -417,6 +417,17 @@ export function testData(api: CallTheApi) {
 
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
 
+		// An own allocable category shared like heating, not marked as fuel (#100)
+		heatingCategory: (title: string) => addCategory(title, () => ({ isAllowedUtilityCost: true, isHeatingCost: true })),
+
+		// An own fuel category with a Tankbestand of the building; the reading goes before the category (#100)
+		async fuelCategoryWithStock(buildingTitle: string, categoryTitle: string) {
+			await addCategory(categoryTitle, () => ({ isAllowedUtilityCost: true, isHeatingCost: true, isFuel: true }));
+			const path = `buildings/${ids.get(buildingTitle)}/fuel-stocks`;
+			const stock = await post(path, { readingDate: '2025-12-31', amount: '900.00', categoryId: ids.get(categoryTitle) });
+			extras.unshift(`${path}/${stock.id}`);
+		},
+
 		async categoryAllowance(title: string, isAllowedUtilityCost: boolean) {
 			await put(`categories/${ids.get(title)}`, { isAllowedUtilityCost });
 		},

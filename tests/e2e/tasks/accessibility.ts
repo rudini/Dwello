@@ -17,6 +17,7 @@ import {
 	PostFormAction,
 	Press,
 	Select,
+	Uncheck,
 	Wait
 } from '../screenplay/interactions';
 import { randomUUID } from 'crypto';
@@ -33,7 +34,7 @@ import { invoicePdf, uploadBelege } from './invoice-upload';
 import { goToGeneration } from './statement-generate';
 import { generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
-import { nameInput, proposal, proposeButton } from '../targets/categories';
+import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { userMenuButton } from '../targets/app-frame';
@@ -332,6 +333,10 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// chosen first: the stand-in finds stairwell cleaning umlagefähig, the own choice stays
 	'ki-proposal-kept': () => (actor) =>
 		actor.attemptsTo(Check.the(on.notAllowedOption), askKi('Treppenhausreinigung')),
+	// #100: «Brennstoff» is asked only for a heating cost
+	fuel: () => (actor) => actor.attemptsTo(Check.the(heatingCheckbox), Wait.until(fuelCheckbox)),
+	'fuel-refused': () => (actor) =>
+		actor.attemptsTo(Uncheck.the(fuelCheckbox), Click.on(on.saveButton), Wait.until(on.formProblem)),
 	'profile-sum-invalid': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('50').into(on.januaryShare), Wait.until(on.invalidProfileTotal)),
 	'mobile-menu-open': (_, viewport) => async (actor) => {

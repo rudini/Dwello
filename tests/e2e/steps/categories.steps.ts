@@ -25,7 +25,9 @@ import {
 	askKi,
 	kiFails,
 	createCategory,
+	createFuelCategory,
 	deleteCategory,
+	saveWithoutFuel,
 	openCategories,
 	openCategoryEdit,
 	openNewCategory,
@@ -47,6 +49,40 @@ Given(
 	'es gibt die eigene Kategorie {string} mit gleichem englischem Namen und der Beschreibung {string}',
 	async ({ seed }, title: string, text: string) => {
 		await seed.categoryNamedAlikeInEnglish(title, text);
+	}
+);
+
+Given('es gibt die umlagefähige Heizkosten-Kategorie {string}', async ({ seed }, title: string) => {
+	await seed.heatingCategory(title);
+});
+
+When(
+	'der Liegenschaftsverwalter die umlagefähige Heizkosten-Kategorie {string} als Brennstoff erfasst',
+	async ({ verwalter, seed }, title: string) => {
+		await verwalter.attemptsTo(createFuelCategory(seed.unique(title)));
+	}
+);
+
+Given(
+	'das Gebäude {string} hat einen Tankbestand in der Kategorie für Brennstoff {string}',
+	async ({ seed }, building: string, category: string) => {
+		await seed.fuelCategoryWithStock(building, category);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Kategorie {string} nicht mehr als Brennstoff speichert',
+	async ({ verwalter, seed }, title: string) => {
+		await verwalter.attemptsTo(saveWithoutFuel(seed.idOf(title)!));
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Kategorie wegen ihrer Tankbestände Brennstoff bleibt',
+	async ({ verwalter }) => {
+		const message =
+			'Die Kategorie hat Tankbestände. Deshalb bleiben die Häkchen «Heizkosten nach dem Heizprofil verteilen» und «Brennstoff» gesetzt. Wenn Sie sie entfernen möchten, löschen Sie zuerst die Tankbestände auf der Seite des Gebäudes.';
+		await verwalter.sees(errorMessageShown(message)).toBe(true);
 	}
 );
 

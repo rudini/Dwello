@@ -1,11 +1,13 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Check, Click, Enter, Navigate, Wait } from '../screenplay/interactions';
+import { Browser, Check, Click, Enter, Navigate, Uncheck, Wait } from '../screenplay/interactions';
 import { viewports } from '../fixtures/screens';
 import {
 	allowanceOption,
 	allowedFilter,
 	deleteButton,
 	editButton,
+	fuelCheckbox,
+	heatingCheckbox,
 	nameInput,
 	proposeButton,
 	submitButton
@@ -30,11 +32,25 @@ export const createCategory = (name: string, allowed: boolean): Activity => (act
 		Click.on(submitButton)
 	);
 
+// An allocable category shared like heating whose invoices are fuel deliveries (#100)
+export const createFuelCategory = (name: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Check.the(allowanceOption('Umlagefähig')),
+		Check.the(heatingCheckbox),
+		Check.the(fuelCheckbox),
+		Enter.theValue(name).into(nameInput),
+		Click.on(submitButton),
+		Wait.until(allowedFilter) // saved: back on the list
+	);
+
 export const saveFormAsNotAllowed: Activity = (actor) =>
 	actor.attemptsTo(Check.the(allowanceOption('Nicht umlagefähig')), Click.on(submitButton));
 
 export const saveAsNotAllowed = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(editButton(name)), saveFormAsNotAllowed);
+
+export const saveWithoutFuel = (categoryId: string): Activity => (actor) =>
+	actor.attemptsTo(openCategoryEdit(categoryId), Uncheck.the(fuelCheckbox), Click.on(submitButton));
 
 export const deleteCategory = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));

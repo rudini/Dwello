@@ -183,6 +183,8 @@ export interface Category {
 	isAllowedUtilityCost: boolean;
 	// Shared by the heating profile at a tenant change (heating, chimney sweep), not by days
 	isHeatingCost?: boolean;
+	// Brennstoff (#100): deliveries of Heizmaterial, the only categories with a Tankbestand
+	isFuel?: boolean;
 	description?: string;
 	sortOrder?: number;
 }

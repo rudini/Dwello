@@ -144,6 +144,16 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('fuel-stocks'), actual)).toEqual([]);
 	});
 
+	// #100: die Heizung mit Tankbestand bleibt Brennstoff
+	it('PUT /categories/:id ohne Brennstoff bei Tankbestand liefert die Felder von category-fuel-refused.json', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await sendJson('POST', `/api/v1/buildings/${rental.building}/fuel-stocks`, { readingDate: '2024-12-31', amount: '2650.00', categoryId: heating.id });
+		const response = await sendJson('PUT', `/api/v1/categories/${heating.id}`, { isFuel: false });
+
+		expect(response.status).toBe(400);
+		expect(drift(await sample('category-fuel-refused'), await response.json())).toEqual([]);
+	});
+
 	it('GET /contracts/:id liefert die Felder von contract.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
 		expect(drift(await sample('contract'), actual)).toEqual([]);
