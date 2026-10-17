@@ -9,6 +9,7 @@ Branch `claude/w16b-e2e-races`. Non-functional (rows in `docs/design/offene-punk
 - [x] O-37 root cause: the whole E2E database had no building while «draft-dropped» and «draft-discard-dialog» ran first; `restoreDraft` ticks the first building (or tenant) but the two draft states seeded nothing. Fix: `seedFor` seeds the screen records for `draft-restored` and `draft-discard-dialog` (the failing pair seen red, then green; all 8 draft rows green)
 - [x] O-36: `saveConfig` upserts on `key`; pg test with ten parallel first writes (red with a warmed pool, then green)
 - [x] rows moved to `docs/archive/offene-punkte-verlauf.md`
-- [ ] closing code-reviewer round; pull request, merge; then merge main into #417
+- [x] code-reviewer round 1 (`docs/reviews/w16b-review-1.md`): no Blocker/Major; C-1 (draft state ticks its own building) and C-2 (select only for the audited rate) fixed; C-3 accepted (a race test), C-4 done at the merge into #417
+- [ ] pull request, merge; then merge main into #417
 
 Files: `backend/src/services/config.service.ts`, `backend/src/__tests__/config.pg.test.ts`, `tests/e2e/fixtures/screens.ts`, `docs/design/offene-punkte.md`, `docs/archive/offene-punkte-verlauf.md`.
