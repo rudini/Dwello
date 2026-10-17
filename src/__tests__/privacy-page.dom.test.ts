@@ -356,4 +356,12 @@ describe('Datenschutzerklärung zum E-Mail-Versand', () => {
 		expect(text).toContain('Nebenkostenabrechnungen, Zahlungserinnerungen und Mahnungen per E-Mail');
 		expect(text).toContain('die Kosten und ihre Verteilung, der Saldo sowie IBAN und Zahlungsreferenz');
 	});
+
+	it('nennt auch bei Resend die Abrechnungen und was jedes PDF enthält', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], mail: 'resend' } } as never);
+
+		const text = document.body.textContent!.replace(/\s+/g, ' ');
+		expect(text).toContain('bei einer Zahlungserinnerung oder Mahnung Adresse und offener Betrag');
+		expect(text).toContain('die Kosten und ihre Verteilung, der Saldo sowie IBAN und Zahlungsreferenz');
+	});
 });
