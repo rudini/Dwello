@@ -184,3 +184,11 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Lea Graf"
     Dann erfährt der Liegenschaftsverwalter, dass bei einem befristeten Mietvertrag eine Mietzinserhöhung erst nach dem Vertragsende möglich ist
     Und erfährt der Liegenschaftsverwalter, dass er eine Erhöhung begründet und mit dem amtlichen Formular mitteilt
+
+  # #429: die Nebenkostenpauschale steht beim Mietvertrag und zählt im Monatlich total
+  @wip
+  Szenario: Nebenkostenpauschale nachtragen
+    Wenn der Liegenschaftsverwalter die Nebenkostenpauschale auf "120" Franken setzt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und zeigt der Mietvertrag die Nebenkostenpauschale "CHF 120.00"
+    Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 1’070.00"

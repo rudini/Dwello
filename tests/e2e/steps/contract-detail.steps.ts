@@ -21,7 +21,8 @@ import {
 	statusOfContract,
 	totalRent,
 	fixedTermCheckShown,
-	fixedTermErrorText
+	fixedTermErrorText,
+	flatRateUtilityCharge
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
@@ -301,6 +302,17 @@ Then('zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres', asy
 
 Given('der Mietvertrag von {string} hat {string} Franken Akonto', async ({ seed }, tenant: string, advance: string) => {
 	await seed.advancePayment(tenant, advance);
+});
+
+Given(
+	'der Mietvertrag von {string} hat {string} Franken Nebenkostenpauschale',
+	async ({ seed }, tenant: string, amount: string) => {
+		await seed.flatRateUtilityCharge(tenant, amount);
+	}
+);
+
+Then('zeigt der Mietvertrag die Nebenkostenpauschale {string}', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(flatRateUtilityCharge).toBe(amount);
 });
 
 Then(

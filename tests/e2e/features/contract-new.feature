@@ -176,3 +176,10 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann erfährt der Liegenschaftsverwalter, dass der Mieter ohne Akonto meist eine Nebenkostenpauschale bezahlt
     Und erfährt der Liegenschaftsverwalter, dass er sonst alle Häkchen bei «Vereinbarte Nebenkosten» entfernt
     Und erfährt der Liegenschaftsverwalter, dass vereinbarte Nebenkosten ohne Akonto ganz mit der Nebenkostenabrechnung bezahlt werden
+
+  # #429: die Nebenkostenpauschale zählt im Monatlich total und wird nie abgerechnet
+  @wip
+  Szenario: Mietvertrag mit Nebenkostenpauschale prüfen
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "120" Franken Nebenkostenpauschale bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Nebenkostenpauschale" mit "CHF 120.00"
+    Und zeigt die Prüfung "Monatlich total" mit "CHF 1’070.00"

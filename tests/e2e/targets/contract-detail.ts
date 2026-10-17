@@ -2,6 +2,10 @@ import { target } from '../screenplay/target';
 
 export const contractApartment = target('Wohnung des Mietvertrags', (page) => page.getByTestId('contract-apartment'));
 export const contractTotalRent = target('Monatlicher Mietzins', (page) => page.getByTestId('contract-total-rent'));
+// #429: «Nebenkostenpauschale» in the rent per month
+export const contractFlatRate = target('Nebenkostenpauschale des Mietvertrags', (page) =>
+	page.getByTestId('contract-flat-rate')
+);
 export const contractStatus = target('Status des Mietvertrags', (page) => page.getByTestId('contract-status'));
 export const contractEndDate = target('Vertragsende', (page) => page.getByTestId('contract-end-date'));
 export const endContractButton = target('Mietvertrag beenden', (page) => page.getByTestId('contract-end-button'));

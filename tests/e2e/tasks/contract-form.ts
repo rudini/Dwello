@@ -6,6 +6,7 @@ import {
 	agreedCategoryBoxAt,
 	agreedCategoryBoxes,
 	advancePaymentInput,
+	flatRateInput,
 	apartmentSelect,
 	baseRentInput,
 	contractSubmitButton,
@@ -33,6 +34,7 @@ export type ContractData = {
 	startDate: string;
 	baseRent: string;
 	advancePayment?: string;
+	flatRateUtilityCharge?: string; // «Nebenkostenpauschale» (#429)
 	confirmPastStart?: boolean; // the wizard asks once about a start in the past
 	managementFee?: string | null; // own rate in percent, 'run' for the run's rate (default), null for no choice (#89)
 	notAgreed?: string[]; // categories the lease does not agree, unticked (#91)
@@ -77,6 +79,8 @@ const fillContract = (contract: Omit<ContractData, 'tenantId'>): Activity => asy
 	if (contract.confirmPastStart) await actor.attemptsTo(goToNextStep);
 	await actor.attemptsTo(Enter.theValue(contract.baseRent).into(baseRentInput));
 	if (contract.advancePayment) await actor.attemptsTo(Enter.theValue(contract.advancePayment).into(advancePaymentInput));
+	if (contract.flatRateUtilityCharge)
+		await actor.attemptsTo(Enter.theValue(contract.flatRateUtilityCharge).into(flatRateInput));
 	await actor.attemptsTo(chooseManagementFee(contract.managementFee === undefined ? 'run' : contract.managementFee));
 	for (const categoryId of contract.notAgreed ?? []) await actor.attemptsTo(Uncheck.the(agreedCategory(categoryId)));
 	await actor.attemptsTo(goToNextStep);
@@ -117,6 +121,9 @@ export const chooseTenantWhileLoading = (tenantId: string): Activity => (actor) 
 
 export const changeBaseRent = (baseRent: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(baseRent).into(baseRentInput), Click.on(contractSubmitButton));
+
+export const changeFlatRateUtilityCharge = (amount: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(amount).into(flatRateInput), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: the contract ends on a fixed day; a past day is confirmed with its consequence
 export const saveEndDate = (isoDate: string, { confirmPast = false } = {}): Activity => async (actor) => {

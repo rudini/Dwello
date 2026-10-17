@@ -36,6 +36,7 @@ import {
 	agreeManagementFee,
 	enterBilledUntil,
 	changeBaseRent,
+	changeFlatRateUtilityCharge,
 	deleteDraftAndSave,
 	openContractEdit,
 	openNewContract,
@@ -503,3 +504,23 @@ Then(
 		await verwalter.sees(runningContractEditHintText).toContain('begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig');
 	}
 );
+
+// #429: «Nebenkostenpauschale» counts in «Monatlich total», never billed
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit {string} Franken Nebenkostenpauschale bis zur Prüfung erfasst',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, flatRate: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({
+				tenantId: seed.idOf(tenant)!,
+				apartmentId: seed.idOf(apartment)!,
+				startDate,
+				baseRent,
+				flatRateUtilityCharge: flatRate
+			})
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter die Nebenkostenpauschale auf {string} Franken setzt', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(changeFlatRateUtilityCharge(amount));
+});
