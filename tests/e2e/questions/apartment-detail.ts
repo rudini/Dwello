@@ -16,7 +16,7 @@ import { breadcrumbLink } from '../targets/navigation';
 
 export const apartmentInfo = (info: ApartmentInfo) => Text.of(infoCard(info));
 export const currentTenant = Text.of(currentTenantName);
-export const grossMonthlyRent = Text.of(monthlyTotal);
+export const monthlyTotalOfApartment = Text.of(monthlyTotal);
 export const vacancyShown = Visibility.of(vacancyNote);
 export const nextTenant = Text.of(nextTenantNote);
 export const currentContractsListed = Text.of(currentContracts);

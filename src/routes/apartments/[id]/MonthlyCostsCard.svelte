@@ -29,7 +29,7 @@
 		<div class="flex justify-between gap-4 border-t border-line pt-2">
 			<dt class="font-semibold text-ink">{m.common_monthly_total()}</dt>
 			<dd class="font-bold text-ink" data-testid="monthly-costs-total">
-				{formatCurrency(costs.totalBrutto)}
+				{formatCurrency(costs.monthlyTotal)}
 			</dd>
 		</div>
 	</dl>
