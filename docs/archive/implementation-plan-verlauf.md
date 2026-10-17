@@ -1408,6 +1408,25 @@ Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requ
 
 Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.
 
+## Session 2026-10-17: QR-bill against SIX IG v2.4 (#78, W13)
+
+- [x] Field-by-field check of `qr-bill.service.ts` and the payment part of `pdf.service.ts` against IG QR-bill v2.4 (six-group.com blocked by the network policy: guideline excerpts through `mmx search`, cross-checked with the `swissqrbill` 4.4.2 package); no change of the stored data needed, so the «Stop and ask» does not apply
+- [x] Scenario `@wip` «Der Zahlteil ohne Korrespondenzadresse hat ein Feld für Name und Adresse» (`statement-detail.feature`), seen red
+- [x] fach-reviewer round 1 on the scenario and the planned changes (`docs/reviews/78-fachreview-1.md`)
+- [x] QR payload only with the permitted character set (IG 4.1.1), IBAN in capitals, no line break after EPD; unit tests first. No scenario: the payload is only readable by a decoder, covered in `qr-bill.service.test.ts`
+- [x] «Zahlbar durch (Name/Adresse)» with a blank field with corner marks (52 × 20 mm receipt, 65 × 25 mm payment part) when the QR code names no debtor; the payment part prints creditor and debtor as in the QR code; unit tests first, scenario green
+- [x] House number in the street line: decided in #102 (no separate field), no new issue
+- [x] Issue #395 for the made-up creditor without Firmenadresse (pre-existing, fach-review V-1)
+- [x] code-reviewer round 1 (`docs/reviews/78-review-1.md`): C-1 to C-7 fixed (field size test, receipt field ends above the amount, lengths cut in the QR data, scenario step without Korrespondenzadresse)
+- [x] persona Dr. Weber (`docs/design/personas/dr-weber-78.md`): nothing to fix
+- [x] daten-pruefer round 1 (`docs/reviews/78-datenpruefung-1.md`): no findings
+- [x] code-reviewer round 2 (`docs/reviews/78-review-2.md`): no Blocker/Major
+- [x] Result with guideline chapters noted in #78
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-78.md`)
+- [x] plan archived; pull request open, merge waits for the product owner (V-1, #395)
+
+Files: `tests/e2e/features/statement-detail.feature`, `tests/e2e/steps/tenant-form.steps.ts`, `backend/src/services/{qr-bill,pdf}.service.ts`, `backend/src/__tests__/{qr-bill.service,statement-pdf-render}.test.ts`, `backend/src/__tests__/helpers/pdf-text.ts`, reviews and persona report.
+
 ## Session W14: #80 July share of «Heizung Bergregion»
 
 - [x] Compare the Bergregion row with the source table: Mieterverband merkblatt_nebenkostenabrechnung_waehrend_periode.pdf (PDF dated 2023-09-09), page 2, «Verteilungsschlüssel in Bergebieten und im Tessin», row «Berggebiete»: 14.0, 11.5, 11.5, 9.0, 7.0, 4.5, 1.0, 4.0, 5.5, 8.5, 10.5, 13.0, the same as the migration (no misprint); mietrecht.ch and HEV not reachable from the cloud session

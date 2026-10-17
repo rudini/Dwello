@@ -79,6 +79,10 @@ Given(
 	}
 );
 
+Given('für {string} ist keine Korrespondenzadresse erfasst', async ({ seed }, tenant: string) => {
+	await seed.address(tenant, '', '', '', 'CH');
+});
+
 Given(
 	'die Korrespondenzadresse von {string} ist noch die Adresse des Gebäudes {string}',
 	async ({ seed }, tenant: string, building: string) => {

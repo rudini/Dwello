@@ -248,6 +248,17 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
     Dann nennt die Bestätigung die Korrespondenzadresse "Marktstätte 3, 78462 Konstanz, Deutschland"
 
+  # Ohne Korrespondenzadresse des Mieters hat der Zahlteil ein leeres Feld mit Eckmarken, in das der Mieter Name und
+  # Adresse schreibt (SIX, Implementation Guidelines QR-Rechnung v2.4, Zahlteil und Empfangsschein) (#78)
+  Szenario: Der Zahlteil ohne Korrespondenzadresse hat ein Feld für Name und Adresse
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" ist keine Korrespondenzadresse erfasst
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Zahlbar durch (Name/Adresse)"
+
   # Persona W3c (Anna P-1): das PDF eines Entwurfs nennt die Korrespondenzadresse, wie sie jetzt ist, auch wenn es vor
   # der neuen Adresse schon einmal erstellt wurde
   Szenario: Das PDF eines Entwurfs nennt die neue Korrespondenzadresse
