@@ -815,24 +815,56 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('fragt vor dem Versenden nach und nennt Empfänger, Korrespondenzweg und PDF', () => {
-		detail();
+		detail({ tenantCorrespondenceChannel: 'letter', tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
 		click('statement-send-button');
 		const dialog = document.querySelector('[role="dialog"]')!;
 		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
 		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
 		expect(recipient).toContain('Anna Keller');
 		expect(recipient).toContain('Korrespondenzkanal');
-		expect(recipient).toContain('Per E-Mail');
-		expect(recipient).toContain('anna@example.ch');
 		const pdf = byTestId('send-pdf-view')!;
 		expect(pdf.getAttribute('href')).toBe('/statements/s1/pdf?ansehen');
 		expect(pdf.getAttribute('target')).toBe('_blank');
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
 	});
 
+	// #86: wünscht der Mieter E-Mail, sendet Dwello das PDF selbst
+	it('fragt vor dem Senden per E-Mail nach und nennt die E-Mail-Adresse', () => {
+		detail();
+		expect(byTestId('statement-send-button')!.textContent!.trim()).toBe('Per E-Mail senden');
+		click('statement-send-button');
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		expect(dialog).toContain('Abrechnung per E-Mail senden');
+		expect(dialog).toContain(
+			'Dwello sendet die Abrechnung als PDF per E-Mail an den Mieter und legt sie unter «Dokumente» ab. Dwello datiert die Abrechnung auf den Tag des Versands. Die Zahlungsfrist ist so viele Tage danach, wie in den Einstellungen festgelegt; eine spätere Zahlungsfrist, die Sie bei der Abrechnung eingetragen haben, bleibt.'
+		);
+		expect(dialog).not.toContain('nicht selbst');
+		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
+		expect(recipient).toContain('Per E-Mail');
+		expect(recipient).toContain('anna@example.ch');
+		expect(byTestId('statement-send-confirm')!.textContent).toContain('Per E-Mail senden');
+	});
+
+	it('sagt nach einer gescheiterten E-Mail, was schiefging, und bietet den Brief an', () => {
+		detail({ tenantAddress: 'Ahornweg 3, 8400 Winterthur' }, { sendError: 'Die E-Mail wurde nicht zugestellt.' });
+		expect(text()).toContain('Abrechnung nicht versendet');
+		expect(byTestId('send-feedback')!.textContent).toBe('Die E-Mail wurde nicht zugestellt.');
+
+		expect(byTestId('statement-send-by-letter')!.textContent!.trim()).toBe('Selbst per Brief zustellen');
+		click('statement-send-by-letter');
+		const dialog = document.querySelector('[role="dialog"]')!;
+		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
+		// the letter goes to the postal address (code review C-1)
+		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
+		expect(recipient).toContain('Per Brief, Ahornweg 3, 8400 Winterthur');
+		expect(recipient).not.toContain('anna@example.ch');
+		expect(dialog.closest('body')!.querySelector<HTMLInputElement>('input[name="byLetter"]')!.value).toBe('true');
+		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
+	});
+
 	// Datum und Zahlungsfrist gelten ab dem Tag des Versands: ein früher erstelltes PDF trüge eine abgelaufene Frist
 	it('sagt vor dem Versand, ab wann die Zahlungsfrist läuft', () => {
-		detail();
+		detail({ tenantCorrespondenceChannel: 'letter' });
 		click('statement-send-button');
 
 		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
@@ -1043,7 +1075,7 @@ describe('Abrechnungsdetail', () => {
 
 	// Der Knopf sagt, was er tut: Dwello verschickt nichts selbst
 	it('nennt den Knopf «Als versendet markieren»', () => {
-		detail();
+		detail({ tenantCorrespondenceChannel: 'letter' });
 		expect(byTestId('statement-send-button')!.textContent!.trim()).toBe('Als versendet markieren');
 	});
 

@@ -622,6 +622,12 @@ BALANCE (refund): CHF 30
 4. **Bezahlt** (`paid`) - Settled; «Zahlung zurücksetzen» takes a wrong payment back to Versendet or Überfällig, recorded in the Verlauf (#92)
 5. **Partial** (future) - If multiple transactions needed
 
+**Sending (#86):**
+- Tenant with Korrespondenzkanal E-Mail: «Per E-Mail senden» e-mails the PDF (with QR-bill) in the tenant's Sprache and stores it as a Dokument; no batch sending
+- Korrespondenzkanal Brief: the property manager delivers the PDF and marks the statement as sent
+- A failed e-mail (no address, not set up, refused) leaves the statement Entwurf and says what to do: send again, or deliver it by letter («Per Brief zustellen»)
+- The statement is dated, and the Zahlungsfrist counted, from the day it goes out (scenarios in `statement-send.feature`)
+
 **Status Management:**
 - Mark statement as paid when tenant pays
 - Record payment date and amount

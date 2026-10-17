@@ -34,6 +34,7 @@
 	import ReminderModal from './ReminderModal.svelte';
 	import ResetPaymentDialog from './ResetPaymentDialog.svelte';
 	import SendDialog from './SendDialog.svelte';
+	import SendFeedback from './SendFeedback.svelte';
 	import StatusActions from './StatusActions.svelte';
 	import type { ActionData } from './$types';
 
@@ -60,6 +61,9 @@
 	let showReminder = $state(false);
 	let showDelete = $state(false);
 	let showSend = $state(false);
+	let sendByLetter = $state(false); // after a failed e-mail (#86)
+	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
+	const sendError = $derived(form?.sendError);
 	let showResetPayment = $state(false);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
@@ -133,11 +137,12 @@
 			/>
 			<StatusActions
 				status={statement.status}
+				{byEmail}
 				owes={claimed(statement.balance)}
 				waiting={!!nextReminderLater(statement)}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
-				onsend={() => (showSend = true)}
+				onsend={() => ((sendByLetter = false), (showSend = true))}
 				onresetpayment={() => (showResetPayment = true)}
 			/>
 		{/snippet}
@@ -171,6 +176,10 @@
 		</Alert>
 	{/if}
 	<ReminderFeedback reminder={form?.reminder} />
+	<SendFeedback
+		error={sendError}
+		onletter={() => ((sendByLetter = true), (showSend = true))}
+	/>
 
 	<!-- Full width so every amount is visible; min-w-0: if still too wide it scrolls inside, not the page -->
 	<div class="min-w-0">
@@ -252,6 +261,6 @@
 
 <ResetPaymentDialog bind:open={showResetPayment} {statement} />
 
-<SendDialog bind:open={showSend} {statement} />
+<SendDialog bind:open={showSend} {statement} byLetter={sendByLetter} />
 
 <ReminderModal bind:open={showReminder} {statement} sentReminders={data.reminders.length} />

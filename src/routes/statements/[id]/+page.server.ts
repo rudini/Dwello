@@ -6,6 +6,7 @@ import { loadDocuments } from '$lib/server/documents';
 import {
 	markStatementPaid,
 	resetStatementPayment,
+	sendStatement,
 	sendStatementReminder
 } from '$lib/server/statement-actions';
 import { countryName } from '$lib/tenant';
@@ -31,28 +32,29 @@ async function laterInvoices(fetch: typeof globalThis.fetch, id: string) {
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const statement = await loadStatement(fetch, params.id);
-	const [address, reminders, later] = await Promise.all([
+	const [address, documents, later] = await Promise.all([
 		tenantAddress(fetch, statement.tenantId),
 		loadDocuments(fetch, `statementId=${params.id}`),
 		laterInvoices(fetch, params.id)
 	]);
-	return { statement: { ...statement, tenantAddress: address }, reminders, laterInvoices: later };
-};
-
-type Fetch = typeof globalThis.fetch;
-
-const changeStatus = async (fetch: Fetch, id: string, body: object, failure: string) => {
-	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/status`, {
-		method: 'PUT',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(body)
-	});
-	if (!response.ok) return fail(response.status, { actionError: failure });
+	// the statement's own Dokument (sent by e-mail, #86) is no Mahnung: the next Mahnstufe counts these
+	return {
+		statement: { ...statement, tenantAddress: address },
+		reminders: documents.filter((document) => document.type === 'reminder'),
+		laterInvoices: later
+	};
 };
 
 export const actions: Actions = {
-	send: ({ params, fetch }) =>
-		changeStatus(fetch, params.id, { status: 'sent' }, m.statements_send_failed()),
+	send: async ({ params, fetch, request }) => {
+		const byLetter = (await request.formData()).get('byLetter') === 'true';
+		const refused = await sendStatement(fetch, params.id, byLetter);
+		if (refused)
+			return fail(
+				refused.status,
+				refused.undelivered ? { sendError: refused.message } : { actionError: refused.message }
+			);
+	},
 	markPaid: async ({ params, fetch, request }) => {
 		// none sent (no dialog field, no JavaScript): today; sent but empty (an invalid date): refused
 		const form = await request.formData();
