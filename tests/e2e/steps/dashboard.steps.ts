@@ -188,6 +188,31 @@ Then(
 	}
 );
 
+Given(
+	'{string} hat die Abrechnungen der letzten beiden Jahre für das Gebäude {string}',
+	async ({ seed }, tenant: string, building: string) => {
+		await seed.statement(tenant, building, lastYear - 1);
+		await seed.statement(tenant, building, lastYear);
+	}
+);
+
+Given(
+	'{string} hat die Abrechnung des vorletzten Jahres für das Gebäude {string}',
+	async ({ seed }, tenant: string, building: string) => {
+		await seed.statement(tenant, building, lastYear - 1);
+	}
+);
+
+// the task names each building with its periods in brackets: «Ahornhof (2023, 01.07.2024 – 31.12.2024)»
+Then(
+	'nennt die Aufgabe {string} für das Gebäude {string} die Periode {string}',
+	async ({ verwalter, names }, title: string, building: string, period: string) => {
+		const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		await verwalter
+			.sees(overviewTaskText(title))
+			.toMatch(new RegExp(`${escape(names.get(building)!)} \\([^)]*(?<=[(, ])${escape(period)}[,)]`));
+	}
+);
 Then('nennt die Belegung von {string} {string}', async ({ verwalter, names }, building: string, text: string) => {
 	await verwalter.sees(occupancyText(names.get(building)!)).toContain(text);
 });

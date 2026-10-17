@@ -85,6 +85,7 @@ Funktionalität: Barrierefreiheit
       | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | delete-dialog       |
       | contract-detail        | missing-statements  |
+      | contract-partly-billed-detail | default          |
       | contract-moved-out-detail | default          |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
@@ -135,6 +136,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | tank-question       |
       | statement-generate     | old-address-preview |
       | statement-generate     | preview-all-billed  |
+      | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |
       | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |

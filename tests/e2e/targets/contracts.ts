@@ -24,3 +24,8 @@ export const contractAmount = (tenantName: string, label: string) =>
 	target(`${label} im Mietvertrag von ${tenantName}`, (page) =>
 		contractRow(tenantName).locate(page).locator(`dt:text-is("${label}") + dd`)
 	);
+// The note on a row that the contract misses a statement (#211)
+export const contractMissingStatement = (tenantName: string) =>
+	target(`Fehlende Abrechnung von «${tenantName}»`, (page) =>
+		contractRow(tenantName).locate(page).getByTestId('contract-missing-statement-badge')
+	);

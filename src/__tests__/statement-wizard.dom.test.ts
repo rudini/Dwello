@@ -499,6 +499,19 @@ describe('Abrechnungen erstellen', () => {
 		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
 	});
 
+	// #132: der übliche Nachzügler; ohne neue Abrechnung zählen nur die Entwürfe, denen Rechnungen fehlen
+	it('nennt bei einer leeren Vorschau die Entwürfe, denen Rechnungen fehlen, nicht die Einstellungen', () => {
+		const draft = { id: '1', statementNumber: 'NK-2024-0001', tenantName: 'Nina Brunner', outdated: true, profile: null, profileEdited: 'Winter', fee: { used: 3, now: 4.5, source: 'run' as const } };
+		const other = { ...draft, id: '2', outdated: false, profile: { used: 'Winter', run: 'Heizung Mittelland' } };
+		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2, changed: [draft, other] }] });
+
+		expect(byTestId('existing-statement-1')!.getAttribute('href')).toBe('/statements/1');
+		expect(byTestId('existing-statement-notes-1')!.textContent!.trim()).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurden Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht.'
+		);
+		expect(byTestId('existing-statement-2')).toBeNull();
+	});
+
 	// code review C-1 (round 2), persona Dr. Weber P-1: löscht er den Entwurf und erstellt ihn in dieser Periode neu,
 	// bleiben die Tage, die der Entwurf abrechnete, ohne Abrechnung
 	it('rät bei einer leeren Vorschau mit offenen Tagen nicht, Entwürfe zu löschen', async () => {
@@ -942,7 +955,7 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('existing-statements')!.textContent).toContain('Ahornhof');
 		expect(byTestId('existing-statements')!.textContent).toContain('2 Nebenkostenabrechnungen');
 		expect(byTestId('existing-statements')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.'
+			'Bestehende Abrechnungen bleiben, wie sie sind, auch Entwürfe. Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.'
 		);
 		expect(
 			byTestId('existing-statements')!.querySelector('a[href="/statements?building=b1"]')
@@ -975,6 +988,60 @@ describe('Abrechnungen erstellen', () => {
 		next();
 		await settle();
 		expect(heading()).toBe('Erstellen');
+	});
+
+	// #132: veraltete Entwürfe und Abrechnungen mit anderen Einstellungen, je mit ihrem Link
+	const changed = (id: string, more: object) => ({
+		id,
+		statementNumber: `NK-2024-000${id}`,
+		tenantName: 'Nina Brunner',
+		outdated: false,
+		profile: null,
+		profileEdited: null,
+		fee: null,
+		...more
+	});
+	const withChanged = (list: ReturnType<typeof changed>[]) =>
+		open({ preview, invoices: [{ ...invoices[0], statements: 2, changed: list }] });
+	const notesOf = (id: string) => byTestId(`existing-statement-notes-${id}`)!.textContent!.replace(/\s+/g, ' ').trim();
+	const sameSettings =
+		'Damit alle Abrechnungen dieser Abrechnungsperiode gleich gerechnet sind, wählen Sie im Schritt 3 «Heizprofil und Verwaltungspauschale» dasselbe Heizprofil und denselben Satz wie bei den bestehenden Abrechnungen.';
+
+	it('nennt bestehende Abrechnungen, die veraltet oder anders eingestellt sind, mit ihrem Link', () => {
+		withChanged([
+			changed('1', { outdated: true }),
+			changed('2', { profile: { used: 'Winter', run: 'Heizung Mittelland' }, fee: { used: 3, now: 4.5, source: 'run' } })
+		]);
+
+		expect(byTestId('existing-statement-1')!.getAttribute('href')).toBe('/statements/1');
+		expect(byTestId('existing-statement-1')!.textContent!.trim()).toBe('NK-2024-0001, Nina Brunner');
+		expect(notesOf('1')).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurden Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht.'
+		);
+		expect(notesOf('2')).toBe(
+			'Erstellt mit dem Heizprofil «Winter», die neuen Abrechnungen mit «Heizung Mittelland». Erstellt mit 3 % Verwaltungspauschale, die neuen Abrechnungen mit 4.5 %.'
+		);
+		expect(byTestId('existing-statements')!.textContent!.replace(/\s+/g, ' ')).toContain(sameSettings);
+		// Fachreview V-6: a statement named is a warning, also where #251 would only inform
+		expect(byTestId('existing-statements')!.className).toContain('border-caution');
+	});
+
+	// Fachreview M-1: the contract's own rate or none is no choice of the run; Fachreview V-1: edited since
+	it('sagt, woher der heutige Satz kommt, und rät nur zu den Einstellungen, die der Lauf wählt', () => {
+		withChanged([
+			changed('1', { fee: { used: 3, now: 2.5, source: 'contract' } }),
+			changed('2', { fee: { used: 3, now: 0, source: 'none' } }),
+			changed('3', { profileEdited: 'Winter' })
+		]);
+
+		expect(notesOf('1')).toBe('Erstellt mit 3 % Verwaltungspauschale; im Mietvertrag ist heute ein Satz von 2.5 % vereinbart.');
+		expect(notesOf('2')).toBe(
+			'Erstellt mit 3 % Verwaltungspauschale; im Mietvertrag ist heute keine Verwaltungspauschale vereinbart.'
+		);
+		expect(notesOf('3')).toBe(
+			'Das Heizprofil «Winter» wurde nach dem Erstellen dieser Abrechnung bearbeitet. Die Abrechnung rechnet mit den Monatsanteilen von damals.'
+		);
+		expect(byTestId('existing-statements')!.textContent).not.toContain('Damit alle Abrechnungen');
 	});
 
 	it('zeigt bei einer leeren Vorschau keine Rechnungsprüfung', () => {
