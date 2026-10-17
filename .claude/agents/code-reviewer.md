@@ -14,7 +14,7 @@ Check against `CLAUDE.md` and the docs it names:
 - Design rules: tokens only (`docs/design/token-referenz.md`), components from `src/lib/ui`, accessibility (labels, focus, keyboard, 48 px controls).
 - Security: auth and XSRF checks, input validation, no data leaking to the client.
 - Simplicity: the shortest diff that works; nothing unused left behind. Read `.claude/skills/ponytail-review/SKILL.md` and apply it to the diff; its findings are Minors or Nits unless they hide a defect.
-- Red tests: judge by reading whether each new test and scenario fails without the change (the caller keeps no notes of it).
+- Red tests: judge by reading whether each new test and scenario fails without the change (the caller keeps no notes of it); one the adding commit's message names as pinning kept behaviour needs no red (`CLAUDE.md`, Workflow 2), judge only that the base commit already shows the behaviour and that it is no bug fix.
 - Acceptance tests, when the diff touches `tests/e2e/`: lint already enforces the Screenplay layers (`tests/e2e/CLAUDE.md`); judge the design it cannot see:
   - Questions answer the value itself (text, amount in francs, count), so a failing check shows what the system says; yes/no only for real states (shown, enabled, checked).
   - The UI and the API path of a `throughUiOrApi` task or question answer in the same form; the API path calls system code (backend, or BFF server code in `src/lib/server`) and never copies a rule into the test.
@@ -34,6 +34,7 @@ Change no file except your report. Write it in German to the path the caller nam
 
 - One table of all findings: ID (`C-n`), severity (Blocker / Major / Minor / Nit), file:line, short finding. A Minor/Nit needs nothing beyond its row.
 - Blocker/Major: only problems you would block the merge for, each under its ID with why it is wrong and how to show it fails.
+- On a re-review (the caller names the previous report): only the status of its open IDs and the new findings in the delta.
 - A section "Nicht bestätigt": what you could not verify and where you looked.
 
 Done when every changed file in the diff has been read and every requirement line is either confirmed by code and a test (for a change that alters no behavior, such as docs or agent instructions: by the changed text), or listed as a finding or under "Nicht bestätigt".

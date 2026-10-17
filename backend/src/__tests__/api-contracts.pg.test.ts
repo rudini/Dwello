@@ -362,6 +362,11 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statements'), actual)).toEqual([]);
 	});
 
+	it('GET /heating-profiles liefert die Felder von heating-profiles.json', async () => {
+		const actual = await (await callApi('/api/v1/heating-profiles?limit=100')).json();
+		expect(drift(await sample('heating-profiles'), actual)).toEqual([]);
+	});
+
 	it('GET /statements einer Periode liefert die Felder von period-statements.json', async () => {
 		const actual = await (await callApi(`/api/v1/statements?periodStart=${period.periodStart}&periodEnd=${period.periodEnd}&limit=1000`)).json();
 		expect(drift(await sample('period-statements'), actual)).toEqual([]);

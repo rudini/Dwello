@@ -90,6 +90,11 @@ export const hintedInvoiceLink = (date: string) =>
 	target(`Rechnung vom ${date} in einem Hinweis bearbeiten`, (page) =>
 		page.getByTestId('hinted-invoice').filter({ hasText: date }).getByRole('link')
 	);
+// Per statement in the preview's hint on existing statements: what changed since or differs (#132)
+export const existingStatementNotes = (statementId: string) =>
+	target(`Hinweis zur Abrechnung ${statementId}`, (page) => page.getByTestId(`existing-statement-notes-${statementId}`));
+export const existingStatementLink = (statementId: string) =>
+	target(`Abrechnung ${statementId} in der Vorschau`, (page) => page.getByTestId(`existing-statement-${statementId}`));
 // #91, step «Einstellungen»: per contract of the run, whether a category with costs in the period is agreed
 export const agreementQuestions = target('Fragen nach vereinbarten Nebenkosten', (page) => page.getByTestId('agreement-questions'));
 export const agreementsOf = (contractId: string) =>
