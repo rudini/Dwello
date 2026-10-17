@@ -14,7 +14,7 @@ Check against `CLAUDE.md` and the docs it names:
 - Design rules: tokens only (`docs/design/token-referenz.md`), components from `src/lib/ui`, accessibility (labels, focus, keyboard, 48 px controls).
 - Security: auth and XSRF checks, input validation, no data leaking to the client.
 - Simplicity: the shortest diff that works; nothing unused left behind. Read `.claude/skills/ponytail-review/SKILL.md` and apply it to the diff; its findings are Minors or Nits unless they hide a defect.
-- Red tests: judge by reading whether each new test and scenario fails without the change (the caller keeps no notes of it); one the adding commit's message names as pinning kept behaviour needs no red (`CLAUDE.md`, Workflow 2), judge only that the behaviour is really kept.
+- Red tests: judge by reading whether each new test and scenario fails without the change (the caller keeps no notes of it); one the adding commit's message names as pinning kept behaviour needs no red (`CLAUDE.md`, Workflow 2), judge only that the base commit already shows the behaviour and that it is no bug fix.
 - Acceptance tests, when the diff touches `tests/e2e/`: lint already enforces the Screenplay layers (`tests/e2e/CLAUDE.md`); judge the design it cannot see:
   - Questions answer the value itself (text, amount in francs, count), so a failing check shows what the system says; yes/no only for real states (shown, enabled, checked).
   - The UI and the API path of a `throughUiOrApi` task or question answer in the same form; the API path calls system code (backend, or BFF server code in `src/lib/server`) and never copies a rule into the test.

@@ -8,5 +8,6 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] T3: `fach-reviewer` writes a Minor/Nit as its row only; both reviewers report only the delta on a re-review (`.claude/agents/{fach-reviewer,code-reviewer}.md`)
 - [x] T2: merge `main` once before the push, reviewed in the closing round; no further merges while the pull request waits (`CLAUDE.md` Gotchas "Branches", `.claude/skills/pull-request/SKILL.md`)
 - [x] T6: a test that pins kept behaviour needs no red run (`CLAUDE.md` "Done means" and Workflow 2, `.claude/agents/code-reviewer.md`)
-- [ ] code-reviewer round 1
+- [x] code-reviewer round 1: `docs/reviews/t3t2t6-review-1.md` (C-1 Major fixed: merge only before the first push; C-2 to C-4 fixed; C-5 stays in the report)
+- [ ] code-reviewer round 2 on the C-1 fix
 - [ ] session archived, pull request
