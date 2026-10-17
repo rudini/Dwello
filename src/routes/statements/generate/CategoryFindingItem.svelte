@@ -3,7 +3,11 @@
 	import { findingText, type CategoryFinding } from '$lib/statement-wizard';
 
 	// One finding of the check per category; a Tankbestand finding leads to the building
-	let { finding, buildingId }: { finding: CategoryFinding; buildingId: string } = $props();
+	let {
+		finding,
+		buildingId,
+		fixedTerm = false
+	}: { finding: CategoryFinding; buildingId: string; fixedTerm?: boolean } = $props();
 
 	const tank = $derived(finding.kind === 'stock' || finding.kind === 'consumption');
 	// a missing reading is captured, a negative consumption or one far from the year before checked
@@ -12,7 +16,7 @@
 
 <li data-testid="category-finding">
 	<span class="font-semibold">{m.statements_finding_category({ name: finding.categoryName })}</span>
-	{findingText(finding)}
+	{findingText(finding, fixedTerm)}
 	{#if tank}
 		<a
 			href="/buildings/{buildingId}"

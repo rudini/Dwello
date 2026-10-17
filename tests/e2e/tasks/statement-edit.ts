@@ -13,3 +13,6 @@ export const extendPaymentDeadline = (deadline: string, note: string): Activity 
 
 export const clearPaymentDeadline: Activity = (actor) =>
 	actor.attemptsTo(Enter.theValue('').into(paymentDeadlineInput), Click.on(saveStatementButton));
+
+export const keepNote = (note: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(note).into(notesInput), Click.on(saveStatementButton));

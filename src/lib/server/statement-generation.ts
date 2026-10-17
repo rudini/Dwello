@@ -12,6 +12,7 @@ type Contract = {
 	startDate: string;
 	endDate: string | null;
 	billedUntil?: string | null;
+	terminated?: boolean;
 	tenantName: string;
 	apartmentNumber: string;
 	managementFeeAgreed?: boolean;
@@ -124,7 +125,8 @@ export async function contractAgreements(fetch: Fetch, request: Run) {
 export async function previewStatements(fetch: Fetch, request: GenerationRequest) {
 	const { periodStart, periodEnd, heatingProfileId, managementFeePercent } = request;
 	const rows = [];
-	for (const { contract } of await contractsInPeriod(fetch, request)) {
+	for (const { buildingId, contract } of await contractsInPeriod(fetch, request)) {
+		const movedOut = !!contract.endDate && contract.endDate <= [periodEnd, localToday()].sort()[1]; // ended by now
 		const preview = await call(fetch, 'statements/preview', {
 			contractId: contract.id,
 			periodStart,
@@ -141,8 +143,11 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			balance: Number(preview.balance),
 			rentalDays: Number(preview.rentalDays),
 			totalPeriodDays: Number(preview.totalPeriodDays),
-			movedOut: !!contract.endDate && contract.endDate <= [periodEnd, localToday()].sort()[1], // ended by now
-			oldAddress: !!contract.oldAddress // A-5: moved out, still with the building's address
+			movedOut,
+			// befristet, its end not reached: no Kündigungstermin before it (#76)
+			fixedTerm: !!contract.endDate && !contract.terminated && !movedOut,
+			oldAddress: !!contract.oldAddress, // A-5: moved out, still with the building's address
+			buildingId
 		});
 	}
 	return rows;

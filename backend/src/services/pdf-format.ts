@@ -18,3 +18,6 @@ export const roundToRappen = (amount: number) => Math.round(Number((amount * 100
 /** The Saldo the tenant pays or gets back, to 5 Rappen only in the tenant's favour (#79): a payment down, a refund up;
  * to the Rappen first, so float noise (0.3 − 0.1 = 0.19999…) is no remainder */
 export const roundTo5Rappen = (amount: number) => Math.floor(Math.round(roundToRappen(amount) * 100) / 5) / 20 + 0; // + 0: no −0
+
+/** #94: a Saldo below CHF 5 (the stored, rounded one; 0 included) is neither claimed nor paid out */
+export const belowMinimum = (balance: number) => Math.abs(balance) < 5;

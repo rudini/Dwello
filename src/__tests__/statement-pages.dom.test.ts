@@ -477,6 +477,29 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('366 Mietstage');
 	});
 
+	// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt; ab CHF 5.00 wie bisher
+	it.each([
+		[4.95, 'Der Betrag ist kleiner als CHF 5.00. Sie verzichten darauf.'],
+		[-0.05, 'Der Betrag ist kleiner als CHF 5.00. Sie zahlen ihn nicht aus.'],
+		[5, 'Der Mieter bezahlt die Nachzahlung von CHF 5.00.'],
+		[-5, 'Sie erstatten dem Mieter CHF 5.00 zurück.']
+	])('sagt bei einem Saldo von %s, was mit dem Betrag geschieht', (balance, summary) => {
+		detail({ balance });
+		expect(byTestId('statement-payment-summary')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(summary);
+	});
+
+	// Fachprüfung V-4: ohne Zahlung keine Zahlungsfrist und kein «Bezahlt am»
+	it('nennt bei einem Saldo unter CHF 5 weder Zahlungsfrist noch Zahlungsdatum', () => {
+		detail({ balance: 4.95, status: 'paid', paidDate: '2026-02-01' });
+		expect(byTestId('statement-payment-summary')).not.toBeNull();
+		expect(byTestId('statement-payment-deadline')).toBeNull();
+		expect(text()).not.toContain('Bezahlt am');
+		document.body.innerHTML = '';
+		detail({ balance: 5, status: 'paid', paidDate: '2026-02-01' });
+		expect(byTestId('statement-payment-deadline')).not.toBeNull();
+		expect(text()).toContain('Bezahlt am');
+	});
+
 	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
 	const later = (laterInvoices: number, status: 'draft' | 'sent' = 'draft') =>
 		show(StatementPage, {
@@ -1194,6 +1217,20 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
 	});
 
+	// #94: ein Saldo unter CHF 5 wird nicht eingefordert, auch überfällig nach dem Zurücksetzen der Zahlung nicht
+	it('bietet bei einem Saldo unter CHF 5 keine Mahnung an', () => {
+		detail({ status: 'overdue', balance: 4.95 });
+		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+		expect(byTestId('statement-reminder-button')).toBeNull();
+	});
+
+	// Code-Review C-3: das Bezahlt-Markieren verspricht nicht, dass danach keine Mahnung mehr möglich ist
+	it('sagt beim Bezahlt-Markieren eines Saldos unter CHF 5 nichts über Mahnungen', () => {
+		detail({ status: 'overdue', balance: 4.95 });
+		click('statement-mark-paid-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain('Mahnung');
+	});
+
 	// Der Knopf sagt, was er tut: Dwello verschickt nichts selbst
 	it('nennt den Knopf «Als versendet markieren»', () => {
 		detail({ tenantCorrespondenceChannel: 'letter' });
@@ -1367,6 +1404,14 @@ describe('Abrechnung bearbeiten', () => {
 		expect(document.querySelector('label[for="paymentDeadline"]')!.textContent).toContain(
 			'Rückerstattung bis'
 		);
+	});
+
+	// #94 (Persona Marco P-1): ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt, also keine Frist
+	it('fragt bei einem Saldo unter CHF 5 nach keiner Frist', () => {
+		edit({ balance: -2.5 });
+
+		expect(byTestId('statement-notes-input')).not.toBeNull();
+		expect(byTestId('payment-deadline-input')).toBeNull();
 	});
 
 	it('meldet eine fehlende Frist am Feld', () => {

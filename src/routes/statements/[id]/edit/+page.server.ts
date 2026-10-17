@@ -16,15 +16,16 @@ const failed = (status: number, errors: Record<string, string>) => fail(status, 
 export const actions: Actions = {
 	default: async ({ request, params, fetch }) => {
 		const form = await request.formData();
-		const paymentDeadline = String(form.get('paymentDeadline') ?? '');
-		if (!paymentDeadline) {
+		// no field below CHF 5 (#94): nothing is paid, so there is no deadline to change
+		const paymentDeadline = form.get('paymentDeadline');
+		if (paymentDeadline === '') {
 			return failed(400, { paymentDeadline: m.statements_deadline_missing() });
 		}
 		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				paymentDeadline,
+				...(paymentDeadline !== null && { paymentDeadline }),
 				notes: String(form.get('notes'))
 			})
 		});

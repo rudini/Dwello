@@ -22,6 +22,10 @@ export const previewFee = target('Verwaltungspauschale der Vorschau', (page) => 
 export const previewRows = target('Zeilen der Vorschau', (page) => page.getByTestId('preview-row'));
 export const previewRow = (tenantName: string) =>
 	target(`Zeile von «${tenantName}» in der Vorschau`, (page) => previewRows.locate(page).filter({ hasText: tenantName }));
+export const previewAkontoHint = (tenantName: string) =>
+	target(`Akonto-Hinweis von «${tenantName}» in der Vorschau`, (page) =>
+		previewRow(tenantName).locate(page).getByTestId('preview-akonto-hint')
+	);
 export const previewEmpty = target('Hinweis keine Mietverträge in der Periode', (page) => page.getByTestId('preview-empty'));
 export const generationResult = target('Ergebnis der Erstellung', (page) => page.getByTestId('generation-result'));
 export const showStatementsButton = target('Abrechnungen anzeigen', (page) => page.getByTestId('show-statements-button'));
