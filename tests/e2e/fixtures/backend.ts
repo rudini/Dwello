@@ -373,6 +373,10 @@ export function testData(api: CallTheApi) {
 
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
 
+		async categoryAllowance(title: string, isAllowedUtilityCost: boolean) {
+			await put(`categories/${ids.get(title)}`, { isAllowedUtilityCost });
+		},
+
 		// An own category whose English name is its German one, as an own «Internet» would have
 		categoryNamedAlikeInEnglish: (title: string, description: string) =>
 			addCategory(title, (name) => ({ nameEN: name, description, isAllowedUtilityCost: true })),
@@ -406,6 +410,10 @@ export function testData(api: CallTheApi) {
 				inDays(0)
 			);
 			ids.set(`Rechnung ${supplier}`, id);
+		},
+
+		async invoiceAllocable(supplier: string, isValidUtilityCost: boolean) {
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { isValidUtilityCost });
 		},
 
 		async invoiceNumber(supplier: string, invoiceNumber: string) {

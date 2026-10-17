@@ -41,3 +41,9 @@ Funktionalität: Breadcrumb
       | bearbeitet die Rechnung von "Hauswart Huber"                   | Hauswart Huber | der Detailseite der Rechnung von "Hauswart Huber"  |
       | ist auf der Seite "Neue Rechnung"                              | Rechnungen     | der Rechnungsliste                                 |
       | ist auf der Seite "Heizprofile"                                | Einstellungen  | der Seite "Einstellungen"                          |
+
+    # Protokoll (#357)
+    @wip
+    Beispiele:
+      | Ausgangslage                  | Breadcrumb    | Ziel                      |
+      | ist auf der Seite "Protokoll" | Einstellungen | der Seite "Einstellungen" |

@@ -63,3 +63,34 @@ Funktionalität: Einstellungen
   # Rückerstattung (#69)
   Szenario: Die Einstellungen sagen, wer eine Rückerstattung überweist
     Dann erklären die Einstellungen bei der IBAN "Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters"
+
+  # Protokoll (#357, Entscheid in #111): Änderungen und Anmeldungen mit Datum, unter den Einstellungen; die Einträge
+  # bleiben, bis der Liegenschaftsverwalter sie löscht. Anmeldung, Verwaltungspauschale und zurückgesetzte Zahlung
+  # prüfen die Backend-Tests (audit-log*.pg.test.ts): die Anmeldung läuft hier nicht über Google, und die
+  # Verwaltungspauschale gilt für alle parallel laufenden Szenarien.
+  # TODO(fachlich prüfen, #370): Begriff «Protokoll» fehlt im Glossar
+  @wip
+  Szenario: Protokoll öffnen
+    Wenn der Liegenschaftsverwalter das Protokoll öffnet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Protokoll"
+
+  @wip
+  Szenario: Änderungen im Protokoll sehen
+    Angenommen es gibt die umlagefähige Kategorie "Gartenpflege Nord"
+    Und die Kategorie "Gartenpflege Nord" ist inzwischen nicht umlagefähig
+    Und das Gebäude "Lindenhof" in "Bern" existiert
+    Und "Hauswart Meier" stellt dem Gebäude "Lindenhof" "450.00" Franken für "Treppenhausreinigung" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Meier" ist inzwischen als nicht umlagefähig markiert
+    Wenn der Liegenschaftsverwalter das Protokoll öffnet
+    Dann nennt das Protokoll mit heutigem Datum "Kategorie «Gartenpflege Nord»: jetzt nicht umlagefähig"
+    Und nennt das Protokoll mit heutigem Datum "Rechnung «Treppenhausreinigung» von Hauswart Meier über CHF 450.00: als nicht umlagefähig markiert"
+
+  @wip
+  Szenario: Eintrag im Protokoll löschen
+    Angenommen es gibt die umlagefähige Kategorie "Gartenpflege Süd"
+    Und die Kategorie "Gartenpflege Süd" ist inzwischen nicht umlagefähig
+    Und der Liegenschaftsverwalter ist auf der Seite "Protokoll"
+    Wenn der Liegenschaftsverwalter den Eintrag "Kategorie «Gartenpflege Süd»: jetzt nicht umlagefähig" löschen will
+    Dann warnt das Protokoll "Der Eintrag wird endgültig aus dem Protokoll gelöscht. Das lässt sich nicht rückgängig machen."
+    Wenn der Liegenschaftsverwalter das Löschen bestätigt
+    Dann nennt das Protokoll "Kategorie «Gartenpflege Süd»: jetzt nicht umlagefähig" nicht mehr
