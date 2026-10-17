@@ -420,6 +420,27 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Ihr Anteil: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52"
     Und steht im PDF "Zeitanteil: Ihre Mietstage in der Abrechnungsperiode. Bei einer Rechnung mit Leistungszeitraum zählen Ihre Mietstage in diesem Zeitraum. Hat eine Abrechnungsposition Rechnungen über verschiedene Tage, steht die Berechnung darunter. Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Der Prozentwert ist gerundet; Ihr Anteil folgt aus der Berechnung unter der Position."
 
+  # Zwei Hauswart-Rechnungen ohne Leistungszeitraum über denselben Betrag: Daten und Betrag allein ordnen ihre Zeilen
+  # keinem Beleg zu, darum nennt jede ihre Rechnung; die Rechnung über einen eigenen Leistungszeitraum ist schon
+  # eindeutig und bleibt ohne (#236, V-8 von #226)
+  @wip
+  Szenario: PDF nennt die Rechnung, wenn Daten und Betrag sie nicht unterscheiden
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "765" Franken vom "2025-03-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "765" Franken vom "2025-09-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "1200" Franken vom "2025-10-05" für die Zeit vom "2025-07-01" bis "2025-09-30"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Rechnung «Hauswart 2025-03-31» – Ohne Leistungszeitraum: CHF 765.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode"
+    Und steht im PDF "Rechnung «Hauswart 2025-09-30» – Ohne Leistungszeitraum: CHF 765.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode"
+    Und steht im PDF "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1'200.00, Ihre Mietstage 47 von 92 Tagen"
+    Und steht im PDF nicht "Hauswart 2025-10-05"
+
   # Heizkosten ohne Heizprofil nach Tagen: eine Lieferung über einen Leistungszeitraum und die Veränderung des Tankbestands
   # (600 - 100 = 500); die Zeile des Tankbestands ist keine Rechnung und heisst so (#239)
   Szenario: PDF nennt die Veränderung des Tankbestands unter den Heizkosten als solche
