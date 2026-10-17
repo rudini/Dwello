@@ -1,7 +1,6 @@
-import { error } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
 import { toAuditEntries } from '$lib/server/audit-log';
-import { deleteRecord } from '$lib/server/save-form';
 import type { Actions, PageServerLoad } from './$types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/audit-log`;
@@ -13,11 +12,12 @@ export const load: PageServerLoad = async ({ fetch }) => {
 };
 
 export const actions: Actions = {
-	delete: async ({ request, fetch }) =>
-		deleteRecord(
-			fetch,
-			`${API}/${(await request.formData()).get('id')}`,
-			m.audit_delete_failed(),
-			'/config/audit-log'
-		)
+	delete: async ({ request, fetch }) => {
+		const id = (await request.formData()).get('id');
+		const response = await fetch(`${API}/${id}`, { method: 'DELETE' });
+		// 404: already deleted, in another tab or by another visitor of the demo; the list without it is what was asked
+		if (!response.ok && response.status !== 404)
+			return fail(response.status, { error: m.audit_delete_failed() });
+		throw redirect(303, '/config/audit-log');
+	}
 };

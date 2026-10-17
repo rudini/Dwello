@@ -1598,17 +1598,18 @@
 	"audit_category_excluded": "Catégorie « {name} » : passée d’imputable à non imputable",
 	"audit_category_excluded_invoice": "Catégorie « {name} » : passée d’imputable à non imputable ; 1 facture n’est donc plus imputable",
 	"audit_category_excluded_invoices": "Catégorie « {name} » : passée d’imputable à non imputable ; {count} factures ne sont donc plus imputables",
-	"audit_category_included": "Catégorie « {name} » : passée de non imputable à imputable",
+	"audit_category_included": "Catégorie « {name} » : passée de non imputable à imputable ; ses factures non imputables le restent",
 	"audit_invoice_excluded": "Facture « {description} » de {supplier} du {date} de {amount} ({building}) : marquée comme non imputable",
 	"audit_invoice_included": "Facture « {description} » de {supplier} du {date} de {amount} ({building}) : de nouveau marquée comme imputable",
 	"audit_payment_reset": "Paiement du {date} du décompte {number} retiré",
 	"audit_payment_reset_undated": "Paiement du décompte {number} retiré",
 	"audit_statement_corrected": "Décompte {number} remplacé par le décompte rectifié {replacement}",
-	"audit_delete_label": "Supprimer l’entrée : {text}",
+	"audit_delete_label": "Supprimer l’entrée du {when} : {text}",
 	"audit_delete_title": "Supprimer l’entrée ?",
-	"audit_delete_text": "Cette entrée sera définitivement supprimée du journal : {text}. La modification elle-même reste en place. Cette action est irréversible.",
+	"audit_delete_text": "L’entrée du {when} sera définitivement supprimée du journal : {text}. Seule l’entrée est supprimée, pas ce qu’elle consigne. Cette action est irréversible.",
 	"audit_deleted": "L’entrée est supprimée.",
 	"audit_delete_failed": "L’entrée n’a pas pu être supprimée. Veuillez réessayer.",
 	"audit_privacy": "Pour que vous puissiez retracer plus tard ce qui a changé, Dwello consigne dans le journal sous « Paramètres », avec date et heure : chaque connexion avec le fournisseur choisi (sans nom ni adresse e-mail), les modifications des frais de gestion et du caractère imputable des catégories, les factures qui ne sont plus ou de nouveau imputables (avec émetteur, description, date, montant et immeuble), ainsi que les paiements retirés. Les entrées restent, même si vous supprimez la facture, jusqu’à ce que vous les supprimiez dans le journal. Le journal du serveur (voir « Connexion ») en est distinct.",
-	"audit_privacy_demo": "Dans la démo, tous les visiteurs voient le journal avec les connexions des autres, sans nom ni adresse e-mail."
+	"audit_privacy_demo": "Dans la démo, tous les visiteurs voient le journal avec les connexions des autres, sans nom ni adresse e-mail, et peuvent en supprimer des entrées.",
+	"audit_not_deleted": "Entrée non supprimée"
 }

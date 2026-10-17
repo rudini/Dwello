@@ -14,7 +14,6 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | Datei | Endpunkt |
 |---|---|
 | `statement.json` | `GET /api/v1/statements/:id` |
-| `audit-log.json` | `GET /api/v1/audit-log` (Protokoll unter «Einstellungen», neuste zuerst) |
 | `statement-payment-reset.json` | `POST /api/v1/statements/:id/payment-reset` (die Abrechnung mit dem Zurücksetzen im Verlauf) |
 | `statement-paid-date-refused.json` | `PUT /api/v1/statements/:id/status` mit einem Zahlungsdatum vor dem Abrechnungsdatum |
 | `building-contracts.json` | `GET /api/v1/contracts?buildingId=…` |
@@ -45,3 +44,4 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `statement-calculation-refused.json` | `POST /api/v1/statements/preview` für einen Mietvertrag, den die Berechnung nicht lesen kann (400) |
 | `statement-pdf-failed.json` | `POST /api/v1/statements/:id/generate-pdf`, die aus einem unerwarteten Grund scheitert (500) |
 | `validation-refused.json` | jede Anfrage, die das Schema verletzt, z.B. `POST /api/v1/statements/preview` mit einer Zahl als `contractId` (422) |
+| `audit-log.json` | `GET /api/v1/audit-log` (Protokoll unter «Einstellungen», neuste zuerst) |

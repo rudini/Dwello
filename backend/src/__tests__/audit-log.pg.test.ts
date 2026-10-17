@@ -165,7 +165,7 @@ describe('Protokoll der umlagefähigen Rechnungen', () => {
 });
 
 describe('Protokoll einer zurückgesetzten Zahlung', () => {
-	it('hält die Abrechnung mit dem Zahlungsdatum und dem Betrag fest', async () => {
+	it('hält die Abrechnung mit dem Zahlungsdatum fest', async () => {
 		const rental = await createRental(token, { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
 		cleanUps.push(() => rental.remove());
 		const id = await idOf(

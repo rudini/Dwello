@@ -30,8 +30,18 @@ describe('Protokoll unter den Einstellungen', () => {
 
 		click('audit-entry-delete-button');
 
+		// Personas Weber P-1/P-2, Helga P-1/P-2: mit Zeitpunkt, und eine Anmeldung ist keine Änderung
 		expect(byTestId('audit-entry-delete-message')?.textContent).toBe(
-			'Dieser Eintrag wird endgültig aus dem Protokoll gelöscht: Anmeldung mit Google. Die Änderung selbst bleibt bestehen. Das lässt sich nicht rückgängig machen.'
+			'Der Eintrag vom 17.10.2026, 14:05 wird endgültig aus dem Protokoll gelöscht: Anmeldung mit Google. Gelöscht wird nur der Eintrag, nicht was er festhält. Das lässt sich nicht rückgängig machen.'
+		);
+	});
+
+	// Persona Sven P-1: gleichlautende Einträge unterscheidet nur ihr Zeitpunkt
+	it('nennt den Zeitpunkt im Namen des Löschknopfs', () => {
+		show(AuditLogPage, { data: { entries: [entry] }, form: null } as never);
+
+		expect(byTestId('audit-entry-delete-button')?.getAttribute('aria-label')).toBe(
+			'Eintrag vom 17.10.2026, 14:05 löschen: Anmeldung mit Google'
 		);
 	});
 
@@ -43,6 +53,8 @@ describe('Protokoll unter den Einstellungen', () => {
 
 		click('audit-entry-delete-button');
 
+		// Code-Review C-8: Titel und Text sagen nicht zweimal dasselbe
+		expect(byTestId('form-error')?.textContent).toContain('Eintrag nicht gelöscht');
 		expect(byTestId('form-error')?.textContent).toContain(
 			'Der Eintrag konnte nicht gelöscht werden.'
 		);

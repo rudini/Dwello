@@ -59,15 +59,20 @@ export function takeLoginFlow(
  * it does not stop the login
  */
 export async function recordLogin(jwt: string, provider: OAuthProvider) {
+	const timeout = new AbortController();
+	const timer = setTimeout(() => timeout.abort(), 5000); // a hanging backend does not hold up the login
 	try {
 		await fetch(`${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/audit-log/logins`, {
 			method: 'POST',
 			headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' },
-			body: JSON.stringify({ provider })
+			body: JSON.stringify({ provider }),
+			signal: timeout.signal
 		});
 	} catch (error) {
 		logAuthError(error instanceof Error ? error : new Error(String(error)), {
 			operation: 'record_login'
 		});
+	} finally {
+		clearTimeout(timer);
 	}
 }

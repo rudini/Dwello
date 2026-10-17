@@ -1,6 +1,6 @@
 import { localName } from '$lib/names';
 import { m } from '$lib/paraglide/messages';
-import { formatCurrency, formatDate, formatDateTime } from '$lib/utils/format';
+import { formatCurrency, formatDate, formatDateTime, normalizeDecimal } from '$lib/utils/format';
 
 /** An entry of GET /api/v1/audit-log: what happened, with a snapshot of what it names (#357) */
 type BackendEntry = {
@@ -17,8 +17,9 @@ const PROVIDERS: Record<string, string> = { google: 'Google', microsoft: 'Micros
 
 // The entry in the UI language, built when it is shown (fach review V-9)
 const TEXTS: Record<string, (d: Details) => string> = {
-	login: (d) => m.audit_login({ provider: PROVIDERS[String(d.provider)] ?? String(d.provider) }),
-	management_fee_changed: (d) => m.audit_fee({ from: String(d.from), to: String(d.to) }),
+	login: (d) => m.audit_login({ provider: PROVIDERS[String(d.provider)] }),
+	management_fee_changed: (d) =>
+		m.audit_fee({ from: normalizeDecimal(String(d.from)), to: normalizeDecimal(String(d.to)) }),
 	category_allocability_changed: (d) => {
 		const name = localName(d as { name: string });
 		if (d.allocable) return m.audit_category_included({ name });

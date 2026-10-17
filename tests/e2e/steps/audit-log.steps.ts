@@ -23,6 +23,10 @@ Given('die Rechnung von {string} ist inzwischen als nicht umlagefähig markiert'
 	await seed.invoiceAllocable(supplier, false);
 });
 
+Given('der Eintrag zur Kategorie {string} ist inzwischen anderswo gelöscht', async ({ seed }, title: string) => {
+	await seed.removeAuditEntriesOfCategory(title);
+});
+
 Given('der Liegenschaftsverwalter ist auf der Seite "Protokoll"', async ({ verwalter }) => {
 	await verwalter.attemptsTo(goToAuditLog);
 });
@@ -39,8 +43,10 @@ Then('nennt das Protokoll mit heutigem Datum {string}', async ({ verwalter, name
 	await verwalter.sees(auditEntryDay(named(names, text))).toContain(swissDate(inDays(0)));
 });
 
-Then('warnt das Protokoll {string}', async ({ verwalter, names }, text: string) => {
-	await verwalter.sees(deleteAuditEntryConsequence).toBe(named(names, text));
+// The dialog names the entry's time of today, «17.10.2026, 14:05»
+Then('warnt das Protokoll, der Eintrag von heute {string}', async ({ verwalter, names }, text: string) => {
+	const rest = named(names, text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	await verwalter.sees(deleteAuditEntryConsequence).toMatch(new RegExp(`^Der Eintrag vom ${swissDate(inDays(0))}, \\d\\d:\\d\\d ${rest}$`));
 });
 
 Then('nennt das Protokoll {string} nicht mehr', async ({ verwalter, names }, text: string) => {

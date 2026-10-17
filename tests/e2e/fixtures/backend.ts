@@ -412,6 +412,13 @@ export function testData(api: CallTheApi) {
 			ids.set(`Rechnung ${supplier}`, id);
 		},
 
+		// The Protokoll's entries about the category, deleted as another tab or visitor would (#357)
+		async removeAuditEntriesOfCategory(title: string) {
+			for (const entry of (await get('audit-log')).data) {
+				if (entry.details.categoryId === ids.get(title)) await remove(`audit-log/${entry.id}`);
+			}
+		},
+
 		async invoiceDate(supplier: string, invoiceDate: string) {
 			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { invoiceDate });
 		},

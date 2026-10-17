@@ -123,7 +123,7 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 		show(PrivacyPage, { data: { recipient: null, demo: true, providers: ['Google'] } } as never);
 
 		expect(demoSection()?.textContent).toContain(
-			'In der Demo sehen alle Besucher das Protokoll mit den Anmeldungen der anderen, ohne Name und E-Mail-Adresse.'
+			'In der Demo sehen alle Besucher das Protokoll mit den Anmeldungen der anderen, ohne Namen und E-Mail-Adresse, und können Einträge löschen.'
 		);
 	});
 

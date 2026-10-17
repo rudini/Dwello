@@ -11,6 +11,8 @@
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let toDelete = $state<AuditEntry | null>(null);
+	// what the dialog names; empty while it is closed
+	const shown = $derived(toDelete ?? { id: '', when: '', text: '' });
 </script>
 
 <svelte:head>
@@ -46,7 +48,7 @@
 						variant="danger-ghost"
 						icon="delete"
 						onclick={() => (toDelete = entry)}
-						ariaLabel={m.audit_delete_label({ text: entry.text })}
+						ariaLabel={m.audit_delete_label({ when: entry.when, text: entry.text })}
 						testid="audit-entry-delete-button">{m.buildings_delete()}</Button
 					>
 				</li>
@@ -63,12 +65,12 @@
 		}
 	}
 	record="auditEntry"
-	name={toDelete?.text ?? ''}
-	id={toDelete?.id}
+	name={shown.text}
+	id={shown.id}
 	error={form?.error}
 	confirmTestid="audit-entry-delete-confirm"
 >
 	<p data-testid="audit-entry-delete-message">
-		{m.audit_delete_text({ text: toDelete?.text ?? '' })}
+		{m.audit_delete_text({ when: shown.when, text: shown.text })}
 	</p>
 </DeleteDialog>

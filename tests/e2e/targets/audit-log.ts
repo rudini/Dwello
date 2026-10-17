@@ -1,6 +1,6 @@
 import { target } from '../screenplay/target';
 
-export const auditLogLink = target('Link zum Protokoll', (page) => page.getByTestId('audit-log-link'));
+export const auditLogLink = target('Link zum Protokoll', (page) => page.getByTestId('quick-link-audit-log').getByRole('link'));
 const entry = (text: string) => (page: Parameters<Parameters<typeof target>[1]>[0]) =>
 	page.getByTestId('audit-entry').filter({ has: page.getByTestId('audit-entry-text').getByText(text, { exact: true }) });
 export const auditEntries = (text: string) => target(`Protokolleintrag «${text}»`, entry(text));

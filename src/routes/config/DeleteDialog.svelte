@@ -44,7 +44,7 @@
 		auditEntry: {
 			deleted: m.audit_deleted,
 			question: m.audit_delete_title,
-			notDeleted: m.audit_delete_failed
+			notDeleted: m.audit_not_deleted
 		}
 	};
 	const text = $derived(texts[record]);

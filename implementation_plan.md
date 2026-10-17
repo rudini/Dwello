@@ -12,4 +12,8 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] a11y: `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature` (default, empty, delete-dialog)
 - [x] Privacy statement names the log (PR #359 not merged: paragraph `audit_privacy` under «Welche Daten Dwello speichert», demo note)
 - [x] `docs/PRD-Dwello.md` audit lines point to what is built
-- [ ] Slice review (code-reviewer), feature review (personas, fach-reviewer), workflow review, archive the session
+- [x] Code review round 1: `docs/reviews/w7e-review-1.md`
+- [x] Fach review round 2 (feature review): `docs/reviews/w7e-fachreview-2.md`
+- [x] Personas: `docs/design/personas/{helga,marco,weber,sven,anna}-w7e.md`
+- [ ] Re-reviews of the Major fixes (code-reviewer C-1; Anna P-1/P-2, Sven P-1), closing code-reviewer round
+- [ ] Workflow review, archive the session

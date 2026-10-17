@@ -285,6 +285,25 @@ describe('Auth Routes Integration Tests', () => {
 			expect(authModule.setSessionCookie).toHaveBeenCalled();
 		});
 
+		// Code-Review C-4: ein hängendes Backend hält die Anmeldung nicht auf
+		it('wartet höchstens 5 Sekunden darauf, dass das Protokoll die Anmeldung festhält', async () => {
+			vi.useFakeTimers();
+			mockFetch.mockImplementation(
+				(_url: string, init: RequestInit) =>
+					new Promise((_resolve, reject) =>
+						init.signal?.addEventListener('abort', () => reject(new Error('timeout')))
+					)
+			);
+			try {
+				const redirect = callback('code=auth-code-123&state=mock-state-abc123');
+				await vi.advanceTimersByTimeAsync(5000);
+
+				expect(await redirect).toMatchObject({ status: 303, location: '/statements?status=overdue' });
+			} finally {
+				vi.useRealTimers();
+			}
+		});
+
 		it('lehnt den Rückruf ohne begonnene Anmeldung ab', async () => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_oauth_state', 'mock-state-abc123');

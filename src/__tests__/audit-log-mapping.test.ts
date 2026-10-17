@@ -26,14 +26,15 @@ describe('Protokoll aus dem Backend', () => {
 			'Vorgeschlagene Verwaltungspauschale von 3 % auf 4.5 % geändert',
 			'Kategorie «Gartenpflege»: von umlagefähig auf nicht umlagefähig geändert; 2 Rechnungen sind damit nicht mehr umlagefähig',
 			'Rechnung «Treppenhausreinigung» von Hauswart Meier vom 31.03.2026 über CHF\u00a0450.00 (Lindenhof): als nicht umlagefähig markiert',
-			'Zahlung der Abrechnung NK-2025-0001 vom 02.03.2026 zurückgesetzt',
+			'Zahlung vom 02.03.2026 zur Abrechnung NK-2025-0001 zurückgesetzt',
 			'Abrechnung NK-2025-0002 durch die berichtigte Abrechnung NK-2025-0007 ersetzt'
 		]);
 	});
 
 	it('nennt die Gegenrichtung: wieder umlagefähig', () => {
+		// Persona Anna P-2: die Rechnungen, die mit der Kategorie nicht umlagefähig wurden, kommen nicht zurück
 		expect(textOf(category, { allocable: true, invoices: undefined })).toBe(
-			'Kategorie «Gartenpflege»: von nicht umlagefähig auf umlagefähig geändert'
+			'Kategorie «Gartenpflege»: von nicht umlagefähig auf umlagefähig geändert; ihre nicht umlagefähigen Rechnungen bleiben es'
 		);
 		expect(textOf(invoice, { allocable: true })).toBe(
 			'Rechnung «Treppenhausreinigung» von Hauswart Meier vom 31.03.2026 über CHF\u00a0450.00 (Lindenhof): wieder als umlagefähig markiert'
@@ -57,6 +58,13 @@ describe('Protokoll aus dem Backend', () => {
 	it('nennt 0 % als Satz', () => {
 		expect(textOf(fee, { from: '0', to: '3' })).toBe(
 			'Vorgeschlagene Verwaltungspauschale von 0 % auf 3 % geändert'
+		);
+	});
+
+	// Fachprüfung V-15: über die API gespeichert, «3.50» wie die Einstellungen ihn zeigen
+	it('nennt den Satz ohne nachgestellte Nullen', () => {
+		expect(textOf(fee, { from: '3.50', to: '4.0' })).toBe(
+			'Vorgeschlagene Verwaltungspauschale von 3.5 % auf 4 % geändert'
 		);
 	});
 

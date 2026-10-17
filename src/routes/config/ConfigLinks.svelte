@@ -10,7 +10,6 @@
 		label: string;
 		text: string;
 		icon: IconName;
-		testid?: string;
 	};
 
 	// The master data pages, named and ordered as in the main navigation; the Protokoll (#357) on its own
@@ -57,7 +56,6 @@
 				<div class="flex flex-col gap-1">
 					<a
 						href={link.href}
-						data-testid={link.testid}
 						class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
 						>{link.label}</a
 					>
