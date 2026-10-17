@@ -90,12 +90,12 @@ describe('Neue Wohnung', () => {
 
 	it('zeigt die Fehler beim Feld', () => {
 		open(null, {
-			errors: { buildingId: 'Bitte wählen Sie ein Gebäude aus', area: 'Fläche ist erforderlich' }
+			errors: { buildingId: 'Bitte wählen Sie ein Gebäude aus.', area: 'Fläche ist erforderlich.' }
 		});
 		const errors = [...document.querySelectorAll('[data-testid="form-error"]')].map((error) =>
 			error.textContent!.trim()
 		);
-		expect(errors).toEqual(['Bitte wählen Sie ein Gebäude aus', 'Fläche ist erforderlich']);
+		expect(errors).toEqual(['Bitte wählen Sie ein Gebäude aus.', 'Fläche ist erforderlich.']);
 	});
 
 	it('bestätigt das Speichern mit der Wohnungsnummer', async () => {

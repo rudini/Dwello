@@ -47,7 +47,7 @@ Funktionalität: Verwaltungspauschale berechnen
   Szenario: Pauschale über 10 %
     Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale "1000" eintippt
     Und der Liegenschaftsverwalter weitergeht
-    Dann meldet das Feld der Verwaltungspauschale "Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5."
+    Dann meldet das Feld der Verwaltungspauschale "Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Dezimalstellen ein, zum Beispiel 3 oder 2.5."
     Und bleibt der Assistent beim Schritt mit der Verwaltungspauschale
 
   # #89: die Pauschale gilt nur für Mietverträge, in denen sie vereinbart ist (Art. 257a Abs. 2 OR); ein eigener
