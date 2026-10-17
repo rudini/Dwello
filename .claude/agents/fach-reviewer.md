@@ -21,7 +21,8 @@ Sources, in this order:
 Change no file except your report. Write it in German to the path the caller names:
 
 - One table: ID (`V-n`, `M-n`, `R-n`), role, severity (Blocker / Major / Minor / Nit), short finding.
-- Per finding: evidence (file:line, scenario line or Fedlex quote), why it is wrong, what would fix it.
+- Per Blocker/Major: evidence (file:line, scenario line or Fedlex quote), why it is wrong, what would fix it. A Minor/Nit needs nothing beyond its row (evidence and fix in a few words).
+- On a re-review (the caller names the previous report): only the status of its open IDs and the new findings in the delta; confirmed rules are not listed again.
 - Missing terms: propose a wording; the caller opens an issue for it (labels `fachlich`, `entscheiden`).
 - A section "Nicht bestätigt": what you could not confirm and where you looked.
 
