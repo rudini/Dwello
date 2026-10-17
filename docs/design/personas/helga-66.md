@@ -72,3 +72,59 @@ Etwa 20 Minuten, 12 Skriptläufe. Assistent bis Schritt 4: 3 × «Weiter» plus 
 - Speichern (Auftrag: nur anschauen). Daher weiss ich nicht, was Dwello nach dem Speichern einer höheren Miete oder eines anderen Akontos sagt und wie sich eine spätere Nebenkostenabrechnung ändert.
 - Andere Sprachen als Deutsch, Mobilansicht.
 - Den «Abbrechen»-Fall mit einem Klick auf «Entwurf verwerfen» habe ich nur gesehen, nicht ausgelöst.
+
+## Runde 2
+
+Persona: Helga, Desktop 1440 × 900 bei 150 % (Stichprobe 200 %), Maus. Nur angeschaut, nichts gespeichert (keine POST/PUT/DELETE-Anfragen im Netzwerkprotokoll). Bilder: `r2-02-edit-top-1.5.png`, `r2-02-edit-top-2.png`, `r2-03-top-200.png` im selben Ordner wie Runde 1.
+
+Geprüft nur: der Hinweis «Laufender Mietvertrag» auf «Mietvertrag bearbeiten» (Anna Schmidt, Wohnung 1.02, Musterhaus Zentrum). Er lautet jetzt:
+
+> Dwello übernimmt Änderungen sofort, auch für die Zeit, die noch nicht abgerechnet ist. Eine Mietzinserhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig. Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt.
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-1 | Minor (war Major) | Mietvertrag bearbeiten, Hinweis «Laufender Mietvertrag» | Behoben im Kern: Der letzte Satz sagt mir, was ich tun soll: die neue Miete erst eintragen, wenn sie gilt. Rest: Der erste Satz sagt, Dwello übernimmt Änderungen «auch für die Zeit, die noch nicht abgerechnet ist». Trage ich die höhere Miete am 1. April ein, gilt sie dann in Dwello auch für Januar bis März, falls dafür noch keine Abrechnung gemacht ist? Und welches «abgerechnet» ist gemeint: die Nebenkostenabrechnung oder die Miete? Die beiden Sätze passen für mich nicht ganz zusammen. |
+| P-6 | Nit | Mietvertrag bearbeiten, Hinweis «Laufender Mietvertrag» | Der Satz, der mir sagt, was ich tun soll, steht ganz am Schluss, nach drei Sätzen Rechtliches. Beim ersten Lesen bin ich bei «nichtig» hängen geblieben und hätte den letzten Satz fast überlesen. |
+
+P-2 (Kündigungstermin, amtliches Formular nicht erklärt) besteht unverändert; P-3 bis P-5 nicht erneut geprüft.
+
+### Beobachtungen
+
+- Bei 150 % und bei 200 % steht der gelbe Kasten mit Warndreieck ganz oben, ohne Scrollen ganz lesbar, kein seitliches Scrollen (Bild `r2-03-top-200.png`).
+- Bei der «Verwaltungspauschale» und den «Vereinbarten Nebenkosten» steht weiter unten die gleiche Regel (amtliches Formular, nächster Kündigungstermin), dort sogar mit «Art. 269d OR». Beim Hinweis oben fehlt diese Angabe; ich hätte sie dort eher gesucht.
+- Dwello erinnert mich nicht an den Tag, an dem die Erhöhung gilt. Ich benutze Dwello nur ein paar Mal im Jahr; zwischen Brief und Stichtag liegen Monate. Ich müsste mir das Datum selbst aufschreiben.
+
+### Aufgabe geschafft: ja
+
+Vor der Erhöhung: in Dwello nichts tun, den Brief mit dem amtlichen Formular rechtzeitig schicken. Am Tag, ab dem sie gilt: die neue Nettomiete hier eintragen und speichern. Das steht jetzt so da; «vorher nichts tun» muss ich mir allerdings selbst denken. Unsicher bleibe ich nur, was «auch für die Zeit, die noch nicht abgerechnet ist» für die Monate davor bedeutet (P-1, Rest).
+
+### Aufwand
+
+Etwa 5 Minuten, 3 Skriptläufe: Mietverträge → Anna Schmidt → «Bearbeiten», einmal bei 150 %, einmal bei 200 %.
+
+### Ablauf
+
+1. **Mietverträge → «Anna Schmidt».** Erwartet: ihre Vertragsseite. Gesehen: «Mietvertrag von Anna Schmidt», Nettomiete CHF 1’850.00, Akonto CHF 300.00, «Bearbeiten». Gut.
+2. **«Bearbeiten».** Erwartet: oben ein Hinweis, der mir sagt, wann ich eine höhere Miete eintrage. Gesehen: gelber Kasten «Laufender Mietvertrag» mit dem neuen Text (oben zitiert). Der Schlusssatz «Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt» beantwortet meine Frage aus Runde 1.
+3. **Ersten Satz noch einmal gelesen.** Erwartet: dass «sofort» heisst «ab heute». Gesehen: «auch für die Zeit, die noch nicht abgerechnet ist». Das klingt für mich, als würde Dwello rückwärts rechnen. Dann hilft es nur teilweise, die Erhöhung erst am Stichtag einzutragen (P-1, Rest).
+
+### Verwirrung
+
+- «noch nicht abgerechnet»: Nebenkostenabrechnung oder Miete? Ab wann genau zählt dann die neue Miete?
+- «wenn sie gilt»: am Stichtag selbst, oder geht auch ein paar Tage später? Und was passiert, wenn ich es zu spät eintrage?
+- «Kündigungstermin», «Beginn der Kündigungsfrist», «amtliches Formular»: weiter unerklärt (P-2).
+
+### Fehlerrisiken
+
+- Ich trage die Erhöhung am Stichtag ein, und Dwello rechnet sie in einer späteren Abrechnung doch für die Monate davor (P-1, Rest). Ob es das tut, kann ich ohne Speichern nicht sehen.
+- Ich vergesse den Stichtag, weil Dwello mich nicht daran erinnert, und die alte Miete bleibt monatelang stehen (Beobachtung).
+
+### Vorschläge
+
+- **P-1 (Rest):** Mietverträge → Anna Schmidt → «Bearbeiten», ersten Satz lesen. Hilfreich: sagen, was «sofort» für die Monate vor der Änderung heisst, z. B. «Dwello rechnet ab dem Tag, an dem Sie speichern, mit dem neuen Betrag; frühere Monate bleiben unverändert», oder, wenn Dwello wirklich rückwirkend rechnet, das so deutlich sagen, mit einem Beispiel.
+- **P-6:** Gleiche Stelle. Hilfreich: den Satz «Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt» direkt nach dem ersten Satz bringen und das Rechtliche danach, oder ihn fett setzen.
+
+### Nicht geprüft
+
+- Speichern (Auftrag: nur anschauen); deshalb weiss ich nicht, ob Dwello eine geänderte Miete tatsächlich für frühere Monate verwendet.
+- P-3 bis P-5, andere Sprachen, Mobilansicht.

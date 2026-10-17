@@ -66,3 +66,54 @@ Rund 10 Minuten, 8 Schritte (Übersicht, Mietverträge, Mietvertrag Laura Keller
 - Rücksetzen auf «Unbefristet» und ob dann der unbefristete Hinweis wieder erscheint: nicht Teil der Aufgabe; der Mietvertrag von Laura Keller bleibt befristet bis 31.12.2099.
 - Andere Sprachen, Mobile-Ansicht.
 - Rechtliche Würdigung ohne Konsultation von Kommentaren; die Einordnung der Akontoerhöhung unter Art. 269d OR folgt der verbreiteten Praxis, nicht einem geprüften Entscheid.
+
+## Runde 2
+
+Nur angesehen, nichts gespeichert. Mietvertrag Hans Müller (Wohnung 1.01, Musterhaus Zentrum, unbefristet seit 01.03.2021), «Bearbeiten», Hinweis «Laufender Mietvertrag» gelesen. Skript `r2a.mjs`, Screenshots `r2-01-contracts.png` bis `r2-03-edit.png` im Scratchpad-Ordner oben.
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-1 | – (behoben) | Mietvertrag bearbeiten, Hinweis «Laufender Mietvertrag» | Der Widerspruch ist weg: «sofort» bezieht sich jetzt ausdrücklich auf Dwello, nicht auf das Recht, und der letzte Satz sagt, wann ich eintrage. |
+| P-7 | Major | Mietvertrag bearbeiten, Hinweis «Laufender Mietvertrag» | Erster und letzter Satz zusammen führen im Normalfall zu falschen Abrechnungen: Dwello übernimmt die Änderung «auch für die Zeit, die noch nicht abgerechnet ist», und ich soll die Erhöhung eintragen, «wenn sie gilt». Gilt eine höhere Akontozahlung ab 01.10., ist Januar bis September meist noch nicht abgerechnet; trage ich sie am 01.10. ein, rechnet Dwello nach dem ersten Satz auch für diese Monate mit dem höheren Akonto. Bei Hans Müller fehlen sogar die Abrechnungen 2021 bis 2023. Der Hinweis sagt nicht, was ich stattdessen tun soll (zuerst die offenen Perioden abrechnen? warten?). |
+| P-8 | Minor | wie P-7 | «Mietzinserhöhung» im letzten Satz: Ein Laie weiss nicht, ob das auch Akonto, Zusatzmiete und Verwaltungspauschale meint (hängt mit P-3 zusammen, das unverändert ist). Für Senkungen und Korrekturen eines Tippfehlers sagt der Hinweis nichts; ein Tippfehler soll ja gerade rückwirkend gelten. |
+| P-9 | Nit | wie P-7 | «Dwello übernimmt Änderungen sofort» ist etwas unbestimmt; «Dwello rechnet ab dem Speichern mit den neuen Beträgen» sagte genauer, was passiert. |
+
+### Beobachtungen (Runde 2)
+
+- Wortlaut jetzt: «Dwello übernimmt Änderungen sofort, auch für die Zeit, die noch nicht abgerechnet ist. Eine Mietzinserhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig. Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt.» (Screenshot `r2-03-edit.png`, gelber Kasten mit Warndreieck oben im Formular.)
+- Rechtlich sind die neuen Sätze korrekt: Der erste ist eine Aussage über Dwello, nicht über das Recht; der letzte gibt eine richtige Handlungsanweisung (eintragen ab dem Termin, ab dem die Erhöhung nach Art. 269d OR wirksam ist). Ficht der Mieter an (Art. 270b OR), gilt die Erhöhung erst nach dem Entscheid; «wenn sie gilt» deckt das sinngemäss ab, nennt es aber nicht.
+- Der mittlere Teil ist unverändert: «nächsten» statt «nächstmöglichen» Kündigungstermin, Kündigungsandrohung als Nichtigkeitsgrund fehlt (P-4 bleibt offen).
+- Die Seite des Mietvertrags zeigt bei Hans Müller «3 Abrechnungen fehlen» (2023, 2022, 2021); gerade hier wäre die Rückwirkung des ersten Satzes gross.
+
+### Aufgabe geschafft (Runde 2): ja
+
+### Aufwand (Runde 2)
+
+Rund 3 Minuten, 3 Schritte (Mietverträge, Mietvertrag Hans Müller, Bearbeiten).
+
+### Ablauf (Runde 2)
+
+1. Mietverträge, «Hans Müller» geöffnet. Erwartet: Mietvertrag Wohnung 1.01. Gesehen: «Mietvertrag von Hans Müller, Wohnung 1.01 · Musterhaus Zentrum», Laufend seit 01.03.2021, unbefristet, Nettomiete CHF 1’450.00, Akonto CHF 240.00, Zusatzmiete CHF 100.00, dazu «3 Abrechnungen fehlen».
+2. «Bearbeiten». Erwartet: ein Hinweis, der sagt, ab wann Dwello mit einer neuen Miete rechnet und wann ich sie eintrage. Gesehen: neuer erster Satz klärt «sofort» als Verhalten von Dwello und sagt, dass auch nicht abgerechnete Zeit betroffen ist; neuer letzter Satz «Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt.» P-1 ist damit beantwortet.
+3. Nachgerechnet am Beispiel Erhöhung des Akontos ab 01.10., Abrechnungsperiode Kalenderjahr: Die Anweisung des letzten Satzes und die Rückwirkung des ersten vertragen sich nicht (P-7). Selbst geprüft habe ich das nicht (nur ansehen erlaubt), ich stütze mich auf den Wortlaut des ersten Satzes.
+
+### Verwirrung (Runde 2)
+
+- «auch für die Zeit, die noch nicht abgerechnet ist»: Heisst das, die ganze laufende Abrechnungsperiode wird mit dem neuen Betrag gerechnet, auch Monate vor dem Eintrag? So lese ich es, und dann ist der letzte Satz keine sichere Anweisung.
+- «Mietzinserhöhung»: nur Nettomiete, oder alles im Abschnitt «Miete»?
+
+### Fehlerrisiken (Runde 2)
+
+- Akonto-Erhöhung mitten in der Periode korrekt am Wirksamkeitstag eingetragen; Dwello rechnet für die ganze offene Periode mit dem höheren Akonto, schreibt dem Mieter nie bezahlte Akontozahlungen gut, und die Nachzahlung fällt zu tief aus (bzw. ein Guthaben zu hoch). Das ist der Normalfall, nicht ein Sonderfall (P-7).
+
+### Vorschläge (Runde 2)
+
+- **P-7** Reproduktion: Mietverträge > Hans Müller > Bearbeiten, Kasten oben lesen. Hilfe: entweder ein Feld «gilt ab» für neue Beträge, oder den letzten Satz ergänzen: «Erstellen Sie vorher die Nebenkostenabrechnung für die Zeit davor, sonst rechnet Dwello auch diese Zeit mit dem neuen Betrag.» Falls Dwello intern doch nur ab dem Speichertag rechnet, den ersten Satz entsprechend berichtigen.
+- **P-8** Reproduktion: wie P-7. Hilfe: «Eine Erhöhung von Nettomiete, Akonto, Zusatzmiete oder Verwaltungspauschale …»; ein Satz zu Korrekturen: «Einen Tippfehler korrigieren Sie jederzeit; er gilt für die ganze nicht abgerechnete Zeit.»
+- **P-9** Reproduktion: wie P-7. Hilfe: «Dwello rechnet ab dem Speichern mit den neuen Beträgen, auch für …».
+
+### Nicht geprüft (Runde 2)
+
+- Ob Dwello eine geänderte Akontozahlung tatsächlich rückwirkend in der offenen Periode verrechnet: Dafür hätte ich speichern und eine Abrechnung erstellen müssen; diese Runde war nur zum Ansehen.
+- Die Variante des Hinweises bei einem befristeten Mietvertrag (P-2, P-5): In den frischen Demodaten habe ich keinen befristeten laufenden Mietvertrag geöffnet; die Aufgabe nannte nur Hans Müller.
+- Andere Sprachen, Mobile-Ansicht.
