@@ -216,4 +216,29 @@ describe('Migrationen anwenden', () => {
 			{ total_costs: '500.00', agreed_category_ids: null }
 		]);
 	});
+
+	// #100: Brennstoff ist die Heizung und jede Heizkosten-Kategorie, die schon einen Tankbestand hat; sonst liesse sich
+	// ihr nächster Endbestand nicht mehr erfassen
+	it('kennzeichnet die Heizung und Heizkosten-Kategorien mit Tankbestand als Brennstoff', async () => {
+		const name = await database();
+		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+		for (const file of files.filter((file) => file < '0024_category_fuel.sql')) {
+			await copyFile(join(migrations, file), join(before, file));
+		}
+		await migrate(`${server}/${name}`, before);
+		await query(
+			name,
+			`WITH b AS (INSERT INTO buildings (name, address, postal_code, city, canton) VALUES ('Testhof', 'Testweg 1', '8400', 'Winterthur', 'ZH') RETURNING id),
+			wood AS (INSERT INTO categories (name, name_de, is_heating_cost, type) VALUES ('Holz', 'Holz', true, 'custom') RETURNING id),
+			service AS (INSERT INTO categories (name, name_de, is_heating_cost, type) VALUES ('Service', 'Service', true, 'custom') RETURNING id),
+			-- Heizkosten later removed: Brennstoff only with them, else no change of the category could be saved (Fachreview V-9)
+			gas AS (INSERT INTO categories (name, name_de, is_heating_cost, type) VALUES ('Gas', 'Gas', false, 'custom') RETURNING id)
+			INSERT INTO fuel_stocks (building_id, category_id, reading_date, amount)
+			SELECT b.id, wood.id, DATE '2025-12-31', 900 FROM b, wood UNION ALL SELECT b.id, gas.id, DATE '2024-12-31', 100 FROM b, gas`
+		);
+
+		await migrate(`${server}/${name}`, migrations);
+
+		expect(await query(name, `SELECT name FROM categories WHERE is_fuel ORDER BY name`)).toEqual([{ name: 'Heating' }, { name: 'Holz' }]);
+	});
 });

@@ -81,7 +81,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 |---------|-----------|---------------|
 | **Kategorie** | Klassifikation der Kostenart. Bestimmt, ob Kosten auf Mieter umgelegt werden dürfen. | `categories` Tabelle (`name_de`, `name`) |
 | **Heizkosten (Kategorie)** | Kategorie für die Kosten der Heizung (z.B. Heizung, Kaminfeger). Separat abgerechnetes Warmwasser gehört nicht dazu. | `is_heating_cost` Feld |
-| **Brennstoff (Kategorie)** | Merkmal einer umlagefähigen Heizkosten-Kategorie: Ihre Rechnungen sind Lieferungen von Heizmaterial (z.B. Heizöl, Pellets). Nur eine solche Kategorie hat einen Tankbestand. | geplant (#100) |
+| **Brennstoff (Kategorie)** | Merkmal einer umlagefähigen Heizkosten-Kategorie: Ihre Rechnungen sind Lieferungen von Heizmaterial (z.B. Heizöl, Pellets). Nur eine solche Kategorie hat einen Tankbestand. | `is_fuel` Feld |
 | **Vordefinierte Kategorie** | Mit Dwello gelieferte Kategorie (die mit Namen genannten Kategorien der Listen unter «Umlagefähig» und «Nicht umlagefähig»); Gegenstück zur eigenen Kategorie des Liegenschaftsverwalters. In der Oberfläche «Von Dwello». | `type = 'predefined'` |
 | **Eigene Kategorie** | Kategorie, die der Liegenschaftsverwalter erfasst hat. | `type = 'custom'` |
 | **Umlagefähigkeit** | Ob die Kosten einer Kategorie in die Nebenkostenabrechnung fliessen können (Art. 257b OR, Art. 4–6c VMWG); bezahlen muss der Mieter sie nur, wenn der Mietvertrag sie vorsieht (Art. 257a Abs. 2 OR). Beim Erfassen Pflichtwahl, ohne Vorgabe. | `is_allowed_utility_cost` Feld |

@@ -7,6 +7,7 @@
 	"nameEN": "Internet",
 	"isAllowedUtilityCost": true,
 	"isHeatingCost": false,
+	"isFuel": false,
 	"type": "custom",
 	"description": "Glasfaseranschluss im Keller",
 	"sortOrder": 40,

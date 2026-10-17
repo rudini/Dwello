@@ -15,6 +15,7 @@ import proposal from '../../tests/contracts/category-proposal.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
 import invalid from '../../tests/contracts/validation-refused.json';
 import contract from '../../tests/contracts/category.json';
+import fuelRefused from '../../tests/contracts/category-fuel-refused.json';
 import recipient from '../../tests/contracts/llm-recipient.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
@@ -33,6 +34,7 @@ const saved = {
 	description: 'Reinigung von Treppenhaus und Eingang',
 	isAllowedUtilityCost: true,
 	isHeatingCost: false,
+	isFuel: false,
 	sortOrder: 15,
 	nameFR: 'Nettoyage cage d’escalier',
 	nameIT: null,
@@ -152,6 +154,19 @@ describe('Neue Kategorie', () => {
 		await result.catch(() => {});
 
 		expect(calls[0].body).toMatchObject({ isHeatingCost: true });
+	});
+
+	// #100: Brennstoff ist ein Merkmal von Heizkosten (das Backend speichert es nur mit ihnen)
+	it('übernimmt «Brennstoff»', async () => {
+		const { calls, result } = runAction(newActions.save, '', 201, {
+			name: 'Pellets',
+			isAllowedUtilityCost: 'true',
+			isHeatingCost: 'on',
+			isFuel: 'on'
+		});
+		await result.catch(() => {});
+
+		expect(calls[0].body).toMatchObject({ isFuel: true });
 	});
 
 	it('verlangt einen Namen', async () => {
@@ -290,6 +305,21 @@ describe('Kategorie löschen', () => {
 
 		await expect(result).rejects.toMatchObject({ status: 303, location: '/config/categories' });
 		expect(calls).toEqual([{ method: 'DELETE', url: `${API}/c1`, body: undefined }]);
+	});
+
+	// #100 (Fachreview V-2): eine Kategorie mit Tankbestand bleibt Brennstoff; das betrifft nicht den Namen
+	it('sagt für das ganze Formular, dass eine Kategorie mit Tankbestand Brennstoff bleibt', async () => {
+		const { result } = runAction(editActions.default, 'c1', 200, form, {}, { status: 400, answer: fuelRefused });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				errors: {
+					// names both checkboxes: removing the heating cost alone is refused too (Fachreview V-10)
+					form: 'Die Kategorie hat Tankbestände. Deshalb bleiben die Häkchen «Heizkosten nach dem Heizprofil verteilen» und «Brennstoff» gesetzt. Wenn Sie sie entfernen möchten, löschen Sie zuerst die Tankbestände auf der Seite des Gebäudes.'
+				}
+			}
+		});
 	});
 
 	it('erklärt, warum eine verwendete Kategorie bleibt', async () => {

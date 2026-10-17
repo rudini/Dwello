@@ -128,3 +128,17 @@ Funktionalität: Kostenkategorien
     Dann erfährt der Liegenschaftsverwalter, dass Dwello die Kategorie mitliefert
     Und erfährt der Liegenschaftsverwalter, dass der Mieter Kosten des Vermieters nicht schuldet, auch wenn er die Kategorie auf umlagefähig stellt
     Und erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den Namen oder die Beschreibung ändert
+
+  # Ein eigener Brennstoff wie Stückholz hat einen Tankbestand (#100)
+  Szenario: Eigene Kategorie für Brennstoff erfassen
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die umlagefähige Heizkosten-Kategorie "Stückholz" als Brennstoff erfasst
+    Dann bietet der Tankbestand des Gebäudes "Birkenhof" die Kategorie "Stückholz" an
+
+  # Ohne Brennstoff liesse sich der nächste Endbestand nicht erfassen, die Abrechnung nähme den Einkauf (#100)
+  Szenario: Eine Kategorie mit Tankbestand bleibt Brennstoff
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und das Gebäude "Birkenhof" hat einen Tankbestand in der Kategorie für Brennstoff "Stückholz"
+    Wenn der Liegenschaftsverwalter die Kategorie "Stückholz" nicht mehr als Brennstoff speichert
+    Dann erfährt der Liegenschaftsverwalter, dass die Kategorie wegen ihrer Tankbestände Brennstoff bleibt

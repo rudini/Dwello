@@ -64,10 +64,10 @@ async function fuelStockData(fetch: Fetch, buildingId: string) {
 					};
 				})
 			: null,
-		// allocable fuel only: the chimney sweep is shared like heating but is no fuel (the API refuses it too)
+		// allocable Brennstoff only (#100), as the API accepts it
 		heatingCategories:
 			categories
-				?.filter((c) => c.isHeatingCost && c.isAllowedUtilityCost && c.name !== 'Chimney Sweep')
+				?.filter((c) => c.isFuel && c.isAllowedUtilityCost)
 				.map((c) => ({ id: String(c.id), name: name(c) })) ?? null
 	};
 }

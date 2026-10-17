@@ -285,9 +285,47 @@ describe('Tankbestand über die API', () => {
 		expect((await record('2028-12-31', '10.00', noTank.building, chimney.id)).status).toBe(400);
 	});
 
+	// #100: eine eigene Heizkosten-Kategorie hat nur als Brennstoff einen Tankbestand, nicht wegen ihres Namens
+	it.each([
+		[false, 400],
+		[true, 201]
+	])('nimmt den Tankbestand einer eigenen Heizkosten-Kategorie nur als Brennstoff an (Brennstoff: %p)', async (isFuel, status) => {
+		const own = (await (
+			await sendJson('POST', '/api/v1/categories', {
+				name: `Heizungsservice ${isFuel} ${token}`,
+				isAllowedUtilityCost: true,
+				isHeatingCost: true,
+				isFuel
+			})
+		).json()) as { id: string };
+		const building = await createRental(`${token}-own-${isFuel}`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+
+		expect((await record('2028-12-31', '10.00', building.building, own.id)).status).toBe(status);
+		await building.remove();
+		await db.delete(categories).where(eq(categories.id, own.id));
+	});
+
+	// #100 (Fachreview V-2): ohne «Brennstoff» liesse sich der nächste Endbestand nicht erfassen, die Abrechnung nähme den Einkauf
+	it.each([{ isFuel: false }, { isHeatingCost: false }])('lässt einer Kategorie mit Tankbestand «Brennstoff» (%j)', async (change) => {
+		const [own] = await db
+			.insert(categories)
+			.values({ name: `Pellets ${Object.keys(change)[0]} ${token}`, isHeatingCost: true, isFuel: true })
+			.returning();
+		const pellets = await createRental(`${token}-pellets-${Object.keys(change)[0]}`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await record('2024-12-31', '900.00', pellets.building, own.id);
+
+		const response = await sendJson('PUT', `/api/v1/categories/${own.id}`, change);
+
+		// 400, not 409: the form shows a 409 at the name, which is not what was refused
+		expect(response.status).toBe(400);
+		expect(((await response.json()) as { code: string }).code).toBe('CATEGORY_FUEL_HAS_STOCK');
+		await pellets.remove();
+		await db.delete(categories).where(eq(categories.id, own.id));
+	});
+
 	// OR 257a: wird die Kategorie später nicht umlagefähig, trägt der Mieter auch den Verbrauch aus dem Tank nicht
 	it('rechnet den Tankbestand einer Kategorie nicht ab, die nicht mehr umlagefähig ist', async () => {
-		const [own] = await db.insert(categories).values({ name: `Holz ${token}`, nameDE: `Holz ${token}`, isHeatingCost: true }).returning();
+		const [own] = await db.insert(categories).values({ name: `Holz ${token}`, nameDE: `Holz ${token}`, isHeatingCost: true, isFuel: true }).returning();
 		const wood = await createRental(`${token}-wood`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
 		await record('2024-12-31', '900.00', wood.building, own.id);
 		await record('2025-12-31', '300.00', wood.building, own.id);
@@ -300,7 +338,7 @@ describe('Tankbestand über die API', () => {
 
 	// #74: eine von Hand umlagefähig markierte Ölrechnung brächte sonst den Einkauf statt des Verbrauchs in die Abrechnung
 	it('rechnet in einer nicht umlagefähigen Tankkategorie weder Einkauf noch Verbrauch ab, auch wenn das Formular die Rechnung umlagefähig schickt', async () => {
-		const [own] = await db.insert(categories).values({ name: `Öl ${token}`, nameDE: `Öl ${token}`, isHeatingCost: true }).returning();
+		const [own] = await db.insert(categories).values({ name: `Öl ${token}`, nameDE: `Öl ${token}`, isHeatingCost: true, isFuel: true }).returning();
 		const oil = await createRental(`${token}-oil`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
 		await record('2024-12-31', '900.00', oil.building, own.id);
 		await record('2025-12-31', '300.00', oil.building, own.id);
@@ -324,7 +362,7 @@ describe('Tankbestand über die API', () => {
 
 	// Ein Tank, eine Kategorie: sonst landet der Verbrauch still in einer anderen Kategorie (z.B. Kaminfeger)
 	it('lehnt einen Stand in einer anderen Kategorie als die übrigen Stände des Gebäudes ab', async () => {
-		const [pellets] = await db.insert(categories).values({ name: `Pellets B ${token}`, isHeatingCost: true }).returning();
+		const [pellets] = await db.insert(categories).values({ name: `Pellets B ${token}`, isHeatingCost: true, isFuel: true }).returning();
 
 		expect((await record('2028-12-31', '10.00', rental.building, pellets.id)).status).toBe(409);
 		await db.delete(categories).where(eq(categories.id, pellets.id));
@@ -333,7 +371,7 @@ describe('Tankbestand über die API', () => {
 	it('lehnt eine Kategorie ab, die nicht umlagefähig ist', async () => {
 		const [owner] = await db
 			.insert(categories)
-			.values({ name: `Heizung Eigentümer ${token}`, isHeatingCost: true, isAllowedUtilityCost: false })
+			.values({ name: `Heizung Eigentümer ${token}`, isHeatingCost: true, isFuel: true, isAllowedUtilityCost: false })
 			.returning();
 
 		expect((await record('2028-12-31', '10.00', noTank.building, owner.id)).status).toBe(400);
@@ -343,7 +381,7 @@ describe('Tankbestand über die API', () => {
 	it('verhindert das Löschen einer Kategorie mit Tankbeständen', async () => {
 		const [own] = await db
 			.insert(categories)
-			.values({ name: `Pellets ${token}`, nameDE: `Pellets ${token}`, isHeatingCost: true })
+			.values({ name: `Pellets ${token}`, nameDE: `Pellets ${token}`, isHeatingCost: true, isFuel: true })
 			.returning();
 		await record('2027-12-31', '10.00', noTank.building, own.id);
 

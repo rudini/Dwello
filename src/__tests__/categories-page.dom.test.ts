@@ -593,4 +593,28 @@ describe('Kategorie bearbeiten', () => {
 		expect(text()).toContain('nach dem Heizprofil');
 		expect(text()).toContain('Separat abgerechnetes Warmwasser wird das ganze Jahr etwa gleich verbraucht');
 	});
+
+	// #100: nur eine Kategorie für Brennstoff hat einen Tankbestand; Brennstoff gibt es nur bei Heizkosten
+	it('zeigt die gespeicherte Wahl «Brennstoff» einer Heizkosten-Kategorie', () => {
+		const heating = { ...category('c1', 'Heizung', true), isHeatingCost: true, isFuel: true };
+		show(EditCategoryPage, { data: { category: heating }, form: null } as never);
+
+		const box = byTestId<HTMLInputElement>('category-fuel-checkbox')!;
+		expect(box.checked).toBe(true);
+		expect(box.name).toBe('isFuel');
+		expect(box.labels![0].textContent!.trim()).toBe('Brennstoff');
+		// the predefined «Heizung» also holds servicing invoices: only a category for nothing else is no fuel (personas)
+		expect(byTestId('category-fuel-checkbox-help')!.textContent).toContain(
+			'Eine Kategorie nur für Service, Wartung oder den Kaminfeger ist kein Brennstoff.'
+		);
+	});
+
+	it('fragt nach Brennstoff erst bei Heizkosten und wählt ihn bei einer neuen Kategorie nicht vor', () => {
+		show(NewCategoryPage, { data: { kiEnabled: false }, form: null } as never);
+		expect(byTestId('category-fuel-checkbox')).toBeNull();
+
+		click('category-heating-checkbox');
+
+		expect(byTestId<HTMLInputElement>('category-fuel-checkbox')!.checked).toBe(false);
+	});
 });

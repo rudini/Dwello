@@ -1,0 +1,2 @@
+# Every task appends its session at the end (CLAUDE.md, Workflow 8): keep both sides instead of a conflict
+docs/archive/implementation-plan-verlauf.md merge=union

@@ -26,6 +26,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
   - Payment: `PAID_DATE_INVALID {date}`, `PAID_DATE_BEFORE_STATEMENT {date}`, `PAID_DATE_IN_FUTURE {date}`, `STATEMENT_NOT_PAID`
   - Not found: `APARTMENT_NOT_FOUND`, `BUILDING_NOT_FOUND`, `CATEGORY_NOT_FOUND`, `CONTRACT_NOT_FOUND`, `DISTRIBUTION_KEY_NOT_FOUND`, `HEATING_PROFILE_NOT_FOUND`, `INVOICE_NOT_FOUND`, `STATEMENT_NOT_FOUND`
   - Names and numbers taken (409): `APARTMENT_NUMBER_TAKEN {number}`, `CATEGORY_NAME_TAKEN {name}`, `DISTRIBUTION_KEY_NAME_TAKEN {name}`, `HEATING_PROFILE_NAME_TAKEN {name}`
+  - Category change refused (400): `CATEGORY_FUEL_HAS_STOCK`
   - Delete refusals: `CATEGORY_PREDEFINED`, `CATEGORY_HAS_FUEL_STOCK`, `CATEGORY_IN_USE_ONE` / `CATEGORY_IN_USE {count}`, `DISTRIBUTION_KEY_PREDEFINED`, `DISTRIBUTION_KEY_IN_USE_ONE` / `DISTRIBUTION_KEY_IN_USE {count}`, `DISTRIBUTION_KEY_IS_DEFAULT`, `HEATING_PROFILE_PREDEFINED`, `HEATING_PROFILE_IS_DEFAULT`, `STATEMENT_NOT_DRAFT`
   - Distribution keys and formulas: `DISTRIBUTION_KEY_TYPE_FIXED`, `DISTRIBUTION_KEY_FORMULA_FIXED`, `FORMULA_INVALID` (every formula error in `causes`: `[{ code, params }]`, in the order of the text), `FORMULA_REQUIRED`, `FORMULA_UNKNOWN_VARIABLE {variable}`, `FORMULA_NO_VARIABLE`, `FORMULA_INVALID_CHARACTERS {characters}`, `FORMULA_UNOPENED_PARENTHESIS`, `FORMULA_UNCLOSED_PARENTHESIS`, `FORMULA_CONSECUTIVE_OPERATORS`, `FORMULA_DIVISION_BY_ZERO`, `FORMULA_VALUE_MISSING {variable}`, `FORMULA_NOT_A_NUMBER`, `FORMULA_NOT_COMPUTABLE` (the engine's own text only in `error`, for the log), `FORMULA_SAMPLE_FAILED {sample, reason, …}`, `FORMULA_SAMPLE_NEGATIVE {sample}` (`sample`: `FORMULA_SAMPLE_SMALL`, `_MEDIUM`, `_LARGE`), `FORMULA_APARTMENT_FAILED {reason, …}`, `FORMULA_NEGATIVE`, `FORMULA_ALL_ZERO`. The params `cause`, `reason` and `sample` may hold a code, shown as that code's message
   - Heating profiles: `HEATING_PROFILE_SHARES_SUM {sum}`, `HEATING_PROFILE_SHARE_NEGATIVE {month}`, `HEATING_PROFILE_TYPE_FIXED`, `HEATING_PROFILE_SHARES_FIXED`
@@ -56,7 +57,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 | PUT | `/:id` | Body: any subset of the POST fields. → building. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the building still has apartments |
 | GET | `/:id/fuel-stocks` | → array of `{ id, buildingId, readingDate, amount, categoryId, createdAt }` by date (Tankbestand, see `tests/contracts/fuel-stocks.json`). 404 building |
-| POST | `/:id/fuel-stocks` | Body: `readingDate` (date), `amount` (string, CHF ≥ 0, two decimals), `categoryId` (uuid of an allocable heating cost category). → 201 reading. 400 date that does not exist or category not allowed; 404 building; 409 a reading on that day exists, or the building's readings are in another category; 422 invalid body |
+| POST | `/:id/fuel-stocks` | Body: `readingDate` (date), `amount` (string, CHF ≥ 0, two decimals), `categoryId` (uuid of an allocable category marked `isFuel`, #100). → 201 reading. 400 date that does not exist or category not allowed; 404 building; 409 a reading on that day exists, or the building's readings are in another category; 422 invalid body |
 | DELETE | `/:id/fuel-stocks/:stockId` | 204. 404; 422 ids not uuids |
 
 ## 4. Apartments `/api/v1/apartments`
@@ -105,8 +106,8 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/allowed` | → array of categories with `isAllowedUtilityCost = true` |
 | GET | `/:id` | → category with `invoiceCount`. 404 |
 | POST | `/propose` | Body: `name` (1–100) required; optional `description`, `language` (`de`\|`fr`\|`it`\|`en`, the language of `reasoning`, default `de`). The KI's proposal for a new category (#176): → `{ isAllowedUtilityCost, reasoning }` from a confidence of 0.7; **503** without a sure answer: `KI_PROPOSAL_UNAVAILABLE` (no KI, error; trying later can help) or `KI_PROPOSAL_UNSURE` (unusable answer, lower confidence) (#186). The prompt quotes Art. 256 Abs. 1, 256b, 257a, 257b OR and Art. 4 Abs. 3, 5 Abs. 1–2, 6, 6a, 6b, 6c Abs. 3 VMWG verbatim (`LEGAL_BASIS` in `backend/src/config/llm.ts`) |
-| POST | `/` | Body: `name` (1–100), `isAllowedUtilityCost` (boolean) required; optional `nameDE`, `nameFR`, `nameIT`, `nameEN`, `description`, `sortOrder`. → 201. **409** `name` or `nameDE` already used |
-| PUT | `/:id` | Body: any subset. → category. 404; 409. Setting `isAllowedUtilityCost: false` also sets `isValidUtilityCost = false` on its invoices (OR 257a) |
+| POST | `/` | Body: `name` (1–100), `isAllowedUtilityCost` (boolean) required; optional `nameDE`, `nameFR`, `nameIT`, `nameEN`, `description`, `sortOrder`, `isHeatingCost`, `isFuel` (Brennstoff, stored only with `isHeatingCost`, #100). → 201. **409** `name` or `nameDE` already used |
+| PUT | `/:id` | Body: any subset. → category. 404; 409. Setting `isAllowedUtilityCost: false` also sets `isValidUtilityCost = false` on its invoices (OR 257a). **400** `CATEGORY_FUEL_HAS_STOCK` when the change would clear `isFuel` (directly or with `isHeatingCost: false`) of a category with fuel stocks |
 | DELETE | `/:id` | 204. 404; **409** if invoices use it |
 
 There is no "predefined" flag on categories.

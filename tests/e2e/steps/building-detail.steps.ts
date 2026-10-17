@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	buildingAddress,
+	fuelStockCategoryNames,
 	fuelStocksTitle,
 	listedApartment,
 	shownMaps,
@@ -112,3 +113,19 @@ Then('nennt die Gebäudeseite zum Tank {string}', async ({ verwalter }, text: st
 Then('heisst der Abschnitt zum Heizmaterial auf der Gebäudeseite {string}', async ({ verwalter }, title: string) => {
 	await verwalter.sees(fuelStocksTitle).toBe(title);
 });
+
+Then(
+	'bietet der Tankbestand des Gebäudes {string} die Kategorie {string} an',
+	async ({ verwalter, seed, names }, title: string, category: string) => {
+		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!));
+		await verwalter.sees(fuelStockCategoryNames).toContain(names.get(category) ?? category);
+	}
+);
+
+Then(
+	'weder die Kategorie {string} noch die Kategorie {string}',
+	async ({ verwalter, names }, first: string, second: string) => {
+		await verwalter.sees(fuelStockCategoryNames).not.toContain(names.get(first) ?? first);
+		await verwalter.sees(fuelStockCategoryNames).not.toContain(names.get(second) ?? second);
+	}
+);

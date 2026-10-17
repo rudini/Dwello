@@ -1449,6 +1449,26 @@ Files: `backend/src/__tests__/heating-profiles.pg.test.ts` (comment), `implement
 
 Files: `backend/migrations/0021_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`, `tests/e2e/{features/categories.feature,steps/categories.steps.ts,tasks/categories.ts,questions/categories.ts,targets/categories.ts,screenplay/questions.ts}`
 
+## Session W16: categories marked «Brennstoff» hold a Tankbestand (#100)
+
+Branch `claude/w16-brennstoff-100`. #100's "Decided" section (option 2) is the requirement; implemented directly, no separate implementation issue. The glossary already has «Brennstoff (Kategorie)» (an attribute of an allocable heating cost category), so no marker.
+
+- [x] `@wip` scenarios (building-detail.feature: own heating category and the chimney sweep are not offered; categories.feature: an own category marked Brennstoff is offered), committed and reviewed by `fach-reviewer` before implementing
+- [x] fach-reviewer round 1 (`docs/reviews/w16-fachreview-1.md`)
+- [x] migration `0024_category_fuel.sql`: `categories.is_fuel`, set for the predefined «Heating» and every heating cost category that already has a Tankbestand; schema, data-model.md, PRD, contracts
+- [x] backend: `isFuelCategory` reads the flag (no name check); create/update take `isFuel`, stored only with `isHeatingCost`; a category with a Tankbestand stays Brennstoff (`CATEGORY_FUEL_HAS_STOCK`); `*.pg.test.ts` for the predefined chimney sweep and an own heating category
+- [x] frontend: building page filters by the flag; category form checkbox «Brennstoff» with help (only with «Heizkosten nach dem Heizprofil verteilen»); texts in four languages
+- [x] a11y state `category-new` `fuel` (screens.json, accessibility.feature, sprachen-bildschirme.feature)
+- [x] code-reviewer round 1 (`docs/reviews/w16-review-1.md`)
+- [x] personas (`docs/design/personas/helga-w16.md`, `docs/design/personas/marco-w16.md`); fach-reviewer round 2 (`docs/reviews/w16-fachreview-2.md`)
+- [x] fixes of the review findings: refusal scenario and a11y screen `category-edit-fuel`, texts naming both checkboxes, migration only for heating costs, api-specification, translation terms
+- [x] Workflow note: auto mode refuses running a test with the code taken out to show its red (the E2E scenario of the refusal was written after the backend rule; its pg test was seen red)
+- [x] Helga round 2 (`docs/design/personas/helga-w16.md`, «Runde 2»): P-1 fixed; P-2, P-3, P-6 Minor/Nit stay in the report
+- [x] closing code-reviewer round (`docs/reviews/w16-review-2.md`): C-12, C-13 fixed; C-4, C-9, C-14 Nits left
+- [x] workflow notes (`docs/reviews/workflow-notes-issue-100.md`); archive the session; pull request (Fixes #100)
+
+Files: `backend/migrations/0024_category_fuel.sql`, `backend/src/db/schema.ts`, `backend/src/services/{category,fuel-stock}.service.ts`, `backend/src/routes/{categories,buildings}.ts`, `src/lib/{types.ts,server/category.ts}`, `src/routes/buildings/[id]/+page.server.ts`, `src/routes/config/categories/{CategoryForm,HeatingChoice}.svelte`, `messages/*.json`, `tests/contracts/category{,-fuel-refused}.json`, `docs/{data-model,PRD-Dwello,api-specification}.md`, tests and features.
+
 ## Session 2026-10-17 W18: «Ihre Angaben» instead of «Entwurf» for the wizard input (#57)
 
 - [x] `@wip` scenarios: both wizards say the input is kept only in this browser and not saved yet, and «Angaben wiederhergestellt»; «Angaben verwerfen» (contract wizard); privacy notice; help `help_tenants_3`
@@ -1627,6 +1647,17 @@ Branch `claude/w15-akonto-hints-66` (PR #401). Product owner 2026-10-17: #66 opt
 - [x] Personas `docs/design/personas/{helga,weber}-66b.md`: Helga P-2 fixed (`contracts_agreed_costs_none_text`), Helga P-1 → #428 (product decision)
 - [x] Workflow note: glossary edit on the product owner's instruction, round limit (`docs/reviews/workflow-notes-issue-66.md`)
 - [x] Push and pull request follow (PR #401 says `Fixes #66`, `Fixes #388`)
+
+## Session 2026-10-17 CI: readable E2E logs, no archive conflicts
+
+No scenario: CI and repository configuration only, no app behaviour changes.
+
+- [x] Reporter `list` on CI, so the log names each failed test (run #540 named none)
+- [x] `.gitattributes`: `merge=union` for `docs/archive/implementation-plan-verlauf.md` (every task appends there; four conflicts in one session; a simulated merge of two appended sessions conflicts without it and keeps both with it)
+- [x] Slice review round 1: `docs/reviews/ci3-review-1.md` (no Blocker/Major; C-1 fixed in the commit message; C-2 to C-4 stay)
+- [x] Plan archived, pull request, CI
+
+Files: `.gitattributes`, `playwright.config.ts`
 
 ## Session W16b: E2E races O-36 and O-37 (product owner's choice for PR #417)
 
