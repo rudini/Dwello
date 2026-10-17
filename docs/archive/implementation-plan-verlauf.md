@@ -1408,6 +1408,17 @@ Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requ
 
 Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.
 
+## Session W14: #80 July share of «Heizung Bergregion»
+
+- [x] Compare the Bergregion row with the source table: Mieterverband merkblatt_nebenkostenabrechnung_waehrend_periode.pdf (PDF dated 2023-09-09), page 2, «Verteilungsschlüssel in Bergebieten und im Tessin», row «Berggebiete»: 14.0, 11.5, 11.5, 9.0, 7.0, 4.5, 1.0, 4.0, 5.5, 8.5, 10.5, 13.0, the same as the migration (no misprint); mietrecht.ch and HEV not reachable from the cloud session
+- [x] Name the source in the test comment (`backend/src/__tests__/heating-profiles.pg.test.ts`); No scenario: only a test comment changes, no behaviour
+- [x] Note the source in issue #80 (comment 6232504741)
+- [x] Slice review round 1 (`code-reviewer`): `docs/reviews/w14-review-1.md`
+- [x] Closing code-reviewer round 2: `docs/reviews/w14-review-2.md`
+- [x] Session archived before the pull request
+
+Files: `backend/src/__tests__/heating-profiles.pg.test.ts` (comment), `implementation_plan.md`, this file, `docs/reviews/w14-review-{1,2}.md`.
+
 ## Session 2026-10-17 W8c-2: remove the 3-month hint (#65, option A)
 
 - [x] Decision recorded in #65 (option A, label `entscheiden` removed)
