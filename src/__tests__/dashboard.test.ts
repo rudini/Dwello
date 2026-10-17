@@ -3,6 +3,7 @@ import { load } from '../routes/dashboard/+page.server';
 import contractList from '../../tests/contracts/contracts.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import apartmentList from '../../tests/contracts/apartments.json';
+import documentList from '../../tests/contracts/documents.json';
 
 const API = 'http://localhost:3001/api/v1';
 // an apartment of the API contract, without the dates it does not have
@@ -119,6 +120,27 @@ function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both
 
 describe('Übersicht laden', () => {
 	afterEach(() => vi.useRealTimers());
+
+	// #178: an ehemaliger Mieter whose uploads date from before the last Vertragsende
+	it('nennt ehemalige Mieter mit Dokumenten von vor dem Ende ihres letzten Mietvertrags', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const [upload] = documentList.data;
+		const former = { ...contracts[0], id: 'k9', tenantId: 't9', tenantName: 'Ida Alt', startDate: '2020-01-01', endDate: '2026-03-31' };
+		const base = backend();
+		const fetch = (async (url: string) => {
+			const path = url.replace(API, '');
+			if (path === '/documents')
+				return Response.json({ data: [{ ...upload, tenantId: 't9', createdAt: '2024-05-01T09:00:00.000Z' }] });
+			if (path === '/contracts?limit=1000') return Response.json({ contracts: [...contracts, former] });
+			return base(url);
+		}) as typeof globalThis.fetch;
+
+		const data = await load({ fetch } as never);
+
+		expect(data.tasks).toContainEqual(
+			expect.objectContaining({ id: 'former-documents-t9', title: 'Dokumente von Ida Alt prüfen', href: '/tenants/t9' })
+		);
+	});
 
 	it('liefert die Kennzahlen und daraus die Aufgaben und Fristen von heute', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });

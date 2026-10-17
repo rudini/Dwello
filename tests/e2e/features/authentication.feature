@@ -43,8 +43,7 @@ Funktionalität: Anmeldung
     Dann ist der Liegenschaftsverwalter auf der Seite "Anmelden"
     Und führt die Übersicht den Liegenschaftsverwalter wieder zur Anmeldung
 
-  @wip
   Szenario: Anmeldung ohne dauerhaften Zugriff auf das Google-Konto
-    Angenommen ein Besucher hat die überfälligen Abrechnungen aufgerufen
+    Angenommen ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher sich mit "Google" anmeldet
     Dann bittet Dwello Google nicht um dauerhaften Zugriff auf das Konto

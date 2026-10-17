@@ -4,6 +4,7 @@ import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-
 import { overviewDeadlines, overviewTasks, type Deadline, type Task } from '$lib/overview';
 import { localToday } from '$lib/contract-status';
 import { reletStarts } from '$lib/apartment';
+import { formerTenantDocuments } from '$lib/former-tenant-documents';
 
 export interface DashboardData {
 	portfolio: {
@@ -101,6 +102,22 @@ function noticed(contracts: Row[]) {
 		}));
 }
 
+// Ehemalige Mieter with uploads from before their last Vertragsende (#178)
+function formerTenants(contracts: Row[], documents: Row[], today: string) {
+	const of = <T extends Row>(rows: T[], tenantId: unknown) => rows.filter((r) => r.tenantId === tenantId);
+	return [...new Set(contracts.map((c) => c.tenantId))].flatMap((tenantId) => {
+		const former = formerTenantDocuments(
+			of(contracts, tenantId) as { startDate: string; endDate: string | null }[],
+			of(documents, tenantId) as { type: string; createdAt: string }[],
+			today
+		);
+		const tenantName = String(contracts.find((c) => c.tenantId === tenantId)?.tenantName);
+		return former
+			? [{ tenantId: String(tenantId), tenantName, endDate: former.endDate, count: former.documents.length }]
+			: [];
+	});
+}
+
 const tenantOf = (statement: Row) => {
 	const tenant = statement.tenant as Row | null;
 	return tenant ? `${tenant.firstName} ${tenant.lastName}` : '';
@@ -111,7 +128,7 @@ export const load = async ({
 }: {
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
-	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts] =
+	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts, documents] =
 		await Promise.all([
 			fetchRecord(
 				fetch,
@@ -124,7 +141,8 @@ export const load = async ({
 			list(fetch, 'contracts?status=active&limit=100', 'contracts'),
 			lastPeriod(fetch).catch(() => null),
 			list(fetch, 'apartments?limit=1000', 'apartments'),
-			list(fetch, 'contracts?limit=1000', 'contracts')
+			list(fetch, 'contracts?limit=1000', 'contracts'),
+			list(fetch, 'documents', 'data')
 		]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
@@ -138,8 +156,9 @@ export const load = async ({
 			}))
 	}));
 	const noticedContracts = noticed(allContracts);
+	const today = localToday(); // the day in Switzerland
 	const input = {
-		today: localToday(), // the day in Switzerland
+		today,
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
 		dueStatements: [...overdue, ...sent].map((s) => ({
@@ -151,6 +170,7 @@ export const load = async ({
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),
 		noticedContracts,
+		formerTenants: formerTenants(allContracts, documents, today),
 		// a contract with a task is named by it, not twice (A-4.4); one given notice with a next tenant keeps its
 		// deadline (review K-6)
 		endingContracts: contracts

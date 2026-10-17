@@ -3,6 +3,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import { deleteDocument, loadDocuments, uploadDocument } from '$lib/server/documents';
 import { loadTenant } from '$lib/server/tenant';
 import { contractStatus, grossRent, toContractHistory } from '$lib/server/contract-history';
+import { localToday } from '$lib/contract-status';
+import { formerTenantDocuments } from '$lib/former-tenant-documents';
 import type { Actions, PageServerLoad } from './$types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -38,6 +40,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		await fetch(`${API}/contracts?tenantId=${params.id}&limit=100`)
 	).json();
 	const name = `${tenant.firstName} ${tenant.lastName}`;
+	const documents = await loadDocuments(fetch, `tenantId=${tenant.id}`);
 
 	return {
 		tenant,
@@ -46,7 +49,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			...toContractHistory(c, name),
 			apartment: apartmentOf(c)
 		})),
-		documents: await loadDocuments(fetch, `tenantId=${tenant.id}`)
+		documents,
+		formerDocuments: formerTenantDocuments(contracts, documents, localToday())
 	};
 };
 

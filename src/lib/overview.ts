@@ -32,6 +32,8 @@ export interface OverviewInput {
 		apartmentNumber: string;
 		endDate: string;
 	}[];
+	// ehemalige Mieter with uploads from before their last Vertragsende (#178)
+	formerTenants?: { tenantId: string; tenantName: string; endDate: string; count: number }[];
 }
 
 /** One thing the landlord should do now, with the page where it is done */
@@ -178,10 +180,29 @@ const successorTasks = ({ noticedContracts }: OverviewInput): Task[] =>
 			icon: 'contract'
 		}));
 
+// TODO(fachlich prüfen, #331): the task stays while the landlord rightly keeps a document
+// TODO(fachlich prüfen, #334): «Mietzinsdepot» is not in the glossary
+const formerDocumentTasks = ({ formerTenants = [] }: OverviewInput): Task[] =>
+	formerTenants.map((t) => ({
+		id: `former-documents-${t.tenantId}`,
+		title: m.dashboard_task_former_documents({ name: t.tenantName }),
+		text: (t.count === 1
+			? m.dashboard_task_former_documents_text_one
+			: m.dashboard_task_former_documents_text_many)({ count: t.count, date: formatDate(t.endDate) }),
+		href: `/tenants/${t.tenantId}`,
+		action: m.dashboard_task_former_documents_action(),
+		icon: 'document'
+	}));
+
 /** Tasks in the order they should be done; set-up comes first */
 export function overviewTasks(input: OverviewInput): Task[] {
 	const step = setup.find(({ missing }) => missing(input.portfolio));
-	return [...(step ? [step.task()] : []), ...workTasks(input), ...successorTasks(input)];
+	return [
+		...(step ? [step.task()] : []),
+		...workTasks(input),
+		...successorTasks(input),
+		...formerDocumentTasks(input)
+	];
 }
 
 /** A date the landlord should not miss, with how far away it is in words; `kind` is an id, shown via a message */

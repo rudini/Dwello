@@ -19,6 +19,13 @@ describe('Anmeldeseite (Ansicht)', () => {
 		expect(body).toContain('href="/terms"');
 	});
 
+	// #82: the privacy statement next to the terms, as information, not as something to accept
+	it('verweist auf die Datenschutzerklärung', () => {
+		const body = page({});
+		expect(body).toMatch(/href="\/privacy"[^>]*data-testid="login-privacy-link"/);
+		expect(body).toContain('Wie Dwello Ihre Daten bearbeitet, steht in der');
+	});
+
 	it('meldet einen Fehler sofort', () => {
 		const body = page({ error: 'Die Anmeldung wurde abgebrochen.' });
 		expect(body).toMatch(

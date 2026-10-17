@@ -163,9 +163,10 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello nichts von selbst löscht und Geschäftsbücher und Belege 10 Jahre aufzubewahren sind',
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello nichts von selbst löscht und wer zur Buchführung verpflichtet ist, Geschäftsbücher und Buchungsbelege 10 Jahre aufbewahrt',
 	async ({ verwalter }, heading: string) => {
-		await verwalter.sees(sectionText(heading)).toContain('löscht keine Daten von selbst');
+		await verwalter.sees(sectionText(heading)).toContain('löscht Dwello keine gespeicherten Daten von selbst');
+		await verwalter.sees(sectionText(heading)).toContain('Wer zur Buchführung verpflichtet ist');
 		await verwalter.sees(sectionText(heading)).toContain('10 Jahre');
 		await verwalter.sees(sectionText(heading)).toContain('Art. 958f OR');
 	}

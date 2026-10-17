@@ -18,7 +18,6 @@ Funktionalität: Öffentliche Demo
     Wenn der Liegenschaftsverwalter die Datenschutzerklärung der Demo liest
     Dann erfährt der Liegenschaftsverwalter unter "Öffentliche Demo", dass alle Besucher dieselben Daten sehen, jede Nacht alles gelöscht wird und andere Besucher seinen Namen und seine E-Mail-Adresse nicht sehen
 
-  @wip
   Szenario: Nutzungsbedingungen der Demo
     Wenn der Liegenschaftsverwalter die Nutzungsbedingungen der Demo liest
     Dann erfährt der Liegenschaftsverwalter unter "Öffentliche Demo", dass alle Besucher dieselben Daten sehen, jede Nacht alles gelöscht wird und er keine echten Daten eingeben soll

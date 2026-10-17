@@ -45,8 +45,7 @@ vi.mock('$lib/server/oauth', async () => {
 			sub: 'user-123',
 			email: 'test@example.com',
 			name: 'Test User',
-			provider: 'google' as const,
-			picture: 'https://example.com/photo.jpg'
+			provider: 'google' as const
 		}))
 	};
 });
@@ -286,7 +285,6 @@ describe('Auth Routes Integration Tests', () => {
 				email: 'test@example.com',
 				name: 'Test User',
 				provider: 'google',
-				picture: 'https://example.com/photo.jpg',
 				iss: 'dwello',
 				aud: 'dwello-app',
 				iat: Math.floor(Date.now() / 1000),

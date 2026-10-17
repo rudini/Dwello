@@ -165,6 +165,17 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('GET /mail-transport liefert die Felder von mail-transport.json', async () => {
+		const configured = process.env.MAIL_TRANSPORT;
+		process.env.MAIL_TRANSPORT = 'resend';
+		try {
+			const actual = await (await callApi('/api/v1/mail-transport')).json();
+			expect(drift(await sample('mail-transport'), actual)).toEqual([]);
+		} finally {
+			process.env.MAIL_TRANSPORT = configured;
+		}
+	});
+
 	it('POST /categories/propose liefert die Felder von category-proposal.json', async () => {
 		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.9, reasoning: 'Erneuerung' });
 		try {

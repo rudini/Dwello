@@ -88,7 +88,6 @@ Funktionalität: Sprache der Oberfläche
     Wenn der Besucher den Link zu den Nutzungsbedingungen öffnet
     Dann ist der Besucher auf der Seite "Nutzungsbedingungen"
 
-  @wip
   Szenario: Die Datenschutzerklärung von der Anmeldeseite aus lesen
     Angenommen ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher den Link zur Datenschutzerklärung öffnet

@@ -35,6 +35,12 @@
 <div class="flex max-w-3xl flex-col gap-8">
 	<PageHeader title={m.terms_title()} purpose={m.terms_purpose()} />
 
+	{#if data.demo}
+		<Panel title={m.demo_notice_title()} testid="page-section">
+			<p class="text-ink">{m.terms_demo_1()}</p>
+		</Panel>
+	{/if}
+
 	{#each sections as section (section.id)}
 		<Panel title={section.title} testid="page-section">
 			{#if section.id === 'availability' && operator}
