@@ -690,6 +690,7 @@ Files: `backend/migrations/0008_contract_notice_received.sql`, `backend/src/db/s
 - [x] Closing re-review (`docs/reviews/issue-89-review-4.md`): C-11 and the delta confirmed, no Blocker/Major open; C-18 fixed, C-17 left (accessibility targets keep their own module)
 - [x] PR
 - Files: `backend/migrations/0011_contract_management_fee.sql`, `backend/src/{db/schema.ts,routes/contracts.ts,routes/statements.ts,services/calculation.service.ts,services/config.service.ts,services/contract.service.ts}`, `backend/demo/demo-data.sql`, `src/lib/{contract-form.ts,contract-wizard.ts,statement-wizard.ts,types.ts,utils/format.ts,server/settings.ts,server/statement-generation.ts}`, `src/routes/contracts/{new/RentStep.svelte,[id]/*}`, `src/routes/statements/generate/{+page.server.ts,FeeNotAgreed.svelte,SettingsStep.svelte,StatementStep.svelte}`, `messages/*.json`, docs
+
 ## Session 2026-10-16 (#97, #101: identity of a statement)
 
 - [x] #97: a per-building, per-year number sequence that never gives a number twice; a deleted draft leaves a gap (`*.pg.test.ts`: two drafts, delete the second, generate again → `…-0003`); existing numbers unchanged; `docs/data-model.md` names where the sequence is kept
@@ -1277,6 +1278,7 @@ Files changed: `backend/migrations/0020_contract_categories.sql`, `backend/src/d
 - [x] workflow-review, session archived, pull request (waits for the product owner on #352 / #353 before the merge)
 
 Files: `backend/src/services/{pdf-format,pdf.service,reminder.service,statement.service}.ts`, `backend/src/__tests__/{statement-lock.pg,reminders.pg,statement-pdf-render}.test.ts`, `src/lib/statement.ts`, `src/routes/statements/+page.svelte`, `src/routes/statements/[id]/{+page,PaymentPanel}.svelte`, `src/routes/statements/[id]/edit/{+page.svelte,+page.server.ts}`, `src/__tests__/{statement-pages.dom,statement-edit-actions}.test.ts`, `messages/*.json`, `tests/e2e/features/statement-minimum-balance.feature`, `tests/e2e/{steps,questions,targets,tasks}/statement-{detail,edit}*.ts`, `docs/{data-model,PRD-Dwello,nebenkostenabrechnung-anforderungen}.md`, `docs/design/offene-punkte.md` (O-36), reviews `docs/reviews/w6d-*.md`, persona reports `dr-weber-w6d.md`, `marco-w6d.md`
+
 ## Session 2026-10-16 W5d: «Abgerechnet bis» on the Mietvertrag (#133)
 
 - [x] Read #133 and its comments (Option 3; a period past «Abgerechnet bis» bills Mietstage and Akonto from the day after); #281 and #130 do not change its outcome; no implementation issue exists, the decision is the requirement
@@ -1298,3 +1300,27 @@ Files: `backend/src/services/{pdf-format,pdf.service,reminder.service,statement.
 - [x] Code review round 3, closing (`docs/reviews/w5d-review-3.md`): C-9 closed; C-13 fixed; no Blocker/Major
 - [x] Checks before push; archive the session
 - [x] Push and pull request follow (CLAUDE.md, Workflow 9); the merge waits on the product owner (open Majors that need a decision: #327, #325; glossary row of «Abgerechnet bis»)
+
+## Session W9c: privacy statement (#82) and documents of former tenants (#178)
+
+Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requirement (no separate implementation issues exist).
+
+- [x] #82 `@wip` scenarios (privacy.feature, authentication.feature, sprachen.feature, demo.feature), committed and reviewed by `fach-reviewer` before implementing (round 1: `docs/reviews/w9c-fachreview-1.md`)
+- [x] #82 controller from `OPERATOR_*`, «Betreiber» explained, right of access (DSG) (R-1 open: #330)
+- [x] #82 retention: kept until the landlord deletes, 10 years (Art. 958f OR, only for those required to keep books), no automatic deletion (R-2 follow-up: #332)
+- [x] #82 third parties per configured provider (sign-in, mail transport via `GET /api/v1/mail-transport`, OpenPLZ, Google Maps): country, disclosure abroad, link; what the sign-in provider learns (SMTP provider and server country: #333)
+- [x] #82 Google sign-in without `access_type=offline`/`prompt=consent`, no profile picture taken over (JWT, refresh, `/auth/me`)
+- [x] #82 server log: purpose, reader, retention set by the operator
+- [x] #82 cookie lifetime from `JWT_EXPIRY`; cookies can be refused (Art. 45c lit. b FMG, fach-reviewer agreed, R-9)
+- [x] #82 sign-in page links the privacy statement
+- [x] #82 terms: demo paragraph (screens.json `terms`/`demo`); «Liegenschaftsverwalter»; FR «rappels de paiement et les rappels»; draft notice reviewed, `TODO(fachlich prüfen, #82)` removed
+- [x] #178 tenant page and overview name uploaded documents older than the end of the tenant's last Mietvertrag (No scenario: the upload API stamps the current time, so a document from before a past Vertragsende cannot be seeded; unit and DOM tests). Overview task that never ends: #331; glossary terms: #334
+- [x] code-reviewer round 1 (`docs/reviews/w9c-review-1.md`)
+- [x] fach-reviewer round 2 (`docs/reviews/w9c-fachreview-2.md`)
+- [x] personas (`docs/design/personas/helga-w9c.md`, `docs/design/personas/dr-weber-w9c.md`)
+- [x] closing code-reviewer round (`docs/reviews/w9c-review-2.md`)
+- [x] workflow notes (`docs/reviews/workflow-notes-issue-82-178.md`)
+- [x] merge of main reviewed (`docs/reviews/w9c-review-merge.md`, `-2`, `-3`): A-6 and #178 agree
+- [x] plan archived; pull request open, merge waits for the product decisions (#330, #331)
+
+Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.

@@ -11,6 +11,7 @@ import {
 	pageOverflowsSideways,
 	pageTitleText,
 	pageTitleWidth,
+	sectionLinkAddresses,
 	sectionShareInWindow,
 	sectionShown,
 	sectionText,
@@ -98,8 +99,9 @@ Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(sectionText(heading)).toContain(
-			'Jede Anmeldung und jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
+			'Jede Anmeldung, jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) und jede Abmeldung wird im Protokoll des Servers festgehalten'
 		);
+		await verwalter.sees(sectionText(heading)).toContain('ausser bei der Abmeldung, der E-Mail-Adresse');
 	}
 );
 
@@ -107,7 +109,7 @@ Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass ungespeicherte Eingaben bis zum Speichern, Verwerfen oder Abmelden als Entwurf in diesem Browser bleiben',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(draftNoticeText(heading)).toContain(
-			'als Entwurf in diesem Browser auf, bis Sie sie speichern, verwerfen oder sich abmelden'
+			'als Entwurf in diesem Browser auf, bis Sie sie speichern, verwerfen oder sich mit «Abmelden» abmelden'
 		);
 	}
 );
@@ -151,6 +153,75 @@ Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: 
 Then('erklärt die Hilfe unter {string} {string}', async ({ verwalter }, heading: string, text: string) => {
 	await verwalter.sees(sectionText(heading)).toContain(text);
 });
+
+Then(
+	'erklärt die Datenschutzerklärung unter {string}, wer der Betreiber ist',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Betreiber ist, wer');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass jede Person beim Betreiber Auskunft über ihre Daten verlangen kann',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Auskunft');
+		await verwalter.sees(sectionText(heading)).toContain('Art. 25 DSG');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello nichts von selbst löscht und wer zur Buchführung verpflichtet ist, Geschäftsbücher und Buchungsbelege 10 Jahre aufbewahrt',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('löscht Dwello keine gespeicherten Daten von selbst');
+		await verwalter.sees(sectionText(heading)).toContain('Wer zur Buchführung verpflichtet ist');
+		await verwalter.sees(sectionText(heading)).toContain('10 Jahre');
+		await verwalter.sees(sectionText(heading)).toContain('Art. 958f OR');
+	}
+);
+
+Then(
+	'nennt die Datenschutzerklärung unter {string} {string} in {string} mit seiner Datenschutzerklärung {string}',
+	async ({ verwalter }, heading: string, name: string, country: string, policy: string) => {
+		await verwalter.sees(sectionText(heading)).toContain(name);
+		await verwalter.sees(sectionText(heading)).toContain(country);
+		await verwalter.sees(sectionLinkAddresses(heading)).toContain(policy);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Google erfährt, wann und von welcher IP-Adresse diese Installation genutzt wird',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('diese Dwello-Installation');
+		await verwalter.sees(sectionText(heading)).toContain('IP-Adresse');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass nur der Betreiber das Protokoll des Servers zur Sicherheit und Fehlersuche liest und selbst bestimmt, wie lange es aufbewahrt wird',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Sicherheit');
+		await verwalter.sees(sectionText(heading)).toContain('Fehlersuche');
+		await verwalter.sees(sectionText(heading)).toContain('nur der Betreiber');
+		await verwalter.sees(sectionText(heading)).toContain('legt der Betreiber');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass {string} und {string} {int} Tage gelten',
+	async ({ verwalter }, heading: string, first: string, second: string, days: number) => {
+		await verwalter.sees(sectionText(heading)).toContain(`«${first}»`);
+		await verwalter.sees(sectionText(heading)).toContain(`«${second}»`);
+		await verwalter.sees(sectionText(heading)).toContain(`${days} Tage`);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass er Cookies im Browser ablehnen kann, sich dann aber nicht anmelden kann',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('ablehnen');
+		await verwalter.sees(sectionText(heading)).toContain('nicht anmelden');
+	}
+);
 
 Then(
 	'erklärt die Hilfe den Begriff {string} mit {string}',

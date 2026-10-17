@@ -52,6 +52,12 @@
 				data-testid="login-terms-link"
 				class="text-accent underline underline-offset-4">{m.terms_title()}</a
 			>.
+			{m.login_privacy_before()}
+			<a
+				href="/privacy"
+				data-testid="login-privacy-link"
+				class="text-accent underline underline-offset-4">{m.privacy_record()}</a
+			>.
 		</p>
 	</div>
 </div>

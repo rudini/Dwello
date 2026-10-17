@@ -10,7 +10,6 @@ declare global {
 				email: string;
 				name: string;
 				provider: string;
-				picture?: string;
 			};
 		}
 		// interface PageData {}

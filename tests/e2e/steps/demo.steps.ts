@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { sectionText } from '../questions/app-frame';
 import { demoNoticeShown, demoNoticeText } from '../questions/demo';
-import { openDemoOverview, openDemoPrivacy, openDemoSignIn } from '../tasks/demo';
+import { openDemoOverview, openDemoPrivacy, openDemoSignIn, openDemoTerms } from '../tasks/demo';
 
 const { When, Then } = createBdd(test);
 
@@ -41,6 +41,19 @@ Then(
 		await verwalter.sees(sectionText(heading)).toContain('dieselben Daten');
 		await verwalter.sees(sectionText(heading)).toContain('jede Nacht');
 		await verwalter.sees(sectionText(heading)).toContain('Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht, nur der Betreiber');
+	}
+);
+
+When('der Liegenschaftsverwalter die Nutzungsbedingungen der Demo liest', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openDemoTerms);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass alle Besucher dieselben Daten sehen, jede Nacht alles gelöscht wird und er keine echten Daten eingeben soll',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('dieselben Daten');
+		await verwalter.sees(sectionText(heading)).toContain('jede Nacht');
+		await verwalter.sees(sectionText(heading)).toContain('keine echten Daten');
 	}
 );
 

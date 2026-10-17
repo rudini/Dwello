@@ -24,7 +24,6 @@ interface GoogleUserProfile {
 	name: string;
 	given_name?: string;
 	family_name?: string;
-	picture?: string;
 }
 
 interface MicrosoftUserProfile {
@@ -110,9 +109,7 @@ export function generateOAuthUrl(provider: OAuthProvider, state: string): string
 		redirect_uri: creds.redirectUri,
 		response_type: 'code',
 		scope: config.scopes.join(' '),
-		state: state,
-		access_type: 'offline', // Request refresh token
-		prompt: 'consent' // Force consent screen to get refresh token
+		state: state
 	});
 
 	// Microsoft-specific parameters
@@ -189,8 +186,7 @@ export async function fetchUserProfile(
 			sub: profile.id,
 			email: profile.email,
 			name: profile.name,
-			provider: 'google',
-			picture: profile.picture
+			provider: 'google'
 		};
 	} else {
 		const profile: MicrosoftUserProfile = await response.json();
@@ -198,8 +194,7 @@ export async function fetchUserProfile(
 			sub: profile.id,
 			email: profile.mail || profile.userPrincipalName,
 			name: profile.displayName,
-			provider: 'microsoft',
-			picture: undefined // Microsoft Graph requires separate call for photo
+			provider: 'microsoft'
 		};
 	}
 }

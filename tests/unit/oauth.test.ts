@@ -54,9 +54,11 @@ describe('OAuth URL Generation', () => {
 			expect(url).toContain('openid');
 		});
 
-		it('should request offline access for refresh tokens', () => {
+		// #82: Dwello asks for no lasting access to the account
+		it('should not request offline access or a forced consent', () => {
 			const url = generateOAuthUrl('google', 'state');
-			expect(url).toContain('access_type=offline');
+			expect(url).not.toContain('access_type');
+			expect(url).not.toContain('prompt');
 		});
 	});
 });
@@ -160,7 +162,8 @@ describe('User Profile Fetching', () => {
 			expect(profile.email).toBe('user@gmail.com');
 			expect(profile.name).toBe('Google User');
 			expect(profile.provider).toBe('google');
-			expect(profile.picture).toBe('https://google.com/photo.jpg');
+			// #82: the profile picture Google also sends is not taken over
+			expect(profile).not.toHaveProperty('picture');
 		});
 
 		it('should fetch Microsoft user profile', async () => {

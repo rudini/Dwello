@@ -19,6 +19,10 @@ const providers: Record<string, (env: MailEnv, from: string) => MailTransport> =
 	resend: resendTransport
 };
 
+/** The configured provider's name for the privacy statement; null while none is configured */
+export const mailTransportName = (env: MailEnv = process.env) =>
+	env.MAIL_TRANSPORT && Object.keys(providers).includes(env.MAIL_TRANSPORT) ? env.MAIL_TRANSPORT : null;
+
 export function createMailTransport(env: MailEnv = process.env): MailTransport {
 	const name = env.MAIL_TRANSPORT;
 	if (!name) throw new MailConfigError('E-mail delivery is not configured (MAIL_TRANSPORT)');

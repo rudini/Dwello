@@ -7,3 +7,4 @@ export const DEMO_INSTANCE = 'http://localhost:3104';
 export const openDemoSignIn = Navigate.to(`${DEMO_INSTANCE}/login`);
 export const openDemoOverview = Navigate.to(`${DEMO_INSTANCE}/dashboard`);
 export const openDemoPrivacy = Navigate.to(`${DEMO_INSTANCE}/privacy`);
+export const openDemoTerms = Navigate.to(`${DEMO_INSTANCE}/terms`);
