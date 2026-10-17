@@ -207,6 +207,7 @@ Funktionalität: Barrierefreiheit
       | privacy                | default             |
       | privacy                | demo                |
       | terms                  | default             |
+      | terms                  | demo                |
       | analytics              | default             |
       | reports                | default             |
       | help-public            | default             |

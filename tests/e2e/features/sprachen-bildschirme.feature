@@ -208,6 +208,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | privacy                | default             |
       | privacy                | demo                |
       | terms                  | default             |
+      | terms                  | demo                |
       | analytics              | default             |
       | reports                | default             |
       | help-public            | default             |

@@ -4,6 +4,7 @@ import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-
 import { overviewDeadlines, overviewTasks, type Deadline, type Task } from '$lib/overview';
 import { localToday } from '$lib/contract-status';
 import { reletStarts } from '$lib/apartment';
+import { formerTenantDocuments } from '$lib/former-tenant-documents';
 
 export interface DashboardData {
 	portfolio: {
@@ -131,6 +132,24 @@ const expired = (contracts: Row[], today: string) =>
 			endDate: String(c.endDate)
 		}));
 
+// Ehemalige Mieter with uploads from before their last Vertragsende (#178)
+type Contracts = Parameters<typeof formerTenantDocuments>[0];
+function formerTenants(contracts: Row[], documents: Row[], today: string) {
+	const of = (rows: Row[], tenantId: unknown) => rows.filter((r) => r.tenantId === tenantId);
+	return [...new Set(contracts.map((c) => c.tenantId))].flatMap((tenantId) => {
+		const former = formerTenantDocuments(
+			of(contracts, tenantId) as Contracts,
+			of(documents, tenantId) as { type: string; createdAt: string }[],
+			today,
+			contracts as Contracts
+		);
+		const tenantName = String(contracts.find((c) => c.tenantId === tenantId)?.tenantName);
+		return former
+			? [{ tenantId: String(tenantId), tenantName, endDate: former.endDate, count: former.documents.length }]
+			: [];
+	});
+}
+
 const tenantOf = (statement: Row) => {
 	const tenant = statement.tenant as Row | null;
 	return tenant ? `${tenant.firstName} ${tenant.lastName}` : '';
@@ -152,7 +171,8 @@ export const load = async ({
 		apartments,
 		allContracts,
 		stored,
-		drafts
+		drafts,
+		documents
 	] = await Promise.all([
 		fetchRecord(
 			fetch,
@@ -167,7 +187,8 @@ export const load = async ({
 		list(fetch, 'apartments?limit=1000', 'apartments'),
 		list(fetch, 'contracts?limit=1000', 'contracts'),
 		config,
-		list(fetch, 'statements?status=draft&limit=100', 'data')
+		list(fetch, 'statements?status=draft&limit=100', 'data'),
+		list(fetch, 'documents', 'data')
 	]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
@@ -200,6 +221,7 @@ export const load = async ({
 		noticedContracts,
 		oldAddresses: oldAddresses(drafts),
 		expiredContracts: expired(allContracts, today),
+		formerTenants: formerTenants(allContracts, documents, today),
 		// a contract with a task is named by it, not twice (A-4.4); one given notice with a next tenant keeps its
 		// deadline (review K-6)
 		endingContracts: contracts

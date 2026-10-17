@@ -16,7 +16,6 @@ export interface JwtPayload {
 	email: string;
 	name: string;
 	provider: 'google' | 'microsoft' | 'swisseid';
-	picture?: string;
 }
 
 /**
@@ -41,8 +40,7 @@ export async function generateJwt(user: JwtPayload): Promise<string> {
 		sub: user.sub,
 		email: user.email,
 		name: user.name,
-		provider: user.provider,
-		picture: user.picture
+		provider: user.provider
 	})
 		.setProtectedHeader({ alg: jwtConfig.algorithm })
 		.setIssuedAt()

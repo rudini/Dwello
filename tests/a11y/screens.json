@@ -75,7 +75,7 @@
 		"server-error": "The error page for a failed load (not 404): message and the hint to try again.",
 		"other-language": "The page in French, chosen with the language selection (it reloads in French).",
 		"language-menu-open": "The language menu in the header open.",
-		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement also its section on the demo."
+		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement and the terms also their section on the demo."
 	},
 	"screens": [
 		{
@@ -698,7 +698,8 @@
 			"name": "terms",
 			"path": "/terms",
 			"states": [
-				"default"
+				"default",
+				"demo"
 			]
 		},
 		{
