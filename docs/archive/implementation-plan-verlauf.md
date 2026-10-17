@@ -1034,3 +1034,21 @@ Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/Z
 - [x] code-reviewer per slice; feature review: persona Dr. Weber on the fr/it/en PDFs and letters, 2 rounds (`docs/design/personas/dr-weber-w4d.md`; round 1 read German refund PDFs cached before the SQL language change → bug #351); fach-reviewer covered by the two reviews before implementation (no domain change since); no daten-pruefer (no amounts changed)
 - [x] Workflow review: `docs/reviews/workflow-notes-issue-83-84.md`; E2E: language and axe rows of contract, statement and help screens and `statement-reminder.feature` (148 passed); archive the session
 - [ ] PR `Fixes #83` `Fixes #84`, CI, merge
+
+## Session W3d: Monatlich total names and «Tankbestand» title (#62, #75)
+
+Branch `claude/w3d-monatlich-total-tankbestand-62-75`. Both issues have "Done means" worded like decision issues; their "Decided (product owner)" sections are the requirement.
+
+- [x] #62, #75: glossary checked: «Monatlich total» no longer compares with «Bruttomiete»; «Zeitanteil», «Heizmaterial», «Empfangsschein» are entries; no `TODO(fachlich prüfen, #62|#75)` markers left
+- [x] #75: scenario «Der Abschnitt zum Heizmaterial heisst Tankbestand» in `building-detail.feature`, seen red, green
+- [x] fach-reviewer on the `@wip` scenario and the fr/it/en words before implementing: `docs/reviews/w3d-fachreview-1.md`
+- [x] #75: `buildings_fuel_title` «Tankbestand» in four languages (fr/it/en from `docs/design/i18n-begriffe.md`, not the «citerne / serbatoio» of #315); fr intro «le dépôt» (V-1)
+- [x] #62: rename `grossRent`, `rentBrutto`, `totalBrutto` and the test «Bruttomiete» to Monatlich total names (No scenario: internal names only, no behaviour change; no API field involved); `grossRent`, `rentBrutto`, `totalBrutto` → `monthlyTotal`
+- [x] slice review rename (code-reviewer): `docs/reviews/rename-review-1.md`
+- [x] #62 after review: tenant rental `rent` → `monthlyTotal` (V-5), E2E step «beträgt das Monatlich total der Wohnung» (V-6, C-1)
+- [x] slice review title (code-reviewer): `docs/reviews/title-review-1.md` (Nits stay)
+- [x] feature review: persona `docs/design/personas/helga-w3d.md` (no Blocker/Major; P-1 to P-5 stay in the report); fach-reviewer not again: no words changed after round 1 apart from its own V-1
+- [x] Workflow note: `docs/reviews/workflow-notes-w3d.md`
+- [x] Blocked on me: none for the glossary; «Monatlich total» without «Bruttomiete» and the entries «Zeitanteil», «Heizmaterial», «Empfangsschein» are already in `UBIQUITOUS_LANGUAGE.md`
+
+Files: `src/lib/server/{contract-history,apartment}.ts`, `src/lib/types.ts`, `src/routes/apartments/[id]/{ContractHistory,MonthlyCostsCard}.svelte`, `src/routes/tenants/[id]/{+page.server.ts,TenantContracts.svelte,TenantRentalCard.svelte}`, `messages/*.json`, tests in `src/__tests__/{apartment,apartments-pages.dom,tenant-detail,tenant-detail-page.dom,buildings-pages.dom}.test.ts`, E2E `building-detail` and `apartment-detail` features, steps, questions, targets.

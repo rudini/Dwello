@@ -339,7 +339,7 @@
 	"buildings_delete_text_before": "L’immobile",
 	"buildings_delete_text_after": "e tutte le sue fatture verranno eliminati definitivamente. L’operazione non può essere annullata.",
 	"buildings_delete_impossible": "Eliminazione impossibile",
-	"buildings_fuel_title": "Combustibile nel serbatoio o nel deposito",
+	"buildings_fuel_title": "Scorta di combustibile",
 	"buildings_fuel_intro": "Solo per immobili riscaldati a olio, gas liquido, pellet o legna. Viene conteggiato ciò che è stato consumato: scorta iniziale + acquisti − scorta finale. Registri a tal fine, l’ultimo giorno di ogni periodo di conteggio, per esempio il 31.12., il valore nel serbatoio o nel deposito in franchi. Il valore del 31.12.2024 è la scorta finale 2024 e la scorta iniziale 2025. Calcoli il valore così: quantità nel serbatoio o nel deposito per il prezzo unitario (litro, kg o stero) dell’ultima fornitura. Se nel serbatoio o nel deposito c’è più dell’ultima fornitura, calcoli il resto al prezzo della fornitura precedente. Se legge il livello solo a inizio gennaio, registri comunque il valore al 31.12.",
 	"buildings_not_loaded": "Non caricato",
 	"buildings_fuel_load_failed": "Non è stato possibile caricare le scorte di combustibile. Ricarichi la pagina.",
