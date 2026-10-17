@@ -863,6 +863,38 @@ describe('Abrechnungsdetail', () => {
 		expect(recipient).toContain('Ahornweg 3, 8400 Winterthur');
 	});
 
+	// A-5 (#114): nach dem Auszug ginge die Abrechnung an die verlassene Wohnung; versenden bleibt möglich
+	it('warnt vor dem Versand, wenn der ausgezogene Mieter noch die Adresse der Wohnung hat', () => {
+		detail({ tenantName: 'Eva Frei', oldAddress: true });
+		click('statement-send-button');
+		expect(byTestId('send-old-address')!.textContent).toContain(
+			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
+		);
+		expect(byTestId('statement-send-confirm')).not.toBeNull();
+	});
+
+	// Persona W3c Anna P-2: schon auf der Seite des Entwurfs, nicht erst im Dialog; nach dem Versand nicht mehr
+	it('warnt auf der Seite eines Entwurfs, wenn der ausgezogene Mieter noch die Adresse der Wohnung hat', () => {
+		detail({ tenantName: 'Eva Frei', tenantId: 't1', oldAddress: true, status: 'draft' });
+		const warning = byTestId('statement-old-address')!;
+		expect(warning.textContent).toContain(
+			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
+		);
+		expect(warning.querySelector('a')!.getAttribute('href')).toBe('/tenants/t1/edit');
+	});
+
+	it('warnt auf der Seite einer versendeten Abrechnung nicht mehr', () => {
+		detail({ oldAddress: true, status: 'sent' });
+		expect(byTestId('statement-old-address')).toBeNull();
+	});
+
+	it('warnt nicht, solange die Adresse nicht die der Wohnung ist', () => {
+		detail({ oldAddress: false });
+		click('statement-send-button');
+		expect(byTestId('send-recipient')).not.toBeNull();
+		expect(byTestId('send-old-address')).toBeNull();
+	});
+
 	it('bietet eine versendete Abrechnung zum Mahnen und Bezahlen an, aber nicht zum Löschen', () => {
 		detail({ status: 'sent' });
 

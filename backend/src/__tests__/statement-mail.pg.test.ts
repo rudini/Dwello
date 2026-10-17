@@ -62,6 +62,10 @@ const statusOf = async (id: string) =>
 
 const storedFor = (id: string) => db.select().from(documents).where(eq(documents.statementId, id));
 
+// the PDF as sent, made at sending and kept with the statement (W3c, closing review C-1)
+const pdfKept = async (id: string) =>
+	!!(await db.select({ pdf: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id)))[0].pdf;
+
 beforeAll(async () => {
 	smtp = new SMTPServer({
 		authOptional: true,
@@ -129,6 +133,7 @@ describe('Abrechnung per E-Mail versenden', () => {
 		expect(result.document).toMatchObject({ type: 'statement', channel: 'email', status: 'sent', title: 'Nebenkostenabrechnung', paymentDeadline: null });
 		const [stored] = await storedFor(id);
 		expect(Buffer.from(stored.content, 'base64').equals(mail.attachments[0].content)).toBe(true);
+		expect(await pdfKept(id)).toBe(true);
 	});
 
 	it('schreibt die E-Mail in der Sprache des Mieters', async () => {
@@ -216,6 +221,7 @@ describe('Abrechnung per Brief', () => {
 		expect(result.document).toBeUndefined();
 		expect(mails.length).toBe(before);
 		expect(await storedFor(id)).toHaveLength(0);
+		expect(await pdfKept(id)).toBe(true);
 	});
 
 	it('stellt sie nach einer gescheiterten E-Mail per Brief zu', async () => {

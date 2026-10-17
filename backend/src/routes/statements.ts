@@ -10,7 +10,6 @@ import {
 	listStatements,
 	getStatement,
 	updateStatement,
-	updateStatementStatus,
 	deleteStatement,
 	addLineItems,
 	getStatementCountsByStatus,
@@ -18,7 +17,7 @@ import {
 	generateStatement,
 	resetPayment
 } from '../services/statement.service';
-import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
+import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { changedInvoices } from '../services/statement-invoices.service';
 import { sendStatement } from '../services/statement-send.service';
 
@@ -230,7 +229,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/:id/status',
 		async ({ params, body, set }) => {
 			try {
-				const statement = await updateStatementStatus(
+				const statement = await changeStatementStatus(
 					params.id,
 					body.status as 'draft' | 'sent' | 'paid' | 'overdue',
 					{

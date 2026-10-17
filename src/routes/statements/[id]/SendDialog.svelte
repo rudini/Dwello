@@ -6,6 +6,7 @@
 	import type { StatementWithDetails } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
+	import OldAddressWarning from './OldAddressWarning.svelte';
 
 	// Before "Versendet": to a tenant who wants e-mail Dwello sends the PDF itself (#86); for a letter, also instead of a
 	// failed e-mail (byLetter), the user delivers the PDF and then records it here
@@ -89,6 +90,7 @@
 			</dd>
 		</div>
 	</dl>
+	<OldAddressWarning {statement} testid="send-old-address" />
 	<div>
 		<Button
 			href="/statements/{statement.id}/pdf?ansehen"

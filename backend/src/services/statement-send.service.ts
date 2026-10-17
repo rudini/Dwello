@@ -10,8 +10,8 @@ import { getTypedConfig } from './config.service';
 import { createDocument } from './document.service';
 import { balanceText } from './pdf.service';
 import { statementMail } from './reminder-letter';
-import { generateStatementPdf } from './statement-pdf.service';
-import { getStatement, updateStatementStatus } from './statement.service';
+import { changeStatementStatus, generateStatementPdf } from './statement-pdf.service';
+import { getStatement } from './statement.service';
 import { getTenant } from './tenant.service';
 
 export async function sendStatement(id: string, byLetter = false) {
@@ -19,7 +19,7 @@ export async function sendStatement(id: string, byLetter = false) {
 	if (!statement) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (statement.status !== 'draft') throw new CodedError('STATEMENT_ALREADY_SENT', 'Only a draft can be sent');
 	const tenant = (await getTenant(statement.tenantId))!;
-	if (byLetter || tenant.correspondenceChannel !== 'email') return { statement: await updateStatementStatus(id, 'sent') };
+	if (byLetter || tenant.correspondenceChannel !== 'email') return { statement: await changeStatementStatus(id, 'sent') };
 	if (!tenant.email) throw new CodedError('STATEMENT_TENANT_NO_EMAIL', 'The tenant has no e-mail address');
 
 	// the PDF dated today, as it goes out and stays in the Dokument
@@ -47,7 +47,7 @@ export async function sendStatement(id: string, byLetter = false) {
 		throw new CodedError('STATEMENT_MAIL_FAILED', 'The e-mail was not delivered');
 	}
 
-	const sent = await updateStatementStatus(id, 'sent');
+	const sent = await changeStatementStatus(id, 'sent');
 	const document = await createDocument({
 		tenantId: tenant.id,
 		statementId: id,

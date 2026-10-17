@@ -556,7 +556,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 **Header Section:**
 - Statement number (auto-generated, unique identifier)
 - Statement date (date statement was issued)
-- Tenant name and address
+- Tenant name and Korrespondenzadresse; abroad the country alone on the last line, in capitals, a neighbouring country in its language, any other in English (Swiss Post, #102)
 - Apartment identification (floor, size, room count)
 - Apartment address (building address + unit number)
 - Accounting period (from - to dates)
@@ -710,14 +710,14 @@ BALANCE (refund): CHF 30
 - IBAN: Configured in settings
 - Reference number: QR reference (QRR) only when the configured IBAN is a QR-IBAN; with a normal IBAN no reference
 - Amount: Total balance due (CHF)
-- Debtor: Tenant name and address
+- Debtor: Tenant name and Korrespondenzadresse with its country (ISO code); printed with the country code before the postal code outside Switzerland, e.g. «DE-78462 Konstanz» (#102)
 - Payment description: Statement number and period reference
 
 **IBAN Management:**
-- Global IBAN setting (Swiss bank account details)
+- Global IBAN setting (bank account in Switzerland or Liechtenstein)
 - Stored securely in configuration
 - Multiple IBANs per building (future feature)
-- Validation with a valid MOD-97 checksum: the settings form accepts only Swiss IBANs (CH), the QR-bill service also Liechtenstein (LI); which one applies is open (#191)
+- Validation: an IBAN from Switzerland (CH) or Liechtenstein (LI) with a valid MOD-97 checksum, in the settings form and the QR-bill service alike (#191)
 
 **QR Code Generation:**
 - Encodes all necessary payment information
@@ -960,7 +960,7 @@ BALANCE (refund): CHF 30
 - Email (required only when the Korrespondenzkanal is e-mail)
 - Phone (optional)
 - Korrespondenzkanal: letter (default) or e-mail
-- Address (street, postal code, city)
+- Korrespondenzadresse (street with house number, postal code, city, country; country Schweiz unless chosen, #102), with the help «Hierhin gehen Abrechnungen und Mahnungen; nach dem Auszug die neue Adresse eintragen» (#68); a 4-digit postal code is checked only in Switzerland and Liechtenstein
 - Notes (optional)
 - Submit/Cancel
 
@@ -1105,7 +1105,7 @@ BALANCE (refund): CHF 30
 
 **Tab 7: IBAN Setting**
 - IBAN input field (for QR-bill generation)
-- Format validation (settings form: CH only; QR-bill service: CH or LI, #191; MOD-97 checksum)
+- Format validation: CH or LI with a valid MOD-97 checksum (#191)
 - Test QR-bill preview
 - Help text: "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung."
 - A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference
