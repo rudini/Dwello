@@ -13,6 +13,11 @@ export const announcement = (text: string) =>
 	target(`Ansage «${text}»`, (page) => page.getByRole('status').filter({ hasText: text }));
 export const buildingCheckbox = (buildingId: string) =>
 	target(`Gebäude ${buildingId} für die Abrechnungen`, (page) => page.getByTestId(`generate-building-${buildingId}`));
+export const existingStatements = target('Hinweis «Es gibt schon Abrechnungen»', (page) => page.getByTestId('existing-statements'));
+export const stepLabel = target('Name des Schritts', (page) => page.getByTestId('statement-step-label'));
+export const allBuildingsCheckbox = target('Alle Gebäude', (page) => page.getByTestId('generate-all-buildings'));
+// Next to the counter: the buildings «Alle Gebäude» leaves out
+export const allBuildingsNote = target('Hinweis zu «Alle Gebäude»', (page) => page.getByTestId('generate-all-buildings-note'));
 // Mietverträge of the building that already have a statement for the period (step 2)
 export const buildingBilled = (buildingId: string) =>
 	target(`Schon abgerechnet im Gebäude ${buildingId}`, (page) => page.getByTestId(`generate-building-billed-${buildingId}`));
@@ -22,6 +27,7 @@ export const previewFee = target('Verwaltungspauschale der Vorschau', (page) => 
 export const previewRows = target('Zeilen der Vorschau', (page) => page.getByTestId('preview-row'));
 export const previewRow = (tenantName: string) =>
 	target(`Zeile von «${tenantName}» in der Vorschau`, (page) => previewRows.locate(page).filter({ hasText: tenantName }));
+export const previewAllBilled = target('Hinweis alle Mietverträge abgerechnet', (page) => page.getByTestId('preview-all-billed'));
 export const previewAkontoHint = (tenantName: string) =>
 	target(`Akonto-Hinweis von «${tenantName}» in der Vorschau`, (page) =>
 		previewRow(tenantName).locate(page).getByTestId('preview-akonto-hint')

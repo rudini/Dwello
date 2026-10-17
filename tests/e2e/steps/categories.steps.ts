@@ -10,6 +10,7 @@ import {
 	descriptionOf,
 	contractHint,
 	formReasonText,
+	hiddenDescription,
 	kindOf,
 	predefinedHintText,
 	whyNotDeletable,
@@ -32,7 +33,8 @@ import {
 	saveAsNotAllowed,
 	saveFormAsNotAllowed,
 	saveWithoutChoice,
-	showAllowedCategories
+	showAllowedCategories,
+	usePhone
 } from '../tasks/categories';
 
 const { Given, When, Then } = createBdd(test);
@@ -80,6 +82,14 @@ Given(
 		await verwalter.attemptsTo(openPredefinedCategory(name));
 	}
 );
+
+Given('der Liegenschaftsverwalter benutzt ein Telefon', async ({ verwalter }) => {
+	await verwalter.attemptsTo(usePhone);
+});
+
+Then('zeigt das Feld «Beschreibung» seinen ganzen Text', async ({ verwalter }) => {
+	await verwalter.sees(hiddenDescription).toBe(0);
+});
 
 When('der Liegenschaftsverwalter nur die umlagefähigen Kategorien anzeigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(showAllowedCategories);
