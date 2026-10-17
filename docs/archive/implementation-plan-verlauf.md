@@ -922,3 +922,13 @@ Files: `backend/migrations/0014_line_item_invoices.sql`, `backend/src/db/schema.
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-136-72-73-61.md` (collected review left to the coordinator, see the note)
 - Open, needs the product owner: glossary #315; that a negative consumption needs no confirmation (#73) although Anna P-1 asked for one
 - [x] workflow-review, session archived, pull request
+
+## Session 2026-10-17 W8c: statement wizard check thresholds (#65)
+
+- [x] #130 read: its open rhythm question refines `missingParts` only with a year before, which already needs at least 2 invoices; the two rules stay apart
+- [x] Thresholds confirmed as UX choices (15 % / 30 % Akonto, 25 % and CHF 100, 92 days): `#65` markers replaced by comments naming the issue (No scenario: code comments only); the F-16 half (#76) and the #130 marker in `CategoryCheck.svelte` stay
+- [ ] 3-month gap only for categories with more than one invoice the year before: blocked, the hint runs per building and only without a year before; options A/B/C asked in #65 (label `entscheiden`); its markers in `statement-wizard.ts` (`GAP_DAYS`) and `PreviewChecks.svelte` stay
+- Files: `src/lib/statement-wizard.ts`, `src/routes/statements/generate/CategoryCheck.svelte`, `backend/src/services/invoice-completeness.service.ts`, `implementation_plan.md`, this archive, `docs/reviews/{w8c-review-1,workflow-notes-issue-65}.md`
+- [x] code-reviewer round 1: `docs/reviews/w8c-review-1.md` (C-1, C-2, C-3 Nits fixed)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-65.md`
+- [x] workflow-review, session archived, pull request (`Refs #65`)

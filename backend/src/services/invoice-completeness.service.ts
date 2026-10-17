@@ -47,7 +47,7 @@ export interface CategoryFinding {
 // A change of more than 25 % and at least CHF 100 against the year before is worth a look: a UX choice (#65)
 const DEVIATION_SHARE = 0.25;
 const DEVIATION_MINIMUM = 100;
-// The year before counts as recorded when the building's first invoice lies in its first 92 days: a UX choice (#65)
+// The year before counts as recorded when the building's first invoice lies within 92 days of its start: a UX choice (#65)
 const RECORDED_FROM_START_DAYS = 92;
 // An invoice without Leistungszeitraum dated up to 90 days after the period end may belong to the period (#131)
 const LATE_INVOICE_DAYS = 90;
