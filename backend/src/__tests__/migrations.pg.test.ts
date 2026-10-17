@@ -86,4 +86,39 @@ describe('Migrationen anwenden', () => {
 		expect(await query(name, `SELECT value FROM configuration WHERE key = 'default_language'`)).toEqual([{ value: 'de' }]);
 		await expect(query(name, `UPDATE tenants SET language = 'rm'`)).rejects.toThrow('tenants_language_check');
 	});
+	// #79: ein Entwurf erhält die Rundung zugunsten des Mieters; was versendet ist, behält den Saldo, den der Mieter erhielt
+	it('rundet den Saldo der Entwürfe neu und lässt versendete Abrechnungen, wie sie sind', async () => {
+		const name = await database();
+		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+		for (const file of files.filter((file) => file < '0016_statement_balance_tenant_favour.sql')) {
+			await copyFile(join(migrations, file), join(before, file));
+		}
+		await migrate(`${server}/${name}`, before);
+		await query(
+			name,
+			`WITH b AS (INSERT INTO buildings (name, address, postal_code, city, canton) VALUES ('Testhof', 'Testweg 1', '8400', 'Winterthur', 'ZH') RETURNING id),
+			a AS (INSERT INTO apartments (building_id, number, area, rooms) SELECT id, '1.01', 50, 2 FROM b RETURNING id),
+			t AS (INSERT INTO tenants (first_name, last_name) VALUES ('Test', 'Mieter') RETURNING id),
+			c AS (INSERT INTO rental_contracts (apartment_id, tenant_id, start_date, base_rent, monthly_advance_payment)
+				SELECT a.id, t.id, '2020-01-01', 900, 20 FROM a, t RETURNING id, apartment_id, tenant_id)
+			INSERT INTO utility_statements (tenant_id, apartment_id, contract_id, statement_number, period_start, period_end,
+				statement_date, rental_days, rental_start, rental_end, total_costs, total_advance_payments, balance, status, pdf_blob)
+			SELECT tenant_id, apartment_id, id, n, '2024-01-01', '2024-12-31', '2025-01-15', 366, '2024-01-01', '2024-12-31', 1031.03, advance, balance, status, 'pdf'
+			FROM c, (VALUES ('S-1', 240, 791.05, 'draft'), ('S-2', 1080, -48.95, 'draft'), ('S-3', 1031.00, 0.05, 'draft'),
+				('S-4', 1031.04, 0.00, 'draft'), ('S-5', 1031.03, 0.00, 'draft'), ('S-6', 240, 791.05, 'sent'), ('S-7', 1080, -48.95, 'paid'))
+				AS s (n, advance, balance, status)`
+		);
+
+		await migrate(`${server}/${name}`, migrations);
+
+		expect(await query(name, 'SELECT statement_number, balance, pdf_blob FROM utility_statements ORDER BY statement_number')).toEqual([
+			{ statement_number: 'S-1', balance: '791.00', pdf_blob: null },
+			{ statement_number: 'S-2', balance: '-49.00', pdf_blob: null },
+			{ statement_number: 'S-3', balance: '0.00', pdf_blob: null },
+			{ statement_number: 'S-4', balance: '-0.05', pdf_blob: null },
+			{ statement_number: 'S-5', balance: '0.00', pdf_blob: 'pdf' },
+			{ statement_number: 'S-6', balance: '791.05', pdf_blob: 'pdf' },
+			{ statement_number: 'S-7', balance: '-48.95', pdf_blob: 'pdf' }
+		]);
+	});
 });
