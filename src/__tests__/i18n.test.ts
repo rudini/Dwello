@@ -36,6 +36,23 @@ describe('Sprachdateien', () => {
 		);
 		expect(wrong).toEqual([]);
 	});
+
+	// #83: Kündigungsfrist and Kündigungstermin as in Art. 266a–266c OR
+	it('Französisch sagt «délai de congé» und «terme de congé», nicht «… de résiliation»', () => {
+		const messages = JSON.parse(readFileSync('messages/fr.json', 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && /(délai|terme)s? de résiliation/i.test(text)
+		);
+		expect(wrong).toEqual([]);
+	});
+
+	it('Italienisch sagt «termine di preavviso» und «ricevimento della disdetta»', () => {
+		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && /termin[ei] di disdetta|ricezione della disdetta/i.test(text)
+		);
+		expect(wrong).toEqual([]);
+	});
 });
 
 // Renders a page through the server hook; the page template carries %lang%

@@ -6,9 +6,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 Request (coordinator): «Setze #83 #84 um». #83 Option B: the Fedlex word (OR/ZGB, VMWG in fr/it) where one exists, a native speaker only for the rest, English plain words. #84 Option B: an AI model reads the texts a tenant sees (statement PDF, reminder letters, e-mails) as a native speaker; the landlord UI later. Both "Done means" are worded as decision issues: the decision is the requirement. Fedlex read with single `curl` downloads (WebFetch got 503): SR 220 of 1.10.2026, SR 221.213.11 of 1.10.2025, fr and it.
 
-- [ ] fach-reviewer on the term proposal (Fedlex words for the ❓ terms and «Kündigungsfrist»), before any text changes
-- [ ] #83: terms with a Fedlex word in `docs/design/i18n-begriffe.md`, `messages/{fr,it,en}.json`, PDF and letter texts; terms pinned in `src/__tests__/i18n.test.ts` (red first)
-- [ ] #83: remaining ❓ terms (no Fedlex word) listed for a native speaker, follow-up issue
+- [x] fach-reviewer on the term proposal (Fedlex words for the ❓ terms and «Kündigungsfrist»), before any text changes: `docs/reviews/w4d-terms-fachreview-1.md`
+- [x] #83: terms with a Fedlex word in `docs/design/i18n-begriffe.md`, `messages/{fr,it,en}.json`, PDF and letter texts; terms pinned in `src/__tests__/i18n.test.ts` (red first). Kündigungsfrist fr «délai de congé», it «termine di preavviso»; Kündigungstermin fr «terme de congé»; it «addebitabile» settled; English ❓ removed. Files: `messages/{fr,it}.json`, `docs/design/i18n-begriffe.md`, `src/__tests__/i18n.test.ts`. No scenario: wording of existing texts only, pinned by `i18n.test.ts`; `sprachen-bildschirme.feature` checks the screens
+- [x] #83: remaining ❓ terms (no Fedlex word: Umlagefähig fr, Mahnung family, Abrechnungslauf, Konfidenz, Kündigung aufheben) for a native speaker: #342; scope of Option B for «inquilino»/«pigione»: #343
 - [ ] #84: AI native reads (fr, it, en) of statement PDF, reminder letters and e-mail; fix the findings as pure text changes
 - [ ] #84: German findings of `i18n-native-de.md` still open listed in the issue
 - [ ] code-reviewer per slice; feature review (persona on the fr/it PDF and letters, fach-reviewer)
