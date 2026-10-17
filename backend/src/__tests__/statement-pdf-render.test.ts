@@ -148,11 +148,26 @@ describe('PDF einer Nachzahlung', () => {
 		expect(fr).toContain('Informations supplémentaires Décompte des charges NK-1-2025-0001');
 	});
 
-	// Der QR-Code nennt den Zahlungspflichtigen nur mit vollständiger Adresse
-	it('nennt «Zahlbar durch» nur mit Name, Postleitzahl und Ort', async () => {
-		const pdf = await textOf({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } });
+	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code, auch wo er ein Zeichen ersetzt (#78)
+	it('druckt Zahlungsempfänger und Zahlungspflichtigen wie im QR-Code', async () => {
+		const shop = { ...config, companyName: 'Müller’s Immobilien' };
+		const tenant = { firstName: 'Nina', lastName: 'D’Angelo', address: 'Seeweg 15', postalCode: '6003', city: 'Luzern' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant }, shop, 'de'), 'base64')).flowing;
 
-		expect(pdf.flowing).not.toContain('Zahlbar durch');
+		expect(pdf).toContain("Zahlbar an CH44 3199 9123 0008 8901 2 Müller's Immobilien Firmenweg 9 8001 Zürich");
+		expect(pdf).toContain("Zahlbar durch Nina D'Angelo Seeweg 15 6003 Luzern");
+	});
+
+	// Der QR-Code nennt den Zahlungspflichtigen nur mit vollständiger Adresse; sonst lassen Empfangsschein und Zahlteil
+	// unter «Zahlbar durch (Name/Adresse)» ein leeres Feld mit Eckmarken frei (SIX IG, #78)
+	it('lässt ohne Postleitzahl und Ort ein Feld für Name und Adresse frei', async () => {
+		const tenant = { firstName: 'Nina', lastName: 'Brunner' };
+		const pdf = await textOf({ ...due, tenant });
+		const fr = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant }, config, 'fr'), 'base64')).flowing;
+
+		expect(pdf.flowing.match(/Zahlbar durch \(Name\/Adresse\)/g)).toHaveLength(2);
+		expect(pdf.flowing).not.toContain('Zahlbar durch Nina');
+		expect(fr.match(/Payable par \(nom\/adresse\)/g)).toHaveLength(2);
 	});
 
 	// Post ins Ausland: das Land in Grossbuchstaben allein auf der letzten Zeile der Adresse, ein Nachbarland in seiner

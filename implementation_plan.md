@@ -5,13 +5,14 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 ## Session 2026-10-17: QR-bill against SIX IG v2.4 (#78, W13)
 
 - [x] Field-by-field check of `qr-bill.service.ts` and the payment part of `pdf.service.ts` against IG QR-bill v2.4 (six-group.com blocked by the network policy: guideline excerpts through `mmx search`, cross-checked with the `swissqrbill` 4.4.2 package); no change of the stored data needed, so the «Stop and ask» does not apply
-- [ ] Scenario `@wip` «Der Zahlteil ohne Korrespondenzadresse hat ein Feld für Name und Adresse» (`statement-detail.feature`), seen red
-- [ ] fach-reviewer on the scenario and the planned changes
-- [ ] Slice 1: QR payload only with the permitted character set (IG 4.1.1); unit test first. No scenario: the payload is only readable by a decoder, covered in `qr-bill.service.test.ts`
-- [ ] Slice 2: «Zahlbar durch (Name/Adresse)» with a blank field with corner marks (52 × 20 mm receipt, 65 × 25 mm payment part) when the QR code names no debtor; unit test first
-- [ ] Issue for separate house number fields (data model decision) from the comment on #78
+- [x] Scenario `@wip` «Der Zahlteil ohne Korrespondenzadresse hat ein Feld für Name und Adresse» (`statement-detail.feature`), seen red
+- [x] fach-reviewer round 1 on the scenario and the planned changes (`docs/reviews/78-fachreview-1.md`)
+- [x] QR payload only with the permitted character set (IG 4.1.1), IBAN in capitals, no line break after EPD; unit tests first. No scenario: the payload is only readable by a decoder, covered in `qr-bill.service.test.ts`
+- [x] «Zahlbar durch (Name/Adresse)» with a blank field with corner marks (52 × 20 mm receipt, 65 × 25 mm payment part) when the QR code names no debtor; the payment part prints creditor and debtor as in the QR code; unit tests first, scenario green
+- [x] House number in the street line: decided in #102 (no separate field), no new issue
+- [x] Issue #395 for the made-up creditor without Firmenadresse (pre-existing)
 - [ ] Result with guideline chapters noted in #78
 - [ ] Slice reviews, feature review (fach-reviewer, daten-pruefer, persona)
 - [ ] Workflow review, archive the session
 
-Files: `tests/e2e/features/statement-detail.feature`
+Files: `tests/e2e/features/statement-detail.feature`, `backend/src/services/qr-bill.service.ts`, `backend/src/services/pdf.service.ts`, `backend/src/__tests__/qr-bill.service.test.ts`, `backend/src/__tests__/statement-pdf-render.test.ts`, `docs/reviews/78-fachreview-1.md`

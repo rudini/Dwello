@@ -227,6 +227,17 @@ function formatAmount(amount: number): string {
 	return amount.toFixed(2);
 }
 
+// SIX IG 4.1.1: only Basic Latin, Latin-1 Supplement, Latin Extended-A, Ș ș Ț ț and €; typographic quotes and dashes
+// become their plain form, another letter loses its accents, anything else (a line break, a tab) becomes «.»
+const PERMITTED = /^[\u{20}-\u{7E}\u{A0}-\u{17F}\u{218}-\u{21B}\u{20AC}]*$/u;
+const PLAIN: Record<string, string> = { '‘': "'", '’': "'", '‚': "'", '“': '"', '”': '"', '„': '"', '–': '-', '—': '-' };
+const permitted = (value: string) =>
+	value.normalize('NFC').replace(/./gsu, (c) => {
+		const bare = PLAIN[c] ?? c.normalize('NFD').replace(/\p{M}/gu, '');
+		return PERMITTED.test(c) ? c : PERMITTED.test(bare) ? bare : '.';
+	});
+const text = (value: string | null | undefined) => (value ? permitted(value) : undefined);
+
 // An optional field of the payload, cut to its length (empty if not given)
 const field = (value: string | undefined, max = Infinity) => (value ?? '').slice(0, max);
 
@@ -254,7 +265,7 @@ function generateQRDataString(data: QRBillData): string {
 		data.coding, // 1
 
 		// Creditor Account
-		data.creditorIBAN.replace(/\s/g, ''),
+		data.creditorIBAN.replace(/\s/g, '').toUpperCase(),
 
 		// Creditor Address (type S = structured)
 		'S',
@@ -287,7 +298,8 @@ function generateQRDataString(data: QRBillData): string {
 		// Additional information
 		field(data.unstructuredMessage, 140),
 		data.trailer,
-		field(data.billingInfo, 140)
+		// SIX IG 4.1.4: the last element ends without a line break, so empty billing information is left out
+		...(data.billingInfo ? [data.billingInfo.slice(0, 140)] : [])
 	];
 
 	return lines.join('\n');
@@ -344,25 +356,25 @@ export async function generateQRBillForStatement(
 		coding: '1',
 
 		creditorIBAN: config.iban,
-		creditorName: config.companyName,
-		creditorStreet: config.address,
+		creditorName: permitted(config.companyName),
+		creditorStreet: text(config.address),
 		creditorPostalCode: config.postalCode,
-		creditorCity: config.city,
+		creditorCity: permitted(config.city),
 		creditorCountry: config.country || 'CH',
 
 		amount,
 		currency: 'CHF',
 
-		debtorName: `${statement.tenant.firstName} ${statement.tenant.lastName}`,
-		debtorStreet: statement.tenant.address ?? undefined,
-		debtorPostalCode: statement.tenant.postalCode ?? undefined,
-		debtorCity: statement.tenant.city ?? undefined,
+		debtorName: permitted(`${statement.tenant.firstName} ${statement.tenant.lastName}`),
+		debtorStreet: text(statement.tenant.address),
+		debtorPostalCode: text(statement.tenant.postalCode),
+		debtorCity: text(statement.tenant.city),
 		debtorCountry: statement.tenant.country ?? 'CH',
 
 		referenceType: useQRReference ? 'QRR' : 'NON',
 		reference,
 
-		unstructuredMessage: `${statement.title ?? 'Nebenkostenabrechnung'} ${statement.statementNumber}`,
+		unstructuredMessage: permitted(`${statement.title ?? 'Nebenkostenabrechnung'} ${statement.statementNumber}`),
 		trailer: 'EPD'
 	};
 

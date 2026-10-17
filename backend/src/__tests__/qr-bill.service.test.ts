@@ -44,7 +44,7 @@ describe('QR-Rechnung einer Abrechnung', () => {
 		);
 		const lines = qrDataString.split('\n');
 
-		expect(lines).toHaveLength(32); // SIX Version 2.0: 32 Elemente bis zu den Rechnungsinformationen
+		expect(lines).toHaveLength(31); // SIX Version 2.0: 31 Elemente bis zum Trailer EPD, leere Rechnungsinformationen entfallen
 		expect(lines.slice(20, 27)).toEqual(['', '', '', '', '', '', '']); // Endgültiger Zahlungspflichtiger
 	});
 
@@ -88,6 +88,35 @@ describe('QR-Rechnung einer Abrechnung', () => {
 		);
 
 		expect(qrDataString.split('\n').slice(20, 27)).toEqual(['S', 'Eva Frei', 'Marktstätte 3', '', '78462', 'Konstanz', 'DE']);
+	});
+
+	// SIX IG 4.1.1: im QR-Code nur Basic Latin, Latin-1 Supplement, Latin Extended-A, Ș ș Ț ț und €; ein anderes
+	// Zeichen kann die Bank ablehnen (#78)
+	it('schreibt nur die zulässigen Zeichen in den QR-Code', async () => {
+		const tenant = {
+			firstName: 'Zoe\u0308', // «e» und Trema getrennt, wie macOS es speichern kann
+			lastName: 'D’Angelo–Țîrlea Nguyễn Ωmega',
+			address: '„Seehof“\n5\t€',
+			postalCode: '8002',
+			city: 'Zürich'
+		};
+		const { qrDataString } = await generateQRBillForStatement(
+			{ ...statement('a1111111-1111-4111-8111-111111111111'), tenant },
+			config
+		);
+
+		expect(qrDataString.split('\n').slice(21, 23)).toEqual(["Zoë D'Angelo-Țîrlea Nguyen .mega", '"Seehof".5.€']);
+	});
+
+	// SIX IG 4.1: die IBAN ohne Leerzeichen in Grossbuchstaben; das letzte Element endet ohne Zeilenumbruch (#78)
+	it('schreibt die IBAN in Grossbuchstaben und endet mit EPD', async () => {
+		const { qrDataString } = await generateQRBillForStatement(
+			statement('a1111111-1111-4111-8111-111111111111'),
+			{ ...config, iban: 'ch44 3199 9123 0008 8901 2' }
+		);
+
+		expect(qrDataString.split('\n')[3]).toBe('CH4431999123000889012');
+		expect(qrDataString.endsWith('\nEPD')).toBe(true);
 	});
 
 	// Beispielwerte aus den SIX Implementation Guidelines; eine falsche Prüfziffer lehnt die Bank ab
