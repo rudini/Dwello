@@ -1,5 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
-import { billsIn, localToday } from '$lib/contract-status';
+import { billingStart, billsIn, localToday } from '$lib/contract-status';
 import { m } from '$lib/paraglide/messages';
 import { namesById } from '$lib/server/statement';
 import type { InvoiceCheck } from '$lib/statement-wizard';
@@ -56,10 +56,6 @@ function covers(periods: Period[], from: string, to: string) {
 	return next > to;
 }
 
-// Its first day to bill: the day after «Abgerechnet bis», as in `billsIn` (#133)
-const billingStart = (c: Contract) =>
-	c.billedUntil && c.billedUntil >= c.startDate ? nextDay(c.billedUntil) : c.startDate;
-
 type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
 
 // Per building: its contracts with Mietstage in the period (from the day after «Abgerechnet bis», #133), and those of
@@ -75,9 +71,9 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 			// a statement replaced in this very period does not count: the run creates its berichtigte Abrechnung (#120)
 			const replacedHere = (s: Period & { status?: string }) =>
 				s.status === 'replaced' && s.periodStart === periodStart && s.periodEnd === periodEnd;
-			const overlapping = (statements as (Period & { contractId: string; status?: string })[]).filter(
-				(s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s)
-			);
+			const overlapping = (
+				statements as (Period & { contractId: string; status?: string })[]
+			).filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s));
 			const inPeriod = (contracts as Contract[]).filter((c) =>
 				billsIn(c, { start: periodStart, end: periodEnd })
 			);
