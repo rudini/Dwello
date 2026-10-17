@@ -82,7 +82,7 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 			changePercent: null
 		};
 		expect(findingText(finding)).toBe(
-			'La facture pour le mois de mars manque. L’année précédente\u00a0: 2 factures.'
+			'La facture pour mars manque. L’année précédente\u00a0: 2 factures.'
 		);
 	});
 

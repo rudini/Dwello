@@ -33,7 +33,7 @@ describe('Eigene Verteilschlüssel', () => {
 
 		const response = await create('Fläche und Zimmer');
 
-		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen "Fläche und Zimmer ${token}" existiert bereits.`, 'DISTRIBUTION_KEY_NAME_TAKEN', {
+		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen «Fläche und Zimmer ${token}» existiert bereits.`, 'DISTRIBUTION_KEY_NAME_TAKEN', {
 			name: `Fläche und Zimmer ${token}`
 		});
 	});
@@ -44,7 +44,7 @@ describe('Eigene Verteilschlüssel', () => {
 
 		const response = await keys.send('PUT', `/${id}`, { nameDE: `Treppenhaus ${token}` });
 
-		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen "Treppenhaus ${token}" existiert bereits.`, 'DISTRIBUTION_KEY_NAME_TAKEN', {
+		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen «Treppenhaus ${token}» existiert bereits.`, 'DISTRIBUTION_KEY_NAME_TAKEN', {
 			name: `Treppenhaus ${token}`
 		});
 	});

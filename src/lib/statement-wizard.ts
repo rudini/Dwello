@@ -106,10 +106,6 @@ type Coverage = {
 const invoices = (count: number) =>
 	count === 1 ? m.statements_invoices_one() : m.statements_invoices_many({ count });
 
-// "a und b und c", as German said it
-const joined = (parts: string[], and: (pair: { first: string; second: string }) => string) =>
-	parts.reduce((first, second) => and({ first, second }));
-
 // A whole calendar month, quarter or half-year by its name; null for other slices
 function calendarName({ start, end }: { start: string; end: string }) {
 	const from = new Date(`${start}T00:00:00Z`);
@@ -121,10 +117,7 @@ function calendarName({ start, end }: { start: string; end: string }) {
 	const month = from.getUTCMonth();
 	if (from.getUTCDate() !== 1 || after.getUTCDate() !== 1 || month % months !== 0) return null;
 	const names: Record<number, () => string> = {
-		1: () =>
-			m.statements_part_month({
-				month: from.toLocaleDateString(`${getLocale()}-CH`, { month: 'long', timeZone: 'UTC' })
-			}),
+		1: () => from.toLocaleDateString(`${getLocale()}-CH`, { month: 'long', timeZone: 'UTC' }),
 		3: () => m.statements_part_quarter({ number: month / 3 + 1 }),
 		6: () => m.statements_part_half({ number: month / 6 + 1 })
 	};
@@ -137,10 +130,10 @@ const partLabel = (slice: { start: string; end: string }) =>
 	m.statements_part_dates({ start: formatDate(slice.start), end: formatDate(slice.end) });
 
 function stockText(missingDays: { start: string }[]) {
-	const dates = joined(
-		missingDays.map((day) => formatDate(day.start)),
-		m.statements_stock_dates_and
-	);
+	// "a und am b"
+	const dates = missingDays
+		.map((day) => formatDate(day.start))
+		.reduce((first, second) => m.statements_stock_dates_and({ first, second }));
 	const missing =
 		missingDays.length > 1
 			? m.statements_finding_stock_missing_many({ dates })
@@ -174,7 +167,7 @@ function findingBody({
 	if (kind === 'new') return m.statements_finding_new({ amount: formatCurrency(current.total) });
 	if (kind === 'gap') {
 		const gap = {
-			parts: joined(missingParts.map(partLabel), m.statements_list_and),
+			parts: new Intl.ListFormat(`${getLocale()}-CH`).format(missingParts.map(partLabel)),
 			invoices: invoices(previous.count)
 		};
 		return missingParts.length === 1

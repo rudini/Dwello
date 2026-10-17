@@ -695,7 +695,7 @@ describe('Abrechnungen erstellen', () => {
 		);
 		expect(findings).toEqual([
 			'Kaminfeger: Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF 290.00.',
-			'Kaltwasser: Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
+			'Kaltwasser: Die Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
 			'Heizung: CHF 6’565.00, 37 % mehr als im Vorjahr (CHF 4’800.00). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.'
 		]);
 		expect(check.querySelector('p')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
