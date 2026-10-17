@@ -36,3 +36,17 @@ describe('Empfänger der Rechnungsdaten', () => {
 		expect(llmRecipient(config('https://api.openai.com/v1', '', '', false))).toBeNull();
 	});
 });
+
+// Ohne Grafikkarte braucht das Standardmodell zum Kategorisieren rund 40 s, zum Auslesen einer Rechnung rund 80 s (#419)
+describe('Wartezeit auf die KI', () => {
+	it('wartet ohne LLM_TIMEOUT 120 s auf eine Antwort', async () => {
+		const saved = process.env.LLM_TIMEOUT;
+		delete process.env.LLM_TIMEOUT;
+		try {
+			const { llmConfig: fresh } = await import(`../config/llm?timeout=${Date.now()}`);
+			expect(fresh.timeout).toBe(120_000);
+		} finally {
+			if (saved !== undefined) process.env.LLM_TIMEOUT = saved;
+		}
+	});
+});

@@ -1,0 +1,7 @@
+# Workflow notes: #419 (default KI model qwen3-vl:8b-instruct)
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 2 («A test must fail before the code changes») | The change of a default value in `backend/src/config/llm.ts` has no behaviour a test can show short of pinning the string; no test was written, the issue says «Scenario: none». The rule does not say whether a configuration default counts. | Say that a changed default value or a documentation change needs no red test when the issue says «Scenario: none» for that reason. |
+| `backend/CLAUDE.md`, `llm:eval` «before and after» | The prompts were unchanged; the «before» run of the new model (#415, same commit range of `backend/src`) was reused instead of a second paid run. | Say that a change of model only needs one run of the new model when no prompt changed. |
+| `CLAUDE.md`, Workflow 1 (scenario for a bug fix a user can see) and the issue's «Scenario: none» | The issue said «Scenario: none» for a configuration change; measuring the new model on a CPU showed it broke categorization at the 30 s timeout, so the slice became a user-visible fix and the closing review (419-review-2 C-1) asked for a scenario, which the KI stand-in could produce. | When a task's measurement turns «configuration only» into a fix the landlord sees, say in Workflow 1 that the issue's «Scenario: none» no longer holds and a scenario is written before the fix. |

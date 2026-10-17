@@ -62,7 +62,7 @@ type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
 
 // Per building: its contracts with Mietstage in the period (from the day after «Abgerechnet bis», #133), and those of
 // them with a statement in the period already
-// TODO(fachlich prüfen, #199): an overlapping statement counts as billed, the dashboard counts only one inside the period
+// an overlapping statement counts as billed, on every screen (#199, #211)
 async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }: Run) {
 	return Promise.all(
 		buildingIds.map(async (buildingId) => {

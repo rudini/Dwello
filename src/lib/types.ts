@@ -158,6 +158,7 @@ export interface ContractWithDetails extends RentalContract {
 	buildingName?: string;
 	buildingAddress: string;
 	totalRent: number;
+	missingStatement?: boolean; // #211: an ended period with rent days but no statement
 }
 
 // Contracts list response

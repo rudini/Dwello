@@ -1561,3 +1561,67 @@ Files: `src/lib/server/statement-generation.ts`, `src/lib/server/statement.ts`, 
 - [x] session archived, pull request
 
 Files: `CLAUDE.md`, `.claude/agents/{fach-reviewer,code-reviewer}.md`, `.claude/skills/pull-request/SKILL.md`, `docs/reviews/t3t2t6-review-{1,2,3}.md`
+
+## Session W9: #211, #199 missing statements (Refs #408, #199)
+
+- [x] Merge `origin/main` (#133 «Abgerechnet bis», #120 replaced statements) into the branch; drop the step-2 scenarios that wait on #281
+- [x] Scenarios: partial range without a wizard button, «Abgerechnet bis» on dashboard and list, V-4 and V-8 of fachreview 1
+- [x] fach-reviewer round 2 on the scenarios and the new texts (`docs/reviews/issue-211-fachreview-2.md`)
+- [x] `missingPeriods` (accounting-period): uncovered intervals per ended period with rent days, «Abgerechnet bis», replaced statements
+- [x] Contract page: uncovered ranges, invoice link per range, no wizard button for a partial range (#408)
+- [x] Dashboard: every ended period since the Vertragsbeginn, by building
+- [x] Contract list: badge «Abrechnung fehlt»
+- [x] Texts in de/fr/it/en
+- [x] Slice review (code-reviewer): `docs/reviews/issue-211-review-1.md`, round 2 `issue-211-review-2.md`
+- [x] Feature review: personas `docs/design/personas/anna-211.md`, `helga-211.md`; fach-reviewer `docs/reviews/issue-211-fachreview-3.md`
+- [x] Workflow note: issues closed into #408 during the task (markers and «Fixes» line), persona state set up by SQL (`docs/reviews/workflow-notes-issue-211.md`)
+- [x] Slice review round 3: `docs/reviews/issue-211-review-3.md` (C-16, C-17 fixed)
+- [x] Plan archived, pull request (Refs #408, #199; #211 closed into #408), CI
+
+Files: `src/lib/accounting-period.ts`, `src/lib/server/missing-statements.ts`, `src/lib/overview.ts`, `src/lib/types.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/contracts/+page.server.ts`, `src/routes/contracts/ContractRow.svelte`, `src/routes/contracts/[id]/+page.server.ts`, `src/routes/contracts/[id]/MissingStatement.svelte`, `src/lib/server/statement-generation.ts` (marker), `messages/*.json`, tests and scenarios
+
+## Session 2026-10-17 CI: E2E shards on main within their time limit
+
+No scenario: CI configuration only, no app behaviour changes.
+
+- [x] E2E shards on main get 60 minutes instead of 30 (run #534 on main: both E2E shards cancelled at 30:20 with every browser; pull requests keep 30)
+- [x] Slice review round 1: `docs/reviews/ci2-review-1.md` (no Blocker/Major; C-1, C-2 fixed)
+- [x] Plan archived, pull request, CI
+
+Files: `.github/workflows/ci.yml`
+
+## Session 2026-10-17: default KI model qwen3-vl:8b-instruct (#419)
+
+- [x] Default model `qwen3-vl:8b-instruct` in `backend/src/config/llm.ts`, `.env.example`, Compose files, README, demo README, `docs/tech-stack.md`, `docs/PRD-Dwello.md`
+- [x] README: upgrade note for installations that relied on the old default
+- [x] `backend/CLAUDE.md`: `llm:eval` through OpenRouter counts as the default model's run
+- [x] `llm:eval` with the new default through OpenRouter (baseline 43/47, #415): the run of #415 measured this model on unchanged prompts; no new run
+- [x] Manual check: reading of a sample invoice through OpenRouter with the new model: a quarterly invoice and a Schlussrechnung with two deducted Akontorechnungen, every field right (amount 1'250.00 before the deduction, deducted 500.00), about 7 s each
+- [x] Lint, check, type-check, affected tests; `code-reviewer` round 1 (`docs/reviews/419-review-1.md`)
+- [x] Session to the archive; pull request
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-419.md`
+- Files: `backend/src/config/llm.ts`, `.env.example`, `docker-compose.dev.yml`, `docker-compose.prod.yml`, `README.md`, `deploy/demo/README.md`, `docs/tech-stack.md`, `docs/PRD-Dwello.md`, `backend/CLAUDE.md`
+
+## Session 2026-10-17: KI timeouts for installations without a GPU (#419, product owner: 120 s)
+
+- [x] BFF: a request the KI answers (POST `/invoices`, `/invoices/extract`, `/invoices/categorize`, `/invoices/:id/recategorize`) waits 300 s, every other one 30 s
+- [x] Backend: `LLM_TIMEOUT` default 120000
+- [x] Docs: `.env.example`, README, `docs/tech-stack.md` name the new defaults and the CPU timings
+- [x] Checks; closing `code-reviewer` round (`docs/reviews/419-review-2.md`): C-1 Major (no scenario) fixed with «Dwello wartet auf eine KI, die zum Lesen länger als eine halbe Minute braucht», red on be454eb6 (BFF 504, Betrag empty), green now; C-2 to C-5 fixed, C-6 kept
+- [x] Re-review of the C-1 fix (`docs/reviews/419-review-3.md`): C-1 closed, C-7 Nit kept (the long wait stays out of the shared step)
+- Files: `src/lib/server/api-proxy.ts`, `tests/unit/api-proxy.test.ts`, `backend/src/config/llm.ts`, `backend/src/__tests__/llm-recipient.test.ts`, `.env.example`, `README.md`, `docs/tech-stack.md`
+- Measured on 4 CPU cores without GPU, model loaded: qwen3-vl:8b-instruct categorize 37 s, read 77–90 s; qwen2.5vl:7b 21 s and 75 s
+- Files (round 2): `tests/e2e/features/invoices.feature`, `tests/e2e/steps/invoice-upload.steps.ts`, `tests/e2e/tasks/invoice-upload.ts`, `tests/e2e/screenplay/interactions.ts` (`Wait.until` timeout), `backend/scripts/llm-stub.ts`
+
+## Session W16b: E2E races O-36 and O-37 (product owner's choice for PR #417)
+
+Branch `claude/w16b-e2e-races`. Non-functional (rows in `docs/design/offene-punkte.md`); no issue. No scenario: it fixes a race between test data and a backend write, not a behaviour the Liegenschaftsverwalter sees.
+
+- [x] O-37 root cause: the whole E2E database had no building while «draft-dropped» and «draft-discard-dialog» ran first; `restoreDraft` ticks the first building (or tenant) but the two draft states seeded nothing. Fix: `seedFor` seeds the screen records for `draft-restored` and `draft-discard-dialog` (the failing pair seen red, then green; all 8 draft rows green)
+- [x] O-36: `saveConfig` upserts on `key`; pg test with ten parallel first writes (red with a warmed pool, then green)
+- [x] rows moved to `docs/archive/offene-punkte-verlauf.md`
+- [x] code-reviewer round 1 (`docs/reviews/w16b-review-1.md`): no Blocker/Major; C-1 (draft state ticks its own building) and C-2 (select only for the audited rate) fixed; C-3 accepted (a race test), C-4 done at the merge into #417
+- [x] closing code-reviewer round 2 (`docs/reviews/w16b-review-2.md`): no Blocker/Major; C-5 (lost line break) fixed, C-6 Nit left
+- [x] session archived; pull request and merge, then main merged into #417 (O-37 row removed there)
+
+Files: `backend/src/services/config.service.ts`, `backend/src/__tests__/config.pg.test.ts`, `tests/e2e/fixtures/screens.ts`, `docs/design/offene-punkte.md`, `docs/archive/offene-punkte-verlauf.md`.

@@ -59,3 +59,19 @@ Funktionalität: Mietvertragsliste
   Szenario: Mietvertrag aus der Liste bearbeiten
     Wenn der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" bearbeiten will
     Dann ist der Liegenschaftsverwalter auf der Seite "Mietvertrag bearbeiten"
+
+  # #211: die Liste zeigt, welchem Mietvertrag eine Abrechnung fehlt, ohne jeden Vertrag zu öffnen
+  Szenario: Mietvertragsliste zeigt eine fehlende Abrechnung
+    Dann zeigt die Mietvertragsliste beim Mietvertrag von "Anna Keller" "Abrechnung fehlt"
+
+  Szenario: Abgerechneter Mietvertrag ohne Hinweis in der Liste
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Ben Meier" existiert
+    Und "Ben Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2024-12-31" für "900" Franken
+    Und für "Ben Meier" gibt es die Abrechnung 2024 im Gebäude "Ahornhof"
+    Dann zeigt die Mietvertragsliste beim Mietvertrag von "Ben Meier" keine fehlende Abrechnung
+
+  # #133: «Abgerechnet bis» deckt die beendeten Perioden ab
+  Szenario: Ausserhalb von Dwello abgerechneter Mietvertrag ohne Hinweis in der Liste
+    Angenommen der Mietvertrag von "Anna Keller" ist bis Ende des letzten Jahres ausserhalb von Dwello abgerechnet
+    Dann zeigt die Mietvertragsliste beim Mietvertrag von "Anna Keller" keine fehlende Abrechnung

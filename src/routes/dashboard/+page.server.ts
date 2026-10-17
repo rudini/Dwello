@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { fetchRecord } from '$lib/server/save-form';
-import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-period';
+import { missingByContract } from '$lib/server/missing-statements';
 import { overviewDeadlines, overviewTasks, type Deadline, type Task } from '$lib/overview';
 import { localToday } from '$lib/contract-status';
 import { reletStarts } from '$lib/apartment';
@@ -59,34 +59,26 @@ async function settings(fetch: typeof globalThis.fetch): Promise<Record<string, 
 	return response?.ok ? ((await response.json()).data ?? {}) : {};
 }
 
-// The last ended Abrechnungsperiode and the Mietverträge that already have a Nebenkostenabrechnung for it
-async function lastPeriod(fetch: typeof globalThis.fetch, config: Promise<Record<string, string>>) {
-	const stored = await config;
-	if (!stored.accounting_period) return null;
-	const period = lastCompletedPeriod(stored.accounting_period as AccountingPeriodType);
-	const response = await fetch(
-		`${BACKEND_URL}/api/v1/statements?periodStart=${period.start}&periodEnd=${period.end}&limit=1000`
-	);
-	if (!response.ok) return null; // unknown: better no task than every building
-	const statements: Row[] = (await response.json()).data ?? [];
-	// a replaced statement no longer bills the period (#120)
-	const billing = statements.filter((s) => s.status !== 'replaced');
-	return { ...period, done: new Set(billing.map((s) => s.contractId)) };
-}
-
-// Buildings with a Mietvertrag in the last period that has no statement yet, also one that has ended since
-function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, contracts: Row[]) {
-	if (!period) return null;
-	const missing = contracts.filter(
-		(c) =>
-			String(c.startDate) <= period.end &&
-			(!c.endDate || String(c.endDate) >= period.start) &&
-			!period.done.has(c.id)
-	);
-	const buildings = [...new Set(missing.map((c) => String(c.buildingName)))].sort((a, b) =>
-		a.localeCompare(b, 'de-CH')
-	);
-	return buildings.length ? { start: period.start, end: period.end, buildings } : null;
+// Per building the parts of ended Abrechnungsperioden since a Vertragsbeginn without a statement, as on the contract
+// page (#211); each once, the latest first, also of a contract that has ended since
+async function missingStatements(fetch: typeof globalThis.fetch, contracts: Row[]) {
+	const missing = await missingByContract(fetch, contracts);
+	if (!missing) return []; // unknown: better no task than every building
+	const byBuilding = new Map<string, Map<string, { start: string; end: string }>>();
+	for (const c of contracts)
+		for (const range of missing.get(String(c.id)) ?? []) {
+			const building = String(c.buildingName);
+			if (!byBuilding.has(building)) byBuilding.set(building, new Map());
+			byBuilding.get(building)!.set(`${range.start}/${range.end}`, range);
+		}
+	return [...byBuilding]
+		.sort(([a], [b]) => a.localeCompare(b, 'de-CH'))
+		.map(([building, ranges]) => ({
+			building,
+			periods: [...ranges.values()].sort(
+				(a, b) => b.start.localeCompare(a.start) || b.end.localeCompare(a.end)
+			)
+		}));
 }
 
 // A later contract for the same apartment
@@ -167,7 +159,6 @@ export const load = async ({
 		sent,
 		letters,
 		contracts,
-		period,
 		apartments,
 		allContracts,
 		stored,
@@ -183,7 +174,6 @@ export const load = async ({
 		list(fetch, 'statements?status=sent&limit=100', 'data'),
 		list(fetch, 'documents?status=to_send', 'data'),
 		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
-		lastPeriod(fetch, config).catch(() => null),
 		list(fetch, 'apartments?limit=1000', 'apartments'),
 		list(fetch, 'contracts?limit=1000', 'contracts'),
 		config,
@@ -217,7 +207,7 @@ export const load = async ({
 		paymentDeadlineDays: Number(stored.payment_deadline_days ?? 30),
 		reminderAfterDays: Number(stored.reminder_after_days ?? 14),
 		lettersToSend: letters.length,
-		missingPeriod: missingPeriod(period, allContracts),
+		missingStatements: await missingStatements(fetch, allContracts).catch(() => []),
 		noticedContracts,
 		oldAddresses: oldAddresses(drafts),
 		expiredContracts: expired(allContracts, today),

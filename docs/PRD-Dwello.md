@@ -73,7 +73,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 | **Backend** | ElysiaJS on Bun | High performance, modern TypeScript framework, Bun's speed |
 | **Database** | PostgreSQL | Robust, ACID transactions, JSON support, proven reliability |
 | **Authentication** | BFF + OAuth 2.0 / SSO | Backend for Frontend pattern with OAuth 2.0, HTTPOnly cookies, XSRF protection |
-| **LLM** | Any OpenAI-compatible API (default: local Ollama with `qwen2.5vl:7b`) | Self-hosted by default, no vendor lock-in; configured through `.env` |
+| **LLM** | Any OpenAI-compatible API (default: local Ollama with `qwen3-vl:8b-instruct`) | Self-hosted by default, no vendor lock-in; configured through `.env` |
 | **Deployment** | Docker / Docker Compose | Containerized, portable, easy to run anywhere |
 | **Maps** | none (map dropped, #129) | Address shown as text |
 | **Internationalization** | i18n library | German UI; statement PDFs in five languages |
@@ -1475,7 +1475,7 @@ BALANCE (refund): CHF 30
 
 **Provider:** any OpenAI-compatible API, configured through `.env`:
 - `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`
-- Default: local **Ollama** with `qwen2.5vl:7b` (Docker container); invoice data stays on the server
+- Default: local **Ollama** with `qwen3-vl:8b-instruct` (Docker container); invoice data stays on the server
 - External provider (e.g. OpenAI): `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` are required and named in the privacy statement (Swiss DSG Art. 19); see README section "External LLM provider"
 - `LLM_ENABLED=false` turns categorization off
 

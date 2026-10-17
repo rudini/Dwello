@@ -22,6 +22,19 @@ afterAll(async () => {
 });
 
 describe('Einstellungen speichern', () => {
+	// O-36: zwei erste Speicherungen derselben Einstellung zur gleichen Zeit (parallele Szenarien) liefen auf den
+	// eindeutigen Schlüssel und brachen mit 500 ab
+	it('speichert eine Einstellung, die mehrmals gleichzeitig zum ersten Mal gesetzt wird', async () => {
+		await deleteConfig('company_city');
+		// open the connections first: the pool opens them one by one, which would order the writes
+		await Promise.all(Array.from({ length: 10 }, () => db.execute(sql`select pg_sleep(0.05)`)));
+
+		const writes = await Promise.allSettled(Array.from({ length: 10 }, () => setConfig('company_city', 'Winterthur')));
+
+		expect(writes.filter((write) => write.status === 'rejected')).toEqual([]);
+		expect(await getConfig('company_city')).toBe('Winterthur');
+	});
+
 	// Mit falscher Prüfziffer entstünde der Einzahlungsschein nicht, das PDF käme ohne Zahlteil
 	it('lehnt eine IBAN mit falscher Prüfziffer ab', async () => {
 		const response = await sendJson('PUT', '/api/v1/config', {
