@@ -62,6 +62,45 @@ describe('Abrechnung aus dem Backend', () => {
 		});
 	});
 
+	// #104: Wohnungsanteil und Zeitanteil wie im PDF
+	it('übernimmt Wohnungsanteil, Zeitanteil und die Tage jeder Position', () => {
+		expect(toStatement(backendStatement).lineItems[0]).toMatchObject({
+			apartmentShare: 1000,
+			periodShare: 1,
+			shareDays: { days: 366, total: 366 }
+		});
+	});
+
+	// #96, #104: die Rechnungen, die eine Position abrechnet; bei verschiedenen Tagen jede mit ihren Tagen (#240)
+	it('übernimmt die abgerechneten Rechnungen jeder Position, mit ihren Tagen, wo sie verschieden sind', () => {
+		const [line] = backendStatement.lineItems;
+		const invoiceParts = [{ start: '2024-01-01', end: '2024-12-31', amount: 1000, days: 91, total: 366, noPeriod: true }];
+		const [item] = toStatement({ ...backendStatement, lineItems: [{ ...line, invoiceParts }] }).lineItems;
+
+		expect(item.invoices).toEqual([
+			{ ...line.invoices[0], part: invoiceParts[0] }
+		]);
+		expect(toStatement(backendStatement).lineItems[0].invoices[0].part).toBeNull();
+	});
+
+	// Persona Marco P-1: bei Heizkosten nach Heizprofil ist der Zeitanteil der Anteil nach dem Heizprofil, wie das PDF sagt
+	it('erkennt eine Position, deren Zeitanteil der Anteil nach dem Heizprofil ist', () => {
+		const [line] = backendStatement.lineItems;
+		const heatingShare = { byDays: false, percent: 55.8, months: [] };
+		const heating = { ...line, periodShare: '0.5580', positionRentalDays: null, billedDays: null };
+		const items = (statement: object) => toStatement({ ...backendStatement, ...statement }).lineItems;
+
+		expect(items({ heatingShare, lineItems: [heating, line] }).map((item) => item.byProfile)).toEqual([true, false]);
+		expect(items({ heatingShare: { byDays: true }, lineItems: [heating] })[0].byProfile).toBe(false);
+	});
+
+	// Vor #96 kannte eine Position ihre Rechnungen nicht
+	it('nennt bei einer älteren Abrechnung keine Rechnungen der Positionen', () => {
+		const [line] = backendStatement.lineItems;
+		const statement = toStatement({ ...backendStatement, lineItems: [{ ...line, invoices: null }] });
+		expect(statement.lineItems[0].invoices).toEqual([]);
+	});
+
 	// Wie im PDF auf zwei Stellen: der Anteil an den Gebäudekosten ist selten rund
 	it('zeigt den Anteil an den Gebäudekosten auf zwei Stellen', () => {
 		const [line] = backendStatement.lineItems;

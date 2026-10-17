@@ -17,3 +17,4 @@ export const overrideReason = target('Grund der Änderung der KI-Kategorie', (pa
 	page.getByTestId('invoice-override-reason')
 );
 export const invoiceNumber = target('Rechnungsnummer', (page) => page.getByTestId('invoice-number'));
+export const missedWarning = target('Warnung nicht in den Abrechnungen', (page) => page.getByTestId('invoice-missed-warning'));
