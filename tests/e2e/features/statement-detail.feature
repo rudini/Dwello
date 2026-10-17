@@ -544,7 +544,6 @@ Funktionalität: Abrechnungsdetail
 
   # #120, #358 (A-11): eine versendete Abrechnung wird ersetzt und bleibt unverändert; die berichtigte Abrechnung
   # bekommt eine neue Nummer und nennt die ersetzte
-  @wip
   Szenario: Versendete Abrechnung berichtigen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -556,7 +555,6 @@ Funktionalität: Abrechnungsdetail
     Und nennt die Abrechnung, dass sie die Abrechnung 2024 von "Eva Frei" ersetzt
 
   # #120: die Bestätigung nennt die Folge und die Verjährung, bevor etwas geändert wird
-  @wip
   Szenario: Vor dem Berichtigen die Folge bestätigen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -569,7 +567,6 @@ Funktionalität: Abrechnungsdetail
   # #120: eine später erfasste Rechnung wird mit der berichtigten Abrechnung nachverlangt; bezahlt sind 430.00 + 3 %
   # Verwaltungspauschale = 442.90. Neu: 430.00 + 182.00 (Hauswart 732.00 × 91/366) + 3 % = 630.36, abzüglich 442.90
   # = 187.46, auf 5 Rappen zugunsten des Mieters 187.45
-  @wip
   Szenario: Berichtigte Abrechnung rechnet die Zahlung an
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -583,7 +580,6 @@ Funktionalität: Abrechnungsdetail
 
   # #120: die ersetzte Abrechnung wird nicht mehr gemahnt (auch nach Ablauf der Zahlungsfrist), nicht bezahlt, nicht
   # bearbeitet und nicht noch einmal ersetzt
-  @wip
   Szenario: Ersetzte Abrechnung bleibt unverändert
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -595,7 +591,6 @@ Funktionalität: Abrechnungsdetail
 
   # Persona Anna I4: der Mieter zog erst 2025 ein; die versendete Abrechnung 2024 ist ersetzt, eine berichtigte gibt es
   # nicht (Fachreview W2e V-5)
-  @wip
   Szenario: Keine berichtigte Abrechnung ohne Mietstage in der Periode
     Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Marc Huber" ist versendet
@@ -606,7 +601,6 @@ Funktionalität: Abrechnungsdetail
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Teilen Sie dem Mieter mit, dass die Abrechnung"
     Und hat die Abrechnung den Status "Ersetzt"
 
-  @wip
   Szenario: Von der ersetzten Abrechnung zur berichtigten wechseln
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -615,7 +609,6 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die berichtigte Abrechnung öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite der berichtigten Abrechnung 2024 von "Eva Frei"
 
-  @wip
   Szenario: Von der berichtigten Abrechnung zur ersetzten wechseln
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -623,3 +616,19 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die ersetzte Abrechnung öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+
+  # #120, Fachreview W2e V-2: der Mieter hat die ersetzte Abrechnung mit ihrem Zahlteil noch; das PDF sagt, dass sie
+  # nicht mehr gilt, und rechnet die 442.90 an, die darauf bezahlt sind
+  Szenario: PDF der berichtigten Abrechnung nennt die ersetzte und das schon Bezahlte
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist bezahlt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und die Abrechnung 2024 von "Eva Frei" ist berichtigt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Diese gilt nicht mehr: Bezahlen Sie nur noch den Saldo dieser Abrechnung."
+    Und steht im PDF "bereits bezahlt CHF 442.90"
+    Und steht im PDF "Nachzahlung 187.45"

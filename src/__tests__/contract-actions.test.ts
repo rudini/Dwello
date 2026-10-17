@@ -588,7 +588,7 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 			status: 409,
 			data: {
 				fixedTermError:
-					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann Dwello das Vertragsende nicht entfernen. Für Sie und den Mieter läuft der Mietvertrag trotzdem unbefristet weiter. Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.'
+					'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum kann Dwello das Vertragsende noch nicht entfernen. Für Sie und den Mieter läuft der Mietvertrag trotzdem unbefristet weiter. Berichtigen Sie zuerst jede dieser Abrechnungen. Öffnen Sie sie dazu und wählen Sie «Abrechnung berichtigen».'
 			}
 		});
 	});

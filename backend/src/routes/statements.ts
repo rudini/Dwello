@@ -188,7 +188,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				return statement;
 			} catch (error) {
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Failed to update statement' };
+				return errorBody(error, 'Failed to update statement'); // a replaced statement with its code (#120)
 			}
 		},
 		{

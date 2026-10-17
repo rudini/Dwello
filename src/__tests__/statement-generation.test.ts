@@ -204,6 +204,16 @@ describe('Abrechnungen erstellen', () => {
 		expect(posts.map((post) => post.body.contractId)).toEqual(['auszug']);
 	});
 
+	// Fachreview W2e V-3: eine ersetzte Abrechnung einer anderen, nur überlappenden Periode bleibt abgerechnet
+	it('übergeht einen Mietvertrag, dessen ersetzte Abrechnung eine andere Periode hat', async () => {
+		const { fetch, posts } = backend([
+			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' }
+		]);
+
+		expect(await generateStatements(fetch, period)).toBe(1);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
+	});
+
 	it('meldet in Worten, wenn das Backend die Berechnung ablehnt', async () => {
 		const fetch = (async (url: string) =>
 			url.includes('contracts')

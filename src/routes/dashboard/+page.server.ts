@@ -68,7 +68,9 @@ async function lastPeriod(fetch: typeof globalThis.fetch, config: Promise<Record
 	);
 	if (!response.ok) return null; // unknown: better no task than every building
 	const statements: Row[] = (await response.json()).data ?? [];
-	return { ...period, done: new Set(statements.map((s) => s.contractId)) };
+	// a replaced statement no longer bills the period (#120)
+	const billing = statements.filter((s) => s.status !== 'replaced');
+	return { ...period, done: new Set(billing.map((s) => s.contractId)) };
 }
 
 // Buildings with a Mietvertrag in the last period that has no statement yet, also one that has ended since

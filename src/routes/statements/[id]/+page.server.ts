@@ -4,7 +4,9 @@ import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
 import { loadDocuments } from '$lib/server/documents';
 import {
+	correctStatement,
 	markStatementPaid,
+	replaceStatement,
 	resetStatementPayment,
 	sendStatementReminder
 } from '$lib/server/statement-actions';
@@ -66,6 +68,15 @@ export const actions: Actions = {
 	resetPayment: async ({ params, fetch }) => {
 		const refused = await resetStatementPayment(fetch, params.id);
 		if (refused) return fail(refused.status, { actionError: refused.message });
+	},
+	replace: async ({ params, fetch }) => {
+		const refused = await replaceStatement(fetch, params.id);
+		if (refused) return fail(refused.status, { actionError: refused.message });
+	},
+	correct: async ({ params, fetch }) => {
+		const result = await correctStatement(fetch, params.id);
+		if ('message' in result) return fail(result.status, { actionError: result.message });
+		throw redirect(303, `/statements/${result.id}`);
 	},
 	remind: async ({ params, fetch }) => {
 		const result = await sendStatementReminder(fetch, params.id);

@@ -260,6 +260,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
 	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
+	'correct-dialog': () => openDialog(on.correctButton),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('{area}').into(on.formulaInput),

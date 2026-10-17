@@ -15,15 +15,16 @@
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
-	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import CostTable from './CostTable.svelte';
+	import Correction from './Correction.svelte';
 	import FormDialog from './FormDialog.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { localToday } from '$lib/contract-status';
 	import MetadataCard from './MetadataCard.svelte';
+	import MoreActions from './MoreActions.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
 	import PdfAction from './PdfAction.svelte';
@@ -59,6 +60,7 @@
 	let showDelete = $state(false);
 	let showSend = $state(false);
 	let showResetPayment = $state(false);
+	let showCorrect = $state(false);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
 	let paidError = $state('');
@@ -150,8 +152,10 @@
 		/>
 	</p>
 
+	<Correction {statement} bind:open={showCorrect} />
+
 	{#if data.laterInvoices}
-		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->
+		<!-- a draft is created again; a sent statement is corrected by a berichtigte Abrechnung (it cannot be deleted) -->
 		<Alert tone="caution" title={m.statements_later_title()} testid="statement-later-invoices">
 			{#if statement.status === 'draft'}
 				<p>{m.statements_later_draft({ later: laterInvoices })}</p>
@@ -182,20 +186,11 @@
 		<div class="flex min-w-0 flex-col gap-8">
 			<PartiesPanel {statement} />
 			<Panel title={m.statements_more_actions()}>
-				<div class="flex flex-col gap-4">
-					<Button href="/statements/{statement.id}/edit" icon="edit" testid="statement-edit-button"
-						>{m.statements_edit_button()}</Button
-					>
-					<!-- Only a draft can be deleted; once sent, the statement stays as the tenant received it -->
-					{#if statement.status === 'draft'}
-						<Button
-							variant="danger-ghost"
-							icon="delete"
-							onclick={() => (showDelete = true)}
-							testid="statement-delete-button">{m.statements_delete()}</Button
-						>
-					{/if}
-				</div>
+				<MoreActions
+					{statement}
+					oncorrect={() => (showCorrect = true)}
+					ondelete={() => (showDelete = true)}
+				/>
 			</Panel>
 			<MetadataCard
 				createdAt={statement.createdAt}

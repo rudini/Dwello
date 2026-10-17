@@ -1,0 +1,5 @@
+{
+	"error": "The contract has no rent days in the period",
+	"code": "STATEMENT_NO_RENTAL_DAYS_SENT",
+	"params": { "number": "NK-AB12CD34-2024-0001", "amount": "0.00" }
+}

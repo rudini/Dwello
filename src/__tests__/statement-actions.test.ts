@@ -3,6 +3,7 @@ import { runAction } from './helpers/action';
 import { actions } from '../routes/statements/[id]/+page.server';
 import { localToday } from '$lib/contract-status';
 import paidDateRefused from '../../tests/contracts/statement-paid-date-refused.json';
+import correctionRefused from '../../tests/contracts/statement-correction-refused.json';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 const today = localToday(); // the day in Switzerland, as the app takes it
@@ -216,5 +217,43 @@ describe('Abrechnung laden', () => {
 
 		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { laterInvoices: number };
 		expect(data.laterInvoices).toBe(0);
+	});
+});
+
+// #120, #358: berichtigte Abrechnung
+describe('Abrechnung berichtigen', () => {
+	it('ersetzt die Abrechnung im Backend', async () => {
+		const { calls, result } = runAction(actions.replace, 's1');
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/replace`, body: undefined }]);
+	});
+
+	it('meldet, wenn das Backend das Ersetzen ablehnt', async () => {
+		const { result } = runAction(actions.replace, 's1', 409, {}, { code: 'STATEMENT_NOT_REPLACEABLE', params: {} });
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { actionError: 'Nur eine versendete oder bezahlte Abrechnung lässt sich berichtigen. Laden Sie die Seite neu.' }
+		});
+	});
+
+	it('erstellt die berichtigte Abrechnung und öffnet sie', async () => {
+		const { calls, result } = runAction(actions.correct, 's1', 201, {}, { id: 's2' });
+
+		await expect(result).rejects.toMatchObject({ status: 303, location: '/statements/s2' });
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/correction`, body: undefined }]);
+	});
+
+	it('sagt ohne Mietstage in der Periode, was zu tun ist', async () => {
+		const { result } = runAction(actions.correct, 's1', 409, {}, correctionRefused);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				actionError:
+					'Der Mietvertrag hat in dieser Abrechnungsperiode keine Mietstage mehr. Darum gibt es keine berichtigte Abrechnung. Teilen Sie dem Mieter mit, dass die Abrechnung NK-AB12CD34-2024-0001 nicht mehr gilt.'
+			}
+		});
 	});
 });

@@ -153,7 +153,8 @@ describe('Abrechnungsstatus auf der Übersicht', () => {
 			draft: 'Draft',
 			sent: 'Sent',
 			paid: 'Paid',
-			overdue: 'Overdue'
+			overdue: 'Overdue',
+			replaced: 'Replaced'
 		});
 	});
 });

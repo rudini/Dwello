@@ -32,6 +32,7 @@
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
 		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
+		"correct-dialog": "The confirmation before a sent or paid statement is replaced by a berichtigte Abrechnung open, with the amount it offsets and the limitation (#120).",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
@@ -446,7 +447,8 @@
 				"default",
 				"reminder-dialog",
 				"mark-paid-dialog",
-				"action-error"
+				"action-error",
+				"correct-dialog"
 			]
 		},
 		{
@@ -454,7 +456,29 @@
 			"path": "/statements/{paidStatement}",
 			"states": [
 				"default",
-				"reset-payment-dialog"
+				"reset-payment-dialog",
+				"correct-dialog"
+			]
+		},
+		{
+			"name": "statement-replaced-detail",
+			"path": "/statements/{replacedStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-corrected-detail",
+			"path": "/statements/{correctedStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-correction-detail",
+			"path": "/statements/{correctionStatement}",
+			"states": [
+				"default"
 			]
 		},
 		{

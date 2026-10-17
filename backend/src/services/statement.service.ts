@@ -314,9 +314,10 @@ async function correctionsOf(statement: { id: string; replacesId: string | null 
 		next = replaced.replacesId;
 	}
 	const [replacedBy] = await db.select(columns).from(utilityStatements).where(eq(utilityStatements.replacesId, statement.id));
-	const replaces = chain[0] && { id: chain[0].id, statementNumber: chain[0].statementNumber, statementDate: chain[0].statementDate };
+	const [first] = chain;
+	const replaces = first ? { id: first.id, statementNumber: first.statementNumber, statementDate: first.statementDate } : null;
 	const priorPaidOn = chain.filter((s) => Number(s.paidAmount ?? 0) !== 0).map((s) => s.statementNumber).reverse();
-	return { replaces: replaces ?? null, replacedBy: replacedBy ?? null, priorPaidOn };
+	return { replaces, replacedBy: replacedBy ?? null, priorPaidOn };
 }
 
 /** Parameters of a statement calculation; the management fee overrides the configured default */
@@ -626,11 +627,11 @@ export async function correctStatement(id: string): Promise<StatementWithDetails
 		if (!(error instanceof CodedError && error.code === 'CONTRACT_NOT_IN_PERIOD')) throw error;
 		// what the tenant paid comes back to him, a refund paid to him goes back to the landlord; only sent: nothing
 		const paid = paidSoFar(replaced);
-		const code = paid > 0 ? 'STATEMENT_NO_RENTAL_DAYS_PAID' : paid < 0 ? 'STATEMENT_NO_RENTAL_DAYS_REFUNDED' : 'STATEMENT_NO_RENTAL_DAYS_SENT';
-		throw new CodedError(code, 'The contract has no rent days in the period', {
-			number: replaced.statementNumber,
-			amount: Math.abs(paid).toFixed(2)
-		});
+		const params = { number: replaced.statementNumber, amount: Math.abs(paid).toFixed(2) };
+		const message = 'The contract has no rent days in the period';
+		if (paid > 0) throw new CodedError('STATEMENT_NO_RENTAL_DAYS_PAID', message, params);
+		if (paid < 0) throw new CodedError('STATEMENT_NO_RENTAL_DAYS_REFUNDED', message, params);
+		throw new CodedError('STATEMENT_NO_RENTAL_DAYS_SENT', message, params);
 	}
 }
 

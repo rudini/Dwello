@@ -90,6 +90,18 @@ describe('Abrechnung ersetzen', () => {
 		await expectRejection(await replace(id), 409, 'Only a sent or paid statement can be replaced', 'STATEMENT_NOT_REPLACEABLE');
 	});
 
+	it('lässt die ersetzte Abrechnung nicht mehr bearbeiten', async () => {
+		const id = await sentStatement();
+		await replace(id);
+
+		await expectRejection(
+			await sendJson('PUT', `/api/v1/statements/${id}`, { notes: 'geändert' }),
+			400,
+			'A replaced statement cannot be changed',
+			'STATEMENT_REPLACED'
+		);
+	});
+
 	it('lässt die ersetzte Abrechnung nicht mehr als bezahlt markieren', async () => {
 		const id = await sentStatement();
 		await replace(id);
@@ -156,7 +168,11 @@ describe('Berichtigte Abrechnung', () => {
 		await sendJson('PUT', `/api/v1/statements/${second}/status`, { status: 'paid', paidDate: today(), paidAmount: '50.00' });
 		await replace(second);
 
-		expect(((await (await correct(second)).json()) as Statement).priorPayments).toBe('250.00');
+		const third = (await (await correct(second)).json()) as Statement & { priorPaidOn: string[] };
+
+		expect(third.priorPayments).toBe('250.00');
+		// the oldest first
+		expect(third.priorPaidOn).toEqual([(await statement(first)).statementNumber, (await statement(second)).statementNumber]);
 	});
 
 	it('wird nur für eine ersetzte Abrechnung erstellt', async () => {
