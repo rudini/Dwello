@@ -16,13 +16,13 @@ description: Push, open, drive to green and merge the pull request of a finished
 
 ## Before each push
 
-1. "Before marking anything complete" (`CLAUDE.md`) passes.
-2. Closing review: when code (`src/`, `backend/src/`, `backend/migrations/`, `messages/`, `tests/`, `tools/`, `.claude/hooks/`) changed since the last reviewed commit (Minor/Nit fixes, a conflict resolved in it, a CI fix), one `code-reviewer` round on that delta (skill `slice-review`), its own slice for the round limit. Only a Blocker/Major it reports gets another round. A delta only in reports (`docs/reviews/`, persona reports in `docs/design/personas/`), `implementation_plan.md` or `docs/archive/` needs none, and the round's range leaves out the reviews, the plan and the archive (`git diff <base> <commit> -- . ':!docs/reviews' ':!implementation_plan.md' ':!docs/archive'`).
+1. Before the first push, merge `origin/main` once (no rebase, no force-push); later merges only as in "Open and drive". Then "Before marking anything complete" (`CLAUDE.md`) passes.
+2. Closing review: when code (`src/`, `backend/src/`, `backend/migrations/`, `messages/`, `tests/`, `tools/`, `.claude/hooks/`) changed since the last reviewed commit (Minor/Nit fixes, a conflict resolved in it, a CI fix), one `code-reviewer` round on that delta (skill `slice-review`), its own slice for the round limit. Only a Blocker/Major it reports gets another round. A delta only in reports (`docs/reviews/`, persona reports in `docs/design/personas/`), `implementation_plan.md` or `docs/archive/` needs none, and the round's range leaves out the reviews, the plan and the archive (`git diff <base> <commit> -- . ':!docs/reviews' ':!implementation_plan.md' ':!docs/archive'`; with a merge of `main` in the delta: `git diff <last reviewed> <merge>^1`, its conflict resolution `git show --remerge-diff <merge>`, and `git diff <merge> <commit>` for what follows it, each with the same pathspec).
 
 ## Open and drive
 
 - Push the branch, open the pull request in English with `Fixes #n` (or `Refs #n` in the KI case, `backend/CLAUDE.md`); subscribe to its activity. If the session cannot wait for CI, say under "Blocked on me" that the pull request waits for CI and is not merged.
-- A merge conflict: merge `origin/main` (no rebase, no force-push). A conflict in app code gets a `code-reviewer` round on the merge commit.
+- Merge a newer `main` into the open pull request only for a merge conflict, a red check that `main` fixes, or when GitHub refuses the merge because the branch is behind; not while it waits on the product owner. A conflict in app code gets a `code-reviewer` round on the merge commit.
 - Red CI: fix the cause and push. A fourth round of CI fixes needs the product owner first.
 - Right before merging: read the check runs of the latest commit and the open findings again. Merge with a merge commit (the repository has no auto-merge) once CI is green and the pull request is mergeable; name its CI screenshot comment, or that there is none, in the closing report.
 - Never without the product owner: what `CLAUDE.md`, "When to ask", lists for pushes and merges (merging while a Blocker/Major is open includes the two kinds "Done means" lets a task finish with).
