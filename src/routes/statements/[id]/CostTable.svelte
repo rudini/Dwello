@@ -4,6 +4,7 @@
 	import { balanceLabel } from '$lib/statement';
 	import Table from '$lib/ui/Table.svelte';
 	import { formatCurrency } from '$lib/utils/format';
+	import { getLocale } from '$lib/paraglide/runtime';
 	import LineInvoices from './LineInvoices.svelte';
 
 	// The costs line by line, then the Verwaltungspauschale, the Akonto and what remains: the Saldo
@@ -13,12 +14,50 @@
 	// The Saldo goes to 5 Rappen. As in the PDF: the amount before, its rounding seen from the amount shown (a refund
 	// that grows gets +), the Saldo; only a real rounding (under 5 Rappen)
 	const cents = (amount: number) => Math.round(amount * 100) / 100;
-	const unrounded = $derived(cents(statement.totalCosts - statement.totalAdvancePayments));
+	// a berichtigte Abrechnung also offsets what was paid on the statements it replaced (#120); a refund paid counts negative
+	const prior = $derived(statement.priorPayments ?? 0);
+	// TODO(fachlich prüfen, #362): «Bereits bezahlt» is not in the glossary yet
+	const priorLabel = (numbers: string) =>
+		prior > 0 ? m.statements_prior_paid({ numbers }) : m.statements_prior_refunded({ numbers });
+	const unrounded = $derived(cents(statement.totalCosts - statement.totalAdvancePayments - prior));
 	const rounding = $derived(
 		Math.abs(statement.balance - unrounded) < 0.05
 			? cents(Math.abs(statement.balance) - Math.abs(unrounded))
 			: 0
 	);
+	// «+ CHF 0.02» for an amount that adds, «− CHF 0.02» for one that subtracts
+	const signed = (adds: boolean, amount: number) =>
+		`${adds ? '+' : '−'} ${formatCurrency(Math.abs(amount))}`;
+	// between the Akonto and the Saldo: what was already paid, the amount before rounding and the rounding
+	const adjustments = $derived([
+		...(prior
+			? [
+					{
+						testid: 'statement-prior-payments',
+						label: priorLabel(
+							new Intl.ListFormat(getLocale(), { type: 'conjunction' }).format(
+								statement.priorPaidOn ?? []
+							)
+						),
+						value: signed(prior < 0, prior)
+					}
+				]
+			: []),
+		...(rounding
+			? [
+					{
+						testid: 'statement-rounding',
+						label: m.statements_before_rounding({ balance: balanceLabel(unrounded) }),
+						value: formatCurrency(Math.abs(unrounded))
+					},
+					{
+						testid: 'statement-rounding',
+						label: m.statements_rounding(),
+						value: signed(rounding > 0, rounding)
+					}
+				]
+			: [])
+	]);
 	// Wohnungsanteil and Zeitanteil as the PDF shows them: the Zeitanteil as days where it is one (#104)
 	type Item = StatementWithDetails['lineItems'][number];
 	const apartmentShare = (item: Item) =>
@@ -136,22 +175,13 @@
 		<dt class="text-ink-muted">{m.statements_advance_paid()}</dt>
 		<dd class="whitespace-nowrap text-ink">− {formatCurrency(statement.totalAdvancePayments)}</dd>
 	</div>
-	{#if rounding}
+	{#each adjustments as row (row.label)}
 		<!-- each pair directly in the list: a <dl> holds only groups of <dt> and <dd> -->
-		<div class="flex justify-between gap-4" data-testid="statement-rounding">
-			<dt class="text-ink-muted">
-				{m.statements_before_rounding({ balance: balanceLabel(unrounded) })}
-			</dt>
-			<dd class="whitespace-nowrap text-ink">{formatCurrency(Math.abs(unrounded))}</dd>
+		<div class="flex justify-between gap-4" data-testid={row.testid}>
+			<dt class="text-ink-muted">{row.label}</dt>
+			<dd class="whitespace-nowrap text-ink">{row.value}</dd>
 		</div>
-		<div class="flex justify-between gap-4" data-testid="statement-rounding">
-			<dt class="text-ink-muted">{m.statements_rounding()}</dt>
-			<dd class="whitespace-nowrap text-ink">
-				{rounding > 0 ? '+' : '−'}
-				{formatCurrency(Math.abs(rounding))}
-			</dd>
-		</div>
-	{/if}
+	{/each}
 	<div
 		class="flex justify-between gap-4 border-t border-line pt-2 text-lg font-bold"
 		data-testid="statement-balance"

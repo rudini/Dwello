@@ -4,7 +4,7 @@
  */
 
 import { Elysia } from 'elysia';
-import { count, eq, and, sum, desc, gt, gte, sql, type SQL } from 'drizzle-orm';
+import { count, eq, and, sum, desc, gt, gte, or, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, apartments, utilityStatements, invoices } from '../db/schema';
 import { apartmentStatus } from '../services/apartment.service';
@@ -128,7 +128,12 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 			overdueAmount: await sumStatements(utilityStatements.balance, owed('overdue')),
 			paidThisMonth: await sumStatements(
 				utilityStatements.paidAmount,
-				and(owed('paid'), gte(utilityStatements.paidDate, monthStart)) // only Nachzahlungen, not refunds (#93)
+				// only Nachzahlungen, not refunds (#93); also on a statement replaced since (#120)
+				and(
+					or(statusCondition('paid'), eq(utilityStatements.status, 'replaced')),
+					gt(utilityStatements.balance, '0'),
+					gte(utilityStatements.paidDate, monthStart)
+				)
 			)
 		},
 		statements,

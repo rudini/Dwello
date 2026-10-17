@@ -70,4 +70,22 @@ export const confirmResetPaymentButton = target('Zurücksetzen bestätigen', (pa
 	page.getByTestId('statement-reset-payment-confirm')
 );
 export const resetPaymentDialog = target('Bestätigung des Zurücksetzens', (page) => page.getByRole('dialog'));
+
+// #120: the correction of a sent statement
+export const correctStatementButton = target('Abrechnung berichtigen', (page) => page.getByTestId('statement-correct-button'));
+export const correctDialog = target('Bestätigung des Berichtigens', (page) => page.getByRole('dialog'));
+export const confirmCorrectButton = target('Ersetzen bestätigen', (page) => page.getByTestId('statement-correct-confirm'));
+export const createCorrectionButton = target('Berichtigte Abrechnung erstellen', (page) =>
+	page.getByTestId('statement-create-correction-button')
+);
+export const replacesLink = target('Ersetzte Abrechnung', (page) => page.getByTestId('statement-replaces-link'));
+export const replacedByLink = target('Berichtigte Abrechnung', (page) => page.getByTestId('statement-replaced-by-link'));
+export const priorPayments = target('Bereits bezahlt', (page) => page.getByTestId('statement-prior-payments'));
+export const statementBalance = target('Saldo der Abrechnung', (page) => page.getByTestId('statement-balance'));
+export const replacedContractLink = target('Mietvertrag der ersetzten Abrechnung', (page) =>
+	page.getByTestId('statement-replaced-contract-link')
+);
+export const paymentSummary = target('Zahlung der Abrechnung', (page) => page.getByTestId('statement-payment-summary'));
+export const paymentDeadline = target('Zahlungsfrist der Abrechnung', (page) => page.getByTestId('statement-payment-deadline'));
+export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));

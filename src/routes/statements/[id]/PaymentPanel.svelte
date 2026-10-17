@@ -11,21 +11,31 @@
 	const amount = $derived(formatCurrency(Math.abs(statement.balance)));
 	const refund = $derived(statement.balance < 0);
 	const nextReminder = $derived(nextReminderLater(statement));
+	// a replaced statement asks for nothing: its berichtigte Abrechnung says what is still due (#120)
+	const replaced = $derived(statement.status === 'replaced');
 	// below CHF 5 nothing is paid: no Zahlungsfrist and no «Bezahlt am» (#94)
 	const waived = $derived(belowMinimum(statement.balance));
 	const summary = $derived(
-		statement.balance === 0
-			? m.statements_summary_settled()
-			: waived
-				? refund
-					? m.statements_summary_waived_refund()
-					: m.statements_summary_waived_due()
-				: refund
-					? m.statements_summary_refund({ amount })
-					: m.statements_summary_due({ amount })
+		replaced
+			? m.statements_summary_replaced()
+			: statement.balance === 0
+				? m.statements_summary_settled()
+				: waived
+					? refund
+						? m.statements_summary_waived_refund()
+						: m.statements_summary_waived_due()
+					: refund
+						? m.statements_summary_refund({ amount })
+						: m.statements_summary_due({ amount })
 	);
+	const deadline = $derived({
+		label: refund ? m.statements_refund_by() : m.glossary_deadline_term(),
+		date: replaced || waived ? undefined : statement.paymentDeadline,
+		testid: 'statement-payment-deadline'
+	});
 	const rows = $derived(
 		[
+			deadline,
 			{ label: m.statements_statement_date(), date: statement.statementDate },
 			{ label: m.statements_paid_on(), date: waived ? null : statement.paidDate },
 			{ label: m.statements_last_reminder(), date: statement.lastReminderDate }
@@ -36,20 +46,12 @@
 <Panel title={m.statements_payment()}>
 	<p class="text-ink" data-testid="statement-payment-summary">{summary}</p>
 	<dl class="grid gap-4 sm:grid-cols-2">
-		{#if !waived}
-			<div class="flex flex-col gap-1">
-				<dt class="text-ink-muted">
-					{refund ? m.statements_refund_by() : m.glossary_deadline_term()}
-				</dt>
-				<dd class="font-semibold text-ink" data-testid="statement-payment-deadline">
-					{formatDate(statement.paymentDeadline)}
-				</dd>
-			</div>
-		{/if}
 		{#each rows as row (row.label)}
 			<div class="flex flex-col gap-1">
 				<dt class="text-ink-muted">{row.label}</dt>
-				<dd class="font-semibold text-ink">{formatDate(row.date!)}</dd>
+				<dd class="font-semibold text-ink" data-testid={'testid' in row ? row.testid : undefined}>
+					{formatDate(row.date!)}
+				</dd>
 			</div>
 		{/each}
 		{#if nextReminder}

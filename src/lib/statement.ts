@@ -17,6 +17,9 @@ export const statusLabels: Record<StatementStatus, string> = {
 	},
 	get overdue() {
 		return m.statements_status_overdue();
+	},
+	get replaced() {
+		return m.statements_status_replaced();
 	}
 };
 
@@ -24,7 +27,8 @@ export const statusTones: Record<StatementStatus, Tone> = {
 	draft: 'neutral',
 	sent: 'info',
 	paid: 'positive',
-	overdue: 'critical'
+	overdue: 'critical',
+	replaced: 'neutral'
 };
 
 /** The Saldo in words: positive, the tenant pays; negative, the tenant gets money back */

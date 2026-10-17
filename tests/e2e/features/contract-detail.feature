@@ -327,7 +327,8 @@ Funktionalität: Mietvertragsdetail
     Und ist der Mietvertrag von "Bruno Meier" unbefristet
     Und findet die Abrechnungsliste keine Abrechnung 2025 von "Bruno Meier"
 
-  # Eine versendete Abrechnung ändert Dwello nicht: der Mietvertrag läuft hier nicht unbefristet weiter
+  # Eine versendete Abrechnung ändert Dwello nicht: der Mietvertrag läuft erst unbefristet weiter, wenn sie ersetzt ist
+  # (#120, #358)
   Szenario: Unbefristet weiterführen nach einer versendeten Abrechnung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Bruno Meier" existiert
@@ -335,5 +336,15 @@ Funktionalität: Mietvertragsdetail
     Und für "Bruno Meier" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
     Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
-    Dann meldet der Mietvertrag "Klären Sie die Korrektur der Abrechnung direkt mit dem Mieter."
+    Dann meldet der Mietvertrag "Berichtigen Sie zuerst jede dieser Abrechnungen."
     Und zeigt der Mietvertrag "Befristet bis 30.06.2025"
+
+  Szenario: Unbefristet weiterführen nach dem Berichtigen der Abrechnung
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-06-30" für "900" Franken
+    Und für "Bruno Meier" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Und die Abrechnung 2025 von "Bruno Meier" ist ersetzt
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
+    Dann ist der Mietvertrag unbefristet

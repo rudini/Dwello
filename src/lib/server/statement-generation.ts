@@ -54,9 +54,12 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 				call(fetch, `contracts?buildingId=${encodeURIComponent(buildingId)}&limit=1000`),
 				call(fetch, `statements?buildingId=${encodeURIComponent(buildingId)}&limit=1000`)
 			]);
+			// a statement replaced in this very period does not count: the run creates its berichtigte Abrechnung (#120)
+			const replacedHere = (s: Period & { status?: string }) =>
+				s.status === 'replaced' && s.periodStart === periodStart && s.periodEnd === periodEnd;
 			const billed = new Set(
-				(statements as (Period & { contractId: string })[])
-					.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart)
+				(statements as (Period & { contractId: string; status?: string })[])
+					.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s))
 					.map((s) => s.contractId)
 			);
 			const inPeriod = (contracts as Contract[]).filter(
