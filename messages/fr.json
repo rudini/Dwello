@@ -102,7 +102,7 @@
 	"glossary_allocable_term": "Imputable",
 	"glossary_allocable_text": "Une facture imputable entre dans le décompte des charges, par exemple le chauffage, l’eau, le concierge ou les ordures. Le fait qu’une facture soit imputable découle de sa catégorie ; vous pouvez en exclure une facture isolée d’une catégorie imputable. Le locataire ne doit payer ces frais que si le contrat de bail les mentionne comme frais accessoires.",
 	"glossary_balance_term": "Solde",
-	"glossary_balance_text": "La part des coûts du locataire, frais de gestion compris, moins ses acomptes versés, arrondie à 5 centimes. Si le solde est positif, le locataire paie la différence (montant à payer) ; s’il est négatif, il est remboursé (remboursement).",
+	"glossary_balance_text": "La part des coûts du locataire, frais de gestion compris, moins ses acomptes versés, arrondie à 5 centimes, uniquement en faveur du locataire : un montant à payer est arrondi vers le bas, un remboursement vers le haut. Si le solde est positif, le locataire paie la différence (montant à payer) ; s’il est négatif, il est remboursé (remboursement).",
 	"glossary_deadline_term": "Délai de paiement",
 	"glossary_deadline_text": "La date à laquelle le locataire doit avoir réglé un montant à payer. Pour un remboursement, c’est la date à laquelle vous lui versez le montant (« Remboursement au plus tard le »).",
 	"glossary_reminder_term": "Rappel",
