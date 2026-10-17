@@ -17,4 +17,5 @@ Branch `claude/w6e-invoice-hints-378-379`. #379 is not ready: the code has no ru
 - [x] merge `main` once PR #385 (wording «Abrechnung berichtigen») is in, before the push, and check «Abrechnung berichtigen» in the scenario (review C-1): merged; the scenario checks the sentence (absent on the base commit); lint, check, type-check, DOM/open-work/design-guard tests, E2E invoice and statement-generate features with the axe and language rows (84 passed)
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-378-379.md` (dependency on an open PR; collected review with parallel sessions left to the coordinator)
 - [ ] archive the session
-- [ ] PR `Fixes #378` (or `Refs #378`, see above), CI, merge
+- [x] closing review (code-reviewer): `docs/reviews/w6e-review-3.md` (no Blocker/Major; C-12 fixed; C-11, C-13 stay)
+- [ ] PR `Fixes #378`, CI, merge
