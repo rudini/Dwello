@@ -92,7 +92,7 @@ Then('nennt die Rechnung keinen Grund der Umlagefähigkeit', async ({ verwalter 
 	await verwalter.sees(reasonsOfCategory).toBe(0);
 });
 
-// After the reason that anchors it: no «Keiner – … pro Wohnung verteilt» for an invoice nobody pays (#292, Helga P-1)
+// After the reason that anchors it: no «Keiner – … pro Wohnung verteilt» for an invoice not distributed to the tenants (#292, Helga P-1)
 Then('sagt die Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde', async ({ verwalter }) => {
 	await verwalter.sees(distributionKeyRows).toBe(0);
 });
