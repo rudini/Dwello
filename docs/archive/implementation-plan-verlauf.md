@@ -1,3 +1,19 @@
+## Session 2026-10-17 W12: Fedlex check of the statement requirements (#77)
+
+- [x] Read Art. 67, 128, 257a, 257b, 269d, 270b OR (Fedlex, SR 220, as of 1.10.2026, de/fr/it) and Art. 4–8 VMWG (SR 221.213.11, as of 1.10.2025, de/fr/it) on fedlex.data.admin.ch
+- [x] Compare the PDF notes in `pdf.service.ts` (de/fr/it/en): all match Fedlex, no change
+- [x] Compare the help texts in `messages/*.json` that cite these articles: `contracts_fee_help` (Art. 269d OR) lacked the ten-day lead time, the reasons and «nächstmöglichen»; fixed in all four languages, `contract-wizard.dom.test.ts` red first
+- [x] `docs/nebenkostenabrechnung-anforderungen.md`: Fedlex link and version per requirement, «Sicherheit» checked on Fedlex, wrong statements corrected (Art. 269d nullity, Art. 6 VMWG scope, Art. 5 Abs. 2 lit. a–i wording)
+- [x] Glossary deviations listed in #77 (glossary not edited; the three the issue named were already gone, none left)
+- [x] `fach-reviewer` round 1: `docs/reviews/fedlex77-fachreview-1.md`
+- [x] `code-reviewer` round 1: `docs/reviews/fedlex77-review-1.md`
+- [x] Scenario «Hilfe zu einer neuen Verwaltungspauschale während der Mietdauer» (`contract-new.feature`), red against the old text, green; help paragraph of `RadioGroup` gets `data-testid="<testid>-help"`
+- [x] `code-reviewer` round 2 on the scenario: `docs/reviews/fedlex77-review-2.md`
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-77.md`
+- [x] Pull request (opened after archiving this session)
+
+Files: `docs/nebenkostenabrechnung-anforderungen.md`, `messages/{de,fr,it,en}.json`, `src/__tests__/contract-wizard.dom.test.ts`, `src/lib/ui/RadioGroup.svelte`, `tests/e2e/{features/contract-new.feature,steps/contract-form.steps.ts,targets/contract-form.ts,questions/contract-form.ts}`, `docs/reviews/fedlex77-{fachreview-1,review-1,review-2}.md`, `docs/reviews/workflow-notes-issue-77.md`
+
 ## Session 2026-10-17 W2e: berichtigte Abrechnung (#120, #358)
 
 - [x] Implementation issue #358 created (A-11, «Done means» from #120)
@@ -1411,6 +1427,17 @@ Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.sve
 
 Files: `tests/e2e/features/statement-detail.feature`, `tests/e2e/steps/tenant-form.steps.ts`, `backend/src/services/{qr-bill,pdf}.service.ts`, `backend/src/__tests__/{qr-bill.service,statement-pdf-render}.test.ts`, `backend/src/__tests__/helpers/pdf-text.ts`, reviews and persona report.
 
+## Session W14: #80 July share of «Heizung Bergregion»
+
+- [x] Compare the Bergregion row with the source table: Mieterverband merkblatt_nebenkostenabrechnung_waehrend_periode.pdf (PDF dated 2023-09-09), page 2, «Verteilungsschlüssel in Bergebieten und im Tessin», row «Berggebiete»: 14.0, 11.5, 11.5, 9.0, 7.0, 4.5, 1.0, 4.0, 5.5, 8.5, 10.5, 13.0, the same as the migration (no misprint); mietrecht.ch and HEV not reachable from the cloud session
+- [x] Name the source in the test comment (`backend/src/__tests__/heating-profiles.pg.test.ts`); No scenario: only a test comment changes, no behaviour
+- [x] Note the source in issue #80 (comment 6232504741)
+- [x] Slice review round 1 (`code-reviewer`): `docs/reviews/w14-review-1.md`
+- [x] Closing code-reviewer round 2: `docs/reviews/w14-review-2.md`
+- [x] Session archived before the pull request
+
+Files: `backend/src/__tests__/heating-profiles.pg.test.ts` (comment), `implementation_plan.md`, this file, `docs/reviews/w14-review-{1,2}.md`.
+
 ## Session 2026-10-17 W8c-2: remove the 3-month hint (#65, option A)
 
 - [x] Decision recorded in #65 (option A, label `entscheiden` removed)
@@ -1440,3 +1467,35 @@ Files: `tests/e2e/features/statement-detail.feature`, `tests/e2e/steps/tenant-fo
 - [x] Merge reviews after main took the migration number: `docs/reviews/204-review-4.md`, `204-review-5.md` (migration now `0021`, after main took 0018 to 0020)
 
 Files: `backend/migrations/0021_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`, `tests/e2e/{features/categories.feature,steps/categories.steps.ts,tasks/categories.ts,questions/categories.ts,targets/categories.ts,screenplay/questions.ts}`
+
+## Session W7d: #71 Heizprofil within the Leistungszeitraum
+
+- [x] Read #71 and the open `entscheiden` issues on the same calculation (#257, #256, #280, #237); #257 (Tankbestand) proposes that a delivery's Leistungszeitraum does not count in a tank category: tank categories keep today's sharing until #257 is decided
+- [x] Scenario `@wip` in `tests/e2e/features/statement-detail.feature` (amount and PDF), seen red
+- [x] `fach-reviewer` on the scenario before implementing (amounts change): `docs/reviews/71-fachreview-1.md`; M-2 → #335 (entscheiden), V-7 → #336 (entscheiden), V-6 → comment on #237
+- [x] Calculation: a heating invoice with a Leistungszeitraum is shared by the Heizprofil's months inside it, normalised to 100 % (tdd, `calculation.service.ts`)
+- [x] PDF: each invoice of such a position with its months and the division, recomputable from the printed values (#232)
+- [x] `docs/nebenkostenabrechnung-anforderungen.md` rule 5, `docs/data-model.md` (CR2-N2)
+- Files: `backend/src/services/{calculation,pdf,statement-pdf}.service.ts`, `backend/src/db/schema.ts` (`InvoicePart.profile`, jsonb, no migration), tests `heating-distribution.pg.test.ts`, `statement-pdf-render.test.ts`, `statement-pdf.pg.test.ts`, `statement-detail.feature` + step, docs rule 5 and `data-model.md`
+- [x] Slice review round 1: `docs/reviews/71-review-1.md` (C-1, C-5 to C-8 fixed; C-2 answered by the domain review; C-3, C-4, C-9, C-10 stay in the report; C-11: V-3 stated in rule 5, V-4 stays in report 1)
+- [x] Domain review round 2: `docs/reviews/71-fachreview-2.md` (M-4, V-9 to V-13 fixed)
+- [x] Persona Dr. Weber: `docs/design/personas/dr-weber-71.md` (P-1 → #339 entscheiden; P-3 fixed; P-2, P-4 stay in the report)
+- [x] Domain review round 3: `docs/reviews/71-fachreview-3.md` (M-4 closed; V-14 fixed)
+- [x] Closing `code-reviewer` round 2: `docs/reviews/71-review-2.md` (C-1 fixed with a test, C-2 and C-4 fixed, C-3 accepted: reviewed wording)
+- [x] `daten-pruefer` on Seepark Residenz A2 and controls: `docs/reviews/71-datenpruefung-1.md` (no findings)
+- [x] Merge `origin/main` (conflict in the schema import of `calculation.service.ts` only)
+- [x] Closing code review round 3: `docs/reviews/71-review-3.md` (C-1 Major: a decommissioned tank no longer keeps the exception, `periodReadings().covered`, test first; C-2 settled by it); re-review round 4: `docs/reviews/71-review-4.md` (C-1, C-2 closed; C-3 Minor stays in the report)
+- [x] Merge of main after the product owner's go (conflicts in calculation, PDF texts, render test, rule 5): review of the merge commit `docs/reviews/71-review-5.md` (no Blocker/Major; C-1, C-2 stay in the report)
+- [x] Further merge of main and test fix (part order of two invoices with one date): review round 6 `docs/reviews/71-review-6.md` (no Blocker/Major; C-1 pre-existing, C-2 stay in the report)
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
+- [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
+
+## Session 2026-10-17: fewer review rounds (T1, T4 of `docs/reviews/workflow-rules-review-2026-10-17-2.md`)
+
+- [x] Collected review on token cost: `docs/reviews/workflow-rules-review-2026-10-17-2.md`
+- [x] T1: fixes of feature-review Minors/Nits form no slice; the closing round reviews them (`.claude/skills/slice-review/SKILL.md`, "Rounds")
+- [x] T4: no closing round for a delta of reports, personas, plan or archive; the round's range leaves them out (`.claude/skills/pull-request/SKILL.md`, `CLAUDE.md` Workflow 7)
+- [x] code-reviewer round 1: `docs/reviews/t1t4-review-1.md` (C-1 fixed: the range keeps `docs/design/personas/README.md` and `demo-records.md`; C-4 fixed; C-2, C-3 stay in the report)
+- [x] session archived, pull request
+
+Files: `CLAUDE.md`, `.claude/skills/{slice-review,pull-request}/SKILL.md`, `docs/reviews/workflow-rules-review-2026-10-17-2.md`, `docs/reviews/t1t4-review-1.md`

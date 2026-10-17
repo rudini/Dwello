@@ -473,6 +473,54 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 
 });
 
+// #71: Einzug im Mai, eine Heizrechnung für Januar bis März und eine ohne Leistungszeitraum: jede mit ihrem Anteil nach
+// Heizprofil, die mit Leistungszeitraum mit den Monaten darin und der Teilung (nachrechenbar wie #232)
+describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
+	const months = (shares: [number, number][]) => shares.map(([month, percentage]) => ({ month, percentage }));
+	const invoiceParts = [
+		{ start: '2024-01-01', end: '2024-03-31', amount: 1000, days: 0, total: 91, profile: { percent: 0, months: [], periodMonths: months([[1, 18], [2, 14], [3, 11]]) } },
+		{ start: '2024-01-01', end: '2024-12-31', amount: 1000, days: 245, total: 366, noPeriod: true as const, profile: { percent: 52, months: months([[5, 2], [12, 26]]), periodMonths: [] } }
+	];
+	const winter: StatementPDFData = {
+		...due,
+		heating: { profile: 'Winter', percent: 52, months: months([[5, 2], [6, 0], [7, 0], [8, 0], [9, 2], [10, 8], [11, 14], [12, 26]]) },
+		lineItems: [{ category: 'Heizung', key: 'Pro Fläche (m²)', totalAmount: 2000, apartmentShare: 2000, periodShare: 0.26, invoiceParts, byProfile: true, heating: true, tenantShare: 520 }]
+	};
+
+	it('nennt jede Rechnung mit ihrem Anteil nach Heizprofil und rechnet bis zu Ihrem Anteil', async () => {
+		const text = (await textOf(winter)).flowing;
+		expect(text).toContain("Leistungszeitraum 01.01.2024 – 31.03.2024: CHF 1'000.00, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: keine; zusammen 0.00 %. Anteil nach Heizprofil: 0.00 % / 43.00 % = 0.00 %");
+		expect(text).toContain("Ohne Leistungszeitraum: CHF 1'000.00, Anteil nach Heizprofil: 52.00 % (siehe Heiz- und Warmwasserkosten)");
+		expect(text).toContain("Ihr Anteil: 2'000.00 × (1'000.00 × 0.00 % + 1'000.00 × 52.00 %) / 2'000.00 = 520.00");
+	});
+
+	// Fachreview 1, M-1 und M-3: der Satz zum Heizprofil gilt nur für die Rechnung ohne Leistungszeitraum
+	it('schränkt den Anteil im Heizungsabschnitt und die Erläuterung auf Rechnungen ohne Leistungszeitraum ein', async () => {
+		const text = (await textOf(winter)).flowing;
+		expect(text).toContain('Heizkosten nach Heizprofil «Winter»: 52.00 % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.');
+		expect(text).toContain('Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil; bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
+		expect((await textOf(heated)).flowing).toContain('44.20 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
+	});
+
+	// Fachreview 1, V-1: der Teil in der Periode nach Tagen, mit dem Beleg wie #241; darin die Monate des Heizprofils
+	it('nennt bei einem Leistungszeitraum über die Periode hinaus den Beleg und die Monate in der Periode', async () => {
+		const beyond = { start: '2024-01-01', end: '2024-03-31', amount: 905.03, days: 91, total: 91, whole: { start: '2023-10-01', end: '2024-03-31', amount: 1820 }, profile: { percent: 100, months: months([[1, 18], [2, 14], [3, 11]]), periodMonths: months([[1, 18], [2, 14], [3, 11]]) } };
+		const text = (await textOf({ ...winter, lineItems: [{ ...winter.lineItems[0], invoiceParts: [beyond, invoiceParts[1]] }] })).flowing;
+		expect(text).toContain("Leistungszeitraum 01.10.2023 – 31.03.2024 (Rechnung CHF 1'820.00), davon 01.01.2024 – 31.03.2024: CHF 905.03, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteil nach Heizprofil: 43.00 % / 43.00 % = 100.00 %");
+	});
+
+	it.each([
+		['fr', "Période de prestation 01.01.2024 – 31.03.2024 : CHF 1'000.00, parts des mois dans le profil de chauffage : janv. 18.00 %, févr. 14.00 %, mars 11.00 % ; au total 43.00 %. Parts des mois de votre bail dans cette période : aucune ; au total 0.00 %. Part selon le profil de chauffage : 0.00 % / 43.00 % = 0.00 %", "Sans période de prestation : CHF 1'000.00, part selon le profil de chauffage : 52.00 % (voir « Frais de chauffage et d’eau chaude »)", '52.00 % pour une facture sans période de prestation.'],
+		['it', "Periodo di prestazione 01.01.2024 – 31.03.2024: CHF 1'000.00, quote dei mesi nel profilo di riscaldamento: gen 18.00 %, feb 14.00 %, mar 11.00 %; in totale 43.00 %. Quote dei mesi della sua locazione in tale periodo: nessuna; in totale 0.00 %. Quota secondo il profilo di riscaldamento: 0.00 % / 43.00 % = 0.00 %", "Senza periodo di prestazione: CHF 1'000.00, quota secondo il profilo di riscaldamento: 52.00 % (vedi spese di riscaldamento e acqua calda)", '52.00 % per una fattura senza periodo di prestazione.'],
+		['en', "Service period 01.01.2024 – 31.03.2024: CHF 1'000.00, monthly shares in the heating profile: Jan 18.00 %, Feb 14.00 %, Mar 11.00 %; in total 43.00 %. Monthly shares during your tenancy within it: none; in total 0.00 %. Share under the heating profile: 0.00 % / 43.00 % = 0.00 %", "Without a service period: CHF 1'000.00, share under the heating profile: 52.00 % (see ‘Heating and hot water costs’)", '52.00 % for an invoice without a service period.']
+	] as const)('nennt die Rechnungen nach Heizprofil auch auf %s', async (language, line, run, note) => {
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(winter, config, language), 'base64')).flowing;
+		expect(text).toContain(line);
+		expect(text).toContain(run);
+		expect(text).toContain(note);
+	});
+});
+
 // #120, #358: die berichtigte Abrechnung nennt die ersetzte und rechnet an, was darauf schon bezahlt ist
 describe('PDF einer berichtigten Abrechnung', () => {
 	// bezahlt 100.00 auf NK-1-2025-0001: 784.13 − 600.00 − 100.00 = 84.13, auf 5 Rappen zugunsten des Mieters 84.10

@@ -6,10 +6,10 @@
  * Jan–Mar 43%, Apr 5%, May–Dec 52%.
  */
 
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, heatingProfiles, invoices } from '../db/schema';
+import { categories, fuelStocks, heatingProfiles, invoices, type InvoicePart } from '../db/schema';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
@@ -17,7 +17,7 @@ import { createContract, deleteContract } from '../services/contract.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 
-type LineItem = { categoryName: string; isHeatingCost: boolean; apartmentShare: number; tenantShare: number; periodShare: number };
+type LineItem = { categoryName: string; isHeatingCost: boolean; apartmentShare: number; tenantShare: number; periodShare: number; invoiceParts: InvoicePart[] | null };
 
 const token = crypto.randomUUID();
 const created: { building: string; apartments: string[]; tenants: string[]; contracts: string[] } = {
@@ -205,5 +205,147 @@ describe('Heizkostenverteilung bei Mieterwechsel und Leerstand', () => {
 		const sum = preview.lineItems.reduce((total, line) => total + line.tenantShare, 0);
 
 		expect(preview.subtotal).toBe(Math.round(sum * 100) / 100);
+	});
+});
+
+// #71: eine Heizkostenrechnung mit Leistungszeitraum zählt nur die Monate des Heizprofils darin, auf 100 % gebracht.
+// Eine Wohnung allein im Gebäude, Profil wie oben (Januar bis März 43 %, Mai bis Dezember 52 %)
+describe('Heizkosten einer Rechnung mit Leistungszeitraum nach dem Heizprofil', () => {
+	let building: string;
+	let apartment: string;
+	let heatingId: string;
+
+	const heatingOf = async (contractId: string, periodStart = '2024-01-01') => {
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId, periodStart, periodEnd: '2024-12-31', heatingProfileId })
+		});
+		const line = ((await response.json()) as { lineItems: LineItem[] }).lineItems.find((item) => item.isHeatingCost)!;
+		await deleteContract(contractId, true);
+		return line;
+	};
+	const invoice = (amount: string, servicePeriodStart?: string, servicePeriodEnd?: string) =>
+		insertInvoice(building, { categoryId: heatingId, description: `Heizung ${amount}`, amount, invoiceDate: '2024-04-10', servicePeriodStart, servicePeriodEnd });
+
+	beforeAll(async () => {
+		building = (await createBuilding({ name: `Quartal ${token}`, address: 'Testweg 2', postalCode: '8400', city: 'Winterthur', canton: 'ZH' })).id;
+		apartment = (await createApartment({ buildingId: building, number: '1.01', floor: 1, area: '100', rooms: '3.5' })).id;
+		heatingId = (await db.select().from(categories).where(eq(categories.name, 'Heating')))[0].id;
+	});
+
+	afterEach(async () => {
+		await db.delete(invoices).where(eq(invoices.buildingId, building));
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, building));
+	});
+
+	afterAll(async () => {
+		await deleteApartment(apartment);
+		await deleteBuilding(building);
+	});
+
+	// Beispiel des Entscheids: wer im Mai einzieht, trägt nichts von Januar bis März, 52 % der Jahresrechnung
+	it('belastet einen Mieter ab Mai mit nichts von einer Rechnung für Januar bis März', async () => {
+		await invoice('1000.00', '2024-01-01', '2024-03-31');
+		await invoice('1000.00');
+
+		const line = await heatingOf(await rent('Ab Mai', apartment, '2024-05-01'));
+
+		expect(line).toMatchObject({ apartmentShare: 2000, periodShare: 0.26, tenantShare: 520 });
+	});
+
+	// Januar bis März: alle Monate des Leistungszeitraums, 43 / 43 = 100 % davon, 43 % der Jahresrechnung
+	it('belastet einen Mieter von Januar bis März mit der ganzen Rechnung für Januar bis März', async () => {
+		await invoice('1000.00', '2024-01-01', '2024-03-31');
+		await invoice('1000.00');
+
+		const line = await heatingOf(await rent('Bis März', apartment, '2024-01-01', '2024-03-31'));
+
+		expect(line).toMatchObject({ periodShare: 0.715, tenantShare: 1430 });
+	});
+
+	// Einzug am 15. Februar, nur eine Rechnung für Januar bis März: Februar 14 × 15/29 = 7.24 %, März 11 %, zusammen
+	// 18.24 % von 43.00 %, also 42.42 %; die Rechnung steht mit ihren Monaten unter der Position (Fachreview 1, V-5)
+	it('teilt eine einzige Rechnung mit Leistungszeitraum nach den Monaten darin, auch bei einem angebrochenen Monat', async () => {
+		await invoice('1000.00', '2024-01-01', '2024-03-31');
+
+		const line = await heatingOf(await rent('Mitte Februar', apartment, '2024-02-15'));
+
+		expect(line).toMatchObject({ periodShare: 0.4242, tenantShare: 424.2 });
+		expect(line.invoiceParts![0].profile).toEqual({
+			percent: 42.42,
+			months: [{ month: 2, percentage: 7.24 }, { month: 3, percentage: 11 }],
+			periodMonths: [{ month: 1, percentage: 18 }, { month: 2, percentage: 14 }, { month: 3, percentage: 11 }]
+		});
+	});
+
+	// Auszug am 10. Januar, Rechnung ab 15. Januar: keine Mietstage darin, kein Anteil
+	it('belastet einen Mieter ohne Mietstage im Leistungszeitraum mit nichts', async () => {
+		await invoice('1000.00', '2024-01-15', '2024-03-31');
+
+		const line = await heatingOf(await rent('Bis 10. Januar', apartment, '2024-01-01', '2024-01-10'));
+
+		expect(line).toMatchObject({ periodShare: 0, tenantShare: 0 });
+	});
+
+	// Juni bis August haben im Profil 0 %: diese Rechnung nach Tagen, 62 von 92 (#137; Fachreview 1, Punkt 2)
+	it('teilt eine Rechnung, deren Monate im Heizprofil 0 % haben, nach den Mietstagen darin', async () => {
+		await invoice('920.00', '2024-06-01', '2024-08-31');
+		await invoice('1000.00');
+
+		const line = await heatingOf(await rent('Ab Juli', apartment, '2024-07-01'));
+
+		// both invoices carry the same date: the order of the parts is not fixed
+		const summer = line.invoiceParts!.find((part) => part.start === '2024-06-01')!;
+		expect(summer).toMatchObject({ days: 62, total: 92 });
+		expect(summer.profile).toBeUndefined();
+		expect(line).toMatchObject({ tenantShare: 1120 });
+	});
+
+	// Leistungszeitraum Oktober 2023 bis März 2024: in der Periode der Teil nach Tagen, 1820 × 91/183 = 905.03; darin
+	// zählen die Monate des Heizprofils, Januar bis März ganz beim Mieter bis März (Fachreview 1, V-1)
+	it('teilt den Teil einer Rechnung über die Periode hinaus nach den Monaten in der Periode', async () => {
+		await invoice('1820.00', '2023-10-01', '2024-03-31');
+
+		const line = await heatingOf(await rent('Bis März', apartment, '2024-01-01', '2024-03-31'));
+
+		expect(line.invoiceParts![0]).toMatchObject({ amount: 905.03, whole: { start: '2023-10-01', end: '2024-03-31', amount: 1820 } });
+		expect(line.invoiceParts![0].profile!.percent).toBe(100);
+		expect(line).toMatchObject({ tenantShare: 905.03 });
+	});
+
+	// Rechnung und Gutschrift ergeben zusammen null: keine Rechnungen unter der Position, wie nach Tagen (#226, #237;
+	// Code-Review 1, C-1)
+	it('nennt keine Rechnungen unter einer Heizposition, deren Rechnungen zusammen null ergeben', async () => {
+		await invoice('1000.00', '2024-01-01', '2024-03-31');
+		await invoice('-1000.00');
+
+		const line = await heatingOf(await rent('Ab Mai', apartment, '2024-05-01'));
+
+		expect(line).toMatchObject({ tenantShare: 0, invoiceParts: null });
+	});
+
+	// Tank Ende 2023 stillgelegt (Endbestand 0, Wechsel auf Fernwärme): 2024 gilt #71 wieder (#72; Code-Review 3, C-1)
+	it('teilt nach der Stilllegung des Tanks eine Heizrechnung mit Leistungszeitraum nach den Monaten darin', async () => {
+		await db.insert(fuelStocks).values([
+			{ buildingId: building, categoryId: heatingId, readingDate: '2022-12-31', amount: '700.00' },
+			{ buildingId: building, categoryId: heatingId, readingDate: '2023-12-31', amount: '0.00' }
+		]);
+		await invoice('1000.00', '2024-01-01', '2024-03-31');
+
+		const line = await heatingOf(await rent('Ab Mai', apartment, '2024-05-01'));
+
+		expect(line).toMatchObject({ tenantShare: 0 });
+		expect(line.invoiceParts![0].profile!.percent).toBe(0);
+	});
+
+	// Heizöl aus dem Tank zählt nach Verbrauch über die ganze Periode, auch ohne Endbestand (#257; Fachreview 1, V-2)
+	it('teilt eine Lieferung in den Tank des Gebäudes weiter nach dem Heizprofil über die ganze Periode', async () => {
+		await db.insert(fuelStocks).values({ buildingId: building, categoryId: heatingId, readingDate: '2023-12-31', amount: '500.00' });
+		await invoice('1000.00', '2024-01-01', '2024-03-31');
+
+		const line = await heatingOf(await rent('Ab Mai', apartment, '2024-05-01'));
+
+		expect(line).toMatchObject({ periodShare: 0.52, tenantShare: 520, invoiceParts: null });
 	});
 });

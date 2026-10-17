@@ -742,7 +742,7 @@
 	"contracts_advance_label": "Acconto al mese",
 	"contracts_advance_help": "Anticipo mensile dell’inquilino per le spese accessorie (riscaldamento, acqua ecc.). Viene compensato con il conteggio spese accessorie.",
 	"contracts_fee_label": "Spese di gestione",
-	"contracts_fee_help": "Scelga ciò che prevede il contratto di locazione firmato. Se indica una percentuale, scelga «Sì, con un’aliquota propria» e la inserisca. Se prevede solo che le spese di gestione sono fatturate, scelga «Sì, all’aliquota dell’allestimento dei conteggi»: sceglierà l’aliquota quando allestisce i conteggi. Se non dice nulla, scelga «No». Nuove spese di gestione durante la locazione devono essere comunicate all’inquilino con il modulo ufficiale; valgono solo dalla prossima scadenza di disdetta (art. 269d CO).",
+	"contracts_fee_help": "Scelga ciò che prevede il contratto di locazione firmato. Se indica una percentuale, scelga «Sì, con un’aliquota propria» e la inserisca. Se prevede solo che le spese di gestione sono fatturate, scelga «Sì, all’aliquota dell’allestimento dei conteggi»: sceglierà l’aliquota quando allestisce i conteggi. Se non dice nulla, scelga «No». Nuove spese di gestione durante la locazione devono essere comunicate e motivate all’inquilino con il modulo ufficiale, almeno dieci giorni prima dell’inizio del termine di preavviso; valgono solo dalla prossima scadenza di disdetta possibile (art. 269d CO).",
 	"contracts_fee_run": "Sì, all’aliquota dell’allestimento dei conteggi",
 	"contracts_fee_own": "Sì, con un’aliquota propria",
 	"contracts_fee_none": "No",
