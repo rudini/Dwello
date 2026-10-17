@@ -12,4 +12,5 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] Running-contract hint names Art. 269d OR (befristet: #76's sentence, `TODO(fachlich prüfen, #388)`)
 - [x] `TODO(fachlich prüfen, #66)` markers removed; all four languages
 - Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/RentStep.svelte`, `src/lib/ui/MoneyInput.svelte` (help testid), `src/__tests__/contract-edit.dom.test.ts`, `src/__tests__/contract-wizard.dom.test.ts`, `tests/e2e/{features,steps,questions,targets}`
-- [ ] Slice review, feature review (persona), PR "Fixes #66"
+- [x] Code review round 1 (`docs/reviews/66-review-1.md`)
+- [ ] Fach review round 2, feature review (personas Dr. Weber, Helga), PR "Refs #66"
