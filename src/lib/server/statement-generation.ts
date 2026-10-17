@@ -149,12 +149,12 @@ const editedSince = (listed: Listed, profiles: Profile[]) => {
 	return !!edited && Date.parse(edited) > Date.parse(listed.createdAt);
 };
 
-// Another Heizprofil, named as the statement stored it (#209), or its own one edited since; neither counts where the
-// statement shared the heating costs by days, as for a contract over the whole period (Dr. Weber P-2, Fachreview V-8)
+// Another Heizprofil, named as the statement stored it (#209), or its own one edited since; neither counts for a
+// contract over the whole period, shared by days whatever the profile (Dr. Weber P-2, Fachreview V-8, code review C-13)
 function profileDifference(listed: Listed, run: GenerationRequest, profiles: Profile[]) {
 	const share = listed.heatingShare;
 	const id: string | null = listed.heatingProfileId;
-	if (share?.byDays === true) return { profile: null, profileEdited: null };
+	if (share?.reason === 'wholePeriod') return { profile: null, profileEdited: null };
 	if (id !== run.heatingProfileId) {
 		const used = share?.names ? localName(share.names) : nameOf(profiles, id);
 		return { profile: { used, run: nameOf(profiles, run.heatingProfileId) }, profileEdited: null };

@@ -17,5 +17,6 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 - [x] `docs/PRD-Dwello.md`, wizard step «Review & Calculate»
 - [x] Workflow review notes: `docs/reviews/workflow-notes-issue-132.md`
 - [x] Second merge of `main` (no conflicts)
-- [ ] Closing code review before the push
+- [x] Closing code review round 2: `docs/reviews/w1c-review-2.md` (C-12 scenario «Vorschau nennt kein anderes Heizprofil bei einer Abrechnung über die ganze Periode», C-13 fixed)
+- [ ] Code review round 3 on the C-12/C-13 fix
 - [ ] Pull request `Fixes #132`, CI green, merged (session archived before the push)

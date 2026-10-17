@@ -356,6 +356,13 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		expect(await changedOf(fetch)).toEqual([]);
 	});
 
+	// code review C-13: without heating months in the rented months, or without a profile, another one may share differently
+	it('nennt ein anderes Heizprofil, wenn die Abrechnung nach Tagen verteilt hat, weil ihr Heizprofil keine Heizmonate hatte', async () => {
+		const fetch = fetchWith([{ ...statement('1', c1, 'sent', 'hp2', '4.50'), heatingShare: { byDays: true, reason: 'noHeatingMonths' } }]);
+
+		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Winter', run: 'Heizung Mittelland' } })]);
+	});
+
 	// Fachreview V-1: the statement keeps the Monatsanteile of its time, the run takes the profile as it is now
 	it('nennt eine Abrechnung, deren Heizprofil nach dem Erstellen bearbeitet wurde', async () => {
 		const share = { byDays: false, percent: 43, months: [], names: { name: 'Heizung Mittelland', nameDE: 'Heizung Mittelland', nameFR: null, nameIT: null, nameEN: null } };
