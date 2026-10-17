@@ -64,7 +64,7 @@ export function selectionErrors(selection: WizardSelection, step: number): Recor
 export interface CategoryFinding {
 	categoryId: string | null;
 	categoryName: string;
-	kind: 'stock' | 'tank' | 'missing' | 'gap' | 'new' | 'deviation';
+	kind: 'stock' | 'tank' | 'consumption' | 'missing' | 'gap' | 'new' | 'deviation';
 	current: { count: number; total: number };
 	previous: { count: number; total: number };
 	missingParts: { start: string; end: string }[];
@@ -132,9 +132,7 @@ const partLabel = (slice: { start: string; end: string }) =>
 	calendarName(slice) ??
 	m.statements_part_dates({ start: formatDate(slice.start), end: formatDate(slice.end) });
 
-function stockText(missingDays: { start: string }[], consumption: number) {
-	if (!missingDays.length)
-		return m.statements_finding_stock_negative({ amount: formatCurrency(-consumption) });
+function stockText(missingDays: { start: string }[]) {
 	const dates = joined(
 		missingDays.map((day) => formatDate(day.start)),
 		m.statements_stock_dates_and
@@ -163,7 +161,10 @@ function findingBody({
 	missingParts,
 	changePercent
 }: CategoryFinding): string {
-	if (kind === 'stock') return stockText(missingParts, current.total);
+	if (kind === 'stock') return stockText(missingParts);
+	// a hint on the readings: a negative consumption, or one far from the year before (#73)
+	if (kind === 'consumption' && changePercent === null)
+		return m.statements_finding_stock_negative({ amount: formatCurrency(-current.total) });
 	if (kind === 'missing')
 		return m.statements_finding_missing({ amount: formatCurrency(previous.total) });
 	if (kind === 'new') return m.statements_finding_new({ amount: formatCurrency(current.total) });
@@ -176,14 +177,20 @@ function findingBody({
 			? m.statements_finding_gap_one(gap)
 			: m.statements_finding_gap_many(gap);
 	}
+	return changeText(kind === 'consumption', current.total, previous.total, changePercent ?? 0);
+}
+
+// Costs, or the consumption of the Tankbestand (#73), far from the year before
+function changeText(consumption: boolean, total: number, previous: number, percent: number) {
 	const change = {
-		amount: formatCurrency(current.total),
-		percent: Math.abs(changePercent ?? 0),
-		previous: formatCurrency(previous.total)
+		amount: formatCurrency(total),
+		percent: Math.abs(percent),
+		previous: formatCurrency(previous)
 	};
-	return (changePercent ?? 0) > 0
-		? m.statements_finding_more(change)
-		: m.statements_finding_less(change);
+	const [more, less] = consumption
+		? [m.statements_finding_consumption_more, m.statements_finding_consumption_less]
+		: [m.statements_finding_more, m.statements_finding_less];
+	return percent > 0 ? more(change) : less(change);
 }
 
 // TODO(fachlich prüfen, #65, #76): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices;
