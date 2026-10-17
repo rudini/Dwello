@@ -368,6 +368,25 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		expect(earlier).toContain('zusammen 30.00 %. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen 50.00 %.');
 	});
 
+	// #71, Fachreview 2 M-4: die einzige Heizrechnung liegt in Monaten mit 0 % (Juni bis August) und wird nach Tagen
+	// geteilt, 920 × 62/92 = 620.00; der Satz zum Heizprofil nennt den Anteil des Laufs, Juli bis Dezember im geänderten
+	// Profil 0 + 0 + 0 + 30 + 5 + 5 = 40 %, nicht den der Position
+	it('nennt bei einer Heizposition nach Tagen im Leistungszeitraum den Anteil nach Heizprofil des Laufs', async () => {
+		const july = await createRental(crypto.randomUUID(), { startDate: '2025-07-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(july.building, { categoryId: heating.id, amount: '920.00', description: 'Fernwärme Sommer', invoiceDate: '2025-09-30', servicePeriodStart: '2025-06-01', servicePeriodEnd: '2025-08-31' });
+		const statement = await generateStatement({ contractId: july.contract, buildingId: july.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId: profileId, managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const summer = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await july.remove();
+
+		expect(summer).toContain('Leistungszeitraum 01.06.2025 – 31.08.2025: CHF 920.00, Ihre Mietstage 62 von 92 Tagen');
+		expect(summer).toContain('40.00 % für eine Rechnung ohne Leistungszeitraum');
+		expect(summer).not.toContain('67.39 % der Heizkosten');
+		expect(summer).toContain('Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
+	});
+
 	// Februar 13.9 × 7/28 = 3.475 % genau auf der Hälfte, gerundet 3.48 % (#232): Erläuterung und Position zeigen denselben
 	// Wert (#229, Rundung)
 	it('nennt in der Erläuterung denselben Anteil wie in der Position', async () => {

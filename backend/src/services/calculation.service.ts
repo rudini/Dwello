@@ -152,31 +152,30 @@ function daysOf(group: InvoiceGroup, rentalStart: string, rentalEnd: string, who
 	if (group.invoices.every((invoice) => invoice.start === start && invoice.end === end))
 		return { ...noDays, positionRentalDays: rentedIn({ start, end }, rentalStart, rentalEnd), billedDays: days(start, end) };
 	if (wholePeriod || group.totalAmount === 0) return noDays;
-	const invoiceParts = group.invoices.map((invoice) => ({
-		start: invoice.start,
-		end: invoice.end,
-		amount: invoice.amount,
-		days: rentedIn(invoice, rentalStart, rentalEnd),
-		total: days(invoice.start, invoice.end),
-		...(invoice.noPeriod && { noPeriod: invoice.noPeriod }),
-		...(invoice.whole && { whole: invoice.whole }),
-		...(invoice.fuelStock && { fuelStock: invoice.fuelStock })
-	}));
-	return { ...noDays, invoiceParts };
+	return { ...noDays, invoiceParts: group.invoices.map((invoice) => partOf(invoice, rentalStart, rentalEnd)) };
 }
+
+// An invoice under its position: its days in the period and the tenant's days in them (#226)
+const partOf = (invoice: InvoiceGroup['invoices'][number], rentalStart: string, rentalEnd: string): InvoicePart => ({
+	start: invoice.start,
+	end: invoice.end,
+	amount: invoice.amount,
+	days: rentedIn(invoice, rentalStart, rentalEnd),
+	total: days(invoice.start, invoice.end),
+	...(invoice.noPeriod && { noPeriod: invoice.noPeriod }),
+	...(invoice.whole && { whole: invoice.whole }),
+	...(invoice.fuelStock && { fuelStock: invoice.fuelStock })
+});
 
 // #71: a heating invoice counts the Heizprofil's months in its days in the period, normalised to 100 %, from the
 // rounded months as printed (#232); days whose months carry 0 % in the profile are shared by days (#137)
-const toDate = (day: string) => new Date(day);
 function byProfile(group: InvoiceGroup, profile: HeatingProfile, rentalStart: string, rentalEnd: string): InvoicePart[] {
 	return group.invoices.map((invoice) => {
-		const rented = rentedIn(invoice, rentalStart, rentalEnd);
-		const part: InvoicePart = { start: invoice.start, end: invoice.end, amount: invoice.amount, days: rented, total: days(invoice.start, invoice.end), ...(invoice.noPeriod && { noPeriod: invoice.noPeriod }), ...(invoice.whole && { whole: invoice.whole }) };
-		const billed = calculateHeatingShare(profile, toDate(invoice.start), toDate(invoice.end), 100);
+		const part = partOf(invoice, rentalStart, rentalEnd);
+		const billed = calculateHeatingShare(profile, new Date(invoice.start), new Date(invoice.end), 100);
 		if (billed.percentage <= 0) return part;
-		const tenant = rented
-			? calculateHeatingShare(profile, toDate(invoice.start > rentalStart ? invoice.start : rentalStart), toDate(invoice.end < rentalEnd ? invoice.end : rentalEnd), 100)
-			: { percentage: 0, monthBreakdown: [] };
+		const [from, to] = [invoice.start > rentalStart ? invoice.start : rentalStart, invoice.end < rentalEnd ? invoice.end : rentalEnd];
+		const tenant = part.days ? calculateHeatingShare(profile, new Date(from), new Date(to), 100) : { percentage: 0, monthBreakdown: [] };
 		const percent = roundToRappen((tenant.percentage / billed.percentage) * 100);
 		return { ...part, profile: { percent, months: tenant.monthBreakdown, periodMonths: billed.monthBreakdown } };
 	});
@@ -187,9 +186,11 @@ const partShare = (part: InvoicePart) => (part.profile ? part.profile.percent / 
 // invoice's days (#71), weighted by amount like days (#226)
 function sharedByInvoices(group: InvoiceGroup, rentalStart: string, rentalEnd: string, wholePeriod: boolean, profile: HeatingProfile | null) {
 	if (!profile) return { periodShare: rentalShare(group, rentalStart, rentalEnd), shareDays: daysOf(group, rentalStart, rentalEnd, wholePeriod) };
+	// invoices summing to zero bill nothing and are not listed, as by days (#237)
+	if (group.totalAmount === 0) return { periodShare: 0, shareDays: noDays };
 	const invoiceParts = byProfile(group, profile, rentalStart, rentalEnd);
 	const rented = invoiceParts.reduce((sum, part) => sum + part.amount * partShare(part), 0);
-	return { periodShare: group.totalAmount === 0 ? 0 : rented / group.totalAmount, shareDays: { ...noDays, invoiceParts } };
+	return { periodShare: rented / group.totalAmount, shareDays: { ...noDays, invoiceParts } };
 }
 
 // The run's Heizprofil share of a heating group; none where it shares by days (#137, #208)

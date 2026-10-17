@@ -99,7 +99,7 @@ const translations: Record<Language, Record<string, string>> = {
 		sharesNoteParts: ' Hat eine Abrechnungsposition Rechnungen über verschiedene Tage, steht die Berechnung darunter.',
 		sharesNoteRounded: ' Der Prozentwert ist gerundet; Ihr Anteil folgt aus der Berechnung unter der Position.',
 		sharesNoteHeating: ' Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil.',
-		sharesNoteHeatingParts: ' Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil; bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin, haben sie dort zusammen 0 %, Ihre Mietstage darin.',
+		sharesNoteHeatingParts: ' Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil; bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0\u00a0%, zählen stattdessen Ihre Mietstage darin.',
 		sharesNoteFuel: 'Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten).',
 		heatingSection: 'Heiz- und Warmwasserkosten',
 		fuelIntro: 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.',
@@ -163,7 +163,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partShare: 'Votre part{colon}{apartment} × ({sum}) / {costs} = {share}',
 		partProfile: ', parts des mois dans le profil de chauffage : {periodMonths} ; au total {period}\u00a0%. Parts des mois de votre bail dans cette période : {months} ; au total {tenant}\u00a0%. Part selon le profil de chauffage : {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', part selon le profil de chauffage : {percent}\u00a0% (voir frais de chauffage et d’eau chaude)',
-		partProfileNone: 'aucun',
+		partProfileNone: 'aucune',
 		yourCosts: 'Vos frais accessoires',
 		pageOf: 'Page {page} sur {pages}',
 		tenancyLine: 'Votre bail pendant la période : {start} – {end} ({days} jours sur {total})',
@@ -181,7 +181,7 @@ const translations: Record<Language, Record<string, string>> = {
 		sharesNoteParts: ' Si un poste du décompte comporte des factures sur des jours différents, le calcul figure en dessous.',
 		sharesNoteRounded: ' Le pourcentage est arrondi ; votre part découle du calcul sous le poste.',
 		sharesNoteHeating: ' Pour les frais de chauffage, la part temporelle est la part selon le profil de chauffage.',
-		sharesNoteHeatingParts: ' Pour les frais de chauffage, la part temporelle est la part selon le profil de chauffage ; pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent ou, s’ils totalisent 0 %, vos jours de location dans cette période.',
+		sharesNoteHeatingParts: ' Pour les frais de chauffage, la part temporelle est la part selon le profil de chauffage ; pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent. Si ces mois totalisent 0\u00a0% dans le profil de chauffage, ce sont vos jours de location dans cette période qui comptent.',
 		sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne : la consommation (voir frais de chauffage et d’eau chaude).',
 		heatingSection: 'Frais de chauffage et d’eau chaude',
 		fuelIntro: 'Le décompte porte sur le combustible consommé et non sur les achats.',
@@ -228,7 +228,7 @@ const translations: Record<Language, Record<string, string>> = {
 		statementNumber: 'N. conteggio',
 		statementDate: 'Data del conteggio',
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
-		heatingNoteParts: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura senza periodo di prestazione. Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la sua quota figura sotto la voce del conteggio.',
+		heatingNoteParts: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura senza periodo di prestazione. Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
 		heatingMonths: 'Quote dei mesi della sua locazione: {months}',
 		heatingPeriodSums: '; in totale {tenant}\u00a0%. I mesi del periodo di conteggio totalizzano {period}\u00a0% nel profilo di riscaldamento.',
 		heatingPeriodMonths: '; in totale {tenant}\u00a0%. Quote dei mesi del periodo di conteggio nel profilo di riscaldamento: {months}; in totale {period}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
@@ -245,7 +245,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partShare: 'La sua quota{colon}{apartment} × ({sum}) / {costs} = {share}',
 		partProfile: ', quote dei mesi nel profilo di riscaldamento: {periodMonths}; in totale {period}\u00a0%. Quote dei mesi della sua locazione in tale periodo: {months}; in totale {tenant}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', quota secondo il profilo di riscaldamento: {percent}\u00a0% (vedi spese di riscaldamento e acqua calda)',
-		partProfileNone: 'nessuno',
+		partProfileNone: 'nessuna',
 		yourCosts: 'Le sue spese accessorie',
 		pageOf: 'Pagina {page} di {pages}',
 		tenancyLine: 'La sua locazione in questo periodo: {start} – {end} ({days} giorni su {total})',
@@ -263,7 +263,7 @@ const translations: Record<Language, Record<string, string>> = {
 		sharesNoteParts: ' Se una voce del conteggio comprende fatture su giorni diversi, il calcolo figura sotto.',
 		sharesNoteRounded: ' La percentuale è arrotondata; la sua quota risulta dal calcolo sotto la voce.',
 		sharesNoteHeating: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento.',
-		sharesNoteHeatingParts: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento; per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo o, se totalizzano 0 %, i suoi giorni di locazione in tale periodo.',
+		sharesNoteHeatingParts: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento; per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo. Se questi mesi totalizzano 0\u00a0% nel profilo di riscaldamento, contano invece i suoi giorni di locazione in tale periodo.',
 		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi costi di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
 		fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
@@ -345,7 +345,7 @@ const translations: Record<Language, Record<string, string>> = {
 		sharesNoteParts: ' If a statement line has invoices over different days, the calculation is shown below it.',
 		sharesNoteRounded: ' The percentage is rounded; your share follows from the calculation below the line.',
 		sharesNoteHeating: ' For heating costs, the time share is the share by the heating profile.',
-		sharesNoteHeatingParts: ' For heating costs, the time share is the share by the heating profile; for an invoice with a service period, the months of the heating profile within it count or, where they total 0 %, your days rented within it.',
+		sharesNoteHeatingParts: ' For heating costs, the time share is the share by the heating profile; for an invoice with a service period, the months of the heating profile within it count. Where these months total 0\u00a0% in the heating profile, your days rented within it count instead.',
 		sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see heating and hot water costs).',
 		heatingSection: 'Heating and hot water costs',
 		fuelIntro: 'The fuel consumed is billed, not the fuel purchased.',
@@ -721,7 +721,7 @@ const monthList = (shares: { month: number; percentage: number }[], t: Record<st
 const monthSum = (shares: { month: number; percentage: number }[]) =>
 	(shares.reduce((total, m) => total + Math.round(m.percentage * 100), 0) / 100).toFixed(2);
 // a heating position with invoices by the Heizprofil's months in their own days: the run's share is not theirs (#71)
-const ownProfileDays = (data: StatementPDFData) => data.lineItems.some((item) => item.invoiceParts?.some((part) => part.profile));
+const ownProfileDays = (data: StatementPDFData) => data.lineItems.some((item) => item.byProfile && item.invoiceParts);
 
 // An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241);
 // the change of the Tankbestand is no invoice and says so (#239)
@@ -787,7 +787,6 @@ function heatingLines({ t, data }: Page) {
 	const shown = (Math.round(percent * 100) / 100).toFixed(2);
 	const lines = [heatingNote(data, t, profile, shown)];
 	if (!months?.length || percent >= 100) return lines;
-	const list = (shares: { month: number; percentage: number }[]) => monthList(shares, t);
 	// a period whose months do not carry 100 % (under a year): both sums, from the printed months (#229); since #232 the
 	// period's months and the division the share comes from
 	const sum = monthSum(months);
@@ -796,9 +795,9 @@ function heatingLines({ t, data }: Page) {
 		periodPercent == null || periodPercent === 100
 			? ''
 			: periodMonths
-				? fill(t.heatingPeriodMonths, { tenant: sum, months: list(periodMonths), period, percent: shown })
+				? fill(t.heatingPeriodMonths, { tenant: sum, months: monthList(periodMonths, t), period, percent: shown })
 				: fill(t.heatingPeriodSums, { tenant: sum, period });
-	lines.push(fill(t.heatingMonths, { months: list(months) }) + sums);
+	lines.push(fill(t.heatingMonths, { months: monthList(months, t) }) + sums);
 	return lines;
 }
 

@@ -312,6 +312,17 @@ describe('Heizkosten einer Rechnung mit Leistungszeitraum nach dem Heizprofil', 
 		expect(line).toMatchObject({ tenantShare: 905.03 });
 	});
 
+	// Rechnung und Gutschrift ergeben zusammen null: keine Rechnungen unter der Position, wie nach Tagen (#226, #237;
+	// Code-Review 1, C-1)
+	it('nennt keine Rechnungen unter einer Heizposition, deren Rechnungen zusammen null ergeben', async () => {
+		await invoice('1000.00', '2024-01-01', '2024-03-31');
+		await invoice('-1000.00');
+
+		const line = await heatingOf(await rent('Ab Mai', apartment, '2024-05-01'));
+
+		expect(line).toMatchObject({ tenantShare: 0, invoiceParts: null });
+	});
+
 	// Heizöl aus dem Tank zählt nach Verbrauch über die ganze Periode, auch ohne Endbestand (#257; Fachreview 1, V-2)
 	it('teilt eine Lieferung in den Tank des Gebäudes weiter nach dem Heizprofil über die ganze Periode', async () => {
 		await db.insert(fuelStocks).values({ buildingId: building, categoryId: heatingId, readingDate: '2023-12-31', amount: '500.00' });
