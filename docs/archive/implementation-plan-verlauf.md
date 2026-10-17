@@ -1421,3 +1421,13 @@ Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.sve
 - [x] Merge reviews after main took the migration number: `docs/reviews/204-review-4.md`, `204-review-5.md` (migration now `0021`, after main took 0018 to 0020)
 
 Files: `backend/migrations/0021_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`, `tests/e2e/{features/categories.feature,steps/categories.steps.ts,tasks/categories.ts,questions/categories.ts,targets/categories.ts,screenplay/questions.ts}`
+
+## Session 2026-10-17: fewer review rounds (T1, T4 of `docs/reviews/workflow-rules-review-2026-10-17-2.md`)
+
+- [x] Collected review on token cost: `docs/reviews/workflow-rules-review-2026-10-17-2.md`
+- [x] T1: fixes of feature-review Minors/Nits form no slice; the closing round reviews them (`.claude/skills/slice-review/SKILL.md`, "Rounds")
+- [x] T4: no closing round for a delta of reports, personas, plan or archive; the round's range leaves them out (`.claude/skills/pull-request/SKILL.md`, `CLAUDE.md` Workflow 7)
+- [x] code-reviewer round 1: `docs/reviews/t1t4-review-1.md` (C-1 fixed: the range keeps `docs/design/personas/README.md` and `demo-records.md`; C-4 fixed; C-2, C-3 stay in the report)
+- [x] session archived, pull request
+
+Files: `CLAUDE.md`, `.claude/skills/{slice-review,pull-request}/SKILL.md`, `docs/reviews/workflow-rules-review-2026-10-17-2.md`, `docs/reviews/t1t4-review-1.md`
