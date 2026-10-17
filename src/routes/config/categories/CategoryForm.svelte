@@ -11,17 +11,19 @@
 	import CategoryProposal from './CategoryProposal.svelte';
 	import CategoryReason from './CategoryReason.svelte';
 
-	// `proposal` only on a new category: the KI's answer to «Von der KI prüfen lassen»
+	// `ki` and `proposal` only on a new category: whether the KI is on (#219), its answer to «Von der KI prüfen lassen»
 	let {
 		action,
 		category,
 		errors = {},
+		ki = false,
 		proposal,
 		submitLabel
 	}: {
 		action?: string;
 		category?: Category & { key?: string; predefined?: boolean };
 		errors?: Record<string, string>;
+		ki?: boolean;
 		proposal?: Proposal | null;
 		submitLabel: string;
 	} = $props();
@@ -120,7 +122,7 @@
 			testid="category-allowance"
 		/>
 		<CategoryReason category={chosen} />
-		{#if action}
+		{#if ki}
 			<div>
 				<div>
 					<Button

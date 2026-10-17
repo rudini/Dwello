@@ -136,6 +136,17 @@ describe('Rechnungen hochladen', () => {
 		expect(status()).toBe('blitz.pdf entfernt.');
 	});
 
+	// dieselbe Hilfe wie im Formular «Neue Rechnung» (#254)
+	it('erklärt beim Leistungszeitraum Kosten über mehrere Jahre', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('boiler.pdf'));
+		click('invoice-upload-row-toggle');
+		expect(byTestId('invoice-service-period-help')!.textContent).toContain(
+			'Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre.'
+		);
+	});
+
 	it('liest den Hinweis der KI vor der Hilfe des Feldes vor (Persona Sven)', async () => {
 		open(() => [200, read]);
 		chooseBuilding();
