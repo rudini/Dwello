@@ -154,7 +154,9 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Eigene Nebenkosten** | Summe der Mieteranteile aller Abrechnungspositionen einer Abrechnung, vor der Verwaltungspauschale. Auf der Abrechnung: „Zwischensumme“. | Berechnung |
 | **Verwaltungspauschale** | Abgeltung des Aufwands für die Nebenkostenabrechnung: ein Prozentsatz der eigenen Nebenkosten des Mieters. Nur zulässig, wenn im Mietvertrag vereinbart. Üblich sind etwa 3 %. Ein höherer Satz muss dem tatsächlichen Aufwand entsprechen (Art. 4 Abs. 3 VMWG). | `management_fee`, `management_fee_percent` |
 | **Geleistete Akontobeiträge** | Summe der monatlichen Vorauszahlungen des Mieters während der Abrechnungsperiode. | `total_advance_payments` |
-| **Saldo** | Kostenanteil inklusive Verwaltungspauschale minus geleistete Akontobeiträge, gerundet auf 5 Rappen zugunsten des Mieters. Positiv = Nachzahlung, negativ = Rückerstattung; Saldo 0.00: keine Zahlung, kein Zahlteil. | `balance`; Rundung zugunsten des Mieters: geplant (#79) |
+| **Saldo** | Kostenanteil inklusive Verwaltungspauschale minus geleistete Akontobeiträge, gerundet auf 5 Rappen zugunsten des Mieters. Positiv = Nachzahlung, negativ = Rückerstattung; Saldo 0.00 oder unter dem Mindestbetrag: keine Zahlung, kein Zahlteil. | `balance`; Rundung zugunsten des Mieters: geplant (#79) |
+| **Mindestbetrag** | Fester Betrag von CHF 5.00. Ist der gerundete Saldo kleiner (Nachzahlung oder Rückerstattung), wird er übertragen; auf der Schlussabrechnung gilt kein Mindestbetrag. | geplant (#403) |
+| **Übertrag** | Ein Saldo unter dem Mindestbetrag (CHF 5.00), Nachzahlung oder Rückerstattung, wird nicht eingefordert oder ausbezahlt, sondern in der nächsten Abrechnung desselben Mietvertrags verrechnet. Auf der Schlussabrechnung gibt es keinen Übertrag. | geplant (#403) |
 | **Rundung auf 5 Rappen** | Differenz zwischen dem Saldo und dem Saldo vor Rundung. Gerundet wird nur zugunsten des Mieters: eine Nachzahlung ab-, eine Rückerstattung aufgerundet. Im PDF mit + oder – vom gezeigten Betrag aus: +, wenn er durch die Rundung grösser wird. | Berechnung; zugunsten des Mieters: geplant (#79) |
 | **Abgerechnete Tage** | Die Tage, die eine Rechnung in der Abrechnungsperiode abrechnet: ohne Leistungszeitraum die Tage der Abrechnungsperiode, mit Leistungszeitraum dessen Tage innerhalb der Abrechnungsperiode. Rechnen alle Rechnungen einer Abrechnungsposition dieselben Tage ab, sind das die abgerechneten Tage der Position (`billed_days`); sonst gelten sie je Rechnung (`invoice_parts`). | `billed_days`, `invoice_parts` (nicht gespeichert bei einem Mietvertrag über die ganze Periode) |
 | **Mietstage der Position** | Anzahl der Tage, an denen der Mietvertrag läuft, innerhalb der abgerechneten Tage einer Rechnung oder Abrechnungsposition. | `position_rental_days`, je Rechnung `invoice_parts` (`days`) |
@@ -169,7 +171,8 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 |--------|-----------|
 | **Entwurf** | Abrechnung erstellt, noch nicht versendet. (`draft`) |
 | **Versendet** | Abrechnung dem Mieter zugestellt. (`sent`) |
-| **Bezahlt** | Nachzahlung/Rückerstattung abgeschlossen. (`paid`) |
+| **Bezahlt** | Nachzahlung/Rückerstattung mit einer Zahlung abgeschlossen. (`paid`) |
+| **Erledigt** | Status einer versendeten Abrechnung ohne Zahlung, weil der Saldo 0.00 ist oder übertragen wird. Sie hat kein Zahlungsdatum und wird nicht gemahnt. (geplant #403) |
 | **Überfällig** | Versendet und Zahlungsfrist überschritten. (`overdue`) |
 | **Ersetzt** | Durch eine berichtigte Abrechnung ersetzt; wird nicht gemahnt und zählt nicht als Abrechnung der Periode; Zahlungsdatum und Saldo der ersetzten Abrechnung bleiben erhalten. (`replaced`, geplant #120) |
 
@@ -180,6 +183,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | Begriff | Definition | Code / Schema |
 |---------|-----------|---------------|
 | **Zahlungsfrist** | Datum, bis zu dem die Abrechnung bezahlt sein muss. Bei einer Rückerstattung das Datum, bis zu dem der Vermieter zurückerstattet (Anzeige: „Rückerstattung bis“). | `payment_deadline` Feld, `payment_deadline_days` Config |
+| **Zahlungsfrist einer Mahnung** | Datum, bis zu dem der Mieter nach einer Mahnung bezahlen soll; 10 Tage ab dem Datum des Briefs. Die Zahlungsfrist der Abrechnung bleibt unverändert, die Abrechnung bleibt «Überfällig». Die nächste Mahnstufe ist ab dem Tag danach möglich. | `documents` (Zahlungsfrist des Briefs) |
 | **Mahnung** | Vom Liegenschaftsverwalter ausgelöste Zahlungsaufforderung zu einer versendeten Abrechnung. | `documents` Tabelle |
 | **Mahnstufe** | Zahlungserinnerung (1. Stufe), 2. Mahnung, 3. Mahnung. | `reminder_level` Feld |
 | **Mahnfrist** | Anzahl Tage nach Ablauf der Zahlungsfrist bis zur Mahnung. | `reminder_after_days` Config |
