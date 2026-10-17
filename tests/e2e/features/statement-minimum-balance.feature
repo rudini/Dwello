@@ -66,6 +66,16 @@ Funktionalität: Saldo unter CHF 5
     Dann hat die Abrechnung den Status "Überfällig"
     Und bietet die Abrechnung keine Mahnung an
 
+  # Ohne Zahlung gibt es keine Frist (Persona Marco P-1); eine Bemerkung lässt sich weiter festhalten
+  Szenario: Bei einem Saldo unter CHF 5 hält der Liegenschaftsverwalter nur eine Bemerkung fest
+    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1197" Franken für 2024
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Anna Keller"
+    Dann fragt die Bearbeitungsseite nur nach einer Bemerkung
+    Wenn der Liegenschaftsverwalter nur die Bemerkung "Mieterin zieht Ende Jahr aus" festhält
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Und die Abrechnung enthält die Bemerkung "Mieterin zieht Ende Jahr aus"
+
   # Verglichen wird der gerundete Saldo: 5.02 und –4.98 sind gerundet CHF 5.00 und bleiben offen
   Szenariogrundriss: Saldo an der Grenze von CHF 5
     Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "<Rechnung>" Franken für 2024

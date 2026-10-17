@@ -483,16 +483,18 @@ export async function updateStatementStatus(
 
 	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.statementDate);
 	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
-	// A Saldo below CHF 5, 0 included, is settled once sent: neither claimed nor paid out, so no money moves (#94)
-	const settled = sentToday && belowMinimum(parseFloat(existing.balance)) && { status: 'paid', paidDate: sentToday.statementDate, paidAmount: '0.00' };
+	// A Saldo below CHF 5, 0 included, is settled once sent: neither claimed nor paid out (#94)
+	const waived = belowMinimum(parseFloat(existing.balance));
+	const settled = sentToday && waived && { status: 'paid', paidDate: sentToday.statementDate };
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
 		...additionalData,
 		...sentToday,
 		...settled
 	};
-	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93)
-	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? existing.balance, paymentRecordedAt: new Date() });
+	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94)
+	const saldo = waived ? '0.00' : existing.balance;
+	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? saldo, paymentRecordedAt: new Date() });
 
 	return updateStatement(id, updateData);
 }
