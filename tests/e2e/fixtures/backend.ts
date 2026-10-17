@@ -417,6 +417,9 @@ export function testData(api: CallTheApi) {
 
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
 
+		// An own allocable category shared like heating, not marked as fuel (#100)
+		heatingCategory: (title: string) => addCategory(title, () => ({ isAllowedUtilityCost: true, isHeatingCost: true })),
+
 		async categoryAllowance(title: string, isAllowedUtilityCost: boolean) {
 			await put(`categories/${ids.get(title)}`, { isAllowedUtilityCost });
 		},

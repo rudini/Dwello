@@ -5,6 +5,8 @@ import {
 	allowedFilter,
 	deleteButton,
 	editButton,
+	fuelCheckbox,
+	heatingCheckbox,
 	nameInput,
 	proposeButton,
 	submitButton
@@ -25,6 +27,17 @@ export const createCategory = (name: string, allowed: boolean): Activity => (act
 		Check.the(allowanceOption(allowed ? 'Umlagefähig' : 'Nicht umlagefähig')),
 		Enter.theValue(name).into(nameInput),
 		Click.on(submitButton)
+	);
+
+// An allocable category shared like heating whose invoices are fuel deliveries (#100)
+export const createFuelCategory = (name: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Check.the(allowanceOption('Umlagefähig')),
+		Check.the(heatingCheckbox),
+		Check.the(fuelCheckbox),
+		Enter.theValue(name).into(nameInput),
+		Click.on(submitButton),
+		Wait.until(allowedFilter) // saved: back on the list
 	);
 
 export const saveFormAsNotAllowed: Activity = (actor) =>

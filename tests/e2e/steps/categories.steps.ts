@@ -24,6 +24,7 @@ import {
 	askKi,
 	kiFails,
 	createCategory,
+	createFuelCategory,
 	deleteCategory,
 	openCategories,
 	openCategoryEdit,
@@ -48,7 +49,18 @@ Given(
 	}
 );
 
-Given('es gibt die nicht umlagefähige Kategorie {string}', async ({ seed }, title: string) => {
+Given('es gibt die umlagefähige Heizkosten-Kategorie {string}', async ({ seed }, title: string) => {
+	await seed.heatingCategory(title);
+});
+
+When(
+	'der Liegenschaftsverwalter die umlagefähige Heizkosten-Kategorie {string} als Brennstoff erfasst',
+	async ({ verwalter, seed }, title: string) => {
+		await verwalter.attemptsTo(createFuelCategory(seed.unique(title)));
+	}
+);
+
+Given('es gibt die nicht umlagefähige Kategorie {string}',async ({ seed }, title: string) => {
 	await seed.category(title, false);
 });
 
