@@ -36,7 +36,7 @@ const contracts = [
 	contract('nachher', '2025-01-01', null)
 ];
 
-function backend(statements: { contractId: string; periodStart: string; periodEnd: string }[] = [], inBuilding = contracts) {
+function backend(statements: { contractId: string; periodStart: string; periodEnd: string; status?: string }[] = [], inBuilding = contracts) {
 	const posts: { url: string; body: Record<string, string> }[] = [];
 	const fetch = async (url: string, init?: RequestInit) => {
 		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: statements });
@@ -191,6 +191,17 @@ describe('Abrechnungen erstellen', () => {
 		]);
 		expect(await generateStatements(fetch, period)).toBe(1);
 		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug', 'einzug']);
+	});
+
+	// #120: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode; der Lauf erstellt die berichtigte
+	it('erstellt für einen Mietvertrag mit einer ersetzten Abrechnung die berichtigte', async () => {
+		const { fetch, posts } = backend([
+			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'replaced' },
+			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'paid' }
+		]);
+
+		expect(await generateStatements(fetch, period)).toBe(1);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['auszug']);
 	});
 
 	it('meldet in Worten, wenn das Backend die Berechnung ablehnt', async () => {
