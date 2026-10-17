@@ -10,6 +10,13 @@ Given('das Gebäude {string} in {string} existiert', async ({ seed }, title: str
 	await seed.building(title, city);
 });
 
+Given(
+	'das Gebäude {string} an der {string} in {string} existiert',
+	async ({ seed }, title: string, street: string, city: string) => {
+		await seed.building(title, city, street);
+	}
+);
+
 Given('der Liegenschaftsverwalter ist auf der Gebäudeliste', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openBuildingList);
 });
@@ -21,8 +28,8 @@ Then(
 	}
 );
 
-When('der Liegenschaftsverwalter nach {string} sucht', async ({ verwalter, names }, term: string) => {
-	await verwalter.attemptsTo(searchBuildings(names.get(term) ?? term));
+When('der Liegenschaftsverwalter nach {string} sucht', async ({ verwalter, seed }, term: string) => {
+	await verwalter.attemptsTo(searchBuildings(seed.withNames(term)));
 });
 
 Then('die Liste enthält genau {int} Gebäude', async ({ verwalter }, count: number) => {

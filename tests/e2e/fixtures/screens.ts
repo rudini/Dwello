@@ -13,7 +13,7 @@ export const variants = Object.keys(screenList.viewports).flatMap((viewport) =>
 
 // Query strings that put a screen into a state before it loads; a screen may override them in screens.json
 const query: Record<string, string> = {
-	'filtered-empty': '?search=keine-treffer-a11y',
+	'filtered-empty': '?search=xq-a11y-0', // no German word: the apartment list repeats the term (#160)
 	'login-error': '?error=failed'
 };
 

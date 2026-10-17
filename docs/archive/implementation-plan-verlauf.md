@@ -1121,6 +1121,26 @@ Branch `claude/w3e-de-wording-348`. All findings of the issue checked against `m
 
 Files: `messages/*.json`, `src/lib/statement-wizard.ts`, `backend/src/services/{category,heating-profile,distribution-key,formula}.service.ts`, tests in `src/__tests__/`, `src/lib/utils/__tests__/contract-availability.test.ts`, `backend/src/__tests__/`, E2E features, steps and questions that pin the texts.
 
+## Session W4e: word-wise search (#160, #373)
+
+Branch `claude/w4e-search-160`.
+
+- [x] Implementation issue for #160 created: #373
+- [x] Scenarios `@wip` (apartments.feature, buildings.feature) seen red
+- [x] Word-wise apartment search (number, building name, street, place; «Wohnung» ignored), pg test
+- [x] Word-wise building search, pg test
+- [x] Help text at the apartment search field, empty state names the term (de/fr/it/en)
+- [x] Code review round 1: `docs/reviews/search-review-1.md`
+- [x] Personas: `docs/design/personas/helga-search-160.md`, `marco-search-160.md`
+- [x] Fix Helga P-1 (Major): help text shows a pattern instead of the example «Seepark 3.02», which found nothing
+- [x] Helga round 2 on the new help text: P-1 closed (same report)
+- [x] Closing code review: `docs/reviews/search-review-2.md` (C-1 rejected: the wording was this session's own proposal in #373, not a decided text; C-2, C-3 fixed)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-160.md`
+- [x] Found: fr/it/en card word («Appartement 3.02») not ignored, decision issue #376
+- [ ] Session archived, pull request merged (Fixes #160, Fixes #373)
+
+Files: `backend/src/services/{word-search,apartment.service,building.service}.ts`, `backend/src/__tests__/{apartment,building}-search.pg.test.ts`, `src/routes/apartments/{+page,ApartmentFilters}.svelte`, `src/lib/ui/TextInput.svelte` (`helpTestid`), `src/__tests__/apartments-pages.dom.test.ts`, `messages/*.json`, `tests/e2e/features/{apartments,buildings}.feature`, steps, targets, questions, `tests/e2e/fixtures/{backend,screens}.ts` (`withNames`; a11y search term without German, since the empty state repeats it)
+
 ## Session 2026-10-17 W7e: audit log (#357)
 
 - [x] Scenarios in `settings.feature` («Protokoll öffnen», «Änderungen im Protokoll sehen», «Eintrag im Protokoll löschen»), breadcrumb example, `privacy.feature`; fach-reviewer before implementing: `docs/reviews/w7e-fachreview-1.md` (R-1, R-2, V-1 Major fixed; V-2–V-9, R-3 fixed or answered)
