@@ -25,7 +25,7 @@ describe('Kostenkategorien', () => {
 	it('lehnt einen schon vergebenen Namen verständlich ab', async () => {
 		await create('Treppenhaus');
 
-		await expectRejection(await create('Treppenhaus'), 409, `Eine Kategorie mit dem Namen "Treppenhaus ${token}" existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
+		await expectRejection(await create('Treppenhaus'), 409, `Eine Kategorie mit dem Namen «Treppenhaus ${token}» existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
 			name: `Treppenhaus ${token}`
 		});
 	});
@@ -36,7 +36,7 @@ describe('Kostenkategorien', () => {
 
 		const response = await categories.send('PUT', `/${id}`, { nameDE: `Dachrinne ${token}` });
 
-		await expectRejection(response, 409, `Eine Kategorie mit dem Namen "Dachrinne ${token}" existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
+		await expectRejection(response, 409, `Eine Kategorie mit dem Namen «Dachrinne ${token}» existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
 			name: `Dachrinne ${token}`
 		});
 	});

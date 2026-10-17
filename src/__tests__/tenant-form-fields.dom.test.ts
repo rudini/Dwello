@@ -7,9 +7,9 @@ describe('Mieterformular nach einem abgelehnten Speichern', () => {
 	it('nimmt die Fehler der Adresse weg, wenn der Korrespondenzkanal wechselt', () => {
 		show(TenantFormFields, {
 			errors: {
-				firstName: 'Vorname ist erforderlich',
-				address: 'Für Briefe ist eine Adresse erforderlich',
-				city: 'Für Briefe ist ein Ort erforderlich'
+				firstName: 'Vorname ist erforderlich.',
+				address: 'Für Briefe ist eine Adresse erforderlich.',
+				city: 'Für Briefe ist ein Ort erforderlich.'
 			}
 		});
 

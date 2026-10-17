@@ -167,7 +167,7 @@ export function validatePercentages(percentages: MonthlyPercentages): {
 }
 
 const nameTaken = (name: string) =>
-	new Conflict('HEATING_PROFILE_NAME_TAKEN', `Ein Heizprofil mit dem Namen "${name}" existiert bereits.`, { name });
+	new Conflict('HEATING_PROFILE_NAME_TAKEN', `Ein Heizprofil mit dem Namen «${name}» existiert bereits.`, { name });
 
 const invalidShares = ({ error, errorCode }: ReturnType<typeof validatePercentages>) =>
 	new CodedError(errorCode!.code, error!, errorCode!.params);

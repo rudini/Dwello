@@ -33,9 +33,9 @@ Funktionalität: Neue Wohnung
   Szenario: Pflichtangaben fehlen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"
     Wenn der Liegenschaftsverwalter die Wohnung ohne Angaben speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie ein Gebäude aus"
-    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Wohnungsnummer ist erforderlich"
-    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Fläche ist erforderlich"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie ein Gebäude aus."
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Wohnungsnummer ist erforderlich."
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Fläche ist erforderlich."
 
   Szenario: Wohnungsnummer ist im Gebäude schon vergeben
     Angenommen der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude "Birkenhof"
