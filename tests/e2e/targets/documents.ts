@@ -20,8 +20,8 @@ export const documentFileInput = target('Datei des Dokuments', (page) => page.ge
 export const documentTitleInput = target('Titel des Dokuments', (page) => page.getByTestId('tenant-document-title-input'));
 export const uploadDocumentButton = target('Dokument hochladen', (page) => page.getByTestId('tenant-document-upload-button'));
 export const noDocumentsHint = target('Hinweis keine Dokumente', (page) => page.getByTestId('tenant-documents-empty'));
-export const openDocumentLink = (title: string) =>
-	target(`«${title}» öffnen`, (page) => documentRow(title).locate(page).getByTestId('document-pdf-link'));
+export const openDocumentLink = (title: string, tenantName = '') =>
+	target(`«${title}» ${tenantName}`.trim() + ' öffnen', (page) => documentRow(title, tenantName).locate(page).getByTestId('document-pdf-link'));
 export const deleteDocumentButton = (title: string) =>
 	target(`«${title}» löschen`, (page) => documentRow(title).locate(page).getByTestId('document-delete-button'));
 export const deleteTenantMessage = target('Bestätigung Mieter löschen', (page) => page.getByTestId('delete-dialog-message'));
