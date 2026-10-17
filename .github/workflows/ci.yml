@@ -7,7 +7,9 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # A newer push to a pull request replaces its run; on main every run finishes and only the newest waiting one is kept,
+  # so quick merges are tested together instead of cancelling each other
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   NODE_VERSION: 22
@@ -150,6 +152,8 @@ jobs:
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
+      # Pull requests and the axe check: Chromium only (with the API driver); pushes to main: every browser
+      BROWSERS: ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || 'chromium firefox webkit' }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -181,10 +185,15 @@ jobs:
       - run: bun install --frozen-lockfile
         if: env.SKIP != 'true'
         working-directory: backend
-      # Pull requests: Chromium and the API driver only; pushes to main: every browser and the API driver
+      # The browsers of this Playwright version from the cache; their system packages are installed each time
+      - uses: actions/cache@v4
+        if: env.SKIP != 'true'
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ env.BROWSERS }}
       - name: Install Playwright browsers
         if: env.SKIP != 'true'
-        run: bunx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
+        run: bunx playwright install --with-deps ${{ env.BROWSERS }}
       - name: ${{ matrix.name }}
         if: env.SKIP != 'true'
         run: bun run test:e2e -- ${{ matrix.filter }} --shard=${{ matrix.shard }}/${{ matrix.shards }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
