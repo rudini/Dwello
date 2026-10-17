@@ -60,7 +60,7 @@ Funktionalität: Wohnungsliste
     Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnung passt zu «Ahornhof 9.99». Gesucht wird in Wohnungsnummer, Gebäudename, Strasse und Ort."
 
   Szenario: Die Wohnungssuche sagt, wonach sie sucht
-    Dann erfährt der Liegenschaftsverwalter bei der Wohnungssuche "Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort. Mehrere Wörter grenzen die Suche ein, zum Beispiel «Seepark 3.02»."
+    Dann erfährt der Liegenschaftsverwalter bei der Wohnungssuche "Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort. Mehrere Wörter grenzen die Suche ein, zum Beispiel Gebäudename und Wohnungsnummer."
 
   Szenario: Filter nach dem Zurücksetzen leer
     Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht

@@ -152,7 +152,10 @@ describe('Wohnungsliste', () => {
 		list([apartment()]);
 		const input = byTestId('apartments-search-input')!;
 		const help = document.getElementById(input.getAttribute('aria-describedby')!)!;
-		expect(help.textContent).toContain('Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort.');
+		// a pattern, not a literal example: a typed example would find nothing in the landlord's data (persona Helga)
+		expect(help.textContent!.trim()).toBe(
+			'Suchen Sie nach Wohnungsnummer, Gebäudename, Strasse oder Ort. Mehrere Wörter grenzen die Suche ein, zum Beispiel Gebäudename und Wohnungsnummer.'
+		);
 		expect(input.getAttribute('placeholder')).toBeNull();
 	});
 
