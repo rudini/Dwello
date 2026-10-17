@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
-import { languageLabels } from '$lib/tenant';
+import { countryCodes, languageLabels } from '$lib/tenant';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -16,6 +16,7 @@ function readFields(formData: FormData) {
 		address: field('address'),
 		postalCode: field('postalCode'),
 		city: field('city'),
+		country: countryCodes.includes(field('country')) ? field('country') : 'CH',
 		correspondenceChannel: field('correspondenceChannel') === 'email' ? 'email' : 'letter',
 		language: field('language') in languageLabels ? field('language') : 'de'
 	};
@@ -28,7 +29,8 @@ function contactErrors(t: TenantFields) {
 	if (t.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) {
 		errors.email = m.tenants_error_email_invalid();
 	}
-	if (t.postalCode && !/^\d{4}$/.test(t.postalCode))
+	// Liechtenstein has Swiss postal codes; abroad each country has its own form (#102)
+	if (['CH', 'LI'].includes(t.country) && t.postalCode && !/^\d{4}$/.test(t.postalCode))
 		errors.postalCode = m.buildings_error_postal_code_digits();
 	return errors;
 }

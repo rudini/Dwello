@@ -35,8 +35,23 @@ describe('Mieterformular', () => {
 			address: 'Ahornweg 3',
 			postalCode: '8400',
 			city: 'Winterthur',
+			country: 'CH',
 			correspondenceChannel: 'email',
 			language: 'fr'
+		});
+	});
+
+	// Ohne Angabe liegt die Korrespondenzadresse in der Schweiz (#102)
+	it('übernimmt das Land der Korrespondenzadresse, sonst die Schweiz', () => {
+		expect(parseTenantForm(form({ ...anna, country: 'DE' })).tenant.country).toBe('DE');
+		expect(parseTenantForm(form({ ...anna, country: 'XX' })).tenant.country).toBe('CH');
+	});
+
+	// Eine Postleitzahl im Ausland hat ihre eigene Form; Liechtenstein hat Schweizer Postleitzahlen
+	it('prüft die vier Ziffern der PLZ nur in der Schweiz und in Liechtenstein', () => {
+		expect(parseTenantForm(form({ ...anna, country: 'DE', postalCode: '78462' })).errors).toEqual({});
+		expect(parseTenantForm(form({ ...anna, country: 'LI', postalCode: '949' })).errors).toEqual({
+			postalCode: 'PLZ muss 4 Ziffern haben'
 		});
 	});
 

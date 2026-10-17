@@ -63,7 +63,7 @@ function open(
 			today,
 			missingStatements,
 			billedBy,
-			nextSteps: terminated ? { successor: false } : null, // the loader decides (review K-1)
+			nextSteps: terminated ? { successor: false, ended: false } : null, // the loader decides (review K-1)
 			contract: contract(startDate, endDate, terminated),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
@@ -203,7 +203,7 @@ describe('Mietvertragsdetail', () => {
 		expect(text('contract-end-death')).toContain(
 			'Ist der Mieter gestorben, endet der Mietvertrag nicht von selbst: Er geht auf die Erben über. Erfassen Sie das Vertragsende erst, wenn die Erben oder Sie gekündigt haben.'
 		);
-		expect(text('contract-end-death')).toContain('unter «Adresse»'); // Persona Weber P-1
+		expect(text('contract-end-death')).toContain('unter «Korrespondenzadresse»'); // Persona Weber P-1
 	});
 
 	it('bietet bei einer versendeten Abrechnung kein Löschen an', async () => {
@@ -263,7 +263,7 @@ describe('Mietvertragsdetail', () => {
 				today: '2026-10-10',
 				missingStatements: [],
 				billedBy: [],
-				nextSteps: { successor: true },
+				nextSteps: { successor: true, ended: false },
 				contract: contract('2024-04-01', '2099-03-31', true),
 				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 			},
@@ -273,6 +273,26 @@ describe('Mietvertragsdetail', () => {
 			a.textContent!.trim()
 		);
 		expect(links).toEqual(['Neuen Mietvertrag für Anna Keller erfassen', 'Neue Adresse eintragen']);
+	});
+
+	// A-5 (#114, review C-3): nach dem Vertragsende nur noch die neue Adresse
+	it('bietet nach dem Vertragsende nur noch die neue Adresse an', () => {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: { successor: false, ended: true },
+				contract: contract('2024-04-01', '2025-03-31', true),
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			},
+			form: null
+		} as never);
+		const steps = byTestId('contract-next-steps')!;
+		expect(steps.textContent).toContain(
+			'Bitten Sie Anna Keller um die neue Adresse und tragen Sie sie beim Mieter ein. Dorthin geht die Nebenkostenabrechnung.'
+		);
+		expect([...steps.querySelectorAll('a')].map((a) => a.textContent!.trim())).toEqual(['Neue Adresse eintragen']);
 	});
 
 	it('nennt ohne Kündigung keine nächsten Schritte', () => {

@@ -20,7 +20,7 @@ interface ContractDetailsData {
 	missingStatements: { start: string; end: string; href: string }[]; // A-10, #142: newest first
 	// the contract's statements: it cannot be deleted (#116); null when they cannot be read (review C-1)
 	billedBy: { id: string; statementNumber: string; status: string }[] | null;
-	nextSteps: { successor: boolean } | null; // A-4: a notice still running
+	nextSteps: { successor: boolean; ended: boolean } | null; // A-4: a notice still running; A-5: after it the address
 	fixedTermCheck: boolean; // A-6: an agreed end passed, the tenant may have stayed
 	contract: RentalContract & {
 		tenant: Tenant;
@@ -71,9 +71,11 @@ async function successorAfter(fetch: typeof globalThis.fetch, contract: Row, end
 // review K-1); null without one, or when the apartment's contracts cannot be read: no hint rather than a wrong one
 async function nextStepsDue(fetch: typeof globalThis.fetch, contract: Row) {
 	const end = contract.endDate ? String(contract.endDate).slice(0, 10) : null;
-	if (!contract.terminated || !end || end < localToday()) return null;
+	if (!contract.terminated || !end) return null;
+	// after the end only the new address, while the moved-out tenant still has the building's (A-5, #114)
+	if (end < localToday()) return contract.oldAddress ? { successor: false, ended: true } : null;
 	const successor = await successorAfter(fetch, contract, end);
-	return successor === null ? null : { successor };
+	return successor === null ? null : { successor, ended: false };
 }
 
 // An agreed end passed without a later contract or «Mieter ist ausgezogen»: the tenant may have stayed, and then

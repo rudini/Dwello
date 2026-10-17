@@ -21,6 +21,7 @@ import {
 	managementFeeHint,
 	managementFeeInput,
 	missingInvoices,
+	oldAddress,
 	periodStartInput,
 	periodRunningWarning,
 	previewEmpty,
@@ -136,3 +137,4 @@ export const presetNoticeText = Text.of(wizardPresetNotice);
 export const agreementQuestionsOf = (contractId: string) => Text.of(agreementsOf(contractId));
 export const agreementQuestionsShown = Visibility.of(agreementQuestions);
 export const notAgreedCostsOf = (contractId: string) => Text.of(notAgreedCostsLink(contractId));
+export const oldAddressWarning = Text.of(oldAddress);

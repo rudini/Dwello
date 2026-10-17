@@ -6,6 +6,7 @@
 	import type { StatementWithDetails } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
+	import OldAddressWarning from './OldAddressWarning.svelte';
 
 	// Before "Versendet": Dwello sends nothing itself; the user delivers the PDF and then records it here
 	let { open = $bindable(), statement }: { open: boolean; statement: StatementWithDetails } =
@@ -60,6 +61,7 @@
 			</dd>
 		</div>
 	</dl>
+	<OldAddressWarning {statement} testid="send-old-address" />
 	<div>
 		<Button
 			href="/statements/{statement.id}/pdf?ansehen"

@@ -91,3 +91,4 @@ export const notAgreedCostsLink = (contractId: string) =>
 	target(`Mietvertrag ${contractId} mit nicht vereinbarten Nebenkosten`, (page) =>
 		page.getByTestId(`not-agreed-costs-link-${contractId}`)
 	);
+export const oldAddress = target('Warnung vor der alten Adresse', (page) => page.getByTestId('preview-old-address'));

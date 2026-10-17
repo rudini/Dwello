@@ -32,6 +32,7 @@ const tenantBodySchema = t.Object({
 	address: t.Optional(t.Nullable(t.String())),
 	postalCode: t.Optional(t.Nullable(t.String())),
 	city: t.Optional(t.Nullable(t.String())),
+	country: t.Optional(t.String({ pattern: '^[A-Z]{2}$' })), // ISO 3166 code, Schweiz by default
 	correspondenceChannel: t.Optional(t.Union([t.Literal('email'), t.Literal('letter')]))
 });
 
