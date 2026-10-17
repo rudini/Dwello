@@ -13,7 +13,7 @@ Branch `claude/w3d-monatlich-total-tankbestand-62-75`. Both issues have "Done me
 - [x] #62: rename `grossRent`, `rentBrutto`, `totalBrutto` and the test «Bruttomiete» to Monatlich total names (No scenario: internal names only, no behaviour change; no API field involved); `grossRent`, `rentBrutto`, `totalBrutto` → `monthlyTotal`
 - [x] slice review rename (code-reviewer): `docs/reviews/rename-review-1.md`
 - [x] #62 after review: tenant rental `rent` → `monthlyTotal` (V-5), E2E step «beträgt das Monatlich total der Wohnung» (V-6, C-1)
-- [ ] slice review title (code-reviewer)
+- [x] slice review title (code-reviewer): `docs/reviews/title-review-1.md` (Nits stay)
 - [ ] feature review: persona (building page title), fach-reviewer if words changed after round 1
 - [ ] Workflow note / workflow-review if it applies
 
