@@ -200,7 +200,8 @@ async function billedOf(statement: StatementWithDetails) {
 async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
 	// the tenant's part of the period, as billed: from moving in or the period start to moving out or the period end
 	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd, ...(await billedOf(statement)) };
-	const heatingLine = statement.lineItems.find((item) => item.categoryId && names.get(item.categoryId)?.isHeatingCost);
+	// a position with invoices by their own days has its own share, not the run's, and one summing to zero none (#71)
+	const heatingLine = statement.lineItems.find((item) => item.categoryId && names.get(item.categoryId)?.isHeatingCost && !item.invoiceParts && parseFloat(item.totalAmount) !== 0);
 	return {
 		...rental,
 		...heatingOf(statement, language, hasHeating, heatingLine?.periodShare),

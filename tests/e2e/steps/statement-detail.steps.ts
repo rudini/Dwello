@@ -194,7 +194,7 @@ When('der Liegenschaftsverwalter die Wohnung der Abrechnung öffnet', async ({ v
 });
 
 Then(
-	'trägt {string} {int} % der Heizkosten, also {string}',
+	'trägt {string} {float} % der Heizkosten, also {string}',
 	async ({ verwalter }, _tenant: string, share: number, amount: string) => {
 		await verwalter.sees(heatingCostsOfTenant).toEqual({ share, amount: francs(amount) });
 	}
