@@ -88,6 +88,11 @@ Funktionalität: Sprache der Oberfläche
     Wenn der Besucher den Link zu den Nutzungsbedingungen öffnet
     Dann ist der Besucher auf der Seite "Nutzungsbedingungen"
 
+  Szenario: Die Datenschutzerklärung von der Anmeldeseite aus lesen
+    Angenommen ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher den Link zur Datenschutzerklärung öffnet
+    Dann ist der Besucher auf der Seite "Datenschutz"
+
   Szenario: Von den Nutzungsbedingungen zurück zur Anmeldung
     Angenommen ein Besucher hat die Seite "/terms" geöffnet
     Wenn der Besucher den Link zur Anmeldung öffnet

@@ -5,6 +5,7 @@ import periodStatements from '../../tests/contracts/period-statements.json';
 import apartmentList from '../../tests/contracts/apartments.json';
 import config from '../../tests/contracts/config.json';
 import statementList from '../../tests/contracts/statements.json';
+import documentList from '../../tests/contracts/documents.json';
 
 const API = 'http://localhost:3001/api/v1';
 // an apartment of the API contract, without the dates it does not have
@@ -150,6 +151,30 @@ function backend(
 
 describe('Übersicht laden', () => {
 	afterEach(() => vi.useRealTimers());
+
+	// #178: an ehemaliger Mieter whose uploads date from before the last Vertragsende
+	it('nennt ehemalige Mieter mit Dokumenten von vor dem Ende ihres letzten Mietvertrags', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const [upload] = documentList.data;
+		// a fixed term without notice, then the next tenant: she has left, no question whether she stayed (A-6)
+		const former = { ...contracts[0], id: 'k9', tenantId: 't9', tenantName: 'Ida Alt', apartmentId: 'a9', startDate: '2020-01-01', endDate: '2026-03-31', terminated: false, movedOut: false };
+		const next = { ...former, id: 'k10', tenantId: 't10', tenantName: 'Ugo Nuovo', startDate: '2026-04-01', endDate: null };
+		const base = backend();
+		const fetch = (async (url: string) => {
+			const path = url.replace(API, '');
+			if (path === '/documents')
+				return Response.json({ data: [{ ...upload, tenantId: 't9', createdAt: '2024-05-01T09:00:00.000Z' }] });
+			if (path === '/contracts?limit=1000') return Response.json({ contracts: [...contracts, former, next] });
+			return base(url);
+		}) as typeof globalThis.fetch;
+
+		const data = await load({ fetch } as never);
+
+		expect(data.tasks).toContainEqual(
+			expect.objectContaining({ id: 'former-documents-t9', title: 'Dokumente von Ida Alt prüfen', href: '/tenants/t9' })
+		);
+		expect(data.tasks.map((task) => task.id)).not.toContain('fixed-term-k9');
+	});
 
 	it('liefert die Kennzahlen und daraus die Aufgaben und Fristen von heute', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });

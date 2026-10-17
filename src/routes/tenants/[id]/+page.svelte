@@ -60,7 +60,13 @@
 		</div>
 		<div class="flex flex-col gap-6 lg:col-span-2">
 			<TenantContracts contracts={data.contractHistory} />
-			<TenantDocumentsCard documents={data.documents} {form} demo={data.demo} />
+			<TenantDocumentsCard
+				documents={data.documents}
+				former={data.formerDocuments}
+				name={`${tenant.firstName} ${tenant.lastName}`}
+				{form}
+				demo={data.demo}
+			/>
 		</div>
 	</div>
 </div>

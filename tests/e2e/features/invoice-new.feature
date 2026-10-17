@@ -48,6 +48,10 @@ Funktionalität: Neue Rechnung erfassen
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "30022025" eintippt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
 
+  # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)
+  Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre
+    Dann erklärt das Formular beim Leistungszeitraum "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
+
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
