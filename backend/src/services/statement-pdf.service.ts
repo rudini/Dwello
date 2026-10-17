@@ -15,7 +15,7 @@ import { refusal } from './coded-error';
 import { billingStart, getContract } from './contract.service';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
-async function qrBillConfig(): Promise<QRBillConfig | null> {
+export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const companyName = await getTypedConfig('company_name');
 	const companyAddress = await getTypedConfig('company_address');
 	const companyPostalCode = await getTypedConfig('company_postal_code');

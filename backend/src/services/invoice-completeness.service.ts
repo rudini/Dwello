@@ -6,9 +6,10 @@
 
 import { and, asc, eq, gte, isNull, lte, min, notInArray, or } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, invoices } from '../db/schema';
+import { buildings, categories, fuelStocks, invoices } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
-import { fuelStockChange, hasFuelStocks, periodReadings } from './fuel-stock.service';
+import { fuelStockChange, periodReadings } from './fuel-stock.service';
+import { swissToday } from './today';
 
 export interface Period {
 	start: string;
@@ -32,9 +33,10 @@ export interface CategoryFinding {
 	categoryName: string;
 	// missing: no invoice although the year before had costs; gap: a part of the rhythm has none;
 	// new: costs the year before did not have (agreed in the lease?); deviation: costs differ a lot;
-	// stock: a Tankbestand reading is missing (missingParts: its days) or the consumption is negative;
+	// stock: a Tankbestand reading is missing (missingParts: its days); consumption: a hint on the readings, the
+	// consumption is negative or differs a lot from the year before (changePercent);
 	// tank: heating costs without any Tankbestand (heated with oil or pellets? then the purchases are billed)
-	kind: 'stock' | 'tank' | 'missing' | 'gap' | 'new' | 'deviation';
+	kind: 'stock' | 'tank' | 'consumption' | 'missing' | 'gap' | 'new' | 'deviation';
 	current: Sum;
 	previous: Sum;
 	missingParts: Period[]; // the slices of the rhythm without invoice (gap), the missing readings (stock), otherwise empty
@@ -140,14 +142,20 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 	if (current.length === 0) return { ...base, kind: 'missing' };
 	const parts = missingParts(current, previous, period, yearBefore(period));
 	if (parts.length > 0) return { ...base, kind: 'gap', missingParts: parts };
-	const change = base.current.total - base.previous.total;
-	if (Math.abs(change) >= DEVIATION_MINIMUM && Math.abs(change) > base.previous.total * DEVIATION_SHARE) {
-		return { ...base, kind: 'deviation', changePercent: Math.round((change / base.previous.total) * 100) };
-	}
-	return null;
+	const stock = (list: CategoryInvoice[]) => list.some((invoice) => invoice.isFuelStock);
+	return changeFinding(base, stock(current), stock(previous));
 }
 
-const ORDER = { stock: 0, missing: 1, gap: 2, new: 3, deviation: 4, tank: 5 };
+// Costs far from the year before; with both years' readings their consumption (#73). No comparison with a year whose
+// readings give a consumption of zero or below: in the period it has its own hint, the year before is no measure
+function changeFinding(base: Omit<CategoryFinding, 'kind'>, stockNow: boolean, stockBefore: boolean): CategoryFinding | null {
+	if ((stockNow && base.current.total <= 0) || (stockBefore && base.previous.total <= 0)) return null;
+	const change = base.current.total - base.previous.total;
+	if (Math.abs(change) < DEVIATION_MINIMUM || Math.abs(change) <= base.previous.total * DEVIATION_SHARE) return null;
+	return { ...base, kind: stockNow && stockBefore ? 'consumption' : 'deviation', changePercent: Math.round((change / base.previous.total) * 100) };
+}
+
+const ORDER = { stock: 0, missing: 1, gap: 2, new: 3, consumption: 4, deviation: 5, tank: 6 };
 
 /**
  * Findings per category of the period against the same dates one year earlier; most serious first.
@@ -211,10 +219,18 @@ function tankQuestion(current: CategoryInvoice[]): CategoryFinding | null {
 	};
 }
 
-// Without both readings the statement bills the purchases, not the consumption; a negative consumption is a typo
+// Without both readings the statement bills the purchases, not the consumption; a negative consumption is a typo, a
+// hint only (#73). A reading whose Stichtag lies after today cannot exist yet (#136). A building recorded without a
+// tank needs none for a period no reading covers, and is not asked about one (#72).
 async function stockFinding(buildingId: string, period: Period, current: CategoryInvoice[]): Promise<CategoryFinding | null> {
-	const readings = await periodReadings(buildingId, period.start, period.end);
-	if (!readings) return (await hasFuelStocks(buildingId)) ? null : tankQuestion(current);
+	const [readings, [building]] = await Promise.all([
+		periodReadings(buildingId, period.start, period.end),
+		db.select({ noTank: buildings.noTank }).from(buildings).where(eq(buildings.id, buildingId))
+	]);
+	if (building?.noTank && !readings?.covered) return null;
+	if (!readings) return tankQuestion(current);
+	const today = swissToday();
+	const missing = readings.missing.filter((day) => day <= today);
 	const costs = current.filter((invoice) => invoice.categoryId === readings.categoryId);
 	const [category] = await db.select({ name: categories.name, nameDE: categories.nameDE }).from(categories).where(eq(categories.id, readings.categoryId));
 	const finding = {
@@ -223,11 +239,12 @@ async function stockFinding(buildingId: string, period: Period, current: Categor
 		kind: 'stock' as const,
 		current: sum(costs),
 		previous: { count: 0, total: 0 },
-		missingParts: readings.missing.map((day) => ({ start: day, end: day })),
+		missingParts: missing.map((day) => ({ start: day, end: day })),
 		changePercent: null,
 		partialCount: 0
 	};
-	return readings.missing.length > 0 || finding.current.total < 0 ? finding : null;
+	if (missing.length > 0) return finding;
+	return finding.current.total < 0 ? { ...finding, kind: 'consumption' } : null;
 }
 
 // The building's allocable invoices without Leistungszeitraum dated in these days: they count where their date lies;
