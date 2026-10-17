@@ -1274,8 +1274,6 @@
 	"statements_utility_many": "{count} décomptes des charges",
 	"statements_view_of": "Voir les décomptes de {name}",
 	"statements_existing_note": "Les contrats de bail ayant un décompte dans cette période n’en reçoivent pas de nouveau. Pour recalculer un brouillon, supprimez-le et établissez à nouveau les décomptes.",
-	"statements_partial_title": "Factures pour une partie de la période seulement",
-	"statements_partial_text": "Pour {names}, il y a plus de trois mois sans facture au début ou à la fin de la période de décompte. Vérifiez s’il manque encore des factures.",
 	"statements_confirm_label": "Établir tout de même les décomptes",
 	"statements_preview_empty": "Dans cette période de décompte, il n’y a pas de contrats de bail sans décompte dans les immeubles choisis.",
 	"statements_all_billed_lead": "Tous les contrats de bail ont déjà un décompte dans cette période.",
