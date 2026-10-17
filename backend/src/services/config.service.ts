@@ -211,22 +211,13 @@ async function saveConfig(
 		await recordAudit('management_fee_changed', { from: before, to: value }, tx);
 	}
 
-	if (existing) {
-		// Update existing
-		const [updated] = await tx
-			.update(configuration)
-			.set({ value, updatedAt: new Date() })
-			.where(eq(configuration.key, key))
-			.returning();
-		return updated;
-	} else {
-		// Insert new
-		const [created] = await tx
-			.insert(configuration)
-			.values({ key, value })
-			.returning();
-		return created;
-	}
+	// An upsert: two first writes of one key at once would both insert (O-36)
+	const [saved] = await tx
+		.insert(configuration)
+		.values({ key, value })
+		.onConflictDoUpdate({ target: configuration.key, set: { value, updatedAt: new Date() } })
+		.returning();
+	return saved;
 }
 
 /**
