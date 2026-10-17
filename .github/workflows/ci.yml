@@ -143,12 +143,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Five shards each: Playwright splits by test count, and the heavy screen checks (accessibility.feature,
+        # sprachen-bildschirme.feature) would otherwise land in one shard; measured 2026-10-17, longest shard 245 s of 905 s
+        suite: [e2e, a11y]
+        shard: [1, 2, 3, 4, 5]
         include:
-          - { name: E2E tests, filter: --grep-invert @a11y, reports: e2e-reports, shard: 1, shards: 2 }
-          - { name: E2E tests, filter: --grep-invert @a11y, reports: e2e-reports, shard: 2, shards: 2 }
-          - { name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shard: 1, shards: 3 }
-          - { name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shard: 2, shards: 3 }
-          - { name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shard: 3, shards: 3 }
+          - { suite: e2e, name: E2E tests, filter: --grep-invert @a11y, reports: e2e-reports, shards: 5 }
+          - { suite: a11y, name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shards: 5 }
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
@@ -219,8 +220,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { name: E2E tests, shards: 2 }
-          - { name: Accessibility (axe), shards: 3 }
+          - { name: E2E tests, shards: 5 }
+          - { name: Accessibility (axe), shards: 5 }
     steps:
       - env:
           GH_TOKEN: ${{ github.token }}
