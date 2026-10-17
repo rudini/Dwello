@@ -96,10 +96,15 @@ describe('Datenschutzerklärung zu Entwürfen im Browser', () => {
 
 		const draft = byTestId('draft-notice')?.textContent;
 		expect(draft).toContain('«Mietvertrag erfassen» und «Abrechnungen erstellen»');
-		expect(draft).toContain('als Entwurf in diesem Browser');
-		expect(draft).toContain('bis Sie sie speichern, verwerfen oder sich mit «Abmelden» abmelden');
-		// a session that only expires leaves the draft (review W9c-1, R-10)
-		expect(draft).toContain('Läuft die Anmeldung nur ab, bleibt der Entwurf.');
+		// #57: «Entwurf» is only the statement status; why, until when (Fachprüfung #57, R-1, R-2) and what (R-3)
+		expect(draft).not.toContain('Entwurf');
+		expect(draft).toContain('nur in diesem Browser auf, damit Sie später weitermachen können');
+		expect(draft).toContain(
+			'bis Sie den Mietvertrag speichern oder die Abrechnungen erstellen, Ihre Angaben verwerfen oder sich mit «Abmelden» abmelden'
+		);
+		expect(draft).toContain('Beträge, Daten und die Auswahl von Mieter und Wohnung');
+		// a session that only expires leaves the input (review W9c-1, R-10)
+		expect(draft).toContain('Läuft die Anmeldung nur ab, bleiben die Angaben erhalten.');
 	});
 });
 

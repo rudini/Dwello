@@ -603,7 +603,7 @@ describe('Entwurf des Mietvertrags', () => {
 		await open();
 		select('contract-tenant-select', 't1');
 		await settle();
-		expect(byTestId('save-status')!.textContent).toContain('Entwurf gespeichert');
+		expect(byTestId('save-status')!.textContent).toContain('Noch nicht gespeichert');
 	});
 
 	it('setzt einen Entwurf fort und lässt ihn verwerfen', async () => {
