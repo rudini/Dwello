@@ -159,6 +159,13 @@ Given('der Mietvertrag von {string} ist in {int} Tagen gekündigt', async ({ see
 });
 
 Then(
+	'nennt die Übersicht keine Aufgabe {string} für {string}',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.sees(overviewTaskShownFor(title, names.get(tenant)!)).toBe(false);
+	}
+);
+
+Then(
 	'nennt die Übersicht die Aufgabe {string} für {string}',
 	async ({ verwalter, names }, title: string, tenant: string) => {
 		await verwalter.sees(overviewTaskShownFor(title, names.get(tenant)!)).toBe(true);

@@ -30,6 +30,7 @@ const oldAddress = async () => {
 
 beforeAll(async () => {
 	rental = await createRental(crypto.randomUUID(), { startDate: '2024-01-01', endDate: '2024-03-31', monthlyAdvancePayment: '0' });
+	await db.update(rentalContracts).set({ terminated: true }).where(eq(rentalContracts.id, rental.contract)); // given notice
 	statement = await idOf(
 		await sendJson('POST', '/api/v1/statements/generate', {
 			contractId: rental.contract,
@@ -78,6 +79,19 @@ describe('Ausgezogener Mieter mit der Adresse der Wohnung', () => {
 		await deleteContract(running.id, true);
 		await deleteApartment(apartment.id);
 		expect(await oldAddress()).toBe(true);
+	});
+
+	// A-6 (#115, merge review C-1): after an agreed end without «Mieter ist ausgezogen» the tenant may have stayed
+	it('warnt nach einem abgelaufenen befristeten Mietvertrag erst, wenn der Auszug bestätigt ist', async () => {
+		const contract = (fields: { terminated?: boolean; movedOut?: boolean }) =>
+			db.update(rentalContracts).set(fields).where(eq(rentalContracts.id, rental.contract));
+		await address({ address: 'Testweg 1', postalCode: '8400', city: 'Winterthur' }); // the building's
+		await contract({ terminated: false });
+
+		expect(await oldAddress()).toBe(false);
+		await contract({ movedOut: true });
+		expect(await oldAddress()).toBe(true);
+		await contract({ terminated: true, movedOut: false });
 	});
 
 	// directly: the draft of 2024 refuses a later Vertragsende through the API
