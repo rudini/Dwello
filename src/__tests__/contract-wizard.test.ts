@@ -7,10 +7,14 @@ import {
 	contractSteps,
 	contractSummary,
 	firstStepWithError,
+	lastRent,
+	rentTakenOver,
+	rentToPreset,
 	startValues,
 	stepErrors
 } from '../lib/contract-wizard';
 import type { ContractFormValues } from '../lib/contract-form';
+import listed from '../../tests/contracts/contracts.json';
 
 const empty: ContractFormValues = {
 	tenantId: '',
@@ -20,7 +24,9 @@ const empty: ContractFormValues = {
 	isUnlimited: true,
 	baseRent: '',
 	additionalRent: '',
-	advancePayment: ''
+	advancePayment: '',
+	managementFee: '',
+	managementFeeRate: ''
 };
 const filled: ContractFormValues = {
 	...empty,
@@ -28,7 +34,8 @@ const filled: ContractFormValues = {
 	apartmentId: 'a1',
 	startDate: '2025-01-01',
 	baseRent: '950',
-	advancePayment: '180'
+	advancePayment: '180',
+	managementFee: 'run'
 };
 const tenants = [{ id: 't1', name: 'Anna Keller' }];
 const apartments = [{ id: 'a1', unit: '2.01', building: 'Ahornhof' }];
@@ -45,14 +52,14 @@ describe('Mietvertrag Schritt für Schritt', () => {
 	});
 
 	it('prüft bei "Weiter" nur die Angaben des aktuellen Schritts', () => {
-		expect(stepErrors(empty, 1)).toEqual({ tenantId: 'Bitte wählen Sie einen Mieter aus' });
+		expect(stepErrors(empty, 1)).toEqual({ tenantId: 'Bitte wählen Sie einen Mieter aus.' });
 		expect(stepErrors({ ...empty, tenantId: 't1' }, 1)).toEqual({});
-		expect(stepErrors(empty, 3)).toEqual({ startDate: 'Vertragsbeginn ist erforderlich' });
+		expect(stepErrors(empty, 3)).toEqual({ startDate: 'Vertragsbeginn ist erforderlich.' });
 		expect(stepErrors({ ...filled, isUnlimited: false }, 3)).toEqual({
-			endDate: 'Vertragsende ist erforderlich bei befristetem Vertrag'
+			endDate: 'Bei einem befristeten Mietvertrag ist das Vertragsende erforderlich.'
 		});
 		expect(stepErrors({ ...filled, baseRent: '' }, 4)).toEqual({
-			baseRent: 'Nettomiete ist erforderlich'
+			baseRent: 'Nettomiete ist erforderlich.'
 		});
 	});
 
@@ -78,6 +85,13 @@ describe('Mietvertrag Schritt für Schritt', () => {
 			{ label: 'Nettomiete', value: 'CHF\u00a0950.00', step: 4, field: 'baseRent' },
 			{ label: 'Akonto', value: 'CHF\u00a0180.00', step: 4, field: 'advancePayment' },
 			{ label: 'Zusatzmiete', value: 'CHF\u00a00.00', step: 4, field: 'additionalRent' },
+			{
+				label: 'Verwaltungspauschale',
+				value: 'Vereinbart, Satz des Abrechnungslaufs',
+				step: 4,
+				field: 'managementFee'
+			},
+			{ label: 'Vereinbarte Nebenkosten', value: 'Keine', step: 4, field: 'agreedCosts' },
 			{ label: 'Monatlich total', value: 'CHF\u00a01’130.00', step: null, field: '' } // a sum, changed through its parts
 		]);
 		const limited = { ...filled, isUnlimited: false, endDate: '2026-12-31' };
@@ -85,6 +99,20 @@ describe('Mietvertrag Schritt für Schritt', () => {
 			'Donnerstag, 31. Dezember 2026'
 		);
 	});
+});
+
+// #91: ein neuer Mietvertrag vereinbart alle umlagefähigen Kategorien, bis der Liegenschaftsverwalter eine abwählt
+it('nennt bei der Prüfung die vereinbarten Nebenkosten', () => {
+	const categories = [
+		{ id: 'c1', name: 'Heizung' },
+		{ id: 'c2', name: 'Lift' }
+	];
+	const agreed = (values: ContractFormValues) =>
+		contractSummary(values, tenants, apartments, categories).find((item) => item.field === 'agreedCosts')?.value;
+
+	expect(agreed(filled)).toBe('Heizung, Lift');
+	expect(agreed({ ...filled, agreedCategoryIds: ['c2'] })).toBe('Lift');
+	expect(agreed({ ...filled, agreedCategoryIds: [] })).toBe('Keine');
 });
 
 describe('Startwerte des Mietvertrags', () => {
@@ -106,6 +134,13 @@ describe('Startwerte des Mietvertrags', () => {
 			restored: true,
 			dropped: false
 		});
+	});
+
+	// B-16 (#156): «Neuen Mietvertrag erfassen» unter «Bearbeiten» gibt den frühesten Vertragsbeginn mit
+	it('beginnt am Tag aus der Adresse, auch vor dem Entwurf', () => {
+		const params = new URLSearchParams('tenant=t1&start=2099-04-01');
+		expect(startValues(params, null, known).values.startDate).toBe('2099-04-01');
+		expect(startValues(params, filled, known).values.startDate).toBe('2099-04-01');
 	});
 
 	it('lässt Mieter und Wohnungen weg, die es nicht mehr gibt, und sagt es', () => {
@@ -195,5 +230,65 @@ describe('Beträge und Daten wie in der Schweiz geschrieben', () => {
 		expect(startDateNotice('', '2026-10-10')).toBeNull();
 		// an impossible year gets its own error, not a misleading "in the past"
 		expect(startDateNotice('12025-01-01', '2026-10-10')).toBeNull();
+	});
+});
+
+// P-17 (#144): Nettomiete, Zusatzmiete und Akonto aus dem letzten Mietvertrag der Wohnung
+describe('Beträge des letzten Mietvertrags', () => {
+	const contract = listed.contracts[0]; // 950.00 Nettomiete, 0.00 Zusatzmiete, 150.00 Akonto
+	const earlier = {
+		...contract,
+		id: 'c0',
+		startDate: '2019-01-01',
+		endDate: '2024-03-31',
+		baseRent: '800.00'
+	};
+	const taken = { baseRent: '950.00', additionalRent: '', advancePayment: '150.00' };
+
+	it('nimmt den Mietvertrag mit dem spätesten Vertragsbeginn, eine Null bleibt leer', () => {
+		expect(lastRent({ data: { contracts: [earlier, contract] } })).toEqual({
+			...taken,
+			startDate: '2024-04-01',
+			endDate: '2099-03-31',
+			terminated: true
+		});
+	});
+
+	// Fachreview P17 M-1: wer einen älteren Mietvertrag nachträgt, erhält die Beträge des vorangegangenen
+	it('nimmt nur Mietverträge, die vor dem neuen Vertragsbeginn beginnen', () => {
+		expect(lastRent({ data: { contracts: [contract, earlier] } }, '2024-01-01')?.baseRent).toBe(
+			'800.00'
+		);
+	});
+
+	it('hat ohne Mietvertrag oder ohne Antwort nichts zu übernehmen', () => {
+		expect(lastRent({ data: { contracts: [] } })).toBeNull();
+		expect(lastRent({ error: { message: 'x' } })).toBeNull();
+	});
+
+	it('füllt leere Beträge aus', () => {
+		expect(rentToPreset(empty, taken, null)).toEqual(taken);
+	});
+
+	it('überschreibt keinen eingetippten Betrag', () => {
+		expect(rentToPreset({ ...empty, baseRent: '980' }, taken, null)).toBeNull();
+		expect(rentToPreset({ ...empty, ...taken, baseRent: '980' }, taken, taken)).toBeNull();
+	});
+
+	// Fachreview P17 V-6: «950» ist derselbe Betrag wie «950.00»
+	it('erkennt übernommene Beträge auch anders geschrieben', () => {
+		expect(rentTakenOver({ ...empty, ...taken, baseRent: '950' }, taken)).toBe(true);
+		expect(rentTakenOver({ ...empty, ...taken, baseRent: '980' }, taken)).toBe(false);
+		expect(rentTakenOver({ ...empty, ...taken }, null)).toBe(false);
+	});
+
+	it('ersetzt unveränderte Beträge einer zuvor gewählten Wohnung, auch durch leere', () => {
+		const other = { baseRent: '1200.00', additionalRent: '50.00', advancePayment: '' };
+		expect(rentToPreset({ ...empty, ...taken }, other, taken)).toEqual(other);
+		expect(rentToPreset({ ...empty, ...taken }, null, taken)).toEqual({
+			baseRent: '',
+			additionalRent: '',
+			advancePayment: ''
+		});
 	});
 });

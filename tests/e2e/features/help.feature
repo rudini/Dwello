@@ -26,3 +26,29 @@ Funktionalität: Hilfe
   # Kosten über mehrere Jahre (#254)
   Szenario: Die Hilfe erklärt Kosten über mehrere Jahre
     Dann erklärt die Hilfe unter "Rechnungen erfassen" "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
+
+  # Begriffe zum Mietvertrag und zur KI-Kategorie (#109); Abrechnungsperiode wie im Glossar (#67); Fachreview (#69)
+  Szenariogrundriss: Die Hilfe erklärt den Begriff "<Begriff>"
+    Dann erklärt die Hilfe den Begriff "<Begriff>" mit "<Erklärung>"
+
+    Beispiele:
+      | Begriff                 | Erklärung                                                       |
+      | Befristet / Unbefristet | endet ohne Kündigung am vereinbarten Vertragsende               |
+      | Kündigungstermin        | Tag, auf den ein unbefristeter Mietvertrag gekündigt werden kann |
+      | Kündigungsfrist         | Zeit zwischen dem Eingang der Kündigung und dem Kündigungstermin |
+      | Manuell überschrieben   | «Manuell»                                                       |
+      | Abrechnungsperiode      | Ohne Leistungszeitraum bestimmt das Rechnungsdatum, in welche Abrechnungsperiode eine Rechnung fällt. |
+      | Umlagefähig             | Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt. |
+      | Mahnung                 | erst nach einer eigenen schriftlichen Zahlungsfrist von mindestens 30 Tagen |
+
+  # Inhaltsverzeichnis (#109)
+  Szenario: Die Hilfe führt vom Inhalt direkt zu den Begriffen
+    Angenommen das Browserfenster ist 390 Pixel breit
+    Wenn der Liegenschaftsverwalter im Inhalt der Hilfe "Begriffe kurz erklärt" wählt
+    Dann sieht der Liegenschaftsverwalter die Begriffe der Hilfe unter ihrer eigenen Adresse
+    Und scrollt die Seite nicht seitwärts
+
+  # #59: drei Mahnungen von Dwello erlauben keine Kündigung wegen Zahlungsrückstand
+  Szenario: Die Hilfe grenzt die Mahnung von der Zahlungsfrist mit Kündigungsandrohung ab
+    Dann erklärt die Hilfe unter "Zahlungen und Mahnungen" "Eine Mahnung von Dwello ist eine Zahlungsaufforderung. Sie ist keine Zahlungsfrist mit Kündigungsandrohung nach Art. 257d OR."
+    Und erklärt die Hilfe unter "Zahlungen und Mahnungen" "Lassen Sie sich beraten."

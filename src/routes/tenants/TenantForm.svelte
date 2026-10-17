@@ -14,6 +14,7 @@
 		tenant,
 		errors,
 		forContract = false,
+		apartment = '',
 		cancelHref,
 		submitLabel,
 		submitIcon
@@ -21,6 +22,7 @@
 		tenant?: Tenant;
 		errors?: Record<string, string>;
 		forContract?: boolean; // opened from the contract wizard, which continues with the new tenant
+		apartment?: string; // the apartment chosen there, given back (#144)
 		cancelHref: string;
 		submitLabel: string;
 		submitIcon: IconName;
@@ -44,6 +46,7 @@
 	class="flex flex-col gap-6 rounded-panel border border-line bg-surface p-6"
 >
 	{#if forContract}<input type="hidden" name="for" value="contract" />{/if}
+	{#if apartment}<input type="hidden" name="apartment" value={apartment} />{/if}
 	{#if errors?.form}
 		<Alert tone="critical" title={m.tenants_not_saved()} testid="form-error">
 			<p>{errors.form}</p>

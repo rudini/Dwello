@@ -26,7 +26,7 @@ describe('Gebäude speichern', () => {
 		show(BuildingForm, { mode: 'create' as const, errors: {}, cancelHref: '/buildings' });
 		fireEvent(byTestId<HTMLInputElement>('building-name-input')!, 'input', 'Rosengarten');
 		await saved();
-		expect(get(toasts).map((toast) => toast.message)).toContain('Gebäude Rosengarten gespeichert');
+		expect(get(toasts).map((toast) => toast.message)).toContain('Gebäude «Rosengarten» gespeichert');
 	});
 
 	it('zeigt beim Speichern, dass gearbeitet wird', () => {

@@ -30,7 +30,7 @@ Funktionalität: Verwaltungspauschale berechnen
 
   Szenario: Die Vorschau nennt die Verwaltungspauschale
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 4.5 % Verwaltungspauschale öffnet
-    Dann nennt die Vorschau eine Verwaltungspauschale von "4.5 % der eigenen Nebenkosten jedes Mieters"
+    Dann nennt die Vorschau eine Verwaltungspauschale von "4.5 % der eigenen Nebenkosten jedes Mieters mit vereinbarter Verwaltungspauschale. Ein eigener Satz im Mietvertrag geht vor."
 
   # Mit Komma oder Punkt, Zeichen für Zeichen wie auf der Tastatur
   Szenariogrundriss: Pauschale mit Dezimalstellen eintippen
@@ -42,3 +42,41 @@ Funktionalität: Verwaltungspauschale berechnen
       | Eingabe |
       | 4,5     |
       | 4.5     |
+
+  # #124: höchstens 10 %; die Grenze fängt auch Tippfehler wie 1000 statt 10 ab
+  Szenario: Pauschale über 10 %
+    Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale "1000" eintippt
+    Und der Liegenschaftsverwalter weitergeht
+    Dann meldet das Feld der Verwaltungspauschale "Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5."
+    Und bleibt der Assistent beim Schritt mit der Verwaltungspauschale
+
+  # #89: die Pauschale gilt nur für Mietverträge, in denen sie vereinbart ist (Art. 257a Abs. 2 OR); ein eigener
+  # Satz im Mietvertrag geht dem Satz des Abrechnungslaufs vor. Heizkosten 250 und 750 Franken
+  @api
+  Szenario: Pauschale nur mit vereinbarter Verwaltungspauschale
+    Angenommen im Mietvertrag von "Anna Keller" ist keine Verwaltungspauschale vereinbart
+    Und im Mietvertrag von "Beat Huber" ist eine Verwaltungspauschale von 2 % vereinbart
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 3 % Verwaltungspauschale öffnet
+    Dann kostet die Abrechnung von "Anna Keller" "CHF 250.00"
+    Und kostet die Abrechnung von "Beat Huber" "CHF 765.00"
+
+  Szenario: Der Assistent nennt die Mietverträge ohne vereinbarte Verwaltungspauschale
+    Angenommen im Mietvertrag von "Anna Keller" ist keine Verwaltungspauschale vereinbart
+    Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale auf 3 % setzt
+    Dann nennt der Assistent den Mietvertrag von "Anna Keller" ohne vereinbarte Verwaltungspauschale
+    Aber nicht den Mietvertrag von "Beat Huber"
+
+  Szenario: Mietvertrag ohne vereinbarte Verwaltungspauschale öffnen
+    Angenommen im Mietvertrag von "Anna Keller" ist keine Verwaltungspauschale vereinbart
+    Und der Liegenschaftsverwalter hat für das Gebäude "Rosenhof" die Verwaltungspauschale auf 3 % gesetzt
+    Wenn der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" ohne vereinbarte Verwaltungspauschale öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+
+  # #89: der Satz des Laufs kommt aus einer Abrechnung zum Satz des Laufs, nicht aus einer ohne vereinbarte Pauschale
+  Szenario: Neue Abrechnung übernimmt den Satz des Abrechnungslaufs
+    Angenommen im Mietvertrag von "Anna Keller" ist keine Verwaltungspauschale vereinbart
+    Und für "Beat Huber" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024 mit 4.5 % Verwaltungspauschale
+    Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Rosenhof" und 2024 öffnet
+    Dann schlägt der Assistent eine Verwaltungspauschale von "4.5" % vor
+

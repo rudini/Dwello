@@ -45,7 +45,7 @@ async function create(resource: string, body: object, post = resource) {
 	const response = await sendJson('POST', `/api/v1/${post}`, body);
 	const record = (await response.json()) as { id: string; error?: string };
 	expect({ resource, status: response.status, error: record.error }).toEqual({ resource, status: 201, error: undefined });
-	created.push(`${resource}/${record.id}`);
+	created.push(`${resource}/${record.id}${resource === 'contracts' ? '?confirmMistake=true' : ''}`); // a started contract too (#116)
 	return record.id;
 }
 

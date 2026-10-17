@@ -73,7 +73,7 @@ When('der Liegenschaftsverwalter die Wohnung sperrt', async ({ verwalter }) => {
 Then(
 	'warnt das Formular, dass die Wohnungsnummer {string} vergeben ist',
 	async ({ verwalter }, number: string) => {
-		await verwalter.sees(numberTaken).toContain(`"${number}" existiert bereits`);
+		await verwalter.sees(numberTaken).toContain(`«${number}» existiert bereits`);
 	}
 );
 

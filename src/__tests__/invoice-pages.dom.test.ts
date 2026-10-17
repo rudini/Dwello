@@ -28,6 +28,8 @@ import {
 	submit
 } from './helpers/dom';
 import validationRefused from '../../tests/contracts/validation-refused.json';
+import invoiceContract from '../../tests/contracts/invoice.json';
+import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 
 const buildings = [{ id: 'b1', name: 'Seeblick', address: 'Seeweg 1, 8400 Winterthur' }];
 const categories = [
@@ -259,21 +261,38 @@ describe('Rechnungsdetail', () => {
 		expect(text()).not.toContain('Bestimmt, in welche Abrechnungsperiode');
 	});
 
-	// Nachzügler: erfasst, nachdem die Abrechnungen der Periode erstellt wurden
-	it('weist darauf hin, wenn die Abrechnungen der Periode ohne diese Rechnung erstellt wurden', () => {
+	// Nachzügler oder danach geändert: die Abrechnungen der Periode rechnen sie nicht so ab, wie sie jetzt ist (#96)
+	// #378, Personas Anna und Marco: die Warnung führt zu den Abrechnungen, die zu berichtigen sind
+	it('verlinkt die Abrechnungen des Gebäudes in der Periode, die diese Rechnung vermissen', () => {
 		show(InvoicePage, {
 			data: { invoice: invoice(), missedIn: [{ start: '2024-01-01', end: '2024-12-31' }] }
 		});
 
-		const hint = byTestId('invoice-missed-warning')!.textContent!.replace(/\s+/g, ' ');
+		const link = byTestId('invoice-missed-warning')!.querySelector('a')!;
+		expect(link.textContent).toBe('Abrechnungen von Seeblick ansehen');
+		expect(link.getAttribute('href')).toBe('/statements?building=b1&periodStart=2024-01-01&periodEnd=2024-12-31');
+		// several periods give links of the same name: each is described by its period's sentence (C-8)
+		expect(document.getElementById(link.getAttribute('aria-describedby')!)!.textContent).toContain(
+			'Abrechnungsperiode 01.01.2024 – 31.12.2024'
+		);
+	});
+
+	it('weist darauf hin, wenn Abrechnungen der Periode diese Rechnung nicht oder mit einem früheren Stand abrechnen', () => {
+		show(InvoicePage, {
+			data: { invoice: invoice(), missedIn: [{ start: '2024-01-01', end: '2024-12-31' }] }
+		});
+
+		const warning = byTestId('invoice-missed-warning')!;
+		const hint = warning.textContent!.replace(/\s+/g, ' ');
+		expect(hint).toContain('Abrechnungen nicht aktuell');
 		expect(hint).toContain(
-			'Für die Abrechnungsperiode 01.01.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung.'
+			'Für die Abrechnungsperiode 01.01.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon.'
 		);
 		expect(hint).toContain(
-			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann ist sie dabei.'
+			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann rechnen die neuen Abrechnungen die Rechnung so ab, wie sie jetzt ist.'
 		);
 		expect(hint).toContain(
-			'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
+			'Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung. Die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt. Lassen Sie sich im Zweifel beraten.'
 		);
 	});
 
@@ -288,7 +307,7 @@ describe('Rechnungsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel Bezahltes zurück. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 
@@ -465,9 +484,9 @@ describe('Rechnung erfassen', () => {
 
 		submit('submit-button');
 
-		expect(text()).toContain('Bitte wählen Sie ein Gebäude');
-		expect(text()).toContain('Bitte geben Sie einen Rechnungssteller ein');
-		expect(text()).toContain('Bitte geben Sie einen gültigen Betrag ein');
+		expect(text()).toContain('Bitte wählen Sie ein Gebäude.');
+		expect(text()).toContain('Bitte geben Sie einen Rechnungssteller ein.');
+		expect(text()).toContain('Bitte geben Sie einen gültigen Betrag ein.');
 		expect(calls).toEqual([]);
 	});
 
@@ -483,7 +502,7 @@ describe('Rechnung erfassen', () => {
 		submit('submit-button');
 		await settle();
 
-		expect(calls.at(-1)).toMatchObject({
+		expect(calls.at(-2)).toMatchObject({
 			method: 'POST',
 			path: '/invoices',
 			body: { servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' }
@@ -566,7 +585,7 @@ describe('Rechnung erfassen', () => {
 		submit('submit-button');
 		await settle();
 
-		expect(calls.at(-1)).toMatchObject({
+		expect(calls.at(-2)).toMatchObject({
 			method: 'POST',
 			path: '/invoices',
 			body: {
@@ -630,8 +649,13 @@ describe('Rechnung erfassen', () => {
 		);
 	});
 
+	// Der Assistent erstellt die Abrechnungen gerade: er bleibt der Weg, auch wenn Abrechnungen die Rechnung nicht enthalten
 	it('wählt das Gebäude vor und kehrt nach dem Speichern zum Assistenten zurück', async () => {
-		fakeBff(() => [201, { id: 'i9' }]);
+		fakeBff((call) =>
+			call.path === '/invoices/i9/statements'
+				? [200, { ...invoiceStatements, missedIn: invoiceStatements.billedIn }]
+				: [201, { ...invoiceContract, id: 'i9' }]
+		);
 		show(NewInvoicePage, {
 			data: data(false, { buildingId: 'b1', returnTo: '/statements/generate' })
 		} as never);
@@ -643,6 +667,46 @@ describe('Rechnung erfassen', () => {
 		await settle();
 
 		expect(goto).toHaveBeenCalledWith('/statements/generate');
+	});
+
+	// #378: auf der Rechnungsliste stünde nur «gespeichert»; die Seite der Rechnung warnt vor den Abrechnungen ohne sie
+	it('öffnet nach dem Speichern die Rechnung, wenn Abrechnungen ihrer Periode sie nicht enthalten', async () => {
+		const calls = fakeBff((call) =>
+			call.path === '/invoices/i9/statements'
+				? [200, { ...invoiceStatements, missedIn: invoiceStatements.billedIn }]
+				: [201, { ...invoiceContract, id: 'i9' }]
+		);
+		show(NewInvoicePage, { data: data(false) } as never);
+		fill();
+		submit('submit-button');
+		await settle();
+
+		expect(calls.at(-1)).toMatchObject({ method: 'GET', path: '/invoices/i9/statements' });
+		expect(goto).toHaveBeenCalledWith('/invoices/i9');
+	});
+
+	// Ohne Antwort weiss Dwello nicht, ob Abrechnungen die Rechnung vermissen: die Seite der Rechnung prüft es selbst
+	it('öffnet nach dem Speichern die Rechnung, wenn sich ihre Abrechnungen nicht prüfen lassen', async () => {
+		fakeBff((call) => (call.method === 'GET' ? [500] : [201, { ...invoiceContract, id: 'i9' }]));
+		show(NewInvoicePage, { data: data(false) } as never);
+		fill();
+		submit('submit-button');
+		await settle();
+
+		expect(goto).toHaveBeenCalledWith('/invoices/i9');
+	});
+
+	it('lässt die Rechnung nicht zweimal speichern, während Dwello ihre Abrechnungen prüft', async () => {
+		globalThis.fetch = (async (_url: string, init?: RequestInit) =>
+			init?.method === 'POST'
+				? Response.json({ ...invoiceContract, id: 'i9' }, { status: 201 })
+				: new Promise(() => {})) as typeof fetch;
+		show(NewInvoicePage, { data: data(false) } as never);
+		fill();
+		submit('submit-button');
+		await settle();
+
+		expect(byTestId<HTMLButtonElement>('submit-button')!.disabled).toBe(true);
 	});
 
 	it('sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird', () => {
@@ -753,7 +817,7 @@ describe('Rechnung bearbeiten', () => {
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 30.06.2024');
 		expect(warning).toContain(
-			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter; zu viel Bezahltes zahlen Sie zurück.'
+			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist.'
 		);
 	});
 
@@ -835,7 +899,7 @@ describe('Rechnung bearbeiten', () => {
 
 		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c2');
 		submit('submit-button');
-		expect(text()).toContain('Bitte geben Sie einen Grund für die Änderung an');
+		expect(text()).toContain('Bitte geben Sie einen Grund für die Änderung an.');
 		expect(calls).toEqual([]);
 
 		fireEvent(

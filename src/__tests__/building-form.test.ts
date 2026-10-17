@@ -32,7 +32,8 @@ describe('BuildingForm', () => {
 			'Ort',
 			'Kanton',
 			'Gebäudetyp (optional)',
-			'Baujahr (optional)'
+			'Baujahr (optional)',
+			'Kein Tank oder Tank stillgelegt'
 		]);
 		expect(body).toContain('Mehrfamilienhaus, Einfamilienhaus');
 		expect(body).not.toMatch(/text-gray|bg-blue|text-sm/);
@@ -67,19 +68,45 @@ describe('BuildingForm', () => {
 			props: {
 				mode: 'edit',
 				errors: {
-					name: 'Gebäudename ist erforderlich',
-					postalCode: 'PLZ muss 4 Ziffern haben',
-					canton: 'Kanton ist erforderlich',
+					name: 'Gebäudename ist erforderlich.',
+					postalCode: 'PLZ muss 4 Ziffern haben.',
+					canton: 'Kanton ist erforderlich.',
 					form: 'Fehler beim Speichern'
 				},
 				cancelHref: '/buildings/42'
 			}
 		});
 
-		expect(body).toContain('Gebäudename ist erforderlich');
-		expect(body).toContain('PLZ muss 4 Ziffern haben');
-		expect(body).toContain('Kanton ist erforderlich');
+		expect(body).toContain('Gebäudename ist erforderlich.');
+		expect(body).toContain('PLZ muss 4 Ziffern haben.');
+		expect(body).toContain('Kanton ist erforderlich.');
 		expect(body).toContain('Fehler beim Speichern');
 		expect(body.match(/data-testid="form-error"/g)).toHaveLength(4);
+	});
+});
+
+describe('Kein Tank oder Tank stillgelegt (#72)', () => {
+	it('zeigt beim Bearbeiten, was festgehalten ist', () => {
+		const form = (noTank: boolean) =>
+			render(BuildingForm, {
+				props: {
+					mode: 'edit',
+					initial: {
+						name: 'A',
+						address: 'B 1',
+						postalCode: '8001',
+						city: 'Z',
+						canton: 'ZH',
+						noTank
+					},
+					errors: {},
+					cancelHref: '/buildings/42'
+				}
+			}).body;
+		expect(form(true)).toMatch(/name="noTank"[^>]*checked/);
+		expect(form(false)).not.toMatch(/name="noTank"[^>]*checked/);
+		expect(form(false)).toContain('fragt Dwello dann nicht mehr nach dem Tankbestand');
+		// the year of decommissioning: first the closing reading, then the box (persona Helga P-1)
+		expect(form(false)).toContain('erfassen Sie zuerst auf der Seite des Gebäudes den Endbestand');
 	});
 });

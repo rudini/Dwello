@@ -92,7 +92,7 @@
 
 	<p><Badge tone={status.tone} label={status.label} /></p>
 
-	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} />{/if}
+	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} {invoice} />{/if}
 
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex flex-col gap-8 lg:col-span-2">

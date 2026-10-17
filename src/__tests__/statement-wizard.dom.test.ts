@@ -1,4 +1,6 @@
 import PreviewChecks from '../routes/statements/generate/PreviewChecks.svelte';
+import CategoryFindingItem from '../routes/statements/generate/CategoryFindingItem.svelte';
+import completeness from '../../tests/contracts/invoice-completeness.json';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // enhance as SvelteKit wires it: the test can play the server's answer to the last submit
@@ -148,6 +150,45 @@ describe('Abrechnungen erstellen', () => {
 		expect(said).toContain('wie die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode');
 	});
 
+	// #89, closing review C-1: no other statement at the run's rate: the profile from them, the fee from the settings
+	it('sagt, wenn nur das Heizprofil von den übrigen Abrechnungen kommt', async () => {
+		const preset = {
+			building: 'Seeblick',
+			start: '2025-01-01',
+			end: '2025-12-31',
+			fromStatements: true,
+			feeFromSettings: true
+		};
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b1'], preset },
+			form: null
+		} as never);
+		await settle();
+		expect(byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Das Heizprofil ist wie bei den übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode eingestellt, die Verwaltungspauschale kommt aus den Einstellungen.'
+		);
+	});
+
+	// #119: verschieden eingestellte übrige Abrechnungen: beides aus den Einstellungen
+	it('sagt, wenn die übrigen Abrechnungen verschieden eingestellt sind', async () => {
+		const preset = {
+			building: 'Seeblick',
+			start: '2025-01-01',
+			end: '2025-12-31',
+			fromStatements: false,
+			feeFromSettings: true,
+			differing: true
+		};
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b1'], preset },
+			form: null
+		} as never);
+		await settle();
+		expect(byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen.'
+		);
+	});
+
 	it('beginnt mit der vorgeschlagenen Abrechnungsperiode, in Worten wiederholt', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');
@@ -211,6 +252,8 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	async function toSettings() {
+		// step 3 asks whether the contracts agree the period's Nebenkosten (#91): none open here
+		fakeBff((call) => (call.path.startsWith('/statements/agreements') ? [200, []] : [500]));
 		open();
 		next();
 		await settle();
@@ -240,12 +283,12 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain(
 			'Hat Ihr Gebäude in den Wohnungen Wärme- oder Warmwasserzähler oder Heizkostenverteiler (kleine Geräte an den Heizkörpern), müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
 		);
+		// #89: the run's rate applies only where the contract agrees a fee; an own rate in the contract goes first
 		expect(text()).toContain(
-			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
+			'Prozentsatz der eigenen Nebenkosten jedes Mieters, für dessen Mietvertrag eine Verwaltungspauschale vereinbart ist.'
 		);
-		// Ein Lauf rechnet alle Mietverträge eines Gebäudes: andere Sätze über die Entwürfe dieser Mietverträge
 		expect(text()).toContain(
-			'Hat ein Mietvertrag einen anderen Satz, löschen Sie danach seinen Entwurf und erstellen Sie ihn mit diesem Satz neu.'
+			'Steht im Mietvertrag ein eigener Satz, gilt dieser. Ohne vereinbarte Verwaltungspauschale enthält die Abrechnung keine.'
 		);
 	});
 
@@ -254,6 +297,9 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain('Prozentsatz der eigenen Nebenkosten jedes Mieters');
 		fireEvent(byTestId<HTMLInputElement>('management-fee-input')!, 'input', '4.5');
 		expect(byTestId('management-fee-hint')).not.toBeNull();
+		// persona Dr. Weber P-2 (#124): above 10 % the field refuses the rate; a hint on it would contradict that
+		fireEvent(byTestId<HTMLInputElement>('management-fee-input')!, 'input', '12');
+		expect(byTestId('management-fee-hint')).toBeNull();
 	});
 
 	// Ein geleertes Feld ist kein Satz von 0 %: der Assistent fragt nach, statt still keine Pauschale zu verrechnen
@@ -263,12 +309,12 @@ describe('Abrechnungen erstellen', () => {
 		fireEvent(fee, 'input', '');
 		await next();
 		expect(text()).toContain(
-			'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		);
 		fireEvent(fee, 'input', '1e2');
 		await next();
 		expect(text()).toContain(
-			'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		);
 		fireEvent(fee, 'input', '2,5');
 		expect(fee.value).toBe('2,5');
@@ -362,6 +408,27 @@ describe('Abrechnungen erstellen', () => {
 		expect(findings[0]).toContain('Tankbestand am 31.12.2024 fehlt');
 		expect(byTestId('missing-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Ohne Rechnungen fehlen deren Kosten in den Abrechnungen, und die Mieter erhalten ihr Akonto weitgehend zurück.'
+		);
+	});
+
+	// #76: neue Nebenkosten in einem Gebäude mit einem laufenden befristeten Mietvertrag
+	it('nennt bei neuen Nebenkosten das Vertragsende eines befristeten Mietvertrags im Gebäude', () => {
+		const added = {
+			categoryId: 'w',
+			categoryName: 'Hauswart',
+			kind: 'new',
+			current: { count: 1, total: 900 },
+			previous: { count: 0, total: 0 },
+			missingParts: [],
+			changePercent: null
+		};
+		const check = { buildingId: 'b1', comparedWith: { start: '2023-01-01', end: '2023-12-31' }, hasComparison: true };
+		open({
+			preview,
+			invoices: [{ ...invoices[0], fixedTerm: true, check: { ...check, findings: [added] } }]
+		});
+		expect(byTestId('category-finding')!.textContent).toContain(
+			'Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich'
 		);
 	});
 
@@ -510,8 +577,74 @@ describe('Abrechnungen erstellen', () => {
 				]
 			});
 
-		withFindings([{ ...heating, kind: 'stock', current: sums(0, -880) }]);
+		withFindings([{ ...heating, kind: 'consumption', current: sums(0, -880) }]);
 		expect(byTestId('category-finding-stock-link')!.textContent).toContain('Tankbestände prüfen');
+		// a hint, no confirmation (#73)
+		expect(byTestId('confirm-missing-invoices')).toBeNull();
+	});
+
+	// without the year before the frame says nothing about a comparison (fach-review V-4)
+	it('nennt einen negativen Verbrauch ohne Vorjahr nicht als Vergleich mit dem Vorjahr', () => {
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: false,
+						findings: [
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'consumption',
+								current: { count: 1, total: -300 },
+								previous: { count: 0, total: 0 },
+								missingParts: [],
+								changePercent: null
+							}
+						]
+					}
+				}
+			]
+		});
+
+		const frame = byTestId('category-check')!;
+		expect(frame.querySelector('p')!.textContent).toBe('Tankbestände prüfen');
+		expect(frame.textContent).not.toContain('Vorjahr');
+	});
+
+	// with the year before as well: a Tankbestand hint alone is no comparison «nicht falsch» (persona Anna P-1, V-13)
+	it('nennt einen negativen Verbrauch auch mit Vorjahr unter «Tankbestände prüfen»', () => {
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'consumption',
+								current: { count: 1, total: -300 },
+								previous: { count: 1, total: 4000 },
+								missingParts: [],
+								changePercent: null
+							}
+						]
+					}
+				}
+			]
+		});
+
+		const frame = byTestId('category-check')!;
+		expect(frame.querySelector('p')!.textContent).toBe('Tankbestände prüfen');
+		expect(frame.textContent).not.toContain('heisst nicht, dass etwas falsch ist');
 	});
 
 	it('bietet bei Heizkosten ohne Tankbestand an, ihn zu erfassen', () => {
@@ -547,6 +680,10 @@ describe('Abrechnungen erstellen', () => {
 		expect(question.textContent).toContain('Heizen Sie mit Öl, Flüssiggas, Pellets oder Holz?');
 		expect(question.querySelector('a')!.getAttribute('href')).toBe('/buildings/b1');
 		expect(question.querySelector('a')!.textContent).toContain('Tankbestand erfassen');
+		// without a tank the landlord records it on the building, and the question stops (#72)
+		const noTank = byTestId<HTMLAnchorElement>('tank-question-no-tank-b1')!;
+		expect(noTank.getAttribute('href')).toBe('/buildings/b1/edit');
+		expect(noTank.textContent).toContain('Kein Tank festhalten');
 	});
 
 	it('nennt pro Kategorie fehlende Rechnungen im Vergleich zum Vorjahr und verlangt eine Bestätigung', async () => {
@@ -601,7 +738,7 @@ describe('Abrechnungen erstellen', () => {
 		);
 		expect(findings).toEqual([
 			'Kaminfeger: Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF 290.00.',
-			'Kaltwasser: Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
+			'Kaltwasser: Die Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
 			'Heizung: CHF 6’565.00, 37 % mehr als im Vorjahr (CHF 4’800.00). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.'
 		]);
 		expect(check.querySelector('p')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
@@ -687,6 +824,67 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('category-check')).toBeNull();
 	});
 
+	// Ein Leistungszeitraum über die Periode hinaus erklärt tiefere Kosten (#130)
+	it('nennt bei einer Abweichung die Rechnungen, die nur teilweise zählen', () => {
+		const finding = {
+			...completeness.findings[0],
+			kind: 'deviation' as const,
+			partialCount: 1
+		};
+		show(CategoryFindingItem, { finding, buildingId: 'b1' });
+
+		expect(byTestId('category-finding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'1 Rechnung zählt nur teilweise: ihr Leistungszeitraum reicht über die Abrechnungsperiode hinaus.'
+		);
+	});
+
+	const withInvoices = (
+		lists: Partial<Record<'lateInvoices' | 'invoicesWithoutServicePeriod', unknown[]>>
+	) =>
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						...completeness,
+						buildingId: 'b1',
+						findings: [],
+						lateInvoices: [],
+						invoicesWithoutServicePeriod: [],
+						...lists
+					}
+				}
+			]
+		});
+
+	// Eine Rechnung ohne Leistungszeitraum kurz nach dem Ende zählt zur nächsten Periode (#131)
+	it('nennt Rechnungen ohne Leistungszeitraum kurz nach der Abrechnungsperiode, ohne Bestätigung', async () => {
+		withInvoices({ lateInvoices: completeness.lateInvoices });
+		const hint = byTestId('late-invoices')!;
+		const late = completeness.lateInvoices[0];
+
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain('Ahornhof');
+		expect(byTestId('hinted-invoice')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			`${late.billingEntityName}: ${late.description}. Rechnungsdatum 20.01.2026, CHF 290.00`
+		);
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(`/invoices/${late.id}/edit`);
+		expect(byTestId('confirm-missing-invoices')).toBeNull();
+		next();
+		await settle();
+		expect(heading()).toBe('Erstellen');
+	});
+
+	// In einer Periode unter einem Jahr zählt eine Jahresrechnung ohne Leistungszeitraum ganz (#134)
+	it('nennt Rechnungen ohne Leistungszeitraum einer kurzen Abrechnungsperiode', () => {
+		withInvoices({ invoicesWithoutServicePeriod: completeness.lateInvoices });
+
+		expect(byTestId('invoices-without-service-period')!.textContent).toContain(
+			'Die Abrechnungsperiode ist kürzer als ein Jahr.'
+		);
+		expect(byTestId('late-invoices')).toBeNull();
+	});
+
 	it('vergleicht die Kosten jeder Abrechnung mit dem Akonto', () => {
 		open({
 			preview: [{ ...preview[0], totalCosts: 1200, totalAdvancePayments: 3000 }, preview[1]],
@@ -696,6 +894,18 @@ describe('Abrechnungen erstellen', () => {
 			h.textContent!.trim()
 		);
 		expect(hints).toEqual(['Kosten CHF\u00a01’800.00 (60 %) unter dem Akonto. Fehlen Rechnungen?']);
+	});
+
+	// A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
+	it('warnt bei einem ausgezogenen Mieter, der noch die Adresse der Wohnung hat', () => {
+		open({
+			preview: [{ ...preview[0], tenantName: 'Eva Frei', oldAddress: true }, preview[1]],
+			invoices: [invoices[0]]
+		});
+		const warnings = [...document.querySelectorAll('[data-testid="preview-old-address"]')];
+		expect(warnings.map((w) => w.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
+			'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.'
+		]);
 	});
 
 	it('warnt, wenn es für ein Gebäude in der Periode schon Abrechnungen gibt, und verlangt eine Bestätigung', async () => {
@@ -776,7 +986,7 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	it('meldet die erstellten Entwürfe und führt zu ihnen', () => {
-		open({ created: 2 });
+		open({ created: ['s1', 's2'] });
 		expect(byTestId('generation-result')!.textContent).toContain(
 			'2 Nebenkostenabrechnungen sind als Entwurf erstellt'
 		);
@@ -784,6 +994,17 @@ describe('Abrechnungen erstellen', () => {
 			'/statements?status=draft&periodStart=2024-01-01&periodEnd=2024-12-31'
 		);
 		expect(byTestId('wizard-next')).toBeNull();
+	});
+
+	// the PDFs of this run only, e.g. to print them in one go (#356)
+	it('bietet die PDFs der erstellten Entwürfe als eine ZIP-Datei an', () => {
+		open({ created: ['s1', 's2'] });
+		expect(byTestId('download-zip-button')!.getAttribute('href')).toBe(
+			'/statements/zip?ids=s1%2Cs2&periodStart=2024-01-01&periodEnd=2024-12-31'
+		);
+		expect(byTestId('download-zip-button')!.textContent).toContain('Alle als ZIP herunterladen');
+		// not to the page of a statement «zip»: the browser itself follows the link to the file
+		expect(byTestId('download-zip-button')!.hasAttribute('data-sveltekit-reload')).toBe(true);
 	});
 });
 
@@ -968,6 +1189,47 @@ describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 		expect(invoiceCalls[0].path).not.toContain('buildingId');
 		// the list stays inside its panel on phones (a fieldset is as wide as its content by default)
 		expect(document.querySelector('fieldset')!.className).toMatch(/(^| )min-w-0( |$)/);
+	});
+});
+
+// #89: the run's rate applies only where the contract agrees a Verwaltungspauschale; the others are named with a link
+describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
+	it('nennt im Schritt «Einstellungen» die Mietverträge ohne vereinbarte Pauschale, je mit Link', async () => {
+		const calls = fakeBff((call) =>
+			call.path.startsWith('/statements/billed')
+				? [
+						200,
+						[
+							{
+								buildingId: 'b1',
+								contracts: 2,
+								billed: 0,
+								withoutFee: [{ id: 'c7', tenantName: 'Anna Keller', apartmentNumber: '1.01' }]
+							}
+						]
+					]
+				: [200, { invoices: [], total: 0 }]
+		);
+		open();
+		await settle();
+		next();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+
+		const hint = byTestId('management-fee-not-agreed')!;
+		expect(hint.textContent).toContain('Ohne vereinbarte Verwaltungspauschale');
+		expect(hint.textContent).toContain(
+			'Bei diesen Mietverträgen ist keine Verwaltungspauschale vereinbart (Angabe beim Mietvertrag). Ihre Abrechnungen enthalten keine Pauschale (0 %).'
+		);
+		const link = byTestId('management-fee-not-agreed-link-c7')!;
+		expect(link.textContent!.trim()).toBe('Anna Keller, Wohnung 1.01');
+		expect(link.getAttribute('href')).toBe('/contracts/c7');
+		// asked for the buildings chosen in step 2 only
+		expect(calls.filter((c) => c.path.startsWith('/statements/billed')).at(-1)!.path).toContain(
+			'buildingIds=b1&'
+		);
 	});
 });
 

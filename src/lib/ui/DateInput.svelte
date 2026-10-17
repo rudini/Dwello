@@ -120,7 +120,16 @@
 </script>
 
 <div bind:this={frame} class="flex flex-col gap-2">
-	<Field {id} {note} {label} help={helpText} example={EXAMPLE} error={shownError} {optional}>
+	<Field
+		{id}
+		{note}
+		{label}
+		help={helpText}
+		helpTestid="{testid}-help"
+		example={EXAMPLE}
+		error={shownError}
+		{optional}
+	>
 		{#snippet children(control)}
 			<div class="flex gap-2">
 				<input

@@ -22,6 +22,7 @@ sync with the migrations by hand. Domain terms follow `UBIQUITOUS_LANGUAGE.md`.
 
 ```
 buildings 1─n apartments 1─n rental_contracts n─1 tenants
+rental_contracts 1─n contract_categories n─1 categories
 buildings 1─n invoices ──> categories (category_id, llm_category_id), distribution_keys
 buildings 1─n fuel_stocks
 
@@ -29,7 +30,7 @@ utility_statements ──> tenants, apartments, rental_contracts (contract_id)
 utility_statements 1─n utility_statement_line_items ──> categories, distribution_keys
 documents ──> tenants, utility_statements (optional)
 
-heating_profiles, configuration: no foreign keys
+heating_profiles, configuration, audit_log: no foreign keys
 ```
 
 | Foreign key | On delete |
@@ -40,6 +41,7 @@ heating_profiles, configuration: no foreign keys
 | `invoices.building_id` → `buildings` | CASCADE |
 | `invoices.category_id`, `invoices.llm_category_id` → `categories` | SET NULL |
 | `invoices.distribution_key_id` → `distribution_keys` | SET NULL |
+| `contract_categories.contract_id` → `rental_contracts`, `.category_id` → `categories` | CASCADE |
 | `fuel_stocks.building_id` → `buildings` | CASCADE |
 | `fuel_stocks.category_id` → `categories` | RESTRICT (deleting such a category answers 409) |
 | `utility_statements.tenant_id` / `apartment_id` / `contract_id` | RESTRICT |
@@ -70,6 +72,7 @@ latitude      DECIMAL(10,7)
 longitude     DECIMAL(10,7)
 building_type VARCHAR(50)            -- Gebäudetyp
 year_built    INTEGER                -- Baujahr
+no_tank       BOOLEAN      NOT NULL DEFAULT false -- kein Tank oder Tank stillgelegt: no Tankbestand asked for periods without readings (#72)
 ```
 
 Index: `buildings_city_idx (city)`.
@@ -99,11 +102,12 @@ last_name              VARCHAR(100) NOT NULL
 email                  VARCHAR(255)
 phone                  VARCHAR(30)
 language               VARCHAR(5)   NOT NULL DEFAULT 'de'
-address                VARCHAR(500)
+address                VARCHAR(500)  -- Korrespondenzadresse: street with house number
 postal_code            VARCHAR(10)
 city                   VARCHAR(100)
+country                VARCHAR(2)   NOT NULL DEFAULT 'CH'      -- ISO 3166 code of the Korrespondenzadresse (#102)
 correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
-CHECK (language IN ('de', 'fr', 'it', 'rm', 'en'))
+CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0012 (#63)
 ```
 
 No indexes besides the primary key; `email` is not unique. `correspondence_channel` has no CHECK.
@@ -116,20 +120,42 @@ tenant_id               UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 start_date              DATE NOT NULL           -- Vertragsbeginn
 end_date                DATE                    -- Vertragsende, NULL = unbefristet
 terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date is the Kündigungstermin of an open-ended contract, not an agreed end
+notice_received_on      DATE              -- the day the notice arrived (A-3, #112), optional; only with terminated
+billed_until            DATE              -- «Abgerechnet bis» (#133), optional: billed outside Dwello up to this day; Mietstage and Akonto count from the day after
+moved_out               BOOLEAN NOT NULL DEFAULT FALSE -- «Mieter ist ausgezogen» after an agreed end (A-6, #115); cleared when end_date changes
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
+management_fee_agreed   BOOLEAN NOT NULL DEFAULT FALSE -- Verwaltungspauschale vereinbart (#89)
+management_fee_percent  DECIMAL(5,2)            -- own rate 0–10 %, before the run's; NULL: the run's rate
 reference_index         DECIMAL(6,4)            -- Referenzindex
 contract_pdf            TEXT
 notes                   TEXT
 CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date)
 CONSTRAINT contracts_terminated_check CHECK (NOT terminated OR end_date IS NOT NULL)
+CONSTRAINT contracts_notice_received_check CHECK (notice_received_on IS NULL OR terminated)
 ```
 
 Indexes: `contracts_apartment_id_idx`, `contracts_tenant_id_idx`, `contracts_end_date_idx (end_date)`,
 `contracts_dates_idx (start_date, end_date)`.
 
 That contracts of one apartment must not overlap is enforced in the application, not in the database.
+
+### contract_categories (Vereinbarte Nebenkosten, #91)
+
+```sql
+contract_id  UUID    NOT NULL  -- rental_contracts (CASCADE)
+category_id  UUID    NOT NULL  -- categories (CASCADE)
+agreed       BOOLEAN NOT NULL  -- true: the contract agrees the category; false: answered «nicht vereinbart»
+PRIMARY KEY (contract_id, category_id)
+```
+
+A statement bills a contract only the categories with `agreed` (Art. 257a Abs. 2 OR); an invoice without a category
+is billed as before. A category without a row is not answered yet: not billed, and the statement wizard asks when it
+has costs in the period. A new contract gets a row for every umlagefähige category (agreed unless the form unticks
+it); a category created or made umlagefähig later has no row. Migration `0020` gave a contract with statements the
+categories its statements billed and those of the building's umlagefähige invoices over its tenancy up to its last
+statement, and a contract without statements every umlagefähige category.
 
 ### categories (Kategorie)
 
@@ -254,28 +280,33 @@ rental_end             DATE          NOT NULL  -- last billed day: earlier of pe
 total_costs            DECIMAL(12,2) NOT NULL
 total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
-management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
+management_fee_percent DECIMAL(5,2)            -- rate the statement used: the contract's own, the run's, or 0 without agreement (#89)
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
 heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true, reason, names } or percent, months, profile names
-balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
+agreed_category_ids    JSONB                   -- ids of the categories the contract agreed at creation (#91); NULL: created before, billed every category
+balance                DECIMAL(12,2) NOT NULL  -- Saldo, to 5 Rappen in the tenant's favour (#79; sent before: commercially): positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
-paid_date              DATE
-paid_amount            DECIMAL(12,2)
+paid_date              DATE                    -- from the Abrechnungsdatum up to today (#138)
+paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93); 0.00 for a Saldo below CHF 5, settled on sending or marked paid without an amount (#94)
+payment_resets         JSONB   NOT NULL DEFAULT '[]' -- payments taken back: { resetOn, paidDate, paidAmount } (#92)
+payment_recorded_at    TIMESTAMP               -- when the payment was recorded; a reset discards only a PDF made after it (#92)
+replaces_id            UUID → utility_statements(id) -- a berichtigte Abrechnung: the statement it replaces (#120, unique)
+prior_payments         DECIMAL(12,2) NOT NULL DEFAULT 0 -- paid on the replaced statement and its own replaced ones; a refund paid negative (#120)
 reminder_sent_date     DATE
 pdf_blob               TEXT                    -- Base64 PDF with QR-bill
 pdf_generated_at       TIMESTAMP
 qr_bill_reference      VARCHAR(27)             -- QR reference (only with a QR-IBAN)
 notes                  TEXT
-CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid'))
+CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid', 'replaced'))
 CONSTRAINT statements_period_check CHECK (period_end >= period_start)
 ```
 
 Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_period_start_idx`,
 `statements_status_idx`, `statements_tenant_period_idx (tenant_id, period_start)`, unique
-`statements_number_idx (statement_number)`.
+`statements_number_idx (statement_number)`, unique `statements_replaces_idx (replaces_id)`.
 
 `heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }` with the chosen profile's names and why it was not applied (`reason`: `wholePeriod` or `noHeatingMonths`, #247), or the percent of the period's heating costs, the months with their shares (rounded to two places; the percent is their division, #232), for a period whose months do not carry 100 % the period's percent and months (`periodPercent`, `periodMonths`), and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF and the detail page print them after an own profile was changed, renamed or deleted. Empty without a heating profile, without heating costs and for statements created before; the PDF of one created before names no heating profile (#232, C-5).
 
@@ -287,7 +318,10 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 | `draft` (Entwurf) | `sent` |
 | `sent` (Versendet) | `paid` |
 | `overdue` (Überfällig, computed) | `paid` |
-| `paid` (Bezahlt) | — |
+| `paid` (Bezahlt) | `sent` only by `resetPayment` (#92): paid date and amount cleared, the reset appended to `payment_resets`, a PDF made after the payment was recorded discarded |
+| `sent`, `overdue`, `paid` | `replaced` (Ersetzt) only by `replaceStatement` (#120): nothing else changes; never back |
+
+**Berichtigte Abrechnung (#120, #358):** `correctStatement` (or a statement run of the same contract and the same Abrechnungsperiode) creates a draft from today's data with a new number from the counter, `replaces_id` set to the replaced statement without a replacement, `prior_payments` = its `paid_amount` + its own `prior_payments`, and `balance` = Saldo of costs − Akonto − `prior_payments`, rounded as every Saldo. A replaced statement does not count as the statement of its period (statement run, missing statements) and no longer locks the contract dates.
 
 **Lock rule:** only a `draft` can be deleted (`deleteStatement`), get line items (`addLineItems`) or have its
 amounts changed (`updateStatement` rejects `total_costs`, `total_advance_payments`, `management_fee_percent`,
@@ -296,6 +330,19 @@ editable; a changed `payment_deadline` clears `pdf_blob` and `pdf_generated_at`.
 
 **Overdue:** never stored. Reads, filters and counts treat a `sent` statement whose `payment_deadline` has
 passed as `overdue`; the CHECK does not allow it as a stored value.
+
+### statement_numbers (Abrechnungsnummern)
+
+```sql
+prefix       VARCHAR(50)   PRIMARY KEY  -- NK-{first 8 characters of the building id}-{year of the period end}-
+last_number  INTEGER       NOT NULL     -- the last number given with this prefix
+```
+
+Migration `0009` (#97). `generateStatementNumber` (`backend/src/services/calculation.service.ts`) counts `last_number`
+up for every new statement, so a number is never given twice: a deleted draft leaves a gap, because its PDF may already
+have been handed out. A prefix without a row (its first statement since the migration) starts after the highest
+`statement_number` with that prefix; existing numbers stay as they are. A number deleted before the migration that was
+the highest of its prefix is given once more: nothing recorded it.
 
 ### utility_statement_line_items (Abrechnungsposition)
 
@@ -312,10 +359,13 @@ period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating 
 position_rental_days INTEGER                -- the tenant's days in the days billed (null: not a ratio of days)
 billed_days         INTEGER                 -- the days the position's invoices bill in the period
 invoice_parts       JSONB                   -- invoices over different days: [{start, end, amount, days, total, noPeriod?, whole?, fuelStock?}] (null: none)
+invoices            JSONB                   -- the invoices it billed: [{id, description, amount, start, end, fuelStock?}] (null: created before #96)
 sort_order          INTEGER DEFAULT 0
 ```
 
 `apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position. `position_rental_days` and `billed_days` (migration `0003`, #208) hold `period_share` as a fraction of days when all invoices of the position bill the same days and it is not shared by the heating profile; the PDF prints them as «x/y Tage». Statements created before keep them empty. `invoice_parts` (migration `0006`, #226) holds, for a position whose invoices bill different days, each invoice's days in the period (`start`, `end`, `total`), its amount for them and the tenant's days in them (`days`); the PDF lists them under the position with the weighted share. `noPeriod` marks an invoice without Leistungszeitraum, `whole` holds the whole Leistungszeitraum and the invoice's amount when it reaches beyond the period (#241), `fuelStock` marks the change of the Tankbestand (#239); parts stored before have neither. It stays empty when the tenant rents the whole period or the invoices sum to zero.
+
+`invoices` (migration `0014`, #96) holds every invoice the position billed, in the order of `invoice_parts`: its id, its description, its amount in the period and the days it bills there (`start`, `end`); the change of the Tankbestand is stored with `fuelStock` and the id `fuel-stock-<period end>`, it is no invoice. It is the link from a statement to its invoices: an invoice of the period that no position holds with its current amount, days, category and distribution key, or a held invoice that left the period (deleted, made non-allocable), was recorded or changed after the statement (`GET /statements/:id/changed-invoices`, `GET /invoices/:id/statements`); the statement detail links each position to its invoices. Statements created before keep it empty; for them, as before, an invoice of the period recorded after the statement counts as missing. No foreign key: a deleted invoice stays in the statement that billed it.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 
@@ -328,14 +378,16 @@ with a tenant who has no contracts).
 ```sql
 tenant_id      UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 statement_id   UUID REFERENCES utility_statements ON DELETE RESTRICT
-type           VARCHAR(30)  NOT NULL   -- reminder | upload
+type           VARCHAR(30)  NOT NULL   -- reminder | statement (sent by e-mail, #86) | upload
 reminder_level INTEGER                 -- Mahnstufe: 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 title          VARCHAR(255) NOT NULL
 file_name      VARCHAR(255) NOT NULL
 content        TEXT         NOT NULL   -- the file, Base64
 mime_type      VARCHAR(50)  NOT NULL DEFAULT 'application/pdf'  -- application/pdf | image/jpeg | image/png
-channel        VARCHAR(10)             -- email | letter; NULL for an upload
+channel        VARCHAR(10)             -- email | letter; NULL for an upload; letter once a failed e-mail is posted
 status         VARCHAR(20)             -- Versandstatus: sent | to_send; NULL for an upload
+payment_deadline DATE                  -- the Zahlungsfrist a reminder prints (letter date + 10 days); the next
+                                       -- Mahnstufe is possible from the day after; NULL for an upload
 sent_at        TIMESTAMP
 delivery_error TEXT                    -- why an e-mail could not be sent
 ```
@@ -357,7 +409,7 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | Key | Default | Validation |
 |---|---|---|
 | `accounting_period` | `calendar` | `calendar` \| `july-june` \| `november-october` |
-| `management_fee_pct` | `3` | number >= 0 (3 % is the guideline, not a cap) |
+| `management_fee_pct` | `3` | number 0–10 (3 % is the guideline, not a cap; #124) |
 | `default_heating_profile_id` | none | an existing heating profile |
 | `default_distribution_key_id` | none | an existing distribution key |
 | `company_name` | `''` | <= 255 characters |
@@ -367,9 +419,22 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | `iban` | `''` | CH or LI IBAN, 21 characters, MOD-97 checksum |
 | `payment_deadline_days` | `30` | 7–90 |
 | `reminder_after_days` | `14` | 7–60 |
-| `default_language` | `de` | `de` \| `fr` \| `it` \| `rm` \| `en` |
+| `default_language` | `de` | `de` \| `fr` \| `it` \| `en` |
 
 The IBAN is stored in plain text.
+
+### audit_log (Protokoll, #357)
+
+```sql
+id          UUID PRIMARY KEY
+occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
+action      VARCHAR(50) NOT NULL   -- login, management_fee_changed, category_allocability_changed,
+                                   -- invoice_allocability_changed, payment_reset, statement_corrected
+details     JSONB NOT NULL         -- snapshot of what the entry names (API: docs/api-specification.md, 11a)
+```
+
+No foreign keys: an entry stays readable after its record changed or was deleted, and stays until the landlord
+deletes it under «Einstellungen» › «Protokoll». A login stores only the provider. Migration `0019_audit_log.sql`.
 
 ---
 
@@ -417,6 +482,7 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
+  0003 … 0020           -- later changes, each named in its table above
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in
@@ -445,7 +511,6 @@ document. Do not use `db:generate` (Drizzle Kit has no snapshots and would emit 
 
 ## Not implemented
 
-- Audit log (no `audit_logs` table; only invoices record a manual category override).
 - Database views.
 - Backups (scenario R2 in `docs/migration-mva.md`).
 - Encryption of individual columns (e.g. the IBAN).

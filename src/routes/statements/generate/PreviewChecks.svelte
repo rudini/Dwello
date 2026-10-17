@@ -3,6 +3,7 @@
 	import type { invoiceRows } from '$lib/statement-wizard';
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
+	import InvoiceHint from './InvoiceHint.svelte';
 	import { localToday } from '$lib/contract-status';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -26,11 +27,18 @@
 	const missing = $derived(rows.filter((row) => row.missing));
 	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
-	// a building without any invoice has its own warning above, only its Tankbestand hints are listed;
+	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
+	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
+		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
+	const late = $derived(hinted('lateInvoices'));
+	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
+	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
 	const shown = (row: (typeof rows)[number]) => ({
 		...row,
-		findings: row.findings.filter((f) => f.kind !== 'tank' && (!row.missing || f.kind === 'stock'))
+		findings: row.findings.filter(
+			(f) => f.kind !== 'tank' && (!row.missing || f.kind === 'stock' || f.kind === 'consumption')
+		)
 	});
 	const checked = $derived(rows.map(shown).filter((row) => row.findings.length > 0));
 	const tankQuestions = $derived(rows.filter((row) => row.findings.some((f) => f.kind === 'tank')));
@@ -76,6 +84,20 @@
 {/if}
 
 {#if tankQuestions.length}<TankQuestion buildings={tankQuestions} />{/if}
+
+<InvoiceHint
+	buildings={whole}
+	title={m.statements_whole_title()}
+	text={m.statements_whole_text()}
+	testid="invoices-without-service-period"
+/>
+
+<InvoiceHint
+	buildings={late}
+	title={m.statements_late_title()}
+	text={m.statements_late_text()}
+	testid="late-invoices"
+/>
 
 {#if existing.length}
 	<Alert tone="caution" title={m.statements_existing_title()} testid="existing-statements">

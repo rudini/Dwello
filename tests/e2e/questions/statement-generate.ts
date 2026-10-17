@@ -7,18 +7,32 @@ import {
 	buildingCheckbox,
 	buildingInvoices,
 	categoryFinding,
+	confirmMissingInvoices,
+	hintedInvoice,
+	invoicesWithoutServicePeriod,
+	lateInvoices,
 	draftsOnlyNote,
+	feeNotAgreed,
+	agreementQuestions,
+	agreementsFailed,
+	agreementsOf,
+	notAgreedCostsLink,
 	generationResult,
 	heatingProfileSelect,
 	managementFeeHint,
 	managementFeeInput,
 	missingInvoices,
+	oldAddress,
 	periodStartInput,
+	periodRunningWarning,
 	previewEmpty,
 	previewFee,
+	previewAkontoHint,
 	previewRow,
 	previewRows,
-	wizardChoices
+	tankQuestion,
+	wizardChoices,
+	wizardPresetNotice
 } from '../targets/statement-generate';
 import { draftRestored } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
@@ -64,6 +78,7 @@ export const createdStatements = throughUiOrApi<Question<number | string | null>
 );
 
 const rowOf = (tenantName: string) => Text.of(previewRow(tenantName));
+export const akontoHintOf = (tenantName: string) => Text.of(previewAkontoHint(tenantName));
 
 /** The Saldo of the tenant's statement in the preview, in francs (a refund negative) */
 export const balanceOf = (tenantName: string) =>
@@ -107,6 +122,23 @@ export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(b
 export const restoredDraftText = Text.of(draftRestored);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
+export const periodRunning = Text.of(periodRunningWarning);
+export const tankQuestions = Count.of(tankQuestion);
+export const missingStockFindings = Count.of(categoryFinding('Ohne Anfangs- und Endbestand'));
+export const confirmationAsked = Visibility.of(confirmMissingInvoices);
+export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
+export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));
+export const invoiceWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(invoicesWithoutServicePeriod, date));
+export const countOfInvoicesWithoutServicePeriodOn = (date: string) => Count.of(hintedInvoice(invoicesWithoutServicePeriod, date));
 // the option names the profile and its sum, «Winter … (100%)»
 export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
+export const contractsWithoutFee = Text.of(feeNotAgreed);
+export const presetNoticeText = Text.of(wizardPresetNotice);
+
+// #91: what the step «Einstellungen» asks or says about the agreed Nebenkosten of one contract
+export const agreementQuestionsOf = (contractId: string) => Text.of(agreementsOf(contractId));
+export const agreementQuestionsShown = Visibility.of(agreementQuestions);
+export const notAgreedCostsOf = (contractId: string) => Text.of(notAgreedCostsLink(contractId));
+export const oldAddressWarning = Text.of(oldAddress);
+export const agreementsFailure = Text.of(agreementsFailed);

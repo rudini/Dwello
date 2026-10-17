@@ -4,8 +4,16 @@
 	import type { IconName } from '$lib/ui/icons';
 	import Panel from '$lib/ui/Panel.svelte';
 
-	// The master data pages, named and ordered as in the main navigation
-	const links: { key: string; href: string; label: string; text: string; icon: IconName }[] = [
+	type Link = {
+		key: string;
+		href: string;
+		label: string;
+		text: string;
+		icon: IconName;
+	};
+
+	// The master data pages, named and ordered as in the main navigation; the Protokoll (#357) on its own
+	const masterData = (): Link[] => [
 		{
 			key: 'categories',
 			href: '/config/categories',
@@ -28,10 +36,16 @@
 			icon: 'heating'
 		}
 	];
+
+	let {
+		title = m.settings_master_data(),
+		testid = 'quick-links',
+		links = masterData()
+	}: { title?: string; testid?: string; links?: Link[] } = $props();
 </script>
 
-<Panel title={m.settings_master_data()}>
-	<ul class="grid gap-4 md:grid-cols-3" data-testid="quick-links">
+<Panel {title}>
+	<ul class="grid gap-4 md:grid-cols-3" data-testid={testid}>
 		{#each links as link (link.key)}
 			<!-- The whole card opens the page; its name is the link -->
 			<li

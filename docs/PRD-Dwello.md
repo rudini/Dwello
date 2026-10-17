@@ -46,7 +46,7 @@ Dwello provides:
 - Centralized property, tenant, and contract management
 - LLM-powered invoice categorization with validation
 - Professional PDF statement and QR invoice generation
-- German user interface; tenant-facing statement PDFs in five languages (German, French, Italian, Romansh, English)
+- German user interface; tenant-facing statement PDFs and reminders in four languages (German, French, Italian, English)
 - Secure data storage with automated backups
 
 ### 2.4 Target Market
@@ -75,7 +75,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 | **Authentication** | BFF + OAuth 2.0 / SSO | Backend for Frontend pattern with OAuth 2.0, HTTPOnly cookies, XSRF protection |
 | **LLM** | Any OpenAI-compatible API (default: local Ollama with `qwen2.5vl:7b`) | Self-hosted by default, no vendor lock-in; configured through `.env` |
 | **Deployment** | Docker / Docker Compose | Containerized, portable, easy to run anywhere |
-| **Maps** | OpenStreetMap + Leaflet | Open source, no licensing, complete privacy |
+| **Maps** | none (map dropped, #129) | Address shown as text |
 | **Internationalization** | i18n library | German UI; statement PDFs in five languages |
 | **PDF Generation** | PDFKit | Professional PDFs |
 | **QR Bills** | Own code + `qrcode` (npm) | Standards-compliant Swiss QR-bills |
@@ -121,7 +121,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 │  - Contracts, Invoices, Statements                       │
 │  - Configuration, Categories, Distribution Keys          │
 │  - Blob storage for PDFs and contracts                   │
-│  - Audit logs (planned)                                  │
+│  - Protokoll (audit log, #357)                           │
 └──────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────┐
@@ -177,7 +177,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 - Address validation
 - Manual address entry fallback if API unavailable
 
-**Map Visualization:**
+**Map Visualization** (dropped, #129; not built):
 - Display all buildings on interactive map (OpenStreetMap)
 - Building markers with address and apartment count
 - Click to view building details
@@ -469,21 +469,22 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 
 ### 5.8 Management Costs Configuration
 
-**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; a higher agreed percentage is applied as set.
+**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; Dwello accepts at most 10% (#124, against typos). The fee applies only where the rental contract agrees one (#89): at the run's rate, or at the contract's own rate, which takes precedence; a contract without agreement gets 0%.
 
 **Features:**
-- Global management cost percentage (0% or more; default suggestion for new statements, adjustable per statement run)
-- The rate of a statement run applies to every rental contract in it; Dwello does not check whether the fee is agreed in the rental contract
+- Global management cost percentage (0% to 10%; default suggestion for new statements, adjustable per statement run)
+- Per rental contract «Verwaltungspauschale vereinbart»: at the run's rate, with its own rate (0% to 10%, before the run's), or not agreed (0%); the statement wizard names the contracts without agreement
 - No distribution key: the fee is a percentage of each tenant's own costs
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
-- The Saldo (costs minus Akonto) is rounded commercially to 5 Rappen; the statement shows the amount before rounding and the rounding
+- The Saldo (costs minus Akonto) is rounded to 5 Rappen only in the tenant's favour, a Nachzahlung down and a Rückerstattung up (#79); the statement shows the amount before rounding and the rounding
+- A Saldo below CHF 5.00 (Nachzahlung or Rückerstattung, the rounded one) is neither claimed nor paid out: the PDF says so, without payment part or IBAN request; the statement is paid on sending (amount paid 0.00) and cannot be gemahnt; nothing is carried forward (#94)
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**
 - Simple percentage input field
 - Help text naming the customary guideline (up to 3%)
-- Audit trail showing when percentage was last changed (planned, not implemented)
+- The Protokoll under «Einstellungen» lists each change of the percentage with the old and the new rate and its date (#357)
 
 **Statement Impact:**
 - Automatically calculated per apartment
@@ -493,7 +494,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 **Use Cases:**
 1. Initial setup: Set management fee to agreed percentage (e.g., 2%)
 2. Annual review: Adjust percentage if contract changes
-3. Validation: the percentage may not be negative
+3. Validation: the percentage lies between 0% and 10%
 
 ---
 
@@ -537,7 +538,7 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
   - Total costs and advance payments
   - Balance (refund or additional payment)
 - Ability to adjust individual statement amounts if needed (drafts only)
-- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a draft names invoices recorded after it was created
+- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a statement names the invoices of its period recorded, changed or deleted since it was created (each position keeps the invoices it billed, #96)
 
 **Step 4: Generate PDFs**
 - Generate statement PDF for each rental contract, one per contract and period; at a tenant change each contract gets its own (requirements and sources: `docs/nebenkostenabrechnung-anforderungen.md`):
@@ -549,14 +550,14 @@ Predefined profiles cannot be deleted and their monthly shares cannot change; th
 - Append Swiss QR-bill to each statement with an amount due (SIX layout: receipt 62 mm, payment part, 105 mm high at
   the bottom of the last page)
 - Store PDFs in database
-- Option to download all as ZIP (planned, not implemented)
+- Option to download all PDFs of the run as one ZIP (#356)
 
 **Statement Details:**
 
 **Header Section:**
 - Statement number (auto-generated, unique identifier)
 - Statement date (date statement was issued)
-- Tenant name and address
+- Tenant name and Korrespondenzadresse; abroad the country alone on the last line, in capitals, a neighbouring country in its language, any other in English (Swiss Post, #102)
 - Apartment identification (floor, size, room count)
 - Apartment address (building address + unit number)
 - Accounting period (from - to dates)
@@ -618,8 +619,14 @@ BALANCE (refund): CHF 30
 1. **Entwurf** (`draft`) - Statement generated, not yet sent; the only status in which it can be edited (amounts, line items) or deleted
 2. **Versendet** (`sent`) - Statement delivered to the tenant, awaiting payment
 3. **Überfällig** (`overdue`) - Sent and past the payment deadline (computed from the deadline)
-4. **Bezahlt** (`paid`) - Settled; final, cannot be reverted
+4. **Bezahlt** (`paid`) - Settled; «Zahlung zurücksetzen» takes a wrong payment back to Versendet or Überfällig, recorded in the Verlauf (#92)
 5. **Partial** (future) - If multiple transactions needed
+
+**Sending (#86):**
+- Tenant with Korrespondenzkanal E-Mail: «Per E-Mail senden» e-mails the PDF (with QR-bill) in the tenant's Sprache and stores it as a Dokument; no batch sending
+- Korrespondenzkanal Brief: the property manager delivers the PDF and marks the statement as sent
+- A failed e-mail (no address, not set up, refused) leaves the statement Entwurf and says what to do: send again, or deliver it by letter («Per Brief zustellen»)
+- The statement is dated, and the Zahlungsfrist counted, from the day it goes out (scenarios in `statement-send.feature`)
 
 **Status Management:**
 - Mark statement as paid when tenant pays
@@ -631,7 +638,7 @@ BALANCE (refund): CHF 30
 
 **Reminders (manual, levels 1–3):**
 - The property manager creates a reminder for an overdue statement: Zahlungserinnerung (level 1), 2. Mahnung, 3. Mahnung; a fourth is not possible
-- A reminder is possible as soon as the payment deadline has passed; the setting «Reminder period» (`reminder_after_days`, default 14 days) is not applied; automatic reminders are planned, not implemented
+- A reminder is possible as soon as the payment deadline has passed; the setting «Reminder period» (`reminder_after_days`, default 14 days) is not applied; automatic reminders: «Vision, nicht geplant» (#111)
 - Each reminder is a PDF in the tenant's documents and goes out by e-mail or letter according to the tenant's Korrespondenzkanal (scenarios in `statement-reminder.feature`)
 - Show reminder status on statement detail view
 - Log of all reminders sent (for audit trail)
@@ -639,7 +646,7 @@ BALANCE (refund): CHF 30
 **Reminder Content:**
 - Reference statement number
 - Reference tenant name
-- Outstanding balance
+- Outstanding balance, with a QR payment part (Zahlteil) for it and the statement's QR reference (#108); none once the statement is paid
 - Deadline for payment
 - Building/property manager contact info
 
@@ -704,14 +711,14 @@ BALANCE (refund): CHF 30
 - IBAN: Configured in settings
 - Reference number: QR reference (QRR) only when the configured IBAN is a QR-IBAN; with a normal IBAN no reference
 - Amount: Total balance due (CHF)
-- Debtor: Tenant name and address
+- Debtor: Tenant name and Korrespondenzadresse with its country (ISO code); printed with the country code before the postal code outside Switzerland, e.g. «DE-78462 Konstanz» (#102)
 - Payment description: Statement number and period reference
 
 **IBAN Management:**
-- Global IBAN setting (Swiss bank account details)
+- Global IBAN setting (bank account in Switzerland or Liechtenstein)
 - Stored securely in configuration
 - Multiple IBANs per building (future feature)
-- Validation with a valid MOD-97 checksum: the settings form accepts only Swiss IBANs (CH), the QR-bill service also Liechtenstein (LI); which one applies is open (#191)
+- Validation: an IBAN from Switzerland (CH) or Liechtenstein (LI) with a valid MOD-97 checksum, in the settings form and the QR-bill service alike (#191)
 
 **QR Code Generation:**
 - Encodes all necessary payment information
@@ -763,7 +770,7 @@ BALANCE (refund): CHF 30
 
 **Manual Override:**
 - An invoice of an allocable category can be excluded from statements; an invoice of a non-allocable category is never allocable, whatever the form or the LLM sends
-- Override creates audit log entry (planned, not implemented)
+- An exclusion, and taking it back, goes into the Protokoll under «Einstellungen» (#357)
 
 **Reporting:**
 - Statistics on % of invalid costs by category
@@ -845,7 +852,6 @@ BALANCE (refund): CHF 30
 
 **Top Navigation:**
 - "Buildings" tab (active)
-- "Map View" tab
 - "Add Building" button
 
 **Buildings List View:**
@@ -859,7 +865,6 @@ BALANCE (refund): CHF 30
 
 **Building Card (Grid View):**
 - Address as title
-- Map thumbnail showing location
 - Apartment count badge
 - Occupancy percentage
 - Last updated date
@@ -884,7 +889,7 @@ BALANCE (refund): CHF 30
 - Tab 4: Configuration
   - Notes/metadata
 
-**Map View:**
+**Map View** (dropped, #129; not built):
 - Interactive map (OpenStreetMap) centered on Switzerland
 - Building markers with icons
 - Marker color indicates status (green/yellow/red)
@@ -956,7 +961,7 @@ BALANCE (refund): CHF 30
 - Email (required only when the Korrespondenzkanal is e-mail)
 - Phone (optional)
 - Korrespondenzkanal: letter (default) or e-mail
-- Address (street, postal code, city)
+- Korrespondenzadresse (street with house number, postal code, city, country; country Schweiz unless chosen, #102), with the help «Hierhin gehen Abrechnungen und Mahnungen; nach dem Auszug die neue Adresse eintragen» (#68); a 4-digit postal code is checked only in Switzerland and Liechtenstein
 - Notes (optional)
 - Submit/Cancel
 
@@ -1022,7 +1027,7 @@ BALANCE (refund): CHF 30
 - Invalid invoices highlighted in list
 - When added to statement, system warns user
 - Option to exclude from statement distribution
-- Audit log shows which invalid costs were excluded (planned, not implemented)
+- The Protokoll lists each invoice that becomes not allocable or allocable again, also through its category or the KI, and how many invoices a category change excluded (#357)
 
 ---
 
@@ -1101,7 +1106,7 @@ BALANCE (refund): CHF 30
 
 **Tab 7: IBAN Setting**
 - IBAN input field (for QR-bill generation)
-- Format validation (settings form: CH only; QR-bill service: CH or LI, #191; MOD-97 checksum)
+- Format validation: CH or LI with a valid MOD-97 checksum (#191)
 - Test QR-bill preview
 - Help text: "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung."
 - A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference
@@ -1152,7 +1157,7 @@ BALANCE (refund): CHF 30
 - "Save but don't generate" (for review later)
 - Progress bar showing generation status
 - Result: "Successfully generated X statements"
-  - Button: "Download all as ZIP" (planned, not implemented)
+  - Button: "Download all as ZIP" (#356)
   - Button: "View statements list"
 
 **Statement List View:**
@@ -1198,7 +1203,7 @@ BALANCE (refund): CHF 30
 - If paid:
   - Payment date
   - Payment amount (should match statement balance)
-  - No undo: Bezahlt (paid) is final
+  - Payment date from the Abrechnungsdatum up to today (#138); «Zahlung zurücksetzen» takes it back (#92)
 
 **Associated Data:**
 - List of invoices included in this statement
@@ -1208,7 +1213,7 @@ BALANCE (refund): CHF 30
 **Statement Actions:**
 - Download as PDF
 - Print
-- Mark as paid (final, no undo)
+- Mark as paid; reset the payment (#92)
 - Send payment reminder
 - Regenerate (if invoices/contracts changed)
 - Edit amounts and line items (draft only)
@@ -1241,7 +1246,7 @@ BALANCE (refund): CHF 30
 ### 7.2 Security
 
 **Authentication:**
-- OAuth 2.0 / SSO integration (Google, Microsoft; Swiss eID planned, not implemented)
+- OAuth 2.0 / SSO integration (Google, Microsoft; Swiss eID: «Vision, nicht geplant», #111)
 - No direct password storage
 - Secure session tokens with expiration
 - HTTPS/TLS 1.2+ for all communication
@@ -1250,7 +1255,7 @@ BALANCE (refund): CHF 30
 - Role-based access control (future: multi-user support)
 - Single user in MVP has full access
 - Session: the session JWT expires after `JWT_EXPIRY` (default 7 days); the open app refreshes it periodically (every 50 minutes). No inactivity timeout is implemented
-- Login audit logging (planned, not implemented)
+- Each login goes into the Protokoll with its time and provider (#357)
 
 **Data Protection:**
 - SQL injection prevention (parameterized queries, ORM)
@@ -1261,13 +1266,12 @@ BALANCE (refund): CHF 30
 
 **Data at Rest:**
 - No passwords or OAuth tokens are stored
-- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): planned, not implemented; depends on deployment
+- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): «Vision, nicht geplant»; an operations decision of the installation (#111; O-3, O-6 in `docs/design/offene-punkte.md`)
 
-**Audit Logging (planned, not implemented):**
-- Log all sensitive operations (invoice changes, statement generation)
-- Log invalid access attempts
-- Retention: 1 year of logs
-- Admin dashboard for log review (future feature)
+**Audit Logging (Protokoll, #357, decided in #111):**
+- The Protokoll under «Einstellungen» records, each with its time: logins (provider only), changes of the Verwaltungspauschale rate, of a category's allocability, invoices that become not allocable or allocable again, reset payments and corrections of sent statements (#358)
+- Entries stay until the landlord deletes them (one at a time, confirmed); no automatic retention
+- Not part of the decision: other invoice changes, statement generation, failed access attempts
 
 ---
 
@@ -1351,7 +1355,7 @@ BALANCE (refund): CHF 30
 
 **Internationalization:**
 - User interface in German
-- Tenant-facing statement PDFs in German, French, Italian, Romansh, English
+- Tenant-facing statement PDFs and reminders in German, French, Italian, English
 - Consistent translations across application
 - Date/time formatting per locale
 - Currency formatting (CHF with appropriate symbols)
@@ -1457,7 +1461,7 @@ BALANCE (refund): CHF 30
 - **Cost:** Free (open source)
 
 **OAuth Provider**
-- **Options:** Google OAuth, Microsoft Azure AD, Swiss eID (future)
+- **Options:** Google OAuth, Microsoft Azure AD; Swiss eID: «Vision, nicht geplant» (#111)
 - **Purpose:** Secure user authentication (SSO)
 - **Integration:** Callback to `/auth/callback` endpoint
 - **Tokens:** Access token stored securely, refresh token for session extension
@@ -1509,7 +1513,7 @@ BALANCE (refund): CHF 30
 - Embed in PDF statement
 - Validate QR code format before generation
 
-**Map Integration**
+**Map Integration** (dropped, #129)
 
 **Provider:** OpenStreetMap + Leaflet.js
 - **OpenStreetMap:** Free, open-source map data
@@ -1521,7 +1525,7 @@ BALANCE (refund): CHF 30
 
 **Library:** `svelte-i18n`
 - **Purpose:** UI texts (German) and tenant-facing statement PDFs
-- **Languages:** UI in German; statement PDFs in German, French, Italian, Romansh, English
+- **Languages:** UI in German; statement PDFs and reminders in German, French, Italian, English
 - **Format:** JSON translation files per language
 - **Cost:** Free
 
@@ -1550,7 +1554,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 - **Document** (`documents`)
 - **Configuration** (`configuration`, key/value; keys and defaults in `backend/src/services/config.service.ts`: `accounting_period`, `management_fee_pct`, `default_heating_profile_id`, `default_distribution_key_id`, `company_name`, `company_address`, `company_postal_code`, `company_city`, `iban`, `payment_deadline_days` (default 30), `reminder_after_days` (default 14), `default_language`)
 
-An audit log is planned, not implemented.
+- **Protokoll** (`audit_log`, #357): logins and changes, each with its time and a snapshot of what it names (`docs/data-model.md`)
 
 ---
 
@@ -1581,12 +1585,11 @@ An audit log is planned, not implemented.
 - Apartment CRUD endpoints and UI screens
 - Tenant CRUD endpoints and UI screens
 - OpenPLZ API integration for address search
-- Map visualization with Leaflet
 - Building detail views with apartment list
 - Apartment occupancy tracking
 - Data validation and error handling
 
-**Tests:** CRUD operations, API integration, address validation, map rendering
+**Tests:** CRUD operations, API integration, address validation
 
 ### Phase 3: Contract Management (Week 5)
 **Objective:** Rental contract management with PDF storage
@@ -1647,9 +1650,9 @@ An audit log is planned, not implemented.
 - Swiss QR-bill generation with correct encoding
 - IBAN configuration
 - PDF embedding in database
-- Multi-language PDF templates (German, French, Italian, Romansh, English)
+- Multi-language PDF templates (German, French, Italian, English)
 - Statement number generation
-- PDF download and batch download (ZIP; planned, not implemented)
+- PDF download and batch download (ZIP of a run: #356)
 - QR-bill validation and testing
 - PDF preview in browser
 
@@ -1711,7 +1714,7 @@ An audit log is planned, not implemented.
 - LLM categorization aligned with allowed/disallowed costs
 - Data retention policies implemented (10 years for financial records)
 - GDPR compliance for EU tenants verified
-- Audit logs capturing all sensitive operations
+- Protokoll of logins and changes that affect statements (#357)
 
 ---
 
@@ -1851,7 +1854,7 @@ This PRD complies with the following Swiss regulations:
 
 Key Legal Requirements Addressed (see the status note below for what is implemented):
 - Allowed/disallowed utility cost validation
-- Management fee: customary guideline up to 3% of total costs, not a cap
+- Management fee: customary guideline up to 3% of the tenant's own utility costs, not a legal cap; only where agreed in the rental contract
 - Detailed statement requirements
 - Tenant-facing statement PDFs in five languages
 - Data retention (10 years for financial records)

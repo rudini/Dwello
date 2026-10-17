@@ -1,6 +1,13 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { buildingAddress, listedApartment, yearBuilt } from '../questions/building-detail';
+import {
+	buildingAddress,
+	fuelStocksTitle,
+	listedApartment,
+	shownMaps,
+	tankOfBuilding,
+	yearBuilt
+} from '../questions/building-detail';
 import { emptyListShown, listedBuildingCount } from '../questions/buildings';
 import {
 	deleteBuilding,
@@ -79,6 +86,14 @@ Then('sieht der Liegenschaftsverwalter das Baujahr {string}', async ({ verwalter
 	await verwalter.sees(yearBuilt).toBe(year);
 });
 
+Given('für das Gebäude {string} sind Koordinaten erfasst', async ({ seed }, title: string) => {
+	await seed.buildingCoordinates(title);
+});
+
+Then('sieht der Liegenschaftsverwalter keine Karte des Gebäudes', async ({ verwalter }) => {
+	await verwalter.sees(shownMaps).toBe(0);
+});
+
 Then('sieht der Liegenschaftsverwalter die Adresse {string}', async ({ verwalter }, address: string) => {
 	await verwalter.sees(buildingAddress).toContain(address);
 });
@@ -89,3 +104,11 @@ When(
 		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!), recordFuelStock(date, amount));
 	}
 );
+
+Then('nennt die Gebäudeseite zum Tank {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(tankOfBuilding).toContain(text);
+});
+
+Then('heisst der Abschnitt zum Heizmaterial auf der Gebäudeseite {string}', async ({ verwalter }, title: string) => {
+	await verwalter.sees(fuelStocksTitle).toBe(title);
+});

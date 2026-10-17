@@ -13,6 +13,7 @@ import {
 	downloadStatementPdfFromList,
 	requestStatementPdfFromList,
 	openStatement,
+	openStatementWithoutPdf,
 	openStatementList,
 	searchStatements,
 	showDraftsOfBuilding,
@@ -162,6 +163,14 @@ Then(
 	}
 );
 
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen der Abrechnungsperiode des laufenden Jahres zeigt',
+	async ({ verwalter }) => {
+		const year = inDays(0).slice(0, 4);
+		await verwalter.sees(listScope).toContain(`Abrechnungsperiode 01.01.${year} – 31.12.${year}`);
+	}
+);
+
 // the status tabs count what the list can show, not every statement
 Then('zählt die Liste {int} Entwurf/Entwürfe', async ({ verwalter }, count: number) => {
 	await verwalter.sees(countedStatements('draft')).toBe(String(count));
@@ -175,5 +184,26 @@ When(
 	'der Liegenschaftsverwalter in der Liste das PDF der Abrechnung {int} von {string} anfordert',
 	async ({ verwalter, names }, year: number, tenant: string) => {
 		await verwalter.attemptsTo(requestStatementPdfFromList(names.get(tenant) ?? tenant, year));
+	}
+);
+
+Then(
+	'zeigt die Abrechnungsliste bei der Abrechnung von {string} {string}',
+	async ({ verwalter, names }, tenant: string, text: string) => {
+		await verwalter.sees(listedStatement(names.get(tenant) ?? tenant)).toContain(text);
+	}
+);
+
+Then(
+	'die Abrechnungsliste zeigt bei der Abrechnung von {string} nicht {string}',
+	async ({ verwalter, names }, tenant: string, text: string) => {
+		await verwalter.sees(listedStatement(names.get(tenant) ?? tenant)).not.toContain(text);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter beim fehlenden PDF der Abrechnung {int} von {string} weitergeht',
+	async ({ verwalter, names }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(openStatementWithoutPdf(names.get(tenant) ?? tenant, year));
 	}
 );

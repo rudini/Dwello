@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/documents/+page.server';
 import { GET as pdf } from '../routes/documents/[id]/pdf/+server';
 import { runAction } from './helpers/action';
+import documentList from '../../tests/contracts/documents.json';
 
 const API = 'http://localhost:3001/api/v1/documents';
 
@@ -40,6 +41,16 @@ describe('Dokumente', () => {
 		await result;
 
 		expect(calls).toEqual([{ method: 'PUT', url: `${API}/d1/sent`, body: undefined }]);
+	});
+
+	// #193: the letter is remade on marking; its new PDF is offered to print, also under «Zu versenden»
+	it('nennt den eben markierten Brief, damit er jetzt gedruckt wird', async () => {
+		const sent = { ...documentList.data[0], id: 'd1', type: 'reminder', reminderLevel: 2 };
+		const { result } = runAction(actions.markSent, '', 200, { id: 'd1' }, sent);
+
+		expect(await result).toEqual({
+			sent: { id: 'd1', title: '2. Mahnung', tenantName: 'Marco Bernasconi' }
+		});
 	});
 
 	it('liefert das PDF eines Dokuments zum Herunterladen', async () => {
