@@ -143,8 +143,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Five shards each: Playwright splits by test count, and the heavy screen checks (accessibility.feature,
-        # sprachen-bildschirme.feature) would otherwise land in one shard; measured 2026-10-17, longest shard 245 s of 905 s
+        # Five shards each: Playwright splits by test count, and the slow screen checks (accessibility.feature,
+        # sprachen-bildschirme.feature) would otherwise fill one shard that runs twice as long as the others
         suite: [e2e, a11y]
         shard: [1, 2, 3, 4, 5]
         include:

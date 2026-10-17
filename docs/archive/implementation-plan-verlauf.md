@@ -1410,3 +1410,16 @@ Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.sve
 - [x] Merge reviews after main took the migration number: `docs/reviews/204-review-4.md`, `204-review-5.md` (migration now `0021`, after main took 0018 to 0020)
 
 Files: `backend/migrations/0021_category_descriptions.sql`, `backend/scripts/llm-eval.ts`, `backend/src/__tests__/{migrations,invoice-categorization,heating-profiles}.pg.test.ts`, `docs/data-model.md`, `docs/reviews/204-*.md`, `src/routes/config/categories/CategoryForm.svelte`, `src/__tests__/category-predefined.dom.test.ts`, `tests/e2e/{features/categories.feature,steps/categories.steps.ts,tasks/categories.ts,questions/categories.ts,targets/categories.ts,screenplay/questions.ts}`
+
+## Session 2026-10-17 CI: complete runs on main, balanced E2E shards, cached browsers
+
+No scenario: CI configuration only, no app behaviour changes.
+
+- [x] Runs on main are no longer cancelled by the next merge (`concurrency.cancel-in-progress` only for pull requests; 26 of the last 28 runs on main were cancelled)
+- [x] E2E and axe shards balanced by measured duration instead of test count: 5 shards each (full PR suite timed locally: longest E2E shard 561 s → 235 s, axe 367 s → 245 s; a split by tag @i18n gave 241 s with more matrix code)
+- [x] Playwright browsers cached between runs (a shared frontend build from the job Build was dropped: the shards would wait for it, about as long as they now build)
+- [x] Slice review round 1: `docs/reviews/ci-review-1.md` (no Blocker/Major; C-1, C-4 fixed; C-2, C-3 stay)
+- [x] Workflow note: `docs/reviews/workflow-notes-ci-main-runs.md`
+- [x] Plan archived, pull request, CI
+
+Files: `.github/workflows/ci.yml`, `docs/test-pyramid.md`
