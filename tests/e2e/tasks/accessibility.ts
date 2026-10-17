@@ -392,7 +392,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Check.the(on.generateBuilding(example.building)),
 			Click.on(nextButton),
 			Select.option(example.heatingProfile).from(heatingProfileSelect),
-			Click.on(nextButton),
+			leaveSettings, // step 3 waits for the question whether the contracts agree the costs (#91)
 			Wait.until(on.shown('confirm-missing-invoices')),
 			goToGeneration,
 			Click.on(generateButton),
