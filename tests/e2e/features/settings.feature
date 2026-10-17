@@ -67,7 +67,8 @@ Funktionalität: Einstellungen
   # Protokoll (#357, Entscheid in #111): Änderungen und Anmeldungen mit Datum, unter den Einstellungen; die Einträge
   # bleiben, bis der Liegenschaftsverwalter sie löscht. Die übrigen Einträge prüfen audit-log.pg.test.ts und
   # auth-routes.test.ts: die Anmeldung läuft hier nicht über Google, die Verwaltungspauschale gilt für alle parallel
-  # laufenden Szenarien, und das Zurücksetzen einer Zahlung schreibt denselben Eintrag wie die übrigen Änderungen.
+  # laufenden Szenarien, und das Zurücksetzen einer Zahlung und das Berichtigen einer Abrechnung schreiben denselben
+  # Eintrag wie die übrigen Änderungen.
   # TODO(fachlich prüfen, #370): Begriff «Protokoll» fehlt im Glossar
   Szenario: Protokoll öffnen
     Wenn der Liegenschaftsverwalter das Protokoll öffnet

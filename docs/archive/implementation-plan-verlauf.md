@@ -1166,7 +1166,7 @@ Files: `backend/src/services/{word-search,apartment.service,building.service}.ts
 
 - [x] Scenarios in `settings.feature` («Protokoll öffnen», «Änderungen im Protokoll sehen», «Eintrag im Protokoll löschen»), breadcrumb example, `privacy.feature`; fach-reviewer before implementing: `docs/reviews/w7e-fachreview-1.md` (R-1, R-2, V-1 Major fixed; V-2–V-9, R-3 fixed or answered)
 - [x] Migration `0019_audit_log.sql`, `schema.ts`, `docs/data-model.md`, `docs/api-specification.md` (11a)
-- [x] Backend: `audit-log.service.ts` and route; entries for the Verwaltungspauschale rate, a category's Umlagefähigkeit (with the invoices it excluded), an invoice that becomes (not) umlagefähig (form, category, KI), a reset payment, logins; `recordStatementCorrection(replaced, replacement)` for #358 (W2e); `audit-log.pg.test.ts`, contract `audit-log.json`
+- [x] Backend: `audit-log.service.ts` and route; entries for the Verwaltungspauschale rate, a category's Umlagefähigkeit (with the invoices it excluded), an invoice that becomes (not) umlagefähig (form, category, KI), a reset payment, logins; `recordStatementCorrection` for #358 (W2e); `audit-log.pg.test.ts`, contract `audit-log.json`
 - [x] BFF: login entry from `src/routes/auth/callback` (`recordLogin` in `login-flow.ts`, fails open)
 - [x] Page `/config/audit-log` with delete confirmation; link under «Einstellungen»; texts in four languages, term `TODO(fachlich prüfen, #370)`
 - [x] a11y: `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature` (default, empty, delete-dialog)

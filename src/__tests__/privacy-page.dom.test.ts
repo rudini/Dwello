@@ -101,13 +101,13 @@ describe('Datenschutzerklärung zu Entwürfen im Browser', () => {
 	});
 });
 
-// Protokoll (#357), Fachprüfung R-1/R-4: die Erklärung nennt alles, was das Protokoll festhält
+// Protokoll (#357), Fachprüfung R-1/R-4/R-6: die Erklärung nennt alles, was das Protokoll festhält
 describe('Datenschutzerklärung zum Protokoll', () => {
 	it('nennt auch Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
 		expect(document.body.textContent).toContain(
-			'sowie zurückgesetzte Zahlungen und Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden (mit ihrer Nummer).'
+			'sowie zurückgesetzte Zahlungen (mit Abrechnungsnummer und Zahlungsdatum) und Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden (mit ihrer Nummer).'
 		);
 	});
 });

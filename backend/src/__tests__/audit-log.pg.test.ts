@@ -210,6 +210,7 @@ describe('Protokoll einer berichtigten Abrechnung', () => {
 		const statement = (await (await callApi(`/api/v1/statements/${id}`)).json()) as { statementNumber: string };
 		const [entry] = await entriesOf('statement_corrected', (details) => details.statementId === id);
 		expect(entry.details).toEqual({ statementId: id, number: statement.statementNumber });
+		await callApi(`/api/v1/audit-log/${entry.id}`, { method: 'DELETE' });
 	});
 });
 
