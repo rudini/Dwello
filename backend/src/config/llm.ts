@@ -20,8 +20,9 @@ export const llmConfig = {
 	// Model for reading uploaded invoices and categorizing them: it must read images (#217)
 	model: process.env.LLM_MODEL || 'qwen3-vl:8b-instruct',
 
-	// Request timeout in milliseconds
-	timeout: parseInt(process.env.LLM_TIMEOUT || '30000', 10),
+	// Request timeout in milliseconds; without a GPU the default model needs about 40 s to categorize and 80 s to read an
+	// invoice (#419)
+	timeout: parseInt(process.env.LLM_TIMEOUT || '120000', 10),
 
 	// Enable/disable LLM categorization
 	enabled: process.env.LLM_ENABLED !== 'false',

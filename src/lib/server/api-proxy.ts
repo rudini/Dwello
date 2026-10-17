@@ -45,6 +45,11 @@ function getBackendTimeout(): number {
 	return parseInt(env.BACKEND_API_TIMEOUT || '30000', 10);
 }
 
+// Requests the KI answers: two KI calls (reading, then categorizing) of the backend's LLM_TIMEOUT (120 s) on a server
+// without a GPU (#419)
+const KI_PATH = /^\/invoices(\/extract|\/categorize|\/[^/]+\/recategorize)?$/;
+const KI_TIMEOUT = 300_000;
+
 /**
  * Build the full backend URL for an API path
  */
@@ -110,7 +115,9 @@ export async function forwardRequest<T = unknown>(
 	const fetchOptions: RequestInit = {
 		method: method.toUpperCase(),
 		headers,
-		signal: AbortSignal.timeout(getBackendTimeout())
+		signal: AbortSignal.timeout(
+			method.toUpperCase() === 'POST' && KI_PATH.test(path) ? KI_TIMEOUT : getBackendTimeout()
+		)
 	};
 
 	// Add body for mutation requests
