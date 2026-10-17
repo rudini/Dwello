@@ -66,6 +66,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.sendStatement('Bruno', 2025);
 	await seed.paymentDeadline('Bruno', 2025, '2026-01-31'); // overdue: only then a reminder can be sent
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
+	// wants e-mail without an address: her draft is sent by e-mail, and sending it is refused (#86)
+	await seed.correspondence('Carla', 'email');
+	await seed.noEmail('Carla');
 	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	await seed.sendStatement('Anna', 2024);

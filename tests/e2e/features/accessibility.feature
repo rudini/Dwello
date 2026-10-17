@@ -151,6 +151,8 @@ Funktionalität: Barrierefreiheit
       | statement-paid-detail  | reset-payment-dialog |
       | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
+      | statement-empty-detail | send-dialog         |
+      | statement-empty-detail | send-refused        |
       | statement-pdf-refused  | default             |
       | statement-zip-refused  | default             |
       | statement-edit         | default             |
