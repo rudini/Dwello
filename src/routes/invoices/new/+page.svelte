@@ -97,7 +97,7 @@
 		if (Object.keys(errors).length) return focusFirstError(event.target as Element);
 
 		saving = true;
-		const response = await api.post('/invoices', {
+		const response = await api.post<{ id: string }>('/invoices', {
 			buildingId,
 			invoiceDate,
 			...servicePeriodOf({ servicePeriodStart, servicePeriodEnd }),
@@ -115,7 +115,10 @@
 			return;
 		}
 		addToast('success', m.invoices_saved({ name: billingEntity.trim() }));
-		goto(back);
+		// Statements of its period made before it lack it (#378): its page says what to do
+		const id = response.data!.id;
+		const periods = await api.get<{ missedIn?: unknown[] }>(`/invoices/${id}/statements`);
+		goto(periods.data?.missedIn?.length ? `/invoices/${id}` : back);
 	}
 </script>
 

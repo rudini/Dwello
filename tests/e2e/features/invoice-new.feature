@@ -14,6 +14,16 @@ Funktionalität: Neue Rechnung erfassen
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
     Und die Rechnung von "Hauswart Huber" über "CHF 450.00" in der Kategorie "Hauswart" ist auffindbar
 
+  # #378: fehlt die neue Rechnung in schon erstellten Abrechnungen, sagt Dwello nach dem Speichern, was zu tun ist
+  Szenario: Rechnung einer schon abgerechneten Periode erfassen
+    Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "450.00" Franken für "Treppenhausreinigung Q1" im Gebäude "Seeblick" in der Kategorie "Hauswart" erfasst
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"
+    Und warnt die Rechnung "gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon"
+
   Szenario: Nicht umlagefähige Kategorie wählen
     Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
     Dann ist die Rechnung nicht als umlagefähig markiert

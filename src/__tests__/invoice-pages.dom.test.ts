@@ -27,6 +27,8 @@ import {
 	submit
 } from './helpers/dom';
 import validationRefused from '../../tests/contracts/validation-refused.json';
+import invoiceContract from '../../tests/contracts/invoice.json';
+import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 
 const buildings = [{ id: 'b1', name: 'Seeblick', address: 'Seeweg 1, 8400 Winterthur' }];
 const categories = [
@@ -484,7 +486,7 @@ describe('Rechnung erfassen', () => {
 		submit('submit-button');
 		await settle();
 
-		expect(calls.at(-1)).toMatchObject({
+		expect(calls.at(-2)).toMatchObject({
 			method: 'POST',
 			path: '/invoices',
 			body: { servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' }
@@ -529,7 +531,7 @@ describe('Rechnung erfassen', () => {
 		submit('submit-button');
 		await settle();
 
-		expect(calls.at(-1)).toMatchObject({
+		expect(calls.at(-2)).toMatchObject({
 			method: 'POST',
 			path: '/invoices',
 			body: {
@@ -606,6 +608,24 @@ describe('Rechnung erfassen', () => {
 		await settle();
 
 		expect(goto).toHaveBeenCalledWith('/statements/generate');
+	});
+
+	// #378: auf der Rechnungsliste stünde nur «gespeichert»; die Seite der Rechnung warnt vor den Abrechnungen ohne sie
+	it('öffnet nach dem Speichern die Rechnung, wenn Abrechnungen ihrer Periode sie nicht enthalten', async () => {
+		const calls = fakeBff((call) =>
+			call.path === '/invoices/i9/statements'
+				? [200, { ...invoiceStatements, missedIn: invoiceStatements.billedIn }]
+				: [201, { ...invoiceContract, id: 'i9' }]
+		);
+		show(NewInvoicePage, {
+			data: data(false, { returnTo: '/statements/generate' })
+		} as never);
+		fill();
+		submit('submit-button');
+		await settle();
+
+		expect(calls.at(-1)).toMatchObject({ method: 'GET', path: '/invoices/i9/statements' });
+		expect(goto).toHaveBeenCalledWith('/invoices/i9');
 	});
 
 	it('sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird', () => {
