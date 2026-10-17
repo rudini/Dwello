@@ -6,7 +6,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 - [x] @wip scenarios: Nachzahlung and Rückerstattung below CHF 5 in the PDF sent to the tenant (no payment part, no IBAN request), settled on sending with the detail page's text, boundary with rounded examples (`statement-minimum-balance.feature`)
 - [x] fach-reviewer round 1 on the scenarios and texts before implementing: `docs/reviews/w6d-fachreview-1.md` (M-1 needs the product owner: #352; glossary: #353; small Saldo noted in #291)
-- [ ] merge main with #341 (Saldo rounded in the tenant's favour) before the push, or report it unmerged (the threshold reads the stored, rounded `balance`, so it needs no code of #341)
+- [x] merged main with #341 (Saldo rounded in the tenant's favour); the threshold reads the stored, rounded `balance`
 - [x] backend: settled on sending below CHF 5 with amount paid 0.00 (`updateStatementStatus`), PDF text without payment part or IBAN request (`pdf.service.ts`), Mahnung refused `REMINDER_BELOW_MINIMUM` also after a payment reset (`reminder.service.ts`), `belowMinimum` in `pdf-format.ts`
 - [x] detail page: the payment panel says the amount is waived or not paid out, without Zahlungsfrist and «Bezahlt am»; no Mahnung offered (`PaymentPanel.svelte`, `+page.svelte`, `$lib/statement.ts`, `messages/*.json`)
 - [x] docs: `data-model.md`, `nebenkostenabrechnung-anforderungen.md`, `PRD-Dwello.md`; O-34 (config insert race seen in E2E) in `offene-punkte.md`
