@@ -27,7 +27,8 @@
 		"pdf-missing": "Statement list of the seeded building's drafts, whose PDF is not created yet: each row says «PDF noch nicht erstellt» with a link to its statement (#253).",
 		"list-scoped": "List opened from a link that names a Mietvertrag or an Abrechnungsperiode: a sentence above the list says which statements it shows and links to all.",
 		"link-preset": "Statement wizard opened from a link that names a building and a period (after a changed Vertragsende): it starts at the settings step and says what the link chose.",
-		"send-dialog": "The confirmation before marking a statement as sent open.",
+		"send-dialog": "The confirmation before sending a statement open: marking it as sent for a letter, sending it by e-mail for a tenant who wants e-mail (#86).",
+		"send-refused": "A draft statement whose tenant wants e-mail but has no address, sent: it stays a draft, the alert says why and offers to deliver it by letter (#86).",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
@@ -493,7 +494,9 @@
 			"name": "statement-empty-detail",
 			"path": "/statements/{emptyStatement}",
 			"states": [
-				"default"
+				"default",
+				"send-dialog",
+				"send-refused"
 			]
 		},
 		{

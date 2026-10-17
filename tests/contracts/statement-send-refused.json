@@ -1,0 +1,4 @@
+{
+	"error": "The tenant has no e-mail address",
+	"code": "STATEMENT_TENANT_NO_EMAIL"
+}

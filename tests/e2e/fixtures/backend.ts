@@ -198,9 +198,10 @@ export function testData(api: CallTheApi) {
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},
 
-		// Unique per scenario: tenants of parallel scenarios must not share an address
-		async email(tenantTitle: string) {
-			const email = `${ids.get(tenantTitle)}@dwello.test`;
+		// Unique per scenario: tenants of parallel scenarios must not share an address; the mail catcher refuses
+		// abgewiesen.dwello.test
+		async email(tenantTitle: string, domain = 'dwello.test') {
+			const email = `${ids.get(tenantTitle)}@${domain}`;
 			await put(`tenants/${ids.get(tenantTitle)}`, { email });
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
