@@ -83,6 +83,7 @@ describe('Wohnungsdetail', () => {
 			baseRent: 1200,
 			additionalRent: 50,
 			advancePayment: 180,
+			flatRateUtilityCharge: 0,
 			monthlyTotal: 1430
 		});
 	});
@@ -140,6 +141,7 @@ describe('Wohnungsdetail', () => {
 			baseRent: 0,
 			additionalRent: 0,
 			advancePayment: 0,
+			flatRateUtilityCharge: 0,
 			monthlyTotal: 0
 		});
 	});
@@ -183,6 +185,18 @@ describe('Monatlich total', () => {
 				monthlyAdvancePayment: '180.00'
 			})
 		).toBe(1430);
+	});
+
+	// #429: die Nebenkostenpauschale bezahlt der Mieter jeden Monat, abgerechnet wird sie nicht
+	it('zählt die Nebenkostenpauschale dazu', () => {
+		expect(
+			monthlyTotal({
+				baseRent: '1200.00',
+				additionalRent: '50.00',
+				monthlyAdvancePayment: '180.00',
+				flatRateUtilityCharge: '100.00'
+			})
+		).toBe(1530);
 	});
 });
 

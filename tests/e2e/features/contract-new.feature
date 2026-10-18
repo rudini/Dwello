@@ -162,3 +162,49 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken ohne die Nebenkosten "Lift" bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"
     Aber zeigt die Prüfung "Vereinbarte Nebenkosten" ohne "Lift"
+
+  # #66: nur im Mietvertrag vereinbarte Nebenkosten darf der Liegenschaftsverwalter abrechnen (Art. 257a Abs. 2 OR)
+  Szenario: Die Hilfe zum Akonto nennt die vereinbarten Nebenkosten
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann erfährt der Liegenschaftsverwalter, dass das Akonto ein Vorschuss für die im Mietvertrag vereinbarten Nebenkosten ist
+
+  # #66: ohne Akonto bezahlt der Mieter meist eine Nebenkostenpauschale, oder es sind keine Nebenkosten vereinbart
+  Szenario: Ohne Akonto erfährt der Liegenschaftsverwalter, was für Nebenkostenpauschale und vereinbarte Nebenkosten gilt
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann erfährt der Liegenschaftsverwalter, dass der Mieter ohne Akonto meist eine Nebenkostenpauschale bezahlt
+    Und erfährt der Liegenschaftsverwalter, dass er sonst alle Häkchen bei «Vereinbarte Nebenkosten» entfernt
+    Und erfährt der Liegenschaftsverwalter, dass vereinbarte Nebenkosten ohne Akonto ganz mit der Nebenkostenabrechnung bezahlt werden
+
+  # #429: die Nebenkostenpauschale zählt im Monatlich total und wird nie abgerechnet
+  Szenario: Mietvertrag mit Nebenkostenpauschale prüfen
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "120" Franken Nebenkostenpauschale bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Nebenkostenpauschale" mit "CHF 120.00"
+    Und zeigt die Prüfung "Monatlich total" mit "CHF 1’070.00"
+
+  # #429 (fach-review V-2): auch die Nebenkostenpauschale des letzten Mietvertrags ist vorgeschlagen (#144)
+  Szenario: Nebenkostenpauschale des letzten Mietvertrags übernehmen
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.01" von "2024-01-01" bis "2025-12-31" für "900" Franken mit "0" Franken Akonto
+    Und der Mietvertrag von "Bruno Meier" hat "80" Franken Nebenkostenpauschale
+    Und der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann schlägt der Schritt "Miete" die Nebenkostenpauschale "80.00" aus dem letzten Mietvertrag der Wohnung vor
+
+  # #429: ohne Akonto sagt der Hinweis, wo die Nebenkostenpauschale steht; mit Pauschale und Häkchen warnt das Formular,
+  # dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet
+  Szenario: Mit Nebenkostenpauschale warnt das Formular vor angekreuzten Nebenkosten
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Dann erfährt der Liegenschaftsverwalter, wo er eine Nebenkostenpauschale einträgt
+    Wenn der Liegenschaftsverwalter eine Nebenkostenpauschale von "120" Franken einträgt
+    Dann warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet
+
+  # persona Helga 429 P-1: deckt die Pauschale alle Nebenkosten, sind keine Häkchen richtig und kein Grund für eine Warnung
+  Szenario: Mit Nebenkostenpauschale und ohne angekreuzte Nebenkosten warnt das Formular nicht
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Und der Liegenschaftsverwalter eine Nebenkostenpauschale von "120" Franken einträgt
+    Und der Liegenschaftsverwalter alle Nebenkosten abwählt
+    Dann weist das Formular ohne Warnung darauf hin, dass keine Nebenkosten vereinbart sind

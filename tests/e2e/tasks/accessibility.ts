@@ -70,7 +70,7 @@ import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../ta
 import { DEMO_INSTANCE } from './demo';
 import { leaveSettings } from './statement-generate';
 import { untickAllCategories } from './contract-form';
-import { agreedCategoryBoxes } from '../targets/contract-form';
+import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
 import { UPLOADED } from '../fixtures/screens';
@@ -145,6 +145,18 @@ const endWithPastDate: Activity = async (actor) => {
 		);
 	}
 	await actor.attemptsTo(Wait.until(on.invalidPastEndConfirm));
+};
+
+// «Neuer Mietvertrag» (tenant and apartment from the address) up to the step «Miete»; the edit form shows it at once
+const toRentStep: Activity = async (actor) => {
+	if ((await actor.answer(pageAddress)).includes('/contracts/new'))
+		await actor.attemptsTo(
+			Click.on(nextButton),
+			Click.on(nextButton),
+			EnterDate.of('2030-01-01').into(startDateInput),
+			Click.on(nextButton),
+			Wait.until(agreedCategoryBoxes)
+		);
 };
 
 // Two files, one created: the result with the file still open. Files go into the example's own building: the first
@@ -266,17 +278,16 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'link-preset': () => Wait.until(on.wizardPreset),
 	// every box of the agreed Nebenkosten unticked, not saved: the note that no Nebenkosten are billed
 	'agreed-costs-none': () => async (actor) => {
-		// «Neuer Mietvertrag» (tenant and apartment from the address): the boxes are on the step «Miete»
-		if ((await actor.answer(pageAddress)).includes('/contracts/new'))
-			await actor.attemptsTo(
-				Click.on(nextButton),
-				Click.on(nextButton),
-				EnterDate.of('2030-01-01').into(startDateInput),
-				Click.on(nextButton),
-				Wait.until(agreedCategoryBoxes)
-			);
-		await actor.attemptsTo(untickAllCategories, Wait.until(on.shown('contract-agreed-costs-none')));
+		await actor.attemptsTo(toRentStep, untickAllCategories, Wait.until(on.shown('contract-agreed-costs-none')));
 	},
+	// a Nebenkostenpauschale without Akonto, the boxes ticked, not saved: the warning that they are still billed (#429)
+	'flat-rate-warning': () => (actor) =>
+		actor.attemptsTo(
+			toRentStep,
+			Enter.theValue('').into(advancePaymentInput),
+			Enter.theValue('120').into(flatRateInput),
+			Wait.until(on.shown('contract-flat-rate-warning'))
+		),
 	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen»
 	'agreements-failed': () => (actor) =>
 		actor.attemptsTo(

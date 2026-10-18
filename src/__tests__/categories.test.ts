@@ -234,7 +234,9 @@ describe('Vorschlag der KI', () => {
 
 	const hint = async (status: number, body: unknown) =>
 		((await runAction(newActions.propose, '', status, form, body).result) as { proposal: { error: string } }).proposal.error;
-	const UNSURE = 'Die KI ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.';
+	// The rule for a case of doubt (#292, Entscheid #221)
+	const UNSURE =
+		'Die KI ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind; die Regeln stehen im Hilfetext oben. Im Zweifel: nicht umlagefähig.';
 	const UNAVAILABLE =
 		'Die KI ist nicht erreichbar. Versuchen Sie es später nochmals oder wählen Sie selbst, ob die Kosten umlagefähig sind.';
 
@@ -250,9 +252,21 @@ describe('Vorschlag der KI', () => {
 	// «non è sicura» / «n’est pas sûre» lesen sich auch als «nicht ungefährlich» (Persona Marco P-1, Code-Review M-9);
 	// Englisch «Decide yourself» (Fachreview H-28)
 	it.each([
-		['it', unsure, 'L’IA non ne è certa. Indichi Lei se i costi sono addebitabili.'],
-		['fr', unsure, 'L’IA n’en est pas certaine. Indiquez vous-même si les frais sont imputables.'],
-		['en', unsure, 'The AI is not sure. Decide yourself whether the costs are allocable.'],
+		[
+			'it',
+			unsure,
+			'L’IA non ne è certa. Indichi Lei se i costi sono addebitabili; le regole sono nel testo d’aiuto qui sopra. Nel dubbio: non addebitabile.'
+		],
+		[
+			'fr',
+			unsure,
+			'L’IA n’en est pas certaine. Indiquez vous-même si les frais sont imputables ; les règles figurent dans le texte d’aide ci-dessus. En cas de doute : non imputable.'
+		],
+		[
+			'en',
+			unsure,
+			'The AI is not sure. Decide yourself whether the costs are allocable; the rules are in the help text above. If in doubt: not allocable.'
+		],
 		[
 			'en',
 			{ ...unsure, code: 'KI_PROPOSAL_UNAVAILABLE' },

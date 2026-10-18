@@ -7,6 +7,7 @@ import {
 	contractSteps,
 	contractSummary,
 	firstStepWithError,
+	flatRateNotice,
 	lastRent,
 	rentTakenOver,
 	rentToPreset,
@@ -25,6 +26,7 @@ const empty: ContractFormValues = {
 	baseRent: '',
 	additionalRent: '',
 	advancePayment: '',
+	flatRateUtilityCharge: '',
 	managementFee: '',
 	managementFeeRate: ''
 };
@@ -68,10 +70,12 @@ describe('Mietvertrag Schritt für Schritt', () => {
 		expect(firstStepWithError({})).toBeNull();
 	});
 
+	// #66: meist eine Nebenkostenpauschale, oder keine Nebenkosten vereinbart; dann bleibt kein Häkchen
 	it('erklärt, was ein Mietvertrag ohne Akonto bedeutet', () => {
-		expect(advancePaymentNotice({ ...filled, advancePayment: '' })).toBe(
-			'Ohne Akonto bezahlt der Mieter alle Nebenkosten erst mit der Nebenkostenabrechnung.'
-		);
+		const notice = advancePaymentNotice({ ...filled, advancePayment: '' });
+		expect(notice).toContain('Ohne Akonto bezahlt der Mieter meist eine Nebenkostenpauschale');
+		expect(notice).toContain('entfernen Sie unten bei «Vereinbarte Nebenkosten» alle Häkchen');
+		expect(notice).toContain('bezahlt der Mieter sie ganz mit der Nebenkostenabrechnung');
 		expect(advancePaymentNotice({ ...filled, advancePayment: '0' })).not.toBeNull();
 		expect(advancePaymentNotice(filled)).toBeNull();
 	});
@@ -84,6 +88,7 @@ describe('Mietvertrag Schritt für Schritt', () => {
 			{ label: 'Vertragsende', value: 'Unbefristet', step: 3, field: 'duration' },
 			{ label: 'Nettomiete', value: 'CHF\u00a0950.00', step: 4, field: 'baseRent' },
 			{ label: 'Akonto', value: 'CHF\u00a0180.00', step: 4, field: 'advancePayment' },
+			{ label: 'Nebenkostenpauschale', value: 'CHF\u00a00.00', step: 4, field: 'flatRateUtilityCharge' },
 			{ label: 'Zusatzmiete', value: 'CHF\u00a00.00', step: 4, field: 'additionalRent' },
 			{
 				label: 'Verwaltungspauschale',
@@ -98,6 +103,25 @@ describe('Mietvertrag Schritt für Schritt', () => {
 		expect(contractSummary(limited, tenants, apartments)[3].value).toBe(
 			'Donnerstag, 31. Dezember 2026'
 		);
+	});
+
+	// #429 (Product Owner): mit Pauschale, ohne Akonto und mit Häkchen rechnet Dwello die angekreuzten Nebenkosten ab
+	it('warnt bei einer Nebenkostenpauschale vor angekreuzten Nebenkosten', () => {
+		const categories = [{ id: 'c1', name: 'Heizung' }];
+		const flat = { ...filled, advancePayment: '', flatRateUtilityCharge: '120' };
+		expect(flatRateNotice(flat, categories)).toContain('rechnet ihm trotzdem alle angekreuzten Nebenkosten ab');
+		expect(flatRateNotice({ ...flat, agreedCategoryIds: ['c1'] }, categories)).not.toBeNull();
+		expect(flatRateNotice({ ...flat, agreedCategoryIds: [] }, categories)).toBeNull();
+		expect(flatRateNotice({ ...flat, advancePayment: '50' }, categories)).toBeNull();
+		expect(flatRateNotice({ ...flat, flatRateUtilityCharge: '' }, categories)).toBeNull();
+		expect(flatRateNotice(flat, [])).toBeNull();
+	});
+
+	// #429: die Nebenkostenpauschale zählt im Monatlich total
+	it('zählt die Nebenkostenpauschale im Monatlich total', () => {
+		const summary = contractSummary({ ...filled, flatRateUtilityCharge: '120' }, tenants, apartments);
+		expect(summary.find((item) => item.field === 'flatRateUtilityCharge')?.value).toBe('CHF 120.00');
+		expect(summary.at(-1)?.value).toBe('CHF 1’250.00');
 	});
 });
 
@@ -243,7 +267,7 @@ describe('Beträge des letzten Mietvertrags', () => {
 		endDate: '2024-03-31',
 		baseRent: '800.00'
 	};
-	const taken = { baseRent: '950.00', additionalRent: '', advancePayment: '150.00' };
+	const taken = { baseRent: '950.00', additionalRent: '', advancePayment: '150.00', flatRateUtilityCharge: '' };
 
 	it('nimmt den Mietvertrag mit dem spätesten Vertragsbeginn, eine Null bleibt leer', () => {
 		expect(lastRent({ data: { contracts: [earlier, contract] } })).toEqual({
@@ -283,12 +307,20 @@ describe('Beträge des letzten Mietvertrags', () => {
 	});
 
 	it('ersetzt unveränderte Beträge einer zuvor gewählten Wohnung, auch durch leere', () => {
-		const other = { baseRent: '1200.00', additionalRent: '50.00', advancePayment: '' };
+		const other = { baseRent: '1200.00', additionalRent: '50.00', advancePayment: '', flatRateUtilityCharge: '' };
 		expect(rentToPreset({ ...empty, ...taken }, other, taken)).toEqual(other);
 		expect(rentToPreset({ ...empty, ...taken }, null, taken)).toEqual({
 			baseRent: '',
 			additionalRent: '',
-			advancePayment: ''
+			advancePayment: '',
+			flatRateUtilityCharge: ''
 		});
+	});
+
+	// #429 (fach-review V-2): auch die Nebenkostenpauschale des letzten Mietvertrags wird vorgeschlagen
+	it('übernimmt die Nebenkostenpauschale', () => {
+		const flat = { ...contract, flatRateUtilityCharge: '80.00' };
+		expect(lastRent({ data: { contracts: [flat] } })?.flatRateUtilityCharge).toBe('80.00');
+		expect(rentTakenOver({ ...empty, ...taken, flatRateUtilityCharge: '90' }, taken)).toBe(false);
 	});
 });

@@ -165,6 +165,29 @@ Funktionalität: Mietvertrag bearbeiten
     Aber nicht die Nebenkosten "Lift"
 
   # Persona Marco W10c P-1: ohne Häkchen rechnet Dwello keine Nebenkosten ab, das soll nicht unbemerkt geschehen
+  # Persona Helga 66b P-2: bei einer Nebenkostenpauschale bleiben die Häkchen leer (#66)
   Szenario: Das Formular warnt, wenn keine Nebenkosten vereinbart sind
     Wenn der Liegenschaftsverwalter alle Nebenkosten abwählt
     Dann warnt das Formular "Ohne Häkchen rechnet Dwello diesem Mieter keine Nebenkosten ab."
+    Und warnt das Formular "Bezahlt der Mieter alle Nebenkosten mit einer Nebenkostenpauschale, lassen Sie die Häkchen leer."
+
+  # #66: eine Mietzinserhöhung folgt Art. 269d OR, nicht nur den Kündigungsfristen
+  Szenario: Der laufende Mietvertrag nennt die Regeln einer Mietzinserhöhung
+    Dann erfährt der Liegenschaftsverwalter, dass eine Mietzinserhöhung das amtliche Formular braucht und frühestens auf den nächsten Kündigungstermin gilt
+
+  # #66, #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin; #388: auch eine vorgesehene
+  # Erhöhung braucht das amtliche Formular
+  Szenario: Der laufende befristete Mietvertrag nennt die Regel einer Mietzinserhöhung
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "2.02" befristet von "2024-01-01" bis "2099-12-31" für "900" Franken mit "20" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Lea Graf"
+    Dann erfährt der Liegenschaftsverwalter, dass bei einem befristeten Mietvertrag eine Mietzinserhöhung erst nach dem Vertragsende möglich ist
+    Und erfährt der Liegenschaftsverwalter, dass er eine Erhöhung begründet und mit dem amtlichen Formular mitteilt
+
+  # #429: die Nebenkostenpauschale steht beim Mietvertrag und zählt im Monatlich total
+  Szenario: Nebenkostenpauschale nachtragen
+    Wenn der Liegenschaftsverwalter die Nebenkostenpauschale auf "120" Franken setzt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und zeigt der Mietvertrag die Nebenkostenpauschale "CHF 120.00"
+    Und zeigt der Mietvertrag das Monatlich total "CHF 1’070.00"

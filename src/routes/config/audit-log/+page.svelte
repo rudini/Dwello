@@ -7,7 +7,7 @@
 	import DeleteDialog from '../DeleteDialog.svelte';
 	import type { ActionData, PageData } from './$types';
 
-	// TODO(fachlich prüfen, #370): the term «Protokoll» is not in the glossary yet
+	// TODO(fachlich prüfen, #370): «Protokoll» has its glossary row; the help texts follow
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let toDelete = $state<AuditEntry | null>(null);

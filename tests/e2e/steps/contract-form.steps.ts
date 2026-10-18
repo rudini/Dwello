@@ -24,7 +24,12 @@ import {
 	runningContractHintText,
 	startHint,
 	tenantChoices,
-	withdrawNoticeHelp
+	withdrawNoticeHelp,
+	advancePaymentHelpText,
+	noAdvanceNoticeText,
+	runningContractEditHintText,
+	enteredFlatRate,
+	flatRateWarningText
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
@@ -33,6 +38,8 @@ import {
 	agreeManagementFee,
 	enterBilledUntil,
 	changeBaseRent,
+	changeFlatRateUtilityCharge,
+	enterFlatRateUtilityCharge,
 	deleteDraftAndSave,
 	openContractEdit,
 	openNewContract,
@@ -444,5 +451,99 @@ Then(
 		await verwalter.sees(withdrawNoticeHelp).toContain('die Schlichtungsbehörde oder ein Gericht');
 		await verwalter.sees(withdrawNoticeHelp).toContain('weder der Mieter noch der Vermieter allein');
 		await verwalter.sees(withdrawNoticeHelp).toContain('Der Mietvertrag läuft dann ohne Ende weiter.');
+	}
+);
+
+// #66: the Akonto covers only the Nebenkosten agreed in the Mietvertrag (Art. 257a Abs. 2 OR)
+Then(
+	'erfährt der Liegenschaftsverwalter, dass das Akonto ein Vorschuss für die im Mietvertrag vereinbarten Nebenkosten ist',
+	async ({ verwalter }) => {
+		await verwalter.sees(advancePaymentHelpText).toContain('für die im Mietvertrag vereinbarten Nebenkosten');
+	}
+);
+
+// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
+Then(
+	'erfährt der Liegenschaftsverwalter, dass eine Mietzinserhöhung das amtliche Formular braucht und frühestens auf den nächsten Kündigungstermin gilt',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('frühestens auf den nächsten Kündigungstermin');
+		await verwalter.sees(runningContractEditHintText).toContain('mit dem amtlichen Formular');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass bei einem befristeten Mietvertrag eine Mietzinserhöhung erst nach dem Vertragsende möglich ist',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('erst nach dem Vertragsende möglich');
+	}
+);
+
+// #66: without Akonto usually a Nebenkostenpauschale, or no Nebenkosten agreed; then no box stays ticked
+Then(
+	'erfährt der Liegenschaftsverwalter, dass der Mieter ohne Akonto meist eine Nebenkostenpauschale bezahlt',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('meist eine Nebenkostenpauschale');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er sonst alle Häkchen bei «Vereinbarte Nebenkosten» entfernt',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('bei «Vereinbarte Nebenkosten» alle Häkchen');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass vereinbarte Nebenkosten ohne Akonto ganz mit der Nebenkostenabrechnung bezahlt werden',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('bezahlt der Mieter sie ganz mit der Nebenkostenabrechnung');
+	}
+);
+
+// #388: an increase the contract provides for still needs the official form
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er eine Erhöhung begründet und mit dem amtlichen Formular mitteilt',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig');
+	}
+);
+
+// #429: «Nebenkostenpauschale» counts in «Monatlich total», never billed
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit {string} Franken Nebenkostenpauschale bis zur Prüfung erfasst',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, flatRate: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({
+				tenantId: seed.idOf(tenant)!,
+				apartmentId: seed.idOf(apartment)!,
+				startDate,
+				baseRent,
+				flatRateUtilityCharge: flatRate
+			})
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter die Nebenkostenpauschale auf {string} Franken setzt', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(changeFlatRateUtilityCharge(amount));
+});
+
+When('der Liegenschaftsverwalter eine Nebenkostenpauschale von {string} Franken einträgt', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(enterFlatRateUtilityCharge(amount));
+});
+
+Then('erfährt der Liegenschaftsverwalter, wo er eine Nebenkostenpauschale einträgt', async ({ verwalter }) => {
+	await verwalter.sees(noAdvanceNoticeText).toContain('bei «Nebenkostenpauschale pro Monat» ein');
+});
+
+Then('warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet', async ({ verwalter }) => {
+	await verwalter.sees(flatRateWarningText).toContain('rechnet ihm trotzdem alle angekreuzten Nebenkosten ab');
+});
+
+Then(
+	'schlägt der Schritt "Miete" die Nebenkostenpauschale {string} aus dem letzten Mietvertrag der Wohnung vor',
+	async ({ verwalter }, amount: string) => {
+		await verwalter.sees(enteredFlatRate).toBe(amount);
+		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
 	}
 );

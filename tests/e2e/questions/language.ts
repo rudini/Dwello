@@ -44,8 +44,22 @@ const germanOnly = Object.fromEntries(
 	})
 );
 
-// Names and places, the same in every language
-const sameEverywhere = ['Dwello', 'Google', 'Microsoft', 'Resend', 'PostgreSQL', 'IBAN', 'CHF', 'PDF', 'XSRF', 'SMTP', 'STÜBER SYSTEMS GmbH'];
+// Names and places, the same in every language; the German leaflet the reasons cite by its title (#292)
+const sameEverywhere = [
+	'Dwello',
+	'Google',
+	'Microsoft',
+	'Resend',
+	'PostgreSQL',
+	'IBAN',
+	'CHF',
+	'PDF',
+	'XSRF',
+	'SMTP',
+	'STÜBER SYSTEMS GmbH',
+	'Mieterinnen- und Mieterverband',
+	'Zulässige und unzulässige Nebenkosten'
+];
 // A record named by a scenario: up to three words, then 12 hex digits (fixtures/backend.ts) or a UUID (the file names of
 // tasks/accessibility.ts)
 const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-)?[0-9a-f]{12}\b/gu;

@@ -24,15 +24,22 @@
 		noticeReceivedOn?: string | null;
 		billedUntil?: string | null; // «Abgerechnet bis» (#133)
 		status: ContractHistory['status'];
-		rent: { baseRent: number; additionalRent: number; advancePayment: number; total: number };
+		rent: {
+			baseRent: number;
+			additionalRent: number;
+			advancePayment: number;
+			flatRateUtilityCharge: number; // «Nebenkostenpauschale» (#429)
+			total: number;
+		};
 		fee: string; // «Verwaltungspauschale» in words (#89)
 		agreedCosts: string[] | null; // the agreed Nebenkosten (#91); null when the categories could not be loaded
 	} = $props();
 
 	const amounts = $derived([
-		[m.common_net_rent(), rent.baseRent],
-		[m.common_advance_payment(), rent.advancePayment],
-		[m.common_additional_rent(), rent.additionalRent]
+		[m.common_net_rent(), rent.baseRent, undefined],
+		[m.common_advance_payment(), rent.advancePayment, undefined],
+		[m.common_flat_rate_utility_charge(), rent.flatRateUtilityCharge, 'contract-flat-rate'],
+		[m.common_additional_rent(), rent.additionalRent, undefined]
 	] as const);
 </script>
 
@@ -85,10 +92,10 @@
 
 <Panel title={m.contracts_rent_per_month()}>
 	<dl class="flex flex-col divide-y divide-line tabular-nums">
-		{#each amounts as [label, amount] (label)}
+		{#each amounts as [label, amount, testid] (label)}
 			<div class="flex justify-between gap-4 py-2">
 				<dt class="text-ink-muted">{label}</dt>
-				<dd class="text-ink">{formatCurrency(amount)}</dd>
+				<dd class="text-ink" data-testid={testid}>{formatCurrency(amount)}</dd>
 			</div>
 		{/each}
 		<div class="flex justify-between gap-4 py-2 text-lg">

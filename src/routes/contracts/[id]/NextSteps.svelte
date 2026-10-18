@@ -5,7 +5,7 @@
 
 	// What a notice asks for next (A-4): the next tenant until one is recorded, a new contract for a move within
 	// the house (#156), always the new address for the final statement, after the end only that while the tenant
-	// still has the building's address (A-5, #114); TODO(fachlich prüfen, #140): «Nachmieter» is not in the glossary
+	// still has the building's address (A-5, #114)
 	let {
 		shown,
 		apartmentId,

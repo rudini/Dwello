@@ -12,6 +12,9 @@
 		...(costs.advancePayment
 			? [{ label: m.common_advance_payment(), value: costs.advancePayment }]
 			: []),
+		...(costs.flatRateUtilityCharge
+			? [{ label: m.common_flat_rate_utility_charge(), value: costs.flatRateUtilityCharge }]
+			: []),
 		...(costs.additionalRent
 			? [{ label: m.common_additional_rent(), value: costs.additionalRent }]
 			: [])

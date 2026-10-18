@@ -5,10 +5,14 @@ import {
 	numberOfInvoice,
 	categoryOfInvoice,
 	distributionKeyOfInvoice,
+	distributionKeyRows,
 	missedWarningText,
 	reasonForOverride,
+	reasonOfCategory,
+	reasonsOfCategory,
 	recategorizationFailure,
 	tenancyLawNote,
+	tenancyLawNotes,
 	utilityCostOfInvoice
 } from '../questions/invoice-detail';
 import { pageAddressInApp } from '../questions/statements';
@@ -29,6 +33,10 @@ Given(
 		await verwalter.attemptsTo(openInvoice(seed.idOf(`Rechnung ${supplier}`)!));
 	}
 );
+
+Given('die Rechnung von {string} hat keinen Verteilschlüssel', async ({ seed }, supplier: string) => {
+	await seed.invoiceWithoutKey(supplier);
+});
 
 When('der Liegenschaftsverwalter die Rechnung löscht', async ({ verwalter }) => {
 	await verwalter.attemptsTo(deleteInvoice);
@@ -72,6 +80,27 @@ Then(
 		await verwalter.sees(tenancyLawNote).toContain('Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein.');
 	}
 );
+
+Then(
+	'nennt die Rechnung als Grund der Umlagefähigkeit ihrer Kategorie {string}',
+	async ({ verwalter }, text: string) => {
+		await verwalter.sees(reasonOfCategory).toContain(text);
+	}
+);
+
+Then('nennt die Rechnung keinen Grund der Umlagefähigkeit', async ({ verwalter }) => {
+	await verwalter.sees(reasonsOfCategory).toBe(0);
+});
+
+// After the reason that anchors it: no «Keiner – … pro Wohnung verteilt» for an invoice not distributed to the tenants (#292, Helga P-1)
+Then('sagt die Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde', async ({ verwalter }) => {
+	await verwalter.sees(distributionKeyRows).toBe(0);
+});
+
+// After the reason that anchors it: the general note gives way to the category's reason (#292, Fachreview V-6)
+Then('erklärt kein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst', async ({ verwalter }) => {
+	await verwalter.sees(tenancyLawNotes).toBe(0);
+});
 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist oder keine passende Kategorie geliefert hat',

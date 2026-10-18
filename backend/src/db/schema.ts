@@ -129,6 +129,8 @@ export const rentalContracts = pgTable(
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
 		monthlyAdvancePayment: decimal('monthly_advance_payment', { precision: 10, scale: 2 }).notNull(), // Akonto
+		// «Nebenkostenpauschale» (#429): counts in «Monatlich total», never billed
+		flatRateUtilityCharge: decimal('flat_rate_utility_charge', { precision: 10, scale: 2 }).default('0').notNull(),
 		// #89: the run's rate applies only with a fee agreed; an own rate (0–10 %) takes precedence
 		managementFeeAgreed: boolean('management_fee_agreed').default(false).notNull(),
 		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),

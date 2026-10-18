@@ -97,7 +97,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
       | 2026    | CHF 75.30 |
       | 2027    | CHF 99.95 |
 
-  # TODO(fachlich prüfen, #294): «Abrechnungsnummer» fehlt im Glossar
+  # TODO(fachlich prüfen, #294): «Abrechnungsnummer» steht im Glossar; die Hilfetexte folgen
   # Das PDF eines Entwurfs kann schon weitergegeben sein: die Abrechnungsnummer eines gelöschten Entwurfs wird nicht
   # wieder vergeben, sie bleibt eine Lücke (#97). Eva Frei erhält -0001, Marc Huber -0002, nach dem Löschen -0003.
   Szenario: Die Abrechnungsnummer eines gelöschten Entwurfs wird nicht wieder vergeben
@@ -162,6 +162,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann kostet die Abrechnung von "Eva Frei" "CHF 63.86"
     Und beträgt der Saldo von "Eva Frei" "Rückerstattung CHF 56.15"
     Und kostet die Abrechnung von "Marc Huber" "CHF 504.70"
+
+  # #429: die Nebenkostenpauschale wird nicht abgerechnet, nur das Akonto. Hauswart 732.00 für 366 Tage = 2.00 pro Tag;
+  # Marc Huber 245 Tage = 490.00 + 3 % = 504.70, Akonto 8 Monate × 50.00 = 400.00, Saldo 104.70
+  @api
+  Szenario: Die Nebenkostenpauschale zählt nicht in der Abrechnung
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und der Mietvertrag von "Marc Huber" hat "100" Franken Nebenkostenpauschale
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Marc Huber" "CHF 504.70"
+    Und beträgt der Saldo von "Marc Huber" "Nachzahlung CHF 104.70"
 
   # A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
   Szenario: Vorschau warnt vor der alten Adresse eines ausgezogenen Mieters
@@ -250,6 +261,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin, auf den Akonto oder neue Nebenkosten
   # steigen könnten; ein unbefristeter behält den Hinweis auf den nächsten Kündigungstermin
+  # #388: auch eine Erhöhung, die der Mietvertrag vorsieht, braucht das amtliche Formular
   Szenario: Hinweise zu Akonto und neuen Nebenkosten bei einem befristeten Mietvertrag
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert
@@ -257,7 +269,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2023-01-15"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "2000" Franken vom "2024-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
-    Dann rät die Vorschau für "Lea Graf": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
+    Dann rät die Vorschau für "Lea Graf": "Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig."
     Und meldet die Prüfung der Kategorien für "Kaltwasser": "frühestens auf den nächsten Kündigungstermin"
     Und meldet die Prüfung der Kategorien für "Kaltwasser": "Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor."
 

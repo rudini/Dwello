@@ -1,3 +1,41 @@
+## Session 2026-10-16 (17): Akonto hint and glossary translations (#222)
+
+Branch `feat/glossary-texts-222`. Issue #222 "Decided (product owner)" (the glossary entries are in `UBIQUITOUS_LANGUAGE.md` since #244) plus `CLAUDE.md`, "Workflow".
+
+- [x] `@wip` scenario «Schlussrechnung mit abgezogenen Akontorechnungen» with the decided text, red; `fach-reviewer` on it (domain term)
+  Scenario red (chromium): received the old hint «… Vorgeschlagen ist das Total der Leistungen vor dem Abzug. Erfassen Sie die Akontozahlungen nicht zusätzlich …»
+  fach-reviewer round 1 (docs/reviews/222-fachreview-1.md): V-1, V-2 (Major) and V-3 answered by the product owner: the hint names one way only («… Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie, sonst zählen sie doppelt.», recorded in #222), so glossary and hint agree, no amount below 0, the costs fall into the periods of the Schlussrechnung; V-5: the help text stays (product owner); V-4: rows «Auslesen» and «Mahnung eines Rechnungsstellers» planned for `i18n-begriffe.md` with the words the UI uses; V-6, V-7 (Nits) left as they are: the prompt changes only with `llm:eval`
+  fach-reviewer round 2 (docs/reviews/222-fachreview-2.md): V-1 (Major, evidence checked: sent statements are not recomputed, `invoices_delete_billed_text` says to delete only wrongly entered invoices) waits for the product owner (variant A or B); V-2, V-3 (Minor) change decided texts, asked with V-1; V-4 fixed (this plan); V-5 taken for the rows; V-6 (Nit, before) → #262
+  Product owner 2026-10-16 (recorded in #222): V-1 variant A (an advance invoice already in a statement stays, its amount is deducted from the total; the glossary sentence on «Akontorechnung» is the product owner's edit), V-2 and V-3 accepted; both scenarios changed
+  fach-reviewer round 3 (docs/reviews/222-fachreview-3.md): round-2 V-1..V-3 fixed; V-9 fixed (U+00A0 in `messages/fr.json`; GitHub stores the issue text with a plain space); V-11 rejected: no change needed (reviewer); open V-7, V-8 (Minor) → #261, V-10 (Nit) and the term «abgerechnet» → #263
+  Scenario red (chromium, round 2 texts): upload hint received «… Erfassen Sie die Akontozahlungen nicht zusätzlich …» (stale build of the old text, the message is not changed yet); invoice page received «… Ist der Betrag das Total vor dem Abzug, dürfen …»
+  Test red: invoice-upload.test.ts (2) and invoice-pages.dom.test.ts «zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat» – expected the decided texts, received the old ones
+- [x] `invoices_upload_deducted` in de/fr/it/en as decided (one way, «Akontorechnung»)
+- [x] `invoices_beleg_deducted` in de/fr/it/en as decided (V-3)
+  Scenario green (chromium): both scenarios, `@wip` removed; unit and DOM tests green
+- [x] `docs/design/i18n-begriffe.md`: rows «Akontorechnung (eines Rechnungsstellers)» facture d’acompte / fattura d’acconto / advance invoice, «Mahnung eines Rechnungsstellers» and «Auslesen»
+- [ ] Blocked on the product owner: the sentence on billed advance invoices (variant A) in «Akontorechnung», `UBIQUITOUS_LANGUAGE.md`; the pull request is merged only after that edit (`CLAUDE.md`, Design-Regeln)
+  Skills: ponytail-review (text-only diff, «Lean already»); tdd and ponytail were not loaded for this slice, the tests were changed and shown red before the texts
+  code-reviewer round 1 (docs/reviews/222-review-1.md): fixed C-1 (Skills line), C-2 (plan item for the glossary edit), C-3 (issue numbers, 0489f9ab), C-4 (rows and files named), C-5 (brackets in the row «Mahnung eines Rechnungsstellers»)
+  Files: `messages/{de,fr,it,en}.json`, `tests/e2e/features/invoices.feature`, `src/__tests__/invoice-upload.test.ts`, `src/__tests__/invoice-pages.dom.test.ts`, `docs/design/i18n-begriffe.md`, `docs/reviews/222-*.md`, `implementation_plan.md`
+  Checks on 017fd97d: `bun run test:coverage` exit 0, `bun run check` exit 0, backend `bun run test` exit 0, `bun run type-check` exit 0, `bun run test:e2e`: chromium 769 passed, 0 failed (incl. invoices and the a11y/language screens); firefox and webkit did not start (browser executables missing in this container), CI runs them
+  Feature review: personas Dr. Weber (texts), Helga (terms for beginners), Marco (phone); `fach-reviewer` round 3 already checked the final texts, and code-reviewer round 1 confirmed the strings in `messages/*.json` equal them, so no separate domain round
+  persona Marco (docs/design/personas/marco-222.md): open P-1..P-4 (Minor), P-5 (Nit) → #268
+  persona Helga (docs/design/personas/helga-222.md): P-1 (Major) fixed by the product owner's decision (separate sentences, where to delete); open P-2..P-4 (Minor), P-5 (Nit) → #268
+  persona Dr. Weber (docs/design/personas/weber-222.md): P-1 (Major, = #261 first part) fixed by the product owner's decision (service period after the period already in a statement); open P-2..P-5 (Minor), P-6, P-7 (Nit) → #268
+  Product owner 2026-10-16 (recorded in #222): both hints changed for Helga P-1 and Weber P-1
+  Scenario red (chromium, persona fixes): upload hint received «… Haben Sie die Akontorechnungen schon erfasst oder hier ausgewählt, löschen oder entfernen Sie sie …»; invoice page received the hint without the service period
+  Test red: invoice-upload.test.ts (2) and invoice-pages.dom.test.ts «zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat» – expected the new texts, received the round-2 ones
+  fach-reviewer round 4 (docs/reviews/222-fachreview-4.md): Helga P-1 and Weber P-1 confirmed fixed; V-12 (Minor) and V-13 (Nit) fixed by the product owner's decision 2026-10-18 («Abrechnungsperiode, in der sie abgerechnet ist»; «mit «Datei entfernen»»), wording as the reviewer proposed (pronoun form «retirez-les / li rimuova / remove them» as the product owner saw it in de)
+  Scenario green (chromium): both scenarios with the final texts, `@wip` removed; unit and DOM tests green
+  code-reviewer round 2 (docs/reviews/222-review-2.md): C-2..C-5 confirmed fixed; C-1/C-6 (Minor) accepted, not fixable after the fact: `tdd` and `ponytail` were not loaded for the text slices (workflow review W-3); C-7 fixed (item below)
+- [x] Personas Helga and Dr. Weber again, task on the two changed hints only (Workflow 6)
+  persona Helga round 2 (docs/design/personas/helga-222-2.md): round-1 P-1 confirmed fixed; open P-1..P-3 (Minor), P-4 (Nit) → #268
+  persona Dr. Weber round 2 (docs/design/personas/weber-222-2.md): round-1 P-1 and P-6 confirmed fixed (CHF 1’250.00 over both periods); open P-1, P-2 (Minor), P-3 (Nit) → #261, P-4 (Nit) → #268
+  Checks on 1c81c7e4: `bun run test:coverage` exit 0, `bun run check` exit 0, backend `bun run test` exit 0, `bun run type-check` exit 0, `playwright test --project=chromium` 756 passed, 0 failed
+- [x] Reviews (`code-reviewer`; feature review: personas and `fach-reviewer` where they apply)
+- [x] Before marking complete: all checks in `CLAUDE.md`
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-222.md`
 ## Session 2026-10-17 W12: Fedlex check of the statement requirements (#77)
 
 - [x] Read Art. 67, 128, 257a, 257b, 269d, 270b OR (Fedlex, SR 220, as of 1.10.2026, de/fr/it) and Art. 4–8 VMWG (SR 221.213.11, as of 1.10.2025, de/fr/it) on fedlex.data.admin.ch
@@ -1408,6 +1446,25 @@ Branch `claude/w9c-privacy-82-178`. Both issues' "Decided" sections are the requ
 
 Files: `src/routes/privacy/*`, `src/routes/terms/*`, `src/routes/login/+page.svelte`, `src/lib/server/{oauth,auth,operator}.ts`, `src/routes/auth/{me,refresh}/+server.ts`, `src/hooks.server.ts`, `src/app.d.ts`, `src/lib/stores.ts`, `src/lib/former-tenant-documents.ts`, `src/lib/overview.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/tenants/[id]/*`, `backend/src/{app.ts,mail/index.ts}`, `messages/*.json`, tests and features.
 
+## Session 2026-10-17: QR-bill against SIX IG v2.4 (#78, W13)
+
+- [x] Field-by-field check of `qr-bill.service.ts` and the payment part of `pdf.service.ts` against IG QR-bill v2.4 (six-group.com blocked by the network policy: guideline excerpts through `mmx search`, cross-checked with the `swissqrbill` 4.4.2 package); no change of the stored data needed, so the «Stop and ask» does not apply
+- [x] Scenario `@wip` «Der Zahlteil ohne Korrespondenzadresse hat ein Feld für Name und Adresse» (`statement-detail.feature`), seen red
+- [x] fach-reviewer round 1 on the scenario and the planned changes (`docs/reviews/78-fachreview-1.md`)
+- [x] QR payload only with the permitted character set (IG 4.1.1), IBAN in capitals, no line break after EPD; unit tests first. No scenario: the payload is only readable by a decoder, covered in `qr-bill.service.test.ts`
+- [x] «Zahlbar durch (Name/Adresse)» with a blank field with corner marks (52 × 20 mm receipt, 65 × 25 mm payment part) when the QR code names no debtor; the payment part prints creditor and debtor as in the QR code; unit tests first, scenario green
+- [x] House number in the street line: decided in #102 (no separate field), no new issue
+- [x] Issue #395 for the made-up creditor without Firmenadresse (pre-existing, fach-review V-1)
+- [x] code-reviewer round 1 (`docs/reviews/78-review-1.md`): C-1 to C-7 fixed (field size test, receipt field ends above the amount, lengths cut in the QR data, scenario step without Korrespondenzadresse)
+- [x] persona Dr. Weber (`docs/design/personas/dr-weber-78.md`): nothing to fix
+- [x] daten-pruefer round 1 (`docs/reviews/78-datenpruefung-1.md`): no findings
+- [x] code-reviewer round 2 (`docs/reviews/78-review-2.md`): no Blocker/Major
+- [x] Result with guideline chapters noted in #78
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-78.md`)
+- [x] plan archived; pull request open, merge waits for the product owner (V-1, #395)
+
+Files: `tests/e2e/features/statement-detail.feature`, `tests/e2e/steps/tenant-form.steps.ts`, `backend/src/services/{qr-bill,pdf}.service.ts`, `backend/src/__tests__/{qr-bill.service,statement-pdf-render}.test.ts`, `backend/src/__tests__/helpers/pdf-text.ts`, reviews and persona report.
+
 ## Session W14: #80 July share of «Heizung Bergregion»
 
 - [x] Compare the Bergregion row with the source table: Mieterverband merkblatt_nebenkostenabrechnung_waehrend_periode.pdf (PDF dated 2023-09-09), page 2, «Verteilungsschlüssel in Bergebieten und im Tessin», row «Berggebiete»: 14.0, 11.5, 11.5, 9.0, 7.0, 4.5, 1.0, 4.0, 5.5, 8.5, 10.5, 13.0, the same as the migration (no misprint); mietrecht.ch and HEV not reachable from the cloud session
@@ -1505,6 +1562,23 @@ Files: `messages/{de,fr,it,en}.json`, `src/lib/ui/SaveStatus.svelte`, `src/__tes
 - [x] Further merge of main and test fix (part order of two invoices with one date): review round 6 `docs/reviews/71-review-6.md` (no Blocker/Major; C-1 pre-existing, C-2 stay in the report)
 - [x] Workflow notes: `docs/reviews/workflow-notes-issue-71.md`
 - [ ] Pull request `Fixes #71`, CI green; merge waits for the product owner (open decision Majors #335, #339; session archived before the push)
+
+## Session: #292 reasons of predefined categories on the invoice (W17)
+
+- [x] `@wip` scenarios: invoice detail (reason of a predefined category, excluded invoice, own non-allocable category), changed texts in `categories.feature`
+- [x] Draft texts (de, fr, it, en) and domain review by `fach-reviewer` before implementing: `docs/reviews/292-fachreview-1.md`; terms #397 (VMWG), #398 (Vollservicevertrag), Lift description #399 (now #407, point 5)
+- [x] Reasons end with their conclusion; OR and VMWG spelled out per reason; Feuerlöscher and Schädlingsbekämpfung «umstritten» with the leaflet; lift with full-service contract; Gebäudeversicherung with the heating exception (204 M-2); help text and `invoices_legal_text` with OR spelled out
+- [x] Contract note and unsure-KI hint with the decided wording
+- [x] Invoice detail shows the category's reason in the categorisation panel, not as a warning; the general note only without a reason (backend: category `type` in the invoice response, contract `invoice.json`)
+- [x] Demo invoices «Wartungsabonnement Lift 2024/2025»
+- [x] Existing tests pinning the old texts updated
+- [x] Slice review by `code-reviewer`: `docs/reviews/292-review-1.md` (C-1, C-4 to C-6 fixed; C-7 rejected)
+- [x] Feature review: personas `docs/design/personas/{weber,helga}-292.md`; key row of a non-allocable invoice without a key removed (Helga P-1, Weber P-5); badge tone and the rest to `offene-punkte.md` U-39, Lift description in #407
+- [x] Closing `code-reviewer` rounds on the fixes: `docs/reviews/292-review-2.md` (C-1 step «sagt die Rechnung ohne Verteilschlüssel nicht, wie sie verteilt würde» with its own precondition, seen red; C-2, C-3 comment; C-4), `docs/reviews/292-review-3.md`
+- [x] Workflow notes: `docs/reviews/workflow-notes-issue-292.md`
+- [ ] Pull request `Fixes #292`, CI green, merge (session archived before the push)
+
+Files: `messages/{de,fr,it,en}.json`, `src/routes/config/categories/CategoryReason.svelte`, `src/routes/invoices/[id]/{+page,CategorizationPanel}.svelte`, `src/lib/types.ts`, `backend/src/services/invoice.service.ts`, `backend/demo/demo-data.sql`, `tests/contracts/invoice.json`, `tests/e2e/{features,steps,questions,targets,fixtures}`, `src/__tests__/{categories-page.dom,categories,invoice-pages.dom,help-page.dom}.test.ts`, `docs/design/offene-punkte.md` (U-39)
 
 ## Session 2026-10-17: fewer review rounds (T1, T4 of `docs/reviews/workflow-rules-review-2026-10-17-2.md`)
 
@@ -1613,6 +1687,41 @@ Files: `.github/workflows/ci.yml`
 - Measured on 4 CPU cores without GPU, model loaded: qwen3-vl:8b-instruct categorize 37 s, read 77–90 s; qwen2.5vl:7b 21 s and 75 s
 - Files (round 2): `tests/e2e/features/invoices.feature`, `tests/e2e/steps/invoice-upload.steps.ts`, `tests/e2e/tasks/invoice-upload.ts`, `tests/e2e/screenplay/interactions.ts` (`Wait.until` timeout), `backend/scripts/llm-stub.ts`
 
+## Session W15: Akonto and rent hints in the contract forms (#66)
+
+Branch `claude/w15-akonto-hints-66`. The pull request says `Refs #66`: one of the three decided parts waits on the product owner.
+
+- [x] @wip scenarios in `contract-new.feature` (Akonto help) and `contract-edit.feature` (running contract: Art. 269d OR, befristet)
+- [x] fach-reviewer round 1 on the scenarios and texts before implementing (`docs/reviews/66-fachreview-1.md`)
+- [x] Akonto help names the Nebenkosten agreed in the Mietvertrag, examples stay (option A)
+- [x] Hint for a contract without Akonto: not built; fach-review M-1 contradicts the decided text, question to the product owner in #66 (label `entscheiden`)
+- [x] Running-contract hint names Art. 269d OR (befristet: #76's sentence, `TODO(fachlich prüfen, #388)`)
+- [x] `TODO(fachlich prüfen, #66)` markers removed; all four languages
+- Files: `messages/{de,fr,it,en}.json`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/new/RentStep.svelte`, `src/lib/ui/MoneyInput.svelte` (help testid), `src/__tests__/contract-edit.dom.test.ts`, `src/__tests__/contract-wizard.dom.test.ts`, `tests/e2e/{features,steps,questions,targets}`
+- [x] Code review round 1 (`docs/reviews/66-review-1.md`)
+- [x] Fach review round 2 (`docs/reviews/66-fachreview-2.md`)
+- [x] Feature review round 1: personas `docs/design/personas/weber-66.md`, `helga-66.md`; P-1 fix (hint says what Dwello does and when to enter an increase)
+- [x] Persona round 2 on the P-1 fix (same reports, «Runde 2»)
+- [x] Code review round 2 (`docs/reviews/66-review-2.md`)
+- [x] Fach review round 3 on the P-1 fix (`docs/reviews/66-fachreview-3.md`)
+- [x] Workflow note: split of a decided issue and the fach round limit (`docs/reviews/workflow-notes-issue-66.md`)
+- [x] Push and pull request follow (CLAUDE.md, Workflow 9)
+
+## Session W15b: hint without Akonto, Nebenkostenpauschale, form rule for befristet (#66, #388)
+
+Branch `claude/w15-akonto-hints-66` (PR #401). Product owner 2026-10-17: #66 option A of the comment plus the glossary term «Nebenkostenpauschale», #388 option A.
+
+- [x] @wip scenarios: hint without Akonto (`contract-new.feature`), form rule in the befristet running-contract hint (`contract-edit.feature`) and in the Akonto hint of the statement preview (`statement-generate.feature`)
+- [x] fach-reviewer round 1 before implementing (`docs/reviews/66b-fachreview-1.md`)
+- [x] `contracts_no_advance_text` per #66 (all four languages)
+- [x] Form rule appended to `contracts_running_text_fixed_term` and `statements_akonto_raise_fixed_term`; `TODO(fachlich prüfen, #388)` removed
+- [x] «Nebenkostenpauschale» in `UBIQUITOUS_LANGUAGE.md` (product owner's instruction, against CLAUDE.md «never edit it») and `docs/design/i18n-begriffe.md`
+- Files: `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `src/routes/contracts/ContractForm.svelte` (marker), tests `contract-wizard`, `contracts-i18n`, `contract-edit.dom`, `statement-wizard`, E2E `contract-new`, `contract-edit`, `statement-generate`
+- [x] Code review rounds 1 and 2 (`docs/reviews/66b-review-{1,2}.md`); fach-review rounds 2 and 3 (`docs/reviews/66b-fachreview-{2,3}.md`)
+- [x] Personas `docs/design/personas/{helga,weber}-66b.md`: Helga P-2 fixed (`contracts_agreed_costs_none_text`), Helga P-1 → #428 (product decision)
+- [x] Workflow note: glossary edit on the product owner's instruction, round limit (`docs/reviews/workflow-notes-issue-66.md`)
+- [x] Push and pull request follow (PR #401 says `Fixes #66`, `Fixes #388`)
+
 ## Session 2026-10-17 CI: readable E2E logs, no archive conflicts
 
 No scenario: CI and repository configuration only, no app behaviour changes.
@@ -1652,3 +1761,46 @@ Files: `backend/src/services/config.service.ts`, `backend/src/__tests__/config.p
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-424.md`
 - [x] Checks, reviews, archive, pull request
 - Files: `tests/e2e/fixtures/backend.ts`, `tests/e2e/questions/language.ts`, `tests/e2e/CLAUDE.md`, `src/styles/globals.css`, `tests/e2e/tasks/authentication.ts`, `src/lib/ui/Button.svelte`, `src/__tests__/ui-button.dom.test.ts`, `src/routes/tenants/[id]/TenantDocumentRow.svelte`, `src/routes/documents/DocumentItem.svelte`, `src/routes/statements/generate/BuildingStep.svelte`, `src/__tests__/statement-wizard.dom.test.ts`, `tests/e2e/{targets,tasks}/statement-generate.ts`, `tests/e2e/tasks/contracts.ts`
+## Session 2026-10-17: related issues together, decision issues implemented directly (G2, G1 of `docs/reviews/workflow-rules-review-2026-10-17.md`)
+
+- [x] G2: related issues of one request go into one pull request with one `Fixes #n` each (`.claude/skills/pull-request/SKILL.md`, `CLAUDE.md` "Open work")
+- [x] G1: a decision implemented in the same task closes the decision issue directly, no implementation issue (`.github/ISSUE_TEMPLATE/decision.md`, `CLAUDE.md` "Open work")
+- [x] code-reviewer round 1: `docs/reviews/g2g1-review-1.md` (no Blocker/Major; C-1 to C-4 fixed: `entscheiden` removed once the decision is recorded, each issue's scenario named, markers removed on direct implementation, `Fixes #n` per issue)
+- [x] session archived, pull request
+
+Files: `CLAUDE.md`, `.claude/skills/pull-request/SKILL.md`, `.github/ISSUE_TEMPLATE/decision.md`, `docs/reviews/g2g1-review-1.md`
+
+## Session W15c: Nebenkostenpauschale on the Mietvertrag (#429)
+
+Branch `claude/w15c-pauschale-429`. Product owner 2026-10-17: field «Nebenkostenpauschale pro Monat», shown everywhere the Akonto is, counts in «Monatlich total», never billed, not on the PDF.
+
+- [x] @wip scenarios: record in the wizard (review step, total), edit and contract page, apartment monthly costs, statement does not bill it (the statement scenario pins kept behaviour), warning, carry-over
+- [x] fach-reviewer on scenarios, texts and glossary rows before implementing (`docs/reviews/429-fachreview-1.md`)
+- [x] Migration 0025 `flat_rate_utility_charge` (not null, default 0), schema, routes, service, API contracts, `docs/data-model.md`
+- [x] Form: field in `RentStep`, `contract-form`, `contract-wizard` (summary, total, carry-over, `flatRateNotice`), hint «Kein Akonto» points to it
+- [x] Display: contract page (`ContractTerms`), apartment monthly costs (`MonthlyCostsCard`), every «Monatlich total» (`contract-history.monthlyTotal`, contract list)
+- [x] Glossary rows «Nebenkostenpauschale», «Monatlich total» (product owner confirms the wording in the PR); i18n-begriffe already has the term (#66)
+- [x] Axe and language state `flat-rate-warning` on `contract-new` and `contract-edit`
+- [x] Slice review round 1 (`docs/reviews/429-review-1.md`)
+- [x] Feature review: fach-reviewer round 2 (`docs/reviews/429-fachreview-2.md`), personas Helga and Dr. Weber (`docs/design/personas/helga-429.md`, `weber-429.md`), daten-pruefer round 1 (`docs/reviews/429-datenpruefung-1.md`)
+- [x] Fixes from the feature review: the note «Keine Nebenkosten vereinbart» informs instead of warning when a Pauschale is entered (`AgreedCategories.svelte`, `agreed-categories.dom.test.ts`); reviewed wording of the hint «Kein Akonto», the warning title and en text; glossary row without the repeated sentence; `monthlyTotal` test (`tenant-detail.test.ts`)
+- [x] Dr. Weber P-1 (warning with Akonto and Pauschale) contradicts the decision in #429: #432
+- [x] Product owner confirms the glossary rows and the hint sentence in #429 (2026-10-18); #432 decided option 1 (warn in the mixed case too), its own task
+- [x] Closing code-review rounds (`docs/reviews/429-review-2.md`, C-14 fixed with a scenario; `429-review-3.md`, no Blocker/Major)
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-429.md`)
+- [x] PR `Fixes #429`
+
+Files: `backend/migrations/0025_contract_flat_rate.sql`, `backend/src/{db/schema.ts,routes/contracts.ts,services/contract.service.ts}`, `src/lib/{types,contract-form,contract-wizard}.ts`, `src/lib/server/{apartment,contract-history}.ts`, `src/lib/ui/Alert.svelte`, `src/routes/contracts/{+page.server.ts,AgreedCategories.svelte,[id]/+page.server.ts,[id]/ContractTerms.svelte,new/RentStep.svelte}`, `src/routes/apartments/[id]/MonthlyCostsCard.svelte`, `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `tests/contracts/contract{,s}.json`, `tests/a11y/screens.json`, `tests/e2e/**`.
+
+## Session G3: Glossary from the decisions of 2026-10-18
+
+Branch `claude/brave-babbage-d7bnoa`. Product owner 2026-10-18: the open `entscheiden` issues were decided by adopting the fach-reviewer's unambiguous recommendations; «Führe das Glossar nach» updates the glossary from them.
+
+- [x] `UBIQUITOUS_LANGUAGE.md`: rows from #402 (Leerstand, Verwaltungspauschale family, Abrechnungsdatum, Zahlung zurücksetzen, Abrechnungsnummer, Gebäude ohne Tank, Verbrauch, Bereits bezahlt, Saldo, Vereinbarte Nebenkosten, Nicht vereinbart, Umlagefähige Nebenkosten, Protokoll, Kosten/Nebenkosten des Gebäudes, VMWG, Vollservicevertrag), #407 (Vereinbart ab), #408 (Tage ohne Abrechnung, Kurze Abrechnungsperiode, Hinweis auf fehlende Abrechnungen, Abgerechnet bis, Mietstage, Geleistete Akontobeiträge, Nebenkostenabrechnung), #409 (Akontorechnung, Abgerechnet), #410 (Befristet / Unbefristet, Auszug bestätigt), #411 (Betreiber, Verantwortlicher, Auftragsbearbeiter, Mietzinsdepot, Freigabe, Protokoll des Servers, Ausweiskopie)
+- [x] `docs/design/i18n-begriffe.md`: rows for the new terms as the app already words them; ❓ removed where #405 (1b, 1c) and #408 (point 3) kept the word; changed words (#405 1e, 2b; it «Costi dell’immobile») wait for their implementation
+- [x] Markers of #140, #397, #398 removed (they waited only for the glossary); markers of #294, #334, #362, #370 now say the row exists and the help texts follow
+- [x] Closing code-review round 1 (`docs/reviews/g3-glossary-review-1.md`: C-1 Major, C-2 to C-12 fixed or answered)
+- [x] Re-review of the C-1 fix (`docs/reviews/g3-glossary-review-2.md`: no Blocker/Major; C-4 «Ersatzmieter» row added, its Italian word shared with «Nachmieter» goes to #405)
+- [ ] PR `Fixes #140`, `Fixes #397`, `Fixes #398`, «No scenario: glossary and code comments only»
+
+Files: `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/reviews/g3-glossary-review-{1,2}.md`, comments in `src/lib/overview.ts`, `src/routes/config/{categories/CategoryReason,audit-log/+page}.svelte`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/tenants/[id]/TenantDocumentsCard.svelte`, `src/routes/statements/[id]/CostTable.svelte`, `backend/src/services/pdf.service.ts`, `tests/e2e/features/{settings,statement-generate,statement-detail}.feature`.

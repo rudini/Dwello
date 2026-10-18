@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { agreedCostsOfContract } from '../questions/contract-detail';
-import { noAgreedCostsWarning, reviewed } from '../questions/contract-form';
+import { noAgreedCostsTone, noAgreedCostsWarning, reviewed } from '../questions/contract-form';
 import { agreementQuestionsOf, agreementQuestionsShown, agreementsFailure, notAgreedCostsOf } from '../questions/statement-generate';
 import { openContract } from '../tasks/contract-detail';
 import { leaveOutCategory, reviewContract, untickAllCategories } from '../tasks/contract-form';
@@ -151,4 +151,9 @@ When('der Liegenschaftsverwalter alle Nebenkosten abwählt', async ({ verwalter 
 
 Then('warnt das Formular {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(noAgreedCostsWarning).toContain(message);
+});
+
+Then('weist das Formular ohne Warnung darauf hin, dass keine Nebenkosten vereinbart sind', async ({ verwalter }) => {
+	await verwalter.sees(noAgreedCostsWarning).toContain('Keine Nebenkosten vereinbart');
+	await verwalter.sees(noAgreedCostsTone).toBe('info');
 });
