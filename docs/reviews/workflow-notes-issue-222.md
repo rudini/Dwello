@@ -1,4 +1,4 @@
-# Workflow rules review: issue #222 (Akonto hint and glossary translations)
+# Workflow notes: issue #222 (Akonto hint and glossary translations)
 
 Task: «Setze #222 um» – the hint on deducted advance invoices in the upload dialog and on the invoice page, plus term rows in `docs/design/i18n-begriffe.md`. Three domain rounds, the product owner decided twice during the task.
 

@@ -35,7 +35,7 @@ Branch `feat/glossary-texts-222`. Issue #222 "Decided (product owner)" (the glos
   Checks on 1c81c7e4: `bun run test:coverage` exit 0, `bun run check` exit 0, backend `bun run test` exit 0, `bun run type-check` exit 0, `playwright test --project=chromium` 756 passed, 0 failed
 - [x] Reviews (`code-reviewer`; feature review: personas and `fach-reviewer` where they apply)
 - [x] Before marking complete: all checks in `CLAUDE.md`
-- [x] Workflow review `docs/reviews/workflow-rules-review-issue-222.md`
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-222.md`
 ## Session 2026-10-17 W12: Fedlex check of the statement requirements (#77)
 
 - [x] Read Art. 67, 128, 257a, 257b, 269d, 270b OR (Fedlex, SR 220, as of 1.10.2026, de/fr/it) and Art. 4–8 VMWG (SR 221.213.11, as of 1.10.2025, de/fr/it) on fedlex.data.admin.ch
