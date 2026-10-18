@@ -195,7 +195,6 @@ function workTasks({
 }
 
 // A notice gives time to find the next tenant; the earliest end first (A-4)
-// TODO(fachlich prüfen, #140): «Nachmieter» is not in the glossary
 const successorTasks = ({ noticedContracts }: OverviewInput): Task[] =>
 	[...noticedContracts]
 		.sort((a, b) => a.endDate.localeCompare(b.endDate))
@@ -233,7 +232,7 @@ const fixedTermTasks = ({ expiredContracts }: OverviewInput): Task[] =>
 			icon: 'contract'
 		}));
 // TODO(fachlich prüfen, #331): the task stays while the landlord rightly keeps a document
-// TODO(fachlich prüfen, #334): «Mietzinsdepot» is not in the glossary
+// TODO(fachlich prüfen, #334): «Mietzinsdepot» has its glossary row; the help texts follow
 const formerDocumentTasks = ({ formerTenants = [] }: OverviewInput): Task[] =>
 	formerTenants.map((t) => ({
 		id: `former-documents-${t.tenantId}`,

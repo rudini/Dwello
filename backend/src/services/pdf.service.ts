@@ -662,7 +662,7 @@ const unrounded = (data: StatementPDFData) => roundToRappen(data.totalCosts - da
 const totalRows = (data: StatementPDFData, t: Record<string, string>) => (rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0);
 const priorRow = (doc: Doc, prior: ReturnType<typeof priorLine>, top: number) => (prior ? row(doc, total(prior.label, prior.amount), top) : top);
 // «Bereits bezahlt auf NK-… und NK-…», or what the landlord already refunded
-// TODO(fachlich prüfen, #362): «Bereits bezahlt» / «Bereits zurückerstattet» are not in the glossary yet
+// TODO(fachlich prüfen, #362): «Bereits bezahlt» / «Bereits zurückerstattet» have their glossary row; the help texts follow
 function priorLine(data: StatementPDFData, t: Record<string, string>) {
 	const prior = priorOf(data);
 	if (!prior) return null;
