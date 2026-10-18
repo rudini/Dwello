@@ -19,6 +19,7 @@ export interface ContractFormValues {
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
+	flatRateUtilityCharge?: string; // «Nebenkostenpauschale» (#429); absent in a draft saved before it
 	// «Verwaltungspauschale vereinbart» (#89): at the run's rate, an own rate, none; '' until chosen (no default)
 	managementFee: '' | 'run' | 'own' | 'none';
 	managementFeeRate: string; // the own rate as typed, comma or point
@@ -62,6 +63,7 @@ export function initialContractValues(
 			baseRent: '',
 			additionalRent: '',
 			advancePayment: '',
+			flatRateUtilityCharge: '',
 			managementFee: '',
 			managementFeeRate: ''
 		};
@@ -77,6 +79,7 @@ export function initialContractValues(
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
 		advancePayment: String(contract.monthlyAdvancePayment || ''),
+		flatRateUtilityCharge: String(contract.flatRateUtilityCharge || ''),
 		managementFee: feeChoice(contract),
 		managementFeeRate: contract.managementFeePercent ?? '',
 		agreedCategoryIds: contract.agreedCategoryIds
@@ -114,6 +117,7 @@ export function validateContract(values: ContractFormValues): Record<string, str
 		baseRent: baseRentError(values.baseRent),
 		additionalRent: amountError(values.additionalRent),
 		advancePayment: amountError(values.advancePayment),
+		flatRateUtilityCharge: amountError(values.flatRateUtilityCharge ?? ''),
 		managementFee: values.managementFee ? undefined : m.contracts_error_fee_choice(),
 		managementFeeRate:
 			values.managementFee === 'own' && !isFeeRate(parsePercent(values.managementFeeRate))
@@ -136,6 +140,7 @@ export const contractBody = (values: ContractFormValues) => ({
 	baseRent: String(values.baseRent),
 	additionalRent: String(values.additionalRent || 0),
 	monthlyAdvancePayment: String(values.advancePayment || 0),
+	flatRateUtilityCharge: String(values.flatRateUtilityCharge || 0),
 	managementFeeAgreed: values.managementFee !== 'none',
 	managementFeePercent:
 		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null,

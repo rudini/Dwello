@@ -10,7 +10,8 @@ import { createRental } from './helpers/rental';
 const token = crypto.randomUUID();
 let rental: Awaited<ReturnType<typeof createRental>>;
 
-const contract = async () => (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
+const contract = async () =>
+	(await (await callApi(`/api/v1/contracts/${rental.contract}`)).json()) as { flatRateUtilityCharge: string };
 
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2020-01-01', monthlyAdvancePayment: '0' });

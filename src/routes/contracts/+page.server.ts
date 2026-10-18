@@ -2,6 +2,7 @@ import { localToday } from '$lib/contract-status';
 import type { ContractsListData, ContractWithDetails } from '$lib/types';
 import type { PageServerLoad } from './$types';
 import { missingByContract } from '$lib/server/missing-statements';
+import { monthlyTotal } from '$lib/server/contract-history';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -49,10 +50,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 			apartmentNumber: (c.apartmentNumber as string) || '',
 			buildingName: (c.buildingName as string) || '',
 			buildingAddress: (c.buildingAddress as string) || '',
-			totalRent:
-				Number(c.baseRent || 0) +
-				Number(c.additionalRent || 0) +
-				Number(c.monthlyAdvancePayment || 0),
+			totalRent: monthlyTotal(c),
 			missingStatement: !!missing?.get(String(c.id))?.length
 		}));
 

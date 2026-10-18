@@ -41,6 +41,7 @@ describe('initialContractValues', () => {
 				...filled,
 				startDate: '',
 				baseRent: '',
+				flatRateUtilityCharge: '',
 				// #89: no default, the landlord chooses
 				managementFee: ''
 			}
@@ -78,6 +79,7 @@ describe('initialContractValues', () => {
 			baseRent: '950.00',
 			additionalRent: '',
 			advancePayment: '120.00',
+			flatRateUtilityCharge: '',
 			managementFee: 'own',
 			managementFeeRate: '4.00'
 		});

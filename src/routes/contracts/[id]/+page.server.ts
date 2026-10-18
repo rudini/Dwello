@@ -9,6 +9,7 @@ import { periodType } from '$lib/server/missing-statements';
 import { invoicesOf } from '$lib/overview';
 import { wizardLink } from '$lib/statement-wizard';
 import { backendMessage } from '$lib/backend-error';
+import { monthlyTotal } from '$lib/server/contract-history';
 import {
 	contractEndError,
 	localToday,
@@ -42,6 +43,7 @@ interface ContractDetailsData {
 		baseRent: number;
 		additionalRent: number;
 		advancePayment: number;
+		flatRateUtilityCharge: number; // «Nebenkostenpauschale» (#429)
 		total: number;
 	};
 }
@@ -140,6 +142,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				baseRent: data.baseRent || '0',
 				additionalRent: data.additionalRent || null,
 				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
+				flatRateUtilityCharge: data.flatRateUtilityCharge || '0',
 				managementFeeAgreed: !!data.managementFeeAgreed,
 				managementFeePercent: data.managementFeePercent ?? null,
 				tenant: {
@@ -191,7 +194,8 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				baseRent,
 				additionalRent,
 				advancePayment,
-				total: baseRent + additionalRent + advancePayment
+				flatRateUtilityCharge: Number(data.flatRateUtilityCharge) || 0,
+				total: monthlyTotal(data)
 			}
 		};
 	} catch (err) {

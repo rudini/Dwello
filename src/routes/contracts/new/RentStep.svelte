@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { advancePaymentNotice, normalizeAmounts } from '$lib/contract-wizard';
+	import { advancePaymentNotice, flatRateNotice, normalizeAmounts } from '$lib/contract-wizard';
 	import type { ContractFormValues } from '$lib/contract-form';
 	import Alert from '$lib/ui/Alert.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
@@ -26,12 +26,15 @@
 
 	const total = $derived.by(() => {
 		const plain = normalizeAmounts(values); // "1'450" as typed
-		return [plain.baseRent, plain.advancePayment, plain.additionalRent].reduce(
-			(sum, amount) => sum + (parseFloat(amount) || 0),
-			0
-		);
+		return [
+			plain.baseRent,
+			plain.advancePayment,
+			plain.flatRateUtilityCharge ?? '',
+			plain.additionalRent
+		].reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
 	});
 	const notice = $derived(advancePaymentNotice(values));
+	const flatRateWarning = $derived(flatRateNotice(values, categories)); // #429
 	const ownRate = $derived(parsePercent(values.managementFeeRate));
 	// «Verwaltungspauschale vereinbart» (#89); TODO(fachlich prüfen, #286): «eigener Satz», «Satz des Abrechnungslaufs»
 	const feeChoices = $derived([
@@ -72,6 +75,29 @@
 {#if notice}
 	<Alert title={m.contracts_no_advance()} testid="advance-payment-notice"><p>{notice}</p></Alert>
 {/if}
+
+<!-- #429: a fixed monthly amount, in «Monatlich total», never billed -->
+<MoneyInput
+	id="flatRateUtilityCharge"
+	label={m.contracts_flat_rate_label()}
+	help={m.contracts_flat_rate_help()}
+	optional
+	bind:value={values.flatRateUtilityCharge}
+	error={errors.flatRateUtilityCharge}
+	testid="contract-flat-rate-input"
+/>
+
+<div role="status">
+	{#if flatRateWarning}
+		<Alert
+			tone="caution"
+			title={m.contracts_flat_rate_warning_title()}
+			testid="contract-flat-rate-warning"
+		>
+			<p>{flatRateWarning}</p>
+		</Alert>
+	{/if}
+</div>
 
 <MoneyInput
 	id="additionalRent"

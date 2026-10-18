@@ -186,7 +186,6 @@ Funktionalität: Mietvertrag bearbeiten
     Und erfährt der Liegenschaftsverwalter, dass er eine Erhöhung begründet und mit dem amtlichen Formular mitteilt
 
   # #429: die Nebenkostenpauschale steht beim Mietvertrag und zählt im Monatlich total
-  @wip
   Szenario: Nebenkostenpauschale nachtragen
     Wenn der Liegenschaftsverwalter die Nebenkostenpauschale auf "120" Franken setzt
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"

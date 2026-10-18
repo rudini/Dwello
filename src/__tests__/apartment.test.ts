@@ -83,6 +83,7 @@ describe('Wohnungsdetail', () => {
 			baseRent: 1200,
 			additionalRent: 50,
 			advancePayment: 180,
+			flatRateUtilityCharge: 0,
 			monthlyTotal: 1430
 		});
 	});
@@ -140,6 +141,7 @@ describe('Wohnungsdetail', () => {
 			baseRent: 0,
 			additionalRent: 0,
 			advancePayment: 0,
+			flatRateUtilityCharge: 0,
 			monthlyTotal: 0
 		});
 	});

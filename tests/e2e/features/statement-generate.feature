@@ -165,7 +165,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #429: die Nebenkostenpauschale wird nicht abgerechnet, nur das Akonto. Hauswart 732.00 für 366 Tage = 2.00 pro Tag;
   # Marc Huber 245 Tage = 490.00 + 3 % = 504.70, Akonto 8 Monate × 50.00 = 400.00, Saldo 104.70
-  @api @wip
+  @api
   Szenario: Die Nebenkostenpauschale zählt nicht in der Abrechnung
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
     Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
