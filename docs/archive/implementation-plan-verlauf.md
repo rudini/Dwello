@@ -1747,7 +1747,7 @@ Branch `claude/brave-babbage-d7bnoa`. Product owner 2026-10-18: the open `entsch
 - [x] `docs/design/i18n-begriffe.md`: rows for the new terms as the app already words them; ❓ removed where #405 (1b, 1c) and #408 (point 3) kept the word; changed words (#405 1e, 2b; it «Costi dell’immobile») wait for their implementation
 - [x] Markers of #140, #397, #398 removed (they waited only for the glossary); markers of #294, #334, #362, #370 now say the row exists and the help texts follow
 - [x] Closing code-review round 1 (`docs/reviews/g3-glossary-review-1.md`: C-1 Major, C-2 to C-12 fixed or answered)
-- [ ] Re-review of the C-1 fix
+- [x] Re-review of the C-1 fix (`docs/reviews/g3-glossary-review-2.md`: no Blocker/Major; C-4 «Ersatzmieter» row added, its Italian word shared with «Nachmieter» goes to #405)
 - [ ] PR `Fixes #140`, `Fixes #397`, `Fixes #398`, «No scenario: glossary and code comments only»
 
-Files: `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/reviews/g3-glossary-review-1.md`, comments in `src/lib/overview.ts`, `src/routes/config/{categories/CategoryReason,audit-log/+page}.svelte`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/tenants/[id]/TenantDocumentsCard.svelte`, `src/routes/statements/[id]/CostTable.svelte`, `backend/src/services/pdf.service.ts`, `tests/e2e/features/{settings,statement-generate,statement-detail}.feature`.
+Files: `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/reviews/g3-glossary-review-{1,2}.md`, comments in `src/lib/overview.ts`, `src/routes/config/{categories/CategoryReason,audit-log/+page}.svelte`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/tenants/[id]/TenantDocumentsCard.svelte`, `src/routes/statements/[id]/CostTable.svelte`, `backend/src/services/pdf.service.ts`, `tests/e2e/features/{settings,statement-generate,statement-detail}.feature`.
