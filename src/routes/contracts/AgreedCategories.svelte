@@ -14,7 +14,7 @@
 		categories: { id: string; name: string }[];
 		agreed: string[] | undefined;
 		help: string;
-		flatRate?: boolean; // a Nebenkostenpauschale: no box is the expected choice (persona Helga 429 P-1)
+		flatRate?: boolean; // a Nebenkostenpauschale: no box may be right, so no warning (persona Helga 429 P-1)
 	} = $props();
 
 	const isAgreed = (id: string) => agreed?.includes(id) ?? true;

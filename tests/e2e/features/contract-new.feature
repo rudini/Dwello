@@ -200,3 +200,11 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann erfährt der Liegenschaftsverwalter, wo er eine Nebenkostenpauschale einträgt
     Wenn der Liegenschaftsverwalter eine Nebenkostenpauschale von "120" Franken einträgt
     Dann warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet
+
+  # persona Helga 429 P-1: deckt die Pauschale alle Nebenkosten, sind keine Häkchen richtig und kein Grund für eine Warnung
+  Szenario: Mit Nebenkostenpauschale und ohne angekreuzte Nebenkosten warnt das Formular nicht
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Und der Liegenschaftsverwalter eine Nebenkostenpauschale von "120" Franken einträgt
+    Und der Liegenschaftsverwalter alle Nebenkosten abwählt
+    Dann weist das Formular ohne Warnung darauf hin, dass keine Nebenkosten vereinbart sind

@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { advancePaymentNotice, flatRateNotice, normalizeAmounts } from '$lib/contract-wizard';
 	import type { ContractFormValues } from '$lib/contract-form';
+	import { plainAmount } from '$lib/invoice';
 	import Alert from '$lib/ui/Alert.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
@@ -142,7 +143,7 @@
 	{categories}
 	bind:agreed={values.agreedCategoryIds}
 	help={agreedHelp}
-	flatRate={parseFloat(normalizeAmounts(values).flatRateUtilityCharge ?? '') > 0}
+	flatRate={parseFloat(plainAmount(values.flatRateUtilityCharge ?? '')) > 0}
 />
 
 <p class="flex items-baseline justify-between gap-4 border-t border-line pt-4 text-lg">
