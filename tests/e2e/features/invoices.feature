@@ -108,9 +108,9 @@ Funktionalität: Rechnungsliste
     Und ist die Datei von "Sammelscan" nicht zum Erstellen ausgewählt
 
   # Die KI-Ersatzattrappe erkennt am Rechnungssteller, was auf der Rechnung steht (backend/scripts/llm-stub.ts)
-  Szenario: Schlussrechnung mit abgezogenen Akontozahlungen
+  Szenario: Schlussrechnung mit abgezogenen Akontorechnungen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
-    Dann sagt die Datei von "Werke Schlussrechnung" "Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF 1’000.00). Vorgeschlagen ist das Total der Leistungen vor dem Abzug. Erfassen Sie die Akontozahlungen nicht zusätzlich als eigene Rechnungen, sonst zählen sie doppelt."
+    Dann sagt die Datei von "Werke Schlussrechnung" "Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF 1’000.00). Vorgeschlagen ist das Total vor dem Abzug. Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist."
 
   Szenario: Rechnung mit Kosten, die nicht umlagefähig sind
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Lift Service und Reparatur" hochlädt
@@ -169,4 +169,4 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter bei der Datei von "Werke Schlussrechnung" die Kategorie "Allgemeinstrom" wählt
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Und der Liegenschaftsverwalter die Rechnung von "Werke Schlussrechnung" ansieht
-    Dann erinnert der Beleg "Auf dem Beleg sind bereits bezahlte Beträge abgezogen (CHF 1’000.00). Prüfen Sie, dass sie nur einmal zählen: Ist der Betrag das Total vor dem Abzug, dürfen die Akontorechnungen nicht zusätzlich erfasst sein."
+    Dann erinnert der Beleg "Auf dem Beleg sind bereits bezahlte Beträge abgezogen (CHF 1’000.00). Prüfen Sie, dass sie nur einmal zählen: Der Betrag ist das Total vor dem Abzug, und die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist."
