@@ -21,6 +21,19 @@ describe('Button', () => {
 		expect(byTestId('go')!.getAttribute('href')).toBe('/tenants/new');
 	});
 
+	// WebKit zeigt ein Bild sonst an, statt es zu speichern (#424); ein gewöhnlicher Link speichert nichts
+	it('lässt die Datei eines Links auf Wunsch speichern statt anzeigen', () => {
+		show(Button, {
+			children: label,
+			href: '/documents/d1/pdf',
+			download: true,
+			testid: 'save-file'
+		});
+		expect(byTestId('save-file')!.hasAttribute('download')).toBe(true);
+		show(Button, { children: label, href: '/tenants/new', testid: 'go' });
+		expect(byTestId('go')!.hasAttribute('download')).toBe(false);
+	});
+
 	it('öffnet einen Link auf Wunsch in einem neuen Tab und sagt es', () => {
 		show(Button, {
 			children: label,

@@ -1,0 +1,7 @@
+# Workflow notes: #424 (E2E in Firefox and WebKit)
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `tests/e2e/CLAUDE.md`, "Run" (`bun run test:e2e` runs all browsers) | A local run of all four projects at once put more than 1000 apartments into `dwello_e2e`; the contract wizard loads `apartments?limit=1000` sorted by building name, so scenarios missed their apartment (30 failures that do not happen in CI). The five CI shards run one after another were green. | Say that a local check of «all browsers, as on main» runs the five shards one after another (`--grep-invert @a11y --shard=i/5`), not one `bun run test:e2e`. |
+| `CLAUDE.md`, Gotchas «Cloud sessions» | Firefox and WebKit are not in the image; `npx playwright install firefox webkit` needed `cdn.playwright.dev` and `playwright.download.prss.microsoft.com` in the environment's allowed hosts, then `npx playwright install-deps` (apt). | Name these hosts and the two commands where the session-start hook or the gotcha talks about Playwright browsers. |
+| `CLAUDE.md`, Workflow 1 (scenario first) | Every fix of #424 was shown red by an existing scenario in Firefox or WebKit, and the issue named them («the existing scenarios above»); no new scenario. | None; noted because the PR says so instead of `No scenario`. |

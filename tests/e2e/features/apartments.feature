@@ -42,7 +42,7 @@ Funktionalität: Wohnungsliste
     Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
     Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnungen gefunden"
 
-  # Wohnungsnummern ohne die Buchstaben a bis f: sonst passen sie in die UUID der Testnamen
+  # Wohnungsnummern ohne die Buchstaben a bis f: sonst passen sie in die Hex-Ziffern der Testnamen
   # #160, #373: jedes Wort muss zur Wohnungsnummer, zum Gebäudenamen oder zur Adresse des Gebäudes passen
   Szenario: Wohnungen wortweise nach Gebäude, Adresse und Wohnungsnummer suchen
     Angenommen das Gebäude "Seepark" an der "Seestrasse 5" in "Uster" existiert

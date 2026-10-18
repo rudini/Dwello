@@ -1,6 +1,6 @@
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
-import { Click, Cookies, NoticeRequest, Navigate } from '../screenplay/interactions';
+import { Click, Cookies, NoticeRequest, Navigate, Wait } from '../screenplay/interactions';
 import { userMenuButton } from '../targets/app-frame';
 import { loginButton, logoutButton } from '../targets/authentication';
 
@@ -10,7 +10,9 @@ export const GOOGLE_SIGN_IN = 'Anmeldung bei Google';
 export const signInWith = (provider: string): Activity => (actor) =>
 	actor.attemptsTo(NoticeRequest(/^https:\/\/accounts\.google\.com\//, GOOGLE_SIGN_IN), Click.on(loginButton(provider)));
 
-export const signOut: Activity = (actor) => actor.attemptsTo(Click.on(userMenuButton), Click.on(logoutButton));
+// ends on the sign-in page: a step after it would otherwise race the sign-out's redirect (WebKit, #424)
+export const signOut: Activity = (actor) =>
+	actor.attemptsTo(Click.on(userMenuButton), Click.on(logoutButton), Wait.until(loginButton('Google')));
 
 /** The session cookies of a session that ended a minute ago */
 export const expireSession = (baseURL: string): Activity => async (actor) =>

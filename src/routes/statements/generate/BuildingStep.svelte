@@ -24,22 +24,17 @@
 	let billed = $state<Record<string, { contracts: number; billed: number; partly: number }>>({});
 	$effect(() => {
 		const ids = buildings.map((b) => b.id);
-		api
-			.get<{ invoices: { buildingId: string }[] }>('/invoices', {
+		// both answers shown at once: one arriving later would push the rows below away while a building is clicked
+		// (seen in Firefox, #424)
+		Promise.all([
+			api.get<{ invoices: { buildingId: string }[] }>('/invoices', {
 				dateFrom: period.start,
 				dateTo: period.end,
 				isValidUtilityCost: 'true',
 				limit: '1000'
-			})
-			.then(({ data }) => {
-				if (!data) return;
-				const counts = Object.fromEntries(ids.map((id) => [id, 0]));
-				for (const { buildingId } of data.invoices) if (buildingId in counts) counts[buildingId]++;
-				invoiceCounts = counts;
-			});
-		// Contracts with a statement in the period already get none from this run
-		api
-			.get<{ buildingId: string; contracts: number; billed: number; partly: number }[]>(
+			}),
+			// Contracts with a statement in the period already get none from this run
+			api.get<{ buildingId: string; contracts: number; billed: number; partly: number }[]>(
 				'/statements/billed',
 				{
 					buildingIds: ids.join(','),
@@ -47,9 +42,16 @@
 					periodEnd: period.end
 				}
 			)
-			.then(({ data }) => {
-				if (data) billed = Object.fromEntries(data.map((row) => [row.buildingId, row]));
-			});
+		]).then(([invoices, statements]) => {
+			if (invoices.data) {
+				const counts = Object.fromEntries(ids.map((id) => [id, 0]));
+				for (const { buildingId } of invoices.data.invoices)
+					if (buildingId in counts) counts[buildingId]++;
+				invoiceCounts = counts;
+			}
+			if (statements.data)
+				billed = Object.fromEntries(statements.data.map((row) => [row.buildingId, row]));
+		});
 	});
 
 	// «Alle Gebäude» leaves out buildings whose contracts are all billed for the whole period: none gets a statement

@@ -273,6 +273,8 @@ describe('Mieterdetail', () => {
 		expect(letter.getAttribute('aria-label')).toBe('PDF herunterladen: Zahlungserinnerung · NK-2024-001');
 		expect(file.textContent!.trim()).toBe('Datei herunterladen');
 		expect(file.getAttribute('aria-label')).toBe('Datei herunterladen: Ausweiskopie');
+		// gespeichert, nicht angezeigt: WebKit zeigt ein Foto sonst im Browser an (#424)
+		expect([letter, file].every((link) => link.hasAttribute('download'))).toBe(true);
 	});
 
 	it('sagt bei einem Mieter mit Mietverträgen, dass hochgeladene Dokumente einzeln gelöscht werden', () => {

@@ -84,6 +84,8 @@ describe('Dokumente', () => {
 		expect(byTestId('document-mark-sent')).toBeNull();
 		expect(byTestId('document-pdf-link')!.textContent).toContain('Datei herunterladen');
 		expect(byTestId('document-pdf-link')!.getAttribute('aria-label')).toBe('Datei herunterladen: Ausweiskopie');
+		// gespeichert, nicht angezeigt: WebKit zeigt ein Foto sonst im Browser an (#424)
+		expect(byTestId('document-pdf-link')!.hasAttribute('download')).toBe(true);
 	});
 
 	it('nennt hochgeladene Dokumente, wenn noch keine Dokumente da sind', () => {

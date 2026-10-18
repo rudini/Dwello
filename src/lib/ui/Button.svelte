@@ -11,6 +11,7 @@
 		variant = 'secondary',
 		href,
 		reload = false,
+		download = false,
 		target,
 		type = 'button',
 		formaction,
@@ -29,6 +30,7 @@
 		variant?: Variant;
 		href?: string;
 		reload?: boolean; // follows href with a full page load
+		download?: boolean; // saves the file the link answers, also an image a browser would show (WebKit, #424)
 		target?: '_blank'; // a link that opens in a new tab, e.g. a PDF to look at
 		type?: 'button' | 'submit';
 		formaction?: string;
@@ -81,6 +83,7 @@
 		aria-describedby={describedby}
 		data-testid={testid}
 		data-sveltekit-reload={reload || undefined}
+		download={download || undefined}
 		{target}
 		rel={target ? 'noopener' : undefined}
 	>

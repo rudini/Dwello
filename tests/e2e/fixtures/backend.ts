@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import type { CallTheApi } from '../screenplay/abilities';
 import { inDays } from './dates';
 
-// Scenario-scoped test data: Gherkin names map to UUID-namespaced names, and everything is removed afterwards.
+// Scenario-scoped test data: Gherkin names map to names with 12 random hex digits, and everything is removed afterwards.
 export function testData(api: CallTheApi) {
 	const names = new Map<string, string>();
 	const ids = new Map<string, string>();
@@ -13,7 +13,9 @@ export function testData(api: CallTheApi) {
 	const extras: string[] = []; // invoices and configuration records, removed before their building
 	const restores: (() => Promise<unknown>)[] = []; // predefined records a scenario changed
 	const unique = (title: string) => {
-		const name = `${title} ${randomUUID()}`;
+		// 12 hex digits without hyphens: Firefox and WebKit do not break a UUID's digit groups, so a full UUID in a name
+		// made pages wider than 390 px there (#424); 48 bits keep the names of one run apart
+		const name = `${title} ${randomUUID().replaceAll('-', '').slice(0, 12)}`;
 		names.set(title, name);
 		return name;
 	};

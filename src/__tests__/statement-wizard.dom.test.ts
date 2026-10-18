@@ -1305,6 +1305,49 @@ describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 		// the list stays inside its panel on phones (a fieldset is as wide as its content by default)
 		expect(document.querySelector('fieldset')!.className).toMatch(/(^| )min-w-0( |$)/);
 	});
+
+	// Beide Angaben kommen zusammen: eine, die später ankommt, schöbe die Zeilen darunter weg, während der
+	// Liegenschaftsverwalter ein Gebäude anklickt (Firefox, #424)
+	it('zeigt die Rechnungen eines Gebäudes erst, wenn auch die schon abgerechneten Mietverträge da sind', async () => {
+		let releaseBilled = () => {};
+		const billedLater = new Promise<void>((resolve) => (releaseBilled = resolve));
+		globalThis.fetch = (async (url: string) => {
+			if (String(url).includes('/statements/billed')) {
+				await billedLater;
+				return new Response(JSON.stringify([]), { status: 200 });
+			}
+			return new Response(JSON.stringify({ invoices: [{ buildingId: 'b1' }], total: 1 }), {
+				status: 200
+			});
+		}) as typeof fetch;
+		open();
+		await settle();
+		next();
+		await settle();
+		expect(byTestId('generate-building-invoices-b1')).toBeNull();
+
+		releaseBilled();
+		await settle();
+		expect(byTestId('generate-building-invoices-b1')!.textContent).toContain(
+			'1 Rechnung in der Abrechnungsperiode'
+		);
+	});
+
+	// beide zusammen heisst nicht: beide oder keine (Code-Review 424-2, C-8)
+	it('zeigt die Rechnungen eines Gebäudes auch, wenn die abgerechneten Mietverträge nicht geladen werden', async () => {
+		fakeBff((call) =>
+			call.path.startsWith('/statements/billed')
+				? [500]
+				: [200, { invoices: [{ buildingId: 'b1' }], total: 1 }]
+		);
+		open();
+		await settle();
+		next();
+		await settle();
+		expect(byTestId('generate-building-invoices-b1')!.textContent).toContain(
+			'1 Rechnung in der Abrechnungsperiode'
+		);
+	});
 });
 
 // #89: the run's rate applies only where the contract agrees a Verwaltungspauschale; the others are named with a link

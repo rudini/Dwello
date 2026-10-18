@@ -178,7 +178,9 @@
 	{#each adjustments as row (row.label)}
 		<!-- each pair directly in the list: a <dl> holds only groups of <dt> and <dd> -->
 		<div class="flex justify-between gap-4" data-testid={row.testid}>
-			<dt class="text-ink-muted">{row.label}</dt>
+			<!-- the statement number may break: Firefox does not break it at its hyphens, so with the amount beside it the
+			     row was wider than a 390 px screen (#424) -->
+			<dt class="min-w-0 break-words text-ink-muted">{row.label}</dt>
 			<dd class="whitespace-nowrap text-ink">{row.value}</dd>
 		</div>
 	{/each}
