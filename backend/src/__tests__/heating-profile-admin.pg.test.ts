@@ -41,7 +41,7 @@ describe('Eigene Heizprofile', () => {
 
 		expect(response.status).toBe(409);
 		expect(await response.json()).toEqual({
-			error: `Ein Heizprofil mit dem Namen "Bergtal ${token}" existiert bereits.`,
+			error: `Ein Heizprofil mit dem Namen «Bergtal ${token}» existiert bereits.`,
 			code: 'HEATING_PROFILE_NAME_TAKEN',
 			params: { name: `Bergtal ${token}` }
 		});

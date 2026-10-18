@@ -4,7 +4,7 @@
 	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import type { HeatingProfile } from '$lib/types';
 	import { localName } from '$lib/names';
-	import { parsePercent } from '$lib/utils/format';
+	import { isFeeRate, parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -23,11 +23,6 @@
 		managementFeePercent: number;
 		errors: Record<string, string>;
 	} = $props();
-
-	// 3 % is the usual guideline for Swiss utility statements (glossary), not a limit;
-	// TODO(fachlich prüfen, #60): sources name 3 to 5 % depending on the region (review B, MR2-N2); the MV leaflet 2026 names
-	// at most 3 % as usual (cantonal decisions, BWO 32 Nr. 12)
-	const USUAL_MAXIMUM = 3;
 
 	const sum = (profile: HeatingProfile) =>
 		Object.values(profile.monthlyPercentages).reduce((total, value) => total + Number(value), 0);
@@ -96,7 +91,7 @@
 />
 <!-- announced while typing: the hint appears without the focus moving -->
 <div role="status">
-	{#if managementFeePercent > USUAL_MAXIMUM}
+	{#if managementFeePercent > USUAL_MAXIMUM && isFeeRate(managementFeePercent)}
 		<Alert tone="caution" title={m.statements_fee_above_title()} testid="management-fee-hint">
 			<p>{m.statements_fee_above_text({ max: USUAL_MAXIMUM })}</p>
 		</Alert>

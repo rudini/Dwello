@@ -2,7 +2,11 @@ import { m } from '$lib/paraglide/messages';
 import { plainAmount } from './invoice';
 import {
 	apartmentOption,
+	impossible,
+	impossibleYear,
 	initialContractValues,
+	agreedNames,
+	managementFeeText,
 	validateContract,
 	type ContractFormValues
 } from './contract-form';
@@ -35,7 +39,14 @@ export const contractSteps: { label: string; fields: Field[] }[] = [
 		get label() {
 			return m.contracts_rent();
 		},
-		fields: ['baseRent', 'additionalRent', 'advancePayment']
+		fields: [
+			'baseRent',
+			'additionalRent',
+			'advancePayment',
+			'flatRateUtilityCharge',
+			'managementFee',
+			'managementFeeRate'
+		]
 	},
 	{
 		get label() {
@@ -54,10 +65,6 @@ export function stepErrors(values: ContractFormValues, step: number): Record<str
 		)
 	);
 }
-
-// A date field typed over can end up in year 12026; such a date is surely a typing mistake
-export const impossibleYear = () => m.common_error_impossible_year();
-export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
 
 function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
 	return {
@@ -79,11 +86,20 @@ export function advancePaymentNotice(values: ContractFormValues): string | null 
 
 const amount = (value: string) => parseFloat(value) || 0;
 
+/** #429: a Nebenkostenpauschale without Akonto, yet with ticked Nebenkosten (none chosen yet: all ticked) */
+export function flatRateNotice(values: ContractFormValues, categories?: { id: string }[]): string | null {
+	const ticked = values.agreedCategoryIds?.length ?? categories?.length ?? 0;
+	return amount(values.flatRateUtilityCharge ?? '') > 0 && !(amount(values.advancePayment) > 0) && ticked > 0
+		? m.contracts_flat_rate_warning_text()
+		: null;
+}
+
 /** The amounts in the form the checks and the backend read */
 export const normalizeAmounts = (values: ContractFormValues): ContractFormValues => ({
 	...values,
 	baseRent: plainAmount(values.baseRent),
 	advancePayment: plainAmount(values.advancePayment),
+	flatRateUtilityCharge: plainAmount(values.flatRateUtilityCharge ?? ''),
 	additionalRent: plainAmount(values.additionalRent)
 });
 
@@ -98,11 +114,16 @@ export function startDateNotice(startDate: string, today: string): string | null
 export function contractSummary(
 	values: ContractFormValues,
 	tenants: { id: string; name: string }[],
-	apartments: { id: string; unit: string; building: string }[]
+	apartments: { id: string; unit: string; building: string }[],
+	categories: { id: string; name: string }[] = [] // the umlagefähige ones the contract can agree (#91)
 ) {
 	const apartment = apartments.find((a) => a.id === values.apartmentId);
+	const flatRate = amount(values.flatRateUtilityCharge ?? '');
 	const gross =
-		amount(values.baseRent) + amount(values.advancePayment) + amount(values.additionalRent);
+		amount(values.baseRent) +
+		amount(values.advancePayment) +
+		flatRate +
+		amount(values.additionalRent);
 	return [
 		{
 			label: m.contracts_tenant(),
@@ -143,17 +164,40 @@ export function contractSummary(
 			field: 'advancePayment'
 		},
 		{
+			label: m.common_flat_rate_utility_charge(),
+			value: formatCurrency(flatRate),
+			step: 4,
+			field: 'flatRateUtilityCharge'
+		},
+		{
 			label: m.common_additional_rent(),
 			value: formatCurrency(amount(values.additionalRent)),
 			step: 4,
 			field: 'additionalRent'
+		},
+		{
+			label: m.contracts_fee_label(),
+			value: values.managementFee
+				? managementFeeText(
+						values.managementFee !== 'none',
+						values.managementFee === 'own' ? values.managementFeeRate : null
+					)
+				: '',
+			step: 4,
+			field: 'managementFee'
+		},
+		{
+			label: m.contracts_agreed_costs_label(),
+			value: agreedNames(values.agreedCategoryIds, categories).join(', ') || m.contracts_agreed_costs_none(),
+			step: 4,
+			field: 'agreedCosts'
 		},
 		{ label: m.common_monthly_total(), value: formatCurrency(gross), step: null, field: '' }
 	];
 }
 
 /**
- * What the wizard starts with: a draft from this browser, else empty; tenant and apartment given in the
+ * What the wizard starts with: a draft from this browser, else empty; tenant, apartment and start given in the
  * address win (e.g. back from "Neuen Mieter erfassen"). Tenants and apartments deleted meanwhile are dropped.
  */
 export function startValues(
@@ -165,6 +209,7 @@ export function startValues(
 	const values = { ...fromUrl, ...draft };
 	values.tenantId = fromUrl.tenantId || values.tenantId;
 	values.apartmentId = fromUrl.apartmentId || values.apartmentId;
+	values.startDate = fromUrl.startDate || values.startDate;
 	const dropped =
 		(!!values.tenantId && !known.tenantIds.includes(values.tenantId)) ||
 		(!!values.apartmentId && !known.apartmentIds.includes(values.apartmentId));
@@ -184,4 +229,62 @@ export function apartmentChoices(
 			...apartmentOption(apartment, availability.get(apartment.id), false)
 		}))
 		.sort((a, b) => Number(a.disabled) - Number(b.disabled));
+}
+
+type Rent = Pick<ContractFormValues, 'baseRent' | 'additionalRent' | 'advancePayment' | 'flatRateUtilityCharge'>;
+/** A contract as the contract list answers it, with what the wizard reads */
+export type ListedContract = {
+	id: string;
+	tenantId?: string;
+	startDate: string;
+	endDate: string | null;
+	terminated?: boolean;
+	baseRent: string;
+	additionalRent?: string | null;
+	monthlyAdvancePayment?: string | null;
+	flatRateUtilityCharge?: string | null; // «Nebenkostenpauschale» (#429)
+};
+const RENT = ['baseRent', 'additionalRent', 'advancePayment', 'flatRateUtilityCharge'] as const;
+const kept = (amount?: string | null) => (Number(amount) ? String(amount) : ''); // a zero stays empty
+const rentOf = (rent: Rent): Rent => ({
+	baseRent: rent.baseRent,
+	additionalRent: rent.additionalRent,
+	advancePayment: rent.advancePayment,
+	flatRateUtilityCharge: rent.flatRateUtilityCharge ?? ''
+});
+
+/** Amounts of the apartment's last contract that starts before `before`, to take over (#144) */
+export function lastRent(
+	response: { data?: { contracts?: ListedContract[] }; error?: unknown },
+	before = ''
+) {
+	const last = (response.error ? [] : (response.data?.contracts ?? []))
+		.filter((c) => !before || c.startDate.slice(0, 10) < before)
+		.sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
+	if (!last) return null;
+	return {
+		baseRent: kept(last.baseRent),
+		additionalRent: kept(last.additionalRent),
+		advancePayment: kept(last.monthlyAdvancePayment),
+		flatRateUtilityCharge: kept(last.flatRateUtilityCharge),
+		startDate: last.startDate,
+		endDate: last.endDate,
+		terminated: !!last.terminated
+	};
+}
+
+/** True while the amounts are the taken-over ones, however they are written ("950" or "950.00") */
+export const rentTakenOver = (values: Rent, rent: Rent | null) =>
+	!!rent &&
+	RENT.every(
+		(key) => (parseFloat(plainAmount(values[key] ?? '')) || 0) === (parseFloat(rent[key] ?? '') || 0)
+	);
+
+/** The amounts to fill in: only into empty fields or ones still holding the amounts filled in before */
+export function rentToPreset(values: Rent, rent: Rent | null, preset: Rent | null): Rent | null {
+	if (!RENT.every((key) => !values[key]) && !rentTakenOver(values, preset)) return null;
+	if (rent) return rentOf(rent);
+	return preset
+		? { baseRent: '', additionalRent: '', advancePayment: '', flatRateUtilityCharge: '' }
+		: null;
 }

@@ -1,0 +1,7 @@
+# Workflow notes: W6c, QR payment part on reminders (#108), Art. 257d OR hint (#59)
+
+| Rule location | What happened in this task | Proposed change |
+|---|---|---|
+| skill `pull-request` («one pull request per issue») vs `CLAUDE.md`, Workflow 8 («a request that covers several issues is one session») | The two issues were planned, reviewed and committed as one session on one branch; only at the push the skill asked for one pull request per issue, so the #59 files were copied onto a second branch from `main` after the fact (its reviews ride with it, the session archive with the last pull request). | Say it at the start: `CLAUDE.md`, "Working on an issue", «a request with several issues: one branch per issue from the start, one plan session», or let issues that touch the same area share one pull request. |
+| `tests/e2e/CLAUDE.md`, "No scenario"; `tests/e2e/fixtures/backend.ts` | The dialog after the 3rd Mahnung (#59) cannot be reached in E2E: three reminders need two passed Zahlungsfristen and the backend clock cannot move; a DOM test covers it (`No scenario`). The persona needed SQL to see it. | A seed step that ages a statement's reminders through a test-only path, or name this case in the "No scenario" list. |
+| `~/.claude/stop-hook-git-check.sh` vs `CLAUDE.md`, Workflow 9 | The stop hook asked three times to commit and push while subagent reviews ran; CLAUDE.md says it overrides nothing, so it cost one local commit each time. | As already noted in earlier notes; nothing new. |

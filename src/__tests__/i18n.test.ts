@@ -28,6 +28,32 @@ describe('Sprachdateien', () => {
 		expect(wrong).toEqual([]);
 	});
 
+	// «de« Saisir» once lost its space before « (review #57, C-1)
+	it('Französisch setzt vor « ein Leerzeichen', () => {
+		const messages = JSON.parse(readFileSync('messages/fr.json', 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && /[\p{L}\d]«/u.test(text)
+		);
+		expect(wrong).toEqual([]);
+	});
+
+	// #348: names in «», as everywhere else
+	it.each(languages)('%s setzt Guillemets, keine geraden Anführungszeichen', (language) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && text.includes('"')
+		);
+		expect(wrong).toEqual([]);
+	});
+
+	it.each(languages)('%s schliesst jede Fehlermeldung eines Felds mit einem Punkt', (language) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([key, text]) => key.includes('_error_') && !/[.?!]$/.test(String(text))
+		);
+		expect(wrong).toEqual([]);
+	});
+
 	it('Italienisch sagt «immobile», nicht «stabile»', () => {
 		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
 		const wrong = Object.entries(messages).filter(
@@ -36,34 +62,72 @@ describe('Sprachdateien', () => {
 		);
 		expect(wrong).toEqual([]);
 	});
+
+	// #83: Kündigungsfrist and Kündigungstermin as in Art. 266a–266c OR
+	it('Französisch sagt «délai de congé» und «terme de congé», nicht «… de résiliation»', () => {
+		const messages = JSON.parse(readFileSync('messages/fr.json', 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && /(délai|terme)s? de résiliation/i.test(text)
+		);
+		expect(wrong).toEqual([]);
+	});
+
+	it('Italienisch sagt «termine di preavviso» und «ricevimento della disdetta»', () => {
+		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && /termin[ei] di disdetta|\bricezione\b/i.test(text)
+		);
+		expect(wrong).toEqual([]);
+	});
 });
 
 // Renders a page through the server hook; the page template carries %lang%
-async function htmlLang(cookie?: string) {
+async function renderLogin(acceptLanguage: string, cookie?: string) {
 	const url = new URL('http://localhost:3000/login');
 	const event = {
 		url,
-		// A browser that prefers French; only the chosen language counts
 		request: new Request(url, {
-			headers: { 'accept-language': 'fr-CH', ...(cookie ? { cookie } : {}) }
+			headers: { 'accept-language': acceptLanguage, ...(cookie ? { cookie } : {}) }
 		}),
 		cookies: { get: () => undefined },
 		locals: {} as App.Locals
 	};
 	const resolve = vi.fn(
 		async (_event, options) =>
-			new Response(await options.transformPageChunk({ html: '<html lang="%lang%">', done: true }))
+			new Response(await options.transformPageChunk({ html: '<html lang="%lang%">', done: true }), {
+				headers: { 'content-type': 'text/html' }
+			})
 	);
-	const response = await handle({ event, resolve } as never);
-	return response.text();
+	return (await handle({ event, resolve } as never)) as Response;
 }
+const htmlLang = async (acceptLanguage: string, cookie?: string) =>
+	(await renderLogin(acceptLanguage, cookie)).text();
 
 describe('Sprache der Seite', () => {
-	it('ist ohne Wahl Deutsch, auch wenn der Browser eine andere Sprache will', async () => {
-		expect(await htmlLang()).toBe('<html lang="de">');
+	it.each([
+		['fr-CH,fr;q=0.9', 'fr'],
+		['it-CH', 'it'],
+		['en-GB,en;q=0.9', 'en'],
+		['de-CH', 'de']
+	])('folgt ohne Wahl der Sprache des Browsers (%s)', async (acceptLanguage, language) => {
+		expect(await htmlLang(acceptLanguage)).toBe(`<html lang="${language}">`);
 	});
 
-	it.each(['fr', 'it', 'en'])('folgt der gewählten Sprache %s', async (language) => {
-		expect(await htmlLang(`PARAGLIDE_LOCALE=${language}`)).toBe(`<html lang="${language}">`);
+	it('ist ohne Wahl Deutsch, wenn der Browser keine der vier Sprachen will', async () => {
+		expect(await htmlLang('es-ES,es;q=0.9')).toBe('<html lang="de">');
+	});
+
+	it.each(['fr', 'it', 'en'])(
+		'folgt der gewählten Sprache %s, auch wenn der Browser Deutsch will',
+		async (language) => {
+			expect(await htmlLang('de-CH', `PARAGLIDE_LOCALE=${language}`)).toBe(
+				`<html lang="${language}">`
+			);
+		}
+	);
+
+	// A cache in between must not hand a French page to a German browser
+	it('sagt Zwischenspeichern, dass die Seite von der Browsersprache abhängt', async () => {
+		expect((await renderLogin('fr-CH')).headers.get('vary')).toContain('Accept-Language');
 	});
 });

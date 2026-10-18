@@ -4,24 +4,27 @@
 	import type { Proposal } from '$lib/server/category';
 	import type { Category } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
-	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import Textarea from '$lib/ui/Textarea.svelte';
 	import SaveForm from '../SaveForm.svelte';
 	import CategoryProposal from './CategoryProposal.svelte';
 	import CategoryReason from './CategoryReason.svelte';
+	import HeatingChoice from './HeatingChoice.svelte';
 
-	// `proposal` only on a new category: the KI's answer to «Von der KI prüfen lassen»
+	// `ki` and `proposal` only on a new category: whether the KI is on (#219), its answer to «Von der KI prüfen lassen»
 	let {
 		action,
 		category,
 		errors = {},
+		ki = false,
 		proposal,
 		submitLabel
 	}: {
 		action?: string;
 		category?: Category & { key?: string; predefined?: boolean };
 		errors?: Record<string, string>;
+		ki?: boolean;
 		proposal?: Proposal | null;
 		submitLabel: string;
 	} = $props();
@@ -39,7 +42,8 @@
 			sortOrder: String(category?.sortOrder || ''),
 			// A new category starts without a choice (#176)
 			allowed: category ? String(category.isAllowedUtilityCost) : '',
-			heating: category?.isHeatingCost ?? false
+			heating: category?.isHeatingCost ?? false,
+			fuel: category?.isFuel ?? false
 		}))
 	);
 	// The reason of a predefined category follows the choice in the form, not the saved one
@@ -101,9 +105,11 @@
 		error={errors.name}
 		testid="category-name-input"
 	/>
-	<TextInput
+	<Textarea
 		id="description"
 		name="description"
+		rows={6}
+		testid="category-description-input"
 		label={m.invoices_description()}
 		help={category?.predefined ? m.categories_description_predefined() : undefined}
 		optional
@@ -120,7 +126,7 @@
 			testid="category-allowance"
 		/>
 		<CategoryReason category={chosen} />
-		{#if action}
+		{#if ki}
 			<div>
 				<div>
 					<Button
@@ -149,14 +155,7 @@
 			</div>
 		{/if}
 	</div>
-	<Checkbox
-		id="isHeatingCost"
-		name="isHeatingCost"
-		label={m.categories_heating()}
-		help={m.categories_heating_help()}
-		bind:checked={values.heating}
-		testid="category-heating-checkbox"
-	/>
+	<HeatingChoice bind:heating={values.heating} bind:fuel={values.fuel} />
 	<TextInput
 		id="sortOrder"
 		name="sortOrder"
@@ -169,8 +168,9 @@
 		bind:value={values.sortOrder}
 	/>
 
-	<fieldset class="flex flex-col gap-4">
+	<fieldset class="flex flex-col gap-4" aria-describedby="translations-help">
 		<legend class="text-lg font-semibold text-ink">{m.categories_translations()}</legend>
+		<p id="translations-help" class="text-ink-muted">{m.categories_translations_help()}</p>
 		<div class="grid gap-6 md:grid-cols-3">
 			{#each translations as { key, label } (key)}
 				<TextInput id={key} name={key} {label} optional bind:value={values[key]} />

@@ -12,6 +12,9 @@
 		...(costs.advancePayment
 			? [{ label: m.common_advance_payment(), value: costs.advancePayment }]
 			: []),
+		...(costs.flatRateUtilityCharge
+			? [{ label: m.common_flat_rate_utility_charge(), value: costs.flatRateUtilityCharge }]
+			: []),
 		...(costs.additionalRent
 			? [{ label: m.common_additional_rent(), value: costs.additionalRent }]
 			: [])
@@ -29,7 +32,7 @@
 		<div class="flex justify-between gap-4 border-t border-line pt-2">
 			<dt class="font-semibold text-ink">{m.common_monthly_total()}</dt>
 			<dd class="font-bold text-ink" data-testid="monthly-costs-total">
-				{formatCurrency(costs.totalBrutto)}
+				{formatCurrency(costs.monthlyTotal)}
 			</dd>
 		</div>
 	</dl>

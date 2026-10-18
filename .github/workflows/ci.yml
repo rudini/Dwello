@@ -7,7 +7,9 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # A newer push to a pull request replaces its run; on main every run finishes and only the newest waiting one is kept,
+  # so quick merges are tested together instead of cancelling each other
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   NODE_VERSION: 22
@@ -20,6 +22,7 @@ jobs:
     outputs:
       backend: ${{ steps.diff.outputs.backend }}
       app: ${{ steps.diff.outputs.app }}
+      ui: ${{ steps.diff.outputs.ui }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,13 +30,16 @@ jobs:
       - id: diff
         run: |
           if [ "${{ github.event_name }}" != pull_request ]; then
-            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && exit 0
+            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
-          git diff --name-only "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
+          git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
           # The API contracts are checked against the backend (api-contracts.pg.test.ts)
           echo "backend=$(grep -qE '^(backend|tests/contracts)/' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|screens/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # What the axe check sees: frontend code (not its unit tests), texts, styles, build config, dependencies, the check itself
+          ui_files=$(grep -vE '(^|/)__tests__/|\.(test|spec)\.ts$|\.md$|^tests/e2e/features/' changed.txt | grep -E '^(src|messages|static|project\.inlang|tests/a11y|tests/e2e)/|^(tailwind|postcss|svelte|vite|playwright)\.config\.(js|ts)$|^(package\.json|bun\.lock|tsconfig\.json|\.github/workflows/ci\.yml)$' || true)
+          echo "ui=$([ -n "$ui_files" ] || grep -qx tests/e2e/features/accessibility.feature changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   build:
     name: Build
@@ -127,22 +133,29 @@ jobs:
         working-directory: backend
 
   # The axe check (@a11y, every screen and state in tests/a11y/screens.json) runs as its own check, so it can be required on its own
+  # Each runs in shards (Playwright --shard) on parallel runners; the job "e2e-results" reports each under its own name
   e2e-tests:
-    name: ${{ matrix.name }}
+    name: ${{ matrix.name }} (${{ matrix.shard }}/${{ matrix.shards }})
     needs: changes
     if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # main runs every browser, about three times the tests of a pull request (Chromium and the API driver)
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 60 }}
     strategy:
       fail-fast: false
       matrix:
+        # Five shards each: Playwright splits by test count, and the slow screen checks (accessibility.feature,
+        # sprachen-bildschirme.feature) would otherwise fill one shard that runs twice as long as the others
+        suite: [e2e, a11y]
+        shard: [1, 2, 3, 4, 5]
         include:
-          - name: E2E tests
-            filter: --grep-invert @a11y
-            reports: e2e-reports
-          - name: Accessibility (axe)
-            filter: --project=chromium --grep @a11y
-            reports: a11y-reports
+          - { suite: e2e, name: E2E tests, filter: --grep-invert @a11y, reports: e2e-reports, shards: 5 }
+          - { suite: a11y, name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shards: 5 }
+    # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
+    env:
+      SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
+      # Pull requests and the axe check: Chromium only (with the API driver); pushes to main: every browser
+      BROWSERS: ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || 'chromium firefox webkit' }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -158,29 +171,67 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
+      - name: No UI change
+        if: env.SKIP == 'true'
+        run: echo "::notice::No file the axe check sees changed, so it is skipped."
       - uses: actions/checkout@v4
+        if: env.SKIP != 'true'
       - uses: actions/setup-node@v4
+        if: env.SKIP != 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
       - uses: oven-sh/setup-bun@v2
+        if: env.SKIP != 'true'
       - run: bun install --frozen-lockfile
+        if: env.SKIP != 'true'
       - run: bun install --frozen-lockfile
+        if: env.SKIP != 'true'
         working-directory: backend
-      # Pull requests: Chromium and the API driver only; pushes to main: every browser and the API driver
+      # The browsers of this Playwright version from the cache; their system packages are installed each time
+      - uses: actions/cache@v4
+        if: env.SKIP != 'true'
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ env.BROWSERS }}
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
+        if: env.SKIP != 'true'
+        run: bunx playwright install --with-deps ${{ env.BROWSERS }}
       - name: ${{ matrix.name }}
-        run: bun run test:e2e -- ${{ matrix.filter }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
+        if: env.SKIP != 'true'
+        run: bun run test:e2e -- ${{ matrix.filter }} --shard=${{ matrix.shard }}/${{ matrix.shards }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.reports }}
+          name: ${{ matrix.reports }}-${{ matrix.shard }}
           path: |
             playwright-report/
             cucumber-report/
             test-results/
           retention-days: 7
+
+  # The checks "E2E tests" and "Accessibility (axe)" under their old names, so they can stay required: each passes only when all its shards did
+  e2e-results:
+    name: ${{ matrix.name }}
+    needs: [changes, e2e-tests]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    strategy:
+      matrix:
+        include:
+          - { name: E2E tests, shards: 5 }
+          - { name: Accessibility (axe), shards: 5 }
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ needs.changes.result }}" != success ]; then echo "::error::The job Changes failed, so no shard ran."; exit 1; fi
+          if [ "${{ needs.changes.outputs.app }}" != true ]; then exit 0; fi
+          passed=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100" \
+            --jq '[.jobs[] | select(.name | startswith("${{ matrix.name }} (")) | select(.conclusion == "success")] | length')
+          if [ "$passed" != "${{ matrix.shards }}" ]; then echo "::error::$passed of ${{ matrix.shards }} shards passed."; exit 1; fi
 
   fallow:
     name: Fallow audit

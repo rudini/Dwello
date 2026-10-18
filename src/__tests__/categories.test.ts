@@ -1,13 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { actions as listActions, load } from '../routes/config/categories/+page.server';
-import { actions as newActions } from '../routes/config/categories/new/+page.server';
-import { actions as editActions } from '../routes/config/categories/[id]/edit/+page.server';
+import {
+	actions as newActions,
+	load as loadNew
+} from '../routes/config/categories/new/+page.server';
+import {
+	actions as editActions,
+	load as loadEdit
+} from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
+import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
 import invalid from '../../tests/contracts/validation-refused.json';
 import contract from '../../tests/contracts/category.json';
+import fuelRefused from '../../tests/contracts/category-fuel-refused.json';
+import recipient from '../../tests/contracts/llm-recipient.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
@@ -25,6 +34,7 @@ const saved = {
 	description: 'Reinigung von Treppenhaus und Eingang',
 	isAllowedUtilityCost: true,
 	isHeatingCost: false,
+	isFuel: false,
 	sortOrder: 15,
 	nameFR: 'Nettoyage cage d’escalier',
 	nameIT: null,
@@ -70,6 +80,46 @@ describe('Kategorien anzeigen', () => {
 });
 
 describe('Neue Kategorie', () => {
+	// #219: «Von der KI prüfen lassen» nur, solange der Betreiber die KI eingeschaltet hat
+	it('fragt das Backend, ob die KI eingeschaltet ist', async () => {
+		const urls: string[] = [];
+		const answer = (enabled: boolean) =>
+			(async (url: string) => {
+				urls.push(url);
+				return Response.json({ ...recipient, enabled });
+			}) as typeof globalThis.fetch;
+
+		expect(await loadNew({ fetch: answer(true) } as never)).toEqual({ kiEnabled: true });
+		expect(await loadNew({ fetch: answer(false) } as never)).toEqual({ kiEnabled: false });
+		expect(urls[0]).toMatch(/\/api\/v1\/invoices\/llm-recipient$/);
+	});
+
+	// Code-Review W5b C-2: ohne Antwort bleibt die Prüfung angeboten; eine Ablehnung sagt dann, warum
+	it('bietet die KI an, wenn das Backend nicht sagt, ob sie eingeschaltet ist', async () => {
+		const fails = (async () => {
+			throw new Error('offline');
+		}) as typeof globalThis.fetch;
+
+		expect(await loadNew({ fetch: fails } as never)).toEqual({ kiEnabled: true });
+		const silent = (async () => Response.json({})) as typeof globalThis.fetch;
+		expect(await loadNew({ fetch: silent } as never)).toEqual({ kiEnabled: true });
+	});
+
+	// Fachreview W5b V-3: der Hinweis einer vordefinierten Kategorie nennt die KI nur, wenn sie eingeschaltet ist
+	it('fragt beim Bearbeiten das Backend, ob die KI eingeschaltet ist', async () => {
+		const fetch = (async (url: string) =>
+			url.endsWith('/llm-recipient')
+				? Response.json({ ...recipient, enabled: false })
+				: Response.json(contract)) as typeof globalThis.fetch;
+
+		const data = await loadEdit({ fetch, params: { id: 'c1' } } as never);
+
+		expect(data).toEqual({
+			category: expect.objectContaining({ key: 'Internet' }),
+			kiEnabled: false
+		});
+	});
+
 	it('erfasst die Kategorie unter ihrem deutschen Namen und zeigt die Kategorien', async () => {
 		const { calls, result } = runAction(newActions.save, '', 201, form, { id: 'c9' });
 
@@ -106,12 +156,25 @@ describe('Neue Kategorie', () => {
 		expect(calls[0].body).toMatchObject({ isHeatingCost: true });
 	});
 
+	// #100: Brennstoff ist ein Merkmal von Heizkosten (das Backend speichert es nur mit ihnen)
+	it('übernimmt «Brennstoff»', async () => {
+		const { calls, result } = runAction(newActions.save, '', 201, {
+			name: 'Pellets',
+			isAllowedUtilityCost: 'true',
+			isHeatingCost: 'on',
+			isFuel: 'on'
+		});
+		await result.catch(() => {});
+
+		expect(calls[0].body).toMatchObject({ isFuel: true });
+	});
+
 	it('verlangt einen Namen', async () => {
 		const { calls, result } = runAction(newActions.save, '', 201, { ...form, name: ' ' });
 
 		expect(await result).toMatchObject({
 			status: 400,
-			data: { errors: { name: 'Name ist erforderlich' } }
+			data: { errors: { name: 'Name ist erforderlich.' } }
 		});
 		expect(calls).toEqual([]);
 	});
@@ -171,7 +234,9 @@ describe('Vorschlag der KI', () => {
 
 	const hint = async (status: number, body: unknown) =>
 		((await runAction(newActions.propose, '', status, form, body).result) as { proposal: { error: string } }).proposal.error;
-	const UNSURE = 'Die KI ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.';
+	// The rule for a case of doubt (#292, Entscheid #221)
+	const UNSURE =
+		'Die KI ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind; die Regeln stehen im Hilfetext oben. Im Zweifel: nicht umlagefähig.';
 	const UNAVAILABLE =
 		'Die KI ist nicht erreichbar. Versuchen Sie es später nochmals oder wählen Sie selbst, ob die Kosten umlagefähig sind.';
 
@@ -187,9 +252,21 @@ describe('Vorschlag der KI', () => {
 	// «non è sicura» / «n’est pas sûre» lesen sich auch als «nicht ungefährlich» (Persona Marco P-1, Code-Review M-9);
 	// Englisch «Decide yourself» (Fachreview H-28)
 	it.each([
-		['it', unsure, 'L’IA non ne è certa. Indichi Lei se i costi sono addebitabili.'],
-		['fr', unsure, 'L’IA n’en est pas certaine. Indiquez vous-même si les frais sont imputables.'],
-		['en', unsure, 'The AI is not sure. Decide yourself whether the costs are allocable.'],
+		[
+			'it',
+			unsure,
+			'L’IA non ne è certa. Indichi Lei se i costi sono addebitabili; le regole sono nel testo d’aiuto qui sopra. Nel dubbio: non addebitabile.'
+		],
+		[
+			'fr',
+			unsure,
+			'L’IA n’en est pas certaine. Indiquez vous-même si les frais sont imputables ; les règles figurent dans le texte d’aide ci-dessus. En cas de doute : non imputable.'
+		],
+		[
+			'en',
+			unsure,
+			'The AI is not sure. Decide yourself whether the costs are allocable; the rules are in the help text above. If in doubt: not allocable.'
+		],
 		[
 			'en',
 			{ ...unsure, code: 'KI_PROPOSAL_UNAVAILABLE' },
@@ -220,7 +297,7 @@ describe('Vorschlag der KI', () => {
 	it('verlangt zuerst einen Namen', async () => {
 		const { calls, result } = runAction(newActions.propose, '', 200, { ...form, name: ' ' });
 
-		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich' } } });
+		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich.' } } });
 		expect(calls).toEqual([]);
 	});
 });
@@ -244,10 +321,54 @@ describe('Kategorie löschen', () => {
 		expect(calls).toEqual([{ method: 'DELETE', url: `${API}/c1`, body: undefined }]);
 	});
 
+	// #100 (Fachreview V-2): eine Kategorie mit Tankbestand bleibt Brennstoff; das betrifft nicht den Namen
+	it('sagt für das ganze Formular, dass eine Kategorie mit Tankbestand Brennstoff bleibt', async () => {
+		const { result } = runAction(editActions.default, 'c1', 200, form, {}, { status: 400, answer: fuelRefused });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				errors: {
+					// names both checkboxes: removing the heating cost alone is refused too (Fachreview V-10)
+					form: 'Die Kategorie hat Tankbestände. Deshalb bleiben die Häkchen «Heizkosten nach dem Heizprofil verteilen» und «Brennstoff» gesetzt. Wenn Sie sie entfernen möchten, löschen Sie zuerst die Tankbestände auf der Seite des Gebäudes.'
+				}
+			}
+		});
+	});
+
 	it('erklärt, warum eine verwendete Kategorie bleibt', async () => {
 		const message = 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.';
 		const { result } = runAction(listActions.delete, '', 409, { id: 'c1' }, { error: message });
 
 		expect(await result).toMatchObject({ status: 409, data: { error: message } });
+	});
+});
+
+// #91: the categories a Mietvertrag can agree, named in the UI language
+describe('Kategorien, die ein Mietvertrag vereinbaren kann', () => {
+	const answer = (status = 200) =>
+		(async (url: string) =>
+			url === `${API}?limit=100`
+				? Response.json(
+						{
+							categories: [
+								{ ...contract, id: 'c1', nameDE: 'Internet' },
+								{ ...contract, id: 'c2', nameDE: 'Verwaltung', isAllowedUtilityCost: false }
+							]
+						},
+						{ status }
+					)
+				: Response.json({}, { status: 404 })) as typeof globalThis.fetch;
+
+	it('nennt nur die umlagefähigen', async () => {
+		expect(await agreeableCategories(answer())).toEqual([{ id: 'c1', name: 'Internet' }]);
+	});
+
+	// a list that failed to load would save every category as not agreed
+	it('scheitert, wenn die Kategorien nicht geladen werden können', async () => {
+		await expect(agreeableCategories(answer(500))).rejects.toMatchObject({
+			status: 500,
+			body: { message: 'Die Kategorien konnten nicht geladen werden. Laden Sie die Seite neu.' }
+		});
 	});
 });

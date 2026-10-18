@@ -4,7 +4,6 @@
 	import { occupancyParts } from '$lib/apartment';
 	import { buildingTypeLabel } from '$lib/building-type';
 	import type { BuildingWithStats } from '$lib/types';
-	import BuildingMiniMap from '../BuildingMiniMap.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 
 	// The building's master data and how many of its apartments are rented
@@ -40,6 +39,14 @@
 				</dd>
 			</div>
 		{/if}
+		{#if building.noTank}
+			<div>
+				<dt class="text-ink-muted">{m.buildings_tank()}</dt>
+				<dd class="font-semibold text-ink" data-testid="building-no-tank">
+					{m.buildings_no_tank_fact()}
+				</dd>
+			</div>
+		{/if}
 		<div>
 			<dt class="text-ink-muted">{m.nav_apartments()}</dt>
 			<dd class="font-semibold tabular-nums text-ink">
@@ -47,11 +54,4 @@
 			</dd>
 		</div>
 	</dl>
-	{#if building.latitude && building.longitude}
-		<BuildingMiniMap
-			latitude={Number(building.latitude)}
-			longitude={Number(building.longitude)}
-			address={place}
-		/>
-	{/if}
 </Panel>

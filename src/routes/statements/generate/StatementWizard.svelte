@@ -6,6 +6,7 @@
 		invoiceRows,
 		needsConfirmation,
 		restoredSelection,
+		restoredStep,
 		droppedNotes,
 		selectionErrors,
 		statementSteps,
@@ -35,12 +36,18 @@
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
 			defaultBuildingIds: string[]; // chosen by the link that opened the wizard (A-10)
-			preset?: { building: string; start: string; end: string; fromStatements: boolean } | null;
+			preset?: {
+				building: string;
+				start: string;
+				end: string;
+				fromStatements: boolean;
+				feeFromSettings: boolean;
+			} | null;
 		};
 		form: {
 			preview?: PreviewRow[];
 			invoices?: Parameters<typeof invoiceRows>[0];
-			created?: number;
+			created?: string[];
 			error?: string;
 		} | null;
 	} = $props();
@@ -52,6 +59,7 @@
 		5: m.statements_drafts_busy()
 	};
 	const NOTHING = m.statements_nothing();
+	const NOTHING_OPEN = m.statements_nothing_open(); // no advice to delete drafts with days open (code review C-1)
 	const fresh = (): WizardSelection => ({
 		periodStart: data.defaultPeriod.start,
 		periodEnd: data.defaultPeriod.end,
@@ -68,6 +76,7 @@
 	);
 	let errors = $state<Record<string, string>>({});
 	let confirmed = $state(false); // statements despite buildings without invoices, for this preview only
+	let agreementsBlocking = $state(false); // step 3: whether the contracts agree the period's costs is open (#91)
 	let busy = $state(false); // the server is calculating the preview or creating the drafts
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
@@ -88,25 +97,23 @@
 
 	onMount(() => {
 		if (form || chosen) return; // coming back from the server, or a link chose for this visit
-		const draft = readDraft<WizardSelection>(browserStorage(), DRAFT);
+		const draft = readDraft<WizardSelection & { step?: number }>(browserStorage(), DRAFT);
 		if (!draft) return;
-		({ selection, dropped } = restoredSelection(draft.values, {
+		const { step: left, ...values } = draft.values;
+		({ selection, dropped } = restoredSelection(values, {
 			buildingIds: data.buildings.map((b) => b.id),
 			heatingProfileIds: data.heatingProfiles.map((p) => p.id)
 		}));
 		restoredAt = draft.savedAt;
-		// Back from "Rechnung erfassen": the step before the preview, so "Weiter" calculates it anew
-		// a building gone meanwhile is checked first, in step 2 (code review C-5)
-		const complete =
-			!dropped.buildings && [1, 2].every((n) => !Object.keys(selectionErrors(selection, n)).length);
-		if (new URL(location.href).searchParams.get('schritt') === '3' && complete) {
-			step = 3;
-			resumed = true;
-		}
+		// In the step it was left in (#201); back from "Rechnung erfassen" the step before the preview, so "Weiter"
+		// calculates it anew; a building gone meanwhile is checked first, in step 2 (code review C-5)
+		const back = new URL(location.href).searchParams.get('schritt') === '3';
+		step = restoredStep(back ? 3 : left, selection, dropped);
+		resumed = back && step === 3;
 	});
 
 	$effect(() => {
-		const snapshot = $state.snapshot(selection);
+		const snapshot = { ...$state.snapshot(selection), step };
 		if (touched) savedAt = writeDraft(browserStorage(), DRAFT, snapshot, new Date());
 	});
 
@@ -125,7 +132,7 @@
 		await tick();
 		section
 			?.querySelector<HTMLElement>(
-				':is(input, select, textarea)[aria-invalid="true"], [data-testid="confirm-missing-invoices"]'
+				':is(input, select, textarea)[aria-invalid="true"], [role="radiogroup"][aria-invalid="true"] input, [data-testid="confirm-missing-invoices"]'
 			)
 			?.focus();
 	}
@@ -151,7 +158,11 @@
 			event.preventDefault();
 			event.stopImmediatePropagation();
 		};
-		errors = { ...selectionErrors(selection, step), ...(step === 4 ? previewErrors() : {}) };
+		errors = {
+			...selectionErrors(selection, step),
+			...(step === 3 && agreementsBlocking ? { agreements: m.statements_agreement_error() } : {}),
+			...(step === 4 ? previewErrors() : {})
+		};
 		if (Object.keys(errors).length > 0) return (stay(), showErrors());
 		if (step === 3 || step === 5) return void (busy = true); // to the server through `enhance`
 		stay();
@@ -159,7 +170,8 @@
 	}
 
 	function previewErrors(): Record<string, string> {
-		if (previewRows.length === 0) return { preview: NOTHING };
+		if (previewRows.length === 0)
+			return { preview: invoices.some((row) => row.partlyBilled) ? NOTHING_OPEN : NOTHING };
 		return confirmationNeeded && !confirmed ? { confirm: CONFIRM } : {};
 	}
 
@@ -179,6 +191,7 @@
 	}
 
 	function created() {
+		touched = false; // nothing left to keep
 		clearDraft(browserStorage(), DRAFT);
 		return goTo(5);
 	}
@@ -226,7 +239,7 @@
 			<span class="sr-only"
 				>{m.contracts_step_of({ current: step, total: statementSteps.length })}</span
 			>
-			<span data-step-label>{statementSteps[step - 1]}</span>
+			<span data-step-label data-testid="statement-step-label">{statementSteps[step - 1]}</span>
 		</h2>
 		<PresetNotice preset={data.preset} {step} />
 		{#if shownError}
@@ -239,11 +252,12 @@
 			{data}
 			bind:selection
 			bind:confirmed
+			bind:agreementsBlocking
 			{errors}
 			{previewRows}
 			{invoices}
 			{periodLabel}
-			createdCount={form?.created ?? null}
+			created={form?.created ?? null}
 		/>
 	</section>
 

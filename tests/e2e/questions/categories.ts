@@ -1,12 +1,15 @@
-import { Checked, Count, Enabled, Text, Visibility } from '../screenplay/questions';
+import { Accessible, Checked, Count, Enabled, HiddenText, Text, Visibility } from '../screenplay/questions';
 import {
 	allowanceOption,
 	allowedBadge,
 	categoryRow,
 	deleteButton,
 	description,
+	descriptionInput,
 	contractNote,
 	formReason,
+	kindBadge,
+	predefinedHint,
 	proposal,
 	reason,
 	usage
@@ -25,3 +28,7 @@ export const reasonOf = (name: string) => Text.of(reason(name));
 export const reasonsOf = (name: string) => Count.of(reason(name));
 export const contractHint = Text.of(contractNote);
 export const formReasonText = Text.of(formReason);
+export const hiddenDescription = HiddenText.of(descriptionInput);
+export const kindOf = (name: string) => Text.of(kindBadge(name));
+export const whyNotDeletable = (name: string) => Accessible.descriptionOf(deleteButton(name));
+export const predefinedHintText = Text.of(predefinedHint);

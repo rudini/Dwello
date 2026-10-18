@@ -1,6 +1,6 @@
 # Demo records for persona tasks
 
-For the caller of a persona run, not for the persona: it reads only `README.md` and one section of `docs/design/arbeitsregeln.md`, and must not see IDs or states set up on purpose.
+For the caller of a persona run, not for the persona: it reads only `README.md`, and must not see IDs or states set up on purpose.
 
 `persona-stack.sh` loads the demo data (`backend/demo/demo-data.sql`, statements from `backend/src/db/demo-data.ts`) with fixed IDs. Before naming a record in a persona's task, look it up here, so the task names the tenant who really holds that contract. Personas that save at the same time each get their own building (`CLAUDE.md`, Workflow 5); with three buildings, at most three personas save at once, the others only look.
 
@@ -20,5 +20,7 @@ For the caller of a persona run, not for the persona: it reads only `README.md` 
 | Alpenblick (`33333333-3333-3333-3333-333333333333`) | EG | Laura Keller | `b0000003-0003-0003-0003-000000000001` | open-ended since 01.11.2022; no statement 2025 (invoices missing on purpose) |
 | | OG1 | Kevin Fischer | `b0000003-0003-0003-0003-000000000002` | open-ended since 01.05.2021; no statement 2025 |
 | | OG2 | – | – | vacant |
+
+«Verwaltungspauschale vereinbart» (#89): every contract «Ja, zum Satz des Abrechnungslaufs», except Marco Bernasconi (B2, own rate 2.5 %) and Kevin Fischer in Alpenblick OG1 («Nein», 0 %).
 
 Every contract that ran in 2024 has a paid statement 2024. There is no fixed-term contract and none that starts in the future: a task that needs one has the persona create it in its own building.

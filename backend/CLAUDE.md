@@ -15,7 +15,7 @@ bun run db:demo         # load demo data; running it twice adds nothing
 bun run llm:eval        # hit rate of the configured KI on the allocability cases (LLM_* variables, migrated DATABASE_URL)
 ```
 
-`llm:eval` measures only the allocability check (`proposeAllocability`); it is run before and after a change to that prompt (the invoice prompts have no cases yet). In a cloud session the default Ollama model cannot be pulled: point `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` at an allowed OpenAI-compatible provider and name that model with the result, which then is not the default model's and leaves the issue open (`CLAUDE.md`, Workflow 1).
+`llm:eval` measures only the allocability check (`proposeAllocability`); it is run before and after a change to that prompt (the invoice prompts have no cases yet). In a cloud session the default model runs through OpenRouter, and that run counts as the default model's (#419): `LLM_BASE_URL=https://openrouter.ai/api/v1 LLM_MODEL=qwen/qwen3-vl-8b-instruct bun run llm:eval` (the proxy injects the key; `DATABASE_URL` of a migrated database, e.g. `dwello_test` after `bun scripts/migrate.ts`). The model and both scores go into the plan and the pull request. Only when the session cannot reach OpenRouter does the task still finish and its pull request get merged, but it says `Refs #n` instead of `Fixes #n` (with the scenario or `No scenario: <reason>` as usual) and the missing run goes under "Blocked on me"; the session the product owner gives the result closes the issue when the score did not drop and the cases the issue names are answered right, else works on the issue again.
 
 Every `bun test` started in `backend/` itself loads the preload `scripts/test-db.ts` (`bunfig.toml`), so no test writes into the dev database; from a subdirectory Bun skips `bunfig.toml` and the preload. One backend test run at a time: each run drops and recreates `dwello_test` (`TEST_DATABASE_URL` overrides it).
 
@@ -41,7 +41,7 @@ Every `bun test` started in `backend/` itself loads the preload `scripts/test-db
 
 - **Today:** the Swiss day (`swissToday()`, in SQL `sqlToday`, `src/services/today.ts`), never `toISOString()` of now or SQL `current_date`: server and database run in UTC, a day behind between midnight and 01:00/02:00 Swiss time.
 - **Allocable costs (OR 257a):** a category that is not allocable (`categories.is_allowed_utility_cost`, seeded in `0002_stammdaten.sql`) always makes its invoices non-allocable, whatever the form or the LLM sends; an invoice in an allocable category can still be excluded.
-- **Management fee:** 3 % is the customary guideline, not a cap; statements apply the percentage that is set (`management-fee*.test.ts`).
+- **Management fee:** 3 % is the customary guideline, not a cap; at most 10 % (#124). Only a contract with `management_fee_agreed` pays one: its own `management_fee_percent`, else the run's rate; the statement stores the rate it used (#89, `management-fee*.test.ts`).
 - **Prorating:** by days rented; heating costs by the heating profile's monthly shares (`prorating.service.ts`).
 - **QR-bill (SIX):** a QR reference (MOD10) only with a QR-IBAN (IID 30000–31999); with a normal IBAN no reference. The debtor block is written only when name, postal code and town are all present; otherwise it stays empty. IBANs are checked with MOD-97.
 

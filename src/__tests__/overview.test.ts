@@ -18,10 +18,38 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 	lettersToSend: 0,
 	endingContracts: [],
 	noticedContracts: [],
+	oldAddresses: [],
+	paymentDeadlineDays: 30,
+	reminderAfterDays: 14,
+	expiredContracts: [],
 	...overrides
 });
 
 describe('Aufgaben der Übersicht', () => {
+	// #178: a former tenant's uploads from before the last Vertragsende, to look at and delete
+	it('nennt für jeden ehemaligen Mieter die Dokumente von vor dem Vertragsende', () => {
+		const tasks = overviewTasks(
+			input({
+				formerTenants: [
+					{ tenantId: 't1', tenantName: 'Ida Alt', endDate: '2026-03-31', count: 1 },
+					{ tenantId: 't2', tenantName: 'Ugo Vecchio', endDate: '2026-05-31', count: 2 }
+				]
+			})
+		);
+		expect(tasks).toContainEqual(
+			expect.objectContaining({
+				id: 'former-documents-t1',
+				title: 'Dokumente von Ida Alt prüfen',
+				text: 'Der letzte Mietvertrag endete am 31.03.2026. 1 hochgeladenes Dokument stammt aus der Zeit davor. Löschen Sie, was Sie nicht mehr brauchen; behalten Sie Übergabeprotokolle, bis das Mietzinsdepot freigegeben ist.',
+				href: '/tenants/t1',
+				action: 'Dokumente ansehen'
+			})
+		);
+		expect(tasks).toContainEqual(
+			expect.objectContaining({ id: 'former-documents-t2', text: expect.stringContaining('2 hochgeladene Dokumente stammen') })
+		);
+	});
+
 	// A-4: in der Kündigungszeit einen Nachmieter suchen, ab dem Tag, an dem die Kündigung erfasst ist
 	it('nennt für jede Kündigung die Suche nach einem Nachmieter', () => {
 		const tasks = overviewTasks(
@@ -45,6 +73,42 @@ describe('Aufgaben der Übersicht', () => {
 				href: '/contracts/new?apartment=a1'
 			})
 		);
+	});
+
+	// A-5 (#114): solange ein Entwurf an die verlassene Wohnung ginge
+	it('nennt die neue Adresse eines ausgezogenen Mieters, dessen Adresse noch die der Wohnung ist', () => {
+		const tasks = overviewTasks(input({ oldAddresses: [{ tenantId: 't1', tenantName: 'Eva Frei' }] }));
+
+		expect(tasks).toContainEqual(
+			expect.objectContaining({
+				id: 'old-address-t1',
+				title: 'Neue Adresse eintragen',
+				text: 'Eva Frei ist ausgezogen. Die Adresse ist noch die der Wohnung. Tragen Sie die neue Adresse ein.',
+				href: '/tenants/t1/edit'
+			})
+		);
+	});
+
+	// A-6 (#115): ein abgelaufener befristeter Mietvertrag läuft unbefristet weiter, wenn der Mieter geblieben ist
+	it('fragt nach jedem abgelaufenen befristeten Mietvertrag, ob der Mieter noch in der Wohnung wohnt', () => {
+		const tasks = overviewTasks(
+			input({
+				expiredContracts: [
+					{ id: 'c2', tenantName: 'Bruno Meier', endDate: '2025-12-31' },
+					{ id: 'c1', tenantName: 'Eva Frei', endDate: '2024-03-31' }
+				]
+			})
+		);
+		expect(tasks).toEqual([
+			expect.objectContaining({
+				id: 'fixed-term-c1',
+				title: 'Befristeten Mietvertrag prüfen',
+				text: 'Der befristete Mietvertrag von Eva Frei ist am 31.03.2024 abgelaufen. Wohnt Eva Frei noch in der Wohnung und sind Sie damit einverstanden, zum Beispiel weil Sie den Mietzins weiter annehmen? Dann läuft der Mietvertrag unbefristet weiter.',
+				href: '/contracts/c1',
+				action: 'Mietvertrag öffnen'
+			}),
+			expect.objectContaining({ id: 'fixed-term-c2' })
+		]);
 	});
 
 	it('beginnt ohne Gebäude mit dem ersten Gebäude', () => {
@@ -87,7 +151,9 @@ describe('Aufgaben der Übersicht', () => {
 		const tasks = overviewTasks(
 			input({
 				statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 1 },
-				missingPeriod: { start: '2025-01-01', end: '2025-12-31', buildings: ['Seeblick'] }
+				missingStatements: [
+					{ building: 'Seeblick', periods: [{ start: '2025-01-01', end: '2025-12-31' }] }
+				]
 			})
 		);
 		expect(tasks.map((task) => task.id)).toEqual(['overdue', 'missing-period', 'drafts']);
@@ -99,8 +165,7 @@ describe('Aufgaben der Übersicht', () => {
 			title: 'Nebenkostenabrechnungen erstellen',
 			href: '/statements/generate'
 		});
-		expect(tasks[1].text).toContain('01.01.2025 – 31.12.2025');
-		expect(tasks[1].text).toContain('Seeblick');
+		expect(tasks[1].text).toContain('Noch nicht abgerechnet: Seeblick (2025).');
 		// the invoices come first, so the task leads to them as well
 		expect(tasks[1].link).toEqual({
 			href: '/invoices?year=2025',
@@ -108,9 +173,42 @@ describe('Aufgaben der Übersicht', () => {
 		});
 	});
 
+	// #211: every ended period since the Vertragsbeginn, by building; only the days without a statement (#199)
+	it('nennt jedes Gebäude mit seinen Perioden ohne Abrechnung', () => {
+		const tasks = overviewTasks(
+			input({
+				missingStatements: [
+					{
+						building: 'Ahornhof',
+						periods: [
+							{ start: '2025-01-01', end: '2025-12-31' },
+							{ start: '2024-07-01', end: '2024-12-31' }
+						]
+					},
+					{ building: 'Seeblick', periods: [{ start: '2023-01-01', end: '2023-12-31' }] }
+				]
+			})
+		);
+		const task = tasks.find((one) => one.id === 'missing-period')!;
+		expect(task.text).toContain(
+			'Noch nicht abgerechnet: Ahornhof (2025, 01.07.2024 – 31.12.2024), Seeblick (2023).'
+		);
+		// the invoices of the newest period come first
+		expect(task.link).toEqual({ href: '/invoices?year=2025', label: 'Rechnungen 2025 ansehen' });
+	});
+
+	it('erinnert nicht, wenn jeder Mietvertrag abgerechnet ist', () => {
+		const tasks = overviewTasks(input({ missingStatements: [] }));
+		expect(tasks.map((task) => task.id)).not.toContain('missing-period');
+	});
+
 	it('führt bei einer Abrechnungsperiode über den Jahreswechsel zu allen Rechnungen', () => {
 		const tasks = overviewTasks(
-			input({ missingPeriod: { start: '2024-07-01', end: '2025-06-30', buildings: ['Seeblick'] } })
+			input({
+				missingStatements: [
+					{ building: 'Seeblick', periods: [{ start: '2024-07-01', end: '2025-06-30' }] }
+				]
+			})
 		);
 		expect(tasks.find((task) => task.id === 'missing-period')!.link).toEqual({
 			href: '/invoices',
@@ -125,6 +223,80 @@ describe('Aufgaben der Übersicht', () => {
 		expect(overdue.text).toContain('2 Nebenkostenabrechnungen sind');
 		expect(letters.text).toContain('1 Brief ist');
 		expect(drafts.text).toContain('1 Nebenkostenabrechnung ist');
+	});
+
+	// #107: solange die Zahlungsfrist der letzten Mahnung läuft, ist keine Mahnung zu senden
+	it('zählt keine Abrechnung, deren nächste Mahnung erst später möglich ist', () => {
+		const overdue = (nextReminderFrom: string | null) => ({
+			id: 's1',
+			tenantName: 'Anna Keller',
+			paymentDeadline: '2026-09-20',
+			nextReminderFrom
+		});
+		const titles = (nextReminderFrom: string | null) =>
+			overviewTasks(
+				input({
+					statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
+					dueStatements: [overdue(nextReminderFrom)]
+				})
+			).map((task) => task.title);
+
+		expect(titles('2026-10-11')).not.toContain('Überfällige Abrechnungen prüfen');
+		expect(titles('2026-10-10')).toContain('Überfällige Abrechnungen prüfen');
+		expect(titles(null)).toContain('Überfällige Abrechnungen prüfen');
+	});
+
+	// #64: «Überfällig» ab dem Tag nach der Zahlungsfrist, eine Mahnung schlägt die Übersicht erst nach der Mahnfrist vor
+	it('schlägt eine Mahnung erst nach der Mahnfrist vor', () => {
+		const titles = (paymentDeadline: string, reminderAfterDays: number) =>
+			overviewTasks(
+				input({
+					statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
+					dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline }],
+					reminderAfterDays
+				})
+			).map((task) => task.title);
+
+		expect(titles('2026-09-26', 14)).not.toContain('Überfällige Abrechnungen prüfen');
+		expect(titles('2026-09-25', 14)).toContain('Überfällige Abrechnungen prüfen');
+		expect(titles('2026-09-26', 7)).toContain('Überfällige Abrechnungen prüfen');
+	});
+
+	// #64, Fachreview V-1: eine Rückerstattung wird nie gemahnt, der Vermieter schuldet sie ab dem Tag nach der Zahlungsfrist
+	it('nennt eine überfällige Rückerstattung ohne Mahnfrist', () => {
+		const tasks = overviewTasks(
+			input({
+				statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
+				dueStatements: [
+					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-09', refund: true }
+				]
+			})
+		);
+		expect(tasks.map((task) => task.title)).toContain('Überfällige Abrechnungen prüfen');
+	});
+
+	// a statement still within its Zahlungsfrist is not among the overdue ones it counts
+	it('zieht nur überfällige Abrechnungen ab', () => {
+		const tasks = overviewTasks(
+			input({
+				statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 1 },
+				dueStatements: [
+					{
+						id: 's1',
+						tenantName: 'Anna Keller',
+						paymentDeadline: '2026-09-20',
+						nextReminderFrom: null
+					},
+					{
+						id: 's2',
+						tenantName: 'Eva Frei',
+						paymentDeadline: '2026-10-20',
+						nextReminderFrom: '2026-10-25'
+					}
+				]
+			})
+		);
+		expect(tasks.map((task) => task.title)).toContain('Überfällige Abrechnungen prüfen');
 	});
 });
 
@@ -146,8 +318,8 @@ describe('Fristen der Übersicht', () => {
 		]);
 	});
 
-	// Die Zahlungsfrist beträgt 30 Tage: eine eben versendete Abrechnung steht gleich in den Fristen
-	it('lässt ferne Termine weg: Zahlungsfrist nach 30, Vertragsende nach 60 Tagen', () => {
+	// Die Zahlungsfrist beträgt hier 30 Tage: eine eben versendete Abrechnung steht gleich in den Fristen
+	it('lässt ferne Termine weg: Zahlungsfrist nach den eingestellten 30, Vertragsende nach 60 Tagen', () => {
 		const deadlines = overviewDeadlines(
 			input({
 				dueStatements: [
@@ -162,6 +334,20 @@ describe('Fristen der Übersicht', () => {
 			})
 		);
 		expect(deadlines.map((d) => d.name)).toEqual(['Hans Müller', 'Ueli Graf']);
+	});
+
+	// #87: eine eben versendete Abrechnung steht mit jeder eingestellten Zahlungsfrist gleich in den Fristen
+	it('zeigt jede offene Zahlungsfrist innerhalb der eingestellten Tage', () => {
+		const deadlines = overviewDeadlines(
+			input({
+				paymentDeadlineDays: 60,
+				dueStatements: [
+					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-12-10' },
+					{ id: 's2', tenantName: 'Hans Müller', paymentDeadline: '2026-12-09' }
+				]
+			})
+		);
+		expect(deadlines.map((d) => d.name)).toEqual(['Hans Müller']);
 	});
 
 	it('sagt heute und ein Tag in der Einzahl', () => {

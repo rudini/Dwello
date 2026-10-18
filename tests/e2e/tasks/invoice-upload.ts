@@ -65,6 +65,9 @@ export const uploadBelege = (buildingId: string, files: File[]): Activity => (ac
 	);
 
 export const openBeleg = (fileName: string) => Click.on(belegDetailsToggle(fileName));
+// a file the KI reads for longer than the usual wait: its row opens once the reading ended
+export const openBelegOnceRead = (fileName: string, timeout: number): Activity => (actor) =>
+	actor.attemptsTo(Wait.until(belegDetailsToggle(fileName), timeout), openBeleg(fileName));
 
 export const fillInBeleg = (
 	fileName: string,

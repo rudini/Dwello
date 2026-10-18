@@ -15,7 +15,9 @@ import {
 	date,
 	index,
 	uniqueIndex,
-	jsonb
+	primaryKey,
+	jsonb,
+	type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -36,6 +38,7 @@ export const buildings = pgTable(
 		longitude: decimal('longitude', { precision: 10, scale: 7 }),
 		buildingType: varchar('building_type', { length: 50 }),
 		yearBuilt: integer('year_built'),
+		noTank: boolean('no_tank').notNull().default(false), // no tank or decommissioned: no Tankbestand asked (#72)
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -89,10 +92,11 @@ export const tenants = pgTable('tenants', {
 	lastName: varchar('last_name', { length: 100 }).notNull(),
 	email: varchar('email', { length: 255 }),
 	phone: varchar('phone', { length: 30 }),
-	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, rm, en
+	language: varchar('language', { length: 5 }).notNull().default('de'), // de, fr, it, en
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),
+	country: varchar('country', { length: 2 }).notNull().default('CH'), // ISO 3166 code of the Korrespondenzadresse
 	correspondenceChannel: varchar('correspondence_channel', { length: 10 }).notNull().default('letter'), // email, letter
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
@@ -119,9 +123,17 @@ export const rentalContracts = pgTable(
 		startDate: date('start_date').notNull(),
 		endDate: date('end_date'), // null = ongoing
 		terminated: boolean('terminated').default(false).notNull(), // endDate is a Kündigungstermin, not agreed
+		noticeReceivedOn: date('notice_received_on'), // the day the notice arrived (A-3), only with terminated
+		billedUntil: date('billed_until'), // «Abgerechnet bis» (#133): billed outside Dwello up to this day
+		movedOut: boolean('moved_out').default(false).notNull(), // «Mieter ist ausgezogen» after this end (A-6)
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
 		monthlyAdvancePayment: decimal('monthly_advance_payment', { precision: 10, scale: 2 }).notNull(), // Akonto
+		// «Nebenkostenpauschale» (#429): counts in «Monatlich total», never billed
+		flatRateUtilityCharge: decimal('flat_rate_utility_charge', { precision: 10, scale: 2 }).default('0').notNull(),
+		// #89: the run's rate applies only with a fee agreed; an own rate (0–10 %) takes precedence
+		managementFeeAgreed: boolean('management_fee_agreed').default(false).notNull(),
+		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),
 		referenceIndex: decimal('reference_index', { precision: 6, scale: 4 }), // Swiss rental index
 		contractPdf: text('contract_pdf'), // Base64 or URL
 		notes: text('notes'),
@@ -148,6 +160,21 @@ export const rentalContractsRelations = relations(rentalContracts, ({ one, many 
 	statements: many(utilityStatements)
 }));
 
+// #91: the Nebenkosten a contract agrees, or answered «nicht vereinbart»; no row: not answered, not billed
+export const contractCategories = pgTable(
+	'contract_categories',
+	{
+		contractId: uuid('contract_id')
+			.notNull()
+			.references(() => rentalContracts.id, { onDelete: 'cascade' }),
+		categoryId: uuid('category_id')
+			.notNull()
+			.references(() => categories.id, { onDelete: 'cascade' }),
+		agreed: boolean('agreed').notNull()
+	},
+	(table) => [primaryKey({ columns: [table.contractId, table.categoryId] })]
+);
+
 // ============================================================================
 // Categories Table (Utility Cost Categories)
 // ============================================================================
@@ -169,6 +196,8 @@ export const categories = pgTable('categories', {
 	isAllowedUtilityCost: boolean('is_allowed_utility_cost').notNull().default(true),
 	// Heating costs (Art. 5 VMWG): shared by the heating profile at a tenant change; separate hot water by days
 	isHeatingCost: boolean('is_heating_cost').notNull().default(false),
+	// Brennstoff (#100): its invoices are deliveries of Heizmaterial; only such a heating cost category has a Tankbestand
+	isFuel: boolean('is_fuel').notNull().default(false),
 	type: varchar('type', { length: 20 }).notNull().default('predefined'), // predefined, custom
 	...describedAndOrdered()
 });
@@ -339,18 +368,36 @@ export type InvoicePart = {
 	noPeriod?: true; // an invoice without Leistungszeitraum: it bills the period (#241)
 	whole?: { start: string; end: string; amount: number }; // a Leistungszeitraum beyond the period, with the invoice's amount
 	fuelStock?: true; // the change of the Tankbestand, not an invoice (#239)
+	// a heating invoice shared by the Heizprofil's months in its days (#71): the tenant's months, those days' months
+	profile?: { percent: number; months: { month: number; percentage: number }[]; periodMonths: { month: number; percentage: number }[] };
 };
 
+// An invoice a position billed (#96): its amount in the period and the days it bills there; the change of the
+// Tankbestand is billed like one (#239) under the id fuel-stock-<period end>
+export type BilledInvoice = { id: string; description: string; amount: number; start: string; end: string; fuelStock?: true };
+
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
+type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+/** A payment taken back (#92): the day of the reset and what it cleared */
+export type PaymentReset = { resetOn: string; paidDate: string | null; paidAmount: string | null };
+
 export type HeatingShare =
-	| { byDays: true }
+	// the chosen profile and why it was not applied (#247); both absent on statements created before
+	| { byDays: true; reason?: 'wholePeriod' | 'noHeatingMonths'; names?: HeatingProfileNames }
 	| {
 			byDays: false;
 			percent: number;
 			months: { month: number; percentage: number }[];
 			periodPercent?: number; // the period's months in the profile (#229); absent on statements of #209
-			names: { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+			periodMonths?: { month: number; percentage: number }[]; // where they do not carry 100 % (#232); absent before
+			names: HeatingProfileNames;
 	  };
+
+// The last statement number given per prefix NK-{building}-{year}-, so a deleted draft's number is not given again (#97)
+export const statementNumbers = pgTable('statement_numbers', {
+	prefix: varchar('prefix', { length: 50 }).primaryKey(),
+	lastNumber: integer('last_number').notNull()
+});
 
 export const utilityStatements = pgTable(
 	'utility_statements',
@@ -383,8 +430,14 @@ export const utilityStatements = pgTable(
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
 		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
+		agreedCategoryIds: jsonb('agreed_category_ids').$type<string[]>(), // agreed when created (#91); null: before
+		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
+		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
+		// a berichtigte Abrechnung: the statement it replaces and what was already paid on that one and its own (#120)
+		replacesId: uuid('replaces_id').references((): AnyPgColumn => utilityStatements.id),
+		priorPayments: decimal('prior_payments', { precision: 12, scale: 2 }).notNull().default('0'),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
-		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
+		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid, replaced; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
 		paidDate: date('paid_date'),
 		paidAmount: decimal('paid_amount', { precision: 12, scale: 2 }),
@@ -402,7 +455,8 @@ export const utilityStatements = pgTable(
 		index('statements_period_start_idx').on(table.periodStart),
 		index('statements_status_idx').on(table.status),
 		index('statements_tenant_period_idx').on(table.tenantId, table.periodStart),
-		uniqueIndex('statements_number_idx').on(table.statementNumber)
+		uniqueIndex('statements_number_idx').on(table.statementNumber),
+		uniqueIndex('statements_replaces_idx').on(table.replacesId)
 	]
 );
 
@@ -446,6 +500,7 @@ export const utilityStatementLineItems = pgTable(
 		positionRentalDays: integer('position_rental_days'),
 		billedDays: integer('billed_days'),
 		invoiceParts: jsonb('invoice_parts').$type<InvoicePart[]>(), // the invoices of a position over different days (#226)
+		invoices: jsonb('invoices').$type<BilledInvoice[]>(), // the invoices it billed (#96); null: created before
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
@@ -481,7 +536,7 @@ export const documents = pgTable(
 			.notNull()
 			.references(() => tenants.id, { onDelete: 'restrict' }),
 		statementId: uuid('statement_id').references(() => utilityStatements.id, { onDelete: 'restrict' }),
-		type: varchar('type', { length: 30 }).notNull(), // reminder, upload
+		type: varchar('type', { length: 30 }).notNull(), // reminder, statement (e-mailed, #86), upload
 		reminderLevel: integer('reminder_level'), // 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 		title: varchar('title', { length: 255 }).notNull(),
 		fileName: varchar('file_name', { length: 255 }).notNull(),
@@ -491,6 +546,7 @@ export const documents = pgTable(
 		status: varchar('status', { length: 20 }), // sent, to_send; null for an upload
 		sentAt: timestamp('sent_at'),
 		deliveryError: text('delivery_error'),
+		paymentDeadline: date('payment_deadline'), // the Zahlungsfrist a reminder prints; null for an upload
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
 	(table) => [
@@ -515,6 +571,14 @@ export const configuration = pgTable(
 	},
 	(table) => [uniqueIndex('config_key_idx').on(table.key)]
 );
+
+// The Protokoll under «Einstellungen» (#357): logins and changes, each with its time and a snapshot of what it names
+export const auditLog = pgTable('audit_log', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	occurredAt: timestamp('occurred_at', { withTimezone: true }).defaultNow().notNull(),
+	action: varchar('action', { length: 50 }).notNull(),
+	details: jsonb('details').$type<Record<string, unknown>>().notNull()
+});
 
 // ============================================================================
 // Type Exports for Use in Application

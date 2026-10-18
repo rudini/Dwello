@@ -7,6 +7,7 @@ import {
 	endedSince,
 	localToday,
 	pastEndConfirmation,
+	shortNoticePeriod,
 	billedDaysError,
 	statusBadges
 } from '../lib/contract-status';
@@ -100,7 +101,7 @@ describe('Vertragsdaten, die die Mietstage einer Abrechnung ändern', () => {
 		expect(
 			billedDaysError([of('NK-2025-0003'), of('NK-2024-0003', 'paid'), of('NK-2023-0001', 'sent')])
 		).toBe(
-			'Die Nebenkostenabrechnungen NK-2024-0003 (bezahlt) und NK-2023-0001 (versendet) wurden mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum lässt sich das Datum nicht speichern. Prüfen Sie das Datum. Stimmt es, klären Sie die Korrektur der Abrechnung direkt mit dem Mieter. Betroffen ist auch der Entwurf NK-2025-0003.'
+			'Die Nebenkostenabrechnungen NK-2024-0003 (bezahlt) und NK-2023-0001 (versendet) wurden mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum lässt sich das Datum noch nicht speichern. Prüfen Sie das Datum. Stimmt es, berichtigen Sie zuerst jede dieser Abrechnungen. Öffnen Sie sie dazu und wählen Sie «Abrechnung berichtigen». Betroffen ist auch der Entwurf NK-2025-0003.'
 		);
 	});
 });
@@ -144,5 +145,24 @@ describe('Heute', () => {
 		vi.useFakeTimers({ now: new Date('2026-10-11T22:30:00Z') });
 		expect(localToday()).toBe('2026-10-12');
 		vi.useRealTimers();
+	});
+});
+
+// A-3 (#112): Kündigungsfrist vom Eingang bis zum Vertragsende, mindestens 3 Monate (Art. 266c OR)
+describe('Zu kurze Kündigungsfrist', () => {
+	it.each([
+		['2026-12-31', '2027-03-31', false],
+		['2027-01-01', '2027-03-31', true],
+		['2027-11-30', '2028-02-29', false], // der Tag auf das Monatsende gekürzt
+		['2027-03-31', '2027-06-30', false],
+		['2099-02-15', '2099-03-31', true],
+		['2098-12-15', '2099-03-31', false]
+	])('Eingang %s, Vertragsende %s: Hinweis %s', (receivedOn, endDate, short) => {
+		expect(shortNoticePeriod(receivedOn, endDate)).toBe(short);
+	});
+
+	it('gibt ohne Eingang oder ohne Vertragsende keinen Hinweis', () => {
+		expect(shortNoticePeriod('', '2027-03-31')).toBe(false);
+		expect(shortNoticePeriod('2027-03-01', '')).toBe(false);
 	});
 });

@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
-import { parsePercent } from '$lib/utils/format';
+import { isFeeRate, parsePercent } from '$lib/utils/format';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/config`;
 
@@ -14,15 +14,23 @@ const KEYS = {
 	accountingPeriod: 'accounting_period',
 	managementFeePercent: 'management_fee_pct',
 	defaultHeatingProfileId: 'default_heating_profile_id',
-	defaultDistributionKeyId: 'default_distribution_key_id'
+	defaultDistributionKeyId: 'default_distribution_key_id',
+	paymentDeadlineDays: 'payment_deadline_days',
+	reminderAfterDays: 'reminder_after_days'
 } as const;
 
 export type Settings = Record<keyof typeof KEYS, string>;
 
+// whole days within the limits the backend accepts (config.service.ts)
+const days = (value: string, min: number, max: number) =>
+	/^\d+$/.test(value) && Number(value) >= min && Number(value) <= max;
+
 const compact = (iban: string) => iban.replace(/\s/g, '').toUpperCase();
-/** ISO 13616: country (CH = 1217) and check digits moved to the end, the number mod 97 must be 1 */
-const ibanChecksumValid = (iban: string) =>
-	BigInt(iban.slice(4) + '1217' + iban.slice(2, 4)) % 97n === 1n;
+/** ISO 13616: country and check digits moved to the end, letters as numbers (A = 10), the number mod 97 must be 1 */
+const ibanChecksumValid = (iban: string) => {
+	const moved = iban.slice(4) + iban.slice(0, 4);
+	return BigInt(moved.replace(/[A-Z]/g, (c) => String(c.charCodeAt(0) - 55))) % 97n === 1n;
+};
 /** "CH93 0076 2011 6238 5295 7" */
 const groupIban = (iban: string) => compact(iban).replace(/(.{4})(?=.)/g, '$1 ');
 
@@ -33,20 +41,27 @@ export function toSettings(stored: Record<string, string | null>): Settings {
 	return { ...settings, iban: groupIban(settings.iban) };
 }
 
-function settingsErrors(s: Settings) {
-	const errors: Record<string, string> = {};
-	if (s.companyPostalCode && !/^\d{4}$/.test(s.companyPostalCode)) {
-		errors.companyPostalCode = m.buildings_error_postal_code_digits();
-	}
-	const iban = compact(s.iban);
-	if (iban && !(/^CH\d{19}$/.test(iban) && ibanChecksumValid(iban))) {
-		errors.iban = m.settings_error_iban();
-	}
-	if (s.managementFeePercent && Number.isNaN(parsePercent(s.managementFeePercent))) {
-		errors.managementFeePercent = m.statements_error_fee();
-	}
-	return errors;
-}
+// A filled field that breaks its rule gets its message; an empty one is reset to its default
+const RULES: [keyof Settings, (value: string) => boolean, () => string][] = [
+	['companyPostalCode', (v) => /^\d{4}$/.test(v), m.buildings_error_postal_code_digits],
+	[
+		'iban',
+		// Switzerland or Liechtenstein, as the QR-bill takes them (#191)
+		(v) => /^(CH|LI)\d{7}[A-Z0-9]{12}$/.test(compact(v)) && ibanChecksumValid(compact(v)),
+		m.settings_error_iban
+	],
+	['managementFeePercent', (v) => isFeeRate(parsePercent(v)), m.statements_error_fee],
+	['paymentDeadlineDays', (v) => days(v, 7, 90), m.settings_error_payment_days],
+	['reminderAfterDays', (v) => days(v, 7, 60), m.settings_error_reminder_days]
+];
+
+const settingsErrors = (s: Settings): Record<string, string> =>
+	Object.fromEntries(
+		RULES.filter(([field, valid]) => s[field] && !valid(s[field])).map(([field, , message]) => [
+			field,
+			message()
+		])
+	);
 
 /** Saves filled values and resets emptied ones to their default */
 export async function saveSettings(fetch: typeof globalThis.fetch, request: Request) {

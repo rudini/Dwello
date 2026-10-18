@@ -12,6 +12,7 @@
 		validateContract
 	} from '$lib/contract-form';
 	import {
+		billsIn,
 		contractStatusOn,
 		localToday,
 		pastEndConfirmation,
@@ -20,12 +21,12 @@
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
 	import { formatDate } from '$lib/utils/format';
-	import { backendMessage } from '$lib/backend-error';
 	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { ContractForAvailability } from '$lib/utils/contract-availability';
@@ -41,8 +42,14 @@
 	let {
 		contract,
 		tenant,
-		apartment
-	}: { contract: RentalContract; tenant: string; apartment: string } = $props();
+		apartment,
+		categories
+	}: {
+		contract: RentalContract;
+		tenant: string;
+		apartment: string;
+		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
+	} = $props();
 
 	let values = $state(untrack(() => initialContractValues(contract, $page.url.searchParams)));
 	let errors = $state<Record<string, string>>({});
@@ -60,6 +67,11 @@
 	const running = $derived(
 		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
 	);
+	const runningText = $derived(
+		contract.endDate && !contract.terminated
+			? m.contracts_running_text_fixed_term()
+			: m.contracts_running_text()
+	);
 	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
 	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)
 	let unknown = $state(false);
@@ -73,8 +85,9 @@
 	const link =
 		'inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4 hover:text-accent-strong';
 	// the earliest start of a new contract after this one (YYYY-MM-DD is midnight UTC)
-	const dayAfter = (end: string) =>
-		formatDate(new Date(Date.parse(end.slice(0, 10)) + 86_400_000).toISOString().slice(0, 10));
+	const nextDay = (end: string) =>
+		new Date(Date.parse(end.slice(0, 10)) + 86_400_000).toISOString().slice(0, 10);
+	const dayAfter = (end: string) => formatDate(nextDay(end));
 	// «Befristet» for a contract saved open-ended: a notice is entered with «Beenden» (Sven K1 M1); a saved notice
 	// always has an end (backend `checkNotice`)
 	const noticeHint = $derived(!contract.endDate && !values.isUnlimited && !values.terminated);
@@ -103,16 +116,41 @@
 	}
 
 	function edited(event: Event) {
-		const id = (event.target as HTMLElement).id;
+		const { id, name } = event.target as HTMLInputElement;
 		delete errors[id];
+		if (name) delete errors[name]; // a radio group's error is named after the group (#89)
 		// the offer belongs to the values refused (review K-2); its message points to it below
 		if (refused.length) delete errors.form;
 		refused = [];
 	}
 
+	// a draft whose whole period «Abgerechnet bis» now covers, not the contract dates: no statement is created for it
+	// again (fach review V-10, V-15)
+	function covered(draft: RefusedStatement) {
+		const dates = {
+			startDate: values.startDate,
+			endDate: values.isUnlimited ? null : values.endDate
+		};
+		const period = { start: draft.periodStart, end: draft.periodEnd };
+		return (
+			billsIn(dates, period) && !billsIn({ ...dates, billedUntil: values.billedUntil }, period)
+		);
+	}
+	const onlyCovered = (statements: RefusedStatement[]) =>
+		statements.length === 1 && statements[0].status === 'draft' && covered(statements[0]);
+
+	const coveredConsequence = $derived(
+		onlyCovered(refused)
+			? m.contracts_delete_draft_covered_consequence({ number: refused[0].statementNumber })
+			: undefined
+	);
+
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
 	function saveError({ message, details }: { message: string; details?: Record<string, unknown> }) {
-		if (Array.isArray(details?.statements)) return billedDaysError(details.statements);
+		const statements = details?.statements;
+		if (Array.isArray(statements) && onlyCovered(statements))
+			return m.contracts_billed_draft_covered({ number: statements[0].statementNumber });
+		if (Array.isArray(statements)) return billedDaysError(statements);
 		if (/overlap/i.test(message)) return m.backend_contract_overlap();
 		return m.contracts_save_failed();
 	}
@@ -124,13 +162,19 @@
 		const unconfirmed = endChanged && confirmedDay !== values.endDate;
 		const pastConfirmed = unconfirmed && pastEndConfirmation(values.endDate, today);
 		if (pastConfirmed) errors.pastConfirmed = pastConfirmed;
+		// a typed «Abgerechnet bis» that is no date is not sent as none (code review C-2); the field says why
+		const billedText = form?.querySelector<HTMLInputElement>('#billedUntil')?.value.trim();
+		if (billedText && !values.billedUntil)
+			errors.billedUntil = m.ui_date_not_a_date({ example: '31.12.2024' });
 		return Object.keys(errors).length === 0;
 	}
 
-	// saves and opens `next`; a refusal names the statements it concerns (A-10)
-	async function put(next: string) {
+	// saves and opens `next`; a refusal names the statements it concerns (A-10); `deleteDraft` names a draft the
+	// backend deletes with the change, or keeps when it refuses it (#141)
+	async function put(next: string, deleteDraft?: string) {
 		saving = true;
-		const response = await apiCall(back, { method: 'PUT', body: contractBody(values) });
+		const body = { ...contractBody(values), deleteDraft };
+		const response = await apiCall(back, { method: 'PUT', body });
 		saving = false;
 		if (response.error) {
 			errors = { form: saveError(response.error) };
@@ -153,7 +197,7 @@
 		await put(back);
 	}
 
-	// the one draft the new dates would change goes first; the wizard then creates it anew (A-10)
+	// the one draft the new dates would change goes with the save; the wizard then creates it anew (A-10)
 	const contractsMessage = (state: typeof contractsState) =>
 		state === 'loading'
 			? m.contracts_apartment_contracts_loading()
@@ -161,7 +205,7 @@
 
 	async function deleteDraftAndSave(draft: RefusedStatement) {
 		if (!valid()) return focusFirstError(form);
-		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2);
+		// an overlap is said here, before the request (review K-2); the backend keeps the draft when it refuses (#141);
 		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
 		if (overlap || contractsState !== 'loaded') {
 			errors = { form: overlap ? m.backend_contract_overlap() : contractsMessage(contractsState) };
@@ -169,15 +213,10 @@
 			if (overlap) refused = [];
 			return focusFirstError(form);
 		}
-		saving = true;
-		const deleted = await apiCall(`/statements/${draft.id}`, { method: 'DELETE' });
-		saving = false;
-		if (deleted.error) {
-			errors = { form: backendMessage(deleted.error, m.contracts_save_failed()) };
-			refused = [];
-			return focusFirstError(form);
-		}
-		await put(wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd));
+		const next = covered(draft)
+			? back
+			: wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd);
+		await put(next, draft.id);
 	}
 </script>
 
@@ -190,9 +229,10 @@
 	class="flex flex-col gap-6"
 >
 	{#if running}
-		<!-- TODO(fachlich prüfen, #66): the hint on legal notice periods is not from the glossary -->
-		<Alert tone="caution" title={m.contracts_running_title()}>
-			<p>{m.contracts_running_text()}</p>
+		<!-- a rent increase per Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#66, #76),
+		     an increase it provides for still needs the official form (#388) -->
+		<Alert tone="caution" title={m.contracts_running_title()} testid="contract-running-hint">
+			<p>{runningText}</p>
 		</Alert>
 	{/if}
 
@@ -220,12 +260,17 @@
 					: m.contracts_parties_fixed_open()}
 			</p>
 			<p>{m.contracts_parties_fixed_mistake()}</p>
+			<p>{m.contracts_parties_fixed_by_law()}</p>
+			<p>{m.contracts_parties_fixed_transfer()}</p>
 			<a href={back} class={link} data-testid="contract-parties-link"
 				>{m.contracts_parties_fixed_link({ name: tenant })}</a
 			>
 			{#if contract.endDate}
-				<a href="/contracts/new" class={link} data-testid="contract-parties-new"
-					>{m.contracts_parties_fixed_new()}</a
+				<!-- for the same tenant, e.g. a move within the house (#156); the name keeps it from the Nachmieter -->
+				<a
+					href="/contracts/new?tenant={contract.tenantId}&start={nextDay(contract.endDate)}"
+					class={link}
+					data-testid="contract-parties-new">{m.contracts_new_for_tenant({ name: tenant })}</a
 				>
 			{/if}
 		</div>
@@ -251,10 +296,20 @@
 			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
 		/>
 		<NoticeHint shown={noticeHint} href={back} />
+		<!-- #133: billed outside Dwello up to this day; runs bill from the day after -->
+		<DateInput
+			id="billedUntil"
+			label={m.contracts_billed_until()}
+			help={m.contracts_billed_until_help()}
+			bind:value={values.billedUntil}
+			optional
+			error={errors.billedUntil}
+			testid="billed-until-input"
+		/>
 	</Panel>
 
 	<Panel title={m.contracts_rent()}>
-		<RentStep bind:values {errors} />
+		<RentStep bind:values {errors} {categories} agreedHelp={m.contracts_agreed_costs_help_edit()} />
 	</Panel>
 
 	{#if errors.form}
@@ -262,7 +317,7 @@
 			<p>{errors.form}</p>
 		</Alert>
 		{#if refused.length}
-			<RefusedStatements statements={refused}>
+			<RefusedStatements statements={refused} consequence={coveredConsequence}>
 				{#snippet action(draft, consequence)}
 					<div>
 						<Button

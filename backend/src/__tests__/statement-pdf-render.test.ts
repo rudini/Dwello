@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { generateStatementPDFBase64, type StatementPDFData } from '../services/pdf.service';
+import { calculateBalance } from '../services/calculation.service';
 import { generateQRBillForStatement } from '../services/qr-bill.service';
 import { readPdf } from './helpers/pdf-text';
 
@@ -28,8 +29,18 @@ const refund: StatementPDFData = {
 	managementFeePercent: 0,
 	totalCosts: 784.13,
 	totalAdvancePayments: 878,
-	balance: -93.85 // 784.13 − 878.00 = −93.87, to 5 Rappen
+	balance: -93.85 // 784.13 − 878.00 = −93.87, commercially to 5 Rappen: a statement made before #79 keeps it
 };
+
+// Width and height in mm of each field drawn with 0.75 pt corner marks (pdfkit: «0.75 w», then «x y m/l» lines, «S»)
+const blankFields = (streams: string[]) =>
+	streams.flatMap((content) =>
+		[...content.matchAll(/0\.75 w\n(?:.*\n)*?((?:[\d.]+ [\d.]+ [ml]\n)+)S/g)].map(([, path]) => {
+			const points = [...path.matchAll(/([\d.]+) ([\d.]+) [ml]/g)].map(([, x, y]) => [Number(x), Number(y)]);
+			const extent = (i: number) => Math.round((Math.max(...points.map((p) => p[i])) - Math.min(...points.map((p) => p[i]))) / (72 / 25.4));
+			return [extent(0), extent(1)];
+		})
+	);
 
 const textOf = async (data: StatementPDFData) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
 
@@ -48,6 +59,19 @@ describe('PDF einer Rückerstattung', () => {
 		const older = { ...refund, lineItems: [{ ...refund.lineItems[0], apartmentShare: null, periodShare: null }] };
 
 		expect((await textOf(older)).flowing).toContain("Hauswart Pro Fläche (m²) 3'060.00 – – 784.13");
+	});
+});
+
+// #84 FR-7: «1er», not «1e»
+describe('Stockwerk im französischen PDF', () => {
+	it.each([
+		[-1, 'A2, 1er sous-sol'],
+		[-2, 'A2, 2e sous-sol']
+	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'fr'), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
 	});
 });
 
@@ -92,6 +116,17 @@ describe('Rundung des Saldos im PDF', () => {
 		expect((await textOf(refund)).flowing).toContain('auf 5 Rappen gerundet');
 	});
 
+	// Nur zugunsten des Mieters (#79): die Nachzahlung wird kleiner (–), die Rückerstattung grösser (+), um bis 4 Rappen
+	it('zeigt die Rundung zugunsten des Mieters vom gezeigten Betrag aus', async () => {
+		const rounded = (data: StatementPDFData) => ({ ...data, balance: calculateBalance(data.totalCosts, data.totalAdvancePayments) });
+		expect((await textOf(rounded(due))).flowing).toContain('Nachzahlung vor Rundung 184.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 184.10');
+		expect((await textOf(rounded(refund))).flowing).toContain('Rückerstattung vor Rundung 93.87 Rundung auf 5 Rappen + 0.03 Rückerstattung 93.90');
+		const smallest = rounded({ ...refund, totalCosts: 877.99 });
+		expect((await textOf(smallest)).flowing).toContain('Rückerstattung vor Rundung 0.01 Rundung auf 5 Rappen + 0.04 Rückerstattung 0.05');
+		const evened = rounded({ ...due, totalCosts: 600.03 });
+		expect((await textOf(evened)).flowing).toContain('Nachzahlung vor Rundung 0.03 Rundung auf 5 Rappen – 0.03 Ausgeglichen 0.00');
+	});
+
 	// 1000.02 − 1000.00 gibt nach der Rundung 0: der Text sagt, dass nach der Rundung nichts zu bezahlen ist
 	it('nennt bei einem Saldo von 0 nach der Rundung die Rundung statt gleich hoher Beträge', async () => {
 		const evened = { ...due, totalCosts: 1000.02, totalAdvancePayments: 1000, balance: 0 };
@@ -106,7 +141,7 @@ describe('Rundung des Saldos im PDF', () => {
 	// Die Zeile passt in allen Sprachen auf eine Zeile, sonst kann der Saldo allein auf die nächste Seite rutschen
 	it('nennt die Rundung auf Italienisch in einer Zeile mit ihrem Betrag', async () => {
 		const it = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'it'), 'base64')).flowing;
-		expect(it).toContain('Arrotondamento + 0.02');
+		expect(it).toContain('Arrotondamento a 5 centesimi + 0.02');
 		expect(it).toContain('prima dell’arrotondamento 184.13');
 	});
 
@@ -116,24 +151,61 @@ describe('Rundung des Saldos im PDF', () => {
 });
 
 describe('PDF einer Nachzahlung', () => {
-	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code; Rätoromanisch sieht der Zahlteil nicht vor
-	it('druckt den Zahlteil auf Rätoromanisch deutsch und die Mitteilung wie im QR-Code', async () => {
-		const rm = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'rm'), 'base64')).flowing;
+	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code
+	it('druckt die Mitteilung im Zahlteil wie im QR-Code', async () => {
 		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'fr'), 'base64')).flowing;
 
-		expect(rm).toContain('Empfangsschein');
-		expect(rm).toContain('Zahlteil');
-		// Halb übersetzte Sätze wirkten unprofessionell: bis alles übersetzt ist, das ganze PDF deutsch
-		expect(rm).toContain('Nebenkostenabrechnung 01.01.2025 – 31.12.2025');
-		expect(rm).not.toContain('Rendaquint');
 		expect(fr).toContain('Informations supplémentaires Décompte des charges NK-1-2025-0001');
 	});
 
-	// Der QR-Code nennt den Zahlungspflichtigen nur mit vollständiger Adresse
-	it('nennt «Zahlbar durch» nur mit Name, Postleitzahl und Ort', async () => {
-		const pdf = await textOf({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } });
+	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code, auch wo er ein Zeichen ersetzt (#78)
+	it('druckt Zahlungsempfänger und Zahlungspflichtigen wie im QR-Code', async () => {
+		const shop = { ...config, companyName: 'Müller’s Immobilien' };
+		const tenant = { firstName: 'Nina', lastName: 'D’Angelo', address: 'Seeweg 15', postalCode: '6003', city: 'Luzern' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant }, shop, 'de'), 'base64')).flowing;
 
-		expect(pdf.flowing).not.toContain('Zahlbar durch');
+		expect(pdf).toContain("Zahlbar an CH44 3199 9123 0008 8901 2 Müller's Immobilien Firmenweg 9 8001 Zürich");
+		expect(pdf).toContain("Zahlbar durch Nina D'Angelo Seeweg 15 6003 Luzern");
+	});
+
+	// Der QR-Code nennt den Zahlungspflichtigen nur mit vollständiger Adresse; sonst lassen Empfangsschein und Zahlteil
+	// unter «Zahlbar durch (Name/Adresse)» ein leeres Feld mit Eckmarken frei (SIX IG, #78)
+	it('lässt ohne Postleitzahl und Ort ein Feld für Name und Adresse frei', async () => {
+		const tenant = { firstName: 'Nina', lastName: 'Brunner' };
+		const pdf = await textOf({ ...due, tenant });
+		const fr = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant }, config, 'fr'), 'base64')).flowing;
+
+		expect(pdf.flowing.match(/Zahlbar durch \(Name\/Adresse\)/g)).toHaveLength(2);
+		expect(pdf.flowing).not.toContain('Zahlbar durch Nina');
+		expect(fr.match(/Payable par \(nom\/adresse\)/g)).toHaveLength(2);
+		expect(blankFields(pdf.streams)).toEqual([[52, 20], [65, 25]]); // Empfangsschein, Zahlteil
+		expect(blankFields((await textOf(due)).streams)).toEqual([]);
+	});
+
+	// Ein langer Zahlungsempfänger braucht im Empfangsschein mehr Zeilen: das Feld endet über «Währung» und «Betrag»
+	it('lässt das Feld im Empfangsschein nicht in den Betrag reichen', async () => {
+		const long = { ...config, companyName: 'Immobilienverwaltung Muster & Partner GmbH Winterthur', address: 'Hauptstrasse der Gemeinde Oberwinterthur 125b' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } }, long, 'de'), 'base64'));
+
+		expect(blankFields(pdf.streams)[0][1]).toBeLessThan(20);
+	});
+
+	// Post ins Ausland: das Land in Grossbuchstaben allein auf der letzten Zeile der Adresse, ein Nachbarland in seiner
+	// Sprache, jedes andere englisch; im Zahlteil der Ländercode vor der Postleitzahl, ausser in der Schweiz (#102)
+	it('nennt bei einer Korrespondenzadresse im Ausland das Land in der Adresse und im Zahlteil', async () => {
+		const abroad = { firstName: 'Nina', lastName: 'Brunner', address: 'Marktstätte 3', postalCode: '78462', city: 'Konstanz', country: 'DE' };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64({ ...due, tenant: abroad }, config, 'fr'), 'base64'));
+
+		expect(pdf.text).toContain('Nina Brunner\nMarktstätte 3\n78462 Konstanz\nDEUTSCHLAND');
+		expect(pdf.text).toContain('DE-78462 Konstanz');
+		expect(pdf.pages).toBe(2); // the payment part on a page of its own
+		expect(pdf.pageTexts[0]).not.toContain('DE-'); // the address block keeps the postal code alone
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'US' } })).text).toContain('78462 Konstanz\nUNITED STATES');
+		expect((await textOf({ ...due, tenant: { ...abroad, country: 'LI' } })).text).toContain('LI-78462 Konstanz');
+		const home = await textOf({ ...due, tenant: { ...abroad, country: 'CH' } });
+		expect(home.text).toContain('78462 Konstanz\n');
+		expect(home.text).not.toContain('SCHWEIZ');
+		expect(home.text).not.toContain('CH-78462');
 	});
 
 	it('wiederholt den Tabellenkopf auf jeder Seite der Kostenübersicht', async () => {
@@ -201,6 +273,42 @@ describe('PDF ohne Saldo und einer bezahlten Abrechnung', () => {
 	});
 });
 
+// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt: kein Zahlteil, keine Bitte um die IBAN
+describe('PDF mit einem Saldo unter CHF 5', () => {
+	it('fordert eine kleine Nachzahlung nicht ein und druckt keinen Zahlteil', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.95, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Nachzahlung CHF 4.95');
+		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(pdf.flowing).not.toContain('Zahlteil');
+	});
+
+	it('zahlt eine kleine Rückerstattung nicht aus und fragt nicht nach der IBAN', async () => {
+		const pdf = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir zahlen ihn nicht aus.');
+		expect(pdf.flowing).not.toContain('IBAN');
+		expect(pdf.flowing).not.toContain('überweisen');
+	});
+
+	// nach dem Versand ist sie bezahlt, aber ohne Zahlung: kein «Bezahlt am», kein «Überwiesen am»
+	it('sagt auch nach dem Versand, dass der Betrag nicht eingefordert oder ausbezahlt wird', async () => {
+		const waived = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.1, paidDate: '2026-02-15' });
+		const back = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paidDate: '2026-02-15' });
+
+		expect(waived.flowing).toContain('Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(waived.flowing).not.toContain('Bezahlt am');
+		expect(back.flowing).toContain('Wir zahlen ihn nicht aus.');
+		expect(back.flowing).not.toContain('Überwiesen am');
+	});
+
+	it('fordert CHF 5.00 mit dem Zahlteil ein', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 779.15, balance: 5 });
+
+		expect(pdf.flowing).toContain('Zahlteil');
+	});
+});
+
 describe('QR-Code im Zahlteil', () => {
 	// 46 mm gedruckt: mit 166 Pixeln waren die Module ungleich breit; jetzt ganze Pixel je Modul, scharf auch beim Druck
 	it('bettet den QR-Code mit ganzen Pixeln je Modul in Druckauflösung ein', async () => {
@@ -233,8 +341,32 @@ describe('Heiz- und Warmwasserkosten im PDF', () => {
 
 	// Beim Tank zählt nicht die Rechnung, sondern der Verbrauch
 	it('erklärt in der Fussnote, dass beim Tank der Verbrauch zählt', async () => {
-		expect((await textOf(heated)).flowing).toContain('Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch');
+		expect((await textOf(heated)).flowing).toContain('Kosten des Gebäudes bei Heizmaterial aus dem Tank: der Verbrauch');
 		expect((await textOf(due)).flowing).not.toContain('aus dem Tank');
+	});
+});
+
+// Das PDF nennt das Gebäude und seine Kosten mit den Worten der App (statements_building_costs), nicht «Liegenschaft» (#249)
+describe('Gebäude im PDF', () => {
+	it('sagt «Gebäude» und «Kosten des Gebäudes»', async () => {
+		const { flowing } = await textOf(due);
+
+		expect(flowing).toContain('Gebäude Seepark');
+		expect(flowing).toContain('Kosten des Gebäudes: die Rechnungen der Abrechnungsperiode');
+		expect(flowing).toContain('Wohnungsanteil: der Anteil Ihrer Wohnung an den Kosten des Gebäudes nach dem Verteilschlüssel');
+		expect(flowing).not.toContain('Liegenschaft');
+	});
+
+	it.each([
+		['fr', 'Immeuble Seepark', 'Coûts de l’immeuble', 'la part des coûts de l’immeuble qui revient à votre logement'],
+		['it', 'Immobile Seepark', 'Costi immobile', 'la quota dei costi dell’immobile a carico del suo appartamento'],
+		['en', 'Building Seepark', 'Building costs', 'your apartment’s part of the building costs']
+	] as const)('sagt auf %s die Worte der App', async (language, building, costs, apartmentShare) => {
+		const { flowing } = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, language), 'base64'));
+
+		expect(flowing).toContain(building);
+		expect(flowing).toContain(costs);
+		expect(flowing).toContain(apartmentShare);
 	});
 });
 
@@ -281,6 +413,20 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect(text).toContain(beyond);
 	});
 
+	// #236: eine Zeile ohne Leistungszeitraum nennt ihre Rechnung, in jeder Sprache; die eindeutige nicht
+	it.each([
+		['de', 'Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode (Rechnung «Hauswartung Q3»)'],
+		['fr', 'Sans période de prestation : CHF 600.00, vos jours de location 139 sur 365 jours de la période de décompte (facture « Hauswartung Q3 »)'],
+		['it', 'Senza periodo di prestazione: CHF 600.00, i suoi giorni di locazione 139 su 365 giorni del periodo di conteggio (fattura «Hauswartung Q3»)'],
+		['en', 'Without a service period: CHF 600.00, your days rented 139 of 365 days of the billing period (invoice ‘Hauswartung Q3’)']
+	] as const)('nennt die Rechnung einer Zeile ohne Leistungszeitraum auf %s', async (language, line) => {
+		const named = [{ ...special[0], description: 'Hauswartung Q3' }, { ...special[1], description: 'Hauswartung Winter' }];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: named, tenantShare: 512.08 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+		expect(text).toContain(line);
+		expect(text).not.toContain('Hauswartung Winter');
+	});
+
 	// #239: die Veränderung des Tankbestands ist keine Rechnung, in jeder Sprache
 	it.each([
 		['de', 'Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen'],
@@ -325,4 +471,98 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		expect([pageOf('01.04.2025'), pageOf('(600.00')]).toEqual([pageOf('306.52'), pageOf('306.52')]);
 	});
 
+});
+
+// #71: Einzug im Mai, eine Heizrechnung für Januar bis März und eine ohne Leistungszeitraum: jede mit ihrem Anteil nach
+// Heizprofil, die mit Leistungszeitraum mit den Monaten darin und der Teilung (nachrechenbar wie #232)
+describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
+	const months = (shares: [number, number][]) => shares.map(([month, percentage]) => ({ month, percentage }));
+	const invoiceParts = [
+		{ start: '2024-01-01', end: '2024-03-31', amount: 1000, days: 0, total: 91, profile: { percent: 0, months: [], periodMonths: months([[1, 18], [2, 14], [3, 11]]) } },
+		{ start: '2024-01-01', end: '2024-12-31', amount: 1000, days: 245, total: 366, noPeriod: true as const, profile: { percent: 52, months: months([[5, 2], [12, 26]]), periodMonths: [] } }
+	];
+	const winter: StatementPDFData = {
+		...due,
+		heating: { profile: 'Winter', percent: 52, months: months([[5, 2], [6, 0], [7, 0], [8, 0], [9, 2], [10, 8], [11, 14], [12, 26]]) },
+		lineItems: [{ category: 'Heizung', key: 'Pro Fläche (m²)', totalAmount: 2000, apartmentShare: 2000, periodShare: 0.26, invoiceParts, byProfile: true, heating: true, tenantShare: 520 }]
+	};
+
+	it('nennt jede Rechnung mit ihrem Anteil nach Heizprofil und rechnet bis zu Ihrem Anteil', async () => {
+		const text = (await textOf(winter)).flowing;
+		expect(text).toContain("Leistungszeitraum 01.01.2024 – 31.03.2024: CHF 1'000.00, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: keine; zusammen 0.00 %. Anteil nach Heizprofil: 0.00 % / 43.00 % = 0.00 %");
+		expect(text).toContain("Ohne Leistungszeitraum: CHF 1'000.00, Anteil nach Heizprofil: 52.00 % (siehe Heiz- und Warmwasserkosten)");
+		expect(text).toContain("Ihr Anteil: 2'000.00 × (1'000.00 × 0.00 % + 1'000.00 × 52.00 %) / 2'000.00 = 520.00");
+	});
+
+	// Fachreview 1, M-1 und M-3: der Satz zum Heizprofil gilt nur für die Rechnung ohne Leistungszeitraum
+	it('schränkt den Anteil im Heizungsabschnitt und die Erläuterung auf Rechnungen ohne Leistungszeitraum ein', async () => {
+		const text = (await textOf(winter)).flowing;
+		expect(text).toContain('Heizkosten nach Heizprofil «Winter»: 52.00 % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.');
+		expect(text).toContain('Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil; bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin. Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
+		expect((await textOf(heated)).flowing).toContain('44.20 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
+	});
+
+	// Fachreview 1, V-1: der Teil in der Periode nach Tagen, mit dem Beleg wie #241; darin die Monate des Heizprofils
+	it('nennt bei einem Leistungszeitraum über die Periode hinaus den Beleg und die Monate in der Periode', async () => {
+		const beyond = { start: '2024-01-01', end: '2024-03-31', amount: 905.03, days: 91, total: 91, whole: { start: '2023-10-01', end: '2024-03-31', amount: 1820 }, profile: { percent: 100, months: months([[1, 18], [2, 14], [3, 11]]), periodMonths: months([[1, 18], [2, 14], [3, 11]]) } };
+		const text = (await textOf({ ...winter, lineItems: [{ ...winter.lineItems[0], invoiceParts: [beyond, invoiceParts[1]] }] })).flowing;
+		expect(text).toContain("Leistungszeitraum 01.10.2023 – 31.03.2024 (Rechnung CHF 1'820.00), davon 01.01.2024 – 31.03.2024: CHF 905.03, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteil nach Heizprofil: 43.00 % / 43.00 % = 100.00 %");
+	});
+
+	it.each([
+		['fr', "Période de prestation 01.01.2024 – 31.03.2024 : CHF 1'000.00, parts des mois dans le profil de chauffage : janv. 18.00 %, févr. 14.00 %, mars 11.00 % ; au total 43.00 %. Parts des mois de votre bail dans cette période : aucune ; au total 0.00 %. Part selon le profil de chauffage : 0.00 % / 43.00 % = 0.00 %", "Sans période de prestation : CHF 1'000.00, part selon le profil de chauffage : 52.00 % (voir « Frais de chauffage et d’eau chaude »)", '52.00 % pour une facture sans période de prestation.'],
+		['it', "Periodo di prestazione 01.01.2024 – 31.03.2024: CHF 1'000.00, quote dei mesi nel profilo di riscaldamento: gen 18.00 %, feb 14.00 %, mar 11.00 %; in totale 43.00 %. Quote dei mesi della sua locazione in tale periodo: nessuna; in totale 0.00 %. Quota secondo il profilo di riscaldamento: 0.00 % / 43.00 % = 0.00 %", "Senza periodo di prestazione: CHF 1'000.00, quota secondo il profilo di riscaldamento: 52.00 % (vedi spese di riscaldamento e acqua calda)", '52.00 % per una fattura senza periodo di prestazione.'],
+		['en', "Service period 01.01.2024 – 31.03.2024: CHF 1'000.00, monthly shares in the heating profile: Jan 18.00 %, Feb 14.00 %, Mar 11.00 %; in total 43.00 %. Monthly shares during your tenancy within it: none; in total 0.00 %. Share under the heating profile: 0.00 % / 43.00 % = 0.00 %", "Without a service period: CHF 1'000.00, share under the heating profile: 52.00 % (see ‘Heating and hot water costs’)", '52.00 % for an invoice without a service period.']
+	] as const)('nennt die Rechnungen nach Heizprofil auch auf %s', async (language, line, run, note) => {
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(winter, config, language), 'base64')).flowing;
+		expect(text).toContain(line);
+		expect(text).toContain(run);
+		expect(text).toContain(note);
+	});
+});
+
+// #120, #358: die berichtigte Abrechnung nennt die ersetzte und rechnet an, was darauf schon bezahlt ist
+describe('PDF einer berichtigten Abrechnung', () => {
+	// bezahlt 100.00 auf NK-1-2025-0001: 784.13 − 600.00 − 100.00 = 84.13, auf 5 Rappen zugunsten des Mieters 84.10
+	const corrected: StatementPDFData = {
+		...due,
+		statementNumber: 'NK-1-2025-0002',
+		balance: 84.1,
+		replaces: { statementNumber: 'NK-1-2025-0001', statementDate: '2026-02-01', paidOn: ['NK-1-2025-0001'], priorPayments: 100 }
+	};
+
+	// Fachreview W2e V-2: der Mieter hat die alte Abrechnung mit ihrem Zahlteil noch
+	it('sagt, dass die ersetzte Abrechnung nicht mehr gilt und nur noch dieser Saldo zu bezahlen ist', async () => {
+		expect((await textOf(corrected)).flowing).toContain(
+			'Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Die Abrechnung NK-1-2025-0001 gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung.'
+		);
+	});
+
+	it('verlangt bei einer Rückerstattung keine Zahlung', async () => {
+		const flowing = (await textOf({ ...corrected, balance: -20 })).flowing;
+		expect(flowing).toContain('Diese Abrechnung ersetzt die Abrechnung NK-1-2025-0001 vom 01.02.2026. Die Abrechnung NK-1-2025-0001 gilt nicht mehr.');
+		expect(flowing).not.toContain('Bezahlen Sie nur noch');
+	});
+
+	it('zieht das schon Bezahlte vor der Rundung ab', async () => {
+		const flowing = (await textOf(corrected)).flowing;
+		expect(flowing).toContain('Geleistete Akontobeiträge – 600.00 Bereits bezahlt auf NK-1-2025-0001 – 100.00');
+		expect(flowing).toContain('Nachzahlung vor Rundung 84.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 84.10');
+		expect(flowing).toContain('bereits bezahlt CHF 100.00');
+	});
+
+	// Fachreview W2e V-4, V-11: jede Abrechnung der Kette; eine schon bezahlte Rückerstattung zählt dazu
+	it('nennt jede Abrechnung, auf die zurückerstattet wurde, und zählt den Betrag dazu', async () => {
+		const flowing = (
+			await textOf({ ...corrected, balance: 204.1, replaces: { ...corrected.replaces!, paidOn: ['NK-1-2025-0001', 'NK-1-2025-0002'], priorPayments: -20 } })
+		).flowing;
+		expect(flowing).toContain('Bereits zurückerstattet auf NK-1-2025-0001 und NK-1-2025-0002 + 20.00');
+		expect(flowing).toContain('bereits zurückerstattet CHF 20.00');
+	});
+
+	it('nennt die ersetzte Abrechnung auf Französisch', async () => {
+		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(corrected, config, 'fr'), 'base64')).flowing;
+		expect(fr).toContain('Ce décompte remplace le décompte NK-1-2025-0001 du 01.02.2026.');
+		expect(fr).toContain('Déjà payé sur NK-1-2025-0001');
+	});
 });

@@ -17,7 +17,7 @@ Run `@wip` only through `test:e2e:wip`: when `bddgen` fails (a missing step, `$l
 
 `bddgen` loads the steps, and the API driver imports BFF server code with `$lib` paths: on a fresh checkout run `bunx svelte-kit sync` once before calling `bddgen` directly (`bun run test:e2e` does it).
 
-The run starts its own stack: mail catcher, KI stand-in on 2527 (`backend/scripts/llm-stub.ts`: answers only the check of a new category, so invoices still find no KI), backend on 3101 and a production build of the frontend on 3100, against `dwello_e2e`, recreated from `backend/migrations` before every run. Only PostgreSQL on 5432 must be running. `E2E_DATABASE_URL` overrides the database. Locally a frontend already listening on 3100 is reused, so stop it after code changes or the tests run an old build; 3101 must be free. A second, empty instance (backend 3103 on `dwello_e2e_empty`, the same build on 3102) serves the axe check's `empty` and `first-use` states; 3102 and 3103 must be free as well.
+The run starts its own stack: mail catcher, KI stand-in on 2527 (`backend/scripts/llm-stub.ts`: answers only the check of a new category, so invoices still find no KI), backend on 3101 and a production build of the frontend on 3100, against `dwello_e2e`, recreated from `backend/migrations` before every run; backend and frontend use the JWT secret of `fixtures/session.ts` and a Google sign-in with test credentials, and the development servers and database `dwello` are never touched. Only PostgreSQL on 5432 must be running. `E2E_DATABASE_URL` overrides the database. Locally the build runs only when the frontend (`src/` without `__tests__`, `messages/`, `static/`, its configuration and packages, and `playwright.config.ts`, which sets APP_VERSION) changed since the last E2E build (`tools/e2e/build-if-changed.mjs`; on CI always), so a run after a change to steps or the backend starts in seconds. Locally a frontend already listening on 3100 is reused, so stop it after code changes or the tests run an old build; 3101 must be free. A second, empty instance (backend 3103 on `dwello_e2e_empty`, the same build on 3102) serves the axe check's `empty` and `first-use` states; 3102 and 3103 must be free as well. It and the demo frontend (3104) start only when the generated tests include `accessibility.feature`, `sprachen-bildschirme.feature` or `demo.feature` (a `@wip` run usually does not).
 
 ## Layers (Screenplay, after Dave Farley)
 
@@ -58,10 +58,20 @@ Then('ist im Mietvertrag der Mieter {string} gewählt', async ({ verwalter, name
 });
 ```
 
+## No scenario
+
+A state the E2E stack cannot produce gets a lower-layer test and `No scenario: <reason>` in the plan and the pull request instead of a scenario (`CLAUDE.md`, Workflow 1):
+
+- a failure only between server parts (a load function, the BFF calling the backend);
+- the server's clock or time zone (a test with a set clock);
+- the backend start or a CLI script;
+- how the UI shows a refusal its own checks never send to the backend (a DOM test with the body from a contract);
+- the quality of a KI answer.
+
 ## Rules
 
-- **Isolation:** every scenario creates its own data and removes it; `seed.names` appends a UUID to each name ("Lindenhof" becomes "Lindenhof 3f2a…"), so scenarios run in parallel. Never rely on data from another scenario or from the demo data. Enter periods and dates that match the seeded records, never a default of the app that moves with today. A result that depends on a choice the app preselects names that choice: a preselection reads all records, also those of parallel scenarios.
+- **Isolation:** every scenario creates its own data and removes it (temporal isolation); `seed.names` appends a UUID to each name ("Lindenhof" becomes "Lindenhof 3f2a…"), so scenarios run in parallel (functional isolation). Never rely on data from another scenario or from the demo data. Enter periods and dates that match the seeded records, never a default of the app that moves with today. A result that depends on a choice the app preselects names that choice: a preselection reads all records, also those of parallel scenarios.
 - **Negative checks** ("X is not shown") need a positive anchor first (an empty-state hint or the page title); otherwise they also pass on an error page. A negative check names the shortest word every wrong variant contains («Heizprofil», not «nach Heizprofil»).
-- **Failure states** (`docs/test-pyramid.md`): `FailRequests.to(path, query)` answers every call of that endpoint with those query values with status 500 and no data, `FailRequests.noLonger` lifts every route of the page. A form action `?/upload` is the query key `/upload` with the value `''` (`FailRequests.to('/tenants/<id>', { '/upload': '' })`). "One failing request" means one endpoint with all its calls (a page that loads contracts per apartment sends several). Set it before the page sends the calls; an axe or language state with a failure (`tasks/accessibility.ts`) sets it on the open page and then `Navigate.reload`.
+- **Failure states:** the only API mock in a scenario. A state that only a failing request produces is reached by answering that one endpoint with an error status at the browser boundary, never with invented data; only requests the browser makes, so not in `@api` scenarios. `FailRequests.to(path, query)` (`tests/e2e/screenplay/`) answers every call of that endpoint with those query values with status 500 and no data, `FailRequests.noLonger` lifts every route of the page. A form action `?/upload` is the query key `/upload` with the value `''` (`FailRequests.to('/tenants/<id>', { '/upload': '' })`). "One failing request" means one endpoint with all its calls (a page that loads contracts per apartment sends several). Set it before the page sends the calls; an axe or language state with a failure (`tasks/accessibility.ts`) sets it on the open page and then `Navigate.reload`.
 - **Pages outside the app** (an HTML answer of a `+server.ts` route, without scripts): `Navigate.to` waits for `body[data-hydrated]`, so such a page sets the attribute itself (`pdfRefusal` in `src/lib/server/statement.ts`).
-- `@api` is for business rules and calculations that do not depend on the UI; workflows, navigation and forms stay UI-only.
+- `@api` is for business rules and calculations that do not depend on the UI (examples and the two drivers: `docs/test-pyramid.md`, "Two protocol drivers"); workflows, navigation and forms stay UI-only. A new `@api` step needs both paths; the API path lives in `tasks/<area>-api.ts`.

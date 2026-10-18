@@ -4,6 +4,8 @@ import { toContractHistory } from '../lib/server/contract-history';
 import { runAction } from './helpers/action';
 import tenant from '../../tests/contracts/tenant.json';
 import tenantList from '../../tests/contracts/tenants.json';
+import documentList from '../../tests/contracts/documents.json';
+import contractResponse from '../../tests/contracts/contract.json';
 
 const API = 'http://localhost:3001/api/v1';
 const day = (offset: number) =>
@@ -46,6 +48,54 @@ const loadTenant = async (contracts: unknown[]) =>
 	>;
 
 describe('Mieterdetail', () => {
+	// #178: a former tenant's documents uploaded before the last Vertragsende
+	it('nennt die Dokumente, die vor dem Ende des letzten Mietvertrags hochgeladen wurden', async () => {
+		const [upload] = documentList.data;
+		const fetch = (async (url: string) =>
+			url === `${API}/tenants/t1`
+				? Response.json(tenant)
+				: url.startsWith(`${API}/contracts`)
+					? Response.json({ contracts: [{ ...contract('c1', '2020-01-01', day(-1), '2.01'), terminated: true }] })
+					: Response.json({ data: [{ ...upload, createdAt: '2024-05-01T09:00:00.000Z' }] })) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;
+
+		expect(data.formerDocuments).toMatchObject({ endDate: day(-1), documents: [{ id: upload.id }] });
+	});
+
+	// A-6: after a fixed term without notice, the next tenant's contract shows that she moved out
+	it('nennt die Dokumente nach einem befristeten Mietvertrag, wenn ein anderer Mieter eingezogen ist', async () => {
+		const [upload] = documentList.data;
+		const ended = contract('c1', '2020-01-01', day(-2), '2.01');
+		const fetch = (async (url: string) =>
+			url === `${API}/tenants/t1`
+				? Response.json(tenant)
+				: url === `${API}/contracts?apartmentId=a-c1&limit=100`
+					? Response.json({ contracts: [ended, { ...contract('c2', day(-1), null, '2.01'), apartmentId: 'a-c1' }] })
+					: url.startsWith(`${API}/contracts`)
+						? Response.json({ contracts: [ended] })
+						: Response.json({ data: [{ ...upload, createdAt: '2024-05-01T09:00:00.000Z' }] })) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;
+
+		expect(data.formerDocuments).toMatchObject({ endDate: day(-2) });
+	});
+
+	// the apartment's contracts only feed the notice: without them the page still loads, without a notice
+	it('zeigt die Seite ohne Hinweis, wenn die Mietverträge der Wohnung nicht laden', async () => {
+		const fetch = (async (url: string) => {
+			if (url === `${API}/tenants/t1`) return Response.json(tenant);
+			if (url.includes('apartmentId=')) throw new TypeError('fetch failed');
+			if (url.startsWith(`${API}/contracts`))
+				return Response.json({ contracts: [contract('c1', '2020-01-01', day(-2), '2.01')] });
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 't1' }, fetch } as never)) as Record<string, unknown>;
+
+		expect(data.formerDocuments).toBeNull();
+	});
+
 	it('lädt die Mietverträge des Mieters', async () => {
 		const { urls, fetch } = backend([]);
 
@@ -62,7 +112,7 @@ describe('Mieterdetail', () => {
 			apartmentId: 'a-c1',
 			apartment: 'Wohnung 2.01',
 			building: 'Ahornhof',
-			rent: 1050,
+			monthlyTotal: 1050,
 			startDate: day(-400),
 			upcoming: false
 		});
@@ -93,7 +143,7 @@ describe('Mieterdetail', () => {
 				id: 'c1',
 				apartment: 'Wohnung 2.01',
 				status: 'active',
-				rentBrutto: 1050
+				monthlyTotal: 1050
 			}),
 			expect.objectContaining({ id: 'c0', apartment: 'Wohnung 1.01', status: 'ended' })
 		]);
@@ -114,6 +164,13 @@ describe('Vertragsstatus in der Historie', () => {
 		const contract = { id: 'c', startDate: day(-10), endDate: day(10) };
 		expect(toContractHistory({ ...contract, terminated: true }, 'Anna').terminated).toBe(true);
 		expect(toContractHistory(contract, 'Anna').terminated).toBe(false);
+	});
+	// #429: die Nebenkostenpauschale zählt im Monatlich total
+	it('zählt die Nebenkostenpauschale im Monatlich total', () => {
+		const withFlatRate = { ...contractResponse, flatRateUtilityCharge: '120.00' };
+		expect(toContractHistory(withFlatRate, 'Anna').monthlyTotal).toBe(
+			toContractHistory(contractResponse, 'Anna').monthlyTotal + 120
+		);
 	});
 });
 
@@ -136,19 +193,26 @@ describe('Mieter löschen', () => {
 });
 
 describe('Mieterliste', () => {
-	it('kennzeichnet Mieter mit laufendem oder künftigem Vertrag als aktiv', async () => {
+	// F-4 (#58): aktiv mit laufendem, künftig nur mit künftigem Mietvertrag
+	it('kennzeichnet Mieter als aktiv oder künftig, wie das Backend sie einordnet', async () => {
 		const { load: loadList } = await import('../routes/tenants/+page.server');
 		const fetch = (async () =>
 			Response.json({
-				tenants: [tenantList.tenants[0], { ...tenantList.tenants[0], id: 't2', isActive: false }],
+				tenants: [
+					tenantList.tenants[0],
+					{ ...tenantList.tenants[0], id: 't2', isActive: false, isFuture: true }
+				],
 				total: 2
 			})) as unknown as typeof globalThis.fetch;
 
 		const data = (await loadList({ url: new URL('http://localhost/tenants'), fetch } as never)) as {
-			tenants: { isActive: boolean }[];
+			tenants: { isActive: boolean; isFuture: boolean }[];
 		};
 
-		expect(data.tenants.map((t) => t.isActive)).toEqual([true, false]);
+		expect(data.tenants.map((t) => [t.isActive, t.isFuture])).toEqual([
+			[true, false],
+			[false, true]
+		]);
 	});
 
 	it('nennt bei einem künftigen Mieter den Vertragsbeginn', async () => {

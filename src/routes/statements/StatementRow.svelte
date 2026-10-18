@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { balanceLabel, statusLabels, statusTones } from '$lib/statement';
+	import { balanceLabel, nextReminderLater, statusLabels, statusTones } from '$lib/statement';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
@@ -17,6 +17,7 @@
 		m.statements_row_name({ number: statement.statementNumber, tenant: statement.tenantName })
 	);
 	const open = $derived(statement.status === 'sent' || statement.status === 'overdue');
+	const nextReminder = $derived(nextReminderLater(statement));
 </script>
 
 <!-- Stacked up to xl; side by side only where all columns fit, the actions never shrink -->
@@ -42,7 +43,9 @@
 				})}</span
 			>
 			<span class="text-ink-muted"
-				>{formatDate(statement.periodStart)} – {formatDate(statement.periodEnd)}</span
+				>{formatDate(statement.rentalStart)} – {formatDate(statement.rentalEnd)}, {m.statements_rental_days(
+					{ days: statement.rentalDays }
+				)}</span
 			>
 		</p>
 	</div>
@@ -57,6 +60,11 @@
 				>{m.statements_reminded_on({ date: formatDate(statement.lastReminderDate) })}</span
 			>
 		{/if}
+		{#if statement.status === 'overdue' && nextReminder}
+			<span class="text-ink-muted"
+				>{m.statements_next_reminder_on({ date: formatDate(nextReminder) })}</span
+			>
+		{/if}
 	</div>
 	<!-- Above the row link, so these stay their own buttons -->
 	<div class="relative flex flex-wrap gap-2 xl:w-64 xl:shrink-0 xl:flex-col xl:items-end">
@@ -68,6 +76,14 @@
 				icon="document-download"
 				ariaLabel={m.statements_pdf_download_of({ name })}
 				testid="statement-pdf-link">PDF</Button
+			>
+		{:else}
+			<!-- A new draft has no PDF until «PDF erstellen» on its detail page (#253) -->
+			<a
+				href="/statements/{statement.id}"
+				class="inline-flex min-h-12 items-center text-accent underline underline-offset-4 hover:text-accent-strong"
+				aria-label={m.statements_pdf_missing_of({ name })}
+				data-testid="statement-pdf-missing">{m.statements_pdf_missing()}</a
 			>
 		{/if}
 		{#if open}

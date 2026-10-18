@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Panel from '$lib/ui/Panel.svelte';
-	import { statusLabels } from '$lib/apartment';
-	import { formatCurrency, formatDate } from '$lib/utils/format';
+	import { reletParts, statusLabels } from '$lib/apartment';
+	import { endedSince } from '$lib/contract-status';
+	import { formatCurrency } from '$lib/utils/format';
 	import type { DashboardData } from './+page.server';
 
 	// Counts that lead to the filtered lists, and the rented share per building
@@ -46,14 +47,19 @@
 			testid: 'stat-reserved'
 		}
 	]);
-	// The relet apartments as the building cards count them, by the start of their future contract
-	function reletParts(starts: string[] = []) {
-		const counts = new Map<string, number>();
-		for (const start of starts) counts.set(start, (counts.get(start) ?? 0) + 1);
-		return [...counts]
-			.map(([start, count]) => `, ${m.dashboard_relet_from({ count, date: formatDate(start) })}`)
+	// The relet apartments as the building cards count them, and each empty one, since when if it had a contract (#145)
+	const occupancyNotes = (building: DashboardData['buildingOccupancy'][number]) =>
+		[
+			...reletParts(building.reletStarts),
+			...(building.vacant ?? []).map(({ number, lastContractEnd }) =>
+				lastContractEnd
+					? m.dashboard_vacant_since({ number, date: endedSince(lastContractEnd) })
+					: m.dashboard_vacant({ number })
+			)
+		]
+			.map((note) => `, ${note}`)
 			.join('');
-	}
+	const anyVacant = $derived(data.buildingOccupancy.some((b) => b.vacant?.length));
 	const statementFigures = [
 		{ status: 'draft', label: m.statements_status_draft() },
 		{ status: 'sent', label: m.statements_status_sent() },
@@ -116,7 +122,6 @@
 
 	{#if data.buildingOccupancy.length}
 		<Panel title={m.dashboard_occupancy_heading()} level={3}>
-			<!-- TODO(fachlich prüfen, #55): share of rented apartments has no glossary term ("Belegungsrate") -->
 			<ul class="flex flex-col divide-y divide-line">
 				{#each data.buildingOccupancy as building (building.buildingId)}
 					<li data-testid="occupancy-row" class="flex min-h-12 flex-wrap items-center gap-4 py-2">
@@ -132,15 +137,16 @@
 							>
 							{building.occupiedApartments === 1
 								? m.dashboard_occupied_one()
-								: m.dashboard_occupied()}{reletParts(building.reletStarts)}</span
-						>
-						<span
-							class="w-20 whitespace-nowrap text-right font-semibold tabular-nums text-ink"
-							data-testid="occupancy-rate">{building.occupancyRate.toFixed(1)} %</span
+								: m.dashboard_occupied()}{occupancyNotes(building)}</span
 						>
 					</li>
 				{/each}
 			</ul>
+			{#if anyVacant}
+				<p class="text-ink-muted" data-testid="occupancy-vacancy-help">
+					{m.apartments_vacancy_costs_help()}
+				</p>
+			{/if}
 		</Panel>
 	{/if}
 </section>

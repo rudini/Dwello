@@ -14,6 +14,17 @@ Funktionalität: Neue Rechnung erfassen
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
     Und die Rechnung von "Hauswart Huber" über "CHF 450.00" in der Kategorie "Hauswart" ist auffindbar
 
+  # #378: fehlt die neue Rechnung in schon erstellten Abrechnungen, sagt Dwello nach dem Speichern, was zu tun ist
+  Szenario: Rechnung einer schon abgerechneten Periode erfassen
+    Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "450.00" Franken für "Treppenhausreinigung Q1" im Gebäude "Seeblick" in der Kategorie "Hauswart" erfasst
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"
+    Und warnt die Rechnung "gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon"
+    Und warnt die Rechnung "Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung."
+
   Szenario: Nicht umlagefähige Kategorie wählen
     Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
     Dann ist die Rechnung nicht als umlagefähig markiert
@@ -22,10 +33,10 @@ Funktionalität: Neue Rechnung erfassen
 
   Szenario: Pflichtangaben fehlen
     Wenn der Liegenschaftsverwalter die Rechnung ohne Angaben speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie ein Gebäude"
-    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen Rechnungssteller ein"
-    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine Beschreibung ein"
-    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen gültigen Betrag ein"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie ein Gebäude."
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen Rechnungssteller ein."
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine Beschreibung ein."
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen gültigen Betrag ein."
 
   # Datum als TT.MM.JJJJ, unabhängig von der Sprache des Browsers; die Punkte setzt das Feld selbst, getippte Punkte zählen nicht doppelt
   Szenario: Rechnungsdatum als TT.MM.JJJJ eintippen
@@ -36,6 +47,10 @@ Funktionalität: Neue Rechnung erfassen
     Dann zeigt das Feld Rechnungsdatum "15.01.2026"
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "30022025" eintippt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
+
+  # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)
+  Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre
+    Dann erklärt das Formular beim Leistungszeitraum "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
 
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

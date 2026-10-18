@@ -1,6 +1,6 @@
 ---
 name: slice-review
-description: How to run the reviewer subagents of a Dwello slice (code-reviewer, fach-reviewer, daten-pruefer, persona) - worktree, prompt, report path, plan line, triage. Load before starting any reviewer subagent (CLAUDE.md, Workflow steps 1, 4 to 6), or when the user says "slice-review", "review the slice" or "run the reviewers".
+description: How to run the reviewer subagents of a Dwello slice (code-reviewer, fach-reviewer, daten-pruefer, persona) - worktree, prompt, report path, triage. Load before starting any reviewer subagent (CLAUDE.md, Workflow steps 1, 4 to 7), or when the user says "slice-review", "review the slice" or "run the reviewers".
 ---
 
 # Slice review
@@ -23,22 +23,25 @@ Personas get no worktree, only the running app (`docs/design/tools/persona-stack
 
 Every prompt names the requirement (the scenario, the issue's "Done means", or the request in its words) and the report path. Reviewers in a worktree write it to your scratchpad: `<slice>-review-<n>.md` (`code-reviewer`), `<slice>-fachreview-<n>.md` (`fach-reviewer`), `<slice>-datenpruefung-<n>.md` (`daten-pruefer`); personas write `docs/design/personas/<persona>-<slice>.md` themselves. Add per agent:
 
-- `code-reviewer`: the worktree, the commit range (`git diff <base> <commit>`), the checks you ran on that commit with their results (a check run before a later change, run again).
+- `code-reviewer`: the worktree, the commit range (`git diff <base> <commit>`), the checks you ran on that commit and whether they passed (a check run before a later change, run again).
 - `fach-reviewer`: the worktree and the subject: the `@wip` scenario before implementation, or the diff and the screens it changes.
 - `daten-pruefer`: the worktree, the change, the affected records, and that the app is running.
-- `persona`: the persona, a task on what the change touches (never the code), that the app runs on :3300, the building of the demo data it may save in only when its task needs saving, and for a failure state the request to fail or the SQL you ran (`CLAUDE.md`, Workflow 5).
+- `persona`: the persona, a task on what the change touches (never the code), that the app runs on :3300, the building of the demo data it may save in only when its task needs saving, and for a failure state or blocking demo records the request to fail or the SQL you ran (`docs/design/personas/README.md`, "Running a review").
 
 For a re-review give only the delta, the open finding IDs and the previous report. Then keep working in your tree while it runs, but do not amend or rebase the reviewed commits.
 
 ## 3. Triage
 
 1. Copy each report from your scratchpad to `docs/reviews/` under the same name.
-2. Judge and fix the findings as `CLAUDE.md`, Workflow 6 says.
-3. Add one line per reviewer and round to the latest `## Session` of `implementation_plan.md`:
-   `<reviewer> round <n> (<report path>): open <ID (severity)>, fixed <IDs>, rejected <ID: reason>`
-   The findings stay in the report. A finding fixed in a later round changes its status in the line of the round that raised it.
+2. Judge and fix the findings (`CLAUDE.md`, Workflow 6):
+   - Every report gives severity (Blocker / Major / Minor / Nit) and evidence (file:line or reproduction steps). Check the evidence before acting; reject a finding with a reason when it does not hold.
+   - A fix that changes behavior (a help or error text the user sees included) gets a failing test first. A wording fix of a translation that a reviewer named and checked needs none, also when it answers a persona finding: the report is the evidence. Any other fixed persona finding is closed by a test that shows it (scenario or lower layer, red before the fix).
+   - A persona runs again only when a fix adds a text or screen state it has not seen, and then only the personas whose finding the fix answers, with a task on just that text or state.
+   - Persona "Beobachtungen": check each on the base commit. One the change caused or made more visible is a finding of the slice; the others stay in the persona's report.
+   - Rounds (`CLAUDE.md`, Workflow 7): a round is one run of one reviewer on one slice; fixes of feature-review Blockers/Majors form a new slice, fixes of Minors/Nits get no round of their own (the closing round of skill `pull-request` reviews them). What stays open when the task ends: `CLAUDE.md`, "Done means".
+3. The plan checklist gets one item per review round that names its report; the findings and their status stay out of the plan. Rejected findings and their reasons go under "Found" in the closing report. Findings of different reviewers with one cause are one fix and one test.
 4. Remove the worktree: `git worktree remove <path>` (no `--force`: the links are ignored).
 
 When a reviewer stops without a review (no worktree named, app not reachable), fix the cause and start it once more; when `git worktree remove` refuses, look at `git -C <path> status` and remove only what you created. A second failure of either goes under "Blocked on me".
 
-Done when every report is in `docs/reviews/` (personas: `docs/design/personas/`), every finding has a status in its round's plan line, and the worktrees of this round are removed.
+Done when every report is in `docs/reviews/` (personas: `docs/design/personas/`), every Blocker/Major is fixed, rejected with a reason or under "Blocked on me", and the worktrees of this round are removed.

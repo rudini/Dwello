@@ -25,7 +25,7 @@ describe('Kostenkategorien', () => {
 	it('lehnt einen schon vergebenen Namen verständlich ab', async () => {
 		await create('Treppenhaus');
 
-		await expectRejection(await create('Treppenhaus'), 409, `Eine Kategorie mit dem Namen "Treppenhaus ${token}" existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
+		await expectRejection(await create('Treppenhaus'), 409, `Eine Kategorie mit dem Namen «Treppenhaus ${token}» existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
 			name: `Treppenhaus ${token}`
 		});
 	});
@@ -36,7 +36,7 @@ describe('Kostenkategorien', () => {
 
 		const response = await categories.send('PUT', `/${id}`, { nameDE: `Dachrinne ${token}` });
 
-		await expectRejection(response, 409, `Eine Kategorie mit dem Namen "Dachrinne ${token}" existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
+		await expectRejection(response, 409, `Eine Kategorie mit dem Namen «Dachrinne ${token}» existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
 			name: `Dachrinne ${token}`
 		});
 	});
@@ -49,6 +49,40 @@ describe('Kostenkategorien', () => {
 
 		const category = (await (await callApi(`/api/v1/categories/${id}`)).json()) as { isHeatingCost: boolean };
 		expect(category.isHeatingCost).toBe(true);
+	});
+
+	// #100: nur die Heizung bringt Dwello als Brennstoff mit; eine eigene Kategorie ist es erst, wenn der
+	// Liegenschaftsverwalter sie so markiert
+	it('kennzeichnet die Heizung als Brennstoff, eigene Kategorien erst auf Wunsch', async () => {
+		const id = await idOf(
+			await categories.create({ name: `Stückholz ${token}`, nameDE: `Stückholz ${token}`, isAllowedUtilityCost: true, isHeatingCost: true })
+		);
+		const fuel = async () => {
+			const { categories: all } = (await (await callApi('/api/v1/categories?limit=100')).json()) as {
+				categories: { id: string; name: string; isFuel: boolean }[];
+			};
+			return Object.fromEntries(all.filter((c) => ['Heating', 'Chimney Sweep'].includes(c.name) || c.id === id).map((c) => [c.name, c.isFuel]));
+		};
+		expect(await fuel()).toEqual({ Heating: true, 'Chimney Sweep': false, [`Stückholz ${token}`]: false });
+
+		await categories.send('PUT', `/${id}`, { isFuel: true });
+
+		expect((await fuel())[`Stückholz ${token}`]).toBe(true);
+	});
+
+	// #100 (Code-Review C-12): Brennstoff ist ein Merkmal von Heizkosten
+	it('speichert «Brennstoff» nur zusammen mit Heizkosten', async () => {
+		const withoutHeating = await idOf(
+			await categories.create({ name: `Gas ${token}`, nameDE: `Gas ${token}`, isAllowedUtilityCost: true, isFuel: true })
+		);
+		const unticked = await idOf(
+			await categories.create({ name: `Pellets B ${token}`, nameDE: `Pellets B ${token}`, isAllowedUtilityCost: true, isHeatingCost: true, isFuel: true })
+		);
+		await categories.send('PUT', `/${unticked}`, { isHeatingCost: false });
+
+		for (const id of [withoutHeating, unticked]) {
+			expect(((await (await callApi(`/api/v1/categories/${id}`)).json()) as { isFuel: boolean }).isFuel).toBe(false);
+		}
 	});
 
 	it('findet Kategorien über den deutschen Namen', async () => {

@@ -9,21 +9,37 @@ import {
 	chosenTenantId,
 	chosenTenantName,
 	confirmation,
-	draftRestoredShown,
 	durationChosen,
+	enteredAdvancePayment,
 	enteredBaseRent,
 	failure,
 	fixedApartmentName,
 	fixedTenantName,
+	billedUntilHelpText,
+	feeHelpText,
 	partiesHelpText,
 	reviewHint,
+	rentTakenOverText,
 	reviewed,
+	runningContractHintText,
 	startHint,
-	tenantChoices
+	tenantChoices,
+	withdrawNoticeHelp,
+	advancePaymentHelpText,
+	noAdvanceNoticeText,
+	runningContractEditHintText,
+	enteredFlatRate,
+	flatRateWarningText
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
+import { pageAddress } from '../questions/navigation';
+import { restoredDraftText, saveStatusText } from '../questions/wizard';
 import {
+	agreeManagementFee,
+	enterBilledUntil,
 	changeBaseRent,
+	changeFlatRateUtilityCharge,
+	enterFlatRateUtilityCharge,
 	deleteDraftAndSave,
 	openContractEdit,
 	openNewContract,
@@ -42,6 +58,10 @@ import {
 	discardDraft,
 	goBackToStep,
 	goToNextStep,
+	goToRentWith,
+	openNewContractFor,
+	newContractAfterEnd,
+	openRunningContract,
 	registerContract,
 	rentApartment,
 	reopenNewContract,
@@ -132,7 +152,7 @@ When('der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder ö
 	await verwalter.attemptsTo(reopenNewContract);
 });
 
-When('der Liegenschaftsverwalter den Entwurf verwirft', async ({ verwalter }) => {
+When('der Liegenschaftsverwalter seine Angaben verwirft', async ({ verwalter }) => {
 	await verwalter.attemptsTo(discardDraft);
 });
 
@@ -166,9 +186,19 @@ Then('ist im Mietvertrag kein Mieter gewählt', async ({ verwalter }) => {
 	await verwalter.sees(chosenTenantId).toBe('');
 });
 
-Then('sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist', async ({ verwalter }) => {
-	await verwalter.sees(draftRestoredShown).toBe(true);
+// Both wizards (#57): the input is «Ihre Angaben», «Entwurf» is only the statement status
+Then('sieht der Liegenschaftsverwalter, dass seine Angaben wiederhergestellt sind', async ({ verwalter }) => {
+	await verwalter.sees(restoredDraftText).toContain('Angaben wiederhergestellt');
 });
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass seine Angaben nur in diesem Browser aufbewahrt und noch nicht gespeichert sind',
+	async ({ verwalter }) => {
+		await verwalter.sees(saveStatusText).toContain(
+			'Noch nicht gespeichert: Dwello bewahrt Ihre Angaben nur in diesem Browser auf.'
+		);
+	}
+);
 
 Then('der Mietvertrag von {string} ist in der Liste auffindbar', async ({ verwalter, names }, tenant: string) => {
 	const name = names.get(tenant) ?? tenant;
@@ -307,5 +337,213 @@ Then(
 		await verwalter.sees(partiesHelpText).toContain('Bei einem Mieterwechsel');
 		// the place where it goes on, not only the rule (code review m-5)
 		await verwalter.sees(partiesHelpText).toContain('mit «Beenden»');
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken ohne Angabe zur Verwaltungspauschale vermieten will',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: null })
+		);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit einer Verwaltungspauschale von {string} % bis zur Prüfung erfasst',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, fee: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: fee })
+		);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis {string} ausserhalb von Dwello abgerechnet sind',
+	async ({ verwalter }, date: string) => {
+		await verwalter.attemptsTo(enterBilledUntil(date));
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass Dwello die Nebenkosten erst ab dem Tag nach «Abgerechnet bis» abrechnet',
+	async ({ verwalter }) => {
+		await verwalter.sees(billedUntilHelpText).toContain('erst ab dem Tag danach');
+	}
+);
+
+When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
+	await verwalter.attemptsTo(agreeManagementFee);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass {string} einen Mietvertrag ohne Vertragsende für die Wohnung {string} hat',
+	async ({ verwalter, names }, tenant: string, apartment: string) => {
+		await verwalter.sees(runningContractHintText).toContain(names.get(tenant) ?? tenant);
+		await verwalter.sees(runningContractHintText).toContain(`Wohnung ${apartment}`);
+	}
+);
+
+When('der Liegenschaftsverwalter den laufenden Mietvertrag im Hinweis öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openRunningContract);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass der Mietvertrag beim Tod des Mieters weiterläuft',
+	async ({ verwalter }) => {
+		await verwalter.sees(partiesHelpText).toContain('Stirbt der Mieter, endet der Mietvertrag nicht');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er die Adresse der Erben als Korrespondenzadresse einträgt',
+	async ({ verwalter }) => {
+		await verwalter.sees(partiesHelpText).toContain('unter «Korrespondenzadresse» die Adresse ein, an die die Post für die Erben geht');
+	}
+);
+
+When('der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erfassen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(newContractAfterEnd);
+});
+
+// the link carries the start; that the wizard takes it from `?start=` is tested in contract-wizard.test.ts
+Then('schlägt der neue Mietvertrag den Vertragsbeginn {string} vor', async ({ verwalter }, date: string) => {
+	await verwalter.sees(pageAddress).toMatch(new RegExp(`start=${date}`));
+});
+
+Given(
+	'der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung {string}',
+	async ({ verwalter, seed }, apartment: string) => {
+		await verwalter.attemptsTo(openNewContractFor(seed.idOf(apartment)!));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter für {string} ab {string} bis zur Miete weitergeht',
+	async ({ verwalter, seed }, tenant: string, startDate: string) => {
+		await verwalter.attemptsTo(goToRentWith(seed.idOf(tenant)!, startDate));
+	}
+);
+
+Then(
+	'schlägt der Schritt "Miete" die Nettomiete {string} und das Akonto {string} aus dem letzten Mietvertrag der Wohnung vor',
+	async ({ verwalter }, baseRent: string, advancePayment: string) => {
+		await verwalter.sees(enteredBaseRent).toBe(baseRent);
+		await verwalter.sees(enteredAdvancePayment).toBe(advancePayment);
+		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
+
+// a new fee during the tenancy is a one-sided change of the contract (Art. 269d Abs. 1 and 3 OR, #77)
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er eine neue Verwaltungspauschale mindestens zehn Tage vor Beginn der Kündigungsfrist begründet mitteilt',
+	async ({ verwalter }) => {
+		await verwalter.sees(feeHelpText).toContain('mitteilen und begründen, mindestens zehn Tage vor Beginn der Kündigungsfrist');
+		await verwalter.sees(feeHelpText).toContain('frühestens ab dem nächstmöglichen Kündigungstermin');
+	}
+);
+
+// the help names who can withdraw a notice, after the glossary «Kündigung aufheben»
+Then(
+	'erfährt der Liegenschaftsverwalter bei «Kündigung aufheben», wann sich eine Kündigung aufheben lässt',
+	async ({ verwalter }) => {
+		await verwalter.sees(withdrawNoticeHelp).toContain('gemeinsam zurücknehmen');
+		await verwalter.sees(withdrawNoticeHelp).toContain('die Schlichtungsbehörde oder ein Gericht');
+		await verwalter.sees(withdrawNoticeHelp).toContain('weder der Mieter noch der Vermieter allein');
+		await verwalter.sees(withdrawNoticeHelp).toContain('Der Mietvertrag läuft dann ohne Ende weiter.');
+	}
+);
+
+// #66: the Akonto covers only the Nebenkosten agreed in the Mietvertrag (Art. 257a Abs. 2 OR)
+Then(
+	'erfährt der Liegenschaftsverwalter, dass das Akonto ein Vorschuss für die im Mietvertrag vereinbarten Nebenkosten ist',
+	async ({ verwalter }) => {
+		await verwalter.sees(advancePaymentHelpText).toContain('für die im Mietvertrag vereinbarten Nebenkosten');
+	}
+);
+
+// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
+Then(
+	'erfährt der Liegenschaftsverwalter, dass eine Mietzinserhöhung das amtliche Formular braucht und frühestens auf den nächsten Kündigungstermin gilt',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('frühestens auf den nächsten Kündigungstermin');
+		await verwalter.sees(runningContractEditHintText).toContain('mit dem amtlichen Formular');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass bei einem befristeten Mietvertrag eine Mietzinserhöhung erst nach dem Vertragsende möglich ist',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('erst nach dem Vertragsende möglich');
+	}
+);
+
+// #66: without Akonto usually a Nebenkostenpauschale, or no Nebenkosten agreed; then no box stays ticked
+Then(
+	'erfährt der Liegenschaftsverwalter, dass der Mieter ohne Akonto meist eine Nebenkostenpauschale bezahlt',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('meist eine Nebenkostenpauschale');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er sonst alle Häkchen bei «Vereinbarte Nebenkosten» entfernt',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('bei «Vereinbarte Nebenkosten» alle Häkchen');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass vereinbarte Nebenkosten ohne Akonto ganz mit der Nebenkostenabrechnung bezahlt werden',
+	async ({ verwalter }) => {
+		await verwalter.sees(noAdvanceNoticeText).toContain('bezahlt der Mieter sie ganz mit der Nebenkostenabrechnung');
+	}
+);
+
+// #388: an increase the contract provides for still needs the official form
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er eine Erhöhung begründet und mit dem amtlichen Formular mitteilt',
+	async ({ verwalter }) => {
+		await verwalter.sees(runningContractEditHintText).toContain('begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig');
+	}
+);
+
+// #429: «Nebenkostenpauschale» counts in «Monatlich total», never billed
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit {string} Franken Nebenkostenpauschale bis zur Prüfung erfasst',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, flatRate: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({
+				tenantId: seed.idOf(tenant)!,
+				apartmentId: seed.idOf(apartment)!,
+				startDate,
+				baseRent,
+				flatRateUtilityCharge: flatRate
+			})
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter die Nebenkostenpauschale auf {string} Franken setzt', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(changeFlatRateUtilityCharge(amount));
+});
+
+When('der Liegenschaftsverwalter eine Nebenkostenpauschale von {string} Franken einträgt', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(enterFlatRateUtilityCharge(amount));
+});
+
+Then('erfährt der Liegenschaftsverwalter, wo er eine Nebenkostenpauschale einträgt', async ({ verwalter }) => {
+	await verwalter.sees(noAdvanceNoticeText).toContain('bei «Nebenkostenpauschale pro Monat» ein');
+});
+
+Then('warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet', async ({ verwalter }) => {
+	await verwalter.sees(flatRateWarningText).toContain('rechnet ihm trotzdem alle angekreuzten Nebenkosten ab');
+});
+
+Then(
+	'schlägt der Schritt "Miete" die Nebenkostenpauschale {string} aus dem letzten Mietvertrag der Wohnung vor',
+	async ({ verwalter }, amount: string) => {
+		await verwalter.sees(enteredFlatRate).toBe(amount);
+		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
 	}
 );

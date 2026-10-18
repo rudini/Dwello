@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { invoiceRows } from '$lib/statement-wizard';
+	import { sameSettingsNote, type invoiceRows } from '$lib/statement-wizard';
+	import ChangedStatements from './ChangedStatements.svelte';
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
+	import InvoiceHint from './InvoiceHint.svelte';
 	import { localToday } from '$lib/contract-status';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 
-	// Plausibility checks of the preview: no invoices or existing statements need a confirmation, a gap is a hint
+	// Plausibility checks of the preview: no invoices, missing invoices or statements that leave days of a contract
+	// unbilled need a confirmation; statements that cover their contracts are named (#251), as a warning when the list
+	// names one outdated or made otherwise (#132), a gap is a hint
 	let {
 		rows,
 		period,
@@ -24,13 +28,30 @@
 	// ISO dates compare as text; repeated from step 1, where it may have been overlooked
 	const notOver = $derived(period.periodEnd >= localToday());
 	const missing = $derived(rows.filter((row) => row.missing));
-	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
-	// a building without any invoice has its own warning above, only its Tankbestand hints are listed;
+	// where to choose the existing statements' settings, when they differ in one the run chooses (#132)
+	const existingNote = $derived(
+		[sameSettingsNote(existing.flatMap((row) => row.changed)), m.statements_existing_note()]
+			.filter(Boolean)
+			.join(' ')
+	);
+	const unbilledDays = $derived(rows.some((row) => row.partlyBilled > 0));
+	// days left unbilled are a finding to confirm; a statement named as outdated or other is a warning (#132, V-6)
+	const existingTone = $derived(
+		unbilledDays || existing.some((row) => row.changed.length) ? 'caution' : 'info'
+	);
+	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
+	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
+		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
+	const late = $derived(hinted('lateInvoices'));
+	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
+	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
 	const shown = (row: (typeof rows)[number]) => ({
 		...row,
-		findings: row.findings.filter((f) => f.kind !== 'tank' && (!row.missing || f.kind === 'stock'))
+		findings: row.findings.filter(
+			(f) => f.kind !== 'tank' && (!row.missing || f.kind === 'stock' || f.kind === 'consumption')
+		)
 	});
 	const checked = $derived(rows.map(shown).filter((row) => row.findings.length > 0));
 	const tankQuestions = $derived(rows.filter((row) => row.findings.some((f) => f.kind === 'tank')));
@@ -41,7 +62,7 @@
 		[
 			missing.length && 'missing-invoices-text',
 			incomplete.length && 'category-check-text',
-			existing.length && 'existing-statements-text'
+			unbilledDays && 'existing-statements-text'
 		].filter((id): id is string => !!id)
 	);
 	const statements = (count: number) =>
@@ -77,8 +98,22 @@
 
 {#if tankQuestions.length}<TankQuestion buildings={tankQuestions} />{/if}
 
+<InvoiceHint
+	buildings={whole}
+	title={m.statements_whole_title()}
+	text={m.statements_whole_text()}
+	testid="invoices-without-service-period"
+/>
+
+<InvoiceHint
+	buildings={late}
+	title={m.statements_late_title()}
+	text={m.statements_late_text()}
+	testid="late-invoices"
+/>
+
 {#if existing.length}
-	<Alert tone="caution" title={m.statements_existing_title()} testid="existing-statements">
+	<Alert tone={existingTone} title={m.statements_existing_title()} testid="existing-statements">
 		<div id="existing-statements-text" class="flex flex-col gap-2">
 			{#each existing as row (row.buildingId)}
 				<p>
@@ -89,16 +124,10 @@
 						>{m.statements_view_of({ name: row.name })}</a
 					>
 				</p>
+				<ChangedStatements buildingId={row.buildingId} statements={row.changed} />
 			{/each}
-			<p>{m.statements_existing_note()}</p>
+			<p>{existingNote}</p>
 		</div>
-	</Alert>
-{/if}
-
-{#if partial.length}
-	<!-- TODO(fachlich prüfen, #65): a hint only; one oil delivery a year can be complete -->
-	<Alert tone="caution" title={m.statements_partial_title()} testid="partial-invoices">
-		<p>{m.statements_partial_text({ names: partial.map((row) => row.name).join(', ') })}</p>
 	</Alert>
 {/if}
 

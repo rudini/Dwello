@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { listedAmount, listedContract, listedContractCount } from '../questions/contracts';
+import { listedAmount, listedContract, listedContractCount, missingStatementOfContract } from '../questions/contracts';
 import { pageAddress, pageTitle } from '../questions/navigation';
 import {
 	editContract,
@@ -28,6 +28,22 @@ Given(
 	'{string} mietete die Wohnung {string} von {string} bis {string} für {string} Franken',
 	async ({ seed }, tenant: string, apartment: string, startDate: string, endDate: string, baseRent: string) => {
 		await seed.contract(tenant, apartment, { startDate, endDate, baseRent });
+	}
+);
+
+// «mietet … befristet»: an agreed end not reached yet, not terminated (#76)
+Given(
+	'{string} mietete/mietet die Wohnung {string} (befristet )von {string} bis {string} für {string} Franken mit {string} Franken Akonto',
+	async (
+		{ seed },
+		tenant: string,
+		apartment: string,
+		startDate: string,
+		endDate: string,
+		baseRent: string,
+		monthlyAdvancePayment: string
+	) => {
+		await seed.contract(tenant, apartment, { startDate, endDate, baseRent, monthlyAdvancePayment });
 	}
 );
 
@@ -127,3 +143,22 @@ Then(
 Then('ist der Liegenschaftsverwalter auf der Mietvertragsliste', async ({ verwalter }) => {
 	await verwalter.sees(pageAddress).toMatch(/\/contracts$/);
 });
+
+Then(
+	'zeigt die Mietvertragsliste beim Mietvertrag von {string} {string}',
+	async ({ verwalter, names }, tenant: string, note: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await verwalter.attemptsTo(openContractList, searchContracts(name));
+		await verwalter.sees(missingStatementOfContract(name)).toBe(note);
+	}
+);
+
+Then(
+	'zeigt die Mietvertragsliste beim Mietvertrag von {string} keine fehlende Abrechnung',
+	async ({ verwalter, names }, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await verwalter.attemptsTo(openContractList, searchContracts(name));
+		await verwalter.sees(listedContract(name)).toContain(name);
+		await verwalter.sees(missingStatementOfContract(name)).toBeNull();
+	}
+);

@@ -63,6 +63,11 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter die Rechnung von "Elektro Blitz" ansieht
     Dann öffnet der Beleg die PDF-Rechnung von "Elektro Blitz"
 
+  # Ohne Grafikkarte liest die KI eine Datei über eine Minute lang (#419); die KI-Ersatzattrappe liest «… Langsam» nach 35 s
+  Szenario: Dwello wartet auf eine KI, die zum Lesen länger als eine halbe Minute braucht
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz Langsam" hochlädt
+    Dann schlägt die KI nach dem langen Lesen für die Rechnung von "Elektro Blitz Langsam" den Betrag "1250.00" vor
+
   Szenario: Eine Datei, die weder PDF noch Bild ist, blockiert die anderen nicht
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" und die Word-Datei "notizen.docx" hochlädt
     Dann sagt die Datei "notizen.docx" "Dwello nimmt nur PDF-, JPG- und PNG-Dateien an. Speichern Sie die Datei als PDF und wählen Sie sie erneut."

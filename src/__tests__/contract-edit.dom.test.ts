@@ -92,20 +92,91 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
 	});
 
+	// #133: bis zu diesem Tag ausserhalb von Dwello abgerechnet; Hilfe am Feld (fach review V-5)
+	it('erklärt «Abgerechnet bis» und speichert es', async () => {
+		await open();
+		expect(document.querySelector('label[for="billedUntil"]')!.textContent).toContain(
+			'Abgerechnet bis'
+		);
+		expect(byTestId('billed-until-input-help')!.textContent).toContain(
+			'Dwello rechnet erst ab dem Tag danach ab'
+		);
+		type('billed-until-input', '31.12.2025');
+		await save();
+		expect(puts()[0].body).toMatchObject({ billedUntil: '2025-12-31' });
+	});
+
+	// fach review V-10: «Abgerechnet bis» covers the draft's whole period: Dwello creates no statement for it again
+	it('löscht einen Entwurf, den «Abgerechnet bis» ganz abdeckt, und sagt, dass keiner neu entsteht', async () => {
+		calls = fakeBff(({ method, body }) => {
+			if (method === 'PUT')
+				return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, refused];
+			return [200, { contracts: [] }];
+		});
+		await open();
+		type('billed-until-input', '31.12.2025');
+		await save();
+		const covered =
+			'Für diesen Mietvertrag erstellt Dwello in dieser Abrechnungsperiode keine Abrechnung.';
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Der Entwurf NK-2025-0003 rechnet Tage ab, die Sie jetzt als ausserhalb von Dwello abgerechnet eintragen.'
+		);
+		const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
+		expect(document.getElementById(described)!.textContent).toContain(covered);
+		expect(document.body.textContent).not.toContain('neu erstellen');
+		click('delete-draft-and-save');
+		await settle();
+		expect(goto).toHaveBeenCalledWith('/contracts/c1');
+	});
+
+	// code review C-2: a mistyped date must not clear the stored «Abgerechnet bis»
+	it('speichert ein falsch getipptes «Abgerechnet bis» nicht als kein Datum', async () => {
+		show(EditPage, {
+			data: { ...data(), contract: { ...contract(), billedUntil: '2024-12-31' } }
+		} as never);
+		await settle();
+		type('billed-until-input', '31.06.2024');
+		await save();
+		expect(puts()).toEqual([]);
+		expect(document.body.textContent).toContain('Dieses Datum gibt es nicht.');
+	});
+
 	it('speichert ohne Nettomiete nicht und nennt den Fehler beim Feld', async () => {
 		await open();
 		type('contract-base-rent-input', '');
 		await save();
 
 		expect(puts()).toEqual([]);
-		expect(byTestId('form-error')!.textContent).toContain('Nettomiete ist erforderlich');
+		expect(byTestId('form-error')!.textContent).toContain('Nettomiete ist erforderlich.');
 		expect(document.activeElement).toBe(byTestId('contract-base-rent-input'));
 	});
 
-	it('weist bei einem laufenden Mietvertrag darauf hin, dass Änderungen sofort gelten', async () => {
+	it('weist auf einen laufenden Mietvertrag hin', async () => {
 		await open();
 		expect(document.body.textContent).toContain('Laufender Mietvertrag');
 	});
+
+	// #66: a rent increase follows Art. 269d OR; a befristeter Mietvertrag has no Kündigungstermin before its end (#76)
+	const onTermination = 'frühestens auf den nächsten Kündigungstermin';
+	const afterEnd = 'erst nach dem Vertragsende möglich';
+	// #388: the befristet hint names the form rule too
+	const afterEndWithForm = `${afterEnd}, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.`;
+	it.each([
+		['unbefristet', null, false, onTermination, afterEnd],
+		['gekündigt', '2099-03-31', true, onTermination, afterEnd],
+		['befristet', '2099-03-31', false, afterEndWithForm, 'Kündigungstermin']
+	])(
+		'nennt bei einem laufenden %s Mietvertrag die Regel einer Mietzinserhöhung',
+		async (_kind, endDate, terminated, rule, otherRule) => {
+			await open(endDate, terminated);
+			const hint = byTestId('contract-running-hint')!.textContent;
+			expect(hint).toContain(rule);
+			expect(hint).not.toContain(otherRule);
+			// personas Weber and Helga 66 P-1: what Dwello does, and when to enter an increase
+			expect(hint).toContain('Dwello übernimmt Änderungen sofort');
+			expect(hint).toContain('Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt.');
+		}
+	);
 
 	// B-15 (#152): eine Änderung ging still verloren; ein Mieterwechsel oder Umzug ist ein neuer Mietvertrag
 	it('nennt Mieter und Wohnung, ohne sie zur Auswahl anzubieten', async () => {
@@ -126,9 +197,9 @@ describe('Mietvertrag bearbeiten', () => {
 		const help = byTestId('contract-parties-help')!.textContent!;
 		expect(help).toContain('Mieter und Wohnung lassen sich nicht ändern.');
 		expect(help).toContain('mit «Beenden»');
-		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel
+		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel; auch ein begonnener wird gelöscht (#116)
 		expect(help).toContain(
-			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt und hat der Mietvertrag noch nicht begonnen'
+			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt, löschen Sie den Mietvertrag auf seiner Seite und erfassen Sie ihn neu. Gibt es dazu schon den Entwurf einer Nebenkostenabrechnung, löschen Sie zuerst den Entwurf.'
 		);
 		// Persona Sven N-2: der Link nennt den Mietvertrag wie die anderen Links zur selben Seite
 		expect(byTestId('contract-parties-link')!.textContent).toBe(
@@ -138,6 +209,26 @@ describe('Mietvertrag bearbeiten', () => {
 		// Code-Review m-6: zuerst «Beenden», dann der neue Mietvertrag (dazu #156)
 		expect(byTestId('contract-parties-new')).toBeNull();
 	});
+
+	// F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über; ein Eintritt eines Dritten
+	// (Art. 263 OR, Art. 121 ZGB) ist Vertragsende und neuer Mietvertrag
+	it.each([null, '2099-03-31'])(
+		'erklärt, wie Tod, Übertragung und Zuweisung durch ein Gericht erfasst werden (Vertragsende %s)',
+		async (endDate) => {
+			await open(endDate);
+			const help = byTestId('contract-parties-help')!.textContent!;
+			expect(help).toContain('Stirbt der Mieter, endet der Mietvertrag nicht von selbst');
+			expect(help).toContain('erfassen Sie eines erst, wenn die Erben oder Sie gekündigt haben');
+			expect(help).toContain(
+				// Persona Weber P-1: der Abschnitt heisst im Mieterformular «Korrespondenzadresse» (#68)
+				'unter «Korrespondenzadresse» die Adresse ein, an die die Post für die Erben geht, bei Post per E-Mail auch unter «E-Mail»'
+			);
+			// Fachreview W10 M-2, M-4: Vertragsende ohne Kündigungsfrist, gleiche Bedingungen, schriftliche Zustimmung
+			expect(help).toContain('mit Ihrer schriftlichen Zustimmung');
+			expect(help).toContain('bei der Scheidung die Wohnung der Familie'); // Persona Weber P-3
+			expect(help).toContain('am Tag vor dem Wechsel, ohne Kündigungsfrist');
+		}
+	);
 
 	// Fachreview V-2: mit Vertragsende gibt es kein «Beenden» mehr
 	it('nennt bei einem Mietvertrag mit Vertragsende den frühesten Tag des neuen Mietvertrags', async () => {
@@ -152,8 +243,14 @@ describe('Mietvertrag bearbeiten', () => {
 		);
 		expect(help).toContain('ändern Sie zuerst unten unter «Vertragsdauer» das Vertragsende.');
 		expect(help).not.toContain('«Beenden»');
-		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt
-		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe('/contracts/new');
+		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt; B-16 (#156): mit Mieter und frühestem Beginn,
+		// den der Link nennt, damit ihn niemand für den Nachmieter nimmt (Fachreview W10 V-1)
+		expect(byTestId('contract-parties-new')!.textContent).toBe(
+			'Neuen Mietvertrag für Anna Keller erfassen'
+		);
+		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe(
+			'/contracts/new?tenant=t1&start=2099-04-01'
+		);
 	});
 
 	it('kehrt beim Abbrechen zum Mietvertrag zurück', async () => {
@@ -351,6 +448,26 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(document.getElementById(described)!.textContent).toContain('wird gelöscht');
 		});
 
+		// fach review V-15: new contract dates that leave the period out are not «Abgerechnet bis»
+		it('nennt bei einem Vertragsende vor der Periode des Entwurfs nicht «Abgerechnet bis» als Grund', async () => {
+			calls = fakeBff(({ method }) =>
+				method === 'PUT' ? [409, refused] : [200, { contracts: [] }]
+			);
+			await open();
+			await endOn('31.12.2024');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			expect(byTestId('form-error')!.textContent).not.toContain('ausserhalb von Dwello');
+			// code review C-13: the button still leads to the wizard
+			calls = fakeBff(({ method }) => (method === 'PUT' ? [200, {}] : [200, { contracts: [] }]));
+			click('delete-draft-and-save');
+			await settle();
+			expect(goto).toHaveBeenCalledWith(
+				'/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+			);
+		});
+
 		// Haiku-Review R5: ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen
 		it('löscht keinen Entwurf, wenn die Mietverträge der Wohnung nicht geladen werden konnten', async () => {
 			calls = fakeBff(({ method }) => (method === 'PUT' ? [409, refused] : [500, {}]));
@@ -446,12 +563,12 @@ describe('Mietvertrag bearbeiten', () => {
 			);
 		});
 
-		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot
-		it('nennt den Grund, wenn der Entwurf nicht gelöscht werden kann', async () => {
-			calls = fakeBff(({ method }) => {
-				if (method === 'PUT') return [409, refused];
-				if (method === 'DELETE')
-					return [400, { error: 'not a draft', code: 'STATEMENT_NOT_DRAFT' }];
+		// Review K-7, #141: ein inzwischen versendeter Entwurf; das Backend lehnt ab und behält ihn, kein zweites Angebot
+		it('nennt den Grund, wenn der Entwurf nicht mehr gelöscht werden kann', async () => {
+			const drafted = (body: unknown) => !!(body as { deleteDraft?: string }).deleteDraft;
+			const sent = { ...refused, statements: [{ ...refused.statements[0], status: 'sent' }] };
+			calls = fakeBff(({ method, body }) => {
+				if (method === 'PUT') return [409, drafted(body) ? sent : refused];
 				return [200, { contracts: [] }];
 			});
 			await open();
@@ -461,18 +578,18 @@ describe('Mietvertrag bearbeiten', () => {
 			await save();
 			click('delete-draft-and-save');
 			await settle();
+			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Die Abrechnung ist kein Entwurf mehr und kann nicht gelöscht werden.'
+				'Die Nebenkostenabrechnung NK-2025-0003 (versendet) wurde mit den bisherigen Vertragsdaten berechnet.'
 			);
 			expect(byTestId('delete-draft-and-save')).toBeNull();
 		});
 
-		// A-10: der einzige Entwurf wird gelöscht, der Mietvertrag gespeichert, danach geht es in den Assistenten
+		// A-10: der einzige Entwurf wird mit dem Speichern gelöscht (#141: in einem Schritt), danach geht es in den Assistenten
 		it('löscht den Entwurf, speichert und öffnet den Assistenten für Gebäude und Periode', async () => {
-			let refuse = true;
-			calls = fakeBff(({ method }) => {
-				if (method === 'PUT') return refuse ? [409, refused] : [200, {}];
-				if (method === 'DELETE') return ((refuse = false), [204]);
+			calls = fakeBff(({ method, body }) => {
+				if (method === 'PUT')
+					return (body as { deleteDraft?: string }).deleteDraft ? [200, {}] : [409, refused];
 				return [200, { contracts: [] }];
 			});
 			await open();
@@ -483,10 +600,13 @@ describe('Mietvertrag bearbeiten', () => {
 			click('delete-draft-and-save');
 			await settle();
 
-			expect(calls.filter((c) => c.method !== 'GET').map((c) => [c.method, c.path])).toEqual([
-				['PUT', '/contracts/c1'],
-				['DELETE', '/statements/s1'],
-				['PUT', '/contracts/c1']
+			expect(
+				calls
+					.filter((c) => c.method !== 'GET')
+					.map((c) => [c.method, c.path, (c.body as { deleteDraft?: string }).deleteDraft])
+			).toEqual([
+				['PUT', '/contracts/c1', undefined],
+				['PUT', '/contracts/c1', 's1']
 			]);
 			expect(goto).toHaveBeenCalledWith(
 				'/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'

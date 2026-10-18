@@ -79,14 +79,18 @@ describe('Einstellungen', () => {
 
 	it('meldet Fehler pro Feld', () => {
 		expect(
-			settingsPage({ errors: { iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein' } })
-		).toContain('Bitte geben Sie eine gültige Schweizer IBAN ein');
+			settingsPage({
+				errors: {
+					iban: 'Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.'
+				}
+			})
+		).toContain('Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.');
 	});
 
 	it('bestätigt das Speichern und nennt, was gespeichert ist', () => {
 		const saved = settingsPage({ saved: true });
 		expect(saved).toContain('data-testid="settings-saved"');
-		expect(saved).toContain('Absender, Verwaltungspauschale und Vorschläge gespeichert');
+		expect(saved).toContain('Absender, Verwaltungspauschale, Fristen und Vorschläge gespeichert');
 		expect(settingsPage()).not.toContain('data-testid="settings-saved"');
 	});
 
@@ -95,10 +99,18 @@ describe('Einstellungen', () => {
 
 		expect(body).toContain('Zeitraum, für den Sie die Nebenkosten abrechnen');
 		expect(body).toContain(
-			'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %.'
+			'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters, für dessen Mietvertrag eine Verwaltungspauschale vereinbart ist. Üblich sind etwa 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen. Dwello nimmt höchstens 10 % an.'
 		);
 		expect(body).toContain('Verteilt die Heizkosten in Prozent auf die 12 Monate');
 		expect(body).toContain('wie die Kosten eines Gebäudes auf die einzelnen Wohnungen');
+		// Fachreview #69 (V-7, V-10, V-12)
+		for (const said of [
+			'Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters; die Abrechnung bittet ihn, Ihnen seine IBAN mitzuteilen.',
+			'zum Beispiel Kalenderjahr (01.01.–31.12.)',
+			'Der hier gewählte Verteilschlüssel wird beim Erfassen neuer Rechnungen vorgeschlagen.'
+		])
+			expect(body).toContain(said);
+		expect(body).not.toContain('z. B.');
 	});
 
 	it('führt zu den Stammdaten unter den Namen der Hauptnavigation', () => {
@@ -112,6 +124,15 @@ describe('Einstellungen', () => {
 			expect(body).toMatch(new RegExp(`<a href="${href}"[^>]*>${label}</a>`));
 		}
 	});
+
+	// Personas on #357 (Anna P-1, Helga P-3, Marco P-2): at the end of the long form nobody found it
+	it('führt gleich nach den Stammdaten zum Protokoll, vor dem Formular', () => {
+		const body = settingsPage();
+
+		const protokoll = body.search(/<a href="\/config\/audit-log"[^>]*>Protokoll<\/a>/);
+		expect(protokoll).toBeGreaterThan(body.indexOf('href="/config/heating-profiles"'));
+		expect(protokoll).toBeLessThan(body.indexOf('<form'));
+	});
 });
 
 // The values of the checked choices «umlagefähig» ('true') and «nicht umlagefähig» ('false')
@@ -123,7 +144,9 @@ const chosenAllowance = (body: string) =>
 describe('Kategorie erfassen und bearbeiten', () => {
 	// Eine Kategorie ist nie umlagefähig, nur weil niemand hingeschaut hat (#176)
 	it('beginnt eine neue Kategorie ohne Wahl der Umlagefähigkeit', () => {
-		const body = render(NewCategoryPage, { props: { form: null } as never }).body;
+		const body = render(NewCategoryPage, {
+			props: { data: { kiEnabled: true }, form: null } as never
+		}).body;
 
 		expect(chosenAllowance(body)).toEqual([]);
 		expect(body).toContain('Kategorie speichern');

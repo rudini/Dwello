@@ -1,6 +1,14 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { buildingAddress, listedApartment, yearBuilt } from '../questions/building-detail';
+import {
+	buildingAddress,
+	fuelStockCategoryNames,
+	fuelStocksTitle,
+	listedApartment,
+	shownMaps,
+	tankOfBuilding,
+	yearBuilt
+} from '../questions/building-detail';
 import { emptyListShown, listedBuildingCount } from '../questions/buildings';
 import {
 	deleteBuilding,
@@ -79,6 +87,14 @@ Then('sieht der Liegenschaftsverwalter das Baujahr {string}', async ({ verwalter
 	await verwalter.sees(yearBuilt).toBe(year);
 });
 
+Given('für das Gebäude {string} sind Koordinaten erfasst', async ({ seed }, title: string) => {
+	await seed.buildingCoordinates(title);
+});
+
+Then('sieht der Liegenschaftsverwalter keine Karte des Gebäudes', async ({ verwalter }) => {
+	await verwalter.sees(shownMaps).toBe(0);
+});
+
 Then('sieht der Liegenschaftsverwalter die Adresse {string}', async ({ verwalter }, address: string) => {
 	await verwalter.sees(buildingAddress).toContain(address);
 });
@@ -87,5 +103,29 @@ When(
 	'der Liegenschaftsverwalter für das Gebäude {string} den Tankbestand vom {string} mit {string} Franken erfasst',
 	async ({ verwalter, seed }, title: string, date: string, amount: string) => {
 		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!), recordFuelStock(date, amount));
+	}
+);
+
+Then('nennt die Gebäudeseite zum Tank {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(tankOfBuilding).toContain(text);
+});
+
+Then('heisst der Abschnitt zum Heizmaterial auf der Gebäudeseite {string}', async ({ verwalter }, title: string) => {
+	await verwalter.sees(fuelStocksTitle).toBe(title);
+});
+
+Then(
+	'bietet der Tankbestand des Gebäudes {string} die Kategorie {string} an',
+	async ({ verwalter, seed, names }, title: string, category: string) => {
+		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!));
+		await verwalter.sees(fuelStockCategoryNames).toContain(names.get(category) ?? category);
+	}
+);
+
+Then(
+	'weder die Kategorie {string} noch die Kategorie {string}',
+	async ({ verwalter, names }, first: string, second: string) => {
+		await verwalter.sees(fuelStockCategoryNames).not.toContain(names.get(first) ?? first);
+		await verwalter.sees(fuelStockCategoryNames).not.toContain(names.get(second) ?? second);
 	}
 );

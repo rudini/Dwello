@@ -133,7 +133,7 @@ describe.each([
 		);
 
 		expect(result).toMatchObject({
-			errors: { name: 'Gebäudename ist erforderlich', canton: 'Kanton ist erforderlich' }
+			errors: { name: 'Gebäudename ist erforderlich.', canton: 'Kanton ist erforderlich.' }
 		});
 	});
 
@@ -145,7 +145,7 @@ describe.each([
 			{ ...validBuilding, city: '' }
 		);
 
-		expect(result).toMatchObject({ errors: { city: 'Ort ist erforderlich' } });
+		expect(result).toMatchObject({ errors: { city: 'Ort ist erforderlich.' } });
 	});
 });
 
@@ -170,10 +170,10 @@ describe('Gebäudedetail', () => {
 		});
 	});
 
-	it('zählt wiedervermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {
+	it('zählt künftig vermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {
 		const apartments = [
 			{ id: 'a1', status: 'relet', nextContractStart: '2099-11-01' },
-			{ id: 'a2', status: 'reserved', nextContractStart: null },
+			{ id: 'a2', status: 'reserved', nextContractStart: null, lastContractEnd: '2024-03-31' },
 			{ id: 'a3', status: 'occupied', nextContractStart: null }
 		];
 		const fetch = (async (url: string) =>
@@ -186,8 +186,10 @@ describe('Gebäudedetail', () => {
 			fetch
 		} as never)) as BuildingDetailsData;
 
-		expect(data.building).toMatchObject({ reletCount: 1, reservedCount: 1 });
+		expect(data.building).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 1 });
 		expect(data.apartments[0]).toMatchObject({ status: 'relet', nextContractStart: '2099-11-01' });
+		// «Leer seit» on the floor plan too (#145, review C-2)
+		expect(data.apartments[1]).toMatchObject({ lastContractEnd: '2024-03-31' });
 	});
 });
 
@@ -200,22 +202,21 @@ describe('Gebäudeliste', () => {
 			url: new URL('http://localhost/buildings'),
 			fetch
 		} as never)) as {
-			buildings: { name: string; latitude: number; occupiedCount: number; vacantCount: number }[];
+			buildings: { name: string; occupiedCount: number; vacantCount: number }[];
 			total: number;
 		};
 
 		expect(data.total).toBe(1);
 		expect(data.buildings[0]).toMatchObject({
 			name: 'Seeblick',
-			latitude: 47.3769,
 			occupiedCount: 1,
 			vacantCount: 1
 		});
 	});
 
-	it('zählt die wiedervermieteten und gesperrten Wohnungen jedes Gebäudes', async () => {
+	it('zählt die künftig vermieteten und gesperrten Wohnungen jedes Gebäudes', async () => {
 		const apartments = [
-			{ buildingId: 'b1', status: 'relet' },
+			{ buildingId: 'b1', status: 'relet', nextContractStart: '2099-11-01' },
 			{ buildingId: 'b1', status: 'occupied' },
 			{ buildingId: 'b2', status: 'reserved' }
 		];
@@ -228,10 +229,10 @@ describe('Gebäudeliste', () => {
 		const data = (await listLoad({
 			url: new URL('http://localhost/buildings'),
 			fetch
-		} as never)) as { buildings: { reletCount: number; reservedCount: number }[] };
+		} as never)) as { buildings: { reletStarts: string[]; reservedCount: number }[] };
 
 		expect(urls).toContain('http://localhost:3001/api/v1/apartments?limit=1000');
-		expect(data.buildings[0]).toMatchObject({ reletCount: 1, reservedCount: 0 });
+		expect(data.buildings[0]).toMatchObject({ reletStarts: ['2099-11-01'], reservedCount: 0 });
 	});
 
 	// The counts are an addition: without them the buildings still show
@@ -244,9 +245,9 @@ describe('Gebäudeliste', () => {
 		const data = (await listLoad({
 			url: new URL('http://localhost/buildings'),
 			fetch
-		} as never)) as { buildings: { name: string; reletCount: number }[] };
+		} as never)) as { buildings: { name: string; reletStarts: string[] }[] };
 
-		expect(data.buildings).toMatchObject([{ name: 'Seeblick', reletCount: 0 }]);
+		expect(data.buildings).toMatchObject([{ name: 'Seeblick', reletStarts: [] }]);
 	});
 });
 
@@ -324,6 +325,15 @@ describe('Tankbestand', () => {
 											name: 'Heating',
 											nameDE: 'Heizung',
 											isHeatingCost: true,
+											isFuel: true,
+											isAllowedUtilityCost: true
+										},
+										{
+											id: 'c5',
+											name: 'Heizungsservice',
+											nameDE: 'Heizungsservice',
+											isHeatingCost: true,
+											isFuel: false,
 											isAllowedUtilityCost: true
 										},
 										{
@@ -345,6 +355,7 @@ describe('Tankbestand', () => {
 											name: 'Owner heating',
 											nameDE: 'Heizung Eigentümer',
 											isHeatingCost: true,
+											isFuel: true,
 											isAllowedUtilityCost: false
 										}
 									]
@@ -354,7 +365,7 @@ describe('Tankbestand', () => {
 								: backendBuilding
 					)) as typeof globalThis.fetch;
 
-	// only allocable fuel: the chimney sweep is shared like heating but is no fuel
+	// only allocable fuel (#100): the chimney sweep and a heating service are shared like heating but are no fuel
 	it('lädt die Stichtage des Gebäudes und die umlagefähigen Kategorien für den Brennstoff', async () => {
 		const data = (await detailLoad({
 			params: { id: 'b1' },

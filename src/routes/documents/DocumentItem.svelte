@@ -41,6 +41,11 @@
 	<div class="flex flex-col gap-1">
 		<p class="font-semibold text-ink">{heading}</p>
 		<p class="text-ink-muted">{created}</p>
+		{#if document.paymentDeadline}
+			<p class="text-ink-muted">
+				{m.documents_payment_deadline({ date: formatDate(document.paymentDeadline) })}
+			</p>
+		{/if}
 		{#if !upload}
 			<p>
 				<Badge

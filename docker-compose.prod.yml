@@ -25,7 +25,6 @@ services:
       - OPERATOR_CONTACT=${OPERATOR_CONTACT:-}
       - PUBLIC_APP_NAME=Dwello
       - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
-      - PUBLIC_CARTO_API_KEY=${PUBLIC_CARTO_API_KEY:-}
       - JWT_SECRET=${JWT_SECRET}
       - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID}
       - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET}
@@ -63,7 +62,7 @@ services:
       - LLM_API_KEY=${LLM_API_KEY:-}
       - LLM_PROVIDER=${LLM_PROVIDER:-}
       - LLM_PROVIDER_COUNTRY=${LLM_PROVIDER_COUNTRY:-}
-      - LLM_MODEL=${LLM_MODEL:-qwen2.5vl:7b}
+      - LLM_MODEL=${LLM_MODEL:-qwen3-vl:8b-instruct}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
     depends_on:
       postgres:
@@ -112,7 +111,7 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - dwello-network
-    # Note: After first start, run: docker exec dwello-ollama ollama pull qwen2.5vl:7b
+    # Note: After first start, run: docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
     # Not needed when LLM_BASE_URL points to an external provider
 
   # ============================================

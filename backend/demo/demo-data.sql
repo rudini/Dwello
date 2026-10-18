@@ -85,6 +85,18 @@ INSERT INTO rental_contracts (id, apartment_id, tenant_id, start_date, end_date,
 UPDATE rental_contracts SET terminated = TRUE
 WHERE id IN ('b0000001-0001-0001-0001-000000000099', 'b0000002-0002-0002-0002-000000000002');
 
+-- «Verwaltungspauschale vereinbart» (#89): most contracts agree one at the run's rate, Marco Bernasconi's his own
+-- 2.5 %, and Kevin Fischer's none, so the statement wizard has a contract to point out
+UPDATE rental_contracts SET management_fee_agreed = TRUE
+WHERE id <> 'b0000003-0003-0003-0003-000000000002';
+UPDATE rental_contracts SET management_fee_percent = 2.50 WHERE id = 'b0000002-0002-0002-0002-000000000004';
+
+-- Vereinbarte Nebenkosten (#91): every contract agrees every umlagefähige category, as a new contract does
+INSERT INTO contract_categories (contract_id, category_id, agreed)
+SELECT c.id, cat.id, TRUE FROM rental_contracts c CROSS JOIN categories cat
+WHERE cat.is_allowed_utility_cost AND c.id::text LIKE 'b000000_-000_-000_-000_-0000000000__'
+ON CONFLICT DO NOTHING;
+
 -- ============================================================================
 -- Invoices, dated at the end of the period they cover (the Rechnungsdatum decides the Abrechnungsperiode).
 -- Alpenblick lacks, on purpose, the chimney sweep and the water of the second half of 2025, so the check for
@@ -92,7 +104,7 @@ WHERE id IN ('b0000001-0001-0001-0001-000000000099', 'b0000002-0002-0002-0002-00
 -- ============================================================================
 -- Musterhaus Zentrum: 2024 und 2025
 INSERT INTO invoices (id, building_id, invoice_number, billing_entity_name, description, category_id, distribution_key_id, amount, is_valid_utility_cost, invoice_date, due_date) VALUES
-('c0000001-2024-4000-8000-000000000001', '11111111-1111-1111-1111-111111111111', 'MZ-2024-001', 'Lift AG', 'Serviceabonnement Lift 2024', (SELECT id FROM categories WHERE name_de = 'Lift'), (SELECT id FROM distribution_keys WHERE name = 'Per Unit'), 1650.00, true, '2024-02-12', '2024-03-13'),
+('c0000001-2024-4000-8000-000000000001', '11111111-1111-1111-1111-111111111111', 'MZ-2024-001', 'Lift AG', 'Wartungsabonnement Lift 2024', (SELECT id FROM categories WHERE name_de = 'Lift'), (SELECT id FROM distribution_keys WHERE name = 'Per Unit'), 1650.00, true, '2024-02-12', '2024-03-13'),
 ('c0000001-2024-4000-8000-000000000002', '11111111-1111-1111-1111-111111111111', 'MZ-2024-002', 'Hauswartung Meier GmbH', 'Hauswartung Q1 2024', (SELECT id FROM categories WHERE name_de = 'Hauswart'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 900.00, true, '2024-03-31', '2024-04-30'),
 ('c0000001-2024-4000-8000-000000000003', '11111111-1111-1111-1111-111111111111', 'MZ-2024-003', 'Wasserversorgung Zürich', 'Wasser und Abwasser Q1 2024', (SELECT id FROM categories WHERE name_de = 'Kaltwasser'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 910.00, true, '2024-03-31', '2024-04-30'),
 ('c0000001-2024-4000-8000-000000000004', '11111111-1111-1111-1111-111111111111', 'MZ-2024-004', 'ewz', 'Allgemeinstrom Q1 2024', (SELECT id FROM categories WHERE name_de = 'Allgemeinstrom'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 205.40, true, '2024-03-31', '2024-04-30'),
@@ -111,7 +123,7 @@ INSERT INTO invoices (id, building_id, invoice_number, billing_entity_name, desc
 ('c0000001-2024-4000-8000-000000000017', '11111111-1111-1111-1111-111111111111', 'MZ-2024-017', 'Hauswartung Meier GmbH', 'Hauswartung Q4 2024', (SELECT id FROM categories WHERE name_de = 'Hauswart'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 900.00, true, '2024-12-31', '2025-01-30'),
 ('c0000001-2024-4000-8000-000000000018', '11111111-1111-1111-1111-111111111111', 'MZ-2024-018', 'Wasserversorgung Zürich', 'Wasser und Abwasser Q4 2024', (SELECT id FROM categories WHERE name_de = 'Kaltwasser'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 925.00, true, '2024-12-31', '2025-01-30'),
 ('c0000001-2024-4000-8000-000000000019', '11111111-1111-1111-1111-111111111111', 'MZ-2024-019', 'ewz', 'Allgemeinstrom Q4 2024', (SELECT id FROM categories WHERE name_de = 'Allgemeinstrom'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 221.60, true, '2024-12-31', '2025-01-30'),
-('c0000001-2025-4000-8000-000000000020', '11111111-1111-1111-1111-111111111111', 'MZ-2025-001', 'Lift AG', 'Serviceabonnement Lift 2025', (SELECT id FROM categories WHERE name_de = 'Lift'), (SELECT id FROM distribution_keys WHERE name = 'Per Unit'), 1690.00, true, '2025-02-10', '2025-03-12'),
+('c0000001-2025-4000-8000-000000000020', '11111111-1111-1111-1111-111111111111', 'MZ-2025-001', 'Lift AG', 'Wartungsabonnement Lift 2025', (SELECT id FROM categories WHERE name_de = 'Lift'), (SELECT id FROM distribution_keys WHERE name = 'Per Unit'), 1690.00, true, '2025-02-10', '2025-03-12'),
 ('c0000001-2025-4000-8000-000000000021', '11111111-1111-1111-1111-111111111111', 'MZ-2025-002', 'Hauswartung Meier GmbH', 'Hauswartung Q1 2025', (SELECT id FROM categories WHERE name_de = 'Hauswart'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 920.00, true, '2025-03-31', '2025-04-30'),
 ('c0000001-2025-4000-8000-000000000022', '11111111-1111-1111-1111-111111111111', 'MZ-2025-003', 'Wasserversorgung Zürich', 'Wasser und Abwasser Q1 2025', (SELECT id FROM categories WHERE name_de = 'Kaltwasser'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 930.00, true, '2025-03-31', '2025-04-30'),
 ('c0000001-2025-4000-8000-000000000023', '11111111-1111-1111-1111-111111111111', 'MZ-2025-004', 'ewz', 'Allgemeinstrom Q1 2025', (SELECT id FROM categories WHERE name_de = 'Allgemeinstrom'), (SELECT id FROM distribution_keys WHERE name = 'Per Area (m²)'), 198.70, true, '2025-03-31', '2025-04-30'),

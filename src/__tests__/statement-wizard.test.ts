@@ -6,6 +6,7 @@ import {
 	needsConfirmation,
 	invoiceRows,
 	restoredSelection,
+	restoredStep,
 	selectionErrors,
 	statementSteps
 } from '../lib/statement-wizard';
@@ -17,7 +18,6 @@ const selection = {
 	managementFeePercent: 3,
 	buildingIds: ['b1']
 };
-const period = { periodStart: '2024-01-01', periodEnd: '2024-12-31' };
 const buildings = [
 	{ id: 'b1', name: 'Ahornhof' },
 	{ id: 'b2', name: 'Lindenhof' }
@@ -58,9 +58,14 @@ describe('Abrechnungen Schritt für Schritt', () => {
 			selectionErrors({ ...selection, heatingProfileId: '', managementFeePercent: -1 }, 3)
 		).toEqual({
 			heatingProfileId: 'Bitte wählen Sie ein Heizprofil.',
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		});
 		expect(selectionErrors({ ...selection, managementFeePercent: NaN }, 3)).toHaveProperty(
+			'managementFeePercent'
+		);
+		// #124: höchstens 10 %, so fällt ein Tippfehler wie 1000 statt 10 auf, bevor eine Anfrage ihn ablehnt
+		expect(selectionErrors({ ...selection, managementFeePercent: 10 }, 3)).toEqual({});
+		expect(selectionErrors({ ...selection, managementFeePercent: 10.01 }, 3)).toHaveProperty(
 			'managementFeePercent'
 		);
 		// ein geleertes Feld kommt aus dem gespeicherten Zwischenstand als null zurück, nicht als 0 %
@@ -78,8 +83,7 @@ describe('Rechnungen pro Gebäude', () => {
 					{ buildingId: 'b1', count: 3, first: '2024-01-15', last: '2024-06-30' },
 					{ buildingId: 'b2', count: 0, first: null, last: null }
 				],
-				buildings,
-				period
+				buildings
 			)
 		).toEqual([
 			{
@@ -87,8 +91,12 @@ describe('Rechnungen pro Gebäude', () => {
 				name: 'Ahornhof',
 				text: '3 Rechnungen vom 15.01.2024 bis 30.06.2024',
 				missing: false,
-				partial: true, // nothing after June
 				existing: 0,
+				changed: [],
+				partlyBilled: 0,
+				fixedTerm: false,
+				lateInvoices: [],
+				invoicesWithoutServicePeriod: [],
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -98,8 +106,12 @@ describe('Rechnungen pro Gebäude', () => {
 				name: 'Lindenhof',
 				text: 'Keine Rechnungen erfasst',
 				missing: true,
-				partial: false,
 				existing: 0,
+				changed: [],
+				partlyBilled: 0,
+				fixedTerm: false,
+				lateInvoices: [],
+				invoicesWithoutServicePeriod: [],
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -108,25 +120,16 @@ describe('Rechnungen pro Gebäude', () => {
 		expect(
 			invoiceRows(
 				[{ buildingId: 'b1', count: 1, first: '2024-03-15', last: '2024-03-15' }],
-				buildings,
-				period
+				buildings
 			)[0].text
 		).toBe('1 Rechnung vom 15.03.2024');
 	});
 });
 
-describe('Rechnungen über die ganze Periode', () => {
-	// More than three months at the start or end without any invoice: worth a second look, not a stop
-	it('weist auf Rechnungen hin, die nur einen Teil der Periode abdecken', () => {
-		const rows = (first: string, last: string) =>
-			invoiceRows([{ buildingId: 'b1', count: 4, first, last }], buildings, period)[0].partial;
-		expect(rows('2024-01-10', '2024-12-20')).toBe(false);
-		expect(rows('2024-01-10', '2024-03-31')).toBe(true); // only Q1
-		expect(rows('2024-06-01', '2024-12-20')).toBe(true); // nothing in the first five months
-	});
-});
-
-const finding = (kind: 'stock' | 'tank' | 'missing' | 'gap' | 'new' | 'deviation', extra = {}) => ({
+const finding = (
+	kind: 'stock' | 'tank' | 'consumption' | 'missing' | 'gap' | 'new' | 'deviation',
+	extra = {}
+) => ({
 	categoryId: 'c1',
 	categoryName: 'Kaltwasser',
 	kind,
@@ -152,10 +155,33 @@ describe('Rechnungen pro Kategorie', () => {
 		).toBe('Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF\u00a0290.00.');
 	});
 
+	// Nur eine Lücke oder Abweichung lässt sich durch einen Teil der Kosten erklären (#130)
+	it('nennt bei Lücke und Abweichung die Rechnungen, die nur teilweise zählen', () => {
+		const parts = { missingParts: [{ start: '2025-07-01', end: '2025-12-31' }], partialCount: 2 };
+
+		expect(findingText(finding('gap', parts))).toContain(
+			'2 Rechnungen zählen nur teilweise: ihre Leistungszeiträume reichen über die Abrechnungsperiode hinaus.'
+		);
+		expect(findingText(finding('deviation', { changePercent: -40, partialCount: 2 }))).toContain(
+			'2 Rechnungen zählen nur teilweise'
+		);
+		expect(findingText(finding('new', { partialCount: 2 }))).not.toContain('teilweise');
+	});
+
+	// #76: die Kategorie gilt für das ganze Gebäude; mit einem laufenden befristeten Mietvertrag gilt für ihn das Vertragsende
+	it('ergänzt neue Nebenkosten um das Vertragsende, wenn das Gebäude einen laufenden befristeten Mietvertrag hat', () => {
+		const fixedTerm =
+			'Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor.';
+		// after the form rule, which holds for both (fach-review V-4), not after the net rent
+		expect(findingText(finding('new'), true)).toContain(`ist die Änderung nichtig. ${fixedTerm} Waren die Kosten`);
+		expect(findingText(finding('new'))).not.toContain('befristet');
+		expect(findingText(finding('missing'), true)).not.toContain('befristet');
+	});
+
 	it('nennt den Teil des Jahres, für den die Rechnung fehlt', () => {
 		const part = (start: string, end: string) => ({ start, end });
 		expect(findingText(finding('gap', { missingParts: [part('2025-07-01', '2025-12-31')] }))).toBe(
-			'Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.'
+			'Die Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.'
 		);
 		expect(
 			findingText(
@@ -164,11 +190,23 @@ describe('Rechnungen pro Kategorie', () => {
 					previous: { count: 4, total: 3600 }
 				})
 			)
-		).toBe('Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
-		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('für den März fehlt');
+		).toBe('Die Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
+		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('Die Rechnung für März fehlt.');
 		expect(findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))).toContain(
 			'für die Zeit vom 14.01.2026 bis 15.07.2026 fehlt'
 		);
+		// a list says each month once, without «den» before each (#348)
+		expect(
+			findingText(
+				finding('gap', {
+					missingParts: [
+						part('2025-01-01', '2025-01-31'),
+						part('2025-02-01', '2025-02-28'),
+						part('2025-03-01', '2025-03-31')
+					]
+				})
+			)
+		).toContain('Die Rechnungen für Januar, Februar und März fehlen.');
 	});
 
 	it('nennt Kosten, die deutlich vom Vorjahr abweichen, mit dem nächsten Schritt', () => {
@@ -189,13 +227,14 @@ describe('Rechnungen pro Kategorie', () => {
 	});
 
 	// Nebenkosten dürfen nur abgerechnet werden, wenn sie im Mietvertrag vereinbart sind
-	it('fragt bei einer neuen Kategorie, ob sie im Mietvertrag vereinbart ist', () => {
+	// #91: ob vereinbart, sagt der Mietvertrag; der Hinweis zeigt auf die Mietverträge, nicht auf die Rechnungen
+	it('weist bei einer neuen Kategorie darauf hin, dass nur Mietverträge mit Vereinbarung sie bezahlen', () => {
 		expect(
 			findingText(
 				finding('new', { current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } })
 			)
 		).toBe(
-			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein, frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist die Änderung nichtig. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.'
+			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Dwello rechnet diese Kosten nur bei Mietverträgen ab, die sie vereinbaren (Angabe beim Mietvertrag). Prüfen Sie, ob sie in den unterschriebenen Mietverträgen stehen. Neue Nebenkosten führen Sie nur für die Zukunft ein, frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist die Änderung nichtig. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.'
 		);
 	});
 
@@ -204,7 +243,7 @@ describe('Rechnungen pro Kategorie', () => {
 		expect(
 			findingText(finding('stock', { missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] }))
 		).toBe(
-			'Tankbestand am 31.12.2025 fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.'
+			'Der Tankbestand am 31.12.2025 fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.'
 		);
 		expect(
 			findingText(
@@ -215,7 +254,7 @@ describe('Rechnungen pro Kategorie', () => {
 					]
 				})
 			)
-		).toContain('Tankbestand am 31.12.2024 und am 31.12.2025 fehlen.');
+		).toContain('Die Tankbestände am 31.12.2024 und am 31.12.2025 fehlen.');
 	});
 
 	// Erste Abrechnung: ob das Gebäude einen Tank hat, weiss Dwello nicht
@@ -234,8 +273,26 @@ describe('Rechnungen pro Kategorie', () => {
 	});
 
 	it('meldet einen negativen Verbrauch aus dem Tank', () => {
-		expect(findingText(finding('stock', { current: { count: 1, total: -4900 } }))).toBe(
-			'Der Endbestand ist CHF\u00a04’900.00 höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände.'
+		expect(findingText(finding('consumption', { current: { count: 1, total: -4900 } }))).toBe(
+			'Der Endbestand ist CHF\u00a04’900.00 höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände und ob eine Lieferung fehlt oder ihre Rechnung erst nach dem Ende der Periode datiert ist.'
+		);
+	});
+
+	// Plausibilität der Tankbestände gegen das Vorjahr (#73)
+	it('vergleicht den Verbrauch an Heizmaterial mit dem Vorjahr', () => {
+		const consumption = (total: number, changePercent: number) =>
+			findingText(
+				finding('consumption', {
+					current: { count: 1, total },
+					previous: { count: 1, total: 1000 },
+					changePercent
+				})
+			);
+		expect(consumption(2000, 100)).toBe(
+			'Verbrauch CHF\u00a02’000.00, 100 % mehr als im Vorjahr (CHF\u00a01’000.00). Prüfen Sie die Tankbestände.'
+		);
+		expect(consumption(600, -40)).toBe(
+			'Verbrauch CHF\u00a0600.00, 40 % weniger als im Vorjahr (CHF\u00a01’000.00). Prüfen Sie die Tankbestände.'
 		);
 	});
 
@@ -251,8 +308,7 @@ describe('Rechnungen pro Kategorie', () => {
 						check: check(findings)
 					}
 				],
-				buildings,
-				period
+				buildings
 			)[0];
 
 		expect(
@@ -263,27 +319,6 @@ describe('Rechnungen pro Kategorie', () => {
 		expect(row([finding('missing')]).incomplete).toBe(true);
 		expect(row([finding('deviation', { changePercent: 30 })]).incomplete).toBe(false);
 		expect(row([]).comparedWith).toEqual({ start: '2023-01-01', end: '2023-12-31' });
-	});
-
-	// Mit Vorjahr ersetzt der Vergleich pro Kategorie die grobe Prüfung von Anfang und Ende der Periode
-	it('prüft Anfang und Ende der Periode nur, wenn es kein Vorjahr zum Vergleich gibt', () => {
-		const partial = (hasComparison: boolean) =>
-			invoiceRows(
-				[
-					{
-						buildingId: 'b1',
-						count: 2,
-						first: '2024-01-15',
-						last: '2024-03-31',
-						check: check([], hasComparison)
-					}
-				],
-				buildings,
-				period
-			)[0].partial;
-
-		expect(partial(true)).toBe(false);
-		expect(partial(false)).toBe(true);
 	});
 });
 
@@ -296,11 +331,25 @@ describe('Bestätigung vor dem Erstellen', () => {
 		...extra
 	});
 
-	it('verlangt sie ohne Rechnungen, bei bestehenden Abrechnungen und bei fehlenden Rechnungen einer Kategorie', () => {
+	it('verlangt sie ohne Rechnungen und bei fehlenden Rechnungen einer Kategorie', () => {
 		expect(needsConfirmation([coverage({ count: 0 })])).toBe(true);
-		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(true);
 		expect(needsConfirmation([coverage({ check: check([finding('gap')]) })])).toBe(true);
 		expect(needsConfirmation([coverage({ check: check([finding('stock')]) })])).toBe(true);
+	});
+
+	// #251: Mietverträge mit einer Abrechnung erhalten keine neue; das allein ist kein Befund
+	it('verlangt sie nicht, nur weil es schon Abrechnungen gibt', () => {
+		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(false);
+	});
+
+	// Fachreview M-1: Tage der Mietdauer, die keine Abrechnung abdeckt, werden in diesem Lauf nicht abgerechnet
+	it('verlangt sie, wenn eine Abrechnung nur einen Teil der Mietdauer in der Periode abdeckt', () => {
+		expect(needsConfirmation([coverage({ statements: 1, partlyBilled: 1 })])).toBe(true);
+	});
+
+	// ein Hinweis auf die Tankbestände, nie eine Bestätigung (#73)
+	it('verlangt sie nicht für einen unplausiblen Verbrauch an Heizmaterial', () => {
+		expect(needsConfirmation([coverage({ check: check([finding('consumption')]) })])).toBe(false);
 	});
 
 	it('verlangt sie nicht für Hinweise auf neue Kategorien oder Abweichungen', () => {
@@ -341,6 +390,14 @@ describe('Abweichung zum Akonto', () => {
 	it('schlägt bei einem beendeten Mietvertrag keine Erhöhung vor', () => {
 		expect(akontoHint({ ...row(2800, 2400), movedOut: true })).toBe(
 			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto.'
+		);
+	});
+
+	// #76: ein befristeter Mietvertrag hat vor seinem Ende keinen Kündigungstermin (Text des Product Owners; das
+	// Formular dazu ist #388, Option A)
+	it('nennt bei einem laufenden befristeten Mietvertrag das Vertragsende statt des Kündigungstermins', () => {
+		expect(akontoHint({ ...row(2800, 2400), fixedTerm: true })).toBe(
+			'Kosten CHF 400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Bei einem befristeten Mietvertrag ist eine Erhöhung erst nach dem Vertragsende möglich, ausser der Mietvertrag sieht sie vor. Teilen Sie eine Erhöhung begründet und mit dem amtlichen Formular mit, sonst ist sie nichtig.'
 		);
 	});
 
@@ -393,5 +450,30 @@ describe('Entwürfe nach dem Abrechnungslauf ansehen', () => {
 		expect(draftsLink({ ...selection, buildingIds: ['b1', 'b2'] })).toBe(
 			'/statements?status=draft&periodStart=2024-07-01&periodEnd=2025-06-30'
 		);
+	});
+});
+
+// #201: der Assistent öffnet im Schritt, in dem er verlassen wurde, wenn dieser noch gilt
+describe('Wiederhergestellter Schritt', () => {
+	const none = { buildings: 0, heatingProfile: false };
+
+	it('öffnet den Schritt, in dem der Liegenschaftsverwalter aufgehört hat', () => {
+		expect(restoredStep(2, selection, none)).toBe(2);
+		expect(restoredStep(3, selection, none)).toBe(3);
+	});
+
+	it('öffnet nach der Vorschau den Schritt davor, denn die Vorschau rechnet der Server neu', () => {
+		expect(restoredStep(4, selection, none)).toBe(3);
+		expect(restoredStep(5, selection, none)).toBe(3);
+	});
+
+	it('öffnet den ersten Schritt, der nicht mehr gilt', () => {
+		expect(restoredStep(3, { ...selection, periodStart: '' }, none)).toBe(1);
+		expect(restoredStep(3, { ...selection, buildingIds: [] }, none)).toBe(2);
+		expect(restoredStep(3, selection, { ...none, buildings: 1 })).toBe(2);
+	});
+
+	it('öffnet einen Entwurf ohne gespeicherten Schritt im ersten Schritt', () => {
+		expect(restoredStep(undefined, selection, none)).toBe(1);
 	});
 });

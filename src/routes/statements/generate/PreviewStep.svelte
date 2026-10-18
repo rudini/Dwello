@@ -32,7 +32,7 @@
 	} = $props();
 
 	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
-	const rows = $derived(invoiceRows(invoices, buildings, period));
+	const rows = $derived(invoiceRows(invoices, buildings));
 	const billed = $derived(rows.filter((row) => row.existing > 0));
 	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back, 0: Ausgeglichen
 	const saldo = (balance: number) =>
@@ -125,6 +125,15 @@
 							</span>
 						{/if}
 					</span>
+					{#if row.oldAddress}
+						<!-- A-5 (#114): the statement would go to the apartment the tenant left -->
+						<span
+							class="flex w-full items-center gap-2 text-caution"
+							data-testid="preview-old-address"
+						>
+							<Icon name="warning" />{m.statements_old_address({ name: row.tenantName })}
+						</span>
+					{/if}
 				</li>
 			{/each}
 		</ul>

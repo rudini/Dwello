@@ -78,6 +78,15 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(result.status).toBe(2);
 	});
 
+	it('checks a subject with --check before the commit, so a blocked commit loses no edits', () => {
+		const check = (subject: string) => spawnSync('node', [HOOK, '--check', subject], { encoding: 'utf8' });
+		expect(check('fix(contracts): guard contract retries')).toMatchObject({ status: 0, stderr: '' });
+		const blocked = check('fix(contracts): mark unchecked apartments in choice');
+		expect(blocked.status).toBe(2);
+		expect(blocked.stderr).toContain('51 characters');
+		expect(blocked.stderr).not.toContain('nothing in this command ran');
+	});
+
 	it('takes types and scopes from CLAUDE.md, so the list exists once', () => {
 		expect(hook('git commit -m "fix(i18n): x"').status).toBe(0);
 		expect(hook('git commit -m "docs(build): x"').status).toBe(0);

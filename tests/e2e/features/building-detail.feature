@@ -13,6 +13,12 @@ Funktionalität: Gebäudedetail
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann sieht der Liegenschaftsverwalter die Wohnung "1.01" mit dem Status "Leer"
 
+  Szenario: Die Detailseite zeigt die Adresse als Text ohne Karte
+    Angenommen für das Gebäude "Birkenhof" sind Koordinaten erfasst
+    Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
+    Dann sieht der Liegenschaftsverwalter die Adresse "Testweg 1, 8400 Winterthur (ZH)"
+    Und sieht der Liegenschaftsverwalter keine Karte des Gebäudes
+
   Szenario: Gebäude löschen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Wenn der Liegenschaftsverwalter das Gebäude löscht
@@ -47,3 +53,15 @@ Funktionalität: Gebäudedetail
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Wenn der Liegenschaftsverwalter die Wohnung "1.01" öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 1.01"
+
+  # Wizard und Rechnung sagen «Tankbestand»; der Abschnitt der Gebäudeseite heisst gleich (#75)
+  Szenario: Der Abschnitt zum Heizmaterial heisst Tankbestand
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
+    Dann heisst der Abschnitt zum Heizmaterial auf der Gebäudeseite "Tankbestand"
+
+  # Nur eine Kategorie für Brennstoff hat einen Tankbestand (#100); ein Heizungsservice und der Kaminfeger werden
+  # wie Heizkosten verteilt, sind aber kein Brennstoff
+  Szenario: Der Tankbestand bietet nur Kategorien für Brennstoff an
+    Angenommen es gibt die umlagefähige Heizkosten-Kategorie "Heizungsservice"
+    Dann bietet der Tankbestand des Gebäudes "Birkenhof" die Kategorie "Heizung" an
+    Aber weder die Kategorie "Heizungsservice" noch die Kategorie "Kaminfeger"

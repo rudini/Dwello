@@ -160,7 +160,7 @@ describe('Kategorien', () => {
 
 describe('Kategorie erfassen', () => {
 	it('bestätigt das Speichern mit dem Namen der Kategorie', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
 
 		await answer({ type: 'redirect' });
@@ -170,6 +170,7 @@ describe('Kategorie erfassen', () => {
 
 	it('meldet, warum die Kategorie nicht gespeichert wurde', () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { form: 'Eine Kategorie mit dem Namen "Lift" existiert bereits.' } }
 		} as never);
 
@@ -186,7 +187,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		)!;
 
 	it('wählt nichts vor und bietet die Prüfung durch die KI an', () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
 		expect(choice('Umlagefähig').checked).toBe(false);
 		expect(choice('Nicht umlagefähig').checked).toBe(false);
@@ -195,17 +196,38 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Art. 257a Absatz 2 OR: umlagefähig heisst noch nicht, dass der Mieter sie schuldet
 	it('erklärt, wann der Mieter umlagefähige Kosten bezahlt', () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
-		expect(text()).toContain('wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR)');
+		// Wie der Vertragshinweis der Liste, OR ausgeschrieben (#292, Fachreview M-4)
+		expect(text()).toContain('(Art. 257a–257b Obligationenrecht, OR)');
+		expect(text()).toContain('wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art. 257a Absatz 2 OR)');
 		expect(text()).toContain('Gebäudeversicherung');
 		// Wasser und Abwasser: Merkblatt des Mieterverbands, «Unzulässig» (C-8)
 		expect(text()).toContain('auch nicht die Gebühr für Regenwasser');
 	});
 
+	// Fachreview #69 (V-8, V-11): wozu die Übersetzungen dienen, was die Reihenfolge ordnet
+	it('erklärt die Übersetzungen und die Reihenfolge', () => {
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
+
+		expect(text()).toContain(
+			'Ihn zeigt die Nebenkostenabrechnung eines Mieters mit dieser Sprache, ebenso Dwello in dieser Sprache. Fehlt er, steht der deutsche Name.'
+		);
+		expect(text()).toContain(
+			'Position in den Auswahllisten und in der Liste der Kategorien: kleinere Zahlen stehen weiter oben, bei gleicher Zahl entscheidet der Name.'
+		);
+		// ein Screenreader liest die Hilfe mit den Feldern der Übersetzungen
+		const fieldset = [...document.querySelectorAll('fieldset')].find(
+			(f) => f.querySelector('legend')?.textContent === 'Übersetzungen'
+		);
+		expect(
+			document.getElementById(fieldset!.getAttribute('aria-describedby') ?? '')?.textContent
+		).toContain('Der Name der Kategorie auf Französisch, Italienisch und Englisch.');
+	});
+
 	// Die KI hat den Namen geprüft, der im Feld steht: so kommt die Antwort nach «Von der KI prüfen lassen»
 	function checked(name: string, proposal: object) {
-		const props = reactiveProps({ form: null as unknown });
+		const props = reactiveProps({ data: { kiEnabled: true }, form: null as unknown });
 		show(NewCategoryPage, props as never);
 		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', name);
 		props.form = { proposal: { name, description: '', ...proposal } };
@@ -271,7 +293,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Sven P-2: eine eigene Wahl überschreibt die KI nicht
 	it('lässt eine eigene Wahl vor der Prüfung stehen und sagt das', () => {
-		const props = reactiveProps({ form: null as unknown });
+		const props = reactiveProps({ data: { kiEnabled: true }, form: null as unknown });
 		show(NewCategoryPage, props as never);
 		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
 		click(choice('Nicht umlagefähig'));
@@ -328,7 +350,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Die KI braucht bis zu 30 s: der Knopf zeigt, dass sie prüft, und lässt sich nicht nochmals drücken (E-4)
 	it('zeigt während der Prüfung, dass die KI arbeitet', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		const button = byTestId<HTMLButtonElement>('category-propose-button')!;
 		const after = server.submit!({ formData: new FormData(server.form!), submitter: button }) as (
 			input: unknown
@@ -345,14 +367,14 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Der Bereich für die Ansage steht schon vor dem ersten Vorschlag, sonst sagt ihn ein Screenreader nicht an (E-13)
 	it('hält den Bereich für den Vorschlag der KI schon vor der Prüfung bereit', () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 
 		expect(document.querySelector('[role="status"][data-testid="category-proposal-region"]')).not.toBeNull();
 	});
 
 	// Ein Speichern während der Prüfung bleibt als laufend markiert, wenn die Prüfung zuerst antwortet (E-12)
 	it('zeigt das Speichern weiter als laufend, wenn die Prüfung vorher fertig wird', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		const check = server.submit!({
 			formData: new FormData(server.form!),
 			submitter: byTestId('category-propose-button')
@@ -366,7 +388,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Nach der Prüfung bleibt der Fokus beim Knopf, statt an den Seitenanfang zu fallen (E-15)
 	it('setzt den Fokus nach der Prüfung wieder auf den Knopf', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		const button = byTestId<HTMLButtonElement>('category-propose-button')!;
 		const after = server.submit!({ formData: new FormData(server.form!), submitter: button }) as (
 			input: unknown
@@ -379,7 +401,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Sven P-4: wer während der Prüfung weitergegangen ist, bleibt dort
 	it('lässt den Fokus, wo er während der Prüfung hingegangen ist', async () => {
-		show(NewCategoryPage, { form: null } as never);
+		show(NewCategoryPage, { data: { kiEnabled: true }, form: null } as never);
 		const after = server.submit!({
 			formData: new FormData(server.form!),
 			submitter: byTestId('category-propose-button')
@@ -396,6 +418,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	// Sven P-6, P-9: die Fehlermeldung kommt zuerst und verschwindet mit der Wahl
 	it('liest die fehlende Wahl zuerst vor und nimmt sie mit der Wahl zurück', () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
 		} as never);
 		expect(choice('Umlagefähig').getAttribute('aria-describedby')!.split(' ')[0]).toBe('isAllowedUtilityCost-error');
@@ -406,6 +429,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	it('meldet die fehlende Wahl an der Wahl', () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
 		} as never);
 
@@ -415,11 +439,20 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	// Nach der Ablehnung führt der Fokus zur Wahl, damit ein Screenreader die Meldung vorliest (E-2)
 	it('setzt den Fokus nach der Ablehnung auf die Wahl', async () => {
 		show(NewCategoryPage, {
+			data: { kiEnabled: true },
 			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
 		} as never);
 		await focusFirstError(document.querySelector('form')!);
 
 		expect(document.activeElement).toBe(choice('Umlagefähig'));
+	});
+
+	// #219: eine ausgeschaltete KI antwortet nie, also bietet die Seite sie nicht an
+	it('bietet die Prüfung durch die KI nicht an, solange die KI ausgeschaltet ist', () => {
+		show(NewCategoryPage, { data: { kiEnabled: false }, form: null } as never);
+
+		expect(byTestId('category-allowance')).not.toBeNull();
+		expect(byTestId('category-propose-button')).toBeNull();
 	});
 
 	it('zeigt beim Bearbeiten die gespeicherte Wahl, ohne die KI anzubieten', () => {
@@ -442,10 +475,74 @@ describe('Grund der Umlagefähigkeit', () => {
 	it('nennt in der Liste den Grund jeder vordefinierten Kategorie', () => {
 		show(CategoriesPage, { data: { categories: [fireExtinguisher, lift] }, form: null } as never);
 
+		// «umstritten» mit dem Merkblatt als Quelle, der Wartungsanteil eines Vollservicevertrags (#292, Fachreview M-1, M-2)
 		expect(reasons()).toEqual([
-			'Brandschutz ist auch nötig, wenn das Gebäude leer steht; die Wartung hängt nicht mit dem Gebrauch zusammen.',
-			'Strom, Notruftelefon und Wartung des Lifts hängen mit dem Gebrauch zusammen; Reparaturen, Ersatzteile und Serviceabos mit Reparaturen trägt der Vermieter.'
+			'Ob die Wartung von Feuerlöschern mit dem Gebrauch zusammenhängt (Art. 257a Absatz 1 Obligationenrecht, OR), ist umstritten (Mieterinnen- und Mieterverband, Merkblatt «Zulässige und unzulässige Nebenkosten»). Nach dem Merkblatt gehört Brandschutz, der auch bei leerem Gebäude nötig ist, nicht zu den Nebenkosten. Dwello folgt dem Merkblatt: Die Wartung ist also nicht umlagefähig.',
+			'Strom, Notruftelefon und Wartung des Lifts hängen mit dem Gebrauch zusammen (Art. 257a Absatz 1 Obligationenrecht, OR); Reparaturen und Ersatzteile trägt der Vermieter. Deckt ein Vollservicevertrag auch Reparaturen, ist nur sein Anteil für die Wartung umlagefähig: Erfassen Sie unter «Lift» nur diesen Anteil. Strom, Notruftelefon und Wartung sind also umlagefähig.'
 		]);
+	});
+
+	// Each reason stands alone (also on an invoice): it ends with its conclusion and writes out the laws it cites
+	// before their abbreviation (#292, Entscheid #221 A)
+	const PREDEFINED = [
+		['Heating', true],
+		['Hot Water', true],
+		['Cold Water', true],
+		['Wastewater', true],
+		['Electricity Common Areas', true],
+		['Elevator', true],
+		['Caretaker', true],
+		['Garden Maintenance', true],
+		['Snow Removal', true],
+		['Waste Disposal', true],
+		['TV/Cable', true],
+		['Chimney Sweep', true],
+		['Repairs', false],
+		['Building Insurance', false],
+		['Property Tax', false],
+		['Mortgage Interest', false],
+		['Administration', false],
+		['Renovation', false],
+		['Capital Improvements', false],
+		['Pest Control', false],
+		['Fire Extinguisher Maintenance', false]
+	] as const;
+	const allReasons = (locale: 'de' | 'fr' | 'it' | 'en') => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(CategoriesPage, {
+				data: {
+					categories: PREDEFINED.map(([key, allowed], i) => category(`p${i}`, key, allowed, 0, { key, predefined: true }))
+				},
+				form: null
+			} as never);
+			return reasons();
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	};
+
+	it('schliesst jeden Grund mit seiner Folgerung', () => {
+		const shown = allReasons('de');
+
+		expect(shown).toHaveLength(PREDEFINED.length);
+		shown.forEach((reason, i) =>
+			expect(reason).toMatch(PREDEFINED[i][1] ? /also umlagefähig\.$/ : /also nicht umlagefähig\.$/)
+		);
+	});
+
+	// The first abbreviation in a reason is the one its spelled-out name introduces
+	it.each([
+		['de', 'Obligationenrecht, OR', 'Verordnung über die Miete, VMWG'],
+		['fr', 'Code des obligations, CO', 'ordonnance sur le bail, OBLF'],
+		['it', 'Codice delle obbligazioni, CO', 'ordinanza concernente la locazione, OLAL'],
+		['en', 'Code of Obligations, CO', 'Tenancy Ordinance, VMWG']
+	] as const)('schreibt auf %s Gesetz und Verordnung in jedem Grund aus', (locale, ...laws) => {
+		for (const reason of allReasons(locale))
+			for (const law of laws) {
+				const short = law.split(', ')[1];
+				if (reason.includes(short)) expect(reason.indexOf(short), reason).toBe(reason.indexOf(law) + law.length - short.length);
+			}
 	});
 
 	// Sonst stünde neben «Umlagefähig» ein Satz, der das Gegenteil begründet (Fachreview H-4)
@@ -466,7 +563,7 @@ describe('Grund der Umlagefähigkeit', () => {
 		show(CategoriesPage, { data: { categories: [lift] }, form: null } as never);
 
 		expect(byTestId('category-contract-note')!.textContent).toContain(
-			'Der Mieter bezahlt umlagefähige Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR).'
+			'Der Mieter bezahlt umlagefähige Kosten nur, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt (Art. 257a Absatz 2 Obligationenrecht, OR).'
 		);
 	});
 
@@ -482,12 +579,12 @@ describe('Grund der Umlagefähigkeit', () => {
 
 	// Fachreview Runde 2 (H-25 bis H-27) und Dr. Weber P-7: die Vereinbarung verlangt Art. 257a Abs. 2 OR
 	it.each([
-		['de', 'Administration', false, 'wenn der Mietvertrag sie nennt (Art. 257a Absatz 2 OR)'],
-		['it', 'Pest Control', false, 'è necessario anche quando è vuoto'],
+		['de', 'Administration', false, 'wenn der Mietvertrag sie nennt (Art. 257a Absatz 2 Obligationenrecht, OR)'],
+		['it', 'Pest Control', false, 'è controverso'],
 		['it', 'Caretaker', true, 'piccoli lavori di conservazione'],
-		['fr', 'Administration', false, 'si le contrat de bail les mentionne (art. 257a, al. 2, CO)'],
-		['it', 'Administration', false, 'se il contratto di locazione le indica (art. 257a cpv. 2 CO)'],
-		['en', 'Administration', false, 'if the rental contract names it (Art. 257a para. 2 CO)']
+		['fr', 'Administration', false, 'si le contrat de bail les mentionne (art. 257a, al. 2, du Code des obligations, CO)'],
+		['it', 'Administration', false, 'se il contratto di locazione le indica (art. 257a cpv. 2 del Codice delle obbligazioni, CO)'],
+		['en', 'Administration', false, 'if the rental contract names it (Art. 257a para. 2 Code of Obligations, CO)']
 	] as const)('nennt auf %s den Grund von %s im geprüften Wortlaut', (locale, key, allowed, wording) => {
 		overwriteGetLocale(() => locale);
 		try {
@@ -520,7 +617,7 @@ describe('Grund der Umlagefähigkeit', () => {
 	it('nennt den Grund beim Bearbeiten einer vordefinierten Kategorie', () => {
 		show(EditCategoryPage, { data: { category: fireExtinguisher }, form: null } as never);
 
-		expect(byTestId('category-reason')!.textContent).toContain('die Wartung hängt nicht mit dem Gebrauch zusammen');
+		expect(byTestId('category-reason')!.textContent).toContain('Die Wartung ist also nicht umlagefähig.');
 	});
 
 	// Wartung zählt nicht allgemein; Kehricht wie Wasser und Abwasser (#186, Fachreview H-16)
@@ -561,5 +658,29 @@ describe('Kategorie bearbeiten', () => {
 		expect(text()).toContain('Heizkosten nach dem Heizprofil verteilen');
 		expect(text()).toContain('nach dem Heizprofil');
 		expect(text()).toContain('Separat abgerechnetes Warmwasser wird das ganze Jahr etwa gleich verbraucht');
+	});
+
+	// #100: nur eine Kategorie für Brennstoff hat einen Tankbestand; Brennstoff gibt es nur bei Heizkosten
+	it('zeigt die gespeicherte Wahl «Brennstoff» einer Heizkosten-Kategorie', () => {
+		const heating = { ...category('c1', 'Heizung', true), isHeatingCost: true, isFuel: true };
+		show(EditCategoryPage, { data: { category: heating }, form: null } as never);
+
+		const box = byTestId<HTMLInputElement>('category-fuel-checkbox')!;
+		expect(box.checked).toBe(true);
+		expect(box.name).toBe('isFuel');
+		expect(box.labels![0].textContent!.trim()).toBe('Brennstoff');
+		// the predefined «Heizung» also holds servicing invoices: only a category for nothing else is no fuel (personas)
+		expect(byTestId('category-fuel-checkbox-help')!.textContent).toContain(
+			'Eine Kategorie nur für Service, Wartung oder den Kaminfeger ist kein Brennstoff.'
+		);
+	});
+
+	it('fragt nach Brennstoff erst bei Heizkosten und wählt ihn bei einer neuen Kategorie nicht vor', () => {
+		show(NewCategoryPage, { data: { kiEnabled: false }, form: null } as never);
+		expect(byTestId('category-fuel-checkbox')).toBeNull();
+
+		click('category-heating-checkbox');
+
+		expect(byTestId<HTMLInputElement>('category-fuel-checkbox')!.checked).toBe(false);
 	});
 });

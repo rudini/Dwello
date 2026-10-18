@@ -13,8 +13,8 @@ async function sessionUser(cookies: Parameters<typeof getJwtFromCookie>[0]) {
 	const jwt = getJwtFromCookie(cookies);
 	if (!jwt) return undefined;
 	try {
-		const { sub, email, name, provider, picture } = await verifyJwt(jwt);
-		return { sub, email, name, provider, picture };
+		const { sub, email, name, provider } = await verifyJwt(jwt);
+		return { sub, email, name, provider };
 	} catch {
 		return undefined; // expired or forged
 	}
@@ -34,14 +34,20 @@ const session: Handle = async ({ event, resolve }) => {
 	return redirectTo(`/login?redirectTo=${encodeURIComponent(pathname + search)}`);
 };
 
-// UI language from the cookie (German without one), around the session check; <html lang> follows it
+// UI language from the cookie, else the browser's, else German, around the session check; <html lang> follows it
 export const handle: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
 		event.request = request;
 		return session({
 			event,
-			resolve: (event) =>
-				resolve(event, { transformPageChunk: ({ html }) => html.replace('%lang%', locale) })
+			resolve: async (event) => {
+				const response = await resolve(event, {
+					transformPageChunk: ({ html }) => html.replace('%lang%', locale)
+				});
+				// Without a cookie the answer depends on the browser language: no cache may hand it to another
+				response.headers.append('Vary', 'Accept-Language');
+				return response;
+			}
 		});
 	});
 

@@ -17,3 +17,9 @@ export const overrideReason = target('Grund der Änderung der KI-Kategorie', (pa
 	page.getByTestId('invoice-override-reason')
 );
 export const invoiceNumber = target('Rechnungsnummer', (page) => page.getByTestId('invoice-number'));
+export const missedWarning = target('Warnung nicht in den Abrechnungen', (page) => page.getByTestId('invoice-missed-warning'));
+export const missedStatementsLink = target('Abrechnungen ohne diese Rechnung', (page) =>
+	page.getByTestId('invoice-missed-statements-link')
+);
+export const categoryReason = target('Grund der Umlagefähigkeit der Kategorie', (page) => page.getByTestId('category-reason'));
+export const distributionKeyRow = target('Verteilschlüssel der Rechnung', (page) => page.getByTestId('invoice-key-row'));

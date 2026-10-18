@@ -14,7 +14,7 @@
 		building: Building & { apartmentCount: number };
 		selected: boolean;
 		invoices: number | undefined;
-		billed?: { contracts: number; billed: number };
+		billed?: { contracts: number; billed: number; partly?: number };
 		error?: string;
 		ontoggle: () => void;
 	} = $props();
@@ -31,14 +31,25 @@
 	// Said only when some contract of the period has a statement already
 	const billedText = $derived.by(() => {
 		if (!billed?.billed) return '';
-		const { contracts: total, billed: count } = billed;
-		if (count < total)
-			return count === 1
+		const { contracts: total, billed: count, partly } = billed;
+		const one = total === 1;
+		const some = () =>
+			count === 1
 				? m.statements_building_billed_one({ billed: count, total })
 				: m.statements_building_billed_many({ billed: count, total });
-		return total === 1
-			? m.statements_building_billed_all_one()
-			: m.statements_building_billed_all_many();
+		// days a statement leaves open: the building is no «need not choose it», and deleting a draft to create it
+		// anew in this period would bill those days no more (Fachreview V-9, persona Dr. Weber P-1)
+		const all = () =>
+			partly
+				? one
+					? m.statements_building_billed_all_partly_one()
+					: m.statements_building_billed_all_partly_many()
+				: one
+					? m.statements_building_billed_all_one()
+					: m.statements_building_billed_all_many();
+		// otherwise how an existing draft is recalculated, here already (persona Helga P-7, #201)
+		const then = partly ? m.statements_building_billed_open() : m.statements_building_recalculate();
+		return `${count < total ? some() : all()} ${then}`;
 	});
 	const describedBy = $derived(
 		[error && 'buildings-error', billedText && billedId].filter(Boolean).join(' ') || undefined

@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
 import { toHeatingProfile } from '$lib/server/heating-profile';
 import {
+	billedContracts,
 	generateStatements,
 	invoicesInPeriod,
 	previewStatements,
@@ -33,12 +34,27 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 	const [id, start, end] = ['building', 'start', 'end'].map((key) => url.searchParams.get(key));
 	const building = buildings.find((b) => b.id === id);
 	if (!building || !isDay(start) || !isDay(end) || start! > end!) return null;
-	const statements = await json(
-		fetch,
-		`statements?buildingId=${id}&periodStart=${start}&periodEnd=${end}&limit=1`
+	const [statements, contracts] = await Promise.all([
+		json(fetch, `statements?buildingId=${id}&periodStart=${start}&periodEnd=${end}&limit=1000`),
+		json(fetch, `contracts?buildingId=${id}&limit=1000`)
+	]);
+	const others = (statements.data ?? []) as Row[];
+	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1);
+	// the heating profile comes from any of them, as before #89 (closing review C-1)
+	const ofBuilding = (contracts.contracts ?? []) as Row[];
+	const runRates = others.filter((s) =>
+		ofBuilding.some(
+			(c) => c.id === s.contractId && c.managementFeeAgreed && c.managementFeePercent == null
+		)
 	);
-	const [other] = (statements.data ?? []) as Row[];
-	return { building, period: { start: start!, end: end! }, other };
+	// set differently, they tell nothing: both from the settings (#119); a deleted profile is no setting (fach-review V-5)
+	// TODO(fachlich prüfen, #387): at a tenant change the settings' Heizprofil may differ from the other tenant's
+	const profiles = others.filter((s) => s.heatingProfileId);
+	const differing =
+		new Set(profiles.map((s) => s.heatingProfileId)).size > 1 ||
+		new Set(runRates.map((s) => Number(s.managementFeePercent))).size > 1;
+	const [other, runRate] = differing ? [] : [profiles[0], runRates[0]];
+	return { building, period: { start: start!, end: end! }, other, runRate, differing };
 }
 
 export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
@@ -56,7 +72,7 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 		buildings: buildingList,
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
 		defaultManagementFeePercent: Number(
-			pick?.other?.managementFeePercent ?? settings.management_fee_pct ?? 3
+			pick?.runRate?.managementFeePercent ?? settings.management_fee_pct ?? 3
 		),
 		defaultPeriod:
 			pick?.period ??
@@ -69,7 +85,9 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 		preset: pick && {
 			building: String(pick.building.name),
 			...pick.period,
-			fromStatements: !!pick.other
+			fromStatements: !!pick.other,
+			feeFromSettings: !pick.runRate,
+			differing: pick.differing
 		}
 	};
 };
@@ -89,11 +107,23 @@ export const actions: Actions = {
 	preview: async ({ request, fetch }) => {
 		try {
 			const run = generationRequest(await request.formData());
-			const [preview, invoices] = await Promise.all([
+			const [preview, invoices, billed] = await Promise.all([
 				previewStatements(fetch, run),
-				invoicesInPeriod(fetch, run)
+				invoicesInPeriod(fetch, run),
+				billedContracts(fetch, run)
 			]);
-			return { preview, invoices };
+			const partly = new Map(billed.map((row) => [row.buildingId, row.partly]));
+			// new costs are the building's: say whether it bills a running befristeter Mietvertrag (#76)
+			const fixedTerm = (id: string) =>
+				preview.some((row) => row.buildingId === id && row.fixedTerm);
+			return {
+				preview,
+				invoices: invoices.map((row) => ({
+					...row,
+					partlyBilled: partly.get(row.buildingId) ?? 0,
+					fixedTerm: fixedTerm(row.buildingId)
+				}))
+			};
 		} catch (err) {
 			return failed(err);
 		}

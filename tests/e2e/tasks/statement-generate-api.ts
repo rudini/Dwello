@@ -31,9 +31,9 @@ export const openPreviewViaApi =
 
 /** Generation: remembers how many statements the system reports as created */
 export const generateStatementsViaApi =
-	(year: number, buildingId: string): Activity =>
+	(year: number, buildingId: string, options: RunOptions = {}): Activity =>
 	async (actor) =>
 		actor.remember(
 			CREATED_STATEMENTS,
-			await generateStatements(actor.abilityTo(CallTheApi).fetch, run(year, buildingId, {}))
+			(await generateStatements(actor.abilityTo(CallTheApi).fetch, run(year, buildingId, options))).length
 		);

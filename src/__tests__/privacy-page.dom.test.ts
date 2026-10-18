@@ -96,8 +96,26 @@ describe('Datenschutzerklärung zu Entwürfen im Browser', () => {
 
 		const draft = byTestId('draft-notice')?.textContent;
 		expect(draft).toContain('«Mietvertrag erfassen» und «Abrechnungen erstellen»');
-		expect(draft).toContain('als Entwurf in diesem Browser');
-		expect(draft).toContain('bis Sie sie speichern, verwerfen oder sich abmelden');
+		// #57: «Entwurf» is only the statement status; why, until when (Fachprüfung #57, R-1, R-2) and what (R-3)
+		expect(draft).not.toContain('Entwurf');
+		expect(draft).toContain('nur in diesem Browser auf, damit Sie später weitermachen können');
+		expect(draft).toContain(
+			'bis Sie den Mietvertrag speichern oder die Abrechnungen erstellen, Ihre Angaben verwerfen oder sich mit «Abmelden» abmelden'
+		);
+		expect(draft).toContain('Beträge, Daten und die Auswahl von Mieter und Wohnung');
+		// a session that only expires leaves the input (review W9c-1, R-10)
+		expect(draft).toContain('Läuft die Anmeldung nur ab, bleiben die Angaben erhalten.');
+	});
+});
+
+// Protokoll (#357), Fachprüfung R-1/R-4/R-6: die Erklärung nennt alles, was das Protokoll festhält
+describe('Datenschutzerklärung zum Protokoll', () => {
+	it('nennt auch Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		expect(document.body.textContent).toContain(
+			'sowie zurückgesetzte Zahlungen (mit Abrechnungsnummer und Zahlungsdatum) und Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden (mit ihrer Nummer).'
+		);
 	});
 });
 
@@ -118,6 +136,15 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 		);
 	});
 
+	// Fachprüfung R-3 (#357): das Protokoll unter den Einstellungen teilen sich alle Besucher der Demo
+	it('sagt, dass alle Besucher die Anmeldungen der anderen im Protokoll sehen', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: true, providers: ['Google'] } } as never);
+
+		expect(demoSection()?.textContent).toContain(
+			'In der Demo sehen alle Besucher das Protokoll mit den Anmeldungen der anderen, ohne Namen und E-Mail-Adresse, und können Einträge löschen.'
+		);
+	});
+
 	it('hat in einer eigenen Installation keinen Abschnitt zur Demo', () => {
 		show(PrivacyPage, { data: { recipient: null, demo: false, providers: ['Google'] } } as never);
 
@@ -134,8 +161,9 @@ describe('Datenschutzerklärung zur Anmeldung', () => {
 			section.querySelector('h2')?.textContent?.includes('Anmeldung')
 		);
 		expect(login?.textContent).toContain(
-			'Jede Anmeldung und jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
+			'Jede Anmeldung, jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) und jede Abmeldung wird im Protokoll des Servers festgehalten, mit der Kennung des Kontos beim Anbieter und, ausser bei der Abmeldung, der E-Mail-Adresse.'
 		);
+		expect(login?.textContent).toContain('Das Protokoll dient der Sicherheit und der Fehlersuche; nur der Betreiber liest es.');
 		expect(login?.textContent).not.toContain('verwendet sie nur');
 	});
 });
@@ -154,9 +182,9 @@ describe('Datenschutzerklärung zu Anmeldung, Dritten und Cookies', () => {
 		);
 	});
 
-	it('nennt die Kartenkacheln von CARTO und die Adresssuche von OpenPLZ, aber kein Google Fonts', () => {
+	it('nennt die Adresssuche von OpenPLZ, aber weder CARTO noch Google Fonts', () => {
 		const text = page(['Google']);
-		expect(text).toContain('CARTO');
+		expect(text).not.toContain('CARTO');
 		expect(text).toContain('OpenPLZ');
 		expect(text).not.toContain('Google Fonts');
 	});
@@ -188,7 +216,7 @@ describe('Datenschutzerklärung: Grenzen der genannten Dienste', () => {
 
 	it('nennt Google Maps beim Planen einer Route und keine Weitergabe ausser den genannten', () => {
 		expect(text()).toContain(
-			'Google erhält die Adresse und die IP-Adresse des Browsers erst, wenn Sie den Link wählen.'
+			'Google erhält die Adresse und die IP-Adresse des Browsers erst, wenn Sie den Link wählen; die Daten können dabei in die USA gelangen.'
 		);
 		expect(text()).not.toContain('Darüber hinaus gibt Dwello keine Daten an Dritte weiter.');
 		expect(text()).toContain(
@@ -198,5 +226,147 @@ describe('Datenschutzerklärung: Grenzen der genannten Dienste', () => {
 
 	it('sagt nicht, das Sprach-Cookie entstehe erst mit einer Wahl', () => {
 		expect(text()).toContain('«PARAGLIDE_LOCALE» speichert die Sprache der Oberfläche');
+	});
+
+	it('sagt, dass das Sprach-Cookie beim ersten Besuch der Sprache des Browsers folgt', () => {
+		expect(text()).toContain(
+			'Beim ersten Besuch setzt Dwello es auf die Sprache Ihres Browsers, wenn sie Deutsch, Französisch, Italienisch oder Englisch ist, sonst auf Deutsch.'
+		);
+	});
+});
+
+// #82: controller, retention, providers with country and policy, cookie lifetime and refusal
+describe('Datenschutzerklärung nach #82', () => {
+	const operator = { name: 'Beispiel Hosting AG', address: 'Teststrasse 1, 9999 Testdorf', contact: 'kontakt@beispiel.test' };
+	const section = (title: string) =>
+		[...document.querySelectorAll('[data-testid="page-section"]')].find(
+			(one) => one.querySelector('h2')?.textContent === title
+		);
+	const links = (title: string) =>
+		[...(section(title)?.querySelectorAll('a') ?? [])].map((link) => link.getAttribute('href'));
+	const page = (data: Record<string, unknown> = {}) =>
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], mail: 'smtp', sessionSeconds: 604800, operator, ...data } } as never);
+
+	it('nennt den Betreiber aus der Konfiguration als Verantwortlichen, mit Kontakt und Auskunftsrecht', () => {
+		page();
+
+		const text = section('Verantwortlich')?.textContent;
+		expect(text).toContain('ist ihr Betreiber: Beispiel Hosting AG, Teststrasse 1, 9999 Testdorf.');
+		expect(text).toContain('Kontakt: kontakt@beispiel.test.');
+		expect(text).toContain('Betreiber ist, wer diese Dwello-Installation');
+		expect(text).toContain('kostenlos Auskunft');
+		expect(text).toContain('(Art. 25 DSG)');
+	});
+
+	it('sagt ohne eingetragenen Betreiber, was zu tun ist', () => {
+		page({ operator: null });
+
+		const text = section('Verantwortlich')?.textContent;
+		expect(text).toContain('Er hat seinen Namen und seine Adresse noch nicht hinterlegt.');
+		expect(text).toContain('Betreiben Sie Dwello selbst, tragen Sie sie bei der Einrichtung ein');
+	});
+
+	it('sagt, dass Dwello nichts von selbst löscht und wer 10 Jahre aufbewahren muss', () => {
+		page();
+
+		const text = section('Aufbewahrung')?.textContent;
+		expect(text).toContain('Ausser in der öffentlichen Demo löscht Dwello keine gespeicherten Daten von selbst.');
+		expect(text).toContain('Nicht löschen lassen sich versendete Abrechnungen, alle Mahnungen sowie Mieter und Mietverträge, zu denen es Abrechnungen gibt.');
+		expect(text).toContain('Wer zur Buchführung verpflichtet ist');
+		expect(text).toContain('10 Jahre ab Ende des Geschäftsjahres aufbewahren (Art. 958f OR)');
+		expect(text).toContain('Hat der letzte Mietvertrag eines Mieters geendet');
+	});
+
+	it('nennt für Google Firma, Land, was Google erfährt und seine Datenschutzerklärung', () => {
+		page();
+
+		const text = section('Anmeldung')?.textContent;
+		expect(text).toContain('nur Name, E-Mail-Adresse und die Kennung des Kontos beim Anbieter');
+		expect(text).not.toContain('Profilbild');
+		expect(text).toContain('Google (Google Ireland Limited, Irland, und Google LLC, USA) erfährt bei jeder Anmeldung');
+		expect(text).toContain('Swiss-U.S. Data Privacy Framework');
+		expect(text).not.toContain('Microsoft');
+		expect(links('Anmeldung')).toEqual(['https://policies.google.com/privacy']);
+	});
+
+	it('nennt Microsoft nur, wenn es eingerichtet ist', () => {
+		page({ providers: ['Microsoft'] });
+
+		expect(section('Anmeldung')?.textContent).toContain('Microsoft (Microsoft Corporation, USA;');
+		expect(links('Anmeldung')).toEqual(['https://privacy.microsoft.com/privacystatement']);
+	});
+
+	it('nennt beim Mailversand über SMTP den Mailserver, den der Betreiber eingerichtet hat', () => {
+		page();
+
+		const text = section('Weitergabe an Dritte')?.textContent;
+		expect(text).toContain('über den Mailserver zugestellt, den der Betreiber eingerichtet hat');
+		expect(text).not.toContain('Resend');
+	});
+
+	it('nennt Resend mit Land und Datenschutzerklärung, wenn Resend eingerichtet ist', () => {
+		page({ mail: 'resend' });
+
+		expect(section('Weitergabe an Dritte')?.textContent).toContain('über Resend (Resend, Inc., USA) zugestellt');
+		// the safeguard itself, not a referral (Art. 19 Abs. 4 DSG, review W9c-2 R-5)
+		expect(section('Weitergabe an Dritte')?.textContent).toContain('(Art. 16 Abs. 2 Bst. d DSG)');
+		expect(links('Weitergabe an Dritte')).toContain('https://resend.com/legal/privacy-policy');
+	});
+
+	it('sagt ohne Mailversand, dass Dwello keine E-Mails versendet', () => {
+		page({ mail: null });
+
+		expect(section('Weitergabe an Dritte')?.textContent).toContain(
+			'Dwello versendet keine E-Mails, weil der Betreiber keinen Mailversand eingerichtet hat.'
+		);
+	});
+
+	it('nennt OpenPLZ und Google Maps mit Land und Datenschutzerklärung', () => {
+		page();
+
+		const text = section('Weitergabe an Dritte')?.textContent;
+		expect(text).toContain('OpenPLZ (STÜBER SYSTEMS GmbH, Deutschland)');
+		expect(text).toContain('Google Maps (Google Ireland Limited, Irland, und Google LLC, USA)');
+		expect(links('Weitergabe an Dritte')).toEqual([
+			'https://legal.stueber.de/privacy.php',
+			'https://policies.google.com/privacy'
+		]);
+	});
+
+	it('nennt die Gültigkeit der Anmelde-Cookies aus der Konfiguration', () => {
+		page();
+		expect(section('Cookies')?.textContent).toContain('Beide gelten 7 Tage ab der Anmeldung oder der letzten Verlängerung der Sitzung.');
+	});
+
+	it('nennt eine Gültigkeit in Stunden, wenn sie nicht ganze Tage dauert', () => {
+		page({ sessionSeconds: 12 * 3600 });
+		expect(section('Cookies')?.textContent).toContain('Beide gelten 12 Stunden ab der Anmeldung oder der letzten Verlängerung der Sitzung.');
+	});
+
+	it('sagt, dass Cookies im Browser abgelehnt werden können (Art. 45c FMG)', () => {
+		page();
+
+		expect(section('Cookies')?.textContent).toContain(
+			'Sie können Cookies und andere Websitedaten in den Einstellungen Ihres Browsers ablehnen oder löschen.'
+		);
+	});
+});
+
+// #86: Dwello sendet auch Nebenkostenabrechnungen per E-Mail, mit dem PDF und allem, was darin steht
+describe('Datenschutzerklärung zum E-Mail-Versand', () => {
+	it('nennt Abrechnungen per E-Mail und was mit ihrem PDF den Server verlässt', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], mail: 'smtp' } } as never);
+
+		const text = document.body.textContent!.replace(/\s+/g, ' ');
+		expect(text).toContain('Nebenkostenabrechnungen, Zahlungserinnerungen und Mahnungen per E-Mail');
+		expect(text).toContain('die Kosten und ihre Verteilung, der Saldo sowie IBAN und Zahlungsreferenz');
+	});
+
+	it('nennt auch bei Resend die Abrechnungen und was jedes PDF enthält', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], mail: 'resend' } } as never);
+
+		const text = document.body.textContent!.replace(/\s+/g, ' ');
+		expect(text).toContain('bei einer Zahlungserinnerung oder Mahnung Adresse und offener Betrag');
+		expect(text).toContain('die Kosten und ihre Verteilung, der Saldo sowie IBAN und Zahlungsreferenz');
 	});
 });

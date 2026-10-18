@@ -15,7 +15,8 @@ export function parseBuildingForm(formData: FormData) {
 		city: field('city'),
 		canton: field('canton'),
 		buildingType: field('buildingType') || undefined,
-		yearBuilt: yearBuilt ? Number(yearBuilt) : null
+		yearBuilt: yearBuilt ? Number(yearBuilt) : null,
+		noTank: formData.has('noTank')
 	};
 
 	const errors: Record<string, string> = {};

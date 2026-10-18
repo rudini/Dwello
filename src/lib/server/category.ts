@@ -1,11 +1,13 @@
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import { backendMessage, type BackendError } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
+import { localName } from '$lib/names';
 import type { Category } from '$lib/types';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
-const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/categories`;
+const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
+const API = `${BACKEND}/categories`;
 const LIST = '/config/categories';
 
 export type CategoryWithUsage = Category & { key: string; usageCount: number; predefined: boolean };
@@ -22,12 +24,36 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 		nameEN: (c.nameEN || '') as string,
 		isAllowedUtilityCost: (c.isAllowedUtilityCost ?? true) as boolean,
 		isHeatingCost: (c.isHeatingCost ?? false) as boolean,
+		isFuel: (c.isFuel ?? false) as boolean,
 		description: (c.description || '') as string,
 		sortOrder: Number(c.sortOrder) || 0,
 		usageCount: Number(c.invoiceCount) || 0,
 		// Dwello's own categories (English key and description) as the backend stores them
 		predefined: c.type === 'predefined'
 	};
+}
+
+/** Whether the operator switched the KI on; unknown counts as on, so a refusal says why (#219) */
+export const kiEnabled = (fetch: typeof globalThis.fetch) =>
+	fetch(`${BACKEND}/invoices/llm-recipient`)
+		.then((response) => response.json())
+		.then((answer) => answer.enabled !== false)
+		.catch(() => true);
+
+/**
+ * The umlagefähige categories a Mietvertrag can agree (#91), named in the UI language; a list that failed to load
+ * would save every category as not agreed, so the page fails instead
+ */
+export async function agreeableCategories(fetch: typeof globalThis.fetch) {
+	const response = await fetch(`${API}?limit=100`);
+	if (!response.ok) throw error(response.status, m.buildings_categories_load_failed());
+	const { categories } = (await response.json()) as { categories: Record<string, unknown>[] };
+	return categories
+		.filter((category) => category.isAllowedUtilityCost)
+		.map((category) => ({
+			id: category.id as string,
+			name: localName(category as Parameters<typeof localName>[0])
+		}));
 }
 
 export const fetchCategory = async (fetch: typeof globalThis.fetch, id: string) =>
@@ -46,6 +72,8 @@ function parseCategory(formData: FormData) {
 		description: field('description'),
 		isAllowedUtilityCost: allowed === 'true',
 		isHeatingCost: formData.get('isHeatingCost') === 'on',
+		// only with heating costs, which the backend keeps (#100)
+		isFuel: formData.get('isFuel') === 'on',
 		...(field('sortOrder') && { sortOrder: Number(field('sortOrder')) }),
 		nameFR: field('nameFR') || null,
 		nameIT: field('nameIT') || null,

@@ -1,10 +1,13 @@
-import { Text } from '../screenplay/questions';
+import { Count, Text } from '../screenplay/questions';
 import {
 	invoiceNumber,
 	amount,
 	category,
+	categoryReason,
+	distributionKeyRow,
 	distributionKey,
 	legalNote,
+	missedWarning,
 	overrideReason,
 	recategorizeError,
 	utilityCost
@@ -18,3 +21,8 @@ export const tenancyLawNote = Text.of(legalNote);
 export const recategorizationFailure = Text.of(recategorizeError);
 export const reasonForOverride = Text.of(overrideReason);
 export const numberOfInvoice = Text.of(invoiceNumber);
+export const missedWarningText = Text.of(missedWarning);
+export const reasonOfCategory = Text.of(categoryReason);
+export const reasonsOfCategory = Count.of(categoryReason);
+export const tenancyLawNotes = Count.of(legalNote);
+export const distributionKeyRows = Count.of(distributionKeyRow);

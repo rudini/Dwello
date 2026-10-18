@@ -11,7 +11,7 @@
 
 import { roundToRappen } from './pdf-format';
 import { getHeatingProfile, calculateHeatingShare } from './heating-profile.service';
-import { getContractsByPeriod, type ContractWithDetails } from './contract.service';
+import { billingStart, getContractsByPeriod, type ContractWithDetails } from './contract.service';
 
 /**
  * Period definition
@@ -157,7 +157,7 @@ async function handleMultipleContracts(
 	const overlaps: ContractPeriodOverlap[] = [];
 
 	for (const contract of contracts) {
-		const contractStart = new Date(contract.startDate);
+		const contractStart = new Date(billingStart(contract)); // #133: from the day after «Abgerechnet bis»
 		const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
 
 		const proration = calculateProrationDays(
@@ -193,8 +193,15 @@ export async function handleMidYearMoves(
 	periodEnd: Date,
 	totalHeatingCosts: number
 ): Promise<
-	| { byDays: true }
-	| { byDays: false; share: number; percentage: number; periodPercentage: number; monthBreakdown: { month: number; percentage: number }[] }
+	| { byDays: true; reason?: 'wholePeriod' | 'noHeatingMonths' }
+	| {
+			byDays: false;
+			share: number;
+			percentage: number;
+			periodPercentage: number;
+			monthBreakdown: { month: number; percentage: number }[];
+			periodBreakdown: { month: number; percentage: number }[];
+	  }
 > {
 	const profile = await getHeatingProfile(heatingProfileId);
 	if (!profile) return { byDays: true };
@@ -206,15 +213,23 @@ export async function handleMidYearMoves(
 		: periodEnd;
 
 	// Rule 5: the profile only on a move in or out; a contract over the whole period is shared by days (#208)
-	if (effectiveStart <= periodStart && effectiveEnd >= periodEnd) return { byDays: true };
+	if (effectiveStart <= periodStart && effectiveEnd >= periodEnd) return { byDays: true, reason: 'wholePeriod' };
 
 	// The tenant's months against the months of the period: a period under a year carries only its months' shares
 	const tenant = calculateHeatingShare(profile, effectiveStart, effectiveEnd, totalHeatingCosts);
 	const period = calculateHeatingShare(profile, periodStart, periodEnd, totalHeatingCosts);
-	if (period.percentage <= 0) return { byDays: true };
-	const percentage = (tenant.percentage / period.percentage) * 100;
-	// periodPercentage: what the period's months carry in the profile, so the PDF can show the division (#229)
-	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage, periodPercentage: period.percentage, byDays: false };
+	if (period.percentage <= 0) return { byDays: true, reason: 'noHeatingMonths' };
+	// the division of the printed sums, rounded as printed (#232)
+	const percentage = roundToRappen((tenant.percentage / period.percentage) * 100);
+	// periodPercentage and its months: what the period's months carry in the profile, so the PDF can show the division (#229)
+	return {
+		share: totalHeatingCosts * (percentage / 100),
+		percentage,
+		monthBreakdown: tenant.monthBreakdown,
+		periodPercentage: period.percentage,
+		periodBreakdown: period.monthBreakdown,
+		byDays: false
+	};
 }
 
 /**

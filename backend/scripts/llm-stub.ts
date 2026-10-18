@@ -21,8 +21,7 @@ const answers: {
 	// Answers only when the whole prompt also matches
 	when?: (prompt: string) => boolean;
 }[] = [
-	// A slow KI: the screen checks see «Die KI prüft die Kategorie …» while it answers, 25 s, below the
-	// backend's LLM_TIMEOUT of 30 s
+	// A slow KI: the screen checks see «Die KI prüft die Kategorie …» while it answers, 25 s
 	{
 		match: /langsam/i,
 		isAllowedUtilityCost: true,
@@ -112,7 +111,9 @@ const readsAs = (fileName: string) => ({
 	nonAllocableItems: fileName.includes('Reparatur')
 });
 
-function read(fileName: string) {
+async function read(fileName: string) {
+	// a KI without a GPU: longer than the 30 s the backend and the BFF used to wait (#419)
+	if (fileName.includes('Langsam')) await Bun.sleep(35_000);
 	if (fileName.includes('ohne KI')) return new Response(null, { status: 503 });
 	if (fileName.includes('unlesbar')) return Response.json({ choices: [{ message: { content: 'Ich kann diese Datei nicht lesen.' } }] });
 	const answer = {

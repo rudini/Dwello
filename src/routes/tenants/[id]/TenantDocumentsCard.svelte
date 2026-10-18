@@ -3,19 +3,27 @@
 	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import type { StatementDocument } from '$lib/types';
+	import { getLocale } from '$lib/paraglide/runtime';
+	import { formatDate } from '$lib/utils/format';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import TenantDocumentRow from './TenantDocumentRow.svelte';
 	import TenantDocumentUpload from './TenantDocumentUpload.svelte';
 
 	// Letters and e-mails to the tenant (e.g. Mahnungen), each with its Versandstatus and PDF, and the files the
 	// property manager uploaded, which can be deleted
+	// former: a former tenant's uploads from before the last Vertragsende, to look at and delete (#178)
 	let {
 		documents,
+		former = null,
+		name = '',
 		form,
 		demo = false
 	}: {
 		documents: StatementDocument[];
+		former?: { endDate: string; documents: Pick<StatementDocument, 'title'>[] } | null;
+		name?: string;
 		form?: { title?: string; uploadError?: string; titleError?: string; deleteError?: string } | null;
 		demo?: boolean;
 	} = $props();
@@ -27,6 +35,20 @@
 
 <Panel title={m.nav_documents()}>
 	<div class="flex flex-col gap-6">
+		{#if former}
+			<Alert tone="caution" title={m.tenants_former_documents_title()} testid="tenant-former-documents">
+				<!-- TODO(fachlich prüfen, #334): «Mietzinsdepot» has its glossary row; the help texts follow -->
+				<p>
+					{m.tenants_former_documents_text({
+						name,
+						date: formatDate(former.endDate),
+						titles: new Intl.ListFormat(getLocale(), { type: 'conjunction' }).format(
+							former.documents.map((document) => document.title)
+						)
+					})}
+				</p>
+			</Alert>
+		{/if}
 		<ul
 			bind:this={list}
 			tabindex="-1"

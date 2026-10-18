@@ -18,7 +18,9 @@ import { heatingProfileRoutes } from './routes/heating-profiles';
 import { configRoutes } from './routes/config';
 import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
+import { auditLogRoutes } from './routes/audit-log';
 import { authMiddleware } from './middleware/auth';
+import { mailTransportName } from './mail';
 import { refusal } from './services/coded-error';
 
 export const app = new Elysia()
@@ -67,6 +69,8 @@ export const app = new Elysia()
 	}))
 	// Who receives invoice data for the KI categorisation: the privacy notice is public, so this is too
 	.get('/api/v1/invoices/llm-recipient', () => ({ recipient: llmRecipient(), enabled: llmConfig.enabled }))
+	// Which mail provider receives tenants' data, for the same notice (#82)
+	.get('/api/v1/mail-transport', () => ({ transport: mailTransportName() }))
 	// Everything below requires a valid JWT
 	.use(authMiddleware)
 	.use(dashboardRoutes)
@@ -81,4 +85,5 @@ export const app = new Elysia()
 	.use(heatingProfileRoutes)
 	.use(configRoutes)
 	.use(statementRoutes)
-	.use(documentRoutes);
+	.use(documentRoutes)
+	.use(auditLogRoutes);

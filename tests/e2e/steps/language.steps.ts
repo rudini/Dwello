@@ -10,10 +10,11 @@ import {
 	chooseInFooter,
 	openHelpFromPublicPage,
 	openLoginFromPublicPage,
+	openPrivacyFromLogin,
 	openTermsFromLogin
 } from '../tasks/app-frame';
 import { loseSession, signInAgain } from '../tasks/authentication';
-import { chooseLanguage, preferEnglishInTheBrowser } from '../tasks/language';
+import { chooseLanguage, preferInTheBrowser } from '../tasks/language';
 import { openPage, reloadPage } from '../tasks/navigation';
 
 const { Given, When, Then } = createBdd(test);
@@ -66,8 +67,12 @@ Then(
 	}
 );
 
-Given('der Browser des Liegenschaftsverwalters bevorzugt Englisch', async ({ verwalter }) => {
-	await verwalter.attemptsTo(preferEnglishInTheBrowser);
+Given('der Browser des Liegenschaftsverwalters bevorzugt {word}', async ({ verwalter }, language: string) => {
+	await verwalter.attemptsTo(preferInTheBrowser(language));
+});
+
+Given('der Browser des Besuchers bevorzugt {word}', async ({ besucher }, language: string) => {
+	await besucher.attemptsTo(preferInTheBrowser(language));
 });
 
 Given('ein Besucher hat die Seite {string} geöffnet', async ({ besucher }, path: string) => {
@@ -76,6 +81,10 @@ Given('ein Besucher hat die Seite {string} geöffnet', async ({ besucher }, path
 
 When('der Besucher den Link zu den Nutzungsbedingungen öffnet', async ({ besucher }) => {
 	await besucher.attemptsTo(openTermsFromLogin);
+});
+
+When('der Besucher den Link zur Datenschutzerklärung öffnet', async ({ besucher }) => {
+	await besucher.attemptsTo(openPrivacyFromLogin);
 });
 
 When('der Besucher den Link zur Anmeldung öffnet', async ({ besucher }) => {

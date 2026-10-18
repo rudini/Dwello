@@ -59,15 +59,27 @@ Funktionalität: Kostenkategorien
     Dann ist die vordefinierte Kategorie "Schädlingsbekämpfung" nicht umlagefähig
     Und ist die vordefinierte Kategorie "Feuerlöscher-Wartung" nicht umlagefähig
 
+  # Jeder Grund endet mit seiner Folgerung und schreibt OR und VMWG aus (#292)
   Szenario: Vordefinierte Kategorien nennen den Grund ihrer Umlagefähigkeit
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
-    Dann nennt die vordefinierte Kategorie "Feuerlöscher-Wartung" als Grund "nicht mit dem Gebrauch zusammen"
-    Und nennt die vordefinierte Kategorie "Lift" als Grund "Reparaturen, Ersatzteile und Serviceabos mit Reparaturen trägt der Vermieter"
-    Und erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag sie nennt
+    Dann nennt die vordefinierte Kategorie "Feuerlöscher-Wartung" als Grund "umstritten"
+    Und nennt die vordefinierte Kategorie "Schädlingsbekämpfung" als Grund "umstritten"
+    Und nennt die vordefinierte Kategorie "Lift" als Grund "Vollservicevertrag"
+    Und nennt die vordefinierte Kategorie "Lift" als Grund "also umlagefähig."
+    Und nennt die vordefinierte Kategorie "Gebäudeversicherung" als Grund "nur die Heizungsanlage"
+    Und nennt die vordefinierte Kategorie "Liegenschaftssteuer" als Grund "Obligationenrecht, OR"
+    Und nennt die vordefinierte Kategorie "Liegenschaftssteuer" als Grund "also nicht umlagefähig."
+    Und erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt
 
   Szenario: Grund der Umlagefähigkeit beim Bearbeiten einer vordefinierten Kategorie
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
-    Dann nennt die Kategorie als Grund "nicht mit dem Gebrauch zusammen"
+    Dann nennt die Kategorie als Grund "umstritten"
+
+  # Die Beschreibung nennt, was nicht dazugehört («ohne …», #204); die längste ist die der Heizung
+  Szenario: Ganze Beschreibung einer vordefinierten Kategorie auf dem Telefon
+    Angenommen der Liegenschaftsverwalter benutzt ein Telefon
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Heizung"
+    Dann zeigt das Feld «Beschreibung» seinen ganzen Text
 
   Szenario: Geänderte vordefinierte Kategorie nennt keinen festen Grund
     Angenommen die vordefinierte Kategorie "Schneeräumung" ist als nicht umlagefähig gespeichert
@@ -93,6 +105,7 @@ Funktionalität: Kostenkategorien
     Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Bewachung" umlagefähig ist
     Dann erfährt der Liegenschaftsverwalter, dass die KI sich nicht sicher ist
     Und erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind
+    Und erfährt der Liegenschaftsverwalter, dass Kosten im Zweifel nicht umlagefähig sind
     Und ist weder umlagefähig noch nicht umlagefähig gewählt
 
   Szenario: KI ist nicht erreichbar
@@ -106,3 +119,33 @@ Funktionalität: Kostenkategorien
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die Kategorie "Fassadenreinigung" speichert, ohne zu wählen, ob sie umlagefähig ist
     Dann erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten umlagefähig sind
+
+  Szenario: Vordefinierte und eigene Kategorien sind gekennzeichnet
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann ist die vordefinierte Kategorie "Liegenschaftssteuer" als "Von Dwello" gekennzeichnet
+    Und ist die eigene Kategorie "Treppenhausreinigung" als "Eigene" gekennzeichnet
+
+  Szenario: Vordefinierte Kategorien lassen sich nicht löschen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann kann der Liegenschaftsverwalter die vordefinierte Kategorie "Liegenschaftssteuer" nicht löschen
+    Und erfährt der Liegenschaftsverwalter, dass sich die vordefinierte Kategorie "Liegenschaftssteuer" nicht löschen lässt, weil Dwello sie mitliefert
+
+  Szenario: Bearbeiten einer vordefinierten Kategorie
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Liegenschaftssteuer"
+    Dann erfährt der Liegenschaftsverwalter, dass Dwello die Kategorie mitliefert
+    Und erfährt der Liegenschaftsverwalter, dass der Mieter Kosten des Vermieters nicht schuldet, auch wenn er die Kategorie auf umlagefähig stellt
+    Und erfährt der Liegenschaftsverwalter, dass die KI womöglich eine andere Kategorie vorschlägt, wenn er den Namen oder die Beschreibung ändert
+
+  # Ein eigener Brennstoff wie Stückholz hat einen Tankbestand (#100)
+  Szenario: Eigene Kategorie für Brennstoff erfassen
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die umlagefähige Heizkosten-Kategorie "Stückholz" als Brennstoff erfasst
+    Dann bietet der Tankbestand des Gebäudes "Birkenhof" die Kategorie "Stückholz" an
+
+  # Ohne Brennstoff liesse sich der nächste Endbestand nicht erfassen, die Abrechnung nähme den Einkauf (#100)
+  Szenario: Eine Kategorie mit Tankbestand bleibt Brennstoff
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und das Gebäude "Birkenhof" hat einen Tankbestand in der Kategorie für Brennstoff "Stückholz"
+    Wenn der Liegenschaftsverwalter die Kategorie "Stückholz" nicht mehr als Brennstoff speichert
+    Dann erfährt der Liegenschaftsverwalter, dass die Kategorie wegen ihrer Tankbestände Brennstoff bleibt

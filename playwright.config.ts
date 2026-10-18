@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
 import { E2E_JWT_SECRET } from './tests/e2e/fixtures/session';
@@ -13,6 +14,13 @@ const E2E_EMPTY_DATABASE_URL = (() => {
 	url.pathname = `${url.pathname}_empty`;
 	return url.href;
 })();
+// The empty instance (3102, 3103) and the demo (3104) start only when this run's generated tests use them: the screen
+// checks of accessibility.feature and sprachen-bildschirme.feature (tests/e2e/tasks/accessibility.ts) and demo.feature.
+// bddgen writes only the features its tags select (a @wip run often none of these); without generated tests all start.
+const generated = (feature: string) => `.features-gen/tests/e2e/features/${feature}.feature.spec.js`;
+const usesExtraInstances =
+	!existsSync('.features-gen') ||
+	['accessibility', 'sprachen-bildschirme', 'demo'].some((feature) => existsSync(generated(feature)));
 
 // The frontend's environment (sessions, sign-in test credentials, operator, gallery)
 const frontendEnv = {
@@ -54,6 +62,8 @@ export default defineConfig<{ driver: Driver }>({
 		timeout: 5000
 	},
 	reporter: [
+		// On CI the log names each failed test and its error; the HTML reports keep the details
+		...(process.env.CI ? [['list'] as const] : []),
 		['html', { open: 'never' }],
 		cucumberReporter('html', { outputFile: 'cucumber-report/report.html' })
 	],
@@ -97,46 +107,51 @@ export default defineConfig<{ driver: Driver }>({
 			// Frontend (SvelteKit) built and started like in production (adapter-node), talking to the E2E backend, so the
 			// acceptance tests check what is shipped. Sessions are real JWTs signed with the same secret (fixtures/session.ts);
 			// Google sign-in is configured with test credentials and never completes.
-			command: 'bun run build && node build',
+			// The build runs locally only when the frontend changed since the last E2E build (tools/e2e/build-if-changed.mjs)
+			command: 'node tools/e2e/build-if-changed.mjs bun run build && node build',
 			port: 3100,
 			reuseExistingServer: !process.env.CI,
 			timeout: 180000,
 			env: frontendEnv
 		},
-		{
-			// Empty backend for the axe check of 'empty' and 'first-use' (tests/e2e/tasks/accessibility.ts)
-			command: 'cd backend && bun run e2e-db && bun run src/index.ts',
-			port: 3103,
-			reuseExistingServer: false,
-			timeout: 60000,
-			env: {
-				PORT: '3103',
-				DATABASE_URL: E2E_EMPTY_DATABASE_URL,
-				JWT_SECRET: E2E_JWT_SECRET,
-				LLM_BASE_URL: 'http://127.0.0.1:9/v1'
-			}
-		},
-		{
-			// The same build as on 3100 (started after it), talking to the empty backend
-			command: 'node build',
-			port: 3102,
-			reuseExistingServer: !process.env.CI,
-			timeout: 60000,
-			env: {
-				...frontendEnv,
-				PORT: '3102',
-				ORIGIN: 'http://localhost:3102',
-				BACKEND_URL: 'http://localhost:3103'
-			}
-		},
-		{
-			// The same build as the public demo (DEMO=on), talking to the main backend: tests/e2e/features/demo.feature
-			command: 'node build',
-			port: 3104,
-			reuseExistingServer: !process.env.CI,
-			timeout: 60000,
-			env: { ...frontendEnv, PORT: '3104', ORIGIN: 'http://localhost:3104', DEMO: 'on' }
-		}
+		...(usesExtraInstances
+			? [
+				{
+					// Empty backend for the axe check of 'empty' and 'first-use' (tests/e2e/tasks/accessibility.ts)
+					command: 'cd backend && bun run e2e-db && bun run src/index.ts',
+					port: 3103,
+					reuseExistingServer: false,
+					timeout: 60000,
+					env: {
+						PORT: '3103',
+						DATABASE_URL: E2E_EMPTY_DATABASE_URL,
+						JWT_SECRET: E2E_JWT_SECRET,
+						LLM_BASE_URL: 'http://127.0.0.1:9/v1'
+					}
+				},
+				{
+					// The same build as on 3100 (started after it), talking to the empty backend
+					command: 'node build',
+					port: 3102,
+					reuseExistingServer: !process.env.CI,
+					timeout: 60000,
+					env: {
+						...frontendEnv,
+						PORT: '3102',
+						ORIGIN: 'http://localhost:3102',
+						BACKEND_URL: 'http://localhost:3103'
+					}
+				},
+				{
+					// The same build as the public demo (DEMO=on), talking to the main backend: tests/e2e/features/demo.feature
+					command: 'node build',
+					port: 3104,
+					reuseExistingServer: !process.env.CI,
+					timeout: 60000,
+					env: { ...frontendEnv, PORT: '3104', ORIGIN: 'http://localhost:3104', DEMO: 'on' }
+				}
+				]
+			: [])
 	],
 	use: {
 		baseURL: 'http://localhost:3100',

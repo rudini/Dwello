@@ -2,11 +2,23 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { pageAddress } from '../questions/navigation';
 import {
+	allBilledText,
+	allBuildingsNoteText,
+	confirmationReason,
+	currentStep,
+	existingStatementsText,
+	akontoHintOf,
 	announcedFeeHint,
 	balanceOf,
 	billedOfBuilding,
 	buildingChosen,
 	categoryFindingOf,
+	contractsWithoutFee,
+	confirmationAsked,
+	invoiceWithoutServicePeriodOn,
+	countOfInvoicesWithoutServicePeriodOn,
+	lateInvoiceOn,
+	countOfLateInvoicesOn,
 	draftsOnly,
 	feeAboveGuideline,
 	feeFieldDescription,
@@ -19,22 +31,38 @@ import {
 	invoicesOfBuilding,
 	missingInvoicesWarning,
 	missingInvoicesWarnings,
+	partialInvoicesHints,
+	oldAddressWarning,
 	noContractsInPeriod,
+	notesOnExistingStatement,
+	periodRunning,
+	missingStockFindings,
 	periodChoiceShown,
+	presetNoticeText,
 	previewHasStatementOf,
 	proposedHeatingProfile,
 	settingsChoiceCount,
 	settingsChoiceName,
 	createdStatements,
-	restoredDraftText,
+	discardQuestion,
 	statementsInPreview,
+	tankQuestions,
 	totalCostsOf
 } from '../questions/statement-generate';
+import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
+	chooseAllBuildings,
 	chooseBuilding,
 	chooseBuildingsFor,
+	chooseBuildingsForPeriod,
+	closeRestoredNotice,
 	confirmDespiteWarnings,
+	confirmDiscarding,
+	discardInput,
+	editHintedInvoice,
 	generateMore,
+	openContractWithoutFee,
+	openExistingStatement,
 	generateStatements,
 	goToGeneration,
 	openPreview,
@@ -42,14 +70,18 @@ import {
 	openStatementWizardFor,
 	recalculatePreview,
 	recordInvoiceFromWarning,
+	recordNoTankFromQuestion,
 	reopenStatementWizard,
 	returnToStatementList,
 	setManagementFee,
 	showCreatedStatements,
+	downloadCreatedStatementsZip,
+	requestCreatedStatementsZip,
 	tryNextWithoutConfirmation,
 	typeManagementFee
 } from '../tasks/statement-generate';
 import { francs, signedFrancs } from '../questions/amounts';
+import { filesInDownloadedZip } from '../questions/download';
 import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
@@ -66,16 +98,19 @@ When(
 );
 
 When(
-	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} erstellt',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!));
+	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} erstellt',
+	async ({ verwalter, seed }, year: number, building: string, profile: string) => {
+		const options = { heatingProfileId: await seed.heatingProfileId(profile) };
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, options));
 	}
 );
 
+// the wizard preselects a heating profile, maybe one a parallel scenario already deleted: name a seeded one
 Given(
-	'der Liegenschaftsverwalter hat die Abrechnungen {int} für das Gebäude {string} erstellt',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!));
+	'der Liegenschaftsverwalter hat die Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} erstellt',
+	async ({ verwalter, seed }, year: number, building: string, profile: string) => {
+		const options = { heatingProfileId: await seed.heatingProfileId(profile) };
+		await verwalter.attemptsTo(generateStatements(year, seed.idOf(building)!, options));
 		await verwalter.sees(generationOutcomeShown).toBe(true);
 	}
 );
@@ -83,6 +118,21 @@ Given(
 When('der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(showCreatedStatements);
 });
+
+When('der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP herunterlädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(downloadCreatedStatementsZip);
+});
+
+When('der Liegenschaftsverwalter die erstellten Abrechnungen als ZIP anfordert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(requestCreatedStatementsZip);
+});
+
+Then(
+	'enthält die ZIP-Datei nur das PDF der Abrechnung {int} von {string}, benannt nach ihrer Abrechnungsnummer',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(filesInDownloadedZip).toEqual([`${await seed.statementNumber(tenant, year)}.pdf %PDF-`]);
+	}
+);
 
 When('der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(returnToStatementList);
@@ -92,7 +142,7 @@ Then('enthält die Vorschau die Abrechnung von {string}', async ({ verwalter, na
 	await verwalter.sees(previewHasStatementOf(names.get(tenant) ?? tenant)).toBe(true);
 });
 
-Then('die Vorschau enthält genau {int} Abrechnungen', async ({ verwalter }, count: number) => {
+Then('die Vorschau enthält genau {int} Abrechnung(en)', async ({ verwalter }, count: number) => {
 	await verwalter.sees(statementsInPreview).toBe(count);
 });
 
@@ -112,7 +162,7 @@ When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} und {float} % Verwaltungspauschale öffnet',
 	async ({ verwalter, seed }, year: number, building: string, profile: string, fee: number) => {
 		await verwalter.attemptsTo(
-			openPreview(year, seed.idOf(building)!, { heatingProfileId: seed.idOf(profile), managementFeePercent: fee })
+			openPreview(year, seed.idOf(building)!, { heatingProfileId: await seed.heatingProfileId(profile), managementFeePercent: fee })
 		);
 	}
 );
@@ -203,6 +253,10 @@ Then('warnt die Vorschau nicht vor fehlenden Rechnungen', async ({ verwalter }) 
 	await verwalter.sees(missingInvoicesWarnings).toBe(0);
 });
 
+Then('weist die Vorschau nicht auf Monate ohne Rechnung hin', async ({ verwalter }) => {
+	await verwalter.sees(partialInvoicesHints).toBe(0);
+});
+
 When('der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(tryNextWithoutConfirmation);
 });
@@ -282,6 +336,10 @@ Then('schlägt der Assistent das Heizprofil {string} vor', async ({ verwalter, n
 	await verwalter.sees(proposedHeatingProfile).toContain(names.get(profile)!);
 });
 
+Then('rät die Vorschau für {string}: {string}', async ({ verwalter, names }, tenant: string, hint: string) => {
+	await verwalter.sees(akontoHintOf(names.get(tenant)!)).toContain(hint);
+});
+
 const lastYear = Number(inDays(0).slice(0, 4)) - 1;
 const wizardAddressFor = (buildingId: string, year: number) =>
 	new RegExp(`/statements/generate\\?building=${buildingId}&start=${year}-01-01&end=${year}-12-31`);
@@ -310,10 +368,246 @@ When('der Liegenschaftsverwalter die Gebäude für die Abrechnungen {int} wähle
 	await verwalter.attemptsTo(chooseBuildingsFor(year));
 });
 
-Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text: string) => {
+Then('sagt der Hinweis auf die wiederhergestellten Angaben {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(restoredDraftText).toContain(text);
 });
 
 Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
 	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
 });
+
+When('der Liegenschaftsverwalter alle Gebäude wählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(chooseAllBuildings);
+});
+
+Then('nicht das Gebäude {string}', async ({ verwalter, seed }, building: string) => {
+	await verwalter.sees(buildingChosen(seed.idOf(building)!)).toBe(false);
+});
+
+Then(
+	'sagt die Wahl der Gebäude, dass «Alle Gebäude» die Gebäude auslässt, deren Mietverträge alle schon eine Abrechnung haben',
+	async ({ verwalter }) => {
+		// other scenarios add fully billed buildings too: the count is not checked
+		await verwalter.sees(allBuildingsNoteText).toMatch(
+			/^«Alle Gebäude» lässt \d+ Gebäude aus, (dessen|deren) Mietverträge in dieser Abrechnungsperiode alle schon eine Abrechnung haben\.$/
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter seine Angaben verwerfen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(discardInput);
+});
+
+Then('fragt der Assistent zuerst {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(discardQuestion).toContain(text);
+});
+
+When('der Liegenschaftsverwalter das Verwerfen bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmDiscarding);
+});
+
+When('der Liegenschaftsverwalter den Hinweis auf seine wiederhergestellten Angaben schliesst', async ({ verwalter }) => {
+	await verwalter.attemptsTo(closeRestoredNotice);
+});
+
+Then('sieht der Liegenschaftsverwalter keinen Hinweis auf wiederhergestellte Angaben', async ({ verwalter }) => {
+	await verwalter.sees(restoredDraftShown).toBe(false);
+});
+
+Then('meldet das Feld der Verwaltungspauschale {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(feeFieldDescription).toContain(message);
+});
+
+Then('bleibt der Assistent beim Schritt mit der Verwaltungspauschale', async ({ verwalter }) => {
+	await verwalter.sees(feeFieldShown).toBe(true);
+});
+
+Given(
+	'der Liegenschaftsverwalter hat für das Gebäude {string} die Verwaltungspauschale auf {float} % gesetzt',
+	async ({ verwalter, seed }, building: string, fee: number) => {
+		await verwalter.attemptsTo(setManagementFee(seed.idOf(building)!, fee));
+	}
+);
+
+Then(
+	'nennt der Assistent den Mietvertrag von {string} ohne vereinbarte Verwaltungspauschale',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.sees(contractsWithoutFee).toContain(names.get(tenant)!);
+	}
+);
+
+Then('nicht den Mietvertrag von {string}', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(contractsWithoutFee).not.toContain(names.get(tenant)!);
+});
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag von {string} ohne vereinbarte Verwaltungspauschale öffnet',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.attemptsTo(openContractWithoutFee(seed.idOf(`Mietvertrag ${tenant}`)!));
+	}
+);
+
+Given(
+	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung {int} mit {float} % Verwaltungspauschale',
+	async ({ seed }, tenant: string, building: string, year: number, fee: number) => {
+		await seed.statement(tenant, building, year, undefined, undefined, fee);
+	}
+);
+
+Then('schlägt der Assistent eine Verwaltungspauschale von {string} % vor', async ({ verwalter }, fee: string) => {
+	await verwalter.sees(feeFieldValue).toBe(fee);
+});
+
+Then('sagt der Assistent {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(presetNoticeText).toContain(text);
+});
+
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, start: string, end: string, building: string) => {
+		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, { periodStart: start, periodEnd: end }));
+	}
+);
+
+Then('verlangt die Vorschau keine Bestätigung', async ({ verwalter }) => {
+	await verwalter.sees(confirmationAsked).toBe(false);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(lateInvoiceOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen nach der Abrechnungsperiode keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfLateInvoicesOn(date)).toBe(0);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen ohne Leistungszeitraum die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(invoiceWithoutServicePeriodOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfInvoicesWithoutServicePeriodOn(date)).toBe(0);
+});
+
+When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
+	await verwalter.attemptsTo(editHintedInvoice(date));
+});
+// A-5 (#114): the warning starts with the tenant's full name
+Then(
+	'warnt die Vorschau, dass {string} ausgezogen ist: {string}',
+	async ({ verwalter, names }, tenant: string, rest: string) => {
+		await verwalter.sees(oldAddressWarning).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
+	}
+);
+
+Given(
+	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung {int} mit dem Heizprofil {string} und {float} % Verwaltungspauschale',
+	async ({ seed }, tenant: string, building: string, year: number, profile: string, fee: number) => {
+		await seed.statement(tenant, building, year, profile, undefined, fee);
+	}
+);
+
+Then('sagt die Vorschau {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(existingStatementsText).toContain(text);
+});
+
+// a seeded Heizprofil «Winter» is named «Winter <id>»
+const withNames = (text: string, names: Map<string, string>) =>
+	text.replace(/«([^»]+)»/g, (quoted, name: string) => (names.has(name) ? `«${names.get(name)}»` : quoted));
+
+Then(
+	'sagt die Vorschau zur Abrechnung {int} von {string} {string}',
+	async ({ verwalter, seed, names }, year: number, tenant: string, text: string) => {
+		await verwalter.sees(notesOnExistingStatement(seed.idOf(`Abrechnung ${tenant} ${year}`)!)).toContain(withNames(text, names));
+	}
+);
+
+Then('zur Abrechnung {int} von {string} sagt die Vorschau nichts', async ({ verwalter, seed }, year: number, tenant: string) => {
+	await verwalter.sees(notesOnExistingStatement(seed.idOf(`Abrechnung ${tenant} ${year}`)!)).toBeNull();
+});
+
+When(
+	'der Liegenschaftsverwalter in der Vorschau die Abrechnung {int} von {string} öffnet',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(openExistingStatement(seed.idOf(`Abrechnung ${tenant} ${year}`)!));
+	}
+);
+
+// Tankbestand checks (#136, #72)
+Given(
+	'im Gebäude {string} war vor {int} Tagen Heizöl für {string} Franken im Tank',
+	async ({ seed }, building: string, days: number, amount: string) => {
+		await seed.fuelStock(building, inDays(-days), amount);
+	}
+);
+
+Given(
+	'im Gebäude {string} gibt es eine Heizkostenrechnung über {string} Franken von heute',
+	async ({ seed }, building: string, amount: string) => {
+		await seed.invoiceOn(building, 'Heizung', amount, inDays(0));
+	}
+);
+
+Given('das Gebäude {string} hat keinen Tank oder der Tank ist stillgelegt', async ({ seed }, building: string) => {
+	await seed.noTank(building);
+});
+
+// A period relative to today: running whatever day today is
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen von vor {int} Tagen bis in {int} Tagen für das Gebäude {string} öffnet',
+	async ({ verwalter, seed }, ago: number, ahead: number, building: string) => {
+		const [periodStart, periodEnd] = [inDays(-ago), inDays(ahead)];
+		await verwalter.attemptsTo(openPreview(Number(periodStart.slice(0, 4)), seed.idOf(building)!, { periodStart, periodEnd }));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Gebäude für die Abrechnungen vom {string} bis {string} wählen will',
+	async ({ verwalter }, periodStart: string, periodEnd: string) => {
+		await verwalter.attemptsTo(chooseBuildingsForPeriod(periodStart, periodEnd));
+	}
+);
+
+Then('nennt die Vorschau die bestehenden Abrechnungen von {string}', async ({ verwalter, names }, building: string) => {
+	await verwalter.sees(existingStatementsText).toContain(`Für ${names.get(building) ?? building} gibt es in dieser Abrechnungsperiode schon`);
+});
+
+Then(
+	'verlangt die Vorschau eine Bestätigung, weil es für {string} schon Abrechnungen gibt',
+	async ({ verwalter, names }, building: string) => {
+		await verwalter.sees(confirmationReason).toContain(`Für ${names.get(building) ?? building} gibt es in dieser Abrechnungsperiode schon`);
+	}
+);
+
+Then('ist der Assistent im Schritt {string}', async ({ verwalter }, step: string) => {
+	await verwalter.sees(currentStep).toBe(step);
+});
+
+Then('sagt die leere Vorschau {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(allBilledText).toBe(text);
+});
+
+Then('nennt die Prüfung der Kategorien keinen fehlenden Tankbestand', async ({ verwalter }) => {
+	await verwalter.sees(missingStockFindings).toBe(0);
+});
+
+Then('warnt die Vorschau, dass die Abrechnungsperiode noch läuft', async ({ verwalter }) => {
+	await verwalter.sees(periodRunning).toContain('Periode läuft noch');
+});
+
+Then('fragt die Vorschau nicht nach dem Heizmaterial', async ({ verwalter }) => {
+	await verwalter.sees(tankQuestions).toBe(0);
+});
+
+When(
+	'der Liegenschaftsverwalter aus der Frage nach dem Heizmaterial festhalten will, dass {string} keinen Tank hat',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(recordNoTankFromQuestion(seed.idOf(building)!));
+	}
+);
