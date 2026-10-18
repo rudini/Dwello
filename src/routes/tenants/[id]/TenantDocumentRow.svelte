@@ -38,6 +38,7 @@
 	<div class="flex flex-wrap items-center gap-4">
 		<Button
 			href="/documents/{document.id}/pdf"
+			download
 			icon="document-download"
 			ariaLabel={upload
 				? m.documents_download_file_aria({ title: heading(document) })

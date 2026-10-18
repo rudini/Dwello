@@ -62,6 +62,7 @@
 		{@render children?.()}
 		<Button
 			href="/documents/{document.id}/pdf"
+			download
 			icon="document-download"
 			ariaLabel={upload
 				? m.documents_download_file_aria({ title: heading })

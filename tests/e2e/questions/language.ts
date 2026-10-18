@@ -32,7 +32,7 @@ export const inPageLanguage = (text: string) =>
 	);
 
 // German left on a screen in another language: words that occur in German UI texts (messages/de.json) but in no text
-// of the shown language, and words with umlauts or ß. User data is masked first: scenario records carry a UUID, seeded places and addresses are fixed.
+// of the shown language, and words with umlauts or ß. User data is masked first: scenario records carry 12 hex digits, seeded places and addresses are fixed.
 const words = (text: string) => text.toLowerCase().match(/\p{L}{3,}/gu) ?? [];
 const vocabulary = (language: string) => new Set(Object.values(messagesOf(language)).flatMap(words));
 
@@ -46,8 +46,9 @@ const germanOnly = Object.fromEntries(
 
 // Names and places, the same in every language
 const sameEverywhere = ['Dwello', 'Google', 'Microsoft', 'Resend', 'PostgreSQL', 'IBAN', 'CHF', 'PDF', 'XSRF', 'SMTP', 'STÜBER SYSTEMS GmbH'];
-// A record named by a scenario: up to three words, then a UUID (fixtures/backend.ts)
-const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gu;
+// A record named by a scenario: up to three words, then 12 hex digits (fixtures/backend.ts) or a UUID (the file names of
+// tasks/accessibility.ts)
+const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-)?[0-9a-f]{12}\b/gu;
 // Invoice descriptions the seeds write (fixtures/backend.ts): «Heizöl 2025», «<category> 2025-01-31»
 const seededDescription = /\b(?:Heizöl \d{4}|\p{L}+ \d{4}-\d{2}-\d{2})\b/gu;
 // Fixed values that are user data: seeds (fixtures/backend.ts, the axe seeds) and the operator (playwright.config.ts)
