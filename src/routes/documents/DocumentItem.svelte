@@ -41,7 +41,6 @@
 	<div class="flex flex-col gap-1">
 		<p class="font-semibold text-ink">{heading}</p>
 		<p class="text-ink-muted">{created}</p>
-		<!-- TODO(fachlich prüfen, #277): «Zahlungsfrist» of a Mahnung is not yet a glossary term -->
 		{#if document.paymentDeadline}
 			<p class="text-ink-muted">
 				{m.documents_payment_deadline({ date: formatDate(document.paymentDeadline) })}
