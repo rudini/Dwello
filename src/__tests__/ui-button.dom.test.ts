@@ -22,7 +22,7 @@ describe('Button', () => {
 	});
 
 	// WebKit zeigt ein Bild sonst an, statt es zu speichern (#424); ein gewöhnlicher Link speichert nichts
-	it('speichert die Datei eines Links auf Wunsch, auch ein Bild', () => {
+	it('lässt die Datei eines Links auf Wunsch speichern statt anzeigen', () => {
 		show(Button, {
 			children: label,
 			href: '/documents/d1/pdf',

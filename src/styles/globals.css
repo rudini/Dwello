@@ -28,7 +28,7 @@ textarea::placeholder {
 }
 
 /* WebKit lays out a select's options as flex boxes that widen the field around it, so a long building or apartment
-   name made the page scroll sideways at 390 px in Safari (#424); paint containment keeps them inside the select */
+   name made the page scroll sideways at 390 px (Playwright's WebKit, #424); paint containment keeps them inside the select */
 select {
 	contain: paint;
 }
