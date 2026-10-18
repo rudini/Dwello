@@ -37,7 +37,7 @@
 	<div class="flex flex-col gap-6">
 		{#if former}
 			<Alert tone="caution" title={m.tenants_former_documents_title()} testid="tenant-former-documents">
-				<!-- TODO(fachlich prüfen, #334): «Mietzinsdepot» is not in the glossary -->
+				<!-- TODO(fachlich prüfen, #334): «Mietzinsdepot» has its glossary row; the help texts follow -->
 				<p>
 					{m.tenants_former_documents_text({
 						name,

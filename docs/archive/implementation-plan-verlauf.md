@@ -1745,8 +1745,9 @@ Branch `claude/brave-babbage-d7bnoa`. Product owner 2026-10-18: the open `entsch
 
 - [x] `UBIQUITOUS_LANGUAGE.md`: rows from #402 (Leerstand, Verwaltungspauschale family, Abrechnungsdatum, Zahlung zurücksetzen, Abrechnungsnummer, Gebäude ohne Tank, Verbrauch, Bereits bezahlt, Saldo, Vereinbarte Nebenkosten, Nicht vereinbart, Umlagefähige Nebenkosten, Protokoll, Kosten/Nebenkosten des Gebäudes, VMWG, Vollservicevertrag), #407 (Vereinbart ab), #408 (Tage ohne Abrechnung, Kurze Abrechnungsperiode, Hinweis auf fehlende Abrechnungen, Abgerechnet bis, Mietstage, Geleistete Akontobeiträge, Nebenkostenabrechnung), #409 (Akontorechnung, Abgerechnet), #410 (Befristet / Unbefristet, Auszug bestätigt), #411 (Betreiber, Verantwortlicher, Auftragsbearbeiter, Mietzinsdepot, Freigabe, Protokoll des Servers, Ausweiskopie)
 - [x] `docs/design/i18n-begriffe.md`: rows for the new terms as the app already words them; ❓ removed where #405 (1b, 1c) and #408 (point 3) kept the word; changed words (#405 1e, 2b; it «Costi dell’immobile») wait for their implementation
-- [x] Markers of #140, #397, #398 removed (they waited only for the glossary)
-- [x] Closing code-review round
-- [x] PR `Fixes #140`, `Fixes #397`, `Fixes #398`
+- [x] Markers of #140, #397, #398 removed (they waited only for the glossary); markers of #294, #334, #362, #370 now say the row exists and the help texts follow
+- [x] Closing code-review round 1 (`docs/reviews/g3-glossary-review-1.md`: C-1 Major, C-2 to C-12 fixed or answered)
+- [ ] Re-review of the C-1 fix
+- [ ] PR `Fixes #140`, `Fixes #397`, `Fixes #398`, «No scenario: glossary and code comments only»
 
-Files: `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `src/lib/overview.ts`, `src/routes/config/categories/CategoryReason.svelte`, `src/routes/contracts/[id]/NextSteps.svelte`.
+Files: `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/reviews/g3-glossary-review-1.md`, comments in `src/lib/overview.ts`, `src/routes/config/{categories/CategoryReason,audit-log/+page}.svelte`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/tenants/[id]/TenantDocumentsCard.svelte`, `src/routes/statements/[id]/CostTable.svelte`, `backend/src/services/pdf.service.ts`, `tests/e2e/features/{settings,statement-generate,statement-detail}.feature`.

@@ -16,7 +16,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Fläche | surface | superficie | area |
 | Zimmeranzahl | nombre de pièces | numero di locali | number of rooms |
 | Mietstatus | statut de location | stato di locazione | rental status |
-| Vermietet / Vermietet ab {Datum} / Leer / Leer seit {Datum} / Gesperrt | loué / loué dès le {date} / vacant / vacant depuis le {date} / bloqué | locato / locato dal {date} / sfitto / sfitto dal {date} / bloccato | let / let from {date} / vacant / vacant since {date} / blocked |
+| Vermietet / Vermietet ab {Datum} / Vermietet bis {Datum} / Leer / Leer seit {Datum} / Gesperrt | loué / loué dès le {date} / loué jusqu’au {date} / vacant / vacant depuis le {date} / bloqué | locato / locato dal {date} / locato fino al {date} / sfitto / sfitto dal {date} / bloccato | let / let from {date} / let until {date} / vacant / vacant since {date} / blocked |
 | Mieter | locataire | inquilino | tenant |
 | Mieter: aktiv / künftig / ehemalig | actif / futur / ancien | attivo / futuro / ex | active / future / former |
 | Korrespondenzkanal | canal de correspondance | canale di corrispondenza | correspondence channel |
@@ -29,7 +29,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Vertragsstatus: laufend / künftig / beendet | en cours / futur / terminé | in corso / futuro / terminato | current / future / ended |
 | Befristet / Unbefristet | durée déterminée / durée indéterminée | a tempo determinato / a tempo indeterminato | fixed-term / open-ended |
 | Nachmieter / Mieterwechsel | nouveau locataire / changement de locataire | nuovo inquilino / cambio d’inquilino | new tenant / change of tenant |
-| Kündigung / gekündigt / Kündigungstermin / Kündigung aufheben | résiliation / résilié / terme de congé / annuler la résiliation ❓ | disdetta / disdetto / scadenza di disdetta / revocare la disdetta ❓ | notice of termination / terminated by notice / termination date / withdraw notice |
+| Kündigung / gekündigt / Kündigungstermin / Kündigung aufheben | résiliation / résilié / terme de congé / annuler la résiliation | disdetta / disdetto / scadenza di disdetta / revocare la disdetta ❓ | notice of termination / terminated by notice / termination date / withdraw notice |
 | Kündigungsfrist | délai de congé | termine di preavviso | notice period |
 | Nettomiete (Mietzins) | loyer net (loyer) | pigione netta (pigione) | net rent (rent) |
 | Zusatzmiete | loyer supplémentaire | pigione supplementare | additional rent |
@@ -47,7 +47,10 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Betrag | montant | importo | amount |
 | Fälligkeitsdatum / Zahlungsdatum | date d’échéance / date de paiement | data di scadenza / data di pagamento | due date / payment date |
 | Umlagefähig | imputable ❓ | addebitabile | allocable |
+| abgerechnet (Rechnung, #409) | décomptée | conteggiata | billed |
 | Wartung (umlagefähig, Art. 5 Abs. 2 lit. g VMWG; nicht «Unterhalt» nach Art. 256 OR) | maintenance (nicht «entretien») | manutenzione | servicing (nicht «maintenance») |
+| Vollservicevertrag (Lift) | contrat de maintenance complet | contratto di manutenzione completo | full-service contract |
+| Verordnung über die Miete (VMWG) | ordonnance sur le bail (OBLF) | ordinanza concernente la locazione (OLAL) | Tenancy Ordinance (VMWG) |
 | Kategorie / Kategorisierung | catégorie / catégorisation | categoria / categorizzazione | category / categorisation |
 | Vordefinierte Kategorie «Von Dwello» / Eigene Kategorie «Eigene» (#166, #205) | «De Dwello» / «Personnalisée» | «Da Dwello» / «Personalizzata» | «From Dwello» / «Custom» |
 | KI / KI-Kategorie | IA / catégorie proposée par l’IA | IA / categoria proposta dall’IA | AI / AI category |
