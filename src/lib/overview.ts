@@ -195,7 +195,6 @@ function workTasks({
 }
 
 // A notice gives time to find the next tenant; the earliest end first (A-4)
-// TODO(fachlich prüfen, #140): «Nachmieter» is not in the glossary
 const successorTasks = ({ noticedContracts }: OverviewInput): Task[] =>
 	[...noticedContracts]
 		.sort((a, b) => a.endDate.localeCompare(b.endDate))

@@ -5,7 +5,6 @@
 	// Each predefined category by its key, with the allocability its fixed sentence explains (#186, wording from the
 	// domain review docs/reviews/186-fachreview-1.md); each writes out the laws it cites and ends with its conclusion
 	// (#292, docs/reviews/292-fachreview-1.md)
-	// TODO(fachlich prüfen, #397) «Verordnung über die Miete (VMWG)», TODO(fachlich prüfen, #398) «Vollservicevertrag»
 	const REASONS: Record<string, [allowed: boolean, reason: () => string]> = {
 		Heating: [true, m.categories_reason_heating],
 		'Hot Water': [true, m.categories_reason_hot_water],

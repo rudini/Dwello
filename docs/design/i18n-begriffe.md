@@ -28,12 +28,14 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Vertragsbeginn / Vertragsende | début du contrat / fin du contrat | inizio del contratto / fine del contratto | contract start / contract end |
 | Vertragsstatus: laufend / künftig / beendet | en cours / futur / terminé | in corso / futuro / terminato | current / future / ended |
 | Befristet / Unbefristet | durée déterminée / durée indéterminée | a tempo determinato / a tempo indeterminato | fixed-term / open-ended |
+| Nachmieter / Mieterwechsel | nouveau locataire / changement de locataire | nuovo inquilino / cambio d’inquilino | new tenant / change of tenant |
 | Kündigung / gekündigt / Kündigungstermin / Kündigung aufheben | résiliation / résilié / terme de congé / annuler la résiliation ❓ | disdetta / disdetto / scadenza di disdetta / revocare la disdetta ❓ | notice of termination / terminated by notice / termination date / withdraw notice |
 | Kündigungsfrist | délai de congé | termine di preavviso | notice period |
 | Nettomiete (Mietzins) | loyer net (loyer) | pigione netta (pigione) | net rent (rent) |
 | Zusatzmiete | loyer supplémentaire | pigione supplementare | additional rent |
 | Akonto | acompte | acconto | advance payment |
 | Geleistete Akontobeiträge | acomptes versés | acconti versati | advance payments made |
+| Vereinbarte Nebenkosten / Nicht vereinbart | frais accessoires convenus / non convenue | spese accessorie pattuite / non pattuita | agreed utility costs / not agreed |
 | Referenzindex | taux de référence | tasso di riferimento | reference rate |
 | Rechnung | facture | fattura | invoice |
 | Beleg (hochgeladene Datei einer Rechnung, #217) | pièce justificative | giustificativo | supporting document |
@@ -57,26 +59,28 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Nebenkosten | frais accessoires | spese accessorie | utility costs |
 | Nebenkostenabrechnung | décompte des charges | conteggio spese accessorie | utility cost statement |
 | Abrechnung (short) | décompte | conteggio | statement |
-| Abrechnungslauf | établissement des décomptes ❓ | allestimento dei conteggi ❓ | statement run |
+| Abrechnungslauf | établissement des décomptes | allestimento dei conteggi | statement run |
 | Abrechnungsperiode | période de décompte | periodo di conteggio | billing period |
 | Abrechnungsposition | poste du décompte | voce del conteggio | statement line |
+| Abrechnungsnummer / Abrechnungsdatum | numéro de décompte / date du décompte | numero di conteggio / data del conteggio | statement number / statement date |
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |
 | Kosten des Gebäudes | coûts de l’immeuble | costi immobile | building costs |
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
+| Zahlung zurücksetzen | Retirer le paiement saisi | Rimuovere il pagamento registrato | Reset payment |
 | Nebenkostenpauschale (#66) | forfait de frais accessoires ❓ | forfait per le spese accessorie ❓ | flat-rate utility charge |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |
 | Berichtigte Abrechnung (#120) | décompte rectificatif | conteggio rettificato | corrected statement |
 | Ersetzt (Abrechnungsstatus, #120) | remplacé | sostituito | replaced |
 | Abrechnung berichtigen / Berichtigte Abrechnung erstellen | Rectifier le décompte / Établir le décompte rectificatif | Rettificare il conteggio / Allestire il conteggio rettificato | Correct statement / Create corrected statement |
-| Bereits bezahlt / Bereits zurückerstattet auf NK-… (#362, glossary open) | déjà payé / déjà remboursé sur NK-… | già pagato / già rimborsato su NK-… | already paid / already refunded on NK-… |
+| Bereits bezahlt / Bereits zurückerstattet auf NK-… (#362) | déjà payé / déjà remboursé sur NK-… | già pagato / già rimborsato su NK-… | already paid / already refunded on NK-… |
 | Ausgeglichen (Saldo 0) | solde nul | in pareggio | nil balance |
 | Mietstage | jours de location | giorni di locazione | days rented |
-| Abgerechnet bis | décompté jusqu’au ❓ (#325) | conteggiato fino al ❓ (#325) | billed until ❓ (#325) |
+| Abgerechnet bis | décompté jusqu’au | conteggiato fino al | billed until |
 | Leerstand | vacance | sfitto | vacancy |
 | Entwurf / Versendet / Bezahlt / Überfällig | brouillon / envoyé / payé / en retard | bozza / inviato / pagato / scaduto | draft / sent / paid / overdue |
 | Zahlungsfrist | délai de paiement | termine di pagamento | payment deadline |
-| Mahnung / Zahlungserinnerung / 2. Mahnung | rappel / rappel de paiement / 2e rappel ❓ | sollecito / promemoria di pagamento / 2° sollecito ❓ | reminder / payment reminder / 2nd reminder |
-| Mahnstufe / Mahnfrist | niveau de rappel / délai de rappel ❓ | livello di sollecito / termine di sollecito ❓ | reminder level / reminder period |
+| Mahnung / Zahlungserinnerung / 2. Mahnung | rappel / rappel de paiement / 2e rappel | sollecito / promemoria di pagamento / 2° sollecito | reminder / payment reminder / 2nd reminder |
+| Mahnstufe / Mahnfrist | niveau de rappel / délai de rappel | livello di sollecito / termine di sollecito | reminder level / reminder period |
 | Dokument / Versandstatus / Zu versenden | document / statut d’envoi / à envoyer | documento / stato di invio / da inviare | document / dispatch status / to send |
 | hochladen / Hochgeladenes Dokument | téléverser / document téléversé | caricare / documento caricato | upload / uploaded document |
 | Übergabeprotokoll | procès-verbal de remise | verbale di consegna | handover report |
@@ -86,9 +90,12 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Tankbestand / Heizmaterial | stock de combustible / combustible | scorta di combustibile / combustibile | fuel stock / fuel |
 | Veränderung Tankbestand | variation du stock de combustible | variazione della scorta di combustibile | change in fuel stock |
 | Anfangsbestand / Endbestand | stock initial / stock final | scorta iniziale / scorta finale | opening stock / closing stock |
-| Tank / Tank stillgelegt (Glossar offen, #315) | citerne / citerne désaffectée | serbatoio / serbatoio dismesso | tank / tank decommissioned |
+| Tank / Tank stillgelegt / Verbrauch (Heizmaterial) | citerne / citerne désaffectée / consommation | serbatoio / serbatoio dismesso / consumo | tank / tank decommissioned / consumption |
 | Zeitanteil | part temporelle | quota temporale | time share |
 | Firmenname / Firmenadresse | nom de l’entreprise / adresse de l’entreprise | nome dell’azienda / indirizzo dell’azienda | company name / company address |
+| Protokoll (Einstellungen) / Protokoll des Servers | journal / journal du serveur | registro / registro del server | log / server log |
+| Betreiber / Verantwortlicher (DSG) / Auftragsbearbeiter (DSG) | exploitant / responsable du traitement / sous-traitant | gestore / titolare del trattamento / responsabile del trattamento | operator / controller / processor |
+| Mietzinsdepot / Freigabe des Mietzinsdepots | garantie de loyer / libération de la garantie de loyer | deposito di garanzia / svincolo del deposito di garanzia | rent deposit / release of the rent deposit |
 | Übersicht | vue d’ensemble | panoramica | overview |
 
 Names of master data (categories, distribution keys, heating profiles) come from the database columns `name_fr`, `name_it`, `name_en`, not from the message files.
@@ -109,5 +116,5 @@ The help page quotes these labels, so the buttons must use the same words.
 | Entwürfe erstellen | Créer les brouillons | Creare le bozze | Create drafts |
 | Als versendet markieren | Marquer comme envoyé | Segnare come inviato | Mark as sent |
 | Als bezahlt markieren | Marquer comme payé | Segnare come pagato | Mark as paid |
-| Mahnung senden | Envoyer un rappel ❓ | Inviare un sollecito ❓ | Send reminder |
+| Mahnung senden | Envoyer un rappel | Inviare un sollecito | Send reminder |
 | Zurück / Weiter / Abbrechen | Retour / Continuer / Annuler | Indietro / Avanti / Annullare | Back / Next / Cancel |
