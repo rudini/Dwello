@@ -1332,6 +1332,22 @@ describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 			'1 Rechnung in der Abrechnungsperiode'
 		);
 	});
+
+	// beide zusammen heisst nicht: beide oder keine (Code-Review 424-2, C-8)
+	it('zeigt die Rechnungen eines Gebäudes auch, wenn die abgerechneten Mietverträge nicht geladen werden', async () => {
+		fakeBff((call) =>
+			call.path.startsWith('/statements/billed')
+				? [500]
+				: [200, { invoices: [{ buildingId: 'b1' }], total: 1 }]
+		);
+		open();
+		await settle();
+		next();
+		await settle();
+		expect(byTestId('generate-building-invoices-b1')!.textContent).toContain(
+			'1 Rechnung in der Abrechnungsperiode'
+		);
+	});
 });
 
 // #89: the run's rate applies only where the contract agrees a Verwaltungspauschale; the others are named with a link

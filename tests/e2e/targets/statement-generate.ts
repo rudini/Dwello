@@ -13,7 +13,7 @@ export const announcement = (text: string) =>
 	target(`Ansage «${text}»`, (page) => page.getByRole('status').filter({ hasText: text }));
 export const buildingCheckbox = (buildingId: string) =>
 	target(`Gebäude ${buildingId} für die Abrechnungen`, (page) => page.getByTestId(`generate-building-${buildingId}`));
-// shown once step 2 has counted the building's invoices and its billed contracts (BuildingStep.svelte)
+// shown once step 2 has its answers on the building's invoices and its billed contracts, together (BuildingStep.svelte)
 export const buildingInvoiceCount = (buildingId: string) =>
 	target(`Rechnungen von Gebäude ${buildingId} in der Wahl`, (page) => page.getByTestId(`generate-building-invoices-${buildingId}`));
 export const existingStatements = target('Hinweis «Es gibt schon Abrechnungen»', (page) => page.getByTestId('existing-statements'));
