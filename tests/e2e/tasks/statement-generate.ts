@@ -6,6 +6,7 @@ import {
 	allBuildingsCheckbox,
 	backLink,
 	buildingCheckbox,
+	buildingInvoiceCount,
 	feeNotAgreedLink,
 	agreementAnswered,
 	agreementsLoading,
@@ -42,8 +43,14 @@ export const openStatementWizardFor = (buildingId: string, year: number) =>
 	Navigate.to(`${WIZARD}?building=${buildingId}&start=${year}-01-01&end=${year}-12-31`);
 
 // Steps "Abrechnungsperiode" (default period) and "Gebäude"
+// once the step has loaded what it tells about each building: later text would move the rows under the click
+// (Firefox, #424)
 export const chooseBuilding = (buildingId: string): Activity => (actor) =>
-	actor.attemptsTo(goToNextStep, Check.the(buildingCheckbox(buildingId)));
+	actor.attemptsTo(
+		goToNextStep,
+		Wait.until(buildingInvoiceCount(buildingId)),
+		Check.the(buildingCheckbox(buildingId))
+	);
 
 // Step "Abrechnungsperiode", on to step "Gebäude"
 export const chooseBuildingsForPeriod = (start: string, end: string): Activity => (actor) =>
