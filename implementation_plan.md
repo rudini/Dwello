@@ -32,6 +32,8 @@ Branch `feat/glossary-texts-222`. Issue #222 "Decided (product owner)" (the glos
   Test red: invoice-upload.test.ts (2) and invoice-pages.dom.test.ts «zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat» – expected the new texts, received the round-2 ones
   fach-reviewer round 4 (docs/reviews/222-fachreview-4.md): Helga P-1 and Weber P-1 confirmed fixed; V-12 (Minor) and V-13 (Nit) fixed by the product owner's decision 2026-10-18 («Abrechnungsperiode, in der sie abgerechnet ist»; «mit «Datei entfernen»»), wording as the reviewer proposed (pronoun form «retirez-les / li rimuova / remove them» as the product owner saw it in de)
   Scenario green (chromium): both scenarios with the final texts, `@wip` removed; unit and DOM tests green
+  code-reviewer round 2 (docs/reviews/222-review-2.md): C-2..C-5 confirmed fixed; C-1/C-6 (Minor) accepted, not fixable after the fact: `tdd` and `ponytail` were not loaded for the text slices (workflow review W-3); C-7 fixed (item below)
+- [ ] Personas Helga and Dr. Weber again, task on the two changed hints only (Workflow 6)
 - [ ] Reviews (`code-reviewer`; feature review: personas and `fach-reviewer` where they apply)
 - [ ] Before marking complete: all checks in `CLAUDE.md`
 - [x] Workflow review `docs/reviews/workflow-rules-review-issue-222.md`
