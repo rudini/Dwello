@@ -142,6 +142,7 @@
 	{categories}
 	bind:agreed={values.agreedCategoryIds}
 	help={agreedHelp}
+	flatRate={parseFloat(normalizeAmounts(values).flatRateUtilityCharge ?? '') > 0}
 />
 
 <p class="flex items-baseline justify-between gap-4 border-t border-line pt-4 text-lg">

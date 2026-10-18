@@ -8,11 +8,13 @@
 	let {
 		categories,
 		agreed = $bindable(),
-		help
+		help,
+		flatRate = false
 	}: {
 		categories: { id: string; name: string }[];
 		agreed: string[] | undefined;
 		help: string;
+		flatRate?: boolean; // a Nebenkostenpauschale: no box is the expected choice (persona Helga 429 P-1)
 	} = $props();
 
 	const isAgreed = (id: string) => agreed?.includes(id) ?? true;
@@ -48,7 +50,7 @@
 	<div role="status">
 		{#if agreed?.length === 0}
 			<Alert
-				tone="caution"
+				tone={flatRate ? 'info' : 'caution'}
 				title={m.contracts_agreed_costs_none_title()}
 				testid="contract-agreed-costs-none"
 			>
