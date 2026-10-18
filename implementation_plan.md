@@ -30,6 +30,8 @@ Branch `feat/glossary-texts-222`. Issue #222 "Decided (product owner)" (the glos
   Product owner 2026-10-16 (recorded in #222): both hints changed for Helga P-1 and Weber P-1
   Scenario red (chromium, persona fixes): upload hint received «… Haben Sie die Akontorechnungen schon erfasst oder hier ausgewählt, löschen oder entfernen Sie sie …»; invoice page received the hint without the service period
   Test red: invoice-upload.test.ts (2) and invoice-pages.dom.test.ts «zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat» – expected the new texts, received the round-2 ones
+  fach-reviewer round 4 (docs/reviews/222-fachreview-4.md): Helga P-1 and Weber P-1 confirmed fixed; V-12 (Minor) and V-13 (Nit) fixed by the product owner's decision 2026-10-18 («Abrechnungsperiode, in der sie abgerechnet ist»; «mit «Datei entfernen»»), wording as the reviewer proposed (pronoun form «retirez-les / li rimuova / remove them» as the product owner saw it in de)
+  Scenario green (chromium): both scenarios with the final texts, `@wip` removed; unit and DOM tests green
 - [ ] Reviews (`code-reviewer`; feature review: personas and `fach-reviewer` where they apply)
 - [ ] Before marking complete: all checks in `CLAUDE.md`
 - [x] Workflow review `docs/reviews/workflow-rules-review-issue-222.md`
