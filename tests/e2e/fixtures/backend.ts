@@ -188,6 +188,11 @@ export function testData(api: CallTheApi) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment });
 		},
 
+		// «Nebenkostenpauschale»: counts in «Monatlich total», never billed (#429)
+		async flatRateUtilityCharge(tenantTitle: string, flatRateUtilityCharge: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { flatRateUtilityCharge });
+		},
+
 		// «Abgerechnet bis»: up to that day the Nebenkosten are billed outside Dwello (#133)
 		async billedUntil(tenantTitle: string, billedUntil: string) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { billedUntil });

@@ -163,6 +163,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und beträgt der Saldo von "Eva Frei" "Rückerstattung CHF 56.15"
     Und kostet die Abrechnung von "Marc Huber" "CHF 504.70"
 
+  # #429: die Nebenkostenpauschale wird nicht abgerechnet, nur das Akonto. Hauswart 732.00 für 366 Tage = 2.00 pro Tag;
+  # Marc Huber 245 Tage = 490.00 + 3 % = 504.70, Akonto 8 Monate × 50.00 = 400.00, Saldo 104.70
+  @api
+  Szenario: Die Nebenkostenpauschale zählt nicht in der Abrechnung
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und der Mietvertrag von "Marc Huber" hat "100" Franken Nebenkostenpauschale
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Marc Huber" "CHF 504.70"
+    Und beträgt der Saldo von "Marc Huber" "Nachzahlung CHF 104.70"
+
   # A-5 (#114): schon beim Erstellen fällt auf, dass die Abrechnung an die verlassene Wohnung ginge
   Szenario: Vorschau warnt vor der alten Adresse eines ausgezogenen Mieters
     Angenommen die Korrespondenzadresse von "Eva Frei" ist noch die Adresse des Gebäudes "Lindenhof"

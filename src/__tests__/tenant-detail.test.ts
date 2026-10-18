@@ -5,6 +5,7 @@ import { runAction } from './helpers/action';
 import tenant from '../../tests/contracts/tenant.json';
 import tenantList from '../../tests/contracts/tenants.json';
 import documentList from '../../tests/contracts/documents.json';
+import contractResponse from '../../tests/contracts/contract.json';
 
 const API = 'http://localhost:3001/api/v1';
 const day = (offset: number) =>
@@ -163,6 +164,13 @@ describe('Vertragsstatus in der Historie', () => {
 		const contract = { id: 'c', startDate: day(-10), endDate: day(10) };
 		expect(toContractHistory({ ...contract, terminated: true }, 'Anna').terminated).toBe(true);
 		expect(toContractHistory(contract, 'Anna').terminated).toBe(false);
+	});
+	// #429: die Nebenkostenpauschale zählt im Monatlich total
+	it('zählt die Nebenkostenpauschale im Monatlich total', () => {
+		const withFlatRate = { ...contractResponse, flatRateUtilityCharge: '120.00' };
+		expect(toContractHistory(withFlatRate, 'Anna').monthlyTotal).toBe(
+			toContractHistory(contractResponse, 'Anna').monthlyTotal + 120
+		);
 	});
 });
 

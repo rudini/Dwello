@@ -39,6 +39,7 @@ const contractFields = {
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
 	monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
+	flatRateUtilityCharge: rentalContracts.flatRateUtilityCharge,
 	managementFeeAgreed: rentalContracts.managementFeeAgreed,
 	managementFeePercent: rentalContracts.managementFeePercent,
 	referenceIndex: rentalContracts.referenceIndex,

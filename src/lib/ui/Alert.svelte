@@ -25,6 +25,7 @@
 	role={tone === 'critical' ? 'alert' : undefined}
 	tabindex="-1"
 	data-testid={testid}
+	data-tone={tone}
 >
 	<span class={style.text}><Icon name={style.icon} size={24} /></span>
 	<div class="flex min-w-0 flex-col gap-2">

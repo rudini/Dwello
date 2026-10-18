@@ -37,6 +37,10 @@ export const pastEndConfirm = target('Bestätigung Vertragsende in der Vergangen
 );
 export const baseRentInput = target('Nettomiete', (page) => page.getByTestId('contract-base-rent-input'));
 export const advancePaymentInput = target('Akonto', (page) => page.getByTestId('contract-advance-payment-input'));
+export const flatRateInput = target('Nebenkostenpauschale', (page) => page.getByTestId('contract-flat-rate-input'));
+export const flatRateWarning = target('Hinweis zur Nebenkostenpauschale', (page) =>
+	page.getByTestId('contract-flat-rate-warning')
+);
 // #66: the Akonto's help, the hint without Akonto, and the hint on changing a running contract
 export const advancePaymentHelp = target('Hilfe zum Akonto', (page) => page.getByTestId('contract-advance-payment-input-help'));
 export const noAdvanceNotice = target('Hinweis ohne Akonto', (page) => page.getByTestId('advance-payment-notice'));

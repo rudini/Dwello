@@ -8,11 +8,12 @@ const categories = [
 	{ id: 'c2', name: 'Lift' }
 ];
 
-function boxes(agreed?: string[]) {
+function boxes(agreed?: string[], flatRate = false) {
 	const bound = { agreed };
 	show(AgreedCategories, {
 		categories,
 		help: 'Hilfe',
+		flatRate,
 		get agreed() {
 			return bound.agreed;
 		},
@@ -48,5 +49,13 @@ describe('Vereinbarte Nebenkosten im Mietvertrag', () => {
 		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain(
 			'Bezahlt der Mieter alle Nebenkosten mit einer Nebenkostenpauschale, lassen Sie die Häkchen leer.'
 		);
+		expect(byTestId('contract-agreed-costs-none')!.className).toContain('bg-caution-soft');
+	});
+
+	// persona Helga 429 P-1: with a Nebenkostenpauschale no box is the right choice, so the note does not warn
+	it('warnt mit Nebenkostenpauschale nicht, wenn keine Nebenkosten vereinbart sind', () => {
+		boxes([], true);
+
+		expect(byTestId('contract-agreed-costs-none')!.className).not.toContain('bg-caution-soft');
 	});
 });

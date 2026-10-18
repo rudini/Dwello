@@ -50,6 +50,7 @@ const contractBodySchema = t.Object({
 	baseRent: t.String(),
 	additionalRent: t.Optional(t.Nullable(t.String())),
 	monthlyAdvancePayment: t.String(),
+	flatRateUtilityCharge: t.Optional(t.String()), // «Nebenkostenpauschale» (#429)
 	...managementFee,
 	agreedCategoryIds: agreedList,
 	referenceIndex: t.Optional(t.Nullable(t.String())),
@@ -70,6 +71,7 @@ const contractUpdateSchema = t.Partial(
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),
+		flatRateUtilityCharge: t.String(),
 		...managementFee,
 		agreedCategoryIds: agreedList,
 		referenceIndex: t.Optional(t.Nullable(t.String())),

@@ -12,6 +12,7 @@
 			"baseRent": "950.00",
 			"additionalRent": "0.00",
 			"monthlyAdvancePayment": "150.00",
+			"flatRateUtilityCharge": "0.00",
 			"tenantName": "Anna Keller",
 			"apartmentNumber": "2.01",
 			"buildingName": "Ahornhof",

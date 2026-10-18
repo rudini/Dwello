@@ -80,3 +80,9 @@ Funktionalität: Wohnungsdetail
     Dann steht der Mietvertrag von "Beat Huber" über den früheren Mietverträgen
     Und steht der Mietvertrag von "Eva Graf" unter "Frühere Mietverträge"
     Und erklärt der Mietvertrag von "Eva Graf" "Bleibt als Historie erhalten: Nebenkostenabrechnungen brauchen seine Mietstage."
+
+  # #429: die Nebenkostenpauschale zählt in den monatlichen Kosten der Wohnung
+  Szenario: Monatliche Kosten mit Nebenkostenpauschale
+    Angenommen der Mietvertrag von "Beat Huber" hat "100" Franken Nebenkostenpauschale
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
+    Dann beträgt das Monatlich total der Wohnung "CHF 1’050.00"

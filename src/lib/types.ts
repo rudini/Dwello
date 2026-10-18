@@ -85,6 +85,7 @@ export interface RentalContract {
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto
+	flatRateUtilityCharge?: string | number; // «Nebenkostenpauschale» (#429): in «Monatlich total», never billed
 	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
 	managementFeePercent?: string | null; // own rate, before the run's
 	agreedCategoryIds?: string[]; // #91: the umlagefähige categories it agrees
@@ -111,6 +112,7 @@ export interface ContractHistory {
 export interface MonthlyCosts {
 	baseRent: number;
 	advancePayment?: number;
+	flatRateUtilityCharge?: number; // «Nebenkostenpauschale» (#429)
 	additionalRent?: number;
 	monthlyTotal: number;
 }

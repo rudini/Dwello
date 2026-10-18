@@ -126,6 +126,7 @@ moved_out               BOOLEAN NOT NULL DEFAULT FALSE -- «Mieter ist ausgezoge
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
+flat_rate_utility_charge DECIMAL(10,2) NOT NULL DEFAULT 0  -- Nebenkostenpauschale (#429): in «Monatlich total», never billed
 management_fee_agreed   BOOLEAN NOT NULL DEFAULT FALSE -- Verwaltungspauschale vereinbart (#89)
 management_fee_percent  DECIMAL(5,2)            -- own rate 0–10 %, before the run's; NULL: the run's rate
 reference_index         DECIMAL(6,4)            -- Referenzindex

@@ -1,0 +1,7 @@
+# Workflow notes: issue #429
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, "Design-Regeln", Copy: `UBIQUITOUS_LANGUAGE.md` «never edit it»; skill `pull-request`: a decided glossary term is edited by the product owner | #429 lists the glossary rows under «Where» and asks only that the product owner confirm their wording. So the session wrote them, and the code review raised the missing confirmation as a Major (C-1). The task then waited on a question the product owner could have answered when deciding the issue. | Allow the session to write the rows when the issue names them, with the product owner's confirmation as a "Done means" item. Ask for that confirmation together with the issue's other open points, not after the review. |
+| `CLAUDE.md`, Workflow 5: `daten-pruefer` when «amounts … changed» | The change added an amount to «Monatlich total» but left statements, PDFs and QR-bills as they were. It was unclear whether a displayed total counts as «amounts». The run confirmed 36 totals and found nothing. | Name the cases: amounts the landlord bills or that a statement, PDF or QR-bill prints. A displayed total gets a unit test and the fach-reviewer's recalculation. |
+| As in `workflow-notes-issue-57.md` (French non-breaking spaces with the Edit tool) | New: replacing only the part of a sentence before a guillemet kept the existing U+00A0 untouched; `od -c` confirmed it. | Mention this partial replacement next to the escape in `i18n-begriffe.md`. |
