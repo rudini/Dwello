@@ -88,7 +88,6 @@ const translations: Record<Language, Record<string, string>> = {
 		partStock: 'Veränderung Tankbestand {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partShare: 'Ihr Anteil{colon}{apartment} × ({sum}) / {costs} = {share}',
-		// TODO(fachlich prüfen, #336): «Anteil nach Heizprofil» over an invoice's own days
 		partProfile: ', Anteile der Monate im Heizprofil: {periodMonths}; zusammen {period}\u00a0%. Anteile der Monate Ihres Mietverhältnisses darin: {months}; zusammen {tenant}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', Anteil nach Heizprofil: {percent}\u00a0% (siehe Heiz- und Warmwasserkosten)',
 		partProfileNone: 'keine',
