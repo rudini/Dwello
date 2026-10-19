@@ -46,6 +46,6 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] @wip scenario «Kein Hinweis, wenn der Rechnungssteller von monatlich auf vierteljährlich wechselt» (`statement-generate.feature`); unit tests (two red, three pin kept behaviour)
 - [x] fach-reviewer on the scenario before implementing (`docs/reviews/130-fachreview-1.md`, no Blocker/Major; V-1 to V-4 tests added)
 - [x] Divisor rule in `missingParts` (`invoice-completeness.service.ts`, `coarserRhythm`)
-- [ ] Marker `TODO(fachlich prüfen, #130)` in `CategoryCheck.svelte`: repoint to an open issue
+- [x] Marker `TODO(fachlich prüfen, #130)` in `CategoryCheck.svelte` removed (product owner 2026-10-19: settled by #409)
 - [ ] Slice review
 - [ ] PR `Fixes #130`
