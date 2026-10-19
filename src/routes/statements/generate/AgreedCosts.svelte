@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { api } from '$lib/api';
 	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
+	import AgreementsCheck from './AgreementsCheck.svelte';
 	import AgreementQuestion from './AgreementQuestion.svelte';
 
 	// Step 3 (#91, Art. 257a Abs. 2 OR): per contract of the run, whether a category with costs in the period and no
@@ -60,20 +60,7 @@
 	});
 </script>
 
-{#if status === 'loading'}
-	<p role="status" class="text-ink-muted" data-testid="agreements-loading">
-		{m.statements_agreements_loading()}
-	</p>
-{:else if status === 'failed'}
-	<Alert tone="critical" title={m.statements_agreements_failed_title()} testid="agreements-failed">
-		<p>{m.statements_agreements_failed_text()}</p>
-		{#snippet action()}
-			<Button variant="secondary" onclick={() => attempt++}
-				>{m.statements_agreements_retry()}</Button
-			>
-		{/snippet}
-	</Alert>
-{/if}
+<AgreementsCheck {status} {error} onretry={() => attempt++} />
 
 {#if asked.length}
 	<!-- TODO(fachlich prüfen, #369): the term «Vereinbarte Nebenkosten» -->

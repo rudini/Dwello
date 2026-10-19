@@ -288,12 +288,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Enter.theValue('120').into(flatRateInput),
 			Wait.until(on.shown('contract-flat-rate-warning'))
 		),
-	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen»
+	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen», and
+	// after «Weiter» the note that the wizard waits for the check (#439)
 	'agreements-failed': () => (actor) =>
 		actor.attemptsTo(
 			FailRequests.to('/api/statements/agreements', {}),
 			Navigate.reload,
-			Wait.until(on.shown('agreements-failed'))
+			Wait.until(on.shown('agreements-failed')),
+			Click.on(nextButton),
+			Wait.until(on.shown('agreements-wait'))
 		),
 	// an answer that cannot be saved: the question's error (idempotent, nothing is stored)
 	'agreement-save-failed': () => (actor) =>

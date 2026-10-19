@@ -46,7 +46,7 @@
 		"agreed-costs-none": "Contract form with every box of the agreed Nebenkosten unticked (#91): the note that the tenant is then billed no Nebenkosten (not saved).",
 		"flat-rate-warning": "Contract form at the step «Miete» with a Nebenkostenpauschale, no Akonto and ticked Nebenkosten (#429): the warning that Dwello still bills the ticked Nebenkosten (not saved).",
 		"agreed-costs": "Statement wizard at the settings step (#91): «Weiter» with the questions whether a category is agreed not answered (their errors), and the contract whose answered «nicht vereinbart» category has costs in the period.",
-		"agreements-failed": "Statement wizard at the settings step (#91) when whether the contracts agree the period's Nebenkosten cannot be checked (that request answers an error): the alert with «Erneut versuchen».",
+		"agreements-failed": "Statement wizard at the settings step (#91) when whether the contracts agree the period's Nebenkosten cannot be checked (that request answers an error): the alert with «Erneut versuchen», and after «Weiter» the note that the wizard waits for the check (#439).",
 		"agreement-save-failed": "Statement wizard at the settings step (#91): an answer whether a category is agreed that could not be saved (the save answers an error): the question's error.",
 		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",

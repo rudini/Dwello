@@ -20,6 +20,7 @@ import {
 	feeNotAgreed,
 	agreementQuestions,
 	agreementsFailed,
+	agreementsWait,
 	agreementsOf,
 	notAgreedCostsLink,
 	generationResult,
@@ -156,3 +157,4 @@ export const agreementQuestionsShown = Visibility.of(agreementQuestions);
 export const notAgreedCostsOf = (contractId: string) => Text.of(notAgreedCostsLink(contractId));
 export const oldAddressWarning = Text.of(oldAddress);
 export const agreementsFailure = Text.of(agreementsFailed);
+export const agreementsWaiting = Text.of(agreementsWait);

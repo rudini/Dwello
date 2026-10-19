@@ -95,4 +95,16 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 		expect(byTestId('agreements-failed')).toBeNull();
 		expect(props.blocking).toBe(false);
 	});
+
+	// #439: «Weiter» während der Prüfung bleibt nicht stumm
+	it('sagt nach «Weiter» während der Prüfung, worauf der Assistent wartet', async () => {
+		globalThis.fetch = (() => new Promise<Response>(() => {})) as typeof fetch;
+		show(AgreedCosts, { buildingIds: ['b1'], period, error: 'Weiter ohne Antwort' });
+		await settle();
+
+		expect(byTestId('agreements-loading')).not.toBeNull();
+		expect(byTestId('agreements-wait')!.textContent).toContain(
+			'Dwello geht weiter, sobald die Mietverträge geprüft sind.'
+		);
+	});
 });
