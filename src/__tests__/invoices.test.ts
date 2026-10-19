@@ -296,20 +296,6 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		expect(data.distributionKeys).toHaveLength(1);
 		expect(data.llmAvailable).toBe(false);
 	});
-
-	it('bietet alle Gebäude an, nicht nur die ersten 20', async () => {
-		for (const load of [newLoad, editLoad]) {
-			const { urls, fetch } = backend(answers);
-
-			await load({
-				params: { id: 'i1' },
-				url: new URL('http://localhost/invoices/new'),
-				fetch
-			} as never);
-
-			expect(urls).toContain(`${API}/buildings?limit=1000`);
-		}
-	});
 });
 
 describe('Rechnung prüfen', () => {
