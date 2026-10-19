@@ -1815,3 +1815,13 @@ Branch `ccr-240d3fd7-ogc0me`. A second session solved #424 in parallel; #438 sol
 - [x] PR, «No scenario: a list limit no realistic data reaches; docs»
 
 Files: `src/routes/{apartments,apartments/new,invoices,invoices/new,invoices/[id]/edit,contracts,statements,statements/generate}/+page.server.ts`, `src/__tests__/invoices.test.ts`, `docs/design/offene-punkte.md`, `docs/reviews/workflow-notes-issue-424.md`.
+
+## Session R1: «Found» names where you looked
+
+Branch `ccr-9b88c9f2-p44e0b`. Review of the instructions against the Opus 5.5 guide (product owner 2026-10-19): point 2, «Found» also says where an unconfirmed point was looked for, as the «Nicht bestätigt» of `code-reviewer` and `fach-reviewer` already does.
+
+- [x] `CLAUDE.md`, «When to ask», closing headings: «what could not be confirmed and where you looked»
+- [x] Closing code-review round (`docs/reviews/r1-review-1.md`: no Blocker/Major; C-1 fixed, C-2 left as is: `issue-triage` defines its own «Found» for an unattended run)
+- [x] PR, «No scenario: rule text only»
+
+Files: `CLAUDE.md`, `docs/reviews/r1-review-1.md`.
