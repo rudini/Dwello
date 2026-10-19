@@ -12,6 +12,7 @@ vi.mock('$app/forms', () => ({
 	}
 }));
 
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { toCategory } from '$lib/server/category';
 import CategoryForm from '../routes/config/categories/CategoryForm.svelte';
 import backendCategory from '../../tests/contracts/category.json';
@@ -137,5 +138,23 @@ describe('Vordefinierte Kategorie auf umlagefähig stellen', () => {
 		choose('true');
 
 		expect(save().sent).toBe(true);
+	});
+});
+
+// #405 (decided), code review 452-2 C-12: the French choice reads as the texts that send the landlord to it
+describe('Umlagefähigkeit auf Französisch', () => {
+	it('nennt die Wahl «Répercutable» und «Non répercutable»', () => {
+		overwriteGetLocale(() => 'fr');
+		try {
+			show(CategoryForm, { category: own(0), submitLabel: 'Enregistrer' });
+			const group = byTestId('category-allowance')!.textContent!.replace(/\s+/g, ' ');
+
+			expect(group).toContain('Frais accessoires répercutables');
+			expect(group).toContain('Répercutable');
+			expect(group).toContain('Non répercutable');
+			expect(group).not.toContain('mputable');
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
 	});
 });
