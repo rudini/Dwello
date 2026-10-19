@@ -7,6 +7,8 @@
 #   SITE_SFTP_PATH      folder of the site on the server, as the Manager shows it (e.g. sites/dwello.ch)
 #   SITE_SFTP_KNOWN_HOSTS  optional: the server's host key line (ssh-keyscan <host>); without it the key is read on each run
 #   SITE_FTP_TLS        optional: "yes" for an FTP-only access (FTP over TLS instead of SFTP)
+#   SITE_FTP_PLAIN      optional: "yes" for a host that offers neither SSH nor TLS (Infomaniak Starter): plain FTP,
+#                       the password crosses the internet unencrypted; use an FTP account limited to the site folder
 # Without SITE_SFTP_HOST the job skips the upload. Pages that still contain data-pending (operator not filled in) are left out.
 name: Deploy website
 
@@ -33,6 +35,7 @@ jobs:
       SFTP_PATH: ${{ secrets.SITE_SFTP_PATH }}
       KNOWN_HOSTS: ${{ secrets.SITE_SFTP_KNOWN_HOSTS }}
       FTP_TLS: ${{ secrets.SITE_FTP_TLS }}
+      FTP_PLAIN: ${{ secrets.SITE_FTP_PLAIN }}
     steps:
       - name: Check the settings
         id: settings
@@ -45,6 +48,7 @@ jobs:
           for name in SFTP_USER LFTP_PASSWORD SFTP_PATH; do
             [ -n "${!name}" ] || { echo "::error::Secret for $name is missing"; exit 1; }
           done
+          if [ "$FTP_TLS" = "yes" ] && [ "$FTP_PLAIN" = "yes" ]; then echo "::error::Set either SITE_FTP_TLS or SITE_FTP_PLAIN, not both"; exit 1; fi
           case "$SFTP_PATH" in /|.|./|'~'|'~/') echo "::error::SITE_SFTP_PATH must be the site's folder, not the root"; exit 1 ;; esac
           echo "ready=yes" >> "$GITHUB_OUTPUT"
 
@@ -62,11 +66,17 @@ jobs:
           done
           sudo apt-get update -qq && sudo apt-get install -y -qq lftp > /dev/null
           mkdir -p ~/.ssh
-          if [ "$FTP_TLS" = "yes" ]; then
+          if [ "$FTP_PLAIN" = "yes" ]; then
+            echo "::warning::Plain FTP: the password and the files cross the internet unencrypted (SITE_FTP_PLAIN)"
+            url="ftp://$SFTP_HOST"; opts="set ftp:ssl-allow false;"
+          elif [ "$FTP_TLS" = "yes" ]; then
             url="ftp://$SFTP_HOST"; opts="set ftp:ssl-force true; set ftp:ssl-protect-data true;"
           else
             url="sftp://$SFTP_HOST"; opts="set sftp:connect-program 'ssh -a -x -o UserKnownHostsFile=$HOME/.ssh/known_hosts';"
-            if [ -n "$KNOWN_HOSTS" ]; then echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts; else ssh-keyscan -H "$SFTP_HOST" > ~/.ssh/known_hosts 2>/dev/null; fi
+            if [ -n "$KNOWN_HOSTS" ]; then echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+            elif ! ssh-keyscan -T 15 -H "$SFTP_HOST" > ~/.ssh/known_hosts 2>/dev/null || [ ! -s ~/.ssh/known_hosts ]; then
+              echo "::error::$SFTP_HOST answers no SSH on port 22: use an access with SSH, or set SITE_FTP_TLS=yes for FTP over TLS"; exit 1
+            fi
           fi
           # Upload new and changed files; files removed from the repository stay on the server
           lftp -c "set net:max-retries 2; $opts open --user \"$SFTP_USER\" --env-password $url; \
