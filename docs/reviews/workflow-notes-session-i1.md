@@ -1,0 +1,10 @@
+# Workflow notes: Session I1 (open issues one after another, 2026-10-19)
+
+Issues of the session: #439, #432, #444, #130, #457 (#308), #338, #51, #456, #435. Only points where a rule was unclear, contradicted another, cost effort without benefit or was worked around.
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 8 (`implementation_plan.md`, `open-work.test.ts` allows one session) | Sessions on other branches (O-38, #468) added their sections to this branch's `## Session I1` on `main`. Merging `main` before a push ended in a conflict in `implementation_plan.md` three times (PRs #467, #472 and before #462), each resolved by hand by keeping both sections; their sections now go to the archive with this session. | One plan file per branch (e.g. `plans/<branch>.md`, `open-work.test.ts` checks each), or a rule that a session only appends below the last line, so git merges both sides. |
+| Stop hook `~/.claude/stop-hook-git-check.sh` | As in `workflow-notes-issue-358.md`. New: after `git switch -C <branch> origin/main` (a merged pull request) the hook counted commits against the stale remote branch and reported 6 or 7 unpushed commits where 1 or 2 existed. | Count against `origin/main` when the remote branch is already merged. |
+| `tests/e2e/steps/dashboard.steps.ts` («hat eine versendete Abrechnung, deren Zahlungsfrist …») | The seed sets the deadline after sending; the backend then drops the PDF made at sending. The #435 scenario needed an extra step «die PDF dieser Abrechnung … liegt vor» before the export found the PDF the tenant received. | Set the deadline before sending in the seed, so a sent statement keeps its PDF as in real use. |
+| `CLAUDE.md`, Workflow 1 (fach-reviewer before implementing a change to legal texts or data leaving the server) | Worked as meant: on #435 it found four Majors in the scenario and proposal (no reminder checked, no check against another tenant's data, no help text, the PDF rule) before any production code; two points went to the product owner. | Keep. |
