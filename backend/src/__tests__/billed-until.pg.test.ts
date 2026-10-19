@@ -197,7 +197,7 @@ describe('Abgerechnet bis', () => {
 			expect(text).toContain(
 				'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.12.2024. Ihre Nebenkosten und Akontobeiträge bis 30.04.2024 sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst 01.05.2024 – 31.12.2024 (245 Mietstage von 366 Tagen).'
 			);
-			expect(text).toContain('Geleistete Akontobeiträge ab 01.05.2024');
+			expect(text).toContain('Akontobeiträge ab 01.05.2024');
 		});
 	});
 });

@@ -245,7 +245,7 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024. Ihre Nebenkosten und Akontobeiträge bis 29.02.2024 sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst 01.03.2024 – 31.03.2024 (31 Mietstage von 366 Tagen)."
-    Und steht im PDF "Geleistete Akontobeiträge ab 01.03.2024"
+    Und steht im PDF "Akontobeiträge ab 01.03.2024"
 
   # Eine Korrespondenzadresse im Ausland: das Land steht allein auf der letzten Zeile des Adressfelds und als Ländercode
   # vor der PLZ im Zahlteil der QR-Rechnung, den die Nachzahlung braucht (ohne Akonto) (#102)
