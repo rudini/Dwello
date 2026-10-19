@@ -18,7 +18,7 @@ type Export = {
 	fileName: string;
 	data: {
 		tenant: { firstName: string; lastName: string };
-		contracts: { apartment: { number: string; building: { name: string } }; file?: string | null }[];
+		contracts: { apartment: { number: string; building: { name: string } }; file?: string | null; advancePayments: { validFrom: string; amount: string }[] }[];
 		statements: { number: string; status: string; file: string | null; statementDate: string | null; paymentDeadline: string | null }[];
 		documents: { title: string; file: string }[];
 		reminders: { statement: string; level: number; status: string; file: string }[];
@@ -94,6 +94,8 @@ describe('Daten eines Mieters exportieren', () => {
 
 		expect(data.tenant.firstName).toBe('Anna');
 		expect(data.contracts.map((contract) => contract.apartment.number)).toEqual(['2.01']);
+		// #464 (domain review 464-1 F-15): every Akonto amount with its «Gültig ab»
+		expect(data.contracts[0].advancePayments).toEqual([{ validFrom: '2024-01-01', amount: '100.00' }]);
 		expect(data.statements).toEqual([
 			expect.objectContaining({ number: statementNumber, status: 'sent', file: `abrechnungen/${statementNumber}.pdf` })
 		]);

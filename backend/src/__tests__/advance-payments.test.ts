@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'bun:test';
-import { calculateTotalAdvancePayments } from '../services/calculation.service';
+import { advanceLines, calculateTotalAdvancePayments } from '../services/advance-payment.service';
 
+const total95 = (start: string, end: string) =>
+	calculateTotalAdvancePayments(95, new Date(`${start}T00:00:00Z`), new Date(`${end}T00:00:00Z`));
 const total = (start: string, end: string) =>
 	calculateTotalAdvancePayments(150, new Date(`${start}T00:00:00Z`), new Date(`${end}T00:00:00Z`));
 
@@ -25,3 +27,35 @@ describe('Akontobeiträge einer Abrechnungsperiode', () => {
 		expect(total('2024-03-16', '2024-09-15')).toBe(902.42);
 	});
 });
+
+// #464: each Akonto amount for the months it applied, one line per amount and per split month (domain review F-2, F-9)
+describe('Akonto mit Gültig ab', () => {
+	const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
+	const lines = (amounts: { validFrom: string; amount: number }[], start: string, end: string) =>
+		advanceLines(amounts, day(start), day(end));
+
+	it('zählt jeden Betrag für die Monate, in denen er galt', () => {
+		expect(lines([{ validFrom: '2024-01-01', amount: 50 }, { validFrom: '2024-07-01', amount: 80 }], '2024-05-01', '2024-12-31')).toEqual([
+			{ from: '2024-05-01', to: '2024-06-30', months: 2, amount: 50, total: 100 },
+			{ from: '2024-07-01', to: '2024-12-31', months: 6, amount: 80, total: 480 }
+		]);
+	});
+
+	it('zeigt einen angebrochenen Monat mit seinen Tagen', () => {
+		expect(lines([{ validFrom: '2024-03-16', amount: 120 }], '2024-03-16', '2024-04-30')).toEqual([
+			{ from: '2024-03-16', to: '2024-03-31', days: 16, daysInMonth: 31, amount: 120, total: 61.94 },
+			{ from: '2024-04-01', to: '2024-04-30', months: 1, amount: 120, total: 120 }
+		]);
+	});
+
+	it('rundet jede Zeile, damit die Zeilen das Total ergeben (Fachreview F-2)', () => {
+		expect(total95('2024-01-02', '2024-03-02')).toBe(193.07);
+	});
+
+	it('lässt den ersten Betrag ab dem Vertragsbeginn gelten', () => {
+		expect(lines([{ validFrom: '2024-07-01', amount: 80 }], '2024-05-01', '2024-06-30')).toEqual([
+			{ from: '2024-05-01', to: '2024-06-30', months: 2, amount: 80, total: 160 }
+		]);
+	});
+});
+
