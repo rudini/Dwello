@@ -62,7 +62,7 @@ const occurrences = (text: string) => pdf.text.split(text).length - 1;
 // #464: the PDF prints the Akonto lines the statement stored, below their total
 describe('Akonto im PDF', () => {
 	it('nennt das Akonto als Monate mal Betrag, wie die Abrechnung es gespeichert hat', () => {
-		expect(pdf.flowing).toContain('Geleistete Akontobeiträge – 300.00 6 Monate × CHF 50.00 (01.07.2025 – 31.12.2025) 300.00');
+		expect(pdf.flowing).toContain('Akontobeiträge – 300.00 6 Monate × CHF 50.00 (01.07.2025 – 31.12.2025) 300.00');
 	});
 });
 

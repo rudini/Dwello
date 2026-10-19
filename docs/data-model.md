@@ -301,7 +301,7 @@ rental_days            INTEGER       NOT NULL  -- Mietstage
 rental_start           DATE          NOT NULL  -- first billed day: later of period start and Vertragsbeginn
 rental_end             DATE          NOT NULL  -- last billed day: earlier of period end and Vertragsende
 total_costs            DECIMAL(12,2) NOT NULL
-total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge: the sum of advance_lines
+total_advance_payments DECIMAL(12,2) NOT NULL  -- Akontobeiträge (#477, before «Geleistete Akontobeiträge»): the sum of advance_lines
 advance_lines          JSONB                   -- #464: per amount its range, months (or days of a split month), amount and total, each rounded to the Rappen; for the PDF
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
 management_fee_percent DECIMAL(5,2)            -- rate the statement used: the contract's own, the run's, or 0 without agreement (#89)

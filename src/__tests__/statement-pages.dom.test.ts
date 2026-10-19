@@ -689,6 +689,8 @@ describe('Abrechnungsdetail', () => {
 			'Die Akontobeiträge dieser Abrechnung (CHF 1’800.00) sind anders als in der ersetzten Abrechnung NK-2024-0001 (CHF 1’200.00). Stimmt ein früherer Betrag am Mietvertrag nicht, löschen Sie diesen Entwurf, tragen Sie den Betrag mit seinem «Gültig ab» ein und erstellen Sie die berichtigte Abrechnung erneut.'
 		);
 		expect(byTestId('statement-advance-paid')!.textContent).toMatch(/CHF\s1’800.00/);
+		// #477 (product owner 2026-10-19): the agreed Akonto, not «geleistet» (fach review 477-1 V-4)
+		expect(byTestId('statement-advance-paid')!.previousElementSibling!.textContent).toBe('Akontobeiträge');
 	});
 
 	it('warnt nicht bei gleichem Akonto', () => {

@@ -546,7 +546,7 @@ describe('PDF einer berichtigten Abrechnung', () => {
 
 	it('zieht das schon Bezahlte vor der Rundung ab', async () => {
 		const flowing = (await textOf(corrected)).flowing;
-		expect(flowing).toContain('Geleistete Akontobeiträge – 600.00 Bereits bezahlt auf NK-1-2025-0001 – 100.00');
+		expect(flowing).toContain('Akontobeiträge – 600.00 Bereits bezahlt auf NK-1-2025-0001 – 100.00');
 		expect(flowing).toContain('Nachzahlung vor Rundung 84.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 84.10');
 		expect(flowing).toContain('bereits bezahlt CHF 100.00');
 	});
@@ -583,7 +583,7 @@ describe('Akonto als Monate mal Betrag im PDF', () => {
 	it('nennt jede Zeile mit ihrem Betrag unter den Akontobeiträgen und den Hinweis zum vereinbarten Akonto', async () => {
 		const pdf = await textOf(changed);
 
-		expect(pdf.flowing).toContain("Geleistete Akontobeiträge – 1'141.94 16/31 Tage × CHF 120.00 (16.03.2025 – 31.03.2025) 61.94 9 Monate × CHF 120.00 (01.04.2025 – 31.12.2025) 1'080.00");
+		expect(pdf.flowing).toContain("Akontobeiträge – 1'141.94 16/31 Tage × CHF 120.00 (16.03.2025 – 31.03.2025) 61.94 9 Monate × CHF 120.00 (01.04.2025 – 31.12.2025) 1'080.00");
 		expect(pdf.flowing).toContain('Abgezogen sind die Akontobeiträge, die im Mietvertrag vereinbart sind. Haben Sie Akontobeiträge nicht bezahlt, regeln wir das ausserhalb dieser Abrechnung.');
 	});
 
@@ -593,6 +593,19 @@ describe('Akonto als Monate mal Betrag im PDF', () => {
 
 		expect(french).toContain('1 mois × CHF 120.00 (01.12.2025 – 31.12.2025) 120.00');
 		expect((await textOf(one)).flowing).toContain('1 Monat × CHF 120.00 (01.12.2025 – 31.12.2025) 120.00');
+	});
+
+	// #477 (product owner 2026-10-19, fach review 477-1): Dwello deducts the agreed Akonto, not the paid one
+	it.each([
+		['de', 'Akontobeiträge', 'Geleistete'],
+		['fr', 'Acomptes', 'versés'],
+		['it', 'Acconti', 'versati'],
+		['en', 'Advance payments', 'made']
+	] as const)('nennt die Zeile auf %s ohne «geleistet»', async (language, label, paid) => {
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(changed, config, language), 'base64')).flowing;
+
+		expect(text).toContain(`${label} – 1'141.94`);
+		expect(text).not.toContain(paid);
 	});
 
 	it('zeigt bei einer älteren Abrechnung ohne gespeicherte Zeilen nur die Summe', async () => {

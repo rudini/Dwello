@@ -44,7 +44,7 @@ const translations: Record<Language, Record<string, string>> = {
 		subtotal: 'Zwischensumme',
 		managementFee: 'Verwaltungspauschale',
 		colon: ': ',
-		advancePayments: 'Geleistete Akontobeiträge',
+		advancePayments: 'Akontobeiträge',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
 		advanceMonths: '{n} Monate × CHF {amount} ({from} – {to})',
 		advanceMonth: '1 Monat × CHF {amount} ({from} – {to})',
@@ -145,7 +145,7 @@ const translations: Record<Language, Record<string, string>> = {
 		subtotal: 'Sous-total',
 		managementFee: 'Frais de gestion',
 		colon: '\u00a0: ',
-		advancePayments: 'Acomptes versés',
+		advancePayments: 'Acomptes',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
 		advanceMonths: '{n} mois × CHF {amount} ({from} – {to})',
 		advanceMonth: '1 mois × CHF {amount} ({from} – {to})',
@@ -245,7 +245,7 @@ const translations: Record<Language, Record<string, string>> = {
 		subtotal: 'Subtotale',
 		managementFee: 'Spese di gestione',
 		colon: ': ',
-		advancePayments: 'Acconti versati',
+		advancePayments: 'Acconti',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
 		advanceMonths: '{n} mesi × CHF {amount} ({from} – {to})',
 		advanceMonth: '1 mese × CHF {amount} ({from} – {to})',
@@ -345,7 +345,7 @@ const translations: Record<Language, Record<string, string>> = {
 		subtotal: 'Subtotal',
 		managementFee: 'Management fee',
 		colon: ': ',
-		advancePayments: 'Advance payments made',
+		advancePayments: 'Advance payments',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
 		advanceMonths: '{n} months × CHF {amount} ({from} – {to})',
 		advanceMonth: '1 month × CHF {amount} ({from} – {to})',

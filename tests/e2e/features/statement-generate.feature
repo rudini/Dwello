@@ -150,7 +150,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann enthält die Vorschau die Abrechnung von "Eva Frei"
     Und die Vorschau enthält genau 1 Abrechnung
 
-  # #133: reicht die Abrechnungsperiode über «Abgerechnet bis» hinaus, zählen Mietstage und geleistete Akontobeiträge
+  # #133: reicht die Abrechnungsperiode über «Abgerechnet bis» hinaus, zählen Mietstage und Akontobeiträge
   # erst ab dem Tag danach. Hauswart 732.00 für 366 Tage = 2.00 pro Tag; Eva Frei vom 01.03. bis 31.03.2024: 31 Tage
   # = 62.00 + 3 % = 63.86, Akonto nur für März 120.00; Marc Huber bleibt bei 245 Tagen = 490.00 + 3 % = 504.70
   @api

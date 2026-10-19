@@ -34,8 +34,9 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] daten-pruefer (`docs/reviews/464-datenpruefung-1.md`: no finding above Nit)
 - [x] Closing code-review round 1 (`docs/reviews/464-review-3.md`): C-14 (toast after deleting, DOM test with reactive props seen red), C-15 (scenarios «Das Formular nennt die eingetragenen Akonto-Beträge», «Vertragsbeginn und erstes Akonto zusammen korrigieren», toast step in «Ein späteres Akonto löschen», two seen red), C-12 (codes written out), C-17 (subject of d486f1e2 reworded before the push)
 - [x] Closing code-review round 2 (`docs/reviews/464-review-4.md`): no finding open above Minor
-- [ ] #477 part (product owner 2026-10-19, recorded in #477): the line «Geleistete Akontobeiträge» becomes «Akontobeiträge» in the app, the PDF and the help texts, in this pull request; @wip scenario «Das PDF nennt die Akontobeiträge, nicht die geleisteten» seen red; fach-reviewer on the texts before implementing; the glossary row is the product owner's edit
-- [ ] Re-sign the commits `git filter-branch` left unsigned (d486f1e2, e6955d63, 20630756) before the push
+- [x] #477 part (product owner 2026-10-19, recorded in #477): the line «Geleistete Akontobeiträge» becomes «Akontobeiträge» in the app, the PDF and the help texts, in this pull request; @wip scenario seen red, then folded into «Das PDF nennt das Akonto als Monate mal Betrag» (fach review 477-1 V-5); fach-reviewer round 1 (`docs/reviews/477-fachreview-1.md`): V-2 to V-8 fixed, V-1 (glossary row) is the product owner's edit; render test per language and DOM test seen red
+- [ ] Code-review of the #477 part
+- [x] Re-sign the commits `git filter-branch` left unsigned (now aa2e0360, 3fa73919, bcb86319)
 - [ ] PR `Fixes #464`, `Refs #477`
 - [ ] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464`
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
