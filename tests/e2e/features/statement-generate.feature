@@ -443,7 +443,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   Szenario: Schon abgerechnete Mietverträge zeigen sich bei der Wahl der Gebäude
     Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen."
+    Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen."
 
   # #201: «Alle Gebäude» wählt nur Gebäude, für die eine neue Abrechnung entsteht
   Szenario: Alle Gebäude lässt schon abgerechnete Gebäude aus
@@ -452,7 +452,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen."
+    Dann nennt die Wahl für "Lindenhof" "Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen."
     Wenn der Liegenschaftsverwalter alle Gebäude wählt
     Dann ist für die Abrechnungen das Gebäude "Ahornhof" gewählt
     Aber nicht das Gebäude "Lindenhof"

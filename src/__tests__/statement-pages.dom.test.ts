@@ -510,7 +510,7 @@ describe('Abrechnungsdetail', () => {
 	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
 		later(2);
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Wählen Sie «Neu berechnen», dann rechnet er die Rechnungen ab, wie sie jetzt sind.'
 		);
 	});
 
@@ -1076,8 +1076,22 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('send-old-address')).toBeNull();
 	});
 
+	// #338: nur ein Entwurf wird neu berechnet, mit derselben Nummer; Helga 338 P-2: die Bestätigung nennt die Folge
+	it('bietet einen Entwurf zum Neuberechnen an und nennt vorher, was bleibt und was sich ändert', () => {
+		detail({ status: 'draft' });
+
+		expect(byTestId('statement-recalculate-button')!.textContent!.trim()).toBe('Neu berechnen');
+		click('statement-recalculate-button');
+
+		expect(byTestId('statement-recalculate-confirm')).not.toBeNull();
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nummer, Heizprofil, Verwaltungspauschale, Abrechnungsdatum, Zahlungsfrist und Bemerkung bleiben. Beträge, Positionen und Saldo ändern sich. Ein schon erstelltes PDF wird verworfen.'
+		);
+	});
+
 	it('bietet eine versendete Abrechnung zum Mahnen und Bezahlen an, aber nicht zum Löschen', () => {
 		detail({ status: 'sent' });
+		expect(byTestId('statement-recalculate-button')).toBeNull();
 
 		expect(byTestId('statement-send-button')).toBeNull();
 		expect(byTestId('statement-delete-button')).toBeNull();

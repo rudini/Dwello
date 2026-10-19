@@ -384,11 +384,55 @@ const agreedStock = async (input: StatementInput & { buildingId: string }, agree
 	return change && agreedCategoryIds.includes(change.categoryId) ? change.stock : null;
 };
 
+// The columns and positions a calculation gives a statement: shared by a new draft and a recalculated one (#338)
+async function calculatedRows(input: StatementInput & { buildingId: string }) {
+	const calculation = await calculateStatement(input);
+	const values = {
+		tenantId: calculation.tenantId,
+		apartmentId: calculation.apartmentId,
+		contractId: input.contractId,
+		periodStart: input.periodStart,
+		periodEnd: input.periodEnd,
+		rentalDays: calculation.rentalDays,
+		rentalStart: calculation.rentalStart,
+		rentalEnd: calculation.rentalEnd,
+		totalCosts: String(calculation.totalCosts),
+		totalAdvancePayments: String(calculation.totalAdvancePayments),
+		managementFee: String(calculation.managementFee),
+		managementFeePercent: String(calculation.managementFeePercent),
+		heatingProfileId: input.heatingProfileId || null,
+		heatingShare: calculation.heating,
+		fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
+		agreedCategoryIds: calculation.agreedCategoryIds,
+		keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
+		balance: String(calculation.balance),
+		replacesId: calculation.replacesId,
+		priorPayments: String(calculation.priorPayments)
+	};
+	const lineItems = calculation.lineItems.map((item, index) => ({
+		categoryId: item.categoryId,
+		distributionKeyId: item.distributionKeyId,
+		description: item.description,
+		totalAmount: String(item.totalBuildingAmount),
+		tenantShare: String(item.tenantShare),
+		// Share column next to building total and tenant share: the tenant's share of the building total
+		sharePercentage: item.totalBuildingAmount ? String((item.tenantShare / item.totalBuildingAmount) * 100) : '0',
+		apartmentShare: String(item.apartmentShare),
+		periodShare: String(item.periodShare),
+		positionRentalDays: item.positionRentalDays,
+		billedDays: item.billedDays,
+		invoiceParts: item.invoiceParts,
+		invoices: item.invoices,
+		sortOrder: index
+	}));
+	return { values, lineItems };
+}
+
 /** Calculate a contract's statement and store it as a draft with its line items */
 export async function generateStatement(
 	input: StatementInput & { buildingId: string }
 ): Promise<StatementWithDetails> {
-	const calculation = await calculateStatement(input);
+	const { values, lineItems } = await calculatedRows(input);
 	const statementNumber = await generateStatementNumber(
 		input.buildingId,
 		new Date(input.periodEnd)
@@ -398,49 +442,46 @@ export async function generateStatement(
 	const statementDate = swissToday();
 
 	return createStatement(
-		{
-			tenantId: calculation.tenantId,
-			apartmentId: calculation.apartmentId,
-			contractId: input.contractId,
-			statementNumber,
-			periodStart: input.periodStart,
-			periodEnd: input.periodEnd,
-			statementDate,
-			rentalDays: calculation.rentalDays,
-			rentalStart: calculation.rentalStart,
-			rentalEnd: calculation.rentalEnd,
-			totalCosts: String(calculation.totalCosts),
-			totalAdvancePayments: String(calculation.totalAdvancePayments),
-			managementFee: String(calculation.managementFee),
-			managementFeePercent: String(calculation.managementFeePercent),
-			heatingProfileId: input.heatingProfileId || null,
-			heatingShare: calculation.heating,
-			fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
-			agreedCategoryIds: calculation.agreedCategoryIds,
-			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
-			balance: String(calculation.balance),
-			replacesId: calculation.replacesId,
-			priorPayments: String(calculation.priorPayments),
-			status: 'draft',
-			paymentDeadline: daysAfter(statementDate, paymentDeadlineDays)
-		},
-		calculation.lineItems.map((item, index) => ({
-			categoryId: item.categoryId,
-			distributionKeyId: item.distributionKeyId,
-			description: item.description,
-			totalAmount: String(item.totalBuildingAmount),
-			tenantShare: String(item.tenantShare),
-			// Share column next to building total and tenant share: the tenant's share of the building total
-			sharePercentage: item.totalBuildingAmount ? String((item.tenantShare / item.totalBuildingAmount) * 100) : '0',
-			apartmentShare: String(item.apartmentShare),
-			periodShare: String(item.periodShare),
-			positionRentalDays: item.positionRentalDays,
-			billedDays: item.billedDays,
-			invoiceParts: item.invoiceParts,
-			invoices: item.invoices,
-			sortOrder: index
-		}))
+		{ ...values, statementNumber, statementDate, status: 'draft', paymentDeadline: daysAfter(statementDate, paymentDeadlineDays) },
+		lineItems
 	);
+}
+
+/**
+ * Calculate a draft again from the invoices as they are now (#338): same number, Heizprofil and Verwaltungspauschale,
+ * new amounts and positions; a sent or paid statement is corrected by a berichtigte Abrechnung instead (#120)
+ */
+export async function recalculateStatement(id: string): Promise<StatementWithDetails> {
+	const draft = await getStatement(id);
+	if (!draft) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
+	if (draft.status !== 'draft') throw new CodedError('STATEMENT_NOT_RECALCULABLE', 'Only a draft can be recalculated');
+	// the wizard asks only for contracts without a statement: the landlord deletes the draft first (review 338-1 C-3)
+	const { contractId, periodStart, periodEnd } = draft;
+	await refuseOpenAgreements(contractId, draft.building!.id, periodStart, periodEnd, 'STATEMENT_RECALCULATION_AGREEMENTS_OPEN');
+	const { values, lineItems } = await calculatedRows({
+		contractId,
+		buildingId: draft.building!.id,
+		periodStart,
+		periodEnd,
+		heatingProfileId: draft.heatingProfileId ?? undefined,
+		managementFeePercent: draft.managementFeePercent === null ? undefined : Number(draft.managementFeePercent)
+	});
+	// a berichtigte Abrechnung keeps the statement it replaces and what was paid on it (review 338-1 C-1)
+	const priorPayments = Number(draft.priorPayments);
+	const kept = {
+		replacesId: draft.replacesId,
+		priorPayments: draft.priorPayments,
+		balance: String(calculateBalance(Number(values.totalCosts), Number(values.totalAdvancePayments) + priorPayments))
+	};
+	await db.transaction(async (tx) => {
+		await tx.delete(utilityStatementLineItems).where(eq(utilityStatementLineItems.statementId, id));
+		await tx
+			.update(utilityStatements)
+			.set({ ...values, ...kept, pdfBlob: null, pdfGeneratedAt: null, updatedAt: new Date() })
+			.where(eq(utilityStatements.id, id));
+		if (lineItems.length) await tx.insert(utilityStatementLineItems).values(lineItems.map((item) => ({ ...item, statementId: id })));
+	});
+	return (await getStatement(id))!;
 }
 
 /**
@@ -627,7 +668,13 @@ export async function replaceStatement(id: string): Promise<StatementWithDetails
 
 // The correction is made without the wizard, which asks whether a category with costs and no answer is agreed (#91):
 // it would drop out unasked, so the landlord answers in the wizard first (merge review W10c-2 C-1)
-async function refuseOpenAgreements(contractId: string, buildingId: string, periodStart: string, periodEnd: string) {
+async function refuseOpenAgreements(
+	contractId: string,
+	buildingId: string,
+	periodStart: string,
+	periodEnd: string,
+	code = 'STATEMENT_AGREEMENTS_OPEN'
+) {
 	const [contract] = await db
 		.select({ id: rentalContracts.id, startDate: rentalContracts.startDate, endDate: rentalContracts.endDate })
 		.from(rentalContracts)
@@ -638,7 +685,7 @@ async function refuseOpenAgreements(contractId: string, buildingId: string, peri
 		.select({ name: categories.name, nameDE: categories.nameDE })
 		.from(categories)
 		.where(inArray(categories.id, open.map((answer) => answer.categoryId)));
-	throw new CodedError('STATEMENT_AGREEMENTS_OPEN', 'Whether the contract agrees these categories is not answered', {
+	throw new CodedError(code, 'Whether the contract agrees these categories is not answered', {
 		categories: named.map((category) => category.nameDE || category.name).join(', ')
 	});
 }

@@ -88,3 +88,7 @@ export const paymentSummary = target('Zahlung der Abrechnung', (page) => page.ge
 export const paymentDeadline = target('Zahlungsfrist der Abrechnung', (page) => page.getByTestId('statement-payment-deadline'));
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));
+
+// #338: «Neu berechnen» and its confirmation
+export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
+export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));

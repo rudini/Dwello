@@ -165,7 +165,7 @@
 	<OldAddressWarning {statement} testid="statement-old-address" />
 
 	{#if laterHint}
-		<!-- a draft is created again; a sent statement is corrected by a berichtigte Abrechnung (it cannot be deleted) -->
+		<!-- a draft is recalculated (#338); a sent statement is corrected by a berichtigte Abrechnung -->
 		<Alert tone="caution" title={m.statements_later_title()} testid="statement-later-invoices">
 			{#if statement.status === 'draft'}
 				<p>{m.statements_later_draft({ later: laterInvoices })}</p>

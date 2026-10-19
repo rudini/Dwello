@@ -62,6 +62,19 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Closing code-review round (`docs/reviews/457-review-2.md`, no findings)
 - [ ] PR `Fixes #457`, `Fixes #308`
 
+### #338 «Neu berechnen» on a single draft
+
+- [x] @wip scenario «Entwurf neu berechnen» (`statement-detail.feature`), seen red at the missing button
+- [x] `statement-recalculation.pg.test.ts` (same number, new amounts, no changed invoices after; sent refused), red first
+- [x] Backend: `recalculateStatement`, `POST /statements/:id/recalculation`; `generateStatement` shares `calculatedRows`
+- [x] Frontend: «Neu berechnen» in «Weitere Aktionen» of a draft, confirmation dialog `statement-recalculate-confirm`; texts that said «delete and create again» point to «Neu berechnen» (statement, wizard, invoice, Tankbestand, Heizprofil texts), four languages; DOM tests and scenarios updated red first; axe and language state `recalculate-dialog`
+- [x] Slice review round 1 (`docs/reviews/338-review-1.md`: C-1 Blocker, C-2 to C-4 Major) and persona Helga (`docs/design/personas/helga-338.md`: P-1, P-2 Major)
+- [x] Fixes: a berichtigte Abrechnung keeps `replaces` and `priorPayments` (C-1); own codes `STATEMENT_NOT_RECALCULABLE`, `STATEMENT_RECALCULATION_AGREEMENTS_OPEN` with texts (C-2, C-3); paid refused tested (C-4); kept fields tested (C-9); confirmation dialog naming what stays and changes, success toast at the top (P-1, P-2, C-6); it «Ricalcolare» (C-7); API spec and PRD (C-10); nits C-11, C-12
+- [x] Re-review round 2 (`docs/reviews/338-review-2.md`: no Blocker/Major; C-14 saldo of a recalculated berichtigte Abrechnung pinned, C-15 duplicate step removed; C-16 to C-18 kept)
+- [x] daten-pruefer on the recalculated draft (`docs/reviews/338-datenpruefung-1.md`: every amount to the Rappen, no findings; preview endpoint and PDF not checked)
+- [x] Helga round 2 (`docs/design/personas/helga-338-2.md`: P-1, P-2 of round 1 fixed; new P-1, P-2 Minor on the toast, P-3, P-4 Nit, kept); closing code-review round 3 after merging `main` (`docs/reviews/338-review-3.md`, no findings); lint, check, type-check, affected vitest (760) and pg tests, E2E Chromium statement rows (157 passed)
+- [ ] PR `Fixes #338`
+
 ### Main CI red since #440: E2E leftovers (O-38)
 
 Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox and WebKit shards (PRs run Chromium only): the statement wizard's buildings step (two backend requests per building, all buildings up to 1000 since #440) and step 3's agreement check took longer than 5 s, because every scenario with a sent statement left its building, apartment and tenant in `dwello_e2e`. Reproduced in Chromium with 600 leftover buildings (all three «Schon abgerechnet» scenarios fail as on CI). No scenario: test infrastructure only.

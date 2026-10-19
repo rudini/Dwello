@@ -653,6 +653,16 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht."
 
+  # #338: ein Entwurf wird mit den Rechnungen von jetzt neu berechnet und behält seine Nummer
+  Szenario: Entwurf neu berechnen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
+    Dann bestätigt Dwello "Der Entwurf ist neu berechnet. Er rechnet die Rechnungen ab, wie sie jetzt sind."
+    Und nennt die Position "Hauswart" "Hauswart 2024-12-31"
+    Und weist die Abrechnung auf keine geänderten Rechnungen hin
+
   # #96: eine danach geänderte Rechnung zählt wie eine neue
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
