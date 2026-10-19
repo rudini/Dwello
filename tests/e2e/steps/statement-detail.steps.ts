@@ -44,6 +44,7 @@ import {
 import { openStatementList, searchStatements } from '../tasks/statements';
 import {
 	correctStatement,
+	recalculateDraft,
 	createCorrection,
 	openCorrectConfirmation,
 	openCorrection,
@@ -403,6 +404,10 @@ Given(
 		await verwalter.attemptsTo(openStatementDetail(`/statements/${seed.idOf(`Berichtigte Abrechnung ${tenant} ${year}`)}`));
 	}
 );
+
+When('der Liegenschaftsverwalter den Entwurf neu berechnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(recalculateDraft);
+});
 
 When('der Liegenschaftsverwalter die Abrechnung berichtigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(correctStatement);

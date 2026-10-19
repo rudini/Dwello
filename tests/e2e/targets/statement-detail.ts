@@ -71,6 +71,7 @@ export const confirmResetPaymentButton = target('Zurücksetzen bestätigen', (pa
 export const resetPaymentDialog = target('Bestätigung des Zurücksetzens', (page) => page.getByRole('dialog'));
 
 // #120: the correction of a sent statement
+export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
 export const correctStatementButton = target('Abrechnung berichtigen', (page) => page.getByTestId('statement-correct-button'));
 export const correctDialog = target('Bestätigung des Berichtigens', (page) => page.getByRole('dialog'));
 export const confirmCorrectButton = target('Ersetzen bestätigen', (page) => page.getByTestId('statement-correct-confirm'));

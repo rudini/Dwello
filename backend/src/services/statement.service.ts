@@ -384,11 +384,55 @@ const agreedStock = async (input: StatementInput & { buildingId: string }, agree
 	return change && agreedCategoryIds.includes(change.categoryId) ? change.stock : null;
 };
 
+// The columns and positions a calculation gives a statement: shared by a new draft and a recalculated one (#338)
+async function calculatedRows(input: StatementInput & { buildingId: string }) {
+	const calculation = await calculateStatement(input);
+	const values = {
+		tenantId: calculation.tenantId,
+		apartmentId: calculation.apartmentId,
+		contractId: input.contractId,
+		periodStart: input.periodStart,
+		periodEnd: input.periodEnd,
+		rentalDays: calculation.rentalDays,
+		rentalStart: calculation.rentalStart,
+		rentalEnd: calculation.rentalEnd,
+		totalCosts: String(calculation.totalCosts),
+		totalAdvancePayments: String(calculation.totalAdvancePayments),
+		managementFee: String(calculation.managementFee),
+		managementFeePercent: String(calculation.managementFeePercent),
+		heatingProfileId: input.heatingProfileId || null,
+		heatingShare: calculation.heating,
+		fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
+		agreedCategoryIds: calculation.agreedCategoryIds,
+		keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
+		balance: String(calculation.balance),
+		replacesId: calculation.replacesId,
+		priorPayments: String(calculation.priorPayments)
+	};
+	const lineItems = calculation.lineItems.map((item, index) => ({
+		categoryId: item.categoryId,
+		distributionKeyId: item.distributionKeyId,
+		description: item.description,
+		totalAmount: String(item.totalBuildingAmount),
+		tenantShare: String(item.tenantShare),
+		// Share column next to building total and tenant share: the tenant's share of the building total
+		sharePercentage: item.totalBuildingAmount ? String((item.tenantShare / item.totalBuildingAmount) * 100) : '0',
+		apartmentShare: String(item.apartmentShare),
+		periodShare: String(item.periodShare),
+		positionRentalDays: item.positionRentalDays,
+		billedDays: item.billedDays,
+		invoiceParts: item.invoiceParts,
+		invoices: item.invoices,
+		sortOrder: index
+	}));
+	return { values, lineItems };
+}
+
 /** Calculate a contract's statement and store it as a draft with its line items */
 export async function generateStatement(
 	input: StatementInput & { buildingId: string }
 ): Promise<StatementWithDetails> {
-	const calculation = await calculateStatement(input);
+	const { values, lineItems } = await calculatedRows(input);
 	const statementNumber = await generateStatementNumber(
 		input.buildingId,
 		new Date(input.periodEnd)
@@ -398,49 +442,37 @@ export async function generateStatement(
 	const statementDate = swissToday();
 
 	return createStatement(
-		{
-			tenantId: calculation.tenantId,
-			apartmentId: calculation.apartmentId,
-			contractId: input.contractId,
-			statementNumber,
-			periodStart: input.periodStart,
-			periodEnd: input.periodEnd,
-			statementDate,
-			rentalDays: calculation.rentalDays,
-			rentalStart: calculation.rentalStart,
-			rentalEnd: calculation.rentalEnd,
-			totalCosts: String(calculation.totalCosts),
-			totalAdvancePayments: String(calculation.totalAdvancePayments),
-			managementFee: String(calculation.managementFee),
-			managementFeePercent: String(calculation.managementFeePercent),
-			heatingProfileId: input.heatingProfileId || null,
-			heatingShare: calculation.heating,
-			fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
-			agreedCategoryIds: calculation.agreedCategoryIds,
-			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
-			balance: String(calculation.balance),
-			replacesId: calculation.replacesId,
-			priorPayments: String(calculation.priorPayments),
-			status: 'draft',
-			paymentDeadline: daysAfter(statementDate, paymentDeadlineDays)
-		},
-		calculation.lineItems.map((item, index) => ({
-			categoryId: item.categoryId,
-			distributionKeyId: item.distributionKeyId,
-			description: item.description,
-			totalAmount: String(item.totalBuildingAmount),
-			tenantShare: String(item.tenantShare),
-			// Share column next to building total and tenant share: the tenant's share of the building total
-			sharePercentage: item.totalBuildingAmount ? String((item.tenantShare / item.totalBuildingAmount) * 100) : '0',
-			apartmentShare: String(item.apartmentShare),
-			periodShare: String(item.periodShare),
-			positionRentalDays: item.positionRentalDays,
-			billedDays: item.billedDays,
-			invoiceParts: item.invoiceParts,
-			invoices: item.invoices,
-			sortOrder: index
-		}))
+		{ ...values, statementNumber, statementDate, status: 'draft', paymentDeadline: daysAfter(statementDate, paymentDeadlineDays) },
+		lineItems
 	);
+}
+
+/**
+ * Calculate a draft again from the invoices as they are now (#338): same number, Heizprofil and Verwaltungspauschale,
+ * new amounts and positions; a sent or paid statement is corrected by a berichtigte Abrechnung instead (#120)
+ */
+export async function recalculateStatement(id: string): Promise<StatementWithDetails> {
+	const draft = await getStatement(id);
+	if (!draft) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
+	if (draft.status !== 'draft') throw new CodedError('STATEMENT_NOT_DRAFT', 'Only a draft can be recalculated');
+	await refuseOpenAgreements(draft.contractId, draft.building!.id, draft.periodStart, draft.periodEnd);
+	const { values, lineItems } = await calculatedRows({
+		contractId: draft.contractId,
+		buildingId: draft.building!.id,
+		periodStart: draft.periodStart,
+		periodEnd: draft.periodEnd,
+		heatingProfileId: draft.heatingProfileId ?? undefined,
+		managementFeePercent: draft.managementFeePercent === null ? undefined : Number(draft.managementFeePercent)
+	});
+	await db.transaction(async (tx) => {
+		await tx.delete(utilityStatementLineItems).where(eq(utilityStatementLineItems.statementId, id));
+		await tx
+			.update(utilityStatements)
+			.set({ ...values, pdfBlob: null, pdfGeneratedAt: null, updatedAt: new Date() })
+			.where(eq(utilityStatements.id, id));
+		if (lineItems.length) await tx.insert(utilityStatementLineItems).values(lineItems.map((item) => ({ ...item, statementId: id })));
+	});
+	return (await getStatement(id))!;
 }
 
 /**

@@ -17,7 +17,8 @@ import {
 	generateStatement,
 	resetPayment,
 	replaceStatement,
-	correctStatement
+	correctStatement,
+	recalculateStatement
 } from '../services/statement.service';
 import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { changedInvoices } from '../services/statement-invoices.service';
@@ -222,6 +223,20 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				const statement = await correctStatement(params.id);
 				set.status = 201;
 				return statement;
+			} catch (error) {
+				set.status = correctionStatus(error);
+				return codedBody(error, 'CALCULATION_FAILED', 'Statement generation failed');
+			}
+		},
+		{ params: t.Object({ id: t.String() }) }
+	)
+
+	// Calculate a draft again from the invoices as they are now (#338)
+	.post(
+		'/:id/recalculation',
+		async ({ params, set }) => {
+			try {
+				return await recalculateStatement(params.id);
 			} catch (error) {
 				set.status = correctionStatus(error);
 				return codedBody(error, 'CALCULATION_FAILED', 'Statement generation failed');

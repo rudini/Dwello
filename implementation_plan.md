@@ -61,3 +61,12 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-457.md`, two Minors on the decided text, one Nit)
 - [x] Closing code-review round (`docs/reviews/457-review-2.md`, no findings)
 - [ ] PR `Fixes #457`, `Fixes #308`
+
+### #338 «Neu berechnen» on a single draft
+
+- [x] @wip scenario «Entwurf neu berechnen» (`statement-detail.feature`), seen red at the missing button
+- [x] `statement-recalculation.pg.test.ts` (same number, new amounts, no changed invoices after; sent refused), red first
+- [x] Backend: `recalculateStatement`, `POST /statements/:id/recalculation`; `generateStatement` shares `calculatedRows`
+- [x] Frontend: «Neu berechnen» in «Weitere Aktionen» of a draft, confirmation `statement-recalculated`; texts that said «delete and create again» point to «Neu berechnen» (statement, wizard, invoice, Tankbestand, Heizprofil texts), four languages; DOM tests and scenarios updated red first; axe and language state `recalculated`
+- [ ] Slice review, feature review (persona Helga)
+- [ ] PR `Fixes #338`

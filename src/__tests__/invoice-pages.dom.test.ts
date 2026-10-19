@@ -339,7 +339,7 @@ describe('Rechnungsdetail', () => {
 			'Für die Abrechnungsperiode 01.01.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung oder mit einem früheren Stand davon.'
 		);
 		expect(hint).toContain(
-			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann rechnen die neuen Abrechnungen die Rechnung so ab, wie sie jetzt ist.'
+			'Berechnen Sie die Entwürfe dieser Periode mit «Neu berechnen» auf ihrer Seite neu, dann rechnen sie die Rechnung so ab, wie sie jetzt ist.'
 		);
 		expect(hint).toContain(
 			'Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung. Die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt. Lassen Sie sich im Zweifel beraten.'
@@ -357,7 +357,7 @@ describe('Rechnungsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Berechnen Sie danach die Entwürfe mit «Neu berechnen» auf ihrer Seite neu. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 
@@ -867,7 +867,7 @@ describe('Rechnung bearbeiten', () => {
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 30.06.2024');
 		expect(warning).toContain(
-			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist.'
+			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Berechnen Sie danach die Entwürfe mit «Neu berechnen» auf ihrer Seite neu. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist.'
 		);
 	});
 

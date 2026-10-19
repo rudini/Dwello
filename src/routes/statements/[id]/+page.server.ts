@@ -6,6 +6,7 @@ import { loadDocuments } from '$lib/server/documents';
 import {
 	correctStatement,
 	markStatementPaid,
+	recalculateStatement,
 	replaceStatement,
 	resetStatementPayment,
 	sendStatement,
@@ -73,6 +74,11 @@ export const actions: Actions = {
 		const result = await correctStatement(fetch, params.id);
 		if ('message' in result) return fail(result.status, { actionError: result.message });
 		throw redirect(303, `/statements/${result.id}`);
+	},
+	recalculate: async ({ params, fetch }) => {
+		const refused = await recalculateStatement(fetch, params.id);
+		if (refused) return fail(refused.status, { actionError: refused.message });
+		return { recalculated: true };
 	},
 	remind: async ({ params, fetch }) => {
 		const result = await sendStatementReminder(fetch, params.id);

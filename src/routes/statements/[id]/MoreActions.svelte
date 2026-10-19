@@ -1,15 +1,22 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
+	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 
-	// Edit, correct (#120) or delete, as far as the status allows; a replaced statement stays as it was: no card
+	// Edit, recalculate (#338), correct (#120) or delete, as far as the status allows; a replaced statement stays as it was: no card
 	let {
 		statement,
+		recalculated = false,
 		oncorrect,
 		ondelete
-	}: { statement: StatementWithDetails; oncorrect: () => void; ondelete: () => void } = $props();
+	}: {
+		statement: StatementWithDetails;
+		recalculated?: boolean; // «Neu berechnen» was just done (#338)
+		oncorrect: () => void;
+		ondelete: () => void;
+	} = $props();
 </script>
 
 {#if statement.status !== 'replaced'}
@@ -23,6 +30,17 @@
 					>{m.statements_correct()}</Button
 				>
 			{:else}
+				<!-- #338: a draft is calculated again from the invoices as they are now, with the same number -->
+				<form method="POST" action="?/recalculate" class="flex flex-col">
+					<Button type="submit" icon="refresh" testid="statement-recalculate-button"
+						>{m.statements_recalculate()}</Button
+					>
+				</form>
+				{#if recalculated}
+					<Alert tone="positive" title={m.statements_recalculate()} testid="statement-recalculated">
+						<p>{m.statements_recalculated()}</p>
+					</Alert>
+				{/if}
 				<!-- Only a draft can be deleted; once sent, the statement stays as the tenant received it -->
 				<Button
 					variant="danger-ghost"

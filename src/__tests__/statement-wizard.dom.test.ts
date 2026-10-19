@@ -484,7 +484,7 @@ describe('Abrechnungen erstellen', () => {
 		await settle();
 		expect(heading()).toBe('Vorschau');
 		expect(text()).toContain(
-			'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude, oder löschen Sie zuerst die Entwürfe, die Sie neu berechnen wollen.'
+			'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu.'
 		);
 	});
 
@@ -494,7 +494,7 @@ describe('Abrechnungen erstellen', () => {
 
 		const empty = byTestId('preview-empty')!.parentElement!.textContent!.replace(/\s+/g, ' ');
 		expect(empty).toContain(
-			'Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
 	});
@@ -955,7 +955,7 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('existing-statements')!.textContent).toContain('Ahornhof');
 		expect(byTestId('existing-statements')!.textContent).toContain('2 Nebenkostenabrechnungen');
 		expect(byTestId('existing-statements')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Bestehende Abrechnungen bleiben, wie sie sind, auch Entwürfe. Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.'
+			'Bestehende Abrechnungen bleiben, wie sie sind, auch Entwürfe. Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu.'
 		);
 		expect(
 			byTestId('existing-statements')!.querySelector('a[href="/statements?building=b1"]')
@@ -1437,7 +1437,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 		expect(billedText('b2')).toBeUndefined();
 		// read after the building's name, not as part of it (persona Sven P-1), and a tap on it still chooses the
@@ -1468,10 +1468,10 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 		expect(billedText('b2')).toBe(
-			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 	});
 
@@ -1580,7 +1580,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 	});
 });
