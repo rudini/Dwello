@@ -92,8 +92,7 @@ export function flatRateNotice(values: ContractFormValues, categories?: { id: st
 	if (!(amount(values.flatRateUtilityCharge ?? '') > 0) || ticked === 0) return null;
 	if (!(amount(values.advancePayment) > 0)) return m.contracts_flat_rate_warning_text();
 	// with an Akonto some ticks are right: warn only while every box is still ticked (#432, Helga 432 P-1)
-	const all = !values.agreedCategoryIds || !categories || ticked >= categories.length;
-	return all ? m.contracts_flat_rate_warning_text_advance() : null;
+	return ticked >= (categories?.length ?? 0) ? m.contracts_flat_rate_warning_text_advance() : null;
 }
 
 /** The amounts in the form the checks and the backend read */
