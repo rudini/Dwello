@@ -202,7 +202,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet
 
   # #432 (Dr. Weber 429 P-1): auch mit Akonto rechnet Dwello alle angekreuzten Nebenkosten ab, auch die der Pauschale
-  @wip
   Szenario: Mit Akonto und Nebenkostenpauschale warnt das Formular vor angekreuzten Nebenkosten
     Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
     Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht

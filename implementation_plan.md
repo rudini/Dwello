@@ -22,7 +22,7 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 
 - [x] @wip scenario «Mit Akonto und Nebenkostenpauschale warnt das Formular vor angekreuzten Nebenkosten» (`contract-new.feature`)
 - [x] fach-reviewer on the scenario and the proposed variant text before implementing (`docs/reviews/432-fachreview-1.md`)
-- [ ] Product owner confirms the variant text (decision of #432)
-- [ ] `flatRateNotice` warns with Akonto too (variant text), unit test; texts in all four languages
+- [x] Product owner confirms the variant text (decision of #432, 2026-10-19, recorded in the issue)
+- [x] `flatRateNotice` warns with Akonto too (variant text), unit test; texts in all four languages; axe and language state `flat-rate-warning-advance` on `contract-new` and `contract-edit`
 - [ ] Slice review, feature review (persona Dr. Weber)
 - [ ] PR `Fixes #432`

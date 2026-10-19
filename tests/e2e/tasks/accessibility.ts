@@ -288,6 +288,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Enter.theValue('120').into(flatRateInput),
 			Wait.until(on.shown('contract-flat-rate-warning'))
 		),
+	// an Akonto and a Nebenkostenpauschale, the boxes ticked, not saved: the warning to leave only those with Akonto (#432)
+	'flat-rate-warning-advance': () => (actor) =>
+		actor.attemptsTo(
+			toRentStep,
+			Enter.theValue('200').into(advancePaymentInput),
+			Enter.theValue('50').into(flatRateInput),
+			Wait.until(on.shown('contract-flat-rate-warning'))
+		),
 	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen», and
 	// after «Weiter» the note that the wizard waits for the check (#439)
 	'agreements-failed': () => (actor) =>

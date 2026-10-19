@@ -86,12 +86,14 @@ export function advancePaymentNotice(values: ContractFormValues): string | null 
 
 const amount = (value: string) => parseFloat(value) || 0;
 
-/** #429: a Nebenkostenpauschale without Akonto, yet with ticked Nebenkosten (none chosen yet: all ticked) */
+/** #429, #432: a Nebenkostenpauschale with ticked Nebenkosten (none chosen yet: all ticked) */
 export function flatRateNotice(values: ContractFormValues, categories?: { id: string }[]): string | null {
 	const ticked = values.agreedCategoryIds?.length ?? categories?.length ?? 0;
-	return amount(values.flatRateUtilityCharge ?? '') > 0 && !(amount(values.advancePayment) > 0) && ticked > 0
-		? m.contracts_flat_rate_warning_text()
-		: null;
+	if (!(amount(values.flatRateUtilityCharge ?? '') > 0) || ticked === 0) return null;
+	// with an Akonto some ticks are right: only those the Pauschale covers are billed twice (#432)
+	return amount(values.advancePayment) > 0
+		? m.contracts_flat_rate_warning_text_advance()
+		: m.contracts_flat_rate_warning_text();
 }
 
 /** The amounts in the form the checks and the backend read */
