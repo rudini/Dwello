@@ -47,5 +47,7 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 
 - [x] `backend/scripts/e2e-purge-statements.ts`: deletes a scenario's statements and their documents in the E2E database only; `tests/e2e/fixtures/backend.ts` calls it in `cleanUp` (statement-detail.feature left 23 buildings, apartments and tenants before, none after)
 - [x] O-38 moved to `docs/archive/offene-punkte-verlauf.md`
-- [ ] Full Chromium + API run green, nothing left in `dwello_e2e`
-- [ ] Slice review (code-reviewer), PR
+- [x] Full Chromium + API run: 1153 passed, 1 failed (O-34, the known IBAN race of `settings.feature`); no tenant or statement left, but 256 buildings «Talblick»: the screen examples seed «Talblick» twice and the second name replaced the first one's token, so the cleanup now keeps every token it handed out
+- [x] Slice review round 1 (`docs/reviews/o38-review-1.md`; C-1 fixed: the purge always gets the E2E database's URL, never `backend/.env`'s; C-3 not taken: the extra branch pushed `cleanUp` over fallow's complexity limit, and a scenario without names is rare)
+- [x] `previewOf` (axe and language rows of `statement-generate`) waits for step 2's texts before ticking a building, as `chooseBuilding` does (#424; «preview-all-billed» once failed locally with «Clicking the checkbox did not change its state»); the statement-generate rows of both features: 38 passed, nothing left in `dwello_e2e`
+- [ ] Re-review round 2, PR

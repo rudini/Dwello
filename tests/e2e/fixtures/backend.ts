@@ -3,6 +3,16 @@ import { randomUUID } from 'crypto';
 import type { CallTheApi } from '../screenplay/abilities';
 import { inDays } from './dates';
 
+// The backend deletes draft statements only; a sent one would keep its tenant, apartment and building (O-38).
+// The URL is always set: `bun run` would read the development database's from backend/.env
+function purgeStatements(tokens: string[]) {
+	const url = process.env.E2E_DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello_e2e';
+	execFileSync('bun', ['run', 'e2e-purge-statements', ...tokens], {
+		cwd: 'backend',
+		env: { ...process.env, DATABASE_URL: url }
+	});
+}
+
 // Scenario-scoped test data: Gherkin names map to names with 12 random hex digits, and everything is removed afterwards.
 export function testData(api: CallTheApi) {
 	const names = new Map<string, string>();
@@ -13,11 +23,14 @@ export function testData(api: CallTheApi) {
 	const remove = (path: string) => api.remove(path);
 	const extras: string[] = []; // invoices and configuration records, removed before their building
 	const restores: (() => Promise<unknown>)[] = []; // predefined records a scenario changed
+	const tokens: string[] = [];
 	const unique = (title: string) => {
 		// 12 hex digits without hyphens: Firefox and WebKit do not break a UUID's digit groups, so a full UUID in a name
 		// made pages wider than 390 px there (#424); 48 bits keep the names of one run apart
-		const name = `${title} ${randomUUID().replaceAll('-', '').slice(0, 12)}`;
+		const token = randomUUID().replaceAll('-', '').slice(0, 12);
+		const name = `${title} ${token}`;
 		names.set(title, name);
+		tokens.push(token); // a title seeded twice («Talblick» of the screen examples) keeps both for the cleanup
 		return name;
 	};
 
@@ -540,12 +553,7 @@ export function testData(api: CallTheApi) {
 
 		async cleanUp() {
 			for (const restore of restores) await restore();
-			const tokens = [...names.values()].map((name) => name.split(' ').pop()!);
-			// the backend deletes draft statements only; a sent one would keep its tenant, apartment and building (O-38)
-			execFileSync('bun', ['run', 'e2e-purge-statements', ...tokens], {
-				cwd: 'backend',
-				env: { ...process.env, DATABASE_URL: process.env.E2E_DATABASE_URL }
-			});
+			purgeStatements(tokens);
 			for (const token of tokens) await removeTenants(token);
 			for (const path of extras) await remove(path);
 			// Heating profiles created through the UI carry a scenario name as well
