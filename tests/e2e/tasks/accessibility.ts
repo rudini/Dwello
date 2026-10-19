@@ -69,7 +69,7 @@ import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
 import { leaveSettings } from './statement-generate';
-import { tickAllCategories, untickAllCategories } from './contract-form';
+import { keepApartment, tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
@@ -154,7 +154,7 @@ const toRentStep: Activity = async (actor) => {
 	if ((await actor.answer(pageAddress)).includes('/contracts/new'))
 		await actor.attemptsTo(
 			Click.on(nextButton),
-			Click.on(nextButton),
+			keepApartment,
 			EnterDate.of('2030-01-01').into(startDateInput),
 			Click.on(nextButton),
 			Wait.until(agreedCategoryBoxes)
@@ -382,7 +382,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'overlap-warning': () => (actor) =>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address
-			Click.on(nextButton),
+			keepApartment,
 			Wait.forValue(startDateInput, '01.01.2099'), // the suggestion arrived, it cannot land in the typed date
 			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2098
 			Wait.until(on.overlapWarning)
@@ -391,7 +391,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'rent-taken-over': () => (actor) =>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address
-			Click.on(nextButton),
+			keepApartment,
 			Wait.forValue(startDateInput, '01.04.2099'), // the day after the last contract, suggested
 			Click.on(nextButton),
 			Wait.until(on.shown('contract-rent-taken-over'))
