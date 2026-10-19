@@ -107,7 +107,8 @@ describe('Einstellungen', () => {
 		for (const said of [
 			'Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters; die Abrechnung bittet ihn, Ihnen seine IBAN mitzuteilen.',
 			'zum Beispiel Kalenderjahr (01.01.–31.12.)',
-			'Der hier gewählte Verteilschlüssel wird beim Erfassen neuer Rechnungen vorgeschlagen.'
+			// Fachreview 452-2 V-20: the latest invoice of the category in the building comes first (#379)
+			'Dwello schlägt den hier gewählten Verteilschlüssel beim Erfassen einer Rechnung vor, wenn im Gebäude noch keine Rechnung derselben Kategorie einen hat.'
 		])
 			expect(body).toContain(said);
 		expect(body).not.toContain('z. B.');

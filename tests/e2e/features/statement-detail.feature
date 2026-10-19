@@ -663,6 +663,14 @@ Funktionalität: Abrechnungsdetail
     Und nennt die Position "Hauswart" "Hauswart 2024-12-31"
     Und weist die Abrechnung auf keine geänderten Rechnungen hin
 
+  # #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; «Neu berechnen» wartet darauf
+  Szenario: Kein Neuberechnen, solange eine umlagefähige Rechnung keine Kategorie hat
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine umlagefähige Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "berechnen Sie den Entwurf dann neu"
+
   # #96: eine danach geänderte Rechnung zählt wie eine neue
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
@@ -783,7 +791,6 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Nachzahlung 187.45"
 
   # #452 Punkt 7 (#379): eine alte Rechnung ohne Verteilschlüssel verteilt Dwello gleichmässig pro Wohnung, wie «Pro Einheit»
-  @wip
   Szenario: Das PDF nennt bei einer Rechnung ohne Verteilschlüssel «Pro Einheit»
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "400" Franken vom "2024-06-30"

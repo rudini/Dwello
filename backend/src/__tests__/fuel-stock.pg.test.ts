@@ -241,6 +241,19 @@ describe('Tankbestand', () => {
 		]);
 	});
 
+	// Fachreview 452-2 V-22: an invoice recorded before the key was required (#379) does not hide an older key
+	it('nimmt den Schlüssel der letzten Rechnung, die einen hat', async () => {
+		await insertInvoice(rental.building, { categoryId: heating, description: 'Ohne Schlüssel', amount: '0.00', invoiceDate: '2025-12-01' });
+		await db.update(invoices).set({ distributionKeyId: null }).where(eq(invoices.description, 'Ohne Schlüssel'));
+		try {
+			// the stock's line; the invoice itself is a line of its own, without key
+			const stock = (await linesOf(rental.contract, 2025)).filter((line) => line.categoryId === heating && line.totalBuildingAmount !== 0);
+			expect(stock).toMatchObject([{ distributionKeyName: 'Per Area (m²)', totalBuildingAmount: 400 }]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, 'Ohne Schlüssel'));
+		}
+	});
+
 	// ein Hinweis auf die Tankbestände, keine Bestätigung (#73); nur einer für die Kategorie
 	it('meldet einen negativen Verbrauch', async () => {
 		await record('2026-12-31', '5000.00');

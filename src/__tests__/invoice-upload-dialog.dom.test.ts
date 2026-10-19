@@ -52,7 +52,7 @@ const rowText = () => allByTestId('invoice-upload-row').map((row) => row.textCon
 // #452 Punkt 7 (#379): auch eine hochgeladene Rechnung bekommt den Verteilschlüssel ihrer Kategorie im Gebäude
 describe('Verteilschlüssel beim Hochladen', () => {
 	const openWith = (defaultDistributionKeyId: string) => {
-		fakeBff(() => [200, read]);
+		const calls = fakeBff((call) => (call.path === '/invoices' ? [201, { id: 'i9' }] : [200, read]));
 		show(InvoiceUploadDialog, {
 			open: true,
 			buildings,
@@ -65,15 +65,34 @@ describe('Verteilschlüssel beim Hochladen', () => {
 			latestKeys: [{ buildingId: 'b1', categoryId: 'c1', distributionKeyId: 'k2' }],
 			oncreated: vi.fn()
 		});
+		return calls;
 	};
+	const sentKey = (calls: ReturnType<typeof fakeBff>) =>
+		JSON.parse(String((calls.find((call) => call.path === '/invoices')!.body as FormData).get('invoice'))).distributionKeyId;
 
-	it('schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor', async () => {
+	// Code-Review 452-1 C-1: the row of the KI's invoice stays folded, as usual
+	it('schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor, auch zugeklappt', async () => {
+		const calls = openWith('k1');
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+
+		click('invoice-upload-create-button');
+		await settle();
+
+		expect(sentKey(calls)).toBe('k2');
+	});
+
+	// Code-Review 452-1 C-2: folding and unfolding the row keeps the landlord's own choice
+	it('behält einen selbst gewählten Verteilschlüssel nach dem Zu- und Aufklappen', async () => {
 		openWith('k1');
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
 		click('invoice-upload-row-toggle');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!, 'change', 'k1');
+		click('invoice-upload-row-toggle');
+		click('invoice-upload-row-toggle');
 
-		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k2');
+		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k1');
 	});
 
 	it('erstellt keine Rechnung ohne Verteilschlüssel und sagt warum', async () => {

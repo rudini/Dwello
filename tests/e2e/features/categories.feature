@@ -151,7 +151,6 @@ Funktionalität: Kostenkategorien
     Dann erfährt der Liegenschaftsverwalter, dass die Kategorie wegen ihrer Tankbestände Brennstoff bleibt
 
   # #452 Punkt 1 (#302): bei Dwellos Kategorien entscheidet «Heizkosten», wie Dwello beim Mieterwechsel verteilt
-  @wip
   Szenario: Bei einer vordefinierten Kategorie ist «Heizkosten» fest
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Kaminfeger"
     Dann lässt sich nicht ändern, ob die Kategorie zu den Heizkosten zählt
@@ -159,7 +158,6 @@ Funktionalität: Kostenkategorien
     Und erklärt das Kategorieformular "Heizung und Kaminfeger verteilt Dwello beim Mieterwechsel nach dem Heizprofil, alle anderen Kategorien nach Tagen. Brauchen Sie eine andere Verteilung, erfassen Sie eine eigene Kategorie."
 
   # #452 Punkt 2 (#309): Zurückstellen holt die Rechnungen nicht zurück
-  @wip
   Szenario: Vor dem Umstellen auf nicht umlagefähig nennt Dwello die Rechnungen, die es betrifft
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
     Und eine umlagefähige Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
@@ -172,7 +170,6 @@ Funktionalität: Kostenkategorien
     Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
     Und ist die Kategorie "Treppenhausreinigung" nicht umlagefähig
 
-  @wip
   Szenario: Umstellen auf nicht umlagefähig abbrechen
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
     Und eine umlagefähige Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
@@ -184,7 +181,6 @@ Funktionalität: Kostenkategorien
 
   # #452 Punkt 2 (#309): Kosten, die das Gesetz dem Vermieter zuweist (Art. 256b OR); bestätigt wird im DOM-Test, weil
   # die vordefinierte Kategorie allen Szenarien gehört
-  @wip
   Szenario: Vor dem Umstellen einer vordefinierten Kategorie auf umlagefähig fragt Dwello
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Wenn der Liegenschaftsverwalter die vordefinierte Kategorie "Liegenschaftssteuer" als umlagefähig speichert

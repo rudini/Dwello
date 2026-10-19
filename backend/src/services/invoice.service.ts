@@ -604,5 +604,5 @@ export async function getInvoicesForStatement(buildingId: string, periodStart: s
 export async function getUncategorizedInvoices(buildingId: string, periodStart: string, periodEnd: string) {
 	return (await getInvoicesForStatement(buildingId, periodStart, periodEnd))
 		.filter((invoice) => !invoice.categoryId)
-		.map(({ id, billingEntityName, description, invoiceDate, amount }) => ({ id, billingEntityName, description, invoiceDate, amount }));
+		.map(({ billingEntityName, invoiceDate, amount }) => ({ billingEntityName, invoiceDate, amount }));
 }

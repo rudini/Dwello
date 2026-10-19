@@ -14,7 +14,7 @@
 		type Proposal,
 		type UploadRow
 	} from '$lib/invoice-upload';
-	import type { LatestKey } from '$lib/invoice';
+	import { proposedKey, type LatestKey } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import { formatDate } from '$lib/utils/format';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -49,6 +49,14 @@
 	} = $props();
 
 	let buildingId = $state('');
+	// #379: also a folded row gets the key of its category's latest invoice in the building (code review 452-1 C-1)
+	$effect(() => {
+		for (const row of rows) {
+			const proposal = proposedKey(latestKeys, buildingId, row.values.categoryId, defaultDistributionKeyId);
+			if (!row.keyChosen && proposal && row.values.distributionKeyId !== proposal)
+				row.values.distributionKeyId = proposal;
+		}
+	});
 	let rows = $state<UploadRow[]>([]);
 	let pages = $state<Record<number, string[]>>({}); // the images the KI reads, by row
 	let errors = $state<Record<number, Record<string, string>>>({}); // what keeps a row from being created

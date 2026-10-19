@@ -152,7 +152,6 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Und hat die Abrechnung den Status "Ersetzt"
 
   # #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; ohne sie ginge die Rechnung an jeden Mieter
-  @wip
   Szenario: Eine umlagefähige Rechnung ohne Kategorie hält die Vorschau an
     Angenommen im Gebäude "Rosenhof" gibt es eine umlagefähige Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
@@ -162,14 +161,12 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Ordnen Sie jeder Rechnung eine Kategorie zu"
     Und ist der Assistent im Schritt "Vorschau"
 
-  @wip
   Szenario: Rechnung ohne Kategorie aus der Vorschau öffnen
     Angenommen im Gebäude "Rosenhof" gibt es eine umlagefähige Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
     Und der Liegenschaftsverwalter die Rechnung vom "30.06.2024" aus dem Hinweis bearbeitet
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
 
-  @wip
   Szenario: Keine berichtigte Abrechnung, solange eine umlagefähige Rechnung keine Kategorie hat
     Angenommen für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
     Und die Abrechnung 2024 von "Anna Keller" ist versendet

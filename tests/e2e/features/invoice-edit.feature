@@ -57,7 +57,6 @@ Funktionalität: Rechnung bearbeiten
     Und sieht der Liegenschaftsverwalter die Rechnungsnummer "R-1002"
 
   # #452 Punkt 7 (#379): eine alte Rechnung ohne Verteilschlüssel bekommt den Vorschlag, gespeichert wird sie nur mit einem
-  @wip
   Szenario: Eine Rechnung ohne Verteilschlüssel bekommt den Verteilschlüssel der letzten Rechnung ihrer Kategorie vorgeschlagen
     Angenommen "Hauswart Meier" stellt dem Gebäude "Seeblick" "300.00" Franken für "Umgebungsarbeiten" in der Kategorie "Hauswart" in Rechnung
     Und die Rechnung von "Hauswart Meier" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
@@ -65,7 +64,6 @@ Funktionalität: Rechnung bearbeiten
     Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" bearbeitet
     Dann ist im Rechnungsformular der Verteilschlüssel "Pro Zimmer" gewählt
 
-  @wip
   Szenario: Ohne Verteilschlüssel speichert das Formular die Rechnung nicht
     Wenn der Liegenschaftsverwalter die Rechnung ohne Verteilschlüssel speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie, wie die Kosten verteilt werden."

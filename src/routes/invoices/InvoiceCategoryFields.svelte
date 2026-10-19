@@ -23,7 +23,7 @@
 		buildingId,
 		latestKeys = [],
 		defaultKeyId = '',
-		keyChosen = false,
+		keyChosen = $bindable(),
 		keyError,
 		keyNote
 	}: {
@@ -46,11 +46,10 @@
 
 	// #379: Dwello proposes the key of the latest invoice of the category in the building, else the settings', until
 	// the Liegenschaftsverwalter chooses one himself
-	let chosen = untrack(() => keyChosen);
 	$effect(() => {
 		const proposal = proposedKey(latestKeys, buildingId, categoryId, defaultKeyId);
 		untrack(() => {
-			if (!chosen && proposal) distributionKeyId = proposal;
+			if (!keyChosen && proposal) distributionKeyId = proposal;
 		});
 	});
 
@@ -111,7 +110,7 @@
 	placeholder={m.invoices_choose_key()}
 	options={distributionKeys.map((key) => ({ value: key.id, label: key.name }))}
 	bind:value={distributionKeyId}
-	onchange={() => (chosen = true)}
+	onchange={() => (keyChosen = true)}
 	error={keyError}
 	note={keyNote}
 	testid="invoice-distribution-key-select"

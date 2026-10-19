@@ -73,6 +73,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too
 	// #382: an allocable invoice without Kategorie holds the preview of 2015; a description alike in every language
 	await seed.invoiceWithoutCategory('Seeblick', '120.00', '2015-06-30', 'FTTH');
+	// #379: recorded before the Verteilschlüssel was required; its edit form says so
+	const keylessInvoice = await seed.invoiceOn('Seeblick', 'Hauswart', '200.00', '2014-03-31');
+	await seed.invoiceWithoutKey('Hauswart 2014-03-31');
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	await seed.sendStatement('Anna', 2024);
 	await seed.markPaid('Anna', 2024); // paid: its payment can be reset (#92)
@@ -195,6 +198,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		fuelCategory: seed.idOf('Pellets'),
 		// with an allocable invoice in Waldblick: saving it as not allocable asks first (#309)
 		usedCategory: seed.idOf('Internet'),
+		keylessInvoice,
 		// a predefined category shows the reason of its allocability (#186)
 		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
 		distributionKey: seed.idOf('Nach Wohnungen'),

@@ -124,6 +124,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | invoice-detail         | delete-dialog       |
       | invoice-edit           | default             |
       | invoice-edit           | submit-cleared      |
+      | invoice-edit-keyless   | default             |
       | invoice-billed-detail  | default             |
       | invoice-billed-detail  | delete-dialog       |
       | invoice-billed-edit    | default             |
@@ -202,6 +203,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | category-edit          | saved-toast         |
       | category-edit-predefined | default           |
       | category-edit-predefined | allocable-confirm |
+      | category-edit-used     | default             |
       | category-edit-used     | allocability-confirm |
       | category-edit-fuel     | default             |
       | category-edit-fuel     | fuel-refused        |

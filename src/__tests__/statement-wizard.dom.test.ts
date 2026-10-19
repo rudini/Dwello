@@ -549,6 +549,14 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
+	// Code-Review 452-1 C-7: without a contract to bill there is no hint on invoices without Kategorie to answer
+	it('meldet eine Periode ohne Mietverträge auch neben einer Rechnung ohne Kategorie', async () => {
+		open({ preview: [], invoices: [{ ...invoices[0], uncategorized: completeness.lateInvoices }] });
+		next();
+		await settle();
+		expect(text()).toContain('Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.');
+	});
+
 	// Nachzügler: alle Mietverträge haben schon eine Abrechnung, der Verwalter will einen Entwurf neu berechnen
 	it('sagt bei einer leeren Vorschau, dass alle Mietverträge schon eine Abrechnung haben, und wo sie stehen', () => {
 		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2 }] });

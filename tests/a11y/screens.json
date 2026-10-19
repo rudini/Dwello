@@ -405,6 +405,13 @@
 			]
 		},
 		{
+			"name": "invoice-edit-keyless",
+			"path": "/invoices/{keylessInvoice}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "invoice-billed-detail",
 			"path": "/invoices/{billedInvoice}",
 			"states": [
@@ -668,6 +675,7 @@
 			"name": "category-edit-used",
 			"path": "/config/categories/{usedCategory}/edit",
 			"states": [
+				"default",
 				"allocability-confirm"
 			]
 		},

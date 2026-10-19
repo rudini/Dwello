@@ -64,6 +64,7 @@ export type UploadRow = {
 	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
 	selected: boolean;
 	createError?: string; // why the invoice was not created
+	keyChosen?: boolean; // the property manager chose the Verteilschlüssel: Dwello proposes none any more (#379)
 };
 
 // The kinds of file Dwello keeps, told by their first bytes, as the backend checks them

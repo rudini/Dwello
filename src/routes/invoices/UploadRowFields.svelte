@@ -104,6 +104,7 @@
 			{categories}
 			{distributionKeys}
 			{...keyProposal}
+			bind:keyChosen={row.keyChosen}
 			keyError={errors.distributionKeyId}
 		/>
 	</div>
