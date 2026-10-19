@@ -2008,7 +2008,7 @@ Files: `.claude/agents/code-reviewer.md`, `docs/reviews/nits-review-1.md`.
 Branch `w9-issue-455-resultlist`. Product owner (via coordinator), for #455: the fallow clone group dup:4489c5c6 (count heading, list, Pagination of the list pages) blocked a change to `src/routes/invoices/+page.svelte`; it moves into one component, with no change in behaviour. No scenario: refactoring without behaviour change.
 
 - [x] `src/lib/ui/ResultList.svelte`, used by the lists of buildings, apartments, contracts, invoices, statements and tenants; each keeps its list class; `docs/design/token-referenz.md` (Lists)
-- [x] Slice review round 1 (`docs/reviews/resultlist-review-1.md`, no Blocker/Major; C-1 token reference and C-2 apartment list fixed)
+- [x] Slice review round 1 (`docs/reviews/resultlist-review-1.md`, no Blocker/Major; C-1 token reference and C-2 apartment list fixed); closing round 2 (`docs/reviews/resultlist-review-2.md`, no findings)
 - [x] PR `Refs #455`
 
-Files: `src/lib/ui/ResultList.svelte`, `src/routes/{buildings,apartments,contracts,invoices,statements,tenants}/+page.svelte`, `docs/design/token-referenz.md`, `docs/reviews/resultlist-review-1.md`.
+Files: `src/lib/ui/ResultList.svelte`, `src/routes/{buildings,apartments,contracts,invoices,statements,tenants}/+page.svelte`, `docs/design/token-referenz.md`, `docs/reviews/resultlist-review-{1,2}.md`.
