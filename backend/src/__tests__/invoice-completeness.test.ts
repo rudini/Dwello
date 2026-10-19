@@ -248,7 +248,7 @@ describe('Prüfung pro Kategorie', () => {
 	it('ordnet eine Rechnung am letzten Tag eines Abschnitts diesem Abschnitt zu', () => {
 		const { findings } = checkCategories(quarterly('Kaltwasser', 2025, [1, 2, 3]), quarterly('Kaltwasser', 2024), year2025);
 
-		expect(findings[0].missingParts).toEqual([{ start: '2025-10-01', end: '2025-12-31' }]);
+		expect(findings[0]).toMatchObject({ kind: 'gap', missingParts: [{ start: '2025-10-01', end: '2025-12-31' }] }); // 4 to 3 stays a gap (#409)
 	});
 
 	// #130, #409 Punkt 1 (Teilerregel): weniger Rechnungen in einem gröberen, regelmässigen Rhythmus sind keine Lücke
@@ -266,12 +266,6 @@ describe('Prüfung pro Kategorie', () => {
 		const { findings } = checkCategories(fourMonths, monthly(2024), year2025);
 
 		expect(findings).toMatchObject([{ kind: 'deviation', changePercent: -67 }]);
-	});
-
-	it('meldet die Lücke weiter, wenn die Zahl der Rechnungen die des Vorjahres nicht teilt (4 statt 3)', () => {
-		const { findings } = checkCategories(quarterly('Kaltwasser', 2025, [1, 2, 3]), quarterly('Kaltwasser', 2024), year2025);
-
-		expect(findings).toMatchObject([{ kind: 'gap' }]);
 	});
 
 	it('meldet die Lücke weiter bei einer einzigen Rechnung, wo das Vorjahr mehrere hatte', () => {

@@ -116,9 +116,8 @@ function coarserRhythm(current: CategoryInvoice[], period: Period, parts: number
 	const n = current.length;
 	if (n < 2 || n >= parts || parts % n !== 0) return false;
 	const coarse = slices(period, n);
-	const hits = coarse.map(() => 0);
-	for (const invoice of current) hits[sliceOf(invoice.invoiceDate, coarse)]++;
-	return hits.every((count) => count === 1);
+	const hit = new Set(current.map((invoice) => sliceOf(invoice.invoiceDate, coarse)));
+	return hit.size === n && !hit.has(-1);
 }
 
 // The rhythm of the year before (one slice per invoice, at most one per month) and the slices without invoice now;
