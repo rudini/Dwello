@@ -185,11 +185,16 @@ async function validateConfig(key: ConfigKey, value: string) {
 	}
 }
 
-/** An IBAN only with name, postal code and town of the Firmenadresse, as saved or now changed: the QR-bill names the landlord (#450) */
+/**
+ * A saved IBAN only with name, postal code and town of the Firmenadresse, as saved or now changed: the QR-bill names the
+ * landlord (#450). The form sends the IBAN it shows with every save; a save without it (the IBAN emptied, reset after)
+ * stays possible (code review C-1)
+ */
 async function checkCreditor(changes: Partial<Record<ConfigKey, string>>) {
+	if (!changes.iban?.trim()) return;
 	const stored = await getAllConfig();
 	const value = (key: ConfigKey) => (changes[key] ?? stored[key] ?? '').trim();
-	if (value('iban') && !(['company_name', 'company_postal_code', 'company_city'] as const).every(value))
+	if (!(['company_name', 'company_postal_code', 'company_city'] as const).every(value))
 		throw new CodedError('IBAN_COMPANY_ADDRESS_MISSING', 'An IBAN needs the company name, postal code and town');
 }
 
