@@ -30,6 +30,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
 import { isRealDate } from './real-date';
 import { oldAddress } from './old-address';
@@ -751,7 +752,7 @@ export async function replaceStatement(id: string, paidAmount?: string): Promise
 // A Saldo carried over that a sent next statement counts: the berichtigte Abrechnung offsets it as «Bereits
 // verrechnet» (#448, Fachreview 448-1 V-2, 448-2 M-5); a draft that counts it loses it, and once replaced the Saldo
 // is no longer carried over: the next statement takes the berichtigte Abrechnung's (448-2 V-14)
-async function offsetOf(statement: StatementWithDetails, tx: Transaction) {
+async function offsetOf(statement: StatementWithDetails, tx: Tx) {
 	const [row] = await tx
 		.select({ countedBy })
 		.from(utilityStatements)
@@ -763,7 +764,6 @@ async function offsetOf(statement: StatementWithDetails, tx: Transaction) {
 		.where(and(eq(utilityStatements.carriedFromId, statement.id), eq(utilityStatements.status, 'draft')));
 	return row.countedBy ? { paidAmount: statement.balance } : {};
 }
-type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 // «Bereits bezahlt» of a sent or overdue statement, in francs and Rappen
 function paidOn(statement: StatementWithDetails, amount: string) {

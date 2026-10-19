@@ -529,7 +529,7 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-payment-summary')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(summary);
 	});
 
-	// #94 versendet: was der Vermieter damals las, bleibt
+	// #94 versendet: eine erlassene Nachzahlung bleibt erlassen; eine einbehaltene Rückerstattung wird übertragen (oben)
 	it.each([[4.95, 'Der Betrag ist kleiner als CHF 5.00. Sie verzichten darauf.']])(
 		'sagt bei einer nach #94 erledigten Nachzahlung mit %s weiter, was damals galt',
 		(balance, summary) => {
@@ -689,6 +689,13 @@ describe('Abrechnungsdetail', () => {
 		expect(correctDialog()).toContain(
 			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten. Enthält eine versendete nächste Abrechnung ihren Saldo schon als Übertrag, rechnet die berichtigte ihn als «Bereits verrechnet» an.'
 		);
+	});
+
+	// Fachreview 448-3 V-25, Code-Review 448-2 C-13: eine nach #94 einbehaltene Rückerstattung wird auch übertragen
+	it('nennt beim Berichtigen einer nach #94 erledigten Rückerstattung, was mit dem übertragenen Saldo geschieht', () => {
+		detail({ status: 'paid', balance: -3, paidDate: '2025-02-01', paidAmount: 0 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('rechnet die berichtigte ihn als «Bereits verrechnet» an.');
 	});
 
 	it.each(['paid', 'settled'])('fragt beim Berichtigen einer Abrechnung im Status %s nicht nach dem bereits Bezahlten', (status) => {

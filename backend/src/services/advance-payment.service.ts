@@ -5,7 +5,7 @@ import { formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { sqlToday } from './today';
 
-type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /** The Akonto amounts of a contract per «Gültig ab» (#464), oldest first */
 export const advancesOf = (contractId: string, tx: Tx | typeof db = db) =>

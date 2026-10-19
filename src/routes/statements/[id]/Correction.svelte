@@ -16,16 +16,21 @@
 
 	// what the berichtigte Abrechnung will offset: the payment recorded and what this one offset itself, or nothing
 	// yet; a refund is paid by the landlord (Fachreview W2e V-1, V-6, V-12, V-13)
-	// not paid: a sent or overdue one, or a settled one whose Saldo may be carried over already (#448)
+	// a settled one, or a refund settled under #94, whose Saldo may be carried over already (#448, Fachreview 448-3 V-25)
+	const carried = $derived(
+		statement.status === 'settled' ||
+			(statement.status === 'paid' && statement.paidAmount === 0 && statement.balance < 0 && statement.balance > -5)
+	);
+	// not paid: a sent or overdue one, or one whose Saldo is carried over
 	const unpaidConsequence = (number: string) =>
-		statement.status === 'settled'
+		carried
 			? m.statements_correct_open_settled({ number })
 			: statement.balance < 0
 				? m.statements_correct_open_refund({ number })
 				: m.statements_correct_open({ number });
 	const consequence = $derived.by(() => {
 		const number = statement.statementNumber;
-		if (statement.status !== 'paid' || !statement.paidDate) return unpaidConsequence(number);
+		if (carried || statement.status !== 'paid' || !statement.paidDate) return unpaidConsequence(number);
 		const offset = (statement.paidAmount ?? 0) + (statement.priorPayments ?? 0);
 		if (Math.abs(offset) < 0.005) return m.statements_correct_settled({ number });
 		const paid = {

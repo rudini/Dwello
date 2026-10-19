@@ -6,8 +6,9 @@ Funktionalität: Saldo unter CHF 5
   damit der Mieter für ein paar Franken weder einzahlen noch seine IBAN schicken muss und nichts verloren geht (#403)
 
   # #403: weder Zahlteil noch Bitte um die IBAN; der Saldo wird mit der nächsten Abrechnung desselben Mietvertrags
-  # verrechnet (Übertrag). Abrechnungen, die nach #94 versendet wurden, behalten ihren Text (No scenario: Dwello
-  # versendet keine solche mehr; statement-carry-over.pg.test.ts)
+  # verrechnet (Übertrag). Abrechnungen, die nach #94 versendet wurden, behalten ihr PDF; eine erlassene Nachzahlung
+  # bleibt erlassen, eine einbehaltene Rückerstattung wird übertragen (No scenario: Dwello versendet keine solche mehr;
+  # statement-carry-over.pg.test.ts, statement-pages.dom.test.ts)
   Grundlage:
     Angenommen das Gebäude "Rosenhof" in "Winterthur" existiert
     Und im Gebäude "Rosenhof" gibt es die leere Wohnung "1.01"

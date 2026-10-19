@@ -244,14 +244,17 @@ describe('Übertrag und Berichtigung', () => {
 	// Fachreview 448-2 V-14: verrechnet ist ein Saldo erst in einer versendeten Abrechnung; ein Entwurf verliert ihn
 	it('nimmt einem Entwurf, der den Saldo zählt, den Übertrag, wenn die übertragene Abrechnung ersetzt wird', async () => {
 		const rental = await rentalOf();
-		const first = await sentWith(rental, 2024, '3.00');
+		const first = await sentWith(rental, 2024, '-3.00');
 		const draft = await generate(rental, 2025);
+		await db.update(utilityStatements).set({ balance: '47.00' }).where(eq(utilityStatements.id, draft)); // own Saldo 50.00
 
 		const corrected = await replaceAndCorrect(first.id);
+		const replacedDraft = await read(draft); // Fachreview 448-3 V-24: right after the replacement
 		// Code-Review 448-1 C-1: also once the draft is calculated again
 		await callApi(`/api/v1/statements/${draft}/recalculation`, { method: 'POST' });
 
 		expect(corrected).toMatchObject({ priorPayments: '0.00', balance: '0.00' });
+		expect(replacedDraft).toMatchObject({ balance: '50.00', carriedFrom: null });
 		expect(await read(draft)).toMatchObject({ balance: '0.00', carriedFrom: null });
 	});
 
