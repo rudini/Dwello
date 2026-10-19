@@ -15,7 +15,7 @@ export interface ContractFormValues {
 	endDate: string;
 	isUnlimited: boolean;
 	terminated?: boolean; // the end is a Kündigungstermin of an open-ended contract (A-1), only when editing
-	billedUntil?: string; // «Abgerechnet bis» (#133), only when editing; '' for none
+	billedUntil?: string; // «Abgerechnet bis» (#133); in the wizard only for a Vertragsbeginn before today (#453); '' for none
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
@@ -60,6 +60,7 @@ export function initialContractValues(
 			startDate: impossible(start) ? '' : start, // the day after the contract it follows (#156), never one the date check refuses (#296)
 			endDate: '',
 			isUnlimited: true,
+			billedUntil: '',
 			baseRent: '',
 			additionalRent: '',
 			advancePayment: '',
@@ -128,6 +129,14 @@ export function validateContract(values: ContractFormValues): Record<string, str
 		string,
 		string
 	>;
+}
+
+/** #453 (#337): «Abgerechnet bis» after today or before the Vertragsbeginn, refused as the backend does */
+export function billedUntilError({ billedUntil, startDate }: ContractFormValues, today: string) {
+	if (!billedUntil) return undefined;
+	if (billedUntil > today) return m.backend_billed_until_future();
+	if (startDate && billedUntil < startDate)
+		return m.backend_billed_until_before_start({ date: formatDate(startDate) });
 }
 
 /** Request body of the contract API */

@@ -405,6 +405,82 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(heading()).toBe('Miete');
 	});
 
+	// #453 (#328): a running contract recorded on the switch to Dwello may be billed outside Dwello up to a day
+	it('bietet «Abgerechnet bis» bei einem Vertragsbeginn vor heute an, nennt es in der Prüfung und speichert es', async () => {
+		await toPeriod();
+		type('start-date-input', '01.01.2027');
+		await settle();
+		expect(byTestId('billed-until-input')).toBeNull();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		expect(byTestId('start-date-notice')!.textContent).toContain(
+			'Sind die Nebenkosten schon ausserhalb von Dwello abgerechnet, tragen Sie unten «Abgerechnet bis» ein.'
+		);
+		type('billed-until-input', '31.12.2024');
+		next();
+		await settle();
+		next();
+		await settle();
+		type('contract-base-rent-input', '950');
+		chooseFee('run');
+		next();
+		await settle();
+		const items = [...document.querySelectorAll('[data-testid="contract-review-item"]')];
+		expect(items.map((item) => item.textContent!.replace(/\s+/g, ' ').trim())).toContain(
+			'Abgerechnet bis Dienstag, 31. Dezember 2024 Ändern'
+		);
+		const calls = backend();
+		submit('submit-button');
+		await settle();
+		expect(calls.at(-1)).toMatchObject({ method: 'POST', path: '/contracts', body: { billedUntil: '2024-12-31' } });
+	});
+
+	it('nennt «Abgerechnet bis» in der Prüfung nicht, wenn es leer ist, und sendet keines', async () => {
+		await untilReview();
+		expect(document.body.textContent).not.toContain('Abgerechnet bis');
+		const calls = backend();
+		submit('submit-button');
+		await settle();
+		expect(calls.at(-1)!.body).not.toHaveProperty('billedUntil');
+	});
+
+	// fach review 453-1 V-6: the field hides once the Vertragsbeginn moves to today or later
+	it('vergisst «Abgerechnet bis», wenn der Vertragsbeginn danach in die Zukunft rückt', async () => {
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		type('billed-until-input', '31.12.2024');
+		type('start-date-input', '01.01.2027');
+		await settle();
+		next();
+		await settle();
+		type('contract-base-rent-input', '950');
+		chooseFee('run');
+		next();
+		await settle();
+		expect(heading()).toBe('Prüfen');
+		expect(document.body.textContent).not.toContain('Abgerechnet bis');
+		const calls = backend();
+		submit('submit-button');
+		await settle();
+		expect(calls.at(-1)!.body).not.toHaveProperty('billedUntil');
+	});
+
+	// #453 (#337): a statement exists only after its period ended; a day before the Vertragsbeginn has no effect
+	it.each([
+		['31.12.2099', 'Abgerechnet bis kann nicht in der Zukunft liegen. Tragen Sie den letzten Tag der letzten Abrechnung ein, die ausserhalb von Dwello erstellt wurde.'],
+		['31.12.2019', 'Abgerechnet bis liegt vor dem Vertragsbeginn 01.01.2020. Lassen Sie das Feld leer, wenn für diesen Mietvertrag noch nichts ausserhalb von Dwello abgerechnet ist.']
+	])('lehnt «Abgerechnet bis» %s am Feld ab', async (date, error) => {
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		type('billed-until-input', date);
+		next();
+		await settle();
+		expect(heading()).toBe('Vertragsdauer');
+		expect(document.body.textContent).toContain(error);
+	});
+
 	it('lehnt ein unmögliches Datum ab', async () => {
 		await toPeriod();
 		type('start-date-input', '31.02.2026');

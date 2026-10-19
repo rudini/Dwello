@@ -36,7 +36,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'draft-restored', 'draft-discard-dialog'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'draft-restored', 'draft-discard-dialog'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -111,6 +111,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.apartment('Bergsicht', '2.02', 'vacant');
 	await seed.tenant('Emil');
 	await seed.contract('Emil', '2.02', { startDate: '2010-01-01', endDate: '2014-12-31', baseRent: '1500.00' });
+	await seed.billedUntil('Emil', '2014-12-31'); // the wizard's preview of 2014 passes him over (#453)
 	// a tenant who has not moved in yet: «Vermietet ab», Mieter «Künftig» (#58)
 	await seed.apartment('Bergsicht', '2.03', 'vacant');
 	await seed.tenant('Fritz');

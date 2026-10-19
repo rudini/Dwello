@@ -17,6 +17,11 @@ describe('Akontobeiträge einer Abrechnungsperiode', () => {
 		expect(total('2024-01-01', '2024-06-30')).toBe(900);
 	});
 
+	// #453 (#408, Punkt 3): «Abgerechnet bis» 15.03.2024, CHF 120 Akonto: 16 von 31 Tagen im März
+	it('rechnet das Akonto ab dem Tag nach «Abgerechnet bis» mitten im Monat tagesgenau an', () => {
+		expect(calculateTotalAdvancePayments(120, new Date('2024-03-16T00:00:00Z'), new Date('2024-03-31T00:00:00Z'))).toBe(61.94);
+	});
+
 	it('rechnet einen angebrochenen Monat tagesgenau an', () => {
 		expect(total('2024-01-16', '2024-01-31')).toBe(77.42);
 	});

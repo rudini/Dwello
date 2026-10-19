@@ -347,6 +347,13 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-pdf-refused'), await response.json())).toEqual([]);
 	});
 
+	// #453 (#337): «Abgerechnet bis» before the Vertragsbeginn 01.01.2024
+	it('PUT /contracts/:id mit «Abgerechnet bis» vor dem Vertragsbeginn liefert die Felder von contract-billed-until-refused.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { billedUntil: '2023-12-31' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-billed-until-refused'), await response.json())).toEqual([]);
+	});
+
 	// the 2024 statement already bills the days after 31.03.2024
 	it('PUT /contracts/:id mit einem Vertragsende vor einer Abrechnung liefert die Felder von contract-end-refused.json', async () => {
 		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2024-03-31' });

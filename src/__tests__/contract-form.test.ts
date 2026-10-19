@@ -40,6 +40,7 @@ describe('initialContractValues', () => {
 			{
 				...filled,
 				startDate: '',
+				billedUntil: '',
 				baseRent: '',
 				flatRateUtilityCharge: '',
 				// #89: no default, the landlord chooses

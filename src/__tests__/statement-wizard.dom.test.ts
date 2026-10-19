@@ -401,11 +401,47 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
+	// #453 (#327, V-13): days billed outside Dwello are missing from the total too
 	it('erklärt, warum die Kosten aller Abrechnungen kleiner sein können als die Rechnungen', () => {
 		open({ preview, invoices });
-		expect(document.body.textContent).toContain(
-			'Den Anteil leerer Wohnungen trägt der Vermieter; er ist in diesem Betrag nicht enthalten.'
+		expect(byTestId('preview-vacancy-note')!.textContent).toBe(
+			'Den Anteil leerer Wohnungen und der Tage, die ausserhalb von Dwello abgerechnet sind, enthält das Total nicht.'
 		);
+	});
+
+	// #453 (#327): before creating, the landlord checks per contract whether «Abgerechnet bis» works
+	it('nennt in jeder Zeile der Vorschau die abgerechneten Tage, das Akonto und «Abgerechnet bis»', () => {
+		const rows = [
+			{ ...preview[0], rentalStart: '2024-03-01', rentalEnd: '2024-03-31', rentalDays: 31, totalAdvancePayments: 120, billedUntil: '2024-02-29' },
+			{ ...preview[1], rentalStart: '2024-05-01', rentalEnd: '2024-12-31', rentalDays: 245, totalAdvancePayments: 1800 }
+		];
+		open({ preview: rows, invoices });
+		const [anna, marc] = allByTestId('preview-row').map((r) => r.textContent!.replace(/\s+/g, ' '));
+		expect(anna).toContain('01.03.2024 – 31.03.2024, 31 Mietstage, Akonto CHF 120.00');
+		expect(anna).toContain('Abgerechnet bis 29.02.2024 (am Mietvertrag): Mietstage und Akonto ab 01.03.2024');
+		expect(marc).toContain('01.05.2024 – 31.12.2024, 245 Mietstage, Akonto CHF 1’800.00');
+		expect(marc).not.toContain('Abgerechnet');
+	});
+
+	it('nennt jeden Mietvertrag, den «Abgerechnet bis» ganz abdeckt, mit einem Link darauf', () => {
+		const skipped = [{ id: 'c9', tenantName: 'Eva Frei', billedUntil: '2024-12-31' }];
+		open({ preview, invoices: [{ ...invoices[0], skipped }, invoices[1]] });
+		const line = byTestId('preview-skipped-c9')!;
+		expect(line.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+			'Eva Frei: Abgerechnet bis 31.12.2024 (am Mietvertrag). Für diese Abrechnungsperiode erstellt Dwello für diesen Mietvertrag keine Abrechnung.'
+		);
+		expect(line.querySelector('a')!.getAttribute('href')).toBe('/contracts/c9');
+		expect(line.querySelector('a')!.textContent).toBe('Eva Frei');
+	});
+
+	it('sagt statt «keine Mietverträge», dass alle Mietverträge des Gebäudes ausserhalb von Dwello abgerechnet sind', () => {
+		const skipped = [{ id: 'c9', tenantName: 'Eva Frei', billedUntil: '2024-12-31' }];
+		open({ preview: [], invoices: [{ ...invoices[1], skipped, allSkipped: true }] });
+		expect(byTestId('preview-all-skipped-b2')!.textContent!.trim()).toBe(
+			'Alle Mietverträge von Lindenhof sind in dieser Abrechnungsperiode schon ausserhalb von Dwello abgerechnet («Abgerechnet bis» am Mietvertrag).'
+		);
+		expect(byTestId('preview-skipped-c9')).not.toBeNull();
+		expect(byTestId('preview-empty')).toBeNull();
 	});
 
 	it('zeigt die Vorschau mit Saldo in Worten und den Rechnungen jedes Gebäudes', () => {

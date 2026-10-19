@@ -53,6 +53,7 @@ import {
 	apartmentContractsUnknown,
 	apartmentSelect,
 	baseRentInput,
+	billedUntilInput,
 	contractSubmitButton,
 	durationChoice,
 	endDateInput,
@@ -244,6 +245,17 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(openDialog(endContractButton), Click.on(confirmEndContractButton), Wait.until(on.dialogError)),
 	// the end dialog on the contract page, the contract form on its edit page
 	'past-end-error': () => endWithPastDate,
+	// «Abgerechnet bis» after today; in the wizard after a Vertragsbeginn in the past, whose warning points to it (#453)
+	'billed-until-refused': () => async (actor) => {
+		const wizard = (await actor.answer(pageAddress)).includes('/contracts/new');
+		if (wizard)
+			await actor.attemptsTo(Click.on(nextButton), Click.on(nextButton), EnterDate.of('2020-01-01').into(startDateInput));
+		await actor.attemptsTo(
+			EnterDate.of('2099-12-31').into(billedUntilInput),
+			Click.on(wizard ? nextButton : contractSubmitButton),
+			Wait.until(on.formProblem)
+		);
+	},
 	// the seeded contract runs since 2015 with statements only for 2024 and 2025: several periods are missing (#142)
 	'missing-statements': () => Wait.until(on.shown('contract-missing-statement')),
 	// the 2025 draft already bills rent days after 31.03.2025: the dialog links it and offers to delete it (A-10)
@@ -454,6 +466,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
 	// 2024 with the second building, where Fritz moved out and still has its address (A-5, #114)
 	'old-address-preview': (example) => previewOf('2024', 'preview-old-address')(example, example.tankBuilding),
+	// 2014: Emil's contract in the second building is billed outside Dwello up to its end (#453)
+	'preview-skipped': (example) =>
+		previewOf('2014', `preview-all-skipped-${example.tankBuilding}`)(example, example.tankBuilding),
 	'old-address-task': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Neue Adresse eintragen')))),
 	// a draft from an earlier visit whose building and heating profile were deleted since
 	'draft-dropped': () => (actor) =>

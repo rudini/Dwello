@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { backendMessage } from '$lib/backend-error';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount, tick, untrack } from 'svelte';
@@ -24,7 +25,8 @@
 		type ListedContract,
 		startDateNotice,
 		startValues,
-		stepErrors
+		stepErrors,
+		offeredBilledUntil
 	} from '$lib/contract-wizard';
 	import { contractPeriod, contractStatusOn } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
@@ -230,13 +232,16 @@
 		const wrong = firstStepWithError(errors);
 		if (wrong) return showErrors(wrong);
 		saving = true;
-		const response = await apiCall('/contracts', { method: 'POST', body: contractBody(values) });
+		const response = await apiCall('/contracts', {
+			method: 'POST',
+			body: contractBody(offeredBilledUntil(values, today))
+		});
 		saving = false;
 		if (response.error) {
-			// the backend answers in English; the only refusal a valid form can meet is an overlap
+			// the backend answers in English: an overlap, or «Abgerechnet bis» after the browser's today (#453)
 			errors = /overlap/i.test(response.error.message)
 				? { form: OVERLAP }
-				: { form: m.contracts_save_failed() };
+				: { form: backendMessage(response.error.details, m.contracts_save_failed()) };
 			return;
 		}
 		touched = false;
@@ -259,7 +264,7 @@
 		event.preventDefault();
 		Object.assign(values, normalizeAmounts(values)); // in place: a new object would rerun the effects
 		if (step === contractSteps.length) return save();
-		errors = stepErrors(values, step);
+		errors = stepErrors(values, step, today);
 		if (step === 3 && !errors.startDate) errors = { ...errors, ...periodWarnings() };
 		if (Object.keys(errors).length > 0) return showErrors(step);
 		goTo(step + 1);
@@ -321,6 +326,8 @@
 				bind:startDate={values.startDate}
 				bind:endDate={values.endDate}
 				bind:isUnlimited={values.isUnlimited}
+				bind:billedUntil={values.billedUntil}
+				offerBilledUntil
 				min={startLimit.min}
 				{unknown}
 				onretry={retry}
@@ -332,7 +339,7 @@
 			<RentStep bind:values {errors} {takenFrom} {categories} />
 		{:else}
 			<ReviewStep
-				{values}
+				values={offeredBilledUntil(values, today)}
 				{tenants}
 				{apartments}
 				{categories}

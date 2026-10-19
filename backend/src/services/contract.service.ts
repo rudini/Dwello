@@ -290,6 +290,17 @@ function checkNotice(terminated: boolean | undefined, endDate: string | null | u
 	if (terminated && !endDate) throw new CodedError('CONTRACT_NOTICE_WITHOUT_END', 'A notice needs an end date');
 }
 
+/**
+ * «Abgerechnet bis» (#453, #337): a statement exists only after its period ended, so never after today; before the
+ * Vertragsbeginn it has no effect. Checked when the date or the Vertragsbeginn is sent; a stored value stays till then
+ */
+function checkBilledUntil(startDate: string, billedUntil: string | null | undefined, sent: boolean) {
+	if (!billedUntil || !sent) return;
+	if (billedUntil > swissToday()) throw new CodedError('BILLED_UNTIL_FUTURE', '«Abgerechnet bis» lies in the future');
+	if (billedUntil < startDate)
+		throw new CodedError('BILLED_UNTIL_BEFORE_START', '«Abgerechnet bis» lies before the contract start', { date: startDate });
+}
+
 // Without an agreed Verwaltungspauschale no own rate is kept: agreeing again later must not bring it back (#89)
 const feeRate = <T extends Partial<NewRentalContract>>(data: T, agreed = data.managementFeeAgreed): T =>
 	agreed ? data : { ...data, managementFeePercent: null };
@@ -299,6 +310,7 @@ const feeRate = <T extends Partial<NewRentalContract>>(data: T, agreed = data.ma
  */
 export async function createContract({ agreedCategoryIds, ...data }: NewRentalContract & AgreedList): Promise<RentalContract> {
 	checkNotice(data.terminated, data.endDate);
+	checkBilledUntil(data.startDate, data.billedUntil, true);
 	// Check for overlapping contracts
 	const { hasOverlap, overlappingContract } = await checkContractOverlap(
 		data.apartmentId,
@@ -401,6 +413,8 @@ export async function updateContract(
 		throw new CodedError('CONTRACT_PARTIES_FIXED', 'Tenant and apartment of a contract cannot be changed');
 	// removing the end withdraws the notice (below), whatever flag comes with it
 	if (data.endDate !== null) checkNotice(data.terminated, data.endDate ?? current.endDate);
+	const { startDate, billedUntil } = { ...current, ...newDates(data) };
+	checkBilledUntil(startDate, billedUntil, data.billedUntil !== undefined || !!data.startDate);
 	// the draft delete and the change in one transaction: a refused change keeps the draft (#141)
 	const [contract] = await db.transaction(async (tx) => {
 		await checkNewDates(current, data, tx, deleteDraft);

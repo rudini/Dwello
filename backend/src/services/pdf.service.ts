@@ -45,6 +45,7 @@ const translations: Record<Language, Record<string, string>> = {
 		managementFee: 'Verwaltungspauschale',
 		colon: ': ',
 		advancePayments: 'Geleistete Akontobeiträge',
+		advancePaymentsFrom: 'Geleistete Akontobeiträge ab {date}',
 		rounding: 'Rundung auf 5 Rappen',
 		beforeRounding: 'vor Rundung',
 		roundedNote: 'auf 5 Rappen gerundet',
@@ -74,6 +75,7 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
 		heatingNoteParts: 'Heizkosten nach Heizprofil «{profile}»: {percent} % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
 		heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses: {months}',
+		heatingMonthsBilled: 'Anteile der abgerechneten Monate Ihres Mietverhältnisses: {months}',
 		heatingPeriodSums: '; zusammen {tenant}\u00a0%. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen {period}\u00a0%.',
 		heatingPeriodMonths: '; zusammen {tenant}\u00a0%. Anteile der Monate der Abrechnungsperiode im Heizprofil: {months}; zusammen {period}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
 		months: 'Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez',
@@ -89,13 +91,14 @@ const translations: Record<Language, Record<string, string>> = {
 		partLine: 'Leistungszeitraum {start} – {end}{colon}CHF {amount}, Ihre Mietstage {days} von {total} Tagen',
 		partShare: 'Ihr Anteil{colon}{apartment} × ({sum}) / {costs} = {share}',
 		partProfile: ', Anteile der Monate im Heizprofil: {periodMonths}; zusammen {period}\u00a0%. Anteile der Monate Ihres Mietverhältnisses darin: {months}; zusammen {tenant}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
+		partProfileBilled: ', Anteile der Monate im Heizprofil: {periodMonths}; zusammen {period}\u00a0%. Anteile der abgerechneten Monate Ihres Mietverhältnisses darin: {months}; zusammen {tenant}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', Anteil nach Heizprofil: {percent}\u00a0% (siehe Heiz- und Warmwasserkosten)',
 		partProfileNone: 'keine',
 		partNamed: '{line} (Rechnung «{description}»)',
 		yourCosts: 'Ihre Nebenkosten',
 		pageOf: 'Seite {page} von {pages}',
 		tenancyLine: 'Ihr Mietverhältnis in dieser Periode: {start} – {end} ({days} Mietstage von {total} Tagen)',
-		tenancyBilledLine: 'Ihr Mietverhältnis in dieser Periode: {tenancyStart} – {end}. Abgerechnet bis {billedUntil}; diese Abrechnung umfasst {start} – {end} ({days} Mietstage von {total} Tagen)',
+		tenancyBilledLine: 'Ihr Mietverhältnis in dieser Periode: {tenancyStart} – {end}. Ihre Nebenkosten und Akontobeiträge bis {billedUntil} sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst {start} – {end} ({days} Mietstage von {total} Tagen).',
 		payBy: 'Bitte bezahlen Sie den Betrag bis {date} mit dem Zahlteil.',
 		payNoDate: 'Bitte bezahlen Sie den Betrag mit dem Zahlteil.',
 		paidOn: 'Bezahlt am {date}. Vielen Dank.',
@@ -141,6 +144,7 @@ const translations: Record<Language, Record<string, string>> = {
 		managementFee: 'Frais de gestion',
 		colon: '\u00a0: ',
 		advancePayments: 'Acomptes versés',
+		advancePaymentsFrom: 'Acomptes versés à partir du {date}',
 		rounding: 'Arrondi à 5 centimes',
 		beforeRounding: 'avant arrondi',
 		roundedNote: 'arrondi à 5 centimes',
@@ -170,6 +174,7 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% des frais de chauffage de votre logement pour la période de décompte',
 		heatingNoteParts: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% pour une facture sans période de prestation. Pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
 		heatingMonths: 'Parts des mois de votre bail\u00a0: {months}',
+		heatingMonthsBilled: 'Parts des mois décomptés de votre bail\u00a0: {months}',
 		heatingPeriodSums: '\u00a0; au total {tenant}\u00a0%. Les mois de la période de décompte totalisent {period}\u00a0% dans le profil de chauffage.',
 		heatingPeriodMonths: '\u00a0; au total {tenant}\u00a0%. Parts des mois de la période de décompte dans le profil de chauffage\u00a0: {months}\u00a0; au total {period}\u00a0%. Part selon le profil de chauffage\u00a0: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
 		months: 'janv.,févr.,mars,avr.,mai,juin,juil.,août,sept.,oct.,nov.,déc.',
@@ -184,13 +189,14 @@ const translations: Record<Language, Record<string, string>> = {
 		partLine: 'Période de prestation {start} – {end}{colon}CHF {amount}, vos jours de location {days} sur {total}',
 		partShare: 'Votre part{colon}{apartment} × ({sum}) / {costs} = {share}',
 		partProfile: ', parts des mois dans le profil de chauffage\u00a0: {periodMonths}\u00a0; au total {period}\u00a0%. Parts des mois de votre bail dans cette période\u00a0: {months}\u00a0; au total {tenant}\u00a0%. Part selon le profil de chauffage\u00a0: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
+		partProfileBilled: ', parts des mois dans le profil de chauffage\u00a0: {periodMonths}\u00a0; au total {period}\u00a0%. Parts des mois décomptés de votre bail dans cette période\u00a0: {months}\u00a0; au total {tenant}\u00a0%. Part selon le profil de chauffage\u00a0: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', part selon le profil de chauffage\u00a0: {percent}\u00a0% (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»)',
 		partProfileNone: 'aucune',
 		partNamed: '{line} (facture « {description} »)',
 		yourCosts: 'Vos frais accessoires',
 		pageOf: 'Page {page} sur {pages}',
-		tenancyLine: 'Votre bail pendant la période : {start} – {end} ({days} jours sur {total})',
-		tenancyBilledLine: 'Votre bail pendant la période : {tenancyStart} – {end}. Décompté jusqu’au {billedUntil} ; ce décompte couvre {start} – {end} ({days} jours sur {total})',
+		tenancyLine: 'Votre bail pendant cette période\u00a0: {start} – {end} ({days} jours de location sur {total})',
+		tenancyBilledLine: 'Votre bail pendant cette période\u00a0: {tenancyStart} – {end}. Vos frais accessoires et acomptes jusqu’au {billedUntil} ont été décomptés dans un décompte antérieur. Ce décompte couvre {start} – {end} ({days} jours de location sur {total}).',
 		payBy: 'Veuillez payer le montant au plus tard le {date} au moyen de la section paiement.',
 		payNoDate: 'Veuillez payer le montant au moyen de la section paiement.',
 		paidOn: 'Payé le {date}. Merci.',
@@ -236,6 +242,7 @@ const translations: Record<Language, Record<string, string>> = {
 		managementFee: 'Spese di gestione',
 		colon: ': ',
 		advancePayments: 'Acconti versati',
+		advancePaymentsFrom: 'Acconti versati dal {date}',
 		rounding: 'Arrotondamento a 5 centesimi',
 		beforeRounding: 'prima dell’arrotondamento',
 		roundedNote: 'arrotondato a 5 centesimi',
@@ -265,6 +272,7 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
 		heatingNoteParts: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura senza periodo di prestazione. Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
 		heatingMonths: 'Quote dei mesi della sua locazione: {months}',
+		heatingMonthsBilled: 'Quote dei mesi conteggiati del suo rapporto di locazione: {months}',
 		heatingPeriodSums: '; in totale {tenant}\u00a0%. I mesi del periodo di conteggio totalizzano {period}\u00a0% nel profilo di riscaldamento.',
 		heatingPeriodMonths: '; in totale {tenant}\u00a0%. Quote dei mesi del periodo di conteggio nel profilo di riscaldamento: {months}; in totale {period}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
 		months: 'gen,feb,mar,apr,mag,giu,lug,ago,set,ott,nov,dic',
@@ -279,13 +287,14 @@ const translations: Record<Language, Record<string, string>> = {
 		partLine: 'Periodo di prestazione {start} – {end}{colon}CHF {amount}, i suoi giorni di locazione {days} su {total}',
 		partShare: 'La sua quota{colon}{apartment} × ({sum}) / {costs} = {share}',
 		partProfile: ', quote dei mesi nel profilo di riscaldamento: {periodMonths}; in totale {period}\u00a0%. Quote dei mesi della sua locazione in tale periodo: {months}; in totale {tenant}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
+		partProfileBilled: ', quote dei mesi nel profilo di riscaldamento: {periodMonths}; in totale {period}\u00a0%. Quote dei mesi conteggiati del suo rapporto di locazione in tale periodo: {months}; in totale {tenant}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', quota secondo il profilo di riscaldamento: {percent}\u00a0% (vedi spese di riscaldamento e acqua calda)',
 		partProfileNone: 'nessuna',
 		partNamed: '{line} (fattura «{description}»)',
 		yourCosts: 'Le sue spese accessorie',
 		pageOf: 'Pagina {page} di {pages}',
-		tenancyLine: 'La sua locazione in questo periodo: {start} – {end} ({days} giorni su {total})',
-		tenancyBilledLine: 'La sua locazione in questo periodo: {tenancyStart} – {end}. Conteggiato fino al {billedUntil}; questo conteggio comprende {start} – {end} ({days} giorni su {total})',
+		tenancyLine: 'Il suo rapporto di locazione in questo periodo: {start} – {end} ({days} giorni di locazione su {total})',
+		tenancyBilledLine: 'Il suo rapporto di locazione in questo periodo: {tenancyStart} – {end}. Le sue spese accessorie e i suoi acconti fino al {billedUntil} sono stati conteggiati in un conteggio precedente. Questo conteggio comprende {start} – {end} ({days} giorni di locazione su {total}).',
 		payBy: 'La preghiamo di pagare l’importo entro il {date} tramite la sezione pagamento.',
 		payNoDate: 'La preghiamo di pagare l’importo tramite la sezione pagamento.',
 		paidOn: 'Pagato il {date}. Grazie.',
@@ -331,6 +340,7 @@ const translations: Record<Language, Record<string, string>> = {
 		managementFee: 'Management fee',
 		colon: ': ',
 		advancePayments: 'Advance payments made',
+		advancePaymentsFrom: 'Advance payments made from {date}',
 		rounding: 'Rounding to 5 centimes',
 		beforeRounding: 'before rounding',
 		roundedNote: 'rounded to 5 centimes',
@@ -360,6 +370,7 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Heating costs under the heating profile ‘{profile}’: {percent} % of your apartment’s heating costs for the billing period',
 		heatingNoteParts: 'Heating costs under the heating profile ‘{profile}’: {percent} % for an invoice without a service period. For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.',
 		heatingMonths: 'Monthly shares during your tenancy: {months}',
+		heatingMonthsBilled: 'Monthly shares of the billed months of your tenancy: {months}',
 		heatingPeriodSums: '; in total {tenant}\u00a0%. The months of the billing period total {period}\u00a0% in the heating profile.',
 		heatingPeriodMonths: '; in total {tenant}\u00a0%. Monthly shares of the billing period in the heating profile: {months}; in total {period}\u00a0%. Share under the heating profile: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
 		months: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
@@ -374,13 +385,14 @@ const translations: Record<Language, Record<string, string>> = {
 		partLine: 'Service period {start} – {end}{colon}CHF {amount}, your days rented {days} of {total}',
 		partShare: 'Your share{colon}{apartment} × ({sum}) / {costs} = {share}',
 		partProfile: ', monthly shares in the heating profile: {periodMonths}; in total {period}\u00a0%. Monthly shares during your tenancy within it: {months}; in total {tenant}\u00a0%. Share under the heating profile: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
+		partProfileBilled: ', monthly shares in the heating profile: {periodMonths}; in total {period}\u00a0%. Monthly shares of the billed months of your tenancy within it: {months}; in total {tenant}\u00a0%. Share under the heating profile: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', share under the heating profile: {percent}\u00a0% (see ‘Heating and hot water costs’)',
 		partProfileNone: 'none',
 		partNamed: '{line} (invoice ‘{description}’)',
 		yourCosts: 'Your utility costs',
 		pageOf: 'Page {page} of {pages}',
-		tenancyLine: 'Your tenancy in this period: {start} – {end} ({days} of {total} days)',
-		tenancyBilledLine: 'Your tenancy in this period: {tenancyStart} – {end}. Billed until {billedUntil}; this statement covers {start} – {end} ({days} of {total} days)',
+		tenancyLine: 'Your tenancy in this period: {start} – {end} ({days} of {total} days rented)',
+		tenancyBilledLine: 'Your tenancy in this period: {tenancyStart} – {end}. Your utility costs and advance payments up to {billedUntil} were billed in an earlier statement. This statement covers {start} – {end} ({days} of {total} days rented).',
 		payBy: 'Please pay the amount by {date} using the payment part.',
 		payNoDate: 'Please pay the amount using the payment part.',
 		paidOn: 'Paid on {date}. Thank you.',
@@ -620,7 +632,6 @@ function title({ doc, t, data }: Page, y: number) {
 		.text(`${t.statementNumber} ${data.statementNumber} · ${t.statementDate} ${formatDate(data.statementDate)}`)
 		.fillColor(COLORS.ink)
 		.text(
-			// TODO(fachlich prüfen, #325): the line with «Abgerechnet bis» is the domain review's proposal
 			fill(data.billed ? t.tenancyBilledLine : t.tenancyLine, {
 				start: formatDate(data.rentalStart),
 				end: formatDate(data.rentalEnd),
@@ -1124,12 +1135,23 @@ function printableDoc(doc: Doc) {
 	return doc;
 }
 
+// #453 (#325): with «Abgerechnet bis» in the period the Akonto and the tenant's months are those from the day after
+const billedTexts = (t: Record<string, string>, data: StatementPDFData) =>
+	data.billed
+		? {
+				...t,
+				advancePayments: fill(t.advancePaymentsFrom, { date: formatDate(data.rentalStart) }),
+				heatingMonths: t.heatingMonthsBilled,
+				partProfile: t.partProfileBilled
+			}
+		: t;
+
 /**
  * Generate utility statement PDF: A4, header and footer on every page, the balance first, then how each cost is
  * shared, the heating costs and the tenant's rights; the QR-bill at the bottom of the last page for an amount due
  */
 async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig, language: Language = 'de'): Promise<Buffer> {
-	const t = { ...translations.de, ...translations[language] };
+	const t = billedTexts({ ...translations.de, ...translations[language] }, data);
 	const qr = await qrCodeFor(data, config, t);
 
 	return new Promise((resolve, reject) => {

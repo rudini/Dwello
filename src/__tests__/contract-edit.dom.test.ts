@@ -16,6 +16,7 @@ import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
+import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
 
 const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
@@ -127,6 +128,29 @@ describe('Mietvertrag bearbeiten', () => {
 		click('delete-draft-and-save');
 		await settle();
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
+	});
+
+	// #453 (#337): a statement exists only after its period ended; a day before the Vertragsbeginn has no effect
+	it.each([
+		['31.12.2099', 'Abgerechnet bis kann nicht in der Zukunft liegen. Tragen Sie den letzten Tag der letzten Abrechnung ein, die ausserhalb von Dwello erstellt wurde.'],
+		['31.03.2024', 'Abgerechnet bis liegt vor dem Vertragsbeginn 01.04.2024. Lassen Sie das Feld leer, wenn für diesen Mietvertrag noch nichts ausserhalb von Dwello abgerechnet ist.']
+	])('lehnt «Abgerechnet bis» %s am Feld ab', async (date, error) => {
+		await open();
+		type('billed-until-input', date);
+		await save();
+		expect(puts()).toEqual([]);
+		expect(document.body.textContent).toContain(error);
+	});
+
+	// a refusal of the backend (its clock may differ from the browser's) in the UI language
+	it('nennt die Ablehnung von «Abgerechnet bis» durch das Backend in Worten', async () => {
+		calls = fakeBff(({ method }) => (method === 'PUT' ? [400, billedRefused] : [200, { contracts: [] }]));
+		await open();
+		type('billed-until-input', '01.04.2024');
+		await save();
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Abgerechnet bis liegt vor dem Vertragsbeginn 01.01.2024.'
+		);
 	});
 
 	// code review C-2: a mistyped date must not clear the stored «Abgerechnet bis»

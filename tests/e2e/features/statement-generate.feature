@@ -165,7 +165,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #453 (#327): vor dem Erstellen prüft der Liegenschaftsverwalter, ob «Abgerechnet bis» wirkt: jede Zeile nennt die
   # abgerechneten Tage und das Akonto, Eva Frei 01.03. bis 31.03.2024 = 31 Mietstage, Akonto 1 Monat × 120.00
-  @wip
   Szenario: Die Vorschau nennt Mietstage und Akonto ab dem Tag nach «Abgerechnet bis»
     Angenommen der Mietvertrag von "Eva Frei" hat "120" Franken Akonto
     Und der Mietvertrag von "Eva Frei" ist bis "2024-02-29" ausserhalb von Dwello abgerechnet
@@ -177,13 +176,11 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und sagt die Vorschau zum Total "Den Anteil leerer Wohnungen und der Tage, die ausserhalb von Dwello abgerechnet sind, enthält das Total nicht."
 
   # #453 (#327): ein übergangener Mietvertrag fällt nicht still aus der Vorschau
-  @wip
   Szenario: Die Vorschau nennt einen Mietvertrag, den «Abgerechnet bis» ganz abdeckt
     Angenommen der Mietvertrag von "Marc Huber" ist bis "2024-12-31" ausserhalb von Dwello abgerechnet
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann nennt die Vorschau den übergangenen Mietvertrag von "Marc Huber": "Abgerechnet bis 31.12.2024 (am Mietvertrag). Für diese Abrechnungsperiode erstellt Dwello für diesen Mietvertrag keine Abrechnung."
 
-  @wip
   Szenario: Von der Vorschau zum übergangenen Mietvertrag
     Angenommen der Mietvertrag von "Marc Huber" ist bis "2024-12-31" ausserhalb von Dwello abgerechnet
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
@@ -191,7 +188,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Marc Huber"
 
   # #453 (#327): sind alle übergangen, stimmt «keine Mietverträge» nicht
-  @wip
   Szenario: Alle Mietverträge des Gebäudes sind ausserhalb von Dwello abgerechnet
     Angenommen der Mietvertrag von "Eva Frei" ist bis "2024-12-31" ausserhalb von Dwello abgerechnet
     Und der Mietvertrag von "Marc Huber" ist bis "2024-12-31" ausserhalb von Dwello abgerechnet

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { backendMessage } from '$lib/backend-error';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { tick, untrack } from 'svelte';
@@ -9,7 +10,8 @@
 		forAvailability,
 		initialContractValues,
 		overlapWarning,
-		validateContract
+		validateContract,
+		billedUntilError
 	} from '$lib/contract-form';
 	import {
 		billsIn,
@@ -152,7 +154,7 @@
 			return m.contracts_billed_draft_covered({ number: statements[0].statementNumber });
 		if (Array.isArray(statements)) return billedDaysError(statements);
 		if (/overlap/i.test(message)) return m.backend_contract_overlap();
-		return m.contracts_save_failed();
+		return backendMessage(details, m.contracts_save_failed()); // e.g. «Abgerechnet bis» (#453)
 	}
 
 	// the fields' errors; true when the form may be sent
@@ -164,8 +166,10 @@
 		if (pastConfirmed) errors.pastConfirmed = pastConfirmed;
 		// a typed «Abgerechnet bis» that is no date is not sent as none (code review C-2); the field says why
 		const billedText = form?.querySelector<HTMLInputElement>('#billedUntil')?.value.trim();
+		const billed = billedUntilError(values, today); // #453 (#337)
 		if (billedText && !values.billedUntil)
 			errors.billedUntil = m.ui_date_not_a_date({ example: '31.12.2024' });
+		else if (billed) errors.billedUntil = billed;
 		return Object.keys(errors).length === 0;
 	}
 

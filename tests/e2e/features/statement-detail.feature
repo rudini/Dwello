@@ -236,7 +236,6 @@ Funktionalität: Abrechnungsdetail
 
   # #453 (#325): mit «Abgerechnet bis» in der Periode sagt das PDF, was schon abgerechnet ist und ab wann das Akonto
   # zählt; 01.03. bis 31.03.2024 = 31 Mietstage von 366 Tagen
-  @wip
   Szenario: Das PDF nennt, was vor «Abgerechnet bis» schon abgerechnet ist
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und der Mietvertrag von "Eva Frei" hat "120" Franken Akonto
