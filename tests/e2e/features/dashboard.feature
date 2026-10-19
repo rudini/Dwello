@@ -78,6 +78,12 @@ Funktionalität: Übersicht
       | Bezahlt    |
       | Überfällig |
 
+    # #403 (2): versendet ohne Zahlung
+    @wip
+    Beispiele:
+      | Status   |
+      | Erledigt |
+
   Szenariogrundriss: Häufige Arbeit direkt beginnen
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Schnellaktion "<Schnellaktion>" wählt
