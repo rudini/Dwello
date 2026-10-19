@@ -2033,3 +2033,11 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] PR `Fixes #464`, `Refs #477`: pushed after this archive; merged once the product owner changed the glossary row (fach review 477-1 V-1)
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
+
+## Session C1: E2E in every browser on pull requests
+
+Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.
+
+- [x] `ci.yml`: E2E on pull requests with Chromium, Firefox, WebKit and `api` (60 min, as `main`); the axe check stays Chromium; `docs/test-pyramid.md`, `tests/e2e/CLAUDE.md`
+- [x] Slice review (`docs/reviews/ci-browsers-review-1.md`): C-1 `docs/tech-stack.md` fixed; C-2 (the axe shards get 60 min on pull requests too) kept, harmless
+- [x] PR (#473, merged): the first pull request with every browser shows the time it takes; its first run found a Firefox failure in «Suche ohne Treffer», cause not found (O-41)
