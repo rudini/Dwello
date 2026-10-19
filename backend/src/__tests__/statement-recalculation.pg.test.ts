@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, utilityStatements } from '../db/schema';
+import { roundTo5Rappen } from '../services/pdf-format';
 import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -18,6 +19,7 @@ type Statement = {
 	paymentDeadline: string;
 	managementFeePercent: string;
 	totalCosts: string;
+	totalAdvancePayments: string;
 	balance: string;
 	priorPayments: string;
 	replaces: { id: string } | null;
@@ -93,7 +95,9 @@ describe('Entwurf neu berechnen', () => {
 		expect(after.replaces?.id).toBe(sent);
 		expect(after.priorPayments).toBe(before.priorPayments);
 		expect(Number(before.priorPayments)).not.toBe(0);
-		expect(Number(after.balance)).toBeGreaterThan(Number(before.balance));
+		// the balance offsets what was paid (review 338-2 C-14)
+		const due = Number(after.totalCosts) - Number(after.totalAdvancePayments) - Number(after.priorPayments);
+		expect(Number(after.balance)).toBe(roundTo5Rappen(due));
 	});
 
 	// review 338-1 C-3: the wizard does not ask for a contract with a draft; the refusal sends to deleting it first

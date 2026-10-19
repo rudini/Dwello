@@ -18,7 +18,6 @@ import {
 	invoiceOfPosition,
 	invoicesOfPosition,
 	laterInvoicesHint,
-	recalculatedDone,
 	laterInvoicesHints,
 	languageOfPdf,
 	paidDateInvalid,
@@ -408,10 +407,6 @@ Given(
 
 When('der Liegenschaftsverwalter den Entwurf neu berechnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(recalculateDraft);
-});
-
-Then('bestätigt die Abrechnung {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(recalculatedDone).toContain(text);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung berichtigt', async ({ verwalter }) => {

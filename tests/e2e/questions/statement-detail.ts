@@ -89,7 +89,6 @@ export const languageOfPdf = Text.of(pdfLanguage);
 // #120
 export const correctConfirmation = Text.of(correctDialog);
 export const replacedDone = Text.of(successToast);
-export const recalculatedDone = Text.of(successToast);
 export const deadlineShown = Count.of(paymentDeadline);
 export const paymentText = Text.of(paymentSummary);
 export const replacedStatementLink = Attribute.named('href').of(replacesLink);
