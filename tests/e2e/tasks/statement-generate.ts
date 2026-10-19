@@ -3,6 +3,7 @@ import type { Activity } from '../screenplay/actor';
 import { Check, Click, DownloadFrom, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import {
+	agreementsRetry,
 	allBuildingsCheckbox,
 	backLink,
 	buildingCheckbox,
@@ -147,6 +148,7 @@ export const answerAgreement = (contractId: string, categoryId: string, agreed: 
 export const openContractWithNotAgreedCosts = (contractId: string) => Click.on(notAgreedCostsLink(contractId));
 // saving an answer fails (the BFF route the browser calls)
 export const agreementsCannotBeChecked = FailRequests.to('/api/statements/agreements', {});
+export const agreementsCheckAgain: Activity = (actor) => actor.attemptsTo(FailRequests.noLonger, Click.on(agreementsRetry));
 export const agreementsCannotBeSaved = (contractId: string) => FailRequests.to(`/api/contracts/${contractId}/agreements`, {});
 
 export const chooseAllBuildings = Check.the(allBuildingsCheckbox);

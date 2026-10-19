@@ -108,6 +108,14 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     # #439: «Weiter» ohne fertige Prüfung bleibt nicht stumm
     Und erklärt der Assistent "Dwello konnte die Mietverträge nicht prüfen. Wählen Sie «Erneut versuchen»."
 
+  # #439: nach «Weiter» geht der Assistent weiter, sobald die Prüfung gelingt
+  Szenario: Nach erneuter Prüfung geht der Assistent zur Vorschau
+    Angenommen das Prüfen der vereinbarten Nebenkosten ist gestört
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
+    Wenn der Liegenschaftsverwalter weitergeht
+    Und der Liegenschaftsverwalter die Prüfung erneut versucht, nachdem sie wieder geht
+    Dann enthält die Vorschau die Abrechnung von "Anna Keller"
+
   # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
   Szenario: Das PDF nennt die vereinbarten Nebenkosten
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

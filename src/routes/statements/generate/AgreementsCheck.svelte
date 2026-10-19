@@ -23,7 +23,9 @@
 	<Alert tone="critical" title={m.statements_agreements_failed_title()} testid="agreements-failed">
 		<p>{m.statements_agreements_failed_text()}</p>
 		{#snippet action()}
-			<Button variant="secondary" onclick={onretry}>{m.statements_agreements_retry()}</Button>
+			<Button variant="secondary" onclick={onretry} testid="agreements-retry"
+				>{m.statements_agreements_retry()}</Button
+			>
 		{/snippet}
 	</Alert>
 {/if}

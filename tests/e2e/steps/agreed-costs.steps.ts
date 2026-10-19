@@ -5,7 +5,7 @@ import { noAgreedCostsTone, noAgreedCostsWarning, reviewed } from '../questions/
 import { agreementQuestionsOf, agreementQuestionsShown, agreementsFailure, agreementsWaiting, notAgreedCostsOf } from '../questions/statement-generate';
 import { openContract } from '../tasks/contract-detail';
 import { leaveOutCategory, reviewContract, untickAllCategories } from '../tasks/contract-form';
-import { agreementsCannotBeChecked, agreementsCannotBeSaved, answerAgreement, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
+import { agreementsCannotBeChecked, agreementsCheckAgain, agreementsCannotBeSaved, answerAgreement, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -55,6 +55,10 @@ Then('meldet der Assistent bei den vereinbarten Nebenkosten {string}', async ({ 
 
 Then('erklärt der Assistent {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(agreementsWaiting).toContain(message);
+});
+
+When('der Liegenschaftsverwalter die Prüfung erneut versucht, nachdem sie wieder geht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(agreementsCheckAgain);
 });
 
 Given('das Speichern der Antworten zum Mietvertrag von {string} ist gestört', async ({ verwalter, seed }, tenant: string) => {
