@@ -454,6 +454,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
 	// 2024 with the second building, where Fritz moved out and still has its address (A-5, #114)
 	'old-address-preview': (example) => previewOf('2024', 'preview-old-address')(example, example.tankBuilding),
+	// 2024 in Bergsicht: Ida and Kurt moved out, a heating invoice without Leistungszeitraum beside one with (#339)
+	'heating-hints': (example) => previewOf('2024', 'heating-without-service-period')(example, example.tankBuilding),
 	'old-address-task': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Neue Adresse eintragen')))),
 	// a draft from an earlier visit whose building and heating profile were deleted since
 	'draft-dropped': () => (actor) =>

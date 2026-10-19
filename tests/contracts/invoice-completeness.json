@@ -23,5 +23,7 @@
 			"amount": "290.00"
 		}
 	],
-	"invoicesWithoutServicePeriod": []
+	"invoicesWithoutServicePeriod": [],
+	"heatingWithoutServicePeriod": [],
+	"oldHeatingRule": []
 }

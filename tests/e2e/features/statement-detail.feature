@@ -443,7 +443,7 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Leistungszeitraum 01.01.2024 – 31.03.2024: CHF 1'000.00, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: keine; zusammen 0.00 %. Anteil nach Heizprofil: 0.00 % / 43.00 % = 0.00 %"
-    Und steht im PDF "Rechnung ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 1'000.00, Anteil nach Heizprofil: 52.00 % (siehe Heiz- und Warmwasserkosten) – Rechnung vom 30.06.2024"
+    Und steht im PDF "Rechnung vom 30.06.2024 ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 1'000.00, Anteil nach Heizprofil: 52.00 % (siehe Heiz- und Warmwasserkosten)"
     Und steht im PDF "Heizkosten nach Heizprofil «Winter"
     Und steht im PDF "»: 52.00 % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition."
     Und steht im PDF "Ihr Anteil: 2'000.00 × Zeitanteil (1'000.00 × 0.00 % + 1'000.00 × 52.00 %) / 2'000.00 = 520.00"
@@ -472,7 +472,7 @@ Funktionalität: Abrechnungsdetail
   # Unter einer Position über verschiedene Tage nennt eine Zeile ihre Rechnung, wo Daten und Betrag sie keinem Beleg
   # zuordnen: eine Rechnung ohne Leistungszeitraum (sie gilt für die ganze Abrechnungsperiode) und zwei Rechnungen über
   # denselben Leistungszeitraum und Betrag; die Rechnung über April bis Juni ist eindeutig und bleibt ohne (#236). Die
-  # Zeile heisst nach Rechnungsdatum und Rechnungsnummer wie auf dem Beleg, nicht nach der Beschreibung (#451, Punkt 3)
+  # Zeile beginnt mit Rechnungsdatum und Rechnungsnummer wie auf dem Beleg, nicht mit der Beschreibung (#451, Punkt 3, V-8)
   @wip
   Szenario: PDF nennt die Rechnung, wenn Daten und Betrag sie nicht unterscheiden
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
@@ -488,9 +488,9 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Rechnung ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 765.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode – Rechnung vom 30.09.2025"
-    Und steht im PDF "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen – Rechnung vom 05.10.2025 (Nr. 4711)"
-    Und steht im PDF "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen – Rechnung vom 06.10.2025"
+    Dann steht im PDF "Rechnung vom 30.09.2025 ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 765.00, Ihre Mietstage 139 von 365 Tagen"
+    Und steht im PDF "Rechnung vom 05.10.2025 (Nr. 4711), Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen"
+    Und steht im PDF "Rechnung vom 06.10.2025, Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen"
     Und steht im PDF "Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen"
     Und steht im PDF nicht "Hauswart 2025"
     Und steht im PDF nicht "vom 05.07.2025"
@@ -563,10 +563,11 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann nennt die Abrechnung das Heizprofil "Winter"
 
-  # #280: eine Abrechnung ohne Heizkosten wendet kein Heizprofil an und nennt keines (#451, Punkt 8)
+  # #280: eine Abrechnung ohne Heizkosten wendet kein Heizprofil an und nennt keines, auch im PDF (#451, Punkt 8)
   @wip
   Szenario: Abrechnung ohne Heizkosten nennt kein Heizprofil
-    Angenommen das Gebäude "Rosenhof" in "Winterthur" existiert
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und das Gebäude "Rosenhof" in "Winterthur" existiert
     Und im Gebäude "Rosenhof" gibt es die leere Wohnung "1.01"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und der Mieter "Lea Graf" existiert
@@ -575,6 +576,10 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
     Dann nennt die Abrechnung das Mietverhältnis "Ihr Mietverhältnis in dieser Periode: 01.05.2024 – 31.12.2024"
     Und nennt die Abrechnung kein Heizprofil
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Hauswart"
+    Und steht im PDF nicht "Heizprofil"
 
   # #229 (F-7): ein eigenes Heizprofil lässt sich umbenennen; die Abrechnung nennt es, wie sie es gespeichert hat
   Szenario: Abrechnung nennt ihr Heizprofil auch nach dem Umbenennen
@@ -666,7 +671,8 @@ Funktionalität: Abrechnungsdetail
     Dann nennt die Position "Hauswart" den Wohnungsanteil "CHF 900.00", den Zeitanteil "366/366 Tage" und den Betrag "CHF 900.00"
 
   # #104 und #240: unter einer Position mit Rechnungen über verschiedene Tage steht jede Rechnung mit ihren Tagen und die
-  # Berechnung, wie im PDF (zwei gleich grosse Wohnungen: Wohnungsanteil 900.00 von 1’800.00)
+  # Berechnung wie im PDF; die Zeile heisst nach der Beschreibung der Rechnung (#451, V-12; zwei gleich grosse
+  # Wohnungen: Wohnungsanteil 900.00 von 1’800.00)
   Szenario: Kostenposition nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert

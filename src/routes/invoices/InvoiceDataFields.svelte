@@ -84,6 +84,7 @@
 		<p>{m.invoices_service_period_help({ year })}</p>
 		<p>{m.invoices_service_period_years({ year, end: year + 5 })}</p>
 		<p>{m.invoices_service_period_boiler()}</p>
+		<p>{m.invoices_service_period_fuel()}</p>
 	</div>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<DateInput

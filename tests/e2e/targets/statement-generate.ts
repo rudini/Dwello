@@ -87,7 +87,7 @@ export const invoicesWithoutServicePeriod = target('Hinweis auf Rechnungen ohne 
 	page.getByTestId('invoices-without-service-period')
 );
 // Heating invoices without Leistungszeitraum next to ones with one, at a tenant change with a Heizprofil (#339)
-export const heatingWithoutServicePeriod = target('Hinweis auf Heizrechnungen ohne Leistungszeitraum', (page) =>
+export const heatingWithoutServicePeriod = target('Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum', (page) =>
 	page.getByTestId('heating-without-service-period')
 );
 export const hintedInvoice = (hint: Target, date: string) =>

@@ -41,10 +41,15 @@
 		unbilledDays || existing.some((row) => row.changed.length) ? 'caution' : 'info'
 	);
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
-	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
+	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod' | 'heatingWithoutServicePeriod') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
 	const late = $derived(hinted('lateInvoices'));
 	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
+	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
+	const heating = $derived(hinted('heatingWithoutServicePeriod'));
+	const heatingCategories = $derived(
+		[...new Set(heating.flatMap((row) => row.invoices.map((invoice) => invoice.categoryName)))].join(', ')
+	);
 	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
 	const shown = (row: (typeof rows)[number]) => ({
@@ -103,6 +108,13 @@
 	title={m.statements_whole_title()}
 	text={m.statements_whole_text()}
 	testid="invoices-without-service-period"
+/>
+
+<InvoiceHint
+	buildings={heating}
+	title={m.statements_heating_whole_title()}
+	text={m.statements_heating_whole_text({ category: heatingCategories })}
+	testid="heating-without-service-period"
 />
 
 <InvoiceHint

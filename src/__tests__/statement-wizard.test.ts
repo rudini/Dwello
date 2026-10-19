@@ -97,6 +97,7 @@ describe('Rechnungen pro Gebäude', () => {
 				fixedTerm: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
+				heatingWithoutServicePeriod: [],
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -112,6 +113,7 @@ describe('Rechnungen pro Gebäude', () => {
 				fixedTerm: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
+				heatingWithoutServicePeriod: [],
 				findings: [],
 				incomplete: false,
 				comparedWith: null

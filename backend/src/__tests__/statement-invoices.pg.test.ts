@@ -69,14 +69,15 @@ describe('Rechnungen einer Abrechnungsposition', () => {
 	it('speichert zu jeder Position die abgerechneten Rechnungen mit Betrag und Tagen in der Periode', async () => {
 		await clear();
 		const first = await invoice();
-		const second = await invoice({ amount: '400.00', servicePeriodStart: '2024-07-01', servicePeriodEnd: '2025-06-30', invoiceDate: '2024-07-05' });
+		const second = await invoice({ amount: '400.00', servicePeriodStart: '2024-07-01', servicePeriodEnd: '2025-06-30', invoiceDate: '2024-07-05', invoiceNumber: 'SR-2024-7' });
 
 		const { lineItems } = await statement();
 
 		expect(lineItems).toHaveLength(1);
+		// with Rechnungsdatum and Rechnungsnummer, which name an invoice line in the PDF (#451)
 		expect(lineItems[0].invoices).toEqual([
-			{ id: second, description: `Hauswart ${token}`, amount: 201.64, start: '2024-07-01', end: '2024-12-31' },
-			{ id: first, description: `Hauswart ${token}`, amount: 732, start: '2024-01-01', end: '2024-12-31' }
+			{ id: second, description: `Hauswart ${token}`, invoiceDate: '2024-07-05', invoiceNumber: 'SR-2024-7', amount: 201.64, start: '2024-07-01', end: '2024-12-31' },
+			{ id: first, description: `Hauswart ${token}`, invoiceDate: '2024-12-31', amount: 732, start: '2024-01-01', end: '2024-12-31' }
 		]);
 	});
 });

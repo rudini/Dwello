@@ -164,7 +164,8 @@ describe('handleMidYearMoves', () => {
 		await deleteHeatingProfile(winter.id);
 
 		expect(result).toMatchObject({ byDays: false, percentage: 95.36, share: 953.6, periodPercentage: 50 });
-		expect((result as { monthBreakdown: unknown[] }).monthBreakdown.slice(0, 2)).toEqual([{ month: 1, percentage: 15.68 }, { month: 2, percentage: 14 }]);
+		// the split January with its share in the profile and its days, for the PDF (#451, point 3)
+		expect((result as { monthBreakdown: unknown[] }).monthBreakdown.slice(0, 2)).toEqual([{ month: 1, percentage: 15.68, full: 18, days: 27, total: 31 }, { month: 2, percentage: 14 }]);
 	});
 
 	// Ein Profil darf 100 % ± 0.1 ergeben: bei 100.10 % teilt auch ein ganzes Jahr, 50.10 / 100.10 = 50.05 % (#232, M-2)
