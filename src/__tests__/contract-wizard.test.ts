@@ -124,6 +124,11 @@ describe('Mietvertrag Schritt für Schritt', () => {
 			'Lassen Sie nur die Nebenkosten angekreuzt, für die der Mieter Akonto bezahlt.'
 		);
 		expect(flatRateNotice({ ...mixed, agreedCategoryIds: [] }, categories)).toBeNull();
+		// Helga 432 P-1 (Product Owner): mit Akonto warnt es nur, solange alle Nebenkosten angekreuzt sind
+		const two = [...categories, { id: 'c2', name: 'Hauswart' }];
+		expect(flatRateNotice({ ...mixed, agreedCategoryIds: ['c1', 'c2'] }, two)).not.toBeNull();
+		expect(flatRateNotice({ ...mixed, agreedCategoryIds: ['c1'] }, two)).toBeNull();
+		expect(flatRateNotice({ ...mixed, advancePayment: '', agreedCategoryIds: ['c1'] }, two)).not.toBeNull();
 		expect(flatRateNotice({ ...mixed, advancePayment: '0' }, categories)).toContain('trotzdem'); // no Akonto
 	});
 

@@ -69,7 +69,7 @@ import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
 import { leaveSettings } from './statement-generate';
-import { untickAllCategories } from './contract-form';
+import { tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
@@ -292,6 +292,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'flat-rate-warning-advance': () => (actor) =>
 		actor.attemptsTo(
 			toRentStep,
+			tickAllCategories,
 			Enter.theValue('200').into(advancePaymentInput),
 			Enter.theValue('50').into(flatRateInput),
 			Wait.until(on.shown('contract-flat-rate-warning'))

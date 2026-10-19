@@ -90,10 +90,10 @@ const amount = (value: string) => parseFloat(value) || 0;
 export function flatRateNotice(values: ContractFormValues, categories?: { id: string }[]): string | null {
 	const ticked = values.agreedCategoryIds?.length ?? categories?.length ?? 0;
 	if (!(amount(values.flatRateUtilityCharge ?? '') > 0) || ticked === 0) return null;
-	// with an Akonto some ticks are right: only those the Pauschale covers are billed twice (#432)
-	return amount(values.advancePayment) > 0
-		? m.contracts_flat_rate_warning_text_advance()
-		: m.contracts_flat_rate_warning_text();
+	if (!(amount(values.advancePayment) > 0)) return m.contracts_flat_rate_warning_text();
+	// with an Akonto some ticks are right: warn only while every box is still ticked (#432, Helga 432 P-1)
+	const all = !values.agreedCategoryIds || !categories || ticked >= categories.length;
+	return all ? m.contracts_flat_rate_warning_text_advance() : null;
 }
 
 /** The amounts in the form the checks and the backend read */
