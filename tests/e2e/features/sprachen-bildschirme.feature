@@ -39,6 +39,11 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | buildings              | filtered-empty      |
       | building-new           | default             |
       | building-new           | submit-empty        |
+      | building-new           | register-preview    |
+      | building-new           | register-submit-missing |
+      | building-new           | register-no-apartments |
+      | building-new           | register-no-hit     |
+      | building-new           | register-unreachable |
       | building-detail        | default             |
       | building-detail        | delete-dialog       |
       | building-detail        | fuel-stock-dialog   |
