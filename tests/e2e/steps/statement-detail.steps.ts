@@ -32,7 +32,8 @@ import {
 	tenancyOfStatement,
 	totalLabelOfStatement,
 	oldAddressWarningText,
-	advancePaidOfStatement
+	advancePaidOfStatement,
+	advanceDiffersText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -461,6 +462,16 @@ Then('sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert b
 Then('nennt die Bestätigung die Verjährung nach fünf Jahren', async ({ verwalter }) => {
 	await verwalter.sees(correctConfirmation).toContain('fünf Jahren (Art. 128 Ziff. 1 OR)');
 });
+
+Then(
+	'warnt die berichtigte Abrechnung, dass ihre Akontobeiträge {string} anders sind als die {string} der ersetzten Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, now: string, before: string, year: number, tenant: string) => {
+		const replaced = await seed.statementNumber(tenant, year);
+		await verwalter
+			.sees(advanceDiffersText)
+			.toBe(`Die Akontobeiträge dieser Abrechnung (${now}) sind anders als in der ersetzten Abrechnung ${replaced} (${before}). Prüfen Sie die Akontobeträge am Mietvertrag.`);
+	}
+);
 
 Then('zieht die Abrechnung {string} Akontobeiträge ab', async ({ verwalter }, amount: string) => {
 	await verwalter.sees(advancePaidOfStatement).toContain(amount);

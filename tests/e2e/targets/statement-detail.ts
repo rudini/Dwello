@@ -94,3 +94,5 @@ export const recalculateButton = target('Neu berechnen', (page) => page.getByTes
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));
 // #464: the Akonto the statement deducts
 export const statementAdvancePaid = target('Geleistete Akontobeiträge', (page) => page.getByTestId('statement-advance-paid'));
+// #464 (F-4): the berichtigte Abrechnung deducts another Akonto than the statement it replaces
+export const advanceDiffers = target('Hinweis zum anderen Akonto', (page) => page.getByTestId('statement-advance-differs'));

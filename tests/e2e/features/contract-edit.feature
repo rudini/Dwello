@@ -207,3 +207,10 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Die Hilfe zum Akonto nennt, wie Dwello es abrechnet
     Dann erfährt der Liegenschaftsverwalter, dass Dwello das vereinbarte Akonto abrechnet und fehlende Zahlungen ausserhalb von Dwello geregelt werden
     Und erfährt der Liegenschaftsverwalter, dass eine Erhöhung des Akontos das amtliche Formular braucht
+
+  # #464 (F-3): ein neues Akonto darf eine schon erstellte Abrechnung nicht stillschweigend ändern
+  @wip
+  Szenario: Akonto in einer schon abgerechneten Zeit
+    Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter das Akonto ab "2025-07-01" auf "200" Franken ändert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Berichtigen Sie zuerst diese Abrechnung, oder wählen Sie ein späteres «Gültig ab»."
