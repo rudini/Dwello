@@ -56,7 +56,6 @@ Funktionalität: Wohnungsliste
     Und die Wohnungsliste enthält genau 1 Wohnung
 
   # #461 (#376): die Karte nennt die Wohnung auf Französisch «Appartement 2.01»
-  @wip
   Szenario: Die Wohnungssuche übergeht das Wort für Wohnung in jeder Sprache
     Wenn der Liegenschaftsverwalter im Gebäude "Ahornhof" nach der Wohnung "appartement 2.01" sucht
     Dann ist die Wohnung "2.01" "Leer"

@@ -20,7 +20,6 @@ Funktionalität: Verteilschlüssel
     Und verteilt der Verteilschlüssel "Nach Zimmern" nach der Formel "{rooms}"
 
   # #461 (#345, 3b): ein eigener Verteilschlüssel bekommt seinen Namen auf Französisch, Italienisch und Englisch
-  @wip
   Szenario: Eigener Verteilschlüssel mit französischem Namen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Volumen" mit der Formel "{volume}" und dem französischen Namen "Selon le volume" erfasst
