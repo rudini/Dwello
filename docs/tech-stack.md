@@ -149,7 +149,7 @@ No date library; formatting uses the built-in `Intl` APIs / `Date`.
 
 ### Address Lookup: Gebäuderegister (geo.admin.ch)
 
-The address search of «Neues Gebäude» asks the BFF (`/api/addresses`), which calls `https://api3.geo.admin.ch` (swisstopo; the federal Gebäude- und Wohnungsregister) in `src/lib/server/building-register.ts`: addresses with house number, then the building's type, year and Wohnungen (#479). The browser never calls it. `GEO_ADMIN_URL` points elsewhere; E2E uses the stand-in `backend/scripts/gwr-stub.ts` on 2529.
+The address search of «Neues Gebäude» asks the BFF (`/api/addresses`), which calls `https://api3.geo.admin.ch` (swisstopo; the federal Gebäude- und Wohnungsregister) in `src/lib/server/building-register.ts`: addresses with house number, then the building's type, year and Wohnungen (#479). The browser never calls it. `GEO_ADMIN_URL` points elsewhere; E2E uses the stand-in `backend/scripts/gwr-stub.ts` on 2529. The frontend server needs direct internet access for it: Node's `fetch` ignores `HTTPS_PROXY` unless started with `NODE_USE_ENV_PROXY=1` (Node 22.21+, not the Node 20 image; O-42).
 
 ### Build & Tooling
 

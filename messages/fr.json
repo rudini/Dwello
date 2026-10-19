@@ -323,6 +323,8 @@
 	"buildings_register_rooms_help": "Dans le registre sans demi-pièces : veuillez vérifier",
 	"buildings_register_missing": "Manque dans le registre des bâtiments",
 	"buildings_register_create": "Créer l’immeuble et les appartements",
+	"buildings_register_error_area": "Saisissez la surface en m² sous forme de nombre, p. ex. 72.5.",
+	"buildings_register_error_rooms": "Saisissez le nombre de pièces par demi-pièces, p. ex. 3.5.",
 	"buildings_street": "Rue et numéro",
 	"buildings_street_example": "Rue de l’Exemple 12",
 	"buildings_postal_code": "NPA",

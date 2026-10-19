@@ -323,6 +323,8 @@
 	"buildings_register_rooms_help": "Im Register ohne halbe Zimmer: bitte prüfen",
 	"buildings_register_missing": "Fehlt im Gebäuderegister",
 	"buildings_register_create": "Gebäude und Wohnungen erstellen",
+	"buildings_register_error_area": "Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.",
+	"buildings_register_error_rooms": "Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5.",
 	"buildings_street": "Strasse und Hausnummer",
 	"buildings_street_example": "Musterstrasse 12",
 	"buildings_postal_code": "PLZ",

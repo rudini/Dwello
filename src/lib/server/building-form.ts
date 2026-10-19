@@ -37,7 +37,8 @@ export function parseBuildingForm(formData: FormData) {
 
 /**
  * The Wohnungen taken from the Gebäuderegister (#479), as `apartments.<row>.<field>`: rows the landlord left out are
- * disabled in the form and not sent. Every field is required, its error keyed like the field.
+ * disabled in the form and not sent. Every field is required, its error keyed like the field; Fläche (m², up to two
+ * decimals, above 0) and Zimmeranzahl (half rooms, 0.5 to 99.5) also as numbers, with a comma or a point.
  */
 export function parseRegisterApartments(formData: FormData, errors: Record<string, string>) {
 	const rows = new Set(
@@ -49,17 +50,30 @@ export function parseRegisterApartments(formData: FormData, errors: Record<strin
 		area: m.apartments_error_area,
 		rooms: m.apartments_error_rooms
 	};
+	// the columns: decimal(8,2) and decimal(3,1)
+	const numbers = { area: /^\d{1,6}(\.\d{1,2})?$/, rooms: /^\d{1,2}(\.[05])?$/ };
+	const notNumbers = {
+		area: m.buildings_register_error_area,
+		rooms: m.buildings_register_error_rooms
+	};
 	return [...rows].map((row) => {
 		const field = (key: keyof typeof required) => {
 			const value = String(formData.get(`apartments.${row}.${key}`) ?? '').trim();
 			if (!value) errors[`apartments.${row}.${key}`] = required[key]();
 			return value;
 		};
+		const decimal = (key: 'area' | 'rooms') => {
+			const value = field(key).replace(',', '.');
+			if (value && !(numbers[key].test(value) && Number(value) > 0)) {
+				errors[`apartments.${row}.${key}`] = notNumbers[key]();
+			}
+			return value;
+		};
 		return {
 			number: field('number'),
 			floor: Number(field('floor')),
-			area: field('area'),
-			rooms: field('rooms')
+			area: decimal('area'),
+			rooms: decimal('rooms')
 		};
 	});
 }

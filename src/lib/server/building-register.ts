@@ -13,8 +13,6 @@ export interface AddressHit {
 	postalCode: string;
 	city: string;
 	canton: string;
-	latitude: string;
-	longitude: string;
 }
 
 type Field = 'number' | 'floor' | 'area' | 'rooms';
@@ -48,9 +46,7 @@ export function toAddressHits(answer: SearchAnswer): AddressHit[] {
 				street,
 				postalCode,
 				city,
-				canton: String(attrs.detail).split(' ').at(-1)!.toUpperCase(),
-				latitude: Number(attrs.lat).toFixed(7),
-				longitude: Number(attrs.lon).toFixed(7)
+				canton: String(attrs.detail).split(' ').at(-1)!.toUpperCase()
 			};
 		})
 		.filter((hit) => hit.street);
@@ -79,7 +75,7 @@ const taken = new Set([3003, 3004]); // im Bau, bestehend
 
 const text = (value: number | null) => (value === null ? '' : String(value));
 
-// A Wohnungsnummer the register lacks, from Stockwerk and side («2. OG Links»), a counter on repeats; none without floor
+// A Wohnungsnummer the register lacks, from Stockwerk and position on the floor («2. OG Links»), a counter on repeats; none without floor
 function proposedNumber(floor: number | null, side: string | null, used: Set<string>) {
 	if (floor === null) return '';
 	const base = [floorLabel(floor), side].filter(Boolean).join(' ');

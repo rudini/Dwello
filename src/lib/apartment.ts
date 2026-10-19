@@ -18,14 +18,22 @@ export const floorLabel = (floor: number) =>
 				? m.apartments_floor_first()
 				: m.apartments_floor_upper({ floor });
 
-export const floorOptions = [-1, 0, 1, 2, 3, 4, 5, 6].map((floor) => ({
-	value: String(floor),
-	get label() {
-		return floorLabel(floor);
-	}
-}));
+/** The usual floors, and the given one when it lies outside them (taken from the Gebäuderegister, #479) */
+export const floorOptions = (current?: number | null) =>
+	[...new Set([-1, 0, 1, 2, 3, 4, 5, 6, ...(current == null ? [] : [current])])]
+		.sort((a, b) => a - b)
+		.map((floor) => ({ value: String(floor), label: floorLabel(floor) }));
 
-export const roomOptions = ['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5'];
+/** The usual numbers of rooms, and the given one when it lies outside them (#479) */
+export const roomOptions = (current?: string) =>
+	[
+		...new Set([
+			...['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5'],
+			...(current ? [current] : [])
+		])
+	]
+		.sort((a, b) => Number(a) - Number(b))
+		.map((value) => ({ value, label: roomsLabel(value) }));
 
 export const statusLabels: Record<ApartmentStatus, string> = {
 	get occupied() {

@@ -9,6 +9,7 @@ import {
 import backendBuilding from '../../tests/contracts/building.json';
 import buildingList from '../../tests/contracts/buildings.json';
 import fuelStocks from '../../tests/contracts/fuel-stocks.json';
+import numberTaken from '../../tests/contracts/building-apartment-number-taken.json';
 import { load as listLoad } from '../routes/buildings/+page.server';
 
 type Action = (event: never) => Promise<unknown>;
@@ -96,6 +97,56 @@ describe('Neues Gebäude', () => {
 			{ number: '101', floor: 1, area: '75', rooms: '3' },
 			{ number: '201', floor: 2, area: '98', rooms: '4.5' }
 		]);
+	});
+
+	it('nennt die Wohnungsnummer, die zweimal vorkommt, in der Sprache der Oberfläche', async () => {
+		const result = await run(
+			newActions.default as Action,
+			() => Response.json(numberTaken, { status: 409 }),
+			{},
+			withApartments
+		);
+
+		expect(result).toEqual({
+			success: false,
+			errors: { form: 'Die Wohnungsnummer 101 existiert bereits in diesem Gebäude.' }
+		});
+	});
+
+	it('nimmt Fläche und Zimmeranzahl auch mit Komma an', async () => {
+		let body: Record<string, unknown> = {};
+		await run(
+			newActions.default as Action,
+			(_url, init) => {
+				body = JSON.parse(String(init?.body));
+				return Response.json({ id: 'b1' });
+			},
+			{},
+			{ ...withApartments, 'apartments.0.area': '72,5', 'apartments.0.rooms': '3,5' }
+		).catch(() => {});
+
+		expect(body.apartments).toContainEqual({ number: '101', floor: 1, area: '72.5', rooms: '3.5' });
+	});
+
+	it.each([
+		['area', 'abc', 'Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.'],
+		['area', '0', 'Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.'],
+		['area', '72.555', 'Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.'],
+		['rooms', '3.25', 'Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5.'],
+		['rooms', '0', 'Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5.'],
+		['rooms', '100', 'Geben Sie die Zimmeranzahl in halben Zimmern ein, z. B. 3.5.']
+	])('lehnt %s «%s» ab und sagt, was einzugeben ist', async (field, value, error) => {
+		const result = await run(
+			newActions.default as Action,
+			() => Response.json({ id: 'b1' }),
+			{},
+			{
+				...withApartments,
+				[`apartments.0.${field}`]: value
+			}
+		);
+
+		expect(result).toMatchObject({ success: false, errors: { [`apartments.0.${field}`]: error } });
 	});
 
 	it('verlangt Fläche, Stockwerk und Zimmeranzahl jeder übernommenen Wohnung', async () => {

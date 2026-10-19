@@ -113,12 +113,21 @@
 				: m.buildings_add()
 	);
 
+	// what the last chosen address proposed: a field still holding it takes the next address's proposal, one the
+	// landlord changed stays
+	let proposed = { name: '', buildingType: '', yearBuilt: '' };
+	const propose = (field: keyof typeof proposed, current: string, next: string) => {
+		const value = current === '' || current === proposed[field] ? next : current;
+		proposed[field] = next;
+		return value;
+	};
+
 	async function handleAddressSelect(selected: AddressHit) {
 		address = selected.street;
 		postalCode = selected.postalCode;
 		city = selected.city;
 		canton = selected.canton;
-		if (!name) name = selected.street;
+		name = propose('name', name, selected.street);
 		registerRead = false;
 		rows = [];
 		existing = undefined;
@@ -140,8 +149,8 @@
 			searchOutcome = 'unreachable';
 			return;
 		}
-		if (register.data.buildingType) buildingType = register.data.buildingType;
-		if (register.data.yearBuilt) yearBuilt = String(register.data.yearBuilt);
+		buildingType = propose('buildingType', buildingType, register.data.buildingType ?? '');
+		yearBuilt = propose('yearBuilt', yearBuilt, String(register.data.yearBuilt ?? ''));
 		rows = toRows(register.data.apartments);
 		registerRead = true;
 	}

@@ -23,7 +23,7 @@
 </script>
 
 <script lang="ts">
-	import { floorLabel } from '$lib/apartment';
+	import { floorOptions } from '$lib/apartment';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -33,11 +33,6 @@
 		errors
 	}: { rows: RegisterRow[]; errors: Record<string, string | undefined> } = $props();
 
-	// the usual floors, and the register's when it lies outside them
-	const floorChoices = (floor: number | null) =>
-		[...new Set([-1, 0, 1, 2, 3, 4, 5, 6, ...(floor === null ? [] : [floor])])]
-			.sort((a, b) => a - b)
-			.map((value) => ({ value: String(value), label: floorLabel(value) }));
 	const note = (row: RegisterRow, field: 'number' | 'floor' | 'area' | 'rooms', i: number) =>
 		row.missing.includes(field)
 			? { text: m.buildings_register_missing(), testid: `register-apartment-${field}-note-${i}` }
@@ -77,7 +72,7 @@
 					id="apartments-{i}-floor"
 					name="apartments.{i}.floor"
 					label={m.apartments_floor()}
-					options={floorChoices(row.floor)}
+					options={floorOptions(row.floor)}
 					placeholder={m.apartments_floor_choose()}
 					bind:value={row.floorValue}
 					disabled={!row.included}

@@ -33,6 +33,7 @@
 	let isLoading = $state(false);
 	let isOpen = $state(false);
 	let selectedIndex = $state(-1);
+	let input = $state<HTMLInputElement>();
 	let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	// Debounced search
@@ -78,10 +79,13 @@
 		}
 	}
 
+	// a hint about the last search goes with it; the focus stays in the field instead of falling to the page
 	function clear() {
 		value = '';
 		results = [];
 		isOpen = false;
+		onfound?.('hits');
+		input?.focus();
 	}
 
 	// Delay closing to allow a click on a result
@@ -101,6 +105,7 @@
 					<Icon name="search" />
 				</span>
 				<input
+					bind:this={input}
 					id={control.id}
 					type="text"
 					{value}

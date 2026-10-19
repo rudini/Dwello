@@ -61,16 +61,14 @@ const flat = (whgnr: string | null, wstwk: number | null, more: Attributes = {})
 });
 
 describe('Adresssuche im Gebäuderegister', () => {
-	it('liefert Adressen mit Hausnummer, PLZ, Ort, Kanton und Koordinaten', () => {
+	it('liefert Adressen mit Hausnummer, PLZ, Ort und Kanton', () => {
 		expect(toAddressHits(searchAnswer)).toEqual([
 			{
 				egid: '147881',
 				street: 'Seebahnstrasse 155',
 				postalCode: '8003',
 				city: 'Zürich',
-				canton: 'ZH',
-				latitude: '47.3735275',
-				longitude: '8.5151596'
+				canton: 'ZH'
 			}
 		]);
 	});
@@ -157,7 +155,7 @@ describe('Gebäude aus dem Gebäuderegister', () => {
 		});
 	});
 
-	it('schlägt eine fehlende Wohnungsnummer aus Stockwerk und Lage vor', () => {
+	it('schlägt eine fehlende Wohnungsnummer aus Stockwerk und Position im Stockwerk vor', () => {
 		const building = toRegisterBuilding(
 			findAnswer(
 				apartments(

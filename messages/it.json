@@ -323,6 +323,8 @@
 	"buildings_register_rooms_help": "Nel registro senza mezzi locali: verifichi per favore",
 	"buildings_register_missing": "Manca nel registro degli edifici",
 	"buildings_register_create": "Creare l’immobile e gli appartamenti",
+	"buildings_register_error_area": "Inserisca la superficie in m² come numero, ad es. 72.5.",
+	"buildings_register_error_rooms": "Inserisca il numero di locali a mezzi locali, ad es. 3.5.",
 	"buildings_street": "Via e numero civico",
 	"buildings_street_example": "Via Esempio 12",
 	"buildings_postal_code": "NPA",
