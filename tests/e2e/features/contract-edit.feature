@@ -142,6 +142,17 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-12-31" ausserhalb von Dwello abgerechnet sind
     Dann zeigt der Mietvertrag «Abgerechnet bis» "31.12.2025"
 
+  # #453 (#337): eine Abrechnung entsteht erst nach dem Ende ihrer Periode; ein Datum vor dem Vertragsbeginn wirkt nicht
+  @wip
+  Szenario: «Abgerechnet bis» in der Zukunft
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2099-12-31" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Abgerechnet bis kann nicht in der Zukunft liegen. Tragen Sie den letzten Tag der letzten Abrechnung ein, die ausserhalb von Dwello erstellt wurde."
+
+  @wip
+  Szenario: «Abgerechnet bis» vor dem Vertragsbeginn
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2024-03-31" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Abgerechnet bis liegt vor dem Vertragsbeginn 01.04.2024. Lassen Sie das Feld leer, wenn für diesen Mietvertrag noch nichts ausserhalb von Dwello abgerechnet ist."
+
   Szenario: Hilfe zu «Abgerechnet bis»
     Dann erfährt der Liegenschaftsverwalter, dass Dwello die Nebenkosten erst ab dem Tag nach «Abgerechnet bis» abrechnet
 

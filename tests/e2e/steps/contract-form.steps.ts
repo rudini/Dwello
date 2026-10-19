@@ -30,7 +30,10 @@ import {
 	runningContractEditHintText,
 	enteredFlatRate,
 	flatRateWarningShown,
-	flatRateWarningText
+	flatRateWarningText,
+	startDateWarning,
+	startDateAsked,
+	billedUntilAsked
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import { pageAddress } from '../questions/navigation';
@@ -68,7 +71,10 @@ import {
 	registerContract,
 	rentApartment,
 	reopenNewContract,
-	reviewContract
+	reviewContract,
+	enterStartDate,
+	enterStartAndBilledUntil,
+	saveContract
 } from '../tasks/contract-form';
 import { searchContracts } from '../tasks/contracts';
 
@@ -564,5 +570,39 @@ Then(
 	async ({ verwalter }, amount: string) => {
 		await verwalter.sees(enteredFlatRate).toBe(amount);
 		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
+
+// #453 (#328, #337): «Abgerechnet bis» in the wizard «Neuer Mietvertrag»
+When('der Liegenschaftsverwalter den Vertragsbeginn {string} einträgt', async ({ verwalter }, date: string) => {
+	await verwalter.attemptsTo(enterStartDate(date));
+});
+
+Then('sieht der Liegenschaftsverwalter beim Vertragsbeginn die Warnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(startDateWarning).toContain(text);
+});
+
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken bis {string} abgerechnet bis zur Prüfung erfasst',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, billedUntil: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, billedUntil, confirmPastStart: true })
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietvertrag speichert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(saveContract);
+});
+
+Then('fragt der Assistent nach dem Vertragsbeginn, aber nicht nach «Abgerechnet bis»', async ({ verwalter }) => {
+	await verwalter.sees(startDateAsked).toBe(true);
+	await verwalter.sees(billedUntilAsked).toBe(false);
+});
+
+When(
+	'der Liegenschaftsverwalter ab dem Vertragsbeginn {string} einträgt, dass die Nebenkosten bis {string} ausserhalb von Dwello abgerechnet sind',
+	async ({ verwalter }, startDate: string, billedUntil: string) => {
+		await verwalter.attemptsTo(enterStartAndBilledUntil(startDate, billedUntil));
 	}
 );
