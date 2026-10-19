@@ -260,7 +260,7 @@ describe('Vorschlag der KI', () => {
 		[
 			'fr',
 			unsure,
-			'L’IA n’en est pas certaine. Indiquez vous-même si les frais sont imputables ; les règles figurent dans le texte d’aide ci-dessus. En cas de doute : non imputable.'
+			'L’IA n’en est pas certaine. Indiquez vous-même si les frais sont répercutables ; les règles figurent dans le texte d’aide ci-dessus. En cas de doute : non répercutable.'
 		],
 		[
 			'en',

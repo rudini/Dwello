@@ -566,3 +566,15 @@ describe('PDF einer berichtigten Abrechnung', () => {
 		expect(fr).toContain('Déjà payé sur NK-1-2025-0001');
 	});
 });
+
+describe('Verwaltungspauschale auf Französisch und Italienisch', () => {
+	// #405, #461: the words of Art. 4 al. 3 OBLF / cpv. 3 OLAL; «frais de gestion» are the costs of managing the property
+	it('nennt sie wie das Gesetz «frais d’administration» und «spese amministrative»', async () => {
+		const fee = { ...refund, managementFee: 23.52, managementFeePercent: 3, totalCosts: 807.65 };
+		const text = async (language: 'fr' | 'it') =>
+			readPdf(Buffer.from(await generateStatementPDFBase64(fee, config, language), 'base64')).flowing;
+
+		expect(await text('fr')).toContain('Frais d’administration');
+		expect(await text('it')).toContain('Spese amministrative');
+	});
+});

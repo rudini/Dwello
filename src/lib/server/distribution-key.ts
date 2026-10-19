@@ -2,7 +2,7 @@ import { backendMessage, type BackendError } from '$lib/backend-error';
 import { error } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
 import type { DistributionKeyRow, FormulaTest } from '$lib/distribution-key';
-import { deleteRecord, fetchRecord, saveRecord } from './save-form';
+import { deleteRecord, fetchRecord, nameTranslations, saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/distribution-keys`;
 const LIST = '/config/distribution-keys';
@@ -47,7 +47,7 @@ async function parseKey(request: Request) {
 	if (!field('formula')) errors.formula = m.backend_formula_required();
 	return {
 		name: field('name'),
-		body: { description: field('description'), formula: field('formula') },
+		body: { description: field('description'), formula: field('formula'), ...nameTranslations(field) },
 		errors
 	};
 }

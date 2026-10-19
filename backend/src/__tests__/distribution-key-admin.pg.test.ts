@@ -96,4 +96,11 @@ describe('Eigene Verteilschlüssel', () => {
 
 		await expectRejection(response, 400, 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.', 'DISTRIBUTION_KEY_PREDEFINED');
 	});
+
+	// #461: the migrations seed them; the second seed list with other names is gone (#345)
+	it('legt vordefinierte Verteilschlüssel nur mit den Stammdaten-Migrationen an', async () => {
+		const response = await keys.send('POST', '/initialize');
+
+		expect(response.status).toBe(404);
+	});
 });

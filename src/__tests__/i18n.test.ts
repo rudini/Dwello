@@ -72,6 +72,42 @@ describe('Sprachdateien', () => {
 		expect(wrong).toEqual([]);
 	});
 
+	// #405, #461: words that mean something else in the law (Art. 259a CO, Art. 4 al. 3 OBLF, Art. 34 CO)
+	it.each([
+		['fr', '«répercutable», nicht «imputable»', /imputab/i],
+		['fr', '«frais d’administration», nicht «frais de gestion»', /frais de gestion/i],
+		['it', '«spese amministrative», nicht «spese di gestione»', /spese di gestione/i],
+		['it', '«annullare la disdetta», nicht «revocare»', /\brevoca/i],
+		['fr', '«degré de confiance» für die Konfidenz', /fiabilité de l’IA/i],
+		['it', '«grado di certezza» für die Konfidenz', /affidabilità dell’IA/i],
+		// the categories renamed in migration 0026 (#345)
+		['fr', '«assurance du bâtiment», nicht «assurance bâtiment»', /assurance bâtiment/i],
+		['it', '«assicurazione dell’immobile», nicht «assicurazione edificio»', /assicurazione edificio/i],
+		['en', '«Lift», nicht «Elevator»', /elevator/i]
+	])('%s sagt %s', (language, _description, word) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		const wrong = Object.entries(messages).filter(([, text]) => typeof text === 'string' && word.test(text));
+		expect(wrong).toEqual([]);
+	});
+
+	// #461: «nuovo inquilino» is the Nachmieter; the Ersatzmieter of Art. 264 CO is «inquilino sostitutivo»
+	it('Italienisch nennt den Ersatzmieter «inquilino sostitutivo»', () => {
+		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
+		expect(messages.glossary_notice_period_text).toContain('inquilino sostitutivo');
+		expect(messages.contracts_notice_period_short).toContain('inquilino sostitutivo');
+	});
+
+	// Art. 264 Abs. 1 OR: the tenant is freed once he proposes a reasonable replacement tenant (461-fachreview-1, M-1)
+	it.each([
+		['de', 'wenn er Ihnen einen zumutbaren Ersatzmieter vorschlägt.'],
+		['fr', 's’il vous présente un locataire de remplacement que vous ne pouvez raisonnablement refuser.'],
+		['it', 'se Le propone un inquilino sostitutivo che Lei non può ragionevolmente rifiutare.'],
+		['en', 'if the tenant proposes a replacement tenant you cannot reasonably refuse.']
+	])('%s: der Ersatzmieter muss nur vorgeschlagen sein, damit der Mietvertrag früher endet', (language, end) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		expect(messages.glossary_notice_period_text.endsWith(end)).toBe(true);
+	});
+
 	it('Italienisch sagt «termine di preavviso» und «ricevimento della disdetta»', () => {
 		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
 		const wrong = Object.entries(messages).filter(

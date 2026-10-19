@@ -23,9 +23,9 @@ Funktionalität: Verteilschlüssel
   @wip
   Szenario: Eigener Verteilschlüssel mit französischem Namen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
-    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Zimmern" mit der Formel "{rooms}" und dem französischen Namen "Par chambre" erfasst
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Volumen" mit der Formel "{volume}" und dem französischen Namen "Selon le volume" erfasst
     Und der Liegenschaftsverwalter die Sprache "Français" wählt
-    Dann zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Par chambre"
+    Dann zeigt die Seite "Verteilschlüssel" den Verteilschlüssel "Selon le volume"
 
   Szenario: Formel mit unbekannter Variable
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"

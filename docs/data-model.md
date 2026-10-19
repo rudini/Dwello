@@ -447,6 +447,8 @@ deletes it under «Einstellungen» › «Protokoll». A login stores only the pr
 
 ## Seed data (`0002_stammdaten.sql`)
 
+`0026_master_data_names.sql` sets the reviewed fr/it/en names of these rows (#345, #461) and writes «70 %» with a non-breaking space; a name the landlord changed stays.
+
 ### Categories
 
 Allocable (`is_allowed_utility_cost = true`, sort order 1–14): Heizung, Warmwasser, Kaltwasser, Abwasser,
@@ -468,7 +470,7 @@ Gebäudeversicherung and Verwaltung where the landlord had not changed the text 
 | Pro Einheit | `{units}` | 1 |
 | Pro Fläche (m²) | `{area}` | 2 |
 | Pro Zimmer | `{rooms}` | 3 |
-| Heizung (Fläche 70% / Einheit 30%) | `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}` | 6 |
+| Heizung (Fläche 70 % / Einheit 30 %) | `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}` | 6 |
 
 ### Heating profiles (all `predefined`, table `heating_profiles`)
 

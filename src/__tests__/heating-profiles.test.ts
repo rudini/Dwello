@@ -29,8 +29,13 @@ const months = [
 const form = (january = '16.4') => ({
 	name: ' Bergtal ',
 	description: 'Lange Heizperiode',
+	// #461: the names in the other languages are optional, an empty one stays empty (null)
+	nameFR: '',
+	nameIT: ' Valle del monte ',
+	nameEN: '',
 	...Object.fromEntries(months.map((month) => [month, month === 'january' ? january : '7.6']))
 });
+const translations = { nameFR: null, nameIT: 'Valle del monte', nameEN: null };
 const shares = Object.fromEntries(
 	months.map((month) => [`${month}Pct`, month === 'january' ? 16.4 : 7.6])
 );
@@ -53,7 +58,7 @@ describe('Neues Heizprofil', () => {
 			{
 				method: 'POST',
 				url: API,
-				body: { name: 'Bergtal', description: 'Lange Heizperiode', ...shares }
+				body: { name: 'Bergtal', description: 'Lange Heizperiode', ...translations, ...shares }
 			}
 		]);
 	});
@@ -92,7 +97,7 @@ describe('Heizprofil bearbeiten', () => {
 		expect(calls[0]).toEqual({
 			method: 'PUT',
 			url: `${API}/hp1`,
-			body: { name: 'Bergtal', description: 'Lange Heizperiode', ...shares }
+			body: { name: 'Bergtal', description: 'Lange Heizperiode', ...translations, ...shares }
 		});
 	});
 });
