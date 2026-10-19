@@ -59,5 +59,5 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] `contracts_fixed_term_objection` with the second sentence in four languages; markers `#308` removed
 - [x] Slice review round 1 (`docs/reviews/457-review-1.md`, one Nit, fixed)
 - [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-457.md`, two Minors on the decided text, one Nit)
-- [ ] Closing code-review round
+- [x] Closing code-review round (`docs/reviews/457-review-2.md`, no findings)
 - [ ] PR `Fixes #457`, `Fixes #308`
