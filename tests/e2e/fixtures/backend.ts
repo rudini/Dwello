@@ -424,6 +424,11 @@ export function testData(api: CallTheApi) {
 			await put(`invoices/${ids.get(key)}`, { amount });
 		},
 
+		// A recorded invoice that gets its Leistungszeitraum afterwards (#335)
+		async invoiceServicePeriod(key: string, servicePeriodStart: string, servicePeriodEnd: string) {
+			await put(`invoices/${ids.get(key)}`, { servicePeriodStart, servicePeriodEnd });
+		},
+
 		async predefinedCategoryId(categoryName: string): Promise<string> {
 			return (await predefinedCategory(categoryName)).id;
 		},

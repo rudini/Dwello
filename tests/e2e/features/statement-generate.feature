@@ -625,3 +625,58 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Sommer"
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann sagt der Assistent "Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen."
+
+  # #335 (#451, Punkt 5): Marc Hubers Abrechnung ist versendet, bevor die Heizrechnung für Januar bis März ihren
+  # Leistungszeitraum hatte; sie rechnet die Heizkosten über die ganze Periode nach dem Heizprofil. Eva Freis neue
+  # Abrechnung rechnet die Monate im Leistungszeitraum: zusammen können beide mehr als die Heizkosten der Wohnung tragen
+  @wip
+  Szenario: Vorschau weist auf eine versendete Abrechnung derselben Wohnung nach der alten Regel hin
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Rechnung "Heizung 2024-04-10" gilt danach für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Marc Huber" "ist schon versendet und rechnet die Heizkosten noch ohne die Monate im Leistungszeitraum. Prüfen Sie, ob beide Abrechnungen zusammen die Heizkosten Ihrer Wohnung nicht übersteigen."
+
+  # #335 (#451, Punkt 5): hatte die Heizrechnung ihren Leistungszeitraum schon beim Erstellen, rechnet die versendete
+  # Abrechnung die Monate darin; kein Hinweis
+  @wip
+  Szenario: Kein Hinweis auf die alte Regel, wenn die versendete Abrechnung die Monate im Leistungszeitraum rechnet
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10" für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau "Bestehende Abrechnungen bleiben, wie sie sind, auch Entwürfe."
+    Aber zur Abrechnung 2024 von "Marc Huber" sagt die Vorschau nichts
+
+  # #339 (#451, Punkt 6): bei einem Mieterwechsel mit Heizprofil zählt eine Heizrechnung mit Leistungszeitraum nur die
+  # Monate darin, eine ohne über die ganze Periode; die Vorschau nennt die Heizrechnungen ohne, wenn andere derselben
+  # Kategorie einen haben
+  @wip
+  Szenario: Hinweis auf Heizrechnungen ohne Leistungszeitraum neben solchen mit
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1520" Franken vom "2024-03-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1410" Franken vom "2025-01-05" für die Zeit vom "2024-10-01" bis "2024-12-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt der Hinweis auf Heizrechnungen ohne Leistungszeitraum "Diese Heizrechnungen haben keinen Leistungszeitraum, andere derselben Kategorie schon. Tragen Sie ihn ein, damit jeder Mieter die Kosten seiner Monate trägt."
+    Und nennt der Hinweis auf Heizrechnungen ohne Leistungszeitraum die Rechnung vom "31.03.2024" über "1’520.00"
+    Und nennt der Hinweis auf Heizrechnungen ohne Leistungszeitraum keine Rechnung vom "05.01.2025"
+    Und nennt der Hinweis auf Heizrechnungen ohne Leistungszeitraum keine Rechnung vom "31.12.2024"
+
+  @wip
+  Szenario: Von einer Heizrechnung ohne Leistungszeitraum zur Rechnung
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1520" Franken vom "2024-03-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1410" Franken vom "2025-01-05" für die Zeit vom "2024-10-01" bis "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter die Rechnung vom "31.03.2024" aus dem Hinweis bearbeitet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
