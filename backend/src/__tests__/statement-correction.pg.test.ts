@@ -248,6 +248,8 @@ describe('Berichtigte Abrechnung', () => {
 
 // Fachreview W2e V-3: eine Abrechnung einer anderen, nur überlappenden Periode rechnet keine Zahlung an
 it('verknüpft im Abrechnungslauf keine Abrechnung einer anderen Periode', async () => {
+	// only the replaced one: a statement of 2025 that bills would refuse the overlapping period (#199)
+	await removeStatements();
 	const id = await sentStatement();
 	await replace(id);
 

@@ -124,8 +124,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		await seed.notice(tenant, '2024-06-30');
 		await seed.buildingAddress(tenant, 'Bergsicht');
 	}
-	await seed.statement('Ida', 'Bergsicht', 2024, 'Standard');
-	// #199: a statement covers 2024 only up to 30.06.: the contract page names the rest without a way into the wizard
+	// #199, #408 point 2: Bergsicht's statements cover 2024 only up to 30.06. (one Abrechnungsperiode per day and
+	// building): the contract page offers a short period for the rest of Lea's 2024
+	await seed.statement('Ida', 'Bergsicht', 2024, 'Standard', ['2024-01-01', '2024-06-30']);
 	await seed.apartment('Bergsicht', '2.06', 'vacant');
 	await seed.tenant('Lea');
 	await seed.contract('Lea', '2.06', { startDate: '2024-01-01', baseRent: '1200.00' });

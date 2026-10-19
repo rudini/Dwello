@@ -4,7 +4,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { agreeableCategories } from '$lib/server/category';
 import { agreedNames } from '$lib/contract-form';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { endedPeriodsSince, missingPeriods } from '$lib/accounting-period';
+import { missingWays } from '$lib/accounting-period';
 import { periodType } from '$lib/server/missing-statements';
 import { invoicesOf } from '$lib/overview';
 import { wizardLink } from '$lib/statement-wizard';
@@ -22,11 +22,13 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
-	// A-10, #142: the latest first; href into the wizard only for a whole period (#199, #408)
+	// A-10, #142: the latest first, each with its way into the wizard (#199, #408 point 2); no href when step 2 would
+	// refuse that period (Fachreview 199-1 V-1)
 	missingStatements: {
 		start: string;
 		end: string;
 		href: string | null;
+		way: { kind: string; start: string; end: string };
 		invoices: { href: string; label: string };
 	}[];
 	// the contract's statements: it cannot be deleted (#116); null when they cannot be read (review C-1)
@@ -86,26 +88,29 @@ async function fixedTermCheckDue(fetch: typeof globalThis.fetch, contract: Row) 
 }
 
 // The parts of ended Abrechnungsperioden since the Vertragsbeginn with rent days but no statement, the latest first
-// (A-10, #142, #199): a whole period leads into the wizard, a part a statement leaves does not until #408 decides how;
-// each to the building's invoices (#211). None when the settings or the statements cannot be read
+// (A-10, #142, #199), each with its way into the wizard: the period of a statement of the building that holds it,
+// else the whole period or a short one (#408 point 2); each to the building's invoices (#211). None when the settings
+// or the statements of the contract or the building cannot be read
 async function missingStatements(
 	fetch: typeof globalThis.fetch,
 	contract: Row,
 	statements: Row[] | null
 ) {
 	if (!statements || !contract.startDate) return [];
-	const type = await periodType(fetch);
-	if (!type) return [];
 	const building = String((contract.building as Row | undefined)?.id);
-	const whole = endedPeriodsSince(type, String(contract.startDate).slice(0, 10));
-	const dated = contract as Parameters<typeof missingPeriods>[1];
-	return missingPeriods(type, dated, statements as Parameters<typeof missingPeriods>[2]).map(
-		({ start, end }) => ({
+	const [type, ofBuilding] = await Promise.all([
+		periodType(fetch),
+		rows(fetch, `statements?buildingId=${encodeURIComponent(building)}&limit=1000`)
+	]);
+	if (!type || !ofBuilding) return [];
+	type Dated = Parameters<typeof missingWays>[2];
+	const dated = contract as Parameters<typeof missingWays>[1];
+	return missingWays(type, dated, statements as Dated, ofBuilding as Dated).map(
+		({ start, end, way, open }) => ({
 			start,
 			end,
-			href: whole.some((p) => p.start === start && p.end === end)
-				? wizardLink(building, start, end)
-				: null,
+			href: open ? wizardLink(building, way.start, way.end) : null,
+			way,
 			invoices: invoicesOf({ start, end }, building)
 		})
 	);

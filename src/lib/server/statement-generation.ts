@@ -1,5 +1,6 @@
 import { backendMessage } from '$lib/backend-error';
-import { billingStart, billsIn, localToday } from '$lib/contract-status';
+import { billsIn, localToday } from '$lib/contract-status';
+import { billingPeriods, overlappedBy, uncovered } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { changedInvoiceCount, namesById, toStatement } from '$lib/server/statement';
@@ -47,22 +48,50 @@ async function call(fetch: Fetch, path: string, body?: object) {
 	return data;
 }
 
-const nextDay = (date: string) =>
-	new Date(Date.parse(`${date}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
-
-// Whether the periods together cover every day from `from` to `to` (ISO dates compare as text)
-function covers(periods: Period[], from: string, to: string) {
-	let next = from;
-	for (const p of [...periods].sort((a, b) => a.periodStart.localeCompare(b.periodStart)))
-		if (p.periodStart <= next && p.periodEnd >= next) next = nextDay(p.periodEnd);
-	return next > to;
-}
-
 type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
 
-// Per building: its contracts with Mietstage in the period (from the day after «Abgerechnet bis», #133), and those of
-// them with a statement in the period already
-// an overlapping statement counts as billed, on every screen (#199, #211)
+type Billing = Period & { contractId: string; status?: string };
+
+/**
+ * #199, #408 point 2: one Abrechnungsperiode per day and building. When the run's period overlaps a statement period
+ * of the building without being equal, the run is refused for it; the ways out are the overlapped periods in which a
+ * contract has Mietstage but no statement, and the days of the run that no statement covers, ended and with Mietstage
+ * (short periods), neither ever refused itself (Fachreview 199-1 V-1, V-4, V-5); `vacant`: those days have no
+ * Mietstage (V-3); `statements`: how many statements have the overlapped periods. Statements made before stay as they
+ * are
+ */
+function overlapOf(
+	run: { start: string; end: string },
+	contracts: Contract[],
+	statements: Billing[]
+) {
+	const periods = billingPeriods(statements);
+	const overlapped = overlappedBy(run, periods);
+	if (!overlapped.length) return null;
+	const billing = statements.filter((s) => s.status !== 'replaced');
+	const within = (s: Billing, p: { start: string; end: string }) =>
+		s.periodStart <= p.end && s.periodEnd >= p.start;
+	// as the run counts it: a contract with a statement that overlaps the period is billed there (#199)
+	const unbilled = (p: { start: string; end: string }) =>
+		contracts.some(
+			(c) => billsIn(c, p) && !billing.some((s) => s.contractId === c.id && within(s, p))
+		);
+	const rest = uncovered(run, billing)
+		.reverse()
+		.filter((days) => days.end < localToday());
+	const short = rest.filter((days) => contracts.some((c) => billsIn(c, days)));
+	return {
+		periods: overlapped,
+		choose: overlapped.filter(unbilled),
+		short,
+		vacant: rest.length > 0 && !short.length,
+		statements: billing.filter((s) => overlapped.some((p) => within(s, p))).length
+	};
+}
+
+// Per building: its contracts with Mietstage in the period (from the day after «Abgerechnet bis», #133), those of
+// them with a statement in the period already (an overlapping statement counts, #199, #211), and whether the period
+// overlaps one of the building's (#408 point 2)
 async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }: Run) {
 	return Promise.all(
 		buildingIds.map(async (buildingId) => {
@@ -73,46 +102,47 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 			// a statement replaced in this very period does not count: the run creates its berichtigte Abrechnung (#120)
 			const replacedHere = (s: Period & { status?: string }) =>
 				s.status === 'replaced' && s.periodStart === periodStart && s.periodEnd === periodEnd;
-			const overlapping = (
-				statements as (Period & { contractId: string; status?: string })[]
-			).filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s));
+			const overlapping = (statements as Billing[]).filter(
+				(s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s)
+			);
 			const inPeriod = (contracts as Contract[]).filter((c) =>
 				billsIn(c, { start: periodStart, end: periodEnd })
 			);
 			const billed = inPeriod.filter((c) => overlapping.some((s) => s.contractId === c.id));
-			// its days in the period that none of its statements covers stay unbilled (Fachreview M-1, #199)
-			const partly = billed.filter(
-				(c) =>
-					!covers(
-						overlapping.filter((s) => s.contractId === c.id),
-						[billingStart(c), periodStart].sort()[1],
-						c.endDate && c.endDate < periodEnd ? c.endDate : periodEnd
-					)
-			);
-			return { buildingId, inPeriod, billed, partly };
+			const overlap = overlapOf({ start: periodStart, end: periodEnd }, contracts, statements);
+			return { buildingId, inPeriod, billed, overlap };
 		})
 	);
 }
 
 // Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two
-// statements); a contract that already has one in the period gets none, so a deleted draft can be created again
+// statements); a contract that already has one in the period gets none, so a deleted draft can be created again.
+// A building whose statement period the run overlaps refuses the run, as step 2 and the backend do (#408 point 2)
 async function contractsInPeriod(fetch: Fetch, request: Run) {
-	return (await contractsOf(fetch, request)).flatMap(({ buildingId, inPeriod, billed }) =>
+	const buildings = await contractsOf(fetch, request);
+	const refused = buildings.find((b) => b.overlap);
+	if (refused) {
+		const [{ start, end }] = refused.overlap!.periods;
+		const { name } = await call(fetch, `buildings/${encodeURIComponent(refused.buildingId)}`);
+		const params = { building: name, periodStart: start, periodEnd: end };
+		throw new Error(backendMessage({ code: 'STATEMENT_PERIOD_OVERLAPS', params }, ''));
+	}
+	return buildings.flatMap(({ buildingId, inPeriod, billed }) =>
 		inPeriod.filter((c) => !billed.includes(c)).map((contract) => ({ buildingId, contract }))
 	);
 }
 
 /**
- * Per building: its contracts in the period, how many of them have a statement there already and how many of these
- * leave days unbilled (wizard steps 2 and 4), and those this run bills without an agreed Verwaltungspauschale (#89,
- * step «Einstellungen»)
+ * Per building: its contracts in the period, how many of them have a statement there already, whether the period
+ * overlaps one of the building's (wizard step 2), and those this run bills without an agreed Verwaltungspauschale
+ * (#89, step «Einstellungen»)
  */
 export async function billedContracts(fetch: Fetch, request: Run) {
-	return (await contractsOf(fetch, request)).map(({ buildingId, inPeriod, billed, partly }) => ({
+	return (await contractsOf(fetch, request)).map(({ buildingId, inPeriod, billed, overlap }) => ({
 		buildingId,
 		contracts: inPeriod.length,
 		billed: billed.length,
-		partly: partly.length,
+		overlap,
 		withoutFee: inPeriod
 			.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
 			.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }))

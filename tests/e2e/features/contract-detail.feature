@@ -252,17 +252,17 @@ Funktionalität: Mietvertragsdetail
 
   # #199: eine Abrechnung, die die Periode teilweise abdeckt, zählt; es fehlen nur die Mietstage ohne Abrechnung.
   # #408 Punkt 2: Tage, die keine Abrechnung des Gebäudes abdeckt, rechnet eine kurze Abrechnungsperiode ab
-  @wip
   Szenario: Teilweise abgerechnete Periode am Mietvertrag
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann meldet der Mietvertrag die fehlende Abrechnung "01.10.2024 – 31.12.2024"
     Und erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt
     Und bietet der Mietvertrag für die Tage ab "2024-10-01" "Kurze Abrechnungsperiode 01.10.2024 – 31.12.2024 abrechnen" an
+    # #486: die Abrechnungsperiode kann im Mietvertrag stehen
+    Und rät der Mietvertrag "Steht die Abrechnungsperiode in Ihren Mietverträgen, informieren Sie die Mieter über den Wechsel."
     # Fachreview 2 V-9: «Abgerechnet bis» würde die bestehende Abrechnung ändern
     Und nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg
 
-  @wip
   Szenario: Kurze Abrechnungsperiode am Mietvertrag abrechnen
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
@@ -271,7 +271,6 @@ Funktionalität: Mietvertragsdetail
 
   # #408 Punkt 2: Tage in der Periode einer bestehenden Abrechnung des Gebäudes rechnet genau diese Periode ab,
   # die übrigen Tage eine kurze Abrechnungsperiode für alle Mietverträge des Gebäudes
-  @wip
   Szenario: Fehlende Tage in der Abrechnungsperiode eines anderen Mietvertrags
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Ben Meier" existiert
@@ -283,7 +282,6 @@ Funktionalität: Mietvertragsdetail
     Und bietet der Mietvertrag für die Tage ab "2024-04-01" "Abrechnungsperiode 01.07.2023 – 30.06.2024 wählen" an
     Und bietet der Mietvertrag für die Tage ab "2024-07-01" "Kurze Abrechnungsperiode 01.07.2024 – 31.12.2024 abrechnen" an
 
-  @wip
   Szenario: Von fehlenden Tagen zur Abrechnungsperiode eines anderen Mietvertrags
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Ben Meier" existiert

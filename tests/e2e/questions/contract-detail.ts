@@ -18,6 +18,7 @@ import {
 	deleteDialog,
 	deleteDialogStatementLink,
 	missingStatements,
+	shortPeriodHelp,
 	missingStatementLink,
 	fixedTermCheck,
 	fixedTermError,
@@ -42,6 +43,7 @@ export const endConfirmationInWindow = question(
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
 export const missingStatementsShown = Visibility.of(missingStatements);
+export const shortPeriodHelpText = Text.of(shortPeriodHelp);
 // the way into the wizard for the missing days from that day on
 export const missingStatementOffer = (periodStart: string) => Text.of(missingStatementLink(periodStart));
 export const managementFeeOfContract = Text.of(contractManagementFee);

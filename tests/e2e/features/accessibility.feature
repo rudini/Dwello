@@ -148,6 +148,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
+      | statement-generate     | buildings-overlap   |
       | statement-generate     | link-preset         |
       | statement-generate     | agreed-costs        |
       | statement-generate     | agreement-save-failed |

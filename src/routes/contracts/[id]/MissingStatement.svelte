@@ -7,15 +7,17 @@
 	type Missing = {
 		start: string;
 		end: string;
-		href: string | null;
+		href: string | null; // none when step 2 would refuse its period (Fachreview 199-1 V-1)
+		way: { kind: string; start: string; end: string };
 		invoices: { href: string; label: string };
 	};
 	// Rent days in ended Abrechnungsperioden without a statement, the newest first, each with its way to the wizard
-	// (A-10, #142) and to the building's invoices (#211); a part a statement leaves has no way to the wizard (#199)
+	// (A-10, #142): the whole period, the period of a statement of the building that holds the days, or a short
+	// period for days no statement of the building covers (#199, #408 point 2); and to the building's invoices (#211)
 	let { missing }: { missing: Missing[] } = $props();
 
 	const single = $derived(missing.length === 1);
-	const parts = $derived(missing.filter((period) => !period.href));
+	const parts = $derived(missing.filter((period) => period.way.kind !== 'whole' || !period.href));
 	const title = $derived(
 		single
 			? m.contracts_statement_missing({ period: periodName(missing[0]) })
@@ -27,7 +29,6 @@
 			? !parts.length && m.contracts_statement_missing_text()
 			: m.contracts_statements_missing_text()
 	);
-	// TODO(fachlich prüfen, #408): what the landlord does with these days
 	// «Abgerechnet bis» (#133) would change the statement that covers the rest (Fachreview 2 V-9)
 	const hint = $derived(
 		parts.length
@@ -37,10 +38,14 @@
 				: m.contracts_statements_missing_billed_elsewhere()
 	);
 	// several: short labels side by side, each with its verb (#142 personas, code review C-8)
-	const createLabel = (period: Missing) =>
-		single
-			? m.dashboard_create_statements()
-			: m.contracts_statement_create({ period: periodName(period) });
+	const createLabel = ({ way, ...period }: Missing) =>
+		way.kind === 'existing'
+			? m.statements_period_choose({ period: periodName(way) })
+			: way.kind === 'short'
+				? m.statements_period_short({ period: periodName(way) })
+				: single
+					? m.dashboard_create_statements()
+					: m.contracts_statement_create({ period: periodName(period) });
 </script>
 
 {#if missing.length}
@@ -71,5 +76,9 @@
 				</div>
 			{/each}
 		</div>
+		<!-- #486: the Abrechnungsperiode may be part of the Mietvertrag -->
+		{#if missing.some((period) => period.href && period.way.kind === 'short')}
+			<p data-testid="contract-missing-statement-short-help">{m.statements_short_period_help()}</p>
+		{/if}
 	</Alert>
 {/if}

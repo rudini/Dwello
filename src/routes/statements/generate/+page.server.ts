@@ -2,7 +2,6 @@ import { fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
 import { toHeatingProfile } from '$lib/server/heating-profile';
 import {
-	billedContracts,
 	generateStatements,
 	invoicesInPeriod,
 	previewStatements,
@@ -107,12 +106,10 @@ export const actions: Actions = {
 	preview: async ({ request, fetch }) => {
 		try {
 			const run = generationRequest(await request.formData());
-			const [preview, invoices, billed] = await Promise.all([
+			const [preview, invoices] = await Promise.all([
 				previewStatements(fetch, run),
-				invoicesInPeriod(fetch, run),
-				billedContracts(fetch, run)
+				invoicesInPeriod(fetch, run)
 			]);
-			const partly = new Map(billed.map((row) => [row.buildingId, row.partly]));
 			// new costs are the building's: say whether it bills a running befristeter Mietvertrag (#76)
 			const fixedTerm = (id: string) =>
 				preview.some((row) => row.buildingId === id && row.fixedTerm);
@@ -120,7 +117,6 @@ export const actions: Actions = {
 				preview,
 				invoices: invoices.map((row) => ({
 					...row,
-					partlyBilled: partly.get(row.buildingId) ?? 0,
 					fixedTerm: fixedTerm(row.buildingId)
 				}))
 			};

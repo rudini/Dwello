@@ -14,6 +14,7 @@ import {
 	managementFeeOfContract,
 	missingStatementsText,
 	missingStatementsShown,
+	shortPeriodHelpText,
 	missingStatementOffer,
 	billedUntilOfContract,
 	nextStepsText,
@@ -252,6 +253,10 @@ Then(
 // #408 point 2: the way the warning offers for the days from that day, by its label
 Then('bietet der Mietvertrag für die Tage ab {string} {string} an', async ({ verwalter }, periodStart: string, label: string) => {
 	await verwalter.sees(missingStatementOffer(periodStart)).toBe(label);
+});
+
+Then('rät der Mietvertrag {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(shortPeriodHelpText).toBe(help);
 });
 
 When('der Liegenschaftsverwalter die fehlende Abrechnung ab {string} erstellen will', async ({ verwalter }, periodStart: string) => {

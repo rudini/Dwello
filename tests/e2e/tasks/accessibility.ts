@@ -472,6 +472,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(nextButton),
 			Wait.until(on.shown(`generate-building-billed-${example.building}`))
 		),
+	// #199, #408 point 2: 01.07.2025 – 30.06.2026 overlaps the 2025 statements of Anna and Bruno
+	'buildings-overlap': (example) => (actor) =>
+		actor.attemptsTo(
+			EnterDate.of('2025-07-01').into(on.periodStartInput),
+			EnterDate.of('2026-06-30').into(on.periodEndInput),
+			Click.on(nextButton),
+			Wait.until(on.shown(`generate-building-billed-${example.building}`))
+		),
 	'period-not-over': () => (actor) =>
 		actor.attemptsTo(EnterDate.of('2099-12-31').into(on.periodEndInput), Wait.until(on.periodFutureWarning))
 };

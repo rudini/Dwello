@@ -36,9 +36,10 @@ const dayAfter = (date: string, days = 1) =>
 	isoDate(new Date(Date.parse(date) + days * 86_400_000));
 
 type Range = { start: string; end: string };
+type Dated = { periodStart: string; periodEnd: string; status?: unknown };
 
 // The parts of the period no statement covers, the latest first
-function uncovered(period: Range, statements: { periodStart: string; periodEnd: string }[]) {
+export function uncovered(period: Range, statements: { periodStart: string; periodEnd: string }[]) {
 	const gaps: Range[] = [];
 	let from = period.start;
 	for (const s of [...statements].sort((a, b) => a.periodStart.localeCompare(b.periodStart))) {
@@ -66,6 +67,65 @@ export function missingPeriods(
 	return endedPeriodsSince(type, contract.startDate.slice(0, 10), today)
 		.flatMap((period) => uncovered(period, billing))
 		.filter((gap) => billsIn(contract, gap));
+}
+
+const overlaps = (a: Range, b: Range) => a.start <= b.end && a.end >= b.start;
+const same = (a: Range, b: Range) => a.start === b.start && a.end === b.end;
+
+/** The Abrechnungsperioden of the statements that bill, each once, the earliest first; a replaced one no longer bills (#120) */
+export function billingPeriods(statements: Dated[]): Range[] {
+	const periods = new Map<string, Range>();
+	for (const s of statements.filter((s) => s.status !== 'replaced')) {
+		const period = { start: s.periodStart.slice(0, 10), end: s.periodEnd.slice(0, 10) };
+		periods.set(`${period.start}/${period.end}`, period);
+	}
+	return [...periods.values()].sort((a, b) => a.start.localeCompare(b.start));
+}
+
+/**
+ * #199, #408 point 2: one Abrechnungsperiode per day and building. The building's periods that `run` overlaps without
+ * being equal, none when it equals one of them: statements made before this rule may overlap, a run equal to one of
+ * their periods is allowed (product owner, Fachreview 199-1 V-1); a run with any of them is refused
+ */
+export const overlappedBy = (run: Range, periods: Range[]) =>
+	periods.some((p) => same(p, run)) ? [] : periods.filter((p) => overlaps(p, run));
+
+/**
+ * The contract page's way for each part of its missing periods (#408 point 2): days inside the period of a statement
+ * of the building go to exactly that period; the days of an ended period no statement of the building covers to a
+ * period of their own, the whole one or a short one for all its contracts. `open` is false when a statement of the
+ * contract overlaps that period: the run would not bill it there (periods made before this rule, Fachreview 199-1 V-1)
+ */
+export function missingWays(
+	type: AccountingPeriodType,
+	contract: Parameters<typeof billsIn>[0],
+	statements: Dated[],
+	building: Dated[],
+	today = new Date()
+) {
+	const periods = billingPeriods(building);
+	const own = billingPeriods(statements);
+	const ways = (period: Range) => [
+		...periods.filter((p) => overlaps(p, period)).map((p) => ({ ...p, kind: 'existing' })),
+		...uncovered(
+			period,
+			building.filter((s) => s.status !== 'replaced')
+		).map((u) => ({ ...u, kind: 'short' }))
+	];
+	return missingPeriods(type, contract, statements, today)
+		.flatMap((gap) => {
+			const period = endedPeriodsSince(type, gap.start, today).find((p) => p.start <= gap.start)!;
+			return ways(period)
+				.filter((way) => overlaps(way, gap))
+				.map(({ kind, ...way }) => ({
+					start: [gap.start, way.start].sort()[1],
+					end: [gap.end, way.end].sort()[0],
+					way: { kind: same(way, period) ? 'whole' : kind, ...way },
+					open: !own.some((p) => overlaps(p, way))
+				}));
+		})
+		.filter((part) => billsIn(contract, part))
+		.sort((a, b) => b.start.localeCompare(a.start));
 }
 
 /** A calendar year by its number, any other range by its two days */
