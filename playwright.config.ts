@@ -43,6 +43,10 @@ const frontendEnv = {
 	OPERATOR_NAME: 'Muster Hosting AG',
 	OPERATOR_ADDRESS: 'Bahnhofstrasse 1, 8001 Zürich',
 	OPERATOR_CONTACT: 'betrieb@muster-hosting.ch',
+	// The server's and the mail server's country privacy.feature expects (#458)
+	OPERATOR_SERVER_COUNTRY: 'Deutschland',
+	MAIL_PROVIDER_NAME: 'Muster Mail AG',
+	MAIL_PROVIDER_COUNTRY: 'Schweiz',
 	// The component gallery the axe check visits (src/routes/gallery)
 	UI_GALLERY: 'on'
 };

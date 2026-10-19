@@ -4,6 +4,7 @@ import {
 	draftNoticeText,
 	footerVersionText,
 	glossaryExplanationText,
+	legalAsOfText,
 	llmRecipientNotice,
 	operatorNoticeText,
 	pageAnchor,
@@ -162,12 +163,43 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter unter {string}, dass jede Person beim Betreiber Auskunft über ihre Daten verlangen kann',
+	'erfährt der Liegenschaftsverwalter unter {string}, dass seine Mieter bei ihm Auskunft über ihre Daten verlangen können',
 	async ({ verwalter }, heading: string) => {
-		await verwalter.sees(sectionText(heading)).toContain('Auskunft');
+		await verwalter.sees(sectionText(heading)).toContain('Ihre Mieter können bei Ihnen kostenlos Auskunft');
 		await verwalter.sees(sectionText(heading)).toContain('Art. 25 DSG');
 	}
 );
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass ein Anbieter die erfassten Daten nur in seinem Auftrag bearbeitet und der Betreiber für Anmeldung, Protokoll des Servers und Cookies verantwortlich ist',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Ein solcher Anbieter bearbeitet die Daten, die Sie erfassen, nur in Ihrem Auftrag.');
+		await verwalter.sees(sectionText(heading)).toContain(
+			'Für die Anmeldung, das Protokoll des Servers und die Cookies ist der Betreiber verantwortlich.'
+		);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass seine Mieter bei ihm Berichtigung, Herausgabe und Löschung verlangen und eine Verletzung beim EDÖB anzeigen können',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('dass unrichtige Daten berichtigt werden (Art. 32 Abs. 1 DSG)');
+		await verwalter.sees(sectionText(heading)).toContain('in einem gängigen elektronischen Format herausgegeben werden (Art. 28 DSG)');
+		await verwalter.sees(sectionText(heading)).toContain('die Daten gelöscht werden (Art. 32 Abs. 2 DSG)');
+		await verwalter.sees(sectionText(heading)).toContain('(EDÖB) anzeigen (Art. 49 DSG)');
+	}
+);
+
+Then(
+	'nennen die Nutzungsbedingungen unter {string} {string}',
+	async ({ verwalter }, heading: string, text: string) => {
+		await verwalter.sees(sectionText(heading)).toContain(text);
+	}
+);
+
+Then('nennt die Seite den Stand {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(legalAsOfText).toBe(`Stand: ${date}`);
+});
 
 Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello nichts von selbst löscht und wer zur Buchführung verpflichtet ist, Geschäftsbücher und Buchungsbelege 10 Jahre aufbewahrt',

@@ -31,6 +31,8 @@ export const draftNotice = (heading: string) => inSection(heading, 'Hinweis auf 
 export const operatorNotice = (heading: string) => inSection(heading, 'Betreiber', 'terms-operator');
 export const pageTitle = target('Seitentitel', (page) => page.getByRole('heading', { level: 1 }));
 export const pagePurpose = target('Zweck der Seite unter dem Titel', (page) => page.getByTestId('page-purpose'));
+/** When the privacy statement or the terms of use last changed */
+export const legalAsOf = target('Stand der Seite', (page) => page.getByTestId('legal-as-of'));
 export const termsLinkOnLogin = target('Nutzungsbedingungen', (page) => page.getByTestId('login-terms-link'));
 export const privacyLinkOnLogin = target('Datenschutz', (page) => page.getByTestId('login-privacy-link'));
 export const publicLoginLink = target('Zur Anmeldung', (page) => page.getByTestId('public-login-link'));
