@@ -254,7 +254,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
   # #130 (#409 Punkt 1): ein Rechnungssteller wechselt auf einen gröberen, regelmässigen Rhythmus; die Summe bleibt gleich
-  @wip
   Szenario: Kein Hinweis, wenn der Rechnungssteller von monatlich auf vierteljährlich wechselt
     Angenommen im Gebäude "Lindenhof" gibt es im Jahr 2023 jeden Monat eine Rechnung der Kategorie "Kaltwasser" über "100" Franken
     Und im Gebäude "Lindenhof" gibt es im Jahr 2024 jedes Quartal eine Rechnung der Kategorie "Kaltwasser" über "300" Franken

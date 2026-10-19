@@ -286,4 +286,20 @@ describe('Prüfung pro Kategorie', () => {
 
 		expect(findings).toMatchObject([{ kind: 'gap' }]);
 	});
+
+	// fach-review 130 V-1 to V-4: other divisors, the accepted limit, a credit note, p capped at 12
+	it('meldet bei 4 statt 2 Rechnungen keine Lücke, wenn jedes Halbjahr eine hat', () => {
+		const halves = [invoice('Kaltwasser', '2025-06-30', 1800), invoice('Kaltwasser', '2025-12-31', 1800)];
+		expect(checkCategories(halves, quarterly('Kaltwasser', 2024), year2025).findings).toEqual([]);
+		// accepted limit (#409): Q1 and Q3 only look half-yearly, the totals give a deviation
+		const q1q3 = checkCategories(quarterly('Kaltwasser', 2025, [1, 3]), quarterly('Kaltwasser', 2024), year2025);
+		expect(q1q3.findings).toMatchObject([{ kind: 'deviation', changePercent: -50 }]);
+	});
+
+	it('meldet bei 6 statt 12 Rechnungen keine Lücke, auch mit einer Gutschrift und 14 Rechnungen im Vorjahr', () => {
+		const bimonthly = monthly(2025, 200).filter((_, m) => m % 2 === 1);
+		const credit = invoice('Kaltwasser', '2025-05-15', -50);
+		const previous = [...monthly(2024), invoice('Kaltwasser', '2024-03-15', 0), invoice('Kaltwasser', '2024-09-15', 0)];
+		expect(checkCategories([...bimonthly, credit], previous, year2025).findings).toEqual([]);
+	});
 });

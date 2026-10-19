@@ -110,6 +110,17 @@ function groupByCategory(list: CategoryInvoice[]) {
 	return groups;
 }
 
+// A regular, coarser rhythm than the year before (#409 point 1): 2 ≤ n < p, n divides p and each of n equal slices
+// holds exactly one invoice (12 monthly to 4 quarterly); 4 to 3 or a single invoice stays a gap
+function coarserRhythm(current: CategoryInvoice[], period: Period, parts: number) {
+	const n = current.length;
+	if (n < 2 || n >= parts || parts % n !== 0) return false;
+	const coarse = slices(period, n);
+	const hits = coarse.map(() => 0);
+	for (const invoice of current) hits[sliceOf(invoice.invoiceDate, coarse)]++;
+	return hits.every((count) => count === 1);
+}
+
 // The rhythm of the year before (one slice per invoice, at most one per month) and the slices without invoice now;
 // a credit note is no part of the rhythm, and as many invoices as the year before are complete however they are dated
 function missingParts(current: CategoryInvoice[], previous: CategoryInvoice[], period: Period, before: Period) {
@@ -119,6 +130,7 @@ function missingParts(current: CategoryInvoice[], previous: CategoryInvoice[], p
 	[current, previous] = [bills(current), bills(previous)];
 	const parts = Math.min(previous.length, 12);
 	if (parts < 2 || current.length >= previous.length) return [];
+	if (coarserRhythm(current, period, parts)) return [];
 	const now = slices(period, parts);
 	const then = slices(before, parts);
 	const billedThen = new Set(previous.map((invoice) => sliceOf(invoice.invoiceDate, then)));
