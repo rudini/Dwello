@@ -103,7 +103,16 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] Slice review round 1 (`docs/reviews/51-review-1.md`: no Blocker/Major; C-1 missing `verified_email` counts as unverified, C-2 `/auth/me` refuses, C-3 README restricted and O-39 in `offene-punkte.md`, C-5 fixed; C-4, C-6 Nits kept) and persona Helga (`docs/design/personas/helga-51.md`: P-1 Major)
 - [x] Helga P-1: Google lets the visitor choose the account (`prompt=select_account`, not `consent`), scenario «Bei Google das Konto wählen» seen red first; P-2, P-3 Minor kept
 - [x] Re-review: code-reviewer round 2, also closing (`docs/reviews/51-review-2.md`, no findings); Helga round 2 (`docs/design/personas/helga-51-2.md`: P-1 fixed, P-2 and P-3 Minor kept); lint, check, vitest 201, E2E Chromium auth, login and demo rows 34 passed
-- [ ] PR `Fixes #51`
+- [x] PR `Fixes #51` (#469, merged)
+
+### #456 Link from a building to its invoices
+
+- [x] @wip scenario «Rechnungen eines Gebäudes öffnen» (`building-detail.feature`), red at the missing link
+- [x] DOM test of the building detail page for `building-invoices-button` (link `/invoices?building=<id>`), red first
+- [x] Secondary button «Rechnungen ansehen» in the page header (the primary action stays «Wohnung hinzufügen»), the text of the overview's same link (`dashboard_invoices`, review C-1); files: `src/routes/buildings/[id]/+page.svelte`, `messages/*.json`, `buildings-pages.dom.test.ts`, `building-detail.feature` and its steps, task and target
+- [x] Slice review round 1 (`docs/reviews/456-review-1.md`: no Blocker/Major; C-1 reuse `dashboard_invoices`, C-2, C-3 import order, fixed); persona Helga (`docs/design/personas/helga-456.md`: task done, no Blocker/Major; P-1 no link back from the filtered list, P-2 filter shown only in the select (existed before), P-3 Nit; kept)
+- [x] Closing review round 2 (`docs/reviews/456-review-2.md`: C-1 to C-3 done, C-4 Nit in this plan fixed); E2E Chromium building-detail scenarios plus axe and language rows: 17 passed
+- [ ] PR `Fixes #456`
 
 ### #468 «Weiter» waits while a step loads
 

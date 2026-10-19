@@ -207,6 +207,13 @@ describe('Gebäudedetail', () => {
 		expect(byTestId('apartment-status-legend')).not.toBeNull();
 	});
 
+	it('führt in einem Schritt zu den Rechnungen des Gebäudes (#456)', () => {
+		detail([]);
+		const invoices = byTestId('building-invoices-button')!;
+		expect(invoices.getAttribute('href')).toBe('/invoices?building=b1');
+		expect(invoices.textContent!.trim()).toBe('Rechnungen ansehen');
+	});
+
 	it('erfasst Wohnungen im Gebäude als nächsten Schritt', () => {
 		detail([flat('a1', '1.01', 1)]);
 		const add = byTestId('apartment-add-button')!;

@@ -7,6 +7,7 @@ export const confirmDeleteButton = target('Gebäude löschen bestätigen', (page
 	page.getByTestId('building-delete-confirm')
 );
 export const editButton = target('Gebäude bearbeiten', (page) => page.getByTestId('building-edit-button'));
+export const invoicesButton = target('Rechnungen des Gebäudes', (page) => page.getByTestId('building-invoices-button'));
 export const addApartmentButton = target('Wohnung hinzufügen', (page) => page.getByTestId('apartment-add-button'));
 export const firstApartmentButton = target('Erste Wohnung erstellen', (page) =>
 	page.getByTestId('apartment-first-create-button')

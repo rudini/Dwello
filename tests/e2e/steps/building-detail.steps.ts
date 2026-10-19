@@ -10,10 +10,12 @@ import {
 	yearBuilt
 } from '../questions/building-detail';
 import { emptyListShown, listedBuildingCount } from '../questions/buildings';
+import { chosenInvoiceBuilding } from '../questions/invoices';
 import {
 	deleteBuilding,
 	openApartment,
 	openBuildingDetail,
+	openBuildingInvoices,
 	recordFuelStock,
 	startDeletingBuilding,
 	startEditing,
@@ -55,6 +57,14 @@ When('der Liegenschaftsverwalter das Gebäude löschen will', async ({ verwalter
 
 When('der Liegenschaftsverwalter das Gebäude bearbeiten will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(startEditing);
+});
+
+When('der Liegenschaftsverwalter die Rechnungen des Gebäudes öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openBuildingInvoices);
+});
+
+Then('zeigt die Rechnungsliste die Rechnungen im Gebäude {string}', async ({ verwalter, names }, building: string) => {
+	await verwalter.sees(chosenInvoiceBuilding).toBe(names.get(building)!);
 });
 
 When('der Liegenschaftsverwalter eine Wohnung hinzufügen will', async ({ verwalter }) => {
