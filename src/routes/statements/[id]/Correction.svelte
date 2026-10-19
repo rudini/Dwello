@@ -5,6 +5,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
+	import { FRANCS } from '$lib/contract-form';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import FormDialog from './FormDialog.svelte';
 
@@ -15,12 +16,16 @@
 
 	// what the berichtigte Abrechnung will offset: the payment recorded and what this one offset itself, or nothing
 	// yet; a refund is paid by the landlord (Fachreview W2e V-1, V-6, V-12, V-13)
-	const consequence = $derived.by(() => {
-		const number = statement.statementNumber;
-		if (statement.status !== 'paid' || !statement.paidDate)
-			return statement.balance < 0
+	// not paid: a sent or overdue one, or a settled one whose Saldo may be carried over already (#448)
+	const unpaidConsequence = (number: string) =>
+		statement.status === 'settled'
+			? m.statements_correct_open_settled({ number })
+			: statement.balance < 0
 				? m.statements_correct_open_refund({ number })
 				: m.statements_correct_open({ number });
+	const consequence = $derived.by(() => {
+		const number = statement.statementNumber;
+		if (statement.status !== 'paid' || !statement.paidDate) return unpaidConsequence(number);
 		const offset = (statement.paidAmount ?? 0) + (statement.priorPayments ?? 0);
 		if (Math.abs(offset) < 0.005) return m.statements_correct_settled({ number });
 		const paid = {
@@ -37,7 +42,7 @@
 	let paidAmount = $state('0.00');
 	let paidError = $state('');
 	function checkPaid() {
-		const valid = !askPaid || /^\d+(\.\d{1,2})?$/.test(paidAmount.trim());
+		const valid = !askPaid || FRANCS.test(paidAmount.trim());
 		paidError = valid ? '' : m.backend_statement_paid_amount_invalid({ amount: paidAmount });
 		return valid;
 	}

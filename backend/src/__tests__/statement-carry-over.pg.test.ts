@@ -7,9 +7,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, utilityStatements } from '../db/schema';
+import { documents, invoices, utilityStatements } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
-import { expectRejection, idOf } from './helpers/records';
+import { expectRejection, idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
 type Rental = Awaited<ReturnType<typeof createRental>>;
@@ -26,7 +26,7 @@ const rentals: Rental[] = [];
 const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 
 // No invoices and no Akonto: a statement's own Saldo is 0.00, so what it shows beyond that is the Übertrag
-const rentalOf = async (contract: { startDate: string; endDate?: string } = { startDate: '2020-01-01' }) => {
+const rentalOf = async (contract: { startDate: string; endDate?: string; monthlyAdvancePayment?: string } = { startDate: '2020-01-01' }) => {
 	const rental = await createRental(crypto.randomUUID(), { monthlyAdvancePayment: '0', managementFeeAgreed: false, ...contract });
 	rentals.push(rental);
 	return rental;
@@ -54,6 +54,7 @@ afterAll(async () => {
 		const ids = db.select({ id: utilityStatements.id }).from(utilityStatements).where(eq(utilityStatements.contractId, rental.contract));
 		await db.delete(documents).where(inArray(documents.statementId, ids)); // the Mahnung
 		await db.update(utilityStatements).set({ carriedFromId: null }).where(eq(utilityStatements.contractId, rental.contract));
+		await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
 		await db.delete(utilityStatements).where(eq(utilityStatements.contractId, rental.contract));
 		await rental.remove();
 	}
@@ -139,6 +140,18 @@ describe('Übertrag', () => {
 		expect(await read(await generate(rental, 2025))).toMatchObject({ balance: '0.00', carriedFrom: null });
 	});
 
+	// Fachreview 448-1 V-8: übertragen wird der gerundete Saldo: 1'203.02 − 1'200.00 = 3.02 → 3.00
+	it('überträgt den auf 5 Rappen gerundeten Saldo', async () => {
+		const rental = await rentalOf({ startDate: '2020-01-01', monthlyAdvancePayment: '100' });
+		await insertInvoice(rental.building, { amount: '1203.02', invoiceDate: '2024-06-30' });
+		const first = await send(await generate(rental, 2024));
+
+		const next = await read(await generate(rental, 2025));
+
+		expect(first).toMatchObject({ status: 'settled', balance: '3.00' });
+		expect(next).toMatchObject({ balance: '-1197.00', carriedFrom: { id: first.id, balance: '3.00' } });
+	});
+
 	it('rechnet einen Saldo, der ein anderer Mietvertrag übertragen hat, nicht ein', async () => {
 		await sentWith(await rentalOf(), 2024, '3.00');
 
@@ -217,7 +230,7 @@ describe('Übertrag und Berichtigung', () => {
 	it('rechnet einen schon übertragenen Saldo in der berichtigten Abrechnung als verrechnet an', async () => {
 		const rental = await rentalOf();
 		const first = await sentWith(rental, 2024, '3.00');
-		const next = await read(await generate(rental, 2025));
+		const next = await send(await generate(rental, 2025)); // with the Übertrag: 3.00, settled itself
 
 		const corrected = await replaceAndCorrect(first.id);
 		const detail = (await read(corrected.id)) as typeof corrected;
@@ -226,6 +239,37 @@ describe('Übertrag und Berichtigung', () => {
 		expect(detail.priorPaidOn).toEqual([]);
 		expect(detail.offsetWith).toEqual([{ statementNumber: (next as Statement & { statementNumber: string }).statementNumber, amount: '3.00' }]);
 		expect((await read(next.id)).carriedFrom).toMatchObject({ id: first.id });
+	});
+
+	// Fachreview 448-2 V-14: verrechnet ist ein Saldo erst in einer versendeten Abrechnung; ein Entwurf verliert ihn
+	it('nimmt einem Entwurf, der den Saldo zählt, den Übertrag, wenn die übertragene Abrechnung ersetzt wird', async () => {
+		const rental = await rentalOf();
+		const first = await sentWith(rental, 2024, '3.00');
+		const draft = await generate(rental, 2025);
+
+		const corrected = await replaceAndCorrect(first.id);
+		// Code-Review 448-1 C-1: also once the draft is calculated again
+		await callApi(`/api/v1/statements/${draft}/recalculation`, { method: 'POST' });
+
+		expect(corrected).toMatchObject({ priorPayments: '0.00', balance: '0.00' });
+		expect(await read(draft)).toMatchObject({ balance: '0.00', carriedFrom: null });
+	});
+
+	// Fachreview 448-2 M-5: auch eine nach #94 einbehaltene Rückerstattung, die die nächste Abrechnung schon zählt
+	it('rechnet eine nach #94 erledigte Rückerstattung, die die nächste Abrechnung zählt, als verrechnet an', async () => {
+		const rental = await rentalOf();
+		const first = await generate(rental, 2024);
+		await db
+			.update(utilityStatements)
+			.set({ status: 'paid', balance: '-3.00', paidDate: '2025-02-01', paidAmount: '0.00' })
+			.where(eq(utilityStatements.id, first));
+		const next = await generate(rental, 2025);
+		await db.update(utilityStatements).set({ balance: '50.00' }).where(eq(utilityStatements.id, next)); // claimed
+		await send(next);
+
+		const corrected = await replaceAndCorrect(first);
+
+		expect(corrected).toMatchObject({ priorPayments: '-3.00', balance: '3.00' });
 	});
 
 	it('lässt einen noch nicht übertragenen Saldo entfallen; die nächste Abrechnung nimmt den der berichtigten', async () => {
@@ -353,6 +397,17 @@ describe('Bereits bezahlt beim Berichtigen', () => {
 
 // #403 (6): das PDF druckt die Bemerkung; eine geänderte verwirft das gespeicherte
 describe('Bemerkung', () => {
+	// Code-Review 448-1 C-4: die Bearbeitungsseite sendet eine leere Bemerkung als ''
+	it('behält das gespeicherte PDF, wenn die leere Bemerkung leer bleibt', async () => {
+		const sent = await sentWith(await rentalOf(), 2024, '100.00');
+		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, sent.id));
+
+		await sendJson('PUT', `/api/v1/statements/${sent.id}`, { notes: '' });
+
+		const [row] = await db.select({ pdfBlob: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, sent.id));
+		expect(row.pdfBlob).toBe('JVBERi0=');
+	});
+
 	it('verwirft das gespeicherte PDF, wenn sie sich ändert', async () => {
 		const sent = await sentWith(await rentalOf(), 2024, '100.00');
 		await db.update(utilityStatements).set({ pdfBlob: 'JVBERi0=', pdfGeneratedAt: new Date() }).where(eq(utilityStatements.id, sent.id));

@@ -379,11 +379,11 @@ export async function calculateStatement(input: StatementInput) {
 	return { ...calculation, balance, priorPayments, carryOver, carriedFromId: carried?.id ?? null, replacesId: replaced?.id ?? null };
 }
 
-// The number of the statement of another period that counts this statement's Saldo as its Übertrag (#448); a
-// berichtigte Abrechnung of the same period counts it again
+// The number of the sent statement of another period that counts this statement's Saldo as its Übertrag (#448); a
+// berichtigte Abrechnung of the same period counts it again; a draft may still change (Fachreview 448-2 V-14)
 const countedBy = sql<string | null>`(
 	select counting.statement_number from utility_statements counting
-	where counting.carried_from_id = utility_statements.id
+	where counting.carried_from_id = utility_statements.id and counting.status <> 'draft'
 		and (counting.period_start <> utility_statements.period_start or counting.period_end <> utility_statements.period_end)
 	limit 1
 )`; // the outer table by its name: drizzle writes a column of a single-table select without it
@@ -604,10 +604,7 @@ export async function updateStatement(
 	}
 
 	// The PDF prints date, payment deadline and remark (#448); a change discards it, it is made again. Once paid, the PDF as sent stays
-	const pdfOutdated =
-		(data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline) ||
-		(data.notes !== undefined && data.notes !== existing.notes) ||
-		(data.statementDate !== undefined && data.statementDate !== existing.statementDate);
+	const pdfOutdated = changesPdf(data, existing);
 
 	// Update the statement
 	const [updated] = await db
@@ -620,6 +617,12 @@ export async function updateStatement(
 
 	return await getStatement(id);
 }
+
+// A field the PDF prints, changed; the edit page sends no remark as ''
+const changesPdf = (data: Partial<NewUtilityStatement>, existing: StatementWithDetails) =>
+	(['paymentDeadline', 'statementDate', 'notes'] as const).some(
+		(field) => data[field] !== undefined && (data[field] ?? '') !== (existing[field] ?? '')
+	);
 
 /** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by */
 export async function keyValuesOf(buildingId: string, apartmentId: string): Promise<KeyValues | null> {
@@ -732,21 +735,31 @@ export async function replaceStatement(id: string, paidAmount?: string): Promise
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (!['sent', 'overdue', 'paid', 'settled'].includes(existing.status))
 		throw new CodedError('STATEMENT_NOT_REPLACEABLE', 'Only a sent or paid statement can be replaced');
-	const paid = paidAmount === undefined ? await offsetOf(existing) : { paidAmount: paidOn(existing, paidAmount) };
+	const entered = paidAmount === undefined ? undefined : { paidAmount: paidOn(existing, paidAmount) };
 	await db.transaction(async (tx) => {
+		const paid = entered ?? (await offsetOf(existing, tx));
 		await tx.update(utilityStatements).set({ status: 'replaced', ...paid, updatedAt: new Date() }).where(eq(utilityStatements.id, id));
 		await recordStatementCorrection(existing, tx); // the Protokoll (#357)
 	});
 	return (await getStatement(id))!;
 }
 
-// A settled statement whose Saldo the next one counted as its Übertrag: the berichtigte Abrechnung offsets it as
-// «Bereits verrechnet» (#448, Fachreview 448-1 V-2); one not counted yet is no longer carried over once replaced
-async function offsetOf(statement: StatementWithDetails) {
-	if (statement.status !== 'settled') return {};
-	const [row] = await db.select({ countedBy }).from(utilityStatements).where(eq(utilityStatements.id, statement.id));
+// A Saldo carried over that a sent next statement counts: the berichtigte Abrechnung offsets it as «Bereits
+// verrechnet» (#448, Fachreview 448-1 V-2, 448-2 M-5); a draft that counts it loses it, and once replaced the Saldo
+// is no longer carried over: the next statement takes the berichtigte Abrechnung's (448-2 V-14)
+async function offsetOf(statement: StatementWithDetails, tx: Transaction) {
+	const [row] = await tx
+		.select({ countedBy })
+		.from(utilityStatements)
+		.where(and(eq(utilityStatements.id, statement.id), carriable));
+	if (!row) return {};
+	await tx
+		.update(utilityStatements)
+		.set({ carriedFromId: null, balance: sql`${utilityStatements.balance} - ${statement.balance}` })
+		.where(and(eq(utilityStatements.carriedFromId, statement.id), eq(utilityStatements.status, 'draft')));
 	return row.countedBy ? { paidAmount: statement.balance } : {};
 }
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 // «Bereits bezahlt» of a sent or overdue statement, in francs and Rappen
 function paidOn(statement: StatementWithDetails, amount: string) {

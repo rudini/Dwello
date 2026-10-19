@@ -170,6 +170,10 @@ Funktionalität: Barrierefreiheit
       | statement-paid-detail  | reset-payment-dialog |
       | statement-paid-detail  | correct-dialog      |
       | statement-settled-detail | default           |
+      | statement-carried-detail | default           |
+      | statement-carried-detail | correct-dialog    |
+      | statement-carry-detail | default             |
+      | statement-offset-detail | default            |
       | statement-replaced-detail | default          |
       | statement-corrected-detail | default         |
       | statement-correction-detail | default        |

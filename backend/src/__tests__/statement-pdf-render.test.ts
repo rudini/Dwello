@@ -280,14 +280,17 @@ describe('PDF mit einem Saldo unter CHF 5', () => {
 		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.1, paymentDeadline: '2026-03-17', carried: true });
 
 		expect(pdf.flowing).toContain('Nachzahlung CHF 4.10');
-		expect(pdf.flowing).toContain('Der Betrag von CHF 4.10 wird mit der nächsten Abrechnung verrechnet.');
+		expect(pdf.flowing).toContain(
+			'Der Betrag ist kleiner als CHF 5.00. Wir verrechnen ihn mit der nächsten Nebenkostenabrechnung; Sie müssen jetzt nichts bezahlen.'
+		);
 		expect(pdf.flowing).not.toContain('Zahlteil');
 	});
 
 	it('verrechnet eine kleine Rückerstattung mit der nächsten Abrechnung und fragt nicht nach der IBAN', async () => {
 		const pdf = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paymentDeadline: '2026-03-17', carried: true });
 
-		expect(pdf.flowing).toContain('Der Betrag von CHF 2.85 wird mit der nächsten Abrechnung verrechnet.');
+		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir verrechnen ihn mit der nächsten Nebenkostenabrechnung.');
+		expect(pdf.flowing).not.toContain('bezahlen');
 		expect(pdf.flowing).not.toContain('IBAN');
 		expect(pdf.flowing).not.toContain('überweisen');
 	});
@@ -298,9 +301,9 @@ describe('PDF mit einem Saldo unter CHF 5', () => {
 			(['fr', 'it', 'en'] as const).map(async (language) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing)
 		);
 
-		expect(texts[0]).toContain('Le montant de CHF 2.85 sera compensé avec le prochain décompte.');
-		expect(texts[1]).toContain('L’importo di CHF 2.85 sarà compensato con il prossimo conteggio.');
-		expect(texts[2]).toContain('The amount of CHF 2.85 will be offset against the next statement.');
+		expect(texts[0]).toContain('Le montant est inférieur à CHF 5.00. Nous le compensons avec le prochain décompte des charges.');
+		expect(texts[1]).toContain('L’importo è inferiore a CHF 5.00. Lo compensiamo con il prossimo conteggio delle spese accessorie.');
+		expect(texts[2]).toContain('The amount is less than CHF 5.00. We will offset it against the next utility cost statement.');
 	});
 
 	// #94 versendet: der Mieter hat gelesen, dass nichts folgt; der Text bleibt, ohne «Bezahlt am» und «Überwiesen am»

@@ -70,7 +70,8 @@ const translations: Record<Language, Record<string, string>> = {
 		priorRefunded: 'Bereits zurückerstattet auf {numbers}',
 		priorPaidShort: 'bereits bezahlt',
 		priorRefundedShort: 'bereits zurückerstattet',
-		carriedOver: 'Der Betrag ist kleiner als CHF 5.00. Der Betrag von CHF {amount} wird mit der nächsten Abrechnung verrechnet.',
+		carriedDue: 'Der Betrag ist kleiner als CHF 5.00. Wir verrechnen ihn mit der nächsten Nebenkostenabrechnung; Sie müssen jetzt nichts bezahlen.',
+		carriedRefund: 'Der Betrag ist kleiner als CHF 5.00. Wir verrechnen ihn mit der nächsten Nebenkostenabrechnung.',
 		carryOver: 'Übertrag aus Abrechnung {number}: CHF {amount}',
 		carryOverShort: 'Übertrag',
 		offsetWith: 'Bereits verrechnet mit {numbers}',
@@ -171,7 +172,8 @@ const translations: Record<Language, Record<string, string>> = {
 		priorRefunded: 'Déjà remboursé sur {numbers}',
 		priorPaidShort: 'déjà payé',
 		priorRefundedShort: 'déjà remboursé',
-		carriedOver: 'Le montant est inférieur à CHF 5.00. Le montant de CHF {amount} sera compensé avec le prochain décompte.',
+		carriedDue: 'Le montant est inférieur à CHF 5.00. Nous le compensons avec le prochain décompte des charges\u00a0; vous n’avez rien à payer maintenant.',
+		carriedRefund: 'Le montant est inférieur à CHF 5.00. Nous le compensons avec le prochain décompte des charges.',
 		carryOver: 'Report du décompte {number}\u00a0: CHF {amount}',
 		carryOverShort: 'report',
 		offsetWith: 'Déjà compensé avec {numbers}',
@@ -271,7 +273,8 @@ const translations: Record<Language, Record<string, string>> = {
 		priorRefunded: 'Già rimborsato su {numbers}',
 		priorPaidShort: 'già pagato',
 		priorRefundedShort: 'già rimborsato',
-		carriedOver: 'L’importo è inferiore a CHF 5.00. L’importo di CHF {amount} sarà compensato con il prossimo conteggio.',
+		carriedDue: 'L’importo è inferiore a CHF 5.00. Lo compensiamo con il prossimo conteggio delle spese accessorie; ora non deve pagare nulla.',
+		carriedRefund: 'L’importo è inferiore a CHF 5.00. Lo compensiamo con il prossimo conteggio delle spese accessorie.',
 		carryOver: 'Riporto dal conteggio {number}: CHF {amount}',
 		carryOverShort: 'riporto',
 		offsetWith: 'Già compensato con {numbers}',
@@ -371,7 +374,8 @@ const translations: Record<Language, Record<string, string>> = {
 		priorRefunded: 'Already refunded on {numbers}',
 		priorPaidShort: 'already paid',
 		priorRefundedShort: 'already refunded',
-		carriedOver: 'The amount is less than CHF 5.00. The amount of CHF {amount} will be offset against the next statement.',
+		carriedDue: 'The amount is less than CHF 5.00. We will offset it against the next utility cost statement; you do not need to pay anything now.',
+		carriedRefund: 'The amount is less than CHF 5.00. We will offset it against the next utility cost statement.',
 		carryOver: 'Carried over from statement {number}: CHF {amount}',
 		carryOverShort: 'carried over',
 		offsetWith: 'Already offset against {numbers}',
@@ -676,7 +680,8 @@ function title({ doc, t, data }: Page, y: number) {
 // neither claimed nor paid out
 function settledText(t: Record<string, string>, data: StatementPDFData) {
 	if (data.balance === 0) return rounding(data) ? t.balancedRounded : t.balancedNote;
-	if (data.carried) return fill(t.carriedOver, { amount: formatCHF(Math.abs(data.balance)) });
+	// Fachreview 448-1 V-6: the reviewer's wording, without «Der Betrag» twice (product owner 2026-10-19)
+	if (data.carried) return data.balance < 0 ? t.carriedRefund : t.carriedDue;
 	return data.balance < 0 ? t.waivedRefund : t.waivedDue;
 }
 const unpaid = (data: StatementPDFData) => data.balance === 0 || data.carried || data.waived;

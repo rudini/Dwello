@@ -21,6 +21,7 @@
 	"replacedBy": null,
 	"priorPaidOn": [],
 	"carriedFrom": null,
+	"offsetWith": [],
 	"final": false,
 	"status": "draft",
 	"oldAddress": false,

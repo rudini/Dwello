@@ -94,7 +94,7 @@ function endDateError({ isUnlimited, startDate, endDate }: ContractFormValues) {
 }
 
 // Francs and up to two decimals of Rappen; anything else ("1.450", "1,450.00") would be read as a wrong amount
-const FRANCS = /^\d+(\.\d{1,2})?$/;
+export const FRANCS = /^\d+(\.\d{1,2})?$/;
 const amountHint = () => m.contracts_error_amount();
 
 function baseRentError(baseRent: string) {

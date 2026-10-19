@@ -45,10 +45,12 @@ export function balanceLabel(balance: number): string {
 /** A Saldo below CHF 5, 0 included, is neither claimed nor paid out: carried over to the next statement (#448) */
 export const belowMinimum = (balance: number) => Math.abs(balance) < 5;
 /** No payment: a Saldo of 0, or one below CHF 5 that is no Schlussabrechnung's (#448, the Mindestbetrag) */
-export const unpaid = (statement: { balance: number; final?: boolean }) =>
-	statement.balance === 0 || (belowMinimum(statement.balance) && !statement.final);
+export const unpaid = (statement: { balance: number; final?: boolean; status?: string }) =>
+	statement.balance === 0 ||
+	statement.status === 'settled' || // also when the contract's end moves into the period afterwards (448-2 V-17)
+	(belowMinimum(statement.balance) && !statement.final);
 /** A Nachzahlung the landlord claims and may remind of: CHF 5 and more, on a Schlussabrechnung any (#448) */
-export const claimed = (statement: { balance: number; final?: boolean }) =>
+export const claimed = (statement: { balance: number; final?: boolean; status?: string }) =>
 	statement.balance > 0 && !unpaid(statement);
 
 /** The day the help of «Bezahlt am» asks for: the tenant's payment, or for a refund the landlord's transfer */

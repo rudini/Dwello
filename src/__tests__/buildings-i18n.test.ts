@@ -154,7 +154,7 @@ describe('Abrechnungsstatus auf der Übersicht', () => {
 			draft: 'Draft',
 			sent: 'Sent',
 			paid: 'Paid',
-			settled: 'Settled',
+			settled: 'Closed',
 			overdue: 'Overdue',
 			replaced: 'Replaced'
 		});

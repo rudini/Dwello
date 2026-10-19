@@ -25,7 +25,7 @@ Funktionalität: Saldo unter CHF 5
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Nachzahlung CHF 3.00"
-    Und steht im PDF "Der Betrag von CHF 3.00 wird mit der nächsten Abrechnung verrechnet."
+    Und steht im PDF "Wir verrechnen ihn mit der nächsten Nebenkostenabrechnung; Sie müssen jetzt nichts bezahlen."
     Und steht im PDF nicht "Zahlteil"
     Und steht im PDF nicht "verzichten"
 
@@ -40,7 +40,7 @@ Funktionalität: Saldo unter CHF 5
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Rückerstattung CHF 3.00"
-    Und steht im PDF "Der Betrag von CHF 3.00 wird mit der nächsten Abrechnung verrechnet."
+    Und steht im PDF "Der Betrag ist kleiner als CHF 5.00. Wir verrechnen ihn mit der nächsten Nebenkostenabrechnung."
     Und steht im PDF nicht "IBAN mit"
     Und steht im PDF nicht "nicht aus"
 

@@ -1,4 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
+import { FRANCS } from '$lib/contract-form';
 import { localToday } from '$lib/contract-status';
 import { m } from '$lib/paraglide/messages';
 import { localTitle } from '$lib/server/documents';
@@ -76,7 +77,7 @@ export async function resetStatementPayment(fetch: Fetch, id: string): Promise<R
 /** The statement replaced by a berichtigte Abrechnung to come (#120); null when done, otherwise what to tell the user */
 export async function replaceStatement(fetch: Fetch, id: string, paidAmount?: string): Promise<Refusal | null> {
 	// «Bereits bezahlt» of a sent or overdue statement, in francs (#448)
-	if (paidAmount !== undefined && !/^\d+(\.\d{1,2})?$/.test(paidAmount.trim()))
+	if (paidAmount !== undefined && !FRANCS.test(paidAmount.trim()))
 		return { status: 400, message: m.backend_statement_paid_amount_invalid({ amount: paidAmount }) };
 	const response = await fetch(
 		`${API}/${id}/replace`,

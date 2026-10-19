@@ -75,6 +75,8 @@ describe('Daten der Abrechnung im PDF', () => {
 		[{ balance: '3.00', status: 'settled' }, { carried: true }],
 		[{ balance: '-3.00', status: 'draft' }, { carried: true }],
 		[{ balance: '3.00', status: 'sent', final: true }, {}],
+		// Fachreview 448-2 V-17: erledigt bleibt erledigt, auch wenn das Vertragsende danach in die Periode fällt
+		[{ balance: '3.00', status: 'settled', final: true }, { carried: true }],
 		[{ balance: '3.00', status: 'paid', paidDate: '2025-02-01', paidAmount: '0.00' }, { waived: true }],
 		[{ balance: '0.00', status: 'settled' }, {}],
 		[{ balance: '5.00', status: 'sent' }, {}]

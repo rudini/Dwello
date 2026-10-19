@@ -81,7 +81,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnung berichtigen / Berichtigte Abrechnung erstellen | Rectifier le décompte / Établir le décompte rectificatif | Rettificare il conteggio / Allestire il conteggio rettificato | Correct statement / Create corrected statement |
 | Bereits bezahlt / Bereits zurückerstattet auf NK-… (#362) | déjà payé / déjà remboursé sur NK-… | già pagato / già rimborsato su NK-… | already paid / already refunded on NK-… |
 | Ausgeglichen (Saldo 0) | solde nul | in pareggio | nil balance |
-| Erledigt (Abrechnungsstatus, #448) | clôturé ❓ | chiuso ❓ | settled |
+| Erledigt (Abrechnungsstatus, #448) | clôturé | chiuso | closed |
 | Übertrag / Übertrag aus Abrechnung NK-… (#448) | report / report du décompte NK-… | riporto / riporto dal conteggio NK-… | carried over / carried over from statement NK-… |
 | Bereits verrechnet mit NK-… (#448) | déjà compensé avec NK-… | già compensato con NK-… | already offset against NK-… |
 | Schlussabrechnung (#448) | décompte final | conteggio finale | final statement |

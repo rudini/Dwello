@@ -90,6 +90,22 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
 	await seed.remind('Bruno', 2024);
 	const lateInvoice = await seed.invoiceOn('Seeblick', 'Lift', '200.00', '2025-06-30'); // recorded after the 2025 statements
+	// #448: a Saldo of 3.00 carried over («Erledigt»), the next statement with its Übertrag; in a second building the
+	// carried statement corrected after the next one was sent: «Bereits verrechnet mit»
+	for (const [building, tenant, number] of [['Uferweg', 'Jana', 'U1'], ['Hafenblick', 'Kai', 'H1']]) {
+		await seed.building(building, 'Winterthur');
+		await seed.apartment(building, number, 'vacant');
+		await seed.tenant(tenant);
+		await seed.contract(tenant, number, { startDate: '2023-01-01', baseRent: '1200.00' });
+		await seed.managementFee(tenant, false);
+		await seed.invoiceOn(building, 'Hauswart', '3.00', '2023-06-30');
+		await seed.invoiceOn(building, 'Hauswart', '100.00', '2024-06-30');
+		await seed.statement(tenant, building, 2023);
+		await seed.sendStatement(tenant, 2023);
+		await seed.statement(tenant, building, 2024);
+	}
+	await seed.sendStatement('Kai', 2024);
+	await seed.replaceStatement('Kai', 2023, true);
 	// heating costs without any Tankbestand: the wizard asks about a tank; rented, so its preview has a row too
 	await seed.building('Bergsicht', 'Winterthur');
 	await seed.apartment('Bergsicht', '2.01', 'vacant');
@@ -186,6 +202,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
 		settledStatement: seed.idOf('Abrechnung Carla 2021'),
+		carriedStatement: seed.idOf('Abrechnung Jana 2023'),
+		carryStatement: seed.idOf('Abrechnung Jana 2024'),
+		offsetStatement: seed.idOf('Berichtigte Abrechnung Kai 2023'),
 		correctedStatement: seed.idOf('Abrechnung Carla 2024'),
 		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),

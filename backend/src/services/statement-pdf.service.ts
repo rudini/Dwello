@@ -166,7 +166,8 @@ function minimumOf(statement: StatementWithDetails) {
 	const balance = parseFloat(statement.balance);
 	if (!belowMinimum(balance) || balance === 0) return {};
 	if (statement.paidDate && Number(statement.paidAmount) === 0) return { waived: true };
-	return statement.final ? {} : { carried: true };
+	// settled stays settled, also when the contract's end moves into the period afterwards (Fachreview 448-2 V-17)
+	return statement.final && statement.status !== 'settled' ? {} : { carried: true };
 }
 
 // The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs

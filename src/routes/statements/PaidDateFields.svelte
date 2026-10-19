@@ -31,7 +31,10 @@
 	bind:value={paidDate}
 	testid="paid-date-input"
 />
-{#if early}
-	<Alert tone="caution" title={early} testid="paid-date-early-warning" />
-{/if}
+<!-- read out when it appears: the focus stays on the button, whose name changes -->
+<div aria-live="polite">
+	{#if early}
+		<Alert tone="caution" title={early} testid="paid-date-early-warning" />
+	{/if}
+</div>
 <p class="rounded-panel bg-sunken p-4 font-semibold text-ink">{summary}</p>
