@@ -1348,7 +1348,7 @@
 	"settings_sender_text": "Figure sur chaque décompte et chaque rappel. Avec l’IBAN, Dwello crée la QR-facture.",
 	"settings_company_name": "Nom de l’entreprise",
 	"settings_company_name_example": "Immobilier Modèle SA",
-	"settings_iban_help": "Compte sur lequel vos locataires versent les montants à payer ; il figure sur la QR-facture. Un remboursement, vous le versez vous-même sur le compte du locataire d’ici le délai de paiement ; le décompte lui demande de vous communiquer son IBAN.",
+	"settings_iban_help": "Compte sur lequel vos locataires versent les montants à payer ; il figure sur la QR-facture. Un remboursement, vous le versez vous-même sur le compte du locataire d’ici le délai de paiement ; le décompte lui demande de vous communiquer son IBAN. Avec un IBAN, le nom de l’entreprise, le NPA et la localité sont nécessaires.",
 	"settings_fee_label": "Frais de gestion en %",
 	"settings_fee_suggestion": "Proposés lors de l’établissement des décomptes, où vous pouvez les adapter à chaque fois.",
 	"settings_deadlines": "Délais",

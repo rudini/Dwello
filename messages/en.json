@@ -1348,7 +1348,7 @@
 	"settings_sender_text": "Appears on every statement and every reminder. Dwello uses the IBAN to create the QR-bill.",
 	"settings_company_name": "Company name",
 	"settings_company_name_example": "Sample Properties AG",
-	"settings_iban_help": "Account to which your tenants transfer amounts due; it appears on the QR-bill. You transfer a refund yourself to the tenant’s account by the payment deadline; the statement asks the tenant to give you their IBAN.",
+	"settings_iban_help": "Account to which your tenants transfer amounts due; it appears on the QR-bill. You transfer a refund yourself to the tenant’s account by the payment deadline; the statement asks the tenant to give you their IBAN. With an IBAN, the company name, postcode and town are required.",
 	"settings_fee_label": "Management fee in %",
 	"settings_fee_suggestion": "Suggested when you create the statements, where you can change it for each run.",
 	"settings_deadlines": "Deadlines",

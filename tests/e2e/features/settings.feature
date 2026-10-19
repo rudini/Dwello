@@ -47,6 +47,10 @@ Funktionalität: Einstellungen
       | IBAN       | CH93 0076 2011 6238 5295 7 |
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."
 
+  # #490 (Entscheid des Product Owners): die Hilfe sagt es vor dem Speichern
+  Szenario: Die Einstellungen sagen, was eine IBAN braucht
+    Dann erklären die Einstellungen bei der IBAN "Mit einer IBAN braucht es Firmenname, PLZ und Ort."
+
   Szenario: Ungültige PLZ
     Wenn der Liegenschaftsverwalter die PLZ "80" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "PLZ muss 4 Ziffern haben."

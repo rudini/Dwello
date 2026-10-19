@@ -1348,7 +1348,7 @@
 	"settings_sender_text": "Steht auf jeder Abrechnung und jeder Mahnung. Mit der IBAN erstellt Dwello die QR-Rechnung.",
 	"settings_company_name": "Firmenname",
 	"settings_company_name_example": "Muster Immobilien AG",
-	"settings_iban_help": "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung. Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters; die Abrechnung bittet ihn, Ihnen seine IBAN mitzuteilen.",
+	"settings_iban_help": "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung. Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters; die Abrechnung bittet ihn, Ihnen seine IBAN mitzuteilen. Mit einer IBAN braucht es Firmenname, PLZ und Ort.",
 	"settings_fee_label": "Verwaltungspauschale in %",
 	"settings_fee_suggestion": "Vorschlag beim Erstellen der Abrechnungen, dort für jeden Lauf anpassbar.",
 	"settings_deadlines": "Fristen",

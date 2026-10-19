@@ -1348,7 +1348,7 @@
 	"settings_sender_text": "Figura su ogni conteggio e ogni sollecito. Con l’IBAN Dwello crea la QR-fattura.",
 	"settings_company_name": "Nome dell’azienda",
 	"settings_company_name_example": "Immobili Modello SA",
-	"settings_iban_help": "Conto su cui i suoi inquilini versano gli importi dovuti; figura sulla QR-fattura. Un rimborso lo versa Lei stesso sul conto dell’inquilino entro il termine di pagamento; il conteggio gli chiede di comunicarLe il proprio IBAN.",
+	"settings_iban_help": "Conto su cui i suoi inquilini versano gli importi dovuti; figura sulla QR-fattura. Un rimborso lo versa Lei stesso sul conto dell’inquilino entro il termine di pagamento; il conteggio gli chiede di comunicarLe il proprio IBAN. Con un IBAN servono il nome dell’azienda, il NPA e la località.",
 	"settings_fee_label": "Spese di gestione in %",
 	"settings_fee_suggestion": "Valore proposto quando allestisce i conteggi; lì può adattarlo ogni volta.",
 	"settings_deadlines": "Termini",

@@ -107,7 +107,8 @@ describe('Einstellungen', () => {
 		for (const said of [
 			'Eine Rückerstattung überweisen Sie selbst bis zur Zahlungsfrist auf das Konto des Mieters; die Abrechnung bittet ihn, Ihnen seine IBAN mitzuteilen.',
 			'zum Beispiel Kalenderjahr (01.01.–31.12.)',
-			'Der hier gewählte Verteilschlüssel wird beim Erfassen neuer Rechnungen vorgeschlagen.'
+			'Der hier gewählte Verteilschlüssel wird beim Erfassen neuer Rechnungen vorgeschlagen.',
+			'Mit einer IBAN braucht es Firmenname, PLZ und Ort.' // #490
 		])
 			expect(body).toContain(said);
 		expect(body).not.toContain('z. B.');
