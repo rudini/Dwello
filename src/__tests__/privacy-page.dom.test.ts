@@ -433,6 +433,23 @@ describe('Datenschutzerklärung zum E-Mail-Versand', () => {
 	});
 });
 
+// Persona Helga 458 P-1: the landlord can link his tenants to the sections the terms tell him to pass on
+describe('Sprungmarken der Datenschutzerklärung', () => {
+	it('gibt jedem Abschnitt eine Sprungmarke', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		const titles = Object.fromEntries(
+			['controller', 'stored', 'retention', 'third'].map((id) => [id, document.getElementById(id)?.querySelector('h2')?.textContent])
+		);
+		expect(titles).toEqual({
+			controller: 'Verantwortlich',
+			stored: 'Welche Daten Dwello speichert',
+			retention: 'Aufbewahrung',
+			third: 'Weitergabe an Dritte'
+		});
+	});
+});
+
 // #458 (#347): both legal pages say when they last changed
 describe('Stand der Datenschutzerklärung', () => {
 	it('nennt den Stand in der Sprache der Oberfläche', () => {

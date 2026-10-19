@@ -162,7 +162,7 @@
 	{/if}
 
 	{#each sections as section (section.id)}
-		<Panel title={section.title} testid="page-section">
+		<Panel id={section.id} title={section.title} testid="page-section">
 			{#if section.id === 'third'}
 				<p class="text-ink" data-testid="llm-recipient">{llmNotice}</p>
 			{/if}
