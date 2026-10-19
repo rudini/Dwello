@@ -1,0 +1,73 @@
+# Uploads the marketing site (marketing/) to the web hosting at Infomaniak over SFTP.
+# Runs on every push to main that changes the site, or by hand (Actions → Deploy website → Run workflow).
+# Repository secrets (Settings → Secrets and variables → Actions):
+#   SITE_SFTP_HOST      SFTP server from the Infomaniak Manager (FTP/SSH), e.g. xxxxx.ftp.infomaniak.com
+#   SITE_SFTP_USER      SFTP user
+#   SITE_SFTP_PASSWORD  its password
+#   SITE_SFTP_PATH      folder of the site on the server, as the Manager shows it (e.g. sites/dwello.ch)
+#   SITE_SFTP_KNOWN_HOSTS  optional: the server's host key line (ssh-keyscan <host>); without it the key is read on each run
+#   SITE_FTP_TLS        optional: "yes" for an FTP-only access (FTP over TLS instead of SFTP)
+# Without SITE_SFTP_HOST the job skips the upload. Pages that still contain data-pending (operator not filled in) are left out.
+name: Deploy website
+
+on:
+  push:
+    branches: [main]
+    paths: ['marketing/**', '.github/workflows/deploy-site.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SFTP_HOST: ${{ secrets.SITE_SFTP_HOST }}
+      SFTP_USER: ${{ secrets.SITE_SFTP_USER }}
+      LFTP_PASSWORD: ${{ secrets.SITE_SFTP_PASSWORD }}
+      SFTP_PATH: ${{ secrets.SITE_SFTP_PATH }}
+      KNOWN_HOSTS: ${{ secrets.SITE_SFTP_KNOWN_HOSTS }}
+      FTP_TLS: ${{ secrets.SITE_FTP_TLS }}
+    steps:
+      - name: Check the settings
+        id: settings
+        run: |
+          if [ -z "$SFTP_HOST" ]; then
+            echo "::notice::SITE_SFTP_HOST is not set: nothing uploaded"
+            echo "ready=no" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for name in SFTP_USER LFTP_PASSWORD SFTP_PATH; do
+            [ -n "${!name}" ] || { echo "::error::Secret for $name is missing"; exit 1; }
+          done
+          case "$SFTP_PATH" in /|.|./|'~'|'~/') echo "::error::SITE_SFTP_PATH must be the site's folder, not the root"; exit 1 ;; esac
+          echo "ready=yes" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.settings.outputs.ready == 'yes'
+
+      - name: Upload marketing/ over SFTP
+        if: steps.settings.outputs.ready == 'yes'
+        run: |
+          # Pages whose operator is still open (imprint, privacy statement) stay off the server until it is filled in
+          skip=""
+          for page in $(grep -rl --include='*.html' 'data-pending=' marketing || true); do
+            echo "::warning::Not uploaded, operator still missing: $page"
+            skip="$skip --exclude-glob ${page#marketing/}"
+          done
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp > /dev/null
+          mkdir -p ~/.ssh
+          if [ "$FTP_TLS" = "yes" ]; then
+            url="ftp://$SFTP_HOST"; opts="set ftp:ssl-force true; set ftp:ssl-protect-data true;"
+          else
+            url="sftp://$SFTP_HOST"; opts="set sftp:connect-program 'ssh -a -x -o UserKnownHostsFile=$HOME/.ssh/known_hosts';"
+            if [ -n "$KNOWN_HOSTS" ]; then echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts; else ssh-keyscan -H "$SFTP_HOST" > ~/.ssh/known_hosts 2>/dev/null; fi
+          fi
+          # Upload new and changed files; files removed from the repository stay on the server
+          lftp -c "set net:max-retries 2; $opts open --user \"$SFTP_USER\" --env-password $url; \
+            mirror --reverse --verbose --exclude-glob i18n/ --exclude-glob .fallow/ --exclude-glob README.md$skip marketing/ \"$SFTP_PATH\""
