@@ -502,5 +502,5 @@ Then(
 );
 
 Then('folgt die Kostenaufstellung im üblichen Abstand auf den Status', async ({ verwalter }) => {
-	await verwalter.sees(gapAboveCostBreakdown).toBeLessThanOrEqual(32);
+	await verwalter.sees(gapAboveCostBreakdown).toBe(32);
 });
