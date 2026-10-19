@@ -122,6 +122,7 @@ export const chooseTenantWhileLoading = (tenantId: string): Activity => (actor) 
 export const changeBaseRent = (baseRent: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(baseRent).into(baseRentInput), Click.on(contractSubmitButton));
 
+export const enterAdvancePayment = (amount: string) => Enter.theValue(amount).into(advancePaymentInput);
 export const enterFlatRateUtilityCharge = (amount: string) => Enter.theValue(amount).into(flatRateInput);
 
 export const changeFlatRateUtilityCharge = (amount: string): Activity => (actor) =>
