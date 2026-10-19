@@ -775,7 +775,7 @@
 	"statements_agreements_failed_text": "Dwello n’a pas pu vérifier si les contrats de bail prévoient tous les frais accessoires de cette période. Sans cette vérification, vous ne pouvez pas continuer. Choisissez « Réessayer ».",
 	"statements_agreements_retry": "Réessayer",
 	"statements_agreements_wait": "Dwello continuera dès que les contrats de bail seront vérifiés.",
-	"statements_agreements_wait_failed": "Dwello n’a pas pu vérifier les contrats de bail. Choisissez « Réessayer ». Si la vérification réussit, vous passerez à la suite.",
+	"statements_agreements_wait_failed": "Dwello n’a pas pu vérifier les contrats de bail. Choisissez « Réessayer ». Si la vérification réussit, vous passerez à la suite.",
 	"statements_agreement_question": "« {category} » est-elle convenue dans le contrat de bail de {tenant} (appartement {apartment}) ?",
 	"statements_agreement_yes": "Convenue",
 	"statements_agreement_no": "Non convenue",
