@@ -27,7 +27,13 @@
 
 	// invoices summing to zero: their parts times the apartment's share by the key, as the PDF (#237)
 	const share = $derived.by(() => {
-		const sum = parted.map((invoice) => `${number(invoice.amount)} × ${invoice.part!.days}/${invoice.part!.total}`).join(' + ');
+		// a negative amount with a minus, as the PDF (#257, Fachreview V-24)
+		const sum = parted
+			.map((invoice, i) => {
+				const sign = invoice.amount < 0 ? (i ? ' – ' : '– ') : i ? ' + ' : '';
+				return `${sign}${number(Math.abs(invoice.amount))} × ${invoice.part!.days}/${invoice.part!.total}`;
+			})
+			.join('');
 		if (item.totalAmount === 0) return m.statements_part_share_zero({ sum, share: number(item.tenantShare) });
 		const values = { apartment: number(item.apartmentShare ?? 0), costs: number(item.totalAmount) };
 		return m.statements_part_share({ ...values, sum, share: number(item.tenantShare) });

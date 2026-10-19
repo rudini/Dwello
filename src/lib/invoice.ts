@@ -14,11 +14,11 @@ export function suggestionProvenance(suggestion: Suggestion | null) {
 	return { llmCategoryId: suggestion.category.id, llmConfidence: String(suggestion.confidence) };
 }
 
-/** The Leistungszeitraum as the backend stores it: both dates, or null without one */
 /** Whether the chosen category is a Brennstoff: its delivery counts in the period of its delivery day (#451, M-1) */
 export const isFuel = (categories: { id: string; isFuel?: boolean }[], categoryId: string) =>
 	!!categories.find((category) => category.id === categoryId)?.isFuel;
 
+/** The Leistungszeitraum as the backend stores it: both dates, or null without one */
 export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({
 	servicePeriodStart: values.servicePeriodStart || null,
 	servicePeriodEnd: values.servicePeriodEnd || null

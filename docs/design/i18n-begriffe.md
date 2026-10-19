@@ -98,6 +98,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Veränderung Tankbestand | variation du stock de combustible | variazione della scorta di combustibile | change in fuel stock |
 | Anfangsbestand / Endbestand | stock initial / stock final | scorta iniziale / scorta finale | opening stock / closing stock |
 | Tank / Tank stillgelegt / Verbrauch (Heizmaterial) | citerne / citerne désaffectée / consommation | serbatoio / serbatoio dismesso / consumo | tank / tank decommissioned / consumption |
+| Lieferung (Heizmaterial) / Tag der Lieferung | livraison / jour de la livraison | fornitura / giorno della fornitura | delivery / day of delivery |
 | Zeitanteil | part temporelle | quota temporale | time share |
 | Firmenname / Firmenadresse | nom de l’entreprise / adresse de l’entreprise | nome dell’azienda / indirizzo dell’azienda | company name / company address |
 | Protokoll (Einstellungen) / Protokoll des Servers | journal / journal du serveur | registro / registro del server | log / server log |

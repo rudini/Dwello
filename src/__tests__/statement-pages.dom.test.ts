@@ -791,7 +791,7 @@ describe('Abrechnungsdetail', () => {
 			{ id: 'i2', description: 'Gutschrift Q3', amount: -100, start: '2025-07-01', end: '2025-09-30', part: { days: 92, total: 92 } }
 		];
 		detail({ lineItems: [line({ invoices, totalAmount: 500, apartmentShare: 250, tenantShare: 250 })] });
-		expect(invoicesText()).toContain('Ihr Anteil: 250.00 × (600.00 × 91/91 + -100.00 × 92/92) / 500.00 = 250.00');
+		expect(invoicesText()).toContain('Ihr Anteil: 250.00 × (600.00 × 91/91 – 100.00 × 92/92) / 500.00 = 250.00');
 	});
 
 	// #451, Punkt 1 (Code-Review C-3): Rechnungen, die zusammen null ergeben, haben keinen Zeitanteil; Ihr Anteil ist die
@@ -802,7 +802,7 @@ describe('Abrechnungsdetail', () => {
 			{ id: 'i2', description: 'Gutschrift Q2', amount: -900, start: '2025-04-01', end: '2025-06-30', part: { days: 0, total: 91 } }
 		];
 		detail({ lineItems: [line({ invoices, totalAmount: 0, apartmentShare: 0, periodShare: 0, tenantShare: 229.89 })] });
-		expect(invoicesText()).toContain('Ihr Anteil: (900.00 × 47/92 + -900.00 × 0/91) × Anteil Ihrer Wohnung nach dem Verteilschlüssel = 229.89');
+		expect(invoicesText()).toContain('Ihr Anteil: (900.00 × 47/92 – 900.00 × 0/91) × Anteil Ihrer Wohnung nach dem Verteilschlüssel = 229.89');
 		expect(invoicesText()).not.toContain('/ 0.00');
 		expect(byTestId('statement-line-item')!.querySelectorAll('td')[4].textContent!.trim()).toBe('–');
 	});

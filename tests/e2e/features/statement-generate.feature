@@ -663,7 +663,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
-    Dann sagt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum "Diese Rechnungen der Kategorie «Heizung» haben keinen Leistungszeitraum, andere derselben Kategorie schon. Tragen Sie bei jeder den Leistungszeitraum ein, damit jeder Mieter die Kosten seiner Monate trägt. Gilt eine Rechnung für die ganze Abrechnungsperiode, tragen Sie diese ein."
+    Dann sagt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum "Diese Rechnungen der Kategorie «Heizung» haben keinen Leistungszeitraum, andere derselben Kategorie schon. Tragen Sie bei jeder den Leistungszeitraum ein, damit jeder Mieter die Kosten seiner Monate trägt. Gilt eine Rechnung für die ganze Abrechnungsperiode, tragen Sie die Abrechnungsperiode als Leistungszeitraum ein."
     Und nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum die Rechnung vom "31.03.2024" über "1’520.00"
     Und nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum keine Rechnung vom "05.01.2025"
     Und nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum keine Rechnung vom "31.12.2024"

@@ -853,6 +853,18 @@ describe('Rechnung bearbeiten', () => {
 			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
 		} as never);
 
+	// #451, M-1 (Code-Review C-11): bei einer Brennstoff-Kategorie erklärt das Formular, welcher Tag eine Lieferung zählt
+	it('erklärt bei einer Lieferung von Heizmaterial den Tag der Lieferung', () => {
+		const fuel = { id: 'c3', name: 'Heizöl', isAllowedUtilityCost: true, isFuel: true };
+		show(EditInvoicePage, {
+			data: { invoice: invoice({ categoryId: 'c3' }), buildings, categories: [...categories, fuel], distributionKeys }
+		} as never);
+
+		expect(text()).toContain('Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		expect(text()).not.toContain('Tag der Lieferung');
+	});
+
 	it('warnt, wenn die Rechnung schon in Abrechnungen steckt, und nennt die Folge', () => {
 		show(EditInvoicePage, {
 			data: {
