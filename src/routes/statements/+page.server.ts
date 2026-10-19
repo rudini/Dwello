@@ -67,7 +67,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 		const [statementsRes, countsRes, buildingsRes, scope] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/statements?${params}`),
 			fetch(`${BACKEND_URL}/api/v1/statements/counts${counted.size ? `?${counted}` : ''}`),
-			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
+			fetch(`${BACKEND_URL}/api/v1/buildings?limit=1000`),
 			contractId ? contractScope(fetch, contractId) : periodScope
 		]);
 

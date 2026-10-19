@@ -1804,3 +1804,33 @@ Branch `claude/brave-babbage-d7bnoa`. Product owner 2026-10-18: the open `entsch
 - [ ] PR `Fixes #140`, `Fixes #397`, `Fixes #398`, «No scenario: glossary and code comments only»
 
 Files: `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/reviews/g3-glossary-review-{1,2}.md`, comments in `src/lib/overview.ts`, `src/routes/config/{categories/CategoryReason,audit-log/+page}.svelte`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/tenants/[id]/TenantDocumentsCard.svelte`, `src/routes/statements/[id]/CostTable.svelte`, `backend/src/services/pdf.service.ts`, `tests/e2e/features/{settings,statement-generate,statement-detail}.feature`.
+
+## Session L1: Building lists to 1000, O-38 (after #424)
+
+Branch `ccr-240d3fd7-ogc0me`. A second session solved #424 in parallel; #438 solved it first (main CI #593 green with every browser), so this session's own fix was dropped. What #438 does not carry came along: the building lists of the BFF load 1000 instead of 100 (product owner 2026-10-19), the E2E cleanup leak as O-38, two workflow notes.
+
+- [x] `invoices.test.ts` expects `buildings?limit=1000` (seen red), the eight loads ask for 1000
+- [x] O-38 in `docs/design/offene-punkte.md`, two notes in `docs/reviews/workflow-notes-issue-424.md`
+- [x] Closing code-review round
+- [x] PR, «No scenario: a list limit no realistic data reaches; docs»
+
+Files: `src/routes/{apartments,apartments/new,invoices,invoices/new,invoices/[id]/edit,contracts,statements,statements/generate}/+page.server.ts`, `src/__tests__/invoices.test.ts`, `docs/design/offene-punkte.md`, `docs/reviews/workflow-notes-issue-424.md`.
+
+## Session L2: Tests of the building limit (C-1, C-3 of #440)
+
+Branch `ccr-240d3fd7-ogc0me`. Product owner 2026-10-19: «Setze C1 und C3 um» (closing review of #440).
+
+- [x] C-1: `building-lists-load.test.ts` checks `buildings?limit=1000` in all eight loads (seen red with the contracts load set back to 100); it replaces the invoice-only test in `invoices.test.ts`
+- [x] C-3: the test name says the limit («bis zu 1000 Gebäude, nicht nur die ersten 20 des Backends»)
+- [x] PR, «No scenario: tests only»
+
+Files: `src/__tests__/building-lists-load.test.ts`, `src/__tests__/invoices.test.ts`.
+## Session R1: «Found» names where you looked
+
+Branch `ccr-9b88c9f2-p44e0b`. Review of the instructions against the Opus 5.5 guide (product owner 2026-10-19): point 2, «Found» also says where an unconfirmed point was looked for, as the «Nicht bestätigt» of `code-reviewer` and `fach-reviewer` already does.
+
+- [x] `CLAUDE.md`, «When to ask», closing headings: «what could not be confirmed and where you looked»
+- [x] Closing code-review round (`docs/reviews/r1-review-1.md`: no Blocker/Major; C-1 fixed, C-2 left as is: `issue-triage` defines its own «Found» for an unattended run)
+- [x] PR, «No scenario: rule text only»
+
+Files: `CLAUDE.md`, `docs/reviews/r1-review-1.md`.

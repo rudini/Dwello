@@ -8,7 +8,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const [invoice, buildingsData, choices] = await Promise.all([
 		fetchRecord(fetch, `${BACKEND_URL}/api/v1/invoices/${params.id}`, m.invoices_record()),
-		fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`).then((r) => r.json()),
+		fetch(`${BACKEND_URL}/api/v1/buildings?limit=1000`).then((r) => r.json()),
 		invoiceChoices(fetch)
 	]);
 
