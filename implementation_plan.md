@@ -6,12 +6,12 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 Branch `claude/nifty-tesla-gmus4a`. «Setze #479 um»: address search through the BFF against geo.admin.ch (GWR) instead of OpenPLZ; a preview of the register's Wohnungen; Gebäude and Wohnungen created in one transaction.
 
-- [ ] Scenarios `@wip` in `building-new.feature`, `privacy.feature`; GWR stand-in for E2E
-- [ ] fach-reviewer on the scenarios and the privacy text before implementing
-- [ ] Backend: `POST /buildings` with `apartments[]` in one transaction (pg test, contract)
-- [ ] BFF: `/api/addresses` (search) and `/api/addresses/[egid]` (register), mapping in `src/lib/server/` (unit tests)
-- [ ] UI: address search, preview table, hints (no Wohnungen, unreachable, no hit, existing address)
-- [ ] Privacy statement, texts in four languages, docs (`tech-stack.md`, `PRD-Dwello.md`, U-23 P-8)
-- [ ] a11y and language screens
+- [x] Scenarios in `building-new.feature` (17), `privacy.feature`; GWR stand-in `backend/scripts/gwr-stub.ts` (2529)
+- [x] fach-reviewer round 1 (`docs/reviews/479-fachreview-1.md`), product owner answers in #479 (V-1, V-2, V-3, V-10); round 2 (`docs/reviews/479-fachreview-2.md`); glossary issue #488
+- [x] Backend: `POST /buildings` with `apartments[]` in one transaction (`building.routes.pg.test.ts`; response unchanged, no contract change)
+- [x] BFF: `/api/addresses`, `/api/addresses/[egid]`, `src/lib/server/building-register.ts`, `parseRegisterApartments` (unit tests)
+- [x] UI: `AddressSearch.svelte`, `RegisterApartments.svelte`, `BuildingForm.svelte` (hints, preview); `Select` takes a `note`; OpenPLZ removed
+- [x] Privacy statement, texts in four languages, docs (`tech-stack.md`, `PRD-Dwello.md`, `api-specification.md`, U-23 P-7/P-8)
+- [x] a11y and language screens: `building-new` states `register-preview`, `register-submit-missing`, `register-no-apartments`, `register-no-hit`, `register-unreachable`
 - [ ] Slice reviews, persona review, closing review
 - [ ] PR `Fixes #479`

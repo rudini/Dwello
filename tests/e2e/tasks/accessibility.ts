@@ -73,6 +73,8 @@ import { tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
+import { chooseRegisterAddress, registerUnreachable, searchRegister } from './building-register';
+import { registerNotice } from '../targets/building-register';
 import { UPLOADED } from '../fixtures/screens';
 
 // How the axe check and the language check bring each screen of tests/a11y/screens.json into its state
@@ -186,6 +188,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'login-not-allowed': () => Wait.until(on.loginError),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
+	// the Gebäuderegister of «Neues Gebäude» (#479), answered by its stand-in (backend/scripts/gwr-stub.ts)
+	'register-preview': () => chooseRegisterAddress('Birkenweg 7'),
+	'register-submit-missing': () => (actor) =>
+		actor.attemptsTo(chooseRegisterAddress('Birkenweg 7'), Click.on(on.saveButton), Wait.until(on.formProblem)),
+	// the seeded buildings stand at «Testweg 1», so the register's building without Wohnungen is already entered
+	'register-no-apartments': () => chooseRegisterAddress('Testweg 1'),
+	'register-no-hit': () => (actor) => actor.attemptsTo(searchRegister('Nirgendweg 3'), Wait.until(registerNotice)),
+	'register-unreachable': () => (actor) =>
+		actor.attemptsTo(registerUnreachable, searchRegister('Lindenweg 155'), Wait.until(registerNotice)),
 	'submit-cleared': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('').intoEach(on.requiredFields), Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// saved as loaded

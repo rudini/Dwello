@@ -1,18 +1,21 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { searchAddresses, formatAddress, type Address } from '$lib/services/openplz';
+	import { apiCall } from '$lib/api';
+	import type { AddressHit } from '$lib/server/building-register';
 	import Field from '$lib/ui/Field.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import { controlClass } from '$lib/ui/field';
 
-	// Looks up Swiss streets (openplz) while typing; choosing one fills the address fields
+	// Looks up addresses in the Gebäuderegister while typing (#479); choosing one hands it on. `onfound` says whether the
+	// search found nothing or could not reach the register, for the form to say so
 	interface Props {
 		id?: string;
 		label?: string;
 		help?: string;
 		example?: string;
 		placeholder?: string;
-		onselect?: (_address: Address) => void;
+		onselect?: (_address: AddressHit) => void;
+		onfound?: (_outcome: 'hits' | 'none' | 'unreachable') => void;
 	}
 
 	let {
@@ -21,11 +24,12 @@
 		help,
 		example,
 		placeholder,
-		onselect
+		onselect,
+		onfound
 	}: Props = $props();
 
 	let value = $state('');
-	let results = $state<Address[]>([]);
+	let results = $state<AddressHit[]>([]);
 	let isLoading = $state(false);
 	let isOpen = $state(false);
 	let selectedIndex = $state(-1);
@@ -43,14 +47,16 @@
 		}
 		searchTimeout = setTimeout(async () => {
 			isLoading = true;
-			results = await searchAddresses(value, 8); // empty when the lookup fails
+			const { data, error } = await apiCall<AddressHit[]>('/addresses', { params: { q: value } });
+			results = data ?? [];
 			isOpen = results.length > 0;
 			isLoading = false;
+			onfound?.(error ? 'unreachable' : results.length ? 'hits' : 'none');
 		}, 300);
 	}
 
-	function handleSelect(address: Address) {
-		value = formatAddress(address);
+	function handleSelect(address: AddressHit) {
+		value = `${address.street}, ${address.postalCode} ${address.city}`;
 		results = [];
 		isOpen = false;
 		selectedIndex = -1;
@@ -111,6 +117,7 @@
 					aria-autocomplete="list"
 					aria-describedby={control.describedBy}
 					aria-activedescendant={selectedIndex >= 0 ? `${id}-result-${selectedIndex}` : undefined}
+					data-testid="building-address-search-input"
 				/>
 				<span class="absolute right-0 top-0 flex h-full items-center">
 					{#if isLoading}
@@ -149,12 +156,13 @@
 						? 'bg-accent-soft'
 						: 'hover:bg-sunken'}"
 					onmousedown={() => handleSelect(address)}
+					data-testid="building-address-result-{index}"
 				>
 					<span class="text-ink-muted"><Icon name="location" /></span>
 					<span class="flex min-w-0 flex-col">
 						<span class="font-semibold text-ink">{address.street}</span>
 						<span class="text-ink-muted"
-							>{address.postalCode} {address.city} ({address.cantonShort})</span
+							>{address.postalCode} {address.city} ({address.canton})</span
 						>
 					</span>
 				</li>

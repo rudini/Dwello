@@ -34,3 +34,32 @@ export function parseBuildingForm(formData: FormData) {
 
 	return { building, errors };
 }
+
+/**
+ * The Wohnungen taken from the Gebäuderegister (#479), as `apartments.<row>.<field>`: rows the landlord left out are
+ * disabled in the form and not sent. Every field is required, its error keyed like the field.
+ */
+export function parseRegisterApartments(formData: FormData, errors: Record<string, string>) {
+	const rows = new Set(
+		[...formData.keys()].flatMap((key) => key.match(/^apartments\.(\d+)\./)?.[1] ?? [])
+	);
+	const required = {
+		number: m.apartments_error_number,
+		floor: m.apartments_error_floor,
+		area: m.apartments_error_area,
+		rooms: m.apartments_error_rooms
+	};
+	return [...rows].map((row) => {
+		const field = (key: keyof typeof required) => {
+			const value = String(formData.get(`apartments.${row}.${key}`) ?? '').trim();
+			if (!value) errors[`apartments.${row}.${key}`] = required[key]();
+			return value;
+		};
+		return {
+			number: field('number'),
+			floor: Number(field('floor')),
+			area: field('area'),
+			rooms: field('rooms')
+		};
+	});
+}

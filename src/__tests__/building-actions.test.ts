@@ -67,6 +67,61 @@ describe('Neues Gebäude', () => {
 	it('lässt den optionalen Gebäudetyp weg, statt null zu senden', async () => {
 		expect(await sentBody(newActions.default as Action)).not.toHaveProperty('buildingType');
 	});
+	// Wohnungen aus dem Gebäuderegister (#479): nur die übernommenen Zeilen kommen mit (die anderen sind deaktiviert)
+	const withApartments = {
+		...validBuilding,
+		'apartments.0.number': '101',
+		'apartments.0.floor': '1',
+		'apartments.0.area': '75',
+		'apartments.0.rooms': '3',
+		'apartments.2.number': '201',
+		'apartments.2.floor': '2',
+		'apartments.2.area': '98',
+		'apartments.2.rooms': '4.5'
+	};
+
+	it('sendet die übernommenen Wohnungen mit dem Gebäude', async () => {
+		let body: Record<string, unknown> = {};
+		await run(
+			newActions.default as Action,
+			(_url, init) => {
+				body = JSON.parse(String(init?.body));
+				return Response.json({ id: 'b1' });
+			},
+			{},
+			withApartments
+		).catch(() => {});
+
+		expect(body.apartments).toEqual([
+			{ number: '101', floor: 1, area: '75', rooms: '3' },
+			{ number: '201', floor: 2, area: '98', rooms: '4.5' }
+		]);
+	});
+
+	it('verlangt Fläche, Stockwerk und Zimmeranzahl jeder übernommenen Wohnung', async () => {
+		const result = await run(
+			newActions.default as Action,
+			() => Response.json({ id: 'b1' }),
+			{},
+			{
+				...withApartments,
+				'apartments.2.floor': '',
+				'apartments.2.area': '',
+				'apartments.2.rooms': '',
+				'apartments.0.number': ''
+			}
+		);
+
+		expect(result).toMatchObject({
+			success: false,
+			errors: {
+				'apartments.0.number': 'Wohnungsnummer ist erforderlich.',
+				'apartments.2.floor': 'Stockwerk ist erforderlich.',
+				'apartments.2.area': 'Fläche ist erforderlich.',
+				'apartments.2.rooms': 'Zimmeranzahl ist erforderlich.'
+			}
+		});
+	});
 });
 
 describe('Gebäude bearbeiten', () => {

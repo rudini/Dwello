@@ -197,6 +197,14 @@ Then(
 );
 
 Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass swisstopo den Suchbegriff und die IP-Adresse des Servers erhält, nicht die des Browsers',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('den eingegebenen Suchbegriff');
+		await verwalter.sees(sectionText(heading)).toContain('die IP-Adresse des Servers, nicht die des Browsers');
+	}
+);
+
+Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass nur der Betreiber das Protokoll des Servers zur Sicherheit und Fehlersuche liest und selbst bestimmt, wie lange es aufbewahrt wird',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(sectionText(heading)).toContain('Sicherheit');

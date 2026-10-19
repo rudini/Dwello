@@ -41,6 +41,9 @@ export const Value = {
 		about(target, 'the value of', (element) =>
 			single(element, async (one) => one.evaluate((field) => (field as HTMLInputElement).value, undefined, quick))
 		),
+	/** The values of all fields the target finds, in page order */
+	ofAll: (target: Target) =>
+		about(target, 'the values of', (element) => element.evaluateAll((all) => all.map((field) => (field as HTMLInputElement).value))),
 	/** The label of the chosen option of a select */
 	chosenIn: (target: Target) =>
 		about(target, 'the chosen option of', (element) =>
