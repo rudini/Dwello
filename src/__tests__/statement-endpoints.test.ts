@@ -175,6 +175,17 @@ describe('GET /statements/[id]/pdf', () => {
 		);
 	});
 
+	// persona Dr. Weber P-2 (#450): the way to where the landlord adds what is missing, only when the settings help
+	it('führt bei fehlender Firmenadresse auch zu den Einstellungen', async () => {
+		const settingsLink = /<a [^>]*href="\/config"[^>]*>Zu den Einstellungen<\/a>/;
+		const creditor = await (await get(async () => Response.json(creditorRefused, { status: 400 }))).text();
+		const unknown = await (await get(async () => Response.json(refusedPdf, { status: 404 }))).text();
+
+		expect(creditor).toMatch(settingsLink);
+		expect(creditor).toContain('Zu den Nebenkostenabrechnungen');
+		expect(unknown).not.toMatch(settingsLink);
+	});
+
 	// Helga, Marco (#125): the sentence stood on a bare page, tiny on a phone, without a way back into Dwello
 	it('zeigt den Satz auf einer Seite mit Titel, lesbar auf dem Handy und mit dem Weg zurück zur Liste', async () => {
 		const html = await (await get(async () => Response.json(refusedPdf, { status: 404 }))).text();

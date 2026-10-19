@@ -1031,6 +1031,7 @@
 	"documents_empty": "Pas encore de documents",
 	"documents_empty_text": "Les rappels et les documents que vous téléversez pour un locataire apparaissent ici.",
 	"documents_to_statements": "Vers les décomptes des charges",
+	"documents_to_settings": "Vers les paramètres",
 	"documents_created_to": "À {name}, créé le {date}, {channel}",
 	"documents_created": "créé le {date}, {channel}",
 	"documents_download": "Télécharger le PDF",

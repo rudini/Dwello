@@ -234,6 +234,9 @@ describe('Einstellungen speichern', () => {
 		};
 
 		expect(await answer({ companyName: '' })).toEqual(refused);
+		// the empty fields the message names, marked on the page (persona Helga P-2)
+		const { result } = runAction(actions.default, '', 200, { ...valid, companyName: '', companyCity: '' });
+		expect(await result).toMatchObject({ data: { missing: ['companyName', 'companyCity'] } });
 		expect(await answer({ companyPostalCode: ' ' })).toEqual(refused);
 		expect(await answer({ companyCity: '' })).toEqual(refused);
 		expect(await answer({ companyAddress: '' })).toEqual({ iban: undefined, saved: true });

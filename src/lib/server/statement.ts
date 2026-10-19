@@ -168,6 +168,8 @@ export const pdfFileName = (headers: Headers) =>
 		?.match(/filename="(.*)"/)?.[1]
 		.replace(/[^\w.-]/g, '') || 'statement.pdf';
 
+const SETTINGS_CODES = ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID'];
+
 const escaped = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /**
@@ -177,7 +179,12 @@ const escaped = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt
  * ready at once (`data-hydrated`, which the app's pages set once they react to input)
  */
 export function pdfRefusal(status: number, body: unknown, fallback = m.backend_pdf_failed()) {
-	const sentence = backendMessage({ code: (body as BackendError | null)?.code }, fallback);
+	const code = (body as BackendError | null)?.code;
+	const sentence = backendMessage({ code }, fallback);
+	// a refusal whose way out is in «Einstellungen» links there too (persona Dr. Weber P-2, #450)
+	const settings = SETTINGS_CODES.includes(code ?? '')
+		? `\n<a href="/config" data-testid="pdf-refusal-settings">${escaped(m.documents_to_settings())}</a>`
+		: '';
 	const page = `<!doctype html>
 <html lang="${getLocale()}">
 <head>
@@ -193,7 +200,7 @@ a { display: inline-block; padding: 0.75rem 0; color: CanvasText }
 <body data-hydrated>
 <main>
 <p data-testid="pdf-refusal-message">${escaped(sentence)}</p>
-<a href="/statements" data-testid="pdf-refusal-back">${escaped(m.documents_to_statements())}</a>
+<a href="/statements" data-testid="pdf-refusal-back">${escaped(m.documents_to_statements())}</a>${settings}
 </main>
 </body>
 </html>`;

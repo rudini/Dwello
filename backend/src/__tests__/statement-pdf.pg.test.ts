@@ -858,6 +858,10 @@ describe('PDF ohne vollständige Firmenadresse', () => {
 			expect(response.status).toBe(200);
 			expect(text).toContain('Muster Immobilien AG');
 			expect(text).not.toContain('8001 Zürich'); // no town stands in for the missing one (Fachreview V-3)
+			// «PLZ Ort» is one part: without the town no bare postal code (persona Dr. Weber P-1)
+			expect(text).toContain('Muster Immobilien AG · Firmenweg 9 ');
+			expect(text).not.toContain('Firmenweg 9 · 8001');
+			expect(text).not.toContain('Firmenweg 9, 8001');
 		}));
 
 	// Fachreview V-2: die Adresse (Strasse) bleibt freiwillig; Kopfzeile und Belegeinsicht nennen nur, was erfasst ist

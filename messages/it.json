@@ -1031,6 +1031,7 @@
 	"documents_empty": "Ancora nessun documento",
 	"documents_empty_text": "I solleciti e i documenti che carica per un inquilino compaiono qui.",
 	"documents_to_statements": "Ai conteggi spese accessorie",
+	"documents_to_settings": "Alle impostazioni",
 	"documents_created_to": "A {name}, creato il {date}, {channel}",
 	"documents_created": "creato il {date}, {channel}",
 	"documents_download": "Scaricare il PDF",

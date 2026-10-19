@@ -1031,6 +1031,7 @@
 	"documents_empty": "No documents yet",
 	"documents_empty_text": "Reminders and documents you upload for a tenant appear here.",
 	"documents_to_statements": "Go to utility cost statements",
+	"documents_to_settings": "Go to settings",
 	"documents_created_to": "To {name}, created on {date}, {channel}",
 	"documents_created": "created on {date}, {channel}",
 	"documents_download": "Download PDF",

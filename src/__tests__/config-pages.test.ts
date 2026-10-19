@@ -87,6 +87,22 @@ describe('Einstellungen', () => {
 		).toContain('Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein.');
 	});
 
+	// Persona Helga P-2 (#450): the message stays at the IBAN, the empty fields it names are marked; the focus goes to
+	// the first invalid field, so to the first empty one
+	it('kennzeichnet bei einer IBAN ohne Firmenadresse die leeren Felder', () => {
+		const body = settingsPage({
+			errors: { iban: 'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.' },
+			missing: ['companyName', 'companyCity']
+		});
+		const inputOf = (name: string) => body.match(new RegExp(`<input[^>]*name="${name}"[^>]*>`))?.[0] ?? '';
+
+		for (const name of ['companyName', 'companyCity']) {
+			expect(inputOf(name)).toContain('aria-invalid="true"');
+			expect(inputOf(name)).toContain('iban-error');
+		}
+		expect(inputOf('companyPostalCode')).not.toContain('aria-invalid');
+	});
+
 	it('bestätigt das Speichern und nennt, was gespeichert ist', () => {
 		const saved = settingsPage({ saved: true });
 		expect(saved).toContain('data-testid="settings-saved"');

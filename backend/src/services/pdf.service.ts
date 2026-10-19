@@ -985,9 +985,9 @@ function heatingSection(page: Page, y: number) {
 	return top + 12;
 }
 
-// The landlord as entered: the address (street) is optional (Fachreview #450 V-2)
+// The landlord as entered: the address (street) is optional (Fachreview #450 V-2), «PLZ Ort» only whole (Dr. Weber P-1)
 const senderParts = (config: QRBillConfig) =>
-	[config.companyName, config.address, `${config.postalCode} ${config.city}`.trim()].filter(Boolean);
+	[config.companyName, config.address, config.postalCode && config.city && `${config.postalCode} ${config.city}`].filter(Boolean);
 
 // What the tenant may ask for: the receipts (Art. 257b Abs. 2 OR), the detailed heating statement and the stock
 // (Art. 8 VMWG); kept on one page

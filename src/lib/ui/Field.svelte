@@ -14,6 +14,7 @@
 		optional = false,
 		note,
 		helpTestid,
+		invalidBy,
 		children
 	}: {
 		id: string;
@@ -24,6 +25,7 @@
 		optional?: boolean;
 		note?: { text: string; testid: string }; // a caution about the value, e.g. that the KI read it without being sure
 		helpTestid?: string;
+		invalidBy?: string; // the id of another field's error that names this field too, e.g. an empty required one
 		children: Snippet<[FieldControl]>;
 	} = $props();
 
@@ -32,14 +34,25 @@
 	let frame = $state<HTMLElement>();
 	let corrected = $state<string>(); // the error the field was changed after
 	const shown = $derived(error === corrected ? undefined : error);
-	const change = () => (corrected = error);
+	let edited = $state(false); // changed since invalidBy was set
+	const flagged = $derived(invalidBy && !edited ? invalidBy : undefined);
+	const change = () => {
+		corrected = error;
+		edited = true;
+	};
 	// a check that cleared the error starts over: the same error set again is shown again
 	$effect(() => {
 		if (!error) corrected = undefined;
 	});
 	$effect(() => {
+		if (!invalidBy) edited = false;
+	});
+	$effect(() => {
 		const form = frame?.closest('form');
-		const check = () => (corrected = undefined);
+		const check = () => {
+			corrected = undefined;
+			edited = false;
+		};
 		form?.addEventListener('submit', check, true);
 		return () => form?.removeEventListener('submit', check, true);
 	});
@@ -49,7 +62,7 @@
 	const noteId = $derived(`${id}-note`);
 	// a caution about the value first: it is missed at the end of a long help (persona Sven)
 	const describedBy = $derived(
-		[note && noteId, (help || example) && helpId, shown && errorId].filter(Boolean).join(' ') || undefined
+		[note && noteId, (help || example) && helpId, shown && errorId, flagged].filter(Boolean).join(' ') || undefined
 	);
 </script>
 
@@ -64,7 +77,7 @@
 			{#if example}<span class="whitespace-nowrap">{m.ui_example({ example })}</span>{/if}
 		</p>
 	{/if}
-	{@render children({ id, describedBy, invalid: !!shown })}
+	{@render children({ id, describedBy, invalid: !!shown || !!flagged })}
 	{#if note}
 		<p id={noteId} class="flex items-start gap-2 font-semibold text-caution" data-testid={note.testid}>
 			<Icon name="warning" />

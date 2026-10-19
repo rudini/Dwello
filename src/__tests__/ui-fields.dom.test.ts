@@ -72,6 +72,25 @@ describe('Eingabefeld', () => {
 		unmount(field);
 	});
 
+	// Persona Helga P-2 (#450): an empty field that another field's error names is marked too, and read with that error
+	it('kennzeichnet ein Feld als ungültig, das der Fehler eines anderen Felds nennt, bis es geändert wird', () => {
+		const error = document.body.appendChild(document.createElement('p'));
+		error.id = 'iban-error';
+		error.textContent = 'Mit einer IBAN braucht es die Firmenadresse.';
+		const field = mount(TextInput, {
+			target: document.body,
+			props: { id: 'companyCity', label: 'Ort', invalidBy: 'iban-error', value: '' }
+		});
+		flushSync();
+
+		expect(input().getAttribute('aria-invalid')).toBe('true');
+		expect(describedBy(input())).toContain('Mit einer IBAN braucht es die Firmenadresse.');
+		fireEvent(input(), 'input', 'Zürich');
+		expect(input().getAttribute('aria-invalid')).toBeNull();
+		unmount(field);
+		error.remove();
+	});
+
 	it('nennt freiwillige Felder in Worten', () => {
 		show(TextInput, { id: 'phone', label: 'Telefon', optional: true, value: '' });
 		expect(document.querySelector('label')!.textContent).toContain('(optional)');

@@ -1031,6 +1031,7 @@
 	"documents_empty": "Noch keine Dokumente",
 	"documents_empty_text": "Mahnungen und Dokumente, die Sie zu einem Mieter hochladen, erscheinen hier.",
 	"documents_to_statements": "Zu den Nebenkostenabrechnungen",
+	"documents_to_settings": "Zu den Einstellungen",
 	"documents_created_to": "An {name}, erstellt am {date}, {channel}",
 	"documents_created": "erstellt am {date}, {channel}",
 	"documents_download": "PDF herunterladen",
