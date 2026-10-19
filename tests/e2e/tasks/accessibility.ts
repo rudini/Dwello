@@ -154,7 +154,7 @@ const toRentStep: Activity = async (actor) => {
 	if ((await actor.answer(pageAddress)).includes('/contracts/new'))
 		await actor.attemptsTo(
 			Click.on(nextButton),
-			Click.on(nextButton),
+			keepApartment,
 			EnterDate.of('2030-01-01').into(startDateInput),
 			Click.on(nextButton),
 			Wait.until(agreedCategoryBoxes)
