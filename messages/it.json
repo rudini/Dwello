@@ -1647,7 +1647,7 @@
 	"contracts_end_notice_hint": "Verifichi termine e scadenza nel contratto di locazione: per gli appartamenti vale un termine di preavviso di almeno 3 mesi. Se la disdetta arriva troppo tardi, vale solo per la prossima scadenza di disdetta. Un nuovo contratto di locazione può iniziare il giorno dopo.",
 	"contracts_notice_received": "Disdetta ricevuta il",
 	"contracts_notice_received_help": "Il giorno in cui è arrivata la lettera di disdetta. La disdetta dell’inquilino deve essere data per scritto. Per un’abitazione familiare serve il consenso espresso del coniuge o del partner registrato.",
-	"contracts_notice_period_short": "Tra il ricevimento della disdetta e la fine del contratto ci sono meno di 3 mesi. La disdetta vale quindi probabilmente solo per la prossima scadenza di disdetta. Eccezione: un inquilino sostitutivo riprende il contratto di locazione, oppure Lei ha concordato la fine con l’inquilino.",
+	"contracts_notice_period_short": "Tra il ricevimento della disdetta e la fine del contratto ci sono meno di 3 mesi. La disdetta vale quindi probabilmente solo per la prossima scadenza di disdetta. Eccezione: l’inquilino le propone un inquilino sostitutivo che Lei non può ragionevolmente rifiutare, oppure Lei ha concordato la fine con l’inquilino.",
 	"statements_deadline_missing": "Manca il termine. Inserisca una data.",
 	"contracts_period_range_fixed": "{start} – {end}, a tempo determinato",
 	"contracts_period_range_terminated": "{start} – {end}, disdetto",

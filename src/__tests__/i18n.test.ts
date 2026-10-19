@@ -108,6 +108,17 @@ describe('Sprachdateien', () => {
 		expect(messages.glossary_notice_period_text.endsWith(end)).toBe(true);
 	});
 
+	// #501: the hint at a short Kündigungsfrist says the same as the glossary
+	it.each([
+		['de', 'Ausnahme: Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor, oder Sie haben das Ende mit dem Mieter vereinbart.'],
+		['fr', 'Exception : le locataire vous présente un locataire de remplacement que vous ne pouvez raisonnablement refuser, ou vous avez convenu de la fin avec le locataire.'],
+		['it', 'Eccezione: l’inquilino le propone un inquilino sostitutivo che Lei non può ragionevolmente rifiutare, oppure Lei ha concordato la fine con l’inquilino.'],
+		['en', 'Exception: the tenant proposes a replacement tenant you cannot reasonably refuse, or you agreed on the end with the tenant.']
+	])('%s: der Hinweis zur kurzen Kündigungsfrist nennt den vorgeschlagenen Ersatzmieter', (language, end) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		expect(messages.contracts_notice_period_short.endsWith(end)).toBe(true);
+	});
+
 	it('Italienisch sagt «termine di preavviso» und «ricevimento della disdetta»', () => {
 		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
 		const wrong = Object.entries(messages).filter(

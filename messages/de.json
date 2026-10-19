@@ -1647,7 +1647,7 @@
 	"contracts_end_notice_hint": "Prüfen Sie Frist und Termin im Mietvertrag: Für Wohnungen gilt eine Kündigungsfrist von mindestens 3 Monaten. Ist die Kündigung zu spät, gilt sie erst auf den nächsten Kündigungstermin. Ein neuer Mietvertrag kann am Tag danach beginnen.",
 	"contracts_notice_received": "Kündigung erhalten am",
 	"contracts_notice_received_help": "Der Tag, an dem das Kündigungsschreiben angekommen ist. Die Kündigung des Mieters muss schriftlich sein. Bei einer Familienwohnung braucht es die ausdrückliche Zustimmung des Ehegatten oder eingetragenen Partners.",
-	"contracts_notice_period_short": "Zwischen Eingang und Vertragsende liegen weniger als 3 Monate. Dann gilt die Kündigung wohl erst auf den nächsten Kündigungstermin. Ausnahme: Ein Ersatzmieter übernimmt den Mietvertrag, oder Sie haben das Ende mit dem Mieter vereinbart.",
+	"contracts_notice_period_short": "Zwischen Eingang und Vertragsende liegen weniger als 3 Monate. Dann gilt die Kündigung wohl erst auf den nächsten Kündigungstermin. Ausnahme: Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor, oder Sie haben das Ende mit dem Mieter vereinbart.",
 	"statements_deadline_missing": "Die Frist fehlt. Bitte geben Sie ein Datum ein.",
 	"contracts_period_range_fixed": "{start} – {end}, befristet",
 	"contracts_period_range_terminated": "{start} – {end}, gekündigt",
