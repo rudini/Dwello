@@ -112,9 +112,24 @@ describe('Mietvertrag Schritt für Schritt', () => {
 		expect(flatRateNotice(flat, categories)).toContain('rechnet ihm trotzdem alle angekreuzten Nebenkosten ab');
 		expect(flatRateNotice({ ...flat, agreedCategoryIds: ['c1'] }, categories)).not.toBeNull();
 		expect(flatRateNotice({ ...flat, agreedCategoryIds: [] }, categories)).toBeNull();
-		expect(flatRateNotice({ ...flat, advancePayment: '50' }, categories)).toBeNull();
 		expect(flatRateNotice({ ...flat, flatRateUtilityCharge: '' }, categories)).toBeNull();
 		expect(flatRateNotice(flat, [])).toBeNull();
+	});
+
+	// #432 (Product Owner): auch mit Akonto rechnet Dwello alle angekreuzten Nebenkosten ab, auch die der Pauschale
+	it('warnt mit Akonto und Nebenkostenpauschale vor angekreuzten Nebenkosten', () => {
+		const categories = [{ id: 'c1', name: 'Heizung' }];
+		const mixed = { ...filled, advancePayment: '200', flatRateUtilityCharge: '50' };
+		expect(flatRateNotice(mixed, categories)).toContain(
+			'Lassen Sie nur die Nebenkosten angekreuzt, für die der Mieter Akonto bezahlt.'
+		);
+		expect(flatRateNotice({ ...mixed, agreedCategoryIds: [] }, categories)).toBeNull();
+		// Helga 432 P-1 (Product Owner): mit Akonto warnt es nur, solange alle Nebenkosten angekreuzt sind
+		const two = [...categories, { id: 'c2', name: 'Hauswart' }];
+		expect(flatRateNotice({ ...mixed, agreedCategoryIds: ['c1', 'c2'] }, two)).not.toBeNull();
+		expect(flatRateNotice({ ...mixed, agreedCategoryIds: ['c1'] }, two)).toBeNull();
+		expect(flatRateNotice({ ...mixed, advancePayment: '', agreedCategoryIds: ['c1'] }, two)).not.toBeNull();
+		expect(flatRateNotice({ ...mixed, advancePayment: '0' }, categories)).toContain('trotzdem'); // no Akonto
 	});
 
 	// #429: die Nebenkostenpauschale zählt im Monatlich total

@@ -567,6 +567,7 @@
 	"contracts_flat_rate_help": "Fixed monthly amount for the utility costs agreed in the rental contract. Dwello does not bill it: no amount due and no refund. Below, under «Agreed utility costs», untick the utility costs the flat rate covers.",
 	"contracts_flat_rate_warning_title": "Flat-rate utility charge and ticked utility costs",
 	"contracts_flat_rate_warning_text": "This tenant pays a flat-rate utility charge. Dwello still bills them for all ticked utility costs. Untick the utility costs the flat rate covers.",
+	"contracts_flat_rate_warning_text_advance": "This tenant pays an advance payment and a flat-rate utility charge. Dwello bills them for all ticked utility costs in the utility cost statement, but not for the flat rate. Leave ticked only the utility costs the tenant pays an advance payment for. Otherwise they pay twice for the utility costs the flat rate covers.",
 	"tenants_purpose": "The people who rent or have rented your apartments, with contact details and apartment.",
 	"tenants_none_found": "No tenants found",
 	"tenants_none_found_text": "No tenant matches the search and the filter.",

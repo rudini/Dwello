@@ -69,7 +69,7 @@ import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
 import { leaveSettings } from './statement-generate';
-import { untickAllCategories } from './contract-form';
+import { tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
@@ -286,6 +286,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			toRentStep,
 			Enter.theValue('').into(advancePaymentInput),
 			Enter.theValue('120').into(flatRateInput),
+			Wait.until(on.shown('contract-flat-rate-warning'))
+		),
+	// an Akonto and a Nebenkostenpauschale, the boxes ticked, not saved: the warning to leave only those with Akonto (#432)
+	'flat-rate-warning-advance': () => (actor) =>
+		actor.attemptsTo(
+			toRentStep,
+			tickAllCategories,
+			Enter.theValue('200').into(advancePaymentInput),
+			Enter.theValue('50').into(flatRateInput),
 			Wait.until(on.shown('contract-flat-rate-warning'))
 		),
 	// whether the contracts agree the period's Nebenkosten cannot be checked: the alert with «Erneut versuchen», and

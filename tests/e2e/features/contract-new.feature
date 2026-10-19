@@ -201,6 +201,24 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter eine Nebenkostenpauschale von "120" Franken einträgt
     Dann warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet
 
+  # #432 (Dr. Weber 429 P-1): auch mit Akonto rechnet Dwello alle angekreuzten Nebenkosten ab, auch die der Pauschale
+  Szenario: Mit Akonto und Nebenkostenpauschale warnt das Formular vor angekreuzten Nebenkosten
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Und der Liegenschaftsverwalter ein Akonto von "200" Franken einträgt
+    Und der Liegenschaftsverwalter eine Nebenkostenpauschale von "50" Franken einträgt
+    Dann warnt das Formular zur Nebenkostenpauschale "Lassen Sie nur die Nebenkosten angekreuzt, für die der Mieter Akonto bezahlt."
+
+  # #432 (Helga 432 P-1): mit Akonto sind einige Häkchen richtig; die Warnung gilt nur, solange alle angekreuzt sind
+  Szenario: Mit Akonto verschwindet die Warnung zur Nebenkostenpauschale, sobald eine Nebenkosten abgewählt ist
+    Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
+    Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht
+    Und der Liegenschaftsverwalter ein Akonto von "200" Franken einträgt
+    Und der Liegenschaftsverwalter eine Nebenkostenpauschale von "50" Franken einträgt
+    Dann warnt das Formular zur Nebenkostenpauschale "Lassen Sie nur die Nebenkosten angekreuzt, für die der Mieter Akonto bezahlt."
+    Wenn der Liegenschaftsverwalter eine der Nebenkosten abwählt
+    Dann warnt das Formular nicht mehr zur Nebenkostenpauschale
+
   # persona Helga 429 P-1: deckt die Pauschale alle Nebenkosten, sind keine Häkchen richtig und kein Grund für eine Warnung
   Szenario: Mit Nebenkostenpauschale und ohne angekreuzte Nebenkosten warnt das Formular nicht
     Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"

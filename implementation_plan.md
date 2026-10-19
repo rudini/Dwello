@@ -17,3 +17,17 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Re-review: code-reviewer round 2 (`docs/reviews/439-review-2.md`; C-4 fixed with the scenario «Nach erneuter Prüfung geht der Assistent zur Vorschau»), Sven and Helga (`docs/design/personas/{sven,helga}-439-2.md`)
 - [x] Closing code-review round (`docs/reviews/439-review-3.md`, no Blocker/Major)
 - [ ] PR `Fixes #439`
+
+### #432 Warning with Akonto and Nebenkostenpauschale
+
+- [x] @wip scenario «Mit Akonto und Nebenkostenpauschale warnt das Formular vor angekreuzten Nebenkosten» (`contract-new.feature`)
+- [x] fach-reviewer on the scenario and the proposed variant text before implementing (`docs/reviews/432-fachreview-1.md`)
+- [x] Product owner confirms the variant text (decision of #432, 2026-10-19, recorded in the issue)
+- [x] `flatRateNotice` warns with Akonto too (variant text), unit test; texts in all four languages; axe and language state `flat-rate-warning-advance` on `contract-new` and `contract-edit`
+- [x] Slice review round 1 (`docs/reviews/432-review-1.md`, two Nits; C-1 fixed)
+- [x] Feature review: personas Dr. Weber and Helga (`docs/design/personas/{weber,helga}-432.md`)
+- [x] Helga 432 P-1 (Major, contradicted the decision): product owner 2026-10-19: with an Akonto the warning shows only while every box is ticked; unit test, scenario, a11y state ticks all first
+- [x] Re-review: code-reviewer round 2 (`docs/reviews/432-review-2.md`), Helga (`docs/design/personas/helga-432-2.md`)
+- [x] Issue for Helga 432 P-2 (Akonto without agreed Nebenkosten, existed before): #444
+- [x] Closing code-review round (`docs/reviews/432-review-3.md`, no findings)
+- [ ] PR `Fixes #432`

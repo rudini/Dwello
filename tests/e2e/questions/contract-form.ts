@@ -1,4 +1,4 @@
-import { Attribute, Checked, Count, Enabled, Text, Value } from '../screenplay/questions';
+import { Attribute, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	advancePaymentInput,
 	apartmentContractsUnknown,
@@ -57,4 +57,5 @@ export const advancePaymentHelpText = Text.of(advancePaymentHelp);
 export const noAdvanceNoticeText = Text.of(noAdvanceNotice);
 export const enteredFlatRate = Value.of(flatRateInput);
 export const flatRateWarningText = Text.of(flatRateWarning);
+export const flatRateWarningShown = Visibility.of(flatRateWarning);
 export const runningContractEditHintText = Text.of(runningContractEditHint);

@@ -45,6 +45,7 @@
 		"preview-outdated": "Statement wizard preview of a period whose existing statements include an outdated draft (a later invoice): named with its link and what changed (#132).",
 		"agreed-costs-none": "Contract form with every box of the agreed Nebenkosten unticked (#91): the note that the tenant is then billed no Nebenkosten (not saved).",
 		"flat-rate-warning": "Contract form at the step «Miete» with a Nebenkostenpauschale, no Akonto and ticked Nebenkosten (#429): the warning that Dwello still bills the ticked Nebenkosten (not saved).",
+		"flat-rate-warning-advance": "Contract form at the step «Miete» with an Akonto, a Nebenkostenpauschale and every Nebenkosten ticked (#432): the warning to leave ticked only the Nebenkosten with Akonto (not saved).",
 		"agreed-costs": "Statement wizard at the settings step (#91): «Weiter» with the questions whether a category is agreed not answered (their errors), and the contract whose answered «nicht vereinbart» category has costs in the period.",
 		"agreements-failed": "Statement wizard at the settings step (#91) when whether the contracts agree the period's Nebenkosten cannot be checked (that request answers an error): the alert with «Erneut versuchen», and after «Weiter» the note that the wizard waits for the check (#439).",
 		"agreement-save-failed": "Statement wizard at the settings step (#91): an answer whether a category is agreed that could not be saved (the save answers an error): the question's error.",
@@ -264,11 +265,13 @@
 				"contracts-unknown",
 				"contracts-unknown-review",
 				"agreed-costs-none",
-				"flat-rate-warning"
+				"flat-rate-warning",
+				"flat-rate-warning-advance"
 			],
 			"queries": {
 				"every-wizard-step": "?tenant={tenant}&apartment={freeApartment}",
 				"flat-rate-warning": "?tenant={tenant}&apartment={freeApartment}",
+				"flat-rate-warning-advance": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown-review": "?tenant={tenant}&apartment={freeApartment}",
 				"agreed-costs-none": "?tenant={tenant}&apartment={freeApartment}",
@@ -316,7 +319,8 @@
 				"edit-refused",
 				"contracts-unknown",
 				"agreed-costs-none",
-				"flat-rate-warning"
+				"flat-rate-warning",
+				"flat-rate-warning-advance"
 			]
 		},
 		{

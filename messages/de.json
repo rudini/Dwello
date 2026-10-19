@@ -567,6 +567,7 @@
 	"contracts_flat_rate_help": "Fester Betrag pro Monat für im Mietvertrag vereinbarte Nebenkosten. Dwello rechnet ihn nicht ab: keine Nachzahlung und keine Rückerstattung. Entfernen Sie unten bei «Vereinbarte Nebenkosten» das Häkchen bei den Nebenkosten, die die Pauschale abdeckt.",
 	"contracts_flat_rate_warning_title": "Nebenkostenpauschale und angekreuzte Nebenkosten",
 	"contracts_flat_rate_warning_text": "Dieser Mieter bezahlt eine Nebenkostenpauschale. Dwello rechnet ihm trotzdem alle angekreuzten Nebenkosten ab. Entfernen Sie das Häkchen bei den Nebenkosten, die die Pauschale abdeckt.",
+	"contracts_flat_rate_warning_text_advance": "Dieser Mieter bezahlt ein Akonto und eine Nebenkostenpauschale. Dwello rechnet ihm alle angekreuzten Nebenkosten mit der Nebenkostenabrechnung ab, die Pauschale nicht. Lassen Sie nur die Nebenkosten angekreuzt, für die der Mieter Akonto bezahlt. Sonst bezahlt er die Nebenkosten, die die Pauschale abdeckt, doppelt.",
 	"tenants_purpose": "Die Personen, die Ihre Wohnungen mieten oder gemietet haben, mit Kontaktdaten und Wohnung.",
 	"tenants_none_found": "Keine Mieter gefunden",
 	"tenants_none_found_text": "Kein Mieter passt zur Suche und zum Filter.",

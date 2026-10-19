@@ -567,6 +567,7 @@
 	"contracts_flat_rate_help": "Importo fisso al mese per le spese accessorie pattuite nel contratto di locazione. Dwello non lo conteggia: nessun importo dovuto e nessun rimborso. Qui sotto, in «Spese accessorie pattuite», tolga la selezione dalle spese accessorie che il forfait copre.",
 	"contracts_flat_rate_warning_title": "Forfait per le spese accessorie e spese accessorie selezionate",
 	"contracts_flat_rate_warning_text": "Questo inquilino paga un forfait per le spese accessorie. Dwello gli conteggia comunque tutte le spese accessorie selezionate. Tolga la selezione dalle spese accessorie che il forfait copre.",
+	"contracts_flat_rate_warning_text_advance": "Questo inquilino paga un acconto e un forfait per le spese accessorie. Dwello gli conteggia tutte le spese accessorie selezionate nel conteggio spese accessorie, ma non il forfait. Lasci selezionate solo le spese accessorie per le quali l’inquilino paga un acconto. Altrimenti paga due volte le spese accessorie che il forfait copre.",
 	"tenants_purpose": "Le persone che abitano o hanno abitato nei suoi appartamenti, con i dati di contatto e l’appartamento.",
 	"tenants_none_found": "Nessun inquilino trovato",
 	"tenants_none_found_text": "Nessun inquilino corrisponde alla ricerca e al filtro.",

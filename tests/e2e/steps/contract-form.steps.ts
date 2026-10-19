@@ -29,6 +29,7 @@ import {
 	noAdvanceNoticeText,
 	runningContractEditHintText,
 	enteredFlatRate,
+	flatRateWarningShown,
 	flatRateWarningText
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
@@ -39,6 +40,8 @@ import {
 	enterBilledUntil,
 	changeBaseRent,
 	changeFlatRateUtilityCharge,
+	enterAdvancePayment,
+	untickOneCategory,
 	enterFlatRateUtilityCharge,
 	deleteDraftAndSave,
 	openContractEdit,
@@ -534,6 +537,22 @@ When('der Liegenschaftsverwalter eine Nebenkostenpauschale von {string} Franken 
 
 Then('erfährt der Liegenschaftsverwalter, wo er eine Nebenkostenpauschale einträgt', async ({ verwalter }) => {
 	await verwalter.sees(noAdvanceNoticeText).toContain('bei «Nebenkostenpauschale pro Monat» ein');
+});
+
+When('der Liegenschaftsverwalter ein Akonto von {string} Franken einträgt', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(enterAdvancePayment(amount));
+});
+
+Then('warnt das Formular zur Nebenkostenpauschale {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(flatRateWarningText).toContain(message);
+});
+
+When('der Liegenschaftsverwalter eine der Nebenkosten abwählt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(untickOneCategory);
+});
+
+Then('warnt das Formular nicht mehr zur Nebenkostenpauschale', async ({ verwalter }) => {
+	await verwalter.sees(flatRateWarningShown).toBe(false);
 });
 
 Then('warnt das Formular, dass Dwello die angekreuzten Nebenkosten trotzdem abrechnet', async ({ verwalter }) => {

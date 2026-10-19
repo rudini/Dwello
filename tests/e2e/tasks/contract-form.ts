@@ -122,6 +122,7 @@ export const chooseTenantWhileLoading = (tenantId: string): Activity => (actor) 
 export const changeBaseRent = (baseRent: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(baseRent).into(baseRentInput), Click.on(contractSubmitButton));
 
+export const enterAdvancePayment = (amount: string) => Enter.theValue(amount).into(advancePaymentInput);
 export const enterFlatRateUtilityCharge = (amount: string) => Enter.theValue(amount).into(flatRateInput);
 
 export const changeFlatRateUtilityCharge = (amount: string): Activity => (actor) =>
@@ -167,6 +168,11 @@ export const goToRentWith = (tenantId: string, startDate: string): Activity => (
 	);
 
 // «Vereinbarte Nebenkosten»: every box unticked, not saved (persona Marco W10c P-1)
+export const untickOneCategory = Uncheck.the(agreedCategoryBoxAt(0));
+export const tickAllCategories: Activity = async (actor) => {
+	const boxes = await actor.answer(Count.of(agreedCategoryBoxes));
+	for (let box = 0; box < boxes; box++) await actor.attemptsTo(Check.the(agreedCategoryBoxAt(box)));
+};
 export const untickAllCategories: Activity = async (actor) => {
 	const boxes = await actor.answer(Count.of(agreedCategoryBoxes));
 	for (let box = 0; box < boxes; box++) await actor.attemptsTo(Uncheck.the(agreedCategoryBoxAt(box)));

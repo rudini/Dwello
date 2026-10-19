@@ -567,6 +567,7 @@
 	"contracts_flat_rate_help": "Montant fixe par mois pour les frais accessoires convenus dans le contrat de bail. Dwello ne le décompte pas : ni montant à payer, ni remboursement. Ci-dessous, sous « Frais accessoires convenus », décochez les frais accessoires que le forfait couvre.",
 	"contracts_flat_rate_warning_title": "Forfait de frais accessoires et frais accessoires cochés",
 	"contracts_flat_rate_warning_text": "Ce locataire paie un forfait de frais accessoires. Dwello lui décompte quand même tous les frais accessoires cochés. Décochez les frais accessoires que le forfait couvre.",
+	"contracts_flat_rate_warning_text_advance": "Ce locataire paie un acompte et un forfait de frais accessoires. Dwello lui décompte tous les frais accessoires cochés dans le décompte des charges, mais pas le forfait. Ne laissez cochés que les frais accessoires pour lesquels le locataire paie un acompte. Sinon, il paie deux fois les frais accessoires que le forfait couvre.",
 	"tenants_purpose": "Les personnes qui louent ou ont loué vos appartements, avec leurs coordonnées et leur appartement.",
 	"tenants_none_found": "Aucun locataire trouvé",
 	"tenants_none_found_text": "Aucun locataire ne correspond à la recherche et au filtre.",
