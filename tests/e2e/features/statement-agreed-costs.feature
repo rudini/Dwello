@@ -106,7 +106,7 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Dann meldet der Assistent bei den vereinbarten Nebenkosten "Dwello konnte nicht prüfen, ob die Mietverträge alle Nebenkosten dieser Periode vereinbaren."
     Und bleibt der Assistent beim Schritt mit der Verwaltungspauschale
     # #439: «Weiter» ohne fertige Prüfung bleibt nicht stumm
-    Und erklärt der Assistent "Es geht erst weiter, wenn Dwello die Mietverträge geprüft hat."
+    Und erklärt der Assistent "Dwello konnte die Mietverträge nicht prüfen. Wählen Sie «Erneut versuchen»."
 
   # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
   Szenario: Das PDF nennt die vereinbarten Nebenkosten

@@ -104,7 +104,7 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 
 		expect(byTestId('agreements-loading')).not.toBeNull();
 		expect(byTestId('agreements-wait')!.textContent).toContain(
-			'Es geht erst weiter, wenn Dwello die Mietverträge geprüft hat.'
+			'Dwello geht weiter, sobald die Mietverträge geprüft sind.'
 		);
 	});
 });

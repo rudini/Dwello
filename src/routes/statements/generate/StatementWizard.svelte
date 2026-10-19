@@ -84,6 +84,7 @@
 	let dropped = $state({ buildings: 0, heatingProfile: false }); // what the draft named and is gone meanwhile
 	let resumed = $state(false); // back from "Rechnung erfassen", on the step before the preview
 	let section = $state<HTMLElement>();
+	let wizard = $state<HTMLFormElement>();
 
 	// The last preview stays when creating the drafts fails
 	let previewRows = $state(untrack(() => form?.preview ?? []));
@@ -115,6 +116,11 @@
 	$effect(() => {
 		const snapshot = { ...$state.snapshot(selection), step };
 		if (touched) savedAt = writeDraft(browserStorage(), DRAFT, snapshot, new Date());
+	});
+
+	// «Weiter» waited for the check of the agreed Nebenkosten: the wizard goes on once it is done (#439)
+	$effect(() => {
+		if (step === 3 && errors.agreements && !agreementsBlocking) wizard?.requestSubmit();
 	});
 
 	async function goTo(target: number) {
@@ -198,6 +204,7 @@
 </script>
 
 <form
+	bind:this={wizard}
 	method="POST"
 	action={step === 5 ? '?/generate' : '?/preview'}
 	onsubmit={submitStep}

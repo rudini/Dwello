@@ -28,8 +28,8 @@
 	</Alert>
 {/if}
 {#if error && status !== 'loaded'}
-	<!-- «Weiter» before the check is done: no question to show the error at (#439) -->
+	<!-- «Weiter» before the check is done: no question to show the error at; the wizard goes on once it is (#439) -->
 	<p role="alert" class="font-semibold text-ink" data-testid="agreements-wait">
-		{m.statements_agreements_wait()}
+		{status === 'failed' ? m.statements_agreements_wait_failed() : m.statements_agreements_wait()}
 	</p>
 {/if}

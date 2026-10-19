@@ -1060,6 +1060,31 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('wizard-status')!.textContent!.trim()).toBe('');
 	});
 
+	// #439: «Weiter» während der Prüfung der vereinbarten Nebenkosten geht weiter, sobald sie fertig ist
+	it('geht nach «Weiter» während der Prüfung weiter, sobald die Mietverträge geprüft sind', async () => {
+		let loaded = (_: Response) => {};
+		globalThis.fetch = (() => new Promise<Response>((resolve) => (loaded = resolve))) as typeof fetch;
+		open();
+		next();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+
+		next();
+		await settle();
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		expect(byTestId('agreements-wait')!.textContent).toContain(
+			'Dwello geht weiter, sobald die Mietverträge geprüft sind.'
+		);
+
+		loaded(new Response('[]', { status: 200 }));
+		await settle();
+		expect(byTestId('wizard-status')!.textContent).toContain('Vorschau wird berechnet');
+		await answer({ type: 'success', data: { preview, invoices } });
+		expect(heading()).toBe('Vorschau');
+	});
+
 	it('behält die Vorschau, wenn das Erstellen scheitert', async () => {
 		open({ preview, invoices: [invoices[0]] });
 		next();

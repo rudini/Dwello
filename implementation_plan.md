@@ -12,5 +12,7 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] DOM test: the same while the check loads (`agreed-costs.dom.test.ts`)
 - [x] Message in `AgreedCosts.svelte`, text in all four languages; axe and language state `agreements-failed` clicks «Weiter» too
 - [x] Slice review round 1 (`docs/reviews/439-review-1.md`)
-- [ ] Feature review (persona)
+- [x] Feature review: personas Helga and Sven (`docs/design/personas/{helga,sven}-439.md`)
+- [ ] Fix Sven P-1, P-3 and Helga P-1: the wizard goes on once the check is done; failed text names «Erneut versuchen»
+- [ ] Re-review: code-reviewer round 2, Sven and Helga on the new texts
 - [ ] PR `Fixes #439`
