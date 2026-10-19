@@ -34,7 +34,7 @@
 	let frame = $state<HTMLElement>();
 	let corrected = $state<string>(); // the error the field was changed after
 	const shown = $derived(error === corrected ? undefined : error);
-	let edited = $state(false); // changed since invalidBy was set
+	let edited = $state(false); // the form changed since invalidBy was set: the error it points to may be gone
 	const flagged = $derived(invalidBy && !edited ? invalidBy : undefined);
 	const change = () => {
 		corrected = error;
@@ -53,8 +53,13 @@
 			corrected = undefined;
 			edited = false;
 		};
+		const changed = () => (edited = true);
 		form?.addEventListener('submit', check, true);
-		return () => form?.removeEventListener('submit', check, true);
+		form?.addEventListener('input', changed);
+		return () => {
+			form?.removeEventListener('submit', check, true);
+			form?.removeEventListener('input', changed);
+		};
 	});
 
 	const helpId = $derived(`${id}-help`);

@@ -91,6 +91,22 @@ describe('Eingabefeld', () => {
 		error.remove();
 	});
 
+	// Code review #450 C-2: the IBAN changed, its error is gone; the fields it named are no longer marked either
+	it('nimmt die Kennzeichnung weg, sobald im Formular etwas geändert wird', () => {
+		const form = document.body.appendChild(document.createElement('form'));
+		const other = form.appendChild(document.createElement('input'));
+		const field = mount(TextInput, {
+			target: form,
+			props: { id: 'companyCity', label: 'Ort', invalidBy: 'iban-error', value: '' }
+		});
+		flushSync();
+
+		fireEvent(other, 'input', 'CH93');
+		expect(form.querySelector('#companyCity')!.getAttribute('aria-invalid')).toBeNull();
+		unmount(field);
+		form.remove();
+	});
+
 	it('nennt freiwillige Felder in Worten', () => {
 		show(TextInput, { id: 'phone', label: 'Telefon', optional: true, value: '' });
 		expect(document.querySelector('label')!.textContent).toContain('(optional)');

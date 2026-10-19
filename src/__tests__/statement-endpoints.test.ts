@@ -178,12 +178,15 @@ describe('GET /statements/[id]/pdf', () => {
 	// persona Dr. Weber P-2 (#450): the way to where the landlord adds what is missing, only when the settings help
 	it('führt bei fehlender Firmenadresse auch zu den Einstellungen', async () => {
 		const settingsLink = /<a [^>]*href="\/config"[^>]*>Zu den Einstellungen<\/a>/;
-		const creditor = await (await get(async () => Response.json(creditorRefused, { status: 400 }))).text();
-		const unknown = await (await get(async () => Response.json(refusedPdf, { status: 404 }))).text();
+		const pageFor = async (body: object, status = 400) =>
+			(await get(async () => Response.json(body, { status }))).text();
 
-		expect(creditor).toMatch(settingsLink);
-		expect(creditor).toContain('Zu den Nebenkostenabrechnungen');
-		expect(unknown).not.toMatch(settingsLink);
+		for (const code of ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID']) {
+			const page = await pageFor({ ...creditorRefused, code });
+			expect({ code, link: settingsLink.test(page) }).toEqual({ code, link: true });
+			expect(page).toContain('Zu den Nebenkostenabrechnungen');
+		}
+		expect(await pageFor(refusedPdf, 404)).not.toMatch(settingsLink);
 	});
 
 	// Helga, Marco (#125): the sentence stood on a bare page, tiny on a phone, without a way back into Dwello
