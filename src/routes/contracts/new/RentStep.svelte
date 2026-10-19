@@ -8,6 +8,7 @@
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import AgreedCategories from '../AgreedCategories.svelte';
+	import AdvanceFrom from './AdvanceFrom.svelte';
 	import { formatCurrency, isFeeRate, parsePercent, USUAL_MAXIMUM } from '$lib/utils/format';
 
 	// Step 4: the monthly amounts, each explained with the glossary's words, and their total
@@ -16,13 +17,15 @@
 		errors,
 		takenFrom = null,
 		categories,
-		agreedHelp = m.contracts_agreed_costs_help()
+		agreedHelp = m.contracts_agreed_costs_help(),
+		advanceHelp = m.contracts_advance_help()
 	}: {
 		values: ContractFormValues;
 		errors: Record<string, string>;
 		takenFrom?: string | null; // the period of the contract whose amounts are filled in (#144)
 		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
 		agreedHelp?: string; // editing: existing statements stay, new Nebenkosten need the form
+		advanceHelp?: string; // editing: a new Akonto applies from «Gültig ab», an increase needs the form (#464)
 	} = $props();
 
 	const total = $derived.by(() => {
@@ -65,13 +68,15 @@
 <MoneyInput
 	id="advancePayment"
 	label={m.contracts_advance_label()}
-	help={m.contracts_advance_help()}
+	help={advanceHelp}
 	example="180.00"
 	optional
 	bind:value={values.advancePayment}
 	error={errors.advancePayment}
 	testid="contract-advance-payment-input"
 />
+
+<AdvanceFrom bind:value={values.advancePaymentFrom} error={errors.advancePaymentFrom} />
 
 {#if notice}
 	<Alert title={m.contracts_no_advance()} testid="advance-payment-notice"><p>{notice}</p></Alert>

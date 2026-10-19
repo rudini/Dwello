@@ -96,3 +96,13 @@ export const deleteDraftAndContinueButton = target('Entwurf löschen und unbefri
 export const contractAgreedCosts = target('Vereinbarte Nebenkosten des Mietvertrags', (page) =>
 	page.getByTestId('contract-agreed-costs')
 );
+// #464: one row per Akonto amount with the time it applies
+export const advancePeriod = (amount: string) =>
+	target(`Akonto ${amount}`, (page) => page.getByTestId('contract-advance-period').filter({ hasText: amount }));
+export const advanceDeleteButton = (amount: string) =>
+	target(`Akonto ${amount} löschen`, (page) =>
+		page.getByTestId('contract-advance-period').filter({ hasText: amount }).getByTestId('contract-advance-delete')
+	);
+export const confirmAdvanceDeleteButton = target('Akonto löschen bestätigen', (page) =>
+	page.getByTestId('contract-advance-delete-confirm')
+);
