@@ -1,6 +1,7 @@
 import { asc, eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { apartments, buildings, categories, documents, rentalContracts, tenants, utilityStatements } from '../db/schema';
+import { advancesOf } from './advance-payment.service';
 import { agreedCategoryIds } from './agreed-category.service';
 import { getStatement } from './statement.service';
 import { swissToday } from './today';
@@ -61,7 +62,7 @@ export async function exportTenant(id: string) {
 			billedUntil: contract.billedUntil,
 			baseRent: contract.baseRent,
 			additionalRent: contract.additionalRent,
-			monthlyAdvancePayment: contract.monthlyAdvancePayment,
+			advancePayments: await advancesOf(contract.id), // each Akonto with its «Gültig ab» (#464)
 			flatRateUtilityCharge: contract.flatRateUtilityCharge,
 			managementFeeAgreed: contract.managementFeeAgreed,
 			managementFeePercent: contract.managementFeePercent,
