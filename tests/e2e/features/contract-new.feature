@@ -146,7 +146,7 @@ Funktionalität: Neuen Mietvertrag erfassen
   # #447 (Entscheid in #402, Punkt 2): ein eigener Satz von 0 % heisst dasselbe wie «Nein»; damit der Mietvertrag als
   # Mietvertrag ohne vereinbarte Verwaltungspauschale erscheint, nimmt Dwello den Satz 0 % nicht an
   Szenario: Eigener Satz von 0 % wird abgelehnt
-    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit einem eigenen Satz von "0" % vermieten will
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit einer Verwaltungspauschale von "0" % bis zur Prüfung erfasst
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Ein eigener Satz von 0 % heisst: keine Verwaltungspauschale. Wählen Sie dann «Nein»."
 
   # #77: eine neue Verwaltungspauschale während der Mietdauer ist eine einseitige Vertragsänderung (Art. 269d Abs. 1

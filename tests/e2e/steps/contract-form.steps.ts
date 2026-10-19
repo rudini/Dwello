@@ -352,16 +352,13 @@ When(
 	}
 );
 
-// From the tenant to the review with an own rate; #447: a rate of 0 % is refused before the review
-const withOwnRate = (seed: { idOf: (key: string) => string | undefined }, ...[tenant, apartment, startDate, baseRent, fee]: string[]) =>
-	reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: fee });
-When(
-	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit einem eigenen Satz von {string} % vermieten will',
-	async ({ verwalter, seed }, ...contract: string[]) => verwalter.attemptsTo(withOwnRate(seed, ...contract))
-);
 When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit einer Verwaltungspauschale von {string} % bis zur Prüfung erfasst',
-	async ({ verwalter, seed }, ...contract: string[]) => verwalter.attemptsTo(withOwnRate(seed, ...contract))
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, fee: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: fee })
+		);
+	}
 );
 
 When(

@@ -73,6 +73,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |
 | Kosten des Gebäudes | coûts de l’immeuble | costi dell’immobile | building costs |
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
+| Eigener Satz (#447, #485) | taux propre | aliquota propria | own rate |
+| Satz des Abrechnungslaufs (#447, #485) | taux de l’établissement des décomptes | aliquota dell’allestimento dei conteggi | rate of the statement run |
 | Zahlung zurücksetzen | Retirer le paiement saisi | Rimuovere il pagamento registrato | Reset payment |
 | Nebenkostenpauschale (#66) | forfait de frais accessoires ❓ | forfait per le spese accessorie ❓ | flat-rate utility charge |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |

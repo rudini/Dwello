@@ -700,6 +700,23 @@ Funktionalität: Abrechnungsdetail
     Und nennt die Bestätigung die Verjährung nach fünf Jahren
     Und hat die Abrechnung den Status "Versendet"
 
+  # #447, Fachreview V-1: in einer Kette rechnet die berichtigte Abrechnung alles an, was auf die ersetzten Abrechnungen
+  # geflossen ist. Lea Graf erhielt mit 200 Franken Akonto im Monat eine Rückerstattung, die Nachzahlung der
+  # berichtigten Abrechnung (Hauswart) ist kleiner: netto hat der Vermieter zurückerstattet
+  Szenario: Vor dem Berichtigen einer Kette nennt die Bestätigung, was insgesamt zurückerstattet ist
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-01-01" für "1200" Franken mit "200" Franken Akonto
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Lea Graf" ist versendet
+    Und die Abrechnung 2024 von "Lea Graf" ist bezahlt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und die Abrechnung 2024 von "Lea Graf" ist berichtigt
+    Und die berichtigte Abrechnung 2024 von "Lea Graf" ist versendet und bezahlt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung 2024 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigen will
+    Dann sagt die Bestätigung, dass die berichtigte Abrechnung anrechnet, was der Liegenschaftsverwalter auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet hat
+
   # #120: eine später erfasste Rechnung wird mit der berichtigten Abrechnung nachverlangt; bezahlt sind 430.00 + 3 %
   # Verwaltungspauschale = 442.90. Neu: 430.00 + 182.00 (Hauswart 732.00 × 91/366) + 3 % = 630.36, abzüglich 442.90
   # = 187.46, auf 5 Rappen zugunsten des Mieters 187.45
