@@ -133,6 +133,7 @@
 	"login_error_cancelled": "L’accesso è stato interrotto.",
 	"login_error_failed": "L’accesso non è riuscito. Riprovi, per favore.",
 	"login_error_unavailable": "Questo accesso non è configurato.",
+	"login_error_not_allowed": "Questo account non ha accesso a Dwello. Acceda con l’account configurato per Dwello.",
 	"error_title": "Errore",
 	"error_404": "Questa pagina non esiste.",
 	"error_403": "Non ha accesso a questa pagina.",

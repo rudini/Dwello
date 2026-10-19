@@ -18,6 +18,10 @@ export const signOut: Activity = (actor) =>
 export const expireSession = (baseURL: string): Activity => async (actor) =>
 	actor.attemptsTo(Cookies.add(await sessionCookies(baseURL, Math.floor(Date.now() / 1000) - 60)));
 
+/** A valid session of a Google account that is not in ALLOWED_EMAILS (#51) */
+export const holdSessionWithoutAccess = (baseURL: string): Activity => async (actor) =>
+	actor.attemptsTo(Cookies.add(await sessionCookies(baseURL, undefined, 'fremd@example.com')));
+
 // the session cookies are gone, the page in the browser stays as it is
 export const loseSession = Cookies.clear;
 

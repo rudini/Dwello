@@ -183,6 +183,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	empty: () => Wait.until(on.emptyHint),
 	'first-use': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Erstes Gebäude erfassen')))),
 	'login-error': () => Wait.until(on.loginError),
+	'login-not-allowed': () => Wait.until(on.loginError),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
 	'submit-cleared': () => (actor) =>

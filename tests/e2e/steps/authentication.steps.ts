@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { googleSignInParameter, loginHint, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
-import { expireSession, signInWith, signOut } from '../tasks/authentication';
+import { expireSession, holdSessionWithoutAccess, signInWith, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
 
 const { Given, When, Then } = createBdd(test);
@@ -25,6 +25,14 @@ When('Google den Besucher nach einer abgebrochenen Anmeldung zurückschickt', as
 
 Given('die Sitzung des Liegenschaftsverwalters ist abgelaufen', async ({ verwalter, baseURL }) => {
 	await verwalter.attemptsTo(expireSession(baseURL!));
+});
+
+Given('ein Besucher hat eine Sitzung mit einem Konto ohne Zugang zu Dwello', async ({ besucher, baseURL }) => {
+	await besucher.attemptsTo(holdSessionWithoutAccess(baseURL!));
+});
+
+When('der Besucher die Übersicht öffnet', async ({ besucher }) => {
+	await besucher.attemptsTo(openPage('/dashboard'));
 });
 
 When('der Liegenschaftsverwalter die Anmeldeseite öffnet', async ({ verwalter }) => {
@@ -64,7 +72,11 @@ Then('leitet Dwello den Besucher zur Anmeldung bei Google weiter', async ({ besu
 Then('bittet Dwello Google nicht um dauerhaften Zugriff auf das Konto', async ({ besucher }) => {
 	await besucher.sees(googleSignInParameter('client_id')).toBe('e2e-google-client');
 	await besucher.sees(googleSignInParameter('access_type')).toBeNull();
-	await besucher.sees(googleSignInParameter('prompt')).toBeNull();
+});
+
+// only the account choice, never «consent» (#82: no lasting access)
+Then('lässt Dwello den Besucher bei Google das Konto wählen', async ({ besucher }) => {
+	await besucher.sees(googleSignInParameter('prompt')).toBe('select_account');
 });
 
 Then(

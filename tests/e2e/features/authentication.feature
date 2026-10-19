@@ -29,6 +29,12 @@ Funktionalität: Anmeldung
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Anmelden"
 
+  Szenario: Sitzung eines Kontos ohne Zugang
+    Angenommen ein Besucher hat eine Sitzung mit einem Konto ohne Zugang zu Dwello
+    Wenn der Besucher die Übersicht öffnet
+    Dann ist der Besucher auf der Seite "Anmelden"
+    Und sieht der Besucher den Hinweis "Dieses Konto hat keinen Zugang zu Dwello. Melden Sie sich mit dem Konto an, das für Dwello eingerichtet ist."
+
   Szenario: Angemeldet mit eigenem Namen
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann sieht der Liegenschaftsverwalter seinen Namen "Vera Verwalter" in der Kopfzeile
@@ -47,3 +53,9 @@ Funktionalität: Anmeldung
     Angenommen ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher sich mit "Google" anmeldet
     Dann bittet Dwello Google nicht um dauerhaften Zugriff auf das Konto
+
+  # Helga 51 P-1: wer mit dem falschen Google-Konto angemeldet ist, kommt sonst immer wieder zur gleichen Meldung
+  Szenario: Bei Google das Konto wählen
+    Angenommen ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher sich mit "Google" anmeldet
+    Dann lässt Dwello den Besucher bei Google das Konto wählen

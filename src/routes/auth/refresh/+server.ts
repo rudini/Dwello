@@ -14,6 +14,7 @@ import {
 	setXsrfToken,
 	validateXsrfToken
 } from '$lib/server/auth';
+import { isAllowed } from '$lib/server/allowed-emails';
 import { JWTError, ValidationError, handleRequestError, logger } from '$lib/server/error-handler';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
@@ -40,6 +41,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			});
 			throw new JWTError('Invalid or expired token', 401);
 		}
+		// #51: /auth/* passes the session check of hooks.server.ts, so the account is checked here
+		if (!isAllowed(payload)) throw new JWTError('Account not allowed', 401);
 
 		// Generate new JWT with same user data
 		const newJwt = await generateJwt({

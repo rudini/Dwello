@@ -16,6 +16,7 @@ import {
 	clearAuthCookies
 } from '$lib/server/auth';
 import { exchangeCodeForToken, fetchUserProfile } from '$lib/server/oauth';
+import { isAllowed } from '$lib/server/allowed-emails';
 import { logAuthError, logOAuthEvent } from '$lib/server/error-handler';
 import { cookieConfig } from '$lib/server/jwt-config';
 import { loginPage, recordLogin, takeLoginFlow } from '$lib/server/login-flow';
@@ -40,12 +41,12 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		throw redirect(303, loginPage('failed'));
 	}
 
+	let user: Awaited<ReturnType<typeof fetchUserProfile>>;
 	let jwt: string;
 	try {
 		const token = await exchangeCodeForToken(code, flow.provider);
-		const user = await fetchUserProfile(token.access_token, flow.provider);
+		user = await fetchUserProfile(token.access_token, flow.provider);
 		jwt = await generateJwt(user);
-		logOAuthEvent('login_complete', flow.provider, { userId: user.sub, email: user.email });
 	} catch (error) {
 		logAuthError(error instanceof Error ? error : new Error(String(error)), {
 			operation: 'callback'
@@ -53,6 +54,14 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		clearAuthCookies(cookies);
 		throw redirect(303, loginPage('failed'));
 	}
+
+	// #51: an account outside ALLOWED_EMAILS gets no session
+	if (!isAllowed(user)) {
+		logOAuthEvent('login_failed', flow.provider, { reason: 'not_allowed', email: user.email });
+		clearAuthCookies(cookies);
+		throw redirect(303, loginPage('not_allowed'));
+	}
+	logOAuthEvent('login_complete', flow.provider, { userId: user.sub, email: user.email });
 
 	cookies.delete(cookieConfig.oauthStateName, {
 		path: cookieConfig.path,
