@@ -605,6 +605,12 @@ describe('Abgerechnet bis im PDF', () => {
 		expect(text).not.toContain('Geleistete Akontobeiträge ab'); // #477: the line is «Akontobeiträge»
 	});
 
+	// code review 453-3 C-8: the total relabelled, the lines of #464 below it
+	it('nennt über den Akonto-Zeilen die Summe ab dem Tag nach «Abgerechnet bis»', async () => {
+		const lines = { ...billed, advanceLines: [{ from: '2024-03-01', to: '2024-03-31', months: 1, amount: 120, total: 120 }] };
+		expect(await textIn(lines, 'de')).toContain('Akontobeiträge ab 01.03.2024 – 120.00 1 Monat × CHF 120.00 (01.03.2024 – 31.03.2024) 120.00');
+	});
+
 	it('nennt das Akonto ohne «Abgerechnet bis» ohne Datum', async () => {
 		const text = await textIn(refund, 'de');
 		expect(text).toContain('Akontobeiträge');

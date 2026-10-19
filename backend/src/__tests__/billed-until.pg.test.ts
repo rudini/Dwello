@@ -7,9 +7,9 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, heatingProfiles, invoices, rentalContracts, utilityStatements } from '../db/schema';
+import { categories, contractAdvancePayments, heatingProfiles, invoices, rentalContracts, utilityStatements } from '../db/schema';
 import { daysAfter, swissToday } from '../services/today';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
@@ -134,6 +134,18 @@ describe('Abgerechnet bis', () => {
 		expect(statement).toMatchObject({ rentalDays: 245, rentalStart: '2024-05-01', totalAdvancePayments: 800 });
 		expect(statement.lineItems.find((line) => !line.isHeatingCost)?.tenantShare).toBe(490);
 		expect(statement.lineItems.find((line) => line.isHeatingCost)).toMatchObject({ periodShare: 0.52, tenantShare: 520 });
+	});
+
+	// code review 453-3 C-8: with a second Akonto from 01.09.2024 (#464), May to August at 100, September to December at 150
+	it('zählt nach «Abgerechnet bis» jeden Akontobetrag für seine Monate', async () => {
+		await billedUntil('2024-04-30');
+		await db.insert(contractAdvancePayments).values({ contractId: rental.contract, validFrom: '2024-09-01', amount: '150' });
+		try {
+			const statement = (await (await preview()).json()) as { totalAdvancePayments: number };
+			expect(statement.totalAdvancePayments).toBe(1000);
+		} finally {
+			await db.delete(contractAdvancePayments).where(and(eq(contractAdvancePayments.contractId, rental.contract), eq(contractAdvancePayments.validFrom, '2024-09-01')));
+		}
 	});
 
 	// fach review V-14: a part month counts by its days, 16 of 31 in May
