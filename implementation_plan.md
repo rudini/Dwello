@@ -49,5 +49,5 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Marker `TODO(fachlich prüfen, #130)` in `CategoryCheck.svelte` removed (product owner 2026-10-19: settled by #409)
 - [x] Slice review round 1 (`docs/reviews/130-review-1.md`, three Nits; C-1, C-3 fixed)
 - [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-130.md`, one Nit), data prepared by SQL in `dwello_persona`
-- [ ] Closing code-review round
+- [x] Closing code-review round (`docs/reviews/130-review-2.md`; C-4: the #405 review moved out of this branch)
 - [ ] PR `Fixes #130`
