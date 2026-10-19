@@ -15,5 +15,5 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Feature review: personas Helga and Sven (`docs/design/personas/{helga,sven}-439.md`)
 - [x] Fix Sven P-1, P-3 and Helga P-1: the wizard goes on once the check is done; failed text names «Erneut versuchen»
 - [x] Re-review: code-reviewer round 2 (`docs/reviews/439-review-2.md`; C-4 fixed with the scenario «Nach erneuter Prüfung geht der Assistent zur Vorschau»), Sven and Helga (`docs/design/personas/{sven,helga}-439-2.md`)
-- [ ] Closing code-review round
+- [x] Closing code-review round (`docs/reviews/439-review-3.md`, no Blocker/Major)
 - [ ] PR `Fixes #439`
