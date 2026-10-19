@@ -33,5 +33,5 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Fixes: V-12 (the new Vertragsbeginn as «Gültig ab» corrects the first amount), V-14, V-15; C-10/C-11 («Beenden» shows a refusal with its message, scenario «Mietvertrag vor einem späteren Akonto beenden», states `end-dialog-advance-refused`, `advance-from-missing`); C-12 (codes as literals), C-13 (contracts for the delete and end refusals, API spec); Helga P-1 (the form lists the amounts), P-2 and Weber P-1 (the refusal says when to correct and names the earliest day), P-3 (example a first of a month), P-4 (toast after deleting)
 - [ ] daten-pruefer, closing code-review, PR `Fixes #464`
 - [ ] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464`
-- [ ] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1
+- [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
