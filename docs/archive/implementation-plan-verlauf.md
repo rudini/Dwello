@@ -1804,3 +1804,14 @@ Branch `claude/brave-babbage-d7bnoa`. Product owner 2026-10-18: the open `entsch
 - [ ] PR `Fixes #140`, `Fixes #397`, `Fixes #398`, «No scenario: glossary and code comments only»
 
 Files: `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/reviews/g3-glossary-review-{1,2}.md`, comments in `src/lib/overview.ts`, `src/routes/config/{categories/CategoryReason,audit-log/+page}.svelte`, `src/routes/contracts/[id]/NextSteps.svelte`, `src/routes/tenants/[id]/TenantDocumentsCard.svelte`, `src/routes/statements/[id]/CostTable.svelte`, `backend/src/services/pdf.service.ts`, `tests/e2e/features/{settings,statement-generate,statement-detail}.feature`.
+
+## Session L1: Building lists to 1000, O-38 (after #424)
+
+Branch `ccr-240d3fd7-ogc0me`. A second session solved #424 in parallel; #438 solved it first (main CI #593 green with every browser), so this session's own fix was dropped. What #438 does not carry came along: the building lists of the BFF load 1000 instead of 100 (product owner 2026-10-19), the E2E cleanup leak as O-38, two workflow notes.
+
+- [x] `invoices.test.ts` expects `buildings?limit=1000` (seen red), the eight loads ask for 1000
+- [x] O-38 in `docs/design/offene-punkte.md`, two notes in `docs/reviews/workflow-notes-issue-424.md`
+- [x] Closing code-review round
+- [x] PR, «No scenario: a list limit no realistic data reaches; docs»
+
+Files: `src/routes/{apartments,apartments/new,invoices,invoices/new,invoices/[id]/edit,contracts,statements,statements/generate}/+page.server.ts`, `src/__tests__/invoices.test.ts`, `docs/design/offene-punkte.md`, `docs/reviews/workflow-notes-issue-424.md`.

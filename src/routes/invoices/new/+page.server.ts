@@ -19,7 +19,7 @@ const isoDate = (value: string | null) => (value && /^\d{4}-\d{2}-\d{2}$/.test(v
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const [buildingsData, choices, llmStatus] = await Promise.all([
-		get(fetch, 'buildings?limit=100'),
+		get(fetch, 'buildings?limit=1000'),
 		invoiceChoices(fetch),
 		get(fetch, 'invoices/llm-status')
 	]);
