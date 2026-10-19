@@ -49,3 +49,4 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `statement-pdf-failed.json` | `POST /api/v1/statements/:id/generate-pdf`, die aus einem unerwarteten Grund scheitert (500) |
 | `validation-refused.json` | jede Anfrage, die das Schema verletzt, z.B. `POST /api/v1/statements/preview` mit einer Zahl als `contractId` (422) |
 | `audit-log.json` | `GET /api/v1/audit-log` (Protokoll unter «Einstellungen», neuste zuerst) |
+| `tenant-export.json` | `GET /api/v1/tenants/:id/export` (#435: Name der ZIP-Datei, ihre Datendatei und ihre Dateien; das BFF schreibt `data` unverändert) |

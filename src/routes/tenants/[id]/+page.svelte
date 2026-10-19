@@ -8,6 +8,7 @@
 	import TenantContactCard from './TenantContactCard.svelte';
 	import TenantContracts from './TenantContracts.svelte';
 	import TenantDocumentsCard from './TenantDocumentsCard.svelte';
+	import TenantExportCard from './TenantExportCard.svelte';
 	import TenantRentalCard from './TenantRentalCard.svelte';
 	import type { ActionData, PageData } from './$types';
 
@@ -57,6 +58,7 @@
 		<div class="flex flex-col gap-6">
 			<TenantContactCard {tenant} />
 			<TenantRentalCard rental={data.rental} />
+			<TenantExportCard id={tenant.id} />
 		</div>
 		<div class="flex flex-col gap-6 lg:col-span-2">
 			<TenantContracts contracts={data.contractHistory} />

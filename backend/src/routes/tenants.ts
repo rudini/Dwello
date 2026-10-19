@@ -13,6 +13,7 @@ import {
 	updateTenant,
 	deleteTenant
 } from '../services/tenant.service';
+import { exportTenant } from '../services/tenant-export.service';
 
 // Validation schemas
 const tenantQuerySchema = t.Object({
@@ -65,6 +66,15 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 			return { error: 'Tenant not found' };
 		}
 		return tenant;
+	})
+	// Everything Dwello holds about the tenant, for the right to data handover (#435)
+	.get('/:id/export', async ({ params, set }) => {
+		const result = await exportTenant(params.id);
+		if (!result) {
+			set.status = 404;
+			return { error: 'Tenant not found' };
+		}
+		return result;
 	})
 	// Get tenant with contract history
 	.get('/:id/history', async ({ params, set }) => {

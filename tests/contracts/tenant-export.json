@@ -1,0 +1,9 @@
+{
+	"fileName": "Daten-Müller-Hans.zip",
+	"dataFile": "daten.json",
+	"data": {
+		"exportedOn": "2026-10-19",
+		"tenant": { "firstName": "Hans", "lastName": "Müller" }
+	},
+	"files": [{ "path": "dokumente/2026-10-19 Übergabeprotokoll.pdf", "content": "JVBERi0xLjQK" }]
+}
