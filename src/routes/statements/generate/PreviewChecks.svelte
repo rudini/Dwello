@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { sameSettingsNote, type invoiceRows } from '$lib/statement-wizard';
+	import { heatingWholeText, sameSettingsNote, type invoiceRows } from '$lib/statement-wizard';
 	import ChangedStatements from './ChangedStatements.svelte';
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
@@ -47,9 +47,6 @@
 	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
 	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
 	const heating = $derived(hinted('heatingWithoutServicePeriod'));
-	const heatingCategories = $derived(
-		[...new Set(heating.flatMap((row) => row.invoices.map((invoice) => invoice.categoryName)))].join(', ')
-	);
 	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
 	const shown = (row: (typeof rows)[number]) => ({
@@ -113,7 +110,7 @@
 <InvoiceHint
 	buildings={heating}
 	title={m.statements_heating_whole_title()}
-	text={m.statements_heating_whole_text({ category: heatingCategories })}
+	text={heatingWholeText(heating)}
 	testid="heating-without-service-period"
 />
 

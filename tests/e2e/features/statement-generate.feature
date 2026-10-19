@@ -629,7 +629,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # #335 (#451, Punkt 5): Marc Hubers Abrechnung ist versendet, bevor die Heizrechnung für Januar bis März ihren
   # Leistungszeitraum hatte; sie rechnet die Heizkosten über die ganze Periode nach dem Heizprofil. Eva Freis neue
   # Abrechnung rechnet die Monate im Leistungszeitraum: zusammen können beide mehr als die Heizkosten der Wohnung tragen
-  @wip
   Szenario: Vorschau weist auf eine versendete Abrechnung derselben Wohnung nach der alten Regel hin
     Angenommen es gibt das Heizprofil "Winter"
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
@@ -643,7 +642,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #335 (#451, Punkt 5): hatte die Heizrechnung ihren Leistungszeitraum schon beim Erstellen, rechnet die versendete
   # Abrechnung die Monate darin; kein Hinweis
-  @wip
   Szenario: Kein Hinweis auf die alte Regel, wenn die versendete Abrechnung die Monate im Leistungszeitraum rechnet
     Angenommen es gibt das Heizprofil "Winter"
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
@@ -658,7 +656,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   # #339 (#451, Punkt 6): bei einem Mieterwechsel mit Heizprofil zählt eine Heizrechnung mit Leistungszeitraum nur die
   # Monate darin, eine ohne über die ganze Periode; die Vorschau nennt die Heizrechnungen ohne, wenn andere derselben
   # Kategorie einen haben
-  @wip
   Szenario: Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum neben solchen mit
     Angenommen es gibt das Heizprofil "Winter"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1520" Franken vom "2024-03-31"
@@ -671,7 +668,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum keine Rechnung vom "05.01.2025"
     Und nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum keine Rechnung vom "31.12.2024"
 
-  @wip
   Szenario: Von einer Rechnung der Heizkosten ohne Leistungszeitraum zur Rechnung
     Angenommen es gibt das Heizprofil "Winter"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1520" Franken vom "2024-03-31"

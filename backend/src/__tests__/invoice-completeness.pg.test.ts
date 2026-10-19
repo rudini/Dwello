@@ -167,14 +167,16 @@ describe('Hinweise mit eigenem Gebäude', () => {
 	// #339 (#451, Punkt 6): bei Heizkosten nach Heizprofil zählt eine Rechnung mit Leistungszeitraum nur seine Monate, eine
 	// ohne die ganze Periode; die Prüfung nennt die ohne, wenn andere derselben Kategorie einen haben, nicht aber eine
 	// andere Heizkategorie ganz ohne Leistungszeitraum, Nebenkosten ohne Heizkosten und Lieferungen in den Tank
+	// a tank decommissioned before the period (closing stock 0, Code-Review C-4) shares its category by #71 again
 	it.each([
-		['ohne Tank', false, ['Fernwärme Q1']],
-		['mit Tank in der Kategorie', true, []]
-	] as const)('nennt Heizrechnungen ohne Leistungszeitraum neben solchen mit, %s', async (_, tank, expected) => {
+		['ohne Tank', [], ['Fernwärme Q1']],
+		['mit Tank in der Kategorie', [['2023-12-31', '800.00']], []],
+		['mit einem vor der Periode stillgelegten Tank', [['2022-12-31', '700.00'], ['2023-12-31', '0.00']], ['Fernwärme Q1']]
+	] as const)('nennt Heizrechnungen ohne Leistungszeitraum neben solchen mit, %s', async (_, readings, expected) => {
 		const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
 		const categoryId = async (name: string) => (await db.select().from(categories).where(eq(categories.name, name)))[0].id;
 		const heating = await categoryId('Heating');
-		if (tank) await db.insert(fuelStocks).values({ buildingId: own.building, readingDate: '2023-12-31', amount: '800.00', categoryId: heating });
+		for (const [readingDate, amount] of readings) await db.insert(fuelStocks).values({ buildingId: own.building, readingDate, amount, categoryId: heating });
 		await insertInvoice(own.building, { billingEntityName: 'Fernwärme Q1', categoryId: heating, amount: '1520.00', invoiceDate: '2024-03-31' });
 		await insertInvoice(own.building, { billingEntityName: 'Fernwärme Q4', categoryId: heating, amount: '1410.00', invoiceDate: '2025-01-05', servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' });
 		await insertInvoice(own.building, { billingEntityName: 'Kaminfeger Keller', categoryId: await categoryId('Chimney Sweep'), amount: '290.00', invoiceDate: '2024-10-15' });
@@ -205,15 +207,17 @@ describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
 		return statement.id;
 	};
 
+	// a Leistungszeitraum over the whole period shares as before (Code-Review C-5)
 	it.each([
-		['versendet, der Leistungszeitraum kam danach', 'sent', false, true],
-		['ein Entwurf', 'draft', false, false],
-		['versendet, mit dem Leistungszeitraum schon beim Erstellen', 'sent', true, false]
-	] as const)('nennt eine Abrechnung nur, wenn sie %s', async (_, status, before, named) => {
+		['versendet, der Leistungszeitraum kam danach', 'sent', false, true, ['2025-01-01', '2025-03-31']],
+		['ein Entwurf', 'draft', false, false, ['2025-01-01', '2025-03-31']],
+		['versendet, mit dem Leistungszeitraum schon beim Erstellen', 'sent', true, false, ['2025-01-01', '2025-03-31']],
+		['versendet, mit einem Leistungszeitraum über die ganze Periode', 'sent', false, false, ['2025-01-01', '2025-12-31']]
+	] as const)('nennt eine Abrechnung nur, wenn sie %s', async (_, status, before, named, [servicePeriodStart, servicePeriodEnd]) => {
 		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-06-30' });
-		const quarter = { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-04-10', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-03-31' };
+		const quarter = { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-04-10', servicePeriodStart, servicePeriodEnd };
 		if (before) await insertInvoice(may.building, quarter);
 		const id = await sentStatement(may, status);
 		if (!before) await insertInvoice(may.building, quarter);

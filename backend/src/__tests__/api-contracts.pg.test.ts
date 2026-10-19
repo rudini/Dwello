@@ -75,6 +75,10 @@ beforeAll(async () => {
 		heatingProfileId: profile.id
 	});
 	statementId = ((await response.json()) as { id: string }).id;
+	// heating invoices of 2025 with and without a Leistungszeitraum: the check names the one without (#339)
+	const [heating] = await db.select({ id: categories.id }).from(categories).where(eq(categories.name, 'Heating'));
+	await insertInvoice(rental.building, { categoryId: heating.id, billingEntityName: 'Fernwärme AG', amount: '1520.00', invoiceDate: '2025-03-31' });
+	await insertInvoice(rental.building, { categoryId: heating.id, amount: '1410.00', invoiceDate: '2025-12-31', servicePeriodStart: '2025-10-01', servicePeriodEnd: '2025-12-31' });
 });
 
 afterAll(async () => {

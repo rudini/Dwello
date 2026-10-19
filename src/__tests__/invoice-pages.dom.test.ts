@@ -803,17 +803,22 @@ describe('Rechnung erfassen', () => {
 		);
 	});
 
-	// Eine Öllieferung ist Vorrat: ihr Verbrauch zählt über den Tankbestand, nicht über einen Leistungszeitraum
-	it('erklärt, wann ein Leistungszeitraum hingehört und wann nicht', () => {
-		show(NewInvoicePage, { data: data(false) } as never);
-		const help = text();
+	// Eine Öllieferung ist Vorrat: ihr Verbrauch zählt über den Tankbestand, die Lieferung ganz in der Periode ihres
+	// Liefertags, des Endes ihres Leistungszeitraums (#451, Fachreview M-1, V-14)
+	// the sentence on deliveries only at a Brennstoff category (Code-Review C-2, Fachreview V-20)
+	it('erklärt, wann ein Leistungszeitraum hingehört, auch bei einer Lieferung von Heizmaterial', () => {
+		const fuel = { id: 'c3', name: 'Heizöl', isAllowedUtilityCost: true, isFuel: true };
+		show(NewInvoicePage, { data: data(false, { categories: [...categories, fuel] }) } as never);
+		const delivery =
+			'Bei einer Lieferung von Heizöl, Flüssiggas, Pellets oder Holz zählt der Verbrauch über den Tankbestand des Gebäudes. Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.';
 
-		expect(help).toContain(
+		expect(text()).toContain(
 			'Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
 		);
-		expect(help).toContain(
-			'Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'
-		);
+		expect(text()).not.toContain('Nicht für Lieferungen von Heizöl');
+		expect(text()).not.toContain(delivery);
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c3');
+		expect(text()).toContain(delivery);
 	});
 
 	it('warnt ohne Abrechnungsperiode nicht', () => {

@@ -285,11 +285,12 @@ const withoutServicePeriod = (buildingId: string, from: string, to: string) =>
 		)
 		.orderBy(asc(invoices.invoiceDate));
 
-// The period's heating invoices outside the category of the building's tank, whose deliveries count by consumption
+// The period's heating invoices outside the category of the building's tank, whose deliveries count by consumption;
+// a tank decommissioned before the period shares its category by #71 again (#72)
 async function heatingInvoices(buildingId: string, period: Period) {
 	const tank = await periodReadings(buildingId, period.start, period.end);
 	const bills = await getInvoicesForStatement(buildingId, period.start, period.end);
-	return bills.filter((invoice) => invoice.category?.isHeatingCost && invoice.categoryId !== tank?.categoryId);
+	return bills.filter((invoice) => invoice.category?.isHeatingCost && !(tank?.covered && invoice.categoryId === tank.categoryId));
 }
 
 // #339: heating invoices without a Leistungszeitraum in a category whose other invoices have one; at a tenant change by
@@ -305,7 +306,8 @@ function withoutBesideWith(heating: Awaited<ReturnType<typeof heatingInvoices>>)
 // invoice line by the profile's months) while a heating invoice of the period has a Leistungszeitraum now: a new
 // statement of the same apartment counts the months in it, together they may bill more than the heating costs
 async function oldHeatingRule(buildingId: string, period: Period, heating: Awaited<ReturnType<typeof heatingInvoices>>) {
-	if (!heating.some((invoice) => invoice.servicePeriodStart)) return [];
+	// a Leistungszeitraum over the whole period shares by the profile's months of the period, as before
+	if (!heating.some((invoice) => invoice.inPeriod.start !== period.start || invoice.inPeriod.end !== period.end)) return [];
 	const sent = await db
 		.select({ id: utilityStatements.id, heatingShare: utilityStatements.heatingShare })
 		.from(utilityStatements)

@@ -49,10 +49,10 @@ Funktionalität: Neue Rechnung erfassen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
 
   # #451 (Fachreview M-1): eine Lieferung von Heizmaterial in den Tank zählt ganz in der Abrechnungsperiode ihres
-  # Lieferdatums, des Endes ihres Leistungszeitraums
-  @wip
+  # Lieferdatums, des Endes ihres Leistungszeitraums; der Satz steht bei einer Brennstoff-Kategorie (Code-Review C-2)
   Szenario: Der Leistungszeitraum erklärt die Lieferung von Heizmaterial
-    Dann erklärt das Formular beim Leistungszeitraum "Bei einer Lieferung von Heizmaterial: Tragen Sie als Leistungszeitraum den Tag der Lieferung ein."
+    Wenn der Liegenschaftsverwalter die Kategorie "Heizung" wählt
+    Dann erklärt das Formular beim Leistungszeitraum "Tragen Sie als Beginn und als Ende den Tag der Lieferung ein. Die Lieferung zählt dann ganz in der Abrechnungsperiode dieses Tages, auch wenn die Rechnung erst später kommt."
 
   # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)
   Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre

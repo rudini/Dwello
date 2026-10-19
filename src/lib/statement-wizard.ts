@@ -325,6 +325,14 @@ export const changedNotes = ({ outdated, profile, profileEdited, fee, oldRule, t
 		oldRule && m.statements_existing_old_heating_rule({ tenant: tenantName })
 	].filter(Boolean) as string[];
 
+/** The hint on heating invoices without Leistungszeitraum beside ones with (#339): its categories, each quoted (V-15) */
+export function heatingWholeText(rows: { invoices: { categoryName?: string }[] }[]) {
+	const names = [...new Set(rows.flatMap((row) => row.invoices.map((invoice) => invoice.categoryName ?? '')))];
+	if (names.length === 1) return m.statements_heating_whole_text({ category: names[0] });
+	const categories = new Intl.ListFormat(`${getLocale()}-CH`).format(names.map((name) => m.statements_heating_category({ name })));
+	return m.statements_heating_whole_text_many({ categories });
+}
+
 /** Where the run can choose the settings of the existing statements, when it differs from them in one it chooses */
 export const sameSettingsNote = (changed: ChangedStatement[]) =>
 	changed.some((s) => s.profile || s.fee?.source === 'run')

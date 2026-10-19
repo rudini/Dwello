@@ -5,7 +5,7 @@
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
-	import { plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
+	import { isFuel, plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -130,6 +130,7 @@
 			testid="invoice-number-input"
 		/>
 		<InvoiceDataFields
+			fuel={isFuel(data.categories, values.categoryId)}
 			bind:buildingId={values.buildingId}
 			bind:invoiceDate={values.invoiceDate}
 			bind:servicePeriodStart={values.servicePeriodStart}

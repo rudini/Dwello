@@ -5,6 +5,7 @@
 	import { localToday } from '$lib/contract-status';
 	import { api } from '$lib/api';
 	import {
+		isFuel,
 		plainAmount,
 		servicePeriodOf,
 		suggestionProvenance,
@@ -142,6 +143,7 @@
 
 	<Panel title={m.invoices_data()}>
 		<InvoiceDataFields
+			fuel={isFuel(data.categories, categoryId)}
 			bind:buildingId
 			bind:invoiceDate
 			bind:servicePeriodStart

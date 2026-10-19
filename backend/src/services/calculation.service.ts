@@ -14,7 +14,7 @@ import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { statementNumbers, utilityStatements, type BilledInvoice, type HeatingProfile, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
-import { fuelStockChange, periodReadings } from './fuel-stock.service';
+import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
 import {
@@ -197,21 +197,19 @@ async function byRunProfile(group: InvoiceGroup, apartmentShare: number, run: Gr
 	return result.byDays ? null : result;
 }
 
-type GroupRun = { contract: { startDate: string; endDate: string | null; billedUntil: string | null }; periodStart: Date; periodEnd: Date; heatingProfileId?: string; tankCategory: string | null; wholePeriod: boolean };
+type GroupRun = { contract: { startDate: string; endDate: string | null; billedUntil: string | null }; periodStart: Date; periodEnd: Date; heatingProfileId?: string; wholePeriod: boolean };
 
 // The tenant's part of a group: heating costs by the Heizprofil if available, where it shares by days (no heating
 // months in the period) by days like any other invoice's, with its Leistungszeitraum (#137); a heating invoice with its
-// own days counts the profile's months in them, not in the period (#71). In the category of the building's tank the
-// consumption counts over the whole period, by the profile or by days, whatever a delivery's Leistungszeitraum (#257)
+// own days counts the profile's months in them, not in the period (#71). A delivery into the building's tank comes with
+// the whole period from getInvoicesForStatement: the consumption counts over it, by the profile or by days (#257, #451)
 async function shareOfGroup(
-	invoiceGroup: InvoiceGroup,
+	group: InvoiceGroup,
 	apartment: { share: number; percentage: number },
 	run: GroupRun,
 	rental: { start: string; end: string }
 ): Promise<{ tenantShare: number; periodShare: number; shareDays: LineDays }> {
 	const [start, end] = [isoDay(run.periodStart), isoDay(run.periodEnd)];
-	const tank = !!run.tankCategory && invoiceGroup.categoryId === run.tankCategory;
-	const group = tank ? { ...invoiceGroup, invoices: invoiceGroup.invoices.map((invoice) => ({ ...invoice, start, end, whole: undefined })) } : invoiceGroup;
 	const heating = await byRunProfile(group, apartment.share, run);
 	const ownDays = group.invoices.some((invoice) => invoice.start !== start || invoice.end !== end);
 	// shared by the profile over the period: no days
@@ -384,16 +382,11 @@ export async function calculateStatementForContract(
 		rooms: parseFloat(a.rooms)
 	}));
 
-	// a delivery into the building's tank counts by consumption over the period, not by its Leistungszeitraum (#257);
-	// not after the tank was decommissioned (#72)
-	const tank = await periodReadings(buildingId, start, end);
-	const tankCategory = tank?.covered ? tank.categoryId : null;
-
 	// Calculate line items
 	const heating = await heatingOfRun(invoiceGroups, contract, periodStart, periodEnd, heatingProfileId);
 	const lineItems: CalculatedLineItem[] = [];
 	let subtotal = 0;
-	const run = { contract, periodStart, periodEnd, heatingProfileId, tankCategory, wholePeriod: rentalDays === totalPeriodDays };
+	const run = { contract, periodStart, periodEnd, heatingProfileId, wholePeriod: rentalDays === totalPeriodDays };
 	const rental = { start: isoDay(contractOverlap.overlapStart), end: isoDay(contractOverlap.overlapEnd) };
 
 	for (const group of invoiceGroups) {

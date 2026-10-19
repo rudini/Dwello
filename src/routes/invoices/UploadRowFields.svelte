@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { fieldNote, fileType, type UploadRow } from '$lib/invoice-upload';
+	import { isFuel } from '$lib/invoice';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import type { Category } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -70,6 +71,7 @@
 			testid="invoice-upload-invoice-number-input"
 		/>
 		<InvoiceDataFields
+			fuel={isFuel(categories, row.values.categoryId)}
 			idPrefix={prefix}
 			chooseBuilding={false}
 			buildingId=""

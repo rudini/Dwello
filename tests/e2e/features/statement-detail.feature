@@ -411,7 +411,6 @@ Funktionalität: Abrechnungsdetail
   # Anteil folgt aus den gedruckten Monaten, 47.68 / 50.00 = 95.36 %, also CHF 953.60 (aus den ungerundeten Monaten
   # wären es 95.35 % und CHF 953.55) (#232); der angebrochene Januar steht mit seinem Bruch, und die Erläuterung sagt,
   # dass der Prozentwert gerundet ist (#451, Punkt 3)
-  @wip
   Szenario: PDF rechnet den Anteil nach dem Heizprofil aus den gedruckten Monatsanteilen
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und das Gebäude "Rosenhof" in "Winterthur" existiert
@@ -434,7 +433,6 @@ Funktionalität: Abrechnungsdetail
   # (ab Mai) trägt nichts von Januar bis März und 52 % der Rechnung über das ganze Jahr; der Satz zum Heizprofil gilt
   # nur für die Rechnung ohne Leistungszeitraum (Fachreview 1, M-1); die Berechnung nennt den Zeitanteil, die Rechnung
   # ohne Leistungszeitraum sagt, dass sie für die ganze Periode gilt, und heisst nach ihrem Rechnungsdatum (#451, Punkt 3)
-  @wip
   Szenario: PDF nennt bei Heizkosten mit Leistungszeitraum die Monate des Heizprofils jeder Rechnung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10" für die Zeit vom "2024-01-01" bis "2024-03-31"
@@ -452,7 +450,6 @@ Funktionalität: Abrechnungsdetail
   # Beträgen gewichtet, (600 × 0/91 + 1200 × 47/92) / 1800 = 34.06 % (der Mittelwert der Brüche wäre 25.54 %); das PDF
   # nennt jede Rechnung mit ihren Tagen und die Berechnung, die zu Ihrem Anteil führt: 900.00 × (…) / 1'800.00 = 306.52
   # (#226; Beschriftung und Erläuterung #241; «Zeitanteil» in der Berechnung #451, Punkt 3)
-  @wip
   Szenario: PDF nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -473,7 +470,6 @@ Funktionalität: Abrechnungsdetail
   # zuordnen: eine Rechnung ohne Leistungszeitraum (sie gilt für die ganze Abrechnungsperiode) und zwei Rechnungen über
   # denselben Leistungszeitraum und Betrag; die Rechnung über April bis Juni ist eindeutig und bleibt ohne (#236). Die
   # Zeile beginnt mit Rechnungsdatum und Rechnungsnummer wie auf dem Beleg, nicht mit der Beschreibung (#451, Punkt 3, V-8)
-  @wip
   Szenario: PDF nennt die Rechnung, wenn Daten und Betrag sie nicht unterscheiden
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -497,7 +493,6 @@ Funktionalität: Abrechnungsdetail
 
   # Ein Leistungszeitraum über das Ende der Periode hinaus: die Rechnung nennt ihre Tage und die Tage in der Periode,
   # 765.00 × 92/123 = 572.20; davon trägt Lea Graf (ab 15. August) alle 92 Tage (#451, Punkt 3)
-  @wip
   Szenario: PDF nennt bei einem Leistungszeitraum über die Periode hinaus die Tage der Rechnung und die Tage in der Periode
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -514,7 +509,6 @@ Funktionalität: Abrechnungsdetail
   # Heizkosten ohne Heizprofil nach Tagen, mit Tank: abgerechnet wird der Verbrauch der ganzen Periode, 600 + 900 - 100
   # = 1'400; auch die Lieferung mit Leistungszeitraum Juli bis September zählt nach den Mietstagen der Periode, 139 von
   # 365 Tagen (#451, Punkt 2; #257)
-  @wip
   Szenario: Heizöl aus dem Tank steht im PDF nach den Mietstagen der Periode, auch mit Leistungszeitraum der Lieferung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -564,7 +558,6 @@ Funktionalität: Abrechnungsdetail
     Dann nennt die Abrechnung das Heizprofil "Winter"
 
   # #280: eine Abrechnung ohne Heizkosten wendet kein Heizprofil an und nennt keines, auch im PDF (#451, Punkt 8)
-  @wip
   Szenario: Abrechnung ohne Heizkosten nennt kein Heizprofil
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und das Gebäude "Rosenhof" in "Winterthur" existiert

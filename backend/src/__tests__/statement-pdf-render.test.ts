@@ -477,9 +477,9 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 	];
 	it.each([
 		['de', 'Rechnung ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 600.00, Ihre Mietstage 139 von 365 Tagen', "Leistungszeitraum 01.11.2025 – 31.01.2026 (Rechnung CHF 1'200.00 für 92 Tage), davon 01.11.2025 – 31.12.2025 (61 Tage): CHF 795.65, Ihre Mietstage 61 von 61 Tagen"],
-		['fr', 'Facture sans période de prestation, valable pour toute la période de décompte : CHF 600.00, 139 jours de location sur 365 jours de la période de décompte', "Période de prestation 01.11.2025 – 31.01.2026 (facture de CHF 1'200.00 pour 92 jours), dont 01.11.2025 – 31.12.2025 (61 jours) : CHF 795.65, 61 jours de location sur 61"],
-		['it', 'Fattura senza periodo di prestazione, vale per l’intero periodo di conteggio: CHF 600.00, 139 giorni di locazione su 365 giorni del periodo di conteggio', "Periodo di prestazione 01.11.2025 – 31.01.2026 (fattura di CHF 1'200.00 per 92 giorni), di cui 01.11.2025 – 31.12.2025 (61 giorni): CHF 795.65, 61 giorni di locazione su 61"],
-		['en', 'Invoice without a service period, applies to the whole billing period: CHF 600.00; your days rented: 139 of the 365 days in the billing period', "Service period 01.11.2025 – 31.01.2026 (invoice of CHF 1'200.00 for 92 days), of which 01.11.2025 – 31.12.2025 (61 days): CHF 795.65; your days rented: 61 of 61"]
+		['fr', 'Facture sans période de prestation, valable pour toute la période de décompte : CHF 600.00, 139 jours de location sur 365 jours', "Période de prestation 01.11.2025 – 31.01.2026 (facture de CHF 1'200.00 pour 92 jours), dont 01.11.2025 – 31.12.2025 (61 jours) : CHF 795.65, 61 jours de location sur 61"],
+		['it', 'Fattura senza periodo di prestazione, vale per l’intero periodo di conteggio: CHF 600.00, 139 giorni di locazione su 365 giorni', "Periodo di prestazione 01.11.2025 – 31.01.2026 (fattura di CHF 1'200.00 per 92 giorni), di cui 01.11.2025 – 31.12.2025 (61 giorni): CHF 795.65, 61 giorni di locazione su 61"],
+		['en', 'Invoice without a service period, applies to the whole billing period: CHF 600.00; your days rented: 139 of 365 days', "Service period 01.11.2025 – 31.01.2026 (invoice of CHF 1'200.00 for 92 days), of which 01.11.2025 – 31.12.2025 (61 days): CHF 795.65; your days rented: 61 of 61"]
 	] as const)('nennt eine Rechnung ohne und eine über die Periode hinaus auf %s als solche', async (language, without, beyond) => {
 		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: special, tenantShare: 512.08 }] };
 		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
@@ -490,9 +490,9 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 	// #236: eine Zeile ohne Leistungszeitraum nennt ihre Rechnung, in jeder Sprache; die eindeutige nicht
 	it.each([
 		['de', 'Rechnung vom 30.09.2025 (Nr. SR-2025-17) ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 600.00, Ihre Mietstage 139 von 365 Tagen'],
-		['fr', 'Facture du 30.09.2025 (n° SR-2025-17) sans période de prestation, valable pour toute la période de décompte : CHF 600.00, 139 jours de location sur 365 jours de la période de décompte'],
-		['it', 'Fattura del 30.09.2025 (n. SR-2025-17) senza periodo di prestazione, vale per l’intero periodo di conteggio: CHF 600.00, 139 giorni di locazione su 365 giorni del periodo di conteggio'],
-		['en', 'Invoice dated 30.09.2025 (no. SR-2025-17) without a service period, applies to the whole billing period: CHF 600.00; your days rented: 139 of the 365 days in the billing period']
+		['fr', 'Facture du 30.09.2025 (n° SR-2025-17) sans période de prestation, valable pour toute la période de décompte : CHF 600.00, 139 jours de location sur 365 jours'],
+		['it', 'Fattura del 30.09.2025 (n. SR-2025-17) senza periodo di prestazione, vale per l’intero periodo di conteggio: CHF 600.00, 139 giorni di locazione su 365 giorni'],
+		['en', 'Invoice dated 30.09.2025 (no. SR-2025-17) without a service period, applies to the whole billing period: CHF 600.00; your days rented: 139 of 365 days']
 	] as const)('nennt die Rechnung einer Zeile ohne Leistungszeitraum auf %s', async (language, line) => {
 		const named = [{ ...special[0], description: 'Hauswartung Q3', invoiceDate: '2025-09-30', invoiceNumber: 'SR-2025-17' }, { ...special[1], description: 'Hauswartung Winter', invoiceDate: '2026-02-05' }];
 		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: named, tenantShare: 512.08 }] };

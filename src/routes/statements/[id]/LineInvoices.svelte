@@ -25,14 +25,13 @@
 		return m.statements_part_line(values);
 	}
 
-	const share = $derived(
-		m.statements_part_share({
-			apartment: number(item.apartmentShare ?? 0),
-			sum: parted.map((invoice) => `${number(invoice.amount)} × ${invoice.part!.days}/${invoice.part!.total}`).join(' + '),
-			costs: number(item.totalAmount),
-			share: number(item.tenantShare)
-		})
-	);
+	// invoices summing to zero: their parts times the apartment's share by the key, as the PDF (#237)
+	const share = $derived.by(() => {
+		const sum = parted.map((invoice) => `${number(invoice.amount)} × ${invoice.part!.days}/${invoice.part!.total}`).join(' + ');
+		if (item.totalAmount === 0) return m.statements_part_share_zero({ sum, share: number(item.tenantShare) });
+		const values = { apartment: number(item.apartmentShare ?? 0), costs: number(item.totalAmount) };
+		return m.statements_part_share({ ...values, sum, share: number(item.tenantShare) });
+	});
 </script>
 
 {#if item.invoices.length}

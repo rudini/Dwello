@@ -343,8 +343,8 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		}) as typeof globalThis.fetch;
 
 		expect(await invoicesInPeriod(fetch, { ...period, buildingIds: ['b1', 'b2'] })).toEqual([
-			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1' }, changed: [] },
-			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2' }, changed: [] }
+			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1', heatingWithoutServicePeriod: [] }, changed: [] },
+			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2', heatingWithoutServicePeriod: [] }, changed: [] }
 		]);
 		// each category compared with the same dates one year earlier
 		expect(urls).toContain(`${API}/invoices/completeness/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
@@ -392,19 +392,22 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		['nicht bei einem Mietvertrag über die ganze Periode', [contract('ganz', '2020-01-01', null)], 'hp1', 0],
 		['nicht ohne Heizprofil', [contract('einzug', '2024-05-01', null)], '', 0]
 	] as const)('nennt Heizrechnungen ohne Leistungszeitraum neben solchen mit %s', async (_, inBuilding, heatingProfileId, count) => {
-		const hinted = { ...invoiceCompleteness.lateInvoices[0], invoiceDate: '2024-03-31' };
+		const [hinted] = invoiceCompleteness.heatingWithoutServicePeriod;
 		const fetch = (async (url: string) =>
 			url.includes('/invoices/completeness/')
-				? Response.json({ ...invoiceCompleteness, heatingWithoutServicePeriod: [hinted] })
+				? Response.json(invoiceCompleteness)
 				: url.includes('/contracts?')
 					? Response.json({ contracts: inBuilding })
 					: url.includes('/statements?')
 						? Response.json({ ...statements, data: [] })
-						: Response.json([])) as typeof globalThis.fetch;
+						: url.includes('/categories')
+							? Response.json({ categories: [{ ...category, id: hinted.categoryId, nameDE: 'Heizung' }] })
+							: Response.json([])) as typeof globalThis.fetch;
 
 		const [row] = await invoicesInPeriod(fetch, { ...period, heatingProfileId });
 
-		expect(row.check?.heatingWithoutServicePeriod).toEqual(count ? [{ ...hinted, categoryName: '' }] : []);
+		// named by its category in the UI language
+		expect(row.check?.heatingWithoutServicePeriod).toEqual(count ? [{ ...hinted, categoryName: 'Heizung' }] : []);
 	});
 });
 
