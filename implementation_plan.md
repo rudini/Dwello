@@ -11,6 +11,6 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] @wip scenario: «Weiter» after the check failed says why the wizard waits (`statement-agreed-costs.feature`)
 - [x] DOM test: the same while the check loads (`agreed-costs.dom.test.ts`)
 - [x] Message in `AgreedCosts.svelte`, text in all four languages; axe and language state `agreements-failed` clicks «Weiter» too
-- [ ] Slice review
+- [x] Slice review round 1 (`docs/reviews/439-review-1.md`)
 - [ ] Feature review (persona)
 - [ ] PR `Fixes #439`
