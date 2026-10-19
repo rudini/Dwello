@@ -23,12 +23,15 @@ const pdf = (name: string) => new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 
 const word = new File([new Uint8Array([0x50, 0x4b, 3, 4])], 'notizen.docx');
 const read = { ...extraction, duplicateOf: null, deductedAmount: null };
 
-function open(answer: Parameters<typeof fakeBff>[0]) {
+function open(
+	answer: Parameters<typeof fakeBff>[0],
+	list: { id: string; tank?: string }[] = buildings
+) {
 	const calls = fakeBff(answer);
 	const oncreated = vi.fn();
 	show(InvoiceUploadDialog, {
 		open: true,
-		buildings,
+		buildings: list as typeof buildings,
 		categories: categories as never,
 		distributionKeys: [{ id: 'k1', name: 'Nach Fläche' }],
 		defaultDistributionKeyId: 'k1',
@@ -144,6 +147,18 @@ describe('Rechnungen hochladen', () => {
 		click('invoice-upload-row-toggle');
 		expect(byTestId('invoice-service-period-help')!.textContent).toContain(
 			'Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre.'
+		);
+	});
+
+	// #451, M-1 (Code-Review C-19): in the category of the chosen building's tank the help explains the delivery day
+	it('erklärt beim Leistungszeitraum den Tag der Lieferung in der Kategorie des Tanks im Gebäude', async () => {
+		open(() => [200, read], [{ ...buildings[0], tank: 'c1' }, buildings[1]]);
+		chooseBuilding();
+		await upload(pdf('heizoel.pdf'));
+		click('invoice-upload-row-toggle');
+		// the KI chose c1, the category of the tank in Seeblick
+		expect(byTestId('invoice-service-period-help')!.textContent).toContain(
+			'Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.'
 		);
 	});
 
