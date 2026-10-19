@@ -14,7 +14,7 @@ import {
 	managementFeeOfContract,
 	missingStatementsText,
 	missingStatementsShown,
-	missingStatementOffered,
+	missingStatementOffer,
 	billedUntilOfContract,
 	nextStepsText,
 	statementLinkedInDeleteDialog,
@@ -249,15 +249,14 @@ Then(
 	}
 );
 
-Then(
-	'bietet der Mietvertrag für die Tage ab {string} keine Abrechnung zum Erstellen an',
-	async ({ verwalter }, periodStart: string) => {
-		await verwalter.sees(missingStatementsShown).toBe(true);
-		await verwalter.sees(missingStatementOffered(periodStart)).toBe(false);
-		// nor the whole period it lies in (Fachreview 2 V-12)
-		await verwalter.sees(missingStatementOffered(`${periodStart.slice(0, 4)}-01-01`)).toBe(false);
-	}
-);
+// #408 point 2: the way the warning offers for the days from that day, by its label
+Then('bietet der Mietvertrag für die Tage ab {string} {string} an', async ({ verwalter }, periodStart: string, label: string) => {
+	await verwalter.sees(missingStatementOffer(periodStart)).toBe(label);
+});
+
+When('der Liegenschaftsverwalter die fehlende Abrechnung ab {string} erstellen will', async ({ verwalter }, periodStart: string) => {
+	await verwalter.attemptsTo(createMissingStatement(periodStart));
+});
 
 Then('nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg', async ({ verwalter }) => {
 	await verwalter.sees(missingStatementsShown).toBe(true);

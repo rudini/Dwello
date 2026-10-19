@@ -3,6 +3,7 @@ import type { Activity } from '../screenplay/actor';
 import { Check, Click, DownloadFrom, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import {
+	offeredPeriodLink,
 	agreementsRetry,
 	allBuildingsCheckbox,
 	backLink,
@@ -46,6 +47,7 @@ export const openStatementWizardFor = (buildingId: string, year: number) =>
 // Steps "Abrechnungsperiode" (default period) and "Gebäude"
 // once the step has loaded what it tells about each building: later text would move the rows under the click
 // (Firefox, #424)
+export const chooseOfferedPeriod = (buildingId: string, periodStart: string) => Click.on(offeredPeriodLink(buildingId, periodStart));
 export const chooseBuilding = (buildingId: string): Activity => (actor) =>
 	actor.attemptsTo(
 		goToNextStep,

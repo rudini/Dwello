@@ -43,7 +43,7 @@ export const endConfirmationInWindow = question(
 export const missingStatementsText = Text.of(missingStatements);
 export const missingStatementsShown = Visibility.of(missingStatements);
 // the way into the wizard for the missing days from that day on
-export const missingStatementOffered = (periodStart: string) => Visibility.of(missingStatementLink(periodStart));
+export const missingStatementOffer = (periodStart: string) => Text.of(missingStatementLink(periodStart));
 export const managementFeeOfContract = Text.of(contractManagementFee);
 export const billedUntilOfContract = Text.of(contractBilledUntil); // #133
 export const endDialogDeathText = Text.of(endDialogDeathHint);

@@ -250,16 +250,48 @@ Funktionalität: Mietvertragsdetail
     Dann zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres
     Und meldet der Mietvertrag keine fehlende Abrechnung
 
-  # #199: eine Abrechnung, die die Periode teilweise abdeckt, zählt; es fehlen nur die Mietstage ohne Abrechnung
+  # #199: eine Abrechnung, die die Periode teilweise abdeckt, zählt; es fehlen nur die Mietstage ohne Abrechnung.
+  # #408 Punkt 2: Tage, die keine Abrechnung des Gebäudes abdeckt, rechnet eine kurze Abrechnungsperiode ab
+  @wip
   Szenario: Teilweise abgerechnete Periode am Mietvertrag
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann meldet der Mietvertrag die fehlende Abrechnung "01.10.2024 – 31.12.2024"
-    # #408: eine kürzere Abrechnungsperiode für diese Tage ist noch nicht entschieden
     Und erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt
-    Und bietet der Mietvertrag für die Tage ab "2024-10-01" keine Abrechnung zum Erstellen an
+    Und bietet der Mietvertrag für die Tage ab "2024-10-01" "Kurze Abrechnungsperiode 01.10.2024 – 31.12.2024 abrechnen" an
     # Fachreview 2 V-9: «Abgerechnet bis» würde die bestehende Abrechnung ändern
     Und nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg
+
+  @wip
+  Szenario: Kurze Abrechnungsperiode am Mietvertrag abrechnen
+    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die fehlende Abrechnung ab "2024-10-01" erstellen will
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" vom "2024-10-01" bis "2024-12-31"
+
+  # #408 Punkt 2: Tage in der Periode einer bestehenden Abrechnung des Gebäudes rechnet genau diese Periode ab,
+  # die übrigen Tage eine kurze Abrechnungsperiode für alle Mietverträge des Gebäudes
+  @wip
+  Szenario: Fehlende Tage in der Abrechnungsperiode eines anderen Mietvertrags
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Ben Meier" existiert
+    Und "Ben Meier" mietete die Wohnung "2.02" von "2023-07-01" bis "2024-06-30" für "900" Franken
+    Und für "Ben Meier" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann meldet der Mietvertrag die fehlende Abrechnung "01.04.2024 – 30.06.2024"
+    Und meldet der Mietvertrag die fehlende Abrechnung "01.07.2024 – 31.12.2024"
+    Und bietet der Mietvertrag für die Tage ab "2024-04-01" "Abrechnungsperiode 01.07.2023 – 30.06.2024 wählen" an
+    Und bietet der Mietvertrag für die Tage ab "2024-07-01" "Kurze Abrechnungsperiode 01.07.2024 – 31.12.2024 abrechnen" an
+
+  @wip
+  Szenario: Von fehlenden Tagen zur Abrechnungsperiode eines anderen Mietvertrags
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Ben Meier" existiert
+    Und "Ben Meier" mietete die Wohnung "2.02" von "2023-07-01" bis "2024-06-30" für "900" Franken
+    Und für "Ben Meier" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die fehlende Abrechnung ab "2024-04-01" erstellen will
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" vom "2023-07-01" bis "2024-06-30"
 
   # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode
   Szenario: Rechnungen der fehlenden Periode anzeigen
