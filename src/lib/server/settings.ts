@@ -55,13 +55,18 @@ const RULES: [keyof Settings, (value: string) => boolean, () => string][] = [
 	['reminderAfterDays', (v) => days(v, 7, 60), m.settings_error_reminder_days]
 ];
 
-const settingsErrors = (s: Settings): Record<string, string> =>
-	Object.fromEntries(
+function settingsErrors(s: Settings): Record<string, string> {
+	const errors = Object.fromEntries(
 		RULES.filter(([field, valid]) => s[field] && !valid(s[field])).map(([field, , message]) => [
 			field,
 			message()
 		])
 	);
+	// the QR-bill names the landlord as creditor (#450), as the backend checks it
+	if (s.iban && !errors.iban && !(s.companyName && s.companyPostalCode && s.companyCity))
+		errors.iban = m.backend_iban_company_address_missing();
+	return errors;
+}
 
 /** Saves filled values and resets emptied ones to their default */
 export async function saveSettings(fetch: typeof globalThis.fetch, request: Request) {

@@ -21,6 +21,7 @@ import { configuration, type Configuration } from '../db/schema';
 import { heatingProfileExists } from './heating-profile.service';
 import { distributionKeyExists } from './distribution-key.service';
 import { recordAudit } from './audit-log.service';
+import { CodedError } from './coded-error';
 
 /**
  * Configuration keys with their types and validators
@@ -184,11 +185,20 @@ async function validateConfig(key: ConfigKey, value: string) {
 	}
 }
 
+/** An IBAN only with name, postal code and town of the Firmenadresse, as saved or now changed: the QR-bill names the landlord (#450) */
+async function checkCreditor(changes: Partial<Record<ConfigKey, string>>) {
+	const stored = await getAllConfig();
+	const value = (key: ConfigKey) => (changes[key] ?? stored[key] ?? '').trim();
+	if (value('iban') && !(['company_name', 'company_postal_code', 'company_city'] as const).every(value))
+		throw new CodedError('IBAN_COMPANY_ADDRESS_MISSING', 'An IBAN needs the company name, postal code and town');
+}
+
 /**
  * Set a configuration value
  */
 export async function setConfig(key: ConfigKey, value: string): Promise<Configuration> {
 	await validateConfig(key, value);
+	await checkCreditor({ [key]: value });
 	return saveConfig(db, key, value);
 }
 
@@ -234,6 +244,7 @@ export async function setMultipleConfig(
 
 	// All or nothing: one invalid value, or a write that fails, keeps the others unsaved
 	if (Object.keys(errors).length === 0) {
+		await checkCreditor(configs);
 		await db.transaction(async (tx) => {
 			for (const [key, value] of Object.entries(configs)) {
 				if (value !== undefined) await saveConfig(tx, key as ConfigKey, value);

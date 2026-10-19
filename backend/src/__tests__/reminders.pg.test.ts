@@ -535,4 +535,20 @@ describe('Zahlteil der Mahnung', () => {
 			if (city) await setConfig('company_city', city);
 		}
 	});
+
+	// Fachreview V-1: eine Mahnung von vorher, noch «Zu versenden», entsteht beim Markieren neu; die Ablehnung sagt, was fehlt
+	it('lehnt das Markieren einer Mahnung ohne vollständige Firmenadresse mit dem Code ab', async () => {
+		const city = await getConfig('company_city');
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const letter = (await remind(await statement('sent'))).document;
+		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		try {
+			const response = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+
+			expect(response.status).toBe(400);
+			expect(await response.json()).toEqual(await Bun.file(`${import.meta.dir}/../../../tests/contracts/statement-pdf-creditor-refused.json`).json());
+		} finally {
+			if (city) await setConfig('company_city', city);
+		}
+	});
 });

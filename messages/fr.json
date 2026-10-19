@@ -486,6 +486,8 @@
 	"backend_contract_overlap": "La période chevauche un autre contrat de bail de cet appartement.",
 	"backend_contract_not_in_period": "Le contrat de bail ne se situe pas dans la période de décompte. Choisissez une autre période.",
 	"backend_iban_missing": "Aucun IBAN n’est enregistré. Saisissez l’IBAN dans les paramètres.",
+	"backend_iban_company_address_missing": "Avec un IBAN, l’adresse de l’entreprise est nécessaire. Saisissez le nom, le NPA et la localité.",
+	"backend_creditor_address_missing": "Il manque l’adresse de l’entreprise pour la section paiement. Complétez le nom, le NPA et la localité sous « Paramètres ».",
 	"backend_iban_invalid": "L’IBAN enregistré n’est pas valable. Vérifiez l’IBAN dans les paramètres.",
 	"backend_pdf_failed": "Le PDF n’a pas pu être créé. Réessayez plus tard.",
 	"backend_calculation_failed": "Le décompte n’a pas pu être calculé. Réessayez plus tard.",

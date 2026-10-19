@@ -39,7 +39,6 @@ Funktionalität: Einstellungen
 
   # #450 (Entscheid in #404, Punkt 8): der Zahlteil nennt den Liegenschaftsverwalter als Zahlungsempfänger, nie
   # einen erfundenen. Die Seite speichert dabei nichts
-  @wip
   Szenario: IBAN ohne Firmenadresse
     Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
       | Firmenname |                            |

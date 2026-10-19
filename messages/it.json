@@ -486,6 +486,8 @@
 	"backend_contract_overlap": "Il periodo si sovrappone a un altro contratto di locazione di questo appartamento.",
 	"backend_contract_not_in_period": "Il contratto di locazione non rientra nel periodo di conteggio. Scelga un altro periodo.",
 	"backend_iban_missing": "Non è registrato alcun IBAN. Registri l’IBAN nelle impostazioni.",
+	"backend_iban_company_address_missing": "Con un IBAN serve l’indirizzo dell’azienda. Registri il nome, il NPA e la località.",
+	"backend_creditor_address_missing": "Per la sezione pagamento manca l’indirizzo dell’azienda. Completi il nome, il NPA e la località sotto «Impostazioni».",
 	"backend_iban_invalid": "L’IBAN registrato non è valido. Verifichi l’IBAN nelle impostazioni.",
 	"backend_pdf_failed": "Non è stato possibile creare il PDF. Riprovi più tardi.",
 	"backend_calculation_failed": "Non è stato possibile calcolare il conteggio. Riprovi più tardi.",

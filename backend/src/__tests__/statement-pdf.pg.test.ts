@@ -819,17 +819,18 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 // erfundenen. Eine Installation von vorher kann eine IBAN ohne Ort der Firmenadresse haben
 describe('PDF ohne vollständige Firmenadresse', () => {
 	const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
-	const withoutCity = async (test: (id: string) => Promise<void>) => {
+	const without = (key: 'company_city' | 'company_address') => async (test: (id: string) => Promise<void>) => {
 		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
-		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		await db.delete(configuration).where(eq(configuration.key, key));
 		try {
 			await test(statement.id);
 		} finally {
-			await setConfig('company_city', company.company_city);
+			await setConfig(key, company[key]);
 			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statement.id));
 			await deleteStatement(statement.id);
 		}
 	};
+	const withoutCity = without('company_city');
 
 	it('lehnt ein PDF mit Zahlteil ab und sagt, was fehlt', () =>
 		withoutCity(async (id) => {
@@ -845,7 +846,20 @@ describe('PDF ohne vollständige Firmenadresse', () => {
 			await updateStatementStatus(id, 'paid', { paidDate: today });
 
 			const response = await sendJson('POST', `/api/v1/statements/${id}/generate-pdf`, {});
+			const text = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
 
 			expect(response.status).toBe(200);
+			expect(text).toContain('Muster Immobilien AG');
+			expect(text).not.toContain('8001 Zürich'); // no town stands in for the missing one (Fachreview V-3)
+		}));
+
+	// Fachreview V-2: die Adresse (Strasse) bleibt freiwillig; Kopfzeile und Belegeinsicht nennen nur, was erfasst ist
+	it('nennt ohne Adresse den Absender ohne leere Teile', () =>
+		without('company_address')(async (id) => {
+			await generateStatementPdf(id, 'de');
+			const text = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
+
+			expect(text).toContain('Muster Immobilien AG · 8001 Zürich');
+			expect(text).toContain('Melden Sie sich dafür bei Muster Immobilien AG, 8001 Zürich');
 		}));
 });

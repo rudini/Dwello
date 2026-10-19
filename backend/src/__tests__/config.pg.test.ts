@@ -6,7 +6,7 @@ import { afterAll, describe, expect, it } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
-import { sendJson } from './helpers/auth';
+import { callApi, sendJson } from './helpers/auth';
 
 const iban = await getConfig('iban');
 const companyName = await getConfig('company_name');
@@ -97,6 +97,7 @@ describe('Einstellungen speichern', () => {
 		await deleteConfig('company_name');
 		try {
 			const refused = await sendJson('PUT', '/api/v1/config', { company_city: 'Winterthur', iban: 'CH93 0076 2011 6238 5295 7' });
+			const blank = await sendJson('PUT', '/api/v1/config', { company_name: '  ', iban: 'CH93 0076 2011 6238 5295 7' });
 			const withName = await sendJson('PUT', '/api/v1/config', {
 				company_name: 'Muster Immobilien AG',
 				iban: 'CH93 0076 2011 6238 5295 7'
@@ -105,6 +106,7 @@ describe('Einstellungen speichern', () => {
 			expect(refused.status).toBe(400);
 			expect(await refused.json()).toMatchObject({ code: 'IBAN_COMPANY_ADDRESS_MISSING' });
 			expect(await getConfig('company_city')).toBe(companyCity);
+			expect(blank.status).toBe(400);
 			expect(withName.status).toBe(200);
 		} finally {
 			if (name) await setConfig('company_name', name);
@@ -119,9 +121,13 @@ describe('Einstellungen speichern', () => {
 		await db.execute(sql`DELETE FROM configuration WHERE key = 'company_name'`);
 		try {
 			const response = await sendJson('PUT', '/api/v1/config', { payment_deadline_days: '30' });
+			// the way out without a Firmenadresse: the emptied IBAN is reset (Fachreview V-5)
+			const reset = await callApi('/api/v1/config/iban', { method: 'DELETE' });
+			const afterReset = await sendJson('PUT', '/api/v1/config', { payment_deadline_days: '30' });
 
 			expect(response.status).toBe(400);
 			expect(await response.json()).toMatchObject({ code: 'IBAN_COMPANY_ADDRESS_MISSING' });
+			expect([reset.status, afterReset.status]).toEqual([200, 200]);
 		} finally {
 			if (name) await setConfig('company_name', name);
 		}

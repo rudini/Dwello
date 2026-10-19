@@ -486,6 +486,8 @@
 	"backend_contract_overlap": "Der Zeitraum überschneidet sich mit einem anderen Mietvertrag dieser Wohnung.",
 	"backend_contract_not_in_period": "Der Mietvertrag liegt nicht in der Abrechnungsperiode. Wählen Sie eine andere Periode.",
 	"backend_iban_missing": "Es ist keine IBAN hinterlegt. Erfassen Sie die IBAN in den Einstellungen.",
+	"backend_iban_company_address_missing": "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.",
+	"backend_creditor_address_missing": "Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».",
 	"backend_iban_invalid": "Die hinterlegte IBAN ist ungültig. Prüfen Sie die IBAN in den Einstellungen.",
 	"backend_pdf_failed": "Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.",
 	"backend_calculation_failed": "Die Abrechnung konnte nicht berechnet werden. Versuchen Sie es später erneut.",

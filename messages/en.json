@@ -486,6 +486,8 @@
 	"backend_contract_overlap": "The period overlaps with another rental contract for this apartment.",
 	"backend_contract_not_in_period": "The rental contract does not fall within the billing period. Choose another period.",
 	"backend_iban_missing": "No IBAN is set. Add the IBAN in the settings.",
+	"backend_iban_company_address_missing": "With an IBAN, the company address is required. Enter the name, postcode and town.",
+	"backend_creditor_address_missing": "The company address for the payment part is missing. Add the name, postcode and town under «Settings».",
 	"backend_iban_invalid": "The IBAN on file is not valid. Check the IBAN in the settings.",
 	"backend_pdf_failed": "The PDF could not be created. Try again later.",
 	"backend_calculation_failed": "The statement could not be calculated. Try again later.",

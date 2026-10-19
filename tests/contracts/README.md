@@ -45,7 +45,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `contract-end-refused.json` | `PUT /api/v1/contracts/:id` mit Vertragsdaten, die die abgerechneten Tage einer Abrechnung ändern (409) |
 | `contract-delete-refused.json` | `DELETE /api/v1/contracts/:id?confirmMistake=true` eines Mietvertrags mit Abrechnung (409) |
 | `statement-pdf-refused.json` | `GET /api/v1/statements/:id/pdf` einer Abrechnung, die es nicht gibt (404) |
-| `statement-pdf-creditor-refused.json` | `POST /api/v1/statements/:id/generate-pdf` einer Abrechnung mit Zahlteil, solange Name, PLZ oder Ort der Firmenadresse fehlen (400, #450) |
+| `statement-pdf-creditor-refused.json` | `POST /api/v1/statements/:id/generate-pdf` einer Abrechnung mit Zahlteil, solange Name, PLZ oder Ort der Firmenadresse fehlen (400, #450); dieselbe Antwort gibt `PUT /api/v1/documents/:id/sent` einer Mahnung «Zu versenden» (`reminders.pg.test.ts`) |
 | `statement-calculation-refused.json` | `POST /api/v1/statements/preview` für einen Mietvertrag, den die Berechnung nicht lesen kann (400) |
 | `statement-pdf-failed.json` | `POST /api/v1/statements/:id/generate-pdf`, die aus einem unerwarteten Grund scheitert (500) |
 | `validation-refused.json` | jede Anfrage, die das Schema verletzt, z.B. `POST /api/v1/statements/preview` mit einer Zahl als `contractId` (422) |

@@ -165,12 +165,14 @@ describe('QR-Rechnung einer Abrechnung', () => {
 	// #450: ohne Name, PLZ oder Ort gäbe es keinen echten Zahlungsempfänger; der Zahlteil entsteht dann nicht
 	it('lehnt einen Zahlteil ohne vollständige Firmenadresse ab', async () => {
 		for (const missing of ['companyName', 'postalCode', 'city'] as const) {
-			const bill = generateQRBillForStatement(statement('a1111111-1111-4111-8111-111111111111'), {
-				...config,
-				[missing]: ''
-			});
+			for (const value of ['', '  ']) {
+				const bill = generateQRBillForStatement(statement('a1111111-1111-4111-8111-111111111111'), {
+					...config,
+					[missing]: value
+				});
 
-			await expect(bill).rejects.toMatchObject({ code: 'CREDITOR_ADDRESS_MISSING' });
+				await expect(bill).rejects.toMatchObject({ code: 'CREDITOR_ADDRESS_MISSING' });
+			}
 		}
 	});
 });
