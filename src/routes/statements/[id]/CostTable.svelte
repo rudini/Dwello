@@ -198,7 +198,9 @@
 	</div>
 	<div class="flex justify-between gap-4">
 		<dt class="text-ink-muted">{m.statements_advance_paid()}</dt>
-		<dd class="whitespace-nowrap text-ink">− {formatCurrency(statement.totalAdvancePayments)}</dd>
+		<dd class="whitespace-nowrap text-ink" data-testid="statement-advance-paid">
+			− {formatCurrency(statement.totalAdvancePayments)}
+		</dd>
 	</div>
 	{#each adjustments as row (row.label)}
 		<!-- each pair directly in the list: a <dl> holds only groups of <dt> and <dd> -->

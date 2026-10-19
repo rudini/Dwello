@@ -8,7 +8,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements } from '../db/schema';
+import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
 import { insertInvoice } from './helpers/records';
@@ -352,6 +352,47 @@ describe('API-Verträge des Frontends', () => {
 		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2024-03-31' });
 		expect(response.status).toBe(409);
 		expect(drift(await sample('contract-end-refused'), await response.json())).toEqual([]);
+	});
+
+	// #464: the 2024 draft counts the Akonto from the Vertragsbeginn
+	it('PUT /contracts/:id mit einem Akonto in einer abgerechneten Zeit liefert die Felder von contract-advance-refused.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, {
+			monthlyAdvancePayment: '200',
+			advancePaymentFrom: '2024-07-01'
+		});
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-advance-refused'), await response.json())).toEqual([]);
+	});
+
+	// #464 (review 464-2 C-11): an end before a later Akonto
+	it('PUT /contracts/:id mit einem Vertragsende vor einem späteren Akonto liefert die Felder von contract-end-advance-refused.json', async () => {
+		await db.insert(contractAdvancePayments).values({ contractId: rental.contract, validFrom: '2099-01-01', amount: '200' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2098-12-31', terminated: true });
+			expect(response.status).toBe(400);
+			expect(drift(await sample('contract-end-advance-refused'), await response.json())).toEqual([]);
+		} finally {
+			await db.delete(contractAdvancePayments).where(eq(contractAdvancePayments.validFrom, '2099-01-01'));
+		}
+	});
+
+	// #464: a later Akonto the 2024 draft counts, entered before the draft (as the demo data could)
+	it('DELETE /contracts/:id/advance-payments/:validFrom eines gezählten Akontos liefert die Felder von contract-advance-delete-refused.json', async () => {
+		await db.insert(contractAdvancePayments).values({ contractId: rental.contract, validFrom: '2024-07-01', amount: '200' });
+		const [{ stored }] = await db
+			.update(utilityStatements)
+			.set({ totalAdvancePayments: '2100.00' }) // 6 × 150 + 6 × 200: the draft counts the later Akonto
+			.where(eq(utilityStatements.id, statementId))
+			.returning({ stored: utilityStatements.totalAdvancePayments });
+		expect(stored).toBe('2100.00');
+		try {
+			const response = await callApi(`/api/v1/contracts/${rental.contract}/advance-payments/2024-07-01`, { method: 'DELETE' });
+			expect(response.status).toBe(400);
+			expect(drift(await sample('contract-advance-delete-refused'), await response.json())).toEqual([]);
+		} finally {
+			await db.delete(contractAdvancePayments).where(eq(contractAdvancePayments.validFrom, '2024-07-01'));
+			await db.update(utilityStatements).set({ totalAdvancePayments: '1800.00' }).where(eq(utilityStatements.id, statementId));
+		}
 	});
 
 	// the 2024 statement bills its rent days: confirmed or not, it stays (#116)

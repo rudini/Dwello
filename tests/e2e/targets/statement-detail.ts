@@ -103,3 +103,7 @@ export const confirmEarlyPaidDateButton = target('Trotzdem speichern', (page) =>
 	page.getByTestId('statement-mark-paid-early-confirm')
 );
 export const correctPaidAmountInput = target('Bereits bezahlt', (page) => page.getByTestId('statement-correct-paid-amount'));
+// #464: the Akonto the statement deducts
+export const statementAdvancePaid = target('Akontobeiträge', (page) => page.getByTestId('statement-advance-paid'));
+// #464 (F-4): the berichtigte Abrechnung deducts another Akonto than the statement it replaces
+export const advanceDiffers = target('Hinweis zum anderen Akonto', (page) => page.getByTestId('statement-advance-differs'));

@@ -10,6 +10,7 @@ import {
 	type ContractFormValues
 } from '../lib/contract-form';
 import type { AvailabilityInfo } from '../lib/utils/contract-availability';
+import { localToday } from '../lib/contract-status';
 
 const filled: ContractFormValues = {
 	tenantId: 't1',
@@ -79,6 +80,7 @@ describe('initialContractValues', () => {
 			baseRent: '950.00',
 			additionalRent: '',
 			advancePayment: '120.00',
+			savedAdvance: '120.00',
 			flatRateUtilityCharge: '',
 			managementFee: 'own',
 			managementFeeRate: '4.00'
@@ -177,6 +179,51 @@ describe('contractBody', () => {
 			managementFeeAgreed: true,
 			managementFeePercent: null
 		});
+	});
+
+	// #464 (fach review 464-2 V-2): im laufenden Mietvertrag gilt ein neues Akonto frühestens ab dem nächsten Ersten;
+	// nur ein geänderter Betrag geht mit seinem «Gültig ab» mit, sonst entstünde bei jedem Speichern ein Eintrag
+	const advances = [
+		{ validFrom: '2024-04-01', amount: '50.00' },
+		{ validFrom: '2024-07-01', amount: '80.00' }
+	];
+	const edited = (startDate: string, endDate: string | null) =>
+		initialContractValues(
+			{ ...filled, id: 'c1', startDate, endDate, monthlyAdvancePayment: '80.00', advancePayments: advances } as never,
+			new URLSearchParams()
+		);
+	it('schlägt im laufenden Mietvertrag den nächsten Ersten als «Gültig ab» vor', () => {
+		const [year, month] = localToday().split('-').map(Number);
+		const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+
+		expect(edited('2024-04-01', null).advancePaymentFrom).toBe(next);
+	});
+
+	it('schlägt beim künftigen Mietvertrag den Vertragsbeginn, beim beendeten den Tag des letzten Betrags vor', () => {
+		expect(edited('2099-01-01', null).advancePaymentFrom).toBe('2099-01-01');
+		expect(edited('2024-04-01', '2025-03-31').advancePaymentFrom).toBe('2024-07-01');
+	});
+
+	it('sendet Akonto und «Gültig ab» nur, wenn sich der Betrag geändert hat', () => {
+		const values = edited('2024-04-01', null);
+
+		expect(contractBody(values)).not.toHaveProperty('monthlyAdvancePayment');
+		expect(contractBody({ ...values, advancePaymentFrom: '2030-01-01' })).not.toHaveProperty('advancePaymentFrom');
+		expect(contractBody({ ...values, advancePayment: '90' })).toMatchObject({
+			monthlyAdvancePayment: '90',
+			advancePaymentFrom: values.advancePaymentFrom
+		});
+		expect(contractBody(filled)).not.toHaveProperty('advancePaymentFrom');
+	});
+
+	// review 464-1 C-2: ein leeres oder falsch getipptes «Gültig ab» ändert nicht still den ersten Betrag
+	it('verlangt ein «Gültig ab», wenn sich das Akonto ändert', () => {
+		const values = { ...edited('2024-04-01', null), advancePayment: '90' };
+
+		expect(validateContract({ ...values, advancePaymentFrom: '' }).advancePaymentFrom).toBe(
+			'Geben Sie an, ab welchem Tag das neue Akonto gilt, zum Beispiel den Ersten des nächsten Monats.'
+		);
+		expect(validateContract({ ...values, advancePayment: '80.00', advancePaymentFrom: '' })).not.toHaveProperty('advancePaymentFrom');
 	});
 
 	// #429: die Nebenkostenpauschale geht mit, leer als 0, und kommt beim Bearbeiten zurück ins Formular

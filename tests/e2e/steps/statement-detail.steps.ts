@@ -37,7 +37,9 @@ import {
 	statusOfStatement,
 	tenancyOfStatement,
 	totalLabelOfStatement,
-	oldAddressWarningText
+	oldAddressWarningText,
+	advancePaidOfStatement,
+	advanceDiffersText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -479,6 +481,20 @@ Then('nennt die Bestätigung die Verjährung nach fünf Jahren', async ({ verwal
 	await verwalter.sees(correctConfirmation).toContain('fünf Jahren (Art. 128 Ziff. 1 OR)');
 });
 
+Then(
+	'warnt die berichtigte Abrechnung, dass ihre Akontobeiträge {string} anders sind als die {string} der ersetzten Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, now: string, before: string, year: number, tenant: string) => {
+		const replaced = await seed.statementNumber(tenant, year);
+		await verwalter
+			.sees(advanceDiffersText)
+			.toContain(`Die Akontobeiträge dieser Abrechnung (${now}) sind anders als in der ersetzten Abrechnung ${replaced} (${before}). Stimmt ein früherer Betrag am Mietvertrag nicht, löschen Sie diesen Entwurf, tragen Sie den Betrag mit seinem «Gültig ab» ein und erstellen Sie die berichtigte Abrechnung erneut.`);
+	}
+);
+
+Then('zieht die Abrechnung {string} Akontobeiträge ab', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(advancePaidOfStatement).toContain(amount);
+});
+
 Then('rechnet die Abrechnung {string} als bereits bezahlt an', async ({ verwalter }, amount: string) => {
 	await verwalter.sees(priorPaymentsAmount).toBe(francs(amount));
 });
@@ -530,7 +546,8 @@ Then(
 Then(
 	'steht im PDF der Übertrag {string} aus der Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, amount: string, year: number, tenant: string) => {
-		await verwalter.sees(downloadedPdfText).toContain(`Übertrag aus Abrechnung ${await seed.statementNumber(tenant, year)}: ${amount}`);
+		const number = (await seed.statementNumber(tenant, year)).replace(/-/g, '-\\s?'); // broken after a hyphen
+		await verwalter.sees(downloadedPdfText).toMatch(new RegExp(`Übertrag aus Abrechnung ${number}: ${amount}`));
 	}
 );
 
@@ -572,7 +589,9 @@ Then('fragt die Bestätigung nicht nach dem bereits Bezahlten', async ({ verwalt
 Then(
 	'steht im PDF, dass auf die Abrechnung {int} von {string} bereits {string} bezahlt sind',
 	async ({ verwalter, seed }, year: number, tenant: string, amount: string) => {
-		await verwalter.sees(downloadedPdfText).toContain(`Bereits bezahlt auf ${await seed.statementNumber(tenant, year)}`);
+		// the PDF may break the number after a hyphen
+		const number = (await seed.statementNumber(tenant, year)).replace(/-/g, '-\\s?');
+		await verwalter.sees(downloadedPdfText).toMatch(new RegExp(`Bereits bezahlt auf ${number}`));
 		await verwalter.sees(downloadedPdfText).toContain(`bereits bezahlt CHF ${amount}`);
 	}
 );

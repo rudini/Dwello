@@ -4,6 +4,8 @@ import { Accessible, Attribute, Count, Text, Value } from '../screenplay/questio
 import { successToast } from '../targets/form';
 import {
 	carryOverRow,
+	advanceDiffers,
+	statementAdvancePaid,
 	correctDialog,
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
@@ -117,3 +119,7 @@ export const correctPaidAmount = Value.of(correctPaidAmountInput);
 export const correctPaidAmountHelp = Accessible.descriptionOf(correctPaidAmountInput);
 export const correctPaidAmountAsked = Count.of(correctPaidAmountInput);
 export const resetOffers = Count.of(resetPaymentButton);
+
+// #464: the Akonto the statement deducts, e.g. «− CHF 400.00»
+export const advancePaidOfStatement = Text.of(statementAdvancePaid);
+export const advanceDiffersText = Text.of(advanceDiffers);

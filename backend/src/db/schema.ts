@@ -160,6 +160,20 @@ export const rentalContractsRelations = relations(rentalContracts, ({ one, many 
 	statements: many(utilityStatements)
 }));
 
+// #464: the Akonto of a contract per «Gültig ab» (the first of a month); the first amount applies from the
+// Vertragsbeginn whatever its day
+export const contractAdvancePayments = pgTable(
+	'contract_advance_payments',
+	{
+		contractId: uuid('contract_id')
+			.notNull()
+			.references(() => rentalContracts.id, { onDelete: 'cascade' }),
+		validFrom: date('valid_from').notNull(),
+		amount: decimal('amount', { precision: 10, scale: 2 }).notNull()
+	},
+	(table) => [primaryKey({ columns: [table.contractId, table.validFrom] })]
+);
+
 // #91: the Nebenkosten a contract agrees, or answered «nicht vereinbart»; no row: not answered, not billed
 export const contractCategories = pgTable(
 	'contract_categories',
@@ -374,6 +388,11 @@ export type InvoicePart = {
 
 // An invoice a position billed (#96): its amount in the period and the days it bills there; the change of the
 // Tankbestand is billed like one (#239) under the id fuel-stock-<period end>
+/** One line of the Akonto on a statement (#464): whole months of one amount, or the days of a split month */
+export type AdvanceLine = { from: string; to: string; amount: number; total: number } & (
+	| { months: number }
+	| { days: number; daysInMonth: number }
+);
 export type BilledInvoice = { id: string; description: string; amount: number; start: string; end: string; fuelStock?: true };
 
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
@@ -430,6 +449,8 @@ export const utilityStatements = pgTable(
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
 		heatingShare: jsonb('heating_share').$type<HeatingShare>(),
+		// #464: the Akonto lines as calculated (months × amount); null: created before, the PDF prints only the total
+		advanceLines: jsonb('advance_lines').$type<AdvanceLine[]>(),
 		agreedCategoryIds: jsonb('agreed_category_ids').$type<string[]>(), // agreed when created (#91); null: before
 		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
 		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
