@@ -55,7 +55,9 @@ const cases: [string, boolean][] = [
 	['Installation des Kabelanschlusses', false],
 	['Rasensanierung', false],
 	['Kehrichtgrundgebühr nach Gebäudeversicherungswert', false],
-	['Honorar für die Heizkostenabrechnung', false],
+	['Honorar der Verwaltung für die Heizkostenabrechnung', false],
+	// Art. 5 Abs. 2 Bst. f VMWG: a third party's service for the consumption-based heating statement (Fachreview 452-3 V-1)
+	['Abrechnungsservice für die verbrauchsabhängige Heizkostenabrechnung', true],
 	['Gebühren für die Verwaltungsapp', false],
 	['Honorar für die Nebenkostenabrechnung', false]
 ];

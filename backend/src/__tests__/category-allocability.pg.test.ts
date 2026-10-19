@@ -48,7 +48,7 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 			expect(llm.prompts[0]).toContain('Beschreibung: Neues Ziegeldach\n');
 			// Sonst würde der Aufwand neben der Verwaltungspauschale doppelt verrechnet (F-19)
 			expect(llm.prompts[0]).toContain(
-				'Den Aufwand für die Erstellung der Nebenkostenabrechnung (Art. 4 Abs. 3 VMWG) rechnet Dwello über die Verwaltungspauschale ab; eine Kategorie dafür, auch ein Honorar für die Heizkostenabrechnung, ist nicht umlagefähig.'
+				'Den Aufwand für die Erstellung der Nebenkostenabrechnung (Art. 4 Abs. 3 VMWG) rechnet Dwello über die Verwaltungspauschale ab; eine Kategorie dafür ist nicht umlagefähig, auch nicht ein Honorar der Verwaltung für die Heizkostenabrechnung.'
 			);
 			expect(llm.prompts[0]).toContain(
 				'Die Nebenkosten sind das Entgelt für die Leistungen des Vermieters oder eines Dritten, die mit dem Gebrauch der Sache zusammenhängen.'
@@ -116,9 +116,11 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 			await sendJson('POST', '/api/v1/categories/propose', { name: 'Brennerservice' });
 
 			expect(llm.prompts[0]).toContain(
-				'Wartung und Service der Heizungsanlage, z.B. der Brennerservice, sind umlagefähig (Art. 5 Abs. 2 Bst. g VMWG); ihre Reparatur nicht (Regel 1).'
+				'Wartung und Service der Heizungs- oder Warmwasseranlage, z.B. der Brennerservice, sind umlagefähig (Art. 5 Abs. 2 Bst. e und g VMWG); ihre Reparatur nicht (Regel 1).'
 			);
-			expect(llm.prompts[0]).toContain('eine Kategorie dafür, auch ein Honorar für die Heizkostenabrechnung, ist nicht umlagefähig.');
+			expect(llm.prompts[0]).toContain(
+				'Umlagefähig sind dagegen die Verbrauchserfassung und der Abrechnungsservice eines Dritten für die verbrauchsabhängige Heizkostenabrechnung, z.B. Ablesung und Abrechnung der Wärmezähler durch einen Messdienst (Art. 5 Abs. 2 Bst. f VMWG).'
+			);
 		} finally {
 			llm.stop();
 		}

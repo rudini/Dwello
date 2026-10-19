@@ -146,7 +146,7 @@ const ALLOCABILITY_PROMPT = `Du bist ein Experte für Schweizer Nebenkostenabrec
 
 ${LEGAL_BASIS}
 
-Den Aufwand für die Erstellung der Nebenkostenabrechnung (Art. 4 Abs. 3 VMWG) rechnet Dwello über die Verwaltungspauschale ab; eine Kategorie dafür, auch ein Honorar für die Heizkostenabrechnung, ist nicht umlagefähig.
+Den Aufwand für die Erstellung der Nebenkostenabrechnung (Art. 4 Abs. 3 VMWG) rechnet Dwello über die Verwaltungspauschale ab; eine Kategorie dafür ist nicht umlagefähig, auch nicht ein Honorar der Verwaltung für die Heizkostenabrechnung. Umlagefähig sind dagegen die Verbrauchserfassung und der Abrechnungsservice eines Dritten für die verbrauchsabhängige Heizkostenabrechnung, z.B. Ablesung und Abrechnung der Wärmezähler durch einen Messdienst (Art. 5 Abs. 2 Bst. f VMWG).
 
 VORDEFINIERTE UMLAGEFÄHIGE KATEGORIEN (dürfen auf Mieter umgelegt werden, wenn im Mietvertrag vereinbart, Art. 257a Abs. 2 OR):
 {categories_allowed}
@@ -157,7 +157,7 @@ VORDEFINIERTE NICHT UMLAGEFÄHIGE KATEGORIEN (dürfen NICHT auf Mieter umgelegt 
 SO PRÜFST DU, der Reihe nach:
 1. Reparatur, Renovation, Erneuerung, Ersatz und Anschaffung von Anlagen, Geräten und Bauteilen sowie wertvermehrende Investitionen trägt immer der Vermieter, auch wenn sie eine umlagefähige Kategorie betreffen, z.B. den Lift, die Heizung oder den Garten (Art. 256 Abs. 1 OR; sie sind keine Nebenkosten nach Art. 257b Abs. 1 OR; für Heizung und Warmwasser Art. 6 VMWG). Brennstoffe und Energie, die verbraucht werden, sind keine Anschaffung (Art. 5 Abs. 2 Bst. a VMWG). Der Vermieter trägt auch die mit der Sache verbundenen Lasten und öffentlichen Abgaben, z.B. die Liegenschaftssteuer (Art. 256b OR).
 2. Die vordefinierten Kategorien sind nicht vollständig. Ist die neue Kategorie eine Leistung derselben Art wie eine vordefinierte Kategorie, gilt deren Einstufung; was deren Beschreibung mit «ohne» ausschliesst, gehört nicht dazu. Beispiel: Die Reinigung der Waschküche ist eine Reinigung wie beim «Hauswart» und damit umlagefähig; die Reparatur der Waschküchentür ist eine Reparatur und nicht umlagefähig. Wartung von Brandschutzeinrichtungen gilt wie «Feuerlöscher-Wartung», Bekämpfung von Ungeziefer wie «Schädlingsbekämpfung».
-3. Art. 5 und 6 VMWG nur anwenden, wenn die Kategorie Heizung oder Warmwasser betrifft. Wartung und Service der Heizungsanlage, z.B. der Brennerservice, sind umlagefähig (Art. 5 Abs. 2 Bst. g VMWG); ihre Reparatur nicht (Regel 1).
+3. Art. 5 und 6 VMWG nur anwenden, wenn die Kategorie Heizung oder Warmwasser betrifft. Wartung und Service der Heizungs- oder Warmwasseranlage, z.B. der Brennerservice, sind umlagefähig (Art. 5 Abs. 2 Bst. e und g VMWG); ihre Reparatur nicht (Regel 1).
 4. Passt keine vordefinierte Kategorie: Laufende Kosten für Leistungen, die mit dem Gebrauch zusammenhängen (Betrieb, Reinigung, Verbrauch), und öffentliche Abgaben, die sich aus dem Gebrauch ergeben (z.B. Gebühren nach Verbrauch), sind umlagefähig, wenn im Mietvertrag vereinbart (Art. 257b Abs. 1, Art. 257a Abs. 2 OR). Abgaben, die vom Wert der Liegenschaft abhängen, trägt der Vermieter (Art. 256b OR).
 
 Kategorie: {name}
