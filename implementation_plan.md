@@ -67,8 +67,22 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] @wip scenario «Entwurf neu berechnen» (`statement-detail.feature`), seen red at the missing button
 - [x] `statement-recalculation.pg.test.ts` (same number, new amounts, no changed invoices after; sent refused), red first
 - [x] Backend: `recalculateStatement`, `POST /statements/:id/recalculation`; `generateStatement` shares `calculatedRows`
-- [x] Frontend: «Neu berechnen» in «Weitere Aktionen» of a draft, confirmation `statement-recalculated`; texts that said «delete and create again» point to «Neu berechnen» (statement, wizard, invoice, Tankbestand, Heizprofil texts), four languages; DOM tests and scenarios updated red first; axe and language state `recalculated`
+- [x] Frontend: «Neu berechnen» in «Weitere Aktionen» of a draft, confirmation dialog `statement-recalculate-confirm`; texts that said «delete and create again» point to «Neu berechnen» (statement, wizard, invoice, Tankbestand, Heizprofil texts), four languages; DOM tests and scenarios updated red first; axe and language state `recalculate-dialog`
 - [x] Slice review round 1 (`docs/reviews/338-review-1.md`: C-1 Blocker, C-2 to C-4 Major) and persona Helga (`docs/design/personas/helga-338.md`: P-1, P-2 Major)
 - [x] Fixes: a berichtigte Abrechnung keeps `replaces` and `priorPayments` (C-1); own codes `STATEMENT_NOT_RECALCULABLE`, `STATEMENT_RECALCULATION_AGREEMENTS_OPEN` with texts (C-2, C-3); paid refused tested (C-4); kept fields tested (C-9); confirmation dialog naming what stays and changes, success toast at the top (P-1, P-2, C-6); it «Ricalcolare» (C-7); API spec and PRD (C-10); nits C-11, C-12
-- [ ] Re-review: code-reviewer round 2, Helga; daten-pruefer on the recalculated draft
+- [x] Re-review round 2 (`docs/reviews/338-review-2.md`: no Blocker/Major; C-14 saldo of a recalculated berichtigte Abrechnung pinned, C-15 duplicate step removed; C-16 to C-18 kept)
+- [x] daten-pruefer on the recalculated draft (`docs/reviews/338-datenpruefung-1.md`: every amount to the Rappen, no findings; preview endpoint and PDF not checked)
+- [ ] Helga round 2 on the dialog and the toast; closing code-review round after merging `main`
 - [ ] PR `Fixes #338`
+
+### Main CI red since #440: E2E leftovers (O-38)
+
+Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox and WebKit shards (PRs run Chromium only): the statement wizard's buildings step (two backend requests per building, all buildings up to 1000 since #440) and step 3's agreement check took longer than 5 s, because every scenario with a sent statement left its building, apartment and tenant in `dwello_e2e`. Reproduced in Chromium with 600 leftover buildings (all three «Schon abgerechnet» scenarios fail as on CI). No scenario: test infrastructure only.
+
+- [x] `backend/scripts/e2e-purge-statements.ts`: deletes a scenario's statements and their documents in the E2E database only; `tests/e2e/fixtures/backend.ts` calls it in `cleanUp` (statement-detail.feature left 23 buildings, apartments and tenants before, none after)
+- [x] O-38 moved to `docs/archive/offene-punkte-verlauf.md`
+- [x] Full Chromium + API run: 1153 passed, 1 failed (O-34, the known IBAN race of `settings.feature`); no tenant or statement left, but 256 buildings «Talblick»: the screen examples seed «Talblick» twice and the second name replaced the first one's token, so the cleanup now keeps every token it handed out
+- [x] Slice review round 1 (`docs/reviews/o38-review-1.md`; C-1 fixed: the purge always gets the E2E database's URL, never `backend/.env`'s; C-3 not taken: the extra branch pushed `cleanUp` over fallow's complexity limit, and a scenario without names is rare)
+- [x] `previewOf` (axe and language rows of `statement-generate`) waits for step 2's texts before ticking a building, as `chooseBuilding` does (#424; «preview-all-billed» once failed locally with «Clicking the checkbox did not change its state»); the statement-generate rows of both features: 38 passed, nothing left in `dwello_e2e`
+- [x] Re-review and closing round 2 (`docs/reviews/o38-review-2.md`, no Blocker/Major; C-5 Nit kept); after the purge refactor statement-detail and statement-generate (Chromium + API): 156 passed, nothing left
+- [ ] PR
