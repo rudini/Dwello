@@ -53,3 +53,75 @@ Etwa 3 Minuten. Liste → «Gebäude erfassen» → Suche tippen (Fehlermeldung 
 - Ich habe das von Hand angelegte Gebäude «Saumackerstrasse 20» (ohne Wohnungen) stehen lassen. Ein neuer Lauf sollte zuerst dieses Gebäude löschen oder einen frischen Stack verwenden, damit es kein doppeltes Gebäude gibt.
 
 Skripte und Screenshots: `/tmp/claude-0/-home-user-Dwello/7dafbd2e-3753-5fd4-bcb4-6211ba03db69/scratchpad/marco-479/`.
+
+---
+
+# Runde 2 (frische Datenbank, Register erreichbar)
+
+Aufgabe wie oben. Diesmal antwortet das Gebäuderegister; P-1 aus Runde 1 tritt nicht mehr auf (`/api/addresses` → 200).
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-2 | Minor | Neues Gebäude, Wohnungen aus dem Gebäuderegister | Die Wohnungen stehen in einer unsortierten Reihenfolge: «Wohnung 2, 1, 102, 101, 202, 201, 302, 301». Auf der Gebäudeseite nach dem Speichern sind sie richtig nach Stockwerk und Nummer sortiert. Beim Prüfen auf dem Handy suche ich so «Wohnung 1» an zweiter Stelle. |
+| P-3 | Minor | Neues Gebäude, nach Wahl des Treffers | Nach dem Antippen des Treffers sehe ich nirgends, wie viele Wohnungen gefunden wurden. Die Liste beginnt rund 2000 px weiter unten, unter «Weitere Angaben» und dem langen Tank-Text; im Blickfeld bleibt nur der blaue Kasten «Das Gebäuderegister enthält nur Wohnungen …». Ob überhaupt Wohnungen kamen, merke ich erst beim Scrollen. Auch der Knopf «Gebäude und Wohnungen erstellen» nennt keine Zahl, und er ändert sich nicht, wenn ich eine Wohnung abwähle. |
+| P-4 | Minor | Neues Gebäude, Wohnungskarte | Das Feld «Fläche» zeigt nur «56» bzw. «76» ohne Einheit und ohne Hilfetext. Ich nehme an, das sind m² (die Gebäudeseite zeigt danach «56 m²»), aber im Formular steht es nicht. |
+| P-5 | Minor | Neues Gebäude, ganze Seite | Mit 8 Wohnungen wird die Seite auf dem Handy etwa 7650 px lang; jede Karte ist rund 560 px hoch (Häkchen, Nummer, Stockwerk, Fläche, Zimmer, alle untereinander). Bis zum Speichern-Knopf muss ich etwa neun Bildschirmhöhen wischen. Es gibt keine kompakte Übersicht («8 Wohnungen: EG 2, 1.–3. OG je 2»), die ich nur bei Bedarf aufklappe. |
+
+## Beobachtungen (Runde 2)
+
+- Kein seitliches Scrollen: Seitenbreite 390 = Fensterbreite, vor und nach der Trefferwahl und auf der Gebäudeseite nach dem Speichern. Kein Element ragt über den rechten Rand.
+- Alle Felder, Auswahllisten und Knöpfe sind mindestens 48 px hoch (Speichern-Knopf 68 px, zweizeilig). Das Häkchen «Wohnung übernehmen» selbst ist 24 × 24 px, aber die ganze Zeile mit dem Text ist 274 × 48 px gross und schaltet es um; ich habe auf den Text getippt, das ging zuverlässig.
+- Eine abgewählte Wohnung bleibt sichtbar, ihre Felder werden grau und gesperrt (Screenshot `11-unchecked-card.png`). Das ist klar; ich sehe, was ich weglasse.
+- Der Treffer in der Vorschlagsliste ist 306 × 64 px gross, gut zu treffen.
+- Die Übernahme füllt alles: Gebäudename «Saumackerstrasse 20», Strasse, PLZ 8048, Ort Zürich, Kanton Zürich (ZH), Gebäudetyp Mehrfamilienhaus, Baujahr 1933. Ich musste nichts von Hand eintippen ausser der Suche.
+- Die Hinweise über der Liste («Prüfen Sie die Angaben … können veraltet sein» und «Lassen Sie nur Wohnungen weg, die es nicht mehr gibt … ihren Anteil tragen Sie») sind verständlich. Der zweite Satz ist für mich wichtig: ich hätte sonst die selbst bewohnte Wohnung weggelassen.
+- «Im Register ohne halbe Zimmer: bitte prüfen» bei jeder Zimmeranzahl: Ich verstehe es erst beim zweiten Lesen (eine 3½-Zimmer-Wohnung steht als 3 drin). Ein Beispiel «3½ statt 3» würde helfen.
+- Alle 8 Häkchen heissen für den Screenreader gleich «Wohnung übernehmen»; die Karte (fieldset) heisst aber «Wohnung 2» usw. Für mich mit Touch kein Problem, nur notiert.
+- Nach dem Speichern: Gebäudeseite «Saumackerstrasse 20» mit Meldung «Gebäude «Saumackerstrasse 20» gespeichert», «Wohnungen 8, davon 0 vermietet und 8 leer», nach Stockwerk gruppiert (EG: 1, 2; 1. OG: 101, 102; …), je «2 Zimmer 56 m²» bzw. «3 Zimmer 76 m²», alle «Leer».
+- Im Suchfeld steht nach der Wahl «Saumackerstrasse 20, 80…», abgeschnitten wegen Lupe und ×; stört nicht, die Felder darunter zeigen die volle Adresse.
+
+## Aufgabe geschafft: ja
+
+Gebäude «Saumackerstrasse 20, 8048 Zürich» mit allen 8 Wohnungen in einem Schritt gespeichert (POST `/buildings/new` → Gebäudeseite `/buildings/09c0e68f-…`).
+
+## Aufwand
+
+4 Antipper plus Tippen der Suche: «Gebäude erfassen» → Suchfeld → «Saumackerstrasse 20 8048» tippen → Treffer → (runterwischen, etwa neun Bildschirmhöhen) → «Gebäude und Wohnungen erstellen». Im Skript knapp 5 s; als Mensch schätze ich gut eine Minute, fast nur Wischen und kurz Prüfen der Karten. Treffer erschienen ca. 1–2 s nach dem Tippen, die Wohnungen nach dem Antippen des Treffers ebenfalls in 1–2 s.
+
+## Ablauf (Runde 2)
+
+1. **Gebäudeliste.** Erwartet: Knopf zum Anlegen. Gesehen: «Gebäude erfassen», 3 Demo-Gebäude. Getippt.
+2. **Neues Gebäude.** Erwartet: Suchfeld. Gesehen: wie in Runde 1, «Adresse suchen (optional)» unter «Gebäudename».
+3. **Suche «Saumackerstrasse 20 8048».** Erwartet: Trefferliste. Gesehen: ein Treffer «Saumackerstrasse 20 / 8048 Zürich (ZH)» direkt unter dem Feld (`03-hits.png`).
+4. **Treffer angetippt.** Erwartet: Felder gefüllt und eine Liste der Wohnungen, am besten mit Anzahl. Gesehen: Felder gefüllt, blauer Hinweis «Das Gebäuderegister enthält nur Wohnungen. Erfassen Sie Läden, Büros … als eigene Wohnung.» (`04b-viewport.png`). Von den Wohnungen sah ich zunächst nichts (P-3).
+5. **Runtergewischt.** Gesehen: Abschnitt «Wohnungen aus dem Gebäuderegister» mit 8 Karten, jede mit Häkchen «Wohnung übernehmen» (angehakt), Wohnungsnummer, Stockwerk, Fläche, Zimmeranzahl (`08-list-viewport.png`, `09-list-viewport2.png`). Reihenfolge 2, 1, 102, 101 … (P-2), Fläche ohne Einheit (P-4).
+6. **Probe: ein Häkchen ab- und wieder angehakt** (über den Text getippt). Erwartet: Karte wird ausgeschlossen. Gesehen: Felder grau und gesperrt; wieder angehakt aktiv.
+7. **«Gebäude und Wohnungen erstellen»** ganz unten (`10-bottom.png`). Erwartet: Gebäudeseite mit 8 Wohnungen. Gesehen: genau das, mit Erfolgsmeldung (`07b-saved-viewport.png`).
+
+## Verwirrung (Runde 2)
+
+- Ich wusste nach der Trefferwahl nicht, ob Wohnungen gekommen sind (P-3).
+- «Fläche» ohne Einheit (P-4).
+- «Im Register ohne halbe Zimmer: bitte prüfen» – kurz, aber erst beim zweiten Lesen klar.
+- Der Knopf heisst jetzt «Gebäude und Wohnungen erstellen», vorher und auf der Liste «Gebäude erfassen»: «erstellen» und «erfassen» für dasselbe.
+
+## Fehlerrisiken (Runde 2)
+
+- Wer schnell ist (wie ich), wischt an 8 Karten vorbei und speichert, ohne die veralteten Registerangaben zu prüfen; die Zimmerzahl ist laut Hinweis bei 3½-Zimmer-Wohnungen falsch und landet so in Dwello. Eine kompaktere Liste würde das Prüfen eher fördern als neun Bildschirme Formular.
+- Durch die unsortierte Reihenfolge (P-2) übersieht man leicht, dass eine Wohnung fehlt oder doppelt ist.
+
+## Vorschläge (Runde 2)
+
+- **P-2**: `/buildings/new` auf dem Handy, «Saumackerstrasse 20 8048» suchen, Treffer wählen, zur Liste wischen: Reihenfolge 2, 1, 102, 101, 202, 201, 302, 301. Hilfe: dieselbe Sortierung wie auf der Gebäudeseite (Stockwerk, dann Nummer).
+- **P-3**: wie P-2, nach dem Antippen des Treffers im Blickfeld bleiben. Hilfe: direkt beim Treffer oder im blauen Kasten «8 Wohnungen gefunden, unten prüfen» mit Sprung zur Liste; im Knopf die Zahl der angehakten Wohnungen («Gebäude und 8 Wohnungen erstellen»).
+- **P-4**: wie P-2, eine Karte ansehen. Hilfe: «Fläche in m²» als Label oder «m²» neben dem Feld, wie auf der Gebäudeseite.
+- **P-5**: wie P-2, bis zum Speichern-Knopf wischen (ca. 7650 px Seite). Hilfe: Fläche und Zimmer nebeneinander, oder pro Wohnung eine einzeilige Zusammenfassung («Wohnung 1 · EG · 76 m² · 3 Zimmer»), die man zum Ändern aufklappt.
+
+## Nicht geprüft (Runde 2)
+
+- Ein Gebäude mit Läden oder Büros, ein Treffer ohne Wohnungen und ein Fehler des Registers in dieser Runde (in Runde 1 gesehen).
+- Ändern einer Registerangabe vor dem Speichern (z. B. 3 → 3½ Zimmer) und Prüfung, ob die Änderung gespeichert wird: ich habe alles so übernommen, wie es kam.
+- Dunkelmodus und Querformat.
+- Ich habe genau ein Gebäude gespeichert («Saumackerstrasse 20», 8 Wohnungen); die Demo-Gebäude habe ich nicht angefasst. Zwei vorherige Durchläufe brachen vor dem Speichern ab.
+
+Skripte und Screenshots Runde 2: `/tmp/claude-0/-home-user-Dwello/7dafbd2e-3753-5fd4-bcb4-6211ba03db69/scratchpad/marco-479-r2/`.

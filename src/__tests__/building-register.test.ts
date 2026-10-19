@@ -168,10 +168,10 @@ describe('Gebäude aus dem Gebäuderegister', () => {
 			)
 		);
 		expect(building.apartments.map((a) => [a.number, a.missing])).toEqual([
-			['2. OG Links', ['number']],
-			['2. OG Rechts', ['number']],
 			['EG', ['number']],
 			['EG 2', ['number']],
+			['2. OG Links', ['number']],
+			['2. OG Rechts', ['number']],
 			['', ['number', 'floor']]
 		]);
 	});
@@ -183,7 +183,23 @@ describe('Gebäude aus dem Gebäuderegister', () => {
 				{ edid: 1, deinr: '502', ...apartments(flat('101', 3101), flat('103', 3101)) }
 			)
 		);
-		expect(building.apartments.map((a) => a.number)).toEqual(['500-101', '102', '502-101', '103']);
+		expect(building.apartments.map((a) => a.number)).toEqual(['102', '103', '500-101', '502-101']);
+	});
+
+	// personas Marco and Dr. Weber on #479: the register lists them in the order they were entered
+	it('ordnet die Wohnungen nach Stockwerk und Wohnungsnummer', () => {
+		const building = toRegisterBuilding(
+			findAnswer(
+				apartments(
+					flat('202', 3102),
+					flat('2', 3100),
+					flat('101', 3101),
+					flat('1', 3100),
+					flat('x', null)
+				)
+			)
+		);
+		expect(building.apartments.map((a) => a.number)).toEqual(['1', '2', '101', '202', 'x']);
 	});
 
 	it('hat keine Wohnungen, wenn das Register keine kennt', () => {

@@ -83,7 +83,7 @@
 				<TextInput
 					id="apartments-{i}-area"
 					name="apartments.{i}.area"
-					label={m.apartments_area()}
+					label={m.apartments_area_label()}
 					inputmode="decimal"
 					bind:value={row.area}
 					disabled={!row.included}

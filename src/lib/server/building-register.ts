@@ -128,6 +128,13 @@ export function toRegisterBuilding(answer: FindAnswer): RegisterBuilding {
 		};
 	});
 
+	// floor by floor from the bottom, by number on each floor; without floor at the end
+	const level = (floor: number | null) => floor ?? Infinity;
+	apartments.sort(
+		(a, b) =>
+			level(a.floor) - level(b.floor) || a.number.localeCompare(b.number, 'de', { numeric: true })
+	);
+
 	return {
 		buildingType:
 			Number(first.gkat) === 1040 ? 'Mischnutzung' : (types[Number(first.gklas)] ?? null),

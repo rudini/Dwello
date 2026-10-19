@@ -112,6 +112,23 @@ describe('Adresssuche im Gebäuderegister', () => {
 		expect(value('building-year-built-input')).toBe('');
 	});
 
+	// personas Helga, Marco, Anna, Sven, Dr. Weber on #479
+	it('nennt bei der Fläche einer Wohnung aus dem Register die Einheit', async () => {
+		create();
+		registers['/addresses/3'] = {
+			buildingType: null,
+			yearBuilt: null,
+			apartments: [{ number: '101', floor: 1, area: '72', rooms: '3', missing: [] }]
+		};
+		bff([hit('Lindenweg 155', '3')]);
+		await search('Lindenweg 155');
+		await choose();
+
+		expect(document.querySelector('label[for="apartments-0-area"]')!.textContent).toContain(
+			'Fläche (m²)'
+		);
+	});
+
 	it('behält, was der Liegenschaftsverwalter selbst eingetragen hat', async () => {
 		create();
 		fireEvent(byTestId<HTMLInputElement>('building-name-input')!, 'input', 'Lindenhof');

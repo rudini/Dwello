@@ -6,11 +6,14 @@ import {
 	markNoTank,
 	openBuildingEdit,
 	openNewBuilding,
+	openNewBuildingAtContent,
 	registerBuilding,
 	saveBuilding
 } from '../tasks/building-form';
 
-const { Given, When } = createBdd(test);
+import { focusedField } from '../questions/building-form';
+
+const { Given, When, Then } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neues Gebäude"', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openNewBuilding);
@@ -57,3 +60,11 @@ When(
 		await verwalter.attemptsTo(markNoTank);
 	}
 );
+
+Given('der Liegenschaftsverwalter ist zum Inhalt der Seite "Neues Gebäude" gesprungen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openNewBuildingAtContent);
+});
+
+Then('steht der Fokus im Feld {string}', async ({ verwalter }, field: string) => {
+	await verwalter.sees(focusedField).toBe(field);
+});

@@ -65,3 +65,79 @@ Etwa 6 bis 8 Minuten. Rund 12 Schritte: Übersicht, Navigation «Gebäude», «G
 - Die echte Meldung «keine Treffer» bei einem Tippfehler: Auch dort kam nur «nicht erreichbar».
 - Wie ein übernommenes Einfamilienhaus mit seiner einen Wohnung danach aussieht und ob der Gebäudename dabei vorgeschlagen wird.
 - Den ganzen Ablauf auf dem Handy: Dort habe ich nur das Suchfeld mit der Warnung angesehen.
+
+## Runde 2
+
+Frische Datenbank, die App erreicht das echte Gebäuderegister (geo.admin.ch). Wie in Runde 1: Desktop 1440 × 900 mit Maus, die Suche ohne Treffer zusätzlich auf dem Handy 390 × 844.
+Skripte und Screenshots: `/tmp/claude-0/-home-user-Dwello/7dafbd2e-3753-5fd4-bcb4-6211ba03db69/scratchpad/anna-479/r2/`.
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-1 | erledigt | Neues Gebäude, «Adresse suchen» | Das Register antwortet jetzt (`GET /api/addresses` 200). Ich sehe Treffer, die Übernahme klappt, und auch «keine Treffer» erscheint. |
+| P-2 | erledigt (mit Register) / Minor (von Hand) | Neues Gebäude | Wähle ich einen Treffer, setzt Dwello den Gebäudenamen auf «Rautistrasse 150». So vergesse ich ihn nicht mehr. Ohne Treffer steht das Pflichtfeld weiterhin leer über der Suche, wie in Runde 1. |
+| P-3 | Minor (offen) | Neues Gebäude, Kanton | Auch nach «Keine Adresse gefunden» steht beim Kanton nur «Wird mit der Adresssuche ausgefüllt.» Dass ich ihn dann selbst wähle, sagt der Text nicht. |
+| P-4 | Nit (offen) | Neues Gebäude | «Suchen Sie die Adresse» in der Einleitung, aber «Adresse suchen (optional)» am Feld. Unverändert. |
+| P-5 | Minor | Neues Gebäude, Hinweis «schon erfasst» | Suche ich dieselbe Adresse noch einmal, warnt mich ein gelber Kasten: «Diese Adresse ist schon als Gebäude «Rautistrasse 150» erfasst.» Dazu kommt ein Link zum Öffnen. Gut! Darunter steht aber unverändert der blaue Hauptknopf «Gebäude und Wohnungen erstellen», und das ganze Formular samt Wohnung ist wieder ausgefüllt. Ein Klick aus Gewohnheit, und ich hätte das Haus doppelt (Speichern habe ich nicht ausprobiert). |
+| P-6 | Nit | Neues Gebäude, nach der Übernahme | Der blaue Hinweis «Das Gebäuderegister enthält nur Wohnungen. Erfassen Sie Läden, Büros und andere vermietete Räume …» erscheint auch bei meinem Einfamilienhaus. Er stört nicht, betrifft mich aber nicht. Er sieht genau gleich aus wie die Meldung «Keine Adresse gefunden», deshalb habe ich kurz gedacht, etwas sei schiefgelaufen. |
+| P-7 | Nit | Neues Gebäude, «Wohnungen aus dem Gebäuderegister» | Das Feld «Fläche» zeigt «123» ohne Einheit. Erst auf der Gebäudeseite steht «123 m²». |
+| P-8 | Nit | Gebäudeseite nach dem Speichern | Die Meldung lautet nur «Gebäude «Rautistrasse 150» gespeichert». Dass die Wohnung auch angelegt wurde, sehe ich erst in der Liste darunter. |
+
+### Beobachtungen (Runde 2)
+
+- Auf der Übersicht fehlt «Gebäude erfassen» bei «Häufige Arbeiten» weiterhin. Ich ging über «3 Gebäude» bzw. «Gebäude» in der Navigation und dann «Gebäude erfassen».
+- Die Trefferliste erscheint direkt beim Tippen unter dem Feld: «Rautistrasse 150 8048 Zürich (ZH)» und «Rautistrasse 150a 8048 Zürich (ZH)». Ich hatte «8047» im Kopf. Das Register sagt 8048, und Dwello übernimmt 8048. Ob meine Erinnerung oder das Register stimmt, prüfe ich im Kaufvertrag nach. Einen Hinweis, dass die PLZ von meiner Eingabe abweicht, gibt es nicht, aber ich habe die PLZ ja auch nirgends eingegeben, nur gesucht.
+- Nach der Auswahl war alles ausgefüllt: Name, Strasse, PLZ 8048, Ort, Kanton Zürich (ZH), Gebäudetyp Einfamilienhaus, Baujahr 1839 und darunter der neue Block «Wohnungen aus dem Gebäuderegister» mit Wohnung 1 (Häkchen «Wohnung übernehmen», Nummer 1, EG, Fläche 123, 5 Zimmer). Der Knopf heisst dann «Gebäude und Wohnungen erstellen». So wusste ich, dass beides gespeichert wird.
+- Die beiden Sätze über den Wohnungen helfen: «Prüfen Sie die Angaben: Gemeinde oder Kanton tragen sie ins Register ein, sie können veraltet sein.» und «Lassen Sie nur Wohnungen weg, die es nicht mehr gibt. Wohnungen, die Sie selbst nutzen oder die leer stehen, gehören dazu: ihren Anteil tragen Sie.» Damit verstehe ich auch, warum mein Haus eine «Wohnung» braucht. Das war in Runde 1 mein Fehlerrisiko.
+- «Im Register ohne halbe Zimmer: bitte prüfen» bei der Zimmeranzahl: kurz und verständlich.
+- Gebäudeseite nach dem Speichern: Adresse «Rautistrasse 150, 8048 Zürich (ZH)», Einfamilienhaus, Baujahr 1839, «Wohnungen: 1, davon 0 vermietet und 1 leer», Liste mit «EG» und dem Eintrag «Wohnung 1, 5 Zimmer, 123 m², Leer». Als nächsten Schritt sehe ich einen Mieter bzw. Mietvertrag. Der Block «Tankbestand» ist weiterhin lang (wie in Runde 1).
+- Suche ohne Treffer «Rautisrasse 999 Zürich»: Ein blauer Kasten unter dem Feld sagt «Keine Adresse gefunden. Prüfen Sie Strasse, Hausnummer und Ort oder erfassen Sie das Gebäude von Hand.» Ich weiss, was zu tun ist: zuerst den Tippfehler suchen, sonst unten von Hand ausfüllen. Auf dem Handy bricht der Text sauber um, ohne seitliches Scrollen (scrollWidth 390).
+- Die Suche läuft beim Tippen. Ich musste weder Enter drücken noch einen Knopf suchen.
+
+### Aufgabe geschafft (Runde 2): ja
+
+Das Haus ist mit allem gespeichert, was das Register weiss: Gebäude und eine Wohnung (`/buildings/8cb04271-d57a-4ebe-b557-d6ac5db0f889`, «Rautistrasse 150»). Die Suche ohne Treffer habe ich gesehen und verstanden.
+
+### Aufwand (Runde 2)
+
+Etwa 3 Minuten für die eigentliche Aufgabe, 6 Schritte: Übersicht, «Gebäude», «Gebäude erfassen», Adresse tippen, Treffer wählen, angezeigte Angaben prüfen und «Gebäude und Wohnungen erstellen». Danach noch die Suche ohne Treffer (Desktop und Handy) und die Suche nach der bereits erfassten Adresse.
+
+### Ablauf (Runde 2)
+
+1. **Übersicht.** Erwartet: «Gebäude erfassen». Gesehen: wie in Runde 1 nicht bei «Häufige Arbeiten». Weg über «Gebäude» in der Navigation (`01-uebersicht.png`).
+2. **Neues Gebäude.** Erwartet: dasselbe Formular wie in Runde 1. Gesehen: dasselbe Formular, Knopf «Gebäude erfassen» (`02-neu.png`).
+3. **«Rautistrasse 150 Zürich» tippen.** Erwartet: Treffer. Gesehen: Liste «Gefundene Adressen» mit 150 und 150a, beide 8048 Zürich (ZH) (`03-treffer.png`).
+4. **Treffer «Rautistrasse 150» wählen.** Erwartet: Adresse ausgefüllt, vielleicht die Wohnung. Gesehen: alles ausgefüllt, inklusive Name, Typ, Baujahr und Wohnung 1. Der Knopf heisst jetzt «Gebäude und Wohnungen erstellen» (`04-uebernommen.png`).
+5. **Speichern.** Erwartet: Bestätigung, Haus mit Wohnung. Gesehen: Gebäudeseite, Meldung «Gebäude «Rautistrasse 150» gespeichert», 1 Wohnung leer (`05-gespeichert.png`).
+6. **Suche «Rautisrasse 999 Zürich».** Erwartet: «nichts gefunden» mit Rat. Gesehen: «Keine Adresse gefunden. Prüfen Sie … oder erfassen Sie das Gebäude von Hand.» (`06-keintreffer-desktop.png`, `06-keintreffer-mobile.png`).
+7. **Gleiche Adresse noch einmal suchen und wählen.** Erwartet: eine Warnung. Gesehen: gelber Kasten «schon erfasst» mit Link. Der Hauptknopf zum Erstellen bleibt aber aktiv (`07-doppelt.png`, P-5).
+
+### Verwirrung (Runde 2)
+
+- PLZ 8048 statt meiner 8047: Ich vertraue dem Register mehr als mir. Das Register warnt aber selbst, dass es veraltet sein kann.
+- Der blaue Hinweis zu Läden und Büros bei einem Einfamilienhaus (P-6).
+- «Fläche» ohne m² (P-7).
+- «GWR» verstehe ich dank des Satzes daneben jetzt besser, weil ich sehe, was übernommen wird.
+
+### Fehlerrisiken (Runde 2)
+
+- Doppelt erfasstes Gebäude trotz Warnung (P-5).
+- Ein Baujahr wie 1839 oder ein Stockwerk übernehme ich ungeprüft, weil alles schon ausgefüllt ist. Der Satz «Prüfen Sie die Angaben» steht nur bei den Wohnungen, nicht bei Gebäudetyp und Baujahr.
+- Ohne Treffer bleibt der Weg von Runde 1 mit P-2 und P-3.
+
+### Vorschläge (Runde 2)
+
+- **P-2 (von Hand):** Reproduktion: Suche ohne Treffer, dann unten von Hand ausfüllen und speichern, ohne Namen. Hilfreich: wie beim Treffer den Namen aus «Strasse und Hausnummer» vorschlagen, wenn das Feld leer ist.
+- **P-3:** Reproduktion: «Rautisrasse 999 Zürich» suchen, dann den Kanton ansehen. Hilfreich: «Wird mit der Adresssuche ausgefüllt. Ohne Treffer wählen Sie ihn selbst.»
+- **P-4:** wie in Runde 1.
+- **P-5:** Reproduktion: Gebäude «Rautistrasse 150» aus dem Register speichern, dann auf `/buildings/new` erneut «Rautistrasse 150 Zürich» suchen und den Treffer wählen. Hilfreich: Bei dieser Warnung ist «… öffnen» die Hauptaktion und das Erstellen nur zweitrangig (oder mit Rückfrage «Trotzdem ein zweites Gebäude erstellen?»).
+- **P-6:** Reproduktion: Treffer eines Einfamilienhauses wählen. Hilfreich: Den Hinweis nur bei Mehrfamilien-, Geschäfts- oder Mischbauten zeigen oder ihn als normalen Hilfetext statt als Kasten setzen.
+- **P-7:** Hilfreich: Feld «Fläche (m²)» oder ein Hilfetext «in m²».
+- **P-8:** Hilfreich: «Gebäude «Rautistrasse 150» mit 1 Wohnung gespeichert».
+
+### Nicht geprüft (Runde 2)
+
+- Ein doppeltes Gebäude tatsächlich speichern (P-5): Ich wollte keinen zweiten Datensatz anlegen. Ob Dwello das ablehnt, weiss ich darum nicht.
+- Eine Wohnung abwählen («Wohnung übernehmen» ausschalten) oder Werte vor dem Speichern ändern: Bei meinem Haus mit einer Wohnung hatte ich keinen Anlass dazu.
+- Ein Mehrfamilienhaus mit vielen Wohnungen aus dem Register.
+- Den ganzen Ablauf mit Treffer auf dem Handy: Dort habe ich nur die Suche ohne Treffer angesehen.
+- Ein nicht erreichbares Register in dieser Runde (das war Runde 1).

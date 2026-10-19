@@ -69,3 +69,87 @@ Rund 25 Minuten, 12 Skriptläufe. Vom Seitenanfang bis zur Suche: Sprunglink und
 - Die ganze Wohnungsliste: Gruppen pro Wohnung, «Wohnung übernehmen», eine Wohnung weglassen, Wohnungsnummer, Stockwerk, Fläche, Zimmeranzahl, die Markierung «Fehlt im Gebäuderegister», die Hinweise und die Fehler in einem Wohnungsfeld beim Absenden. Grund wie oben.
 - Ob «Gebäudename» bei einem Treffer vorausgefüllt wird.
 - Bitte erneut laufen lassen, sobald das Backend im Persona-Stack geo.admin.ch erreicht.
+
+---
+
+# Runde 2
+
+Neue Datenbank, gleicher Aufbau wie in Runde 1: Desktop 1440 × 900, nur Tastatur, beurteilt nach dem Accessibility-Tree (fokussiertes Element mit Name, Rolle, Wert, `aria-invalid`, `aria-expanded`, `aria-activedescendant`, Gruppe und Beschreibung, dazu die Live-Bereiche der Seite und `ariaSnapshot`). Nur angeschaut: Abgeschickt habe ich nur Formulare mit Fehlern, gespeichert wurde nichts. Skripte und Screenshots: `/tmp/claude-0/-home-user-Dwello/7dafbd2e-3753-5fd4-bcb4-6211ba03db69/scratchpad/sven-479/r2/`.
+
+Diesmal antwortete das Gebäuderegister (`GET /api/addresses?q=…` mit 200), der Browser fragte wieder nur `localhost:3300`.
+
+## Befunde (Runde 2)
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-1 | erledigt | Neues Gebäude, Adresssuche | Die Hinweise stehen jetzt in einem `aria-live="polite"`-Bereich und werden angesagt: nach der Wahl «Das Gebäuderegister enthält nur Wohnungen. …», bei einem Treffer ohne Wohnungen «Im Gebäuderegister sind keine Wohnungen erfasst. …», ohne Treffer «Keine Adresse gefunden. Prüfen Sie …». Die Meldung «nicht erreichbar» konnte ich nicht auslösen (siehe Nicht geprüft). |
+| P-2 | Major | Neues Gebäude, Absenden mit Fehlern in Wohnungen | Unverändert aus Runde 1, jetzt aber mit mehr Folgen: Nach «Zum Inhalt springen» (URL `#main-content`) landet der Fokus nach dem Absenden auf `main`, nicht auf dem ersten fehlerhaften Feld. Der Fehler steckt diesmal in «Wohnung 40300 › Fläche», rund 30 Tabs weiter unten, und ich höre nur «Hauptbereich». Nichts sagt, dass und wo etwas falsch ist. Ohne Sprunglink ist alles richtig. |
+| P-3 | erledigt | Neues Gebäude, Adresssuche | «Suche löschen» leert das Feld, der Fokus bleibt in der Combobox. |
+| P-4 | Minor | Neues Gebäude, Adresssuche | Wenn die Trefferliste aufgeht, wird nichts angesagt (keine Anzahl wie «8 Adressen gefunden»). Nur `aria-expanded` wechselt auf `true`. Ich weiss nicht, ob und wie viele Treffer da sind, bis ich Pfeil nach unten drücke. |
+| P-5 | Minor | Neues Gebäude, Wohnungen aus dem Gebäuderegister | Die zwei Hinweise der Gruppe «Wohnungen aus dem Gebäuderegister» («Prüfen Sie die Angaben: …» und «Lassen Sie nur Wohnungen weg, die es nicht mehr gibt. … ihren Anteil tragen Sie.») hängen weder an der Gruppe noch am Kontrollkästchen. Wer mit Tab durchgeht, hört nur «Wohnung 40100, Gruppe, Wohnung übernehmen, Kontrollkästchen, aktiviert». Gerade der zweite Hinweis hat Folgen für die Kosten. Auch dass 14 Wohnungen übernommen wurden, sagt niemand an. |
+| P-6 | Minor | Neues Gebäude, Wohnungen aus dem Gebäuderegister | Das Feld heisst nur «Fläche», ohne Einheit, sichtbar wie vorgelesen. Dass m² gemeint sind, erfahre ich erst aus der Fehlermeldung («Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.»). |
+| P-7 | Minor | Neues Gebäude, Wohnungen aus dem Gebäuderegister | Bei Schrattenweg 5, Langnau i. E., hört sich das so an: «Wohnungsnummer, EG, Fehlt im Gebäuderegister». Das Feld hat einen Wert, die Beschreibung sagt aber, er fehle. Ich weiss nicht, ob Dwello «EG» eingesetzt hat und ob ich etwas tun muss. Der Hinweis sagt nicht, was zu tun ist. |
+
+## Beobachtungen (Runde 2)
+
+- Die Combobox funktioniert gut mit der Tastatur: Pfeil nach unten setzt `aria-activedescendant` auf den ersten Treffer, die Listbox heisst «Gefundene Adressen», und die Optionen haben verständliche Namen («Bernastrasse 10 3005 Bern (BE)»). Mit Enter wird gewählt, der Fokus bleibt im Feld, `aria-expanded` geht wieder auf `false`.
+- «Bernstrasse 10, 3005 Bern» gibt es nicht. Der erste Treffer ist «Bernastrasse 10». Für mich ist das in Ordnung, weil die Optionen vorgelesen werden.
+- Nach der Wahl sind Gebäudename, Strasse, PLZ, Ort, Kanton (Bern) und Gebäudetyp (Mehrfamilienhaus) ausgefüllt, darunter 14 Gruppen «Wohnung 40100» bis «Wohnung 43300». Jede Gruppe hat einen Namen, und die fünf Felder sind beschriftet. Die Gruppennamen sind die Registernummern. Das ist eindeutig, sagt mir aber wenig über die Lage.
+- «Wohnung übernehmen» mit Leertaste abwählen: Die Felder der Wohnung werden `disabled`, Tab springt direkt zur nächsten Wohnung. Das ist ruhig und verständlich. Nach dem Absenden mit Fehlern bleibt die Wohnung abgewählt.
+- «Im Register ohne halbe Zimmer: bitte prüfen» hängt als Beschreibung an «Zimmeranzahl» und wird vorgelesen. Gut.
+- Fehler beim Absenden (ohne Sprunglink): Der Fokus geht auf «Wohnung 40300 › Fläche», `aria-invalid=true`, Beschreibung «Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.». Die leere Wohnungsnummer in «Wohnung 40400» ist ebenfalls ungültig, mit der Beschreibung «Wohnungsnummer ist erforderlich.». Beide Meldungen sagen, was zu tun ist. Eine Zusammenfassung («2 Angaben sind falsch») gibt es weiterhin nicht. Die zweite finde ich nur durch Weitertabben.
+- Bis zum Knopf «Gebäude und Wohnungen erstellen» sind es nach der Wahl rund 70 Tabs (14 Wohnungen × 5). Der Knopf sagt nicht, wie viele Wohnungen erstellt werden.
+- «Suche löschen» nach einer Wahl lässt die übernommenen Felder, die 14 Wohnungen und den Hinweis «Das Gebäuderegister enthält nur Wohnungen …» stehen. Gesagt wird dabei nichts. Ich hatte erwartet, dass «löschen» auch die übernommenen Wohnungen entfernt, oder dass mir jemand sagt, dass sie bleiben. Suche ich danach eine Adresse ohne Treffer, steht «Keine Adresse gefunden» neben den Wohnungen der alten Adresse.
+- Escape in der Combobox leert das Feld nicht. Das ist unauffällig.
+- Die Kanton-Beschreibung «Wird mit der Adresssuche ausgefüllt.» stimmt diesmal, weil die Suche geht.
+
+## Aufgabe geschafft: ja
+
+Suche, Wahl, Durchgehen der Wohnungen, eine Wohnung weglassen und Absenden mit «abc» als Fläche und einer leeren Wohnungsnummer: alles mit der Tastatur geschafft. Die Ansage der Hinweise habe ich geprüft. Einschränkung: Mit dem Sprunglink davor findet der Fokus den Fehler nicht (P-2).
+
+## Aufwand (Runde 2)
+
+Rund 20 Minuten, 9 Skriptläufe. Bis zur Suche: Sprunglink und 3 Tabs (ohne Sprunglink 20 Tabs). Treffer wählen: Pfeil nach unten und Enter. Bis zum Absenden rund 70 weitere Tabs.
+
+## Ablauf (Runde 2)
+
+1. **`/buildings/new`, Sprunglink, 3 Tabs.** Erwartet: die Combobox. Gesehen: «Adresse suchen (optional)», Combobox, Gruppe «Adresse», mit der langen Beschreibung zum GWR. Wie in Runde 1.
+2. **«Bernstrasse 10, 3005 Bern» getippt.** Erwartet: Ansage der Treffer. Gesehen: `aria-expanded=true`, Listbox «Gefundene Adressen» mit 8 Optionen, aber kein Text im Live-Bereich (P-4).
+3. **Pfeil nach unten, Enter.** Erwartet: Wahl und Ansage, was übernommen wurde. Gesehen: Nach rund 0,5 s sagt der Live-Bereich «Das Gebäuderegister enthält nur Wohnungen. Erfassen Sie Läden, Büros und andere vermietete Räume nach dem Speichern als eigene Wohnung.» Der Fokus bleibt im Feld mit dem Wert «Bernastrasse 10, 3005 Bern». Gut. Dass 14 Wohnungen da sind, wird nicht gesagt (P-5).
+4. **Durch Adresse und Weitere Angaben tabben.** Alles ausgefüllt und richtig beschriftet.
+5. **In die Wohnungen tabben.** Erwartet: die Hinweise zum Weglassen. Gesehen: direkt «Wohnung 40100» › «Wohnung übernehmen» (aktiviert) › «Wohnungsnummer 40100» › «Stockwerk EG» › «Fläche 35» › «Zimmeranzahl 2» mit dem Hinweis zu halben Zimmern. Die zwei Gruppenhinweise kommen nicht (P-5), die Einheit der Fläche fehlt (P-6).
+6. **«Wohnung 40200», Leertaste.** Erwartet: abgewählt, Felder inaktiv. Gesehen: genau das, Tab springt zu «Wohnung 40300» (Screenshot `03-weggelassen.png`: Kästchen leer, die vier Felder grau).
+7. **«Wohnung 40300 › Fläche» auf «abc», «Wohnung 40400 › Wohnungsnummer» geleert, Tab bis zum Knopf, Enter** (mit Sprunglink). Erwartet: Fokus auf «Fläche» mit Fehlermeldung. Gesehen: `POST /buildings/new` antwortet 200, die Seite bleibt, der Fokus liegt auf `main`, und die URL behält `#main-content` (P-2). Visuell sind beide Felder rot markiert und haben ihre Meldung (Screenshot `04-fehler.png`). Der nächste Tab führt zum Brotkrümel «Gebäude», also an den Seitenanfang.
+8. **Dasselbe ohne Sprunglink.** Gesehen: Fokus auf «Fläche» in Wohnung 40300, ungültig, «Geben Sie die Fläche als Zahl in m² ein, z. B. 72.5.». So soll es sein.
+9. **«Suche löschen».** Gesehen: Feld leer, Fokus in der Combobox (P-3 erledigt). Die übernommenen Angaben und Wohnungen bleiben (siehe Beobachtungen).
+10. **Suche ohne Treffer («Xyzqwstrasse 999 Nirgendwo»).** Gesehen: Live-Bereich «Keine Adresse gefunden. Prüfen Sie Strasse, Hausnummer und Ort oder erfassen Sie das Gebäude von Hand. …» (P-1 erledigt).
+11. **Andere Treffer, um «Fehlt im Gebäuderegister» zu finden.** Unter den Berner Treffern gab es keinen. Bei Schrattenweg 5, 3550 Langnau im Emmental, fand ich «Wohnung EG» mit «Wohnungsnummer EG» und der Beschreibung «Fehlt im Gebäuderegister» (Screenshot `05-fehlt.png`), siehe P-7. Das Feld ist per `aria-required=true` als Pflichtfeld markiert.
+
+## Verwirrung (Runde 2)
+
+- «Fehlt im Gebäuderegister» an einem Feld, das einen Wert hat (P-7).
+- «Fläche» ohne Einheit (P-6).
+- «Wohnung 40100»: Ich höre eine fünfstellige Nummer statt einer Lage wie «EG links». Das ist die Registernummer. Dank Stockwerk lässt sich die Wohnung aber zuordnen.
+- «Suche löschen» löscht nur den Suchtext, nicht die übernommenen Angaben.
+
+## Fehlerrisiken (Runde 2)
+
+- Nach dem Sprunglink abgeschickt, Fokus auf «Hauptbereich»: Ich halte das Gebäude für erstellt, obwohl es zwei Fehler gibt (P-2).
+- Ich wähle eine leer stehende oder selbst genutzte Wohnung ab, weil ich den Hinweis «Lassen Sie nur Wohnungen weg, die es nicht mehr gibt» beim Tabben nie höre (P-5).
+- Ich trage die Fläche in einer anderen Einheit oder mit «m²» ein (P-6).
+- Ich übernehme die Wohnungsnummer «EG» ungeprüft, weil unklar ist, ob sie stimmt (P-7).
+
+## Vorschläge (Runde 2)
+
+- **P-2:** `/buildings/new`, «Zum Inhalt springen», Adresse «Bernstrasse 10, 3005 Bern» wählen, in «Wohnung 40300» als Fläche «abc» eintragen, abschicken. Der Fokus liegt auf `main`. Der Fokus sollte wie ohne Sprunglink auf dem ersten fehlerhaften Feld landen. Eine Fehlerzusammenfassung mit Links zu den Feldern würde zusätzlich helfen.
+- **P-4:** In der Combobox eine Adresse tippen. Es kommt keine Ansage. Die Anzahl der Treffer gehört in den bestehenden Live-Bereich («8 Adressen gefunden. Mit Pfeil nach unten wählen.»).
+- **P-5:** Eine Adresse mit Wohnungen wählen und in die Wohnungen tabben. Die Gruppenhinweise kommen nicht. Hilfreich wäre `aria-describedby` der Gruppe «Wohnungen aus dem Gebäuderegister» (oder des ersten Kontrollkästchens) auf die beiden Hinweise und ein Satz im Live-Bereich nach der Wahl, z. B. «14 Wohnungen aus dem Gebäuderegister übernommen».
+- **P-6:** Feld «Fläche» in einer Wohnung fokussieren. Es fehlt die Einheit. «Fläche in m²» als Beschriftung oder eine Beschreibung «in m², z. B. 72.5» würde helfen.
+- **P-7:** «Hauptstrasse 5 Langnau» suchen, ersten Treffer (Schrattenweg 5) wählen, zu «Wohnung EG › Wohnungsnummer» tabben. Gehört wird «EG, Fehlt im Gebäuderegister». Der Hinweis sollte sagen, woher der Wert kommt und was zu tun ist, z. B. «Fehlt im Gebäuderegister. Dwello hat das Stockwerk eingesetzt, bitte prüfen.».
+
+## Nicht geprüft (Runde 2)
+
+- Die Ansage «Das Gebäuderegister ist gerade nicht erreichbar» im neuen Live-Bereich und ihr Verschwinden nach «Suche löschen». Das Register antwortete, und der Auftrag nannte keine Anfrage, die ich fehlschlagen lassen sollte. Dass Hinweise im selben Bereich angesagt werden, zeigen die Meldungen «Keine Adresse gefunden» und «keine Wohnungen erfasst».
+- «Fehlt im Gebäuderegister» bei Fläche, Stockwerk oder Zimmeranzahl: Ich fand den Hinweis nur bei einer Wohnungsnummer.
+- Wie eine echte Sprachausgabe (NVDA, VoiceOver) die Live-Bereiche und Gruppen wirklich vorliest. Beurteilt habe ich nur den Accessibility-Tree.
+- Erfolgreiches Speichern: Der Auftrag war, nur anzuschauen.
