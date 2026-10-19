@@ -1816,6 +1816,15 @@ Branch `ccr-240d3fd7-ogc0me`. A second session solved #424 in parallel; #438 sol
 
 Files: `src/routes/{apartments,apartments/new,invoices,invoices/new,invoices/[id]/edit,contracts,statements,statements/generate}/+page.server.ts`, `src/__tests__/invoices.test.ts`, `docs/design/offene-punkte.md`, `docs/reviews/workflow-notes-issue-424.md`.
 
+## Session L2: Tests of the building limit (C-1, C-3 of #440)
+
+Branch `ccr-240d3fd7-ogc0me`. Product owner 2026-10-19: «Setze C1 und C3 um» (closing review of #440).
+
+- [x] C-1: `building-lists-load.test.ts` checks `buildings?limit=1000` in all eight loads (seen red with the contracts load set back to 100); it replaces the invoice-only test in `invoices.test.ts`
+- [x] C-3: the test name says the limit («bis zu 1000 Gebäude, nicht nur die ersten 20 des Backends»)
+- [x] PR, «No scenario: tests only»
+
+Files: `src/__tests__/building-lists-load.test.ts`, `src/__tests__/invoices.test.ts`.
 ## Session R1: «Found» names where you looked
 
 Branch `ccr-9b88c9f2-p44e0b`. Review of the instructions against the Opus 5.5 guide (product owner 2026-10-19): point 2, «Found» also says where an unconfirmed point was looked for, as the «Nicht bestätigt» of `code-reviewer` and `fach-reviewer` already does.
