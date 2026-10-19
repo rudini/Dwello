@@ -68,5 +68,17 @@ describe('Vereinbarte Nebenkosten im Mietvertrag', () => {
 		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain(
 			'Kreuzen Sie die Nebenkosten an, für die der Mieter Akonto bezahlt.'
 		);
+		// the Pauschale sentence would contradict it (fach-review 444 V-1)
+		expect(byTestId('contract-agreed-costs-none')!.textContent).not.toContain(
+			'lassen Sie die Häkchen leer'
+		);
+		document.body.innerHTML = '';
+
+		boxes([], false, true);
+		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain('Er bezahlt aber ein Akonto.');
+		document.body.innerHTML = '';
+
+		boxes([]);
+		expect(byTestId('contract-agreed-costs-none')!.textContent).not.toContain('Akonto');
 	});
 });

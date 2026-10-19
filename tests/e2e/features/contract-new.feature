@@ -220,7 +220,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann warnt das Formular nicht mehr zur Nebenkostenpauschale
 
   # #444 (Helga 432 P-2): mit Akonto und ohne Häkchen rechnet Dwello dem Mieter keine Nebenkosten ab
-  @wip
   Szenario: Mit Akonto und ohne angekreuzte Nebenkosten warnt das Formular
     Angenommen der Liegenschaftsverwalter erfasst einen Mietvertrag für die Wohnung "2.01"
     Wenn der Liegenschaftsverwalter für "Anna Keller" ab "2027-01-01" bis zur Miete weitergeht

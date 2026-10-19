@@ -35,7 +35,7 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 ### #444 Akonto without agreed Nebenkosten
 
 - [x] @wip scenario «Mit Akonto und ohne angekreuzte Nebenkosten warnt das Formular» (`contract-new.feature`)
-- [ ] fach-reviewer on the scenario and the proposed sentence before implementing; product owner confirms the wording
-- [ ] `AgreedCategories.svelte`: caution tone and the Akonto sentence when an Akonto is entered; DOM test; texts in all four languages
+- [x] fach-reviewer on the scenario and the proposed sentence before implementing (`docs/reviews/444-fachreview-1.md`); product owner confirmed the wording (recorded in #444)
+- [x] `AgreedCategories.svelte`: caution tone and the Akonto variant text when an Akonto is entered; DOM test; texts in all four languages; axe and language state `agreed-costs-none-advance`
 - [ ] Slice review, feature review (persona Helga)
 - [ ] PR `Fixes #444`

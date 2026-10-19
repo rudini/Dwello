@@ -9,12 +9,14 @@
 		categories,
 		agreed = $bindable(),
 		help,
-		flatRate = false
+		flatRate = false,
+		advance = false
 	}: {
 		categories: { id: string; name: string }[];
 		agreed: string[] | undefined;
 		help: string;
 		flatRate?: boolean; // a Nebenkostenpauschale: no box may be right, so no warning (persona Helga 429 P-1)
+		advance?: boolean; // an Akonto: no box is wrong even with a Pauschale, the Akonto is all paid back (#444)
 	} = $props();
 
 	const isAgreed = (id: string) => agreed?.includes(id) ?? true;
@@ -50,11 +52,15 @@
 	<div role="status">
 		{#if agreed?.length === 0}
 			<Alert
-				tone={flatRate ? 'info' : 'caution'}
+				tone={flatRate && !advance ? 'info' : 'caution'}
 				title={m.contracts_agreed_costs_none_title()}
 				testid="contract-agreed-costs-none"
 			>
-				<p>{m.contracts_agreed_costs_none_text()}</p>
+				<p>
+					{advance
+						? m.contracts_agreed_costs_none_text_advance()
+						: m.contracts_agreed_costs_none_text()}
+				</p>
 			</Alert>
 		{/if}
 	</div>
