@@ -106,6 +106,15 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Dann meldet der Assistent bei den vereinbarten Nebenkosten "Dwello konnte nicht prüfen, ob die Mietverträge alle Nebenkosten dieser Periode vereinbaren."
     Und bleibt der Assistent beim Schritt mit der Verwaltungspauschale
 
+  # #439: «Weiter» ohne fertige Prüfung bleibt nicht stumm
+  Szenario: Weitergehen ohne geprüfte Mietverträge sagt, worauf der Assistent wartet
+    Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"
+    Und das Prüfen der vereinbarten Nebenkosten ist gestört
+    Und der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale geöffnet
+    Wenn der Liegenschaftsverwalter weitergeht
+    Dann erklärt der Assistent "Es geht erst weiter, wenn Dwello die Mietverträge geprüft hat."
+
   # M-2 der Fachreview: das PDF nennt die vereinbarten Kategorien, die es abrechnet, nicht jede angekreuzte
   Szenario: Das PDF nennt die vereinbarten Nebenkosten
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

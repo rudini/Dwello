@@ -774,6 +774,7 @@
 	"statements_agreements_failed_title": "Vereinbarte Nebenkosten nicht geprüft",
 	"statements_agreements_failed_text": "Dwello konnte nicht prüfen, ob die Mietverträge alle Nebenkosten dieser Periode vereinbaren. Ohne diese Prüfung geht es nicht weiter. Wählen Sie «Erneut versuchen».",
 	"statements_agreements_retry": "Erneut versuchen",
+	"statements_agreements_wait": "Es geht erst weiter, wenn Dwello die Mietverträge geprüft hat.",
 	"statements_agreement_question": "Ist «{category}» im Mietvertrag von {tenant} (Wohnung {apartment}) vereinbart?",
 	"statements_agreement_yes": "Vereinbart",
 	"statements_agreement_no": "Nicht vereinbart",

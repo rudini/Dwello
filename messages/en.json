@@ -774,6 +774,7 @@
 	"statements_agreements_failed_title": "Agreed utility costs not checked",
 	"statements_agreements_failed_text": "Dwello could not check whether the rental contracts agree all utility costs of this period. You cannot go on without this check. Choose «Try again».",
 	"statements_agreements_retry": "Try again",
+	"statements_agreements_wait": "You can go on once Dwello has checked the rental contracts.",
 	"statements_agreement_question": "Is «{category}» agreed in the rental contract of {tenant} (apartment {apartment})?",
 	"statements_agreement_yes": "Agreed",
 	"statements_agreement_no": "Not agreed",

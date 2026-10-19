@@ -774,6 +774,7 @@
 	"statements_agreements_failed_title": "Spese accessorie pattuite non verificate",
 	"statements_agreements_failed_text": "Dwello non ha potuto verificare se i contratti di locazione prevedono tutte le spese accessorie di questo periodo. Senza questa verifica non si può proseguire. Scelga «Riprova».",
 	"statements_agreements_retry": "Riprova",
+	"statements_agreements_wait": "Potrà proseguire quando Dwello avrà verificato i contratti di locazione.",
 	"statements_agreement_question": "«{category}» è pattuita nel contratto di locazione di {tenant} (appartamento {apartment})?",
 	"statements_agreement_yes": "Pattuita",
 	"statements_agreement_no": "Non pattuita",
