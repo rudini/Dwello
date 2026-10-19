@@ -606,7 +606,7 @@
 	"tenants_detail_purpose": "Contact details, rent, rental contracts and documents of this tenant.",
 	"tenants_export": "Export data",
 	"tenants_export_title": "Tenant’s data",
-	"tenants_export_help": "Downloads everything Dwello stores about this tenant as a ZIP file: contact details, rental contracts, statements, reminders and documents. If a tenant asks for their data (Art. 28 FADP), give them this file within 30 days. First check whether documents or notes contain other people’s data. Give the file only to the tenant in person.",
+	"tenants_export_help": "Downloads everything Dwello stores about this tenant as a ZIP file: contact details, rental contracts, statements, reminders and documents. If a tenant asks for their data (Art. 28 FADP), give them this file within 30 days. First check whether documents or notes contain other people’s data. Give the file only to the tenant themselves.",
 	"tenants_delete_title": "Delete {name}?",
 	"tenants_delete_confirm": "Delete tenant",
 	"tenants_deleted_toast": "Tenant «{name}» deleted",

@@ -131,11 +131,7 @@ Branch `ccr-01e823d6-yhj5kc`. Run 614 on `main` failed once more in Firefox (sta
 
 ### #435 Export a tenant's data (Art. 28 DSG)
 
-Proposal for the domain review (decided: a button «Daten exportieren» on the tenant page, one ZIP: master data, contracts, statements and reminders as JSON, plus uploaded documents and statement PDFs):
-- ZIP `Daten-<Nachname>-<Vorname>.zip` with `daten.json` and the files under `dokumente/` (uploads, the uploaded contract PDF, reminder letters) and `abrechnungen/<Abrechnungsnummer>.pdf`.
-- `daten.json`: export date; tenant (name, address, e-mail, phone, language, Korrespondenzkanal, earlier addresses); per Mietvertrag the apartment and building address, dates (start, end, Kündigung, Auszug, Abgerechnet bis), Nettomiete, Akonto or Pauschale, Verwaltungspauschale, agreed Nebenkosten, notes; per statement number, period, status, dates, positions, totals, Saldo, payment; per reminder level, date, Zahlungsfrist, channel, status; per document title, file name, date. Keys in English, values as stored.
-- Statement PDFs: every statement that is not a draft (a draft only in `daten.json`); the PDF as the tenant received it. Replaced statements included.
-- Open for the review: drafts in the export at all; reminder letters as files; a Protokoll entry for the export.
+Decided in #435 and the domain review (`docs/reviews/435-fachreview-1.md`): one ZIP, named and foldered in the tenant's language (`Daten-…`, `daten.json`, `dokumente/`, `abrechnungen/`); `daten.json` with English keys, no internal ids, no Base64; drafts only as data; each statement's PDF as the tenant received it (e-mailed copy, else the stored PDF, else none, never made by the export); uploads and reminder letters as files; no Protokoll entry; no glossary row.
 
 - [x] @wip scenario «Daten eines Mieters exportieren» (`tenants.feature`), committed; fach-reviewer before the implementation
 - [x] Steps and tests red (no production code, no texts) until the review reports

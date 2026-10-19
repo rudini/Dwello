@@ -3,6 +3,7 @@ import { db } from '../db/connection';
 import { apartments, buildings, categories, documents, rentalContracts, tenants, utilityStatements } from '../db/schema';
 import { agreedCategoryIds } from './agreed-category.service';
 import { getStatement } from './statement.service';
+import { swissToday } from './today';
 
 // Folder and file names in the tenant's language: the tenant receives the ZIP, and its PDFs are in that language
 const NAMES = {
@@ -123,7 +124,7 @@ export async function exportTenant(id: string) {
 	}
 
 	const documentFile = (document: (typeof tenantDocuments)[number]) => {
-		const date = document.createdAt.toISOString().slice(0, 10);
+		const date = document.createdAt.toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 		return {
 			date,
 			file: file(names.documents, `${date} ${document.title}`, document.content, EXTENSIONS[document.mimeType] ?? 'pdf')
@@ -134,7 +135,7 @@ export async function exportTenant(id: string) {
 		fileName: `${names.zip}-${safe(tenant.lastName)}-${safe(tenant.firstName)}.zip`,
 		dataFile: names.data,
 		data: {
-			exportedOn: new Date().toISOString().slice(0, 10),
+			exportedOn: swissToday(),
 			tenant: {
 				firstName: tenant.firstName,
 				lastName: tenant.lastName,

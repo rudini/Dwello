@@ -12,6 +12,7 @@ import { idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 import { createContract, deleteContract } from '../services/contract.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
+import { swissToday } from '../services/today';
 
 type Export = {
 	fileName: string;
@@ -89,7 +90,7 @@ afterAll(async () => {
 describe('Daten eines Mieters exportieren', () => {
 	it('gibt Name, Mietvertrag, Abrechnung und Dokumente des Mieters mit ihren Dateien heraus', async () => {
 		const { data, files } = await exportOf(rental.tenant);
-		const today = new Date().toISOString().slice(0, 10);
+		const today = swissToday();
 
 		expect(data.tenant.firstName).toBe('Anna');
 		expect(data.contracts.map((contract) => contract.apartment.number)).toEqual(['2.01']);
@@ -152,7 +153,7 @@ describe('Daten eines Mieters exportieren', () => {
 			.returning({ id: documents.id });
 		try {
 			const { data, files } = await exportOf(rental.tenant);
-			const today = new Date().toISOString().slice(0, 10);
+			const today = swissToday();
 			const content = (path: string) => Buffer.from(files.find((file) => file.path === path)!.content, 'base64').toString();
 
 			expect(content(`abrechnungen/${statementNumber}.pdf`)).toContain('mailed');
@@ -177,7 +178,7 @@ describe('Daten eines Mieters exportieren', () => {
 			])
 			.returning({ id: documents.id });
 		try {
-			const today = new Date().toISOString().slice(0, 10);
+			const today = swissToday();
 			const paths = (await exportOf(rental.tenant)).files.map((file) => file.path);
 
 			expect(paths).toEqual(
@@ -198,6 +199,21 @@ describe('Daten eines Mieters exportieren', () => {
 			expect(files.map((file) => file.path.split('/')[0]).sort()).toEqual(['documents', 'décomptes']);
 		} finally {
 			await db.update(tenants).set({ language: 'de' }).where(eq(tenants.id, rental.tenant));
+		}
+	});
+
+	it('datiert ein Dokument nach dem Schweizer Tag, nicht nach UTC (Fachreview F-17)', async () => {
+		// 23:30 UTC on 1 March is already 2 March in Switzerland
+		const [late] = await db
+			.insert(documents)
+			.values({ tenantId: rental.tenant, type: 'upload', title: 'Spät', fileName: 's.pdf', content: pdf('late'), createdAt: new Date('2026-03-01T23:30:00Z') })
+			.returning({ id: documents.id });
+		try {
+			const { data } = await exportOf(rental.tenant);
+
+			expect(data.documents.find((document) => document.title === 'Spät')!.file).toBe('dokumente/2026-03-02 Spät.pdf');
+		} finally {
+			await db.delete(documents).where(eq(documents.id, late.id));
 		}
 	});
 });
