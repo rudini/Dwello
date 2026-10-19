@@ -1,12 +1,22 @@
 import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { handle } from '../hooks.server';
+import { m } from '$lib/paraglide/messages';
 
 const languages = ['de', 'fr', 'it', 'en'] as const;
 const keys = (language: string) =>
 	Object.keys(JSON.parse(readFileSync(`messages/${language}.json`, 'utf8')))
 		.filter((key) => key !== '$schema')
 		.sort();
+
+// 461-review-2, C-6: the formula variables are literal braces, escaped once as in German
+describe('Formelvariablen in den Meldungen', () => {
+	it.each(languages)('%s nennt die Variablen mit geschweiften Klammern', (locale) => {
+		expect(m.backend_formula_unknown_variable({ variable: 'persons' }, { locale })).toContain('{persons}');
+		expect(m.backend_formula_not_computable({}, { locale })).toContain('{area}');
+		expect(m.backend_formula_not_computable({}, { locale })).not.toContain('\\');
+	});
+});
 
 describe('Sprachdateien', () => {
 	it.each(languages.slice(1))('%s hat dieselben Texte wie Deutsch', (language) => {
@@ -112,7 +122,7 @@ describe('Sprachdateien', () => {
 	it.each([
 		['de', 'Ausnahme: Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor, oder Sie haben das Ende mit dem Mieter vereinbart.'],
 		['fr', 'Exception : le locataire vous présente un locataire de remplacement que vous ne pouvez raisonnablement refuser, ou vous avez convenu de la fin avec le locataire.'],
-		['it', 'Eccezione: l’inquilino le propone un inquilino sostitutivo che Lei non può ragionevolmente rifiutare, oppure Lei ha concordato la fine con l’inquilino.'],
+		['it', 'Eccezione: l’inquilino le propone un inquilino sostitutivo che Lei non possa ragionevolmente rifiutare, oppure Lei ha concordato la fine con l’inquilino.'],
 		['en', 'Exception: the tenant proposes a replacement tenant you cannot reasonably refuse, or you agreed on the end with the tenant.']
 	])('%s: der Hinweis zur kurzen Kündigungsfrist nennt den vorgeschlagenen Ersatzmieter', (language, end) => {
 		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));

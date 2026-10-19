@@ -693,7 +693,7 @@
 	"contracts_none_found": "Aucun contrat de bail trouvé",
 	"contracts_none_found_text": "Aucun contrat de bail ne correspond à la recherche et aux filtres.",
 	"contracts_none_yet": "Pas encore de contrats de bail",
-	"contracts_none_yet_text": "Un contrat de bail relie un locataire à un appartement, à partir d’une date de début et pour un loyer donné.",
+	"contracts_none_yet_text": "Un contrat de bail relie un locataire à un appartement, à partir du début du contrat et pour un loyer donné.",
 	"contracts_count_one": "{count} contrat de bail",
 	"contracts_count": "{count} contrats de bail",
 	"contracts_filter_active": "Contrats de bail en cours",

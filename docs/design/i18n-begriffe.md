@@ -65,6 +65,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Verteilschlüssel / Eigener Verteilschlüssel | clé de répartition / clé de répartition personnalisée | chiave di riparto / chiave di riparto personalizzata | distribution key / custom distribution key |
 | Wohnungsanteil | part du logement | quota appartamento | apartment share |
 | Heizprofil / Standard-Heizprofil | profil de chauffage / profil de chauffage par défaut | profilo di riscaldamento / profilo di riscaldamento predefinito | heating profile / default heating profile |
+| Vordefiniert (nicht «Standard»; Kategorien, Verteilschlüssel, Heizprofile) | prédéfini | preimpostato / preimpostata (not «predefinito», which is «Standard») | predefined |
 | Nebenkosten | frais accessoires | spese accessorie | utility costs |
 | Nebenkostenabrechnung | décompte des charges | conteggio spese accessorie | utility cost statement |
 | Abrechnung (short) | décompte | conteggio | statement |
