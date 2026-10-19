@@ -154,7 +154,8 @@
 			return m.contracts_billed_draft_covered({ number: statements[0].statementNumber });
 		if (Array.isArray(statements)) return billedDaysError(statements);
 		if (/overlap/i.test(message)) return m.backend_contract_overlap();
-		return backendMessage(details, m.contracts_save_failed()); // e.g. «Abgerechnet bis» (#453)
+		// a coded refusal in words, e.g. «Abgerechnet bis» (#453); without a code never the backend's English
+		return details?.code ? backendMessage(details, m.contracts_save_failed()) : m.contracts_save_failed();
 	}
 
 	// the fields' errors; true when the form may be sent

@@ -17,6 +17,7 @@ import { toasts } from '$lib/stores';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
+import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
 
 const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
@@ -155,6 +156,15 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Abgerechnet bis liegt vor dem Vertragsbeginn 01.01.2024.'
 		);
+	});
+
+	// code review 453-1 C-2: an answer without a code is never shown in the backend's English
+	it('zeigt eine Ablehnung ohne Code nicht auf Englisch', async () => {
+		calls = fakeBff(({ method }) => (method === 'PUT' ? [400, tenantRefused] : [200, { contracts: [] }]));
+		await open();
+		await save();
+		expect(byTestId('form-error')!.textContent).toContain('Beim Speichern ist ein Fehler aufgetreten.');
+		expect(byTestId('form-error')!.textContent).not.toContain('Tenant');
 	});
 
 	// code review C-2: a mistyped date must not clear the stored «Abgerechnet bis»

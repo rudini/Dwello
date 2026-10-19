@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const location = vi.hoisted(() => ({ url: new URL('http://localhost/contracts/new') }));
 vi.mock('$app/environment', () => ({ browser: true }));
@@ -14,6 +14,8 @@ import { toasts } from '$lib/stores';
 import { writeDraft } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import listed from '../../tests/contracts/contracts.json';
+import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
+import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
 
 const data = {
 	tenants: [
@@ -78,13 +80,17 @@ async function untilReview() {
 	next();
 }
 
+// a set day, so 2027 stays in the future and 2020 in the past (code review 453-1 C-6); only the date, timers run
 beforeEach(() => {
+	vi.useFakeTimers({ toFake: ['Date'] });
+	vi.setSystemTime(new Date('2026-06-15T10:00:00Z'));
 	localStorage.clear();
 	location.url = new URL('http://localhost/contracts/new');
 	vi.mocked(goto).mockClear();
 	toasts.set([]);
 	backend();
 });
+afterEach(() => vi.useRealTimers());
 
 describe('Mietvertrag erfassen', () => {
 	it('beginnt beim Mieter und geht ohne Mieter nicht weiter', async () => {
@@ -263,6 +269,28 @@ describe('Mietvertrag erfassen', () => {
 		expect(error).toContain('überschneidet sich mit einem anderen Mietvertrag');
 		expect(error).not.toContain('Contract');
 		expect(goto).not.toHaveBeenCalled();
+	});
+
+	// code review 453-1 C-3: the backend's clock may differ from the browser's (#453)
+	it('nennt eine codierte Ablehnung beim Speichern in Worten', async () => {
+		await untilReview();
+		fakeBff(() => [400, billedRefused]);
+		submit('submit-button');
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Abgerechnet bis liegt vor dem Vertragsbeginn 01.01.2024.'
+		);
+	});
+
+	// code review 453-1 C-2: an answer without a code is never shown in the backend's English
+	it('zeigt eine Ablehnung ohne Code nicht auf Englisch', async () => {
+		await untilReview();
+		fakeBff(() => [400, tenantRefused]);
+		submit('submit-button');
+		await settle();
+		const error = byTestId('form-error')!.textContent!;
+		expect(error).toContain('Beim Speichern ist ein Fehler aufgetreten.');
+		expect(error).not.toContain('Tenant');
 	});
 });
 
@@ -464,6 +492,17 @@ describe('Prüfungen im Mietvertrag', () => {
 		submit('submit-button');
 		await settle();
 		expect(calls.at(-1)!.body).not.toHaveProperty('billedUntil');
+	});
+
+	it('zeigt bei einem falschen «Abgerechnet bis» zuerst dessen Fehler, nicht die Rückfrage zum Vertragsbeginn', async () => {
+		await toPeriod();
+		type('start-date-input', '01.01.2020');
+		await settle();
+		type('billed-until-input', '31.12.2099');
+		next();
+		await settle();
+		expect(document.activeElement).toBe(byTestId('billed-until-input'));
+		expect(document.body.textContent).not.toContain('nochmals auf «Weiter»');
 	});
 
 	// #453 (#337): a statement exists only after its period ended; a day before the Vertragsbeginn has no effect

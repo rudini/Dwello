@@ -241,7 +241,7 @@
 			// the backend answers in English: an overlap, or «Abgerechnet bis» after the browser's today (#453)
 			errors = /overlap/i.test(response.error.message)
 				? { form: OVERLAP }
-				: { form: backendMessage(response.error.details, m.contracts_save_failed()) };
+				: { form: savedFailed(response.error.details) };
 			return;
 		}
 		touched = false;
@@ -250,6 +250,10 @@
 		addToast('success', m.contracts_saved_toast({ name: String(tenant) }), 10_000); // long enough to read at large zoom
 		await goto('/contracts');
 	}
+
+	// a coded refusal in words; without a code never the backend's English (code review 453-1 C-2)
+	const savedFailed = (details?: Record<string, unknown>) =>
+		details?.code ? backendMessage(details, m.contracts_save_failed()) : m.contracts_save_failed();
 
 	// The overlap blocks; a start in the past only asks once, so it is read out and can be confirmed
 	function periodWarnings(): Record<string, string> {
@@ -265,7 +269,8 @@
 		Object.assign(values, normalizeAmounts(values)); // in place: a new object would rerun the effects
 		if (step === contractSteps.length) return save();
 		errors = stepErrors(values, step, today);
-		if (step === 3 && !errors.startDate) errors = { ...errors, ...periodWarnings() };
+		if (step === 3 && !errors.startDate && !errors.billedUntil)
+			errors = { ...errors, ...periodWarnings() };
 		if (Object.keys(errors).length > 0) return showErrors(step);
 		goTo(step + 1);
 	}

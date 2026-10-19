@@ -93,7 +93,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.tenant('Dora');
 	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00', additionalRent: '80.00' }); // a parking space: the wizard's note after her contract names it (#144)
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
-	await seed.billedUntil('Dora', '2014-12-31'); // «Abgerechnet bis» on her page and in the form (#133)
+	await seed.billedUntil('Dora', '2015-12-31'); // «Abgerechnet bis» on her page and in the form (#133)
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
 	// moved in during 2025, invoices over different days and the change of the Tankbestand: the statement lists them
 	// with their days and the calculation (#104, #240)
