@@ -101,6 +101,19 @@ describe('Mieterdetail', () => {
 		expect(document.body.textContent).toContain('Einzug am');
 	});
 
+	// #435, domain review F-3: what the file holds, the 30 days, other persons' data and to whom it goes
+	it('lädt die Daten des Mieters herunter und sagt vorher, was dabei zu beachten ist', () => {
+		open();
+		const button = byTestId('tenant-export-button')!;
+		expect(button.getAttribute('href')).toBe('/tenants/t1/export');
+		expect(button.hasAttribute('download')).toBe(true);
+		expect(button.textContent!.trim()).toBe('Daten exportieren');
+		expect(text('tenant-export-help')).toBe(
+			'Lädt alles, was Dwello über diesen Mieter speichert, als ZIP-Datei herunter: Kontaktdaten, Mietverträge, Abrechnungen, Mahnungen und Dokumente. Verlangt ein Mieter seine Daten (Art. 28 DSG), geben Sie ihm diese Datei innert 30 Tagen. Prüfen Sie vorher, ob Dokumente oder Notizen Daten anderer Personen enthalten. Geben Sie die Datei nur dem Mieter selbst.'
+		);
+		expect(button.getAttribute('aria-describedby')).toBe(byTestId('tenant-export-help')!.id);
+	});
+
 	it('zeigt Korrespondenzkanal und Sprache', () => {
 		open();
 		expect(text('tenant-channel')).toBe('Per Brief');

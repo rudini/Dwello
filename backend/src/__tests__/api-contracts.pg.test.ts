@@ -264,6 +264,13 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('tenant'), actual)).toEqual([]);
 	});
 
+	it('GET /tenants/:id/export liefert die Felder von tenant-export.json', async () => {
+		await sendJson('POST', `/api/v1/tenants/${rental.tenant}/documents`, { title: 'Export', fileName: 'e.pdf', content: 'JVBERi0xLjQK' });
+		const actual = await (await callApi(`/api/v1/tenants/${rental.tenant}/export`)).json();
+		await db.delete(documents).where(and(eq(documents.tenantId, rental.tenant), eq(documents.title, 'Export')));
+		expect(drift(await sample('tenant-export'), actual)).toEqual([]);
+	});
+
 	it('POST /tenants/:id/documents liefert die Felder von document-uploaded.json, abgelehnt die von document-refused.json', async () => {
 		const upload = (content: Buffer) =>
 			sendJson('POST', `/api/v1/tenants/${rental.tenant}/documents`, {
