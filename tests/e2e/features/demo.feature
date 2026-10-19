@@ -19,7 +19,6 @@ Funktionalität: Öffentliche Demo
     Dann erfährt der Liegenschaftsverwalter unter "Öffentliche Demo", dass alle Besucher dieselben Daten sehen, jede Nacht alles gelöscht wird und andere Besucher seinen Namen und seine E-Mail-Adresse nicht sehen
 
   # #458 (#330): in der Demo erfasst der Betreiber alle Daten
-  @wip
   Szenario: In der Demo ist der Betreiber für alle Daten verantwortlich
     Wenn der Liegenschaftsverwalter die Datenschutzerklärung der Demo liest
     Dann nennt die Datenschutzerklärung unter "Öffentliche Demo" "In der Demo ist der Betreiber für alle Daten verantwortlich."

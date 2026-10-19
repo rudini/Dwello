@@ -65,3 +65,42 @@ describe('Nutzungsbedingungen (#82)', () => {
 		expect(document.body.textContent).not.toContain('Verwaltung ist');
 	});
 });
+
+// #458 (#347): notes, not a contract; a help on informing tenants; the date of the texts
+describe('Nutzungsbedingungen ohne Vertrag', () => {
+	const section = (title: string) =>
+		[...document.querySelectorAll('[data-testid="page-section"]')].find(
+			(one) => one.querySelector('h2')?.textContent === title
+		);
+
+	it('sagt unter «Zweck», dass die Hinweise keinen Vertrag ersetzen', () => {
+		show(TermsPage, { data: { operator: null } } as never);
+
+		expect(section('Zweck')?.textContent).toContain(
+			'Diese Hinweise ersetzen keinen Vertrag. Betreibt ein Anbieter Dwello für Sie, gelten die Vereinbarungen mit ihm.'
+		);
+	});
+
+	it('nennt die Abschnitte der Datenschutzerklärung, die der Vermieter seinen Mietern weitergeben kann', () => {
+		show(TermsPage, { data: { operator: null } } as never);
+
+		expect(section('Verantwortung für Abrechnungen')?.textContent).toContain(
+			'Sie können Ihren Mietern dazu die Abschnitte «Verantwortlich», «Welche Daten Dwello speichert», «Aufbewahrung» und «Weitergabe an Dritte» der Datenschutzerklärung weitergeben.'
+		);
+	});
+
+	// Fachreview 458-1 R-6: notes that are no contract cannot exclude a claim; the agreement with a provider decides
+	it('überlässt die zugesagte Verfügbarkeit der Vereinbarung mit dem Betreiber', () => {
+		show(TermsPage, { data: { operator: null } } as never);
+
+		const text = section('Verfügbarkeit')?.textContent;
+		expect(text).toContain('Ob er eine bestimmte Verfügbarkeit zusagt, regelt die Vereinbarung mit ihm.');
+		expect(text).not.toContain('Anspruch');
+	});
+
+	it('nennt den Stand', () => {
+		show(TermsPage, { data: { operator: null } } as never);
+
+		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 19. Oktober 2026');
+	});
+});

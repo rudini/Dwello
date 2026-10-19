@@ -26,6 +26,14 @@ describe('Anmeldeseite (Ansicht)', () => {
 		expect(body).toContain('Wie Dwello Ihre Daten bearbeitet, steht in der');
 	});
 
+	// #458 (#347): a landlord who runs Dwello himself has no contract partner, so nothing to accept
+	it('verweist auf die Nutzungsbedingungen, ohne eine Zustimmung zu verlangen', () => {
+		const body = page({});
+		expect(body).toMatch(/data-testid="login-legal"/);
+		expect(body).toContain('Was Dwello leistet und wofür Sie verantwortlich sind, steht in den');
+		expect(body).not.toContain('akzeptieren');
+	});
+
 	it('meldet einen Fehler sofort', () => {
 		const body = page({ error: 'Die Anmeldung wurde abgebrochen.' });
 		expect(body).toMatch(

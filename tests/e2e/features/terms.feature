@@ -21,14 +21,11 @@ Funktionalität: Nutzungsbedingungen
     Dann erfährt der Liegenschaftsverwalter unter "Verfügbarkeit", dass "Muster Hosting AG, Bahnhofstrasse 1, 8001 Zürich" die Installation betreibt und unter "betrieb@muster-hosting.ch" erreichbar ist
 
   # #458 (#347): der Vermieter, der Dwello selbst betreibt, hat keinen Vertragspartner
-  @wip
   Szenario: Die Hinweise ersetzen keinen Vertrag
     Dann nennen die Nutzungsbedingungen unter "Zweck" "Diese Hinweise ersetzen keinen Vertrag. Betreibt ein Anbieter Dwello für Sie, gelten die Vereinbarungen mit ihm."
 
-  @wip
   Szenario: Hilfe zum Informieren der Mieter
     Dann nennen die Nutzungsbedingungen unter "Verantwortung für Abrechnungen" "Sie können Ihren Mietern dazu die Abschnitte «Verantwortlich», «Welche Daten Dwello speichert», «Aufbewahrung» und «Weitergabe an Dritte» der Datenschutzerklärung weitergeben."
 
-  @wip
   Szenario: Stand der Nutzungsbedingungen
     Dann nennt die Seite den Stand "19. Oktober 2026"

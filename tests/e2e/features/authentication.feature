@@ -11,7 +11,6 @@ Funktionalität: Anmeldung
     Aber nicht mit "Microsoft"
 
   # #458 (#347): wer Dwello selbst betreibt, hat keinen Vertragspartner, dem er etwas akzeptieren könnte
-  @wip
   Szenario: Die Anmeldeseite verlangt keine Zustimmung zu den Nutzungsbedingungen
     Wenn ein Besucher die Anmeldeseite öffnet
     Dann liest der Besucher unter den Anbietern "Was Dwello leistet und wofür Sie verantwortlich sind, steht in den Nutzungsbedingungen."

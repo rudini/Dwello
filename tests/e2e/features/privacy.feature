@@ -59,7 +59,6 @@ Funktionalität: Datenschutz
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Sprachmodell"
 
   # #458 (#330): Verantwortung geteilt, der Vermieter für die erfassten Daten, der Betreiber für Anmeldung, Protokoll und Cookies
-  @wip
   Szenario: Der Vermieter ist für die erfassten Daten verantwortlich
     Dann nennt die Datenschutzerklärung unter "Verantwortlich" "Für die Daten, die Sie in Dwello erfassen, auch die Ihrer Mieter, sind Sie als Vermieter verantwortlich."
     Und nennt die Datenschutzerklärung unter "Verantwortlich" "Dwello wird von Muster Hosting AG, Bahnhofstrasse 1, 8001 Zürich betrieben."
@@ -67,17 +66,14 @@ Funktionalität: Datenschutz
     Und erklärt die Datenschutzerklärung unter "Verantwortlich", wer der Betreiber ist
     Und erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass ein Anbieter die erfassten Daten nur in seinem Auftrag bearbeitet und der Betreiber für Anmeldung, Protokoll des Servers und Cookies verantwortlich ist
 
-  @wip
   Szenario: Auskunft über die eigenen Daten
     Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass seine Mieter bei ihm Auskunft über ihre Daten verlangen können
 
   # #458 (#346): Rechte über die Auskunft hinaus (Art. 28, 32, 49 DSG)
-  @wip
   Szenario: Weitere Rechte der Mieter
     Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass seine Mieter bei ihm Berichtigung, Herausgabe und Löschung verlangen und eine Verletzung beim EDÖB anzeigen können
 
   # #458 (#333): OPERATOR_SERVER_COUNTRY in playwright.config.ts
-  @wip
   Szenario: Land des Servers
     Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Die Daten liegen in der Datenbank des Betreibers dieser Dwello-Installation. Der Server steht in Deutschland."
 
@@ -96,7 +92,6 @@ Funktionalität: Datenschutz
     Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass nur der Betreiber das Protokoll des Servers zur Sicherheit und Fehlersuche liest und selbst bestimmt, wie lange es aufbewahrt wird
 
   # #458 (#333): MAIL_PROVIDER_NAME und MAIL_PROVIDER_COUNTRY in playwright.config.ts; ohne sie der Text von früher (DOM-Test)
-  @wip
   Szenario: E-Mails über den Mailserver eines Anbieters
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "werden über den Mailserver von Muster Mail AG (Schweiz) zugestellt. Dabei erhält Muster Mail AG Name und E-Mail-Adresse des Mieters"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
@@ -112,6 +107,5 @@ Funktionalität: Datenschutz
     Dann erfährt der Liegenschaftsverwalter unter "Cookies", dass er Cookies im Browser ablehnen kann, sich dann aber nicht anmelden kann
 
   # #458 (#347)
-  @wip
   Szenario: Stand der Datenschutzerklärung
     Dann nennt die Seite den Stand "19. Oktober 2026"

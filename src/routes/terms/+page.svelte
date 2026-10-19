@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { formatDateLong } from '$lib/utils/format';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { PageData } from './$types';
@@ -14,11 +15,19 @@
 	);
 
 	const sections = [
-		{ id: 'purpose', title: m.terms_purpose_title(), paragraphs: [m.terms_purpose_1()] },
+		{
+			id: 'purpose',
+			title: m.terms_purpose_title(),
+			paragraphs: [m.terms_purpose_1(), m.terms_no_contract()]
+		},
 		{
 			id: 'responsibility',
 			title: m.terms_responsibility_title(),
-			paragraphs: [m.terms_responsibility_1(), m.terms_responsibility_2()]
+			paragraphs: [
+				m.terms_responsibility_1(),
+				m.terms_responsibility_2(),
+				m.terms_responsibility_3()
+			]
 		},
 		{
 			id: 'availability',
@@ -34,6 +43,10 @@
 
 <div class="flex max-w-3xl flex-col gap-8">
 	<PageHeader title={m.terms_title()} purpose={m.terms_purpose()} />
+	<!-- The day these texts last changed (#458) -->
+	<p class="text-ink-muted" data-testid="legal-as-of">
+		{m.legal_as_of({ date: formatDateLong('2026-10-19', { weekday: false }) })}
+	</p>
 
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">

@@ -30,9 +30,9 @@ export function formatCurrency(amount: number): string {
 }
 
 /** Date in words, so a wrong pick shows, e.g. "Mittwoch, 1. Januar 2025"; the words follow the UI language */
-export function formatDateLong(isoDate: string): string {
+export function formatDateLong(isoDate: string, { weekday = true } = {}): string {
 	return new Date(isoDate).toLocaleDateString(`${getLocale()}-CH`, {
-		weekday: 'long',
+		weekday: weekday ? 'long' : undefined,
 		day: 'numeric',
 		month: 'long',
 		year: 'numeric',

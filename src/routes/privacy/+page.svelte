@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
+	import { formatDateLong } from '$lib/utils/format';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { PageData } from './$types';
@@ -29,14 +30,22 @@
 				: m.privacy_llm_local()
 	);
 
-	// TODO(fachlich prüfen, #333): the SMTP provider and its country are only known to the operator
+	// The SMTP provider and its country when the operator set both (MAIL_PROVIDER_*, Art. 19 Abs. 4 DSG, #458)
+	const smtpNotice = $derived(
+		data.mailProvider
+			? m.privacy_mail_smtp_provider({
+					provider: data.mailProvider.name,
+					country: data.mailProvider.country
+				})
+			: m.privacy_mail_smtp()
+	);
 	const mailNotice = $derived<Paragraph>(
 		data.mail === 'resend'
 			? {
 					text: m.privacy_mail_resend(),
 					policy: { provider: 'Resend', href: 'https://resend.com/legal/privacy-policy' }
 				}
-			: { text: data.mail === 'smtp' ? m.privacy_mail_smtp() : m.privacy_mail_none() }
+			: { text: data.mail === 'smtp' ? smtpNotice : m.privacy_mail_none() }
 	);
 
 	// JWT_EXPIRY in its largest whole unit, e.g. «7 Tage» or «12 Stunden»
@@ -65,13 +74,25 @@
 		{
 			id: 'controller',
 			title: m.privacy_controller_title(),
-			// TODO(fachlich prüfen, #330): the operator as controller also when a provider hosts Dwello
-			paragraphs: [operator, m.privacy_controller_2(), m.privacy_controller_3()].map((text) => ({ text }))
+			// The landlord for the recorded data, the operator for sign-in, server log and cookies (#458)
+			paragraphs: [
+				operator,
+				m.privacy_controller_2(),
+				m.privacy_controller_3(),
+				m.privacy_controller_4()
+			].map((text) => ({ text }))
 		},
 		{
 			id: 'stored',
 			title: m.privacy_stored_title(),
-			paragraphs: [m.privacy_stored_1(), m.privacy_stored_2(), m.audit_privacy()].map((text) => ({ text }))
+			paragraphs: [
+				m.privacy_stored_1(),
+				m.privacy_stored_2() +
+					(data.serverCountry
+						? ` ${m.privacy_stored_country({ country: data.serverCountry })}`
+						: ''),
+				m.audit_privacy()
+			].map((text) => ({ text }))
 		},
 		{
 			id: 'retention',
@@ -128,6 +149,10 @@
 
 <div class="flex max-w-3xl flex-col gap-8">
 	<PageHeader title={m.privacy_title()} purpose={m.privacy_purpose()} />
+	<!-- The day these texts last changed (#458) -->
+	<p class="text-ink-muted" data-testid="legal-as-of">
+		{m.legal_as_of({ date: formatDateLong('2026-10-19', { weekday: false }) })}
+	</p>
 
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">
