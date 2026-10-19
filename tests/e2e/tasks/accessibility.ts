@@ -32,7 +32,7 @@ import {
 } from '../targets/invoice-upload';
 import { invoicePdf, uploadBelege } from './invoice-upload';
 import { goToGeneration } from './statement-generate';
-import { generateButton, heatingProfileSelect } from '../targets/statement-generate';
+import { buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
 import { Visibility } from '../screenplay/questions';
 import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
@@ -115,7 +115,9 @@ const previewOf =
 			EnterDate.of(end).into(on.periodEndInput),
 			Click.on(nextButton)
 		);
-		for (const building of [example.building, ...others]) await actor.attemptsTo(Check.the(on.generateBuilding(building)));
+		// once the step has loaded what it tells about each building: later text moves the rows under the click (#424)
+		for (const building of [example.building, ...others])
+			await actor.attemptsTo(Wait.until(buildingInvoiceCount(building)), Check.the(on.generateBuilding(building)));
 		await actor.attemptsTo(Click.on(nextButton), leaveSettings, Wait.until(on.shown(shown)));
 	};
 
