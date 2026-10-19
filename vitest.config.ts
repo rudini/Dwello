@@ -43,6 +43,8 @@ export default defineConfig({
 					name: 'dom',
 					include: ['src/**/*.dom.test.ts'],
 					environment: 'jsdom',
+					// One jsdom per worker instead of one per file (dom tests 45 s -> 25 s), files still isolated
+					pool: 'vmThreads',
 					setupFiles: ['tests/mocks/browser-language.ts']
 				}
 			}
