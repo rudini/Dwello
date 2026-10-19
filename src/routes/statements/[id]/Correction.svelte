@@ -32,6 +32,13 @@
 		return offset < 0 ? m.statements_correct_refunded(paid) : m.statements_correct_paid(paid);
 	});
 	let creating = $state(false); // a second click would create a second berichtigte Abrechnung
+	// #464 (domain review F-4, decision A): the Akonto comes from the contract; a different one is checked before sending
+	const advanceBefore = $derived(Number(statement.replaces?.totalAdvancePayments));
+	const advanceDiffers = $derived(
+		statement.status === 'draft' &&
+			!!statement.replaces &&
+			Math.abs(advanceBefore - statement.totalAdvancePayments) >= 0.005
+	);
 	const replaces = $derived(
 		statement.replaces &&
 			m.statements_replaces({
@@ -92,6 +99,17 @@
 			data-testid="statement-replaces-link">{replaces}</a
 		>
 	</p>
+	{#if advanceDiffers}
+		<Alert tone="caution" title={m.statements_advance_differs_title()} testid="statement-advance-differs">
+			<p>
+				{m.statements_advance_differs({
+					now: formatCurrency(statement.totalAdvancePayments),
+					number: statement.replaces.statementNumber,
+					before: formatCurrency(advanceBefore)
+				})}
+			</p>
+		</Alert>
+	{/if}
 {/if}
 
 <FormDialog

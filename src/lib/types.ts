@@ -85,7 +85,8 @@ export interface RentalContract {
 	billedUntil?: string | null; // «Abgerechnet bis» (#133): billed outside Dwello up to this day
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
-	monthlyAdvancePayment: string | number; // Akonto
+	monthlyAdvancePayment: string | number; // Akonto that applies today, or on the start of a future contract
+	advancePayments?: { validFrom: string; amount: string }[]; // each Akonto with its «Gültig ab» (#464)
 	flatRateUtilityCharge?: string | number; // «Nebenkostenpauschale» (#429): in «Monatlich total», never billed
 	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
 	managementFeePercent?: string | null; // own rate, before the run's
@@ -360,7 +361,12 @@ export interface StatementWithDetails extends Statement {
 	rentalEnd: string;
 	lineItems: StatementLineItem[];
 	// a berichtigte Abrechnung: the statement it replaces, what was paid on the replaced ones and where (#120)
-	replaces?: { id: string; statementNumber: string; statementDate: string } | null;
+	replaces?: {
+		id: string;
+		statementNumber: string;
+		statementDate: string;
+		totalAdvancePayments?: number | string; // #464: its Akonto, to warn when the berichtigte one counts another
+	} | null;
 	replacedBy?: { id: string; statementNumber: string } | null;
 	priorPayments?: number;
 	priorPaidOn?: string[];

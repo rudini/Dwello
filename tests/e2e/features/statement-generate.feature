@@ -150,7 +150,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann enthält die Vorschau die Abrechnung von "Eva Frei"
     Und die Vorschau enthält genau 1 Abrechnung
 
-  # #133: reicht die Abrechnungsperiode über «Abgerechnet bis» hinaus, zählen Mietstage und geleistete Akontobeiträge
+  # #133: reicht die Abrechnungsperiode über «Abgerechnet bis» hinaus, zählen Mietstage und Akontobeiträge
   # erst ab dem Tag danach. Hauswart 732.00 für 366 Tage = 2.00 pro Tag; Eva Frei vom 01.03. bis 31.03.2024: 31 Tage
   # = 62.00 + 3 % = 63.86, Akonto nur für März 120.00; Marc Huber bleibt bei 245 Tagen = 490.00 + 3 % = 504.70
   @api
@@ -625,3 +625,14 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Sommer"
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann sagt der Assistent "Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen."
+
+  # #464: jedes Akonto zählt für die Monate, in denen es galt. Hauswart 732.00 für 366 Tage = 2.00 pro Tag;
+  # Marc Huber 245 Tage = 490.00 + 3 % = 504.70; Akonto Mai und Juni 2 × 50.00, Juli bis Dezember 6 × 80.00 = 580.00
+  @api
+  Szenario: Akonto ändert sich während der Abrechnungsperiode
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
+    Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und der Mietvertrag von "Marc Huber" hat ab "2024-07-01" "80" Franken Akonto
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Marc Huber" "CHF 504.70"
+    Und beträgt der Saldo von "Marc Huber" "Rückerstattung CHF 75.30"
