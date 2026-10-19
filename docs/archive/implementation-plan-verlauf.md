@@ -1846,5 +1846,7 @@ Branch `ccr-3dfff432-ljcit4`. Product owner: implement recommendations 1 to 5 of
 - [x] 5. Faster local checks: `eslint --cache`, DOM tests in `vmThreads` (45 s -> 25 s; `fsModuleCache`, which Vitest's own hint names, is no option of Vitest 5), `vitest run --changed` named (`package.json`, `vitest.config.ts`, `CLAUDE.md`)
 - [x] Workflow note: one session in the plan while another session's is open (`docs/reviews/workflow-notes-tokens.md`)
 - [x] Slice review round 1 (`docs/reviews/tokens-review-1.md`, no Blocker/Major; C-1 to C-3 fixed)
+- [x] Closing code-review round 2 (`docs/reviews/tokens-review-2.md`, no Blocker/Major; C-4 Nit kept: the block message was untested on the base too)
+- [x] PR, «No scenario: tooling and rules only»
 
-Files: `.claude/settings.json`, `.claude/hooks/fallow-gate.sh`, `.claude/skills/pull-request/SKILL.md`, `CLAUDE.md`, `.gitignore`, `package.json`, `vitest.config.ts`, `tools/claude-hooks/fallow-gate.test.ts`, `docs/reviews/tokens-review-1.md`, `docs/reviews/workflow-notes-tokens.md`.
+Files: `.claude/settings.json`, `.claude/hooks/fallow-gate.sh`, `.claude/skills/pull-request/SKILL.md`, `CLAUDE.md`, `.gitignore`, `package.json`, `vitest.config.ts`, `tools/claude-hooks/fallow-gate.test.ts`, `docs/reviews/tokens-review-{1,2}.md`, `docs/reviews/workflow-notes-tokens.md`.
