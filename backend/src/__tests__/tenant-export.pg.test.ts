@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { documents, invoices, tenants, utilityStatements } from '../db/schema';
+import { documents, invoices, rentalContracts, tenants, utilityStatements } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
 import { idOf, insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -18,8 +18,8 @@ type Export = {
 	fileName: string;
 	data: {
 		tenant: { firstName: string; lastName: string };
-		contracts: { apartment: { number: string; building: { name: string } } }[];
-		statements: { number: string; status: string; file: string | null }[];
+		contracts: { apartment: { number: string; building: { name: string } }; file?: string | null }[];
+		statements: { number: string; status: string; file: string | null; statementDate: string | null; paymentDeadline: string | null }[];
 		documents: { title: string; file: string }[];
 		reminders: { statement: string; level: number; status: string; file: string }[];
 	};
@@ -133,7 +133,13 @@ describe('Daten eines Mieters exportieren', () => {
 			const { data, files } = await exportOf(rental.tenant);
 			const [{ statementNumber: number }] = before.filter((row) => row.id === draft);
 
-			expect(data.statements.find((statement) => statement.number === number)).toMatchObject({ status: 'draft', file: null });
+			expect(data.statements.find((statement) => statement.number === number)).toMatchObject({
+				status: 'draft',
+				file: null,
+				// a draft's dates are as if sent today: never issued to the tenant (persona Dr. Weber 435 P-1)
+				statementDate: null,
+				paymentDeadline: null
+			});
 			for (const { content } of files) expect(Buffer.from(content, 'base64').toString()).not.toContain('draft');
 			expect(await rows()).toEqual(before);
 		} finally {
@@ -214,6 +220,37 @@ describe('Daten eines Mieters exportieren', () => {
 			expect(data.documents.find((document) => document.title === 'Spät')!.file).toBe('dokumente/2026-03-02 Spät.pdf');
 		} finally {
 			await db.delete(documents).where(eq(documents.id, late.id));
+		}
+	});
+
+	it('antwortet für einen unbekannten Mieter mit 404 (Review C-10)', async () => {
+		expect((await callApi(`/api/v1/tenants/${crypto.randomUUID()}/export`)).status).toBe(404);
+	});
+
+	it('gibt eine Abrechnung mit abgelaufener Zahlungsfrist als überfällig heraus (Fachreview F-8)', async () => {
+		const sent = eq(utilityStatements.statementNumber, statementNumber);
+		const [{ paymentDeadline }] = await db.select().from(utilityStatements).where(sent);
+		await db.update(utilityStatements).set({ paymentDeadline: '2025-01-31' }).where(sent);
+		try {
+			const { data } = await exportOf(rental.tenant);
+
+			expect(data.statements.find((statement) => statement.number === statementNumber)!.status).toBe('overdue');
+		} finally {
+			await db.update(utilityStatements).set({ paymentDeadline }).where(sent);
+		}
+	});
+
+	it('legt die PDF des Mietvertrags bei, wenn sie gespeichert ist (Fachreview F-18, Review C-3)', async () => {
+		const contract = eq(rentalContracts.id, rental.contract);
+		await db.update(rentalContracts).set({ contractPdf: pdf('contract') }).where(contract);
+		try {
+			const { data, files } = await exportOf(rental.tenant);
+			const path = 'dokumente/2024-01-01 Mietvertrag Wohnung 2.01.pdf';
+
+			expect(data.contracts[0]).toMatchObject({ file: path });
+			expect(Buffer.from(files.find((file) => file.path === path)!.content, 'base64').toString()).toContain('contract');
+		} finally {
+			await db.update(rentalContracts).set({ contractPdf: null }).where(contract);
 		}
 	});
 });

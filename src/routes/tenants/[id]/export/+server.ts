@@ -21,8 +21,9 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 
 	const zip = zipSync({
 		[dataFile]: strToU8(JSON.stringify(data, null, 2)),
+		// PDFs and photos are compressed already: stored as they are
 		...Object.fromEntries(
-			files.map(({ path, content }) => [path, new Uint8Array(Buffer.from(content, 'base64'))])
+			files.map(({ path, content }) => [path, [Buffer.from(content, 'base64'), { level: 0 }]])
 		)
 	});
 	// the name keeps its umlauts where the browser reads filename*, an ASCII name elsewhere

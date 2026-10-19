@@ -7,10 +7,10 @@ import { swissToday } from './today';
 
 // Folder and file names in the tenant's language: the tenant receives the ZIP, and its PDFs are in that language
 const NAMES = {
-	de: { zip: 'Daten', data: 'daten.json', documents: 'dokumente', statements: 'abrechnungen' },
-	fr: { zip: 'Données', data: 'données.json', documents: 'documents', statements: 'décomptes' },
-	it: { zip: 'Dati', data: 'dati.json', documents: 'documenti', statements: 'conteggi' },
-	en: { zip: 'Data', data: 'data.json', documents: 'documents', statements: 'statements' }
+	de: { zip: 'Daten', data: 'daten.json', documents: 'dokumente', statements: 'abrechnungen', contract: 'Mietvertrag Wohnung' },
+	fr: { zip: 'Données', data: 'données.json', documents: 'documents', statements: 'décomptes', contract: 'Contrat de bail appartement' },
+	it: { zip: 'Dati', data: 'dati.json', documents: 'documenti', statements: 'conteggi', contract: 'Contratto di locazione appartamento' },
+	en: { zip: 'Data', data: 'data.json', documents: 'documents', statements: 'statements', contract: 'Rental contract apartment' }
 };
 const EXTENSIONS: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png' };
 // a name a user typed, safe as one file name in the ZIP (domain review F-11)
@@ -67,7 +67,11 @@ export async function exportTenant(id: string) {
 			managementFeePercent: contract.managementFeePercent,
 			referenceIndex: contract.referenceIndex,
 			agreedCategories: await categoryNames(await agreedCategoryIds(contract.id)),
-			notes: contract.notes
+			notes: contract.notes,
+			// the signed contract, if one was stored (domain review F-18)
+			file: contract.contractPdf
+				? file(names.documents, `${contract.startDate} ${names.contract} ${apartment.number}`, contract.contractPdf)
+				: null
 		}))
 	);
 
@@ -86,15 +90,17 @@ export async function exportTenant(id: string) {
 	for (const { id: statementId, pdfBlob } of statementRows) {
 		const statement = (await getStatement(statementId))!;
 		numbers.set(statementId, statement.statementNumber);
-		// a draft's PDF would carry a payment slip the tenant never received: the draft only as data
-		const pdf = statement.status === 'draft' ? null : (mailed.get(statementId) ?? pdfBlob);
+		// a draft's PDF would carry a payment slip the tenant never received: the draft only as data, without the dates
+		// it would be sent with (persona Dr. Weber 435 P-1)
+		const draft = statement.status === 'draft';
+		const pdf = draft ? null : (mailed.get(statementId) ?? pdfBlob);
 		statements.push({
 			number: statement.statementNumber,
 			status: statement.status,
 			periodStart: statement.periodStart,
 			periodEnd: statement.periodEnd,
-			statementDate: statement.statementDate,
-			paymentDeadline: statement.paymentDeadline,
+			statementDate: draft ? null : statement.statementDate,
+			paymentDeadline: draft ? null : statement.paymentDeadline,
 			apartment: statement.apartment?.number ?? null,
 			rentalStart: statement.rentalStart,
 			rentalEnd: statement.rentalEnd,
