@@ -66,7 +66,10 @@ jobs:
             url="ftp://$SFTP_HOST"; opts="set ftp:ssl-force true; set ftp:ssl-protect-data true;"
           else
             url="sftp://$SFTP_HOST"; opts="set sftp:connect-program 'ssh -a -x -o UserKnownHostsFile=$HOME/.ssh/known_hosts';"
-            if [ -n "$KNOWN_HOSTS" ]; then echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts; else ssh-keyscan -H "$SFTP_HOST" > ~/.ssh/known_hosts 2>/dev/null; fi
+            if [ -n "$KNOWN_HOSTS" ]; then echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+            elif ! ssh-keyscan -T 15 -H "$SFTP_HOST" > ~/.ssh/known_hosts 2>/dev/null || [ ! -s ~/.ssh/known_hosts ]; then
+              echo "::error::$SFTP_HOST answers no SSH on port 22: use an access with SSH, or set SITE_FTP_TLS=yes for FTP over TLS"; exit 1
+            fi
           fi
           # Upload new and changed files; files removed from the repository stay on the server
           lftp -c "set net:max-retries 2; $opts open --user \"$SFTP_USER\" --env-password $url; \
