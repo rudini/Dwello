@@ -2040,3 +2040,16 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] PR `Fixes #464`, `Refs #477`: pushed after this archive; merged once the product owner changed the glossary row (fach review 477-1 V-1)
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
+
+## Session B1: malformed id and statement gap (2026-10-19)
+
+Branch `claude/fix-invalid-id-and-statement-gap`. Product owner: two bugs from the persona stack. (1) A detail page with an id that is no UUID (`/invoices/abc`, `/invoices/upload`, `/buildings/abc` …) answers 500 instead of 404. (2) The statement detail page shows an empty gap of about 150 px between «Status» and «Kostenaufstellung».
+
+- [x] @wip scenario «Eine Seite mit ungültiger Kennung gibt es nicht» (`navigation.feature`, all 17 detail and edit pages), seen red at the 500 page ("Fehler beim Laden …")
+- [x] Backend test `error-codes.pg.test.ts`: a path id that is no UUID answers 404 `NOT_FOUND` (11 paths), seen red (500, 422); fix: one global `onTransform` in `backend/src/app.ts` (root cause: the id reached PostgreSQL, which refused the cast); `backend_not_found` in four languages; API spec. Tests that used a malformed id to provoke a PDF failure now use a PDF language without texts (pins kept behaviour); `fuel-stock.pg.test.ts` expects 404 instead of 422
+- [x] @wip scenario «Die Kostenaufstellung folgt im üblichen Abstand auf den Status» (`statement-detail.feature`, web question `Gap.between`), seen red at 128 px: three empty items in the page column (gap-8 each): the form of `Correction`'s `FormDialog` (now `hidden`) and the live regions of `ReminderFeedback` and `SendFeedback` (kept in the accessibility tree, `empty:-mt-8` cancels their gap while empty)
+- [x] Slice review (code-reviewer) of both slices, persona review of the statement page (run by the calling session): `docs/reviews/b1-review-1.md` (no Blocker/Major; C-1 fixed in `statement-detail.steps.ts`, C-2 Minor not trivial, stays in the report), `docs/design/personas/marco-b1.md` and `sven-b1.md` (no Blocker/Major; their findings show on the base commit too and stay in the reports)
+- [x] Merge of `origin/main` (conflicts in imports of `api-contracts.pg.test.ts` and `tests/e2e/questions/statement-detail.ts`, both sides kept); checks again green; closing code-reviewer round `docs/reviews/b1-review-2.md`
+- [x] Workflow note: no subagents, and an unfinished earlier session in the plan (`docs/reviews/workflow-notes-invalid-id-and-statement-gap.md`)
+- [x] Checks of «Before marking anything complete»: lint, check, backend type-check, backend `bun run test` (1002, coverage 93.6 %), frontend `test:coverage` (3143), E2E chromium of `navigation`, `statement-detail`, `statement-send`, `statement-reminder` (119) and the axe and language rows of the statement detail screens (44)
+- [x] Workflow review (`docs/reviews/workflow-notes-invalid-id-and-statement-gap.md`); session to the archive; PR
