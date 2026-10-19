@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { backendMessage } from '$lib/backend-error';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { tick, untrack } from 'svelte';
@@ -33,6 +34,7 @@
 	import ContractsUnknown, { retried } from './new/ContractsUnknown.svelte';
 	import PeriodStep from './new/PeriodStep.svelte';
 	import RentStep from './new/RentStep.svelte';
+	import AdvancePeriods from './[id]/AdvancePeriods.svelte';
 	import PastEndConfirm from './PastEndConfirm.svelte';
 	import RefusedStatements from './RefusedStatements.svelte';
 	import NoticeHint from './NoticeHint.svelte';
@@ -67,10 +69,17 @@
 	const running = $derived(
 		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
 	);
+	const fixedTerm = $derived(!!contract.endDate && !contract.terminated);
 	const runningText = $derived(
-		contract.endDate && !contract.terminated
-			? m.contracts_running_text_fixed_term()
-			: m.contracts_running_text()
+		fixedTerm ? m.contracts_running_text_fixed_term() : m.contracts_running_text()
+	);
+	// #464: a new Akonto applies from «Gültig ab»; an increase follows the rules of a rent increase, only in a running
+	// contract: before or after it a change corrects the entry (fach review 464-2 V-5)
+	const changeHelp = $derived(
+		fixedTerm ? m.contracts_advance_change_help_fixed_term() : m.contracts_advance_change_help()
+	);
+	const advanceHelp = $derived(
+		running ? `${m.contracts_advance_help()} ${changeHelp}` : m.contracts_advance_help()
 	);
 	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
 	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)
@@ -146,13 +155,24 @@
 	);
 
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
-	function saveError({ message, details }: { message: string; details?: Record<string, unknown> }) {
+	function saveError({
+		message,
+		code,
+		params,
+		details
+	}: {
+		message: string;
+		code?: string;
+		params?: Record<string, string | number>;
+		details?: Record<string, unknown>;
+	}) {
 		const statements = details?.statements;
 		if (Array.isArray(statements) && onlyCovered(statements))
 			return m.contracts_billed_draft_covered({ number: statements[0].statementNumber });
 		if (Array.isArray(statements)) return billedDaysError(statements);
 		if (/overlap/i.test(message)) return m.backend_contract_overlap();
-		return m.contracts_save_failed();
+		// a refusal with its own message, e.g. an Akonto in a billed time (#464); never the backend's own text
+		return backendMessage({ code, params }, m.contracts_save_failed());
 	}
 
 	// the fields' errors; true when the form may be sent
@@ -309,7 +329,19 @@
 	</Panel>
 
 	<Panel title={m.contracts_rent()}>
-		<RentStep bind:values {errors} {categories} agreedHelp={m.contracts_agreed_costs_help_edit()} />
+		<RentStep
+			bind:values
+			{errors}
+			{categories}
+			agreedHelp={m.contracts_agreed_costs_help_edit()}
+			{advanceHelp}
+		/>
+		<AdvancePeriods
+			startDate={contract.startDate}
+			endDate={contract.endDate}
+			advancePayments={contract.advancePayments}
+			readonly
+		/>
 	</Panel>
 
 	{#if errors.form}
