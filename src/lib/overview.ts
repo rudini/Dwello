@@ -219,7 +219,7 @@ const addressTasks = ({ oldAddresses = [] }: OverviewInput): Task[] =>
 	}));
 
 // The tenant who stayed after an agreed end continues the contract open-ended (Art. 266 Abs. 2 OR, A-6);
-// TODO(fachlich prüfen, #308): wording of the question
+// wording of the question decided in #410 (#308)
 const fixedTermTasks = ({ expiredContracts }: OverviewInput): Task[] =>
 	[...expiredContracts]
 		.sort((a, b) => a.endDate.localeCompare(b.endDate))

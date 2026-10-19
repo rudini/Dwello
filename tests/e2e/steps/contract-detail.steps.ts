@@ -452,6 +452,6 @@ Then('ist der Mietvertrag von {string} unbefristet', async ({ verwalter, seed },
 });
 
 // #457 (#410 point 3): the objection help after a fixed-term end
-Then('sagt die Frage nach dem Vertragsende {string}', async ({ verwalter }, text: string) => {
+Then('sagt der Hinweis zum abgelaufenen Mietvertrag {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(fixedTermCheckText).toContain(text);
 });
