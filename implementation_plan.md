@@ -109,7 +109,7 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 
 - [x] @wip scenario «Rechnungen eines Gebäudes öffnen» (`building-detail.feature`), red at the missing link
 - [x] DOM test of the building detail page for `building-invoices-button` (link `/invoices?building=<id>`), red first
-- [x] Secondary button «Rechnungen ansehen» in the page header (the primary action stays «Wohnung hinzufügen»), four languages (`buildings_invoices`); files: `src/routes/buildings/[id]/+page.svelte`, `messages/*.json`, `buildings-pages.dom.test.ts`, `building-detail.feature` and its steps, task and target
+- [x] Secondary button «Rechnungen ansehen» in the page header (the primary action stays «Wohnung hinzufügen»), the text of the overview's same link (`dashboard_invoices`, review C-1); files: `src/routes/buildings/[id]/+page.svelte`, `messages/*.json`, `buildings-pages.dom.test.ts`, `building-detail.feature` and its steps, task and target
 - [x] Slice review round 1 (`docs/reviews/456-review-1.md`: no Blocker/Major; C-1 reuse `dashboard_invoices`, C-2, C-3 import order, fixed); persona Helga (`docs/design/personas/helga-456.md`: task done, no Blocker/Major; P-1 no link back from the filtered list, P-2 filter shown only in the select (existed before), P-3 Nit; kept)
-- [ ] Closing review round 2
+- [x] Closing review round 2 (`docs/reviews/456-review-2.md`: C-1 to C-3 done, C-4 Nit in this plan fixed); E2E Chromium building-detail scenarios plus axe and language rows: 17 passed
 - [ ] PR `Fixes #456`
