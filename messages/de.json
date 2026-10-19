@@ -1718,7 +1718,7 @@
 	"dashboard_task_fixed_term_action": "Mietvertrag öffnen",
 	"contracts_fixed_term_question": "Der befristete Mietvertrag von {name} ist am {date} abgelaufen. Wohnt {name} noch in der Wohnung und sind Sie damit einverstanden, zum Beispiel weil Sie den Mietzins weiter annehmen? Dann läuft der Mietvertrag unbefristet weiter.",
 	"contracts_fixed_term_title": "Befristeter Mietvertrag abgelaufen",
-	"contracts_fixed_term_objection": "Sind Sie nicht einverstanden, verlangen Sie die Rückgabe der Wohnung sofort schriftlich und lassen Sie sich beraten.",
+	"contracts_fixed_term_objection": "Sind Sie nicht einverstanden, verlangen Sie die Rückgabe der Wohnung sofort schriftlich und lassen Sie sich beraten. Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung.",
 	"contracts_continue_open_ended": "Unbefristet weiterführen",
 	"contracts_moved_out": "Mieter ist ausgezogen",
 	"contracts_continued_toast": "Der Mietvertrag von {name} läuft unbefristet weiter. Er endet erst mit einer Kündigung.",
