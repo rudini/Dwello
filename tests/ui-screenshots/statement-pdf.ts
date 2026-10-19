@@ -27,17 +27,17 @@ const WORDS = {
 		units: 'Wohnungen',
 		byUnit: 'Pro Einheit',
 		byArea: 'Pro Fläche (m²)',
-		mixed: 'Heizung (Fläche 70% / Einheit 30%)',
+		mixed: 'Heizung (Fläche 70 % / Einheit 30 %)',
 		categories: ['Lift', 'Hauswart', 'Kaltwasser', 'Allgemeinstrom', 'Gartenpflege', 'Kehricht', 'Heizung', 'Kaminfeger'],
 		profile: 'Heizung Mittelland',
 		tenant: { firstName: 'Hans', lastName: 'Müller' }
 	},
 	fr: {
 		units: 'logements',
-		byUnit: 'Par unité',
+		byUnit: 'Par logement',
 		byArea: 'Par surface (m²)',
-		mixed: 'Chauffage (surface 70% / unité 30%)',
-		categories: ['Ascenseur', 'Conciergerie', 'Eau froide', 'Électricité parties communes', 'Jardinage', 'Ordures', 'Chauffage', 'Ramoneur'],
+		mixed: 'Chauffage (surface 70 % / logement 30 %)',
+		categories: ['Ascenseur', 'Conciergerie', 'Eau froide', 'Électricité des parties communes', 'Entretien du jardin', 'Enlèvement des ordures', 'Chauffage', 'Ramonage'],
 		profile: 'Chauffage Plateau',
 		tenant: { firstName: 'Marie', lastName: 'Dubois' }
 	}

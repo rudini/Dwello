@@ -44,7 +44,7 @@ describe('Datenschutzerklärung auf Französisch, Italienisch und Englisch', () 
 	it('sagt idiomatisch, dass die KI angibt, ob die Kosten umlagefähig sind', () => {
 		for (const [locale, text] of [
 			['fr', 'pour que l’IA indique si ses frais sont répercutables'],
-			['it', 'affinché l’IA indichi se i suoi costi sono addebitabili']
+			['it', 'affinché l’IA indichi se i relativi costi sono addebitabili']
 		] as const) {
 			overwriteGetLocale(() => locale);
 			show(PrivacyPage, {

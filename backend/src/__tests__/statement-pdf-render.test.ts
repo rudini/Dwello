@@ -75,6 +75,21 @@ describe('Stockwerk im französischen PDF', () => {
 	});
 });
 
+// British English counts «1st floor», «2nd floor» above the ground floor (461-native-en, EN-32), as the UI does
+describe('Stockwerk im englischen PDF', () => {
+	it.each([
+		[1, 'A2, 1st floor'],
+		[2, 'A2, 2nd floor'],
+		[3, 'A2, 3rd floor'],
+		[4, 'A2, 4th floor']
+	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'en'), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
+	});
+});
+
 describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 	// a period whose months carry 0 % in the profile: the calculation shared the heating costs by days
 	const byDays: StatementPDFData = {

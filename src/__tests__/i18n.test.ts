@@ -101,7 +101,7 @@ describe('Sprachdateien', () => {
 	it.each([
 		['de', 'wenn er Ihnen einen zumutbaren Ersatzmieter vorschlägt.'],
 		['fr', 's’il vous présente un locataire de remplacement que vous ne pouvez raisonnablement refuser.'],
-		['it', 'se Le propone un inquilino sostitutivo che Lei non può ragionevolmente rifiutare.'],
+		['it', 'se l’inquilino le propone un inquilino sostitutivo che Lei non possa ragionevolmente rifiutare.'],
 		['en', 'if the tenant proposes a replacement tenant you cannot reasonably refuse.']
 	])('%s: der Ersatzmieter muss nur vorgeschlagen sein, damit der Mietvertrag früher endet', (language, end) => {
 		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));

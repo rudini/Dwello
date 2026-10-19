@@ -25,8 +25,16 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 			'1er étage',
 			'3e étage'
 		]);
+		// British English counts «1st floor», «2nd floor» above the ground floor (461-native-en, EN-32)
 		overwriteGetLocale(() => 'en');
-		expect(floorLabel(2)).toBe('floor 2');
+		expect([1, 2, 3, 4, 11, 22].map(floorLabel)).toEqual([
+			'1st floor',
+			'2nd floor',
+			'3rd floor',
+			'4th floor',
+			'11th floor',
+			'22nd floor'
+		]);
 	});
 
 	it('nennt Mietstatus und Belegung auf Französisch', () => {

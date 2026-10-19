@@ -97,6 +97,17 @@ describe('Eigene Verteilschlüssel', () => {
 		await expectRejection(response, 400, 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.', 'DISTRIBUTION_KEY_PREDEFINED');
 	});
 
+	// #461: the form sends an empty name in another language as null; then the German name stands
+	it('entfernt einen Namen in einer anderen Sprache, den das Formular leer schickt', async () => {
+		const created = await keys.create({ name: `Volumen ${token}`, nameDE: `Volumen ${token}`, nameFR: 'Volume', nameIT: null, formula: '{volume}' });
+		expect(created.status).toBe(201);
+
+		const response = await keys.send('PUT', `/${await idOf(created)}`, { nameFR: null });
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ nameFR: null, nameIT: null });
+	});
+
 	// #461: the migrations seed them; the second seed list with other names is gone (#345)
 	it('legt vordefinierte Verteilschlüssel nur mit den Stammdaten-Migrationen an', async () => {
 		const response = await keys.send('POST', '/initialize');
