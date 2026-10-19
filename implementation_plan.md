@@ -89,7 +89,7 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] `keepApartment` (`tests/e2e/tasks/contract-form.ts`) waits for the apartment choice before «Weiter»; used by `goToRentWith` and the axe and language states `overlap-warning`, `rent-taken-over`; Chromium: those rows 13 passed, `contract-new.feature` (Chromium + API) 33 passed
 - [x] Slice review round 1 (`docs/reviews/612-review-1.md`; C-1: `toRentStep`, used by four `contract-new` rows, clicked twice too, now `keepApartment`; C-2 comment fixed)
 - [x] Re-review and closing round 2 (`docs/reviews/612-review-2.md`, no findings)
-- [ ] PR
+- [x] PR #466 (merged); run 614 on `main` failed once more: #468
 
 ### #51 Sign-in only for configured e-mail addresses (O-1)
 
@@ -103,7 +103,7 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] Slice review round 1 (`docs/reviews/51-review-1.md`: no Blocker/Major; C-1 missing `verified_email` counts as unverified, C-2 `/auth/me` refuses, C-3 README restricted and O-39 in `offene-punkte.md`, C-5 fixed; C-4, C-6 Nits kept) and persona Helga (`docs/design/personas/helga-51.md`: P-1 Major)
 - [x] Helga P-1: Google lets the visitor choose the account (`prompt=select_account`, not `consent`), scenario «Bei Google das Konto wählen» seen red first; P-2, P-3 Minor kept
 - [x] Re-review: code-reviewer round 2, also closing (`docs/reviews/51-review-2.md`, no findings); Helga round 2 (`docs/design/personas/helga-51-2.md`: P-1 fixed, P-2 and P-3 Minor kept); lint, check, vitest 201, E2E Chromium auth, login and demo rows 34 passed
-- [ ] PR `Fixes #51`
+- [x] PR `Fixes #51` (#469, merged)
 
 ### #456 Link from a building to its invoices
 
@@ -113,3 +113,18 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] Slice review round 1 (`docs/reviews/456-review-1.md`: no Blocker/Major; C-1 reuse `dashboard_invoices`, C-2, C-3 import order, fixed); persona Helga (`docs/design/personas/helga-456.md`: task done, no Blocker/Major; P-1 no link back from the filtered list, P-2 filter shown only in the select (existed before), P-3 Nit; kept)
 - [x] Closing review round 2 (`docs/reviews/456-review-2.md`: C-1 to C-3 done, C-4 Nit in this plan fixed); E2E Chromium building-detail scenarios plus axe and language rows: 17 passed
 - [ ] PR `Fixes #456`
+
+### #468 «Weiter» waits while a step loads
+
+Branch `ccr-01e823d6-yhj5kc`. Run 614 on `main` failed once more in Firefox (statement-generate «generation-result»: «Weiter» on step 2 clicked while the buildings' texts loaded). Product owner: lock «Weiter» while a step loads instead of more waits in the tests. No scenario: the loading state lasts only as long as a request; the E2E stack cannot hold one open.
+
+- [x] DOM: contract wizard step «Wohnung»: «Weiter» locked («Bitte warten …») until the apartments' contracts are loaded (`WizardNav` `loading`)
+- [x] DOM: statement wizard step «Gebäude»: locked until invoice counts and billed contracts are loaded; «Zurück» while loading leaves step 1 free (red first: a real bug of the first version)
+- [x] DOM: statement wizard step 3: locked while the agreed Nebenkosten are checked and the contracts without a Verwaltungspauschale load (`FeeNotAgreed` moves «Weiter» too); after a failed check as before (#439)
+- [x] E2E tasks: `tickBuilding` waits for step «Gebäude» before ticking (four places in `accessibility.ts`, two did not wait: run 614); `keepApartment` (#466) removed, as «Weiter» now waits itself and Playwright clicks only an enabled button
+- [x] Affected E2E (Chromium + API): statement-generate, statement-agreed-costs, statement-management-fee, contract-new, statement-minimum-balance, statement-rounding 164 passed; axe and language rows of statement-generate and contract-new 64 passed
+- [x] Slice review round 1 (`docs/reviews/468-review-1.md`): C-1 (Major, an answer of a step left before unlocked the step opened anew) fixed with a test seen red; C-2 a failed load lifts the lock, pinned (kept behaviour, green at once); C-6 fixed
+- [x] Re-review round 2 (`docs/reviews/468-review-2.md`, no Blocker/Major); C-9 (the C-1 fix of `FeeNotAgreed` had no test): test added, red with the fix taken out
+- [x] Feature review: personas Sven and Marco (`docs/design/personas/{sven,marco}-468.md`, locked state reached by delaying the requests); Sven no Blocker/Major; Marco P-1 Major: the notice that arrives as «Weiter» unlocks pushes the button down, a tap lands on its link; it existed before the change: product owner 2026-10-19: merge #468, layout in #470 (`entscheiden`)
+- [x] Closing code-review round 3 (`docs/reviews/468-review-3.md`, no findings)
+- [ ] PR `Fixes #468`

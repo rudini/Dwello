@@ -78,6 +78,7 @@
 	let confirmed = $state(false); // statements despite buildings without invoices, for this preview only
 	let agreementsBlocking = $state(false); // step 3: whether the contracts agree the period's costs is open (#91)
 	let busy = $state(false); // the server is calculating the preview or creating the drafts
+	let loading = $state(false); // the step still loads what it shows: «Weiter» waits (#468)
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
 	let restoredAt = $state<Date | null>(null);
@@ -260,6 +261,7 @@
 			bind:selection
 			bind:confirmed
 			bind:agreementsBlocking
+			bind:loading
 			{errors}
 			{previewRows}
 			{invoices}
@@ -277,6 +279,7 @@
 			finalLabel={m.statements_create_drafts()}
 			finalTestid="generate-statements-button"
 			{busy}
+			{loading}
 			busyLabel={busyLabels[step]}
 			cancelHref="/statements"
 		/>
