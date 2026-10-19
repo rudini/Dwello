@@ -1076,23 +1076,16 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('send-old-address')).toBeNull();
 	});
 
-	// #338: nur ein Entwurf wird neu berechnet, mit derselben Nummer
-	it('bietet einen Entwurf zum Neuberechnen an', () => {
+	// #338: nur ein Entwurf wird neu berechnet, mit derselben Nummer; Helga 338 P-2: die Bestätigung nennt die Folge
+	it('bietet einen Entwurf zum Neuberechnen an und nennt vorher, was bleibt und was sich ändert', () => {
 		detail({ status: 'draft' });
 
-		const button = byTestId('statement-recalculate-button')!;
-		expect(button.textContent!.trim()).toBe('Neu berechnen');
-		expect(button.closest('form')!.getAttribute('action')).toBe('?/recalculate');
-	});
+		expect(byTestId('statement-recalculate-button')!.textContent!.trim()).toBe('Neu berechnen');
+		click('statement-recalculate-button');
 
-	it('bestätigt, dass der Entwurf neu berechnet ist', () => {
-		show(StatementPage, {
-			data: { statement: statement({ status: 'draft' }), reminders: [], laterInvoices: 0 },
-			form: { recalculated: true }
-		} as never);
-
-		expect(byTestId('statement-recalculated')!.textContent).toContain(
-			'Der Entwurf ist neu berechnet. Er rechnet die Rechnungen ab, wie sie jetzt sind.'
+		expect(byTestId('statement-recalculate-confirm')).not.toBeNull();
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nummer, Heizprofil, Verwaltungspauschale, Abrechnungsdatum, Zahlungsfrist und Bemerkung bleiben. Beträge, Positionen und Saldo ändern sich. Ein schon erstelltes PDF wird verworfen.'
 		);
 	});
 

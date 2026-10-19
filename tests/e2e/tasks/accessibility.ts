@@ -331,8 +331,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'send-dialog': () => openDialog(on.sendButton),
 	// refused, so the draft stays one and each viewport can send it again
 	'send-refused': () => (actor) => actor.attemptsTo(PostFormAction('?/send'), Wait.until(on.shown('send-feedback'))),
-	// #338: the draft calculated again; recalculating it again gives the same, so each viewport can
-	recalculated: () => (actor) => actor.attemptsTo(PostFormAction('?/recalculate'), Wait.until(on.shown('statement-recalculated'))),
+	// #338: the confirmation of «Neu berechnen» names what stays and what changes
+	'recalculate-dialog': () => openDialog(on.recalculateButton),
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
 	'reminder-dialog': () => openDialog(on.reminderButton),

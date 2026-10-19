@@ -68,5 +68,7 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] `statement-recalculation.pg.test.ts` (same number, new amounts, no changed invoices after; sent refused), red first
 - [x] Backend: `recalculateStatement`, `POST /statements/:id/recalculation`; `generateStatement` shares `calculatedRows`
 - [x] Frontend: «Neu berechnen» in «Weitere Aktionen» of a draft, confirmation `statement-recalculated`; texts that said «delete and create again» point to «Neu berechnen» (statement, wizard, invoice, Tankbestand, Heizprofil texts), four languages; DOM tests and scenarios updated red first; axe and language state `recalculated`
-- [ ] Slice review, feature review (persona Helga)
+- [x] Slice review round 1 (`docs/reviews/338-review-1.md`: C-1 Blocker, C-2 to C-4 Major) and persona Helga (`docs/design/personas/helga-338.md`: P-1, P-2 Major)
+- [x] Fixes: a berichtigte Abrechnung keeps `replaces` and `priorPayments` (C-1); own codes `STATEMENT_NOT_RECALCULABLE`, `STATEMENT_RECALCULATION_AGREEMENTS_OPEN` with texts (C-2, C-3); paid refused tested (C-4); kept fields tested (C-9); confirmation dialog naming what stays and changes, success toast at the top (P-1, P-2, C-6); it «Ricalcolare» (C-7); API spec and PRD (C-10); nits C-11, C-12
+- [ ] Re-review: code-reviewer round 2, Helga; daten-pruefer on the recalculated draft
 - [ ] PR `Fixes #338`

@@ -4,6 +4,7 @@ import { Click, DownloadFrom, EnterDate, Navigate } from '../screenplay/interact
 import {
 	confirmCorrectButton,
 	correctStatementButton,
+	confirmRecalculateButton,
 	recalculateButton,
 	createCorrectionButton,
 	replacedByLink,
@@ -74,8 +75,9 @@ export const openResetPaymentConfirmation = Click.on(resetPaymentButton);
 export const resetPayment: Activity = (actor) =>
 	actor.attemptsTo(Click.on(resetPaymentButton), Click.on(confirmResetPaymentButton));
 
-// #338: a draft is calculated again from the invoices as they are now
-export const recalculateDraft = Click.on(recalculateButton);
+// #338: a draft is calculated again from the invoices as they are now, after the confirmation names the consequence
+export const recalculateDraft: Activity = (actor) =>
+	actor.attemptsTo(Click.on(recalculateButton), Click.on(confirmRecalculateButton));
 
 // #120: replacing names its consequence first; the berichtigte Abrechnung is created on the replaced one
 export const openCorrectConfirmation = Click.on(correctStatementButton);

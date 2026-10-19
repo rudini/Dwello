@@ -156,7 +156,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
-      | statement-detail       | recalculated        |
+      | statement-detail       | recalculate-dialog  |
       | statement-old-address-detail | default       |
       | statement-old-address-detail | send-dialog   |
       | statement-parts-detail | default             |

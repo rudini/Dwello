@@ -201,7 +201,6 @@
 			<PartiesPanel {statement} />
 			<MoreActions
 				{statement}
-				recalculated={!!form?.recalculated}
 				oncorrect={() => (showCorrect = true)}
 				ondelete={() => (showDelete = true)}
 			/>

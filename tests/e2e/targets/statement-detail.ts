@@ -71,7 +71,6 @@ export const confirmResetPaymentButton = target('Zurücksetzen bestätigen', (pa
 export const resetPaymentDialog = target('Bestätigung des Zurücksetzens', (page) => page.getByRole('dialog'));
 
 // #120: the correction of a sent statement
-export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
 export const correctStatementButton = target('Abrechnung berichtigen', (page) => page.getByTestId('statement-correct-button'));
 export const correctDialog = target('Bestätigung des Berichtigens', (page) => page.getByRole('dialog'));
 export const confirmCorrectButton = target('Ersetzen bestätigen', (page) => page.getByTestId('statement-correct-confirm'));
@@ -89,3 +88,7 @@ export const paymentSummary = target('Zahlung der Abrechnung', (page) => page.ge
 export const paymentDeadline = target('Zahlungsfrist der Abrechnung', (page) => page.getByTestId('statement-payment-deadline'));
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));
+
+// #338: «Neu berechnen» and its confirmation
+export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
+export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));

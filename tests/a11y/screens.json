@@ -29,7 +29,7 @@
 		"link-preset": "Statement wizard opened from a link that names a building and a period (after a changed Vertragsende): it starts at the settings step and says what the link chose.",
 		"send-dialog": "The confirmation before sending a statement open: marking it as sent for a letter, sending it by e-mail for a tenant who wants e-mail (#86).",
 		"send-refused": "A draft statement whose tenant wants e-mail but has no address, sent: it stays a draft, the alert says why and offers to deliver it by letter (#86).",
-		"recalculated": "Draft statement after «Neu berechnen» (#338): the confirmation that it bills the invoices as they are now.",
+		"recalculate-dialog": "Draft statement, «Neu berechnen» chosen (#338): the confirmation that names what stays and what changes.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
@@ -486,7 +486,7 @@
 				"default",
 				"send-dialog",
 				"delete-dialog",
-				"recalculated"
+				"recalculate-dialog"
 			]
 		},
 		{

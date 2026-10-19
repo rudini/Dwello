@@ -454,21 +454,30 @@ export async function generateStatement(
 export async function recalculateStatement(id: string): Promise<StatementWithDetails> {
 	const draft = await getStatement(id);
 	if (!draft) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
-	if (draft.status !== 'draft') throw new CodedError('STATEMENT_NOT_DRAFT', 'Only a draft can be recalculated');
-	await refuseOpenAgreements(draft.contractId, draft.building!.id, draft.periodStart, draft.periodEnd);
+	if (draft.status !== 'draft') throw new CodedError('STATEMENT_NOT_RECALCULABLE', 'Only a draft can be recalculated');
+	// the wizard asks only for contracts without a statement: the landlord deletes the draft first (review 338-1 C-3)
+	const { contractId, periodStart, periodEnd } = draft;
+	await refuseOpenAgreements(contractId, draft.building!.id, periodStart, periodEnd, 'STATEMENT_RECALCULATION_AGREEMENTS_OPEN');
 	const { values, lineItems } = await calculatedRows({
-		contractId: draft.contractId,
+		contractId,
 		buildingId: draft.building!.id,
-		periodStart: draft.periodStart,
-		periodEnd: draft.periodEnd,
+		periodStart,
+		periodEnd,
 		heatingProfileId: draft.heatingProfileId ?? undefined,
 		managementFeePercent: draft.managementFeePercent === null ? undefined : Number(draft.managementFeePercent)
 	});
+	// a berichtigte Abrechnung keeps the statement it replaces and what was paid on it (review 338-1 C-1)
+	const priorPayments = Number(draft.priorPayments);
+	const kept = {
+		replacesId: draft.replacesId,
+		priorPayments: draft.priorPayments,
+		balance: String(calculateBalance(Number(values.totalCosts), Number(values.totalAdvancePayments) + priorPayments))
+	};
 	await db.transaction(async (tx) => {
 		await tx.delete(utilityStatementLineItems).where(eq(utilityStatementLineItems.statementId, id));
 		await tx
 			.update(utilityStatements)
-			.set({ ...values, pdfBlob: null, pdfGeneratedAt: null, updatedAt: new Date() })
+			.set({ ...values, ...kept, pdfBlob: null, pdfGeneratedAt: null, updatedAt: new Date() })
 			.where(eq(utilityStatements.id, id));
 		if (lineItems.length) await tx.insert(utilityStatementLineItems).values(lineItems.map((item) => ({ ...item, statementId: id })));
 	});
@@ -659,7 +668,13 @@ export async function replaceStatement(id: string): Promise<StatementWithDetails
 
 // The correction is made without the wizard, which asks whether a category with costs and no answer is agreed (#91):
 // it would drop out unasked, so the landlord answers in the wizard first (merge review W10c-2 C-1)
-async function refuseOpenAgreements(contractId: string, buildingId: string, periodStart: string, periodEnd: string) {
+async function refuseOpenAgreements(
+	contractId: string,
+	buildingId: string,
+	periodStart: string,
+	periodEnd: string,
+	code = 'STATEMENT_AGREEMENTS_OPEN'
+) {
 	const [contract] = await db
 		.select({ id: rentalContracts.id, startDate: rentalContracts.startDate, endDate: rentalContracts.endDate })
 		.from(rentalContracts)
@@ -670,7 +685,7 @@ async function refuseOpenAgreements(contractId: string, buildingId: string, peri
 		.select({ name: categories.name, nameDE: categories.nameDE })
 		.from(categories)
 		.where(inArray(categories.id, open.map((answer) => answer.categoryId)));
-	throw new CodedError('STATEMENT_AGREEMENTS_OPEN', 'Whether the contract agrees these categories is not answered', {
+	throw new CodedError(code, 'Whether the contract agrees these categories is not answered', {
 		categories: named.map((category) => category.nameDE || category.name).join(', ')
 	});
 }

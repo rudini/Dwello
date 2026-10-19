@@ -659,7 +659,8 @@ Funktionalität: Abrechnungsdetail
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
-    Dann nennt die Position "Hauswart" "Hauswart 2024-12-31"
+    Dann bestätigt die Abrechnung "Der Entwurf ist neu berechnet. Er rechnet die Rechnungen ab, wie sie jetzt sind."
+    Und nennt die Position "Hauswart" "Hauswart 2024-12-31"
     Und weist die Abrechnung auf keine geänderten Rechnungen hin
 
   # #96: eine danach geänderte Rechnung zählt wie eine neue

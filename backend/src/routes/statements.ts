@@ -239,7 +239,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				return await recalculateStatement(params.id);
 			} catch (error) {
 				set.status = correctionStatus(error);
-				return codedBody(error, 'CALCULATION_FAILED', 'Statement generation failed');
+				return codedBody(error, 'CALCULATION_FAILED', 'Statement recalculation failed');
 			}
 		},
 		{ params: t.Object({ id: t.String() }) }

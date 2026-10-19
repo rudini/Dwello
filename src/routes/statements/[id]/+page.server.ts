@@ -78,7 +78,6 @@ export const actions: Actions = {
 	recalculate: async ({ params, fetch }) => {
 		const refused = await recalculateStatement(fetch, params.id);
 		if (refused) return fail(refused.status, { actionError: refused.message });
-		return { recalculated: true };
 	},
 	remind: async ({ params, fetch }) => {
 		const result = await sendStatementReminder(fetch, params.id);
