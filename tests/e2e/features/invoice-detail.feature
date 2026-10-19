@@ -127,15 +127,13 @@ Funktionalität: Rechnungsdetail
     Dann rät die Bestätigung zum Löschen der Rechnung "Laden Sie den Beleg vorher herunter, wenn Sie ihn für die Belegeinsicht brauchen."
 
   # #455 (#268): der Hinweis steht beim Betrag, nicht beim Beleg; die Regel als Hilfetext darunter
-  @wip
   Szenario: Abgezogene Akontorechnungen beim Betrag
     Angenommen "Werke Luzern" stellt dem Gebäude "Seeblick" "1250.00" Franken für "Allgemeinstrom Q1" in der Kategorie "Allgemeinstrom" in Rechnung, auf dem Beleg sind Akontorechnungen von "1000.00" Franken abgezogen
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Werke Luzern"
     Dann steht beim Betrag der Rechnung "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug, weniger die Akontorechnungen, die schon abgerechnet sind."
-    Und erklärt der Hinweis beim Betrag der Rechnung "Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das Total weniger diese Akontorechnungen 0, löschen Sie diese Rechnung mit «Rechnung löschen». Ergibt es weniger als 0, löschen Sie sie auch: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen."
+    Und erklärt der Hinweis beim Betrag der Rechnung "Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das Total weniger die abgerechneten Akontorechnungen 0, löschen Sie diese Rechnung mit «Rechnung löschen». Ergibt es weniger als 0, löschen Sie sie auch: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen."
 
   # #455 (#263): abgerechnet heisst in einer Nebenkostenabrechnung enthalten, gleich welchen Status sie hat
-  @wip
   Szenario: Die Rechnung nennt die Abrechnungen, in denen sie enthalten ist
     Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
     Und der Mieter "Anna Keller" existiert
@@ -144,11 +142,9 @@ Funktionalität: Rechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Dann nennt die Rechnung als enthalten in die Abrechnung des laufenden Jahres von "Anna Keller" im Status "Entwurf"
 
-  @wip
   Szenario: Eine Rechnung, die in keiner Abrechnung enthalten ist
     Dann nennt die Rechnung als enthalten in "Keine"
 
-  @wip
   Szenario: Von der Rechnung zur Abrechnung, in der sie enthalten ist
     Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
     Und der Mieter "Anna Keller" existiert

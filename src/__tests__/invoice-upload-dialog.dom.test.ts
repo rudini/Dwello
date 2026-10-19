@@ -12,7 +12,7 @@ import InvoiceUploadDialog from '../routes/invoices/InvoiceUploadDialog.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { reactiveProps } from './helpers/reactive-props.svelte';
 import extraction from '../../tests/contracts/invoice-extraction.json';
-import recorded from '../../tests/contracts/invoice.json';
+import listed from '../../tests/contracts/invoice-list.json';
 import unreadable from '../../tests/contracts/invoice-extraction-unreadable.json';
 
 const buildings = [
@@ -360,6 +360,8 @@ describe('Rechnungen hochladen', () => {
 		expect(choose.textContent!.trim()).toBe('Dateien auswählen');
 		expect(choose.closest('label')!.htmlFor).toBe(input.id);
 		expect(input.classList).toContain('sr-only');
+		// what the button shows is in the field's name, for speech control (WCAG 2.5.3, code review 455 C-4)
+		expect(choose.closest('[aria-hidden]')).toBeNull();
 	});
 
 	// #455 (#268): Escape closes the open list of a select, not the dialog
@@ -378,7 +380,7 @@ describe('Rechnungen hochladen', () => {
 	it('schlägt den Verteilschlüssel der Rechnungen derselben Kategorie im Gebäude vor', async () => {
 		const calls = fakeBff((call) =>
 			call.path.startsWith('/invoices?')
-				? [200, { invoices: [{ ...recorded, distributionKeyId: 'k2' }], total: 1 }]
+				? [200, { ...listed, invoices: [{ ...listed.invoices[0], distributionKeyId: null }, { ...listed.invoices[0], distributionKeyId: 'k2' }] }]
 				: [200, read]
 		);
 		show(InvoiceUploadDialog, {
@@ -395,7 +397,8 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
 		await settle();
-		expect(calls.map((call) => call.path)).toContain('/invoices?buildingId=b1&categoryId=c1&limit=1');
+		// the newest one without a key does not hide the key of the one before (domain review 455 V-15)
+		expect(calls.map((call) => call.path)).toContain('/invoices?buildingId=b1&categoryId=c1&limit=20');
 		click('invoice-upload-row-toggle');
 		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k2');
 	});

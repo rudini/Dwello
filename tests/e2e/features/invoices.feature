@@ -109,14 +109,12 @@ Funktionalität: Rechnungsliste
 
   # Die KI-Ersatzattrappe erkennt am Rechnungssteller, was auf der Rechnung steht (backend/scripts/llm-stub.ts)
   # #455: eine kurze Zeile mit dem abgezogenen und dem vorgeschlagenen Betrag, die Regel als Hilfetext darunter
-  @wip
   Szenario: Schlussrechnung mit abgezogenen Akontorechnungen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
     Dann sagt die Datei von "Werke Schlussrechnung" "Auf der Rechnung sind Akontorechnungen von CHF 1’000.00 abgezogen. Als Betrag ist das Total vor dem Abzug vorgeschlagen: CHF 1’250.00."
     Und erklärt der Hinweis zu den Akontorechnungen von "Werke Schlussrechnung" "Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen."
 
   # #455: eine Akontorechnung allein zählt sonst mit der Schlussrechnung doppelt (Art. 257b Abs. 1 OR)
-  @wip
   Szenario: Eine Akontorechnung ist nicht zum Erstellen ausgewählt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Akontorechnung" hochlädt
     Dann sagt die Datei von "Werke Akontorechnung" "Das ist eine Akontorechnung: ein Vorschuss, den der Rechnungssteller später mit der Schlussrechnung abrechnet. Erfassen Sie in der Regel nur die Schlussrechnung mit dem Total. Kommt sie erst nach der Abrechnung dieser Periode, setzen Sie das Häkchen bei «Diese Rechnung erstellen» und erfassen Sie die Akontorechnung; ziehen Sie ihren Betrag dann von der Schlussrechnung ab."
@@ -124,7 +122,6 @@ Funktionalität: Rechnungsliste
     Und sagt die Datei von "Werke Akontorechnung" nicht "Wählen Sie eine Kategorie."
 
   # #455: kommt die Schlussrechnung erst nach der Abrechnung, erfasst der Liegenschaftsverwalter die Akontorechnung selbst
-  @wip
   Szenario: Eine ausgewählte Akontorechnung erstellen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Akontorechnung" hochlädt
     Und der Liegenschaftsverwalter die Datei von "Werke Akontorechnung" zum Erstellen auswählt
@@ -185,7 +182,6 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nichts Lesbares antwortet
     Dann sagt die Datei von "Elektro Blitz" "Die KI hat keine lesbare Antwort gegeben. Wählen Sie «Erneut versuchen» oder füllen Sie die Felder aus."
 
-  @wip
   Szenario: Der Hinweis auf abgezogene Akontorechnungen bleibt bei der Rechnung
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
     Und der Liegenschaftsverwalter bei der Datei von "Werke Schlussrechnung" die Kategorie "Allgemeinstrom" wählt
@@ -195,14 +191,18 @@ Funktionalität: Rechnungsliste
     Und erinnert der Beleg nicht an abgezogene Akontorechnungen
 
   # #455 (#268): der Dateiknopf des Browsers spricht die Sprache des Browsers, nicht die von Dwello
-  @wip
   Szenario: Die Dateien werden in der Sprache von Dwello ausgewählt
     Wenn der Liegenschaftsverwalter das Hochladen von Rechnungen öffnet
     Dann bietet der Dialog die Dateien mit "Dateien auswählen" zur Auswahl an
 
   # #455 (#268): Escape schliesst die offene Auswahl der Kategorie, nicht das Hochladen
-  @wip
   Szenario: Escape in der Auswahl der Kategorie bricht das Hochladen nicht ab
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Und der Liegenschaftsverwalter die Auswahl der Kategorie bei der Datei von "Elektro Blitz" mit Escape schliesst
     Dann fragt Dwello nicht, ob das Hochladen abgebrochen werden soll
+
+  # #455 (#268): die Rechnungen derselben Kategorie im Gebäude geben den Verteilschlüssel vor, nicht ein leerer Standard
+  Szenario: Der Verteilschlüssel der Rechnungen derselben Kategorie wird vorgeschlagen
+    Angenommen "EW Winterthur" stellt dem Gebäude "Seeblick" "300.00" Franken für "Allgemeinstrom Q4" in der Kategorie "Allgemeinstrom" in Rechnung
+    Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
+    Dann schlägt Dwello bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" vor

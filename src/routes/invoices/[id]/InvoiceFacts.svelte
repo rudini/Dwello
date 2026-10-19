@@ -43,7 +43,12 @@
 				{formatCurrency(invoice.amount)}
 			</dd>
 			{#if invoice.beleg?.deductedAmount}
-				<dd><DeductedHint amount={invoice.beleg.deductedAmount} /></dd>
+				<dd>
+					<DeductedHint
+						amount={invoice.beleg.deductedAmount}
+						rule={m.invoices_beleg_deducted_rule()}
+					/>
+				</dd>
 			{/if}
 		</div>
 		<div class="flex flex-col gap-1 sm:col-span-2">

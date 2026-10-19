@@ -3,8 +3,8 @@
 	import type { FieldControl } from './field';
 
 	// A file field whose button speaks the language of the interface: the browser's own one speaks the browser's
-	// («Choose Files / No file chosen», #268). The input stays the control, visually hidden; the button is its label,
-	// left out of its name, which the label of the Field gives
+	// («Choose Files / No file chosen», #268). The input stays the control, visually hidden; the button is a second
+	// label, so the name holds what it shows (WCAG 2.5.3)
 	let {
 		input = $bindable(),
 		control,
@@ -47,7 +47,7 @@
 			: 'border-line-strong'}"
 	>
 		<Icon name="document" />
-		<span aria-hidden="true" data-testid="{testid}-choose">{choose}</span>
+		<span data-testid="{testid}-choose">{choose}</span>
 	</label>
 	{#if chosen !== undefined}
 		<span class="break-all text-ink-muted" data-testid="{testid}-chosen">{chosen}</span>

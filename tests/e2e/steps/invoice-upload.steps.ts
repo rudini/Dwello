@@ -22,6 +22,7 @@ import {
 	discardQuestion,
 	noteOnBeleg,
 	proposedAmount,
+	proposedKey,
 	proposedInvoiceNumber,
 	unsureNote,
 	uploadOutcome
@@ -39,6 +40,7 @@ import {
 	invoicePdf,
 	invoicePhoto,
 	openBeleg,
+	openBelegOnce,
 	openBelegOnceRead,
 	openBelegOfInvoice,
 	openFileLarge,
@@ -328,3 +330,13 @@ Then('fragt Dwello nicht, ob das Hochladen abgebrochen werden soll', async ({ ve
 Then('erinnert der Beleg nicht an abgezogene Akontorechnungen', async ({ verwalter }) => {
 	await verwalter.sees(hintsOfUploadOrNone).not.toContain('Akontorechnungen');
 });
+
+// the key of the building's invoices of the Kategorie the KI chose (#455, #268)
+Then(
+	'schlägt Dwello bei der Datei von {string} den Verteilschlüssel {string} vor',
+	async ({ verwalter, names }, supplier: string, key: string) => {
+		const file = pdfOf(names.get(supplier)!);
+		await verwalter.attemptsTo(openBelegOnce(file));
+		await verwalter.sees(proposedKey(file)).toBe(key);
+	}
+);

@@ -5,7 +5,7 @@
 
 	// At the Betrag of a saved invoice: the Akontorechnungen the Rechnungssteller deducted on its Beleg, as the KI saw
 	// them when it was uploaded, with the rule as help below (#455)
-	let { amount }: { amount: string } = $props();
+	let { amount, rule }: { amount: string; rule: string } = $props(); // rule: where «Rechnung löschen» is (455 V-14)
 </script>
 
 <Alert
@@ -14,6 +14,6 @@
 	testid="invoice-deducted-hint"
 >
 	<p class="text-ink-muted" data-testid="invoice-deducted-rule">
-		{m.invoices_beleg_deducted_rule()}
+		{rule}
 	</p>
 </Alert>

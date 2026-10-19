@@ -116,3 +116,7 @@ export const escapeFromCategory = (fileName: string): Activity => async (actor) 
 	if (!(await actor.answer(Visibility.of(belegCategory(fileName))))) await actor.attemptsTo(openBeleg(fileName));
 	await actor.attemptsTo(Press.theKey('Escape').on(belegCategory(fileName)));
 };
+// the invoice of the file opened, unless it is open already
+export const openBelegOnce = (fileName: string): Activity => async (actor) => {
+	if (!(await actor.answer(Visibility.of(belegCategory(fileName))))) await actor.attemptsTo(openBeleg(fileName));
+};

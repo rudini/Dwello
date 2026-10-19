@@ -55,7 +55,8 @@
 	let discardOpen = $state(false);
 	let removed = $state(''); // the file just removed, said by the status until the next change
 	let nextKey = 0;
-	// the Verteilschlüssel of the chosen building's latest invoice in a Kategorie, asked once per Kategorie (#455)
+	// the Verteilschlüssel of the chosen building's latest invoice with one in a Kategorie, asked once per Kategorie (#455)
+	// ponytail: only the latest 20 invoices of the Kategorie are looked at
 	let keys = new Map<string, Promise<string | null>>();
 	function keyFor(categoryId: string) {
 		const asked = `${buildingId}/${categoryId}`;
@@ -63,8 +64,8 @@
 			keys.set(
 				asked,
 				api
-					.get<{ invoices?: { distributionKeyId: string | null }[] }>('/invoices', { buildingId, categoryId, limit: '1' })
-					.then((answer) => answer.data?.invoices?.[0]?.distributionKeyId ?? null)
+					.get<{ invoices?: { distributionKeyId: string | null }[] }>('/invoices', { buildingId, categoryId, limit: '20' })
+					.then((answer) => answer.data?.invoices?.find((one) => one.distributionKeyId)?.distributionKeyId ?? null)
 			);
 		return keys.get(asked)!;
 	}

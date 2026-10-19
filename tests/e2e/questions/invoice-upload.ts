@@ -3,6 +3,7 @@ import { Checked, OpenedFile, Text, Value, Visibility } from '../screenplay/ques
 import {
 	belegAmount,
 	belegDeductedRule,
+	belegDistributionKey,
 	belegHow,
 	belegUploadHints,
 	createInvoicesButton,
@@ -52,3 +53,4 @@ export const deductedRuleOnBeleg = (fileName: string) => Text.of(belegDeductedRu
 export const fileChooserLabel = Text.of(uploadFileChoose);
 // what the Beleg card says from the upload, empty without a hint
 export const hintsOfUploadOrNone = question('the hints from the upload at the Beleg', async (actor) => (await actor.answer(hintsOfUpload)) ?? '');
+export const proposedKey = (fileName: string) => Value.chosenIn(belegDistributionKey(fileName));

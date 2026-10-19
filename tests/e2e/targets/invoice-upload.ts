@@ -53,3 +53,5 @@ export const belegRemove = (fileName: string) => inRow(fileName, 'Datei entferne
 export const belegDeductedRule = (fileName: string) =>
 	inRow(fileName, 'Regel zu den Akontorechnungen', 'invoice-upload-deducted-rule');
 export const uploadFileChoose = target('Dateien auswählen', (page) => page.getByTestId('invoice-upload-file-choose'));
+export const belegDistributionKey = (fileName: string) =>
+	inRow(fileName, 'Verteilschlüssel', 'invoice-distribution-key-select');
