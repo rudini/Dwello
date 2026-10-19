@@ -10,7 +10,7 @@ import { SMTPServer } from 'smtp-server';
 import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
 import { db } from '../db/connection';
-import { documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
+import { configuration, documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { formatQRReferenceForDisplay, statementQRReference } from '../services/qr-bill.service';
 import { updateTenant } from '../services/tenant.service';
@@ -519,5 +519,20 @@ describe('Zahlteil der Mahnung', () => {
 
 		expect(text).toContain('Freundliche Grüsse');
 		expect(text).not.toContain('Zahlteil');
+	});
+
+	// #450 (Entscheid in #404, Punkt 8): ohne Ort der Firmenadresse nennt der Zahlteil keinen erfundenen Zahlungsempfänger
+	it('erstellt ohne vollständige Firmenadresse keine Mahnung mit Zahlteil', async () => {
+		const city = await getConfig('company_city');
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		try {
+			const refused = await remind(statementId);
+
+			expect(refused).toMatchObject({ status: 400, code: 'CREDITOR_ADDRESS_MISSING' });
+		} finally {
+			if (city) await setConfig('company_city', city);
+		}
 	});
 });

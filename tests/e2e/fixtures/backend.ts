@@ -300,9 +300,16 @@ export function testData(api: CallTheApi) {
 			ids.set(`Mahnung ${tenantTitle} ${year}`, document.id);
 		},
 
-		// Global setting: every scenario that needs one uses the same IBAN, so parallel runs agree
+		// Global setting: every scenario that needs one uses the same IBAN and Firmenadresse (the one of «Absender und
+		// Fristen hinterlegen»), so parallel runs agree; an IBAN is saved only with the Firmenadresse (#450)
 		async iban(iban: string) {
-			await put('config', { iban: iban.replace(/\s/g, '') });
+			await put('config', {
+				company_name: 'Muster Immobilien AG',
+				company_address: 'Bahnhofstrasse 1',
+				company_postal_code: '8001',
+				company_city: 'Zürich',
+				iban: iban.replace(/\s/g, '')
+			});
 		},
 
 		async removeBuilding(title: string) {

@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, tenants, utilityStatements } from '../db/schema';
+import { categories, configuration, fuelStocks, tenants, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createFuelStock } from '../services/fuel-stock.service';
@@ -813,4 +813,39 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 		expect(settled.status).toBe('paid');
 		expect(settled.pdfGeneratedAt).not.toBeNull();
 	});
+});
+
+// #450 (Entscheid in #404, Punkt 8): der Zahlteil nennt den Liegenschaftsverwalter als Zahlungsempfänger, nie einen
+// erfundenen. Eine Installation von vorher kann eine IBAN ohne Ort der Firmenadresse haben
+describe('PDF ohne vollständige Firmenadresse', () => {
+	const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+	const withoutCity = async (test: (id: string) => Promise<void>) => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		try {
+			await test(statement.id);
+		} finally {
+			await setConfig('company_city', company.company_city);
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statement.id));
+			await deleteStatement(statement.id);
+		}
+	};
+
+	it('lehnt ein PDF mit Zahlteil ab und sagt, was fehlt', () =>
+		withoutCity(async (id) => {
+			const response = await sendJson('POST', `/api/v1/statements/${id}/generate-pdf`, {});
+
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({ code: 'CREDITOR_ADDRESS_MISSING' });
+		}));
+
+	it('erstellt ein PDF ohne Zahlteil weiterhin', () =>
+		withoutCity(async (id) => {
+			await updateStatementStatus(id, 'sent');
+			await updateStatementStatus(id, 'paid', { paidDate: today });
+
+			const response = await sendJson('POST', `/api/v1/statements/${id}/generate-pdf`, {});
+
+			expect(response.status).toBe(200);
+		}));
 });

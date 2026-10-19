@@ -29,9 +29,24 @@ Funktionalität: Einstellungen
 
   # Die QR-Rechnung nimmt Konten in der Schweiz und in Liechtenstein an, die Einstellungen auch (#191)
   Szenario: IBAN aus Liechtenstein hinterlegen
-    Wenn der Liegenschaftsverwalter die IBAN "LI21 0881 0000 2324 013A A" speichert
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | Firmenname | Muster Immobilien AG       |
+      | PLZ        | 8001                       |
+      | Ort        | Zürich                     |
+      | IBAN       | LI21 0881 0000 2324 013A A |
     Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
     Und nach erneutem Öffnen der Einstellungen ist die IBAN "LI21 0881 0000 2324 013A A" hinterlegt
+
+  # #450 (Entscheid in #404, Punkt 8): der Zahlteil nennt den Liegenschaftsverwalter als Zahlungsempfänger, nie
+  # einen erfundenen. Die Seite speichert dabei nichts
+  @wip
+  Szenario: IBAN ohne Firmenadresse
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | Firmenname |                            |
+      | PLZ        |                            |
+      | Ort        |                            |
+      | IBAN       | CH93 0076 2011 6238 5295 7 |
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."
 
   Szenario: Ungültige PLZ
     Wenn der Liegenschaftsverwalter die PLZ "80" speichert

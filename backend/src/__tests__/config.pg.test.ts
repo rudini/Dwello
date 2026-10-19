@@ -90,4 +90,40 @@ describe('Einstellungen speichern', () => {
 		expect(response.status).toBe(200);
 		expect(await getConfig('iban')).toBe('CH93 0076 2011 6238 5295 7');
 	});
+
+	// #450 (Entscheid in #404, Punkt 8): der Zahlteil nennt den Liegenschaftsverwalter als Zahlungsempfänger
+	it('speichert eine IBAN nur mit Name, PLZ und Ort der Firmenadresse', async () => {
+		const name = await getConfig('company_name');
+		await deleteConfig('company_name');
+		try {
+			const refused = await sendJson('PUT', '/api/v1/config', { company_city: 'Winterthur', iban: 'CH93 0076 2011 6238 5295 7' });
+			const withName = await sendJson('PUT', '/api/v1/config', {
+				company_name: 'Muster Immobilien AG',
+				iban: 'CH93 0076 2011 6238 5295 7'
+			});
+
+			expect(refused.status).toBe(400);
+			expect(await refused.json()).toMatchObject({ code: 'IBAN_COMPANY_ADDRESS_MISSING' });
+			expect(await getConfig('company_city')).toBe(companyCity);
+			expect(withName.status).toBe(200);
+		} finally {
+			if (name) await setConfig('company_name', name);
+			else await deleteConfig('company_name');
+		}
+	});
+
+	// #450: eine Installation von vorher mit IBAN und ohne Firmenadresse: das nächste Speichern verlangt sie
+	it('verlangt die Firmenadresse beim nächsten Speichern, wenn schon eine IBAN hinterlegt ist', async () => {
+		const name = await getConfig('company_name');
+		await setConfig('iban', 'CH93 0076 2011 6238 5295 7');
+		await db.execute(sql`DELETE FROM configuration WHERE key = 'company_name'`);
+		try {
+			const response = await sendJson('PUT', '/api/v1/config', { payment_deadline_days: '30' });
+
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({ code: 'IBAN_COMPANY_ADDRESS_MISSING' });
+		} finally {
+			if (name) await setConfig('company_name', name);
+		}
+	});
 });
