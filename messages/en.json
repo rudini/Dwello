@@ -764,6 +764,7 @@
 	"contracts_agreed_costs_none": "None",
 	"contracts_agreed_costs_none_title": "No utility costs agreed",
 	"contracts_agreed_costs_none_text": "With no box ticked, Dwello bills this tenant no utility costs. If the signed rental contract lists utility costs, tick them. If the tenant pays all utility costs with a flat-rate utility charge, leave the boxes unticked.",
+	"contracts_agreed_costs_none_text_advance": "With no box ticked, Dwello bills this tenant no utility costs. But the tenant pays an advance payment. With the utility cost statement, you refund them all advance payments made. Tick the utility costs the tenant pays an advance payment for.",
 	"contracts_agreed_costs_help": "Dwello has ticked every allocable category. Untick each one the signed rental contract does not list. Dwello bills the tenant only the ticked utility costs. A general phrase such as «other utility costs» is not enough. If the rental contract names «heating costs», the chimney sweep and the other heating cost categories belong to them.",
 	"contracts_agreed_costs_help_edit": "Dwello bills the tenant only the ticked utility costs. A general phrase such as «other utility costs» is not enough. If the rental contract names «heating costs», the chimney sweep and the other heating cost categories belong to them. Existing statements do not change. You introduce new utility costs only on the official form, at the earliest for the next termination date; Dwello cannot bill them from a date yet.",
 	"statements_fee_not_agreed_title": "Without an agreed management fee",

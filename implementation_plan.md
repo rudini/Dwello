@@ -31,3 +31,12 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Issue for Helga 432 P-2 (Akonto without agreed Nebenkosten, existed before): #444
 - [x] Closing code-review round (`docs/reviews/432-review-3.md`, no findings)
 - [ ] PR `Fixes #432`
+
+### #444 Akonto without agreed Nebenkosten
+
+- [x] @wip scenario «Mit Akonto und ohne angekreuzte Nebenkosten warnt das Formular» (`contract-new.feature`)
+- [x] fach-reviewer on the scenario and the proposed sentence before implementing (`docs/reviews/444-fachreview-1.md`); product owner confirmed the wording (recorded in #444)
+- [x] `AgreedCategories.svelte`: caution tone and the Akonto variant text when an Akonto is entered; DOM test; texts in all four languages; axe and language state `agreed-costs-none-advance`
+- [x] Slice review round 1 (`docs/reviews/444-review-1.md`, C-1 and C-3 fixed), feature review (persona Helga, `docs/design/personas/helga-444.md`, no Blocker/Major)
+- [x] Closing code-review round (`docs/reviews/444-review-2.md`, no Blocker/Major)
+- [ ] PR `Fixes #444`

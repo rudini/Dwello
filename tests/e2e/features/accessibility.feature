@@ -79,6 +79,7 @@ Funktionalität: Barrierefreiheit
       | contract-new           | agreed-costs-none        |
       | contract-new           | flat-rate-warning        |
       | contract-new           | flat-rate-warning-advance |
+      | contract-new           | agreed-costs-none-advance |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
       | contract-detail        | end-dialog-error    |
@@ -97,6 +98,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | agreed-costs-none   |
       | contract-edit          | flat-rate-warning   |
       | contract-edit          | flat-rate-warning-advance |
+      | contract-edit          | agreed-costs-none-advance |
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |

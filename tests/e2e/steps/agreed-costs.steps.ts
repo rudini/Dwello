@@ -161,6 +161,10 @@ Then('warnt das Formular {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(noAgreedCostsWarning).toContain(message);
 });
 
+Then('ist der Hinweis ohne vereinbarte Nebenkosten eine Warnung', async ({ verwalter }) => {
+	await verwalter.sees(noAgreedCostsTone).toBe('caution');
+});
+
 Then('weist das Formular ohne Warnung darauf hin, dass keine Nebenkosten vereinbart sind', async ({ verwalter }) => {
 	await verwalter.sees(noAgreedCostsWarning).toContain('Keine Nebenkosten vereinbart');
 	await verwalter.sees(noAgreedCostsTone).toBe('info');

@@ -288,6 +288,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Enter.theValue('120').into(flatRateInput),
 			Wait.until(on.shown('contract-flat-rate-warning'))
 		),
+	// an Akonto and every box unticked, not saved: the caution that the Akonto is paid back (#444)
+	'agreed-costs-none-advance': () => (actor) =>
+		actor.attemptsTo(
+			toRentStep,
+			Enter.theValue('150').into(advancePaymentInput),
+			untickAllCategories,
+			Wait.until(on.shown('contract-agreed-costs-none'))
+		),
 	// an Akonto and a Nebenkostenpauschale, the boxes ticked, not saved: the warning to leave only those with Akonto (#432)
 	'flat-rate-warning-advance': () => (actor) =>
 		actor.attemptsTo(

@@ -8,12 +8,13 @@ const categories = [
 	{ id: 'c2', name: 'Lift' }
 ];
 
-function boxes(agreed?: string[], flatRate = false) {
+function boxes(agreed?: string[], flatRate = false, advance = false) {
 	const bound = { agreed };
 	show(AgreedCategories, {
 		categories,
 		help: 'Hilfe',
 		flatRate,
+		advance,
 		get agreed() {
 			return bound.agreed;
 		},
@@ -57,5 +58,29 @@ describe('Vereinbarte Nebenkosten im Mietvertrag', () => {
 		boxes([], true);
 
 		expect(byTestId('contract-agreed-costs-none')!.className).not.toContain('bg-caution-soft');
+	});
+
+	// #444 (Helga 432 P-2): mit Akonto rechnet Dwello ohne Häkchen keine Nebenkosten ab, auch mit Nebenkostenpauschale
+	it('warnt mit Akonto, wenn keine Nebenkosten vereinbart sind', () => {
+		boxes([], true, true);
+
+		expect(byTestId('contract-agreed-costs-none')!.className).toContain('bg-caution-soft');
+		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain(
+			'Kreuzen Sie die Nebenkosten an, für die der Mieter Akonto bezahlt.'
+		);
+		// the Pauschale sentence would contradict it (fach-review 444 V-1)
+		expect(byTestId('contract-agreed-costs-none')!.textContent).not.toContain(
+			'lassen Sie die Häkchen leer'
+		);
+		document.body.innerHTML = '';
+
+		boxes([], false, true);
+		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain(
+			'Er bezahlt aber ein Akonto.'
+		);
+		document.body.innerHTML = '';
+
+		boxes([]);
+		expect(byTestId('contract-agreed-costs-none')!.textContent).not.toContain('Akonto');
 	});
 });
