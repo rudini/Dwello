@@ -72,7 +72,7 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Fixes: a berichtigte Abrechnung keeps `replaces` and `priorPayments` (C-1); own codes `STATEMENT_NOT_RECALCULABLE`, `STATEMENT_RECALCULATION_AGREEMENTS_OPEN` with texts (C-2, C-3); paid refused tested (C-4); kept fields tested (C-9); confirmation dialog naming what stays and changes, success toast at the top (P-1, P-2, C-6); it «Ricalcolare» (C-7); API spec and PRD (C-10); nits C-11, C-12
 - [x] Re-review round 2 (`docs/reviews/338-review-2.md`: no Blocker/Major; C-14 saldo of a recalculated berichtigte Abrechnung pinned, C-15 duplicate step removed; C-16 to C-18 kept)
 - [x] daten-pruefer on the recalculated draft (`docs/reviews/338-datenpruefung-1.md`: every amount to the Rappen, no findings; preview endpoint and PDF not checked)
-- [ ] Helga round 2 on the dialog and the toast; closing code-review round after merging `main`
+- [x] Helga round 2 (`docs/design/personas/helga-338-2.md`: P-1, P-2 of round 1 fixed; new P-1, P-2 Minor on the toast, P-3, P-4 Nit, kept); closing code-review round 3 after merging `main` (`docs/reviews/338-review-3.md`, no findings); lint, check, type-check, affected vitest (760) and pg tests, E2E Chromium statement rows (157 passed)
 - [ ] PR `Fixes #338`
 
 ### Main CI red since #440: E2E leftovers (O-38)
