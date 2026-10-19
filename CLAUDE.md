@@ -82,7 +82,7 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 - before anything destructive: deleting data, a force-push, changes outside this repo, editing an applied migration (`backend/CLAUDE.md`), starting a branch anew when unmerged commits would be lost (Gotchas, "Branches"). Not destructive: recreating the databases `dwello_persona`, `dwello_test` and `dwello_e2e`, files in the scratchpad, and pushing this branch and its pull request under step 9;
 - before a push or pull request where I said to only commit, a push to `main`, merging with a red check (also one red on `main`), a fourth round of CI fixes, merging while a Blocker/Major is open.
 
-End every run with three headings: **Blocked on me** (decisions, open Blocker/Major, new issues and rows in `docs/design/offene-punkte.md`), **Changed** (files, commits), **Found** (findings by ID and status, issues closed and opened, what could not be confirmed).
+End every run with three headings: **Blocked on me** (decisions, open Blocker/Major, new issues and rows in `docs/design/offene-punkte.md`), **Changed** (files, commits), **Found** (findings by ID and status, issues closed and opened, what could not be confirmed and where you looked).
 
 Before marking anything complete, all of these pass: `bun run lint`, `bun run check`, `cd backend && bun run type-check`, the tests the change affects, also those that read a changed file (`bunx vitest run <files>`, `cd backend && bun test <files>`; for rule files `open-work`, `commit-msg-gate`, `check-issues` and deepcheck `readme`), and the affected E2E scenarios. CI runs the full suites with the coverage floors before the merge.
 
