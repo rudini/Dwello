@@ -29,4 +29,5 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Helga 432 P-1 (Major, contradicted the decision): product owner 2026-10-19: with an Akonto the warning shows only while every box is ticked; unit test, scenario, a11y state ticks all first
 - [x] Re-review: code-reviewer round 2 (`docs/reviews/432-review-2.md`), Helga (`docs/design/personas/helga-432-2.md`)
 - [x] Issue for Helga 432 P-2 (Akonto without agreed Nebenkosten, existed before): #444
+- [x] Closing code-review round (`docs/reviews/432-review-3.md`, no findings)
 - [ ] PR `Fixes #432`
