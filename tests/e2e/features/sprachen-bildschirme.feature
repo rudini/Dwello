@@ -20,6 +20,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | gallery                | busy-dialog-open    |
       | login                  | default             |
       | login                  | login-error         |
+      | login                  | login-not-allowed   |
       | login                  | other-language      |
       | login                  | demo                |
       | error-404              | default             |

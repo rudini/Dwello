@@ -133,6 +133,7 @@
 	"login_error_cancelled": "Die Anmeldung wurde abgebrochen.",
 	"login_error_failed": "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
 	"login_error_unavailable": "Diese Anmeldung ist nicht eingerichtet.",
+	"login_error_not_allowed": "Dieses Konto hat keinen Zugang zu Dwello. Melden Sie sich mit dem Konto an, das für Dwello eingerichtet ist.",
 	"error_title": "Fehler",
 	"error_404": "Diese Seite gibt es nicht.",
 	"error_403": "Sie haben keinen Zugriff auf diese Seite.",

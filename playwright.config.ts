@@ -35,6 +35,8 @@ const frontendEnv = {
 	OAUTH_MICROSOFT_CLIENT_ID: '',
 	OAUTH_MICROSOFT_CLIENT_SECRET: '',
 	OAUTH_MICROSOFT_REDIRECT_URI: '',
+	// Only the Liegenschaftsverwalter of fixtures/session.ts may sign in (#51); every instance below spreads this
+	ALLOWED_EMAILS: 'verwalter@example.com',
 	// The version the build bakes in instead of `git describe` (navigation.feature, «Die Fusszeile zeigt die Version der App»)
 	APP_VERSION: 'v1.4.0',
 	// The operator that terms.feature expects under „Verfügbarkeit“

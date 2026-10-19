@@ -17,6 +17,9 @@ export const LOGIN_ERRORS = {
 	},
 	get unavailable() {
 		return m.login_error_unavailable();
+	},
+	get not_allowed() {
+		return m.login_error_not_allowed(); // #51: not in ALLOWED_EMAILS
 	}
 };
 
