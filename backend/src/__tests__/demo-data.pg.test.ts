@@ -148,6 +148,17 @@ describe('Demodaten', () => {
 		]);
 	});
 
+	// #464 (personas Helga and Weber 464 P-1): every contract has its Akonto from the Vertragsbeginn, else it cannot be saved
+	it('gibt jedem Mietvertrag sein Akonto ab dem Vertragsbeginn', async () => {
+		const rows = await query(
+			name,
+			`SELECT count(*)::int AS missing FROM rental_contracts c
+			WHERE NOT EXISTS (SELECT 1 FROM contract_advance_payments a
+				WHERE a.contract_id = c.id AND a.valid_from = c.start_date AND a.amount = c.monthly_advance_payment)`
+		);
+		expect(rows).toEqual([{ missing: 0 }]);
+	});
+
 	// #89: each choice of «Verwaltungspauschale vereinbart» once, and the statements follow it
 	it('vereinbart die Verwaltungspauschale je Mietvertrag: zum Satz des Laufs, mit eigenem Satz und keine', async () => {
 		const rows = await query(

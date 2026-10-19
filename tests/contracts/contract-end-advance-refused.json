@@ -1,0 +1,5 @@
+{
+	"error": "Another Akonto applies after the new end",
+	"code": "CONTRACT_END_BEFORE_ADVANCE",
+	"params": { "date": "01.01.2099" }
+}

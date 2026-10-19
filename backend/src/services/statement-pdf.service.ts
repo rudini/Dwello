@@ -134,6 +134,7 @@ export function toPdfData(
 		managementFeePercent: parseFloat(statement.managementFeePercent ?? '0'), // rate chosen for the generation run
 		totalCosts: parseFloat(statement.totalCosts),
 		totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
+		advanceLines: statement.advanceLines, // as calculated (#464); null before: the total only
 		balance: parseFloat(statement.balance),
 		paymentDeadline: statement.paymentDeadline || undefined,
 		paidDate: (statement.status === 'paid' && statement.paidDate) || undefined,

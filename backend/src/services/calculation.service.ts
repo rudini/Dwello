@@ -12,7 +12,7 @@
 
 import { like, max, sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { statementNumbers, utilityStatements, type BilledInvoice, type HeatingProfile, type HeatingShare, type InvoicePart } from '../db/schema';
+import { statementNumbers, utilityStatements, type AdvanceLine, type BilledInvoice, type HeatingProfile, type HeatingShare, type InvoicePart } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
@@ -22,6 +22,7 @@ import {
 	handleMidYearMoves
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
+import { advanceLines, advancesOf } from './advance-payment.service';
 import { billingStart, getContract } from './contract.service';
 import { agreedCategoryIds } from './agreed-category.service';
 import { calculateHeatingShare, getHeatingProfile } from './heating-profile.service';
@@ -67,6 +68,7 @@ export interface StatementCalculation {
 	managementFeePercent: number;
 	totalCosts: number;
 	totalAdvancePayments: number;
+	advanceLines: AdvanceLine[]; // the Akonto per amount and split month (#464)
 	balance: number; // Positive = tenant owes, Negative = refund
 	heating: HeatingShare | null; // as the heating costs were shared (#209)
 	agreedCategoryIds: string[]; // the categories the contract agreed (#91)
@@ -281,30 +283,6 @@ export function calculateManagementFee(
 }
 
 /**
- * Calculate total advance payments for a contract in a period
- */
-export function calculateTotalAdvancePayments(
-	monthlyAdvancePayment: number,
-	rentalStart: Date,
-	rentalEnd: Date
-): number {
-	// Advances are due per calendar month; a partial month counts by its share of days
-	let months = 0;
-	const cursor = new Date(Date.UTC(rentalStart.getUTCFullYear(), rentalStart.getUTCMonth(), 1));
-	while (cursor <= rentalEnd) {
-		const year = cursor.getUTCFullYear();
-		const month = cursor.getUTCMonth();
-		const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-		const firstDay = rentalStart > cursor ? rentalStart.getUTCDate() : 1;
-		const lastDay = rentalEnd < new Date(Date.UTC(year, month, daysInMonth)) ? rentalEnd.getUTCDate() : daysInMonth;
-		months += (lastDay - firstDay + 1) / daysInMonth;
-		cursor.setUTCMonth(month + 1);
-	}
-
-	return roundToRappen(months * monthlyAdvancePayment);
-}
-
-/**
  * Calculate balance (tenant owes vs. refund), rounded to 5 Rappen: the amount the tenant pays or gets back
  */
 export function calculateBalance(totalCosts: number, totalAdvancePayments: number): number {
@@ -434,13 +412,15 @@ export async function calculateStatementForContract(
 	const managementFee = calculateManagementFee(subtotal, feePercent).fee;
 	const totalCosts = roundToRappen(subtotal + managementFee);
 
-	// Calculate total advance payments
-	const monthlyAdvance = parseFloat(contract.monthlyAdvancePayment);
-	const totalAdvancePayments = calculateTotalAdvancePayments(
-		monthlyAdvance,
+	// The Akonto of each amount for the months it applied (#464); a contract without rows (made around the service) by
+	// its one amount
+	const amounts = (await advancesOf(contract.id)).map(({ validFrom, amount }) => ({ validFrom, amount: parseFloat(amount) }));
+	const advance = advanceLines(
+		amounts.length ? amounts : [{ validFrom: contract.startDate, amount: parseFloat(contract.monthlyAdvancePayment) }],
 		contractOverlap.overlapStart,
 		contractOverlap.overlapEnd
 	);
+	const totalAdvancePayments = roundToRappen(advance.reduce((sum, line) => sum + line.total, 0));
 
 	// Calculate balance
 	const balance = calculateBalance(totalCosts, totalAdvancePayments);
@@ -461,6 +441,7 @@ export async function calculateStatementForContract(
 		managementFeePercent: feePercent,
 		totalCosts,
 		totalAdvancePayments,
+		advanceLines: advance,
 		balance,
 		heating,
 		agreedCategoryIds: agreed
