@@ -230,6 +230,21 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		).toEqual([missingYear(lastYear)]);
 	});
 
+	// code review 199-2 C-9: two older periods with one first day: the longer one, so no missing day is lost
+	it('nennt bei zwei Altperioden mit gleichem Beginn die Tage der längeren', async () => {
+		const period = (contractId: string, end: string) => ({
+			...statementOf(contractId, lastYear),
+			periodEnd: `${lastYear}-${end}`
+		});
+		const missing = (await missingOf(
+			backend([period('c0', '03-31'), period('c2', '06-30')], `${lastYear}-01-01`)
+		)) as { start: string; end: string }[];
+		expect(missing.map(({ start, end }) => [start, end])).toEqual([
+			[`${lastYear}-07-01`, `${lastYear}-12-31`],
+			[`${lastYear}-01-01`, `${lastYear}-06-30`]
+		]);
+	});
+
 	// code review 199-1 C-6: without the building's statements the ways cannot be told: better no hint
 	it('nennt nichts, wenn die Abrechnungen des Gebäudes nicht gelesen werden können', async () => {
 		const answer = backend([]);

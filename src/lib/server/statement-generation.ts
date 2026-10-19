@@ -1,6 +1,6 @@
 import { backendMessage } from '$lib/backend-error';
 import { billsIn, localToday } from '$lib/contract-status';
-import { billingPeriods, overlappedBy, periodName, uncovered } from '$lib/accounting-period';
+import { overlappedBy, periodName, periodsOf, uncovered } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { changedInvoiceCount, namesById, toStatement } from '$lib/server/statement';
@@ -65,21 +65,20 @@ function overlapOf(
 	contracts: Contract[],
 	statements: Billing[]
 ) {
-	// a replaced statement's period too is one of the building's: its berichtigte Abrechnung keeps it (#120, code
-	// review 199-1 C-1)
-	if (statements.some((s) => s.periodStart === run.start && s.periodEnd === run.end)) return null;
-	const periods = billingPeriods(statements);
-	const overlapped = overlappedBy(run, periods);
+	// a replaced statement's period too is the building's: its berichtigte Abrechnung keeps it (#120, code review
+	// 199-1 C-1, 199-2 C-8)
+	const overlapped = overlappedBy(run, periodsOf(statements));
 	if (!overlapped.length) return null;
 	const billing = statements.filter((s) => s.status !== 'replaced');
 	const within = (s: Billing, p: { start: string; end: string }) =>
 		s.periodStart <= p.end && s.periodEnd >= p.start;
-	// as the run counts it: a contract with a statement that overlaps the period is billed there (#199)
+	// as the run counts it: a contract with a statement that overlaps the period is billed there (#199), a replaced
+	// one bills there no more (#120)
 	const unbilled = (p: { start: string; end: string }) =>
 		contracts.some(
 			(c) => billsIn(c, p) && !billing.some((s) => s.contractId === c.id && within(s, p))
 		);
-	const rest = uncovered(run, billing)
+	const rest = uncovered(run, statements)
 		.reverse()
 		.filter((days) => days.end < localToday());
 	const short = rest.filter((days) => contracts.some((c) => billsIn(c, days)));
@@ -88,7 +87,7 @@ function overlapOf(
 		choose: overlapped.filter(unbilled),
 		short,
 		vacant: rest.length > 0 && !short.length,
-		statements: billing.filter((s) => overlapped.some((p) => within(s, p))).length
+		statements: statements.filter((s) => overlapped.some((p) => within(s, p))).length
 	};
 }
 

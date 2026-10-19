@@ -72,10 +72,13 @@ export function missingPeriods(
 const overlaps = (a: Range, b: Range) => a.start <= b.end && a.end >= b.start;
 const same = (a: Range, b: Range) => a.start === b.start && a.end === b.end;
 
-/** The Abrechnungsperioden of the statements that bill, each once, the earliest first; a replaced one no longer bills (#120) */
-export function billingPeriods(statements: Dated[]): Range[] {
+/**
+ * The Abrechnungsperioden of the statements, each once, the earliest first; a replaced one's too: its period stays the
+ * building's for its berichtigte Abrechnung (#120, code review 199-2 C-8)
+ */
+export function periodsOf(statements: Dated[]): Range[] {
 	const periods = new Map<string, Range>();
-	for (const s of statements.filter((s) => s.status !== 'replaced')) {
+	for (const s of statements) {
 		const period = { start: s.periodStart.slice(0, 10), end: s.periodEnd.slice(0, 10) };
 		periods.set(`${period.start}/${period.end}`, period);
 	}
@@ -103,24 +106,22 @@ export function missingWays(
 	building: Dated[],
 	today = new Date()
 ) {
-	const periods = billingPeriods(building);
-	const own = billingPeriods(statements);
+	const periods = periodsOf(building);
+	// a replaced statement of the contract: the run of its period bills it again (#120)
+	const own = periodsOf(statements.filter((s) => s.status !== 'replaced'));
 	const ways = (period: Range) => [
 		...periods.filter((p) => overlaps(p, period)).map((p) => ({ ...p, kind: 'existing' })),
-		...uncovered(
-			period,
-			building.filter((s) => s.status !== 'replaced')
-		).map((u) => ({ ...u, kind: 'short' }))
+		...uncovered(period, building).map((u) => ({ ...u, kind: 'short' }))
 	];
-	return missingPeriods(type, contract, statements, today)
-		.flatMap((gap) => {
-			const period = endedPeriodsSince(type, gap.start, today).find((p) => p.start <= gap.start)!;
-			// days in a period equal to the building's go there only, not again to an overlapping older one (code
-			// review 199-1 C-2)
-			const found = ways(period).filter((way) => overlaps(way, gap));
-			const whole = found.filter((way) => same(way, period));
-			return (whole.length ? whole.slice(0, 1) : found)
-				.map(({ kind, ...way }) => {
+	return (
+		missingPeriods(type, contract, statements, today)
+			.flatMap((gap) => {
+				const period = endedPeriodsSince(type, gap.start, today).find((p) => p.start <= gap.start)!;
+				// days in a period equal to the building's go there only, not again to an overlapping older one (code
+				// review 199-1 C-2)
+				const found = ways(period).filter((way) => overlaps(way, gap));
+				const whole = found.filter((way) => same(way, period));
+				return (whole.length ? whole.slice(0, 1) : found).map(({ kind, ...way }) => {
 					const whole = same(way, period);
 					// a whole period by its name, a part by the contract's own days in it
 					const [from, to] = whole
@@ -133,10 +134,13 @@ export function missingWays(
 						open: !own.some((p) => overlaps(p, way))
 					};
 				});
-		})
-		.filter((part) => part.start <= part.end && billsIn(contract, part))
-		.filter((part, i, all) => all.findIndex((other) => other.start === part.start) === i)
-		.sort((a, b) => b.start.localeCompare(a.start));
+			})
+			.filter((part) => part.start <= part.end && billsIn(contract, part))
+			// the latest first; of two older periods with one first day the longer one, so no day is lost (code review
+			// 199-2 C-9)
+			.sort((a, b) => b.start.localeCompare(a.start) || b.end.localeCompare(a.end))
+			.filter((part, i, all) => all.findIndex((other) => other.start === part.start) === i)
+	);
 }
 
 /** A calendar year by its number, any other range by its two days */

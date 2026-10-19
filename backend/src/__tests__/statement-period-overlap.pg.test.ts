@@ -192,4 +192,29 @@ describe('Eine Abrechnungsperiode pro Tag und Gebäude', () => {
 		});
 		created.push(`statements/${corrected.id}`);
 	});
+
+	// code review 199-2 C-8: a replaced statement without its berichtigte Abrechnung still holds its period: a run
+	// that overlaps it is refused, else its correction would make two overlapping periods
+	it('zählt eine ersetzte Abrechnung ohne berichtigte als Periode des Gebäudes', async () => {
+		const otherBuilding = await create('buildings', {
+			name: `Rosenhof ${token}`,
+			address: 'Rosenweg 1',
+			postalCode: '8400',
+			city: 'Winterthur',
+			canton: 'ZH'
+		});
+		const apartmentId = await create('apartments', { buildingId: otherBuilding, number: '1.01', floor: 1, area: '60', rooms: '2.5' });
+		const tenantId = await create('tenants', { firstName: 'Ida', lastName: `Rosenhof ${token}` });
+		const contractId = await create('contracts', { apartmentId, tenantId, startDate: '2024-01-01', baseRent: '900', monthlyAdvancePayment: '100' });
+		const generate = (periodStart: string, periodEnd: string) =>
+			sendJson('POST', '/api/v1/statements/generate', { contractId, buildingId: otherBuilding, periodStart, periodEnd, managementFeePercent: 0 });
+		const { id } = (await (await generate('2024-01-01', '2024-12-31')).json()) as { id: string };
+		await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+		await sendJson('POST', `/api/v1/statements/${id}/replace`, {});
+
+		const response = await generate('2024-07-01', '2025-06-30');
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'STATEMENT_PERIOD_OVERLAPS' });
+		await db.delete(utilityStatements).where(eq(utilityStatements.contractId, contractId));
+	});
 });

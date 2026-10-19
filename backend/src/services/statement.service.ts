@@ -432,25 +432,22 @@ async function calculatedRows(input: StatementInput & { buildingId: string }) {
  * #199, #408 point 2: one Abrechnungsperiode per day and building. A new statement whose period overlaps one of the
  * building's without being equal would share an invoice out a second time over the same days (above 100 %); the
  * statements made before stay as they are and may overlap: a period equal to one of theirs is allowed (product owner,
- * Fachreview 199-1 V-1), a replaced one's too, for its berichtigte Abrechnung (#120, code review 199-1 C-1); a
- * replaced one overlaps nothing
+ * Fachreview 199-1 V-1); a replaced one's period stays the building's for its berichtigte Abrechnung (#120, code
+ * review 199-1 C-1, 199-2 C-8)
  */
 async function refuseOverlappingPeriod({ buildingId, periodStart, periodEnd }: StatementInput & { buildingId: string }) {
-	const touching = await db
+	const overlapping = await db
 		.select({
 			building: buildings.name,
 			periodStart: utilityStatements.periodStart,
-			periodEnd: utilityStatements.periodEnd,
-			status: utilityStatements.status
+			periodEnd: utilityStatements.periodEnd
 		})
 		.from(utilityStatements)
 		.innerJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
 		.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(and(eq(apartments.buildingId, buildingId), lte(utilityStatements.periodStart, periodEnd), gte(utilityStatements.periodEnd, periodStart)))
 		.orderBy(utilityStatements.periodStart);
-	if (touching.some((s) => s.periodStart === periodStart && s.periodEnd === periodEnd)) return;
-	const overlapping = touching.filter((s) => s.status !== 'replaced');
-	if (!overlapping.length) return;
+	if (!overlapping.length || overlapping.some((s) => s.periodStart === periodStart && s.periodEnd === periodEnd)) return;
 	// every overlapped period, so the landlord's next choice does not overlap another one (code review 199-1 C-3)
 	const periods = [...new Set(overlapping.map((s) => `${formatSwissDate(s.periodStart)} – ${formatSwissDate(s.periodEnd)}`))];
 	throw new CodedError('STATEMENT_PERIOD_OVERLAPS', 'The period overlaps a statement period of the building', {

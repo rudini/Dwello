@@ -132,13 +132,16 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		expect((await billedContracts(fetch, period))[0].overlap).toBeNull();
 	});
 
-	// code review 199-1 C-4: a replaced statement alone overlaps nothing (#120)
-	it('zählt eine ersetzte Abrechnung nicht als Überschneidung', async () => {
+	// code review 199-2 C-8: a replaced statement without its berichtigte Abrechnung still holds its period, else its
+	// correction would overlap the run (#120)
+	it('zählt eine ersetzte Abrechnung ohne berichtigte als Periode des Gebäudes', async () => {
 		const { fetch } = backend([
 			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' }
 		]);
 
-		expect((await billedContracts(fetch, period))[0].overlap).toBeNull();
+		expect((await billedContracts(fetch, period))[0].overlap?.periods).toEqual([
+			{ start: '2023-07-01', end: '2024-06-30' }
+		]);
 	});
 
 	// code review 199-1 C-1: the period of a replaced statement is one of the building's: its berichtigte Abrechnung is
@@ -214,6 +217,20 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 
 		await expect(previewStatements(fetch, period)).rejects.toThrow(
 			'(01.07.2023 – 30.06.2024, 01.07.2024 – 30.09.2024)'
+		);
+	});
+
+	// code review 199-2 C-10: every refused building is named
+	it('nennt in der Ablehnung jedes abgelehnte Gebäude', async () => {
+		const fetch = (async (url: string) => {
+			const id = new URL(url).searchParams.get('buildingId') ?? url.split('/').at(-1)!;
+			if (url.includes('/statements?')) return Response.json({ data: switched });
+			if (url.includes('/contracts?')) return Response.json({ contracts });
+			return Response.json({ ...building, id, name: id === 'b1' ? 'Seeblick' : 'Bergsicht' });
+		}) as typeof globalThis.fetch;
+
+		await expect(previewStatements(fetch, { ...period, buildingIds: ['b1', 'b2'] })).rejects.toThrow(
+			/von Seeblick \(01\.07\.2023 – 30\.06\.2024\)\..* von Bergsicht \(01\.07\.2023 – 30\.06\.2024\)\./
 		);
 	});
 
@@ -397,14 +414,15 @@ describe('Abrechnungen erstellen', () => {
 		expect(posts.map((post) => post.body.contractId)).toEqual(['auszug']);
 	});
 
-	// Fachreview W2e V-3: eine ersetzte Abrechnung einer anderen, nur überlappenden Periode bleibt abgerechnet
-	it('übergeht einen Mietvertrag, dessen ersetzte Abrechnung eine andere Periode hat', async () => {
+	// Fachreview W2e V-3: eine ersetzte Abrechnung einer anderen, nur überlappenden Periode bleibt abgerechnet; seit
+	// #199 hält sie ihre Periode, und der Lauf wird abgelehnt (code review 199-2 C-8)
+	it('erstellt nichts, wenn eine ersetzte Abrechnung eine andere, überlappende Periode hat', async () => {
 		const { fetch, posts } = backend([
 			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' }
 		]);
 
-		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
-		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
+		await expect(generateStatements(fetch, period)).rejects.toThrow('überschneidet sich');
+		expect(posts).toEqual([]);
 	});
 
 	it('meldet in Worten, wenn das Backend die Berechnung ablehnt', async () => {
