@@ -1333,6 +1333,7 @@
 	"backend_unknown_error": "Si è verificato un errore imprevisto. Riprovi.",
 	"backend_internal_error": "Si è verificato un errore imprevisto. Riprovi.",
 	"backend_proxy_error": "Non è stato possibile elaborare la richiesta. Riprovi.",
+	"backend_not_found": "L’elemento non è stato trovato. Ricarichi la pagina.",
 	"backend_validation_error": "La richiesta non era valida. Ricarichi la pagina e riprovi.",
 	"backend_network_error": "Nessuna connessione al server. Verifichi la connessione a Internet e riprovi.",
 	"backend_service_unavailable": "Il server non risponde. Riprovi tra un momento.",

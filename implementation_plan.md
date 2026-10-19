@@ -2,10 +2,13 @@
 
 Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when the task starts, tick them as they are done, note the files changed. Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
-## Session C1: E2E in every browser on pull requests
+## Session B1: malformed id and statement gap (2026-10-19)
 
-Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.
+Branch `claude/fix-invalid-id-and-statement-gap`. Product owner: two bugs from the persona stack. (1) A detail page with an id that is no UUID (`/invoices/abc`, `/invoices/upload`, `/buildings/abc` …) answers 500 instead of 404. (2) The statement detail page shows an empty gap of about 150 px between «Status» and «Kostenaufstellung».
 
-- [x] `ci.yml`: E2E on pull requests with Chromium, Firefox, WebKit and `api` (60 min, as `main`); the axe check stays Chromium; `docs/test-pyramid.md`, `tests/e2e/CLAUDE.md`
-- [x] Slice review (`docs/reviews/ci-browsers-review-1.md`): C-1 `docs/tech-stack.md` fixed; C-2 (the axe shards get 60 min on pull requests too) kept, harmless
-- [ ] PR: the first pull request with every browser shows the time it takes; its first run found a Firefox failure in «Suche ohne Treffer», cause not found (O-41)
+- [x] @wip scenario «Eine Seite mit ungültiger Kennung gibt es nicht» (`navigation.feature`, all 17 detail and edit pages), seen red at the 500 page ("Fehler beim Laden …")
+- [x] Backend test `error-codes.pg.test.ts`: a path id that is no UUID answers 404 `NOT_FOUND` (11 paths), seen red (500, 422); fix: one global `onTransform` in `backend/src/app.ts` (root cause: the id reached PostgreSQL, which refused the cast); `backend_not_found` in four languages; API spec. Tests that used a malformed id to provoke a PDF failure now use a PDF language without texts (pins kept behaviour); `fuel-stock.pg.test.ts` expects 404 instead of 422
+- [ ] @wip scenario «Die Kostenaufstellung folgt im üblichen Abstand auf den Status» (`statement-detail.feature`), seen red; fix
+- [ ] Slice review (code-reviewer), persona review of the statement page
+- [ ] Checks of «Before marking anything complete»
+- [ ] Workflow review; session to the archive; PR

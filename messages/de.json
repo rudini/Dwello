@@ -1333,6 +1333,7 @@
 	"backend_unknown_error": "Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.",
 	"backend_internal_error": "Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.",
 	"backend_proxy_error": "Die Anfrage konnte nicht verarbeitet werden. Versuchen Sie es erneut.",
+	"backend_not_found": "Der Eintrag wurde nicht gefunden. Laden Sie die Seite neu.",
 	"backend_validation_error": "Die Anfrage war ungültig. Laden Sie die Seite neu und versuchen Sie es erneut.",
 	"backend_network_error": "Keine Verbindung zum Server. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
 	"backend_service_unavailable": "Der Server antwortet nicht. Versuchen Sie es in einem Moment erneut.",
