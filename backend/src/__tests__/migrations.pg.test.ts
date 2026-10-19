@@ -241,8 +241,38 @@ describe('Migrationen anwenden', () => {
 
 		expect(await query(name, `SELECT name FROM categories WHERE is_fuel ORDER BY name`)).toEqual([{ name: 'Heating' }, { name: 'Holz' }]);
 	});
+	// #464: every contract keeps its Akonto from its Vertragsbeginn; statements already created keep their totals
+	it('übernimmt das Akonto bestehender Mietverträge ab Vertragsbeginn und lässt Abrechnungen, wie sie sind', async () => {
+		const name = await database();
+		const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+		for (const file of files.filter((file) => file < '0026_contract_advance_payments.sql')) {
+			await copyFile(join(migrations, file), join(before, file));
+		}
+		await migrate(`${server}/${name}`, before);
+		await query(
+			name,
+			`WITH b AS (INSERT INTO buildings (name, address, postal_code, city, canton) VALUES ('Testhof', 'Testweg 1', '8400', 'Winterthur', 'ZH') RETURNING id),
+			a AS (INSERT INTO apartments (building_id, number, area, rooms) SELECT id, '1.01', 50, 2 FROM b RETURNING id),
+			t AS (INSERT INTO tenants (first_name, last_name) VALUES ('Akonto', 'Mieter') RETURNING id),
+			c AS (INSERT INTO rental_contracts (apartment_id, tenant_id, start_date, base_rent, monthly_advance_payment)
+				SELECT a.id, t.id, '2020-03-15', 900, 200 FROM a, t RETURNING id, apartment_id, tenant_id)
+			INSERT INTO utility_statements (tenant_id, apartment_id, contract_id, statement_number, period_start, period_end,
+				statement_date, rental_days, rental_start, rental_end, total_costs, total_advance_payments, balance, status)
+			SELECT tenant_id, apartment_id, id, 'S-1', '2024-01-01', '2024-12-31', '2025-01-15', 366, '2024-01-01', '2024-12-31', 2000, 1800, 200, 'sent' FROM c`
+		);
+
+		await migrate(`${server}/${name}`, migrations);
+
+		expect(await query(name, "SELECT to_char(valid_from, 'YYYY-MM-DD') AS valid_from, amount FROM contract_advance_payments")).toEqual([
+			{ valid_from: '2020-03-15', amount: '200.00' }
+		]);
+		expect(await query(name, 'SELECT total_advance_payments, advance_lines FROM utility_statements')).toEqual([
+			{ total_advance_payments: '1800.00', advance_lines: null }
+		]);
+	});
+
 	describe('fr/it/en-Namen der vordefinierten Stammdaten (#345, #461)', () => {
-		const migration = '0026_master_data_names.sql';
+		const migration = '0027_master_data_names.sql';
 		const names = (database: string) =>
 			query(
 				database,
@@ -315,3 +345,4 @@ describe('Migrationen anwenden', () => {
 		});
 	});
 });
+

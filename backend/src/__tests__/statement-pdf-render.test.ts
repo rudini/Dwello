@@ -561,7 +561,7 @@ describe('PDF einer berichtigten Abrechnung', () => {
 
 	it('zieht das schon Bezahlte vor der Rundung ab', async () => {
 		const flowing = (await textOf(corrected)).flowing;
-		expect(flowing).toContain('Geleistete Akontobeiträge – 600.00 Bereits bezahlt auf NK-1-2025-0001 – 100.00');
+		expect(flowing).toContain('Akontobeiträge – 600.00 Bereits bezahlt auf NK-1-2025-0001 – 100.00');
 		expect(flowing).toContain('Nachzahlung vor Rundung 84.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 84.10');
 		expect(flowing).toContain('bereits bezahlt CHF 100.00');
 	});
@@ -591,5 +591,51 @@ describe('Verwaltungspauschale auf Französisch und Italienisch', () => {
 
 		expect(await text('fr')).toContain('Frais d’administration');
 		expect(await text('it')).toContain('Spese amministrative');
+	});
+});
+
+// #464 (#103, domain review 464-1 F-6, F-9): das Akonto als Monate mal Betrag, eine Zeile pro Betrag und angebrochenem
+// Monat, mit geschlossenem Zeitraum; der Hinweis sagt, dass das vereinbarte Akonto abgezogen ist
+describe('Akonto als Monate mal Betrag im PDF', () => {
+	const changed: StatementPDFData = {
+		...refund,
+		totalAdvancePayments: 1141.94,
+		balance: -357.8,
+		advanceLines: [
+			{ from: '2025-03-16', to: '2025-03-31', days: 16, daysInMonth: 31, amount: 120, total: 61.94 },
+			{ from: '2025-04-01', to: '2025-12-31', months: 9, amount: 120, total: 1080 }
+		]
+	};
+
+	it('nennt jede Zeile mit ihrem Betrag unter den Akontobeiträgen und den Hinweis zum vereinbarten Akonto', async () => {
+		const pdf = await textOf(changed);
+
+		expect(pdf.flowing).toContain("Akontobeiträge – 1'141.94 16/31 Tage × CHF 120.00 (16.03.2025 – 31.03.2025) 61.94 9 Monate × CHF 120.00 (01.04.2025 – 31.12.2025) 1'080.00");
+		expect(pdf.flowing).toContain('Abgezogen sind die Akontobeiträge, die im Mietvertrag vereinbart sind. Haben Sie Akontobeiträge nicht bezahlt, regeln wir das ausserhalb dieser Abrechnung.');
+	});
+
+	it('nennt einen einzelnen Monat in der Einzahl, auch auf Französisch', async () => {
+		const one = { ...changed, advanceLines: [{ from: '2025-12-01', to: '2025-12-31', months: 1, amount: 120, total: 120 }] };
+		const french = readPdf(Buffer.from(await generateStatementPDFBase64(one, config, 'fr'), 'base64')).flowing;
+
+		expect(french).toContain('1 mois × CHF 120.00 (01.12.2025 – 31.12.2025) 120.00');
+		expect((await textOf(one)).flowing).toContain('1 Monat × CHF 120.00 (01.12.2025 – 31.12.2025) 120.00');
+	});
+
+	// #477 (product owner 2026-10-19, fach review 477-1): Dwello deducts the agreed Akonto, not the paid one
+	it.each([
+		['de', 'Akontobeiträge', 'Geleistete'],
+		['fr', 'Acomptes', 'versés'],
+		['it', 'Acconti', 'versati'],
+		['en', 'Advance payments', 'made']
+	] as const)('nennt die Zeile auf %s ohne «geleistet»', async (language, label, paid) => {
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(changed, config, language), 'base64')).flowing;
+
+		expect(text).toContain(`${label} – 1'141.94`);
+		expect(text).not.toContain(paid);
+	});
+
+	it('zeigt bei einer älteren Abrechnung ohne gespeicherte Zeilen nur die Summe', async () => {
+		expect((await textOf(refund)).flowing).not.toContain('Monate ×');
 	});
 });

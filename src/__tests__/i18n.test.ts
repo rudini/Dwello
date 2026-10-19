@@ -80,7 +80,7 @@ describe('Sprachdateien', () => {
 		['it', '«annullare la disdetta», nicht «revocare»', /\brevoca/i],
 		['fr', '«degré de confiance» für die Konfidenz', /fiabilité de l’IA/i],
 		['it', '«grado di certezza» für die Konfidenz', /affidabilità dell’IA/i],
-		// the categories renamed in migration 0026 (#345)
+		// the categories renamed in migration 0027 (#345)
 		['fr', '«assurance du bâtiment», nicht «assurance bâtiment»', /assurance bâtiment/i],
 		['it', '«assicurazione dell’immobile», nicht «assicurazione edificio»', /assicurazione edificio/i],
 		['en', '«Lift», nicht «Elevator»', /elevator/i]
