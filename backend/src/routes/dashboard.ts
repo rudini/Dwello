@@ -117,6 +117,7 @@ export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () =>
 		draft: await countStatements(statusCondition('draft')),
 		sent: await countStatements(statusCondition('sent')),
 		paid: await countStatements(statusCondition('paid')),
+		settled: await countStatements(statusCondition('settled')), // «Erledigt» (#448)
 		overdue: await countStatements(statusCondition('overdue'))
 	};
 

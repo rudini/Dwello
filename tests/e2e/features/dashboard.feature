@@ -79,7 +79,6 @@ Funktionalität: Übersicht
       | Überfällig |
 
     # #403 (2): versendet ohne Zahlung
-    @wip
     Beispiele:
       | Status   |
       | Erledigt |

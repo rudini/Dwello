@@ -4,19 +4,19 @@
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { StatementsListData, StatementWithDetails } from '$lib/types';
-	import { balanceLabel, claimed, paidDateError, paidHelp } from '$lib/statement';
+	import { balanceLabel, earlyPaidDate, paidDateError } from '$lib/statement';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import DateInput from '$lib/ui/DateInput.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import { localToday } from '$lib/contract-status';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import { formatCurrency } from '$lib/utils/format';
-	import StatementRow from './StatementRow.svelte';
+	import PaidDateFields from './PaidDateFields.svelte';
+	import StatementList from './StatementList.svelte';
 	import StatementSearch from './StatementSearch.svelte';
 	import StatusFilter from './StatusFilter.svelte';
 
@@ -50,19 +50,36 @@
 	let saving = $state(false);
 	let payError = $state('');
 	let paidError = $state('');
+	let earlyFor = $state('');
+	const early = $derived(paying && earlyPaidDate(paidDate, paying.statementDate));
+	const asking = $derived(!!early && earlyFor === paidDate);
+	function startPaying(chosen: StatementWithDetails) {
+		paying = chosen;
+		paidDate = localToday();
+		paidError = '';
+		earlyFor = '';
+	}
+	// the confirmation asks once more for a day before the Abrechnungsdatum
+	const confirm = $derived(
+		asking
+			? { label: m.statements_save_anyway(), testid: 'statement-list-mark-paid-early-confirm' }
+			: { label: m.statements_mark_paid(), testid: 'statement-list-mark-paid-confirm' }
+	);
 	async function markPaid() {
 		// a wrong date is said at the field, which gets the focus; nothing is sent
 		paidError = '';
 		flushSync(); // cleared first: the same error set again shows again
-		paidError = paidDateError(paidDate, paying!.statementDate) ?? '';
+		paidError = paidDateError(paidDate, paying!.periodEnd) ?? '';
 		if (paidError) return focusFirstError(document.querySelector('[role="dialog"]'));
+		// #448: a day before the Abrechnungsdatum is saved after the landlord confirmed that very day
+		if (early && earlyFor !== paidDate) return (earlyFor = paidDate);
 		saving = true;
 		payError = '';
 		const failed = m.statements_mark_paid_failed();
 		try {
 			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
 				method: 'POST',
-				body: JSON.stringify({ paidDate, statementDate: paying!.statementDate })
+				body: JSON.stringify({ paidDate, periodEnd: paying!.periodEnd })
 			});
 			if (!response.ok) {
 				// the date check says what to do; any other refusal gets the general sentence
@@ -151,18 +168,7 @@
 					? m.statements_count_one()
 					: m.statements_count_many({ count: data.total })}
 			</h2>
-			<ul class="divide-y divide-line rounded-panel border border-line bg-surface">
-				{#each data.statements as statement (statement.id)}
-					<StatementRow
-						{statement}
-						onmarkpaid={(chosen) => (
-							(paying = chosen),
-							(paidDate = localToday()),
-							(paidError = '')
-						)}
-					/>
-				{/each}
-			</ul>
+			<StatementList statements={data.statements} onmarkpaid={startPaying} />
 		</section>
 		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
 	{/if}
@@ -171,10 +177,10 @@
 <Dialog
 	open={!!paying}
 	title={m.statements_mark_paid_title()}
-	confirmLabel={m.statements_mark_paid()}
+	confirmLabel={confirm.label}
 	busy={saving}
 	busyLabel={m.ui_saving()}
-	confirmTestid="statement-list-mark-paid-confirm"
+	confirmTestid={confirm.testid}
 	onconfirm={markPaid}
 	onclose={() => {
 		paying = null;
@@ -182,19 +188,15 @@
 	}}
 >
 	{#if paying}
-		{#if claimed(paying.balance)}<p>{m.statements_no_reminder_after()}</p>{/if}
-		<DateInput
-			id="paidDate"
-			label={m.statements_paid_on()}
-			help={paidHelp(paying.balance)}
+		<PaidDateFields
+			statement={paying}
+			summary="{paying.statementNumber}, {paying.tenantName}: {balanceLabel(
+				paying.balance
+			)} {formatCurrency(Math.abs(paying.balance))}"
+			bind:paidDate
 			error={paidError}
-			bind:value={paidDate}
-			testid="paid-date-input"
+			early={asking ? early : null}
 		/>
-		<p class="rounded-panel bg-sunken p-4 font-semibold text-ink">
-			{paying.statementNumber}, {paying.tenantName}: {balanceLabel(paying.balance)}
-			{formatCurrency(Math.abs(paying.balance))}
-		</p>
 		{#if payError}
 			<Alert tone="critical" title={m.buildings_not_saved()}><p>{payError}</p></Alert>
 		{/if}

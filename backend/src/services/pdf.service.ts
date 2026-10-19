@@ -17,7 +17,7 @@ import {
 	type QRBillConfig,
 	type StatementForQRBill
 } from './qr-bill.service';
-import { belowMinimum, formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { countryLine, qrTown } from './postal-address';
 import type { InvoicePart } from '../db/schema';
@@ -70,6 +70,11 @@ const translations: Record<Language, Record<string, string>> = {
 		priorRefunded: 'Bereits zurückerstattet auf {numbers}',
 		priorPaidShort: 'bereits bezahlt',
 		priorRefundedShort: 'bereits zurückerstattet',
+		carriedOver: 'Der Betrag ist kleiner als CHF 5.00. Der Betrag von CHF {amount} wird mit der nächsten Abrechnung verrechnet.',
+		carryOver: 'Übertrag aus Abrechnung {number}: CHF {amount}',
+		carryOverShort: 'Übertrag',
+		offsetWith: 'Bereits verrechnet mit {numbers}',
+		offsetShort: 'bereits verrechnet',
 		and: 'und',
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
 		heatingNoteParts: 'Heizkosten nach Heizprofil «{profile}»: {percent} % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
@@ -166,6 +171,11 @@ const translations: Record<Language, Record<string, string>> = {
 		priorRefunded: 'Déjà remboursé sur {numbers}',
 		priorPaidShort: 'déjà payé',
 		priorRefundedShort: 'déjà remboursé',
+		carriedOver: 'Le montant est inférieur à CHF 5.00. Le montant de CHF {amount} sera compensé avec le prochain décompte.',
+		carryOver: 'Report du décompte {number}\u00a0: CHF {amount}',
+		carryOverShort: 'report',
+		offsetWith: 'Déjà compensé avec {numbers}',
+		offsetShort: 'déjà compensé',
 		and: 'et',
 		heatingNote: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% des frais de chauffage de votre logement pour la période de décompte',
 		heatingNoteParts: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% pour une facture sans période de prestation. Pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
@@ -261,6 +271,11 @@ const translations: Record<Language, Record<string, string>> = {
 		priorRefunded: 'Già rimborsato su {numbers}',
 		priorPaidShort: 'già pagato',
 		priorRefundedShort: 'già rimborsato',
+		carriedOver: 'L’importo è inferiore a CHF 5.00. L’importo di CHF {amount} sarà compensato con il prossimo conteggio.',
+		carryOver: 'Riporto dal conteggio {number}: CHF {amount}',
+		carryOverShort: 'riporto',
+		offsetWith: 'Già compensato con {numbers}',
+		offsetShort: 'già compensato',
 		and: 'e',
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
 		heatingNoteParts: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura senza periodo di prestazione. Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
@@ -356,6 +371,11 @@ const translations: Record<Language, Record<string, string>> = {
 		priorRefunded: 'Already refunded on {numbers}',
 		priorPaidShort: 'already paid',
 		priorRefundedShort: 'already refunded',
+		carriedOver: 'The amount is less than CHF 5.00. The amount of CHF {amount} will be offset against the next statement.',
+		carryOver: 'Carried over from statement {number}: CHF {amount}',
+		carryOverShort: 'carried over',
+		offsetWith: 'Already offset against {numbers}',
+		offsetShort: 'already offset',
 		and: 'and',
 		heatingNote: 'Heating costs under the heating profile ‘{profile}’: {percent} % of your apartment’s heating costs for the billing period',
 		heatingNoteParts: 'Heating costs under the heating profile ‘{profile}’: {percent} % for an invoice without a service period. For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.',
@@ -497,7 +517,21 @@ export interface StatementPDFData {
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, negative = refund
 	// a berichtigte Abrechnung: the statement it replaces and what was paid on the replaced ones, a refund negative (#120)
-	replaces?: { statementNumber: string; statementDate: string; paidOn: string[]; priorPayments: number };
+	// (#448, Fachreview 448-1 V-2) `offsetWith`: a replaced Saldo the next statement counted as its Übertrag, part of the
+	// prior payments
+	replaces?: {
+		statementNumber: string;
+		statementDate: string;
+		paidOn: string[];
+		priorPayments: number;
+		offsetWith?: { statementNumber: string; amount: number }[];
+	};
+	// #448: the Übertrag counted in from the previous statement of the Mietvertrag (a refund negative); this statement's
+	// own Saldo below CHF 5 carried over to the next one; or, sent under #94, neither claimed nor paid out
+	carryOver?: { statementNumber: string; amount: number };
+	carried?: boolean;
+	waived?: boolean;
+	notes?: string; // the landlord's remark, printed for the tenant (#448)
 
 	// Payment info
 	paymentDeadline?: string;
@@ -638,17 +672,20 @@ function title({ doc, t, data }: Page, y: number) {
 	return doc.y + 14;
 }
 
-// Settled when sent: a Saldo of 0, or one below CHF 5 that is neither claimed nor paid out (#94)
+// Settled when sent: a Saldo of 0, or one below CHF 5 carried over to the next statement (#448), or sent under #94
+// neither claimed nor paid out
 function settledText(t: Record<string, string>, data: StatementPDFData) {
 	if (data.balance === 0) return rounding(data) ? t.balancedRounded : t.balancedNote;
+	if (data.carried) return fill(t.carriedOver, { amount: formatCHF(Math.abs(data.balance)) });
 	return data.balance < 0 ? t.waivedRefund : t.waivedDue;
 }
+const unpaid = (data: StatementPDFData) => data.balance === 0 || data.carried || data.waived;
 
 // What the balance asks the tenant to do: pay with the payment part, wait for the refund, or nothing (also the e-mail, #86)
 export function balanceText(data: StatementPDFData, language: Language) {
 	const t = translations[language];
 	const date = data.paymentDeadline && formatDate(data.paymentDeadline);
-	if (belowMinimum(data.balance)) return settledText(t, data);
+	if (unpaid(data)) return settledText(t, data);
 	if (data.paidDate) return fill(data.balance < 0 ? t.refundPaidOn : t.paidOn, { date: formatDate(data.paidDate) });
 	if (data.balance < 0) return `${date ? fill(t.refundBy, { date }) : t.refundNoDate} ${t.refundAccount}`;
 	return date ? fill(t.payBy, { date }) : t.payNoDate;
@@ -657,14 +694,39 @@ export function balanceText(data: StatementPDFData, language: Language) {
 // The Saldo is rounded to 5 Rappen. Read top to bottom: the amount before rounding, its rounding as «+ 0.02» or
 // «– 0.02» (seen from the amount shown, so a refund that grows gets +), the Saldo; only a real rounding is shown
 const priorOf = (data: StatementPDFData) => data.replaces?.priorPayments ?? 0;
-const unrounded = (data: StatementPDFData) => roundToRappen(data.totalCosts - data.totalAdvancePayments - priorOf(data));
+const carryOf = (data: StatementPDFData) => data.carryOver?.amount ?? 0;
+const unrounded = (data: StatementPDFData) => roundToRappen(data.totalCosts - data.totalAdvancePayments - priorOf(data) + carryOf(data));
 // Rows from the subtotal to the Saldo, kept on one page
-const totalRows = (data: StatementPDFData, t: Record<string, string>) => (rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0);
+const totalRows = (data: StatementPDFData, t: Record<string, string>) =>
+	(rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0) + (offsetLine(data, t) ? 1 : 0) + (data.carryOver ? 1 : 0);
+// «Bereits verrechnet mit NK-…»: the replaced Saldo the next statement counts as its Übertrag (#448)
+function offsetLine(data: StatementPDFData, t: Record<string, string>) {
+	const offset = offsetOf(data);
+	if (!offset) return null;
+	const numbers = data.replaces!.offsetWith!.map((o) => o.statementNumber).join(', ');
+	return {
+		label: fill(t.offsetWith, { numbers }),
+		short: `${offset > 0 ? '–' : '+'} ${t.offsetShort} ${formatCurrency(offset)}`,
+		amount: `${offset > 0 ? '–' : '+'} ${formatCHF(Math.abs(offset))}`
+	};
+}
+// «Übertrag aus Abrechnung NK-…: CHF 3.00»: a Nachzahlung carried over adds, a refund subtracts (#448)
+function carryLine(data: StatementPDFData, t: Record<string, string>) {
+	if (!data.carryOver) return null;
+	const { statementNumber, amount } = data.carryOver;
+	const sign = amount > 0 ? '+' : '–';
+	return {
+		label: fill(t.carryOver, { number: statementNumber, amount: formatCHF(Math.abs(amount)) }),
+		short: `${sign} ${t.carryOverShort} ${formatCurrency(amount)}`,
+		amount: `${sign} ${formatCHF(Math.abs(amount))}`
+	};
+}
 const priorRow = (doc: Doc, prior: ReturnType<typeof priorLine>, top: number) => (prior ? row(doc, total(prior.label, prior.amount), top) : top);
 // «Bereits bezahlt auf NK-… und NK-…», or what the landlord already refunded
 // TODO(fachlich prüfen, #362): «Bereits bezahlt» / «Bereits zurückerstattet» have their glossary row; the help texts follow
+const offsetOf = (data: StatementPDFData) => roundToRappen((data.replaces?.offsetWith ?? []).reduce((sum, o) => sum + o.amount, 0));
 function priorLine(data: StatementPDFData, t: Record<string, string>) {
-	const prior = priorOf(data);
+	const prior = roundToRappen(priorOf(data) - offsetOf(data));
 	if (!prior) return null;
 	const paidOn = data.replaces!.paidOn;
 	const numbers = paidOn.length > 1 ? `${paidOn.slice(0, -1).join(', ')} ${t.and} ${paidOn.at(-1)}` : paidOn.join('');
@@ -690,7 +752,10 @@ function balanceBox(page: Page, y: number) {
 	const what = balanceText(page.data, page.language);
 	const rounded = rounding(data) ? `, ${t.roundedNote}` : '';
 	const prior = priorLine(data, t);
-	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${prior ? ` ${prior.short}` : ''}${rounded}`;
+	const offset = offsetLine(data, t);
+	const carry = carryLine(data, t);
+	const parts = [prior, offset, carry].map((line) => (line ? ` ${line.short}` : '')).join('');
+	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${parts}${rounded}`;
 	doc.font('Helvetica').fontSize(9);
 	const height = 46 + doc.heightOfString(what, { width: width - 24 }) + doc.heightOfString(how, { width: width - 24 });
 	doc.lineWidth(1.5).strokeColor(COLORS.ink).rect(PAGE.left, y, width, height).stroke();
@@ -777,6 +842,8 @@ function costTable(page: Page, y: number) {
 	top = row(doc, total(t.yourCosts, formatCHF(data.totalCosts)), top + 2, { bold: true, above: 1 });
 	top = row(doc, total(t.advancePayments, `– ${formatCHF(data.totalAdvancePayments)}`), top);
 	top = priorRow(doc, priorLine(data, t), top);
+	top = priorRow(doc, offsetLine(data, t), top);
+	top = priorRow(doc, carryLine(data, t), top);
 	if (rounding(data)) {
 		const before = `${labelOf(unrounded(data), t)} ${t.beforeRounding}`;
 		top = row(doc, total(before, formatCHF(Math.abs(unrounded(data)))), top + 2, { above: 1 });
@@ -950,7 +1017,7 @@ function notes({ doc, t, data, config }: Page, y: number) {
 	const contact = `${config.companyName}, ${config.address}, ${config.postalCode} ${config.city}`;
 	// TODO(fachlich prüfen, #369): «vereinbarte Nebenkosten»
 	const agreed = data.agreedCosts?.length ? [fill(t.agreedCosts, { categories: data.agreedCosts.join(', ') })] : [];
-	const lines = [...agreed, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
+	const lines = [...(data.notes ? [data.notes] : []), ...agreed, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
 	const width = PAGE.right - PAGE.left;
 	doc.font('Helvetica').fontSize(9);
 	const height = lines.reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 6, 0);
@@ -1098,8 +1165,9 @@ function frame({ doc, t, data, config }: Page, qrPage: number | null) {
 	}
 }
 
-// Only an amount still due gets a payment part: not a refund, not a balance below CHF 5 (#94), not a statement already paid
-const owed = (data: StatementPDFData) => data.balance > 0 && !belowMinimum(data.balance) && !data.paidDate;
+// Only an amount still due gets a payment part: not a refund, not a Saldo carried over (#448) or waived (#94), not a
+// statement already paid
+const owed = (data: StatementPDFData) => data.balance > 0 && !unpaid(data) && !data.paidDate;
 async function qrCodeFor(data: StatementPDFData, config: QRBillConfig, t: Record<string, string>): Promise<QRResult | null> {
 	if (!owed(data)) return null;
 	try {

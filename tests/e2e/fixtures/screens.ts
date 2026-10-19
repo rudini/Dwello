@@ -79,6 +79,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.sendStatement('Carla', 2024);
 	await seed.markPaid('Carla', 2024);
 	await seed.replaceStatement('Carla', 2024, true);
+	// no invoices and no Akonto in 2021: a Saldo of 0.00, «Erledigt» once sent (#448)
+	await seed.statement('Carla', 'Seeblick', 2021, 'Standard');
+	await seed.sendStatement('Carla', 2021);
 	await seed.statement('Carla', 'Seeblick', 2022, 'Standard');
 	await seed.sendStatement('Carla', 2022);
 	await seed.replaceStatement('Carla', 2022);
@@ -182,6 +185,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
+		settledStatement: seed.idOf('Abrechnung Carla 2021'),
 		correctedStatement: seed.idOf('Abrechnung Carla 2024'),
 		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),

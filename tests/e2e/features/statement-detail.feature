@@ -107,7 +107,6 @@ Funktionalität: Abrechnungsdetail
     Und nennt der Verlauf "Bezahlt" am Tag des Versands
 
   # #403 (4): ein Mieter darf früher zahlen; ein Datum vor dem Abrechnungsdatum gilt erst nach der Bestätigung
-  @wip
   Szenario: Zahlungseingang vor dem Abrechnungsdatum bestätigen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -120,7 +119,6 @@ Funktionalität: Abrechnungsdetail
     Und nennt der Verlauf "Bezahlt" am "15.01.2025"
 
   # #403 (4): vor dem Ende der Abrechnungsperiode kann die Zahlung nicht für diese Abrechnung sein
-  @wip
   Szenario: Kein Zahlungseingang vor dem Ende der Abrechnungsperiode
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -731,7 +729,6 @@ Funktionalität: Abrechnungsdetail
 
   # #403 (5): der Mieter hat auf die versendete Abrechnung 200.00 überwiesen, ein Teilbetrag. Neu: 630.36 (wie oben),
   # abzüglich 200.00 = 430.36, auf 5 Rappen zugunsten des Mieters 430.35
-  @wip
   Szenario: Berichtigte Abrechnung rechnet eine Teilzahlung an
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -743,7 +740,6 @@ Funktionalität: Abrechnungsdetail
     Und beträgt der Saldo der Abrechnung "CHF 430.35"
 
   # #403 (5): ohne Eingabe gilt 0.00; eine bezahlte Abrechnung nennt ihren Betrag schon selbst
-  @wip
   Szenario: Vor dem Berichtigen nach dem bereits Bezahlten fragen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -751,8 +747,6 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung berichtigen will
     Dann steht in der Bestätigung bei «Bereits bezahlt» "0.00"
     Und erklärt die Bestätigung «Bereits bezahlt» mit "Was der Mieter auf diese Abrechnung schon überwiesen hat, auch ein Teilbetrag."
-
-  @wip
   Szenario: Eine bezahlte Abrechnung berichtigen, ohne nach dem bereits Bezahlten zu fragen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
@@ -830,18 +824,17 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Nachzahlung 187.45"
 
   # #403 (5): die Teilzahlung auf die ersetzte Abrechnung steht im PDF der berichtigten als «Bereits bezahlt auf NK-…»
-  @wip
   Szenario: PDF der berichtigten Abrechnung nennt die Teilzahlung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und die Abrechnung 2024 von "Eva Frei" ist berichtigt, auf sie sind "200.00" Franken bezahlt
     Und der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung 2024 von "Eva Frei"
-    Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF, dass auf die Abrechnung 2024 von "Eva Frei" bereits "200.00" bezahlt sind
 
-  # #403 (6): eine geänderte Bemerkung verwirft das gespeicherte PDF; das neue PDF druckt sie
-  @wip
+  # #403 (6): eine geänderte Bemerkung verwirft das gespeicherte PDF; das neu erstellte druckt sie
   Szenario: Eine geänderte Bemerkung steht im PDF
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -849,11 +842,11 @@ Funktionalität: Abrechnungsdetail
     Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter nur die Bemerkung "Ratenzahlung bis Ende März vereinbart" festhält
+    Und der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Ratenzahlung bis Ende März vereinbart"
 
   # #403 (6): der Mieter erfährt den Grund der Berichtigung aus der Bemerkung; ein eigenes Feld gibt es nicht
-  @wip
   Szenario: Bei einer berichtigten Abrechnung rät die Bemerkung, den Grund der Berichtigung zu nennen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet

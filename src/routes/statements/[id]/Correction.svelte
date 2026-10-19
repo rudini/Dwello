@@ -4,6 +4,7 @@
 	import type { StatementWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import FormDialog from './FormDialog.svelte';
 
@@ -31,6 +32,15 @@
 		if (statement.priorPayments) return m.statements_correct_paid_chain(paid);
 		return offset < 0 ? m.statements_correct_refunded(paid) : m.statements_correct_paid(paid);
 	});
+	// #448 (5): what was already paid on a sent or overdue statement, also a part; on a refund by the landlord
+	const askPaid = $derived(statement.status === 'sent' || statement.status === 'overdue');
+	let paidAmount = $state('0.00');
+	let paidError = $state('');
+	function checkPaid() {
+		const valid = !askPaid || /^\d+(\.\d{1,2})?$/.test(paidAmount.trim());
+		paidError = valid ? '' : m.backend_statement_paid_amount_invalid({ amount: paidAmount });
+		return valid;
+	}
 	let creating = $state(false); // a second click would create a second berichtigte Abrechnung
 	const replaces = $derived(
 		statement.replaces &&
@@ -100,11 +110,27 @@
 	title={m.statements_correct()}
 	confirmLabel={m.statements_correct()}
 	confirmTestid="statement-correct-confirm"
+	fields={askPaid ? { paidAmount } : {}}
+	check={checkPaid}
 	success={m.statements_replaced_done()}
 	danger
 >
 	<!-- the real consequence, what is offset, and the limitation -->
 	<p>{consequence}</p>
+	{#if askPaid}
+		<MoneyInput
+			id="paidAmount"
+			label={statement.balance < 0
+				? m.statements_correct_refunded_amount()
+				: m.statements_correct_paid_amount()}
+			help={statement.balance < 0
+				? m.statements_correct_refunded_help()
+				: m.statements_correct_paid_help()}
+			error={paidError}
+			bind:value={paidAmount}
+			testid="statement-correct-paid-amount"
+		/>
+	{/if}
 	<p>{m.statements_correct_next()}</p>
 	<p class="font-semibold">{m.statements_correct_final()}</p>
 	<p>{m.statements_correct_limit()}</p>

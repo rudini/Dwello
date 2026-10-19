@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
-	import { belowMinimum, nextReminderLater } from '$lib/statement';
+	import { belowMinimum, nextReminderLater, unpaid } from '$lib/statement';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	// Who pays whom by when; a refund has no Zahlungsfrist for the tenant
@@ -13,8 +13,12 @@
 	const nextReminder = $derived(nextReminderLater(statement));
 	// a replaced statement asks for nothing: its berichtigte Abrechnung says what is still due (#120)
 	const replaced = $derived(statement.status === 'replaced');
-	// below CHF 5 nothing is paid: no Zahlungsfrist and no «Bezahlt am» (#94)
-	const waived = $derived(belowMinimum(statement.balance));
+	// below CHF 5 nothing is paid: no Zahlungsfrist and no «Bezahlt am»; the Saldo is carried over (#448), on a
+	// Schlussabrechnung claimed or paid out; settled under #94 (paid with 0.00) it was waived
+	const waived = $derived(
+		belowMinimum(statement.balance) && statement.status === 'paid' && statement.paidAmount === 0
+	);
+	const noPayment = $derived(waived || unpaid(statement));
 	const summary = $derived(
 		replaced
 			? m.statements_summary_replaced()
@@ -24,20 +28,22 @@
 					? refund
 						? m.statements_summary_waived_refund()
 						: m.statements_summary_waived_due()
-					: refund
-						? m.statements_summary_refund({ amount })
-						: m.statements_summary_due({ amount })
+					: noPayment
+						? m.statements_summary_carried()
+						: refund
+							? m.statements_summary_refund({ amount })
+							: m.statements_summary_due({ amount })
 	);
 	const deadline = $derived({
 		label: refund ? m.statements_refund_by() : m.glossary_deadline_term(),
-		date: replaced || waived ? undefined : statement.paymentDeadline,
+		date: replaced || noPayment ? undefined : statement.paymentDeadline,
 		testid: 'statement-payment-deadline'
 	});
 	const rows = $derived(
 		[
 			deadline,
 			{ label: m.statements_statement_date(), date: statement.statementDate },
-			{ label: m.statements_paid_on(), date: waived ? null : statement.paidDate },
+			{ label: m.statements_paid_on(), date: noPayment ? null : statement.paidDate },
 			{ label: m.statements_last_reminder(), date: statement.lastReminderDate }
 		].filter((row) => row.date)
 	);

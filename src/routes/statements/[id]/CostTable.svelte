@@ -15,11 +15,17 @@
 	// that grows gets +), the Saldo; only a real rounding (under 5 Rappen)
 	const cents = (amount: number) => Math.round(amount * 100) / 100;
 	// a berichtigte Abrechnung also offsets what was paid on the statements it replaced (#120); a refund paid counts negative
-	const prior = $derived(statement.priorPayments ?? 0);
+	const offsets = $derived(statement.offsetWith ?? []);
+	const offset = $derived(cents(offsets.reduce((sum, o) => sum + o.amount, 0)));
+	// what was paid, without a Saldo the next statement counts as its Übertrag: that one is «Bereits verrechnet» (#448)
+	const prior = $derived(cents((statement.priorPayments ?? 0) - offset));
+	const carry = $derived(statement.carriedFrom?.balance ?? 0);
 	// TODO(fachlich prüfen, #362): «Bereits bezahlt» has its glossary row; the help texts follow
 	const priorLabel = (numbers: string) =>
 		prior > 0 ? m.statements_prior_paid({ numbers }) : m.statements_prior_refunded({ numbers });
-	const unrounded = $derived(cents(statement.totalCosts - statement.totalAdvancePayments - prior));
+	const unrounded = $derived(
+		cents(statement.totalCosts - statement.totalAdvancePayments - prior - offset + carry)
+	);
 	const rounding = $derived(
 		Math.abs(statement.balance - unrounded) < 0.05
 			? cents(Math.abs(statement.balance) - Math.abs(unrounded))
@@ -40,6 +46,25 @@
 							)
 						),
 						value: signed(prior < 0, prior)
+					}
+				]
+			: []),
+		...(offset
+			? [
+					{
+						testid: 'statement-offset',
+						label: m.statements_offset_with({ numbers: offsets.map((o) => o.statementNumber).join(', ') }),
+						value: signed(offset < 0, offset)
+					}
+				]
+			: []),
+		// #448: the Übertrag from the previous statement of the Mietvertrag; a Nachzahlung adds, a refund subtracts
+		...(statement.carriedFrom
+			? [
+					{
+						testid: 'statement-carry-over',
+						label: m.statements_carry_over({ number: statement.carriedFrom.statementNumber }),
+						value: signed(carry > 0, carry)
 					}
 				]
 			: []),

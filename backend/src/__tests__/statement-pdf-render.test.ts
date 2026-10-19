@@ -273,31 +273,44 @@ describe('PDF ohne Saldo und einer bezahlten Abrechnung', () => {
 	});
 });
 
-// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt: kein Zahlteil, keine Bitte um die IBAN
+// #403: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt, sondern mit der nächsten Abrechnung verrechnet:
+// kein Zahlteil, keine Bitte um die IBAN
 describe('PDF mit einem Saldo unter CHF 5', () => {
-	it('fordert eine kleine Nachzahlung nicht ein und druckt keinen Zahlteil', async () => {
-		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.95, paymentDeadline: '2026-03-17' });
+	it('verrechnet eine kleine Nachzahlung mit der nächsten Abrechnung und druckt keinen Zahlteil', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.1, paymentDeadline: '2026-03-17', carried: true });
 
-		expect(pdf.flowing).toContain('Nachzahlung CHF 4.95');
-		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(pdf.flowing).toContain('Nachzahlung CHF 4.10');
+		expect(pdf.flowing).toContain('Der Betrag von CHF 4.10 wird mit der nächsten Abrechnung verrechnet.');
 		expect(pdf.flowing).not.toContain('Zahlteil');
 	});
 
-	it('zahlt eine kleine Rückerstattung nicht aus und fragt nicht nach der IBAN', async () => {
-		const pdf = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paymentDeadline: '2026-03-17' });
+	it('verrechnet eine kleine Rückerstattung mit der nächsten Abrechnung und fragt nicht nach der IBAN', async () => {
+		const pdf = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paymentDeadline: '2026-03-17', carried: true });
 
-		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir zahlen ihn nicht aus.');
+		expect(pdf.flowing).toContain('Der Betrag von CHF 2.85 wird mit der nächsten Abrechnung verrechnet.');
 		expect(pdf.flowing).not.toContain('IBAN');
 		expect(pdf.flowing).not.toContain('überweisen');
 	});
 
-	// nach dem Versand ist sie bezahlt, aber ohne Zahlung: kein «Bezahlt am», kein «Überwiesen am»
-	it('sagt auch nach dem Versand, dass der Betrag nicht eingefordert oder ausbezahlt wird', async () => {
-		const waived = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.1, paidDate: '2026-02-15' });
-		const back = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paidDate: '2026-02-15' });
+	it('verrechnet den Betrag auf Französisch, Italienisch und Englisch', async () => {
+		const data = { ...refund, totalAdvancePayments: 787, balance: -2.85, carried: true };
+		const texts = await Promise.all(
+			(['fr', 'it', 'en'] as const).map(async (language) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing)
+		);
+
+		expect(texts[0]).toContain('Le montant de CHF 2.85 sera compensé avec le prochain décompte.');
+		expect(texts[1]).toContain('L’importo di CHF 2.85 sarà compensato con il prossimo conteggio.');
+		expect(texts[2]).toContain('The amount of CHF 2.85 will be offset against the next statement.');
+	});
+
+	// #94 versendet: der Mieter hat gelesen, dass nichts folgt; der Text bleibt, ohne «Bezahlt am» und «Überwiesen am»
+	it('sagt bei einer nach #94 erledigten Abrechnung weiter, dass der Betrag nicht eingefordert oder ausbezahlt wird', async () => {
+		const waived = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.1, paidDate: '2026-02-15', waived: true });
+		const back = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paidDate: '2026-02-15', waived: true });
 
 		expect(waived.flowing).toContain('Wir verzichten darauf; Sie müssen nichts bezahlen.');
 		expect(waived.flowing).not.toContain('Bezahlt am');
+		expect(waived.flowing).not.toContain('Zahlteil');
 		expect(back.flowing).toContain('Wir zahlen ihn nicht aus.');
 		expect(back.flowing).not.toContain('Überwiesen am');
 	});
@@ -306,6 +319,49 @@ describe('PDF mit einem Saldo unter CHF 5', () => {
 		const pdf = await textOf({ ...due, totalAdvancePayments: 779.15, balance: 5 });
 
 		expect(pdf.flowing).toContain('Zahlteil');
+	});
+
+	// die Schlussabrechnung kennt keinen Mindestbetrag
+	it('fordert auf der Schlussabrechnung auch CHF 4.10 mit dem Zahlteil ein', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.1, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Zahlteil');
+		expect(pdf.flowing).not.toContain('verrechnet');
+		expect(pdf.flowing).not.toContain('kleiner als');
+	});
+});
+
+// #403: der Übertrag der letzten Abrechnung desselben Mietvertrags, vor der Rundung in den Saldo gerechnet
+describe('PDF mit einem Übertrag', () => {
+	// 784.13 − 600.00 + 3.00 = 187.13, auf 5 Rappen zugunsten des Mieters 187.10
+	const carriedIn: StatementPDFData = { ...due, balance: 187.1, carryOver: { statementNumber: 'NK-1-2024-0001', amount: 3 } };
+
+	it('zählt eine übertragene Nachzahlung vor der Rundung dazu', async () => {
+		const flowing = (await textOf(carriedIn)).flowing;
+
+		expect(flowing).toContain('Geleistete Akontobeiträge – 600.00 Übertrag aus Abrechnung NK-1-2024-0001: CHF 3.00 + 3.00');
+		expect(flowing).toContain('Nachzahlung vor Rundung 187.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 187.10');
+	});
+
+	// 784.13 − 600.00 − 3.00 = 181.13 → 181.10
+	it('zieht eine übertragene Rückerstattung vor der Rundung ab', async () => {
+		const flowing = (await textOf({ ...due, balance: 181.1, carryOver: { statementNumber: 'NK-1-2024-0001', amount: -3 } })).flowing;
+
+		expect(flowing).toContain('Übertrag aus Abrechnung NK-1-2024-0001: CHF 3.00 – 3.00');
+		expect(flowing).toContain('Nachzahlung vor Rundung 181.13');
+	});
+
+	it('nennt den Übertrag auf Französisch', async () => {
+		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(carriedIn, config, 'fr'), 'base64')).flowing;
+
+		expect(fr).toContain('Report du décompte NK-1-2024-0001 : CHF 3.00');
+	});
+});
+
+// #403 (6): die Bemerkung der Abrechnung steht im PDF, bei einer berichtigten Abrechnung etwa der Grund
+describe('PDF mit einer Bemerkung', () => {
+	it('druckt die Bemerkung', async () => {
+		expect((await textOf({ ...due, notes: 'Berichtigt: die Hauswartrechnung fehlte.' })).flowing).toContain('Berichtigt: die Hauswartrechnung fehlte.');
 	});
 });
 
@@ -558,6 +614,20 @@ describe('PDF einer berichtigten Abrechnung', () => {
 		).flowing;
 		expect(flowing).toContain('Bereits zurückerstattet auf NK-1-2025-0001 und NK-1-2025-0002 + 20.00');
 		expect(flowing).toContain('bereits zurückerstattet CHF 20.00');
+	});
+
+	// Fachreview 448-1 V-2: der Saldo der ersetzten Abrechnung steht schon als Übertrag in der nächsten
+	it('nennt einen schon übertragenen Saldo als verrechnet mit der nächsten Abrechnung', async () => {
+		const flowing = (
+			await textOf({
+				...corrected,
+				balance: 181.1,
+				replaces: { ...corrected.replaces!, paidOn: [], priorPayments: 3, offsetWith: [{ statementNumber: 'NK-1-2026-0001', amount: 3 }] }
+			})
+		).flowing;
+		expect(flowing).toContain('Geleistete Akontobeiträge – 600.00 Bereits verrechnet mit NK-1-2026-0001 – 3.00');
+		expect(flowing).not.toContain('Bereits bezahlt');
+		expect(flowing).toContain('bereits verrechnet CHF 3.00');
 	});
 
 	it('nennt die ersetzte Abrechnung auf Französisch', async () => {

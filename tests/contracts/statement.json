@@ -20,6 +20,8 @@
 	"replaces": null,
 	"replacedBy": null,
 	"priorPaidOn": [],
+	"carriedFrom": null,
+	"final": false,
 	"status": "draft",
 	"oldAddress": false,
 	"paymentDeadline": "2025-02-14",

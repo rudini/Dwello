@@ -29,8 +29,8 @@ let rental: Awaited<ReturnType<typeof createRental>>;
 const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 const statement = async (id: string) => (await (await callApi(`/api/v1/statements/${id}`)).json()) as Statement;
 
-// The rental's statement 2025, sent to the tenant
-async function sentStatement() {
+// The rental's statement 2025, sent to the tenant; `balance` keeps it open where it would be «Erledigt» (#448)
+async function sentStatement(balance?: string) {
 	const id = await idOf(
 		await sendJson('POST', '/api/v1/statements/generate', {
 			contractId: rental.contract,
@@ -39,6 +39,7 @@ async function sentStatement() {
 			periodEnd: '2025-12-31'
 		})
 	);
+	if (balance) await db.update(utilityStatements).set({ balance }).where(eq(utilityStatements.id, id));
 	await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
 	return id;
 }
@@ -91,7 +92,7 @@ describe('Abrechnung ersetzen', () => {
 	});
 
 	it('lässt die ersetzte Abrechnung nicht mehr bearbeiten', async () => {
-		const id = await sentStatement();
+		const id = await sentStatement('50.00');
 		await replace(id);
 
 		await expectRejection(
@@ -103,7 +104,7 @@ describe('Abrechnung ersetzen', () => {
 	});
 
 	it('lässt die ersetzte Abrechnung nicht mehr als bezahlt markieren', async () => {
-		const id = await sentStatement();
+		const id = await sentStatement('50.00');
 		await replace(id);
 
 		const response = await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'paid', paidDate: today() });

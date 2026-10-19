@@ -35,7 +35,6 @@ Funktionalität: Nebenkostenabrechnungen
 
   # #403 (2): ohne Akonto und ohne Kosten ist der Saldo 0.00; mit dem Versand ist die Abrechnung erledigt. Der Entwurf
   # von Anna Keller passt nicht zum Filter
-  @wip
   Szenario: Nur erledigte Abrechnungen anzeigen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Nina Brunner" existiert

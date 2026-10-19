@@ -417,7 +417,7 @@ describe('API-Verträge der Zahlung', () => {
 		expect(drift(await sample('statement-send-refused'), await response.json())).toEqual([]);
 	});
 
-	it('PUT /statements/:id/status mit einem Zahlungsdatum vor dem Abrechnungsdatum liefert die Felder von statement-paid-date-refused.json', async () => {
+	it('PUT /statements/:id/status mit einem Zahlungsdatum vor dem Ende der Abrechnungsperiode liefert die Felder von statement-paid-date-refused.json', async () => {
 		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
 		const response = await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: '2020-01-01' });
 		expect(response.status).toBe(400);

@@ -520,16 +520,10 @@ Then(
 
 // #403: the Übertrag of the previous statement of the same Mietvertrag; a refund carried over subtracts, a Nachzahlung adds
 Then(
-	'zieht die Abrechnung den Übertrag {string} aus der Abrechnung {int} von {string} ab',
-	async ({ verwalter, seed }, amount: string, year: number, tenant: string) => {
-		await verwalter.sees(carryOver).toBe(`Übertrag aus Abrechnung ${await seed.statementNumber(tenant, year)} − ${amount}`);
-	}
-);
-
-Then(
-	'zählt die Abrechnung den Übertrag {string} aus der Abrechnung {int} von {string} dazu',
-	async ({ verwalter, seed }, amount: string, year: number, tenant: string) => {
-		await verwalter.sees(carryOver).toBe(`Übertrag aus Abrechnung ${await seed.statementNumber(tenant, year)} + ${amount}`);
+	/^(zieht|zählt) die Abrechnung den Übertrag "([^"]+)" aus der Abrechnung (\d+) von "([^"]+)" (?:ab|dazu)$/,
+	async ({ verwalter, seed }, verb: string, amount: string, year: string, tenant: string) => {
+		const sign = verb === 'zieht' ? '−' : '+';
+		await verwalter.sees(carryOver).toBe(`Übertrag aus Abrechnung ${await seed.statementNumber(tenant, Number(year))} ${sign} ${amount}`);
 	}
 );
 

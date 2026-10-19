@@ -9,6 +9,23 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement(backendStatement).managementFeePercent).toBe(3);
 	});
 
+	// #448: die Schlussabrechnung, der Übertrag aus der letzten Abrechnung und was davon schon verrechnet ist
+	it('übernimmt Schlussabrechnung, Übertrag und Verrechnetes als Zahlen', () => {
+		const statement = toStatement({
+			...backendStatement,
+			final: true,
+			carriedFrom: { id: 's0', statementNumber: 'NK-2023-1', balance: '-3.00' },
+			offsetWith: [{ statementNumber: 'NK-2025-1', amount: '3.00' }]
+		});
+
+		expect(statement).toMatchObject({
+			final: true,
+			carriedFrom: { id: 's0', statementNumber: 'NK-2023-1', balance: -3 },
+			offsetWith: [{ statementNumber: 'NK-2025-1', amount: 3 }]
+		});
+		expect(toStatement(backendStatement)).toMatchObject({ final: false, carriedFrom: null, offsetWith: [] });
+	});
+
 	// A-10: wer neu abrechnet, sieht, welches Heizprofil diese Abrechnung verwendet
 	it('nennt das Heizprofil der Abrechnung', () => {
 		expect(toStatement(backendStatement).heatingProfileName).toBe('Standard');

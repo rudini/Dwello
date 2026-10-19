@@ -16,7 +16,6 @@ Funktionalität: Saldo unter CHF 5
     Und im Mietvertrag von "Anna Keller" ist keine Verwaltungspauschale vereinbart
 
   # Nebenkosten 1'203.00 – Akonto 12 × 100.00 = Nachzahlung 3.00; das PDF, das der Mieter mit dem Versand erhält
-  @wip
   Szenario: Kleine Nachzahlung wird mit der nächsten Abrechnung verrechnet
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
@@ -32,7 +31,6 @@ Funktionalität: Saldo unter CHF 5
 
   # Nebenkosten 1'197.00 – Akonto 12 × 100.00 = Rückerstattung 3.00 (Art. 257b Abs. 1 und Art. 115 OR: verrechnet,
   # nicht erlassen)
-  @wip
   Szenario: Kleine Rückerstattung wird mit der nächsten Abrechnung verrechnet
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1197" Franken für 2024
@@ -47,7 +45,6 @@ Funktionalität: Saldo unter CHF 5
     Und steht im PDF nicht "nicht aus"
 
   # Keine Zahlung: die Abrechnung ist mit dem Versand «Erledigt», nicht «Bezahlt»; sie hat kein Zahlungsdatum
-  @wip
   Szenariogrundriss: Saldo unter CHF 5 ist mit dem Versand erledigt
     Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "<Rechnung>" Franken für 2024
     Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
@@ -64,7 +61,6 @@ Funktionalität: Saldo unter CHF 5
 
   # #403 (3): eine erledigte Abrechnung wird nicht gemahnt, auch nach Ablauf der Zahlungsfrist, und hat keine Zahlung,
   # die sich zurücksetzen liesse
-  @wip
   Szenario: Erledigte Abrechnung bietet weder Mahnung noch Zurücksetzen der Zahlung an
     Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
     Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
@@ -77,7 +73,6 @@ Funktionalität: Saldo unter CHF 5
 
   # 2024: Rückerstattung 3.00, übertragen. 2025: Nebenkosten 1'250.00 – Akonto 1'200.00 = 50.00, minus Übertrag 3.00
   # = Nachzahlung 47.00
-  @wip
   Szenario: Die nächste Abrechnung verrechnet eine übertragene Rückerstattung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1197" Franken für 2024
@@ -95,7 +90,6 @@ Funktionalität: Saldo unter CHF 5
 
   # 2024: Nachzahlung 3.00, übertragen. 2025: Nebenkosten 1'250.02 – Akonto 1'200.00 = 50.02, plus Übertrag 3.00
   # = 53.02, als Summe auf 5 Rappen gerundet: Nachzahlung 53.00
-  @wip
   Szenario: Die nächste Abrechnung rechnet eine übertragene Nachzahlung dazu
     Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2024
     Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
@@ -108,7 +102,6 @@ Funktionalität: Saldo unter CHF 5
 
   # #403: endet der Mietvertrag in der Abrechnungsperiode (Schlussabrechnung), gilt kein Mindestbetrag: auch 3.00
   # wird eingefordert, mit Zahlteil
-  @wip
   Szenario: Die Schlussabrechnung fordert auch eine kleine Nachzahlung ein
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und der Mietvertrag von "Anna Keller" endet am "2024-12-31"
@@ -124,7 +117,6 @@ Funktionalität: Saldo unter CHF 5
     Und steht im PDF nicht "verrechnet"
 
   # Auch eine kleine Rückerstattung zahlt der Vermieter mit der Schlussabrechnung aus
-  @wip
   Szenario: Die Schlussabrechnung zahlt auch eine kleine Rückerstattung aus
     Angenommen der Mietvertrag von "Anna Keller" endet am "2024-12-31"
     Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1197" Franken für 2024
@@ -137,7 +129,6 @@ Funktionalität: Saldo unter CHF 5
 
   # 2023: Nachzahlung 3.00, übertragen. Die Schlussabrechnung 2024 (Vertragsende 31.12.2024) rechnet ihn ein:
   # 1'201.00 – 1'200.00 + 3.00 = Nachzahlung 4.00, ohne Mindestbetrag eingefordert
-  @wip
   Szenario: Die Schlussabrechnung rechnet den Übertrag der letzten Abrechnung ein
     Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1203" Franken für 2023
     Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2023
@@ -162,7 +153,6 @@ Funktionalität: Saldo unter CHF 5
     Und die Abrechnung enthält die Bemerkung "Mieterin zieht Ende Jahr aus"
 
   # Verglichen wird der gerundete Saldo: 5.02 und –4.98 sind gerundet CHF 5.00 und bleiben offen
-  @wip
   Szenariogrundriss: Saldo an der Grenze von CHF 5
     Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "<Rechnung>" Franken für 2024
     Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024

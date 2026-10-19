@@ -164,11 +164,13 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
+      | statement-sent-detail  | mark-paid-early     |
       | statement-sent-detail  | action-error        |
       | statement-sent-detail  | correct-dialog      |
       | statement-paid-detail  | default             |
       | statement-paid-detail  | reset-payment-dialog |
       | statement-paid-detail  | correct-dialog      |
+      | statement-settled-detail | default           |
       | statement-replaced-detail | default          |
       | statement-corrected-detail | default         |
       | statement-correction-detail | default        |

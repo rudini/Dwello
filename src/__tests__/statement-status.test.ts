@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { balanceLabel, paidDateError, statusLabels, statusTones } from '../lib/statement';
+import { balanceLabel, earlyPaidDate, paidDateError, statusLabels, statusTones } from '../lib/statement';
 import { backendMessage } from '../lib/backend-error';
 import paidDateRefused from '../../tests/contracts/statement-paid-date-refused.json';
 
@@ -9,6 +9,7 @@ describe('statement status', () => {
 			draft: 'Entwurf',
 			sent: 'Versendet',
 			paid: 'Bezahlt',
+			settled: 'Erledigt',
 			overdue: 'Überfällig',
 			replaced: 'Ersetzt'
 		});
@@ -16,6 +17,7 @@ describe('statement status', () => {
 			draft: 'neutral',
 			sent: 'info',
 			paid: 'positive',
+			settled: 'positive',
 			overdue: 'critical',
 			replaced: 'neutral'
 		});
@@ -30,28 +32,41 @@ describe('balanceLabel', () => {
 	});
 });
 
-// #138: das Zahlungsdatum ist ein Tag, den es gibt, frühestens das Abrechnungsdatum
+// #138: das Zahlungsdatum ist ein Tag, den es gibt; #448: frühestens das Ende der Abrechnungsperiode
 describe('paidDateError', () => {
 	it('lehnt einen Tag ab, den es nicht gibt', () => {
 		for (const day of ['2025-02-30', '2025-13-01', '2025-01-32', '2025-00-10'])
-			expect(paidDateError(day, '2025-01-15'), day).toBe('Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.');
+			expect(paidDateError(day, '2024-12-31'), day).toBe('Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.');
 	});
 
-	it('lehnt einen Tag vor dem Abrechnungsdatum ab', () => {
-		expect(paidDateError('2025-01-14', '2025-01-15')).toBe(
-			'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 15.01.2025. Geben Sie frühestens dieses Datum ein.'
+	it('lehnt einen Tag vor dem Ende der Abrechnungsperiode ab', () => {
+		expect(paidDateError('2024-12-30', '2024-12-31')).toBe(
+			'Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am 31.12.2024. Geben Sie frühestens dieses Datum ein.'
 		);
 	});
 
-	it('nimmt das Abrechnungsdatum selbst an', () => {
-		expect(paidDateError('2025-01-15', '2025-01-15')).toBeNull();
+	it('nimmt das Ende der Abrechnungsperiode selbst an', () => {
+		expect(paidDateError('2024-12-31', '2024-12-31')).toBeNull();
+	});
+});
+
+// #448 (4): ein Mieter darf vor dem Abrechnungsdatum zahlen, gespeichert wird es nach einer Bestätigung
+describe('earlyPaidDate', () => {
+	it('fragt bei einem Tag vor dem Abrechnungsdatum nach', () => {
+		expect(earlyPaidDate('2025-01-14', '2025-01-15')).toBe(
+			'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 15.01.2025. Trotzdem speichern?'
+		);
+	});
+
+	it('fragt ab dem Abrechnungsdatum nicht', () => {
+		expect(earlyPaidDate('2025-01-15', '2025-01-15')).toBeNull();
 	});
 });
 
 describe('Ablehnung des Zahlungsdatums durch das Backend', () => {
-	it('nennt das Abrechnungsdatum als Datum', () => {
+	it('nennt das Ende der Abrechnungsperiode als Datum', () => {
 		expect(backendMessage(paidDateRefused, '')).toBe(
-			'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 05.01.2026. Geben Sie frühestens dieses Datum ein.'
+			'Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am 31.12.2024. Geben Sie frühestens dieses Datum ein.'
 		);
 	});
 });
