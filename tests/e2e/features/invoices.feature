@@ -192,6 +192,7 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Und der Liegenschaftsverwalter die Rechnung von "Werke Schlussrechnung" ansieht
     Dann steht beim Betrag der Rechnung "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug."
+    Und erinnert der Beleg nicht an abgezogene Akontorechnungen
 
   # #455 (#268): der Dateiknopf des Browsers spricht die Sprache des Browsers, nicht die von Dwello
   @wip

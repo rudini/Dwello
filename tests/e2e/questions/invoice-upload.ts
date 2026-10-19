@@ -2,6 +2,7 @@ import { question } from '../screenplay/actor';
 import { Checked, OpenedFile, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	belegAmount,
+	belegDeductedRule,
 	belegHow,
 	belegUploadHints,
 	createInvoicesButton,
@@ -17,6 +18,7 @@ import {
 	discardMessage,
 	keepOriginalHint,
 	uploadBuildingSelect,
+	uploadFileChoose,
 	uploadResult,
 	uploadStatus
 } from '../targets/invoice-upload';
@@ -46,3 +48,7 @@ export const hintsOfUpload = Text.of(belegUploadHints);
 export const billedAdviceOnDelete = Text.of(deleteBilledNote);
 export const uploadDialogShown = Visibility.of(uploadBuildingSelect);
 export const uploadState = Text.of(uploadStatus);
+export const deductedRuleOnBeleg = (fileName: string) => Text.of(belegDeductedRule(fileName));
+export const fileChooserLabel = Text.of(uploadFileChoose);
+// what the Beleg card says from the upload, empty without a hint
+export const hintsOfUploadOrNone = question('the hints from the upload at the Beleg', async (actor) => (await actor.answer(hintsOfUpload)) ?? '');

@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, EnterDate, Enter, FailRequests, OpenInNewTab, Select, Upload, Wait } from '../screenplay/interactions';
+import { Check, Click, EnterDate, Enter, FailRequests, Navigate, OpenInNewTab, Press, Select, Upload, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import { deleteButton } from '../targets/invoice-detail';
 import { successToast } from '../targets/form';
@@ -15,6 +15,7 @@ import {
 	belegCategory,
 	belegInvoiceDate,
 	belegRow,
+	belegSelected,
 	belegUploadButton,
 	cancelUploadButton,
 	createInvoicesButton,
@@ -107,3 +108,11 @@ export const openBelegOfInvoice = OpenInNewTab(belegLink);
 export const openFileLarge = (fileName: string): Activity => (actor) =>
 	actor.attemptsTo(openBeleg(fileName), Wait.until(belegFileLink(fileName)), OpenInNewTab(belegFileLink(fileName)));
 export const removeFile = (fileName: string) => Click.on(belegRemove(fileName));
+
+export const openUploadDialog: Activity = (actor) => actor.attemptsTo(Navigate.to('/invoices'), Click.on(uploadInvoicesButton));
+export const chooseForCreating = (fileName: string) => Check.the(belegSelected(fileName));
+// Escape in the Kategorie of the file, as when its open list is closed (#268)
+export const escapeFromCategory = (fileName: string): Activity => async (actor) => {
+	if (!(await actor.answer(Visibility.of(belegCategory(fileName))))) await actor.attemptsTo(openBeleg(fileName));
+	await actor.attemptsTo(Press.theKey('Escape').on(belegCategory(fileName)));
+};

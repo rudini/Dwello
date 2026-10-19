@@ -5,7 +5,7 @@ import { formatCurrency } from '$lib/utils/format';
 /** What the backend proposes for an uploaded file (POST /invoices/extract, tests/contracts/invoice-extraction.json) */
 export type Proposal = {
 	invoiceCount: number;
-	documentType: string; // invoice, reminder or credit_note
+	documentType: string; // invoice, advance_invoice, reminder or credit_note
 	fields: Record<
 		| 'billingEntityName'
 		| 'invoiceNumber'
@@ -59,7 +59,8 @@ export type UploadRow = {
 	notes: string[]; // what the property manager should know about the file
 	duplicateOf: string | null;
 	several: boolean;
-	documentType: string; // invoice, reminder or credit_note, as the KI read it
+	documentType: string; // invoice, advance_invoice, reminder or credit_note, as the KI read it
+	deducted: string | null; // Akontorechnungen deducted on the Rechnung, with the total proposed (#455)
 	byHand: boolean; // the KI read nothing: every field is filled in by hand
 	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
 	selected: boolean;
@@ -110,6 +111,7 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	duplicateOf: null,
 	several: false,
 	documentType: 'invoice',
+	deducted: null,
 	byHand: false,
 	hints: { deductedAmount: null, nonAllocableItems: false },
 	selected: true
@@ -139,8 +141,10 @@ const named = (fields: string[]) =>
  * review V-5, V-8); nothing on a file no invoice is created from
  */
 export function toDoOf(row: UploadRow): string[] {
-	// nothing to fill in on a file no invoice is created from: several invoices, a Gutschrift, a Mahnung (persona Dr. Weber)
-	if (row.status !== 'check' || row.several || row.documentType !== 'invoice') return [];
+	// nothing to fill in on a file no invoice is created from: several invoices, a Gutschrift, a Mahnung (persona Dr. Weber),
+	// an Akontorechnung the property manager did not choose to record (#455)
+	const recorded = row.documentType === 'invoice' || (row.documentType === 'advance_invoice' && row.selected);
+	if (row.status !== 'check' || row.several || !recorded) return [];
 	// costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also
 	// one the property manager chooses later (domain review V-1, V-8)
 	const mixed = row.hints.nonAllocableItems && row.values.isValidUtilityCost;
@@ -167,8 +171,19 @@ function notesOn(proposal: Proposal, morePages: boolean) {
 		proposal.duplicateOf && m.invoices_upload_duplicate(),
 		proposal.documentType === 'reminder' && m.invoices_upload_reminder(),
 		proposal.documentType === 'credit_note' && m.invoices_upload_credit_note(),
-		proposal.deductedAmount && m.invoices_upload_deducted({ amount: formatCurrency(Number(proposal.deductedAmount)) })
+		// TODO(fachlich prüfen, #483): «Schlussrechnung» has no glossary row yet
+		proposal.documentType === 'advance_invoice' && m.invoices_upload_advance_invoice()
 	];
+}
+
+// Akontorechnungen the Rechnungssteller deducted, with the total the KI proposes as the Betrag (#455)
+function deductedOn(proposal: Proposal) {
+	if (!proposal.deductedAmount) return null;
+	const amount = formatCurrency(Number(proposal.deductedAmount));
+	const total = proposal.fields.amount;
+	return total
+		? m.invoices_upload_deducted({ amount, total: formatCurrency(Number(total)) })
+		: m.invoices_upload_deducted_no_total({ amount });
 }
 
 // The fields of the form each value of the KI's answer goes to
@@ -205,7 +220,7 @@ function readIn(row: UploadRow, proposal: Proposal) {
 }
 
 // Only an invoice that can be created as it is: not a file with several invoices, one already entered, a Gutschrift,
-// a Mahnung (domain review V-9, V-10) or one mixing in costs that are not allocable, whose amount must be split first
+// a Mahnung (domain review V-9, V-10), an Akontorechnung (#455) or one mixing in costs that are not allocable, whose amount must be split first
 const preselected = (proposal: Proposal) =>
 	proposal.invoiceCount === 1 &&
 	!proposal.duplicateOf &&
@@ -230,6 +245,7 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 		duplicateOf: proposal.duplicateOf,
 		several,
 		documentType: proposal.documentType,
+		deducted: deductedOn(proposal),
 		byHand: false,
 		hints: { deductedAmount: proposal.deductedAmount, nonAllocableItems: proposal.nonAllocableItems },
 		selected: preselected(proposal)

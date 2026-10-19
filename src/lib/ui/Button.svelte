@@ -86,6 +86,7 @@
 		download={download || undefined}
 		{target}
 		rel={target ? 'noopener' : undefined}
+		{onclick}
 	>
 		{@render content()}
 	</a>

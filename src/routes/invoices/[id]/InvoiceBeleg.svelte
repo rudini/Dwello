@@ -10,7 +10,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
-	import { controlClass } from '$lib/ui/field';
+	import FileInput from '$lib/ui/FileInput.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 
@@ -18,6 +18,9 @@
 	let { invoice, billed }: { invoice: InvoiceWithDetails; billed: boolean } = $props();
 
 	let input = $state<HTMLInputElement>();
+	let chosenName = $state(''); // the file chosen, said beside its button
+	const chosen = $derived(chosenName || m.invoices_beleg_file_none());
+	const choose = () => (chosenName = input?.files?.[0]?.name ?? '');
 	let saving = $state(false);
 	let error = $state<string>();
 	// which file and which button: choosing a file alone changes nothing (persona Helga)
@@ -60,6 +63,7 @@
 					: m.invoices_beleg_failed()
 			);
 		input!.value = '';
+		chosenName = '';
 		addToast('success', m.invoices_beleg_saved({ name: file.name }));
 		await invalidateAll();
 	}
@@ -96,15 +100,13 @@
 			{error}
 		>
 			{#snippet children(control)}
-				<input
-					bind:this={input}
-					id={control.id}
-					type="file"
-					accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-					aria-describedby={control.describedBy}
-					aria-invalid={control.invalid || undefined}
-					class={controlClass(control.invalid)}
-					data-testid="invoice-document-file-input"
+				<FileInput
+					bind:input
+					{control}
+					choose={m.invoices_beleg_file_choose()}
+					{chosen}
+					onchange={choose}
+					testid="invoice-document-file"
 				/>
 			{/snippet}
 		</Field>

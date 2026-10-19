@@ -337,6 +337,42 @@ describe('Rechnungen hochladen', () => {
 		expect(document.body.textContent).toContain('Sie können höchstens 20 Dateien auf einmal hochladen.');
 	});
 
+	// #455 (#268): the short line names both amounts; the rule follows as help, after what is to do
+	it('nennt abgezogene Akontorechnungen nach den Aufgaben, mit der Regel als Hilfetext darunter', async () => {
+		open(() => [200, { ...read, deductedAmount: '1000.00', categorization: null }]);
+		chooseBuilding();
+		await upload(pdf('werke.pdf'));
+		const message = byTestId('invoice-upload-row-message')!.textContent!.replace(/\s+/g, ' ');
+		const line = 'Auf der Rechnung sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Als Betrag ist das Total vor dem Abzug vorgeschlagen: CHF\u00a01’250.00.'.replace(/\s+/g, ' ');
+		expect(message.indexOf('Wählen Sie eine Kategorie.')).toBeGreaterThan(-1);
+		expect(message.indexOf(line)).toBeGreaterThan(message.indexOf('Wählen Sie eine Kategorie.'));
+		expect(byTestId('invoice-upload-deducted-rule')!.textContent).toBe(
+			'Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag einer abgerechneten Akontorechnung um den Unterschied, und berichtigen Sie die Abrechnungen mit ihr.'
+		);
+	});
+
+	// #455 (#268): the browser's own file button speaks the browser's language
+	it('bietet die Dateien mit einem eigenen Knopf in der Sprache der Oberfläche an', () => {
+		open(() => [200, read]);
+		const input = byTestId<HTMLInputElement>('invoice-upload-file-input')!;
+		const choose = byTestId('invoice-upload-file-choose')!;
+		expect(choose.textContent!.trim()).toBe('Dateien auswählen');
+		expect(choose.closest('label')!.htmlFor).toBe(input.id);
+		expect(input.classList).toContain('sr-only');
+	});
+
+	// #455 (#268): Escape closes the open list of a select, not the dialog
+	it('fragt bei Escape in der Kategorie nicht, ob das Hochladen abgebrochen werden soll', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		byTestId('invoice-category-select')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+		await settle();
+		expect(byTestId('invoice-upload-discard-message')).toBeNull();
+		expect(byTestId('invoice-upload-row')).not.toBeNull();
+	});
+
 	it('fragt vor dem Abbrechen, dass die Dateien verloren gehen', async () => {
 		open(() => [200, read]);
 		chooseBuilding();

@@ -51,7 +51,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Betrag | montant | importo | amount |
 | Fälligkeitsdatum / Zahlungsdatum | date d’échéance / date de paiement | data di scadenza / data di pagamento | due date / payment date |
 | Umlagefähig | imputable ❓ | addebitabile | allocable |
-| abgerechnet (Rechnung, #409) | décomptée | conteggiata | billed |
+| abgerechnet (Rechnung, #409) | décomptée | conteggiata | in a statement |
 | Wartung (umlagefähig, Art. 5 Abs. 2 lit. g VMWG; nicht «Unterhalt» nach Art. 256 OR) | maintenance (nicht «entretien») | manutenzione | servicing (nicht «maintenance») |
 | Vollservicevertrag (Lift) | contrat de maintenance complet | contratto di manutenzione completo | full-service contract |
 | Verordnung über die Miete (VMWG) | ordonnance sur le bail (OBLF) | ordinanza concernente la locazione (OLAL) | Tenancy Ordinance (VMWG) |
