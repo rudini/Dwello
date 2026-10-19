@@ -807,6 +807,19 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
     Dann warnt die berichtigte Abrechnung, dass ihre Akontobeiträge "CHF 640.00" anders sind als die "CHF 400.00" der ersetzten Abrechnung 2024 von "Marc Huber"
 
+  # #477 (Entscheid Product Owner 2026-10-19): Dwello zieht das vereinbarte Akonto ab, nicht das bezahlte; die Zeile
+  # heisst darum «Akontobeiträge», nicht «Geleistete Akontobeiträge»
+  @wip
+  Szenario: Das PDF nennt die Akontobeiträge, nicht die geleisteten
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Marc Huber" gibt es ein PDF
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Akontobeiträge – 400.00"
+    Und steht im PDF nicht "Geleistete"
+
   # #464 (#103): das PDF nennt das Akonto als Monate mal Betrag, eine Zeile pro Betrag mit ihrem Zeitraum, und sagt,
   # dass das vereinbarte Akonto abgezogen ist (Fachreview F-6, F-7, F-9)
   Szenario: Das PDF nennt das Akonto als Monate mal Betrag

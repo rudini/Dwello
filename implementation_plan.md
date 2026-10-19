@@ -33,7 +33,10 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Fixes: V-12 (the new Vertragsbeginn as «Gültig ab» corrects the first amount), V-14, V-15; C-10/C-11 («Beenden» shows a refusal with its message, scenario «Mietvertrag vor einem späteren Akonto beenden», states `end-dialog-advance-refused`, `advance-from-missing`); C-12 (codes as literals), C-13 (contracts for the delete and end refusals, API spec); Helga P-1 (the form lists the amounts), P-2 and Weber P-1 (the refusal says when to correct and names the earliest day), P-3 (example a first of a month), P-4 (toast after deleting)
 - [x] daten-pruefer (`docs/reviews/464-datenpruefung-1.md`: no finding above Nit)
 - [x] Closing code-review round 1 (`docs/reviews/464-review-3.md`): C-14 (toast after deleting, DOM test with reactive props seen red), C-15 (scenarios «Das Formular nennt die eingetragenen Akonto-Beträge», «Vertragsbeginn und erstes Akonto zusammen korrigieren», toast step in «Ein späteres Akonto löschen», two seen red), C-12 (codes written out), C-17 (subject of d486f1e2 reworded before the push)
-- [ ] Closing code-review round 2, PR `Fixes #464`
+- [x] Closing code-review round 2 (`docs/reviews/464-review-4.md`): no finding open above Minor
+- [ ] #477 part (product owner 2026-10-19, recorded in #477): the line «Geleistete Akontobeiträge» becomes «Akontobeiträge» in the app, the PDF and the help texts, in this pull request; @wip scenario «Das PDF nennt die Akontobeiträge, nicht die geleisteten» seen red; fach-reviewer on the texts before implementing; the glossary row is the product owner's edit
+- [ ] Re-sign the commits `git filter-branch` left unsigned (d486f1e2, e6955d63, 20630756) before the push
+- [ ] PR `Fixes #464`, `Refs #477`
 - [ ] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464`
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
