@@ -54,8 +54,8 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 
 ### #457 Objection help after a fixed-term end (closes #308)
 
-- [x] @wip scenario «Die Frage nach dem Vertragsende nennt die stillschweigende Fortsetzung» (`contract-detail.feature`), DOM test; both red
+- [x] @wip scenario «Der Hinweis nach dem Vertragsende nennt die stillschweigende Fortsetzung» (`contract-detail.feature`), DOM test; both red
 - [x] fach-reviewer on the fr/it/en drafts before the text turns green (`docs/reviews/457-fachreview-1.md`, recommended wording taken)
 - [x] `contracts_fixed_term_objection` with the second sentence in four languages; markers `#308` removed
-- [ ] Slice review
+- [x] Slice review round 1 (`docs/reviews/457-review-1.md`, one Nit, fixed)
 - [ ] PR `Fixes #457`, `Fixes #308`

@@ -322,7 +322,7 @@ Funktionalität: Mietvertragsdetail
     Und hat der Mietvertrag den Status "Laufend"
 
   # #457 (#410 Punkt 3): wer den Mietzins nach dem Vertragsende länger annimmt, hat den Mietvertrag meist schon fortgesetzt
-  Szenario: Die Frage nach dem Vertragsende nennt die stillschweigende Fortsetzung
+  Szenario: Der Hinweis nach dem Vertragsende nennt die stillschweigende Fortsetzung
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
