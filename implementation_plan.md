@@ -137,8 +137,11 @@ Proposal for the domain review (decided: a button «Daten exportieren» on the t
 - Statement PDFs: every statement that is not a draft (a draft only in `daten.json`); the PDF as the tenant received it. Replaced statements included.
 - Open for the review: drafts in the export at all; reminder letters as files; a Protokoll entry for the export.
 
-- [ ] @wip scenario «Daten eines Mieters exportieren» (`tenants.feature`), committed; fach-reviewer before the implementation
-- [ ] Steps and tests red (no production code, no texts) until the review reports
-- [ ] Backend `GET /tenants/:id/export`, BFF ZIP route, button on the tenant page, four languages
+- [x] @wip scenario «Daten eines Mieters exportieren» (`tenants.feature`), committed; fach-reviewer before the implementation
+- [x] Steps and tests red (no production code, no texts) until the review reports
+- [x] fach-reviewer round 1 (`docs/reviews/435-fachreview-1.md`: F-1 to F-4 Major, F-5 to F-14 Minor/Nit, no Blocker); product owner on F-12 (2026-10-19, recorded in #435): reminder letters and e-mailed statement copies go in as files; no glossary row for «Daten exportieren»
+- [x] Scenario after the review: IBAN, reminder, another tenant (F-1, F-2, F-9); seen red at the missing button, then at the missing PDF of a sent statement whose deadline the seed changed (the export makes none, F-4)
+- [x] `tenant-export.pg.test.ts` (6 tests, each red first or shown red without its code): data and files; no Vormieter data; a draft without PDF and no change to the statements; e-mailed copy first, reminders as data and files; safe, unique file names with their extension; folders in the tenant's language
+- [x] Backend `exportTenant` (`tenant-export.service.ts`), `GET /tenants/:id/export`; BFF `src/routes/tenants/[id]/export/+server.ts` (ZIP with fflate, `filename*`), contract `tests/contracts/tenant-export.json` with `api-contracts.pg.test.ts`; `TenantExportCard` (secondary button, help text of F-3) with DOM test; texts in four languages from the review; API spec
 - [ ] Slice review, persona, closing review; PR `Fixes #435`
 

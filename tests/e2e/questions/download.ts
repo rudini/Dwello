@@ -55,6 +55,17 @@ export const exportedContractApartments = question('the apartments of the contra
 export const exportedStatementNumbers = question('the statement numbers in the export', async (actor) =>
 	((await actor.answer(exportedData)).statements ?? []).map((statement: { number: string }) => statement.number)
 );
+// the statements the reminders in the export belong to, and the files of the reminders
+export const exportedReminderStatements = question('the statements of the reminders in the export', async (actor) =>
+	((await actor.answer(exportedData)).reminders ?? []).map((reminder: { statement: string }) => reminder.statement)
+);
+export const exportedReminderFiles = question('the files of the reminders in the export', async (actor) =>
+	((await actor.answer(exportedData)).reminders ?? []).map((reminder: { file: string }) => reminder.file)
+);
+// all the export says, its data and the names of its files: where another tenant's data must not appear
+export const everythingExported = question('everything in the export', async (actor) =>
+	JSON.stringify([await actor.answer(exportedData), await actor.answer(fileNamesInDownloadedZip)])
+);
 
 // The names of the files in the downloaded ZIP
 export const fileNamesInDownloadedZip = question('the file names in the downloaded ZIP', async (actor) =>
