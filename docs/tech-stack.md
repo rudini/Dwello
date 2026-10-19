@@ -434,7 +434,7 @@ cd backend && bun run test && bun run type-check
 | Build | `bun run build` and `bun run build` (backend) |
 | Lint and types | `bun run lint`, `bun run check`, backend `bun run type-check` |
 | Unit tests | `bun run test:coverage`; backend `bun run test` if backend changed |
-| E2E tests | `bun run test:e2e` (PRs: Chromium + API driver; main: all browsers); skipped for docs-only changes |
+| E2E tests | `bun run test:e2e` (all browsers and the API driver, on pull requests too); skipped for docs-only changes |
 | Fallow audit | `bunx fallow audit` against the base |
 | UI screenshots | On PRs: screenshots of changed pages, posted as a PR comment |
 
