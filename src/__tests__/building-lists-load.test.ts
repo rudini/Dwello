@@ -10,16 +10,16 @@ import { load as generate } from '../routes/statements/generate/+page.server';
 
 const loads = {
 	apartments,
-	newApartment,
+	'apartments/new': newApartment,
 	contracts,
 	invoices,
-	newInvoice,
-	editInvoice,
+	'invoices/new': newInvoice,
+	'invoices/[id]/edit': editInvoice,
 	statements,
-	generate
+	'statements/generate': generate
 };
 
-// Only the requests count: the backend refuses everything, so no load reads an answer
+// Only the requests count: the backend refuses everything, the answers carry no data
 describe('Gebäudelisten', () => {
 	it.each(Object.entries(loads))(
 		'%s bietet bis zu 1000 Gebäude an, nicht nur die ersten 20 des Backends',
