@@ -29,6 +29,7 @@
 		// both answers shown at once: one arriving later would push the rows below away while a building is clicked
 		// (seen in Firefox, #424)
 		loading = true;
+		let left = false; // an answer to a step left meanwhile must not unlock the one opened anew
 		Promise.all([
 			api.get<{ invoices: { buildingId: string }[] }>('/invoices', {
 				dateFrom: period.start,
@@ -46,6 +47,7 @@
 				}
 			)
 		]).then(([invoices, statements]) => {
+			if (left) return;
 			if (invoices.data) {
 				const counts = Object.fromEntries(ids.map((id) => [id, 0]));
 				for (const { buildingId } of invoices.data.invoices)
@@ -56,7 +58,10 @@
 				billed = Object.fromEntries(statements.data.map((row) => [row.buildingId, row]));
 			loading = false;
 		});
-		return () => (loading = false); // left before the answers came: the next step does not wait for them
+		return () => {
+			left = true;
+			loading = false; // left before the answers came: the next step does not wait for them
+		};
 	});
 
 	// «Alle Gebäude» leaves out buildings whose contracts are all billed for the whole period: none gets a statement

@@ -282,6 +282,36 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(false);
 	});
 
+	// code review 468-1 C-1: the answer of a step left before does not unlock the step opened anew
+	it('wartet beim erneut geöffneten Schritt auf dessen eigene Antworten', async () => {
+		const pending: (() => void)[] = [];
+		globalThis.fetch = ((url: string) =>
+			new Promise<Response>((resolve) =>
+				pending.push(() =>
+					resolve(Response.json(String(url).includes('/invoices') ? { invoices: [] } : []))
+				)
+			)) as typeof fetch;
+		open();
+		next();
+		await settle();
+		click('wizard-back');
+		await settle();
+		next();
+		await settle();
+		pending[0](); // the answers to the step left
+		pending[1]();
+		await settle();
+		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(true);
+	});
+
+	it('lässt weitergehen, wenn Rechnungen und Abrechnungen nicht geladen werden konnten', async () => {
+		fakeBff(() => [500, {}]);
+		open();
+		next();
+		await settle();
+		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(false);
+	});
+
 	async function toSettings() {
 		// step 3 asks whether the contracts agree the period's Nebenkosten (#91): none open here
 		fakeBff((call) => (call.path.startsWith('/statements/agreements') ? [200, []] : [500]));

@@ -19,6 +19,7 @@
 	let contracts = $state<Contract[]>([]);
 	$effect(() => {
 		loading = true;
+		let left = false; // an answer to a step left meanwhile must not unlock the one opened anew
 		api
 			.get<{ withoutFee: Contract[] }[]>('/statements/billed', {
 				buildingIds: buildingIds.join(','),
@@ -26,10 +27,14 @@
 				periodEnd: period.end
 			})
 			.then(({ data }) => {
+				if (left) return;
 				contracts = data?.flatMap((row) => row.withoutFee) ?? [];
 				loading = false;
 			});
-		return () => (loading = false); // left before the answer came
+		return () => {
+			left = true;
+			loading = false; // left before the answer came
+		};
 	});
 </script>
 

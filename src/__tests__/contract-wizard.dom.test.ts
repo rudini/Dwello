@@ -413,7 +413,6 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('form-error')!.textContent).toContain('Dieses Datum gibt es nicht.');
 	});
 
-	// Fehler behoben: kam der Vorschlag an, während man schon tippte, stand «01.01.210001.01.2020» im Feld
 	// #468: what arrives later moved «Weiter» under the click
 	it('lässt bei der Wohnung erst weitergehen, wenn ihre Mietverträge geladen sind', async () => {
 		let release = () => {};
@@ -434,6 +433,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(button.textContent!.trim()).toBe('Weiter');
 	});
 
+	// Fehler behoben: kam der Vorschlag an, während man schon tippte, stand «01.01.210001.01.2020» im Feld
 	it('überschreibt einen schon getippten Vertragsbeginn nicht mit dem Vorschlag', async () => {
 		// the contracts of the apartments arrive only after the start date is being typed
 		let release = () => {};
