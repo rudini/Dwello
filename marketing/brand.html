@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dwello Markenhandbuch</title>
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/dwello-mark.svg" type="image/svg+xml">
+<style>
+/* Layout concept: a manual in chapters. Left rail = chapter index, right = specimens on the 8 px plan grid. */
+@font-face { font-family: "Schibsted Grotesk"; src: url("fonts/schibsted-grotesk-latin.woff2") format("woff2"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "Inter"; src: url("fonts/inter-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("fonts/ibm-plex-mono-500-latin.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+:root {
+	--canvas: #f5f7f8; --surface: #ffffff; --sunken: #ebeff2; --line: #d3dae0; --line-strong: #68747f;
+	--ink: #161c21; --ink-muted: #3f4a54; --petrol: #1b5873; --petrol-deep: #123f54; --petrol-mist: #e3eef3; --on-petrol: #ffffff;
+	--licht: #f0c27a; --licht-ink: #663e00; --licht-soft: #fbf0dc; --positive: #17542e; --positive-soft: #e3f1e7; --critical: #8a1c24; --critical-soft: #fae6e7;
+	--band: #0f2f3e; --band-ink: #eaf3f7; --band-muted: #a9c6d4;
+	--font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+	--font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+	--radius-control: 6px; --radius-panel: 12px;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--canvas: #111518; --surface: #1a1f23; --sunken: #242b30; --line: #3a444c; --line-strong: #8693a0;
+		--ink: #eceff2; --ink-muted: #b4bec7; --petrol: #86bfda; --petrol-deep: #b3d8ea; --petrol-mist: #172c37; --on-petrol: #0d1a20;
+		--licht-ink: #f0c27a; --licht-soft: #3a2c14; --positive: #8fd1a5; --positive-soft: #1c3326; --critical: #f4a3a8; --critical-soft: #3d1d20;
+		--band: #0b1f29; color-scheme: dark;
+	}
+}
+:root[data-theme="dark"] {
+	--canvas: #111518; --surface: #1a1f23; --sunken: #242b30; --line: #3a444c; --line-strong: #8693a0;
+	--ink: #eceff2; --ink-muted: #b4bec7; --petrol: #86bfda; --petrol-deep: #b3d8ea; --petrol-mist: #172c37; --on-petrol: #0d1a20;
+	--licht-ink: #f0c27a; --licht-soft: #3a2c14; --positive: #8fd1a5; --positive-soft: #1c3326; --critical: #f4a3a8; --critical-soft: #3d1d20;
+	--band: #0b1f29; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font: 1rem/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+a { color: var(--petrol); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--licht); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.025em; line-height: 1.1; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.mono { font-family: var(--font-mono); font-weight: 500; }
+.wrap { max-width: 1240px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 720px) { .wrap { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
+.mark { --mark-bg: var(--petrol); --mark-fg: var(--on-petrol); }
+
+.cover { background: var(--band); color: var(--band-ink); }
+.cover .wrap { padding-block: 64px 72px; display: grid; gap: 40px; }
+.cover-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.cover-top a { color: var(--band-muted); }
+.cover h1 { font-size: clamp(2.75rem, 7vw, 5.5rem); font-weight: 780; letter-spacing: -0.04em; }
+.cover p { color: var(--band-muted); font-size: 1.1875rem; max-width: 40em; }
+.cover .mark { --mark-bg: #ffffff; --mark-fg: #1b5873; }
+.cover .lock { display: flex; align-items: center; gap: 16px; color: #fff; }
+.cover .lock .mark { width: 56px; height: 56px; }
+.cover .lock .wm { height: 36px; width: auto; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.toc a { color: var(--band-ink); text-decoration: none; border: 1px solid #2a4c5c; border-radius: var(--radius-control); padding: 8px 12px; font-size: 0.9375rem; }
+.toc a:hover { background: #163b4c; }
+.toc b { font-family: var(--font-mono); font-weight: 500; color: var(--licht); margin-right: 6px; }
+
+.chapter { padding-block: 80px; border-bottom: 1px solid var(--line); }
+.ch-head { display: grid; gap: 12px; margin-bottom: 40px; max-width: 780px; }
+.ch-no { font: 500 0.8125rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--petrol); }
+.ch-head h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 760; }
+.ch-head p { color: var(--ink-muted); font-size: 1.125rem; }
+.grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); padding: 24px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card h3 { font-size: 1.25rem; }
+.card p, .card li { color: var(--ink-muted); }
+.label { font: 500 0.75rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+
+.statement { font: 700 clamp(1.5rem, 3.2vw, 2.25rem)/1.25 var(--font-display); letter-spacing: -0.02em; max-width: 30em; }
+.statement em { font-style: normal; color: var(--petrol); }
+.isnt { width: 100%; border-collapse: collapse; }
+.isnt th, .isnt td { text-align: left; padding: 12px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.isnt th { font: 500 0.75rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+.isnt td:first-child { font-weight: 600; }
+.isnt td:last-child { color: var(--ink-muted); }
+
+.logo-stage { overflow: hidden; border-radius: var(--radius-panel); border: 1px solid var(--line); min-height: 220px; display: grid; place-items: center; padding: 32px; }
+.logo-stage .lock { display: flex; align-items: center; gap: 14px; }
+.logo-stage .lock .mark { width: 52px; height: 52px; }
+.logo-stage .lock .wm { height: 34px; width: auto; }
+.st-light { background: #f5f7f8; color: #161c21; } .st-light .mark { --mark-bg: #1b5873; --mark-fg: #ffffff; }
+.st-dark { background: #111518; color: #eceff2; } .st-dark .mark { --mark-bg: #86bfda; --mark-fg: #0d1a20; }
+.st-petrol { background: #1b5873; color: #ffffff; } .st-petrol .mark { --mark-bg: #ffffff; --mark-fg: #1b5873; }
+.construct { width: 100%; max-width: 360px; }
+.dont { position: relative; }
+.dont::after { content: ""; position: absolute; inset: 12px; background: linear-gradient(to top right, transparent calc(50% - 1.5px), var(--critical) calc(50% - 1.5px), var(--critical) calc(50% + 1.5px), transparent calc(50% + 1.5px)); pointer-events: none; opacity: .8; }
+.dont .logo-stage { min-height: 140px; }
+.cap { font-size: 0.9375rem; color: var(--ink-muted); margin-top: 8px; }
+.cap b { color: var(--ink); }
+
+.swatch { border-radius: var(--radius-panel); overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+.swatch .chip { height: 120px; display: flex; align-items: end; padding: 14px; font: 700 1.125rem var(--font-display); }
+.swatch .meta { padding: 14px; display: grid; gap: 4px; font-size: 0.9375rem; }
+.swatch .meta .mono { font-size: 0.8125rem; color: var(--ink-muted); }
+.ratio { display: flex; height: 48px; border-radius: var(--radius-control); overflow: hidden; border: 1px solid var(--line); margin-top: 16px; }
+.ratio div { display: flex; align-items: center; padding-inline: 10px; font: 500 0.75rem var(--font-mono); white-space: nowrap; overflow: hidden; }
+
+.type-row { display: grid; gap: 8px 32px; padding-block: 24px; border-top: 1px solid var(--line); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .type-row { grid-template-columns: 220px minmax(0, 1fr); } }
+.type-row .spec { font-size: 0.875rem; color: var(--ink-muted); }
+.type-row .spec b { display: block; color: var(--ink); font-size: 1rem; }
+.sample-display { font: 780 clamp(2.5rem, 6vw, 4.5rem)/1 var(--font-display); letter-spacing: -0.035em; overflow-wrap: anywhere; }
+.sample-body { font: 400 1.25rem/1.55 var(--font-body); max-width: 36em; }
+.sample-mono { font: 500 1.25rem/1.6 var(--font-mono); overflow-wrap: anywhere; }
+.scale { display: grid; gap: 12px; }
+.scale div { display: flex; align-items: baseline; gap: 24px; border-bottom: 1px dashed var(--line); padding-bottom: 8px; min-width: 0; }
+.scale span.mono { font-size: 0.75rem; color: var(--ink-muted); width: 72px; flex: none; }
+.scale b { font-family: var(--font-display); letter-spacing: -0.02em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+.il { --l: var(--ink-muted); --f: var(--sunken); --s: var(--surface); --a: var(--petrol); }
+.il .ln { fill: none; stroke: var(--l); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.il .fl { fill: var(--f); stroke: var(--l); stroke-width: 2; stroke-linejoin: round; }
+.il .sf { fill: var(--s); stroke: var(--l); stroke-width: 2; stroke-linejoin: round; }
+.il .ac { fill: none; stroke: var(--a); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.il .lt { fill: var(--licht); }
+.il-tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); padding: 16px; display: grid; gap: 8px; }
+.il-tile svg { width: 100%; height: auto; background: var(--canvas); border-radius: var(--radius-control); }
+.il-tile b { font-size: 0.9375rem; }
+.rules { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--ink-muted); }
+.rules b { color: var(--ink); }
+
+.voice { width: 100%; border-collapse: collapse; }
+.voice th, .voice td { text-align: left; padding: 14px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.voice th { font: 500 0.75rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+.voice td.no { color: var(--critical); text-decoration: line-through; text-decoration-thickness: 1px; }
+.voice td.yes { color: var(--positive); font-weight: 600; }
+.scroll-x { overflow-x: auto; }
+
+.persona { display: grid; gap: 8px; }
+.persona .who { display: flex; gap: 12px; align-items: center; }
+.persona .av { width: 44px; height: 44px; border-radius: 50%; background: var(--petrol-mist); color: var(--petrol); display: grid; place-items: center; font: 700 1rem var(--font-display); flex: none; }
+.persona q { font-family: var(--font-display); font-size: 1.125rem; font-weight: 650; letter-spacing: -0.01em; color: var(--ink); quotes: "«" "»"; }
+
+/* Sitemap */
+.tree { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.tree > li { display: grid; gap: 8px 24px; padding-block: 20px; border-top: 1px solid var(--line); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .tree > li { grid-template-columns: 260px minmax(0, 1fr) 220px; align-items: start; } }
+.tree .path { font: 500 0.875rem var(--font-mono); color: var(--petrol); }
+.tree h3 { font-size: 1.1875rem; margin-top: 2px; }
+.tree .sub { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tree .sub span { font: 500 0.75rem var(--font-mono); background: var(--sunken); border-radius: var(--radius-control); padding: 4px 8px; color: var(--ink-muted); }
+.tree .goal { color: var(--ink-muted); }
+.tree .cta { font-size: 0.875rem; }
+.tree .cta b { display: block; font: 500 0.75rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+.prio { display: inline-block; font: 600 0.75rem var(--font-body); padding: 3px 8px; border-radius: var(--radius-control); margin-left: 8px; vertical-align: middle; }
+.prio.p1 { background: var(--petrol); color: var(--on-petrol); } .prio.p2 { background: var(--petrol-mist); color: var(--petrol); } .prio.p3 { background: var(--sunken); color: var(--ink-muted); }
+.kw { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.kw th, .kw td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+.kw th { font: 500 0.75rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+.phase { display: grid; gap: 6px; }
+.phase .when { font: 500 0.8125rem var(--font-mono); color: var(--petrol); }
+
+/* Applications */
+.social { aspect-ratio: 1200 / 630; max-width: 100%; border-radius: var(--radius-panel); background: #0f2f3e; color: #eaf3f7; padding: 6%; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; position: relative; }
+.social .mark { --mark-bg: #ffffff; --mark-fg: #1b5873; width: 9%; height: auto; aspect-ratio: 1; }
+.social h3 { font-size: clamp(1.25rem, 3.6vw, 2.75rem); font-weight: 780; align-self: center; max-width: 62%; position: relative; z-index: 1; letter-spacing: -0.035em; }
+.social .foot { max-width: 60%; font: 500 clamp(0.625rem, 1.2vw, 0.875rem) var(--font-mono); color: #a9c6d4; }
+.social svg.house { position: absolute; right: 5%; bottom: 0; width: 32%; height: auto; }
+.appicon { display: flex; gap: 24px; align-items: end; flex-wrap: wrap; }
+.appicon svg { display: block; }
+footer { padding-block: 48px; color: var(--ink-muted); font-size: 0.9375rem; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+	<symbol id="dw-mark" viewBox="0 0 48 48"><rect width="48" height="48" rx="12" fill="var(--mark-bg)"/><path d="M12 22.5 24 12.5 36 22.5V36H12Z" fill="none" stroke="var(--mark-fg)" stroke-width="3.2" stroke-linejoin="round"/><rect x="20" y="25" width="8" height="11" rx="1" fill="#F0C27A"/></symbol>
+	<symbol id="dw-wm" viewBox="59 -1500 6403 1527"><path fill="currentColor" d="M502.26214599609375 26.782470703125Q365.69720458984375 26.782470703125 265.892822265625 -40.8262939453125Q166.08843994140625 -108.43505859375 112.52310180664062 -235.78286743164062Q58.957763671875 -363.13067626953125 58.957763671875 -542.3912353515625Q58.957763671875 -721.6517944335938 113.02310180664062 -847.8039855957031Q167.08843994140625 -973.9561767578125 267.4362487792969 -1040.3693237304688Q367.7840576171875 -1106.782470703125 507.82708740234375 -1106.782470703125Q630.5219116210938 -1106.782470703125 721.6529846191406 -1051.0Q812.7840576171875 -995.217529296875 872.0446166992188 -869.9131469726562L839.1322631835938 -869.56494140625V-1500.0H1168.5155639648438V0.0H856.0884399414062V-215.2613525390625L859.0015869140625 -199.95697021484375Q802.48046875 -83.34820556640625 711.2625427246094 -28.282867431640625Q620.0446166992188 26.782470703125 502.26214599609375 26.782470703125ZM626.2581787109375 -219.64703369140625Q692.4765014648438 -219.64703369140625 744.3904418945312 -254.95181274414062Q796.3043823242188 -290.256591796875 826.1310729980469 -361.496826171875Q855.957763671875 -432.737060546875 855.957763671875 -538.3912353515625Q855.957763671875 -697.9593505859375 790.6521911621094 -779.5039672851562Q725.3466186523438 -861.048583984375 628.9537963867188 -861.048583984375Q526.9522094726562 -861.048583984375 466.6900634765625 -774.5473937988281Q406.42791748046875 -688.0462036132812 406.42791748046875 -535.6087646484375Q406.42791748046875 -387.08447265625 464.7334899902344 -303.3657531738281Q523.0390625 -219.64703369140625 626.2581787109375 -219.64703369140625Z M1527.540703125 0.0 1273.4514697265624 -1080.0H1614.226005859375L1769.6658251953124 -201.646240234375H1745.622001953125L1941.7988818359374 -1080.0H2381.7877734374997L2576.0084765624997 -199.90679931640625H2546.964653320312L2707.882561035156 -1080.0H3028.484184570312L2773.003715820312 0.0H2316.492912597656L2124.142326660156 -966.0H2181.2714160156247L1984.0515063476562 0.0Z M3638.290207519531 26.782470703125Q3478.725266113281 26.782470703125 3348.83482421875 -42.565338134765625Q3218.9443823242186 -111.91314697265625 3141.94517578125 -239.45657348632812Q3064.945969238281 -367.0 3064.945969238281 -541.782470703125Q3064.945969238281 -714.782470703125 3140.2061315917967 -841.4346618652344Q3215.4662939453124 -968.0868530273438 3344.9001623535155 -1037.4346618652344Q3474.3340307617186 -1106.782470703125 3637.5507666015624 -1106.782470703125Q3727.72447265625 -1106.782470703125 3820.485031738281 -1079.6302795410156Q3913.2455908203124 -1052.4780883789062 3991.3539587402342 -983.5868530273438Q4069.462326660156 -914.6956176757812 4117.136032714843 -791.2828674316406Q4164.809738769531 -667.8701171875 4164.809738769531 -475.65338134765625H3276.5930029296874V-653.3904418945312H3870.643173828125L3842.816086425781 -602.9115600585938Q3834.337998046875 -702.4788818359375 3804.8156896972655 -763.7844543457031Q3775.293381347656 -825.0900268554688 3729.9662939453124 -853.15576171875Q3684.6392065429686 -881.2214965820312 3628.290207519531 -881.2214965820312Q3552.767502441406 -881.2214965820312 3503.9404150390624 -837.2864379882812Q3455.1133276367186 -793.3513793945312 3431.3300634765624 -716.4374389648438Q3407.546799316406 -639.5234985351562 3407.546799316406 -540.0868530273438Q3407.546799316406 -390.2581787109375 3462.5699011230467 -301.4745178222656Q3517.5930029296874 -212.69085693359375 3635.507736816406 -212.69085693359375Q3710.422470703125 -212.69085693359375 3765.0973669433592 -251.34384155273438Q3819.7722631835936 -289.996826171875 3849.902939453125 -371.737060546875L4144.983444824218 -299.73785400390625Q4106.679062499999 -184.1737060546875 4027.071091308593 -112.1087646484375Q3947.4631201171874 -40.0438232421875 3845.442001953125 -6.63067626953125Q3743.4208837890624 26.782470703125 3638.290207519531 26.782470703125Z M4559.956032714844 0.0Q4425.6986474609375 0.0 4357.525734863281 -62.325103759765625Q4289.352822265625 -124.65020751953125 4289.352822265625 -245.29962158203125V-1500.0H4618.736123046875V-293.08209228515625Q4618.736123046875 -259.6647216796875 4628.236123046875 -248.52559814453124Q4637.736123046875 -237.386474609375 4668.736123046875 -237.386474609375H4746.607033691406V0.0Z M5116.2760327148435 0.0Q4982.018647460937 0.0 4913.845734863281 -62.325103759765625Q4845.672822265625 -124.65020751953125 4845.672822265625 -245.29962158203125V-1500.0H5175.056123046875V-293.08209228515625Q5175.056123046875 -259.6647216796875 5184.556123046875 -248.52559814453124Q5194.056123046875 -237.386474609375 5225.056123046875 -237.386474609375H5302.927033691406V0.0Z M5900.090711109057 26.782470703125Q5734.27862680796 26.782470703125 5607.737825630806 -45.21865437313051Q5481.197024453652 -117.21977944938602 5410.29054103542 -245.109889724693Q5339.384057617187 -373.0 5339.384057617187 -540.3478088378906Q5339.384057617187 -707.6956176757812 5410.2778610763835 -835.3632003822615Q5481.171664535581 -963.0307830887417 5607.6898368627635 -1034.9066268959334Q5734.208009189946 -1106.782470703125 5899.990441894531 -1106.782470703125Q6066.598413085937 -1106.782470703125 6193.032678222656 -1034.9346618652344Q6319.466943359374 -963.0868530273438 6390.727502441406 -835.4858772122129Q6461.988061523437 -707.8849013970822 6461.988061523437 -540.0946418606505Q6461.988061523437 -372.30438232421875 6390.867778934036 -244.63679961773852Q6319.747496344635 -116.96921691125827 6192.825145877396 -45.093373104066636Q6065.902795410156 26.782470703125 5900.090711109057 26.782470703125ZM5900.772471703949 -211.9952392578125Q6002.210351562499 -211.9952392578125 6060.798791503906 -300.1851985139667Q6119.387231445312 -388.3751577701209 6119.387231445312 -540.0Q6119.387231445312 -691.7848510742188 6060.7123793702685 -779.8948059082031Q6002.037527295224 -868.0047607421875 5900.599647436675 -868.0047607421875Q5799.161767578124 -868.0047607421875 5740.573327636718 -779.8948059082031Q5681.984887695312 -691.7848510742188 5681.984887695312 -540.0Q5681.984887695312 -387.82391357421875 5740.659739770355 -299.9095764160156Q5799.3345918454 -211.9952392578125 5900.772471703949 -211.9952392578125Z"/></symbol>
+</svg>
+
+<header class="cover">
+	<div class="wrap">
+		<div class="cover-top">
+			<span class="lock"><svg class="mark" aria-hidden="true"><use href="#dw-mark"/></svg><svg class="wm" viewBox="0 0 6403 1527" role="img" aria-label="Dwello"><use href="#dw-wm"/></svg></span>
+			<a href="index.html">Zur Website</a>
+		</div>
+		<div style="display:grid;gap:20px">
+			<span class="mono" style="color:var(--licht);font-size:.8125rem;letter-spacing:.08em">MARKENHANDBUCH · VERSION 1.0 · OKTOBER 2026</span>
+			<h1>Wie Dwello aussieht, klingt und sich anfühlt.</h1>
+			<p>Dieses Handbuch gilt für die Website, GitHub, Präsentationen und Social Media. Die App selbst folgt denselben Farben und Regeln: Die Marke ist aus dem Produkt gewachsen, nicht umgekehrt.</p>
+		</div>
+		<nav class="toc" aria-label="Kapitel">
+			<a href="#kern"><b>01</b>Markenkern</a><a href="#logo"><b>02</b>Logo</a><a href="#farbe"><b>03</b>Farbe</a><a href="#typo"><b>04</b>Typografie</a><a href="#illu"><b>05</b>Illustration</a><a href="#ton"><b>06</b>Tonalität</a><a href="#botschaften"><b>07</b>Botschaften</a><a href="#sitemap"><b>08</b>Sitemap</a><a href="#anwendung"><b>09</b>Anwendungen</a>
+		</nav>
+	</div>
+</header>
+
+<main>
+<!-- 01 -->
+<section class="chapter" id="kern"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">01 · Markenkern</span><h2>Ein Zuhause für Ihre Liegenschaftsdaten.</h2></div>
+	<p class="statement">Dwello ist die freie Software, mit der private Vermieterinnen und Vermieter in der Schweiz ihre Nebenkosten <em>richtig, ruhig und auf dem eigenen Server</em> abrechnen.</p>
+	<div class="grid g3" style="margin-top:40px">
+		<div class="card"><span class="label">Wert 1</span><h3>Klar</h3><p>Ein Schritt nach dem anderen, ein Wort für eine Sache. Wer Dwello vier Mal im Jahr öffnet, findet sich sofort zurecht.</p></div>
+		<div class="card"><span class="label">Wert 2</span><h3>Eigen</h3><p>Ihre Daten, Ihr Server, Ihre KI. Dwello gehört niemandem, der Ihre Daten will, und kostet nichts.</p></div>
+		<div class="card"><span class="label">Wert 3</span><h3>Verlässlich</h3><p>Rechnet nach Obligationenrecht, auf den Rappen genau, mit Hunderten automatischer Prüfungen. Was nicht fertig ist, heisst «geplant».</p></div>
+	</div>
+	<div class="grid g2" style="margin-top:16px">
+		<div class="card"><span class="label">Das Bild hinter dem Logo</span><h3>Das Licht in der Tür</h3><p>Ein Haus, eine Tür, ein warmes Licht: Jemand ist zuhause und kümmert sich. Das Licht (Farbe «Licht», #F0C27A) kommt in jedem Bild genau einmal vor und markiert, was gerade wichtig ist.</p></div>
+		<div class="card"><span class="label">Persönlichkeit</span>
+			<div class="scroll-x"><table class="isnt"><thead><tr><th>Dwello ist</th><th>Dwello ist nicht</th></tr></thead><tbody>
+				<tr><td>ruhig und genau</td><td>hektisch, laut, «disruptiv»</td></tr>
+				<tr><td>ein hilfsbereiter Nachbar</td><td>ein Startup mit Wachstumsziel</td></tr>
+				<tr><td>schweizerisch nüchtern</td><td>heimattümelnd mit Alpenpanorama</td></tr>
+				<tr><td>offen über Grenzen</td><td>voller Versprechen</td></tr>
+			</tbody></table></div>
+		</div>
+	</div>
+</div></section>
+
+<!-- 02 -->
+<section class="chapter" id="logo"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">02 · Logo</span><h2>Haus, Tür, Licht. Und ein Name in Kleinbuchstaben.</h2><p>Die Wortmarke ist in Schibsted Grotesk (Gewicht 760, Laufweite −3.5 %) gesetzt und in Pfade umgewandelt. Das Zeichen baut auf dem 48er-Raster der App-Icons auf.</p></div>
+	<div class="grid g3">
+		<div><div class="logo-stage st-light"><span class="lock"><svg class="mark" aria-hidden="true"><use href="#dw-mark"/></svg><svg class="wm" viewBox="0 0 6403 1527" role="img" aria-label="Dwello"><use href="#dw-wm"/></svg></span></div><p class="cap"><b>Primär.</b> Petrol-Zeichen, Wortmarke in Schiefer, auf Kalkweiss.</p></div>
+		<div><div class="logo-stage st-dark"><span class="lock"><svg class="mark" aria-hidden="true"><use href="#dw-mark"/></svg><svg class="wm" viewBox="0 0 6403 1527" role="img" aria-label="Dwello"><use href="#dw-wm"/></svg></span></div><p class="cap"><b>Dunkel.</b> Helles Petrol (#86BFDA), wie der Dunkelmodus der App.</p></div>
+		<div><div class="logo-stage st-petrol"><span class="lock"><svg class="mark" aria-hidden="true"><use href="#dw-mark"/></svg><svg class="wm" viewBox="0 0 6403 1527" role="img" aria-label="Dwello"><use href="#dw-wm"/></svg></span></div><p class="cap"><b>Invers.</b> Weisses Zeichen auf Petrol, für Bänder und Social Media.</p></div>
+	</div>
+	<div class="grid g2" style="margin-top:24px">
+		<div class="card">
+			<span class="label">Konstruktion</span>
+			<svg class="construct" viewBox="-8 -8 64 64" role="img" aria-label="Konstruktion des Zeichens auf einem 48er-Raster">
+				<g stroke="var(--line)" stroke-width=".25">
+					<path d="M0 0h48M0 4h48M0 8h48M0 12h48M0 16h48M0 20h48M0 24h48M0 28h48M0 32h48M0 36h48M0 40h48M0 44h48M0 48h48M0 0v48M4 0v48M8 0v48M12 0v48M16 0v48M20 0v48M24 0v48M28 0v48M32 0v48M36 0v48M40 0v48M44 0v48M48 0v48"/>
+				</g>
+				<g class="mark" style="--mark-bg:transparent;--mark-fg:var(--ink)"><rect width="48" height="48" rx="12" fill="none" stroke="var(--petrol)" stroke-width=".6" stroke-dasharray="1.5 1.5"/><path d="M12 22.5 24 12.5 36 22.5V36H12Z" fill="none" stroke="var(--ink)" stroke-width="3.2" stroke-linejoin="round"/><rect x="20" y="25" width="8" height="11" rx="1" fill="#F0C27A"/></g>
+				<g font-family="IBM Plex Mono, monospace" font-size="2.6" fill="var(--petrol)">
+					<text x="12" y="-2.5" text-anchor="middle">12</text><text x="36" y="-2.5" text-anchor="middle">36</text>
+					<text x="50" y="13.5">12.5</text><text x="50" y="23.5">22.5</text><text x="50" y="37">36</text>
+					<text x="24" y="53" text-anchor="middle">Tür 8 × 11 · Radius 12 · Linie 3.2</text>
+				</g>
+			</svg>
+			<p>Das Dach steigt im Winkel von 40°, die Tür sitzt auf der Mittelachse und schliesst unten mit der Grundlinie ab. Die Linienstärke 3.2 entspricht bei 24 px dem Strich der App-Icons.</p>
+		</div>
+		<div class="card">
+			<span class="label">Schutzraum und Mindestgrösse</span>
+			<svg viewBox="0 0 320 150" role="img" aria-label="Schutzraum: eine Türhöhe rund um das Logo" style="width:100%;max-width:420px">
+				<rect x="10" y="10" width="300" height="100" fill="none" stroke="var(--critical)" stroke-dasharray="4 4"/>
+				<g transform="translate(40 40)" class="mark"><svg width="40" height="40"><use href="#dw-mark"/></svg></g>
+				<g transform="translate(92 46)" style="color:var(--ink)"><svg width="188" height="28" viewBox="0 0 6403 1527"><use href="#dw-wm"/></svg></g>
+				<path d="M10 60h30M280 60h30M160 10v30M160 80v30" stroke="var(--critical)"/>
+				<text x="160" y="130" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink-muted)">Abstand rundum = 1 Türhöhe (11/48 des Zeichens)</text>
+			</svg>
+			<ul class="rules"><li><b>Zeichen allein:</b> ab 16 px (Favicon). Darunter nicht verwenden.</li><li><b>Logo mit Wortmarke:</b> ab 96 px Breite.</li><li><b>Dateien:</b> <span class="mono">assets/dwello-logo.svg</span>, <span class="mono">-inverse.svg</span>, <span class="mono">-mark.svg</span>, <span class="mono">-wordmark.svg</span></li></ul>
+		</div>
+	</div>
+	<div class="grid g4" style="margin-top:24px">
+		<div class="dont"><div class="logo-stage st-light"><span class="lock"><svg class="mark" aria-hidden="true" style="--mark-bg:#7a3fbf"><use href="#dw-mark"/></svg><svg class="wm" viewBox="0 0 6403 1527" aria-hidden="true"><use href="#dw-wm"/></svg></span></div><p class="cap">Keine fremden Farben.</p></div>
+		<div class="dont"><div class="logo-stage st-light"><span class="lock" style="transform:scaleX(1.35)"><svg class="mark" aria-hidden="true"><use href="#dw-mark"/></svg><svg class="wm" viewBox="0 0 6403 1527" aria-hidden="true"><use href="#dw-wm"/></svg></span></div><p class="cap">Nicht verzerren.</p></div>
+		<div class="dont"><div class="logo-stage st-light"><span class="lock" style="filter:drop-shadow(0 6px 10px rgb(0 0 0 / .45))"><svg class="mark" aria-hidden="true"><use href="#dw-mark"/></svg><svg class="wm" viewBox="0 0 6403 1527" aria-hidden="true"><use href="#dw-wm"/></svg></span></div><p class="cap">Keine Schatten oder Effekte.</p></div>
+		<div class="dont"><div class="logo-stage st-light"><span class="lock"><svg class="mark" aria-hidden="true" style="--mark-bg:#1b5873;--mark-fg:#fff"><use href="#dw-mark"/></svg><span style="font:700 2rem Georgia,serif">Dwello</span></span></div><p class="cap">Wortmarke nie neu setzen.</p></div>
+	</div>
+</div></section>
+
+<!-- 03 -->
+<section class="chapter" id="farbe"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">03 · Farbe</span><h2>Petrol für Vertrauen. Licht für den einen wichtigen Moment.</h2><p>Die Markenfarben sind die Tokens der App (<span class="mono">src/styles/tokens.css</span>). Neu ist nur «Licht». Jede Farbe hat einen Wert für hell und für dunkel.</p></div>
+	<div class="grid g4">
+		<div class="swatch"><div class="chip" style="background:#1b5873;color:#fff">Petrol</div><div class="meta"><b>Dwello Petrol</b><span class="mono">#1B5873 · dunkel #86BFDA</span><span>Hauptaktionen, Links, Zeichen. 7.6 : 1 auf Weiss.</span></div></div>
+		<div class="swatch"><div class="chip" style="background:#161c21;color:#eceff2">Schiefer</div><div class="meta"><b>Schiefer</b><span class="mono">#161C21 · dunkel #ECEFF2</span><span>Text und Wortmarke.</span></div></div>
+		<div class="swatch"><div class="chip" style="background:#f5f7f8;color:#161c21;border-bottom:1px solid var(--line)">Kalkweiss</div><div class="meta"><b>Kalkweiss</b><span class="mono">#F5F7F8 · dunkel #111518</span><span>Seitengrund. Leicht kühl, nie Creme.</span></div></div>
+		<div class="swatch"><div class="chip" style="background:#f0c27a;color:#3a2c14">Licht</div><div class="meta"><b>Licht</b><span class="mono">#F0C27A</span><span>Einmal pro Bild: die Tür, das erleuchtete Fenster, der Fokusrahmen.</span></div></div>
+	</div>
+	<div class="grid g4" style="margin-top:16px">
+		<div class="swatch"><div class="chip" style="background:#e3eef3;color:#123f54">Nebel</div><div class="meta"><b>Petrol Nebel</b><span class="mono">#E3EEF3 · dunkel #172C37</span><span>Ausgewählt, Hinweise, Icon-Flächen.</span></div></div>
+		<div class="swatch"><div class="chip" style="background:#0f2f3e;color:#eaf3f7">Tiefe</div><div class="meta"><b>Petrol Tiefe</b><span class="mono">#0F2F3E</span><span>Marketing-Bänder (Datenschutz, Social Media).</span></div></div>
+		<div class="swatch"><div class="chip" style="background:#e3f1e7;color:#17542e">Erledigt</div><div class="meta"><b>Positiv</b><span class="mono">#17542E / #E3F1E7</span><span>Nur für Zustände, nie Dekoration.</span></div></div>
+		<div class="swatch"><div class="chip" style="background:#fbf0dc;color:#663e00">Prüfen</div><div class="meta"><b>Achtung</b><span class="mono">#663E00 / #FBF0DC</span><span>Plausibilität, Hinweise der KI.</span></div></div>
+	</div>
+	<div class="card" style="margin-top:16px"><span class="label">Mengenverhältnis auf einer Seite</span>
+		<div class="ratio" aria-label="70 Prozent Kalkweiss und Weiss, 18 Prozent Schiefer, 10 Prozent Petrol, 2 Prozent Licht"><div style="width:70%;background:#f5f7f8;color:#161c21">70 % Kalkweiss / Weiss</div><div style="width:18%;background:#161c21;color:#fff">18 % Schiefer</div><div style="width:10%;background:#1b5873;color:#fff">10 %</div><div style="width:2%;background:#f0c27a"></div></div>
+		<p>Keine Verläufe, kein Glühen, kein Glas-Effekt. Farbe ist nie der einzige Träger einer Information: Zustände haben immer auch ein Wort.</p>
+	</div>
+</div></section>
+
+<!-- 04 -->
+<section class="chapter" id="typo"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">04 · Typografie</span><h2>Grotesk für Haltung, Inter für Ruhe, Mono für Zahlen.</h2><p>Alle drei Schriften stehen unter der SIL Open Font License und werden selbst ausgeliefert. Keine Anfrage an Google, auch nicht für Schriften.</p></div>
+	<div class="type-row"><div class="spec"><b>Schibsted Grotesk</b>Titel, Claims, Logo · 650–800 · Laufweite −2 bis −4 %</div><div class="sample-display">Ihre Daten. Ihr Server.</div></div>
+	<div class="type-row"><div class="spec"><b>Inter</b>Fliesstext und App · 400–600 · Zeilenhöhe 1.5–1.6</div><p class="sample-body">Dwello rechnet die Heizkosten tagesgenau ab, auch wenn im Oktober jemand auszieht und die Wohnung zwei Monate leer steht.</p></div>
+	<div class="type-row"><div class="spec"><b>IBM Plex Mono</b>Beträge, IBAN, Referenzen, Befehle, Kapitelmarken · 500</div><p class="sample-mono">CHF 1'284.60 · CH44 3199 9123 0008 8901 2</p></div>
+	<div class="card" style="margin-top:24px"><span class="label">Grössen (Website)</span>
+		<div class="scale">
+			<div><span class="mono">Display</span><b style="font-size:clamp(2rem,5vw,4.9rem);font-weight:780">Ihr Server.</b></div>
+			<div><span class="mono">H2 · 52</span><b style="font-size:clamp(1.75rem,4vw,3.25rem);font-weight:760">Läuft dort, wo Sie es wollen.</b></div>
+			<div><span class="mono">H3 · 38</span><b style="font-size:clamp(1.5rem,3vw,2.375rem);font-weight:740">Rechnungen per Drag &amp; Drop.</b></div>
+			<div><span class="mono">Lead · 21</span><span style="font-size:1.3125rem">Belege hineinziehen, prüfen, versenden.</span></div>
+			<div><span class="mono">Text · 17</span><span style="font-size:1.0625rem">Schweizer Rechtschreibung mit «ss», Anrede «Sie».</span></div>
+		</div>
+	</div>
+</div></section>
+
+<!-- 05 -->
+<section class="chapter" id="illu"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">05 · Illustration</span><h2>Strichzeichnungen wie ein Bauplan.</h2><p>Dieselbe Sprache wie die zehn Illustrationen in der App (<span class="mono">src/lib/ui/illustrations</span>), erweitert für die Website.</p></div>
+	<div class="grid g4">
+		<div class="il-tile"><svg class="il" viewBox="0 0 160 120" aria-hidden="true"><line class="ln" x1="16" y1="104" x2="144" y2="104"/><rect class="fl" x="44" y="50" width="72" height="54"/><polyline class="ln" points="34,56 80,20 126,56"/><rect class="sf" x="52" y="62" width="16" height="14"/><rect class="lt" x="92" y="62" width="16" height="14"/><rect x="92" y="62" width="16" height="14" fill="none" stroke="var(--l)" stroke-width="2"/><rect x="72" y="78" width="16" height="26" fill="var(--s)" class="ac"/></svg><b>Gebäude</b></div>
+		<div class="il-tile"><svg class="il" viewBox="0 0 160 120" aria-hidden="true"><path class="fl" d="M34 16H86V96L80 90 73 96 66 90 60 96 53 90 47 96 40 90 34 96Z"/><path class="sf" d="M70 26H122V106L116 100 109 106 102 100 96 106 89 100 83 106 76 100 70 106Z"/><line class="ln" x1="80" y1="42" x2="112" y2="42"/><line class="ln" x1="80" y1="54" x2="104" y2="54"/><line class="ln" x1="80" y1="66" x2="108" y2="66"/><line class="ac" x1="96" y1="84" x2="112" y2="84"/><circle class="lt" cx="128" cy="22" r="7"/></svg><b>Belege</b></div>
+		<div class="il-tile"><svg class="il" viewBox="0 0 160 120" aria-hidden="true"><rect class="sf" x="40" y="12" width="80" height="100" rx="4"/><line class="ln" x1="52" y1="30" x2="96" y2="30"/><line class="ln" x1="52" y1="44" x2="108" y2="44"/><line class="ln" x1="52" y1="54" x2="108" y2="54"/><line class="ac" x1="80" y1="66" x2="108" y2="66"/><line x1="40" y1="78" x2="120" y2="78" stroke="var(--l)" stroke-width="1.5" stroke-dasharray="3 4"/><rect class="fl" x="52" y="86" width="20" height="20"/><rect class="lt" x="59" y="93" width="6" height="6"/></svg><b>Abrechnung mit QR</b></div>
+		<div class="il-tile"><svg class="il" viewBox="0 0 160 120" aria-hidden="true"><line class="ln" x1="16" y1="104" x2="144" y2="104"/><rect class="fl" x="46" y="40" width="68" height="64" rx="4"/><line class="ln" x1="58" y1="58" x2="90" y2="58"/><line class="ln" x1="58" y1="74" x2="84" y2="74"/><line class="ln" x1="58" y1="90" x2="88" y2="90"/><circle class="lt" cx="102" cy="58" r="4"/><circle cx="102" cy="74" r="4" fill="var(--a)"/><circle cx="102" cy="90" r="4" fill="var(--a)"/></svg><b>Ihr Server</b></div>
+	</div>
+	<div class="grid g2" style="margin-top:16px">
+		<div class="card"><span class="label">Regeln</span><ol class="rules">
+			<li><b>Linie:</b> 2 px in Schiefer gedämpft, runde Enden und Ecken.</li>
+			<li><b>Flächen:</b> nur «sunken» und «surface», nie Verläufe.</li>
+			<li><b>Akzent:</b> genau ein Strich in Petrol, 3 px.</li>
+			<li><b>Licht:</b> genau eine Fläche in Licht-Gelb.</li>
+			<li><b>Echte Inhalte:</b> Beträge im Schweizer Format (1'284.60), echte Begriffe, keine Platzhalter.</li>
+		</ol></div>
+		<div class="card"><span class="label">Bilder und Screenshots</span><ul class="rules">
+			<li>Produkt zeigen statt Stockfotos. Wenn Fotos, dann echte Schweizer Mehrfamilienhäuser, Tageslicht, keine Menschen mit Laptop.</li>
+			<li>Screenshots immer mit Demo-Daten (Zürich, Luzern, Interlaken), nie mit echten Mieterdaten.</li>
+			<li>Keine Emoji als Icons, keine KI-generierten Bilder, kein Alpenpanorama.</li>
+		</ul></div>
+	</div>
+</div></section>
+
+<!-- 06 -->
+<section class="chapter" id="ton"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">06 · Tonalität</span><h2>So wie eine kompetente Nachbarin erklärt.</h2><p>Die Regeln der App gelten auch im Marketing: Anrede «Sie», «ss» statt «ß», kurze Sätze, Verben auf Schaltflächen, Fachbegriffe nur aus dem Glossar.</p></div>
+	<div class="scroll-x"><table class="voice"><thead><tr><th>Statt</th><th>Schreiben wir</th><th>Weil</th></tr></thead><tbody>
+		<tr><td class="no">Revolutionieren Sie Ihr Property Management mit KI!</td><td class="yes">Ziehen Sie Ihre Belege hinein. Dwello liest sie für Sie.</td><td>Konkret statt gross. Keine Anglizismen.</td></tr>
+		<tr><td class="no">100 % rechtssicher</td><td class="yes">Rechnet nach Art. 257a OR und zeigt jeden Schritt.</td><td>Wir versprechen nur, was geprüft ist.</td></tr>
+		<tr><td class="no">NK-Statement generieren</td><td class="yes">Abrechnungen erstellen</td><td>Wörter aus dem Glossar, ausgeschrieben.</td></tr>
+		<tr><td class="no">Coming soon 🚀</td><td class="yes">Geplant</td><td>Nüchtern, ohne Emoji, ohne Datum, das wir nicht halten.</td></tr>
+		<tr><td class="no">Ups, da ist was schiefgelaufen!</td><td class="yes">Die Rechnung konnte nicht gelesen werden. Bitte tragen Sie den Betrag selbst ein.</td><td>Fehler sagen, was passiert ist und was zu tun ist.</td></tr>
+	</tbody></table></div>
+	<div class="grid g3" style="margin-top:24px">
+		<div class="card"><span class="label">Deutsch</span><p style="color:var(--ink)">Ihre Liegenschaft. Ihre Daten. Ihr Server.</p></div>
+		<div class="card"><span class="label">Français</span><p style="color:var(--ink)">Votre immeuble. Vos données. Votre serveur.</p></div>
+		<div class="card"><span class="label">Italiano</span><p style="color:var(--ink)">Il vostro stabile. I vostri dati. Il vostro server.</p></div>
+	</div>
+</div></section>
+
+<!-- 07 -->
+<section class="chapter" id="botschaften"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">07 · Botschaften</span><h2>Ein Claim, drei Säulen, eine Botschaft pro Mensch.</h2></div>
+	<div class="grid g3">
+		<div class="card"><span class="label">Säule 1 · Einfach</span><h3>Die Abrechnung in einer Stunde.</h3><p>Belege per Drag &amp; Drop, KI liest, Assistent rechnet, QR-Rechnung geht raus.</p></div>
+		<div class="card"><span class="label">Säule 2 · Eigen</span><h3>Ihre Daten bleiben bei Ihnen.</h3><p>Selbst betrieben, lokale KI, nach revDSG gebaut, alles exportierbar.</p></div>
+		<div class="card"><span class="label">Säule 3 · Frei</span><h3>Gratis. Offen. Für immer.</h3><p>Open Source, kein Abo, kein Limit pro Wohnung, Code prüfbar.</p></div>
+	</div>
+	<div class="grid g3" style="margin-top:16px">
+		<div class="card persona"><div class="who"><span class="av">H</span><div><b>Helga</b><br><span class="label">Erste Abrechnung</span></div></div><q>Dwello erklärt jeden Begriff direkt am Feld.</q></div>
+		<div class="card persona"><div class="who"><span class="av">M</span><div><b>Marco</b><br><span class="label">Unterwegs, am Handy</span></div></div><q>Beleg fotografiert, hochgeladen, erledigt.</q></div>
+		<div class="card persona"><div class="who"><span class="av">W</span><div><b>Dr. Weber</b><br><span class="label">Prüft Recht und Zahlen</span></div></div><q>Art. 257a OR, tagesgenau, auf 5 Rappen zugunsten der Mieter.</q></div>
+		<div class="card persona"><div class="who"><span class="av">S</span><div><b>Sven</b><br><span class="label">Tastatur und Screenreader</span></div></div><q>WCAG 2.2 AA in jeder Ansicht, ohne Ausnahmen.</q></div>
+		<div class="card persona"><div class="who"><span class="av">A</span><div><b>Anna</b><br><span class="label">Kommt nach Monaten zurück</span></div></div><q>Die Übersicht sagt, was als Nächstes zu tun ist.</q></div>
+		<div class="card persona"><div class="who"><span class="av">T</span><div><b>Tech-Helfer</b><br><span class="label">Installiert für die Familie</span></div></div><q>Ein Docker-Befehl, Postgres und Ollama inklusive.</q></div>
+	</div>
+	<div class="card" style="margin-top:16px"><span class="label">Boilerplate (50 Wörter)</span><p style="color:var(--ink)">Dwello ist eine kostenlose Open-Source-Software für private Vermieterinnen und Vermieter in der Schweiz. Sie erstellt Nebenkostenabrechnungen nach Obligationenrecht mit Swiss QR-Rechnung, liest Belege mit einer lokalen KI und läuft auf dem eigenen PC, Homeserver oder Server. Dwello ist barrierefrei, in vier Sprachen verfügbar und nach dem revDSG gebaut.</p></div>
+</div></section>
+
+<!-- 08 -->
+<section class="chapter" id="sitemap"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">08 · Strategische Sitemap</span><h2>Jede Seite hat eine Aufgabe und eine Hauptaktion.</h2><p>Drei Wege führen zu Dwello: Suche nach einem Problem («Nebenkostenabrechnung Vorlage»), Empfehlung aus der Self-Hosting-Szene und Weiterempfehlung unter Vermietern. Die Sitemap bedient alle drei und bleibt bei zwei Ebenen.</p></div>
+	<ul class="tree">
+		<li><div><span class="path">/</span><h3>Startseite <span class="prio p1">P1</span></h3></div><p class="goal">Versprechen in 5 Sekunden, Beweis in 60. Die Seite in diesem Ordner.</p><p class="cta"><b>Hauptaktion</b>Installieren · Demo</p></li>
+		<li><div><span class="path">/funktionen</span><h3>Funktionen <span class="prio p1">P1</span></h3><div class="sub"><span>/belege-und-ki</span><span>/nebenkostenabrechnung</span><span>/qr-rechnung-mahnwesen</span><span>/gebaeude-gwr</span><span>/mcp</span></div></div><p class="goal">Eine Seite pro Aufgabe des Vermieterjahrs, jede mit Screenshot, Ablauf und Gesetzesbezug. Landeseiten für die Suche.</p><p class="cta"><b>Hauptaktion</b>Demo öffnen</p></li>
+		<li><div><span class="path">/installieren</span><h3>Installieren <span class="prio p1">P1</span></h3><div class="sub"><span>/pc</span><span>/homeserver</span><span>/cloud</span><span>/ki-wählen</span><span>/update-backup</span></div></div><p class="goal">Schritt-für-Schritt mit Kopierknöpfen und Prüfpunkten. Für Synology, Unraid, Raspberry Pi, Infomaniak, Exoscale.</p><p class="cta"><b>Hauptaktion</b>Befehl kopieren</p></li>
+		<li><div><span class="path">/datenschutz</span><h3>Datenschutz und Sicherheit <span class="prio p1">P1</span></h3></div><p class="goal">revDSG-Leitfaden für Vermieter: welche Daten, wie lange, Auskunft und Herausgabe. Baut Vertrauen bei Dr. Weber.</p><p class="cta"><b>Hauptaktion</b>Leitfaden lesen</p></li>
+		<li><div><span class="path">/ratgeber</span><h3>Ratgeber <span class="prio p2">P2</span></h3><div class="sub"><span>/nebenkosten-was-ist-umlegbar</span><span>/verteilschluessel</span><span>/heizkosten-abrechnen</span><span>/mieterwechsel</span><span>/qr-rechnung</span><span>/vorlagen</span></div></div><p class="goal">Der organische Motor: neutrale Antworten auf die Fragen, die Vermieter googeln. Jeder Artikel endet bei der passenden Funktion.</p><p class="cta"><b>Hauptaktion</b>Funktion ansehen</p></li>
+		<li><div><span class="path">/open-source</span><h3>Open Source und Mitmachen <span class="prio p2">P2</span></h3><div class="sub"><span>/roadmap</span><span>/mitmachen</span><span>/lizenz</span><span>/changelog</span></div></div><p class="goal">Für Entwickler und die Self-Hosting-Szene: Architektur, Roadmap, wie man beiträgt, Übersetzungen.</p><p class="cta"><b>Hauptaktion</b>GitHub</p></li>
+		<li><div><span class="path">/hilfe</span><h3>Hilfe und Fragen <span class="prio p3">P3</span></h3></div><p class="goal">FAQ, Fehlermeldungen, Community-Forum (GitHub Discussions).</p><p class="cta"><b>Hauptaktion</b>Frage stellen</p></li>
+		<li><div><span class="path">/marke</span><h3>Presse und Marke <span class="prio p3">P3</span></h3></div><p class="goal">Dieses Handbuch, Logos, Screenshots, Boilerplate.</p><p class="cta"><b>Hauptaktion</b>Logos laden</p></li>
+		<li><div><span class="path">/fr · /it · /en</span><h3>Sprachversionen <span class="prio p2">P2</span></h3></div><p class="goal">Romandie und Tessin zuerst: wenig Konkurrenz bei «décompte de charges» und «conteggio spese accessorie».</p><p class="cta"><b>Hauptaktion</b>wie DE</p></li>
+	</ul>
+	<div class="grid g2" style="margin-top:32px">
+		<div class="card"><span class="label">Suchbegriffe mit Absicht</span><div class="scroll-x"><table class="kw"><thead><tr><th>Begriff</th><th>Zielseite</th></tr></thead><tbody>
+			<tr><td>Nebenkostenabrechnung Vorlage Schweiz</td><td class="mono">/ratgeber/vorlagen</td></tr>
+			<tr><td>Nebenkostenabrechnung Mieterwechsel</td><td class="mono">/ratgeber/mieterwechsel</td></tr>
+			<tr><td>Heizkosten Verteilschlüssel</td><td class="mono">/ratgeber/verteilschluessel</td></tr>
+			<tr><td>QR-Rechnung Vermieter erstellen</td><td class="mono">/funktionen/qr-rechnung…</td></tr>
+			<tr><td>Liegenschaftsverwaltung Software gratis</td><td class="mono">/</td></tr>
+			<tr><td>self-hosted property management</td><td class="mono">/en</td></tr>
+			<tr><td>décompte de charges locataire</td><td class="mono">/fr/guide</td></tr>
+		</tbody></table></div></div>
+		<div class="card"><span class="label">Messen, ohne zu tracken</span><ul class="rules">
+			<li><b>Docker-Pulls und GitHub-Releases</b> als Installationszahl.</li>
+			<li><b>GitHub-Sterne und Discussions</b> als Community-Signal.</li>
+			<li><b>Server-Logs ohne Cookies</b> (z. B. Plausible selbst gehostet) für Seitenaufrufe.</li>
+			<li><b>Demo-Sitzungen</b> auf demo.dwello.ch, anonym gezählt.</li>
+			<li>Kein Google Analytics, kein Facebook-Pixel: Die Website hält, was das Produkt verspricht.</li>
+		</ul></div>
+	</div>
+	<div class="grid g3" style="margin-top:16px">
+		<div class="card phase"><span class="when">Phase 1 · Launch</span><h3>Website, Demo, Lizenz</h3><p>Startseite, Installieren, Datenschutz. Lizenz festlegen. Ankündigung in r/selfhosted, Hacker News, awesome-selfhosted, Hauseigentümer-Foren.</p></div>
+		<div class="card phase"><span class="when">Phase 2 · Januar bis April</span><h3>Abrechnungssaison</h3><p>Ratgeber-Artikel vor der Saison online. Video «Abrechnung in 10 Minuten». FR und IT live.</p></div>
+		<div class="card phase"><span class="when">Phase 3 · laufend</span><h3>Community</h3><p>GWR-Import und MCP als Release-Momente. Übersetzer und Beitragende sichtbar danken.</p></div>
+	</div>
+</div></section>
+
+<!-- 09 -->
+<section class="chapter" id="anwendung"><div class="wrap">
+	<div class="ch-head"><span class="ch-no">09 · Anwendungen</span><h2>Social Card, App-Icon, GitHub.</h2></div>
+	<div class="grid g2">
+		<div style="display:grid;gap:8px">
+			<div class="social">
+				<svg class="mark" viewBox="0 0 48 48" aria-hidden="true"><use href="#dw-mark"/></svg>
+				<h3>Die Nebenkosten&shy;abrechnung, die bei Ihnen bleibt.</h3>
+				<span class="foot">DWELLO · OPEN SOURCE · GRATIS · FÜR DIE SCHWEIZ</span>
+				<svg class="house" viewBox="0 0 160 120" aria-hidden="true"><polyline points="34,56 80,20 126,56" fill="none" stroke="#a9c6d4" stroke-width="2"/><rect x="44" y="50" width="72" height="70" fill="#163b4c" stroke="#a9c6d4" stroke-width="2"/><rect x="72" y="84" width="16" height="36" fill="#f0c27a"/><rect x="52" y="62" width="14" height="12" fill="none" stroke="#a9c6d4" stroke-width="2"/><rect x="94" y="62" width="14" height="12" fill="none" stroke="#a9c6d4" stroke-width="2"/></svg>
+			</div>
+			<p class="cap"><b>Social Card 1200 × 630.</b> Ein Satz, ein Haus, ein Licht.</p>
+		</div>
+		<div class="card"><span class="label">App-Icon und Favicon</span>
+			<div class="appicon">
+				<svg width="120" height="120" class="mark" aria-hidden="true"><use href="#dw-mark"/></svg>
+				<svg width="64" height="64" class="mark" aria-hidden="true"><use href="#dw-mark"/></svg>
+				<svg width="32" height="32" class="mark" aria-hidden="true"><use href="#dw-mark"/></svg>
+				<svg width="16" height="16" class="mark" aria-hidden="true"><use href="#dw-mark"/></svg>
+			</div>
+			<p>Das Zeichen ersetzt das heutige Favicon der App (Lucide-Haus). Bei 16 px bleibt die Tür als Lichtpunkt erkennbar.</p>
+			<span class="label" style="margin-top:12px">GitHub README</span>
+			<p>Kopf: Logo invers auf Petrol Tiefe, darunter der Claim und drei Badges (Lizenz, Docker, WCAG 2.2 AA). Erster Abschnitt: der Installationsbefehl.</p>
+		</div>
+	</div>
+</div></section>
+</main>
+<footer><div class="wrap">Dwello Markenhandbuch 1.0 · Schriften: Schibsted Grotesk, Inter, IBM Plex Mono (SIL OFL 1.1) · <a href="index.html">Zur Website</a></div></footer>
+</body>
+</html>
