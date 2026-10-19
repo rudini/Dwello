@@ -249,6 +249,17 @@ describe('Akonto mit Gültig ab: Korrektur und Vertragsdaten', () => {
 		]);
 	});
 
+	// fach review 464-3 V-12: «Gültig ab» on the new Vertragsbeginn corrects the first amount, in both directions
+	it.each([
+		['2027-04-01', '2027-03-15'],
+		['2027-03-15', '2027-04-01']
+	])('korrigiert den ersten Betrag, wenn «Gültig ab» der neue Vertragsbeginn %s → %s ist', async (start, moved) => {
+		const contract = await rentalFrom(start, '100');
+
+		expect((await put(contract, { startDate: moved, monthlyAdvancePayment: '120', advancePaymentFrom: moved })).status).toBe(200);
+		expect(await advancesOf(contract)).toEqual([{ validFrom: moved, amount: '120.00' }]);
+	});
+
 	it('lehnt einen Vertragsbeginn oder ein Vertragsende über ein späteres Akonto hinaus ab', async () => {
 		const contract = await rentalFrom('2024-01-01', '100');
 		await put(contract, { monthlyAdvancePayment: '120', advancePaymentFrom: '2024-07-01' });

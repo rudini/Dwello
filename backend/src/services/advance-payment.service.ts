@@ -45,8 +45,9 @@ export async function setAdvance(contractId: string, amount: string, from: strin
 	const [first] = await advancesOf(contractId, tx);
 	const { startDate, endDate } = await datesOf(contractId, tx);
 	// a monthly amount changes on the first of a month, within the contract (product owner on F-10, 2026-10-19); the
-	// day of the first amount is that amount, also when the form still names the Vertragsbeginn before a move
-	if (from === first?.validFrom) from = undefined;
+	// day of the first amount is that amount, also when the form still names the Vertragsbeginn before a move, and so
+	// is the new Vertragsbeginn: the first amount moves there (fach review 464-3 V-12)
+	if (from === first?.validFrom || from === startDate) from = undefined;
 	if (from && from !== startDate && !from.endsWith('-01')) {
 		const [year, month] = from.split('-').map(Number);
 		const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
