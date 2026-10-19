@@ -132,8 +132,33 @@ describe('Mietvertrag bearbeiten', () => {
 		type('contract-advance-from-input', '01.07.2024');
 		await save();
 		expect(byTestId('form-error')!.textContent).toContain(
-			'Das Akonto ab 01.07.2024 ändert den Entwurf NK-2024-0001. Löschen Sie zuerst den Entwurf, oder wählen Sie ein späteres «Gültig ab».'
+			'Das Akonto ab 01.07.2024 ändert den Entwurf der Nebenkostenabrechnung NK-2024-0001. Gilt das neue Akonto schon ab 01.07.2024, löschen Sie zuerst diesen Entwurf. Gilt es erst später, wählen Sie ein «Gültig ab» ab 01.01.2025.'
 		);
+	});
+
+	// persona Helga 464-2 P-1, P-3: the form names the amounts already entered; the example is a first of a month
+	it('nennt im Formular die eingetragenen Akonto-Beträge und einen Ersten als Beispiel', async () => {
+		show(EditPage, {
+			data: {
+				...data(),
+				contract: {
+					...contract(),
+					advancePayments: [
+						{ validFrom: '2024-04-01', amount: '150.00' },
+						{ validFrom: '2099-01-01', amount: '220.00' }
+					]
+				}
+			}
+		} as never);
+		await settle();
+		const rows = [...document.querySelectorAll('[data-testid="contract-advance-period"]')].map((row) =>
+			row.textContent!.replace(/\s+/g, ' ').trim()
+		);
+		expect(rows).toEqual(['CHF 150.00 vom 01.04.2024 bis 31.12.2098', 'CHF 220.00 ab 01.01.2099']);
+		expect(byTestId('contract-advance-delete')).toBeNull();
+		const help = byTestId('contract-advance-from-input-help')!.textContent!;
+		expect(help).toMatch(/01\.01\.\d{4}/);
+		expect(help).not.toContain('31.12.');
 	});
 
 	// #464 (#90, fach review 464): the agreed Akonto is billed; an increase needs the official form, by contract kind

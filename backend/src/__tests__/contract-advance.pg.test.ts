@@ -89,7 +89,8 @@ describe('Akonto mit Gültig ab', () => {
 			expect(refused.status).toBe(400);
 			expect(await refused.json()).toMatchObject({
 				code: 'ADVANCE_CHANGES_DRAFT',
-				params: { from: '01.09.2024', number: statementNumber }
+				// persona Helga 464-2 P-2: the earliest day no statement bills
+				params: { from: '01.09.2024', number: statementNumber, next: '01.01.2025' }
 			});
 			// the same amount again changes nothing
 			expect((await setAdvance('80', '2024-07-01')).status).toBe(200);

@@ -272,7 +272,10 @@ async function endOn(
 			refused,
 			refusedDay: endDate
 		});
-	return response.ok ? null : fail(response.status, { endError: m.contracts_end_failed() });
+	if (response.ok) return null;
+	// a refusal with its own message, e.g. a later Akonto (review 464-2 C-11); never the backend's own text
+	const { code, params } = response.status === 400 ? await response.json().catch(() => ({})) : {};
+	return fail(response.status, { endError: backendMessage({ code, params }, m.contracts_end_failed()) });
 }
 
 // Only a draft of this contract: a stale page or another form must not delete a sent statement

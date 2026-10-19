@@ -14,6 +14,7 @@
 		help={m.contracts_advance_from_help()}
 		bind:value
 		{error}
+		example={`01.01.${new Date().getFullYear() + 1}`}
 		testid="contract-advance-from-input"
 	/>
 {/if}

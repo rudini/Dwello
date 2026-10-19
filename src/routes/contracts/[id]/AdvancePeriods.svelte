@@ -3,18 +3,21 @@
 	import { m } from '$lib/paraglide/messages';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { addToast } from '$lib/stores';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	let {
 		startDate,
 		endDate,
 		advancePayments = [],
-		advanceDelete = null
+		advanceDelete = null,
+		readonly = false
 	}: {
 		startDate: string;
 		endDate?: string | null;
 		advancePayments?: { validFrom: string; amount: string }[]; // each Akonto with its «Gültig ab» (#464)
 		advanceDelete?: { validFrom: string; error: string } | null; // a refused deletion, shown in its dialog
+		readonly?: boolean; // in the edit form: the amounts already entered, deleted on the contract page (persona Helga 464-2 P-1)
 	} = $props();
 
 	// #464: each Akonto up to the day before the next; the first from the Vertragsbeginn, the last up to the end
@@ -59,7 +62,7 @@
 					data-testid="contract-advance-period"
 				>
 					<span>{period.text}</span>
-					{#if period.before}
+					{#if period.before && !readonly}
 						<Button
 							variant="danger-ghost"
 							icon="delete"
@@ -83,6 +86,7 @@
 		confirmTestid="contract-advance-delete-confirm"
 		error={deleteError}
 		fields={{ validFrom: deleting }}
+		onsuccess={() => addToast('success', m.contracts_advance_deleted_toast({ from: deleted.values.from }))}
 	>
 		<p>{m.contracts_advance_delete_text({ ...deleted.values, before: deleted.before })}</p>
 	</ActionDialog>

@@ -6,7 +6,8 @@ import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
-import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
+import endAdvanceRefused from '../../tests/contracts/contract-end-advance-refused.json';
+import advanceDeleteRefused from '../../tests/contracts/contract-advance-delete-refused.json';
 import category from '../../tests/contracts/category.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import contractHasStatements from '../../tests/contracts/contract-delete-refused.json';
@@ -269,6 +270,21 @@ describe('Mietvertrag beenden', () => {
 				body: { endDate: '2099-12-31', terminated: true }
 			}
 		]);
+	});
+
+	// review 464-2 C-11: a later Akonto refuses the end; the dialog says which and what to do
+	it('nennt das spätere Akonto, wenn es das Vertragsende ablehnt', async () => {
+		const { result } = runAction(actions.end, 'c1', 200, { endDate: '2098-12-31' }, { startDate: '2024-04-01' }, {
+			status: 400,
+			answer: endAdvanceRefused
+		});
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				endError: 'Ab 01.01.2099 gilt ein anderes Akonto. Löschen Sie zuerst dieses Akonto, oder wählen Sie ein späteres Vertragsende.'
+			}
+		});
 	});
 
 	// A-3 (#112): der Tag, an dem die Kündigung eingegangen ist, wird mit dem Vertragsende gespeichert
@@ -597,14 +613,14 @@ describe('Akonto löschen', () => {
 	});
 
 	it('nennt im Dialog, warum das Backend das Löschen ablehnt', async () => {
-		const { result } = runAction(actions.deleteAdvance, 'c1', 400, { validFrom: '2024-07-01' }, advanceRefused);
+		const { result } = runAction(actions.deleteAdvance, 'c1', 400, { validFrom: '2024-07-01' }, advanceDeleteRefused);
 
 		expect(await result).toMatchObject({
 			status: 400,
 			data: {
 				validFrom: '2024-07-01',
 				advanceDeleteError:
-					'Das Akonto ab 01.07.2024 ändert den Entwurf NK-2024-0001. Löschen Sie zuerst den Entwurf, oder wählen Sie ein späteres «Gültig ab».'
+					'Das Akonto ab 01.07.2024 zählt im Entwurf NK-2024-0001. Löschen Sie zuerst den Entwurf.'
 			}
 		});
 	});

@@ -81,7 +81,7 @@ export async function deleteAdvance(contractId: string, validFrom: string) {
 		await tx
 			.delete(contractAdvancePayments)
 			.where(and(eq(contractAdvancePayments.contractId, contractId), eq(contractAdvancePayments.validFrom, validFrom)));
-		await refuseChangedStatements(contractId, validFrom, before, tx, 'ADVANCE_DELETE_CHANGES');
+		await refuseChangedStatements(contractId, validFrom, before, tx, DELETE_CHANGES);
 	});
 }
 
@@ -113,7 +113,10 @@ export async function alignAdvances(contractId: string, tx: Tx) {
  * A changed Akonto may not alter a statement already created, not replaced (product owner on F-3, 2026-10-19): it
  * would change what the tenant was billed silently; a draft is deleted first, a sent statement corrected first
  */
-async function refuseChangedStatements(contractId: string, validFrom: string, before: Amounts, tx: Tx, code = 'ADVANCE_CHANGES') {
+const CHANGES = { draft: 'ADVANCE_CHANGES_DRAFT', statement: 'ADVANCE_CHANGES_STATEMENT' };
+const DELETE_CHANGES = { draft: 'ADVANCE_DELETE_CHANGES_DRAFT', statement: 'ADVANCE_DELETE_CHANGES_STATEMENT' };
+
+async function refuseChangedStatements(contractId: string, validFrom: string, before: Amounts, tx: Tx, codes = CHANGES) {
 	const after = await amountsOf(contractId, tx);
 	const statements = await tx
 		.select({
@@ -132,9 +135,13 @@ async function refuseChangedStatements(contractId: string, validFrom: string, be
 		// the amount the statement counted may be entered (fach review 464-2 V-1); one rounded over all months before
 		// #464 may differ by a Rappen (F-2)
 		if (Math.abs(total(after) - total(before)) < 0.005 || Math.abs(total(after) - parseFloat(statement.stored)) < 0.015) continue;
-		const params = { from: formatSwissDate(validFrom), number: statement.number };
-		if (statement.status === 'draft') throw new CodedError(`${code}_DRAFT`, 'The Akonto changes a draft statement', params);
-		throw new CodedError(`${code}_STATEMENT`, 'The Akonto changes a statement already created', params);
+		// the earliest day no stored statement bills (persona Helga 464-2 P-2)
+		const last = statements.map(({ rentalEnd }) => rentalEnd).sort().at(-1)!;
+		const [year, month] = last.split('-').map(Number);
+		const next = formatSwissDate(new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10));
+		const params = { from: formatSwissDate(validFrom), number: statement.number, next };
+		if (statement.status === 'draft') throw new CodedError(codes.draft, 'The Akonto changes a draft statement', params);
+		throw new CodedError(codes.statement, 'The Akonto changes a statement already created', params);
 	}
 }
 

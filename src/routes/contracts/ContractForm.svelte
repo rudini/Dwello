@@ -34,6 +34,7 @@
 	import ContractsUnknown, { retried } from './new/ContractsUnknown.svelte';
 	import PeriodStep from './new/PeriodStep.svelte';
 	import RentStep from './new/RentStep.svelte';
+	import AdvancePeriods from './[id]/AdvancePeriods.svelte';
 	import PastEndConfirm from './PastEndConfirm.svelte';
 	import RefusedStatements from './RefusedStatements.svelte';
 	import NoticeHint from './NoticeHint.svelte';
@@ -334,6 +335,12 @@
 			{categories}
 			agreedHelp={m.contracts_agreed_costs_help_edit()}
 			{advanceHelp}
+		/>
+		<AdvancePeriods
+			startDate={contract.startDate}
+			endDate={contract.endDate}
+			advancePayments={contract.advancePayments}
+			readonly
 		/>
 	</Panel>
 

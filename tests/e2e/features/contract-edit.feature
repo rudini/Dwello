@@ -210,4 +210,4 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Akonto in einer schon abgerechneten Zeit
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter das Akonto ab "2025-07-01" auf "200" Franken ändert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Berichtigen Sie zuerst diese Abrechnung, oder wählen Sie ein späteres «Gültig ab»."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Gilt das neue Akonto schon ab 01.07.2025, berichtigen Sie zuerst diese Abrechnung. Gilt es erst später, wählen Sie ein «Gültig ab» ab 01.01.2026."

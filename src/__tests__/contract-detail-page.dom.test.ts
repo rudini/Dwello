@@ -465,8 +465,12 @@ describe('Mietvertragsdetail', () => {
 			'Das Akonto von CHF 200.00 ab 01.07.2025 wird gelöscht. Ab dann gilt wieder das Akonto von CHF 150.00.'
 		);
 		const sent = new FormData();
-		actions.get('?/deleteAdvance')!({ formData: sent });
+		toasts.set([]);
+		const after = actions.get('?/deleteAdvance')!({ formData: sent }) as (input: unknown) => Promise<void>;
 		expect(sent.get('validFrom')).toBe('2025-07-01');
+		// persona Helga 464-2 P-4: the deletion is confirmed as saving is
+		await after({ update: async () => {}, result: { type: 'success' } });
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Akonto ab 01.07.2025 gelöscht']);
 	});
 
 	it('zeigt im Dialog, warum das Löschen eines Akontos abgelehnt wird', async () => {

@@ -1,5 +1,5 @@
 {
 	"error": "The new Akonto changes a draft statement",
 	"code": "ADVANCE_CHANGES_DRAFT",
-	"params": { "from": "01.07.2024", "number": "NK-2024-0001" }
+	"params": { "from": "01.07.2024", "number": "NK-2024-0001", "next": "01.01.2025" }
 }
