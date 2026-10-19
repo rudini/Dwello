@@ -8,6 +8,10 @@
 <meta name="description" content="Dwello ist die kostenlose Open-Source-Software für private Vermieterinnen und Vermieter in der Schweiz: Nebenkostenabrechnung mit QR-Rechnung, Belege per Drag &amp; Drop, KI auf Ihrem eigenen Rechner.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="assets/dwello-mark.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="de-CH" href="index.html">
+<link rel="alternate" hreflang="fr-CH" href="fr/index.html">
+<link rel="alternate" hreflang="it-CH" href="it/index.html">
+<link rel="alternate" hreflang="en" href="en/index.html">
 <style>
 /* Layout concept: the site is built like the app. Same tokens, same Inter, same panels, badges and 48 px controls;
    the product itself (real screenshots of the demo data, light and dark) carries every section. */
@@ -273,6 +277,7 @@ section { padding-block: 96px; }
 .compare thead th { background: var(--sunken); font-weight: 600; }
 .compare td:first-child { color: var(--ink-muted); }
 .compare td.d { font-weight: 600; color: var(--accent); }
+@media (max-width: 479px) { .compare th, .compare td { padding: 12px 8px; } }
 
 /* Roadmap */
 .road { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
@@ -281,6 +286,7 @@ section { padding-block: 96px; }
 .road article { border: 1px dashed var(--line-strong); border-radius: var(--radius-panel); padding: 24px; display: grid; gap: 10px; align-content: start; }
 .road h3 { font-size: 1.1875rem; }
 .road p { color: var(--ink-muted); }
+.road .issue { justify-self: start; font-size: 0.9375rem; font-weight: 600; }
 
 /* FAQ */
 .faq { max-width: 860px; }
@@ -311,6 +317,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 .langs { display: flex; gap: 4px; }
 .langs a { padding: 8px 12px; border-radius: var(--radius-control); text-decoration: none; color: var(--ink-muted); font-weight: 600; font-size: 0.875rem; }
 .langs a[aria-current] { background: var(--accent-soft); color: var(--accent); }
+.head-langs { display: none; }
+@media (min-width: 1180px) { .head-langs { display: flex; margin-left: 8px; } }
+@media (min-width: 1000px) and (max-width: 1179px) { .nav { margin-left: auto; } }
 </style>
 </head>
 <body>
@@ -363,6 +372,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<a href="#open-source">Open Source</a>
 			<a href="#faq">Fragen</a>
 		</nav>
+		<nav class="langs head-langs" aria-label="Sprache"><a href="index.html" hreflang="de" lang="de" aria-current="page">DE</a><a href="fr/index.html" hreflang="fr" lang="fr">FR</a><a href="it/index.html" hreflang="it" lang="it">IT</a><a href="en/index.html" hreflang="en" lang="en">EN</a></nav>
 		<a class="btn btn-primary header-cta" href="#installieren">Installieren</a>
 	</div>
 </header>
@@ -526,9 +536,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<h3>Gebäude erfassen in zwei Minuten.</h3>
 				<p>Geben Sie Strasse, PLZ oder Ort ein und wählen Sie einen Treffer: Dwello füllt die Adresse aus. Jedes Feld hat seine Erklärung und ein Beispiel direkt darunter.</p>
 				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Adresssuche für die ganze Schweiz<small>Verfügbar heute.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Adresssuche mit Strasse, PLZ oder Ort<small>Verfügbar heute.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Wohnungen mit Fläche, Zimmern, Volumen<small>Die Grundlage für jeden Verteilschlüssel.</small></span></li>
-					<li><svg class="ic" aria-hidden="true" style="color:var(--ink-muted)"><use href="#i-info"/></svg><span>Import aus dem GWR <span class="badge plan">Geplant</span><small>Gebäude und Wohnungen mit einem Klick aus dem eidgenössischen Gebäude- und Wohnungsregister.</small></span></li>
+					<li><svg class="ic" aria-hidden="true" style="color:var(--ink-muted)"><use href="#i-info"/></svg><span>Gebäude aus dem Gebäuderegister <span class="badge plan">Geplant</span><small>Adresse wählen, und alle Wohnungen mit Fläche, Stockwerk und Zimmern kommen aus dem eidgenössischen Gebäude- und Wohnungsregister (GWR).</small></span></li>
 				</ul>
 			</div>
 			<figure class="shot">
@@ -561,7 +571,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="badge ok">Verfügbar</span></div><h3>Mieterdaten auf Knopfdruck</h3><p>Alles über eine Mieterin oder einen Mieter als ZIP, für die Datenherausgabe nach Art. 28 DSG.</p></article>
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span class="badge ok">Verfügbar</span></div><h3>Protokoll aller Änderungen</h3><p>Anmeldungen und jede Änderung, die eine Abrechnung betrifft, mit Zeitpunkt und Stand davor.</p></article>
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span class="badge ok">Verfügbar</span></div><h3>Dokumente pro Mieter</h3><p>Briefe, Abrechnungen und Mahnungen an einem Ort.</p></article>
-			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge plan">Geplant</span></div><h3>Import aus dem GWR</h3><p>Gebäude und Wohnungen mit Flächen und Zimmern aus dem eidgenössischen Register übernehmen.</p></article>
+			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge plan">Geplant</span></div><h3>Gebäude aus dem Gebäuderegister</h3><p>Gebäude und Wohnungen mit Fläche, Stockwerk und Zimmern aus dem eidgenössischen Register übernehmen.</p></article>
 			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span class="badge plan">Geplant</span></div><h3>Alle Daten exportieren</h3><p>Der ganze Bestand jederzeit als CSV und JSON. Ihre Daten gehören Ihnen, auch wenn Sie wechseln.</p></article>
 			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg><span class="badge plan">Geplant</span></div><h3>MCP-Server für KI-Assistenten</h3><p>Fragen Sie Ihren KI-Assistenten nach offenen Beträgen, Fristen oder fehlenden Rechnungen.</p></article>
 		</div>
@@ -710,7 +720,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an und richten dafür einmal einen OAuth-Schlüssel ein. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant.</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an und richten dafür einmal einen OAuth-Schlüssel ein. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a>).</span></div>
 	</div>
 </section>
 
@@ -746,7 +756,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<span class="kicker">Open Source</span>
 			<p class="price">0.–<small> CHF pro Jahr</small></p>
 			<h2 style="font-size:clamp(1.75rem,3.4vw,2.5rem);max-width:18em">Gratis heisst bei Dwello: offen, ohne Haken.</h2>
-			<p style="color:var(--ink-muted);font-size:1.125rem;max-width:34em">Der ganze Quellcode ist öffentlich. Sie können ihn lesen, prüfen, anpassen und weitergeben. Es gibt kein Premium-Abo, keine Limite pro Wohnung und keine Funktion, die später kostenpflichtig wird.</p>
+			<p style="color:var(--ink-muted);font-size:1.125rem;max-width:34em">Der ganze Quellcode ist öffentlich, unter der Lizenz GNU AGPL-3.0. Sie können ihn lesen, prüfen, anpassen und weitergeben. Es gibt kein Premium-Abo, keine Limite pro Wohnung und keine Funktion, die später kostenpflichtig wird. Die AGPL sorgt dafür, dass auch jede veränderte Version, die andere online nutzen, offen bleibt.</p>
 			<div class="actions">
 				<a class="btn btn-primary" href="https://github.com/rudini/Dwello" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-git"/></svg>Quellcode auf GitHub</a>
 				<a class="btn btn-secondary" href="https://github.com/rudini/Dwello/issues" rel="noopener">Idee oder Fehler melden</a>
@@ -762,6 +772,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 					<tr><td>KI liest Belege</td><td class="d">lokal</td><td>in der Cloud</td></tr>
 					<tr><td>Wenn der Anbieter aufhört</td><td class="d">läuft weiter</td><td>Daten weg</td></tr>
 					<tr><td>Quellcode prüfbar</td><td class="d">ja</td><td>nein</td></tr>
+					<tr><td>Lizenz</td><td class="d">AGPL-3.0</td><td>proprietär</td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -774,15 +785,15 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Roadmap</span>
 			<h2>Was als Nächstes kommt.</h2>
-			<p>Dwello wird offen weiterentwickelt. Diese Punkte sind geplant.</p>
+			<p>Dwello wird offen weiterentwickelt. Diese Punkte sind geplant; zu jedem gibt es ein Issue auf GitHub, in dem Sie mitreden können.</p>
 		</div>
 		<div class="road">
-			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>GWR-Import</h3><p>Gebäude und Wohnungen aus dem eidgenössischen Gebäude- und Wohnungsregister übernehmen.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>MCP-Server</h3><p>Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>Vollständiger Export</h3><p>Alle Daten als CSV und JSON, jederzeit, mit einem Klick.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Gebäude aus dem Gebäuderegister</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/479" rel="noopener">#479</a><p>Gebäude und Wohnungen aus dem eidgenössischen Gebäude- und Wohnungsregister übernehmen.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>MCP-Server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener">#495</a><p>Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Vollständiger Export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener">#496</a><p>Alle Daten als CSV und JSON, jederzeit, mit einem Klick.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>Berichte und Auswertungen</h3><p>Einnahmen, Ausgaben und Nebenkosten über die Jahre, für Steuererklärung und Treuhand.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>Offene Lizenz</h3><p>Eine Open-Source-Lizenz, die sicherstellt, dass Dwello für alle frei bleibt.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Link zum Quellcode in der App</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/498" rel="noopener">#498</a><p>Jede Installation zeigt, wo ihr Quellcode liegt, wie es die AGPL verlangt.</p></article>
 		</div>
 	</div>
 </section>
@@ -835,8 +846,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div><h4>Community</h4><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Fehler melden</a></li><li><a href="brand.html">Markenhandbuch</a></li></ul></div>
 		</div>
 		<div class="legal">
-			<span>© 2026 Dwello · Gemacht für die Schweiz</span>
-			<span class="langs" aria-label="Sprache"><a href="#top" aria-current="true">DE</a><a href="#top" lang="fr">FR</a><a href="#top" lang="it">IT</a><a href="#top" lang="en">EN</a></span>
+			<span>© 2026 Dwello · Gemacht für die Schweiz · Lizenz <a href="https://github.com/rudini/Dwello/blob/main/LICENSE" rel="noopener">AGPL-3.0</a></span>
+			<nav class="langs" aria-label="Sprache"><a href="index.html" hreflang="de" lang="de" aria-current="page">DE</a><a href="fr/index.html" hreflang="fr" lang="fr">FR</a><a href="it/index.html" hreflang="it" lang="it">IT</a><a href="en/index.html" hreflang="en" lang="en">EN</a></nav>
 		</div>
 	</div>
 </footer>
