@@ -1834,3 +1834,17 @@ Branch `ccr-9b88c9f2-p44e0b`. Review of the instructions against the Opus 5.5 gu
 - [x] PR, «No scenario: rule text only»
 
 Files: `CLAUDE.md`, `docs/reviews/r1-review-1.md`.
+
+## Session T1: Tokens and speed of the agent workflow (2026-10-19)
+
+Branch `ccr-3dfff432-ljcit4`. Product owner: implement recommendations 1 to 5 of the token measurement (session W16: 95 % of the tokens are cache reads of the main session, whose context grew to 690k without a compaction). No scenario: tooling and rules only, no app behaviour.
+
+- [x] 1. Autocompact at 30 % instead of 75 % (`.claude/settings.json`); a run ending above 200k tokens suggests `/compact` or a new session once (`CLAUDE.md`, Gotchas, «Context»)
+- [x] 2. CI diagnosis: failing job only, its log tailed or grepped, at most one log subagent per round (skill `pull-request`)
+- [x] 3. Targeted reads instead of whole files (`CLAUDE.md`, Gotchas)
+- [x] 4. fallow gate prints the findings, not the whole JSON (`.claude/hooks/fallow-gate.sh`, test in `tools/claude-hooks/fallow-gate.test.ts`, red first)
+- [x] 5. Faster local checks: `eslint --cache`, DOM tests in `vmThreads` (45 s -> 25 s; `fsModuleCache`, which Vitest's own hint names, is no option of Vitest 5), `vitest run --changed` named (`package.json`, `vitest.config.ts`, `CLAUDE.md`)
+- [x] Workflow note: one session in the plan while another session's is open (`docs/reviews/workflow-notes-tokens.md`)
+- [x] Slice review round 1 (`docs/reviews/tokens-review-1.md`, no Blocker/Major; C-1 to C-3 fixed)
+
+Files: `.claude/settings.json`, `.claude/hooks/fallow-gate.sh`, `.claude/skills/pull-request/SKILL.md`, `CLAUDE.md`, `.gitignore`, `package.json`, `vitest.config.ts`, `tools/claude-hooks/fallow-gate.test.ts`, `docs/reviews/tokens-review-1.md`, `docs/reviews/workflow-notes-tokens.md`.

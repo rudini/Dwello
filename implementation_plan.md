@@ -129,13 +129,3 @@ Branch `ccr-01e823d6-yhj5kc`. Run 614 on `main` failed once more in Firefox (sta
 - [x] Closing code-review round 3 (`docs/reviews/468-review-3.md`, no findings)
 - [ ] PR `Fixes #468`
 
-### Tokens and speed of the agent workflow
-
-Branch `ccr-3dfff432-ljcit4`. Product owner: implement recommendations 1 to 5 of the token measurement (session W16: 95 % of the tokens are cache reads of the main session, whose context grew to 690k without a compaction). No scenario: tooling and rules only, no app behaviour.
-
-- [x] 1. Autocompact at 30 % instead of 75 % (`.claude/settings.json`); rule: compact or start a fresh session at a break (`CLAUDE.md`, Workflow)
-- [x] 2. CI diagnosis: failing job only, its log tailed or grepped, at most one log subagent per round (skill `pull-request`)
-- [x] 3. Targeted reads instead of whole files (`CLAUDE.md`, Gotchas)
-- [x] 4. fallow gate prints the findings, not the whole JSON (`.claude/hooks/fallow-gate.sh`, test in `tools/claude-hooks/fallow-gate.test.ts`, red first)
-- [x] 5. Faster local checks: `eslint --cache`, DOM tests in `vmThreads` (45 s -> 25 s; `fsModuleCache`, which Vitest's own hint names, is no option of Vitest 5), `vitest run --changed` named (`package.json`, `vitest.config.ts`, `CLAUDE.md`)
-- [ ] Slice review round 1

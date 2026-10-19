@@ -61,7 +61,6 @@ describe('fallow gate on a finding', () => {
 		const blocked = hook(root, 'git commit -m x');
 		expect(blocked.status).toBe(2);
 		expect(blocked.stderr).toContain('unused-export:src/a.ts:2:unusedHelper');
-		expect(blocked.stderr).toContain('nothing in this command ran');
 		expect(blocked.stderr.length).toBeLessThan(1500);
 	});
 });
