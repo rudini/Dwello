@@ -28,7 +28,9 @@
 		<Alert {tone} title={m.invoices_upload_notes_title({ name: row.file.name })}>
 			{#each messages as message (message)}<p>{message}</p>{/each}
 			{#if row.deducted}
-				<p class="text-ink-muted" data-testid="invoice-upload-deducted-rule">{m.invoices_upload_deducted_rule()}</p>
+				<p class="text-ink-muted" data-testid="invoice-upload-deducted-rule">
+					{m.invoices_upload_deducted_rule()}
+				</p>
 			{/if}
 			{#if row.duplicateOf}
 				<p>

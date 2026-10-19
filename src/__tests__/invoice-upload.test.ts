@@ -4,6 +4,7 @@ import {
 	fileRefusal,
 	invoiceOf,
 	newRow,
+	proposeKey,
 	toDoOf,
 	withoutKi,
 	withProposal,
@@ -107,7 +108,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		);
 		expect(row.selected).toBe(false);
 		expect(said(row)).toEqual([
-			'Das ist eine Akontorechnung: ein Vorschuss, den der Rechnungssteller später mit der Schlussrechnung abrechnet. Erfassen Sie in der Regel nur die Schlussrechnung mit dem Total. Kommt sie erst nach der Abrechnung dieser Periode, können Sie die Akontorechnung auswählen und erfassen; ziehen Sie ihren Betrag dann von der Schlussrechnung ab.'
+			'Das ist eine Akontorechnung: ein Vorschuss, den der Rechnungssteller später mit der Schlussrechnung abrechnet. Erfassen Sie in der Regel nur die Schlussrechnung mit dem Total. Kommt sie erst nach der Abrechnung dieser Periode, setzen Sie das Häkchen bei «Diese Rechnung erstellen» und erfassen Sie die Akontorechnung; ziehen Sie ihren Betrag dann von der Schlussrechnung ab.'
 		]);
 	});
 
@@ -217,6 +218,24 @@ describe('Vorschlag der KI für eine Datei', () => {
 		const row = withoutKi(newRow(1, pdf, defaults), 'unavailable');
 		expect(row).toMatchObject({ status: 'check', selected: true, notes: ['Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus.'] });
 		expect(row.values.billingEntity).toBe('');
+	});
+});
+
+// #455 (#268): the key of the building's invoices of the Kategorie, as long as the property manager has not chosen one
+describe('Verteilschlüssel einer Datei', () => {
+	it('schlägt den Verteilschlüssel der Rechnungen derselben Kategorie vor', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null }));
+		expect(proposeKey(row, 'k2').values.distributionKeyId).toBe('k2');
+		// none recorded in the Kategorie: the key stays
+		expect(proposeKey(row, null).values.distributionKeyId).toBe('k1');
+	});
+
+	it('lässt einen Verteilschlüssel, den der Liegenschaftsverwalter selbst gewählt hat', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null }));
+		const chosen = { ...row, values: { ...row.values, distributionKeyId: 'k3' } };
+		expect(proposeKey(chosen, 'k2').values.distributionKeyId).toBe('k3');
+		// a key proposed before is no choice of his: the next Kategorie proposes its own
+		expect(proposeKey(proposeKey(row, 'k2'), 'k4').values.distributionKeyId).toBe('k4');
 	});
 });
 

@@ -863,9 +863,9 @@ describe('Rechnung bearbeiten', () => {
 	// #455 (#268): wer den Betrag ändert, sieht dort, dass Akontorechnungen abgezogen sind
 	it('zeigt beim Betrag den Hinweis auf abgezogene Akontorechnungen', () => {
 		edit({ beleg: { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: false } });
-		expect(byTestId('invoice-deducted-hint')!.textContent).toContain('Auf dem Beleg sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug.');
+		expect(byTestId('invoice-deducted-hint')!.textContent).toContain('Auf dem Beleg sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug, weniger die Akontorechnungen, die schon abgerechnet sind.');
 		expect(byTestId('invoice-deducted-rule')!.textContent).toBe(
-			'Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag einer abgerechneten Akontorechnung um den Unterschied, und berichtigen Sie die Abrechnungen mit ihr.'
+			'Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das Total weniger diese Akontorechnungen 0, löschen Sie diese Rechnung mit «Rechnung löschen». Ergibt es weniger als 0, löschen Sie sie auch: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen.'
 		);
 	});
 
@@ -1079,9 +1079,9 @@ describe('Beleg einer Rechnung', () => {
 	it('zeigt abgezogene Akontorechnungen beim Betrag, mit der Regel darunter', () => {
 		detail({ beleg: { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: false } });
 		const hint = byTestId('invoice-deducted-hint')!;
-		expect(hint.textContent).toContain('Auf dem Beleg sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug.');
+		expect(hint.textContent).toContain('Auf dem Beleg sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug, weniger die Akontorechnungen, die schon abgerechnet sind.');
 		expect(byTestId('invoice-deducted-rule')!.textContent).toBe(
-			'Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag einer abgerechneten Akontorechnung um den Unterschied, und berichtigen Sie die Abrechnungen mit ihr.'
+			'Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das Total weniger diese Akontorechnungen 0, löschen Sie diese Rechnung mit «Rechnung löschen». Ergibt es weniger als 0, löschen Sie sie auch: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen.'
 		);
 		// next to the Betrag, in the facts of the invoice
 		expect(byTestId('invoice-amount')!.closest('div')!.contains(hint)).toBe(true);

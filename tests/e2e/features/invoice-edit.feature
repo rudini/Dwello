@@ -24,8 +24,8 @@ Funktionalität: Rechnung bearbeiten
   Szenario: Hinweis auf abgezogene Akontorechnungen beim Bearbeiten
     Angenommen "Werke Luzern" stellt dem Gebäude "Seeblick" "1250.00" Franken für "Allgemeinstrom Q1" in der Kategorie "Allgemeinstrom" in Rechnung, auf dem Beleg sind Akontorechnungen von "1000.00" Franken abgezogen
     Wenn der Liegenschaftsverwalter die Rechnung von "Werke Luzern" bearbeitet
-    Dann steht im Formular beim Betrag "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug."
-    Und erklärt der Hinweis im Formular beim Betrag "Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag einer abgerechneten Akontorechnung um den Unterschied, und berichtigen Sie die Abrechnungen mit ihr."
+    Dann steht im Formular beim Betrag "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug, weniger die Akontorechnungen, die schon abgerechnet sind."
+    Und erklärt der Hinweis im Formular beim Betrag "Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das Total weniger diese Akontorechnungen 0, löschen Sie diese Rechnung mit «Rechnung löschen». Ergibt es weniger als 0, löschen Sie sie auch: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen."
 
   Szenario: Betrag korrigieren
     Wenn der Liegenschaftsverwalter den Betrag auf "480.00" Franken korrigiert

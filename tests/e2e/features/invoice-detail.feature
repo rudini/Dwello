@@ -131,8 +131,8 @@ Funktionalität: Rechnungsdetail
   Szenario: Abgezogene Akontorechnungen beim Betrag
     Angenommen "Werke Luzern" stellt dem Gebäude "Seeblick" "1250.00" Franken für "Allgemeinstrom Q1" in der Kategorie "Allgemeinstrom" in Rechnung, auf dem Beleg sind Akontorechnungen von "1000.00" Franken abgezogen
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Werke Luzern"
-    Dann steht beim Betrag der Rechnung "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug."
-    Und erklärt der Hinweis beim Betrag der Rechnung "Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag einer abgerechneten Akontorechnung um den Unterschied, und berichtigen Sie die Abrechnungen mit ihr."
+    Dann steht beim Betrag der Rechnung "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug, weniger die Akontorechnungen, die schon abgerechnet sind."
+    Und erklärt der Hinweis beim Betrag der Rechnung "Prüfen Sie, dass sie nur einmal zählen: Die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist. Ergibt das Total weniger diese Akontorechnungen 0, löschen Sie diese Rechnung mit «Rechnung löschen». Ergibt es weniger als 0, löschen Sie sie auch: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen."
 
   # #455 (#263): abgerechnet heisst in einer Nebenkostenabrechnung enthalten, gleich welchen Status sie hat
   @wip

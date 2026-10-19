@@ -63,6 +63,7 @@ export type UploadRow = {
 	deducted: string | null; // Akontorechnungen deducted on the Rechnung, with the total proposed (#455)
 	byHand: boolean; // the KI read nothing: every field is filled in by hand
 	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
+	proposedKey: string; // the Verteilschlüssel Dwello set: another one the property manager chose himself (#455)
 	selected: boolean;
 	createError?: string; // why the invoice was not created
 };
@@ -114,8 +115,18 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	deducted: null,
 	byHand: false,
 	hints: { deductedAmount: null, nonAllocableItems: false },
+	proposedKey: defaults.distributionKeyId,
 	selected: true
 });
+
+/**
+ * The row with the Verteilschlüssel of the building's invoices of its Kategorie (#455, #268), unless there is none or
+ * the property manager chose another key himself
+ */
+export function proposeKey(row: UploadRow, key: string | null): UploadRow {
+	if (!key || key === row.values.distributionKeyId || row.values.distributionKeyId !== row.proposedKey) return row;
+	return { ...row, values: { ...row.values, distributionKeyId: key }, proposedKey: key };
+}
 
 // The fields the property manager checks, with their labels, in the order the notes name them
 const FIELD_LABELS: [string, () => string][] = [
@@ -143,7 +154,8 @@ const named = (fields: string[]) =>
 export function toDoOf(row: UploadRow): string[] {
 	// nothing to fill in on a file no invoice is created from: several invoices, a Gutschrift, a Mahnung (persona Dr. Weber),
 	// an Akontorechnung the property manager did not choose to record (#455)
-	const recorded = row.documentType === 'invoice' || (row.documentType === 'advance_invoice' && row.selected);
+	const recorded =
+		row.documentType === 'invoice' || (row.documentType === 'advance_invoice' && row.selected);
 	if (row.status !== 'check' || row.several || !recorded) return [];
 	// costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also
 	// one the property manager chooses later (domain review V-1, V-8)
@@ -171,7 +183,6 @@ function notesOn(proposal: Proposal, morePages: boolean) {
 		proposal.duplicateOf && m.invoices_upload_duplicate(),
 		proposal.documentType === 'reminder' && m.invoices_upload_reminder(),
 		proposal.documentType === 'credit_note' && m.invoices_upload_credit_note(),
-		// TODO(fachlich prüfen, #483): «Schlussrechnung» has no glossary row yet
 		proposal.documentType === 'advance_invoice' && m.invoices_upload_advance_invoice()
 	];
 }

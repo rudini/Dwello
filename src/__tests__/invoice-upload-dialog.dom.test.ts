@@ -12,6 +12,7 @@ import InvoiceUploadDialog from '../routes/invoices/InvoiceUploadDialog.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { reactiveProps } from './helpers/reactive-props.svelte';
 import extraction from '../../tests/contracts/invoice-extraction.json';
+import recorded from '../../tests/contracts/invoice.json';
 import unreadable from '../../tests/contracts/invoice-extraction-unreadable.json';
 
 const buildings = [
@@ -347,7 +348,7 @@ describe('Rechnungen hochladen', () => {
 		expect(message.indexOf('Wählen Sie eine Kategorie.')).toBeGreaterThan(-1);
 		expect(message.indexOf(line)).toBeGreaterThan(message.indexOf('Wählen Sie eine Kategorie.'));
 		expect(byTestId('invoice-upload-deducted-rule')!.textContent).toBe(
-			'Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag einer abgerechneten Akontorechnung um den Unterschied, und berichtigen Sie die Abrechnungen mit ihr.'
+			'Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen.'
 		);
 	});
 
@@ -371,6 +372,32 @@ describe('Rechnungen hochladen', () => {
 		await settle();
 		expect(byTestId('invoice-upload-discard-message')).toBeNull();
 		expect(byTestId('invoice-upload-row')).not.toBeNull();
+	});
+
+	// #455 (#268): the building's invoices of the Kategorie are distributed by another key than the default one
+	it('schlägt den Verteilschlüssel der Rechnungen derselben Kategorie im Gebäude vor', async () => {
+		const calls = fakeBff((call) =>
+			call.path.startsWith('/invoices?')
+				? [200, { invoices: [{ ...recorded, distributionKeyId: 'k2' }], total: 1 }]
+				: [200, read]
+		);
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [
+				{ id: 'k1', name: 'Nach Fläche' },
+				{ id: 'k2', name: 'Pro Wohnung' }
+			],
+			defaultDistributionKeyId: 'k1',
+			oncreated: vi.fn()
+		});
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		await settle();
+		expect(calls.map((call) => call.path)).toContain('/invoices?buildingId=b1&categoryId=c1&limit=1');
+		click('invoice-upload-row-toggle');
+		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k2');
 	});
 
 	it('fragt vor dem Abbrechen, dass die Dateien verloren gehen', async () => {

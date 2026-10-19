@@ -3,10 +3,12 @@
 	import { statusLabels } from '$lib/statement';
 	import type { BilledStatement, InvoiceWithDetails } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
+	import DeductedHint from '../DeductedHint.svelte';
 	import { formatCurrency, formatDate, formatDateTime } from '$lib/utils/format';
 
 	// What the invoice says: date, amount, building and service, and the statements it is in
-	let { invoice, statements }: { invoice: InvoiceWithDetails; statements: BilledStatement[] } = $props();
+	let { invoice, statements }: { invoice: InvoiceWithDetails; statements: BilledStatement[] } =
+		$props();
 
 	const changed = (iso?: string) => (iso ? formatDateTime(iso) : '–');
 </script>
@@ -40,6 +42,9 @@
 			<dd class="text-xl font-semibold tabular-nums text-ink" data-testid="invoice-amount">
 				{formatCurrency(invoice.amount)}
 			</dd>
+			{#if invoice.beleg?.deductedAmount}
+				<dd><DeductedHint amount={invoice.beleg.deductedAmount} /></dd>
+			{/if}
 		</div>
 		<div class="flex flex-col gap-1 sm:col-span-2">
 			<dt class="text-ink-muted">{m.apartments_building()}</dt>
@@ -65,7 +70,10 @@
 						href="/statements/{statement.id}"
 						class="inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4"
 						data-testid="invoice-billed-in-link"
-						>{m.invoices_billed_in_entry({ number: statement.statementNumber, status: statusLabels[statement.status] })}</a
+						>{m.invoices_billed_in_entry({
+							number: statement.statementNumber,
+							status: statusLabels[statement.status]
+						})}</a
 					>
 				{:else}
 					<span class="text-ink">{m.invoices_billed_in_none()}</span>

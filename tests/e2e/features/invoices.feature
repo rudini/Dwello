@@ -113,13 +113,13 @@ Funktionalität: Rechnungsliste
   Szenario: Schlussrechnung mit abgezogenen Akontorechnungen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
     Dann sagt die Datei von "Werke Schlussrechnung" "Auf der Rechnung sind Akontorechnungen von CHF 1’000.00 abgezogen. Als Betrag ist das Total vor dem Abzug vorgeschlagen: CHF 1’250.00."
-    Und erklärt der Hinweis zu den Akontorechnungen von "Werke Schlussrechnung" "Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag einer abgerechneten Akontorechnung um den Unterschied, und berichtigen Sie die Abrechnungen mit ihr."
+    Und erklärt der Hinweis zu den Akontorechnungen von "Werke Schlussrechnung" "Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen."
 
   # #455: eine Akontorechnung allein zählt sonst mit der Schlussrechnung doppelt (Art. 257b Abs. 1 OR)
   @wip
   Szenario: Eine Akontorechnung ist nicht zum Erstellen ausgewählt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Akontorechnung" hochlädt
-    Dann sagt die Datei von "Werke Akontorechnung" "Das ist eine Akontorechnung: ein Vorschuss, den der Rechnungssteller später mit der Schlussrechnung abrechnet. Erfassen Sie in der Regel nur die Schlussrechnung mit dem Total. Kommt sie erst nach der Abrechnung dieser Periode, können Sie die Akontorechnung auswählen und erfassen; ziehen Sie ihren Betrag dann von der Schlussrechnung ab."
+    Dann sagt die Datei von "Werke Akontorechnung" "Das ist eine Akontorechnung: ein Vorschuss, den der Rechnungssteller später mit der Schlussrechnung abrechnet. Erfassen Sie in der Regel nur die Schlussrechnung mit dem Total. Kommt sie erst nach der Abrechnung dieser Periode, setzen Sie das Häkchen bei «Diese Rechnung erstellen» und erfassen Sie die Akontorechnung; ziehen Sie ihren Betrag dann von der Schlussrechnung ab."
     Und ist die Datei von "Werke Akontorechnung" nicht zum Erstellen ausgewählt
     Und sagt die Datei von "Werke Akontorechnung" nicht "Wählen Sie eine Kategorie."
 
@@ -191,7 +191,7 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter bei der Datei von "Werke Schlussrechnung" die Kategorie "Allgemeinstrom" wählt
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Und der Liegenschaftsverwalter die Rechnung von "Werke Schlussrechnung" ansieht
-    Dann steht beim Betrag der Rechnung "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug."
+    Dann steht beim Betrag der Rechnung "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug, weniger die Akontorechnungen, die schon abgerechnet sind."
     Und erinnert der Beleg nicht an abgezogene Akontorechnungen
 
   # #455 (#268): der Dateiknopf des Browsers spricht die Sprache des Browsers, nicht die von Dwello
