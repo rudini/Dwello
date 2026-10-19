@@ -1177,6 +1177,39 @@ describe('Abrechnungen erstellen', () => {
 		expect(button.textContent!.trim()).toBe('Weiter');
 	});
 
+	// code review 468-2 C-9: the same for the contracts without a Verwaltungspauschale
+	it('wartet bei den erneut geöffneten Einstellungen auf deren eigene Antworten', async () => {
+		const billed: (() => void)[] = [];
+		globalThis.fetch = ((url: string) => {
+			const path = new URL(String(url), 'http://localhost').pathname;
+			if (!path.endsWith('/billed'))
+				return Response.json(path.endsWith('/invoices') ? { invoices: [] } : []);
+			return new Promise<Response>((resolve) => billed.push(() => resolve(Response.json([]))));
+		}) as typeof fetch;
+		open();
+		next();
+		await settle();
+		billed[0](); // step «Gebäude»
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+		click('wizard-back');
+		await settle();
+		billed[2](); // step «Gebäude» again
+		await settle();
+		next();
+		await settle();
+		billed[1](); // the answer to the settings left
+		await settle();
+		const button = byTestId<HTMLButtonElement>('wizard-next')!;
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		expect(button.disabled).toBe(true);
+		billed[3]();
+		await settle();
+		expect(button.disabled).toBe(false);
+	});
+
 	it('behält die Vorschau, wenn das Erstellen scheitert', async () => {
 		open({ preview, invoices: [invoices[0]] });
 		next();

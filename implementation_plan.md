@@ -101,4 +101,6 @@ Branch `ccr-01e823d6-yhj5kc`. Run 614 on `main` failed once more in Firefox (sta
 - [x] E2E tasks: `tickBuilding` waits for step «Gebäude» before ticking (four places in `accessibility.ts`, two did not wait: run 614); `keepApartment` (#466) removed, as «Weiter» now waits itself and Playwright clicks only an enabled button
 - [x] Affected E2E (Chromium + API): statement-generate, statement-agreed-costs, statement-management-fee, contract-new, statement-minimum-balance, statement-rounding 164 passed; axe and language rows of statement-generate and contract-new 64 passed
 - [x] Slice review round 1 (`docs/reviews/468-review-1.md`): C-1 (Major, an answer of a step left before unlocked the step opened anew) fixed with a test seen red; C-2 a failed load lifts the lock, pinned (kept behaviour, green at once); C-6 fixed
-- [ ] Re-review round 2, feature review (personas), PR `Fixes #468`
+- [x] Re-review round 2 (`docs/reviews/468-review-2.md`, no Blocker/Major); C-9 (the C-1 fix of `FeeNotAgreed` had no test): test added, red with the fix taken out
+- [ ] Feature review: personas Sven and Marco (locked state reached by delaying the requests)
+- [ ] PR `Fixes #468`
