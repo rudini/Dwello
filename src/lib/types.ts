@@ -245,12 +245,11 @@ export interface InvoicesListData {
 	total: number;
 	page: number;
 	pageSize: number;
-	buildings: { id: string; name: string; address: string }[];
+	buildings: { id: string; name: string; address: string; tank?: string }[]; // tank: the category of its tank (#451)
 	categories: Category[];
 	years: string[]; // Rechnungsdatum years offered in the filter
 	distributionKeys: { id: string; name: string }[]; // offered for the invoices of «Rechnungen hochladen»
 	defaultDistributionKeyId: string; // preselected there, as set in the settings
-	tanks: Record<string, string>; // per building the category of its tank (#451, M-1)
 }
 
 // Heating Profile types

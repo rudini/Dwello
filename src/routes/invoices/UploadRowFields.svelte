@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { fieldNote, fileType, type UploadRow } from '$lib/invoice-upload';
+	import { deliversToTank } from '$lib/invoice';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import type { Category } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -15,7 +16,7 @@
 		errors,
 		categories,
 		distributionKeys,
-		tank = ''
+		tank
 	}: {
 		row: UploadRow;
 		preview?: string;
@@ -72,7 +73,7 @@
 			testid="invoice-upload-invoice-number-input"
 		/>
 		<InvoiceDataFields
-			fuel={!!tank && row.values.categoryId === tank}
+			fuel={deliversToTank(tank, row.values.categoryId)}
 			idPrefix={prefix}
 			chooseBuilding={false}
 			buildingId=""

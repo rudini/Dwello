@@ -163,3 +163,7 @@ Then('erklärt das Formular {string}', async ({ verwalter }, text: string) => {
 Then('erklärt das Formular beim Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(servicePeriodHelpText).toContain(text);
 });
+
+Then('erklärt das Formular beim Leistungszeitraum nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodHelpText).not.toContain(text);
+});

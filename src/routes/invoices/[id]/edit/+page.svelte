@@ -58,6 +58,7 @@
 
 	// Overriding the KI's category needs a reason
 	const needsReason = $derived(values.categoryId !== initial.categoryId && !!invoice.llmConfidence);
+	const fuel = $derived(deliversToTank(data.tanks?.[values.buildingId], values.categoryId));
 	const changed = $derived(
 		(Object.keys(initial) as (keyof typeof initial)[]).some((key) => values[key] !== initial[key])
 	);
@@ -131,7 +132,7 @@
 			testid="invoice-number-input"
 		/>
 		<InvoiceDataFields
-			fuel={deliversToTank(data.tanks, values.buildingId, values.categoryId)}
+			{fuel}
 			bind:buildingId={values.buildingId}
 			bind:invoiceDate={values.invoiceDate}
 			bind:servicePeriodStart={values.servicePeriodStart}

@@ -144,7 +144,7 @@
 
 	<Panel title={m.invoices_data()}>
 		<InvoiceDataFields
-			fuel={deliversToTank(data.tanks, buildingId, categoryId)}
+			fuel={deliversToTank(data.tanks?.[buildingId], categoryId)}
 			bind:buildingId
 			bind:invoiceDate
 			bind:servicePeriodStart

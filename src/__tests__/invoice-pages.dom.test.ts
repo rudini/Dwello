@@ -855,7 +855,8 @@ describe('Rechnung bearbeiten', () => {
 			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
 		} as never);
 
-	// #451, M-1 (Code-Review C-11): bei einer Brennstoff-Kategorie erklärt das Formular, welcher Tag eine Lieferung zählt
+	// #451, M-1 (Code-Review C-11): in der Kategorie des Tanks im Gebäude erklärt das Formular, welcher Tag eine Lieferung
+	// zählt
 	it('erklärt bei einer Lieferung von Heizmaterial den Tag der Lieferung', () => {
 		const fuel = { id: 'c3', name: 'Heizöl', isAllowedUtilityCost: true, isFuel: true };
 		show(EditInvoicePage, {
