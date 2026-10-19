@@ -9,6 +9,7 @@ import { GET as getZip } from '../routes/statements/zip/+server';
 import { unzipSync } from 'fflate';
 import buildingContracts from '../../tests/contracts/building-contracts.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
+import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 import { localToday } from '$lib/contract-status';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
@@ -164,6 +165,14 @@ describe('GET /statements/[id]/pdf', () => {
 	it('nennt beim Ansehen den Grund, den das Backend mit Code angibt', async () => {
 		const response = await get(async () => Response.json(refusedPdf, { status: 404 }), '?ansehen');
 		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
+	});
+
+	// #450: an installation from before has an IBAN without the Firmenadresse; the page says where to add it
+	it('sagt, dass für den Zahlteil die Firmenadresse fehlt und wo man sie ergänzt', async () => {
+		const response = await get(async () => Response.json(creditorRefused, { status: 400 }));
+		expect(await sentenceOf(response)).toBe(
+			'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
+		);
 	});
 
 	// Helga, Marco (#125): the sentence stood on a bare page, tiny on a phone, without a way back into Dwello
