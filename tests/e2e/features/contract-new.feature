@@ -227,6 +227,7 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter eine Nebenkostenpauschale von "40" Franken einträgt
     Und der Liegenschaftsverwalter alle Nebenkosten abwählt
     Dann warnt das Formular "Kreuzen Sie die Nebenkosten an, für die der Mieter Akonto bezahlt."
+    Und ist der Hinweis ohne vereinbarte Nebenkosten eine Warnung
 
   # persona Helga 429 P-1: deckt die Pauschale alle Nebenkosten, sind keine Häkchen richtig und kein Grund für eine Warnung
   Szenario: Mit Nebenkostenpauschale und ohne angekreuzte Nebenkosten warnt das Formular nicht

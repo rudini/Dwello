@@ -75,7 +75,9 @@ describe('Vereinbarte Nebenkosten im Mietvertrag', () => {
 		document.body.innerHTML = '';
 
 		boxes([], false, true);
-		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain('Er bezahlt aber ein Akonto.');
+		expect(byTestId('contract-agreed-costs-none')!.textContent).toContain(
+			'Er bezahlt aber ein Akonto.'
+		);
 		document.body.innerHTML = '';
 
 		boxes([]);
