@@ -37,6 +37,8 @@ export const pastEndConfirm = target('Bestätigung Vertragsende in der Vergangen
 );
 export const baseRentInput = target('Nettomiete', (page) => page.getByTestId('contract-base-rent-input'));
 export const advancePaymentInput = target('Akonto', (page) => page.getByTestId('contract-advance-payment-input'));
+// #464: the day from which a changed Akonto applies
+export const advancePaymentFromInput = target('Akonto gültig ab', (page) => page.getByTestId('contract-advance-from-input'));
 export const flatRateInput = target('Nebenkostenpauschale', (page) => page.getByTestId('contract-flat-rate-input'));
 export const flatRateWarning = target('Hinweis zur Nebenkostenpauschale', (page) =>
 	page.getByTestId('contract-flat-rate-warning')

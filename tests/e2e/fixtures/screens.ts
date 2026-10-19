@@ -47,6 +47,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.tenant('Carla');
 	await seed.upload('Anna', UPLOADED);
 	await seed.contract('Anna', '1.01', { startDate: '2015-01-01', baseRent: '1800.00', monthlyAdvancePayment: '200.00' });
+	// a later Akonto her 2025 draft counts: her page lists both, deleting it is refused (#464)
+	await seed.advancePayment('Anna', '220.00', '2025-07-01');
+	await seed.advancePayment('Anna', '240.00', '2099-01-01'); // an end before it is refused (#464)
 	await seed.contract('Bruno', '1.02', { startDate: '2015-01-01', baseRent: '1500.00', monthlyAdvancePayment: '150.00' });
 	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2098-12-31', baseRent: '1400.00' });
 	await seed.managementFee('Carla', false); // step «Einstellungen» of the statement wizard names her contract (#89)
@@ -78,7 +81,10 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	// (2022: a replaced statement of a whole year would count as billed for the shorter periods of 2025 the wizard shows)
 	await seed.sendStatement('Carla', 2024);
 	await seed.markPaid('Carla', 2024);
-	await seed.replaceStatement('Carla', 2024, true);
+	await seed.replaceStatement('Carla', 2024);
+	// #464: an Akonto entered after the replacement: the berichtigte Abrechnung warns that it counts another one
+	await seed.advancePayment('Carla', '50.00', '2024-01-01');
+	await seed.correctStatement('Carla', 2024);
 	await seed.statement('Carla', 'Seeblick', 2022, 'Standard');
 	await seed.sendStatement('Carla', 2022);
 	await seed.replaceStatement('Carla', 2022);

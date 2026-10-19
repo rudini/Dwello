@@ -1,4 +1,5 @@
 import { m } from '$lib/paraglide/messages';
+import { localToday } from './contract-status';
 import type { RentalContract } from './types';
 import { formatDate, isFeeRate, parsePercent } from './utils/format';
 import {
@@ -19,6 +20,8 @@ export interface ContractFormValues {
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
+	advancePaymentFrom?: string; // «Gültig ab» of the Akonto (#464), only when editing
+	savedAdvance?: string; // the Akonto as loaded: unchanged, it is not sent again (fach review 464-2 V-2)
 	flatRateUtilityCharge?: string; // «Nebenkostenpauschale» (#429); absent in a draft saved before it
 	// «Verwaltungspauschale vereinbart» (#89): at the run's rate, an own rate, none; '' until chosen (no default)
 	managementFee: '' | 'run' | 'own' | 'none';
@@ -46,6 +49,24 @@ const dateForInput = (date: string | null | undefined) =>
 // A date field typed over can end up in year 12026; such a date is surely a typing mistake
 export const impossibleYear = () => m.common_error_impossible_year();
 export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
+
+/**
+ * «Gültig ab» of a new Akonto (#464, fach review 464-2 V-2): in a running contract the next first of a month, as an
+ * increase applies from a Kündigungstermin at the earliest; a future contract corrects it from its Vertragsbeginn, an
+ * ended one its last amount
+ */
+function proposedAdvanceFrom(contract: RentalContract) {
+	const today = localToday();
+	if (contract.startDate > today) return dateForInput(contract.startDate);
+	const [year, month] = today.split('-').map(Number);
+	const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+	if (!contract.endDate || next <= dateForInput(contract.endDate)) return next;
+	return contract.advancePayments?.at(-1)?.validFrom;
+}
+
+// a changed Akonto goes with its «Gültig ab»; on a new contract it always goes
+const advanceChanged = (values: ContractFormValues) =>
+	values.savedAdvance === undefined || Number(values.advancePayment || 0) !== Number(values.savedAdvance || 0);
 
 /** Values of the contract being edited, or of a new contract for the tenant and apartment given in the URL */
 export function initialContractValues(
@@ -80,6 +101,8 @@ export function initialContractValues(
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
 		advancePayment: String(contract.monthlyAdvancePayment || ''),
+		advancePaymentFrom: contract.advancePayments && proposedAdvanceFrom(contract),
+		savedAdvance: String(contract.monthlyAdvancePayment || ''),
 		flatRateUtilityCharge: String(contract.flatRateUtilityCharge || ''),
 		managementFee: feeChoice(contract),
 		managementFeeRate: contract.managementFeePercent ?? '',
@@ -118,6 +141,10 @@ export function validateContract(values: ContractFormValues): Record<string, str
 		baseRent: baseRentError(values.baseRent),
 		additionalRent: amountError(values.additionalRent),
 		advancePayment: amountError(values.advancePayment),
+		advancePaymentFrom:
+			values.advancePaymentFrom === '' && advanceChanged(values)
+				? m.contracts_error_advance_from_required()
+				: undefined,
 		flatRateUtilityCharge: amountError(values.flatRateUtilityCharge ?? ''),
 		managementFee: values.managementFee ? undefined : m.contracts_error_fee_choice(),
 		managementFeeRate:
@@ -148,7 +175,10 @@ export const contractBody = (values: ContractFormValues) => ({
 	terminated: !values.isUnlimited && !!values.terminated,
 	baseRent: String(values.baseRent),
 	additionalRent: String(values.additionalRent || 0),
-	monthlyAdvancePayment: String(values.advancePayment || 0),
+	...(advanceChanged(values) && {
+		monthlyAdvancePayment: String(values.advancePayment || 0),
+		...(values.advancePaymentFrom && { advancePaymentFrom: values.advancePaymentFrom })
+	}),
 	flatRateUtilityCharge: String(values.flatRateUtilityCharge || 0),
 	managementFeeAgreed: values.managementFee !== 'none',
 	managementFeePercent:

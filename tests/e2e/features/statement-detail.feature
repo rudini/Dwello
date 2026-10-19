@@ -794,3 +794,45 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung."
     Und steht im PDF "bereits bezahlt CHF 442.90"
     Und steht im PDF "Nachzahlung 187.45"
+
+  # #464: die berichtigte Abrechnung rechnet mit dem Akonto, das in der Periode galt, nicht mit dem heutigen;
+  # Marc Huber Mai und Juni 2 × 50.00, Juli bis Dezember 6 × 80.00 = 580.00 (ab 2025 gilt 100.00)
+  Szenario: Berichtigte Abrechnung rechnet mit dem damaligen Akonto
+    Angenommen der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und der Mietvertrag von "Marc Huber" hat ab "2024-07-01" "80" Franken Akonto
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und der Mietvertrag von "Marc Huber" hat ab "2025-01-01" "100" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigt
+    Und der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann zieht die Abrechnung "CHF 580.00" Akontobeiträge ab
+
+  # #464 (F-4, Option A): weicht das Akonto der berichtigten Abrechnung von dem der ersetzten ab, sagt Dwello es;
+  # die ersetzte zählte 8 × 50.00 = 400.00, das Akonto ist inzwischen ab Vertragsbeginn 80.00: 8 × 80.00 = 640.00
+  Szenario: Die berichtigte Abrechnung nennt ein anderes Akonto als die ersetzte
+    Angenommen der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Abrechnung 2024 von "Marc Huber" ist ersetzt
+    Und der Mietvertrag von "Marc Huber" hat "80" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann warnt die berichtigte Abrechnung, dass ihre Akontobeiträge "CHF 640.00" anders sind als die "CHF 400.00" der ersetzten Abrechnung 2024 von "Marc Huber"
+
+  # #464 (#103): das PDF nennt das Akonto als Monate mal Betrag, eine Zeile pro Betrag mit ihrem Zeitraum, und sagt,
+  # dass das vereinbarte Akonto abgezogen ist (Fachreview F-6, F-7, F-9; #477)
+  Szenario: Das PDF nennt das Akonto als Monate mal Betrag
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und der Mietvertrag von "Marc Huber" hat ab "2024-07-01" "80" Franken Akonto
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Marc Huber" gibt es ein PDF
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Akontobeiträge – 580.00"
+    Und steht im PDF "2 Monate × CHF 50.00 (01.05.2024 – 30.06.2024) 100.00"
+    Und steht im PDF "6 Monate × CHF 80.00 (01.07.2024 – 31.12.2024) 480.00"
+    Und steht im PDF "Abgezogen sind die Akontobeiträge, die im Mietvertrag vereinbart sind."
+    # #477 (Entscheid Product Owner 2026-10-19): die Zeile heisst «Akontobeiträge», nicht «Geleistete …»
+    Und steht im PDF nicht "Geleistete"

@@ -74,7 +74,9 @@ import {
 	reviewContract,
 	enterStartDate,
 	enterStartAndBilledUntil,
-	saveContract
+	saveContract,
+	changeAdvancePaymentFrom,
+	saveStartWithAdvance
 } from '../tasks/contract-form';
 import { searchContracts } from '../tasks/contracts';
 
@@ -533,6 +535,22 @@ When(
 	}
 );
 
+// #464 (#90): the help at the Akonto field; the wording follows the domain review
+Then(
+	'erfährt der Liegenschaftsverwalter, dass Dwello das vereinbarte Akonto abrechnet und fehlende Zahlungen ausserhalb von Dwello geregelt werden',
+	async ({ verwalter }) => {
+		await verwalter.sees(advancePaymentHelpText).toContain('ausserhalb von Dwello');
+	}
+);
+
+Then('erfährt der Liegenschaftsverwalter, dass eine Erhöhung des Akontos das amtliche Formular braucht', async ({ verwalter }) => {
+	await verwalter.sees(advancePaymentHelpText).toContain('amtlichen Formular');
+});
+
+When('der Liegenschaftsverwalter das Akonto ab {string} auf {string} Franken ändert', async ({ verwalter }, date: string, amount: string) => {
+	await verwalter.attemptsTo(changeAdvancePaymentFrom(date, amount));
+});
+
 When('der Liegenschaftsverwalter die Nebenkostenpauschale auf {string} Franken setzt', async ({ verwalter }, amount: string) => {
 	await verwalter.attemptsTo(changeFlatRateUtilityCharge(amount));
 });
@@ -611,5 +629,12 @@ Then(
 	'erfährt der Liegenschaftsverwalter, dass Dwello keine Abrechnung erstellt, wenn der Mietvertrag bis «Abgerechnet bis» endet',
 	async ({ verwalter }) => {
 		await verwalter.sees(billedUntilHelpText).toContain('oder in denen der Mietvertrag bis dahin endet');
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter den Vertragsbeginn {string} mit {string} Franken Akonto ab {string} speichert',
+	async ({ verwalter }, date: string, amount: string, from: string) => {
+		await verwalter.attemptsTo(saveStartWithAdvance(date, amount, from));
 	}
 );
