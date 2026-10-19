@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { googleSignInParameter, loginHint, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
-import { expireSession, signInWith, signOut } from '../tasks/authentication';
+import { expireSession, holdSessionWithoutAccess, signInWith, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
 
 const { Given, When, Then } = createBdd(test);
@@ -25,6 +25,14 @@ When('Google den Besucher nach einer abgebrochenen Anmeldung zurückschickt', as
 
 Given('die Sitzung des Liegenschaftsverwalters ist abgelaufen', async ({ verwalter, baseURL }) => {
 	await verwalter.attemptsTo(expireSession(baseURL!));
+});
+
+Given('ein Besucher hat eine Sitzung mit einem Konto ohne Zugang zu Dwello', async ({ besucher, baseURL }) => {
+	await besucher.attemptsTo(holdSessionWithoutAccess(baseURL!));
+});
+
+When('der Besucher die Übersicht öffnet', async ({ besucher }) => {
+	await besucher.attemptsTo(openPage('/dashboard'));
 });
 
 When('der Liegenschaftsverwalter die Anmeldeseite öffnet', async ({ verwalter }) => {

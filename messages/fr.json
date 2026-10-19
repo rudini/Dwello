@@ -133,6 +133,7 @@
 	"login_error_cancelled": "La connexion a été interrompue.",
 	"login_error_failed": "La connexion a échoué. Veuillez réessayer.",
 	"login_error_unavailable": "Cette connexion n’est pas configurée.",
+	"login_error_not_allowed": "Ce compte n’a pas accès à Dwello. Connectez-vous avec le compte configuré pour Dwello.",
 	"error_title": "Erreur",
 	"error_404": "Cette page n’existe pas.",
 	"error_403": "Vous n’avez pas accès à cette page.",

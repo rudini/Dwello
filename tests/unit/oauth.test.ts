@@ -164,6 +164,16 @@ describe('User Profile Fetching', () => {
 			expect(profile.provider).toBe('google');
 			// #82: the profile picture Google also sends is not taken over
 			expect(profile).not.toHaveProperty('picture');
+			expect(profile.emailVerified).toBe(true);
+		});
+
+		it('meldet, wenn Google die Adresse nicht bestätigt hat (#51)', async () => {
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({ id: 'g-1', email: 'neu@gmail.com', verified_email: false, name: 'Neu' })
+			});
+
+			expect((await fetchUserProfile('access-token', 'google')).emailVerified).toBe(false);
 		});
 
 		it('should fetch Microsoft user profile', async () => {

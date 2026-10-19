@@ -166,7 +166,7 @@ export async function exchangeCodeForToken(
 export async function fetchUserProfile(
 	accessToken: string,
 	provider: OAuthProvider
-): Promise<JwtPayload> {
+): Promise<JwtPayload & { emailVerified: boolean }> {
 	const config = providerConfigs[provider];
 
 	const response = await fetch(config.userInfoUrl, {
@@ -186,7 +186,8 @@ export async function fetchUserProfile(
 			sub: profile.id,
 			email: profile.email,
 			name: profile.name,
-			provider: 'google'
+			provider: 'google',
+			emailVerified: profile.verified_email // ALLOWED_EMAILS counts only verified addresses (#51)
 		};
 	} else {
 		const profile: MicrosoftUserProfile = await response.json();
@@ -194,7 +195,8 @@ export async function fetchUserProfile(
 			sub: profile.id,
 			email: profile.mail || profile.userPrincipalName,
 			name: profile.displayName,
-			provider: 'microsoft'
+			provider: 'microsoft',
+			emailVerified: false // `mail` / `userPrincipalName` of tenant `common` is not verified
 		};
 	}
 }

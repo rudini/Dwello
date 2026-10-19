@@ -90,3 +90,14 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] Slice review round 1 (`docs/reviews/612-review-1.md`; C-1: `toRentStep`, used by four `contract-new` rows, clicked twice too, now `keepApartment`; C-2 comment fixed)
 - [x] Re-review and closing round 2 (`docs/reviews/612-review-2.md`, no findings)
 - [ ] PR
+
+### #51 Sign-in only for configured e-mail addresses (O-1)
+
+- [x] @wip scenario «Sitzung eines Kontos ohne Zugang» (`authentication.feature`), red at the missing refusal
+- [x] `isAllowed` (`ALLOWED_EMAILS`: list ignoring spaces and case, verified Google only, Microsoft refused, `*` or unset allows every account); unit tests red first
+- [x] Callback refuses with `/login?error=not_allowed`, `login_error_not_allowed` in four languages; `hooks.server.ts` and `/auth/refresh` treat a session not allowed as signed out (`tests/unit/auth-routes.test.ts`)
+- [x] `init` hook: production without `ALLOWED_EMAILS` refuses to start (unit test)
+- [x] E2E stack and `persona-stack.sh` set `ALLOWED_EMAILS=verwalter@example.com`; demo `ALLOWED_EMAILS=*`; `.env.example`, `docker-compose.prod.yml`, README (also `JWT_SECRET` ends all sessions)
+- [x] a11y and language state `login-not-allowed`
+- Files: `src/lib/server/allowed-emails.ts` (new), `src/hooks.server.ts`, `src/routes/auth/callback/+server.ts`, `src/routes/auth/refresh/+server.ts`, `src/lib/server/oauth.ts` (`emailVerified`), `src/lib/server/login-flow.ts`, `messages/*.json`, tests (`tests/unit/allowed-emails.test.ts`, `auth-routes.test.ts`, `oauth.test.ts`, `src/__tests__/hooks.server.test.ts`), E2E (`authentication.feature`, session fixture, a11y rows), `playwright.config.ts`, `persona-stack.sh`, `docker-compose.prod.yml`, `.env.example`, `deploy/demo/`, README
+- [ ] Slice review, closing review; PR `Fixes #51`

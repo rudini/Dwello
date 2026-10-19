@@ -73,6 +73,7 @@
 		"fuel": "New category form with «Heizkosten nach dem Heizprofil verteilen» ticked: the checkbox «Brennstoff» with its help (#100).",
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
 		"login-error": "Login page showing a sign-in error (?error=failed).",
+		"login-not-allowed": "Login page after an account outside ALLOWED_EMAILS was refused (?error=not_allowed, #51).",
 		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
 		"user-menu-open": "User menu in the header open.",
 		"dialog-open": "A confirmation dialog of the page open.",
@@ -101,6 +102,7 @@
 			"states": [
 				"default",
 				"login-error",
+				"login-not-allowed",
 				"other-language",
 				"demo"
 			]

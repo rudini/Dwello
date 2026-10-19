@@ -311,6 +311,18 @@ describe('Auth Routes Integration Tests', () => {
 
 			expect(redirect).toMatchObject({ status: 303, location: '/login?error=failed' });
 			expect(oauthModule.exchangeCodeForToken).not.toHaveBeenCalled();
+		})
+		it('gibt einem Konto ohne Zugang keine Sitzung und nennt den Grund (#51)', async () => {
+			vi.stubEnv('ALLOWED_EMAILS', 'verwalter@example.com');
+			try {
+				const redirect = await callback('code=auth-code-123&state=mock-state-abc123');
+
+				expect(redirect).toMatchObject({ status: 303, location: '/login?error=not_allowed' });
+				expect(authModule.setSessionCookie).not.toHaveBeenCalled();
+				expect(authModule.clearAuthCookies).toHaveBeenCalled();
+			} finally {
+				vi.unstubAllEnvs();
+			}
 		});
 	});
 
@@ -440,6 +452,30 @@ describe('Auth Routes Integration Tests', () => {
 
 			const response = await POST(event);
 			expect(response.status).toBe(401);
+		})
+		it('verlängert die Sitzung eines Kontos ohne Zugang nicht (#51)', async () => {
+			vi.stubEnv('ALLOWED_EMAILS', 'verwalter@example.com');
+			vi.mocked(authModule.validateXsrfToken).mockReturnValue(true);
+			vi.mocked(authModule.getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			vi.spyOn(authModule, 'verifyJwt').mockResolvedValue({
+				sub: 'user-123',
+				email: 'fremd@example.com',
+				name: 'Fremd',
+				provider: 'google'
+			} as Awaited<ReturnType<typeof authModule.verifyJwt>>);
+			const mockGenerateJwt = vi.spyOn(authModule, 'generateJwt');
+			try {
+				const { POST } = await import('$lib/../routes/auth/refresh/+server');
+				const event = createMockRequestEvent({
+					url: 'http://localhost:3000/auth/refresh',
+					method: 'POST'
+				});
+
+				expect((await POST(event)).status).toBe(401);
+				expect(mockGenerateJwt).not.toHaveBeenCalled();
+			} finally {
+				vi.unstubAllEnvs();
+			}
 		});
 	});
 

@@ -43,6 +43,8 @@ On the OAuth consent screen, set the publishing status to **In production**: in 
 
 Microsoft sign-in is not wired into `docker-compose.prod.yml`; the demo uses Google only.
 
+`ALLOWED_EMAILS=*` in `deploy/demo/.env` lets every Google account in. Without it the frontend refuses to start, because production names the accounts that may sign in (#51).
+
 ## 4. Access to the repository
 
 `rudini/Dwello` is private, and GitHub takes no passwords for `git clone`. The VM reads it with a deploy key: an SSH key that may only read this one repository.

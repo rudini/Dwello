@@ -133,6 +133,7 @@
 	"login_error_cancelled": "Sign-in was cancelled.",
 	"login_error_failed": "Sign-in failed. Please try again.",
 	"login_error_unavailable": "This sign-in is not set up.",
+	"login_error_not_allowed": "This account has no access to Dwello. Sign in with the account that is set up for Dwello.",
 	"error_title": "Error",
 	"error_404": "This page does not exist.",
 	"error_403": "You do not have access to this page.",
