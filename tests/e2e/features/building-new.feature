@@ -56,6 +56,12 @@ Funktionalität: Neues Gebäude erfassen
     Wenn der Liegenschaftsverwalter im Gebäuderegister die Adresse "Lindenweg 155" wählt
     Dann schlägt die Erfassung die Wohnungen "101, 102, 201" vor
 
+  # Fachprüfung V-1: Läden und Büros führt das Register nicht
+  @wip
+  Szenario: Das Gebäuderegister enthält nur Wohnungen
+    Wenn der Liegenschaftsverwalter im Gebäuderegister die Adresse "Lindenweg 155" wählt
+    Dann sieht der Liegenschaftsverwalter bei der Erfassung den Hinweis "Das Gebäuderegister enthält nur Wohnungen. Erfassen Sie Läden, Büros und andere vermietete Räume nach dem Speichern als eigene Wohnung."
+
   @wip
   Szenario: Die Zimmeranzahl aus dem Gebäuderegister prüfen
     Wenn der Liegenschaftsverwalter im Gebäuderegister die Adresse "Lindenweg 155" wählt
@@ -73,7 +79,7 @@ Funktionalität: Neues Gebäude erfassen
   @wip
   Szenario: Was es heisst, eine Wohnung nicht zu übernehmen
     Wenn der Liegenschaftsverwalter im Gebäuderegister die Adresse "Lindenweg 155" wählt
-    Dann erfährt der Liegenschaftsverwalter bei den Wohnungen "Nicht übernommene Wohnungen erfasst Dwello nicht. Die Verteilschlüssel verteilen die Kosten dann nur auf die übrigen Wohnungen."
+    Dann erfährt der Liegenschaftsverwalter bei den Wohnungen "Lassen Sie nur Wohnungen weg, die es nicht mehr gibt. Wohnungen, die Sie selbst nutzen oder die leer stehen, gehören dazu: ihren Anteil tragen Sie."
 
   @wip
   Szenario: Angaben ergänzen, die im Gebäuderegister fehlen
@@ -81,15 +87,16 @@ Funktionalität: Neues Gebäude erfassen
     Und der Liegenschaftsverwalter das Gebäude mit seinen Wohnungen erstellt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Fläche ist erforderlich."
     Und sieht der Liegenschaftsverwalter die Fehlermeldung "Stockwerk ist erforderlich."
-    Wenn der Liegenschaftsverwalter bei der Wohnung "2" die Fläche "64" und das Stockwerk "1. OG" ergänzt
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Zimmeranzahl ist erforderlich."
+    Wenn der Liegenschaftsverwalter bei der Wohnung "2" die Fläche "64", das Stockwerk "1. OG" und die Zimmeranzahl "2.5" ergänzt
     Und der Liegenschaftsverwalter das Gebäude mit seinen Wohnungen erstellt
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Birkenweg 7"
-    Und zeigt die Gebäudeseite die Wohnung "2" mit "2 Zimmer" und "64 m²"
+    Und zeigt die Gebäudeseite die Wohnung "2" mit "2.5 Zimmer" und "64 m²"
 
   @wip
   Szenario: Die Erfassung nennt, was im Gebäuderegister fehlt
     Wenn der Liegenschaftsverwalter im Gebäuderegister die Adresse "Birkenweg 7" wählt
-    Dann erfährt der Liegenschaftsverwalter bei der Wohnung "2", dass im Gebäuderegister "Fläche, Stockwerk" fehlen
+    Dann erfährt der Liegenschaftsverwalter bei der Wohnung "2", dass im Gebäuderegister "Fläche, Stockwerk, Zimmeranzahl" fehlen
 
   @wip
   Szenario: Eine fehlende Wohnungsnummer aus Stockwerk und Lage vorschlagen
@@ -97,7 +104,7 @@ Funktionalität: Neues Gebäude erfassen
     Dann schlägt die Erfassung die Wohnungen "2. OG Links, 2" vor
 
   @wip
-  Szenario: Gleiche Wohnungsnummern an zwei Eingängen
+  Szenario: Gleiche Wohnungsnummern unter zwei Hausnummern eines Gebäudes
     Wenn der Liegenschaftsverwalter im Gebäuderegister die Adresse "Eschenweg 500" wählt
     Dann schlägt die Erfassung die Wohnungen "500-101, 502-101" vor
 

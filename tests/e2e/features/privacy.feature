@@ -96,5 +96,5 @@ Funktionalität: Datenschutz
   # Gebäuderegister (#479): der Server von Dwello fragt geo.admin.ch, nicht der Browser
   @wip
   Szenario: Die Adresssuche fragt das Gebäuderegister des Bundes
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "swisstopo" in "Schweiz" mit seiner Datenschutzerklärung "https://www.geo.admin.ch/de/allgemeine-nutzungsbedingungen-bgdi"
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "swisstopo" in "Schweiz" mit seiner Datenschutzerklärung "https://www.swisstopo.admin.ch/de/rechtliches"
     Und erfährt der Liegenschaftsverwalter unter "Weitergabe an Dritte", dass swisstopo den Suchbegriff und die IP-Adresse des Servers erhält, nicht die des Browsers
