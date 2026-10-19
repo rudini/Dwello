@@ -139,8 +139,8 @@ jobs:
     needs: changes
     if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
-    # main runs every browser, about three times the tests of a pull request (Chromium and the API driver)
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 60 }}
+    # every browser on pull requests too: a race only Firefox or WebKit loses turned main red after green pull requests
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -154,8 +154,8 @@ jobs:
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
-      # Pull requests and the axe check: Chromium only (with the API driver); pushes to main: every browser
-      BROWSERS: ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || 'chromium firefox webkit' }}
+      # The axe check: Chromium only; the E2E tests: every browser (with the API driver)
+      BROWSERS: ${{ matrix.reports == 'a11y-reports' && 'chromium' || 'chromium firefox webkit' }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -198,7 +198,7 @@ jobs:
         run: bunx playwright install --with-deps ${{ env.BROWSERS }}
       - name: ${{ matrix.name }}
         if: env.SKIP != 'true'
-        run: bun run test:e2e -- ${{ matrix.filter }} --shard=${{ matrix.shard }}/${{ matrix.shards }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
+        run: bun run test:e2e -- ${{ matrix.filter }} --shard=${{ matrix.shard }}/${{ matrix.shards }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4

@@ -128,3 +128,10 @@ Branch `ccr-01e823d6-yhj5kc`. Run 614 on `main` failed once more in Firefox (sta
 - [x] Feature review: personas Sven and Marco (`docs/design/personas/{sven,marco}-468.md`, locked state reached by delaying the requests); Sven no Blocker/Major; Marco P-1 Major: the notice that arrives as «Weiter» unlocks pushes the button down, a tap lands on its link; it existed before the change: product owner 2026-10-19: merge #468, layout in #470 (`entscheiden`)
 - [x] Closing code-review round 3 (`docs/reviews/468-review-3.md`, no findings)
 - [ ] PR `Fixes #468`
+
+### E2E in every browser on pull requests
+
+Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.
+
+- [x] `ci.yml`: E2E on pull requests with Chromium, Firefox, WebKit and `api` (60 min, as `main`); the axe check stays Chromium; `docs/test-pyramid.md`, `tests/e2e/CLAUDE.md`
+- [ ] Slice review, PR: the first pull request with every browser shows the time it takes
