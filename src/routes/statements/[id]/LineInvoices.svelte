@@ -9,6 +9,9 @@
 
 	const number = (amount: number) => formatCurrency(amount).replace(/^CHF\s?/, '');
 	const parted = $derived(item.invoices.filter((invoice) => invoice.part));
+	// by the Heizprofil its share, as the PDF (#71; persona Dr. Weber P-1 of #451), else the days
+	const factor = (part: NonNullable<StatementLineInvoice['part']>) =>
+		part.profile ? `${part.profile.percent.toFixed(2)} %` : `${part.days}/${part.total}`;
 
 	function partText({ part, start, end, amount, fuelStock }: StatementLineInvoice) {
 		const values = { start: formatDate(start), end: formatDate(end), amount: formatCurrency(amount), days: part!.days, total: part!.total };
@@ -31,7 +34,7 @@
 		const sum = parted
 			.map((invoice, i) => {
 				const sign = invoice.amount < 0 ? (i ? ' – ' : '– ') : i ? ' + ' : '';
-				return `${sign}${number(Math.abs(invoice.amount))} × ${invoice.part!.days}/${invoice.part!.total}`;
+				return `${sign}${number(Math.abs(invoice.amount))} × ${factor(invoice.part!)}`;
 			})
 			.join('');
 		if (item.totalAmount === 0) return m.statements_part_share_zero({ sum, share: number(item.tenantShare) });

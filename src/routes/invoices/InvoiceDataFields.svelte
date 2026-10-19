@@ -40,7 +40,7 @@
 		onblur?: () => void;
 		idPrefix?: string; // several invoices on one page (the upload dialog) need their own ids
 		chooseBuilding?: boolean; // false where the building is chosen once for all (the upload dialog)
-		fuel?: boolean; // a Brennstoff category: a delivery counts in the period of its delivery day (#451, M-1)
+		fuel?: boolean; // a delivery into the building's tank: it counts in the period of its delivery day (#451, M-1)
 		read?: { unsure: string[]; missing: string[] }; // fields the KI read without being sure, or did not find
 	} = $props();
 
@@ -83,10 +83,10 @@
 		{m.invoices_service_period()} <span class="font-normal text-ink-muted">{m.ui_optional()}</span>
 	</legend>
 	<div class="flex flex-col gap-2 text-ink-muted" data-testid="invoice-service-period-help">
+		{#if fuel}<p>{m.invoices_service_period_fuel()}</p>{/if}
 		<p>{m.invoices_service_period_help({ year })}</p>
 		<p>{m.invoices_service_period_years({ year, end: year + 5 })}</p>
 		<p>{m.invoices_service_period_boiler()}</p>
-		{#if fuel}<p>{m.invoices_service_period_fuel()}</p>{/if}
 	</div>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<DateInput

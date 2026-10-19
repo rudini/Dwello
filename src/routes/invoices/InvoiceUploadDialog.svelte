@@ -35,6 +35,7 @@
 		categories,
 		distributionKeys,
 		defaultDistributionKeyId,
+		tanks = {},
 		oncreated
 	}: {
 		open?: boolean;
@@ -42,6 +43,7 @@
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
 		defaultDistributionKeyId: string;
+		tanks?: Record<string, string>; // per building the category of its tank (#451, M-1)
 		oncreated: (created: Created[]) => void;
 	} = $props();
 
@@ -259,6 +261,7 @@
 					errors={errors[row.key] ?? {}}
 					{categories}
 					{distributionKeys}
+					tank={tanks[buildingId]}
 					onretry={() => read(row.key)}
 					onremove={() => removeRow(row.key)}
 				/>

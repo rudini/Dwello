@@ -14,9 +14,9 @@ export function suggestionProvenance(suggestion: Suggestion | null) {
 	return { llmCategoryId: suggestion.category.id, llmConfidence: String(suggestion.confidence) };
 }
 
-/** Whether the chosen category is a Brennstoff: its delivery counts in the period of its delivery day (#451, M-1) */
-export const isFuel = (categories: { id: string; isFuel?: boolean }[], categoryId: string) =>
-	!!categories.find((category) => category.id === categoryId)?.isFuel;
+/** Whether the invoice is a delivery into the building's tank: it counts in the period of its delivery day (#451, M-1) */
+export const deliversToTank = (tanks: Record<string, string> | undefined, buildingId: string, categoryId: string) =>
+	!!categoryId && tanks?.[buildingId] === categoryId;
 
 /** The Leistungszeitraum as the backend stores it: both dates, or null without one */
 export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({

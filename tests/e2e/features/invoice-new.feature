@@ -51,7 +51,10 @@ Funktionalität: Neue Rechnung erfassen
   # #451 (Fachreview M-1): eine Lieferung von Heizmaterial in den Tank zählt ganz in der Abrechnungsperiode ihres
   # Lieferdatums, des Endes ihres Leistungszeitraums; der Satz steht bei einer Brennstoff-Kategorie (Code-Review C-2)
   Szenario: Der Leistungszeitraum erklärt die Lieferung von Heizmaterial
-    Wenn der Liegenschaftsverwalter die Kategorie "Heizung" wählt
+    Angenommen im Gebäude "Seeblick" war am "2024-12-31" Heizöl für "600" Franken im Tank
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter die Rechnung dem Gebäude "Seeblick" zuordnet
+    Und der Liegenschaftsverwalter die Kategorie "Heizung" wählt
     Dann erklärt das Formular beim Leistungszeitraum "Tragen Sie als Beginn und als Ende den Tag der Lieferung ein. Die Lieferung zählt dann ganz in der Abrechnungsperiode dieses Tages, auch wenn die Rechnung erst später kommt."
 
   # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)

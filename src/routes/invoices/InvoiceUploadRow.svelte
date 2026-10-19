@@ -16,6 +16,7 @@
 		errors,
 		categories,
 		distributionKeys,
+		tank,
 		onretry,
 		onremove
 	}: {
@@ -24,6 +25,7 @@
 		errors: Record<string, string>;
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
+		tank?: string;
 		onretry: () => void;
 		onremove: () => void;
 	} = $props();
@@ -85,6 +87,6 @@
 	</div>
 
 	{#if open && editable && !row.several}
-		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} />
+		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} {tank} />
 	{/if}
 </li>

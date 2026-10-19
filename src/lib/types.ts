@@ -250,6 +250,7 @@ export interface InvoicesListData {
 	years: string[]; // Rechnungsdatum years offered in the filter
 	distributionKeys: { id: string; name: string }[]; // offered for the invoices of «Rechnungen hochladen»
 	defaultDistributionKeyId: string; // preselected there, as set in the settings
+	tanks: Record<string, string>; // per building the category of its tank (#451, M-1)
 }
 
 // Heating Profile types
@@ -311,6 +312,7 @@ export interface StatementLineInvoice {
 		total: number;
 		noPeriod?: true;
 		whole?: { start: string; end: string; amount: number };
+		profile?: { percent: number }; // a heating invoice by the Heizprofil's months in its days (#71)
 	} | null;
 }
 

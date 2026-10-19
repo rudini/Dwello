@@ -5,7 +5,7 @@
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
-	import { isFuel, plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
+	import { deliversToTank, plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -31,6 +31,7 @@
 			distributionKeys: DistributionKeyRow[];
 			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice
 			missedIn?: { start: string; end: string }[]; // periods with statements made before it was recorded
+			tanks?: Record<string, string>; // per building the category of its tank (#451, M-1)
 		};
 	} = $props();
 
@@ -130,7 +131,7 @@
 			testid="invoice-number-input"
 		/>
 		<InvoiceDataFields
-			fuel={isFuel(data.categories, values.categoryId)}
+			fuel={deliversToTank(data.tanks, values.buildingId, values.categoryId)}
 			bind:buildingId={values.buildingId}
 			bind:invoiceDate={values.invoiceDate}
 			bind:servicePeriodStart={values.servicePeriodStart}

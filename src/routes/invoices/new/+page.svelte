@@ -5,7 +5,7 @@
 	import { localToday } from '$lib/contract-status';
 	import { api } from '$lib/api';
 	import {
-		isFuel,
+		deliversToTank,
 		plainAmount,
 		servicePeriodOf,
 		suggestionProvenance,
@@ -35,6 +35,7 @@
 			buildingId: string;
 			returnTo: string | null;
 			period?: { start: string; end: string } | null;
+			tanks?: Record<string, string>; // per building the category of its tank (#451, M-1)
 		};
 	} = $props();
 
@@ -143,7 +144,7 @@
 
 	<Panel title={m.invoices_data()}>
 		<InvoiceDataFields
-			fuel={isFuel(data.categories, categoryId)}
+			fuel={deliversToTank(data.tanks, buildingId, categoryId)}
 			bind:buildingId
 			bind:invoiceDate
 			bind:servicePeriodStart

@@ -1,5 +1,5 @@
 import type { InvoicesListData } from '$lib/types';
-import { invoiceChoices, toInvoice } from '$lib/server/invoice';
+import { invoiceChoices, tankCategories, toInvoice } from '$lib/server/invoice';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -53,6 +53,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			})
 		);
 
+		const tanks = await tankCategories(fetch, buildings.map((b: { id: string }) => b.id));
 		const { categories } = choices;
 		const invoices = (invoicesData.invoices || invoicesData.data || []).map(
 			(r: Record<string, unknown>) => toInvoice(r, categories)
@@ -67,7 +68,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			categories,
 			years,
 			distributionKeys: choices.distributionKeys,
-			defaultDistributionKeyId: choices.defaultDistributionKeyId
+			defaultDistributionKeyId: choices.defaultDistributionKeyId,
+			tanks
 		};
 	} catch (err) {
 		console.error('Failed to fetch invoices:', err);
@@ -80,7 +82,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			categories: [],
 			years,
 			distributionKeys: [],
-			defaultDistributionKeyId: ''
+			defaultDistributionKeyId: '',
+			tanks: {}
 		};
 	}
 };

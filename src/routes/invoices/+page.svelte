@@ -55,6 +55,7 @@
 		categories={data.categories}
 		distributionKeys={data.distributionKeys}
 		defaultDistributionKeyId={data.defaultDistributionKeyId}
+		tanks={data.tanks}
 		oncreated={(list) => {
 			created = list;
 			invalidateAll();
