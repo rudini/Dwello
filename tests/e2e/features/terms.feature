@@ -26,6 +26,7 @@ Funktionalität: Nutzungsbedingungen
 
   Szenario: Hilfe zum Informieren der Mieter
     Dann nennen die Nutzungsbedingungen unter "Verantwortung für Abrechnungen" "Sie können Ihren Mietern dazu die Abschnitte «Verantwortlich», «Welche Daten Dwello speichert», «Aufbewahrung» und «Weitergabe an Dritte» der Datenschutzerklärung weitergeben."
+    Und nennen die Nutzungsbedingungen unter "Verantwortung für Abrechnungen" "Nennen Sie dabei Ihren Namen und wie Ihre Mieter Sie erreichen, und sagen Sie dazu, dass mit «Sie» dort der Vermieter gemeint ist (Art. 19 Abs. 2 DSG)."
 
   Szenario: Stand der Nutzungsbedingungen
     Dann nennt die Seite den Stand "19. Oktober 2026"

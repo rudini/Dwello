@@ -163,9 +163,11 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter unter {string}, dass seine Mieter bei ihm Auskunft über ihre Daten verlangen können',
+	'erfährt der Liegenschaftsverwalter unter {string}, dass seine Mieter und andere erfasste Personen bei ihm Auskunft über ihre Daten verlangen können',
 	async ({ verwalter }, heading: string) => {
-		await verwalter.sees(sectionText(heading)).toContain('Ihre Mieter können bei Ihnen kostenlos Auskunft');
+		await verwalter.sees(sectionText(heading)).toContain(
+			'Ihre Mieter und andere Personen, deren Daten Sie erfassen, etwa Rechnungssteller, können bei Ihnen kostenlos Auskunft'
+		);
 		await verwalter.sees(sectionText(heading)).toContain('Art. 25 DSG');
 	}
 );
@@ -181,8 +183,9 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter unter {string}, dass seine Mieter bei ihm Berichtigung, Herausgabe und Löschung verlangen und eine Verletzung beim EDÖB anzeigen können',
+	'erfährt der Liegenschaftsverwalter unter {string}, dass erfasste Personen bei ihm Berichtigung, Herausgabe und Löschung verlangen und eine Verletzung beim EDÖB anzeigen können',
 	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Ebenso können diese Personen bei Ihnen und Sie beim Betreiber verlangen');
 		await verwalter.sees(sectionText(heading)).toContain('dass unrichtige Daten berichtigt werden (Art. 32 Abs. 1 DSG)');
 		await verwalter.sees(sectionText(heading)).toContain('in einem gängigen elektronischen Format herausgegeben werden (Art. 28 DSG)');
 		await verwalter.sees(sectionText(heading)).toContain('die Daten gelöscht werden (Art. 32 Abs. 2 DSG)');

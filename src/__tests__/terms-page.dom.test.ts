@@ -87,6 +87,10 @@ describe('Nutzungsbedingungen ohne Vertrag', () => {
 		expect(section('Verantwortung für Abrechnungen')?.textContent).toContain(
 			'Sie können Ihren Mietern dazu die Abschnitte «Verantwortlich», «Welche Daten Dwello speichert», «Aufbewahrung» und «Weitergabe an Dritte» der Datenschutzerklärung weitergeben.'
 		);
+		// PO on Fachreview 458-1 R-2: the sections do not name the landlord (Art. 19 Abs. 2 Bst. a DSG)
+		expect(section('Verantwortung für Abrechnungen')?.textContent).toContain(
+			'Nennen Sie dabei Ihren Namen und wie Ihre Mieter Sie erreichen, und sagen Sie dazu, dass mit «Sie» dort der Vermieter gemeint ist (Art. 19 Abs. 2 DSG).'
+		);
 	});
 
 	// Fachreview 458-1 R-6: notes that are no contract cannot exclude a claim; the agreement with a provider decides

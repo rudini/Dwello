@@ -67,15 +67,15 @@ Funktionalität: Datenschutz
     Und erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass ein Anbieter die erfassten Daten nur in seinem Auftrag bearbeitet und der Betreiber für Anmeldung, Protokoll des Servers und Cookies verantwortlich ist
 
   Szenario: Auskunft über die eigenen Daten
-    Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass seine Mieter bei ihm Auskunft über ihre Daten verlangen können
+    Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass seine Mieter und andere erfasste Personen bei ihm Auskunft über ihre Daten verlangen können
 
   # #458 (#346): Rechte über die Auskunft hinaus (Art. 28, 32, 49 DSG)
   Szenario: Weitere Rechte der Mieter
-    Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass seine Mieter bei ihm Berichtigung, Herausgabe und Löschung verlangen und eine Verletzung beim EDÖB anzeigen können
+    Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass erfasste Personen bei ihm Berichtigung, Herausgabe und Löschung verlangen und eine Verletzung beim EDÖB anzeigen können
 
   # #458 (#333): OPERATOR_SERVER_COUNTRY in playwright.config.ts
   Szenario: Land des Servers
-    Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Die Daten liegen in der Datenbank des Betreibers dieser Dwello-Installation. Der Server steht in Deutschland."
+    Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Die Daten liegen in der Datenbank des Betreibers dieser Dwello-Installation. Der Server steht in folgendem Land: Liechtenstein."
 
   Szenario: Wie lange Dwello Daten aufbewahrt
     Dann erfährt der Liegenschaftsverwalter unter "Aufbewahrung", dass Dwello nichts von selbst löscht und wer zur Buchführung verpflichtet ist, Geschäftsbücher und Buchungsbelege 10 Jahre aufbewahrt
@@ -93,7 +93,7 @@ Funktionalität: Datenschutz
 
   # #458 (#333): MAIL_PROVIDER_NAME und MAIL_PROVIDER_COUNTRY in playwright.config.ts; ohne sie der Text von früher (DOM-Test)
   Szenario: E-Mails über den Mailserver eines Anbieters
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "werden über den Mailserver von Muster Mail AG (Schweiz) zugestellt. Dabei erhält Muster Mail AG Name und E-Mail-Adresse des Mieters"
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "werden über den Mailserver von Muster Mail AG (Liechtenstein) zugestellt. Dabei erhält Muster Mail AG Name und E-Mail-Adresse des Mieters"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
 
   Szenario: Länder und Datenschutzerklärungen der Dienste, die der Browser aufruft

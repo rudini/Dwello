@@ -268,11 +268,12 @@ describe('Datenschutzerklärung nach #82', () => {
 		expect(text).not.toContain('ist ihr Betreiber');
 	});
 
-	it('sagt, dass Mieter beim Vermieter Auskunft verlangen und der Vermieter beim Betreiber', () => {
+	// PO on Fachreview 458-1 R-3: every person whose data the landlord records (Art. 25 Abs. 1 DSG «Jede Person»)
+	it('sagt, dass Mieter und andere erfasste Personen beim Vermieter Auskunft verlangen und der Vermieter beim Betreiber', () => {
 		page();
 
 		expect(section('Verantwortlich')?.textContent).toContain(
-			'Ihre Mieter können bei Ihnen kostenlos Auskunft darüber verlangen, ob und welche Daten über sie bearbeitet werden, Sie selbst beim Betreiber (Art. 25 DSG).'
+			'Ihre Mieter und andere Personen, deren Daten Sie erfassen, etwa Rechnungssteller, können bei Ihnen kostenlos Auskunft darüber verlangen, ob und welche Daten über sie bearbeitet werden, Sie selbst beim Betreiber (Art. 25 DSG).'
 		);
 	});
 
@@ -281,6 +282,7 @@ describe('Datenschutzerklärung nach #82', () => {
 		page();
 
 		const text = section('Verantwortlich')?.textContent;
+		expect(text).toContain('Ebenso können diese Personen bei Ihnen und Sie beim Betreiber verlangen');
 		expect(text).toContain('dass unrichtige Daten berichtigt werden (Art. 32 Abs. 1 DSG)');
 		expect(text).toContain('in einem gängigen elektronischen Format herausgegeben werden (Art. 28 DSG)');
 		expect(text).toContain('die Daten gelöscht werden (Art. 32 Abs. 2 DSG)');
@@ -298,11 +300,12 @@ describe('Datenschutzerklärung nach #82', () => {
 	});
 
 	// #458 (#333): the server's country only when OPERATOR_SERVER_COUNTRY is set (Art. 19 Abs. 4 DSG)
+	// PO on Fachreview 458-1 R-1: no preposition before the value, so «Schweiz» reads right too
 	it('nennt das Land des Servers, wenn es eingerichtet ist', () => {
-		page({ serverCountry: 'Deutschland' });
+		page({ serverCountry: 'Schweiz' });
 
 		expect(section('Welche Daten Dwello speichert')?.textContent).toContain(
-			'Die Daten liegen in der Datenbank des Betreibers dieser Dwello-Installation. Der Server steht in Deutschland.'
+			'Die Daten liegen in der Datenbank des Betreibers dieser Dwello-Installation. Der Server steht in folgendem Land: Schweiz.'
 		);
 	});
 
