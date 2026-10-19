@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { commitAll, git, writeProject } from '../deepcheck/test/helpers.ts';
@@ -43,5 +44,23 @@ describe('fallow gate without a base branch', () => {
 		const advice = /run (git fetch [^,]+)/.exec(blocked.stderr)?.[1] ?? '';
 		git(root, ...advice.split(' ').slice(1));
 		expect(hook(root, 'git commit -m x')).toMatchObject({ status: 0 });
+	});
+});
+
+describe('fallow gate on a finding', () => {
+	it('names the finding in a few lines instead of the whole audit JSON', () => {
+		const root = writeProject({
+			'package.json': '{ "name": "x", "type": "module", "main": "src/index.ts" }\n',
+			'src/index.ts': "import { a } from './a.ts';\nconsole.log(a);\n",
+			'src/a.ts': 'export const a = 1;\n'
+		});
+		git(root, 'init', '-q', '-b', 'main');
+		commitAll(root, 'initial');
+		git(root, 'switch', '-q', '-c', 'work');
+		writeFileSync(`${root}/src/a.ts`, 'export const a = 1;\nexport const unusedHelper = 2;\n');
+		const blocked = hook(root, 'git commit -m x');
+		expect(blocked.status).toBe(2);
+		expect(blocked.stderr).toContain('unused-export:src/a.ts:2:unusedHelper');
+		expect(blocked.stderr.length).toBeLessThan(1500);
 	});
 });

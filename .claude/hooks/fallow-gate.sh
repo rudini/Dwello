@@ -78,7 +78,15 @@ if [ "$VERDICT" = "fail" ]; then
   echo "fallow-gate: blocked by fallow ${VERSION:-unknown} at $BIN_DESC" >&2
   # Changed for Dwello (keep when regenerating): the whole Bash command was dropped, not only the git call
   echo "fallow-gate: nothing in this command ran, edits and git add before the git call included." >&2
-  cat "$TMP_JSON" >&2
+  # Changed for Dwello (keep when regenerating): one line per finding instead of the whole JSON (about 7 KB that stays
+  # in the agent's context); the JSON only when the compact run prints nothing
+  "${RUNNER[@]}" audit --format compact --quiet >"$TMP_ERR" 2>/dev/null || true
+  if [ -s "$TMP_ERR" ]; then
+    cat "$TMP_ERR" >&2
+    echo "fallow-gate: details with bunx fallow audit" >&2
+  else
+    cat "$TMP_JSON" >&2
+  fi
   exit 2
 fi
 
