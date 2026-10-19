@@ -14,11 +14,19 @@
 			}) + (data.operator.contact ? ` ${m.terms_contact({ contact: data.operator.contact })}` : '')
 	);
 
-	const sections = [
+	// The sections of the privacy statement the landlord passes on to his tenants (terms_responsibility_3, #458)
+	const forTenants = [
+		{ id: 'controller', title: m.privacy_controller_title() },
+		{ id: 'stored', title: m.privacy_stored_title() },
+		{ id: 'retention', title: m.privacy_retention_title() },
+		{ id: 'third', title: m.privacy_third_title() }
+	];
+
+	const sections: { id: string; title: string; paragraphs: string[]; after?: string[] }[] = [
 		{
 			id: 'purpose',
 			title: m.terms_purpose_title(),
-			paragraphs: [m.terms_purpose_1(), m.terms_no_contract()]
+			paragraphs: [m.terms_purpose_1(), m.terms_no_contract(), m.terms_processor()]
 		},
 		{
 			id: 'responsibility',
@@ -27,7 +35,8 @@
 				m.terms_responsibility_1(),
 				m.terms_responsibility_2(),
 				m.terms_responsibility_3()
-			]
+			],
+			after: [m.terms_responsibility_4(), m.terms_responsibility_5()]
 		},
 		{
 			id: 'availability',
@@ -62,6 +71,22 @@
 			{#each section.paragraphs as paragraph (paragraph)}
 				<p class="text-ink">{paragraph}</p>
 			{/each}
+			{#if section.after}
+				<ul class="flex flex-col">
+					{#each forTenants as link (link.id)}
+						<li>
+							<a
+								href="/privacy#{link.id}"
+								class="inline-flex min-h-12 items-center text-accent underline underline-offset-4 hover:text-accent-strong"
+								data-testid="terms-privacy-section-link">{link.title}</a
+							>
+						</li>
+					{/each}
+				</ul>
+				{#each section.after as paragraph (paragraph)}
+					<p class="text-ink">{paragraph}</p>
+				{/each}
+			{/if}
 		</Panel>
 	{/each}
 </div>

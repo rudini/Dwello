@@ -24,6 +24,7 @@ import {
 	chooseInHelpContents,
 	chooseInMainNav,
 	chooseLogo,
+	openPrivacySectionFromTerms,
 	openSettingsFromUserMenu,
 	useWindowWidth
 } from '../tasks/app-frame';
@@ -46,6 +47,13 @@ When(
 	'der Liegenschaftsverwalter in der Hauptnavigation {string} wählt',
 	async ({ verwalter }, label: string) => {
 		await verwalter.attemptsTo(chooseInMainNav(label));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter in den Nutzungsbedingungen den Abschnitt {string} der Datenschutzerklärung wählt',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.attemptsTo(openPrivacySectionFromTerms(heading));
 	}
 );
 

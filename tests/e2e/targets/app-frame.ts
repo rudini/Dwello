@@ -33,6 +33,11 @@ export const pageTitle = target('Seitentitel', (page) => page.getByRole('heading
 export const pagePurpose = target('Zweck der Seite unter dem Titel', (page) => page.getByTestId('page-purpose'));
 /** When the privacy statement or the terms of use last changed */
 export const legalAsOf = target('Stand der Seite', (page) => page.getByTestId('legal-as-of'));
+/** A link in the terms of use to a section of the privacy statement the landlord passes on */
+export const privacySectionLinkInTerms = (heading: string) =>
+	target(`Link auf den Abschnitt «${heading}»`, (page) =>
+		page.getByTestId('terms-privacy-section-link').filter({ hasText: heading })
+	);
 export const termsLinkOnLogin = target('Nutzungsbedingungen', (page) => page.getByTestId('login-terms-link'));
 export const privacyLinkOnLogin = target('Datenschutz', (page) => page.getByTestId('login-privacy-link'));
 export const publicLoginLink = target('Zur Anmeldung', (page) => page.getByTestId('public-login-link'));
