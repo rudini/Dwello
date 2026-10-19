@@ -200,8 +200,9 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
-		async advancePayment(tenantTitle: string, monthlyAdvancePayment: string) {
-			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment });
+		// #464: from a day on, or for the whole contract without one
+		async advancePayment(tenantTitle: string, monthlyAdvancePayment: string, advancePaymentFrom?: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment, advancePaymentFrom });
 		},
 
 		// «Nebenkostenpauschale»: counts in «Monatlich total», never billed (#429)
@@ -353,7 +354,12 @@ export function testData(api: CallTheApi) {
 		async replaceStatement(tenantTitle: string, year: number, correct = false) {
 			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
 			await post(`statements/${id}/replace`, {});
-			if (correct) ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
+			if (correct) await this.correctStatement(tenantTitle, year);
+		},
+
+		async correctStatement(tenantTitle: string, year: number) {
+			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
+			ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
 		},
 
 		async resetPayment(tenantTitle: string, year: number) {

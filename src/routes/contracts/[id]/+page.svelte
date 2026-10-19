@@ -167,6 +167,10 @@
 			rent={data.rentBreakdown}
 			fee={managementFeeText(contract.managementFeeAgreed, contract.managementFeePercent)}
 			agreedCosts={data.agreedCosts}
+			advancePayments={contract.advancePayments}
+			advanceDelete={form?.advanceDeleteError
+				? { validFrom: String(form.validFrom), error: form.advanceDeleteError }
+				: null}
 		/>
 	</div>
 
