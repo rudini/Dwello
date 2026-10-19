@@ -25,7 +25,7 @@ import {
 } from '../db/schema';
 import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
-import { formatCHF, roundToRappen } from './pdf-format';
+import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
@@ -428,33 +428,38 @@ async function calculatedRows(input: StatementInput & { buildingId: string }) {
 	return { values, lineItems };
 }
 
-/** Calculate a contract's statement and store it as a draft with its line items */
 /**
  * #199, #408 point 2: one Abrechnungsperiode per day and building. A new statement whose period overlaps one of the
  * building's without being equal would share an invoice out a second time over the same days (above 100 %); the
  * statements made before stay as they are and may overlap: a period equal to one of theirs is allowed (product owner,
- * Fachreview 199-1 V-1); a replaced one no longer bills (#120)
+ * Fachreview 199-1 V-1), a replaced one's too, for its berichtigte Abrechnung (#120, code review 199-1 C-1); a
+ * replaced one overlaps nothing
  */
 async function refuseOverlappingPeriod({ buildingId, periodStart, periodEnd }: StatementInput & { buildingId: string }) {
-	const overlapping = await db
-		.select({ building: buildings.name, periodStart: utilityStatements.periodStart, periodEnd: utilityStatements.periodEnd })
+	const touching = await db
+		.select({
+			building: buildings.name,
+			periodStart: utilityStatements.periodStart,
+			periodEnd: utilityStatements.periodEnd,
+			status: utilityStatements.status
+		})
 		.from(utilityStatements)
 		.innerJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
 		.innerJoin(buildings, eq(apartments.buildingId, buildings.id))
-		.where(
-			and(
-				eq(apartments.buildingId, buildingId),
-				sql`${utilityStatements.status} <> 'replaced'`,
-				lte(utilityStatements.periodStart, periodEnd),
-				gte(utilityStatements.periodEnd, periodStart)
-			)
-		)
+		.where(and(eq(apartments.buildingId, buildingId), lte(utilityStatements.periodStart, periodEnd), gte(utilityStatements.periodEnd, periodStart)))
 		.orderBy(utilityStatements.periodStart);
-	const equal = overlapping.some((s) => s.periodStart === periodStart && s.periodEnd === periodEnd);
-	const [other] = equal ? [] : overlapping;
-	if (other) throw new CodedError('STATEMENT_PERIOD_OVERLAPS', 'The period overlaps a statement period of the building', other);
+	if (touching.some((s) => s.periodStart === periodStart && s.periodEnd === periodEnd)) return;
+	const overlapping = touching.filter((s) => s.status !== 'replaced');
+	if (!overlapping.length) return;
+	// every overlapped period, so the landlord's next choice does not overlap another one (code review 199-1 C-3)
+	const periods = [...new Set(overlapping.map((s) => `${formatSwissDate(s.periodStart)} – ${formatSwissDate(s.periodEnd)}`))];
+	throw new CodedError('STATEMENT_PERIOD_OVERLAPS', 'The period overlaps a statement period of the building', {
+		building: overlapping[0].building,
+		periods: periods.join(', ')
+	});
 }
 
+/** Calculate a contract's statement and store it as a draft with its line items */
 export async function generateStatement(
 	input: StatementInput & { buildingId: string }
 ): Promise<StatementWithDetails> {

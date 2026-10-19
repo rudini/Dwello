@@ -1,4 +1,4 @@
-import { billsIn } from './contract-status';
+import { billingStart, billsIn } from './contract-status';
 import { formatDate } from './utils/format';
 
 // First month (1-12) of each accounting period type
@@ -115,16 +115,27 @@ export function missingWays(
 	return missingPeriods(type, contract, statements, today)
 		.flatMap((gap) => {
 			const period = endedPeriodsSince(type, gap.start, today).find((p) => p.start <= gap.start)!;
-			return ways(period)
-				.filter((way) => overlaps(way, gap))
-				.map(({ kind, ...way }) => ({
-					start: [gap.start, way.start].sort()[1],
-					end: [gap.end, way.end].sort()[0],
-					way: { kind: same(way, period) ? 'whole' : kind, ...way },
-					open: !own.some((p) => overlaps(p, way))
-				}));
+			// days in a period equal to the building's go there only, not again to an overlapping older one (code
+			// review 199-1 C-2)
+			const found = ways(period).filter((way) => overlaps(way, gap));
+			const whole = found.filter((way) => same(way, period));
+			return (whole.length ? whole.slice(0, 1) : found)
+				.map(({ kind, ...way }) => {
+					const whole = same(way, period);
+					// a whole period by its name, a part by the contract's own days in it
+					const [from, to] = whole
+						? [gap.start, gap.end]
+						: [billingStart(contract), contract.endDate];
+					return {
+						start: [gap.start, way.start, from].sort()[2],
+						end: [gap.end, way.end, to?.slice(0, 10) ?? gap.end].sort()[0],
+						way: { kind: whole ? 'whole' : kind, ...way },
+						open: !own.some((p) => overlaps(p, way))
+					};
+				});
 		})
-		.filter((part) => billsIn(contract, part))
+		.filter((part) => part.start <= part.end && billsIn(contract, part))
+		.filter((part, i, all) => all.findIndex((other) => other.start === part.start) === i)
 		.sort((a, b) => b.start.localeCompare(a.start));
 }
 

@@ -132,6 +132,26 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		expect((await billedContracts(fetch, period))[0].overlap).toBeNull();
 	});
 
+	// code review 199-1 C-4: a replaced statement alone overlaps nothing (#120)
+	it('zählt eine ersetzte Abrechnung nicht als Überschneidung', async () => {
+		const { fetch } = backend([
+			{ contractId: 'auszug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' }
+		]);
+
+		expect((await billedContracts(fetch, period))[0].overlap).toBeNull();
+	});
+
+	// code review 199-1 C-1: the period of a replaced statement is one of the building's: its berichtigte Abrechnung is
+	// created there, also when another, older statement overlaps it
+	it('lässt die Periode einer ersetzten Abrechnung zu, auch wenn eine andere sie schneidet', async () => {
+		const { fetch } = backend([
+			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31', status: 'replaced' },
+			{ contractId: 'einzug', periodStart: '2024-07-01', periodEnd: '2025-06-30' }
+		]);
+
+		expect((await billedContracts(fetch, period))[0].overlap).toBeNull();
+	});
+
 	// Fachreview 199-1 V-2: a statement period inside the run leaves two pieces, each its own short period
 	it('bietet für jedes Stück übriger Tage eine eigene kurze Periode an', async () => {
 		const { fetch } = backend([
@@ -186,12 +206,23 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		expect((await billedContracts(fetch, shifted))[0].overlap?.choose).toEqual([]);
 	});
 
+	it('nennt in der Ablehnung jede überschnittene Periode', async () => {
+		const { fetch } = backend([
+			...switched,
+			{ contractId: 'einzug', periodStart: '2024-07-01', periodEnd: '2024-09-30' }
+		]);
+
+		await expect(previewStatements(fetch, period)).rejects.toThrow(
+			'(01.07.2023 – 30.06.2024, 01.07.2024 – 30.09.2024)'
+		);
+	});
+
 	it('erstellt und berechnet für ein solches Gebäude nichts', async () => {
 		const { fetch, posts } = backend(switched);
 
-		// the building by its name, the overlapped period by its days (Fachreview 199-1 V-7)
+		// the building by its name, every overlapped period by its days (Fachreview 199-1 V-7, code review C-3)
 		await expect(generateStatements(fetch, period)).rejects.toThrow(
-			'Die gewählte Abrechnungsperiode überschneidet sich mit der Abrechnungsperiode 01.07.2023 – 30.06.2024 bestehender Abrechnungen von Seeblick.'
+			'Die gewählte Abrechnungsperiode überschneidet sich mit bestehenden Abrechnungen von Seeblick (01.07.2023 – 30.06.2024).'
 		);
 		await expect(previewStatements(fetch, period)).rejects.toThrow('überschneidet sich');
 		expect(posts).toEqual([]);

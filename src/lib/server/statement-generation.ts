@@ -1,6 +1,6 @@
 import { backendMessage } from '$lib/backend-error';
 import { billsIn, localToday } from '$lib/contract-status';
-import { billingPeriods, overlappedBy, uncovered } from '$lib/accounting-period';
+import { billingPeriods, overlappedBy, periodName, uncovered } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { changedInvoiceCount, namesById, toStatement } from '$lib/server/statement';
@@ -65,6 +65,9 @@ function overlapOf(
 	contracts: Contract[],
 	statements: Billing[]
 ) {
+	// a replaced statement's period too is one of the building's: its berichtigte Abrechnung keeps it (#120, code
+	// review 199-1 C-1)
+	if (statements.some((s) => s.periodStart === run.start && s.periodEnd === run.end)) return null;
 	const periods = billingPeriods(statements);
 	const overlapped = overlappedBy(run, periods);
 	if (!overlapped.length) return null;
@@ -120,13 +123,20 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 // A building whose statement period the run overlaps refuses the run, as step 2 and the backend do (#408 point 2)
 async function contractsInPeriod(fetch: Fetch, request: Run) {
 	const buildings = await contractsOf(fetch, request);
-	const refused = buildings.find((b) => b.overlap);
-	if (refused) {
-		const [{ start, end }] = refused.overlap!.periods;
-		const { name } = await call(fetch, `buildings/${encodeURIComponent(refused.buildingId)}`);
-		const params = { building: name, periodStart: start, periodEnd: end };
-		throw new Error(backendMessage({ code: 'STATEMENT_PERIOD_OVERLAPS', params }, ''));
-	}
+	// each building and every period it overlaps (Fachreview 199-1 V-7, code review C-3)
+	const refusals = await Promise.all(
+		buildings.flatMap(({ buildingId, overlap }) =>
+			overlap
+				? [
+						call(fetch, `buildings/${encodeURIComponent(buildingId)}`).then(({ name }) => {
+							const params = { building: name, periods: overlap.periods.map(periodName).join(', ') };
+							return backendMessage({ code: 'STATEMENT_PERIOD_OVERLAPS', params }, '');
+						})
+					]
+				: []
+		)
+	);
+	if (refusals.length) throw new Error(refusals.join(' '));
 	return buildings.flatMap(({ buildingId, inPeriod, billed }) =>
 		inPeriod.filter((c) => !billed.includes(c)).map((contract) => ({ buildingId, contract }))
 	);

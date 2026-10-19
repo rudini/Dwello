@@ -217,6 +217,46 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		]);
 	});
 
+	// code review 199-1 C-2: statements made before #408 point 2 may overlap; days in a period equal to a statement
+	// period of the building go there only, not a second time to an overlapping one
+	it('nennt bei überschneidenden Altdaten dieselben Tage nur einmal', async () => {
+		const older = {
+			...statementOf('c0', lastYear),
+			periodStart: `${lastYear - 1}-07-01`,
+			periodEnd: `${lastYear}-06-30`
+		};
+		expect(
+			await missingOf(backend([older, statementOf('c2', lastYear)], `${lastYear}-01-01`))
+		).toEqual([missingYear(lastYear)]);
+	});
+
+	// code review 199-1 C-6: without the building's statements the ways cannot be told: better no hint
+	it('nennt nichts, wenn die Abrechnungen des Gebäudes nicht gelesen werden können', async () => {
+		const answer = backend([]);
+		const fetch = (async (url: string) =>
+			url.includes('/statements?buildingId=')
+				? new Response(null, { status: 500 })
+				: answer(url)) as typeof globalThis.fetch;
+		expect(await missingOf(fetch)).toEqual([]);
+	});
+
+	// a part names the contract's own days: from the Vertragsbeginn, not from the start of the period
+	it('nennt bei einem Teil die Tage ab Vertragsbeginn', async () => {
+		const other = {
+			...statementOf('c0', lastYear),
+			periodStart: `${lastYear - 1}-07-01`,
+			periodEnd: `${lastYear}-06-30`
+		};
+		const missing = (await missingOf(backend([other], `${lastYear}-04-01`))) as {
+			start: string;
+			end: string;
+		}[];
+		expect(missing.map(({ start, end }) => [start, end])).toEqual([
+			[`${lastYear}-07-01`, `${lastYear}-12-31`],
+			[`${lastYear}-04-01`, `${lastYear}-06-30`]
+		]);
+	});
+
 	// Fachreview 199-1 V-1: statements made before #408 point 2 may overlap; a run of the previous tenant's period would
 	// count the contract as billed by its own overlapping statement and bill it no more there: no way into the wizard
 	it('führt nicht in eine Periode, die der Mietvertrag mit einer eigenen Abrechnung schneidet', async () => {

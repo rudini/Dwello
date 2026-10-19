@@ -426,7 +426,7 @@
 	"backend_distribution_key_not_found": "La clé de répartition est introuvable. Rechargez la page.",
 	"backend_heating_profile_not_found": "Le profil de chauffage est introuvable. Rechargez la page.",
 	"backend_invoice_not_found": "La facture est introuvable. Rechargez la page.",
-	"backend_statement_period_overlaps": "La période de décompte choisie chevauche la période de décompte {periodStart} – {periodEnd} de décomptes existants de {building}. Choisissez cette période de décompte ou une période qui ne la chevauche pas.",
+	"backend_statement_period_overlaps": "La période de décompte choisie chevauche des décomptes existants de {building} ({periods}). Choisissez l’une de ces périodes de décompte ou une période qui n’en chevauche aucune.",
 	"backend_statement_not_found": "Décompte introuvable.",
 	"backend_paid_date_invalid": "Veuillez saisir la date de paiement au format JJ.MM.AAAA.",
 	"backend_paid_date_before_statement": "La date de paiement est antérieure à la date du décompte du {date}. Saisissez cette date ou une date ultérieure.",

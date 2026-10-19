@@ -1678,6 +1678,21 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		expect(byTestId('generate-building-short-help-b1')).toBeNull();
 	});
 
+	// code review 199-1 C-5: a building chosen before (a link, a draft, back from step 3) is no longer chosen
+	it('nimmt ein schon gewähltes Gebäude aus der Auswahl, dessen Abrechnungsperiode die gewählte schneidet', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 1, overlap },
+			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null }
+		]);
+		show(GeneratePage, { data: { ...data, defaultBuildingIds: ['b1'] }, form: null } as never);
+		await settle();
+		click('wizard-back');
+		await settle();
+
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(false);
+		expect(text()).toContain('0 von 2 gewählt');
+	});
+
 	it('wählt bei «Alle Gebäude» kein Gebäude, dessen Abrechnungsperiode die gewählte schneidet', async () => {
 		billed([
 			{ buildingId: 'b1', contracts: 2, billed: 1, overlap },

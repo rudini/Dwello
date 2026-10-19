@@ -426,7 +426,7 @@
 	"backend_distribution_key_not_found": "Der Verteilschlüssel wurde nicht gefunden. Laden Sie die Seite neu.",
 	"backend_heating_profile_not_found": "Das Heizprofil wurde nicht gefunden. Laden Sie die Seite neu.",
 	"backend_invoice_not_found": "Die Rechnung wurde nicht gefunden. Laden Sie die Seite neu.",
-	"backend_statement_period_overlaps": "Die gewählte Abrechnungsperiode überschneidet sich mit der Abrechnungsperiode {periodStart} – {periodEnd} bestehender Abrechnungen von {building}. Wählen Sie diese Abrechnungsperiode oder eine, die sie nicht schneidet.",
+	"backend_statement_period_overlaps": "Die gewählte Abrechnungsperiode überschneidet sich mit bestehenden Abrechnungen von {building} ({periods}). Wählen Sie eine dieser Abrechnungsperioden oder eine, die keine davon schneidet.",
 	"backend_statement_not_found": "Abrechnung nicht gefunden.",
 	"backend_paid_date_invalid": "Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.",
 	"backend_paid_date_before_statement": "Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom {date}. Geben Sie frühestens dieses Datum ein.",

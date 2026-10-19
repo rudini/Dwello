@@ -9,16 +9,19 @@
 	let { buildingId, overlap }: { buildingId: string; overlap: NonNullable<Billed['overlap']> } =
 		$props();
 
-	const ways = $derived([
-		...overlap.choose.map((p) => ({
-			...p,
-			label: m.statements_period_choose({ period: periodName(p) })
-		})),
-		...overlap.short.map((p) => ({
-			...p,
-			label: m.statements_period_short({ period: periodName(p) })
-		}))
-	]);
+	// one way per first day: periods made before #408 point 2 may share it (code review 199-1 C-2)
+	const ways = $derived(
+		[
+			...overlap.choose.map((p) => ({
+				...p,
+				label: m.statements_period_choose({ period: periodName(p) })
+			})),
+			...overlap.short.map((p) => ({
+				...p,
+				label: m.statements_period_short({ period: periodName(p) })
+			}))
+		].filter((way, i, all) => all.findIndex((other) => other.start === way.start) === i)
+	);
 </script>
 
 {#if ways.length}

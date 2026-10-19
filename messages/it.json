@@ -426,7 +426,7 @@
 	"backend_distribution_key_not_found": "La chiave di riparto non è stata trovata. Ricarichi la pagina.",
 	"backend_heating_profile_not_found": "Il profilo di riscaldamento non è stato trovato. Ricarichi la pagina.",
 	"backend_invoice_not_found": "La fattura non è stata trovata. Ricarichi la pagina.",
-	"backend_statement_period_overlaps": "Il periodo di conteggio scelto si sovrappone al periodo di conteggio {periodStart} – {periodEnd} di conteggi esistenti di {building}. Scelga questo periodo di conteggio o uno che non si sovrapponga.",
+	"backend_statement_period_overlaps": "Il periodo di conteggio scelto si sovrappone a conteggi esistenti di {building} ({periods}). Scelga uno di questi periodi di conteggio o uno che non si sovrapponga a nessuno di essi.",
 	"backend_statement_not_found": "Conteggio non trovato.",
 	"backend_paid_date_invalid": "Inserisca la data di pagamento nel formato GG.MM.AAAA.",
 	"backend_paid_date_before_statement": "La data di pagamento è anteriore alla data del conteggio del {date}. Inserisca questa data o una data successiva.",
