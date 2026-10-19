@@ -23,7 +23,7 @@ describe('Protokoll unter den Einstellungen', () => {
 		expect(byTestId('audit-log-empty')?.textContent).toContain('Noch keine Einträge');
 		// #447 (decided in #402, point 8): everything the glossary row «Protokoll» names
 		expect(byTestId('audit-log-empty')?.textContent).toContain(
-			'zurückgesetzte Zahlungen und berichtigte Abrechnungen.'
+			'Änderungen der vorgeschlagenen Verwaltungspauschale und der Umlagefähigkeit von Kategorien und Rechnungen, zurückgesetzte Zahlungen und berichtigte Abrechnungen.'
 		);
 		expect(byTestId('audit-log-list')).toBeNull();
 	});

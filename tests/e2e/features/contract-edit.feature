@@ -138,7 +138,6 @@ Funktionalität: Mietvertrag bearbeiten
     Dann zeigt der Mietvertrag bei der Verwaltungspauschale "Vereinbart, Satz des Abrechnungslaufs"
 
   # #447 (Entscheid in #402, Punkt 2): auch beim Bearbeiten heisst ein eigener Satz von 0 % «Nein»
-  @wip
   Szenario: Eigener Satz von 0 % wird beim Bearbeiten abgelehnt
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale mit einem eigenen Satz von "0" % vereinbart ist

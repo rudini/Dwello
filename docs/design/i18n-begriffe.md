@@ -71,7 +71,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnungsposition | poste du décompte | voce del conteggio | statement line |
 | Abrechnungsnummer / Abrechnungsdatum | numéro de décompte / date du décompte | numero di conteggio / data del conteggio | statement number / statement date |
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |
-| Kosten des Gebäudes | coûts de l’immeuble | costi immobile | building costs |
+| Kosten des Gebäudes | coûts de l’immeuble | costi dell’immobile | building costs |
 | Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
 | Zahlung zurücksetzen | Retirer le paiement saisi | Rimuovere il pagamento registrato | Reset payment |
 | Nebenkostenpauschale (#66) | forfait de frais accessoires ❓ | forfait per le spese accessorie ❓ | flat-rate utility charge |

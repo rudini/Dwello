@@ -30,7 +30,8 @@ Funktionalität: Hilfe
   Szenario: Die Hilfe erklärt Kosten über mehrere Jahre
     Dann erklärt die Hilfe unter "Rechnungen erfassen" "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
 
-  # Begriffe zum Mietvertrag und zur KI-Kategorie (#109); Abrechnungsperiode wie im Glossar (#67); Fachreview (#69)
+  # Begriffe zum Mietvertrag und zur KI-Kategorie (#109); Abrechnungsperiode wie im Glossar (#67); Fachreview (#69);
+  # «bis 3 %» und der Saldo einer berichtigten Abrechnung wie im Glossar (#447, Entscheid in #402)
   Szenariogrundriss: Die Hilfe erklärt den Begriff "<Begriff>"
     Dann erklärt die Hilfe den Begriff "<Begriff>" mit "<Erklärung>"
 
@@ -43,17 +44,8 @@ Funktionalität: Hilfe
       | Abrechnungsperiode      | Ohne Leistungszeitraum bestimmt das Rechnungsdatum, in welche Abrechnungsperiode eine Rechnung fällt. |
       | Umlagefähig             | Bezahlen muss der Mieter diese Kosten nur, wenn der Mietvertrag jede dieser Kostenarten einzeln nennt. |
       | Mahnung                 | erst nach einer eigenen schriftlichen Zahlungsfrist von mindestens 30 Tagen |
-
-  # #447 (Entscheid in #402, Punkte 2 und 6): «bis 3 %», und der Saldo einer berichtigten Abrechnung rechnet an, was
-  # auf die ersetzten Abrechnungen schon bezahlt ist
-  @wip
-  Szenariogrundriss: Die Hilfe erklärt "<Begriff>" wie das Glossar
-    Dann erklärt die Hilfe den Begriff "<Begriff>" mit "<Erklärung>"
-
-    Beispiele:
-      | Begriff              | Erklärung                                                                                   |
-      | Verwaltungspauschale | Üblich sind bis 3 %                                                                         |
-      | Saldo                | bei einer berichtigten Abrechnung zusätzlich minus, was er auf die ersetzten Abrechnungen schon bezahlt hat |
+      | Verwaltungspauschale    | Üblich sind bis 3 %                                             |
+      | Saldo                   | bei einer berichtigten Abrechnung zusätzlich minus, was er auf die ersetzten Abrechnungen schon bezahlt hat |
 
   # Inhaltsverzeichnis (#109)
   Szenario: Die Hilfe führt vom Inhalt direkt zu den Begriffen

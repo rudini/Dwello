@@ -367,6 +367,7 @@ describe('Gebäude im PDF', () => {
 		expect(flowing).toContain(building);
 		expect(flowing).toContain(costs);
 		expect(flowing).toContain(apartmentShare);
+		expect(flowing).not.toContain('Costi immobile'); // #447: also the notes, not only the column
 	});
 });
 

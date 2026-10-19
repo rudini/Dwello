@@ -97,7 +97,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
       | 2026    | CHF 75.30 |
       | 2027    | CHF 99.95 |
 
-  # TODO(fachlich prüfen, #294): «Abrechnungsnummer» steht im Glossar; die Hilfetexte folgen
   # Das PDF eines Entwurfs kann schon weitergegeben sein: die Abrechnungsnummer eines gelöschten Entwurfs wird nicht
   # wieder vergeben, sie bleibt eine Lücke (#97). Eva Frei erhält -0001, Marc Huber -0002, nach dem Löschen -0003.
   Szenario: Die Abrechnungsnummer eines gelöschten Entwurfs wird nicht wieder vergeben

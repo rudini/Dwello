@@ -79,7 +79,6 @@
 			<dd class="font-semibold text-ink" data-testid="contract-management-fee">{fee}</dd>
 		</div>
 		{#if agreedCosts}
-			<!-- TODO(fachlich prüfen, #369): the term «Vereinbarte Nebenkosten» -->
 			<div>
 				<dt class="text-ink-muted">{m.contracts_agreed_costs_label()}</dt>
 				<dd class="font-semibold text-ink" data-testid="contract-agreed-costs">

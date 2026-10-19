@@ -67,7 +67,7 @@ describe('Hilfe', () => {
 			'auf 5 Rappen gerundet, nur zugunsten des Mieters: Eine Nachzahlung wird ab-, eine Rückerstattung aufgerundet.'
 		);
 		expect(glossary?.textContent).toContain(
-			'ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Nur zulässig, wenn im Mietvertrag vereinbart; das tragen Sie beim Mietvertrag ein. Üblich sind bis 3 %'
+			'Die Abgeltung Ihres Aufwands für die Nebenkostenabrechnung: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Nur zulässig, wenn im Mietvertrag vereinbart; das tragen Sie beim Mietvertrag ein. Üblich sind bis 3 %'
 		);
 		expect(glossary?.textContent).not.toContain('Satz und Verteilschlüssel');
 		for (const word of ['Nachzahlung', 'Rückerstattung', 'Vermietet ab …', 'Gesperrt'])
