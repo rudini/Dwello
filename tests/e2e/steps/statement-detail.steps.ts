@@ -31,7 +31,8 @@ import {
 	statusOfStatement,
 	tenancyOfStatement,
 	totalLabelOfStatement,
-	oldAddressWarningText
+	oldAddressWarningText,
+	advancePaidOfStatement
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -459,6 +460,10 @@ Then('sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert b
 
 Then('nennt die Bestätigung die Verjährung nach fünf Jahren', async ({ verwalter }) => {
 	await verwalter.sees(correctConfirmation).toContain('fünf Jahren (Art. 128 Ziff. 1 OR)');
+});
+
+Then('zieht die Abrechnung {string} Akontobeiträge ab', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(advancePaidOfStatement).toContain(amount);
 });
 
 Then('rechnet die Abrechnung {string} als bereits bezahlt an', async ({ verwalter }, amount: string) => {

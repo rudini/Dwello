@@ -802,6 +802,7 @@ Funktionalität: Abrechnungsdetail
     Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
     Und der Mietvertrag von "Marc Huber" hat ab "2024-07-01" "80" Franken Akonto
     Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Marc Huber" gibt es ein PDF
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "2 × CHF 50.00 (01.05.2024 – 30.06.2024)"

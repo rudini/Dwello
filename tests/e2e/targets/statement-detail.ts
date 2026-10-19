@@ -92,3 +92,5 @@ export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) 
 // #338: «Neu berechnen» and its confirmation
 export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));
+// #464: the Akonto the statement deducts
+export const statementAdvancePaid = target('Geleistete Akontobeiträge', (page) => page.getByTestId('statement-advance-paid'));

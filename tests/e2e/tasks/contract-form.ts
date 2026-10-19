@@ -5,6 +5,7 @@ import {
 	agreedCategory,
 	agreedCategoryBoxAt,
 	agreedCategoryBoxes,
+	advancePaymentFromInput,
 	advancePaymentInput,
 	flatRateInput,
 	apartmentSelect,
@@ -124,6 +125,14 @@ export const changeBaseRent = (baseRent: string): Activity => (actor) =>
 
 export const enterAdvancePayment = (amount: string) => Enter.theValue(amount).into(advancePaymentInput);
 export const enterFlatRateUtilityCharge = (amount: string) => Enter.theValue(amount).into(flatRateInput);
+
+// #464: a new Akonto from a day on; the amount before stays for the time before
+export const changeAdvancePaymentFrom = (isoDate: string, amount: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(amount).into(advancePaymentInput),
+		EnterDate.of(isoDate).into(advancePaymentFromInput),
+		Click.on(contractSubmitButton)
+	);
 
 export const changeFlatRateUtilityCharge = (amount: string): Activity => (actor) =>
 	actor.attemptsTo(enterFlatRateUtilityCharge(amount), Click.on(contractSubmitButton));

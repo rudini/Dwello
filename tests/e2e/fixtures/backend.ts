@@ -200,8 +200,9 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
-		async advancePayment(tenantTitle: string, monthlyAdvancePayment: string) {
-			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment });
+		// #464: from a day on, or for the whole contract without one
+		async advancePayment(tenantTitle: string, monthlyAdvancePayment: string, advancePaymentFrom?: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment, advancePaymentFrom });
 		},
 
 		// «Nebenkostenpauschale»: counts in «Monatlich total», never billed (#429)
