@@ -321,6 +321,14 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Mietvertrag unbefristet
     Und hat der Mietvertrag den Status "Laufend"
 
+  # #457 (#410 Punkt 3): wer den Mietzins nach dem Vertragsende länger annimmt, hat den Mietvertrag meist schon fortgesetzt
+  Szenario: Der Hinweis nach dem Vertragsende nennt die stillschweigende Fortsetzung
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2025-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Dann sagt der Hinweis zum abgelaufenen Mietvertrag "Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung."
+
   Szenario: Mieter ist nach dem befristeten Mietvertrag ausgezogen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Bruno Meier" existiert

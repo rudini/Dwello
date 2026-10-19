@@ -249,6 +249,27 @@ Then(
 	}
 );
 
+Then('meldet die Prüfung der Kategorien nichts für {string}', async ({ verwalter }, category: string) => {
+	await verwalter.sees(categoryFindingOf(category)).toBeNull();
+});
+
+Given(
+	'im Gebäude {string} gibt es im Jahr {int} jeden Monat eine Rechnung der Kategorie {string} über {string} Franken',
+	async ({ seed }, building: string, year: number, category: string, amount: string) => {
+		for (let month = 1; month <= 12; month++) {
+			const end = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+			await seed.invoiceOn(building, category, amount, end);
+		}
+	}
+);
+
+Given(
+	'im Gebäude {string} gibt es im Jahr {int} jedes Quartal eine Rechnung der Kategorie {string} über {string} Franken',
+	async ({ seed }, building: string, year: number, category: string, amount: string) => {
+		for (const day of ['03-31', '06-30', '09-30', '12-31']) await seed.invoiceOn(building, category, amount, `${year}-${day}`);
+	}
+);
+
 Then('warnt die Vorschau nicht vor fehlenden Rechnungen', async ({ verwalter }) => {
 	await verwalter.sees(missingInvoicesWarnings).toBe(0);
 });

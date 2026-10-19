@@ -41,6 +41,27 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Closing code-review round (`docs/reviews/444-review-2.md`, no Blocker/Major)
 - [ ] PR `Fixes #444`
 
+### #130 Invoice check after a change of billing rhythm (divisor rule of #409 point 1)
+
+- [x] @wip scenario «Kein Hinweis, wenn der Rechnungssteller von monatlich auf vierteljährlich wechselt» (`statement-generate.feature`); unit tests (two red, three pin kept behaviour)
+- [x] fach-reviewer on the scenario before implementing (`docs/reviews/130-fachreview-1.md`, no Blocker/Major; V-1 to V-4 tests added)
+- [x] Divisor rule in `missingParts` (`invoice-completeness.service.ts`, `coarserRhythm`)
+- [x] Marker `TODO(fachlich prüfen, #130)` in `CategoryCheck.svelte` removed (product owner 2026-10-19: settled by #409)
+- [x] Slice review round 1 (`docs/reviews/130-review-1.md`, three Nits; C-1, C-3 fixed)
+- [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-130.md`, one Nit), data prepared by SQL in `dwello_persona`
+- [x] Closing code-review round (`docs/reviews/130-review-2.md`; C-4: the #405 review moved out of this branch)
+- [ ] PR `Fixes #130`
+
+### #457 Objection help after a fixed-term end (closes #308)
+
+- [x] @wip scenario «Der Hinweis nach dem Vertragsende nennt die stillschweigende Fortsetzung» (`contract-detail.feature`), DOM test; both red
+- [x] fach-reviewer on the fr/it/en drafts before the text turns green (`docs/reviews/457-fachreview-1.md`, recommended wording taken)
+- [x] `contracts_fixed_term_objection` with the second sentence in four languages; markers `#308` removed
+- [x] Slice review round 1 (`docs/reviews/457-review-1.md`, one Nit, fixed)
+- [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-457.md`, two Minors on the decided text, one Nit)
+- [x] Closing code-review round (`docs/reviews/457-review-2.md`, no findings)
+- [ ] PR `Fixes #457`, `Fixes #308`
+
 ### Main CI red since #440: E2E leftovers (O-38)
 
 Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox and WebKit shards (PRs run Chromium only): the statement wizard's buildings step (two backend requests per building, all buildings up to 1000 since #440) and step 3's agreement check took longer than 5 s, because every scenario with a sent statement left its building, apartment and tenant in `dwello_e2e`. Reproduced in Chromium with 600 leftover buildings (all three «Schon abgerechnet» scenarios fail as on CI). No scenario: test infrastructure only.

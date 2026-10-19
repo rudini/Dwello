@@ -21,6 +21,7 @@ import {
 	statusOfContract,
 	totalRent,
 	fixedTermCheckShown,
+	fixedTermCheckText,
 	fixedTermErrorText,
 	flatRateUtilityCharge
 } from '../questions/contract-detail';
@@ -448,4 +449,9 @@ Then('meldet der Mietvertrag {string}', async ({ verwalter }, message: string) =
 Then('ist der Mietvertrag von {string} unbefristet', async ({ verwalter, seed }, tenant: string) => {
 	await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
 	await verwalter.sees(endOfContract).toBe('Unbefristet');
+});
+
+// #457 (#410 point 3): the objection help after a fixed-term end
+Then('sagt der Hinweis zum abgelaufenen Mietvertrag {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(fixedTermCheckText).toContain(text);
 });

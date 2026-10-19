@@ -1718,7 +1718,7 @@
 	"dashboard_task_fixed_term_action": "Open rental contract",
 	"contracts_fixed_term_question": "The fixed-term rental contract of {name} expired on {date}. Does {name} still live in the apartment, and do you agree, for example because you keep accepting the rent? Then the rental contract continues open-ended.",
 	"contracts_fixed_term_title": "Fixed-term rental contract expired",
-	"contracts_fixed_term_objection": "If you do not agree, demand the return of the apartment in writing at once and get advice.",
+	"contracts_fixed_term_objection": "If you do not agree, demand the return of the apartment in writing at once and get advice. If you have accepted the rent for an extended period after the contract end, the rental contract has usually already become open-ended and ends only with a notice of termination.",
 	"contracts_continue_open_ended": "Continue open-ended",
 	"contracts_moved_out": "Tenant has moved out",
 	"contracts_continued_toast": "The rental contract of {name} continues open-ended. It ends only with a notice of termination.",
