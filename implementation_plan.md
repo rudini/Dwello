@@ -40,3 +40,12 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Slice review round 1 (`docs/reviews/444-review-1.md`, C-1 and C-3 fixed), feature review (persona Helga, `docs/design/personas/helga-444.md`, no Blocker/Major)
 - [x] Closing code-review round (`docs/reviews/444-review-2.md`, no Blocker/Major)
 - [ ] PR `Fixes #444`
+
+### #130 Invoice check after a change of billing rhythm (divisor rule of #409 point 1)
+
+- [x] @wip scenario «Kein Hinweis, wenn der Rechnungssteller von monatlich auf vierteljährlich wechselt» (`statement-generate.feature`); unit tests (two red, three pin kept behaviour)
+- [ ] fach-reviewer on the scenario before implementing
+- [ ] Divisor rule in `missingParts` (`invoice-completeness.service.ts`)
+- [ ] Marker `TODO(fachlich prüfen, #130)` in `CategoryCheck.svelte`: repoint to an open issue
+- [ ] Slice review
+- [ ] PR `Fixes #130`
