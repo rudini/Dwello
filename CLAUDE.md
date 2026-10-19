@@ -12,6 +12,7 @@ Frontend (repo root):
 bun run dev                         # dev server; needs the backend running
 bunx vitest run                      # all unit tests once (bun run test starts watch mode)
 bunx vitest run src/__tests__/x.test.ts   # one file; *.dom.test.ts run in jsdom (mounting, clicking), all others in node
+bunx vitest run --changed origin/main   # tests that import a changed file (a test that reads one as text: name it)
 bun run test:coverage               # with coverage floor, as in CI
 bun run lint                        # ESLint, fails on warnings
 bun run check                       # svelte-check incl. tests/ and *.config.ts
@@ -104,6 +105,7 @@ Before marking anything complete, all of these pass: `bun run lint`, `bun run ch
 - **Formatting:** run `prettier --write` only on files you create, never on a directory: many files are not Prettier-clean. In a file you change, format only your own lines (`bunx prettier <file> | diff <file> -`).
 - **Branches:** commit only on a named branch, never on a detached HEAD (only a read-only review worktree may be detached). A session or subagent you start that commits gets its own branch; no session pushes to another's branch. At the start of a task, `git fetch origin main`: if the branch's pull request is merged and `git merge-base --is-ancestor HEAD origin/main` holds, `git switch -C <branch> origin/main` before the first change; if it is only behind, merge `origin/main` first. Later, merge `main` once right before the first push; the closing round reviews the merge commit with the rest (skill `pull-request`).
 - **Cloud sessions:** `.claude/hooks/session-start.sh` installs dependencies, starts PostgreSQL with the role `dwello` and, when Playwright expects another Chromium build than the image has, sets `PLAYWRIGHT_BROWSERS_PATH` to a shim. If E2E cannot start a browser or reach the database, run it again.
+- **Context:** every model call reads the whole context again, so what enters it is paid on every later call. Read the lines you need (`grep -n`, `Read` with `offset`/`limit`, `sed -n`), not whole files, and do not read the same file again unchanged; filter test and CI output (`tail`, `grep`). Autocompact starts at 30 % (`.claude/settings.json`); a run that ends with the context above 200k tokens says once in its closing report that `/compact` or a new session would make the next request cheaper.
 - **Web search:** `mmx search "<query>"` (MiniMax CLI, `--output json` for parsing, at most 10 results) for current library docs, Swiss legal or tax rules and error messages; in cloud sessions its key is a network secret for `api.minimax.io`, and the setup script stores a placeholder key (`npm install -g mmx-cli && mmx config set --key api_key --value placeholder`), because mmx refuses to run without one.
 
 ## Coding guidelines

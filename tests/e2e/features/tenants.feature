@@ -55,3 +55,21 @@ Funktionalität: Mieterliste
     Angenommen der Liegenschaftsverwalter sucht den Mieter "Hans Müller"
     Wenn der Liegenschaftsverwalter den Mieter "Hans Müller" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Hans Müller"
+
+  # #435: Recht auf Datenherausgabe (Art. 28 DSG): alles, was Dwello über den Mieter hält, in einem Download,
+  # ohne Daten anderer Mieter (Art. 26 und 29 DSG; Fachreview docs/reviews/435-fachreview-1.md)
+  Szenario: Daten eines Mieters exportieren
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und das Gebäude "Seeblick" in "Winterthur" existiert
+    Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und "Hans Müller" mietet die Wohnung "1.01" seit "2020-01-01" für "900" Franken
+    Und "Hans Müller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 10 Tagen abgelaufen ist
+    Und die PDF dieser Abrechnung von "Hans Müller" liegt vor
+    Und "Hans Müller" hat für diese Abrechnung eine Zahlungserinnerung erhalten
+    Und "Hans Müller" hat das hochgeladene Dokument "Übergabeprotokoll"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" hat das hochgeladene Dokument "Kündigung"
+    Wenn der Liegenschaftsverwalter die Daten von "Hans Müller" exportiert
+    Dann enthält der Export Name und Kontaktdaten, den Mietvertrag, die Abrechnung und die Zahlungserinnerung von "Hans Müller"
+    Und enthält der Export das Dokument "Übergabeprotokoll", das PDF der Abrechnung und die Zahlungserinnerung von "Hans Müller"
+    Und enthält der Export keine Daten von "Anna Keller"
