@@ -307,7 +307,7 @@ describe('Rechnung erfassen und bearbeiten', () => {
 				fetch
 			} as never);
 
-			expect(urls).toContain(`${API}/buildings?limit=100`);
+			expect(urls).toContain(`${API}/buildings?limit=1000`);
 		}
 	});
 });
