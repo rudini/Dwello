@@ -53,3 +53,9 @@ Funktionalität: Anmeldung
     Angenommen ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher sich mit "Google" anmeldet
     Dann bittet Dwello Google nicht um dauerhaften Zugriff auf das Konto
+
+  # Helga 51 P-1: wer mit dem falschen Google-Konto angemeldet ist, kommt sonst immer wieder zur gleichen Meldung
+  Szenario: Bei Google das Konto wählen
+    Angenommen ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher sich mit "Google" anmeldet
+    Dann lässt Dwello den Besucher bei Google das Konto wählen

@@ -284,7 +284,7 @@ Every merge to `main` gets the next version as a tag and a GitHub Release (`.git
 
 See [.env.example](./.env.example) for all required environment variables.
 
-**Who may sign in:** `ALLOWED_EMAILS`, set for the frontend, lists the e-mail addresses that may sign in, separated by commas; spaces and case do not count. Only Google accounts whose address Google reports as verified are let in, and Microsoft accounts are refused while the list is set. `ALLOWED_EMAILS=*` lets every account in (the public demo). With `NODE_ENV=production` and no `ALLOWED_EMAILS` the frontend refuses to start. An address removed from the list loses its open sessions at its next request. Changing `JWT_SECRET` ends every open session at once: everyone signs in again.
+**Who may sign in:** `ALLOWED_EMAILS`, set for the frontend, lists the e-mail addresses that may sign in, separated by commas; spaces and case do not count. Only Google accounts whose address Google reports as verified are let in, and Microsoft accounts are refused while the list is set. `ALLOWED_EMAILS=*` lets every account in (the public demo). With `NODE_ENV=production` and no `ALLOWED_EMAILS` the frontend refuses to start. An address removed from the list loses its open sessions in the app at its next request; the backend accepts its session token until it expires (`JWT_EXPIRY`), so a backend published on the host (see `docker-compose.prod.yml`) stays reachable with it until then. Changing `JWT_SECRET` ends every open session at once: everyone signs in again.
 
 The terms of use name the operator of the installation (who runs it and backs up its data) from `OPERATOR_NAME`, `OPERATOR_ADDRESS` and `OPERATOR_CONTACT`, set for the frontend. Without `OPERATOR_NAME` they speak of "the operator" only.
 

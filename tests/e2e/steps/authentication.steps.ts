@@ -72,7 +72,11 @@ Then('leitet Dwello den Besucher zur Anmeldung bei Google weiter', async ({ besu
 Then('bittet Dwello Google nicht um dauerhaften Zugriff auf das Konto', async ({ besucher }) => {
 	await besucher.sees(googleSignInParameter('client_id')).toBe('e2e-google-client');
 	await besucher.sees(googleSignInParameter('access_type')).toBeNull();
-	await besucher.sees(googleSignInParameter('prompt')).toBeNull();
+});
+
+// only the account choice, never «consent» (#82: no lasting access)
+Then('lässt Dwello den Besucher bei Google das Konto wählen', async ({ besucher }) => {
+	await besucher.sees(googleSignInParameter('prompt')).toBe('select_account');
 });
 
 Then(

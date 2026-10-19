@@ -116,6 +116,9 @@ export function generateOAuthUrl(provider: OAuthProvider, state: string): string
 	if (provider === 'microsoft') {
 		params.set('response_mode', 'query');
 	}
+	// Google lets the visitor pick the account, else it signs a refused account in again at once (#51); not
+	// «consent» (#82: no lasting access)
+	if (provider === 'google') params.set('prompt', 'select_account');
 
 	return `${config.authorizeUrl}?${params.toString()}`;
 }
@@ -187,7 +190,7 @@ export async function fetchUserProfile(
 			email: profile.email,
 			name: profile.name,
 			provider: 'google',
-			emailVerified: profile.verified_email // ALLOWED_EMAILS counts only verified addresses (#51)
+			emailVerified: profile.verified_email === true // ALLOWED_EMAILS counts only verified addresses (#51)
 		};
 	} else {
 		const profile: MicrosoftUserProfile = await response.json();

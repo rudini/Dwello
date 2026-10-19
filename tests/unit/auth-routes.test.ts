@@ -311,7 +311,8 @@ describe('Auth Routes Integration Tests', () => {
 
 			expect(redirect).toMatchObject({ status: 303, location: '/login?error=failed' });
 			expect(oauthModule.exchangeCodeForToken).not.toHaveBeenCalled();
-		})
+		});
+
 		it('gibt einem Konto ohne Zugang keine Sitzung und nennt den Grund (#51)', async () => {
 			vi.stubEnv('ALLOWED_EMAILS', 'verwalter@example.com');
 			try {
@@ -327,6 +328,25 @@ describe('Auth Routes Integration Tests', () => {
 	});
 
 	describe('GET /auth/me', () => {
+		it('gibt einer Sitzung ohne Zugang keine Benutzerdaten (#51)', async () => {
+			vi.stubEnv('ALLOWED_EMAILS', 'verwalter@example.com');
+			vi.mocked(authModule.getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			vi.spyOn(authModule, 'verifyJwt').mockResolvedValue({
+				sub: 'user-123',
+				email: 'fremd@example.com',
+				name: 'Fremd',
+				provider: 'google'
+			} as Awaited<ReturnType<typeof authModule.verifyJwt>>);
+			try {
+				const { GET } = await import('$lib/../routes/auth/me/+server');
+				const event = createMockRequestEvent({ url: 'http://localhost:3000/auth/me' });
+
+				expect((await GET(event)).status).toBe(401);
+			} finally {
+				vi.unstubAllEnvs();
+			}
+		});
+
 		it('should return user info for valid session', async () => {
 			vi.mocked(authModule.getJwtFromCookie).mockReturnValue('valid-jwt-token');
 
@@ -452,7 +472,8 @@ describe('Auth Routes Integration Tests', () => {
 
 			const response = await POST(event);
 			expect(response.status).toBe(401);
-		})
+		});
+
 		it('verlängert die Sitzung eines Kontos ohne Zugang nicht (#51)', async () => {
 			vi.stubEnv('ALLOWED_EMAILS', 'verwalter@example.com');
 			vi.mocked(authModule.validateXsrfToken).mockReturnValue(true);

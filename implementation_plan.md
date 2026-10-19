@@ -100,4 +100,7 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] E2E stack and `persona-stack.sh` set `ALLOWED_EMAILS=verwalter@example.com`; demo `ALLOWED_EMAILS=*`; `.env.example`, `docker-compose.prod.yml`, README (also `JWT_SECRET` ends all sessions)
 - [x] a11y and language state `login-not-allowed`
 - Files: `src/lib/server/allowed-emails.ts` (new), `src/hooks.server.ts`, `src/routes/auth/callback/+server.ts`, `src/routes/auth/refresh/+server.ts`, `src/lib/server/oauth.ts` (`emailVerified`), `src/lib/server/login-flow.ts`, `messages/*.json`, tests (`tests/unit/allowed-emails.test.ts`, `auth-routes.test.ts`, `oauth.test.ts`, `src/__tests__/hooks.server.test.ts`), E2E (`authentication.feature`, session fixture, a11y rows), `playwright.config.ts`, `persona-stack.sh`, `docker-compose.prod.yml`, `.env.example`, `deploy/demo/`, README
-- [ ] Slice review, closing review; PR `Fixes #51`
+- [x] Slice review round 1 (`docs/reviews/51-review-1.md`: no Blocker/Major; C-1 missing `verified_email` counts as unverified, C-2 `/auth/me` refuses, C-3 README restricted and O-39 in `offene-punkte.md`, C-5 fixed; C-4, C-6 Nits kept) and persona Helga (`docs/design/personas/helga-51.md`: P-1 Major)
+- [x] Helga P-1: Google lets the visitor choose the account (`prompt=select_account`, not `consent`), scenario «Bei Google das Konto wählen» seen red first; P-2, P-3 Minor kept
+- [ ] Re-review: code-reviewer round 2 (also closing), Helga on the account choice
+- [ ] PR `Fixes #51`
