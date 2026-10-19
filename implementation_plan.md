@@ -75,4 +75,5 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] PR #463 (merged); run 612 on `main`: the statement wizard failures are gone, one new failure in Firefox: «contract-new overlap-warning» stayed on step «Wohnung» (screenshot): the open-contract notice, shown once the apartment's contracts are loaded, moved «Weiter» under the second click (#424 kind; the same double click in `goToRentWith` explains WebKit's `start-date-input` timeout of run 600)
 - [x] `keepApartment` (`tests/e2e/tasks/contract-form.ts`) waits for the apartment choice before «Weiter»; used by `goToRentWith` and the axe and language states `overlap-warning`, `rent-taken-over`; Chromium: those rows 13 passed, `contract-new.feature` (Chromium + API) 33 passed
 - [x] Slice review round 1 (`docs/reviews/612-review-1.md`; C-1: `toRentStep`, used by four `contract-new` rows, clicked twice too, now `keepApartment`; C-2 comment fixed)
+- [x] Re-review and closing round 2 (`docs/reviews/612-review-2.md`, no findings)
 - [ ] PR
