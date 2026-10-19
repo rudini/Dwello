@@ -44,10 +44,7 @@
 			</dd>
 			{#if invoice.beleg?.deductedAmount}
 				<dd>
-					<DeductedHint
-						amount={invoice.beleg.deductedAmount}
-						rule={m.invoices_beleg_deducted_rule()}
-					/>
+					<DeductedHint amount={invoice.beleg.deductedAmount} />
 				</dd>
 			{/if}
 		</div>

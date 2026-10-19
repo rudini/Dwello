@@ -129,7 +129,7 @@
 	note={fieldNote(read, 'amount')}
 	testid="invoice-amount-input"
 />
-{#if deducted}<DeductedHint amount={deducted} rule={m.invoices_edit_deducted_rule()} />{/if}
+{#if deducted}<DeductedHint amount={deducted} />{/if}
 
 <TextInput
 	id="{idPrefix}billingEntity"

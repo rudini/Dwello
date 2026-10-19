@@ -348,7 +348,7 @@ describe('Rechnungen hochladen', () => {
 		expect(message.indexOf('Wählen Sie eine Kategorie.')).toBeGreaterThan(-1);
 		expect(message.indexOf(line)).toBeGreaterThan(message.indexOf('Wählen Sie eine Kategorie.'));
 		expect(byTestId('invoice-upload-deducted-rule')!.textContent).toBe(
-			'Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist. Ergibt das 0, erfassen Sie die Schlussrechnung nicht. Ergibt es weniger als 0, erfassen Sie sie auch nicht: Verringern Sie den Betrag der abgerechneten Akontorechnungen um den Unterschied, und berichtigen Sie die Abrechnungen mit ihnen.'
+			'Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet sind. Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Übernehmen Sie den Leistungszeitraum der Rechnung. War eine Akontorechnung schon abgerechnet, führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». So trägt jede Abrechnungsperiode ihre tatsächlichen Kosten.'
 		);
 	});
 
