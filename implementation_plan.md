@@ -40,3 +40,12 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] Slice review round 1 (`docs/reviews/444-review-1.md`, C-1 and C-3 fixed), feature review (persona Helga, `docs/design/personas/helga-444.md`, no Blocker/Major)
 - [x] Closing code-review round (`docs/reviews/444-review-2.md`, no Blocker/Major)
 - [ ] PR `Fixes #444`
+
+### Main CI red since #440: E2E leftovers (O-38)
+
+Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox and WebKit shards (PRs run Chromium only): the statement wizard's buildings step (two backend requests per building, all buildings up to 1000 since #440) and step 3's agreement check took longer than 5 s, because every scenario with a sent statement left its building, apartment and tenant in `dwello_e2e`. Reproduced in Chromium with 600 leftover buildings (all three «Schon abgerechnet» scenarios fail as on CI). No scenario: test infrastructure only.
+
+- [x] `backend/scripts/e2e-purge-statements.ts`: deletes a scenario's statements and their documents in the E2E database only; `tests/e2e/fixtures/backend.ts` calls it in `cleanUp` (statement-detail.feature left 23 buildings, apartments and tenants before, none after)
+- [x] O-38 moved to `docs/archive/offene-punkte-verlauf.md`
+- [ ] Full Chromium + API run green, nothing left in `dwello_e2e`
+- [ ] Slice review (code-reviewer), PR

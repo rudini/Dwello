@@ -321,3 +321,7 @@ U-23 lost its map parts when the building map was removed: the map said nothing 
 
 - O-36 (setting a configuration key the first time was check-then-insert, so parallel first writes failed with 500 on `config_key_idx`): `saveConfig` in `backend/src/services/config.service.ts` upserts on `key`; `config.pg.test.ts` writes one key ten times at once (seen red with a warmed pool).
 - O-37 (the axe rows «statement-generate draft-discard-dialog» and «draft-restored» found no building when no earlier row of the run had seeded one, e.g. next to «draft-dropped» at the start of a shard): the states `draft-restored` and `draft-discard-dialog` now seed the screen records themselves (`seedFor` in `tests/e2e/fixtures/screens.ts`); the pair that failed passes.
+
+## O-38 – E2E leftovers fixed
+
+O-38 (a scenario's sent, paid or replaced statement kept its tenant, apartment and building in `dwello_e2e`; with the building lists at 1000 since #440 the statement wizard's buildings step sent two requests per leftover building, so the Firefox and WebKit shards on `main` timed out in the wizard from run 595 on): the cleanup (`tests/e2e/fixtures/backend.ts`) now deletes the scenario's statements and their documents directly in the E2E database (`backend/scripts/e2e-purge-statements.ts`, refuses any other database) before it removes the rest through the API.

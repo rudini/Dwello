@@ -1,3 +1,4 @@
+import { execFileSync } from 'child_process';
 import { randomUUID } from 'crypto';
 import type { CallTheApi } from '../screenplay/abilities';
 import { inDays } from './dates';
@@ -540,6 +541,11 @@ export function testData(api: CallTheApi) {
 		async cleanUp() {
 			for (const restore of restores) await restore();
 			const tokens = [...names.values()].map((name) => name.split(' ').pop()!);
+			// the backend deletes draft statements only; a sent one would keep its tenant, apartment and building (O-38)
+			execFileSync('bun', ['run', 'e2e-purge-statements', ...tokens], {
+				cwd: 'backend',
+				env: { ...process.env, DATABASE_URL: process.env.E2E_DATABASE_URL }
+			});
 			for (const token of tokens) await removeTenants(token);
 			for (const path of extras) await remove(path);
 			// Heating profiles created through the UI carry a scenario name as well
