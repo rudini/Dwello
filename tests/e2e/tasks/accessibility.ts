@@ -73,6 +73,7 @@ import { tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
+import { advanceDeleteButton } from '../targets/contract-detail';
 import { UPLOADED } from '../fixtures/screens';
 
 // How the axe check and the language check bring each screen of tests/a11y/screens.json into its state
@@ -199,6 +200,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(Wait.until(on.frenchPage));
 	},
 	'delete-dialog': () => openDialog(on.firstDeleteButton),
+	// the later Akonto of Anna's contract (fixtures/screens.ts)
+	'advance-delete-dialog': () => openDialog(advanceDeleteButton('220.00')),
 	// the tenant's uploaded document (fixtures/screens.ts)
 	'document-delete-dialog': () => openDialog(deleteDocumentButton(UPLOADED)),
 	// a file Dwello does not take: the refusal at the file field

@@ -628,7 +628,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
 
   # #464: jedes Akonto zählt für die Monate, in denen es galt. Hauswart 732.00 für 366 Tage = 2.00 pro Tag;
   # Marc Huber 245 Tage = 490.00 + 3 % = 504.70; Akonto Mai und Juni 2 × 50.00, Juli bis Dezember 6 × 80.00 = 580.00
-  @api @wip
+  @api
   Szenario: Akonto ändert sich während der Abrechnungsperiode
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31" für die Zeit vom "2024-01-01" bis "2024-12-31"
     Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto

@@ -1,4 +1,5 @@
 import { m } from '$lib/paraglide/messages';
+import { localToday } from './contract-status';
 import type { RentalContract } from './types';
 import { formatDate, isFeeRate, parsePercent } from './utils/format';
 import {
@@ -19,6 +20,7 @@ export interface ContractFormValues {
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
+	advancePaymentFrom?: string; // «Gültig ab» of the Akonto (#464), only when editing
 	flatRateUtilityCharge?: string; // «Nebenkostenpauschale» (#429); absent in a draft saved before it
 	// «Verwaltungspauschale vereinbart» (#89): at the run's rate, an own rate, none; '' until chosen (no default)
 	managementFee: '' | 'run' | 'own' | 'none';
@@ -79,6 +81,11 @@ export function initialContractValues(
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
 		advancePayment: String(contract.monthlyAdvancePayment || ''),
+		// the day of the amount that applies today: saved unchanged, it corrects that amount (#464, F-13)
+		advancePaymentFrom: (
+			contract.advancePayments?.findLast((entry) => entry.validFrom <= localToday()) ??
+			contract.advancePayments?.[0]
+		)?.validFrom,
 		flatRateUtilityCharge: String(contract.flatRateUtilityCharge || ''),
 		managementFee: feeChoice(contract),
 		managementFeeRate: contract.managementFeePercent ?? '',
@@ -140,6 +147,7 @@ export const contractBody = (values: ContractFormValues) => ({
 	baseRent: String(values.baseRent),
 	additionalRent: String(values.additionalRent || 0),
 	monthlyAdvancePayment: String(values.advancePayment || 0),
+	...(values.advancePaymentFrom && { advancePaymentFrom: values.advancePaymentFrom }),
 	flatRateUtilityCharge: String(values.flatRateUtilityCharge || 0),
 	managementFeeAgreed: values.managementFee !== 'none',
 	managementFeePercent:

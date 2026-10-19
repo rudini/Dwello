@@ -88,6 +88,7 @@ Funktionalität: Barrierefreiheit
       | contract-detail        | end-dialog-refused  |
       | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | delete-dialog       |
+      | contract-detail        | advance-delete-dialog |
       | contract-detail        | missing-statements  |
       | contract-partly-billed-detail | default          |
       | contract-moved-out-detail | default          |

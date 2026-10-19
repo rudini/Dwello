@@ -63,10 +63,14 @@ describe('Akonto mit Gültig ab', () => {
 	});
 
 	it('lässt ein neues Akonto nur ab dem Ersten eines Monats im Mietvertrag gelten (Entscheid zu F-10)', async () => {
-		const code = async (response: Response) => [response.status, ((await response.json()) as { code: string }).code];
+		const refusal = async (response: Response) => {
+			const { code, params } = (await response.json()) as { code: string; params?: object };
+			return [response.status, code, params];
+		};
 
-		expect(await code(await setAdvance('90', '2024-08-15'))).toEqual([400, 'ADVANCE_FROM_NOT_MONTH_START']);
-		expect(await code(await setAdvance('90', '2024-04-01'))).toEqual([400, 'ADVANCE_FROM_OUTSIDE_CONTRACT']);
+		// the example is the next first of a month; the Vertragsbeginn is named (fach review F-10)
+		expect(await refusal(await setAdvance('90', '2024-08-15'))).toEqual([400, 'ADVANCE_FROM_NOT_MONTH_START', { next: '01.09.2024' }]);
+		expect(await refusal(await setAdvance('90', '2024-04-01'))).toEqual([400, 'ADVANCE_FROM_BEFORE_START', { date: '01.05.2024' }]);
 		expect((await contract()).advancePayments).toHaveLength(2);
 	});
 
@@ -155,5 +159,36 @@ describe('Akonto mit Gültig ab', () => {
 			await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
 		}
 	});
-});
 
+	it('lässt den ersten Betrag mit seinem Tag speichern, wenn sich der Vertragsbeginn ändert', async () => {
+		const moved = await createRental(crypto.randomUUID(), { startDate: '2024-05-15', monthlyAdvancePayment: '50' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/contracts/${moved.contract}`, {
+				startDate: '2024-05-20',
+				monthlyAdvancePayment: '60',
+				advancePaymentFrom: '2024-05-15'
+			});
+
+			expect(response.status).toBe(200);
+			const { advancePayments } = (await (await callApi(`/api/v1/contracts/${moved.contract}`)).json()) as Contract;
+			expect(advancePayments).toEqual([{ validFrom: '2024-05-15', amount: '60.00' }]);
+		} finally {
+			await moved.remove();
+		}
+	});
+
+	it('nennt das Vertragsende, wenn ein Akonto danach gelten soll', async () => {
+		const ending = await createRental(crypto.randomUUID(), { startDate: '2024-05-01', endDate: '2024-12-31', monthlyAdvancePayment: '50' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/contracts/${ending.contract}`, {
+				monthlyAdvancePayment: '60',
+				advancePaymentFrom: '2025-01-01'
+			});
+
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({ code: 'ADVANCE_FROM_AFTER_END', params: { date: '31.12.2024' } });
+		} finally {
+			await ending.remove();
+		}
+	});
+});

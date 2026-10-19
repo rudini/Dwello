@@ -142,6 +142,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				baseRent: data.baseRent || '0',
 				additionalRent: data.additionalRent || null,
 				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
+				advancePayments: data.advancePayments,
 				flatRateUtilityCharge: data.flatRateUtilityCharge || '0',
 				managementFeeAgreed: !!data.managementFeeAgreed,
 				managementFeePercent: data.managementFeePercent ?? null,
@@ -304,23 +305,24 @@ const toWizard = (draft: Row) =>
 		)
 	);
 
+// The end on the day of the form; the draft named is deleted with it (A-10)
+async function endOnFormDay(fetch: typeof globalThis.fetch, id: string, form: FormData, draft?: string) {
+	const day = await endDay(fetch, id, form);
+	return typeof day === 'string' ? endOn(fetch, id, day, form, draft) : day;
+}
+
 export const actions: Actions = {
 	// The last day of the tenancy, the Kündigungstermin of an open-ended contract; a past day only confirmed, never before a statement's end
 	end: async ({ params, fetch, request }) => {
-		const form = await request.formData();
-		const day = await endDay(fetch, params.id, form);
-		if (typeof day !== 'string') return day;
-		const refused = await endOn(fetch, params.id, day, form);
+		const refused = await endOnFormDay(fetch, params.id, await request.formData());
 		if (refused) return refused;
 	},
 	// The one draft the end would change is deleted with it; the wizard then creates the statement anew (A-10)
 	endDeletingDraft: async ({ params, fetch, request }) => {
 		const form = await request.formData();
-		const day = await endDay(fetch, params.id, form);
-		if (typeof day !== 'string') return day;
 		const draft = await ownDraft(fetch, params.id, String(form.get('statementId') ?? ''));
 		if (!draft) return fail(409, { endError: m.contracts_end_failed() });
-		const refused = await endOn(fetch, params.id, day, form, String(draft.id));
+		const refused = await endOnFormDay(fetch, params.id, form, String(draft.id));
 		if (refused) return refused;
 		throw toWizard(draft);
 	},
@@ -344,6 +346,16 @@ export const actions: Actions = {
 	},
 	// a contract that has started only when confirmed as entered by mistake (A-7, #116); the backend refuses one
 	// that a statement bills
+	// #464 (product owner on F-13): a later Akonto; the backend refuses one that would change a statement
+	deleteAdvance: async ({ params, fetch, request }) => {
+		const validFrom = String((await request.formData()).get('validFrom'));
+		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}/advance-payments/${validFrom}`, {
+			method: 'DELETE'
+		});
+		if (response.ok) return null;
+		const body = await response.json().catch(() => null);
+		return fail(response.status, { validFrom, advanceDeleteError: backendMessage(body, m.contracts_save_failed()) });
+	},
 	delete: async ({ params, fetch, request }) => {
 		const confirmed = (await request.formData()).get('mistakeConfirmed') === 'on';
 		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;

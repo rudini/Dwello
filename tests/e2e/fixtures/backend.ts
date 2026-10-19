@@ -353,7 +353,12 @@ export function testData(api: CallTheApi) {
 		async replaceStatement(tenantTitle: string, year: number, correct = false) {
 			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
 			await post(`statements/${id}/replace`, {});
-			if (correct) ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
+			if (correct) await this.correctStatement(tenantTitle, year);
+		},
+
+		async correctStatement(tenantTitle: string, year: number) {
+			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
+			ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
 		},
 
 		async resetPayment(tenantTitle: string, year: number) {

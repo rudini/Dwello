@@ -193,7 +193,6 @@ Funktionalität: Mietvertrag bearbeiten
     Und zeigt der Mietvertrag das Monatlich total "CHF 1’070.00"
 
   # #464: ein neues Akonto gilt ab einem Datum; das bisherige bleibt für die Zeit davor
-  @wip
   Szenario: Akonto ab einem Datum ändern
     Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
@@ -203,13 +202,11 @@ Funktionalität: Mietvertrag bearbeiten
     Und zeigt der Mietvertrag das Akonto "CHF 200.00" ab "01.07.2025"
 
   # #464 (#90): das Akonto zählt als vereinbart, nicht als bezahlt; eine Erhöhung braucht das amtliche Formular
-  @wip
   Szenario: Die Hilfe zum Akonto nennt, wie Dwello es abrechnet
     Dann erfährt der Liegenschaftsverwalter, dass Dwello das vereinbarte Akonto abrechnet und fehlende Zahlungen ausserhalb von Dwello geregelt werden
     Und erfährt der Liegenschaftsverwalter, dass eine Erhöhung des Akontos das amtliche Formular braucht
 
   # #464 (F-3): ein neues Akonto darf eine schon erstellte Abrechnung nicht stillschweigend ändern
-  @wip
   Szenario: Akonto in einer schon abgerechneten Zeit
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter das Akonto ab "2025-07-01" auf "200" Franken ändert

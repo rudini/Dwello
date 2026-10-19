@@ -16,6 +16,7 @@ import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
+import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
 
 const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
@@ -26,7 +27,8 @@ const contract = (endDate: string | null = null, terminated = false) => ({
 	terminated,
 	baseRent: '950.00',
 	additionalRent: null,
-	monthlyAdvancePayment: '150.00'
+	monthlyAdvancePayment: '150.00',
+	advancePayments: [{ validFrom: '2024-04-01', amount: '150.00' }]
 });
 const data = (endDate: string | null = null, terminated = false) => ({
 	contract: contract(endDate, terminated),
@@ -90,6 +92,44 @@ describe('Mietvertrag bearbeiten', () => {
 		]);
 		expect(get(toasts).map((t) => t.message)).toEqual(['Mietvertrag von Anna Keller gespeichert']);
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
+	});
+
+	// #464: ein neues Akonto gilt ab «Gültig ab»; vorgeschlagen ist der Tag des heutigen Betrags
+	it('speichert ein neues Akonto mit seinem «Gültig ab»', async () => {
+		await open();
+		expect(document.querySelector('label[for="advancePaymentFrom"]')!.textContent).toContain('Gültig ab');
+		expect(byTestId<HTMLInputElement>('contract-advance-from-input')!.value).toBe('01.04.2024');
+		type('contract-advance-payment-input', '200');
+		type('contract-advance-from-input', '01.07.2025');
+		await save();
+		expect(puts()[0].body).toMatchObject({ monthlyAdvancePayment: '200', advancePaymentFrom: '2025-07-01' });
+	});
+
+	// #464 (fach review F-3): ein neues Akonto ändert keine erstellte Abrechnung still; die Meldung sagt, was zu tun ist
+	it('sagt, warum ein Akonto in einer abgerechneten Zeit nicht gespeichert wird', async () => {
+		calls = fakeBff(({ method }) =>
+			method === 'PUT' ? [400, advanceRefused] : [200, { contracts: [] }]
+		);
+		await open();
+		type('contract-advance-payment-input', '200');
+		type('contract-advance-from-input', '01.07.2024');
+		await save();
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Das Akonto ab 01.07.2024 ändert den Entwurf NK-2024-0001. Löschen Sie zuerst den Entwurf, oder wählen Sie ein späteres «Gültig ab».'
+		);
+	});
+
+	// #464 (#90, fach review 464): the agreed Akonto is billed; an increase needs the official form, by contract kind
+	it.each([
+		['unbefristet', null, 'frühestens auf den nächsten Kündigungstermin', 'erst nach dem Vertragsende'],
+		['befristet', '2099-03-31', 'erst nach dem Vertragsende möglich', 'Kündigungstermin']
+	])('erklärt beim %s Mietvertrag, wie ein neues Akonto gilt', async (_kind, endDate, rule, otherRule) => {
+		await open(endDate);
+		const help = byTestId('contract-advance-payment-input-help')!.textContent!;
+		expect(help).toContain('Fehlende Zahlungen regeln Sie ausserhalb von Dwello.');
+		expect(help).toContain('amtlichen Formular');
+		expect(help).toContain(rule);
+		expect(help).not.toContain(otherRule);
 	});
 
 	// #133: bis zu diesem Tag ausserhalb von Dwello abgerechnet; Hilfe am Feld (fach review V-5)
@@ -172,8 +212,10 @@ describe('Mietvertrag bearbeiten', () => {
 			const hint = byTestId('contract-running-hint')!.textContent;
 			expect(hint).toContain(rule);
 			expect(hint).not.toContain(otherRule);
-			// personas Weber and Helga 66 P-1: what Dwello does, and when to enter an increase
-			expect(hint).toContain('Dwello übernimmt Änderungen sofort');
+			// personas Weber and Helga 66 P-1: what Dwello does, and when to enter an increase; #464 (F-14): a new
+			// Akonto no longer applies to the time not yet billed
+			expect(hint).toContain('Ein neues Akonto gilt ab dem Tag, den Sie dazu eintragen. Andere Änderungen übernimmt Dwello sofort');
+			expect(hint).not.toContain('Dwello übernimmt Änderungen sofort');
 			expect(hint).toContain('Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt.');
 		}
 	);

@@ -179,6 +179,25 @@ describe('contractBody', () => {
 		});
 	});
 
+	// #464: beim Bearbeiten gilt ein Akonto ab «Gültig ab»; vorgeschlagen ist der Tag des heute gültigen Betrags
+	it('schlägt beim Bearbeiten den Tag des heute gültigen Akontos vor und sendet ihn mit', () => {
+		const contract = {
+			...filled,
+			id: 'c1',
+			monthlyAdvancePayment: '80.00',
+			advancePayments: [
+				{ validFrom: '2024-04-01', amount: '50.00' },
+				{ validFrom: '2024-07-01', amount: '80.00' },
+				{ validFrom: '2099-01-01', amount: '90.00' }
+			]
+		};
+		const values = initialContractValues(contract as never, new URLSearchParams());
+
+		expect(values.advancePaymentFrom).toBe('2024-07-01');
+		expect(contractBody({ ...values, advancePaymentFrom: '2025-07-01' }).advancePaymentFrom).toBe('2025-07-01');
+		expect(contractBody(filled)).not.toHaveProperty('advancePaymentFrom');
+	});
+
 	// #429: die Nebenkostenpauschale geht mit, leer als 0, und kommt beim Bearbeiten zurück ins Formular
 	it('sendet die Nebenkostenpauschale und liest sie beim Bearbeiten', () => {
 		expect(contractBody({ ...filled, flatRateUtilityCharge: '120' }).flatRateUtilityCharge).toBe('120');

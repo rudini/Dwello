@@ -6,6 +6,7 @@ import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
+import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
 import category from '../../tests/contracts/category.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import contractHasStatements from '../../tests/contracts/contract-delete-refused.json';
@@ -572,6 +573,31 @@ describe('Mietvertrag löschen', () => {
 		expect(await result).toMatchObject({
 			status: 400,
 			data: { deleteError: 'Mietvertrag konnte nicht gelöscht werden.' }
+		});
+	});
+});
+
+// #464 (Entscheid zu F-13): ein späteres Akonto lässt sich löschen; eine Ablehnung bleibt im Dialog
+describe('Akonto löschen', () => {
+	it('löscht das Akonto mit seinem «Gültig ab»', async () => {
+		const { calls, result } = runAction(actions.deleteAdvance, 'c1', 200, { validFrom: '2025-07-01' });
+		await result;
+
+		expect(calls).toEqual([
+			{ method: 'DELETE', url: 'http://localhost:3001/api/v1/contracts/c1/advance-payments/2025-07-01', body: undefined }
+		]);
+	});
+
+	it('nennt im Dialog, warum das Backend das Löschen ablehnt', async () => {
+		const { result } = runAction(actions.deleteAdvance, 'c1', 400, { validFrom: '2024-07-01' }, advanceRefused);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				validFrom: '2024-07-01',
+				advanceDeleteError:
+					'Das Akonto ab 01.07.2024 ändert den Entwurf NK-2024-0001. Löschen Sie zuerst den Entwurf, oder wählen Sie ein späteres «Gültig ab».'
+			}
 		});
 	});
 });

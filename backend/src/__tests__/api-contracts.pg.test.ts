@@ -354,6 +354,16 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract-end-refused'), await response.json())).toEqual([]);
 	});
 
+	// #464: the 2024 draft counts the Akonto from the Vertragsbeginn
+	it('PUT /contracts/:id mit einem Akonto in einer abgerechneten Zeit liefert die Felder von contract-advance-refused.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, {
+			monthlyAdvancePayment: '200',
+			advancePaymentFrom: '2024-07-01'
+		});
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-advance-refused'), await response.json())).toEqual([]);
+	});
+
 	// the 2024 statement bills its rent days: confirmed or not, it stays (#116)
 	it('DELETE /contracts/:id eines Mietvertrags mit Abrechnung liefert die Felder von contract-delete-refused.json', async () => {
 		const response = await callApi(`/api/v1/contracts/${rental.contract}?confirmMistake=true`, { method: 'DELETE' });

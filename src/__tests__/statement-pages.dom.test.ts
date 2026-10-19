@@ -679,6 +679,30 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-rounding')).toBeNull();
 	});
 
+	// #464 (Fachreview F-4, Entscheid A): die berichtigte Abrechnung zählt das Akonto des Mietvertrags; weicht es von
+	// der ersetzten ab, sagt sie es vor dem Versenden
+	it('warnt, wenn die berichtigte Abrechnung ein anderes Akonto abzieht als die ersetzte', () => {
+		const replaces = { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' };
+		detail({ replaces: { ...replaces, totalAdvancePayments: 1200 } });
+
+		expect(byTestId('statement-advance-differs')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die Akontobeiträge dieser Abrechnung (CHF 1’800.00) sind anders als in der ersetzten Abrechnung NK-2024-0001 (CHF 1’200.00). Prüfen Sie die Akontobeträge am Mietvertrag.'
+		);
+		expect(byTestId('statement-advance-paid')!.textContent).toMatch(/CHF\s1’800.00/);
+	});
+
+	it('warnt nicht bei gleichem Akonto', () => {
+		const replaces = { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' };
+		detail({ replaces: { ...replaces, totalAdvancePayments: 1800 } });
+		expect(byTestId('statement-advance-differs')).toBeNull();
+	});
+
+	it('warnt nach dem Versenden nicht mehr', () => {
+		const replaces = { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' };
+		detail({ status: 'sent', replaces: { ...replaces, totalAdvancePayments: 1200 } });
+		expect(byTestId('statement-advance-differs')).toBeNull();
+	});
+
 	// Fachreview W2e V-4, V-11: jede Abrechnung der Kette, auf die bezahlt wurde; eine Rückerstattung zählt dazu
 	it('nennt jede Abrechnung, auf die schon bezahlt oder zurückerstattet wurde', () => {
 		detail({

@@ -784,7 +784,6 @@ Funktionalität: Abrechnungsdetail
 
   # #464: die berichtigte Abrechnung rechnet mit dem Akonto, das in der Periode galt, nicht mit dem heutigen;
   # Marc Huber Mai und Juni 2 × 50.00, Juli bis Dezember 6 × 80.00 = 580.00 (ab 2025 gilt 100.00)
-  @wip
   Szenario: Berichtigte Abrechnung rechnet mit dem damaligen Akonto
     Angenommen der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
     Und der Mietvertrag von "Marc Huber" hat ab "2024-07-01" "80" Franken Akonto
@@ -798,7 +797,6 @@ Funktionalität: Abrechnungsdetail
 
   # #464 (F-4, Option A): weicht das Akonto der berichtigten Abrechnung von dem der ersetzten ab, sagt Dwello es;
   # die ersetzte zählte 8 × 50.00 = 400.00, das Akonto ist inzwischen ab Vertragsbeginn 80.00: 8 × 80.00 = 640.00
-  @wip
   Szenario: Die berichtigte Abrechnung nennt ein anderes Akonto als die ersetzte
     Angenommen der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
     Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -811,7 +809,6 @@ Funktionalität: Abrechnungsdetail
 
   # #464 (#103): das PDF nennt das Akonto als Monate mal Betrag, eine Zeile pro Betrag mit ihrem Zeitraum, und sagt,
   # dass das vereinbarte Akonto abgezogen ist (Fachreview F-6, F-7, F-9)
-  @wip
   Szenario: Das PDF nennt das Akonto als Monate mal Betrag
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto

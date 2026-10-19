@@ -382,3 +382,11 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
     Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
     Dann ist der Mietvertrag unbefristet
+
+  # #464 (Entscheid zu F-13): ein später eingetragenes Akonto lässt sich löschen; das bisherige gilt dann weiter
+  Szenario: Ein späteres Akonto löschen
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Mietvertrag von "Anna Keller" hat ab "2025-07-01" "200" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter das Akonto "CHF 200.00" löscht
+    Dann zeigt der Mietvertrag das Monatlich total "CHF 1’100.00"

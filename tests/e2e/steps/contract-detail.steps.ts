@@ -33,6 +33,7 @@ import { pageAddress } from '../questions/navigation';
 import {
 	chooseNextStep,
 	createMissingStatement,
+	deleteAdvance,
 	deleteContract,
 	deleteContractEnteredByMistake,
 	deleteDraftAndEndContract,
@@ -474,4 +475,8 @@ Then('ist der Mietvertrag von {string} unbefristet', async ({ verwalter, seed },
 // #457 (#410 point 3): the objection help after a fixed-term end
 Then('sagt der Hinweis zum abgelaufenen Mietvertrag {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(fixedTermCheckText).toContain(text);
+});
+
+When('der Liegenschaftsverwalter das Akonto {string} löscht', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(deleteAdvance(amount));
 });

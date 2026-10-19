@@ -39,11 +39,24 @@ export async function setAdvance(contractId: string, amount: string, from: strin
 		.select({ startDate: rentalContracts.startDate, endDate: rentalContracts.endDate })
 		.from(rentalContracts)
 		.where(eq(rentalContracts.id, contractId));
-	// a monthly amount changes on the first of a month, within the contract (product owner on F-10, 2026-10-19)
-	if (from && from !== startDate && !from.endsWith('-01'))
-		throw new CodedError('ADVANCE_FROM_NOT_MONTH_START', 'A new Akonto applies from the first of a month');
-	if (from && (from < startDate || (endDate && from > endDate)))
-		throw new CodedError('ADVANCE_FROM_OUTSIDE_CONTRACT', 'A new Akonto applies within the contract');
+	// a monthly amount changes on the first of a month, within the contract (product owner on F-10, 2026-10-19); the
+	// first amount keeps its day, also when the Vertragsbeginn moves: it applies from the Vertragsbeginn anyway
+	if (from === first?.validFrom) from = undefined;
+	if (from && from !== startDate && !from.endsWith('-01')) {
+		const [year, month] = from.split('-').map(Number);
+		const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+		throw new CodedError('ADVANCE_FROM_NOT_MONTH_START', 'A new Akonto applies from the first of a month', {
+			next: formatSwissDate(next)
+		});
+	}
+	if (from && from < startDate)
+		throw new CodedError('ADVANCE_FROM_BEFORE_START', 'An Akonto cannot apply before the contract start', {
+			date: formatSwissDate(startDate)
+		});
+	if (from && endDate && from > endDate)
+		throw new CodedError('ADVANCE_FROM_AFTER_END', 'An Akonto cannot apply after the contract end', {
+			date: formatSwissDate(endDate)
+		});
 	const validFrom = from ?? first?.validFrom ?? startDate;
 	const before = await amountsOf(contractId, tx);
 	await tx

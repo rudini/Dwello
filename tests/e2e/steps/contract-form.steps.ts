@@ -537,7 +537,7 @@ Then(
 );
 
 Then('erfährt der Liegenschaftsverwalter, dass eine Erhöhung des Akontos das amtliche Formular braucht', async ({ verwalter }) => {
-	await verwalter.sees(advancePaymentHelpText).toContain('amtliche Formular');
+	await verwalter.sees(advancePaymentHelpText).toContain('amtlichen Formular');
 });
 
 When('der Liegenschaftsverwalter das Akonto ab {string} auf {string} Franken ändert', async ({ verwalter }, date: string, amount: string) => {
