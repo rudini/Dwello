@@ -10,6 +10,7 @@
 		onback,
 		finalLabel,
 		busy = false,
+		loading = false,
 		cancelHref,
 		finalTestid = 'submit-button',
 		busyLabel = m.ui_saving()
@@ -19,6 +20,7 @@
 		onback: () => void;
 		finalLabel: string;
 		busy?: boolean;
+		loading?: boolean; // the step still loads what it shows: «Weiter» waits for it (#468)
 		cancelHref: string;
 		finalTestid?: string;
 		busyLabel?: string;
@@ -38,8 +40,12 @@
 			>{finalLabel}</Button
 		>
 	{:else}
-		<Button type="submit" variant="primary" {busy} {busyLabel} testid="wizard-next"
-			>{m.ui_next()}</Button
+		<Button
+			type="submit"
+			variant="primary"
+			busy={busy || loading}
+			busyLabel={loading ? m.ui_please_wait() : busyLabel}
+			testid="wizard-next">{m.ui_next()}</Button
 		>
 	{/if}
 </div>

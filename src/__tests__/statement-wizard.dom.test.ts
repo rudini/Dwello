@@ -251,6 +251,67 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain('0 von 2 gewählt');
 	});
 
+	// #468: the invoice counts and «Schon abgerechnet» arriving later moved «Weiter» under the click
+	it('lässt bei den Gebäuden erst weitergehen, wenn ihre Rechnungen und Abrechnungen geladen sind', async () => {
+		let release = () => {};
+		const loaded = new Promise<void>((resolve) => (release = resolve));
+		globalThis.fetch = (async (url: string) => {
+			await loaded;
+			return Response.json(String(url).includes('/invoices') ? { invoices: [] } : []);
+		}) as typeof fetch;
+		open();
+		next();
+		await settle();
+		const button = byTestId<HTMLButtonElement>('wizard-next')!;
+		expect(button.disabled).toBe(true);
+		expect(button.textContent!.trim()).toBe('Bitte warten …');
+		release();
+		await settle();
+		expect(button.disabled).toBe(false);
+		expect(button.textContent!.trim()).toBe('Weiter');
+	});
+
+	it('lässt nach «Zurück» während des Ladens wieder weitergehen', async () => {
+		globalThis.fetch = (() => new Promise<Response>(() => {})) as typeof fetch;
+		open();
+		next();
+		await settle();
+		click('wizard-back');
+		await settle();
+		expect(heading()).toBe('Abrechnungsperiode');
+		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(false);
+	});
+
+	// code review 468-1 C-1: the answer of a step left before does not unlock the step opened anew
+	it('wartet beim erneut geöffneten Schritt auf dessen eigene Antworten', async () => {
+		const pending: (() => void)[] = [];
+		globalThis.fetch = ((url: string) =>
+			new Promise<Response>((resolve) =>
+				pending.push(() =>
+					resolve(Response.json(String(url).includes('/invoices') ? { invoices: [] } : []))
+				)
+			)) as typeof fetch;
+		open();
+		next();
+		await settle();
+		click('wizard-back');
+		await settle();
+		next();
+		await settle();
+		pending[0](); // the answers to the step left
+		pending[1]();
+		await settle();
+		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(true);
+	});
+
+	it('lässt weitergehen, wenn Rechnungen und Abrechnungen nicht geladen werden konnten', async () => {
+		fakeBff(() => [500, {}]);
+		open();
+		next();
+		await settle();
+		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(false);
+	});
+
 	async function toSettings() {
 		// step 3 asks whether the contracts agree the period's Nebenkosten (#91): none open here
 		fakeBff((call) => (call.path.startsWith('/statements/agreements') ? [200, []] : [500]));
@@ -1083,6 +1144,70 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('wizard-status')!.textContent).toContain('Vorschau wird berechnet');
 		await answer({ type: 'success', data: { preview, invoices } });
 		expect(heading()).toBe('Vorschau');
+	});
+
+	// #468: the agreed Nebenkosten and the contracts without a Verwaltungspauschale load after the step opens
+	it('lässt bei den Einstellungen erst weitergehen, wenn die Mietverträge geprüft sind', async () => {
+		const pending: Record<string, () => void> = {};
+		globalThis.fetch = ((url: string) => {
+			const path = new URL(String(url), 'http://localhost').pathname;
+			const body = path.endsWith('/invoices') ? { invoices: [] } : [];
+			if (!path.endsWith('/agreements') && !path.endsWith('/billed')) return Response.json(body);
+			return new Promise<Response>(
+				(resolve) => (pending[path] = () => resolve(Response.json(body)))
+			);
+		}) as typeof fetch;
+		open();
+		next();
+		await settle();
+		pending['/api/statements/billed']();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+		const button = byTestId<HTMLButtonElement>('wizard-next')!;
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		expect(button.disabled).toBe(true);
+		pending['/api/statements/agreements']();
+		await settle();
+		expect(button.disabled).toBe(true); // the contracts without an agreed Verwaltungspauschale still load
+		pending['/api/statements/billed']();
+		await settle();
+		expect(button.disabled).toBe(false);
+		expect(button.textContent!.trim()).toBe('Weiter');
+	});
+
+	// code review 468-2 C-9: the same for the contracts without a Verwaltungspauschale
+	it('wartet bei den erneut geöffneten Einstellungen auf deren eigene Antworten', async () => {
+		const billed: (() => void)[] = [];
+		globalThis.fetch = ((url: string) => {
+			const path = new URL(String(url), 'http://localhost').pathname;
+			if (!path.endsWith('/billed'))
+				return Response.json(path.endsWith('/invoices') ? { invoices: [] } : []);
+			return new Promise<Response>((resolve) => billed.push(() => resolve(Response.json([]))));
+		}) as typeof fetch;
+		open();
+		next();
+		await settle();
+		billed[0](); // step «Gebäude»
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+		click('wizard-back');
+		await settle();
+		billed[2](); // step «Gebäude» again
+		await settle();
+		next();
+		await settle();
+		billed[1](); // the answer to the settings left
+		await settle();
+		const button = byTestId<HTMLButtonElement>('wizard-next')!;
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		expect(button.disabled).toBe(true);
+		billed[3]();
+		await settle();
+		expect(button.disabled).toBe(false);
 	});
 
 	it('behält die Vorschau, wenn das Erstellen scheitert', async () => {

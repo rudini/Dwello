@@ -83,6 +83,7 @@
 		new Map([...(contracts ?? [])].map(([id, list]) => [id, list && computeAvailability(list)]))
 	);
 	const unknown = $derived(contracts?.get(values.apartmentId) === null);
+	const loading = $derived(step === 2 && !contracts); // «Weiter» waits for the apartments' contracts (#468)
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId)));
 	const overlap = $derived(overlapWarning(values, contracts?.get(values.apartmentId) ?? []));
 	// contracts of the chosen tenant without a Vertragsende (#156)
@@ -354,6 +355,7 @@
 		onback={() => goTo(step - 1)}
 		finalLabel={m.contracts_save()}
 		busy={saving}
+		{loading}
 		cancelHref="/contracts"
 	/>
 </form>
