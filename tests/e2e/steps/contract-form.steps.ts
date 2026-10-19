@@ -606,3 +606,10 @@ When(
 		await verwalter.attemptsTo(enterStartAndBilledUntil(startDate, billedUntil));
 	}
 );
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass Dwello keine Abrechnung erstellt, wenn der Mietvertrag bis «Abgerechnet bis» endet',
+	async ({ verwalter }) => {
+		await verwalter.sees(billedUntilHelpText).toContain('oder in denen der Mietvertrag bis dahin endet');
+	}
+);

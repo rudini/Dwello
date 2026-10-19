@@ -102,6 +102,10 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('billed-until-input-help')!.textContent).toContain(
 			'Dwello rechnet erst ab dem Tag danach ab'
 		);
+		// #480: a contract ending by then is passed over too
+		expect(byTestId('billed-until-input-help')!.textContent).toContain(
+			'Für Abrechnungsperioden, die bis dahin enden oder in denen der Mietvertrag bis dahin endet, erstellt Dwello keine Abrechnung.'
+		);
 		type('billed-until-input', '31.12.2025');
 		await save();
 		expect(puts()[0].body).toMatchObject({ billedUntil: '2025-12-31' });
