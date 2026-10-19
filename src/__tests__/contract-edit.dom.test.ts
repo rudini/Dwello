@@ -14,8 +14,11 @@ import { goto } from '$app/navigation';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
+import { localToday } from '$lib/contract-status';
+import { formatDate } from '$lib/utils/format';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
+import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
 
 const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
@@ -26,7 +29,8 @@ const contract = (endDate: string | null = null, terminated = false) => ({
 	terminated,
 	baseRent: '950.00',
 	additionalRent: null,
-	monthlyAdvancePayment: '150.00'
+	monthlyAdvancePayment: '150.00',
+	advancePayments: [{ validFrom: '2024-04-01', amount: '150.00' }]
 });
 const data = (endDate: string | null = null, terminated = false) => ({
 	contract: contract(endDate, terminated),
@@ -85,11 +89,89 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(puts()).toEqual([
 			expect.objectContaining({
 				path: '/contracts/c1',
-				body: expect.objectContaining({ baseRent: '1450', monthlyAdvancePayment: '150.00' })
+				body: expect.objectContaining({ baseRent: '1450' })
 			})
 		]);
+		// fach review 464-2 V-2: an unchanged Akonto is not sent again
+		expect(puts()[0].body).not.toHaveProperty('monthlyAdvancePayment');
 		expect(get(toasts).map((t) => t.message)).toEqual(['Mietvertrag von Anna Keller gespeichert']);
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
+	});
+
+	// #464: ein neues Akonto gilt ab «Gültig ab»; vorgeschlagen ist der Tag des heutigen Betrags
+	it('speichert ein neues Akonto mit seinem «Gültig ab»', async () => {
+		await open();
+		expect(document.querySelector('label[for="advancePaymentFrom"]')!.textContent).toContain('Gültig ab');
+		// fach review 464-2 V-4: how to correct an amount entered by mistake
+		expect(byTestId('contract-advance-from-input-help')!.textContent).toContain('tragen Sie seinen Tag aus «Akonto nach Zeitraum» ein');
+		const [year, month] = localToday().split('-').map(Number);
+		const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+		expect(byTestId<HTMLInputElement>('contract-advance-from-input')!.value).toBe(formatDate(next));
+		type('contract-advance-payment-input', '200');
+		type('contract-advance-from-input', '01.07.2025');
+		await save();
+		expect(puts()[0].body).toMatchObject({ monthlyAdvancePayment: '200', advancePaymentFrom: '2025-07-01' });
+	});
+
+	// fach review 464-2 V-5: before the start a change corrects the entry; the rules of an increase do not apply
+	it('nennt bei einem künftigen Mietvertrag keine Regel einer Erhöhung des Akontos', async () => {
+		show(EditPage, { data: { ...data(), contract: { ...contract(), startDate: '2099-01-01' } } } as never);
+		await settle();
+		const help = byTestId('contract-advance-payment-input-help')!.textContent!;
+		expect(help).toContain('Fehlende Zahlungen regeln Sie ausserhalb von Dwello.');
+		expect(help).not.toContain('Formular');
+	});
+
+	// #464 (fach review F-3): ein neues Akonto ändert keine erstellte Abrechnung still; die Meldung sagt, was zu tun ist
+	it('sagt, warum ein Akonto in einer abgerechneten Zeit nicht gespeichert wird', async () => {
+		calls = fakeBff(({ method }) =>
+			method === 'PUT' ? [400, advanceRefused] : [200, { contracts: [] }]
+		);
+		await open();
+		type('contract-advance-payment-input', '200');
+		type('contract-advance-from-input', '01.07.2024');
+		await save();
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Das Akonto ab 01.07.2024 ändert den Entwurf der Nebenkostenabrechnung NK-2024-0001. Gilt das neue Akonto schon ab 01.07.2024, löschen Sie zuerst diesen Entwurf. Gilt es erst später, wählen Sie ein «Gültig ab» ab 01.01.2025.'
+		);
+	});
+
+	// persona Helga 464-2 P-1, P-3: the form names the amounts already entered; the example is a first of a month
+	it('nennt im Formular die eingetragenen Akonto-Beträge und einen Ersten als Beispiel', async () => {
+		show(EditPage, {
+			data: {
+				...data(),
+				contract: {
+					...contract(),
+					advancePayments: [
+						{ validFrom: '2024-04-01', amount: '150.00' },
+						{ validFrom: '2099-01-01', amount: '220.00' }
+					]
+				}
+			}
+		} as never);
+		await settle();
+		const rows = [...document.querySelectorAll('[data-testid="contract-advance-period"]')].map((row) =>
+			row.textContent!.replace(/\s+/g, ' ').trim()
+		);
+		expect(rows).toEqual(['CHF 150.00 vom 01.04.2024 bis 31.12.2098', 'CHF 220.00 ab 01.01.2099']);
+		expect(byTestId('contract-advance-delete')).toBeNull();
+		const help = byTestId('contract-advance-from-input-help')!.textContent!;
+		expect(help).toMatch(/01\.01\.\d{4}/);
+		expect(help).not.toContain('31.12.');
+	});
+
+	// #464 (#90, fach review 464): the agreed Akonto is billed; an increase needs the official form, by contract kind
+	it.each([
+		['unbefristet', null, 'frühestens auf den nächsten Kündigungstermin', 'erst nach dem Vertragsende'],
+		['befristet', '2099-03-31', 'erst nach dem Vertragsende möglich', 'Kündigungstermin']
+	])('erklärt beim %s Mietvertrag, wie ein neues Akonto gilt', async (_kind, endDate, rule, otherRule) => {
+		await open(endDate);
+		const help = byTestId('contract-advance-payment-input-help')!.textContent!;
+		expect(help).toContain('Fehlende Zahlungen regeln Sie ausserhalb von Dwello.');
+		expect(help).toContain('amtlichen Formular');
+		expect(help).toContain(rule);
+		expect(help).not.toContain(otherRule);
 	});
 
 	// #133: bis zu diesem Tag ausserhalb von Dwello abgerechnet; Hilfe am Feld (fach review V-5)
@@ -172,8 +254,10 @@ describe('Mietvertrag bearbeiten', () => {
 			const hint = byTestId('contract-running-hint')!.textContent;
 			expect(hint).toContain(rule);
 			expect(hint).not.toContain(otherRule);
-			// personas Weber and Helga 66 P-1: what Dwello does, and when to enter an increase
-			expect(hint).toContain('Dwello übernimmt Änderungen sofort');
+			// personas Weber and Helga 66 P-1: what Dwello does, and when to enter an increase; #464 (F-14): a new
+			// Akonto no longer applies to the time not yet billed
+			expect(hint).toContain('Ein neues Akonto gilt ab dem Tag, den Sie dazu eintragen. Andere Änderungen übernimmt Dwello sofort');
+			expect(hint).not.toContain('Dwello übernimmt Änderungen sofort');
 			expect(hint).toContain('Tragen Sie eine Mietzinserhöhung erst ein, wenn sie gilt.');
 		}
 	);

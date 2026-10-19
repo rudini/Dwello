@@ -14,6 +14,7 @@ import {
 	type RentalContract,
 	type NewRentalContract
 } from '../db/schema';
+import { alignAdvances, currentAdvance, setAdvance } from './advance-payment.service';
 import { setAgreedCategories } from './agreed-category.service';
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
@@ -38,7 +39,7 @@ const contractFields = {
 	movedOut: rentalContracts.movedOut,
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
-	monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
+	monthlyAdvancePayment: currentAdvance, // the Akonto of today, of the Vertragsbeginn or the Vertragsende (#464)
 	flatRateUtilityCharge: rentalContracts.flatRateUtilityCharge,
 	managementFeeAgreed: rentalContracts.managementFeeAgreed,
 	managementFeePercent: rentalContracts.managementFeePercent,
@@ -316,6 +317,7 @@ export async function createContract({ agreedCategoryIds, ...data }: NewRentalCo
 	return db.transaction(async (tx) => {
 		const [contract] = await tx.insert(rentalContracts).values(feeRate(data)).returning();
 		await setAgreedCategories(contract.id, agreedCategoryIds, tx);
+		await setAdvance(contract.id, data.monthlyAdvancePayment, data.startDate, tx);
 		return contract;
 	});
 }
@@ -390,7 +392,7 @@ const onlyDraft = (statements: { id: string; status: string }[], draft?: string)
  */
 export async function updateContract(
 	id: string,
-	{ agreedCategoryIds, ...data }: Partial<NewRentalContract> & AgreedList,
+	{ agreedCategoryIds, advancePaymentFrom, ...data }: Partial<NewRentalContract> & AgreedList & { advancePaymentFrom?: string },
 	deleteDraft?: string
 ): Promise<RentalContract | null> {
 	const current = await getContract(id);
@@ -405,7 +407,7 @@ export async function updateContract(
 	const [contract] = await db.transaction(async (tx) => {
 		await checkNewDates(current, data, tx, deleteDraft);
 		if (agreedCategoryIds) await setAgreedCategories(id, agreedCategoryIds, tx, { answeredOnly: true });
-		return tx
+		const updated = await tx
 			.update(rentalContracts)
 			// without an end there is no notice: withdrawing it makes the contract open-ended again; without a notice
 			// there is no day it arrived; a move-out belongs to the end it was confirmed for (A-6)
@@ -418,6 +420,10 @@ export async function updateContract(
 			})
 			.where(eq(rentalContracts.id, id))
 			.returning();
+		// after the new dates: a new Akonto applies within them (#464)
+		if (data.monthlyAdvancePayment !== undefined) await setAdvance(id, data.monthlyAdvancePayment, advancePaymentFrom, tx);
+		await alignAdvances(id, tx);
+		return updated;
 	});
 
 	return contract || null;

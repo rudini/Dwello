@@ -37,7 +37,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Nettomiete (Mietzins) | loyer net (loyer) | pigione netta (pigione) | net rent (rent) |
 | Zusatzmiete | loyer supplémentaire | pigione supplementare | additional rent |
 | Akonto | acompte | acconto | advance payment |
-| Geleistete Akontobeiträge | acomptes versés | acconti versati | advance payments made |
+| Akontobeiträge (#477, bis dahin «Geleistete Akontobeiträge») | acomptes | acconti | advance payments |
 | Vereinbarte Nebenkosten / Nicht vereinbart | frais accessoires convenus / non convenue | spese accessorie pattuite / non pattuita | agreed utility costs / not agreed |
 | Referenzindex | taux de référence | tasso di riferimento | reference rate |
 | Rechnung | facture | fattura | invoice |
