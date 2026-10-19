@@ -268,5 +268,7 @@
 	"code:# Auf einem frischen Linux-Server mit Docker": "# On a fresh Linux server with Docker",
 	"code:# HTTPS mit Caddy: Vorlage in deploy/demo/": "# HTTPS with Caddy: template in deploy/demo/",
 	"code:https://ihr-ki-anbieter.example/v1": "https://your-ai-provider.example/v1",
-	"code:dwello.ihre-domain.ch": "dwello.your-domain.ch"
+	"code:dwello.ihre-domain.ch": "dwello.your-domain.ch",
+	"Impressum": "Legal notice",
+	"Datenschutzerklärung": "Privacy statement"
 }

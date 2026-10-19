@@ -54,6 +54,10 @@ jobs:
       - name: Upload marketing/ over SFTP
         if: steps.settings.outputs.ready == 'yes'
         run: |
+          # The imprint and privacy statement must name the operator before the site goes live
+          if pending=$(grep -rl --include='*.html' 'data-pending=' marketing); then
+            echo "::error::Operator still missing in: $pending"; exit 1
+          fi
           sudo apt-get update -qq && sudo apt-get install -y -qq lftp > /dev/null
           mkdir -p ~/.ssh
           if [ "$FTP_TLS" = "yes" ]; then
