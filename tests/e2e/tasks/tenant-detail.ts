@@ -1,15 +1,20 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Navigate } from '../screenplay/interactions';
+import { Click, DownloadFrom, Navigate } from '../screenplay/interactions';
 import { historyLink } from '../targets/apartment-detail';
 import {
 	confirmDeleteTenantButton,
 	deleteTenantButton,
 	editTenantButton,
+	exportTenantButton,
 	newContractButton,
 	rentalApartmentLink
 } from '../targets/tenant-detail';
 
 export const openTenantDetail = (tenantId: string) => Navigate.to(`/tenants/${tenantId}`);
+
+/** #435: the ZIP with everything Dwello holds about the tenant */
+export const exportTenantData = (tenantId: string): Activity => (actor) =>
+	actor.attemptsTo(openTenantDetail(tenantId), DownloadFrom(exportTenantButton));
 
 export const editTenant = Click.on(editTenantButton);
 

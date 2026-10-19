@@ -38,3 +38,25 @@ export const downloadedPdfText = question(
 export const downloadedFileMagic = question('the kind of the downloaded file', async (actor) =>
 	(await actor.answer(DownloadedFile)).content.subarray(0, 3).toString('hex')
 );
+
+// The data file of a tenant export (#435), as the tenant's other program reads it: its tenant, the apartments of its
+// contracts and the numbers of its statements
+const exportedData = question('the data in the downloaded export', async (actor) => {
+	const [, data] = Object.entries(unzipSync((await actor.answer(DownloadedFile)).content)).find(([name]) => name === 'daten.json') ?? [];
+	return JSON.parse(data ? Buffer.from(data).toString() : '{}');
+});
+export const exportedTenantName = question('the tenant in the downloaded export', async (actor) => {
+	const { tenant } = await actor.answer(exportedData);
+	return tenant ? `${tenant.firstName} ${tenant.lastName}` : null;
+});
+export const exportedContractApartments = question('the apartments of the contracts in the export', async (actor) =>
+	((await actor.answer(exportedData)).contracts ?? []).map((contract: { apartment: { number: string } }) => contract.apartment.number)
+);
+export const exportedStatementNumbers = question('the statement numbers in the export', async (actor) =>
+	((await actor.answer(exportedData)).statements ?? []).map((statement: { number: string }) => statement.number)
+);
+
+// The names of the files in the downloaded ZIP
+export const fileNamesInDownloadedZip = question('the file names in the downloaded ZIP', async (actor) =>
+	Object.keys(unzipSync((await actor.answer(DownloadedFile)).content)).sort()
+);

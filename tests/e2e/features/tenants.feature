@@ -66,5 +66,5 @@ Funktionalität: Mieterliste
     Und "Hans Müller" hat das hochgeladene Dokument "Übergabeprotokoll"
     Wenn der Liegenschaftsverwalter die Daten von "Hans Müller" exportiert
     Dann enthält der Export die Stammdaten, den Mietvertrag und die Abrechnung von "Hans Müller"
-    Und enthält der Export das Dokument "Übergabeprotokoll" und das PDF der Abrechnung
+    Und enthält der Export das Dokument "Übergabeprotokoll" und das PDF der Abrechnung von "Hans Müller"
 
