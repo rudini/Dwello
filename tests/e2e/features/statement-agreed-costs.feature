@@ -150,3 +150,32 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Beim Mietvertrag ist noch nicht angegeben, ob diese Nebenkosten vereinbart sind"
     Und hat die Abrechnung den Status "Ersetzt"
+
+  # #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; ohne sie ginge die Rechnung an jeden Mieter
+  @wip
+  Szenario: Eine umlagefähige Rechnung ohne Kategorie hält die Vorschau an
+    Angenommen im Gebäude "Rosenhof" gibt es eine Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
+    Dann nennt der Hinweis auf Rechnungen ohne Kategorie die Rechnung vom "30.06.2024" über "120.00"
+    Und erklärt der Hinweis auf Rechnungen ohne Kategorie "Ordnen Sie jeder Rechnung eine Kategorie zu oder stellen Sie sie auf «Nicht umlagefähig». Danach geht es weiter."
+    Wenn der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Ordnen Sie jeder Rechnung eine Kategorie zu"
+    Und ist der Assistent im Schritt "Vorschau"
+
+  @wip
+  Szenario: Rechnung ohne Kategorie aus der Vorschau öffnen
+    Angenommen im Gebäude "Rosenhof" gibt es eine Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter die Rechnung vom "30.06.2024" aus dem Hinweis bearbeitet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
+
+  @wip
+  Szenario: Keine berichtigte Abrechnung, solange eine umlagefähige Rechnung keine Kategorie hat
+    Angenommen für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und die Abrechnung 2024 von "Anna Keller" ist ersetzt
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Diese umlagefähigen Rechnungen haben keine Kategorie"
+    Und hat die Abrechnung den Status "Ersetzt"

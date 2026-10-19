@@ -781,3 +781,15 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung."
     Und steht im PDF "bereits bezahlt CHF 442.90"
     Und steht im PDF "Nachzahlung 187.45"
+
+  # #452 Punkt 7 (#379): eine alte Rechnung ohne Verteilschlüssel verteilt Dwello gleichmässig pro Wohnung, wie «Pro Einheit»
+  @wip
+  Szenario: Das PDF nennt bei einer Rechnung ohne Verteilschlüssel «Pro Einheit»
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "400" Franken vom "2024-06-30"
+    Und die Rechnung der Kategorie "Hauswart" vom "2024-06-30" hat keinen Verteilschlüssel
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Pro Einheit"

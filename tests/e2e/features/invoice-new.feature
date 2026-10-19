@@ -55,3 +55,27 @@ Funktionalität: Neue Rechnung erfassen
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
+
+  # #452 Punkt 7 (#379): pro Kategorie und Gebäude gilt ein Verteilschlüssel; vorgeschlagen ist der der letzten Rechnung
+  @wip
+  Szenario: Dwello schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Pro Zimmer" gewählt
+    Und erklärt das Formular beim Verteilschlüssel "Dwello schlägt den Verteilschlüssel vor, den die letzte Rechnung dieser Kategorie im Gebäude hat, sonst den aus den Einstellungen."
+
+  @wip
+  Szenario: Einen selbst gewählten Verteilschlüssel überschreibt der Vorschlag nicht
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Pro Einheit" wählt
+    Und der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Pro Einheit" gewählt
+
+  @wip
+  Szenario: Ohne Verteilschlüssel speichert das Formular die Rechnung nicht
+    Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "450.00" Franken für "Treppenhausreinigung Q1" im Gebäude "Seeblick" in der Kategorie "Hauswart" ohne Verteilschlüssel erfasst
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie, wie die Kosten verteilt werden."

@@ -499,3 +499,7 @@ Then(
 		await verwalter.sees(oldAddressWarningText).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );
+
+Given('die Rechnung der Kategorie {string} vom {string} hat keinen Verteilschlüssel', async ({ seed }, category: string, date: string) => {
+	await seed.invoiceWithoutKey(`${category} ${date}`);
+});

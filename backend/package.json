@@ -24,7 +24,8 @@
     "llm-stub": "bun scripts/llm-stub.ts",
     "llm:eval": "bun scripts/llm-eval.ts",
     "e2e-db": "bun scripts/e2e-db.ts",
-    "e2e-purge-statements": "bun scripts/e2e-purge-statements.ts"
+    "e2e-invoice-without-key": "bun scripts/e2e-invoice-without-key.ts",
+    "e2e-purge-statements":"bun scripts/e2e-purge-statements.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.2",

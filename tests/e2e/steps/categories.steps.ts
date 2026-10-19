@@ -3,7 +3,12 @@ import { test } from '../fixtures/test';
 import { errorMessageShown } from '../questions/form';
 import { pageTitle } from '../questions/navigation';
 import {
+	allocabilityConsequence,
+	allocabilityQuestionText,
 	allowance,
+	heatingChangeable,
+	heatingChecked,
+	heatingHelpText,
 	categoryDeletable,
 	categoryListed,
 	invoicesOf,
@@ -23,6 +28,9 @@ import {
 } from '../questions/categories';
 import {
 	askKi,
+	cancelAllocability,
+	confirmAllocability,
+	saveAsAllowed,
 	kiFails,
 	createCategory,
 	createFuelCategory,
@@ -357,3 +365,42 @@ Then(
 			.toContain('Ändern Sie den Namen oder die Beschreibung, schlägt die KI für neue Rechnungen womöglich eine andere Kategorie vor.');
 	}
 );
+
+// #452 Punkt 1 (#302)
+Then('lässt sich nicht ändern, ob die Kategorie Heizkosten sind', async ({ verwalter }) => {
+	await verwalter.sees(heatingChangeable).toBe(false);
+});
+
+Then('ist die Kategorie als Heizkosten markiert', async ({ verwalter }) => {
+	await verwalter.sees(heatingChecked).toBe(true);
+});
+
+Then('erklärt das Kategorieformular {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(heatingHelpText).toContain(text);
+});
+
+// #452 Punkt 2 (#309)
+When('der Liegenschaftsverwalter die vordefinierte Kategorie {string} als umlagefähig speichert', async ({ verwalter }, name: string) => {
+	await verwalter.attemptsTo(saveAsAllowed(name));
+});
+
+Then('fragt Dwello {string}', async ({ verwalter, names }, question: string) => {
+	const named = [...names.entries()].reduce((text, [title, name]) => text.replace(`«${title}»`, `«${name}»`), question);
+	await verwalter.sees(allocabilityQuestionText).toBe(named);
+});
+
+Then('erklärt die Rückfrage {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(allocabilityConsequence).toContain(text);
+});
+
+When('der Liegenschaftsverwalter das Umstellen bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmAllocability);
+});
+
+When('der Liegenschaftsverwalter das Umstellen abbricht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(cancelAllocability);
+});
+
+Then('ist die Kategorie {string} umlagefähig', async ({ verwalter, names }, title: string) => {
+	await verwalter.sees(allowance(names.get(title)!)).toBe('Umlagefähig');
+});
