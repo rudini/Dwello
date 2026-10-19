@@ -53,6 +53,7 @@ export const endDialogText = Text.of(endDialog);
 export const noticeReceivedOn = Text.of(contractNoticeReceived);
 export const nextStepsText = Text.of(nextSteps);
 export const fixedTermCheckShown = Visibility.of(fixedTermCheck);
+export const fixedTermCheckText = Text.of(fixedTermCheck);
 export const fixedTermErrorText = Text.of(fixedTermError);
 
 export const agreedCostsOfContract = Text.of(contractAgreedCosts);

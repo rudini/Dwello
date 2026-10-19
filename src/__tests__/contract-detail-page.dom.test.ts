@@ -841,6 +841,10 @@ describe('Abgelaufener befristeter Mietvertrag', () => {
 		expect(text('contract-fixed-term-check')).toContain(
 			'Sind Sie nicht einverstanden, verlangen Sie die Rückgabe der Wohnung sofort schriftlich und lassen Sie sich beraten.'
 		);
+		// #457 (#410 Punkt 3): nach längerer Annahme des Mietzinses läuft der Mietvertrag meist schon weiter
+		expect(text('contract-fixed-term-check')).toContain(
+			'Haben Sie den Mietzins nach dem Vertragsende längere Zeit angenommen, läuft der Mietvertrag meist schon unbefristet weiter und endet nur mit einer Kündigung.'
+		);
 		const button = (testid: string) => [
 			byTestId(testid)!.textContent!.trim(),
 			byTestId(testid)!.closest('form')!.getAttribute('action')
