@@ -67,7 +67,7 @@ describe('Hilfe', () => {
 			'auf 5 Rappen gerundet, nur zugunsten des Mieters: Eine Nachzahlung wird ab-, eine Rückerstattung aufgerundet.'
 		);
 		expect(glossary?.textContent).toContain(
-			'ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Nur zulässig, wenn im Mietvertrag vereinbart; das tragen Sie beim Mietvertrag ein. Üblich sind etwa 3 %'
+			'ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Nur zulässig, wenn im Mietvertrag vereinbart; das tragen Sie beim Mietvertrag ein. Üblich sind bis 3 %'
 		);
 		expect(glossary?.textContent).not.toContain('Satz und Verteilschlüssel');
 		for (const word of ['Nachzahlung', 'Rückerstattung', 'Vermietet ab …', 'Gesperrt'])
@@ -96,10 +96,17 @@ describe('Hilfe', () => {
 			'Zieht ein Mieter während der Abrechnungsperiode ein oder aus, teilt Dwello seine Heizkosten so nach Monaten',
 			'bei Heizkosten mit Heizprofil den Anteil seiner Monate',
 			'Bei einer Rückerstattung ist es das Datum, bis zu dem Sie ihm den Betrag überweisen («Rückerstattung bis»).',
-			'Üblich sind etwa 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen.'
+			'Üblich sind bis 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen (Art. 4 Absatz 3 VMWG).',
+			// #447 (decided in #402, point 6): the Saldo of a berichtigte Abrechnung, as the glossary row
+			'minus seine geleisteten Akontobeiträge; bei einer berichtigten Abrechnung zusätzlich minus, was er auf die ersetzten Abrechnungen schon bezahlt hat (plus, was Sie ihm schon zurückerstattet haben).'
 		])
 			expect(glossary).toContain(said);
-		for (const old of ['Wechselt der Mieter', 'Leerstand', 'lässt sich pro Rechnung anpassen'])
+		for (const old of [
+			'Wechselt der Mieter',
+			'Leerstand',
+			'lässt sich pro Rechnung anpassen',
+			'etwa 3 %'
+		])
 			expect(glossary).not.toContain(old);
 	});
 

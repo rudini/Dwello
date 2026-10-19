@@ -352,6 +352,16 @@ When(
 	}
 );
 
+// #447: the rate is refused before the review, so the step only fills the form
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit einem eigenen Satz von {string} % vermieten will',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, fee: string) => {
+		await verwalter.attemptsTo(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, managementFee: fee })
+		);
+	}
+);
+
 When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit einer Verwaltungspauschale von {string} % bis zur Prüfung erfasst',
 	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, fee: string) => {
@@ -376,8 +386,15 @@ Then(
 );
 
 When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
-	await verwalter.attemptsTo(agreeManagementFee);
+	await verwalter.attemptsTo(agreeManagementFee());
 });
+
+When(
+	'der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale mit einem eigenen Satz von {string} % vereinbart ist',
+	async ({ verwalter }, rate: string) => {
+		await verwalter.attemptsTo(agreeManagementFee(rate));
+	}
+);
 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass {string} einen Mietvertrag ohne Vertragsende für die Wohnung {string} hat',

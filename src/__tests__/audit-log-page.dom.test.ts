@@ -21,6 +21,10 @@ describe('Protokoll unter den Einstellungen', () => {
 		show(AuditLogPage, { data: { entries: [] }, form: null } as never);
 
 		expect(byTestId('audit-log-empty')?.textContent).toContain('Noch keine Einträge');
+		// #447 (decided in #402, point 8): everything the glossary row «Protokoll» names
+		expect(byTestId('audit-log-empty')?.textContent).toContain(
+			'zurückgesetzte Zahlungen und berichtigte Abrechnungen.'
+		);
 		expect(byTestId('audit-log-list')).toBeNull();
 	});
 
