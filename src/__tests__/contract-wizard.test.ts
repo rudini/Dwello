@@ -124,6 +124,7 @@ describe('Mietvertrag Schritt für Schritt', () => {
 			'Lassen Sie nur die Nebenkosten angekreuzt, für die der Mieter Akonto bezahlt.'
 		);
 		expect(flatRateNotice({ ...mixed, agreedCategoryIds: [] }, categories)).toBeNull();
+		expect(flatRateNotice({ ...mixed, advancePayment: '0' }, categories)).toContain('trotzdem'); // no Akonto
 	});
 
 	// #429: die Nebenkostenpauschale zählt im Monatlich total

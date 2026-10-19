@@ -24,5 +24,6 @@ Branch `ccr-6c5f45f8-br8wl9`. Product owner: work the open issues one by one, bu
 - [x] fach-reviewer on the scenario and the proposed variant text before implementing (`docs/reviews/432-fachreview-1.md`)
 - [x] Product owner confirms the variant text (decision of #432, 2026-10-19, recorded in the issue)
 - [x] `flatRateNotice` warns with Akonto too (variant text), unit test; texts in all four languages; axe and language state `flat-rate-warning-advance` on `contract-new` and `contract-edit`
-- [ ] Slice review, feature review (persona Dr. Weber)
+- [x] Slice review round 1 (`docs/reviews/432-review-1.md`, two Nits; C-1 fixed)
+- [ ] Feature review: personas Dr. Weber and Helga
 - [ ] PR `Fixes #432`
