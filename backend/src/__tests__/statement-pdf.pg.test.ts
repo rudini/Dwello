@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, tenants, utilityStatements } from '../db/schema';
+import { categories, fuelStocks, invoices, tenants, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createFuelStock } from '../services/fuel-stock.service';
@@ -812,5 +812,35 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 
 		expect(settled.status).toBe('paid');
 		expect(settled.pdfGeneratedAt).not.toBeNull();
+	});
+});
+
+// #452 point 7 (#379): an invoice recorded before the key was required is shared evenly per apartment, as «Pro Einheit»
+describe('Rechnung ohne Verteilschlüssel im PDF', () => {
+	let keyless: Awaited<ReturnType<typeof createRental>>;
+	let text: string;
+
+	beforeAll(async () => {
+		keyless = await createRental(crypto.randomUUID(), { startDate: '2025-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(keyless.building, { amount: '400.00' });
+		await db.update(invoices).set({ distributionKeyId: null }).where(eq(invoices.buildingId, keyless.building));
+		const statement = await generateStatement({
+			contractId: keyless.contract,
+			buildingId: keyless.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			managementFeePercent: 0
+		});
+		await generateStatementPdf(statement.id, 'de');
+		text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+	});
+
+	afterAll(async () => {
+		await keyless.remove();
+	});
+
+	it('nennt den Verteilschlüssel «Pro Einheit» mit dem Anteil der Wohnung', () => {
+		expect(text).toContain('Hauswart Pro Einheit 1 / 1 Wohnungen 400.00 400.00');
 	});
 });

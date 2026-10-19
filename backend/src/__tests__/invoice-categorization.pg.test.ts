@@ -9,7 +9,7 @@ import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createInvoice, deleteInvoice } from '../services/invoice.service';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
-import { expectRejection, invoicedBuilding } from './helpers/records';
+import { expectRejection, invoicedBuilding, perAreaKey } from './helpers/records';
 
 type Invoice = {
 	id: string;
@@ -69,7 +69,8 @@ describe('Neu kategorisieren', () => {
 			billingEntityName: 'Sanitär Meier',
 			description: `Leck Hauptleitung ${token}`,
 			amount: '800.00',
-			invoiceDate: '2025-05-12'
+			invoiceDate: '2025-05-12',
+			distributionKeyId: await perAreaKey()
 		});
 		const llm = openAiCompatible({ category: 'Repairs', confidence: 0.95, isAllowedUtilityCost: true });
 		try {
@@ -109,6 +110,7 @@ describe('Neu kategorisieren einer ausgeschlossenen Rechnung', () => {
 			description: `Sonderreinigung nach Umbau ${token}`,
 			amount: '300.00',
 			invoiceDate: '2025-05-12',
+			distributionKeyId: await perAreaKey(),
 			categoryId: categories[0].id,
 			isValidUtilityCost: false
 		});
@@ -171,7 +173,8 @@ describe('Kategorie der KI für eine neue Rechnung', () => {
 				billingEntityName: 'Sanitär Meier',
 				description: `Leck Steigleitung ${token}`,
 				amount: '800.00',
-				invoiceDate: '2025-05-12'
+				invoiceDate: '2025-05-12',
+				distributionKeyId: await perAreaKey()
 			});
 			await deleteInvoice(invoice.id);
 
@@ -233,7 +236,7 @@ describe('Kategorien im Prompt', () => {
 				'- TV/Cable (TV/Kabelanschluss): Laufende Grundgebühr des Kabelnetzes; ohne Installation des Anschlusses\n'
 			);
 			expect(llm.prompts[0]).toContain(
-				'- Waste Disposal (Kehricht): Kehrichtgebühren und Grünabfuhr; ohne Räumungen, die der Vermieter bestellt\n'
+				'- Waste Disposal (Kehricht): Kehrichtgebühren nach Gebrauch und Grünabfuhr; ohne Grümpelräumungen, die der Vermieter bestellt, und Grundgebühren, die vom Wert der Liegenschaft abhängen\n'
 			);
 		} finally {
 			llm.stop();
@@ -335,6 +338,7 @@ describe('Kategorie von Hand', () => {
 			amount: '800.00',
 			invoiceDate: '2025-05-12',
 			categoryId: await repairs(),
+			distributionKeyId: await perAreaKey(),
 			isValidUtilityCost: true
 		});
 

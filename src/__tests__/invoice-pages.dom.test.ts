@@ -762,7 +762,7 @@ describe('Rechnung erfassen', () => {
 	it('sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		expect(document.querySelector('#distributionKey-help')!.textContent).toContain(
-			'Ohne Verteilschlüssel werden die Kosten gleichmässig pro Wohnung verteilt.'
+			'Dwello schlägt den Verteilschlüssel vor, den die letzte Rechnung dieser Kategorie im Gebäude hat, sonst den aus den Einstellungen.'
 		);
 	});
 
@@ -1107,6 +1107,100 @@ describe('Beleg einer Rechnung', () => {
 		click('invoice-document-upload-button');
 		await settle();
 		expect(text()).toContain('Dwello nimmt nur PDF-, JPG- und PNG-Dateien an.');
+	});
+});
+
+// #452 Punkt 7 (#379): pro Kategorie und Gebäude ein Verteilschlüssel, vorgeschlagen aus der letzten Rechnung
+describe('Verteilschlüssel einer Rechnung', () => {
+	const keys = [
+		{ id: 'k1', name: 'Nach Fläche' },
+		{ id: 'k2', name: 'Pro Zimmer' },
+		{ id: 'k3', name: 'Pro Einheit' }
+	];
+	const latestKeys = [{ buildingId: 'b1', categoryId: 'c1', distributionKeyId: 'k2' }];
+	const key = () => byTestId<HTMLSelectElement>('invoice-distribution-key-select')!;
+	const newInvoice = (defaultDistributionKeyId = 'k1') =>
+		show(NewInvoicePage, {
+			data: {
+				buildings,
+				categories,
+				distributionKeys: keys,
+				latestKeys,
+				llmAvailable: false,
+				defaultDistributionKeyId,
+				buildingId: '',
+				returnTo: null
+			}
+		} as never);
+	const choose = (testid: string, value: string) =>
+		fireEvent(byTestId<HTMLSelectElement>(testid)!, 'change', value);
+
+	it('schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor', () => {
+		newInvoice();
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c1');
+
+		expect(key().value).toBe('k2');
+	});
+
+	it('schlägt ohne frühere Rechnung den Verteilschlüssel aus den Einstellungen vor', () => {
+		newInvoice('k3');
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c2');
+
+		expect(key().value).toBe('k3');
+	});
+
+	it('überschreibt einen selbst gewählten Verteilschlüssel nicht', () => {
+		newInvoice();
+		choose('invoice-distribution-key-select', 'k3');
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c1');
+
+		expect(key().value).toBe('k3');
+	});
+
+	it('speichert keine Rechnung ohne Verteilschlüssel', () => {
+		const calls = fakeBff();
+		newInvoice('');
+		submit('submit-button');
+
+		expect(text()).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+		expect(calls).toEqual([]);
+	});
+
+	it('schlägt einer Rechnung ohne Verteilschlüssel beim Bearbeiten den Verteilschlüssel vor', () => {
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice({ distributionKeyId: undefined, distributionKey: undefined }),
+				buildings,
+				categories,
+				distributionKeys: keys,
+				latestKeys,
+				defaultDistributionKeyId: 'k1'
+			}
+		} as never);
+
+		expect(key().value).toBe('k2');
+		// Fachreview 452-1 V-5: a later berichtigte Abrechnung shares it otherwise than the one sent
+		expect(byTestId('invoice-key-missing-note')!.textContent!.trim()).toBe(
+			'Diese Rechnung hatte keinen Verteilschlüssel und wurde gleichmässig pro Wohnung verteilt. Dwello schlägt den Verteilschlüssel der letzten Rechnung dieser Kategorie vor; prüfen Sie ihn.'
+		);
+	});
+
+	it('lässt beim Bearbeiten den gespeicherten Verteilschlüssel stehen', () => {
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice({ distributionKeyId: 'k3' }),
+				buildings,
+				categories,
+				distributionKeys: keys,
+				latestKeys,
+				defaultDistributionKeyId: 'k1'
+			}
+		} as never);
+
+		expect(key().value).toBe('k3');
 	});
 });
 

@@ -177,6 +177,8 @@
 	}
 
 	function previewErrors(): Record<string, string> {
+		if (invoices.some((row) => row.uncategorized?.length))
+			return { uncategorized: m.statements_uncategorized_error() };
 		if (previewRows.length === 0)
 			return { preview: invoices.some((row) => row.partlyBilled) ? NOTHING_OPEN : NOTHING };
 		return confirmationNeeded && !confirmed ? { confirm: CONFIRM } : {};

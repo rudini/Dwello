@@ -14,6 +14,7 @@
 		type Proposal,
 		type UploadRow
 	} from '$lib/invoice-upload';
+	import type { LatestKey } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import { formatDate } from '$lib/utils/format';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -35,6 +36,7 @@
 		categories,
 		distributionKeys,
 		defaultDistributionKeyId,
+		latestKeys = [],
 		oncreated
 	}: {
 		open?: boolean;
@@ -42,6 +44,7 @@
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
 		defaultDistributionKeyId: string;
+		latestKeys?: LatestKey[];
 		oncreated: (created: Created[]) => void;
 	} = $props();
 
@@ -259,6 +262,7 @@
 					errors={errors[row.key] ?? {}}
 					{categories}
 					{distributionKeys}
+					keyProposal={{ buildingId, latestKeys, defaultKeyId: defaultDistributionKeyId }}
 					onretry={() => read(row.key)}
 					onremove={() => removeRow(row.key)}
 				/>

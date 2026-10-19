@@ -304,10 +304,11 @@ describe('Rechnung prüfen', () => {
 		invoiceDate: '2025-06-30',
 		billingEntity: 'Hauswart Huber',
 		description: 'Reinigung',
-		amount: "1'200.50"
+		amount: "1'200.50",
+		distributionKeyId: 'k1'
 	};
 
-	it('verlangt Gebäude, Datum, Rechnungssteller, Beschreibung und einen Betrag über null', () => {
+	it('verlangt Gebäude, Datum, Rechnungssteller, Beschreibung, einen Betrag über null und einen Verteilschlüssel', () => {
 		expect(
 			Object.keys(
 				validateInvoice({
@@ -318,7 +319,7 @@ describe('Rechnung prüfen', () => {
 					amount: '0'
 				})
 			)
-		).toEqual(['buildingId', 'invoiceDate', 'billingEntity', 'description', 'amount']);
+		).toEqual(['buildingId', 'invoiceDate', 'billingEntity', 'description', 'amount', 'distributionKeyId']);
 	});
 
 	it('nimmt Beträge so, wie man sie in der Schweiz schreibt', () => {

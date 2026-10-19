@@ -19,4 +19,4 @@ export const invoiceNumberInput = target('Rechnungsnummer', (page) => page.getBy
 export const servicePeriodHelp = target('Hilfe zum Leistungszeitraum', (page) => page.getByTestId('invoice-service-period-help'));
 export const utilityCostHelp = target('Hilfe zu Umlagefähig', (page) => page.getByTestId('invoice-utility-cost-checkbox-help'));
 export const keySelect = target('Verteilschlüssel', (page) => page.getByTestId('invoice-distribution-key-select'));
-export const keyHelp = target('Hilfe zum Verteilschlüssel', (page) => page.getByTestId('invoice-distribution-key-help'));
+export const keyHelp = target('Hilfe zum Verteilschlüssel', (page) => page.getByTestId('invoice-distribution-key-select-help'));

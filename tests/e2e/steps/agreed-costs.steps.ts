@@ -147,7 +147,7 @@ Then('zeigt die Prüfung {string} ohne {string}', async ({ verwalter }, label: s
 });
 
 Given(
-	'im Gebäude {string} gibt es eine Rechnung ohne Kategorie über {string} Franken vom {string}',
+	'im Gebäude {string} gibt es eine (umlagefähige )Rechnung ohne Kategorie über {string} Franken vom {string}',
 	async ({ seed }, building: string, amount: string, date: string) => {
 		await seed.invoiceWithoutCategory(building, amount, date);
 	}

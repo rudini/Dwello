@@ -3,7 +3,7 @@
  * Business logic for invoice operations with LLM categorization
  */
 
-import { eq, sql, desc, and, gte, lte, ilike, isNull, or } from 'drizzle-orm';
+import { eq, sql, desc, and, gte, lte, ilike, isNotNull, isNull, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { recordAudit } from './audit-log.service';
 import {
@@ -232,6 +232,27 @@ async function categorizeWithKi(data: NewInvoice): Promise<Pick<NewInvoice, 'llm
 	}
 }
 
+/** #379: every invoice says how its costs are shared; without a key the PDF could not name one */
+function requireKey(distributionKeyId: string | null | undefined) {
+	if (!distributionKeyId) throw new CodedError('INVOICE_KEY_REQUIRED', 'An invoice needs a distribution key');
+}
+
+/**
+ * Per building and category the Verteilschlüssel of the latest invoice that has one (#379): the invoice form proposes
+ * it, as one category of a building keeps one key
+ */
+export async function latestKeys() {
+	return db
+		.selectDistinctOn([invoices.buildingId, invoices.categoryId], {
+			buildingId: invoices.buildingId,
+			categoryId: invoices.categoryId,
+			distributionKeyId: invoices.distributionKeyId
+		})
+		.from(invoices)
+		.where(and(isNotNull(invoices.categoryId), isNotNull(invoices.distributionKeyId)))
+		.orderBy(invoices.buildingId, invoices.categoryId, desc(invoices.invoiceDate), desc(invoices.createdAt));
+}
+
 /** Checks the invoice's category; costs of a non-allocable one stay with the owners (OR 257a), whatever the form sends */
 async function applyCategory(data: Partial<NewInvoice>, categoryId: string | null | undefined) {
 	if (!categoryId) return;
@@ -255,6 +276,7 @@ export async function createInvoice(
 	const file = beleg && checkedFile(beleg);
 
 	await applyCategory(data, data.categoryId);
+	requireKey(data.distributionKeyId);
 
 	// Without a category the KI categorizes the invoice; a suggestion taken in the form arrives in data
 	const suggestion = !data.categoryId && !options.skipLlmCategorization ? await categorizeWithKi(data) : {};
@@ -317,6 +339,8 @@ export async function updateInvoice(
 	// Check if invoice exists
 	const existing = await getInvoice(id);
 	if (!existing) return null;
+	// an old invoice without key keeps working for other changes; emptying the key is refused
+	if ('distributionKeyId' in data) requireKey(data.distributionKeyId);
 
 	await applyCategory(data, 'categoryId' in data ? data.categoryId : existing.categoryId);
 
@@ -574,14 +598,11 @@ export async function getInvoicesForStatement(buildingId: string, periodStart: s
 }
 
 /**
- * Check if an invoice exists
+ * The building's invoices the period would bill without a category (#382): Dwello checks the agreement of the
+ * Mietvertrag through the category, so the run waits until each has one or is not allocable
  */
-export async function invoiceExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: invoices.id })
-		.from(invoices)
-		.where(eq(invoices.id, id))
-		.limit(1);
-
-	return !!result;
+export async function getUncategorizedInvoices(buildingId: string, periodStart: string, periodEnd: string) {
+	return (await getInvoicesForStatement(buildingId, periodStart, periodEnd))
+		.filter((invoice) => !invoice.categoryId)
+		.map(({ id, billingEntityName, description, invoiceDate, amount }) => ({ id, billingEntityName, description, invoiceDate, amount }));
 }

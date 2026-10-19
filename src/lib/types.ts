@@ -249,6 +249,7 @@ export interface InvoicesListData {
 	years: string[]; // Rechnungsdatum years offered in the filter
 	distributionKeys: { id: string; name: string }[]; // offered for the invoices of «Rechnungen hochladen»
 	defaultDistributionKeyId: string; // preselected there, as set in the settings
+	latestKeys: { buildingId: string; categoryId: string; distributionKeyId: string }[]; // proposed there (#379)
 }
 
 // Heating Profile types

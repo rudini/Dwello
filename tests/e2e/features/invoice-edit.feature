@@ -59,8 +59,8 @@ Funktionalität: Rechnung bearbeiten
   # #452 Punkt 7 (#379): eine alte Rechnung ohne Verteilschlüssel bekommt den Vorschlag, gespeichert wird sie nur mit einem
   @wip
   Szenario: Eine Rechnung ohne Verteilschlüssel bekommt den Verteilschlüssel der letzten Rechnung ihrer Kategorie vorgeschlagen
-    Angenommen "Gärtner Meier" stellt dem Gebäude "Seeblick" "300.00" Franken für "Gartenpflege" in der Kategorie "Hauswart" in Rechnung
-    Und die Rechnung von "Gärtner Meier" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Angenommen "Hauswart Meier" stellt dem Gebäude "Seeblick" "300.00" Franken für "Umgebungsarbeiten" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Meier" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
     Und die Rechnung von "Hauswart Huber" hat keinen Verteilschlüssel
     Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" bearbeitet
     Dann ist im Rechnungsformular der Verteilschlüssel "Pro Zimmer" gewählt

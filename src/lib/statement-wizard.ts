@@ -115,6 +115,7 @@ type Coverage = {
 	check?: InvoiceCheck;
 	changed?: ChangedStatement[];
 	fixedTerm?: boolean; // the run bills a running befristeter Mietvertrag here (#76)
+	uncategorized?: HintedInvoice[]; // allocable invoices of the period without a category hold the run (#382)
 };
 
 const invoices = (count: number) =>
@@ -279,6 +280,7 @@ export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name:
 		changed: c.changed ?? [],
 		partlyBilled: c.partlyBilled ?? 0,
 		fixedTerm: !!c.fixedTerm,
+		uncategorized: c.uncategorized ?? [],
 		...categoryCheck(c.check)
 	}));
 

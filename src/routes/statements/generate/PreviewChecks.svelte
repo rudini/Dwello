@@ -17,12 +17,14 @@
 		rows,
 		period,
 		confirmed = $bindable(),
-		error
+		error,
+		uncategorizedError
 	}: {
 		rows: ReturnType<typeof invoiceRows>;
 		period: { periodStart: string; periodEnd: string };
 		confirmed: boolean;
 		error?: string;
+		uncategorizedError?: string; // «Weiter» while an invoice without category holds the run (#382)
 	} = $props();
 
 	// ISO dates compare as text; repeated from step 1, where it may have been overlooked
@@ -41,9 +43,10 @@
 		unbilledDays || existing.some((row) => row.changed.length) ? 'caution' : 'info'
 	);
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
-	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
+	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod' | 'uncategorized') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
 	const late = $derived(hinted('lateInvoices'));
+	const uncategorized = $derived(hinted('uncategorized'));
 	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
 	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
@@ -90,6 +93,19 @@
 			<Button href={newInvoice} icon="invoice">{m.dashboard_add_invoice()}</Button>
 		{/snippet}
 	</Alert>
+{/if}
+
+<InvoiceHint
+	buildings={uncategorized}
+	title={m.statements_uncategorized_title()}
+	text={m.statements_uncategorized_text()}
+	tone="caution"
+	testid="uncategorized-invoices"
+/>
+{#if uncategorizedError}
+	<p class="font-semibold text-critical" role="alert" data-testid="form-error">
+		{uncategorizedError}
+	</p>
 {/if}
 
 {#if checked.length}

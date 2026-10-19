@@ -49,6 +49,55 @@ const chooseBuilding = () =>
 	fireEvent(byTestId<HTMLSelectElement>('invoice-upload-building-select')!, 'change', 'b1');
 const rowText = () => allByTestId('invoice-upload-row').map((row) => row.textContent?.replace(/\s+/g, ' '));
 
+// #452 Punkt 7 (#379): auch eine hochgeladene Rechnung bekommt den Verteilschlüssel ihrer Kategorie im Gebäude
+describe('Verteilschlüssel beim Hochladen', () => {
+	const openWith = (defaultDistributionKeyId: string) => {
+		fakeBff(() => [200, read]);
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [
+				{ id: 'k1', name: 'Nach Fläche' },
+				{ id: 'k2', name: 'Pro Zimmer' }
+			],
+			defaultDistributionKeyId,
+			latestKeys: [{ buildingId: 'b1', categoryId: 'c1', distributionKeyId: 'k2' }],
+			oncreated: vi.fn()
+		});
+	};
+
+	it('schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor', async () => {
+		openWith('k1');
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+
+		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k2');
+	});
+
+	it('erstellt keine Rechnung ohne Verteilschlüssel und sagt warum', async () => {
+		fakeBff(() => [200, { ...read, categorization: null }]);
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [{ id: 'k1', name: 'Nach Fläche' }],
+			defaultDistributionKeyId: '',
+			latestKeys: [],
+			oncreated: vi.fn()
+		});
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		await settle();
+
+		expect(byTestId('invoice-upload-row-message')!.textContent).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+		expect(byTestId('invoice-upload-create-button')!.textContent?.trim()).toBe('0 Rechnungen erstellen (1 unvollständig)');
+	});
+});
+
 describe('Rechnungen hochladen', () => {
 	it('nimmt Dateien erst, wenn das Gebäude gewählt ist, und erinnert an die Originalrechnung', () => {
 		open(() => [200, read]);

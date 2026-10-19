@@ -32,7 +32,8 @@ describe('Vorschau der Abrechnungen', () => {
 					partlyBilled: 0,
 					check: expect.anything(),
 					changed: [],
-					fixedTerm: false
+					fixedTerm: false,
+					uncategorized: []
 				}
 			]
 		});

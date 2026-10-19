@@ -153,6 +153,7 @@ export function toDoOf(row: UploadRow): string[] {
 	return [
 		mixed && m.invoices_upload_mixed(),
 		!row.values.categoryId && m.invoices_upload_category_missing(),
+		!row.values.distributionKeyId && m.invoices_error_key_required(), // #379
 		required.length > 0 && m.invoices_upload_fill_in({ fields: named(required) }),
 		row.unsure.length > 0 && m.invoices_upload_check_these({ fields: named(row.unsure) }),
 		optional.length > 0 && m.invoices_upload_add_if_shown({ fields: named(optional) })

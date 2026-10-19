@@ -9,6 +9,7 @@
 		servicePeriodOf,
 		suggestionProvenance,
 		validateInvoice,
+		type LatestKey,
 		type Suggestion
 	} from '$lib/invoice';
 	import { addToast } from '$lib/stores';
@@ -31,6 +32,7 @@
 			distributionKeys: { id: string; name: string }[];
 			llmAvailable: boolean;
 			defaultDistributionKeyId: string;
+			latestKeys: LatestKey[];
 			buildingId: string;
 			returnTo: string | null;
 			period?: { start: string; end: string } | null;
@@ -92,7 +94,8 @@
 			servicePeriodEnd,
 			billingEntity,
 			description,
-			amount
+			amount,
+			distributionKeyId
 		});
 		if (Object.keys(errors).length) return focusFirstError(event.target as Element);
 
@@ -171,6 +174,10 @@
 			bind:isValidUtilityCost
 			categories={data.categories}
 			distributionKeys={data.distributionKeys}
+			{buildingId}
+			latestKeys={data.latestKeys}
+			defaultKeyId={data.defaultDistributionKeyId}
+			keyError={errors.distributionKeyId}
 		/>
 	</Panel>
 

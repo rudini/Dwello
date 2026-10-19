@@ -9,6 +9,7 @@ import { clearCategorizationCache } from '../services/llm.service';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
+import { perAreaKey } from './helpers/records';
 
 const configured = { ...llmConfig };
 const page = 'data:image/png;base64,iVBORw0KGgo=';
@@ -121,7 +122,8 @@ describe('Datei auslesen', () => {
 			invoiceNumber: 'r-1001',
 			description: 'Allgemeinstrom Q1',
 			amount: '1250.00',
-			invoiceDate: '2026-03-31'
+			invoiceDate: '2026-03-31',
+			distributionKeyId: await perAreaKey()
 		});
 		const { id } = (await created.json()) as { id: string };
 		ki();

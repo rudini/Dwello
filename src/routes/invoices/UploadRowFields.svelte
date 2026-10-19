@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { fieldNote, fileType, type UploadRow } from '$lib/invoice-upload';
 	import DateInput from '$lib/ui/DateInput.svelte';
+	import type { KeyProposal } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -14,13 +15,15 @@
 		preview,
 		errors,
 		categories,
-		distributionKeys
+		distributionKeys,
+		keyProposal
 	}: {
 		row: UploadRow;
 		preview?: string;
 		errors: Record<string, string>;
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
+		keyProposal: KeyProposal;
 	} = $props();
 
 	const prefix = $derived(`upload-${row.key}-`);
@@ -100,6 +103,8 @@
 			bind:isValidUtilityCost={row.values.isValidUtilityCost}
 			{categories}
 			{distributionKeys}
+			{...keyProposal}
+			keyError={errors.distributionKeyId}
 		/>
 	</div>
 </div>

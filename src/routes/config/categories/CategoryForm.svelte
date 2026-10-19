@@ -8,6 +8,7 @@
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 	import SaveForm from '../SaveForm.svelte';
+	import AllocabilityQuestion from './AllocabilityQuestion.svelte';
 	import CategoryProposal from './CategoryProposal.svelte';
 	import CategoryReason from './CategoryReason.svelte';
 	import HeatingChoice from './HeatingChoice.svelte';
@@ -22,7 +23,7 @@
 		submitLabel
 	}: {
 		action?: string;
-		category?: Category & { key?: string; predefined?: boolean };
+		category?: Category & { key?: string; predefined?: boolean; allocableInvoiceCount?: number };
 		errors?: Record<string, string>;
 		ki?: boolean;
 		proposal?: Proposal | null;
@@ -84,10 +85,17 @@
 	$effect(() => {
 		if (values.allowed !== kiChoice) kiChoice = '';
 	});
+
+	let form = $state<HTMLFormElement>();
+	let ask = $state<() => boolean>();
+	const submitAgain = () => form?.requestSubmit(); // once the question is answered
+	const predefined = $derived(!!category?.predefined); // «Heizkosten» fixed (#302)
 </script>
 
 <SaveForm
 	{action}
+	bind:form
+	{ask}
 	bind:checking
 	record="category"
 	error={errors.form}
@@ -155,7 +163,11 @@
 			</div>
 		{/if}
 	</div>
-	<HeatingChoice bind:heating={values.heating} bind:fuel={values.fuel} />
+	<HeatingChoice
+		bind:heating={values.heating}
+		bind:fuel={values.fuel}
+		fixed={predefined}
+	/>
 	<TextInput
 		id="sortOrder"
 		name="sortOrder"
@@ -178,3 +190,10 @@
 		</div>
 	</fieldset>
 </SaveForm>
+
+<AllocabilityQuestion
+	{category}
+	allowed={values.allowed}
+	bind:ask
+	onconfirm={submitAgain}
+/>

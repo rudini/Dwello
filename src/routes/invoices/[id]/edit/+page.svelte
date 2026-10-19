@@ -5,7 +5,7 @@
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
-	import { plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
+	import { plainAmount, servicePeriodOf, validateInvoice, type LatestKey } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -29,6 +29,8 @@
 			buildings: { id: string; name: string; address: string }[];
 			categories: Category[];
 			distributionKeys: DistributionKeyRow[];
+			latestKeys: LatestKey[];
+			defaultDistributionKeyId: string;
 			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice
 			missedIn?: { start: string; end: string }[]; // periods with statements made before it was recorded
 		};
@@ -49,6 +51,10 @@
 		isValidUtilityCost: data.invoice.isValidUtilityCost
 	}));
 	const invoice = $derived(data.invoice);
+	// Fachreview 452-1 V-5: recorded before the key was required; a corrected statement shares it by the new one
+	const keyNote = initial.distributionKeyId
+		? undefined
+		: { text: m.invoices_key_missing_note(), testid: 'invoice-key-missing-note' };
 	let values = $state({ ...initial });
 	let overrideReason = $state('');
 	let errors = $state<Record<string, string>>({});
@@ -153,6 +159,12 @@
 			bind:isValidUtilityCost={values.isValidUtilityCost}
 			categories={data.categories}
 			distributionKeys={data.distributionKeys}
+			buildingId={values.buildingId}
+			latestKeys={data.latestKeys}
+			defaultKeyId={data.defaultDistributionKeyId}
+			keyChosen={!!initial.distributionKeyId}
+			keyError={errors.distributionKeyId}
+			{keyNote}
 		>
 			{#snippet after()}
 				{#if needsReason}

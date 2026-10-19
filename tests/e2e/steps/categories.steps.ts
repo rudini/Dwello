@@ -99,7 +99,7 @@ Given('es gibt die nicht umlagefähige Kategorie {string}', async ({ seed }, tit
 });
 
 Given(
-	'eine Rechnung des Gebäudes {string} ist der Kategorie {string} zugeordnet',
+	'eine (umlagefähige )Rechnung des Gebäudes {string} ist der Kategorie {string} zugeordnet',
 	async ({ seed }, building: string, category: string) => {
 		await seed.invoiceInCategory(building, category);
 	}
@@ -367,7 +367,7 @@ Then(
 );
 
 // #452 Punkt 1 (#302)
-Then('lässt sich nicht ändern, ob die Kategorie Heizkosten sind', async ({ verwalter }) => {
+Then('lässt sich nicht ändern, ob die Kategorie zu den Heizkosten zählt', async ({ verwalter }) => {
 	await verwalter.sees(heatingChangeable).toBe(false);
 });
 

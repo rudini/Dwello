@@ -3,7 +3,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { invoices, utilityStatements } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
@@ -273,6 +273,23 @@ describe('Vertragsdaten nach dem Ersetzen', () => {
 		await replace(id);
 
 		expect((await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2025-05-01' })).status).toBe(200);
+	});
+});
+
+// #452 point 4 (#382): the berichtigte Abrechnung is made without the wizard, which holds such invoices
+describe('Berichtigte Abrechnung mit einer Rechnung ohne Kategorie', () => {
+	it('lehnt sie ab, solange eine umlagefähige Rechnung der Periode keine Kategorie hat', async () => {
+		await removeStatements();
+		const id = await sentStatement();
+		await replace(id);
+		await insertInvoice(rental.building, { categoryId: null, billingEntityName: 'Garten AG', amount: '120.00', invoiceDate: '2025-06-30' });
+		try {
+			await expectRejection(await correct(id), 409, 'Allocable invoices of the period have no category', 'STATEMENT_UNCATEGORIZED_INVOICES', {
+				invoices: 'Garten AG, 30.06.2025, CHF 120.00'
+			});
+		} finally {
+			await db.delete(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.billingEntityName, 'Garten AG')));
+		}
 	});
 });
 

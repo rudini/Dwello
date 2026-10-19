@@ -154,7 +154,7 @@ Funktionalität: Kostenkategorien
   @wip
   Szenario: Bei einer vordefinierten Kategorie ist «Heizkosten» fest
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Kaminfeger"
-    Dann lässt sich nicht ändern, ob die Kategorie Heizkosten sind
+    Dann lässt sich nicht ändern, ob die Kategorie zu den Heizkosten zählt
     Und ist die Kategorie als Heizkosten markiert
     Und erklärt das Kategorieformular "Heizung und Kaminfeger verteilt Dwello beim Mieterwechsel nach dem Heizprofil, alle anderen Kategorien nach Tagen. Brauchen Sie eine andere Verteilung, erfassen Sie eine eigene Kategorie."
 
@@ -162,12 +162,12 @@ Funktionalität: Kostenkategorien
   @wip
   Szenario: Vor dem Umstellen auf nicht umlagefähig nennt Dwello die Rechnungen, die es betrifft
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
-    Und eine Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
+    Und eine umlagefähige Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" als nicht umlagefähig speichert
     Dann fragt Dwello "Kategorie «Treppenhausreinigung» auf nicht umlagefähig stellen?"
     Und erklärt die Rückfrage "1 erfasste Rechnung dieser Kategorie fliesst dann nicht mehr in neue Nebenkostenabrechnungen."
-    Und erklärt die Rückfrage "Stellen Sie die Kategorie später zurück, bleiben diese Rechnungen nicht umlagefähig: Sie müssen sie einzeln wieder auf «Umlagefähig» stellen."
+    Und erklärt die Rückfrage "Stellen Sie die Kategorie später zurück, bleibt diese Rechnung nicht umlagefähig: Sie müssen sie wieder auf «Umlagefähig» stellen."
     Wenn der Liegenschaftsverwalter das Umstellen bestätigt
     Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
     Und ist die Kategorie "Treppenhausreinigung" nicht umlagefähig
@@ -175,7 +175,7 @@ Funktionalität: Kostenkategorien
   @wip
   Szenario: Umstellen auf nicht umlagefähig abbrechen
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
-    Und eine Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
+    Und eine umlagefähige Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" als nicht umlagefähig speichert
     Und der Liegenschaftsverwalter das Umstellen abbricht

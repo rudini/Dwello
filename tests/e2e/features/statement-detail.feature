@@ -792,4 +792,4 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Pro Einheit"
+    Dann steht im PDF "Pro Einheit 1 / 1 Wohnungen 400.00 400.00"

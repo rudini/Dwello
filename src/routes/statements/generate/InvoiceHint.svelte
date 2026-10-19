@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { HintedInvoice } from '$lib/statement-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
+	import type { Tone } from '$lib/ui/tone';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	// Invoices without Leistungszeitraum per building that may count in the wrong period; each opens to be edited
@@ -9,17 +10,19 @@
 		buildings,
 		title,
 		text,
+		tone = 'info',
 		testid
 	}: {
 		buildings: { buildingId: string; name: string; invoices: HintedInvoice[] }[];
 		title: string;
 		text: string;
+		tone?: Exclude<Tone, 'neutral'>;
 		testid: string;
 	} = $props();
 </script>
 
 {#if buildings.length}
-	<Alert tone="info" {title} {testid}>
+	<Alert {tone} {title} {testid}>
 		<p>{text}</p>
 		{#each buildings as row (row.buildingId)}
 			<p class="font-semibold" aria-hidden="true">{row.name}</p>

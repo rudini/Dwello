@@ -7,6 +7,7 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { sendJson } from './helpers/auth';
+import { perAreaKey } from './helpers/records';
 
 // English key of each seeded category and whether its costs may be passed on to the tenant
 const ALLOWED_BY_LAW: Record<string, boolean> = {
@@ -81,6 +82,7 @@ beforeAll(async () => {
 				description: category.name,
 				amount: '100.00',
 				invoiceDate: '2024-06-30',
+				distributionKeyId: await perAreaKey(),
 				// The form's choice; a category that is not umlagefähig overrules it
 				isValidUtilityCost: true
 			},

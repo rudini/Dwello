@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { UploadRow } from '$lib/invoice-upload';
+	import type { KeyProposal } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -16,6 +17,7 @@
 		errors,
 		categories,
 		distributionKeys,
+		keyProposal,
 		onretry,
 		onremove
 	}: {
@@ -24,6 +26,7 @@
 		errors: Record<string, string>;
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
+		keyProposal: KeyProposal;
 		onretry: () => void;
 		onremove: () => void;
 	} = $props();
@@ -85,6 +88,6 @@
 	</div>
 
 	{#if open && editable && !row.several}
-		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} />
+		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} {keyProposal} />
 	{/if}
 </li>

@@ -461,8 +461,8 @@ export function testData(api: CallTheApi) {
 		},
 
 		// Invoice without a Kategorie, distributed by area: billed as «Nicht kategorisiert»
-		async invoiceWithoutCategory(buildingTitle: string, amount: string, date: string) {
-			await invoice(buildingTitle, {}, `Ohne Kategorie ${date}`, amount, date).then((id) => put(`invoices/${id}`, { categoryId: null }));
+		async invoiceWithoutCategory(buildingTitle: string, amount: string, date: string, description = `Ohne Kategorie ${date}`) {
+			await invoice(buildingTitle, {}, description, amount, date).then((id) => put(`invoices/${id}`, { categoryId: null }));
 		},
 
 		// Invoice in an own category, distributed by area

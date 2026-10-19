@@ -10,7 +10,12 @@ const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 const API = `${BACKEND}/categories`;
 const LIST = '/config/categories';
 
-export type CategoryWithUsage = Category & { key: string; usageCount: number; predefined: boolean };
+export type CategoryWithUsage = Category & {
+	key: string;
+	usageCount: number;
+	allocableInvoiceCount: number;
+	predefined: boolean;
+};
 
 /** Backend category as shown in the German interface: `name` stays the English key for invoice recognition */
 export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
@@ -28,6 +33,8 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 		description: (c.description || '') as string,
 		sortOrder: Number(c.sortOrder) || 0,
 		usageCount: Number(c.invoiceCount) || 0,
+		// the invoices a save as «nicht umlagefähig» takes out (#309); only the single category has it
+		allocableInvoiceCount: Number(c.allocableInvoiceCount) || 0,
 		// Dwello's own categories (English key and description) as the backend stores them
 		predefined: c.type === 'predefined'
 	};

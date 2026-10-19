@@ -11,7 +11,7 @@ import { buildings, categories, distributionKeys, invoices } from '../db/schema'
 import { calculateStatement } from '../services/statement.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { callApi, sendJson } from './helpers/auth';
-import { insertInvoice } from './helpers/records';
+import { insertInvoice, perAreaKey } from './helpers/records';
 import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
@@ -309,7 +309,7 @@ describe('Tankbestand über die API', () => {
 	it.each([{ isFuel: false }, { isHeatingCost: false }])('lässt einer Kategorie mit Tankbestand «Brennstoff» (%j)', async (change) => {
 		const [own] = await db
 			.insert(categories)
-			.values({ name: `Pellets ${Object.keys(change)[0]} ${token}`, isHeatingCost: true, isFuel: true })
+			.values({ name: `Pellets ${Object.keys(change)[0]} ${token}`, isHeatingCost: true, isFuel: true, type: 'custom' })
 			.returning();
 		const pellets = await createRental(`${token}-pellets-${Object.keys(change)[0]}`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
 		await record('2024-12-31', '900.00', pellets.building, own.id);
@@ -350,6 +350,7 @@ describe('Tankbestand über die API', () => {
 			amount: '2000.00',
 			invoiceDate: '2025-06-10',
 			categoryId: own.id,
+			distributionKeyId: await perAreaKey(),
 			isValidUtilityCost: true
 		});
 

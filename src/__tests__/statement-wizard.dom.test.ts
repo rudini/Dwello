@@ -972,6 +972,22 @@ describe('Abrechnungen erstellen', () => {
 		expect(heading()).toBe('Erstellen');
 	});
 
+	// #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; ohne sie geht es nicht weiter
+	it('hält die Vorschau an, solange eine umlagefähige Rechnung keine Kategorie hat', async () => {
+		const late = completeness.lateInvoices[0];
+		open({ preview, invoices: [{ ...invoices[0], uncategorized: [late] }] });
+		const hint = byTestId('uncategorized-invoices')!;
+
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Diese umlagefähigen Rechnungen haben keine Kategorie. Dwello rechnet nur Nebenkosten ab, die der Mietvertrag vereinbart, und prüft das über die Kategorie. Ordnen Sie jeder Rechnung eine Kategorie zu oder stellen Sie sie auf «Nicht umlagefähig». Danach geht es weiter.'
+		);
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(`/invoices/${late.id}/edit`);
+		next();
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain('Ordnen Sie jeder Rechnung eine Kategorie zu');
+		expect(heading()).toBe('Vorschau');
+	});
+
 	// In einer Periode unter einem Jahr zählt eine Jahresrechnung ohne Leistungszeitraum ganz (#134)
 	it('nennt Rechnungen ohne Leistungszeitraum einer kurzen Abrechnungsperiode', () => {
 		withInvoices({ invoicesWithoutServicePeriod: completeness.lateInvoices });
