@@ -220,6 +220,28 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		);
 	});
 
+	// code review 199-3 C-12: a replaced statement and its berichtigte Abrechnung are one statement for step 2's text
+	it('zählt eine ersetzte Abrechnung mit ihrer berichtigten einmal', async () => {
+		const { fetch } = backend([
+			{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30', status: 'replaced' },
+			{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30' }
+		]);
+
+		expect((await billedContracts(fetch, period))[0].overlap?.statements).toBe(1);
+	});
+
+	// code review 199-3 C-12: days a replaced statement holds are no days for a short period
+	it('bietet keine kurze Periode für Tage einer ersetzten Abrechnung an', async () => {
+		const { fetch } = backend([
+			{ contractId: 'einzug', periodStart: '2023-07-01', periodEnd: '2024-06-30' },
+			{ contractId: 'einzug', periodStart: '2024-07-01', periodEnd: '2024-09-30', status: 'replaced' }
+		]);
+
+		expect((await billedContracts(fetch, period))[0].overlap?.short).toEqual([
+			{ start: '2024-10-01', end: '2024-12-31' }
+		]);
+	});
+
 	// code review 199-2 C-10: every refused building is named
 	it('nennt in der Ablehnung jedes abgelehnte Gebäude', async () => {
 		const fetch = (async (url: string) => {

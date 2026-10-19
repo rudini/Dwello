@@ -87,7 +87,12 @@ function overlapOf(
 		choose: overlapped.filter(unbilled),
 		short,
 		vacant: rest.length > 0 && !short.length,
-		statements: statements.filter((s) => overlapped.some((p) => within(s, p))).length
+		// a replaced statement and its berichtigte Abrechnung are one (code review 199-3 C-12)
+		statements: new Set(
+			statements
+				.filter((s) => overlapped.some((p) => within(s, p)))
+				.map((s) => `${s.contractId}/${s.periodStart}/${s.periodEnd}`)
+		).size
 	};
 }
 
@@ -128,7 +133,10 @@ async function contractsInPeriod(fetch: Fetch, request: Run) {
 			overlap
 				? [
 						call(fetch, `buildings/${encodeURIComponent(buildingId)}`).then(({ name }) => {
-							const params = { building: name, periods: overlap.periods.map(periodName).join(', ') };
+							const params = {
+								building: name,
+								periods: overlap.periods.map(periodName).join(', ')
+							};
 							return backendMessage({ code: 'STATEMENT_PERIOD_OVERLAPS', params }, '');
 						})
 					]

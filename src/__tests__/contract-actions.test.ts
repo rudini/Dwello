@@ -230,6 +230,23 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		).toEqual([missingYear(lastYear)]);
 	});
 
+	// code review 199-3 C-12: another contract's replaced statement still holds its period for the building (C-8)
+	it('führt Tage in der Periode einer ersetzten Abrechnung des Gebäudes in diese Periode', async () => {
+		const replaced = {
+			...statementOf('c0', lastYear),
+			periodStart: `${lastYear - 1}-07-01`,
+			periodEnd: `${lastYear}-06-30`,
+			status: 'replaced'
+		};
+		expect(await missingOf(backend([replaced], `${lastYear}-01-01`))).toEqual([
+			missing(`${lastYear}-07-01`, `${lastYear}-12-31`, 'short'),
+			missing(`${lastYear}-01-01`, `${lastYear}-06-30`, 'existing', {
+				start: `${lastYear - 1}-07-01`,
+				end: `${lastYear}-06-30`
+			})
+		]);
+	});
+
 	// code review 199-2 C-9: two older periods with one first day: the longer one, so no missing day is lost
 	it('nennt bei zwei Altperioden mit gleichem Beginn die Tage der längeren', async () => {
 		const period = (contractId: string, end: string) => ({
