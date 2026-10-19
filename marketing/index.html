@@ -9,386 +9,352 @@
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="assets/dwello-mark.svg" type="image/svg+xml">
 <style>
-/* Layout concept: "Grundriss". An 8 px plan grid (the app's grid) under a 12-column page; one warm light per picture (the lit door of the logo). */
-@font-face { font-family: "Schibsted Grotesk"; src: url("fonts/schibsted-grotesk-latin.woff2") format("woff2"); font-weight: 400 900; font-display: swap; }
-@font-face { font-family: "Inter"; src: url("fonts/inter-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
-@font-face { font-family: "IBM Plex Mono"; src: url("fonts/ibm-plex-mono-500-latin.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+/* Layout concept: the site is built like the app. Same tokens, same Inter, same panels, badges and 48 px controls;
+   the product itself (real screenshots of the demo data, light and dark) carries every section. */
+@font-face { font-family: "Inter"; src: url("fonts/inter-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
 
 :root {
-	/* Brand palette = the app's tokens (src/styles/tokens.css) plus "Licht" */
-	--canvas: #f5f7f8;        /* Kalkweiss */
+	/* = src/styles/tokens.css */
+	--canvas: #f5f7f8;
 	--surface: #ffffff;
 	--sunken: #ebeff2;
 	--line: #d3dae0;
 	--line-strong: #68747f;
-	--ink: #161c21;           /* Schiefer */
+	--ink: #161c21;
 	--ink-muted: #3f4a54;
-	--petrol: #1b5873;        /* Dwello Petrol */
-	--petrol-deep: #123f54;
-	--petrol-mist: #e3eef3;
-	--on-petrol: #ffffff;
-	--licht: #f0c27a;         /* Licht: the lit door, one per picture */
-	--licht-ink: #663e00;
-	--licht-soft: #fbf0dc;
+	--accent: #1b5873;
+	--accent-strong: #123f54;
+	--accent-soft: #e3eef3;
+	--on-accent: #ffffff;
 	--positive: #17542e;
 	--positive-soft: #e3f1e7;
-	--band: #0f2f3e;          /* deep petrol band, same in both themes */
+	--caution: #663e00;
+	--caution-soft: #fbf0dc;
+	--focus: #1b5873;
+	/* marketing only: the deep band and the terminal */
+	--band: #123f54;
 	--band-ink: #eaf3f7;
-	--band-muted: #a9c6d4;
-	--band-line: #2a4c5c;
+	--band-muted: #b3d1de;
+	--band-line: #2b5a70;
 	--term: #111518;
 	--term-ink: #eceff2;
 	--term-muted: #8693a0;
 
-	--font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
-	--font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-	--font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-
+	--font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
 	--radius-control: 6px;
 	--radius-panel: 12px;
 	--shadow-raised: 0 2px 8px rgb(0 0 0 / 0.12);
-	--shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.16);
+	--shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.24);
 	--max: 1200px;
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme="light"]) {
 		--canvas: #111518; --surface: #1a1f23; --sunken: #242b30; --line: #3a444c; --line-strong: #8693a0;
-		--ink: #eceff2; --ink-muted: #b4bec7; --petrol: #86bfda; --petrol-deep: #b3d8ea; --petrol-mist: #172c37;
-		--on-petrol: #0d1a20; --licht-ink: #f0c27a; --licht-soft: #3a2c14; --positive: #8fd1a5; --positive-soft: #1c3326;
-		--band: #0b1f29; --band-line: #23414f;
+		--ink: #eceff2; --ink-muted: #b4bec7; --accent: #86bfda; --accent-strong: #b3d8ea; --accent-soft: #172c37;
+		--on-accent: #0d1a20; --positive: #8fd1a5; --positive-soft: #1c3326; --caution: #f0c27a; --caution-soft: #3a2c14;
+		--focus: #f0c27a; --band: #0e2531; --band-line: #23414f;
 		--shadow-raised: 0 2px 8px rgb(0 0 0 / 0.5); --shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.6);
 		color-scheme: dark;
 	}
+	:root:not([data-theme="light"]) .shot .l { display: none; }
+	:root:not([data-theme="light"]) .shot .d { display: block; }
 }
 :root[data-theme="dark"] {
 	--canvas: #111518; --surface: #1a1f23; --sunken: #242b30; --line: #3a444c; --line-strong: #8693a0;
-	--ink: #eceff2; --ink-muted: #b4bec7; --petrol: #86bfda; --petrol-deep: #b3d8ea; --petrol-mist: #172c37;
-	--on-petrol: #0d1a20; --licht-ink: #f0c27a; --licht-soft: #3a2c14; --positive: #8fd1a5; --positive-soft: #1c3326;
-	--band: #0b1f29; --band-line: #23414f;
+	--ink: #eceff2; --ink-muted: #b4bec7; --accent: #86bfda; --accent-strong: #b3d8ea; --accent-soft: #172c37;
+	--on-accent: #0d1a20; --positive: #8fd1a5; --positive-soft: #1c3326; --caution: #f0c27a; --caution-soft: #3a2c14;
+	--focus: #f0c27a; --band: #0e2531; --band-line: #23414f;
 	--shadow-raised: 0 2px 8px rgb(0 0 0 / 0.5); --shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.6);
 	color-scheme: dark;
 }
+:root[data-theme="dark"] .shot .l { display: none; }
+:root[data-theme="dark"] .shot .d { display: block; }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; scroll-padding-top: 88px; }
-body { margin: 0; background: var(--canvas); color: var(--ink); font-family: var(--font-body); font-size: 1.0625rem; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font: 400 1.0625rem/1.55 var(--font); -webkit-font-smoothing: antialiased; }
 img, svg { max-width: 100%; }
-a { color: var(--petrol); text-underline-offset: 3px; }
-:focus-visible { outline: 3px solid var(--licht); outline-offset: 2px; border-radius: 2px; }
-h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -0.025em; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+h1, h2, h3, h4 { line-height: 1.15; margin: 0; text-wrap: balance; font-weight: 700; letter-spacing: -0.022em; }
 p { margin: 0; }
 .wrap { max-width: var(--max); margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 @media (min-width: 720px) { .wrap { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
 .num { font-variant-numeric: tabular-nums; }
-.mono { font-family: var(--font-mono); font-weight: 500; }
-[hidden] { display: none !important; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
-/* Eyebrow: names the part of the landlord's year a section covers */
-.eyebrow { font-family: var(--font-mono); font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--petrol); display: inline-flex; align-items: center; gap: 10px; }
-.eyebrow::before { content: ""; width: 24px; height: 2px; background: currentColor; }
+/* App components */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 24px; border-radius: var(--radius-control); font: 600 1rem/1 var(--font); text-decoration: none; border: 2px solid transparent; cursor: pointer; transition: background-color .15s, border-color .15s; }
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { background: var(--accent-strong); }
+.btn-secondary { background: var(--surface); color: var(--accent); border-color: var(--line-strong); }
+.btn-secondary:hover { border-color: var(--accent); }
+.btn .ic { width: 20px; height: 20px; }
+.badge { justify-self: start; display: inline-flex; align-items: center; gap: 4px; font: 600 0.875rem/1 var(--font); padding: 4px 8px; border-radius: var(--radius-control); border: 1px solid currentColor; white-space: nowrap; }
+.badge .ic { width: 14px; height: 14px; stroke-width: 2; }
+.badge.ok { background: var(--positive-soft); color: var(--positive); }
+.badge.info { background: var(--accent-soft); color: var(--accent); }
+.badge.plan { background: var(--sunken); color: var(--ink-muted); border-style: dashed; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
 
-/* Buttons: 48 px like the app */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: var(--radius-control); font: 600 1rem/1 var(--font-body); text-decoration: none; border: 1.5px solid transparent; cursor: pointer; transition: background-color .15s, border-color .15s, color .15s; }
-.btn-primary { background: var(--petrol); color: var(--on-petrol); }
-.btn-primary:hover { background: var(--petrol-deep); }
-.btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--line-strong); }
-.btn-secondary:hover { border-color: var(--ink); }
-.btn svg { width: 20px; height: 20px; flex: none; }
-
-/* Header */
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--canvas); }
-.site-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--canvas); border-bottom: 1px solid var(--line); }
-.site-header .wrap { display: flex; align-items: center; gap: 24px; min-height: 72px; }
-.brand { display: inline-flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
-.brand .mark { width: 36px; height: 36px; }
-.brand .wm { height: 22px; width: auto; color: var(--ink); }
+/* Header: the app's header */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.site-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--surface); border-bottom: 1px solid var(--line); }
+.site-header .wrap { display: flex; align-items: center; gap: 16px; min-height: 64px; }
+.logo { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); text-decoration: none; min-height: 48px; }
+.logo .ic { color: var(--accent); }
+.logo .wm { height: 15px; width: auto; color: var(--ink); }
 .nav { display: none; gap: 4px; margin-left: auto; }
-.nav a { color: var(--ink-muted); text-decoration: none; font-weight: 500; padding: 10px 12px; border-radius: var(--radius-control); }
-.nav a:hover { color: var(--ink); background: var(--sunken); }
+.nav a { color: var(--ink); text-decoration: none; font-weight: 500; padding: 12px; border-radius: var(--radius-control); }
+.nav a:hover { background: var(--accent-soft); color: var(--accent); }
 .header-cta { margin-left: auto; }
 @media (min-width: 1000px) { .nav { display: flex; } .header-cta { margin-left: 8px; } }
 
-/* Mark: CSS variables reach into the <use> tree */
-.mark { --mark-bg: var(--petrol); --mark-fg: var(--on-petrol); }
+/* Section heads */
+section { padding-block: 96px; }
+@media (max-width: 719px) { section { padding-block: 64px; } }
+.kicker { font: 600 0.9375rem var(--font); color: var(--accent); }
+.sec-head { display: grid; gap: 16px; max-width: 760px; margin-bottom: 48px; }
+.sec-head h2 { font-size: clamp(2rem, 4.2vw, 3rem); }
+.sec-head p { font-size: 1.1875rem; color: var(--ink-muted); max-width: 38em; }
+
+/* Screenshots: light and dark, the theme decides */
+.shot { margin: 0; position: relative; border-radius: var(--radius-panel); overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-overlay); min-width: 0; }
+.shot img { display: block; width: 100%; height: auto; }
+.shot .d { display: none; }
+.caption { font-size: 0.9375rem; color: var(--ink-muted); overflow-wrap: anywhere; }
+.figure { display: grid; gap: 12px; min-width: 0; margin: 0; }
+.paper { margin: 0; background: #fff; border-radius: 4px; box-shadow: var(--shadow-overlay); overflow: hidden; border: 1px solid var(--line); }
+.paper img { display: block; width: 100%; height: auto; }
 
 /* Hero */
-.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
-.hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 32px 32px; opacity: .35; mask-image: linear-gradient(to bottom, #000 0%, transparent 85%); -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 85%); pointer-events: none; }
-.hero .wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; padding-block: 56px 64px; align-items: center; }
-@media (min-width: 980px) { .hero .wrap { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); padding-block: 88px 96px; } }
-.hero h1 { font-size: clamp(2.6rem, 6.4vw, 4.9rem); font-weight: 780; letter-spacing: -0.035em; margin-top: 20px; }
-.hero h1 .soft { color: var(--petrol); }
-.hero .lede { font-size: clamp(1.125rem, 1.6vw, 1.3125rem); color: var(--ink-muted); max-width: 34em; margin-top: 24px; }
-.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
-.cmd { margin-top: 28px; display: flex; align-items: stretch; max-width: 560px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); overflow: hidden; }
-.cmd code { flex: 1; min-width: 0; font: 500 0.875rem/1.4 var(--font-mono); padding: 14px 16px; overflow-x: auto; white-space: nowrap; color: var(--ink); }
-.cmd code::before { content: "$ "; color: var(--line-strong); }
-.copy { border: 0; border-left: 1px solid var(--line); background: var(--sunken); color: var(--ink); font: 600 0.875rem var(--font-body); padding: 0 16px; cursor: pointer; min-height: 48px; }
-.copy:hover { background: var(--petrol-mist); }
-.hero-note { margin-top: 12px; font-size: 0.9375rem; color: var(--ink-muted); }
-.hero-art { min-width: 0; }
-.hero-art svg { display: block; width: 100%; height: auto; }
+.hero { padding-block: 72px 0; border-bottom: 1px solid var(--line); overflow: hidden; }
+.hero-copy { display: grid; gap: 24px; max-width: 820px; }
+.hero h1 { font-size: clamp(2.5rem, 6.4vw, 4.75rem); letter-spacing: -0.035em; line-height: 1.04; font-weight: 750; }
+.hero h1 span { color: var(--accent); }
+.hero .lede { font-size: clamp(1.125rem, 1.7vw, 1.3125rem); color: var(--ink-muted); max-width: 36em; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.cmd { display: flex; align-items: stretch; max-width: 600px; border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--surface); overflow: hidden; }
+.cmd code { flex: 1; min-width: 0; font: 500 0.9375rem/1.4 var(--mono); padding: 14px 16px; overflow-x: auto; white-space: nowrap; }
+.cmd code::before { content: "$ "; color: var(--ink-muted); }
+.copy { border: 0; border-left: 1px solid var(--line); background: var(--sunken); color: var(--ink); font: 600 0.9375rem var(--font); padding: 0 16px; cursor: pointer; min-height: 48px; }
+.copy:hover { background: var(--accent-soft); color: var(--accent); }
+.hero-note { font-size: 0.9375rem; color: var(--ink-muted); }
+.stage { position: relative; margin-top: 56px; margin-bottom: -1px; }
+.stage .shot.desk { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 0; }
+.stage .phone { position: absolute; right: -8px; bottom: 32px; width: 23%; display: none; }
+@media (min-width: 900px) { .stage .phone { display: block; } .stage .shot.desk { margin-right: 14%; } }
+.phone { border: 8px solid #161c21; border-radius: 36px; overflow: hidden; background: #161c21; box-shadow: var(--shadow-overlay); }
+.phone .shot { border: 0; border-radius: 28px; box-shadow: none; }
 
-/* Illustration language: line = ink-muted 2px, fill = sunken, one petrol stroke, one light */
-.il { --l: var(--ink-muted); --f: var(--sunken); --s: var(--surface); --a: var(--petrol); }
-.il .ln { fill: none; stroke: var(--l); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.il .fl { fill: var(--f); stroke: var(--l); stroke-width: 2; stroke-linejoin: round; }
-.il .sf { fill: var(--s); stroke: var(--l); stroke-width: 2; stroke-linejoin: round; }
-.il .ac { fill: none; stroke: var(--a); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.il .lt { fill: var(--licht); }
-.il .tx { font-family: var(--font-body); fill: var(--ink); }
-.il .tm { font-family: var(--font-body); fill: var(--ink-muted); }
-.il .mn { font-family: var(--font-mono); fill: var(--ink); }
-.il .dash { fill: none; stroke: var(--line-strong); stroke-width: 1.5; stroke-dasharray: 4 5; }
-.il .drag { fill: none; stroke: var(--a); stroke-width: 2; stroke-dasharray: 2 7; stroke-linecap: round; }
-@media (prefers-reduced-motion: no-preference) {
-	.il .flying { animation: fly 6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-	@keyframes fly { 0%, 100% { transform: translate(0, 0) rotate(7deg); } 50% { transform: translate(-6px, 8px) rotate(5deg); } }
-	.il .drag { animation: march 1.6s linear infinite; }
-	@keyframes march { to { stroke-dashoffset: -18; } }
-}
-
-/* Facts strip */
-.facts { border-bottom: 1px solid var(--line); background: var(--surface); }
-.facts ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 900px) { .facts ul { grid-template-columns: repeat(5, 1fr); } }
-.facts li { padding: 24px 16px 24px 0; display: grid; gap: 4px; }
-.facts li + li { }
+/* Facts */
+.facts { background: var(--surface); border-bottom: 1px solid var(--line); }
+.facts ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 900px) { .facts ul { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.facts li { padding: 24px 16px 24px 0; display: grid; gap: 4px; align-content: start; }
 @media (min-width: 900px) { .facts li { padding: 32px 24px; border-left: 1px solid var(--line); } .facts li:first-child { border-left: 0; padding-left: 0; } }
-.facts b { font: 760 clamp(1.75rem, 3vw, 2.25rem)/1 var(--font-display); letter-spacing: -0.02em; }
+.facts b { font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1.1; }
 .facts span { color: var(--ink-muted); font-size: 0.9375rem; line-height: 1.4; }
 
-/* Sections */
-section { padding-block: 88px; }
-@media (max-width: 719px) { section { padding-block: 64px; } }
-.sec-head { display: grid; gap: 16px; max-width: 760px; margin-bottom: 48px; }
-.sec-head h2 { font-size: clamp(2rem, 4.2vw, 3.25rem); font-weight: 760; }
-.sec-head p { font-size: 1.1875rem; color: var(--ink-muted); max-width: 36em; }
-
-/* Year in four steps */
-.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; counter-reset: step; }
-@media (min-width: 760px) { .steps { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1100px) { .steps { grid-template-columns: repeat(4, 1fr); } }
-.steps li { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); padding: 24px; display: grid; gap: 12px; align-content: start; }
-.steps li::before { content: counter(step); font: 500 0.8125rem var(--font-mono); color: var(--petrol); border: 1.5px solid var(--petrol); border-radius: 50%; width: 32px; height: 32px; display: grid; place-items: center; }
-.steps .when { font: 500 0.8125rem var(--font-mono); color: var(--ink-muted); letter-spacing: .04em; text-transform: uppercase; }
-.steps h3 { font-size: 1.375rem; }
+/* Year in four steps: like the app's "Häufige Arbeiten" */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.steps li { padding: 24px; display: grid; gap: 12px; align-content: start; }
+.steps .top { display: flex; align-items: center; justify-content: space-between; }
+.steps .ic { width: 28px; height: 28px; color: var(--accent); }
+.steps .n { font-size: 0.875rem; font-weight: 600; color: var(--ink-muted); }
+.steps h3 { font-size: 1.25rem; }
 .steps p { color: var(--ink-muted); font-size: 1rem; }
 
 /* Feature rows */
-.feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 56px; border-top: 1px solid var(--line); }
+.feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 64px; border-top: 1px solid var(--line); }
 .feature:first-of-type { border-top: 0; padding-top: 0; }
-@media (min-width: 980px) { .feature { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 72px; } .feature.flip > .copy-col { order: 2; } }
+@media (min-width: 980px) { .feature { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 64px; } .feature.flip > .copy-col { order: 2; } .feature.flip { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); } .feature.wide { grid-template-columns: minmax(0, 1fr); } }
 .copy-col { display: grid; gap: 20px; min-width: 0; }
-.copy-col h3 { font-size: clamp(1.75rem, 3vw, 2.375rem); font-weight: 740; }
+.copy-col h3 { font-size: clamp(1.75rem, 3vw, 2.25rem); }
 .copy-col > p { color: var(--ink-muted); font-size: 1.125rem; max-width: 34em; }
-.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.checks li { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; }
-.checks li::before { content: ""; width: 20px; height: 20px; margin-top: 3px; border-radius: 50%; background: var(--petrol-mist) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 10.5l2.6 2.5L14 7.5' fill='none' stroke='%231b5873' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 20px no-repeat; }
-.checks small { display: block; color: var(--ink-muted); font-size: 0.9375rem; }
-.law { font: 500 0.8125rem var(--font-mono); color: var(--petrol); white-space: nowrap; }
-
-/* Product specimens (built like the app: tokens, 48 px rows, labels above values) */
-.specimen { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); box-shadow: var(--shadow-overlay); overflow: hidden; min-width: 0; }
-.specimen-bar { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); font-weight: 600; }
-.specimen-bar .crumb { color: var(--ink-muted); font-weight: 500; font-size: 0.9375rem; }
-.specimen-body { padding: 20px; display: grid; gap: 16px; }
-.drop { border: 2px dashed var(--petrol); background: var(--petrol-mist); border-radius: var(--radius-panel); padding: 24px; display: grid; justify-items: center; gap: 8px; text-align: center; }
-.drop strong { font-family: var(--font-display); font-size: 1.25rem; letter-spacing: -0.01em; }
-.drop span { color: var(--ink-muted); font-size: 0.9375rem; }
-.file { display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-control); min-width: 0; }
-.file .ic { width: 40px; height: 40px; border-radius: var(--radius-control); background: var(--sunken); display: grid; place-items: center; color: var(--ink-muted); }
-.file .ic svg { width: 22px; height: 22px; }
-.file .meta { min-width: 0; }
-.file .meta b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.file .meta span { color: var(--ink-muted); font-size: 0.9375rem; }
-.badge { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font: 600 0.8125rem/1 var(--font-body); padding: 6px 10px; border-radius: var(--radius-control); white-space: nowrap; }
-.badge.ok { background: var(--positive-soft); color: var(--positive); }
-.badge.check { background: var(--licht-soft); color: var(--licht-ink); }
-.badge.plan { background: var(--sunken); color: var(--ink-muted); border: 1px dashed var(--line-strong); }
-.badge.live { background: var(--petrol-mist); color: var(--petrol); }
-.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; padding: 16px; background: var(--canvas); border-radius: var(--radius-control); }
-.fields label { display: block; font-size: 0.8125rem; font-weight: 600; color: var(--ink-muted); margin-bottom: 4px; }
-.fields .val { min-height: 44px; display: flex; align-items: center; padding: 0 12px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-control); background: var(--surface); font-variant-numeric: tabular-nums; overflow: hidden; white-space: nowrap; }
-.fields .val.unsure { border-color: var(--licht); box-shadow: inset 0 0 0 1px var(--licht); }
-.fields .help { grid-column: 1 / -1; font-size: 0.875rem; color: var(--licht-ink); display: flex; gap: 8px; align-items: start; }
-
-.stmt { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.9375rem; }
-.stmt th { text-align: left; font-weight: 600; color: var(--ink-muted); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: .05em; padding: 10px 12px; background: var(--sunken); }
-.stmt td { padding: 11px 12px; border-bottom: 1px solid var(--line); }
-.stmt td.r, .stmt th.r { text-align: right; white-space: nowrap; }
-.stmt tr.total td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--ink); }
-.stmt .sub { display: block; color: var(--ink-muted); font-size: 0.8125rem; }
-.scroll-x { overflow-x: auto; }
-
-.qrpart { display: grid; grid-template-columns: 120px 1fr; gap: 20px; padding: 20px; border-top: 1.5px dashed var(--line-strong); position: relative; }
-.qrpart::before { content: "✂"; position: absolute; top: -13px; left: 16px; background: var(--surface); color: var(--line-strong); padding: 0 6px; font-size: 1rem; }
-.qrpart svg { width: 120px; height: 120px; }
-.qrpart dl { margin: 0; display: grid; gap: 8px; font-size: 0.875rem; }
-.qrpart dt { font-weight: 700; font-size: 0.75rem; }
-.qrpart dd { margin: 0; font-variant-numeric: tabular-nums; }
-
-.formula { font: 500 0.9375rem/1.7 var(--font-mono); background: var(--canvas); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 16px; overflow-wrap: anywhere; }
-.formula .v { color: var(--petrol); }
-.split { display: flex; height: 40px; border-radius: var(--radius-control); overflow: hidden; border: 1px solid var(--line); }
-.split div { display: flex; align-items: center; padding: 0 12px; font-size: 0.875rem; font-weight: 600; white-space: nowrap; overflow: hidden; }
-.split .a { background: var(--petrol); color: var(--on-petrol); }
-.split .b { background: var(--petrol-mist); color: var(--petrol); }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.checks li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; align-items: start; font-weight: 600; }
+.checks li > .ic { width: 22px; height: 22px; color: var(--positive); margin-top: 1px; stroke-width: 2; }
+.checks small { display: block; color: var(--ink-muted); font-size: 0.9375rem; font-weight: 400; margin-top: 2px; }
+.law { font-weight: 600; color: var(--accent); white-space: nowrap; }
+.duo { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .duo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+.pdfs { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 600px) { .pdfs { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); } .pdfs .paper.qr { margin-top: 96px; } }
 
 /* Feature index */
-.grid-feat { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-panel); overflow: hidden; }
-@media (min-width: 640px) { .grid-feat { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1000px) { .grid-feat { grid-template-columns: repeat(3, 1fr); } }
-.grid-feat article { background: var(--surface); padding: 28px 24px; display: grid; grid-template-rows: auto auto 1fr; gap: 10px; }
+.grid-feat { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 640px) { .grid-feat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .grid-feat { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.grid-feat article { padding: 24px; display: grid; grid-template-rows: auto auto 1fr; gap: 10px; }
+.grid-feat article.planned { background: transparent; border-style: dashed; border-color: var(--line-strong); }
 .grid-feat .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.grid-feat .ico { width: 44px; height: 44px; border-radius: var(--radius-control); background: var(--petrol-mist); color: var(--petrol); display: grid; place-items: center; }
-.grid-feat .ico svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
-.grid-feat h3 { font-size: 1.1875rem; letter-spacing: -0.015em; }
-.grid-feat p { color: var(--ink-muted); font-size: 0.96875rem; line-height: 1.55; }
-.legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; color: var(--ink-muted); font-size: 0.9375rem; align-items: center; }
+.grid-feat .top > .ic { color: var(--accent); width: 28px; height: 28px; }
+.grid-feat h3 { font-size: 1.1875rem; letter-spacing: -0.01em; }
+.grid-feat p { color: var(--ink-muted); font-size: 1rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 24px; color: var(--ink-muted); font-size: 0.9375rem; align-items: center; }
 
 /* Privacy band */
 .band { background: var(--band); color: var(--band-ink); }
-.band .eyebrow { color: var(--licht); }
+.band .kicker { color: var(--band-muted); }
 .band .sec-head p { color: var(--band-muted); }
 .band-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; }
-@media (min-width: 980px) { .band-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+@media (min-width: 980px) { .band-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
 .promises { list-style: none; margin: 0; padding: 0; display: grid; }
-.promises li { display: grid; grid-template-columns: 136px 1fr; gap: 20px; padding-block: 20px; border-top: 1px solid var(--band-line); }
+.promises li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 16px; padding-block: 20px; border-top: 1px solid var(--band-line); }
 .promises li:last-child { border-bottom: 1px solid var(--band-line); }
-.promises .ref { font: 500 0.8125rem var(--font-mono); color: var(--licht); padding-top: 3px; }
-.promises b { display: block; font-family: var(--font-display); font-size: 1.1875rem; letter-spacing: -0.01em; margin-bottom: 4px; }
+.promises .ic { color: var(--band-muted); width: 26px; height: 26px; }
+.promises b { display: block; font-size: 1.125rem; margin-bottom: 2px; }
 .promises span { color: var(--band-muted); }
-.band .il { --l: var(--band-muted); --f: #163b4c; --s: #0f2f3e; --a: #86bfda; }
-.band .il .tx { fill: var(--band-ink); } .band .il .tm { fill: var(--band-muted); }
+.promises .ref { color: var(--band-ink); font-weight: 600; }
+.illu { --illu-line: var(--band-muted); --illu-fill: #1b4b61; --illu-surface: #123f54; --illu-accent: #86bfda; }
 
-/* MCP */
-.chat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); box-shadow: var(--shadow-overlay); overflow: hidden; }
+/* MCP chat, in app panel style */
+.chat { overflow: hidden; box-shadow: var(--shadow-overlay); min-width: 0; }
+.chat-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); font-weight: 600; }
+.chat-head .ic { color: var(--accent); }
 .chat-body { padding: 20px; display: grid; gap: 14px; }
-.msg { max-width: 88%; padding: 12px 16px; border-radius: var(--radius-panel); font-size: 0.96875rem; }
-.msg.me { justify-self: end; background: var(--petrol); color: var(--on-petrol); border-bottom-right-radius: 4px; }
+.msg { max-width: 92%; padding: 12px 16px; border-radius: var(--radius-panel); font-size: 1rem; }
+.msg.me { justify-self: end; background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 4px; }
 .msg.ai { background: var(--sunken); border-bottom-left-radius: 4px; }
-.tool { font: 500 0.8125rem/1.5 var(--font-mono); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 10px 12px; color: var(--ink-muted); overflow-x: auto; white-space: nowrap; }
-.tool b { color: var(--petrol); font-weight: 500; }
+.tool { font: 500 0.875rem/1.5 var(--mono); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 10px 12px; color: var(--ink-muted); overflow-x: auto; white-space: nowrap; }
+.tool b { color: var(--accent); font-weight: 600; }
 .msg table { width: 100%; border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; font-size: 0.9375rem; }
-.msg td { padding: 6px 0; border-top: 1px solid var(--line); }
-.msg td.r { text-align: right; }
+.msg td { padding: 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.msg td.r { text-align: right; font-weight: 600; white-space: nowrap; padding-left: 12px; }
 
 /* Install */
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.tab { min-height: 48px; padding: 0 18px; border-radius: var(--radius-control); border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink); font: 600 1rem var(--font-body); cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
-.tab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
-.tab[aria-selected="true"] { background: var(--petrol); border-color: var(--petrol); color: var(--on-petrol); }
+.tab { min-height: 48px; padding: 0 18px; border-radius: var(--radius-control); border: 2px solid var(--line-strong); background: var(--surface); color: var(--ink); font: 600 1rem var(--font); cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
+.tab .ic { width: 20px; height: 20px; }
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .install { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
-@media (min-width: 980px) { .install { grid-template-columns: 1.35fr 1fr; } }
+@media (min-width: 980px) { .install { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); } }
 .term { background: var(--term); color: var(--term-ink); border-radius: var(--radius-panel); overflow: hidden; min-width: 0; border: 1px solid var(--line); }
-.term-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 10px 16px; border-bottom: 1px solid #2a3238; font: 500 0.8125rem var(--font-mono); color: var(--term-muted); }
-.term-bar button { min-height: 36px; border: 1px solid #3a444c; background: transparent; color: var(--term-ink); border-radius: var(--radius-control); padding: 0 12px; font: 600 0.8125rem var(--font-body); cursor: pointer; }
-.term pre { margin: 0; padding: 20px; overflow-x: auto; font: 500 0.875rem/1.85 var(--font-mono); }
+.term-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; border-bottom: 1px solid #2a3238; font-size: 0.875rem; color: var(--term-muted); }
+.term-bar button { min-height: 36px; border: 1px solid #3a444c; background: transparent; color: var(--term-ink); border-radius: var(--radius-control); padding: 0 12px; font: 600 0.875rem var(--font); cursor: pointer; }
+.term pre { margin: 0; padding: 20px; overflow-x: auto; font: 500 0.875rem/1.85 var(--mono); }
 .term .c { color: var(--term-muted); }
 .term .p { color: #86bfda; user-select: none; }
 .term .ok { color: #8fd1a5; }
-.needs { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); padding: 24px; display: grid; gap: 16px; align-content: start; }
+.needs { padding: 24px; display: grid; gap: 16px; align-content: start; }
 .needs h3 { font-size: 1.25rem; }
 .needs dl { margin: 0; display: grid; gap: 14px; }
-.needs dt { font-size: 0.8125rem; font-weight: 600; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .05em; }
-.needs dd { margin: 2px 0 0; }
-.honest { display: flex; gap: 12px; align-items: start; padding: 16px; border-radius: var(--radius-control); background: var(--licht-soft); color: var(--licht-ink); font-size: 0.9375rem; }
-.honest svg { flex: none; width: 20px; height: 20px; margin-top: 2px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.needs dt { font-weight: 600; }
+.needs dd { margin: 2px 0 0; color: var(--ink-muted); }
+.alert { display: flex; gap: 12px; align-items: start; padding: 16px; border-radius: var(--radius-control); border-left: 4px solid var(--caution); background: var(--caution-soft); color: var(--ink); }
+.alert .ic { color: var(--caution); }
+.alert b { color: var(--caution); display: block; }
 
 /* Accessibility */
 .a11y { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; align-items: center; }
-@media (min-width: 980px) { .a11y { grid-template-columns: 1fr 1fr; } }
-.phone { width: min(340px, 100%); margin-inline: auto; border: 10px solid var(--ink); border-radius: 40px; background: var(--canvas); overflow: hidden; box-shadow: var(--shadow-overlay); }
-.phone-top { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
-.phone-top .wm { height: 16px; color: var(--ink); }
-.burger { width: 44px; height: 44px; border-radius: var(--radius-control); border: 1.5px solid var(--line-strong); display: grid; place-items: center; }
-.burger svg { width: 20px; height: 20px; stroke: var(--ink); stroke-width: 2; fill: none; stroke-linecap: round; }
-.phone-body { padding: 20px 16px 24px; display: grid; gap: 14px; }
-.phone-body h4 { font-size: 1.625rem; }
-.phone-body .purpose { color: var(--ink-muted); font-size: 0.9375rem; }
-.task { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; min-height: 64px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); text-decoration: none; color: var(--ink); }
-.task b { display: block; font-size: 0.96875rem; }
-.task span { font-size: 0.8125rem; color: var(--ink-muted); }
-.task svg { width: 18px; height: 18px; stroke: var(--ink-muted); fill: none; stroke-width: 2; }
-.phone .btn { width: 100%; }
-.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
-.rules li { display: grid; grid-template-columns: 96px 1fr; gap: 20px; padding-block: 18px; border-top: 1px solid var(--line); }
-.rules .m { font: 760 1.5rem/1 var(--font-display); color: var(--petrol); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.rules b { display: block; }
-.rules span { color: var(--ink-muted); font-size: 0.96875rem; }
+@media (min-width: 980px) { .a11y { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); } }
+.a11y .phone { width: min(320px, 100%); margin-inline: auto; }
+.rules { list-style: none; margin: 0; padding: 0; display: grid; }
+.rules li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding-block: 18px; border-top: 1px solid var(--line); }
+.rules .m { font-size: 1.5rem; font-weight: 750; color: var(--accent); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.rules span span { display: block; color: var(--ink-muted); font-size: 1rem; }
 
 /* Open source */
 .oss { background: var(--surface); border-block: 1px solid var(--line); }
 .oss-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; }
-@media (min-width: 980px) { .oss-grid { grid-template-columns: 1.2fr 1fr; } }
-.price { font: 800 clamp(4.5rem, 12vw, 8.5rem)/0.9 var(--font-display); letter-spacing: -0.05em; }
-.price small { font-size: 0.28em; letter-spacing: -0.01em; font-weight: 600; color: var(--ink-muted); }
-.compare { width: 100%; border-collapse: collapse; font-size: 0.96875rem; }
-.compare th, .compare td { padding: 12px 8px; border-bottom: 1px solid var(--line); text-align: left; }
-.compare th { font-size: 0.8125rem; color: var(--ink-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+@media (min-width: 980px) { .oss-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
+.price { font-size: clamp(4.5rem, 12vw, 8rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.9; }
+.price small { font-size: 0.26em; letter-spacing: -0.01em; font-weight: 600; color: var(--ink-muted); }
+.table-wrap { overflow-x: auto; }
+.compare { width: 100%; border-collapse: collapse; font-size: 1rem; }
+.compare th, .compare td { padding: 14px 16px; border-bottom: 1px solid var(--line); text-align: left; }
+.compare tr:last-child td { border-bottom: 0; }
+.compare thead th { background: var(--sunken); font-weight: 600; }
 .compare td:first-child { color: var(--ink-muted); }
-.compare td.d { font-weight: 600; color: var(--petrol); }
+.compare td.d { font-weight: 600; color: var(--accent); }
 
 /* Roadmap */
-.road { display: grid; gap: 16px; }
-@media (min-width: 760px) { .road { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1100px) { .road { grid-template-columns: repeat(3, 1fr); } }
-.road article { border: 1.5px dashed var(--line-strong); border-radius: var(--radius-panel); padding: 24px; display: grid; gap: 10px; align-content: start; }
+.road { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .road { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .road { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.road article { border: 1px dashed var(--line-strong); border-radius: var(--radius-panel); padding: 24px; display: grid; gap: 10px; align-content: start; }
 .road h3 { font-size: 1.1875rem; }
-.road p { color: var(--ink-muted); font-size: 0.96875rem; }
+.road p { color: var(--ink-muted); }
 
 /* FAQ */
-.faq { display: grid; gap: 0; max-width: 860px; }
+.faq { max-width: 860px; }
 .faq details { border-top: 1px solid var(--line); }
 .faq details:last-child { border-bottom: 1px solid var(--line); }
-.faq summary { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; font: 650 1.1875rem/1.3 var(--font-display); letter-spacing: -0.01em; list-style: none; padding-block: 12px; }
+.faq summary { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; font-size: 1.1875rem; font-weight: 600; list-style: none; padding-block: 12px; }
 .faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: "+"; font: 400 1.75rem/1 var(--font-body); color: var(--petrol); }
+.faq summary::after { content: "+"; font-size: 1.75rem; font-weight: 400; color: var(--accent); line-height: 1; }
 .faq details[open] summary::after { content: "–"; }
 .faq details p { padding-bottom: 24px; color: var(--ink-muted); max-width: 44em; }
 
-/* Final CTA + footer */
-.final { text-align: left; }
-.final-box { background: var(--petrol); color: var(--on-petrol); border-radius: var(--radius-panel); padding: clamp(32px, 6vw, 72px); display: grid; gap: 24px; position: relative; overflow: hidden; }
-.final-box h2 { font-size: clamp(2.25rem, 5vw, 3.75rem); font-weight: 780; max-width: 14em; }
-.final-box p { font-size: 1.1875rem; max-width: 34em; opacity: .92; }
-.final-box .btn-primary { background: var(--on-petrol); color: var(--petrol); }
-.final-box .btn-secondary { background: transparent; color: var(--on-petrol); border-color: var(--on-petrol); }
-.final-box .actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.final-house { position: absolute; right: -24px; bottom: -8px; width: 260px; opacity: .22; pointer-events: none; }
+/* Final + footer */
+.final-box { background: var(--accent); color: var(--on-accent); border-radius: var(--radius-panel); padding: clamp(32px, 6vw, 72px); display: grid; gap: 24px; position: relative; overflow: hidden; }
+.final-box h2 { font-size: clamp(2.25rem, 5vw, 3.5rem); max-width: 14em; letter-spacing: -0.03em; }
+.final-box p { font-size: 1.1875rem; max-width: 34em; }
+.final-box .btn-primary { background: var(--on-accent); color: var(--accent); }
+.final-box .btn-secondary { background: transparent; color: var(--on-accent); border-color: var(--on-accent); }
+.final-house { position: absolute; right: 24px; bottom: -24px; width: 240px; height: 240px; opacity: .18; stroke-width: 1.2; }
 @media (max-width: 719px) { .final-house { display: none; } }
-footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem; }
-.foot { display: grid; gap: 40px; }
-@media (min-width: 900px) { .foot { grid-template-columns: 1.4fr repeat(4, 1fr); } }
-.foot h4 { font: 600 0.8125rem var(--font-body); text-transform: uppercase; letter-spacing: .06em; color: var(--ink); margin-bottom: 12px; }
+footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface); border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 0.9375rem; }
+.foot { display: grid; gap: 40px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .foot { grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)); } }
+.foot h4 { font-size: 0.875rem; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
 .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .foot a { color: var(--ink-muted); text-decoration: none; }
-.foot a:hover { color: var(--ink); text-decoration: underline; }
-.legal { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+.foot a:hover { color: var(--accent); text-decoration: underline; }
+.legal { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: center; }
 .langs { display: flex; gap: 4px; }
-.langs a { padding: 6px 10px; border-radius: var(--radius-control); text-decoration: none; color: var(--ink-muted); font-weight: 600; font-size: 0.875rem; }
-.langs a[aria-current] { background: var(--petrol-mist); color: var(--petrol); }
+.langs a { padding: 8px 12px; border-radius: var(--radius-control); text-decoration: none; color: var(--ink-muted); font-weight: 600; font-size: 0.875rem; }
+.langs a[aria-current] { background: var(--accent-soft); color: var(--accent); }
 </style>
 </head>
 <body>
 
-<!-- Brand symbols: the mark (house with a lit door) and the outlined wordmark -->
+<!-- Symbols: the app's Lucide icons and the outlined wordmark (Inter Bold, as in the app header) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-	<symbol id="dw-mark" viewBox="0 0 48 48"><rect width="48" height="48" rx="12" fill="var(--mark-bg)"/><path d="M12 22.5 24 12.5 36 22.5V36H12Z" fill="none" stroke="var(--mark-fg)" stroke-width="3.2" stroke-linejoin="round"/><rect x="20" y="25" width="8" height="11" rx="1" fill="#F0C27A"/></symbol>
-	<symbol id="dw-wm" viewBox="59 -1500 6403 1527"><path fill="currentColor" d="M502.26214599609375 26.782470703125Q365.69720458984375 26.782470703125 265.892822265625 -40.8262939453125Q166.08843994140625 -108.43505859375 112.52310180664062 -235.78286743164062Q58.957763671875 -363.13067626953125 58.957763671875 -542.3912353515625Q58.957763671875 -721.6517944335938 113.02310180664062 -847.8039855957031Q167.08843994140625 -973.9561767578125 267.4362487792969 -1040.3693237304688Q367.7840576171875 -1106.782470703125 507.82708740234375 -1106.782470703125Q630.5219116210938 -1106.782470703125 721.6529846191406 -1051.0Q812.7840576171875 -995.217529296875 872.0446166992188 -869.9131469726562L839.1322631835938 -869.56494140625V-1500.0H1168.5155639648438V0.0H856.0884399414062V-215.2613525390625L859.0015869140625 -199.95697021484375Q802.48046875 -83.34820556640625 711.2625427246094 -28.282867431640625Q620.0446166992188 26.782470703125 502.26214599609375 26.782470703125ZM626.2581787109375 -219.64703369140625Q692.4765014648438 -219.64703369140625 744.3904418945312 -254.95181274414062Q796.3043823242188 -290.256591796875 826.1310729980469 -361.496826171875Q855.957763671875 -432.737060546875 855.957763671875 -538.3912353515625Q855.957763671875 -697.9593505859375 790.6521911621094 -779.5039672851562Q725.3466186523438 -861.048583984375 628.9537963867188 -861.048583984375Q526.9522094726562 -861.048583984375 466.6900634765625 -774.5473937988281Q406.42791748046875 -688.0462036132812 406.42791748046875 -535.6087646484375Q406.42791748046875 -387.08447265625 464.7334899902344 -303.3657531738281Q523.0390625 -219.64703369140625 626.2581787109375 -219.64703369140625Z M1527.540703125 0.0 1273.4514697265624 -1080.0H1614.226005859375L1769.6658251953124 -201.646240234375H1745.622001953125L1941.7988818359374 -1080.0H2381.7877734374997L2576.0084765624997 -199.90679931640625H2546.964653320312L2707.882561035156 -1080.0H3028.484184570312L2773.003715820312 0.0H2316.492912597656L2124.142326660156 -966.0H2181.2714160156247L1984.0515063476562 0.0Z M3638.290207519531 26.782470703125Q3478.725266113281 26.782470703125 3348.83482421875 -42.565338134765625Q3218.9443823242186 -111.91314697265625 3141.94517578125 -239.45657348632812Q3064.945969238281 -367.0 3064.945969238281 -541.782470703125Q3064.945969238281 -714.782470703125 3140.2061315917967 -841.4346618652344Q3215.4662939453124 -968.0868530273438 3344.9001623535155 -1037.4346618652344Q3474.3340307617186 -1106.782470703125 3637.5507666015624 -1106.782470703125Q3727.72447265625 -1106.782470703125 3820.485031738281 -1079.6302795410156Q3913.2455908203124 -1052.4780883789062 3991.3539587402342 -983.5868530273438Q4069.462326660156 -914.6956176757812 4117.136032714843 -791.2828674316406Q4164.809738769531 -667.8701171875 4164.809738769531 -475.65338134765625H3276.5930029296874V-653.3904418945312H3870.643173828125L3842.816086425781 -602.9115600585938Q3834.337998046875 -702.4788818359375 3804.8156896972655 -763.7844543457031Q3775.293381347656 -825.0900268554688 3729.9662939453124 -853.15576171875Q3684.6392065429686 -881.2214965820312 3628.290207519531 -881.2214965820312Q3552.767502441406 -881.2214965820312 3503.9404150390624 -837.2864379882812Q3455.1133276367186 -793.3513793945312 3431.3300634765624 -716.4374389648438Q3407.546799316406 -639.5234985351562 3407.546799316406 -540.0868530273438Q3407.546799316406 -390.2581787109375 3462.5699011230467 -301.4745178222656Q3517.5930029296874 -212.69085693359375 3635.507736816406 -212.69085693359375Q3710.422470703125 -212.69085693359375 3765.0973669433592 -251.34384155273438Q3819.7722631835936 -289.996826171875 3849.902939453125 -371.737060546875L4144.983444824218 -299.73785400390625Q4106.679062499999 -184.1737060546875 4027.071091308593 -112.1087646484375Q3947.4631201171874 -40.0438232421875 3845.442001953125 -6.63067626953125Q3743.4208837890624 26.782470703125 3638.290207519531 26.782470703125Z M4559.956032714844 0.0Q4425.6986474609375 0.0 4357.525734863281 -62.325103759765625Q4289.352822265625 -124.65020751953125 4289.352822265625 -245.29962158203125V-1500.0H4618.736123046875V-293.08209228515625Q4618.736123046875 -259.6647216796875 4628.236123046875 -248.52559814453124Q4637.736123046875 -237.386474609375 4668.736123046875 -237.386474609375H4746.607033691406V0.0Z M5116.2760327148435 0.0Q4982.018647460937 0.0 4913.845734863281 -62.325103759765625Q4845.672822265625 -124.65020751953125 4845.672822265625 -245.29962158203125V-1500.0H5175.056123046875V-293.08209228515625Q5175.056123046875 -259.6647216796875 5184.556123046875 -248.52559814453124Q5194.056123046875 -237.386474609375 5225.056123046875 -237.386474609375H5302.927033691406V0.0Z M5900.090711109057 26.782470703125Q5734.27862680796 26.782470703125 5607.737825630806 -45.21865437313051Q5481.197024453652 -117.21977944938602 5410.29054103542 -245.109889724693Q5339.384057617187 -373.0 5339.384057617187 -540.3478088378906Q5339.384057617187 -707.6956176757812 5410.2778610763835 -835.3632003822615Q5481.171664535581 -963.0307830887417 5607.6898368627635 -1034.9066268959334Q5734.208009189946 -1106.782470703125 5899.990441894531 -1106.782470703125Q6066.598413085937 -1106.782470703125 6193.032678222656 -1034.9346618652344Q6319.466943359374 -963.0868530273438 6390.727502441406 -835.4858772122129Q6461.988061523437 -707.8849013970822 6461.988061523437 -540.0946418606505Q6461.988061523437 -372.30438232421875 6390.867778934036 -244.63679961773852Q6319.747496344635 -116.96921691125827 6192.825145877396 -45.093373104066636Q6065.902795410156 26.782470703125 5900.090711109057 26.782470703125ZM5900.772471703949 -211.9952392578125Q6002.210351562499 -211.9952392578125 6060.798791503906 -300.1851985139667Q6119.387231445312 -388.3751577701209 6119.387231445312 -540.0Q6119.387231445312 -691.7848510742188 6060.7123793702685 -779.8948059082031Q6002.037527295224 -868.0047607421875 5900.599647436675 -868.0047607421875Q5799.161767578124 -868.0047607421875 5740.573327636718 -779.8948059082031Q5681.984887695312 -691.7848510742188 5681.984887695312 -540.0Q5681.984887695312 -387.82391357421875 5740.659739770355 -299.9095764160156Q5799.3345918454 -211.9952392578125 5900.772471703949 -211.9952392578125Z"/></symbol>
-	<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M14 3v5h5M9 13h6M9 17h4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></symbol>
-	<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-	<symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><circle cx="6" cy="18" r="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><circle cx="18" cy="8" r="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M6 8.5v7M18 10.5c0 4-6 3-11 5.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></symbol>
-	<symbol id="qr" viewBox="0 0 29 29"><path d="M0 0h7v1h-7zM8 0h1v1h-1zM11 0h1v1h-1zM15 0h2v1h-2zM18 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM12 1h3v1h-3zM16 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h2v1h-2zM11 2h1v1h-1zM14 2h4v1h-4zM19 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h1v1h-1zM14 3h1v1h-1zM17 3h2v1h-2zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM10 4h6v1h-6zM18 4h1v1h-1zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM15 5h1v1h-1zM17 5h2v1h-2zM20 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM9 7h1v1h-1zM14 7h3v1h-3zM20 7h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM6 8h2v1h-2zM11 8h1v1h-1zM13 8h2v1h-2zM19 8h1v1h-1zM23 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM0 9h2v1h-2zM3 9h1v1h-1zM7 9h3v1h-3zM12 9h3v1h-3zM17 9h1v1h-1zM19 9h5v1h-5zM27 9h2v1h-2zM1 10h3v1h-3zM6 10h1v1h-1zM9 10h1v1h-1zM15 10h1v1h-1zM17 10h4v1h-4zM22 10h5v1h-5zM28 10h1v1h-1zM0 11h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM10 11h1v1h-1zM13 11h1v1h-1zM18 11h2v1h-2zM21 11h1v1h-1zM24 11h2v1h-2zM0 12h1v1h-1zM2 12h2v1h-2zM6 12h2v1h-2zM10 12h2v1h-2zM13 12h1v1h-1zM15 12h2v1h-2zM18 12h2v1h-2zM22 12h2v1h-2zM28 12h1v1h-1zM7 13h1v1h-1zM11 13h2v1h-2zM16 13h2v1h-2zM19 13h2v1h-2zM22 13h2v1h-2zM27 13h2v1h-2zM4 14h4v1h-4zM9 14h1v1h-1zM12 14h3v1h-3zM16 14h1v1h-1zM19 14h1v1h-1zM21 14h4v1h-4zM28 14h1v1h-1zM2 15h4v1h-4zM7 15h1v1h-1zM9 15h1v1h-1zM12 15h1v1h-1zM14 15h3v1h-3zM18 15h3v1h-3zM22 15h2v1h-2zM1 16h6v1h-6zM8 16h2v1h-2zM13 16h2v1h-2zM16 16h2v1h-2zM20 16h3v1h-3zM28 16h1v1h-1zM2 17h2v1h-2zM8 17h1v1h-1zM11 17h4v1h-4zM19 17h1v1h-1zM22 17h2v1h-2zM26 17h3v1h-3zM0 18h4v1h-4zM6 18h3v1h-3zM15 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM24 18h2v1h-2zM28 18h1v1h-1zM2 19h1v1h-1zM7 19h7v1h-7zM15 19h2v1h-2zM20 19h1v1h-1zM22 19h1v1h-1zM24 19h1v1h-1zM0 20h2v1h-2zM3 20h1v1h-1zM5 20h3v1h-3zM10 20h2v1h-2zM13 20h1v1h-1zM16 20h1v1h-1zM20 20h6v1h-6zM27 20h1v1h-1zM8 21h1v1h-1zM10 21h1v1h-1zM15 21h2v1h-2zM18 21h1v1h-1zM20 21h1v1h-1zM24 21h3v1h-3zM28 21h1v1h-1zM0 22h7v1h-7zM8 22h1v1h-1zM13 22h4v1h-4zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM28 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM9 23h1v1h-1zM14 23h1v1h-1zM16 23h1v1h-1zM18 23h3v1h-3zM24 23h1v1h-1zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM9 24h1v1h-1zM13 24h2v1h-2zM16 24h1v1h-1zM19 24h7v1h-7zM27 24h2v1h-2zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM10 25h3v1h-3zM14 25h3v1h-3zM19 25h3v1h-3zM24 25h3v1h-3zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM8 26h3v1h-3zM12 26h1v1h-1zM14 26h4v1h-4zM21 26h1v1h-1zM24 26h1v1h-1zM27 26h2v1h-2zM0 27h1v1h-1zM6 27h1v1h-1zM11 27h1v1h-1zM14 27h1v1h-1zM16 27h1v1h-1zM18 27h1v1h-1zM20 27h1v1h-1zM23 27h3v1h-3zM0 28h7v1h-7zM8 28h2v1h-2zM11 28h2v1h-2zM14 28h1v1h-1zM16 28h1v1h-1zM20 28h1v1h-1zM24 28h2v1h-2zM28 28h1v1h-1z" fill="currentColor"/></symbol>
+	<symbol id="wm" viewBox="134.64 -1490 6488 1512"><path fill="currentColor" d="M658.4994506835938 0.0H272.58050537109375V-263.0361328125H644.3395385742188Q788.0010986328125 -263.0361328125 885.3619995117188 -313.9068908691406Q982.722900390625 -364.77764892578125 1032.0032958984375 -471.8285827636719Q1081.28369140625 -578.8795166015625 1081.28369140625 -745.840087890625Q1081.28369140625 -912.4205932617188 1031.6933288574219 -1018.781494140625Q982.1029663085938 -1125.1423950195312 885.502197265625 -1176.0531311035156Q788.9014282226562 -1226.9638671875 646.1401977539062 -1226.9638671875H265.66046142578125V-1490.0H664Q888.479736328125 -1490.0 1049.7294616699219 -1400.7300109863281Q1210.9791870117188 -1311.4600219726562 1298.0690002441406 -1144.6900329589844Q1385.1588134765625 -977.9200439453125 1385.1588134765625 -745.840087890625Q1385.1588134765625 -513.3800659179688 1298.1089782714844 -346.1500549316406Q1211.0591430664062 -178.9200439453125 1048.279296875 -89.46002197265625Q885.4994506835938 0.0 658.4994506835938 0.0ZM440.1971435546875 -1490.0V0.0H134.641845703125V-1490.0Z M1819.4619555664062 0.0 1489.64158203125 -1118.0H1804.2965502929687L1901.4181323242187 -704.5169677734375Q1926.1782641601562 -593.7174072265625 1955.2083850097656 -463.1675720214844Q1984.238505859375 -332.61773681640625 2008.75876953125 -174.77764892578125H1974.5189013671875Q2000.7390551757812 -329.3975830078125 2031.7390551757812 -460.4474182128906Q2062.7390551757812 -591.4972534179688 2089.5791430664062 -704.5169677734375L2191.720439453125 -1118.0H2467.95701171875L2567.0183520507812 -704.5169677734375Q2592.8584399414062 -592.3373413085938 2623.89841796875 -461.7875061035156Q2654.9383959960937 -331.2376708984375 2681.1585498046875 -174.77764892578125H2647.5386157226562Q2671.9789233398437 -330.317626953125 2699.4290881347656 -460.8674621582031Q2726.8792529296875 -591.4172973632812 2752.0994067382812 -704.5169677734375L2849.2209887695312 -1118.0H3168.19578125L2836.2154956054687 0.0H2531.400615234375L2407.4597583007812 -431.4830322265625Q2389.2396044921875 -495.5235595703125 2371.209483642578 -574.1736145019531Q2353.1793627929687 -652.8236694335938 2336.1492419433594 -734.3937683105469Q2319.11912109375 -815.9638671875 2301.3589892578125 -886.7645263671875H2354.3184619140625Q2337.558330078125 -816.4238891601562 2320.0282092285156 -734.623779296875Q2302.4980883789062 -652.8236694335938 2284.7379565429687 -573.7135925292969Q2266.9778247070312 -494.603515625 2248.2176928710937 -431.4830322265625L2124.2768359375 0.0Z M3812.4397802734375 21.840087890625Q3641.2601538085937 21.840087890625 3517.2804174804687 -48.269989013671875Q3393.3006811523437 -118.38006591796875 3326.830802001953 -247.38006591796875Q3260.3609228515625 -376.38006591796875 3260.3609228515625 -553.2398681640625Q3260.3609228515625 -725.7798461914062 3326.4107580566406 -855.9698791503906Q3392.4605932617187 -986.159912109375 3513.2502966308593 -1059.0799560546875Q3634.04 -1132 3797.3795385742187 -1132.0Q3906.898703613281 -1132.0 4002.038352050781 -1097.1002197265625Q4097.178000488281 -1062.200439453125 4169.027945556641 -991.8406372070312Q4240.877890625 -921.4808349609375 4281.257956542969 -815.0208129882812Q4321.6380224609375 -708.560791015625 4321.6380224609375 -564.9003295898438V-480.720703125H3383.44087890625V-669.439208984375H4175.500021972656L4035.342307128906 -618.8389892578125Q4035.342307128906 -706.159912109375 4008.6719885253906 -770.6007690429688Q3982.001669921875 -835.0416259765625 3929.6610327148437 -870.5821533203125Q3877.3203955078125 -906.1226806640625 3799.5394506835937 -906.1226806640625Q3721.758505859375 -906.1226806640625 3667.5777807617187 -870.1221313476562Q3613.3970556640625 -834.12158203125 3585.11666015625 -772.4408569335938Q3556.8362646484375 -710.7601318359375 3556.8362646484375 -632.1796264648438V-499.3209228515625Q3556.8362646484375 -402.31982421875 3589.3066931152343 -336.3389892578125Q3621.777121582031 -270.358154296875 3680.647879638672 -237.19769287109375Q3739.5186376953125 -204.0372314453125 3817.2196264648437 -204.0372314453125Q3869.72017578125 -204.0372314453125 3912.650626220703 -218.98739624023438Q3955.581076660156 -233.93756103515625 3986.48140625 -263.2579345703125Q4017.3817358398437 -292.57830810546875 4033.52193359375 -335.53887939453125L4304.717978515625 -285.37896728515625Q4277.6380224609375 -192.73931884765625 4210.778220214844 -123.60952758789062Q4143.91841796875 -54.479736328125 4043.238791503906 -16.31982421875Q3942.5591650390625 21.840087890625 3812.4397802734375 21.840087890625Z M4806.196352539062 -1490.0V0.0H4506.3212304687495V-1490.0Z M5340.716352539062 -1490.0V0.0H5040.84123046875V-1490.0Z M6075.719384765625 21.840087890625Q5907.520043945313 21.840087890625 5784.650384521485 -50.429901123046875Q5661.780725097657 -122.69989013671875 5595.35082397461 -252.42990112304688Q5528.920922851563 -382.159912109375 5528.920922851563 -554.159912109375Q5528.920922851563 -727.5399780273438 5595.35082397461 -857.5Q5661.780725097657 -987.4600219726562 5784.650384521485 -1059.7300109863281Q5907.520043945313 -1132.0 6075.719384765625 -1132.0Q6244.378747558594 -1132.0 6366.938439941407 -1059.7300109863281Q6489.498132324219 -987.4600219726562 6555.928033447266 -857.5Q6622.357934570313 -727.5399780273438 6622.357934570313 -554.159912109375Q6622.357934570313 -382.159912109375 6555.928033447266 -252.42990112304688Q6489.498132324219 -122.69989013671875 6366.938439941407 -50.429901123046875Q6244.378747558594 21.840087890625 6075.719384765625 21.840087890625ZM6075.719384765625 -214.21685791015625Q6155.780725097657 -214.21685791015625 6209.6115051269535 -258.7174072265625Q6263.44228515625 -303.21795654296875 6290.342614746094 -380.43865966796875Q6317.242944335938 -457.65936279296875 6317.242944335938 -555.2398681640625Q6317.242944335938 -653.8203735351562 6290.342614746094 -730.6911315917969Q6263.44228515625 -807.5618896484375 6209.6115051269535 -851.7524719238281Q6155.780725097657 -895.9430541992188 6075.719384765625 -895.9430541992188Q5995.578088378907 -895.9430541992188 5941.937341308594 -851.7524719238281Q5888.296594238282 -807.5618896484375 5861.396264648438 -730.921142578125Q5834.495935058594 -654.2803955078125 5834.495935058594 -555.2398681640625Q5834.495935058594 -457.65936279296875 5861.396264648438 -380.43865966796875Q5888.296594238282 -303.21795654296875 5941.937341308594 -258.7174072265625Q5995.578088378907 -214.21685791015625 6075.719384765625 -214.21685791015625Z"/></symbol>
+	<symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+	<symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+	<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+	<symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
+	<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+	<symbol id="i-building" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2M10 6h4M10 10h4M10 14h4M10 18h4"/></symbol>
+	<symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/></symbol>
+	<symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
+	<symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+	<symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="8" r="3"/><path d="M6 9v6M18 11c0 4-6 3-11 6"/></symbol>
+	<symbol id="i-a11y" viewBox="0 0 24 24"><circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1M5 8l3-3 5.5 3-2.36 3.5M4.24 14.5a5 5 0 0 0 6.88 6M13.76 17.5a5 5 0 0 0-6.88-6"/></symbol>
+	<symbol id="i-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+	<symbol id="i-lang" viewBox="0 0 24 24"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></symbol>
+	<symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+	<symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol>
+	<symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></symbol>
+	<symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+	<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></symbol>
+	<symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+	<symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.510 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+	<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></symbol>
+	<symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+	<symbol id="i-table" viewBox="0 0 24 24"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18"/></symbol>
+	<symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+	<symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
+	<symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/></symbol>
+	<symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></symbol>
+	<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49M14.084 14.158a3 3 0 0 1-4.242-4.242M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></symbol>
+	<symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+	<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></symbol>
 </svg>
 
 <header class="site-header">
 	<div class="wrap">
-		<a class="brand" href="#top" aria-label="Dwello, zur Startseite">
-			<svg class="mark" aria-hidden="true"><use href="#dw-mark"/></svg>
-			<svg class="wm" viewBox="0 0 6403 1527" aria-hidden="true"><use href="#dw-wm"/></svg>
+		<a class="logo" href="#top" aria-label="Dwello, zur Startseite">
+			<svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>
+			<svg class="wm" viewBox="0 0 6488 1512" aria-hidden="true"><use href="#wm"/></svg>
 		</a>
 		<nav class="nav" aria-label="Hauptnavigation">
 			<a href="#funktionen">Funktionen</a>
@@ -404,15 +370,15 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <main id="top">
 
 <!-- HERO -->
-<section class="hero" style="padding-block:0">
+<section class="hero">
 	<div class="wrap">
-		<div>
-			<span class="eyebrow">Open Source · Gratis · Für die Schweiz</span>
-			<h1>Ihre Liegenschaft.<br>Ihre Daten.<br><span class="soft">Ihr Server.</span></h1>
-			<p class="lede">Dwello macht die Nebenkostenabrechnung für private Vermieterinnen und Vermieter. Belege hineinziehen, Abrechnung prüfen, mit QR-Rechnung versenden. Die Software läuft bei Ihnen, und die KI liest Ihre Belege auf Ihrem eigenen Rechner.</p>
+		<div class="hero-copy">
+			<span class="badge info"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Open Source · Gratis · Für die Schweiz</span>
+			<h1>Ihre Liegenschaft. Ihre Daten. <span>Ihr Server.</span></h1>
+			<p class="lede">Dwello macht die Nebenkostenabrechnung für private Vermieterinnen und Vermieter. Rechnungen hineinziehen, Abrechnung prüfen, mit QR-Rechnung versenden. Die Software läuft bei Ihnen, und die KI liest Ihre Belege auf Ihrem eigenen Rechner.</p>
 			<div class="actions">
-				<a class="btn btn-primary" href="#installieren">Dwello installieren <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-				<a class="btn btn-secondary" href="https://demo.dwello.ch" rel="noopener">Demo ansehen</a>
+				<a class="btn btn-primary" href="#installieren">Dwello installieren <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+				<a class="btn btn-secondary" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen</a>
 			</div>
 			<div class="cmd" role="group" aria-label="Startbefehl">
 				<code id="hero-cmd">docker compose -f docker-compose.prod.yml up -d</code>
@@ -420,74 +386,17 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 			</div>
 			<p class="hero-note">Kostenlos, ohne Abo und ohne Konto bei uns. Für Liegenschaften bis 50 Wohnungen.</p>
 		</div>
-
-		<div class="hero-art">
-			<svg class="il" viewBox="0 0 560 480" role="img" aria-labelledby="hero-art-t">
-				<title id="hero-art-t">Ein Mehrfamilienhaus, davor eine Nebenkostenabrechnung mit QR-Zahlteil. Eine Heizölrechnung wird hineingezogen und von der KI erkannt.</title>
-				<!-- ground -->
-				<line class="ln" x1="8" y1="420" x2="552" y2="420"/>
-				<!-- house -->
-				<path class="fl" d="M40 420V170h190v250z"/>
-				<polyline class="ln" points="24,182 135,92 246,182"/>
-				<rect class="sf" x="172" y="104" width="22" height="40"/>
-				<g class="sf">
-					<rect x="62" y="196" width="30" height="36" rx="2"/><rect x="120" y="196" width="30" height="36" rx="2"/><rect x="178" y="196" width="30" height="36" rx="2"/>
-					<rect x="62" y="258" width="30" height="36" rx="2"/><rect x="120" y="258" width="30" height="36" rx="2"/>
-					<rect x="62" y="320" width="30" height="36" rx="2"/><rect x="178" y="320" width="30" height="36" rx="2"/>
-				</g>
-				<rect class="lt" x="179" y="259" width="28" height="34" rx="1"/>
-				<rect x="178" y="258" width="30" height="36" rx="2" fill="none" stroke="var(--l)" stroke-width="2"/>
-				<rect x="120" y="370" width="30" height="50" fill="var(--s)" class="ac"/>
-				<!-- statement sheet -->
-				<g transform="rotate(-2.5 400 290)">
-					<rect class="sf" x="262" y="128" width="268" height="332" rx="6"/>
-					<text class="tm" x="284" y="160" font-size="11" letter-spacing=".06em">NEBENKOSTENABRECHNUNG</text>
-					<text class="tx" x="284" y="182" font-size="17" font-weight="700">1.7.2024 – 30.6.2025</text>
-					<text class="tm" x="284" y="202" font-size="11.5">Wohnung 2.1 · Bergstrasse 12, 6003 Luzern</text>
-					<g font-size="12.5">
-						<text class="tx" x="284" y="232">Heizung und Warmwasser</text><text class="mn" x="508" y="232" text-anchor="end">1'284.60</text>
-						<line class="ln" x1="284" y1="242" x2="508" y2="242" stroke-width="1" opacity=".5"/>
-						<text class="tx" x="284" y="262">Wasser und Abwasser</text><text class="mn" x="508" y="262" text-anchor="end">412.30</text>
-						<line class="ln" x1="284" y1="272" x2="508" y2="272" stroke-width="1" opacity=".5"/>
-						<text class="tx" x="284" y="292">Hauswartung</text><text class="mn" x="508" y="292" text-anchor="end">368.00</text>
-						<line x1="284" y1="304" x2="508" y2="304" stroke="var(--ink)" stroke-width="1.5"/>
-						<text class="tx" x="284" y="324" font-weight="700">Nachzahlung</text><text class="mn" x="508" y="324" text-anchor="end" font-weight="700">CHF 164.85</text>
-					</g>
-					<line class="dash" x1="262" y1="344" x2="530" y2="344"/>
-					<text class="tx" x="284" y="368" font-size="11" font-weight="700">Zahlteil</text>
-					<g transform="translate(284 378)">
-						<rect width="68" height="68" fill="var(--s)"/>
-						<use href="#qr" width="68" height="68" style="color:var(--ink)"/>
-						<rect x="28" y="28" width="12" height="12" fill="var(--ink)" stroke="var(--s)" stroke-width="1.5"/>
-						<path d="M34 30.5v7M30.5 34h7" stroke="var(--s)" stroke-width="2.2"/>
-					</g>
-					<text class="tx" x="368" y="392" font-size="10.5" font-weight="700">Währung   Betrag</text>
-					<text class="mn" x="368" y="408" font-size="12">CHF        164.85</text>
-					<text class="tx" x="368" y="430" font-size="10.5" font-weight="700">Konto / Zahlbar an</text>
-					<text class="mn" x="368" y="445" font-size="9.5">CH44 3199 9123 0008 8901 2</text>
-					
-				</g>
-				<!-- drag path -->
-				<path class="drag" d="M466 100 C 452 112, 444 122, 436 134"/>
-				<!-- flying invoice -->
-				<g class="flying">
-					<path class="sf" d="M432 10h96v92l-8-7-8 7-8-7-8 7-8-7-8 7-8-7-8 7-8-7-8 7-8-7z"/>
-					<line class="ln" x1="446" y1="32" x2="500" y2="32"/>
-					<line class="ln" x1="446" y1="46" x2="490" y2="46"/>
-					<line class="ln" x1="446" y1="60" x2="496" y2="60"/>
-					<line class="ac" x1="476" y1="80" x2="512" y2="80"/>
-				</g>
-				<!-- cursor -->
-				<path d="M500 62l0 26 7-6 5 11 5-2-5-11 9 0z" fill="var(--ink)" stroke="var(--s)" stroke-width="1.5" stroke-linejoin="round"/>
-				<!-- recognised chip -->
-				<g transform="translate(300 52)">
-					<rect width="138" height="54" rx="8" fill="var(--surface)" stroke="var(--line)" style="filter:drop-shadow(0 2px 6px rgb(0 0 0 / .12))"/>
-					<circle cx="20" cy="27" r="9" fill="var(--positive-soft)"/>
-					<path d="M15.5 27.5l3 3 6-6.5" fill="none" stroke="var(--positive)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					<text class="tx" x="38" y="23" font-size="11.5" font-weight="700">Heizöl erkannt</text>
-					<text class="mn" x="38" y="40" font-size="11">CHF 2'184.60</text>
-				</g>
-			</svg>
+		<div class="stage">
+			<figure class="shot desk">
+				<img class="l" src="shots/dashboard-light.webp" width="2000" height="1250" alt="Die Übersicht in Dwello: als nächster Schritt Nebenkostenabrechnungen erstellen, darunter Fristen und häufige Arbeiten.">
+				<img class="d" src="shots/dashboard-dark.webp" width="2000" height="1250" alt="" aria-hidden="true">
+			</figure>
+			<div class="phone" aria-hidden="true">
+				<figure class="shot">
+					<img class="l" src="shots/mobile-dashboard-light.webp" width="780" height="1688" alt="">
+					<img class="d" src="shots/mobile-dashboard-dark.webp" width="780" height="1688" alt="">
+				</figure>
+			</div>
 		</div>
 	</div>
 </section>
@@ -509,15 +418,15 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <section id="ablauf">
 	<div class="wrap">
 		<div class="sec-head">
-			<span class="eyebrow">Ihr Vermieterjahr</span>
+			<span class="kicker">Ihr Vermieterjahr</span>
 			<h2>Vier Schritte. Einmal im Jahr. Ohne Excel.</h2>
-			<p>Dwello ist für Menschen gemacht, die eine Liegenschaft besitzen und keine Verwaltung führen wollen. Die App führt Sie durch jeden Schritt und erklärt jeden Begriff direkt am Feld.</p>
+			<p>Dwello ist für Menschen gemacht, die eine Liegenschaft besitzen und keine Verwaltung führen wollen. Die Übersicht sagt Ihnen, was als Nächstes zu tun ist, und jedes Feld erklärt seinen Begriff.</p>
 		</div>
 		<ol class="steps">
-			<li><span class="when">Einmalig</span><h3>Liegenschaft erfassen</h3><p>Adresse eingeben, Wohnungen mit Fläche und Zimmern anlegen, Mieter und Mietverträge erfassen. Die Postleitzahl ergänzt den Ort.</p></li>
-			<li><span class="when">Laufend</span><h3>Belege hineinziehen</h3><p>Rechnungen als PDF auf die Seite ziehen. Die KI liest Betrag, Datum und Kategorie und zeigt, wo sie sich nicht sicher ist.</p></li>
-			<li><span class="when">Einmal im Jahr</span><h3>Abrechnung prüfen</h3><p>Ein Assistent erstellt die Abrechnungen für das ganze Gebäude, tagesgenau bei Mieterwechsel und mit Heizprofil.</p></li>
-			<li><span class="when">Fertig</span><h3>Versenden</h3><p>Per E-Mail oder als Brief, mit Swiss QR-Rechnung und in der Sprache Ihrer Mieterin oder Ihres Mieters.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg><span class="n">Einmalig</span></div><h3>Gebäude erfassen</h3><p>Adresse suchen, Wohnungen mit Fläche und Zimmern anlegen, Mieter und Mietverträge erfassen.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span class="n">Laufend</span></div><h3>Rechnungen hochladen</h3><p>PDFs hineinziehen. Die KI liest Betrag, Datum und Kategorie und sagt, was Sie prüfen sollten.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><span class="n">Einmal im Jahr</span></div><h3>Abrechnungen erstellen</h3><p>Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg><span class="n">Fertig</span></div><h3>Prüfen und versenden</h3><p>Per E-Mail oder als Brief, mit Swiss QR-Rechnung und in der Sprache Ihrer Mieter.</p></li>
 		</ol>
 	</div>
 </section>
@@ -526,149 +435,106 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <section id="funktionen" style="padding-top:0">
 	<div class="wrap">
 		<div class="sec-head">
-			<span class="eyebrow">Was Dwello für Sie erledigt</span>
+			<span class="kicker">So sieht Dwello aus</span>
 			<h2>Die Arbeit macht die Software. Sie entscheiden.</h2>
+			<p>Alle Bilder auf dieser Seite stammen aus der echten App mit den Demodaten: drei Gebäude in Zürich, Luzern und Interlaken.</p>
 		</div>
 
 		<!-- Invoices -->
 		<div class="feature">
 			<div class="copy-col">
-				<span class="badge live">Belege und KI</span>
+				<span class="badge info">Rechnungen und KI</span>
 				<h3>Rechnungen per Drag &amp; Drop. Gelesen auf Ihrem eigenen Rechner.</h3>
-				<p>Ziehen Sie zehn PDFs auf einmal in Dwello. Die KI liest Betrag, Datum und Abzüge, ordnet die Kosten einer Kategorie zu und markiert Kosten, die Sie nicht auf die Mieter umlegen dürfen. Was sie nicht sicher weiss, prüfen Sie.</p>
+				<p>Ziehen Sie bis zu 20 Rechnungen auf einmal in Dwello. Die KI liest Rechnungssteller, Betrag, Datum und Leistungszeitraum und ordnet die Kategorie zu. Was sie nicht sicher weiss, zeigt Dwello als Hinweis. Erst wenn Sie bestätigen, wird die Rechnung erstellt.</p>
 				<ul class="checks">
-					<li><span>Lokale KI mit Ollama, ohne Cloud<small>Ihre Belege verlassen den Server nicht. Wer will, verbindet jede OpenAI-kompatible KI.</small></span></li>
-					<li><span>Hinweis auf fehlende Rechnungen<small>Dwello erwartet, was letztes Jahr kam: fehlt die Heizöl- oder Wasserrechnung, sehen Sie es vor der Abrechnung.</small></span></li>
-					<li><span>Nicht umlegbare Kosten werden markiert<small>Reparaturen und Erneuerungen landen nicht in der Abrechnung.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Lokale KI mit Ollama, ohne Cloud<small>Ihre Belege verlassen den Server nicht. Wer will, verbindet jede OpenAI-kompatible KI.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Hinweis auf fehlende Rechnungen<small>Dwello erwartet, was letztes Jahr kam. Fehlt die Wasserrechnung, sehen Sie es vor der Abrechnung.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Umlagefähig oder nicht<small>Kosten, die Sie nicht auf die Mieter umlegen dürfen, kommen nicht in die Abrechnung.</small></span></li>
 				</ul>
 			</div>
-			<div class="specimen" aria-label="Beispiel: Rechnungen hochladen in Dwello">
-				<div class="specimen-bar"><span class="crumb">Rechnungen /</span> Rechnungen hochladen</div>
-				<div class="specimen-body">
-					<div class="drop">
-						<svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--petrol)"><path d="M12 15V4M7 9l5-5 5 5M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
-						<strong>PDFs hierher ziehen</strong>
-						<span>oder Dateien auswählen. Mehrere auf einmal sind möglich.</span>
-					</div>
-					<div class="file">
-						<span class="ic"><svg aria-hidden="true"><use href="#i-file"/></svg></span>
-						<span class="meta"><b>Tanklieferung_Heizoel_2025.pdf</b><span>Heizkosten · 14.11.2025</span></span>
-						<span class="badge ok">Gelesen</span>
-					</div>
-					<div class="file">
-						<span class="ic"><svg aria-hidden="true"><use href="#i-file"/></svg></span>
-						<span class="meta"><b>EWL_Wasser_Abwasser_Q4.pdf</b><span>Wasser und Abwasser · 3.12.2025</span></span>
-						<span class="badge check">Bitte prüfen</span>
-					</div>
-					<div class="fields">
-						<div><label>Betrag</label><div class="val mono">CHF 412.30</div></div>
-						<div><label>Rechnungsdatum</label><div class="val mono">03.12.2025</div></div>
-						<div><label>Kategorie</label><div class="val">Wasser und Abwasser</div></div>
-						<div><label>Abzug</label><div class="val mono unsure">CHF 38.00</div></div>
-						<p class="help"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Die KI ist beim Abzug unsicher. Bitte vergleichen Sie den Betrag mit der Rechnung.</p>
-					</div>
-				</div>
-			</div>
+			<figure class="shot">
+				<img class="l" src="shots/upload-light.webp" width="1400" height="1356" loading="lazy" alt="Dialog Rechnungen hochladen: Gebäude Musterhaus Zentrum gewählt, eine Datei gelesen, mit dem Hinweis, das Rechnungsdatum zu prüfen.">
+				<img class="d" src="shots/upload-dark.webp" width="1400" height="1356" loading="lazy" alt="" aria-hidden="true">
+			</figure>
 		</div>
 
 		<!-- Statement -->
 		<div class="feature flip">
 			<div class="copy-col">
-				<span class="badge live">Nebenkostenabrechnung</span>
-				<h3>Eine Abrechnung, die vor der Schlichtungsstelle hält.</h3>
-				<p>Dwello rechnet so, wie es das Mietrecht verlangt, und zeigt Ihnen jeden Schritt. Sie müssen die Regeln nicht kennen, Dwello hält sich an sie.</p>
+				<span class="badge info">Nebenkostenabrechnung</span>
+				<h3>Eine Abrechnung, die jede Zahl erklärt.</h3>
+				<p>Dwello rechnet so, wie es das Mietrecht verlangt, und zeigt für jede Kategorie die Kosten des Gebäudes, den Anteil der Wohnung und die Mietstage. Ihre Mieter sehen dieselbe Aufstellung im PDF.</p>
 				<ul class="checks">
-					<li><span>Nur was der Vertrag erlaubt <span class="law">Art. 257a OR</span><small>Abgerechnet werden nur die Nebenkosten, die im Mietvertrag vereinbart sind.</small></span></li>
-					<li><span>Tagesgenau bei Mieterwechsel und Leerstand<small>Mit Heizprofil für Mittelland, Bergregion oder Tessin: der Winter zählt mehr als der Sommer.</small></span></li>
-					<li><span>Heizöl nach Verbrauch, nicht nach Einkauf<small>Der Tankbestand am Anfang und Ende der Periode wird berücksichtigt.</small></span></li>
-					<li><span>Auf 5 Rappen gerundet, zugunsten der Mieter<small>Kleinstbeträge unter CHF 5 werden weder gefordert noch ausbezahlt.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Nur was der Vertrag erlaubt <span class="law">Art. 257a OR</span><small>Abgerechnet werden nur die Nebenkosten, die im Mietvertrag vereinbart sind.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Tagesgenau bei Mieterwechsel und Leerstand<small>Die Nebenkosten einer leeren Wohnung trägt der Vermieter.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Auf 5 Rappen gerundet, zugunsten der Mieter<small>Kleinstbeträge unter CHF 5 werden weder gefordert noch ausbezahlt.</small></span></li>
 				</ul>
 			</div>
-			<div class="specimen" aria-label="Beispiel: Nebenkostenabrechnung in Dwello">
-				<div class="specimen-bar"><span class="crumb">Abrechnungen /</span> Wohnung 2.1</div>
-				<div class="scroll-x">
-					<table class="stmt">
-						<thead><tr><th>Kosten</th><th>Schlüssel</th><th class="r">Ihr Anteil</th></tr></thead>
-						<tbody>
-							<tr><td>Heizung und Warmwasser<span class="sub">Heizprofil Mittelland · 1.7.–30.6.</span></td><td>Fläche</td><td class="r">1'284.60</td></tr>
-							<tr><td>Wasser und Abwasser</td><td>Personen</td><td class="r">412.30</td></tr>
-							<tr><td>Hauswartung</td><td>70/30</td><td class="r">368.00</td></tr>
-							<tr><td>Verwaltungspauschale<span class="sub">3 % der Nebenkosten</span></td><td>–</td><td class="r">61.95</td></tr>
-							<tr><td>Akontozahlungen<span class="sub">12 × CHF 163.50</span></td><td></td><td class="r">−1'962.00</td></tr>
-							<tr class="total"><td>Nachzahlung</td><td></td><td class="r">CHF 164.85</td></tr>
-						</tbody>
-					</table>
-				</div>
-				<div class="specimen-body" style="padding-top:12px">
-					<div style="display:grid;gap:8px">
-						<span style="font-size:.8125rem;font-weight:600;color:var(--ink-muted)">Verteilschlüssel «70/30» als Formel</span>
-						<div class="formula">0.7 × <span class="v">{area}</span> / <span class="v">{area_total}</span> + 0.3 × <span class="v">{units}</span> / <span class="v">{units_total}</span></div>
-						<div class="split" aria-hidden="true"><div class="a" style="width:70%">70 % nach Fläche</div><div class="b" style="width:30%">30 % je Wohnung</div></div>
+			<figure class="shot">
+				<img class="l" src="shots/statement-light.webp" width="1600" height="1105" loading="lazy" alt="Abrechnung NK-11111111-2025-0001 für Hans Müller, Musterhaus Zentrum, Wohnung 1.01: Kostenaufstellung mit Lift und Allgemeinstrom.">
+				<img class="d" src="shots/statement-dark.webp" width="1600" height="1105" loading="lazy" alt="" aria-hidden="true">
+			</figure>
+		</div>
+
+		<!-- Keys + heating -->
+		<div class="feature wide">
+			<div class="copy-col" style="max-width:760px">
+				<span class="badge info">Verteilschlüssel und Heizprofile</span>
+				<h3>Gerecht verteilt, auch im Winter.</h3>
+				<p>Kosten nach Fläche, Zimmern, Einheiten oder als eigene Formel, etwa 70 % nach Fläche und 30 % pro Wohnung. Heizkosten folgen einem Heizprofil: Im Januar zählt ein Mietstag mehr als im Juli. Für Mittelland, Bergregion und Tessin ist je ein Profil dabei.</p>
+			</div>
+			<div class="duo">
+				<figure class="figure">
+					<div class="shot">
+						<img class="l" src="shots/keys-light.webp" width="1600" height="1193" loading="lazy" alt="Liste der Verteilschlüssel: Pro Einheit, Pro Fläche, Pro Zimmer und Heizung mit der Formel 0.7 mal Fläche plus 0.3 mal Einheiten.">
+						<img class="d" src="shots/keys-dark.webp" width="1600" height="1193" loading="lazy" alt="" aria-hidden="true">
 					</div>
-				</div>
+					<figcaption class="caption">Verteilschlüssel als Formel: <code>0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}</code></figcaption>
+				</figure>
+				<figure class="figure">
+					<div class="shot">
+						<img class="l" src="shots/heating-light.webp" width="1600" height="916" loading="lazy" alt="Heizprofil Heizung und Warmwasser: Monatsanteile von 13.6 Prozent im Januar bis 3.6 Prozent im August.">
+						<img class="d" src="shots/heating-dark.webp" width="1600" height="916" loading="lazy" alt="" aria-hidden="true">
+					</div>
+					<figcaption class="caption">Heizprofil mit Monatsanteilen: Januar 13.6 %, August 3.6 %</figcaption>
+				</figure>
 			</div>
 		</div>
 
 		<!-- QR -->
 		<div class="feature">
 			<div class="copy-col">
-				<span class="badge live">Swiss QR-Rechnung und Mahnwesen</span>
+				<span class="badge info">Swiss QR-Rechnung und Mahnwesen</span>
 				<h3>Ihre Mieter zahlen mit dem Handy. Sie sehen, wer noch offen ist.</h3>
-				<p>Jede Abrechnung kommt als PDF mit Zahlteil nach Schweizer Standard. Wenn eine Zahlung ausbleibt, schreibt Dwello die Zahlungserinnerung und die Mahnungen für Sie, jede mit eigenem QR-Zahlteil für den offenen Betrag.</p>
+				<p>Jede Abrechnung kommt als PDF mit Zahlteil nach Schweizer Standard und in der Sprache der Mieterin oder des Mieters. Bleibt eine Zahlung aus, schreibt Dwello die Zahlungserinnerung und die Mahnungen, jede mit eigenem QR-Zahlteil.</p>
 				<ul class="checks">
-					<li><span>QR-Zahlteil nach ISO 20022 und SIX-Standard<small>Scannen, prüfen, bezahlen. Kein Abtippen von IBAN und Referenz.</small></span></li>
-					<li><span>Erinnerung, 2. und 3. Mahnung<small>Per E-Mail oder Brief, in der Sprache der Mieterin oder des Mieters.</small></span></li>
-					<li><span>Alle Abrechnungen eines Gebäudes als ZIP<small>Für Ihr Archiv oder Ihre Treuhänderin.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>QR-Zahlteil nach SIX-Standard<small>Scannen, prüfen, bezahlen. Kein Abtippen von IBAN und Referenz.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>In der Sprache der Mieter<small>Marco Bernasconi in Luzern bekommt seine Abrechnung auf Italienisch.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Erinnerung, 2. und 3. Mahnung<small>Per E-Mail oder Brief. Alle PDFs eines Gebäudes auch als ZIP.</small></span></li>
 				</ul>
 			</div>
-			<div class="specimen" aria-label="Beispiel: Zahlteil einer QR-Rechnung">
-				<div class="specimen-bar"><span class="crumb">PDF /</span> Abrechnung 2024/25, Seite 2</div>
-				<div class="specimen-body" style="gap:24px">
-					<p style="color:var(--ink-muted);font-size:.9375rem">Bitte überweisen Sie die Nachzahlung bis zum 31. Januar 2026. Sie können den Zahlteil unten mit Ihrer Banking-App scannen.</p>
-				</div>
-				<div class="qrpart">
-					<svg viewBox="0 0 120 120" role="img" aria-label="QR-Code mit Schweizerkreuz (Beispiel, führt zum Dwello-Quellcode)">
-						<rect width="120" height="120" fill="var(--surface)"/>
-						<use href="#qr" x="6" y="6" width="108" height="108" style="color:var(--ink)"/>
-						<rect x="51" y="51" width="18" height="18" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/>
-						<path d="M60 54.5v11M54.5 60h11" stroke="var(--surface)" stroke-width="3.2"/>
-					</svg>
-					<dl>
-						<div><dt>Konto / Zahlbar an</dt><dd class="mono">CH44 3199 9123 0008 8901 2</dd><dd>Anna Muster, Bergstrasse 12, 6003 Luzern</dd></div>
-						<div><dt>Referenz</dt><dd class="mono">21 00000 00003 13947 14300 09017</dd></div>
-						<div style="display:flex;gap:24px"><div><dt>Währung</dt><dd class="mono">CHF</dd></div><div><dt>Betrag</dt><dd class="mono">164.85</dd></div></div>
-					</dl>
-				</div>
+			<div class="pdfs">
+				<figure class="paper"><img src="shots/pdf-page-1.webp" width="1100" height="1555" loading="lazy" alt="Seite 1 der Nebenkostenabrechnung von Hans Müller: Nachzahlung CHF 215.80, Kostenübersicht nach Kategorien."></figure>
+				<figure class="paper qr"><img src="shots/pdf-qr-part.webp" width="1240" height="666" loading="lazy" alt="QR-Zahlteil mit Schweizerkreuz, Konto, Referenz und Betrag CHF 215.80."></figure>
 			</div>
 		</div>
 
-		<!-- Buildings / GWR -->
+		<!-- Buildings -->
 		<div class="feature flip">
 			<div class="copy-col">
-				<span class="badge live">Gebäude und Wohnungen</span>
-				<h3>Gebäude erfassen in zwei Minuten. Bald mit einem Klick aus dem GWR.</h3>
-				<p>Heute geben Sie die Adresse ein und Dwello ergänzt Postleitzahl und Ort. Als Nächstes kommt der Import aus dem eidgenössischen Gebäude- und Wohnungsregister: Adresse suchen, Gebäude bestätigen, und Baujahr, Wohnungen, Flächen und Zimmer sind erfasst.</p>
+				<span class="badge info">Gebäude und Wohnungen</span>
+				<h3>Gebäude erfassen in zwei Minuten.</h3>
+				<p>Geben Sie Strasse, PLZ oder Ort ein und wählen Sie einen Treffer: Dwello füllt die Adresse aus. Jedes Feld hat seine Erklärung und ein Beispiel direkt darunter.</p>
 				<ul class="checks">
-					<li><span>Adresssuche mit Schweizer Postleitzahlen<small>Verfügbar heute.</small></span></li>
-					<li><span>Wohnungen mit Fläche, Zimmern, Volumen<small>Die Grundlage für jeden Verteilschlüssel.</small></span></li>
-					<li><span>Import aus dem GWR (EGID, EWID) <span class="badge plan">Geplant</span><small>Daten des Bundesamts für Statistik, öffentlich und kostenlos.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Adresssuche für die ganze Schweiz<small>Verfügbar heute.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Wohnungen mit Fläche, Zimmern, Volumen<small>Die Grundlage für jeden Verteilschlüssel.</small></span></li>
+					<li><svg class="ic" aria-hidden="true" style="color:var(--ink-muted)"><use href="#i-info"/></svg><span>Import aus dem GWR <span class="badge plan">Geplant</span><small>Gebäude und Wohnungen mit einem Klick aus dem eidgenössischen Gebäude- und Wohnungsregister.</small></span></li>
 				</ul>
 			</div>
-			<div class="specimen" aria-label="Entwurf: Gebäude aus dem GWR übernehmen">
-				<div class="specimen-bar"><span class="crumb">Gebäude /</span> Gebäude erfassen <span class="badge plan" style="margin-left:auto">Entwurf</span></div>
-				<div class="specimen-body">
-					<div><label style="display:block;font-weight:600;margin-bottom:6px">Adresse des Gebäudes</label>
-						<div class="fields" style="grid-template-columns:1fr;padding:0;background:none"><div class="val" style="border-color:var(--petrol);box-shadow:inset 0 0 0 1px var(--petrol)">Bergstrasse 12, Luz|</div></div>
-						<p style="color:var(--ink-muted);font-size:.9375rem;margin-top:6px">Wir suchen das Gebäude im eidgenössischen Gebäude- und Wohnungsregister.</p>
-					</div>
-					<div style="border:1px solid var(--line);border-radius:var(--radius-control);overflow:hidden">
-						<div style="padding:14px 16px;background:var(--petrol-mist);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>Bergstrasse 12, 6003 Luzern</b><span class="mono" style="font-size:.8125rem;color:var(--ink-muted)">EGID 190 234 551</span></div>
-						<div class="scroll-x"><table class="stmt"><thead><tr><th>Wohnung</th><th class="r">Zimmer</th><th class="r">Fläche</th></tr></thead>
-							<tbody><tr><td>EG links</td><td class="r">3.5</td><td class="r">82 m²</td></tr><tr><td>1. OG</td><td class="r">4.5</td><td class="r">104 m²</td></tr><tr><td>2. OG</td><td class="r">4.5</td><td class="r">104 m²</td></tr><tr><td>DG</td><td class="r">2.5</td><td class="r">61 m²</td></tr></tbody></table></div>
-					</div>
-					<span class="btn btn-primary" style="justify-self:start">4 Wohnungen übernehmen</span>
-				</div>
-			</div>
+			<figure class="shot">
+				<img class="l" src="shots/building-new-light.webp" width="1400" height="1225" loading="lazy" alt="Formular Neues Gebäude mit Gebäudename, Adresssuche, Strasse, PLZ und Ort, jedes Feld mit Hilfetext und Beispiel.">
+				<img class="d" src="shots/building-new-dark.webp" width="1400" height="1225" loading="lazy" alt="" aria-hidden="true">
+			</figure>
 		</div>
 	</div>
 </section>
@@ -677,27 +543,27 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <section id="alles" style="background:var(--surface);border-block:1px solid var(--line)">
 	<div class="wrap">
 		<div class="sec-head">
-			<span class="eyebrow">Alles auf einen Blick</span>
+			<span class="kicker">Alles auf einen Blick</span>
 			<h2>Was in Dwello steckt.</h2>
-			<p>Jede Funktion hier ist mit automatischen Tests abgesichert. Was noch geplant ist, steht als geplant da.</p>
+			<p>Jede Funktion ist mit automatischen Tests abgesichert. Was noch nicht fertig ist, steht als geplant da.</p>
 		</div>
-		<div class="legend"><span class="badge live">Verfügbar</span> heute in Dwello <span class="badge plan">Geplant</span> auf der Roadmap</div>
+		<div class="legend"><span class="badge ok"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Verfügbar</span> heute in Dwello <span class="badge plan">Geplant</span> auf der Roadmap</div>
 		<div class="grid-feat">
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M5 9l7 1.5L19 9M12 10.5V15l-3 6M12 15l3 6"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Barrierefrei nach WCAG 2.2 AA</h3><p>Jede Ansicht wird mit axe geprüft, auf Handy, Tablet und Desktop, hell und dunkel. Ohne Ausnahmen.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Mobile first</h3><p>Funktioniert ab 390 Pixel Breite ohne seitliches Scrollen. Schaltflächen mindestens 48 Pixel hoch.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2M6 5c0 4 3 7 6 8M11 5c0 4-3 7-6 8M13 21l4-9 4 9M14.5 18h5"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Deutsch, Französisch, Italienisch, Englisch</h3><p>Für Sie und Ihre Mieter. Abrechnungen und Mahnungen gehen in der Sprache der Mieterin oder des Mieters raus.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Dunkelmodus</h3><p>Folgt der Einstellung Ihres Geräts. Alle Kontraste sind geprüft, auch im Dunkeln.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Übersicht mit Aufgaben</h3><p>Fällige Abrechnungen, Zahlungsfristen, Vertragsenden und vermietete Wohnungen pro Gebäude auf einer Seite.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Mietverträge und Vertragsende</h3><p>Befristet oder unbefristet. Beim Ende zeigt Dwello die Kündigungsfrist und fragt nach der neuen Adresse.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Heizkosten mit Heizprofil</h3><p>Monatsanteile für Mittelland, Bergregion, Tessin oder Heizung mit Warmwasser. Ölstand nach Verbrauch.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h6"/><circle cx="18" cy="16" r="3"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Eigene Verteilschlüssel</h3><p>Nach Fläche, Zimmern, Volumen, Wohnungen oder als Formel gemischt, zum Beispiel 70/30.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 6l8 6 8-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Versand per E-Mail oder Brief</h3><p>Wer E-Mail möchte, bekommt das PDF. Für alle anderen druckt Dwello den Brief und merkt sich den Versand.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Mieterdaten auf Knopfdruck</h3><p>Alles über eine Mieterin oder einen Mieter als ZIP, für die Datenherausgabe nach Art. 28 DSG.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Protokoll aller Änderungen</h3><p>Anmeldungen und jede Änderung, die eine Abrechnung betrifft, mit Zeitpunkt und Stand davor.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 18v-6M9 15l3 3 3-3"/></svg></span><span class="badge live">Verfügbar</span></div><h3>Dokumente pro Mieter</h3><p>Briefe, Abrechnungen und Mahnungen an einem Ort. Versendete Mahnungen lassen sich nicht löschen.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg></span><span class="badge plan">Geplant</span></div><h3>Import aus dem GWR</h3><p>Gebäude und Wohnungen mit Flächen und Zimmern direkt aus dem eidgenössischen Register übernehmen.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg></span><span class="badge plan">Geplant</span></div><h3>Alle Daten exportieren</h3><p>Der ganze Bestand jederzeit als CSV und JSON. Ihre Daten gehören Ihnen, auch wenn Sie wechseln.</p></article>
-			<article><div class="top"><span class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 10h.01M15 10h.01M9 15c1.7 1.3 4.3 1.3 6 0"/></svg></span><span class="badge plan">Geplant</span></div><h3>MCP-Server für KI-Assistenten</h3><p>Fragen Sie Claude, ChatGPT oder Ihre lokale KI direkt nach offenen Beträgen oder fehlenden Belegen.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-a11y"/></svg><span class="badge ok">Verfügbar</span></div><h3>Barrierefrei nach WCAG 2.2 AA</h3><p>Jede Ansicht wird mit axe geprüft, auf Handy, Tablet und Desktop, hell und dunkel. Ohne Ausnahmen.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg><span class="badge ok">Verfügbar</span></div><h3>Mobile first</h3><p>Funktioniert ab 390 Pixel Breite ohne seitliches Scrollen. Schaltflächen mindestens 48 Pixel hoch.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-lang"/></svg><span class="badge ok">Verfügbar</span></div><h3>Vier Sprachen</h3><p>Deutsch, Französisch, Italienisch und Englisch. Abrechnungen und Mahnungen in der Sprache der Mieter.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span class="badge ok">Verfügbar</span></div><h3>Dunkelmodus</h3><p>Folgt der Einstellung Ihres Geräts. Alle Kontraste sind geprüft, auch im Dunkeln.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span class="badge ok">Verfügbar</span></div><h3>Übersicht mit nächstem Schritt</h3><p>Was jetzt zu tun ist, welche Fristen anstehen und welche Wohnungen leer sind.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><span class="badge ok">Verfügbar</span></div><h3>Mietverträge und Vertragsende</h3><p>Befristet oder unbefristet. Beim Ende zeigt Dwello die Kündigungsfrist und fragt nach der neuen Adresse.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-flame"/></svg><span class="badge ok">Verfügbar</span></div><h3>Heizkosten mit Heizprofil</h3><p>Monatsanteile für Mittelland, Bergregion, Tessin oder Heizung mit Warmwasser. Heizöl nach Verbrauch.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg><span class="badge ok">Verfügbar</span></div><h3>Eigene Verteilschlüssel</h3><p>Nach Fläche, Zimmern, Volumen, Einheiten oder als Formel gemischt.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg><span class="badge ok">Verfügbar</span></div><h3>Versand per E-Mail oder Brief</h3><p>Wer E-Mail möchte, bekommt das PDF. Für alle anderen druckt Dwello den Brief.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="badge ok">Verfügbar</span></div><h3>Mieterdaten auf Knopfdruck</h3><p>Alles über eine Mieterin oder einen Mieter als ZIP, für die Datenherausgabe nach Art. 28 DSG.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span class="badge ok">Verfügbar</span></div><h3>Protokoll aller Änderungen</h3><p>Anmeldungen und jede Änderung, die eine Abrechnung betrifft, mit Zeitpunkt und Stand davor.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span class="badge ok">Verfügbar</span></div><h3>Dokumente pro Mieter</h3><p>Briefe, Abrechnungen und Mahnungen an einem Ort.</p></article>
+			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge plan">Geplant</span></div><h3>Import aus dem GWR</h3><p>Gebäude und Wohnungen mit Flächen und Zimmern aus dem eidgenössischen Register übernehmen.</p></article>
+			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span class="badge plan">Geplant</span></div><h3>Alle Daten exportieren</h3><p>Der ganze Bestand jederzeit als CSV und JSON. Ihre Daten gehören Ihnen, auch wenn Sie wechseln.</p></article>
+			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg><span class="badge plan">Geplant</span></div><h3>MCP-Server für KI-Assistenten</h3><p>Fragen Sie Ihren KI-Assistenten nach offenen Beträgen, Fristen oder fehlenden Rechnungen.</p></article>
 		</div>
 	</div>
 </section>
@@ -707,29 +573,29 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 	<div class="wrap band-grid">
 		<div>
 			<div class="sec-head">
-				<span class="eyebrow">Datenschutz</span>
+				<span class="kicker">Datenschutz</span>
 				<h2>Nach dem Schweizer Datenschutzgesetz gebaut.</h2>
 				<p>Mieterdaten sind Personendaten. Dwello behandelt sie so: Sie bleiben auf Ihrem Gerät, nichts geht an uns, und Sie können jederzeit Auskunft geben.</p>
 			</div>
-			<svg class="il" viewBox="0 0 360 220" role="img" aria-label="Ein Homeserver im Haus, die Daten bleiben drinnen" style="max-width:420px">
-				<line class="ln" x1="10" y1="200" x2="350" y2="200"/>
-				<path class="fl" d="M60 200V96h240v104z"/>
-				<polyline class="ln" points="44,108 180,28 316,108"/>
-				<rect class="sf" x="128" y="118" width="104" height="62" rx="6"/>
-				<line class="ln" x1="144" y1="138" x2="196" y2="138"/>
-				<line class="ln" x1="144" y1="158" x2="186" y2="158"/>
-				<circle cx="214" cy="138" r="4" class="lt"/>
-				<circle cx="214" cy="158" r="4" fill="var(--a)"/>
-				<rect class="sf" x="84" y="128" width="26" height="30" rx="2"/><rect class="sf" x="250" y="128" width="26" height="30" rx="2"/>
-				<text class="tm" x="180" y="214" font-size="11" text-anchor="middle" letter-spacing=".08em">IHR SERVER · IHR HAUS</text>
+			<!-- In the app's illustration style: line, fill, one accent stroke -->
+			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Ein Haus mit einem Server darin" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="16" y1="104" x2="144" y2="104" fill="none"/>
+				<rect x="36" y="50" width="88" height="54"/>
+				<polyline points="26,56 80,18 134,56" fill="none"/>
+				<rect x="56" y="62" width="48" height="16" rx="2" fill="var(--illu-surface)"/>
+				<rect x="56" y="82" width="48" height="16" rx="2" fill="var(--illu-surface)"/>
+				<line x1="64" y1="70" x2="80" y2="70" fill="none"/>
+				<line x1="64" y1="90" x2="80" y2="90" fill="none"/>
+				<line x1="92" y1="70" x2="96" y2="70" fill="none" stroke="var(--illu-accent)" stroke-width="3"/>
+				<line x1="92" y1="90" x2="96" y2="90" fill="none" stroke="var(--illu-accent)" stroke-width="3"/>
 			</svg>
 		</div>
 		<ul class="promises">
-			<li><span class="ref">Selbst betrieben</span><span><b>Ihr Server, Ihre Datenbank</b>Dwello läuft auf Ihrem PC, Ihrem NAS oder bei einem Hoster Ihrer Wahl, auch in einem Rechenzentrum in der Schweiz.</span></li>
-			<li><span class="ref">Lokale KI</span><span><b>Belege bleiben im Haus</b>Die KI läuft mit Ollama auf Ihrem Server. Keine Rechnung geht an einen Cloud-Dienst, ausser Sie wollen es so.</span></li>
-			<li><span class="ref">Art. 28 DSG</span><span><b>Datenherausgabe auf Knopfdruck</b>Alle Daten einer Mieterin oder eines Mieters als ZIP, mit Ordnern in ihrer Sprache.</span></li>
-			<li><span class="ref">Art. 6 DSG</span><span><b>Nur was nötig ist</b>Kein Tracking, keine Werbung, keine Analyse-Cookies. Wir erfahren nicht, dass Sie Dwello nutzen.</span></li>
-			<li><span class="ref">Nachvollziehbar</span><span><b>Protokoll und Datenschutzerklärung</b>Jede Änderung an Abrechnungsdaten wird protokolliert. Eine Datenschutzerklärung für Ihre Mieter ist dabei.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-server"/></svg><span><b>Ihr Server, Ihre Datenbank</b>Dwello läuft auf Ihrem PC, Ihrem NAS oder bei einem Hoster Ihrer Wahl, auch in einem Rechenzentrum in der Schweiz.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><span><b>Belege bleiben im Haus</b>Die KI läuft mit Ollama auf Ihrem Server. Keine Rechnung geht an einen Cloud-Dienst, ausser Sie wollen es so.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span><b>Datenherausgabe auf Knopfdruck</b><span class="ref">Art. 28 DSG.</span> Alle Daten einer Mieterin oder eines Mieters als ZIP, mit Ordnern in ihrer Sprache.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-eye-off"/></svg><span><b>Kein Tracking</b>Keine Werbung, keine Analyse-Cookies. Wir erfahren nicht, dass Sie Dwello nutzen.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span><b>Protokoll und Datenschutzerklärung</b>Jede Änderung an Abrechnungsdaten wird protokolliert. Eine Datenschutzerklärung für Ihre Mieter ist dabei.</span></li>
 		</ul>
 	</div>
 </section>
@@ -740,24 +606,25 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 		<div class="feature" style="padding:0;border:0">
 			<div class="copy-col">
 				<span class="badge plan">Geplant · MCP</span>
-				<h3 style="font-size:clamp(2rem,4.2vw,3.25rem);font-weight:760">Fragen Sie Ihre Liegenschaft einfach.</h3>
-				<p>Mit dem Model Context Protocol verbindet sich Dwello mit Ihrem KI-Assistenten: Claude, ChatGPT oder einer lokalen KI. Sie fragen in Ihren Worten, der Assistent schaut in Dwello nach. Er liest nur, was Sie freigeben, und ändert nichts ohne Ihre Bestätigung.</p>
+				<h3 style="font-size:clamp(2rem,4.2vw,3rem)">Fragen Sie Ihre Liegenschaft einfach.</h3>
+				<p>Mit dem Model Context Protocol verbindet sich Dwello mit Ihrem KI-Assistenten: Claude, ChatGPT oder eine lokale KI. Sie fragen in Ihren Worten, der Assistent schaut in Dwello nach. Er liest nur, was Sie freigeben, und ändert nichts ohne Ihre Bestätigung.</p>
 				<ul class="checks">
-					<li><span>Offene Beträge, Fristen, fehlende Belege<small>Antworten aus Ihren echten Daten, mit Quelle.</small></span></li>
-					<li><span>Läuft auf Ihrem Server<small>Der MCP-Server ist Teil der Installation. Kein Umweg über uns.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Offene Beträge, Fristen, fehlende Rechnungen<small>Antworten aus Ihren echten Daten, mit Quelle.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Läuft auf Ihrem Server<small>Der MCP-Server ist Teil der Installation. Kein Umweg über uns.</small></span></li>
 				</ul>
 			</div>
-			<div class="chat" aria-label="Entwurf: Gespräch mit einem KI-Assistenten über Dwello">
-				<div class="specimen-bar"><svg width="22" height="22" aria-hidden="true" class="mark"><use href="#dw-mark"/></svg> KI-Assistent mit Dwello verbunden</div>
+			<div class="panel chat" aria-label="Entwurf: Gespräch mit einem KI-Assistenten über Dwello">
+				<div class="chat-head"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>KI-Assistent mit Dwello verbunden <span class="badge plan" style="margin-left:auto">Entwurf</span></div>
 				<div class="chat-body">
-					<div class="msg me">Wer hat die Nebenkosten 2024/25 noch nicht bezahlt?</div>
-					<div class="tool"><b>dwello.open_balances</b>(period: "2024-07-01/2025-06-30")</div>
-					<div class="msg ai">Zwei Abrechnungen sind offen:
+					<div class="msg me">Was muss ich diese Woche bei meinen Liegenschaften erledigen?</div>
+					<div class="tool"><b>dwello.next_steps</b>() · <b>dwello.deadlines</b>(days: 14)</div>
+					<div class="msg ai">Eine Frist und zwei Aufgaben:
 						<table><tbody>
-							<tr><td>Wohnung 2.1 · M. Keller</td><td class="r mono">CHF 164.85</td></tr>
-							<tr><td>EG links · L. Bianchi</td><td class="r mono">CHF 92.40</td></tr>
+							<tr><td>Zahlungsfrist Hans Müller, Musterhaus Zentrum, Wohnung 1.01</td><td class="r">CHF 215.80</td></tr>
+							<tr><td>Abrechnungen im Entwurf prüfen und versenden</td><td class="r">7</td></tr>
+							<tr><td>Abrechnung 2025 für Alpenblick erstellen</td><td class="r">1</td></tr>
 						</tbody></table>
-						<p style="margin-top:8px">Die Zahlungsfrist ist am 31.1.2026 abgelaufen. Soll ich Zahlungserinnerungen vorbereiten?</p>
+						<p style="margin-top:8px">Die Frist von Herrn Müller läuft am 28.10.2026 ab. Soll ich die Entwürfe der Seepark Residenz zuerst öffnen?</p>
 					</div>
 				</div>
 			</div>
@@ -769,14 +636,14 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <section id="installieren" style="background:var(--surface);border-block:1px solid var(--line)">
 	<div class="wrap">
 		<div class="sec-head">
-			<span class="eyebrow">Installieren</span>
+			<span class="kicker">Installieren</span>
 			<h2>Läuft dort, wo Sie es wollen.</h2>
 			<p>Ein Docker-Befehl startet Dwello mit Datenbank und lokaler KI. Wählen Sie, wo es laufen soll.</p>
 		</div>
 		<div class="tabs" role="tablist" aria-label="Wo soll Dwello laufen?">
-			<button class="tab" role="tab" id="tab-pc" aria-selected="true" aria-controls="panel-pc"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>Eigener PC</button>
-			<button class="tab" role="tab" id="tab-home" aria-selected="false" aria-controls="panel-home" tabindex="-1"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01"/></svg>Homeserver / NAS</button>
-			<button class="tab" role="tab" id="tab-cloud" aria-selected="false" aria-controls="panel-cloud" tabindex="-1"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9z"/></svg>Server in der Cloud</button>
+			<button class="tab" role="tab" id="tab-pc" aria-selected="true" aria-controls="panel-pc"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg>Eigener PC</button>
+			<button class="tab" role="tab" id="tab-home" aria-selected="false" aria-controls="panel-home" tabindex="-1"><svg class="ic" aria-hidden="true"><use href="#i-server"/></svg>Homeserver / NAS</button>
+			<button class="tab" role="tab" id="tab-cloud" aria-selected="false" aria-controls="panel-cloud" tabindex="-1"><svg class="ic" aria-hidden="true"><use href="#i-cloud"/></svg>Server in der Cloud</button>
 		</div>
 
 		<div class="install" id="panel-pc" role="tabpanel" aria-labelledby="tab-pc">
@@ -792,11 +659,11 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <span class="p">$ </span>docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
 <span class="ok">✓ Dwello läuft auf http://localhost:3000</span></pre>
 			</div>
-			<div class="needs">
+			<div class="panel needs">
 				<h3>Ideal für den Start</h3>
 				<dl>
-					<div><dt>Sie brauchen</dt><dd>Docker Desktop, 16 GB Arbeitsspeicher für die lokale KI</dd></div>
-					<div><dt>Zeitaufwand</dt><dd>Rund 15 Minuten, inklusive Download des KI-Modells</dd></div>
+					<div><dt>Sie brauchen</dt><dd>Docker Desktop und 16 GB Arbeitsspeicher für die lokale KI.</dd></div>
+					<div><dt>Zeitaufwand</dt><dd>Rund 15 Minuten, inklusive Download des KI-Modells.</dd></div>
 					<div><dt>Gut zu wissen</dt><dd>Dwello läuft nur, wenn Ihr PC an ist. Für den Zugriff vom Handy eignet sich ein Homeserver.</dd></div>
 				</dl>
 			</div>
@@ -804,7 +671,7 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 
 		<div class="install" id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
 			<div class="term">
-				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC, Raspberry Pi 5</span><button type="button" data-copy="code-home">Kopieren</button></div>
+				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC</span><button type="button" data-copy="code-home">Kopieren</button></div>
 <pre id="code-home"><span class="c"># Auf dem Homeserver per SSH</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
@@ -813,7 +680,7 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
 <span class="ok">✓ Dwello läuft auf http://homeserver.local:3000</span></pre>
 			</div>
-			<div class="needs">
+			<div class="panel needs">
 				<h3>Immer erreichbar, im eigenen Haus</h3>
 				<dl>
 					<div><dt>Sie brauchen</dt><dd>Ein NAS oder einen Mini-PC mit Docker. Für die lokale KI 16 GB Arbeitsspeicher.</dd></div>
@@ -825,7 +692,7 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 
 		<div class="install" id="panel-cloud" role="tabpanel" aria-labelledby="tab-cloud" hidden>
 			<div class="term">
-				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner, AWS</span><button type="button" data-copy="code-cloud">Kopieren</button></div>
+				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner</span><button type="button" data-copy="code-cloud">Kopieren</button></div>
 <pre id="code-cloud"><span class="c"># Auf einem frischen Linux-Server mit Docker</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
@@ -833,17 +700,17 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <span class="c"># HTTPS mit Caddy: Vorlage in deploy/demo/</span>
 <span class="ok">✓ Dwello läuft auf https://dwello.ihre-domain.ch</span></pre>
 			</div>
-			<div class="needs">
+			<div class="panel needs">
 				<h3>Von überall erreichbar</h3>
 				<dl>
-					<div><dt>Sie brauchen</dt><dd>Einen Linux-Server mit Docker und eine eigene Domain</dd></div>
+					<div><dt>Sie brauchen</dt><dd>Einen Linux-Server mit Docker und eine eigene Domain.</dd></div>
 					<div><dt>Daten in der Schweiz</dt><dd>Wählen Sie ein Rechenzentrum in der Schweiz. Unsere Demo läuft in Zürich.</dd></div>
 					<div><dt>Gut zu wissen</dt><dd>Die Demo-Vorlage richtet HTTPS automatisch mit Caddy ein.</dd></div>
 				</dl>
 			</div>
 		</div>
 
-		<p class="honest" style="margin-top:24px"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg><span>Heute melden Sie sich mit Ihrem Google-Konto an und richten dafür einmal einen OAuth-Schlüssel ein. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist in Arbeit.</span></p>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an und richten dafür einmal einen OAuth-Schlüssel ein. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant.</span></div>
 	</div>
 </section>
 
@@ -852,31 +719,22 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 	<div class="wrap a11y">
 		<div>
 			<div class="sec-head" style="margin-bottom:32px">
-				<span class="eyebrow">Einfach zu bedienen</span>
+				<span class="kicker">Einfach zu bedienen</span>
 				<h2>Für Menschen, die das nur ein paar Mal im Jahr machen.</h2>
 				<p>Dwello ist nicht für Profis gebaut, sondern für Sie. Klare Wörter statt Fachjargon, eine Hauptaktion pro Seite, und bevor etwas Endgültiges passiert, sagt Dwello Ihnen genau, was passiert.</p>
 			</div>
 			<ul class="rules">
-				<li><span class="m">48 px</span><span><b>Grosse Schaltflächen</b><span>Gut zu treffen, mit dem Finger und mit zittriger Hand.</span></span></li>
-				<li><span class="m">1</span><span><b>Eine Hauptaktion pro Seite</b><span>Sie sehen immer, was als Nächstes zu tun ist.</span></span></li>
+				<li><span class="m">48 px</span><span><b>Grosse Schaltflächen</b><span>Gut zu treffen, mit dem Finger und mit der Maus.</span></span></li>
+				<li><span class="m">1</span><span><b>Eine Hauptaktion pro Seite</b><span>Die Übersicht zeigt immer den nächsten Schritt.</span></span></li>
 				<li><span class="m">7 : 1</span><span><b>Kontrast für Hilfetexte</b><span>Auch graue Texte sind gut lesbar, bei Sonne und im Dunkeln.</span></span></li>
 				<li><span class="m">390 px</span><span><b>Ganz auf dem Handy</b><span>Jede Seite passt aufs Handy, ohne seitliches Scrollen.</span></span></li>
 			</ul>
 		</div>
-		<div class="phone" aria-label="Dwello auf dem Handy: die Übersicht">
-			<div class="phone-top">
-				<svg class="wm" viewBox="0 0 6403 1527" aria-hidden="true"><use href="#dw-wm"/></svg>
-				<span class="burger"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
-			</div>
-			<div class="phone-body">
-				<h4>Übersicht</h4>
-				<p class="purpose">Was jetzt zu tun ist und welche Fristen anstehen.</p>
-				<b style="font-size:.9375rem;margin-top:4px">Als Nächstes zu tun</b>
-				<a class="task" href="#ablauf" tabindex="-1"><span><b>Abrechnung 2024/25 erstellen</b><span>Bergstrasse 12 · 4 Wohnungen</span></span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
-				<a class="task" href="#ablauf" tabindex="-1"><span><b>Zahlungsfrist M. Keller</b><span>in 3 Tagen · CHF 164.85</span></span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
-				<a class="task" href="#ablauf" tabindex="-1"><span><b>Neue Adresse von L. Bianchi fehlt</b><span>Vertragsende 30.9.2025</span></span><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
-				<span class="btn btn-primary" style="margin-top:6px">Rechnungen hochladen</span>
-			</div>
+		<div class="phone">
+			<figure class="shot">
+				<img class="l" src="shots/mobile-dashboard-light.webp" width="780" height="1688" loading="lazy" alt="Dwello auf dem Handy: die Übersicht mit dem nächsten Schritt Nebenkostenabrechnungen erstellen.">
+				<img class="d" src="shots/mobile-dashboard-dark.webp" width="780" height="1688" loading="lazy" alt="" aria-hidden="true">
+			</figure>
 		</div>
 	</div>
 </section>
@@ -885,19 +743,19 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <section id="open-source" class="oss">
 	<div class="wrap oss-grid">
 		<div style="display:grid;gap:24px">
-			<span class="eyebrow">Open Source</span>
+			<span class="kicker">Open Source</span>
 			<p class="price">0.–<small> CHF pro Jahr</small></p>
-			<h2 style="font-size:clamp(1.75rem,3.4vw,2.5rem);font-weight:740;max-width:18em">Gratis heisst bei Dwello: offen, ohne Haken.</h2>
+			<h2 style="font-size:clamp(1.75rem,3.4vw,2.5rem);max-width:18em">Gratis heisst bei Dwello: offen, ohne Haken.</h2>
 			<p style="color:var(--ink-muted);font-size:1.125rem;max-width:34em">Der ganze Quellcode ist öffentlich. Sie können ihn lesen, prüfen, anpassen und weitergeben. Es gibt kein Premium-Abo, keine Limite pro Wohnung und keine Funktion, die später kostenpflichtig wird.</p>
-			<div class="actions" style="display:flex;gap:12px;flex-wrap:wrap">
-				<a class="btn btn-primary" href="https://github.com/rudini/Dwello" rel="noopener"><svg aria-hidden="true"><use href="#i-git"/></svg>Quellcode auf GitHub</a>
+			<div class="actions">
+				<a class="btn btn-primary" href="https://github.com/rudini/Dwello" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-git"/></svg>Quellcode auf GitHub</a>
 				<a class="btn btn-secondary" href="https://github.com/rudini/Dwello/issues" rel="noopener">Idee oder Fehler melden</a>
 			</div>
 		</div>
-		<div class="scroll-x">
+		<div class="panel table-wrap">
 			<table class="compare">
 				<caption class="sr-only">Dwello im Vergleich zu typischen Verwaltungs-Abos</caption>
-				<thead><tr><th></th><th>Dwello</th><th>Typisches Abo</th></tr></thead>
+				<thead><tr><th scope="col"><span class="sr-only">Merkmal</span></th><th scope="col">Dwello</th><th scope="col">Typisches Abo</th></tr></thead>
 				<tbody>
 					<tr><td>Kosten pro Jahr</td><td class="d">CHF 0.–</td><td>pro Wohnung</td></tr>
 					<tr><td>Wo Ihre Daten liegen</td><td class="d">bei Ihnen</td><td>beim Anbieter</td></tr>
@@ -914,9 +772,9 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <section id="roadmap">
 	<div class="wrap">
 		<div class="sec-head">
-			<span class="eyebrow">Roadmap</span>
+			<span class="kicker">Roadmap</span>
 			<h2>Was als Nächstes kommt.</h2>
-			<p>Dwello wird offen weiterentwickelt. Diese Punkte sind geplant und in Arbeit.</p>
+			<p>Dwello wird offen weiterentwickelt. Diese Punkte sind geplant.</p>
 		</div>
 		<div class="road">
 			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
@@ -933,30 +791,30 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <section id="faq" style="padding-top:0">
 	<div class="wrap">
 		<div class="sec-head">
-			<span class="eyebrow">Fragen</span>
+			<span class="kicker">Fragen</span>
 			<h2>Häufige Fragen.</h2>
 		</div>
 		<div class="faq">
 			<details open><summary>Kostet Dwello wirklich nichts?</summary><p>Ja. Dwello ist Open Source und kostenlos. Sie bezahlen höchstens Ihren eigenen Server oder den Strom für Ihren PC. Wenn Sie eine externe KI statt der lokalen nutzen, bezahlen Sie diese direkt beim Anbieter.</p></details>
 			<details><summary>Brauche ich technische Kenntnisse?</summary><p>Für die Installation sollten Sie ein paar Befehle im Terminal eingeben können, oder Sie kennen jemanden, der das kann. Die App selbst ist für Menschen ohne Vorkenntnisse gemacht: Jeder Begriff wird am Feld erklärt.</p></details>
 			<details><summary>Für wie viele Wohnungen eignet sich Dwello?</summary><p>Für private Vermieterinnen und Vermieter mit einem bis fünf Gebäuden und bis zu 50 Wohnungen. Für grosse Verwaltungen mit Teams ist Dwello nicht gemacht.</p></details>
-			<details><summary>Was passiert, wenn die KI eine Rechnung falsch liest?</summary><p>Nichts, ohne dass Sie es bestätigen. Die KI schlägt Betrag, Datum und Kategorie vor und markiert, wo sie unsicher ist. Sie prüfen und korrigieren, bevor eine Rechnung in die Abrechnung kommt.</p></details>
-			<details><summary>Ist Dwello rechtlich geprüft?</summary><p>Dwello rechnet nach den Regeln des Obligationenrechts und wird mit automatischen Tests gegen diese Regeln geprüft. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen hilft Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.</p></details>
-			<details><summary>Kann ich Dwello ausprobieren, ohne etwas zu installieren?</summary><p>Ja. Die Demo auf demo.dwello.ch zeigt drei Gebäude in Zürich, Luzern und Interlaken mit Beispieldaten. Sie wird jede Nacht zurückgesetzt.</p></details>
+			<details><summary>Was passiert, wenn die KI eine Rechnung falsch liest?</summary><p>Nichts, ohne dass Sie es bestätigen. Die KI schlägt die Angaben vor und Dwello sagt, welche Sie prüfen sollten. Erst wenn Sie bestätigen, wird die Rechnung erstellt. Sie können jede Rechnung auch selbst erfassen.</p></details>
+			<details><summary>Ist Dwello rechtlich geprüft?</summary><p>Dwello rechnet nach den Regeln des Obligationenrechts und wird mit automatischen Tests gegen diese Regeln geprüft. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.</p></details>
+			<details><summary>Kann ich Dwello ausprobieren, ohne etwas zu installieren?</summary><p>Ja. Die Demo auf demo.dwello.ch zeigt drei Gebäude in Zürich, Luzern und Interlaken mit 13 Wohnungen. Sie wird jede Nacht zurückgesetzt.</p></details>
 		</div>
 	</div>
 </section>
 
 <!-- FINAL -->
-<section class="final" style="padding-top:0">
+<section style="padding-block:0">
 	<div class="wrap">
 		<div class="final-box">
-			<svg class="final-house" viewBox="0 0 48 48" aria-hidden="true"><path d="M12 22.5 24 12.5 36 22.5V36H12Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><rect x="20" y="25" width="8" height="11" rx="1" fill="#F0C27A"/></svg>
+			<svg class="ic final-house" aria-hidden="true"><use href="#i-home"/></svg>
 			<h2>Die nächste Abrechnung machen Sie mit Dwello.</h2>
-			<p>Installieren Sie Dwello heute, erfassen Sie Ihr Gebäude, und ziehen Sie die Belege hinein, sobald sie kommen. Im Frühling ist die Abrechnung dann in einer Stunde fertig.</p>
+			<p>Installieren Sie Dwello heute, erfassen Sie Ihr Gebäude und laden Sie die Rechnungen hoch, sobald sie kommen. Im Frühling ist die Abrechnung dann schnell gemacht.</p>
 			<div class="actions">
 				<a class="btn btn-primary" href="#installieren">Dwello installieren</a>
-				<a class="btn btn-secondary" href="https://demo.dwello.ch" rel="noopener">Demo ansehen</a>
+				<a class="btn btn-secondary" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen</a>
 			</div>
 		</div>
 	</div>
@@ -967,13 +825,13 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 <footer>
 	<div class="wrap">
 		<div class="foot">
-			<div style="display:grid;gap:16px;align-content:start">
-				<a class="brand" href="#top" aria-label="Dwello, zur Startseite"><svg class="mark" aria-hidden="true"><use href="#dw-mark"/></svg><svg class="wm" viewBox="0 0 6403 1527" aria-hidden="true"><use href="#dw-wm"/></svg></a>
+			<div style="display:grid;gap:12px;align-content:start">
+				<a class="logo" href="#top" aria-label="Dwello, zur Startseite"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg><svg class="wm" viewBox="0 0 6488 1512" aria-hidden="true"><use href="#wm"/></svg></a>
 				<p style="max-width:24em">Open-Source-Software für private Vermieterinnen und Vermieter in der Schweiz.</p>
 			</div>
 			<div><h4>Produkt</h4><ul><li><a href="#funktionen">Funktionen</a></li><li><a href="#datenschutz">Datenschutz</a></li><li><a href="#mcp">KI und MCP</a></li><li><a href="#roadmap">Roadmap</a></li></ul></div>
-			<div><h4>Loslegen</h4><ul><li><a href="#installieren">Installation</a></li><li><a href="https://demo.dwello.ch" rel="noopener">Demo</a></li><li><a href="#faq">Häufige Fragen</a></li></ul></div>
-			<div><h4>Wissen</h4><ul><li><a href="#funktionen">Ratgeber Nebenkosten</a></li><li><a href="#funktionen">Verteilschlüssel erklärt</a></li><li><a href="#funktionen">QR-Rechnung erklärt</a></li></ul></div>
+			<div><h4>Loslegen</h4><ul><li><a href="#installieren">Installation</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Demo</a></li><li><a href="#faq">Häufige Fragen</a></li></ul></div>
+			<div><h4>Wissen</h4><ul><li><a href="#funktionen">Nebenkosten abrechnen</a></li><li><a href="#funktionen">Verteilschlüssel</a></li><li><a href="#funktionen">QR-Rechnung</a></li></ul></div>
 			<div><h4>Community</h4><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Fehler melden</a></li><li><a href="brand.html">Markenhandbuch</a></li></ul></div>
 		</div>
 		<div class="legal">
@@ -987,8 +845,9 @@ footer { padding-block: 64px 40px; color: var(--ink-muted); font-size: 0.9375rem
 (function () {
 	function copy(btn) {
 		var el = document.getElementById(btn.getAttribute('data-copy'));
-		var text = el.innerText.split('\n').filter(function (l) { return l.trim() && l.trim()[0] !== '#' && l.trim()[0] !== '✓'; }).map(function (l) { return l.replace(/^\$\s/, ''); }).join('\n');
-		var done = function () { var t = btn.textContent; btn.textContent = 'Kopiert'; setTimeout(function () { btn.textContent = t; }, 1600); };
+		var text = el.innerText.split('\n').filter(function (l) { l = l.trim(); return l && l[0] !== '#' && l[0] !== '✓'; }).map(function (l) { return l.replace(/^\$\s/, ''); }).join('\n');
+		var label = btn.textContent;
+		var done = function () { btn.textContent = 'Kopiert'; setTimeout(function () { btn.textContent = label; }, 1600); };
 		var fallback = function () { var r = document.createRange(); r.selectNodeContents(el); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Markiert'; };
 		try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
 	}
