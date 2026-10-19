@@ -10,6 +10,7 @@ import {
 	yearBuilt
 } from '../questions/building-detail';
 import { emptyListShown, listedBuildingCount } from '../questions/buildings';
+import { chosenInvoiceBuilding } from '../questions/invoices';
 import {
 	deleteBuilding,
 	openApartment,
@@ -22,7 +23,6 @@ import {
 	startNewApartment
 } from '../tasks/building-detail';
 import { searchBuildings } from '../tasks/buildings';
-import { chosenInvoiceBuilding } from '../questions/invoices';
 
 const { Given, When, Then } = createBdd(test);
 

@@ -348,7 +348,6 @@
 	"buildings_edit_purpose": "Corrigez les informations de {name}.",
 	"buildings_detail_purpose": "Informations et appartements de l’immeuble",
 	"buildings_edit": "Modifier",
-	"buildings_invoices": "Voir les factures",
 	"buildings_delete": "Supprimer",
 	"buildings_no_apartments": "Pas encore d’appartements",
 	"buildings_no_apartments_text": "Saisissez les appartements de cet immeuble afin de pouvoir les louer et établir les décomptes.",

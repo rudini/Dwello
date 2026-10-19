@@ -35,7 +35,7 @@
 			<Button
 				href="/invoices?building={building.id}"
 				icon="invoice"
-				testid="building-invoices-button">{m.buildings_invoices()}</Button
+				testid="building-invoices-button">{m.dashboard_invoices()}</Button
 			>
 			<Button href="/buildings/{building.id}/edit" icon="edit" testid="building-edit-button"
 				>{m.buildings_edit()}</Button

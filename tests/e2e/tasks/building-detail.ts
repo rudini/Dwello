@@ -8,10 +8,10 @@ import {
 	deleteButton,
 	editButton,
 	firstApartmentButton,
-	invoicesButton,
 	fuelStockAmount,
 	fuelStockDate,
 	fuelStockRows,
+	invoicesButton,
 	saveFuelStockButton
 } from '../targets/building-detail';
 
