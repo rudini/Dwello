@@ -157,12 +157,16 @@ export const leaveOutCategory = (categoryId: string): Activity => (actor) =>
 export const openRunningContract = Click.on(runningContractLink);
 export const newContractAfterEnd = Click.on(newContractAfterEndLink);
 
+// Step «Wohnung», the apartment from the address: once its contracts are loaded, as the notices they bring move
+// «Weiter» under the click (Firefox, WebKit; #424)
+export const keepApartment: Activity = (actor) => actor.attemptsTo(Wait.until(apartmentSelect), goToNextStep);
+
 // From step «Mieter» to step «Miete», the apartment preselected
 export const goToRentWith = (tenantId: string, startDate: string): Activity => (actor) =>
 	actor.attemptsTo(
 		Select.option(tenantId).from(tenantSelect),
 		goToNextStep,
-		goToNextStep,
+		keepApartment,
 		EnterDate.of(startDate).into(startDateInput),
 		goToNextStep
 	);
