@@ -3,6 +3,8 @@ import { type Question, question } from '../screenplay/actor';
 import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
+	advanceDiffers,
+	statementAdvancePaid,
 	correctDialog,
 	paymentDeadline,
 	paymentSummary,
@@ -106,3 +108,7 @@ export const changeOffers = question('the offers to pay, remind, edit or correct
 	)
 );
 export const oldAddressWarningText = Text.of(oldAddressWarning);
+
+// #464: the Akonto the statement deducts, e.g. «− CHF 400.00»
+export const advancePaidOfStatement = Text.of(statementAdvancePaid);
+export const advanceDiffersText = Text.of(advanceDiffers);
