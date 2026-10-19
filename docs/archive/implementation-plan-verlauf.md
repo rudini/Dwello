@@ -1992,3 +1992,13 @@ Decided in #435 and the domain review (`docs/reviews/435-fachreview-1.md`): one 
 - [x] Re-review: code-reviewer round 2, also closing (`docs/reviews/435-review-2.md`: no Blocker/Major; C-16 API spec and C-9 row O-40 fixed; C-15, C-17 kept); Dr. Weber round 2 (`docs/design/personas/weber-435-2.md`: P-1 fixed; P-2 to P-7 Minor/Nit kept)
 - [x] Workflow review: note `docs/reviews/workflow-notes-session-i1.md`, collected review `docs/reviews/workflow-rules-review-2026-10-19.md` (end of the request: the product owner said to stop after #435)
 - [x] PR `Fixes #435` (the pull request that archives this session)
+
+## Session T2: code-reviewer reports no Nits (2026-10-19)
+
+Branch `ccr-3dfff432-ljcit4`. Product owner: after the review against «Getting the most out of Opus 5.5» («List only problems you'd block the merge for»), `code-reviewer` reports Blockers, Majors and Minors that are real defects, no Nits. No scenario: agent instructions only.
+
+- [x] `.claude/agents/code-reviewer.md`: severities Blocker / Major / Minor, Minor defined as a real defect, Nits left out; ponytail findings are Minors
+- [x] Slice review round 1 (`docs/reviews/nits-review-1.md`, no Blocker/Major; C-1 fixed: ponytail findings only as defects)
+- [x] PR, «No scenario: agent instructions only»
+
+Files: `.claude/agents/code-reviewer.md`, `docs/reviews/nits-review-1.md`.

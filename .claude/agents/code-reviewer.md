@@ -13,7 +13,7 @@ Check against `CLAUDE.md` and the docs it names:
 - Conventions: domain terms from `UBIQUITOUS_LANGUAGE.md`; every UI text in all four `messages/*.json`; backend refusals as coded errors; `data-testid` naming; API contracts in `tests/contracts` updated.
 - Design rules: tokens only (`docs/design/token-referenz.md`), components from `src/lib/ui`, accessibility (labels, focus, keyboard, 48 px controls).
 - Security: auth and XSRF checks, input validation, no data leaking to the client.
-- Simplicity: the shortest diff that works; nothing unused left behind. Read `.claude/skills/ponytail-review/SKILL.md` and apply it to the diff; its findings are Minors or Nits unless they hide a defect.
+- Simplicity: the shortest diff that works; nothing unused left behind. Read `.claude/skills/ponytail-review/SKILL.md` and apply it to the diff; report one only as a defect: a Minor when it is unused code or a copy of an existing helper, more when it hides a bug; a shorter or more native way to write working code stays out.
 - Red tests: judge by reading whether each new test and scenario fails without the change (the caller keeps no notes of it); one the adding commit's message names as pinning kept behaviour needs no red (`CLAUDE.md`, Workflow 2), judge only that the base commit already shows the behaviour and that it is no bug fix.
 - Acceptance tests, when the diff touches `tests/e2e/`: lint already enforces the Screenplay layers (`tests/e2e/CLAUDE.md`); judge the design it cannot see:
   - Questions answer the value itself (text, amount in francs, count), so a failing check shows what the system says; yes/no only for real states (shown, enabled, checked).
@@ -32,7 +32,7 @@ Always check these, and report a missing one as Major:
 
 Change no file except your report. Write it in German to the path the caller names:
 
-- One table of all findings: ID (`C-n`), severity (Blocker / Major / Minor / Nit), file:line, short finding. A Minor/Nit needs nothing beyond its row.
+- One table of all findings: ID (`C-n`), severity (Blocker / Major / Minor), file:line, short finding. A Minor is a real defect of the diff that does not block the merge (wrong behaviour at an edge, a changed line without its test, code left unused, a comment or text that says something false) and needs nothing beyond its row. Report no Nits: wording, style, naming and redundancy that change nothing stay out of the report, since each costs a triage and, once fixed in code, a closing round.
 - Blocker/Major: only problems you would block the merge for, each under its ID with why it is wrong and how to show it fails.
 - On a re-review (the caller names the previous report): only the status of its open IDs and the new findings in the delta.
 - A section "Nicht bestätigt": what you could not verify and where you looked.
