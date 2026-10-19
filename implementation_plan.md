@@ -104,3 +104,10 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] Helga P-1: Google lets the visitor choose the account (`prompt=select_account`, not `consent`), scenario «Bei Google das Konto wählen» seen red first; P-2, P-3 Minor kept
 - [x] Re-review: code-reviewer round 2, also closing (`docs/reviews/51-review-2.md`, no findings); Helga round 2 (`docs/design/personas/helga-51-2.md`: P-1 fixed, P-2 and P-3 Minor kept); lint, check, vitest 201, E2E Chromium auth, login and demo rows 34 passed
 - [ ] PR `Fixes #51`
+
+### #456 Link from a building to its invoices
+
+- [x] @wip scenario «Rechnungen eines Gebäudes öffnen» (`building-detail.feature`), red at the missing link
+- [x] DOM test of the building detail page for `building-invoices-button` (link `/invoices?building=<id>`), red first
+- [x] Secondary button «Rechnungen ansehen» in the page header (the primary action stays «Wohnung hinzufügen»), four languages (`buildings_invoices`); files: `src/routes/buildings/[id]/+page.svelte`, `messages/*.json`, `buildings-pages.dom.test.ts`, `building-detail.feature` and its steps, task and target
+- [ ] Slice review, persona, closing review; PR `Fixes #456`

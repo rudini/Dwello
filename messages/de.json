@@ -348,6 +348,7 @@
 	"buildings_edit_purpose": "Korrigieren Sie die Angaben von {name}.",
 	"buildings_detail_purpose": "Angaben und Wohnungen des Gebäudes",
 	"buildings_edit": "Bearbeiten",
+	"buildings_invoices": "Rechnungen ansehen",
 	"buildings_delete": "Löschen",
 	"buildings_no_apartments": "Noch keine Wohnungen",
 	"buildings_no_apartments_text": "Erfassen Sie die Wohnungen dieses Gebäudes, damit Sie sie vermieten und abrechnen können.",

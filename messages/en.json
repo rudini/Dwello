@@ -348,6 +348,7 @@
 	"buildings_edit_purpose": "Correct the details of {name}.",
 	"buildings_detail_purpose": "Details and apartments of the building",
 	"buildings_edit": "Edit",
+	"buildings_invoices": "View invoices",
 	"buildings_delete": "Delete",
 	"buildings_no_apartments": "No apartments yet",
 	"buildings_no_apartments_text": "Add the apartments of this building so that you can let them and bill them.",

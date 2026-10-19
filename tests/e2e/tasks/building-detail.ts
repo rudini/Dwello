@@ -8,6 +8,7 @@ import {
 	deleteButton,
 	editButton,
 	firstApartmentButton,
+	invoicesButton,
 	fuelStockAmount,
 	fuelStockDate,
 	fuelStockRows,
@@ -23,6 +24,8 @@ export const deleteBuilding: Activity = (actor) => actor.attemptsTo(startDeletin
 export const startEditing = Click.on(editButton);
 
 export const startNewApartment = Click.on(addApartmentButton);
+
+export const openBuildingInvoices = Click.on(invoicesButton);
 
 export const startFirstApartment = Click.on(firstApartmentButton);
 

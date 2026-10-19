@@ -37,6 +37,11 @@ Funktionalität: Gebäudedetail
     Wenn der Liegenschaftsverwalter das Gebäude bearbeiten will
     Dann ist der Liegenschaftsverwalter auf der Seite "Gebäude bearbeiten"
 
+  Szenario: Rechnungen eines Gebäudes öffnen
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
+    Wenn der Liegenschaftsverwalter die Rechnungen des Gebäudes öffnet
+    Dann zeigt die Rechnungsliste die Rechnungen im Gebäude "Birkenhof"
+
   Szenario: Wohnung hinzufügen
     Angenommen im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"

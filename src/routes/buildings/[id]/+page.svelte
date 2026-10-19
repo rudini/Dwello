@@ -31,6 +31,12 @@
 		trail={[{ href: '/buildings', label: m.nav_buildings() }]}
 	>
 		{#snippet action()}
+			<!-- #456: the invoice list, filtered to this building -->
+			<Button
+				href="/invoices?building={building.id}"
+				icon="invoice"
+				testid="building-invoices-button">{m.buildings_invoices()}</Button
+			>
 			<Button href="/buildings/{building.id}/edit" icon="edit" testid="building-edit-button"
 				>{m.buildings_edit()}</Button
 			>
