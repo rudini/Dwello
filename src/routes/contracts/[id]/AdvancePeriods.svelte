@@ -86,7 +86,8 @@
 		confirmTestid="contract-advance-delete-confirm"
 		error={deleteError}
 		fields={{ validFrom: deleting }}
-		onsuccess={() => addToast('success', m.contracts_advance_deleted_toast({ from: deleted.values.from }))}
+		onsuccess={() =>
+			addToast('success', m.contracts_advance_deleted_toast({ from: formatDate(deleting) }))}
 	>
 		<p>{m.contracts_advance_delete_text({ ...deleted.values, before: deleted.before })}</p>
 	</ActionDialog>

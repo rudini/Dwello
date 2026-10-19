@@ -134,6 +134,15 @@ export const changeAdvancePaymentFrom = (isoDate: string, amount: string): Activ
 		Click.on(contractSubmitButton)
 	);
 
+// #464 (V-12): the Vertragsbeginn and the first Akonto corrected in one save
+export const saveStartWithAdvance = (isoDate: string, amount: string, from: string): Activity => (actor) =>
+	actor.attemptsTo(
+		EnterDate.of(isoDate).into(startDateInput),
+		Enter.theValue(amount).into(advancePaymentInput),
+		EnterDate.of(from).into(advancePaymentFromInput),
+		Click.on(contractSubmitButton)
+	);
+
 export const changeFlatRateUtilityCharge = (amount: string): Activity => (actor) =>
 	actor.attemptsTo(enterFlatRateUtilityCharge(amount), Click.on(contractSubmitButton));
 

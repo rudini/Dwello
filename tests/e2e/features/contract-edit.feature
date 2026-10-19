@@ -211,3 +211,18 @@ Funktionalität: Mietvertrag bearbeiten
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter das Akonto ab "2025-07-01" auf "200" Franken ändert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Gilt das neue Akonto schon ab 01.07.2025, berichtigen Sie zuerst diese Abrechnung. Gilt es erst später, wählen Sie ein «Gültig ab» ab 01.01.2026."
+
+  # #464 (Persona Helga 464-2 P-1): das Formular nennt die Akonto-Beträge, die schon eingetragen sind
+  Szenario: Das Formular nennt die eingetragenen Akonto-Beträge
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Mietvertrag von "Anna Keller" hat ab "2099-01-01" "200" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann zeigt der Mietvertrag das Akonto "CHF 150.00" vom "01.04.2024" bis "31.12.2098"
+    Und zeigt der Mietvertrag das Akonto "CHF 200.00" ab "01.01.2099"
+
+  # #464 (Fachreview 464-3 V-12): ein «Gültig ab» am neuen Vertragsbeginn korrigiert das erste Akonto
+  Szenario: Vertragsbeginn und erstes Akonto zusammen korrigieren
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2024-03-15" mit "180" Franken Akonto ab "2024-03-15" speichert
+    Dann zeigt der Mietvertrag das Monatlich total "CHF 1’130.00"

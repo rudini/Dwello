@@ -390,6 +390,7 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter das Akonto "CHF 200.00" löscht
     Dann zeigt der Mietvertrag das Monatlich total "CHF 1’100.00"
+    Und bestätigt Dwello "Akonto ab 01.07.2025 gelöscht"
 
   # #464 (Fachreview 464-2 V-6): ein Akonto, das eine erstellte Abrechnung zählt, bleibt, bis sie berichtigt ist
   Szenario: Ein Akonto, das eine Abrechnung zählt, lässt sich nicht löschen

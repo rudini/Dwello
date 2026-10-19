@@ -69,7 +69,8 @@ import {
 	rentApartment,
 	reopenNewContract,
 	reviewContract,
-	changeAdvancePaymentFrom
+	changeAdvancePaymentFrom,
+	saveStartWithAdvance
 } from '../tasks/contract-form';
 import { searchContracts } from '../tasks/contracts';
 
@@ -581,5 +582,12 @@ Then(
 	async ({ verwalter }, amount: string) => {
 		await verwalter.sees(enteredFlatRate).toBe(amount);
 		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter den Vertragsbeginn {string} mit {string} Franken Akonto ab {string} speichert',
+	async ({ verwalter }, date: string, amount: string, from: string) => {
+		await verwalter.attemptsTo(saveStartWithAdvance(date, amount, from));
 	}
 );

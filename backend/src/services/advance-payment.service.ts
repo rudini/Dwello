@@ -81,7 +81,7 @@ export async function deleteAdvance(contractId: string, validFrom: string) {
 		await tx
 			.delete(contractAdvancePayments)
 			.where(and(eq(contractAdvancePayments.contractId, contractId), eq(contractAdvancePayments.validFrom, validFrom)));
-		await refuseChangedStatements(contractId, validFrom, before, tx, DELETE_CHANGES);
+		await refuseChangedStatements(contractId, validFrom, before, tx, true);
 	});
 }
 
@@ -113,10 +113,18 @@ export async function alignAdvances(contractId: string, tx: Tx) {
  * A changed Akonto may not alter a statement already created, not replaced (product owner on F-3, 2026-10-19): it
  * would change what the tenant was billed silently; a draft is deleted first, a sent statement corrected first
  */
-const CHANGES = { draft: 'ADVANCE_CHANGES_DRAFT', statement: 'ADVANCE_CHANGES_STATEMENT' };
-const DELETE_CHANGES = { draft: 'ADVANCE_DELETE_CHANGES_DRAFT', statement: 'ADVANCE_DELETE_CHANGES_STATEMENT' };
+// each code written out: backend-codes.test.ts finds its message (review 464-2 C-12)
+const refusalOf = (deleting: boolean, draft: boolean, params: Record<string, string>) => {
+	if (deleting)
+		return draft
+			? new CodedError('ADVANCE_DELETE_CHANGES_DRAFT', 'The Akonto counts in a draft statement', params)
+			: new CodedError('ADVANCE_DELETE_CHANGES_STATEMENT', 'The Akonto counts in a statement already created', params);
+	return draft
+		? new CodedError('ADVANCE_CHANGES_DRAFT', 'The Akonto changes a draft statement', params)
+		: new CodedError('ADVANCE_CHANGES_STATEMENT', 'The Akonto changes a statement already created', params);
+};
 
-async function refuseChangedStatements(contractId: string, validFrom: string, before: Amounts, tx: Tx, codes = CHANGES) {
+async function refuseChangedStatements(contractId: string, validFrom: string, before: Amounts, tx: Tx, deleting = false) {
 	const after = await amountsOf(contractId, tx);
 	const statements = await tx
 		.select({
@@ -140,8 +148,7 @@ async function refuseChangedStatements(contractId: string, validFrom: string, be
 		const [year, month] = last.split('-').map(Number);
 		const next = formatSwissDate(new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10));
 		const params = { from: formatSwissDate(validFrom), number: statement.number, next };
-		if (statement.status === 'draft') throw new CodedError(codes.draft, 'The Akonto changes a draft statement', params);
-		throw new CodedError(codes.statement, 'The Akonto changes a statement already created', params);
+		throw refusalOf(deleting, statement.status === 'draft', params);
 	}
 }
 
