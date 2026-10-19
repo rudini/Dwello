@@ -683,10 +683,10 @@ describe('Abrechnungsdetail', () => {
 	// der ersetzten ab, sagt sie es vor dem Versenden
 	it('warnt, wenn die berichtigte Abrechnung ein anderes Akonto abzieht als die ersetzte', () => {
 		const replaces = { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' };
-		detail({ replaces: { ...replaces, totalAdvancePayments: 1200 } });
+		detail({ replaces: { ...replaces, totalAdvancePayments: '1200.00' } });
 
 		expect(byTestId('statement-advance-differs')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Die Akontobeiträge dieser Abrechnung (CHF 1’800.00) sind anders als in der ersetzten Abrechnung NK-2024-0001 (CHF 1’200.00). Prüfen Sie die Akontobeträge am Mietvertrag.'
+			'Die Akontobeiträge dieser Abrechnung (CHF 1’800.00) sind anders als in der ersetzten Abrechnung NK-2024-0001 (CHF 1’200.00). Stimmt ein früherer Betrag am Mietvertrag nicht, löschen Sie diesen Entwurf, tragen Sie den Betrag mit seinem «Gültig ab» ein und erstellen Sie die berichtigte Abrechnung erneut.'
 		);
 		expect(byTestId('statement-advance-paid')!.textContent).toMatch(/CHF\s1’800.00/);
 	});

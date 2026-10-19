@@ -14,7 +14,7 @@ import {
 	type RentalContract,
 	type NewRentalContract
 } from '../db/schema';
-import { currentAdvance, setAdvance } from './advance-payment.service';
+import { alignAdvances, currentAdvance, setAdvance } from './advance-payment.service';
 import { setAgreedCategories } from './agreed-category.service';
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
@@ -422,6 +422,7 @@ export async function updateContract(
 			.returning();
 		// after the new dates: a new Akonto applies within them (#464)
 		if (data.monthlyAdvancePayment !== undefined) await setAdvance(id, data.monthlyAdvancePayment, advancePaymentFrom, tx);
+		await alignAdvances(id, tx);
 		return updated;
 	});
 

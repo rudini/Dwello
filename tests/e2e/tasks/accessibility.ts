@@ -69,7 +69,7 @@ import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
 import { leaveSettings } from './statement-generate';
-import { tickAllCategories, untickAllCategories } from './contract-form';
+import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
@@ -202,6 +202,11 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'delete-dialog': () => openDialog(on.firstDeleteButton),
 	// the later Akonto of Anna's contract (fixtures/screens.ts)
 	'advance-delete-dialog': () => openDialog(advanceDeleteButton('220.00')),
+	'advance-delete-refused': () => (actor) =>
+		actor.attemptsTo(openDialog(advanceDeleteButton('220.00')), Click.on(on.dialogConfirm), Wait.until(on.formProblem)),
+	// from a day Anna's 2025 draft bills (fixtures/screens.ts)
+	'advance-refused': () => (actor) =>
+		actor.attemptsTo(changeAdvancePaymentFrom('2025-01-01', '230.00'), Wait.until(on.formProblem)),
 	// the tenant's uploaded document (fixtures/screens.ts)
 	'document-delete-dialog': () => openDialog(deleteDocumentButton(UPLOADED)),
 	// a file Dwello does not take: the refusal at the file field

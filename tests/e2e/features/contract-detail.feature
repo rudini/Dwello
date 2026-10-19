@@ -390,3 +390,12 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter das Akonto "CHF 200.00" löscht
     Dann zeigt der Mietvertrag das Monatlich total "CHF 1’100.00"
+
+  # #464 (Fachreview 464-2 V-6): ein Akonto, das eine erstellte Abrechnung zählt, bleibt, bis sie berichtigt ist
+  Szenario: Ein Akonto, das eine Abrechnung zählt, lässt sich nicht löschen
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Mietvertrag von "Anna Keller" hat ab "2025-07-01" "200" Franken Akonto
+    Und für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter das Akonto "CHF 200.00" löscht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Akonto ab 01.07.2025 zählt in der Abrechnung"

@@ -72,9 +72,13 @@
 	const runningText = $derived(
 		fixedTerm ? m.contracts_running_text_fixed_term() : m.contracts_running_text()
 	);
-	// #464: a new Akonto applies from «Gültig ab»; an increase follows the rules of a rent increase
+	// #464: a new Akonto applies from «Gültig ab»; an increase follows the rules of a rent increase, only in a running
+	// contract: before or after it a change corrects the entry (fach review 464-2 V-5)
+	const changeHelp = $derived(
+		fixedTerm ? m.contracts_advance_change_help_fixed_term() : m.contracts_advance_change_help()
+	);
 	const advanceHelp = $derived(
-		`${m.contracts_advance_help()} ${fixedTerm ? m.contracts_advance_change_help_fixed_term() : m.contracts_advance_change_help()}`
+		running ? `${m.contracts_advance_help()} ${changeHelp}` : m.contracts_advance_help()
 	);
 	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
 	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)

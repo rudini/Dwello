@@ -77,7 +77,7 @@
 	<ActionDialog
 		bind:open={deleteOpen}
 		action="?/deleteAdvance"
-		title={m.contracts_advance_delete_title()}
+		title={m.contracts_advance_delete_title({ from: deleted.values.from })}
 		confirmLabel={m.contracts_advance_delete_confirm()}
 		danger
 		confirmTestid="contract-advance-delete-confirm"

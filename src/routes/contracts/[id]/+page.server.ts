@@ -305,10 +305,10 @@ const toWizard = (draft: Row) =>
 		)
 	);
 
-// The end on the day of the form; the draft named is deleted with it (A-10)
-async function endOnFormDay(fetch: typeof globalThis.fetch, id: string, form: FormData, draft?: string) {
+// The end on the day of the form
+async function endOnFormDay(fetch: typeof globalThis.fetch, id: string, form: FormData) {
 	const day = await endDay(fetch, id, form);
-	return typeof day === 'string' ? endOn(fetch, id, day, form, draft) : day;
+	return typeof day === 'string' ? endOn(fetch, id, day, form) : day;
 }
 
 export const actions: Actions = {
@@ -320,9 +320,11 @@ export const actions: Actions = {
 	// The one draft the end would change is deleted with it; the wizard then creates the statement anew (A-10)
 	endDeletingDraft: async ({ params, fetch, request }) => {
 		const form = await request.formData();
+		const day = await endDay(fetch, params.id, form);
+		if (typeof day !== 'string') return day;
 		const draft = await ownDraft(fetch, params.id, String(form.get('statementId') ?? ''));
 		if (!draft) return fail(409, { endError: m.contracts_end_failed() });
-		const refused = await endOnFormDay(fetch, params.id, form, String(draft.id));
+		const refused = await endOn(fetch, params.id, day, form, String(draft.id));
 		if (refused) return refused;
 		throw toWizard(draft);
 	},
@@ -349,6 +351,7 @@ export const actions: Actions = {
 	// #464 (product owner on F-13): a later Akonto; the backend refuses one that would change a statement
 	deleteAdvance: async ({ params, fetch, request }) => {
 		const validFrom = String((await request.formData()).get('validFrom'));
+		if (!/^\d{4}-\d{2}-\d{2}$/.test(validFrom)) return fail(400, { validFrom, advanceDeleteError: m.contracts_save_failed() });
 		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}/advance-payments/${validFrom}`, {
 			method: 'DELETE'
 		});

@@ -14,6 +14,8 @@ import { goto } from '$app/navigation';
 import { get } from 'svelte/store';
 import EditPage from '../routes/contracts/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
+import { localToday } from '$lib/contract-status';
+import { formatDate } from '$lib/utils/format';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
@@ -87,9 +89,11 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(puts()).toEqual([
 			expect.objectContaining({
 				path: '/contracts/c1',
-				body: expect.objectContaining({ baseRent: '1450', monthlyAdvancePayment: '150.00' })
+				body: expect.objectContaining({ baseRent: '1450' })
 			})
 		]);
+		// fach review 464-2 V-2: an unchanged Akonto is not sent again
+		expect(puts()[0].body).not.toHaveProperty('monthlyAdvancePayment');
 		expect(get(toasts).map((t) => t.message)).toEqual(['Mietvertrag von Anna Keller gespeichert']);
 		expect(goto).toHaveBeenCalledWith('/contracts/c1');
 	});
@@ -98,11 +102,24 @@ describe('Mietvertrag bearbeiten', () => {
 	it('speichert ein neues Akonto mit seinem «Gültig ab»', async () => {
 		await open();
 		expect(document.querySelector('label[for="advancePaymentFrom"]')!.textContent).toContain('Gültig ab');
-		expect(byTestId<HTMLInputElement>('contract-advance-from-input')!.value).toBe('01.04.2024');
+		// fach review 464-2 V-4: how to correct an amount entered by mistake
+		expect(byTestId('contract-advance-from-input-help')!.textContent).toContain('tragen Sie seinen Tag aus «Akonto nach Zeitraum» ein');
+		const [year, month] = localToday().split('-').map(Number);
+		const next = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10);
+		expect(byTestId<HTMLInputElement>('contract-advance-from-input')!.value).toBe(formatDate(next));
 		type('contract-advance-payment-input', '200');
 		type('contract-advance-from-input', '01.07.2025');
 		await save();
 		expect(puts()[0].body).toMatchObject({ monthlyAdvancePayment: '200', advancePaymentFrom: '2025-07-01' });
+	});
+
+	// fach review 464-2 V-5: before the start a change corrects the entry; the rules of an increase do not apply
+	it('nennt bei einem künftigen Mietvertrag keine Regel einer Erhöhung des Akontos', async () => {
+		show(EditPage, { data: { ...data(), contract: { ...contract(), startDate: '2099-01-01' } } } as never);
+		await settle();
+		const help = byTestId('contract-advance-payment-input-help')!.textContent!;
+		expect(help).toContain('Fehlende Zahlungen regeln Sie ausserhalb von Dwello.');
+		expect(help).not.toContain('Formular');
 	});
 
 	// #464 (fach review F-3): ein neues Akonto ändert keine erstellte Abrechnung still; die Meldung sagt, was zu tun ist

@@ -588,6 +588,14 @@ describe('Akonto löschen', () => {
 		]);
 	});
 
+	// review 464-1 C-9: only a day goes into the backend path
+	it('sendet kein Löschen für etwas anderes als einen Tag', async () => {
+		const { calls, result } = runAction(actions.deleteAdvance, 'c1', 200, { validFrom: '../../c2' });
+
+		expect(await result).toMatchObject({ status: 400 });
+		expect(calls).toEqual([]);
+	});
+
 	it('nennt im Dialog, warum das Backend das Löschen ablehnt', async () => {
 		const { result } = runAction(actions.deleteAdvance, 'c1', 400, { validFrom: '2024-07-01' }, advanceRefused);
 

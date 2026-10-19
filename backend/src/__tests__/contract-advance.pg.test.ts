@@ -160,7 +160,7 @@ describe('Akonto mit Gültig ab', () => {
 		}
 	});
 
-	it('lässt den ersten Betrag mit seinem Tag speichern, wenn sich der Vertragsbeginn ändert', async () => {
+	it('nimmt den ersten Betrag mit seinem alten Tag an, wenn sich der Vertragsbeginn ändert, und rückt ihn mit', async () => {
 		const moved = await createRental(crypto.randomUUID(), { startDate: '2024-05-15', monthlyAdvancePayment: '50' });
 		try {
 			const response = await sendJson('PUT', `/api/v1/contracts/${moved.contract}`, {
@@ -171,7 +171,7 @@ describe('Akonto mit Gültig ab', () => {
 
 			expect(response.status).toBe(200);
 			const { advancePayments } = (await (await callApi(`/api/v1/contracts/${moved.contract}`)).json()) as Contract;
-			expect(advancePayments).toEqual([{ validFrom: '2024-05-15', amount: '60.00' }]);
+			expect(advancePayments).toEqual([{ validFrom: '2024-05-20', amount: '60.00' }]);
 		} finally {
 			await moved.remove();
 		}
@@ -190,5 +190,88 @@ describe('Akonto mit Gültig ab', () => {
 		} finally {
 			await ending.remove();
 		}
+	});
+});
+
+describe('Akonto mit Gültig ab: Korrektur und Vertragsdaten', () => {
+	const rentals: Awaited<ReturnType<typeof createRental>>[] = [];
+	const rentalFrom = async (startDate: string, monthlyAdvancePayment: string, endDate?: string) => {
+		const created = await createRental(crypto.randomUUID(), { startDate, endDate, monthlyAdvancePayment });
+		await insertInvoice(created.building, { amount: '1200.00', invoiceDate: '2024-03-31' });
+		rentals.push(created);
+		return created;
+	};
+	const statementOf = async (contract: Awaited<ReturnType<typeof createRental>>, status: 'draft' | 'sent') => {
+		const id = await idOf(
+			await sendJson('POST', '/api/v1/statements/generate', {
+				contractId: contract.contract,
+				buildingId: contract.building,
+				periodStart: '2024-01-01',
+				periodEnd: '2024-12-31'
+			})
+		);
+		if (status === 'sent') await db.update(utilityStatements).set({ status }).where(eq(utilityStatements.id, id));
+		return id;
+	};
+	const advancesOf = async (contract: Awaited<ReturnType<typeof createRental>>) =>
+		((await (await callApi(`/api/v1/contracts/${contract.contract}`)).json()) as Contract).advancePayments;
+	const put = (contract: Awaited<ReturnType<typeof createRental>>, body: object) =>
+		sendJson('PUT', `/api/v1/contracts/${contract.contract}`, body);
+	const codeOf = async (response: Response) => [response.status, ((await response.json()) as { code: string }).code];
+
+	afterAll(async () => {
+		for (const created of rentals) {
+			await db.delete(utilityStatements).where(eq(utilityStatements.contractId, created.contract));
+			await db.delete(invoices).where(eq(invoices.buildingId, created.building));
+			await created.remove();
+		}
+	});
+
+	// fach review 464-2 V-1: the migration took today's amount; the amount the sent statement counted may be entered
+	it('nimmt einen Betrag an, der zum gespeicherten Akonto einer versendeten Abrechnung passt', async () => {
+		const contract = await rentalFrom('2024-01-01', '200');
+		const id = await statementOf(contract, 'sent');
+		await db.update(utilityStatements).set({ totalAdvancePayments: '1800.00' }).where(eq(utilityStatements.id, id));
+
+		expect((await put(contract, { monthlyAdvancePayment: '150' })).status).toBe(200);
+		expect(await codeOf(await put(contract, { monthlyAdvancePayment: '160' }))).toEqual([400, 'ADVANCE_CHANGES_STATEMENT']);
+	});
+
+	// V-3: the first amount applies from the Vertragsbeginn, stored so, also when the start moves
+	it('rückt den ersten Betrag mit dem Vertragsbeginn mit', async () => {
+		const contract = await rentalFrom('2024-03-15', '100');
+
+		expect((await put(contract, { startDate: '2024-01-01' })).status).toBe(200);
+		expect((await put(contract, { monthlyAdvancePayment: '120', advancePaymentFrom: '2024-02-01' })).status).toBe(200);
+		expect(await advancesOf(contract)).toEqual([
+			{ validFrom: '2024-01-01', amount: '100.00' },
+			{ validFrom: '2024-02-01', amount: '120.00' }
+		]);
+	});
+
+	it('lehnt einen Vertragsbeginn oder ein Vertragsende über ein späteres Akonto hinaus ab', async () => {
+		const contract = await rentalFrom('2024-01-01', '100');
+		await put(contract, { monthlyAdvancePayment: '120', advancePaymentFrom: '2024-07-01' });
+
+		const start = await put(contract, { startDate: '2024-07-01' });
+		expect(start.status).toBe(400);
+		expect(await start.json()).toMatchObject({ code: 'CONTRACT_START_AFTER_ADVANCE', params: { date: '01.07.2024' } });
+		const end = await put(contract, { endDate: '2024-06-30' });
+		expect(end.status).toBe(400);
+		expect(await end.json()).toMatchObject({ code: 'CONTRACT_END_BEFORE_ADVANCE', params: { date: '01.07.2024' } });
+		expect(await advancesOf(contract)).toHaveLength(2);
+	});
+
+	// V-6, review C-5: deleting an Akonto a stored statement counts is refused, with a message without «Gültig ab»
+	it('lehnt das Löschen eines Akontos ab, das eine erstellte Abrechnung zählt', async () => {
+		const contract = await rentalFrom('2024-01-01', '100');
+		await put(contract, { monthlyAdvancePayment: '120', advancePaymentFrom: '2024-07-01' });
+		const remove = () => callApi(`/api/v1/contracts/${contract.contract}/advance-payments/2024-07-01`, { method: 'DELETE' });
+
+		const id = await statementOf(contract, 'draft');
+		expect(await codeOf(await remove())).toEqual([400, 'ADVANCE_DELETE_CHANGES_DRAFT']);
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, id));
+		expect(await codeOf(await remove())).toEqual([400, 'ADVANCE_DELETE_CHANGES_STATEMENT']);
+		expect(await advancesOf(contract)).toHaveLength(2);
 	});
 });

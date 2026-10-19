@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'bun:test';
-import { advanceLines, calculateTotalAdvancePayments } from '../services/advance-payment.service';
+import { advanceLines } from '../services/advance-payment.service';
+import { roundToRappen } from '../services/pdf-format';
 
-const total95 = (start: string, end: string) =>
-	calculateTotalAdvancePayments(95, new Date(`${start}T00:00:00Z`), new Date(`${end}T00:00:00Z`));
-const total = (start: string, end: string) =>
-	calculateTotalAdvancePayments(150, new Date(`${start}T00:00:00Z`), new Date(`${end}T00:00:00Z`));
+// the Akonto total of a span with one amount: the sum of its lines, as a statement stores it
+const totalOf = (amount: number) => (start: string, end: string) =>
+	roundToRappen(
+		advanceLines([{ validFrom: start, amount }], new Date(`${start}T00:00:00Z`), new Date(`${end}T00:00:00Z`)).reduce(
+			(sum, line) => sum + line.total,
+			0
+		)
+	);
+const total95 = totalOf(95);
+const total = totalOf(150);
 
 describe('Akontobeiträge einer Abrechnungsperiode', () => {
 	it('zählt ein volles Jahr als zwölf Monatsbeiträge', () => {

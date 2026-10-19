@@ -26,7 +26,10 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Delete a later Akonto (product owner on F-13): scenario «Ein späteres Akonto löschen», seen red; axe and language state `advance-delete-dialog`; the berichtigte Abrechnung of the axe check warns (Carla 2024)
 - [x] The first amount keeps its day when the Vertragsbeginn moves (pg test seen red); refusals before the start and after the end name the day
 - [x] All eight scenarios green without `@wip`
-- [x] Fallow: the duplicated start of the actions `end` and `endDeletingDraft` is one function `endOnFormDay` (the draft is now looked up before the day is checked); the Akonto rows and «Gültig ab» are components of their own (`AdvancePeriods.svelte`, `AdvanceFrom.svelte`)
+- [x] Fallow: the action `end` uses `endOnFormDay`, `endDeletingDraft` keeps its order (review C-3); the Akonto rows and «Gültig ab» are components of their own (`AdvancePeriods.svelte`, `AdvanceFrom.svelte`)
+- [x] Slice review round 1 (`docs/reviews/464-review-1.md`), fach-reviewer round 2 (`docs/reviews/464-fachreview-2.md`), personas Helga and Dr. Weber (`docs/design/personas/helga-464.md`, `weber-464.md`: both stopped at saving, demo contracts had no Akonto rows; fixed in 8fd1c700)
+- [x] Fixes: refusal compares with the stored total too; first amount moves with the Vertragsbeginn, start or end beyond a later Akonto refused; own codes for a refused delete; «Gültig ab» proposes the next first in a running contract, an unchanged Akonto is not sent, an empty «Gültig ab» is refused; the rules of an increase only in a running contract; texts V-4, V-7 to V-9; scenario «Ein Akonto, das eine Abrechnung zählt, lässt sich nicht löschen» and axe states `advance-delete-refused`, `advance-refused`
+- [ ] Re-reviews: code-reviewer round 2, fach-reviewer round 3, personas Helga and Dr. Weber again, then daten-pruefer
 - [ ] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464`
 - [ ] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1
 

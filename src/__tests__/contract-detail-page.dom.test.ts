@@ -460,8 +460,9 @@ describe('Mietvertragsdetail', () => {
 
 		button.click();
 		await settle();
+		expect(document.querySelector('[role=dialog] h2')?.textContent).toContain('Akonto ab 01.07.2025 löschen?');
 		expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Das Akonto CHF 200.00 ab 01.07.2025 wird gelöscht. Ab dann gilt wieder das Akonto CHF 150.00.'
+			'Das Akonto von CHF 200.00 ab 01.07.2025 wird gelöscht. Ab dann gilt wieder das Akonto von CHF 150.00.'
 		);
 		const sent = new FormData();
 		actions.get('?/deleteAdvance')!({ formData: sent });

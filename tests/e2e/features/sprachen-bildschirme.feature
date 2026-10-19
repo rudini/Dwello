@@ -90,6 +90,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | delete-dialog       |
       | contract-detail        | advance-delete-dialog |
+      | contract-detail        | advance-delete-refused |
       | contract-detail        | missing-statements  |
       | contract-partly-billed-detail | default          |
       | contract-moved-out-detail | default          |
@@ -97,6 +98,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit          | submit-cleared      |
       | contract-edit          | past-end-error      |
       | contract-edit          | edit-refused        |
+      | contract-edit          | advance-refused     |
       | contract-edit          | contracts-unknown   |
       | contract-edit          | agreed-costs-none   |
       | contract-edit          | flat-rate-warning   |

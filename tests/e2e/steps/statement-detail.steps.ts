@@ -469,7 +469,7 @@ Then(
 		const replaced = await seed.statementNumber(tenant, year);
 		await verwalter
 			.sees(advanceDiffersText)
-			.toContain(`Die Akontobeiträge dieser Abrechnung (${now}) sind anders als in der ersetzten Abrechnung ${replaced} (${before}). Prüfen Sie die Akontobeträge am Mietvertrag.`);
+			.toContain(`Die Akontobeiträge dieser Abrechnung (${now}) sind anders als in der ersetzten Abrechnung ${replaced} (${before}). Stimmt ein früherer Betrag am Mietvertrag nicht, löschen Sie diesen Entwurf, tragen Sie den Betrag mit seinem «Gültig ab» ein und erstellen Sie die berichtigte Abrechnung erneut.`);
 	}
 );
 
