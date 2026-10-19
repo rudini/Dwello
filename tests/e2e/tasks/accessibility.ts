@@ -69,7 +69,7 @@ import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
 import { leaveSettings } from './statement-generate';
-import { keepApartment, tickAllCategories, untickAllCategories } from './contract-form';
+import { tickAllCategories, untickAllCategories } from './contract-form';
 import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
@@ -106,6 +106,9 @@ let resultRuns = 0;
 
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
+// Step «Gebäude», once it has loaded what it tells about each building: later text moves the rows under the click (#424)
+const tickBuilding = (building: string): Activity => (actor) =>
+	actor.attemptsTo(Wait.until(buildingInvoiceCount(building)), Check.the(on.generateBuilding(building)));
 const previewOf =
 	(year: string, shown: string, end = `${year}-12-31`) =>
 	(example: Example, ...others: string[]): Activity =>
@@ -115,9 +118,7 @@ const previewOf =
 			EnterDate.of(end).into(on.periodEndInput),
 			Click.on(nextButton)
 		);
-		// once the step has loaded what it tells about each building: later text moves the rows under the click (#424)
-		for (const building of [example.building, ...others])
-			await actor.attemptsTo(Wait.until(buildingInvoiceCount(building)), Check.the(on.generateBuilding(building)));
+		for (const building of [example.building, ...others]) await actor.attemptsTo(tickBuilding(building));
 		await actor.attemptsTo(Click.on(nextButton), leaveSettings, Wait.until(on.shown(shown)));
 	};
 
@@ -125,7 +126,7 @@ const previewOf =
 const startDraft: Record<string, (example: Example) => Activity> = {
 	'/contracts/new': () => Select.option({ index: 1 }).from(tenantSelect),
 	'/statements/generate': (example) => (actor) =>
-		actor.attemptsTo(Click.on(nextButton), Check.the(on.generateBuilding(example.building)))
+		actor.attemptsTo(Click.on(nextButton), tickBuilding(example.building))
 };
 
 // a draft starts with an input; reloaded, the wizard restores it
@@ -154,7 +155,7 @@ const toRentStep: Activity = async (actor) => {
 	if ((await actor.answer(pageAddress)).includes('/contracts/new'))
 		await actor.attemptsTo(
 			Click.on(nextButton),
-			keepApartment,
+			Click.on(nextButton),
 			EnterDate.of('2030-01-01').into(startDateInput),
 			Click.on(nextButton),
 			Wait.until(agreedCategoryBoxes)
@@ -384,7 +385,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'overlap-warning': () => (actor) =>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address
-			keepApartment,
+			Click.on(nextButton),
 			Wait.forValue(startDateInput, '01.01.2099'), // the suggestion arrived, it cannot land in the typed date
 			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2098
 			Wait.until(on.overlapWarning)
@@ -393,7 +394,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'rent-taken-over': () => (actor) =>
 		actor.attemptsTo(
 			Click.on(nextButton), // tenant and apartment come from the address
-			keepApartment,
+			Click.on(nextButton),
 			Wait.forValue(startDateInput, '01.04.2099'), // the day after the last contract, suggested
 			Click.on(nextButton),
 			Wait.until(on.shown('contract-rent-taken-over'))
@@ -438,7 +439,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
 			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
 			Click.on(nextButton),
-			Check.the(on.generateBuilding(example.building)),
+			tickBuilding(example.building),
 			Click.on(nextButton),
 			Select.option(example.heatingProfile).from(heatingProfileSelect),
 			leaveSettings, // step 3 waits for the question whether the contracts agree the costs (#91)
@@ -503,7 +504,7 @@ const statementWizardSteps =
 		await actor.attemptsTo(look); // "Abrechnungsperiode"
 		await nextStep('generate-all-buildings'); // "Gebäude"
 		// this example's building: another example's may still be seeding, without a contract to preview
-		await actor.attemptsTo(Check.the(on.generateBuilding(example.building)));
+		await actor.attemptsTo(tickBuilding(example.building));
 		// "Heizprofil und Verwaltungspauschale"; the seeded contract of Carla has no fee agreed, and the notice that names it
 		// loads after the step (#89, code review C-3)
 		await actor.attemptsTo(

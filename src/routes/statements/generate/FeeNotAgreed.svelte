@@ -5,19 +5,31 @@
 
 	// Step 3: the run's contracts without an agreed Verwaltungspauschale get none (#89, Art. 257a Abs. 2 OR); each
 	// leads to its contract, where the landlord records what the signed contract says
-	let { buildingIds, period }: { buildingIds: string[]; period: { start: string; end: string } } =
-		$props();
+	let {
+		buildingIds,
+		period,
+		loading = $bindable(false)
+	}: {
+		buildingIds: string[];
+		period: { start: string; end: string };
+		loading?: boolean; // until the contracts are known (#468)
+	} = $props();
 
 	type Contract = { id: string; tenantName: string; apartmentNumber: string };
 	let contracts = $state<Contract[]>([]);
 	$effect(() => {
+		loading = true;
 		api
 			.get<{ withoutFee: Contract[] }[]>('/statements/billed', {
 				buildingIds: buildingIds.join(','),
 				periodStart: period.start,
 				periodEnd: period.end
 			})
-			.then(({ data }) => (contracts = data?.flatMap((row) => row.withoutFee) ?? []));
+			.then(({ data }) => {
+				contracts = data?.flatMap((row) => row.withoutFee) ?? [];
+				loading = false;
+			});
+		return () => (loading = false); // left before the answer came
 	});
 </script>
 

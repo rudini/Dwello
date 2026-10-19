@@ -18,6 +18,7 @@
 		selection = $bindable(),
 		confirmed = $bindable(),
 		agreementsBlocking = $bindable(false),
+		loading = $bindable(false),
 		errors,
 		previewRows,
 		invoices,
@@ -32,12 +33,21 @@
 		selection: WizardSelection;
 		confirmed: boolean;
 		agreementsBlocking?: boolean;
+		loading?: boolean; // the step still loads what it shows (#468)
 		errors: Record<string, string>;
 		previewRows: PreviewRow[];
 		invoices: Parameters<typeof invoiceRows>[0];
 		periodLabel: string;
 		created: string[] | null;
 	} = $props();
+
+	// what steps 2 and 3 load after they open; each is false once its step is left
+	let buildingsLoading = $state(false);
+	let feeLoading = $state(false);
+	let agreementsLoading = $state(false);
+	$effect(() => {
+		loading = buildingsLoading || feeLoading || agreementsLoading;
+	});
 
 	const heatingProfile = $derived(
 		data.heatingProfiles.find((p) => p.id === selection.heatingProfileId)
@@ -56,6 +66,7 @@
 		bind:selectedBuildingIds={selection.buildingIds}
 		period={{ start: selection.periodStart, end: selection.periodEnd }}
 		error={errors.buildings}
+		bind:loading={buildingsLoading}
 	/>
 {:else if step === 3}
 	<SettingsStep
@@ -67,11 +78,13 @@
 	<FeeNotAgreed
 		buildingIds={selection.buildingIds}
 		period={{ start: selection.periodStart, end: selection.periodEnd }}
+		bind:loading={feeLoading}
 	/>
 	<AgreedCosts
 		buildingIds={selection.buildingIds}
 		period={{ start: selection.periodStart, end: selection.periodEnd }}
 		bind:blocking={agreementsBlocking}
+		bind:loading={agreementsLoading}
 		error={errors.agreements}
 	/>
 {:else if step === 4}

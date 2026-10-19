@@ -90,3 +90,14 @@ Branch `ccr-01e823d6-yhj5kc`. Runs 595 to 606 on `main` failed in the Firefox an
 - [x] Slice review round 1 (`docs/reviews/612-review-1.md`; C-1: `toRentStep`, used by four `contract-new` rows, clicked twice too, now `keepApartment`; C-2 comment fixed)
 - [x] Re-review and closing round 2 (`docs/reviews/612-review-2.md`, no findings)
 - [ ] PR
+
+### #468 «Weiter» waits while a step loads
+
+Branch `ccr-01e823d6-yhj5kc`. Run 614 on `main` failed once more in Firefox (statement-generate «generation-result»: «Weiter» on step 2 clicked while the buildings' texts loaded). Product owner: lock «Weiter» while a step loads instead of more waits in the tests. No scenario: the loading state lasts only as long as a request; the E2E stack cannot hold one open.
+
+- [x] DOM: contract wizard step «Wohnung»: «Weiter» locked («Bitte warten …») until the apartments' contracts are loaded (`WizardNav` `loading`)
+- [x] DOM: statement wizard step «Gebäude»: locked until invoice counts and billed contracts are loaded; «Zurück» while loading leaves step 1 free (red first: a real bug of the first version)
+- [x] DOM: statement wizard step 3: locked while the agreed Nebenkosten are checked and the contracts without a Verwaltungspauschale load (`FeeNotAgreed` moves «Weiter» too); after a failed check as before (#439)
+- [x] E2E tasks: `tickBuilding` waits for step «Gebäude» before ticking (four places in `accessibility.ts`, two did not wait: run 614); `keepApartment` (#466) removed, as «Weiter» now waits itself and Playwright clicks only an enabled button
+- [ ] Affected E2E (Chromium + API)
+- [ ] Slice review, feature review (personas), PR `Fixes #468`

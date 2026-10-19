@@ -251,6 +251,37 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain('0 von 2 gewählt');
 	});
 
+	// #468: the invoice counts and «Schon abgerechnet» arriving later moved «Weiter» under the click
+	it('lässt bei den Gebäuden erst weitergehen, wenn ihre Rechnungen und Abrechnungen geladen sind', async () => {
+		let release = () => {};
+		const loaded = new Promise<void>((resolve) => (release = resolve));
+		globalThis.fetch = (async (url: string) => {
+			await loaded;
+			return Response.json(String(url).includes('/invoices') ? { invoices: [] } : []);
+		}) as typeof fetch;
+		open();
+		next();
+		await settle();
+		const button = byTestId<HTMLButtonElement>('wizard-next')!;
+		expect(button.disabled).toBe(true);
+		expect(button.textContent!.trim()).toBe('Bitte warten …');
+		release();
+		await settle();
+		expect(button.disabled).toBe(false);
+		expect(button.textContent!.trim()).toBe('Weiter');
+	});
+
+	it('lässt nach «Zurück» während des Ladens wieder weitergehen', async () => {
+		globalThis.fetch = (() => new Promise<Response>(() => {})) as typeof fetch;
+		open();
+		next();
+		await settle();
+		click('wizard-back');
+		await settle();
+		expect(heading()).toBe('Abrechnungsperiode');
+		expect(byTestId<HTMLButtonElement>('wizard-next')!.disabled).toBe(false);
+	});
+
 	async function toSettings() {
 		// step 3 asks whether the contracts agree the period's Nebenkosten (#91): none open here
 		fakeBff((call) => (call.path.startsWith('/statements/agreements') ? [200, []] : [500]));
@@ -1083,6 +1114,37 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('wizard-status')!.textContent).toContain('Vorschau wird berechnet');
 		await answer({ type: 'success', data: { preview, invoices } });
 		expect(heading()).toBe('Vorschau');
+	});
+
+	// #468: the agreed Nebenkosten and the contracts without a Verwaltungspauschale load after the step opens
+	it('lässt bei den Einstellungen erst weitergehen, wenn die Mietverträge geprüft sind', async () => {
+		const pending: Record<string, () => void> = {};
+		globalThis.fetch = ((url: string) => {
+			const path = new URL(String(url), 'http://localhost').pathname;
+			const body = path.endsWith('/invoices') ? { invoices: [] } : [];
+			if (!path.endsWith('/agreements') && !path.endsWith('/billed')) return Response.json(body);
+			return new Promise<Response>(
+				(resolve) => (pending[path] = () => resolve(Response.json(body)))
+			);
+		}) as typeof fetch;
+		open();
+		next();
+		await settle();
+		pending['/api/statements/billed']();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+		const button = byTestId<HTMLButtonElement>('wizard-next')!;
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		expect(button.disabled).toBe(true);
+		pending['/api/statements/agreements']();
+		await settle();
+		expect(button.disabled).toBe(true); // the contracts without an agreed Verwaltungspauschale still load
+		pending['/api/statements/billed']();
+		await settle();
+		expect(button.disabled).toBe(false);
+		expect(button.textContent!.trim()).toBe('Weiter');
 	});
 
 	it('behält die Vorschau, wenn das Erstellen scheitert', async () => {

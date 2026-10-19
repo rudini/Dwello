@@ -10,12 +10,14 @@
 		buildings,
 		selectedBuildingIds = $bindable(),
 		period,
-		error
+		error,
+		loading = $bindable(false)
 	}: {
 		buildings: (Building & { apartmentCount: number })[];
 		selectedBuildingIds: string[];
 		period: { start: string; end: string };
 		error?: string;
+		loading?: boolean; // until both answers below are shown (#468)
 	} = $props();
 
 	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview:
@@ -26,6 +28,7 @@
 		const ids = buildings.map((b) => b.id);
 		// both answers shown at once: one arriving later would push the rows below away while a building is clicked
 		// (seen in Firefox, #424)
+		loading = true;
 		Promise.all([
 			api.get<{ invoices: { buildingId: string }[] }>('/invoices', {
 				dateFrom: period.start,
@@ -51,7 +54,9 @@
 			}
 			if (statements.data)
 				billed = Object.fromEntries(statements.data.map((row) => [row.buildingId, row]));
+			loading = false;
 		});
+		return () => (loading = false); // left before the answers came: the next step does not wait for them
 	});
 
 	// «Alle Gebäude» leaves out buildings whose contracts are all billed for the whole period: none gets a statement
