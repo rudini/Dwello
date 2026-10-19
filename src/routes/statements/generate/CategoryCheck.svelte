@@ -43,7 +43,7 @@
 	);
 </script>
 
-<!-- TODO(fachlich prüfen, #130): a hint against the year before; a supplier may bill differently -->
+<!-- a hint against the year before, confirmed to go on: a supplier may bill differently (#130, #409) -->
 <Alert tone="caution" {title} testid="category-check">
 	<div id="category-check-text" class="flex flex-col gap-2">
 		{#if compared}<p>{m.statements_compared_text({ compared: comparedText })}</p>{/if}

@@ -253,6 +253,15 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
+  # #130 (#409 Punkt 1): ein Rechnungssteller wechselt auf einen gröberen, regelmässigen Rhythmus; die Summe bleibt gleich
+  Szenario: Kein Hinweis, wenn der Rechnungssteller von monatlich auf vierteljährlich wechselt
+    Angenommen im Gebäude "Lindenhof" gibt es im Jahr 2023 jeden Monat eine Rechnung der Kategorie "Kaltwasser" über "100" Franken
+    Und im Gebäude "Lindenhof" gibt es im Jahr 2024 jedes Quartal eine Rechnung der Kategorie "Kaltwasser" über "300" Franken
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann enthält die Vorschau die Abrechnung von "Marc Huber"
+    Und meldet die Prüfung der Kategorien nichts für "Kaltwasser"
+    Und verlangt die Vorschau keine Bestätigung
+
   Szenario: Hinweis auf eine Rechnung, die nur teilweise zählt
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "1000" Franken vom "2023-01-31"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "1200" Franken vom "2025-06-30" für die Zeit vom "2024-07-01" bis "2025-06-30"
