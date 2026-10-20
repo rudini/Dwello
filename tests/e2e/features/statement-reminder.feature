@@ -96,13 +96,33 @@ Funktionalität: Mahnungen
     Wenn der Liegenschaftsverwalter eine Mahnung senden will
     Dann sagt die Mahnung vor dem Senden, dass für "Anna Keller" keine E-Mail-Adresse erfasst ist
 
-  # #449 (Punkt 3, #322): bezahlt, bevor der Brief zur Post ging; der Brief bleibt unter «Dokumente»
+  # #449 (Punkt 3, #322; Entscheid V-2 A): bezahlt, bevor der Brief zur Post ging; der Brief bleibt unter «Dokumente»,
+  # zählt aber nicht mehr als «Zu versenden»
   @wip
   Szenario: Eine Mahnung nach der Zahlung geht nicht mehr hinaus
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
     Und die Abrechnung 2024 von "Anna Keller" ist bezahlt
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Dann führen die Dokumente die "Zahlungserinnerung" an "Anna Keller" als "Nicht mehr versenden: Abrechnung bezahlt"
+    Und ist die "Zahlungserinnerung" an "Anna Keller" nicht mehr bei den zu versendenden Dokumenten
+
+  # #449 (Punkt 3): bezahlt, während die Liste «Zu versenden» offen war; Markieren lehnt Dwello ab
+  @wip
+  Szenario: Eine Mahnung einer inzwischen bezahlten Abrechnung lässt sich nicht als versendet markieren
+    Angenommen "Anna Keller" wünscht Korrespondenz per Brief
+    Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
     Und der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten
+    Und die Abrechnung 2024 von "Anna Keller" ist bezahlt
     Wenn der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" als versendet markiert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab."
-    Und liegt die "Zahlungserinnerung" an "Anna Keller" weiter bei den zu versendenden Dokumenten
+
+  # #449 (Entscheid V-4): eine ersetzte Abrechnung wird nicht gemahnt (Glossar «Ersetzt»)
+  @wip
+  Szenario: Eine Mahnung einer ersetzten Abrechnung lässt sich nicht als versendet markieren
+    Angenommen "Anna Keller" wünscht Korrespondenz per Brief
+    Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
+    Und der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten
+    Und die Abrechnung 2024 von "Anna Keller" ist ersetzt
+    Wenn der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" als versendet markiert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Abrechnung ist durch eine berichtigte Abrechnung ersetzt. Schicken Sie diese Mahnung nicht mehr ab."

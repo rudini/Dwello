@@ -520,6 +520,35 @@ describe('Zahlteil der Mahnung', () => {
 	});
 
 	// #449 (Entscheid in #404, Punkt 3, #322): eine Mahnung nach der Zahlung geht nicht mehr hinaus; der Brief bleibt
+	// Entscheid V-2 A: der Brief bleibt unter «Dokumente», zählt aber nicht mehr als «Zu versenden»
+	it('zählt die Mahnung einer bezahlten Abrechnung nicht mehr als zu versenden', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const letter = (await remind(statementId)).document;
+		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		const toSend = (await (await api('GET', '/api/v1/documents?status=to_send')).json()) as { data: { id: string }[] };
+		const all = (await (await api('GET', `/api/v1/documents?statementId=${statementId}`)).json()) as {
+			data: { id: string; status: string; statementPaid: boolean }[];
+		};
+
+		expect(toSend.data.map((document) => document.id)).not.toContain(letter.id);
+		// no new status: the letter stays as it was, the row knows its statement is paid
+		expect(all.data.find((document) => document.id === letter.id)).toMatchObject({ status: 'to_send', statementPaid: true });
+	});
+
+	// Entscheid V-4: eine ersetzte Abrechnung wird nicht gemahnt
+	it('lehnt das Markieren als versendet ab, wenn die Abrechnung inzwischen ersetzt ist', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const letter = (await remind(statementId)).document;
+		await db.update(utilityStatements).set({ status: 'replaced' }).where(eq(utilityStatements.id, statementId));
+		const response = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'REMINDER_STATEMENT_REPLACED' });
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, statementId));
+	});
+
 	it('lehnt das Markieren als versendet ab, wenn die Abrechnung inzwischen bezahlt ist', async () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
 		const statementId = await statement('sent');

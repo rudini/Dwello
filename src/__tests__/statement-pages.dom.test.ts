@@ -1012,6 +1012,8 @@ describe('Abrechnungsdetail', () => {
 		click('statement-send-button');
 		const dialog = document.querySelector('[role="dialog"]')!;
 		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
+		// #449, Entscheid V-7: der Brief wird ein Dokument
+		expect(dialog.textContent).toContain('Dwello legt sie danach unter «Dokumente» ab.');
 		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
 		expect(recipient).toContain('Anna Keller');
 		expect(recipient).toContain('Korrespondenzkanal');
@@ -1043,7 +1045,7 @@ describe('Abrechnungsdetail', () => {
 		detail({ tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
 		click('statement-send-button');
 		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
-			'Kommt die E-Mail später als unzustellbar zurück, stellen Sie die Abrechnung per Brief zu.'
+			'Kommt die E-Mail später als unzustellbar zurück, stellen Sie die Abrechnung per Brief zu. Mahnen Sie dann erst, wenn der Mieter die Abrechnung per Brief erhalten hat und die Zahlungsfrist danach abgelaufen ist.'
 		);
 
 		click('send-by-letter-instead');
@@ -1060,6 +1062,8 @@ describe('Abrechnungsdetail', () => {
 
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
 		expect(byTestId('send-by-letter-instead')).toBeNull();
+		// Entscheid V-9: der Dialog sagt, warum nur der Brief bleibt
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain('Für Anna Keller ist keine E-Mail-Adresse erfasst.');
 		expect(document.querySelector<HTMLInputElement>('input[name="byLetter"]')?.value).toBe('true');
 	});
 
@@ -1419,8 +1423,9 @@ describe('Abrechnungsdetail', () => {
 		detail({ status: 'overdue', tenantEmail: null });
 		click('statement-reminder-button');
 
+		// Entscheid V-3 A: dazu die Sprache und das Markieren am Tag der Post
 		expect(byTestId('reminder-delivery-info')!.textContent).toBe(
-			'Für Anna Keller ist keine E-Mail-Adresse erfasst. Dwello erstellt die Mahnung als PDF. Sie liegt danach unter «Dokumente» zum Ausdrucken.'
+			'Für Anna Keller ist keine E-Mail-Adresse erfasst. Dwello erstellt die Mahnung als PDF. Sie liegt danach unter «Dokumente» zum Ausdrucken. Die Zahlungserinnerung ist auf Deutsch. Markieren Sie den Brief dort am Tag, an dem Sie ihn zur Post bringen, als versendet.'
 		);
 		expect(text()).not.toContain('per E-Mail an .');
 	});

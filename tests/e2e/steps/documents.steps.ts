@@ -13,6 +13,7 @@ import {
 	reminderDelivery,
 	reminderOutcome
 } from '../questions/documents';
+import { pageTitleText } from '../questions/app-frame';
 import { listedStatement } from '../questions/statements';
 import { downloadDocument, markLetterSent, openDocuments, openDocumentsToSend, openReminder, sendReminder } from '../tasks/documents';
 import { openStatementList } from '../tasks/statements';
@@ -172,9 +173,17 @@ Then(
 );
 
 Then(
-	'liegt die {string} an {string} weiter bei den zu versendenden Dokumenten',
+	'führen die Dokumente die {string} an {string} als {string}',
+	async ({ verwalter, names }, title: string, tenant: string, status: string) => {
+		await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toContain(status);
+	}
+);
+
+Then(
+	'ist die {string} an {string} nicht mehr bei den zu versendenden Dokumenten',
 	async ({ verwalter, names }, title: string, tenant: string) => {
 		await verwalter.attemptsTo(openDocumentsToSend);
-		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(1);
+		await verwalter.sees(pageTitleText).toBe('Dokumente');
+		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(0);
 	}
 );

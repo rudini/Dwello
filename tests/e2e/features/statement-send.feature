@@ -20,7 +20,7 @@ Funktionalität: Abrechnung per E-Mail senden
     Wenn der Liegenschaftsverwalter die Abrechnung per E-Mail senden will
     Dann nennt die Bestätigung den Empfänger "Nora Beispiel" mit dem Korrespondenzkanal "Per E-Mail"
     Und sagt die Bestätigung, dass Dwello die Abrechnung per E-Mail sendet und die Zahlungsfrist ab dem Tag des Versands rechnet
-    Und erklärt die Bestätigung des Versands "Kommt die E-Mail später als unzustellbar zurück, stellen Sie die Abrechnung per Brief zu."
+    Und erklärt die Bestätigung des Versands "Kommt die E-Mail später als unzustellbar zurück, stellen Sie die Abrechnung per Brief zu. Mahnen Sie dann erst, wenn der Mieter die Abrechnung per Brief erhalten hat und die Zahlungsfrist danach abgelaufen ist."
 
   Szenario: Abrechnung per E-Mail senden
     Angenommen "Nora Beispiel" wünscht Korrespondenz per E-Mail
