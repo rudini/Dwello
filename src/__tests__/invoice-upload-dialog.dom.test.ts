@@ -198,6 +198,18 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-row-message')!.textContent!.split('Wählen Sie eine Kategorie.').length).toBe(2);
 	});
 
+	// chosen after creating, the Kategorie is no longer asked for (#245, persona Helga P-1)
+	it('nimmt die fehlende Kategorie zurück, sobald sie nach dem Erstellen gewählt ist', async () => {
+		open(() => [200, { ...read, categorization: null, duplicateOf: null }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		await settle();
+		expect(byTestId('invoice-upload-row-message')?.textContent ?? '').not.toContain('Wählen Sie eine Kategorie.');
+	});
+
 	it('zeigt eine Datei gross nur als das, was ihre ersten Bytes sagen, nie als Webseite (Code-Review C-7)', async () => {
 		const made = vi.spyOn(URL, 'createObjectURL');
 		open(() => [200, read]);
