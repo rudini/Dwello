@@ -325,3 +325,7 @@ U-23 lost its map parts when the building map was removed: the map said nothing 
 ## O-38 – E2E leftovers fixed
 
 O-38 (a scenario's sent, paid or replaced statement kept its tenant, apartment and building in `dwello_e2e`; with the building lists at 1000 since #440 the statement wizard's buildings step sent two requests per leftover building, so the Firefox and WebKit shards on `main` timed out in the wizard from run 595 on): the cleanup (`tests/e2e/fixtures/backend.ts`) now deletes the scenario's statements and their documents directly in the E2E database (`backend/scripts/e2e-purge-statements.ts`, refuses any other database) before it removes the rest through the API.
+
+## O-34 – the IBAN scenarios have the settings to themselves
+
+O-34 («Absender und Fristen hinterlegen» and «IBAN aus Liechtenstein hinterlegen» in `settings.feature` save the IBAN, one setting for every scenario, browser project and worker; overlapping, one read the other's IBAN after reopening, and every IBAN `seed.iban` set could break the Liechtenstein one): closed in #450. Both scenarios carry `@einstellungen-global` and run under a lock on the settings (`tests/e2e/fixtures/settings-lock.ts`, fixture `globalSettings`), which `seed.iban` takes for its write too; running the file serially would not have been enough (closing code review `docs/reviews/450-review-3.md`). Seen red without the lock, green with it (8 repeats each, pull request of #450).
