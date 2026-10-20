@@ -5,6 +5,7 @@ import { downloadedFileHeader, downloadedFileName, downloadedPdfText, downloaded
 import {
 	balanceAmount,
 	changeOffers,
+	gapAboveCostBreakdown,
 	correctConfirmation,
 	deadlineShown,
 	paymentText,
@@ -527,3 +528,7 @@ Then(
 		await verwalter.sees(oldAddressWarningText).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );
+
+Then('folgt die Kostenaufstellung im üblichen Abstand auf den Status', async ({ verwalter }) => {
+	await verwalter.sees(gapAboveCostBreakdown).toBe(32);
+});

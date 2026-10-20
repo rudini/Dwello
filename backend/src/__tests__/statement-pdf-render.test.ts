@@ -75,6 +75,21 @@ describe('Stockwerk im französischen PDF', () => {
 	});
 });
 
+// British English counts «1st floor», «2nd floor» above the ground floor (461-native-en, EN-32), as the UI does
+describe('Stockwerk im englischen PDF', () => {
+	it.each([
+		[1, 'A2, 1st floor'],
+		[2, 'A2, 2nd floor'],
+		[3, 'A2, 3rd floor'],
+		[4, 'A2, 4th floor']
+	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'en'), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
+	});
+});
+
 describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 	// a period whose months carry 0 % in the profile: the calculation shared the heating costs by days
 	const byDays: StatementPDFData = {
@@ -565,6 +580,18 @@ describe('PDF einer berichtigten Abrechnung', () => {
 		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(corrected, config, 'fr'), 'base64')).flowing;
 		expect(fr).toContain('Ce décompte remplace le décompte NK-1-2025-0001 du 01.02.2026.');
 		expect(fr).toContain('Déjà payé sur NK-1-2025-0001');
+	});
+});
+
+describe('Verwaltungspauschale auf Französisch und Italienisch', () => {
+	// #405, #461: the words of Art. 4 al. 3 OBLF / cpv. 3 OLAL; «frais de gestion» are the costs of managing the property
+	it('nennt sie wie das Gesetz «frais d’administration» und «spese amministrative»', async () => {
+		const fee = { ...refund, managementFee: 23.52, managementFeePercent: 3, totalCosts: 807.65 };
+		const text = async (language: 'fr' | 'it') =>
+			readPdf(Buffer.from(await generateStatementPDFBase64(fee, config, language), 'base64')).flowing;
+
+		expect(await text('fr')).toContain('Frais d’administration');
+		expect(await text('it')).toContain('Spese amministrative');
 	});
 });
 

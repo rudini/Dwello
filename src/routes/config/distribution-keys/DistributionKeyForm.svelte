@@ -10,6 +10,7 @@
 	import Field from '$lib/ui/Field.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import { controlClass } from '$lib/ui/field';
+	import NameTranslations from '../NameTranslations.svelte';
 	import SaveForm from '../SaveForm.svelte';
 	import FormulaHelp from './FormulaHelp.svelte';
 	import FormulaTestResult from './FormulaTestResult.svelte';
@@ -94,6 +95,8 @@
 			<FormulaTestResult {test} />
 		{/if}
 	</div>
+
+	<NameTranslations names={key} help={m.keys_translations_help()} testid="distribution-key" />
 
 	<FormulaHelp />
 </SaveForm>

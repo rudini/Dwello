@@ -54,3 +54,28 @@ Funktionalität: Navigation
 
   Szenario: Die Fusszeile zeigt die Version der App
     Dann zeigt die Fusszeile die Version "1.4.0"
+
+  # Eine Kennung, die keine sein kann, ist wie eine unbekannte: die Seite gibt es nicht, kein Fehler beim Laden
+  Szenariogrundriss: Eine Seite mit ungültiger Kennung gibt es nicht
+    Wenn der Liegenschaftsverwalter die Seite "<Pfad>" öffnet
+    Dann sagt die Fehlerseite "Diese Seite gibt es nicht."
+
+    Beispiele:
+      | Pfad                               |
+      | /buildings/abc                     |
+      | /buildings/abc/edit                |
+      | /apartments/abc                    |
+      | /apartments/abc/edit               |
+      | /tenants/abc                       |
+      | /tenants/abc/edit                  |
+      | /contracts/abc                     |
+      | /contracts/abc/edit                |
+      | /invoices/abc                      |
+      | /invoices/upload                   |
+      | /invoices/abc/edit                 |
+      | /statements/abc                    |
+      | /statements/abc/edit               |
+      | /config/categories/abc/edit        |
+      | /config/distribution-keys/abc/edit |
+      | /config/heating-profiles/abc       |
+      | /config/heating-profiles/abc/edit  |
