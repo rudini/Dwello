@@ -265,6 +265,8 @@ describe('Vorschlag der KI für eine Datei', () => {
 	it('nennt als Grund einer offenen Datei ihre erste Aufgabe', () => {
 		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, deductedAmount: null, categorization: null }));
 		expect(openReason(row)).toBe('Wählen Sie eine Kategorie.');
+		// also without a Verteilschlüssel (#379): the Kategorie first, as the row names its to-dos
+		expect(openReason({ ...row, values: { ...row.values, distributionKeyId: '' } })).toBe('Wählen Sie eine Kategorie.');
 	});
 });
 
