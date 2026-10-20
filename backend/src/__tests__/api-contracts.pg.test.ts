@@ -126,10 +126,11 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-preview'), actual)).toEqual([]);
 	});
 
-	it('GET /invoices und /invoices/:id liefern die Felder von invoice.json', async () => {
+	it('GET /invoices und /invoices/:id liefern die Felder von invoice.json und invoice-list.json', async () => {
 		const listed = (await (await callApi(`/api/v1/invoices?buildingId=${rental.building}`)).json()) as { invoices: { id: string }[] };
 		const actual = await (await callApi(`/api/v1/invoices/${listed.invoices[0].id}`)).json();
 		expect(drift(await sample('invoice'), listed.invoices[0])).toEqual([]);
+		expect(drift(await sample('invoice-list'), listed)).toEqual([]);
 		expect(drift(await sample('invoice'), actual)).toEqual([]);
 	});
 

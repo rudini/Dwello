@@ -2161,3 +2161,22 @@ Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20:
 
 - [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
 - [x] PR `Fixes #488`
+
+## Session W9b: Akontorechnungen, «In Abrechnungen enthalten», upload bugs of #268 (2026-10-19 to 2026-10-20)
+
+Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of #222 (#245), #481, #482, #483; product owner decisions via the coordinator during the task, recorded in #455 «Decided (product owner)» (V-1, V-2, «Manuell», Verteilschlüssel; option C after domain review 455-3; the delete text of 2026-10-20). The list section of the list pages moved out first (PR #494, session W9a).
+
+- [x] `@wip` scenarios (invoices, invoice-detail, invoice-edit, invoice-new), red on the base build (11 at the missing behaviour; «Eine ausgewählte Akontorechnung erstellen» passes on the base, which reads an advance invoice as a plain invoice)
+- [x] Domain review round 1 (`docs/reviews/455-fachreview-1.md`): V-1, V-2 decided by the product owner; V-3, V-6, V-8 became #481, #482, #483, decided; V-4, V-5, V-7, V-9, V-11 (en) fixed; V-10 kept
+- [x] Prompt: document type `advance_invoice` (glossary words, an instalment invoice is none); `llm:eval` (qwen/qwen3-vl-8b-instruct via OpenRouter) 45/47 before and after
+- [x] Upload: Akontorechnung not preselected, its hint, to-dos once ticked; deducted line with the proposed total (and without one), the rule as help after the to-dos; key of the building's newest invoice with a key in the Kategorie, unless the landlord chose one
+- [x] Invoice page and «Rechnung bearbeiten»: hint at the Betrag (`DeductedHint`), not in the Beleg card; «In Abrechnungen enthalten» with number and status, linked (backend `statements`, contract, API spec); en «in a statement»; help on the Leistungszeitraum over several years
+- [x] Bugs of #268, each with a test red first: own file button (`FileInput`), Escape in a select, empty paragraph under a date field, «Rechnungen hochladen» as a link to `?upload`; «Manuell kategorisiert» kept (product owner: not a bug)
+- [x] Code review round 1 (`docs/reviews/455-review-1.md`): C-1, C-2, C-4 to C-7 fixed; C-3 kept (Escape in a closed select no longer closes a dialog)
+- [x] Domain review round 2 (`docs/reviews/455-fachreview-2.md`): V-12, V-13, V-14, V-15 fixed; V-16 scenario added; V-4 kept (no extraction cases in `llm:eval`)
+- [x] Personas round 1: Dr. Weber (`docs/design/personas/weber-455.md`, P-1 Major), Marco (`docs/design/personas/marco-455.md`, Minors kept)
+- [x] Domain review round 3 (`docs/reviews/455-fachreview-3.md`): option C decided; texts, glossary rows «Akontorechnung», «Schlussrechnung», delete text; scenarios red on e3cb329e first
+- [x] Code review round 2 (`docs/reviews/455-review-2.md`, no new findings); closing round 3 (`docs/reviews/455-review-3.md`: C-8 Major, a scenario step for the delete text; C-9) and re-check 4 (`docs/reviews/455-review-4.md`, clean); Dr. Weber round 2 (`docs/design/personas/weber-455-2.md`: P-1 to P-4 done, P-6/P-7 fixed by the delete text of 2026-10-20, P-5 kept)
+- [x] PR `Fixes #455`, `Fixes #481`, `Fixes #482`, `Fixes #483`, `Refs #245`
+
+Files: `backend/src/config/llm.ts`, `backend/src/services/statement-invoices.service.ts`, `backend/scripts/llm-stub.ts`, `src/lib/invoice-upload.ts`, `src/lib/server/invoice.ts`, `src/lib/types.ts`, `src/lib/ui/{FileInput,Dialog,DateInput,Button}.svelte`, `src/routes/invoices/` (`+page.svelte`, `DeductedHint`, `InvoiceDataFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadFiles`, `UploadRowNotes`, `[id]/{+page,InvoiceFacts,InvoiceBeleg}.svelte`, `[id]/edit/+page.svelte`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `tests/contracts/{invoice-statements,invoice-list}.json`, tests and E2E layers.

@@ -50,3 +50,11 @@ export const deleteBilledNote = target('Rat beim Löschen einer abgerechneten Re
 export const belegFileLink = (fileName: string) => inRow(fileName, 'Datei gross', 'invoice-upload-file-link');
 export const uploadStatus = target('Stand des Hochladens', (page) => page.getByTestId('invoice-upload-progress'));
 export const belegRemove = (fileName: string) => inRow(fileName, 'Datei entfernen', 'invoice-upload-row-remove');
+export const belegDeductedRule = (fileName: string) =>
+	inRow(fileName, 'Regel zu den Akontorechnungen', 'invoice-upload-deducted-rule');
+export const uploadFileChoose = target('Dateien auswählen', (page) => page.getByTestId('invoice-upload-file-choose'));
+export const belegDistributionKey = (fileName: string) =>
+	inRow(fileName, 'Verteilschlüssel', 'invoice-distribution-key-select');
+export const deleteBilledText = target('Was beim Löschen einer abgerechneten Rechnung zu tun ist', (page) =>
+	page.getByTestId('invoice-delete-billed-text')
+);
