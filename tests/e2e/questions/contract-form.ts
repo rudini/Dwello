@@ -1,5 +1,6 @@
 import { Attribute, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
+	billedUntilError,
 	startDateNotice,
 	billedUntilInput as billedUntilField,
 	startDateInput as startDateField,
@@ -67,3 +68,6 @@ export const runningContractEditHintText = Text.of(runningContractEditHint);
 export const startDateWarning = Text.of(startDateNotice);
 export const startDateAsked = Visibility.of(startDateField);
 export const billedUntilAsked = Visibility.of(billedUntilField);
+
+// #499: what the field «Abgerechnet bis» says when it is refused
+export const billedUntilErrorText = Text.of(billedUntilError);

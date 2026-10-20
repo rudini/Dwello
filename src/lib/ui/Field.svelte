@@ -15,6 +15,7 @@
 		note,
 		helpTestid,
 		labelTestid,
+		testid,
 		invalidBy,
 		children
 	}: {
@@ -27,6 +28,7 @@
 		note?: { text: string; testid: string; quiet?: boolean }; // a caution about the value, e.g. that the KI read it without being sure; quiet: only a hint
 		labelTestid?: string;
 		helpTestid?: string;
+		testid?: string; // the whole field, label to error: a test finds the error of this field (#499)
 		invalidBy?: string; // the id of another field's error that names this field too, e.g. an empty required one
 		children: Snippet<[FieldControl]>;
 	} = $props();
@@ -78,7 +80,7 @@
 	);
 </script>
 
-<div bind:this={frame} class="flex flex-col gap-2" oninput={change}>
+<div bind:this={frame} class="flex flex-col gap-2" oninput={change} data-testid={testid}>
 	<label for={id} class="font-semibold text-ink" data-testid={labelTestid}>
 		{label}
 		{#if optional}<span class="font-normal text-ink-muted">{m.ui_optional()}</span>{/if}

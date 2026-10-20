@@ -3,7 +3,8 @@
  * Business logic for rental contract operations
  */
 
-import { eq, and, or, sql, desc, gte, lte, isNull, ilike, ne } from 'drizzle-orm';
+import { eq, and, or, sql, desc, gte, lte, isNull, ilike, ne, inArray } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/connection';
 import {
 	rentalContracts,
@@ -390,9 +391,48 @@ async function checkNewDates(current: RentalContract, data: Partial<NewRentalCon
 		throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
 			contract: overlappingContract!
 		});
+	await checkBilledByDwello(current, data.billedUntil, startDate, q);
 	const statements = await statementsChanged(current.id, billingStart({ startDate, billedUntil }), endDate, q);
 	if (onlyDraft(statements, draft)) await q.delete(utilityStatements).where(eq(utilityStatements.id, draft!));
 	else if (statements.length) throw new BilledDaysError(statements);
+}
+
+/**
+ * #499 (decided 2026-10-19 and 2026-10-20): «Abgerechnet bis» may not cover a day a Dwello statement of the contract
+ * bills: a sent, paid or settled one, or a replaced one whose berichtigte Abrechnung is missing or still a draft. Named is the
+ * first such statement; the latest day left is the one before its first billed day, unless that is before the
+ * Vertragsbeginn. Checked before the offer to delete a draft (fach review 499-1 V-3), only for a new or changed date.
+ */
+async function checkBilledByDwello(current: RentalContract, billedUntil: string | null | undefined, startDate: string, q: Query) {
+	if (!billedUntil || billedUntil === current.billedUntil) return;
+	const successor = alias(utilityStatements, 'successor');
+	const [first] = await q
+		.select({
+			number: utilityStatements.statementNumber,
+			start: utilityStatements.periodStart,
+			end: utilityStatements.periodEnd,
+			rentalStart: utilityStatements.rentalStart
+		})
+		.from(utilityStatements)
+		.leftJoin(successor, eq(successor.replacesId, utilityStatements.id))
+		.where(
+			and(
+				eq(utilityStatements.contractId, current.id),
+				lte(utilityStatements.rentalStart, billedUntil),
+				or(
+					inArray(utilityStatements.status, ['sent', 'paid', 'settled']), // settled: sent, its small Saldo carried over (#448)
+					and(eq(utilityStatements.status, 'replaced'), or(isNull(successor.id), eq(successor.status, 'draft')))
+				)
+			)
+		)
+		.orderBy(utilityStatements.rentalStart, utilityStatements.statementNumber)
+		.limit(1);
+	if (!first) return;
+	const { number, start, end } = first;
+	const date = daysAfter(first.rentalStart, -1);
+	if (date < startDate)
+		throw new CodedError('BILLED_UNTIL_BILLED_START', '«Abgerechnet bis» covers days a statement bills from the contract start', { number, start, end });
+	throw new CodedError('BILLED_UNTIL_BILLED', '«Abgerechnet bis» covers days a sent or paid statement bills', { number, start, end, date });
 }
 
 /** The changed statements are just the draft named */

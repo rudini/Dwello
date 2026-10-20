@@ -1,0 +1,5 @@
+{
+	"error": "«Abgerechnet bis» covers days a sent or paid statement bills from the contract start",
+	"code": "BILLED_UNTIL_BILLED_START",
+	"params": { "number": "NK-2024-0001", "start": "2024-01-01", "end": "2024-12-31" }
+}
