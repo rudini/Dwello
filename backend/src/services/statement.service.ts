@@ -582,8 +582,10 @@ export async function recalculation(statement: StatementWithDetails) {
 	if (!now) return null;
 	const result = JSON.stringify([now.balance, sharesOf(now.lineItems)]);
 	const changes = result !== JSON.stringify([String(Number(statement.balance)), sharesOf(statement.lineItems)]);
-	const [before, after] = [Number(statement.balance), Number(now.balance)];
-	return { changes, result, raises: after > before, lowers: after < before };
+	// as claimed: a Saldo below CHF 5 is neither claimed nor paid out, but in a Schlussabrechnung (PO 2026-10-20, V-30 A)
+	const claimed = (balance: string) => (!statement.final && belowMinimum(Number(balance)) ? 0 : Number(balance));
+	const [before, after] = [claimed(statement.balance), claimed(now.balance)];
+	return { changes, result, raises: after >= before, lowers: after < before };
 }
 
 /**

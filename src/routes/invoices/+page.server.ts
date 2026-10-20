@@ -21,7 +21,8 @@ function invoiceQuery(url: URL, page: number, pageSize: number) {
 		params.set('periodStart', get('periodStart'));
 		params.set('periodEnd', get('periodEnd'));
 	}
-	if (/^\d{4}$/.test(get('year'))) {
+	// with a period no year by Rechnungsdatum: it would drop invoices the period takes by Leistungszeitraum (D-1)
+	else if (/^\d{4}$/.test(get('year'))) {
 		params.set('dateFrom', `${get('year')}-01-01`);
 		params.set('dateTo', `${get('year')}-12-31`);
 	}

@@ -259,7 +259,7 @@ describe('Aufgaben der Übersicht', () => {
 			const task = tasks.find((one) => one.id === 'outdated-drafts')!;
 			expect(task.title).toBe('3 Entwürfe sind nicht aktuell');
 			expect(task.text).toBe(
-				'Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht oder der Tankbestand geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen.'
+				'Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht, oder der Tankbestand wurde geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen.'
 			);
 			expect(task.links).toEqual([
 				{

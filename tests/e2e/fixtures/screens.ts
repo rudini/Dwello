@@ -39,6 +39,15 @@ async function correctionStates(seed: TestData) {
 	}
 	await seed.invoiceOn('Rebhof', 'Hauswart', '300.00', '2025-12-15', ['2025-10-01', '2025-12-31']);
 	await seed.declineCorrection('Nora', 2025);
+	// a billed invoice deleted afterwards: Olga's Saldo would fall, so «Nicht berichtigen» is missing (code review 454-2 C-9)
+	await seed.building('Ried', 'Winterthur');
+	await seed.apartment('Ried', '6.01', 'vacant');
+	await seed.tenant('Olga');
+	await seed.contract('Olga', '6.01', { startDate: '2025-01-01', baseRent: '1200.00' });
+	await seed.invoiceOn('Ried', 'Hauswart', '600.00', '2025-03-15');
+	await seed.statement('Olga', 'Ried', 2025, 'Standard');
+	await seed.sendStatement('Olga', 2025);
+	await seed.deleteInvoice('Rechnung Hauswart 2025-03-15');
 }
 
 /** The example's address with its ids filled in, and the buildings the statement wizard checks */
@@ -238,6 +247,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		settledStatement: seed.idOf('Abrechnung Carla 2021'),
 		unaffectedStatement: seed.idOf('Abrechnung Mia 2025'),
 		declinedStatement: seed.idOf('Abrechnung Nora 2025'),
+		loweredStatement: seed.idOf('Abrechnung Olga 2025'),
 		carriedStatement: seed.idOf('Abrechnung Jana 2023'),
 		carryStatement: seed.idOf('Abrechnung Jana 2024'),
 		offsetStatement: seed.idOf('Berichtigte Abrechnung Kai 2023'),

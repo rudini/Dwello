@@ -488,6 +488,34 @@ describe('Abrechnung berichtigen fällig', () => {
 			}
 		}));
 
+	// PO 2026-10-20 (Fachreview 454-3 V-30 A): also when the Saldo does not fall; a Saldo below CHF 5 counts as 0, but
+	// in a Schlussabrechnung (#448): here a contract over the whole year, 4.00 before, 3.00 after
+	it('erlaubt «Nicht berichtigen», wenn beide Saldi unter CHF 5 liegen', async () => {
+		const whole = await createRental(`${token}-whole`, { startDate: '2024-01-01', monthlyAdvancePayment: '0' });
+		const created = await generateStatement({
+			contractId: whole.contract,
+			buildingId: whole.building,
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31',
+			managementFeePercent: 0
+		});
+		try {
+			await db.update(utilityStatements).set({ status: 'sent', balance: '4.00' }).where(eq(utilityStatements.id, created.id));
+			await invoice({ buildingId: whole.building, amount: '3.00', invoiceDate: '2024-02-15' });
+			const changes = (await (await callApi(`/api/v1/statements/${created.id}/changed-invoices`)).json()) as {
+				correctionDue: boolean;
+				correctionDeclinable: boolean;
+				correctionLowers: boolean;
+			};
+			expect(changes).toMatchObject({ correctionDue: true, correctionDeclinable: true, correctionLowers: false });
+		} finally {
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, created.id));
+			await deleteStatement(created.id);
+			await db.delete(invoices).where(eq(invoices.buildingId, whole.building));
+			await whole.remove();
+		}
+	});
+
 	it('erlaubt «Nicht berichtigen», wenn die Neuberechnung den Saldo erhöht', () =>
 		sent(async (id) => {
 			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });

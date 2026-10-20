@@ -60,6 +60,7 @@ import {
 	declineCorrection,
 	createCorrection,
 	openCorrectConfirmation,
+	openCorrectionFromHint,
 	openCorrection,
 	openReplacedContract,
 	openReplacedStatement,
@@ -463,6 +464,15 @@ When('der Liegenschaftsverwalter die Abrechnung berichtigt', async ({ verwalter 
 
 When('der Liegenschaftsverwalter die Abrechnung berichtigen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openCorrectConfirmation);
+});
+
+// #454 (persona Anna 454 P-1): from the hint on what changed since
+When('der Liegenschaftsverwalter die Abrechnung aus dem Hinweis berichtigen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openCorrectionFromHint);
+});
+
+Given('die Rechnung {string} ist danach gelöscht', async ({ seed }, invoice: string) => {
+	await seed.deleteInvoice(`Rechnung ${invoice}`);
 });
 
 When('der Liegenschaftsverwalter die berichtigte Abrechnung erstellt', async ({ verwalter }) => {

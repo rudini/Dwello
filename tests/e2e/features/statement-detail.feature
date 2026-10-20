@@ -744,6 +744,20 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieser Abrechnung wurde der Tankbestand der Abrechnungsperiode geändert."
 
+  # code review 454-2 C-8: senkt die Neuberechnung den Saldo (eine doppelt erfasste Rechnung gelöscht), sagt die
+  # Abrechnung warum «Nicht berichtigen» fehlt (Fachreview 454-3 V-32) und führt aus dem Hinweis zum Berichtigen
+  # (Persona Anna 454 P-1)
+  Szenario: Versendete Abrechnung mit danach gelöschter Rechnung berichtigen
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Rechnung "Hauswart 2024-12-31" ist danach gelöscht
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "eine tiefere Nachzahlung oder eine höhere Rückerstattung. Berichtigen Sie die Abrechnung, sonst verlangen Sie mehr als die tatsächlichen Kosten."
+    Und bietet die Abrechnung «Nicht berichtigen» nicht mehr an
+    Wenn der Liegenschaftsverwalter die Abrechnung aus dem Hinweis berichtigen will
+    Dann sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt
+
   # ein Tankbestand, der seit dem Erstellen gleich blieb, gibt keinen Hinweis (Fachreview 454-1 V-5, V-15)
   Szenario: Kein Hinweis, wenn der Tankbestand der Periode unverändert ist
     Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank

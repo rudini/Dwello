@@ -81,6 +81,20 @@ describe('Rechnungsliste', () => {
 		);
 	});
 
+	// Datenprüfung 454-1 D-1: the period takes invoices by Leistungszeitraum, a year by Rechnungsdatum would drop some
+	it('schneidet die Abrechnungsperiode nicht zusätzlich nach dem Jahr des Rechnungsdatums', async () => {
+		const { urls, fetch } = backend({});
+
+		await listLoad({
+			url: new URL('http://localhost/invoices?building=b1&periodStart=2025-01-01&periodEnd=2025-12-31&year=2025'),
+			fetch
+		} as never);
+
+		const listed = urls.find((one) => one.includes('periodStart='))!;
+		expect(listed).not.toContain('dateFrom');
+		expect(listed).not.toContain('dateTo');
+	});
+
 	// Fachreview 454-1 V-11: the part of each invoice in the period, as the backend names it
 	it('übernimmt den Teil jeder Rechnung in der Abrechnungsperiode', () => {
 		expect(toInvoice(periodList.invoices[0]).inPeriodAmount).toBe(413.33);

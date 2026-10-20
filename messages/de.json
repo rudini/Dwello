@@ -281,7 +281,7 @@
 	"dashboard_task_drafts_action": "Entwürfe ansehen",
 	"dashboard_task_outdated_drafts_one": "{count} Entwurf ist nicht aktuell",
 	"dashboard_task_outdated_drafts_many": "{count} Entwürfe sind nicht aktuell",
-	"dashboard_task_outdated_drafts_text": "Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht oder der Tankbestand geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen.",
+	"dashboard_task_outdated_drafts_text": "Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht, oder der Tankbestand wurde geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen.",
 	"dashboard_task_correct_text": "Seit dem Erstellen der Abrechnung {number} von {tenant} {later}. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen». Die berichtigte Abrechnung rechnet an, was schon bezahlt ist.",
 	"dashboard_task_correct_old": "Diese Abrechnungsperiode endete vor mehr als fünf Jahren. Lassen Sie sich beraten, ob die Forderung verjährt ist.",
 	"dashboard_task_correct_action": "Abrechnung öffnen",

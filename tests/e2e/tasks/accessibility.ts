@@ -414,6 +414,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'period-filter': () => Wait.until(on.shown('invoice-period-filter')),
 	unaffected: () => Wait.until(on.shown('statement-later-invoices')),
 	declined: () => Wait.until(on.shown('statement-later-invoices')),
+	lowers: () => Wait.until(on.shown('statement-later-correct-button')),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('{area}').into(on.formulaInput),

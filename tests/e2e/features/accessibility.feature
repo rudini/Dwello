@@ -184,6 +184,7 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | decline-dialog      |
       | statement-unaffected-detail | unaffected     |
       | statement-declined-detail | declined         |
+      | statement-lowered-detail | lowers            |
       | statement-paid-detail  | default             |
       | statement-paid-detail  | reset-payment-dialog |
       | statement-paid-detail  | correct-dialog      |

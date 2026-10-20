@@ -6,6 +6,7 @@ import {
 	confirmEarlyPaidDateButton,
 	correctPaidAmountInput,
 	correctStatementButton,
+	laterCorrectButton,
 	confirmRecalculateButton,
 	confirmDeclineCorrectionButton,
 	declineCorrectionButton,
@@ -89,6 +90,7 @@ export const recalculateDraft: Activity = (actor) =>
 
 // #120: replacing names its consequence first; the berichtigte Abrechnung is created on the replaced one
 export const openCorrectConfirmation = Click.on(correctStatementButton);
+export const openCorrectionFromHint = Click.on(laterCorrectButton);
 export const correctStatement: Activity = (actor) =>
 	actor.attemptsTo(Click.on(correctStatementButton), Click.on(confirmCorrectButton));
 export const createCorrection = Click.on(createCorrectionButton);

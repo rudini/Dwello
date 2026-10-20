@@ -455,6 +455,11 @@ export function testData(api: CallTheApi) {
 			return id;
 		},
 
+		// A recorded invoice deleted afterwards, e.g. one recorded twice (#454)
+		async deleteInvoice(key: string) {
+			await remove(`invoices/${ids.get(key)}`);
+		},
+
 		// A recorded invoice that costs another amount afterwards
 		async invoiceAmount(key: string, amount: string) {
 			await put(`invoices/${ids.get(key)}`, { amount });
