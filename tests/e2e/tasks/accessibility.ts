@@ -468,7 +468,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'category-check': (example) => previewOf('2026', 'category-check')(example),
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
 	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
-	'invoice-hints': (example) => previewOf('2025', 'late-invoices', '2025-05-31')(example),
+	'invoice-hints': (example) => previewOf('2026', 'late-invoices', '2026-05-31')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
 	// 2025: Anna's draft misses the Lift invoice recorded after it (#132)
 	'preview-outdated': (example) => previewOf('2025', `existing-statements-changed-${example.building}`)(example),
