@@ -22,7 +22,7 @@ const numberTaken = (error: unknown) => {
 	const { code, cause } = error as { code?: string; cause?: { code?: string } };
 	return (code ?? cause?.code) === '23505';
 };
-const numberTakenError = (number: string) =>
+export const numberTakenError = (number: string) =>
 	refusal('APARTMENT_NUMBER_TAKEN', `Die Wohnungsnummer ${number} existiert bereits in diesem Gebäude.`, { number });
 
 // Validation schemas

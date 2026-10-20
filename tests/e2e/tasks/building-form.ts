@@ -14,6 +14,8 @@ import {
 export type BuildingData = { name: string; address: string; postalCode: string; city: string; canton: string };
 
 export const openNewBuilding = Navigate.to('/buildings/new');
+// what «Zum Inhalt springen» leaves in the address
+export const openNewBuildingAtContent = Navigate.to('/buildings/new#main-content');
 export const openBuildingEdit = (buildingId: string) => Navigate.to(`/buildings/${buildingId}/edit`);
 
 export const saveBuilding = Click.on(submitButton);
