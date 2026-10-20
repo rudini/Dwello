@@ -27,67 +27,6 @@ export interface DistributionKeyWithUsage extends DistributionKey {
 }
 
 /**
- * Predefined distribution keys (initialized at first run)
- */
-export const PREDEFINED_DISTRIBUTION_KEYS: Omit<NewDistributionKey, 'id' | 'createdAt' | 'updatedAt'>[] = [
-	{
-		name: 'Per Unit',
-		nameDE: 'Pro Einheit',
-		nameFR: 'Par unité',
-		nameIT: 'Per unità',
-		nameEN: 'Per Unit',
-		type: 'predefined',
-		formula: '{units}',
-		description: 'Gleichmässige Verteilung auf alle Wohnungen (1 Anteil pro Einheit)',
-		sortOrder: 1
-	},
-	{
-		name: 'Per Area',
-		nameDE: 'Nach Fläche',
-		nameFR: 'Par surface',
-		nameIT: 'Per superficie',
-		nameEN: 'Per Area',
-		type: 'predefined',
-		formula: '{area}',
-		description: 'Verteilung nach Wohnfläche in Quadratmetern',
-		sortOrder: 2
-	},
-	{
-		name: 'Per Rooms',
-		nameDE: 'Nach Zimmerzahl',
-		nameFR: 'Par nombre de pièces',
-		nameIT: 'Per numero di stanze',
-		nameEN: 'Per Rooms',
-		type: 'predefined',
-		formula: '{rooms}',
-		description: 'Verteilung nach Anzahl Zimmer',
-		sortOrder: 3
-	},
-	{
-		name: 'Heating Costs (Area)',
-		nameDE: 'Heizkosten (nach Fläche)',
-		nameFR: 'Frais de chauffage (surface)',
-		nameIT: 'Costi riscaldamento (superficie)',
-		nameEN: 'Heating Costs (Area)',
-		type: 'predefined',
-		formula: '{area}',
-		description: 'Standard-Verteilschlüssel für Heizkosten basierend auf Wohnfläche',
-		sortOrder: 4
-	},
-	{
-		name: 'Hot Water (Per Unit)',
-		nameDE: 'Warmwasser (pro Einheit)',
-		nameFR: 'Eau chaude (par unité)',
-		nameIT: 'Acqua calda (per unità)',
-		nameEN: 'Hot Water (Per Unit)',
-		type: 'predefined',
-		formula: '{units}',
-		description: 'Warmwasserkosten gleichmässig verteilt',
-		sortOrder: 5
-	}
-];
-
-/**
  * List all distribution keys with optional filters
  */
 export async function listDistributionKeys(filters: DistributionKeyFilters = {}): Promise<{
@@ -432,24 +371,4 @@ export async function calculateBuildingDistribution(
 			amount: d.amount
 		}))
 	};
-}
-
-/**
- * Initialize predefined distribution keys if they don't exist
- */
-export async function initializePredefinedKeys(): Promise<{ created: number; existing: number }> {
-	let created = 0;
-	let existing = 0;
-
-	for (const keyData of PREDEFINED_DISTRIBUTION_KEYS) {
-		const exists = await getDistributionKeyByName(keyData.name);
-		if (!exists) {
-			await db.insert(distributionKeys).values(keyData);
-			created++;
-		} else {
-			existing++;
-		}
-	}
-
-	return { created, existing };
 }

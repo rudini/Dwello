@@ -1,12 +1,22 @@
 import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { handle } from '../hooks.server';
+import { m } from '$lib/paraglide/messages';
 
 const languages = ['de', 'fr', 'it', 'en'] as const;
 const keys = (language: string) =>
 	Object.keys(JSON.parse(readFileSync(`messages/${language}.json`, 'utf8')))
 		.filter((key) => key !== '$schema')
 		.sort();
+
+// 461-review-2, C-6: the formula variables are literal braces, escaped once as in German
+describe('Formelvariablen in den Meldungen', () => {
+	it.each(languages)('%s nennt die Variablen mit geschweiften Klammern', (locale) => {
+		expect(m.backend_formula_unknown_variable({ variable: 'persons' }, { locale })).toContain('{persons}');
+		expect(m.backend_formula_not_computable({}, { locale })).toContain('{area}');
+		expect(m.backend_formula_not_computable({}, { locale })).not.toContain('\\');
+	});
+});
 
 describe('Sprachdateien', () => {
 	it.each(languages.slice(1))('%s hat dieselben Texte wie Deutsch', (language) => {
@@ -70,6 +80,53 @@ describe('Sprachdateien', () => {
 			([, text]) => typeof text === 'string' && /(délai|terme)s? de résiliation/i.test(text)
 		);
 		expect(wrong).toEqual([]);
+	});
+
+	// #405, #461: words that mean something else in the law (Art. 259a CO, Art. 4 al. 3 OBLF, Art. 34 CO)
+	it.each([
+		['fr', '«répercutable», nicht «imputable»', /imputab/i],
+		['fr', '«frais d’administration», nicht «frais de gestion»', /frais de gestion/i],
+		['it', '«spese amministrative», nicht «spese di gestione»', /spes[ae] di gestione/i],
+		['it', '«annullare la disdetta», nicht «revocare»', /\brevoca/i],
+		['fr', '«degré de confiance» für die Konfidenz', /fiabilité de l’IA/i],
+		['it', '«grado di certezza» für die Konfidenz', /affidabilità dell’IA/i],
+		// the categories renamed in migration 0027 (#345)
+		['fr', '«assurance du bâtiment», nicht «assurance bâtiment»', /assurance bâtiment/i],
+		['it', '«assicurazione dell’immobile», nicht «assicurazione edificio»', /assicurazione edificio/i],
+		['en', '«Lift», nicht «Elevator»', /elevator/i]
+	])('%s sagt %s', (language, _description, word) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		const wrong = Object.entries(messages).filter(([, text]) => typeof text === 'string' && word.test(text));
+		expect(wrong).toEqual([]);
+	});
+
+	// #461: «nuovo inquilino» is the Nachmieter; the Ersatzmieter of Art. 264 CO is «inquilino sostitutivo»
+	it('Italienisch nennt den Ersatzmieter «inquilino sostitutivo»', () => {
+		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
+		expect(messages.glossary_notice_period_text).toContain('inquilino sostitutivo');
+		expect(messages.contracts_notice_period_short).toContain('inquilino sostitutivo');
+	});
+
+	// Art. 264 Abs. 1 OR: the tenant is freed once he proposes a reasonable replacement tenant (461-fachreview-1, M-1)
+	it.each([
+		['de', 'wenn er Ihnen einen zumutbaren Ersatzmieter vorschlägt.'],
+		['fr', 's’il vous présente un locataire de remplacement que vous ne pouvez raisonnablement refuser.'],
+		['it', 'se l’inquilino le propone un inquilino sostitutivo che Lei non possa ragionevolmente rifiutare.'],
+		['en', 'if the tenant proposes a replacement tenant you cannot reasonably refuse.']
+	])('%s: der Ersatzmieter muss nur vorgeschlagen sein, damit der Mietvertrag früher endet', (language, end) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		expect(messages.glossary_notice_period_text.endsWith(end)).toBe(true);
+	});
+
+	// #501: the hint at a short Kündigungsfrist says the same as the glossary
+	it.each([
+		['de', 'Ausnahme: Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor, oder Sie haben das Ende mit dem Mieter vereinbart.'],
+		['fr', 'Exception : le locataire vous présente un locataire de remplacement que vous ne pouvez raisonnablement refuser, ou vous avez convenu de la fin avec le locataire.'],
+		['it', 'Eccezione: l’inquilino le propone un inquilino sostitutivo che Lei non possa ragionevolmente rifiutare, oppure Lei ha concordato la fine con l’inquilino.'],
+		['en', 'Exception: the tenant proposes a replacement tenant you cannot reasonably refuse, or you agreed on the end with the tenant.']
+	])('%s: der Hinweis zur kurzen Kündigungsfrist nennt den vorgeschlagenen Ersatzmieter', (language, end) => {
+		const messages = JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+		expect(messages.contracts_notice_period_short.endsWith(end)).toBe(true);
 	});
 
 	it('Italienisch sagt «termine di preavviso» und «ricevimento della disdetta»', () => {

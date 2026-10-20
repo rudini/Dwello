@@ -13,6 +13,7 @@ import { pageTitle } from '../questions/navigation';
 import {
 	changeFormula,
 	createDistributionKey,
+	createDistributionKeyInFrench,
 	deleteDistributionKey,
 	openDistributionKeyEdit,
 	openDistributionKeys,
@@ -63,6 +64,13 @@ When(
 );
 
 When(
+	'der Liegenschaftsverwalter den Verteilschlüssel {string} mit der Formel {string} und dem französischen Namen {string} erfasst',
+	async ({ verwalter, seed }, title: string, formula: string, frenchName: string) => {
+		await verwalter.attemptsTo(createDistributionKeyInFrench(seed.unique(title), formula, seed.unique(frenchName)));
+	}
+);
+
+When(
 	'der Liegenschaftsverwalter die Formel des Verteilschlüssels {string} auf {string} ändert',
 	async ({ verwalter, names }, title: string, formula: string) => {
 		await verwalter.attemptsTo(changeFormula(names.get(title)!, formula));
@@ -92,6 +100,13 @@ Then(
 	async ({ verwalter, names }, title: string) => {
 		await verwalter.sees(pageTitle).toBe('Verteilschlüssel - Dwello');
 		await verwalter.sees(listedKeysNamed(names.get(title)!)).toBe(0);
+	}
+);
+
+Then(
+	'zeigt die Seite "Verteilschlüssel" den Verteilschlüssel {string}',
+	async ({ verwalter, names }, title: string) => {
+		await verwalter.sees(listedKeysNamed(names.get(title)!)).toBe(1);
 	}
 );
 

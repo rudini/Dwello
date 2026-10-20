@@ -8,6 +8,11 @@ import { m } from '$lib/paraglide/messages';
 
 // Texts are getters and functions: read when shown, so they are in the language of the request
 
+// English counts floors with ordinals: 1st, 2nd, 3rd, 4th, 11th, 22nd (461-native-en, EN-32)
+const ORDINAL: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' };
+const englishOrdinal = (n: number) =>
+	`${n}${ORDINAL[new Intl.PluralRules('en', { type: 'ordinal' }).select(n)]}`;
+
 /** The floor in the words of the statement PDF; the UI shows any floor below ground as one */
 export const floorLabel = (floor: number) =>
 	floor < 0
@@ -16,7 +21,7 @@ export const floorLabel = (floor: number) =>
 			? m.apartments_floor_ground()
 			: floor === 1
 				? m.apartments_floor_first()
-				: m.apartments_floor_upper({ floor });
+				: m.apartments_floor_upper({ floor: getLocale() === 'en' ? englishOrdinal(floor) : floor });
 
 /** The usual floors, and the given one when it lies outside them (taken from the Gebäuderegister, #479) */
 export const floorOptions = (current?: number | null) =>

@@ -207,7 +207,12 @@ export const ThePage = {
 		question('the accessibility violations on the page', async (actor) => {
 			const page = pageOf(actor);
 			// From the top of the page: a scrolled page slides content under the sticky header, and target-size would
-			// then judge a 48 px link by the part the header leaves visible
+			// then judge a 48 px link by the part the header leaves visible. First the page settles: after a refused save
+			// `focusFirstError` (src/lib/ui/focus-error.ts) focuses the field in a timeout, and that focus scrolls the page
+			// again; a scroll to the top before it left a date field's calendar button under the header (PR #514)
+			await page.evaluate(
+				() => new Promise((resolve) => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+			);
 			await page.evaluate(() => window.scrollTo(0, 0));
 			const { violations } = await new AxeBuilder({ page }).withTags(tags).analyze();
 			return violations.flatMap((violation) =>
