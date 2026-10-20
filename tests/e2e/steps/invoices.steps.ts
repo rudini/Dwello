@@ -6,10 +6,12 @@ import {
 	invoiceListEmpty,
 	listedInvoiceCount,
 	listedInvoicesOf,
+	invoicePeriodFilterText,
+	invoiceShown,
 	statusOfListedInvoice
 } from '../questions/invoices';
 import { pageAddress, pageTitle } from '../questions/navigation';
-import { editInvoice, filterInvoices, openInvoiceList, searchInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
+import { editInvoice, filterInvoices, openInvoiceList, openInvoicesOfPeriod, searchInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -104,3 +106,20 @@ Then(
 		await verwalter.sees(listedInvoicesOf(name)).toBe(0);
 	}
 );
+
+When(
+	'der Liegenschaftsverwalter die Rechnungen der Abrechnungsperiode vom {string} bis {string} im Gebäude {string} anzeigt',
+	async ({ verwalter, seed }, start: string, end: string, building: string) => {
+		await verwalter.attemptsTo(openInvoicesOfPeriod(seed.idOf(building)!, start, end));
+	}
+);
+
+// the filter names the building: by its seeded name
+Then('nennt die Rechnungsliste den Filter {string}', async ({ verwalter, names }, text: string) => {
+	const named = [...names.entries()].reduce((all, [title, name]) => all.replaceAll(` ${title},`, ` ${name},`), text);
+	await verwalter.sees(invoicePeriodFilterText).toBe(named);
+});
+
+Then('sieht der Liegenschaftsverwalter die Rechnung {string}', async ({ verwalter }, description: string) => {
+	await verwalter.sees(invoiceShown(description)).toBe(true);
+});

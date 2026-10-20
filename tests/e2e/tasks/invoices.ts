@@ -12,6 +12,9 @@ import {
 } from '../targets/invoices';
 
 export const openInvoiceList = Navigate.to('/invoices');
+// #454: the list of the invoices a statement of the period takes, as the link of a missing statement opens it
+export const openInvoicesOfPeriod = (buildingId: string, periodStart: string, periodEnd: string) =>
+	Navigate.to(`/invoices?building=${buildingId}&periodStart=${periodStart}&periodEnd=${periodEnd}`);
 
 export const searchInvoices =(term: string): Activity => (actor) =>
 	actor.attemptsTo(

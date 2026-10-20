@@ -7,6 +7,9 @@ import {
 	occupancyHelp,
 	occupancyText,
 	occupancyShown,
+	outdatedDraftsOf,
+	outdatedDraftsText,
+	outdatedDraftsAnd,
 	overviewTaskShown,
 	overviewTaskShownFor,
 	overviewTaskText,
@@ -18,6 +21,7 @@ import {
 	chooseQuickAction,
 	openBuildingFromOccupancy,
 	openDashboard,
+	openOutdatedDrafts,
 	openStatementsWithStatus,
 	openTile,
 	startOverviewTask,
@@ -237,3 +241,46 @@ When(
 Then('nicht die Aufgabe {string} für {string}', async ({ verwalter, names }, title: string, tenant: string) => {
 	await verwalter.sees(overviewTaskShownFor(title, names.get(tenant)!)).toBe(false);
 });
+
+// recorded after the statement: a statement of the last year lacks it (#96)
+Given('im Gebäude {string} gibt es danach eine Rechnung des letzten Jahres', async ({ seed }, building: string) => {
+	await seed.invoiceOn(building, 'Hauswart', '300.00', `${lastYear}-06-15`);
+});
+
+Then(
+	'nennt die Aufgabe zu nicht aktuellen Entwürfen die Entwürfe von {string} des letzten Jahres',
+	async ({ verwalter, names }, building: string) => {
+		await verwalter.sees(outdatedDraftsOf(names.get(building)!)).toContain(String(lastYear));
+	}
+);
+
+Then('sagt die Aufgabe zu nicht aktuellen Entwürfen {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(outdatedDraftsText).toContain(text);
+});
+
+Then(
+	'steht die Aufgabe zu nicht aktuellen Entwürfen vor der Aufgabe {string}',
+	async ({ verwalter }, title: string) => {
+		await verwalter.sees(outdatedDraftsAnd(title)).toEqual(['nicht aktuell', title]);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die nicht aktuellen Entwürfe von {string} des letzten Jahres öffnet',
+	async ({ verwalter, names }, building: string) => {
+		await verwalter.attemptsTo(openOutdatedDrafts(names.get(building)!));
+	}
+);
+
+Then('zeigt die Abrechnungsliste die Entwürfe von {string} des letzten Jahres', async ({ verwalter, seed }, building: string) => {
+	await verwalter.sees(pageAddress).toMatch(
+		new RegExp(`/statements\\?building=${seed.idOf(building)}&periodStart=${lastYear}-01-01&periodEnd=${lastYear}-12-31&status=draft`)
+	);
+});
+
+Then(
+	'ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung des letzten Jahres von {string}',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.sees(pageAddress).toMatch(new RegExp(`/statements/${seed.idOf(`Abrechnung ${tenant} ${lastYear}`)}$`));
+	}
+);

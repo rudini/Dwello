@@ -7,6 +7,9 @@ import {
 	occupancyVacancyHelp,
 	overviewDeadline,
 	overviewTask,
+	outdatedDraftsTask,
+	outdatedDraftsLink,
+	overviewTaskTitles,
 	overviewTaskFor,
 	overviewTasksOf
 } from '../targets/dashboard';
@@ -40,3 +43,12 @@ export const statusFilterShown = question('the status filter of the list', async
 	const status = new URL(await actor.answer(pageAddress)).searchParams.get('status');
 	return Object.keys(statuses).find((label) => statuses[label] === status) ?? status;
 });
+export const outdatedDraftsText = Text.of(outdatedDraftsTask);
+export const outdatedDraftsOf = (name: string) => Text.of(outdatedDraftsLink(name));
+// the titles of the outdated-drafts task and of another one, in the order the page shows them
+export const outdatedDraftsAnd = (title: string) =>
+	question(`the order of «nicht aktuell» and «${title}»`, async (actor) =>
+		(await actor.answer(Text.ofAll(overviewTaskTitles)))
+			.map((shown) => (/nicht aktuell/.test(shown) ? 'nicht aktuell' : shown))
+			.filter((shown) => shown === 'nicht aktuell' || shown === title)
+	);

@@ -533,3 +533,10 @@ Then(
 Then('folgt die Kostenaufstellung im üblichen Abstand auf den Status', async ({ verwalter }) => {
 	await verwalter.sees(gapAboveCostBreakdown).toBe(32);
 });
+
+Given(
+	'der Tankbestand vom {string} im Gebäude {string} ist danach {string} Franken',
+	async ({ seed }, date: string, building: string, amount: string) => {
+		await seed.changeFuelStock(building, date, amount);
+	}
+);

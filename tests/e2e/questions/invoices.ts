@@ -3,6 +3,7 @@ import {
 	invoiceBuildingFilter,
 	invoiceRow,
 	invoiceRows,
+	invoicePeriodFilter,
 	invoicesEmptyNotice,
 	invoiceYearFilter,
 	rowAmount,
@@ -18,3 +19,5 @@ export const statusOfListedInvoice = (supplier: string) => Text.of(rowStatus(sup
 export const invoiceListEmpty = Visibility.of(invoicesEmptyNotice);
 export const chosenInvoiceBuilding = Value.chosenIn(invoiceBuildingFilter);
 export const chosenInvoiceYear = Value.chosenIn(invoiceYearFilter);
+export const invoicePeriodFilterText = Text.of(invoicePeriodFilter);
+export const invoiceShown = (description: string) => Visibility.of(invoiceRow(description));

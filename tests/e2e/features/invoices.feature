@@ -26,6 +26,20 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter die Rechnungen des Jahres 2024 im Gebäude "Seeblick" anzeigt
     Dann die Rechnungsliste enthält genau 1 Rechnung
 
+  # #454 (#408 Punkt 1): der Filter «Abrechnungsperiode» zeigt die Rechnungen, die eine Abrechnung der Periode nimmt:
+  # ohne Leistungszeitraum nach Rechnungsdatum, mit Leistungszeitraum, wenn er die Periode berührt (Regel 1)
+  @wip
+  Szenario: Rechnungen einer Abrechnungsperiode anzeigen
+    Angenommen im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2026-01-20" für die Zeit vom "2025-10-01" bis "2025-12-31"
+    Und im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2025-11-15"
+    Und im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Hauswart" über "200" Franken vom "2025-09-30"
+    Und im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Hauswart" über "250" Franken vom "2025-12-20" für die Zeit vom "2026-01-01" bis "2026-03-31"
+    Wenn der Liegenschaftsverwalter die Rechnungen der Abrechnungsperiode vom "2025-10-01" bis "2025-12-31" im Gebäude "Seeblick" anzeigt
+    Dann nennt die Rechnungsliste den Filter "Rechnungen von Seeblick, die in die Abrechnungsperiode 01.10.2025 – 31.12.2025 fallen (nach Leistungszeitraum, sonst Rechnungsdatum)"
+    Und sieht der Liegenschaftsverwalter die Rechnung "Heizung 2026-01-20"
+    Und sieht der Liegenschaftsverwalter die Rechnung "Hauswart 2025-11-15"
+    Und die Rechnungsliste enthält genau 2 Rechnungen
+
   Szenario: Nicht umlagefähige Rechnungen anzeigen
     Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung
     Wenn der Liegenschaftsverwalter die nicht umlagefähigen Rechnungen im Gebäude "Seeblick" anzeigt

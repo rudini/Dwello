@@ -690,6 +690,37 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht."
 
+  # #454 (#408 Punkt 8, #307): ein danach geänderter Tankbestand der Periode zählt wie eine geänderte Rechnung: der
+  # Verbrauch bestimmt die Heizkosten (Art. 5 Abs. 2 lit. a VMWG)
+  @wip
+  Szenario: Entwurf weist auf einen danach geänderten Tankbestand hin
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Tankbestand vom "2024-12-31" im Gebäude "Lindenhof" ist danach "200" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde der Tankbestand der Abrechnungsperiode geändert."
+
+  @wip
+  Szenario: Versendete Abrechnung weist auf einen danach geänderten Tankbestand hin
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Tankbestand vom "2024-12-31" im Gebäude "Lindenhof" ist danach "200" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieser Abrechnung wurde der Tankbestand der Abrechnungsperiode geändert."
+
+  # ein Tankbestand mit demselben Verbrauch ändert die Heizkosten nicht
+  @wip
+  Szenario: Kein Hinweis, wenn der Tankbestand der Periode unverändert ist
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann hat die Abrechnung den Status "Entwurf"
+    Und weist die Abrechnung auf keine geänderten Rechnungen hin
+
   Szenario: Kein Hinweis, solange die Rechnungen der Periode unverändert sind
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

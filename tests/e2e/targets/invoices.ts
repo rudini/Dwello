@@ -4,6 +4,8 @@ export const invoiceRow = (supplier: string) =>
 	target(`Rechnung von ${supplier} in der Liste`, (page) =>
 		page.getByTestId(/^invoice-row-/).filter({ hasText: supplier })
 	);
+// #454: the filter «Abrechnungsperiode», named above the list
+export const invoicePeriodFilter = target('Filter Abrechnungsperiode', (page) => page.getByTestId('invoice-period-filter'));
 export const invoiceRows = target('Rechnungen in der Liste', (page) => page.getByTestId(/^invoice-row-/));
 export const invoiceSearchInput = target('Suche Rechnungen', (page) => page.getByTestId('invoice-search-input'));
 export const invoiceSearchButton = target('Suchen', (page) => page.getByTestId('invoice-search-submit'));
