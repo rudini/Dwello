@@ -18,6 +18,7 @@ import {
 import { categorizeInvoice, extractInvoice, recategorizeInvoice } from './llm.service';
 import { validateInvoiceForUtilityStatement } from './utility-validation.service';
 import { buildingExists } from './building.service';
+import { periodReadings } from './fuel-stock.service';
 import { getCategory } from './category.service';
 import { roundToRappen } from './pdf-format';
 import { CodedError, refusal, type Refusal } from './coded-error';
@@ -240,6 +241,11 @@ async function applyCategory(data: Partial<NewInvoice>, categoryId: string | nul
 	if (!category.isAllowedUtilityCost) data.isValidUtilityCost = false;
 }
 
+// A credit is deducted from the invoice it belongs to, as the form says; never a negative invoice (#451, point 1)
+function refuseCredit(amount?: string) {
+	if (amount != null && parseFloat(amount) < 0) throw new CodedError('INVOICE_AMOUNT_NEGATIVE', 'The amount of an invoice cannot be negative');
+}
+
 /**
  * Create a new invoice with optional LLM categorization
  */
@@ -251,6 +257,7 @@ export async function createInvoice(
 	if (!(await buildingExists(data.buildingId))) {
 		throw new CodedError('BUILDING_NOT_FOUND', 'Building not found');
 	}
+	refuseCredit(data.amount);
 	// A file Dwello does not keep refuses the invoice before anything is saved
 	const file = beleg && checkedFile(beleg);
 
@@ -317,6 +324,7 @@ export async function updateInvoice(
 	// Check if invoice exists
 	const existing = await getInvoice(id);
 	if (!existing) return null;
+	refuseCredit(data.amount);
 
 	await applyCategory(data, 'categoryId' in data ? data.categoryId : existing.categoryId);
 
@@ -547,9 +555,11 @@ function inPeriod(
 
 /**
  * Allocable invoices of a building for a period (for statement generation): those whose Leistungszeitraum overlaps it,
- * or without one, whose Rechnungsdatum lies in it; each with its part in the period
+ * or without one, whose Rechnungsdatum lies in it; each with its part in the period. A delivery into the building's
+ * tank counts in full in the period of its delivery date, the end of its Leistungszeitraum, never split (#451, M-1)
  */
 export async function getInvoicesForStatement(buildingId: string, periodStart: string, periodEnd: string) {
+	const tank = await periodReadings(buildingId, periodStart, periodEnd);
 	const results = await selectWithDetails()
 		.where(
 			and(
@@ -562,26 +572,17 @@ export async function getInvoicesForStatement(buildingId: string, periodStart: s
 			)
 		)
 		.orderBy(invoices.invoiceDate);
+	const delivery = (invoice: (typeof results)[number]['invoice']) => !!tank?.covered && invoice.categoryId === tank.categoryId;
 
-	return results.map((row) => ({
-		...row.invoice,
-		building: row.building,
-		category: row.category,
-		distributionKey: row.distributionKey,
-		llmCategory: null,
-		inPeriod: inPeriod(row.invoice, periodStart, periodEnd)
-	}));
+	return results
+		.filter(({ invoice }) => !delivery(invoice) || !invoice.servicePeriodEnd || invoice.servicePeriodEnd <= periodEnd)
+		.map((row) => ({
+			...row.invoice,
+			building: row.building,
+			category: row.category,
+			distributionKey: row.distributionKey,
+			llmCategory: null,
+			inPeriod: delivery(row.invoice) ? { start: periodStart, end: periodEnd, amount: parseFloat(row.invoice.amount) } : inPeriod(row.invoice, periodStart, periodEnd)
+		}));
 }
 
-/**
- * Check if an invoice exists
- */
-export async function invoiceExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: invoices.id })
-		.from(invoices)
-		.where(eq(invoices.id, id))
-		.limit(1);
-
-	return !!result;
-}

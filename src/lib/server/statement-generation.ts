@@ -311,7 +311,8 @@ async function changedStatements(
 	buildingId: string,
 	run: GenerationRequest,
 	overlapping: Listed[],
-	profiles: () => Promise<Profile[]>
+	profiles: () => Promise<Profile[]>,
+	oldRule: (listed: Listed) => boolean
 ): Promise<ChangedStatement[]> {
 	const same = overlapping.filter(
 		(s) => s.periodStart === run.periodStart && s.periodEnd === run.periodEnd
@@ -333,14 +334,42 @@ async function changedStatements(
 		overlapping.map(async (listed) => {
 			const { id, statementNumber, tenantName, status } = toStatement(listed);
 			const outdated = status === 'draft' && (await changedInvoiceCount(fetch, id)) > 0;
-			const differs = settings(listed);
-			return outdated || differs.profile || differs.profileEdited || differs.fee
+			const differs = { ...settings(listed), oldRule: oldRule(listed) };
+			return outdated || differs.profile || differs.profileEdited || differs.fee || differs.oldRule
 				? { id, statementNumber, tenantName, outdated, ...differs }
 				: null;
 		})
 	);
 	return changed.filter((one) => one !== null);
 }
+
+// The building's contracts this run bills: Mietstage in the period and no statement there yet (as contractsOf); only a
+// hint, none when they do not load
+async function runContracts(fetch: Fetch, buildingId: string, run: Run, overlapping: Listed[]) {
+	const { contracts = [] }: { contracts?: Contract[] } = await call(fetch, `contracts?buildingId=${encodeURIComponent(buildingId)}&limit=1000`).catch(() => ({}));
+	return contracts.filter(
+		(c) => billsIn(c, { start: run.periodStart, end: run.periodEnd }) && !overlapping.some((s) => s.contractId === c.id)
+	);
+}
+
+// A contract moving in or out in the period: by the Heizprofil a heating invoice with a Leistungszeitraum counts only its
+// months (#339)
+const movesIn = (c: Contract, { periodStart, periodEnd }: Run) =>
+	billingStart(c) > periodStart || (!!c.endDate && c.endDate < periodEnd);
+
+// The hints on heating by the Heizprofil need the contracts this run bills (#335, #339): heating invoices without
+// Leistungszeitraum only at a move-in or move-out, a sent statement under the old rule only when the run bills another
+// contract of its apartment
+async function heatingHints(fetch: Fetch, buildingId: string, run: GenerationRequest, overlapping: Listed[], check?: InvoiceCheck) {
+	const { heatingWithoutServicePeriod: hinted = [], oldHeatingRule: sent = [] } = check ?? {};
+	const billed = hinted.length + sent.length ? await runContracts(fetch, buildingId, run, overlapping) : [];
+	const change = !!run.heatingProfileId && billed.some((c) => movesIn(c, run));
+	return { found: check && { ...check, heatingWithoutServicePeriod: change ? hinted : [] }, oldRule: rebills(sent, billed) };
+}
+
+// a sent statement under the old rule whose apartment the run bills again, by another contract
+const rebills = (sent: string[], billed: Contract[]) => (listed: Listed) =>
+	sent.includes(listed.id) && billed.some((c) => c.id !== listed.contractId && c.apartmentNumber === listed.apartment?.number);
 
 /** Per building: the utility invoices of the period, the statements whose period overlaps it and the check per category */
 export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
@@ -378,20 +407,16 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 						i.servicePeriodEnd && i.inPeriod ? [i.inPeriod.start, i.inPeriod.end] : [i.invoiceDate]
 					)
 					.sort();
+				const overlapping = (statements as Listed[]).filter((s) => overlaps(s as Period));
+				const { found, oldRule } = await heatingHints(fetch, buildingId, run, overlapping, check as InvoiceCheck | undefined);
 				return {
 					buildingId,
 					count: invoices.length,
 					first: dates[0] ?? null,
 					last: dates.at(-1) ?? null,
 					statements: (statements as Period[]).filter(overlaps).length,
-					check: check as InvoiceCheck | undefined,
-					changed: await changedStatements(
-						fetch,
-						buildingId,
-						run,
-						(statements as Listed[]).filter((s) => overlaps(s as Period)),
-						loadProfiles
-					)
+					check: found,
+					changed: await changedStatements(fetch, buildingId, run, overlapping, loadProfiles, oldRule)
 				};
 			})
 		),
@@ -403,6 +428,10 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 // The check names each category in German: here in the UI language
 const localCheck = (check: InvoiceCheck, names: Map<string, string>): InvoiceCheck => ({
 	...check,
+	heatingWithoutServicePeriod: check.heatingWithoutServicePeriod?.map((invoice) => ({
+		...invoice,
+		categoryName: (invoice.categoryId && names.get(invoice.categoryId)) || ''
+	})),
 	findings: check.findings?.map((finding) => ({
 		...finding,
 		categoryName: finding.categoryId

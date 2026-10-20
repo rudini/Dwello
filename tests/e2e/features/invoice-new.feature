@@ -48,6 +48,23 @@ Funktionalität: Neue Rechnung erfassen
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "30022025" eintippt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
 
+  # #451 (Fachreview M-1): eine Lieferung von Heizmaterial in den Tank zählt ganz in der Abrechnungsperiode ihres
+  # Lieferdatums, des Endes ihres Leistungszeitraums; der Satz steht in der Kategorie des Tanks im Gebäude, zuerst
+  # (Code-Review C-2, Persona Helga P-2, P-4)
+  Szenario: Der Leistungszeitraum erklärt die Lieferung von Heizmaterial
+    Angenommen im Gebäude "Seeblick" war am "2024-12-31" Heizöl für "600" Franken im Tank
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter die Rechnung dem Gebäude "Seeblick" zuordnet
+    Und der Liegenschaftsverwalter die Kategorie "Heizung" wählt
+    Dann erklärt das Formular beim Leistungszeitraum "Tragen Sie als Beginn und als Ende den Tag der Lieferung ein. Die Lieferung zählt dann ganz in der Abrechnungsperiode dieses Tages, auch wenn die Rechnung erst später kommt."
+
+  # Helga P-4 (#451): Fernwärme in der Kategorie «Heizung» eines Gebäudes ohne Tank ist keine Lieferung in den Tank
+  Szenario: Ohne Tank erklärt der Leistungszeitraum keine Lieferung von Heizmaterial
+    Wenn der Liegenschaftsverwalter die Rechnung dem Gebäude "Seeblick" zuordnet
+    Und der Liegenschaftsverwalter die Kategorie "Heizung" wählt
+    Dann erklärt das Formular beim Leistungszeitraum "Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an"
+    Aber erklärt das Formular beim Leistungszeitraum nicht "Tag der Lieferung"
+
   # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)
   Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre
     Dann erklärt das Formular beim Leistungszeitraum "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."

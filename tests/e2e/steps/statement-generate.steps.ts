@@ -16,6 +16,9 @@ import {
 	confirmationAsked,
 	invoiceWithoutServicePeriodOn,
 	countOfInvoicesWithoutServicePeriodOn,
+	heatingHintText,
+	heatingWithoutServicePeriodOn,
+	countOfHeatingWithoutServicePeriodOn,
 	lateInvoiceOn,
 	countOfLateInvoicesOn,
 	draftsOnly,
@@ -541,6 +544,21 @@ Then(
 
 Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
 	await verwalter.sees(countOfInvoicesWithoutServicePeriodOn(date)).toBe(0);
+});
+
+Then('sagt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(heatingHintText).toContain(text);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(heatingWithoutServicePeriodOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfHeatingWithoutServicePeriodOn(date)).toBe(0);
 });
 
 When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
