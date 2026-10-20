@@ -441,7 +441,7 @@ jobs:
       - env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RED: ${{ contains(needs.*.result, 'failure') }}
+          RED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           title="CI auf main ist rot"
