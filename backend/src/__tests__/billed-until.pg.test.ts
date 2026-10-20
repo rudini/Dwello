@@ -13,7 +13,7 @@ import { categories, contractAdvancePayments, heatingProfiles, invoices, rentalC
 import { daysAfter, swissToday } from '../services/today';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
-import { generateStatement, updateStatementStatus } from '../services/statement.service';
+import { correctStatement, generateStatement, replaceStatement, updateStatementStatus } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { readPdf } from './helpers/pdf-text';
 import { insertInvoice } from './helpers/records';
@@ -232,6 +232,77 @@ describe('Abgerechnet bis', () => {
 				'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.12.2024. Ihre Nebenkosten und Akontobeiträge bis 30.04.2024 sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst 01.05.2024 – 31.12.2024 (245 Mietstage von 366 Tagen).'
 			);
 			expect(text).toContain('Akontobeiträge ab 01.05.2024');
+		});
+
+		// fach review 499-1 V-3: the new refusal comes before the offer to delete a draft (#141)
+		it('lehnt auch mit einem Entwurf der Folgeperiode ab, ohne den Entwurf zum Löschen anzubieten', async () => {
+			const draft = await generateStatement({
+				contractId: rental.contract,
+				buildingId: rental.building,
+				periodStart: '2025-01-01',
+				periodEnd: '2025-12-31',
+				heatingProfileId,
+				managementFeePercent: 3
+			});
+			try {
+				expect(await (await billedUntil('2025-06-30')).json()).toMatchObject({ code: 'BILLED_UNTIL_BILLED' });
+			} finally {
+				await db.delete(utilityStatements).where(eq(utilityStatements.id, draft.id));
+			}
+		});
+
+		// #499, fach review 499-1 V-1 (decided: option a): a replaced statement bills those days until its berichtigte
+		// Abrechnung is sent; correcting first and entering «Abgerechnet bis» after it led to the same dead end
+		it('zählt eine ersetzte Abrechnung, solange ihre berichtigte Abrechnung fehlt oder ein Entwurf ist', async () => {
+			const [stored] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
+			await replaceStatement(statementId);
+			expect(await (await billedUntil('2024-06-30')).json()).toMatchObject({
+				code: 'BILLED_UNTIL_BILLED',
+				params: { number: stored.statementNumber }
+			});
+			const correction = await correctStatement(statementId);
+			try {
+				expect(await (await billedUntil('2024-06-30')).json()).toMatchObject({
+					code: 'BILLED_UNTIL_BILLED',
+					params: { number: stored.statementNumber }
+				});
+			} finally {
+				await db.delete(utilityStatements).where(eq(utilityStatements.id, correction.id));
+			}
+		});
+	});
+
+	// #499, fach review 499-1 V-2 (decided): with the Vertragsbeginn in the statement's period no day before it is left
+	describe('mit einer versendeten Abrechnung ab dem Vertragsbeginn', () => {
+		let later: Awaited<ReturnType<typeof createRental>>;
+		let sent: string;
+		beforeAll(async () => {
+			later = await createRental(crypto.randomUUID(), { startDate: '2024-04-01', monthlyAdvancePayment: '100' });
+			await insertInvoice(later.building, { amount: '732.00', invoiceDate: '2024-06-30' });
+			const statement = await generateStatement({
+				contractId: later.contract,
+				buildingId: later.building,
+				periodStart: '2024-01-01',
+				periodEnd: '2024-12-31',
+				heatingProfileId,
+				managementFeePercent: 3
+			});
+			sent = statement.id;
+			await updateStatementStatus(sent, 'sent');
+		});
+		afterAll(async () => {
+			await db.delete(utilityStatements).where(eq(utilityStatements.id, sent));
+			await db.delete(invoices).where(eq(invoices.buildingId, later.building));
+			await later.remove();
+		});
+
+		it('rät, das Feld leer zu lassen, statt einen Tag vor dem Vertragsbeginn zu nennen', async () => {
+			const response = await sendJson('PUT', `/api/v1/contracts/${later.contract}`, { billedUntil: '2024-06-30' });
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({
+				code: 'BILLED_UNTIL_BILLED_START',
+				params: { start: '2024-01-01', end: '2024-12-31' }
+			});
 		});
 	});
 });

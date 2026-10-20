@@ -516,11 +516,12 @@ describe('API-Verträge der Zahlung', () => {
 		expect(drift(await sample('statement-payment-reset'), actual)).toEqual([]);
 	});
 
-	// #499: the sent statement 2024 bills those days in Dwello
-	it('PUT /contracts/:id mit «Abgerechnet bis» über die versendete Abrechnung liefert die Felder von contract-billed-until-billed.json', async () => {
+	// #499: the sent statement 2024 bills those days from the Vertragsbeginn 01.01.2024 (the variant with a day before it,
+	// contract-billed-until-billed.json, is checked field by field in billed-until.pg.test.ts)
+	it('PUT /contracts/:id mit «Abgerechnet bis» über die versendete Abrechnung liefert die Felder von contract-billed-until-billed-start.json', async () => {
 		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { billedUntil: '2024-06-30' });
 		expect(response.status).toBe(400);
-		expect(drift(await sample('contract-billed-until-billed'), await response.json())).toEqual([]);
+		expect(drift(await sample('contract-billed-until-billed-start'), await response.json())).toEqual([]);
 	});
 });
 
