@@ -39,4 +39,4 @@ Funktionalität: Nutzungsbedingungen
     Dann ist der Liegenschaftsverwalter auf der Seite "Datenschutz"
 
   Szenario: Stand der Nutzungsbedingungen
-    Dann nennt die Seite den Stand "19. Oktober 2026"
+    Dann nennt die Seite den Stand "20. Oktober 2026"

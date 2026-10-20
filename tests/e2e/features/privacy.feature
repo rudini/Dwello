@@ -108,4 +108,4 @@ Funktionalität: Datenschutz
 
   # #458 (#347)
   Szenario: Stand der Datenschutzerklärung
-    Dann nennt die Seite den Stand "19. Oktober 2026"
+    Dann nennt die Seite den Stand "20. Oktober 2026"

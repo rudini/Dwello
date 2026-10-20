@@ -151,7 +151,7 @@
 	<PageHeader title={m.privacy_title()} purpose={m.privacy_purpose()} />
 	<!-- The day these texts last changed (#458) -->
 	<p class="text-ink-muted" data-testid="legal-as-of">
-		{m.legal_as_of({ date: formatDateLong('2026-10-19', { weekday: false }) })}
+		{m.legal_as_of({ date: formatDateLong('2026-10-20', { weekday: false }) })}
 	</p>
 
 	{#if data.demo}
