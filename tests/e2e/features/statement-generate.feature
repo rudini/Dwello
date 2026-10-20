@@ -235,23 +235,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann erfährt der Liegenschaftsverwalter, dass die Abrechnungen als Entwurf entstehen und nichts verschickt wird
 
-  # Fachreview M-1: eine Abrechnung, die nur einen Teil der Mietdauer in der Periode abdeckt, bleibt ein Befund
-  Szenario: Eine Abrechnung für einen Teil der Periode verlangt weiter eine Bestätigung
-    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
-    Und der Mieter "Lea Graf" existiert
-    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-01-01" für "900" Franken
-    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
-    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-07-01" bis "2025-06-30" für das Gebäude "Lindenhof" öffnet
-    Dann verlangt die Vorschau eine Bestätigung, weil es für "Lindenhof" schon Abrechnungen gibt
-
-  # Code review C-1/C-10, persona Dr. Weber P-1: wer hier einen Entwurf löscht und neu erstellt, lässt dessen Tage ohne Abrechnung
-  Szenario: Eine leere Vorschau mit offenen Mietstagen rät nicht, Entwürfe zu löschen
-    Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
-    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-07-01" bis "2025-06-30" für das Gebäude "Lindenhof" öffnet
-    Dann sagt die leere Vorschau "Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung."
-    Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude."
-
   Szenario: Eine Bestätigung gilt nur für ihre Vorschau
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
@@ -474,7 +457,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   Szenario: Schon abgerechnete Mietverträge zeigen sich bei der Wahl der Gebäude
     Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen."
+    Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung für diese Abrechnungsperiode. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen."
 
   # #201: «Alle Gebäude» wählt nur Gebäude, für die eine neue Abrechnung entsteht
   Szenario: Alle Gebäude lässt schon abgerechnete Gebäude aus
@@ -483,19 +466,76 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen."
+    Dann nennt die Wahl für "Lindenhof" "Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung für diese Abrechnungsperiode. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen."
     Wenn der Liegenschaftsverwalter alle Gebäude wählt
     Dann ist für die Abrechnungen das Gebäude "Ahornhof" gewählt
     Aber nicht das Gebäude "Lindenhof"
     Und sagt die Wahl der Gebäude, dass «Alle Gebäude» die Gebäude auslässt, deren Mietverträge alle schon eine Abrechnung haben
 
-  # Fachreview M-1: eine Abrechnung, die nur einen Teil der Mietdauer in der Periode abdeckt, lässt Tage offen
-  Szenario: Alle Gebäude wählt ein Gebäude, dessen Abrechnung nur einen Teil der Periode abdeckt
-    Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+  # #199, #408 Punkt 2: eine Abrechnungsperiode pro Tag und Gebäude; eine Periode, die eine bestehende des Gebäudes
+  # schneidet, ohne gleich zu sein, ist für das Gebäude nicht wählbar, sonst verteilt Dwello eine Rechnung über 100 %
+  Szenario: Eine Abrechnungsperiode, die eine bestehende schneidet, lässt sich nicht wählen
+    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Und für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann nennt die Wahl für "Lindenhof" "Für Lindenhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. Rechnen Sie die übrigen Tage in einer kurzen Abrechnungsperiode 01.07.2024 – 31.12.2024 ab."
+    Und lässt sich das Gebäude "Lindenhof" für diese Abrechnungsperiode nicht wählen
+
+  # Tage eines Mietvertrags in der Periode einer bestehenden Abrechnung des Gebäudes rechnet genau diese Periode ab
+  Szenario: Die Wahl nennt die bestehende Abrechnungsperiode für Mietverträge ohne Abrechnung
+    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann nennt die Wahl für "Lindenhof" "Für Lindenhof gibt es schon eine Abrechnung für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. Rechnen Sie Mietverträge ohne Abrechnung in der Abrechnungsperiode 01.07.2023 – 30.06.2024 ab. Rechnen Sie die übrigen Tage in einer kurzen Abrechnungsperiode 01.07.2024 – 31.12.2024 ab."
+
+  Szenario: Von der Wahl der Gebäude zur bestehenden Abrechnungsperiode
+    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Und der Liegenschaftsverwalter für "Lindenhof" die Abrechnungsperiode ab "2023-07-01" wählt
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Lindenhof" vom "2023-07-01" bis "2024-06-30"
+
+  Szenario: Von der Wahl der Gebäude zur kurzen Abrechnungsperiode
+    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Und für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Und der Liegenschaftsverwalter für "Lindenhof" die Abrechnungsperiode ab "2024-07-01" wählt
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Lindenhof" vom "2024-07-01" bis "2024-12-31"
+
+  # Beispiel des Fachreviews zu #408: die Rechnung vom 15.11.2024 liegt nur in der kurzen Abrechnungsperiode und
+  # zählt dort einmal ganz (Marc 184 von 184 Tagen, dazu 3 % Verwaltungspauschale); den Nachweis «nicht über 100 %»
+  # über beide Perioden trägt backend/src/__tests__/statement-period-overlap.pg.test.ts
+  @api
+  Szenario: Die kurze Abrechnungsperiode rechnet eine Rechnung nur in ihrer Periode ab
+    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Und für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "1000" Franken vom "2024-11-15"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-07-01" bis "2024-12-31" für das Gebäude "Lindenhof" öffnet
+    Dann enthält die Vorschau die Abrechnung von "Marc Huber"
+    Und die Vorschau enthält genau 1 Abrechnung
+    Und kostet die Abrechnung von "Marc Huber" "CHF 1'030.00"
+
+  # Fachreview 199-1 V-2: liegt eine bestehende Abrechnungsperiode ganz im Lauf, sind die übrigen Tage zwei Stücke,
+  # jedes eine eigene kurze Abrechnungsperiode
+  Szenario: Ein Lauf, der eine bestehende Abrechnungsperiode ganz enthält, bietet zwei kurze Abrechnungsperioden an
+    Angenommen für "Marc Huber" gibt es die Abrechnung vom "2024-10-01" bis "2024-12-31" im Gebäude "Lindenhof"
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen vom "2024-07-01" bis "2025-06-30" wählen will
-    Dann nennt die Wahl für "Lindenhof" "Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung."
-    Wenn der Liegenschaftsverwalter alle Gebäude wählt
-    Dann ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
+    Dann nennt die Wahl für "Lindenhof" "Für Lindenhof gibt es schon eine Abrechnung für 01.10.2024 – 31.12.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. Rechnen Sie die übrigen Tage in kurzen Abrechnungsperioden ab: 01.07.2024 – 30.09.2024, 01.01.2025 – 30.06.2025."
+
+  # Fachreview 199-1 V-3: in den übrigen Tagen ist die Wohnung leer; dafür gibt es nichts abzurechnen
+  Szenario: Die Wahl sagt, wenn in den übrigen Tagen kein Mietvertrag Mietstage hat
+    Angenommen für "Eva Frei" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Und für "Marc Huber" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2023 wählen will
+    Dann nennt die Wahl für "Lindenhof" "Für Lindenhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. In den übrigen Tagen hat kein Mietvertrag Mietstage; dafür ist nichts abzurechnen."
+
+  # «Alle Gebäude» wählt kein Gebäude, dessen bestehende Abrechnungsperiode die gewählte schneidet (#199)
+  Szenario: Alle Gebäude lässt ein Gebäude mit überschneidender Abrechnungsperiode aus
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen vom "2024-07-01" bis "2025-06-30" wählen will
+    Und der Liegenschaftsverwalter alle Gebäude wählt
+    Dann ist für die Abrechnungen das Gebäude "Ahornhof" gewählt
+    Aber nicht das Gebäude "Lindenhof"
 
   Szenario: Erstellte Abrechnungen anzeigen
     Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" erstellt

@@ -124,7 +124,6 @@ export const actions: Actions = {
 				preview,
 				invoices: invoices.map((row) => ({
 					...row,
-					partlyBilled: byBuilding.get(row.buildingId)?.partly ?? 0,
 					// #453 (#327): contracts «Abgerechnet bis» covers, and whether no contract is left to bill
 					...skippedIn(byBuilding.get(row.buildingId)),
 					fixedTerm: fixedTerm(row.buildingId)

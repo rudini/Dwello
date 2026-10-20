@@ -105,13 +105,31 @@ export interface ChangedStatement {
 	fee: { used: number; now: number; source: 'run' | 'contract' | 'none' } | null;
 }
 
+type Range = { start: string; end: string };
+
+/**
+ * Step 2, per building: its contracts in the period and those with a statement there already; `overlap` when the
+ * period overlaps one of the building's statement periods without being equal: the building cannot be chosen, with
+ * the ways out (#199, #408 point 2, `overlapOf` in `$lib/server/statement-generation`)
+ */
+export type Billed = {
+	contracts: number;
+	billed: number;
+	overlap?: {
+		periods: Range[];
+		choose: Range[];
+		short: Range[];
+		vacant: boolean;
+		statements: number;
+	} | null;
+};
+
 type Coverage = {
 	buildingId: string;
 	count: number;
 	first: string | null;
 	last: string | null;
 	statements?: number; // already created for this period
-	partlyBilled?: number; // contracts whose statements leave days of the period unbilled
 	check?: InvoiceCheck;
 	changed?: ChangedStatement[];
 	fixedTerm?: boolean; // the run bills a running befristeter Mietvertrag here (#76)
@@ -259,10 +277,10 @@ const coverageText = ({ count, first, last }: Coverage) => {
 const lacksInvoices = (check?: InvoiceCheck) =>
 	!!check?.findings.some((f) => f.kind === 'missing' || f.kind === 'gap' || f.kind === 'stock');
 
-/** No invoices, invoices missing in a category or statements that leave days unbilled: going on needs a confirmation;
- *  a contract whose statement covers its days gets no new one, which alone is no finding (#251) */
+/** No invoices or invoices missing in a category: going on needs a confirmation; a contract whose statement covers
+ *  its days gets no new one, which alone is no finding (#251) */
 export const needsConfirmation = (coverage: Coverage[]) =>
-	coverage.some((c) => c.count === 0 || (c.partlyBilled ?? 0) > 0 || lacksInvoices(c.check));
+	coverage.some((c) => c.count === 0 || lacksInvoices(c.check));
 
 // Findings per category; missing invoices (not a hint on new or changed costs) need a confirmation
 const categoryCheck = (check?: InvoiceCheck) => ({
@@ -282,7 +300,6 @@ export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name:
 		missing: c.count === 0,
 		existing: c.statements ?? 0,
 		changed: c.changed ?? [],
-		partlyBilled: c.partlyBilled ?? 0,
 		fixedTerm: !!c.fixedTerm,
 		skipped: c.skipped ?? [],
 		allSkipped: !!c.allSkipped,

@@ -11,15 +11,11 @@
 		billed: {
 			buildingId: string;
 			name: string;
-			partlyBilled: number;
 			changed: ChangedStatement[];
 		}[];
 		explained?: boolean; // #453: every building says itself why it has no contract to bill
 		error?: string;
 	} = $props();
-	// days a statement leaves open: deleting a draft to create it anew in this period would leave the days it billed
-	// without a statement (code review C-1, persona Dr. Weber P-1)
-	const open = $derived(billed.some((row) => row.partlyBilled > 0));
 	// the run creates nothing: only drafts missing invoices matter, not settings of new statements (#132)
 	const outdated = (changed: ChangedStatement[]) =>
 		changed
@@ -34,7 +30,7 @@
 {#if billed.length}
 	<p class="text-ink" data-testid="preview-all-billed">
 		{m.statements_all_billed_lead()}
-		{open ? m.statements_building_billed_open() : m.statements_building_recalculate()}
+		{m.statements_building_recalculate()}
 	</p>
 	<ul class="flex flex-col">
 		{#each billed as row (row.buildingId)}
