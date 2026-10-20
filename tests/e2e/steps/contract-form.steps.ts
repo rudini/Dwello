@@ -1,4 +1,5 @@
 import { createBdd } from 'playwright-bdd';
+import { errorMessageShown } from '../questions/form';
 import { test } from '../fixtures/test';
 import {
 	apartmentChoiceLabel,
@@ -645,3 +646,15 @@ When(
 		await verwalter.attemptsTo(saveStartWithAdvance(date, amount, from));
 	}
 );
+
+// #499: the refusal names the Dwello statement and offers no correction
+Then(
+	'nennt die Fehlermeldung die Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(errorMessageShown(`Für ${year} gibt es schon die Abrechnung ${await seed.statementNumber(tenant, year)} in Dwello.`)).toBe(true);
+	}
+);
+
+Then('rät die Fehlermeldung nicht zum Berichtigen', async ({ verwalter }) => {
+	await verwalter.sees(errorMessageShown('berichtigen')).toBe(false);
+});

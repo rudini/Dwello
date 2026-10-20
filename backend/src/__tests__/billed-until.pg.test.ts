@@ -188,6 +188,18 @@ describe('Abgerechnet bis', () => {
 			expect((await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: null })).status).toBe(200);
 		});
 
+		// #499 (persona Dr. Weber 453 P-1): the sent statement bills 2024 in Dwello; correcting it led to a dead end
+		it('lehnt «Abgerechnet bis» über die versendete Abrechnung ohne Weg über das Berichtigen ab', async () => {
+			const [stored] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
+			const response = await billedUntil('2024-06-30');
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({
+				code: 'BILLED_UNTIL_BILLED',
+				params: { number: stored.statementNumber, start: '2024-01-01', end: '2024-12-31', date: '2024-04-30' }
+			});
+			expect((await billedUntil('2023-12-31')).status).toBe(409); // earlier: it changes the billed Mietstage (#120)
+		});
+
 		it('lehnt ein anderes «Abgerechnet bis» ab, das ihre Mietstage ändert, und nennt sie', async () => {
 			for (const date of ['2024-06-30', null]) {
 				const response = await billedUntil(date);
