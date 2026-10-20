@@ -158,7 +158,8 @@ jobs:
     needs: changes
     if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
-    # every browser on pull requests too: a race only Firefox or WebKit loses turned main red after green pull requests
+    # Pull requests: Chromium and the API driver only; every browser on each push to main and nightly, so a race only
+    # Firefox or WebKit loses shows on main right after the merge
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -176,8 +177,9 @@ jobs:
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
-      # The axe check: Chromium only; the E2E tests: every browser (with the API driver)
-      BROWSERS: ${{ matrix.reports == 'a11y-reports' && 'chromium' || 'chromium firefox webkit' }}
+      # The axe check and pull requests: Chromium only; else the E2E tests in every browser (with the API driver)
+      BROWSERS: ${{ (matrix.reports == 'a11y-reports' || github.event_name == 'pull_request') && 'chromium' || 'chromium firefox webkit' }}
+      PROJECTS: ${{ matrix.reports == 'e2e-reports' && github.event_name == 'pull_request' && '--project=api --project=chromium' || '' }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -220,7 +222,7 @@ jobs:
         run: bunx playwright install --with-deps ${{ env.BROWSERS }}
       - name: ${{ matrix.name }}
         if: env.SKIP != 'true'
-        run: bun run test:e2e -- ${{ matrix.filter }} --shard=${{ matrix.shard }}/${{ matrix.shards }}
+        run: bun run test:e2e -- ${{ matrix.filter }} ${{ env.PROJECTS }} --shard=${{ matrix.shard }}/${{ matrix.shards }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
@@ -425,3 +427,28 @@ jobs:
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
             if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
             else await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body });
+
+  # A red run on main (after a push or nightly) opens the issue "CI auf main ist rot", or comments on it while it is open;
+  # the next green run closes it. The session whose merge it was fixes it (skill pull-request, "After the merge").
+  main-status:
+    name: Main status
+    needs: [changes, build, static-checks, unit-tests, e2e-tests, e2e-results, fallow]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RED: ${{ contains(needs.*.result, 'failure') }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="CI auf main ist rot"
+          open=$(gh issue list --state open --search "\"$title\" in:title" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -1)
+          if [ "$RED" = true ]; then
+            body="Der Lauf $RUN (${{ github.event_name }}, ${{ github.sha }}) ist fehlgeschlagen."
+            if [ -n "$open" ]; then gh issue comment "$open" --body "$body"; else gh issue create --title "$title" --label bug --body "$body"; fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --reason completed --comment "Der Lauf $RUN (${{ github.sha }}) ist grün."
+          fi

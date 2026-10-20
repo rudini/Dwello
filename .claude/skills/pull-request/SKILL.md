@@ -27,4 +27,8 @@ description: Push, open, drive to green and merge the pull request of a finished
 - Right before merging: read the check runs of the latest commit and the open findings again. Merge with a merge commit once CI is green and the pull request is mergeable, or turn on auto-merge (merge commit) once nothing but CI is left, so GitHub merges when the required checks pass; name its CI screenshot comment, or that there is none, in the closing report.
 - Never without the product owner: what `CLAUDE.md`, "When to ask", lists for pushes and merges (merging while a Blocker/Major is open includes the two kinds "Done means" lets a task finish with).
 
-Done when the pull request is merged, or its state is under "Blocked on me".
+## After the merge
+
+The push to `main` runs the full CI, every browser included; pull requests run the E2E tests in Chromium and the API driver only. A red run on `main` opens the issue «CI auf main ist rot» (job "Main status"). After the merge, arm one check-in about 45 minutes later (`send_later`) and read the run of `main` that contains the merge commit: when it is red, its failure is this task's, as a red check of the pull request was (one run may test several merges: the failing scenario and `git log` show whose). Fix it in a new pull request with `Fixes #<that issue>` from this branch restarted on `origin/main`, through this skill again; a failure that is not this merge's goes as a comment on the issue and under "Blocked on me".
+
+Done when the pull request is merged and the run of `main` with its merge is green or its failure is handled as above, or the state is under "Blocked on me".
