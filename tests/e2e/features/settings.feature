@@ -91,7 +91,6 @@ Funktionalität: Einstellungen
   # auth-routes.test.ts: die Anmeldung läuft hier nicht über Google, die Verwaltungspauschale gilt für alle parallel
   # laufenden Szenarien, und das Zurücksetzen einer Zahlung und das Berichtigen einer Abrechnung schreiben denselben
   # Eintrag wie die übrigen Änderungen.
-  # TODO(fachlich prüfen, #370): «Protokoll» steht im Glossar; die Hilfetexte folgen
   Szenario: Protokoll öffnen
     Wenn der Liegenschaftsverwalter das Protokoll öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Protokoll"

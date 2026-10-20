@@ -240,7 +240,7 @@ const translations: Record<Language, Record<string, string>> = {
 		building: 'Immobile',
 		costBreakdown: 'Riepilogo costi',
 		category: 'Categoria',
-		totalAmount: 'Costi immobile',
+		totalAmount: 'Costi dell’immobile',
 		yourShare: 'La sua quota',
 		subtotal: 'Subtotale',
 		managementFee: 'Spese di gestione',
@@ -312,13 +312,13 @@ const translations: Record<Language, Record<string, string>> = {
 		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla né riceve alcun rimborso.',
 		waivedDue: 'L’importo è inferiore a CHF 5.00. Vi rinunciamo; non deve pagare nulla.',
 		waivedRefund: 'L’importo è inferiore a CHF 5.00. Non glielo bonifichiamo.',
-		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: la quota dei costi dell’immobile a carico del suo appartamento secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio.{days}{parts} La sua quota è la quota appartamento moltiplicata per la quota temporale.{rounded}{heating}',
+		sharesNote: 'Costi dell’immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: la quota dei costi dell’immobile a carico del suo appartamento secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio.{days}{parts} La sua quota è la quota appartamento moltiplicata per la quota temporale.{rounded}{heating}',
 		sharesNoteDays: ' Per una fattura con periodo di prestazione contano i suoi giorni di locazione in tale periodo.',
 		sharesNoteParts: ' Se una voce del conteggio comprende fatture su giorni diversi, il calcolo figura sotto.',
 		sharesNoteRounded: ' La percentuale è arrotondata; la sua quota risulta dal calcolo sotto la voce.',
 		sharesNoteHeating: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento.',
 		sharesNoteHeatingParts: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento; per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo. Se questi mesi totalizzano 0\u00a0% nel profilo di riscaldamento, contano invece i suoi giorni di locazione in tale periodo.',
-		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi spese di riscaldamento e acqua calda).',
+		sharesNoteFuel: 'Costi dell’immobile per il combustibile in cisterna: il consumo (vedi spese di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
 		fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
 		fuelOpening: 'Scorta iniziale al {date}',
@@ -684,7 +684,6 @@ const totalRows = (data: StatementPDFData, t: Record<string, string>) =>
 	(rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0) + (data.advanceLines?.length ?? 0);
 const priorRow = (doc: Doc, prior: ReturnType<typeof priorLine>, top: number) => (prior ? row(doc, total(prior.label, prior.amount), top) : top);
 // «Bereits bezahlt auf NK-… und NK-…», or what the landlord already refunded
-// TODO(fachlich prüfen, #362): «Bereits bezahlt» / «Bereits zurückerstattet» have their glossary row; the help texts follow
 function priorLine(data: StatementPDFData, t: Record<string, string>) {
 	const prior = priorOf(data);
 	if (!prior) return null;
@@ -993,7 +992,6 @@ const senderParts = (config: QRBillConfig) =>
 // (Art. 8 VMWG); kept on one page
 function notes({ doc, t, data, config }: Page, y: number) {
 	const contact = senderParts(config).join(', ');
-	// TODO(fachlich prüfen, #369): «vereinbarte Nebenkosten»
 	const agreed = data.agreedCosts?.length ? [fill(t.agreedCosts, { categories: data.agreedCosts.join(', ') })] : [];
 	const advance = data.totalAdvancePayments > 0 ? [t.noteAdvance] : [];
 	const lines = [...agreed, ...advance, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];

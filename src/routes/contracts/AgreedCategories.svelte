@@ -4,7 +4,7 @@
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 
 	// #91 (Art. 257a Abs. 2 OR): the Nebenkosten the contract agrees, one box per umlagefähige category; without a choice
-	// (a new contract) every one is ticked. TODO(fachlich prüfen, #369): the term «Vereinbarte Nebenkosten»
+	// (a new contract) every one is ticked
 	let {
 		categories,
 		agreed = $bindable(),

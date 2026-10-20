@@ -16,7 +16,6 @@
 	const cents = (amount: number) => Math.round(amount * 100) / 100;
 	// a berichtigte Abrechnung also offsets what was paid on the statements it replaced (#120); a refund paid counts negative
 	const prior = $derived(statement.priorPayments ?? 0);
-	// TODO(fachlich prüfen, #362): «Bereits bezahlt» has its glossary row; the help texts follow
 	const priorLabel = (numbers: string) =>
 		prior > 0 ? m.statements_prior_paid({ numbers }) : m.statements_prior_refunded({ numbers });
 	const unrounded = $derived(cents(statement.totalCosts - statement.totalAdvancePayments - prior));

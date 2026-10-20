@@ -69,7 +69,6 @@
 <AgreementsCheck {status} {error} onretry={() => attempt++} />
 
 {#if asked.length}
-	<!-- TODO(fachlich prüfen, #369): the term «Vereinbarte Nebenkosten» -->
 	<!-- TODO(fachlich prüfen, #368): an agreement from a date (Art. 269d OR), until then the help text -->
 	<Alert tone="caution" title={m.statements_agreements_title()} testid="agreement-questions">
 		<p>{m.statements_agreements_text()}</p>

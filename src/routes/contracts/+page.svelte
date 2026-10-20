@@ -5,7 +5,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Pagination from '$lib/ui/Pagination.svelte';
+	import ResultList from '$lib/ui/ResultList.svelte';
 	import ContractFilters from './ContractFilters.svelte';
 	import ContractRow from './ContractRow.svelte';
 
@@ -57,18 +57,19 @@
 			{/if}
 		</div>
 	{:else}
-		<section aria-labelledby="contracts-count" class="flex flex-col gap-4">
-			<h2 id="contracts-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{data.total === 1
-					? m.contracts_count_one({ count: data.total })
-					: m.contracts_count({ count: data.total })}
-			</h2>
-			<ul class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
-				{#each data.contracts as contract (contract.id)}
-					<ContractRow {contract} today={data.today} />
-				{/each}
-			</ul>
-		</section>
-		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
+		<ResultList
+			id="contracts-count"
+			heading={data.total === 1
+				? m.contracts_count_one({ count: data.total })
+				: m.contracts_count({ count: data.total })}
+			url={$page.url}
+			page={data.page}
+			pageSize={data.pageSize}
+			total={data.total}
+		>
+			{#each data.contracts as contract (contract.id)}
+				<ContractRow {contract} today={data.today} />
+			{/each}
+		</ResultList>
 	{/if}
 </div>
