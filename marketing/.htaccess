@@ -1,8 +1,9 @@
 # Apache settings for the static marketing site (Infomaniak web hosting runs Apache)
 
-# Always HTTPS
+# Always HTTPS; Infomaniak ends HTTPS in front of Apache and passes the scheme in X-Forwarded-Proto
 RewriteEngine On
 RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # The build tools and notes are not part of the site
