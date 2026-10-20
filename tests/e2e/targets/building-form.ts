@@ -8,3 +8,4 @@ export const cantonSelect = target('Kanton', (page) => page.getByTestId('buildin
 export const yearBuiltInput = target('Baujahr', (page) => page.getByTestId('building-year-built-input'));
 export const noTankCheckbox = target('Kein Tank oder Tank stillgelegt', (page) => page.getByTestId('building-no-tank-checkbox'));
 export const submitButton = target('Gebäude speichern', (page) => page.getByTestId('building-form-submit'));
+export const buildingTypeSelect = target('Gebäudetyp', (page) => page.getByTestId('building-type-select'));

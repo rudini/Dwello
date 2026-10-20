@@ -48,3 +48,67 @@ describe('PUT /api/v1/buildings/:id', () => {
 		expect(await (await sendJson('GET', `/api/v1/buildings/${id}`)).json()).toMatchObject({ noTank: true });
 	});
 });
+
+// Gebäude mit seinen Wohnungen aus dem Gebäuderegister in einem Schritt (#479)
+describe('POST /api/v1/buildings mit Wohnungen', () => {
+	type Apartment = { id: string; number: string; floor: number; area: string; rooms: string; status: string };
+	const read = async <T>(path: string) => (await (await sendJson('GET', path)).json()) as T;
+	const buildingsNamed = async (name: string) =>
+		(await read<{ buildings: { id: string }[] }>(`/api/v1/buildings?search=${encodeURIComponent(name)}`)).buildings;
+	const apartmentsOf = async (id: string) =>
+		(await read<{ apartments: Apartment[] }>(`/api/v1/apartments?buildingId=${id}`)).apartments;
+	const names: string[] = [];
+	afterAll(async () => {
+		for (const name of names) {
+			for (const building of await buildingsNamed(name)) {
+				for (const apartment of await apartmentsOf(building.id)) await sendJson('DELETE', `/api/v1/apartments/${apartment.id}`);
+				await deleteBuilding(building.id);
+			}
+		}
+	});
+
+	const building = (apartments: object[]) => {
+		const name = `Registertest ${crypto.randomUUID()}`;
+		names.push(name);
+		return { name, address: 'Lindenweg 155', postalCode: '8400', city: 'Winterthur', canton: 'ZH', apartments };
+	};
+
+	it('legt das Gebäude mit seinen Wohnungen an', async () => {
+		const body = building([
+			{ number: '101', floor: 1, area: '75', rooms: '3' },
+			{ number: '201', floor: 2, area: '98', rooms: '4.5' }
+		]);
+
+		const response = await sendJson('POST', '/api/v1/buildings', body);
+
+		expect(response.status).toBe(201);
+		const { id } = (await response.json()) as { id: string };
+		const apartments = await apartmentsOf(id);
+		expect(apartments.map((a) => [a.number, a.floor, Number(a.area), Number(a.rooms), a.status])).toEqual([
+			['101', 1, 75, 3, 'vacant'],
+			['201', 2, 98, 4.5, 'vacant']
+		]);
+	});
+
+	it('legt nichts an, wenn eine Wohnungsnummer zweimal vorkommt', async () => {
+		const body = building([
+			{ number: '101', floor: 1, area: '75', rooms: '3' },
+			{ number: '101', floor: 2, area: '98', rooms: '4' }
+		]);
+
+		const response = await sendJson('POST', '/api/v1/buildings', body);
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ code: 'APARTMENT_NUMBER_TAKEN', params: { number: '101' } });
+		expect(await buildingsNamed(body.name)).toEqual([]);
+	});
+
+	it('legt auch das Gebäude nicht an, wenn eine Wohnung nicht gespeichert werden kann', async () => {
+		const body = building([{ number: '101', floor: 1.5, area: '75', rooms: '3' }]); // floor is an integer column
+
+		const response = await sendJson('POST', '/api/v1/buildings', body);
+
+		expect(response.status).toBe(400);
+		expect(await buildingsNamed(body.name)).toEqual([]);
+	});
+});

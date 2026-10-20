@@ -123,7 +123,7 @@
 				mailNotice,
 				{
 					text: m.privacy_third_3(),
-					policy: { provider: 'OpenPLZ', href: 'https://legal.stueber.de/privacy.php' }
+					policy: { provider: 'swisstopo', href: 'https://www.swisstopo.admin.ch/en/legal-framework' }
 				},
 				{ text: m.privacy_third_4(), policy: GOOGLE },
 				{ text: m.privacy_third_5() }

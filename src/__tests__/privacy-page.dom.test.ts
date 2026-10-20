@@ -189,10 +189,11 @@ describe('Datenschutzerklärung zu Anmeldung, Dritten und Cookies', () => {
 		);
 	});
 
-	it('nennt die Adresssuche von OpenPLZ, aber weder CARTO noch Google Fonts', () => {
+	it('nennt die Adresssuche im Gebäuderegister, aber weder OpenPLZ, CARTO noch Google Fonts', () => {
 		const text = page(['Google']);
 		expect(text).not.toContain('CARTO');
-		expect(text).toContain('OpenPLZ');
+		expect(text).not.toContain('OpenPLZ');
+		expect(text).toContain('Gebäude- und Wohnungsregister (GWR)');
 		expect(text).not.toContain('Google Fonts');
 	});
 
@@ -383,14 +384,16 @@ describe('Datenschutzerklärung nach #82', () => {
 		);
 	});
 
-	it('nennt OpenPLZ und Google Maps mit Land und Datenschutzerklärung', () => {
+	// Gebäuderegister (#479): der Server fragt swisstopo, nicht der Browser
+	it('nennt swisstopo und Google Maps mit Land und Datenschutzerklärung', () => {
 		page();
 
 		const text = section('Weitergabe an Dritte')?.textContent;
-		expect(text).toContain('OpenPLZ (STÜBER SYSTEMS GmbH, Deutschland)');
+		expect(text).toContain('swisstopo auf geo.admin.ch bereitstellt (Schweiz)');
+		expect(text).toContain('die IP-Adresse des Servers, nicht die des Browsers');
 		expect(text).toContain('Google Maps (Google Ireland Limited, Irland, und Google LLC, USA)');
 		expect(links('Weitergabe an Dritte')).toEqual([
-			'https://legal.stueber.de/privacy.php',
+			'https://www.swisstopo.admin.ch/en/legal-framework',
 			'https://policies.google.com/privacy'
 		]);
 	});

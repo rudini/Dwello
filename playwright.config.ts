@@ -49,7 +49,9 @@ const frontendEnv = {
 	MAIL_PROVIDER_NAME: 'Muster Mail AG',
 	MAIL_PROVIDER_COUNTRY: 'Liechtenstein',
 	// The component gallery the axe check visits (src/routes/gallery)
-	UI_GALLERY: 'on'
+	UI_GALLERY: 'on',
+	// The Gebäuderegister stand-in instead of api3.geo.admin.ch (backend/scripts/gwr-stub.ts)
+	GEO_ADMIN_URL: 'http://127.0.0.1:2529'
 };
 
 const testDir = defineBddConfig({
@@ -89,6 +91,13 @@ export default defineConfig<{ driver: Driver }>({
 			// KI stand-in: the allocability check of a new category and the reading of uploaded invoice files (backend/scripts/llm-stub.ts)
 			command: 'cd backend && bun run llm-stub',
 			port: 2527,
+			reuseExistingServer: true,
+			timeout: 30000
+		},
+		{
+			// Gebäuderegister stand-in: the address search of «Neues Gebäude» (backend/scripts/gwr-stub.ts)
+			command: 'cd backend && bun run gwr-stub',
+			port: 2529,
 			reuseExistingServer: true,
 			timeout: 30000
 		},

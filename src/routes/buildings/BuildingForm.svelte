@@ -4,8 +4,11 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { addToast } from '$lib/stores';
+	import { apiCall } from '$lib/api';
 	import AddressSearch from './AddressSearch.svelte';
-	import type { Address } from '$lib/services/openplz';
+	import RegisterApartments, { toRows, type RegisterRow } from './RegisterApartments.svelte';
+	import RegisterNotices from './RegisterNotices.svelte';
+	import type { AddressHit, RegisterBuilding } from '$lib/server/building-register';
 	import { buildingTypeLabel, buildingTypes } from '$lib/building-type';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -96,11 +99,60 @@
 		label: buildingTypeLabel(type)
 	}));
 
-	function handleAddressSelect(selected: Address) {
-		if (selected.street) address = selected.street;
+	// The Gebäuderegister (#479): what the search found, the chosen building's Wohnungen, and a Gebäude with the same
+	// address that is already entered
+	let searchOutcome = $state<'hits' | 'none' | 'unreachable'>('hits');
+	let registerRead = $state(false);
+	let rows = $state<RegisterRow[]>([]);
+	let existing = $state<{ id: string; name: string }>();
+	const submitLabel = $derived(
+		!isCreate
+			? m.buildings_save_changes()
+			: rows.some((row) => row.included)
+				? m.buildings_register_create()
+				: m.buildings_add()
+	);
+
+	// what the last chosen address proposed: a field still holding it takes the next address's proposal, one the
+	// landlord changed stays
+	let proposed = { name: '', buildingType: '', yearBuilt: '' };
+	const propose = (field: keyof typeof proposed, current: string, next: string) => {
+		const value = current === '' || current === proposed[field] ? next : current;
+		proposed[field] = next;
+		return value;
+	};
+
+	async function handleAddressSelect(selected: AddressHit) {
+		address = selected.street;
 		postalCode = selected.postalCode;
 		city = selected.city;
-		canton = selected.cantonShort;
+		canton = selected.canton;
+		name = propose('name', name, selected.street);
+		registerRead = false;
+		rows = [];
+		existing = undefined;
+		const [register, same] = await Promise.all([
+			apiCall<RegisterBuilding>(`/addresses/${selected.egid}`),
+			apiCall<{ buildings: { id: string; name: string; address: string; postalCode: string }[] }>(
+				'/buildings',
+				{
+					params: { search: selected.street }
+				}
+			)
+		]);
+		existing = same.data?.buildings.find(
+			(b) =>
+				b.address.toLowerCase() === selected.street.toLowerCase() &&
+				b.postalCode === selected.postalCode
+		);
+		if (!register.data) {
+			searchOutcome = 'unreachable';
+			return;
+		}
+		buildingType = propose('buildingType', buildingType, register.data.buildingType ?? '');
+		yearBuilt = propose('yearBuilt', yearBuilt, String(register.data.yearBuilt ?? ''));
+		rows = toRows(register.data.apartments);
+		registerRead = true;
 	}
 </script>
 
@@ -129,6 +181,13 @@
 				help={m.buildings_address_search_help()}
 				example={m.buildings_address_search_example()}
 				onselect={handleAddressSelect}
+				onfound={(outcome) => (searchOutcome = outcome)}
+			/>
+			<RegisterNotices
+				outcome={searchOutcome}
+				{existing}
+				registered={registerRead}
+				apartmentCount={rows.length}
 			/>
 		{/if}
 		<TextInput
@@ -187,6 +246,7 @@
 				placeholder={m.buildings_type_none()}
 				bind:value={buildingType}
 				optional
+				testid="building-type-select"
 			/>
 			<TextInput
 				id="yearBuilt"
@@ -214,6 +274,10 @@
 		/>
 	</fieldset>
 
+	{#if rows.length}
+		<RegisterApartments bind:rows {errors} />
+	{/if}
+
 	<div class="flex flex-col-reverse gap-4 border-t border-line pt-6 sm:flex-row">
 		<Button href={cancelHref} testid="form-cancel">{m.ui_cancel()}</Button>
 		<Button
@@ -224,7 +288,7 @@
 			busyLabel={m.ui_saving()}
 			testid="building-form-submit"
 		>
-			{isCreate ? m.buildings_add() : m.buildings_save_changes()}
+			{submitLabel}
 		</Button>
 	</div>
 </form>

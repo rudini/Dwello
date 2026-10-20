@@ -17,6 +17,7 @@
 		optional = false,
 		disabled = false,
 		onchange,
+		note,
 		testid
 	}: {
 		id: string;
@@ -31,11 +32,12 @@
 		optional?: boolean;
 		disabled?: boolean;
 		onchange?: (value: string) => void;
+		note?: { text: string; testid: string }; // see Field
 		testid?: string;
 	} = $props();
 </script>
 
-<Field {id} {label} {help} {example} {error} {optional}>
+<Field {id} {label} {help} {example} {error} {optional} {note}>
 	{#snippet children(control)}
 		<select
 			id={control.id}
