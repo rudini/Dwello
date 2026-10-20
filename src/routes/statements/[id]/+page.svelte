@@ -174,7 +174,9 @@
 	<OldAddressWarning {statement} testid="statement-old-address" />
 
 	<!-- a replaced statement is corrected by its berichtigte Abrechnung: no hint on it (#120) -->
-	{#if data.later}<LaterChanges {statement} later={data.later} />{/if}
+	{#if data.later}
+		<LaterChanges {statement} later={data.later} oncorrect={() => (showCorrect = true)} />
+	{/if}
 
 	{#if form?.actionError}
 		<Alert tone="critical" title={m.ui_action_failed()}>

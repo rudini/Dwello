@@ -12,9 +12,11 @@
 	// «Nicht berichtigen» only where it would raise the Saldo (Fachreview 454-2 M-3 B)
 	let {
 		statement,
-		later
+		later,
+		oncorrect
 	}: {
 		statement: StatementWithDetails;
+		oncorrect: () => void; // «Abrechnung berichtigen», where the hint says so (persona Anna 454 P-1)
 		later: {
 			invoices: number;
 			fuelStock: boolean;
@@ -33,6 +35,8 @@
 				: m.statements_later_title_fuel_stock()
 	);
 	const declined = $derived(statement.correctionDeclined);
+	// a warning only while something is to do (persona Anna 454 P-7)
+	const tone = $derived(statement.status === 'draft' || later.correctionDue ? 'caution' : 'info');
 	const text = $derived(
 		statement.status === 'draft'
 			? m.statements_later_draft({ later: changed })
@@ -45,12 +49,21 @@
 </script>
 
 {#if statement.status !== 'replaced' && (later.invoices || later.fuelStock)}
-	<Alert tone="caution" {title} testid="statement-later-invoices">
+	<Alert {tone} {title} testid="statement-later-invoices">
 		<p>{text}</p>
-		{#if later.correctionDeclinable}
-			<Button onclick={() => (declining = true)} testid="statement-decline-correction-button"
-				>{m.statements_decline_correction()}</Button
-			>
+		{#if statement.status !== 'draft' && later.correctionDue}
+			<div class="flex flex-wrap gap-4">
+				<Button icon="edit" onclick={oncorrect} testid="statement-later-correct-button"
+					>{m.statements_correct()}</Button
+				>
+				{#if later.correctionDeclinable}
+					<Button
+						variant="ghost"
+						onclick={() => (declining = true)}
+						testid="statement-decline-correction-button">{m.statements_decline_correction()}</Button
+					>
+				{/if}
+			</div>
 		{/if}
 	</Alert>
 	<FormDialog

@@ -659,6 +659,29 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-decline-correction-button')).toBeNull();
 	});
 
+	// Persona Anna 454 P-1: the hint leads to correcting where it says so, not only to «Nicht berichtigen»
+	it('bietet im Hinweis «Abrechnung berichtigen» an, wenn das Berichtigen fällig ist', () => {
+		later(1, 'sent', { correctionDue: true, correctionDeclinable: true });
+		click('statement-later-correct-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain('berichtigte Abrechnung ersetzt');
+	});
+
+	it('bietet im Hinweis kein Berichtigen an, wenn es nichts ändert', () => {
+		later(1, 'sent');
+		expect(byTestId('statement-later-correct-button')).toBeNull();
+	});
+
+	// Persona Anna 454 P-7: nothing left to do is no warning
+	it('warnt nicht mehr, wenn nichts zu berichtigen ist', () => {
+		later(1, 'sent');
+		expect(byTestId('statement-later-invoices')!.dataset.tone).toBe('info');
+	});
+
+	it('warnt, solange das Berichtigen fällig ist', () => {
+		later(1, 'sent', { correctionDue: true });
+		expect(byTestId('statement-later-invoices')!.dataset.tone).toBe('caution');
+	});
+
 	it('nennt den Entscheid, die Abrechnung nicht zu berichtigen', () => {
 		later(1, 'sent', {}, { correctionDeclined: { on: '2026-10-20' } });
 		expect(laterText()).toContain('Am 20.10.2026 haben Sie entschieden, die Abrechnung nicht zu berichtigen.');
