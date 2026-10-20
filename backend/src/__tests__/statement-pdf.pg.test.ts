@@ -93,11 +93,13 @@ describe('PDF der Nebenkostenabrechnung', () => {
 
 	// Periode Juli bis Dezember, ganz gemietet: kein Ein- oder Auszug, die Heizkosten gehen nach Mietstagen (Regel 5, #208)
 	it('nennt bei einem Mietvertrag über die ganze Periode die Mietstage statt des Heizprofils', async () => {
+		// its own building: one with the statement 2025 of beforeAll refuses another, overlapping period (#199)
+		const own = await createRental(crypto.randomUUID(), { startDate: '2025-07-01', monthlyAdvancePayment: '50' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-		await insertInvoice(rental.building, { categoryId: heating.id, amount: '600.00', invoiceDate: '2025-10-15' });
+		await insertInvoice(own.building, { categoryId: heating.id, amount: '600.00', invoiceDate: '2025-10-15' });
 		const part = await generateStatement({
-			contractId: rental.contract,
-			buildingId: rental.building,
+			contractId: own.contract,
+			buildingId: own.building,
 			periodStart: '2025-07-01',
 			periodEnd: '2025-12-31',
 			heatingProfileId: (await getHeatingProfileByName('Heating Mittelland'))!.id,
@@ -112,15 +114,18 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		// the chosen profile, as it was named, and why it was not applied: for the detail page (#247)
 		expect(part.heatingShare).toEqual({ byDays: true, reason: 'wholePeriod', names: { name: 'Heating Mittelland', nameDE: 'Heizung Mittelland', nameFR: 'Chauffage Plateau', nameIT: 'Riscaldamento Altipiano', nameEN: 'Heating Swiss Plateau' } });
 		expect(text).toContain('detaillierte Abrechnung der Heiz- und Warmwasserkosten verlangen');
+		await own.remove();
 	});
 
 	// Juni bis August: 0 % im Mittelland, die Heizkosten gehen nach Mietstagen (Einzug 1. Juli: 62 von 92 Tagen, #137)
 	it('nennt bei einer Periode ohne Heizanteil im Heizprofil die Mietstage und kein Heizprofil', async () => {
+		// its own building: one with the statement 2025 of beforeAll refuses another, overlapping period (#199)
+		const own = await createRental(crypto.randomUUID(), { startDate: '2025-07-01', monthlyAdvancePayment: '50' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-		await insertInvoice(rental.building, { categoryId: heating.id, amount: '300.00', invoiceDate: '2025-07-15' });
+		await insertInvoice(own.building, { categoryId: heating.id, amount: '300.00', invoiceDate: '2025-07-15' });
 		const summer = await generateStatement({
-			contractId: rental.contract,
-			buildingId: rental.building,
+			contractId: own.contract,
+			buildingId: own.building,
 			periodStart: '2025-06-01',
 			periodEnd: '2025-08-31',
 			heatingProfileId: (await getHeatingProfileByName('Heating Mittelland'))!.id,
@@ -134,6 +139,7 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		expect(text).not.toContain('Heizprofil');
 		expect(summer.heatingShare).toEqual({ byDays: true, reason: 'noHeatingMonths', names: { name: 'Heating Mittelland', nameDE: 'Heizung Mittelland', nameFR: 'Chauffage Plateau', nameIT: 'Riscaldamento Altipiano', nameEN: 'Heating Swiss Plateau' } });
 		expect(text).toContain('detaillierte Abrechnung der Heiz- und Warmwasserkosten verlangen');
+		await own.remove();
 	});
 
 	// Einzige Wohnung des Gebäudes: Wohnungsanteil = Kosten der Liegenschaft; Hauswart nach Tagen 184 / 365

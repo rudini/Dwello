@@ -29,7 +29,6 @@ describe('Vorschau der Abrechnungen', () => {
 					first: null,
 					last: null,
 					statements: 0,
-					partlyBilled: 0,
 					check: expect.anything(),
 					changed: [],
 					fixedTerm: false
@@ -38,8 +37,8 @@ describe('Vorschau der Abrechnungen', () => {
 		});
 	});
 
-	// Fachreview M-1: a statement that leaves days of the contract open is a finding of the preview
-	it('nennt pro Gebäude die Mietverträge, deren Abrechnung nur einen Teil der Periode abdeckt', async () => {
+	// #199, #408 point 2: a period that overlaps a statement period of the building without being equal is refused
+	it('lehnt die Vorschau ab, wenn die Periode eine bestehende des Gebäudes schneidet', async () => {
 		const form = new FormData();
 		for (const [name, value] of Object.entries({
 			...run,
@@ -48,7 +47,7 @@ describe('Vorschau der Abrechnungen', () => {
 		}))
 			form.append(name, value);
 		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
-		// moved in on 01.05.2024: the statement 2024 leaves 01.01.–30.06.2025 open
+		// moved in on 01.05.2024, billed for 2024: 01.07.2024–30.06.2025 overlaps that period
 		const contract = {
 			...buildingContracts.contracts[0],
 			startDate: '2024-05-01',
@@ -64,10 +63,9 @@ describe('Vorschau der Abrechnungen', () => {
 		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
 			fetch,
 			request
-		})) as {
-			invoices: { partlyBilled: number }[];
-		};
-		expect(result.invoices[0].partlyBilled).toBe(1);
+		})) as { status: number; data: { error: string } };
+		expect(result.status).toBe(400);
+		expect(result.data.error).toContain('Die gewählte Abrechnungsperiode überschneidet sich');
 	});
 
 	// #453 (#327): a contract «Abgerechnet bis» covers in full is named; its building has its own text when all are

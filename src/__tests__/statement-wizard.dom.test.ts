@@ -609,27 +609,6 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('existing-statement-2')).toBeNull();
 	});
 
-	// code review C-1 (round 2), persona Dr. Weber P-1: löscht er den Entwurf und erstellt ihn in dieser Periode neu,
-	// bleiben die Tage, die der Entwurf abrechnete, ohne Abrechnung
-	it('rät bei einer leeren Vorschau mit offenen Tagen nicht, Entwürfe zu löschen', async () => {
-		open({
-			preview: [],
-			invoices: [{ ...invoices[0], buildingId: 'b1', statements: 1, partlyBilled: 1 }]
-		});
-
-		const empty = byTestId('preview-empty')!.parentElement!.textContent!.replace(/\s+/g, ' ');
-		expect(empty).toContain(
-			'Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung.'
-		);
-		expect(empty).not.toContain('löschen Sie ihn');
-		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
-		next();
-		await settle();
-		expect(byTestId('form-error')!.textContent!.trim()).toBe(
-			'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.'
-		);
-	});
-
 	// #65: ohne Vorjahr kein Hinweis auf Monate ohne Rechnung; eine Rechnung im Jahr kann vollständig sein
 	it('weist nicht auf Monate ohne Rechnung am Anfang oder Ende der Periode hin', () => {
 		open({
@@ -1059,30 +1038,6 @@ describe('Abrechnungen erstellen', () => {
 			byTestId('existing-statements')!.querySelector('a[href="/statements?building=b1"]')
 		).not.toBeNull();
 		expect(byTestId('confirm-missing-invoices')).toBeNull();
-		next();
-		await settle();
-		expect(heading()).toBe('Erstellen');
-	});
-
-	// Fachreview M-1: die Tage, die eine Abrechnung offen lässt, rechnet dieser Lauf nicht ab
-	it('verlangt eine Bestätigung, wenn eine Abrechnung nur einen Teil der Periode abdeckt', async () => {
-		open({
-			preview,
-			invoices: [
-				{
-					buildingId: 'b1',
-					count: 3,
-					first: '2024-01-15',
-					last: '2024-12-15',
-					statements: 1,
-					partlyBilled: 1
-				}
-			]
-		});
-		next();
-		await settle();
-		expect(byTestId('form-error')!.textContent).toContain('Bestätigen Sie');
-		click('confirm-missing-invoices');
 		next();
 		await settle();
 		expect(heading()).toBe('Erstellen');
@@ -1580,7 +1535,7 @@ describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
 
 describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 	const billed = (
-		rows: { buildingId: string; contracts: number; billed: number; partly?: number }[]
+		rows: { buildingId: string; contracts: number; billed: number; overlap?: unknown; withoutFee?: [] }[]
 	) =>
 		fakeBff((call) =>
 			call.path.startsWith('/statements/billed') ? [200, rows] : [200, { invoices: [], total: 0 }]
@@ -1599,7 +1554,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung für diese Abrechnungsperiode. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 		expect(billedText('b2')).toBeUndefined();
 		// read after the building's name, not as part of it (persona Sven P-1), and a tap on it still chooses the
@@ -1630,18 +1585,18 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung für diese Abrechnungsperiode. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 		expect(billedText('b2')).toBe(
-			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung für diese Abrechnungsperiode. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen. Wenn Sie es wählen, wird dafür nichts erstellt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 	});
 
 	// #201: «Alle Gebäude» wählt nur Gebäude, für die eine neue Abrechnung entsteht, und sagt es beim Zähler
 	it('lässt bei «Alle Gebäude» die Gebäude aus, deren Mietverträge alle schon eine Abrechnung haben', async () => {
 		billed([
-			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 0 },
-			{ buildingId: 'b2', contracts: 1, billed: 0, partly: 0 }
+			{ buildingId: 'b1', contracts: 2, billed: 2 },
+			{ buildingId: 'b2', contracts: 1, billed: 0 }
 		]);
 		open();
 		await settle();
@@ -1661,11 +1616,147 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(false);
 	});
 
-	// Fachreview M-1: eine Abrechnung, die nur einen Teil der Periode abdeckt, lässt Tage offen
-	it('wählt bei «Alle Gebäude» ein Gebäude, dessen Abrechnungen Tage der Periode offen lassen', async () => {
+	// #199, #408 point 2: one Abrechnungsperiode per day and building; a period that overlaps one of the building's
+	// statements without being equal is refused, with the ways out
+	const overlap = {
+		periods: [{ start: '2023-07-01', end: '2024-06-30' }],
+		choose: [{ start: '2023-07-01', end: '2024-06-30' }],
+		short: [{ start: '2024-07-01', end: '2024-12-31' }],
+		vacant: false,
+		statements: 2
+	};
+
+	it('lässt ein Gebäude nicht wählen, dessen Abrechnungsperiode die gewählte schneidet, und nennt die Wege', async () => {
 		billed([
-			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 1 },
-			{ buildingId: 'b2', contracts: 1, billed: 1, partly: 0 }
+			{ buildingId: 'b1', contracts: 2, billed: 1, overlap },
+			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'Für Ahornhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. Rechnen Sie Mietverträge ohne Abrechnung in der Abrechnungsperiode 01.07.2023 – 30.06.2024 ab. Rechnen Sie die übrigen Tage in einer kurzen Abrechnungsperiode 01.07.2024 – 31.12.2024 ab.'
+		);
+		const checkbox = byTestId<HTMLInputElement>('generate-building-b1')!;
+		expect(checkbox.disabled).toBe(true);
+		expect(checkbox.getAttribute('aria-describedby')).toContain('building-billed-b1');
+		const existing = byTestId('generate-building-period-b1-2023-07-01')!;
+		expect(existing.getAttribute('href')).toBe(
+			'/statements/generate?building=b1&start=2023-07-01&end=2024-06-30'
+		);
+		expect(existing.textContent!.trim()).toBe('Abrechnungsperiode 01.07.2023 – 30.06.2024 wählen');
+		const short = byTestId('generate-building-period-b1-2024-07-01')!;
+		expect(short.getAttribute('href')).toBe(
+			'/statements/generate?building=b1&start=2024-07-01&end=2024-12-31'
+		);
+		expect(short.textContent!.trim()).toBe(
+			'Kurze Abrechnungsperiode 01.07.2024 – 31.12.2024 abrechnen'
+		);
+		// #486: a visible help text at the link
+		expect(byTestId('generate-building-short-help-b1')!.textContent!.trim()).toBe(
+			'Sehen Sie in den Mietverträgen nach (oft bei den Nebenkosten), ob dort eine Abrechnungsperiode steht. Dann gilt diese, bis die Mieter einer Änderung schriftlich zustimmen. Ohne Zustimmung teilen Sie die Änderung begründet mit dem amtlichen Formular mit, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR). Bis dahin rechnen Sie nach der Abrechnungsperiode im Mietvertrag ab.'
+		);
+	});
+
+	// Fachreview 199-1 V-2: a statement period inside the run leaves two pieces
+	it('nennt für mehrere Stücke übriger Tage je eine kurze Abrechnungsperiode', async () => {
+		const short = [
+			{ start: '2024-07-01', end: '2024-09-30' },
+			{ start: '2025-01-01', end: '2025-06-30' }
+		];
+		billed([
+			{
+				buildingId: 'b1',
+				contracts: 1,
+				billed: 1,
+				overlap: { periods: [{ start: '2024-10-01', end: '2024-12-31' }], choose: [], short, vacant: false, statements: 1 }
+			}
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'Für Ahornhof gibt es schon eine Abrechnung für 01.10.2024 – 31.12.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. Rechnen Sie die übrigen Tage in kurzen Abrechnungsperioden ab: 01.07.2024 – 30.09.2024, 01.01.2025 – 30.06.2025.'
+		);
+		expect(byTestId('generate-building-period-b1-2024-07-01')).not.toBeNull();
+		expect(byTestId('generate-building-period-b1-2025-01-01')).not.toBeNull();
+	});
+
+	// Fachreview 199-1 V-3: the remaining days are vacancy
+	it('sagt, wenn in den übrigen Tagen kein Mietvertrag Mietstage hat', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 1, billed: 1, overlap: { ...overlap, choose: [], short: [], vacant: true } }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'Für Ahornhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit. In den übrigen Tagen hat kein Mietvertrag Mietstage; dafür ist nichts abzurechnen.'
+		);
+	});
+
+	// persona Dr. Weber P-5 (#199): after a change of the setting «2025» could be 2025/26: the days, not the year
+	it('nennt eine bestehende Periode über ein Kalenderjahr mit ihren Tagen', async () => {
+		const year = { start: '2025-01-01', end: '2025-12-31' };
+		billed([
+			{
+				buildingId: 'b1',
+				contracts: 2,
+				billed: 1,
+				overlap: { periods: [year], choose: [year], short: [], vacant: false, statements: 1 }
+			}
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toContain('gibt es schon eine Abrechnung für 01.01.2025 – 31.12.2025.');
+		expect(billedText('b1')).toContain('in der Abrechnungsperiode 01.01.2025 – 31.12.2025 ab.');
+		expect(byTestId('generate-building-period-b1-2025-01-01')!.textContent!.trim()).toBe(
+			'Abrechnungsperiode 01.01.2025 – 31.12.2025 wählen'
+		);
+	});
+
+	it('nennt nur die bestehende Periode, wenn es keinen Weg für die übrigen Tage gibt', async () => {
+		billed([{ buildingId: 'b1', contracts: 1, billed: 1, overlap: { ...overlap, choose: [], short: [] } }]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'Für Ahornhof gibt es schon Abrechnungen für 01.07.2023 – 30.06.2024. Die gewählte Abrechnungsperiode überschneidet sich damit.'
+		);
+		expect(byTestId('generate-building-period-b1-2023-07-01')).toBeNull();
+		expect(byTestId('generate-building-short-help-b1')).toBeNull();
+	});
+
+	// code review 199-1 C-5: a building chosen before (a link, a draft, back from step 3) is no longer chosen
+	it('nimmt ein schon gewähltes Gebäude aus der Auswahl, dessen Abrechnungsperiode die gewählte schneidet', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 1, overlap, withoutFee: [] },
+			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null, withoutFee: [] }
+		]);
+		show(GeneratePage, { data: { ...data, defaultBuildingIds: ['b1'] }, form: null } as never);
+		await settle();
+		click('wizard-back');
+		await settle();
+
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(false);
+		expect(text()).toContain('0 von 2 gewählt');
+	});
+
+	it('wählt bei «Alle Gebäude» kein Gebäude, dessen Abrechnungsperiode die gewählte schneidet', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 1, overlap },
+			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null }
 		]);
 		open();
 		await settle();
@@ -1674,50 +1765,16 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 
 		click('generate-all-buildings');
 		await settle();
-		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(true);
-		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(false);
-	});
-
-	// Fachreview V-9, persona Dr. Weber P-1/P-2: offene Tage sind kein «Sie müssen es nicht wählen», und Löschen
-	// und neu Erstellen in dieser Periode rechnete die Tage der bestehenden Abrechnung nicht mehr ab
-	it('sagt bei einem Gebäude mit offenen Tagen, dass dieser Lauf sie nicht abrechnet', async () => {
-		billed([
-			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 1 },
-			{ buildingId: 'b2', contracts: 1, billed: 1, partly: 1 }
-		]);
-		open();
-		await settle();
-		next();
-		await settle();
-
-		const open_ =
-			' Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung.';
-		expect(billedText('b1')).toBe(
-			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.' +
-				open_
-		);
-		expect(billedText('b2')).toBe(
-			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.' +
-				open_
-		);
-	});
-
-	it('lässt den Rat zum Neuberechnen weg, wenn bei einigen Mietverträgen Tage offen bleiben', async () => {
-		billed([{ buildingId: 'b1', contracts: 3, billed: 2, partly: 1 }]);
-		open();
-		await settle();
-		next();
-		await settle();
-
-		expect(billedText('b1')).toBe(
-			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Mindestens eine dieser Abrechnungen deckt nicht alle Mietstage in dieser Abrechnungsperiode ab. Für die übrigen Mietstage erstellt dieser Lauf keine Abrechnung.'
-		);
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(false);
+		expect(byTestId<HTMLInputElement>('generate-building-b2')!.checked).toBe(true);
+		// the note counts only buildings whose contracts are all billed
+		expect(byTestId('generate-all-buildings-note')).toBeNull();
 	});
 
 	it('nennt beim Zähler mehrere ausgelassene Gebäude in der Mehrzahl', async () => {
 		billed([
-			{ buildingId: 'b1', contracts: 2, billed: 2, partly: 0 },
-			{ buildingId: 'b2', contracts: 1, billed: 1, partly: 0 }
+			{ buildingId: 'b1', contracts: 2, billed: 2 },
+			{ buildingId: 'b2', contracts: 1, billed: 1 }
 		]);
 		open();
 		await settle();
@@ -1742,7 +1799,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
+			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung für diese Abrechnungsperiode. Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 	});
 });
