@@ -2,7 +2,7 @@
  * Dwello API application (all routes, without starting the server)
  */
 
-import { Elysia } from 'elysia';
+import { Elysia, NotFoundError } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { dashboardRoutes } from './routes/dashboard';
@@ -57,9 +57,18 @@ export const app = new Elysia()
 	)
 	// Every schema refusal (body, query, params) with a code the UI translates, instead of Elysia's own text
 	.onError({ as: 'global' }, ({ code, set }) => {
+		if (code === 'NOT_FOUND') {
+			set.status = 404;
+			return refusal('NOT_FOUND', 'Not found');
+		}
 		if (code !== 'VALIDATION') return;
 		set.status = 422;
 		return refusal('VALIDATION_ERROR', 'Invalid request');
+	})
+	// A path id that is no UUID names no record: not found, before its schema or PostgreSQL refuse it (422, 500)
+	.onTransform({ as: 'global' }, ({ params }) => {
+		const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+		if (Object.entries(params ?? {}).some(([name, id]) => /id$/i.test(name) && !uuid.test(id ?? ''))) throw new NotFoundError();
 	})
 	// Health check endpoint
 	.get('/health', () => ({

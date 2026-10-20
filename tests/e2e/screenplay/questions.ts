@@ -144,6 +144,16 @@ export const Width = {
 		about(target, 'the width of', (element) => single(element, async (one) => (await one.boundingBox(quick))?.width ?? 0))
 };
 
+/** The space in pixels from the bottom of one target down to the top of another, null when either is missing */
+export const Gap = {
+	between: (upper: Target, lower: Target) =>
+		question(`the gap between ${upper} and ${lower}`, async (actor) => {
+			const page = pageOf(actor);
+			const [top, bottom] = await Promise.all([upper, lower].map((one) => one.locate(page).boundingBox(quick)));
+			return top && bottom ? Math.round(bottom.y - (top.y + top.height)) : null;
+		})
+};
+
 export const ThePage = {
 	url: question('the address of the page', (actor) => pageOf(actor).url()),
 	title: question('the title of the page', (actor) => pageOf(actor).title()),
