@@ -10,6 +10,7 @@
 		earlyPaidDate,
 		nextReminderLater,
 		paidDateError,
+		statusIcons,
 		statusLabels,
 		statusTones
 	} from '$lib/statement';
@@ -169,6 +170,7 @@
 		{m.statements_status_label()}
 		<Badge
 			tone={statusTones[statement.status]}
+			icon={statusIcons[statement.status]}
 			label={statusLabels[statement.status]}
 			testid="statement-status"
 		/>

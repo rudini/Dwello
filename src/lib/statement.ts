@@ -3,6 +3,7 @@ import { isDay, localToday } from '$lib/contract-status';
 import { formatDate } from '$lib/utils/format';
 import type { StatementStatus } from './types';
 import type { Tone } from './ui/tone';
+import type { IconName } from './ui/icons';
 
 // Getters: read when shown, in the language of the request
 export const statusLabels: Record<StatementStatus, string> = {
@@ -34,6 +35,9 @@ export const statusTones: Record<StatementStatus, Tone> = {
 	overdue: 'critical',
 	replaced: 'neutral'
 };
+
+/** The badge's own icon where the tone's would mislead: «Erledigt» is no hint (persona anna-448-2 P-1) */
+export const statusIcons: Partial<Record<StatementStatus, IconName>> = { settled: 'check' };
 
 /** The Saldo in words: positive, the tenant pays; negative, the tenant gets money back */
 export function balanceLabel(balance: number): string {

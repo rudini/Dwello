@@ -560,6 +560,15 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-correct-button')).not.toBeNull();
 	});
 
+	// persona anna-448-2 P-1: «Erledigt» trägt ein eigenes Symbol, nicht das «i» eines Hinweises
+	it('zeigt «Erledigt» mit einem eigenen Symbol, nicht dem eines Entwurfs', () => {
+		detail({ status: 'settled', balance: 3 });
+		const settled = byTestId('statement-status')!.querySelector('svg')!.innerHTML;
+		document.body.innerHTML = '';
+		detail({ status: 'draft' });
+		expect(settled).not.toBe(byTestId('statement-status')!.querySelector('svg')!.innerHTML);
+	});
+
 	// #403: die Schlussabrechnung fordert auch einen kleinen Betrag ein, gemahnt wird nach Ablauf der Frist
 	it('bietet bei einer überfälligen Schlussabrechnung unter CHF 5 eine Mahnung an', () => {
 		detail({ status: 'overdue', balance: 4.95, final: true });
