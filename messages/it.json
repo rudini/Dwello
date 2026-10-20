@@ -951,7 +951,7 @@
 	"invoices_more_actions": "Altre azioni",
 	"invoices_delete": "Eliminare la fattura",
 	"invoices_delete_text": "La fattura di {name} di {amount} verrà eliminata. Non confluirà più in nessun nuovo conteggio spese accessorie. L’operazione non può essere annullata.",
-	"invoices_delete_billed_text": "Elimini solo le fatture registrate per errore o le fatture d’acconto che una fattura finale sostituisce. Le bozze contengono ancora questa fattura: ricalcoli poi le bozze con «Ricalcolare» sulla loro pagina. I conteggi inviati o pagati li rettifica con «Rettificare il conteggio» sul conteggio; il conteggio rettificato computa quanto è già stato pagato. Conservi la fattura originale: l’inquilino può chiedere di consultarla.",
+	"invoices_delete_billed_text": "Elimini solo le fatture registrate per errore o le fatture d’acconto al cui posto subentra una fattura finale. Se una fattura finale sostituisce questa fattura d’acconto, registri prima la fattura finale. Le bozze contengono ancora questa fattura: ricalcoli poi le bozze con «Ricalcolare» sulla loro pagina. I conteggi inviati o pagati li rettifica con «Rettificare il conteggio» sul conteggio; il conteggio rettificato computa quanto è già stato pagato. Conservi la fattura originale: l’inquilino può chiedere di consultarla.",
 	"invoices_upload_open": "Caricare fatture",
 	"invoices_upload_purpose": "Scelga l’immobile e i file delle Sue fatture. L’IA legge i dati; Lei li verifica prima che Dwello crei le fatture.",
 	"invoices_upload_building_first": "Scelga prima l’immobile.",

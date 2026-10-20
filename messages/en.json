@@ -951,7 +951,7 @@
 	"invoices_more_actions": "More actions",
 	"invoices_delete": "Delete invoice",
 	"invoices_delete_text": "The invoice from {name} for {amount} will be deleted. It will then no longer go into any new utility cost statement. This cannot be undone.",
-	"invoices_delete_billed_text": "Delete only invoices recorded by mistake or advance invoices that a final invoice replaces. The drafts still contain it: then recalculate the drafts with «Recalculate» on their page. Correct sent or paid statements with «Correct statement» on the statement; the corrected statement offsets what has already been paid. Keep the original invoice: the tenant may ask to inspect it.",
+	"invoices_delete_billed_text": "Delete only invoices recorded by mistake or advance invoices replaced by a final invoice. If a final invoice replaces this advance invoice, enter the final invoice first. The drafts still contain it: then recalculate the drafts with «Recalculate» on their page. Correct sent or paid statements with «Correct statement» on the statement; the corrected statement offsets what has already been paid. Keep the original invoice: the tenant may ask to inspect it.",
 	"invoices_upload_open": "Upload invoices",
 	"invoices_upload_purpose": "Choose the building and the files of your invoices. The AI reads the details; you check them before Dwello creates the invoices.",
 	"invoices_upload_building_first": "Choose the building first.",
