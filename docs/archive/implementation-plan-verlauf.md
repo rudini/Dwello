@@ -2066,6 +2066,23 @@ Branch `w6-issue-458`, worker W6 of a coordinated run (the checklist was kept in
 - [x] fach-reviewer round 2 (`docs/reviews/458-fachreview-2.md`): links, when and how, export, Art. 9 DSG on /terms (b6006970), tests and a navigation scenario seen red
 - [x] Closing code-reviewer rounds (`docs/reviews/458-review-2.md`, after the date fix R-12 and the merge with #479 `458-review-3.md`: no finding)
 - [x] Affected E2E (chromium) green; PR `Fixes #458`, `Fixes #330`, `Fixes #333`
+## Session W10: fr/it/en words of #405 (#461, with #501) (2026-10-19)
+
+Branch `w10-issue-461`, worker W10 of a coordinated run (checklist also in the pull request; Session C1 of another branch stays in the plan, coordinator's rule).
+
+- [x] `@wip` scenarios «Die Wohnungssuche übergeht das Wort für Wohnung in jeder Sprache» (`apartments.feature`) and «Eigener Verteilschlüssel mit französischem Namen» (`distribution-keys.feature`), seen red at the missing behaviour
+- [x] fach-reviewer before implementing (`docs/reviews/461-fachreview-1.md`), Ersatzmieter review as `docs/reviews/405-fachreview-1.md`
+- [x] 1a «répercutable», 1d «degré de confiance» / «grado di certezza», 1e «annullare la disdetta», 2b «frais d’administration» / «spese amministrative» (UI and PDF), Ersatzmieter it «inquilino sostitutivo»; guard tests in `src/__tests__/i18n.test.ts`
+- [x] 3a migration `0027_master_data_names.sql` (renumbered twice after merges of `main`) with `migrations.pg.test.ts`; `PREDEFINED_DISTRIBUTION_KEYS` and `POST /distribution-keys/initialize` removed
+- [x] 3b optional fr/it/en names on the forms of Verteilschlüssel and Heizprofil (`NameTranslations.svelte`, shared with the category form), API accepts `null`
+- [x] 4 apartment search ignores «wohnung», «appartement», «appartamento», «apartment» (`word-search.test.ts`)
+- [x] `docs/design/i18n-begriffe.md` without ❓ (Nebenkostenpauschale: product owner option A, 2026-10-19), new rows Umlagefähigkeit, Akonto verrechnen, Vordefiniert
+- [x] 5 native reads fr/it/en (`docs/reviews/461-native-{fr,it,en}.md`) applied; FR-6 U+00A0, EN-4 «», IT-20 lowercase courtesy forms, EN-32 English floor ordinals (UI and PDF); `glossary_fee_text` left to #447 (W7)
+- [x] Code review rounds 1–3 (`docs/reviews/461-review-{1,2,3}.md`), fach-reviewer round 2 (`461-fachreview-2.md`)
+- [x] #501 (decided on the product owner's delegation): `contracts_notice_period_short` names the proposed Ersatzmieter (Art. 264 Abs. 1 OR)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-461.md`, `weber-461.md`), daten-pruefer (`docs/reviews/461-datenpruefung-1.md`, no finding); Weber P-2–P-5 as #511, Helga P-1 as U-41
+- [x] Workflow note (`docs/reviews/workflow-notes-issue-461.md`)
+- [x] Affected E2E features green; PR `Fixes #461`, `Fixes #501`
 ## Session B1: malformed id and statement gap (2026-10-19)
 
 Branch `claude/fix-invalid-id-and-statement-gap`. Product owner: two bugs from the persona stack. (1) A detail page with an id that is no UUID (`/invoices/abc`, `/invoices/upload`, `/buildings/abc` …) answers 500 instead of 404. (2) The statement detail page shows an empty gap of about 150 px between «Status» and «Kostenaufstellung».

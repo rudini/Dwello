@@ -160,4 +160,15 @@ describe('Verteilschlüssel bearbeiten', () => {
 		expect(byTestId<HTMLInputElement>('distribution-key-formula-input')!.value).toBe('{rooms} * 2');
 		expect(byTestId('form-error')!.textContent).toContain('Formel ist ungültig');
 	});
+
+	// #461 (#345, 3b): wie beim Kategorie-Formular, für die Abrechnung eines Mieters mit dieser Sprache
+	it('übernimmt die Namen auf Französisch, Italienisch und Englisch und erklärt sie', () => {
+		const data = { key: { ...key('k2', 'Eigener', 'custom'), nameFR: 'Propre', nameIT: null, nameEN: 'Own' } };
+		show(EditKeyPage, { data, form: null } as never);
+
+		expect(byTestId<HTMLInputElement>('distribution-key-name-fr-input')!.value).toBe('Propre');
+		expect(byTestId<HTMLInputElement>('distribution-key-name-it-input')!.value).toBe('');
+		expect(byTestId<HTMLInputElement>('distribution-key-name-en-input')!.value).toBe('Own');
+		expect(text()).toContain('Fehlt er, steht der deutsche Name.');
+	});
 });

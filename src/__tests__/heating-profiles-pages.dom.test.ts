@@ -161,6 +161,19 @@ describe('Heizprofil erfassen und bearbeiten', () => {
 		);
 	});
 
+	// #461 (#345, 3b): wie beim Kategorie-Formular, für die Abrechnung eines Mieters mit dieser Sprache
+	it('übernimmt beim Bearbeiten die Namen auf Französisch, Italienisch und Englisch und erklärt sie', () => {
+		show(EditProfilePage, {
+			data: { profile: { ...profile('custom'), nameFR: 'Hiver', nameIT: null, nameEN: 'Winter' } },
+			form: null
+		} as never);
+
+		expect(byTestId<HTMLInputElement>('heating-profile-name-fr-input')!.value).toBe('Hiver');
+		expect(byTestId<HTMLInputElement>('heating-profile-name-it-input')!.value).toBe('');
+		expect(byTestId<HTMLInputElement>('heating-profile-name-en-input')!.value).toBe('Winter');
+		expect(text()).toContain('Fehlt er, steht der deutsche Name.');
+	});
+
 	it('sagt beim Erfassen nichts über bestehende Abrechnungen', () => {
 		show(NewProfilePage, { form: null } as never);
 		expect(byTestId('heating-profile-shares-help')!.textContent).toContain('Die Monatsanteile verteilen');
