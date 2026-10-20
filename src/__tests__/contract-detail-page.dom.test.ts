@@ -368,6 +368,17 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('contract-missing-statement-link-2025-07-01')).toBeNull();
 	});
 
+	// persona Dr. Weber P-5: after a change of the setting «2024» could be 2024/25: the link names the days
+	it('nennt eine bestehende Periode über ein Kalenderjahr mit ihren Tagen', () => {
+		const way = { kind: 'existing', start: '2024-01-01', end: '2024-12-31' };
+		open('2024-04-01', null, null, '2026-10-10', false, [
+			{ start: '2024-07-01', end: '2024-12-31', href: '/statements/generate?existing', way }
+		]);
+		expect(byTestId('contract-missing-statement-link-2024-07-01')!.textContent!.trim()).toBe(
+			'Abrechnungsperiode 01.01.2024 – 31.12.2024 wählen'
+		);
+	});
+
 	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {
 		const missing = [{ start: '2024-07-01', end: '2025-06-30', href: '/statements/generate' }];
 		open('2024-04-01', null, null, '2026-10-10', false, missing);

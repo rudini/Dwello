@@ -242,6 +242,17 @@ describe('Abrechnungsperiode, die eine bestehende des Gebäudes schneidet', () =
 		]);
 	});
 
+	// persona Dr. Weber P-5: a calendar year by its days, not «2024»
+	it('nennt in der Ablehnung ein Kalenderjahr mit seinen Tagen', async () => {
+		const { fetch } = backend([
+			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31' }
+		]);
+
+		await expect(
+			previewStatements(fetch, { ...period, periodStart: '2024-07-01', periodEnd: '2025-06-30' })
+		).rejects.toThrow('von Seeblick (01.01.2024 – 31.12.2024)');
+	});
+
 	// code review 199-2 C-10: every refused building is named
 	it('nennt in der Ablehnung jedes abgelehnte Gebäude', async () => {
 		const fetch = (async (url: string) => {
