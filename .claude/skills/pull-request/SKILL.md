@@ -5,7 +5,7 @@ description: Push, open, drive to green and merge the pull request of a finished
 
 # Pull request
 
-`CLAUDE.md`, "Done means", says when a task is ready for this; nothing is pushed before. Only the session that holds the product owner's task runs this skill, never a subagent or a session it started.
+`CLAUDE.md`, "Done means", says when a task is ready for this; nothing is pushed before, except the draft of a session without subagents (Workflow 5), which stays a draft and is not merged until the missing reviews ran. Only the session that holds the product owner's task runs this skill, never a subagent or a session it started.
 
 ## Which pull requests
 
