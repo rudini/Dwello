@@ -73,6 +73,8 @@ import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from
 import { advancePaymentFromInput, advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
+import { chooseRegisterAddress, registerUnreachable, searchRegister } from './building-register';
+import { registerNotice } from '../targets/building-register';
 import { advanceDeleteButton } from '../targets/contract-detail';
 import { UPLOADED } from '../fixtures/screens';
 
@@ -187,12 +189,27 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'login-not-allowed': () => Wait.until(on.loginError),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
+	// the Gebäuderegister of «Neues Gebäude» (#479), answered by its stand-in (backend/scripts/gwr-stub.ts)
+	'register-preview': () => chooseRegisterAddress('Birkenweg 7'),
+	'register-submit-missing': () => (actor) =>
+		actor.attemptsTo(chooseRegisterAddress('Birkenweg 7'), Click.on(on.saveButton), Wait.until(on.formProblem)),
+	// the seeded buildings stand at «Testweg 1», so the register's building without Wohnungen is already entered
+	'register-no-apartments': () => chooseRegisterAddress('Testweg 1'),
+	'register-no-hit': () => (actor) => actor.attemptsTo(searchRegister('Nirgendweg 3'), Wait.until(registerNotice)),
+	'register-unreachable': () => (actor) =>
+		actor.attemptsTo(registerUnreachable, searchRegister('Lindenweg 155'), Wait.until(registerNotice)),
 	'submit-cleared': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('').intoEach(on.requiredFields), Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// saved as loaded
 	'saved-toast': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.savedToast)),
+	// a page whose data fails to load, from the 404 page's «Zur Übersicht»: only the page's data request fails
+	// (root layout and page, '11'); the error page's own request ('1') answers, else SvelteKit loads the page anew
 	'server-error': () => async (actor) =>
-		actor.attemptsTo(Wait.until(on.text(await say(actor, 'Versuchen Sie es später erneut.')))),
+		actor.attemptsTo(
+			FailRequests.to('/dashboard/__data.json', { 'x-sveltekit-invalidated': '11' }),
+			Click.on(on.link(await say(actor, 'Zur Übersicht'))),
+			Wait.until(on.text(await say(actor, 'Versuchen Sie es später erneut.')))
+		),
 	// French chosen with the language selection (the page reloads); later viewports start in French already
 	'other-language': () => async (actor) => {
 		if ((await actor.answer(pageLanguage)) !== 'fr')

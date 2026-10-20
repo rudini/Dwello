@@ -41,6 +41,9 @@ export const Value = {
 		about(target, 'the value of', (element) =>
 			single(element, async (one) => one.evaluate((field) => (field as HTMLInputElement).value, undefined, quick))
 		),
+	/** The values of all fields the target finds, in page order */
+	ofAll: (target: Target) =>
+		about(target, 'the values of', (element) => element.evaluateAll((all) => all.map((field) => (field as HTMLInputElement).value))),
 	/** The label of the chosen option of a select */
 	chosenIn: (target: Target) =>
 		about(target, 'the chosen option of', (element) =>
@@ -59,6 +62,10 @@ export const HiddenText = {
 			)
 		)
 };
+/** The data-testid of the element that has the focus, null without one */
+export const FocusedElement = question('the focused element', (actor) =>
+	pageOf(actor).evaluate(() => document.activeElement?.getAttribute('data-testid') ?? null)
+);
 export const Visibility = { of: (target: Target) => about(target, 'whether shown:', (element) => element.isVisible()) };
 export const Count = { of: (target: Target) => about(target, 'how many of', (element) => element.count()) };
 export const Enabled = {
@@ -135,6 +142,16 @@ export const ShareInViewport = {
 export const Width = {
 	of: (target: Target) =>
 		about(target, 'the width of', (element) => single(element, async (one) => (await one.boundingBox(quick))?.width ?? 0))
+};
+
+/** The space in pixels from the bottom of one target down to the top of another, null when either is missing */
+export const Gap = {
+	between: (upper: Target, lower: Target) =>
+		question(`the gap between ${upper} and ${lower}`, async (actor) => {
+			const page = pageOf(actor);
+			const [top, bottom] = await Promise.all([upper, lower].map((one) => one.locate(page).boundingBox(quick)));
+			return top && bottom ? Math.round(bottom.y - (top.y + top.height)) : null;
+		})
 };
 
 export const ThePage = {

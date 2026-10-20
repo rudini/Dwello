@@ -14,6 +14,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Liegenschaft** | Synonym für Gebäude im Verwaltungskontext. | — |
 | **Gebäudetyp** | Klassifikation: Mehrfamilienhaus, Einfamilienhaus, Geschäftshaus, Gewerbegebäude, Mischnutzung. | `building_type` Feld |
 | **Baujahr** | Jahr der Erstellung des Gebäudes. | `year_built` Feld |
+| **Gebäuderegister** | Eidgenössisches Gebäude- und Wohnungsregister (GWR) des Bundesamts für Statistik; Gemeinde oder Kanton tragen die Angaben nach. Dwello übernimmt beim Erfassen eines Gebäudes daraus Adresse, Kanton, Baujahr, Gebäudetyp und die Wohnungen. Enthält keine Geschäftsräume. | `src/lib/server/building-register.ts` (geo.admin.ch, #479) |
 | **Wohnung** | Einzelne Mieteinheit innerhalb eines Gebäudes. Besitzt Wohnungsnummer, Stockwerk, Fläche (m²) und Zimmeranzahl. | `apartments` Tabelle |
 | **Wohnungsnummer** | Bezeichnung der Wohnung im Gebäude (z.B. 3.01), pro Gebäude eindeutig. | `number` Feld |
 | **Stockwerk** | Lage der Wohnung: UG, EG, 1. OG, 2. OG usw. | `floor` Feld (Zahl: -1 = UG, 0 = EG) |
@@ -56,7 +57,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Nicht vereinbart** | Der Liegenschaftsverwalter hat angegeben, dass der Mietvertrag die Kategorie nicht vorsieht; Dwello fragt nicht mehr nach. | `agreed = false` |
 | **Vereinbart ab** | Tag, ab dem eine Kategorie im Mietvertrag vereinbart ist, z.B. weil der Vermieter sie mit dem amtlichen Formular neu eingeführt hat (Art. 269d Abs. 3 OR). Leer: ab Vertragsbeginn. Dwello rechnet die Kategorie nur für die Tage ab diesem Datum ab. | geplant (#407) |
 | **Vereinbarte Verwaltungspauschale** | Ob der Mietvertrag eine Verwaltungspauschale vereinbart: «Ja, zum Satz des Abrechnungslaufs», «Ja, mit eigenem Satz» oder «Nein». Pflichtwahl beim Erfassen eines Mietvertrags, ohne Vorgabe. Bestehende Mietverträge gelten als «Nein», bis der Vermieter einträgt, was der Mietvertrag sagt. Eine neue Verwaltungspauschale während des Mietverhältnisses braucht das amtliche Formular (Art. 269d Abs. 3 OR). | `management_fee_agreed` Feld |
-| **Eigener Satz** | Prozentsatz der Verwaltungspauschale, der im Mietvertrag steht; geht dem Satz des Abrechnungslaufs vor. Grösser als 0 bis 10 %. | `management_fee_percent` Feld; «grösser als 0» geplant (#402) |
+| **Eigener Satz** | Prozentsatz der Verwaltungspauschale, der im Mietvertrag steht; geht dem Satz des Abrechnungslaufs vor. Grösser als 0 bis 10 %. | `management_fee_percent` Feld |
 | **Mietzinsdepot** | Sicherheit in Geld, die der Mieter leistet und die der Vermieter bei einer Bank auf einem Sparkonto oder Depot auf den Namen des Mieters hinterlegt; bei Wohnräumen höchstens drei Monatszinse (Art. 257e OR). Dwello erfasst es nicht. | — |
 | **Freigabe des Mietzinsdepots** | Die Bank gibt das Mietzinsdepot heraus: mit Zustimmung beider Parteien, gestützt auf einen rechtskräftigen Zahlungsbefehl oder ein rechtskräftiges Gerichtsurteil. Hat der Vermieter innert einem Jahr nach Ende des Mietverhältnisses keinen Anspruch rechtlich geltend gemacht, kann der Mieter es von der Bank zurückverlangen (Art. 257e Abs. 3 OR). In der Oberfläche «bis das Mietzinsdepot freigegeben ist». | — |
 

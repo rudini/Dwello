@@ -6,7 +6,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Pagination from '$lib/ui/Pagination.svelte';
+	import ResultList from '$lib/ui/ResultList.svelte';
 	import InvoiceRow from './InvoiceRow.svelte';
 	import InvoiceSearch from './InvoiceSearch.svelte';
 	import UploadResult from './UploadResult.svelte';
@@ -98,16 +98,18 @@
 			{/if}
 		</div>
 	{:else}
-		<section class="flex flex-col gap-4" aria-labelledby="invoices-count">
-			<h2 id="invoices-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{data.total === 1 ? m.invoices_count_one() : m.invoices_count({ count: data.total })}
-			</h2>
-			<ul class="divide-y divide-line rounded-panel border border-line bg-surface">
-				{#each data.invoices as invoice (invoice.id)}
-					<InvoiceRow {invoice} />
-				{/each}
-			</ul>
-		</section>
-		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
+		<ResultList
+			id="invoices-count"
+			heading={data.total === 1 ? m.invoices_count_one() : m.invoices_count({ count: data.total })}
+			listClass="divide-y divide-line rounded-panel border border-line bg-surface"
+			url={$page.url}
+			page={data.page}
+			pageSize={data.pageSize}
+			total={data.total}
+		>
+			{#each data.invoices as invoice (invoice.id)}
+				<InvoiceRow {invoice} />
+			{/each}
+		</ResultList>
 	{/if}
 </div>

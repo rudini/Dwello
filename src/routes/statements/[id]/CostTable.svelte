@@ -20,7 +20,6 @@
 	// what was paid, without a Saldo the next statement counts as its Übertrag: that one is «Bereits verrechnet» (#448)
 	const prior = $derived(cents((statement.priorPayments ?? 0) - offset));
 	const carry = $derived(statement.carriedFrom?.balance ?? 0);
-	// TODO(fachlich prüfen, #362): «Bereits bezahlt» has its glossary row; the help texts follow
 	const priorLabel = (numbers: string) =>
 		prior > 0 ? m.statements_prior_paid({ numbers }) : m.statements_prior_refunded({ numbers });
 	const unrounded = $derived(

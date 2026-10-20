@@ -9,6 +9,7 @@ import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
 import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments } from '../db/schema';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
 import { insertInvoice } from './helpers/records';
@@ -374,9 +375,17 @@ describe('API-Verträge des Frontends', () => {
 	});
 
 	it('POST /statements/:id/generate-pdf, das scheitert, liefert die Felder von statement-pdf-failed.json', async () => {
-		const response = await sendJson('POST', '/api/v1/statements/keine-id/generate-pdf', {});
-		expect(response.status).toBe(500);
-		expect(drift(await sample('statement-pdf-failed'), await response.json())).toEqual([]);
+		const iban = await getConfig('iban');
+		await setConfig('iban', 'CH9300762011623852957');
+		try {
+			// a language the PDF has no texts for: an unexpected failure
+			const response = await sendJson('POST', `/api/v1/statements/${statementId}/generate-pdf`, { language: 'xx' });
+			expect(response.status).toBe(500);
+			expect(drift(await sample('statement-pdf-failed'), await response.json())).toEqual([]);
+		} finally {
+			if (iban) await setConfig('iban', iban);
+			else await deleteConfig('iban');
+		}
 	});
 
 	it('eine Anfrage, die das Schema verletzt, liefert die Felder von validation-refused.json', async () => {
@@ -440,6 +449,20 @@ describe('API-Verträge des Frontends', () => {
 	});
 
 	// the 2024 statement bills its rent days: confirmed or not, it stays (#116)
+	it('POST /buildings mit einer Wohnungsnummer zweimal liefert die Felder von building-apartment-number-taken.json', async () => {
+		const apartment = { number: '101', floor: 1, area: '70', rooms: '3' };
+		const response = await sendJson('POST', '/api/v1/buildings', {
+			name: `Vertrag ${crypto.randomUUID()}`,
+			address: 'Lindenweg 155',
+			postalCode: '8400',
+			city: 'Winterthur',
+			canton: 'ZH',
+			apartments: [apartment, apartment]
+		});
+		expect(response.status).toBe(409);
+		expect(drift(await sample('building-apartment-number-taken'), await response.json())).toEqual([]);
+	});
+
 	it('DELETE /contracts/:id eines Mietvertrags mit Abrechnung liefert die Felder von contract-delete-refused.json', async () => {
 		const response = await callApi(`/api/v1/contracts/${rental.contract}?confirmMistake=true`, { method: 'DELETE' });
 		expect(response.status).toBe(409);

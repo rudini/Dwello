@@ -14,6 +14,12 @@
 	let { statement, open = $bindable() }: { statement: StatementWithDetails; open: boolean } =
 		$props();
 
+	// in a chain (second text), part of it was paid on the statements this one replaced, on other days; net, paid or
+	// refunded (#447)
+	const offsetText = {
+		paid: [m.statements_correct_paid, m.statements_correct_paid_chain],
+		refunded: [m.statements_correct_refunded, m.statements_correct_refunded_chain]
+	};
 	// what the berichtigte Abrechnung will offset: the payment recorded and what this one offset itself, or nothing
 	// yet; a refund is paid by the landlord (Fachreview W2e V-1, V-6, V-12, V-13)
 	// a settled one, or a refund settled under #94, whose Saldo may be carried over already (#448, Fachreview 448-3 V-25)
@@ -38,9 +44,7 @@
 			amount: formatCurrency(Math.abs(offset)),
 			date: formatDate(statement.paidDate)
 		};
-		// in a chain, part of it was paid on the statements this one replaced, on other days
-		if (statement.priorPayments) return m.statements_correct_paid_chain(paid);
-		return offset < 0 ? m.statements_correct_refunded(paid) : m.statements_correct_paid(paid);
+		return offsetText[offset < 0 ? 'refunded' : 'paid'][statement.priorPayments ? 1 : 0](paid);
 	});
 	// #448 (5): what was already paid on a sent or overdue statement, also a part; on a refund by the landlord
 	const askPaid = $derived(statement.status === 'sent' || statement.status === 'overdue');

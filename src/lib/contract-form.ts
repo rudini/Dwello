@@ -130,6 +130,13 @@ function baseRentError(baseRent: string) {
 const amountError = (amount: string) =>
 	amount && !FRANCS.test(String(amount)) ? amountHint() : undefined;
 
+// An own rate is greater than 0 up to 10 %: 0 % means «Nein» (#447, decided in #402)
+function ownRateError(typed: string) {
+	const rate = parsePercent(typed);
+	if (rate === 0) return m.contracts_error_fee_rate_zero();
+	return isFeeRate(rate) ? undefined : m.contracts_error_fee_rate();
+}
+
 /** Error message per field; empty when the contract can be saved */
 export function validateContract(values: ContractFormValues): Record<string, string> {
 	const errors = {
@@ -147,9 +154,7 @@ export function validateContract(values: ContractFormValues): Record<string, str
 		flatRateUtilityCharge: amountError(values.flatRateUtilityCharge ?? ''),
 		managementFee: values.managementFee ? undefined : m.contracts_error_fee_choice(),
 		managementFeeRate:
-			values.managementFee === 'own' && !isFeeRate(parsePercent(values.managementFeeRate))
-				? m.statements_error_fee()
-				: undefined
+			values.managementFee === 'own' ? ownRateError(values.managementFeeRate) : undefined
 	};
 	return Object.fromEntries(Object.entries(errors).filter(([, message]) => message)) as Record<
 		string,

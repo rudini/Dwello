@@ -5,7 +5,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Pagination from '$lib/ui/Pagination.svelte';
+	import ResultList from '$lib/ui/ResultList.svelte';
 	import TenantFilters from './TenantFilters.svelte';
 	import TenantRow from './TenantRow.svelte';
 
@@ -56,16 +56,19 @@
 			{/if}
 		</div>
 	{:else}
-		<section aria-labelledby="tenants-count" class="flex flex-col gap-4">
-			<h2 id="tenants-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{(data.total === 1 ? m.tenants_count_one : m.tenants_count_many)({ count: data.total })}
-			</h2>
-			<ul class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
-				{#each data.tenants as tenant (tenant.id)}
-					<TenantRow {tenant} />
-				{/each}
-			</ul>
-		</section>
-		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
+		<ResultList
+			id="tenants-count"
+			heading={(data.total === 1 ? m.tenants_count_one : m.tenants_count_many)({
+				count: data.total
+			})}
+			url={$page.url}
+			page={data.page}
+			pageSize={data.pageSize}
+			total={data.total}
+		>
+			{#each data.tenants as tenant (tenant.id)}
+				<TenantRow {tenant} />
+			{/each}
+		</ResultList>
 	{/if}
 </div>

@@ -1,10 +1,11 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Attribute, Count, Text, Value } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Gap, Text, Value } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
 	carryOverRow,
 	advanceDiffers,
+	costBreakdown,
 	statementAdvancePaid,
 	correctDialog,
 	correctPaidAmountInput,
@@ -119,6 +120,9 @@ export const correctPaidAmount = Value.of(correctPaidAmountInput);
 export const correctPaidAmountHelp = Accessible.descriptionOf(correctPaidAmountInput);
 export const correctPaidAmountAsked = Count.of(correctPaidAmountInput);
 export const resetOffers = Count.of(resetPaymentButton);
+
+// The page's usual spacing between the status line and the first panel, no empty items in between
+export const gapAboveCostBreakdown = Gap.between(statementStatus, costBreakdown);
 
 // #464: the Akonto the statement deducts, e.g. «− CHF 400.00»
 export const advancePaidOfStatement = Text.of(statementAdvancePaid);
