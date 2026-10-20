@@ -534,16 +534,16 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col">
 				<span class="badge info">Immeubles et appartements</span>
 				<h3>Saisir un immeuble en deux minutes.</h3>
-				<p>Saisissez la rue, le NPA ou la localité et choisissez un résultat : Dwello remplit l’adresse. Chaque champ a son explication et un exemple juste en dessous.</p>
+				<p>Saisissez la rue, le numéro et la localité et choisissez un résultat : Dwello reprend l’immeuble et ses appartements du registre des bâtiments. Chaque champ a son explication et un exemple juste en dessous.</p>
 				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Recherche d’adresse par rue, NPA ou localité<small>Disponible aujourd’hui.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Recherche d’adresse par rue, numéro et localité<small>Sans résultat, vous saisissez l’immeuble à la main.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Appartements avec surface, pièces, volume<small>La base de chaque clé de répartition.</small></span></li>
-					<li><svg class="ic" aria-hidden="true" style="color:var(--ink-muted)"><use href="#i-info"/></svg><span>Immeuble depuis le registre des bâtiments <span class="badge plan">Prévu</span><small>Choisissez l’adresse, et tous les appartements avec surface, étage et pièces viennent du Registre fédéral des bâtiments et des logements (RegBL).</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Immeuble depuis le registre des bâtiments<small>Choisissez l’adresse, et tous les appartements avec surface, étage et pièces viennent du Registre fédéral des bâtiments et des logements (RegBL). Vous les vérifiez avant d’enregistrer.</small></span></li>
 				</ul>
 			</div>
 			<figure class="shot">
-				<img class="l" src="../shots/fr/building-new-light.webp" width="1400" height="1225" loading="lazy" alt="Formulaire Nouvel immeuble avec nom de l’immeuble, recherche d’adresse, rue, NPA et localité, chaque champ avec texte d’aide et exemple.">
-				<img class="d" src="../shots/fr/building-new-dark.webp" width="1400" height="1225" loading="lazy" alt="" aria-hidden="true">
+				<img class="l" src="../shots/fr/building-register-light.webp" width="1532" height="1836" loading="lazy" alt="Formulaire Nouvel immeuble : appartements 101 et 102 du registre des bâtiments, chacun avec numéro, étage, surface et nombre de pièces à vérifier.">
+				<img class="d" src="../shots/fr/building-register-dark.webp" width="1532" height="1836" loading="lazy" alt="" aria-hidden="true">
 			</figure>
 		</div>
 	</div>
@@ -571,7 +571,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="badge ok">Disponible</span></div><h3>Données des locataires en un clic</h3><p>Tout sur une locataire ou un locataire en ZIP, pour la remise des données selon l’art. 28 LPD.</p></article>
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span class="badge ok">Disponible</span></div><h3>Journal de toutes les modifications</h3><p>Connexions et chaque modification qui touche un décompte, avec l’heure et l’état précédent.</p></article>
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span class="badge ok">Disponible</span></div><h3>Documents par locataire</h3><p>Lettres, décomptes et rappels au même endroit.</p></article>
-			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge plan">Prévu</span></div><h3>Immeuble depuis le registre des bâtiments</h3><p>Reprendre immeubles et appartements avec surface, étage et pièces du registre fédéral.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge ok">Disponible</span></div><h3>Immeuble depuis le registre des bâtiments</h3><p>Reprendre immeubles et appartements avec surface, étage et pièces du registre fédéral.</p></article>
 			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span class="badge plan">Prévu</span></div><h3>Exporter toutes les données</h3><p>Toutes vos données à tout moment en CSV et JSON. Vos données vous appartiennent, même si vous changez.</p></article>
 			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg><span class="badge plan">Prévu</span></div><h3>Serveur MCP pour assistants IA</h3><p>Demandez à votre assistant IA les montants ouverts, les délais ou les factures manquantes.</p></article>
 		</div>
@@ -789,7 +789,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		</div>
 		<div class="road">
 			<article><span class="badge plan">Prévu</span><h3>Installateur en une étape</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a><p>Une commande, une question sur votre e-mail, terminé. Avec sa propre connexion, sans compte Google.</p></article>
-			<article><span class="badge plan">Prévu</span><h3>Immeuble depuis le registre des bâtiments</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/479" rel="noopener">#479</a><p>Reprendre immeubles et appartements du Registre fédéral des bâtiments et des logements.</p></article>
 			<article><span class="badge plan">Prévu</span><h3>Serveur MCP</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener">#495</a><p>Dwello comme outil pour votre assistant IA, en local et avec votre autorisation.</p></article>
 			<article><span class="badge plan">Prévu</span><h3>Export complet</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener">#496</a><p>Toutes les données en CSV et JSON, à tout moment, en un clic.</p></article>
 			<article><span class="badge plan">Prévu</span><h3>Rapports et analyses</h3><p>Recettes, dépenses et frais accessoires au fil des ans, pour la déclaration d’impôt et la fiduciaire.</p></article>
