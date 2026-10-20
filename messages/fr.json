@@ -907,7 +907,7 @@
 	"invoices_choose_category": "Choisir une catégorie",
 	"invoices_key_help": "Comment les coûts sont répartis entre les appartements de l’immeuble. Dwello propose la clé de répartition de la dernière facture de cette catégorie dans l’immeuble, sinon celle des paramètres. Utilisez toujours la même clé de répartition pour une catégorie.",
 	"invoices_error_key_required": "Choisissez comment les coûts sont répartis.",
-	"invoices_key_missing_note": "Cette facture n’a pas encore de clé de répartition. Dwello la répartit donc à parts égales par appartement, comme « Par unité ». Vérifiez la clé de répartition que Dwello propose. Si vous enregistrez la facture, elle vaut pour chaque décompte que Dwello établit ou recalcule ensuite ; ceux déjà envoyés restent tels quels.",
+	"invoices_key_missing_note": "Cette facture n’a pas encore de clé de répartition. Dwello la répartit donc à parts égales par appartement, comme « Par unité ». Vérifiez la clé de répartition que Dwello propose. Si vous enregistrez la facture, elle vaut pour les décomptes que Dwello établit ou recalcule ensuite ; ceux déjà établis restent tels quels.",
 	"invoices_choose_key": "Choisir une clé de répartition",
 	"invoices_allocable_help": "La facture entre dans le décompte des charges.",
 	"invoices_not_allocable_help": "La facture n’entre pas dans le décompte des charges.",

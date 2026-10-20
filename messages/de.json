@@ -907,7 +907,7 @@
 	"invoices_choose_category": "Kategorie auswählen",
 	"invoices_key_help": "Wie die Kosten auf die Wohnungen des Gebäudes verteilt werden. Dwello schlägt den Verteilschlüssel vor, den die letzte Rechnung dieser Kategorie im Gebäude hat, sonst den aus den Einstellungen. Verwenden Sie für eine Kategorie immer denselben Verteilschlüssel.",
 	"invoices_error_key_required": "Wählen Sie, wie die Kosten verteilt werden.",
-	"invoices_key_missing_note": "Diese Rechnung hat noch keinen Verteilschlüssel. Dwello verteilt sie darum gleichmässig pro Wohnung, wie «Pro Einheit». Prüfen Sie den Verteilschlüssel, den Dwello vorschlägt. Speichern Sie die Rechnung, gilt er für jede Abrechnung, die Dwello danach erstellt oder neu berechnet; schon versendete bleiben, wie sie sind.",
+	"invoices_key_missing_note": "Diese Rechnung hat noch keinen Verteilschlüssel. Dwello verteilt sie darum gleichmässig pro Wohnung, wie «Pro Einheit». Prüfen Sie den Verteilschlüssel, den Dwello vorschlägt. Speichern Sie die Rechnung, gilt er für Abrechnungen, die Dwello danach erstellt oder neu berechnet; schon erstellte bleiben, wie sie sind.",
 	"invoices_choose_key": "Verteilschlüssel auswählen",
 	"invoices_allocable_help": "Die Rechnung fliesst in die Nebenkostenabrechnung ein.",
 	"invoices_not_allocable_help": "Die Rechnung fliesst nicht in die Nebenkostenabrechnung ein.",

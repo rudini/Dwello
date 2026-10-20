@@ -1210,7 +1210,7 @@ describe('Verteilschlüssel einer Rechnung', () => {
 		expect(key().value).toBe('k2');
 		// Fachreview 452-1 V-5: a later berichtigte Abrechnung shares it otherwise than the one sent
 		expect(byTestId('invoice-key-missing-note')!.textContent!.trim()).toBe(
-			'Diese Rechnung hat noch keinen Verteilschlüssel. Dwello verteilt sie darum gleichmässig pro Wohnung, wie «Pro Einheit». Prüfen Sie den Verteilschlüssel, den Dwello vorschlägt. Speichern Sie die Rechnung, gilt er für jede Abrechnung, die Dwello danach erstellt oder neu berechnet; schon versendete bleiben, wie sie sind.'
+			'Diese Rechnung hat noch keinen Verteilschlüssel. Dwello verteilt sie darum gleichmässig pro Wohnung, wie «Pro Einheit». Prüfen Sie den Verteilschlüssel, den Dwello vorschlägt. Speichern Sie die Rechnung, gilt er für Abrechnungen, die Dwello danach erstellt oder neu berechnet; schon erstellte bleiben, wie sie sind.'
 		);
 	});
 

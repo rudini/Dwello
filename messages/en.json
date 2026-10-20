@@ -907,7 +907,7 @@
 	"invoices_choose_category": "Choose a category",
 	"invoices_key_help": "How the costs are split among the building’s apartments. Dwello proposes the distribution key of the latest invoice of this category in the building, otherwise the one from the settings. Always use the same distribution key for a category.",
 	"invoices_error_key_required": "Choose how the costs are split.",
-	"invoices_key_missing_note": "This invoice has no distribution key yet. Dwello therefore splits it equally per apartment, as «Per Unit». Check the distribution key Dwello proposes. If you save the invoice, it applies to every statement Dwello creates or recalculates afterwards; statements already sent stay as they are.",
+	"invoices_key_missing_note": "This invoice has no distribution key yet. Dwello therefore splits it equally per apartment, as «Per Unit». Check the distribution key Dwello proposes. If you save the invoice, it applies to statements Dwello creates or recalculates afterwards; statements already created stay as they are.",
 	"invoices_choose_key": "Choose a distribution key",
 	"invoices_allocable_help": "The invoice goes into the utility cost statement.",
 	"invoices_not_allocable_help": "The invoice does not go into the utility cost statement.",

@@ -907,7 +907,7 @@
 	"invoices_choose_category": "Scegliere una categoria",
 	"invoices_key_help": "Come i costi vengono ripartiti sugli appartamenti dell’immobile. Dwello propone la chiave di riparto dell’ultima fattura di questa categoria nell’immobile, altrimenti quella delle impostazioni. Per una categoria usi sempre la stessa chiave di riparto.",
 	"invoices_error_key_required": "Scelga come vengono ripartiti i costi.",
-	"invoices_key_missing_note": "Questa fattura non ha ancora una chiave di riparto. Dwello la ripartisce quindi in parti uguali per appartamento, come «Per unità». Verifichi la chiave di riparto che Dwello propone. Se salva la fattura, vale per ogni conteggio che Dwello allestisce o ricalcola in seguito; quelli già inviati restano come sono.",
+	"invoices_key_missing_note": "Questa fattura non ha ancora una chiave di riparto. Dwello la ripartisce quindi in parti uguali per appartamento, come «Per unità». Verifichi la chiave di riparto che Dwello propone. Se salva la fattura, vale per i conteggi che Dwello allestisce o ricalcola in seguito; quelli già allestiti restano come sono.",
 	"invoices_choose_key": "Scegliere una chiave di riparto",
 	"invoices_allocable_help": "La fattura confluisce nel conteggio spese accessorie.",
 	"invoices_not_allocable_help": "La fattura non confluisce nel conteggio spese accessorie.",
