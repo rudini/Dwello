@@ -1,6 +1,6 @@
 import { localName } from '$lib/names';
 import { ValidationError } from './error-handler';
-import type { InvoiceWithDetails } from '$lib/types';
+import type { BilledStatement, InvoiceWithDetails } from '$lib/types';
 import { toCategory } from './category';
 import { toDistributionKey } from './distribution-key';
 
@@ -99,12 +99,15 @@ type Period = { start: string; end: string };
 
 /**
  * The periods with statements that bill this invoice (billedIn) and that lack it as it is now (missedIn: recorded or
- * changed after them), from the invoices the statements keep (#96); none if they cannot be loaded
+ * changed after them), from the invoices the statements keep (#96), and each statement it is in; none if they cannot
+ * be loaded
  */
 export async function statementPeriods(fetch: typeof globalThis.fetch, backendUrl: string, invoiceId: string) {
 	const response = await fetch(`${backendUrl}/api/v1/invoices/${invoiceId}/statements`).catch(() => null);
-	const periods: { billedIn?: Period[]; missedIn?: Period[] } = response?.ok ? await response.json() : {};
-	return { billedIn: periods.billedIn ?? [], missedIn: periods.missedIn ?? [] };
+	const periods: { billedIn?: Period[]; missedIn?: Period[]; statements?: BilledStatement[] } = response?.ok
+		? await response.json()
+		: {};
+	return { billedIn: periods.billedIn ?? [], missedIn: periods.missedIn ?? [], statements: periods.statements ?? [] };
 }
 
 /** The form a page sent with a file; one that is no form is refused as a bad request */

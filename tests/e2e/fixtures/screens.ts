@@ -36,7 +36,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'draft-restored', 'draft-discard-dialog'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'draft-restored', 'draft-discard-dialog'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -99,7 +99,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.tenant('Dora');
 	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00', additionalRent: '80.00' }); // a parking space: the wizard's note after her contract names it (#144)
 	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
-	await seed.billedUntil('Dora', '2014-12-31'); // «Abgerechnet bis» on her page and in the form (#133)
+	await seed.billedUntil('Dora', '2015-12-31'); // «Abgerechnet bis» on her page and in the form (#133)
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
 	// moved in during 2025, invoices over different days and the change of the Tankbestand: the statement lists them
 	// with their days and the calculation (#104, #240)
@@ -117,6 +117,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.apartment('Bergsicht', '2.02', 'vacant');
 	await seed.tenant('Emil');
 	await seed.contract('Emil', '2.02', { startDate: '2010-01-01', endDate: '2014-12-31', baseRent: '1500.00' });
+	await seed.billedUntil('Emil', '2014-12-31'); // the wizard's preview of 2014 passes him over (#453)
 	// a tenant who has not moved in yet: «Vermietet ab», Mieter «Künftig» (#58)
 	await seed.apartment('Bergsicht', '2.03', 'vacant');
 	await seed.tenant('Fritz');

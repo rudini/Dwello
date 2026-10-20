@@ -7,9 +7,10 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { categories, contractAdvancePayments, heatingProfiles, invoices, rentalContracts, utilityStatements } from '../db/schema';
+import { daysAfter, swissToday } from '../services/today';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { generateStatement, updateStatementStatus } from '../services/statement.service';
@@ -75,6 +76,52 @@ describe('Abgerechnet bis', () => {
 		expect(await (await callApi(`/api/v1/contracts/${rental.contract}`)).json()).toMatchObject({ billedUntil: null });
 	});
 
+	// #453 (#337): a statement exists only after its period ended, and a date before the Vertragsbeginn has no effect
+	it('lehnt «Abgerechnet bis» nach heute ab', async () => {
+		const response = await billedUntil(daysAfter(swissToday(), 1));
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'BILLED_UNTIL_FUTURE' });
+		expect((await billedUntil(swissToday())).status).toBe(200);
+	});
+
+	it('lehnt «Abgerechnet bis» vor dem Vertragsbeginn ab und nennt ihn', async () => {
+		const response = await billedUntil('2019-12-31');
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'BILLED_UNTIL_BEFORE_START', params: { date: '2020-01-01' } });
+		expect((await billedUntil('2020-01-01')).status).toBe(200);
+	});
+
+	// fach review 453-1 M-1: the stored «Abgerechnet bis» against a new Vertragsbeginn
+	it('lehnt einen Vertragsbeginn nach dem gespeicherten «Abgerechnet bis» ab', async () => {
+		expect((await billedUntil('2020-06-30')).status).toBe(200);
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2020-07-01' });
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'BILLED_UNTIL_BEFORE_START', params: { date: '2020-07-01' } });
+		expect((await billedUntil(null)).status).toBe(200);
+	});
+
+	it('lehnt beim Erfassen «Abgerechnet bis» vor dem Vertragsbeginn ab', async () => {
+		const [contract] = await db.select().from(rentalContracts).where(eq(rentalContracts.id, rental.contract));
+		const response = await sendJson('POST', '/api/v1/contracts', {
+			tenantId: contract.tenantId,
+			apartmentId: contract.apartmentId,
+			startDate: '2010-01-01',
+			endDate: '2011-12-31',
+			baseRent: '900',
+			monthlyAdvancePayment: '0',
+			billedUntil: '2009-12-31'
+		});
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'BILLED_UNTIL_BEFORE_START', params: { date: '2010-01-01' } });
+	});
+
+	it('behält ein gespeichertes «Abgerechnet bis» nach heute bis zum nächsten Speichern des Datums', async () => {
+		await db.update(rentalContracts).set({ billedUntil: '2099-12-31' }).where(eq(rentalContracts.id, rental.contract));
+		expect((await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { baseRent: '1000.00' })).status).toBe(200);
+		expect(await (await callApi(`/api/v1/contracts/${rental.contract}`)).json()).toMatchObject({ billedUntil: '2099-12-31' });
+		expect((await billedUntil(null)).status).toBe(200);
+	});
+
 	it('zählt Mietstage, Heizanteil und Akonto erst ab dem Tag nach «Abgerechnet bis»', async () => {
 		await billedUntil('2024-04-30');
 		const statement = (await (await preview()).json()) as {
@@ -87,6 +134,18 @@ describe('Abgerechnet bis', () => {
 		expect(statement).toMatchObject({ rentalDays: 245, rentalStart: '2024-05-01', totalAdvancePayments: 800 });
 		expect(statement.lineItems.find((line) => !line.isHeatingCost)?.tenantShare).toBe(490);
 		expect(statement.lineItems.find((line) => line.isHeatingCost)).toMatchObject({ periodShare: 0.52, tenantShare: 520 });
+	});
+
+	// code review 453-3 C-8: with a second Akonto from 01.09.2024 (#464), May to August at 100, September to December at 150
+	it('zählt nach «Abgerechnet bis» jeden Akontobetrag für seine Monate', async () => {
+		await billedUntil('2024-04-30');
+		await db.insert(contractAdvancePayments).values({ contractId: rental.contract, validFrom: '2024-09-01', amount: '150' });
+		try {
+			const statement = (await (await preview()).json()) as { totalAdvancePayments: number };
+			expect(statement.totalAdvancePayments).toBe(1000);
+		} finally {
+			await db.delete(contractAdvancePayments).where(and(eq(contractAdvancePayments.contractId, rental.contract), eq(contractAdvancePayments.validFrom, '2024-09-01')));
+		}
 	});
 
 	// fach review V-14: a part month counts by its days, 16 of 31 in May
@@ -146,9 +205,11 @@ describe('Abgerechnet bis', () => {
 			if (iban) await setConfig('iban', iban);
 			else await deleteConfig('iban');
 			const text = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64')).flowing;
+			// #453 (#325): what is billed already, and from when the Akonto counts
 			expect(text).toContain(
-				'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.12.2024. Abgerechnet bis 30.04.2024; diese Abrechnung umfasst 01.05.2024 – 31.12.2024 (245 Mietstage von 366 Tagen)'
+				'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.12.2024. Ihre Nebenkosten und Akontobeiträge bis 30.04.2024 sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst 01.05.2024 – 31.12.2024 (245 Mietstage von 366 Tagen).'
 			);
+			expect(text).toContain('Akontobeiträge ab 01.05.2024');
 		});
 	});
 });

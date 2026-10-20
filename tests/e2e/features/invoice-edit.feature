@@ -19,6 +19,13 @@ Funktionalität: Rechnung bearbeiten
     Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" bearbeitet
     Dann warnt das Formular, dass es mit dieser Rechnung schon Abrechnungen gibt
 
+  # #455 (#268): wer den Betrag ändert, sieht den Hinweis auf die abgezogenen Akontorechnungen beim Betrag
+  Szenario: Hinweis auf abgezogene Akontorechnungen beim Bearbeiten
+    Angenommen "Werke Luzern" stellt dem Gebäude "Seeblick" "1250.00" Franken für "Allgemeinstrom Q1" in der Kategorie "Allgemeinstrom" in Rechnung, auf dem Beleg sind Akontorechnungen von "1000.00" Franken abgezogen
+    Wenn der Liegenschaftsverwalter die Rechnung von "Werke Luzern" bearbeitet
+    Dann steht im Formular beim Betrag "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug."
+    Und erklärt der Hinweis im Formular beim Betrag "Prüfen Sie, dass die Akontorechnungen nicht zusätzlich erfasst sind. Ist eine noch erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet ist, und führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». Der Leistungszeitraum ist der auf dem Beleg."
+
   Szenario: Betrag korrigieren
     Wenn der Liegenschaftsverwalter den Betrag auf "480.00" Franken korrigiert
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"

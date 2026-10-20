@@ -3,5 +3,7 @@
 	"totalAdvancePayments": 1800,
 	"balance": -755,
 	"rentalDays": 366,
-	"totalPeriodDays": 366
+	"totalPeriodDays": 366,
+	"rentalStart": "2024-01-01",
+	"rentalEnd": "2024-12-31"
 }

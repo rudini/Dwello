@@ -1,4 +1,5 @@
 {
 	"billedIn": [{ "start": "2026-01-01", "end": "2026-12-31" }],
-	"missedIn": []
+	"missedIn": [],
+	"statements": [{ "id": "s1", "statementNumber": "NK-2026-0001", "status": "draft" }]
 }

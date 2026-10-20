@@ -13,6 +13,8 @@
 		endDate = $bindable(),
 		isUnlimited = $bindable(),
 		terminated = $bindable(false),
+		billedUntil = $bindable(),
+		offerBilledUntil = false,
 		noticed = false,
 		min,
 		unknown = false,
@@ -25,6 +27,8 @@
 		endDate: string;
 		isUnlimited: boolean;
 		terminated?: boolean;
+		billedUntil?: string;
+		offerBilledUntil?: boolean; // the wizard: «Abgerechnet bis» for a Vertragsbeginn before today (#453)
 		noticed?: boolean; // the saved contract is open-ended and ended by notice: it can be withdrawn
 		min?: string;
 		unknown?: boolean; // the apartment's contracts could not be loaded: no earliest start is known
@@ -89,7 +93,10 @@
 <!-- always present, so screen readers hear the hint when it appears -->
 <div role="status" data-testid="start-date-notice">
 	{#if pastStart}
-		<Alert tone="caution" title={m.contracts_check_start()}><p>{pastStart}</p></Alert>
+		<Alert tone="caution" title={m.contracts_check_start()}>
+			<p>{pastStart}</p>
+			{#if offerBilledUntil}<p>{m.contracts_start_in_past_billed()}</p>{/if}
+		</Alert>
 	{/if}
 </div>
 
@@ -113,6 +120,19 @@
 		min={startDate || undefined}
 		error={errors.endDate}
 		testid="end-date-input"
+	/>
+{/if}
+
+<!-- #453 (#328): a running contract recorded on the switch to Dwello, billed outside Dwello up to a day -->
+{#if offerBilledUntil && pastStart}
+	<DateInput
+		id="billedUntil"
+		label={m.contracts_billed_until()}
+		help={m.contracts_billed_until_help()}
+		bind:value={billedUntil}
+		optional
+		error={errors.billedUntil}
+		testid="billed-until-input"
 	/>
 {/if}
 
