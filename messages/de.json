@@ -1260,7 +1260,7 @@
 	"statements_building_period_short_text": "Rechnen Sie die übrigen Tage in einer kurzen Abrechnungsperiode {periods} ab.",
 	"statements_period_choose": "Abrechnungsperiode {period} wählen",
 	"statements_period_short": "Kurze Abrechnungsperiode {period} abrechnen",
-	"statements_short_period_help": "Steht die Abrechnungsperiode in Ihren Mietverträgen, informieren Sie die Mieter über den Wechsel.",
+	"statements_short_period_help": "Sehen Sie in den Mietverträgen nach (oft bei den Nebenkosten), ob dort eine Abrechnungsperiode steht. Dann gilt diese, bis die Mieter einer Änderung schriftlich zustimmen. Ohne Zustimmung teilen Sie die Änderung begründet mit dem amtlichen Formular mit, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR). Bis dahin rechnen Sie nach der Abrechnungsperiode im Mietvertrag ab.",
 	"statements_building_period_short_many": "Rechnen Sie die übrigen Tage in kurzen Abrechnungsperioden ab: {periods}.",
 	"statements_building_period_vacant": "In den übrigen Tagen hat kein Mietvertrag Mietstage; dafür ist nichts abzurechnen.",
 	"statements_building_recalculate": "Einen Entwurf berechnen Sie auf seiner Seite mit «Neu berechnen» neu. Versendete Abrechnungen lassen sich nicht neu berechnen.",

@@ -1260,7 +1260,7 @@
 	"statements_building_period_short_text": "Allestisca il conteggio dei giorni restanti in un periodo di conteggio breve {periods}.",
 	"statements_period_choose": "Scegliere il periodo di conteggio {period}",
 	"statements_period_short": "Allestire il periodo di conteggio breve {period}",
-	"statements_short_period_help": "Se il periodo di conteggio figura nei Suoi contratti di locazione, informi gli inquilini del cambiamento.",
+	"statements_short_period_help": "Verifichi nei contratti di locazione (spesso alla voce spese accessorie) se vi figura un periodo di conteggio. In tal caso vale finché gli inquilini non accettano una modifica per iscritto. Senza il loro consenso, comunichi e motivi la modifica con il modulo ufficiale, almeno dieci giorni prima dell’inizio del termine di preavviso. Vale solo dalla prossima scadenza di disdetta possibile (art. 269d CO). Fino ad allora allestisca il conteggio secondo il periodo di conteggio del contratto di locazione.",
 	"statements_building_period_short_many": "Allestisca il conteggio dei giorni restanti in periodi di conteggio brevi: {periods}.",
 	"statements_building_period_vacant": "Nei giorni restanti nessun contratto di locazione ha giorni di locazione; non c’è nulla da conteggiare.",
 	"statements_building_recalculate": "Per ricalcolare una bozza, scelga «Ricalcolare» sulla sua pagina. I conteggi inviati non possono essere ricalcolati.",

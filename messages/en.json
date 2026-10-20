@@ -1260,7 +1260,7 @@
 	"statements_building_period_short_text": "Bill the remaining days in a short billing period {periods}.",
 	"statements_period_choose": "Choose billing period {period}",
 	"statements_period_short": "Bill short billing period {period}",
-	"statements_short_period_help": "If your rental contracts state the billing period, inform the tenants of the change.",
+	"statements_short_period_help": "Check the rental contracts (often under utility costs) for a billing period. If they state one, it applies until the tenants agree to a change in writing. Without their agreement, give notice of the change with reasons on the official form, at least ten days before the notice period begins. It applies at the earliest from the next possible termination date (Art. 269d CO). Until then, bill according to the billing period in the rental contract.",
 	"statements_building_period_short_many": "Bill the remaining days in short billing periods: {periods}.",
 	"statements_building_period_vacant": "No rental contract has days rented on the remaining days; there is nothing to bill.",
 	"statements_building_recalculate": "To recalculate a draft, choose «Recalculate» on its page. Sent statements cannot be recalculated.",

@@ -332,7 +332,7 @@ describe('Mietvertragsdetail', () => {
 		);
 		// #486: a visible help text at the link
 		expect(text('contract-missing-statement-short-help')).toBe(
-			'Steht die Abrechnungsperiode in Ihren Mietverträgen, informieren Sie die Mieter über den Wechsel.'
+			'Sehen Sie in den Mietverträgen nach (oft bei den Nebenkosten), ob dort eine Abrechnungsperiode steht. Dann gilt diese, bis die Mieter einer Änderung schriftlich zustimmen. Ohne Zustimmung teilen Sie die Änderung begründet mit dem amtlichen Formular mit, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR). Bis dahin rechnen Sie nach der Abrechnungsperiode im Mietvertrag ab.'
 		);
 		expect(byTestId('contract-missing-statement-invoices-2025-10-01')).not.toBeNull();
 	});

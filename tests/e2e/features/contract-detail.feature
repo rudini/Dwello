@@ -259,7 +259,7 @@ Funktionalität: Mietvertragsdetail
     Und erfährt der Liegenschaftsverwalter, dass es für diese Tage noch keine Abrechnung gibt
     Und bietet der Mietvertrag für die Tage ab "2024-10-01" "Kurze Abrechnungsperiode 01.10.2024 – 31.12.2024 abrechnen" an
     # #486: die Abrechnungsperiode kann im Mietvertrag stehen
-    Und rät der Mietvertrag "Steht die Abrechnungsperiode in Ihren Mietverträgen, informieren Sie die Mieter über den Wechsel."
+    Und rät der Mietvertrag "Sehen Sie in den Mietverträgen nach (oft bei den Nebenkosten), ob dort eine Abrechnungsperiode steht. Dann gilt diese, bis die Mieter einer Änderung schriftlich zustimmen. Ohne Zustimmung teilen Sie die Änderung begründet mit dem amtlichen Formular mit, mindestens zehn Tage vor Beginn der Kündigungsfrist. Sie gilt frühestens ab dem nächstmöglichen Kündigungstermin (Art. 269d OR). Bis dahin rechnen Sie nach der Abrechnungsperiode im Mietvertrag ab."
     # Fachreview 2 V-9: «Abgerechnet bis» würde die bestehende Abrechnung ändern
     Und nennt der Mietvertrag «Abgerechnet bis» nicht als Ausweg
 
