@@ -33,3 +33,21 @@ Vorheriger Bericht `245-review-1.md`: C-1, C-2 und C-3 sind behoben (siehe unten
 - Rot des C-2-DOM-Tests auf der Basis: nur aus dem Svelte-Verhalten abgeleitet (`each_key_duplicate` im Dev-Build, den Vitest kompiliert), nicht ausgeführt.
 - Die Meldung `invoices_upload_fields_missing` (`UploadRowNotes.svelte:17`) bleibt nach dem Ausfüllen der übrigen Felder ebenfalls bis zum nächsten Erstellen stehen. Das ist dieselbe Art Fehler wie P-1, besteht aber schon auf der Basis und gehört nicht zu P-1. Deshalb kein Befund dieses Diffs. Ob Helga oder Marco es gesehen haben: in `helga-245.md` nicht erwähnt.
 - `docs/archive/implementation-plan-verlauf.md`: nur als Teil des Diffs gesehen (Session-Archiv), nicht inhaltlich gegen den Plan geprüft.
+
+## Runde 2 (Commit 2e017a5f, nur R-1)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| – | – | – | Keine neuen Befunde im Delta. |
+
+**R-1: geschlossen.** Das Szenario «Rechnung ohne KI aus einer Datei erfassen» (`tests/e2e/features/invoices.feature:99-100`) prüft jetzt nach der Wahl der Kategorie «Allgemeinstrom» zuerst den Anker `Dann bietet Dwello "1 Rechnung erstellen" an` und danach `Und sagt die Datei von "Elektro Blitz" nichts mehr`. Das Szenario ist nicht `@wip`.
+
+- **Anker:** `createLabel` (`src/routes/invoices/InvoiceUploadDialog.svelte:116-122`) zählt nur vollständige gewählte Zeilen. Vor der Wahl der Kategorie ist die Zeile unvollständig, und die Schaltfläche heisst nicht genau «1 Rechnung erstellen». Der Anker wartet also auf den Zustand nach der Wahl. Er ist positiv (der Dialog ist offen, die Zeile wird gezählt) und deckt eine Fehlerseite oder eine verschwundene Zeile ab. So hält das Szenario die Regel «Negative checks» aus `tests/e2e/CLAUDE.md` ein.
+- **Negativer Check:** Der neue Schritt (`tests/e2e/steps/invoice-upload.steps.ts:202-205`) ruft nur `verwalter.sees(noteOnBeleg(…)).toBeNull()` auf, also eine bestehende Question (`tests/e2e/questions/invoice-upload.ts:33`, `Text.of`). Er greift weder auf die Seite noch auf einen Locator zu, die Screenplay-Schichten bleiben eingehalten. `null` heisst: kein Hinweis zu dieser Datei. Das ist enger als «nicht ‹Wählen Sie eine Kategorie.›» und erfasst jede Variante des stehengebliebenen Satzes. Die Abweichung vom Vorschlag in Runde 1 ist begründet: Der vorhandene Schritt `sagt … nicht {string}` verlangt zuerst `not.toBeNull()` (Zeile 198), und nach der Behebung gibt es keinen Hinweis mehr.
+- **Rot:** Nach dem Lesen wird der Schritt auf 9353cc58 rot. Dort nimmt `UploadRowNotes.svelte` `errors.category` ohne Bedingung auf, und `errors` wird erst beim nächsten Erstellen neu gesetzt. Der Hinweis bleibt also stehen. Das deckt sich mit dem gemeldeten «Received: "Hinweise zu Elektro Blitz … Wählen Sie eine Kategorie."». Die Commit-Nachricht sagt zwar «pin», nennt aber den roten Lauf. Eine Ausnahme ohne Rot wird also nicht beansprucht.
+- **Feature-Sprache:** «sagt die Datei … nichts mehr» beschreibt, was der Verwalter sieht, nicht wie er es bedient.
+
+### Nicht bestätigt
+
+- Rot auf 9353cc58 und grün auf 2e017a5f (1 passed): vom Aufrufer gemeldet. E2E habe ich nicht gestartet (Vorgabe). Bestätigt ist beides nur durch das Lesen von `UploadRowNotes.svelte` und `InvoiceUploadDialog.svelte`.
+- Lint grün: vom Aufrufer gemeldet, nicht erneut ausgeführt.
