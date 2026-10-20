@@ -12,7 +12,6 @@ Funktionalität: Rechnung bearbeiten
 
   # Wer eine schon abgerechnete Rechnung ändert, verschiebt Kosten: die Abrechnungen stimmen nicht mehr
   # #245: die Warnung nennt den Status der Abrechnungen (Dr. Weber 233 P-5)
-  @wip
   Szenario: Warnung beim Bearbeiten einer schon abgerechneten Rechnung
     Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
     Und der Mieter "Anna Keller" existiert
@@ -30,8 +29,8 @@ Funktionalität: Rechnung bearbeiten
     Und erklärt der Hinweis im Formular beim Betrag "Prüfen Sie, dass die Akontorechnungen nicht zusätzlich erfasst sind. Ist eine noch erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet ist, und führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». Der Leistungszeitraum ist der auf dem Beleg."
 
   # #245: die Kategorie ist beim Bearbeiten Pflicht, wie beim Hochladen (Product Owner)
-  @wip
   Szenario: Die Kategorie ist beim Bearbeiten Pflicht
+    Dann ist die Kategorie im Formular keine freiwillige Angabe
     Wenn der Liegenschaftsverwalter die Kategorie der Rechnung entfernt und speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie eine Kategorie."
 

@@ -7,7 +7,7 @@
 	import type { DistributionKeyRow } from '$lib/distribution-key';
 	import { plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
-	import type { Category, InvoiceWithDetails } from '$lib/types';
+	import type { BilledStatement, Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import BilledWarning from '../../BilledWarning.svelte';
 	import MissedWarning from '../../MissedWarning.svelte';
@@ -31,6 +31,7 @@
 			distributionKeys: DistributionKeyRow[];
 			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice
 			missedIn?: { start: string; end: string }[]; // periods with statements made before it was recorded
+			statements?: BilledStatement[]; // the statements it is in, with number and status (#245)
 		};
 	} = $props();
 
@@ -82,6 +83,8 @@
 	async function save(event: Event) {
 		event.preventDefault();
 		errors = validateInvoice(values);
+		// required here as on upload (#245, product owner)
+		if (!values.categoryId) errors.category = m.invoices_upload_category_missing();
 		if (needsReason && !overrideReason.trim()) errors.overrideReason = m.invoices_error_reason();
 		if (Object.keys(errors).length) return focusFirstError(event.target as Element);
 
@@ -118,7 +121,7 @@
 	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} invoice={data.invoice} />{/if}
 
 	{#if data.billedIn?.length}
-		<BilledWarning periods={data.billedIn}>
+		<BilledWarning periods={data.billedIn} statements={data.statements}>
 			<p>{m.invoices_edit_billed_text()}</p>
 		</BilledWarning>
 	{/if}
@@ -157,6 +160,8 @@
 			bind:isValidUtilityCost={values.isValidUtilityCost}
 			categories={data.categories}
 			distributionKeys={data.distributionKeys}
+			categoryRequired
+			categoryError={errors.category}
 		>
 			{#snippet after()}
 				{#if needsReason}

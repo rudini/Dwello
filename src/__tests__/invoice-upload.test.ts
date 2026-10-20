@@ -55,7 +55,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(several).toMatchObject({ selected: false, several: true });
 		// nothing to check or fill in on a file no invoice is created from (persona Anna)
 		expect(said(several)).toEqual([
-			'Diese Datei enthält mehrere Rechnungen. Laden Sie jede Rechnung als eigene Datei hoch, oder erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an.'
+			'Diese Datei enthält mehrere Rechnungen. Erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an, oder laden Sie jede Rechnung als eigene Datei hoch.'
 		]);
 	});
 
@@ -123,10 +123,16 @@ describe('Vorschlag der KI für eine Datei', () => {
 	});
 
 	it('sagt bei einer Gutschrift, dass keine Rechnung daraus entsteht und wo sie abgezogen wird', () => {
-		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note' }));
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note', deductedAmount: null }));
 		expect(said(row)[0]).toBe(
 			'Das ist eine Gutschrift über CHF\u00a01’250.00. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: in der Zeile dieser Rechnung, wenn ihre Datei hier ausgewählt ist, sonst auf ihrer Seite mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf.'
 		);
+	});
+
+	// #245, domain review V-6: the total of a Schlussrechnung read as a credit note is no credit note's amount
+	it('nennt bei einer Gutschrift mit abgezogenen Beträgen keinen Betrag', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note', deductedAmount: '1000.00' }));
+		expect(said(row)[0]).toMatch(/^Das ist eine Gutschrift\. /);
 	});
 
 	it('verlangt bei einer Gutschrift und einer Mahnung nichts zum Ausfüllen, weil keine Rechnung daraus entsteht (Persona Dr. Weber)', () => {
@@ -206,6 +212,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 	it('nennt ohne KI gleich die Pflichtangaben, die fehlen, und nimmt jede zurück, sobald sie ausgefüllt ist (Persona Helga)', () => {
 		const row = withoutKi(newRow(1, pdf, defaults), 'unavailable');
 		expect(toDoOf(row)).toEqual([
+			'Die KI hat diese Datei nicht gelesen. Füllen Sie die Felder aus.',
 			'Wählen Sie eine Kategorie.',
 			'Füllen Sie aus: Rechnungsdatum, Betrag, Rechnungssteller, Beschreibung.'
 		]);
@@ -243,11 +250,11 @@ describe('Vorschlag der KI für eine Datei', () => {
 	it('sagt bei einer nicht ausgewählten Gutschrift und gemischten Rechnung, warum', () => {
 		const credit = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note' }));
 		expect(selectionHelp(credit)).toBe(
-			'Nicht zum Erstellen ausgewählt, weil aus einer Gutschrift keine Rechnung entsteht. Ist die Datei doch eine Rechnung, setzen Sie das Häkchen bei «Diese Rechnung erstellen».'
+			'Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil aus einer Gutschrift keine Rechnung entsteht. Ist die Datei doch eine Rechnung, setzen Sie es.'
 		);
 		const mixed = withProposal(newRow(2, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true }));
 		expect(selectionHelp(mixed)).toBe(
-			'Nicht zum Erstellen ausgewählt, weil Sie zuerst den Betrag aufteilen. Setzen Sie danach das Häkchen bei «Diese Rechnung erstellen».'
+			'Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil Sie zuerst den Betrag aufteilen müssen. Setzen Sie es danach.'
 		);
 		expect(selectionHelp({ ...mixed, selected: true })).toBeUndefined();
 	});

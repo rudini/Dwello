@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import { inDays } from '../fixtures/dates';
 import {
 	billedWarningText,
+	categoryLabelText,
 	dateOutsidePeriodWarning,
 	dateOutsidePeriodWarnings,
 	invoiceDate,
@@ -173,3 +174,8 @@ Then(
 		await verwalter.sees(billedWarningText).toContain(`${number}, ${status}`);
 	}
 );
+
+// the form names the field without «(optional)»: the Kategorie is required (#245, Helga P-5 of #233)
+Then('ist die Kategorie im Formular keine freiwillige Angabe', async ({ verwalter }) => {
+	await verwalter.sees(categoryLabelText).toBe('Kategorie');
+});

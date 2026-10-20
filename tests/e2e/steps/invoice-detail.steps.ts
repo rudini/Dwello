@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	amountOfInvoice,
+	billedWarningOnDelete,
 	deductedHintAtAmount,
 	deductedRuleAtAmount,
 	statementsOfInvoice,
@@ -193,5 +194,12 @@ Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung des laufenden Jahres von {string}',
 	async ({ verwalter, seed }, tenant: string) => {
 		await verwalter.sees(pageAddressInApp).toBe(statementPath(seed, tenant, thisYear()));
+	}
+);
+
+Then(
+	'nennt die Bestätigung die Abrechnung des laufenden Jahres von {string} im Status {string}',
+	async ({ verwalter, seed }, tenant: string, status: string) => {
+		await verwalter.sees(billedWarningOnDelete).toContain(`${await seed.statementNumber(tenant, thisYear())}, ${status}`);
 	}
 );

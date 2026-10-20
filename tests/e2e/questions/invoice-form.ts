@@ -1,6 +1,7 @@
 import { Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	billedWarning,
+	categoryLabel,
 	categoryWarning,
 	invoiceDateInput,
 	invoiceDateWords,
@@ -21,3 +22,4 @@ export const dateOutsidePeriodWarning = Text.of(periodWarning);
 export const dateOutsidePeriodWarnings = Count.of(periodWarning);
 export const utilityCostHelpText = Text.of(utilityCostHelp);
 export const servicePeriodHelpText = Text.of(servicePeriodHelp);
+export const categoryLabelText = Text.of(categoryLabel);

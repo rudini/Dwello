@@ -364,3 +364,9 @@ Then(
 Then('bietet Dwello zum Verwerfen {string} an', async ({ verwalter }, label: string) => {
 	await verwalter.sees(discardButtonLabel).toBe(label);
 });
+
+// after the anchor (the row's note): the help at the checkbox is gone
+Then('erklärt die Auswahl der Datei von {string} nichts mehr', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.sees(noteOnBeleg(pdfOf(names.get(supplier)!))).not.toBeNull();
+	await verwalter.sees(whyBelegSelectedOrNot(pdfOf(names.get(supplier)!))).toBeNull();
+});

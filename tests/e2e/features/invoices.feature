@@ -75,10 +75,9 @@ Funktionalität: Rechnungsliste
     Dann sagt Dwello "1 Rechnung erstellt"
 
   # #245: eine abgelehnte Datei zählt nicht als gelesen (Fachreview 233-2 V-10)
-  @wip
   Szenario: Dwello sagt, was nach dem Lesen zu tun ist, und meldet eine entfernte Datei
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" und die Word-Datei "notizen.docx" hochlädt
-    Dann meldet Dwello "Gelesen: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1."
+    Dann meldet Dwello "Fertig: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1."
     Wenn der Liegenschaftsverwalter die Datei "notizen.docx" entfernt
     Dann meldet Dwello "notizen.docx entfernt."
 
@@ -88,7 +87,6 @@ Funktionalität: Rechnungsliste
     Dann zeigt ein neuer Tab die Datei als PDF
 
   # #245: der Hinweis sagt, dass die KI diese Datei nicht gelesen hat, und geht, sobald die Pflichtfelder ausgefüllt sind; die Felder in der Reihenfolge des Formulars
-  @wip
   Szenario: Rechnung ohne KI aus einer Datei erfassen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
     Dann sagt die Datei von "Elektro Blitz" "Die KI hat diese Datei nicht gelesen. Füllen Sie die Felder aus."
@@ -102,7 +100,6 @@ Funktionalität: Rechnungsliste
     Dann sagt Dwello "1 Rechnung erstellt"
 
   # #245: eine schon erfasste Rechnung verlangt nichts zum Ausfüllen (Marco 233)
-  @wip
   Szenario: Eine schon erfasste Rechnung wird nicht doppelt erstellt
     Angenommen die Rechnung von "Hauswart Huber" hat die Rechnungsnummer "R-1001"
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Hauswart Huber" hochlädt
@@ -111,7 +108,6 @@ Funktionalität: Rechnungsliste
     Und sagt die Datei von "Hauswart Huber" nicht "Wählen Sie eine Kategorie."
 
   # #245: zuerst der Weg, den auch ein Anfänger gehen kann (Anna 233 P-4)
-  @wip
   Szenario: Eine Datei mit mehreren Rechnungen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Sammelscan" hochlädt
     Dann sagt die Datei von "Sammelscan" "Diese Datei enthält mehrere Rechnungen. Erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an, oder laden Sie jede Rechnung als eigene Datei hoch."
@@ -141,22 +137,21 @@ Funktionalität: Rechnungsliste
     Dann sagt Dwello "1 Rechnung erstellt"
 
   # #245: der Rest bekommt dieselbe Datei als Beleg; die Zeile sagt, warum sie nicht ausgewählt ist
-  @wip
   Szenario: Rechnung mit Kosten, die nicht umlagefähig sind
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Lift Service und Reparatur" hochlädt
-    Dann sagt die Datei von "Lift Service und Reparatur" "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z. B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen; fügen Sie diese Datei auf ihrer Seite mit «Beleg hinzufügen» an."
+    Dann sagt die Datei von "Lift Service und Reparatur" "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z. B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein. Erfassen Sie den Rest danach mit «Rechnung erfassen» als zweite Rechnung in der Kategorie Reparaturen und fügen Sie dort diese Datei mit «Beleg hinzufügen» an."
     Und ist die Datei von "Lift Service und Reparatur" nicht zum Erstellen ausgewählt
-    Und erklärt die Auswahl der Datei von "Lift Service und Reparatur" "Nicht zum Erstellen ausgewählt, weil Sie zuerst den Betrag aufteilen. Setzen Sie danach das Häkchen bei «Diese Rechnung erstellen»."
+    Und erklärt die Auswahl der Datei von "Lift Service und Reparatur" "Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil Sie zuerst den Betrag aufteilen müssen. Setzen Sie es danach."
     Wenn der Liegenschaftsverwalter bei der Datei von "Lift Service und Reparatur" die Kategorie "Reparaturen" wählt
     Dann sagt die Datei von "Lift Service und Reparatur" nicht "nicht umlagefähig sind"
+    Und erklärt die Auswahl der Datei von "Lift Service und Reparatur" nichts mehr
 
   # #245: die Gutschrift nennt ihren Betrag und die Zeile, in der er abgezogen wird, und warum sie nicht ausgewählt ist
-  @wip
   Szenario: Eine Gutschrift ist nicht zum Erstellen ausgewählt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Gutschrift" hochlädt
     Dann sagt die Datei von "Werke Gutschrift" "Das ist eine Gutschrift über CHF 1’250.00. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: in der Zeile dieser Rechnung, wenn ihre Datei hier ausgewählt ist, sonst auf ihrer Seite mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf."
     Und ist die Datei von "Werke Gutschrift" nicht zum Erstellen ausgewählt
-    Und erklärt die Auswahl der Datei von "Werke Gutschrift" "Nicht zum Erstellen ausgewählt, weil aus einer Gutschrift keine Rechnung entsteht. Ist die Datei doch eine Rechnung, setzen Sie das Häkchen bei «Diese Rechnung erstellen»."
+    Und erklärt die Auswahl der Datei von "Werke Gutschrift" "Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil aus einer Gutschrift keine Rechnung entsteht. Ist die Datei doch eine Rechnung, setzen Sie es."
     Und sagt die Datei von "Werke Gutschrift" nicht "Wählen Sie eine Kategorie."
 
   Szenario: Hochladen abbrechen verwirft die Dateien
@@ -168,12 +163,12 @@ Funktionalität: Rechnungsliste
     Dann die Rechnungsliste enthält genau 1 Rechnung
 
   # #245: auch eine Datei, deren Lesen scheiterte, nennt die Pflichtfelder (Code-Review 233-4 C-25)
-  @wip
   Szenario: Das Auslesen einer Datei scheitert
     Angenommen das Auslesen von Dateien ist gestört
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Dann sagt die Datei von "Elektro Blitz" "Die Datei wurde nicht gelesen, weil Dwello nicht geantwortet hat. Wählen Sie «Erneut versuchen» oder füllen Sie die Felder aus."
     Und sagt die Datei von "Elektro Blitz" "Füllen Sie aus: Rechnungsdatum, Betrag, Rechnungssteller, Beschreibung."
+    Und meldet Dwello "Fertig: 1 von 1. Nicht gelesen: 1."
 
   Szenario: Das Erstellen scheitert
     Angenommen das Erstellen von Rechnungen ist gestört
@@ -188,7 +183,6 @@ Funktionalität: Rechnungsliste
     Und erklärt Dwello "Dwello speichert die Datei jeder erstellten Rechnung als Beleg. Dateien, aus denen Sie keine Rechnung erstellen, speichert Dwello nicht."
 
   # #245: «Noch offen» nennt den Grund; nach dem Erstellen verwirft der Knopf nur die übrigen Dateien
-  @wip
   Szenario: Nur vollständige Rechnungen werden gezählt und erstellt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnungen von "Elektro Blitz" und "Werke Schlussrechnung" hochlädt
     Dann sagt die Datei von "Werke Schlussrechnung" "Wählen Sie eine Kategorie."

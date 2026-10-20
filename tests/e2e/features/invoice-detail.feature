@@ -116,6 +116,7 @@ Funktionalität: Rechnungsdetail
     Wenn der Liegenschaftsverwalter die Rechnung löschen will
     Dann sagt die Bestätigung zum Löschen der Rechnung "Der Beleg wird ebenfalls gelöscht."
 
+  # #245: die Bestätigung nennt die Abrechnungen mit Status (Dr. Weber 233 P-5, Fachreview 245-1 V-7)
   Szenario: Abgerechnete Rechnung mit Beleg löschen
     Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
     Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
@@ -124,7 +125,8 @@ Funktionalität: Rechnungsdetail
     Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Wenn der Liegenschaftsverwalter die Rechnung löschen will
-    Dann rät die Bestätigung zum Löschen der Rechnung "Laden Sie den Beleg vorher herunter, wenn Sie ihn für die Belegeinsicht brauchen."
+    Dann nennt die Bestätigung die Abrechnung des laufenden Jahres von "Anna Keller" im Status "Entwurf"
+    Und rät die Bestätigung zum Löschen der Rechnung "Laden Sie den Beleg vorher herunter, wenn Sie ihn für die Belegeinsicht brauchen."
     Und sagt die Bestätigung zum Löschen einer abgerechneten Rechnung "Löschen Sie nur falsch erfasste Rechnungen oder Akontorechnungen, an deren Stelle eine Schlussrechnung tritt. Ersetzt eine Schlussrechnung diese Akontorechnung, erfassen Sie zuerst die Schlussrechnung. Die Entwürfe enthalten diese Rechnung weiter"
 
   # #455 (#268): der Hinweis steht beim Betrag, nicht beim Beleg; die Regel als Hilfetext darunter

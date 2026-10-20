@@ -9,6 +9,7 @@
 		fileRefusal,
 		invoiceOf,
 		newRow,
+		openReason,
 		withoutKi,
 		withProposal,
 		type Proposal,
@@ -78,20 +79,22 @@
 	const chosen = $derived(rows.filter((row) => row.selected && row.status !== 'reading' && row.status !== 'refused'));
 	const resultShown = $derived(created.length > 0);
 	// after creating: the files chosen but not created, because they still lack something (persona Anna, C-4)
-	const stillOpen = $derived(chosen.map((row) => row.file.name));
+	const stillOpen = $derived(chosen.map((row) => ({ name: row.file.name, reason: openReason(row) })));
 	const buildingOptions = $derived(buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` })));
 	const buildingHelp = $derived(rows.length ? m.invoices_upload_building_locked() : undefined);
 	const discardText = $derived(
 		created.length ? m.invoices_upload_discard_text_created() : m.invoices_upload_discard_text()
 	);
-	const done = $derived(rows.filter((row) => row.status !== 'reading').length);
+	// a refused file is never read: it does not count (#245, domain review 233 V-10)
+	const counted = $derived(rows.filter((row) => row.status !== 'refused'));
+	const done = $derived(counted.filter((row) => row.status !== 'reading').length);
 	// what a screen reader hears: the progress, when all are read what is to do, or the file just removed (persona Sven)
 	const outcome = $derived(
 		(
 			[
 				[m.invoices_upload_status_check(), 'check'],
 				[m.invoices_upload_status_refused(), 'refused'],
-				[m.invoices_upload_status_error(), 'failed']
+				[m.invoices_upload_summary_failed(), 'failed']
 			] as const
 		)
 			.map(([label, status]) => ({ label, count: rows.filter((row) => row.status === status).length }))
@@ -103,9 +106,11 @@
 			? m.invoices_upload_removed({ name: removed })
 			: !rows.length
 				? ''
-				: done < rows.length
-					? m.invoices_upload_progress({ done, count: rows.length })
-					: [`${m.invoices_upload_progress({ done, count: rows.length })}.`, ...outcome].join(' ')
+				: done < counted.length
+					? m.invoices_upload_progress({ done, count: counted.length })
+					: [counted.length > 0 && `${m.invoices_upload_progress({ done, count: counted.length })}.`, ...outcome]
+							.filter(Boolean)
+							.join(' ')
 	);
 	// the button counts what it creates: a chosen row that still lacks something is named apart (#233)
 	const complete = $derived(chosen.filter((row) => !Object.keys(checkRow(row)).length).length);
@@ -287,7 +292,7 @@
 <Dialog
 	bind:open={discardOpen}
 	title={m.invoices_upload_discard_title()}
-	confirmLabel={m.invoices_upload_discard_confirm()}
+	confirmLabel={created.length ? m.invoices_upload_discard_confirm_created() : m.invoices_upload_discard_confirm()}
 	cancelLabel={m.invoices_upload_keep_going()}
 	danger
 	confirmTestid="invoice-upload-discard-confirm"

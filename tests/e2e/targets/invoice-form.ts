@@ -18,3 +18,4 @@ export const invoiceSubmitButton = target('Rechnung speichern', (page) => page.g
 export const invoiceNumberInput = target('Rechnungsnummer', (page) => page.getByTestId('invoice-number-input'));
 export const servicePeriodHelp = target('Hilfe zum Leistungszeitraum', (page) => page.getByTestId('invoice-service-period-help'));
 export const utilityCostHelp = target('Hilfe zu Umlagefähig', (page) => page.getByTestId('invoice-utility-cost-checkbox-help'));
+export const categoryLabel = target('Bezeichnung der Kategorie', (page) => page.getByTestId('invoice-category-label'));

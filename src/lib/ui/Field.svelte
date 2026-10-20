@@ -14,6 +14,7 @@
 		optional = false,
 		note,
 		helpTestid,
+		labelTestid,
 		children
 	}: {
 		id: string;
@@ -22,7 +23,8 @@
 		example?: string;
 		error?: string;
 		optional?: boolean;
-		note?: { text: string; testid: string }; // a caution about the value, e.g. that the KI read it without being sure
+		note?: { text: string; testid: string; quiet?: boolean }; // a caution about the value, e.g. that the KI read it without being sure; quiet: only a hint
+		labelTestid?: string;
 		helpTestid?: string;
 		children: Snippet<[FieldControl]>;
 	} = $props();
@@ -47,6 +49,9 @@
 	const helpId = $derived(`${id}-help`);
 	const errorId = $derived(`${id}-error`);
 	const noteId = $derived(`${id}-note`);
+	// a quiet note is only a hint, not a warning (#245, persona Helga of #233)
+	const warning = $derived(!note?.quiet);
+	const noteLook = $derived(warning ? 'font-semibold text-caution' : 'text-ink-muted');
 	// a caution about the value first: it is missed at the end of a long help (persona Sven)
 	const describedBy = $derived(
 		[note && noteId, (help || example) && helpId, shown && errorId].filter(Boolean).join(' ') || undefined
@@ -54,7 +59,7 @@
 </script>
 
 <div bind:this={frame} class="flex flex-col gap-2" oninput={change}>
-	<label for={id} class="font-semibold text-ink">
+	<label for={id} class="font-semibold text-ink" data-testid={labelTestid}>
 		{label}
 		{#if optional}<span class="font-normal text-ink-muted">{m.ui_optional()}</span>{/if}
 	</label>
@@ -66,8 +71,12 @@
 	{/if}
 	{@render children({ id, describedBy, invalid: !!shown })}
 	{#if note}
-		<p id={noteId} class="flex items-start gap-2 font-semibold text-caution" data-testid={note.testid}>
-			<Icon name="warning" />
+		<p
+			id={noteId}
+			class="flex items-start gap-2 {noteLook}"
+			data-testid={note.testid}
+		>
+			{#if warning}<Icon name="warning" />{/if}
 			{note.text}
 		</p>
 	{/if}

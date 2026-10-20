@@ -1113,7 +1113,7 @@ describe('Beleg einer Rechnung', () => {
 		// the Akonto hint sits at the Betrag (#455)
 		expect(byTestId('invoice-document-hints')!.textContent).not.toContain('Akontorechnungen');
 		expect(byTestId('invoice-document-hints')!.textContent).toContain(
-			'Der Beleg enthält auch Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Prüfen Sie, dass der Betrag nur den umlagefähigen Teil enthält und der Rest als eigene Rechnung in einer nicht umlagefähigen Kategorie erfasst ist.'
+			'Der Beleg enthält auch Kosten, die nicht umlagefähig sind (z. B. Reparaturen). Prüfen Sie, dass der Betrag nur den umlagefähigen Teil enthält und der Rest als eigene Rechnung in einer nicht umlagefähigen Kategorie erfasst ist.'
 		);
 		// an invoice that is not allocable keeps all its costs out already
 		document.body.innerHTML = '';

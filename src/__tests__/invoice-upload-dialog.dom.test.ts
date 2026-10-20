@@ -131,7 +131,7 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'), word);
 		const status = () => byTestId('invoice-upload-progress')!.textContent?.trim();
-		expect(status()).toBe('Gelesen: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1.');
+		expect(status()).toBe('Fertig: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1.');
 		allByTestId('invoice-upload-row-remove')[1].click();
 		await settle();
 		expect(status()).toBe('notizen.docx entfernt.');
@@ -309,7 +309,7 @@ describe('Rechnungen hochladen', () => {
 		open(() => [500, {}]);
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
-		expect(byTestId('invoice-upload-progress')!.textContent!.trim()).toBe('Gelesen: 1 von 1. Nicht gelesen: 1.');
+		expect(byTestId('invoice-upload-progress')!.textContent!.trim()).toBe('Fertig: 1 von 1. Nicht gelesen: 1.');
 	});
 
 	// #245 (Weber P-5 of #217 round 2, Marco P-3): an unticked row says why, at its checkbox
@@ -317,7 +317,7 @@ describe('Rechnungen hochladen', () => {
 		open(() => [200, { ...read, documentType: 'credit_note' }]);
 		chooseBuilding();
 		await upload(pdf('gutschrift.pdf'));
-		expect(byTestId('invoice-upload-row-select-help')!.textContent).toContain('weil aus einer Gutschrift keine Rechnung entsteht');
+		expect(byTestId('invoice-upload-row-select-help')!.textContent).toContain('fehlt, weil aus einer Gutschrift keine Rechnung entsteht');
 		click('invoice-upload-row-select');
 		expect(byTestId('invoice-upload-row-select-help')).toBeNull();
 	});
@@ -334,7 +334,7 @@ describe('Rechnungen hochladen', () => {
 		const { calls } = open(() => [503, { error: 'x', code: 'EXTRACTION_UNAVAILABLE', params: {} }]);
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
-		expect(rowText()[0]).toContain('Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus.');
+		expect(rowText()[0]).toContain('Die KI hat diese Datei nicht gelesen. Füllen Sie die Felder aus.');
 
 		click('invoice-upload-create-button');
 		await settle();
@@ -494,7 +494,7 @@ describe('Rechnungen hochladen', () => {
 		await upload(pdf('a.pdf'), pdf('b.pdf'));
 		const status = byTestId('invoice-upload-progress')!;
 		expect(status.getAttribute('role')).toBe('status');
-		expect(status.textContent).toContain('Gelesen: 2 von 2');
+		expect(status.textContent).toContain('Fertig: 2 von 2');
 	});
 
 	it('gibt nach dem Entfernen einer Datei den Fokus der Dateiauswahl', async () => {
