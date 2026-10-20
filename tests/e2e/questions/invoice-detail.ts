@@ -2,6 +2,9 @@ import { Count, Text } from '../screenplay/questions';
 import {
 	invoiceNumber,
 	amount,
+	billedIn,
+	deductedHint,
+	deductedRule,
 	category,
 	categoryReason,
 	distributionKeyRow,
@@ -26,3 +29,6 @@ export const reasonOfCategory = Text.of(categoryReason);
 export const reasonsOfCategory = Count.of(categoryReason);
 export const tenancyLawNotes = Count.of(legalNote);
 export const distributionKeyRows = Count.of(distributionKeyRow);
+export const deductedHintAtAmount = Text.of(deductedHint);
+export const deductedRuleAtAmount = Text.of(deductedRule);
+export const statementsOfInvoice = Text.of(billedIn);

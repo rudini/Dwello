@@ -16,6 +16,10 @@
 
 	// open at once when the Übersicht's «Rechnungen hochladen» led here
 	let uploading = $state($page.url.searchParams.has('upload'));
+	const openUpload = (event: MouseEvent) => {
+		event.preventDefault();
+		uploading = true;
+	};
 	let created = $state<Created[]>([]);
 
 	// Only the year is chosen: an empty list means nothing is recorded yet, not a filter mistake
@@ -39,7 +43,8 @@
 	<PageHeader title={m.nav_invoices()} purpose={m.invoices_purpose()}>
 		{#snippet action()}
 			<div class="flex flex-wrap gap-4">
-				<Button variant="primary" icon="document" onclick={() => (uploading = true)} testid="invoice-upload-button"
+				<!-- a link to the address that opens the dialog: a click before the page's scripts run works too (#268) -->
+				<Button variant="primary" icon="document" href="?upload" onclick={openUpload} testid="invoice-upload-button"
 					>{m.invoices_upload_open()}</Button
 				>
 				<Button href="/invoices/new" icon="add" testid="invoice-new-button">{m.dashboard_add_invoice()}</Button>

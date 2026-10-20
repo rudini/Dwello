@@ -59,7 +59,6 @@
 		5: m.statements_drafts_busy()
 	};
 	const NOTHING = m.statements_nothing();
-	const NOTHING_OPEN = m.statements_nothing_open(); // no advice to delete drafts with days open (code review C-1)
 	const fresh = (): WizardSelection => ({
 		periodStart: data.defaultPeriod.start,
 		periodEnd: data.defaultPeriod.end,
@@ -177,8 +176,7 @@
 	}
 
 	function previewErrors(): Record<string, string> {
-		if (previewRows.length === 0)
-			return { preview: invoices.some((row) => row.partlyBilled) ? NOTHING_OPEN : NOTHING };
+		if (previewRows.length === 0) return { preview: NOTHING };
 		if (invoices.some((row) => row.uncategorized?.length))
 			return { uncategorized: m.statements_uncategorized_error() };
 		return confirmationNeeded && !confirmed ? { confirm: CONFIRM } : {};

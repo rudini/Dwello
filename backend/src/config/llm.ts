@@ -265,7 +265,7 @@ const EXTRACTION_PROMPT = `Du liest eine Rechnung an den Vermieter eines Gebäud
 
 Lies diese Angaben ab, so wie sie auf der Rechnung stehen; erfinde nichts. Fehlt eine Angabe, setze null.
 - invoiceCount: wie viele verschiedene Rechnungen die Datei enthält
-- documentType: "invoice" für eine Rechnung, "reminder" für eine Mahnung, "credit_note" für eine Gutschrift
+- documentType: "invoice" für eine Rechnung oder Schlussrechnung, "advance_invoice" für eine Akontorechnung (eine Teilrechnung über einen Vorschuss, die der Rechnungssteller später mit einer Schlussrechnung abrechnet; eine Rechnung, die nur in Raten bezahlt wird, ist keine Akontorechnung), "reminder" für eine Mahnung, "credit_note" für eine Gutschrift
 - billingEntityName: Firma oder Person, die die Rechnung stellt
 - invoiceNumber: Rechnungsnummer
 - invoiceDate: Rechnungsdatum (JJJJ-MM-TT)
@@ -300,7 +300,7 @@ export const buildExtractionPrompt = (fileName: string) =>
 /** What the KI read from a Beleg: the fields as the invoice form takes them, and what the property manager must check */
 export type Extraction = {
 	invoiceCount: number;
-	documentType: 'invoice' | 'reminder' | 'credit_note';
+	documentType: 'invoice' | 'advance_invoice' | 'reminder' | 'credit_note';
 	fields: {
 		billingEntityName: string | null;
 		invoiceNumber: string | null;
@@ -323,7 +323,7 @@ const date = (value: unknown) => {
 	return iso && isRealDate(iso) ? iso : null;
 };
 const francs = (value: unknown) => (typeof value === 'number' && value > 0 ? roundToRappen(value).toFixed(2) : null);
-const DOCUMENT_TYPES = ['invoice', 'reminder', 'credit_note'] as const;
+const DOCUMENT_TYPES = ['invoice', 'advance_invoice', 'reminder', 'credit_note'] as const;
 // How many invoices a file holds, also when the KI writes the number as text; anything else counts as one
 const count = (value: unknown) => {
 	const n = typeof value === 'string' || typeof value === 'number' ? Number(value) : NaN;

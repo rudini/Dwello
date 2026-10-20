@@ -21,6 +21,11 @@ export const stepLabel = target('Name des Schritts', (page) => page.getByTestId(
 export const allBuildingsCheckbox = target('Alle Gebäude', (page) => page.getByTestId('generate-all-buildings'));
 // Next to the counter: the buildings «Alle Gebäude» leaves out
 export const allBuildingsNote = target('Hinweis zu «Alle Gebäude»', (page) => page.getByTestId('generate-all-buildings-note'));
+// #199, #408 point 2: a way out of a period that overlaps the building's statements, by the first day of the period it opens
+export const offeredPeriodLink = (buildingId: string, periodStart: string) =>
+	target(`Abrechnungsperiode ab ${periodStart} für Gebäude ${buildingId}`, (page) =>
+		page.getByTestId(`generate-building-period-${buildingId}-${periodStart}`)
+	);
 // Mietverträge of the building that already have a statement for the period (step 2)
 export const buildingBilled = (buildingId: string) =>
 	target(`Schon abgerechnet im Gebäude ${buildingId}`, (page) => page.getByTestId(`generate-building-billed-${buildingId}`));
@@ -30,7 +35,6 @@ export const previewFee = target('Verwaltungspauschale der Vorschau', (page) => 
 export const previewRows = target('Zeilen der Vorschau', (page) => page.getByTestId('preview-row'));
 export const previewRow = (tenantName: string) =>
 	target(`Zeile von «${tenantName}» in der Vorschau`, (page) => previewRows.locate(page).filter({ hasText: tenantName }));
-export const previewAllBilled = target('Hinweis alle Mietverträge abgerechnet', (page) => page.getByTestId('preview-all-billed'));
 export const previewAkontoHint = (tenantName: string) =>
 	target(`Akonto-Hinweis von «${tenantName}» in der Vorschau`, (page) =>
 		previewRow(tenantName).locate(page).getByTestId('preview-akonto-hint')
@@ -128,3 +132,13 @@ export const agreementsLoading = target('Vereinbarte Nebenkosten werden geprüft
 export const agreementsFailed = target('Vereinbarte Nebenkosten nicht geprüft', (page) => page.getByTestId('agreements-failed'));
 export const agreementsRetry = target('Erneut versuchen', (page) => page.getByTestId('agreements-retry'));
 export const agreementsWait = target('Warten auf die Prüfung der Mietverträge', (page) => page.getByTestId('agreements-wait'));
+// #453 (#327): the note on the total, a contract «Abgerechnet bis» covers in full, and a building all of whose are
+export const previewVacancyNote = target('Notiz zum Total der Vorschau', (page) => page.getByTestId('preview-vacancy-note'));
+export const previewSkipped = (contractId: string) =>
+	target('übergangener Mietvertrag in der Vorschau', (page) => page.getByTestId(`preview-skipped-${contractId}`));
+export const previewSkippedLink = (contractId: string) =>
+	target('Link zum übergangenen Mietvertrag', (page) => previewSkipped(contractId).locate(page).getByRole('link'));
+export const previewAllSkipped = (buildingId: string) =>
+	target('Hinweis alle Mietverträge ausserhalb von Dwello abgerechnet', (page) =>
+		page.getByTestId(`preview-all-skipped-${buildingId}`)
+	);

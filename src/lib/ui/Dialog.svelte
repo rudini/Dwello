@@ -82,7 +82,8 @@
 	function keydown(event: KeyboardEvent) {
 		// a dialog opened above this one (e.g. its own confirmation) handles the keys
 		if (!open || panel?.closest('[inert]')) return;
-		if (event.key === 'Escape') {
+		// Escape in a select closes its open list, not the dialog (#268)
+		if (event.key === 'Escape' && !(event.target as HTMLElement).matches?.('select')) {
 			event.stopPropagation();
 			close();
 		}

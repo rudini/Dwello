@@ -98,13 +98,18 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 // A-10, #142: Mietstage in abgelaufenen Abrechnungsperioden ohne Abrechnung
 describe('Fehlende Abrechnungen am Mietvertrag', () => {
 	const lastYear = new Date().getFullYear() - 1;
-	const year = (y: number) => ({ start: `${y}-01-01`, end: `${y}-12-31` });
-	// a whole period leads into the wizard; each range to the building's invoices of its year (#211)
-	const missingYear = (y: number) => ({
-		...year(y),
-		href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`,
-		invoices: { href: `/invoices?building=b1&year=${y}`, label: `Rechnungen ${y} ansehen` }
+	// each range leads into the wizard and to the building's invoices of its year (#211)
+	const missing = (start: string, end: string, kind: string, way = { start, end }) => ({
+		start,
+		end,
+		href: `/statements/generate?building=b1&start=${way.start}&end=${way.end}`,
+		way: { kind, ...way },
+		invoices: {
+			href: `/invoices?building=b1&year=${start.slice(0, 4)}`,
+			label: `Rechnungen ${start.slice(0, 4)} ansehen`
+		}
 	});
+	const missingYear = (y: number) => missing(`${y}-01-01`, `${y}-12-31`, 'whole');
 	// backend answers as checked against the real API (tests/contracts); the statements filter by contractId as the
 	// backend does: a previous tenant's statement in the same apartment comes back only without that filter
 	const statementOf = (contractId: string, y: number) => ({
@@ -185,24 +190,115 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		]);
 	});
 
-	// #199: an overlapping statement counts; the days it leaves have no way into the wizard until #408 decides one
-	it('nennt nur die Tage, die keine Abrechnung abdeckt, ohne Weg in den Assistenten', async () => {
+	// #199, #408 point 2: an overlapping statement counts; the days no statement of the building covers get a short
+	// Abrechnungsperiode
+	it('bietet für die Tage, die keine Abrechnung des Gebäudes abdeckt, eine kurze Abrechnungsperiode an', async () => {
 		const overlapping = {
 			...statementOf('c1', lastYear),
 			periodStart: `${lastYear - 1}-07-01`,
 			periodEnd: `${lastYear}-06-30`
 		};
 		expect(await missingOf(backend([overlapping], `${lastYear}-01-01`))).toEqual([
-			{
-				start: `${lastYear}-07-01`,
-				end: `${lastYear}-12-31`,
-				href: null,
-				invoices: {
-					href: `/invoices?building=b1&year=${lastYear}`,
-					label: `Rechnungen ${lastYear} ansehen`
-				}
-			}
+			missing(`${lastYear}-07-01`, `${lastYear}-12-31`, 'short')
 		]);
+	});
+
+	// #408 point 2: days inside the period of another contract's statement are billed in exactly that period
+	it('bietet für Tage in der Periode einer Abrechnung des Gebäudes genau diese Periode an', async () => {
+		const other = {
+			...statementOf('c0', lastYear),
+			periodStart: `${lastYear - 1}-07-01`,
+			periodEnd: `${lastYear}-06-30`
+		};
+		expect(await missingOf(backend([other], `${lastYear}-01-01`))).toEqual([
+			missing(`${lastYear}-07-01`, `${lastYear}-12-31`, 'short'),
+			missing(`${lastYear}-01-01`, `${lastYear}-06-30`, 'existing', {
+				start: `${lastYear - 1}-07-01`,
+				end: `${lastYear}-06-30`
+			})
+		]);
+	});
+
+	// code review 199-1 C-2: statements made before #408 point 2 may overlap; days in a period equal to a statement
+	// period of the building go there only, not a second time to an overlapping one
+	it('nennt bei überschneidenden Altdaten dieselben Tage nur einmal', async () => {
+		const older = {
+			...statementOf('c0', lastYear),
+			periodStart: `${lastYear - 1}-07-01`,
+			periodEnd: `${lastYear}-06-30`
+		};
+		expect(
+			await missingOf(backend([older, statementOf('c2', lastYear)], `${lastYear}-01-01`))
+		).toEqual([missingYear(lastYear)]);
+	});
+
+	// code review 199-3 C-12: another contract's replaced statement still holds its period for the building (C-8)
+	it('führt Tage in der Periode einer ersetzten Abrechnung des Gebäudes in diese Periode', async () => {
+		const replaced = {
+			...statementOf('c0', lastYear),
+			periodStart: `${lastYear - 1}-07-01`,
+			periodEnd: `${lastYear}-06-30`,
+			status: 'replaced'
+		};
+		expect(await missingOf(backend([replaced], `${lastYear}-01-01`))).toEqual([
+			missing(`${lastYear}-07-01`, `${lastYear}-12-31`, 'short'),
+			missing(`${lastYear}-01-01`, `${lastYear}-06-30`, 'existing', {
+				start: `${lastYear - 1}-07-01`,
+				end: `${lastYear}-06-30`
+			})
+		]);
+	});
+
+	// code review 199-2 C-9: two older periods with one first day: the longer one, so no missing day is lost
+	it('nennt bei zwei Altperioden mit gleichem Beginn die Tage der längeren', async () => {
+		const period = (contractId: string, end: string) => ({
+			...statementOf(contractId, lastYear),
+			periodEnd: `${lastYear}-${end}`
+		});
+		const missing = (await missingOf(
+			backend([period('c0', '03-31'), period('c2', '06-30')], `${lastYear}-01-01`)
+		)) as { start: string; end: string }[];
+		expect(missing.map(({ start, end }) => [start, end])).toEqual([
+			[`${lastYear}-07-01`, `${lastYear}-12-31`],
+			[`${lastYear}-01-01`, `${lastYear}-06-30`]
+		]);
+	});
+
+	// code review 199-1 C-6: without the building's statements the ways cannot be told: better no hint
+	it('nennt nichts, wenn die Abrechnungen des Gebäudes nicht gelesen werden können', async () => {
+		const answer = backend([]);
+		const fetch = (async (url: string) =>
+			url.includes('/statements?buildingId=')
+				? new Response(null, { status: 500 })
+				: answer(url)) as typeof globalThis.fetch;
+		expect(await missingOf(fetch)).toEqual([]);
+	});
+
+	// a part names the contract's own days: from the Vertragsbeginn, not from the start of the period
+	it('nennt bei einem Teil die Tage ab Vertragsbeginn', async () => {
+		const other = {
+			...statementOf('c0', lastYear),
+			periodStart: `${lastYear - 1}-07-01`,
+			periodEnd: `${lastYear}-06-30`
+		};
+		const missing = (await missingOf(backend([other], `${lastYear}-04-01`))) as {
+			start: string;
+			end: string;
+		}[];
+		expect(missing.map(({ start, end }) => [start, end])).toEqual([
+			[`${lastYear}-07-01`, `${lastYear}-12-31`],
+			[`${lastYear}-04-01`, `${lastYear}-06-30`]
+		]);
+	});
+
+	// Fachreview 199-1 V-1: statements made before #408 point 2 may overlap; a run of the previous tenant's period would
+	// count the contract as billed by its own overlapping statement and bill it no more there: no way into the wizard
+	it('führt nicht in eine Periode, die der Mietvertrag mit einer eigenen Abrechnung schneidet', async () => {
+		const own = { ...statementOf('c1', lastYear), periodEnd: `${lastYear}-06-30` };
+		const missing = (await missingOf(
+			backend([own, statementOf('c0', lastYear)], `${lastYear}-01-01`)
+		)) as { start: string; href: string | null }[];
+		expect(missing.map(({ start, href }) => [start, href])).toEqual([[`${lastYear}-07-01`, null]]);
 	});
 
 	// #211: the list marks each contract with the same rule, without opening it

@@ -34,7 +34,7 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 		overwriteGetLocale(() => 'it');
 		expect(m.statements_building_billed_many({ billed: 2, total: 8 })).toMatch(/^Su 8 contratti/);
 		overwriteGetLocale(() => 'en');
-		expect(m.statements_building_billed_all_many()).toContain('covers all or part of this period');
+		expect(m.statements_building_billed_all_many()).toContain('already have a statement for this period');
 	});
 
 	it('nennt den Saldo auf Französisch wie das PDF', () => {

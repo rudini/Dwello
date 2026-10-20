@@ -43,10 +43,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(row.status).toBe('check');
 		expect(row.unsure).toEqual(['invoiceDate']);
 		expect(row.selected).toBe(true);
-		expect(said(row)).toEqual([
-			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Vorgeschlagen ist das Total vor dem Abzug. Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist.',
-			'Prüfen Sie: Rechnungsdatum.'
-		]);
+		expect(said(row)).toEqual(['Prüfen Sie: Rechnungsdatum.']);
 	});
 
 	it('wählt eine schon erfasste Rechnung und eine Datei mit mehreren Rechnungen nicht zum Erstellen', () => {
@@ -55,8 +52,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(several).toMatchObject({ selected: false, several: true });
 		// nothing to check or fill in on a file no invoice is created from (persona Anna)
 		expect(said(several)).toEqual([
-			'Diese Datei enthält mehrere Rechnungen. Laden Sie jede Rechnung als eigene Datei hoch, oder erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an.',
-			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Vorgeschlagen ist das Total vor dem Abzug. Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist.'
+			'Diese Datei enthält mehrere Rechnungen. Laden Sie jede Rechnung als eigene Datei hoch, oder erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an.'
 		]);
 	});
 
@@ -87,6 +83,40 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(said(row).join(' ')).toContain('nicht umlagefähig sind');
 		row.values.isValidUtilityCost = false; // «Reparaturen» chosen
 		expect(said(row).join(' ')).not.toContain('nicht umlagefähig sind');
+	});
+
+	// #455 (#268): eine kurze Zeile mit dem abgezogenen und dem vorgeschlagenen Betrag; die Regel steht als Hilfetext darunter
+	it('nennt abgezogene Akontorechnungen in einer eigenen kurzen Zeile mit dem vorgeschlagenen Total', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null }));
+		expect(row.deducted).toBe(
+			'Auf der Rechnung sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Als Betrag ist das Total vor dem Abzug vorgeschlagen: CHF\u00a01’250.00.'
+		);
+		expect(withProposal(newRow(2, pdf, defaults), proposal({ deductedAmount: null })).deducted).toBeNull();
+		// without a total read there is nothing proposed to name (domain review 455 V-5)
+		const fields = { ...extraction.fields, amount: null };
+		expect(withProposal(newRow(3, pdf, defaults), proposal({ duplicateOf: null, fields })).deducted).toBe(
+			'Auf der Rechnung sind Akontorechnungen von CHF 1’000.00 abgezogen. Tragen Sie als Betrag das Total vor dem Abzug ein.'
+		);
+	});
+
+	// #455 (#262): eine Akontorechnung zählt sonst mit der Schlussrechnung doppelt (Art. 257b Abs. 1 OR)
+	it('wählt eine Akontorechnung nicht zum Erstellen und sagt, wann sie zu erfassen ist', () => {
+		const row = withProposal(
+			newRow(1, pdf, defaults),
+			proposal({ duplicateOf: null, documentType: 'advance_invoice', deductedAmount: null, categorization: null })
+		);
+		expect(row.selected).toBe(false);
+		expect(said(row)).toEqual([
+			'Das ist eine Akontorechnung: ein Vorschuss, den der Rechnungssteller später mit der Schlussrechnung abrechnet. Erfassen Sie in der Regel nur die Schlussrechnung mit dem Total. Kommt die Schlussrechnung erst nach der Abrechnung dieser Periode, setzen Sie das Häkchen bei «Diese Rechnung erstellen» und erfassen Sie die Akontorechnung; löschen Sie sie, wenn Sie die Schlussrechnung erfassen.'
+		]);
+	});
+
+	it('nennt bei einer ausgewählten Akontorechnung, was zum Erstellen fehlt', () => {
+		const row = withProposal(
+			newRow(1, pdf, defaults),
+			proposal({ duplicateOf: null, documentType: 'advance_invoice', deductedAmount: null, categorization: null })
+		);
+		expect(toDoOf({ ...row, selected: true })).toContain('Wählen Sie eine Kategorie.');
 	});
 
 	it('sagt bei einer Gutschrift, dass keine Rechnung daraus entsteht und wo sie abgezogen wird', () => {

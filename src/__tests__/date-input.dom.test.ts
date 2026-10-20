@@ -34,6 +34,14 @@ function type(text: string) {
 }
 
 describe('Datumsfeld TT.MM.JJJJ', () => {
+	// #455 (#268): a screen reader read an empty paragraph under «Die KI ist unsicher …» (persona Marco of #222)
+	it('hat unter dem Feld keinen leeren Absatz', () => {
+		date('2026-03-31', { note: { text: 'Die KI ist unsicher. Bitte prüfen Sie den Wert.', testid: 'date-unsure' } });
+		// an empty paragraph hidden while empty (empty:hidden) is not in the accessibility tree
+		const empty = [...document.querySelectorAll('p')].filter((p) => !p.textContent!.trim() && !p.classList.contains('empty:hidden'));
+		expect(empty).toEqual([]);
+	});
+
 	// «31.12.2024» Taste für Taste: «31.12.20» war schon ein Datum (2020) und wurde angesagt und geprüft
 	it('übernimmt ein zweistelliges Jahr erst beim Verlassen, nicht beim Tippen', () => {
 		const bound = date();

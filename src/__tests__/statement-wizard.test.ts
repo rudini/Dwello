@@ -93,9 +93,10 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: false,
 				existing: 0,
 				changed: [],
-				partlyBilled: 0,
 				fixedTerm: false,
 				uncategorized: [],
+				skipped: [],
+				allSkipped: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
 				findings: [],
@@ -109,9 +110,10 @@ describe('Rechnungen pro Gebäude', () => {
 				missing: true,
 				existing: 0,
 				changed: [],
-				partlyBilled: 0,
 				fixedTerm: false,
 				uncategorized: [],
+				skipped: [],
+				allSkipped: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
 				findings: [],
@@ -342,11 +344,6 @@ describe('Bestätigung vor dem Erstellen', () => {
 	// #251: Mietverträge mit einer Abrechnung erhalten keine neue; das allein ist kein Befund
 	it('verlangt sie nicht, nur weil es schon Abrechnungen gibt', () => {
 		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(false);
-	});
-
-	// Fachreview M-1: Tage der Mietdauer, die keine Abrechnung abdeckt, werden in diesem Lauf nicht abgerechnet
-	it('verlangt sie, wenn eine Abrechnung nur einen Teil der Mietdauer in der Periode abdeckt', () => {
-		expect(needsConfirmation([coverage({ statements: 1, partlyBilled: 1 })])).toBe(true);
 	});
 
 	// ein Hinweis auf die Tankbestände, nie eine Bestätigung (#73)

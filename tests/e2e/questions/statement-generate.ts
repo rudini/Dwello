@@ -1,9 +1,8 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Checked, Count, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	allBuildingsNote,
-	previewAllBilled,
 	confirmMissingInvoices,
 	existingStatements,
 	stepLabel,
@@ -38,6 +37,9 @@ import {
 	previewAkontoHint,
 	previewRow,
 	previewRows,
+	previewVacancyNote,
+	previewSkipped,
+	previewAllSkipped,
 	tankQuestion,
 	wizardChoices,
 	wizardPresetNotice
@@ -131,6 +133,7 @@ export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(b
 export const discardQuestion = Text.of(discardDraftMessage);
 export const allBuildingsNoteText = Text.of(allBuildingsNote);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
+export const buildingSelectable = (buildingId: string) => Enabled.of(buildingCheckbox(buildingId));
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
 export const periodRunning = Text.of(periodRunningWarning);
 export const tankQuestions = Count.of(tankQuestion);
@@ -147,9 +150,7 @@ export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);
 export const existingStatementsText = Text.of(existingStatements);
 // the warnings the confirmation confirms, read with its checkbox
-export const confirmationReason = Accessible.descriptionOf(confirmMissingInvoices);
 export const currentStep = Text.of(stepLabel);
-export const allBilledText = Text.of(previewAllBilled);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
 export const presetNoticeText = Text.of(wizardPresetNotice);
 export const notesOnExistingStatement = (statementId: string) => Text.of(existingStatementNotes(statementId));
@@ -161,3 +162,9 @@ export const notAgreedCostsOf = (contractId: string) => Text.of(notAgreedCostsLi
 export const oldAddressWarning = Text.of(oldAddress);
 export const agreementsFailure = Text.of(agreementsFailed);
 export const agreementsWaiting = Text.of(agreementsWait);
+
+// #453 (#327): what the preview says per contract, on its total, and on contracts «Abgerechnet bis» covers
+export const previewRowText = (tenantName: string) => Text.of(previewRow(tenantName));
+export const vacancyNoteText = Text.of(previewVacancyNote);
+export const skippedContractText = (contractId: string) => Text.of(previewSkipped(contractId));
+export const allSkippedText = (buildingId: string) => Text.of(previewAllSkipped(buildingId));

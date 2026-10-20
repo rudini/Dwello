@@ -2052,6 +2052,38 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
+## Session W6-458: legal texts, split responsibility (2026-10-19)
+
+Branch `w6-issue-458`, worker W6 of a coordinated run (the checklist was kept in the pull request; `implementation_plan.md` keeps another worker's open session, coordinator's rule). Issue #458, closes #330 and #333.
+
+- [x] @wip scenarios in `privacy.feature`, `terms.feature`, `demo.feature`, `authentication.feature` (9251867b); all 11 seen red at the missing behaviour; 15 DOM and unit tests seen red
+- [x] fach-reviewer round 1 (`docs/reviews/458-fachreview-1.md`): R-1 to R-3 decided by the product owner as proposed; R-4 to R-10, R-13 applied; R-6 with a test seen red
+- [x] Implementation (0d847905): `src/lib/server/operator.ts` (`loadHosting`), `src/routes/privacy/+page.server.ts`, `src/routes/privacy/+page.svelte`, `src/routes/terms/+page.svelte`, `src/routes/login/+page.svelte`, `src/lib/utils/format.ts`, `messages/*.json`, `.env.example`, `docker-compose.prod.yml`, `README.md`; markers #330 and #333 removed
+- [x] PO wording R-1 to R-3 (ab6bcc58), tests seen red; E2E countries «Liechtenstein», since the language check flags German country names
+- [x] code-reviewer round 1 (`docs/reviews/458-review-1.md`: no finding)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-458.md`, `dr-weber-458.md`); Dr. Weber P-1 (deletion after retention) moved to #459
+- [x] Anchors on the privacy sections, glossary note «in der Datenschutzerklärung geplant, #411» removed on the PO's order (8807e6ae)
+- [x] fach-reviewer round 2 (`docs/reviews/458-fachreview-2.md`): links, when and how, export, Art. 9 DSG on /terms (b6006970), tests and a navigation scenario seen red
+- [x] Closing code-reviewer rounds (`docs/reviews/458-review-2.md`, after the date fix R-12 and the merge with #479 `458-review-3.md`: no finding)
+- [x] Affected E2E (chromium) green; PR `Fixes #458`, `Fixes #330`, `Fixes #333`
+## Session W1: «Abgerechnet bis» lines, preview, wizard field, refusals (#453, #325, #480) (2026-10-19)
+
+Branch `w1-issue-453`, worker W1 of a parallel run; the checklist lived in the pull request (one session per plan, another worker's open session in `implementation_plan.md`, coordinator's consent) and comes here at the end.
+
+- [x] @wip scenarios in `statement-generate`, `statement-detail`, `contract-new`, `contract-edit.feature`, seen red at the missing behaviour (one passes on the base: no field for a future start)
+- [x] fach-reviewer before implementing (`docs/reviews/453-fachreview-1.md`: V-1 Major fixed; V-3 became #480)
+- [x] Backend refusals `BILLED_UNTIL_FUTURE`, `BILLED_UNTIL_BEFORE_START` (create, update, stored value kept), PDF tenancy line, Akonto line «Akontobeiträge ab» (#477), page 2 texts
+- [x] Preview: days and Akonto per row, «Abgerechnet bis» line, skipped contracts with link, own text per building, total note
+- [x] Wizard: field in «Vertragsdauer» for a start before today, warning points to it, check step row, refusals at the field in wizard and edit form
+- [x] Messages in four languages, `glossary_days_text`; a11y states `billed-until-refused`, `preview-skipped`
+- [x] #480 (decided, glossary edit ordered by the product owner): glossary row and help text
+- [x] Reviews: code-reviewer rounds 1 to 3 (`docs/reviews/453-review-1..3.md`), personas Dr. Weber and Helga (`docs/design/personas/weber-453.md`, `helga-453.md`), daten-pruefer (`docs/reviews/453-datenpruefung-1.md`), native reads (`docs/reviews/453-native-fr/it/en.md`)
+- [x] Found: #499 (dead end after «Abgerechnet bis» over a billed statement, decided option 1), #500 («Wohnung EG, EG»)
+- [x] Merge of `origin/main` with #464, conflicts resolved
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-453.md`
+- [x] PR `Fixes #453`, `Fixes #325`, `Fixes #480`
+
+Files: `backend/src/services/{contract,pdf}.service.ts`, `backend/src/routes/contracts.ts`, `src/lib/{contract-form,contract-wizard,statement-wizard}.ts`, `src/lib/server/statement-generation.ts`, `src/routes/contracts/{ContractForm.svelte,new/ContractWizard.svelte,new/PeriodStep.svelte}`, `src/routes/statements/generate/` (`+page.server.ts`, `PreviewStep`, `PreviewSkipped`, `PreviewEmpty`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, tests and E2E files.
 ## Session W10: fr/it/en words of #405 (#461, with #501) (2026-10-19)
 
 Branch `w10-issue-461`, worker W10 of a coordinated run (checklist also in the pull request; Session C1 of another branch stays in the plan, coordinator's rule).
@@ -2143,3 +2175,41 @@ Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20:
 
 - [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
 - [x] PR `Fixes #488`
+
+## Session W2-199: one Abrechnungsperiode per day and building (#199, #408, #486, #487)
+
+Branch `w2-issue-199` (worker W2; reviewers started by the coordinator). Fixes #199 (decision #408 point 2, texts in https://github.com/rudini/Dwello/issues/408#issuecomment-6249569443), #408 (its last marker), #486 and #487 (product owner decisions 2026-10-19/20). The checklist was kept in the pull request description: ten parallel workers share `implementation_plan.md` (coordinator's rule).
+
+- [x] Scenarios `@wip` in `statement-generate.feature` (refused overlap, way to the existing period, short period, «Alle Gebäude») and `contract-detail.feature` (short period, days in another contract's period); red at the missing behaviour (9 of 9). The `@api` scenario «Die kurze Abrechnungsperiode rechnet eine Rechnung nur in ihrer Periode ab» pins kept behaviour.
+- [x] fach-reviewer round 1 (`docs/reviews/199-fachreview-1.md`): V-1 (product owner: a period equal to an existing one is allowed, also with overlapping old data), V-2 to V-7, V-9 (product owner's wording), V-10 fixed; M-1 → #486, V-8/V-11 → #487
+- [x] BFF, step 2, backend `statements/generate` (`STATEMENT_PERIOD_OVERLAPS`) refuse a period that overlaps a statement period of the building and equals none; ways out: the existing period, short periods for ended days with Mietstage, vacancy sentence; `*.pg.test.ts` with the domain review's example (no distribution above 100 %)
+- [x] Contract page: each part of the missing days with its way (existing period, short period), the contract's own days, no way when its own statement overlaps the period
+- [x] Unreachable «partly billed» path removed (BFF, wizard, texts, tests); V-6 texts without «ganz oder teilweise»
+- [x] Marker `TODO(fachlich prüfen, #408)` and the comments naming #199/#408 removed or repointed
+- [x] Texts in de/fr/it/en; screen state `buildings-overlap` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature` (axe and languages green)
+- [x] code-reviewer rounds 1 to 3 (`docs/reviews/199-review-1.md` to `-3.md`): C-1 to C-12 fixed (C-8 by the coordinator's decision: a replaced statement without its berichtigte Abrechnung keeps its period)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-199.md`, `weber-199.md`): Weber P-1 = Helga P-3 → fach-reviewer round 2 (`docs/reviews/199-fachreview-2.md`, M-2) and the product owner's help text of #486 (2026-10-20); Weber P-2 = Helga P-1 (existed on `main`) → #512; P-5 fixed; P-3, P-4, P-6, Helga P-2, P-4 stay in the reports; V-3 → #521
+- [x] daten-pruefer (`docs/reviews/199-datenpruefung-1.md`): no findings
+- [x] #487: glossary rows entered as the product owner ordered
+- [x] Merge of `origin/main` (conflict in `UBIQUITOUS_LANGUAGE.md` only); closing code-reviewer round (`docs/reviews/199-review-4.md`)
+- [x] Workflow note: parallel workers share `implementation_plan.md`, the scratchpad, the E2E lock and the persona stack (`docs/reviews/workflow-notes-issue-199.md`)
+
+Files: `src/lib/accounting-period.ts`, `src/lib/server/statement-generation.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{+page.server.ts,BuildingStep,BuildingChoice,OverlapWays,PreviewChecks,PreviewEmpty,StatementWizard}.svelte`, `src/routes/contracts/[id]/{+page.server.ts,MissingStatement.svelte}`, `backend/src/services/statement.service.ts`, `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/api-specification.md`, tests and E2E files.
+## Session W9b: Akontorechnungen, «In Abrechnungen enthalten», upload bugs of #268 (2026-10-19 to 2026-10-20)
+
+Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of #222 (#245), #481, #482, #483; product owner decisions via the coordinator during the task, recorded in #455 «Decided (product owner)» (V-1, V-2, «Manuell», Verteilschlüssel; option C after domain review 455-3; the delete text of 2026-10-20). The list section of the list pages moved out first (PR #494, session W9a).
+
+- [x] `@wip` scenarios (invoices, invoice-detail, invoice-edit, invoice-new), red on the base build (11 at the missing behaviour; «Eine ausgewählte Akontorechnung erstellen» passes on the base, which reads an advance invoice as a plain invoice)
+- [x] Domain review round 1 (`docs/reviews/455-fachreview-1.md`): V-1, V-2 decided by the product owner; V-3, V-6, V-8 became #481, #482, #483, decided; V-4, V-5, V-7, V-9, V-11 (en) fixed; V-10 kept
+- [x] Prompt: document type `advance_invoice` (glossary words, an instalment invoice is none); `llm:eval` (qwen/qwen3-vl-8b-instruct via OpenRouter) 45/47 before and after
+- [x] Upload: Akontorechnung not preselected, its hint, to-dos once ticked; deducted line with the proposed total (and without one), the rule as help after the to-dos; key of the building's newest invoice with a key in the Kategorie, unless the landlord chose one
+- [x] Invoice page and «Rechnung bearbeiten»: hint at the Betrag (`DeductedHint`), not in the Beleg card; «In Abrechnungen enthalten» with number and status, linked (backend `statements`, contract, API spec); en «in a statement»; help on the Leistungszeitraum over several years
+- [x] Bugs of #268, each with a test red first: own file button (`FileInput`), Escape in a select, empty paragraph under a date field, «Rechnungen hochladen» as a link to `?upload`; «Manuell kategorisiert» kept (product owner: not a bug)
+- [x] Code review round 1 (`docs/reviews/455-review-1.md`): C-1, C-2, C-4 to C-7 fixed; C-3 kept (Escape in a closed select no longer closes a dialog)
+- [x] Domain review round 2 (`docs/reviews/455-fachreview-2.md`): V-12, V-13, V-14, V-15 fixed; V-16 scenario added; V-4 kept (no extraction cases in `llm:eval`)
+- [x] Personas round 1: Dr. Weber (`docs/design/personas/weber-455.md`, P-1 Major), Marco (`docs/design/personas/marco-455.md`, Minors kept)
+- [x] Domain review round 3 (`docs/reviews/455-fachreview-3.md`): option C decided; texts, glossary rows «Akontorechnung», «Schlussrechnung», delete text; scenarios red on e3cb329e first
+- [x] Code review round 2 (`docs/reviews/455-review-2.md`, no new findings); closing round 3 (`docs/reviews/455-review-3.md`: C-8 Major, a scenario step for the delete text; C-9) and re-check 4 (`docs/reviews/455-review-4.md`, clean); Dr. Weber round 2 (`docs/design/personas/weber-455-2.md`: P-1 to P-4 done, P-6/P-7 fixed by the delete text of 2026-10-20, P-5 kept)
+- [x] PR `Fixes #455`, `Fixes #481`, `Fixes #482`, `Fixes #483`, `Refs #245`
+
+Files: `backend/src/config/llm.ts`, `backend/src/services/statement-invoices.service.ts`, `backend/scripts/llm-stub.ts`, `src/lib/invoice-upload.ts`, `src/lib/server/invoice.ts`, `src/lib/types.ts`, `src/lib/ui/{FileInput,Dialog,DateInput,Button}.svelte`, `src/routes/invoices/` (`+page.svelte`, `DeductedHint`, `InvoiceDataFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadFiles`, `UploadRowNotes`, `[id]/{+page,InvoiceFacts,InvoiceBeleg}.svelte`, `[id]/edit/+page.svelte`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `tests/contracts/{invoice-statements,invoice-list}.json`, tests and E2E layers.

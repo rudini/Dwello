@@ -4,6 +4,7 @@ import {
 	draftNotice,
 	footerVersion,
 	glossaryExplanation,
+	legalAsOf,
 	llmRecipient,
 	operatorNotice,
 	pagePurpose,
@@ -23,6 +24,7 @@ export const operatorNoticeText = (heading: string) => Text.of(operatorNotice(he
 export const pageTitleWidth = Width.of(pageTitle);
 export const pageTitleText = Text.of(pageTitle);
 export const pagePurposeText = Text.of(pagePurpose);
+export const legalAsOfText = Text.of(legalAsOf);
 export const pageOverflowsSideways = question(
 	'whether the page scrolls sideways',
 	async (actor) => (await actor.answer(ThePage.sidewaysOverflow)) > 0

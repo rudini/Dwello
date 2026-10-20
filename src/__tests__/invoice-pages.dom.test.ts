@@ -94,6 +94,14 @@ describe('Rechnungsliste', () => {
 		expect(byTestId('invoice-upload-building-select')).not.toBeNull();
 	});
 
+	// #455 (#268): a click before the page's scripts run opens the dialog through the address, as above
+	it('öffnet «Rechnungen hochladen» auch über die Adresse, bevor die Skripte der Seite laufen', () => {
+		list([]);
+		expect(byTestId('invoice-upload-button')!.getAttribute('href')).toBe('?upload');
+		click('invoice-upload-button');
+		expect(byTestId('invoice-upload-building-select')).not.toBeNull();
+	});
+
 	// After a search the focus moves here, so the number of results is read out
 	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {
 		list([invoice()]);
@@ -357,7 +365,7 @@ describe('Rechnungsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Berechnen Sie danach die Entwürfe mit «Neu berechnen» auf ihrer Seite neu. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen oder Akontorechnungen, an deren Stelle eine Schlussrechnung tritt. Ersetzt eine Schlussrechnung diese Akontorechnung, erfassen Sie zuerst die Schlussrechnung. Die Entwürfe enthalten diese Rechnung weiter: Berechnen Sie danach die Entwürfe mit «Neu berechnen» auf ihrer Seite neu. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 
@@ -592,6 +600,10 @@ describe('Rechnung erfassen', () => {
 
 		expect(help).toContain(
 			'Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre.'
+		);
+		// #455 (#276): the Leistungszeitraum of the last invoice stays when the work comes earlier or later
+		expect(help).toContain(
+			'Kommt die Arbeit früher wieder, ändern Sie den Leistungszeitraum der letzten Rechnung nicht: Sonst ändern sich die Teile, die schon abgerechnet sind. Bis zu seinem Ende zählen dann beide Rechnungen. Kommt sie später, zählt in den Monaten dazwischen keine.'
 		);
 		expect(help).toContain(
 			'Bei einem Boiler in der Wohnung ist das umstritten: Verrechnen Sie es nur, wenn der Mietvertrag das Entkalken des Boilers ausdrücklich als Nebenkosten nennt. Im Zweifel ist es nicht umlagefähig.'
@@ -849,6 +861,15 @@ describe('Rechnung bearbeiten', () => {
 			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
 		} as never);
 
+	// #455 (#268): wer den Betrag ändert, sieht dort, dass Akontorechnungen abgezogen sind
+	it('zeigt beim Betrag den Hinweis auf abgezogene Akontorechnungen', () => {
+		edit({ beleg: { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: false } });
+		expect(byTestId('invoice-deducted-hint')!.textContent).toContain('Auf dem Beleg sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug.');
+		expect(byTestId('invoice-deducted-rule')!.textContent).toBe(
+			'Prüfen Sie, dass die Akontorechnungen nicht zusätzlich erfasst sind. Ist eine noch erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet ist, und führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». Der Leistungszeitraum ist der auf dem Beleg.'
+		);
+	});
+
 	it('warnt, wenn die Rechnung schon in Abrechnungen steckt, und nennt die Folge', () => {
 		show(EditInvoicePage, {
 			data: {
@@ -1021,6 +1042,21 @@ describe('Beleg einer Rechnung', () => {
 		expect(byTestId('invoice-keep-original')!.textContent).toContain('Bewahren Sie die Originalrechnung auf');
 	});
 
+	// #455 (#268): the browser's own file button speaks the browser's language, not the interface's
+	it('bietet die Datei des Belegs mit einem eigenen Knopf an und nennt die gewählte Datei', () => {
+		detail();
+		const input = byTestId<HTMLInputElement>('invoice-document-file-input')!;
+		const choose = byTestId('invoice-document-file-choose')!;
+		expect(choose.textContent!.trim()).toBe('Datei auswählen');
+		expect(choose.closest('label')!.htmlFor).toBe(input.id);
+		expect(input.classList).toContain('sr-only');
+		expect(byTestId('invoice-document-file-chosen')!.textContent!.trim()).toBe('Keine Datei ausgewählt');
+		Object.defineProperty(input, 'files', { value: [new File(['%PDF-'], 'huber-q2.pdf')], configurable: true });
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+		expect(byTestId('invoice-document-file-chosen')!.textContent!.trim()).toBe('huber-q2.pdf');
+	});
+
 	it('sagt, dass kein Beleg gespeichert ist, und bietet an, einen hinzuzufügen', () => {
 		detail();
 		expect(byTestId('invoice-document-link')).toBeNull();
@@ -1044,9 +1080,8 @@ describe('Beleg einer Rechnung', () => {
 	it('zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat (Persona Anna; Fachreview V-3, V-4)', () => {
 		const beleg = { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: true };
 		detail({ beleg });
-		expect(byTestId('invoice-document-hints')!.textContent).toContain(
-			'Auf dem Beleg sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Prüfen Sie, dass sie nur einmal zählen: Der Betrag ist das Total vor dem Abzug, und die Akontorechnungen sind nicht zusätzlich erfasst. Ist eine davon schon abgerechnet, bleibt sie erfasst, ihr Betrag ist vom Total abgezogen, und der Leistungszeitraum beginnt erst nach der Abrechnungsperiode, in der sie abgerechnet ist.'
-		);
+		// the Akonto hint sits at the Betrag (#455)
+		expect(byTestId('invoice-document-hints')!.textContent).not.toContain('Akontorechnungen');
 		expect(byTestId('invoice-document-hints')!.textContent).toContain(
 			'Der Beleg enthält auch Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Prüfen Sie, dass der Betrag nur den umlagefähigen Teil enthält und der Rest als eigene Rechnung in einer nicht umlagefähigen Kategorie erfasst ist.'
 		);
@@ -1054,6 +1089,41 @@ describe('Beleg einer Rechnung', () => {
 		document.body.innerHTML = '';
 		detail({ beleg: { ...beleg, deductedAmount: null }, isValidUtilityCost: false });
 		expect(byTestId('invoice-document-hints')).toBeNull();
+	});
+
+	// #455 (#268): eine kurze Zeile beim Betrag, die Regel als Hilfetext darunter
+	it('zeigt abgezogene Akontorechnungen beim Betrag, mit der Regel darunter', () => {
+		detail({ beleg: { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: false } });
+		const hint = byTestId('invoice-deducted-hint')!;
+		expect(hint.textContent).toContain('Auf dem Beleg sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug.');
+		expect(byTestId('invoice-deducted-rule')!.textContent).toBe(
+			'Prüfen Sie, dass die Akontorechnungen nicht zusätzlich erfasst sind. Ist eine noch erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet ist, und führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». Der Leistungszeitraum ist der auf dem Beleg.'
+		);
+		// next to the Betrag, in the facts of the invoice
+		expect(byTestId('invoice-amount')!.closest('div')!.contains(hint)).toBe(true);
+	});
+
+	// #455 (#263): immer, mit Nummer und Status jeder Abrechnung, verlinkt
+	it('nennt die Abrechnungen, in denen die Rechnung enthalten ist, mit Nummer und Status', () => {
+		show(InvoicePage, {
+			data: {
+				invoice: invoice(),
+				billedIn: [{ start: '2024-01-01', end: '2024-12-31' }],
+				statements: [
+					{ id: 's1', statementNumber: 'NK-2024-0001', status: 'draft' },
+					{ id: 's2', statementNumber: 'NK-2024-0002', status: 'replaced' }
+				]
+			}
+		} as never);
+		const links = allByTestId('invoice-billed-in-link');
+		expect(links.map((link) => link.textContent!.trim())).toEqual(['NK-2024-0001, Entwurf', 'NK-2024-0002, Ersetzt']);
+		expect(links.map((link) => link.getAttribute('href'))).toEqual(['/statements/s1', '/statements/s2']);
+		expect(text()).toContain('In Abrechnungen enthalten');
+	});
+
+	it('sagt bei einer Rechnung in keiner Abrechnung «Keine»', () => {
+		detail();
+		expect(byTestId('invoice-billed-in')!.textContent!.trim()).toBe('Keine');
 	});
 
 	it('warnt nur bei einer abgerechneten Rechnung mit Beleg', () => {
