@@ -1,0 +1,7 @@
+# Workflow notes: #450 (and #490)
+
+| Rule | What happened | Proposed change |
+|---|---|---|
+| `tests/e2e/CLAUDE.md`, "No scenario" | The issue asked for a scenario in `statement-detail.feature` for a PDF refused while the Firmenadresse is incomplete. The settings are one global record for all parallel scenarios, and after the change the state can no longer be saved; none of the five listed kinds fits, so the reason had to be argued with the fach-reviewer and the code-reviewer (`IBAN_MISSING` has no scenario for the same reason). | Add a sixth kind: «a state of a global setting (`configuration`) that would break the scenarios running in parallel». |
+| `CLAUDE.md`, Workflow 8 (one session in the plan) | Ten workers in parallel; the plan held Session C1 of another branch, unfinished. The coordinator ruled: checklist in the pull request, session straight into the archive. As in `workflow-notes-issue-464.md`; new is that with parallel workers every branch hits it at once. | Keep the checklist in the pull request when several sessions work in parallel, and archive it there at the end. |
+| `CLAUDE.md`, "Before marking anything complete" (affected E2E) | A full local E2E run took 44 minutes under the load of ten workers and failed once on hydration (`dashboard user-menu-open`), and the settings feature hit the known race O-34; the coordinator then limited local runs to the affected features. | Say «the affected feature files» explicitly and leave the full suite to CI. |

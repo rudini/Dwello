@@ -147,4 +147,32 @@ describe('QR-Rechnung einer Abrechnung', () => {
 
 		expect(bill.qrDataString.split('\n').slice(27, 29)).toEqual(['NON', '']);
 	});
+
+	// #450 (Entscheid in #404, Punkt 8): das Land des Zahlungsempfängers aus seiner PLZ, Liechtenstein hat 9485 bis 9498
+	it('nennt als Land des Zahlungsempfängers Liechtenstein nur für die PLZ 9485 bis 9498', async () => {
+		const countries: Record<string, string> = {};
+		for (const postalCode of ['9484', '9485', '9498', '9499']) {
+			const { qrData } = await generateQRBillForStatement(statement('a1111111-1111-4111-8111-111111111111'), {
+				...config,
+				postalCode
+			});
+			countries[postalCode] = qrData.creditorCountry;
+		}
+
+		expect(countries).toEqual({ '9484': 'CH', '9485': 'LI', '9498': 'LI', '9499': 'CH' });
+	});
+
+	// #450: ohne Name, PLZ oder Ort gäbe es keinen echten Zahlungsempfänger; der Zahlteil entsteht dann nicht
+	it('lehnt einen Zahlteil ohne vollständige Firmenadresse ab', async () => {
+		for (const missing of ['companyName', 'postalCode', 'city'] as const) {
+			for (const value of ['', '  ']) {
+				const bill = generateQRBillForStatement(statement('a1111111-1111-4111-8111-111111111111'), {
+					...config,
+					[missing]: value
+				});
+
+				await expect(bill).rejects.toMatchObject({ code: 'CREDITOR_ADDRESS_MISSING' });
+			}
+		}
+	});
 });

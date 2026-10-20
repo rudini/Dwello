@@ -35,6 +35,14 @@ describe('Vereinbarte Nebenkosten im Mietvertrag', () => {
 		expect(bound.agreed).toEqual(['c1']);
 	});
 
+	// CI of #450 (contract-edit agreed-costs-none-advance): an agreed category the form does not show (no longer listed)
+	// leaves every box empty all the same; the note follows the boxes
+	it('weist darauf hin, wenn kein gezeigtes Kästchen angekreuzt ist', () => {
+		boxes(['c-not-shown']);
+
+		expect(byTestId('contract-agreed-costs-none')).not.toBeNull();
+	});
+
 	// Persona Marco W10c P-1: ohne Häkchen rechnet Dwello keine Nebenkosten ab, das soll nicht unbemerkt geschehen
 	it('weist darauf hin, wenn keine Nebenkosten vereinbart sind', () => {
 		boxes(['c1']);

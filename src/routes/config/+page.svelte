@@ -17,6 +17,9 @@
 	const settings = $derived(data.settings);
 	const result = $derived(form as { errors?: Record<string, string>; saved?: boolean } | null);
 	const errors = $derived(result?.errors ?? {});
+	// empty fields of the Firmenadresse that the IBAN's error names (#450, persona Helga P-2)
+	const missing = $derived((form as { missing?: string[] } | null)?.missing ?? []);
+	const namedBy = (field: string) => (missing.includes(field) ? 'iban-error' : undefined);
 	const saved = $derived(result?.saved === true);
 	let saving = $state(false);
 </script>
@@ -66,6 +69,7 @@
 				label={m.settings_company_name()}
 				value={settings.companyName}
 				example={m.settings_company_name_example()}
+				invalidBy={namedBy('companyName')}
 			/>
 			<SettingField
 				name="companyAddress"
@@ -79,6 +83,7 @@
 					label={m.buildings_postal_code()}
 					value={settings.companyPostalCode}
 					error={errors.companyPostalCode}
+					invalidBy={namedBy('companyPostalCode')}
 					example="8001"
 				/>
 				<div class="sm:col-span-2">
@@ -87,6 +92,7 @@
 						label={m.buildings_city()}
 						value={settings.companyCity}
 						example={m.settings_city_example()}
+						invalidBy={namedBy('companyCity')}
 					/>
 				</div>
 			</div>

@@ -85,8 +85,10 @@ export interface QRBillConfig {
 	address: string;
 	postalCode: string;
 	city: string;
-	country?: string;
 }
+
+// Liechtenstein's postal codes lie within the Swiss range (#450)
+const creditorCountry = (postalCode: string) => (+postalCode >= 9485 && +postalCode <= 9498 ? 'LI' : 'CH');
 
 /**
  * Validate a Swiss or Liechtenstein IBAN
@@ -338,6 +340,10 @@ export async function generateQRBillForStatement(
 	qrCodeImage: Buffer;
 	reference: string;
 }> {
+	// The landlord is the creditor: without name, postal code or town the tenant would pay to no one known (#450)
+	if (![config.companyName, config.postalCode, config.city].every((part) => part.trim()))
+		throw new CodedError('CREDITOR_ADDRESS_MISSING', 'Company name, postal code and town are required for the payment part');
+
 	// Validate IBAN
 	const ibanValidation = validateIBAN(config.iban);
 	if (!ibanValidation.valid) {
@@ -363,7 +369,7 @@ export async function generateQRBillForStatement(
 		creditorStreet: text(config.address, 70),
 		creditorPostalCode: permitted(config.postalCode).slice(0, 16),
 		creditorCity: permitted(config.city).slice(0, 35),
-		creditorCountry: config.country || 'CH',
+		creditorCountry: creditorCountry(config.postalCode),
 
 		amount,
 		currency: 'CHF',

@@ -2052,6 +2052,21 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
+## Session W5-450: QR-bill creditor (#450) and the IBAN help (#490) (2026-10-19)
+
+Worker W5 of ten in parallel: the checklist ran in the pull request, the session goes straight here (coordinator rule; Session C1 of another branch stays in the plan).
+
+- [x] @wip scenario «IBAN ohne Firmenadresse» and red lower-layer tests (config, statement PDF, reminder, QR country 9484/9485/9498/9499, BFF), committed; fach-reviewer round 1 before the implementation (`docs/reviews/450-fachreview-1.md`: V-1 Major, V-2 to V-11)
+- [x] Implementation: IBAN only with name, postal code and town (field and backend `IBAN_COMPANY_ADDRESS_MISSING`); a PDF or reminder with a payment part refused (`CREDITOR_ADDRESS_MISSING`); invented creditor gone; creditor country from the postal code; V-1 (marking a reminder sent returns the code), V-2 to V-5, V-11
+- [x] No scenario for the PDF refusal in `statement-detail.feature`: the settings are global for parallel scenarios and the state exists only in installations from before (comment in #450); contract `statement-pdf-creditor-refused.json`
+- [x] Issues from the review: #490 (glossary, IBAN help; decided and implemented here), #491 (letter while the PDF is refused; decided, comes with #449), #503 (Verlauf «PDF erstellt» while refused)
+- [x] code-reviewer round 1 (`docs/reviews/450-review-1.md`: C-1 Major, C-2) and round 2 (`450-review-2.md`: both fixed)
+- [x] #490: help text in four languages and the glossary rows the product owner asked for; fach-reviewer round 2 (`docs/reviews/450-fachreview-2.md`: no Blocker/Major)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-450.md`, `weber-450.md`): Helga P-2, Dr. Weber P-1, P-2 fixed with tests seen red; observations: U-42, #503
+- [x] Closing code-review round 3 (`docs/reviews/450-review-3.md`: C-1 Major, C-2, C-3): scenario step for the marked fields (seen red), marks end with any input, all three codes tested
+- [x] O-34 closed: lock on the global settings (`tests/e2e/fixtures/settings-lock.ts`), seen red without it (3 of 8) and green with it (24 of 24)
+- [x] Closing code-review round 4 (`docs/reviews/450-review-4.md`: no finding)
+- [x] PR `Fixes #450`, `Fixes #490`
 ## Session W6-458: legal texts, split responsibility (2026-10-19)
 
 Branch `w6-issue-458`, worker W6 of a coordinated run (the checklist was kept in the pull request; `implementation_plan.md` keeps another worker's open session, coordinator's rule). Issue #458, closes #330 and #333.

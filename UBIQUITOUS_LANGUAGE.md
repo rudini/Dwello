@@ -226,6 +226,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Empfangsschein** | Teil der QR-Rechnung links neben dem Zahlteil, den der Zahlende als Quittung behält (Begriff der SIX). | PDF-Komponente |
 | **QR-Referenz** | Eindeutige Referenznummer auf der QR-Rechnung zur Zahlungszuordnung. | `qr_bill_reference` |
 | **IBAN** | Internationale Bankkontonummer des Vermieters/Verwalters. | `iban` Config |
+| **Zahlungsempfänger** | Wer auf der QR-Rechnung unter «Konto / Zahlbar an» steht: der Liegenschaftsverwalter mit Firmenname und Firmenadresse; das Land folgt aus der PLZ (9485–9498 Liechtenstein, sonst Schweiz). | `creditor*` in `QRBillData` |
 
 ---
 
@@ -252,7 +253,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Standard-Heizprofil** | Vorgeschlagenes Heizprofil für den Abrechnungslauf. | `default_heating_profile_id` Config |
 | **Standard-Verteilschlüssel** | Vorgeschlagener Verteilschlüssel für neue Rechnungen. | `default_distribution_key_id` Config |
 | **Firmenname** | Name des Liegenschaftsverwalters/der Verwaltungsfirma. | `company_name` Config |
-| **Firmenadresse** | Adresse des Liegenschaftsverwalters für Korrespondenz und QR-Rechnung. | `company_address`, `company_postal_code`, `company_city` Config |
+| **Firmenadresse** | Firmenname, Adresse, PLZ und Ort des Liegenschaftsverwalters für Korrespondenz und QR-Rechnung. Mit einer IBAN sind Firmenname, PLZ und Ort Pflicht. | `company_name`, `company_address`, `company_postal_code`, `company_city` Config |
 | **Protokoll** | Liste unter «Einstellungen», die mit Datum und Uhrzeit Anmeldungen und Änderungen festhält, die Abrechnungen beeinflussen (Verwaltungspauschale, Umlagefähigkeit von Kategorien und Rechnungen, zurückgesetzte Zahlungen, berichtigte Abrechnungen). Einträge bleiben, bis der Liegenschaftsverwalter sie löscht. Nicht zu verwechseln mit dem Protokoll des Servers und dem Übergabeprotokoll. | `audit_log` Tabelle |
 
 ---
