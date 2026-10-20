@@ -2264,3 +2264,17 @@ Branch `w3-issue-451` (worker W3). Points 1–6 and 8 of #406, consolidated in #
 No scenario: credits summing to zero and the refused negative amount (the backend refuses a negative invoice, so E2E cannot create one; pg, render and DOM tests); the plural of the heating hint (unit test).
 
 Files: `backend/src/services/{calculation,invoice,invoice-completeness,pdf,statement-pdf,statement,heating-profile}.service.ts`, `backend/src/db/schema.ts`, `backend/demo/demo-data.sql`, `src/lib/{invoice,statement-wizard,types}.ts`, `src/lib/server/{statement-generation,invoice}.ts`, `src/routes/invoices/**`, `src/routes/statements/{generate,[id]}/**`, `messages/*.json`, tests in `backend/src/__tests__`, `src/__tests__`, `tests/e2e`, `tests/a11y/screens.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/{nebenkostenabrechnung-anforderungen,api-specification}.md`, `docs/design/{i18n-begriffe,offene-punkte}.md`.
+
+## Session: faster CI round trips (GitHub bottleneck, 2026-10-20)
+
+Request: implement proposals 1 and 2 of the CI analysis (42 % of PR runs came from merging `main`, 48 % from docs commits).
+
+- [x] Push to `main` runs the E2E tests and the axe check (`.github/workflows/ci.yml`), so a pull request no longer needs to be up to date with `main`
+- [x] Turn off "Require branches to be up to date" and turn on auto-merge (GitHub settings)
+- [x] A pull request push that changes only documentation since the last green run of its branch skips the backend tests, E2E and axe (`tools/ci/docs-only-since.mjs`, `.github/workflows/ci.yml`)
+- [x] Skill `pull-request`: merge `main` and auto-merge as the new settings allow
+- [x] `code-reviewer` round 1: `docs/reviews/ci-speed-review-1.md`
+- [x] Workflow note: none, no rule was unclear or in the way
+- [x] PR to `main`
+- No scenario: CI configuration, no app behaviour changes
+- Files: `.github/workflows/ci.yml`, `tools/ci/docs-only-since.mjs`, `tools/ci/docs-only-since.test.ts`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `.claude/skills/pull-request/SKILL.md`
