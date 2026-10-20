@@ -302,7 +302,7 @@ describe('Rechnung erfassen und bearbeiten', () => {
 
 		const list = (await listLoad({ url: new URL('http://localhost/invoices'), fetch } as never)) as { buildings: { tank?: string }[] };
 		expect(list.buildings[0].tank).toBe(tanks.b1);
-		expect(((await editLoad({ params: { id: 'i1' }, fetch } as never)) as { tanks: object }).tanks).toEqual(tanks);
+		expect(((await editLoad({ params: { id: 'i1' }, url: new URL('http://localhost/invoices/i1/edit'), fetch } as never)) as { tanks: object }).tanks).toEqual(tanks);
 	});
 
 	it('übergeht ein unbekanntes Gebäude und eine fremde Rücksprung-Adresse', async () => {
