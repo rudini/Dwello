@@ -50,7 +50,7 @@ describe('Abrechnungsliste laden', () => {
 			pageSize: 10,
 			buildings: [{ id: 'b1', name: 'Ahornhof' }]
 		});
-		expect(data.statusCounts).toEqual({ draft: 2, sent: 0, paid: 0, overdue: 1 });
+		expect(data.statusCounts).toEqual({ draft: 2, sent: 0, paid: 0, settled: 0, overdue: 1 });
 		expect(data.statements[0]).toMatchObject({
 			tenantName: 'Anna Keller',
 			apartmentUnit: '2.01',

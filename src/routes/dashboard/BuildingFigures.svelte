@@ -64,6 +64,7 @@
 		{ status: 'draft', label: m.statements_status_draft() },
 		{ status: 'sent', label: m.statements_status_sent() },
 		{ status: 'paid', label: m.statements_status_paid() },
+		{ status: 'settled', label: m.statements_status_settled() },
 		{ status: 'overdue', label: m.statements_status_overdue() }
 	] as const;
 </script>

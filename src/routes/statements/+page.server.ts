@@ -95,6 +95,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 				draft: countsData.draft || 0,
 				sent: countsData.sent || 0,
 				paid: countsData.paid || 0,
+				settled: countsData.settled || 0,
 				overdue: countsData.overdue || 0
 			}
 		};
@@ -112,6 +113,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 				draft: 0,
 				sent: 0,
 				paid: 0,
+				settled: 0,
 				overdue: 0
 			}
 		};

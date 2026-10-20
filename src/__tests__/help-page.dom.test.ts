@@ -53,6 +53,7 @@ describe('Hilfe', () => {
 			'Mietstage',
 			'Umlagefähig',
 			'Saldo',
+			'Erledigt', // #448: no payment, unlike «Bezahlt» (personas dr-weber-448 P-2, anna-448 P-4)
 			'Zahlungsfrist',
 			'Mahnung',
 			'Korrespondenzkanal',
@@ -63,6 +64,8 @@ describe('Hilfe', () => {
 			'Manuell überschrieben'
 		]);
 		expect(glossary?.textContent).toContain('Ist der Saldo positiv, zahlt der Mieter nach');
+		// personas dr-weber-448 P-2, anna-448 P-4: a carried-over amount is not paid yet
+		expect(glossary?.textContent).toContain('Ein übertragener Betrag ist damit noch nicht bezahlt');
 		expect(glossary?.textContent).toContain(
 			'auf 5 Rappen gerundet, nur zugunsten des Mieters: Eine Nachzahlung wird ab-, eine Rückerstattung aufgerundet.'
 		);
@@ -98,7 +101,7 @@ describe('Hilfe', () => {
 			'Bei einer Rückerstattung ist es das Datum, bis zu dem Sie ihm den Betrag überweisen («Rückerstattung bis»).',
 			'Üblich sind bis 3 %; ein höherer Satz muss Ihrem tatsächlichen Aufwand entsprechen (Art. 4 Absatz 3 VMWG).',
 			// #447 (decided in #402, point 6): the Saldo of a berichtigte Abrechnung, as the glossary row
-			'minus seine Akontobeiträge; bei einer berichtigten Abrechnung zusätzlich minus, was er auf die ersetzten Abrechnungen schon bezahlt hat (plus, was Sie ihm schon zurückerstattet haben).'
+			'minus seine Akontobeiträge, plus eine übertragene Nachzahlung bzw. minus eine übertragene Rückerstattung der vorherigen Abrechnung; bei einer berichtigten Abrechnung zusätzlich minus, was er auf die ersetzten Abrechnungen schon bezahlt hat (plus, was Sie ihm schon zurückerstattet haben).'
 		])
 			expect(glossary).toContain(said);
 		for (const old of [
