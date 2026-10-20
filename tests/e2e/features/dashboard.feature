@@ -155,6 +155,9 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann ist die Frist "Zahlungsfrist Bruno Meier" "in 10 Tagen"
     Und nicht die Aufgabe "Abrechnung berichtigen" für "Bruno Meier"
+    # PO 2026-10-20 (Fachreview 454-2 V-17 A): die Abrechnung sagt dasselbe
+    Wenn der Liegenschaftsverwalter die Abrechnung des letzten Jahres von "Bruno Meier" öffnet
+    Dann weist die Abrechnung darauf hin: "ändert das weder den Saldo noch eine Position. Sie müssen die Abrechnung nicht berichtigen."
 
   # PO 2026-10-20 (Fachreview 454-1 E-5): auch nach mehr als fünf Jahren, mit dem Hinweis auf die Verjährung
   @wip
@@ -174,7 +177,9 @@ Funktionalität: Übersicht
     Und der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Aufgabe "Abrechnung berichtigen" für "Anna Keller" beginnt
     Und der Liegenschaftsverwalter die Abrechnung nicht berichtigt
-    Dann nennt der Verlauf "Nicht berichtigt" am Tag des Versands
+    Dann nennt der Verlauf "Nicht berichtigt" am heutigen Tag
+    Und weist die Abrechnung darauf hin: "haben Sie entschieden, die Abrechnung nicht zu berichtigen."
+    Und bietet die Abrechnung «Nicht berichtigen» nicht mehr an
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann ist die Frist "Zahlungsfrist Anna Keller" "in 10 Tagen"
     Und nicht die Aufgabe "Abrechnung berichtigen" für "Anna Keller"

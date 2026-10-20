@@ -195,10 +195,11 @@ describe('Aufgaben der Übersicht', () => {
 		expect(task.text).toContain(
 			'Noch nicht abgerechnet: Ahornhof (2025, 01.07.2024 – 31.12.2024), Seeblick (2023).'
 		);
-		// the invoices of the newest period come first, of its building (Fachreview 454-1 V-10)
+		// the invoices of the newest period come first, of its building (Fachreview 454-1 V-10), named when the text
+		// names several (Fachreview 454-2 V-22)
 		expect(task.link).toEqual({
 			href: '/invoices?building=b2&periodStart=2025-01-01&periodEnd=2025-12-31',
-			label: 'Rechnungen 2025 ansehen'
+			label: 'Rechnungen von Ahornhof für 2025 ansehen'
 		});
 	});
 
@@ -336,6 +337,28 @@ describe('Aufgaben der Übersicht', () => {
 			const old = 'Diese Abrechnungsperiode endete vor mehr als fünf Jahren. Lassen Sie sich beraten, ob die Forderung verjährt ist.';
 			expect(correctText({ invoices: 1, fuelStock: false }, '2021-10-09')).toMatch(new RegExp(`${old}$`));
 			expect(correctText({ invoices: 1, fuelStock: false }, '2021-10-10')).not.toContain(old);
+		});
+
+		// Fachreview 454-2 V-27: five calendar years back from the Swiss day, the 29th of February to the 28th
+		it('rechnet die fünf Jahre nach dem Kalender', () => {
+			const text = (end: string) =>
+				overviewTasks({
+					...input({
+						statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 0 },
+						outdatedStatements: [outdated('s6', 'sent', 'b1', 'Seeblick', '2022-03-01', end)]
+					}),
+					today: '2028-02-29'
+				}).find((one) => one.id === 'correct-s6')!.text;
+			expect(text('2023-02-27')).toContain('vor mehr als fünf Jahren');
+			expect(text('2023-02-28')).not.toContain('vor mehr als fünf Jahren');
+		});
+
+		// Fachreview 454-2 V-23: also an erledigte Abrechnung (#448) is corrected
+		it('nennt auch eine erledigte Abrechnung als «Abrechnung berichtigen»', () => {
+			const tasks = overviewTasks(
+				input({ outdatedStatements: [outdated('s8', 'settled', 'b1', 'Seeblick', '2024-01-01', '2024-12-31')] })
+			);
+			expect(tasks.find((one) => one.id === 'correct-s8')!.title).toBe('Abrechnung berichtigen');
 		});
 
 		// Fachreview 454-1 V-12: a Mahnung of a statement that needs correcting comes after the correction

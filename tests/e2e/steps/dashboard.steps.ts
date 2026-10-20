@@ -29,6 +29,8 @@ import {
 	startOverviewTaskFor
 } from '../tasks/dashboard';
 import { pageAddress } from '../questions/navigation';
+import { statementPath } from '../questions/statements';
+import { openStatementDetail } from '../tasks/statement-detail';
 import type { TestData } from '../fixtures/backend';
 import { inDays } from '../fixtures/dates';
 
@@ -256,6 +258,10 @@ Given(
 		await seed.invoiceOn(building, 'Hauswart', '300.00', `${lastYear}-12-15`, [`${lastYear}-10-01`, `${lastYear}-12-31`]);
 	}
 );
+
+When('der Liegenschaftsverwalter die Abrechnung des letzten Jahres von {string} öffnet', async ({ verwalter, seed }, tenant: string) => {
+	await verwalter.attemptsTo(openStatementDetail(statementPath(seed, tenant, lastYear)));
+});
 
 Then('sagt die Aufgabe {string} für {string} {string}', async ({ verwalter, names }, title: string, tenant: string, text: string) => {
 	await verwalter.sees(overviewTaskTextFor(title, names.get(tenant)!)).toContain(text);

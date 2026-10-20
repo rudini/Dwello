@@ -169,13 +169,43 @@ describe('Geänderte Rechnungen seit der Abrechnung', () => {
 				expect(await changed(id)).toEqual([]);
 			}));
 
-		it('meldet nichts, wenn der Verbrauch gleich bleibt', () =>
+		// PO 2026-10-20 (Fachreview 454-1 E-2, 454-2 V-16): the PDF prints the readings, not only their difference
+		it('meldet andere Werte auch bei gleichem Verbrauch', () =>
 			withReadings(async () => {
 				await reading('2023-12-31', '600.00');
 				await reading('2024-12-31', '100.00');
 				const { id } = await statement();
 				await reading('2023-12-31', '700.00');
 				await reading('2024-12-31', '200.00');
+				expect(await fuelStockChanged(id)).toBe(true);
+			}));
+
+		// the Anfangsbestand is the Endbestand of the period before
+		it('meldet einen danach geänderten Anfangsbestand', () =>
+			withReadings(async () => {
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				const { id } = await statement();
+				await reading('2023-12-31', '650.00');
+				expect(await fuelStockChanged(id)).toBe(true);
+			}));
+
+		// a negative change (600 - 700 = -100.00) is a change as well
+		it('meldet einen danach höheren Endbestand', () =>
+			withReadings(async () => {
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				const { id } = await statement();
+				await reading('2024-12-31', '700.00');
+				expect(await fuelStockChanged(id)).toBe(true);
+			}));
+
+		it('meldet nichts bei denselben Werten', () =>
+			withReadings(async () => {
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				const { id } = await statement();
+				await reading('2024-12-31', '100.00');
 				expect(await fuelStockChanged(id)).toBe(false);
 			}));
 
@@ -348,6 +378,21 @@ describe('Abrechnung berichtigen fällig', () => {
 			expect(await due(id)).toBe(false);
 		}));
 
+	// Fachreview 454-2 V-23: also an erledigte Abrechnung (#448)
+	it('ist auch bei einer erledigten Abrechnung fällig', () =>
+		sent(async (id) => {
+			await db.update(utilityStatements).set({ status: 'settled' }).where(eq(utilityStatements.id, id));
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			expect(await due(id)).toBe(true);
+		}));
+
+	// Fachreview 454-2 V-18: only with a change the hint names, not by other data a recalculation takes
+	it('ist ohne geänderte Rechnung und ohne geänderten Tankbestand nicht fällig', () =>
+		sent(async (id) => {
+			await db.update(utilityStatements).set({ totalCosts: '1.00' }).where(eq(utilityStatements.id, id));
+			expect(await due(id)).toBe(false);
+		}));
+
 	it('ist bei einem Entwurf nie fällig', async () => {
 		await clear();
 		const { id } = await statement();
@@ -364,6 +409,34 @@ describe('Abrechnung berichtigen fällig', () => {
 			expect(await due(id)).toBe(false);
 			await invoice({ amount: '50.00', invoiceDate: '2024-03-15' });
 			expect(await due(id)).toBe(true);
+		}));
+
+	// Fachreview 454-2 V-21: a change back to what the statement billed makes it current again, not due
+	it('ist nach «Nicht berichtigen» nicht fällig, wenn die Abrechnung wieder stimmt', () =>
+		sent(async (id) => {
+			const later = await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			expect((await decline(id)).status).toBe(200);
+			await db.delete(invoices).where(eq(invoices.id, later));
+			expect(await due(id)).toBe(false);
+		}));
+
+	// PO 2026-10-20 (Fachreview 454-2 M-3 B): «Nicht berichtigen» only when the Saldo would rise
+	it('erlaubt «Nicht berichtigen» nur, wenn die Neuberechnung den Saldo erhöht', () =>
+		sent(async (id) => {
+			await db.update(utilityStatements).set({ balance: '9999.00' }).where(eq(utilityStatements.id, id));
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { correctionDeclinable: boolean };
+			expect(changes.correctionDeclinable).toBe(false);
+			const refused = await decline(id);
+			expect(refused.status).toBe(409);
+			expect(((await refused.json()) as { code: string }).code).toBe('STATEMENT_CORRECTION_LOWERS_BALANCE');
+		}));
+
+	it('erlaubt «Nicht berichtigen», wenn die Neuberechnung den Saldo erhöht', () =>
+		sent(async (id) => {
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { correctionDeclinable: boolean };
+			expect(changes.correctionDeclinable).toBe(true);
 		}));
 
 	it('verweigert «Nicht berichtigen», wenn kein Berichtigen fällig ist', async () => {

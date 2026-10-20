@@ -1,7 +1,8 @@
 /**
- * #454 (#408 point 1): the invoice list filtered by an Abrechnungsperiode shows the invoices a statement of that period
- * takes (rule 1, `getInvoicesForStatement`): without a Leistungszeitraum by the Rechnungsdatum, with one when it touches
- * the period (real PostgreSQL database)
+ * #454 (#408 point 1): the invoice list filtered by an Abrechnungsperiode shows the invoices of the building that fall
+ * into it by rule 1: without a Leistungszeitraum by the Rechnungsdatum, with one when it touches the period; allocable
+ * and not (PO 2026-10-20, Fachreview 454-1 E-1, 454-2 V-26), so its allocable ones are the selection of
+ * `getInvoicesForStatement` (real PostgreSQL database)
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';

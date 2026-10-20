@@ -8,6 +8,7 @@ import {
 	costBreakdown,
 	statementAdvancePaid,
 	correctDialog,
+	declineCorrectionButton,
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
 	paymentDeadline,
@@ -127,3 +128,6 @@ export const gapAboveCostBreakdown = Gap.between(statementStatus, costBreakdown)
 // #464: the Akonto the statement deducts, e.g. «− CHF 400.00»
 export const advancePaidOfStatement = Text.of(statementAdvancePaid);
 export const advanceDiffersText = Text.of(advanceDiffers);
+
+// #454 (Fachreview 454-1 E-6)
+export const declineCorrectionOffered = Count.of(declineCorrectionButton);

@@ -20,6 +20,7 @@ import {
 	invoicesOfPosition,
 	laterInvoicesHint,
 	laterInvoicesHints,
+	declineCorrectionOffered,
 	languageOfPdf,
 	carryOver,
 	correctPaidAmount,
@@ -361,6 +362,15 @@ Then('nennt der Hinweis auf Änderungen seit dem Erstellen den Titel {string}', 
 
 When('der Liegenschaftsverwalter die Abrechnung nicht berichtigt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(declineCorrection);
+});
+
+// after a positive check on the same page
+Then('bietet die Abrechnung «Nicht berichtigen» nicht mehr an', async ({ verwalter }) => {
+	await verwalter.sees(declineCorrectionOffered).toBe(0);
+});
+
+Then('nennt der Verlauf {string} am heutigen Tag', async ({ verwalter }, label: string) => {
+	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${sendingDay().replace(/\./g, '\\.')}`));
 });
 
 Then('nennt die Abrechnung {string}', async ({ verwalter }, language: string) => {

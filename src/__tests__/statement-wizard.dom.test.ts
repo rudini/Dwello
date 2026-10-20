@@ -1048,6 +1048,7 @@ describe('Abrechnungen erstellen', () => {
 		statementNumber: `NK-2024-000${id}`,
 		tenantName: 'Nina Brunner',
 		outdated: false,
+		fuelStock: false,
 		profile: null,
 		profileEdited: null,
 		fee: null,
@@ -1058,6 +1059,15 @@ describe('Abrechnungen erstellen', () => {
 	const notesOf = (id: string) => byTestId(`existing-statement-notes-${id}`)!.textContent!.replace(/\s+/g, ' ').trim();
 	const sameSettings =
 		'Damit alle Abrechnungen dieser Abrechnungsperiode gleich gerechnet sind, wählen Sie im Schritt 3 «Heizprofil und Verwaltungspauschale» dasselbe Heizprofil und denselben Satz wie bei den bestehenden Abrechnungen.';
+
+	// #454 (#408 point 8), Fachreview 454-2 V-19: a Tankbestand changed since, alone or with invoices
+	it('nennt einen Entwurf mit danach geändertem Tankbestand', () => {
+		withChanged([changed('1', { fuelStock: true }), changed('2', { outdated: true, fuelStock: true })]);
+		expect(notesOf('1')).toBe('Seit dem Erstellen dieses Entwurfs wurde der Tankbestand der Abrechnungsperiode geändert.');
+		expect(notesOf('2')).toBe(
+			'Seit dem Erstellen dieses Entwurfs wurden Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht, und der Tankbestand wurde geändert.'
+		);
+	});
 
 	it('nennt bestehende Abrechnungen, die veraltet oder anders eingestellt sind, mit ihrem Link', () => {
 		withChanged([

@@ -607,12 +607,18 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 	const notAgreed = { ...buildingContracts.contracts[0], id: 'ohne', managementFeeAgreed: false };
 	const profile = (id: string, nameDE: string, updatedAt = '2024-01-01T00:00:00.000Z') => ({ ...heatingProfiles.data[0], id, nameDE, updatedAt });
 	const profiles = [profile('hp1', 'Heizung Mittelland'), profile('hp2', 'Winter')];
-	const fetchWith = (data: object[], changed: Record<string, string[]> = {}, asked: string[] = [], known = profiles) =>
+	const fetchWith = (
+		data: object[],
+		changed: Record<string, string[]> = {},
+		asked: string[] = [],
+		known = profiles,
+		fuelStock: string[] = []
+	) =>
 		(async (url: string) => {
 			const id = url.match(/statements\/([^/]+)\/changed-invoices/)?.[1];
 			if (id) {
 				asked.push(id);
-				return Response.json({ ...statementChangedInvoices, invoiceIds: changed[id] ?? [] });
+				return Response.json({ ...statementChangedInvoices, invoiceIds: changed[id] ?? [], fuelStockChanged: fuelStock.includes(id) });
 			}
 			if (url.includes('/statements?')) return Response.json({ ...statements, data });
 			if (url.includes('/contracts?')) return Response.json({ contracts: [...buildingContracts.contracts, ownRate, notAgreed] });
@@ -625,6 +631,7 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		statementNumber: `NK-2024-${id}`,
 		tenantName: 'Nina Brunner',
 		outdated: false,
+		fuelStock: false,
 		profile: null,
 		profileEdited: null,
 		fee: null,
@@ -636,6 +643,13 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		const fetch = fetchWith([statement('1', c1, 'draft', 'hp1', '4.50'), statement('2', c1, 'draft', 'hp1', '4.50')], { '1': ['i2'] });
 
 		expect(await changedOf(fetch)).toEqual([named('1', { outdated: true })]);
+	});
+
+	// #454 (#408 point 8), Fachreview 454-2 V-19
+	it('nennt einen Entwurf, dessen Tankbestand sich seither geändert hat', async () => {
+		const fetch = fetchWith([statement('1', c1, 'draft', 'hp1', '4.50')], {}, [], profiles, ['1']);
+
+		expect(await changedOf(fetch)).toEqual([named('1', { fuelStock: true })]);
 	});
 
 	// sent and paid statements are corrected by a berichtigte Abrechnung (#120), not by a new run
