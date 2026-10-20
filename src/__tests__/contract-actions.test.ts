@@ -104,13 +104,13 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		end,
 		href: `/statements/generate?building=b1&start=${way.start}&end=${way.end}`,
 		way: { kind, ...way },
-		// #454: the invoices a statement of exactly these days takes; a calendar year by its number
+		// #454, Fachreview 454-1 V-2: the invoices the offered statement takes, of its period; a calendar year by its number
 		invoices: {
-			href: `/invoices?building=b1&periodStart=${start}&periodEnd=${end}`,
+			href: `/invoices?building=b1&periodStart=${way.start}&periodEnd=${way.end}`,
 			label:
-				start.endsWith('-01-01') && end === `${start.slice(0, 4)}-12-31`
-					? `Rechnungen ${start.slice(0, 4)} ansehen`
-					: `Rechnungen für ${day(start)} – ${day(end)} ansehen`
+				way.start.endsWith('-01-01') && way.end === `${way.start.slice(0, 4)}-12-31`
+					? `Rechnungen ${way.start.slice(0, 4)} ansehen`
+					: `Rechnungen für ${day(way.start)} – ${day(way.end)} ansehen`
 		}
 	});
 	const day = (date: string) => date.split('-').reverse().join('.');

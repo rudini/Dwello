@@ -152,7 +152,7 @@ describe('Aufgaben der Übersicht', () => {
 			input({
 				statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 1 },
 				missingStatements: [
-					{ building: 'Seeblick', periods: [{ start: '2025-01-01', end: '2025-12-31' }] }
+					{ building: 'Seeblick', buildingId: 'b1', periods: [{ start: '2025-01-01', end: '2025-12-31' }] }
 				]
 			})
 		);
@@ -169,7 +169,7 @@ describe('Aufgaben der Übersicht', () => {
 		// the invoices come first, so the task leads to them as well
 		// #454: the invoices a statement of the period takes
 		expect(tasks[1].link).toEqual({
-			href: '/invoices?periodStart=2025-01-01&periodEnd=2025-12-31',
+			href: '/invoices?building=b1&periodStart=2025-01-01&periodEnd=2025-12-31',
 			label: 'Rechnungen 2025 ansehen'
 		});
 	});
@@ -181,12 +181,13 @@ describe('Aufgaben der Übersicht', () => {
 				missingStatements: [
 					{
 						building: 'Ahornhof',
+						buildingId: 'b2',
 						periods: [
 							{ start: '2025-01-01', end: '2025-12-31' },
 							{ start: '2024-07-01', end: '2024-12-31' }
 						]
 					},
-					{ building: 'Seeblick', periods: [{ start: '2023-01-01', end: '2023-12-31' }] }
+					{ building: 'Seeblick', buildingId: 'b1', periods: [{ start: '2023-01-01', end: '2023-12-31' }] }
 				]
 			})
 		);
@@ -194,9 +195,9 @@ describe('Aufgaben der Übersicht', () => {
 		expect(task.text).toContain(
 			'Noch nicht abgerechnet: Ahornhof (2025, 01.07.2024 – 31.12.2024), Seeblick (2023).'
 		);
-		// the invoices of the newest period come first
+		// the invoices of the newest period come first, of its building (Fachreview 454-1 V-10)
 		expect(task.link).toEqual({
-			href: '/invoices?periodStart=2025-01-01&periodEnd=2025-12-31',
+			href: '/invoices?building=b2&periodStart=2025-01-01&periodEnd=2025-12-31',
 			label: 'Rechnungen 2025 ansehen'
 		});
 	});
@@ -211,12 +212,12 @@ describe('Aufgaben der Übersicht', () => {
 		const tasks = overviewTasks(
 			input({
 				missingStatements: [
-					{ building: 'Seeblick', periods: [{ start: '2024-07-01', end: '2025-06-30' }] }
+					{ building: 'Seeblick', buildingId: 'b1', periods: [{ start: '2024-07-01', end: '2025-06-30' }] }
 				]
 			})
 		);
 		expect(tasks.find((task) => task.id === 'missing-period')!.link).toEqual({
-			href: '/invoices?periodStart=2024-07-01&periodEnd=2025-06-30',
+			href: '/invoices?building=b1&periodStart=2024-07-01&periodEnd=2025-06-30',
 			label: 'Rechnungen für 01.07.2024 – 30.06.2025 ansehen'
 		});
 	});

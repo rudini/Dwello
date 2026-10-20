@@ -178,6 +178,37 @@ describe('Geänderte Rechnungen seit der Abrechnung', () => {
 				expect(await fuelStockChanged(id)).toBe(false);
 			}));
 
+		// Fachreview 454-1 V-3: a statement from before migration 0014 keeps no invoices in its positions, but its Tankbestand
+		// in utility_statements.fuel_stock
+		it('meldet bei einer Abrechnung ohne gespeicherte Rechnungen keinen unveränderten Tankbestand', () =>
+			withReadings(async () => {
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				const { id, lineItems } = await statement();
+				for (const item of lineItems) await forget(item.id);
+				expect(await fuelStockChanged(id)).toBe(false);
+			}));
+
+		// Fachreview 454-1 V-15
+		it('meldet einen danach gelöschten Tankbestand', () =>
+			withReadings(async () => {
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				const { id } = await statement();
+				await db.delete(fuelStocks).where(and(eq(fuelStocks.buildingId, rental.building), eq(fuelStocks.readingDate, '2024-12-31')));
+				expect(await fuelStockChanged(id)).toBe(true);
+			}));
+
+		it('meldet keinen Tankbestand, wenn der Mietvertrag die Heizkosten nicht vereinbart hat', () =>
+			withReadings(async () => {
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				const { id } = await statement();
+				await db.update(utilityStatements).set({ agreedCategoryIds: [] }).where(eq(utilityStatements.id, id));
+				await reading('2024-12-31', '200.00');
+				expect(await fuelStockChanged(id)).toBe(false);
+			}));
+
 		it('meldet einen Tankbestand, der nach der Abrechnung dazukam', () =>
 			withReadings(async () => {
 				const { id } = await statement();
