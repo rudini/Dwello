@@ -1384,6 +1384,7 @@
 	"backend_unknown_error": "Une erreur inattendue s’est produite. Veuillez réessayer.",
 	"backend_internal_error": "Une erreur inattendue s’est produite. Veuillez réessayer.",
 	"backend_proxy_error": "La requête n’a pas pu être traitée. Veuillez réessayer.",
+	"backend_not_found": "L’élément est introuvable. Rechargez la page.",
 	"backend_validation_error": "La requête n’était pas valable. Rechargez la page et réessayez.",
 	"backend_network_error": "Pas de connexion au serveur. Vérifiez votre connexion Internet et réessayez.",
 	"backend_service_unavailable": "Le serveur ne répond pas. Veuillez réessayer dans un instant.",

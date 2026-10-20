@@ -252,3 +252,11 @@ Then('erklärt die Seite {string} {string}', async ({ verwalter }, title: string
 	await verwalter.sees(pageTitleText).toBe(title);
 	await verwalter.sees(pagePurposeText).toContain(text);
 });
+
+When('der Liegenschaftsverwalter die Seite {string} öffnet', async ({ verwalter }, path: string) => {
+	await verwalter.attemptsTo(openPage(path));
+});
+
+Then('sagt die Fehlerseite {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(pageTitleText).toBe(message);
+});
