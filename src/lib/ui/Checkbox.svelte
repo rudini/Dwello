@@ -21,10 +21,17 @@
 		disabled?: boolean;
 		testid?: string;
 	} = $props();
+
+	// a checkbox that cannot be ticked looks so (#245, persona Helga of #233)
+	const cursor = $derived(disabled ? 'cursor-not-allowed' : 'cursor-pointer');
+	const labelLook = $derived(disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer');
 </script>
 
 <div class="flex flex-col gap-1">
-	<label for={id} class="flex min-h-12 cursor-pointer items-center gap-4 font-semibold text-ink">
+	<label
+		for={id}
+		class="flex min-h-12 items-center gap-4 font-semibold text-ink {labelLook}"
+	>
 		<input
 			{id}
 			{name}
@@ -35,7 +42,7 @@
 				.filter(Boolean)
 				.join(' ') || undefined}
 			aria-invalid={error ? true : undefined}
-			class="size-6 shrink-0 cursor-pointer rounded-control border-2 border-line-strong accent-accent"
+			class="size-6 shrink-0 rounded-control border-2 border-line-strong accent-accent {cursor}"
 			data-testid={testid}
 		/>
 		{label}

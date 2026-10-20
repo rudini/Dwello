@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { UploadRow } from '$lib/invoice-upload';
+	import { selectionHelp, type UploadRow } from '$lib/invoice-upload';
 	import type { KeyProposal } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -66,6 +66,7 @@
 				id="upload-{row.key}-select"
 				label={m.invoices_upload_select()}
 				bind:checked={row.selected}
+				help={selectionHelp(row)}
 				disabled={row.several}
 				{describedby}
 				testid="invoice-upload-row-select"

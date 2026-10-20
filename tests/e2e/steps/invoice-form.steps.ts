@@ -1,7 +1,9 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { thisYear } from '../fixtures/dates';
 import {
 	billedWarningText,
+	categoryLabelText,
 	chosenKey,
 	dateOutsidePeriodWarning,
 	dateOutsidePeriodWarnings,
@@ -19,6 +21,7 @@ import { amountOfListedInvoice, categoryOfListedInvoice } from '../questions/inv
 import {
 	chooseBuilding,
 	chooseCategory,
+	clearCategory,
 	chooseCategoryIn,
 	chooseKey,
 	clearSupplier,
@@ -168,6 +171,24 @@ Then('erklärt das Formular {string}', async ({ verwalter }, text: string) => {
 
 Then('erklärt das Formular beim Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(servicePeriodHelpText).toContain(text);
+});
+
+When('der Liegenschaftsverwalter die Kategorie der Rechnung entfernt und speichert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(clearCategory);
+});
+
+// the statements of the year the invoice dated today is in, with number and status (#245, Dr. Weber P-5 of #233)
+Then(
+	'nennt die Warnung die Abrechnung des laufenden Jahres von {string} im Status {string}',
+	async ({ verwalter, seed }, tenant: string, status: string) => {
+		const number = await seed.statementNumber(tenant, thisYear());
+		await verwalter.sees(billedWarningText).toContain(`${number}, ${status}`);
+	}
+);
+
+// the form names the field without «(optional)»: the Kategorie is required (#245, Helga P-5 of #233)
+Then('ist die Kategorie im Formular keine freiwillige Angabe', async ({ verwalter }) => {
+	await verwalter.sees(categoryLabelText).toBe('Kategorie');
 });
 
 Given('die Rechnung von {string} wird nach dem Verteilschlüssel {string} verteilt', async ({ seed }, supplier: string, key: string) => {

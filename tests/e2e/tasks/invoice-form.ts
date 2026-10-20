@@ -62,3 +62,5 @@ export const typeInvoiceDate = (text: string) => Enter.keyByKey(text).intoAndLea
 export const enterInvoiceDate = (date: string) => EnterDate.of(date).into(invoiceDateInput);
 export const correctInvoiceNumber = (number: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(number).into(invoiceNumberInput), saveInvoice);
+// the Kategorie emptied, then saved: refused, the Kategorie is required (#245)
+export const clearCategory: Activity = (actor) => actor.attemptsTo(Select.option('').from(categorySelect), saveInvoice);

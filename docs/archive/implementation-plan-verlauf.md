@@ -2240,6 +2240,20 @@ Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of
 
 Files: `backend/src/config/llm.ts`, `backend/src/services/statement-invoices.service.ts`, `backend/scripts/llm-stub.ts`, `src/lib/invoice-upload.ts`, `src/lib/server/invoice.ts`, `src/lib/types.ts`, `src/lib/ui/{FileInput,Dialog,DateInput,Button}.svelte`, `src/routes/invoices/` (`+page.svelte`, `DeductedHint`, `InvoiceDataFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadFiles`, `UploadRowNotes`, `[id]/{+page,InvoiceFacts,InvoiceBeleg}.svelte`, `[id]/edit/+page.svelte`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `tests/contracts/{invoice-statements,invoice-list}.json`, tests and E2E layers.
 
+## Session W9c: open points of the invoice upload (#245, 2026-10-20)
+
+Branch `w9-issue-245`. Issue #245 (open points of the reviews of #233): per point a fix or a reasoned «decided against» (product owner); the Kategorie required in «Rechnung bearbeiten»; unticked Lift and Gutschrift rows say why. The hint texts of #222 were built with #455.
+
+- [x] `@wip` scenarios (invoices, invoice-edit, invoice-detail), red on main (10 at the missing behaviour, 5 more after the domain review's wording)
+- [x] Domain review round 1 (`docs/reviews/245-fachreview-1.md`): V-1 Major «Fertig» status line, V-2 to V-7, V-9 to V-12 taken over; V-8 not done (optional)
+- [x] Upload: a reason at an unticked row, «Noch offen» with its reason (from `checkRow`), the Gutschrift's amount (not with a deduction), the Lift remainder as a second invoice with the Beleg, the beginner's way first for several invoices, «Die KI hat diese Datei nicht gelesen» until the required fields are filled, a failed reading names its fields, the fields in the form's order, an unticked duplicate asks nothing, a quiet «nicht gefunden», «Übrige Dateien verwerfen», «z. B.»
+- [x] Invoice pages: Kategorie required in «Rechnung bearbeiten»; the warning when editing and deleting lists each statement with number and status; a disabled checkbox looks so
+- [x] Decided against with reasons (comment in #245): comparing file and fields beside each other; the Kategorie inside «Füllen Sie aus»; Weber P-6 already fixed since #120
+- [x] Code review round 1 (`docs/reviews/245-review-1.md`, no Blocker/Major; C-1 to C-3 fixed, tests red first)
+- [x] Personas Helga (`docs/design/personas/helga-245.md`: P-1 fixed, P-2, P-3, P-5 kept, P-4 = #535) and Marco (`docs/design/personas/marco-245.md`: P-1 pre-existing, now #535; P-3 in `docs/design/offene-punkte.md` U-3; P-2, P-4, P-5 kept)
+- [x] PR `Fixes #245`
+
+Files: `src/lib/invoice-upload.ts`, `src/lib/ui/{Field,Checkbox}.svelte`, `src/routes/invoices/{InvoiceUploadDialog,InvoiceUploadRow,UploadRowNotes,UploadResult,BilledWarning,InvoiceCategoryFields}.svelte`, `src/routes/invoices/[id]/{+page,DeleteConsequences}.svelte`, `src/routes/invoices/[id]/edit/+page.svelte`, `messages/*.json`, `docs/design/offene-punkte.md`, tests and E2E layers.
 ## Session W1b: «Abgerechnet bis» over a Dwello statement (#499) (2026-10-20)
 
 Branch `w1-issue-499`, worker W1; the checklist lived in the pull request (parallel workers) and comes here at the end.

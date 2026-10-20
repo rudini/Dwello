@@ -62,6 +62,7 @@ export type UploadRow = {
 	documentType: string; // invoice, advance_invoice, reminder or credit_note, as the KI read it
 	deducted: string | null; // Akontorechnungen deducted on the Rechnung, with the total proposed (#455)
 	byHand: boolean; // the KI read nothing: every field is filled in by hand
+	notRead?: boolean; // the KI was not available for this file (#245: said until the required fields are filled)
 	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
 	selected: boolean;
 	createError?: string; // why the invoice was not created
@@ -118,15 +119,15 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	selected: true
 });
 
-// The fields the property manager checks, with their labels, in the order the notes name them
+// The fields the property manager checks, with their labels, in the order of the form (#245, persona Helga of #233)
 const FIELD_LABELS: [string, () => string][] = [
-	['billingEntityName', m.invoices_billing_entity],
 	['invoiceNumber', m.invoices_invoice_number],
 	['invoiceDate', m.invoices_date],
 	['servicePeriodStart', m.invoices_service_period],
-	['dueDate', m.invoices_due_date],
 	['amount', m.invoices_amount],
-	['description', m.invoices_description]
+	['billingEntityName', m.invoices_billing_entity],
+	['description', m.invoices_description],
+	['dueDate', m.invoices_due_date]
 ];
 // without these an invoice is not created (validateInvoice)
 const REQUIRED = ['billingEntityName', 'invoiceDate', 'amount', 'description'];
@@ -144,19 +145,22 @@ const named = (fields: string[]) =>
 export function toDoOf(row: UploadRow): string[] {
 	// nothing to fill in on a file no invoice is created from: several invoices, a Gutschrift, a Mahnung (persona Dr. Weber),
 	// an Akontorechnung the property manager did not choose to record (#455)
+	// or a duplicate he did not tick again (#245)
 	const recorded =
-		row.documentType === 'invoice' || (row.documentType === 'advance_invoice' && row.selected);
-	if (row.status !== 'check' || row.several || !recorded) return [];
-	// costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also
-	// one the property manager chooses later (domain review V-1, V-8)
-	const mixed = row.hints.nonAllocableItems && row.values.isValidUtilityCost;
+		(row.documentType === 'invoice' && !(row.duplicateOf && !row.selected)) ||
+		(row.documentType === 'advance_invoice' && row.selected);
+	// a file whose reading failed is filled in by hand too (#245, code review 233-4 C-25)
+	const byHand = row.byHand || row.status === 'failed';
+	if ((row.status !== 'check' && row.status !== 'failed') || row.several || !recorded) return [];
+	const mixed = mixedCosts(row);
 	// without the KI the required fields are named at once, not only after creating (persona Helga); a required one
 	// counts as done as the create button counts it, an optional one once anything is in it
 	const formField = (field: string) => FORM_FIELD[field as keyof Proposal['fields']];
 	const wrong = validateInvoice({ buildingId: 'chosen in the dialog', ...row.values });
-	const required = REQUIRED.filter((field) => (row.byHand || row.missing.includes(field)) && wrong[formField(field)]);
+	const required = REQUIRED.filter((field) => (byHand || row.missing.includes(field)) && wrong[formField(field)]);
 	const optional = row.missing.filter((field) => !REQUIRED.includes(field) && !row.values[formField(field)]);
 	return [
+		row.notRead && required.length > 0 && m.invoices_upload_not_read(),
 		mixed && m.invoices_upload_mixed(),
 		!row.values.categoryId && m.invoices_upload_category_missing(),
 		!row.values.distributionKeyId && m.invoices_error_key_required(), // #379
@@ -173,9 +177,29 @@ function notesOn(proposal: Proposal, morePages: boolean) {
 		proposal.invoiceCount > 1 && m.invoices_upload_several(),
 		proposal.duplicateOf && m.invoices_upload_duplicate(),
 		proposal.documentType === 'reminder' && m.invoices_upload_reminder(),
-		proposal.documentType === 'credit_note' && m.invoices_upload_credit_note(),
+		proposal.documentType === 'credit_note' && creditNote(proposal),
 		proposal.documentType === 'advance_invoice' && m.invoices_upload_advance_invoice()
 	];
+}
+
+// A Gutschrift with its amount (#245, persona Marco of #233); not the total of a file that deducts amounts, which
+// would be a Schlussrechnung's total, not a credit (domain review 245 V-6)
+const creditNote = (proposal: Proposal) =>
+	proposal.fields.amount && !proposal.deductedAmount
+		? m.invoices_upload_credit_note_amount({ amount: formatCurrency(Number(proposal.fields.amount)) })
+		: m.invoices_upload_credit_note();
+
+// costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also one the
+// property manager chooses later (domain review V-1, V-8)
+const mixedCosts = (row: UploadRow) => row.hints.nonAllocableItems && row.values.isValidUtilityCost;
+
+/** Why a file Dwello read is not ticked for creating, said at its checkbox until it is (#245, product owner) */
+export function selectionHelp(row: UploadRow) {
+	if (row.selected || row.status !== 'check') return undefined;
+	if (row.documentType === 'credit_note') return m.invoices_upload_unticked_credit();
+	// only a single invoice not entered yet waits for its amount to be split (code review 245 C-1)
+	if (mixedCosts(row) && row.documentType === 'invoice' && !row.several && !row.duplicateOf)
+		return m.invoices_upload_unticked_mixed();
 }
 
 // Akontorechnungen the Rechnungssteller deducted, with the total the KI proposes as the Betrag (#455)
@@ -249,6 +273,7 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 		documentType: proposal.documentType,
 		deducted: deductedOn(proposal),
 		byHand: false,
+		notRead: false,
 		hints: { deductedAmount: proposal.deductedAmount, nonAllocableItems: proposal.nonAllocableItems },
 		selected: preselected(proposal)
 	};
@@ -258,14 +283,22 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 export const withoutKi = (row: UploadRow, reason: 'unavailable' | 'unreadable'): UploadRow => ({
 	...row,
 	status: 'check',
-	notes: [reason === 'unavailable' ? m.backend_extraction_unavailable() : m.invoices_upload_unreadable()],
+	// without the KI the to-dos say it while fields are missing (#245, persona Helga of #233)
+	notes: reason === 'unavailable' ? [] : [m.invoices_upload_unreadable()],
+	notRead: reason === 'unavailable',
 	byHand: true
 });
+
+/** Why a file is still open after creating: the first thing that keeps its invoice from being created (#245) */
+export const openReason = (row: UploadRow) => Object.values(checkRow(row))[0] ?? row.createError ?? '';
 
 /** What the invoice still lacks, by field; a Kategorie is required here, unlike on «Neue Rechnung» (#217) */
 export function checkRow(row: UploadRow): Record<string, string> {
 	const errors = validateInvoice({ buildingId: 'chosen in the dialog', ...row.values });
-	return row.values.categoryId ? errors : { ...errors, category: m.invoices_upload_category_missing() };
+	// in the order the row names its to-dos: Kategorie, Verteilschlüssel, then the fields
+	const category = row.values.categoryId ? undefined : m.invoices_upload_category_missing();
+	const ordered = { category, distributionKeyId: errors.distributionKeyId, ...errors };
+	return Object.fromEntries(Object.entries(ordered).filter(([, error]) => error)) as Record<string, string>;
 }
 
 /** The new invoice as the backend takes it */
@@ -292,5 +325,5 @@ export function invoiceOf(row: UploadRow, buildingId: string) {
 export function fieldNote(read: { unsure: string[]; missing: string[] }, field: string) {
 	if (read.unsure.includes(field)) return { text: m.invoices_upload_unsure(), testid: `invoice-upload-unsure-${field}` };
 	if (read.missing.includes(field))
-		return { text: m.invoices_upload_missing(), testid: `invoice-upload-missing-${field}` };
+		return { text: m.invoices_upload_missing(), testid: `invoice-upload-missing-${field}`, quiet: true };
 }

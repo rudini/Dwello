@@ -12,7 +12,8 @@
 			[
 				...row.notes,
 				...toDoOf(row),
-				errors.category,
+				// gone once a Kategorie is chosen after creating (#245, persona Helga P-1)
+				!row.values.categoryId && errors.category,
 				Object.keys(errors).some((field) => field !== 'category') && m.invoices_upload_fields_missing(),
 				row.createError,
 				// after what is to do, so the long rule below does not push it down (#455, persona Marco of #222)

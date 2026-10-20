@@ -79,6 +79,7 @@
 	help={m.invoices_category_help()}
 	optional={!categoryRequired}
 	error={categoryError}
+	labelTestid="invoice-category-label"
 >
 	{#snippet children(control)}
 		<!-- The options are written here, not in a child component, so they are in the page before it is hydrated -->

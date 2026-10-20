@@ -11,6 +11,7 @@ Funktionalität: Rechnung bearbeiten
     Und der Liegenschaftsverwalter bearbeitet die Rechnung von "Hauswart Huber"
 
   # Wer eine schon abgerechnete Rechnung ändert, verschiebt Kosten: die Abrechnungen stimmen nicht mehr
+  # #245: die Warnung nennt den Status der Abrechnungen (Dr. Weber 233 P-5)
   Szenario: Warnung beim Bearbeiten einer schon abgerechneten Rechnung
     Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
     Und der Mieter "Anna Keller" existiert
@@ -18,6 +19,7 @@ Funktionalität: Rechnung bearbeiten
     Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
     Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" bearbeitet
     Dann warnt das Formular, dass es mit dieser Rechnung schon Abrechnungen gibt
+    Und nennt die Warnung die Abrechnung des laufenden Jahres von "Anna Keller" im Status "Entwurf"
 
   # #455 (#268): wer den Betrag ändert, sieht den Hinweis auf die abgezogenen Akontorechnungen beim Betrag
   Szenario: Hinweis auf abgezogene Akontorechnungen beim Bearbeiten
@@ -25,6 +27,12 @@ Funktionalität: Rechnung bearbeiten
     Wenn der Liegenschaftsverwalter die Rechnung von "Werke Luzern" bearbeitet
     Dann steht im Formular beim Betrag "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug."
     Und erklärt der Hinweis im Formular beim Betrag "Prüfen Sie, dass die Akontorechnungen nicht zusätzlich erfasst sind. Ist eine noch erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet ist, und führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». Der Leistungszeitraum ist der auf dem Beleg."
+
+  # #245: die Kategorie ist beim Bearbeiten Pflicht, wie beim Hochladen (Product Owner)
+  Szenario: Die Kategorie ist beim Bearbeiten Pflicht
+    Dann ist die Kategorie im Formular keine freiwillige Angabe
+    Wenn der Liegenschaftsverwalter die Kategorie der Rechnung entfernt und speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie eine Kategorie."
 
   Szenario: Betrag korrigieren
     Wenn der Liegenschaftsverwalter den Betrag auf "480.00" Franken korrigiert

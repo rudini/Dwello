@@ -4,6 +4,8 @@ import {
 	fileRefusal,
 	invoiceOf,
 	newRow,
+	openReason,
+	selectionHelp,
 	toDoOf,
 	withoutKi,
 	withProposal,
@@ -52,7 +54,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(several).toMatchObject({ selected: false, several: true });
 		// nothing to check or fill in on a file no invoice is created from (persona Anna)
 		expect(said(several)).toEqual([
-			'Diese Datei enthält mehrere Rechnungen. Laden Sie jede Rechnung als eigene Datei hoch, oder erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an.'
+			'Diese Datei enthält mehrere Rechnungen. Erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an, oder laden Sie jede Rechnung als eigene Datei hoch.'
 		]);
 	});
 
@@ -120,10 +122,16 @@ describe('Vorschlag der KI für eine Datei', () => {
 	});
 
 	it('sagt bei einer Gutschrift, dass keine Rechnung daraus entsteht und wo sie abgezogen wird', () => {
-		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note' }));
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note', deductedAmount: null }));
 		expect(said(row)[0]).toBe(
-			'Das ist eine Gutschrift. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: hier in ihrer Zeile oder, wenn sie schon erfasst ist, mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf.'
+			'Das ist eine Gutschrift über CHF\u00a01’250.00. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: in der Zeile dieser Rechnung, wenn ihre Datei hier ausgewählt ist, sonst auf ihrer Seite mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf.'
 		);
+	});
+
+	// #245, domain review V-6: the total of a Schlussrechnung read as a credit note is no credit note's amount
+	it('nennt bei einer Gutschrift mit abgezogenen Beträgen keinen Betrag', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note', deductedAmount: '1000.00' }));
+		expect(said(row)[0]).toMatch(/^Das ist eine Gutschrift\. /);
 	});
 
 	it('verlangt bei einer Gutschrift und einer Mahnung nichts zum Ausfüllen, weil keine Rechnung daraus entsteht (Persona Dr. Weber)', () => {
@@ -203,20 +211,67 @@ describe('Vorschlag der KI für eine Datei', () => {
 	it('nennt ohne KI gleich die Pflichtangaben, die fehlen, und nimmt jede zurück, sobald sie ausgefüllt ist (Persona Helga)', () => {
 		const row = withoutKi(newRow(1, pdf, defaults), 'unavailable');
 		expect(toDoOf(row)).toEqual([
+			'Die KI hat diese Datei nicht gelesen. Füllen Sie die Felder aus.',
 			'Wählen Sie eine Kategorie.',
-			'Füllen Sie aus: Rechnungssteller, Rechnungsdatum, Betrag, Beschreibung.'
+			'Füllen Sie aus: Rechnungsdatum, Betrag, Rechnungssteller, Beschreibung.'
 		]);
 		row.values.amount = '80.00';
-		expect(toDoOf(row)).toContain('Füllen Sie aus: Rechnungssteller, Rechnungsdatum, Beschreibung.');
+		expect(toDoOf(row)).toContain('Füllen Sie aus: Rechnungsdatum, Rechnungssteller, Beschreibung.');
 		// what does not count as filled in stays named, as the create button counts it (persona Helga, round 2)
 		Object.assign(row.values, { amount: 'abc', billingEntity: '  ', invoiceDate: '2026-03-31', description: 'Hauswartung' });
-		expect(toDoOf(row)).toContain('Füllen Sie aus: Rechnungssteller, Betrag.');
+		expect(toDoOf(row)).toContain('Füllen Sie aus: Betrag, Rechnungssteller.');
 	});
 
-	it('lässt die Felder ohne KI leer und sagt, warum', () => {
+	it('lässt die Felder ohne KI leer und sagt, warum, bis die Pflichtfelder ausgefüllt sind (#245, Persona Helga)', () => {
 		const row = withoutKi(newRow(1, pdf, defaults), 'unavailable');
-		expect(row).toMatchObject({ status: 'check', selected: true, notes: ['Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus.'] });
+		expect(row).toMatchObject({ status: 'check', selected: true });
 		expect(row.values.billingEntity).toBe('');
+		expect(said(row)).toContain('Die KI hat diese Datei nicht gelesen. Füllen Sie die Felder aus.');
+		Object.assign(row.values, { amount: '80.00', billingEntity: 'Elektro Blitz', invoiceDate: '2026-03-31', description: 'Licht' });
+		expect(said(row).join(' ')).not.toContain('nicht gelesen');
+	});
+
+	// #245 (code review 233-4 C-25): a row whose reading failed names the fields to fill in, as one without KI
+	it('nennt bei einer Datei, deren Lesen scheiterte, die Pflichtfelder', () => {
+		const row = { ...newRow(1, pdf, defaults), status: 'failed' as const, notes: ['Die Datei wurde nicht gelesen.'] };
+		expect(toDoOf(row)).toContain('Füllen Sie aus: Rechnungsdatum, Betrag, Rechnungssteller, Beschreibung.');
+	});
+
+	// #245 (Marco of #233): an unticked duplicate asks for nothing; ticked, the to-dos come back
+	it('verlangt bei einer schon erfassten Rechnung nichts, solange sie nicht ausgewählt ist', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ deductedAmount: null, categorization: null }));
+		expect(row.selected).toBe(false);
+		expect(toDoOf(row)).toEqual([]);
+		expect(toDoOf({ ...row, selected: true })).toContain('Wählen Sie eine Kategorie.');
+	});
+
+	// #245 (Weber P-5, Marco P-3 of #233; product owner: the landlord ticks it himself)
+	it('sagt bei einer nicht ausgewählten Gutschrift und gemischten Rechnung, warum', () => {
+		const credit = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note' }));
+		expect(selectionHelp(credit)).toBe(
+			'Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil aus einer Gutschrift keine Rechnung entsteht. Ist die Datei doch eine Rechnung, setzen Sie es.'
+		);
+		const mixed = withProposal(newRow(2, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true }));
+		expect(selectionHelp(mixed)).toBe(
+			'Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil Sie zuerst den Betrag aufteilen müssen. Setzen Sie es danach.'
+		);
+		expect(selectionHelp({ ...mixed, selected: true })).toBeUndefined();
+		// unticked for another reason: several invoices, a duplicate, an Akontorechnung (code review 245 C-1)
+		for (const values of [{ invoiceCount: 2 }, { duplicateOf: 'i1' }, { documentType: 'advance_invoice' }])
+			expect(selectionHelp(withProposal(newRow(3, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true, ...values })))).toBeUndefined();
+	});
+
+	// #245 (Anna P-1 of #233): the result names why a file is still open
+	it('nennt als Grund einer offenen Datei ihre erste Aufgabe', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, deductedAmount: null, categorization: null }));
+		expect(openReason(row)).toBe('Wählen Sie eine Kategorie.');
+		// also without a Verteilschlüssel (#379): the Kategorie first, as the row names its to-dos
+		expect(openReason({ ...row, values: { ...row.values, distributionKeyId: '' } })).toBe('Wählen Sie eine Kategorie.');
+		// with a Kategorie: the Verteilschlüssel before the required fields, as the row names them (code review 245-2 C-1)
+		const read = withProposal(newRow(2, pdf, defaults), proposal({ duplicateOf: null }));
+		expect(openReason({ ...read, values: { ...read.values, categoryId: 'c1', amount: '', distributionKeyId: '' } })).toBe(
+			'Wählen Sie, wie die Kosten verteilt werden.'
+		);
 	});
 });
 
