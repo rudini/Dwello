@@ -345,6 +345,14 @@ describe('Zahlungsfrist der Mahnung', () => {
 	});
 
 	// #449 (Entscheid in #404, Punkt 2): erst wenn die vorige Mahnung als versendet markiert ist
+	// Fachreview V-1: die Übersicht schlägt dann keine Mahnung vor
+	it('sagt bei der Abrechnung, dass eine Mahnung noch zu versenden ist', async () => {
+		const reminderToSend = async () =>
+			((await (await api('GET', `/api/v1/statements/${statementId}`)).json()) as { reminderToSend: boolean }).reminderToSend;
+
+		expect(await reminderToSend()).toBe(true);
+	});
+
 	it('lehnt die nächste Mahnstufe ab, solange die vorige Mahnung nicht versendet ist, auch nach ihrer Zahlungsfrist', async () => {
 		await db
 			.update(documents)
