@@ -2129,7 +2129,7 @@ Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20:
 
 ## Session W4: payments after #403 (#448, #484)
 
-Branch `w4-issue-448`. Worker W4 of the coordinator session; the checklist was kept in the pull request (coordinator rule for parallel workers). Stop and ask of #448 checked: the carry-over needs a new nullable column (`carried_from_id`, migration 0027) and a status `settled`; no existing statement changes. Product owner 2026-10-19 (via coordinator): M-1, V-2, V-4 of the domain review decided in #448; #484 decided and entered by this session as ordered.
+Branch `w4-issue-448`. Worker W4 of the coordinator session; the checklist was kept in the pull request (coordinator rule for parallel workers). Stop and ask of #448 checked: the carry-over needs a new nullable column (`carried_from_id`, migration 0028) and a status `settled`; no existing statement changes. Product owner 2026-10-19 (via coordinator): M-1, V-2, V-4 of the domain review decided in #448; #484 decided and entered by this session as ordered.
 
 - [x] @wip scenarios (`statement-minimum-balance.feature`, `statement-detail.feature`, `statements.feature`, `dashboard.feature`) seen red; domain review before implementing (`docs/reviews/448-fachreview-1.md`)
 - [x] Übertrag below CHF 5 (also refunds settled under #94), status «Erledigt», Schlussabrechnung without Mindestbetrag, payment date from the end of the period with a confirmation before the Abrechnungsdatum, «Bereits bezahlt» / «Bereits zurückerstattet» when correcting, «Bereits verrechnet» for a Saldo a sent next statement counts, the remark on the PDF; tests: `statement-carry-over.pg.test.ts`, `statement-pdf-render.test.ts`, `statement-pdf-data.test.ts`, `statement-pages.dom.test.ts`, BFF and mapping tests
@@ -2137,4 +2137,4 @@ Branch `w4-issue-448`. Worker W4 of the coordinator session; the checklist was k
 - [x] a11y and language screens: `statement-settled-detail`, `statement-carried-detail`, `statement-carry-detail`, `statement-offset-detail`, state `mark-paid-early`
 - [x] Domain reviews 1 to 4 (`docs/reviews/448-fachreview-1..4.md`), code reviews 1 and 2 (`448-review-1..2.md`), data check (`448-datenpruefung-1.md`), personas `dr-weber-448`, `anna-448` and their re-runs
 - [x] Open work: #506 (Übertrag that reaches no statement), #523 (partial payment when marking paid), #524 (a new PDF replaces the one sent), U-41 (edit page table cut off)
-- [x] Migration renumbered 0026 → 0027 (0026 taken on `main` by #464)
+- [x] Migration renumbered 0026 → 0027 → 0028 (taken on `main` by #464 and #514)
