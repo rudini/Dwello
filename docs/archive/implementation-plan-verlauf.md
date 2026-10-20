@@ -2354,3 +2354,16 @@ Request: «Setze alle um» (every proposal of `docs/reviews/workflow-rules-revie
 - [x] Archive, PR («pushed after this archive»; no closing round: the fixes touch only rules and docs, none of the code paths of skill `pull-request`, step 2)
 
 Files: `CLAUDE.md`, `implementation_plan.md`, `backend/CLAUDE.md`, `tests/e2e/CLAUDE.md`, `docs/design/personas/README.md`, `docs/design/tools/persona-stack.sh`, `vitest.config.ts`, `.claude/skills/{slice-review,pull-request,commit-gates}/SKILL.md`, `.claude/agents/{code-reviewer,fach-reviewer}.md`, `.claude/skills/tdd/SKILL.md`, `docs/design/arbeitsregeln.md`; review `docs/reviews/w1-review-1.md`.
+
+## Session W2: move occasion-bound rules out of `CLAUDE.md` (w1-review-1 C-1)
+
+Request: «Ja mache es» (the three blocks proposed after w1-review-1 C-1). No scenario: rules and skills only.
+
+- [x] «Open work» points 3 to 5 into a new skill `issue-work`; references in `grill-me` and `check-issues.mjs` follow
+- [x] Gotchas «One build» and «Cloud sessions» (but the scratchpad sentence) into `tests/e2e/CLAUDE.md` and `docs/design/personas/README.md`
+- [x] Workflow 5: the persona details shortened to a reference to `docs/design/personas/README.md`
+- [x] Checks: lint, rule-file tests
+- [x] Code review `docs/reviews/w1-review-2.md`: C-1 closed; C-7 (Minor) fixed (references in «When to ask» and `issue-triage`)
+- [x] Archive, push («pushed after this archive»; no closing round: the C-7 fix touches only rule text)
+
+Files: `CLAUDE.md` (22.3 → 20.4 KB), `.claude/skills/issue-work/SKILL.md` (new), `.claude/skills/grill-me/SKILL.md`, `tools/open-work/check-issues.mjs` (comment), `tests/e2e/CLAUDE.md`, `docs/design/personas/README.md`, `.claude/skills/issue-triage/SKILL.md`.
