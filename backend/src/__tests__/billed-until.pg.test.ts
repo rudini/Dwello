@@ -200,9 +200,9 @@ describe('Abgerechnet bis', () => {
 			expect((await billedUntil('2023-12-31')).status).toBe(409); // earlier: it changes the billed Mietstage (#120)
 		});
 
-		// fach review 499-1 V-6b: a paid statement counts too
-		it('lehnt «Abgerechnet bis» auch über die bezahlte Abrechnung ab', async () => {
-			await db.update(utilityStatements).set({ status: 'paid' }).where(eq(utilityStatements.id, statementId));
+		// fach review 499-1 V-6b: a paid statement counts too, and a settled one (Saldo below CHF 5 carried over, #448)
+		it.each(['paid', 'settled'])('lehnt «Abgerechnet bis» auch über die Abrechnung im Status %s ab', async (status) => {
+			await db.update(utilityStatements).set({ status }).where(eq(utilityStatements.id, statementId));
 			try {
 				expect(await (await billedUntil('2024-06-30')).json()).toMatchObject({ code: 'BILLED_UNTIL_BILLED' });
 			} finally {

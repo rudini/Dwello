@@ -399,7 +399,7 @@ async function checkNewDates(current: RentalContract, data: Partial<NewRentalCon
 
 /**
  * #499 (decided 2026-10-19 and 2026-10-20): «Abgerechnet bis» may not cover a day a Dwello statement of the contract
- * bills: a sent or paid one, or a replaced one whose berichtigte Abrechnung is missing or still a draft. Named is the
+ * bills: a sent, paid or settled one, or a replaced one whose berichtigte Abrechnung is missing or still a draft. Named is the
  * first such statement; the latest day left is the one before its first billed day, unless that is before the
  * Vertragsbeginn. Checked before the offer to delete a draft (fach review 499-1 V-3), only for a new or changed date.
  */
@@ -420,7 +420,7 @@ async function checkBilledByDwello(current: RentalContract, billedUntil: string 
 				eq(utilityStatements.contractId, current.id),
 				lte(utilityStatements.rentalStart, billedUntil),
 				or(
-					inArray(utilityStatements.status, ['sent', 'paid']),
+					inArray(utilityStatements.status, ['sent', 'paid', 'settled']), // settled: sent, its small Saldo carried over (#448)
 					and(eq(utilityStatements.status, 'replaced'), or(isNull(successor.id), eq(successor.status, 'draft')))
 				)
 			)
