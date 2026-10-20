@@ -2045,4 +2045,7 @@ Worker W5 of ten in parallel: the checklist ran in the pull request, the session
 - [x] code-reviewer round 1 (`docs/reviews/450-review-1.md`: C-1 Major, C-2) and round 2 (`450-review-2.md`: both fixed)
 - [x] #490: help text in four languages and the glossary rows the product owner asked for; fach-reviewer round 2 (`docs/reviews/450-fachreview-2.md`: no Blocker/Major)
 - [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-450.md`, `weber-450.md`): Helga P-2, Dr. Weber P-1, P-2 fixed with tests seen red; observations: U-41, #503
-- [x] Closing code-review round before the push; PR `Fixes #450`, `Fixes #490`
+- [x] Closing code-review round 3 (`docs/reviews/450-review-3.md`: C-1 Major, C-2, C-3): scenario step for the marked fields (seen red), marks end with any input, all three codes tested
+- [x] O-34 closed: lock on the global settings (`tests/e2e/fixtures/settings-lock.ts`), seen red without it (3 of 8) and green with it (24 of 24)
+- [x] Closing code-review round 4 (`docs/reviews/450-review-4.md`: no finding)
+- [x] PR `Fixes #450`, `Fixes #490`
