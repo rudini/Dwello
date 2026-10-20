@@ -1,5 +1,8 @@
 import { Attribute, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
+	startDateNotice,
+	billedUntilInput as billedUntilField,
+	startDateInput as startDateField,
 	advancePaymentInput,
 	apartmentContractsUnknown,
 	apartmentOption,
@@ -59,3 +62,8 @@ export const enteredFlatRate = Value.of(flatRateInput);
 export const flatRateWarningText = Text.of(flatRateWarning);
 export const flatRateWarningShown = Visibility.of(flatRateWarning);
 export const runningContractEditHintText = Text.of(runningContractEditHint);
+
+// #453 (#328): the warning on a start in the past, and which date fields step «Mietdauer» asks for
+export const startDateWarning = Text.of(startDateNotice);
+export const startDateAsked = Visibility.of(startDateField);
+export const billedUntilAsked = Visibility.of(billedUntilField);

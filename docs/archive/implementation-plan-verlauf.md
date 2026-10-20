@@ -2052,6 +2052,24 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
+## Session W1: «Abgerechnet bis» lines, preview, wizard field, refusals (#453, #325, #480) (2026-10-19)
+
+Branch `w1-issue-453`, worker W1 of a parallel run; the checklist lived in the pull request (one session per plan, another worker's open session in `implementation_plan.md`, coordinator's consent) and comes here at the end.
+
+- [x] @wip scenarios in `statement-generate`, `statement-detail`, `contract-new`, `contract-edit.feature`, seen red at the missing behaviour (one passes on the base: no field for a future start)
+- [x] fach-reviewer before implementing (`docs/reviews/453-fachreview-1.md`: V-1 Major fixed; V-3 became #480)
+- [x] Backend refusals `BILLED_UNTIL_FUTURE`, `BILLED_UNTIL_BEFORE_START` (create, update, stored value kept), PDF tenancy line, Akonto line «Akontobeiträge ab» (#477), page 2 texts
+- [x] Preview: days and Akonto per row, «Abgerechnet bis» line, skipped contracts with link, own text per building, total note
+- [x] Wizard: field in «Vertragsdauer» for a start before today, warning points to it, check step row, refusals at the field in wizard and edit form
+- [x] Messages in four languages, `glossary_days_text`; a11y states `billed-until-refused`, `preview-skipped`
+- [x] #480 (decided, glossary edit ordered by the product owner): glossary row and help text
+- [x] Reviews: code-reviewer rounds 1 to 3 (`docs/reviews/453-review-1..3.md`), personas Dr. Weber and Helga (`docs/design/personas/weber-453.md`, `helga-453.md`), daten-pruefer (`docs/reviews/453-datenpruefung-1.md`), native reads (`docs/reviews/453-native-fr/it/en.md`)
+- [x] Found: #499 (dead end after «Abgerechnet bis» over a billed statement, decided option 1), #500 («Wohnung EG, EG»)
+- [x] Merge of `origin/main` with #464, conflicts resolved
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-453.md`
+- [x] PR `Fixes #453`, `Fixes #325`, `Fixes #480`
+
+Files: `backend/src/services/{contract,pdf}.service.ts`, `backend/src/routes/contracts.ts`, `src/lib/{contract-form,contract-wizard,statement-wizard}.ts`, `src/lib/server/statement-generation.ts`, `src/routes/contracts/{ContractForm.svelte,new/ContractWizard.svelte,new/PeriodStep.svelte}`, `src/routes/statements/generate/` (`+page.server.ts`, `PreviewStep`, `PreviewSkipped`, `PreviewEmpty`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, tests and E2E files.
 ## Session W10: fr/it/en words of #405 (#461, with #501) (2026-10-19)
 
 Branch `w10-issue-461`, worker W10 of a coordinated run (checklist also in the pull request; Session C1 of another branch stays in the plan, coordinator's rule).

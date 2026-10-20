@@ -2,6 +2,7 @@ import { m } from '$lib/paraglide/messages';
 import { plainAmount } from './invoice';
 import {
 	apartmentOption,
+	billedUntilError,
 	impossible,
 	impossibleYear,
 	initialContractValues,
@@ -33,7 +34,7 @@ export const contractSteps: { label: string; fields: Field[] }[] = [
 		get label() {
 			return m.contracts_period();
 		},
-		fields: ['startDate', 'endDate']
+		fields: ['startDate', 'endDate', 'billedUntil']
 	},
 	{
 		get label() {
@@ -56,15 +57,32 @@ export const contractSteps: { label: string; fields: Field[] }[] = [
 	}
 ];
 
-/** Errors of one step (counted from 1), checked when the user goes on */
-export function stepErrors(values: ContractFormValues, step: number): Record<string, string> {
+/** Errors of one step (counted from 1), checked when the user goes on; with `today` also «Abgerechnet bis» (#453) */
+export function stepErrors(
+	values: ContractFormValues,
+	step: number,
+	today = ''
+): Record<string, string> {
 	const fields: string[] = contractSteps[step - 1].fields;
+	const billed = today && billedUntilError(offeredBilledUntil(values, today), today);
 	return Object.fromEntries(
-		Object.entries({ ...validateContract(values), ...dateErrors(values) }).filter(([field]) =>
-			fields.includes(field)
-		)
+		Object.entries({
+			...validateContract(values),
+			...dateErrors(values),
+			...(billed && { billedUntil: billed })
+		}).filter(([field]) => fields.includes(field))
 	);
 }
+
+/** #453 (#328): the wizard offers «Abgerechnet bis» for a Vertragsbeginn before today; otherwise it is not sent */
+export const offeredBilledUntil = (
+	values: ContractFormValues,
+	today: string
+): ContractFormValues => ({
+	...values,
+	billedUntil:
+		startDateNotice(values.startDate, today) && values.billedUntil ? values.billedUntil : undefined
+});
 
 function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
 	return {
@@ -152,6 +170,16 @@ export function contractSummary(
 			step: 3,
 			field: values.isUnlimited ? 'duration' : 'endDate'
 		},
+		...(values.billedUntil
+			? [
+					{
+						label: m.contracts_billed_until(),
+						value: formatDateLong(values.billedUntil),
+						step: 3,
+						field: 'billedUntil'
+					}
+				]
+			: []),
 		{
 			label: m.common_net_rent(),
 			value: formatCurrency(amount(values.baseRent)),

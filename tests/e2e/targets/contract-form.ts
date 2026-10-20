@@ -85,3 +85,5 @@ export const agreedCategoryBoxes = target('Kästchen der vereinbarten Nebenkoste
 export const agreedCategoryBoxAt = (index: number) =>
 	target(`Kästchen ${index + 1} der vereinbarten Nebenkosten`, (page) => page.getByTestId(/^contract-category-/).nth(index));
 export const noAgreedCostsNote = target('Hinweis ohne vereinbarte Nebenkosten', (page) => page.getByTestId('contract-agreed-costs-none'));
+// the hint below the Vertragsbeginn, e.g. on a start in the past
+export const startDateNotice = target('Hinweis zum Vertragsbeginn', (page) => page.getByTestId('start-date-notice'));

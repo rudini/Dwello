@@ -51,6 +51,7 @@ const contractBodySchema = t.Object({
 	startDate: t.String({ format: 'date' }),
 	endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 	terminated: t.Optional(t.Boolean()),
+	billedUntil: t.Optional(t.Nullable(t.String({ format: 'date' }))), // «Abgerechnet bis» in the wizard (#453)
 	baseRent: t.String(),
 	additionalRent: t.Optional(t.Nullable(t.String())),
 	monthlyAdvancePayment: t.String(),

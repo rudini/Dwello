@@ -8,6 +8,9 @@ export interface PreviewRow {
 	balance: number;
 	rentalDays?: number;
 	totalPeriodDays?: number;
+	rentalStart?: string; // the billed days, from the day after «Abgerechnet bis» (#453)
+	rentalEnd?: string;
+	billedUntil?: string; // «Abgerechnet bis», only where it shortens the Mietstage in the period
 	movedOut?: boolean;
 	fixedTerm?: boolean; // #76: befristet, its end not reached
 	oldAddress?: boolean; // A-5 (#114): moved out, still with the building's address
