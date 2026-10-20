@@ -2081,3 +2081,10 @@ Branch `ccr-3510fafb-cx2ywk`. Product owner 2026-10-19: proposals A, C, D and th
 - [x] Slice review (`docs/reviews/c2-review-1.md`): C-1 (Minor, plan said fallow does not run on push) fixed
 - [x] Workflow note (`docs/reviews/workflow-notes-ci-less-runs.md`)
 - [x] PR: pushed after this archive
+
+## Session G2: Glossar «Gebäuderegister» (#488)
+
+Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20: the proposal of #488 as it stands, entered by this session. No scenario: glossary only.
+
+- [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
+- [x] PR `Fixes #488`
