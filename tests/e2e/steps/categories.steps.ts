@@ -177,6 +177,10 @@ Then('sieht der Liegenschaftsverwalter die Kategorie {string} nicht mehr', async
 	await verwalter.sees(listedCategoriesNamed(names.get(title)!)).toBe(0);
 });
 
+Then('ist im Formular der Kategorie {string} gewählt', async ({ verwalter }, choice: string) => {
+	await verwalter.sees(choice === 'Umlagefähig' ? allowedChosen : notAllowedChosen).toBe(true);
+});
+
 Then('ist die vordefinierte Kategorie {string} nicht umlagefähig', async ({ verwalter }, name: string) => {
 	await verwalter.sees(allowance(name)).toBe('Nicht umlagefähig');
 });

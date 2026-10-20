@@ -167,6 +167,14 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
     Und der Liegenschaftsverwalter die Rechnung vom "30.06.2024" aus dem Hinweis bearbeitet
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
 
+  # Persona Dr. Weber P-2 (#452): nach dem Speichern zurück in den Assistenten, wie nach «Rechnung erfassen»
+  Szenario: Nach dem Zuordnen der Kategorie geht es im Assistenten weiter
+    Angenommen im Gebäude "Rosenhof" gibt es eine umlagefähige Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
+    Und der Liegenschaftsverwalter die Rechnung vom "30.06.2024" aus dem Hinweis bearbeitet
+    Und der Liegenschaftsverwalter die Rechnung der Kategorie "Hauswart" zuordnet
+    Dann ist der Assistent im Schritt "Heizprofil und Verwaltungspauschale"
+
   Szenario: Keine berichtigte Abrechnung, solange eine umlagefähige Rechnung keine Kategorie hat
     Angenommen für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
     Und die Abrechnung 2024 von "Anna Keller" ist versendet

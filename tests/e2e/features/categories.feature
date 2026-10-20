@@ -188,5 +188,7 @@ Funktionalität: Kostenkategorien
     Und erklärt die Rückfrage "Kosten, die das Gesetz dem Vermieter zuweist, schuldet der Mieter auch dann nicht, wenn Sie die Kategorie umstellen."
     Und erklärt die Rückfrage "Die Wahl gilt für Rechnungen, die Sie dieser Kategorie ab jetzt zuordnen; schon erfasste bleiben nicht umlagefähig."
     Wenn der Liegenschaftsverwalter das Umstellen abbricht
-    Und der Liegenschaftsverwalter die Bearbeitung abbricht
+    # Persona Dr. Weber P-3 (#452): das Formular zeigt wieder die gespeicherte Wahl
+    Dann ist im Formular der Kategorie "Nicht umlagefähig" gewählt
+    Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist die vordefinierte Kategorie "Liegenschaftssteuer" nicht umlagefähig
