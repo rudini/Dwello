@@ -2243,7 +2243,7 @@ Branch `w3-issue-451` (worker W3). Points 1–6 and 8 of #406, consolidated in #
 - [x] Glossary «Heizrechnung», «Verbrauch (Heizmaterial)» as ordered by the product owner; `i18n-begriffe.md` «Lieferung»; requirements rule 5; API specification
 - [x] Screen state `statement-generate` / `heating-hints` (screens.json, accessibility, sprachen-bildschirme)
 - [x] fach-reviewer rounds 2, 3 (`451-fachreview-2.md`, `-3.md`); Nits V-7 rest, V-17, V-27–V-29 kept in the reports
-- [x] code-reviewer rounds 1–7 (`451-review-1.md` … `-7.md`); C-20 fixed; C-14 rejected (#507); C-18 row O-44; C-19 DOM test of the upload dialog
+- [x] code-reviewer rounds 1–8 (`451-review-1.md` … `-8.md`); C-20 fixed; round 8 checked the CI fix of the #232 test; C-14 rejected (#507); C-18 row O-44; C-19 DOM test of the upload dialog
 - [x] Personas Dr. Weber, Helga (`docs/design/personas/dr-weber-451.md`, `helga-451.md`): P-1 profile factor on the detail page fixed (existing since #71/#354); P-2/P-3 came from the test setup, no code fault; issues #507, #508, #509 opened, not implemented
 - [x] E2E: C-12, C-13 seen red without their fixes; affected features 187 passed, screen rows 34 passed (c9439466); after the last merge 193 and 84 passed (9b935d31)
 - [x] daten-pruefer (`docs/reviews/451-datenpruefung-1.md`): no finding; not confirmed for lack of data or session: tank, sum zero, beyond the period, split month, no heating costs, detail page, fr/en (covered by pg, render and DOM tests)
