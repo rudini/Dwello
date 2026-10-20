@@ -1,6 +1,7 @@
 import type { Activity } from '../screenplay/actor';
 import { Click, Navigate } from '../screenplay/interactions';
 import {
+	billedInLink,
 	buildingLink,
 	deleteButton,
 	deleteConfirm,
@@ -16,3 +17,4 @@ export const startEditingInvoice = Click.on(editButton);
 export const openBuildingOfInvoice = Click.on(buildingLink);
 export const recategorizeInvoice = Click.on(recategorizeButton);
 export const openMissedStatements = Click.on(missedStatementsLink);
+export const openStatementOfInvoice = (statementNumber: string) => Click.on(billedInLink(statementNumber));

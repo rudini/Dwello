@@ -125,3 +125,13 @@ export const agreementsLoading = target('Vereinbarte Nebenkosten werden geprüft
 export const agreementsFailed = target('Vereinbarte Nebenkosten nicht geprüft', (page) => page.getByTestId('agreements-failed'));
 export const agreementsRetry = target('Erneut versuchen', (page) => page.getByTestId('agreements-retry'));
 export const agreementsWait = target('Warten auf die Prüfung der Mietverträge', (page) => page.getByTestId('agreements-wait'));
+// #453 (#327): the note on the total, a contract «Abgerechnet bis» covers in full, and a building all of whose are
+export const previewVacancyNote = target('Notiz zum Total der Vorschau', (page) => page.getByTestId('preview-vacancy-note'));
+export const previewSkipped = (contractId: string) =>
+	target('übergangener Mietvertrag in der Vorschau', (page) => page.getByTestId(`preview-skipped-${contractId}`));
+export const previewSkippedLink = (contractId: string) =>
+	target('Link zum übergangenen Mietvertrag', (page) => previewSkipped(contractId).locate(page).getByRole('link'));
+export const previewAllSkipped = (buildingId: string) =>
+	target('Hinweis alle Mietverträge ausserhalb von Dwello abgerechnet', (page) =>
+		page.getByTestId(`preview-all-skipped-${buildingId}`)
+	);

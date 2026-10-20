@@ -162,6 +162,8 @@ describe('Abrechnungen erstellen', () => {
 				balance: -50,
 				rentalDays: 366,
 				totalPeriodDays: 366,
+				rentalStart: '2024-01-01',
+				rentalEnd: '2024-12-31',
 				movedOut: true,
 				fixedTerm: false,
 				oldAddress: false,
@@ -176,6 +178,8 @@ describe('Abrechnungen erstellen', () => {
 				balance: -50,
 				rentalDays: 366,
 				totalPeriodDays: 366,
+				rentalStart: '2024-01-01',
+				rentalEnd: '2024-12-31',
 				movedOut: false,
 				fixedTerm: false,
 				oldAddress: false,
@@ -195,7 +199,52 @@ describe('Abrechnungen erstellen', () => {
 		expect(await generateStatements(fetch, period)).toEqual(['s-einzug']);
 		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
 		expect(await billedContracts(fetch, period)).toEqual([
-			{ buildingId: 'b1', contracts: 1, billed: 0, partly: 0, withoutFee: [] }
+			{
+				buildingId: 'b1',
+				contracts: 1,
+				billed: 0,
+				partly: 0,
+				withoutFee: [],
+				skipped: [{ id: 'auszug', tenantName: 'Mieter auszug', billedUntil: '2024-03-31' }]
+			}
+		]);
+	});
+
+	// #453 (#327): the preview names a contract «Abgerechnet bis» covers in full, not only those it shortens
+	it('nennt die Mietverträge, die «Abgerechnet bis» in der Periode ganz abdeckt', async () => {
+		const inBuilding = [
+			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-03-31' },
+			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' },
+			{ ...contract('vorher', '2020-01-01', '2023-12-31'), billedUntil: '2023-12-31' }
+		];
+		const { fetch } = backend([], inBuilding);
+
+		expect((await billedContracts(fetch, period))[0].skipped).toEqual([
+			{ id: 'auszug', tenantName: 'Mieter auszug', billedUntil: '2024-03-31' }
+		]);
+	});
+
+	// fach review 453-1 V-2: billed outside Dwello beyond its end, the contract has no Mietstage left in the period
+	it('nennt einen Mietvertrag, der über sein Vertragsende hinaus ausserhalb von Dwello abgerechnet ist', async () => {
+		const { fetch } = backend([], [{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-06-30' }]);
+
+		expect((await billedContracts(fetch, period))[0].skipped).toEqual([
+			{ id: 'auszug', tenantName: 'Mieter auszug', billedUntil: '2024-06-30' }
+		]);
+	});
+
+	// #453 (#327): each row names its billed days; «Abgerechnet bis» only where it shortens them in the period
+	it('nennt in jeder Zeile die abgerechneten Tage und «Abgerechnet bis», wo es sie kürzt', async () => {
+		const inBuilding = [
+			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-02-29' },
+			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' }
+		];
+		const { fetch } = backend([], inBuilding);
+
+		const rows = await previewStatements(fetch, period);
+		expect(rows.map(({ contractId, rentalStart, rentalEnd, billedUntil }) => ({ contractId, rentalStart, rentalEnd, billedUntil }))).toEqual([
+			{ contractId: 'auszug', rentalStart: statementPreview.rentalStart, rentalEnd: statementPreview.rentalEnd, billedUntil: '2024-02-29' },
+			{ contractId: 'einzug', rentalStart: statementPreview.rentalStart, rentalEnd: statementPreview.rentalEnd, billedUntil: undefined }
 		]);
 	});
 

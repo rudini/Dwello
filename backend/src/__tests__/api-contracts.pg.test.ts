@@ -8,7 +8,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments } from '../db/schema';
+import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
@@ -126,10 +126,11 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-preview'), actual)).toEqual([]);
 	});
 
-	it('GET /invoices und /invoices/:id liefern die Felder von invoice.json', async () => {
+	it('GET /invoices und /invoices/:id liefern die Felder von invoice.json und invoice-list.json', async () => {
 		const listed = (await (await callApi(`/api/v1/invoices?buildingId=${rental.building}`)).json()) as { invoices: { id: string }[] };
 		const actual = await (await callApi(`/api/v1/invoices/${listed.invoices[0].id}`)).json();
 		expect(drift(await sample('invoice'), listed.invoices[0])).toEqual([]);
+		expect(drift(await sample('invoice-list'), listed)).toEqual([]);
 		expect(drift(await sample('invoice'), actual)).toEqual([]);
 	});
 
@@ -354,6 +355,27 @@ describe('API-Verträge des Frontends', () => {
 		const response = await callApi(`/api/v1/statements/${crypto.randomUUID()}/pdf`);
 		expect(response.status).toBe(404);
 		expect(drift(await sample('statement-pdf-refused'), await response.json())).toEqual([]);
+	});
+
+	// an unknown tenant: a refusal without a code (#453, code review C-2)
+	it('POST /contracts mit einem unbekannten Mieter liefert die Felder von contract-tenant-refused.json', async () => {
+		const [contract] = await db.select().from(rentalContracts).where(eq(rentalContracts.id, rental.contract));
+		const response = await sendJson('POST', '/api/v1/contracts', {
+			tenantId: crypto.randomUUID(),
+			apartmentId: contract.apartmentId,
+			startDate: '2030-01-01',
+			baseRent: '900',
+			monthlyAdvancePayment: '0'
+		});
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-tenant-refused'), await response.json())).toEqual([]);
+	});
+
+	// #453 (#337): «Abgerechnet bis» before the Vertragsbeginn 01.01.2024
+	it('PUT /contracts/:id mit «Abgerechnet bis» vor dem Vertragsbeginn liefert die Felder von contract-billed-until-refused.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { billedUntil: '2023-12-31' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-billed-until-refused'), await response.json())).toEqual([]);
 	});
 
 	// the 2024 statement already bills the days after 31.03.2024

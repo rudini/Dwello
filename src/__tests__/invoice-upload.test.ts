@@ -4,6 +4,7 @@ import {
 	fileRefusal,
 	invoiceOf,
 	newRow,
+	proposeKey,
 	toDoOf,
 	withoutKi,
 	withProposal,
@@ -43,10 +44,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(row.status).toBe('check');
 		expect(row.unsure).toEqual(['invoiceDate']);
 		expect(row.selected).toBe(true);
-		expect(said(row)).toEqual([
-			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Vorgeschlagen ist das Total vor dem Abzug. Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist.',
-			'Prüfen Sie: Rechnungsdatum.'
-		]);
+		expect(said(row)).toEqual(['Prüfen Sie: Rechnungsdatum.']);
 	});
 
 	it('wählt eine schon erfasste Rechnung und eine Datei mit mehreren Rechnungen nicht zum Erstellen', () => {
@@ -55,8 +53,7 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(several).toMatchObject({ selected: false, several: true });
 		// nothing to check or fill in on a file no invoice is created from (persona Anna)
 		expect(said(several)).toEqual([
-			'Diese Datei enthält mehrere Rechnungen. Laden Sie jede Rechnung als eigene Datei hoch, oder erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an.',
-			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Vorgeschlagen ist das Total vor dem Abzug. Haben Sie die Akontorechnungen schon erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen». Sind ihre Dateien hier ausgewählt, entfernen Sie diese mit «Datei entfernen». Sonst zählen sie doppelt. Ist eine davon schon abgerechnet, löschen Sie sie nicht, sondern ziehen Sie ihren Betrag vom Total ab und lassen Sie den Leistungszeitraum erst nach der Abrechnungsperiode beginnen, in der sie abgerechnet ist.'
+			'Diese Datei enthält mehrere Rechnungen. Laden Sie jede Rechnung als eigene Datei hoch, oder erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an.'
 		]);
 	});
 
@@ -87,6 +84,40 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(said(row).join(' ')).toContain('nicht umlagefähig sind');
 		row.values.isValidUtilityCost = false; // «Reparaturen» chosen
 		expect(said(row).join(' ')).not.toContain('nicht umlagefähig sind');
+	});
+
+	// #455 (#268): eine kurze Zeile mit dem abgezogenen und dem vorgeschlagenen Betrag; die Regel steht als Hilfetext darunter
+	it('nennt abgezogene Akontorechnungen in einer eigenen kurzen Zeile mit dem vorgeschlagenen Total', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null }));
+		expect(row.deducted).toBe(
+			'Auf der Rechnung sind Akontorechnungen von CHF\u00a01’000.00 abgezogen. Als Betrag ist das Total vor dem Abzug vorgeschlagen: CHF\u00a01’250.00.'
+		);
+		expect(withProposal(newRow(2, pdf, defaults), proposal({ deductedAmount: null })).deducted).toBeNull();
+		// without a total read there is nothing proposed to name (domain review 455 V-5)
+		const fields = { ...extraction.fields, amount: null };
+		expect(withProposal(newRow(3, pdf, defaults), proposal({ duplicateOf: null, fields })).deducted).toBe(
+			'Auf der Rechnung sind Akontorechnungen von CHF 1’000.00 abgezogen. Tragen Sie als Betrag das Total vor dem Abzug ein.'
+		);
+	});
+
+	// #455 (#262): eine Akontorechnung zählt sonst mit der Schlussrechnung doppelt (Art. 257b Abs. 1 OR)
+	it('wählt eine Akontorechnung nicht zum Erstellen und sagt, wann sie zu erfassen ist', () => {
+		const row = withProposal(
+			newRow(1, pdf, defaults),
+			proposal({ duplicateOf: null, documentType: 'advance_invoice', deductedAmount: null, categorization: null })
+		);
+		expect(row.selected).toBe(false);
+		expect(said(row)).toEqual([
+			'Das ist eine Akontorechnung: ein Vorschuss, den der Rechnungssteller später mit der Schlussrechnung abrechnet. Erfassen Sie in der Regel nur die Schlussrechnung mit dem Total. Kommt die Schlussrechnung erst nach der Abrechnung dieser Periode, setzen Sie das Häkchen bei «Diese Rechnung erstellen» und erfassen Sie die Akontorechnung; löschen Sie sie, wenn Sie die Schlussrechnung erfassen.'
+		]);
+	});
+
+	it('nennt bei einer ausgewählten Akontorechnung, was zum Erstellen fehlt', () => {
+		const row = withProposal(
+			newRow(1, pdf, defaults),
+			proposal({ duplicateOf: null, documentType: 'advance_invoice', deductedAmount: null, categorization: null })
+		);
+		expect(toDoOf({ ...row, selected: true })).toContain('Wählen Sie eine Kategorie.');
 	});
 
 	it('sagt bei einer Gutschrift, dass keine Rechnung daraus entsteht und wo sie abgezogen wird', () => {
@@ -187,6 +218,24 @@ describe('Vorschlag der KI für eine Datei', () => {
 		const row = withoutKi(newRow(1, pdf, defaults), 'unavailable');
 		expect(row).toMatchObject({ status: 'check', selected: true, notes: ['Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus.'] });
 		expect(row.values.billingEntity).toBe('');
+	});
+});
+
+// #455 (#268): the key of the building's invoices of the Kategorie, as long as the property manager has not chosen one
+describe('Verteilschlüssel einer Datei', () => {
+	it('schlägt den Verteilschlüssel der Rechnungen derselben Kategorie vor', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null }));
+		expect(proposeKey(row, 'k2').values.distributionKeyId).toBe('k2');
+		// none recorded in the Kategorie: the key stays
+		expect(proposeKey(row, null).values.distributionKeyId).toBe('k1');
+	});
+
+	it('lässt einen Verteilschlüssel, den der Liegenschaftsverwalter selbst gewählt hat', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null }));
+		const chosen = { ...row, values: { ...row.values, distributionKeyId: 'k3' } };
+		expect(proposeKey(chosen, 'k2').values.distributionKeyId).toBe('k3');
+		// a key proposed before is no choice of his: the next Kategorie proposes its own
+		expect(proposeKey(proposeKey(row, 'k2'), 'k4').values.distributionKeyId).toBe('k4');
 	});
 });
 

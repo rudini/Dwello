@@ -14,7 +14,9 @@
 				...toDoOf(row),
 				errors.category,
 				Object.keys(errors).some((field) => field !== 'category') && m.invoices_upload_fields_missing(),
-				row.createError
+				row.createError,
+				// after what is to do, so the long rule below does not push it down (#455, persona Marco of #222)
+				row.deducted
 			].filter((text) => !!text) as string[]
 		)
 	]);
@@ -25,6 +27,11 @@
 	<div data-testid="invoice-upload-row-message">
 		<Alert {tone} title={m.invoices_upload_notes_title({ name: row.file.name })}>
 			{#each messages as message (message)}<p>{message}</p>{/each}
+			{#if row.deducted}
+				<p class="text-ink-muted" data-testid="invoice-upload-deducted-rule">
+					{m.invoices_upload_deducted_rule()}
+				</p>
+			{/if}
 			{#if row.duplicateOf}
 				<p>
 					<a class="font-semibold text-accent-strong underline" href="/invoices/{row.duplicateOf}"

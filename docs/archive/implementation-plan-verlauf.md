@@ -2066,6 +2066,24 @@ Branch `w6-issue-458`, worker W6 of a coordinated run (the checklist was kept in
 - [x] fach-reviewer round 2 (`docs/reviews/458-fachreview-2.md`): links, when and how, export, Art. 9 DSG on /terms (b6006970), tests and a navigation scenario seen red
 - [x] Closing code-reviewer rounds (`docs/reviews/458-review-2.md`, after the date fix R-12 and the merge with #479 `458-review-3.md`: no finding)
 - [x] Affected E2E (chromium) green; PR `Fixes #458`, `Fixes #330`, `Fixes #333`
+## Session W1: «Abgerechnet bis» lines, preview, wizard field, refusals (#453, #325, #480) (2026-10-19)
+
+Branch `w1-issue-453`, worker W1 of a parallel run; the checklist lived in the pull request (one session per plan, another worker's open session in `implementation_plan.md`, coordinator's consent) and comes here at the end.
+
+- [x] @wip scenarios in `statement-generate`, `statement-detail`, `contract-new`, `contract-edit.feature`, seen red at the missing behaviour (one passes on the base: no field for a future start)
+- [x] fach-reviewer before implementing (`docs/reviews/453-fachreview-1.md`: V-1 Major fixed; V-3 became #480)
+- [x] Backend refusals `BILLED_UNTIL_FUTURE`, `BILLED_UNTIL_BEFORE_START` (create, update, stored value kept), PDF tenancy line, Akonto line «Akontobeiträge ab» (#477), page 2 texts
+- [x] Preview: days and Akonto per row, «Abgerechnet bis» line, skipped contracts with link, own text per building, total note
+- [x] Wizard: field in «Vertragsdauer» for a start before today, warning points to it, check step row, refusals at the field in wizard and edit form
+- [x] Messages in four languages, `glossary_days_text`; a11y states `billed-until-refused`, `preview-skipped`
+- [x] #480 (decided, glossary edit ordered by the product owner): glossary row and help text
+- [x] Reviews: code-reviewer rounds 1 to 3 (`docs/reviews/453-review-1..3.md`), personas Dr. Weber and Helga (`docs/design/personas/weber-453.md`, `helga-453.md`), daten-pruefer (`docs/reviews/453-datenpruefung-1.md`), native reads (`docs/reviews/453-native-fr/it/en.md`)
+- [x] Found: #499 (dead end after «Abgerechnet bis» over a billed statement, decided option 1), #500 («Wohnung EG, EG»)
+- [x] Merge of `origin/main` with #464, conflicts resolved
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-453.md`
+- [x] PR `Fixes #453`, `Fixes #325`, `Fixes #480`
+
+Files: `backend/src/services/{contract,pdf}.service.ts`, `backend/src/routes/contracts.ts`, `src/lib/{contract-form,contract-wizard,statement-wizard}.ts`, `src/lib/server/statement-generation.ts`, `src/routes/contracts/{ContractForm.svelte,new/ContractWizard.svelte,new/PeriodStep.svelte}`, `src/routes/statements/generate/` (`+page.server.ts`, `PreviewStep`, `PreviewSkipped`, `PreviewEmpty`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, tests and E2E files.
 ## Session W10: fr/it/en words of #405 (#461, with #501) (2026-10-19)
 
 Branch `w10-issue-461`, worker W10 of a coordinated run (checklist also in the pull request; Session C1 of another branch stays in the plan, coordinator's rule).
@@ -2157,3 +2175,22 @@ Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20:
 
 - [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
 - [x] PR `Fixes #488`
+
+## Session W9b: Akontorechnungen, «In Abrechnungen enthalten», upload bugs of #268 (2026-10-19 to 2026-10-20)
+
+Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of #222 (#245), #481, #482, #483; product owner decisions via the coordinator during the task, recorded in #455 «Decided (product owner)» (V-1, V-2, «Manuell», Verteilschlüssel; option C after domain review 455-3; the delete text of 2026-10-20). The list section of the list pages moved out first (PR #494, session W9a).
+
+- [x] `@wip` scenarios (invoices, invoice-detail, invoice-edit, invoice-new), red on the base build (11 at the missing behaviour; «Eine ausgewählte Akontorechnung erstellen» passes on the base, which reads an advance invoice as a plain invoice)
+- [x] Domain review round 1 (`docs/reviews/455-fachreview-1.md`): V-1, V-2 decided by the product owner; V-3, V-6, V-8 became #481, #482, #483, decided; V-4, V-5, V-7, V-9, V-11 (en) fixed; V-10 kept
+- [x] Prompt: document type `advance_invoice` (glossary words, an instalment invoice is none); `llm:eval` (qwen/qwen3-vl-8b-instruct via OpenRouter) 45/47 before and after
+- [x] Upload: Akontorechnung not preselected, its hint, to-dos once ticked; deducted line with the proposed total (and without one), the rule as help after the to-dos; key of the building's newest invoice with a key in the Kategorie, unless the landlord chose one
+- [x] Invoice page and «Rechnung bearbeiten»: hint at the Betrag (`DeductedHint`), not in the Beleg card; «In Abrechnungen enthalten» with number and status, linked (backend `statements`, contract, API spec); en «in a statement»; help on the Leistungszeitraum over several years
+- [x] Bugs of #268, each with a test red first: own file button (`FileInput`), Escape in a select, empty paragraph under a date field, «Rechnungen hochladen» as a link to `?upload`; «Manuell kategorisiert» kept (product owner: not a bug)
+- [x] Code review round 1 (`docs/reviews/455-review-1.md`): C-1, C-2, C-4 to C-7 fixed; C-3 kept (Escape in a closed select no longer closes a dialog)
+- [x] Domain review round 2 (`docs/reviews/455-fachreview-2.md`): V-12, V-13, V-14, V-15 fixed; V-16 scenario added; V-4 kept (no extraction cases in `llm:eval`)
+- [x] Personas round 1: Dr. Weber (`docs/design/personas/weber-455.md`, P-1 Major), Marco (`docs/design/personas/marco-455.md`, Minors kept)
+- [x] Domain review round 3 (`docs/reviews/455-fachreview-3.md`): option C decided; texts, glossary rows «Akontorechnung», «Schlussrechnung», delete text; scenarios red on e3cb329e first
+- [x] Code review round 2 (`docs/reviews/455-review-2.md`, no new findings); closing round 3 (`docs/reviews/455-review-3.md`: C-8 Major, a scenario step for the delete text; C-9) and re-check 4 (`docs/reviews/455-review-4.md`, clean); Dr. Weber round 2 (`docs/design/personas/weber-455-2.md`: P-1 to P-4 done, P-6/P-7 fixed by the delete text of 2026-10-20, P-5 kept)
+- [x] PR `Fixes #455`, `Fixes #481`, `Fixes #482`, `Fixes #483`, `Refs #245`
+
+Files: `backend/src/config/llm.ts`, `backend/src/services/statement-invoices.service.ts`, `backend/scripts/llm-stub.ts`, `src/lib/invoice-upload.ts`, `src/lib/server/invoice.ts`, `src/lib/types.ts`, `src/lib/ui/{FileInput,Dialog,DateInput,Button}.svelte`, `src/routes/invoices/` (`+page.svelte`, `DeductedHint`, `InvoiceDataFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadFiles`, `UploadRowNotes`, `[id]/{+page,InvoiceFacts,InvoiceBeleg}.svelte`, `[id]/edit/+page.svelte`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `tests/contracts/{invoice-statements,invoice-list}.json`, tests and E2E layers.

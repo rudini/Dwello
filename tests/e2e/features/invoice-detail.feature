@@ -125,3 +125,32 @@ Funktionalität: Rechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Wenn der Liegenschaftsverwalter die Rechnung löschen will
     Dann rät die Bestätigung zum Löschen der Rechnung "Laden Sie den Beleg vorher herunter, wenn Sie ihn für die Belegeinsicht brauchen."
+    Und sagt die Bestätigung zum Löschen einer abgerechneten Rechnung "Löschen Sie nur falsch erfasste Rechnungen oder Akontorechnungen, an deren Stelle eine Schlussrechnung tritt. Ersetzt eine Schlussrechnung diese Akontorechnung, erfassen Sie zuerst die Schlussrechnung. Die Entwürfe enthalten diese Rechnung weiter"
+
+  # #455 (#268): der Hinweis steht beim Betrag, nicht beim Beleg; die Regel als Hilfetext darunter
+  Szenario: Abgezogene Akontorechnungen beim Betrag
+    Angenommen "Werke Luzern" stellt dem Gebäude "Seeblick" "1250.00" Franken für "Allgemeinstrom Q1" in der Kategorie "Allgemeinstrom" in Rechnung, auf dem Beleg sind Akontorechnungen von "1000.00" Franken abgezogen
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Werke Luzern"
+    Dann steht beim Betrag der Rechnung "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug."
+    Und erklärt der Hinweis beim Betrag der Rechnung "Prüfen Sie, dass die Akontorechnungen nicht zusätzlich erfasst sind. Ist eine noch erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet ist, und führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». Der Leistungszeitraum ist der auf dem Beleg."
+
+  # #455 (#263): abgerechnet heisst in einer Nebenkostenabrechnung enthalten, gleich welchen Status sie hat
+  Szenario: Die Rechnung nennt die Abrechnungen, in denen sie enthalten ist
+    Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Dann nennt die Rechnung als enthalten in die Abrechnung des laufenden Jahres von "Anna Keller" im Status "Entwurf"
+
+  Szenario: Eine Rechnung, die in keiner Abrechnung enthalten ist
+    Dann nennt die Rechnung als enthalten in "Keine"
+
+  Szenario: Von der Rechnung zur Abrechnung, in der sie enthalten ist
+    Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Wenn der Liegenschaftsverwalter die Abrechnung des laufenden Jahres von "Anna Keller" öffnet, in der die Rechnung enthalten ist
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung des laufenden Jahres von "Anna Keller"

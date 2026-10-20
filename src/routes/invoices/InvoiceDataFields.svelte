@@ -8,6 +8,7 @@
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import { fieldNote } from '$lib/invoice-upload';
+	import DeductedHint from './DeductedHint.svelte';
 
 	// What the invoice says: building, date, amount, supplier and service; shared by "Neue Rechnung" and "Rechnung bearbeiten"
 	let {
@@ -24,7 +25,8 @@
 		onblur,
 		idPrefix = '',
 		chooseBuilding = true,
-		read = { unsure: [], missing: [] }
+		read = { unsure: [], missing: [] },
+		deducted
 	}: {
 		buildingId: string;
 		invoiceDate: string;
@@ -40,6 +42,7 @@
 		idPrefix?: string; // several invoices on one page (the upload dialog) need their own ids
 		chooseBuilding?: boolean; // false where the building is chosen once for all (the upload dialog)
 		read?: { unsure: string[]; missing: string[] }; // fields the KI read without being sure, or did not find
+		deducted?: string | null; // Akontorechnungen deducted on the saved Beleg, said at the Betrag (#455)
 	} = $props();
 
 	// the year of the date fields' examples (DateInput), so the help names one year (#250)
@@ -126,6 +129,7 @@
 	note={fieldNote(read, 'amount')}
 	testid="invoice-amount-input"
 />
+{#if deducted}<DeductedHint amount={deducted} />{/if}
 
 <TextInput
 	id="{idPrefix}billingEntity"

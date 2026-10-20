@@ -23,6 +23,7 @@ const empty: ContractFormValues = {
 	startDate: '',
 	endDate: '',
 	isUnlimited: true,
+	billedUntil: '',
 	baseRent: '',
 	additionalRent: '',
 	advancePayment: '',
