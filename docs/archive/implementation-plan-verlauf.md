@@ -2003,6 +2003,13 @@ Branch `ccr-3dfff432-ljcit4`. Product owner: after the review against «Getting 
 
 Files: `.claude/agents/code-reviewer.md`, `docs/reviews/nits-review-1.md`.
 
+## Session C1: E2E in every browser on pull requests
+
+Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.
+
+- [x] `ci.yml`: E2E on pull requests with Chromium, Firefox, WebKit and `api` (60 min, as `main`); the axe check stays Chromium; `docs/test-pyramid.md`, `tests/e2e/CLAUDE.md`
+- [x] Slice review (`docs/reviews/ci-browsers-review-1.md`): C-1 `docs/tech-stack.md` fixed; C-2 (the axe shards get 60 min on pull requests too) kept, harmless
+- [x] PR (#473, merged): the first pull request with every browser shows the time it takes; its first run found a Firefox failure in «Suche ohne Treffer», cause not found (O-41)
 ## Session I2: open issues, one after another, continued (2026-10-19)
 
 Branch `ccr-6c5f45f8-br8wl9`. Product owner: «Weiter mit issues» after Session I1. No open bug; #470 waits for a decision.
@@ -2049,3 +2056,50 @@ Worker W5 of ten in parallel: the checklist ran in the pull request, the session
 - [x] O-34 closed: lock on the global settings (`tests/e2e/fixtures/settings-lock.ts`), seen red without it (3 of 8) and green with it (24 of 24)
 - [x] Closing code-review round 4 (`docs/reviews/450-review-4.md`: no finding)
 - [x] PR `Fixes #450`, `Fixes #490`
+## Session G1: Gebäude mit allen Wohnungen aus dem Gebäuderegister (#479)
+
+Branch `claude/nifty-tesla-gmus4a`. «Setze #479 um»: address search through the BFF against geo.admin.ch (GWR) instead of OpenPLZ; a preview of the register's Wohnungen; Gebäude and Wohnungen created in one transaction.
+
+- [x] Scenarios in `building-new.feature` (17), `privacy.feature`; GWR stand-in `backend/scripts/gwr-stub.ts` (2529)
+- [x] fach-reviewer round 1 (`docs/reviews/479-fachreview-1.md`), product owner answers in #479 (V-1, V-2, V-3, V-10); round 2 (`docs/reviews/479-fachreview-2.md`); glossary issue #488
+- [x] Backend: `POST /buildings` with `apartments[]` in one transaction (`building.routes.pg.test.ts`; response unchanged, no contract change)
+- [x] BFF: `/api/addresses`, `/api/addresses/[egid]`, `src/lib/server/building-register.ts`, `parseRegisterApartments` (unit tests)
+- [x] UI: `AddressSearch.svelte`, `RegisterApartments.svelte`, `BuildingForm.svelte` (hints, preview); `Select` takes a `note`; OpenPLZ removed
+- [x] Privacy statement, texts in four languages, docs (`tech-stack.md`, `PRD-Dwello.md`, `api-specification.md`, U-23 P-7/P-8)
+- [x] a11y and language screens: `building-new` states `register-preview`, `register-submit-missing`, `register-no-apartments`, `register-no-hit`, `register-unreachable`
+- [x] Code review round 1 (`docs/reviews/479-review-1.md`): C-1 contract `building-apartment-number-taken.json` and BFF test (kept behaviour), C-2 = V-15, C-3 proposals of a second address, C-5 coordinates removed; C-4 kept (no test for a failing `/api/addresses/<egid>`)
+- [x] fach-reviewer round 3 (`docs/reviews/479-fachreview-3.md`): V-15 numbers checked (comma, > 0, half rooms), V-16 apartment form keeps values outside its choices, V-17, V-18 (`i18n-begriffe.md`), V-19
+- [x] Persona round 1 (`docs/design/personas/{helga,marco,weber,sven,anna}-479.md`): the persona server could not reach geo.admin.ch (Node `fetch` ignores `HTTPS_PROXY`): `persona-stack.sh` starts with `NODE_USE_ENV_PROXY=1`, O-42; Sven P-1 hints announced (live region), P-3 clearing the search; P-2 existing before (O-43)
+- [x] Persona round 2 (same reports, «Runde 2»): every task done; fixed: focus after a refused save behind the skip link (Sven P-2, made more visible by the Wohnungen; `focus-error.ts`, scenario), unit m² at «Fläche» (five personas), Wohnungen ordered by floor and number (Marco P-2, Weber P-12); rejected: saving an address already entered (Anna P-5, Helga P-9: decided in #479)
+- [x] Workflow note `docs/reviews/workflow-notes-issue-479.md`
+- [x] Closing review round 2 (`docs/reviews/479-review-2.md`): no Blocker/Major; C-4, C-6 to C-9 Minor, kept (C-9: the test «behält, was der Liegenschaftsverwalter selbst eingetragen hat» pins kept behaviour)
+- [x] PR `Fixes #479` (the pull request that archives this session)
+
+Files: `backend/scripts/gwr-stub.ts`, `backend/src/routes/{buildings,apartments}.ts`, `backend/src/services/building.service.ts`, `src/lib/server/{building-register,building-form}.ts`, `src/routes/api/addresses/`, `src/routes/buildings/{AddressSearch,BuildingForm,RegisterApartments,RegisterNotices}.svelte`, `src/lib/{apartment.ts,ui/Select.svelte,ui/focus-error.ts}`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `tests/e2e/…`, `tests/contracts/building-apartment-number-taken.json`, docs.
+## Session C1: E2E in every browser on pull requests
+
+Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.
+
+- [x] `ci.yml`: E2E on pull requests with Chromium, Firefox, WebKit and `api` (60 min, as `main`); the axe check stays Chromium; `docs/test-pyramid.md`, `tests/e2e/CLAUDE.md`
+- [x] Slice review (`docs/reviews/ci-browsers-review-1.md`): C-1 `docs/tech-stack.md` fixed; C-2 (the axe shards get 60 min on pull requests too) kept, harmless
+- [x] PR (#473, merged): the first pull request with every browser shows the time it takes; its first run found a Firefox failure in «Suche ohne Treffer», cause not found (O-41)
+
+## Session C2: less CI per change, run 634 (2026-10-19)
+
+Branch `ccr-3510fafb-cx2ywk`. Product owner 2026-10-19: proposals A, C, D and the cause of the red run 634 on `main`. Merge queues exist only for organisations (Session C1), so the pull request stays the full check. No scenario: CI only.
+
+- [x] A: pushes to `main` run build, lint, unit tests and fallow only; the full run (every browser, axe) runs nightly and on `workflow_dispatch`; `main` has no branch protection yet (API 2026-10-19): the product owner turns it on with «Require branches to be up to date»
+- [x] C: the axe check in 3 shards instead of 5
+- [x] D: skill `pull-request`: reports, plan and archive are committed before the first push
+- [x] Run 634: `gh api` answered HTTP 502 in the job "Accessibility (axe)" of `e2e-results`, and `fail-fast` cancelled "E2E tests"; retry and no fail-fast (simulated with a `gh` that answers 502 once: old step exit 1, new exit 0; always 502: exit 1)
+- [x] `docs/test-pyramid.md`, `docs/tech-stack.md`; files: `.github/workflows/ci.yml`, `.claude/skills/pull-request/SKILL.md`
+- [x] Slice review (`docs/reviews/c2-review-1.md`): C-1 (Minor, plan said fallow does not run on push) fixed
+- [x] Workflow note (`docs/reviews/workflow-notes-ci-less-runs.md`)
+- [x] PR: pushed after this archive
+
+## Session G2: Glossar «Gebäuderegister» (#488)
+
+Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20: the proposal of #488 as it stands, entered by this session. No scenario: glossary only.
+
+- [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
+- [x] PR `Fixes #488`

@@ -2,6 +2,7 @@
   "name": "dwello-backend",
   "version": "0.1.0",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "description": "Dwello Backend API - ElysiaJS",
   "type": "module",
   "scripts": {
@@ -22,6 +23,7 @@
     "db:studio": "drizzle-kit studio",
     "mail-catcher": "bun scripts/mail-catcher.ts",
     "llm-stub": "bun scripts/llm-stub.ts",
+    "gwr-stub": "bun scripts/gwr-stub.ts",
     "llm:eval": "bun scripts/llm-eval.ts",
     "e2e-db": "bun scripts/e2e-db.ts",
     "e2e-purge-statements": "bun scripts/e2e-purge-statements.ts"

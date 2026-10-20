@@ -414,6 +414,20 @@ describe('API-Verträge des Frontends', () => {
 	});
 
 	// the 2024 statement bills its rent days: confirmed or not, it stays (#116)
+	it('POST /buildings mit einer Wohnungsnummer zweimal liefert die Felder von building-apartment-number-taken.json', async () => {
+		const apartment = { number: '101', floor: 1, area: '70', rooms: '3' };
+		const response = await sendJson('POST', '/api/v1/buildings', {
+			name: `Vertrag ${crypto.randomUUID()}`,
+			address: 'Lindenweg 155',
+			postalCode: '8400',
+			city: 'Winterthur',
+			canton: 'ZH',
+			apartments: [apartment, apartment]
+		});
+		expect(response.status).toBe(409);
+		expect(drift(await sample('building-apartment-number-taken'), await response.json())).toEqual([]);
+	});
+
 	it('DELETE /contracts/:id eines Mietvertrags mit Abrechnung liefert die Felder von contract-delete-refused.json', async () => {
 		const response = await callApi(`/api/v1/contracts/${rental.contract}?confirmMistake=true`, { method: 'DELETE' });
 		expect(response.status).toBe(409);
