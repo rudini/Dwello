@@ -51,8 +51,12 @@
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
 		"preview-skipped": "Statement wizard preview of 2014 with a building whose only contract is billed outside Dwello up to 31.12.2014 («Abgerechnet bis»): the text that all its contracts are billed outside Dwello and the line with the link to the contract (#453).",
+		"billed-until-statement": "Contract form with «Abgerechnet bis» over the paid Dwello statement 2024 of the seeded contract: the refusal at the field, without the way through a correction (#499).",
 		"billed-until-refused": "Contract form with «Abgerechnet bis» after today: the refusal at the field; in the wizard «Neuer Mietvertrag» at step «Vertragsdauer» with a Vertragsbeginn in the past, whose warning points to the field (#453).",
 		"category-check": "Statement wizard preview whose check per category reports invoices missing against the year before.",
+		"uncategorized-invoices": "Statement wizard preview of 2015 with an allocable invoice without Kategorie: the hint that holds the run, with the invoice's edit link (#382, #452).",
+		"allocability-confirm": "Edit form of a category with allocable invoices, saved as not allocable: the question that names how many invoices it takes out (#309, #452).",
+		"allocable-confirm": "Edit form of a predefined category that is not allocable, saved as allocable: the question that names the law (#309, #452).",
 		"invoice-hints": "Statement wizard preview of a period under a year (January to May): the invoices without Leistungszeitraum that count in full, and one dated shortly after the period end, each with its edit link (#131, #134).",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
 		"preview-all-billed": "Statement wizard preview of a period in which every contract already has a statement: how to recalculate and the links to the statements.",
@@ -355,7 +359,8 @@
 				"flat-rate-warning",
 				"flat-rate-warning-advance",
 				"agreed-costs-none-advance",
-				"billed-until-refused"
+				"billed-until-refused",
+				"billed-until-statement"
 			]
 		},
 		{
@@ -430,6 +435,13 @@
 			]
 		},
 		{
+			"name": "invoice-edit-keyless",
+			"path": "/invoices/{keylessInvoice}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "invoice-billed-detail",
 			"path": "/invoices/{billedInvoice}",
 			"states": [
@@ -487,6 +499,7 @@
 				"preview-empty",
 				"category-check",
 				"invoice-hints",
+				"uncategorized-invoices",
 				"period-not-over",
 				"tank-question",
 				"old-address-preview",
@@ -717,7 +730,16 @@
 			"name": "category-edit-predefined",
 			"path": "/config/categories/{predefinedCategory}/edit",
 			"states": [
-				"default"
+				"default",
+				"allocable-confirm"
+			]
+		},
+		{
+			"name": "category-edit-used",
+			"path": "/config/categories/{usedCategory}/edit",
+			"states": [
+				"default",
+				"allocability-confirm"
 			]
 		},
 		{

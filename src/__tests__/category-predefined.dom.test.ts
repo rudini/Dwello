@@ -42,6 +42,27 @@ describe('Vordefinierte und eigene Kategorien', () => {
 		expect(pageText()).toContain(PREDEFINED_HELP);
 	});
 
+	// #452 Punkt 1 (#302): «Heizkosten» entscheidet, wie Dwello beim Mieterwechsel verteilt
+	it('sperrt «Heizkosten» bei einer vordefinierten Kategorie und sagt warum', () => {
+		show(CategoryForm, { category: { ...seeded, isHeatingCost: true }, submitLabel: 'Speichern' });
+		const heating = byTestId<HTMLInputElement>('category-heating-checkbox')!;
+
+		expect(heating.disabled).toBe(true);
+		expect(heating.checked).toBe(true);
+		expect(byTestId('category-heating-checkbox-help')?.textContent).toBe(
+			'Dwello hat dieses Häkchen bei seinen Kategorien voreingestellt und es lässt sich nicht ändern: Heizung und Kaminfeger verteilt Dwello beim Mieterwechsel nach dem Heizprofil, alle anderen Kategorien nach Tagen. Brauchen Sie eine andere Verteilung, erfassen Sie eine eigene Kategorie.'
+		);
+	});
+
+	it('lässt «Heizkosten» bei einer eigenen Kategorie ändern', () => {
+		show(CategoryForm, { category: own, submitLabel: 'Speichern' });
+
+		expect(byTestId<HTMLInputElement>('category-heating-checkbox')!.disabled).toBe(false);
+		expect(byTestId('category-heating-checkbox-help')?.textContent).toContain(
+			'Zum Beispiel Heizöl'
+		);
+	});
+
 	// Die Beschreibung nennt, was nicht dazugehört («ohne …», #204); ein einzeiliges Feld schnitt das auf dem Telefon ab
 	it('zeigt die Beschreibung in einem mehrzeiligen Feld', () => {
 		show(CategoryForm, { category: seeded, submitLabel: 'Speichern' });
@@ -116,7 +137,7 @@ describe('Kennzeichnung und Schutz vordefinierter Kategorien', () => {
 		} as never);
 
 		expect(hint()).toContain(
-			'Wählen Sie «Umlagefähig», schuldet der Mieter Kosten, die das Gesetz dem Vermieter zuweist, trotzdem nicht. Die Wahl gilt nur für neue Rechnungen; schon erfasste bleiben nicht umlagefähig.'
+			'Wählen Sie «Umlagefähig», schuldet der Mieter Kosten, die das Gesetz dem Vermieter zuweist, trotzdem nicht. Die Wahl gilt für Rechnungen, die Sie dieser Kategorie ab jetzt zuordnen; schon erfasste bleiben nicht umlagefähig.'
 		);
 		expect(hint()).not.toContain('Stellen Sie die Kategorie auf nicht umlagefähig');
 	});

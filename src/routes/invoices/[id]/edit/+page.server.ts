@@ -1,11 +1,12 @@
 import { m } from '$lib/paraglide/messages';
+import { localPath } from '$lib/invoice';
 import { invoiceChoices, statementPeriods, tankCategories, toInvoice } from '$lib/server/invoice';
 import { fetchRecord } from '$lib/server/save-form';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, url, fetch }) => {
 	const [invoice, buildingsData, choices] = await Promise.all([
 		fetchRecord(fetch, `${BACKEND_URL}/api/v1/invoices/${params.id}`, m.invoices_record()),
 		fetch(`${BACKEND_URL}/api/v1/buildings?limit=1000`).then((r) => r.json()),
@@ -25,6 +26,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		...(await statementPeriods(fetch, BACKEND_URL, params.id)),
 		buildings,
 		tanks: await tankCategories(fetch, buildings.map((b: { id: string }) => b.id)),
-		...choices
+		...choices,
+		returnTo: localPath(url.searchParams.get('returnTo'))
 	};
 };

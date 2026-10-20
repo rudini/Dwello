@@ -103,7 +103,11 @@ describe('Rechnungen in der gewählten Sprache', () => {
 
 	it('nennt die ursprüngliche Kategorie der KI beim Bearbeiten auf Französisch', async () => {
 		overwriteGetLocale(() => 'fr');
-		const data = (await editLoad({ params: { id: 'i1' }, fetch: backend(answers) } as never)) as {
+		const data = (await editLoad({
+			params: { id: 'i1' },
+			url: new URL('http://localhost/invoices/i1/edit'),
+			fetch: backend(answers)
+		} as never)) as {
 			invoice: { llmCategory: { name: string } };
 		};
 		expect(data.invoice.llmCategory.name).toBe('Concierge');

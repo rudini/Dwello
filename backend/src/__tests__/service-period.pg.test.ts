@@ -12,7 +12,7 @@ import { getHeatingProfileByName } from '../services/heating-profile.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { calculateStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
-import { insertInvoice } from './helpers/records';
+import { insertInvoice, perAreaKey } from './helpers/records';
 import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
@@ -131,6 +131,7 @@ describe('Leistungszeitraum einer Heizkostenrechnung in einer Periode ohne Heiza
 	});
 });
 
+const key = await perAreaKey();
 describe('Leistungszeitraum über die API', () => {
 	const post = (period: object) =>
 		sendJson('POST', '/api/v1/invoices?skipLlm=true', {
@@ -139,6 +140,7 @@ describe('Leistungszeitraum über die API', () => {
 			description: 'Hauswartung Q4',
 			amount: '900.00',
 			invoiceDate: '2025-01-15',
+			distributionKeyId: key,
 			...period
 		});
 

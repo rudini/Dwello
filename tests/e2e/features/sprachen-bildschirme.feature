@@ -113,6 +113,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit          | flat-rate-warning-advance |
       | contract-edit          | agreed-costs-none-advance |
       | contract-edit          | billed-until-refused |
+      | contract-edit          | billed-until-statement |
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |
@@ -136,6 +137,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | invoice-detail         | delete-dialog       |
       | invoice-edit           | default             |
       | invoice-edit           | submit-cleared      |
+      | invoice-edit-keyless   | default             |
       | invoice-billed-detail  | default             |
       | invoice-billed-detail  | delete-dialog       |
       | invoice-billed-edit    | default             |
@@ -152,6 +154,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | preview-empty       |
       | statement-generate     | category-check      |
       | statement-generate     | invoice-hints       |
+      | statement-generate     | uncategorized-invoices |
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
       | statement-generate     | old-address-preview |
@@ -221,6 +224,9 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | category-edit          | submit-cleared      |
       | category-edit          | saved-toast         |
       | category-edit-predefined | default           |
+      | category-edit-predefined | allocable-confirm |
+      | category-edit-used     | default             |
+      | category-edit-used     | allocability-confirm |
       | category-edit-fuel     | default             |
       | category-edit-fuel     | fuel-refused        |
       | categories             | delete-dialog       |

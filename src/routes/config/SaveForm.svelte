@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
 	import { addToast } from '$lib/stores';
@@ -17,6 +18,8 @@
 		submitLabel,
 		submitTestid,
 		checking = $bindable(false),
+		form = $bindable(),
+		ask,
 		children
 	}: {
 		action?: string;
@@ -26,6 +29,8 @@
 		submitLabel: string;
 		submitTestid: string;
 		checking?: boolean; // while another action runs, e.g. «Von der KI prüfen lassen»
+		form?: HTMLFormElement;
+		ask?: () => boolean; // true: a question comes before the save, which the asker sends again once answered
 		children: Snippet;
 	} = $props();
 
@@ -37,14 +42,11 @@
 	const text = $derived(texts[record]);
 
 	let saving = $state(false);
-</script>
 
-<form
-	method="POST"
-	{action}
-	use:enhance={({ formData, submitter }) => {
+	const submitted: SubmitFunction = ({ formData, submitter, cancel }) => {
 		// another action, e.g. "Formel testen", saves nothing; each answer ends only its own request
 		const check = !!submitter?.hasAttribute('formaction');
+		if (!check && ask?.()) return cancel();
 		if (check) checking = true;
 		else saving = true;
 		const name = String(formData.get('name') ?? '').trim();
@@ -63,7 +65,14 @@
 					: submitter
 				)?.focus();
 		};
-	}}
+	};
+</script>
+
+<form
+	bind:this={form}
+	method="POST"
+	{action}
+	use:enhance={submitted}
 	class="flex flex-col gap-8"
 	novalidate
 >

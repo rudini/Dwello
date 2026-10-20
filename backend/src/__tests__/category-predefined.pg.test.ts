@@ -38,4 +38,13 @@ describe('Vordefinierte Kategorie', () => {
 		const stored = (await (await callApi(`/api/v1/categories/${predefined.id}`)).json()) as Record<string, unknown>;
 		expect(stored).toMatchObject({ name: key, nameDE: `Treppenhaus ${key}`, isAllowedUtilityCost: false });
 	});
+
+	// #452 point 1 (#302): «Heizkosten» decides how Dwello shares at a tenant change; fixed on Dwello's categories
+	it('behält «Heizkosten», wenn das Formular es ändert', async () => {
+		const response = await sendJson('PUT', `/api/v1/categories/${predefined.id}`, { isHeatingCost: true });
+
+		expect(response.status).toBe(200);
+		const [stored] = await db.select().from(categories).where(eq(categories.id, predefined.id));
+		expect(stored.isHeatingCost).toBe(false);
+	});
 });

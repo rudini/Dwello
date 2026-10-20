@@ -6,13 +6,12 @@ import { inDays } from './dates';
 
 // The backend deletes draft statements only; a sent one would keep its tenant, apartment and building (O-38).
 // The URL is always set: `bun run` would read the development database's from backend/.env
-function purgeStatements(tokens: string[]) {
-	const url = process.env.E2E_DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello_e2e';
-	execFileSync('bun', ['run', 'e2e-purge-statements', ...tokens], {
+const e2eScript = (script: string, args: string[]) =>
+	execFileSync('bun', ['run', script, ...args], {
 		cwd: 'backend',
-		env: { ...process.env, DATABASE_URL: url }
+		env: { ...process.env, DATABASE_URL: process.env.E2E_DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello_e2e' }
 	});
-}
+const purgeStatements = (tokens: string[]) => e2eScript('e2e-purge-statements', tokens);
 
 // Scenario-scoped test data: Gherkin names map to names with 12 random hex digits, and everything is removed afterwards.
 export function testData(api: CallTheApi) {
@@ -489,8 +488,8 @@ export function testData(api: CallTheApi) {
 		},
 
 		// Invoice without a Kategorie, distributed by area: billed as «Nicht kategorisiert»
-		async invoiceWithoutCategory(buildingTitle: string, amount: string, date: string) {
-			await invoice(buildingTitle, {}, `Ohne Kategorie ${date}`, amount, date).then((id) => put(`invoices/${id}`, { categoryId: null }));
+		async invoiceWithoutCategory(buildingTitle: string, amount: string, date: string, description = `Ohne Kategorie ${date}`) {
+			await invoice(buildingTitle, {}, description, amount, date).then((id) => put(`invoices/${id}`, { categoryId: null }));
 		},
 
 		// Invoice in an own category, distributed by area
@@ -542,8 +541,14 @@ export function testData(api: CallTheApi) {
 			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { isValidUtilityCost });
 		},
 
+		// An invoice recorded before the Verteilschlüssel was required (#379): the backend refuses to remove it
 		async invoiceWithoutKey(supplier: string) {
-			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { distributionKeyId: null });
+			e2eScript('e2e-invoice-without-key', [ids.get(`Rechnung ${supplier}`)!]);
+		},
+
+		async invoiceKey(supplier: string, keyName: string) {
+			const key = (await get('distribution-keys?limit=100')).data.find((k: { nameDE: string }) => k.nameDE === keyName);
+			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}`, { distributionKeyId: key.id });
 		},
 
 		async invoiceNumber(supplier: string, invoiceNumber: string) {

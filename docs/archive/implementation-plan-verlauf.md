@@ -2240,6 +2240,18 @@ Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of
 
 Files: `backend/src/config/llm.ts`, `backend/src/services/statement-invoices.service.ts`, `backend/scripts/llm-stub.ts`, `src/lib/invoice-upload.ts`, `src/lib/server/invoice.ts`, `src/lib/types.ts`, `src/lib/ui/{FileInput,Dialog,DateInput,Button}.svelte`, `src/routes/invoices/` (`+page.svelte`, `DeductedHint`, `InvoiceDataFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadFiles`, `UploadRowNotes`, `[id]/{+page,InvoiceFacts,InvoiceBeleg}.svelte`, `[id]/edit/+page.svelte`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `tests/contracts/{invoice-statements,invoice-list}.json`, tests and E2E layers.
 
+## Session W1b: «Abgerechnet bis» over a Dwello statement (#499) (2026-10-20)
+
+Branch `w1-issue-499`, worker W1; the checklist lived in the pull request (parallel workers) and comes here at the end.
+
+- [x] @wip scenarios in `contract-edit.feature` and a pg test that reproduce the dead end (persona Dr. Weber 453 P-1), seen red; the scenario for the day before pins kept behaviour
+- [x] fach-reviewer before implementing (`docs/reviews/499-fachreview-1.md`): V-1 and V-2 decided by the product owner 2026-10-20 (a replaced statement counts until its berichtigte Abrechnung is sent; a variant without a date when the contract starts in the statement's period)
+- [x] Backend `checkBilledByDwello` before #141 (`BILLED_UNTIL_BILLED`, `BILLED_UNTIL_BILLED_START`), the refusal at the field, messages in four languages, API contracts, a11y/language state `contract-edit billed-until-statement`
+- [x] Reviews: code-reviewer rounds 1 and 2 (`docs/reviews/499-review-1..2.md`), persona Dr. Weber (`docs/design/personas/weber-499.md`, no Blocker/Major)
+- [x] Merge of `origin/main` (conflict in `src/lib/ui/Field.svelte` resolved)
+- [x] PR `Fixes #499`
+
+Files: `backend/src/services/contract.service.ts`, `src/routes/contracts/ContractForm.svelte`, `src/lib/ui/{Field,DateInput}.svelte`, `messages/*.json`, `tests/contracts/contract-billed-until-billed(-start).json`, tests and E2E files.
 ## Session W3-451: tenant shares at a tenant change (#451)
 
 Branch `w3-issue-451` (worker W3). Points 1–6 and 8 of #406, consolidated in #451; product-owner answers M-1, V-3, V-8 to the domain review. The plan of another session stayed open in `implementation_plan.md`, so this session was kept in the pull request and archived here directly (coordinator).
@@ -2265,6 +2277,26 @@ No scenario: credits summing to zero and the refused negative amount (the backen
 
 Files: `backend/src/services/{calculation,invoice,invoice-completeness,pdf,statement-pdf,statement,heating-profile}.service.ts`, `backend/src/db/schema.ts`, `backend/demo/demo-data.sql`, `src/lib/{invoice,statement-wizard,types}.ts`, `src/lib/server/{statement-generation,invoice}.ts`, `src/routes/invoices/**`, `src/routes/statements/{generate,[id]}/**`, `messages/*.json`, tests in `backend/src/__tests__`, `src/__tests__`, `tests/e2e`, `tests/a11y/screens.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/{nebenkostenabrechnung-anforderungen,api-specification}.md`, `docs/design/{i18n-begriffe,offene-punkte}.md`.
 
+## Session W8: categories and required Verteilschlüssel (#452) (2026-10-20)
+
+Branch `w8-issue-452`. Issue #452 (points 1, 2, 4, 5, 6, 7 of #407; point 3 is #368). Worker W8 of the parallel run; the checklist was kept in the pull request (coordinator rule for `implementation_plan.md`).
+
+- [x] Scenarios @wip first in `categories.feature`, `statement-agreed-costs.feature`, `statement-detail.feature`, `invoice-new.feature`, `invoice-edit.feature`, `distribution-keys.feature`; all seen red
+- [x] Fach-review before implementing and after (`docs/reviews/452-fachreview-1.md` to `-3.md`); PO decision to amend the allocability prompt; V-1 wording verbatim
+- [x] Point 1: «Heizkosten» fixed on predefined categories (form and backend)
+- [x] Point 2: confirmations before a category turns «nicht umlagefähig» or a predefined one umlagefähig
+- [x] Point 4: allocable invoices without Kategorie hold the preview, the berichtigte Abrechnung and «Neu berechnen» (coded errors)
+- [x] Points 5, 6: migration `0029_lift_waste_descriptions.sql` (renamed three times for other workers' migrations); `bun run llm:eval` before and after (98/98/100 % final)
+- [x] Point 7: key proposed (latest invoice of the category in the building, else the settings' default) and required in new, upload and edit; «Pro Einheit» for old invoices without a key
+- [x] Slice reviews rounds 1 to 3 (`docs/reviews/452-review-1.md` to `-3.md`); C-3 rejected (#405)
+- [x] Personas Dr. Weber and Helga (`docs/design/personas/weber-452.md`, `helga-452.md`); daten-pruefer (`docs/reviews/452-datenpruefung-1.md`, no Blocker/Major)
+- [x] Persona triage: Helga P-1, P-4 (PO wording 2026-10-20), Weber P-2, P-3, P-6 fixed; Weber P-1 existed before (#379), issue #528; the rest stay in the reports
+- [x] Merges of main: #455's own upload key proposal replaced by #452's (coordinator for the PO); fr «Par logement» (#461); upload scenarios choose a key; #448, #450, #530 resolved
+- [x] Workflow notes (`docs/reviews/workflow-notes-issue-452.md`)
+- [x] Closing review (`docs/reviews/452-review-4.md`: C-15, C-16 Major, C-17, C-18 Minor, all fixed; C-15 with three scenarios seen red) and re-review (`docs/reviews/452-review-5.md`)
+- [x] PR `Refs #452`
+
+Files: `backend/src/services/{category,invoice,statement,statement-pdf,fuel-stock}.service.ts`, `backend/src/routes/invoices.ts`, `backend/src/config/llm.ts`, `backend/scripts/{llm-eval,e2e-client,e2e-invoice-without-key,e2e-purge-statements}.ts`, `backend/migrations/0029_lift_waste_descriptions.sql`, `src/lib/{invoice,invoice-upload,statement-wizard}.ts`, `src/lib/server/statement-generation.ts`, `src/lib/ui/Select.svelte`, `src/routes/config/categories/` (`CategoryForm`, `AllocabilityQuestion`, `HeatingChoice`, `SaveForm`), `src/routes/invoices/` (`InvoiceCategoryFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadRowFields`, `[id]/edit/`), `src/routes/statements/generate/` (`StatementWizard`, `PreviewChecks`, `InvoiceHint`), `messages/*.json`, `docs/nebenkostenabrechnung-anforderungen.md`, `tests/a11y/screens.json`, tests and E2E layers.
 ## Session: faster CI round trips (GitHub bottleneck, 2026-10-20)
 
 Request: implement proposals 1 and 2 of the CI analysis (42 % of PR runs came from merging `main`, 48 % from docs commits).
@@ -2278,3 +2310,16 @@ Request: implement proposals 1 and 2 of the CI analysis (42 % of PR runs came fr
 - [x] PR to `main`
 - No scenario: CI configuration, no app behaviour changes
 - Files: `.github/workflows/ci.yml`, `tools/ci/docs-only-since.mjs`, `tools/ci/docs-only-since.test.ts`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `.claude/skills/pull-request/SKILL.md`
+
+## Session: CI on pull requests in Chromium only, red main gets an owner (2026-10-20)
+
+Request: implement proposals 1 and 3 of the follow-up CI recommendations.
+
+- [x] Pull requests run the E2E tests in Chromium and the API driver only (1098 instead of 3240 tests); every browser on push to `main` and nightly (`.github/workflows/ci.yml`)
+- [x] A red run on `main` opens or comments on the issue «CI auf main ist rot», a green one closes it (job "Main status")
+- [x] Skill `pull-request`, "After the merge": the merging session checks the run of `main` with its merge and fixes a failure
+- [x] `code-reviewer` round 1: `docs/reviews/ci-speed2-review-1.md`
+- [x] Workflow note: none
+- [x] PR to `main`
+- No scenario: CI configuration, no app behaviour changes
+- Files: `.github/workflows/ci.yml`, `.claude/skills/pull-request/SKILL.md`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `tests/e2e/CLAUDE.md`

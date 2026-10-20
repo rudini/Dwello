@@ -30,6 +30,7 @@ import {
 } from '../questions/invoice-upload';
 import {
 	chooseCategory,
+	chooseKey,
 	chooseForCreating,
 	escapeFromCategory,
 	openUploadDialog,
@@ -144,6 +145,13 @@ When(
 	'der Liegenschaftsverwalter bei der Datei von {string} die Kategorie {string} wählt',
 	async ({ verwalter, names }, supplier: string, category: string) => {
 		await verwalter.attemptsTo(chooseCategory(names.get(supplier)!, category));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter bei der Datei von {string} den Verteilschlüssel {string} wählt',
+	async ({ verwalter, names }, supplier: string, key: string) => {
+		await verwalter.attemptsTo(chooseKey(names.get(supplier)!, key));
 	}
 );
 

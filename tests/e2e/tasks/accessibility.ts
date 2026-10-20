@@ -285,6 +285,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(openDialog(endContractButton), Click.on(confirmEndContractButton), Wait.until(on.dialogError)),
 	// the end dialog on the contract page, the contract form on its edit page
 	'past-end-error': () => endWithPastDate,
+	// «Abgerechnet bis» over the paid statement 2024 of Anna's contract: the refusal at the field (#499)
+	'billed-until-statement': () => (actor) =>
+		actor.attemptsTo(
+			EnterDate.of('2024-06-30').into(billedUntilInput),
+			Click.on(contractSubmitButton),
+			Wait.until(on.formProblem)
+		),
 	// «Abgerechnet bis» after today; in the wizard after a Vertragsbeginn in the past, whose warning points to it (#453)
 	'billed-until-refused': () => async (actor) => {
 		const wizard = (await actor.answer(pageAddress)).includes('/contracts/new');
@@ -432,6 +439,11 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(Check.the(on.notAllowedOption), askKi('Treppenhausreinigung')),
 	// #100: «Brennstoff» is asked only for a heating cost
 	fuel: () => (actor) => actor.attemptsTo(Check.the(heatingCheckbox), Wait.until(fuelCheckbox)),
+	// #309: the question before the allocability of a category changes
+	'allocability-confirm': () => (actor) =>
+		actor.attemptsTo(Check.the(on.notAllowedOption), Click.on(on.saveButton), Wait.until(on.dialog)),
+	'allocable-confirm': () => (actor) =>
+		actor.attemptsTo(Check.the(on.allowedOption), Click.on(on.saveButton), Wait.until(on.dialog)),
 	'fuel-refused': () => (actor) =>
 		actor.attemptsTo(Uncheck.the(fuelCheckbox), Click.on(on.saveButton), Wait.until(on.formProblem)),
 	'profile-sum-invalid': () => (actor) =>
@@ -489,6 +501,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
 	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
 	'invoice-hints': (example) => previewOf('2026', 'late-invoices', '2026-05-31')(example),
+	// 2015: an allocable invoice without Kategorie holds the preview (#382)
+	'uncategorized-invoices': (example) => previewOf('2015', 'uncategorized-invoices')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
 	// 2025: Anna's draft misses the Lift invoice recorded after it (#132)
 	'preview-outdated': (example) => previewOf('2025', `existing-statements-changed-${example.building}`)(example),

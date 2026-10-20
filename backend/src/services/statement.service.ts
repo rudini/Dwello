@@ -26,6 +26,7 @@ import {
 import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { getUncategorizedInvoices } from './invoice.service';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
@@ -572,6 +573,7 @@ export async function recalculateStatement(id: string): Promise<StatementWithDet
 	// the wizard asks only for contracts without a statement: the landlord deletes the draft first (review 338-1 C-3)
 	const { contractId, periodStart, periodEnd } = draft;
 	await refuseOpenAgreements(contractId, draft.building!.id, periodStart, periodEnd, 'STATEMENT_RECALCULATION_AGREEMENTS_OPEN');
+	await refuseUncategorized(draft.building!.id, periodStart, periodEnd, 'STATEMENT_RECALCULATION_UNCATEGORIZED_INVOICES');
 	const { values, lineItems, carryOver } = await calculatedRows({
 		contractId,
 		buildingId: draft.building!.id,
@@ -842,6 +844,17 @@ async function refuseOpenAgreements(
 	});
 }
 
+// #382: without the wizard, which holds them, an allocable invoice without category would go to every tenant unchecked
+async function refuseUncategorized(buildingId: string, periodStart: string, periodEnd: string, code = 'STATEMENT_UNCATEGORIZED_INVOICES') {
+	const uncategorized = await getUncategorizedInvoices(buildingId, periodStart, periodEnd);
+	if (!uncategorized.length) return;
+	throw new CodedError(code, 'Allocable invoices of the period have no category', {
+		invoices: uncategorized
+			.map((invoice) => `${invoice.billingEntityName}, ${formatSwissDate(invoice.invoiceDate)}, CHF ${formatCHF(Number(invoice.amount))}`)
+			.join('; ')
+	});
+}
+
 /**
  * The berichtigte Abrechnung of a replaced statement: a draft of the same Mietvertrag and Abrechnungsperiode with the
  * same Heizprofil and Verwaltungspauschale, from today's data, with a new number; none without Mietstage in the period
@@ -855,6 +868,7 @@ export async function correctStatement(id: string): Promise<StatementWithDetails
 			number: replaced.replacedBy.statementNumber
 		});
 	await refuseOpenAgreements(replaced.contractId, replaced.building!.id, replaced.periodStart, replaced.periodEnd);
+	await refuseUncategorized(replaced.building!.id, replaced.periodStart, replaced.periodEnd);
 	try {
 		return await generateStatement({
 			contractId: replaced.contractId,

@@ -36,7 +36,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -76,6 +76,11 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.correspondence('Carla', 'email');
 	await seed.noEmail('Carla');
 	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too
+	// #382: an allocable invoice without Kategorie holds the preview of 2015; a description alike in every language
+	await seed.invoiceWithoutCategory('Seeblick', '120.00', '2015-06-30', 'FTTH');
+	// #379: recorded before the Verteilschlüssel was required; its edit form says so
+	const keylessInvoice = await seed.invoiceOn('Seeblick', 'Hauswart', '200.00', '2014-03-31');
+	await seed.invoiceWithoutKey('Hauswart 2014-03-31');
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	await seed.sendStatement('Anna', 2024);
 	await seed.markPaid('Anna', 2024); // paid: its payment can be reset (#92)
@@ -198,6 +203,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.category('Rasenpflege', true);
 	await seed.categoryAllowance('Rasenpflege', false);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
+	// the stand-in reads «Elektro Blitz» as Allgemeinstrom: this invoice's key is proposed, so the file can be created (#452)
+	if (['upload-partial', 'upload-discard-created'].includes(state)) await seed.invoiceOn('Seeblick', 'Allgemeinstrom', '300.00', '2025-03-31');
 	const ids: Record<string, string | undefined> = {
 		building: seed.idOf('Seeblick'),
 		apartment: seed.idOf('1.01'),
@@ -233,6 +240,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),
 		fuelCategory: seed.idOf('Pellets'),
+		// with an allocable invoice in Waldblick: saving it as not allocable asks first (#309)
+		usedCategory: seed.idOf('Internet'),
+		keylessInvoice,
 		// a predefined category shows the reason of its allocability (#186)
 		predefinedCategory: await seed.predefinedCategoryId('Feuerlöscher-Wartung'),
 		distributionKey: seed.idOf('Nach Wohnungen'),

@@ -157,7 +157,7 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 	if (response.status === 404) throw error(404, m.statements_not_found());
 	if (!response.ok) throw error(response.status, m.statements_load_failed());
 	const statement = toStatement(await response.json());
-	// Without a key the calculation shares the costs equally among the apartments
+	// Without a key the calculation shares the costs equally among the apartments, as «Pro Einheit» (the PDF names it so)
 	const lineItems = statement.lineItems.map((item) => ({
 		...item,
 		categoryName: item.categoryId
@@ -165,7 +165,7 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 			: m.invoices_not_categorised(), // the backend names it in German
 		distributionKeyName: item.distributionKeyId
 			? (keys.get(item.distributionKeyId) ?? '')
-			: m.statements_equal_per_apartment()
+			: m.statements_key_per_unit()
 	}));
 	return { ...statement, lineItems };
 }
