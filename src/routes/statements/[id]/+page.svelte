@@ -7,9 +7,10 @@
 	import {
 		balanceLabel,
 		claimed,
+		earlyPaidDate,
 		nextReminderLater,
 		paidDateError,
-		paidHelp,
+		statementIcons,
 		statusLabels,
 		statusTones
 	} from '$lib/statement';
@@ -20,9 +21,9 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import CostTable from './CostTable.svelte';
+	import PaidDateFields from '../PaidDateFields.svelte';
 	import Correction from './Correction.svelte';
 	import FormDialog from './FormDialog.svelte';
-	import DateInput from '$lib/ui/DateInput.svelte';
 	import { localToday } from '$lib/contract-status';
 	import MetadataCard from './MetadataCard.svelte';
 	import MoreActions from './MoreActions.svelte';
@@ -72,14 +73,25 @@
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
 	let paidError = $state('');
+	// #448: a day before the Abrechnungsdatum is saved after the landlord confirmed that very day
+	let earlyFor = $state('');
+	const early = $derived(earlyPaidDate(paidDate, statement.statementDate));
+	const asking = $derived(!!early && earlyFor === paidDate);
+	const confirm = $derived(
+		asking
+			? { label: m.statements_save_anyway(), testid: 'statement-mark-paid-early-confirm' }
+			: { label: m.statements_mark_paid(), testid: 'statement-mark-paid-confirm' }
+	);
 
 	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
 	function checkPaidDate() {
 		paidError = '';
 		flushSync(); // cleared first: the same error set again shows again
-		paidError = paidDateError(paidDate, statement.statementDate) ?? '';
+		paidError = paidDateError(paidDate, statement.periodEnd) ?? '';
 		if (paidError) focusFirstError(document.querySelector('[role="dialog"]'));
-		return !paidError;
+		if (paidError || !early || asking) return !paidError;
+		earlyFor = paidDate;
+		return false;
 	}
 	let pdfGeneratedAt = $derived(data.statement.pdfGeneratedAt); // set here after «PDF erstellen», else as the server has it
 
@@ -142,10 +154,12 @@
 			<StatusActions
 				status={statement.status}
 				{byEmail}
-				owes={claimed(statement.balance)}
+				owes={claimed(statement)}
 				waiting={!!nextReminderLater(statement)}
 				onremind={() => (showReminder = true)}
-				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
+				onmarkpaid={() => (
+					(paidDate = localToday()), (paidError = ''), (earlyFor = ''), (showMarkPaid = true)
+				)}
 				onsend={() => ((sendByLetter = false), (showSend = true))}
 				onresetpayment={() => (showResetPayment = true)}
 			/>
@@ -156,6 +170,7 @@
 		{m.statements_status_label()}
 		<Badge
 			tone={statusTones[statement.status]}
+			icon={statementIcons[statement.status]}
 			label={statusLabels[statement.status]}
 			testid="statement-status"
 		/>
@@ -219,24 +234,19 @@
 	bind:open={showMarkPaid}
 	action="?/markPaid"
 	title={m.statements_mark_paid_title()}
-	confirmLabel={m.statements_mark_paid()}
-	confirmTestid="statement-mark-paid-confirm"
-	fields={{ paidDate, statementDate: statement.statementDate }}
+	confirmLabel={confirm.label}
+	confirmTestid={confirm.testid}
+	fields={{ paidDate, periodEnd: statement.periodEnd }}
 	check={checkPaidDate}
 	success={m.statements_marked_paid()}
 >
-	{#if claimed(statement.balance)}<p>{m.statements_no_reminder_after()}</p>{/if}
-	<DateInput
-		id="paidDate"
-		label={m.statements_paid_on()}
-		help={paidHelp(statement.balance)}
+	<PaidDateFields
+		{statement}
+		summary="{statement.tenantName}: {balance}"
+		bind:paidDate
 		error={paidError}
-		bind:value={paidDate}
-		testid="paid-date-input"
+		early={asking ? early : null}
 	/>
-	<p class="rounded-panel bg-sunken p-4 font-semibold text-ink">
-		{statement.tenantName}: {balance}
-	</p>
 </FormDialog>
 
 <FormDialog

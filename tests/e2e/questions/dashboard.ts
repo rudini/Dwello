@@ -21,6 +21,7 @@ const statuses: Record<string, string> = {
 	Entwürfe: 'draft',
 	Versendet: 'sent',
 	Bezahlt: 'paid',
+	Erledigt: 'settled',
 	Überfällig: 'overdue'
 };
 

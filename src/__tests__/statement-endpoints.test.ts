@@ -36,17 +36,17 @@ function call(handler: unknown, status: number, answer: object) {
 
 describe('POST /statements/[id]/mark-paid', () => {
 	// #138: die Liste sendet das Abrechnungsdatum mit; ein früherer Tag geht nicht ans Backend
-	it('lehnt ein Zahlungsdatum vor dem Abrechnungsdatum ab, ohne zu speichern', async () => {
+	it('lehnt ein Zahlungsdatum vor dem Ende der Abrechnungsperiode ab, ohne zu speichern', async () => {
 		const calls: unknown[] = [];
 		const fetch = async (url: string) => (calls.push(url), Response.json({}));
 		const request = new Request('http://localhost/', {
 			method: 'POST',
-			body: JSON.stringify({ paidDate: '2026-01-04', statementDate: '2026-01-05' })
+			body: JSON.stringify({ paidDate: '2024-12-30', periodEnd: '2024-12-31' })
 		});
 		const response = await (markPaid as (event: never) => Promise<Response>)({ params: { id: 's1' }, fetch, request } as never);
 
 		expect(response.status).toBe(400);
-		expect((await response.json()).message).toContain('vor dem Abrechnungsdatum vom 05.01.2026');
+		expect((await response.json()).message).toContain('vor dem Ende der Abrechnungsperiode am 31.12.2024');
 		expect(calls).toEqual([]);
 	});
 

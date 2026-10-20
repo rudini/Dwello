@@ -15,11 +15,11 @@
 	} = $props();
 
 	// a replaced statement has no tab of its own: «Alle» lists it (#120)
-	const statuses: Exclude<StatementStatus, 'replaced'>[] = ['draft', 'sent', 'paid', 'overdue'];
+	const statuses: Exclude<StatementStatus, 'replaced'>[] = ['draft', 'sent', 'paid', 'settled', 'overdue'];
 </script>
 
 <nav aria-label={m.statements_filter_status()}>
-	<ul class="grid grid-cols-2 gap-4 md:grid-cols-4">
+	<ul class="grid grid-cols-2 gap-4 md:grid-cols-5">
 		{#each statuses as status (status)}
 			<li>
 				<a

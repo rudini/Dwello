@@ -1,12 +1,15 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Attribute, Count, Gap, Text } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Gap, Text, Value } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
+	carryOverRow,
 	advanceDiffers,
 	costBreakdown,
 	statementAdvancePaid,
 	correctDialog,
+	correctPaidAmountInput,
+	earlyPaidDateWarning,
 	paymentDeadline,
 	paymentSummary,
 	correctStatementButton,
@@ -109,6 +112,14 @@ export const changeOffers = question('the offers to pay, remind, edit or correct
 	)
 );
 export const oldAddressWarningText = Text.of(oldAddressWarning);
+
+// #403
+export const carryOver = Text.of(carryOverRow);
+export const earlyPaidDateQuestion = Text.of(earlyPaidDateWarning);
+export const correctPaidAmount = Value.of(correctPaidAmountInput);
+export const correctPaidAmountHelp = Accessible.descriptionOf(correctPaidAmountInput);
+export const correctPaidAmountAsked = Count.of(correctPaidAmountInput);
+export const resetOffers = Count.of(resetPaymentButton);
 
 // The page's usual spacing between the status line and the first panel, no empty items in between
 export const gapAboveCostBreakdown = Gap.between(statementStatus, costBreakdown);
