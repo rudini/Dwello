@@ -14,7 +14,7 @@ import { datedToday, getStatement, keyValuesOf, updateStatementStatus, type Stat
 import { refusal } from './coded-error';
 import { billingStart, getContract } from './contract.service';
 
-// Creditor of the QR-bill from the company configuration; null without IBAN
+// Creditor of the QR-bill from the company configuration, as entered (#450); null without IBAN
 export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const companyName = await getTypedConfig('company_name');
 	const companyAddress = await getTypedConfig('company_address');
@@ -23,13 +23,7 @@ export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const iban = await getTypedConfig('iban');
 	if (!iban) return null;
 
-	return {
-		iban,
-		companyName: companyName || 'Dwello Property Management',
-		address: companyAddress || '',
-		postalCode: companyPostalCode || '8000',
-		city: companyCity || 'Zürich'
-	};
+	return { iban, companyName, address: companyAddress, postalCode: companyPostalCode, city: companyCity };
 }
 
 // Name and postal address as stored; a statement without tenant prints no recipient
