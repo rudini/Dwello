@@ -9,7 +9,7 @@ import { SMTPServer } from 'smtp-server';
 import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
 import { db } from '../db/connection';
-import { documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
+import { configuration, documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, getTypedConfig, setConfig } from '../services/config.service';
 import { updateTenant } from '../services/tenant.service';
 import { daysAfter, swissToday } from '../services/today';
@@ -227,6 +227,23 @@ describe('Abrechnung per Brief', () => {
 		const [{ pdf }] = await db.select({ pdf: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id));
 		expect(stored.content).toBe(pdf!);
 		expect(await pdfKept(id)).toBe(true);
+	});
+
+	// #491 (entschieden): ohne PDF kein Brief; sonst liefe die Zahlungsfrist ab einem Tag, an dem nichts zu drucken war
+	it('lehnt den Brief ab, solange das PDF nicht entstehen kann', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
+		const id = await draft();
+		const city = await getConfig('company_city');
+		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		try {
+			const result = await send(id);
+
+			expect(result).toMatchObject({ status: 400, code: 'CREDITOR_ADDRESS_MISSING' });
+			expect(await statusOf(id)).toBe('draft');
+			expect(await storedFor(id)).toHaveLength(0);
+		} finally {
+			if (city) await setConfig('company_city', city);
+		}
 	});
 
 	it('stellt sie nach einer gescheiterten E-Mail per Brief zu', async () => {

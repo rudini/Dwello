@@ -7,7 +7,8 @@ Funktionalität: Abrechnung per E-Mail senden
 
   # #86: per Brief bleibt der Versand manuell (statement-detail.feature, «Abrechnung versenden»)
   Grundlage:
-    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und das Gebäude "Birkenhof" in "Winterthur" existiert
     Und im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
     Und der Mieter "Nora Beispiel" existiert
     Und "Nora Beispiel" mietet die Wohnung "1.01" seit "2014-01-01" für "950" Franken mit "150" Franken Akonto

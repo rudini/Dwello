@@ -43,7 +43,8 @@ Funktionalität: Saldo unter CHF 5
 
   # Nichts zu bezahlen: die Abrechnung ist mit dem Versand erledigt (eine Mahnung lehnt das Backend ab, reminders.pg.test.ts)
   Szenariogrundriss: Saldo unter CHF 5 ist mit dem Versand erledigt
-    Angenommen im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "<Rechnung>" Franken für 2024
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "<Rechnung>" Franken für 2024
     Und für "Anna Keller" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter die Abrechnung versendet
