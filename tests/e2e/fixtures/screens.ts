@@ -36,7 +36,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'draft-restored', 'draft-discard-dialog'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'draft-restored', 'draft-discard-dialog'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -112,6 +112,10 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	}
 	await seed.sendStatement('Kai', 2024);
 	await seed.replaceStatement('Kai', 2023, true);
+	// January to May 2026 without a statement of Seeblick (a shorter period of 2025 overlaps its statements, #199): an
+	// invoice without Leistungszeitraum in it and one shortly after it
+	await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2026-01-31');
+	await seed.invoiceOn('Seeblick', 'Lift', '200.00', '2026-06-30');
 	// heating costs without any Tankbestand: the wizard asks about a tank; rented, so its preview has a row too
 	await seed.building('Bergsicht', 'Winterthur');
 	await seed.apartment('Bergsicht', '2.01', 'vacant');
@@ -151,11 +155,14 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		await seed.buildingAddress(tenant, 'Bergsicht');
 	}
 	await seed.statement('Ida', 'Bergsicht', 2024, 'Standard');
-	// #199: a statement covers 2024 only up to 30.06.: the contract page names the rest without a way into the wizard
-	await seed.apartment('Bergsicht', '2.06', 'vacant');
+	// #199, #408 point 2: Felsblick's only statement covers 2024 up to 30.06. (one Abrechnungsperiode per day and
+	// building): the contract page offers a short period for the rest of Lea's 2024; its own building, so the runs of
+	// 2024 in Bergsicht stay possible
+	await seed.building('Felsblick', 'Winterthur');
+	await seed.apartment('Felsblick', '2.06', 'vacant');
 	await seed.tenant('Lea');
 	await seed.contract('Lea', '2.06', { startDate: '2024-01-01', baseRent: '1200.00' });
-	await seed.statement('Lea', 'Bergsicht', 2024, 'Standard', ['2024-01-01', '2024-06-30']);
+	await seed.statement('Lea', 'Felsblick', 2024, 'Standard', ['2024-01-01', '2024-06-30']);
 	// A-6 (#115): an agreed end in the past, the 2025 statement bills the time after it as Leerstand
 	await seed.building('Talblick', 'Winterthur');
 	await seed.apartment('Talblick', '3.01', 'vacant');

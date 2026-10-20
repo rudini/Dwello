@@ -4,6 +4,7 @@
 	import Icon from '$lib/ui/Icon.svelte';
 	import BuildingChoice from './BuildingChoice.svelte';
 	import type { Building } from '$lib/types';
+	import type { Billed } from '$lib/statement-wizard';
 
 	// Step 2: the buildings whose rental contracts get a Nebenkostenabrechnung
 	let {
@@ -23,7 +24,7 @@
 	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview:
 	// one request for the period, counted per building (fewer than 50 apartments, see CLAUDE.md)
 	let invoiceCounts = $state<Record<string, number>>({});
-	let billed = $state<Record<string, { contracts: number; billed: number; partly: number }>>({});
+	let billed = $state<Record<string, Billed>>({});
 	$effect(() => {
 		const ids = buildings.map((b) => b.id);
 		// both answers shown at once: one arriving later would push the rows below away while a building is clicked
@@ -38,14 +39,11 @@
 				limit: '1000'
 			}),
 			// Contracts with a statement in the period already get none from this run
-			api.get<{ buildingId: string; contracts: number; billed: number; partly: number }[]>(
-				'/statements/billed',
-				{
-					buildingIds: ids.join(','),
-					periodStart: period.start,
-					periodEnd: period.end
-				}
-			)
+			api.get<(Billed & { buildingId: string })[]>('/statements/billed', {
+				buildingIds: ids.join(','),
+				periodStart: period.start,
+				periodEnd: period.end
+			})
 		]).then(([invoices, statements]) => {
 			if (left) return;
 			if (invoices.data) {
@@ -54,8 +52,11 @@
 					if (buildingId in counts) counts[buildingId]++;
 				invoiceCounts = counts;
 			}
-			if (statements.data)
+			if (statements.data) {
 				billed = Object.fromEntries(statements.data.map((row) => [row.buildingId, row]));
+				// a building the period overlaps is not chosen, also not from a link or a draft (#408 point 2)
+				selectedBuildingIds = selectedBuildingIds.filter((id) => !billed[id]?.overlap);
+			}
 			loading = false;
 		});
 		return () => {
@@ -64,15 +65,17 @@
 		};
 	});
 
-	// «Alle Gebäude» leaves out buildings whose contracts are all billed for the whole period: none gets a statement
-	// (#201); a statement that leaves days of a contract open does not count (Fachreview M-1)
+	// «Alle Gebäude» leaves out buildings whose contracts are all billed: none gets a statement (#201), said at the
+	// counter; and buildings the period overlaps, which say so themselves (#408 point 2)
 	const leftOut = $derived(
 		buildings.filter(({ id }) => {
 			const row = billed[id];
-			return !!row?.contracts && row.billed === row.contracts && !row.partly;
+			return !!row?.contracts && row.billed === row.contracts && !row.overlap;
 		})
 	);
-	const all = $derived(buildings.filter((b) => !leftOut.includes(b)).map((b) => b.id));
+	const all = $derived(
+		buildings.filter((b) => !leftOut.includes(b) && !billed[b.id]?.overlap).map((b) => b.id)
+	);
 	const allSelected = $derived(
 		all.length > 0 && all.every((id) => selectedBuildingIds.includes(id))
 	);
