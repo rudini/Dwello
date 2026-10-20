@@ -129,7 +129,12 @@ export const recordInvoiceFromWarning: Activity = (actor) =>
 		Click.on(newInvoiceFromWarning),
 		Wait.forUrl((url) => /\/invoices\/new/.test(url.href))
 	);
-export const openContractWithoutFee = (contractId: string) => Click.on(feeNotAgreedLink(contractId));
+// the contract page loads before the next step looks: its data can take longer than an expectation waits (#494)
+export const openContractWithoutFee = (contractId: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(feeNotAgreedLink(contractId)),
+		Wait.forUrl((url) => url.pathname === `/contracts/${contractId}`)
+	);
 
 // The edit link of an invoice a hint of the preview names
 export const editHintedInvoice = (date: string): Activity => (actor) =>
