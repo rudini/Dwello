@@ -601,8 +601,8 @@ describe('Grund der Umlagefähigkeit', () => {
 
 	// Wie die vordefinierte Kategorie heisst (Fachreview H-26)
 	it.each([
-		['fr', 'l’assurance bâtiment et les impôts'],
-		['it', 'assicurazione edificio e imposte']
+		['fr', 'l’assurance du bâtiment et les impôts'],
+		['it', 'assicurazione dell’immobile e imposte']
 	] as const)('nennt im Hilfetext auf %s die Gebäudeversicherung mit dem Namen ihrer Kategorie', (locale, wording) => {
 		overwriteGetLocale(() => locale);
 		try {
