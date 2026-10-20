@@ -66,5 +66,7 @@ export const proposedKey = (latest: LatestKey[], buildingId: string, categoryId:
 
 /** A path within Dwello to return to (e.g. the statement wizard), never another site */
 export function localPath(value: string | null): string | null {
-	return value && /^\/(?![/\\])/.test(value) && !value.includes('\\') ? value : null;
+	// no backslash and no control character: the browser reads «\» as «/» and drops tabs and line breaks
+	// eslint-disable-next-line no-control-regex
+	return value && /^\/(?![/\\])/.test(value) && !/[\\\u0000-\u001f\u007f]/.test(value) ? value : null;
 }

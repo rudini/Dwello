@@ -375,6 +375,9 @@ describe('Rücksprung nach dem Erfassen', () => {
 		expect(localPath('https://example.com')).toBeNull();
 		expect(localPath('//example.com')).toBeNull();
 		expect(localPath('/\\example.com')).toBeNull();
+		// the browser drops tabs and line breaks from an address: «/\t/x» is «//x» (code review 452-4 C-18)
+		expect(localPath('/\t/evil.example')).toBeNull();
+		expect(localPath('/\n/evil.example')).toBeNull();
 		expect(localPath(null)).toBeNull();
 	});
 });
