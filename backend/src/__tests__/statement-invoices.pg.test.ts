@@ -4,7 +4,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, fuelStocks, invoices, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { deleteStatement, generateStatement } from '../services/statement.service';
@@ -137,6 +137,54 @@ describe('Geänderte Rechnungen seit der Abrechnung', () => {
 		} finally {
 			await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, rental.building));
 		}
+	});
+
+	// #454 (#408 point 8, #307): a Tankbestand of the period changed since counts like a changed invoice
+	describe('Tankbestand der Periode', () => {
+		const reading = async (readingDate: string, amount: string) => {
+			const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+			await db.delete(fuelStocks).where(and(eq(fuelStocks.buildingId, rental.building), eq(fuelStocks.readingDate, readingDate)));
+			await sendJson('POST', `/api/v1/buildings/${rental.building}/fuel-stocks`, { readingDate, amount, categoryId: heating.id });
+		};
+		const fuelStockChanged = async (id: string) =>
+			((await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { fuelStockChanged: boolean }).fuelStockChanged;
+		const withReadings = async (check: () => Promise<void>) => {
+			await clear();
+			try {
+				await check();
+			} finally {
+				await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, rental.building));
+			}
+		};
+
+		it('meldet einen danach geänderten Tankbestand', () =>
+			withReadings(async () => {
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				const { id } = await statement();
+				expect(await fuelStockChanged(id)).toBe(false);
+				await reading('2024-12-31', '200.00');
+				expect(await fuelStockChanged(id)).toBe(true);
+				expect(await changed(id)).toEqual([]);
+			}));
+
+		it('meldet nichts, wenn der Verbrauch gleich bleibt', () =>
+			withReadings(async () => {
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				const { id } = await statement();
+				await reading('2023-12-31', '700.00');
+				await reading('2024-12-31', '200.00');
+				expect(await fuelStockChanged(id)).toBe(false);
+			}));
+
+		it('meldet einen Tankbestand, der nach der Abrechnung dazukam', () =>
+			withReadings(async () => {
+				const { id } = await statement();
+				await reading('2023-12-31', '600.00');
+				await reading('2024-12-31', '100.00');
+				expect(await fuelStockChanged(id)).toBe(true);
+			}));
 	});
 
 	// Before #96 a statement kept no invoices: as before, the invoices recorded after it count (V-15)

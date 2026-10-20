@@ -64,6 +64,21 @@ describe('Rechnungsliste', () => {
 		expect(data.years).toContain(String(thisYear - 5));
 	});
 
+	// #454 (#408 point 1): the period goes to the backend as such, independent of the years offered (older than five
+	// years and across the turn of the year)
+	it('filtert nach der Abrechnungsperiode aus der Adresse', async () => {
+		const { urls, fetch } = backend({});
+
+		await listLoad({
+			url: new URL('http://localhost/invoices?building=b1&periodStart=2019-07-01&periodEnd=2020-06-30'),
+			fetch
+		} as never);
+
+		expect(urls).toContainEqual(
+			expect.stringMatching(/\/invoices\?.*buildingId=b1.*periodStart=2019-07-01.*periodEnd=2020-06-30/)
+		);
+	});
+
 	// Wie in den anderen Listen: ?building= kommt z. B. vom Mietvertrag
 	it('filtert nach dem Gebäude aus der Adresse', async () => {
 		const { urls, fetch } = backend({});

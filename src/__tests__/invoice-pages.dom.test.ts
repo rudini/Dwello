@@ -189,6 +189,23 @@ describe('Rechnungsliste', () => {
 		expect(goto).toHaveBeenCalledWith('/invoices?year=2025&page=1');
 	});
 
+	// #454 (#408 point 1): the list filtered by an Abrechnungsperiode names the filter and the rule
+	it('nennt den Filter «Abrechnungsperiode» mit Gebäude und Tagen', () => {
+		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-10-01&periodEnd=2025-12-31');
+		list([invoice()]);
+		expect(byTestId('invoice-period-filter')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+			'Rechnungen von Seeblick, die in die Abrechnungsperiode 01.10.2025 – 31.12.2025 fallen (nach Leistungszeitraum, sonst Rechnungsdatum)'
+		);
+	});
+
+	it('nennt den Filter «Abrechnungsperiode» ohne Gebäude', () => {
+		url = new URL('http://localhost/invoices?periodStart=2024-07-01&periodEnd=2025-06-30');
+		list([]);
+		expect(byTestId('invoice-period-filter')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+			'Rechnungen, die in die Abrechnungsperiode 01.07.2024 – 30.06.2025 fallen (nach Leistungszeitraum, sonst Rechnungsdatum)'
+		);
+	});
+
 	it('sagt bei einem Jahr ohne Rechnungen, dass noch keine erfasst sind, statt einen Filterfehler zu vermuten', () => {
 		url = new URL('http://localhost/invoices?year=2025');
 		list([]);

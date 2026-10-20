@@ -167,8 +167,9 @@ describe('Aufgaben der Übersicht', () => {
 		});
 		expect(tasks[1].text).toContain('Noch nicht abgerechnet: Seeblick (2025).');
 		// the invoices come first, so the task leads to them as well
+		// #454: the invoices a statement of the period takes
 		expect(tasks[1].link).toEqual({
-			href: '/invoices?year=2025',
+			href: '/invoices?periodStart=2025-01-01&periodEnd=2025-12-31',
 			label: 'Rechnungen 2025 ansehen'
 		});
 	});
@@ -194,7 +195,10 @@ describe('Aufgaben der Übersicht', () => {
 			'Noch nicht abgerechnet: Ahornhof (2025, 01.07.2024 – 31.12.2024), Seeblick (2023).'
 		);
 		// the invoices of the newest period come first
-		expect(task.link).toEqual({ href: '/invoices?year=2025', label: 'Rechnungen 2025 ansehen' });
+		expect(task.link).toEqual({
+			href: '/invoices?periodStart=2025-01-01&periodEnd=2025-12-31',
+			label: 'Rechnungen 2025 ansehen'
+		});
 	});
 
 	it('erinnert nicht, wenn jeder Mietvertrag abgerechnet ist', () => {
@@ -202,7 +206,8 @@ describe('Aufgaben der Übersicht', () => {
 		expect(tasks.map((task) => task.id)).not.toContain('missing-period');
 	});
 
-	it('führt bei einer Abrechnungsperiode über den Jahreswechsel zu allen Rechnungen', () => {
+	// #454 (#408 point 1): also across the turn of the year, by the period's days
+	it('führt bei einer Abrechnungsperiode über den Jahreswechsel zu ihren Rechnungen', () => {
 		const tasks = overviewTasks(
 			input({
 				missingStatements: [
@@ -211,8 +216,85 @@ describe('Aufgaben der Übersicht', () => {
 			})
 		);
 		expect(tasks.find((task) => task.id === 'missing-period')!.link).toEqual({
-			href: '/invoices',
-			label: 'Rechnungen ansehen'
+			href: '/invoices?periodStart=2024-07-01&periodEnd=2025-06-30',
+			label: 'Rechnungen für 01.07.2024 – 30.06.2025 ansehen'
+		});
+	});
+
+	// #454 (#408 point 7, #386): drafts that miss what changed since are no drafts to send
+	describe('Abrechnungen, die nicht aktuell sind', () => {
+		const outdated = (id: string, status: string, buildingId: string, building: string, start: string, end: string) => ({
+			id,
+			statementNumber: `NK-${id}`,
+			tenantName: `Mieter ${id}`,
+			status,
+			buildingId,
+			building,
+			periodStart: start,
+			periodEnd: end
+		});
+		const outdatedStatements = [
+			outdated('s1', 'draft', 'b1', 'Seeblick', '2025-01-01', '2025-12-31'),
+			outdated('s2', 'draft', 'b1', 'Seeblick', '2025-01-01', '2025-12-31'),
+			outdated('s3', 'draft', 'b2', 'Ahornhof', '2024-07-01', '2025-06-30'),
+			outdated('s4', 'sent', 'b1', 'Seeblick', '2024-01-01', '2024-12-31')
+		];
+
+		it('nennt die nicht aktuellen Entwürfe vor den Entwürfen, mit einem Weg je Gebäude und Periode', () => {
+			const tasks = overviewTasks(
+				input({ statementCounts: { draft: 4, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			const task = tasks.find((one) => one.id === 'outdated-drafts')!;
+			expect(task.title).toBe('3 Entwürfe sind nicht aktuell');
+			expect(task.text).toBe(
+				'Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen.'
+			);
+			expect(task.links).toEqual([
+				{
+					href: '/statements?building=b1&periodStart=2025-01-01&periodEnd=2025-12-31&status=draft',
+					label: 'Seeblick, 2025'
+				},
+				{
+					href: '/statements?building=b2&periodStart=2024-07-01&periodEnd=2025-06-30&status=draft',
+					label: 'Ahornhof, 01.07.2024 – 30.06.2025'
+				}
+			]);
+			const ids = tasks.map((one) => one.id);
+			expect(ids.indexOf('outdated-drafts')).toBeLessThan(ids.indexOf('drafts'));
+		});
+
+		it('zählt bei den Entwürfen zum Zustellen nur die aktuellen', () => {
+			const tasks = overviewTasks(
+				input({ statementCounts: { draft: 4, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			expect(tasks.find((one) => one.id === 'drafts')!.text).toContain('1 Nebenkostenabrechnung ist');
+		});
+
+		it('nennt keine Entwürfe zum Zustellen, wenn keiner aktuell ist', () => {
+			const tasks = overviewTasks(
+				input({ statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			expect(tasks.map((one) => one.id)).not.toContain('drafts');
+		});
+
+		it('nennt einen einzelnen nicht aktuellen Entwurf in der Einzahl', () => {
+			const tasks = overviewTasks(
+				input({
+					statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 0 },
+					outdatedStatements: outdatedStatements.slice(0, 1)
+				})
+			);
+			expect(tasks.find((one) => one.id === 'outdated-drafts')!.title).toBe('1 Entwurf ist nicht aktuell');
+		});
+
+		it('nennt eine versendete Abrechnung mit demselben Hinweis als «Abrechnung berichtigen»', () => {
+			const tasks = overviewTasks(
+				input({ statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			const task = tasks.find((one) => one.id === 'correct-s4')!;
+			expect(task).toMatchObject({ title: 'Abrechnung berichtigen', href: '/statements/s4' });
+			expect(task.text).toContain('NK-s4');
+			expect(task.text).toContain('Mieter s4');
 		});
 	});
 

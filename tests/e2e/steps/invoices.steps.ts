@@ -75,7 +75,7 @@ Then(
 	}
 );
 
-Then('die Rechnungsliste enthält genau {int} Rechnung', async ({ verwalter }, count: number) => {
+Then('die Rechnungsliste enthält genau {int} Rechnung(en)', async ({ verwalter }, count: number) => {
 	await verwalter.sees(listedInvoiceCount).toBe(count);
 });
 
