@@ -192,12 +192,22 @@ describe('Mahnung per E-Mail, die der Mailserver ablehnt', () => {
 		expect((await listed(result.document.id))?.deliveryErrorCode).toBe('MAIL_DELIVERY_FAILED');
 	});
 
-	it('nennt den Mieter ohne E-Mail-Adresse mit seinem eigenen Code', async () => {
+	// #449, persona Dr. Weber P-1/P-2 (Entscheid A): ohne Adresse wird keine E-Mail versucht, die Mahnung ist ein Brief
+	it('legt die Mahnung ohne E-Mail-Adresse als Brief an, ohne Zustellfehler', async () => {
 		await updateTenant(rental.tenant, { email: '', correspondenceChannel: 'email' });
 
 		const result = await remind(await statement('sent'));
 
-		expect(result.document).toMatchObject({ status: 'to_send', deliveryErrorCode: 'TENANT_NO_EMAIL' });
+		expect(result.document).toMatchObject({ status: 'to_send', channel: 'letter', deliveryError: null });
+		expect(result.deliveryError).toBeUndefined();
+	});
+
+	it('nennt einen früher gespeicherten Mieter ohne E-Mail-Adresse mit seinem eigenen Code', async () => {
+		const { result } = await refusedReminder();
+		// as stored before #449, when Dwello still tried the e-mail without an address
+		await db.update(documents).set({ deliveryError: 'Der Mieter hat keine E-Mail-Adresse.' }).where(eq(documents.id, result.document.id));
+
+		expect((await listed(result.document.id))?.deliveryErrorCode).toBe('TENANT_NO_EMAIL');
 	});
 });
 
@@ -428,7 +438,9 @@ describe('Brief, der später versendet wird', () => {
 describe('Mahnung nach gescheiterter E-Mail per Post versendet', () => {
 	it('hält den Brief als Versandweg fest', async () => {
 		await updateTenant(rental.tenant, { email: '', correspondenceChannel: 'email' });
-		const { document } = await remind(await statement('sent'));
+		const { document: made } = await remind(await statement('sent'));
+		// as an e-mail the mail server refused leaves it (since #449 a reminder without an address is a letter at once)
+		const [document] = await db.update(documents).set({ channel: 'email', deliveryError: 'MAIL_DELIVERY_FAILED' }).where(eq(documents.id, made.id)).returning();
 
 		const sent = (await (await api('PUT', `/api/v1/documents/${document.id}/sent`)).json()) as Document;
 

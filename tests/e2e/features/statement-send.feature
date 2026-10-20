@@ -33,11 +33,13 @@ Funktionalität: Abrechnung per E-Mail senden
     Und hat "Nora Beispiel" per E-Mail "Nebenkostenabrechnung" mit PDF erhalten
     Und ist die "Nebenkostenabrechnung" an "Nora Beispiel" als versendet festgehalten
 
-  # #449 (Entscheid in #404, Punkt 6): ohne E-Mail-Adresse bietet der Versand nur den Brief an
+  # #449 (Entscheid in #404, Punkt 6; Persona Helga P-2): ohne E-Mail-Adresse bietet der Versand nur den Brief an,
+  # schon die Detailseite
   Szenario: Mieter ohne E-Mail-Adresse
     Angenommen "Nora Beispiel" wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Nora Beispiel"
-    Wenn der Liegenschaftsverwalter die Abrechnung per E-Mail senden will
+    Dann bietet die Detailseite der Abrechnung den Versand als "Als versendet markieren" an
+    Wenn der Liegenschaftsverwalter die Abrechnung versenden will
     Dann bietet die Bestätigung nur den Brief an
 
   # Dass ein nicht eingerichteter E-Mail-Versand die Abrechnung ebenso als Entwurf lässt, prüft statement-mail.pg.test.ts:

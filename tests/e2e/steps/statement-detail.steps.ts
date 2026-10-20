@@ -164,6 +164,11 @@ Then('nennt die Bestätigung die Korrespondenzadresse {string}', async ({ verwal
 	await verwalter.sees(recipient).toContain(address);
 });
 
+// #449, persona Helga P-1 (Entscheid): first marked on the day of delivery, then printed from «Dokumente»
+Then('sagt die Bestätigung vor dem Versand {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(sendConfirmation).toContain(text);
+});
+
 Then('sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt', async ({ verwalter }) => {
 	await verwalter.sees(sendConfirmation).toContain('Dwello verschickt die Abrechnung nicht selbst');
 });

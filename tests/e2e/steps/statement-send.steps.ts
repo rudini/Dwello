@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { history, letterInsteadOffers, sendConfirmLabel, sendConfirmation } from '../questions/statement-detail';
+import { history, letterInsteadOffers, sendButtonLabel, sendConfirmLabel, sendConfirmation } from '../questions/statement-detail';
 import { correspondence } from '../questions/tenant-form';
 import { openTenantDetail } from '../tasks/tenant-detail';
 import { paymentDeadline } from '../questions/statement-edit';
@@ -19,6 +19,14 @@ Given(
 
 When('der Liegenschaftsverwalter die Abrechnung per E-Mail senden will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openSendConfirmation);
+});
+
+When('der Liegenschaftsverwalter die Abrechnung versenden will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openSendConfirmation);
+});
+
+Then('bietet die Detailseite der Abrechnung den Versand als {string} an', async ({ verwalter }, label: string) => {
+	await verwalter.sees(sendButtonLabel).toBe(label);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung per E-Mail sendet', async ({ verwalter }) => {

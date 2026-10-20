@@ -146,6 +146,14 @@ Then(
 	}
 );
 
+Then(
+	'ist die {string} an {string} per Brief zu versenden',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(openDocuments);
+		await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toMatch(/per Brief.*Zu versenden/);
+	}
+);
+
 // #193: marked as sent, the letter is remade; the page names it and offers its new PDF to print now
 Then(
 	'bietet die Seite die {string} an {string} zum Ausdrucken an',

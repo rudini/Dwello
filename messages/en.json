@@ -1294,7 +1294,7 @@
 	"statements_marked_sent": "Statement marked as sent",
 	"statements_mark_sent_title": "Mark statement as sent",
 	"statements_mark_sent": "Mark as sent",
-	"statements_send_text_1": "Dwello does not send the statement itself. Deliver the PDF to the tenant and then mark the statement as sent. Dwello then files it under «Documents».",
+	"statements_send_text_1": "Dwello does not send the statement itself. Mark the statement as sent on the day you deliver it to the tenant. Dwello then files it under «Documents». Print it from there.",
 	"statements_send_text_2": "Dwello dates the statement on the day you mark it as sent. So deliver the PDF on the same day.",
 	"statements_send_email": "Send by email",
 	"statements_send_email_title": "Send statement by email",

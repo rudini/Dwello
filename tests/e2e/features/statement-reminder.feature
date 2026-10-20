@@ -60,7 +60,7 @@ Funktionalität: Mahnungen
 
   # Die E-Mail kam nicht an, der Verwalter hat den Brief ausgedruckt und per Post geschickt (#194)
   Szenario: Nach gescheiterter E-Mail per Post versendete Mahnung gilt als Brief
-    Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
+    Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail an eine Adresse, die der Mailserver abweist
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter eine Mahnung sendet
     Und der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" in den Dokumenten als versendet markiert
@@ -93,6 +93,14 @@ Funktionalität: Mahnungen
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
     Wenn der Liegenschaftsverwalter eine Mahnung senden will
     Dann sagt die Mahnung vor dem Senden, dass für "Anna Keller" keine E-Mail-Adresse erfasst ist
+
+  # #449 (Persona Dr. Weber P-1, P-2; Entscheid A): ohne Adresse wird keine E-Mail versucht, die Mahnung ist ein Brief
+  Szenario: Ohne E-Mail-Adresse entsteht die Mahnung als Brief
+    Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+    Wenn der Liegenschaftsverwalter eine Mahnung sendet
+    Dann meldet die Abrechnung "Das Dokument «Zahlungserinnerung» liegt unter «Dokumente» als Brief zum Ausdrucken bereit."
+    Und ist die "Zahlungserinnerung" an "Anna Keller" per Brief zu versenden
 
   # #449 (Punkt 3, #322; Entscheid V-2 A): bezahlt, bevor der Brief zur Post ging; der Brief bleibt unter «Dokumente»,
   # zählt aber nicht mehr als «Zu versenden»

@@ -109,11 +109,7 @@ async function reminderOn(statement: Statement, level: number, day: string) {
 	return { tenant, letter, pdf, paymentDeadline };
 }
 
-async function deliverByEmail(document: Document, to: string | null, letter: ReturnType<typeof reminderLetter>, pdf: Buffer) {
-	if (!to) {
-		const deliveryError = DELIVERY_ERRORS.TENANT_NO_EMAIL;
-		return { document: (await recordDeliveryError(document.id, deliveryError))!, deliveryError };
-	}
+async function deliverByEmail(document: Document, to: string, letter: ReturnType<typeof reminderLetter>, pdf: Buffer) {
 	try {
 		await createMailTransport().send({
 			to,
@@ -136,6 +132,8 @@ export async function sendReminder(statementId: string) {
 	const level = await nextLevel(statement);
 	const today = swissToday();
 	const { tenant, letter, pdf, paymentDeadline } = await reminderOn(statement, level, today);
+	// without an address no e-mail is tried: the reminder is a letter to print (#449, persona Dr. Weber P-1/P-2)
+	const byEmail = tenant.correspondenceChannel === 'email' && !!tenant.email;
 
 	const document = await createDocument({
 		tenantId: tenant.id,
@@ -145,14 +143,14 @@ export async function sendReminder(statementId: string) {
 		title: letter.title,
 		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_'),
 		content: pdf.toString('base64'),
-		channel: tenant.correspondenceChannel,
+		channel: byEmail ? 'email' : 'letter',
 		status: 'to_send',
 		paymentDeadline
 	});
 	await updateStatement(statementId, { reminderSentDate: today });
 
-	if (tenant.correspondenceChannel !== 'email') return { document };
-	return deliverByEmail(document, tenant.email, letter, pdf);
+	if (!byEmail) return { document };
+	return deliverByEmail(document, tenant.email!, letter, pdf);
 }
 
 /**

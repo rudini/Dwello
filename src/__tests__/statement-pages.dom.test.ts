@@ -1212,6 +1212,10 @@ describe('Abrechnungsdetail', () => {
 		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
 		// #449, Entscheid V-7: der Brief wird ein Dokument
 		expect(dialog.textContent).toContain('Dwello legt sie dann unter «Dokumente» ab.'); // N-8
+		// persona Helga P-1 (Entscheid): zuerst am Tag der Zustellung markieren, dann unter «Dokumente» ausdrucken
+		expect(dialog.textContent).toContain(
+			'Dwello verschickt die Abrechnung nicht selbst. Markieren Sie die Abrechnung am Tag, an dem Sie sie zustellen, als versendet. Dwello legt sie dann unter «Dokumente» ab. Drucken Sie sie dort aus.'
+		);
 		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
 		expect(recipient).toContain('Anna Keller');
 		expect(recipient).toContain('Korrespondenzkanal');

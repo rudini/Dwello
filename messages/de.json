@@ -1294,7 +1294,7 @@
 	"statements_marked_sent": "Abrechnung als versendet markiert",
 	"statements_mark_sent_title": "Abrechnung als versendet markieren",
 	"statements_mark_sent": "Als versendet markieren",
-	"statements_send_text_1": "Dwello verschickt die Abrechnung nicht selbst. Stellen Sie dem Mieter das PDF zu und markieren Sie die Abrechnung danach als versendet. Dwello legt sie dann unter «Dokumente» ab.",
+	"statements_send_text_1": "Dwello verschickt die Abrechnung nicht selbst. Markieren Sie die Abrechnung am Tag, an dem Sie sie zustellen, als versendet. Dwello legt sie dann unter «Dokumente» ab. Drucken Sie sie dort aus.",
 	"statements_send_text_2": "Dwello datiert die Abrechnung auf den Tag, an dem Sie sie als versendet markieren. Stellen Sie das PDF deshalb am selben Tag zu.",
 	"statements_send_email": "Per E-Mail senden",
 	"statements_send_email_title": "Abrechnung per E-Mail senden",

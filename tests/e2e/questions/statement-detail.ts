@@ -42,7 +42,8 @@ import {
 	statementStatus,
 	oldAddressWarning,
 	confirmSendButton,
-	letterInsteadLink
+	letterInsteadLink,
+	sendStatementButton
 } from '../targets/statement-detail';
 import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
@@ -51,6 +52,7 @@ export const statusOfStatement = Text.of(statementStatus);
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);
+export const sendButtonLabel = Text.of(sendStatementButton);
 export const resetConfirmation = Text.of(resetPaymentDialog);
 export const recipient = Text.of(sendRecipient);
 export const pdfToView = Attribute.named('href').of(sendPdfLink);

@@ -89,6 +89,7 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
     Dann nennt die Bestätigung den Empfänger "Eva Frei" mit dem Korrespondenzkanal "Per Brief"
     Und sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt
+    Und sagt die Bestätigung vor dem Versand "Markieren Sie die Abrechnung am Tag, an dem Sie sie zustellen, als versendet. Dwello legt sie dann unter «Dokumente» ab. Drucken Sie sie dort aus."
     Und bietet die Bestätigung das PDF der Abrechnung zum Ansehen an
 
   Szenario: Zahlungseingang festhalten

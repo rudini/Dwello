@@ -1294,7 +1294,7 @@
 	"statements_marked_sent": "Conteggio segnato come inviato",
 	"statements_mark_sent_title": "Segnare il conteggio come inviato",
 	"statements_mark_sent": "Segnare come inviato",
-	"statements_send_text_1": "Dwello non invia il conteggio da sé. Recapiti il PDF all’inquilino e poi segni il conteggio come inviato. Dwello lo archivia poi in «Documenti».",
+	"statements_send_text_1": "Dwello non invia il conteggio da sé. Segni il conteggio come inviato il giorno in cui lo recapita all’inquilino. Dwello lo archivia poi in «Documenti». Lo stampi da lì.",
 	"statements_send_text_2": "Dwello data il conteggio al giorno in cui lo segna come inviato. Recapiti quindi il PDF lo stesso giorno.",
 	"statements_send_email": "Inviare per e-mail",
 	"statements_send_email_title": "Inviare il conteggio per e-mail",
