@@ -143,6 +143,25 @@ describe('Vordefinierte Kategorie auf umlagefähig stellen', () => {
 
 // #405 (decided), code review 452-2 C-12: the French choice reads as the texts that send the landlord to it
 describe('Umlagefähigkeit auf Französisch', () => {
+	// language check of the E2E stack: the question named Dwello's category in German
+	it('nennt die Kategorie in der Rückfrage in der Sprache der Oberfläche', async () => {
+		overwriteGetLocale(() => 'fr');
+		try {
+			show(CategoryForm, {
+				category: { ...predefined(false), nameFR: 'Impôt foncier' },
+				submitLabel: 'Enregistrer'
+			});
+			choose('true');
+			save();
+			await settle();
+
+			expect(dialogText()).toContain('Impôt foncier');
+			expect(dialogText()).not.toContain('Liegenschaftssteuer');
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	});
+
 	it('nennt die Wahl «Répercutable» und «Non répercutable»', () => {
 		overwriteGetLocale(() => 'fr');
 		try {

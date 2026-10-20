@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { localName } from '$lib/names';
 	import { m } from '$lib/paraglide/messages';
 	import type { Category } from '$lib/types';
 	import Dialog from '$lib/ui/Dialog.svelte';
@@ -20,7 +21,7 @@
 	const count = $derived(category?.allocableInvoiceCount ?? 0);
 	const excludes = $derived(!!category?.isAllowedUtilityCost && allowed === 'false' && count > 0);
 	const includes = $derived(!!category?.predefined && !category.isAllowedUtilityCost && allowed === 'true');
-	const name = $derived(category?.name ?? '');
+	const name = $derived(category ? localName(category) : ''); // in the interface language, as the page title
 	const excluding = () => ({
 		title: m.categories_not_allocable_confirm_title({ name }),
 		text: count === 1 ? m.categories_not_allocable_confirm_one() : m.categories_not_allocable_confirm_many({ count }),

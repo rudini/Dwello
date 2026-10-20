@@ -33,7 +33,9 @@ const fillInvoice = (invoice: InvoiceData): Activity => (actor) =>
 		Enter.theValue(invoice.amount).into(amountInput),
 		Enter.theValue(invoice.supplier).into(supplierInput),
 		Enter.theValue(invoice.description).into(descriptionInput),
-		chooseCategory(invoice.category)
+		chooseCategory(invoice.category),
+		// every invoice has a key (#379); the settings' default is shared by parallel scenarios, so it is chosen here
+		chooseKey('Pro Fläche (m²)')
 	);
 
 export const registerInvoice = (invoice: InvoiceData): Activity => (actor) => actor.attemptsTo(fillInvoice(invoice), saveInvoice);
