@@ -4,7 +4,7 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { callApi, sendJson } from './helpers/auth';
-import { idOf } from './helpers/records';
+import { idOf, perAreaKey } from './helpers/records';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
@@ -12,6 +12,7 @@ import { invoiceDocuments } from '../db/schema';
 
 const pdf = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(64, 1)]);
 let buildingId: string;
+const key = await perAreaKey();
 
 const newInvoice = (fields: object = {}) =>
 	sendJson('POST', '/api/v1/invoices?skipLlm=true', {
@@ -20,6 +21,7 @@ const newInvoice = (fields: object = {}) =>
 		description: 'Treppenhauslicht',
 		amount: '180.00',
 		invoiceDate: '2026-03-31',
+		distributionKeyId: key,
 		...fields
 	});
 

@@ -2,6 +2,8 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	belegChosenForCreating,
+	discardButtonLabel,
+	whyBelegSelectedOrNot,
 	deductedRuleOnBeleg,
 	fileChooserLabel,
 	belegHowTo,
@@ -30,6 +32,7 @@ import {
 } from '../questions/invoice-upload';
 import {
 	chooseCategory,
+	chooseKey,
 	chooseForCreating,
 	escapeFromCategory,
 	openUploadDialog,
@@ -144,6 +147,13 @@ When(
 	'der Liegenschaftsverwalter bei der Datei von {string} die Kategorie {string} wählt',
 	async ({ verwalter, names }, supplier: string, category: string) => {
 		await verwalter.attemptsTo(chooseCategory(names.get(supplier)!, category));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter bei der Datei von {string} den Verteilschlüssel {string} wählt',
+	async ({ verwalter, names }, supplier: string, key: string) => {
+		await verwalter.attemptsTo(chooseKey(names.get(supplier)!, key));
 	}
 );
 
@@ -345,4 +355,26 @@ Then(
 // what to do before deleting an invoice in a statement (#455, Dr. Weber P-6, P-7)
 Then('sagt die Bestätigung zum Löschen einer abgerechneten Rechnung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(billedRuleOnDelete).toContain(text);
+});
+
+Then('erklärt die Auswahl der Datei von {string} {string}', async ({ verwalter, names }, supplier: string, text: string) => {
+	await verwalter.sees(whyBelegSelectedOrNot(pdfOf(names.get(supplier)!))).toBe(text);
+});
+
+// the file still open with its reason (#245, Anna P-1 of #233)
+Then(
+	'nennt Dwello die Datei von {string} als noch offen, weil {string}',
+	async ({ verwalter, names }, supplier: string, reason: string) => {
+		await verwalter.sees(uploadOutcome).toContain(`${pdfOf(names.get(supplier)!)}: ${reason}`);
+	}
+);
+
+Then('bietet Dwello zum Verwerfen {string} an', async ({ verwalter }, label: string) => {
+	await verwalter.sees(discardButtonLabel).toBe(label);
+});
+
+// after the anchor (the row's note): the help at the checkbox is gone
+Then('erklärt die Auswahl der Datei von {string} nichts mehr', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.sees(noteOnBeleg(pdfOf(names.get(supplier)!))).not.toBeNull();
+	await verwalter.sees(whyBelegSelectedOrNot(pdfOf(names.get(supplier)!))).toBeNull();
 });

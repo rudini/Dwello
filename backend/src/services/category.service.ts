@@ -20,6 +20,7 @@ export interface CategoryFilters {
 
 export interface CategoryWithUsage extends Category {
 	invoiceCount: number;
+	allocableInvoiceCount?: number;
 }
 
 /**
@@ -109,6 +110,10 @@ export async function getCategory(id: string): Promise<CategoryWithUsage | null>
 			updatedAt: categories.updatedAt,
 			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
 				'invoice_count'
+			),
+			// the invoices a save as «nicht umlagefähig» would take out (#309)
+			allocableInvoiceCount: sql<number>`(SELECT COUNT(*)::int FROM invoices WHERE invoices.category_id = "categories"."id" AND invoices.is_valid_utility_cost)`.as(
+				'allocable_invoice_count'
 			)
 		})
 		.from(categories)
@@ -179,13 +184,14 @@ export async function createCategory(data: NewCategory): Promise<Category> {
  * Update an existing category
  */
 export async function updateCategory(id: string, changes: Partial<NewCategory>): Promise<Category | null> {
-	// A predefined category keeps its key: the KI and its reason know it by that (#166)
+	// A predefined category keeps its key: the KI and its reason know it by that (#166); and «Heizkosten», which
+	// decides how a tenant change shares its costs (#302)
 	const [stored] = await db
 		.select({ type: categories.type, heating: categories.isHeatingCost, fuel: categories.isFuel })
 		.from(categories)
 		.where(eq(categories.id, id));
-	const { name: _key, ...names } = changes;
-	const data: Partial<NewCategory> = stored?.type === 'predefined' ? names : changes;
+	const { name: _key, isHeatingCost: _heating, ...fixed } = changes;
+	const data: Partial<NewCategory> = stored?.type === 'predefined' ? fixed : changes;
 	// Brennstoff is a mark of a heating cost (#100); one with a Tankbestand keeps it, else its next Endbestand could not
 	// be recorded and the statement would bill the purchases
 	if (stored) data.isFuel = (data.isHeatingCost ?? stored.heating) && (data.isFuel ?? stored.fuel);

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { fieldNote, fileType, type UploadRow } from '$lib/invoice-upload';
+	import { deliversToTank } from '$lib/invoice';
 	import DateInput from '$lib/ui/DateInput.svelte';
+	import type { KeyProposal } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -14,13 +16,17 @@
 		preview,
 		errors,
 		categories,
-		distributionKeys
+		distributionKeys,
+		keyProposal,
+		tank
 	}: {
 		row: UploadRow;
 		preview?: string;
 		errors: Record<string, string>;
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
+		keyProposal: KeyProposal;
+		tank?: string; // the category of the chosen building's tank (#451, M-1)
 	} = $props();
 
 	const prefix = $derived(`upload-${row.key}-`);
@@ -70,6 +76,7 @@
 			testid="invoice-upload-invoice-number-input"
 		/>
 		<InvoiceDataFields
+			fuel={deliversToTank(tank, row.values.categoryId)}
 			idPrefix={prefix}
 			chooseBuilding={false}
 			buildingId=""
@@ -100,6 +107,9 @@
 			bind:isValidUtilityCost={row.values.isValidUtilityCost}
 			{categories}
 			{distributionKeys}
+			{...keyProposal}
+			bind:keyChosen={row.keyChosen}
+			keyError={errors.distributionKeyId}
 		/>
 	</div>
 </div>

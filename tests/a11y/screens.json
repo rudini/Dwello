@@ -37,17 +37,14 @@
 		"pdf-missing": "Statement list of the seeded building's drafts, whose PDF is not created yet: each row says «PDF noch nicht erstellt» with a link to its statement (#253).",
 		"list-scoped": "List opened from a link that names a Mietvertrag or an Abrechnungsperiode: a sentence above the list says which statements it shows and links to all.",
 		"link-preset": "Statement wizard opened from a link that names a building and a period (after a changed Vertragsende): it starts at the settings step and says what the link chose.",
-		"send-dialog": "The confirmation before sending a statement open: marking it as sent for a letter, sending it by e-mail for a tenant who wants e-mail (#86).",
-		"send-refused": "A draft statement whose tenant wants e-mail but has no address, sent: it stays a draft, the alert says why and offers to deliver it by letter (#86).",
+		"send-dialog": "The confirmation before sending a statement open: marking it as sent for a letter (also for a tenant who wants e-mail but has no address, #449), sending it by e-mail with the offer to send a letter instead for a tenant who wants e-mail (#86, #449).",
+		"send-refused": "A draft statement sent by e-mail that fails (here: the tenant wants e-mail but has no address, posted without the dialog, which offers only the letter since #449): it stays a draft, the alert says why and offers to deliver it by letter (#86).",
 		"recalculate-dialog": "Draft statement, «Neu berechnen» chosen (#338): the confirmation that names what stays and what changes.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
 		"mark-paid-early": "The dialog that marks a statement as paid, with a day before the Abrechnungsdatum entered and confirmed once: the question whether to save it anyway (#448).",
 		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
-		"unaffected": "Sent statement with an invoice recorded after it for days after the tenant's move-out (#454, Fachreview 454-2 V-17): the hint that correcting changes neither the Saldo nor a position.",
-		"lowers": "Sent statement whose recalculation lowers the Saldo after a billed invoice was deleted (#454, Fachreview 454-3 V-32): the hint why «Nicht berichtigen» is missing, «Abrechnung berichtigen» in it.",
-		"declined": "Sent statement after «Nicht berichtigen» (#454): the hint with the day of the decision, «Nicht berichtigt» in the Verlauf.",
 		"decline-dialog": "Sent statement with an invoice recorded after it that raises the Saldo, «Nicht berichtigen» chosen (#454): the confirmation that the statement stays as it is and the task returns after a further change.",
 		"period-filter": "Invoice list filtered by an Abrechnungsperiode, as the warnings on missing statements link to it (#454): the filter named with its building and rule, the invoices grouped by allocability.",
 		"correct-dialog": "The confirmation before a sent, paid or settled statement is replaced by a berichtigte Abrechnung open, with the amount it offsets, on a sent one the field «Bereits bezahlt» (#448), and the limitation (#120).",
@@ -56,8 +53,12 @@
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
 		"preview-skipped": "Statement wizard preview of 2014 with a building whose only contract is billed outside Dwello up to 31.12.2014 («Abgerechnet bis»): the text that all its contracts are billed outside Dwello and the line with the link to the contract (#453).",
+		"billed-until-statement": "Contract form with «Abgerechnet bis» over the paid Dwello statement 2024 of the seeded contract: the refusal at the field, without the way through a correction (#499).",
 		"billed-until-refused": "Contract form with «Abgerechnet bis» after today: the refusal at the field; in the wizard «Neuer Mietvertrag» at step «Vertragsdauer» with a Vertragsbeginn in the past, whose warning points to the field (#453).",
 		"category-check": "Statement wizard preview whose check per category reports invoices missing against the year before.",
+		"uncategorized-invoices": "Statement wizard preview of 2015 with an allocable invoice without Kategorie: the hint that holds the run, with the invoice's edit link (#382, #452).",
+		"allocability-confirm": "Edit form of a category with allocable invoices, saved as not allocable: the question that names how many invoices it takes out (#309, #452).",
+		"allocable-confirm": "Edit form of a predefined category that is not allocable, saved as allocable: the question that names the law (#309, #452).",
 		"invoice-hints": "Statement wizard preview of a period under a year (January to May): the invoices without Leistungszeitraum that count in full, and one dated shortly after the period end, each with its edit link (#131, #134).",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
 		"preview-all-billed": "Statement wizard preview of a period in which every contract already has a statement: how to recalculate and the links to the statements.",
@@ -79,6 +80,7 @@
 		"draft-discard-dialog": "A wizard reopened with input kept in the browser, «Angaben verwerfen» clicked: the dialog asking before the input is deleted (#201).",
 		"draft-dropped": "Statement wizard reopened with input whose building and heating profile were deleted since: the restore notice says so (#135).",
 		"old-address-preview": "Statement wizard preview of 2024 with a tenant who moved out and still has the building's address: the warning at his row (A-5, #114).",
+		"heating-hints": "Statement wizard preview of 2024 with tenants who moved out and a Heizprofil: the heating invoices without Leistungszeitraum beside one with, each with its edit link (#339, #451).",
 		"old-address-task": "Overview with a draft statement of a tenant who moved out and still has the building's address: the task «Neue Adresse eintragen» (A-5, #114).",
 		"buildings-billed": "Statement wizard step «Gebäude» with a building whose rental contracts partly have a statement in the period: the count at the building (#135).",
 		"buildings-overlap": "Statement wizard step «Gebäude» with a period that overlaps the building's statement period without being equal: the building cannot be chosen, the text names the existing period and the ways out (#199, #408 point 2).",
@@ -359,7 +361,8 @@
 				"flat-rate-warning",
 				"flat-rate-warning-advance",
 				"agreed-costs-none-advance",
-				"billed-until-refused"
+				"billed-until-refused",
+				"billed-until-statement"
 			]
 		},
 		{
@@ -438,6 +441,13 @@
 			]
 		},
 		{
+			"name": "invoice-edit-keyless",
+			"path": "/invoices/{keylessInvoice}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "invoice-billed-detail",
 			"path": "/invoices/{billedInvoice}",
 			"states": [
@@ -495,9 +505,11 @@
 				"preview-empty",
 				"category-check",
 				"invoice-hints",
+				"uncategorized-invoices",
 				"period-not-over",
 				"tank-question",
 				"old-address-preview",
+				"heating-hints",
 				"preview-all-billed",
 				"preview-outdated",
 				"draft-restored",
@@ -548,21 +560,21 @@
 			"name": "statement-unaffected-detail",
 			"path": "/statements/{unaffectedStatement}",
 			"states": [
-				"unaffected"
+				"default"
 			]
 		},
 		{
 			"name": "statement-lowered-detail",
 			"path": "/statements/{loweredStatement}",
 			"states": [
-				"lowers"
+				"default"
 			]
 		},
 		{
 			"name": "statement-declined-detail",
 			"path": "/statements/{declinedStatement}",
 			"states": [
-				"declined"
+				"default"
 			]
 		},
 		{
@@ -746,7 +758,16 @@
 			"name": "category-edit-predefined",
 			"path": "/config/categories/{predefinedCategory}/edit",
 			"states": [
-				"default"
+				"default",
+				"allocable-confirm"
+			]
+		},
+		{
+			"name": "category-edit-used",
+			"path": "/config/categories/{usedCategory}/edit",
+			"states": [
+				"default",
+				"allocability-confirm"
 			]
 		},
 		{

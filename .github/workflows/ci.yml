@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-  # The full run on main (every browser, the axe check): a merge has run it on its up-to-date pull request already
+  # Nightly: the full run on main again, for tests that depend on the date
   schedule:
     - cron: '17 2 * * *'
   workflow_dispatch:
@@ -20,11 +20,15 @@ env:
   NODE_VERSION: 22
 
 jobs:
-  # On pull requests: which parts the change touches, so tests of untouched parts are skipped; pushes to main run all but
-  # the E2E tests and the axe check, which the nightly and manual runs add
+  # On pull requests: which parts the change touches, so tests of untouched parts are skipped; a push that changes only
+  # documentation since a green run of its branch skips the tests that run passed. Pushes to main run everything: a pull
+  # request need not be up to date with main, so main is where pull requests merged side by side meet.
   changes:
     name: Changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     outputs:
       backend: ${{ steps.diff.outputs.backend }}
       app: ${{ steps.diff.outputs.app }}
@@ -34,12 +38,18 @@ jobs:
         with:
           fetch-depth: 0
       - id: diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          if [ "${{ github.event_name }}" = push ]; then
-            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && echo "ui=false" >> "$GITHUB_OUTPUT" && exit 0
-          fi
           if [ "${{ github.event_name }}" != pull_request ]; then
             echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
+          fi
+          green=$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?event=pull_request&status=success&per_page=100" \
+            -f branch="$HEAD_REF" -X GET --jq '.workflow_runs[].head_sha' || true)
+          if node tools/ci/docs-only-since.mjs "${{ github.event.pull_request.head.sha }}" $green; then
+            echo "::notice::Only documentation changed since the last green run of this branch, so its tests are skipped."
+            echo "backend=false" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && echo "ui=false" >> "$GITHUB_OUTPUT" && exit 0
           fi
           git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
           # The API contracts are checked against the backend (api-contracts.pg.test.ts)
@@ -99,6 +109,20 @@ jobs:
             echo "::error::Applied migrations changed: ${changed//$'\n'/, }. Put the change into a new numbered file in backend/migrations (backend/CLAUDE.md)."
             exit 1
           fi
+      # Contributors have no commit hook: CI checks the subjects as .claude/hooks/commit-msg-gate.mjs does (Dependabot's are exempt)
+      - name: Commit subjects
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
+        run: |
+          status=0
+          while IFS= read -r subject; do
+            node .claude/hooks/commit-msg-gate.mjs --check "$subject" || status=1
+          done < <(git log --no-merges --format=%s "origin/${{ github.base_ref }}..HEAD")
+          if [ $status != 0 ]; then echo "::error::Commit subjects break CLAUDE.md, Conventions (Commits); reword them, see the log."; fi
+          exit $status
+      # New files are Prettier-clean; existing ones are not all, and .prettierignore limits Prettier to src/
+      - name: Prettier on new files
+        if: github.event_name == 'pull_request'
+        run: git diff --name-only --diff-filter=A -z "origin/${{ github.base_ref }}...HEAD" | xargs -0 -r bunx prettier --check --ignore-unknown
       # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work")
       - run: node tools/open-work/check-issues.mjs
         env:
@@ -148,7 +172,8 @@ jobs:
     needs: changes
     if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
-    # every browser on pull requests too: a race only Firefox or WebKit loses turned main red after green pull requests
+    # Pull requests: Chromium and the API driver only; every browser on each push to main and nightly, so a race only
+    # Firefox or WebKit loses shows on main right after the merge
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -166,8 +191,9 @@ jobs:
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
-      # The axe check: Chromium only; the E2E tests: every browser (with the API driver)
-      BROWSERS: ${{ matrix.reports == 'a11y-reports' && 'chromium' || 'chromium firefox webkit' }}
+      # The axe check and pull requests: Chromium only; else the E2E tests in every browser (with the API driver)
+      BROWSERS: ${{ (matrix.reports == 'a11y-reports' || github.event_name == 'pull_request') && 'chromium' || 'chromium firefox webkit' }}
+      PROJECTS: ${{ matrix.reports == 'e2e-reports' && github.event_name == 'pull_request' && '--project=api --project=chromium' || '' }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -210,7 +236,7 @@ jobs:
         run: bunx playwright install --with-deps ${{ env.BROWSERS }}
       - name: ${{ matrix.name }}
         if: env.SKIP != 'true'
-        run: bun run test:e2e -- ${{ matrix.filter }} --shard=${{ matrix.shard }}/${{ matrix.shards }}
+        run: bun run test:e2e -- ${{ matrix.filter }} ${{ env.PROJECTS }} --shard=${{ matrix.shard }}/${{ matrix.shards }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
@@ -270,6 +296,18 @@ jobs:
       - name: Fallow audit
         # Pull requests: changes against the target branch; pushes: changes of the pushed commits
         run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
+
+  # A pull request that adds a dependency with a known high or critical vulnerability fails. It needs the dependency
+  # graph, which a private repository only has with GitHub Advanced Security, so it runs once the repository is public
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request' && !github.event.repository.private
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
 
   # New or worsened shallow modules in the changed code (tools/deepcheck), with annotations and a step summary
   deepcheck:
@@ -415,3 +453,28 @@ jobs:
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
             if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
             else await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body });
+
+  # A red run on main (after a push or nightly) opens the issue "CI auf main ist rot", or comments on it while it is open;
+  # the next green run closes it. The session whose merge it was fixes it (skill pull-request, "After the merge").
+  main-status:
+    name: Main status
+    needs: [changes, build, static-checks, unit-tests, e2e-tests, e2e-results, fallow]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="CI auf main ist rot"
+          open=$(gh issue list --state open --search "\"$title\" in:title" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -1)
+          if [ "$RED" = true ]; then
+            body="Der Lauf $RUN (${{ github.event_name }}, ${{ github.sha }}) ist fehlgeschlagen."
+            if [ -n "$open" ]; then gh issue comment "$open" --body "$body"; else gh issue create --title "$title" --label bug --body "$body"; fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --reason completed --comment "Der Lauf $RUN (${{ github.sha }}) ist grün."
+          fi

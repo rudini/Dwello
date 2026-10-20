@@ -54,7 +54,8 @@ async function sender(): Promise<PostalAddress & { iban: string }> {
 	};
 }
 
-async function nextLevel(statement: Statement) {
+/** Refuses a statement that is not an open claim: not sent, not overdue, a refund or a Saldo below the minimum */
+function assertClaimable(statement: Statement) {
 	if (!['sent', 'overdue'].includes(statement.status)) {
 		throw new ReminderError('REMINDER_NOT_SENT', 'Nur versendete Abrechnungen können gemahnt werden.');
 	}
@@ -62,8 +63,15 @@ async function nextLevel(statement: Statement) {
 	if (!(Number(statement.balance) > 0)) throw new ReminderError('REMINDER_REFUND', 'Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
 	// also after «Zahlung zurücksetzen»: a Saldo below CHF 5 is not claimed (#94), except on a Schlussabrechnung (#448)
 	if (belowMinimum(Number(statement.balance)) && !statement.final) throw new ReminderError('REMINDER_BELOW_MINIMUM', 'Ein Saldo unter CHF 5.00 wird nicht eingefordert.');
+}
+
+async function nextLevel(statement: Statement) {
+	assertClaimable(statement);
 	const level = (await countReminders(statement.id)) + 1;
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('REMINDER_LIMIT', 'Es wurden bereits 3 Mahnungen versendet.');
+	// the previous one first goes to the post: its Zahlungsfrist runs from that day (#449, decided in #404, point 2)
+	if (statement.reminderToSend)
+		throw new ReminderError('REMINDER_PREVIOUS_NOT_SENT', 'The previous reminder is not marked sent yet', 400, { reminderLevel: level - 1 });
 	// the next Mahnstufe from the day after the last reminder's Zahlungsfrist (#107)
 	const from = statement.nextReminderFrom;
 	if (from && from > swissToday()) {
@@ -94,18 +102,14 @@ async function reminderOn(statement: Statement, level: number, day: string) {
 		language
 	});
 	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
-	// a statement paid since then gets no payment part, or the tenant pays twice (as on the statement)
-	const config = statement.status === 'paid' ? null : await qrBillConfig();
+	// a paid statement gets no reminder, and none is marked sent after paying (#449): only the IBAN decides the payment part
+	const config = await qrBillConfig();
 	const payment = config ? { statement: { ...statement, tenant }, config, language } : undefined;
 	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(day), payment);
 	return { tenant, letter, pdf, paymentDeadline };
 }
 
-async function deliverByEmail(document: Document, to: string | null, letter: ReturnType<typeof reminderLetter>, pdf: Buffer) {
-	if (!to) {
-		const deliveryError = DELIVERY_ERRORS.TENANT_NO_EMAIL;
-		return { document: (await recordDeliveryError(document.id, deliveryError))!, deliveryError };
-	}
+async function deliverByEmail(document: Document, to: string, letter: ReturnType<typeof reminderLetter>, pdf: Buffer) {
 	try {
 		await createMailTransport().send({
 			to,
@@ -128,6 +132,8 @@ export async function sendReminder(statementId: string) {
 	const level = await nextLevel(statement);
 	const today = swissToday();
 	const { tenant, letter, pdf, paymentDeadline } = await reminderOn(statement, level, today);
+	// without an address no e-mail is tried: the reminder is a letter to print (#449, persona Dr. Weber P-1/P-2)
+	const byEmail = tenant.correspondenceChannel === 'email' && !!tenant.email;
 
 	const document = await createDocument({
 		tenantId: tenant.id,
@@ -137,14 +143,14 @@ export async function sendReminder(statementId: string) {
 		title: letter.title,
 		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_'),
 		content: pdf.toString('base64'),
-		channel: tenant.correspondenceChannel,
+		channel: byEmail ? 'email' : 'letter',
 		status: 'to_send',
 		paymentDeadline
 	});
 	await updateStatement(statementId, { reminderSentDate: today });
 
-	if (tenant.correspondenceChannel !== 'email') return { document };
-	return deliverByEmail(document, tenant.email, letter, pdf);
+	if (!byEmail) return { document };
+	return deliverByEmail(document, tenant.email!, letter, pdf);
 }
 
 /**
@@ -156,6 +162,11 @@ export async function markDocumentPosted(id: string) {
 	if (document?.type !== 'reminder' || document.status !== 'to_send') return markDocumentSent(id);
 	const today = swissToday();
 	const statement = (await getStatement(document.statementId!))!;
+	// nothing left to claim: the letter stays under «Dokumente» (#449, decided in #404: point 3, V-4)
+	if (statement.status === 'replaced')
+		throw new ReminderError('REMINDER_STATEMENT_REPLACED', 'The statement is replaced; do not send this reminder any more');
+	if (statement.status === 'paid')
+		throw new ReminderError('REMINDER_STATEMENT_PAID', 'The statement is paid; do not send this reminder any more');
 	const { pdf, paymentDeadline } = await reminderOn(statement, document.reminderLevel!, today);
 	await updateStatement(statement.id, { reminderSentDate: today });
 	return markDocumentSent(id, { content: pdf.toString('base64'), paymentDeadline });

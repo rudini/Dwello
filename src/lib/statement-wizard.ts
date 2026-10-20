@@ -83,6 +83,7 @@ export interface HintedInvoice {
 	description: string;
 	invoiceDate: string;
 	amount: string;
+	categoryName?: string; // a heating invoice's category in the UI language (#339)
 }
 
 export interface InvoiceCheck {
@@ -92,6 +93,9 @@ export interface InvoiceCheck {
 	findings: CategoryFinding[];
 	lateInvoices?: HintedInvoice[];
 	invoicesWithoutServicePeriod?: HintedInvoice[];
+	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
+	heatingWithoutServicePeriod?: (HintedInvoice & { categoryId: string | null })[];
+	oldHeatingRule?: string[]; // sent statements sharing the heating costs over the period although an invoice has one (#335)
 }
 
 /** An existing statement of the run's period that misses invoices or was made with other settings (#132) */
@@ -104,6 +108,7 @@ export interface ChangedStatement {
 	profile: { used: string; run: string } | null;
 	profileEdited: string | null; // its Heizprofil, edited after it was created
 	fee: { used: number; now: number; source: 'run' | 'contract' | 'none' } | null;
+	oldRule: boolean; // sent, its heating costs over the whole period; the run bills its apartment again (#335)
 }
 
 type Range = { start: string; end: string };
@@ -134,6 +139,7 @@ type Coverage = {
 	check?: InvoiceCheck;
 	changed?: ChangedStatement[];
 	fixedTerm?: boolean; // the run bills a running befristeter Mietvertrag here (#76)
+	uncategorized?: HintedInvoice[]; // allocable invoices of the period without a category hold the run (#382)
 	skipped?: SkippedContract[]; // #453 (#327): no Mietstage after «Abgerechnet bis» in the period
 	allSkipped?: boolean; // no contract of the building is left to bill
 };
@@ -284,13 +290,11 @@ export const needsConfirmation = (coverage: Coverage[]) =>
 	coverage.some((c) => c.count === 0 || lacksInvoices(c.check));
 
 // Findings per category; missing invoices (not a hint on new or changed costs) need a confirmation
-const categoryCheck = (check?: InvoiceCheck) => ({
-	findings: check?.findings ?? [],
-	lateInvoices: check?.lateInvoices ?? [],
-	invoicesWithoutServicePeriod: check?.invoicesWithoutServicePeriod ?? [],
-	incomplete: lacksInvoices(check),
-	comparedWith: check?.hasComparison ? check.comparedWith : null
-});
+const categoryCheck = (check?: InvoiceCheck) => {
+	const { findings = [], lateInvoices = [], invoicesWithoutServicePeriod = [], heatingWithoutServicePeriod = [] } = check ?? {};
+	const comparedWith = check?.hasComparison ? check.comparedWith : null;
+	return { findings, lateInvoices, invoicesWithoutServicePeriod, heatingWithoutServicePeriod, incomplete: lacksInvoices(check), comparedWith };
+};
 
 /** The invoices each building brings into the statements, in words; a building without any is flagged */
 export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name: string }[]) =>
@@ -302,6 +306,7 @@ export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name:
 		existing: c.statements ?? 0,
 		changed: c.changed ?? [],
 		fixedTerm: !!c.fixedTerm,
+		uncategorized: c.uncategorized ?? [],
 		skipped: c.skipped ?? [],
 		allSkipped: !!c.allSkipped,
 		...categoryCheck(c.check)
@@ -338,14 +343,23 @@ const feeNotes = {
 };
 
 /** What changed since an existing statement was made, or what it does differently from the run, in words (#132) */
-export const changedNotes = ({ outdated, fuelStock, profile, profileEdited, fee }: ChangedStatement) =>
+export const changedNotes = ({ outdated, fuelStock, profile, profileEdited, fee, oldRule, tenantName }: ChangedStatement) =>
 	[
 		outdated && !fuelStock && m.statements_existing_outdated(),
 		fuelStock && (outdated ? m.statements_existing_outdated_fuel_stock() : m.statements_existing_fuel_stock()),
 		profile && m.statements_existing_profile(profile),
 		profileEdited && m.statements_existing_profile_edited({ profile: profileEdited }),
-		fee && feeNotes[fee.source](fee)
+		fee && feeNotes[fee.source](fee),
+		oldRule && m.statements_existing_old_heating_rule({ tenant: tenantName })
 	].filter(Boolean) as string[];
+
+/** The hint on heating invoices without Leistungszeitraum beside ones with (#339): its categories, each quoted (V-15) */
+export function heatingWholeText(rows: { invoices: { categoryName?: string }[] }[]) {
+	const names = [...new Set(rows.flatMap((row) => row.invoices.map((invoice) => invoice.categoryName ?? '')))];
+	if (names.length === 1) return m.statements_heating_whole_text({ category: names[0] });
+	const categories = new Intl.ListFormat(`${getLocale()}-CH`).format(names.map((name) => m.statements_heating_category({ name })));
+	return m.statements_heating_whole_text_many({ categories });
+}
 
 /** Where the run can choose the settings of the existing statements, when it differs from them in one it chooses */
 export const sameSettingsNote = (changed: ChangedStatement[]) =>

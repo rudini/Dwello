@@ -534,16 +534,16 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col">
 				<span class="badge info">Immobili e appartamenti</span>
 				<h3>Registrare un immobile in due minuti.</h3>
-				<p>Inserisca via, NPA o località e scelga un risultato: Dwello compila l’indirizzo. Ogni campo ha la sua spiegazione e un esempio subito sotto.</p>
+				<p>Inserisca via, numero civico e località e scelga un risultato: Dwello riprende l’immobile e i suoi appartamenti dal registro degli edifici. Ogni campo ha la sua spiegazione e un esempio subito sotto.</p>
 				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Ricerca dell’indirizzo per via, NPA o località<small>Disponibile oggi.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Ricerca dell’indirizzo per via, numero civico e località<small>Senza risultati, registra l’immobile a mano.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Appartamenti con superficie, locali, volume<small>La base di ogni chiave di riparto.</small></span></li>
-					<li><svg class="ic" aria-hidden="true" style="color:var(--ink-muted)"><use href="#i-info"/></svg><span>Immobile dal registro degli edifici <span class="badge plan">Previsto</span><small>Scelga l’indirizzo, e tutti gli appartamenti con superficie, piano e locali arrivano dal Registro federale degli edifici e delle abitazioni (REA).</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Immobile dal registro degli edifici<small>Scelga l’indirizzo, e tutti gli appartamenti con superficie, piano e locali arrivano dal Registro federale degli edifici e delle abitazioni (REA). Li verifica prima di salvare.</small></span></li>
 				</ul>
 			</div>
 			<figure class="shot">
-				<img class="l" src="../shots/it/building-new-light.webp" width="1400" height="1225" loading="lazy" alt="Modulo Nuovo immobile con nome dell’immobile, ricerca dell’indirizzo, via, NPA e località, ogni campo con testo d’aiuto ed esempio.">
-				<img class="d" src="../shots/it/building-new-dark.webp" width="1400" height="1225" loading="lazy" alt="" aria-hidden="true">
+				<img class="l" src="../shots/it/building-register-light.webp" width="1532" height="1836" loading="lazy" alt="Modulo Nuovo immobile: appartamenti 101 e 102 dal registro degli edifici, ciascuno con numero, piano, superficie e numero di locali da verificare.">
+				<img class="d" src="../shots/it/building-register-dark.webp" width="1532" height="1836" loading="lazy" alt="" aria-hidden="true">
 			</figure>
 		</div>
 	</div>
@@ -571,7 +571,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="badge ok">Disponibile</span></div><h3>Dati degli inquilini con un clic</h3><p>Tutto su un’inquilina o un inquilino in ZIP, per la consegna dei dati secondo l’art. 28 LPD.</p></article>
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span class="badge ok">Disponibile</span></div><h3>Registro di tutte le modifiche</h3><p>Accessi e ogni modifica che riguarda un conteggio, con l’ora e lo stato precedente.</p></article>
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span class="badge ok">Disponibile</span></div><h3>Documenti per inquilino</h3><p>Lettere, conteggi e solleciti in un unico posto.</p></article>
-			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge plan">Previsto</span></div><h3>Immobile dal registro degli edifici</h3><p>Riprendere immobili e appartamenti con superficie, piano e locali dal registro federale.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge ok">Disponibile</span></div><h3>Immobile dal registro degli edifici</h3><p>Riprendere immobili e appartamenti con superficie, piano e locali dal registro federale.</p></article>
 			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span class="badge plan">Previsto</span></div><h3>Esportare tutti i dati</h3><p>Tutti i Suoi dati in qualsiasi momento in CSV e JSON. I Suoi dati appartengono a Lei, anche se cambia.</p></article>
 			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg><span class="badge plan">Previsto</span></div><h3>Server MCP per assistenti IA</h3><p>Chieda al Suo assistente IA gli importi aperti, le scadenze o le fatture mancanti.</p></article>
 		</div>
@@ -789,7 +789,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		</div>
 		<div class="road">
 			<article><span class="badge plan">Previsto</span><h3>Installazione in un passo</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a><p>Un comando, una domanda sulla Sua e-mail, fatto. Con un proprio accesso, senza account Google.</p></article>
-			<article><span class="badge plan">Previsto</span><h3>Immobile dal registro degli edifici</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/479" rel="noopener">#479</a><p>Riprendere immobili e appartamenti dal Registro federale degli edifici e delle abitazioni.</p></article>
 			<article><span class="badge plan">Previsto</span><h3>Server MCP</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener">#495</a><p>Dwello come strumento per il Suo assistente IA, in locale e con la Sua autorizzazione.</p></article>
 			<article><span class="badge plan">Previsto</span><h3>Esportazione completa</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener">#496</a><p>Tutti i dati in CSV e JSON, in qualsiasi momento, con un clic.</p></article>
 			<article><span class="badge plan">Previsto</span><h3>Rapporti e analisi</h3><p>Entrate, uscite e spese accessorie negli anni, per la dichiarazione d’imposta e la fiduciaria.</p></article>

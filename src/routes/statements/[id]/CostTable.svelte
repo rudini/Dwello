@@ -97,7 +97,8 @@
 		Math.abs(item.periodShare! - statement.rentalDays / periodDays) < 0.00005;
 	const timeShare = (item: Item) => {
 		if (item.shareDays) return m.statements_share_days(item.shareDays);
-		if (item.periodShare == null) return '–';
+		// invoices summing to zero have no share of the building's costs (#237)
+		if (item.periodShare == null || (item.totalAmount === 0 && item.invoices.some((invoice) => invoice.part))) return '–';
 		if (rentedShare(item))
 			return m.statements_share_days({ days: statement.rentalDays, total: periodDays });
 		return item.byProfile

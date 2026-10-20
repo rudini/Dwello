@@ -422,6 +422,19 @@ describe('Rechnungsdetail', () => {
 		);
 	});
 
+	// #245 (Dr. Weber P-5 of #233): also the delete confirmation names the statements and their state
+	it('nennt beim Löschen einer abgerechneten Rechnung die Abrechnungen mit Nummer und Status', () => {
+		show(InvoicePage, {
+			data: {
+				invoice: invoice(),
+				billedIn: [{ start: '2024-01-01', end: '2024-12-31' }],
+				statements: [{ id: 's1', statementNumber: 'NK-2024-0001', status: 'sent' }]
+			}
+		} as never);
+		click('invoice-delete-button');
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain('NK-2024-0001, Versendet');
+	});
+
 	it('löscht die Rechnung nach Bestätigung und kehrt zur Liste zurück', async () => {
 		const calls = fakeBff(() => [204]);
 		show(InvoicePage, { data: { invoice: invoice() } });
@@ -476,7 +489,8 @@ describe('Rechnungsdetail', () => {
 	it('erklärt eine Rechnung ohne Verteilschlüssel, statt einen Fehler anzudeuten', () => {
 		show(InvoicePage, { data: { invoice: invoice({ distributionKey: undefined }) } });
 
-		expect(text()).toContain('Keiner – die Kosten werden gleichmässig pro Wohnung verteilt');
+		// Fachreview 452-2 V-24: named as statement and PDF name it
+		expect(text()).toContain('Keiner – die Kosten werden gleichmässig pro Wohnung verteilt, wie «Pro Einheit»');
 		expect(text()).not.toContain('Nicht zugewiesen');
 	});
 
@@ -827,7 +841,7 @@ describe('Rechnung erfassen', () => {
 	it('sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		expect(document.querySelector('#distributionKey-help')!.textContent).toContain(
-			'Ohne Verteilschlüssel werden die Kosten gleichmässig pro Wohnung verteilt.'
+			'Dwello schlägt den Verteilschlüssel vor, den die letzte Rechnung dieser Kategorie im Gebäude hat, sonst den aus den Einstellungen.'
 		);
 	});
 
@@ -868,17 +882,24 @@ describe('Rechnung erfassen', () => {
 		);
 	});
 
-	// Eine Öllieferung ist Vorrat: ihr Verbrauch zählt über den Tankbestand, nicht über einen Leistungszeitraum
-	it('erklärt, wann ein Leistungszeitraum hingehört und wann nicht', () => {
-		show(NewInvoicePage, { data: data(false) } as never);
-		const help = text();
+	// Eine Öllieferung ist Vorrat: ihr Verbrauch zählt über den Tankbestand, die Lieferung ganz in der Periode ihres
+	// Liefertags, des Endes ihres Leistungszeitraums (#451, Fachreview M-1, V-14)
+	// the sentence on deliveries only in the category of the building's tank, and first (Code-Review C-2, Fachreview
+	// V-20, V-29; Helga P-1, P-2, P-4 of #451: district heating in a «Heizung» category has no tank)
+	it('erklärt, wann ein Leistungszeitraum hingehört, auch bei einer Lieferung in den Tank', () => {
+		const fuel = { id: 'c3', name: 'Heizöl', isAllowedUtilityCost: true, isFuel: true };
+		show(NewInvoicePage, { data: data(false, { categories: [...categories, fuel], tanks: { b1: 'c3' } }) } as never);
+		const delivery =
+			'Bei einer Lieferung von Heizöl, Flüssiggas, Pellets oder Holz zählt der Verbrauch über den Tankbestand des Gebäudes. Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.';
+		const periods = 'Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.';
 
-		expect(help).toContain(
-			'Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
-		);
-		expect(help).toContain(
-			'Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'
-		);
+		expect(text()).toContain(periods);
+		expect(text()).not.toContain('Nicht für Lieferungen von Heizöl');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c3');
+		expect(text()).not.toContain(delivery); // no building with this tank chosen yet
+		fireEvent(byTestId<HTMLSelectElement>('invoice-building-select')!, 'change', 'b1');
+		expect(text()).toContain(delivery);
+		expect(text().indexOf(delivery)).toBeLessThan(text().indexOf(periods));
 	});
 
 	it('warnt ohne Abrechnungsperiode nicht', () => {
@@ -913,6 +934,19 @@ describe('Rechnung bearbeiten', () => {
 			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
 		} as never);
 
+	// #451, M-1 (Code-Review C-11): in der Kategorie des Tanks im Gebäude erklärt das Formular, welcher Tag eine Lieferung
+	// zählt
+	it('erklärt bei einer Lieferung von Heizmaterial den Tag der Lieferung', () => {
+		const fuel = { id: 'c3', name: 'Heizöl', isAllowedUtilityCost: true, isFuel: true };
+		show(EditInvoicePage, {
+			data: { invoice: invoice({ categoryId: 'c3' }), buildings, categories: [...categories, fuel], distributionKeys, tanks: { b1: 'c3' } }
+		} as never);
+
+		expect(text()).toContain('Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		expect(text()).not.toContain('Tag der Lieferung');
+	});
+
 	// #455 (#268): wer den Betrag ändert, sieht dort, dass Akontorechnungen abgezogen sind
 	it('zeigt beim Betrag den Hinweis auf abgezogene Akontorechnungen', () => {
 		edit({ beleg: { fileName: 'werke.pdf', mimeType: 'application/pdf', deductedAmount: '1000.00', nonAllocableItems: false } });
@@ -920,6 +954,39 @@ describe('Rechnung bearbeiten', () => {
 		expect(byTestId('invoice-deducted-rule')!.textContent).toBe(
 			'Prüfen Sie, dass die Akontorechnungen nicht zusätzlich erfasst sind. Ist eine noch erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet ist, und führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». Der Leistungszeitraum ist der auf dem Beleg.'
 		);
+	});
+
+	// #245 (product owner): the Kategorie is required here as on upload
+	it('verlangt die Kategorie, wie beim Hochladen', () => {
+		const calls = fakeBff();
+		edit({ categoryId: undefined, category: undefined });
+		expect(document.querySelector('label[for="category"]')!.textContent).not.toContain('optional');
+		submit('submit-button');
+		expect(text()).toContain('Wählen Sie eine Kategorie.');
+		expect(calls).toEqual([]);
+	});
+
+	// #245 (Dr. Weber P-5 of #233): the warning says in which statements, and in what state, the invoice is
+	it('nennt in der Warnung die Abrechnungen mit Nummer und Status', () => {
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice(),
+				buildings,
+				categories,
+				distributionKeys,
+				billedIn: [{ start: '2024-01-01', end: '2024-12-31' }],
+				statements: [{ id: 's1', statementNumber: 'NK-2024-0001', status: 'draft' }]
+			}
+		} as never);
+		expect(byTestId('invoice-billed-warning')!.textContent).toContain('NK-2024-0001, Entwurf');
+	});
+
+	// #245 (Helga P-6 of #233): a checkbox that cannot be ticked looks so
+	it('zeigt «Umlagefähig» bei einer nicht umlagefähigen Kategorie gesperrt', () => {
+		edit({ categoryId: 'c2', category: categories[1], isValidUtilityCost: false });
+		const box = byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!;
+		expect(box.disabled).toBe(true);
+		expect(box.closest('label')!.className).toContain('opacity-60');
 	});
 
 	it('warnt, wenn die Rechnung schon in Abrechnungen steckt, und nennt die Folge', () => {
@@ -1011,6 +1078,21 @@ describe('Rechnung bearbeiten', () => {
 			})
 		]);
 		expect(goto).toHaveBeenCalledWith('/invoices/i1');
+	});
+
+	// Persona Dr. Weber P-2 (#452): aus der Vorschau geöffnet, führt Speichern und Abbrechen zurück
+	it('kehrt nach dem Speichern und beim Abbrechen zum Assistenten zurück', async () => {
+		fakeBff(() => [200, {}]);
+		const returnTo = '/statements/generate?schritt=3';
+		show(EditInvoicePage, {
+			data: { invoice: invoice(), buildings, categories, distributionKeys, returnTo }
+		} as never);
+
+		expect(byTestId('form-cancel')!.getAttribute('href')).toBe(returnTo);
+		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '480');
+		submit('submit-button');
+		await settle();
+		expect(goto).toHaveBeenCalledWith(returnTo);
 	});
 
 	it('verlangt einen Grund, wenn die Kategorie der KI geändert wird', async () => {
@@ -1120,7 +1202,7 @@ describe('Beleg einer Rechnung', () => {
 		// the Akonto hint sits at the Betrag (#455)
 		expect(byTestId('invoice-document-hints')!.textContent).not.toContain('Akontorechnungen');
 		expect(byTestId('invoice-document-hints')!.textContent).toContain(
-			'Der Beleg enthält auch Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Prüfen Sie, dass der Betrag nur den umlagefähigen Teil enthält und der Rest als eigene Rechnung in einer nicht umlagefähigen Kategorie erfasst ist.'
+			'Der Beleg enthält auch Kosten, die nicht umlagefähig sind (z. B. Reparaturen). Prüfen Sie, dass der Betrag nur den umlagefähigen Teil enthält und der Rest als eigene Rechnung in einer nicht umlagefähigen Kategorie erfasst ist.'
 		);
 		// an invoice that is not allocable keeps all its costs out already
 		document.body.innerHTML = '';
@@ -1230,6 +1312,110 @@ describe('Beleg einer Rechnung', () => {
 		click('invoice-document-upload-button');
 		await settle();
 		expect(text()).toContain('Dwello nimmt nur PDF-, JPG- und PNG-Dateien an.');
+	});
+});
+
+// #452 Punkt 7 (#379): pro Kategorie und Gebäude ein Verteilschlüssel, vorgeschlagen aus der letzten Rechnung
+describe('Verteilschlüssel einer Rechnung', () => {
+	const keys = [
+		{ id: 'k1', name: 'Nach Fläche' },
+		{ id: 'k2', name: 'Pro Zimmer' },
+		{ id: 'k3', name: 'Pro Einheit' }
+	];
+	const latestKeys = [{ buildingId: 'b1', categoryId: 'c1', distributionKeyId: 'k2' }];
+	const key = () => byTestId<HTMLSelectElement>('invoice-distribution-key-select')!;
+	const newInvoice = (defaultDistributionKeyId = 'k1') =>
+		show(NewInvoicePage, {
+			data: {
+				buildings,
+				categories,
+				distributionKeys: keys,
+				latestKeys,
+				llmAvailable: false,
+				defaultDistributionKeyId,
+				buildingId: '',
+				returnTo: null
+			}
+		} as never);
+	const choose = (testid: string, value: string) =>
+		fireEvent(byTestId<HTMLSelectElement>(testid)!, 'change', value);
+
+	it('schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor', () => {
+		newInvoice();
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c1');
+
+		expect(key().value).toBe('k2');
+	});
+
+	it('schlägt ohne frühere Rechnung den Verteilschlüssel aus den Einstellungen vor', () => {
+		newInvoice('k3');
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c2');
+
+		expect(key().value).toBe('k3');
+	});
+
+	// Persona Helga 452 P-1: the proposal of the category chosen before does not stay
+	it('nimmt den Vorschlag zurück, wenn die neue Kategorie keinen hat', () => {
+		newInvoice('');
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c1');
+		choose('invoice-category-select', 'c2');
+
+		expect(key().value).toBe('');
+	});
+
+	it('überschreibt einen selbst gewählten Verteilschlüssel nicht', () => {
+		newInvoice();
+		choose('invoice-distribution-key-select', 'k3');
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c1');
+
+		expect(key().value).toBe('k3');
+	});
+
+	it('speichert keine Rechnung ohne Verteilschlüssel', () => {
+		const calls = fakeBff();
+		newInvoice('');
+		submit('submit-button');
+
+		expect(text()).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+		expect(calls).toEqual([]);
+	});
+
+	it('schlägt einer Rechnung ohne Verteilschlüssel beim Bearbeiten den Verteilschlüssel vor', () => {
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice({ distributionKeyId: undefined, distributionKey: undefined }),
+				buildings,
+				categories,
+				distributionKeys: keys,
+				latestKeys,
+				defaultDistributionKeyId: 'k1'
+			}
+		} as never);
+
+		expect(key().value).toBe('k2');
+		// Fachreview 452-1 V-5: a later berichtigte Abrechnung shares it otherwise than the one sent
+		expect(byTestId('invoice-key-missing-note')!.textContent!.trim()).toBe(
+			'Diese Rechnung hat noch keinen Verteilschlüssel. Dwello verteilt sie darum gleichmässig pro Wohnung, wie «Pro Einheit». Prüfen Sie den Verteilschlüssel, den Dwello vorschlägt. Speichern Sie die Rechnung, gilt er für Abrechnungen, die Dwello danach erstellt oder neu berechnet; schon erstellte bleiben, wie sie sind.'
+		);
+	});
+
+	it('lässt beim Bearbeiten den gespeicherten Verteilschlüssel stehen', () => {
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice({ distributionKeyId: 'k3' }),
+				buildings,
+				categories,
+				distributionKeys: keys,
+				latestKeys,
+				defaultDistributionKeyId: 'k1'
+			}
+		} as never);
+
+		expect(key().value).toBe('k3');
 	});
 });
 

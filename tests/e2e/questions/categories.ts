@@ -1,5 +1,7 @@
 import { Accessible, Checked, Count, Enabled, HiddenText, Text, Visibility } from '../screenplay/questions';
 import {
+	allocabilityQuestion,
+	allocabilityText,
 	allowanceOption,
 	allowedBadge,
 	categoryRow,
@@ -8,6 +10,8 @@ import {
 	descriptionInput,
 	contractNote,
 	formReason,
+	heatingCheckbox,
+	heatingHelp,
 	kindBadge,
 	predefinedHint,
 	proposal,
@@ -32,3 +36,8 @@ export const hiddenDescription = HiddenText.of(descriptionInput);
 export const kindOf = (name: string) => Text.of(kindBadge(name));
 export const whyNotDeletable = (name: string) => Accessible.descriptionOf(deleteButton(name));
 export const predefinedHintText = Text.of(predefinedHint);
+export const heatingChangeable = Enabled.of(heatingCheckbox);
+export const heatingChecked = Checked.of(heatingCheckbox);
+export const heatingHelpText = Text.of(heatingHelp);
+export const allocabilityQuestionText = Text.of(allocabilityQuestion);
+export const allocabilityConsequence = Text.of(allocabilityText);

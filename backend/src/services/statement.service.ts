@@ -26,6 +26,7 @@ import {
 import { agreementsInPeriod } from './agreed-category.service';
 import { calculateBalance, calculateStatementForContract, generateStatementNumber } from './calculation.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { getUncategorizedInvoices } from './invoice.service';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
@@ -58,16 +59,22 @@ const nextReminderFrom = sql<string | null>`(
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder'
 )`;
+// A reminder still «Zu versenden»: the next Mahnstufe waits until it is marked sent (#449, decided in #404, point 2)
+const reminderToSend = sql<boolean>`exists (
+	select 1 from ${documents}
+	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'to_send'
+)`;
 // the Schlussabrechnung: the Mietvertrag ends within the period; it has no Mindestbetrag and carries nothing over (#448)
 const final = sql<boolean>`exists (
 	select 1 from ${rentalContracts}
 	where ${rentalContracts.id} = ${utilityStatements.contractId}
 		and ${rentalContracts.endDate} between ${utilityStatements.periodStart} and ${utilityStatements.periodEnd}
 )`;
-const statementColumns = { ...tableColumns, nextReminderFrom, final, oldAddress: oldAddress(utilityStatements.contractId) };
+const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId) };
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
 	nextReminderFrom: string | null;
+	reminderToSend: boolean; // a reminder still to send holds the next Mahnstufe (#449)
 	final: boolean; // a Schlussabrechnung (#448)
 	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
 	tenant: {
@@ -239,6 +246,14 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	};
 }
 
+// Whether a position of the statement is a heating cost
+async function billsHeating(lineItems: { categoryId: string | null }[]) {
+	const ids = lineItems.flatMap((item) => item.categoryId ?? []);
+	if (!ids.length) return false;
+	const [heating] = await db.select({ id: categories.id }).from(categories).where(and(inArray(categories.id, ids), eq(categories.isHeatingCost, true))).limit(1);
+	return !!heating;
+}
+
 /**
  * Get a single statement by ID with all related data
  */
@@ -313,7 +328,8 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		tenant: result.tenant,
 		apartment: result.apartment,
 		building: result.building,
-		heatingProfile: result.heatingProfile,
+		// without a heating cost position the chosen profile was not applied: it names none (#280, #451 point 8)
+		heatingProfile: (await billsHeating(lineItems)) ? result.heatingProfile : null,
 		lineItems,
 		...(await correctionsOf(result.statement)),
 		carriedFrom: await carriedFromOf(result.statement.carriedFromId)
@@ -598,6 +614,7 @@ export async function recalculateStatement(id: string): Promise<StatementWithDet
 	if (draft.status !== 'draft') throw new CodedError('STATEMENT_NOT_RECALCULABLE', 'Only a draft can be recalculated');
 	// the wizard asks only for contracts without a statement: the landlord deletes the draft first (review 338-1 C-3)
 	await refuseOpenAgreements(draft.contractId, draft.building!.id, draft.periodStart, draft.periodEnd, 'STATEMENT_RECALCULATION_AGREEMENTS_OPEN');
+	await refuseUncategorized(draft.building!.id, draft.periodStart, draft.periodEnd, 'STATEMENT_RECALCULATION_UNCATEGORIZED_INVOICES');
 	const { values, lineItems, balance } = await recalculated(draft);
 	// a berichtigte Abrechnung keeps the statement it replaces and what was paid on it (review 338-1 C-1)
 	const kept = { replacesId: draft.replacesId, priorPayments: draft.priorPayments, balance };
@@ -856,6 +873,17 @@ async function refuseOpenAgreements(
 	});
 }
 
+// #382: without the wizard, which holds them, an allocable invoice without category would go to every tenant unchecked
+async function refuseUncategorized(buildingId: string, periodStart: string, periodEnd: string, code = 'STATEMENT_UNCATEGORIZED_INVOICES') {
+	const uncategorized = await getUncategorizedInvoices(buildingId, periodStart, periodEnd);
+	if (!uncategorized.length) return;
+	throw new CodedError(code, 'Allocable invoices of the period have no category', {
+		invoices: uncategorized
+			.map((invoice) => `${invoice.billingEntityName}, ${formatSwissDate(invoice.invoiceDate)}, CHF ${formatCHF(Number(invoice.amount))}`)
+			.join('; ')
+	});
+}
+
 /**
  * The berichtigte Abrechnung of a replaced statement: a draft of the same Mietvertrag and Abrechnungsperiode with the
  * same Heizprofil and Verwaltungspauschale, from today's data, with a new number; none without Mietstage in the period
@@ -869,6 +897,7 @@ export async function correctStatement(id: string): Promise<StatementWithDetails
 			number: replaced.replacedBy.statementNumber
 		});
 	await refuseOpenAgreements(replaced.contractId, replaced.building!.id, replaced.periodStart, replaced.periodEnd);
+	await refuseUncategorized(replaced.building!.id, replaced.periodStart, replaced.periodEnd);
 	try {
 		return await generateStatement({
 			contractId: replaced.contractId,

@@ -37,6 +37,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	return {
 		statement: { ...statement, tenantAddress: address },
 		reminders: documents.filter((document) => document.type === 'reminder'),
+		// how the statement went out: its own Dokument, by e-mail or by letter (#449, decided in #404, point 7)
+		delivery: documents
+			.filter((document) => document.type === 'statement')
+			.map(({ channel, recipient, sentAt }) => ({ channel, recipient: recipient ?? null, sentAt }))[0] ?? null,
 		later
 	};
 };

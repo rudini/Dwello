@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { deliveryErrorText } from '$lib/backend-error';
+	import { documentStatus } from '$lib/document-status';
 	import type { StatementDocument } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatDate } from '$lib/utils/format';
@@ -24,11 +25,7 @@
 			{details(document)}
 			{#if !upload}
 				·
-				<span data-testid="document-status"
-					>{document.status === 'to_send'
-						? m.tenants_document_to_send()
-						: m.statements_status_sent()}</span
-				>
+				<span data-testid="document-status">{documentStatus(document).label}</span>
 			{/if}
 		</p>
 		{#if document.deliveryError}<p class="text-caution">

@@ -13,7 +13,15 @@
 	}: { open: boolean; statement: StatementWithDetails; sentReminders: number } = $props();
 
 	const TITLES = [m.documents_reminder_1(), m.documents_reminder_2(), m.documents_reminder_3()];
+	const LANGUAGES = {
+		de: m.statements_language_de,
+		fr: m.statements_language_fr,
+		it: m.statements_language_it,
+		en: m.statements_language_en
+	};
 	const next = $derived(TITLES[sentReminders]);
+	// the language Dwello writes the reminder in, named in the UI's language (#449, decided in #404, point 4)
+	const language = $derived(LANGUAGES[statement.tenantLanguage ?? 'de']());
 	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
 </script>
 
@@ -26,10 +34,13 @@
 		confirmTestid="statement-reminder-confirm"
 	>
 		<p data-testid="reminder-delivery-info">
-			{#if byEmail}
-				{m.statements_reminder_by_email({ next, email: statement.tenantEmail ?? '' })}
+			{#if byEmail && statement.tenantEmail}
+				{m.statements_reminder_by_email({ next, language, email: statement.tenantEmail })}
+			{:else if byEmail}
+				<!-- the channel says e-mail, but there is no address: the letter waits under «Dokumente» (#283) -->
+				{m.statements_reminder_no_email({ tenant: statement.tenantName, next, language })}
 			{:else}
-				{m.statements_reminder_by_letter({ next })}
+				{m.statements_reminder_by_letter({ next, language })}
 			{/if}
 		</p>
 		<p class="rounded-panel bg-sunken p-4 text-ink">

@@ -54,6 +54,7 @@ const identifiers: Record<string, string[]> = {
 	'src/routes/statements/[id]/pdf/+server.ts': ['ansehen', 'abrechnung'],
 	'src/routes/statements/[id]/SendDialog.svelte': ['ansehen'], // query parameter
 	'src/routes/statements/generate/PreviewChecks.svelte': ['schritt'], // query parameter
+	'src/routes/statements/generate/InvoiceHint.svelte': ['schritt'],
 	'src/routes/statements/generate/StatementWizard.svelte': ['schritt'],
 	'src/lib/statement-wizard.ts': ['akonto'], // a message's name
 	'src/routes/statements/generate/PreviewStep.svelte': ['akonto'], // test id

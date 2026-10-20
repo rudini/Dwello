@@ -167,6 +167,11 @@ Then('nennt die Bestätigung die Korrespondenzadresse {string}', async ({ verwal
 	await verwalter.sees(recipient).toContain(address);
 });
 
+// #449, persona Helga P-1 (Entscheid): first marked on the day of delivery, then printed from «Dokumente»
+Then('sagt die Bestätigung vor dem Versand {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(sendConfirmation).toContain(text);
+});
+
 Then('sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt', async ({ verwalter }) => {
 	await verwalter.sees(sendConfirmation).toContain('Dwello verschickt die Abrechnung nicht selbst');
 });
@@ -289,6 +294,10 @@ Then('steht im PDF nicht {string}', async ({ verwalter }, text: string) => {
 
 Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }, profile: string) => {
 	await verwalter.sees(heatingProfileOfStatement).toContain(names.get(profile)!);
+});
+
+Then('nennt die Abrechnung kein Heizprofil', async ({ verwalter }) => {
+	await verwalter.sees(heatingProfileOfStatement).toBeNull();
 });
 
 Then(
@@ -579,6 +588,10 @@ Then(
 		await verwalter.sees(oldAddressWarningText).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );
+
+Given('die Rechnung der Kategorie {string} vom {string} hat keinen Verteilschlüssel', async ({ seed }, category: string, date: string) => {
+	await seed.invoiceWithoutKey(`${category} ${date}`);
+});
 
 // #403: the Übertrag of the previous statement of the same Mietvertrag; a refund carried over subtracts, a Nachzahlung adds
 Then(

@@ -12,7 +12,6 @@ import InvoiceUploadDialog from '../routes/invoices/InvoiceUploadDialog.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { reactiveProps } from './helpers/reactive-props.svelte';
 import extraction from '../../tests/contracts/invoice-extraction.json';
-import listed from '../../tests/contracts/invoice-list.json';
 import unreadable from '../../tests/contracts/invoice-extraction-unreadable.json';
 
 const buildings = [
@@ -24,12 +23,15 @@ const pdf = (name: string) => new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 
 const word = new File([new Uint8Array([0x50, 0x4b, 3, 4])], 'notizen.docx');
 const read = { ...extraction, duplicateOf: null, deductedAmount: null };
 
-function open(answer: Parameters<typeof fakeBff>[0]) {
+function open(
+	answer: Parameters<typeof fakeBff>[0],
+	list: { id: string; tank?: string }[] = buildings
+) {
 	const calls = fakeBff(answer);
 	const oncreated = vi.fn();
 	show(InvoiceUploadDialog, {
 		open: true,
-		buildings,
+		buildings: list as typeof buildings,
 		categories: categories as never,
 		distributionKeys: [{ id: 'k1', name: 'Nach Fläche' }],
 		defaultDistributionKeyId: 'k1',
@@ -49,6 +51,74 @@ async function upload(...files: File[]) {
 const chooseBuilding = () =>
 	fireEvent(byTestId<HTMLSelectElement>('invoice-upload-building-select')!, 'change', 'b1');
 const rowText = () => allByTestId('invoice-upload-row').map((row) => row.textContent?.replace(/\s+/g, ' '));
+
+// #452 Punkt 7 (#379): auch eine hochgeladene Rechnung bekommt den Verteilschlüssel ihrer Kategorie im Gebäude
+describe('Verteilschlüssel beim Hochladen', () => {
+	const openWith = (defaultDistributionKeyId: string) => {
+		const calls = fakeBff((call) => (call.path === '/invoices' ? [201, { id: 'i9' }] : [200, read]));
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [
+				{ id: 'k1', name: 'Nach Fläche' },
+				{ id: 'k2', name: 'Pro Zimmer' }
+			],
+			defaultDistributionKeyId,
+			latestKeys: [{ buildingId: 'b1', categoryId: 'c1', distributionKeyId: 'k2' }],
+			oncreated: vi.fn()
+		});
+		return calls;
+	};
+	const sentKey = (calls: ReturnType<typeof fakeBff>) =>
+		JSON.parse(String((calls.find((call) => call.path === '/invoices')!.body as FormData).get('invoice'))).distributionKeyId;
+
+	// Code-Review 452-1 C-1: the row of the KI's invoice stays folded, as usual
+	it('schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor, auch zugeklappt', async () => {
+		const calls = openWith('k1');
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+
+		click('invoice-upload-create-button');
+		await settle();
+
+		expect(sentKey(calls)).toBe('k2');
+	});
+
+	// Code-Review 452-1 C-2: folding and unfolding the row keeps the landlord's own choice
+	it('behält einen selbst gewählten Verteilschlüssel nach dem Zu- und Aufklappen', async () => {
+		openWith('k1');
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!, 'change', 'k1');
+		click('invoice-upload-row-toggle');
+		click('invoice-upload-row-toggle');
+
+		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k1');
+	});
+
+	it('erstellt keine Rechnung ohne Verteilschlüssel und sagt warum', async () => {
+		fakeBff(() => [200, { ...read, categorization: null }]);
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [{ id: 'k1', name: 'Nach Fläche' }],
+			defaultDistributionKeyId: '',
+			latestKeys: [],
+			oncreated: vi.fn()
+		});
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		await settle();
+
+		expect(byTestId('invoice-upload-row-message')!.textContent).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+		expect(byTestId('invoice-upload-create-button')!.textContent?.trim()).toBe('0 Rechnungen erstellen (1 unvollständig)');
+	});
+});
 
 describe('Rechnungen hochladen', () => {
 	it('nimmt Dateien erst, wenn das Gebäude gewählt ist, und erinnert an die Originalrechnung', () => {
@@ -90,7 +160,8 @@ describe('Rechnungen hochladen', () => {
 		click('invoice-upload-create-button');
 		await settle();
 		// open: what was chosen but not created; not a Gutschrift, which is not to be created (C-4)
-		expect(byTestId('invoice-upload-result')!.textContent).toContain('Noch offen: werke.pdf.');
+		// with its reason (#245, Anna P-1 of #233)
+		expect(byTestId('invoice-upload-result')!.textContent).toContain('werke.pdf: Wählen Sie eine Kategorie.');
 		expect(byTestId('invoice-upload-result')!.textContent).not.toContain('gutschrift.pdf');
 		expect(byTestId('invoice-upload-result')!.querySelector('a')!.textContent).toBe('Elektro Blitz AG, 31.03.2026');
 
@@ -99,6 +170,8 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-discard-message')!.textContent).toBe(
 			'Erstellte Rechnungen bleiben gespeichert. Die übrigen Dateien und Ihre Eingaben gehen verloren.'
 		);
+		// the created invoices stay: the button discards only the others (#245, Marco P-6 of #233)
+		expect(byTestId('invoice-upload-discard-confirm')!.textContent!.trim()).toBe('Übrige Dateien verwerfen');
 		click('invoice-upload-discard-confirm');
 		await settle();
 		expect(oncreated).toHaveBeenCalledWith([{ id: 'i9', name: 'Elektro Blitz AG, 31.03.2026' }]);
@@ -128,7 +201,7 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'), word);
 		const status = () => byTestId('invoice-upload-progress')!.textContent?.trim();
-		expect(status()).toBe('2 von 2 Dateien gelesen. Bitte prüfen: 1. Nicht möglich: 1.');
+		expect(status()).toBe('Fertig: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1.');
 		allByTestId('invoice-upload-row-remove')[1].click();
 		await settle();
 		expect(status()).toBe('notizen.docx entfernt.');
@@ -145,6 +218,18 @@ describe('Rechnungen hochladen', () => {
 		click('invoice-upload-row-toggle');
 		expect(byTestId('invoice-service-period-help')!.textContent).toContain(
 			'Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre.'
+		);
+	});
+
+	// #451, M-1 (Code-Review C-19): in the category of the chosen building's tank the help explains the delivery day
+	it('erklärt beim Leistungszeitraum den Tag der Lieferung in der Kategorie des Tanks im Gebäude', async () => {
+		open(() => [200, read], [{ ...buildings[0], tank: 'c1' }, buildings[1]]);
+		chooseBuilding();
+		await upload(pdf('heizoel.pdf'));
+		click('invoice-upload-row-toggle');
+		// the KI chose c1, the category of the tank in Seeblick
+		expect(byTestId('invoice-service-period-help')!.textContent).toContain(
+			'Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.'
 		);
 	});
 
@@ -193,6 +278,18 @@ describe('Rechnungen hochladen', () => {
 		click('invoice-upload-create-button');
 		await settle();
 		expect(byTestId('invoice-upload-row-message')!.textContent!.split('Wählen Sie eine Kategorie.').length).toBe(2);
+	});
+
+	// chosen after creating, the Kategorie is no longer asked for (#245, persona Helga P-1)
+	it('nimmt die fehlende Kategorie zurück, sobald sie nach dem Erstellen gewählt ist', async () => {
+		open(() => [200, { ...read, categorization: null, duplicateOf: null }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		await settle();
+		expect(byTestId('invoice-upload-row-message')?.textContent ?? '').not.toContain('Wählen Sie eine Kategorie.');
 	});
 
 	it('zeigt eine Datei gross nur als das, was ihre ersten Bytes sagen, nie als Webseite (Code-Review C-7)', async () => {
@@ -289,6 +386,51 @@ describe('Rechnungen hochladen', () => {
 		}
 	});
 
+	// two files of one name, both still open, are both named (code review 245 C-2)
+	it('nennt zwei offene Dateien mit demselben Namen beide', async () => {
+		const answers = (call: { path: string; body: unknown }) =>
+			call.path === '/invoices'
+				? [201, { id: 'i9' }]
+				: [200, (call.body as { fileName: string }).fileName === 'scan.pdf' ? { ...read, categorization: null } : read];
+		open(answers as never);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'), pdf('scan.pdf'), pdf('scan.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		const items = [...byTestId('invoice-upload-result')!.querySelectorAll('li')].map((li) => li.textContent);
+		expect(items.filter((text) => text?.startsWith('scan.pdf:'))).toHaveLength(2);
+	});
+
+	// #245 (Helga P-4 of #233): a value not found in an optional field is no warning, only a hint
+	it('zeigt «nicht gefunden» unter einem freiwilligen Feld als Hinweis, nicht als Warnung', async () => {
+		open(() => [200, { ...read, fields: { ...extraction.fields, dueDate: null } }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		const missing = byTestId('invoice-upload-missing-dueDate')!;
+		expect(missing.className).toContain('text-ink-muted');
+		expect(missing.className).not.toContain('font-semibold');
+		expect(byTestId('invoice-upload-unsure-invoiceDate')!.className).toContain('text-caution');
+	});
+
+	// #245 (domain review 233 V-10): the summary does not borrow the row's button-like status
+	it('nennt eine Datei, deren Lesen scheiterte, in der Zusammenfassung «Nicht gelesen»', async () => {
+		open(() => [500, {}]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		expect(byTestId('invoice-upload-progress')!.textContent!.trim()).toBe('Fertig: 1 von 1. Nicht gelesen: 1.');
+	});
+
+	// #245 (Weber P-5 of #217 round 2, Marco P-3): an unticked row says why, at its checkbox
+	it('sagt bei einer nicht ausgewählten Gutschrift an ihrem Häkchen, warum', async () => {
+		open(() => [200, { ...read, documentType: 'credit_note' }]);
+		chooseBuilding();
+		await upload(pdf('gutschrift.pdf'));
+		expect(byTestId('invoice-upload-row-select-help')!.textContent).toContain('fehlt, weil aus einer Gutschrift keine Rechnung entsteht');
+		click('invoice-upload-row-select');
+		expect(byTestId('invoice-upload-row-select-help')).toBeNull();
+	});
+
 	it('lehnt eine Datei ab, die weder PDF noch Bild ist, ohne sie der KI zu zeigen', async () => {
 		const { calls } = open(() => [200, read]);
 		chooseBuilding();
@@ -301,7 +443,7 @@ describe('Rechnungen hochladen', () => {
 		const { calls } = open(() => [503, { error: 'x', code: 'EXTRACTION_UNAVAILABLE', params: {} }]);
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'));
-		expect(rowText()[0]).toContain('Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus.');
+		expect(rowText()[0]).toContain('Die KI hat diese Datei nicht gelesen. Füllen Sie die Felder aus.');
 
 		click('invoice-upload-create-button');
 		await settle();
@@ -376,33 +518,6 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-row')).not.toBeNull();
 	});
 
-	// #455 (#268): the building's invoices of the Kategorie are distributed by another key than the default one
-	it('schlägt den Verteilschlüssel der Rechnungen derselben Kategorie im Gebäude vor', async () => {
-		const calls = fakeBff((call) =>
-			call.path.startsWith('/invoices?')
-				? [200, { ...listed, invoices: [{ ...listed.invoices[0], distributionKeyId: null }, { ...listed.invoices[0], distributionKeyId: 'k2' }] }]
-				: [200, read]
-		);
-		show(InvoiceUploadDialog, {
-			open: true,
-			buildings,
-			categories: categories as never,
-			distributionKeys: [
-				{ id: 'k1', name: 'Nach Fläche' },
-				{ id: 'k2', name: 'Pro Wohnung' }
-			],
-			defaultDistributionKeyId: 'k1',
-			oncreated: vi.fn()
-		});
-		chooseBuilding();
-		await upload(pdf('blitz.pdf'));
-		await settle();
-		// the newest one without a key does not hide the key of the one before (domain review 455 V-15)
-		expect(calls.map((call) => call.path)).toContain('/invoices?buildingId=b1&categoryId=c1&limit=20');
-		click('invoice-upload-row-toggle');
-		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k2');
-	});
-
 	it('fragt vor dem Abbrechen, dass die Dateien verloren gehen', async () => {
 		open(() => [200, read]);
 		chooseBuilding();
@@ -461,7 +576,7 @@ describe('Rechnungen hochladen', () => {
 		await upload(pdf('a.pdf'), pdf('b.pdf'));
 		const status = byTestId('invoice-upload-progress')!;
 		expect(status.getAttribute('role')).toBe('status');
-		expect(status.textContent).toContain('2 von 2 Dateien gelesen');
+		expect(status.textContent).toContain('Fertig: 2 von 2');
 	});
 
 	it('gibt nach dem Entfernen einer Datei den Fokus der Dateiauswahl', async () => {

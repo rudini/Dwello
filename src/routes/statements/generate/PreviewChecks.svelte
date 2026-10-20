@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { sameSettingsNote, type invoiceRows } from '$lib/statement-wizard';
+	import { heatingWholeText, sameSettingsNote, type invoiceRows } from '$lib/statement-wizard';
 	import ChangedStatements from './ChangedStatements.svelte';
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
@@ -17,12 +17,14 @@
 		rows,
 		period,
 		confirmed = $bindable(),
-		error
+		error,
+		uncategorizedError
 	}: {
 		rows: ReturnType<typeof invoiceRows>;
 		period: { periodStart: string; periodEnd: string };
 		confirmed: boolean;
 		error?: string;
+		uncategorizedError?: string; // «Weiter» while an invoice without category holds the run (#382)
 	} = $props();
 
 	// ISO dates compare as text; repeated from step 1, where it may have been overlooked
@@ -38,10 +40,13 @@
 	// a statement named as outdated or other is a warning (#132, V-6)
 	const existingTone = $derived(existing.some((row) => row.changed.length) ? 'caution' : 'info');
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
-	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
+	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod' | 'heatingWithoutServicePeriod' | 'uncategorized') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
 	const late = $derived(hinted('lateInvoices'));
+	const uncategorized = $derived(hinted('uncategorized'));
 	const whole = $derived(hinted('invoicesWithoutServicePeriod'));
+	// at a tenant change by the Heizprofil: heating invoices without Leistungszeitraum beside ones with (#339)
+	const heating = $derived(hinted('heatingWithoutServicePeriod'));
 	// a building without any invoice has its own warning above, only its Tankbestand findings are listed;
 	// the question about a tank is no comparison with the year before and has its own hint
 	const shown = (row: (typeof rows)[number]) => ({
@@ -87,6 +92,19 @@
 	</Alert>
 {/if}
 
+<InvoiceHint
+	buildings={uncategorized}
+	title={m.statements_uncategorized_title()}
+	text={m.statements_uncategorized_text()}
+	tone="caution"
+	testid="uncategorized-invoices"
+/>
+{#if uncategorizedError}
+	<p class="font-semibold text-critical" role="alert" data-testid="form-error">
+		{uncategorizedError}
+	</p>
+{/if}
+
 {#if checked.length}
 	<CategoryCheck {checked} {comparedWith} confirm={incomplete.length > 0} {newInvoice} />
 {/if}
@@ -98,6 +116,13 @@
 	title={m.statements_whole_title()}
 	text={m.statements_whole_text()}
 	testid="invoices-without-service-period"
+/>
+
+<InvoiceHint
+	buildings={heating}
+	title={m.statements_heating_whole_title()}
+	text={heatingWholeText(heating)}
+	testid="heating-without-service-period"
 />
 
 <InvoiceHint

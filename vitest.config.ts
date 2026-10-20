@@ -32,7 +32,9 @@ export default defineConfig({
 						'tools/**/*.test.ts'
 					],
 					exclude: ['src/**/*.dom.test.ts'],
-					environment: 'node'
+					environment: 'node',
+					// tests in tools/ and tests/unit start processes; under the load of parallel sessions they took over 5 s
+					testTimeout: 20_000
 				}
 			},
 			{

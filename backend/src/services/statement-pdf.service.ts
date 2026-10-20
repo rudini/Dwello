@@ -63,8 +63,9 @@ const amountOf = (value: string | null) => (value == null ? null : parseFloat(va
 // a mixed key (70 % area, 30 % units): the apartment's share as a percentage of the building's costs
 const percentOf = (part: number | null, total: number) => (part == null || !total ? undefined : `${((part / total) * 100).toFixed(2)} %`);
 
+// '' names a position without key (keyNamesOf)
 const nameIn = (map: Map<string, Names>, id: string | null, language: Language) => {
-	const names = id ? map.get(id) : undefined;
+	const names = map.get(id ?? '');
 	return names && localName(names, language);
 };
 
@@ -85,8 +86,8 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: 
 		apartmentShare,
 		periodShare: amountOf(item.periodShare),
 		shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : undefined,
-		// each part with the description of its invoice, in the same order (#236)
-		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, description: item.invoices?.[i]?.description })),
+		// each part with the Rechnungsdatum and Rechnungsnummer of its invoice, in the same order (#236, #451)
+		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, invoiceDate: item.invoices?.[i]?.invoiceDate, invoiceNumber: item.invoices?.[i]?.invoiceNumber })),
 		byProfile: heating && byProfile,
 		heating,
 		tenantShare: parseFloat(item.tenantShare)
@@ -239,10 +240,17 @@ async function categoryNamesOf(statement: StatementWithDetails) {
 	return new Map(rows.map(({ id, ...names }) => [id, names]));
 }
 
+// A position without key (an invoice recorded before the key was required, #379) is shared evenly per apartment: the
+// PDF names it «Pro Einheit», under '' (the key of a position without one)
 async function keyNamesOf(statement: StatementWithDetails) {
 	const ids = statement.lineItems.map((item) => item.distributionKeyId).filter((id): id is string => !!id);
 	const rows = ids.length ? await db.select().from(distributionKeys).where(inArray(distributionKeys.id, ids)) : [];
-	return new Map(rows.map((key) => [key.id, key as Names & { formula: string | null }]));
+	const keys = new Map(rows.map((key) => [key.id, key as Names & { formula: string | null }]));
+	if (statement.lineItems.some((item) => !item.distributionKeyId)) {
+		const [perUnit] = await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Unit'));
+		if (perUnit) keys.set('', perUnit);
+	}
+	return keys;
 }
 
 const UNITS: Record<string, Record<string, string>> = {

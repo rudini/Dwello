@@ -14,7 +14,9 @@ import {
 	existingStatementNotes,
 	hintedInvoice,
 	invoicesWithoutServicePeriod,
+	heatingWithoutServicePeriod,
 	lateInvoices,
+	uncategorizedInvoices,
 	draftsOnlyNote,
 	feeNotAgreed,
 	agreementQuestions,
@@ -138,10 +140,15 @@ export const periodRunning = Text.of(periodRunningWarning);
 export const tankQuestions = Count.of(tankQuestion);
 export const missingStockFindings = Count.of(categoryFinding('Ohne Anfangs- und Endbestand'));
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
+export const uncategorizedInvoiceOn = (date: string) => Text.of(hintedInvoice(uncategorizedInvoices, date));
+export const uncategorizedInvoicesText = Text.of(uncategorizedInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));
 export const invoiceWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(invoicesWithoutServicePeriod, date));
 export const countOfInvoicesWithoutServicePeriodOn = (date: string) => Count.of(hintedInvoice(invoicesWithoutServicePeriod, date));
+export const heatingHintText = Text.of(heatingWithoutServicePeriod);
+export const heatingWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(heatingWithoutServicePeriod, date));
+export const countOfHeatingWithoutServicePeriodOn = (date: string) => Count.of(hintedInvoice(heatingWithoutServicePeriod, date));
 // the option names the profile and its sum, «Winter … (100%)»
 export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
 export const heatingProfileOffered = Visibility.of(heatingProfileSelect);

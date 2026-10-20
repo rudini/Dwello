@@ -66,7 +66,8 @@ Funktionalität: Abrechnungsdetail
       | Marc Huber | 26     | CHF 520.00   |
 
   Szenario: Abrechnung versenden
-    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung versendet
     Dann hat die Abrechnung den Status "Versendet"
@@ -88,6 +89,7 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
     Dann nennt die Bestätigung den Empfänger "Eva Frei" mit dem Korrespondenzkanal "Per Brief"
     Und sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt
+    Und sagt die Bestätigung vor dem Versand "Markieren Sie die Abrechnung am Tag, an dem Sie sie zustellen, als versendet. Dwello legt sie dann unter «Dokumente» ab. Drucken Sie sie dort aus."
     Und bietet die Bestätigung das PDF der Abrechnung zum Ansehen an
 
   Szenario: Zahlungseingang festhalten
@@ -440,7 +442,8 @@ Funktionalität: Abrechnungsdetail
 
   # Einzug am 5. Januar, Periode Januar bis Juni: Januar 18 % × 27/31 = 15.68 %, zusammen 47.68 % von 50.00 %; der
   # Anteil folgt aus den gedruckten Monaten, 47.68 / 50.00 = 95.36 %, also CHF 953.60 (aus den ungerundeten Monaten
-  # wären es 95.35 % und CHF 953.55) (#232)
+  # wären es 95.35 % und CHF 953.55) (#232); der angebrochene Januar steht mit seinem Bruch, und die Erläuterung sagt,
+  # dass der Prozentwert gerundet ist (#451, Punkt 3)
   Szenario: PDF rechnet den Anteil nach dem Heizprofil aus den gedruckten Monatsanteilen
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und das Gebäude "Rosenhof" in "Winterthur" existiert
@@ -453,14 +456,16 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "95.36 % der Heizkosten"
-    Und steht im PDF "Jan 15.68 %, Feb 14.00 %"
+    Und steht im PDF "Jan 15.68 % (18.00 % × 27/31 Tage), Feb 14.00 %"
     Und steht im PDF "Anteil nach Heizprofil: 47.68 % / 50.00 % = 95.36 %."
     Und steht im PDF "95.36 % 953.60"
+    Und steht im PDF "Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Der Prozentwert ist gerundet. Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil."
 
   # #71: unter den Heizkosten steht jede Rechnung mit ihrem Anteil nach Heizprofil; eine mit Leistungszeitraum mit den
   # Monaten des Heizprofils darin, den Monaten des Mieters darin und der Teilung (nachrechenbar wie #232). Marc Huber
   # (ab Mai) trägt nichts von Januar bis März und 52 % der Rechnung über das ganze Jahr; der Satz zum Heizprofil gilt
-  # nur für die Rechnung ohne Leistungszeitraum (Fachreview 1, M-1)
+  # nur für die Rechnung ohne Leistungszeitraum (Fachreview 1, M-1); die Berechnung nennt den Zeitanteil, die Rechnung
+  # ohne Leistungszeitraum sagt, dass sie für die ganze Periode gilt, und heisst nach ihrem Rechnungsdatum (#451, Punkt 3)
   Szenario: PDF nennt bei Heizkosten mit Leistungszeitraum die Monate des Heizprofils jeder Rechnung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10" für die Zeit vom "2024-01-01" bis "2024-03-31"
@@ -469,15 +474,15 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Leistungszeitraum 01.01.2024 – 31.03.2024: CHF 1'000.00, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: keine; zusammen 0.00 %. Anteil nach Heizprofil: 0.00 % / 43.00 % = 0.00 %"
-    Und steht im PDF "Ohne Leistungszeitraum: CHF 1'000.00, Anteil nach Heizprofil: 52.00 % (siehe Heiz- und Warmwasserkosten)"
+    Und steht im PDF "Rechnung vom 30.06.2024 ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 1'000.00, Anteil nach Heizprofil: 52.00 % (siehe Heiz- und Warmwasserkosten)"
     Und steht im PDF "Heizkosten nach Heizprofil «Winter"
     Und steht im PDF "»: 52.00 % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition."
-    Und steht im PDF "Ihr Anteil: 2'000.00 × (1'000.00 × 0.00 % + 1'000.00 × 52.00 %) / 2'000.00 = 520.00"
+    Und steht im PDF "Ihr Anteil: 2'000.00 × Zeitanteil (1'000.00 × 0.00 % + 1'000.00 × 52.00 %) / 2'000.00 = 520.00"
 
   # Zwei Hauswart-Rechnungen über verschiedene Leistungszeiträume, Einzug am 15. August: der Zeitanteil ist nach den
   # Beträgen gewichtet, (600 × 0/91 + 1200 × 47/92) / 1800 = 34.06 % (der Mittelwert der Brüche wäre 25.54 %); das PDF
   # nennt jede Rechnung mit ihren Tagen und die Berechnung, die zu Ihrem Anteil führt: 900.00 × (…) / 1'800.00 = 306.52
-  # (#226; Beschriftung und Erläuterung #241)
+  # (#226; Beschriftung und Erläuterung #241; «Zeitanteil» in der Berechnung #451, Punkt 3)
   Szenario: PDF nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -491,13 +496,13 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen"
     Und steht im PDF "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1'200.00, Ihre Mietstage 47 von 92 Tagen"
-    Und steht im PDF "Ihr Anteil: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52"
+    Und steht im PDF "Ihr Anteil: 900.00 × Zeitanteil (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52"
     Und steht im PDF "Zeitanteil: Ihre Mietstage in der Abrechnungsperiode. Bei einer Rechnung mit Leistungszeitraum zählen Ihre Mietstage in diesem Zeitraum. Hat eine Abrechnungsposition Rechnungen über verschiedene Tage, steht die Berechnung darunter. Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Der Prozentwert ist gerundet; Ihr Anteil folgt aus der Berechnung unter der Position."
 
   # Unter einer Position über verschiedene Tage nennt eine Zeile ihre Rechnung, wo Daten und Betrag sie keinem Beleg
-  # zuordnen: eine Rechnung ohne Leistungszeitraum (ihre Daten sind die der Abrechnungsperiode) und zwei Rechnungen
-  # über denselben Leistungszeitraum und Betrag; die Rechnung über April bis Juni ist eindeutig und bleibt ohne
-  # (#236, V-8 von #226; Fachreview W11 V-1, V-4)
+  # zuordnen: eine Rechnung ohne Leistungszeitraum (sie gilt für die ganze Abrechnungsperiode) und zwei Rechnungen über
+  # denselben Leistungszeitraum und Betrag; die Rechnung über April bis Juni ist eindeutig und bleibt ohne (#236). Die
+  # Zeile beginnt mit Rechnungsdatum und Rechnungsnummer wie auf dem Beleg, nicht mit der Beschreibung (#451, Punkt 3, V-8)
   Szenario: PDF nennt die Rechnung, wenn Daten und Betrag sie nicht unterscheiden
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -507,19 +512,37 @@ Funktionalität: Abrechnungsdetail
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "600" Franken vom "2025-07-05" für die Zeit vom "2025-04-01" bis "2025-06-30"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-10-05" für die Zeit vom "2025-07-01" bis "2025-09-30"
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-10-06" für die Zeit vom "2025-07-01" bis "2025-09-30"
+    Und die Rechnung "Hauswart 2025-10-05" hat die Rechnungsnummer "4711"
     Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Ohne Leistungszeitraum: CHF 765.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode (Rechnung «Hauswart 2025-09-30»)"
-    Und steht im PDF "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen (Rechnung «Hauswart 2025-10-05»)"
-    Und steht im PDF "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen (Rechnung «Hauswart 2025-10-06»)"
+    Dann steht im PDF "Rechnung vom 30.09.2025 ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 765.00, Ihre Mietstage 139 von 365 Tagen"
+    Und steht im PDF "Rechnung vom 05.10.2025 (Nr. 4711), Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen"
+    Und steht im PDF "Rechnung vom 06.10.2025, Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen"
     Und steht im PDF "Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen"
-    Und steht im PDF nicht "Hauswart 2025-07-05"
+    Und steht im PDF nicht "Hauswart 2025"
+    Und steht im PDF nicht "vom 05.07.2025"
 
-  # Heizkosten ohne Heizprofil nach Tagen: eine Lieferung über einen Leistungszeitraum und die Veränderung des Tankbestands
-  # (600 - 100 = 500); die Zeile des Tankbestands ist keine Rechnung und heisst so (#239)
-  Szenario: PDF nennt die Veränderung des Tankbestands unter den Heizkosten als solche
+  # Ein Leistungszeitraum über das Ende der Periode hinaus: die Rechnung nennt ihre Tage und die Tage in der Periode,
+  # 765.00 × 92/123 = 572.20; davon trägt Lea Graf (ab 15. August) alle 92 Tage (#451, Punkt 3)
+  Szenario: PDF nennt bei einem Leistungszeitraum über die Periode hinaus die Tage der Rechnung und die Tage in der Periode
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2025-08-15" für "900" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "600" Franken vom "2025-07-05" für die Zeit vom "2025-04-01" bis "2025-06-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "765" Franken vom "2025-10-01" für die Zeit vom "2025-10-01" bis "2026-01-31"
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2025 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Leistungszeitraum 01.10.2025 – 31.01.2026 (Rechnung CHF 765.00 für 123 Tage), davon 01.10.2025 – 31.12.2025 (92 Tage): CHF 572.20, Ihre Mietstage 92 von 92 Tagen"
+
+  # Heizkosten ohne Heizprofil nach Tagen, mit Tank: abgerechnet wird der Verbrauch der ganzen Periode, 600 + 900 - 100
+  # = 1'400; auch die Lieferung mit Leistungszeitraum Juli bis September zählt nach den Mietstagen der Periode, 139 von
+  # 365 Tagen (#451, Punkt 2; #257)
+  Szenario: Heizöl aus dem Tank steht im PDF nach den Mietstagen der Periode, auch mit Leistungszeitraum der Lieferung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert
@@ -531,7 +554,9 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2025 von "Lea Graf"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen"
+    Dann steht im PDF "Verbrauch CHF 1'400.00"
+    Und steht im PDF "1'400.00 700.00 139/365 Tage 266.58"
+    Und steht im PDF nicht "Leistungszeitraum 01.07.2025"
 
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
@@ -564,6 +589,23 @@ Funktionalität: Abrechnungsdetail
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann nennt die Abrechnung das Heizprofil "Winter"
+
+  # #280: eine Abrechnung ohne Heizkosten wendet kein Heizprofil an und nennt keines, auch im PDF (#451, Punkt 8)
+  Szenario: Abrechnung ohne Heizkosten nennt kein Heizprofil
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und das Gebäude "Rosenhof" in "Winterthur" existiert
+    Und im Gebäude "Rosenhof" gibt es die leere Wohnung "1.01"
+    Und im Gebäude "Rosenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "1.01" seit "2024-05-01" für "900" Franken
+    Und für "Lea Graf" im Gebäude "Rosenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
+    Dann nennt die Abrechnung das Mietverhältnis "Ihr Mietverhältnis in dieser Periode: 01.05.2024 – 31.12.2024"
+    Und nennt die Abrechnung kein Heizprofil
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Hauswart"
+    Und steht im PDF nicht "Heizprofil"
 
   # #229 (F-7): ein eigenes Heizprofil lässt sich umbenennen; die Abrechnung nennt es, wie sie es gespeichert hat
   Szenario: Abrechnung nennt ihr Heizprofil auch nach dem Umbenennen
@@ -655,7 +697,8 @@ Funktionalität: Abrechnungsdetail
     Dann nennt die Position "Hauswart" den Wohnungsanteil "CHF 900.00", den Zeitanteil "366/366 Tage" und den Betrag "CHF 900.00"
 
   # #104 und #240: unter einer Position mit Rechnungen über verschiedene Tage steht jede Rechnung mit ihren Tagen und die
-  # Berechnung, wie im PDF (zwei gleich grosse Wohnungen: Wohnungsanteil 900.00 von 1’800.00)
+  # Berechnung wie im PDF; die Zeile heisst nach der Beschreibung der Rechnung (#451, V-12; zwei gleich grosse
+  # Wohnungen: Wohnungsanteil 900.00 von 1’800.00)
   Szenario: Kostenposition nennt bei Rechnungen über verschiedene Leistungszeiträume die Tage jeder Rechnung
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert
@@ -667,6 +710,15 @@ Funktionalität: Abrechnungsdetail
     Dann nennt die Position "Hauswart" die Rechnung "Hauswart 2025-07-05" mit "Leistungszeitraum 01.04.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 0 von 91 Tagen"
     Und nennt die Position "Hauswart" die Rechnung "Hauswart 2025-10-05" mit "Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1’200.00, Ihre Mietstage 47 von 92 Tagen"
     Und nennt die Position "Hauswart" "Ihr Anteil: 900.00 × (600.00 × 0/91 + 1’200.00 × 47/92) / 1’800.00 = 306.52"
+
+  # #451, Persona Dr. Weber P-1 (bestand seit #71): die Berechnung unter den Heizkosten nach Heizprofil rechnet mit dem
+  # Anteil nach Heizprofil jeder Rechnung, wie das PDF: Marc Huber (ab Mai) trägt nichts von Januar bis März und 52 % der
+  # Rechnung über das ganze Jahr
+  Szenario: Kostenposition rechnet Heizkosten nach Heizprofil mit dem Anteil nach Heizprofil wie das PDF
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10" für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Dann nennt die Position "Heizung" "Ihr Anteil: 2’000.00 × (1’000.00 × 0.00 % + 1’000.00 × 52.00 %) / 2’000.00 = 520.00"
 
   # #104: jede Kostenposition führt zu den Rechnungen, die sie abrechnet
   Szenario: Rechnung einer Kostenposition öffnen
@@ -693,6 +745,14 @@ Funktionalität: Abrechnungsdetail
     Dann bestätigt Dwello "Der Entwurf ist neu berechnet. Er rechnet mit den Rechnungen und dem Tankbestand, wie sie jetzt sind."
     Und nennt die Position "Hauswart" "Hauswart 2024-12-31"
     Und weist die Abrechnung auf keine geänderten Rechnungen hin
+
+  # #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; «Neu berechnen» wartet darauf
+  Szenario: Kein Neuberechnen, solange eine umlagefähige Rechnung keine Kategorie hat
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine umlagefähige Rechnung ohne Kategorie über "120" Franken vom "2024-06-30"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "berechnen Sie den Entwurf dann neu"
 
   # #96: eine danach geänderte Rechnung zählt wie eine neue
   Szenario: Abrechnung weist auf eine danach geänderte Rechnung hin
@@ -923,6 +983,17 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung."
     Und steht im PDF "bereits bezahlt CHF 442.90"
     Und steht im PDF "Nachzahlung 187.45"
+
+  # #452 Punkt 7 (#379): eine alte Rechnung ohne Verteilschlüssel verteilt Dwello gleichmässig pro Wohnung, wie «Pro Einheit»
+  Szenario: Das PDF nennt bei einer Rechnung ohne Verteilschlüssel «Pro Einheit»
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "400" Franken vom "2024-06-30"
+    Und die Rechnung der Kategorie "Hauswart" vom "2024-06-30" hat keinen Verteilschlüssel
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Pro Einheit 1 / 1 Wohnungen 400.00 400.00"
 
   # #403 (5): die Teilzahlung auf die ersetzte Abrechnung steht im PDF der berichtigten als «Bereits bezahlt auf NK-…»
   Szenario: PDF der berichtigten Abrechnung nennt die Teilzahlung

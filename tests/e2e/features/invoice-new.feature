@@ -48,6 +48,23 @@ Funktionalität: Neue Rechnung erfassen
     Wenn der Liegenschaftsverwalter als Rechnungsdatum "30022025" eintippt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
 
+  # #451 (Fachreview M-1): eine Lieferung von Heizmaterial in den Tank zählt ganz in der Abrechnungsperiode ihres
+  # Lieferdatums, des Endes ihres Leistungszeitraums; der Satz steht in der Kategorie des Tanks im Gebäude, zuerst
+  # (Code-Review C-2, Persona Helga P-2, P-4)
+  Szenario: Der Leistungszeitraum erklärt die Lieferung von Heizmaterial
+    Angenommen im Gebäude "Seeblick" war am "2024-12-31" Heizöl für "600" Franken im Tank
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter die Rechnung dem Gebäude "Seeblick" zuordnet
+    Und der Liegenschaftsverwalter die Kategorie "Heizung" wählt
+    Dann erklärt das Formular beim Leistungszeitraum "Tragen Sie als Beginn und als Ende den Tag der Lieferung ein. Die Lieferung zählt dann ganz in der Abrechnungsperiode dieses Tages, auch wenn die Rechnung erst später kommt."
+
+  # Helga P-4 (#451): Fernwärme in der Kategorie «Heizung» eines Gebäudes ohne Tank ist keine Lieferung in den Tank
+  Szenario: Ohne Tank erklärt der Leistungszeitraum keine Lieferung von Heizmaterial
+    Wenn der Liegenschaftsverwalter die Rechnung dem Gebäude "Seeblick" zuordnet
+    Und der Liegenschaftsverwalter die Kategorie "Heizung" wählt
+    Dann erklärt das Formular beim Leistungszeitraum "Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an"
+    Aber erklärt das Formular beim Leistungszeitraum nicht "Tag der Lieferung"
+
   # Kosten, die nur alle paar Jahre anfallen, verteilt der Leistungszeitraum über diese Jahre (#254)
   Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre
     Dann erklärt das Formular beim Leistungszeitraum "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
@@ -59,3 +76,34 @@ Funktionalität: Neue Rechnung erfassen
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
+
+  # #452 Punkt 7 (#379): pro Kategorie und Gebäude gilt ein Verteilschlüssel; vorgeschlagen ist der der letzten Rechnung
+  Szenario: Dwello schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Pro Zimmer" gewählt
+    Und erklärt das Formular beim Verteilschlüssel "Dwello schlägt den Verteilschlüssel vor, den die letzte Rechnung dieser Kategorie im Gebäude hat, sonst den aus den Einstellungen."
+
+  # Persona Helga P-1 (#452): der Vorschlag der vorherigen Kategorie bleibt nicht stehen; das E2E-Gebäude hat keinen
+  # Verteilschlüssel in den Einstellungen, also bleibt keiner gewählt
+  Szenario: Eine Kategorie ohne eigene Rechnung nimmt den Vorschlag der vorherigen zurück
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Und der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Lift" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Verteilschlüssel auswählen" gewählt
+
+  Szenario: Einen selbst gewählten Verteilschlüssel überschreibt der Vorschlag nicht
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Pro Einheit" wählt
+    Und der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Pro Einheit" gewählt
+
+  Szenario: Ohne Verteilschlüssel speichert das Formular die Rechnung nicht
+    Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "450.00" Franken für "Treppenhausreinigung Q1" im Gebäude "Seeblick" in der Kategorie "Hauswart" ohne Verteilschlüssel erfasst
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie, wie die Kosten verteilt werden."

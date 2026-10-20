@@ -58,3 +58,4 @@ export const belegDistributionKey = (fileName: string) =>
 export const deleteBilledText = target('Was beim Löschen einer abgerechneten Rechnung zu tun ist', (page) =>
 	page.getByTestId('invoice-delete-billed-text')
 );
+export const belegSelectedHelp = (fileName: string) => inRow(fileName, 'Grund der Auswahl', 'invoice-upload-row-select-help');

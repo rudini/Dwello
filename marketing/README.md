@@ -16,4 +16,4 @@ After changing German texts in `index.html`, add them to `i18n/{fr,it,en}.json` 
 
 Retake the screenshots after UI changes: `docs/design/tools/persona-stack.sh` starts the app with the demo data on :3300; capture at 1440 × 900 (DPR 2) and 390 × 844 (DPR 3), light and dark; the language comes from the cookie `PARAGLIDE_LOCALE`.
 
-Features the page marks as "Geplant" do not exist in the app yet; each has an issue: building register #479, MCP server #495, full export #496, one-step installer and local sign-in #497, source link in the app (AGPL §13) #498. Dwello is licensed AGPL-3.0-or-later (`LICENSE`).
+Features the page marks as "Geplant" do not exist in the app yet; each has an issue: MCP server #495, full export #496, one-step installer and local sign-in #497, source link in the app (AGPL §13) #498. Dwello is licensed AGPL-3.0-or-later (`LICENSE`).

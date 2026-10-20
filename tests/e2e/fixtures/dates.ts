@@ -7,3 +7,6 @@ export const inDays = (days: number) => {
 
 /** A YYYY-MM-DD date as the app shows it: DD.MM.YYYY */
 export const swissDate = (iso: string) => iso.split('-').reverse().join('.');
+
+/** The year of the invoices and statements «des laufenden Jahres» (dated today) */
+export const thisYear = () => Number(inDays(0).slice(0, 4));

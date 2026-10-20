@@ -149,3 +149,46 @@ Funktionalität: Kostenkategorien
     Und das Gebäude "Birkenhof" hat einen Tankbestand in der Kategorie für Brennstoff "Stückholz"
     Wenn der Liegenschaftsverwalter die Kategorie "Stückholz" nicht mehr als Brennstoff speichert
     Dann erfährt der Liegenschaftsverwalter, dass die Kategorie wegen ihrer Tankbestände Brennstoff bleibt
+
+  # #452 Punkt 1 (#302): bei Dwellos Kategorien entscheidet «Heizkosten», wie Dwello beim Mieterwechsel verteilt
+  Szenario: Bei einer vordefinierten Kategorie ist «Heizkosten» fest
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Kaminfeger"
+    Dann lässt sich nicht ändern, ob die Kategorie zu den Heizkosten zählt
+    Und ist die Kategorie als Heizkosten markiert
+    Und erklärt das Kategorieformular "Heizung und Kaminfeger verteilt Dwello beim Mieterwechsel nach dem Heizprofil, alle anderen Kategorien nach Tagen. Brauchen Sie eine andere Verteilung, erfassen Sie eine eigene Kategorie."
+
+  # #452 Punkt 2 (#309): Zurückstellen holt die Rechnungen nicht zurück
+  Szenario: Vor dem Umstellen auf nicht umlagefähig nennt Dwello die Rechnungen, die es betrifft
+    Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
+    Und eine umlagefähige Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" als nicht umlagefähig speichert
+    Dann fragt Dwello "Kategorie «Treppenhausreinigung» auf nicht umlagefähig stellen?"
+    Und erklärt die Rückfrage "1 erfasste Rechnung dieser Kategorie fliesst dann nicht mehr in neue Nebenkostenabrechnungen."
+    Und erklärt die Rückfrage "Stellen Sie die Kategorie später zurück, bleibt diese Rechnung nicht umlagefähig: Sie müssen sie wieder auf «Umlagefähig» stellen."
+    Wenn der Liegenschaftsverwalter das Umstellen bestätigt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
+    Und ist die Kategorie "Treppenhausreinigung" nicht umlagefähig
+
+  Szenario: Umstellen auf nicht umlagefähig abbrechen
+    Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
+    Und eine umlagefähige Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Wenn der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" als nicht umlagefähig speichert
+    Und der Liegenschaftsverwalter das Umstellen abbricht
+    Und der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann ist die Kategorie "Treppenhausreinigung" umlagefähig
+
+  # #452 Punkt 2 (#309): Kosten, die das Gesetz dem Vermieter zuweist (Art. 256b OR); bestätigt wird im DOM-Test, weil
+  # die vordefinierte Kategorie allen Szenarien gehört
+  Szenario: Vor dem Umstellen einer vordefinierten Kategorie auf umlagefähig fragt Dwello
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Wenn der Liegenschaftsverwalter die vordefinierte Kategorie "Liegenschaftssteuer" als umlagefähig speichert
+    Dann fragt Dwello "Kategorie «Liegenschaftssteuer» auf umlagefähig stellen?"
+    Und erklärt die Rückfrage "Kosten, die das Gesetz dem Vermieter zuweist, schuldet der Mieter auch dann nicht, wenn Sie die Kategorie umstellen."
+    Und erklärt die Rückfrage "Die Wahl gilt für Rechnungen, die Sie dieser Kategorie ab jetzt zuordnen; schon erfasste bleiben nicht umlagefähig."
+    Wenn der Liegenschaftsverwalter das Umstellen abbricht
+    # Persona Dr. Weber P-3 (#452): das Formular zeigt wieder die gespeicherte Wahl
+    Dann ist im Formular der Kategorie "Nicht umlagefähig" gewählt
+    Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann ist die vordefinierte Kategorie "Liegenschaftssteuer" nicht umlagefähig

@@ -16,7 +16,12 @@ import {
 	confirmationAsked,
 	invoiceWithoutServicePeriodOn,
 	countOfInvoicesWithoutServicePeriodOn,
+	heatingHintText,
+	heatingWithoutServicePeriodOn,
+	countOfHeatingWithoutServicePeriodOn,
 	lateInvoiceOn,
+	uncategorizedInvoiceOn,
+	uncategorizedInvoicesText,
 	countOfLateInvoicesOn,
 	draftsOnly,
 	feeAboveGuideline,
@@ -543,6 +548,21 @@ Then('nennt der Hinweis auf Rechnungen ohne Leistungszeitraum keine Rechnung vom
 	await verwalter.sees(countOfInvoicesWithoutServicePeriodOn(date)).toBe(0);
 });
 
+Then('sagt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(heatingHintText).toContain(text);
+});
+
+Then(
+	'nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(heatingWithoutServicePeriodOn(date)).toContain(amount);
+	}
+);
+
+Then('nennt der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum keine Rechnung vom {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(countOfHeatingWithoutServicePeriodOn(date)).toBe(0);
+});
+
 When('der Liegenschaftsverwalter die Rechnung vom {string} aus dem Hinweis bearbeitet', async ({ verwalter }, date: string) => {
 	await verwalter.attemptsTo(editHintedInvoice(date));
 });
@@ -648,6 +668,18 @@ When(
 		await verwalter.attemptsTo(recordNoTankFromQuestion(seed.idOf(building)!));
 	}
 );
+
+// #452 Punkt 4 (#382): an umlagefähige invoice without Kategorie holds the preview
+Then(
+	'nennt der Hinweis auf Rechnungen ohne Kategorie die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(uncategorizedInvoiceOn(date)).toContain(amount);
+	}
+);
+
+Then('erklärt der Hinweis auf Rechnungen ohne Kategorie {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uncategorizedInvoicesText).toContain(text);
+});
 
 // #453 (#327): days, Akonto and «Abgerechnet bis» per contract; contracts «Abgerechnet bis» covers in full
 Then('nennt die Vorschau bei {string} {string}', async ({ verwalter, names }, tenant: string, text: string) => {

@@ -45,7 +45,7 @@ export async function firstPredefined(resource: string) {
 }
 
 type Invoice = {
-	categoryId?: string;
+	categoryId?: string | null;
 	billingEntityName?: string;
 	distributionKeyId?: string;
 	description?: string;
@@ -54,7 +54,12 @@ type Invoice = {
 	isValidUtilityCost?: boolean;
 	servicePeriodStart?: string;
 	servicePeriodEnd?: string;
+	invoiceNumber?: string;
 };
+
+/** The predefined key «Pro Fläche (m²)», which every invoice the tests record through the API needs (#379) */
+export const perAreaKey = async () =>
+	(await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Area (m²)')))[0].id;
 
 /** Invoice of the building, by default caretaker costs distributed by area */
 export async function insertInvoice(buildingId: string, invoice: Invoice = {}) {

@@ -1,3 +1,4 @@
+import type { LatestKey } from './invoice';
 // ============================================================================
 // Core Entity Types - Match backend schema (camelCase)
 // ============================================================================
@@ -246,11 +247,12 @@ export interface InvoicesListData {
 	total: number;
 	page: number;
 	pageSize: number;
-	buildings: { id: string; name: string; address: string }[];
+	buildings: { id: string; name: string; address: string; tank?: string }[]; // tank: the category of its tank (#451)
 	categories: Category[];
 	years: string[]; // Rechnungsdatum years offered in the filter
 	distributionKeys: { id: string; name: string }[]; // offered for the invoices of «Rechnungen hochladen»
 	defaultDistributionKeyId: string; // preselected there, as set in the settings
+	latestKeys: LatestKey[]; // proposed there (#379)
 }
 
 // Heating Profile types
@@ -315,6 +317,7 @@ export interface StatementLineInvoice {
 		total: number;
 		noPeriod?: true;
 		whole?: { start: string; end: string; amount: number };
+		profile?: { percent: number }; // a heating invoice by the Heizprofil's months in its days (#71)
 	} | null;
 }
 
@@ -342,6 +345,7 @@ export interface Statement {
 	correctionDeclined?: { on: string } | null; // «Nicht berichtigt» (#454)
 	lastReminderDate?: string;
 	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
+	reminderToSend?: boolean; // a reminder still to send holds the next Mahnstufe (#449)
 	oldAddress?: boolean; // A-5 (#114): the moved-out tenant still has the building's address
 	pdfGeneratedAt?: string;
 	notes?: string | null;
@@ -412,6 +416,8 @@ export interface StatementDocument {
 	deliveryError: string | null;
 	deliveryErrorCode?: string | null;
 	paymentDeadline?: string | null; // the Zahlungsfrist a reminder prints
+	recipient?: string | null; // the e-mail address it went to (#449)
+	notToSend?: 'paid' | 'replaced' | null; // a reminder to send whose statement is paid or replaced since (#449)
 	createdAt: string;
 	tenantName: string;
 	statementNumber: string | null;

@@ -274,7 +274,7 @@ describe('Heizkosten einer Rechnung mit Leistungszeitraum nach dem Heizprofil', 
 		expect(line).toMatchObject({ periodShare: 0.4242, tenantShare: 424.2 });
 		expect(line.invoiceParts![0].profile).toEqual({
 			percent: 42.42,
-			months: [{ month: 2, percentage: 7.24 }, { month: 3, percentage: 11 }],
+			months: [{ month: 2, percentage: 7.24, full: 14, days: 15, total: 29 }, { month: 3, percentage: 11 }],
 			periodMonths: [{ month: 1, percentage: 18 }, { month: 2, percentage: 14 }, { month: 3, percentage: 11 }]
 		});
 	});
@@ -316,13 +316,17 @@ describe('Heizkosten einer Rechnung mit Leistungszeitraum nach dem Heizprofil', 
 
 	// Rechnung und Gutschrift ergeben zusammen null: keine Rechnungen unter der Position, wie nach Tagen (#226, #237;
 	// Code-Review 1, C-1)
-	it('nennt keine Rechnungen unter einer Heizposition, deren Rechnungen zusammen null ergeben', async () => {
+	// #451, Punkt 1 (#237): je Rechnung, auch wenn sie zusammen null ergeben: nichts von Januar bis März, von der Gutschrift
+	// ohne Leistungszeitraum der Anteil nach Heizprofil ab Mai; der Mieter erhält seinen Teil der Gutschrift
+	it('rechnet eine Heizposition, deren Rechnungen zusammen null ergeben, je Rechnung', async () => {
 		await invoice('1000.00', '2024-01-01', '2024-03-31');
 		await invoice('-1000.00');
 
 		const line = await heatingOf(await rent('Ab Mai', apartment, '2024-05-01'));
 
-		expect(line).toMatchObject({ tenantShare: 0, invoiceParts: null });
+		expect(line.invoiceParts).toHaveLength(2);
+		expect(line.invoiceParts![0].profile!.percent).toBe(0);
+		expect(line.tenantShare).toBeLessThan(0);
 	});
 
 	// Tank Ende 2023 stillgelegt (Endbestand 0, Wechsel auf Fernwärme): 2024 gilt #71 wieder (#72; Code-Review 3, C-1)

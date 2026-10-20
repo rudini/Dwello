@@ -54,6 +54,7 @@ export const generatePdfButton = target('PDF erstellen', (page) => page.getByTes
 export const downloadPdfLink = target('PDF herunterladen', (page) => page.getByTestId('statement-pdf-download'));
 export const sendDialog = target('Bestätigung des Versands', (page) => page.getByRole('dialog'));
 export const confirmSendButton = target('Versand bestätigen', (page) => page.getByTestId('statement-send-confirm'));
+export const letterInsteadLink = target('Stattdessen per Brief zustellen', (page) => page.getByTestId('send-by-letter-instead'));
 export const deliverByLetterButton = target('Selbst per Brief zustellen', (page) => page.getByTestId('statement-send-by-letter'));
 export const sendRecipient = target('Empfänger', (page) => page.getByTestId('send-recipient'));
 export const sendPdfLink = target('PDF ansehen', (page) => page.getByTestId('send-pdf-view'));

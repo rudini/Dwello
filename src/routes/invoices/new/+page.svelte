@@ -5,10 +5,12 @@
 	import { localToday } from '$lib/contract-status';
 	import { api } from '$lib/api';
 	import {
+		deliversToTank,
 		plainAmount,
 		servicePeriodOf,
 		suggestionProvenance,
 		validateInvoice,
+		type LatestKey,
 		type Suggestion
 	} from '$lib/invoice';
 	import { addToast } from '$lib/stores';
@@ -31,9 +33,11 @@
 			distributionKeys: { id: string; name: string }[];
 			llmAvailable: boolean;
 			defaultDistributionKeyId: string;
+			latestKeys: LatestKey[];
 			buildingId: string;
 			returnTo: string | null;
 			period?: { start: string; end: string } | null;
+			tanks?: Record<string, string>; // per building the category of its tank (#451, M-1)
 		};
 	} = $props();
 
@@ -92,7 +96,8 @@
 			servicePeriodEnd,
 			billingEntity,
 			description,
-			amount
+			amount,
+			distributionKeyId
 		});
 		if (Object.keys(errors).length) return focusFirstError(event.target as Element);
 
@@ -142,6 +147,7 @@
 
 	<Panel title={m.invoices_data()}>
 		<InvoiceDataFields
+			fuel={deliversToTank(data.tanks?.[buildingId], categoryId)}
 			bind:buildingId
 			bind:invoiceDate
 			bind:servicePeriodStart
@@ -171,6 +177,10 @@
 			bind:isValidUtilityCost
 			categories={data.categories}
 			distributionKeys={data.distributionKeys}
+			{buildingId}
+			latestKeys={data.latestKeys}
+			defaultKeyId={data.defaultDistributionKeyId}
+			keyError={errors.distributionKeyId}
 		/>
 	</Panel>
 

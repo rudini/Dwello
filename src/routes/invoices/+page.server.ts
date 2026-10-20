@@ -1,5 +1,5 @@
 import type { InvoicesListData } from '$lib/types';
-import { invoiceChoices, toInvoice } from '$lib/server/invoice';
+import { invoiceChoices, tankCategories, toInvoice } from '$lib/server/invoice';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -52,13 +52,16 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 		const invoicesData = await invoicesRes.json();
 		const buildingsData = await buildingsRes.json();
 
-		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
+		const listed = (buildingsData.buildings || buildingsData.data || []).map(
 			(b: Record<string, unknown>) => ({
 				id: b.id,
 				name: b.name || '',
 				address: `${b.address}, ${b.postalCode} ${b.city}`
 			})
 		);
+		// each with the category of its tank: «Rechnungen hochladen» explains a delivery there (#451, M-1)
+		const tanks = await tankCategories(fetch, listed.map((b: { id: unknown }) => String(b.id)));
+		const buildings = listed.map((b: { id: unknown }) => ({ ...b, tank: tanks[String(b.id)] }));
 
 		const { categories } = choices;
 		const invoices = (invoicesData.invoices || invoicesData.data || []).map(
@@ -74,7 +77,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			categories,
 			years,
 			distributionKeys: choices.distributionKeys,
-			defaultDistributionKeyId: choices.defaultDistributionKeyId
+			defaultDistributionKeyId: choices.defaultDistributionKeyId,
+			latestKeys: choices.latestKeys
 		};
 	} catch (err) {
 		console.error('Failed to fetch invoices:', err);
@@ -87,7 +91,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			categories: [],
 			years,
 			distributionKeys: [],
-			defaultDistributionKeyId: ''
+			defaultDistributionKeyId: '',
+			latestKeys: []
 		};
 	}
 };

@@ -14,6 +14,11 @@ export function suggestionProvenance(suggestion: Suggestion | null) {
 	return { llmCategoryId: suggestion.category.id, llmConfidence: String(suggestion.confidence) };
 }
 
+/** Whether the invoice is a delivery into the building's tank (its category): it counts in the period of its delivery
+ *  day (#451, M-1) */
+export const deliversToTank = (tankCategory: string | undefined, categoryId: string) =>
+	!!categoryId && tankCategory === categoryId;
+
 /** The Leistungszeitraum as the backend stores it: both dates, or null without one */
 export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({
 	servicePeriodStart: values.servicePeriodStart || null,
@@ -41,6 +46,7 @@ export function validateInvoice(invoice: {
 	amount: string;
 	servicePeriodStart?: string;
 	servicePeriodEnd?: string;
+	distributionKeyId?: string;
 }): Record<string, string> {
 	const errors: Record<string, string> = {};
 	if (!invoice.buildingId) errors.buildingId = m.invoices_error_building();
@@ -48,10 +54,24 @@ export function validateInvoice(invoice: {
 	if (!invoice.billingEntity.trim()) errors.billingEntity = m.invoices_error_billing_entity();
 	if (!invoice.description.trim()) errors.description = m.invoices_error_description();
 	if (!(parseFloat(plainAmount(invoice.amount)) > 0)) errors.amount = m.invoices_error_amount();
+	// #379: every invoice says how its costs are shared
+	if (!invoice.distributionKeyId) errors.distributionKeyId = m.invoices_error_key_required();
 	return { ...errors, ...servicePeriodErrors(invoice.servicePeriodStart, invoice.servicePeriodEnd) };
 }
 
+/** Per building and category the Verteilschlüssel of the latest invoice with one (backend `/invoices/latest-keys`) */
+export type LatestKey = { buildingId: string; categoryId: string; distributionKeyId: string };
+
+/** What the proposal needs where the building is chosen elsewhere, as in «Rechnungen hochladen» */
+export type KeyProposal = { buildingId: string; latestKeys: LatestKey[]; defaultKeyId: string };
+
+/** The key the invoice form proposes (#379): that of the latest invoice of the category in the building, else the default */
+export const proposedKey = (latest: LatestKey[], buildingId: string, categoryId: string, fallback: string) =>
+	latest.find((row) => row.buildingId === buildingId && row.categoryId === categoryId)?.distributionKeyId ?? fallback;
+
 /** A path within Dwello to return to (e.g. the statement wizard), never another site */
 export function localPath(value: string | null): string | null {
-	return value && /^\/(?![/\\])/.test(value) && !value.includes('\\') ? value : null;
+	// no backslash and no control character: the browser reads «\» as «/» and drops tabs and line breaks
+	// eslint-disable-next-line no-control-regex
+	return value && /^\/(?![/\\])/.test(value) && !/[\\\u0000-\u001f\u007f]/.test(value) ? value : null;
 }

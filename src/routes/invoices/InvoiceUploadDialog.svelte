@@ -9,11 +9,13 @@
 		fileRefusal,
 		invoiceOf,
 		newRow,
+		openReason,
 		withoutKi,
 		withProposal,
 		type Proposal,
 		type UploadRow
 	} from '$lib/invoice-upload';
+	import { proposedKey, type LatestKey } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import { formatDate } from '$lib/utils/format';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -35,17 +37,28 @@
 		categories,
 		distributionKeys,
 		defaultDistributionKeyId,
+		latestKeys = [],
 		oncreated
 	}: {
 		open?: boolean;
-		buildings: { id: string; name: string; address: string }[];
+		buildings: { id: string; name: string; address: string; tank?: string }[]; // tank: its category (#451, M-1)
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
 		defaultDistributionKeyId: string;
+		latestKeys?: LatestKey[];
 		oncreated: (created: Created[]) => void;
 	} = $props();
 
 	let buildingId = $state('');
+	const tank = $derived(buildings.find((building) => building.id === buildingId)?.tank);
+	// #379: also a folded row gets the key of its category's latest invoice in the building (code review 452-1 C-1)
+	$effect(() => {
+		for (const row of rows) {
+			const proposal = proposedKey(latestKeys, buildingId, row.values.categoryId, defaultDistributionKeyId);
+			if (!row.keyChosen && proposal && row.values.distributionKeyId !== proposal)
+				row.values.distributionKeyId = proposal;
+		}
+	});
 	let rows = $state<UploadRow[]>([]);
 	let pages = $state<Record<number, string[]>>({}); // the images the KI reads, by row
 	let errors = $state<Record<number, Record<string, string>>>({}); // what keeps a row from being created
@@ -55,20 +68,6 @@
 	let discardOpen = $state(false);
 	let removed = $state(''); // the file just removed, said by the status until the next change
 	let nextKey = 0;
-	// the Verteilschlüssel of the chosen building's latest invoice with one in a Kategorie, asked once per Kategorie (#455)
-	// ponytail: only the latest 20 invoices of the Kategorie are looked at
-	let keys = new Map<string, Promise<string | null>>();
-	function keyFor(categoryId: string) {
-		const asked = `${buildingId}/${categoryId}`;
-		if (!keys.has(asked))
-			keys.set(
-				asked,
-				api
-					.get<{ invoices?: { distributionKeyId: string | null }[] }>('/invoices', { buildingId, categoryId, limit: '20' })
-					.then((answer) => answer.data?.invoices?.find((one) => one.distributionKeyId)?.distributionKeyId ?? null)
-			);
-		return keys.get(asked)!;
-	}
 
 	// one building preselected when there is only one
 	$effect(() => {
@@ -78,20 +77,22 @@
 	const chosen = $derived(rows.filter((row) => row.selected && row.status !== 'reading' && row.status !== 'refused'));
 	const resultShown = $derived(created.length > 0);
 	// after creating: the files chosen but not created, because they still lack something (persona Anna, C-4)
-	const stillOpen = $derived(chosen.map((row) => row.file.name));
+	const stillOpen = $derived(chosen.map((row) => ({ key: row.key, name: row.file.name, reason: openReason(row) })));
 	const buildingOptions = $derived(buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` })));
 	const buildingHelp = $derived(rows.length ? m.invoices_upload_building_locked() : undefined);
 	const discardText = $derived(
 		created.length ? m.invoices_upload_discard_text_created() : m.invoices_upload_discard_text()
 	);
-	const done = $derived(rows.filter((row) => row.status !== 'reading').length);
+	// a refused file is never read: it does not count (#245, domain review 233 V-10)
+	const counted = $derived(rows.filter((row) => row.status !== 'refused'));
+	const done = $derived(counted.filter((row) => row.status !== 'reading').length);
 	// what a screen reader hears: the progress, when all are read what is to do, or the file just removed (persona Sven)
 	const outcome = $derived(
 		(
 			[
 				[m.invoices_upload_status_check(), 'check'],
 				[m.invoices_upload_status_refused(), 'refused'],
-				[m.invoices_upload_status_error(), 'failed']
+				[m.invoices_upload_summary_failed(), 'failed']
 			] as const
 		)
 			.map(([label, status]) => ({ label, count: rows.filter((row) => row.status === status).length }))
@@ -103,9 +104,11 @@
 			? m.invoices_upload_removed({ name: removed })
 			: !rows.length
 				? ''
-				: done < rows.length
-					? m.invoices_upload_progress({ done, count: rows.length })
-					: [`${m.invoices_upload_progress({ done, count: rows.length })}.`, ...outcome].join(' ')
+				: done < counted.length
+					? m.invoices_upload_progress({ done, count: counted.length })
+					: [counted.length > 0 && `${m.invoices_upload_progress({ done, count: counted.length })}.`, ...outcome]
+							.filter(Boolean)
+							.join(' ')
 	);
 	// the button counts what it creates: a chosen row that still lacks something is named apart (#233)
 	const complete = $derived(chosen.filter((row) => !Object.keys(checkRow(row)).length).length);
@@ -217,7 +220,6 @@
 		created = [];
 		tooMany = false;
 		removed = '';
-		keys = new Map();
 	}
 
 	// Closing loses the files and what was entered: asked first, unless nothing is there yet
@@ -274,7 +276,8 @@
 					errors={errors[row.key] ?? {}}
 					{categories}
 					{distributionKeys}
-					{keyFor}
+					keyProposal={{ buildingId, latestKeys, defaultKeyId: defaultDistributionKeyId }}
+					{tank}
 					onretry={() => read(row.key)}
 					onremove={() => removeRow(row.key)}
 				/>
@@ -287,7 +290,7 @@
 <Dialog
 	bind:open={discardOpen}
 	title={m.invoices_upload_discard_title()}
-	confirmLabel={m.invoices_upload_discard_confirm()}
+	confirmLabel={created.length ? m.invoices_upload_discard_confirm_created() : m.invoices_upload_discard_confirm()}
 	cancelLabel={m.invoices_upload_keep_going()}
 	danger
 	confirmTestid="invoice-upload-discard-confirm"

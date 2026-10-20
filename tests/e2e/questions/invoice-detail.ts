@@ -3,6 +3,7 @@ import {
 	invoiceNumber,
 	amount,
 	billedIn,
+	deleteDialogWarning,
 	deductedHint,
 	deductedRule,
 	category,
@@ -32,3 +33,4 @@ export const distributionKeyRows = Count.of(distributionKeyRow);
 export const deductedHintAtAmount = Text.of(deductedHint);
 export const deductedRuleAtAmount = Text.of(deductedRule);
 export const statementsOfInvoice = Text.of(billedIn);
+export const billedWarningOnDelete = Text.of(deleteDialogWarning);

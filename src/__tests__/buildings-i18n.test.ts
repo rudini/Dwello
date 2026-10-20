@@ -35,6 +35,8 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 			'11th floor',
 			'22nd floor'
 		]);
+		// #449 (Entscheid in #404, Punkt 5.3): below ground as ordinals too
+		expect([0, -1, -2, -3].map(floorLabel)).toEqual(['ground floor', 'basement', '2nd basement', '3rd basement']);
 	});
 
 	it('nennt Mietstatus und Belegung auf Französisch', () => {
