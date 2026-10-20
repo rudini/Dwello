@@ -107,7 +107,13 @@
 </section>
 
 {#if previewRows.length}
-	<PreviewChecks {rows} {period} bind:confirmed error={errors.confirm} />
+	<PreviewChecks
+		{rows}
+		{period}
+		bind:confirmed
+		error={errors.confirm}
+		uncategorizedError={errors.uncategorized}
+	/>
 {/if}
 
 <section aria-labelledby="statements-heading" class="flex flex-col gap-2">

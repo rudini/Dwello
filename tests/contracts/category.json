@@ -11,5 +11,6 @@
 	"type": "custom",
 	"description": "Glasfaseranschluss im Keller",
 	"sortOrder": 40,
-	"invoiceCount": "2"
+	"invoiceCount": "2",
+	"allocableInvoiceCount": 2
 }

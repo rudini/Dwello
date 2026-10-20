@@ -138,6 +138,7 @@ type Coverage = {
 	check?: InvoiceCheck;
 	changed?: ChangedStatement[];
 	fixedTerm?: boolean; // the run bills a running befristeter Mietvertrag here (#76)
+	uncategorized?: HintedInvoice[]; // allocable invoices of the period without a category hold the run (#382)
 	skipped?: SkippedContract[]; // #453 (#327): no Mietstage after «Abgerechnet bis» in the period
 	allSkipped?: boolean; // no contract of the building is left to bill
 };
@@ -304,6 +305,7 @@ export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name:
 		existing: c.statements ?? 0,
 		changed: c.changed ?? [],
 		fixedTerm: !!c.fixedTerm,
+		uncategorized: c.uncategorized ?? [],
 		skipped: c.skipped ?? [],
 		allSkipped: !!c.allSkipped,
 		...categoryCheck(c.check)

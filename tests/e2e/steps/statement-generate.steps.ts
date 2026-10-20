@@ -20,6 +20,8 @@ import {
 	heatingWithoutServicePeriodOn,
 	countOfHeatingWithoutServicePeriodOn,
 	lateInvoiceOn,
+	uncategorizedInvoiceOn,
+	uncategorizedInvoicesText,
 	countOfLateInvoicesOn,
 	draftsOnly,
 	feeAboveGuideline,
@@ -666,6 +668,18 @@ When(
 		await verwalter.attemptsTo(recordNoTankFromQuestion(seed.idOf(building)!));
 	}
 );
+
+// #452 Punkt 4 (#382): an umlagefähige invoice without Kategorie holds the preview
+Then(
+	'nennt der Hinweis auf Rechnungen ohne Kategorie die Rechnung vom {string} über {string}',
+	async ({ verwalter }, date: string, amount: string) => {
+		await verwalter.sees(uncategorizedInvoiceOn(date)).toContain(amount);
+	}
+);
+
+Then('erklärt der Hinweis auf Rechnungen ohne Kategorie {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uncategorizedInvoicesText).toContain(text);
+});
 
 // #453 (#327): days, Akonto and «Abgerechnet bis» per contract; contracts «Abgerechnet bis» covers in full
 Then('nennt die Vorschau bei {string} {string}', async ({ verwalter, names }, tenant: string, text: string) => {

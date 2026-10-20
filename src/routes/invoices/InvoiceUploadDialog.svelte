@@ -14,6 +14,7 @@
 		type Proposal,
 		type UploadRow
 	} from '$lib/invoice-upload';
+	import { proposedKey, type LatestKey } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import { formatDate } from '$lib/utils/format';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -35,6 +36,7 @@
 		categories,
 		distributionKeys,
 		defaultDistributionKeyId,
+		latestKeys = [],
 		oncreated
 	}: {
 		open?: boolean;
@@ -42,10 +44,19 @@
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
 		defaultDistributionKeyId: string;
+		latestKeys?: LatestKey[];
 		oncreated: (created: Created[]) => void;
 	} = $props();
 
 	let buildingId = $state('');
+	// #379: also a folded row gets the key of its category's latest invoice in the building (code review 452-1 C-1)
+	$effect(() => {
+		for (const row of rows) {
+			const proposal = proposedKey(latestKeys, buildingId, row.values.categoryId, defaultDistributionKeyId);
+			if (!row.keyChosen && proposal && row.values.distributionKeyId !== proposal)
+				row.values.distributionKeyId = proposal;
+		}
+	});
 	let rows = $state<UploadRow[]>([]);
 	let pages = $state<Record<number, string[]>>({}); // the images the KI reads, by row
 	let errors = $state<Record<number, Record<string, string>>>({}); // what keeps a row from being created
@@ -55,20 +66,6 @@
 	let discardOpen = $state(false);
 	let removed = $state(''); // the file just removed, said by the status until the next change
 	let nextKey = 0;
-	// the Verteilschlüssel of the chosen building's latest invoice with one in a Kategorie, asked once per Kategorie (#455)
-	// ponytail: only the latest 20 invoices of the Kategorie are looked at
-	let keys = new Map<string, Promise<string | null>>();
-	function keyFor(categoryId: string) {
-		const asked = `${buildingId}/${categoryId}`;
-		if (!keys.has(asked))
-			keys.set(
-				asked,
-				api
-					.get<{ invoices?: { distributionKeyId: string | null }[] }>('/invoices', { buildingId, categoryId, limit: '20' })
-					.then((answer) => answer.data?.invoices?.find((one) => one.distributionKeyId)?.distributionKeyId ?? null)
-			);
-		return keys.get(asked)!;
-	}
 
 	// one building preselected when there is only one
 	$effect(() => {
@@ -217,7 +214,6 @@
 		created = [];
 		tooMany = false;
 		removed = '';
-		keys = new Map();
 	}
 
 	// Closing loses the files and what was entered: asked first, unless nothing is there yet
@@ -274,8 +270,8 @@
 					errors={errors[row.key] ?? {}}
 					{categories}
 					{distributionKeys}
+					keyProposal={{ buildingId, latestKeys, defaultKeyId: defaultDistributionKeyId }}
 					tank={buildings.find((building) => building.id === buildingId)?.tank}
-					{keyFor}
 					onretry={() => read(row.key)}
 					onremove={() => removeRow(row.key)}
 				/>

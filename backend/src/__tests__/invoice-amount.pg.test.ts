@@ -9,18 +9,21 @@ import { db } from '../db/connection';
 import { invoices } from '../db/schema';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { sendJson } from './helpers/auth';
-import { expectRejection, idOf } from './helpers/records';
+import { expectRejection, idOf, perAreaKey } from './helpers/records';
 
 let buildingId: string;
+let distributionKeyId: string;
 const invoice = () => ({
 	buildingId,
 	billingEntityName: `Muster ${crypto.randomUUID()}`,
 	description: 'Hauswart Q3',
 	amount: '900.00',
-	invoiceDate: '2025-09-30'
+	invoiceDate: '2025-09-30',
+	distributionKeyId
 });
 
 beforeAll(async () => {
+	distributionKeyId = await perAreaKey();
 	buildingId = (await createBuilding({ name: `Betrag ${crypto.randomUUID()}`, address: 'Testweg 1', postalCode: '8400', city: 'Winterthur', canton: 'ZH' })).id;
 });
 

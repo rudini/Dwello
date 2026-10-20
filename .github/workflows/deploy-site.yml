@@ -4,7 +4,8 @@
 #   SITE_SFTP_HOST      SFTP server from the Infomaniak Manager (FTP/SSH), e.g. xxxxx.ftp.infomaniak.com
 #   SITE_SFTP_USER      SFTP user
 #   SITE_SFTP_PASSWORD  its password
-#   SITE_SFTP_PATH      folder of the site on the server, as the Manager shows it (e.g. sites/dwello.ch)
+#   SITE_SFTP_PATH      folder of the site on the server, as the Manager shows it (e.g. sites/dwello.ch);
+#                       / when the account opens in the site's folder (nothing on the server is deleted)
 #   SITE_SFTP_KNOWN_HOSTS  optional: the server's host key line (ssh-keyscan <host>); without it the key is read on each run
 #   SITE_FTP_TLS        optional: "yes" for an FTP-only access (FTP over TLS instead of SFTP)
 #   SITE_FTP_PLAIN      optional: "yes" for a host that offers neither SSH nor TLS (Infomaniak Starter): plain FTP,
@@ -49,7 +50,6 @@ jobs:
             [ -n "${!name}" ] || { echo "::error::Secret for $name is missing"; exit 1; }
           done
           if [ "$FTP_TLS" = "yes" ] && [ "$FTP_PLAIN" = "yes" ]; then echo "::error::Set either SITE_FTP_TLS or SITE_FTP_PLAIN, not both"; exit 1; fi
-          case "$SFTP_PATH" in /|.|./|'~'|'~/') echo "::error::SITE_SFTP_PATH must be the site's folder, not the root"; exit 1 ;; esac
           echo "ready=yes" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v4

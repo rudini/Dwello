@@ -70,7 +70,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			categories,
 			years,
 			distributionKeys: choices.distributionKeys,
-			defaultDistributionKeyId: choices.defaultDistributionKeyId
+			defaultDistributionKeyId: choices.defaultDistributionKeyId,
+			latestKeys: choices.latestKeys
 		};
 	} catch (err) {
 		console.error('Failed to fetch invoices:', err);
@@ -83,7 +84,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			categories: [],
 			years,
 			distributionKeys: [],
-			defaultDistributionKeyId: ''
+			defaultDistributionKeyId: '',
+			latestKeys: []
 		};
 	}
 };

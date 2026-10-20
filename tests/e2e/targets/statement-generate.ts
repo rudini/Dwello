@@ -86,6 +86,9 @@ export const feeNotAgreedLink = (contractId: string) =>
 export const wizardPresetNotice = target('Vorgaben aus dem Link', (page) => page.getByTestId('wizard-preset'));
 // Invoices the preview names because their Leistungszeitraum is missing: dated shortly after the period, or counted
 // in full in a period under a year
+export const uncategorizedInvoices = target('Hinweis auf Rechnungen ohne Kategorie', (page) =>
+	page.getByTestId('uncategorized-invoices')
+);
 export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsperiode', (page) => page.getByTestId('late-invoices'));
 export const invoicesWithoutServicePeriod = target('Hinweis auf Rechnungen ohne Leistungszeitraum', (page) =>
 	page.getByTestId('invoices-without-service-period')

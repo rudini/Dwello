@@ -3,6 +3,7 @@
 	import { fieldNote, fileType, type UploadRow } from '$lib/invoice-upload';
 	import { deliversToTank } from '$lib/invoice';
 	import DateInput from '$lib/ui/DateInput.svelte';
+	import type { KeyProposal } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -16,6 +17,7 @@
 		errors,
 		categories,
 		distributionKeys,
+		keyProposal,
 		tank
 	}: {
 		row: UploadRow;
@@ -23,6 +25,7 @@
 		errors: Record<string, string>;
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
+		keyProposal: KeyProposal;
 		tank?: string; // the category of the chosen building's tank (#451, M-1)
 	} = $props();
 
@@ -104,6 +107,9 @@
 			bind:isValidUtilityCost={row.values.isValidUtilityCost}
 			{categories}
 			{distributionKeys}
+			{...keyProposal}
+			bind:keyChosen={row.keyChosen}
+			keyError={errors.distributionKeyId}
 		/>
 	</div>
 </div>

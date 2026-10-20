@@ -119,4 +119,15 @@ describe('Entwurf neu berechnen', () => {
 			{ categories: category.name }
 		);
 	});
+
+	// #452 point 4 (#382): Dwello checks the agreement through the category; without one it cannot
+	it('lehnt ab, solange eine umlagefähige Rechnung der Periode keine Kategorie hat', async () => {
+		const id = await generate(2029);
+		await insertInvoice(rental.building, { categoryId: null, billingEntityName: 'Garten AG', amount: '120.00', invoiceDate: '2029-06-30' });
+		await insertInvoice(rental.building, { categoryId: null, amount: '80.00', invoiceDate: '2029-07-31', isValidUtilityCost: false });
+
+		await expectRejection(await recalculate(id), 409, 'Allocable invoices of the period have no category', 'STATEMENT_RECALCULATION_UNCATEGORIZED_INVOICES', {
+			invoices: 'Garten AG, 30.06.2029, CHF 120.00'
+		});
+	});
 });

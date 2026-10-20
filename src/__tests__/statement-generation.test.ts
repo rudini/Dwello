@@ -538,14 +538,14 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 			if (url.includes('/invoices/completeness/'))
 				return Response.json({ ...invoiceCompleteness, buildingId: url.includes('b1') ? 'b1' : 'b2' });
 			const invoices = url.includes('/for-statement/b1')
-				? [{ invoiceDate: '2024-06-30' }, { invoiceDate: '2024-01-15' }]
+				? [{ invoiceDate: '2024-06-30', categoryId: 'c1' }, { invoiceDate: '2024-01-15', categoryId: 'c1' }]
 				: [];
 			return Response.json(invoices);
 		}) as typeof globalThis.fetch;
 
 		expect(await invoicesInPeriod(fetch, { ...period, buildingIds: ['b1', 'b2'] })).toEqual([
-			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1', heatingWithoutServicePeriod: [] }, changed: [] },
-			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2', heatingWithoutServicePeriod: [] }, changed: [] }
+			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1', heatingWithoutServicePeriod: [] }, changed: [], uncategorized: [] },
+			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2', heatingWithoutServicePeriod: [] }, changed: [], uncategorized: [] }
 		]);
 		// each category compared with the same dates one year earlier
 		expect(urls).toContain(`${API}/invoices/completeness/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
@@ -572,6 +572,19 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		expect(await invoicesInPeriod(fetch, period)).toMatchObject([{ count: 2, first: '2024-03-31', last: '2024-12-31' }]);
 	});
 
+	// #452 Punkt 4 (#382): the run waits for a category on each allocable invoice it would bill, also without the check
+	it('nennt die Rechnungen der Periode ohne Kategorie', async () => {
+		const uncategorized = { id: 'i1', billingEntityName: 'Garten AG', description: 'Rasen', invoiceDate: '2024-06-30', amount: '120.00' };
+		const fetch = (async (url: string) =>
+			url.includes('/invoices/completeness/')
+				? Response.json({ error: 'kaputt' }, { status: 500 })
+				: url.includes('/for-statement/')
+					? Response.json([{ ...uncategorized, categoryId: null, buildingId: 'b1' }, { ...uncategorized, id: 'i2', categoryId: 'c1' }])
+					: Response.json({ data: [], total: 0 })) as typeof globalThis.fetch;
+
+		expect(await invoicesInPeriod(fetch, period)).toMatchObject([{ count: 2, uncategorized: [uncategorized] }]);
+	});
+
 	// Without the check per category the preview still shows; the look at start and end of the period stays
 	it('zeigt die Rechnungen auch, wenn die Prüfung pro Kategorie scheitert', async () => {
 		const fetch = (async (url: string) =>
@@ -582,7 +595,7 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 					: Response.json({ data: [], total: 0 })) as typeof globalThis.fetch;
 
 		expect(await invoicesInPeriod(fetch, period)).toEqual([
-			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined, changed: [] }
+			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined, changed: [], uncategorized: [] }
 		]);
 	});
 

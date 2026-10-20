@@ -585,6 +585,14 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
+	// Code-Review 452-1 C-7: without a contract to bill there is no hint on invoices without Kategorie to answer
+	it('meldet eine Periode ohne Mietverträge auch neben einer Rechnung ohne Kategorie', async () => {
+		open({ preview: [], invoices: [{ ...invoices[0], uncategorized: completeness.lateInvoices }] });
+		next();
+		await settle();
+		expect(text()).toContain('Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.');
+	});
+
 	// Nachzügler: alle Mietverträge haben schon eine Abrechnung, der Verwalter will einen Entwurf neu berechnen
 	it('sagt bei einer leeren Vorschau, dass alle Mietverträge schon eine Abrechnung haben, und wo sie stehen', () => {
 		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2 }] });
@@ -981,11 +989,31 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('hinted-invoice')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			`${late.billingEntityName}: ${late.description}. Rechnungsdatum 20.01.2026, CHF 290.00`
 		);
-		expect(hint.querySelector('a')!.getAttribute('href')).toBe(`/invoices/${late.id}/edit`);
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/${late.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+		);
 		expect(byTestId('confirm-missing-invoices')).toBeNull();
 		next();
 		await settle();
 		expect(heading()).toBe('Erstellen');
+	});
+
+	// #452 Punkt 4 (#382): Dwello prüft die Vereinbarung über die Kategorie; ohne sie geht es nicht weiter
+	it('hält die Vorschau an, solange eine umlagefähige Rechnung keine Kategorie hat', async () => {
+		const late = completeness.lateInvoices[0];
+		open({ preview, invoices: [{ ...invoices[0], uncategorized: [late] }] });
+		const hint = byTestId('uncategorized-invoices')!;
+
+		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Diese umlagefähigen Rechnungen haben keine Kategorie. Dwello rechnet nur Nebenkosten ab, die der Mietvertrag vereinbart, und prüft das über die Kategorie. Ordnen Sie jeder Rechnung eine Kategorie zu oder stellen Sie sie auf «Nicht umlagefähig». Danach geht es weiter.'
+		);
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/${late.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+		);
+		next();
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain('Ordnen Sie jeder Rechnung eine Kategorie zu');
+		expect(heading()).toBe('Vorschau');
 	});
 
 	// In einer Periode unter einem Jahr zählt eine Jahresrechnung ohne Leistungszeitraum ganz (#134)

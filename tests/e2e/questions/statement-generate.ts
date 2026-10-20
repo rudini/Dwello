@@ -16,6 +16,7 @@ import {
 	invoicesWithoutServicePeriod,
 	heatingWithoutServicePeriod,
 	lateInvoices,
+	uncategorizedInvoices,
 	draftsOnlyNote,
 	feeNotAgreed,
 	agreementQuestions,
@@ -139,6 +140,8 @@ export const periodRunning = Text.of(periodRunningWarning);
 export const tankQuestions = Count.of(tankQuestion);
 export const missingStockFindings = Count.of(categoryFinding('Ohne Anfangs- und Endbestand'));
 export const confirmationAsked = Visibility.of(confirmMissingInvoices);
+export const uncategorizedInvoiceOn = (date: string) => Text.of(hintedInvoice(uncategorizedInvoices, date));
+export const uncategorizedInvoicesText = Text.of(uncategorizedInvoices);
 export const lateInvoiceOn = (date: string) => Text.of(hintedInvoice(lateInvoices, date));
 export const countOfLateInvoicesOn = (date: string) => Count.of(hintedInvoice(lateInvoices, date));
 export const invoiceWithoutServicePeriodOn = (date: string) => Text.of(hintedInvoice(invoicesWithoutServicePeriod, date));
