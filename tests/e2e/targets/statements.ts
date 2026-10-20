@@ -34,3 +34,4 @@ export const statementsEmptyNotice = target('Hinweis keine Abrechnungen', (page)
 export const statementsScope = target('Auswahl der Abrechnungsliste', (page) => page.getByTestId('statements-scope'));
 export const statusCount = (status: string) =>
 	target(`Anzahl im Statusfilter ${status}`, (page) => page.getByTestId(`filter-${status}`).getByTestId('filter-count'));
+export const settledFilter = target('Filter Erledigt', (page) => page.getByTestId('filter-settled'));

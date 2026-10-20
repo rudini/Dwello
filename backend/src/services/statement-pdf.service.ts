@@ -6,7 +6,7 @@
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, utilityStatements, type KeyValues } from '../db/schema';
-import { roundToRappen } from './pdf-format';
+import { belowMinimum, roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
@@ -14,7 +14,7 @@ import { datedToday, getStatement, keyValuesOf, updateStatementStatus, type Stat
 import { refusal } from './coded-error';
 import { billingStart, getContract } from './contract.service';
 
-// Creditor of the QR-bill from the company configuration; null without IBAN
+// Creditor of the QR-bill from the company configuration, as entered (#450); null without IBAN
 export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const companyName = await getTypedConfig('company_name');
 	const companyAddress = await getTypedConfig('company_address');
@@ -23,13 +23,7 @@ export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const iban = await getTypedConfig('iban');
 	if (!iban) return null;
 
-	return {
-		iban,
-		companyName: companyName || 'Dwello Property Management',
-		address: companyAddress || '',
-		postalCode: companyPostalCode || '8000',
-		city: companyCity || 'Zürich'
-	};
+	return { iban, companyName, address: companyAddress, postalCode: companyPostalCode, city: companyCity };
 }
 
 // Name and postal address as stored; a statement without tenant prints no recipient
@@ -144,15 +138,31 @@ export function toPdfData(
 			statement.agreedCategoryIds && statement.lineItems.every((item) => item.categoryId)
 				? [...new Set(statement.lineItems.flatMap((item) => nameIn(categoryNames, item.categoryId, language) ?? []))]
 				: undefined,
+		...minimumOf(statement),
+		...(statement.carriedFrom && {
+			carryOver: { statementNumber: statement.carriedFrom.statementNumber, amount: parseFloat(statement.carriedFrom.balance) }
+		}),
+		notes: statement.notes || undefined,
 		...(statement.replaces && {
 			replaces: {
 				statementNumber: statement.replaces.statementNumber,
 				statementDate: statement.replaces.statementDate,
 				paidOn: statement.priorPaidOn ?? [],
-				priorPayments: parseFloat(statement.priorPayments)
+				priorPayments: parseFloat(statement.priorPayments),
+				offsetWith: (statement.offsetWith ?? []).map((o) => ({ statementNumber: o.statementNumber, amount: parseFloat(o.amount) }))
 			}
 		})
 	};
+}
+
+// #448: a Saldo below CHF 5 is carried over, except on a Schlussabrechnung; one settled under #94 (paid with 0.00) keeps
+// what the tenant was told
+function minimumOf(statement: StatementWithDetails) {
+	const balance = parseFloat(statement.balance);
+	if (!belowMinimum(balance) || balance === 0) return {};
+	if (statement.paidDate && Number(statement.paidAmount) === 0) return { waived: true };
+	// settled stays settled, also when the contract's end moves into the period afterwards (Fachreview 448-2 V-17)
+	return statement.final && statement.status !== 'settled' ? {} : { carried: true };
 }
 
 // The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs

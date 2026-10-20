@@ -43,8 +43,9 @@
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"marked-sent": "A letter just marked as sent: the notice that offers its remade PDF to print (#193).",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
+		"mark-paid-early": "The dialog that marks a statement as paid, with a day before the Abrechnungsdatum entered and confirmed once: the question whether to save it anyway (#448).",
 		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
-		"correct-dialog": "The confirmation before a sent or paid statement is replaced by a berichtigte Abrechnung open, with the amount it offsets and the limitation (#120).",
+		"correct-dialog": "The confirmation before a sent, paid or settled statement is replaced by a berichtigte Abrechnung open, with the amount it offsets, on a sent one the field «Bereits bezahlt» (#448), and the limitation (#120).",
 		"generation-result": "«Abrechnungen erstellen» after creating the drafts of a year without invoices: how many were created, «Entwürfe ansehen», «Alle als ZIP herunterladen» (#356) and «Weitere Abrechnungen erstellen».",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving (the contract wizard's tenant has a contract without Vertragsende: its step «Wohnung» names it, #156).",
@@ -75,6 +76,7 @@
 		"old-address-preview": "Statement wizard preview of 2024 with a tenant who moved out and still has the building's address: the warning at his row (A-5, #114).",
 		"old-address-task": "Overview with a draft statement of a tenant who moved out and still has the building's address: the task «Neue Adresse eintragen» (A-5, #114).",
 		"buildings-billed": "Statement wizard step «Gebäude» with a building whose rental contracts partly have a statement in the period: the count at the building (#135).",
+		"buildings-overlap": "Statement wizard step «Gebäude» with a period that overlaps the building's statement period without being equal: the building cannot be chosen, the text names the existing period and the ways out (#199, #408 point 2).",
 		"formula-tested": "Distribution key form after testing a formula.",
 		"ki-proposal": "New category form after «Von der KI prüfen lassen»: the KI's proposal with its reasoning, the choice preset (#176).",
 		"ki-unsure": "New category form after the KI was not sure: the hint to choose oneself, nothing preset (#176, #186).",
@@ -493,6 +495,7 @@
 				"draft-discard-dialog",
 				"draft-dropped",
 				"buildings-billed",
+				"buildings-overlap",
 				"link-preset",
 				"agreed-costs",
 				"agreement-save-failed",
@@ -539,6 +542,7 @@
 				"default",
 				"reminder-dialog",
 				"mark-paid-dialog",
+				"mark-paid-early",
 				"action-error",
 				"correct-dialog"
 			]
@@ -550,6 +554,35 @@
 				"default",
 				"reset-payment-dialog",
 				"correct-dialog"
+			]
+		},
+		{
+			"name": "statement-settled-detail",
+			"path": "/statements/{settledStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-carried-detail",
+			"path": "/statements/{carriedStatement}",
+			"states": [
+				"default",
+				"correct-dialog"
+			]
+		},
+		{
+			"name": "statement-carry-detail",
+			"path": "/statements/{carryStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-offset-detail",
+			"path": "/statements/{offsetStatement}",
+			"states": [
+				"default"
 			]
 		},
 		{

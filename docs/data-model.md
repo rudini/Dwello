@@ -313,18 +313,19 @@ agreed_category_ids    JSONB                   -- ids of the categories the cont
 balance                DECIMAL(12,2) NOT NULL  -- Saldo, to 5 Rappen in the tenant's favour (#79; sent before: commercially): positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
-paid_date              DATE                    -- from the Abrechnungsdatum up to today (#138)
-paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93); 0.00 for a Saldo below CHF 5, settled on sending or marked paid without an amount (#94)
+paid_date              DATE                    -- from the end of the Abrechnungsperiode up to today (#138, #448; before the Abrechnungsdatum after a confirmation in the UI)
+paid_amount            DECIMAL(12,2)           -- the Saldo when marked paid without an amount (#93); 0.00 for a Saldo below CHF 5 settled under #94 (sent before #448); on a replaced sent or overdue statement «Bereits bezahlt», a refund negative (#448)
 payment_resets         JSONB   NOT NULL DEFAULT '[]' -- payments taken back: { resetOn, paidDate, paidAmount } (#92)
 payment_recorded_at    TIMESTAMP               -- when the payment was recorded; a reset discards only a PDF made after it (#92)
 replaces_id            UUID → utility_statements(id) -- a berichtigte Abrechnung: the statement it replaces (#120, unique)
 prior_payments         DECIMAL(12,2) NOT NULL DEFAULT 0 -- paid on the replaced statement and its own replaced ones; a refund paid negative (#120)
+carried_from_id        UUID → utility_statements(id) -- the Übertrag: the earlier statement of the contract whose Saldo below CHF 5 this one counts in (#448)
 reminder_sent_date     DATE
 pdf_blob               TEXT                    -- Base64 PDF with QR-bill
 pdf_generated_at       TIMESTAMP
 qr_bill_reference      VARCHAR(27)             -- QR reference (only with a QR-IBAN)
 notes                  TEXT
-CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid', 'replaced'))
+CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid', 'settled', 'replaced'))
 CONSTRAINT statements_period_check CHECK (period_end >= period_start)
 ```
 
@@ -339,13 +340,15 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 
 | From | To |
 |---|---|
-| `draft` (Entwurf) | `sent` |
+| `draft` (Entwurf) | `sent`; `settled` (Erledigt) when its Saldo is 0.00 or below CHF 5 and it is no Schlussabrechnung (#448): no payment, no Zahlungsdatum, never gemahnt, no reset |
 | `sent` (Versendet) | `paid` |
 | `overdue` (Überfällig, computed) | `paid` |
 | `paid` (Bezahlt) | `sent` only by `resetPayment` (#92): paid date and amount cleared, the reset appended to `payment_resets`, a PDF made after the payment was recorded discarded |
-| `sent`, `overdue`, `paid` | `replaced` (Ersetzt) only by `replaceStatement` (#120): nothing else changes; never back |
+| `sent`, `overdue`, `paid`, `settled` | `replaced` (Ersetzt) only by `replaceStatement` (#120): nothing else changes, except `paid_amount`: «Bereits bezahlt» entered on a sent or overdue one (a refund negative), or on a settled one whose Saldo a later statement counts as its Übertrag that Saldo, which the berichtigte Abrechnung offsets as «Bereits verrechnet mit NK-…» (#448); never back |
 
 **Berichtigte Abrechnung (#120, #358):** `correctStatement` (or a statement run of the same contract and the same Abrechnungsperiode) creates a draft from today's data with a new number from the counter, `replaces_id` set to the replaced statement without a replacement, `prior_payments` = its `paid_amount` + its own `prior_payments`, and `balance` = Saldo of costs − Akonto − `prior_payments`, rounded as every Saldo. A replaced statement does not count as the statement of its period (statement run, missing statements) and no longer locks the contract dates.
+
+**Übertrag (#448):** a statement of a contract counts in the Saldo of the latest earlier `settled` statement of the same contract with a Saldo other than 0.00 (`carried_from_id`), unless a statement of another period already counts it; a berichtigte Abrechnung of the same period counts it again. `balance` = Saldo of costs + Übertrag − Akonto − `prior_payments`, rounded as every Saldo. A Schlussabrechnung (the contract's end date within the period) has no Mindestbetrag: every Saldo is claimed or paid out. Statements settled under #94 (`paid` with `paid_amount` 0.00) keep their texts; a refund among them is carried over, a waived Nachzahlung is not (product owner 2026-10-19).
 
 **Lock rule:** only a `draft` can be deleted (`deleteStatement`), get line items (`addLineItems`) or have its
 amounts changed (`updateStatement` rejects `total_costs`, `total_advance_payments`, `management_fee_percent`,

@@ -3,6 +3,7 @@ import { Actor } from '../screenplay/actor';
 import { BrowseTheWeb, CallTheApi } from '../screenplay/abilities';
 import { Cookies } from '../screenplay/interactions';
 import { testData, type TestData } from './backend';
+import { withSettingsLock } from './settings-lock';
 import { sessionCookies, sessionToken } from './session';
 
 // Protocol driver the scenarios talk to the system through (Dave Farley): the browser, or the backend API.
@@ -16,6 +17,7 @@ export const test = base.extend<{
 	besucher: Actor;
 	seed: TestData;
 	names: Map<string, string>;
+	globalSettings: void;
 }>({
 	driver: ['ui', { option: true }],
 
@@ -46,5 +48,12 @@ export const test = base.extend<{
 		await data.cleanUp();
 	},
 
-	names: async ({ seed }, use) => use(seed.names)
+	names: async ({ seed }, use) => use(seed.names),
+
+	// A scenario tagged @einstellungen-global saves the IBAN and reads it back: it has the settings to itself (O-34)
+	globalSettings: [
+		async ({ $tags }, use) =>
+			$tags.includes('@einstellungen-global') ? withSettingsLock(() => use()) : use(),
+		{ auto: true }
+	]
 });

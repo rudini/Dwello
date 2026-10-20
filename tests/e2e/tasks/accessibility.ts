@@ -399,6 +399,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Wait.until(on.shown('document-marked-sent'))
 		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
+	// a day after the end of the seeded Abrechnungsperiode 2025, before the Abrechnungsdatum of today (#448)
+	'mark-paid-early': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(on.markPaidButton),
+			EnterDate.of('2026-01-15').into(on.paidDateInput),
+			Click.on(on.markPaidConfirm),
+			Wait.until(on.earlyPaidWarning)
+		),
 	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
 	'correct-dialog': () => openDialog(on.correctButton),
 	'formula-tested': () => (actor) =>
@@ -480,7 +488,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'category-check': (example) => previewOf('2026', 'category-check')(example),
 	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
 	// January to May 2025: the invoice of 31.01. counts in full, the one of 30.06. comes shortly after the end
-	'invoice-hints': (example) => previewOf('2025', 'late-invoices', '2025-05-31')(example),
+	'invoice-hints': (example) => previewOf('2026', 'late-invoices', '2026-05-31')(example),
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
 	// 2025: Anna's draft misses the Lift invoice recorded after it (#132)
 	'preview-outdated': (example) => previewOf('2025', `existing-statements-changed-${example.building}`)(example),
@@ -524,6 +532,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			EnterDate.of('2025-01-01').into(on.periodStartInput),
 			EnterDate.of('2025-12-31').into(on.periodEndInput),
+			Click.on(nextButton),
+			Wait.until(on.shown(`generate-building-billed-${example.building}`))
+		),
+	// #199, #408 point 2: 01.07.2025 – 30.06.2026 overlaps the 2025 statements of Anna and Bruno
+	'buildings-overlap': (example) => (actor) =>
+		actor.attemptsTo(
+			EnterDate.of('2025-07-01').into(on.periodStartInput),
+			EnterDate.of('2026-06-30').into(on.periodEndInput),
 			Click.on(nextButton),
 			Wait.until(on.shown(`generate-building-billed-${example.building}`))
 		),

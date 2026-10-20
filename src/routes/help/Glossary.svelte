@@ -44,6 +44,11 @@
 			term: m.glossary_balance_term(),
 			text: m.glossary_balance_text()
 		},
+		// #448: no payment follows, unlike «Bezahlt» (personas dr-weber-448 P-2, anna-448 P-4)
+		{
+			term: m.glossary_settled_term(),
+			text: m.glossary_settled_text()
+		},
 		{
 			term: m.glossary_deadline_term(),
 			text: m.glossary_deadline_text()

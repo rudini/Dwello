@@ -35,11 +35,8 @@
 			.filter(Boolean)
 			.join(' ')
 	);
-	const unbilledDays = $derived(rows.some((row) => row.partlyBilled > 0));
-	// days left unbilled are a finding to confirm; a statement named as outdated or other is a warning (#132, V-6)
-	const existingTone = $derived(
-		unbilledDays || existing.some((row) => row.changed.length) ? 'caution' : 'info'
-	);
+	// a statement named as outdated or other is a warning (#132, V-6)
+	const existingTone = $derived(existing.some((row) => row.changed.length) ? 'caution' : 'info');
 	// invoices without Leistungszeitraum that may count in the wrong period: a hint, no confirmation
 	const hinted = (list: 'lateInvoices' | 'invoicesWithoutServicePeriod') =>
 		rows.map((row) => ({ ...row, invoices: row[list] })).filter((row) => row.invoices.length > 0);
@@ -59,11 +56,9 @@
 	const comparedWith = $derived(checked.find((row) => row.comparedWith)?.comparedWith);
 	// The warnings that need the confirmation, read with its checkbox
 	const confirming = $derived(
-		[
-			missing.length && 'missing-invoices-text',
-			incomplete.length && 'category-check-text',
-			unbilledDays && 'existing-statements-text'
-		].filter((id): id is string => !!id)
+		[missing.length && 'missing-invoices-text', incomplete.length && 'category-check-text'].filter(
+			(id): id is string => !!id
+		)
 	);
 	const statements = (count: number) =>
 		count === 1 ? m.statements_utility_one() : m.statements_utility_many({ count });

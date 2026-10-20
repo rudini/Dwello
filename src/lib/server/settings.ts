@@ -55,13 +55,20 @@ const RULES: [keyof Settings, (value: string) => boolean, () => string][] = [
 	['reminderAfterDays', (v) => days(v, 7, 60), m.settings_error_reminder_days]
 ];
 
-const settingsErrors = (s: Settings): Record<string, string> =>
-	Object.fromEntries(
+function settingsErrors(s: Settings): Record<string, string> {
+	const errors = Object.fromEntries(
 		RULES.filter(([field, valid]) => s[field] && !valid(s[field])).map(([field, , message]) => [
 			field,
 			message()
 		])
 	);
+	// the QR-bill names the landlord as creditor (#450), as the backend checks it
+	if (s.iban && !errors.iban && creditorMissing(s).length) errors.iban = m.backend_iban_company_address_missing();
+	return errors;
+}
+
+const creditorMissing = (s: Settings) =>
+	(['companyName', 'companyPostalCode', 'companyCity'] as const).filter((field) => !s[field]);
 
 /** Saves filled values and resets emptied ones to their default */
 export async function saveSettings(fetch: typeof globalThis.fetch, request: Request) {
@@ -70,7 +77,11 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 		Object.keys(KEYS).map((field) => [field, String(formData.get(field) ?? '').trim()])
 	) as Settings;
 	const errors = settingsErrors(settings);
-	if (Object.keys(errors).length > 0) return fail(400, { errors });
+	if (Object.keys(errors).length > 0)
+		return fail(400, {
+			errors,
+			missing: errors.iban === m.backend_iban_company_address_missing() ? creditorMissing(settings) : []
+		});
 
 	const fee = settings.managementFeePercent && String(parsePercent(settings.managementFeePercent));
 	const entries = Object.entries({

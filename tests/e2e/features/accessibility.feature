@@ -160,6 +160,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | draft-discard-dialog |
       | statement-generate     | draft-dropped       |
       | statement-generate     | buildings-billed    |
+      | statement-generate     | buildings-overlap   |
       | statement-generate     | link-preset         |
       | statement-generate     | agreed-costs        |
       | statement-generate     | agreement-save-failed |
@@ -176,11 +177,17 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
+      | statement-sent-detail  | mark-paid-early     |
       | statement-sent-detail  | action-error        |
       | statement-sent-detail  | correct-dialog      |
       | statement-paid-detail  | default             |
       | statement-paid-detail  | reset-payment-dialog |
       | statement-paid-detail  | correct-dialog      |
+      | statement-settled-detail | default           |
+      | statement-carried-detail | default           |
+      | statement-carried-detail | correct-dialog    |
+      | statement-carry-detail | default             |
+      | statement-offset-detail | default            |
       | statement-replaced-detail | default          |
       | statement-corrected-detail | default         |
       | statement-correction-detail | default        |

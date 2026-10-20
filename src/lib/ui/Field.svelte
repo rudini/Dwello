@@ -15,6 +15,7 @@
 		note,
 		helpTestid,
 		labelTestid,
+		invalidBy,
 		children
 	}: {
 		id: string;
@@ -26,6 +27,7 @@
 		note?: { text: string; testid: string; quiet?: boolean }; // a caution about the value, e.g. that the KI read it without being sure; quiet: only a hint
 		labelTestid?: string;
 		helpTestid?: string;
+		invalidBy?: string; // the id of another field's error that names this field too, e.g. an empty required one
 		children: Snippet<[FieldControl]>;
 	} = $props();
 
@@ -34,27 +36,45 @@
 	let frame = $state<HTMLElement>();
 	let corrected = $state<string>(); // the error the field was changed after
 	const shown = $derived(error === corrected ? undefined : error);
-	const change = () => (corrected = error);
+	let edited = $state(false); // the form changed since invalidBy was set: the error it points to may be gone
+	const flagged = $derived(invalidBy && !edited ? invalidBy : undefined);
+	const change = () => {
+		corrected = error;
+		edited = true;
+	};
 	// a check that cleared the error starts over: the same error set again is shown again
 	$effect(() => {
 		if (!error) corrected = undefined;
 	});
 	$effect(() => {
+		if (!invalidBy) edited = false;
+	});
+	$effect(() => {
 		const form = frame?.closest('form');
-		const check = () => (corrected = undefined);
+		const check = () => {
+			corrected = undefined;
+			edited = false;
+		};
+		const changed = () => (edited = true);
 		form?.addEventListener('submit', check, true);
-		return () => form?.removeEventListener('submit', check, true);
+		form?.addEventListener('input', changed);
+		return () => {
+			form?.removeEventListener('submit', check, true);
+			form?.removeEventListener('input', changed);
+		};
 	});
 
 	const helpId = $derived(`${id}-help`);
 	const errorId = $derived(`${id}-error`);
 	const noteId = $derived(`${id}-note`);
+	const invalid = $derived(!!shown || !!flagged);
+	const hasHelp = $derived(!!(help || example));
 	// a quiet note is only a hint, not a warning (#245, persona Helga of #233)
 	const warning = $derived(!note?.quiet);
 	const noteLook = $derived(warning ? 'font-semibold text-caution' : 'text-ink-muted');
 	// a caution about the value first: it is missed at the end of a long help (persona Sven)
 	const describedBy = $derived(
-		[note && noteId, (help || example) && helpId, shown && errorId].filter(Boolean).join(' ') || undefined
+		[note && noteId, hasHelp && helpId, shown && errorId, flagged].filter(Boolean).join(' ') || undefined
 	);
 </script>
 
@@ -63,13 +83,13 @@
 		{label}
 		{#if optional}<span class="font-normal text-ink-muted">{m.ui_optional()}</span>{/if}
 	</label>
-	{#if help || example}
+	{#if hasHelp}
 		<p id={helpId} class="text-ink-muted" data-testid={helpTestid}>
 			{help ?? ''}
 			{#if example}<span class="whitespace-nowrap">{m.ui_example({ example })}</span>{/if}
 		</p>
 	{/if}
-	{@render children({ id, describedBy, invalid: !!shown })}
+	{@render children({ id, describedBy, invalid })}
 	{#if note}
 		<p
 			id={noteId}

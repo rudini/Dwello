@@ -43,6 +43,11 @@ const frontendEnv = {
 	OPERATOR_NAME: 'Muster Hosting AG',
 	OPERATOR_ADDRESS: 'Bahnhofstrasse 1, 8001 Zürich',
 	OPERATOR_CONTACT: 'betrieb@muster-hosting.ch',
+	// The server's and the mail server's country privacy.feature expects (#458)
+	// (a country name that reads the same in every language, so the language check finds no German in it)
+	OPERATOR_SERVER_COUNTRY: 'Liechtenstein',
+	MAIL_PROVIDER_NAME: 'Muster Mail AG',
+	MAIL_PROVIDER_COUNTRY: 'Liechtenstein',
 	// The component gallery the axe check visits (src/routes/gallery)
 	UI_GALLERY: 'on',
 	// The Gebäuderegister stand-in instead of api3.geo.admin.ch (backend/scripts/gwr-stub.ts)

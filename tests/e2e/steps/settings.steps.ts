@@ -1,6 +1,6 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { settingHelp, settingsSaved, storedSetting } from '../questions/settings';
+import { settingHelp, settingInvalid, settingsSaved, storedSetting } from '../questions/settings';
 import { openMasterData, openSettings, saveSettings } from '../tasks/settings';
 
 const { Given, When, Then } = createBdd(test);
@@ -57,6 +57,12 @@ Then(
 
 Then('erklärt die Einstellung {string} {string}', async ({ verwalter }, label: string, help: string) => {
 	await verwalter.sees(settingHelp(FIELDS[label])).toContain(help);
+});
+
+// #450, persona Helga P-2: the empty fields the IBAN's message names; the street stays optional
+Then('kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend', async ({ verwalter }) => {
+	for (const label of ['Firmenname', 'PLZ', 'Ort']) await verwalter.sees(settingInvalid(FIELDS[label])).toBe('true');
+	await verwalter.sees(settingInvalid(FIELDS.Adresse)).toBeNull();
 });
 
 Then('erklären die Einstellungen bei der IBAN {string}', async ({ verwalter }, text: string) => {

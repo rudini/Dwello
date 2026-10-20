@@ -10,7 +10,7 @@ import { SMTPServer } from 'smtp-server';
 import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
 import { db } from '../db/connection';
-import { documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
+import { configuration, documents, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { formatQRReferenceForDisplay, statementQRReference } from '../services/qr-bill.service';
 import { updateTenant } from '../services/tenant.service';
@@ -503,7 +503,8 @@ describe('Zahlteil der Mahnung', () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
 		const statementId = await statement('sent');
 		const letter = (await remind(statementId)).document;
-		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		// paid as recorded: the period of this statement may end after today, before which the API refuses it (#448)
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId));
 		await api('PUT', `/api/v1/documents/${letter.id}/sent`);
 		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
 
@@ -519,5 +520,36 @@ describe('Zahlteil der Mahnung', () => {
 
 		expect(text).toContain('Freundliche Grüsse');
 		expect(text).not.toContain('Zahlteil');
+	});
+
+	// #450 (Entscheid in #404, Punkt 8): ohne Ort der Firmenadresse nennt der Zahlteil keinen erfundenen Zahlungsempfänger
+	it('erstellt ohne vollständige Firmenadresse keine Mahnung mit Zahlteil', async () => {
+		const city = await getConfig('company_city');
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		try {
+			const refused = await remind(statementId);
+
+			expect(refused).toMatchObject({ status: 400, code: 'CREDITOR_ADDRESS_MISSING' });
+		} finally {
+			if (city) await setConfig('company_city', city);
+		}
+	});
+
+	// Fachreview V-1: eine Mahnung von vorher, noch «Zu versenden», entsteht beim Markieren neu; die Ablehnung sagt, was fehlt
+	it('lehnt das Markieren einer Mahnung ohne vollständige Firmenadresse mit dem Code ab', async () => {
+		const city = await getConfig('company_city');
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const letter = (await remind(await statement('sent'))).document;
+		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		try {
+			const response = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+
+			expect(response.status).toBe(400);
+			expect(await response.json()).toEqual(await Bun.file(`${import.meta.dir}/../../../tests/contracts/statement-pdf-creditor-refused.json`).json());
+		} finally {
+			if (city) await setConfig('company_city', city);
+		}
 	});
 });

@@ -2052,6 +2052,35 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
+## Session W5-450: QR-bill creditor (#450) and the IBAN help (#490) (2026-10-19)
+
+Worker W5 of ten in parallel: the checklist ran in the pull request, the session goes straight here (coordinator rule; Session C1 of another branch stays in the plan).
+
+- [x] @wip scenario «IBAN ohne Firmenadresse» and red lower-layer tests (config, statement PDF, reminder, QR country 9484/9485/9498/9499, BFF), committed; fach-reviewer round 1 before the implementation (`docs/reviews/450-fachreview-1.md`: V-1 Major, V-2 to V-11)
+- [x] Implementation: IBAN only with name, postal code and town (field and backend `IBAN_COMPANY_ADDRESS_MISSING`); a PDF or reminder with a payment part refused (`CREDITOR_ADDRESS_MISSING`); invented creditor gone; creditor country from the postal code; V-1 (marking a reminder sent returns the code), V-2 to V-5, V-11
+- [x] No scenario for the PDF refusal in `statement-detail.feature`: the settings are global for parallel scenarios and the state exists only in installations from before (comment in #450); contract `statement-pdf-creditor-refused.json`
+- [x] Issues from the review: #490 (glossary, IBAN help; decided and implemented here), #491 (letter while the PDF is refused; decided, comes with #449), #503 (Verlauf «PDF erstellt» while refused)
+- [x] code-reviewer round 1 (`docs/reviews/450-review-1.md`: C-1 Major, C-2) and round 2 (`450-review-2.md`: both fixed)
+- [x] #490: help text in four languages and the glossary rows the product owner asked for; fach-reviewer round 2 (`docs/reviews/450-fachreview-2.md`: no Blocker/Major)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-450.md`, `weber-450.md`): Helga P-2, Dr. Weber P-1, P-2 fixed with tests seen red; observations: U-42, #503
+- [x] Closing code-review round 3 (`docs/reviews/450-review-3.md`: C-1 Major, C-2, C-3): scenario step for the marked fields (seen red), marks end with any input, all three codes tested
+- [x] O-34 closed: lock on the global settings (`tests/e2e/fixtures/settings-lock.ts`), seen red without it (3 of 8) and green with it (24 of 24)
+- [x] Closing code-review round 4 (`docs/reviews/450-review-4.md`: no finding)
+- [x] PR `Fixes #450`, `Fixes #490`
+## Session W6-458: legal texts, split responsibility (2026-10-19)
+
+Branch `w6-issue-458`, worker W6 of a coordinated run (the checklist was kept in the pull request; `implementation_plan.md` keeps another worker's open session, coordinator's rule). Issue #458, closes #330 and #333.
+
+- [x] @wip scenarios in `privacy.feature`, `terms.feature`, `demo.feature`, `authentication.feature` (9251867b); all 11 seen red at the missing behaviour; 15 DOM and unit tests seen red
+- [x] fach-reviewer round 1 (`docs/reviews/458-fachreview-1.md`): R-1 to R-3 decided by the product owner as proposed; R-4 to R-10, R-13 applied; R-6 with a test seen red
+- [x] Implementation (0d847905): `src/lib/server/operator.ts` (`loadHosting`), `src/routes/privacy/+page.server.ts`, `src/routes/privacy/+page.svelte`, `src/routes/terms/+page.svelte`, `src/routes/login/+page.svelte`, `src/lib/utils/format.ts`, `messages/*.json`, `.env.example`, `docker-compose.prod.yml`, `README.md`; markers #330 and #333 removed
+- [x] PO wording R-1 to R-3 (ab6bcc58), tests seen red; E2E countries «Liechtenstein», since the language check flags German country names
+- [x] code-reviewer round 1 (`docs/reviews/458-review-1.md`: no finding)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-458.md`, `dr-weber-458.md`); Dr. Weber P-1 (deletion after retention) moved to #459
+- [x] Anchors on the privacy sections, glossary note «in der Datenschutzerklärung geplant, #411» removed on the PO's order (8807e6ae)
+- [x] fach-reviewer round 2 (`docs/reviews/458-fachreview-2.md`): links, when and how, export, Art. 9 DSG on /terms (b6006970), tests and a navigation scenario seen red
+- [x] Closing code-reviewer rounds (`docs/reviews/458-review-2.md`, after the date fix R-12 and the merge with #479 `458-review-3.md`: no finding)
+- [x] Affected E2E (chromium) green; PR `Fixes #458`, `Fixes #330`, `Fixes #333`
 ## Session W1: «Abgerechnet bis» lines, preview, wizard field, refusals (#453, #325, #480) (2026-10-19)
 
 Branch `w1-issue-453`, worker W1 of a parallel run; the checklist lived in the pull request (one session per plan, another worker's open session in `implementation_plan.md`, coordinator's consent) and comes here at the end.
@@ -2162,6 +2191,36 @@ Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20:
 - [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
 - [x] PR `Fixes #488`
 
+## Session W4: payments after #403 (#448, #484)
+
+Branch `w4-issue-448`. Worker W4 of the coordinator session; the checklist was kept in the pull request (coordinator rule for parallel workers). Stop and ask of #448 checked: the carry-over needs a new nullable column (`carried_from_id`, migration 0028) and a status `settled`; no existing statement changes. Product owner 2026-10-19 (via coordinator): M-1, V-2, V-4 of the domain review decided in #448; #484 decided and entered by this session as ordered.
+
+- [x] @wip scenarios (`statement-minimum-balance.feature`, `statement-detail.feature`, `statements.feature`, `dashboard.feature`) seen red; domain review before implementing (`docs/reviews/448-fachreview-1.md`)
+- [x] Übertrag below CHF 5 (also refunds settled under #94), status «Erledigt», Schlussabrechnung without Mindestbetrag, payment date from the end of the period with a confirmation before the Abrechnungsdatum, «Bereits bezahlt» / «Bereits zurückerstattet» when correcting, «Bereits verrechnet» for a Saldo a sent next statement counts, the remark on the PDF; tests: `statement-carry-over.pg.test.ts`, `statement-pdf-render.test.ts`, `statement-pdf-data.test.ts`, `statement-pages.dom.test.ts`, BFF and mapping tests
+- [x] Glossary rows of #484 and V-15 (`UBIQUITOUS_LANGUAGE.md`), `glossary_balance_text`, help term «Erledigt», `docs/data-model.md`, `docs/api-specification.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/PRD-Dwello.md`, `docs/design/i18n-begriffe.md`
+- [x] a11y and language screens: `statement-settled-detail`, `statement-carried-detail`, `statement-carry-detail`, `statement-offset-detail`, state `mark-paid-early`
+- [x] Domain reviews 1 to 4 (`docs/reviews/448-fachreview-1..4.md`), code reviews 1 and 2 (`448-review-1..2.md`), data check (`448-datenpruefung-1.md`), personas `dr-weber-448`, `anna-448` and their re-runs
+- [x] Open work: #506 (Übertrag that reaches no statement), #523 (partial payment when marking paid), #524 (a new PDF replaces the one sent), U-43 (edit page table cut off)
+- [x] Migration renumbered 0026 → 0027 → 0028 (taken on `main` by #464 and #514)
+## Session W2-199: one Abrechnungsperiode per day and building (#199, #408, #486, #487)
+
+Branch `w2-issue-199` (worker W2; reviewers started by the coordinator). Fixes #199 (decision #408 point 2, texts in https://github.com/rudini/Dwello/issues/408#issuecomment-6249569443), #408 (its last marker), #486 and #487 (product owner decisions 2026-10-19/20). The checklist was kept in the pull request description: ten parallel workers share `implementation_plan.md` (coordinator's rule).
+
+- [x] Scenarios `@wip` in `statement-generate.feature` (refused overlap, way to the existing period, short period, «Alle Gebäude») and `contract-detail.feature` (short period, days in another contract's period); red at the missing behaviour (9 of 9). The `@api` scenario «Die kurze Abrechnungsperiode rechnet eine Rechnung nur in ihrer Periode ab» pins kept behaviour.
+- [x] fach-reviewer round 1 (`docs/reviews/199-fachreview-1.md`): V-1 (product owner: a period equal to an existing one is allowed, also with overlapping old data), V-2 to V-7, V-9 (product owner's wording), V-10 fixed; M-1 → #486, V-8/V-11 → #487
+- [x] BFF, step 2, backend `statements/generate` (`STATEMENT_PERIOD_OVERLAPS`) refuse a period that overlaps a statement period of the building and equals none; ways out: the existing period, short periods for ended days with Mietstage, vacancy sentence; `*.pg.test.ts` with the domain review's example (no distribution above 100 %)
+- [x] Contract page: each part of the missing days with its way (existing period, short period), the contract's own days, no way when its own statement overlaps the period
+- [x] Unreachable «partly billed» path removed (BFF, wizard, texts, tests); V-6 texts without «ganz oder teilweise»
+- [x] Marker `TODO(fachlich prüfen, #408)` and the comments naming #199/#408 removed or repointed
+- [x] Texts in de/fr/it/en; screen state `buildings-overlap` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature` (axe and languages green)
+- [x] code-reviewer rounds 1 to 3 (`docs/reviews/199-review-1.md` to `-3.md`): C-1 to C-12 fixed (C-8 by the coordinator's decision: a replaced statement without its berichtigte Abrechnung keeps its period)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-199.md`, `weber-199.md`): Weber P-1 = Helga P-3 → fach-reviewer round 2 (`docs/reviews/199-fachreview-2.md`, M-2) and the product owner's help text of #486 (2026-10-20); Weber P-2 = Helga P-1 (existed on `main`) → #512; P-5 fixed; P-3, P-4, P-6, Helga P-2, P-4 stay in the reports; V-3 → #521
+- [x] daten-pruefer (`docs/reviews/199-datenpruefung-1.md`): no findings
+- [x] #487: glossary rows entered as the product owner ordered
+- [x] Merge of `origin/main` (conflict in `UBIQUITOUS_LANGUAGE.md` only); closing code-reviewer round (`docs/reviews/199-review-4.md`)
+- [x] Workflow note: parallel workers share `implementation_plan.md`, the scratchpad, the E2E lock and the persona stack (`docs/reviews/workflow-notes-issue-199.md`)
+
+Files: `src/lib/accounting-period.ts`, `src/lib/server/statement-generation.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{+page.server.ts,BuildingStep,BuildingChoice,OverlapWays,PreviewChecks,PreviewEmpty,StatementWizard}.svelte`, `src/routes/contracts/[id]/{+page.server.ts,MissingStatement.svelte}`, `backend/src/services/statement.service.ts`, `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/api-specification.md`, tests and E2E files.
 ## Session W9b: Akontorechnungen, «In Abrechnungen enthalten», upload bugs of #268 (2026-10-19 to 2026-10-20)
 
 Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of #222 (#245), #481, #482, #483; product owner decisions via the coordinator during the task, recorded in #455 «Decided (product owner)» (V-1, V-2, «Manuell», Verteilschlüssel; option C after domain review 455-3; the delete text of 2026-10-20). The list section of the list pages moved out first (PR #494, session W9a).

@@ -4,6 +4,7 @@ import {
 	draftNoticeText,
 	footerVersionText,
 	glossaryExplanationText,
+	legalAsOfText,
 	llmRecipientNotice,
 	operatorNoticeText,
 	pageAnchor,
@@ -23,6 +24,7 @@ import {
 	chooseInHelpContents,
 	chooseInMainNav,
 	chooseLogo,
+	openPrivacySectionFromTerms,
 	openSettingsFromUserMenu,
 	useWindowWidth
 } from '../tasks/app-frame';
@@ -45,6 +47,13 @@ When(
 	'der Liegenschaftsverwalter in der Hauptnavigation {string} wählt',
 	async ({ verwalter }, label: string) => {
 		await verwalter.attemptsTo(chooseInMainNav(label));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter in den Nutzungsbedingungen den Abschnitt {string} der Datenschutzerklärung wählt',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.attemptsTo(openPrivacySectionFromTerms(heading));
 	}
 );
 
@@ -162,12 +171,46 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter unter {string}, dass jede Person beim Betreiber Auskunft über ihre Daten verlangen kann',
+	'erfährt der Liegenschaftsverwalter unter {string}, dass seine Mieter und andere erfasste Personen bei ihm Auskunft über ihre Daten verlangen können',
 	async ({ verwalter }, heading: string) => {
-		await verwalter.sees(sectionText(heading)).toContain('Auskunft');
+		await verwalter.sees(sectionText(heading)).toContain(
+			'Ihre Mieter und andere Personen, deren Daten Sie erfassen, etwa Rechnungssteller, können bei Ihnen kostenlos Auskunft'
+		);
 		await verwalter.sees(sectionText(heading)).toContain('Art. 25 DSG');
 	}
 );
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass ein Anbieter die erfassten Daten nur in seinem Auftrag bearbeitet und der Betreiber für Anmeldung, Protokoll des Servers und Cookies verantwortlich ist',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Ein solcher Anbieter bearbeitet die Daten, die Sie erfassen, nur in Ihrem Auftrag.');
+		await verwalter.sees(sectionText(heading)).toContain(
+			'Für die Anmeldung, das Protokoll des Servers und die Cookies ist der Betreiber verantwortlich.'
+		);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass erfasste Personen bei ihm Berichtigung, Herausgabe und Löschung verlangen und eine Verletzung beim EDÖB anzeigen können',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Ebenso können diese Personen bei Ihnen und Sie beim Betreiber verlangen');
+		await verwalter.sees(sectionText(heading)).toContain('dass unrichtige Daten berichtigt werden (Art. 32 Abs. 1 DSG)');
+		await verwalter.sees(sectionText(heading)).toContain('in einem gängigen elektronischen Format herausgegeben werden (Art. 28 DSG)');
+		await verwalter.sees(sectionText(heading)).toContain('die Daten gelöscht werden (Art. 32 Abs. 2 DSG)');
+		await verwalter.sees(sectionText(heading)).toContain('(EDÖB) anzeigen (Art. 49 DSG)');
+	}
+);
+
+Then(
+	'nennen die Nutzungsbedingungen unter {string} {string}',
+	async ({ verwalter }, heading: string, text: string) => {
+		await verwalter.sees(sectionText(heading)).toContain(text);
+	}
+);
+
+Then('nennt die Seite den Stand {string}', async ({ verwalter }, date: string) => {
+	await verwalter.sees(legalAsOfText).toBe(`Stand: ${date}`);
+});
 
 Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello nichts von selbst löscht und wer zur Buchführung verpflichtet ist, Geschäftsbücher und Buchungsbelege 10 Jahre aufbewahrt',

@@ -4,11 +4,11 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts } from '../db/schema';
+import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
@@ -17,6 +17,12 @@ import { createRental } from './helpers/rental';
 
 const contracts = join(import.meta.dir, '..', '..', '..', 'tests', 'contracts');
 const sample = (name: string) => Bun.file(join(contracts, `${name}.json`)).json();
+
+// the sample without `offsetWith`, which only a berichtigte Abrechnung of a Saldo carried over has (#448, checked below)
+const statementSample = async () => {
+	const { offsetWith: _offsetWith, ...rest } = await sample('statement');
+	return rest;
+};
 
 const kind = (value: unknown) => (value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value);
 
@@ -88,7 +94,45 @@ afterAll(async () => {
 describe('API-Verträge des Frontends', () => {
 	it('GET /statements/:id liefert die Felder von statement.json', async () => {
 		const actual = await (await callApi(`/api/v1/statements/${statementId}`)).json();
-		expect(drift(await sample('statement'), actual)).toEqual([]);
+		expect(drift(await statementSample(), actual)).toEqual([]);
+	});
+
+	// #448 (Code-Review 448-2 C-9): ein Übertrag (`carriedFrom`) und ein Eintrag «Bereits verrechnet» (`offsetWith`)
+	it('GET /statements/:id liefert Übertrag und «Bereits verrechnet» in der Form von statement.json', async () => {
+		const chain = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '0', managementFeeAgreed: false });
+		const generate = async (year: number) =>
+			((await (
+				await sendJson('POST', '/api/v1/statements/generate', {
+					contractId: chain.contract,
+					buildingId: chain.building,
+					periodStart: `${year}-01-01`,
+					periodEnd: `${year}-12-31`
+				})
+			).json()) as { id: string }).id;
+		const send = async (id: string, balance: string) => {
+			await db.update(utilityStatements).set({ balance }).where(eq(utilityStatements.id, id));
+			await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+		};
+		try {
+			const first = await generate(2023);
+			await send(first, '3.00'); // «Erledigt», carried over
+			const next = await generate(2024);
+			await send(next, '53.00');
+			await callApi(`/api/v1/statements/${first}/replace`, { method: 'POST' });
+			const corrected = ((await (await callApi(`/api/v1/statements/${first}/correction`, { method: 'POST' })).json()) as { id: string }).id;
+			const read = async (id: string) => (await callApi(`/api/v1/statements/${id}`)).json() as Promise<{ carriedFrom: unknown; offsetWith: unknown[] }>;
+			const [carrying, offsetting] = [await read(next), await read(corrected)];
+
+			expect(carrying.carriedFrom).not.toBeNull();
+			expect(offsetting.offsetWith).toHaveLength(1);
+			const { carriedFrom, offsetWith } = await sample('statement');
+			expect(drift({ carriedFrom }, carrying)).toEqual([]);
+			expect(drift({ offsetWith }, offsetting)).toEqual([]);
+		} finally {
+			await db.update(utilityStatements).set({ carriedFromId: null }).where(eq(utilityStatements.contractId, chain.contract));
+			await db.delete(utilityStatements).where(eq(utilityStatements.contractId, chain.contract));
+			await chain.remove();
+		}
 	});
 
 	// an invoice of the period recorded after the statement: the statement names it as changed since (#96)
@@ -357,6 +401,24 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-pdf-refused'), await response.json())).toEqual([]);
 	});
 
+	// #450: a Nachzahlung's payment part without the town of the Firmenadresse (an installation from before)
+	it('POST /statements/:id/generate-pdf ohne vollständige Firmenadresse liefert die Felder von statement-pdf-creditor-refused.json', async () => {
+		const saved = await db.select().from(configuration).where(inArray(configuration.key, ['iban', 'company_city']));
+		const [{ balance }] = await db.select({ balance: utilityStatements.balance }).from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		await db.delete(configuration).where(inArray(configuration.key, ['iban', 'company_city']));
+		await db.insert(configuration).values({ key: 'iban', value: 'CH9300762011623852957' });
+		await db.update(utilityStatements).set({ balance: '120.00' }).where(eq(utilityStatements.id, statementId));
+		try {
+			const response = await sendJson('POST', `/api/v1/statements/${statementId}/generate-pdf`, {});
+			expect(response.status).toBe(400);
+			expect(drift(await sample('statement-pdf-creditor-refused'), await response.json())).toEqual([]);
+		} finally {
+			await db.update(utilityStatements).set({ balance, pdfBlob: null, pdfGeneratedAt: null }).where(eq(utilityStatements.id, statementId));
+			await db.delete(configuration).where(inArray(configuration.key, ['iban', 'company_city']));
+			if (saved.length) await db.insert(configuration).values(saved.map(({ key, value }) => ({ key, value })));
+		}
+	});
+
 	// an unknown tenant: a refusal without a code (#453, code review C-2)
 	it('POST /contracts mit einem unbekannten Mieter liefert die Felder von contract-tenant-refused.json', async () => {
 		const [contract] = await db.select().from(rentalContracts).where(eq(rentalContracts.id, rental.contract));
@@ -503,7 +565,7 @@ describe('API-Verträge der Zahlung', () => {
 		expect(drift(await sample('statement-send-refused'), await response.json())).toEqual([]);
 	});
 
-	it('PUT /statements/:id/status mit einem Zahlungsdatum vor dem Abrechnungsdatum liefert die Felder von statement-paid-date-refused.json', async () => {
+	it('PUT /statements/:id/status mit einem Zahlungsdatum vor dem Ende der Abrechnungsperiode liefert die Felder von statement-paid-date-refused.json', async () => {
 		await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
 		const response = await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: '2020-01-01' });
 		expect(response.status).toBe(400);
@@ -525,7 +587,7 @@ describe('API-Verträge der Berichtigung', () => {
 		const corrected = await callApi(`/api/v1/statements/${statementId}/correction`, { method: 'POST' });
 		expect(corrected.status).toBe(201);
 		const { id } = (await corrected.json()) as { id: string };
-		expect(drift(await sample('statement'), await (await callApi(`/api/v1/statements/${id}`)).json())).toEqual([]);
+		expect(drift(await statementSample(), await (await callApi(`/api/v1/statements/${id}`)).json())).toEqual([]);
 		await callApi(`/api/v1/statements/${id}`, { method: 'DELETE' });
 		await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { startDate: '2025-02-01' });
 
