@@ -190,4 +190,21 @@ describe('Demodaten', () => {
 			{ last_name: 'Brunner', rental_days: 184 }
 		]);
 	});
+
+	// #339 (#451, Punkt 6): jede Fernwärme-Rechnung nennt ihr Quartal als Leistungszeitraum, so trägt beim Mieterwechsel
+	// jeder Mieter die Heizkosten seiner Monate
+	it('gibt den Fernwärme-Rechnungen von Seepark ihr Quartal als Leistungszeitraum', async () => {
+		const rows = await query(
+			name,
+			`SELECT to_char(service_period_start, 'YYYY-MM-DD') AS start, to_char(service_period_end, 'YYYY-MM-DD') AS end FROM invoices
+			WHERE building_id = '22222222-2222-2222-2222-222222222222' AND description LIKE 'Fernwärme Q%2025' ORDER BY service_period_start`
+		);
+
+		expect(rows).toEqual([
+			{ start: '2025-01-01', end: '2025-03-31' },
+			{ start: '2025-04-01', end: '2025-06-30' },
+			{ start: '2025-07-01', end: '2025-09-30' },
+			{ start: '2025-10-01', end: '2025-12-31' }
+		]);
+	});
 });

@@ -19,6 +19,7 @@ export const openNewInvoice = Navigate.to('/invoices/new');
 export const openInvoiceEdit = (invoiceId: string) => Navigate.to(`/invoices/${invoiceId}/edit`);
 
 export const chooseCategory = (category: string) => Select.option({ label: category }).from(categorySelect);
+export const chooseBuilding = (buildingId: string) => Select.option(buildingId).from(buildingSelect);
 export const saveInvoice = Click.on(invoiceSubmitButton);
 
 export const chooseKey = (key: string) => Select.option({ label: key }).from(keySelect);

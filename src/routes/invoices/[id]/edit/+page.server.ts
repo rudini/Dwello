@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { localPath } from '$lib/invoice';
-import { invoiceChoices, statementPeriods, toInvoice } from '$lib/server/invoice';
+import { invoiceChoices, statementPeriods, tankCategories, toInvoice } from '$lib/server/invoice';
 import { fetchRecord } from '$lib/server/save-form';
 import type { PageServerLoad } from './$types';
 
@@ -25,6 +25,7 @@ export const load: PageServerLoad = async ({ params, url, fetch }) => {
 		invoice: toInvoice(invoice, [...choices.categories, ...choices.distributionKeys]),
 		...(await statementPeriods(fetch, BACKEND_URL, params.id)),
 		buildings,
+		tanks: await tankCategories(fetch, buildings.map((b: { id: string }) => b.id)),
 		...choices,
 		returnTo: localPath(url.searchParams.get('returnTo'))
 	};

@@ -6,6 +6,7 @@ import { load as newLoad } from '../routes/invoices/new/+page.server';
 import { localPath, suggestionProvenance, validateInvoice } from '../lib/invoice';
 import backendInvoice from '../../tests/contracts/invoice.json';
 import invoiceStatements from '../../tests/contracts/invoice-statements.json';
+import fuelStocks from '../../tests/contracts/fuel-stocks.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -272,6 +273,36 @@ describe('Rechnung erfassen und bearbeiten', () => {
 			returnTo: '/statements/generate',
 			period: { start: '2025-01-01', end: '2025-12-31' }
 		});
+	});
+
+	// #451, M-1 (persona Helga P-4): the form explains a delivery only in the category of the building's tank
+	it('nennt je Gebäude die Kategorie seines Tanks, keine ohne Tankbestand', async () => {
+		const { fetch } = backend({
+			...answers,
+			'/buildings': { buildings: [{ id: 'b1', name: 'Seepark' }, { id: 'b2', name: 'Lindenhof' }] },
+			'/buildings/b1/fuel-stocks': fuelStocks,
+			'/buildings/b2/fuel-stocks': []
+		});
+
+		const data = (await newLoad({ url: new URL('http://localhost/invoices/new'), fetch } as never)) as { tanks: Record<string, string> };
+
+		expect(data.tanks).toEqual({ b1: fuelStocks[0].categoryId });
+	});
+
+	// the list (for «Rechnungen hochladen») and «Rechnung bearbeiten» name the tanks too (Code-Review C-16)
+	it('nennt die Tanks auch in der Liste und beim Bearbeiten', async () => {
+		const { fetch } = backend({
+			...answers,
+			'/invoices': { invoices: [invoice({})], total: 1 },
+			'/invoices/i1': backendInvoice,
+			'/buildings': { buildings: [{ id: 'b1', name: 'Seepark' }] },
+			'/buildings/b1/fuel-stocks': fuelStocks
+		});
+		const tanks = { b1: fuelStocks[0].categoryId };
+
+		const list = (await listLoad({ url: new URL('http://localhost/invoices'), fetch } as never)) as { buildings: { tank?: string }[] };
+		expect(list.buildings[0].tank).toBe(tanks.b1);
+		expect(((await editLoad({ params: { id: 'i1' }, fetch } as never)) as { tanks: object }).tanks).toEqual(tanks);
 	});
 
 	it('übergeht ein unbekanntes Gebäude und eine fremde Rücksprung-Adresse', async () => {

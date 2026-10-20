@@ -40,7 +40,7 @@
 		oncreated
 	}: {
 		open?: boolean;
-		buildings: { id: string; name: string; address: string }[];
+		buildings: { id: string; name: string; address: string; tank?: string }[]; // tank: its category (#451, M-1)
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
 		defaultDistributionKeyId: string;
@@ -271,6 +271,7 @@
 					{categories}
 					{distributionKeys}
 					keyProposal={{ buildingId, latestKeys, defaultKeyId: defaultDistributionKeyId }}
+					tank={buildings.find((building) => building.id === buildingId)?.tank}
 					onretry={() => read(row.key)}
 					onremove={() => removeRow(row.key)}
 				/>

@@ -54,6 +54,7 @@ type Invoice = {
 	isValidUtilityCost?: boolean;
 	servicePeriodStart?: string;
 	servicePeriodEnd?: string;
+	invoiceNumber?: string;
 };
 
 /** The predefined key «Pro Fläche (m²)», which every invoice the tests record through the API needs (#379) */

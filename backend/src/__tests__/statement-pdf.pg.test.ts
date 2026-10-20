@@ -11,7 +11,7 @@ import { createApartment, deleteApartment } from '../services/apartment.service'
 import { createFuelStock } from '../services/fuel-stock.service';
 import { createHeatingProfile, deleteHeatingProfile, getHeatingProfileByName, updateHeatingProfile } from '../services/heating-profile.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
-import { deleteStatement, generateStatement, updateStatementStatus } from '../services/statement.service';
+import { deleteStatement, generateStatement, getStatement, updateStatementStatus } from '../services/statement.service';
 import { readPdf } from './helpers/pdf-text';
 import { sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
@@ -236,8 +236,8 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		expect(mixed).toContain('Hat eine Abrechnungsposition Rechnungen über verschiedene Tage, steht die Berechnung darunter.');
 		expect(mixed).toContain('Leistungszeitraum 01.06.2025 – 30.06.2025: CHF 600.00, Ihre Mietstage 16 von 30 Tagen');
 		// #241 V-1: der Leistungszeitraum reicht über die Periode hinaus; die Zeile nennt ihn und den Betrag des Belegs
-		expect(mixed).toContain("Leistungszeitraum 01.07.2025 – 30.09.2025 (Rechnung CHF 900.00), davon 01.07.2025 – 31.08.2025: CHF 606.52, Ihre Mietstage 31 von 62 Tagen");
-		expect(mixed).toContain("Ihr Anteil: 1'206.52 × (600.00 × 16/30 + 606.52 × 31/62) / 1'206.52 = 623.26");
+		expect(mixed).toContain("Leistungszeitraum 01.07.2025 – 30.09.2025 (Rechnung CHF 900.00 für 92 Tage), davon 01.07.2025 – 31.08.2025 (62 Tage): CHF 606.52, Ihre Mietstage 31 von 62 Tagen");
+		expect(mixed).toContain("Ihr Anteil: 1'206.52 × Zeitanteil (600.00 × 16/30 + 606.52 × 31/62) / 1'206.52 = 623.26");
 	});
 
 	// Beträge im Verhältnis der Tage: der gewichtete Anteil ist zufällig genau Mietstage / Tage der Periode, 139/365;
@@ -252,7 +252,7 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		await deleteStatement(statement.id);
 		await august.remove();
 
-		expect(text).toContain("Ihr Anteil: 3'650.00 × (1'810.00 × 0/181 + 1'840.00 × 139/184) / 3'650.00 = 1'390.00");
+		expect(text).toContain("Ihr Anteil: 3'650.00 × Zeitanteil (1'810.00 × 0/181 + 1'840.00 × 139/184) / 3'650.00 = 1'390.00");
 		expect(text).not.toMatch(/Hauswart .* 139\/365 Tage/);
 	});
 
@@ -268,17 +268,18 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		await mixed.remove();
 
 		// #241 V-1: eine Rechnung ohne Leistungszeitraum heisst nicht «Leistungszeitraum»
-		expect(text).toContain('Ohne Leistungszeitraum: CHF 365.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode');
-		expect(text).toContain("Ihr Anteil: 1'265.00 × (365.00 × 139/365 + 900.00 × 47/92) / 1'265.00 = 598.78");
+		expect(text).toContain('Rechnung vom 05.05.2025 ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 365.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(text).toContain("Ihr Anteil: 1'265.00 × Zeitanteil (365.00 × 139/365 + 900.00 × 47/92) / 1'265.00 = 598.78");
 	});
 
 	// Daten und Betrag ordnen eine Zeile keinem Beleg zu: eine Rechnung ohne Leistungszeitraum (ihre Daten sind die der
-	// Periode) und zwei über denselben Leistungszeitraum und Betrag nennen ihre Rechnung, die eindeutige nicht (#236)
+	// Periode) und zwei über denselben Leistungszeitraum und Betrag nennen ihre Rechnung, die eindeutige nicht (#236); mit
+	// Rechnungsdatum und Rechnungsnummer wie auf dem Beleg, nicht mit der Beschreibung (#451, Punkt 3)
 	it('nennt die Rechnung, wenn Daten und Betrag ihre Zeile keinem Beleg zuordnen', async () => {
 		const twins = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
 		await insertInvoice(twins.building, { amount: '765.00', invoiceDate: '2025-09-30', description: 'Hauswartung Q3' });
 		await insertInvoice(twins.building, { amount: '600.00', invoiceDate: '2025-07-05', servicePeriodStart: '2025-04-01', servicePeriodEnd: '2025-06-30', description: 'Hauswartung Q2' });
-		await insertInvoice(twins.building, { amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30', description: 'Gartenpflege' });
+		await insertInvoice(twins.building, { amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30', description: 'Gartenpflege', invoiceNumber: 'SR-2025-17' });
 		await insertInvoice(twins.building, { amount: '900.00', invoiceDate: '2025-10-06', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30', description: 'Treppenhausreinigung' });
 		const statement = await generateStatement({ contractId: twins.contract, buildingId: twins.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
 		await generateStatementPdf(statement.id, 'de');
@@ -286,14 +287,17 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		await deleteStatement(statement.id);
 		await twins.remove();
 
-		expect(text).toContain('Ohne Leistungszeitraum: CHF 765.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode (Rechnung «Hauswartung Q3»)');
-		expect(text).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen (Rechnung «Gartenpflege»)');
-		expect(text).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen (Rechnung «Treppenhausreinigung»)');
-		expect(text).not.toContain('Hauswartung Q2');
+		expect(text).toContain('Rechnung vom 30.09.2025 ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 765.00, Ihre Mietstage 139 von 365 Tagen');
+		expect(text).toContain('Rechnung vom 05.10.2025 (Nr. SR-2025-17), Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen');
+		expect(text).toContain('Rechnung vom 06.10.2025, Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen');
+		expect(text).not.toContain('Hauswartung');
+		expect(text).not.toContain('Gartenpflege');
+		expect(text).not.toContain('vom 05.07.2025');
 	});
 
-	// Eine Gutschrift hebt die Rechnung auf: die Position hat keinen Anteil, den die Rechnungen ergeben könnten (#226, V-6)
-	it('druckt keine Rechnungen unter einer Position, deren Rechnungen zusammen null ergeben', async () => {
+	// Eine Gutschrift über andere Tage hebt die Rechnung im Gebäude auf, nicht für den Mieter: er trägt je Rechnung
+	// seinen Teil, 900 × 47/92 − 900 × 0/91 = 459.78 (#451, Punkt 1; #237)
+	it('rechnet bei Rechnungen, die zusammen null ergeben, je Rechnung', async () => {
 		const credit = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
 		await insertInvoice(credit.building, { amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
 		await insertInvoice(credit.building, { amount: '-900.00', invoiceDate: '2025-07-05', servicePeriodStart: '2025-04-01', servicePeriodEnd: '2025-06-30' });
@@ -303,8 +307,26 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		await deleteStatement(statement.id);
 		await credit.remove();
 
-		expect(text).toContain('Hauswart');
-		expect(text).not.toContain('47/92 Tage');
+		expect(text).toContain('Hauswart Pro Fläche (m²) 70.00 / 70.00 m² 0.00 0.00 – 459.78');
+		expect(text).toContain('Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen');
+		expect(text).toContain('Ihr Anteil: (– 900.00 × 0/91 + 900.00 × 47/92) × 70.00 / 70.00 m² (Anteil Ihrer Wohnung nach dem Verteilschlüssel) = 459.78');
+	});
+
+	// Eine Gutschrift über Tage vor dem Einzug: die Kosten des Gebäudes sinken stärker als der Anteil des Mieters, der
+	// Zeitanteil liegt über 100 %, (900 × 92/92 − 600 × 0/91) / 300 = 300 % (#451, Punkt 1; #237)
+	it('druckt einen Zeitanteil über 100 % mit der Berechnung darunter', async () => {
+		const july = await createRental(crypto.randomUUID(), { startDate: '2025-07-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(july.building, { amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
+		await insertInvoice(july.building, { amount: '-600.00', invoiceDate: '2025-07-05', servicePeriodStart: '2025-04-01', servicePeriodEnd: '2025-06-30' });
+		const statement = await generateStatement({ contractId: july.contract, buildingId: july.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await july.remove();
+
+		expect(text).toContain('Hauswart Pro Fläche (m²) 70.00 / 70.00 m² 300.00 300.00 300.00 % 900.00');
+		expect(text).toContain('Ihr Anteil: 300.00 × Zeitanteil (– 600.00 × 0/91 + 900.00 × 92/92) / 300.00 = 900.00');
+		expect(text).toContain('Ein Zeitanteil über 100 % entsteht, wenn eine Gutschrift (negativer Betrag) Tage betrifft, an denen Sie nicht gemietet haben.');
 	});
 
 	// Mietvertrag über die ganze Periode: der Mieter trägt alle Tage jeder Rechnung, der Anteil ist 92/92 (Regel 5)
@@ -423,7 +445,8 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 
 	// Code-Review 2, C-1: eine Heizposition mit eigenen Tagen, die zusammen null ergibt, gibt den Satz zum Heizprofil
 	// nicht vor; er nennt den Anteil des Laufs, Mai bis Dezember im geänderten Profil 10 + 0 + 0 + 0 + 0 + 30 + 5 + 5 = 50 %
-	it('nennt bei einer Heizposition, die zusammen null ergibt, den Anteil nach Heizprofil des Laufs', async () => {
+	// Je Rechnung (#451, Punkt 1): 1'000 × 0 % für Januar bis März, die Gutschrift ohne Leistungszeitraum −1'000 × 50 %
+	it('rechnet bei einer Heizposition, die zusammen null ergibt, je Rechnung nach Heizprofil', async () => {
 		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', description: 'Fernwärme Q1', invoiceDate: '2025-03-31', servicePeriodStart: '2025-01-01', servicePeriodEnd: '2025-03-31' });
@@ -434,7 +457,9 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		await deleteStatement(statement.id);
 		await may.remove();
 
-		expect(zero).toContain('50.00 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
+		expect(zero).toContain('50.00 % für eine Rechnung ohne Leistungszeitraum');
+		expect(zero).toContain("(1'000.00 × 0.00 % – 1'000.00 × 50.00 %)");
+		expect(zero).toMatch(/Heizung Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² 0\.00 0\.00 – -500\.00/);
 	});
 
 	// Februar 13.9 × 7/28 = 3.475 % genau auf der Hälfte, gerundet 3.48 % (#232): Erläuterung und Position zeigen denselben
@@ -596,14 +621,18 @@ describe('Tankbestand im PDF', () => {
 		await tank.remove();
 	});
 
-	// #239 (Code-Review C-1 von #241): eine Heizposition nach Tagen mit einer Lieferung über einen Leistungszeitraum;
-	// die Veränderung des Tankbestands ist keine Rechnung und heisst so, nicht «Leistungszeitraum»
-	it('nennt die Veränderung des Tankbestands unter einer Heizposition nach Tagen als solche', async () => {
+	// #257 (#451, Punkt 2): beim Tank zählt der Verbrauch der ganzen Periode, auch eine Lieferung mit Leistungszeitraum
+	// Juli bis September; Einzug am 15. August, 139 von 365 Tagen: 600 + 900 − 100 = 1'400.00 × 139/365 = 533.15, mit
+	// steigendem Bestand 100 + 900 − 400 = 600.00 × 139/365 = 228.49 (Fachreview V-1)
+	it.each([
+		['600.00', '100.00', "1'400.00 1'400.00 139/365 Tage 533.15"],
+		['100.00', '400.00', '600.00 600.00 139/365 Tage 228.49']
+	] as const)('teilt das Heizöl aus dem Tank nach den Mietstagen der Periode, auch bei einer Lieferung mit Leistungszeitraum (%s bis %s)', async (opening, closing, line) => {
 		const august = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 		await insertInvoice(august.building, { categoryId: heating.id, amount: '900.00', description: 'Heizöl', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
-		await createFuelStock(august.building, { readingDate: '2024-12-31', amount: '600.00', categoryId: heating.id });
-		await createFuelStock(august.building, { readingDate: '2025-12-31', amount: '100.00', categoryId: heating.id });
+		await createFuelStock(august.building, { readingDate: '2024-12-31', amount: opening, categoryId: heating.id });
+		await createFuelStock(august.building, { readingDate: '2025-12-31', amount: closing, categoryId: heating.id });
 		const statement = await generateStatement({ contractId: august.contract, buildingId: august.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
 		await generateStatementPdf(statement.id, 'de');
 		const stock = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
@@ -611,8 +640,36 @@ describe('Tankbestand im PDF', () => {
 		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, august.building));
 		await august.remove();
 
-		expect(stock).toContain('Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen');
-		expect(stock).not.toContain('Leistungszeitraum 01.01.2025 – 31.12.2025');
+		expect(stock).toContain(`Heizung Pro Fläche (m²) 70.00 / 70.00 m² ${line}`);
+		expect(stock).not.toContain('Veränderung Tankbestand 01.01.2025');
+		expect(stock).not.toContain('+ -');
+		// the consumption counts over the whole period (Fachreview V-2)
+		expect(stock).toContain('Er zählt über die ganze Abrechnungsperiode, auch wenn eine Lieferung einen Leistungszeitraum hat.');
+	});
+
+	// #451 (Fachreview M-1): eine Lieferung zählt ganz in der Periode ihres Lieferdatums, des Endes ihres
+	// Leistungszeitraums, nie geteilt: die vom 15.12.2025 ganz in 2025, die für den
+	// Januar 2025 mit Beginn im Dezember 2024 ganz in 2025, die mit Ende im Februar 2026 nicht; 600 + 1'000 + 300 − 800 = 1'100.00,
+	// Einzug am 15. August: 1'100.00 × 139/365 = 418.90
+	it('zählt eine Lieferung ganz in der Periode ihres Lieferdatums', async () => {
+		const august = await createRental(crypto.randomUUID(), { startDate: '2025-08-15', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		const delivery = (amount: string, servicePeriodStart: string, servicePeriodEnd: string) =>
+			insertInvoice(august.building, { categoryId: heating.id, amount, description: 'Heizöl', invoiceDate: servicePeriodEnd, servicePeriodStart, servicePeriodEnd });
+		await delivery('1000.00', '2025-12-15', '2025-12-15');
+		await delivery('300.00', '2024-12-20', '2025-01-10');
+		await delivery('700.00', '2025-12-20', '2026-02-10');
+		await createFuelStock(august.building, { readingDate: '2024-12-31', amount: '600.00', categoryId: heating.id });
+		await createFuelStock(august.building, { readingDate: '2025-12-31', amount: '800.00', categoryId: heating.id });
+		const statement = await generateStatement({ contractId: august.contract, buildingId: august.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		const stock = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, august.building));
+		await august.remove();
+
+		expect(stock).toContain("Heizung Pro Fläche (m²) 70.00 / 70.00 m² 1'100.00 1'100.00 139/365 Tage 418.90");
+		expect(stock).toContain("Rechnungen «Heizung» in der Abrechnungsperiode CHF 1'300.00");
 	});
 
 	it('leitet die Heizkosten aus Anfangsbestand, Rechnungen und Endbestand her', () => {
@@ -631,6 +688,22 @@ describe('Tankbestand im PDF', () => {
 
 		expect(again).toContain('Anfangsbestand am 31.12.2024 CHF 600.00');
 		expect(again).toContain('Endbestand am 31.12.2025 CHF 100.00');
+	});
+});
+
+// #280 (#451, Punkt 8): eine Abrechnung ohne Heizkosten wendet das gewählte Heizprofil nicht an; sie nennt keines
+describe('Heizprofil einer Abrechnung ohne Heizkosten', () => {
+	it('nennt kein Heizprofil, wenn keine Position Heizkosten hat', async () => {
+		const plain = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(plain.building);
+		const profile = (await getHeatingProfileByName('Heating Mittelland'))!.id;
+		const statement = await generateStatement({ contractId: plain.contract, buildingId: plain.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId: profile, managementFeePercent: 0 });
+		const stored = await getStatement(statement.id);
+		await deleteStatement(statement.id);
+		await plain.remove();
+
+		expect(stored?.lineItems).toHaveLength(1);
+		expect(stored?.heatingProfile).toBeNull();
 	});
 });
 

@@ -93,6 +93,10 @@ export const lateInvoices = target('Hinweis auf Rechnungen nach der Abrechnungsp
 export const invoicesWithoutServicePeriod = target('Hinweis auf Rechnungen ohne Leistungszeitraum', (page) =>
 	page.getByTestId('invoices-without-service-period')
 );
+// Heating invoices without Leistungszeitraum next to ones with one, at a tenant change with a Heizprofil (#339)
+export const heatingWithoutServicePeriod = target('Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum', (page) =>
+	page.getByTestId('heating-without-service-period')
+);
 export const hintedInvoice = (hint: Target, date: string) =>
 	target(`Rechnung vom ${date} in «${hint}»`, (page) => hint.locate(page).getByTestId('hinted-invoice').filter({ hasText: date }));
 // the date names the invoice in either hint

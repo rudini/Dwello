@@ -5,7 +5,7 @@
 
 import type { PageServerLoad } from './$types';
 import { localPath } from '$lib/invoice';
-import { invoiceChoices } from '$lib/server/invoice';
+import { invoiceChoices, tankCategories } from '$lib/server/invoice';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -30,6 +30,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 
 	return {
 		buildings,
+		tanks: await tankCategories(fetch, buildings.map((b) => b.id)),
 		...choices,
 		llmAvailable: llmStatus.llmAvailable === true,
 		// Opened from a building or from the statement wizard

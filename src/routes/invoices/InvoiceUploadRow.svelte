@@ -18,6 +18,7 @@
 		categories,
 		distributionKeys,
 		keyProposal,
+		tank,
 		onretry,
 		onremove
 	}: {
@@ -27,6 +28,7 @@
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
 		keyProposal: KeyProposal;
+		tank?: string;
 		onretry: () => void;
 		onremove: () => void;
 	} = $props();
@@ -88,6 +90,6 @@
 	</div>
 
 	{#if open && editable && !row.several}
-		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} {keyProposal} />
+		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} {keyProposal} {tank} />
 	{/if}
 </li>

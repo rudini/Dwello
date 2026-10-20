@@ -157,6 +157,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
       | statement-generate     | old-address-preview |
+      | statement-generate     | heating-hints       |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |

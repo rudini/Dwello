@@ -288,6 +288,10 @@ Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }
 	await verwalter.sees(heatingProfileOfStatement).toContain(names.get(profile)!);
 });
 
+Then('nennt die Abrechnung kein Heizprofil', async ({ verwalter }) => {
+	await verwalter.sees(heatingProfileOfStatement).toBeNull();
+});
+
 Then(
 	'nennt die Abrechnung das Heizprofil {string} als nicht angewendet: {string}',
 	async ({ verwalter, names }, profile: string, reason: string) => {

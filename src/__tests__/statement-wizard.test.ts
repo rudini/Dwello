@@ -3,6 +3,7 @@ import {
 	akontoHint,
 	draftsLink,
 	findingText,
+	heatingWholeText,
 	needsConfirmation,
 	invoiceRows,
 	restoredSelection,
@@ -99,6 +100,7 @@ describe('Rechnungen pro Gebäude', () => {
 				allSkipped: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
+				heatingWithoutServicePeriod: [],
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -116,6 +118,7 @@ describe('Rechnungen pro Gebäude', () => {
 				allSkipped: false,
 				lateInvoices: [],
 				invoicesWithoutServicePeriod: [],
+				heatingWithoutServicePeriod: [],
 				findings: [],
 				incomplete: false,
 				comparedWith: null
@@ -474,5 +477,23 @@ describe('Wiederhergestellter Schritt', () => {
 
 	it('öffnet einen Entwurf ohne gespeicherten Schritt im ersten Schritt', () => {
 		expect(restoredStep(undefined, selection, none)).toBe(1);
+	});
+});
+
+// #339 (#451, Fachreview V-15): der Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum nennt jede Kategorie in
+// eigenen Anführungszeichen, bei mehreren in der Mehrzahl
+describe('Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum', () => {
+	const row = (categoryName: string) => ({ invoices: [{ categoryName }] });
+
+	it('nennt eine Kategorie in der Einzahl', () => {
+		expect(heatingWholeText([row('Heizung'), row('Heizung')])).toContain(
+			'Diese Rechnungen der Kategorie «Heizung» haben keinen Leistungszeitraum'
+		);
+	});
+
+	it('nennt mehrere Kategorien je in Anführungszeichen, in der Mehrzahl', () => {
+		expect(heatingWholeText([row('Heizung'), row('Kaminfeger')])).toContain(
+			'Diese Rechnungen der Kategorien «Heizung» und «Kaminfeger» haben keinen Leistungszeitraum'
+		);
 	});
 });

@@ -18,6 +18,20 @@ const localCategory = (c: Record<string, unknown>) => ({
 });
 
 /**
+ * Per building the category of its tank (its latest Tankbestand reading): a delivery there counts in the period of its
+ * delivery day, which the invoice form explains (#451, M-1; persona Helga P-4); a failing call names none
+ */
+export async function tankCategories(fetch: typeof globalThis.fetch, buildingIds: string[]) {
+	const latest = async (id: string) => {
+		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${encodeURIComponent(id)}/fuel-stocks`).catch(() => null);
+		const body: unknown = response?.ok ? await response.json() : [];
+		const readings = (Array.isArray(body) ? body : []) as { categoryId: string }[];
+		return [id, readings.at(-1)?.categoryId ?? ''] as const;
+	};
+	return Object.fromEntries((await Promise.all(buildingIds.map(latest))).filter(([, category]) => category));
+}
+
+/**
  * Categories and distribution keys to choose for an invoice, named in the UI language, and the key the settings
  * preselect; a failing call offers none
  */

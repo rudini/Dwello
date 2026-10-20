@@ -36,7 +36,7 @@ export const UPLOADED = 'IMG_0412';
 
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'invoice-hints', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed', 'preview-outdated', 'buildings-billed', 'buildings-overlap', 'generation-result', 'upload-dialog', 'upload-discard-dialog', 'upload-partial', 'upload-discard-created', 'upload-unreadable', 'old-address-task', 'old-address-preview', 'preview-skipped', 'heating-hints', 'draft-restored', 'draft-discard-dialog', 'uncategorized-invoices'].includes(state)) return { path, building: '', tankBuilding: '', heatingProfile: '' };
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -160,6 +160,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		await seed.buildingAddress(tenant, 'Bergsicht');
 	}
 	await seed.statement('Ida', 'Bergsicht', 2024, 'Standard');
+	// #339: 2024 heating invoices with and without a Leistungszeitraum at the move-outs: the wizard names the one without
+	await seed.invoiceOn('Bergsicht', 'Heizung', '800.00', '2024-03-31');
+	await seed.invoiceOn('Bergsicht', 'Heizung', '700.00', '2025-01-10', ['2024-10-01', '2024-12-31']);
 	// #199, #408 point 2: Felsblick's only statement covers 2024 up to 30.06. (one Abrechnungsperiode per day and
 	// building): the contract page offers a short period for the rest of Lea's 2024; its own building, so the runs of
 	// 2024 in Bergsicht stay possible
