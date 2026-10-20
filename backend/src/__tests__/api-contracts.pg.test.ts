@@ -515,6 +515,13 @@ describe('API-Verträge der Zahlung', () => {
 		const actual = await (await callApi(`/api/v1/statements/${statementId}/payment-reset`, { method: 'POST' })).json();
 		expect(drift(await sample('statement-payment-reset'), actual)).toEqual([]);
 	});
+
+	// #499: the sent statement 2024 bills those days in Dwello
+	it('PUT /contracts/:id mit «Abgerechnet bis» über die versendete Abrechnung liefert die Felder von contract-billed-until-billed.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { billedUntil: '2024-06-30' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-billed-until-billed'), await response.json())).toEqual([]);
+	});
 });
 
 // After the payment: the paid statement is replaced (#120)

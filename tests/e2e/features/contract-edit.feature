@@ -163,8 +163,8 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: «Abgerechnet bis» über eine versendete Abrechnung
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-06-30" ausserhalb von Dwello abgerechnet sind
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "«Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Tragen Sie höchstens den Tag vor dem Beginn dieser Abrechnung ein: 31.12.2024."
-    Und nennt die Fehlermeldung die Abrechnung 2025 von "Anna Keller"
+    Dann sagt das Feld «Abgerechnet bis» "«Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Tragen Sie höchstens den Tag vor dem Beginn dieser Abrechnung ein: 31.12.2024."
+    Und nennt das Feld «Abgerechnet bis» die Abrechnung 2025 von "Anna Keller"
     Aber rät die Fehlermeldung nicht zum Berichtigen
 
   @wip

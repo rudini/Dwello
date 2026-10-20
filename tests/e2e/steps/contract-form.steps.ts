@@ -32,6 +32,7 @@ import {
 	enteredFlatRate,
 	flatRateWarningShown,
 	flatRateWarningText,
+	billedUntilErrorText,
 	startDateWarning,
 	startDateAsked,
 	billedUntilAsked
@@ -648,10 +649,14 @@ When(
 );
 
 // #499: the refusal names the Dwello statement and offers no correction
+Then('sagt das Feld «Abgerechnet bis» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(billedUntilErrorText).toContain(text);
+});
+
 Then(
-	'nennt die Fehlermeldung die Abrechnung {int} von {string}',
+	'nennt das Feld «Abgerechnet bis» die Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
-		await verwalter.sees(errorMessageShown(`Für ${year} gibt es schon die Abrechnung ${await seed.statementNumber(tenant, year)} in Dwello.`)).toBe(true);
+		await verwalter.sees(billedUntilErrorText).toContain(`Für ${year} gibt es schon die Abrechnung ${await seed.statementNumber(tenant, year)} in Dwello.`);
 	}
 );
 

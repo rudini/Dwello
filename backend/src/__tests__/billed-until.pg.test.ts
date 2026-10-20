@@ -200,8 +200,18 @@ describe('Abgerechnet bis', () => {
 			expect((await billedUntil('2023-12-31')).status).toBe(409); // earlier: it changes the billed Mietstage (#120)
 		});
 
+		// fach review 499-1 V-6b: a paid statement counts too
+		it('lehnt «Abgerechnet bis» auch über die bezahlte Abrechnung ab', async () => {
+			await db.update(utilityStatements).set({ status: 'paid' }).where(eq(utilityStatements.id, statementId));
+			try {
+				expect(await (await billedUntil('2024-06-30')).json()).toMatchObject({ code: 'BILLED_UNTIL_BILLED' });
+			} finally {
+				await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, statementId));
+			}
+		});
+
 		it('lehnt ein anderes «Abgerechnet bis» ab, das ihre Mietstage ändert, und nennt sie', async () => {
-			for (const date of ['2024-06-30', null]) {
+			for (const date of ['2024-03-31', null]) {
 				const response = await billedUntil(date);
 				expect(response.status).toBe(409);
 				expect(await response.json()).toMatchObject({ statements: [{ id: statementId, status: 'sent' }] });

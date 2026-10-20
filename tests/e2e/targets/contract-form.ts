@@ -87,3 +87,5 @@ export const agreedCategoryBoxAt = (index: number) =>
 export const noAgreedCostsNote = target('Hinweis ohne vereinbarte Nebenkosten', (page) => page.getByTestId('contract-agreed-costs-none'));
 // the hint below the Vertragsbeginn, e.g. on a start in the past
 export const startDateNotice = target('Hinweis zum Vertragsbeginn', (page) => page.getByTestId('start-date-notice'));
+// the error under the field «Abgerechnet bis» (#499)
+export const billedUntilError = target('Fehler bei «Abgerechnet bis»', (page) => page.locator('#billedUntil-error'));
