@@ -2240,6 +2240,18 @@ Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of
 
 Files: `backend/src/config/llm.ts`, `backend/src/services/statement-invoices.service.ts`, `backend/scripts/llm-stub.ts`, `src/lib/invoice-upload.ts`, `src/lib/server/invoice.ts`, `src/lib/types.ts`, `src/lib/ui/{FileInput,Dialog,DateInput,Button}.svelte`, `src/routes/invoices/` (`+page.svelte`, `DeductedHint`, `InvoiceDataFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadFiles`, `UploadRowNotes`, `[id]/{+page,InvoiceFacts,InvoiceBeleg}.svelte`, `[id]/edit/+page.svelte`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `tests/contracts/{invoice-statements,invoice-list}.json`, tests and E2E layers.
 
+## Session W1b: «Abgerechnet bis» over a Dwello statement (#499) (2026-10-20)
+
+Branch `w1-issue-499`, worker W1; the checklist lived in the pull request (parallel workers) and comes here at the end.
+
+- [x] @wip scenarios in `contract-edit.feature` and a pg test that reproduce the dead end (persona Dr. Weber 453 P-1), seen red; the scenario for the day before pins kept behaviour
+- [x] fach-reviewer before implementing (`docs/reviews/499-fachreview-1.md`): V-1 and V-2 decided by the product owner 2026-10-20 (a replaced statement counts until its berichtigte Abrechnung is sent; a variant without a date when the contract starts in the statement's period)
+- [x] Backend `checkBilledByDwello` before #141 (`BILLED_UNTIL_BILLED`, `BILLED_UNTIL_BILLED_START`), the refusal at the field, messages in four languages, API contracts, a11y/language state `contract-edit billed-until-statement`
+- [x] Reviews: code-reviewer rounds 1 and 2 (`docs/reviews/499-review-1..2.md`), persona Dr. Weber (`docs/design/personas/weber-499.md`, no Blocker/Major)
+- [x] Merge of `origin/main` (conflict in `src/lib/ui/Field.svelte` resolved)
+- [x] PR `Fixes #499`
+
+Files: `backend/src/services/contract.service.ts`, `src/routes/contracts/ContractForm.svelte`, `src/lib/ui/{Field,DateInput}.svelte`, `messages/*.json`, `tests/contracts/contract-billed-until-billed(-start).json`, tests and E2E files.
 ## Session W3-451: tenant shares at a tenant change (#451)
 
 Branch `w3-issue-451` (worker W3). Points 1–6 and 8 of #406, consolidated in #451; product-owner answers M-1, V-3, V-8 to the domain review. The plan of another session stayed open in `implementation_plan.md`, so this session was kept in the pull request and archived here directly (coordinator).

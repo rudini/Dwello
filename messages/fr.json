@@ -469,6 +469,8 @@
 	"backend_contract_not_found": "Le contrat de bail est introuvable. Rechargez la page.",
 	"backend_billed_until_future": "La date « Décompté jusqu’au » ne peut pas se situer dans le futur. Indiquez le dernier jour du dernier décompte établi en dehors de Dwello.",
 	"backend_billed_until_before_start": "La date « Décompté jusqu’au » est antérieure au début du contrat ({date}). Laissez le champ vide si rien n’a encore été décompté en dehors de Dwello pour ce contrat de bail.",
+	"backend_billed_until_billed": "Le décompte {number} ({period}) existe déjà dans Dwello. La date « Décompté jusqu’au » ne peut couvrir que des jours sans décompte Dwello. Indiquez au plus tard la veille du début de ce décompte : {date}.",
+	"backend_billed_until_billed_start": "Le décompte {number} ({period}) existe déjà dans Dwello. La date « Décompté jusqu’au » ne peut couvrir que des jours sans décompte Dwello. Dwello décompte ce contrat de bail dès le début du contrat : laissez le champ vide.",
 	"backend_distribution_key_not_found": "La clé de répartition est introuvable. Rechargez la page.",
 	"backend_invoice_amount_negative": "Le montant d’une facture ne peut pas être négatif. Déduisez une note de crédit du montant de la facture à laquelle elle se rapporte. Si cette facture est déjà décomptée, établissez ensuite un décompte rectificatif.",
 	"backend_heating_profile_not_found": "Le profil de chauffage est introuvable. Rechargez la page.",
