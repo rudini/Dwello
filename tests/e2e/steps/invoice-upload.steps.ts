@@ -6,6 +6,7 @@ import {
 	fileChooserLabel,
 	belegHowTo,
 	billedAdviceOnDelete,
+	billedRuleOnDelete,
 	createButtonLabel,
 	createdInvoiceNames,
 	hintsOfUpload,
@@ -340,3 +341,8 @@ Then(
 		await verwalter.sees(proposedKey(file)).toBe(key);
 	}
 );
+
+// what to do before deleting an invoice in a statement (#455, Dr. Weber P-6, P-7)
+Then('sagt die Bestätigung zum Löschen einer abgerechneten Rechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(billedRuleOnDelete).toContain(text);
+});

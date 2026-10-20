@@ -125,6 +125,7 @@ Funktionalität: Rechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Wenn der Liegenschaftsverwalter die Rechnung löschen will
     Dann rät die Bestätigung zum Löschen der Rechnung "Laden Sie den Beleg vorher herunter, wenn Sie ihn für die Belegeinsicht brauchen."
+    Und sagt die Bestätigung zum Löschen einer abgerechneten Rechnung "Löschen Sie nur falsch erfasste Rechnungen oder Akontorechnungen, an deren Stelle eine Schlussrechnung tritt. Ersetzt eine Schlussrechnung diese Akontorechnung, erfassen Sie zuerst die Schlussrechnung. Die Entwürfe enthalten diese Rechnung weiter"
 
   # #455 (#268): der Hinweis steht beim Betrag, nicht beim Beleg; die Regel als Hilfetext darunter
   Szenario: Abgezogene Akontorechnungen beim Betrag

@@ -55,3 +55,6 @@ export const belegDeductedRule = (fileName: string) =>
 export const uploadFileChoose = target('Dateien auswählen', (page) => page.getByTestId('invoice-upload-file-choose'));
 export const belegDistributionKey = (fileName: string) =>
 	inRow(fileName, 'Verteilschlüssel', 'invoice-distribution-key-select');
+export const deleteBilledText = target('Was beim Löschen einer abgerechneten Rechnung zu tun ist', (page) =>
+	page.getByTestId('invoice-delete-billed-text')
+);

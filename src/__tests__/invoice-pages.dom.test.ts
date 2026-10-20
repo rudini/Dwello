@@ -365,7 +365,7 @@ describe('Rechnungsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen oder Akontorechnungen, an deren Stelle eine Schlussrechnung tritt. Ersetzt eine Schlussrechnung diese Akontorechnung, erfassen Sie zuerst die Schlussrechnung. Die Entwürfe enthalten sie weiter: Berechnen Sie danach die Entwürfe mit «Neu berechnen» auf ihrer Seite neu. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen oder Akontorechnungen, an deren Stelle eine Schlussrechnung tritt. Ersetzt eine Schlussrechnung diese Akontorechnung, erfassen Sie zuerst die Schlussrechnung. Die Entwürfe enthalten diese Rechnung weiter: Berechnen Sie danach die Entwürfe mit «Neu berechnen» auf ihrer Seite neu. Versendete oder bezahlte Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung; die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Bewahren Sie die Originalrechnung auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 

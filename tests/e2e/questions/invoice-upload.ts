@@ -9,6 +9,7 @@ import {
 	createInvoicesButton,
 	createdInvoiceLinks,
 	deleteBilledNote,
+	deleteBilledText,
 	belegBilledNote,
 	belegCategory,
 	belegInvoiceNumber,
@@ -54,3 +55,4 @@ export const fileChooserLabel = Text.of(uploadFileChoose);
 // what the Beleg card says from the upload, empty without a hint
 export const hintsOfUploadOrNone = question('the hints from the upload at the Beleg', async (actor) => (await actor.answer(hintsOfUpload)) ?? '');
 export const proposedKey = (fileName: string) => Value.chosenIn(belegDistributionKey(fileName));
+export const billedRuleOnDelete = Text.of(deleteBilledText);
