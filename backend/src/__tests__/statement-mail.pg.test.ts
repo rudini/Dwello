@@ -246,6 +246,18 @@ describe('Abrechnung per Brief', () => {
 		}
 	});
 
+	// #491, code review C-4/C-5: ohne IBAN auch kein Brief
+	it('lehnt den Brief ohne IBAN ab', async () => {
+		const id = await draft();
+		await deleteConfig('iban');
+
+		const result = await send(id, { byLetter: true }).finally(() => setConfig('iban', 'CH93 0076 2011 6238 5295 7'));
+
+		expect(result).toMatchObject({ status: 400, code: 'IBAN_MISSING' });
+		expect(await statusOf(id)).toBe('draft');
+		expect(await storedFor(id)).toHaveLength(0);
+	});
+
 	it('stellt sie nach einer gescheiterten E-Mail per Brief zu', async () => {
 		await updateTenant(rental.tenant, { email: null });
 		const id = await draft();

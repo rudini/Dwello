@@ -1,6 +1,17 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentInfo, buildingOfApartmentShown, contractHistoryNaming, currentContractsListed, currentTenant, earlierContractShown, earlierContractsListed, monthlyTotalOfApartment, nextTenant, vacancyShown } from '../questions/apartment-detail';
+import {
+	apartmentInfo,
+	buildingOfApartmentShown,
+	contractHistoryNaming,
+	currentContractsListed,
+	currentTenant,
+	earlierContractShown,
+	earlierContractsListed,
+	monthlyTotalOfApartment,
+	nextTenant,
+	vacancyShown
+} from '../questions/apartment-detail';
 import {
 	editApartment,
 	openApartmentDetail,

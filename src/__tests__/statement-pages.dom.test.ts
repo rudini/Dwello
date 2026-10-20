@@ -1256,6 +1256,8 @@ describe('Abrechnungsdetail', () => {
 
 	it('bietet ohne E-Mail-Adresse nur den Brief an', () => {
 		detail({ tenantEmail: null, tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
+		// persona Helga P-2: schon der Knopf nennt den Brief, nicht die E-Mail
+		expect(byTestId('statement-send-button')!.textContent!.trim()).toBe('Als versendet markieren');
 		click('statement-send-button');
 
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');

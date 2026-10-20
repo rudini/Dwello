@@ -65,7 +65,8 @@
 	let showDelete = $state(false);
 	let showSend = $state(false);
 	let sendByLetter = $state(false); // after a failed e-mail (#86)
-	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
+	// without an e-mail address the letter is the only way, from the button on (#449, persona Helga P-2)
+	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email' && !!statement.tenantEmail);
 	const sendError = $derived(form?.sendError);
 	let showResetPayment = $state(false);
 	let showCorrect = $state(false);

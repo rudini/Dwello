@@ -12,7 +12,6 @@ import { balanceText } from './pdf.service';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
-import type { Language } from './pdf.service';
 import { statementMail, statementTitle } from './reminder-letter';
 import { changeStatementStatus, generateStatementPdf } from './statement-pdf.service';
 import { getStatement } from './statement.service';
@@ -73,21 +72,22 @@ const fileNameOf = (title: string, statementNumber: string) => `${title} ${state
  * The landlord delivers the PDF: Dwello records the statement as sent and keeps the PDF as sent as a Dokument by letter
  * (#449, decided in #404, point 7)
  */
-async function sendByLetter(id: string, statementNumber: string, tenant: { id: string; language: string }) {
+async function sendByLetter(id: string, statementNumber: string, tenant: { id: string }) {
 	// no letter without its PDF, refused as the e-mail is; a refusal of the PDF itself passes as it is (#491)
 	const made = await generateStatementPdf(id);
+	if (made === 'not-found') throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (made === 'no-iban') throw new CodedError('IBAN_MISSING', 'IBAN not configured');
 	const sent = await changeStatementStatus(id, 'sent');
+	// the PDF as sent, as the statement keeps it; the one made before when making it again failed (code review C-4)
 	const [{ pdf }] = await db.select({ pdf: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id));
-	if (!pdf) return { statement: sent }; // made a moment ago; only a failure in between leaves none
-	const title = statementTitle(tenant.language as Language);
+	const title = statementTitle(made.language);
 	const document = await createDocument({
 		tenantId: tenant.id,
 		statementId: id,
 		type: 'statement',
 		title,
 		fileName: fileNameOf(title, statementNumber),
-		content: pdf,
+		content: pdf ?? made.pdf,
 		channel: 'letter',
 		status: 'sent',
 		sentAt: new Date()

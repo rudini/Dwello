@@ -102,8 +102,8 @@ async function reminderOn(statement: Statement, level: number, day: string) {
 		language
 	});
 	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
-	// a statement paid since then gets no payment part, or the tenant pays twice (as on the statement)
-	const config = statement.status === 'paid' ? null : await qrBillConfig();
+	// a paid statement gets no reminder, and none is marked sent after paying (#449): only the IBAN decides the payment part
+	const config = await qrBillConfig();
 	const payment = config ? { statement: { ...statement, tenant }, config, language } : undefined;
 	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(day), payment);
 	return { tenant, letter, pdf, paymentDeadline };
