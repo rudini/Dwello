@@ -314,7 +314,7 @@ This is a checklist, not legal advice.
 
 ## Contributing
 
-Ideas and bug reports are welcome as [GitHub issues](https://github.com/rudini/Dwello/issues); how changes are made is in `CLAUDE.md` (Workflow).
+Ideas and bug reports are welcome as [GitHub issues](https://github.com/rudini/Dwello/issues); how to contribute a change is in [CONTRIBUTING.md](CONTRIBUTING.md), the full rules in `CLAUDE.md` (Workflow). Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) and report security problems as in [SECURITY.md](SECURITY.md).
 
 ---
 

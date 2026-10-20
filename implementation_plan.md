@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session 2026-10-20: contributor files and PR checks
+
+No scenario: repository files and CI only, no app change.
+
+- [x] `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `SECURITY.md`, README links
+- [x] `.github/`: pull request template (no checkboxes, `open-work.test.ts`), `bug.yml`, `config.yml`, `CODEOWNERS`, `dependabot.yml`
+- [x] CI: commit subjects via `commit-msg-gate.mjs --check`, Prettier on new files, dependency review (public repository only)
+- [ ] code-reviewer round
+- [ ] PR

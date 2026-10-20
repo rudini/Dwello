@@ -1,0 +1,27 @@
+# Weekly update pull requests, minor and patch versions grouped into one per ecosystem; CI tests them like any other
+version: 2
+updates:
+  - package-ecosystem: bun
+    directories: [/, /backend]
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: chore(build)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: chore(ci)
+  - package-ecosystem: docker
+    directories: [/, /backend]
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(docker)
