@@ -10,5 +10,6 @@ Request: implement proposals 1 and 2 of the CI analysis (42 % of PR runs came fr
 - [x] Turn off "Require branches to be up to date" and turn on auto-merge (GitHub settings)
 - [x] A pull request push that changes only documentation since the last green run of its branch skips the backend tests, E2E and axe (`tools/ci/docs-only-since.mjs`, `.github/workflows/ci.yml`)
 - [x] Skill `pull-request`: merge `main` and auto-merge as the new settings allow
+- [x] `code-reviewer` round 1: `docs/reviews/ci-speed-review-1.md`
 - No scenario: CI configuration, no app behaviour changes
-- Files: `.github/workflows/ci.yml`, `tools/ci/docs-only-since.mjs`, `tools/ci/docs-only-since.test.ts`, `docs/test-pyramid.md`, `.claude/skills/pull-request/SKILL.md`
+- Files: `.github/workflows/ci.yml`, `tools/ci/docs-only-since.mjs`, `tools/ci/docs-only-since.test.ts`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `.claude/skills/pull-request/SKILL.md`
