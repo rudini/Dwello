@@ -28,7 +28,7 @@ beforeAll(async () => {
 afterAll(async () => {
 	if (previousDefault) await setConfig('default_heating_profile_id', previousDefault);
 	else await deleteConfig('default_heating_profile_id');
-	for (const name of ['Bergtal', 'Standard', 'Winterhalbjahr']) {
+	for (const name of ['Bergtal', 'Hochtal', 'Standard', 'Winterhalbjahr']) {
 		const profile = await getHeatingProfileByName(`${name} ${token}`);
 		if (profile) await deleteHeatingProfile(profile.id);
 	}
@@ -95,6 +95,17 @@ describe('Heizprofil bearbeiten', () => {
 		await expectRejection(response, 400, 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).', 'HEATING_PROFILE_SHARES_SUM', {
 			sum: 90
 		});
+	});
+
+	// #461: das Formular schickt einen leeren Namen in einer anderen Sprache als null; dann gilt der deutsche Name
+	it('entfernt einen Namen in einer anderen Sprache, den das Formular leer schickt', async () => {
+		const created = await send('POST', '', { name: `Hochtal ${token}`, nameIT: 'Valle', nameFR: null, ...shares() });
+		expect(created.status).toBe(201);
+
+		const response = await send('PUT', `/${await idOf(created)}`, { nameIT: null });
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ nameIT: null, nameFR: null });
 	});
 
 	// Die Oberfläche bietet das Bearbeiten nicht an; die API lehnt es verständlich ab

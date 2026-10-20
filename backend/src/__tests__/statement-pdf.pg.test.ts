@@ -112,7 +112,7 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		expect(text).toContain('Heizung Pro Fläche (m²) 70.00 / 70.00 m² 600.00 600.00 184/184 Tage 600.00');
 		expect(text).not.toContain('Heizprofil');
 		// the chosen profile, as it was named, and why it was not applied: for the detail page (#247)
-		expect(part.heatingShare).toEqual({ byDays: true, reason: 'wholePeriod', names: { name: 'Heating Mittelland', nameDE: 'Heizung Mittelland', nameFR: 'Chauffage Plateau', nameIT: 'Riscaldamento Altipiano', nameEN: 'Heating Plateau' } });
+		expect(part.heatingShare).toEqual({ byDays: true, reason: 'wholePeriod', names: { name: 'Heating Mittelland', nameDE: 'Heizung Mittelland', nameFR: 'Chauffage Plateau', nameIT: 'Riscaldamento Altipiano', nameEN: 'Heating Swiss Plateau' } });
 		expect(text).toContain('detaillierte Abrechnung der Heiz- und Warmwasserkosten verlangen');
 		await own.remove();
 	});
@@ -137,7 +137,7 @@ describe('PDF der Nebenkostenabrechnung', () => {
 
 		expect(text).toMatch(/Heizung Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² [\d'.]+ [\d'.]+ 62\/92 Tage/);
 		expect(text).not.toContain('Heizprofil');
-		expect(summer.heatingShare).toEqual({ byDays: true, reason: 'noHeatingMonths', names: { name: 'Heating Mittelland', nameDE: 'Heizung Mittelland', nameFR: 'Chauffage Plateau', nameIT: 'Riscaldamento Altipiano', nameEN: 'Heating Plateau' } });
+		expect(summer.heatingShare).toEqual({ byDays: true, reason: 'noHeatingMonths', names: { name: 'Heating Mittelland', nameDE: 'Heizung Mittelland', nameFR: 'Chauffage Plateau', nameIT: 'Riscaldamento Altipiano', nameEN: 'Heating Swiss Plateau' } });
 		expect(text).toContain('detaillierte Abrechnung der Heiz- und Warmwasserkosten verlangen');
 		await own.remove();
 	});

@@ -60,6 +60,18 @@ describe.each(lists)('Filter der Liste $path', (list) => {
 		expect(valueOf(list.search)).toBe('');
 	});
 
+	// O-41 (PR #514): the page store also reports changes without a new address (e.g. new data); a term typed
+	// meanwhile stayed in the field only on some lists, on the others «Suchen» searched for nothing
+	it('behält die Eingabe, wenn sich die Seite ohne neue Adresse ändert', () => {
+		goTo(list.path);
+		show(list.page as never, { data: { ...empty, ...list.data } });
+		fireEvent(byTestId<HTMLInputElement>(list.search)!, 'input', 'Gibt es nicht');
+
+		goTo(list.path);
+
+		expect(valueOf(list.search)).toBe('Gibt es nicht');
+	});
+
 	it('zeigt nach «Zurück» die Suche der früheren Liste', () => {
 		goTo(`${list.path}?search=Linde`);
 		show(list.page as never, { data: { ...empty, ...list.data } });

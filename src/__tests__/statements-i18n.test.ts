@@ -51,7 +51,7 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 		expect(statementSteps).toEqual([
 			'Période de décompte',
 			'Immeubles',
-			'Profil de chauffage et frais de gestion',
+			'Profil de chauffage et frais d’administration',
 			'Aperçu',
 			'Établissement'
 		]);

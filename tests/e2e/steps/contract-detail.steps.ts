@@ -407,7 +407,7 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(noticePeriodHintText).toContain('Zwischen Eingang und Vertragsende liegen weniger als 3 Monate.');
 		await verwalter.sees(noticePeriodHintText).toContain('erst auf den nächsten Kündigungstermin');
-		await verwalter.sees(noticePeriodHintText).toContain('Ein Ersatzmieter übernimmt den Mietvertrag');
+		await verwalter.sees(noticePeriodHintText).toContain('Der Mieter schlägt Ihnen einen zumutbaren Ersatzmieter vor');
 	}
 );
 
