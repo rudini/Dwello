@@ -1,6 +1,6 @@
 import { backendMessage } from '$lib/backend-error';
 import { billsIn, localToday } from '$lib/contract-status';
-import { overlappedBy, periodName, periodsOf, uncovered } from '$lib/accounting-period';
+import { overlappedBy, periodDays, periodsOf, uncovered } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { changedInvoiceCount, namesById, toStatement } from '$lib/server/statement';
@@ -135,7 +135,7 @@ async function contractsInPeriod(fetch: Fetch, request: Run) {
 						call(fetch, `buildings/${encodeURIComponent(buildingId)}`).then(({ name }) => {
 							const params = {
 								building: name,
-								periods: overlap.periods.map(periodName).join(', ')
+								periods: overlap.periods.map(periodDays).join(', ')
 							};
 							return backendMessage({ code: 'STATEMENT_PERIOD_OVERLAPS', params }, '');
 						})

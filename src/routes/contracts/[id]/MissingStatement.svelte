@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
-	import { periodName } from '$lib/accounting-period';
+	import { periodDays, periodName } from '$lib/accounting-period';
 
 	type Missing = {
 		start: string;
@@ -40,9 +40,9 @@
 	// several: short labels side by side, each with its verb (#142 personas, code review C-8)
 	const createLabel = ({ way, ...period }: Missing) =>
 		way.kind === 'existing'
-			? m.statements_period_choose({ period: periodName(way) })
+			? m.statements_period_choose({ period: periodDays(way) })
 			: way.kind === 'short'
-				? m.statements_period_short({ period: periodName(way) })
+				? m.statements_period_short({ period: periodDays(way) })
 				: single
 					? m.dashboard_create_statements()
 					: m.contracts_statement_create({ period: periodName(period) });

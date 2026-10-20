@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { Building } from '$lib/types';
-	import { periodName } from '$lib/accounting-period';
+	import { periodDays } from '$lib/accounting-period';
 	import type { Billed } from '$lib/statement-wizard';
 	import OverlapWays from './OverlapWays.svelte';
 
@@ -32,7 +32,7 @@
 
 	const billedId = $derived(`building-billed-${building.id}`);
 	const overlap = $derived(billed?.overlap);
-	const named = (periods: { start: string; end: string }[]) => periods.map(periodName).join(', ');
+	const named = (periods: { start: string; end: string }[]) => periods.map(periodDays).join(', ');
 	// #199, #408 point 2: a period that overlaps one of the building's: the existing period and the ways out
 	const overlapText = (o: NonNullable<Billed['overlap']>) =>
 		[

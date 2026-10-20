@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { periodName } from '$lib/accounting-period';
+	import { periodDays } from '$lib/accounting-period';
 	import { wizardLink, type Billed } from '$lib/statement-wizard';
 	import Button from '$lib/ui/Button.svelte';
 
@@ -14,11 +14,11 @@
 		[
 			...overlap.choose.map((p) => ({
 				...p,
-				label: m.statements_period_choose({ period: periodName(p) })
+				label: m.statements_period_choose({ period: periodDays(p) })
 			})),
 			...overlap.short.map((p) => ({
 				...p,
-				label: m.statements_period_short({ period: periodName(p) })
+				label: m.statements_period_short({ period: periodDays(p) })
 			}))
 		].filter((way, i, all) => all.findIndex((other) => other.start === way.start) === i)
 	);

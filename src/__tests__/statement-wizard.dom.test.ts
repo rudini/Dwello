@@ -1664,6 +1664,29 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		);
 	});
 
+	// persona Dr. Weber P-5 (#199): after a change of the setting «2025» could be 2025/26: the days, not the year
+	it('nennt eine bestehende Periode über ein Kalenderjahr mit ihren Tagen', async () => {
+		const year = { start: '2025-01-01', end: '2025-12-31' };
+		billed([
+			{
+				buildingId: 'b1',
+				contracts: 2,
+				billed: 1,
+				overlap: { periods: [year], choose: [year], short: [], vacant: false, statements: 1 }
+			}
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toContain('gibt es schon eine Abrechnung für 01.01.2025 – 31.12.2025.');
+		expect(billedText('b1')).toContain('in der Abrechnungsperiode 01.01.2025 – 31.12.2025 ab.');
+		expect(byTestId('generate-building-period-b1-2025-01-01')!.textContent!.trim()).toBe(
+			'Abrechnungsperiode 01.01.2025 – 31.12.2025 wählen'
+		);
+	});
+
 	it('nennt nur die bestehende Periode, wenn es keinen Weg für die übrigen Tage gibt', async () => {
 		billed([{ buildingId: 'b1', contracts: 1, billed: 1, overlap: { ...overlap, choose: [], short: [] } }]);
 		open();
