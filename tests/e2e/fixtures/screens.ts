@@ -201,6 +201,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.category('Rasenpflege', true);
 	await seed.categoryAllowance('Rasenpflege', false);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
+	// the stand-in reads «Elektro Blitz» as Allgemeinstrom: this invoice's key is proposed, so the file can be created (#452)
+	if (['upload-partial', 'upload-discard-created'].includes(state)) await seed.invoiceOn('Seeblick', 'Allgemeinstrom', '300.00', '2025-03-31');
 	const ids: Record<string, string | undefined> = {
 		building: seed.idOf('Seeblick'),
 		apartment: seed.idOf('1.01'),
