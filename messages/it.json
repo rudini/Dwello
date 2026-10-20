@@ -452,6 +452,8 @@
 	"backend_contract_not_found": "Il contratto di locazione non è stato trovato. Ricarichi la pagina.",
 	"backend_billed_until_future": "«Conteggiato fino al» non può essere una data futura. Inserisca l’ultimo giorno dell’ultimo conteggio allestito al di fuori di Dwello.",
 	"backend_billed_until_before_start": "«Conteggiato fino al» è anteriore all’inizio del contratto ({date}). Lasci vuoto il campo se per questo contratto di locazione non è ancora stato conteggiato nulla al di fuori di Dwello.",
+	"backend_billed_until_billed": "Il conteggio {number} ({period}) esiste già in Dwello. «Conteggiato fino al» può coprire solo giorni senza conteggio Dwello. Inserisca al più tardi il giorno precedente l’inizio di questo conteggio: {date}.",
+	"backend_billed_until_billed_start": "Il conteggio {number} ({period}) esiste già in Dwello. «Conteggiato fino al» può coprire solo giorni senza conteggio Dwello. Dwello conteggia questo contratto di locazione dall’inizio del contratto: lasci vuoto il campo.",
 	"backend_distribution_key_not_found": "La chiave di riparto non è stata trovata. Ricarichi la pagina.",
 	"backend_heating_profile_not_found": "Il profilo di riscaldamento non è stato trovato. Ricarichi la pagina.",
 	"backend_invoice_not_found": "La fattura non è stata trovata. Ricarichi la pagina.",

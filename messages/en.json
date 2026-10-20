@@ -452,6 +452,8 @@
 	"backend_contract_not_found": "The rental contract was not found. Reload the page.",
 	"backend_billed_until_future": "«Billed until» cannot be in the future. Enter the last day of the last statement created outside Dwello.",
 	"backend_billed_until_before_start": "«Billed until» is before the start of the rental contract ({date}). Leave the field empty if nothing has been billed outside Dwello for this rental contract yet.",
+	"backend_billed_until_billed": "For {period}, the statement {number} already exists in Dwello. «Billed until» can only cover days without a Dwello statement. Enter no later than the day before this statement begins: {date}.",
+	"backend_billed_until_billed_start": "For {period}, the statement {number} already exists in Dwello. «Billed until» can only cover days without a Dwello statement. Dwello bills this rental contract from the contract start: leave the field empty.",
 	"backend_distribution_key_not_found": "The distribution key was not found. Reload the page.",
 	"backend_heating_profile_not_found": "The heating profile was not found. Reload the page.",
 	"backend_invoice_not_found": "The invoice was not found. Reload the page.",

@@ -285,6 +285,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(openDialog(endContractButton), Click.on(confirmEndContractButton), Wait.until(on.dialogError)),
 	// the end dialog on the contract page, the contract form on its edit page
 	'past-end-error': () => endWithPastDate,
+	// «Abgerechnet bis» over the paid statement 2024 of Anna's contract: the refusal at the field (#499)
+	'billed-until-statement': () => (actor) =>
+		actor.attemptsTo(
+			EnterDate.of('2024-06-30').into(billedUntilInput),
+			Click.on(contractSubmitButton),
+			Wait.until(on.formProblem)
+		),
 	// «Abgerechnet bis» after today; in the wizard after a Vertragsbeginn in the past, whose warning points to it (#453)
 	'billed-until-refused': () => async (actor) => {
 		const wizard = (await actor.answer(pageAddress)).includes('/contracts/new');

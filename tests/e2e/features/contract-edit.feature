@@ -159,7 +159,6 @@ Funktionalität: Mietvertrag bearbeiten
 
   # #499: eine Periode mit einer versendeten Dwello-Abrechnung ist nicht ausserhalb von Dwello abgerechnet; der Weg über
   # das Berichtigen endete in einer Sackgasse (Persona Dr. Weber 453 P-1)
-  @wip
   Szenario: «Abgerechnet bis» über eine versendete Abrechnung
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-06-30" ausserhalb von Dwello abgerechnet sind
@@ -168,14 +167,12 @@ Funktionalität: Mietvertrag bearbeiten
     Aber rät die Fehlermeldung nicht zum Berichtigen
 
   # #499 (Fachreview V-2): beginnt der Mietvertrag in der Periode der versendeten Abrechnung, bleibt kein Tag davor
-  @wip
   Szenario: «Abgerechnet bis» über eine versendete Abrechnung ab dem Vertragsbeginn
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2024 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2024-06-30" ausserhalb von Dwello abgerechnet sind
     Dann sagt das Feld «Abgerechnet bis» "«Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Dwello rechnet diesen Mietvertrag ab Vertragsbeginn ab: Lassen Sie das Feld leer."
     Und nennt das Feld «Abgerechnet bis» die Abrechnung 2024 von "Anna Keller"
 
-  @wip
   Szenario: «Abgerechnet bis» bis zum Tag vor einer versendeten Abrechnung
     Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2024-12-31" ausserhalb von Dwello abgerechnet sind
