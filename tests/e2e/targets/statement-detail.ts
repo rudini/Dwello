@@ -1,6 +1,7 @@
 import { target } from '../screenplay/target';
 
 export const statementStatus = target('Status der Abrechnung', (page) => page.getByTestId('statement-status'));
+export const costBreakdown = target('Kostenaufstellung', (page) => page.getByTestId('statement-cost-breakdown'));
 export const statementLineItem = (category: string) =>
 	target(`Position «${category}» der Abrechnung`, (page) =>
 		page.getByTestId('statement-line-item').filter({ hasText: category })
@@ -92,3 +93,7 @@ export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) 
 // #338: «Neu berechnen» and its confirmation
 export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));
+// #464: the Akonto the statement deducts
+export const statementAdvancePaid = target('Akontobeiträge', (page) => page.getByTestId('statement-advance-paid'));
+// #464 (F-4): the berichtigte Abrechnung deducts another Akonto than the statement it replaces
+export const advanceDiffers = target('Hinweis zum anderen Akonto', (page) => page.getByTestId('statement-advance-differs'));

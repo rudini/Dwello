@@ -200,8 +200,9 @@ export function testData(api: CallTheApi) {
 			});
 		},
 
-		async advancePayment(tenantTitle: string, monthlyAdvancePayment: string) {
-			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment });
+		// #464: from a day on, or for the whole contract without one
+		async advancePayment(tenantTitle: string, monthlyAdvancePayment: string, advancePaymentFrom?: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { monthlyAdvancePayment, advancePaymentFrom });
 		},
 
 		// «Nebenkostenpauschale»: counts in «Monatlich total», never billed (#429)
@@ -340,8 +341,9 @@ export function testData(api: CallTheApi) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { movedOut: true });
 		},
 
-		async sendStatement(tenantTitle: string, year: number) {
-			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
+		// `which`: the key of the statement, «Berichtigte Abrechnung» for the one that replaced it (#447)
+		async sendStatement(tenantTitle: string, year: number, which = 'Abrechnung') {
+			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
 		async contractStart(tenantTitle: string, startDate: string) {
@@ -352,7 +354,12 @@ export function testData(api: CallTheApi) {
 		async replaceStatement(tenantTitle: string, year: number, correct = false) {
 			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
 			await post(`statements/${id}/replace`, {});
-			if (correct) ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
+			if (correct) await this.correctStatement(tenantTitle, year);
+		},
+
+		async correctStatement(tenantTitle: string, year: number) {
+			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
+			ids.set(`Berichtigte Abrechnung ${tenantTitle} ${year}`, (await post(`statements/${id}/correction`, {})).id);
 		},
 
 		async resetPayment(tenantTitle: string, year: number) {
@@ -360,8 +367,8 @@ export function testData(api: CallTheApi) {
 		},
 
 		// paid today, the earliest day a statement sent today allows (#138)
-		async markPaid(tenantTitle: string, year: number) {
-			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
+		async markPaid(tenantTitle: string, year: number, which = 'Abrechnung') {
+			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
 		},
 
 		// Monthly shares January..December in percent

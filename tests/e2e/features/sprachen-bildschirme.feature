@@ -39,6 +39,11 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | buildings              | filtered-empty      |
       | building-new           | default             |
       | building-new           | submit-empty        |
+      | building-new           | register-preview    |
+      | building-new           | register-submit-missing |
+      | building-new           | register-no-apartments |
+      | building-new           | register-no-hit     |
+      | building-new           | register-unreachable |
       | building-detail        | default             |
       | building-detail        | delete-dialog       |
       | building-detail        | fuel-stock-dialog   |
@@ -87,8 +92,11 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail        | end-dialog-error    |
       | contract-detail        | past-end-error      |
       | contract-detail        | end-dialog-refused  |
+      | contract-detail        | end-dialog-advance-refused |
       | contract-detail        | end-dialog-notice-hint |
       | contract-detail        | delete-dialog       |
+      | contract-detail        | advance-delete-dialog |
+      | contract-detail        | advance-delete-refused |
       | contract-detail        | missing-statements  |
       | contract-partly-billed-detail | default          |
       | contract-moved-out-detail | default          |
@@ -96,6 +104,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit          | submit-cleared      |
       | contract-edit          | past-end-error      |
       | contract-edit          | edit-refused        |
+      | contract-edit          | advance-refused     |
+      | contract-edit          | advance-from-missing |
       | contract-edit          | contracts-unknown   |
       | contract-edit          | agreed-costs-none   |
       | contract-edit          | flat-rate-warning   |

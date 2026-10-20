@@ -21,7 +21,8 @@
 	});
 </script>
 
-<div role="status">
+<!-- empty: no gap in the page's column (gap-8), but still in the accessibility tree, so a message is announced -->
+<div role="status" class="empty:-mt-8">
 	{#if reminder}
 		<Alert
 			tone={reminder.deliveryError ? 'caution' : 'positive'}

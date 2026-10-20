@@ -38,7 +38,9 @@
 	let busy = $state(false);
 </script>
 
+<!-- hidden: an empty form would still take a gap in the page's column -->
 <form
+	hidden
 	bind:this={form}
 	method="POST"
 	{action}

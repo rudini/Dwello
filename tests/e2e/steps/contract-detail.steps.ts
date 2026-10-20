@@ -24,7 +24,8 @@ import {
 	fixedTermCheckShown,
 	fixedTermCheckText,
 	fixedTermErrorText,
-	flatRateUtilityCharge
+	flatRateUtilityCharge,
+	advancePeriodOf
 } from '../questions/contract-detail';
 import { statementPath } from '../questions/statements';
 import { contractListEmpty, listedContractsOf } from '../questions/contracts';
@@ -33,6 +34,7 @@ import { pageAddress } from '../questions/navigation';
 import {
 	chooseNextStep,
 	createMissingStatement,
+	deleteAdvance,
 	deleteContract,
 	deleteContractEnteredByMistake,
 	deleteDraftAndEndContract,
@@ -305,6 +307,25 @@ Then('zeigt der Mietvertrag «Abgerechnet bis» am Ende des letzten Jahres', asy
 	await verwalter.sees(billedUntilOfContract).toBe(`31.12.${lastYear}`);
 });
 
+Given(
+	'der Mietvertrag von {string} hat ab {string} {string} Franken Akonto',
+	async ({ seed }, tenant: string, date: string, advance: string) => {
+		await seed.advancePayment(tenant, advance, date);
+	}
+);
+
+Then(
+	'zeigt der Mietvertrag das Akonto {string} vom {string} bis {string}',
+	async ({ verwalter }, amount: string, from: string, to: string) => {
+		await verwalter.sees(advancePeriodOf(amount)).toContain(from);
+		await verwalter.sees(advancePeriodOf(amount)).toContain(to);
+	}
+);
+
+Then('zeigt der Mietvertrag das Akonto {string} ab {string}', async ({ verwalter }, amount: string, from: string) => {
+	await verwalter.sees(advancePeriodOf(amount)).toContain(from);
+});
+
 Given('der Mietvertrag von {string} hat {string} Franken Akonto', async ({ seed }, tenant: string, advance: string) => {
 	await seed.advancePayment(tenant, advance);
 });
@@ -458,4 +479,8 @@ Then('ist der Mietvertrag von {string} unbefristet', async ({ verwalter, seed },
 // #457 (#410 point 3): the objection help after a fixed-term end
 Then('sagt der Hinweis zum abgelaufenen Mietvertrag {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(fixedTermCheckText).toContain(text);
+});
+
+When('der Liegenschaftsverwalter das Akonto {string} löscht', async ({ verwalter }, amount: string) => {
+	await verwalter.attemptsTo(deleteAdvance(amount));
 });

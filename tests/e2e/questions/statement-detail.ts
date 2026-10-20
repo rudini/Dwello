@@ -1,8 +1,11 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
+import { Accessible, Attribute, Count, Gap, Text } from '../screenplay/questions';
 import { successToast } from '../targets/form';
 import {
+	advanceDiffers,
+	costBreakdown,
+	statementAdvancePaid,
 	correctDialog,
 	paymentDeadline,
 	paymentSummary,
@@ -106,3 +109,10 @@ export const changeOffers = question('the offers to pay, remind, edit or correct
 	)
 );
 export const oldAddressWarningText = Text.of(oldAddressWarning);
+
+// The page's usual spacing between the status line and the first panel, no empty items in between
+export const gapAboveCostBreakdown = Gap.between(statementStatus, costBreakdown);
+
+// #464: the Akonto the statement deducts, e.g. «− CHF 400.00»
+export const advancePaidOfStatement = Text.of(statementAdvancePaid);
+export const advanceDiffersText = Text.of(advanceDiffers);

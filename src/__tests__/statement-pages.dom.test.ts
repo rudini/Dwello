@@ -565,7 +565,16 @@ describe('Abrechnungsdetail', () => {
 		click('statement-correct-button');
 		// Code-Review W2e3 C-3: bezahlt wurde auch auf den ersetzten Abrechnungen, nicht nur an diesem Tag
 		expect(correctDialog()).toContain(
-			'Die berichtigte Abrechnung rechnet die CHF 630.35 an, die auf diese und die ersetzten Abrechnungen bezahlt wurden.'
+			'Die berichtigte Abrechnung rechnet die CHF 630.35 an, die auf diese und die ersetzten Abrechnungen insgesamt bezahlt wurden.'
+		);
+	});
+
+	// #447, Fachreview V-1: in the chain the landlord refunded 100 and the tenant paid 50, so 50 refunded in all
+	it('nennt beim Berichtigen einer Kette mit Rückerstattung, was Sie insgesamt zurückerstattet haben', () => {
+		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 50, priorPayments: -100, balance: 50 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain(
+			'Die berichtigte Abrechnung rechnet die CHF 50.00 an, die Sie auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet haben.'
 		);
 	});
 
@@ -677,6 +686,32 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-replaces')!.textContent!.replace(/\s+/g, ' ')).toContain('Ersetzt die Abrechnung NK-2024-0001 vom 15.01.2025');
 		expect(byTestId('statement-prior-payments')!.textContent).toMatch(/Bereits bezahlt auf NK-2024-0001\s*−\s*CHF\s200.00/);
 		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
+	// #464 (Fachreview F-4, Entscheid A): die berichtigte Abrechnung zählt das Akonto des Mietvertrags; weicht es von
+	// der ersetzten ab, sagt sie es vor dem Versenden
+	it('warnt, wenn die berichtigte Abrechnung ein anderes Akonto abzieht als die ersetzte', () => {
+		const replaces = { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' };
+		detail({ replaces: { ...replaces, totalAdvancePayments: '1200.00' } });
+
+		expect(byTestId('statement-advance-differs')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die Akontobeiträge dieser Abrechnung (CHF 1’800.00) sind anders als in der ersetzten Abrechnung NK-2024-0001 (CHF 1’200.00). Stimmt ein früherer Betrag am Mietvertrag nicht, löschen Sie diesen Entwurf, tragen Sie den Betrag mit seinem «Gültig ab» ein und erstellen Sie die berichtigte Abrechnung erneut.'
+		);
+		expect(byTestId('statement-advance-paid')!.textContent).toMatch(/CHF\s1’800.00/);
+		// #477 (product owner 2026-10-19): the agreed Akonto, not «geleistet» (fach review 477-1 V-4)
+		expect(byTestId('statement-advance-paid')!.previousElementSibling!.textContent).toBe('Akontobeiträge');
+	});
+
+	it('warnt nicht bei gleichem Akonto', () => {
+		const replaces = { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' };
+		detail({ replaces: { ...replaces, totalAdvancePayments: 1800 } });
+		expect(byTestId('statement-advance-differs')).toBeNull();
+	});
+
+	it('warnt nach dem Versenden nicht mehr', () => {
+		const replaces = { id: 's0', statementNumber: 'NK-2024-0001', statementDate: '2025-01-15' };
+		detail({ status: 'sent', replaces: { ...replaces, totalAdvancePayments: 1200 } });
+		expect(byTestId('statement-advance-differs')).toBeNull();
 	});
 
 	// Fachreview W2e V-4, V-11: jede Abrechnung der Kette, auf die bezahlt wurde; eine Rückerstattung zählt dazu

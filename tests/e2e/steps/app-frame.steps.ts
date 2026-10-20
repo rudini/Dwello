@@ -197,6 +197,14 @@ Then(
 );
 
 Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass swisstopo den Suchbegriff und die IP-Adresse des Servers erhält, nicht die des Browsers',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('den eingegebenen Suchbegriff');
+		await verwalter.sees(sectionText(heading)).toContain('die IP-Adresse des Servers, nicht die des Browsers');
+	}
+);
+
+Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass nur der Betreiber das Protokoll des Servers zur Sicherheit und Fehlersuche liest und selbst bestimmt, wie lange es aufbewahrt wird',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(sectionText(heading)).toContain('Sicherheit');
@@ -243,4 +251,12 @@ Then('sieht der Liegenschaftsverwalter die Begriffe der Hilfe unter ihrer eigene
 Then('erklärt die Seite {string} {string}', async ({ verwalter }, title: string, text: string) => {
 	await verwalter.sees(pageTitleText).toBe(title);
 	await verwalter.sees(pagePurposeText).toContain(text);
+});
+
+When('der Liegenschaftsverwalter die Seite {string} öffnet', async ({ verwalter }, path: string) => {
+	await verwalter.attemptsTo(openPage(path));
+});
+
+Then('sagt die Fehlerseite {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(pageTitleText).toBe(message);
 });

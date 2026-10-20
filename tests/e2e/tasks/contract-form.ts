@@ -5,6 +5,7 @@ import {
 	agreedCategory,
 	agreedCategoryBoxAt,
 	agreedCategoryBoxes,
+	advancePaymentFromInput,
 	advancePaymentInput,
 	flatRateInput,
 	apartmentSelect,
@@ -125,6 +126,23 @@ export const changeBaseRent = (baseRent: string): Activity => (actor) =>
 export const enterAdvancePayment = (amount: string) => Enter.theValue(amount).into(advancePaymentInput);
 export const enterFlatRateUtilityCharge = (amount: string) => Enter.theValue(amount).into(flatRateInput);
 
+// #464: a new Akonto from a day on; the amount before stays for the time before
+export const changeAdvancePaymentFrom = (isoDate: string, amount: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(amount).into(advancePaymentInput),
+		EnterDate.of(isoDate).into(advancePaymentFromInput),
+		Click.on(contractSubmitButton)
+	);
+
+// #464 (V-12): the Vertragsbeginn and the first Akonto corrected in one save
+export const saveStartWithAdvance = (isoDate: string, amount: string, from: string): Activity => (actor) =>
+	actor.attemptsTo(
+		EnterDate.of(isoDate).into(startDateInput),
+		Enter.theValue(amount).into(advancePaymentInput),
+		EnterDate.of(from).into(advancePaymentFromInput),
+		Click.on(contractSubmitButton)
+	);
+
 export const changeFlatRateUtilityCharge = (amount: string): Activity => (actor) =>
 	actor.attemptsTo(enterFlatRateUtilityCharge(amount), Click.on(contractSubmitButton));
 
@@ -142,9 +160,9 @@ export const withdrawNotice: Activity = (actor) =>
 // «Bearbeiten»: another Vertragsbeginn
 export const saveStartDate = (isoDate: string): Activity => (actor) =>
 	actor.attemptsTo(EnterDate.of(isoDate).into(startDateInput), Click.on(contractSubmitButton));
-// «Bearbeiten»: the fee is agreed at the run's rate
-export const agreeManagementFee: Activity = (actor) =>
-	actor.attemptsTo(Click.on(feeChoice('run')), Click.on(contractSubmitButton));
+// «Bearbeiten»: the fee is agreed at the run's rate, or at an own rate in percent
+export const agreeManagementFee = (fee = 'run'): Activity => (actor) =>
+	actor.attemptsTo(chooseManagementFee(fee), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: the Nebenkosten are billed outside Dwello up to the day given (#133)
 export const enterBilledUntil = (isoDate: string): Activity => (actor) =>

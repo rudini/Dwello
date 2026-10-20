@@ -1,6 +1,7 @@
 import { question } from '../screenplay/actor';
 import { Attribute, ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
+	advancePeriod,
 	nextSteps,
 	endDialogDeathHint,
 	endDialog,
@@ -59,3 +60,5 @@ export const fixedTermCheckText = Text.of(fixedTermCheck);
 export const fixedTermErrorText = Text.of(fixedTermError);
 
 export const agreedCostsOfContract = Text.of(contractAgreedCosts);
+// #464: the row of one Akonto amount with the time it applies
+export const advancePeriodOf = (amount: string) => Text.of(advancePeriod(amount));

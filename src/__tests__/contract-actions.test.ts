@@ -6,6 +6,8 @@ import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import contractList from '../../tests/contracts/contracts.json';
 import contractDetail from '../../tests/contracts/contract.json';
+import endAdvanceRefused from '../../tests/contracts/contract-end-advance-refused.json';
+import advanceDeleteRefused from '../../tests/contracts/contract-advance-delete-refused.json';
 import category from '../../tests/contracts/category.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
 import contractHasStatements from '../../tests/contracts/contract-delete-refused.json';
@@ -366,6 +368,21 @@ describe('Mietvertrag beenden', () => {
 		]);
 	});
 
+	// review 464-2 C-11: a later Akonto refuses the end; the dialog says which and what to do
+	it('nennt das spätere Akonto, wenn es das Vertragsende ablehnt', async () => {
+		const { result } = runAction(actions.end, 'c1', 200, { endDate: '2098-12-31' }, { startDate: '2024-04-01' }, {
+			status: 400,
+			answer: endAdvanceRefused
+		});
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				endError: 'Ab 01.01.2099 gilt ein anderes Akonto. Löschen Sie zuerst dieses Akonto, oder wählen Sie ein späteres Vertragsende.'
+			}
+		});
+	});
+
 	// A-3 (#112): der Tag, an dem die Kündigung eingegangen ist, wird mit dem Vertragsende gespeichert
 	it('speichert den Eingang der Kündigung mit dem Vertragsende', async () => {
 		const { calls, result } = runAction(
@@ -668,6 +685,39 @@ describe('Mietvertrag löschen', () => {
 		expect(await result).toMatchObject({
 			status: 400,
 			data: { deleteError: 'Mietvertrag konnte nicht gelöscht werden.' }
+		});
+	});
+});
+
+// #464 (Entscheid zu F-13): ein späteres Akonto lässt sich löschen; eine Ablehnung bleibt im Dialog
+describe('Akonto löschen', () => {
+	it('löscht das Akonto mit seinem «Gültig ab»', async () => {
+		const { calls, result } = runAction(actions.deleteAdvance, 'c1', 200, { validFrom: '2025-07-01' });
+		await result;
+
+		expect(calls).toEqual([
+			{ method: 'DELETE', url: 'http://localhost:3001/api/v1/contracts/c1/advance-payments/2025-07-01', body: undefined }
+		]);
+	});
+
+	// review 464-1 C-9: only a day goes into the backend path
+	it('sendet kein Löschen für etwas anderes als einen Tag', async () => {
+		const { calls, result } = runAction(actions.deleteAdvance, 'c1', 200, { validFrom: '../../c2' });
+
+		expect(await result).toMatchObject({ status: 400 });
+		expect(calls).toEqual([]);
+	});
+
+	it('nennt im Dialog, warum das Backend das Löschen ablehnt', async () => {
+		const { result } = runAction(actions.deleteAdvance, 'c1', 400, { validFrom: '2024-07-01' }, advanceDeleteRefused);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				validFrom: '2024-07-01',
+				advanceDeleteError:
+					'Das Akonto ab 01.07.2024 zählt im Entwurf NK-2024-0001. Löschen Sie zuerst den Entwurf.'
+			}
 		});
 	});
 });

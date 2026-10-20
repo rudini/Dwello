@@ -4,6 +4,7 @@
 	import type { ContractHistory } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
+	import AdvancePeriods from './AdvancePeriods.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
 	// From when to when, and what the tenant pays each month
@@ -16,7 +17,9 @@
 		status,
 		rent,
 		fee,
-		agreedCosts
+		agreedCosts,
+		advancePayments = [],
+		advanceDelete = null
 	}: {
 		startDate: string;
 		endDate?: string | null;
@@ -33,6 +36,8 @@
 		};
 		fee: string; // «Verwaltungspauschale» in words (#89)
 		agreedCosts: string[] | null; // the agreed Nebenkosten (#91); null when the categories could not be loaded
+		advancePayments?: { validFrom: string; amount: string }[]; // each Akonto with its «Gültig ab» (#464)
+		advanceDelete?: { validFrom: string; error: string } | null; // a refused deletion, shown in its dialog
 	} = $props();
 
 	const amounts = $derived([
@@ -79,7 +84,6 @@
 			<dd class="font-semibold text-ink" data-testid="contract-management-fee">{fee}</dd>
 		</div>
 		{#if agreedCosts}
-			<!-- TODO(fachlich prüfen, #369): the term «Vereinbarte Nebenkosten» -->
 			<div>
 				<dt class="text-ink-muted">{m.contracts_agreed_costs_label()}</dt>
 				<dd class="font-semibold text-ink" data-testid="contract-agreed-costs">
@@ -105,4 +109,5 @@
 			</dd>
 		</div>
 	</dl>
+	<AdvancePeriods {startDate} {endDate} {advancePayments} {advanceDelete} />
 </Panel>

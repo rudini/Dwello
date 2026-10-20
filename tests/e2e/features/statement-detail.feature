@@ -188,6 +188,13 @@ Funktionalität: Abrechnungsdetail
     Dann ist der Seitentitel lesbar
     Und scrollt die Seite nicht seitwärts
 
+  # Leere Bereiche für spätere Meldungen lassen keine Lücke über der Kostenaufstellung
+  Szenario: Die Kostenaufstellung folgt im üblichen Abstand auf den Status
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann folgt die Kostenaufstellung im üblichen Abstand auf den Status
+
   Szenario: Entwurf löschen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
@@ -281,7 +288,6 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Marktstätte 3 78462 Konstanz DEUTSCHLAND"
 
-  # TODO(fachlich prüfen, #294): «Abrechnungsnummer» steht im Glossar; die Hilfetexte folgen
   # Die Datei heisst wie die Abrechnungsnummer auf dem PDF, damit der Liegenschaftsverwalter die Dateien unterscheidet (#101)
   Szenario: Das PDF heisst wie die Abrechnungsnummer
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
@@ -701,6 +707,23 @@ Funktionalität: Abrechnungsdetail
     Und nennt die Bestätigung die Verjährung nach fünf Jahren
     Und hat die Abrechnung den Status "Versendet"
 
+  # #447, Fachreview V-1: in einer Kette rechnet die berichtigte Abrechnung alles an, was auf die ersetzten Abrechnungen
+  # geflossen ist. Lea Graf erhielt mit 200 Franken Akonto im Monat eine Rückerstattung, die Nachzahlung der
+  # berichtigten Abrechnung (Hauswart) ist kleiner: netto hat der Vermieter zurückerstattet
+  Szenario: Vor dem Berichtigen einer Kette nennt die Bestätigung, was insgesamt zurückerstattet ist
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-01-01" für "1200" Franken mit "200" Franken Akonto
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Lea Graf" ist versendet
+    Und die Abrechnung 2024 von "Lea Graf" ist bezahlt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und die Abrechnung 2024 von "Lea Graf" ist berichtigt
+    Und die berichtigte Abrechnung 2024 von "Lea Graf" ist versendet und bezahlt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung 2024 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigen will
+    Dann sagt die Bestätigung, dass die berichtigte Abrechnung anrechnet, was der Liegenschaftsverwalter auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet hat
+
   # #120: eine später erfasste Rechnung wird mit der berichtigten Abrechnung nachverlangt; bezahlt sind 430.00 + 3 %
   # Verwaltungspauschale = 442.90. Neu: 430.00 + 182.00 (Hauswart 732.00 × 91/366) + 3 % = 630.36, abzüglich 442.90
   # = 187.46, auf 5 Rappen zugunsten des Mieters 187.45
@@ -781,3 +804,45 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "gilt nicht mehr. Bezahlen Sie nur noch den Saldo dieser Abrechnung."
     Und steht im PDF "bereits bezahlt CHF 442.90"
     Und steht im PDF "Nachzahlung 187.45"
+
+  # #464: die berichtigte Abrechnung rechnet mit dem Akonto, das in der Periode galt, nicht mit dem heutigen;
+  # Marc Huber Mai und Juni 2 × 50.00, Juli bis Dezember 6 × 80.00 = 580.00 (ab 2025 gilt 100.00)
+  Szenario: Berichtigte Abrechnung rechnet mit dem damaligen Akonto
+    Angenommen der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und der Mietvertrag von "Marc Huber" hat ab "2024-07-01" "80" Franken Akonto
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und der Mietvertrag von "Marc Huber" hat ab "2025-01-01" "100" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigt
+    Und der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann zieht die Abrechnung "CHF 580.00" Akontobeiträge ab
+
+  # #464 (F-4, Option A): weicht das Akonto der berichtigten Abrechnung von dem der ersetzten ab, sagt Dwello es;
+  # die ersetzte zählte 8 × 50.00 = 400.00, das Akonto ist inzwischen ab Vertragsbeginn 80.00: 8 × 80.00 = 640.00
+  Szenario: Die berichtigte Abrechnung nennt ein anderes Akonto als die ersetzte
+    Angenommen der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Marc Huber" ist versendet
+    Und die Abrechnung 2024 von "Marc Huber" ist ersetzt
+    Und der Mietvertrag von "Marc Huber" hat "80" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter die berichtigte Abrechnung erstellt
+    Dann warnt die berichtigte Abrechnung, dass ihre Akontobeiträge "CHF 640.00" anders sind als die "CHF 400.00" der ersetzten Abrechnung 2024 von "Marc Huber"
+
+  # #464 (#103): das PDF nennt das Akonto als Monate mal Betrag, eine Zeile pro Betrag mit ihrem Zeitraum, und sagt,
+  # dass das vereinbarte Akonto abgezogen ist (Fachreview F-6, F-7, F-9; #477)
+  Szenario: Das PDF nennt das Akonto als Monate mal Betrag
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und der Mietvertrag von "Marc Huber" hat "50" Franken Akonto
+    Und der Mietvertrag von "Marc Huber" hat ab "2024-07-01" "80" Franken Akonto
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Marc Huber" gibt es ein PDF
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Akontobeiträge – 580.00"
+    Und steht im PDF "2 Monate × CHF 50.00 (01.05.2024 – 30.06.2024) 100.00"
+    Und steht im PDF "6 Monate × CHF 80.00 (01.07.2024 – 31.12.2024) 480.00"
+    Und steht im PDF "Abgezogen sind die Akontobeiträge, die im Mietvertrag vereinbart sind."
+    # #477 (Entscheid Product Owner 2026-10-19): die Zeile heisst «Akontobeiträge», nicht «Geleistete …»
+    Und steht im PDF nicht "Geleistete"

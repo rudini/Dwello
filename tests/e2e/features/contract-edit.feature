@@ -137,6 +137,12 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist
     Dann zeigt der Mietvertrag bei der Verwaltungspauschale "Vereinbart, Satz des Abrechnungslaufs"
 
+  # #447 (Entscheid in #402, Punkt 2): auch beim Bearbeiten heisst ein eigener Satz von 0 % «Nein»
+  Szenario: Eigener Satz von 0 % wird beim Bearbeiten abgelehnt
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale mit einem eigenen Satz von "0" % vereinbart ist
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Ein eigener Satz von 0 % heisst: keine Verwaltungspauschale. Wählen Sie dann «Nein»."
+
   # #133: vor dem Wechsel zu Dwello hat der Liegenschaftsverwalter die Nebenkosten selbst abgerechnet
   Szenario: Ausserhalb von Dwello abgerechnete Zeit eintragen
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-12-31" ausserhalb von Dwello abgerechnet sind
@@ -191,3 +197,38 @@ Funktionalität: Mietvertrag bearbeiten
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
     Und zeigt der Mietvertrag die Nebenkostenpauschale "CHF 120.00"
     Und zeigt der Mietvertrag das Monatlich total "CHF 1’070.00"
+
+  # #464: ein neues Akonto gilt ab einem Datum; das bisherige bleibt für die Zeit davor
+  Szenario: Akonto ab einem Datum ändern
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter das Akonto ab "2025-07-01" auf "200" Franken ändert
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und zeigt der Mietvertrag das Akonto "CHF 150.00" vom "01.04.2024" bis "30.06.2025"
+    Und zeigt der Mietvertrag das Akonto "CHF 200.00" ab "01.07.2025"
+
+  # #464 (#90): das Akonto zählt als vereinbart, nicht als bezahlt; eine Erhöhung braucht das amtliche Formular
+  Szenario: Die Hilfe zum Akonto nennt, wie Dwello es abrechnet
+    Dann erfährt der Liegenschaftsverwalter, dass Dwello das vereinbarte Akonto abrechnet und fehlende Zahlungen ausserhalb von Dwello geregelt werden
+    Und erfährt der Liegenschaftsverwalter, dass eine Erhöhung des Akontos das amtliche Formular braucht
+
+  # #464 (F-3): ein neues Akonto darf eine schon erstellte Abrechnung nicht stillschweigend ändern
+  Szenario: Akonto in einer schon abgerechneten Zeit
+    Angenommen für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter das Akonto ab "2025-07-01" auf "200" Franken ändert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Gilt das neue Akonto schon ab 01.07.2025, berichtigen Sie zuerst diese Abrechnung. Gilt es erst später, wählen Sie ein «Gültig ab» ab 01.01.2026."
+
+  # #464 (Persona Helga 464-2 P-1): das Formular nennt die Akonto-Beträge, die schon eingetragen sind
+  Szenario: Das Formular nennt die eingetragenen Akonto-Beträge
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Mietvertrag von "Anna Keller" hat ab "2099-01-01" "200" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann zeigt der Mietvertrag das Akonto "CHF 150.00" vom "01.04.2024" bis "31.12.2098"
+    Und zeigt der Mietvertrag das Akonto "CHF 200.00" ab "01.01.2099"
+
+  # #464 (Fachreview 464-3 V-12): ein «Gültig ab» am neuen Vertragsbeginn korrigiert das erste Akonto
+  Szenario: Vertragsbeginn und erstes Akonto zusammen korrigieren
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2024-03-15" mit "180" Franken Akonto ab "2024-03-15" speichert
+    Dann zeigt der Mietvertrag das Monatlich total "CHF 1’130.00"

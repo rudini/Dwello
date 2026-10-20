@@ -19,6 +19,8 @@ import ContractPage from '../routes/contracts/[id]/+page.svelte';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import { byTestId, click, fireEvent, settle, show } from './helpers/dom';
+import { reactiveProps } from './helpers/reactive-props.svelte';
+import { flushSync } from 'svelte';
 import refused from '../../tests/contracts/contract-end-refused.json';
 
 const contract = (startDate: string, endDate: string | null, terminated = false) => ({
@@ -442,6 +444,109 @@ describe('Mietvertragsdetail', () => {
 		expect(amountOf('Zusatzmiete')).toBe('CHF 50.00');
 		expect(amountOf('Monatlich total')).toBe('CHF 1’180.00');
 		expect(text('contract-total-rent')).toBe('CHF 1’180.00');
+	});
+
+	// #464: jedes Akonto mit der Zeit, in der es gilt; der erste Betrag ab dem Vertragsbeginn
+	const withAdvances = (endDate: string | null, advancePayments: { validFrom: string; amount: string }[]) =>
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: null,
+				contract: { ...contract('2024-04-15', endDate), advancePayments },
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 200, total: 1200 }
+			},
+			form: null
+		} as never);
+	const periods = () =>
+		[...document.querySelectorAll('[data-testid="contract-advance-period"]')].map((row) =>
+			row.textContent!.replace(/\s+/g, ' ').trim()
+		);
+	it('nennt jedes Akonto mit seiner Zeit', () => {
+		withAdvances(null, [
+			{ validFrom: '2024-04-15', amount: '150.00' },
+			{ validFrom: '2025-07-01', amount: '200.00' }
+		]);
+		expect(periods()).toEqual(['CHF 150.00 vom 15.04.2024 bis 30.06.2025', expect.stringContaining('CHF 200.00 ab 01.07.2025')]);
+		expect(amountOf('Akonto')).toBe('CHF 200.00');
+	});
+
+	it('nennt das letzte Akonto bis zum Vertragsende', () => {
+		withAdvances('2026-03-31', [
+			{ validFrom: '2024-04-15', amount: '150.00' },
+			{ validFrom: '2025-07-01', amount: '200.00' }
+		]);
+		expect(periods()[1]).toContain('CHF 200.00 vom 01.07.2025 bis 31.03.2026');
+	});
+
+	// #464 (Entscheid zu F-13): ein späteres Akonto lässt sich löschen, das erste nicht; der Dialog nennt die Folge
+	it('lässt ein späteres Akonto mit seiner Folge löschen, das erste nicht', async () => {
+		const advances = [
+			{ validFrom: '2024-04-15', amount: '150.00' },
+			{ validFrom: '2025-07-01', amount: '200.00' }
+		];
+		const props = reactiveProps({
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: null,
+				contract: { ...contract('2024-04-15', null), advancePayments: advances },
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 200, total: 1200 }
+			},
+			form: null
+		});
+		show(ContractPage, props as never);
+		const [first, later] = document.querySelectorAll('[data-testid="contract-advance-period"]');
+		expect(first.querySelector('[data-testid="contract-advance-delete"]')).toBeNull();
+		const button = later.querySelector<HTMLButtonElement>('[data-testid="contract-advance-delete"]')!;
+		expect(button.textContent!.trim()).toBe('Akonto ab 01.07.2025 löschen');
+
+		button.click();
+		await settle();
+		expect(document.querySelector('[role=dialog] h2')?.textContent).toContain('Akonto ab 01.07.2025 löschen?');
+		expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Das Akonto von CHF 200.00 ab 01.07.2025 wird gelöscht. Ab dann gilt wieder das Akonto von CHF 150.00.'
+		);
+		const sent = new FormData();
+		toasts.set([]);
+		const after = actions.get('?/deleteAdvance')!({ formData: sent }) as (input: unknown) => Promise<void>;
+		expect(sent.get('validFrom')).toBe('2025-07-01');
+		// persona Helga 464-2 P-4: the deletion is confirmed as saving is, after the page lost the entry (review C-14)
+		const update = async () => {
+			props.data = { ...props.data, contract: { ...props.data.contract, advancePayments: [advances[0]] } };
+			flushSync();
+		};
+		await after({ update, result: { type: 'success' } });
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Akonto ab 01.07.2025 gelöscht']);
+	});
+
+	it('zeigt im Dialog, warum das Löschen eines Akontos abgelehnt wird', async () => {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatements: [],
+				billedBy: [],
+				nextSteps: null,
+				contract: {
+					...contract('2024-04-15', null),
+					advancePayments: [
+						{ validFrom: '2024-04-15', amount: '150.00' },
+						{ validFrom: '2025-07-01', amount: '200.00' }
+					]
+				},
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 200, total: 1200 }
+			},
+			form: { advanceDeleteError: 'Das Akonto ab 01.07.2025 ändert die Abrechnung NK-2025-0001.', validFrom: '2025-07-01' }
+		} as never);
+		await settle();
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain('ändert die Abrechnung NK-2025-0001');
+	});
+
+	it('nennt ein einziges Akonto nicht eigens', () => {
+		withAdvances(null, [{ validFrom: '2024-04-15', amount: '150.00' }]);
+		expect(periods()).toEqual([]);
 	});
 
 	it('führt über die Namen zum Mieter und zur Wohnung', () => {

@@ -126,7 +126,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 
 ┌──────────────────────────────────────────────────────────┐
 │        External Services (async, non-blocking)           │
-│  - OpenPLZ API: Address search (called from frontend)    │
+│  - geo.admin.ch: Gebäuderegister search (via BFF)        │
 │  - OAuth Provider: Authentication (via BFF)              │
 │  - LLM (default local Ollama): Invoice categorization    │
 │  - Backup Service: Daily snapshots                       │
@@ -172,10 +172,9 @@ Dwello is built for private landlords with little experience who use it a few ti
   - Building type (single-family, multi-family, mixed)
 
 **Address Integration:**
-- Real-time address search using OpenPLZ API
-- Auto-populate GPS coordinates
-- Address validation
-- Manual address entry fallback if API unavailable
+- Address search with house number in the federal Gebäude- und Wohnungsregister (GWR, geo.admin.ch, through the BFF, #479): the chosen address fills address, canton, Gebäudetyp and Baujahr and lists the building's Wohnungen («bestehend» and «im Bau») to check, complete or leave out; «Gebäude und Wohnungen erstellen» creates all together or nothing
+- Hints: register lists only Wohnungen (shops and offices are entered afterwards), no Wohnungen in the register, no address found, register unreachable, address already entered as a Gebäude
+- Manual address entry when the register has no hit or cannot be reached
 
 **Map Visualization** (dropped, #129; not built):
 - Display all buildings on interactive map (OpenStreetMap)
@@ -822,7 +821,7 @@ BALANCE (refund): CHF 30
 **Widget 5: System Status**
 - Last backup timestamp
 - Pending invoices (not yet categorized)
-- Sync status with external services (OpenPLZ, LLM)
+- Sync status with external services (Gebäuderegister, LLM)
 
 **Widget 6: Quick Actions**
 - Button: Add Building
@@ -1454,12 +1453,12 @@ BALANCE (refund): CHF 30
 
 ### 8.1 APIs
 
-**OpenPLZ API**
-- **URL:** https://www.openplzapi.org/de/
-- **Purpose:** Swiss address search and postal code validation
-- **Integration:** Called from the frontend when user enters address in building form
-- **Fallback:** Manual address entry if API unavailable
-- **Rate limit:** Check API documentation (likely generous)
+**geo.admin.ch REST API (Gebäuderegister)**
+- **URL:** https://api3.geo.admin.ch (SearchServer, layer `ch.bfs.gebaeude_wohnungs_register`)
+- **Purpose:** Swiss addresses with house number and the building's Wohnungen from the federal GWR (#479)
+- **Integration:** Called by the BFF (`/api/addresses`), never by the browser
+- **Fallback:** Manual address entry when there is no hit or the register cannot be reached
+- **Rate limit:** free, fair use (BGDI terms of use)
 - **Cost:** Free (open source)
 
 **OAuth Provider**
@@ -1586,7 +1585,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 - Building CRUD endpoints and UI screens
 - Apartment CRUD endpoints and UI screens
 - Tenant CRUD endpoints and UI screens
-- OpenPLZ API integration for address search
+- Gebäuderegister (geo.admin.ch) integration for address search and Wohnungen (#479)
 - Building detail views with apartment list
 - Apartment occupancy tracking
 - Data validation and error handling
@@ -1809,7 +1808,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 | PDF generation performance | Low | Low | Async processing, template caching, batch optimization, consider Puppeteer if needed |
 | Data loss from backup failure | High | Low | Test restore monthly, redundant backups, encryption of backups, retention policy |
 | User adoption/learning curve | Medium | Medium | Intuitive UI design, comprehensive documentation, video tutorials, in-app help |
-| OpenPLZ API downtime | Low | Low | Cache results, manual address entry fallback, retry logic with exponential backoff |
+| Gebäuderegister (geo.admin.ch) downtime | Low | Low | Cache results, manual address entry fallback, retry logic with exponential backoff |
 | Ollama/LLM unavailable | Medium | Low | Allow manual categorization, fallback to default categories, health checks, restart policy |
 | PostgreSQL performance | Medium | Low | Index optimization, query analysis, connection pooling, monitoring |
 | Date/timezone issues | Medium | Low | Always use UTC in database, convert on display, comprehensive date testing |

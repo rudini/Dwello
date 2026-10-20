@@ -5,6 +5,7 @@
 
 import { Elysia, t } from 'elysia';
 import { errorBody, refusal } from '../services/coded-error';
+import { advancesOf, deleteAdvance } from '../services/advance-payment.service';
 import { agreedCategoryIds, agreementsInPeriod, answerAgreement } from '../services/agreed-category.service';
 import { authMiddleware } from '../middleware/auth';
 import {
@@ -32,10 +33,13 @@ const contractQuerySchema = t.Object({
 	offset: t.Optional(t.String())
 });
 
-// «Verwaltungspauschale vereinbart» (#89): without it a contract has none; an own rate from 0 to 10 % (#124)
+// «Verwaltungspauschale vereinbart» (#89): without it a contract has none; an own rate greater than 0 up to 10 %
+// (#124; 0 % means «Nein», #447)
 const managementFee = {
 	managementFeeAgreed: t.Optional(t.Boolean()),
-	managementFeePercent: t.Optional(t.Nullable(t.String({ pattern: '^(10(\\.0{1,2})?|\\d(\\.\\d{1,2})?)$' })))
+	managementFeePercent: t.Optional(
+		t.Nullable(t.String({ pattern: '^(10(\\.0{1,2})?|[1-9](\\.\\d{1,2})?|0\\.(0[1-9]|[1-9]\\d?))$' }))
+	)
 };
 
 // #91: the categories the contract agrees; every other umlagefähige one is not agreed
@@ -71,6 +75,7 @@ const contractUpdateSchema = t.Partial(
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),
+		advancePaymentFrom: t.String({ format: 'date' }), // #464: the «Gültig ab» of a new Akonto; none: the first amount
 		flatRateUtilityCharge: t.String(),
 		...managementFee,
 		agreedCategoryIds: agreedList,
@@ -115,7 +120,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			set.status = 404;
 			return { error: 'Contract not found' };
 		}
-		return { ...contract, agreedCategoryIds: await agreedCategoryIds(params.id) };
+		return { ...contract, agreedCategoryIds: await agreedCategoryIds(params.id), advancePayments: await advancesOf(params.id) };
 	})
 	// The categories with costs for the contract in the period and whether it agrees each (#91)
 	.get(
@@ -229,6 +234,16 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			body: contractUpdateSchema
 		}
 	)
+	// #464: delete a later Akonto amount
+	.delete('/:id/advance-payments/:validFrom', async ({ params, set }) => {
+		try {
+			await deleteAdvance(params.id, params.validFrom);
+			return { success: true };
+		} catch (error) {
+			set.status = 400;
+			return errorBody(error, 'Failed to delete the Akonto');
+		}
+	})
 	// Delete contract; `confirmMistake`: the landlord confirmed a started contract was entered by mistake (#116)
 	.delete(
 		'/:id',

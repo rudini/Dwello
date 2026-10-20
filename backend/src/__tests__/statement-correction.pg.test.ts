@@ -21,7 +21,7 @@ type Statement = {
 	paidDate: string | null;
 	paidAmount: string | null;
 	priorPayments: string;
-	replaces: { id: string; statementNumber: string; statementDate: string } | null;
+	replaces: { id: string; statementNumber: string; statementDate: string; totalAdvancePayments: string } | null;
 	replacedBy: { id: string; statementNumber: string } | null;
 };
 
@@ -136,7 +136,12 @@ describe('Berichtigte Abrechnung', () => {
 		const corrected = (await response.json()) as Statement;
 		expect(corrected.status).toBe('draft');
 		expect(corrected.statementNumber).not.toBe(old.statementNumber);
-		expect(corrected.replaces).toEqual({ id, statementNumber: old.statementNumber, statementDate: old.statementDate });
+		expect(corrected.replaces).toEqual({
+			id,
+			statementNumber: old.statementNumber,
+			statementDate: old.statementDate,
+			totalAdvancePayments: old.totalAdvancePayments // #464: so the page can say when the Akonto differs
+		});
 		expect((await statement(id)).replacedBy).toEqual({ id: corrected.id, statementNumber: corrected.statementNumber });
 	});
 
