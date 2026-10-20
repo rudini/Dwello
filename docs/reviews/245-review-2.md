@@ -51,3 +51,27 @@ Vorheriger Bericht `245-review-1.md`: C-1, C-2 und C-3 sind behoben (siehe unten
 
 - Rot auf 9353cc58 und grün auf 2e017a5f (1 passed): vom Aufrufer gemeldet. E2E habe ich nicht gestartet (Vorgabe). Bestätigt ist beides nur durch das Lesen von `UploadRowNotes.svelte` und `InvoiceUploadDialog.svelte`.
 - Lint grün: vom Aufrufer gemeldet, nicht erneut ausgeführt.
+
+## Runde 3 (Merge 89217dea, origin/main 57211576 in w9-issue-245)
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| – | – | – | Keine Befunde im Merge. |
+
+Offene IDs aus den Runden 1 und 2: keine. R-1 wurde in Runde 2 geschlossen.
+
+### Bestätigt
+
+- **Treue des Merges:** Die Merge-Basis ist 6095bab9. `git diff --numstat 6095bab9 57211576` und `git diff --numstat 2e017a5f 89217dea` über `src tests messages backend` sind gleich, bis auf `src/routes/invoices/InvoiceUploadDialog.svelte` (3/1 statt 2/1, das ist die Auflösung aus Punkt 3). Bei den Dateien, die beide Seiten ändern (`InvoiceUploadRow.svelte`, `invoice-upload-dialog.dom.test.ts`, `invoice-pages.dom.test.ts`, `invoice-detail.steps.ts`, `tasks/invoice-form.ts`, `messages/de.json`), sind die geänderten Zeilen des Merge-Deltas zeilengleich mit denen von main. Der Merge verliert also nichts von main und bringt sonst nichts Fremdes hinein.
+- **Konflikt 1** (`src/routes/invoices/[id]/edit/+page.svelte:34-35`): Beide Props bleiben erhalten. `+page.server.ts` liefert beide: `statements` über `statementPeriods` (`src/lib/server/invoice.ts:119-125`) und `tanks` über `tankCategories`. Das Template nutzt beide, `data.tanks` in Zeile 65 (`deliversToTank`) und `data.statements` in Zeile 126 (`BilledWarning`). Der Import nennt `deliversToTank` (main) und `BilledStatement` (#245).
+- **Konflikt 2** (`tests/e2e/steps/invoice-form.steps.ts`): Die drei Schritte von #245 und der Schritt von main «erklärt das Formular beim Leistungszeitraum nicht {string}» stehen nebeneinander. Die Schritte haben verschiedene Texte, es gibt also keine doppelte Definition. Importiert werden `chooseBuilding` (main) und `clearCategory` (#245). Alle Schritte rufen nur Tasks und Questions auf.
+- **Punkt 3** (`src/routes/invoices/InvoiceUploadDialog.svelte:50,283`): `const tank = $derived(buildings.find(...)?.tank)` hängt von `buildings` (Prop) und `buildingId` (`$state`) ab und wird bei jeder Änderung neu berechnet. Das verhält sich wie der Ausdruck von main im Template. `tank` wird nur in Zeile 283 gebraucht, und `InvoiceUploadRow` nimmt es entgegen (`tank?: string`, Zeile 29) und gibt es an `UploadRowFields` weiter (Zeile 102). Die Verhaltensänderung bleibt aus, deshalb braucht es keinen neuen Test.
+- **Texte:** In allen vier `messages/*.json` ist das JSON gültig, es gibt je 1879 Schlüssel, keiner doppelt.
+- **`docs/design/offene-punkte.md`:** U-3 (#245) und O-44 (main) sind beide da. Keine ID ist doppelt.
+- **Plan-Archiv:** Die Sessions W9c (#245), W3-451 und «faster CI round trips» stehen nacheinander, keine fehlt.
+
+### Nicht bestätigt
+
+- Lint und svelte-check grün: vom Aufrufer gemeldet, nicht erneut ausgeführt.
+- Vitest der Rechnungs-Dateien: Ich habe `bunx vitest run` auf `invoice-pages.dom.test.ts`, `invoice-upload-dialog.dom.test.ts`, `invoices.test.ts` und `invoice-upload.test.ts` versucht. Der Lauf bricht beim Start ab (`Cannot find package 'vitest'`), weil der Review-Worktree kein `node_modules` hat. Das Ergebnis meldet der Aufrufer nach. Der Worktree ist danach unverändert (`git status` leer).
+- E2E der Rechnungs-Features: nicht gestartet (Vorgabe), das Ergebnis meldet der Aufrufer nach. Durch Lesen nicht geprüft habe ich, ob die neuen Szenarien von main (Tank-Hilfe beim Leistungszeitraum, `invoice-new.feature`) mit der Pflicht-Kategorie von #245 in «Rechnung bearbeiten» zusammen laufen. Den Code habe ich nur bis zur Weitergabe der Props verfolgt.
