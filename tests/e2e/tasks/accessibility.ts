@@ -69,10 +69,13 @@ import { demoNotice } from '../targets/demo';
 import { discardDraftButton, draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
 import { leaveSettings } from './statement-generate';
-import { tickAllCategories, untickAllCategories } from './contract-form';
-import { advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
+import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from './contract-form';
+import { advancePaymentFromInput, advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
+import { chooseRegisterAddress, registerUnreachable, searchRegister } from './building-register';
+import { registerNotice } from '../targets/building-register';
+import { advanceDeleteButton } from '../targets/contract-detail';
 import { UPLOADED } from '../fixtures/screens';
 
 // How the axe check and the language check bring each screen of tests/a11y/screens.json into its state
@@ -186,6 +189,15 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'login-not-allowed': () => Wait.until(on.loginError),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
+	// the Gebäuderegister of «Neues Gebäude» (#479), answered by its stand-in (backend/scripts/gwr-stub.ts)
+	'register-preview': () => chooseRegisterAddress('Birkenweg 7'),
+	'register-submit-missing': () => (actor) =>
+		actor.attemptsTo(chooseRegisterAddress('Birkenweg 7'), Click.on(on.saveButton), Wait.until(on.formProblem)),
+	// the seeded buildings stand at «Testweg 1», so the register's building without Wohnungen is already entered
+	'register-no-apartments': () => chooseRegisterAddress('Testweg 1'),
+	'register-no-hit': () => (actor) => actor.attemptsTo(searchRegister('Nirgendweg 3'), Wait.until(registerNotice)),
+	'register-unreachable': () => (actor) =>
+		actor.attemptsTo(registerUnreachable, searchRegister('Lindenweg 155'), Wait.until(registerNotice)),
 	'submit-cleared': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('').intoEach(on.requiredFields), Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// saved as loaded
@@ -199,6 +211,28 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(Wait.until(on.frenchPage));
 	},
 	'delete-dialog': () => openDialog(on.firstDeleteButton),
+	// the later Akonto of Anna's contract (fixtures/screens.ts)
+	'advance-delete-dialog': () => openDialog(advanceDeleteButton('220.00')),
+	'advance-delete-refused': () => (actor) =>
+		actor.attemptsTo(openDialog(advanceDeleteButton('220.00')), Click.on(on.dialogConfirm), Wait.until(on.formProblem)),
+	// before Anna's Akonto from 2099 (fixtures/screens.ts)
+	'end-dialog-advance-refused': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(endContractButton),
+			EnterDate.of('2098-12-31').into(contractEndInput),
+			Click.on(confirmEndContractButton),
+			Wait.until(on.formProblem)
+		),
+	'advance-from-missing': () => (actor) =>
+		actor.attemptsTo(
+			Enter.theValue('230.00').into(advancePaymentInput),
+			Enter.theValue('').into(advancePaymentFromInput),
+			Click.on(contractSubmitButton),
+			Wait.until(on.formProblem)
+		),
+	// from a day Anna's 2025 draft bills (fixtures/screens.ts)
+	'advance-refused': () => (actor) =>
+		actor.attemptsTo(changeAdvancePaymentFrom('2025-01-01', '230.00'), Wait.until(on.formProblem)),
 	// the tenant's uploaded document (fixtures/screens.ts)
 	'document-delete-dialog': () => openDialog(deleteDocumentButton(UPLOADED)),
 	// a file Dwello does not take: the refusal at the file field

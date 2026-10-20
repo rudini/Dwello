@@ -31,7 +31,9 @@ import {
 	statusOfStatement,
 	tenancyOfStatement,
 	totalLabelOfStatement,
-	oldAddressWarningText
+	oldAddressWarningText,
+	advancePaidOfStatement,
+	advanceDiffersText
 } from '../questions/statement-detail';
 import {
 	downloadedFileNameByNumber,
@@ -398,6 +400,11 @@ Given('die Abrechnung {int} von {string} ist berichtigt', async ({ seed }, year:
 	await seed.replaceStatement(tenant, year, true);
 });
 
+Given('die berichtigte Abrechnung {int} von {string} ist versendet und bezahlt', async ({ seed }, year: number, tenant: string) => {
+	await seed.sendStatement(tenant, year, 'Berichtigte Abrechnung');
+	await seed.markPaid(tenant, year, 'Berichtigte Abrechnung');
+});
+
 Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
@@ -457,8 +464,29 @@ Then('sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert b
 	await verwalter.sees(correctConfirmation).toContain('bleibt unverändert erhalten');
 });
 
+Then(
+	'sagt die Bestätigung, dass die berichtigte Abrechnung anrechnet, was der Liegenschaftsverwalter auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet hat',
+	async ({ verwalter }) => {
+		await verwalter.sees(correctConfirmation).toContain('die Sie auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet haben.');
+	}
+);
+
 Then('nennt die Bestätigung die Verjährung nach fünf Jahren', async ({ verwalter }) => {
 	await verwalter.sees(correctConfirmation).toContain('fünf Jahren (Art. 128 Ziff. 1 OR)');
+});
+
+Then(
+	'warnt die berichtigte Abrechnung, dass ihre Akontobeiträge {string} anders sind als die {string} der ersetzten Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, now: string, before: string, year: number, tenant: string) => {
+		const replaced = await seed.statementNumber(tenant, year);
+		await verwalter
+			.sees(advanceDiffersText)
+			.toContain(`Die Akontobeiträge dieser Abrechnung (${now}) sind anders als in der ersetzten Abrechnung ${replaced} (${before}). Stimmt ein früherer Betrag am Mietvertrag nicht, löschen Sie diesen Entwurf, tragen Sie den Betrag mit seinem «Gültig ab» ein und erstellen Sie die berichtigte Abrechnung erneut.`);
+	}
+);
+
+Then('zieht die Abrechnung {string} Akontobeiträge ab', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(advancePaidOfStatement).toContain(amount);
 });
 
 Then('rechnet die Abrechnung {string} als bereits bezahlt an', async ({ verwalter }, amount: string) => {

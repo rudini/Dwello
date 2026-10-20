@@ -18,7 +18,8 @@
 		optional = false,
 		min,
 		note,
-		testid
+		testid,
+		example = `31.12.${new Date().getFullYear()}` // the last day of this year: never in the past
 	}: {
 		id: string;
 		label: string;
@@ -30,10 +31,9 @@
 		min?: string; // limits the calendar only; the page checks the date
 		note?: { text: string; testid: string }; // see Field
 		testid: string;
+		example?: string;
 	} = $props();
 
-	// the example is the last day of this year: never in the past
-	const EXAMPLE = `31.12.${new Date().getFullYear()}`;
 	const toText = (iso: string) => (iso ? formatDate(iso) : '');
 
 	let text = $state(toText(value));
@@ -76,8 +76,8 @@
 		/^\d{1,2}\.\d{1,2}\.?$/.test(text.trim())
 			? NO_YEAR
 			: /^(\d{1,2}\.\d{1,2}\.\d{2,4}|\d{8})$/.test(text.trim())
-				? m.ui_date_not_a_date({ example: EXAMPLE })
-				: m.ui_date_digits_only({ example: EXAMPLE })
+				? m.ui_date_not_a_date({ example })
+				: m.ui_date_digits_only({ example })
 	);
 	const shownError = $derived(invalid && left ? wrongDate : error);
 	const wordsId = $derived(`${id}-words`);
@@ -126,7 +126,7 @@
 		{label}
 		help={helpText}
 		helpTestid="{testid}-help"
-		example={EXAMPLE}
+		{example}
 		error={shownError}
 		{optional}
 	>

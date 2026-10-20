@@ -68,7 +68,9 @@ import {
 	registerContract,
 	rentApartment,
 	reopenNewContract,
-	reviewContract
+	reviewContract,
+	changeAdvancePaymentFrom,
+	saveStartWithAdvance
 } from '../tasks/contract-form';
 import { searchContracts } from '../tasks/contracts';
 
@@ -376,8 +378,15 @@ Then(
 );
 
 When('der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist', async ({ verwalter }) => {
-	await verwalter.attemptsTo(agreeManagementFee);
+	await verwalter.attemptsTo(agreeManagementFee());
 });
+
+When(
+	'der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale mit einem eigenen Satz von {string} % vereinbart ist',
+	async ({ verwalter }, rate: string) => {
+		await verwalter.attemptsTo(agreeManagementFee(rate));
+	}
+);
 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass {string} einen Mietvertrag ohne Vertragsende für die Wohnung {string} hat',
@@ -527,6 +536,22 @@ When(
 	}
 );
 
+// #464 (#90): the help at the Akonto field; the wording follows the domain review
+Then(
+	'erfährt der Liegenschaftsverwalter, dass Dwello das vereinbarte Akonto abrechnet und fehlende Zahlungen ausserhalb von Dwello geregelt werden',
+	async ({ verwalter }) => {
+		await verwalter.sees(advancePaymentHelpText).toContain('ausserhalb von Dwello');
+	}
+);
+
+Then('erfährt der Liegenschaftsverwalter, dass eine Erhöhung des Akontos das amtliche Formular braucht', async ({ verwalter }) => {
+	await verwalter.sees(advancePaymentHelpText).toContain('amtlichen Formular');
+});
+
+When('der Liegenschaftsverwalter das Akonto ab {string} auf {string} Franken ändert', async ({ verwalter }, date: string, amount: string) => {
+	await verwalter.attemptsTo(changeAdvancePaymentFrom(date, amount));
+});
+
 When('der Liegenschaftsverwalter die Nebenkostenpauschale auf {string} Franken setzt', async ({ verwalter }, amount: string) => {
 	await verwalter.attemptsTo(changeFlatRateUtilityCharge(amount));
 });
@@ -564,5 +589,12 @@ Then(
 	async ({ verwalter }, amount: string) => {
 		await verwalter.sees(enteredFlatRate).toBe(amount);
 		await verwalter.sees(rentTakenOverText).toContain('aus dem letzten Mietvertrag dieser Wohnung');
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter den Vertragsbeginn {string} mit {string} Franken Akonto ab {string} speichert',
+	async ({ verwalter }, date: string, amount: string, from: string) => {
+		await verwalter.attemptsTo(saveStartWithAdvance(date, amount, from));
 	}
 );

@@ -5,7 +5,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Pagination from '$lib/ui/Pagination.svelte';
+	import ResultList from '$lib/ui/ResultList.svelte';
 	import ApartmentCard from './ApartmentCard.svelte';
 	import ApartmentFilters from './ApartmentFilters.svelte';
 	import StatusLegend from './StatusLegend.svelte';
@@ -62,19 +62,21 @@
 			{/if}
 		</section>
 	{:else}
-		<section aria-labelledby="apartments-count" class="flex flex-col gap-4">
-			<h2 id="apartments-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{(data.total === 1 ? m.apartments_count_one : m.apartments_count_many)({
-					count: data.total
-				})}
-			</h2>
-			<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-				{#each data.apartments as apartment (apartment.id)}
-					<ApartmentCard {apartment} />
-				{/each}
-			</ul>
-		</section>
-		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
+		<ResultList
+			id="apartments-count"
+			heading={(data.total === 1 ? m.apartments_count_one : m.apartments_count_many)({
+				count: data.total
+			})}
+			listClass="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+			url={$page.url}
+			page={data.page}
+			pageSize={data.pageSize}
+			total={data.total}
+		>
+			{#each data.apartments as apartment (apartment.id)}
+				<ApartmentCard {apartment} />
+			{/each}
+		</ResultList>
 		<StatusLegend />
 	{/if}
 </div>

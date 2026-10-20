@@ -42,6 +42,7 @@ heating_profiles, configuration, audit_log: no foreign keys
 | `invoices.category_id`, `invoices.llm_category_id` → `categories` | SET NULL |
 | `invoices.distribution_key_id` → `distribution_keys` | SET NULL |
 | `contract_categories.contract_id` → `rental_contracts`, `.category_id` → `categories` | CASCADE |
+| `contract_advance_payments.contract_id` → `rental_contracts` | CASCADE |
 | `fuel_stocks.building_id` → `buildings` | CASCADE |
 | `fuel_stocks.category_id` → `categories` | RESTRICT (deleting such a category answers 409) |
 | `utility_statements.tenant_id` / `apartment_id` / `contract_id` | RESTRICT |
@@ -125,7 +126,7 @@ billed_until            DATE              -- «Abgerechnet bis» (#133), optiona
 moved_out               BOOLEAN NOT NULL DEFAULT FALSE -- «Mieter ist ausgezogen» after an agreed end (A-6, #115); cleared when end_date changes
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
-monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
+monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto before #464; the amounts are in contract_advance_payments (read: the one that applies today)
 flat_rate_utility_charge DECIMAL(10,2) NOT NULL DEFAULT 0  -- Nebenkostenpauschale (#429): in «Monatlich total», never billed
 management_fee_agreed   BOOLEAN NOT NULL DEFAULT FALSE -- Verwaltungspauschale vereinbart (#89)
 management_fee_percent  DECIMAL(5,2)            -- own rate 0–10 %, before the run's; NULL: the run's rate
@@ -157,6 +158,21 @@ has costs in the period. A new contract gets a row for every umlagefähige categ
 it); a category created or made umlagefähig later has no row. Migration `0020` gave a contract with statements the
 categories its statements billed and those of the building's umlagefähige invoices over its tenancy up to its last
 statement, and a contract without statements every umlagefähige category.
+
+### contract_advance_payments (Akonto mit «Gültig ab», #464)
+
+```sql
+contract_id  UUID          NOT NULL  -- rental_contracts (CASCADE)
+valid_from   DATE          NOT NULL  -- «Gültig ab»: the first of a month within the contract; the first row from the Vertragsbeginn
+amount       DECIMAL(10,2) NOT NULL  -- Akonto per month from this day until the day before the next row
+PRIMARY KEY (contract_id, valid_from)
+```
+
+The first amount applies from the Vertragsbeginn, whatever its day; the contract answers as `monthlyAdvancePayment`
+the amount that applies today (at the Vertragsbeginn for a future contract, at the Vertragsende for an ended one). A
+row with the same day replaces the amount; any row but the first can be deleted. A change that would alter the
+Akonto of a stored statement that is not replaced is refused (`ADVANCE_CHANGES_DRAFT`, `ADVANCE_CHANGES_STATEMENT`).
+Migration `0026` gave every contract one row from its Vertragsbeginn with its amount.
 
 ### categories (Kategorie)
 
@@ -285,7 +301,8 @@ rental_days            INTEGER       NOT NULL  -- Mietstage
 rental_start           DATE          NOT NULL  -- first billed day: later of period start and Vertragsbeginn
 rental_end             DATE          NOT NULL  -- last billed day: earlier of period end and Vertragsende
 total_costs            DECIMAL(12,2) NOT NULL
-total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
+total_advance_payments DECIMAL(12,2) NOT NULL  -- Akontobeiträge (#477, before «Geleistete Akontobeiträge»): the sum of advance_lines
+advance_lines          JSONB                   -- #464: per amount its range, months (or days of a split month), amount and total, each rounded to the Rappen; for the PDF
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
 management_fee_percent DECIMAL(5,2)            -- rate the statement used: the contract's own, the run's, or 0 without agreement (#89)
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)

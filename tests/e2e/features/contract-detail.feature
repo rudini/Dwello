@@ -382,3 +382,28 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
     Wenn der Liegenschaftsverwalter den Mietvertrag unbefristet weiterführt
     Dann ist der Mietvertrag unbefristet
+
+  # #464 (Entscheid zu F-13): ein später eingetragenes Akonto lässt sich löschen; das bisherige gilt dann weiter
+  Szenario: Ein späteres Akonto löschen
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Mietvertrag von "Anna Keller" hat ab "2025-07-01" "200" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter das Akonto "CHF 200.00" löscht
+    Dann zeigt der Mietvertrag das Monatlich total "CHF 1’100.00"
+    Und bestätigt Dwello "Akonto ab 01.07.2025 gelöscht"
+
+  # #464 (Fachreview 464-2 V-6): ein Akonto, das eine erstellte Abrechnung zählt, bleibt, bis sie berichtigt ist
+  Szenario: Ein Akonto, das eine Abrechnung zählt, lässt sich nicht löschen
+    Angenommen der Mietvertrag von "Anna Keller" hat "150" Franken Akonto
+    Und der Mietvertrag von "Anna Keller" hat ab "2025-07-01" "200" Franken Akonto
+    Und für "Anna Keller" gibt es die versendete Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter das Akonto "CHF 200.00" löscht
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Akonto ab 01.07.2025 zählt in der Abrechnung"
+
+  # #464 (Code-Review 464-2 C-10, C-11): ein Vertragsende vor einem späteren Akonto nennt dieses Akonto
+  Szenario: Mietvertrag vor einem späteren Akonto beenden
+    Angenommen der Mietvertrag von "Anna Keller" hat ab "2099-01-01" "200" Franken Akonto
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2098-12-31" beendet
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Ab 01.01.2099 gilt ein anderes Akonto. Löschen Sie zuerst dieses Akonto, oder wählen Sie ein späteres Vertragsende."

@@ -20,7 +20,7 @@ import {
 import { belowMinimum, formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { countryLine, qrTown } from './postal-address';
-import type { InvoicePart } from '../db/schema';
+import type { AdvanceLine, InvoicePart } from '../db/schema';
 
 /**
  * Supported languages
@@ -44,7 +44,12 @@ const translations: Record<Language, Record<string, string>> = {
 		subtotal: 'Zwischensumme',
 		managementFee: 'Verwaltungspauschale',
 		colon: ': ',
-		advancePayments: 'Geleistete Akontobeiträge',
+		advancePayments: 'Akontobeiträge',
+		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
+		advanceMonths: '{n} Monate × CHF {amount} ({from} – {to})',
+		advanceMonth: '1 Monat × CHF {amount} ({from} – {to})',
+		advanceDays: '{days}/{daysInMonth} Tage × CHF {amount} ({from} – {to})',
+		noteAdvance: 'Abgezogen sind die Akontobeiträge, die im Mietvertrag vereinbart sind. Haben Sie Akontobeiträge nicht bezahlt, regeln wir das ausserhalb dieser Abrechnung.',
 		rounding: 'Rundung auf 5 Rappen',
 		beforeRounding: 'vor Rundung',
 		roundedNote: 'auf 5 Rappen gerundet',
@@ -140,7 +145,12 @@ const translations: Record<Language, Record<string, string>> = {
 		subtotal: 'Sous-total',
 		managementFee: 'Frais de gestion',
 		colon: '\u00a0: ',
-		advancePayments: 'Acomptes versés',
+		advancePayments: 'Acomptes',
+		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
+		advanceMonths: '{n} mois × CHF {amount} ({from} – {to})',
+		advanceMonth: '1 mois × CHF {amount} ({from} – {to})',
+		advanceDays: '{days}/{daysInMonth} jours × CHF {amount} ({from} – {to})',
+		noteAdvance: 'Les acomptes déduits sont ceux convenus dans le contrat de bail. Si vous n’avez pas payé certains acomptes, nous réglons cela en dehors de ce décompte.',
 		rounding: 'Arrondi à 5 centimes',
 		beforeRounding: 'avant arrondi',
 		roundedNote: 'arrondi à 5 centimes',
@@ -230,12 +240,17 @@ const translations: Record<Language, Record<string, string>> = {
 		building: 'Immobile',
 		costBreakdown: 'Riepilogo costi',
 		category: 'Categoria',
-		totalAmount: 'Costi immobile',
+		totalAmount: 'Costi dell’immobile',
 		yourShare: 'La sua quota',
 		subtotal: 'Subtotale',
 		managementFee: 'Spese di gestione',
 		colon: ': ',
-		advancePayments: 'Acconti versati',
+		advancePayments: 'Acconti',
+		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
+		advanceMonths: '{n} mesi × CHF {amount} ({from} – {to})',
+		advanceMonth: '1 mese × CHF {amount} ({from} – {to})',
+		advanceDays: '{days}/{daysInMonth} giorni × CHF {amount} ({from} – {to})',
+		noteAdvance: 'Sono dedotti gli acconti pattuiti nel contratto di locazione. Se non ha pagato alcuni acconti, lo regoliamo al di fuori di questo conteggio.',
 		rounding: 'Arrotondamento a 5 centesimi',
 		beforeRounding: 'prima dell’arrotondamento',
 		roundedNote: 'arrotondato a 5 centesimi',
@@ -297,13 +312,13 @@ const translations: Record<Language, Record<string, string>> = {
 		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla né riceve alcun rimborso.',
 		waivedDue: 'L’importo è inferiore a CHF 5.00. Vi rinunciamo; non deve pagare nulla.',
 		waivedRefund: 'L’importo è inferiore a CHF 5.00. Non glielo bonifichiamo.',
-		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: la quota dei costi dell’immobile a carico del suo appartamento secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio.{days}{parts} La sua quota è la quota appartamento moltiplicata per la quota temporale.{rounded}{heating}',
+		sharesNote: 'Costi dell’immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: la quota dei costi dell’immobile a carico del suo appartamento secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio.{days}{parts} La sua quota è la quota appartamento moltiplicata per la quota temporale.{rounded}{heating}',
 		sharesNoteDays: ' Per una fattura con periodo di prestazione contano i suoi giorni di locazione in tale periodo.',
 		sharesNoteParts: ' Se una voce del conteggio comprende fatture su giorni diversi, il calcolo figura sotto.',
 		sharesNoteRounded: ' La percentuale è arrotondata; la sua quota risulta dal calcolo sotto la voce.',
 		sharesNoteHeating: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento.',
 		sharesNoteHeatingParts: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento; per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo. Se questi mesi totalizzano 0\u00a0% nel profilo di riscaldamento, contano invece i suoi giorni di locazione in tale periodo.',
-		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi spese di riscaldamento e acqua calda).',
+		sharesNoteFuel: 'Costi dell’immobile per il combustibile in cisterna: il consumo (vedi spese di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
 		fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
 		fuelOpening: 'Scorta iniziale al {date}',
@@ -330,7 +345,12 @@ const translations: Record<Language, Record<string, string>> = {
 		subtotal: 'Subtotal',
 		managementFee: 'Management fee',
 		colon: ': ',
-		advancePayments: 'Advance payments made',
+		advancePayments: 'Advance payments',
+		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
+		advanceMonths: '{n} months × CHF {amount} ({from} – {to})',
+		advanceMonth: '1 month × CHF {amount} ({from} – {to})',
+		advanceDays: '{days}/{daysInMonth} days × CHF {amount} ({from} – {to})',
+		noteAdvance: 'The advance payments deducted are those agreed in the rental contract. If you have not paid some of them, we settle this outside this statement.',
 		rounding: 'Rounding to 5 centimes',
 		beforeRounding: 'before rounding',
 		roundedNote: 'rounded to 5 centimes',
@@ -495,6 +515,7 @@ export interface StatementPDFData {
 	managementFeePercent: number;
 	totalCosts: number;
 	totalAdvancePayments: number;
+	advanceLines?: AdvanceLine[] | null; // as calculated (#464); absent on a statement created before: the total only
 	balance: number; // Positive = tenant owes, negative = refund
 	// a berichtigte Abrechnung: the statement it replaces and what was paid on the replaced ones, a refund negative (#120)
 	replaces?: { statementNumber: string; statementDate: string; paidOn: string[]; priorPayments: number };
@@ -659,10 +680,10 @@ export function balanceText(data: StatementPDFData, language: Language) {
 const priorOf = (data: StatementPDFData) => data.replaces?.priorPayments ?? 0;
 const unrounded = (data: StatementPDFData) => roundToRappen(data.totalCosts - data.totalAdvancePayments - priorOf(data));
 // Rows from the subtotal to the Saldo, kept on one page
-const totalRows = (data: StatementPDFData, t: Record<string, string>) => (rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0);
+const totalRows = (data: StatementPDFData, t: Record<string, string>) =>
+	(rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0) + (data.advanceLines?.length ?? 0);
 const priorRow = (doc: Doc, prior: ReturnType<typeof priorLine>, top: number) => (prior ? row(doc, total(prior.label, prior.amount), top) : top);
 // «Bereits bezahlt auf NK-… und NK-…», or what the landlord already refunded
-// TODO(fachlich prüfen, #362): «Bereits bezahlt» / «Bereits zurückerstattet» have their glossary row; the help texts follow
 function priorLine(data: StatementPDFData, t: Record<string, string>) {
 	const prior = priorOf(data);
 	if (!prior) return null;
@@ -776,6 +797,7 @@ function costTable(page: Page, y: number) {
 	}
 	top = row(doc, total(t.yourCosts, formatCHF(data.totalCosts)), top + 2, { bold: true, above: 1 });
 	top = row(doc, total(t.advancePayments, `– ${formatCHF(data.totalAdvancePayments)}`), top);
+	top = advanceRows(doc, data.advanceLines ?? [], t, top);
 	top = priorRow(doc, priorLine(data, t), top);
 	if (rounding(data)) {
 		const before = `${labelOf(unrounded(data), t)} ${t.beforeRounding}`;
@@ -855,6 +877,24 @@ function positionHeight(doc: Doc, cells: string[], lines: string[]) {
 	const height = rowHeight(doc, cells) + 6;
 	doc.fontSize(7.5);
 	return height + doc.heightOfString(lines.join('\n'), { width: PARTS_WIDTH }) + 3;
+}
+
+// #464: one indented line per Akonto amount and split month, its amount in the column «Ihr Anteil»; they add up to the
+// total above
+function advanceRows(doc: Doc, lines: AdvanceLine[], t: Record<string, string>, y: number) {
+	let top = y - 3;
+	for (const line of lines) {
+		const values = { amount: formatCHF(line.amount), from: formatDate(line.from), to: formatDate(line.to) };
+		const text =
+			'days' in line
+				? fill(t.advanceDays, { ...values, days: String(line.days), daysInMonth: String(line.daysInMonth) })
+				: fill(line.months === 1 ? t.advanceMonth : t.advanceMonths, { ...values, n: String(line.months) });
+		doc.font('Helvetica').fontSize(7.5).fillColor(COLORS.muted);
+		doc.text(text, COLUMNS[0].x + 8, top, { width: PARTS_WIDTH });
+		doc.text(formatCHF(line.total), COLUMNS[5].x, top, { width: COLUMNS[5].width, align: 'right' });
+		top += doc.heightOfString(text, { width: PARTS_WIDTH }) + 3;
+	}
+	return lines.length ? top + 6 : y;
 }
 
 function partsBelow(doc: Doc, lines: string[], y: number) {
@@ -948,9 +988,9 @@ function heatingSection(page: Page, y: number) {
 // (Art. 8 VMWG); kept on one page
 function notes({ doc, t, data, config }: Page, y: number) {
 	const contact = `${config.companyName}, ${config.address}, ${config.postalCode} ${config.city}`;
-	// TODO(fachlich prüfen, #369): «vereinbarte Nebenkosten»
 	const agreed = data.agreedCosts?.length ? [fill(t.agreedCosts, { categories: data.agreedCosts.join(', ') })] : [];
-	const lines = [...agreed, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
+	const advance = data.totalAdvancePayments > 0 ? [t.noteAdvance] : [];
+	const lines = [...agreed, ...advance, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
 	const width = PAGE.right - PAGE.left;
 	doc.font('Helvetica').fontSize(9);
 	const height = lines.reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 6, 0);
