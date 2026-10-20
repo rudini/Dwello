@@ -2,9 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { pageAddress } from '../questions/navigation';
 import {
-	allBilledText,
 	allBuildingsNoteText,
-	confirmationReason,
 	currentStep,
 	existingStatementsText,
 	akontoHintOf,
@@ -12,6 +10,7 @@ import {
 	balanceOf,
 	billedOfBuilding,
 	buildingChosen,
+	buildingSelectable,
 	categoryFindingOf,
 	contractsWithoutFee,
 	confirmationAsked,
@@ -58,6 +57,7 @@ import {
 	chooseAllBuildings,
 	chooseBuilding,
 	chooseBuildingsFor,
+	chooseOfferedPeriod,
 	chooseBuildingsForPeriod,
 	closeRestoredNotice,
 	confirmDespiteWarnings,
@@ -398,9 +398,31 @@ Then('sagt der Hinweis auf die wiederhergestellten Angaben {string}', async ({ v
 	await verwalter.sees(restoredDraftText).toContain(text);
 });
 
-Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
-	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
+// the text may name the building: by its seeded name
+Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed, names }, building: string, text: string) => {
+	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text.replaceAll(building, names.get(building) ?? building));
 });
+
+// #199, #408 point 2: a building whose statements' period the run's overlaps without being equal
+Then('lässt sich das Gebäude {string} für diese Abrechnungsperiode nicht wählen', async ({ verwalter, seed }, building: string) => {
+	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toContain('überschneidet sich');
+	await verwalter.sees(buildingSelectable(seed.idOf(building)!)).toBe(false);
+});
+
+When(
+	'der Liegenschaftsverwalter für {string} die Abrechnungsperiode ab {string} wählt',
+	async ({ verwalter, seed }, building: string, periodStart: string) => {
+		await verwalter.attemptsTo(chooseOfferedPeriod(seed.idOf(building)!, periodStart));
+	}
+);
+
+Then(
+	'ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude {string} vom {string} bis {string}',
+	async ({ verwalter, seed }, building: string, start: string, end: string) => {
+		await verwalter.sees(pageAddress).toMatch(new RegExp(`/statements/generate\\?building=${seed.idOf(building)}&start=${start}&end=${end}`));
+		await verwalter.sees(heatingProfileOffered).toBe(true);
+	}
+);
 
 When('der Liegenschaftsverwalter alle Gebäude wählt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(chooseAllBuildings);
@@ -604,19 +626,8 @@ Then('nennt die Vorschau die bestehenden Abrechnungen von {string}', async ({ ve
 	await verwalter.sees(existingStatementsText).toContain(`Für ${names.get(building) ?? building} gibt es in dieser Abrechnungsperiode schon`);
 });
 
-Then(
-	'verlangt die Vorschau eine Bestätigung, weil es für {string} schon Abrechnungen gibt',
-	async ({ verwalter, names }, building: string) => {
-		await verwalter.sees(confirmationReason).toContain(`Für ${names.get(building) ?? building} gibt es in dieser Abrechnungsperiode schon`);
-	}
-);
-
 Then('ist der Assistent im Schritt {string}', async ({ verwalter }, step: string) => {
 	await verwalter.sees(currentStep).toBe(step);
-});
-
-Then('sagt die leere Vorschau {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(allBilledText).toBe(text);
 });
 
 Then('nennt die Prüfung der Kategorien keinen fehlenden Tankbestand', async ({ verwalter }) => {

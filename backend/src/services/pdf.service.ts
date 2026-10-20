@@ -998,10 +998,14 @@ function heatingSection(page: Page, y: number) {
 	return top + 12;
 }
 
+// The landlord as entered: the address (street) is optional (Fachreview #450 V-2), «PLZ Ort» only whole (Dr. Weber P-1)
+const senderParts = (config: QRBillConfig) =>
+	[config.companyName, config.address, config.postalCode && config.city && `${config.postalCode} ${config.city}`].filter(Boolean);
+
 // What the tenant may ask for: the receipts (Art. 257b Abs. 2 OR), the detailed heating statement and the stock
 // (Art. 8 VMWG); kept on one page
 function notes({ doc, t, data, config }: Page, y: number) {
-	const contact = `${config.companyName}, ${config.address}, ${config.postalCode} ${config.city}`;
+	const contact = senderParts(config).join(', ');
 	const agreed = data.agreedCosts?.length ? [fill(t.agreedCosts, { categories: data.agreedCosts.join(', ') })] : [];
 	const advance = data.totalAdvancePayments > 0 ? [t.noteAdvance] : [];
 	const lines = [...agreed, ...advance, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
@@ -1140,7 +1144,7 @@ function frame({ doc, t, data, config }: Page, qrPage: number | null) {
 		doc.switchToPage(i);
 		doc.page.margins.bottom = 0;
 		doc.font('Helvetica').fontSize(8).fillColor(COLORS.muted);
-		const sender = `${config.companyName} · ${config.address} · ${config.postalCode} ${config.city}`;
+		const sender = senderParts(config).join(' · ');
 		doc.text(sender, PAGE.left, 40, { width: 290, height: 10, ellipsis: true, lineBreak: false });
 		doc.text(`${data.statementNumber} · ${fill(t.pageOf, { page: i + 1, pages: count })}`, PAGE.right - 180, 40, { width: 180, align: 'right' });
 		doc.lineWidth(0.5).strokeColor(COLORS.line).moveTo(PAGE.left, 54).lineTo(PAGE.right, 54).stroke();

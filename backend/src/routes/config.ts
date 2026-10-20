@@ -13,6 +13,7 @@ import {
 	CONFIG_KEYS,
 	type ConfigKey
 } from '../services/config.service';
+import { CodedError, errorBody } from '../services/coded-error';
 
 export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	// Get all configuration values
@@ -54,7 +55,14 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 	.put(
 		'/',
 		async ({ body, set }) => {
-			const result = await setMultipleConfig(body as Partial<Record<ConfigKey, string>>);
+			let result: Awaited<ReturnType<typeof setMultipleConfig>>;
+			try {
+				result = await setMultipleConfig(body as Partial<Record<ConfigKey, string>>);
+			} catch (error) {
+				if (!(error instanceof CodedError)) throw error;
+				set.status = 400;
+				return errorBody(error, '');
+			}
 
 			if (!result.success) {
 				set.status = 400;
@@ -106,7 +114,7 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 				};
 			} catch (error) {
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Failed to update configuration' };
+				return errorBody(error, 'Failed to update configuration');
 			}
 		},
 		{

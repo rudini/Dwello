@@ -329,3 +329,7 @@ O-38 (a scenario's sent, paid or replaced statement kept its tenant, apartment a
 ## O-41 – lost building search fixed
 
 O-41 («Suche ohne Treffer», `buildings.feature`, failed in Firefox on #473 and again on #514, run 39385274329): the building list bound its search field to a `$derived` of the `$page` store, and the store also reports changes without a new address, which reset a term typed meanwhile; «Suchen» then searched for nothing. The list now derives the field from the address only (`src/routes/buildings/+page.svelte`, #514); `src/__tests__/list-filters.dom.test.ts` «behält die Eingabe, wenn sich die Seite ohne neue Adresse ändert» was red for the building list only.
+
+## O-34 – the IBAN scenarios have the settings to themselves
+
+O-34 («Absender und Fristen hinterlegen» and «IBAN aus Liechtenstein hinterlegen» in `settings.feature` save the IBAN, one setting for every scenario, browser project and worker; overlapping, one read the other's IBAN after reopening, and every IBAN `seed.iban` set could break the Liechtenstein one): closed in #450. Both scenarios carry `@einstellungen-global` and run under a lock on the settings (`tests/e2e/fixtures/settings-lock.ts`, fixture `globalSettings`), which `seed.iban` takes for its write too; running the file serially would not have been enough (closing code review `docs/reviews/450-review-3.md`). Seen red without the lock, green with it (8 repeats each, pull request of #450). (The ID O-34 was given once before, to an axe upload point; see `implementation-plan-verlauf.md`.)

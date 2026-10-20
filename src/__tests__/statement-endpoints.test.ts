@@ -9,6 +9,7 @@ import { GET as getZip } from '../routes/statements/zip/+server';
 import { unzipSync } from 'fflate';
 import buildingContracts from '../../tests/contracts/building-contracts.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
+import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 import { localToday } from '$lib/contract-status';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
@@ -166,6 +167,28 @@ describe('GET /statements/[id]/pdf', () => {
 		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
 	});
 
+	// #450: an installation from before has an IBAN without the Firmenadresse; the page says where to add it
+	it('sagt, dass für den Zahlteil die Firmenadresse fehlt und wo man sie ergänzt', async () => {
+		const response = await get(async () => Response.json(creditorRefused, { status: 400 }));
+		expect(await sentenceOf(response)).toBe(
+			'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
+		);
+	});
+
+	// persona Dr. Weber P-2 (#450): the way to where the landlord adds what is missing, only when the settings help
+	it('führt bei fehlender Firmenadresse auch zu den Einstellungen', async () => {
+		const settingsLink = /<a [^>]*href="\/config"[^>]*>Zu den Einstellungen<\/a>/;
+		const pageFor = async (body: object, status = 400) =>
+			(await get(async () => Response.json(body, { status }))).text();
+
+		for (const code of ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID']) {
+			const page = await pageFor({ ...creditorRefused, code });
+			expect({ code, link: settingsLink.test(page) }).toEqual({ code, link: true });
+			expect(page).toContain('Zu den Nebenkostenabrechnungen');
+		}
+		expect(await pageFor(refusedPdf, 404)).not.toMatch(settingsLink);
+	});
+
 	// Helga, Marco (#125): the sentence stood on a bare page, tiny on a phone, without a way back into Dwello
 	it('zeigt den Satz auf einer Seite mit Titel, lesbar auf dem Handy und mit dem Weg zurück zur Liste', async () => {
 		const html = await (await get(async () => Response.json(refusedPdf, { status: 404 }))).text();
@@ -300,7 +323,7 @@ describe('GET /api/statements/billed', () => {
 		} as never);
 
 		expect(await response.json()).toEqual([
-			{ buildingId: 'b/1', contracts: 1, billed: 1, partly: 0, withoutFee: [] }
+			{ buildingId: 'b/1', contracts: 1, billed: 1, overlap: null, withoutFee: [] }
 		]);
 		// an id goes into the backend address encoded, as in the preview (code review C-4)
 		expect(urls).toEqual([

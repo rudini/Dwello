@@ -251,22 +251,25 @@ describe('Berichtigte Abrechnung', () => {
 	});
 });
 
-// Fachreview W2e V-3: eine Abrechnung einer anderen, nur überlappenden Periode rechnet keine Zahlung an
-it('verknüpft im Abrechnungslauf keine Abrechnung einer anderen Periode', async () => {
+// Fachreview W2e V-3: eine Abrechnung einer anderen, nur überlappenden Periode rechnet keine Zahlung an; seit #199
+// hält die ersetzte Abrechnung ihre Periode bis zur berichtigten, ein Lauf, der sie schneidet, entsteht nicht
+// (code review 199-2 C-8)
+it('erstellt im Abrechnungslauf keine Abrechnung einer Periode, die eine ersetzte schneidet', async () => {
+	await removeStatements();
 	const id = await sentStatement();
 	await replace(id);
 
-	const generated = (await (
-		await sendJson('POST', '/api/v1/statements/generate', {
-			contractId: rental.contract,
-			buildingId: rental.building,
-			periodStart: '2025-07-01',
-			periodEnd: '2026-06-30'
-		})
-	).json()) as Statement;
+	const response = await sendJson('POST', '/api/v1/statements/generate', {
+		contractId: rental.contract,
+		buildingId: rental.building,
+		periodStart: '2025-07-01',
+		periodEnd: '2026-06-30'
+	});
 
-	expect(generated).toMatchObject({ priorPayments: '0.00', replaces: null });
-	await callApi(`/api/v1/statements/${generated.id}`, { method: 'DELETE' });
+	expect({ status: response.status, code: ((await response.json()) as { code?: string }).code }).toEqual({
+		status: 400,
+		code: 'STATEMENT_PERIOD_OVERLAPS'
+	});
 });
 
 describe('Vertragsdaten nach dem Ersetzen', () => {
