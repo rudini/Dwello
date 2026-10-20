@@ -130,3 +130,31 @@ Keine Blocker, keine Major.
 - vitest 3449/3449 (vor dem Fix), die Rechnungs-Dateien nach dem Fix 174/174, E2E auf 8df35114 (539 passed, 1 failed, der vom Fix behobene Fall), axe- und Sprachzeilen der Rechnungs-Bildschirme (40 passed) und alle Rechnungs-Features nach dem Fix (78 passed): vom Aufrufer gemeldet. Ich habe nichts wiederholt, weil der Worktree kein `node_modules` hat. E2E war laut Auftrag nicht erlaubt. Lint und `bun run check` nennt der Aufrufer nicht. Die Prop-Typen der Bearbeiten-Seite habe ich nur gelesen, nicht mit svelte-check geprüft.
 - Das Rot des R-1-Schritts auf 9353cc58 habe ich nur aus dem Code abgeleitet (`git show 9353cc58:src/routes/invoices/UploadRowNotes.svelte` nimmt `errors.category` ohne Bedingung auf), nicht ausgeführt.
 - **Hinweis, kein Befund dieses Diffs:** Schritt «nichts mehr» war die strengere Prüfung aus Runde 2, und auf dem Merge könnte er nach der Wahl des Verteilschlüssels nicht mehr grün werden. Beim ersten Erstellen setzt `checkRow` auch `distributionKeyId`. `errors` wird erst beim nächsten Erstellen neu gesetzt (`InvoiceUploadDialog.svelte:198`). Deshalb bleibt «Füllen Sie die markierten Felder aus.» (`UploadRowNotes.svelte:17`) nach der Wahl des Schlüssels stehen. Das ist dieselbe Art Fehler wie Helga P-1, jetzt für den Verteilschlüssel. Er besteht schon auf origin/main 1110abb8 (gleiche Zeile in `UploadRowNotes.svelte`, Schlüssel dort Pflicht) und war in Runde 2 schon für die übrigen Felder notiert. Der Merge macht ihn nicht sichtbarer, er prüft ihn nur nicht mehr. Nach «Open work» gehört er in ein Issue (`bug`) oder ergänzt ein vorhandenes. Gesucht habe ich nicht (keine GitHub-Abfrage in diesem Auftrag).
+
+## Runde 6 (Fix C-1)
+
+Gegenstand: Commit `92328bd4` (`git show 92328bd4 -- src`). Er ändert `checkRow` in `src/lib/invoice-upload.ts:296-302` und ergänzt den Unit-Test in `src/__tests__/invoice-upload.test.ts:270-274`. Ausserdem hängt er den Bericht von Runde 5 an `docs/reviews/245-review-2.md` an. Dazwischen liegt nur der Merge `7d0cb149`: `git diff --stat 048c8b8c 7d0cb149` zeigt nur `.github/workflows/deploy-site.yml` (2+/2-). Worktree: `/tmp/claude-0/-home-user-Dwello/64765504-0fe7-53d5-8fe2-5e8bfa233439/scratchpad/w9-review-245-code-7`, detached auf `92328bd4`, unverändert (`git status --short` leer).
+
+### Status offener IDs aus Runde 5
+
+| ID | Status | Beleg |
+|----|--------|-------|
+| C-1 | geschlossen | `checkRow` baut `{ category, distributionKeyId: errors.distributionKeyId, ...errors }` und filtert leere Einträge heraus. Die Reihenfolge ist jetzt Kategorie, Verteilschlüssel, dann Datum, Rechnungssteller, Beschreibung, Betrag und Leistungsperiode. Das ist die Reihenfolge von `validateInvoice` (`src/lib/invoice.ts:52-59`) ohne den Schlüssel. Damit stimmt `checkRow` mit `toDoOf` überein (`invoice-upload.ts:176-178`: Kategorie, `invoices_error_key_required`, Pflichtfelder). Der Fall aus Runde 5 (Kategorie gewählt, Schlüssel und Betrag fehlen) ist im Test abgedeckt. |
+
+### Befunde
+
+Keine neuen Befunde. Keine Blocker, keine Major, keine Minor.
+
+### Geprüft
+
+- **Rot vor dem Fix:** Auf `048c8b8c` gab `checkRow` bei gesetzter `categoryId` `errors` unverändert zurück. Die gelesene Datei `read` ist sonst vollständig, denn `checkRow(filled)` ist `{}` (Test Z. 284). Mit `amount: ''` und `distributionKeyId: ''` steht `amount` (Z. 56) vor `distributionKeyId` (Z. 58). `openReason` lieferte also «Bitte geben Sie einen gültigen Betrag ein.» (`messages/de.json:885`), und die neue Erwartung «Wählen Sie, wie die Kosten verteilt werden.» (`de.json:934`) war rot. Das stimmt mit der Angabe des Aufrufers überein.
+- **Keine Verhaltensänderung für `complete` (`InvoiceUploadDialog.svelte:114`) und `errors` (`:198`, `:200`, `:276`):** Beide nutzen nur die Menge der Schlüssel und die Werte je Schlüssel, nicht die Reihenfolge. Die Menge der Schlüssel bleibt gleich: `category` gibt es weiter nur ohne `categoryId`, `distributionKeyId` nur, wenn `validateInvoice` ihn setzt. Ein nicht gesetzter Schlüssel ist `undefined`, und der Filter entfernt ihn. Der Filter wirft sonst nichts weg, denn alle Fehlertexte von `validateInvoice` und `servicePeriodErrors` (`invoice.ts:33-38`) sind nicht leere Meldungen. Das gilt in allen vier Sprachen, für die zwei betroffenen Schlüssel nachgesehen. Die Werte bleiben gleich, weil `...errors` den Wert für `distributionKeyId` an seiner vorderen Stelle setzt. `validateInvoice` setzt nie `category`, also überschreibt nichts die Kategorie. `UploadRowFields.svelte:104,112` und `UploadRowNotes.svelte:16` lesen die Fehler nach Schlüssel, nicht nach Reihenfolge.
+- **`openReason`** (`invoice-upload.ts:293`) ist die einzige Stelle, die die Reihenfolge braucht. Sie wird nur in `InvoiceUploadDialog.svelte:80` aufgerufen.
+- **Ponytail-review:** Es bleibt nichts Ungenutztes zurück, und der Code kopiert keinen vorhandenen Helfer. Der Kommentar Z. 299 beschreibt richtig, was der Code tut.
+- **Nichts Fremdes:** Der Diff von `src` enthält nur den Fix und den Test. Die Datei unter `docs/reviews` ist der Bericht der Vorrunde. Der Merge bringt nur die Workflow-Datei von origin/main.
+- **Konventionen:** Es gibt keine neuen UI-Texte, keine neuen Bildschirme und keine geänderte API-Antwort. Der Testkommentar ist englisch, der Testname deutsch und unverändert. Ein Szenario ist nicht nötig: Die Abweichung zeigt sich nur in der Reihenfolge von «Noch offen» und wird auf der untersten Schicht (Unit) gezeigt. Das bestehende Szenario «Nur vollständige Rechnungen werden gezählt und erstellt» bleibt nach meiner Lesart unberührt.
+
+### Nicht bestätigt
+
+- Unit-Tests, Lint, `bun run check` und E2E zu `92328bd4`: Ich habe nichts wiederholt, weil der Worktree kein `node_modules` hat. E2E war laut Auftrag nicht erlaubt. Rot und Grün des neuen Tests habe ich nur aus dem Code abgeleitet (siehe oben), nicht ausgeführt. Vom Aufrufer gemeldet: das Rot vor dem Fix mit «Bitte geben Sie einen gültigen Betrag ein.».
+- Die Texte von `invoices_error_date`, `_billing_entity`, `_description` und `invoices_error_service_*` habe ich in den vier `messages/*.json` nicht einzeln geprüft. Ein leerer Text würde den Filter berühren. Die Dateien selbst ändert dieser Commit nicht.
