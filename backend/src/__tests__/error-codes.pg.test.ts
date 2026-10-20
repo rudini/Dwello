@@ -145,12 +145,16 @@ describe('Fehlercodes für die Oberfläche', () => {
 	});
 
 	it('meldet ein PDF, das aus einem unerwarteten Grund nicht entsteht, mit Code', async () => {
-		for (const response of [
-			await sendJson('POST', '/api/v1/statements/keine-id/generate-pdf', {}),
-			await callApi('/api/v1/statements/keine-id/pdf'),
-			await callApi('/api/v1/statements/keine-id/pdf/base64')
-		])
+		const iban = await getConfig('iban');
+		await setConfig('iban', 'CH9300762011623852957');
+		try {
+			// a language the PDF has no texts for: not a refusal, an unexpected failure
+			const response = await sendJson('POST', `/api/v1/statements/${statementId}/generate-pdf`, { language: 'xx' });
 			await expectRejection(response, 500, 'PDF generation failed', 'PDF_FAILED');
+		} finally {
+			if (iban) await setConfig('iban', iban);
+			else await deleteConfig('iban');
+		}
 	});
 
 	it('meldet eine Berechnung, die aus einem unerwarteten Grund scheitert, mit Code', async () => {
@@ -171,5 +175,25 @@ describe('Fehlercodes für die Oberfläche', () => {
 
 		expect(response.status).toBe(422);
 		expect(await response.json()).toMatchObject({ code: 'VALIDATION_ERROR', params: {} });
+	});
+
+	// A path id that is no UUID names no record: not found like an unknown one, not a database error (500)
+	it.each([
+		'/api/v1/buildings/abc',
+		'/api/v1/buildings/abc/fuel-stocks',
+		'/api/v1/apartments/abc',
+		'/api/v1/tenants/abc',
+		'/api/v1/contracts/abc',
+		'/api/v1/invoices/upload',
+		'/api/v1/invoices/abc/statements',
+		'/api/v1/statements/abc',
+		'/api/v1/categories/abc',
+		'/api/v1/distribution-keys/abc',
+		'/api/v1/heating-profiles/abc'
+	])('meldet %s wie eine unbekannte Kennung', async (path) => {
+		const response = await callApi(path);
+
+		expect(response.status).toBe(404);
+		expect(await response.json()).toMatchObject({ code: 'NOT_FOUND' });
 	});
 });
