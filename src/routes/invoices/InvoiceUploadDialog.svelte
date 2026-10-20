@@ -55,6 +55,20 @@
 	let discardOpen = $state(false);
 	let removed = $state(''); // the file just removed, said by the status until the next change
 	let nextKey = 0;
+	// the Verteilschlüssel of the chosen building's latest invoice with one in a Kategorie, asked once per Kategorie (#455)
+	// ponytail: only the latest 20 invoices of the Kategorie are looked at
+	let keys = new Map<string, Promise<string | null>>();
+	function keyFor(categoryId: string) {
+		const asked = `${buildingId}/${categoryId}`;
+		if (!keys.has(asked))
+			keys.set(
+				asked,
+				api
+					.get<{ invoices?: { distributionKeyId: string | null }[] }>('/invoices', { buildingId, categoryId, limit: '20' })
+					.then((answer) => answer.data?.invoices?.find((one) => one.distributionKeyId)?.distributionKeyId ?? null)
+			);
+		return keys.get(asked)!;
+	}
 
 	// one building preselected when there is only one
 	$effect(() => {
@@ -203,6 +217,7 @@
 		created = [];
 		tooMany = false;
 		removed = '';
+		keys = new Map();
 	}
 
 	// Closing loses the files and what was entered: asked first, unless nothing is there yet
@@ -259,6 +274,7 @@
 					errors={errors[row.key] ?? {}}
 					{categories}
 					{distributionKeys}
+					{keyFor}
 					onretry={() => read(row.key)}
 					onremove={() => removeRow(row.key)}
 				/>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Field from '$lib/ui/Field.svelte';
-	import { controlClass } from '$lib/ui/field';
+	import FileInput from '$lib/ui/FileInput.svelte';
 
 	// Where files are chosen or dropped; closed until the building is chosen
 	let { enabled, onfiles }: { enabled: boolean; onfiles: (files: File[]) => void } = $props();
@@ -28,16 +28,13 @@
 >
 	<Field id="invoice-upload-files" label={m.invoices_upload_files_label()} {help}>
 		{#snippet children(control)}
-			<input
-				id={control.id}
-				type="file"
+			<FileInput
+				{control}
+				choose={m.invoices_upload_files_choose()}
 				multiple
-				accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
 				disabled={!enabled}
-				aria-describedby={control.describedBy}
-				class={controlClass(false)}
 				onchange={choose}
-				data-testid="invoice-upload-file-input"
+				testid="invoice-upload-file"
 			/>
 		{/snippet}
 	</Field>

@@ -656,6 +656,79 @@ describe('PDF einer berichtigten Abrechnung', () => {
 	});
 });
 
+// #453 (#325): with «Abgerechnet bis» in the period the PDF says what is billed already and from when the Akonto
+// counts (#408, Punkt 3: Vertragsbeginn 01.01.2024, abgerechnet bis 29.02.2024, 31 of 366 days, Akonto 1 × 120.00)
+describe('Abgerechnet bis im PDF', () => {
+	const billed: StatementPDFData = {
+		...refund,
+		periodStart: '2024-01-01',
+		periodEnd: '2024-12-31',
+		periodDays: 366,
+		rentalDays: 31,
+		rentalStart: '2024-03-01',
+		rentalEnd: '2024-03-31',
+		billed: { until: '2024-02-29', tenancyStart: '2024-01-01' },
+		totalAdvancePayments: 120,
+		balance: 664.13
+	};
+	const textIn = async (data: StatementPDFData, language: 'de' | 'fr' | 'it' | 'en') =>
+		readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+
+	it.each([
+		['de', 'Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024. Ihre Nebenkosten und Akontobeiträge bis 29.02.2024 sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst 01.03.2024 – 31.03.2024 (31 Mietstage von 366 Tagen).', 'Akontobeiträge ab 01.03.2024'],
+		['fr', 'Votre bail pendant cette période : 01.01.2024 – 31.03.2024. Vos frais accessoires et vos acomptes jusqu’au 29.02.2024 ont fait l’objet d’un décompte antérieur. Ce décompte couvre la période 01.03.2024 – 31.03.2024 (31 jours de location sur 366).', 'Acomptes à partir du 01.03.2024'],
+		['it', 'Il suo rapporto di locazione in questo periodo: 01.01.2024 – 31.03.2024. Le sue spese accessorie e i suoi acconti fino al 29.02.2024 figurano in un conteggio precedente. Questo conteggio comprende il periodo 01.03.2024 – 31.03.2024 (31 giorni di locazione su 366).', 'Acconti dal 01.03.2024'],
+		['en', 'Your tenancy in this period: 01.01.2024 – 31.03.2024. Your utility costs and advance payments up to 29.02.2024 have already been billed in an earlier statement. This statement covers 01.03.2024 – 31.03.2024 (31 of 366 days rented).', 'Advance payments from 01.03.2024']
+	] as const)('nennt auf %s das Mietverhältnis, das schon Abgerechnete und das Akonto ab dem Tag danach', async (language, tenancy, advance) => {
+		const text = await textIn(billed, language);
+		expect(text).toContain(tenancy);
+		expect(text).toContain(advance);
+	});
+
+	// «Abgerechnet bis» 15.03.2024: 16 Mietstage, Akonto 120 × 16/31 = 61.94
+	it('nennt bei «Abgerechnet bis» mitten im Monat die Tage ab dem Tag danach', async () => {
+		const mid = { ...billed, rentalDays: 16, rentalStart: '2024-03-16', billed: { until: '2024-03-15', tenancyStart: '2024-01-01' }, totalAdvancePayments: 61.94 };
+		const text = await textIn(mid, 'de');
+		expect(text).toContain('Diese Abrechnung umfasst 16.03.2024 – 31.03.2024 (16 Mietstage von 366 Tagen).');
+		expect(text).toContain('Akontobeiträge ab 16.03.2024');
+		expect(text).not.toContain('Geleistete Akontobeiträge ab'); // #477: the line is «Akontobeiträge»
+	});
+
+	// code review 453-3 C-8: the total relabelled, the lines of #464 below it
+	it('nennt über den Akonto-Zeilen die Summe ab dem Tag nach «Abgerechnet bis»', async () => {
+		const lines = { ...billed, advanceLines: [{ from: '2024-03-01', to: '2024-03-31', months: 1, amount: 120, total: 120 }] };
+		expect(await textIn(lines, 'de')).toContain('Akontobeiträge ab 01.03.2024 – 120.00 1 Monat × CHF 120.00 (01.03.2024 – 31.03.2024) 120.00');
+	});
+
+	it('nennt das Akonto ohne «Abgerechnet bis» ohne Datum', async () => {
+		const text = await textIn(refund, 'de');
+		expect(text).toContain('Akontobeiträge');
+		expect(text).not.toContain('Akontobeiträge ab');
+	});
+
+	// #408, Punkt 3: the line without «Abgerechnet bis» follows the native reads in fr and it
+	it.each([
+		['fr', 'Votre bail pendant cette période : 01.01.2025 – 31.12.2025 (365 jours de location sur 365)'],
+		['it', 'Il suo rapporto di locazione in questo periodo: 01.01.2025 – 31.12.2025 (365 giorni di locazione su 365)']
+	] as const)('nennt auf %s das Mietverhältnis ohne «Abgerechnet bis» nach der Native-Lesung', async (language, tenancy) => {
+		expect(await textIn(refund, language)).toContain(tenancy);
+	});
+
+	it('nennt unter einer Heizrechnung mit Leistungszeitraum die abgerechneten Monate', async () => {
+		const months = (shares: [number, number][]) => shares.map(([month, percentage]) => ({ month, percentage }));
+		const part = { start: '2024-01-01', end: '2024-03-31', amount: 1000, days: 31, total: 91, profile: { percent: 25.58, months: months([[3, 11]]), periodMonths: months([[1, 18], [2, 14], [3, 11]]) } };
+		const item = { category: 'Heizung', key: 'Pro Fläche (m²)', totalAmount: 1000, apartmentShare: 1000, periodShare: 0.2558, invoiceParts: [part], byProfile: true, heating: true, tenantShare: 255.81 };
+		expect(await textIn({ ...billed, lineItems: [item] }, 'de')).toContain(
+			'Anteile der abgerechneten Monate Ihres Mietverhältnisses darin: Mär 11.00 %; zusammen 11.00 %.'
+		);
+	});
+
+	it('nennt auf Seite 2 die abgerechneten Monate des Mietverhältnisses', async () => {
+		const heatedBilled = { ...billed, heating: { profile: 'Winter', percent: 11, months: [{ month: 3, percentage: 11 }] } };
+		expect(await textIn(heatedBilled, 'de')).toContain('Anteile der abgerechneten Monate Ihres Mietverhältnisses: Mär 11.00 %');
+	});
+});
+
 describe('Verwaltungspauschale auf Französisch und Italienisch', () => {
 	// #405, #461: the words of Art. 4 al. 3 OBLF / cpv. 3 OLAL; «frais de gestion» are the costs of managing the property
 	it('nennt sie wie das Gesetz «frais d’administration» und «spese amministrative»', async () => {

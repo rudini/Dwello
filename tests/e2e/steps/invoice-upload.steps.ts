@@ -2,11 +2,15 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	belegChosenForCreating,
+	deductedRuleOnBeleg,
+	fileChooserLabel,
 	belegHowTo,
 	billedAdviceOnDelete,
+	billedRuleOnDelete,
 	createButtonLabel,
 	createdInvoiceNames,
 	hintsOfUpload,
+	hintsOfUploadOrNone,
 	uploadDialogShown,
 	uploadState,
 	belegShown,
@@ -19,12 +23,16 @@ import {
 	discardQuestion,
 	noteOnBeleg,
 	proposedAmount,
+	proposedKey,
 	proposedInvoiceNumber,
 	unsureNote,
 	uploadOutcome
 } from '../questions/invoice-upload';
 import {
 	chooseCategory,
+	chooseForCreating,
+	escapeFromCategory,
+	openUploadDialog,
 	confirmCancelling,
 	createInvoices,
 	creatingFails,
@@ -33,6 +41,7 @@ import {
 	invoicePdf,
 	invoicePhoto,
 	openBeleg,
+	openBelegOnce,
 	openBelegOnceRead,
 	openBelegOfInvoice,
 	openFileLarge,
@@ -284,4 +293,56 @@ When('der Liegenschaftsverwalter die Datei von {string} gross ansieht', async ({
 Then('zeigt ein neuer Tab die Datei als PDF', async ({ verwalter }) => {
 	await verwalter.sees(belegShown).toBe(true);
 	await verwalter.sees(openedBelegMagic).toBe(MAGIC.PDF);
+});
+
+Then(
+	'erklärt der Hinweis zu den Akontorechnungen von {string} {string}',
+	async ({ verwalter, names }, supplier: string, text: string) => {
+		await verwalter.sees(deductedRuleOnBeleg(pdfOf(names.get(supplier)!))).toBe(text);
+	}
+);
+
+When('der Liegenschaftsverwalter die Datei von {string} zum Erstellen auswählt', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.attemptsTo(chooseForCreating(pdfOf(names.get(supplier)!)));
+});
+
+When('der Liegenschaftsverwalter das Hochladen von Rechnungen öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openUploadDialog);
+});
+
+Then('bietet der Dialog die Dateien mit {string} zur Auswahl an', async ({ verwalter }, label: string) => {
+	await verwalter.sees(fileChooserLabel).toBe(label);
+});
+
+When(
+	'der Liegenschaftsverwalter die Auswahl der Kategorie bei der Datei von {string} mit Escape schliesst',
+	async ({ verwalter, names }, supplier: string) => {
+		await verwalter.attemptsTo(escapeFromCategory(pdfOf(names.get(supplier)!)));
+	}
+);
+
+// the dialog is still open (its first check), and asks nothing
+Then('fragt Dwello nicht, ob das Hochladen abgebrochen werden soll', async ({ verwalter }) => {
+	await verwalter.sees(uploadDialogShown).toBe(true);
+	await verwalter.sees(discardQuestion).toBeNull();
+});
+
+// after the hint at the Betrag (its first check): the Beleg card no longer holds it (#455, domain review V-7)
+Then('erinnert der Beleg nicht an abgezogene Akontorechnungen', async ({ verwalter }) => {
+	await verwalter.sees(hintsOfUploadOrNone).not.toContain('Akontorechnungen');
+});
+
+// the key of the building's invoices of the Kategorie the KI chose (#455, #268)
+Then(
+	'schlägt Dwello bei der Datei von {string} den Verteilschlüssel {string} vor',
+	async ({ verwalter, names }, supplier: string, key: string) => {
+		const file = pdfOf(names.get(supplier)!);
+		await verwalter.attemptsTo(openBelegOnce(file));
+		await verwalter.sees(proposedKey(file)).toBe(key);
+	}
+);
+
+// what to do before deleting an invoice in a statement (#455, Dr. Weber P-6, P-7)
+Then('sagt die Bestätigung zum Löschen einer abgerechneten Rechnung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(billedRuleOnDelete).toContain(text);
 });

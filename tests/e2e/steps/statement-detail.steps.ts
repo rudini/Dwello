@@ -497,7 +497,8 @@ Then('nennt die Bestätigung die Verjährung nach fünf Jahren', async ({ verwal
 Then(
 	'warnt die berichtigte Abrechnung, dass ihre Akontobeiträge {string} anders sind als die {string} der ersetzten Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, now: string, before: string, year: number, tenant: string) => {
-		const replaced = await seed.statementNumber(tenant, year);
+		// the replaced one: once the correction exists, it has the same year (WebKit, PR #515)
+		const replaced = await seed.statementNumber(tenant, year, 'replaced');
 		await verwalter
 			.sees(advanceDiffersText)
 			.toContain(`Die Akontobeiträge dieser Abrechnung (${now}) sind anders als in der ersetzten Abrechnung ${replaced} (${before}). Stimmt ein früherer Betrag am Mietvertrag nicht, löschen Sie diesen Entwurf, tragen Sie den Betrag mit seinem «Gültig ab» ein und erstellen Sie die berichtigte Abrechnung erneut.`);

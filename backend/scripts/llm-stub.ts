@@ -102,11 +102,16 @@ function reply(prompt: string) {
 
 // What the stand-in «reads» from an invoice file, by its name: «… ohne KI» fails, «… unlesbar» answers no JSON, «Sammelscan» holds two invoices,
 // «Werke Schlussrechnung» deducts Akonto payments, «… Reparatur» mixes in costs that are not allocable, «… Gutschrift» is a
-// credit note
+// credit note, «… Akontorechnung» an advance invoice
+const DOCUMENT_TYPES = [
+	['Gutschrift', 'credit_note'],
+	['Akontorechnung', 'advance_invoice']
+];
+const documentTypeOf = (fileName: string) => DOCUMENT_TYPES.find(([word]) => fileName.includes(word))?.[1] ?? 'invoice';
 // What the file name says about the file, as the stand-in «reads» it
 const readsAs = (fileName: string) => ({
 	invoiceCount: fileName.includes('Sammelscan') ? 2 : 1,
-	documentType: fileName.includes('Gutschrift') ? 'credit_note' : 'invoice',
+	documentType: documentTypeOf(fileName),
 	deductedAmount: fileName.includes('Werke Schlussrechnung') ? 1000 : null,
 	nonAllocableItems: fileName.includes('Reparatur')
 });
