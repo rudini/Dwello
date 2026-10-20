@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-  # The full run on main (every browser, the axe check): a merge has run it on its up-to-date pull request already
+  # Nightly: the full run on main again, for tests that depend on the date
   schedule:
     - cron: '17 2 * * *'
   workflow_dispatch:
@@ -20,11 +20,15 @@ env:
   NODE_VERSION: 22
 
 jobs:
-  # On pull requests: which parts the change touches, so tests of untouched parts are skipped; pushes to main run all but
-  # the E2E tests and the axe check, which the nightly and manual runs add
+  # On pull requests: which parts the change touches, so tests of untouched parts are skipped; a push that changes only
+  # documentation since a green run of its branch skips the tests that run passed. Pushes to main run everything: a pull
+  # request need not be up to date with main, so main is where pull requests merged side by side meet.
   changes:
     name: Changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     outputs:
       backend: ${{ steps.diff.outputs.backend }}
       app: ${{ steps.diff.outputs.app }}
@@ -34,12 +38,18 @@ jobs:
         with:
           fetch-depth: 0
       - id: diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          if [ "${{ github.event_name }}" = push ]; then
-            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && echo "ui=false" >> "$GITHUB_OUTPUT" && exit 0
-          fi
           if [ "${{ github.event_name }}" != pull_request ]; then
             echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
+          fi
+          green=$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?event=pull_request&status=success&per_page=100" \
+            -f branch="$HEAD_REF" -X GET --jq '.workflow_runs[].head_sha' || true)
+          if node tools/ci/docs-only-since.mjs "${{ github.event.pull_request.head.sha }}" $green; then
+            echo "::notice::Only documentation changed since the last green run of this branch, so its tests are skipped."
+            echo "backend=false" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && echo "ui=false" >> "$GITHUB_OUTPUT" && exit 0
           fi
           git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
           # The API contracts are checked against the backend (api-contracts.pg.test.ts)
