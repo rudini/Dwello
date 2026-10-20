@@ -803,7 +803,7 @@
 	"contracts_fee_none": "No",
 	"contracts_fee_rate_label": "Aliquota propria in %",
 	"contracts_error_fee_choice": "Indichi se nel contratto di locazione sono pattuite spese amministrative.",
-	"contracts_error_fee_rate_zero": "Un’aliquota propria dello 0 % significa: nessuna spesa di gestione. Scelga allora «No».",
+	"contracts_error_fee_rate_zero": "Un’aliquota propria dello 0 % significa: nessuna spesa amministrativa. Scelga allora «No».",
 	"contracts_error_fee_rate": "Inserisca una percentuale da 0,01 a 10 con al massimo due decimali, per esempio 3 o 2,5.",
 	"contracts_fee_shown_run": "Pattuite, aliquota dell’allestimento dei conteggi",
 	"contracts_fee_shown_own": "Pattuite, {percent} %",

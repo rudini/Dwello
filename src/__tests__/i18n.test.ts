@@ -86,7 +86,7 @@ describe('Sprachdateien', () => {
 	it.each([
 		['fr', '«répercutable», nicht «imputable»', /imputab/i],
 		['fr', '«frais d’administration», nicht «frais de gestion»', /frais de gestion/i],
-		['it', '«spese amministrative», nicht «spese di gestione»', /spese di gestione/i],
+		['it', '«spese amministrative», nicht «spese di gestione»', /spes[ae] di gestione/i],
 		['it', '«annullare la disdetta», nicht «revocare»', /\brevoca/i],
 		['fr', '«degré de confiance» für die Konfidenz', /fiabilité de l’IA/i],
 		['it', '«grado di certezza» für die Konfidenz', /affidabilità dell’IA/i],
