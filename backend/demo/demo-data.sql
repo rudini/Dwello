@@ -219,6 +219,10 @@ UPDATE invoices SET invoice_date = '2025-01-20', due_date = '2025-02-19', servic
 WHERE id = 'c0000002-2024-4000-8000-000000000014';
 UPDATE invoices SET invoice_date = '2026-01-20', due_date = '2026-02-19', service_period_start = '2025-10-01', service_period_end = '2025-12-31'
 WHERE id = 'c0000002-2025-4000-8000-000000000029';
+-- The other quarters bill their own months too, so at a tenant change each tenant bears the heating of his months (#339)
+UPDATE invoices SET service_period_start = make_date(EXTRACT(YEAR FROM invoice_date)::int, EXTRACT(MONTH FROM invoice_date)::int - 2, 1), service_period_end = invoice_date
+WHERE id IN ('c0000002-2024-4000-8000-000000000003', 'c0000002-2024-4000-8000-000000000007', 'c0000002-2024-4000-8000-000000000010',
+	'c0000002-2025-4000-8000-000000000018', 'c0000002-2025-4000-8000-000000000022', 'c0000002-2025-4000-8000-000000000025');
 
 -- ============================================================================
 -- Company for the statements and their QR-bill (QR-IBAN from the SIX examples)

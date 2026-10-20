@@ -815,17 +815,24 @@ describe('Rechnung erfassen', () => {
 		);
 	});
 
-	// Eine Öllieferung ist Vorrat: ihr Verbrauch zählt über den Tankbestand, nicht über einen Leistungszeitraum
-	it('erklärt, wann ein Leistungszeitraum hingehört und wann nicht', () => {
-		show(NewInvoicePage, { data: data(false) } as never);
-		const help = text();
+	// Eine Öllieferung ist Vorrat: ihr Verbrauch zählt über den Tankbestand, die Lieferung ganz in der Periode ihres
+	// Liefertags, des Endes ihres Leistungszeitraums (#451, Fachreview M-1, V-14)
+	// the sentence on deliveries only in the category of the building's tank, and first (Code-Review C-2, Fachreview
+	// V-20, V-29; Helga P-1, P-2, P-4 of #451: district heating in a «Heizung» category has no tank)
+	it('erklärt, wann ein Leistungszeitraum hingehört, auch bei einer Lieferung in den Tank', () => {
+		const fuel = { id: 'c3', name: 'Heizöl', isAllowedUtilityCost: true, isFuel: true };
+		show(NewInvoicePage, { data: data(false, { categories: [...categories, fuel], tanks: { b1: 'c3' } }) } as never);
+		const delivery =
+			'Bei einer Lieferung von Heizöl, Flüssiggas, Pellets oder Holz zählt der Verbrauch über den Tankbestand des Gebäudes. Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.';
+		const periods = 'Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.';
 
-		expect(help).toContain(
-			'Geben Sie den Leistungszeitraum bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
-		);
-		expect(help).toContain(
-			'Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'
-		);
+		expect(text()).toContain(periods);
+		expect(text()).not.toContain('Nicht für Lieferungen von Heizöl');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c3');
+		expect(text()).not.toContain(delivery); // no building with this tank chosen yet
+		fireEvent(byTestId<HTMLSelectElement>('invoice-building-select')!, 'change', 'b1');
+		expect(text()).toContain(delivery);
+		expect(text().indexOf(delivery)).toBeLessThan(text().indexOf(periods));
 	});
 
 	it('warnt ohne Abrechnungsperiode nicht', () => {
@@ -859,6 +866,19 @@ describe('Rechnung bearbeiten', () => {
 		show(EditInvoicePage, {
 			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
 		} as never);
+
+	// #451, M-1 (Code-Review C-11): in der Kategorie des Tanks im Gebäude erklärt das Formular, welcher Tag eine Lieferung
+	// zählt
+	it('erklärt bei einer Lieferung von Heizmaterial den Tag der Lieferung', () => {
+		const fuel = { id: 'c3', name: 'Heizöl', isAllowedUtilityCost: true, isFuel: true };
+		show(EditInvoicePage, {
+			data: { invoice: invoice({ categoryId: 'c3' }), buildings, categories: [...categories, fuel], distributionKeys, tanks: { b1: 'c3' } }
+		} as never);
+
+		expect(text()).toContain('Tragen Sie als Beginn und als Ende den Tag der Lieferung ein.');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		expect(text()).not.toContain('Tag der Lieferung');
+	});
 
 	// #455 (#268): wer den Betrag ändert, sieht dort, dass Akontorechnungen abgezogen sind
 	it('zeigt beim Betrag den Hinweis auf abgezogene Akontorechnungen', () => {

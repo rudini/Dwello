@@ -15,6 +15,7 @@ import {
 } from '../questions/invoice-form';
 import { amountOfListedInvoice, categoryOfListedInvoice } from '../questions/invoices';
 import {
+	chooseBuilding,
 	chooseCategory,
 	clearSupplier,
 	correctAmount,
@@ -55,6 +56,10 @@ When(
 
 When('der Liegenschaftsverwalter die Kategorie {string} wählt', async ({ verwalter }, category: string) => {
 	await verwalter.attemptsTo(chooseCategory(category));
+});
+
+When('der Liegenschaftsverwalter die Rechnung dem Gebäude {string} zuordnet', async ({ verwalter, seed }, building: string) => {
+	await verwalter.attemptsTo(chooseBuilding(seed.idOf(building)!));
 });
 
 When('der Liegenschaftsverwalter die Rechnung ohne Angaben speichert', async ({ verwalter }) => {
@@ -157,4 +162,8 @@ Then('erklärt das Formular {string}', async ({ verwalter }, text: string) => {
 
 Then('erklärt das Formular beim Leistungszeitraum {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(servicePeriodHelpText).toContain(text);
+});
+
+Then('erklärt das Formular beim Leistungszeitraum nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodHelpText).not.toContain(text);
 });

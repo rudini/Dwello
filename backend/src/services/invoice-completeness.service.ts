@@ -4,9 +4,9 @@
  * for the property manager, not a rule: a supplier may bill differently from one year to the next.
  */
 
-import { and, asc, eq, gte, isNull, lte, min, notInArray, or } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, isNull, lte, min, notInArray, or } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { buildings, categories, fuelStocks, invoices } from '../db/schema';
+import { apartments, buildings, categories, fuelStocks, invoices, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange, periodReadings } from './fuel-stock.service';
 import { swissToday } from './today';
@@ -285,10 +285,56 @@ const withoutServicePeriod = (buildingId: string, from: string, to: string) =>
 		)
 		.orderBy(asc(invoices.invoiceDate));
 
+// The period's heating invoices outside the category of the building's tank, whose deliveries count by consumption;
+// a tank decommissioned before the period shares its category by #71 again (#72)
+async function heatingInvoices(buildingId: string, period: Period) {
+	const tank = await periodReadings(buildingId, period.start, period.end);
+	const bills = await getInvoicesForStatement(buildingId, period.start, period.end);
+	return bills.filter((invoice) => invoice.category?.isHeatingCost && !(tank?.covered && invoice.categoryId === tank.categoryId));
+}
+
+// #339: heating invoices without a Leistungszeitraum in a category whose other invoices have one; at a tenant change by
+// the Heizprofil they count over the whole period, the others only in their months
+function withoutBesideWith(heating: Awaited<ReturnType<typeof heatingInvoices>>) {
+	const dated = new Set(heating.filter((invoice) => invoice.servicePeriodStart).map((invoice) => invoice.categoryId));
+	return heating
+		.filter((invoice) => !invoice.servicePeriodStart && dated.has(invoice.categoryId))
+		.map(({ id, billingEntityName, description, invoiceDate, amount, categoryId }) => ({ id, billingEntityName, description, invoiceDate, amount, categoryId }));
+}
+
+// #335: the sent statements of the period that share their heating costs by the Heizprofil over the whole period (no
+// invoice line by the profile's months) while a heating invoice of the period has a Leistungszeitraum now: a new
+// statement of the same apartment counts the months in it, together they may bill more than the heating costs
+async function oldHeatingRule(buildingId: string, period: Period, heating: Awaited<ReturnType<typeof heatingInvoices>>) {
+	// a Leistungszeitraum over the whole period shares by the profile's months of the period, as before
+	if (!heating.some((invoice) => invoice.inPeriod.start !== period.start || invoice.inPeriod.end !== period.end)) return [];
+	const sent = await db
+		.select({ id: utilityStatements.id, heatingShare: utilityStatements.heatingShare })
+		.from(utilityStatements)
+		.innerJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
+		.where(
+			and(
+				eq(apartments.buildingId, buildingId),
+				eq(utilityStatements.periodStart, period.start),
+				eq(utilityStatements.periodEnd, period.end),
+				inArray(utilityStatements.status, ['sent', 'paid'])
+			)
+		);
+	const byProfile = sent.filter((statement) => statement.heatingShare?.byDays === false);
+	if (!byProfile.length) return [];
+	const lines = await db
+		.select({ statementId: utilityStatementLineItems.statementId, invoiceParts: utilityStatementLineItems.invoiceParts })
+		.from(utilityStatementLineItems)
+		.where(inArray(utilityStatementLineItems.statementId, byProfile.map((statement) => statement.id)));
+	const byMonths = new Set(lines.filter((line) => line.invoiceParts?.some((part) => part.profile)).map((line) => line.statementId));
+	return byProfile.filter((statement) => !byMonths.has(statement.id)).map((statement) => statement.id);
+}
+
 /**
  * The check for one building and period, with the period it was compared with; also the invoices without
  * Leistungszeitraum dated shortly after the period (they may belong to it) and, in a period under a year, those
- * that count in full (one for a whole year would be billed to the short period alone)
+ * that count in full (one for a whole year would be billed to the short period alone); the hints on heating invoices
+ * by the Heizprofil (#335, #339)
  */
 export async function checkBuildingInvoices(buildingId: string, period: Period) {
 	const comparedWith = yearBefore(period);
@@ -302,12 +348,15 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 	]);
 	const { hasComparison, findings } = checkCategories(current, previous, period, first ?? undefined);
 	const stock = await stockFinding(buildingId, period, current);
+	const heating = await heatingInvoices(buildingId, period);
 	return {
 		buildingId,
 		comparedWith,
 		hasComparison,
 		findings: stock ? [stock, ...findings] : findings,
 		lateInvoices,
-		invoicesWithoutServicePeriod
+		invoicesWithoutServicePeriod,
+		heatingWithoutServicePeriod: withoutBesideWith(heating),
+		oldHeatingRule: await oldHeatingRule(buildingId, period, heating)
 	};
 }
