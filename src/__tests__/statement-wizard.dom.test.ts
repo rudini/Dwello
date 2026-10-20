@@ -1498,7 +1498,7 @@ describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
 
 describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 	const billed = (
-		rows: { buildingId: string; contracts: number; billed: number; overlap?: unknown }[]
+		rows: { buildingId: string; contracts: number; billed: number; overlap?: unknown; withoutFee?: [] }[]
 	) =>
 		fakeBff((call) =>
 			call.path.startsWith('/statements/billed') ? [200, rows] : [200, { invoices: [], total: 0 }]
@@ -1704,8 +1704,8 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 	// code review 199-1 C-5: a building chosen before (a link, a draft, back from step 3) is no longer chosen
 	it('nimmt ein schon gewähltes Gebäude aus der Auswahl, dessen Abrechnungsperiode die gewählte schneidet', async () => {
 		billed([
-			{ buildingId: 'b1', contracts: 2, billed: 1, overlap },
-			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null }
+			{ buildingId: 'b1', contracts: 2, billed: 1, overlap, withoutFee: [] },
+			{ buildingId: 'b2', contracts: 1, billed: 0, overlap: null, withoutFee: [] }
 		]);
 		show(GeneratePage, { data: { ...data, defaultBuildingIds: ['b1'] }, form: null } as never);
 		await settle();
