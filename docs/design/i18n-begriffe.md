@@ -9,7 +9,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Gebäude, Liegenschaft | immeuble | immobile | building |
 | Gebäudetyp | type d’immeuble | tipo di immobile | building type |
 | Baujahr | année de construction | anno di costruzione | year built |
-| Gebäuderegister (#479, Glossar #488) | registre des bâtiments | registro degli edifici | building register |
+| Gebäuderegister | registre des bâtiments | registro degli edifici | building register |
 | eidgenössisches Gebäude- und Wohnungsregister (GWR) | Registre fédéral des bâtiments et des logements (RegBL) | Registro federale degli edifici e delle abitazioni (REA) | Federal Register of Buildings and Dwellings (RBD) |
 | PLZ / Ort / Kanton | NPA / localité / canton | NPA / località / cantone | postcode / town / canton |
 | Wohnung | appartement | appartamento | apartment |
