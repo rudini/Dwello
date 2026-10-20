@@ -23,8 +23,8 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 			set.status = 201;
 			return result;
 		} catch (error) {
-			if (!(error instanceof ReminderError)) throw error;
-			set.status = error.status;
+			if (!(error instanceof CodedError)) throw error;
+			set.status = error instanceof ReminderError ? error.status : 400; // also no Firmenadresse for the payment part (#450)
 			return errorBody(error, '');
 		}
 	})
@@ -72,8 +72,15 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 	})
 	// The property manager printed and posted the letter
 	.put('/documents/:id/sent', async ({ params, set }) => {
-		const sent = await markDocumentPosted(params.id);
-		if (sent) return sent;
-		set.status = 404;
-		return { error: 'Document not found' };
+		try {
+			const sent = await markDocumentPosted(params.id);
+			if (sent) return sent;
+			set.status = 404;
+			return { error: 'Document not found' };
+		} catch (error) {
+			// a reminder remade without the Firmenadresse its payment part needs (#450)
+			if (!(error instanceof CodedError)) throw error;
+			set.status = 400;
+			return errorBody(error, '');
+		}
 	});

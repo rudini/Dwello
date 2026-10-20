@@ -4,11 +4,11 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { buildings, categories, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts } from '../db/schema';
+import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
@@ -399,6 +399,24 @@ describe('API-Verträge des Frontends', () => {
 		const response = await callApi(`/api/v1/statements/${crypto.randomUUID()}/pdf`);
 		expect(response.status).toBe(404);
 		expect(drift(await sample('statement-pdf-refused'), await response.json())).toEqual([]);
+	});
+
+	// #450: a Nachzahlung's payment part without the town of the Firmenadresse (an installation from before)
+	it('POST /statements/:id/generate-pdf ohne vollständige Firmenadresse liefert die Felder von statement-pdf-creditor-refused.json', async () => {
+		const saved = await db.select().from(configuration).where(inArray(configuration.key, ['iban', 'company_city']));
+		const [{ balance }] = await db.select({ balance: utilityStatements.balance }).from(utilityStatements).where(eq(utilityStatements.id, statementId));
+		await db.delete(configuration).where(inArray(configuration.key, ['iban', 'company_city']));
+		await db.insert(configuration).values({ key: 'iban', value: 'CH9300762011623852957' });
+		await db.update(utilityStatements).set({ balance: '120.00' }).where(eq(utilityStatements.id, statementId));
+		try {
+			const response = await sendJson('POST', `/api/v1/statements/${statementId}/generate-pdf`, {});
+			expect(response.status).toBe(400);
+			expect(drift(await sample('statement-pdf-creditor-refused'), await response.json())).toEqual([]);
+		} finally {
+			await db.update(utilityStatements).set({ balance, pdfBlob: null, pdfGeneratedAt: null }).where(eq(utilityStatements.id, statementId));
+			await db.delete(configuration).where(inArray(configuration.key, ['iban', 'company_city']));
+			if (saved.length) await db.insert(configuration).values(saved.map(({ key, value }) => ({ key, value })));
+		}
 	});
 
 	// an unknown tenant: a refusal without a code (#453, code review C-2)

@@ -221,6 +221,28 @@ describe('Einstellungen speichern', () => {
 		expect(calls).toEqual([]);
 	});
 
+	// #450 (Entscheid in #404, Punkt 8): der Zahlteil nennt den Liegenschaftsverwalter als Zahlungsempfänger
+	it('speichert eine IBAN nur mit Name, PLZ und Ort der Firmenadresse', async () => {
+		const answer = async (fields: Partial<typeof valid>) => {
+			const { calls, result } = runAction(actions.default, '', 200, { ...valid, ...fields });
+			const data = ((await result) as { data?: { errors: Record<string, string> } }).data;
+			return { iban: data?.errors.iban, saved: calls.length > 0 };
+		};
+		const refused = {
+			iban: 'Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort.',
+			saved: false
+		};
+
+		expect(await answer({ companyName: '' })).toEqual(refused);
+		// the empty fields the message names, marked on the page (persona Helga P-2)
+		const { result } = runAction(actions.default, '', 200, { ...valid, companyName: '', companyCity: '' });
+		expect(await result).toMatchObject({ data: { missing: ['companyName', 'companyCity'] } });
+		expect(await answer({ companyPostalCode: ' ' })).toEqual(refused);
+		expect(await answer({ companyCity: '' })).toEqual(refused);
+		expect(await answer({ companyAddress: '' })).toEqual({ iban: undefined, saved: true });
+		expect(await answer({ companyName: '', iban: '' })).toEqual({ iban: undefined, saved: true });
+	});
+
 	it('meldet, wenn das Backend die Einstellungen ablehnt, und setzt dann auch nichts zurück', async () => {
 		const { calls, result } = runAction(actions.default, '', 400, valid);
 

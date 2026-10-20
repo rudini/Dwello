@@ -21,6 +21,7 @@
 		onblur,
 		note,
 		helpTestid,
+		invalidBy,
 		testid
 	}: {
 		id: string;
@@ -42,10 +43,11 @@
 		testid?: string;
 		note?: { text: string; testid: string }; // see Field
 		helpTestid?: string;
+		invalidBy?: string; // see Field
 	} = $props();
 </script>
 
-<Field {id} {note} {label} {help} {example} {error} {optional} {helpTestid}>
+<Field {id} {note} {label} {help} {example} {error} {optional} {helpTestid} {invalidBy}>
 	{#snippet children(control)}
 		<input
 			id={control.id}
