@@ -521,7 +521,7 @@ describe('Zahlteil der Mahnung', () => {
 		const [after] = await db.select().from(documents).where(eq(documents.id, letter.id));
 
 		expect(response.status).toBe(400);
-		expect(await response.json()).toMatchObject({ code: 'REMINDER_STATEMENT_PAID' });
+		expect(await response.json()).toEqual(await Bun.file(`${import.meta.dir}/../../../tests/contracts/reminder-paid-refused.json`).json());
 		expect(after.status).toBe('to_send');
 	});
 

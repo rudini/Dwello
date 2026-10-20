@@ -4,6 +4,7 @@ import { GET as pdf } from '../routes/documents/[id]/pdf/+server';
 import { runAction } from './helpers/action';
 import documentList from '../../tests/contracts/documents.json';
 import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
+import paidRefused from '../../tests/contracts/reminder-paid-refused.json';
 
 const API = 'http://localhost:3001/api/v1/documents';
 
@@ -64,6 +65,15 @@ describe('Dokumente', () => {
 				actionError:
 					'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
 			}
+		});
+	});
+
+	// #449 (Entscheid in #404, Punkt 3): die Abrechnung ist bezahlt, der Brief geht nicht mehr hinaus
+	it('sagt beim Markieren einer Mahnung, dass die Abrechnung schon bezahlt ist', async () => {
+		const { result } = runAction(actions.markSent, '', 400, { id: 'd1' }, paidRefused);
+
+		expect(await result).toMatchObject({
+			data: { actionError: 'Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab.' }
 		});
 	});
 
