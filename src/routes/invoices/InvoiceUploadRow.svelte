@@ -16,6 +16,7 @@
 		errors,
 		categories,
 		distributionKeys,
+		tank,
 		keyFor,
 		onretry,
 		onremove
@@ -25,6 +26,7 @@
 		errors: Record<string, string>;
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
+		tank?: string;
 		keyFor: (categoryId: string) => Promise<string | null>; // the key of the building's invoices of a Kategorie
 		onretry: () => void;
 		onremove: () => void;
@@ -97,6 +99,6 @@
 	</div>
 
 	{#if open && editable && !row.several}
-		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} />
+		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} {tank} />
 	{/if}
 </li>

@@ -17,6 +17,7 @@ import {
 } from '../questions/invoice-form';
 import { amountOfListedInvoice, categoryOfListedInvoice } from '../questions/invoices';
 import {
+	chooseBuilding,
 	chooseCategory,
 	clearCategory,
 	clearSupplier,
@@ -58,6 +59,10 @@ When(
 
 When('der Liegenschaftsverwalter die Kategorie {string} wählt', async ({ verwalter }, category: string) => {
 	await verwalter.attemptsTo(chooseCategory(category));
+});
+
+When('der Liegenschaftsverwalter die Rechnung dem Gebäude {string} zuordnet', async ({ verwalter, seed }, building: string) => {
+	await verwalter.attemptsTo(chooseBuilding(seed.idOf(building)!));
 });
 
 When('der Liegenschaftsverwalter die Rechnung ohne Angaben speichert', async ({ verwalter }) => {
@@ -178,4 +183,8 @@ Then(
 // the form names the field without «(optional)»: the Kategorie is required (#245, Helga P-5 of #233)
 Then('ist die Kategorie im Formular keine freiwillige Angabe', async ({ verwalter }) => {
 	await verwalter.sees(categoryLabelText).toBe('Kategorie');
+});
+
+Then('erklärt das Formular beim Leistungszeitraum nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(servicePeriodHelpText).not.toContain(text);
 });

@@ -5,7 +5,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks } from '../db/schema';
+import { categories, fuelStocks, invoices, utilityStatements } from '../db/schema';
+import { getHeatingProfileByName } from '../services/heating-profile.service';
+import { deleteStatement, generateStatement } from '../services/statement.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -160,5 +162,71 @@ describe('Hinweise mit eigenem Gebäude', () => {
 		await own.remove();
 
 		expect(lateInvoices.map((i) => i.billingEntityName)).toEqual(['Kaminfeger Keller']);
+	});
+
+	// #339 (#451, Punkt 6): bei Heizkosten nach Heizprofil zählt eine Rechnung mit Leistungszeitraum nur seine Monate, eine
+	// ohne die ganze Periode; die Prüfung nennt die ohne, wenn andere derselben Kategorie einen haben, nicht aber eine
+	// andere Heizkategorie ganz ohne Leistungszeitraum, Nebenkosten ohne Heizkosten und Lieferungen in den Tank
+	// a tank decommissioned before the period (closing stock 0, Code-Review C-4) shares its category by #71 again
+	it.each([
+		['ohne Tank', [], ['Fernwärme Q1']],
+		['mit Tank in der Kategorie', [['2023-12-31', '800.00']], []],
+		['mit einem vor der Periode stillgelegten Tank', [['2022-12-31', '700.00'], ['2023-12-31', '0.00']], ['Fernwärme Q1']]
+	] as const)('nennt Heizrechnungen ohne Leistungszeitraum neben solchen mit, %s', async (_, readings, expected) => {
+		const own = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', monthlyAdvancePayment: '200' });
+		const categoryId = async (name: string) => (await db.select().from(categories).where(eq(categories.name, name)))[0].id;
+		const heating = await categoryId('Heating');
+		for (const [readingDate, amount] of readings) await db.insert(fuelStocks).values({ buildingId: own.building, readingDate, amount, categoryId: heating });
+		await insertInvoice(own.building, { billingEntityName: 'Fernwärme Q1', categoryId: heating, amount: '1520.00', invoiceDate: '2024-03-31' });
+		await insertInvoice(own.building, { billingEntityName: 'Fernwärme Q4', categoryId: heating, amount: '1410.00', invoiceDate: '2025-01-05', servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' });
+		await insertInvoice(own.building, { billingEntityName: 'Kaminfeger Keller', categoryId: await categoryId('Chimney Sweep'), amount: '290.00', invoiceDate: '2024-10-15' });
+		await insertInvoice(own.building, { billingEntityName: 'Hauswart Huber', invoiceDate: '2024-12-31' });
+		await insertInvoice(own.building, { billingEntityName: 'Hauswart Q4', invoiceDate: '2025-01-05', servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' });
+
+		const response = await callApi(`/api/v1/invoices/completeness/${own.building}?periodStart=2024-01-01&periodEnd=2024-12-31`);
+		const { heatingWithoutServicePeriod } = (await response.json()) as { heatingWithoutServicePeriod: { billingEntityName: string }[] };
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, own.building));
+		await own.remove();
+
+		expect(heatingWithoutServicePeriod.map((i) => i.billingEntityName)).toEqual([...expected]);
+	});
+});
+
+// #335 (#451, Punkt 5): eine versendete Abrechnung, die die Heizkosten nach dem Heizprofil über die ganze Periode
+// rechnet, obwohl eine Heizrechnung der Periode jetzt einen Leistungszeitraum hat: eine neue Abrechnung derselben
+// Wohnung rechnet die Monate darin, beide zusammen tragen dann nicht genau die Heizkosten
+describe('Versendete Abrechnungen nach der alten Regel für Heizkosten', () => {
+	const oldRuleOf = async (building: string) => {
+		const response = await callApi(`/api/v1/invoices/completeness/${building}?periodStart=2025-01-01&periodEnd=2025-12-31`);
+		return ((await response.json()) as { oldHeatingRule: string[] }).oldHeatingRule;
+	};
+	const sentStatement = async (rental: Awaited<ReturnType<typeof createRental>>, status: 'sent' | 'draft') => {
+		const heatingProfileId = (await getHeatingProfileByName('Heating Mittelland'))!.id;
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId, managementFeePercent: 0 });
+		await db.update(utilityStatements).set({ status }).where(eq(utilityStatements.id, statement.id));
+		return statement.id;
+	};
+
+	// a Leistungszeitraum over the whole period shares as before (Code-Review C-5)
+	it.each([
+		['versendet, der Leistungszeitraum kam danach', 'sent', false, true, ['2025-01-01', '2025-03-31']],
+		['ein Entwurf', 'draft', false, false, ['2025-01-01', '2025-03-31']],
+		['versendet, mit dem Leistungszeitraum schon beim Erstellen', 'sent', true, false, ['2025-01-01', '2025-03-31']],
+		['versendet, mit einem Leistungszeitraum über die ganze Periode', 'sent', false, false, ['2025-01-01', '2025-12-31']]
+	] as const)('nennt eine Abrechnung nur, wenn sie %s', async (_, status, before, named, [servicePeriodStart, servicePeriodEnd]) => {
+		const may = await createRental(crypto.randomUUID(), { startDate: '2025-05-01', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(may.building, { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-06-30' });
+		const quarter = { categoryId: heating.id, amount: '1000.00', invoiceDate: '2025-04-10', servicePeriodStart, servicePeriodEnd };
+		if (before) await insertInvoice(may.building, quarter);
+		const id = await sentStatement(may, status);
+		if (!before) await insertInvoice(may.building, quarter);
+
+		const listed = await oldRuleOf(may.building);
+		await deleteStatement(id).catch(() => db.delete(utilityStatements).where(eq(utilityStatements.id, id)));
+		await db.delete(invoices).where(eq(invoices.buildingId, may.building));
+		await may.remove();
+
+		expect(listed).toEqual(named ? [id] : []);
 	});
 });

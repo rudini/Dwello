@@ -85,8 +85,8 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: 
 		apartmentShare,
 		periodShare: amountOf(item.periodShare),
 		shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : undefined,
-		// each part with the description of its invoice, in the same order (#236)
-		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, description: item.invoices?.[i]?.description })),
+		// each part with the Rechnungsdatum and Rechnungsnummer of its invoice, in the same order (#236, #451)
+		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, invoiceDate: item.invoices?.[i]?.invoiceDate, invoiceNumber: item.invoices?.[i]?.invoiceNumber })),
 		byProfile: heating && byProfile,
 		heating,
 		tenantShare: parseFloat(item.tenantShare)

@@ -372,6 +372,10 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 /** Own value and the building's total by unit: the fraction a simple distribution key gives the apartment */
 export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
 
+// A month's share of the heating costs; a month split by a move-in or move-out with its share in the profile and its
+// days (#451), absent before
+export type MonthShare = { month: number; percentage: number; full?: number; days?: number; total?: number };
+
 // An invoice of a position over different days (#226): its days in the period, its amount for them, the tenant's days
 export type InvoicePart = {
 	start: string;
@@ -383,17 +387,18 @@ export type InvoicePart = {
 	whole?: { start: string; end: string; amount: number }; // a Leistungszeitraum beyond the period, with the invoice's amount
 	fuelStock?: true; // the change of the Tankbestand, not an invoice (#239)
 	// a heating invoice shared by the Heizprofil's months in its days (#71): the tenant's months, those days' months
-	profile?: { percent: number; months: { month: number; percentage: number }[]; periodMonths: { month: number; percentage: number }[] };
+	profile?: { percent: number; months: MonthShare[]; periodMonths: MonthShare[] };
 };
 
-// An invoice a position billed (#96): its amount in the period and the days it bills there; the change of the
-// Tankbestand is billed like one (#239) under the id fuel-stock-<period end>
 /** One line of the Akonto on a statement (#464): whole months of one amount, or the days of a split month */
 export type AdvanceLine = { from: string; to: string; amount: number; total: number } & (
 	| { months: number }
 	| { days: number; daysInMonth: number }
 );
-export type BilledInvoice = { id: string; description: string; amount: number; start: string; end: string; fuelStock?: true };
+// An invoice a position billed (#96): its amount in the period and the days it bills there, its Rechnungsdatum and
+// Rechnungsnummer that name it in the PDF (#451; absent on statements created before); the change of the Tankbestand is
+// billed like one (#239) under the id fuel-stock-<period end>
+export type BilledInvoice = { id: string; description: string; invoiceDate?: string; invoiceNumber?: string; amount: number; start: string; end: string; fuelStock?: true };
 
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
@@ -406,9 +411,9 @@ export type HeatingShare =
 	| {
 			byDays: false;
 			percent: number;
-			months: { month: number; percentage: number }[];
+			months: MonthShare[];
 			periodPercent?: number; // the period's months in the profile (#229); absent on statements of #209
-			periodMonths?: { month: number; percentage: number }[]; // where they do not carry 100 % (#232); absent before
+			periodMonths?: MonthShare[]; // where they do not carry 100 % (#232); absent before
 			names: HeatingProfileNames;
 	  };
 

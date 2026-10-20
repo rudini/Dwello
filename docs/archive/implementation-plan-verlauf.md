@@ -2254,3 +2254,41 @@ Branch `w9-issue-245`. Issue #245 (open points of the reviews of #233): per poin
 - [x] PR `Fixes #245`
 
 Files: `src/lib/invoice-upload.ts`, `src/lib/ui/{Field,Checkbox}.svelte`, `src/routes/invoices/{InvoiceUploadDialog,InvoiceUploadRow,UploadRowNotes,UploadResult,BilledWarning,InvoiceCategoryFields}.svelte`, `src/routes/invoices/[id]/{+page,DeleteConsequences}.svelte`, `src/routes/invoices/[id]/edit/+page.svelte`, `messages/*.json`, `docs/design/offene-punkte.md`, tests and E2E layers.
+## Session W3-451: tenant shares at a tenant change (#451)
+
+Branch `w3-issue-451` (worker W3). Points 1–6 and 8 of #406, consolidated in #451; product-owner answers M-1, V-3, V-8 to the domain review. The plan of another session stayed open in `implementation_plan.md`, so this session was kept in the pull request and archived here directly (coordinator).
+
+- [x] Scenarios `@wip` first, fach-reviewer before implementing (`docs/reviews/451-fachreview-1.md`); M-1, V-3, V-8 decided by the product owner
+- [x] 1 Credits: amount × share also when a position sums to zero; Zeitanteil «–»; note above 100 % / below 0 %; backend refuses a negative amount (`INVOICE_AMOUNT_NEGATIVE`)
+- [x] 2 Tank fuel: the tank category shares the whole consumption over the period; M-1: a delivery counts whole in the period of its delivery day; help at «Leistungszeitraum» only in the tank's category of the chosen building (new, edit, upload)
+- [x] 3 PDF invoice lines: rounded note, days beyond the period, «× Zeitanteil», no Leistungszeitraum, split months, unbroken «Ihre Mietstage», minus, fr/it/en order, name by Rechnungsdatum and Rechnungsnummer (V-8)
+- [x] 5 Old rule: preview names a sent statement that shared heating costs over the whole period (V-3 text)
+- [x] 6 Mixed Leistungszeiträume: preview lists heating invoices without Leistungszeitraum beside ones with (V-4, V-15 plural); demo district heating invoices get their quarter
+- [x] 8 No heating costs: detail page names no Heizprofil
+- [x] Glossary «Heizrechnung», «Verbrauch (Heizmaterial)» as ordered by the product owner; `i18n-begriffe.md` «Lieferung»; requirements rule 5; API specification
+- [x] Screen state `statement-generate` / `heating-hints` (screens.json, accessibility, sprachen-bildschirme)
+- [x] fach-reviewer rounds 2, 3 (`451-fachreview-2.md`, `-3.md`); Nits V-7 rest, V-17, V-27–V-29 kept in the reports
+- [x] code-reviewer rounds 1–8 (`451-review-1.md` … `-8.md`); C-20 fixed; round 8 checked the CI fix of the #232 test; C-14 rejected (#507); C-18 row O-44; C-19 DOM test of the upload dialog
+- [x] Personas Dr. Weber, Helga (`docs/design/personas/dr-weber-451.md`, `helga-451.md`): P-1 profile factor on the detail page fixed (existing since #71/#354); P-2/P-3 came from the test setup, no code fault; issues #507, #508, #509 opened, not implemented
+- [x] E2E: C-12, C-13 seen red without their fixes; affected features 187 passed, screen rows 34 passed (c9439466); after the last merge 193 and 84 passed (9b935d31)
+- [x] daten-pruefer (`docs/reviews/451-datenpruefung-1.md`): no finding; not confirmed for lack of data or session: tank, sum zero, beyond the period, split month, no heating costs, detail page, fr/en (covered by pg, render and DOM tests)
+- [x] Workflow note `docs/reviews/workflow-notes-issue-451.md`
+- [x] PR `Fixes #451`
+
+No scenario: credits summing to zero and the refused negative amount (the backend refuses a negative invoice, so E2E cannot create one; pg, render and DOM tests); the plural of the heating hint (unit test).
+
+Files: `backend/src/services/{calculation,invoice,invoice-completeness,pdf,statement-pdf,statement,heating-profile}.service.ts`, `backend/src/db/schema.ts`, `backend/demo/demo-data.sql`, `src/lib/{invoice,statement-wizard,types}.ts`, `src/lib/server/{statement-generation,invoice}.ts`, `src/routes/invoices/**`, `src/routes/statements/{generate,[id]}/**`, `messages/*.json`, tests in `backend/src/__tests__`, `src/__tests__`, `tests/e2e`, `tests/a11y/screens.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/{nebenkostenabrechnung-anforderungen,api-specification}.md`, `docs/design/{i18n-begriffe,offene-punkte}.md`.
+
+## Session: faster CI round trips (GitHub bottleneck, 2026-10-20)
+
+Request: implement proposals 1 and 2 of the CI analysis (42 % of PR runs came from merging `main`, 48 % from docs commits).
+
+- [x] Push to `main` runs the E2E tests and the axe check (`.github/workflows/ci.yml`), so a pull request no longer needs to be up to date with `main`
+- [x] Turn off "Require branches to be up to date" and turn on auto-merge (GitHub settings)
+- [x] A pull request push that changes only documentation since the last green run of its branch skips the backend tests, E2E and axe (`tools/ci/docs-only-since.mjs`, `.github/workflows/ci.yml`)
+- [x] Skill `pull-request`: merge `main` and auto-merge as the new settings allow
+- [x] `code-reviewer` round 1: `docs/reviews/ci-speed-review-1.md`
+- [x] Workflow note: none, no rule was unclear or in the way
+- [x] PR to `main`
+- No scenario: CI configuration, no app behaviour changes
+- Files: `.github/workflows/ci.yml`, `tools/ci/docs-only-since.mjs`, `tools/ci/docs-only-since.test.ts`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `.claude/skills/pull-request/SKILL.md`

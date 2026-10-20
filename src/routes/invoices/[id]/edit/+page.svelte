@@ -5,7 +5,7 @@
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
-	import { plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
+	import { deliversToTank, plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
 	import type { BilledStatement, Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -32,6 +32,7 @@
 			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice
 			missedIn?: { start: string; end: string }[]; // periods with statements made before it was recorded
 			statements?: BilledStatement[]; // the statements it is in, with number and status (#245)
+			tanks?: Record<string, string>; // per building the category of its tank (#451, M-1)
 		};
 	} = $props();
 
@@ -61,6 +62,7 @@
 
 	// Overriding the KI's category needs a reason
 	const needsReason = $derived(values.categoryId !== initial.categoryId && !!invoice.llmConfidence);
+	const fuel = $derived(deliversToTank(data.tanks?.[values.buildingId], values.categoryId));
 	const changed = $derived(
 		(Object.keys(initial) as (keyof typeof initial)[]).some((key) => values[key] !== initial[key])
 	);
@@ -136,6 +138,7 @@
 			testid="invoice-number-input"
 		/>
 		<InvoiceDataFields
+			{fuel}
 			bind:buildingId={values.buildingId}
 			bind:invoiceDate={values.invoiceDate}
 			bind:servicePeriodStart={values.servicePeriodStart}

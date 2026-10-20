@@ -39,7 +39,7 @@
 		oncreated
 	}: {
 		open?: boolean;
-		buildings: { id: string; name: string; address: string }[];
+		buildings: { id: string; name: string; address: string; tank?: string }[]; // tank: its category (#451, M-1)
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
 		defaultDistributionKeyId: string;
@@ -47,6 +47,7 @@
 	} = $props();
 
 	let buildingId = $state('');
+	const tank = $derived(buildings.find((building) => building.id === buildingId)?.tank);
 	let rows = $state<UploadRow[]>([]);
 	let pages = $state<Record<number, string[]>>({}); // the images the KI reads, by row
 	let errors = $state<Record<number, Record<string, string>>>({}); // what keeps a row from being created
@@ -279,6 +280,7 @@
 					errors={errors[row.key] ?? {}}
 					{categories}
 					{distributionKeys}
+					{tank}
 					{keyFor}
 					onretry={() => read(row.key)}
 					onremove={() => removeRow(row.key)}

@@ -136,6 +136,17 @@ Given('die Rechnung {string} kostet danach {string} Franken', async ({ seed }, i
 	await seed.invoiceAmount(`Rechnung ${invoice}`, amount);
 });
 
+Given('die Rechnung {string} hat die Rechnungsnummer {string}', async ({ seed }, invoice: string, number: string) => {
+	await seed.invoiceNumber(invoice, number);
+});
+
+Given(
+	'die Rechnung {string} gilt danach für die Zeit vom {string} bis {string}',
+	async ({ seed }, invoice: string, from: string, to: string) => {
+		await seed.invoiceServicePeriod(`Rechnung ${invoice}`, from, to);
+	}
+);
+
 Then('ist der Liegenschaftsverwalter auf der Detailseite der Rechnung {string}', async ({ verwalter, seed }, invoice: string) => {
 	await verwalter.sees(pageAddressInApp).toBe(`/invoices/${seed.idOf(`Rechnung ${invoice}`)}`);
 });

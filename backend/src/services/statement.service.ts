@@ -239,6 +239,14 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	};
 }
 
+// Whether a position of the statement is a heating cost
+async function billsHeating(lineItems: { categoryId: string | null }[]) {
+	const ids = lineItems.flatMap((item) => item.categoryId ?? []);
+	if (!ids.length) return false;
+	const [heating] = await db.select({ id: categories.id }).from(categories).where(and(inArray(categories.id, ids), eq(categories.isHeatingCost, true))).limit(1);
+	return !!heating;
+}
+
 /**
  * Get a single statement by ID with all related data
  */
@@ -313,7 +321,8 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		tenant: result.tenant,
 		apartment: result.apartment,
 		building: result.building,
-		heatingProfile: result.heatingProfile,
+		// without a heating cost position the chosen profile was not applied: it names none (#280, #451 point 8)
+		heatingProfile: (await billsHeating(lineItems)) ? result.heatingProfile : null,
 		lineItems,
 		...(await correctionsOf(result.statement)),
 		carriedFrom: await carriedFromOf(result.statement.carriedFromId)
