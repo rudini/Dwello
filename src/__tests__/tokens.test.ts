@@ -93,4 +93,12 @@ describe('Grundstile', () => {
 		const extend = (config.theme as Record<string, Record<string, object>>).extend;
 		expect(extend.borderColor).toEqual({ DEFAULT: 'var(--color-line)' });
 	});
+
+	// Tailwind 4 inlines CSS imports without rebasing their url(./files/…), so the font files would not be found
+	it('laden die Schrift Inter über Vite, nicht über einen CSS-Import', () => {
+		expect(globals).not.toContain('@fontsource');
+		expect(readFileSync('src/routes/+layout.svelte', 'utf8')).toContain(
+			"import '@fontsource-variable/inter';"
+		);
+	});
 });

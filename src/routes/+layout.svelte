@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import '@fontsource-variable/inter';
 	import '../styles/globals.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
