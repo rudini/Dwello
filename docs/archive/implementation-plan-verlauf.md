@@ -2041,6 +2041,20 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
+## Session W7: glossary help texts of #402 (#447) (2026-10-19)
+
+Branch `w7-issue-447`. Issue #447 (closes #286, #294, #362, #369, #370, #485). Worker W7 of the parallel run; the checklist was kept in the pull request (coordinator rule for `implementation_plan.md`).
+
+- [x] Scenarios «Eigener Satz von 0 % wird abgelehnt» (`contract-new.feature`), «… beim Bearbeiten abgelehnt» (`contract-edit.feature`), help examples «Verwaltungspauschale», «Saldo» (`help.feature`), «Vor dem Berichtigen einer Kette nennt die Bestätigung, was insgesamt zurückerstattet ist» (`statement-detail.feature`); all seen red
+- [x] Fach-review before implementing (`docs/reviews/447-fachreview-1.md`): V-1 to V-12 and M-1 fixed; V-7 became #485 (decided: rows in `i18n-begriffe.md`)
+- [x] Own rate above 0: `src/lib/contract-form.ts`, `backend/src/routes/contracts.ts`, `contracts_error_fee_rate_zero`, `contracts_error_fee_rate`
+- [x] «bis 3 %» with Art. 4 Abs. 3 VMWG; it «Costi dell’immobile»; `glossary_balance_text`, `audit_empty_text`, `statements_correct_refunded_chain`; markers removed
+- [x] Slice review round 1 (`docs/reviews/447-review-1.md`): C-1 fixed with the chain scenario
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-447.md`, `weber-447.md`): no Blocker/Major; Minors stay in the reports
+- [x] Native readings of #461 on `glossary_fee_text` and `config_help_management_fee` (fr FR-7, it IT-17, IT-18, IT-20) applied
+- [x] Closing review and PR
+
+Files: `messages/{de,fr,it,en}.json`, `src/lib/contract-form.ts`, `src/routes/statements/[id]/Correction.svelte`, `backend/src/routes/contracts.ts`, `backend/src/services/pdf.service.ts`, marker files, `docs/design/i18n-begriffe.md`, `docs/nebenkostenabrechnung-anforderungen.md`, tests and scenarios above.
 ## Session G1: Gebäude mit allen Wohnungen aus dem Gebäuderegister (#479)
 
 Branch `claude/nifty-tesla-gmus4a`. «Setze #479 um»: address search through the BFF against geo.admin.ch (GWR) instead of OpenPLZ; a preview of the register's Wohnungen; Gebäude and Wohnungen created in one transaction.

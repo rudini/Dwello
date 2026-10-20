@@ -220,5 +220,11 @@ describe('Verwaltungspauschale nach Mietvertrag', () => {
 	it('lehnt einen eigenen Satz über dem Höchstsatz ab', async () => {
 		expect((await agree(true, '10.01')).status).toBe(422);
 	});
+
+	// #447 (decided in #402, point 2): an own rate of 0 % means «Nein»; from 0.01 % it is saved as before
+	it('lehnt einen eigenen Satz von 0 % ab und nimmt 0.01 % an', async () => {
+		for (const rate of ['0', '0.0', '0.00']) expect((await agree(true, rate)).status, rate).toBe(422);
+		for (const rate of ['0.01', '0.5', '10']) expect((await agree(true, rate)).status, rate).toBe(200);
+	});
 });
 
