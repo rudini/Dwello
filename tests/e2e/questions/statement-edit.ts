@@ -14,3 +14,4 @@ export const notes = Text.of(statementNotes);
 export const costsAreRecalculated = Visibility.of(recalculateHint);
 export const paymentDeadlineInvalid = Attribute.named('aria-invalid').of(paymentDeadlineInput);
 export const paymentDeadlineProblem = Accessible.descriptionOf(paymentDeadlineInput);
+export const notesHelp = Accessible.descriptionOf(notesInput);

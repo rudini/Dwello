@@ -6,7 +6,7 @@
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, utilityStatements, type KeyValues } from '../db/schema';
-import { roundToRappen } from './pdf-format';
+import { belowMinimum, roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
@@ -85,8 +85,8 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: 
 		apartmentShare,
 		periodShare: amountOf(item.periodShare),
 		shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : undefined,
-		// each part with the description of its invoice, in the same order (#236)
-		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, description: item.invoices?.[i]?.description })),
+		// each part with the Rechnungsdatum and Rechnungsnummer of its invoice, in the same order (#236, #451)
+		invoiceParts: item.invoiceParts?.map((part, i) => ({ ...part, invoiceDate: item.invoices?.[i]?.invoiceDate, invoiceNumber: item.invoices?.[i]?.invoiceNumber })),
 		byProfile: heating && byProfile,
 		heating,
 		tenantShare: parseFloat(item.tenantShare)
@@ -138,15 +138,31 @@ export function toPdfData(
 			statement.agreedCategoryIds && statement.lineItems.every((item) => item.categoryId)
 				? [...new Set(statement.lineItems.flatMap((item) => nameIn(categoryNames, item.categoryId, language) ?? []))]
 				: undefined,
+		...minimumOf(statement),
+		...(statement.carriedFrom && {
+			carryOver: { statementNumber: statement.carriedFrom.statementNumber, amount: parseFloat(statement.carriedFrom.balance) }
+		}),
+		notes: statement.notes || undefined,
 		...(statement.replaces && {
 			replaces: {
 				statementNumber: statement.replaces.statementNumber,
 				statementDate: statement.replaces.statementDate,
 				paidOn: statement.priorPaidOn ?? [],
-				priorPayments: parseFloat(statement.priorPayments)
+				priorPayments: parseFloat(statement.priorPayments),
+				offsetWith: (statement.offsetWith ?? []).map((o) => ({ statementNumber: o.statementNumber, amount: parseFloat(o.amount) }))
 			}
 		})
 	};
+}
+
+// #448: a Saldo below CHF 5 is carried over, except on a Schlussabrechnung; one settled under #94 (paid with 0.00) keeps
+// what the tenant was told
+function minimumOf(statement: StatementWithDetails) {
+	const balance = parseFloat(statement.balance);
+	if (!belowMinimum(balance) || balance === 0) return {};
+	if (statement.paidDate && Number(statement.paidAmount) === 0) return { waived: true };
+	// settled stays settled, also when the contract's end moves into the period afterwards (Fachreview 448-2 V-17)
+	return statement.final && statement.status !== 'settled' ? {} : { carried: true };
 }
 
 // The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs

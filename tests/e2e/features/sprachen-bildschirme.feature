@@ -155,6 +155,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
       | statement-generate     | old-address-preview |
+      | statement-generate     | heating-hints       |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | preview-outdated    |
       | statement-generate     | draft-restored      |
@@ -178,11 +179,17 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
+      | statement-sent-detail  | mark-paid-early     |
       | statement-sent-detail  | action-error        |
       | statement-sent-detail  | correct-dialog      |
       | statement-paid-detail  | default             |
       | statement-paid-detail  | reset-payment-dialog |
       | statement-paid-detail  | correct-dialog      |
+      | statement-settled-detail | default           |
+      | statement-carried-detail | default           |
+      | statement-carried-detail | correct-dialog    |
+      | statement-carry-detail | default             |
+      | statement-offset-detail | default            |
       | statement-replaced-detail | default          |
       | statement-corrected-detail | default         |
       | statement-correction-detail | default        |

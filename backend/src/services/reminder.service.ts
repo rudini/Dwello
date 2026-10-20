@@ -54,14 +54,19 @@ async function sender(): Promise<PostalAddress & { iban: string }> {
 	};
 }
 
-async function nextLevel(statement: Statement) {
+/** Refuses a statement that is not an open claim: not sent, not overdue, a refund or a Saldo below the minimum */
+function assertClaimable(statement: Statement) {
 	if (!['sent', 'overdue'].includes(statement.status)) {
 		throw new ReminderError('REMINDER_NOT_SENT', 'Nur versendete Abrechnungen können gemahnt werden.');
 	}
 	if (statement.status !== 'overdue') throw new ReminderError('REMINDER_NOT_OVERDUE', 'Gemahnt wird erst nach Ablauf der Zahlungsfrist.');
 	if (!(Number(statement.balance) > 0)) throw new ReminderError('REMINDER_REFUND', 'Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
-	// also after «Zahlung zurücksetzen»: a Saldo below CHF 5 is not claimed (#94)
-	if (belowMinimum(Number(statement.balance))) throw new ReminderError('REMINDER_BELOW_MINIMUM', 'Ein Saldo unter CHF 5.00 wird nicht eingefordert.');
+	// also after «Zahlung zurücksetzen»: a Saldo below CHF 5 is not claimed (#94), except on a Schlussabrechnung (#448)
+	if (belowMinimum(Number(statement.balance)) && !statement.final) throw new ReminderError('REMINDER_BELOW_MINIMUM', 'Ein Saldo unter CHF 5.00 wird nicht eingefordert.');
+}
+
+async function nextLevel(statement: Statement) {
+	assertClaimable(statement);
 	const level = (await countReminders(statement.id)) + 1;
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('REMINDER_LIMIT', 'Es wurden bereits 3 Mahnungen versendet.');
 	// the previous one first goes to the post: its Zahlungsfrist runs from that day (#449, decided in #404, point 2)

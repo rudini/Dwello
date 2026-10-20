@@ -327,8 +327,10 @@ export function testData(api: CallTheApi) {
 			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`) ?? (await statementOf(tenantTitle, year)).id}`);
 		},
 
+		// the statement the scenario made, else the one a run made; a berichtigte Abrechnung shares its year (#403)
 		async statementNumber(tenantTitle: string, year: number, status?: string): Promise<string> {
-			return (await statementOf(tenantTitle, year, status)).statementNumber;
+			const id = status ? undefined : ids.get(`Abrechnung ${tenantTitle} ${year}`);
+			return (id ? await get(`statements/${id}`) : await statementOf(tenantTitle, year, status)).statementNumber;
 		},
 
 		async statementPdf(tenantTitle: string, year: number) {
@@ -362,10 +364,11 @@ export function testData(api: CallTheApi) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { startDate });
 		},
 
-		// #120: the statement is replaced; `correct` also creates its berichtigte Abrechnung
-		async replaceStatement(tenantTitle: string, year: number, correct = false) {
+		// #120: the statement is replaced; `correct` also creates its berichtigte Abrechnung; `paidAmount`: «Bereits
+		// bezahlt» on it (#403)
+		async replaceStatement(tenantTitle: string, year: number, correct = false, paidAmount?: string) {
 			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
-			await post(`statements/${id}/replace`, {});
+			await post(`statements/${id}/replace`, paidAmount ? { paidAmount } : {});
 			if (correct) await this.correctStatement(tenantTitle, year);
 		},
 
@@ -441,6 +444,11 @@ export function testData(api: CallTheApi) {
 		// A recorded invoice that costs another amount afterwards
 		async invoiceAmount(key: string, amount: string) {
 			await put(`invoices/${ids.get(key)}`, { amount });
+		},
+
+		// A recorded invoice that gets its Leistungszeitraum afterwards (#335)
+		async invoiceServicePeriod(key: string, servicePeriodStart: string, servicePeriodEnd: string) {
+			await put(`invoices/${ids.get(key)}`, { servicePeriodStart, servicePeriodEnd });
 		},
 
 		async predefinedCategoryId(categoryName: string): Promise<string> {

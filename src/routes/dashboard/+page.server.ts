@@ -22,7 +22,7 @@ export interface DashboardData {
 		overdueAmount: number;
 		paidThisMonth: number;
 	};
-	statements: { draft: number; sent: number; paid: number; overdue: number };
+	statements: { draft: number; sent: number; paid: number; settled: number; overdue: number };
 	recentActivity: {
 		id: string;
 		type: 'statement_created' | 'invoice_added' | 'payment_received';

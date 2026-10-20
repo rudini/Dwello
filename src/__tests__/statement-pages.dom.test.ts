@@ -30,7 +30,7 @@ import { localToday } from '$lib/contract-status';
 import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
 
 const text = () => document.body.textContent ?? '';
-const counts = { draft: 3, sent: 2, paid: 5, overdue: 1 };
+const counts = { draft: 3, sent: 2, paid: 5, settled: 4, overdue: 1 };
 
 beforeEach(() => {
 	url = new URL('http://localhost/statements');
@@ -190,6 +190,17 @@ describe('Abrechnungsliste', () => {
 		);
 	});
 
+	// #448 (2): versendet ohne Zahlung, mit eigenem Filter
+	it('nennt eine erledigte Abrechnung «Erledigt» und filtert nach ihr', () => {
+		list([statement({ status: 'settled', balance: 3 })]);
+
+		expect(byTestId('statement-row-s1')!.textContent).toContain('Erledigt');
+		expect(byTestId('statement-row-s1')!.querySelector('[data-testid="statement-row-mark-paid"]')).toBeNull();
+		const filter = byTestId('filter-settled')!;
+		expect(filter.textContent!.replace(/\s+/g, ' ').trim()).toBe('4 Erledigt');
+		expect(filter.getAttribute('href')).toBe('/statements?status=settled');
+	});
+
 	it('nennt in jeder Zeile die Abrechnung im Link, ohne Statusmeldungen vorzulesen', () => {
 		list([statement()]);
 
@@ -229,10 +240,31 @@ describe('Abrechnungsliste', () => {
 			{
 				method: 'POST',
 				path: '/statements/s1/mark-paid',
-				body: { paidDate: today, statementDate: '2025-01-15' }
+				body: { paidDate: today, periodEnd: '2024-12-31' }
 			}
 		]);
 		expect(invalidateAll).toHaveBeenCalled();
+	});
+
+	// #448 (4), Code-Review 448-1 C-6: ein Tag vor dem Abrechnungsdatum wird nach der Frage gespeichert
+	it('speichert aus der Liste einen Tag vor dem Abrechnungsdatum erst nach der Bestätigung', async () => {
+		const calls = fakeBff();
+		list([statement({ status: 'sent', statementDate: '2025-01-15' })]);
+
+		click('statement-row-mark-paid');
+		fireEvent(byTestId<HTMLInputElement>('paid-date-input')!, 'input', '10.01.2025');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+		expect(calls).toEqual([]);
+		expect(byTestId('paid-date-early-warning')!.textContent!.trim()).toBe(
+			'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 15.01.2025. Trotzdem speichern?'
+		);
+		click('statement-list-mark-paid-early-confirm');
+		await settle();
+
+		expect(calls).toEqual([
+			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-10', periodEnd: '2024-12-31' } }
+		]);
 	});
 
 	it('nennt die Zahlungsaktion so, dass sie nicht wie ein Status aussieht', () => {
@@ -383,7 +415,7 @@ describe('Abrechnungsliste', () => {
 			{
 				method: 'POST',
 				path: '/statements/s1/mark-paid',
-				body: { paidDate: '2025-01-20', statementDate: '2025-01-15' }
+				body: { paidDate: '2025-01-20', periodEnd: '2024-12-31' }
 			}
 		]);
 	});
@@ -477,27 +509,94 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('366 Mietstage');
 	});
 
-	// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt; ab CHF 5.00 wie bisher
+	// #403: ein Saldo unter CHF 5 wird mit der nächsten Abrechnung verrechnet, auf der Schlussabrechnung eingefordert
+	// oder ausbezahlt; ab CHF 5.00 wie bisher
+	const carried = 'Der Betrag ist kleiner als CHF 5.00. Er wird mit der nächsten Abrechnung verrechnet.';
 	it.each([
-		[4.95, 'Der Betrag ist kleiner als CHF 5.00. Sie verzichten darauf.'],
-		[-0.05, 'Der Betrag ist kleiner als CHF 5.00. Sie zahlen ihn nicht aus.'],
-		[5, 'Der Mieter bezahlt die Nachzahlung von CHF 5.00.'],
-		[-5, 'Sie erstatten dem Mieter CHF 5.00 zurück.']
-	])('sagt bei einem Saldo von %s, was mit dem Betrag geschieht', (balance, summary) => {
-		detail({ balance });
+		[{ balance: 4.95 }, carried],
+		[{ balance: -0.05, status: 'settled' }, carried],
+		[{ balance: 0, status: 'settled' }, 'Es ist nichts zu bezahlen.'],
+		[{ balance: 3, final: true }, 'Der Mieter bezahlt die Nachzahlung von CHF 3.00.'],
+		[{ balance: -3, final: true }, 'Sie erstatten dem Mieter CHF 3.00 zurück.'],
+		// Fachreview 448-2 V-17: erledigt bleibt erledigt, auch mit einem späteren Vertragsende in der Periode
+		[{ balance: 3, status: 'settled', final: true }, carried],
+		// Fachreview 448-2 V-18: eine nach #94 einbehaltene Rückerstattung wird jetzt übertragen
+		[{ balance: -0.05, status: 'paid', paidDate: '2026-02-01', paidAmount: 0 }, carried],
+		[{ balance: 5 }, 'Der Mieter bezahlt die Nachzahlung von CHF 5.00.'],
+		[{ balance: -5 }, 'Sie erstatten dem Mieter CHF 5.00 zurück.']
+	])('sagt bei %o, was mit dem Betrag geschieht', (overrides, summary) => {
+		detail(overrides);
 		expect(byTestId('statement-payment-summary')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(summary);
 	});
 
+	// #94 versendet: eine erlassene Nachzahlung bleibt erlassen; eine einbehaltene Rückerstattung wird übertragen (oben)
+	it.each([[4.95, 'Der Betrag ist kleiner als CHF 5.00. Sie verzichten darauf.']])(
+		'sagt bei einer nach #94 erledigten Nachzahlung mit %s weiter, was damals galt',
+		(balance, summary) => {
+		detail({ balance, status: 'paid', paidDate: '2026-02-01', paidAmount: 0 });
+		expect(byTestId('statement-payment-summary')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(summary);
+		}
+	);
+
 	// Fachprüfung V-4: ohne Zahlung keine Zahlungsfrist und kein «Bezahlt am»
-	it('nennt bei einem Saldo unter CHF 5 weder Zahlungsfrist noch Zahlungsdatum', () => {
-		detail({ balance: 4.95, status: 'paid', paidDate: '2026-02-01' });
+	it('nennt bei einer erledigten Abrechnung weder Zahlungsfrist noch Zahlungsdatum', () => {
+		detail({ balance: 4.95, status: 'settled' });
 		expect(byTestId('statement-payment-summary')).not.toBeNull();
 		expect(byTestId('statement-payment-deadline')).toBeNull();
 		expect(text()).not.toContain('Bezahlt am');
 		document.body.innerHTML = '';
-		detail({ balance: 5, status: 'paid', paidDate: '2026-02-01' });
+		detail({ balance: 3, status: 'paid', paidDate: '2026-02-01', paidAmount: 3, final: true });
 		expect(byTestId('statement-payment-deadline')).not.toBeNull();
 		expect(text()).toContain('Bezahlt am');
+	});
+
+	// #403 (2, 3): erledigt heisst ohne Zahlung: nichts zu markieren, zurückzusetzen oder zu mahnen
+	it('nennt eine erledigte Abrechnung «Erledigt» und bietet weder Zahlung noch Zurücksetzen noch Mahnung an', () => {
+		detail({ balance: 3, status: 'settled', paymentDeadline: '2025-01-31' });
+
+		expect(byTestId('statement-status')!.textContent!.trim()).toBe('Erledigt');
+		for (const action of ['statement-mark-paid-button', 'statement-reset-payment-button', 'statement-reminder-button'])
+			expect(byTestId(action), action).toBeNull();
+		expect(byTestId('statement-correct-button')).not.toBeNull();
+	});
+
+	// persona anna-448-2 P-1: «Erledigt» trägt ein eigenes Symbol, nicht das «i» eines Hinweises
+	it('zeigt «Erledigt» mit einem eigenen Symbol, nicht dem eines Entwurfs', () => {
+		detail({ status: 'settled', balance: 3 });
+		const settled = byTestId('statement-status')!.querySelector('svg')!.innerHTML;
+		document.body.innerHTML = '';
+		detail({ status: 'draft' });
+		expect(settled).not.toBe(byTestId('statement-status')!.querySelector('svg')!.innerHTML);
+	});
+
+	// #403: die Schlussabrechnung fordert auch einen kleinen Betrag ein, gemahnt wird nach Ablauf der Frist
+	it('bietet bei einer überfälligen Schlussabrechnung unter CHF 5 eine Mahnung an', () => {
+		detail({ status: 'overdue', balance: 4.95, final: true });
+		expect(byTestId('statement-reminder-button')).not.toBeNull();
+	});
+
+	// #403: der Übertrag aus der letzten Abrechnung desselben Mietvertrags, zwischen Akonto und Saldo
+	it.each([
+		[-3, 'Übertrag aus Abrechnung NK-2023-0001 − CHF 3.00'],
+		[3, 'Übertrag aus Abrechnung NK-2023-0001 + CHF 3.00']
+	])('nennt einen Übertrag von %s mit seiner Abrechnung', (balance, row) => {
+		detail({ carriedFrom: { id: 's0', statementNumber: 'NK-2023-0001', balance } });
+		expect(byTestId('statement-carry-over')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(row);
+	});
+
+	// Fachreview 448-1 V-2: der Saldo der ersetzten Abrechnung steht schon als Übertrag in der nächsten
+	it('nennt einen schon übertragenen Saldo der ersetzten Abrechnung als verrechnet', () => {
+		detail({ priorPayments: 3, priorPaidOn: [], offsetWith: [{ statementNumber: 'NK-2025-0001', amount: 3 }] });
+		expect(byTestId('statement-offset')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+			'Bereits verrechnet mit NK-2025-0001 − CHF 3.00'
+		);
+		expect(byTestId('statement-prior-payments')).toBeNull();
+	});
+
+	it('nennt ohne Übertrag keinen', () => {
+		detail();
+		expect(byTestId('statement-balance')).not.toBeNull();
+		expect(byTestId('statement-carry-over')).toBeNull();
 	});
 
 	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
@@ -541,7 +640,7 @@ describe('Abrechnungsdetail', () => {
 		click('statement-correct-button');
 
 		expect(correctDialog()).toContain(
-			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten, wird nicht mehr gemahnt und lässt sich nicht mehr als bezahlt markieren. Hat der Mieter schon bezahlt, markieren Sie sie zuerst als bezahlt.'
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten, wird nicht mehr gemahnt und lässt sich nicht mehr als bezahlt markieren. Was der Mieter schon überwiesen hat, tragen Sie bei «Bereits bezahlt» ein.'
 		);
 		// Personas W2e: the dialog confirms with the word of the button that opened it; the consequence before the help
 		expect(byTestId('statement-correct-confirm')!.textContent).toContain('Abrechnung berichtigen');
@@ -551,6 +650,79 @@ describe('Abrechnungsdetail', () => {
 			'Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt.'
 		);
 		expect(correctDialog()).toContain('Das lässt sich nicht rückgängig machen.');
+	});
+
+	// #403 (5): was der Mieter auf die versendete Abrechnung schon überwiesen hat, auch ein Teil
+	it.each(['sent', 'overdue'])('fragt beim Berichtigen einer Abrechnung im Status %s nach dem bereits Bezahlten', (status) => {
+		detail({ status });
+		click('statement-correct-button');
+
+		const field = byTestId<HTMLInputElement>('statement-correct-paid-amount')!;
+		expect(field.value).toBe('0.00');
+		expect(document.getElementById(field.getAttribute('aria-describedby')!.split(' ')[0])!.textContent!.trim()).toBe(
+			'Was der Mieter auf diese Abrechnung schon überwiesen hat, auch ein Teilbetrag.'
+		);
+		const formData = new FormData();
+		actions.get('?/replace')!({ formData });
+		expect(formData.get('paidAmount')).toBe('0.00');
+	});
+
+	// Fachreview 448-1 V-1: bei einer Rückerstattung hat der Vermieter schon überwiesen
+	it('fragt beim Berichtigen einer Rückerstattung nach dem bereits Zurückerstatteten', () => {
+		detail({ status: 'sent', balance: -40 });
+		click('statement-correct-button');
+
+		const field = byTestId<HTMLInputElement>('statement-correct-paid-amount')!;
+		expect(document.querySelector(`label[for="${field.id}"]`)!.textContent).toContain('Bereits zurückerstattet');
+		expect(document.getElementById(field.getAttribute('aria-describedby')!.split(' ')[0])!.textContent!.trim()).toBe(
+			'Was Sie dem Mieter auf diese Abrechnung schon überwiesen haben, auch ein Teilbetrag.'
+		);
+	});
+
+	it('meldet beim Berichtigen einen ungültigen Betrag am Feld, ohne zu ersetzen', () => {
+		detail({ status: 'sent' });
+		click('statement-correct-button');
+		const field = byTestId<HTMLInputElement>('statement-correct-paid-amount')!;
+		fireEvent(field, 'input', 'zwanzig');
+		click('statement-correct-confirm');
+		flushSync();
+
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+		expect(correctDialog()).toContain('Der Betrag «zwanzig» ist ungültig. Geben Sie einen Betrag in Franken ein, zum Beispiel 40.00.');
+	});
+
+	// Code-Review 448-1 C-3: ein übertragener Saldo wird angerechnet
+	it('nennt beim Berichtigen einer erledigten Abrechnung, was mit einem übertragenen Saldo geschieht', () => {
+		detail({ status: 'settled', balance: 3 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain(
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten. Enthält eine versendete nächste Abrechnung ihren Saldo schon als Übertrag, rechnet die berichtigte Abrechnung ihn als «Bereits verrechnet» an: Der Mieter bezahlt oder erhält ihn nicht doppelt. Enthält ein Entwurf ihn als Übertrag, entfernt Dwello den Übertrag sofort aus dem Entwurf; die berichtigte Abrechnung rechnet dann den ganzen Saldo ab. Ist der Saldo der berichtigten Abrechnung wieder kleiner als CHF 5.00, berechnen Sie den Entwurf neu, nachdem Sie die berichtigte Abrechnung versendet haben.'
+		);
+	});
+
+	// Fachreview 448-3 V-25, Code-Review 448-2 C-13: eine nach #94 einbehaltene Rückerstattung wird auch übertragen
+	it('nennt beim Berichtigen einer nach #94 erledigten Rückerstattung, was mit dem übertragenen Saldo geschieht', () => {
+		detail({ status: 'paid', balance: -3, paidDate: '2025-02-01', paidAmount: 0 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain('rechnet die berichtigte Abrechnung ihn als «Bereits verrechnet» an');
+	});
+
+	// Fachreview 448-4 V-32: ein Saldo 0.00 wird nie übertragen
+	it('nennt beim Berichtigen einer erledigten Abrechnung mit Saldo 0.00 keinen Übertrag', () => {
+		detail({ status: 'settled', balance: 0 });
+		click('statement-correct-button');
+		expect(correctDialog()).not.toContain('Übertrag');
+		// 448-review-3 C-18: no «Bereits bezahlt» field on a settled one, so the text does not point to it
+		expect(correctDialog()).toContain(
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten.'
+		);
+		expect(correctDialog()).not.toContain('Bereits bezahlt');
+	});
+
+	it.each(['paid', 'settled'])('fragt beim Berichtigen einer Abrechnung im Status %s nicht nach dem bereits Bezahlten', (status) => {
+		detail({ status, paidDate: '2025-02-01', paidAmount: 363 });
+		click('statement-correct-button');
+		expect(byTestId('statement-correct-paid-amount')).toBeNull();
 	});
 
 	it('nennt beim Berichtigen einer bezahlten Abrechnung den Betrag, der angerechnet wird', () => {
@@ -599,10 +771,11 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Fachreview W2e V-13: bei einer Rückerstattung zahlt der Vermieter
-	it('sagt bei einer versendeten Rückerstattung, die überwiesene Rückerstattung zuerst zu erfassen', () => {
+	// Code-Review 448-1 C-3: das schon Überwiesene steht im Feld «Bereits zurückerstattet»
+	it('sagt bei einer versendeten Rückerstattung, die überwiesene Rückerstattung im Feld zu erfassen', () => {
 		detail({ status: 'sent', balance: -40 });
 		click('statement-correct-button');
-		expect(correctDialog()).toContain('Haben Sie die Rückerstattung schon überwiesen, markieren Sie sie zuerst als bezahlt.');
+		expect(correctDialog()).toContain('Was Sie schon überwiesen haben, tragen Sie bei «Bereits zurückerstattet» ein.');
 		expect(correctDialog()).not.toContain('gemahnt');
 	});
 
@@ -826,7 +999,32 @@ describe('Abrechnungsdetail', () => {
 			{ id: 'i2', description: 'Gutschrift Q3', amount: -100, start: '2025-07-01', end: '2025-09-30', part: { days: 92, total: 92 } }
 		];
 		detail({ lineItems: [line({ invoices, totalAmount: 500, apartmentShare: 250, tenantShare: 250 })] });
-		expect(invoicesText()).toContain('Ihr Anteil: 250.00 × (600.00 × 91/91 + -100.00 × 92/92) / 500.00 = 250.00');
+		expect(invoicesText()).toContain('Ihr Anteil: 250.00 × (600.00 × 91/91 – 100.00 × 92/92) / 500.00 = 250.00');
+	});
+
+	// #451, Persona Dr. Weber P-1 (bestand seit #71/#354): eine Heizrechnung nach Heizprofil rechnet in der Formel mit dem
+	// Anteil nach Heizprofil wie das PDF, nicht mit Tagen: 1'520.00 × 44.20 % + 1'410.00 × 100.00 %
+	it('rechnet eine Heizrechnung nach Heizprofil mit dem Anteil nach Heizprofil wie das PDF', () => {
+		const profile = (percent: number) => ({ percent, months: [], periodMonths: [] });
+		const invoices = [
+			{ id: 'i1', description: 'Fernwärme Q1', amount: 1520, start: '2025-01-01', end: '2025-12-31', part: { days: 184, total: 365, noPeriod: true, profile: profile(44.2) } },
+			{ id: 'i2', description: 'Fernwärme Q4', amount: 1410, start: '2025-10-01', end: '2025-12-31', part: { days: 92, total: 92, profile: profile(100) } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 2930, apartmentShare: 750.84, tenantShare: 533.16 })] });
+		expect(invoicesText()).toContain('Ihr Anteil: 750.84 × (1’520.00 × 44.20 % + 1’410.00 × 100.00 %) / 2’930.00 = 533.16');
+	});
+
+	// #451, Punkt 1 (Code-Review C-3): Rechnungen, die zusammen null ergeben, haben keinen Zeitanteil; Ihr Anteil ist die
+	// Summe ihrer Teile mal der Anteil der Wohnung nach dem Verteilschlüssel, wie im PDF
+	it('rechnet Rechnungen, die zusammen null ergeben, je Rechnung wie das PDF', () => {
+		const invoices = [
+			{ id: 'i1', description: 'Hauswart Q3', amount: 900, start: '2025-07-01', end: '2025-09-30', part: { days: 47, total: 92 } },
+			{ id: 'i2', description: 'Gutschrift Q2', amount: -900, start: '2025-04-01', end: '2025-06-30', part: { days: 0, total: 91 } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 0, apartmentShare: 0, periodShare: 0, tenantShare: 229.89 })] });
+		expect(invoicesText()).toContain('Ihr Anteil: (900.00 × 47/92 – 900.00 × 0/91) × Anteil Ihrer Wohnung nach dem Verteilschlüssel = 229.89');
+		expect(invoicesText()).not.toContain('/ 0.00');
+		expect(byTestId('statement-line-item')!.querySelectorAll('td')[4].textContent!.trim()).toBe('–');
 	});
 
 	it('nennt die Summe der Kosten «Ihre Nebenkosten», wie das PDF', () => {
@@ -1296,7 +1494,8 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
 	});
 
-	// #94: ein Saldo unter CHF 5 wird nicht eingefordert, auch überfällig nach dem Zurücksetzen der Zahlung nicht
+	// #94: ein Saldo unter CHF 5, nach #94 erledigt, wird nicht eingefordert, auch überfällig nach dem Zurücksetzen der
+	// Zahlung nicht
 	it('bietet bei einem Saldo unter CHF 5 keine Mahnung an', () => {
 		detail({ status: 'overdue', balance: 4.95 });
 		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
@@ -1340,26 +1539,66 @@ describe('Abrechnungsdetail', () => {
 		expect(history).toContain('Bezahlt 05.10.2026');
 	});
 
-	// #138: das Geld kann nicht vor dem Abrechnungsdatum eingegangen sein
-	it('prüft im Dialog, dass das Zahlungsdatum nicht vor dem Abrechnungsdatum liegt', () => {
+	// #403 (4): vor dem Ende der Abrechnungsperiode kann das Geld nicht für diese Abrechnung sein
+	it('prüft im Dialog, dass das Zahlungsdatum nicht vor dem Ende der Abrechnungsperiode liegt', () => {
 		detail({ status: 'sent', statementDate: '2025-01-15' });
 		click('statement-mark-paid-button');
 		const field = byTestId<HTMLInputElement>('paid-date-input')!;
-		fireEvent(field, 'input', '14.01.2025');
+		fireEvent(field, 'input', '30.12.2024');
 		click('statement-mark-paid-confirm');
 		flushSync();
 
 		expect(field.getAttribute('aria-invalid')).toBe('true');
-		expect(text()).toContain('Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 15.01.2025.');
+		expect(text()).toContain(
+			'Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am 31.12.2024. Geben Sie frühestens dieses Datum ein.'
+		);
 	});
 
-	it('sendet das Abrechnungsdatum mit, damit der Server dieselbe Grenze prüft', () => {
+	// #403 (4): ein Mieter darf früher zahlen; ein Tag vor dem Abrechnungsdatum gilt nach einer Bestätigung
+	it('fragt bei einem Zahlungsdatum vor dem Abrechnungsdatum nach, bevor es gespeichert wird', () => {
+		detail({ status: 'sent', statementDate: '2025-01-15' });
+		click('statement-mark-paid-button');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '10.01.2025');
+		click('statement-mark-paid-confirm');
+		flushSync();
+
+		expect(field.getAttribute('aria-invalid')).not.toBe('true');
+		expect(byTestId('paid-date-early-warning')!.textContent!.trim()).toBe(
+			'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 15.01.2025. Trotzdem speichern?'
+		);
+		expect(byTestId('statement-mark-paid-early-confirm')!.textContent).toContain('Trotzdem speichern');
+		// Code-Review 448-1 C-7: a screen reader reads the question
+		expect(byTestId('paid-date-early-warning')!.closest('[aria-live="polite"]')).not.toBeNull();
+		// another day asks again
+		fireEvent(field, 'input', '16.01.2025');
+		flushSync();
+		expect(byTestId('paid-date-early-warning')).toBeNull();
+		expect(byTestId('statement-mark-paid-confirm')).not.toBeNull();
+	});
+
+	// Code-Review 448-1 C-6: nach der Frage wird das frühere Datum gesendet
+	it('sendet ein Zahlungsdatum vor dem Abrechnungsdatum nach der Bestätigung', () => {
+		detail({ status: 'sent', statementDate: '2025-01-15' });
+		click('statement-mark-paid-button');
+		fireEvent(byTestId<HTMLInputElement>('paid-date-input')!, 'input', '10.01.2025');
+		const submitted = vi.spyOn(HTMLFormElement.prototype, 'requestSubmit').mockImplementation(() => {});
+		click('statement-mark-paid-confirm');
+		flushSync();
+		expect(submitted).not.toHaveBeenCalled();
+		click('statement-mark-paid-early-confirm');
+
+		expect(submitted).toHaveBeenCalledTimes(1);
+		submitted.mockRestore();
+	});
+
+	it('sendet das Ende der Abrechnungsperiode mit, damit der Server dieselbe Grenze prüft', () => {
 		detail({ status: 'sent', statementDate: '2025-01-15' });
 		click('statement-mark-paid-button');
 		const formData = new FormData();
 		actions.get('?/markPaid')!({ formData });
 
-		expect(formData.get('statementDate')).toBe('2025-01-15');
+		expect(formData.get('periodEnd')).toBe('2024-12-31');
 	});
 
 	// #92: eine erfasste Zahlung lässt sich zurücksetzen, nach einer Bestätigung mit der Folge
@@ -1528,6 +1767,25 @@ describe('Abrechnung bearbeiten', () => {
 
 		expect(byTestId('statement-notes-input')).not.toBeNull();
 		expect(byTestId('payment-deadline-input')).toBeNull();
+	});
+
+	// #403: die Schlussabrechnung fordert auch einen kleinen Betrag ein, bis zur Frist
+	it('fragt bei einer Schlussabrechnung unter CHF 5 nach der Frist', () => {
+		edit({ balance: 3, final: true });
+		expect(byTestId('payment-deadline-input')).not.toBeNull();
+	});
+
+	// #403 (6): die Bemerkung steht im PDF; bei der berichtigten Abrechnung der Grund der Berichtigung
+	it.each([
+		[{}, 'Zum Beispiel eine Absprache mit dem Mieter. Die Bemerkung steht im PDF, das der Mieter erhält.'],
+		[
+			{ replaces: { id: 's0', statementNumber: 'NK-2024-0000', statementDate: '2025-01-10' } },
+			'Schreiben Sie hier, warum Sie die Abrechnung berichtigen. Die Bemerkung steht im PDF, das der Mieter erhält.'
+		]
+	])('erklärt die Bemerkung bei %o', (overrides, help) => {
+		edit(overrides);
+		const field = byTestId('statement-notes-input')!;
+		expect(document.getElementById(field.getAttribute('aria-describedby')!.split(' ')[0])!.textContent!.trim()).toBe(help);
 	});
 
 	it('meldet eine fehlende Frist am Feld', () => {

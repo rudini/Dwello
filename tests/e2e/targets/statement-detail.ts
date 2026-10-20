@@ -94,6 +94,17 @@ export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) 
 // #338: «Neu berechnen» and its confirmation
 export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));
+
+// #403: the Übertrag from the previous statement, the confirmation of an early payment date, «Bereits bezahlt» of a
+// correction
+export const carryOverRow = target('Übertrag', (page) => page.getByTestId('statement-carry-over'));
+export const earlyPaidDateWarning = target('Zahlungsdatum vor dem Abrechnungsdatum', (page) =>
+	page.getByTestId('paid-date-early-warning')
+);
+export const confirmEarlyPaidDateButton = target('Trotzdem speichern', (page) =>
+	page.getByTestId('statement-mark-paid-early-confirm')
+);
+export const correctPaidAmountInput = target('Bereits bezahlt', (page) => page.getByTestId('statement-correct-paid-amount'));
 // #464: the Akonto the statement deducts
 export const statementAdvancePaid = target('Akontobeiträge', (page) => page.getByTestId('statement-advance-paid'));
 // #464 (F-4): the berichtigte Abrechnung deducts another Akonto than the statement it replaces

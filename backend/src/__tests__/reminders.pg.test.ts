@@ -338,7 +338,7 @@ describe('Zahlungsfrist der Mahnung', () => {
 	});
 
 	it('nennt bei einer bezahlten Abrechnung keinen Tag für eine nächste Mahnung', async () => {
-		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId)); // #448: as recorded
 
 		expect(await nextReminderFrom(statementId)).toBeNull();
 		await db.update(utilityStatements).set({ status: 'sent', paidDate: null }).where(eq(utilityStatements.id, statementId));
@@ -526,7 +526,7 @@ describe('Zahlteil der Mahnung', () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
 		const statementId = await statement('sent');
 		const letter = (await remind(statementId)).document;
-		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId)); // #448: as recorded
 		const toSend = (await (await api('GET', '/api/v1/documents?status=to_send')).json()) as { data: { id: string }[] };
 		const all = (await (await api('GET', `/api/v1/documents?statementId=${statementId}`)).json()) as {
 			data: { id: string; status: string; notToSend: string | null }[];
@@ -571,7 +571,7 @@ describe('Zahlteil der Mahnung', () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
 		const statementId = await statement('sent');
 		const letter = (await remind(statementId)).document;
-		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId)); // #448: as recorded
 		await api('POST', `/api/v1/statements/${statementId}/payment-reset`, {});
 		const toSend = (await (await api('GET', '/api/v1/documents?status=to_send')).json()) as { data: { id: string }[] };
 		const marked = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
@@ -584,7 +584,7 @@ describe('Zahlteil der Mahnung', () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
 		const statementId = await statement('sent');
 		const letter = (await remind(statementId)).document;
-		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId)); // #448: as recorded
 		const response = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
 		const [after] = await db.select().from(documents).where(eq(documents.id, letter.id));
 

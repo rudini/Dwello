@@ -1,0 +1,8 @@
+# Workflow notes: #451
+
+| Rule | What happened in this task | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 7 (three rounds per slice) | The closing code review needed a fourth round for two Majors (C-12, C-13: scenarios missing for fixes of the persona round); the coordinator allowed it. The rule does not say whether the closing round before a push counts as its own slice. | Say that the closing round before each push has its own three rounds. |
+| `CLAUDE.md`, Gotchas «Commit gates» (fallow duplication) | Passing one more prop in `src/routes/invoices/+page.svelte` made fallow report a clone group of five list pages (Pagination block) that exists on `main`. Worked around by handing the data through the buildings list instead, so the file stayed unchanged. | Let fallow's audit gate count a clone group as inherited when the changed lines are outside the cloned block. |
+| `CLAUDE.md`, Workflow 2 (a test written after the code shows its red by taking the code out) | Two E2E scenarios of review fixes had to be shown red: the fixes were taken out by a script, the scenarios run, the files restored, all under one hold of the shared E2E lock (about 10 min with the build). | For a fix whose lower-layer test was already seen red, allow the scenario's red run to be skipped when the scenario only adds the E2E layer. |
+| Several workers in one container (coordinator rules, not in `CLAUDE.md`) | The shared scratchpad overwrote unprefixed scripts of other workers (`edit1.py`); the worktree isolation refuses heredocs and loops with git, so every edit ran as a script file. | As in the coordinator's rule: name scratchpad files with the worker prefix; mention it in `CLAUDE.md` «Cloud sessions» if parallel workers stay. |

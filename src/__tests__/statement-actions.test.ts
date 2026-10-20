@@ -107,29 +107,29 @@ describe('Zahlungsdatum', () => {
 	});
 });
 
-// #138: frühestens das Abrechnungsdatum, das der Dialog mitsendet; das Backend prüft es noch einmal
-describe('Zahlungsdatum und Abrechnungsdatum', () => {
-	it('lehnt ein Zahlungsdatum vor dem Abrechnungsdatum ab, ohne zu speichern', async () => {
-		const { calls, result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2026-01-04', statementDate: '2026-01-05' });
+// #138, #448: frühestens das Ende der Abrechnungsperiode, das der Dialog mitsendet; das Backend prüft es noch einmal
+describe('Zahlungsdatum und Ende der Abrechnungsperiode', () => {
+	it('lehnt ein Zahlungsdatum vor dem Ende der Abrechnungsperiode ab, ohne zu speichern', async () => {
+		const { calls, result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2024-12-30', periodEnd: '2024-12-31' });
 
 		expect(await result).toMatchObject({
 			status: 400,
 			data: {
 				actionError:
-					'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 05.01.2026. Geben Sie frühestens dieses Datum ein.'
+					'Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am 31.12.2024. Geben Sie frühestens dieses Datum ein.'
 			}
 		});
 		expect(calls).toEqual([]);
 	});
 
 	it('zeigt die Ablehnung des Backends in Worten', async () => {
-		const { result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2026-01-04' }, {}, { status: 400, answer: paidDateRefused });
+		const { result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2024-12-30' }, {}, { status: 400, answer: paidDateRefused });
 
 		expect(await result).toMatchObject({
 			status: 400,
 			data: {
 				actionError:
-					'Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom 05.01.2026. Geben Sie frühestens dieses Datum ein.'
+					'Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am 31.12.2024. Geben Sie frühestens dieses Datum ein.'
 			}
 		});
 	});
@@ -285,6 +285,24 @@ describe('Abrechnung berichtigen', () => {
 		await result;
 
 		expect(calls).toEqual([{ method: 'POST', url: `${API}/replace`, body: undefined }]);
+	});
+
+	// #448 (5): was auf eine versendete oder überfällige Abrechnung schon bezahlt ist, rechnet die berichtigte an
+	it('sendet mit, was schon bezahlt ist', async () => {
+		const { calls, result } = runAction(actions.replace, 's1', 200, { paidAmount: '40.00' });
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/replace`, body: { paidAmount: '40.00' } }]);
+	});
+
+	it('meldet einen ungültigen Betrag, ohne zu ersetzen', async () => {
+		const { calls, result } = runAction(actions.replace, 's1', 200, { paidAmount: '-1' });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { actionError: 'Der Betrag «-1» ist ungültig. Geben Sie einen Betrag in Franken ein, zum Beispiel 40.00.' }
+		});
+		expect(calls).toEqual([]);
 	});
 
 	it('meldet, wenn das Backend das Ersetzen ablehnt', async () => {

@@ -7,7 +7,7 @@
 
 import { eq, sql, asc, ilike, and } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { heatingProfiles, type HeatingProfile, type NewHeatingProfile } from '../db/schema';
+import { heatingProfiles, type HeatingProfile, type MonthShare, type NewHeatingProfile } from '../db/schema';
 import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error';
 import { Conflict } from './conflict';
 import { isDefaultSetting } from './default-setting';
@@ -341,8 +341,8 @@ export function calculateHeatingShare(
 	startDate: Date,
 	endDate: Date,
 	totalCost: number
-): { share: number; percentage: number; monthBreakdown: { month: number; percentage: number }[] } {
-	const monthBreakdown: { month: number; percentage: number }[] = [];
+): { share: number; percentage: number; monthBreakdown: MonthShare[] } {
+	const monthBreakdown: MonthShare[] = [];
 	let totalPercentage = 0;
 
 	// Iterate through each month in the period
@@ -368,7 +368,8 @@ export function calculateHeatingShare(
 		const proratedPct = roundToRappen((monthPct * daysInPeriod) / daysInMonth);
 		totalPercentage = roundToRappen(totalPercentage + proratedPct);
 
-		monthBreakdown.push({ month, percentage: proratedPct });
+		// a month split by the period's start or end with its fraction, for the PDF (#451, point 3)
+		monthBreakdown.push(daysInPeriod < daysInMonth ? { month, percentage: proratedPct, full: monthPct, days: daysInPeriod, total: daysInMonth } : { month, percentage: proratedPct });
 
 		// Move to next month
 		current.setMonth(current.getMonth() + 1);

@@ -1,7 +1,36 @@
 import { CallTheApi, throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, EnterDate, Navigate } from '../screenplay/interactions';
-import { confirmCorrectButton, confirmDeleteStatementButton, confirmMarkPaidButton, confirmRecalculateButton, confirmResetPaymentButton, confirmSendButton, correctStatementButton, createCorrectionButton, deleteStatementButton, deliverByLetterButton, downloadPdfLink, generatePdfButton, letterInsteadLink, lineItemInvoiceLink, markPaidButton, paidDateInput, pdfRefusalBackLink, recalculateButton, replacedByLink, replacedContractLink, replacesLink, resetPaymentButton, sendStatementButton, statementApartmentLink, statementEditButton, statementTenantLink } from '../targets/statement-detail';
+import { Click, DownloadFrom, Enter, EnterDate, Navigate } from '../screenplay/interactions';
+import {
+	confirmCorrectButton,
+	confirmEarlyPaidDateButton,
+	correctPaidAmountInput,
+	correctStatementButton,
+	confirmRecalculateButton,
+	recalculateButton,
+	createCorrectionButton,
+	replacedByLink,
+	replacedContractLink,
+	replacesLink,
+	confirmDeleteStatementButton,
+	confirmMarkPaidButton,
+	confirmSendButton,
+	deliverByLetterButton,
+	deleteStatementButton,
+	downloadPdfLink,
+	pdfRefusalBackLink,
+	generatePdfButton,
+	lineItemInvoiceLink,
+	markPaidButton,
+	paidDateInput,
+	confirmResetPaymentButton,
+	resetPaymentButton,
+	sendStatementButton,
+	statementApartmentLink,
+	statementEditButton,
+	statementTenantLink,
+	letterInsteadLink
+} from '../targets/statement-detail';
 
 /** The API path keeps the statement as the backend returns it for `heatingCostsOfTenant` */
 export const STATEMENT = 'statement';
@@ -65,3 +94,8 @@ export const openReplacedContract = Click.on(replacedContractLink);
 // #449: the letter instead of the e-mail, from the e-mail dialog; the tenant's channel stays
 export const deliverByLetterInstead: Activity = (actor) =>
 	actor.attemptsTo(openSendConfirmation, Click.on(letterInsteadLink), Click.on(confirmSendButton));
+
+// #403
+export const confirmEarlyPaidDate = Click.on(confirmEarlyPaidDateButton);
+export const correctStatementPaid = (amount: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(correctStatementButton), Enter.theValue(amount).into(correctPaidAmountInput), Click.on(confirmCorrectButton));

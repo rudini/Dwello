@@ -2191,6 +2191,17 @@ Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20:
 - [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
 - [x] PR `Fixes #488`
 
+## Session W4: payments after #403 (#448, #484)
+
+Branch `w4-issue-448`. Worker W4 of the coordinator session; the checklist was kept in the pull request (coordinator rule for parallel workers). Stop and ask of #448 checked: the carry-over needs a new nullable column (`carried_from_id`, migration 0028) and a status `settled`; no existing statement changes. Product owner 2026-10-19 (via coordinator): M-1, V-2, V-4 of the domain review decided in #448; #484 decided and entered by this session as ordered.
+
+- [x] @wip scenarios (`statement-minimum-balance.feature`, `statement-detail.feature`, `statements.feature`, `dashboard.feature`) seen red; domain review before implementing (`docs/reviews/448-fachreview-1.md`)
+- [x] Übertrag below CHF 5 (also refunds settled under #94), status «Erledigt», Schlussabrechnung without Mindestbetrag, payment date from the end of the period with a confirmation before the Abrechnungsdatum, «Bereits bezahlt» / «Bereits zurückerstattet» when correcting, «Bereits verrechnet» for a Saldo a sent next statement counts, the remark on the PDF; tests: `statement-carry-over.pg.test.ts`, `statement-pdf-render.test.ts`, `statement-pdf-data.test.ts`, `statement-pages.dom.test.ts`, BFF and mapping tests
+- [x] Glossary rows of #484 and V-15 (`UBIQUITOUS_LANGUAGE.md`), `glossary_balance_text`, help term «Erledigt», `docs/data-model.md`, `docs/api-specification.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/PRD-Dwello.md`, `docs/design/i18n-begriffe.md`
+- [x] a11y and language screens: `statement-settled-detail`, `statement-carried-detail`, `statement-carry-detail`, `statement-offset-detail`, state `mark-paid-early`
+- [x] Domain reviews 1 to 4 (`docs/reviews/448-fachreview-1..4.md`), code reviews 1 and 2 (`448-review-1..2.md`), data check (`448-datenpruefung-1.md`), personas `dr-weber-448`, `anna-448` and their re-runs
+- [x] Open work: #506 (Übertrag that reaches no statement), #523 (partial payment when marking paid), #524 (a new PDF replaces the one sent), U-43 (edit page table cut off)
+- [x] Migration renumbered 0026 → 0027 → 0028 (taken on `main` by #464 and #514)
 ## Session W2-199: one Abrechnungsperiode per day and building (#199, #408, #486, #487)
 
 Branch `w2-issue-199` (worker W2; reviewers started by the coordinator). Fixes #199 (decision #408 point 2, texts in https://github.com/rudini/Dwello/issues/408#issuecomment-6249569443), #408 (its last marker), #486 and #487 (product owner decisions 2026-10-19/20). The checklist was kept in the pull request description: ten parallel workers share `implementation_plan.md` (coordinator's rule).
@@ -2228,3 +2239,42 @@ Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of
 - [x] PR `Fixes #455`, `Fixes #481`, `Fixes #482`, `Fixes #483`, `Refs #245`
 
 Files: `backend/src/config/llm.ts`, `backend/src/services/statement-invoices.service.ts`, `backend/scripts/llm-stub.ts`, `src/lib/invoice-upload.ts`, `src/lib/server/invoice.ts`, `src/lib/types.ts`, `src/lib/ui/{FileInput,Dialog,DateInput,Button}.svelte`, `src/routes/invoices/` (`+page.svelte`, `DeductedHint`, `InvoiceDataFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadFiles`, `UploadRowNotes`, `[id]/{+page,InvoiceFacts,InvoiceBeleg}.svelte`, `[id]/edit/+page.svelte`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/design/i18n-begriffe.md`, `docs/api-specification.md`, `tests/contracts/{invoice-statements,invoice-list}.json`, tests and E2E layers.
+
+## Session W3-451: tenant shares at a tenant change (#451)
+
+Branch `w3-issue-451` (worker W3). Points 1–6 and 8 of #406, consolidated in #451; product-owner answers M-1, V-3, V-8 to the domain review. The plan of another session stayed open in `implementation_plan.md`, so this session was kept in the pull request and archived here directly (coordinator).
+
+- [x] Scenarios `@wip` first, fach-reviewer before implementing (`docs/reviews/451-fachreview-1.md`); M-1, V-3, V-8 decided by the product owner
+- [x] 1 Credits: amount × share also when a position sums to zero; Zeitanteil «–»; note above 100 % / below 0 %; backend refuses a negative amount (`INVOICE_AMOUNT_NEGATIVE`)
+- [x] 2 Tank fuel: the tank category shares the whole consumption over the period; M-1: a delivery counts whole in the period of its delivery day; help at «Leistungszeitraum» only in the tank's category of the chosen building (new, edit, upload)
+- [x] 3 PDF invoice lines: rounded note, days beyond the period, «× Zeitanteil», no Leistungszeitraum, split months, unbroken «Ihre Mietstage», minus, fr/it/en order, name by Rechnungsdatum and Rechnungsnummer (V-8)
+- [x] 5 Old rule: preview names a sent statement that shared heating costs over the whole period (V-3 text)
+- [x] 6 Mixed Leistungszeiträume: preview lists heating invoices without Leistungszeitraum beside ones with (V-4, V-15 plural); demo district heating invoices get their quarter
+- [x] 8 No heating costs: detail page names no Heizprofil
+- [x] Glossary «Heizrechnung», «Verbrauch (Heizmaterial)» as ordered by the product owner; `i18n-begriffe.md` «Lieferung»; requirements rule 5; API specification
+- [x] Screen state `statement-generate` / `heating-hints` (screens.json, accessibility, sprachen-bildschirme)
+- [x] fach-reviewer rounds 2, 3 (`451-fachreview-2.md`, `-3.md`); Nits V-7 rest, V-17, V-27–V-29 kept in the reports
+- [x] code-reviewer rounds 1–8 (`451-review-1.md` … `-8.md`); C-20 fixed; round 8 checked the CI fix of the #232 test; C-14 rejected (#507); C-18 row O-44; C-19 DOM test of the upload dialog
+- [x] Personas Dr. Weber, Helga (`docs/design/personas/dr-weber-451.md`, `helga-451.md`): P-1 profile factor on the detail page fixed (existing since #71/#354); P-2/P-3 came from the test setup, no code fault; issues #507, #508, #509 opened, not implemented
+- [x] E2E: C-12, C-13 seen red without their fixes; affected features 187 passed, screen rows 34 passed (c9439466); after the last merge 193 and 84 passed (9b935d31)
+- [x] daten-pruefer (`docs/reviews/451-datenpruefung-1.md`): no finding; not confirmed for lack of data or session: tank, sum zero, beyond the period, split month, no heating costs, detail page, fr/en (covered by pg, render and DOM tests)
+- [x] Workflow note `docs/reviews/workflow-notes-issue-451.md`
+- [x] PR `Fixes #451`
+
+No scenario: credits summing to zero and the refused negative amount (the backend refuses a negative invoice, so E2E cannot create one; pg, render and DOM tests); the plural of the heating hint (unit test).
+
+Files: `backend/src/services/{calculation,invoice,invoice-completeness,pdf,statement-pdf,statement,heating-profile}.service.ts`, `backend/src/db/schema.ts`, `backend/demo/demo-data.sql`, `src/lib/{invoice,statement-wizard,types}.ts`, `src/lib/server/{statement-generation,invoice}.ts`, `src/routes/invoices/**`, `src/routes/statements/{generate,[id]}/**`, `messages/*.json`, tests in `backend/src/__tests__`, `src/__tests__`, `tests/e2e`, `tests/a11y/screens.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/{nebenkostenabrechnung-anforderungen,api-specification}.md`, `docs/design/{i18n-begriffe,offene-punkte}.md`.
+
+## Session: faster CI round trips (GitHub bottleneck, 2026-10-20)
+
+Request: implement proposals 1 and 2 of the CI analysis (42 % of PR runs came from merging `main`, 48 % from docs commits).
+
+- [x] Push to `main` runs the E2E tests and the axe check (`.github/workflows/ci.yml`), so a pull request no longer needs to be up to date with `main`
+- [x] Turn off "Require branches to be up to date" and turn on auto-merge (GitHub settings)
+- [x] A pull request push that changes only documentation since the last green run of its branch skips the backend tests, E2E and axe (`tools/ci/docs-only-since.mjs`, `.github/workflows/ci.yml`)
+- [x] Skill `pull-request`: merge `main` and auto-merge as the new settings allow
+- [x] `code-reviewer` round 1: `docs/reviews/ci-speed-review-1.md`
+- [x] Workflow note: none, no rule was unclear or in the way
+- [x] PR to `main`
+- No scenario: CI configuration, no app behaviour changes
+- Files: `.github/workflows/ci.yml`, `tools/ci/docs-only-since.mjs`, `tools/ci/docs-only-since.test.ts`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `.claude/skills/pull-request/SKILL.md`

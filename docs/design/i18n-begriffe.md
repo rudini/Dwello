@@ -89,6 +89,10 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnung berichtigen / Berichtigte Abrechnung erstellen | Rectifier le décompte / Établir le décompte rectificatif | Rettificare il conteggio / Allestire il conteggio rettificato | Correct statement / Create corrected statement |
 | Bereits bezahlt / Bereits zurückerstattet auf NK-… (#362) | déjà payé / déjà remboursé sur NK-… | già pagato / già rimborsato su NK-… | already paid / already refunded on NK-… |
 | Ausgeglichen (Saldo 0) | solde nul | in pareggio | nil balance |
+| Erledigt (Abrechnungsstatus, #448) | clôturé | chiuso | closed |
+| Übertrag / Übertrag aus Abrechnung NK-… (#448) | report / report du décompte NK-… | riporto / riporto dal conteggio NK-… | carried over / carried over from statement NK-… |
+| Bereits verrechnet mit NK-… (#448) | déjà compensé avec NK-… | già compensato con NK-… | already offset against NK-… |
+| Schlussabrechnung (#448) | décompte final | conteggio finale | final statement |
 | Mietstage | jours de location | giorni di locazione | days rented |
 | Abgerechnet bis | décompté jusqu’au | conteggiato fino al | billed until |
 | Leerstand | vacance | sfitto | vacancy |
@@ -106,6 +110,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Veränderung Tankbestand | variation du stock de combustible | variazione della scorta di combustibile | change in fuel stock |
 | Anfangsbestand / Endbestand | stock initial / stock final | scorta iniziale / scorta finale | opening stock / closing stock |
 | Tank / Tank stillgelegt / Verbrauch (Heizmaterial) | citerne / citerne désaffectée / consommation | serbatoio / serbatoio dismesso / consumo | tank / tank decommissioned / consumption |
+| Lieferung (Heizmaterial) / Tag der Lieferung | livraison / jour de la livraison | fornitura / giorno della fornitura | delivery / day of delivery |
 | Zeitanteil | part temporelle | quota temporale | time share |
 | Firmenname / Firmenadresse | nom de l’entreprise / adresse de l’entreprise | nome dell’azienda / indirizzo dell’azienda | company name / company address |
 | Protokoll (Einstellungen) / Protokoll des Servers | journal / journal du serveur | registro / registro del server | log / server log |

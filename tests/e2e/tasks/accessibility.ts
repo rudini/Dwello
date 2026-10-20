@@ -399,6 +399,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Wait.until(on.shown('document-marked-sent'))
 		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
+	// a day after the end of the seeded Abrechnungsperiode 2025, before the Abrechnungsdatum of today (#448)
+	'mark-paid-early': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(on.markPaidButton),
+			EnterDate.of('2026-01-15').into(on.paidDateInput),
+			Click.on(on.markPaidConfirm),
+			Wait.until(on.earlyPaidWarning)
+		),
 	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
 	'correct-dialog': () => openDialog(on.correctButton),
 	'formula-tested': () => (actor) =>
@@ -506,6 +514,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
 	// 2024 with the second building, where Fritz moved out and still has its address (A-5, #114)
 	'old-address-preview': (example) => previewOf('2024', 'preview-old-address')(example, example.tankBuilding),
+	// 2024 in Bergsicht: Ida and Kurt moved out, a heating invoice without Leistungszeitraum beside one with (#339)
+	'heating-hints': (example) => previewOf('2024', 'heating-without-service-period')(example, example.tankBuilding),
 	// 2014: Emil's contract in the second building is billed outside Dwello up to its end (#453)
 	'preview-skipped': (example) =>
 		previewOf('2014', `preview-all-skipped-${example.tankBuilding}`)(example, example.tankBuilding),

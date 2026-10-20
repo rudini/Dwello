@@ -1,4 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
+import { FRANCS } from '$lib/contract-form';
 import { localToday } from '$lib/contract-status';
 import { m } from '$lib/paraglide/messages';
 import { localTitle } from '$lib/server/documents';
@@ -12,16 +13,17 @@ type Fetch = typeof globalThis.fetch;
 type Refusal = { status: number; message: string };
 
 /**
- * Payment received on the given day, today if none was given: checked against the Abrechnungsdatum the page sent (the
- * backend checks it again, #138), then stored in the database. Null when stored, otherwise what to tell the user.
+ * Payment received on the given day, today if none was given: checked against the end of the Abrechnungsperiode the
+ * page sent (the backend checks it again, #138, #448), then stored in the database. Null when stored, otherwise what
+ * to tell the user.
  */
 export async function markStatementPaid(
 	fetch: Fetch,
 	id: string,
 	paidDate = localToday(),
-	statementDate = ''
+	periodEnd = ''
 ): Promise<Refusal | null> {
-	const invalid = paidDateError(paidDate, statementDate);
+	const invalid = paidDateError(paidDate, periodEnd);
 	if (invalid) return { status: 400, message: invalid };
 	const response = await fetch(`${API}/${id}/status`, {
 		method: 'PUT',
@@ -73,8 +75,16 @@ export async function resetStatementPayment(fetch: Fetch, id: string): Promise<R
 }
 
 /** The statement replaced by a berichtigte Abrechnung to come (#120); null when done, otherwise what to tell the user */
-export async function replaceStatement(fetch: Fetch, id: string): Promise<Refusal | null> {
-	const response = await fetch(`${API}/${id}/replace`, { method: 'POST' });
+export async function replaceStatement(fetch: Fetch, id: string, paidAmount?: string): Promise<Refusal | null> {
+	// «Bereits bezahlt» of a sent or overdue statement, in francs (#448)
+	if (paidAmount !== undefined && !FRANCS.test(paidAmount.trim()))
+		return { status: 400, message: m.backend_statement_paid_amount_invalid({ amount: paidAmount }) };
+	const response = await fetch(
+		`${API}/${id}/replace`,
+		paidAmount === undefined
+			? { method: 'POST' }
+			: { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paidAmount: paidAmount.trim() }) }
+	);
 	if (response.ok) return null;
 	return {
 		status: response.status,

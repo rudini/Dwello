@@ -9,6 +9,9 @@
 
 	const number = (amount: number) => formatCurrency(amount).replace(/^CHF\s?/, '');
 	const parted = $derived(item.invoices.filter((invoice) => invoice.part));
+	// by the Heizprofil its share, as the PDF (#71; persona Dr. Weber P-1 of #451), else the days
+	const factor = (part: NonNullable<StatementLineInvoice['part']>) =>
+		part.profile ? `${part.profile.percent.toFixed(2)} %` : `${part.days}/${part.total}`;
 
 	function partText({ part, start, end, amount, fuelStock }: StatementLineInvoice) {
 		const values = { start: formatDate(start), end: formatDate(end), amount: formatCurrency(amount), days: part!.days, total: part!.total };
@@ -25,14 +28,19 @@
 		return m.statements_part_line(values);
 	}
 
-	const share = $derived(
-		m.statements_part_share({
-			apartment: number(item.apartmentShare ?? 0),
-			sum: parted.map((invoice) => `${number(invoice.amount)} × ${invoice.part!.days}/${invoice.part!.total}`).join(' + '),
-			costs: number(item.totalAmount),
-			share: number(item.tenantShare)
-		})
-	);
+	// invoices summing to zero: their parts times the apartment's share by the key, as the PDF (#237)
+	const share = $derived.by(() => {
+		// a negative amount with a minus, as the PDF (#257, Fachreview V-24)
+		const sum = parted
+			.map((invoice, i) => {
+				const sign = invoice.amount < 0 ? (i ? ' – ' : '– ') : i ? ' + ' : '';
+				return `${sign}${number(Math.abs(invoice.amount))} × ${factor(invoice.part!)}`;
+			})
+			.join('');
+		if (item.totalAmount === 0) return m.statements_part_share_zero({ sum, share: number(item.tenantShare) });
+		const values = { apartment: number(item.apartmentShare ?? 0), costs: number(item.totalAmount) };
+		return m.statements_part_share({ ...values, sum, share: number(item.tenantShare) });
+	});
 </script>
 
 {#if item.invoices.length}

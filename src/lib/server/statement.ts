@@ -64,7 +64,14 @@ const correctionOf = (data: BackendStatement) => ({
 	replaces: data.replaces ?? null,
 	replacedBy: data.replacedBy ?? null,
 	priorPayments: Number(data.priorPayments ?? 0),
-	priorPaidOn: data.priorPaidOn ?? []
+	priorPaidOn: data.priorPaidOn ?? [],
+	offsetWith: (data.offsetWith ?? []).map((o: BackendStatement) => ({ statementNumber: o.statementNumber, amount: Number(o.amount) }))
+});
+
+// #448: a Schlussabrechnung has no Mindestbetrag; the Übertrag from the previous statement of the Mietvertrag
+const carryOf = (data: BackendStatement) => ({
+	final: !!data.final,
+	carriedFrom: data.carriedFrom ? { ...data.carriedFrom, balance: Number(data.carriedFrom.balance) } : null
 });
 
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
@@ -111,6 +118,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
 		...correctionOf(data),
+		...carryOf(data),
 		paymentResets: (data.paymentResets ?? []).map(({ resetOn, paidDate }: BackendStatement) => ({
 			resetOn,
 			paidDate

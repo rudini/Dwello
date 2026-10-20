@@ -964,6 +964,7 @@ describe('Abrechnungen erstellen', () => {
 						findings: [],
 						lateInvoices: [],
 						invoicesWithoutServicePeriod: [],
+						heatingWithoutServicePeriod: [],
 						...lists
 					}
 				}

@@ -112,7 +112,7 @@ describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 
 	it('erklärt den Zeitanteil der Heizkosten nach dem Heizprofil, wenn eine Position danach geteilt ist', async () => {
 		const byProfile = { ...byDays, lineItems: [{ ...byDays.lineItems[0], byProfile: true }], heating: { profile: 'Winter', percent: 52.17, months: [] } };
-		expect((await textOf(byProfile)).flowing).toContain('Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil.');
+		expect((await textOf(byProfile)).flowing).toContain('Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Der Prozentwert ist gerundet. Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil.');
 	});
 
 	// #229: eine Periode, deren Monate nicht 100 % tragen, nennt beide Summen, in jeder Sprache
@@ -292,31 +292,47 @@ describe('PDF ohne Saldo und einer bezahlten Abrechnung', () => {
 	});
 });
 
-// #94: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt: kein Zahlteil, keine Bitte um die IBAN
+// #403: ein Saldo unter CHF 5 wird weder eingefordert noch ausbezahlt, sondern mit der nächsten Abrechnung verrechnet:
+// kein Zahlteil, keine Bitte um die IBAN
 describe('PDF mit einem Saldo unter CHF 5', () => {
-	it('fordert eine kleine Nachzahlung nicht ein und druckt keinen Zahlteil', async () => {
-		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.95, paymentDeadline: '2026-03-17' });
+	it('verrechnet eine kleine Nachzahlung mit der nächsten Abrechnung und druckt keinen Zahlteil', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.1, paymentDeadline: '2026-03-17', carried: true });
 
-		expect(pdf.flowing).toContain('Nachzahlung CHF 4.95');
-		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir verzichten darauf; Sie müssen nichts bezahlen.');
+		expect(pdf.flowing).toContain('Nachzahlung CHF 4.10');
+		expect(pdf.flowing).toContain(
+			'Der Betrag ist kleiner als CHF 5.00. Wir verrechnen ihn mit der nächsten Nebenkostenabrechnung; Sie müssen jetzt nichts bezahlen.'
+		);
 		expect(pdf.flowing).not.toContain('Zahlteil');
 	});
 
-	it('zahlt eine kleine Rückerstattung nicht aus und fragt nicht nach der IBAN', async () => {
-		const pdf = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paymentDeadline: '2026-03-17' });
+	it('verrechnet eine kleine Rückerstattung mit der nächsten Abrechnung und fragt nicht nach der IBAN', async () => {
+		const pdf = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paymentDeadline: '2026-03-17', carried: true });
 
-		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir zahlen ihn nicht aus.');
+		expect(pdf.flowing).toContain('Der Betrag ist kleiner als CHF 5.00. Wir verrechnen ihn mit der nächsten Nebenkostenabrechnung.');
+		expect(pdf.flowing).not.toContain('bezahlen');
 		expect(pdf.flowing).not.toContain('IBAN');
 		expect(pdf.flowing).not.toContain('überweisen');
 	});
 
-	// nach dem Versand ist sie bezahlt, aber ohne Zahlung: kein «Bezahlt am», kein «Überwiesen am»
-	it('sagt auch nach dem Versand, dass der Betrag nicht eingefordert oder ausbezahlt wird', async () => {
-		const waived = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.1, paidDate: '2026-02-15' });
-		const back = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paidDate: '2026-02-15' });
+	it('verrechnet den Betrag auf Französisch, Italienisch und Englisch', async () => {
+		const data = { ...refund, totalAdvancePayments: 787, balance: -2.85, carried: true };
+		const texts = await Promise.all(
+			(['fr', 'it', 'en'] as const).map(async (language) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing)
+		);
+
+		expect(texts[0]).toContain('Le montant est inférieur à CHF 5.00. Nous le compensons avec le prochain décompte des charges.');
+		expect(texts[1]).toContain('L’importo è inferiore a CHF 5.00. Lo compensiamo con il prossimo conteggio delle spese accessorie.');
+		expect(texts[2]).toContain('The amount is less than CHF 5.00. We will offset it against the next utility cost statement.');
+	});
+
+	// #94 versendet: der Mieter hat gelesen, dass nichts folgt; der Text bleibt, ohne «Bezahlt am» und «Überwiesen am»
+	it('sagt bei einer nach #94 erledigten Abrechnung weiter, dass der Betrag nicht eingefordert oder ausbezahlt wird', async () => {
+		const waived = await textOf({ ...refund, totalAdvancePayments: 780, balance: 4.1, paidDate: '2026-02-15', waived: true });
+		const back = await textOf({ ...refund, totalAdvancePayments: 787, balance: -2.85, paidDate: '2026-02-15', waived: true });
 
 		expect(waived.flowing).toContain('Wir verzichten darauf; Sie müssen nichts bezahlen.');
 		expect(waived.flowing).not.toContain('Bezahlt am');
+		expect(waived.flowing).not.toContain('Zahlteil');
 		expect(back.flowing).toContain('Wir zahlen ihn nicht aus.');
 		expect(back.flowing).not.toContain('Überwiesen am');
 	});
@@ -325,6 +341,49 @@ describe('PDF mit einem Saldo unter CHF 5', () => {
 		const pdf = await textOf({ ...due, totalAdvancePayments: 779.15, balance: 5 });
 
 		expect(pdf.flowing).toContain('Zahlteil');
+	});
+
+	// die Schlussabrechnung kennt keinen Mindestbetrag
+	it('fordert auf der Schlussabrechnung auch CHF 4.10 mit dem Zahlteil ein', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 780, balance: 4.1, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Zahlteil');
+		expect(pdf.flowing).not.toContain('verrechnet');
+		expect(pdf.flowing).not.toContain('kleiner als');
+	});
+});
+
+// #403: der Übertrag der letzten Abrechnung desselben Mietvertrags, vor der Rundung in den Saldo gerechnet
+describe('PDF mit einem Übertrag', () => {
+	// 784.13 − 600.00 + 3.00 = 187.13, auf 5 Rappen zugunsten des Mieters 187.10
+	const carriedIn: StatementPDFData = { ...due, balance: 187.1, carryOver: { statementNumber: 'NK-1-2024-0001', amount: 3 } };
+
+	it('zählt eine übertragene Nachzahlung vor der Rundung dazu', async () => {
+		const flowing = (await textOf(carriedIn)).flowing;
+
+		expect(flowing).toContain('Akontobeiträge – 600.00 Übertrag aus Abrechnung NK-1-2024-0001: CHF 3.00 + 3.00');
+		expect(flowing).toContain('Nachzahlung vor Rundung 187.13 Rundung auf 5 Rappen – 0.03 Nachzahlung 187.10');
+	});
+
+	// 784.13 − 600.00 − 3.00 = 181.13 → 181.10
+	it('zieht eine übertragene Rückerstattung vor der Rundung ab', async () => {
+		const flowing = (await textOf({ ...due, balance: 181.1, carryOver: { statementNumber: 'NK-1-2024-0001', amount: -3 } })).flowing;
+
+		expect(flowing).toContain('Übertrag aus Abrechnung NK-1-2024-0001: CHF 3.00 – 3.00');
+		expect(flowing).toContain('Nachzahlung vor Rundung 181.13');
+	});
+
+	it('nennt den Übertrag auf Französisch', async () => {
+		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(carriedIn, config, 'fr'), 'base64')).flowing;
+
+		expect(fr).toContain('Report du décompte NK-1-2024-0001 : CHF 3.00');
+	});
+});
+
+// #403 (6): die Bemerkung der Abrechnung steht im PDF, bei einer berichtigten Abrechnung etwa der Grund
+describe('PDF mit einer Bemerkung', () => {
+	it('druckt die Bemerkung', async () => {
+		expect((await textOf({ ...due, notes: 'Berichtigt: die Hauswartrechnung fehlte.' })).flowing).toContain('Berichtigt: die Hauswartrechnung fehlte.');
 	});
 });
 
@@ -356,6 +415,21 @@ describe('Heiz- und Warmwasserkosten im PDF', () => {
 		const pdf = await textOf({ ...heated, heating: { profile: 'Heizung + Warmwasser', percent: 55.8, months } });
 
 		expect(pdf.text).toContain('Jun 3.70 %');
+	});
+
+	// #451, Punkt 3: ein angebrochener Monat steht mit seinem Bruch, Einzug am 5. Januar: 18.00 % × 27/31 = 15.68 %
+	it('nennt bei einem angebrochenen Monat den Monatsanteil und die Tage', async () => {
+		const months = [{ month: 1, percentage: 15.68, full: 18, days: 27, total: 31 }, { month: 2, percentage: 14 }];
+		const pdf = await textOf({ ...heated, heating: { profile: 'Winter', percent: 95.36, months } });
+
+		expect(pdf.flowing).toContain('Jan 15.68 % (18.00 % × 27/31 Tage), Feb 14.00 %');
+	});
+
+	// #451, Punkt 3 (#256 V-1): auch eine Heizposition nach Heizprofil druckt einen gerundeten Prozentwert
+	it('sagt bei einer Heizposition nach Heizprofil, dass der Prozentwert gerundet ist', async () => {
+		const byProfile = { ...heated, lineItems: [{ ...refund.lineItems[0], category: 'Heizung', periodShare: 0.388742, byProfile: true, heating: true }] };
+
+		expect((await textOf(byProfile)).flowing).toContain('Ihr Anteil ist der Wohnungsanteil mal der Zeitanteil. Der Prozentwert ist gerundet. Bei Heizkosten ist der Zeitanteil der Anteil nach dem Heizprofil.');
 	});
 
 	// Beim Tank zählt nicht die Rechnung, sondern der Verbrauch
@@ -399,9 +473,9 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 	const mixed = { ...due, lineItems: [{ ...refund.lineItems[0], totalAmount: 1800, apartmentShare: 900, periodShare: 0.3406, invoiceParts, tenantShare: 306.52 }] };
 
 	it.each([
-		['fr', "Période de prestation 01.07.2025 – 30.09.2025 : CHF 1'200.00, vos jours de location 47 sur 92", "Votre part : 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'Si un poste du décompte comporte des factures sur des jours différents, le calcul figure en dessous.'],
-		['it', "Periodo di prestazione 01.07.2025 – 30.09.2025: CHF 1'200.00, i suoi giorni di locazione 47 su 92", "La sua quota: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'Se una voce del conteggio comprende fatture su giorni diversi, il calcolo figura sotto.'],
-		['en', "Service period 01.07.2025 – 30.09.2025: CHF 1'200.00, your days rented 47 of 92", "Your share: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'If a statement line has invoices over different days, the calculation is shown below it.']
+		['fr', "Période de prestation 01.07.2025 – 30.09.2025 : CHF 1'200.00, 47 jours de location sur 92", "Votre part : 900.00 × part temporelle (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'Le pourcentage est arrondi ; votre part découle du calcul figurant sous le poste.'],
+		['it', "Periodo di prestazione 01.07.2025 – 30.09.2025: CHF 1'200.00, 47 giorni di locazione su 92", "La sua quota: 900.00 × quota temporale (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'Se una voce del conteggio comprende fatture relative a giorni diversi, il calcolo è riportato sotto la voce.'],
+		['en', "Service period 01.07.2025 – 30.09.2025: CHF 1'200.00; your days rented: 47 of 92", "Your share: 900.00 × time share (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52", 'If a statement line has invoices covering different periods, the calculation is shown below it. Your share is the apartment share multiplied by the time share. The percentage is rounded; your share is based on the calculation shown below the statement line.']
 	] as const)('nennt die Tage jeder Rechnung und die Berechnung auch auf %s', async (language, line, share, note) => {
 		const text = readPdf(Buffer.from(await generateStatementPDFBase64(mixed, config, language), 'base64')).flowing;
 		expect(text).toContain(line);
@@ -413,7 +487,66 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 	it('beschriftet jede Rechnung mit ihrem Leistungszeitraum und rechnet bis zu Ihrem Anteil', async () => {
 		const text = (await textOf(mixed)).flowing;
 		expect(text).toContain("Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 1'200.00, Ihre Mietstage 47 von 92 Tagen");
-		expect(text).toContain("Ihr Anteil: 900.00 × (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52");
+		expect(text).toContain("Ihr Anteil: 900.00 × Zeitanteil (600.00 × 0/91 + 1'200.00 × 47/92) / 1'800.00 = 306.52");
+	});
+
+	// #451, Punkt 3 (#256 P-5): «Ihre / Mietstage» brach über zwei Zeilen; ein geschütztes Leerzeichen hält es zusammen
+	it('trennt «Ihre Mietstage» nicht über zwei Zeilen', async () => {
+		const { streams } = await textOf(mixed);
+		const printed = streams.join('').replace(/>\s*-?[\d.]+\s*</g, '').toLowerCase(); // the hex strings, kerning removed
+		const hex = (text: string) => Buffer.from(text, 'latin1').toString('hex');
+
+		expect(printed).toContain(hex('Ihre\u00a0Mietstage 47'));
+		expect(printed).not.toContain(hex('Ihre Mietstage 47'));
+	});
+
+	// #451, Punkt 1 (Fachreview V-6): eine Gutschrift über die Mietstage, die Rechnung davor: der Zeitanteil ist negativ,
+	// 300 × (900 × 0/91 − 300 × 47/92) / 600 = −76.63
+	it('erklärt einen negativen Zeitanteil', async () => {
+		const credit = [
+			{ start: '2025-04-01', end: '2025-06-30', amount: 900, days: 0, total: 91 },
+			{ start: '2025-07-01', end: '2025-09-30', amount: -300, days: 47, total: 92 }
+		];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 600, apartmentShare: 300, periodShare: -0.2554, invoiceParts: credit, tenantShare: -76.63 }] };
+
+		expect((await textOf(data)).flowing).toContain('Ein negativer Zeitanteil entsteht, wenn eine Gutschrift (negativer Betrag) Ihre Mietstage betrifft, die Rechnungen derselben Position aber nicht: Sie erhalten Ihren Teil der Gutschrift.');
+		expect((await textOf(mixed)).flowing).not.toContain('negativer Zeitanteil');
+	});
+
+	// #451, Punkt 1 (Fachreview V-7): Rechnungen, die zusammen null ergeben, mit dem Bruch des Verteilschlüssels, in jeder
+	// Sprache; ohne Bruch mit dem Anteil in Prozent
+	it.each([
+		['de', 'Ihr Anteil: (900.00 × 47/92 – 900.00 × 0/91) × 70.00 / 140.00 m² (Anteil Ihrer Wohnung nach dem Verteilschlüssel) = 229.89'],
+		['fr', 'Votre part : (900.00 × 47/92 – 900.00 × 0/91) × 70.00 / 140.00 m² (part de votre logement selon la clé de répartition) = 229.89'],
+		['it', 'La sua quota: (900.00 × 47/92 – 900.00 × 0/91) × 70.00 / 140.00 m² (quota del suo appartamento secondo la chiave di riparto) = 229.89'],
+		['en', 'Your share: (900.00 × 47/92 – 900.00 × 0/91) × 70.00 / 140.00 m² (your apartment’s share under the distribution key) = 229.89']
+	] as const)('rechnet Rechnungen, die zusammen null ergeben, mit dem Anteil der Wohnung nach dem Verteilschlüssel auf %s', async (language, line) => {
+		const zero = [
+			{ start: '2025-07-01', end: '2025-09-30', amount: 900, days: 47, total: 92 },
+			{ start: '2025-04-01', end: '2025-06-30', amount: -900, days: 0, total: 91 }
+		];
+		const item = { ...mixed.lineItems[0], keyShare: '70.00 / 140.00 m²', totalAmount: 0, apartmentShare: 0, periodShare: 0, invoiceParts: zero, tenantShare: 229.89 };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64({ ...mixed, lineItems: [item] }, config, language), 'base64')).flowing;
+
+		expect(text).toContain(line);
+		if (language === 'de') {
+			expect(text).toContain('0.00 0.00 – 229.89');
+			const noKey = (await textOf({ ...mixed, lineItems: [{ ...item, keyShare: undefined }] })).flowing;
+			expect(noKey).toContain('× 50.00 % (Anteil Ihrer Wohnung nach dem Verteilschlüssel) = 229.89');
+		}
+	});
+
+	// #451, Punkt 2 (#257 V-2): ein negativer Betrag steht mit Minus in der Berechnung, nicht als «+ -300.00»
+	it('druckt einen negativen Betrag in der Berechnung mit Minus', async () => {
+		const credit = [
+			{ start: '2025-07-01', end: '2025-09-30', amount: 900, days: 47, total: 92 },
+			{ start: '2025-01-01', end: '2025-12-31', amount: -300, days: 139, total: 365, noPeriod: true as const }
+		];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 600, apartmentShare: 600, periodShare: 0.5248, invoiceParts: credit, tenantShare: 345.54 }] };
+		const text = (await textOf(data)).flowing;
+
+		expect(text).toContain("Ihr Anteil: 600.00 × Zeitanteil (900.00 × 47/92 – 300.00 × 139/365) / 600.00 = 345.54");
+		expect(text).not.toContain('+ -');
 	});
 
 	// #241 V-1: eine Rechnung ohne Leistungszeitraum und eine über die Periode hinaus heissen nicht einfach «Leistungszeitraum»
@@ -422,10 +555,10 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 		{ start: '2025-11-01', end: '2025-12-31', amount: 795.65, days: 61, total: 61, whole: { start: '2025-11-01', end: '2026-01-31', amount: 1200 } }
 	];
 	it.each([
-		['de', 'Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode', "Leistungszeitraum 01.11.2025 – 31.01.2026 (Rechnung CHF 1'200.00), davon 01.11.2025 – 31.12.2025: CHF 795.65, Ihre Mietstage 61 von 61 Tagen"],
-		['fr', 'Sans période de prestation : CHF 600.00, vos jours de location 139 sur 365 jours de la période de décompte', "Période de prestation 01.11.2025 – 31.01.2026 (facture CHF 1'200.00), dont 01.11.2025 – 31.12.2025 : CHF 795.65, vos jours de location 61 sur 61"],
-		['it', 'Senza periodo di prestazione: CHF 600.00, i suoi giorni di locazione 139 su 365 giorni del periodo di conteggio', "Periodo di prestazione 01.11.2025 – 31.01.2026 (fattura CHF 1'200.00), di cui 01.11.2025 – 31.12.2025: CHF 795.65, i suoi giorni di locazione 61 su 61"],
-		['en', 'Without a service period: CHF 600.00, your days rented 139 of 365 days of the billing period', "Service period 01.11.2025 – 31.01.2026 (invoice CHF 1'200.00), of which 01.11.2025 – 31.12.2025: CHF 795.65, your days rented 61 of 61"]
+		['de', 'Rechnung ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 600.00, Ihre Mietstage 139 von 365 Tagen', "Leistungszeitraum 01.11.2025 – 31.01.2026 (Rechnung CHF 1'200.00 für 92 Tage), davon 01.11.2025 – 31.12.2025 (61 Tage): CHF 795.65, Ihre Mietstage 61 von 61 Tagen"],
+		['fr', 'Facture sans période de prestation, valable pour toute la période de décompte : CHF 600.00, 139 jours de location sur 365 jours', "Période de prestation 01.11.2025 – 31.01.2026 (facture de CHF 1'200.00 pour 92 jours), dont 01.11.2025 – 31.12.2025 (61 jours) : CHF 795.65, 61 jours de location sur 61"],
+		['it', 'Fattura senza periodo di prestazione, vale per l’intero periodo di conteggio: CHF 600.00, 139 giorni di locazione su 365 giorni', "Periodo di prestazione 01.11.2025 – 31.01.2026 (fattura di CHF 1'200.00 per 92 giorni), di cui 01.11.2025 – 31.12.2025 (61 giorni): CHF 795.65, 61 giorni di locazione su 61"],
+		['en', 'Invoice without a service period, applies to the whole billing period: CHF 600.00; your days rented: 139 of 365 days', "Service period 01.11.2025 – 31.01.2026 (invoice of CHF 1'200.00 for 92 days), of which 01.11.2025 – 31.12.2025 (61 days): CHF 795.65; your days rented: 61 of 61"]
 	] as const)('nennt eine Rechnung ohne und eine über die Periode hinaus auf %s als solche', async (language, without, beyond) => {
 		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: special, tenantShare: 512.08 }] };
 		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
@@ -435,24 +568,50 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 
 	// #236: eine Zeile ohne Leistungszeitraum nennt ihre Rechnung, in jeder Sprache; die eindeutige nicht
 	it.each([
-		['de', 'Ohne Leistungszeitraum: CHF 600.00, Ihre Mietstage 139 von 365 Tagen der Abrechnungsperiode (Rechnung «Hauswartung Q3»)'],
-		['fr', 'Sans période de prestation : CHF 600.00, vos jours de location 139 sur 365 jours de la période de décompte (facture « Hauswartung Q3 »)'],
-		['it', 'Senza periodo di prestazione: CHF 600.00, i suoi giorni di locazione 139 su 365 giorni del periodo di conteggio (fattura «Hauswartung Q3»)'],
-		['en', 'Without a service period: CHF 600.00, your days rented 139 of 365 days of the billing period (invoice ‘Hauswartung Q3’)']
+		['de', 'Rechnung vom 30.09.2025 (Nr. SR-2025-17) ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 600.00, Ihre Mietstage 139 von 365 Tagen'],
+		['fr', 'Facture du 30.09.2025 (n° SR-2025-17) sans période de prestation, valable pour toute la période de décompte : CHF 600.00, 139 jours de location sur 365 jours'],
+		['it', 'Fattura del 30.09.2025 (n. SR-2025-17) senza periodo di prestazione, vale per l’intero periodo di conteggio: CHF 600.00, 139 giorni di locazione su 365 giorni'],
+		['en', 'Invoice dated 30.09.2025 (no. SR-2025-17) without a service period, applies to the whole billing period: CHF 600.00; your days rented: 139 of 365 days']
 	] as const)('nennt die Rechnung einer Zeile ohne Leistungszeitraum auf %s', async (language, line) => {
-		const named = [{ ...special[0], description: 'Hauswartung Q3' }, { ...special[1], description: 'Hauswartung Winter' }];
+		const named = [{ ...special[0], description: 'Hauswartung Q3', invoiceDate: '2025-09-30', invoiceNumber: 'SR-2025-17' }, { ...special[1], description: 'Hauswartung Winter', invoiceDate: '2026-02-05' }];
 		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: named, tenantShare: 512.08 }] };
 		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
 		expect(text).toContain(line);
-		expect(text).not.toContain('Hauswartung Winter');
+		expect(text).not.toContain('Hauswartung');
+		expect(text).not.toContain('05.02.2026');
+	});
+
+	// #451, Punkt 3 (V-8): zwei gleiche Zeilen mit Leistungszeitraum beginnen mit ihrer Rechnung, in jeder Sprache
+	it.each([
+		['de', 'Rechnung vom 05.10.2025 (Nr. 4711), Leistungszeitraum 01.07.2025 – 30.09.2025: CHF 900.00, Ihre Mietstage 47 von 92 Tagen', 'Rechnung vom 06.10.2025, Leistungszeitraum'],
+		['fr', 'Facture du 05.10.2025 (n° 4711), période de prestation 01.07.2025 – 30.09.2025 : CHF 900.00, 47 jours de location sur 92', 'Facture du 06.10.2025, période de prestation'],
+		['it', 'Fattura del 05.10.2025 (n. 4711), periodo di prestazione 01.07.2025 – 30.09.2025: CHF 900.00, 47 giorni di locazione su 92', 'Fattura del 06.10.2025, periodo di prestazione'],
+		['en', 'Invoice dated 05.10.2025 (no. 4711), service period 01.07.2025 – 30.09.2025: CHF 900.00; your days rented: 47 of 92', 'Invoice dated 06.10.2025, service period']
+	] as const)('nennt zwei gleiche Zeilen mit Leistungszeitraum vorne mit ihrer Rechnung auf %s', async (language, first, second) => {
+		const twin = { start: '2025-07-01', end: '2025-09-30', amount: 900, days: 47, total: 92 };
+		const twins = [{ ...twin, invoiceDate: '2025-10-05', invoiceNumber: '4711' }, { ...twin, invoiceDate: '2025-10-06' }, { ...invoiceParts[0], invoiceDate: '2025-07-05' }];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 2400, apartmentShare: 1200, periodShare: 0.3832, invoiceParts: twins, tenantShare: 459.78 }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+
+		expect(text).toContain(first);
+		expect(text).toContain(second);
+		expect(text).not.toContain('05.07.2025'); // the line over April to June is unique
+	});
+
+	// #451, Punkt 3: ohne Rechnungsnummer heisst die Zeile nur nach dem Rechnungsdatum; der Name steht vorne (V-8)
+	it('nennt eine Rechnung ohne Rechnungsnummer nur mit ihrem Datum', async () => {
+		const named = [{ ...special[0], description: 'Hauswartung Q3', invoiceDate: '2025-09-30' }, special[1]];
+		const data = { ...mixed, lineItems: [{ ...mixed.lineItems[0], totalAmount: 1395.65, apartmentShare: 697.83, periodShare: 0.7338, invoiceParts: named, tenantShare: 512.08 }] };
+
+		expect((await textOf(data)).flowing).toContain('Rechnung vom 30.09.2025 ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 600.00');
 	});
 
 	// #239: die Veränderung des Tankbestands ist keine Rechnung, in jeder Sprache
 	it.each([
 		['de', 'Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Ihre Mietstage 139 von 365 Tagen'],
-		['fr', 'Variation du stock de combustible 01.01.2025 – 31.12.2025 : CHF 500.00, vos jours de location 139 sur 365'],
-		['it', 'Variazione della scorta di combustibile 01.01.2025 – 31.12.2025: CHF 500.00, i suoi giorni di locazione 139 su 365'],
-		['en', 'Change in fuel stock 01.01.2025 – 31.12.2025: CHF 500.00, your days rented 139 of 365']
+		['fr', 'Variation du stock de combustible 01.01.2025 – 31.12.2025 : CHF 500.00, 139 jours de location sur 365'],
+		['it', 'Variazione della scorta di combustibile 01.01.2025 – 31.12.2025: CHF 500.00, 139 giorni di locazione su 365'],
+		['en', 'Change in fuel stock 01.01.2025 – 31.12.2025: CHF 500.00; your days rented: 139 of 365']
 	] as const)('nennt die Veränderung des Tankbestands auf %s als solche', async (language, line) => {
 		const stock = [
 			{ start: '2025-07-01', end: '2025-09-30', amount: 900, days: 47, total: 92 },
@@ -510,8 +669,8 @@ describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
 	it('nennt jede Rechnung mit ihrem Anteil nach Heizprofil und rechnet bis zu Ihrem Anteil', async () => {
 		const text = (await textOf(winter)).flowing;
 		expect(text).toContain("Leistungszeitraum 01.01.2024 – 31.03.2024: CHF 1'000.00, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: keine; zusammen 0.00 %. Anteil nach Heizprofil: 0.00 % / 43.00 % = 0.00 %");
-		expect(text).toContain("Ohne Leistungszeitraum: CHF 1'000.00, Anteil nach Heizprofil: 52.00 % (siehe Heiz- und Warmwasserkosten)");
-		expect(text).toContain("Ihr Anteil: 2'000.00 × (1'000.00 × 0.00 % + 1'000.00 × 52.00 %) / 2'000.00 = 520.00");
+		expect(text).toContain("Rechnung ohne Leistungszeitraum, gilt für die ganze Abrechnungsperiode: CHF 1'000.00, Anteil nach Heizprofil: 52.00 % (siehe Heiz- und Warmwasserkosten)");
+		expect(text).toContain("Ihr Anteil: 2'000.00 × Zeitanteil (1'000.00 × 0.00 % + 1'000.00 × 52.00 %) / 2'000.00 = 520.00");
 	});
 
 	// Fachreview 1, M-1 und M-3: der Satz zum Heizprofil gilt nur für die Rechnung ohne Leistungszeitraum
@@ -526,13 +685,13 @@ describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
 	it('nennt bei einem Leistungszeitraum über die Periode hinaus den Beleg und die Monate in der Periode', async () => {
 		const beyond = { start: '2024-01-01', end: '2024-03-31', amount: 905.03, days: 91, total: 91, whole: { start: '2023-10-01', end: '2024-03-31', amount: 1820 }, profile: { percent: 100, months: months([[1, 18], [2, 14], [3, 11]]), periodMonths: months([[1, 18], [2, 14], [3, 11]]) } };
 		const text = (await textOf({ ...winter, lineItems: [{ ...winter.lineItems[0], invoiceParts: [beyond, invoiceParts[1]] }] })).flowing;
-		expect(text).toContain("Leistungszeitraum 01.10.2023 – 31.03.2024 (Rechnung CHF 1'820.00), davon 01.01.2024 – 31.03.2024: CHF 905.03, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteil nach Heizprofil: 43.00 % / 43.00 % = 100.00 %");
+		expect(text).toContain("Leistungszeitraum 01.10.2023 – 31.03.2024 (Rechnung CHF 1'820.00 für 183 Tage), davon 01.01.2024 – 31.03.2024 (91 Tage): CHF 905.03, Anteile der Monate im Heizprofil: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteile der Monate Ihres Mietverhältnisses darin: Jan 18.00 %, Feb 14.00 %, Mär 11.00 %; zusammen 43.00 %. Anteil nach Heizprofil: 43.00 % / 43.00 % = 100.00 %");
 	});
 
 	it.each([
-		['fr', "Période de prestation 01.01.2024 – 31.03.2024 : CHF 1'000.00, parts des mois dans le profil de chauffage : janv. 18.00 %, févr. 14.00 %, mars 11.00 % ; au total 43.00 %. Parts des mois de votre bail dans cette période : aucune ; au total 0.00 %. Part selon le profil de chauffage : 0.00 % / 43.00 % = 0.00 %", "Sans période de prestation : CHF 1'000.00, part selon le profil de chauffage : 52.00 % (voir « Frais de chauffage et d’eau chaude »)", '52.00 % pour une facture sans période de prestation.'],
-		['it', "Periodo di prestazione 01.01.2024 – 31.03.2024: CHF 1'000.00, quote dei mesi nel profilo di riscaldamento: gen 18.00 %, feb 14.00 %, mar 11.00 %; in totale 43.00 %. Quote dei mesi della sua locazione in tale periodo: nessuna; in totale 0.00 %. Quota secondo il profilo di riscaldamento: 0.00 % / 43.00 % = 0.00 %", "Senza periodo di prestazione: CHF 1'000.00, quota secondo il profilo di riscaldamento: 52.00 % (vedi spese di riscaldamento e acqua calda)", '52.00 % per una fattura senza periodo di prestazione.'],
-		['en', "Service period 01.01.2024 – 31.03.2024: CHF 1'000.00, monthly shares in the heating profile: Jan 18.00 %, Feb 14.00 %, Mar 11.00 %; in total 43.00 %. Monthly shares during your tenancy within it: none; in total 0.00 %. Share under the heating profile: 0.00 % / 43.00 % = 0.00 %", "Without a service period: CHF 1'000.00, share under the heating profile: 52.00 % (see ‘Heating and hot water costs’)", '52.00 % for an invoice without a service period.']
+		['fr', "Période de prestation 01.01.2024 – 31.03.2024 : CHF 1'000.00, parts des mois dans le profil de chauffage : janv. 18.00 %, févr. 14.00 %, mars 11.00 % ; au total 43.00 %. Parts des mois de votre bail dans cette période : aucune ; au total 0.00 %. Part selon le profil de chauffage : 0.00 % / 43.00 % = 0.00 %", "Facture sans période de prestation, valable pour toute la période de décompte : CHF 1'000.00, part selon le profil de chauffage : 52.00 % (voir « Frais de chauffage et d’eau chaude »)", '52.00 % pour une facture sans période de prestation.'],
+		['it', "Periodo di prestazione 01.01.2024 – 31.03.2024: CHF 1'000.00, quote dei mesi nel profilo di riscaldamento: gen 18.00 %, feb 14.00 %, mar 11.00 %; in totale 43.00 %. Quote dei mesi della sua locazione in tale periodo: nessuna; in totale 0.00 %. Quota secondo il profilo di riscaldamento: 0.00 % / 43.00 % = 0.00 %", "Fattura senza periodo di prestazione, vale per l’intero periodo di conteggio: CHF 1'000.00, quota secondo il profilo di riscaldamento: 52.00 % (vedi spese di riscaldamento e acqua calda)", '52.00 % per una fattura senza periodo di prestazione.'],
+		['en', "Service period 01.01.2024 – 31.03.2024: CHF 1'000.00, monthly shares in the heating profile: Jan 18.00 %, Feb 14.00 %, Mar 11.00 %; in total 43.00 %. Monthly shares during your tenancy within it: none; in total 0.00 %. Share under the heating profile: 0.00 % / 43.00 % = 0.00 %", "Invoice without a service period, applies to the whole billing period: CHF 1'000.00, share under the heating profile: 52.00 % (see ‘Heating and hot water costs’)", '52.00 % for an invoice without a service period.']
 	] as const)('nennt die Rechnungen nach Heizprofil auch auf %s', async (language, line, run, note) => {
 		const text = readPdf(Buffer.from(await generateStatementPDFBase64(winter, config, language), 'base64')).flowing;
 		expect(text).toContain(line);
@@ -578,6 +737,20 @@ describe('PDF einer berichtigten Abrechnung', () => {
 		).flowing;
 		expect(flowing).toContain('Bereits zurückerstattet auf NK-1-2025-0001 und NK-1-2025-0002 + 20.00');
 		expect(flowing).toContain('bereits zurückerstattet CHF 20.00');
+	});
+
+	// Fachreview 448-1 V-2: der Saldo der ersetzten Abrechnung steht schon als Übertrag in der nächsten
+	it('nennt einen schon übertragenen Saldo als verrechnet mit der nächsten Abrechnung', async () => {
+		const flowing = (
+			await textOf({
+				...corrected,
+				balance: 181.1,
+				replaces: { ...corrected.replaces!, paidOn: [], priorPayments: 3, offsetWith: [{ statementNumber: 'NK-1-2026-0001', amount: 3 }] }
+			})
+		).flowing;
+		expect(flowing).toContain('Akontobeiträge – 600.00 Bereits verrechnet mit NK-1-2026-0001 – 3.00');
+		expect(flowing).not.toContain('Bereits bezahlt');
+		expect(flowing).toContain('bereits verrechnet CHF 3.00');
 	});
 
 	it('nennt die ersetzte Abrechnung auf Französisch', async () => {

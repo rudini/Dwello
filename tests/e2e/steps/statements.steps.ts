@@ -17,6 +17,7 @@ import {
 	openStatementList,
 	searchStatements,
 	showDraftsOfBuilding,
+	showSettledOfBuilding,
 	showStatementsOfBuilding,
 	showStatementsOfBuildingWhileLoading,
 	startGeneratingStatements,
@@ -77,6 +78,13 @@ When(
 	'der Liegenschaftsverwalter nur die Entwürfe im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
 		await verwalter.attemptsTo(showDraftsOfBuilding(seed.idOf(building)!));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter nur die erledigten Abrechnungen im Gebäude {string} anzeigt',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.attemptsTo(showSettledOfBuilding(seed.idOf(building)!));
 	}
 );
 
