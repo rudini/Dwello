@@ -2412,3 +2412,13 @@ Request: narrow the CLAUDE.md rule "merging with a red check (also one red on `m
 - [x] PR to `main`
 - No scenario: rule change only
 - Files: `CLAUDE.md`
+
+## Session 2026-10-20: contributor files and PR checks
+
+No scenario: repository files and CI only, no app change.
+
+- [x] `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `SECURITY.md`, README links
+- [x] `.github/`: pull request template (no checkboxes, `open-work.test.ts`), `bug.yml`, `config.yml`, `CODEOWNERS`, `dependabot.yml`
+- [x] CI: commit subjects via `commit-msg-gate.mjs --check`, Prettier on new files, dependency review (public repository only)
+- [x] code-reviewer round 1: `docs/reviews/contrib-review-1.md`
+- [x] PR: pushed after this archive
