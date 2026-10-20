@@ -9,6 +9,7 @@ import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
 import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments } from '../db/schema';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
 import { insertInvoice } from './helpers/records';
@@ -330,9 +331,17 @@ describe('API-Verträge des Frontends', () => {
 	});
 
 	it('POST /statements/:id/generate-pdf, das scheitert, liefert die Felder von statement-pdf-failed.json', async () => {
-		const response = await sendJson('POST', '/api/v1/statements/keine-id/generate-pdf', {});
-		expect(response.status).toBe(500);
-		expect(drift(await sample('statement-pdf-failed'), await response.json())).toEqual([]);
+		const iban = await getConfig('iban');
+		await setConfig('iban', 'CH9300762011623852957');
+		try {
+			// a language the PDF has no texts for: an unexpected failure
+			const response = await sendJson('POST', `/api/v1/statements/${statementId}/generate-pdf`, { language: 'xx' });
+			expect(response.status).toBe(500);
+			expect(drift(await sample('statement-pdf-failed'), await response.json())).toEqual([]);
+		} finally {
+			if (iban) await setConfig('iban', iban);
+			else await deleteConfig('iban');
+		}
 	});
 
 	it('eine Anfrage, die das Schema verletzt, liefert die Felder von validation-refused.json', async () => {

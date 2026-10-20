@@ -1381,6 +1381,7 @@
 	"backend_unknown_error": "An unexpected error occurred. Please try again.",
 	"backend_internal_error": "An unexpected error occurred. Please try again.",
 	"backend_proxy_error": "The request could not be processed. Please try again.",
+	"backend_not_found": "The entry was not found. Reload the page.",
 	"backend_validation_error": "The request was invalid. Reload the page and try again.",
 	"backend_network_error": "No connection to the server. Check your internet connection and try again.",
 	"backend_service_unavailable": "The server is not responding. Please try again in a moment.",

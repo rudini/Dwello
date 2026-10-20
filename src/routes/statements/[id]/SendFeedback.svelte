@@ -7,7 +7,8 @@
 	let { error, onletter }: { error?: string; onletter: () => void } = $props();
 </script>
 
-<div role="status">
+<!-- empty: no gap in the page's column (gap-8), but still in the accessibility tree, so a message is announced -->
+<div role="status" class="empty:-mt-8">
 	{#if error}
 		<Alert tone="caution" title={m.statements_send_not_sent()}>
 			<p data-testid="send-feedback">{error}</p>
