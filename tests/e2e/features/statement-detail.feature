@@ -875,7 +875,7 @@ Funktionalität: Abrechnungsdetail
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und die Abrechnung 2024 von "Eva Frei" ist berichtigt
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der berichtigten Abrechnung 2024 von "Eva Frei"
-    Dann erklärt die Bearbeitungsseite die Bemerkung mit "Schreiben Sie hier, warum Sie die Abrechnung berichtigen. Die Bemerkung steht im PDF."
+    Dann erklärt die Bearbeitungsseite die Bemerkung mit "Schreiben Sie hier, warum Sie die Abrechnung berichtigen. Die Bemerkung steht im PDF, das der Mieter erhält."
 
   # #464: die berichtigte Abrechnung rechnet mit dem Akonto, das in der Periode galt, nicht mit dem heutigen;
   # Marc Huber Mai und Juni 2 × 50.00, Juli bis Dezember 6 × 80.00 = 580.00 (ab 2025 gilt 100.00)

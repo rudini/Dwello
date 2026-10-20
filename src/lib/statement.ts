@@ -30,7 +30,7 @@ export const statusTones: Record<StatementStatus, Tone> = {
 	draft: 'neutral',
 	sent: 'info',
 	paid: 'positive',
-	settled: 'positive',
+	settled: 'neutral', // no payment: not the colour of «Bezahlt» (personas dr-weber-448 P-2, anna-448 P-4)
 	overdue: 'critical',
 	replaced: 'neutral'
 };

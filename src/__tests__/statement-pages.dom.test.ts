@@ -687,7 +687,7 @@ describe('Abrechnungsdetail', () => {
 		detail({ status: 'settled', balance: 3 });
 		click('statement-correct-button');
 		expect(correctDialog()).toContain(
-			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten. Enthält eine versendete nächste Abrechnung ihren Saldo schon als Übertrag, rechnet die berichtigte ihn als «Bereits verrechnet» an.'
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten. Enthält eine versendete nächste Abrechnung ihren Saldo schon als Übertrag, rechnet die berichtigte Abrechnung ihn als «Bereits verrechnet» an: Der Mieter bezahlt oder erhält ihn nicht doppelt. Enthält ein Entwurf ihn als Übertrag, entfernt Dwello den Übertrag sofort aus dem Entwurf; die berichtigte Abrechnung rechnet dann den ganzen Saldo ab. Ist der Saldo der berichtigten Abrechnung wieder kleiner als CHF 5.00, berechnen Sie den Entwurf neu, nachdem Sie die berichtigte Abrechnung versendet haben.'
 		);
 	});
 
@@ -695,7 +695,14 @@ describe('Abrechnungsdetail', () => {
 	it('nennt beim Berichtigen einer nach #94 erledigten Rückerstattung, was mit dem übertragenen Saldo geschieht', () => {
 		detail({ status: 'paid', balance: -3, paidDate: '2025-02-01', paidAmount: 0 });
 		click('statement-correct-button');
-		expect(correctDialog()).toContain('rechnet die berichtigte ihn als «Bereits verrechnet» an.');
+		expect(correctDialog()).toContain('rechnet die berichtigte Abrechnung ihn als «Bereits verrechnet» an');
+	});
+
+	// Fachreview 448-4 V-32: ein Saldo 0.00 wird nie übertragen
+	it('nennt beim Berichtigen einer erledigten Abrechnung mit Saldo 0.00 keinen Übertrag', () => {
+		detail({ status: 'settled', balance: 0 });
+		click('statement-correct-button');
+		expect(correctDialog()).not.toContain('Übertrag');
 	});
 
 	it.each(['paid', 'settled'])('fragt beim Berichtigen einer Abrechnung im Status %s nicht nach dem bereits Bezahlten', (status) => {
@@ -1664,10 +1671,10 @@ describe('Abrechnung bearbeiten', () => {
 
 	// #403 (6): die Bemerkung steht im PDF; bei der berichtigten Abrechnung der Grund der Berichtigung
 	it.each([
-		[{}, 'Zum Beispiel eine Absprache mit dem Mieter. Die Bemerkung steht im PDF.'],
+		[{}, 'Zum Beispiel eine Absprache mit dem Mieter. Die Bemerkung steht im PDF, das der Mieter erhält.'],
 		[
 			{ replaces: { id: 's0', statementNumber: 'NK-2024-0000', statementDate: '2025-01-10' } },
-			'Schreiben Sie hier, warum Sie die Abrechnung berichtigen. Die Bemerkung steht im PDF.'
+			'Schreiben Sie hier, warum Sie die Abrechnung berichtigen. Die Bemerkung steht im PDF, das der Mieter erhält.'
 		]
 	])('erklärt die Bemerkung bei %o', (overrides, help) => {
 		edit(overrides);

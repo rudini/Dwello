@@ -17,7 +17,7 @@ describe('statement status', () => {
 			draft: 'neutral',
 			sent: 'info',
 			paid: 'positive',
-			settled: 'positive',
+			settled: 'neutral', // persona 448: «Erledigt» is no payment, unlike «Bezahlt»
 			overdue: 'critical',
 			replaced: 'neutral'
 		});

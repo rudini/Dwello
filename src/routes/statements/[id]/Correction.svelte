@@ -24,7 +24,7 @@
 	// yet; a refund is paid by the landlord (Fachreview W2e V-1, V-6, V-12, V-13)
 	// a settled one, or a refund settled under #94, whose Saldo may be carried over already (#448, Fachreview 448-3 V-25)
 	const carried = $derived(
-		statement.status === 'settled' ||
+		(statement.status === 'settled' && statement.balance !== 0) || // a Saldo of 0.00 is never carried over (448-4 V-32)
 			(statement.status === 'paid' && statement.paidAmount === 0 && statement.balance < 0 && statement.balance > -5)
 	);
 	// not paid: a sent or overdue one, or one whose Saldo is carried over

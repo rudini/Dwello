@@ -47,6 +47,12 @@ Funktionalität: Hilfe
       | Verwaltungspauschale    | Üblich sind bis 3 %                                             |
       | Saldo                   | bei einer berichtigten Abrechnung zusätzlich minus, was er auf die ersetzten Abrechnungen schon bezahlt hat |
 
+    # #448 (personas dr-weber-448 P-2, anna-448 P-4): «Erledigt» ist keine Zahlung; der Saldo zählt den Übertrag
+    Beispiele:
+      | Begriff  | Erklärung                                                  |
+      | Erledigt | Ein übertragener Betrag ist damit noch nicht bezahlt       |
+      | Saldo    | plus eine übertragene Nachzahlung bzw. minus eine übertragene Rückerstattung der vorherigen Abrechnung |
+
   # Inhaltsverzeichnis (#109)
   Szenario: Die Hilfe führt vom Inhalt direkt zu den Begriffen
     Angenommen das Browserfenster ist 390 Pixel breit
