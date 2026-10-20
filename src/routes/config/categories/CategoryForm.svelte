@@ -7,6 +7,7 @@
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
+	import NameTranslations from '../NameTranslations.svelte';
 	import SaveForm from '../SaveForm.svelte';
 	import AllocabilityQuestion from './AllocabilityQuestion.svelte';
 	import CategoryProposal from './CategoryProposal.svelte';
@@ -30,15 +31,10 @@
 		submitLabel: string;
 	} = $props();
 
-	const translations = [
-		{ key: 'nameFR', label: m.tenants_language_fr() },
-		{ key: 'nameIT', label: m.tenants_language_it() },
-		{ key: 'nameEN', label: m.tenants_language_en() }
-	] as const;
 	// The record's texts (empty for a new one), its number and the checkbox as the fields hold them
 	let values = $state(
 		untrack(() => ({
-			...{ name: '', description: '', nameFR: '', nameIT: '', nameEN: '' },
+			...{ name: '', description: '' },
 			...category,
 			sortOrder: String(category?.sortOrder || ''),
 			// A new category starts without a choice (#176)
@@ -180,15 +176,7 @@
 		bind:value={values.sortOrder}
 	/>
 
-	<fieldset class="flex flex-col gap-4" aria-describedby="translations-help">
-		<legend class="text-lg font-semibold text-ink">{m.categories_translations()}</legend>
-		<p id="translations-help" class="text-ink-muted">{m.categories_translations_help()}</p>
-		<div class="grid gap-6 md:grid-cols-3">
-			{#each translations as { key, label } (key)}
-				<TextInput id={key} name={key} {label} optional bind:value={values[key]} />
-			{/each}
-		</div>
-	</fieldset>
+	<NameTranslations names={category} help={m.categories_translations_help()} />
 </SaveForm>
 
 <AllocabilityQuestion

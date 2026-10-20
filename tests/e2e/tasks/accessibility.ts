@@ -202,8 +202,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(Enter.theValue('').intoEach(on.requiredFields), Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// saved as loaded
 	'saved-toast': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.savedToast)),
+	// a page whose data fails to load, from the 404 page's «Zur Übersicht»: only the page's data request fails
+	// (root layout and page, '11'); the error page's own request ('1') answers, else SvelteKit loads the page anew
 	'server-error': () => async (actor) =>
-		actor.attemptsTo(Wait.until(on.text(await say(actor, 'Versuchen Sie es später erneut.')))),
+		actor.attemptsTo(
+			FailRequests.to('/dashboard/__data.json', { 'x-sveltekit-invalidated': '11' }),
+			Click.on(on.link(await say(actor, 'Zur Übersicht'))),
+			Wait.until(on.text(await say(actor, 'Versuchen Sie es später erneut.')))
+		),
 	// French chosen with the language selection (the page reloads); later viewports start in French already
 	'other-language': () => async (actor) => {
 		if ((await actor.answer(pageLanguage)) !== 'fr')

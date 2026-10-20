@@ -35,6 +35,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
   - Uploaded documents: `DOCUMENT_TOO_LARGE {megabytes}`, `DOCUMENT_TYPE_NOT_ALLOWED`, `DOCUMENT_TITLE_TOO_LONG {max}`, `TENANT_NOT_FOUND` (404), `DOCUMENT_NOT_DELETABLE`
   - Reminders: `REMINDER_NOT_SENT`, `REMINDER_NOT_OVERDUE`, `REMINDER_REFUND`, `REMINDER_LIMIT`, `REMINDER_TOO_EARLY` (`date`: the day from which the next Mahnstufe is possible, `deadline`: the last reminder's Zahlungsfrist, both YYYY-MM-DD); delivery errors as `deliveryErrorCode` of a document: `TENANT_NO_EMAIL`, `MAIL_NOT_CONFIGURED`, `MAIL_DELIVERY_FAILED` (any other failure, also one stored before this code existed; the mail server's text is logged, never stored)
 - **Schema validation:** a body, query or path parameter that fails the Elysia `t` schema returns **422** `{ error: 'Invalid request', code: 'VALIDATION_ERROR', params: {} }` (one `onError` in `backend/src/app.ts`); the UI shows `backend_validation_error`.
+- **Not found:** a path id that is no UUID (`/buildings/abc`) names no record and returns **404** `{ error: 'Not found', code: 'NOT_FOUND', params: {} }` before its schema or the database sees it; so does an unknown route.
 - **Types:** IDs are UUID strings. Money, area, rooms and percentages stored as `numeric` are **strings** (`"450.00"`). Dates are `YYYY-MM-DD`; timestamps ISO 8601.
 - **Pagination:** `limit` and `offset` query parameters (strings parsed as integers). Default `limit` per router is noted below. There is no sorting parameter; each list has a fixed order.
 - **Delete:** success is **204** with an empty body.
@@ -151,7 +152,6 @@ There is no "predefined" flag on categories.
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/` | Query: `search`, `type`, `limit`, `offset`. → `{ data, total, limit, offset }` (default limit 100); items include `invoiceCount` |
-| POST | `/initialize` | Creates missing predefined keys. → `{ message, created, existing }` |
 | POST | `/test-formula` | Body: `formula`. → `{ isValid, results: [{ apartment: { area, rooms }, value, share }], totalValue, errors, errorCodes }` (four sample apartments, CHF 10,000; `errorCodes`: `{ code, params }` per error, same order) |
 | POST | `/parse-formula` | Body: `formula`. → `{ isValid, variables, errors, errorCodes, normalizedFormula }` |
 | POST | `/validate-formula` | Body: `formula`. → `{ isValid, errors, errorCodes, warnings }` |

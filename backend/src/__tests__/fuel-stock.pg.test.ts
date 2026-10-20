@@ -281,7 +281,7 @@ describe('Tankbestand über die API', () => {
 		expect((await record('2027-12-31', '10.00', rental.building, caretaker)).status).toBe(400);
 		expect((await record('2024-12-31', '700.00')).status).toBe(409);
 		expect((await callApi(stocks(crypto.randomUUID()))).status).toBe(404);
-		expect((await sendJson('DELETE', `${stocks()}/not-a-uuid`)).status).toBe(422);
+		expect((await sendJson('DELETE', `${stocks()}/not-a-uuid`)).status).toBe(404); // no UUID: no record
 	});
 
 	it('löscht einen Stichtag', async () => {

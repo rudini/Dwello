@@ -4,7 +4,7 @@ import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
 import { localName } from '$lib/names';
 import type { Category } from '$lib/types';
-import { deleteRecord, fetchRecord, saveRecord } from './save-form';
+import { deleteRecord, fetchRecord, nameTranslations, saveRecord } from './save-form';
 
 const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 const API = `${BACKEND}/categories`;
@@ -82,9 +82,7 @@ function parseCategory(formData: FormData) {
 		// only with heating costs, which the backend keeps (#100)
 		isFuel: formData.get('isFuel') === 'on',
 		...(field('sortOrder') && { sortOrder: Number(field('sortOrder')) }),
-		nameFR: field('nameFR') || null,
-		nameIT: field('nameIT') || null,
-		nameEN: field('nameEN') || null
+		...nameTranslations(field)
 	};
 	return { body, errors };
 }

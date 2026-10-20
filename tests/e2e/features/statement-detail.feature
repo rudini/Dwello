@@ -188,6 +188,13 @@ Funktionalität: Abrechnungsdetail
     Dann ist der Seitentitel lesbar
     Und scrollt die Seite nicht seitwärts
 
+  # Leere Bereiche für spätere Meldungen lassen keine Lücke über der Kostenaufstellung
+  Szenario: Die Kostenaufstellung folgt im üblichen Abstand auf den Status
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann folgt die Kostenaufstellung im üblichen Abstand auf den Status
+
   Szenario: Entwurf löschen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"

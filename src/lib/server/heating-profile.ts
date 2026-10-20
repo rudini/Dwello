@@ -2,7 +2,7 @@ import { backendMessage } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
 import type { HeatingProfile } from '$lib/types';
 import { MONTHS, profileTotal } from '$lib/heating-profile';
-import { deleteRecord, fetchRecord, saveRecord } from './save-form';
+import { deleteRecord, fetchRecord, nameTranslations, saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/heating-profiles`;
 
@@ -41,6 +41,7 @@ function parseHeatingProfile(formData: FormData) {
 	const body = {
 		name: field('name'),
 		description: field('description'),
+		...nameTranslations(field),
 		...Object.fromEntries(MONTHS.map(({ key }) => [`${key}Pct`, shares[key]]))
 	};
 	return { body, errors };

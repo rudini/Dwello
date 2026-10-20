@@ -8,6 +8,7 @@ const bySelector = (description: string, selector: string) =>
 export const emptyHint = bySelector('Hinweis auf leere Liste', '[data-testid$="-empty"]');
 export const loginError = bySelector('Anmeldefehler', '[data-testid="login-error"]');
 export const text = (shown: string) => target(`Text «${shown}»`, (page) => page.getByText(shown));
+export const link = (name: string) => target(`Link «${name}»`, (page) => page.getByRole('link', { name }));
 // the save button closes a form
 export const saveButton = target('Speichern', (page) => page.locator('main [type=submit]').last());
 export const requiredFields = target('Pflichtfelder', (page) =>

@@ -5,6 +5,7 @@ import { downloadedFileHeader, downloadedFileName, downloadedPdfText, downloaded
 import {
 	balanceAmount,
 	changeOffers,
+	gapAboveCostBreakdown,
 	correctConfirmation,
 	deadlineShown,
 	paymentText,
@@ -530,4 +531,8 @@ Then(
 
 Given('die Rechnung der Kategorie {string} vom {string} hat keinen Verteilschlüssel', async ({ seed }, category: string, date: string) => {
 	await seed.invoiceWithoutKey(`${category} ${date}`);
+});
+
+Then('folgt die Kostenaufstellung im üblichen Abstand auf den Status', async ({ verwalter }) => {
+	await verwalter.sees(gapAboveCostBreakdown).toBe(32);
 });
