@@ -60,8 +60,8 @@ async function nextLevel(statement: Statement) {
 	}
 	if (statement.status !== 'overdue') throw new ReminderError('REMINDER_NOT_OVERDUE', 'Gemahnt wird erst nach Ablauf der Zahlungsfrist.');
 	if (!(Number(statement.balance) > 0)) throw new ReminderError('REMINDER_REFUND', 'Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
-	// also after «Zahlung zurücksetzen»: a Saldo below CHF 5 is not claimed (#94)
-	if (belowMinimum(Number(statement.balance))) throw new ReminderError('REMINDER_BELOW_MINIMUM', 'Ein Saldo unter CHF 5.00 wird nicht eingefordert.');
+	// also after «Zahlung zurücksetzen»: a Saldo below CHF 5 is not claimed (#94), except on a Schlussabrechnung (#448)
+	if (belowMinimum(Number(statement.balance)) && !statement.final) throw new ReminderError('REMINDER_BELOW_MINIMUM', 'Ein Saldo unter CHF 5.00 wird nicht eingefordert.');
 	const level = (await countReminders(statement.id)) + 1;
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('REMINDER_LIMIT', 'Es wurden bereits 3 Mahnungen versendet.');
 	// the next Mahnstufe from the day after the last reminder's Zahlungsfrist (#107)

@@ -58,7 +58,7 @@ export const actions: Actions = {
 			fetch,
 			params.id,
 			sent === null ? undefined : String(sent),
-			String(form.get('statementDate') ?? '')
+			String(form.get('periodEnd') ?? '')
 		);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
@@ -66,8 +66,9 @@ export const actions: Actions = {
 		const refused = await resetStatementPayment(fetch, params.id);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
-	replace: async ({ params, fetch }) => {
-		const refused = await replaceStatement(fetch, params.id);
+	replace: async ({ params, fetch, request }) => {
+		const paid = (await request.formData()).get('paidAmount');
+		const refused = await replaceStatement(fetch, params.id, paid === null ? undefined : String(paid));
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
 	correct: async ({ params, fetch }) => {

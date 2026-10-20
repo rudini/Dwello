@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
+import { backendMessage } from '$lib/backend-error';
 import { loadDocuments, localTitle } from '$lib/server/documents';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -15,7 +16,11 @@ export const actions: Actions = {
 	markSent: async ({ request, fetch }) => {
 		const id = String((await request.formData()).get('id'));
 		const response = await fetch(`${API}/${id}/sent`, { method: 'PUT' });
-		if (!response.ok) return fail(response.status, { actionError: m.documents_update_failed() });
+		if (!response.ok) {
+			// only a code the UI knows, never the backend's own text
+			const { code } = await response.json().catch(() => ({}));
+			return fail(response.status, { actionError: backendMessage({ code }, m.documents_update_failed()) });
+		}
 		const sent = await response.json();
 		return { sent: { id, title: localTitle(sent), tenantName: sent.tenantName as string } };
 	}

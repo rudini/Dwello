@@ -1,0 +1,5 @@
+{
+	"error": "Company name, postal code and town are required for the payment part",
+	"code": "CREDITOR_ADDRESS_MISSING",
+	"params": {}
+}

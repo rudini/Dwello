@@ -11,7 +11,7 @@ const tiles: Record<string, string> = {
 	Gesperrt: 'stat-reserved',
 	'Überfällige Beträge': 'stat-overdue-amount'
 };
-const statementStatuses: Record<string, string> = { Entwürfe: 'draft', Versendet: 'sent', Bezahlt: 'paid', Überfällig: 'overdue' };
+const statementStatuses: Record<string, string> = { Entwürfe: 'draft', Versendet: 'sent', Bezahlt: 'paid', Erledigt: 'settled', Überfällig: 'overdue' };
 
 export const openDashboard = Navigate.to('/dashboard');
 export const openBuildingFromOccupancy = (building: string) => Click.on(occupancyBuilding(building));

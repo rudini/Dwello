@@ -18,6 +18,28 @@ describe('Formelvariablen in den Meldungen', () => {
 	});
 });
 
+// 448-review-3, C-17: the merge with main dropped the carry-over and the PDF sentence in fr and it
+describe('Saldo und Bemerkung (#448)', () => {
+	it.each(languages)('%s nennt den Mindestbetrag im Saldo und das PDF bei der Bemerkung', (locale) => {
+		expect(m.glossary_balance_text({}, { locale })).toContain('CHF 5.00');
+		expect(m.statements_notes_help({}, { locale })).toContain('PDF');
+	});
+});
+
+// 448-review-3, C-20: typography rules of #405
+describe('Typografie', () => {
+	const texts = (language: string) =>
+		Object.entries(JSON.parse(readFileSync(`messages/${language}.json`, 'utf8')) as Record<string, string>);
+
+	it('fr setzt vor ? ! ; ein geschütztes Leerzeichen', () => {
+		expect(texts('fr').filter(([, text]) => / [?!;]/.test(text)).map(([key]) => key)).toEqual([]);
+	});
+
+	it('en setzt Guillemets statt englischer Anführungszeichen', () => {
+		expect(texts('en').filter(([, text]) => /[“”]/.test(text)).map(([key]) => key)).toEqual([]);
+	});
+});
+
 describe('Sprachdateien', () => {
 	it.each(languages.slice(1))('%s hat dieselben Texte wie Deutsch', (language) => {
 		expect(keys(language)).toEqual(keys('de'));

@@ -21,8 +21,14 @@ import {
 	laterInvoicesHint,
 	laterInvoicesHints,
 	languageOfPdf,
+	carryOver,
+	correctPaidAmount,
+	correctPaidAmountAsked,
+	correctPaidAmountHelp,
+	earlyPaidDateQuestion,
 	paidDateInvalid,
 	paidDateProblem,
+	resetOffers,
 	pdfRefusalText,
 	pdfToView,
 	recipient,
@@ -46,7 +52,9 @@ import {
 } from '../questions/statements';
 import { openStatementList, searchStatements } from '../tasks/statements';
 import {
+	confirmEarlyPaidDate,
 	correctStatement,
+	correctStatementPaid,
 	recalculateDraft,
 	createCorrection,
 	openCorrectConfirmation,
@@ -360,13 +368,23 @@ Then('nennt der Verlauf {string} am Tag des Versands', async ({ verwalter }, lab
 	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${sendingDay().replace(/\./g, '\\.')}`));
 });
 
+// #403 (4): a day before the Abrechnungsdatum is saved only after the confirmation
 Then(
-	'meldet das Feld «Bezahlt am», dass das Zahlungsdatum vor dem Abrechnungsdatum vom Tag des Versands liegt',
+	'fragt Dwello, ob das Zahlungsdatum vor dem Abrechnungsdatum vom Tag des Versands trotzdem gilt',
 	async ({ verwalter }) => {
-		await verwalter.sees(paidDateInvalid).toBe('true');
-		await verwalter.sees(paidDateProblem).toContain(`Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom ${sendingDay()}.`);
+		await verwalter
+			.sees(earlyPaidDateQuestion)
+			.toBe(`Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom ${sendingDay()}. Trotzdem speichern?`);
 	}
 );
+
+When('der Liegenschaftsverwalter das frühere Zahlungsdatum bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmEarlyPaidDate);
+});
+
+Then('nennt der Verlauf {string} am {string}', async ({ verwalter }, label: string, date: string) => {
+	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${date.replace(/\./g, '\\.')}`));
+});
 
 When('der Liegenschaftsverwalter die Zahlung zurücksetzt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(resetPayment);
@@ -533,6 +551,68 @@ Then(
 Given('die Rechnung der Kategorie {string} vom {string} hat keinen Verteilschlüssel', async ({ seed }, category: string, date: string) => {
 	await seed.invoiceWithoutKey(`${category} ${date}`);
 });
+
+// #403: the Übertrag of the previous statement of the same Mietvertrag; a refund carried over subtracts, a Nachzahlung adds
+Then(
+	/^(zieht|zählt) die Abrechnung den Übertrag "([^"]+)" aus der Abrechnung (\d+) von "([^"]+)" (?:ab|dazu)$/,
+	async ({ verwalter, seed }, verb: string, amount: string, year: string, tenant: string) => {
+		const sign = verb === 'zieht' ? '−' : '+';
+		await verwalter.sees(carryOver).toBe(`Übertrag aus Abrechnung ${await seed.statementNumber(tenant, Number(year))} ${sign} ${amount}`);
+	}
+);
+
+Then(
+	'steht im PDF der Übertrag {string} aus der Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, amount: string, year: number, tenant: string) => {
+		const number = (await seed.statementNumber(tenant, year)).replace(/-/g, '-\\s?'); // broken after a hyphen
+		await verwalter.sees(downloadedPdfText).toMatch(new RegExp(`Übertrag aus Abrechnung ${number}: ${amount}`));
+	}
+);
+
+Given('der Mietvertrag von {string} endet am {string}', async ({ seed }, tenant: string, date: string) => {
+	await seed.contractEnd(tenant, date);
+});
+
+Then('bietet die Abrechnung kein Zurücksetzen der Zahlung an', async ({ verwalter }) => {
+	await verwalter.sees(resetOffers).toBe(0);
+});
+
+// #403 (5): what the tenant already paid on a sent or overdue statement, also a part
+When(
+	'der Liegenschaftsverwalter die Abrechnung berichtigt, auf die schon {string} Franken bezahlt sind',
+	async ({ verwalter }, amount: string) => {
+		await verwalter.attemptsTo(correctStatementPaid(amount));
+	}
+);
+
+Given(
+	'die Abrechnung {int} von {string} ist berichtigt, auf sie sind {string} Franken bezahlt',
+	async ({ seed }, year: number, tenant: string, amount: string) => {
+		await seed.replaceStatement(tenant, year, true, amount);
+	}
+);
+
+Then('steht in der Bestätigung bei «Bereits bezahlt» {string}', async ({ verwalter }, amount: string) => {
+	await verwalter.sees(correctPaidAmount).toBe(amount);
+});
+
+Then('erklärt die Bestätigung «Bereits bezahlt» mit {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(correctPaidAmountHelp).toBe(help);
+});
+
+Then('fragt die Bestätigung nicht nach dem bereits Bezahlten', async ({ verwalter }) => {
+	await verwalter.sees(correctPaidAmountAsked).toBe(0);
+});
+
+Then(
+	'steht im PDF, dass auf die Abrechnung {int} von {string} bereits {string} bezahlt sind',
+	async ({ verwalter, seed }, year: number, tenant: string, amount: string) => {
+		// the PDF may break the number after a hyphen
+		const number = (await seed.statementNumber(tenant, year)).replace(/-/g, '-\\s?');
+		await verwalter.sees(downloadedPdfText).toMatch(new RegExp(`Bereits bezahlt auf ${number}`));
+		await verwalter.sees(downloadedPdfText).toContain(`bereits bezahlt CHF ${amount}`);
+	}
+);
 
 Then('folgt die Kostenaufstellung im üblichen Abstand auf den Status', async ({ verwalter }) => {
 	await verwalter.sees(gapAboveCostBreakdown).toBe(32);

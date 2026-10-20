@@ -2052,6 +2052,21 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
+## Session W5-450: QR-bill creditor (#450) and the IBAN help (#490) (2026-10-19)
+
+Worker W5 of ten in parallel: the checklist ran in the pull request, the session goes straight here (coordinator rule; Session C1 of another branch stays in the plan).
+
+- [x] @wip scenario «IBAN ohne Firmenadresse» and red lower-layer tests (config, statement PDF, reminder, QR country 9484/9485/9498/9499, BFF), committed; fach-reviewer round 1 before the implementation (`docs/reviews/450-fachreview-1.md`: V-1 Major, V-2 to V-11)
+- [x] Implementation: IBAN only with name, postal code and town (field and backend `IBAN_COMPANY_ADDRESS_MISSING`); a PDF or reminder with a payment part refused (`CREDITOR_ADDRESS_MISSING`); invented creditor gone; creditor country from the postal code; V-1 (marking a reminder sent returns the code), V-2 to V-5, V-11
+- [x] No scenario for the PDF refusal in `statement-detail.feature`: the settings are global for parallel scenarios and the state exists only in installations from before (comment in #450); contract `statement-pdf-creditor-refused.json`
+- [x] Issues from the review: #490 (glossary, IBAN help; decided and implemented here), #491 (letter while the PDF is refused; decided, comes with #449), #503 (Verlauf «PDF erstellt» while refused)
+- [x] code-reviewer round 1 (`docs/reviews/450-review-1.md`: C-1 Major, C-2) and round 2 (`450-review-2.md`: both fixed)
+- [x] #490: help text in four languages and the glossary rows the product owner asked for; fach-reviewer round 2 (`docs/reviews/450-fachreview-2.md`: no Blocker/Major)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-450.md`, `weber-450.md`): Helga P-2, Dr. Weber P-1, P-2 fixed with tests seen red; observations: U-42, #503
+- [x] Closing code-review round 3 (`docs/reviews/450-review-3.md`: C-1 Major, C-2, C-3): scenario step for the marked fields (seen red), marks end with any input, all three codes tested
+- [x] O-34 closed: lock on the global settings (`tests/e2e/fixtures/settings-lock.ts`), seen red without it (3 of 8) and green with it (24 of 24)
+- [x] Closing code-review round 4 (`docs/reviews/450-review-4.md`: no finding)
+- [x] PR `Fixes #450`, `Fixes #490`
 ## Session W6-458: legal texts, split responsibility (2026-10-19)
 
 Branch `w6-issue-458`, worker W6 of a coordinated run (the checklist was kept in the pull request; `implementation_plan.md` keeps another worker's open session, coordinator's rule). Issue #458, closes #330 and #333.
@@ -2176,6 +2191,17 @@ Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20:
 - [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
 - [x] PR `Fixes #488`
 
+## Session W4: payments after #403 (#448, #484)
+
+Branch `w4-issue-448`. Worker W4 of the coordinator session; the checklist was kept in the pull request (coordinator rule for parallel workers). Stop and ask of #448 checked: the carry-over needs a new nullable column (`carried_from_id`, migration 0028) and a status `settled`; no existing statement changes. Product owner 2026-10-19 (via coordinator): M-1, V-2, V-4 of the domain review decided in #448; #484 decided and entered by this session as ordered.
+
+- [x] @wip scenarios (`statement-minimum-balance.feature`, `statement-detail.feature`, `statements.feature`, `dashboard.feature`) seen red; domain review before implementing (`docs/reviews/448-fachreview-1.md`)
+- [x] Übertrag below CHF 5 (also refunds settled under #94), status «Erledigt», Schlussabrechnung without Mindestbetrag, payment date from the end of the period with a confirmation before the Abrechnungsdatum, «Bereits bezahlt» / «Bereits zurückerstattet» when correcting, «Bereits verrechnet» for a Saldo a sent next statement counts, the remark on the PDF; tests: `statement-carry-over.pg.test.ts`, `statement-pdf-render.test.ts`, `statement-pdf-data.test.ts`, `statement-pages.dom.test.ts`, BFF and mapping tests
+- [x] Glossary rows of #484 and V-15 (`UBIQUITOUS_LANGUAGE.md`), `glossary_balance_text`, help term «Erledigt», `docs/data-model.md`, `docs/api-specification.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/PRD-Dwello.md`, `docs/design/i18n-begriffe.md`
+- [x] a11y and language screens: `statement-settled-detail`, `statement-carried-detail`, `statement-carry-detail`, `statement-offset-detail`, state `mark-paid-early`
+- [x] Domain reviews 1 to 4 (`docs/reviews/448-fachreview-1..4.md`), code reviews 1 and 2 (`448-review-1..2.md`), data check (`448-datenpruefung-1.md`), personas `dr-weber-448`, `anna-448` and their re-runs
+- [x] Open work: #506 (Übertrag that reaches no statement), #523 (partial payment when marking paid), #524 (a new PDF replaces the one sent), U-43 (edit page table cut off)
+- [x] Migration renumbered 0026 → 0027 → 0028 (taken on `main` by #464 and #514)
 ## Session W2-199: one Abrechnungsperiode per day and building (#199, #408, #486, #487)
 
 Branch `w2-issue-199` (worker W2; reviewers started by the coordinator). Fixes #199 (decision #408 point 2, texts in https://github.com/rudini/Dwello/issues/408#issuecomment-6249569443), #408 (its last marker), #486 and #487 (product owner decisions 2026-10-19/20). The checklist was kept in the pull request description: ten parallel workers share `implementation_plan.md` (coordinator's rule).

@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, invoices, tenants, utilityStatements } from '../db/schema';
+import { categories, configuration, fuelStocks, invoices, tenants, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createFuelStock } from '../services/fuel-stock.service';
@@ -823,7 +823,7 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 		const [settled] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
 		await db.update(utilityStatements).set({ status: 'draft', balance, paidDate: null, paidAmount: null, paymentRecordedAt: null }).where(eq(utilityStatements.id, statementId));
 
-		expect(settled.status).toBe('paid');
+		expect(settled.status).toBe('settled'); // «Erledigt» (#448)
 		expect(settled.pdfGeneratedAt).not.toBeNull();
 	});
 });
@@ -856,4 +856,57 @@ describe('Rechnung ohne Verteilschlüssel im PDF', () => {
 	it('nennt den Verteilschlüssel «Pro Einheit» mit dem Anteil der Wohnung', () => {
 		expect(text).toContain('Hauswart Pro Einheit 1 / 1 Wohnungen 400.00 400.00');
 	});
+});
+
+// #450 (Entscheid in #404, Punkt 8): der Zahlteil nennt den Liegenschaftsverwalter als Zahlungsempfänger, nie einen
+// erfundenen. Eine Installation von vorher kann eine IBAN ohne Ort der Firmenadresse haben
+describe('PDF ohne vollständige Firmenadresse', () => {
+	const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+	const without = (key: 'company_city' | 'company_address') => async (test: (id: string) => Promise<void>) => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await db.delete(configuration).where(eq(configuration.key, key));
+		try {
+			await test(statement.id);
+		} finally {
+			await setConfig(key, company[key]);
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statement.id));
+			await deleteStatement(statement.id);
+		}
+	};
+	const withoutCity = without('company_city');
+
+	it('lehnt ein PDF mit Zahlteil ab und sagt, was fehlt', () =>
+		withoutCity(async (id) => {
+			const response = await sendJson('POST', `/api/v1/statements/${id}/generate-pdf`, {});
+
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({ code: 'CREDITOR_ADDRESS_MISSING' });
+		}));
+
+	it('erstellt ein PDF ohne Zahlteil weiterhin', () =>
+		withoutCity(async (id) => {
+			await updateStatementStatus(id, 'sent');
+			await updateStatementStatus(id, 'paid', { paidDate: today });
+
+			const response = await sendJson('POST', `/api/v1/statements/${id}/generate-pdf`, {});
+			const text = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
+
+			expect(response.status).toBe(200);
+			expect(text).toContain('Muster Immobilien AG');
+			expect(text).not.toContain('8001 Zürich'); // no town stands in for the missing one (Fachreview V-3)
+			// «PLZ Ort» is one part: without the town no bare postal code (persona Dr. Weber P-1)
+			expect(text).toContain('Muster Immobilien AG · Firmenweg 9 ');
+			expect(text).not.toContain('Firmenweg 9 · 8001');
+			expect(text).not.toContain('Firmenweg 9, 8001');
+		}));
+
+	// Fachreview V-2: die Adresse (Strasse) bleibt freiwillig; Kopfzeile und Belegeinsicht nennen nur, was erfasst ist
+	it('nennt ohne Adresse den Absender ohne leere Teile', () =>
+		without('company_address')(async (id) => {
+			await generateStatementPdf(id, 'de');
+			const text = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
+
+			expect(text).toContain('Muster Immobilien AG · 8001 Zürich');
+			expect(text).toContain('Melden Sie sich dafür bei Muster Immobilien AG, 8001 Zürich');
+		}));
 });

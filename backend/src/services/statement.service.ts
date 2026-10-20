@@ -31,6 +31,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import type { Tx } from './advance-payment.service';
 import { belowMinimum } from './pdf-format';
 import { isRealDate } from './real-date';
 import { oldAddress } from './old-address';
@@ -58,10 +59,17 @@ const nextReminderFrom = sql<string | null>`(
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder'
 )`;
-const statementColumns = { ...tableColumns, nextReminderFrom, oldAddress: oldAddress(utilityStatements.contractId) };
+// the Schlussabrechnung: the Mietvertrag ends within the period; it has no Mindestbetrag and carries nothing over (#448)
+const final = sql<boolean>`exists (
+	select 1 from ${rentalContracts}
+	where ${rentalContracts.id} = ${utilityStatements.contractId}
+		and ${rentalContracts.endDate} between ${utilityStatements.periodStart} and ${utilityStatements.periodEnd}
+)`;
+const statementColumns = { ...tableColumns, nextReminderFrom, final, oldAddress: oldAddress(utilityStatements.contractId) };
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
 	nextReminderFrom: string | null;
+	final: boolean; // a Schlussabrechnung (#448)
 	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
 	tenant: {
 		id: string;
@@ -81,6 +89,8 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	replaces?: { id: string; statementNumber: string; statementDate: string; totalAdvancePayments: string } | null;
 	replacedBy?: { id: string; statementNumber: string } | null;
 	priorPaidOn?: string[];
+	offsetWith?: { statementNumber: string; amount: string }[]; // «Bereits verrechnet mit NK-…» (#448)
+	carriedFrom?: { id: string; statementNumber: string; balance: string } | null; // the Übertrag (#448); only in the detail
 	heatingProfile?: {
 		id: string;
 		name: string;
@@ -306,8 +316,18 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		building: result.building,
 		heatingProfile: result.heatingProfile,
 		lineItems,
-		...(await correctionsOf(result.statement))
+		...(await correctionsOf(result.statement)),
+		carriedFrom: await carriedFromOf(result.statement.carriedFromId)
 	};
+}
+
+async function carriedFromOf(id: string | null) {
+	if (!id) return null;
+	const [from] = await db
+		.select({ id: utilityStatements.id, statementNumber: utilityStatements.statementNumber, balance: utilityStatements.balance })
+		.from(utilityStatements)
+		.where(eq(utilityStatements.id, id));
+	return from ?? null;
 }
 
 /** The statement a berichtigte Abrechnung replaces, the replaced ones of its chain paid on, and its own replacement */
@@ -316,7 +336,7 @@ async function correctionsOf(statement: { id: string; replacesId: string | null 
 	const chain = [];
 	for (let next = statement.replacesId; next; ) {
 		const [replaced] = await db
-			.select({ ...columns, statementDate: utilityStatements.statementDate, paidAmount: utilityStatements.paidAmount, replacesId: utilityStatements.replacesId, totalAdvancePayments: utilityStatements.totalAdvancePayments })
+			.select({ ...columns, statementDate: utilityStatements.statementDate, paidAmount: utilityStatements.paidAmount, replacesId: utilityStatements.replacesId, totalAdvancePayments: utilityStatements.totalAdvancePayments, countedBy })
 			.from(utilityStatements)
 			.where(eq(utilityStatements.id, next));
 		chain.push(replaced);
@@ -328,8 +348,11 @@ async function correctionsOf(statement: { id: string; replacesId: string | null 
 	const replaces = first
 		? { id: first.id, statementNumber: first.statementNumber, statementDate: first.statementDate, totalAdvancePayments: first.totalAdvancePayments }
 		: null;
-	const priorPaidOn = chain.filter((s) => Number(s.paidAmount ?? 0) !== 0).map((s) => s.statementNumber).reverse();
-	return { replaces, replacedBy: replacedBy ?? null, priorPaidOn };
+	const paidOn = chain.filter((s) => Number(s.paidAmount ?? 0) !== 0);
+	const priorPaidOn = paidOn.filter((s) => !s.countedBy).map((s) => s.statementNumber).reverse();
+	// #448 (Fachreview 448-1 V-2): its Saldo is in the next statement as the Übertrag
+	const offsetWith = paidOn.filter((s) => s.countedBy).map((s) => ({ statementNumber: s.countedBy!, amount: s.paidAmount! }));
+	return { replaces, replacedBy: replacedBy ?? null, priorPaidOn, offsetWith };
 }
 
 /** Parameters of a statement calculation; the management fee overrides the configured default */
@@ -355,8 +378,50 @@ export async function calculateStatement(input: StatementInput) {
 	);
 	const replaced = await openReplaced(input);
 	const priorPayments = replaced ? paidSoFar(replaced) : 0;
-	const balance = calculateBalance(calculation.totalCosts, calculation.totalAdvancePayments + priorPayments);
-	return { ...calculation, balance, priorPayments, replacesId: replaced?.id ?? null };
+	const carried = await carriedOver(input);
+	const carryOver = carried ? Number(carried.balance) : 0;
+	const balance = calculateBalance(calculation.totalCosts + carryOver, calculation.totalAdvancePayments + priorPayments);
+	return { ...calculation, balance, priorPayments, carryOver, carriedFromId: carried?.id ?? null, replacesId: replaced?.id ?? null };
+}
+
+// The number of the sent statement of another period that counts this statement's Saldo as its Übertrag (#448); a
+// berichtigte Abrechnung of the same period counts it again; a draft may still change (Fachreview 448-2 V-14)
+const countedBy = sql<string | null>`(
+	select counting.statement_number from utility_statements counting
+	where counting.carried_from_id = utility_statements.id and counting.status <> 'draft'
+		and (counting.period_start <> utility_statements.period_start or counting.period_end <> utility_statements.period_end)
+	limit 1
+)`; // the outer table by its name: drizzle writes a column of a single-table select without it
+// A Saldo carried over: settled with a Saldo other than 0.00, or a refund below CHF 5 settled under #94, which the
+// tenant is still owed (PO 2026-10-19); a Nachzahlung waived under #94 stays waived
+const carriable = or(
+	and(eq(utilityStatements.status, 'settled'), sql`${utilityStatements.balance} <> 0`),
+	and(eq(utilityStatements.status, 'paid'), sql`${utilityStatements.paidAmount} = 0 and ${utilityStatements.balance} < 0 and ${utilityStatements.balance} > -5`)
+);
+
+/**
+ * The Übertrag (#448): the latest earlier statement of the Mietvertrag with a Saldo carried over that no statement of
+ * another period counts yet
+ */
+async function carriedOver({ contractId, periodStart, periodEnd }: StatementInput) {
+	const [carried] = await db
+		.select({ id: utilityStatements.id, balance: utilityStatements.balance })
+		.from(utilityStatements)
+		.where(
+			and(
+				eq(utilityStatements.contractId, contractId),
+				carriable,
+				lt(utilityStatements.periodEnd, periodStart),
+				sql`not exists (
+					select 1 from utility_statements counting
+					where counting.carried_from_id = utility_statements.id
+						and (counting.period_start <> ${periodStart} or counting.period_end <> ${periodEnd})
+				)`
+			)
+		)
+		.orderBy(desc(utilityStatements.periodEnd))
+		.limit(1);
+	return carried;
 }
 
 /** What was paid on a replaced statement and on the ones it replaced itself; a refund paid to the tenant counts negative */
@@ -412,7 +477,8 @@ async function calculatedRows(input: StatementInput & { buildingId: string }) {
 		keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 		balance: String(calculation.balance),
 		replacesId: calculation.replacesId,
-		priorPayments: String(calculation.priorPayments)
+		priorPayments: String(calculation.priorPayments),
+		carriedFromId: calculation.carriedFromId
 	};
 	const lineItems = calculation.lineItems.map((item, index) => ({
 		categoryId: item.categoryId,
@@ -430,7 +496,7 @@ async function calculatedRows(input: StatementInput & { buildingId: string }) {
 		invoices: item.invoices,
 		sortOrder: index
 	}));
-	return { values, lineItems };
+	return { values, lineItems, carryOver: calculation.carryOver };
 }
 
 /**
@@ -493,7 +559,7 @@ export async function recalculateStatement(id: string): Promise<StatementWithDet
 	const { contractId, periodStart, periodEnd } = draft;
 	await refuseOpenAgreements(contractId, draft.building!.id, periodStart, periodEnd, 'STATEMENT_RECALCULATION_AGREEMENTS_OPEN');
 	await refuseUncategorized(draft.building!.id, periodStart, periodEnd, 'STATEMENT_RECALCULATION_UNCATEGORIZED_INVOICES');
-	const { values, lineItems } = await calculatedRows({
+	const { values, lineItems, carryOver } = await calculatedRows({
 		contractId,
 		buildingId: draft.building!.id,
 		periodStart,
@@ -506,7 +572,7 @@ export async function recalculateStatement(id: string): Promise<StatementWithDet
 	const kept = {
 		replacesId: draft.replacesId,
 		priorPayments: draft.priorPayments,
-		balance: String(calculateBalance(Number(values.totalCosts), Number(values.totalAdvancePayments) + priorPayments))
+		balance: String(calculateBalance(Number(values.totalCosts) + carryOver, Number(values.totalAdvancePayments) + priorPayments))
 	};
 	await db.transaction(async (tx) => {
 		await tx.delete(utilityStatementLineItems).where(eq(utilityStatementLineItems.statementId, id));
@@ -573,10 +639,8 @@ export async function updateStatement(
 		}
 	}
 
-	// The PDF prints date and payment deadline; a change discards it, it is made again. Once paid, the PDF as sent stays
-	const pdfOutdated =
-		(data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline) ||
-		(data.statementDate !== undefined && data.statementDate !== existing.statementDate);
+	// The PDF prints date, payment deadline and remark (#448); a change discards it, it is made again. Once paid, the PDF as sent stays
+	const pdfOutdated = changesPdf(data, existing);
 
 	// Update the statement
 	const [updated] = await db
@@ -589,6 +653,12 @@ export async function updateStatement(
 
 	return await getStatement(id);
 }
+
+// A field the PDF prints, changed; the edit page sends no remark as ''
+const changesPdf = (data: Partial<NewUtilityStatement>, existing: StatementWithDetails) =>
+	(['paymentDeadline', 'statementDate', 'notes'] as const).some(
+		(field) => data[field] !== undefined && (data[field] ?? '') !== (existing[field] ?? '')
+	);
 
 /** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by */
 export async function keyValuesOf(buildingId: string, apartmentId: string): Promise<KeyValues | null> {
@@ -626,18 +696,21 @@ export async function updateStatementStatus(
 		draft: ['sent'],
 		sent: ['paid'],
 		overdue: ['paid'],
-		paid: []
+		paid: [],
+		settled: []
 	};
 
 	if (!validTransitions[existing.status]?.includes(status)) {
 		throw new Error(`Invalid status transition from ${existing.status} to ${status}`);
 	}
 
-	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.statementDate);
+	if (status === 'paid' && additionalData?.paidDate !== undefined) checkPaidDate(additionalData.paidDate, existing.periodEnd);
 	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
-	// A Saldo below CHF 5, 0 included, is settled once sent: neither claimed nor paid out (#94)
-	const waived = belowMinimum(parseFloat(existing.balance));
-	const settled = sentToday && waived && { status: 'paid', paidDate: sentToday.statementDate };
+	// A Saldo of 0.00, or one below CHF 5 carried over, is «Erledigt» once sent: no payment (#448); a Schlussabrechnung
+	// claims or pays out every other Saldo
+	const balance = parseFloat(existing.balance);
+	const waived = belowMinimum(balance) && !existing.final;
+	const settled = sentToday && (balance === 0 || waived) && { status: 'settled' };
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
 		...additionalData,
@@ -646,17 +719,19 @@ export async function updateStatementStatus(
 		// the PDF as sent is made anew after sending, with the tenant and settings then, not a draft's of earlier (review C-9)
 		...(sentToday && { pdfBlob: null, pdfGeneratedAt: null })
 	};
-	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94)
+	// paid without an amount: the Saldo, as the tenant pays it or gets it back (#93); below CHF 5 no money moves (#94: a
+	// statement settled under #94 whose payment was reset)
 	const moved = waived ? '0.00' : existing.balance;
 	if (updateData.status === 'paid') Object.assign(updateData, { paidAmount: updateData.paidAmount ?? moved, paymentRecordedAt: new Date() });
 
 	return updateStatement(id, updateData);
 }
 
-// #138: a day that exists, from the Abrechnungsdatum (for a sent statement the day it was sent) up to today
-function checkPaidDate(paidDate: string, statementDate: string) {
+// #138: a day that exists, up to today; from the end of the Abrechnungsperiode: a tenant may pay before the
+// Abrechnungsdatum, which the UI confirms first (#448)
+function checkPaidDate(paidDate: string, periodEnd: string) {
 	if (!isRealDate(paidDate)) throw new CodedError('PAID_DATE_INVALID', 'Invalid payment date', { date: paidDate });
-	if (paidDate < statementDate) throw new CodedError('PAID_DATE_BEFORE_STATEMENT', 'Payment date before the statement date', { date: statementDate });
+	if (paidDate < periodEnd) throw new CodedError('PAID_DATE_BEFORE_PERIOD_END', 'Payment date before the end of the period', { date: periodEnd });
 	const today = swissToday();
 	if (paidDate > today) throw new CodedError('PAID_DATE_IN_FUTURE', 'Payment date in the future', { date: today });
 }
@@ -686,19 +761,48 @@ export async function resetPayment(id: string): Promise<StatementWithDetails> {
 }
 
 /**
- * Replace a sent, overdue or paid statement (#120): it gets the status «Ersetzt» and stays as it was, its Zahlungsdatum
- * and Saldo included; it is no longer gemahnt and no longer blocks contract dates that change its Mietstage
+ * Replace a sent, overdue, paid or settled (#448) statement (#120): it gets the status «Ersetzt» and stays as it was, its Zahlungsdatum
+ * and Saldo included; it is no longer gemahnt and no longer blocks contract dates that change its Mietstage. On a sent
+ * or overdue one, `paidAmount` is what was already paid on it, also a part (#448): by the tenant on a Nachzahlung, by
+ * the landlord on a refund, which counts negative
  */
-export async function replaceStatement(id: string): Promise<StatementWithDetails> {
+export async function replaceStatement(id: string, paidAmount?: string): Promise<StatementWithDetails> {
 	const existing = await getStatement(id);
 	if (!existing) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
-	if (!['sent', 'overdue', 'paid'].includes(existing.status))
+	if (!['sent', 'overdue', 'paid', 'settled'].includes(existing.status))
 		throw new CodedError('STATEMENT_NOT_REPLACEABLE', 'Only a sent or paid statement can be replaced');
+	const entered = paidAmount === undefined ? undefined : { paidAmount: paidOn(existing, paidAmount) };
 	await db.transaction(async (tx) => {
-		await tx.update(utilityStatements).set({ status: 'replaced', updatedAt: new Date() }).where(eq(utilityStatements.id, id));
+		const paid = entered ?? (await offsetOf(existing, tx));
+		await tx.update(utilityStatements).set({ status: 'replaced', ...paid, updatedAt: new Date() }).where(eq(utilityStatements.id, id));
 		await recordStatementCorrection(existing, tx); // the Protokoll (#357)
 	});
 	return (await getStatement(id))!;
+}
+
+// A Saldo carried over that a sent next statement counts: the berichtigte Abrechnung offsets it as «Bereits
+// verrechnet» (#448, Fachreview 448-1 V-2, 448-2 M-5); a draft that counts it loses it, and once replaced the Saldo
+// is no longer carried over: the next statement takes the berichtigte Abrechnung's (448-2 V-14)
+async function offsetOf(statement: StatementWithDetails, tx: Tx) {
+	const [row] = await tx
+		.select({ countedBy })
+		.from(utilityStatements)
+		.where(and(eq(utilityStatements.id, statement.id), carriable));
+	if (!row) return {};
+	await tx
+		.update(utilityStatements)
+		.set({ carriedFromId: null, balance: sql`${utilityStatements.balance} - ${statement.balance}` })
+		.where(and(eq(utilityStatements.carriedFromId, statement.id), eq(utilityStatements.status, 'draft')));
+	return row.countedBy ? { paidAmount: statement.balance } : {};
+}
+
+// «Bereits bezahlt» of a sent or overdue statement, in francs and Rappen
+function paidOn(statement: StatementWithDetails, amount: string) {
+	if (!['sent', 'overdue'].includes(statement.status))
+		throw new CodedError('STATEMENT_PAID_AMOUNT_NOT_OPEN', 'Only a sent or overdue statement takes what was already paid');
+	if (!/^\d+(\.\d{1,2})?$/.test(amount.trim())) throw new CodedError('STATEMENT_PAID_AMOUNT_INVALID', 'Invalid amount already paid', { amount });
+	const paid = Number(amount);
+	return (Number(statement.balance) < 0 ? -paid : paid).toFixed(2);
 }
 
 // The correction is made without the wizard, which asks whether a category with costs and no answer is agreed (#91):
@@ -840,6 +944,7 @@ export async function getStatementCountsByStatus(filters: Omit<StatementFilters,
 	draft: number;
 	sent: number;
 	paid: number;
+	settled: number;
 	overdue: number;
 	total: number;
 }> {
@@ -849,6 +954,7 @@ export async function getStatementCountsByStatus(filters: Omit<StatementFilters,
 			draft: counted('draft'),
 			sent: counted('sent'),
 			paid: counted('paid'),
+			settled: counted('settled'),
 			overdue: counted('overdue'),
 			total: sql<number>`count(*)`
 		})
@@ -861,6 +967,7 @@ export async function getStatementCountsByStatus(filters: Omit<StatementFilters,
 		draft: Number(row.draft),
 		sent: Number(row.sent),
 		paid: Number(row.paid),
+		settled: Number(row.settled),
 		overdue: Number(row.overdue),
 		total: Number(row.total)
 	};

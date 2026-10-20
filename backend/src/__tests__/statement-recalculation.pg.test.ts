@@ -83,7 +83,8 @@ describe('Entwurf neu berechnen', () => {
 	it('behält bei einer berichtigten Abrechnung, was schon bezahlt ist', async () => {
 		const sent = await generate(2027);
 		await sendJson('PUT', `/api/v1/statements/${sent}/status`, { status: 'sent' });
-		await sendJson('PUT', `/api/v1/statements/${sent}/status`, { status: 'paid', paidDate: new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' }) });
+		// paid as recorded; through the API only from the end of the period 2027 on (#448)
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: '2028-01-15', paidAmount: '50.00' }).where(eq(utilityStatements.id, sent));
 		await sendJson('POST', `/api/v1/statements/${sent}/replace`, {});
 		const corrected = await idOf(await sendJson('POST', `/api/v1/statements/${sent}/correction`, {}));
 		const before = await statement(corrected);

@@ -110,7 +110,7 @@ describe('Dashboard', () => {
 	});
 
 	it('zählt Abrechnungen nach Status, überfällige getrennt von versendeten', () => {
-		expect(added('statements')).toEqual({ draft: 1, sent: 2, overdue: 1, paid: 3 });
+		expect(added('statements')).toEqual({ draft: 1, sent: 2, overdue: 1, paid: 3, settled: 0 });
 	});
 
 	it('zählt versendete und überfällige Abrechnungen als offen', () => {

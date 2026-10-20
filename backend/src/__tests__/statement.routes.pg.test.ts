@@ -101,12 +101,13 @@ describe('POST /api/v1/statements/:id/generate-pdf', () => {
 			expect(((await generatePdf()) as { qrReference: string | null }).qrReference).toBeNull();
 		}));
 
-	it('behält das PDF, wenn nur die Bemerkung ändert', () =>
+	// #448: das PDF druckt die Bemerkung
+	it('verwirft das PDF, wenn die Bemerkung ändert', () =>
 		withIban(async () => {
 			await generatePdf();
 
 			await call(`/${statementId}`, json('PUT', { notes: 'Ratenzahlung vereinbart' }));
-			expect(await pdfGeneratedAt()).not.toBeNull();
+			expect(await pdfGeneratedAt()).toBeNull();
 		}));
 });
 

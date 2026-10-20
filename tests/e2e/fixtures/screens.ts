@@ -90,6 +90,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	// #464: an Akonto entered after the replacement: the berichtigte Abrechnung warns that it counts another one
 	await seed.advancePayment('Carla', '50.00', '2024-01-01');
 	await seed.correctStatement('Carla', 2024);
+	// no invoices and no Akonto in 2021: a Saldo of 0.00, «Erledigt» once sent (#448)
+	await seed.statement('Carla', 'Seeblick', 2021, 'Standard');
+	await seed.sendStatement('Carla', 2021);
 	await seed.statement('Carla', 'Seeblick', 2022, 'Standard');
 	await seed.sendStatement('Carla', 2022);
 	await seed.replaceStatement('Carla', 2022);
@@ -98,6 +101,22 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.paymentDeadline('Bruno', 2024, '2025-01-31');
 	await seed.remind('Bruno', 2024);
 	const lateInvoice = await seed.invoiceOn('Seeblick', 'Lift', '200.00', '2025-06-30'); // recorded after the 2025 statements
+	// #448: a Saldo of 3.00 carried over («Erledigt»), the next statement with its Übertrag; in a second building the
+	// carried statement corrected after the next one was sent: «Bereits verrechnet mit»
+	for (const [building, tenant, number] of [['Uferweg', 'Jana', 'U1'], ['Hafenblick', 'Kai', 'H1']]) {
+		await seed.building(building, 'Winterthur');
+		await seed.apartment(building, number, 'vacant');
+		await seed.tenant(tenant);
+		await seed.contract(tenant, number, { startDate: '2023-01-01', baseRent: '1200.00' });
+		await seed.managementFee(tenant, false);
+		await seed.invoiceOn(building, 'Hauswart', '3.00', '2023-06-30');
+		await seed.invoiceOn(building, 'Hauswart', '100.00', '2024-06-30');
+		await seed.statement(tenant, building, 2023);
+		await seed.sendStatement(tenant, 2023);
+		await seed.statement(tenant, building, 2024);
+	}
+	await seed.sendStatement('Kai', 2024);
+	await seed.replaceStatement('Kai', 2023, true);
 	// January to May 2026 without a statement of Seeblick (a shorter period of 2025 overlaps its statements, #199): an
 	// invoice without Leistungszeitraum in it and one shortly after it
 	await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2026-01-31');
@@ -201,6 +220,10 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		paidStatement: seed.idOf('Abrechnung Anna 2024'),
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
+		settledStatement: seed.idOf('Abrechnung Carla 2021'),
+		carriedStatement: seed.idOf('Abrechnung Jana 2023'),
+		carryStatement: seed.idOf('Abrechnung Jana 2024'),
+		offsetStatement: seed.idOf('Berichtigte Abrechnung Kai 2023'),
 		correctedStatement: seed.idOf('Abrechnung Carla 2024'),
 		correctionStatement: seed.idOf('Berichtigte Abrechnung Carla 2024'),
 		remindedLetter: seed.idOf('Mahnung Bruno 2024'),

@@ -206,15 +206,16 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// Replace a sent or paid statement, and create its berichtigte Abrechnung (#120)
 	.post(
 		'/:id/replace',
-		async ({ params, set }) => {
+		async ({ params, body, set }) => {
 			try {
-				return await replaceStatement(params.id);
+				return await replaceStatement(params.id, body?.paidAmount);
 			} catch (error) {
 				set.status = correctionStatus(error);
 				return errorBody(error, 'Failed to replace the statement');
 			}
 		},
-		{ params: t.Object({ id: t.String() }) }
+		// what was already paid on a sent or overdue statement (#448)
+		{ params: t.Object({ id: t.String() }), body: t.Optional(t.Object({ paidAmount: t.Optional(t.String()) })) }
 	)
 	.post(
 		'/:id/correction',

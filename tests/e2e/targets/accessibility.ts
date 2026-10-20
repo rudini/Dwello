@@ -42,6 +42,9 @@ export const recalculateButton = byTestId('Neu berechnen', 'statement-recalculat
 export const reminderButton = byTestId('Mahnung senden', 'statement-reminder-button');
 export const resetPaymentButton = byTestId('Zahlung zurücksetzen', 'statement-reset-payment-button');
 export const correctButton = byTestId('Abrechnung berichtigen', 'statement-correct-button');
+export const paidDateInput = byTestId('Bezahlt am', 'paid-date-input');
+export const markPaidConfirm = byTestId('Bezahlt bestätigen', 'statement-mark-paid-confirm');
+export const earlyPaidWarning = byTestId('Zahlungsdatum vor dem Abrechnungsdatum', 'paid-date-early-warning');
 // the detail page's button, or the first one in the list
 export const markPaidButton = bySelector(
 	'Als bezahlt markieren',
