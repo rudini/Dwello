@@ -75,3 +75,26 @@ Offene IDs aus den Runden 1 und 2: keine. R-1 wurde in Runde 2 geschlossen.
 - Lint und svelte-check grün: vom Aufrufer gemeldet, nicht erneut ausgeführt.
 - Vitest der Rechnungs-Dateien: Ich habe `bunx vitest run` auf `invoice-pages.dom.test.ts`, `invoice-upload-dialog.dom.test.ts`, `invoices.test.ts` und `invoice-upload.test.ts` versucht. Der Lauf bricht beim Start ab (`Cannot find package 'vitest'`), weil der Review-Worktree kein `node_modules` hat. Das Ergebnis meldet der Aufrufer nach. Der Worktree ist danach unverändert (`git status` leer).
 - E2E der Rechnungs-Features: nicht gestartet (Vorgabe), das Ergebnis meldet der Aufrufer nach. Durch Lesen nicht geprüft habe ich, ob die neuen Szenarien von main (Tank-Hilfe beim Leistungszeitraum, `invoice-new.feature`) mit der Pflicht-Kategorie von #245 in «Rechnung bearbeiten» zusammen laufen. Den Code habe ich nur bis zur Weitergabe der Props verfolgt.
+
+## Runde 4 (Merge 2)
+
+Gegenstand: nur die Konfliktauflösung im Merge-Commit `2e57da40` (Parents `ea275a66` = w9-issue-245, `319335ef` = origin/main; Merge-Base `f8471e13`). Worktree: `/tmp/claude-0/-home-user-Dwello/64765504-0fe7-53d5-8fe2-5e8bfa233439/scratchpad/w9-review-245-code-5`, detached auf `2e57da40`, unverändert (`git status` leer).
+
+### Befunde
+
+| ID | Schwere | Datei:Zeile | Befund |
+|----|---------|-------------|--------|
+| – | – | – | Keine Befunde. |
+
+### Geprüft
+
+- `git show 2e57da40 --cc -- src/lib/ui/Field.svelte`: beide Props sind da, `labelTestid` (#245, Destrukturierung Z. 17, Typ Z. 29) und `testid` (#499, Z. 18 und Z. 31 mit Kommentar). `data-testid={testid}` sitzt am äusseren `div` (Z. 83), `data-testid={labelTestid}` am `label` (Z. 84). Auch die übrigen #245-Änderungen in Field sind erhalten: `note.quiet`, `warning`/`noteLook`. Keine Konfliktmarker.
+- Nichts verloren, Seite main: `git diff ea275a66 2e57da40` gegen `git diff f8471e13 319335ef` (index-Zeilen ignoriert). Die beiden Diffs unterscheiden sich nur in Hunk-Kontext und -Offsets von `docs/archive/implementation-plan-verlauf.md` und in `src/lib/ui/Field.svelte`, dort nur durch die #245-Zeilen im Kontext. Gleiche 27 Dateien, 588+/6-, wie bei `git diff ea275a66^2 319335ef --stat`. Die Stat `94989978..2e57da40` (57 Dateien) enthält zusätzlich den ersten Merge `ea275a66`, deshalb ist sie grösser. Sie ist kein Zeichen für Verlust.
+- Nichts verloren, Seite #245: `git diff f8471e13 ea275a66` gegen `git diff 319335ef 2e57da40`. Sie unterscheiden sich nur in Kontext und Offsets (Archiv, `messages/*.json`) und in den #499-Zeilen von Field.svelte.
+- Archiv: die Sessions W9c (#245, Z. 2243), W1b (#499, Z. 2257) und W3-451 (Z. 2269) stehen alle drin, keine ist doppelt.
+- Aufrufer: `InvoiceCategoryFields.svelte:60` übergibt `labelTestid="invoice-category-label"` (Target `tests/e2e/targets/invoice-form.ts:21`). `DateInput.svelte` übergibt `testid="{testid}-field"` (#499). Die beiden Props kollidieren nicht.
+
+### Nicht bestätigt
+
+- Die Unit- und DOM-Tests habe ich nicht neu laufen lassen. `bunx vitest run src/__tests__/contract-edit.dom.test.ts` bricht im Review-Worktree mit `ERR_MODULE_NOT_FOUND` ab, weil dort keine `node_modules` liegen. Lint, Check und Tests der Merge-Auflösung gelten daher nur als «vom Aufrufer gemeldet».
+- E2E wurde gemäss Auftrag nicht gestartet (gemeinsamer Container). Die Szenarien, die die Selektoren `invoice-category-label` und `{testid}-field` nutzen, sind nicht bestätigt.
