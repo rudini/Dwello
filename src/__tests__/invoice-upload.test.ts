@@ -267,6 +267,11 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(openReason(row)).toBe('Wählen Sie eine Kategorie.');
 		// also without a Verteilschlüssel (#379): the Kategorie first, as the row names its to-dos
 		expect(openReason({ ...row, values: { ...row.values, distributionKeyId: '' } })).toBe('Wählen Sie eine Kategorie.');
+		// with a Kategorie: the Verteilschlüssel before the required fields, as the row names them (code review 245-2 C-1)
+		const read = withProposal(newRow(2, pdf, defaults), proposal({ duplicateOf: null }));
+		expect(openReason({ ...read, values: { ...read.values, categoryId: 'c1', amount: '', distributionKeyId: '' } })).toBe(
+			'Wählen Sie, wie die Kosten verteilt werden.'
+		);
 	});
 });
 

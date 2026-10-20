@@ -295,7 +295,10 @@ export const openReason = (row: UploadRow) => Object.values(checkRow(row))[0] ??
 /** What the invoice still lacks, by field; a Kategorie is required here, unlike on «Neue Rechnung» (#217) */
 export function checkRow(row: UploadRow): Record<string, string> {
 	const errors = validateInvoice({ buildingId: 'chosen in the dialog', ...row.values });
-	return row.values.categoryId ? errors : { category: m.invoices_upload_category_missing(), ...errors };
+	// in the order the row names its to-dos: Kategorie, Verteilschlüssel, then the fields
+	const category = row.values.categoryId ? undefined : m.invoices_upload_category_missing();
+	const ordered = { category, distributionKeyId: errors.distributionKeyId, ...errors };
+	return Object.fromEntries(Object.entries(ordered).filter(([, error]) => error)) as Record<string, string>;
 }
 
 /** The new invoice as the backend takes it */
