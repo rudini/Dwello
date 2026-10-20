@@ -3,7 +3,7 @@ import { billingStart, billsIn, localToday } from '$lib/contract-status';
 import { overlappedBy, periodDays, periodsOf, uncovered } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
-import { changedInvoiceCount, namesById, toStatement } from '$lib/server/statement';
+import { laterChanges, namesById, toStatement } from '$lib/server/statement';
 import type { ChangedStatement, InvoiceCheck } from '$lib/statement-wizard';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -332,10 +332,12 @@ async function changedStatements(
 	const changed = await Promise.all(
 		overlapping.map(async (listed) => {
 			const { id, statementNumber, tenantName, status } = toStatement(listed);
-			const outdated = status === 'draft' && (await changedInvoiceCount(fetch, id)) > 0;
+			const later = status === 'draft' ? await laterChanges(fetch, id) : null;
+			const outdated = !!later?.invoices;
+			const fuelStock = !!later?.fuelStock; // #454 (#408 point 8)
 			const differs = settings(listed);
-			return outdated || differs.profile || differs.profileEdited || differs.fee
-				? { id, statementNumber, tenantName, outdated, ...differs }
+			return outdated || fuelStock || differs.profile || differs.profileEdited || differs.fee
+				? { id, statementNumber, tenantName, outdated, fuelStock, ...differs }
 				: null;
 		})
 	);

@@ -215,7 +215,7 @@ describe('Rechnungsliste', () => {
 	it('nennt in der Abrechnungsperiode den Teil einer Rechnung, der in sie fällt', () => {
 		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-10-01&periodEnd=2025-12-31');
 		list([invoice({ amount: 1200, inPeriodAmount: 413.33 }), invoice({ id: 'i2', description: 'Ganz', inPeriodAmount: 450 })]);
-		expect(byTestId('invoice-row-i1')!.querySelector('[data-testid="invoice-in-period"]')!.textContent!.trim()).toBe(
+		expect(byTestId('invoice-row-i1')!.querySelector('[data-testid="invoice-in-period"]')!.textContent!.replace(/\s/g, ' ').trim()).toBe(
 			'davon CHF 413.33 in der Abrechnungsperiode'
 		);
 		expect(byTestId('invoice-row-i2')!.querySelector('[data-testid="invoice-in-period"]')).toBeNull();

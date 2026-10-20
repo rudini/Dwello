@@ -688,7 +688,7 @@ describe('Abrechnungsdetail', () => {
 
 	// Versendet: der Mieter hat die Abrechnung ohne die Rechnung erhalten
 	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
-		later(1, 'sent');
+		later(1, 'sent', { correctionDue: true });
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. ' +
 				'Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung. Die berichtigte Abrechnung rechnet an, was schon bezahlt ist. ' +

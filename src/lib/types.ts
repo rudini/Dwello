@@ -233,6 +233,7 @@ export interface InvoiceWithDetails extends Invoice {
 	category?: Category & { key?: string; predefined?: boolean }; // key and predefined name its reason (#292)
 	distributionKey?: Pick<DistributionKey, 'id' | 'name'>;
 	llmCategory?: Pick<Category, 'id' | 'name'>; // what the KI suggested
+	inPeriodAmount?: number; // with the filter «Abrechnungsperiode»: its part in the period (#454)
 	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';
 	// the uploaded file of the invoice, with what the KI saw on it when it was uploaded (#233)
 	beleg: { fileName: string; mimeType: string; deductedAmount?: string | null; nonAllocableItems?: boolean } | null;
@@ -338,6 +339,7 @@ export interface Statement {
 	paidAmount?: number | null; // what was paid; a refund paid to the tenant negative (#93)
 	contractId?: string;
 	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
+	correctionDeclined?: { on: string } | null; // «Nicht berichtigt» (#454)
 	lastReminderDate?: string;
 	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
 	oldAddress?: boolean; // A-5 (#114): the moved-out tenant still has the building's address

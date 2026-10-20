@@ -69,6 +69,7 @@ describe('Rechnungen einer Abrechnungsperiode', () => {
 		expect(await listed(`buildingId=${rental.building}&periodStart=2025-12-01&periodEnd=2026-01-31`)).toEqual([
 			'by date after',
 			'service across the year end',
+			'service outside, dated inside', // its Leistungszeitraum starts in January
 			'service touching, dated after'
 		]);
 	});

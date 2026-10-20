@@ -9,13 +9,15 @@
 		pdfGeneratedAt,
 		sentOn,
 		paidOn,
-		paymentResets = []
+		paymentResets = [],
+		correctionDeclinedOn
 	}: {
 		createdAt?: string | null;
 		pdfGeneratedAt?: string | null;
 		sentOn?: string | null;
 		paidOn?: string | null;
 		paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
+		correctionDeclinedOn?: string | null; // «Nicht berichtigen» (#454)
 	} = $props();
 
 	const dates = $derived(
@@ -32,7 +34,11 @@
 				}),
 				date: formatDate(reset.resetOn)
 			})),
-			{ label: m.statements_status_paid(), date: paidOn && formatDate(paidOn) }
+			{ label: m.statements_status_paid(), date: paidOn && formatDate(paidOn) },
+			{
+				label: m.statements_history_correction_declined(),
+				date: correctionDeclinedOn && formatDate(correctionDeclinedOn)
+			}
 		].filter((row) => row.date)
 	);
 </script>

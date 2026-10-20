@@ -29,7 +29,6 @@ Funktionalität: Rechnungsliste
   # #454 (#408 Punkt 1): der Filter «Abrechnungsperiode» zeigt die Rechnungen, die eine Abrechnung der Periode nimmt:
   # ohne Leistungszeitraum nach Rechnungsdatum, mit Leistungszeitraum, wenn er die Periode berührt (Regel 1); PO
   # 2026-10-20 (Fachreview 454-1 E-1): auch die nicht umlagefähigen, getrennt nach Umlagefähigkeit
-  @wip
   Szenario: Rechnungen einer Abrechnungsperiode anzeigen
     Angenommen im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2026-01-20" für die Zeit vom "2025-10-01" bis "2025-12-31"
     Und im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2025-11-15"
@@ -45,7 +44,6 @@ Funktionalität: Rechnungsliste
 
   # Fachreview 454-1 V-11: ein Leistungszeitraum über die Periode hinaus zählt nur mit seinen Tagen in der Periode
   # (900 × 31 / 90 Tage = 310.00), wie im PDF (#241)
-  @wip
   Szenario: Teil einer Rechnung in der Abrechnungsperiode nennen
     Angenommen im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2026-01-10" für die Zeit vom "2025-12-01" bis "2026-02-28"
     Wenn der Liegenschaftsverwalter die Rechnungen der Abrechnungsperiode vom "2025-10-01" bis "2025-12-31" im Gebäude "Seeblick" anzeigt

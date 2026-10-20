@@ -35,6 +35,9 @@ export interface InvoiceFilters {
 	dateTo?: string;
 	isValidUtilityCost?: boolean;
 	wasManuallyOverridden?: boolean;
+	// #454: the invoices that fall into an Abrechnungsperiode by rule 1, allocable first, each with its part in it
+	periodStart?: string;
+	periodEnd?: string;
 	limit?: number;
 	offset?: number;
 }
@@ -108,9 +111,12 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 		dateTo,
 		isValidUtilityCost,
 		wasManuallyOverridden,
+		periodStart,
+		periodEnd,
 		limit = 20,
 		offset = 0
 	} = filters;
+	const period = periodStart && periodEnd ? { start: periodStart, end: periodEnd } : null;
 
 	// Build where conditions
 	const conditions = [];
@@ -149,12 +155,19 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 		conditions.push(eq(invoices.wasManuallyOverridden, wasManuallyOverridden));
 	}
 
+	if (period) conditions.push(inPeriodOf(period.start, period.end));
+
 	const whereClause = and(...conditions);
 
 	// Build the query with joins
 	const results = await selectWithDetails()
 		.where(whereClause)
-		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt), desc(invoices.id)) // id: a stable page order for ties
+		.orderBy(
+			...(period ? [desc(invoices.isValidUtilityCost)] : []), // grouped by allocability (Fachreview 454-1 E-1)
+			desc(invoices.invoiceDate),
+			desc(invoices.createdAt),
+			desc(invoices.id) // a stable page order for ties
+		)
 		.limit(limit)
 		.offset(offset);
 
@@ -165,7 +178,8 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 		category: row.category,
 		distributionKey: row.distributionKey,
 		llmCategory: null, // Would need another join for llm category
-		beleg: row.beleg
+		beleg: row.beleg,
+		...(period && { inPeriod: inPeriod(row.invoice, period.start, period.end) })
 	}));
 
 	// Get total count
@@ -545,22 +559,20 @@ function inPeriod(
 	return beyond ? { ...part, whole: { start: invoice.servicePeriodStart, end: invoice.servicePeriodEnd, amount } } : part;
 }
 
+// Rule 1: in the period by its Leistungszeitraum, without one by its Rechnungsdatum
+const inPeriodOf = (periodStart: string, periodEnd: string) =>
+	or(
+		and(isNull(invoices.servicePeriodStart), gte(invoices.invoiceDate, periodStart), lte(invoices.invoiceDate, periodEnd)),
+		and(lte(invoices.servicePeriodStart, periodEnd), gte(invoices.servicePeriodEnd, periodStart))
+	);
+
 /**
  * Allocable invoices of a building for a period (for statement generation): those whose Leistungszeitraum overlaps it,
  * or without one, whose Rechnungsdatum lies in it; each with its part in the period
  */
 export async function getInvoicesForStatement(buildingId: string, periodStart: string, periodEnd: string) {
 	const results = await selectWithDetails()
-		.where(
-			and(
-				eq(invoices.buildingId, buildingId),
-				eq(invoices.isValidUtilityCost, true),
-				or(
-					and(isNull(invoices.servicePeriodStart), gte(invoices.invoiceDate, periodStart), lte(invoices.invoiceDate, periodEnd)),
-					and(lte(invoices.servicePeriodStart, periodEnd), gte(invoices.servicePeriodEnd, periodStart))
-				)
-			)
-		)
+		.where(and(eq(invoices.buildingId, buildingId), eq(invoices.isValidUtilityCost, true), inPeriodOf(periodStart, periodEnd)))
 		.orderBy(invoices.invoiceDate);
 
 	return results.map((row) => ({
@@ -573,15 +585,3 @@ export async function getInvoicesForStatement(buildingId: string, periodStart: s
 	}));
 }
 
-/**
- * Check if an invoice exists
- */
-export async function invoiceExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: invoices.id })
-		.from(invoices)
-		.where(eq(invoices.id, id))
-		.limit(1);
-
-	return !!result;
-}

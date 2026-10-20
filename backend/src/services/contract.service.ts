@@ -51,6 +51,7 @@ const contractFields = {
 	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
 	tenantEmail: tenants.email,
 	apartmentNumber: apartments.number,
+	buildingId: buildings.id, // the Übersicht links to its invoices (#454)
 	buildingName: buildings.name,
 	buildingAddress: buildings.address,
 	oldAddress: oldAddress(rentalContracts.id) // A-5: a moved-out tenant still has the building's address
@@ -89,6 +90,7 @@ export interface ContractWithDetails extends RentalContract {
 	tenantName: string;
 	tenantEmail: string | null;
 	apartmentNumber: string;
+	buildingId: string;
 	buildingName: string;
 	buildingAddress: string;
 	oldAddress: boolean;

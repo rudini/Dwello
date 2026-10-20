@@ -369,9 +369,6 @@ Then('bietet die Abrechnung «Nicht berichtigen» nicht mehr an', async ({ verwa
 	await verwalter.sees(declineCorrectionOffered).toBe(0);
 });
 
-Then('nennt der Verlauf {string} am heutigen Tag', async ({ verwalter }, label: string) => {
-	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${sendingDay().replace(/\./g, '\\.')}`));
-});
 
 Then('nennt die Abrechnung {string}', async ({ verwalter }, language: string) => {
 	await verwalter.sees(languageOfPdf).toBe(language);
@@ -389,7 +386,7 @@ When('der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt 
 	await verwalter.attemptsTo(markStatementPaidOn(inDays(0)));
 });
 
-Then('nennt der Verlauf {string} am Tag des Versands', async ({ verwalter }, label: string) => {
+Then(/^nennt der Verlauf "([^"]+)" am (?:Tag des Versands|heutigen Tag)$/, async ({ verwalter }, label: string) => {
 	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${sendingDay().replace(/\./g, '\\.')}`));
 });
 

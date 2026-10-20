@@ -6,9 +6,11 @@
 
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { invoices, type UtilityStatementLineItem } from '../db/schema';
+import { invoices, utilityStatements, type UtilityStatementLineItem } from '../db/schema';
+import { CodedError } from './coded-error';
 import { getInvoicesForStatement } from './invoice.service';
-import { getStatement, listStatements } from './statement.service';
+import { agreedStock, getStatement, listStatements, recalculation, type StatementWithDetails } from './statement.service';
+import { swissToday } from './today';
 
 type PeriodInvoice = Awaited<ReturnType<typeof getInvoicesForStatement>>[number];
 type Positions = Pick<UtilityStatementLineItem, 'categoryId' | 'distributionKeyId' | 'invoices'>[];
@@ -33,10 +35,8 @@ const agreedIn = <T extends { categoryId: string | null }>(statement: { agreedCa
 const known = (positions: Positions) => positions.every((position) => position.invoices);
 const recordedAfter = (invoice: { createdAt: Date }, statement: { createdAt: Date }) => invoice.createdAt > statement.createdAt;
 
-/** The invoices of a statement's period recorded, changed or deleted since it was created; null without the statement */
-export async function changedInvoices(statementId: string): Promise<string[] | null> {
-	const statement = await getStatement(statementId);
-	if (!statement?.building) return null;
+// The invoices of a statement's period recorded, changed or deleted since it was created
+async function changedInvoices(statement: StatementWithDetails & { building: { id: string } }): Promise<string[]> {
 	const positions = statement.lineItems;
 	const now = agreedIn(statement, await getInvoicesForStatement(statement.building.id, statement.periodStart, statement.periodEnd));
 	if (!known(positions)) return now.filter((invoice) => recordedAfter(invoice, statement)).map((invoice) => invoice.id);
@@ -46,6 +46,89 @@ export async function changedInvoices(statementId: string): Promise<string[] | n
 		.filter((billed) => !billed.fuelStock && !now.some((invoice) => invoice.id === billed.id))
 		.map((billed) => billed.id);
 	return [...changed, ...gone];
+}
+
+type Stock = { categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string } | null;
+const sameStock = (a: Stock, b: Stock) =>
+	a === b ||
+	(!!a &&
+		!!b &&
+		a.categoryId === b.categoryId &&
+		a.openingDate === b.openingDate &&
+		a.closingDate === b.closingDate &&
+		Number(a.opening) === Number(b.opening) &&
+		Number(a.closing) === Number(b.closing));
+
+// #454 (#408 point 8, Fachreview 454-1 E-2, V-3): the readings the statement was created with against those it would
+// take now, also for a statement before migration 0014
+const fuelStockChanged = async (statement: StatementWithDetails & { building: { id: string } }) =>
+	!sameStock(statement.fuelStock, await agreedStock({ buildingId: statement.building.id, periodStart: statement.periodStart, periodEnd: statement.periodEnd }, statement.agreedCategoryIds));
+
+const CORRECTED = ['sent', 'paid', 'settled']; // what a berichtigte Abrechnung replaces (Fachreview 454-2 V-23)
+
+/**
+ * What changed in a statement's period since it was created: its invoices (#96) and its Tankbestand (#454); for a
+ * statement a berichtigte Abrechnung would replace, whether correcting it is due: only when the hint names a change and
+ * recalculating changes the Saldo or a share of the tenant, unless the landlord chose «Nicht berichtigen» for that very
+ * result (Fachreview 454-1 E-3, E-6, 454-2 V-18, V-21), and whether he may: only when it would raise the Saldo (M-3 B).
+ * Null without the statement
+ */
+export async function statementChanges(statementId: string) {
+	const statement = await getStatement(statementId);
+	if (!statement?.building) return null;
+	const building = statement as typeof statement & { building: { id: string } };
+	const invoiceIds = await changedInvoices(building);
+	const fuelStock = await fuelStockChanged(building);
+	const correctable = CORRECTED.includes(statement.status) && (invoiceIds.length > 0 || fuelStock);
+	const check = correctable ? await recalculation(statement) : null;
+	// not to be recalculated (e.g. the contract changed since): the hint alone says to correct, as before #454
+	const due = check ? check.changes && check.result !== statement.correctionDeclined?.result : correctable;
+	return { invoiceIds, fuelStockChanged: fuelStock, correctionDue: due, correctionDeclinable: due && !!check?.raises, result: check?.result };
+}
+
+/** «Nicht berichtigen» (#454, E-6): remembers the day and the result; refused unless the recalculation raises the Saldo */
+export async function declineCorrection(statementId: string) {
+	const changes = await statementChanges(statementId);
+	if (!changes) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
+	if (!changes.correctionDue) throw new CodedError('STATEMENT_CORRECTION_NOT_DUE', 'No correction is due');
+	if (!changes.correctionDeclinable)
+		throw new CodedError('STATEMENT_CORRECTION_LOWERS_BALANCE', 'The recalculation lowers the Saldo: correct the statement');
+	await db
+		.update(utilityStatements)
+		.set({ correctionDeclined: { on: swissToday(), result: changes.result! }, updatedAt: new Date() })
+		.where(eq(utilityStatements.id, statementId));
+	return (await getStatement(statementId))!;
+}
+
+/**
+ * #454 (#408 point 7): for the Übersicht, the drafts with a change since and the statements due for correcting, with
+ * building, period and what changed
+ */
+export async function outdatedStatements() {
+	const { statements } = await listStatements({ limit: 1000 });
+	const listed = await Promise.all(
+		statements
+			.filter((s) => s.status !== 'replaced')
+			.map(async (s) => {
+				const changes = await statementChanges(s.id);
+				const outdated = s.status === 'draft' ? changes && (changes.invoiceIds.length || changes.fuelStockChanged) : changes?.correctionDue;
+				return outdated
+					? {
+							id: s.id,
+							statementNumber: s.statementNumber,
+							tenantName: s.tenant ? `${s.tenant.firstName} ${s.tenant.lastName}` : '',
+							status: s.status,
+							buildingId: s.building!.id,
+							building: s.building!.name,
+							periodStart: s.periodStart,
+							periodEnd: s.periodEnd,
+							invoices: changes!.invoiceIds.length,
+							fuelStock: changes!.fuelStockChanged
+						}
+					: null;
+			})
+	);
+	return listed.filter((one) => one !== null);
 }
 
 type Period = { start: string; end: string };

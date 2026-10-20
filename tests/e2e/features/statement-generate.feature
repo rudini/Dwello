@@ -608,7 +608,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und sagt die Vorschau "Bestehende Abrechnungen bleiben, wie sie sind, auch Entwürfe."
 
   # #454 (#408 Punkt 8), Fachreview 454-2 V-19: ein danach geänderter Tankbestand zählt wie eine geänderte Rechnung
-  @wip
   Szenario: Vorschau nennt einen Entwurf mit danach geändertem Tankbestand
     Angenommen es gibt das Heizprofil "Winter"
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank

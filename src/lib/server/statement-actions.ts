@@ -102,6 +102,13 @@ export async function recalculateStatement(fetch: Fetch, id: string): Promise<Re
 	};
 }
 
+/** «Nicht berichtigen» (#454): null, or what to tell the user */
+export async function declineCorrection(fetch: Fetch, id: string): Promise<Refusal | null> {
+	const response = await fetch(`${API}/${id}/decline-correction`, { method: 'POST' });
+	if (response.ok) return null;
+	return { status: response.status, message: await refusalOf(response, m.ui_action_failed()) };
+}
+
 /** The berichtigte Abrechnung of a replaced statement (#120): its id, or what to tell the user */
 export async function correctStatement(fetch: Fetch, id: string): Promise<{ id: string } | Refusal> {
 	const response = await fetch(`${API}/${id}/correction`, { method: 'POST' });

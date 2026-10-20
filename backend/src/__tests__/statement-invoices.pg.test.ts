@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, invoices, utilityStatementLineItems, utilityStatements } from '../db/schema';
+import { categories, fuelStocks, invoices, rentalContracts, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { deleteStatement, generateStatement } from '../services/statement.service';
 import { swissToday } from '../services/today';
 import { callApi, sendJson } from './helpers/auth';
@@ -235,7 +235,8 @@ describe('Geänderte Rechnungen seit der Abrechnung', () => {
 				await reading('2023-12-31', '600.00');
 				await reading('2024-12-31', '100.00');
 				const { id } = await statement();
-				await db.update(utilityStatements).set({ agreedCategoryIds: [] }).where(eq(utilityStatements.id, id));
+				// as created for a contract without agreed heating costs: no readings billed (agreedStock)
+				await db.update(utilityStatements).set({ agreedCategoryIds: [], fuelStock: null }).where(eq(utilityStatements.id, id));
 				await reading('2024-12-31', '200.00');
 				expect(await fuelStockChanged(id)).toBe(false);
 			}));
@@ -391,6 +392,19 @@ describe('Abrechnung berichtigen fällig', () => {
 		sent(async (id) => {
 			await db.update(utilityStatements).set({ totalCosts: '1.00' }).where(eq(utilityStatements.id, id));
 			expect(await due(id)).toBe(false);
+		}));
+
+	// a statement that cannot be recalculated any more (here the Mietvertrag starts after the period now): the hint
+	// alone says to correct, as before #454
+	it('ist fällig, wenn sich die Abrechnung nicht mehr neu berechnen lässt', () =>
+		sent(async (id) => {
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			await db.update(rentalContracts).set({ startDate: '2025-01-01', endDate: null }).where(eq(rentalContracts.id, rental.contract));
+			try {
+				expect(await due(id)).toBe(true);
+			} finally {
+				await db.update(rentalContracts).set({ startDate: '2024-01-01', endDate: '2024-03-31' }).where(eq(rentalContracts.id, rental.contract));
+			}
 		}));
 
 	it('ist bei einem Entwurf nie fällig', async () => {

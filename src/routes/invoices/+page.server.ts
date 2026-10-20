@@ -15,6 +15,12 @@ function invoiceQuery(url: URL, page: number, pageSize: number) {
 	if (get('building')) params.set('buildingId', get('building'));
 	if (get('categoryId')) params.set('categoryId', get('categoryId'));
 	if (get('validity')) params.set('isValidUtilityCost', String(get('validity') === 'valid'));
+	// #454: the invoices that fall into an Abrechnungsperiode, as its warnings link to them
+	const day = /^\d{4}-\d{2}-\d{2}$/;
+	if (day.test(get('periodStart')) && day.test(get('periodEnd'))) {
+		params.set('periodStart', get('periodStart'));
+		params.set('periodEnd', get('periodEnd'));
+	}
 	if (/^\d{4}$/.test(get('year'))) {
 		params.set('dateFrom', `${get('year')}-01-01`);
 		params.set('dateTo', `${get('year')}-12-31`);

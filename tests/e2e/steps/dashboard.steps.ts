@@ -166,8 +166,9 @@ Given('der Mietvertrag von {string} ist in {int} Tagen gekündigt', async ({ see
 	await seed.notice(tenant, inDays(days));
 });
 
+// after a positive check on the overview: it has loaded its tasks
 Then(
-	'nennt die Übersicht keine Aufgabe {string} für {string}',
+	/^(?:nennt die Übersicht keine Aufgabe|nicht die Aufgabe) "([^"]+)" für "([^"]+)"$/,
 	async ({ verwalter, names }, title: string, tenant: string) => {
 		await verwalter.sees(overviewTaskShownFor(title, names.get(tenant)!)).toBe(false);
 	}
@@ -241,10 +242,7 @@ When(
 	}
 );
 
-// after the task for the same tenant: the overview has loaded its tasks
-Then('nicht die Aufgabe {string} für {string}', async ({ verwalter, names }, title: string, tenant: string) => {
-	await verwalter.sees(overviewTaskShownFor(title, names.get(tenant)!)).toBe(false);
-});
+
 
 // recorded after the statement: a statement of the last year lacks it (#96)
 Given('im Gebäude {string} gibt es danach eine Rechnung des letzten Jahres', async ({ seed }, building: string) => {

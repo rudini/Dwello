@@ -118,7 +118,6 @@ Funktionalität: Übersicht
 
   # #454 (#408 Punkt 7, #386): ein Entwurf, dem eine danach erfasste Rechnung fehlt, ist nicht aktuell; die Übersicht
   # nennt ihn vor den Entwürfen zum Zustellen und führt zu den Entwürfen des Gebäudes und der Periode
-  @wip
   Szenario: Nicht aktuelle Entwürfe als eigene Aufgabe
     Angenommen "Anna Keller" hat eine Abrechnung im Entwurf
     Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
@@ -127,7 +126,6 @@ Funktionalität: Übersicht
     Und sagt die Aufgabe zu nicht aktuellen Entwürfen "Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht oder der Tankbestand geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen."
     Und steht die Aufgabe zu nicht aktuellen Entwürfen vor der Aufgabe "Abrechnungen prüfen und versenden"
 
-  @wip
   Szenario: Von den nicht aktuellen Entwürfen zu den Entwürfen des Gebäudes
     Angenommen "Anna Keller" hat eine Abrechnung im Entwurf
     Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
@@ -136,7 +134,6 @@ Funktionalität: Übersicht
     Dann zeigt die Abrechnungsliste die Entwürfe von "Seeblick" des letzten Jahres
 
   # #454 (#408 Punkt 7): eine versendete Abrechnung mit demselben Hinweis wird berichtigt, nicht zugestellt
-  @wip
   Szenario: Versendete Abrechnung mit danach erfasster Rechnung als Aufgabe
     Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
     Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
@@ -146,7 +143,6 @@ Funktionalität: Übersicht
 
   # PO 2026-10-20 (Fachreview 454-1 E-3): nur wenn das Neuberechnen den Saldo oder eine Position dieses Mietvertrags
   # ändert; Bruno trägt von einer Rechnung für die Zeit nach seinem Auszug nichts
-  @wip
   Szenario: Keine Aufgabe «Abrechnung berichtigen», wenn die Änderung den Mieter nicht trifft
     Angenommen der Mieter "Bruno Meier" existiert
     Und "Bruno Meier" ist im letzten Jahr aus der Wohnung "1.02" ausgezogen
@@ -160,7 +156,6 @@ Funktionalität: Übersicht
     Dann weist die Abrechnung darauf hin: "ändert das weder den Saldo noch eine Position. Sie müssen die Abrechnung nicht berichtigen."
 
   # PO 2026-10-20 (Fachreview 454-1 E-5): auch nach mehr als fünf Jahren, mit dem Hinweis auf die Verjährung
-  @wip
   Szenario: Aufgabe «Abrechnung berichtigen» für eine Abrechnungsperiode vor mehr als fünf Jahren
     Angenommen für "Anna Keller" gibt es die Abrechnung vom "2020-01-01" bis "2020-12-31" im Gebäude "Seeblick"
     Und die Abrechnung 2020 von "Anna Keller" ist versendet
@@ -170,7 +165,6 @@ Funktionalität: Übersicht
 
   # PO 2026-10-20 (Fachreview 454-1 E-6): der Liegenschaftsverwalter darf auf das Berichtigen verzichten; der Verlauf der
   # Abrechnung hält es fest
-  @wip
   Szenario: Abrechnung nicht berichtigen
     Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
     Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
@@ -184,7 +178,6 @@ Funktionalität: Übersicht
     Dann ist die Frist "Zahlungsfrist Anna Keller" "in 10 Tagen"
     Und nicht die Aufgabe "Abrechnung berichtigen" für "Anna Keller"
 
-  @wip
   Szenario: Von der Aufgabe «Abrechnung berichtigen» zur Abrechnung
     Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
     Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres

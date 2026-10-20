@@ -1,10 +1,11 @@
 import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { m } from '$lib/paraglide/messages';
-import { changedInvoiceCount, loadStatement } from '$lib/server/statement';
+import { laterChanges, loadStatement } from '$lib/server/statement';
 import { loadDocuments } from '$lib/server/documents';
 import {
 	correctStatement,
+	declineCorrection,
 	markStatementPaid,
 	recalculateStatement,
 	replaceStatement,
@@ -30,13 +31,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const [address, documents, later] = await Promise.all([
 		tenantAddress(fetch, statement.tenantId),
 		loadDocuments(fetch, `statementId=${params.id}`),
-		changedInvoiceCount(fetch, params.id)
+		laterChanges(fetch, params.id)
 	]);
 	// the statement's own Dokument (sent by e-mail, #86) is no Mahnung: the next Mahnstufe counts these
 	return {
 		statement: { ...statement, tenantAddress: address },
 		reminders: documents.filter((document) => document.type === 'reminder'),
-		laterInvoices: later
+		later
 	};
 };
 
@@ -78,6 +79,10 @@ export const actions: Actions = {
 	},
 	recalculate: async ({ params, fetch }) => {
 		const refused = await recalculateStatement(fetch, params.id);
+		if (refused) return fail(refused.status, { actionError: refused.message });
+	},
+	declineCorrection: async ({ params, fetch }) => {
+		const refused = await declineCorrection(fetch, params.id);
 		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
 	remind: async ({ params, fetch }) => {

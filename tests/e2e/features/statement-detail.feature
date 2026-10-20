@@ -704,7 +704,6 @@ Funktionalität: Abrechnungsdetail
 
   # #454 (#408 Punkt 8, #307): ein danach geänderter Tankbestand der Periode zählt wie eine geänderte Rechnung: der
   # Verbrauch bestimmt die Heizkosten (Art. 5 Abs. 2 lit. a VMWG)
-  @wip
   Szenario: Entwurf weist auf einen danach geänderten Tankbestand hin
     Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
@@ -716,7 +715,6 @@ Funktionalität: Abrechnungsdetail
 
   # PO 2026-10-20 (Fachreview 454-1 E-2): auch andere Stichtage oder Werte mit demselben Verbrauch, denn das PDF druckt
   # Anfangs- und Endbestand
-  @wip
   Szenario: Entwurf weist auf einen danach geänderten Tankbestand mit demselben Verbrauch hin
     Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
@@ -727,7 +725,6 @@ Funktionalität: Abrechnungsdetail
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde der Tankbestand der Abrechnungsperiode geändert."
 
   # Fachreview 454-1 V-8: Rechnungen und Tankbestand in einem Satz
-  @wip
   Szenario: Entwurf weist auf danach geänderte Rechnungen und Tankbestand hin
     Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
@@ -738,7 +735,6 @@ Funktionalität: Abrechnungsdetail
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht, und der Tankbestand wurde geändert."
     Und nennt der Hinweis auf Änderungen seit dem Erstellen den Titel "Rechnungen und Tankbestand seit der Abrechnung geändert"
 
-  @wip
   Szenario: Versendete Abrechnung weist auf einen danach geänderten Tankbestand hin
     Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
