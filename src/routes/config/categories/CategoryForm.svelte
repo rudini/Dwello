@@ -44,7 +44,9 @@
 		}))
 	);
 	// The reason of a predefined category follows the choice in the form, not the saved one
-	const chosen = $derived(category && { ...category, isAllowedUtilityCost: values.allowed === 'true' });
+	const chosen = $derived(
+		category && { ...category, isAllowedUtilityCost: values.allowed === 'true' }
+	);
 	const allowance = [
 		{
 			value: 'true',
@@ -159,11 +161,7 @@
 			</div>
 		{/if}
 	</div>
-	<HeatingChoice
-		bind:heating={values.heating}
-		bind:fuel={values.fuel}
-		fixed={predefined}
-	/>
+	<HeatingChoice bind:heating={values.heating} bind:fuel={values.fuel} fixed={predefined} />
 	<TextInput
 		id="sortOrder"
 		name="sortOrder"
@@ -179,9 +177,4 @@
 	<NameTranslations names={category} help={m.categories_translations_help()} />
 </SaveForm>
 
-<AllocabilityQuestion
-	{category}
-	allowed={values.allowed}
-	bind:ask
-	onconfirm={submitAgain}
-/>
+<AllocabilityQuestion {category} bind:allowed={values.allowed} bind:ask onconfirm={submitAgain} />

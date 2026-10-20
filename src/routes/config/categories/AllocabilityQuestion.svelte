@@ -8,23 +8,28 @@
 	// law: such a save asks first. `ask` says whether it does, and opens the question
 	let {
 		category,
-		allowed,
+		allowed = $bindable(),
 		onconfirm,
 		ask = $bindable()
 	}: {
 		category?: Category & { predefined?: boolean; allocableInvoiceCount?: number };
-		allowed: string; // the choice in the form
+		allowed: string; // the choice in the form; «Abbrechen» puts the saved one back (Persona Dr. Weber P-3)
 		onconfirm: () => void;
 		ask?: () => boolean;
 	} = $props();
 
 	const count = $derived(category?.allocableInvoiceCount ?? 0);
 	const excludes = $derived(!!category?.isAllowedUtilityCost && allowed === 'false' && count > 0);
-	const includes = $derived(!!category?.predefined && !category.isAllowedUtilityCost && allowed === 'true');
+	const includes = $derived(
+		!!category?.predefined && !category.isAllowedUtilityCost && allowed === 'true'
+	);
 	const name = $derived(category ? localName(category) : ''); // in the interface language, as the page title
 	const excluding = () => ({
 		title: m.categories_not_allocable_confirm_title({ name }),
-		text: count === 1 ? m.categories_not_allocable_confirm_one() : m.categories_not_allocable_confirm_many({ count }),
+		text:
+			count === 1
+				? m.categories_not_allocable_confirm_one()
+				: m.categories_not_allocable_confirm_many({ count }),
 		confirm: m.categories_not_allocable_confirm()
 	});
 	const including = () => ({
@@ -45,6 +50,7 @@
 		title={question.title}
 		confirmLabel={question.confirm}
 		confirmTestid="category-allocability-confirm"
+		onclose={() => (allowed = String(category!.isAllowedUtilityCost))}
 		onconfirm={() => {
 			confirmed = true;
 			open = false;

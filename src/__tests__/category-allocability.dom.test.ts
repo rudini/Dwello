@@ -130,6 +130,22 @@ describe('Vordefinierte Kategorie auf umlagefähig stellen', () => {
 		expect(resubmitted).toBe(1);
 	});
 
+	// Persona Dr. Weber P-3: nach «Abbrechen» sah das Formular aus, als wäre die Kategorie umgestellt
+	it('stellt nach «Abbrechen» die gespeicherte Wahl wieder her', async () => {
+		show(CategoryForm, { category: predefined(false), submitLabel: 'Speichern' });
+		choose('true');
+		save();
+		await settle();
+
+		click('dialog-cancel');
+		await settle();
+
+		const checked = document.querySelector<HTMLInputElement>(
+			'input[name="isAllowedUtilityCost"]:checked'
+		);
+		expect(checked!.value).toBe('false');
+	});
+
 	it('fragt nicht bei einer eigenen Kategorie', () => {
 		show(CategoryForm, {
 			category: { ...own(0), isAllowedUtilityCost: false },
