@@ -9,8 +9,13 @@ const API = 'http://localhost:3001/api/v1/distribution-keys';
 const form = {
 	name: ' Fläche und Zimmer ',
 	description: 'Gemischt',
-	formula: ' {area} * 0.7 + {rooms} * 0.3 '
+	formula: ' {area} * 0.7 + {rooms} * 0.3 ',
+	// #461: the names in the other languages are optional, an empty one stays empty (null)
+	nameFR: ' Surface et pièces ',
+	nameIT: '',
+	nameEN: ''
 };
+const translations = { nameFR: 'Surface et pièces', nameIT: null, nameEN: null };
 
 describe('Verteilschlüssel anzeigen', () => {
 	it('zeigt den deutschen Namen und wie viele Rechnungen danach verteilt werden', async () => {
@@ -54,7 +59,7 @@ describe('Verteilschlüssel anzeigen', () => {
 });
 
 describe('Neuer Verteilschlüssel', () => {
-	it('erfasst den Schlüssel unter seinem deutschen Namen und zeigt die Verteilschlüssel', async () => {
+	it('erfasst den Schlüssel unter seinem deutschen Namen mit seinen Übersetzungen und zeigt die Verteilschlüssel', async () => {
 		const { calls, result } = runAction(newActions.save, '', 201, form, { id: 'k9' });
 
 		await expect(result).rejects.toMatchObject({
@@ -70,7 +75,8 @@ describe('Neuer Verteilschlüssel', () => {
 					nameDE: 'Fläche und Zimmer',
 					type: 'custom',
 					description: 'Gemischt',
-					formula: '{area} * 0.7 + {rooms} * 0.3'
+					formula: '{area} * 0.7 + {rooms} * 0.3',
+					...translations
 				}
 			}
 		]);
@@ -132,7 +138,7 @@ describe('Neuer Verteilschlüssel', () => {
 });
 
 describe('Verteilschlüssel bearbeiten', () => {
-	it('ändert den deutschen Namen und behält den Namen für Rechnungen', async () => {
+	it('ändert den deutschen Namen und die Übersetzungen und behält den Namen für Rechnungen', async () => {
 		const { calls, result } = runAction(editActions.save, 'k1', 200, form);
 
 		await expect(result).rejects.toMatchObject({
@@ -146,7 +152,8 @@ describe('Verteilschlüssel bearbeiten', () => {
 				body: {
 					nameDE: 'Fläche und Zimmer',
 					description: 'Gemischt',
-					formula: '{area} * 0.7 + {rooms} * 0.3'
+					formula: '{area} * 0.7 + {rooms} * 0.3',
+					...translations
 				}
 			}
 		]);

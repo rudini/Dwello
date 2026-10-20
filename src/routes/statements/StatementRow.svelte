@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
-	import { balanceLabel, nextReminderLater, statusIcons, statusLabels, statusTones } from '$lib/statement';
+	import { balanceLabel, nextReminderLater, statementIcons, statusLabels, statusTones } from '$lib/statement';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
@@ -56,7 +56,7 @@
 	<div class="flex flex-col items-start gap-1 xl:w-40 xl:shrink-0">
 		<Badge
 			tone={statusTones[statement.status]}
-			icon={statusIcons[statement.status]}
+			icon={statementIcons[statement.status]}
 			label={statusLabels[statement.status]}
 		/>
 		{#if statement.status === 'overdue' && statement.lastReminderDate}

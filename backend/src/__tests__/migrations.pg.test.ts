@@ -34,7 +34,7 @@ const files = (await readdir(migrations)).filter((file) => file.endsWith('.sql')
 
 afterAll(async () => {
 	for (const name of databases) await query('postgres', `DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
-});
+}, 60_000); // a dozen databases take longer than the default 5 s on a busy machine
 
 // The categories whose description 0021 completes (#204, #220); every KI prompt lists the descriptions
 const described = `'Heating', 'Garden Maintenance', 'Waste Disposal', 'TV/Cable', 'Building Insurance', 'Administration'`;
@@ -241,7 +241,6 @@ describe('Migrationen anwenden', () => {
 
 		expect(await query(name, `SELECT name FROM categories WHERE is_fuel ORDER BY name`)).toEqual([{ name: 'Heating' }, { name: 'Holz' }]);
 	});
-
 	// #464: every contract keeps its Akonto from its Vertragsbeginn; statements already created keep their totals
 	it('übernimmt das Akonto bestehender Mietverträge ab Vertragsbeginn und lässt Abrechnungen, wie sie sind', async () => {
 		const name = await database();
@@ -270,6 +269,80 @@ describe('Migrationen anwenden', () => {
 		expect(await query(name, 'SELECT total_advance_payments, advance_lines FROM utility_statements')).toEqual([
 			{ total_advance_payments: '1800.00', advance_lines: null }
 		]);
+	});
+
+	describe('fr/it/en-Namen der vordefinierten Stammdaten (#345, #461)', () => {
+		const migration = '0027_master_data_names.sql';
+		const names = (database: string) =>
+			query(
+				database,
+				`SELECT 'category' AS kind, name, name_fr, name_it, name_en FROM categories WHERE type = 'predefined'
+				UNION ALL SELECT 'key', name, name_fr, name_it, name_en FROM distribution_keys WHERE type = 'predefined'
+				UNION ALL SELECT 'profile', name, name_fr, name_it, name_en FROM heating_profiles WHERE type = 'predefined'
+				ORDER BY kind, name`
+			);
+		async function beforeNames() {
+			const name = await database();
+			const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
+			try {
+				for (const file of files.filter((file) => file < migration)) await copyFile(join(migrations, file), join(before, file));
+				await migrate(`${server}/${name}`, before);
+			} finally {
+				await rm(before, { recursive: true });
+			}
+			return name;
+		}
+
+		it('gibt den vordefinierten Kategorien, Verteilschlüsseln und Heizprofilen die geprüften Namen', async () => {
+			const name = await beforeNames();
+			const before = await names(name);
+			const germanBefore = await query(name, `SELECT name, name_de FROM categories ORDER BY name`);
+
+			await migrate(`${server}/${name}`, migrations);
+
+			const after = await names(name);
+			const changed = after.filter((row, i) => JSON.stringify(row) !== JSON.stringify(before[i]));
+			expect(changed).toEqual([
+				{ kind: 'category', name: 'Building Insurance', name_fr: 'Assurance du bâtiment', name_it: 'Assicurazione dell’immobile', name_en: 'Building Insurance' },
+				{ kind: 'category', name: 'Capital Improvements', name_fr: 'Investissements créant des plus-values', name_it: 'Investimenti di valorizzazione', name_en: 'Capital Improvements' },
+				{ kind: 'category', name: 'Caretaker', name_fr: 'Conciergerie', name_it: 'Custode', name_en: 'Caretaker' },
+				{ kind: 'category', name: 'Chimney Sweep', name_fr: 'Ramonage', name_it: 'Spazzacamino', name_en: 'Chimney Sweep' },
+				{ kind: 'category', name: 'Electricity Common Areas', name_fr: 'Électricité des parties communes', name_it: 'Elettricità parti comuni', name_en: 'Common Area Electricity' },
+				{ kind: 'category', name: 'Elevator', name_fr: 'Ascenseur', name_it: 'Ascensore', name_en: 'Lift' },
+				{ kind: 'category', name: 'Fire Extinguisher Maintenance', name_fr: 'Maintenance des extincteurs', name_it: 'Manutenzione estintori', name_en: 'Fire Extinguisher Servicing' },
+				{ kind: 'category', name: 'Garden Maintenance', name_fr: 'Entretien du jardin', name_it: 'Cura del giardino', name_en: 'Garden Maintenance' },
+				{ kind: 'category', name: 'Snow Removal', name_fr: 'Déneigement', name_it: 'Sgombero neve', name_en: 'Snow Clearing' },
+				{ kind: 'category', name: 'TV/Cable', name_fr: 'Téléréseau', name_it: 'TV/Cavo', name_en: 'TV/Cable' },
+				{ kind: 'category', name: 'Waste Disposal', name_fr: 'Enlèvement des ordures', name_it: 'Rifiuti', name_en: 'Waste Disposal' },
+				{ kind: 'key', name: 'Heating (Area 70% / Unit 30%)', name_fr: 'Chauffage (surface 70\u00a0% / logement 30\u00a0%)', name_it: 'Riscaldamento (superficie 70\u00a0% / unità 30\u00a0%)', name_en: 'Heating (Area 70% / Unit 30%)' },
+				{ kind: 'key', name: 'Per Area (m²)', name_fr: 'Par surface (m²)', name_it: 'Per superficie (m²)', name_en: 'Per Area (m²)' },
+				{ kind: 'key', name: 'Per Rooms', name_fr: 'Par pièce', name_it: 'Per locali', name_en: 'Per Room' },
+				{ kind: 'key', name: 'Per Unit', name_fr: 'Par logement', name_it: 'Per unità', name_en: 'Per Unit' },
+				{ kind: 'profile', name: 'Heating Mittelland', name_fr: 'Chauffage Plateau', name_it: 'Riscaldamento Altipiano', name_en: 'Heating Swiss Plateau' },
+				{ kind: 'profile', name: 'Heating Mountain', name_fr: 'Chauffage région de montagne', name_it: 'Riscaldamento Montagna', name_en: 'Heating Mountain' }
+			]);
+			// UBIQUITOUS_LANGUAGE.md writes «70 %»; the key is not part of a KI prompt, unlike the categories' names
+			expect(await query(name, `SELECT name_de FROM distribution_keys WHERE name = 'Heating (Area 70% / Unit 30%)'`)).toEqual([
+				{ name_de: 'Heizung (Fläche 70\u00a0% / Einheit 30\u00a0%)' }
+			]);
+			// The KI prompt names the categories by `name` and `name_de` (V-9 of 461-fachreview-1): they stay
+			expect(await query(name, `SELECT name, name_de FROM categories ORDER BY name`)).toEqual(germanBefore);
+		});
+
+		it('lässt einen Namen, den der Vermieter geändert hat, wie er ist', async () => {
+			const name = await beforeNames();
+			await query(name, `UPDATE categories SET name_fr = 'Mon concierge' WHERE name = 'Caretaker'`);
+			await query(name, `UPDATE distribution_keys SET name_en = 'By rooms' WHERE name = 'Per Rooms'`);
+
+			await migrate(`${server}/${name}`, migrations);
+
+			expect(await query(name, `SELECT name_fr, name_it FROM categories WHERE name = 'Caretaker'`)).toEqual([
+				{ name_fr: 'Mon concierge', name_it: 'Custode' }
+			]);
+			expect(await query(name, `SELECT name_fr, name_en FROM distribution_keys WHERE name = 'Per Rooms'`)).toEqual([
+				{ name_fr: 'Par pièce', name_en: 'By rooms' }
+			]);
+		});
 	});
 });
 

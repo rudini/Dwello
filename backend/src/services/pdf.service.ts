@@ -149,7 +149,7 @@ const translations: Record<Language, Record<string, string>> = {
 		totalAmount: 'Coûts de l’immeuble',
 		yourShare: 'Votre part',
 		subtotal: 'Sous-total',
-		managementFee: 'Frais de gestion',
+		managementFee: 'Frais d’administration',
 		colon: '\u00a0: ',
 		advancePayments: 'Acomptes',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
@@ -255,7 +255,7 @@ const translations: Record<Language, Record<string, string>> = {
 		totalAmount: 'Costi dell’immobile',
 		yourShare: 'La sua quota',
 		subtotal: 'Subtotale',
-		managementFee: 'Spese di gestione',
+		managementFee: 'Spese amministrative',
 		colon: ': ',
 		advancePayments: 'Acconti',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
@@ -592,11 +592,13 @@ function winAnsi(text: string) {
 }
 
 // The floor as tenants write it: ground floor, above, below
+// English counts floors with ordinals: 1st, 2nd, 3rd, 4th (461-native-en, EN-32)
+const ORDINAL: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' };
 const FLOORS: Record<Language, [string, (n: number) => string, (n: number) => string]> = {
 	de: ['EG', (n) => `${n}. OG`, (n) => `${n}. UG`],
 	fr: ['rez-de-chaussée', (n) => (n === 1 ? '1er étage' : `${n}e étage`), (n) => (n === 1 ? '1er sous-sol' : `${n}e sous-sol`)],
 	it: ['pianterreno', (n) => `${n}° piano`, (n) => `${n}° piano interrato`],
-	en: ['ground floor', (n) => `floor ${n}`, (n) => `basement ${n}`]
+	en: ['ground floor', (n) => `${n}${ORDINAL[new Intl.PluralRules('en', { type: 'ordinal' }).select(n)]} floor`, (n) => `basement ${n}`]
 };
 
 function formatFloor(floor: number, lang: Language): string {

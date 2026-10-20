@@ -43,8 +43,8 @@ describe('Datenschutzerklärung auf Französisch, Italienisch und Englisch', () 
 	// «proposer si» ist kein Französisch, «proponga se» kein gutes Italienisch (#176, E-22, F-21)
 	it('sagt idiomatisch, dass die KI angibt, ob die Kosten umlagefähig sind', () => {
 		for (const [locale, text] of [
-			['fr', 'pour que l’IA indique si ses frais sont imputables'],
-			['it', 'affinché l’IA indichi se i suoi costi sono addebitabili']
+			['fr', 'pour que l’IA indique si ses frais sont répercutables'],
+			['it', 'affinché l’IA indichi se i relativi costi sono addebitabili']
 		] as const) {
 			overwriteGetLocale(() => locale);
 			show(PrivacyPage, {

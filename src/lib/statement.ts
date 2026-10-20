@@ -37,7 +37,7 @@ export const statusTones: Record<StatementStatus, Tone> = {
 };
 
 /** The badge's own icon where the tone's would mislead: «Erledigt» is no hint (persona anna-448-2 P-1) */
-export const statusIcons: Partial<Record<StatementStatus, IconName>> = { settled: 'check' };
+export const statementIcons: Partial<Record<StatementStatus, IconName>> = { settled: 'check' };
 
 /** The Saldo in words: positive, the tenant pays; negative, the tenant gets money back */
 export function balanceLabel(balance: number): string {

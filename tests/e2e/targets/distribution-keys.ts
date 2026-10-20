@@ -7,6 +7,7 @@ export const keyRow = (name: string) =>
 			.filter({ has: page.getByTestId('distribution-key-name').getByText(name, { exact: true }) })
 	);
 export const nameInput = target('Name', (page) => page.getByTestId('distribution-key-name-input'));
+export const frenchNameInput = target('Name auf Französisch', (page) => page.getByTestId('distribution-key-name-fr-input'));
 export const formulaInput = target('Formel', (page) => page.getByTestId('distribution-key-formula-input'));
 export const testButton = target('Formel testen', (page) => page.getByTestId('distribution-key-test-button'));
 export const submitButton = target('Verteilschlüssel speichern', (page) => page.getByTestId('distribution-key-submit'));

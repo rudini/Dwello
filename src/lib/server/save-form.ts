@@ -58,3 +58,10 @@ export async function fetchRecord(fetch: typeof globalThis.fetch, url: string, r
 	if (!response.ok) throw error(response.status, m.record_not_loaded({ record }));
 	return response.json();
 }
+
+/** The optional fr/it/en names of a form (`NameTranslations.svelte`); an empty one is none, so the German name stands */
+export const nameTranslations = (field: (key: string) => string) => ({
+	nameFR: field('nameFR') || null,
+	nameIT: field('nameIT') || null,
+	nameEN: field('nameEN') || null
+});

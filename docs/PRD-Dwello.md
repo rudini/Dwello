@@ -402,10 +402,10 @@ Seeded by `backend/migrations/0002_stammdaten.sql`. The divisor is always all ap
    - Formula: `Total Cost × (Apartment Size / Total Building Size)`
    - Used for water, wastewater, electricity, maintenance
 
-3. **Pro Zimmer** (Per Rooms), formula `{rooms}`
+3. **Pro Zimmer** (Per Room), formula `{rooms}`
    - Distribution by number of rooms
 
-4. **Heizung (Fläche 70% / Einheit 30%)** (Heating Split), formula `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}`
+4. **Heizung (Fläche 70 % / Einheit 30 %)** (Heating (Area 70% / Unit 30%)), formula `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}`
    - Swiss standard heating distribution
    - The time-based split for tenants who moved mid-period uses the heating profile (see section 5.7)
 
@@ -1070,7 +1070,7 @@ BALANCE (refund): CHF 30
   - Pro Einheit
   - Pro Fläche (m²)
   - Pro Zimmer
-  - Heizung (Fläche 70% / Einheit 30%)
+  - Heizung (Fläche 70 % / Einheit 30 %)
   - (show description and formula)
 
 - Section 2: Custom keys
