@@ -1,2 +1,3 @@
-# Every pull request needs the maintainer's review (with "Require review from Code Owners" in the main ruleset)
+# Pull requests of contributors need the maintainer's review (with "Require review from Code Owners" in the main
+# ruleset; the maintainer goes on its bypass list, since nobody can approve their own pull request)
 * @rudini

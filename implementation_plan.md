@@ -16,5 +16,5 @@ No scenario: repository files and CI only, no app change.
 - [x] `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `SECURITY.md`, README links
 - [x] `.github/`: pull request template (no checkboxes, `open-work.test.ts`), `bug.yml`, `config.yml`, `CODEOWNERS`, `dependabot.yml`
 - [x] CI: commit subjects via `commit-msg-gate.mjs --check`, Prettier on new files, dependency review (public repository only)
-- [ ] code-reviewer round
+- [x] code-reviewer round 1: `docs/reviews/contrib-review-1.md`
 - [ ] PR

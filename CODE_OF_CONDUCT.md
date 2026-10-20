@@ -37,7 +37,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at the maintainer, [@rudini](https://github.com/rudini), by a private message (the contact on the GitHub profile). All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leader responsible for enforcement, the maintainer [@rudini](https://github.com/rudini), privately through **Security → Report a vulnerability** in this repository, which only the maintainer sees. All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 
