@@ -48,9 +48,13 @@ export function testData(api: CallTheApi) {
 	}
 
 	// The tenant's statement of the year, also one a run created
-	async function statementOf(tenantTitle: string, year: number) {
+	// the statement of that year; with a status, the one in that status (a replaced one and its correction share the year)
+	async function statementOf(tenantTitle: string, year: number, status?: string) {
 		const { data } = await get(`statements?tenantId=${ids.get(tenantTitle)}&limit=100`);
-		return data.find((s: { periodStart: string }) => s.periodStart.startsWith(`${year}`));
+		return data.find(
+			(s: { periodStart: string; status: string }) =>
+				s.periodStart.startsWith(`${year}`) && (!status || s.status === status)
+		);
 	}
 
 	async function removeContracts(filter: string) {
@@ -323,8 +327,8 @@ export function testData(api: CallTheApi) {
 			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`) ?? (await statementOf(tenantTitle, year)).id}`);
 		},
 
-		async statementNumber(tenantTitle: string, year: number): Promise<string> {
-			return (await statementOf(tenantTitle, year)).statementNumber;
+		async statementNumber(tenantTitle: string, year: number, status?: string): Promise<string> {
+			return (await statementOf(tenantTitle, year, status)).statementNumber;
 		},
 
 		async statementPdf(tenantTitle: string, year: number) {

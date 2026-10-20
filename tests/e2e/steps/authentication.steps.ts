@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { googleSignInParameter, loginHint, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
+import { googleSignInParameter, loginHint, loginLegalText, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
 import { expireSession, holdSessionWithoutAccess, signInWith, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
@@ -45,6 +45,14 @@ When('der Besucher sich mit {string} anmeldet', async ({ besucher }, provider: s
 
 When('der Liegenschaftsverwalter sich abmeldet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(signOut);
+});
+
+Then('liest der Besucher unter den Anbietern {string}', async ({ besucher }, text: string) => {
+	await besucher.sees(loginLegalText).toContain(text);
+});
+
+Then('liest der Besucher unter den Anbietern nicht {string}', async ({ besucher }, text: string) => {
+	await besucher.sees(loginLegalText).not.toContain(text);
 });
 
 Then('kann sich der Besucher mit {string} anmelden', async ({ besucher }, provider: string) => {

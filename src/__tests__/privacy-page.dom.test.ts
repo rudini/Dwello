@@ -136,6 +136,13 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 		);
 	});
 
+	// #458 (#330): in the demo the operator records all data
+	it('sagt, dass in der Demo der Betreiber für alle Daten verantwortlich ist', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: true, providers: ['Google'] } } as never);
+
+		expect(demoSection()?.textContent).toContain('In der Demo ist der Betreiber für alle Daten verantwortlich.');
+	});
+
 	// Fachprüfung R-3 (#357): das Protokoll unter den Einstellungen teilen sich alle Besucher der Demo
 	it('sagt, dass alle Besucher die Anmeldungen der anderen im Protokoll sehen', () => {
 		show(PrivacyPage, { data: { recipient: null, demo: true, providers: ['Google'] } } as never);
@@ -248,23 +255,78 @@ describe('Datenschutzerklärung nach #82', () => {
 	const page = (data: Record<string, unknown> = {}) =>
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], mail: 'smtp', sessionSeconds: 604800, operator, ...data } } as never);
 
-	it('nennt den Betreiber aus der Konfiguration als Verantwortlichen, mit Kontakt und Auskunftsrecht', () => {
+	// #458 (#330): the landlord for the recorded data, a provider only on his behalf, the operator for sign-in, log and cookies
+	it('nennt den Vermieter als Verantwortlichen für die erfassten Daten und den Betreiber aus der Konfiguration mit Kontakt', () => {
 		page();
 
 		const text = section('Verantwortlich')?.textContent;
-		expect(text).toContain('ist ihr Betreiber: Beispiel Hosting AG, Teststrasse 1, 9999 Testdorf.');
-		expect(text).toContain('Kontakt: kontakt@beispiel.test.');
+		expect(text).toContain(
+			'Für die Daten, die Sie in Dwello erfassen, auch die Ihrer Mieter, sind Sie als Vermieter verantwortlich. Dwello wird von Beispiel Hosting AG, Teststrasse 1, 9999 Testdorf betrieben. Kontakt: kontakt@beispiel.test.'
+		);
 		expect(text).toContain('Betreiber ist, wer diese Dwello-Installation');
-		expect(text).toContain('kostenlos Auskunft');
-		expect(text).toContain('(Art. 25 DSG)');
+		expect(text).toContain('Ein solcher Anbieter bearbeitet die Daten, die Sie erfassen, nur in Ihrem Auftrag.');
+		expect(text).toContain('Für die Anmeldung, das Protokoll des Servers und die Cookies ist der Betreiber verantwortlich.');
+		expect(text).not.toContain('ist ihr Betreiber');
 	});
 
-	it('sagt ohne eingetragenen Betreiber, was zu tun ist', () => {
+	// PO on Fachreview 458-1 R-3: every person whose data the landlord records (Art. 25 Abs. 1 DSG «Jede Person»)
+	it('sagt, dass Mieter und andere erfasste Personen beim Vermieter Auskunft verlangen und der Vermieter beim Betreiber', () => {
+		page();
+
+		expect(section('Verantwortlich')?.textContent).toContain(
+			'Ihre Mieter und andere Personen, deren Daten Sie erfassen, etwa Rechnungssteller, können bei Ihnen kostenlos Auskunft darüber verlangen, ob und welche Daten über sie bearbeitet werden, Sie selbst beim Betreiber (Art. 25 DSG).'
+		);
+	});
+
+	// #458 (#346): rights beyond access (Art. 28, 32, 49 DSG)
+	it('nennt Berichtigung, Herausgabe, Löschung und die Anzeige beim EDÖB', () => {
+		page();
+
+		const text = section('Verantwortlich')?.textContent;
+		expect(text).toContain('Ebenso können diese Personen bei Ihnen und Sie beim Betreiber verlangen');
+		expect(text).toContain('dass unrichtige Daten berichtigt werden (Art. 32 Abs. 1 DSG)');
+		expect(text).toContain('in einem gängigen elektronischen Format herausgegeben werden (Art. 28 DSG)');
+		expect(text).toContain('die Daten gelöscht werden (Art. 32 Abs. 2 DSG)');
+		expect(text).toContain('(EDÖB) anzeigen (Art. 49 DSG)');
+	});
+
+	it('sagt ohne eingetragenen Betreiber, wer verantwortlich ist und was zu tun ist', () => {
 		page({ operator: null });
 
 		const text = section('Verantwortlich')?.textContent;
-		expect(text).toContain('Er hat seinen Namen und seine Adresse noch nicht hinterlegt.');
+		expect(text).toContain(
+			'sind Sie als Vermieter verantwortlich. Der Betreiber dieser Dwello-Installation hat seinen Namen und seine Adresse noch nicht hinterlegt.'
+		);
 		expect(text).toContain('Betreiben Sie Dwello selbst, tragen Sie sie bei der Einrichtung ein');
+	});
+
+	// #458 (#333): the server's country only when OPERATOR_SERVER_COUNTRY is set (Art. 19 Abs. 4 DSG)
+	// PO on Fachreview 458-1 R-1: no preposition before the value, so «Schweiz» reads right too
+	it('nennt das Land des Servers, wenn es eingerichtet ist', () => {
+		page({ serverCountry: 'Schweiz' });
+
+		expect(section('Welche Daten Dwello speichert')?.textContent).toContain(
+			'Die Daten liegen in der Datenbank des Betreibers dieser Dwello-Installation. Der Server steht in folgendem Land: Schweiz.'
+		);
+	});
+
+	it('nennt ohne eingerichtetes Land nur die Datenbank des Betreibers', () => {
+		page({ serverCountry: null });
+
+		const text = section('Welche Daten Dwello speichert')?.textContent;
+		expect(text).toContain('Die Daten liegen in der Datenbank des Betreibers dieser Dwello-Installation.');
+		expect(text).not.toContain('Der Server steht');
+		expect(text).not.toContain('PostgreSQL');
+	});
+
+	it('nennt beim Mailversand über SMTP Anbieter und Land des Mailservers, wenn beide eingerichtet sind', () => {
+		page({ mailProvider: { name: 'Muster Mail AG', country: 'Schweiz' } });
+
+		const text = section('Weitergabe an Dritte')?.textContent;
+		expect(text).toContain(
+			'werden über den Mailserver von Muster Mail AG (Schweiz) zugestellt. Dabei erhält Muster Mail AG Name und E-Mail-Adresse des Mieters'
+		);
+		expect(text).not.toContain('erfahren Sie beim Betreiber');
 	});
 
 	it('sagt, dass Dwello nichts von selbst löscht und wer 10 Jahre aufbewahren muss', () => {
@@ -371,5 +433,31 @@ describe('Datenschutzerklärung zum E-Mail-Versand', () => {
 		const text = document.body.textContent!.replace(/\s+/g, ' ');
 		expect(text).toContain('bei einer Zahlungserinnerung oder Mahnung Adresse und offener Betrag');
 		expect(text).toContain('die Kosten und ihre Verteilung, der Saldo sowie IBAN und Zahlungsreferenz');
+	});
+});
+
+// Persona Helga 458 P-1: the landlord can link his tenants to the sections the terms tell him to pass on
+describe('Sprungmarken der Datenschutzerklärung', () => {
+	it('gibt jedem Abschnitt eine Sprungmarke', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		const titles = Object.fromEntries(
+			['controller', 'stored', 'retention', 'third'].map((id) => [id, document.getElementById(id)?.querySelector('h2')?.textContent])
+		);
+		expect(titles).toEqual({
+			controller: 'Verantwortlich',
+			stored: 'Welche Daten Dwello speichert',
+			retention: 'Aufbewahrung',
+			third: 'Weitergabe an Dritte'
+		});
+	});
+});
+
+// #458 (#347): both legal pages say when they last changed
+describe('Stand der Datenschutzerklärung', () => {
+	it('nennt den Stand in der Sprache der Oberfläche', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 20. Oktober 2026');
 	});
 });
