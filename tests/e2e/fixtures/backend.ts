@@ -340,8 +340,9 @@ export function testData(api: CallTheApi) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { movedOut: true });
 		},
 
-		async sendStatement(tenantTitle: string, year: number) {
-			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
+		// `which`: the key of the statement, «Berichtigte Abrechnung» for the one that replaced it (#447)
+		async sendStatement(tenantTitle: string, year: number, which = 'Abrechnung') {
+			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
 		async contractStart(tenantTitle: string, startDate: string) {
@@ -365,8 +366,8 @@ export function testData(api: CallTheApi) {
 		},
 
 		// paid today, the earliest day a statement sent today allows (#138)
-		async markPaid(tenantTitle: string, year: number) {
-			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
+		async markPaid(tenantTitle: string, year: number, which = 'Abrechnung') {
+			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'paid', paidDate: inDays(0) });
 		},
 
 		// Monthly shares January..December in percent

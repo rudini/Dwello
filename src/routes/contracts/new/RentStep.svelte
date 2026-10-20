@@ -40,7 +40,7 @@
 	const notice = $derived(advancePaymentNotice(values));
 	const flatRateWarning = $derived(flatRateNotice(values, categories)); // #429
 	const ownRate = $derived(parsePercent(values.managementFeeRate));
-	// «Verwaltungspauschale vereinbart» (#89); TODO(fachlich prüfen, #286): «eigener Satz», «Satz des Abrechnungslaufs»
+	// «Verwaltungspauschale vereinbart» (#89), «eigener Satz» and «Satz des Abrechnungslaufs» (#402)
 	const feeChoices = $derived([
 		{ value: 'run', label: m.contracts_fee_run() },
 		{ value: 'own', label: m.contracts_fee_own() },

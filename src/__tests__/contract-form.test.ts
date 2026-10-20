@@ -131,8 +131,8 @@ describe('validateContract', () => {
 		});
 	});
 
-	// #89: «Verwaltungspauschale vereinbart» has no default; an own rate is a percentage from 0 to 10 (#124)
-	it('verlangt eine Angabe zur Verwaltungspauschale und einen eigenen Satz von 0 bis 10', () => {
+	// #89: «Verwaltungspauschale vereinbart» has no default; an own rate is greater than 0 up to 10 (#124, #447)
+	it('verlangt eine Angabe zur Verwaltungspauschale und einen eigenen Satz grösser als 0 bis 10', () => {
 		expect(validateContract({ ...filled, managementFee: '' })).toEqual({
 			managementFee: 'Bitte wählen Sie, ob im Mietvertrag eine Verwaltungspauschale vereinbart ist.'
 		});
@@ -142,14 +142,27 @@ describe('validateContract', () => {
 					.managementFeeRate,
 				rate
 			).toBe(
-				'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+				'Bitte geben Sie einen Prozentsatz von 0,01 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 			);
 		}
-		for (const rate of ['0', '2,5', '10']) {
+		for (const rate of ['0.01', '2,5', '10']) {
 			expect(
 				validateContract({ ...filled, managementFee: 'own', managementFeeRate: rate }),
 				rate
 			).toEqual({});
+		}
+	});
+
+	// #447 (decided in #402, point 2): an own rate of 0 % means «Nein»
+	it('lehnt einen eigenen Satz von 0 % mit dem Hinweis auf «Nein» ab', () => {
+		for (const rate of ['0', '0,00', '0.0']) {
+			expect(
+				validateContract({ ...filled, managementFee: 'own', managementFeeRate: rate })
+					.managementFeeRate,
+				rate
+			).toBe(
+				'Ein eigener Satz von 0 % heisst: keine Verwaltungspauschale. Wählen Sie dann «Nein».'
+			);
 		}
 	});
 
