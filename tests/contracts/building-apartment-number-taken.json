@@ -1,0 +1,5 @@
+{
+	"error": "Die Wohnungsnummer 101 existiert bereits in diesem Gebäude.",
+	"code": "APARTMENT_NUMBER_TAKEN",
+	"params": { "number": "101" }
+}

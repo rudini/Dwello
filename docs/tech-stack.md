@@ -29,7 +29,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 │  ├─ Buildings, apartments, tenants          │
 │  ├─ Contracts, invoices                     │
 │  ├─ Statement generation wizard             │
-│  └─ Address lookup (OpenPLZ, from browser)  │
+│  └─ Address lookup (geo.admin.ch, via BFF)  │
 │                                              │
 │  Cookies: dwello_session (HTTPOnly),        │
 │           dwello_xsrf (readable)            │
@@ -83,7 +83,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 
 ┌─────────────────────────────────────────────┐
 │    External Services                        │
-│  ├─ OpenPLZ: postal code / street lookup    │
+│  ├─ geo.admin.ch: Gebäuderegister (GWR)     │
 │  │  (called from the browser)               │
 │  ├─ OAuth providers: Google, Microsoft      │
 │  └─ SMTP or Resend: reminder e-mails        │
@@ -147,9 +147,9 @@ Svelte's built-in stores are sufficient for a single-user application. Page data
 
 No date library; formatting uses the built-in `Intl` APIs / `Date`.
 
-### Address Lookup: OpenPLZ
+### Address Lookup: Gebäuderegister (geo.admin.ch)
 
-`src/lib/services/openplz.ts` calls `https://openplzapi.org/ch` directly from the browser (postal codes, localities, streets).
+The address search of «Neues Gebäude» asks the BFF (`/api/addresses`), which calls `https://api3.geo.admin.ch` (swisstopo; the federal Gebäude- und Wohnungsregister) in `src/lib/server/building-register.ts`: addresses with house number, then the building's type, year and Wohnungen (#479). The browser never calls it. `GEO_ADMIN_URL` points elsewhere; E2E uses the stand-in `backend/scripts/gwr-stub.ts` on 2529. The frontend server needs direct internet access for it: Node's `fetch` ignores `HTTPS_PROXY` unless started with `NODE_USE_ENV_PROXY=1` (Node 22.21+, not the Node 20 image; O-42).
 
 ### Build & Tooling
 
@@ -388,7 +388,7 @@ dwello/
 │   ├── lib/
 │   │   ├── ui/              # Design system: components, icons, illustrations
 │   │   ├── server/          # BFF: auth, api-proxy, form handling, mapping
-│   │   ├── services/        # e.g. openplz.ts
+│   │   ├── server/          # BFF code, e.g. building-register.ts
 │   │   ├── stores.ts
 │   │   └── api.ts           # apiCall() wrapper
 │   └── styles/globals.css
@@ -426,7 +426,7 @@ cd backend && bun run test && bun run type-check
 
 ### CI/CD Pipeline
 
-**GitHub Actions (`.github/workflows/ci.yml`)**, on push to `main` and on pull requests (Node 22, Bun, PostgreSQL 16 service):
+**GitHub Actions (`.github/workflows/ci.yml`)**, on pull requests, on push to `main` (without E2E and axe) and nightly on `main` (everything; Node 22, Bun, PostgreSQL 16 service):
 
 | Job | What it does |
 |-----|--------------|
@@ -434,8 +434,9 @@ cd backend && bun run test && bun run type-check
 | Build | `bun run build` and `bun run build` (backend) |
 | Lint and types | `bun run lint`, `bun run check`, backend `bun run type-check` |
 | Unit tests | `bun run test:coverage`; backend `bun run test` if backend changed |
-| E2E tests | `bun run test:e2e` (all browsers and the API driver, on pull requests too); skipped for docs-only changes |
-| Fallow audit | `bunx fallow audit` against the base |
+| E2E tests | `bun run test:e2e` (all browsers and the API driver) on pull requests and nightly; skipped for docs-only changes and on push to `main` |
+| Accessibility (axe) | `bun run test:e2e -- --project=chromium --grep @a11y` on pull requests that change the UI, and nightly |
+| Fallow audit | `bunx fallow audit` against the base (not nightly) |
 | UI screenshots | On PRs: screenshots of changed pages, posted as a PR comment |
 
 No Docker image is built or pushed in CI.
