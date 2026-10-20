@@ -469,6 +469,8 @@
 	"backend_contract_not_found": "Der Mietvertrag wurde nicht gefunden. Laden Sie die Seite neu.",
 	"backend_billed_until_future": "Abgerechnet bis kann nicht in der Zukunft liegen. Tragen Sie den letzten Tag der letzten Abrechnung ein, die ausserhalb von Dwello erstellt wurde.",
 	"backend_billed_until_before_start": "Abgerechnet bis liegt vor dem Vertragsbeginn {date}. Lassen Sie das Feld leer, wenn für diesen Mietvertrag noch nichts ausserhalb von Dwello abgerechnet ist.",
+	"backend_billed_until_billed": "Für {period} gibt es schon die Abrechnung {number} in Dwello. «Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Tragen Sie höchstens den Tag vor dem Beginn dieser Abrechnung ein: {date}.",
+	"backend_billed_until_billed_start": "Für {period} gibt es schon die Abrechnung {number} in Dwello. «Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Dwello rechnet diesen Mietvertrag ab Vertragsbeginn ab: Lassen Sie das Feld leer.",
 	"backend_distribution_key_not_found": "Der Verteilschlüssel wurde nicht gefunden. Laden Sie die Seite neu.",
 	"backend_invoice_amount_negative": "Der Betrag einer Rechnung darf nicht negativ sein. Ziehen Sie eine Gutschrift vom Betrag der Rechnung ab, zu der sie gehört. Ist diese Rechnung schon abgerechnet, erstellen Sie danach eine berichtigte Abrechnung.",
 	"backend_heating_profile_not_found": "Das Heizprofil wurde nicht gefunden. Laden Sie die Seite neu.",

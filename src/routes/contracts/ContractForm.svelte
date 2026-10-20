@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { backendMessage } from '$lib/backend-error';
+	import { periodName } from '$lib/accounting-period';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { tick, untrack } from 'svelte';
@@ -156,6 +157,14 @@
 	);
 
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
+	// #499: «Abgerechnet bis» over a Dwello statement, said at the field, its period by its name
+	function billedByDwello({ code, params }: { code?: string; params?: Record<string, string | number> }) {
+		if (!code?.startsWith('BILLED_UNTIL_BILLED') || !params) return null;
+		const { start, end, ...rest } = params;
+		const period = periodName({ start: String(start), end: String(end) });
+		return backendMessage({ code, params: { ...rest, period } }, m.contracts_save_failed());
+	}
+
 	function saveError({
 		message,
 		code,
@@ -200,7 +209,8 @@
 		const response = await apiCall(back, { method: 'PUT', body });
 		saving = false;
 		if (response.error) {
-			errors = { form: saveError(response.error) };
+			const atField = billedByDwello(response.error);
+			errors = atField ? { billedUntil: atField } : { form: saveError(response.error) };
 			const statements = response.error.details?.statements;
 			refused = Array.isArray(statements) ? (statements as RefusedStatement[]) : [];
 			return focusFirstError(form);

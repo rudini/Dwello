@@ -112,6 +112,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | flat-rate-warning-advance |
       | contract-edit          | agreed-costs-none-advance |
       | contract-edit          | billed-until-refused |
+      | contract-edit          | billed-until-statement |
       | contract-detail-notice | default             |
       | contract-detail-notice | delete-dialog       |
       | contract-detail-notice | delete-unconfirmed  |

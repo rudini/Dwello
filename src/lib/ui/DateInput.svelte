@@ -126,6 +126,7 @@
 		{label}
 		help={helpText}
 		helpTestid="{testid}-help"
+		testid="{testid}-field"
 		{example}
 		error={shownError}
 		{optional}

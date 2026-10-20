@@ -534,16 +534,16 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col">
 				<span class="badge info">Gebäude und Wohnungen</span>
 				<h3>Gebäude erfassen in zwei Minuten.</h3>
-				<p>Geben Sie Strasse, PLZ oder Ort ein und wählen Sie einen Treffer: Dwello füllt die Adresse aus. Jedes Feld hat seine Erklärung und ein Beispiel direkt darunter.</p>
+				<p>Geben Sie Strasse, Hausnummer und Ort ein und wählen Sie einen Treffer: Dwello übernimmt das Gebäude und seine Wohnungen aus dem Gebäuderegister. Jedes Feld hat seine Erklärung und ein Beispiel direkt darunter.</p>
 				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Adresssuche mit Strasse, PLZ oder Ort<small>Verfügbar heute.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Adresssuche mit Strasse, Hausnummer und Ort<small>Ohne Treffer erfassen Sie das Gebäude von Hand.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Wohnungen mit Fläche, Zimmern, Volumen<small>Die Grundlage für jeden Verteilschlüssel.</small></span></li>
-					<li><svg class="ic" aria-hidden="true" style="color:var(--ink-muted)"><use href="#i-info"/></svg><span>Gebäude aus dem Gebäuderegister <span class="badge plan">Geplant</span><small>Adresse wählen, und alle Wohnungen mit Fläche, Stockwerk und Zimmern kommen aus dem eidgenössischen Gebäude- und Wohnungsregister (GWR).</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Gebäude aus dem Gebäuderegister<small>Adresse wählen, und alle Wohnungen mit Fläche, Stockwerk und Zimmern kommen aus dem eidgenössischen Gebäude- und Wohnungsregister (GWR). Sie prüfen sie, bevor Sie speichern.</small></span></li>
 				</ul>
 			</div>
 			<figure class="shot">
-				<img class="l" src="shots/building-new-light.webp" width="1400" height="1225" loading="lazy" alt="Formular Neues Gebäude mit Gebäudename, Adresssuche, Strasse, PLZ und Ort, jedes Feld mit Hilfetext und Beispiel.">
-				<img class="d" src="shots/building-new-dark.webp" width="1400" height="1225" loading="lazy" alt="" aria-hidden="true">
+				<img class="l" src="shots/building-register-light.webp" width="1532" height="1836" loading="lazy" alt="Formular Neues Gebäude: Wohnungen 101 und 102 aus dem Gebäuderegister, je mit Wohnungsnummer, Stockwerk, Fläche und Zimmeranzahl zum Prüfen.">
+				<img class="d" src="shots/building-register-dark.webp" width="1532" height="1836" loading="lazy" alt="" aria-hidden="true">
 			</figure>
 		</div>
 	</div>
@@ -571,7 +571,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="badge ok">Verfügbar</span></div><h3>Mieterdaten auf Knopfdruck</h3><p>Alles über eine Mieterin oder einen Mieter als ZIP, für die Datenherausgabe nach Art. 28 DSG.</p></article>
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span class="badge ok">Verfügbar</span></div><h3>Protokoll aller Änderungen</h3><p>Anmeldungen und jede Änderung, die eine Abrechnung betrifft, mit Zeitpunkt und Stand davor.</p></article>
 			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span class="badge ok">Verfügbar</span></div><h3>Dokumente pro Mieter</h3><p>Briefe, Abrechnungen und Mahnungen an einem Ort.</p></article>
-			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge plan">Geplant</span></div><h3>Gebäude aus dem Gebäuderegister</h3><p>Gebäude und Wohnungen mit Fläche, Stockwerk und Zimmern aus dem eidgenössischen Register übernehmen.</p></article>
+			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge ok">Verfügbar</span></div><h3>Gebäude aus dem Gebäuderegister</h3><p>Gebäude und Wohnungen mit Fläche, Stockwerk und Zimmern aus dem eidgenössischen Register übernehmen.</p></article>
 			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span class="badge plan">Geplant</span></div><h3>Alle Daten exportieren</h3><p>Der ganze Bestand jederzeit als CSV und JSON. Ihre Daten gehören Ihnen, auch wenn Sie wechseln.</p></article>
 			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg><span class="badge plan">Geplant</span></div><h3>MCP-Server für KI-Assistenten</h3><p>Fragen Sie Ihren KI-Assistenten nach offenen Beträgen, Fristen oder fehlenden Rechnungen.</p></article>
 		</div>
@@ -789,7 +789,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		</div>
 		<div class="road">
 			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>Gebäude aus dem Gebäuderegister</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/479" rel="noopener">#479</a><p>Gebäude und Wohnungen aus dem eidgenössischen Gebäude- und Wohnungsregister übernehmen.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>MCP-Server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener">#495</a><p>Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>Vollständiger Export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener">#496</a><p>Alle Daten als CSV und JSON, jederzeit, mit einem Klick.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>Berichte und Auswertungen</h3><p>Einnahmen, Ausgaben und Nebenkosten über die Jahre, für Steuererklärung und Treuhand.</p></article>

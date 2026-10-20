@@ -582,6 +582,36 @@ describe('API-Verträge der Zahlung', () => {
 		const actual = await (await callApi(`/api/v1/statements/${statementId}/payment-reset`, { method: 'POST' })).json();
 		expect(drift(await sample('statement-payment-reset'), actual)).toEqual([]);
 	});
+
+	// #499, code review 499-1 C-1: a contract since 01.07.2023 and its sent statement 2024, so a day before it is left
+	it('PUT /contracts/:id mit «Abgerechnet bis» über eine versendete Abrechnung liefert die Felder von contract-billed-until-billed.json', async () => {
+		const earlier = await createRental(crypto.randomUUID(), { startDate: '2023-07-01', monthlyAdvancePayment: '100' });
+		const [profile] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
+		const generated = await sendJson('POST', '/api/v1/statements/generate', {
+			...period,
+			contractId: earlier.contract,
+			buildingId: earlier.building,
+			managementFeePercent: 3,
+			heatingProfileId: profile.id
+		});
+		const { id } = (await generated.json()) as { id: string };
+		try {
+			await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+			const response = await sendJson('PUT', `/api/v1/contracts/${earlier.contract}`, { billedUntil: '2024-06-30' });
+			expect(response.status).toBe(400);
+			expect(drift(await sample('contract-billed-until-billed'), await response.json())).toEqual([]);
+		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+			await earlier.remove();
+		}
+	});
+
+	// #499: the sent statement 2024 bills those days from the Vertragsbeginn 01.01.2024
+	it('PUT /contracts/:id mit «Abgerechnet bis» über die versendete Abrechnung liefert die Felder von contract-billed-until-billed-start.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { billedUntil: '2024-06-30' });
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-billed-until-billed-start'), await response.json())).toEqual([]);
+	});
 });
 
 // After the payment: the paid statement is replaced (#120)

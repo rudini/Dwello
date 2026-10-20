@@ -19,6 +19,8 @@ import { formatDate } from '$lib/utils/format';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import billedRefused from '../../tests/contracts/contract-billed-until-refused.json';
+import billedByStatement from '../../tests/contracts/contract-billed-until-billed.json';
+import billedFromStart from '../../tests/contracts/contract-billed-until-billed-start.json';
 import tenantRefused from '../../tests/contracts/contract-tenant-refused.json';
 import advanceRefused from '../../tests/contracts/contract-advance-refused.json';
 
@@ -247,6 +249,41 @@ describe('Mietvertrag bearbeiten', () => {
 		await save();
 		expect(byTestId('form-error')!.textContent).toContain('Beim Speichern ist ein Fehler aufgetreten.');
 		expect(byTestId('form-error')!.textContent).not.toContain('Tenant');
+	});
+
+	// #499: a sent or paid Dwello statement bills those days; the refusal is at the field and offers no correction
+	it('lehnt «Abgerechnet bis» über eine versendete Abrechnung am Feld ab, ohne zum Berichtigen zu raten', async () => {
+		calls = fakeBff(({ method }) => (method === 'PUT' ? [400, billedByStatement] : [200, { contracts: [] }]));
+		await open();
+		type('billed-until-input', '30.06.2025');
+		await save();
+		const field = byTestId('billed-until-input')!;
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+		expect(document.body.textContent).toContain(
+			'Für 2025 gibt es schon die Abrechnung NK-2025-0003 in Dwello. «Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Tragen Sie höchstens den Tag vor dem Beginn dieser Abrechnung ein: 31.12.2024.'
+		);
+		expect(document.body.textContent).not.toContain('berichtigen');
+	});
+
+	// #499, fach review 499-1 V-2: the Vertragsbeginn lies in the statement's period, no day before it is left
+	it('rät bei einer Abrechnung ab dem Vertragsbeginn, das Feld leer zu lassen', async () => {
+		calls = fakeBff(({ method }) => (method === 'PUT' ? [400, billedFromStart] : [200, { contracts: [] }]));
+		await open();
+		type('billed-until-input', '30.06.2024');
+		await save();
+		expect(document.body.textContent).toContain(
+			'Für 2024 gibt es schon die Abrechnung NK-2024-0001 in Dwello. «Abgerechnet bis» kann nur Tage ohne Dwello-Abrechnung decken. Dwello rechnet diesen Mietvertrag ab Vertragsbeginn ab: Lassen Sie das Feld leer.'
+		);
+	});
+
+	// fach review 499-1 V-6c: a period that is no calendar year by its two days
+	it('nennt eine Abrechnungsperiode über den Jahreswechsel mit ihren Daten', async () => {
+		const july = { ...billedByStatement, params: { ...billedByStatement.params, start: '2024-07-01', end: '2025-06-30' } };
+		calls = fakeBff(({ method }) => (method === 'PUT' ? [400, july] : [200, { contracts: [] }]));
+		await open();
+		type('billed-until-input', '30.09.2024');
+		await save();
+		expect(document.body.textContent).toContain('Für 01.07.2024 – 30.06.2025 gibt es schon die Abrechnung NK-2025-0003 in Dwello.');
 	});
 
 	// code review C-2: a mistyped date must not clear the stored «Abgerechnet bis»

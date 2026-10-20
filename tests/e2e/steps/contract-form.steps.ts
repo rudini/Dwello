@@ -1,4 +1,5 @@
 import { createBdd } from 'playwright-bdd';
+import { errorMessageShown } from '../questions/form';
 import { test } from '../fixtures/test';
 import {
 	apartmentChoiceLabel,
@@ -31,6 +32,7 @@ import {
 	enteredFlatRate,
 	flatRateWarningShown,
 	flatRateWarningText,
+	billedUntilErrorText,
 	startDateWarning,
 	startDateAsked,
 	billedUntilAsked
@@ -645,3 +647,19 @@ When(
 		await verwalter.attemptsTo(saveStartWithAdvance(date, amount, from));
 	}
 );
+
+// #499: the refusal names the Dwello statement and offers no correction
+Then('sagt das Feld «Abgerechnet bis» {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(billedUntilErrorText).toContain(text);
+});
+
+Then(
+	'nennt das Feld «Abgerechnet bis» die Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.sees(billedUntilErrorText).toContain(`Für ${year} gibt es schon die Abrechnung ${await seed.statementNumber(tenant, year)} in Dwello.`);
+	}
+);
+
+Then('rät die Fehlermeldung nicht zum Berichtigen', async ({ verwalter }) => {
+	await verwalter.sees(errorMessageShown('berichtigen')).toBe(false);
+});
