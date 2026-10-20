@@ -1,34 +1,50 @@
 @import '@fontsource-variable/inter';
 @import './tokens.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss' source('..');
+@config '../../tailwind.config.js';
 
-body {
-	margin: 0;
-	font-family: var(--font-sans);
-	font-size: 1rem;
-	line-height: var(--leading-text);
-	color: var(--color-ink);
-	background: var(--color-canvas);
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
+/* In the base layer, so utilities still win over these element rules */
+@layer base {
+	/* Tailwind 3 defaults that Tailwind 4 dropped: bare `border`/`divide-y` take the line token, buttons show a pointer */
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-line);
+	}
 
-/* Visible focus on every interactive element, keyboard only */
-:focus-visible {
-	outline: 3px solid var(--color-focus);
-	outline-offset: 2px;
-}
+	button:not(:disabled),
+	[role='button']:not(:disabled) {
+		cursor: pointer;
+	}
 
-input::placeholder,
-textarea::placeholder {
-	color: var(--color-ink-muted);
-}
+	body {
+		margin: 0;
+		font-family: var(--font-sans);
+		font-size: 1rem;
+		line-height: var(--leading-text);
+		color: var(--color-ink);
+		background: var(--color-canvas);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
 
-/* WebKit lays out a select's options as flex boxes that widen the field around it, so a long building or apartment
-   name made the page scroll sideways at 390 px (Playwright's WebKit, #424); paint containment keeps them inside the select */
-select {
-	contain: paint;
+	/* Visible focus on every interactive element, keyboard only */
+	:focus-visible {
+		outline: 3px solid var(--color-focus);
+		outline-offset: 2px;
+	}
+
+	input::placeholder,
+	textarea::placeholder {
+		color: var(--color-ink-muted);
+	}
+
+	/* WebKit lays out a select's options as flex boxes that widen the field around it, so a long building or apartment
+	   name made the page scroll sideways at 390 px (Playwright's WebKit, #424); paint containment keeps them inside the select */
+	select {
+		contain: paint;
+	}
 }

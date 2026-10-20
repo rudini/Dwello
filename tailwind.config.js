@@ -23,7 +23,6 @@ const tokenColours = [
 
 /** @type {import('tailwindcss').Config} */
 export default {
-	content: ['./src/**/*.{html,js,svelte,ts}'],
 	// Colours, radii and shadows come only from the tokens (replaced, not extended)
 	theme: {
 		colors: {
