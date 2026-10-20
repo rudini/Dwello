@@ -16,7 +16,7 @@ The caller of a run gives each persona a task on the change under review instead
 
 ## Which personas
 
-A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these holds. A change that adds a screen or flow gets every persona named here; any other change at most the two that fit it best (Marco for a phone view counts as one):
+A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these holds; each gets a task on the change. A change that adds a screen or flow gets every persona named here; any other change at most the two that fit it best (Marco for a phone view counts as one):
 
 - **Screen:** the persona's default task uses the changed screen.
 - **Device:** every changed view is also checked on a phone: Marco.
@@ -29,7 +29,7 @@ A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these ho
 - **Reports:** a persona writes only its report into this folder; its scripts and screenshots stay outside the repository. `screens/` keeps only the screenshots of the last redesign and i18n round; earlier ones are in the git history.
 - **Who saves:** personas that run at the same time share one database. Give each persona that needs to save its own building of the demo data, as long as buildings are left, and say in its task that saving in the persona app is part of it (`dwello_persona` is recreated for each run); the others only look. Name records only from `demo-records.md`.
 - **Language:** the interface language is stored on the account, so a persona in another language than German runs alone.
-- **Meanwhile:** personas use their own build, not your tree: keep working while they run, E2E included (`CLAUDE.md`, Gotchas, "One build").
+- **Meanwhile:** personas use their own build, not your tree: keep working while they run, E2E included (`tests/e2e/CLAUDE.md`, "Run"). Stop the persona servers by port (`fuser -k 3300/tcp`), never with `pkill -f`.
 - **A state reached only by a failure:** name how to reach it in the task: the request to fail (the persona simulates it), or for an outside service's result (a refused mail) the SQL that writes it into `dwello_persona`, which the caller runs before starting the persona.
 - **Demo records in the way:** when demo records block the task (a draft overlapping the period to bill), the caller removes them by SQL in `dwello_persona` before starting the persona and names the SQL in the task.
 - **No persona:** a change visible only in a state the persona stack cannot produce (the server's clock, a real KI model instead of the stand-in) needs no persona when a lower-layer test shows it and no persona can reach a new text of it (through a failing request, that SQL or the stand-in's answers); say so in the plan.

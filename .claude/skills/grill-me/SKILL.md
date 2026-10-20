@@ -5,7 +5,7 @@ description: Interview the product owner about one Dwello issue until every deci
 
 # Grill me
 
-The product owner wants the open questions of one issue settled before work starts (`CLAUDE.md`, "Open work": an issue is ready when its decisions are in its text).
+The product owner wants the open questions of one issue settled before work starts (skill `issue-work`: an issue is ready when its decisions are in its text).
 
 1. Read the issue with the GitHub MCP tools, and the code and docs it names. List each decision the implementation needs and the issue does not settle: values, texts the landlord sees, what happens at the edges (empty, failing, legal limits), what is out of scope.
 2. Ask in rounds of at most four questions (`AskUserQuestion`), most consequential first. Each question names the consequence of each option for the landlord and its source (code fact, Fedlex wording, `UBIQUITOUS_LANGUAGE.md`), with your recommendation first. A new question an answer raises goes into the next round.
