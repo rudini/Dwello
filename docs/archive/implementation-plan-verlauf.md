@@ -2337,3 +2337,47 @@ Request: implement proposals 1 and 3 of the follow-up CI recommendations.
 - [x] PR to `main`
 - No scenario: CI configuration, no app behaviour changes
 - Files: `.github/workflows/ci.yml`, `.claude/skills/pull-request/SKILL.md`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `tests/e2e/CLAUDE.md`
+
+## Session W1: apply the collected workflow review of 2026-10-20
+
+Request: «Setze alle um» (every proposal of `docs/reviews/workflow-rules-review-2026-10-20.md`). No scenario: rules, skills, agents and tooling only; no app behaviour changes.
+
+- [x] K1 Workflow 8: parallel sessions keep the checklist in the pull request; a merged pull request's session counts as finished
+- [x] K2 `slice-review` hand-over block; Workflow 4/5: no subagents and no coordinator → draft pull request
+- [x] K3 scratchpad prefix, migration number at the last merge, affected features as local E2E duty, no Paraglide/merge while a run waits, `persona-stack.sh --keep-db`, longer timeout for process-spawning `tools/` tests
+- [x] K4 glossary edit allowed when «Decided (product owner)» names the rows
+- [x] K5 fallow 2.104 already keeps an inherited clone group `introduced: false` (tried: lines added before and after the block); `commit-gates` says so, the gate is unchanged
+- [x] K6 Workflow 7: closing round has its own three rounds
+- [x] K7 Workflow 2: E2E red run skipped when the fix's lower-layer test was seen red
+- [x] K8 sixth "No scenario" kind: global `configuration` state
+- [x] K9 personas README: probe an outside service before a round
+- [x] K10 "Done means": visible in the persona's task counts as more visible
+- [x] K11 native reads list keys with placeholders or escapes apart
+- [x] K12 Coding guidelines: a later decision wins over a prescribed text
+- [x] K13 «Formatting»: one file per command
+- [x] T1 merge review only for a conflict in app code
+- [x] T2 already on `main` (b5a260b6: no merges only because a branch is behind, auto-merge)
+- [x] T3 test-only CI fix rides the next round
+- [x] T4 report form for reviewers; native reads return only changed keys
+- [x] T5 persona re-run only on the screens of its Blocker/Major
+- [x] T6 native reads before the step-1 fach-review closes
+- [x] T7 narrowed: only step 8 moved (into the header of `implementation_plan.md`); step 9, «When to ask» and the closing headings stay, since the main session needs them on every run, and `CLAUDE.md` grew by the new rules (21669 → about 22.4 KB). Moving more is the product owner's call (w1-review-1 C-1)
+- [x] Checks: lint, check, type-check, rule-file tests
+- [x] Review against the Opus 5.5 guide, points 2 and 3: `fach-reviewer` reports no Nits and a Minor starts no round (`code-reviewer` too); a settled decision is not reopened (`CLAUDE.md`, «When to ask»)
+- [x] Code review W1-1 (`docs/reviews/w1-review-1.md`): C-2, C-3, C-5, C-6 fixed; C-4 rejected (the timeout covers `tests/unit` too, where the note saw the same failures, and only changes when a hung test fails); C-1 under «Blocked on me»
+- [x] Archive, PR («pushed after this archive»; no closing round: the fixes touch only rules and docs, none of the code paths of skill `pull-request`, step 2)
+
+Files: `CLAUDE.md`, `implementation_plan.md`, `backend/CLAUDE.md`, `tests/e2e/CLAUDE.md`, `docs/design/personas/README.md`, `docs/design/tools/persona-stack.sh`, `vitest.config.ts`, `.claude/skills/{slice-review,pull-request,commit-gates}/SKILL.md`, `.claude/agents/{code-reviewer,fach-reviewer}.md`, `.claude/skills/tdd/SKILL.md`, `docs/design/arbeitsregeln.md`; review `docs/reviews/w1-review-1.md`.
+
+## Session W2: move occasion-bound rules out of `CLAUDE.md` (w1-review-1 C-1)
+
+Request: «Ja mache es» (the three blocks proposed after w1-review-1 C-1). No scenario: rules and skills only.
+
+- [x] «Open work» points 3 to 5 into a new skill `issue-work`; references in `grill-me` and `check-issues.mjs` follow
+- [x] Gotchas «One build» and «Cloud sessions» (but the scratchpad sentence) into `tests/e2e/CLAUDE.md` and `docs/design/personas/README.md`
+- [x] Workflow 5: the persona details shortened to a reference to `docs/design/personas/README.md`
+- [x] Checks: lint, rule-file tests
+- [x] Code review `docs/reviews/w1-review-2.md`: C-1 closed; C-7 (Minor) fixed (references in «When to ask» and `issue-triage`)
+- [x] Archive, push («pushed after this archive»; no closing round: the C-7 fix touches only rule text)
+
+Files: `CLAUDE.md` (22.3 → 20.4 KB), `.claude/skills/issue-work/SKILL.md` (new), `.claude/skills/grill-me/SKILL.md`, `tools/open-work/check-issues.mjs` (comment), `tests/e2e/CLAUDE.md`, `docs/design/personas/README.md`, `.claude/skills/issue-triage/SKILL.md`.

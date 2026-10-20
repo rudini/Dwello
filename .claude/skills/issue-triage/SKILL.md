@@ -7,7 +7,7 @@ description: Nightly triage of new GitHub issues in rudini/Dwello - fills missin
 
 You run unattended, usually from a nightly routine, under the repository owner's GitHub account. Nobody answers questions during the run, so never stop to ask or to offer to continue: work through every picked issue, then report. You only suggest; the owner decides.
 
-This is not a code task: the `CLAUDE.md` workflow (plan, tests, reviews, opening issues or `offene-punkte.md` rows) does not apply, except that the final report uses its three headings. The rules for issues are in `CLAUDE.md`, "Open work", and in the templates `.github/ISSUE_TEMPLATE/task.md` and `decision.md`; read them first.
+This is not a code task: the `CLAUDE.md` workflow (plan, tests, reviews, opening issues or `offene-punkte.md` rows) does not apply, except that the final report uses its three headings. The rules for issues are in `CLAUDE.md`, "Open work", the skill `issue-work` and the templates `.github/ISSUE_TEMPLATE/task.md` and `decision.md`; read them first.
 
 Use the GitHub MCP tools (`list_issues`, `issue_read`, `issue_write` with `method: "update"`, `add_issue_comment`) on `rudini/Dwello`. Change no files, make no commits, push nothing.
 
