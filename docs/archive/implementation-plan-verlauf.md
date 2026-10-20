@@ -2367,3 +2367,12 @@ Request: «Ja mache es» (the three blocks proposed after w1-review-1 C-1). No s
 - [x] Archive, push («pushed after this archive»; no closing round: the C-7 fix touches only rule text)
 
 Files: `CLAUDE.md` (22.3 → 20.4 KB), `.claude/skills/issue-work/SKILL.md` (new), `.claude/skills/grill-me/SKILL.md`, `tools/open-work/check-issues.mjs` (comment), `tests/e2e/CLAUDE.md`, `docs/design/personas/README.md`, `.claude/skills/issue-triage/SKILL.md`.
+
+## Session: a red main stops only the merges it concerns (2026-10-20)
+
+Request: narrow the CLAUDE.md rule "merging with a red check (also one red on `main`)" to the pull request's own checks and a red `main` in what it touches.
+
+- [x] `CLAUDE.md`, "When to ask": the new rule
+- [x] PR to `main`
+- No scenario: rule change only
+- Files: `CLAUDE.md`
