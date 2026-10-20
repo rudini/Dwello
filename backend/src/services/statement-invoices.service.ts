@@ -83,7 +83,14 @@ export async function statementChanges(statementId: string) {
 	const check = correctable ? await recalculation(statement) : null;
 	// not to be recalculated (e.g. the contract changed since): the hint alone says to correct, as before #454
 	const due = check ? check.changes && check.result !== statement.correctionDeclined?.result : correctable;
-	return { invoiceIds, fuelStockChanged: fuelStock, correctionDue: due, correctionDeclinable: due && !!check?.raises, result: check?.result };
+	return {
+		invoiceIds,
+		fuelStockChanged: fuelStock,
+		correctionDue: due,
+		correctionDeclinable: due && !!check?.raises,
+		correctionLowers: due && !!check?.lowers, // the page says why «Nicht berichtigen» is missing (Fachreview 454-3 V-32)
+		result: check?.result
+	};
 }
 
 /** «Nicht berichtigen» (#454, E-6): remembers the day and the result; refused unless the recalculation raises the Saldo */
@@ -91,6 +98,7 @@ export async function declineCorrection(statementId: string) {
 	const changes = await statementChanges(statementId);
 	if (!changes) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (!changes.correctionDue) throw new CodedError('STATEMENT_CORRECTION_NOT_DUE', 'No correction is due');
+	if (!changes.result) throw new CodedError('STATEMENT_CORRECTION_NOT_RECALCULABLE', 'The statement cannot be recalculated'); // V-31
 	if (!changes.correctionDeclinable)
 		throw new CodedError('STATEMENT_CORRECTION_LOWERS_BALANCE', 'The recalculation lowers the Saldo: correct the statement');
 	await db

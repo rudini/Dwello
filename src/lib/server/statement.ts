@@ -141,12 +141,14 @@ export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 		fuelStockChanged?: boolean;
 		correctionDue?: boolean;
 		correctionDeclinable?: boolean;
+		correctionLowers?: boolean;
 	} = response?.ok ? await response.json() : {};
 	return {
 		invoices: changed.invoiceIds?.length ?? 0,
 		fuelStock: !!changed.fuelStockChanged,
 		correctionDue: !!changed.correctionDue,
-		correctionDeclinable: !!changed.correctionDeclinable
+		correctionDeclinable: !!changed.correctionDeclinable,
+		correctionLowers: !!changed.correctionLowers
 	};
 }
 

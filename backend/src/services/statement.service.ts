@@ -582,7 +582,8 @@ export async function recalculation(statement: StatementWithDetails) {
 	if (!now) return null;
 	const result = JSON.stringify([now.balance, sharesOf(now.lineItems)]);
 	const changes = result !== JSON.stringify([String(Number(statement.balance)), sharesOf(statement.lineItems)]);
-	return { changes, result, raises: Number(now.balance) > Number(statement.balance) };
+	const [before, after] = [Number(statement.balance), Number(now.balance)];
+	return { changes, result, raises: after > before, lowers: after < before };
 }
 
 /**

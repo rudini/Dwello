@@ -603,14 +603,14 @@ describe('Abrechnungsdetail', () => {
 	const later = (
 		invoices: number,
 		status: 'draft' | 'sent' = 'draft',
-		more: { fuelStock?: boolean; correctionDue?: boolean; correctionDeclinable?: boolean } = {},
+		more: { fuelStock?: boolean; correctionDue?: boolean; correctionDeclinable?: boolean; correctionLowers?: boolean } = {},
 		overrides: object = {}
 	) =>
 		show(StatementPage, {
 			data: {
 				statement: statement({ status, ...overrides }),
 				reminders: [],
-				later: { invoices, fuelStock: false, correctionDue: false, correctionDeclinable: false, ...more }
+				later: { invoices, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, ...more }
 			},
 			form: null
 		} as never);
@@ -644,7 +644,11 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('bietet «Nicht berichtigen» nicht an, wenn das Berichtigen den Saldo senken würde', () => {
-		later(1, 'sent', { correctionDue: true });
+		later(1, 'sent', { correctionDue: true, correctionLowers: true });
+		// Fachreview 454-3 V-32: and says why
+		expect(laterText()).toContain(
+			'Die Neuberechnung ergibt für Anna Keller eine tiefere Nachzahlung oder eine höhere Rückerstattung. Berichtigen Sie die Abrechnung, sonst verlangen Sie mehr als die tatsächlichen Kosten.'
+		);
 		expect(laterText()).toContain('Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen»');
 		expect(byTestId('statement-decline-correction-button')).toBeNull();
 	});

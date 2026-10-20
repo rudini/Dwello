@@ -454,6 +454,40 @@ describe('Abrechnung berichtigen fällig', () => {
 			expect(((await refused.json()) as { code: string }).code).toBe('STATEMENT_CORRECTION_LOWERS_BALANCE');
 		}));
 
+	// Fachreview 454-3 V-35: a billed invoice deleted afterwards (a duplicate): the Saldo falls; V-32: the page says so
+	it('meldet, dass die Neuberechnung nach einer gelöschten Rechnung den Saldo senkt', async () => {
+		await clear();
+		const billed = await invoice({ amount: '732.00', invoiceDate: '2024-02-15' });
+		const { id } = await statement();
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, id));
+		try {
+			await db.delete(invoices).where(eq(invoices.id, billed));
+			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as {
+				correctionDue: boolean;
+				correctionDeclinable: boolean;
+				correctionLowers: boolean;
+			};
+			expect(changes).toMatchObject({ correctionDue: true, correctionDeclinable: false, correctionLowers: true });
+			expect(((await (await decline(id)).json()) as { code: string }).code).toBe('STATEMENT_CORRECTION_LOWERS_BALANCE');
+		} finally {
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, id));
+		}
+	});
+
+	// Fachreview 454-3 V-31: not to be recalculated, the refusal says so, not that the Saldo falls
+	it('verweigert «Nicht berichtigen», wenn sich die Abrechnung nicht neu berechnen lässt', () =>
+		sent(async (id) => {
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			await db.update(rentalContracts).set({ startDate: '2025-01-01', endDate: null }).where(eq(rentalContracts.id, rental.contract));
+			try {
+				const refused = await decline(id);
+				expect(refused.status).toBe(409);
+				expect(((await refused.json()) as { code: string }).code).toBe('STATEMENT_CORRECTION_NOT_RECALCULABLE');
+			} finally {
+				await db.update(rentalContracts).set({ startDate: '2024-01-01', endDate: '2024-03-31' }).where(eq(rentalContracts.id, rental.contract));
+			}
+		}));
+
 	it('erlaubt «Nicht berichtigen», wenn die Neuberechnung den Saldo erhöht', () =>
 		sent(async (id) => {
 			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
