@@ -6,6 +6,11 @@
 		"first-use": "Overview without any building, on the empty instance of the E2E stack.",
 		"filtered-empty": "A list whose search matches nothing (?search=…).",
 		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
+		"register-preview": "«Neues Gebäude» after choosing an address of the Gebäuderegister: the hints and the Wohnungen to check, some marked as missing in the register (#479).",
+		"register-submit-missing": "«Neues Gebäude» with the register's Wohnungen submitted while values the register lacks are still empty: their errors at the fields (#479).",
+		"register-no-apartments": "«Neues Gebäude» after choosing an address whose building has no Wohnungen in the register and is already entered in Dwello: both hints (#479).",
+		"register-no-hit": "«Neues Gebäude» with an address search the register finds nothing for (#479).",
+		"register-unreachable": "«Neues Gebäude» with an address search while the register cannot be reached (#479).",
 		"delete-dialog": "The delete confirmation dialog open.",
 		"advance-delete-dialog": "Contract page of a contract with a later Akonto: the dialog confirming its deletion, with the Akonto that applies again (#464).",
 		"advance-delete-refused": "The delete dialog of a later Akonto refused because a draft statement counts it: the refusal in the dialog (#464).",
@@ -157,7 +162,12 @@
 			"path": "/buildings/new",
 			"states": [
 				"default",
-				"submit-empty"
+				"submit-empty",
+				"register-preview",
+				"register-submit-missing",
+				"register-no-apartments",
+				"register-no-hit",
+				"register-unreachable"
 			]
 		},
 		{

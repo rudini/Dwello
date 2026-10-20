@@ -312,13 +312,13 @@ This is a checklist, not legal advice.
 
 ## Contributing
 
-This is a private project. For questions or issues, contact the project owner.
+Ideas and bug reports are welcome as [GitHub issues](https://github.com/rudini/Dwello/issues); how changes are made is in `CLAUDE.md` (Workflow).
 
 ---
 
 ## License
 
-Proprietary - All rights reserved
+Dwello is free software under the GNU Affero General Public License, version 3 or later (AGPL-3.0-or-later); see [LICENSE](LICENSE). If you run a modified version for other people over a network, the AGPL asks you to offer them its source code.
 
 ---
 
