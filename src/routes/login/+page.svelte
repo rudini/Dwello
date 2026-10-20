@@ -45,7 +45,7 @@
 			{/each}
 		</div>
 
-		<p class="text-center text-ink-muted">
+		<p class="text-center text-ink-muted" data-testid="login-legal">
 			{m.login_terms_before()}
 			<a
 				href="/terms"

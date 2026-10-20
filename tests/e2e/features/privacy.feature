@@ -58,13 +58,24 @@ Funktionalität: Datenschutz
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "KI"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Sprachmodell"
 
-  Szenario: Der Betreiber ist verantwortlich
-    Dann nennt die Datenschutzerklärung unter "Verantwortlich" "Muster Hosting AG, Bahnhofstrasse 1, 8001 Zürich"
+  # #458 (#330): Verantwortung geteilt, der Vermieter für die erfassten Daten, der Betreiber für Anmeldung, Protokoll und Cookies
+  Szenario: Der Vermieter ist für die erfassten Daten verantwortlich
+    Dann nennt die Datenschutzerklärung unter "Verantwortlich" "Für die Daten, die Sie in Dwello erfassen, auch die Ihrer Mieter, sind Sie als Vermieter verantwortlich."
+    Und nennt die Datenschutzerklärung unter "Verantwortlich" "Dwello wird von Muster Hosting AG, Bahnhofstrasse 1, 8001 Zürich betrieben."
     Und nennt die Datenschutzerklärung unter "Verantwortlich" "betrieb@muster-hosting.ch"
     Und erklärt die Datenschutzerklärung unter "Verantwortlich", wer der Betreiber ist
+    Und erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass ein Anbieter die erfassten Daten nur in seinem Auftrag bearbeitet und der Betreiber für Anmeldung, Protokoll des Servers und Cookies verantwortlich ist
 
   Szenario: Auskunft über die eigenen Daten
-    Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass jede Person beim Betreiber Auskunft über ihre Daten verlangen kann
+    Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass seine Mieter und andere erfasste Personen bei ihm Auskunft über ihre Daten verlangen können
+
+  # #458 (#346): Rechte über die Auskunft hinaus (Art. 28, 32, 49 DSG)
+  Szenario: Weitere Rechte der Mieter
+    Dann erfährt der Liegenschaftsverwalter unter "Verantwortlich", dass erfasste Personen bei ihm Berichtigung, Herausgabe und Löschung verlangen und eine Verletzung beim EDÖB anzeigen können
+
+  # #458 (#333): OPERATOR_SERVER_COUNTRY in playwright.config.ts
+  Szenario: Land des Servers
+    Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Die Daten liegen in der Datenbank des Betreibers dieser Dwello-Installation. Der Server steht in folgendem Land: Liechtenstein."
 
   Szenario: Wie lange Dwello Daten aufbewahrt
     Dann erfährt der Liegenschaftsverwalter unter "Aufbewahrung", dass Dwello nichts von selbst löscht und wer zur Buchführung verpflichtet ist, Geschäftsbücher und Buchungsbelege 10 Jahre aufbewahrt
@@ -80,8 +91,9 @@ Funktionalität: Datenschutz
   Szenario: Wozu das Protokoll des Servers dient
     Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass nur der Betreiber das Protokoll des Servers zur Sicherheit und Fehlersuche liest und selbst bestimmt, wie lange es aufbewahrt wird
 
-  Szenario: E-Mails über den Mailserver, den der Betreiber eingerichtet hat
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "über den Mailserver zugestellt, den der Betreiber eingerichtet hat"
+  # #458 (#333): MAIL_PROVIDER_NAME und MAIL_PROVIDER_COUNTRY in playwright.config.ts; ohne sie der Text von früher (DOM-Test)
+  Szenario: E-Mails über den Mailserver eines Anbieters
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "werden über den Mailserver von Muster Mail AG (Liechtenstein) zugestellt. Dabei erhält Muster Mail AG Name und E-Mail-Adresse des Mieters"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
 
   Szenario: Länder und Datenschutzerklärungen der Dienste, die der Browser aufruft
@@ -92,6 +104,10 @@ Funktionalität: Datenschutz
 
   Szenario: Cookies im Browser ablehnen
     Dann erfährt der Liegenschaftsverwalter unter "Cookies", dass er Cookies im Browser ablehnen kann, sich dann aber nicht anmelden kann
+
+  # #458 (#347)
+  Szenario: Stand der Datenschutzerklärung
+    Dann nennt die Seite den Stand "20. Oktober 2026"
 
   # Gebäuderegister (#479): der Server von Dwello fragt geo.admin.ch, nicht der Browser
   Szenario: Die Adresssuche fragt das Gebäuderegister des Bundes

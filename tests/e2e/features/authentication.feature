@@ -10,6 +10,12 @@ Funktionalität: Anmeldung
     Dann kann sich der Besucher mit "Google" anmelden
     Aber nicht mit "Microsoft"
 
+  # #458 (#347): wer Dwello selbst betreibt, hat keinen Vertragspartner, dem er etwas akzeptieren könnte
+  Szenario: Die Anmeldeseite verlangt keine Zustimmung zu den Nutzungsbedingungen
+    Wenn ein Besucher die Anmeldeseite öffnet
+    Dann liest der Besucher unter den Anbietern "Was Dwello leistet und wofür Sie verantwortlich sind, steht in den Nutzungsbedingungen."
+    Und liest der Besucher unter den Anbietern nicht "akzeptieren"
+
   Szenario: Ohne Anmeldung keine Daten
     Wenn ein Besucher die überfälligen Abrechnungen aufruft
     Dann ist der Besucher auf der Seite "Anmelden"

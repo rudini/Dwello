@@ -2052,6 +2052,20 @@ Design: a table of Akonto amounts per Mietvertrag with the day from which each a
 - [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
 - [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
 
+## Session W6-458: legal texts, split responsibility (2026-10-19)
+
+Branch `w6-issue-458`, worker W6 of a coordinated run (the checklist was kept in the pull request; `implementation_plan.md` keeps another worker's open session, coordinator's rule). Issue #458, closes #330 and #333.
+
+- [x] @wip scenarios in `privacy.feature`, `terms.feature`, `demo.feature`, `authentication.feature` (9251867b); all 11 seen red at the missing behaviour; 15 DOM and unit tests seen red
+- [x] fach-reviewer round 1 (`docs/reviews/458-fachreview-1.md`): R-1 to R-3 decided by the product owner as proposed; R-4 to R-10, R-13 applied; R-6 with a test seen red
+- [x] Implementation (0d847905): `src/lib/server/operator.ts` (`loadHosting`), `src/routes/privacy/+page.server.ts`, `src/routes/privacy/+page.svelte`, `src/routes/terms/+page.svelte`, `src/routes/login/+page.svelte`, `src/lib/utils/format.ts`, `messages/*.json`, `.env.example`, `docker-compose.prod.yml`, `README.md`; markers #330 and #333 removed
+- [x] PO wording R-1 to R-3 (ab6bcc58), tests seen red; E2E countries «Liechtenstein», since the language check flags German country names
+- [x] code-reviewer round 1 (`docs/reviews/458-review-1.md`: no finding)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-458.md`, `dr-weber-458.md`); Dr. Weber P-1 (deletion after retention) moved to #459
+- [x] Anchors on the privacy sections, glossary note «in der Datenschutzerklärung geplant, #411» removed on the PO's order (8807e6ae)
+- [x] fach-reviewer round 2 (`docs/reviews/458-fachreview-2.md`): links, when and how, export, Art. 9 DSG on /terms (b6006970), tests and a navigation scenario seen red
+- [x] Closing code-reviewer rounds (`docs/reviews/458-review-2.md`, after the date fix R-12 and the merge with #479 `458-review-3.md`: no finding)
+- [x] Affected E2E (chromium) green; PR `Fixes #458`, `Fixes #330`, `Fixes #333`
 ## Session W1: «Abgerechnet bis» lines, preview, wizard field, refusals (#453, #325, #480) (2026-10-19)
 
 Branch `w1-issue-453`, worker W1 of a parallel run; the checklist lived in the pull request (one session per plan, another worker's open session in `implementation_plan.md`, coordinator's consent) and comes here at the end.
