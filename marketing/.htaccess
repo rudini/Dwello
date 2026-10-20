@@ -1,9 +1,6 @@
 # Apache settings for the static marketing site (Infomaniak web hosting runs Apache)
 
-# Always HTTPS
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# HTTPS: the redirect is set in the Infomaniak Manager (a rule here looped: HTTPS ends in front of Apache)
 
 # The build tools and notes are not part of the site
 RedirectMatch 404 ^/(i18n/|README\.md)

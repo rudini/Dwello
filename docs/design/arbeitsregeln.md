@@ -2,7 +2,7 @@
 
 The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Nothing here is in use any more: the personas and how they run are in `docs/design/personas/README.md` (subagent `persona`), the checks before a push in `CLAUDE.md`, "Before marking anything complete".
 
-Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
+Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (edited only as `CLAUDE.md`, "Design-Regeln", allows).
 
 ## Where things are
 

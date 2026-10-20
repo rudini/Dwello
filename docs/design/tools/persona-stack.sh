@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# Starts the app for persona runs: fresh database dwello_persona with demo data, backend :3301, frontend :3300 (built into /tmp/persona-app)
+# Starts the app for persona runs: fresh database dwello_persona (unless --keep-db) with demo data, backend :3301, frontend :3300 (built into /tmp/persona-app)
 set -e
 cd "$(dirname "$0")/../../.."
 export JWT_SECRET=persona-secret-key-at-least-32-characters-long
 DB=postgresql://dwello:dwello@localhost:5432/dwello_persona
 for p in 3300 3301; do fuser -k $p/tcp 2>/dev/null || true; done
-su postgres -c "dropdb --if-exists dwello_persona" && su postgres -c "createdb -O dwello dwello_persona"
+# --keep-db: the servers again on the existing dwello_persona (after a container restart), the records personas saved stay
+case " $* " in *" --keep-db "*) KEEP_DB=1 ;; esac
+[ -n "$KEEP_DB" ] || { su postgres -c "dropdb --if-exists dwello_persona" && su postgres -c "createdb -O dwello dwello_persona"; }
 (cd backend && DATABASE_URL=$DB bun scripts/migrate.ts > /tmp/persona-migrate.log 2>&1)
-(cd backend && DATABASE_URL=$DB bun scripts/demo-data.ts) > /tmp/persona-demo.log 2>&1
+[ -n "$KEEP_DB" ] || (cd backend && DATABASE_URL=$DB bun scripts/demo-data.ts) > /tmp/persona-demo.log 2>&1
 # its own build directories (svelte.config.js, BUILD_DIR), so an E2E build cannot change the pages under a running persona;
 # the build gets package.json (ES modules) and a link to node_modules; --no-build serves the last one again
-[ "$1" = "--no-build" ] || BUILD_DIR=/tmp/persona-app bun run build > /tmp/persona-build.log 2>&1
+case " $* " in *" --no-build "*) ;; *) BUILD_DIR=/tmp/persona-app bun run build > /tmp/persona-build.log 2>&1 ;; esac
 [ -f /tmp/persona-app/index.js ] || { echo "no persona build in /tmp/persona-app: run without --no-build"; exit 1; }
 cp package.json /tmp/persona-app/ && ln -sfn "$PWD/node_modules" /tmp/persona-app/node_modules
 # the servers keep none of the script's output open, so a caller that pipes it gets its end when the script exits
