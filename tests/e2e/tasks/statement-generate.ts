@@ -3,6 +3,7 @@ import type { Activity } from '../screenplay/actor';
 import { Check, Click, DownloadFrom, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
 import {
+	offeredPeriodLink,
 	agreementsRetry,
 	allBuildingsCheckbox,
 	backLink,
@@ -44,6 +45,8 @@ export const openStatementWizard = throughUiOrApi(Navigate.to(WIZARD), async () 
 export const openStatementWizardFor = (buildingId: string, year: number) =>
 	Navigate.to(`${WIZARD}?building=${buildingId}&start=${year}-01-01&end=${year}-12-31`);
 
+// #199, #408 point 2: step 2's way out of a period that overlaps the building's, into the wizard with that period
+export const chooseOfferedPeriod = (buildingId: string, periodStart: string) => Click.on(offeredPeriodLink(buildingId, periodStart));
 // Steps "Abrechnungsperiode" (default period) and "Gebäude"
 // once the step has loaded what it tells about each building: later text would move the rows under the click
 // (Firefox, #424)

@@ -2191,6 +2191,25 @@ Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20:
 - [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
 - [x] PR `Fixes #488`
 
+## Session W2-199: one Abrechnungsperiode per day and building (#199, #408, #486, #487)
+
+Branch `w2-issue-199` (worker W2; reviewers started by the coordinator). Fixes #199 (decision #408 point 2, texts in https://github.com/rudini/Dwello/issues/408#issuecomment-6249569443), #408 (its last marker), #486 and #487 (product owner decisions 2026-10-19/20). The checklist was kept in the pull request description: ten parallel workers share `implementation_plan.md` (coordinator's rule).
+
+- [x] Scenarios `@wip` in `statement-generate.feature` (refused overlap, way to the existing period, short period, «Alle Gebäude») and `contract-detail.feature` (short period, days in another contract's period); red at the missing behaviour (9 of 9). The `@api` scenario «Die kurze Abrechnungsperiode rechnet eine Rechnung nur in ihrer Periode ab» pins kept behaviour.
+- [x] fach-reviewer round 1 (`docs/reviews/199-fachreview-1.md`): V-1 (product owner: a period equal to an existing one is allowed, also with overlapping old data), V-2 to V-7, V-9 (product owner's wording), V-10 fixed; M-1 → #486, V-8/V-11 → #487
+- [x] BFF, step 2, backend `statements/generate` (`STATEMENT_PERIOD_OVERLAPS`) refuse a period that overlaps a statement period of the building and equals none; ways out: the existing period, short periods for ended days with Mietstage, vacancy sentence; `*.pg.test.ts` with the domain review's example (no distribution above 100 %)
+- [x] Contract page: each part of the missing days with its way (existing period, short period), the contract's own days, no way when its own statement overlaps the period
+- [x] Unreachable «partly billed» path removed (BFF, wizard, texts, tests); V-6 texts without «ganz oder teilweise»
+- [x] Marker `TODO(fachlich prüfen, #408)` and the comments naming #199/#408 removed or repointed
+- [x] Texts in de/fr/it/en; screen state `buildings-overlap` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature` (axe and languages green)
+- [x] code-reviewer rounds 1 to 3 (`docs/reviews/199-review-1.md` to `-3.md`): C-1 to C-12 fixed (C-8 by the coordinator's decision: a replaced statement without its berichtigte Abrechnung keeps its period)
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-199.md`, `weber-199.md`): Weber P-1 = Helga P-3 → fach-reviewer round 2 (`docs/reviews/199-fachreview-2.md`, M-2) and the product owner's help text of #486 (2026-10-20); Weber P-2 = Helga P-1 (existed on `main`) → #512; P-5 fixed; P-3, P-4, P-6, Helga P-2, P-4 stay in the reports; V-3 → #521
+- [x] daten-pruefer (`docs/reviews/199-datenpruefung-1.md`): no findings
+- [x] #487: glossary rows entered as the product owner ordered
+- [x] Merge of `origin/main` (conflict in `UBIQUITOUS_LANGUAGE.md` only); closing code-reviewer round (`docs/reviews/199-review-4.md`)
+- [x] Workflow note: parallel workers share `implementation_plan.md`, the scratchpad, the E2E lock and the persona stack (`docs/reviews/workflow-notes-issue-199.md`)
+
+Files: `src/lib/accounting-period.ts`, `src/lib/server/statement-generation.ts`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{+page.server.ts,BuildingStep,BuildingChoice,OverlapWays,PreviewChecks,PreviewEmpty,StatementWizard}.svelte`, `src/routes/contracts/[id]/{+page.server.ts,MissingStatement.svelte}`, `backend/src/services/statement.service.ts`, `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, `docs/api-specification.md`, tests and E2E files.
 ## Session W9b: Akontorechnungen, «In Abrechnungen enthalten», upload bugs of #268 (2026-10-19 to 2026-10-20)
 
 Branch `w9-issue-455`. Issue #455 (points 2 to 6 of #409) with the hint texts of #222 (#245), #481, #482, #483; product owner decisions via the coordinator during the task, recorded in #455 «Decided (product owner)» (V-1, V-2, «Manuell», Verteilschlüssel; option C after domain review 455-3; the delete text of 2026-10-20). The list section of the list pages moved out first (PR #494, session W9a).
