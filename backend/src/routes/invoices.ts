@@ -20,7 +20,8 @@ import {
 	getBeleg,
 	setBeleg,
 	extractFromFile,
-	suggestion
+	suggestion,
+	latestKeys
 } from '../services/invoice.service';
 import { fileResponse } from './file-response';
 import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
@@ -120,6 +121,8 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 			cache: cacheStats
 		};
 	})
+	// The key the invoice form proposes per building and category (#379)
+	.get('/latest-keys', () => latestKeys())
 	// Get Swiss utility cost rules
 	.get('/utility-rules', async () => {
 		return getUtilityCostRules();

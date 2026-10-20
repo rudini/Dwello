@@ -32,6 +32,7 @@ import {
 } from '../questions/invoice-upload';
 import {
 	chooseCategory,
+	chooseKey,
 	chooseForCreating,
 	escapeFromCategory,
 	openUploadDialog,
@@ -149,6 +150,13 @@ When(
 	}
 );
 
+When(
+	'der Liegenschaftsverwalter bei der Datei von {string} den Verteilschlüssel {string} wählt',
+	async ({ verwalter, names }, supplier: string, key: string) => {
+		await verwalter.attemptsTo(chooseKey(names.get(supplier)!, key));
+	}
+);
+
 When('der Liegenschaftsverwalter die Rechnung löschen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(startDeletingInvoice);
 });
@@ -197,11 +205,6 @@ Then('sagt die Datei von {string} {string}', async ({ verwalter, names }, suppli
 Then('sagt die Datei von {string} nicht {string}', async ({ verwalter, names }, supplier: string, text: string) => {
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toBeNull();
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toContain(text);
-});
-
-// after the anchor (what Dwello offers to create): the row has nothing left to say
-Then('sagt die Datei von {string} nichts mehr', async ({ verwalter, names }, supplier: string) => {
-	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).toBeNull();
 });
 
 Then('ist die Datei von {string} nicht zum Erstellen ausgewählt', async ({ verwalter, names }, supplier: string) => {

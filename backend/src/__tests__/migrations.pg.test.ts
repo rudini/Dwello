@@ -39,12 +39,12 @@ afterAll(async () => {
 // The categories whose description 0021 completes (#204, #220); every KI prompt lists the descriptions
 const described = `'Heating', 'Garden Maintenance', 'Waste Disposal', 'TV/Cable', 'Building Insurance', 'Administration'`;
 
-/** A database with every migration except 0021_category_descriptions.sql */
-async function withoutDescriptions() {
+/** A database with every migration except the given one (by default 0021_category_descriptions.sql) */
+async function withoutDescriptions(migration = '0021_category_descriptions.sql') {
 	const name = await database();
 	const before = await mkdtemp(join(tmpdir(), 'dwello-migrations-'));
 	try {
-		await cp(migrations, before, { recursive: true, filter: (file) => !file.endsWith('0021_category_descriptions.sql') });
+		await cp(migrations, before, { recursive: true, filter: (file) => !file.endsWith(migration) });
 		await migrate(`${server}/${name}`, before);
 	} finally {
 		await rm(before, { recursive: true });
@@ -90,13 +90,40 @@ describe('Migrationen anwenden', () => {
 		expect(await query(name, `SELECT name, description FROM categories WHERE name IN (${described}) ORDER BY sort_order`)).toEqual([
 			{ name: 'Heating', description: 'Brennstoff, Energie, Wartung und Betrieb der Heizung, auch Versicherung nur der Heizungsanlage und Verwaltungsarbeit für den Heizbetrieb; ohne Reparatur, Erneuerung, Verzinsung und Abschreibung der Anlage' },
 			{ name: 'Garden Maintenance', description: 'Laufende Pflege von Garten und Umgebung: Rasenmähen, Rückschnitt von Sträuchern, Laub- und Unkrautentfernung; ohne Neubepflanzung, Baumfällung, Rasensanierung und Anschaffung von Geräten' },
+			// 0029 ran before 0021 here and found its seeded text not yet
 			{ name: 'Waste Disposal', description: 'Kehrichtgebühren und Grünabfuhr; ohne Räumungen, die der Vermieter bestellt' },
 			{ name: 'TV/Cable', description: 'Laufende Grundgebühr des Kabelnetzes; ohne Installation des Anschlusses' },
 			{ name: 'Building Insurance', description: 'Prämien der Gebäudeversicherung; ohne Prämien, die nur die Heizungsanlage versichern (gehören zur Heizung)' },
 			{ name: 'Administration', description: 'Allgemeine Verwaltungskosten; ohne Verwaltungsarbeit für den Heizbetrieb, z. B. Brennstoff bestellen (gehört zur Heizung), und ohne Verwaltungspauschale' }
 		]);
+		// #452 point 5 (#399), 0029
 		expect(await query(name, `SELECT description FROM categories WHERE name = 'Elevator'`)).toEqual([
-			{ description: 'Strom, Notruftelefon und reine Wartung des Lifts; ohne Reparaturen, Ersatzteile und Serviceabos mit Reparaturen' }
+			{ description: 'Strom, Notruftelefon und Wartung des Lifts, bei einem Vollservicevertrag nur der Anteil der Wartung; ohne Reparaturen und Ersatzteile' }
+		]);
+	});
+
+	// #452 points 5 (#399) and 6 (#220)
+	it('nennt beim Lift den Anteil eines Vollservicevertrags und nimmt beim Kehricht wertabhängige Grundgebühren aus', async () => {
+		const name = await withoutDescriptions('0029_lift_waste_descriptions.sql');
+
+		await migrate(`${server}/${name}`, migrations);
+
+		expect(await query(name, `SELECT name, description FROM categories WHERE name IN ('Elevator', 'Waste Disposal') ORDER BY name`)).toEqual([
+			{ name: 'Elevator', description: 'Strom, Notruftelefon und Wartung des Lifts, bei einem Vollservicevertrag nur der Anteil der Wartung; ohne Reparaturen und Ersatzteile' },
+			{ name: 'Waste Disposal', description: 'Kehrichtgebühren nach Gebrauch und Grünabfuhr; ohne Grümpelräumungen, die der Vermieter bestellt, und Grundgebühren, die vom Wert der Liegenschaft abhängen' }
+		]);
+	});
+
+	// #452 points 5 and 6: only the seeded texts change
+	it('lässt die Beschreibungen von Lift und Kehricht, die der Vermieter geändert hat, wie sie sind', async () => {
+		const name = await withoutDescriptions('0029_lift_waste_descriptions.sql');
+		await query(name, `UPDATE categories SET description = 'Eigener Text ' || name WHERE name IN ('Elevator', 'Waste Disposal')`);
+
+		await migrate(`${server}/${name}`, migrations);
+
+		expect(await query(name, `SELECT name, description FROM categories WHERE name IN ('Elevator', 'Waste Disposal') ORDER BY name`)).toEqual([
+			{ name: 'Elevator', description: 'Eigener Text Elevator' },
+			{ name: 'Waste Disposal', description: 'Eigener Text Waste Disposal' }
 		]);
 	});
 

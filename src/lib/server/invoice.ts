@@ -3,6 +3,7 @@ import { ValidationError } from './error-handler';
 import type { BilledStatement, InvoiceWithDetails } from '$lib/types';
 import { toCategory } from './category';
 import { toDistributionKey } from './distribution-key';
+import type { LatestKey } from '$lib/invoice';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -40,10 +41,14 @@ export async function invoiceChoices(fetch: typeof globalThis.fetch) {
 		fetch(`${BACKEND_URL}/api/v1/${path}`)
 			.then((response) => (response.ok ? response.json() : {}))
 			.catch(() => ({}));
-	const [categories, keys, defaultKey] = await Promise.all([
+	const [categories, keys, defaultKey, latestKeys] = await Promise.all([
 		get('categories?limit=100'),
 		get('distribution-keys?limit=100'),
-		get('config/default_distribution_key_id')
+		get('config/default_distribution_key_id'),
+		// the key each category last had in each building, which the form proposes (#379)
+		fetch(`${BACKEND_URL}/api/v1/invoices/latest-keys`)
+			.then((response) => (response.ok ? response.json() : []))
+			.catch(() => []) as Promise<LatestKey[]>
 	]);
 	return {
 		categories: (categories.categories || categories.data || []).map(localCategory),
@@ -51,7 +56,8 @@ export async function invoiceChoices(fetch: typeof globalThis.fetch) {
 			...toDistributionKey(d),
 			name: localName(d as MasterData)
 		})),
-		defaultDistributionKeyId: defaultKey.value ?? ''
+		defaultDistributionKeyId: defaultKey.value ?? '',
+		latestKeys
 	};
 }
 

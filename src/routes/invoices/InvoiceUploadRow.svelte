@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { proposeKey, selectionHelp, type UploadRow } from '$lib/invoice-upload';
+	import { selectionHelp, type UploadRow } from '$lib/invoice-upload';
+	import type { KeyProposal } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -16,8 +17,8 @@
 		errors,
 		categories,
 		distributionKeys,
+		keyProposal,
 		tank,
-		keyFor,
 		onretry,
 		onremove
 	}: {
@@ -26,20 +27,11 @@
 		errors: Record<string, string>;
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
+		keyProposal: KeyProposal;
 		tank?: string;
-		keyFor: (categoryId: string) => Promise<string | null>; // the key of the building's invoices of a Kategorie
 		onretry: () => void;
 		onremove: () => void;
 	} = $props();
-
-	// a Kategorie, from the KI or chosen, brings the key of the building's invoices in it (#455)
-	$effect(() => {
-		const categoryId = row.values.categoryId;
-		if (!categoryId) return;
-		void keyFor(categoryId).then((key) => {
-			if (row.values.categoryId === categoryId) row = proposeKey(row, key);
-		});
-	});
 
 	let open = $state(false);
 	// every control of the row names its file and its status to a screen reader
@@ -99,6 +91,6 @@
 	</div>
 
 	{#if open && editable && !row.several}
-		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} {tank} />
+		<UploadRowFields bind:row {preview} {errors} {categories} {distributionKeys} {keyProposal} {tank} />
 	{/if}
 </li>

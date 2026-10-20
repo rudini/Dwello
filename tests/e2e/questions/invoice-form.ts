@@ -5,6 +5,8 @@ import {
 	categoryWarning,
 	invoiceDateInput,
 	invoiceDateWords,
+	keyHelp,
+	keySelect,
 	periodWarning,
 	servicePeriodHelp,
 	utilityCostCheckbox,
@@ -23,3 +25,5 @@ export const dateOutsidePeriodWarnings = Count.of(periodWarning);
 export const utilityCostHelpText = Text.of(utilityCostHelp);
 export const servicePeriodHelpText = Text.of(servicePeriodHelp);
 export const categoryLabelText = Text.of(categoryLabel);
+export const chosenKey = Value.chosenIn(keySelect);
+export const keyHelpText = Text.of(keyHelp);

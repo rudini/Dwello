@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
-import { invoicedBuilding } from './helpers/records';
+import { invoicedBuilding, perAreaKey } from './helpers/records';
 
 type Named = { name: string; nameDE: string };
 type Invoice = { id: string; buildingId: string; category: Named; distributionKey: Named; llmCategory: Named };
@@ -54,7 +54,8 @@ describe('Rechnungen', () => {
 			invoiceDate: '2025-06-30',
 			categoryId: existing.categoryId,
 			llmCategoryId: existing.categoryId,
-			llmConfidence: '0.92'
+			llmConfidence: '0.92',
+			distributionKeyId: await perAreaKey()
 		});
 
 		expect(response.status).toBe(201);

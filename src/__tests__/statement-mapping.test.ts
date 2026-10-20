@@ -159,14 +159,15 @@ describe('Abrechnung laden', () => {
 		});
 	});
 
-	// Ohne Verteilschlüssel verteilt die Berechnung gleichmässig auf die Wohnungen
-	it('nennt eine Position ohne Verteilschlüssel gleichmässig verteilt', async () => {
+	// Ohne Verteilschlüssel verteilt die Berechnung gleichmässig auf die Wohnungen: wie «Pro Einheit», das auch das PDF
+	// nennt (Fachreview 452-1 V-7)
+	it('nennt eine Position ohne Verteilschlüssel «Pro Einheit»', async () => {
 		const [line] = backendStatement.lineItems;
 		const { lineItems } = await loadStatement(
 			backend([{ ...line, distributionKeyId: null }]),
 			's1'
 		);
 
-		expect(lineItems[0].distributionKeyName).toBe('Gleichmässig pro Wohnung');
+		expect(lineItems[0].distributionKeyName).toBe('Pro Einheit');
 	});
 });

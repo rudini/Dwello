@@ -6,7 +6,6 @@ import {
 	newRow,
 	openReason,
 	selectionHelp,
-	proposeKey,
 	toDoOf,
 	withoutKi,
 	withProposal,
@@ -266,24 +265,6 @@ describe('Vorschlag der KI für eine Datei', () => {
 	it('nennt als Grund einer offenen Datei ihre erste Aufgabe', () => {
 		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, deductedAmount: null, categorization: null }));
 		expect(openReason(row)).toBe('Wählen Sie eine Kategorie.');
-	});
-});
-
-// #455 (#268): the key of the building's invoices of the Kategorie, as long as the property manager has not chosen one
-describe('Verteilschlüssel einer Datei', () => {
-	it('schlägt den Verteilschlüssel der Rechnungen derselben Kategorie vor', () => {
-		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null }));
-		expect(proposeKey(row, 'k2').values.distributionKeyId).toBe('k2');
-		// none recorded in the Kategorie: the key stays
-		expect(proposeKey(row, null).values.distributionKeyId).toBe('k1');
-	});
-
-	it('lässt einen Verteilschlüssel, den der Liegenschaftsverwalter selbst gewählt hat', () => {
-		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null }));
-		const chosen = { ...row, values: { ...row.values, distributionKeyId: 'k3' } };
-		expect(proposeKey(chosen, 'k2').values.distributionKeyId).toBe('k3');
-		// a key proposed before is no choice of his: the next Kategorie proposes its own
-		expect(proposeKey(proposeKey(row, 'k2'), 'k4').values.distributionKeyId).toBe('k4');
 	});
 });
 

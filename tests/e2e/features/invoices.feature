@@ -55,7 +55,9 @@ Funktionalität: Rechnungsliste
     Dann erinnert Dwello daran, die Originalrechnungen aufzubewahren
     Und schlägt die KI für die Rechnung von "Elektro Blitz" den Betrag "1250.00", die Rechnungsnummer "R-1001" und die Kategorie "Allgemeinstrom" vor
     Und ist bei der Rechnung von "Elektro Blitz" das Rechnungsdatum als unsicher markiert
-    Wenn der Liegenschaftsverwalter die Rechnungen erstellt
+    Wenn der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" wählt
+    Und der Liegenschaftsverwalter bei der Datei von "Gartenbau Grün" den Verteilschlüssel "Pro Fläche (m²)" wählt
+    Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "2 Rechnungen erstellt"
     Und verlinkt Dwello die erstellte Rechnung von "Elektro Blitz" vom "31.03.2026"
     Wenn der Liegenschaftsverwalter die Rechnungen nach dem Gebäude "Seeblick" filtert
@@ -71,7 +73,8 @@ Funktionalität: Rechnungsliste
   Szenario: Eine Datei, die weder PDF noch Bild ist, blockiert die anderen nicht
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" und die Word-Datei "notizen.docx" hochlädt
     Dann sagt die Datei "notizen.docx" "Dwello nimmt nur PDF-, JPG- und PNG-Dateien an. Speichern Sie die Datei als PDF und wählen Sie sie erneut."
-    Wenn der Liegenschaftsverwalter die Rechnungen erstellt
+    Wenn der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" wählt
+    Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "1 Rechnung erstellt"
 
   # #245: eine abgelehnte Datei zählt nicht als gelesen (Fachreview 233-2 V-10)
@@ -96,8 +99,9 @@ Funktionalität: Rechnungsliste
     Dann sagt die Datei von "Elektro Blitz" "Wählen Sie eine Kategorie."
     Und sagt die Datei von "Elektro Blitz" nicht "Die KI hat diese Datei nicht gelesen"
     Wenn der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" die Kategorie "Allgemeinstrom" wählt
+    Dann sagt die Datei von "Elektro Blitz" nicht "Wählen Sie eine Kategorie."
+    Wenn der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" wählt
     Dann bietet Dwello "1 Rechnung erstellen" an
-    Und sagt die Datei von "Elektro Blitz" nichts mehr
     Wenn der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "1 Rechnung erstellt"
 
@@ -135,6 +139,7 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter die Datei von "Werke Akontorechnung" zum Erstellen auswählt
     Dann sagt die Datei von "Werke Akontorechnung" "Wählen Sie eine Kategorie."
     Wenn der Liegenschaftsverwalter bei der Datei von "Werke Akontorechnung" die Kategorie "Allgemeinstrom" wählt
+    Und der Liegenschaftsverwalter bei der Datei von "Werke Akontorechnung" den Verteilschlüssel "Pro Fläche (m²)" wählt
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "1 Rechnung erstellt"
 
@@ -175,6 +180,7 @@ Funktionalität: Rechnungsliste
   Szenario: Das Erstellen scheitert
     Angenommen das Erstellen von Rechnungen ist gestört
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
+    Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" wählt
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt die Datei von "Elektro Blitz" "Die Rechnung wurde nicht erstellt, weil Dwello nicht geantwortet hat. Versuchen Sie es noch einmal."
 
@@ -187,6 +193,7 @@ Funktionalität: Rechnungsliste
   # #245: «Noch offen» nennt den Grund; nach dem Erstellen verwirft der Knopf nur die übrigen Dateien
   Szenario: Nur vollständige Rechnungen werden gezählt und erstellt
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnungen von "Elektro Blitz" und "Werke Schlussrechnung" hochlädt
+    Und der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" wählt
     Dann sagt die Datei von "Werke Schlussrechnung" "Wählen Sie eine Kategorie."
     Und bietet Dwello "1 Rechnung erstellen (1 unvollständig)" an
     Wenn der Liegenschaftsverwalter die Rechnungen erstellt
@@ -203,6 +210,7 @@ Funktionalität: Rechnungsliste
   Szenario: Der Hinweis auf abgezogene Akontorechnungen bleibt bei der Rechnung
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
     Und der Liegenschaftsverwalter bei der Datei von "Werke Schlussrechnung" die Kategorie "Allgemeinstrom" wählt
+    Und der Liegenschaftsverwalter bei der Datei von "Werke Schlussrechnung" den Verteilschlüssel "Pro Fläche (m²)" wählt
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Und der Liegenschaftsverwalter die Rechnung von "Werke Schlussrechnung" ansieht
     Dann steht beim Betrag der Rechnung "Auf dem Beleg sind Akontorechnungen von CHF 1’000.00 abgezogen. Der Betrag ist das Total vor dem Abzug."
@@ -222,5 +230,6 @@ Funktionalität: Rechnungsliste
   # #455 (#268): die Rechnungen derselben Kategorie im Gebäude geben den Verteilschlüssel vor, nicht ein leerer Standard
   Szenario: Der Verteilschlüssel der Rechnungen derselben Kategorie wird vorgeschlagen
     Angenommen "EW Winterthur" stellt dem Gebäude "Seeblick" "300.00" Franken für "Allgemeinstrom Q4" in der Kategorie "Allgemeinstrom" in Rechnung
+    Und der Liegenschaftsverwalter ist auf der Rechnungsliste
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Dann schlägt Dwello bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" vor

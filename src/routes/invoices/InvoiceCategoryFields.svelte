@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
+	import { proposedKey, type LatestKey } from '$lib/invoice';
 	import type { Category } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
@@ -18,7 +19,13 @@
 		after,
 		idPrefix = '',
 		categoryRequired = false,
-		categoryError
+		categoryError,
+		buildingId,
+		latestKeys = [],
+		defaultKeyId = '',
+		keyChosen = $bindable(),
+		keyError,
+		keyNote
 	}: {
 		categoryId: string;
 		distributionKeyId: string;
@@ -29,7 +36,22 @@
 		idPrefix?: string; // several invoices on one page (the upload dialog) need their own ids
 		categoryRequired?: boolean; // the upload dialog creates no invoice without a Kategorie (#217)
 		categoryError?: string;
+		buildingId: string;
+		latestKeys?: LatestKey[];
+		defaultKeyId?: string; // the settings' Standard-Verteilschlüssel
+		keyChosen?: boolean; // the key the form starts with is the Liegenschaftsverwalter's, e.g. a stored one
+		keyError?: string;
+		keyNote?: { text: string; testid: string };
 	} = $props();
+
+	// #379: Dwello proposes the key of the latest invoice of the category in the building, else the settings', until
+	// the Liegenschaftsverwalter chooses one himself
+	$effect(() => {
+		const proposal = proposedKey(latestKeys, buildingId, categoryId, defaultKeyId);
+		untrack(() => {
+			if (!keyChosen) distributionKeyId = proposal; // also none: a proposal of the category before does not stay
+		});
+	});
 
 	const selectedCategory = $derived(categories.find((c) => c.id === categoryId));
 	const nonAllocable = $derived(selectedCategory?.isAllowedUtilityCost === false);
@@ -87,9 +109,11 @@
 	label={m.glossary_key_term()}
 	help={m.invoices_key_help()}
 	placeholder={m.invoices_choose_key()}
-	optional
 	options={distributionKeys.map((key) => ({ value: key.id, label: key.name }))}
 	bind:value={distributionKeyId}
+	onchange={() => (keyChosen = true)}
+	error={keyError}
+	note={keyNote}
 	testid="invoice-distribution-key-select"
 />
 

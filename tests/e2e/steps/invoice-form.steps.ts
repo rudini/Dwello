@@ -4,11 +4,13 @@ import { thisYear } from '../fixtures/dates';
 import {
 	billedWarningText,
 	categoryLabelText,
+	chosenKey,
 	dateOutsidePeriodWarning,
 	dateOutsidePeriodWarnings,
 	invoiceDate,
 	invoiceDateInWords,
 	invoiceDateShown,
+	keyHelpText,
 	markedAsUtilityCost,
 	nonAllocableCategoryWarning,
 	servicePeriodHelpText,
@@ -20,6 +22,8 @@ import {
 	chooseBuilding,
 	chooseCategory,
 	clearCategory,
+	chooseCategoryIn,
+	chooseKey,
 	clearSupplier,
 	correctAmount,
 	correctInvoiceNumber,
@@ -29,7 +33,9 @@ import {
 	overrideCategory,
 	recategorize,
 	registerInvoice,
+	registerInvoiceWithoutKey,
 	saveInvoice,
+	saveWithoutKey,
 	typeInvoiceDate
 } from '../tasks/invoice-form';
 import { searchInvoices } from '../tasks/invoices';
@@ -183,6 +189,42 @@ Then(
 // the form names the field without «(optional)»: the Kategorie is required (#245, Helga P-5 of #233)
 Then('ist die Kategorie im Formular keine freiwillige Angabe', async ({ verwalter }) => {
 	await verwalter.sees(categoryLabelText).toBe('Kategorie');
+});
+
+Given('die Rechnung von {string} wird nach dem Verteilschlüssel {string} verteilt', async ({ seed }, supplier: string, key: string) => {
+	await seed.invoiceKey(supplier, key);
+});
+
+When(
+	'der Liegenschaftsverwalter im Gebäude {string} die Kategorie {string} wählt',
+	async ({ verwalter, seed }, building: string, category: string) => {
+		await verwalter.attemptsTo(chooseCategoryIn(seed.idOf(building)!, category));
+	}
+);
+
+When('der Liegenschaftsverwalter den Verteilschlüssel {string} wählt', async ({ verwalter }, key: string) => {
+	await verwalter.attemptsTo(chooseKey(key));
+});
+
+When(
+	'der Liegenschaftsverwalter die Rechnung von {string} über {string} Franken für {string} im Gebäude {string} in der Kategorie {string} ohne Verteilschlüssel erfasst',
+	async ({ verwalter, seed }, supplier: string, amount: string, description: string, building: string, category: string) => {
+		await verwalter.attemptsTo(
+			registerInvoiceWithoutKey({ buildingId: seed.idOf(building)!, supplier: seed.unique(supplier), amount, description, category })
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter die Rechnung ohne Verteilschlüssel speichert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(saveWithoutKey);
+});
+
+Then('ist im Rechnungsformular der Verteilschlüssel {string} gewählt', async ({ verwalter }, key: string) => {
+	await verwalter.sees(chosenKey).toBe(key);
+});
+
+Then('erklärt das Formular beim Verteilschlüssel {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(keyHelpText).toContain(text);
 });
 
 Then('erklärt das Formular beim Leistungszeitraum nicht {string}', async ({ verwalter }, text: string) => {

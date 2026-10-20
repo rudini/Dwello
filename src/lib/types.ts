@@ -1,3 +1,4 @@
+import type { LatestKey } from './invoice';
 // ============================================================================
 // Core Entity Types - Match backend schema (camelCase)
 // ============================================================================
@@ -250,6 +251,7 @@ export interface InvoicesListData {
 	years: string[]; // Rechnungsdatum years offered in the filter
 	distributionKeys: { id: string; name: string }[]; // offered for the invoices of «Rechnungen hochladen»
 	defaultDistributionKeyId: string; // preselected there, as set in the settings
+	latestKeys: LatestKey[]; // proposed there (#379)
 }
 
 // Heating Profile types

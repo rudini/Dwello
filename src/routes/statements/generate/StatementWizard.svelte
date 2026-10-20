@@ -177,6 +177,8 @@
 
 	function previewErrors(): Record<string, string> {
 		if (previewRows.length === 0) return { preview: NOTHING };
+		if (invoices.some((row) => row.uncategorized?.length))
+			return { uncategorized: m.statements_uncategorized_error() };
 		return confirmationNeeded && !confirmed ? { confirm: CONFIRM } : {};
 	}
 

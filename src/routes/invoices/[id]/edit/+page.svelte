@@ -5,7 +5,7 @@
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
-	import { deliversToTank, plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
+	import { deliversToTank, plainAmount, servicePeriodOf, validateInvoice, type LatestKey } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
 	import type { BilledStatement, Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -29,9 +29,12 @@
 			buildings: { id: string; name: string; address: string }[];
 			categories: Category[];
 			distributionKeys: DistributionKeyRow[];
+			latestKeys: LatestKey[];
+			defaultDistributionKeyId: string;
 			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice
 			missedIn?: { start: string; end: string }[]; // periods with statements made before it was recorded
 			statements?: BilledStatement[]; // the statements it is in, with number and status (#245)
+			returnTo?: string | null; // opened from the statement wizard (Persona Dr. Weber P-2, #452)
 			tanks?: Record<string, string>; // per building the category of its tank (#451, M-1)
 		};
 	} = $props();
@@ -54,6 +57,11 @@
 		isValidUtilityCost: data.invoice.isValidUtilityCost
 	}));
 	const invoice = $derived(data.invoice);
+	const back = $derived(data.returnTo ?? `/invoices/${invoice.id}`);
+	// Fachreview 452-1 V-5: recorded before the key was required; a corrected statement shares it by the new one
+	const keyNote = initial.distributionKeyId
+		? undefined
+		: { text: m.invoices_key_missing_note(), testid: 'invoice-key-missing-note' };
 	let values = $state({ ...initial });
 	let overrideReason = $state('');
 	let errors = $state<Record<string, string>>({});
@@ -102,7 +110,7 @@
 			return;
 		}
 		addToast('success', m.invoices_saved({ name: values.billingEntity.trim() }));
-		goto(`/invoices/${invoice.id}`);
+		goto(back);
 	}
 </script>
 
@@ -165,6 +173,12 @@
 			distributionKeys={data.distributionKeys}
 			categoryRequired
 			categoryError={errors.category}
+			buildingId={values.buildingId}
+			latestKeys={data.latestKeys}
+			defaultKeyId={data.defaultDistributionKeyId}
+			keyChosen={!!initial.distributionKeyId}
+			keyError={errors.distributionKeyId}
+			{keyNote}
 		>
 			{#snippet after()}
 				{#if needsReason}
@@ -191,7 +205,7 @@
 	<div class="flex flex-col gap-4">
 		<p class="text-ink-muted" role="status">{changed ? m.invoices_unsaved() : ''}</p>
 		<InvoiceFormActions
-			cancelHref="/invoices/{invoice.id}"
+			cancelHref={back}
 			label={m.buildings_save_changes()}
 			busyLabel={m.ui_saving()}
 			busy={saving}

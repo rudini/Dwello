@@ -64,9 +64,9 @@ export type UploadRow = {
 	byHand: boolean; // the KI read nothing: every field is filled in by hand
 	notRead?: boolean; // the KI was not available for this file (#245: said until the required fields are filled)
 	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
-	proposedKey: string; // the Verteilschlüssel Dwello set: another one the property manager chose himself (#455)
 	selected: boolean;
 	createError?: string; // why the invoice was not created
+	keyChosen?: boolean; // the property manager chose the Verteilschlüssel: Dwello proposes none any more (#379)
 };
 
 // The kinds of file Dwello keeps, told by their first bytes, as the backend checks them
@@ -116,18 +116,8 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	deducted: null,
 	byHand: false,
 	hints: { deductedAmount: null, nonAllocableItems: false },
-	proposedKey: defaults.distributionKeyId,
 	selected: true
 });
-
-/**
- * The row with the Verteilschlüssel of the building's invoices of its Kategorie (#455, #268), unless there is none or
- * the property manager chose another key himself
- */
-export function proposeKey(row: UploadRow, key: string | null): UploadRow {
-	if (!key || key === row.values.distributionKeyId || row.values.distributionKeyId !== row.proposedKey) return row;
-	return { ...row, values: { ...row.values, distributionKeyId: key }, proposedKey: key };
-}
 
 // The fields the property manager checks, with their labels, in the order of the form (#245, persona Helga of #233)
 const FIELD_LABELS: [string, () => string][] = [
@@ -173,6 +163,7 @@ export function toDoOf(row: UploadRow): string[] {
 		row.notRead && required.length > 0 && m.invoices_upload_not_read(),
 		mixed && m.invoices_upload_mixed(),
 		!row.values.categoryId && m.invoices_upload_category_missing(),
+		!row.values.distributionKeyId && m.invoices_error_key_required(), // #379
 		required.length > 0 && m.invoices_upload_fill_in({ fields: named(required) }),
 		row.unsure.length > 0 && m.invoices_upload_check_these({ fields: named(row.unsure) }),
 		optional.length > 0 && m.invoices_upload_add_if_shown({ fields: named(optional) })

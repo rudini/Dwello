@@ -60,6 +60,7 @@
 		categories={data.categories}
 		distributionKeys={data.distributionKeys}
 		defaultDistributionKeyId={data.defaultDistributionKeyId}
+		latestKeys={data.latestKeys}
 		oncreated={(list) => {
 			created = list;
 			invalidateAll();

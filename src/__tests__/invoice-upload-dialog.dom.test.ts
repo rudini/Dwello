@@ -12,7 +12,6 @@ import InvoiceUploadDialog from '../routes/invoices/InvoiceUploadDialog.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { reactiveProps } from './helpers/reactive-props.svelte';
 import extraction from '../../tests/contracts/invoice-extraction.json';
-import listed from '../../tests/contracts/invoice-list.json';
 import unreadable from '../../tests/contracts/invoice-extraction-unreadable.json';
 
 const buildings = [
@@ -52,6 +51,74 @@ async function upload(...files: File[]) {
 const chooseBuilding = () =>
 	fireEvent(byTestId<HTMLSelectElement>('invoice-upload-building-select')!, 'change', 'b1');
 const rowText = () => allByTestId('invoice-upload-row').map((row) => row.textContent?.replace(/\s+/g, ' '));
+
+// #452 Punkt 7 (#379): auch eine hochgeladene Rechnung bekommt den Verteilschlüssel ihrer Kategorie im Gebäude
+describe('Verteilschlüssel beim Hochladen', () => {
+	const openWith = (defaultDistributionKeyId: string) => {
+		const calls = fakeBff((call) => (call.path === '/invoices' ? [201, { id: 'i9' }] : [200, read]));
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [
+				{ id: 'k1', name: 'Nach Fläche' },
+				{ id: 'k2', name: 'Pro Zimmer' }
+			],
+			defaultDistributionKeyId,
+			latestKeys: [{ buildingId: 'b1', categoryId: 'c1', distributionKeyId: 'k2' }],
+			oncreated: vi.fn()
+		});
+		return calls;
+	};
+	const sentKey = (calls: ReturnType<typeof fakeBff>) =>
+		JSON.parse(String((calls.find((call) => call.path === '/invoices')!.body as FormData).get('invoice'))).distributionKeyId;
+
+	// Code-Review 452-1 C-1: the row of the KI's invoice stays folded, as usual
+	it('schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor, auch zugeklappt', async () => {
+		const calls = openWith('k1');
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+
+		click('invoice-upload-create-button');
+		await settle();
+
+		expect(sentKey(calls)).toBe('k2');
+	});
+
+	// Code-Review 452-1 C-2: folding and unfolding the row keeps the landlord's own choice
+	it('behält einen selbst gewählten Verteilschlüssel nach dem Zu- und Aufklappen', async () => {
+		openWith('k1');
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!, 'change', 'k1');
+		click('invoice-upload-row-toggle');
+		click('invoice-upload-row-toggle');
+
+		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k1');
+	});
+
+	it('erstellt keine Rechnung ohne Verteilschlüssel und sagt warum', async () => {
+		fakeBff(() => [200, { ...read, categorization: null }]);
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [{ id: 'k1', name: 'Nach Fläche' }],
+			defaultDistributionKeyId: '',
+			latestKeys: [],
+			oncreated: vi.fn()
+		});
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		await settle();
+
+		expect(byTestId('invoice-upload-row-message')!.textContent).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+		expect(byTestId('invoice-upload-create-button')!.textContent?.trim()).toBe('0 Rechnungen erstellen (1 unvollständig)');
+	});
+});
 
 describe('Rechnungen hochladen', () => {
 	it('nimmt Dateien erst, wenn das Gebäude gewählt ist, und erinnert an die Originalrechnung', () => {
@@ -449,33 +516,6 @@ describe('Rechnungen hochladen', () => {
 		await settle();
 		expect(byTestId('invoice-upload-discard-message')).toBeNull();
 		expect(byTestId('invoice-upload-row')).not.toBeNull();
-	});
-
-	// #455 (#268): the building's invoices of the Kategorie are distributed by another key than the default one
-	it('schlägt den Verteilschlüssel der Rechnungen derselben Kategorie im Gebäude vor', async () => {
-		const calls = fakeBff((call) =>
-			call.path.startsWith('/invoices?')
-				? [200, { ...listed, invoices: [{ ...listed.invoices[0], distributionKeyId: null }, { ...listed.invoices[0], distributionKeyId: 'k2' }] }]
-				: [200, read]
-		);
-		show(InvoiceUploadDialog, {
-			open: true,
-			buildings,
-			categories: categories as never,
-			distributionKeys: [
-				{ id: 'k1', name: 'Nach Fläche' },
-				{ id: 'k2', name: 'Pro Wohnung' }
-			],
-			defaultDistributionKeyId: 'k1',
-			oncreated: vi.fn()
-		});
-		chooseBuilding();
-		await upload(pdf('blitz.pdf'));
-		await settle();
-		// the newest one without a key does not hide the key of the one before (domain review 455 V-15)
-		expect(calls.map((call) => call.path)).toContain('/invoices?buildingId=b1&categoryId=c1&limit=20');
-		click('invoice-upload-row-toggle');
-		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k2');
 	});
 
 	it('fragt vor dem Abbrechen, dass die Dateien verloren gehen', async () => {
