@@ -110,6 +110,16 @@ describe('Wohnung bearbeiten', () => {
 	const open = (status = 'vacant') =>
 		show(EditApartmentPage, { data: { apartment: apartment(status) }, form: null } as never);
 
+	// a Wohnung taken from the Gebäuderegister can lie outside the usual choices (#479, fach-review V-16)
+	it('behält Zimmeranzahl und Stockwerk ausserhalb der üblichen Auswahl', () => {
+		show(EditApartmentPage, {
+			data: { apartment: { ...apartment(), floor: 9, rooms: '7.5' } },
+			form: null
+		} as never);
+		expect(byTestId<HTMLSelectElement>('apartment-rooms-select')!.value).toBe('7.5');
+		expect(byTestId<HTMLSelectElement>('apartment-floor-select')!.value).toBe('9');
+	});
+
 	it('führt zurück zur Wohnung und zeigt ihre Werte', () => {
 		open();
 		expect(document.querySelector('h1')!.textContent).toBe('Wohnung 4.01 bearbeiten');
