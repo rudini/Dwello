@@ -28,7 +28,8 @@ import {
 	sendStatementButton,
 	statementApartmentLink,
 	statementEditButton,
-	statementTenantLink
+	statementTenantLink,
+	letterInsteadLink
 } from '../targets/statement-detail';
 
 /** The API path keeps the statement as the backend returns it for `heatingCostsOfTenant` */
@@ -89,6 +90,10 @@ export const createCorrection = Click.on(createCorrectionButton);
 export const openReplacedStatement = Click.on(replacesLink);
 export const openCorrection = Click.on(replacedByLink);
 export const openReplacedContract = Click.on(replacedContractLink);
+
+// #449: the letter instead of the e-mail, from the e-mail dialog; the tenant's channel stays
+export const deliverByLetterInstead: Activity = (actor) =>
+	actor.attemptsTo(openSendConfirmation, Click.on(letterInsteadLink), Click.on(confirmSendButton));
 
 // #403
 export const confirmEarlyPaidDate = Click.on(confirmEarlyPaidDateButton);

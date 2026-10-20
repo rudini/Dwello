@@ -40,7 +40,10 @@ import {
 	statementTenancy,
 	statementTotalLabel,
 	statementStatus,
-	oldAddressWarning
+	oldAddressWarning,
+	confirmSendButton,
+	letterInsteadLink,
+	sendStatementButton
 } from '../targets/statement-detail';
 import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
@@ -49,6 +52,7 @@ export const statusOfStatement = Text.of(statementStatus);
 /** The sentence the tab shows instead of a PDF the backend refused */
 export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);
+export const sendButtonLabel = Text.of(sendStatementButton);
 export const resetConfirmation = Text.of(resetPaymentDialog);
 export const recipient = Text.of(sendRecipient);
 export const pdfToView = Attribute.named('href').of(sendPdfLink);
@@ -127,3 +131,5 @@ export const gapAboveCostBreakdown = Gap.between(statementStatus, costBreakdown)
 // #464: the Akonto the statement deducts, e.g. «− CHF 400.00»
 export const advancePaidOfStatement = Text.of(statementAdvancePaid);
 export const advanceDiffersText = Text.of(advanceDiffers);
+export const sendConfirmLabel = Text.of(confirmSendButton);
+export const letterInsteadOffers = Count.of(letterInsteadLink);

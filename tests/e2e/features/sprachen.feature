@@ -21,6 +21,14 @@ Funktionalität: Sprache der Oberfläche
     Und der Liegenschaftsverwalter öffnet die Übersicht
     Dann ist die Seite auf "Deutsch"
 
+  # #449 (Entscheid in #404, Punkt 5.3): englische Stockwerke als Ordinalzahlen, auch unter dem Erdgeschoss
+  Szenario: Englische Stockwerke unter dem Erdgeschoss
+    Angenommen das Gebäude "Ulmenhof" in "Winterthur" existiert
+    Und im Gebäude "Ulmenhof" gibt es die leere Wohnung "K2" im Stockwerk -2
+    Und der Browser des Liegenschaftsverwalters bevorzugt Englisch
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "K2"
+    Dann nennt die Wohnung das Stockwerk "2nd basement"
+
   Szenario: Die Sprache des ersten Besuchs bleibt, auch wenn der Browser später eine andere bevorzugt
     Angenommen der Browser des Liegenschaftsverwalters bevorzugt Englisch
     Und der Liegenschaftsverwalter öffnet die Übersicht

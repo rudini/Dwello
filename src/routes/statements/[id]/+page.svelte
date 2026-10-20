@@ -25,7 +25,7 @@
 	import Correction from './Correction.svelte';
 	import FormDialog from './FormDialog.svelte';
 	import { localToday } from '$lib/contract-status';
-	import MetadataCard from './MetadataCard.svelte';
+	import MetadataCard, { type Delivery } from './MetadataCard.svelte';
 	import MoreActions from './MoreActions.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
@@ -47,6 +47,7 @@
 		data: {
 			statement: StatementWithDetails;
 			reminders: StatementDocument[];
+			delivery?: Delivery | null;
 			laterInvoices?: number;
 		};
 		form: ActionData;
@@ -64,7 +65,8 @@
 	let showDelete = $state(false);
 	let showSend = $state(false);
 	let sendByLetter = $state(false); // after a failed e-mail (#86)
-	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
+	// without an e-mail address the letter is the only way, from the button on (#449, persona Helga P-2)
+	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email' && !!statement.tenantEmail);
 	const sendError = $derived(form?.sendError);
 	let showResetPayment = $state(false);
 	let showCorrect = $state(false);
@@ -223,6 +225,7 @@
 				createdAt={statement.createdAt}
 				{pdfGeneratedAt}
 				sentOn={statement.status === 'draft' ? null : statement.statementDate}
+				delivery={data.delivery}
 				paidOn={statement.paidDate}
 				paymentResets={statement.paymentResets}
 			/>

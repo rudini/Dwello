@@ -66,11 +66,13 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		nonAllocableItems: true
 	});
 	await seed.statement('Anna', 'Seeblick', 2025, 'Standard');
+	// wants e-mail with an address: her send dialog is the e-mail one, with «Stattdessen per Brief zustellen» (#449)
+	await seed.correspondence('Anna', 'email');
 	await seed.statement('Bruno', 'Seeblick', 2025, 'Standard');
 	await seed.sendStatement('Bruno', 2025);
 	await seed.paymentDeadline('Bruno', 2025, '2026-01-31'); // overdue: only then a reminder can be sent
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
-	// wants e-mail without an address: her draft is sent by e-mail, and sending it is refused (#86)
+	// wants e-mail without an address: the send dialog offers only the letter; sending it by e-mail is refused (#86, #449)
 	await seed.correspondence('Carla', 'email');
 	await seed.noEmail('Carla');
 	await seed.heatingInvoice('Seeblick', '9000.00', 2024); // Bruno owes for 2024 too

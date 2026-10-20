@@ -18,7 +18,15 @@
 
 	let form = $state<HTMLFormElement>();
 	let sending = $state(false);
-	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email' && !byLetter);
+	// the letter instead of the e-mail, for this statement only: the Korrespondenzkanal stays (#449, decided in #404,
+	// point 6); without an e-mail address the letter is the only way
+	let instead = $state(false);
+	$effect(() => {
+		if (!open) instead = false;
+	});
+	const noEmail = $derived(statement.tenantCorrespondenceChannel === 'email' && !statement.tenantEmail);
+	const letterForEmail = $derived(byLetter || instead || noEmail);
+	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email' && !letterForEmail);
 	// the dialog's words: sending by e-mail, or recording a letter as sent
 	const words = $derived(
 		byEmail
@@ -59,7 +67,7 @@
 		};
 	}}
 >
-	{#if byLetter}<input type="hidden" name="byLetter" value="true" />{/if}
+	{#if letterForEmail}<input type="hidden" name="byLetter" value="true" />{/if}
 </form>
 
 <Dialog
@@ -73,7 +81,9 @@
 >
 	{#if byEmail}
 		<p>{m.statements_send_email_text()}</p>
+		<p>{m.statements_send_email_bounce()}</p>
 	{:else}
+		{#if noEmail}<p>{m.statements_send_no_email({ tenant: statement.tenantName })}</p>{/if}
 		<p>{m.statements_send_text_1()}</p>
 		<p>{m.statements_send_text_2()}</p>
 	{/if}
@@ -90,6 +100,13 @@
 			</dd>
 		</div>
 	</dl>
+	{#if byEmail}
+		<div>
+			<Button variant="ghost" onclick={() => (instead = true)} testid="send-by-letter-instead"
+				>{m.statements_send_by_letter_instead()}</Button
+			>
+		</div>
+	{/if}
 	<OldAddressWarning {statement} testid="send-old-address" />
 	<div>
 		<Button

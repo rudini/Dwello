@@ -59,16 +59,22 @@ const nextReminderFrom = sql<string | null>`(
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder'
 )`;
+// A reminder still «Zu versenden»: the next Mahnstufe waits until it is marked sent (#449, decided in #404, point 2)
+const reminderToSend = sql<boolean>`exists (
+	select 1 from ${documents}
+	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'to_send'
+)`;
 // the Schlussabrechnung: the Mietvertrag ends within the period; it has no Mindestbetrag and carries nothing over (#448)
 const final = sql<boolean>`exists (
 	select 1 from ${rentalContracts}
 	where ${rentalContracts.id} = ${utilityStatements.contractId}
 		and ${rentalContracts.endDate} between ${utilityStatements.periodStart} and ${utilityStatements.periodEnd}
 )`;
-const statementColumns = { ...tableColumns, nextReminderFrom, final, oldAddress: oldAddress(utilityStatements.contractId) };
+const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, final, oldAddress: oldAddress(utilityStatements.contractId) };
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
 	nextReminderFrom: string | null;
+	reminderToSend: boolean; // a reminder still to send holds the next Mahnstufe (#449)
 	final: boolean; // a Schlussabrechnung (#448)
 	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
 	tenant: {

@@ -2338,6 +2338,28 @@ Request: implement proposals 1 and 3 of the follow-up CI recommendations.
 - No scenario: CI configuration, no app behaviour changes
 - Files: `.github/workflows/ci.yml`, `.claude/skills/pull-request/SKILL.md`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `tests/e2e/CLAUDE.md`
 
+## Session W5-449: Mahnungen and sending (#449) with the letter refusal (#491) (2026-10-20)
+
+Branch `w5-issue-449` (worker W5). Points of #404 consolidated in #449; product-owner decisions V-1 to V-9, M-1, N-1 to N-8 in #449, #491 in the same pull request (option A). The plan of another session stayed open in `implementation_plan.md`, so this session was kept in the pull request and archived here directly (coordinator).
+
+- [x] Scenarios `@wip` first and red lower-layer tests, committed; fach-reviewer rounds 1 and 2 before the implementation (`docs/reviews/449-fachreview-1.md`, `-2.md`); decisions recorded in #449
+- [x] Point 2: the next Mahnstufe waits until the previous reminder is marked sent (`REMINDER_PREVIOUS_NOT_SENT {reminderLevel}`, `reminderToSend`, overview waits too, V-1)
+- [x] Point 3: a reminder of a paid or replaced statement is no longer sent: derived `notToSend`, «Nicht mehr versenden» on «Dokumente» and the tenant page, marking refused (`REMINDER_STATEMENT_PAID`, `_REPLACED`), back to «Zu versenden» after «Zahlung zurücksetzen»
+- [x] Point 4: the reminder dialog names the language; point 6 (#283): without an e-mail address it says the reminder is a letter (V-3 A), and since persona Dr. Weber P-1/P-2 (decision A) the reminder is created as a letter without a delivery error
+- [x] Point 5: 3rd reminder text V-6 in four languages; English floors below ground in the UI and the PDF
+- [x] Points 6, 7: send dialog «Stattdessen per Brief zustellen», only the letter without an address (also the button, Helga P-2), bounce text (M-1), letter text V-7/N-8 and Helga P-1 (decision: mark on the day of delivery, print from «Dokumente»); the letter stores the PDF as a Dokument, the e-mail its `recipient` (migration 0030), the Verlauf names the way
+- [x] #491: the letter is refused like the e-mail when the PDF cannot be made (`IBAN_MISSING`, `IBAN_INVALID`, `CREDITOR_ADDRESS_MISSING`)
+- [x] Screen fixture: Anna wants e-mail, so the e-mail variant of the send dialog stays in axe and the language check (code review C-1); meanings of `send-dialog`, `send-refused`
+- [x] code-reviewer rounds 1–3 (`docs/reviews/449-review-1.md` … `-3.md`): C-1 to C-9 fixed (C-4 partly: the letter keeps the statement's PDF, made.pdf as fallback)
+- [x] Personas Dr. Weber, Helga (`docs/design/personas/dr-weber-449.md`, `helga-449.md`): Weber P-1/P-2 and Helga P-1, P-2 fixed; Weber P-3/P-4 issue #545; the other Minors and Nits stay in the reports
+- [x] E2E: affected features 205 passed, screen rows 132 and 26 passed
+- [x] Row O-45 (heating-distribution test order, also red on main); issues #532, #533, #534, #545
+- [x] Workflow note `docs/reviews/workflow-notes-issue-449.md`
+- [x] PR `Fixes #449`, `Fixes #491`
+
+No scenario: the 3rd reminder text and the refusal of the next Mahnstufe before marking (the server's clock: a reminder whose Zahlungsfrist passed; unit and pg tests); #491 on the letter (the IBAN and Firmenadresse are global settings that parallel scenarios rely on, as in #450; pg test).
+
+Files: `backend/migrations/0030_document_recipient.sql`, `backend/src/db/schema.ts`, `backend/src/services/{reminder,reminder-letter,document,statement,statement-send,pdf}.service.ts` (`reminder-letter.ts`), `src/lib/{types,backend-error,apartment,overview,document-status}.ts`, `src/lib/server/statement.ts`, `src/routes/dashboard/+page.server.ts`, `src/routes/statements/[id]/**`, `src/routes/documents/{DocumentItem,MarkSentButton}.svelte`, `src/routes/tenants/[id]/TenantDocumentRow.svelte`, `messages/*.json`, tests in `backend/src/__tests__`, `src/__tests__`, `tests/e2e`, `tests/contracts`, `tests/a11y/screens.json`, `docs/{api-specification,data-model}.md`, `docs/design/offene-punkte.md`.
 ## Session W1: apply the collected workflow review of 2026-10-20
 
 Request: «Setze alle um» (every proposal of `docs/reviews/workflow-rules-review-2026-10-20.md`). No scenario: rules, skills, agents and tooling only; no app behaviour changes.
