@@ -22,9 +22,9 @@ description: Push, open, drive to green and merge the pull request of a finished
 ## Open and drive
 
 - Push the branch, open the pull request in English with `Fixes #n` per issue (or `Refs #n` in the KI case, `backend/CLAUDE.md`); subscribe to its activity. If the session cannot wait for CI, say under "Blocked on me" that the pull request waits for CI and is not merged.
-- Merge a newer `main` into the open pull request only for a merge conflict, a red check that `main` fixes, or when GitHub refuses the merge because the branch is behind; not while it waits on the product owner. A conflict in app code gets a `code-reviewer` round on the merge commit.
+- Merge a newer `main` into the open pull request only for a merge conflict, or a red check that `main` fixes (a pull request need not be up to date with `main`: pushes to `main` run the full CI); not while it waits on the product owner. A conflict in app code gets a `code-reviewer` round on the merge commit.
 - Red CI: fix the cause and push. A fourth round of CI fixes needs the product owner first. Read only the failing jobs (the check runs of the latest commit, not the job list with every step), and of each log only its end or a `grep` for the error; one subagent at most per round extracts what a log holds.
-- Right before merging: read the check runs of the latest commit and the open findings again. Merge with a merge commit (the repository has no auto-merge) once CI is green and the pull request is mergeable; name its CI screenshot comment, or that there is none, in the closing report.
+- Right before merging: read the check runs of the latest commit and the open findings again. Merge with a merge commit once CI is green and the pull request is mergeable, or turn on auto-merge (merge commit) once nothing but CI is left, so GitHub merges when the required checks pass; name its CI screenshot comment, or that there is none, in the closing report.
 - Never without the product owner: what `CLAUDE.md`, "When to ask", lists for pushes and merges (merging while a Blocker/Major is open includes the two kinds "Done means" lets a task finish with).
 
 Done when the pull request is merged, or its state is under "Blocked on me".
