@@ -141,6 +141,13 @@ Funktionalität: Übersicht
     Dann nennt die Übersicht die Aufgabe "Abrechnung berichtigen" für "Anna Keller"
     Und sagt die Aufgabe "Abrechnung berichtigen" für "Anna Keller" "wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen». Die berichtigte Abrechnung rechnet an, was schon bezahlt ist."
 
+  # code review 454-1 C-1: auch eine überfällige Abrechnung wird berichtigt
+  Szenario: Überfällige Abrechnung mit danach erfasster Rechnung als Aufgabe
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 15 Tagen abgelaufen ist
+    Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Abrechnung berichtigen" für "Anna Keller"
+
   # PO 2026-10-20 (Fachreview 454-1 E-3): nur wenn das Neuberechnen den Saldo oder eine Position dieses Mietvertrags
   # ändert; Bruno trägt von einer Rechnung für die Zeit nach seinem Auszug nichts
   Szenario: Keine Aufgabe «Abrechnung berichtigen», wenn die Änderung den Mieter nicht trifft

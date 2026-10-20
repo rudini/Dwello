@@ -1,0 +1,11 @@
+{
+	"invoices": [
+		{
+			"id": "i1",
+			"amount": "1200.00",
+			"isValidUtilityCost": true,
+			"inPeriod": { "start": "2025-12-01", "end": "2025-12-31", "amount": 413.33 }
+		}
+	],
+	"total": 1
+}

@@ -183,6 +183,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-sent-detail  | action-error        |
       | statement-sent-detail  | correct-dialog      |
       | statement-sent-detail  | decline-dialog      |
+      | statement-unaffected-detail | unaffected     |
+      | statement-declined-detail | declined         |
       | statement-paid-detail  | default             |
       | statement-paid-detail  | reset-payment-dialog |
       | statement-paid-detail  | correct-dialog      |

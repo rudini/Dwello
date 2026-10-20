@@ -190,6 +190,12 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('invoice'), actual)).toEqual([]);
 	});
 
+	// #454: filtered by an Abrechnungsperiode, each invoice with its part in it
+	it('GET /invoices mit Abrechnungsperiode liefert die Felder von invoice-list-period.json', async () => {
+		const actual = await (await callApi(`/api/v1/invoices?buildingId=${rental.building}&periodStart=2024-01-01&periodEnd=2024-12-31`)).json();
+		expect(drift(await sample('invoice-list-period'), actual)).toEqual([]);
+	});
+
 	it('GET /buildings/:id liefert die Felder von building.json', async () => {
 		const actual = await (await callApi(`/api/v1/buildings/${rental.building}`)).json();
 		expect(drift(await sample('building'), actual)).toEqual([]);
@@ -582,6 +588,13 @@ describe('API-Verträge der Zahlung', () => {
 		const response = await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: '2020-01-01' });
 		expect(response.status).toBe(400);
 		expect(drift(await sample('statement-paid-date-refused'), await response.json())).toEqual([]);
+	});
+
+	// #454: «Nicht berichtigen» of a statement without a correction due
+	it('POST /statements/:id/decline-correction ohne fällige Berichtigung liefert die Felder von statement-correction-not-due.json', async () => {
+		const response = await sendJson('POST', `/api/v1/statements/${statementId}/decline-correction`, {});
+		expect(response.status).toBe(409);
+		expect(drift(await sample('statement-correction-not-due'), await response.json())).toEqual([]);
 	});
 
 	it('POST /statements/:id/payment-reset liefert die Felder von statement-payment-reset.json', async () => {

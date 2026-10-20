@@ -45,6 +45,8 @@
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
 		"mark-paid-early": "The dialog that marks a statement as paid, with a day before the Abrechnungsdatum entered and confirmed once: the question whether to save it anyway (#448).",
 		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
+		"unaffected": "Sent statement with an invoice recorded after it for days after the tenant's move-out (#454, Fachreview 454-2 V-17): the hint that correcting changes neither the Saldo nor a position.",
+		"declined": "Sent statement after «Nicht berichtigen» (#454): the hint with the day of the decision, «Nicht berichtigt» in the Verlauf.",
 		"decline-dialog": "Sent statement with an invoice recorded after it that raises the Saldo, «Nicht berichtigen» chosen (#454): the confirmation that the statement stays as it is and the task returns after a further change.",
 		"period-filter": "Invoice list filtered by an Abrechnungsperiode, as the warnings on missing statements link to it (#454): the filter named with its building and rule, the invoices grouped by allocability.",
 		"correct-dialog": "The confirmation before a sent, paid or settled statement is replaced by a berichtigte Abrechnung open, with the amount it offsets, on a sent one the field «Bereits bezahlt» (#448), and the limitation (#120).",
@@ -539,6 +541,20 @@
 			"path": "/statements/{partsStatement}",
 			"states": [
 				"default"
+			]
+		},
+		{
+			"name": "statement-unaffected-detail",
+			"path": "/statements/{unaffectedStatement}",
+			"states": [
+				"unaffected"
+			]
+		},
+		{
+			"name": "statement-declined-detail",
+			"path": "/statements/{declinedStatement}",
+			"states": [
+				"declined"
 			]
 		},
 		{

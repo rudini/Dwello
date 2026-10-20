@@ -38,8 +38,8 @@
 	);
 	// #454: the filter «Abrechnungsperiode», named with its building and rule
 	const period = $derived.by(() => {
-		const [start, end] = ['periodStart', 'periodEnd'].map((key) => $page.url.searchParams.get(key));
-		if (!start || !end) return null;
+		const [start, end] = ['periodStart', 'periodEnd'].map((key) => $page.url.searchParams.get(key) ?? '');
+		if (![start, end].every((day) => /^\d{4}-\d{2}-\d{2}$/.test(day))) return null; // as the loader sends them
 		const building = data.buildings.find((b) => b.id === $page.url.searchParams.get('building'));
 		const days = { start: formatDate(start), end: formatDate(end) };
 		return building

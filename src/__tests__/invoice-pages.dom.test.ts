@@ -221,6 +221,13 @@ describe('Rechnungsliste', () => {
 		expect(byTestId('invoice-row-i2')!.querySelector('[data-testid="invoice-in-period"]')).toBeNull();
 	});
 
+	// code review 454-1 C-5: only the filter the loader sends
+	it('nennt keinen Filter «Abrechnungsperiode» bei einem ungültigen Datum', () => {
+		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-13&periodEnd=2025-12-31');
+		list([invoice()]);
+		expect(byTestId('invoice-period-filter')).toBeNull();
+	});
+
 	it('trennt ohne Abrechnungsperiode nicht nach Umlagefähigkeit', () => {
 		url = new URL('http://localhost/invoices?building=b1');
 		list([invoice(), invoice({ id: 'i2', description: 'Dachreparatur', isValidUtilityCost: false })]);

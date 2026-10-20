@@ -360,6 +360,11 @@ export function testData(api: CallTheApi) {
 			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
+		// «Nicht berichtigen» of the tenant's statement of the year (#454)
+		async declineCorrection(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/decline-correction`, {});
+		},
+
 		async contractStart(tenantTitle: string, startDate: string) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { startDate });
 		},
@@ -426,7 +431,6 @@ export function testData(api: CallTheApi) {
 			await put(`buildings/${ids.get(buildingTitle)}`, { noTank: true });
 		},
 
-		// Value of the heating oil in the building's tank on a reading day (removed with the building)
 		// A Tankbestand recorded anew for its day, e.g. corrected after a statement (#454)
 		async changeFuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const building = ids.get(buildingTitle);
@@ -436,6 +440,7 @@ export function testData(api: CallTheApi) {
 			await post(`buildings/${building}/fuel-stocks`, { readingDate, amount, categoryId: old.categoryId });
 		},
 
+		// Value of the heating oil in the building's tank on a reading day (removed with the building)
 		async fuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
 			await post(`buildings/${ids.get(buildingTitle)}/fuel-stocks`, { readingDate, amount, categoryId: heating.id });

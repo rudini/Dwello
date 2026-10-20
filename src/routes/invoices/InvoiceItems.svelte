@@ -23,18 +23,19 @@
 	);
 </script>
 
-{#if !grouped}
+{#if grouped}
+	{#each groups as group (group.key)}
+		<li data-testid="invoice-group-{group.key}">
+			<h3 class="p-4 font-semibold text-ink" data-testid="invoice-group-title">{group.title}</h3>
+			<ul class="divide-y divide-line border-t border-line">
+				{#each group.list as invoice (invoice.id)}
+					<InvoiceRow {invoice} />
+				{/each}
+			</ul>
+		</li>
+	{/each}
+{:else}
 	{#each invoices as invoice (invoice.id)}
 		<InvoiceRow {invoice} />
 	{/each}
 {/if}
-{#each grouped ? groups : [] as group (group.key)}
-	<li data-testid="invoice-group-{group.key}">
-		<h3 class="p-4 font-semibold text-ink" data-testid="invoice-group-title">{group.title}</h3>
-		<ul class="divide-y divide-line border-t border-line">
-			{#each group.list as invoice (invoice.id)}
-				<InvoiceRow {invoice} />
-			{/each}
-		</ul>
-	</li>
-{/each}

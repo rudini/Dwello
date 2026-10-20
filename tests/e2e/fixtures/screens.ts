@@ -22,6 +22,25 @@ const query: Record<string, string> = {
 const address = (screen: { path: string; queries?: object }, state: string) =>
 	screen.path + ((screen.queries as Record<string, string> | undefined)?.[state] ?? query[state] ?? '');
 
+// #454 (code review 454-1 C-6): sent statements of 2025 with an invoice for October to December recorded after them:
+// Mia, moved out on 30.06., bears none of it; Nora's Saldo rises, and she was told «Nicht berichtigen»
+async function correctionStates(seed: TestData) {
+	await seed.building('Rebhof', 'Winterthur');
+	await seed.apartment('Rebhof', '5.01', 'vacant');
+	await seed.apartment('Rebhof', '5.02', 'vacant');
+	await seed.tenant('Mia');
+	await seed.tenant('Nora');
+	await seed.contract('Mia', '5.01', { startDate: '2025-01-01', endDate: '2025-06-30', baseRent: '1200.00' });
+	await seed.notice('Mia', '2025-06-30');
+	await seed.contract('Nora', '5.02', { startDate: '2025-01-01', baseRent: '1200.00' });
+	for (const tenant of ['Mia', 'Nora']) {
+		await seed.statement(tenant, 'Rebhof', 2025, 'Standard');
+		await seed.sendStatement(tenant, 2025);
+	}
+	await seed.invoiceOn('Rebhof', 'Hauswart', '300.00', '2025-12-15', ['2025-10-01', '2025-12-31']);
+	await seed.declineCorrection('Nora', 2025);
+}
+
 /** The example's address with its ids filled in, and the buildings the statement wizard checks */
 export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string; heatingProfile: string };
 
@@ -191,6 +210,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.agreement('Ines', 'Video', true);
 	// a change the Protokoll lists and whose entry can be deleted (#357)
 	await seed.category('Rasenpflege', true);
+	await correctionStates(seed);
 	await seed.categoryAllowance('Rasenpflege', false);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -216,6 +236,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
 		settledStatement: seed.idOf('Abrechnung Carla 2021'),
+		unaffectedStatement: seed.idOf('Abrechnung Mia 2025'),
+		declinedStatement: seed.idOf('Abrechnung Nora 2025'),
 		carriedStatement: seed.idOf('Abrechnung Jana 2023'),
 		carryStatement: seed.idOf('Abrechnung Jana 2024'),
 		offsetStatement: seed.idOf('Berichtigte Abrechnung Kai 2023'),

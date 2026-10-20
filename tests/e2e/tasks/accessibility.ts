@@ -412,6 +412,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// #454: the late invoice of the seed raises Bruno's Saldo of 2025
 	'decline-dialog': () => openDialog(on.declineCorrectionButton),
 	'period-filter': () => Wait.until(on.shown('invoice-period-filter')),
+	unaffected: () => Wait.until(on.shown('statement-later-invoices')),
+	declined: () => Wait.until(on.shown('statement-later-invoices')),
 	'formula-tested': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('{area}').into(on.formulaInput),
