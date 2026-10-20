@@ -109,6 +109,20 @@ jobs:
             echo "::error::Applied migrations changed: ${changed//$'\n'/, }. Put the change into a new numbered file in backend/migrations (backend/CLAUDE.md)."
             exit 1
           fi
+      # Contributors have no commit hook: CI checks the subjects as .claude/hooks/commit-msg-gate.mjs does (Dependabot's are exempt)
+      - name: Commit subjects
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
+        run: |
+          status=0
+          while IFS= read -r subject; do
+            node .claude/hooks/commit-msg-gate.mjs --check "$subject" || status=1
+          done < <(git log --no-merges --format=%s "origin/${{ github.base_ref }}..HEAD")
+          if [ $status != 0 ]; then echo "::error::Commit subjects break CLAUDE.md, Conventions (Commits); reword them, see the log."; fi
+          exit $status
+      # New files are Prettier-clean; existing ones are not all, and .prettierignore limits Prettier to src/
+      - name: Prettier on new files
+        if: github.event_name == 'pull_request'
+        run: git diff --name-only --diff-filter=A -z "origin/${{ github.base_ref }}...HEAD" | xargs -0 -r bunx prettier --check --ignore-unknown
       # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work")
       - run: node tools/open-work/check-issues.mjs
         env:
@@ -282,6 +296,18 @@ jobs:
       - name: Fallow audit
         # Pull requests: changes against the target branch; pushes: changes of the pushed commits
         run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
+
+  # A pull request that adds a dependency with a known high or critical vulnerability fails. It needs the dependency
+  # graph, which a private repository only has with GitHub Advanced Security, so it runs once the repository is public
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request' && !github.event.repository.private
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
 
   # New or worsened shallow modules in the changed code (tools/deepcheck), with annotations and a step summary
   deepcheck:

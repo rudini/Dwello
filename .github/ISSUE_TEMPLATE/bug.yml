@@ -1,0 +1,30 @@
+name: Bug
+description: Something in Dwello does not work as it should
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What happened
+      description: What you saw, with the exact message if there was one.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open «Liegenschaften»
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Version and browser
+      placeholder: v1.4.0, Firefox 140, desktop
+  - type: markdown
+    attributes:
+      value: Please leave out real tenant data (names, IBANs, addresses) from text and screenshots.
