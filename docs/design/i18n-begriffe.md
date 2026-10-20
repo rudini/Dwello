@@ -76,8 +76,10 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnungsposition | poste du décompte | voce del conteggio | statement line |
 | Abrechnungsnummer / Abrechnungsdatum | numéro de décompte / date du décompte | numero di conteggio / data del conteggio | statement number / statement date |
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |
-| Kosten des Gebäudes | coûts de l’immeuble | costi immobile | building costs |
+| Kosten des Gebäudes | coûts de l’immeuble | costi dell’immobile | building costs |
 | Verwaltungspauschale | frais d’administration (Art. 4 al. 3 OBLF) | spese amministrative (Art. 4 cpv. 3 OLAL) | management fee |
+| Eigener Satz (#447, #485) | taux propre | aliquota propria | own rate |
+| Satz des Abrechnungslaufs (#447, #485) | taux de l’établissement des décomptes | aliquota dell’allestimento dei conteggi | rate of the statement run |
 | Zahlung zurücksetzen | Retirer le paiement saisi | Rimuovere il pagamento registrato | Reset payment |
 | Nebenkostenpauschale | forfait de frais accessoires (Art. 4 al. 2 OBLF «de manière forfaitaire») | forfait per le spese accessorie (Art. 4 cpv. 2 OLAL «computo forfettario») | flat-rate utility charge |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |

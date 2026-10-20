@@ -565,7 +565,16 @@ describe('Abrechnungsdetail', () => {
 		click('statement-correct-button');
 		// Code-Review W2e3 C-3: bezahlt wurde auch auf den ersetzten Abrechnungen, nicht nur an diesem Tag
 		expect(correctDialog()).toContain(
-			'Die berichtigte Abrechnung rechnet die CHF 630.35 an, die auf diese und die ersetzten Abrechnungen bezahlt wurden.'
+			'Die berichtigte Abrechnung rechnet die CHF 630.35 an, die auf diese und die ersetzten Abrechnungen insgesamt bezahlt wurden.'
+		);
+	});
+
+	// #447, Fachreview V-1: in the chain the landlord refunded 100 and the tenant paid 50, so 50 refunded in all
+	it('nennt beim Berichtigen einer Kette mit Rückerstattung, was Sie insgesamt zurückerstattet haben', () => {
+		detail({ status: 'paid', paidDate: '2025-02-01', paidAmount: 50, priorPayments: -100, balance: 50 });
+		click('statement-correct-button');
+		expect(correctDialog()).toContain(
+			'Die berichtigte Abrechnung rechnet die CHF 50.00 an, die Sie auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet haben.'
 		);
 	});
 
