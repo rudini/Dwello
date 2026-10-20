@@ -417,8 +417,8 @@ payment_deadline DATE                  -- the Zahlungsfrist a reminder prints (l
                                        -- Mahnstufe is possible from the day after; NULL for an upload
 sent_at        TIMESTAMP
 delivery_error TEXT                    -- why an e-mail could not be sent
-recipient      VARCHAR(255)            -- the e-mail address it went to, as it was then (#449, 0029); NULL for a
-                                       -- letter, an upload and an e-mail sent before 0029
+recipient      VARCHAR(255)            -- the e-mail address it went to, as it was then (#449, 0030); NULL for a
+                                       -- letter, an upload and an e-mail sent before 0030
 ```
 
 A reminder `to_send` whose statement is `paid` or `replaced` since no longer goes out (#449): no status of its own, the
