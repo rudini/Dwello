@@ -1,13 +1,10 @@
 import { createBdd } from 'playwright-bdd';
 import { inDays, swissDate } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { pageTitleText } from '../questions/app-frame';
-import { documentsFor } from '../questions/documents';
 import { history, letterInsteadOffers, sendConfirmLabel, sendConfirmation } from '../questions/statement-detail';
 import { correspondence } from '../questions/tenant-form';
 import { openTenantDetail } from '../tasks/tenant-detail';
 import { paymentDeadline } from '../questions/statement-edit';
-import { openDocuments } from '../tasks/documents';
 import { deliverByLetter, deliverByLetterInstead, openSendConfirmation, sendStatement } from '../tasks/statement-detail';
 
 const { Given, When, Then } = createBdd(test);
@@ -37,15 +34,6 @@ Then(
 	async ({ verwalter }) => {
 		await verwalter.sees(sendConfirmation).toContain('Dwello sendet die Abrechnung als PDF per E-Mail');
 		await verwalter.sees(sendConfirmation).toContain('Die Zahlungsfrist ist so viele Tage danach, wie in den Einstellungen festgelegt');
-	}
-);
-
-Then(
-	'ist die {string} an {string} nicht unter «Dokumente» abgelegt',
-	async ({ verwalter, names }, title: string, tenant: string) => {
-		await verwalter.attemptsTo(openDocuments);
-		await verwalter.sees(pageTitleText).toBe('Dokumente');
-		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(0);
 	}
 );
 

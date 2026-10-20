@@ -95,6 +95,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		pdfGeneratedAt: data.pdfGeneratedAt,
 		lastReminderDate: data.reminderSentDate,
 		nextReminderFrom: data.nextReminderFrom,
+		reminderToSend: !!data.reminderToSend,
 		oldAddress: !!data.oldAddress, // A-5: the moved-out tenant still has the building's address
 		notes: data.notes,
 		createdAt: data.createdAt,

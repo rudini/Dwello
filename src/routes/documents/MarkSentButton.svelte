@@ -9,7 +9,7 @@
 	let saving = $state(false);
 </script>
 
-{#if document.status === 'to_send'}
+{#if document.status === 'to_send' && !document.notToSend}
 	<form
 		method="POST"
 		action="?/markSent"

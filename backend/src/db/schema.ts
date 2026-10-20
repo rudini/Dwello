@@ -567,6 +567,7 @@ export const documents = pgTable(
 		status: varchar('status', { length: 20 }), // sent, to_send; null for an upload
 		sentAt: timestamp('sent_at'),
 		deliveryError: text('delivery_error'),
+		recipient: varchar('recipient', { length: 255 }), // the e-mail address it went to (#449); null for a letter or an upload
 		paymentDeadline: date('payment_deadline'), // the Zahlungsfrist a reminder prints; null for an upload
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},

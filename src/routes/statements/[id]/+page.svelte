@@ -24,7 +24,7 @@
 	import FormDialog from './FormDialog.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { localToday } from '$lib/contract-status';
-	import MetadataCard from './MetadataCard.svelte';
+	import MetadataCard, { type Delivery } from './MetadataCard.svelte';
 	import MoreActions from './MoreActions.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
@@ -46,6 +46,7 @@
 		data: {
 			statement: StatementWithDetails;
 			reminders: StatementDocument[];
+			delivery?: Delivery | null;
 			laterInvoices?: number;
 		};
 		form: ActionData;
@@ -208,6 +209,7 @@
 				createdAt={statement.createdAt}
 				{pdfGeneratedAt}
 				sentOn={statement.status === 'draft' ? null : statement.statementDate}
+				delivery={data.delivery}
 				paidOn={statement.paidDate}
 				paymentResets={statement.paymentResets}
 			/>

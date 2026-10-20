@@ -402,7 +402,7 @@ with a tenant who has no contracts).
 ```sql
 tenant_id      UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 statement_id   UUID REFERENCES utility_statements ON DELETE RESTRICT
-type           VARCHAR(30)  NOT NULL   -- reminder | statement (sent by e-mail, #86) | upload
+type           VARCHAR(30)  NOT NULL   -- reminder | statement (sent by e-mail #86, or by letter #449) | upload
 reminder_level INTEGER                 -- Mahnstufe: 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 title          VARCHAR(255) NOT NULL
 file_name      VARCHAR(255) NOT NULL
@@ -414,7 +414,12 @@ payment_deadline DATE                  -- the Zahlungsfrist a reminder prints (l
                                        -- Mahnstufe is possible from the day after; NULL for an upload
 sent_at        TIMESTAMP
 delivery_error TEXT                    -- why an e-mail could not be sent
+recipient      VARCHAR(255)            -- the e-mail address it went to, as it was then (#449, 0029); NULL for a
+                                       -- letter, an upload and an e-mail sent before 0029
 ```
+
+A reminder `to_send` whose statement is `paid` or `replaced` since no longer goes out (#449): no status of its own, the
+lists derive it (`notToSend`), and `status=to_send` leaves it out.
 
 No `updated_at`, no CHECK constraints. Indexes: `documents_tenant_id_idx`, `documents_statement_id_idx`,
 `documents_status_idx`.

@@ -166,7 +166,7 @@ Then('sagt die Mahnung vor dem Senden {string}', async ({ verwalter }, text: str
 Then(
 	'sagt die Mahnung vor dem Senden, dass für {string} keine E-Mail-Adresse erfasst ist',
 	async ({ verwalter, names }, tenant: string) => {
-		await verwalter.sees(reminderDelivery).toBe(
+		await verwalter.sees(reminderDelivery).toContain(
 			`Für ${names.get(tenant) ?? tenant} ist keine E-Mail-Adresse erfasst. Dwello erstellt die Mahnung als PDF. Sie liegt danach unter «Dokumente» zum Ausdrucken.`
 		);
 	}
@@ -179,11 +179,15 @@ Then(
 	}
 );
 
-Then(
-	'ist die {string} an {string} nicht mehr bei den zu versendenden Dokumenten',
+// no row of that title for the tenant on «Dokumente», or only among those to send
+const listsNo =
+	(open: typeof openDocuments): Extract<Parameters<typeof Then>[1], (...args: never[]) => unknown> =>
 	async ({ verwalter, names }, title: string, tenant: string) => {
-		await verwalter.attemptsTo(openDocumentsToSend);
+		await verwalter.attemptsTo(open);
 		await verwalter.sees(pageTitleText).toBe('Dokumente');
 		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(0);
-	}
-);
+	};
+
+Then('ist die {string} an {string} nicht mehr bei den zu versendenden Dokumenten', listsNo(openDocumentsToSend));
+
+Then('ist die {string} an {string} nicht unter «Dokumente» abgelegt', listsNo(openDocuments));

@@ -34,7 +34,6 @@ Funktionalität: Abrechnung per E-Mail senden
     Und ist die "Nebenkostenabrechnung" an "Nora Beispiel" als versendet festgehalten
 
   # #449 (Entscheid in #404, Punkt 6): ohne E-Mail-Adresse bietet der Versand nur den Brief an
-  @wip
   Szenario: Mieter ohne E-Mail-Adresse
     Angenommen "Nora Beispiel" wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Nora Beispiel"
@@ -51,18 +50,18 @@ Funktionalität: Abrechnung per E-Mail senden
     Und hat die Abrechnung den Status "Entwurf"
     Und ist die "Nebenkostenabrechnung" an "Nora Beispiel" nicht unter «Dokumente» abgelegt
 
+  # #449: ohne Adresse bietet der Versand gleich den Brief an; gescheitert ist die E-Mail hier am Mailserver
   Szenario: Nach gescheiterter E-Mail per Brief zustellen
-    Angenommen "Nora Beispiel" wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
+    Angenommen "Nora Beispiel" wünscht Korrespondenz per E-Mail an eine Adresse, die der Mailserver abweist
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Nora Beispiel"
     Wenn der Liegenschaftsverwalter die Abrechnung per E-Mail sendet
     Und der Liegenschaftsverwalter die Abrechnung stattdessen per Brief zustellt
     Dann hat die Abrechnung den Status "Versendet"
-    Und nennt der Verlauf "Versendet" am Tag des Versands
+    Und nennt der Verlauf "Versendet per Brief" am Tag des Versands
     Und ist die Zahlungsfrist 30 Tage nach dem Tag des Versands
 
   # #449 (Entscheid in #404, Punkte 6 und 7): der Brief statt der E-Mail, ohne den Korrespondenzkanal zu ändern; das PDF
   # liegt als Dokument unter «Dokumente», und der Verlauf nennt den Weg
-  @wip
   Szenario: Stattdessen per Brief zustellen
     Angenommen "Nora Beispiel" wünscht Korrespondenz per E-Mail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Nora Beispiel"

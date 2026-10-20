@@ -340,6 +340,7 @@ export interface Statement {
 	paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
 	lastReminderDate?: string;
 	nextReminderFrom?: string | null; // the day after the last reminder's Zahlungsfrist; none after the 3rd (#107)
+	reminderToSend?: boolean; // a reminder still to send holds the next Mahnstufe (#449)
 	oldAddress?: boolean; // A-5 (#114): the moved-out tenant still has the building's address
 	pdfGeneratedAt?: string;
 	notes?: string | null;
@@ -405,6 +406,8 @@ export interface StatementDocument {
 	deliveryError: string | null;
 	deliveryErrorCode?: string | null;
 	paymentDeadline?: string | null; // the Zahlungsfrist a reminder prints
+	recipient?: string | null; // the e-mail address it went to (#449)
+	notToSend?: 'paid' | 'replaced' | null; // a reminder to send whose statement is paid or replaced since (#449)
 	createdAt: string;
 	tenantName: string;
 	statementNumber: string | null;

@@ -57,10 +57,16 @@ const nextReminderFrom = sql<string | null>`(
 	from ${documents}
 	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder'
 )`;
-const statementColumns = { ...tableColumns, nextReminderFrom, oldAddress: oldAddress(utilityStatements.contractId) };
+// A reminder still «Zu versenden»: the next Mahnstufe waits until it is marked sent (#449, decided in #404, point 2)
+const reminderToSend = sql<boolean>`exists (
+	select 1 from ${documents}
+	where ${documents.statementId} = ${utilityStatements.id} and ${documents.type} = 'reminder' and ${documents.status} = 'to_send'
+)`;
+const statementColumns = { ...tableColumns, nextReminderFrom, reminderToSend, oldAddress: oldAddress(utilityStatements.contractId) };
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
 	nextReminderFrom: string | null;
+	reminderToSend: boolean; // a reminder still to send holds the next Mahnstufe (#449)
 	oldAddress: boolean; // A-5: a moved-out tenant still has the building's address
 	tenant: {
 		id: string;

@@ -328,8 +328,8 @@ describe('Zahlungsfrist der Mahnung', () => {
 	});
 
 	it('lehnt die nächste Mahnstufe ab, solange die Zahlungsfrist der letzten Mahnung läuft', async () => {
-		// the last day of the deadline
-		await db.update(documents).set({ paymentDeadline: swissToday() }).where(eq(documents.statementId, statementId));
+		// the last day of the deadline of the posted reminder (one still to send is refused first, #449)
+		await db.update(documents).set({ paymentDeadline: swissToday(), status: 'sent' }).where(eq(documents.statementId, statementId));
 		const result = await remind(statementId);
 
 		expect(result.status).toBe(400);
@@ -349,6 +349,7 @@ describe('Zahlungsfrist der Mahnung', () => {
 	it('sagt bei der Abrechnung, dass eine Mahnung noch zu versenden ist', async () => {
 		const reminderToSend = async () =>
 			((await (await api('GET', `/api/v1/statements/${statementId}`)).json()) as { reminderToSend: boolean }).reminderToSend;
+		await db.update(documents).set({ status: 'to_send' }).where(eq(documents.statementId, statementId));
 
 		expect(await reminderToSend()).toBe(true);
 	});
@@ -356,7 +357,7 @@ describe('Zahlungsfrist der Mahnung', () => {
 	it('lehnt die nächste Mahnstufe ab, solange die vorige Mahnung nicht versendet ist, auch nach ihrer Zahlungsfrist', async () => {
 		await db
 			.update(documents)
-			.set({ paymentDeadline: daysAfter(swissToday(), -1) })
+			.set({ paymentDeadline: daysAfter(swissToday(), -1), status: 'to_send' })
 			.where(eq(documents.statementId, statementId));
 		const result = await remind(statementId);
 

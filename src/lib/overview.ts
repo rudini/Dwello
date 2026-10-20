@@ -20,6 +20,7 @@ export interface OverviewInput {
 		tenantName: string;
 		paymentDeadline: string;
 		nextReminderFrom?: string | null;
+		reminderToSend?: boolean; // the last reminder still waits to be posted: no next one yet (#449)
 		refund?: boolean; // never gemahnt: the landlord pays it
 	}[];
 	// the settings: Zahlungsfrist and Mahnfrist in days (#87)
@@ -141,9 +142,10 @@ function workTasks({
 	// «Überfällig» from the day after the Zahlungsfrist, but a Mahnung is proposed only after the Mahnfrist (#64), the
 	// next one after the Zahlungsfrist of the last Mahnung (#107); a Rückerstattung is due at once (Fachreview V-1)
 	const waiting = (s: OverviewInput['dueStatements'][number]) =>
-		s.nextReminderFrom
+		s.reminderToSend ||
+		(s.nextReminderFrom
 			? s.nextReminderFrom > today
-			: !s.refund && daysFrom(today, s.paymentDeadline) >= -reminderAfterDays;
+			: !s.refund && daysFrom(today, s.paymentDeadline) >= -reminderAfterDays);
 	const overdue =
 		statementCounts.overdue -
 		dueStatements.filter((s) => s.paymentDeadline < today && waiting(s)).length;

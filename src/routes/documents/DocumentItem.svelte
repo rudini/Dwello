@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import { deliveryErrorText } from '$lib/backend-error';
+	import { documentStatus } from '$lib/document-status';
 	import type { StatementDocument } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -31,7 +32,9 @@
 				? m.documents_created_to({ name: document.tenantName, date, channel })
 				: m.documents_created({ date, channel })
 	);
-	const toSend = $derived(document.status === 'to_send');
+	const status = $derived(documentStatus(document));
+	// a letter that no longer goes out has no Zahlungsfrist to name (Fachreview N-7)
+	const notToSend = $derived(!!document.notToSend);
 </script>
 
 <li
@@ -41,18 +44,14 @@
 	<div class="flex flex-col gap-1">
 		<p class="font-semibold text-ink">{heading}</p>
 		<p class="text-ink-muted">{created}</p>
-		{#if document.paymentDeadline}
+		{#if document.paymentDeadline && !notToSend}
 			<p class="text-ink-muted">
 				{m.documents_payment_deadline({ date: formatDate(document.paymentDeadline) })}
 			</p>
 		{/if}
 		{#if !upload}
 			<p>
-				<Badge
-					tone={toSend ? 'caution' : 'positive'}
-					label={toSend ? m.tenants_document_to_send() : m.statements_status_sent()}
-					testid="document-status"
-				/>
+				<Badge tone={status.tone} label={status.label} testid="document-status" />
 			</p>
 		{/if}
 		{#if document.deliveryError}<p class="text-caution">{deliveryErrorText(document)}</p>{/if}

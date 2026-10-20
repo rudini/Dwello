@@ -64,6 +64,9 @@ async function nextLevel(statement: Statement) {
 	if (belowMinimum(Number(statement.balance))) throw new ReminderError('REMINDER_BELOW_MINIMUM', 'Ein Saldo unter CHF 5.00 wird nicht eingefordert.');
 	const level = (await countReminders(statement.id)) + 1;
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('REMINDER_LIMIT', 'Es wurden bereits 3 Mahnungen versendet.');
+	// the previous one first goes to the post: its Zahlungsfrist runs from that day (#449, decided in #404, point 2)
+	if (statement.reminderToSend)
+		throw new ReminderError('REMINDER_PREVIOUS_NOT_SENT', 'The previous reminder is not marked sent yet', 400, { reminderLevel: level - 1 });
 	// the next Mahnstufe from the day after the last reminder's Zahlungsfrist (#107)
 	const from = statement.nextReminderFrom;
 	if (from && from > swissToday()) {
@@ -156,6 +159,11 @@ export async function markDocumentPosted(id: string) {
 	if (document?.type !== 'reminder' || document.status !== 'to_send') return markDocumentSent(id);
 	const today = swissToday();
 	const statement = (await getStatement(document.statementId!))!;
+	// nothing left to claim: the letter stays under «Dokumente» (#449, decided in #404: point 3, V-4)
+	if (statement.status === 'replaced')
+		throw new ReminderError('REMINDER_STATEMENT_REPLACED', 'The statement is replaced; do not send this reminder any more');
+	if (statement.status === 'paid')
+		throw new ReminderError('REMINDER_STATEMENT_PAID', 'The statement is paid; do not send this reminder any more');
 	const { pdf, paymentDeadline } = await reminderOn(statement, document.reminderLevel!, today);
 	await updateStatement(statement.id, { reminderSentDate: today });
 	return markDocumentSent(id, { content: pdf.toString('base64'), paymentDeadline });

@@ -80,7 +80,6 @@ Funktionalität: Mahnungen
     Und steht im PDF "Währung Betrag CHF 2 320.00"
 
   # #449 (Entscheid in #404, Punkt 4): der Liegenschaftsverwalter weiss vor dem Senden, in welcher Sprache die Mahnung ist
-  @wip
   Szenario: Die Mahnung nennt vor dem Senden ihre Sprache
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und die Korrespondenz an "Anna Keller" ist auf "Französisch"
@@ -89,7 +88,6 @@ Funktionalität: Mahnungen
     Dann sagt die Mahnung vor dem Senden "Dwello erstellt die Zahlungserinnerung auf Französisch als PDF"
 
   # #449 (Punkt 6, #283): Kanal E-Mail ohne Adresse; die Mahnung entsteht als Brief unter «Dokumente»
-  @wip
   Szenario: Die Mahnung sagt vor dem Senden, dass die E-Mail-Adresse fehlt
     Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
@@ -98,7 +96,6 @@ Funktionalität: Mahnungen
 
   # #449 (Punkt 3, #322; Entscheid V-2 A): bezahlt, bevor der Brief zur Post ging; der Brief bleibt unter «Dokumente»,
   # zählt aber nicht mehr als «Zu versenden»
-  @wip
   Szenario: Eine Mahnung nach der Zahlung geht nicht mehr hinaus
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
@@ -108,7 +105,6 @@ Funktionalität: Mahnungen
     Und ist die "Zahlungserinnerung" an "Anna Keller" nicht mehr bei den zu versendenden Dokumenten
 
   # #449 (Punkt 3): bezahlt, während die Liste «Zu versenden» offen war; Markieren lehnt Dwello ab
-  @wip
   Szenario: Eine Mahnung einer inzwischen bezahlten Abrechnung lässt sich nicht als versendet markieren
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
@@ -118,7 +114,6 @@ Funktionalität: Mahnungen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Abrechnung ist bereits bezahlt. Schicken Sie diese Mahnung nicht mehr ab."
 
   # #449 (Entscheid V-4): eine ersetzte Abrechnung wird nicht gemahnt (Glossar «Ersetzt»)
-  @wip
   Szenario: Eine Mahnung einer ersetzten Abrechnung lässt sich nicht als versendet markieren
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten

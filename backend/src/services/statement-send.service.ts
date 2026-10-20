@@ -9,7 +9,11 @@ import { CodedError } from './coded-error';
 import { getTypedConfig } from './config.service';
 import { createDocument } from './document.service';
 import { balanceText } from './pdf.service';
-import { statementMail } from './reminder-letter';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { utilityStatements } from '../db/schema';
+import type { Language } from './pdf.service';
+import { statementMail, statementTitle } from './reminder-letter';
 import { changeStatementStatus, generateStatementPdf } from './statement-pdf.service';
 import { getStatement } from './statement.service';
 import { getTenant } from './tenant.service';
@@ -19,7 +23,7 @@ export async function sendStatement(id: string, byLetter = false) {
 	if (!statement) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (statement.status !== 'draft') throw new CodedError('STATEMENT_ALREADY_SENT', 'Only a draft can be sent');
 	const tenant = (await getTenant(statement.tenantId))!;
-	if (byLetter || tenant.correspondenceChannel !== 'email') return { statement: await changeStatementStatus(id, 'sent') };
+	if (byLetter || tenant.correspondenceChannel !== 'email') return sendByLetter(id, statement.statementNumber, tenant);
 	if (!tenant.email) throw new CodedError('STATEMENT_TENANT_NO_EMAIL', 'The tenant has no e-mail address');
 
 	// the PDF dated today, as it goes out and stays in the Dokument
@@ -33,7 +37,7 @@ export async function sendStatement(id: string, byLetter = false) {
 		balance: balanceText(made.data, made.language),
 		language: made.language
 	});
-	const fileName = `${mail.title} ${statement.statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
+	const fileName = fileNameOf(mail.title, statement.statementNumber);
 	try {
 		await createMailTransport().send({
 			to: tenant.email,
@@ -56,6 +60,35 @@ export async function sendStatement(id: string, byLetter = false) {
 		fileName,
 		content: made.pdf,
 		channel: 'email',
+		recipient: tenant.email,
+		status: 'sent',
+		sentAt: new Date()
+	});
+	return { statement: sent, document };
+}
+
+const fileNameOf = (title: string, statementNumber: string) => `${title} ${statementNumber}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
+
+/**
+ * The landlord delivers the PDF: Dwello records the statement as sent and keeps the PDF as sent as a Dokument by letter
+ * (#449, decided in #404, point 7)
+ */
+async function sendByLetter(id: string, statementNumber: string, tenant: { id: string; language: string }) {
+	// no letter without its PDF, refused as the e-mail is; a refusal of the PDF itself passes as it is (#491)
+	const made = await generateStatementPdf(id);
+	if (made === 'no-iban') throw new CodedError('IBAN_MISSING', 'IBAN not configured');
+	const sent = await changeStatementStatus(id, 'sent');
+	const [{ pdf }] = await db.select({ pdf: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id));
+	if (!pdf) return { statement: sent }; // made a moment ago; only a failure in between leaves none
+	const title = statementTitle(tenant.language as Language);
+	const document = await createDocument({
+		tenantId: tenant.id,
+		statementId: id,
+		type: 'statement',
+		title,
+		fileName: fileNameOf(title, statementNumber),
+		content: pdf,
+		channel: 'letter',
 		status: 'sent',
 		sentAt: new Date()
 	});

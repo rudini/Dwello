@@ -568,11 +568,13 @@ function winAnsi(text: string) {
 // The floor as tenants write it: ground floor, above, below
 // English counts floors with ordinals: 1st, 2nd, 3rd, 4th (461-native-en, EN-32)
 const ORDINAL: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' };
+const englishFloor = (word: string) => (n: number) =>
+	`${n}${ORDINAL[new Intl.PluralRules('en', { type: 'ordinal' }).select(n)]} ${word}`; // below ground too (#449)
 const FLOORS: Record<Language, [string, (n: number) => string, (n: number) => string]> = {
 	de: ['EG', (n) => `${n}. OG`, (n) => `${n}. UG`],
 	fr: ['rez-de-chaussée', (n) => (n === 1 ? '1er étage' : `${n}e étage`), (n) => (n === 1 ? '1er sous-sol' : `${n}e sous-sol`)],
 	it: ['pianterreno', (n) => `${n}° piano`, (n) => `${n}° piano interrato`],
-	en: ['ground floor', (n) => `${n}${ORDINAL[new Intl.PluralRules('en', { type: 'ordinal' }).select(n)]} floor`, (n) => `basement ${n}`]
+	en: ['ground floor', englishFloor('floor'), (n) => (n === 1 ? 'basement' : englishFloor('basement')(n))]
 };
 
 function formatFloor(floor: number, lang: Language): string {

@@ -33,7 +33,7 @@ const WORDING = {
 			(s: string) => `gemäss unseren Unterlagen ist die ${s} noch offen. Möglicherweise haben Sie die Zahlung übersehen.`,
 			(s: string) => `Trotz unserer Zahlungserinnerung ist die ${s} noch nicht bezahlt.`,
 			(s: string) =>
-				`Trotz zweimaliger Mahnung ist die ${s} noch immer nicht bezahlt. Begleichen Sie den Betrag bitte umgehend, andernfalls müssen wir weitere Schritte einleiten.`
+				`Trotz zweimaliger Mahnung ist die ${s} noch immer nicht bezahlt. Geht der Betrag nicht innert der unten genannten Frist ein, müssen wir weitere Schritte einleiten.`
 		],
 		amount: 'Offener Betrag: ',
 		payBy: (date: string) => `Bitte überweisen Sie den Betrag bis ${date} auf folgendes Konto:`,
@@ -52,7 +52,7 @@ const WORDING = {
 			(s: string) => `Sauf erreur de notre part, le ${s} n’a pas encore été réglé. Ce paiement vous a peut-être échappé.`,
 			(s: string) => `Malgré notre rappel de paiement, le ${s} n’a toujours pas été réglé.`,
 			(s: string) =>
-				`Malgré deux rappels, le ${s} n’a toujours pas été réglé. Veuillez régler le montant sans délai, faute de quoi nous nous verrons contraints d’entreprendre d’autres démarches.`
+				`Malgré deux rappels, le ${s} n’a toujours pas été réglé. Si le montant ne nous parvient pas dans le délai indiqué ci-dessous, nous nous verrons contraints d’entreprendre d’autres démarches.`
 		],
 		amount: `Montant dû${NBSP}: `,
 		payBy: (date: string) => `Veuillez virer le montant au plus tard le ${date} sur le compte suivant${NBSP}:`,
@@ -71,7 +71,7 @@ const WORDING = {
 			(s: string) => `Secondo la nostra contabilità, il ${s} non è ancora stato pagato. Forse il pagamento le è sfuggito.`,
 			(s: string) => `Nonostante il nostro promemoria di pagamento, il ${s} non è ancora stato pagato.`,
 			(s: string) =>
-				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non pagato. Le chiediamo di saldare l’importo senza indugio, altrimenti dovremo adottare ulteriori provvedimenti.`
+				`Nonostante il promemoria e il sollecito, il ${s} risulta tuttora non pagato. Se l’importo non ci perverrà entro il termine indicato qui sotto, dovremo adottare ulteriori provvedimenti.`
 		],
 		amount: 'Importo dovuto: ',
 		payBy: (date: string) => `La preghiamo di versare l’importo entro il ${date} sul seguente conto:`,
@@ -90,7 +90,7 @@ const WORDING = {
 			(s: string) => `According to our records, the ${s} is still unpaid. You may have overlooked the payment.`,
 			(s: string) => `Despite our payment reminder, the ${s} has still not been paid.`,
 			(s: string) =>
-				`Despite two reminders, the ${s} has still not been paid. Please settle the amount immediately; otherwise we will have to take further steps.`
+				`Despite two reminders, the ${s} has still not been paid. If the amount is not received by the deadline below, we will have to take further steps.`
 		],
 		amount: 'Amount outstanding: ',
 		payBy: (date: string) => `Please transfer the amount by ${date} to the following account:`,
@@ -148,6 +148,9 @@ export interface StatementMailInput {
 	balance: string; // what the Saldo asks the tenant to do, as the PDF says it
 	language: Language;
 }
+
+/** What the statement's Dokument is called in the tenant's language, sent by e-mail or by letter */
+export const statementTitle = (language: Language) => WORDING[language].statementTitle;
 
 /** The e-mail that sends a statement's PDF: its title also names the stored Dokument */
 export function statementMail(input: StatementMailInput) {

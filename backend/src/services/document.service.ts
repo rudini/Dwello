@@ -15,6 +15,11 @@ export interface DocumentFilters {
 	status?: string;
 }
 
+// A reminder still to send whose statement is replaced or paid since: it no longer goes out, without a status of its
+// own; «ersetzt» first, the current status (#449, decided in #404: V-2 A, N-1 A)
+const notToSend = sql<'replaced' | 'paid' | null>`case when ${documents.type} = 'reminder' and ${documents.status} = 'to_send'
+	then case ${utilityStatements.status} when 'replaced' then 'replaced' when 'paid' then 'paid' end end`;
+
 // Everything but the PDF itself, plus whom it is for
 const summary = {
 	id: documents.id,
@@ -29,7 +34,9 @@ const summary = {
 	status: documents.status,
 	sentAt: documents.sentAt,
 	deliveryError: documents.deliveryError,
+	recipient: documents.recipient,
 	paymentDeadline: documents.paymentDeadline,
+	notToSend,
 	createdAt: documents.createdAt,
 	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
 	statementNumber: utilityStatements.statementNumber
@@ -63,7 +70,8 @@ export async function listDocuments(filters: DocumentFilters = {}) {
 	const conditions = [
 		filters.tenantId && eq(documents.tenantId, filters.tenantId),
 		filters.statementId && eq(documents.statementId, filters.statementId),
-		filters.status && eq(documents.status, filters.status)
+		filters.status && eq(documents.status, filters.status),
+		filters.status === 'to_send' && sql`${notToSend} is null`
 	].filter((condition): condition is SQL => Boolean(condition));
 	return selectSummaries(and(...conditions));
 }

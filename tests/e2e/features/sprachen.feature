@@ -22,7 +22,6 @@ Funktionalität: Sprache der Oberfläche
     Dann ist die Seite auf "Deutsch"
 
   # #449 (Entscheid in #404, Punkt 5.3): englische Stockwerke als Ordinalzahlen, auch unter dem Erdgeschoss
-  @wip
   Szenario: Englische Stockwerke unter dem Erdgeschoss
     Angenommen das Gebäude "Ulmenhof" in "Winterthur" existiert
     Und im Gebäude "Ulmenhof" gibt es die leere Wohnung "K2" im Stockwerk -2

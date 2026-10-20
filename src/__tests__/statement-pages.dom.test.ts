@@ -1013,7 +1013,7 @@ describe('Abrechnungsdetail', () => {
 		const dialog = document.querySelector('[role="dialog"]')!;
 		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
 		// #449, Entscheid V-7: der Brief wird ein Dokument
-		expect(dialog.textContent).toContain('Dwello legt sie danach unter «Dokumente» ab.');
+		expect(dialog.textContent).toContain('Dwello legt sie dann unter «Dokumente» ab.'); // N-8
 		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
 		expect(recipient).toContain('Anna Keller');
 		expect(recipient).toContain('Korrespondenzkanal');
@@ -1097,7 +1097,8 @@ describe('Abrechnungsdetail', () => {
 	it('sagt genau, welche Adresse für den Versand fehlt', () => {
 		detail({ tenantCorrespondenceChannel: 'email', tenantEmail: '' });
 		click('statement-send-button');
-		expect(byTestId('send-recipient')!.textContent).toContain('keine E-Mail-Adresse erfasst');
+		// #449: without an e-mail address the dialog offers the letter and says why
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain('keine E-Mail-Adresse erfasst');
 	});
 
 	it('nennt beim Versand per Brief die Postadresse', () => {
