@@ -96,7 +96,9 @@ Funktionalität: Rechnungsliste
     Dann sagt die Datei von "Elektro Blitz" "Wählen Sie eine Kategorie."
     Und sagt die Datei von "Elektro Blitz" nicht "Die KI hat diese Datei nicht gelesen"
     Wenn der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" die Kategorie "Allgemeinstrom" wählt
-    Und der Liegenschaftsverwalter die Rechnungen erstellt
+    Dann bietet Dwello "1 Rechnung erstellen" an
+    Und sagt die Datei von "Elektro Blitz" nichts mehr
+    Wenn der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "1 Rechnung erstellt"
 
   # #245: eine schon erfasste Rechnung verlangt nichts zum Ausfüllen (Marco 233)

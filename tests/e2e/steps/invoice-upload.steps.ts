@@ -199,6 +199,11 @@ Then('sagt die Datei von {string} nicht {string}', async ({ verwalter, names }, 
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toContain(text);
 });
 
+// after the anchor (what Dwello offers to create): the row has nothing left to say
+Then('sagt die Datei von {string} nichts mehr', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).toBeNull();
+});
+
 Then('ist die Datei von {string} nicht zum Erstellen ausgewählt', async ({ verwalter, names }, supplier: string) => {
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toBeNull();
 	await verwalter.sees(belegChosenForCreating(names.get(supplier)!)).toBe(false);
