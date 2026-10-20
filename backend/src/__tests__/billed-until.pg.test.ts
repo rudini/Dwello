@@ -266,6 +266,12 @@ describe('Abgerechnet bis', () => {
 					code: 'BILLED_UNTIL_BILLED',
 					params: { number: stored.statementNumber }
 				});
+				// code review 499-1 C-4: once the berichtigte Abrechnung is sent, it counts, the replaced one no longer
+				await updateStatementStatus(correction.id, 'sent');
+				expect(await (await billedUntil('2024-06-30')).json()).toMatchObject({
+					code: 'BILLED_UNTIL_BILLED',
+					params: { number: correction.statementNumber }
+				});
 			} finally {
 				await db.delete(utilityStatements).where(eq(utilityStatements.id, correction.id));
 			}

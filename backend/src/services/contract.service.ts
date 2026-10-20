@@ -425,7 +425,7 @@ async function checkBilledByDwello(current: RentalContract, billedUntil: string 
 				)
 			)
 		)
-		.orderBy(utilityStatements.rentalStart)
+		.orderBy(utilityStatements.rentalStart, utilityStatements.statementNumber)
 		.limit(1);
 	if (!first) return;
 	const { number, start, end } = first;
