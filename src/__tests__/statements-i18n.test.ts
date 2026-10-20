@@ -109,7 +109,7 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 
 		expect(lineItems.map((item) => [item.categoryName, item.distributionKeyName])).toEqual([
 			['Chauffage', 'Par surface (m²)'],
-			['Chauffage', 'À parts égales par appartement']
+			['Chauffage', 'Par logement']
 		]);
 	});
 

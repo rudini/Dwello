@@ -552,6 +552,10 @@ Then(
 	}
 );
 
+Given('die Rechnung der Kategorie {string} vom {string} hat keinen Verteilschlüssel', async ({ seed }, category: string, date: string) => {
+	await seed.invoiceWithoutKey(`${category} ${date}`);
+});
+
 // #403: the Übertrag of the previous statement of the same Mietvertrag; a refund carried over subtracts, a Nachzahlung adds
 Then(
 	/^(zieht|zählt) die Abrechnung den Übertrag "([^"]+)" aus der Abrechnung (\d+) von "([^"]+)" (?:ab|dazu)$/,

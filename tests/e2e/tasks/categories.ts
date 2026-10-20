@@ -2,6 +2,8 @@ import type { Activity } from '../screenplay/actor';
 import { Browser, Check, Click, Enter, Navigate, Uncheck, Wait } from '../screenplay/interactions';
 import { viewports } from '../fixtures/screens';
 import {
+	allocabilityCancel,
+	allocabilityConfirm,
 	allowanceOption,
 	allowedFilter,
 	deleteButton,
@@ -66,3 +68,11 @@ export const askKi = (name: string): Activity => (actor) =>
 
 export const saveWithoutChoice = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(name).into(nameInput), Click.on(submitButton));
+
+export const saveAsAllowed = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(editButton(name)), Check.the(allowanceOption('Umlagefähig')), Click.on(submitButton));
+
+// The answer to the question before the allocability changes (#309)
+export const confirmAllocability: Activity = (actor) =>
+	actor.attemptsTo(Click.on(allocabilityConfirm), Wait.until(allowedFilter));
+export const cancelAllocability = Click.on(allocabilityCancel);

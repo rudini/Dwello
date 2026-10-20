@@ -37,7 +37,7 @@
 	} = $props();
 </script>
 
-<Field {id} {label} {help} {example} {error} {optional} {note}>
+<Field {id} {label} {help} {example} {error} {optional} {note} helpTestid={testid && `${testid}-help`}>
 	{#snippet children(control)}
 		<select
 			id={control.id}

@@ -13,6 +13,7 @@ import {
 	belegRemove,
 	belegAmount,
 	belegCategory,
+	belegDistributionKey,
 	belegInvoiceDate,
 	belegRow,
 	belegSelected,
@@ -87,6 +88,12 @@ export const fillInBeleg = (
 export const chooseCategory = (fileName: string, category: string): Activity => async (actor) => {
 	if (!(await actor.answer(Visibility.of(belegCategory(fileName))))) await actor.attemptsTo(openBeleg(fileName));
 	await actor.attemptsTo(Select.option({ label: category }).from(belegCategory(fileName)));
+};
+
+// the Verteilschlüssel of the file, where Dwello proposes none (#452 point 7)
+export const chooseKey = (fileName: string, key: string): Activity => async (actor) => {
+	if (!(await actor.answer(Visibility.of(belegDistributionKey(fileName))))) await actor.attemptsTo(openBeleg(fileName));
+	await actor.attemptsTo(Select.option({ label: key }).from(belegDistributionKey(fileName)));
 };
 
 export const createInvoices = Click.on(createInvoicesButton);

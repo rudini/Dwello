@@ -3,7 +3,7 @@
  * the end, not the purchases of the period
  */
 
-import { and, asc, desc, eq, lte } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, lte } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, fuelStocks, invoices } from '../db/schema';
 import { getTypedConfig } from './config.service';
@@ -55,6 +55,7 @@ async function keyFor(buildingId: string, categoryId: string, periodEnd: string)
 					eq(invoices.buildingId, buildingId),
 					eq(invoices.categoryId, categoryId),
 					eq(invoices.isValidUtilityCost, true),
+					isNotNull(invoices.distributionKeyId), // one recorded before the key was required (#379) has none
 					upTo ? lte(invoices.invoiceDate, upTo) : undefined
 				)
 			)

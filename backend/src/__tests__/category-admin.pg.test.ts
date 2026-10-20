@@ -3,13 +3,18 @@
  */
 
 import { afterAll, describe, expect, it } from 'bun:test';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { invoices } from '../db/schema';
+import { createBuilding, deleteBuilding } from '../services/building.service';
 import { callApi } from './helpers/auth';
-import { apiRecords, expectRejection, idOf, invoicedBuilding } from './helpers/records';
+import { apiRecords, expectRejection, idOf, insertInvoice, invoicedBuilding } from './helpers/records';
 
 const token = crypto.randomUUID();
 const categories = apiRecords('categories');
 let removeBuilding = async () => {};
 let removeRepairedBuilding = async () => {};
+let removeGardenBuilding = async () => {};
 
 // German and English name alike, as "Neue Kategorie" creates them
 const create = (name: string) =>
@@ -18,6 +23,7 @@ const create = (name: string) =>
 afterAll(async () => {
 	await removeBuilding();
 	await removeRepairedBuilding();
+	await removeGardenBuilding();
 	await categories.removeAll();
 });
 
@@ -119,5 +125,22 @@ describe('Kategorie wird nicht umlagefähig', () => {
 		const response = await callApi(`/api/v1/invoices?search=${encodeURIComponent(`Unterhalt ${token}`)}`);
 		const { invoices } = (await response.json()) as { invoices: { isValidUtilityCost: boolean }[] };
 		expect(invoices.map((invoice) => invoice.isValidUtilityCost)).toEqual([false]);
+	});
+
+	// #452 point 2 (#309): the question before saving names the invoices the save takes out
+	it('nennt, wie viele umlagefähige Rechnungen das Speichern ausnehmen würde', async () => {
+		const id = await idOf(await create('Gartenpflege'));
+		const building = await createBuilding({ name: `Gartenhaus ${token}`, address: 'Testweg 1', postalCode: '8400', city: 'Winterthur', canton: 'ZH' });
+		removeGardenBuilding = async () => {
+			await db.delete(invoices).where(eq(invoices.buildingId, building.id));
+			await deleteBuilding(building.id);
+		};
+		await insertInvoice(building.id, { categoryId: id });
+		await insertInvoice(building.id, { categoryId: id });
+		await insertInvoice(building.id, { categoryId: id, isValidUtilityCost: false });
+
+		const category = (await (await categories.send('GET', `/${id}`)).json()) as { allocableInvoiceCount: number };
+
+		expect(category.allocableInvoiceCount).toBe(2);
 	});
 });

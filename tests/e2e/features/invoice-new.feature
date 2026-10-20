@@ -76,3 +76,34 @@ Funktionalität: Neue Rechnung erfassen
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
+
+  # #452 Punkt 7 (#379): pro Kategorie und Gebäude gilt ein Verteilschlüssel; vorgeschlagen ist der der letzten Rechnung
+  Szenario: Dwello schlägt den Verteilschlüssel der letzten Rechnung derselben Kategorie im Gebäude vor
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Pro Zimmer" gewählt
+    Und erklärt das Formular beim Verteilschlüssel "Dwello schlägt den Verteilschlüssel vor, den die letzte Rechnung dieser Kategorie im Gebäude hat, sonst den aus den Einstellungen."
+
+  # Persona Helga P-1 (#452): der Vorschlag der vorherigen Kategorie bleibt nicht stehen; das E2E-Gebäude hat keinen
+  # Verteilschlüssel in den Einstellungen, also bleibt keiner gewählt
+  Szenario: Eine Kategorie ohne eigene Rechnung nimmt den Vorschlag der vorherigen zurück
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Und der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Lift" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Verteilschlüssel auswählen" gewählt
+
+  Szenario: Einen selbst gewählten Verteilschlüssel überschreibt der Vorschlag nicht
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Pro Einheit" wählt
+    Und der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Pro Einheit" gewählt
+
+  Szenario: Ohne Verteilschlüssel speichert das Formular die Rechnung nicht
+    Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "450.00" Franken für "Treppenhausreinigung Q1" im Gebäude "Seeblick" in der Kategorie "Hauswart" ohne Verteilschlüssel erfasst
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie, wie die Kosten verteilt werden."

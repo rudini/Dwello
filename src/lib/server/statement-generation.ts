@@ -4,7 +4,7 @@ import { overlappedBy, periodDays, periodsOf, uncovered } from '$lib/accounting-
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
 import { changedInvoiceCount, namesById, toStatement } from '$lib/server/statement';
-import type { ChangedStatement, InvoiceCheck } from '$lib/statement-wizard';
+import type { ChangedStatement, HintedInvoice, InvoiceCheck } from '$lib/statement-wizard';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
@@ -397,8 +397,8 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 					).catch(() => undefined)
 				]);
 				// an invoice with a Leistungszeitraum covers its days in the period, not its date
-				type Bill = {
-					invoiceDate: string;
+				type Bill = HintedInvoice & {
+					categoryId?: string | null;
 					servicePeriodEnd?: string | null;
 					inPeriod?: { start: string; end: string };
 				};
@@ -416,7 +416,17 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 					last: dates.at(-1) ?? null,
 					statements: (statements as Period[]).filter(overlaps).length,
 					check: found,
-					changed: await changedStatements(fetch, buildingId, run, overlapping, loadProfiles, oldRule)
+					changed: await changedStatements(fetch, buildingId, run, overlapping, loadProfiles, oldRule),
+					// #382: the agreement is checked through the category, so the run waits for one on each
+					uncategorized: (invoices as Bill[])
+						.filter((i) => !i.categoryId)
+						.map(({ id, billingEntityName, description, invoiceDate, amount }) => ({
+							id,
+							billingEntityName,
+							description,
+							invoiceDate,
+							amount
+						}))
 				};
 			})
 		),

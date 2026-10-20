@@ -13,6 +13,9 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { invoices } from '../db/schema';
 import { sendJson } from './helpers/auth';
 
 // Test data goes through the API only, so moving services into modules (phase 22.3) leaves this file untouched
@@ -133,7 +136,7 @@ beforeAll(async () => {
 	);
 	const invoice = (
 		categoryName: string,
-		distributionKeyId: string | null,
+		distributionKeyId: string,
 		amount: string,
 		invoiceDate: string,
 		isValidUtilityCost = true
@@ -159,7 +162,9 @@ beforeAll(async () => {
 	await invoice('Caretaker', perArea, '1200.00', '2024-03-31');
 	await invoice('Cold Water', key['Per Unit'], '600.00', '2024-05-31');
 	await invoice('Waste Disposal', key['Per Rooms'], '450.00', '2024-07-31');
-	await invoice('Elevator', null, '330.00', '2024-08-31');
+	// recorded before the key was required (#379): shared evenly per apartment
+	const elevator = await invoice('Elevator', key['Per Unit'], '330.00', '2024-08-31');
+	await db.update(invoices).set({ distributionKeyId: null }).where(eq(invoices.id, elevator));
 	// Same category and key as the March invoice: both form one line item
 	await invoice('Caretaker', perArea, '300.00', '2024-09-30');
 	// Not umlagefähig and outside the period: neither appears in the statement

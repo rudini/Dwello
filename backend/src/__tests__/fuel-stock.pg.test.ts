@@ -11,7 +11,7 @@ import { buildings, categories, distributionKeys, invoices } from '../db/schema'
 import { calculateStatement } from '../services/statement.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { callApi, sendJson } from './helpers/auth';
-import { insertInvoice } from './helpers/records';
+import { insertInvoice, perAreaKey } from './helpers/records';
 import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
@@ -241,6 +241,19 @@ describe('Tankbestand', () => {
 		]);
 	});
 
+	// Fachreview 452-2 V-22: an invoice recorded before the key was required (#379) does not hide an older key
+	it('nimmt den Schlüssel der letzten Rechnung, die einen hat', async () => {
+		await insertInvoice(rental.building, { categoryId: heating, description: 'Ohne Schlüssel', amount: '0.00', invoiceDate: '2025-12-01' });
+		await db.update(invoices).set({ distributionKeyId: null }).where(eq(invoices.description, 'Ohne Schlüssel'));
+		try {
+			// the stock's line; the invoice itself is a line of its own, without key
+			const stock = (await linesOf(rental.contract, 2025)).filter((line) => line.categoryId === heating && line.totalBuildingAmount !== 0);
+			expect(stock).toMatchObject([{ distributionKeyName: 'Per Area (m²)', totalBuildingAmount: 400 }]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, 'Ohne Schlüssel'));
+		}
+	});
+
 	// ein Hinweis auf die Tankbestände, keine Bestätigung (#73); nur einer für die Kategorie
 	it('meldet einen negativen Verbrauch', async () => {
 		await record('2026-12-31', '5000.00');
@@ -309,7 +322,7 @@ describe('Tankbestand über die API', () => {
 	it.each([{ isFuel: false }, { isHeatingCost: false }])('lässt einer Kategorie mit Tankbestand «Brennstoff» (%j)', async (change) => {
 		const [own] = await db
 			.insert(categories)
-			.values({ name: `Pellets ${Object.keys(change)[0]} ${token}`, isHeatingCost: true, isFuel: true })
+			.values({ name: `Pellets ${Object.keys(change)[0]} ${token}`, isHeatingCost: true, isFuel: true, type: 'custom' })
 			.returning();
 		const pellets = await createRental(`${token}-pellets-${Object.keys(change)[0]}`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
 		await record('2024-12-31', '900.00', pellets.building, own.id);
@@ -350,6 +363,7 @@ describe('Tankbestand über die API', () => {
 			amount: '2000.00',
 			invoiceDate: '2025-06-10',
 			categoryId: own.id,
+			distributionKeyId: await perAreaKey(),
 			isValidUtilityCost: true
 		});
 

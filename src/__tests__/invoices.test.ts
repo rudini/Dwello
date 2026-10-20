@@ -209,7 +209,8 @@ describe('Rechnung erfassen und bearbeiten', () => {
 	describe('Perioden mit Abrechnungen, die diese Rechnung enthalten', () => {
 		const periods = async (load: typeof editLoad | typeof detailLoad, answer: unknown) => {
 			const { fetch, urls } = backend({ ...answers, '/invoices/i1/statements': answer });
-			const data = (await load({ params: { id: 'i1' }, fetch } as never)) as {
+			const url = new URL('http://localhost/invoices/i1');
+			const data = (await load({ params: { id: 'i1' }, url, fetch } as never)) as {
 				billedIn: unknown;
 				missedIn: unknown;
 				statements: unknown;
@@ -301,7 +302,7 @@ describe('Rechnung erfassen und bearbeiten', () => {
 
 		const list = (await listLoad({ url: new URL('http://localhost/invoices'), fetch } as never)) as { buildings: { tank?: string }[] };
 		expect(list.buildings[0].tank).toBe(tanks.b1);
-		expect(((await editLoad({ params: { id: 'i1' }, fetch } as never)) as { tanks: object }).tanks).toEqual(tanks);
+		expect(((await editLoad({ params: { id: 'i1' }, url: new URL('http://localhost/invoices/i1/edit'), fetch } as never)) as { tanks: object }).tanks).toEqual(tanks);
 	});
 
 	it('übergeht ein unbekanntes Gebäude und eine fremde Rücksprung-Adresse', async () => {
@@ -313,6 +314,22 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		};
 
 		expect(data).toMatchObject({ buildingId: '', returnTo: null, period: null });
+	});
+
+	// Persona Dr. Weber P-2 (#452): aus der Vorschau zurück in den Assistenten, nie auf eine fremde Seite
+	it('kehrt nach dem Bearbeiten zum Assistenten zurück, nie zu einer fremden Adresse', async () => {
+		const returnTo = async (to: string) => {
+			const url = new URL(`http://localhost/invoices/i1/edit?returnTo=${encodeURIComponent(to)}`);
+			const data = await editLoad({
+				params: { id: 'i1' },
+				url,
+				fetch: backend(answers).fetch
+			} as never);
+			return (data as { returnTo: string | null }).returnTo;
+		};
+
+		expect(await returnTo('/statements/generate?schritt=3')).toBe('/statements/generate?schritt=3');
+		expect(await returnTo('https://example.com')).toBeNull();
 	});
 
 	// Die Kategorien kamen bei einer Persona erst beim zweiten Besuch: sie hängen nicht an der KI
@@ -342,10 +359,11 @@ describe('Rechnung prüfen', () => {
 		invoiceDate: '2025-06-30',
 		billingEntity: 'Hauswart Huber',
 		description: 'Reinigung',
-		amount: "1'200.50"
+		amount: "1'200.50",
+		distributionKeyId: 'k1'
 	};
 
-	it('verlangt Gebäude, Datum, Rechnungssteller, Beschreibung und einen Betrag über null', () => {
+	it('verlangt Gebäude, Datum, Rechnungssteller, Beschreibung, einen Betrag über null und einen Verteilschlüssel', () => {
 		expect(
 			Object.keys(
 				validateInvoice({
@@ -356,7 +374,7 @@ describe('Rechnung prüfen', () => {
 					amount: '0'
 				})
 			)
-		).toEqual(['buildingId', 'invoiceDate', 'billingEntity', 'description', 'amount']);
+		).toEqual(['buildingId', 'invoiceDate', 'billingEntity', 'description', 'amount', 'distributionKeyId']);
 	});
 
 	it('nimmt Beträge so, wie man sie in der Schweiz schreibt', () => {
@@ -388,6 +406,9 @@ describe('Rücksprung nach dem Erfassen', () => {
 		expect(localPath('https://example.com')).toBeNull();
 		expect(localPath('//example.com')).toBeNull();
 		expect(localPath('/\\example.com')).toBeNull();
+		// the browser drops tabs and line breaks from an address: «/\t/x» is «//x» (code review 452-4 C-18)
+		expect(localPath('/\t/evil.example')).toBeNull();
+		expect(localPath('/\n/evil.example')).toBeNull();
 		expect(localPath(null)).toBeNull();
 	});
 });
