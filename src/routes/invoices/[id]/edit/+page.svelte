@@ -33,6 +33,7 @@
 			defaultDistributionKeyId: string;
 			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice
 			missedIn?: { start: string; end: string }[]; // periods with statements made before it was recorded
+			returnTo?: string | null; // opened from the statement wizard (Persona Dr. Weber P-2, #452)
 		};
 	} = $props();
 
@@ -51,6 +52,7 @@
 		isValidUtilityCost: data.invoice.isValidUtilityCost
 	}));
 	const invoice = $derived(data.invoice);
+	const back = $derived(data.returnTo ?? `/invoices/${invoice.id}`);
 	// Fachreview 452-1 V-5: recorded before the key was required; a corrected statement shares it by the new one
 	const keyNote = initial.distributionKeyId
 		? undefined
@@ -100,7 +102,7 @@
 			return;
 		}
 		addToast('success', m.invoices_saved({ name: values.billingEntity.trim() }));
-		goto(`/invoices/${invoice.id}`);
+		goto(back);
 	}
 </script>
 
@@ -191,7 +193,7 @@
 	<div class="flex flex-col gap-4">
 		<p class="text-ink-muted" role="status">{changed ? m.invoices_unsaved() : ''}</p>
 		<InvoiceFormActions
-			cancelHref="/invoices/{invoice.id}"
+			cancelHref={back}
 			label={m.buildings_save_changes()}
 			busyLabel={m.ui_saving()}
 			busy={saving}

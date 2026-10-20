@@ -19,6 +19,8 @@
 		tone?: Exclude<Tone, 'neutral'>;
 		testid: string;
 	} = $props();
+	// saving or cancelling the edit leads back to the wizard (Persona Dr. Weber P-2, #452)
+	const back = encodeURIComponent('/statements/generate?schritt=3');
 </script>
 
 {#if buildings.length}
@@ -30,7 +32,7 @@
 				{#each row.invoices as invoice (invoice.id)}
 					<li data-testid="hinted-invoice">
 						<a
-							href="/invoices/{invoice.id}/edit"
+							href="/invoices/{invoice.id}/edit?returnTo={back}"
 							class="inline-flex min-h-12 items-center text-accent underline underline-offset-4"
 							>{m.statements_hinted_invoice({
 								supplier: invoice.billingEntityName,

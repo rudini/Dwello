@@ -208,7 +208,8 @@ describe('Rechnung erfassen und bearbeiten', () => {
 	describe('Perioden mit Abrechnungen, die diese Rechnung enthalten', () => {
 		const periods = async (load: typeof editLoad | typeof detailLoad, answer: unknown) => {
 			const { fetch, urls } = backend({ ...answers, '/invoices/i1/statements': answer });
-			const data = (await load({ params: { id: 'i1' }, fetch } as never)) as {
+			const url = new URL('http://localhost/invoices/i1');
+			const data = (await load({ params: { id: 'i1' }, url, fetch } as never)) as {
 				billedIn: unknown;
 				missedIn: unknown;
 			};
@@ -275,6 +276,22 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		};
 
 		expect(data).toMatchObject({ buildingId: '', returnTo: null, period: null });
+	});
+
+	// Persona Dr. Weber P-2 (#452): aus der Vorschau zurück in den Assistenten, nie auf eine fremde Seite
+	it('kehrt nach dem Bearbeiten zum Assistenten zurück, nie zu einer fremden Adresse', async () => {
+		const returnTo = async (to: string) => {
+			const url = new URL(`http://localhost/invoices/i1/edit?returnTo=${encodeURIComponent(to)}`);
+			const data = await editLoad({
+				params: { id: 'i1' },
+				url,
+				fetch: backend(answers).fetch
+			} as never);
+			return (data as { returnTo: string | null }).returnTo;
+		};
+
+		expect(await returnTo('/statements/generate?schritt=3')).toBe('/statements/generate?schritt=3');
+		expect(await returnTo('https://example.com')).toBeNull();
 	});
 
 	// Die Kategorien kamen bei einer Persona erst beim zweiten Besuch: sie hängen nicht an der KI

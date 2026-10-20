@@ -940,6 +940,21 @@ describe('Rechnung bearbeiten', () => {
 		expect(goto).toHaveBeenCalledWith('/invoices/i1');
 	});
 
+	// Persona Dr. Weber P-2 (#452): aus der Vorschau geöffnet, führt Speichern und Abbrechen zurück
+	it('kehrt nach dem Speichern und beim Abbrechen zum Assistenten zurück', async () => {
+		fakeBff(() => [200, {}]);
+		const returnTo = '/statements/generate?schritt=3';
+		show(EditInvoicePage, {
+			data: { invoice: invoice(), buildings, categories, distributionKeys, returnTo }
+		} as never);
+
+		expect(byTestId('form-cancel')!.getAttribute('href')).toBe(returnTo);
+		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '480');
+		submit('submit-button');
+		await settle();
+		expect(goto).toHaveBeenCalledWith(returnTo);
+	});
+
 	it('verlangt einen Grund, wenn die Kategorie der KI geändert wird', async () => {
 		const calls = fakeBff(() => [200, {}]);
 		edit({

@@ -973,7 +973,9 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('hinted-invoice')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			`${late.billingEntityName}: ${late.description}. Rechnungsdatum 20.01.2026, CHF 290.00`
 		);
-		expect(hint.querySelector('a')!.getAttribute('href')).toBe(`/invoices/${late.id}/edit`);
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/${late.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+		);
 		expect(byTestId('confirm-missing-invoices')).toBeNull();
 		next();
 		await settle();
@@ -989,7 +991,9 @@ describe('Abrechnungen erstellen', () => {
 		expect(hint.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Diese umlagefähigen Rechnungen haben keine Kategorie. Dwello rechnet nur Nebenkosten ab, die der Mietvertrag vereinbart, und prüft das über die Kategorie. Ordnen Sie jeder Rechnung eine Kategorie zu oder stellen Sie sie auf «Nicht umlagefähig». Danach geht es weiter.'
 		);
-		expect(hint.querySelector('a')!.getAttribute('href')).toBe(`/invoices/${late.id}/edit`);
+		expect(hint.querySelector('a')!.getAttribute('href')).toBe(
+			`/invoices/${late.id}/edit?returnTo=${encodeURIComponent('/statements/generate?schritt=3')}`
+		);
 		next();
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Ordnen Sie jeder Rechnung eine Kategorie zu');
