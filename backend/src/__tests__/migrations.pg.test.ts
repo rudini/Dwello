@@ -90,13 +90,13 @@ describe('Migrationen anwenden', () => {
 		expect(await query(name, `SELECT name, description FROM categories WHERE name IN (${described}) ORDER BY sort_order`)).toEqual([
 			{ name: 'Heating', description: 'Brennstoff, Energie, Wartung und Betrieb der Heizung, auch Versicherung nur der Heizungsanlage und Verwaltungsarbeit für den Heizbetrieb; ohne Reparatur, Erneuerung, Verzinsung und Abschreibung der Anlage' },
 			{ name: 'Garden Maintenance', description: 'Laufende Pflege von Garten und Umgebung: Rasenmähen, Rückschnitt von Sträuchern, Laub- und Unkrautentfernung; ohne Neubepflanzung, Baumfällung, Rasensanierung und Anschaffung von Geräten' },
-			// 0028 ran before 0021 here and found its seeded text not yet
+			// 0029 ran before 0021 here and found its seeded text not yet
 			{ name: 'Waste Disposal', description: 'Kehrichtgebühren und Grünabfuhr; ohne Räumungen, die der Vermieter bestellt' },
 			{ name: 'TV/Cable', description: 'Laufende Grundgebühr des Kabelnetzes; ohne Installation des Anschlusses' },
 			{ name: 'Building Insurance', description: 'Prämien der Gebäudeversicherung; ohne Prämien, die nur die Heizungsanlage versichern (gehören zur Heizung)' },
 			{ name: 'Administration', description: 'Allgemeine Verwaltungskosten; ohne Verwaltungsarbeit für den Heizbetrieb, z. B. Brennstoff bestellen (gehört zur Heizung), und ohne Verwaltungspauschale' }
 		]);
-		// #452 point 5 (#399), 0028
+		// #452 point 5 (#399), 0029
 		expect(await query(name, `SELECT description FROM categories WHERE name = 'Elevator'`)).toEqual([
 			{ description: 'Strom, Notruftelefon und Wartung des Lifts, bei einem Vollservicevertrag nur der Anteil der Wartung; ohne Reparaturen und Ersatzteile' }
 		]);
@@ -104,7 +104,7 @@ describe('Migrationen anwenden', () => {
 
 	// #452 points 5 (#399) and 6 (#220)
 	it('nennt beim Lift den Anteil eines Vollservicevertrags und nimmt beim Kehricht wertabhängige Grundgebühren aus', async () => {
-		const name = await withoutDescriptions('0028_lift_waste_descriptions.sql');
+		const name = await withoutDescriptions('0029_lift_waste_descriptions.sql');
 
 		await migrate(`${server}/${name}`, migrations);
 
@@ -116,7 +116,7 @@ describe('Migrationen anwenden', () => {
 
 	// #452 points 5 and 6: only the seeded texts change
 	it('lässt die Beschreibungen von Lift und Kehricht, die der Vermieter geändert hat, wie sie sind', async () => {
-		const name = await withoutDescriptions('0028_lift_waste_descriptions.sql');
+		const name = await withoutDescriptions('0029_lift_waste_descriptions.sql');
 		await query(name, `UPDATE categories SET description = 'Eigener Text ' || name WHERE name IN ('Elevator', 'Waste Disposal')`);
 
 		await migrate(`${server}/${name}`, migrations);
