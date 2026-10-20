@@ -118,8 +118,14 @@ Funktionalität: Übersicht
 
   # #454 (#408 Punkt 7, #386): ein Entwurf, dem eine danach erfasste Rechnung fehlt, ist nicht aktuell; die Übersicht
   # nennt ihn vor den Entwürfen zum Zustellen und führt zu den Entwürfen des Gebäudes und der Periode
+  # ein aktueller Entwurf in einem anderen Gebäude: die Entwurfsaufgabe zählt nur ihn, unabhängig von parallelen Läufen
   Szenario: Nicht aktuelle Entwürfe als eigene Aufgabe
-    Angenommen "Anna Keller" hat eine Abrechnung im Entwurf
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2020-01-01" für "900" Franken
+    Und "Bruno Meier" hat die Abrechnung des letzten Jahres für das Gebäude "Ahornhof"
+    Und "Anna Keller" hat eine Abrechnung im Entwurf
     Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe zu nicht aktuellen Entwürfen die Entwürfe von "Seeblick" des letzten Jahres
