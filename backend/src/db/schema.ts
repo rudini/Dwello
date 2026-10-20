@@ -457,8 +457,10 @@ export const utilityStatements = pgTable(
 		// a berichtigte Abrechnung: the statement it replaces and what was already paid on that one and its own (#120)
 		replacesId: uuid('replaces_id').references((): AnyPgColumn => utilityStatements.id),
 		priorPayments: decimal('prior_payments', { precision: 12, scale: 2 }).notNull().default('0'),
+		// the Übertrag: the statement of the same Mietvertrag whose Saldo below CHF 5 this one counts in (#448)
+		carriedFromId: uuid('carried_from_id').references((): AnyPgColumn => utilityStatements.id),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
-		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid, replaced; overdue is computed from the payment deadline
+		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid, settled (#448), replaced; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
 		paidDate: date('paid_date'),
 		paidAmount: decimal('paid_amount', { precision: 12, scale: 2 }),

@@ -1,8 +1,10 @@
 import { CallTheApi, throughUiOrApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
-import { Click, DownloadFrom, EnterDate, Navigate } from '../screenplay/interactions';
+import { Click, DownloadFrom, Enter, EnterDate, Navigate } from '../screenplay/interactions';
 import {
 	confirmCorrectButton,
+	confirmEarlyPaidDateButton,
+	correctPaidAmountInput,
 	correctStatementButton,
 	confirmRecalculateButton,
 	recalculateButton,
@@ -87,3 +89,8 @@ export const createCorrection = Click.on(createCorrectionButton);
 export const openReplacedStatement = Click.on(replacesLink);
 export const openCorrection = Click.on(replacedByLink);
 export const openReplacedContract = Click.on(replacedContractLink);
+
+// #403
+export const confirmEarlyPaidDate = Click.on(confirmEarlyPaidDateButton);
+export const correctStatementPaid = (amount: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(correctStatementButton), Enter.theValue(amount).into(correctPaidAmountInput), Click.on(confirmCorrectButton));

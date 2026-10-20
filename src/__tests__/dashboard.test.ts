@@ -20,7 +20,7 @@ const apartment = (buildingId: string, status: string, fields: Record<string, st
 });
 const figures = {
 	portfolio: { totalBuildings: 1, totalApartments: 2, occupiedApartments: 1, reletApartments: 0 },
-	statements: { draft: 1, sent: 1, paid: 0, overdue: 1 },
+	statements: { draft: 1, sent: 1, paid: 0, settled: 0, overdue: 1 },
 	buildingOccupancy: [
 		{ buildingId: 'b1', buildingName: 'Seeblick', occupiedApartments: 1 },
 		{ buildingId: 'b2', buildingName: 'Lindenhof', occupiedApartments: 2 },

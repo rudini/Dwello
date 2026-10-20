@@ -5,6 +5,7 @@ import {
 	deadlineFields,
 	notes,
 	notesField,
+	notesHelp,
 	paymentDeadline,
 	paymentDeadlineInvalid,
 	paymentDeadlineProblem
@@ -60,3 +61,15 @@ Then(
 		await verwalter.sees(costsAreRecalculated).toBe(true);
 	}
 );
+
+Given(
+	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite der berichtigten Abrechnung {int} von {string}',
+	async ({ verwalter, seed }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(openStatementEdit(`/statements/${seed.idOf(`Berichtigte Abrechnung ${tenant} ${year}`)}`));
+	}
+);
+
+// #403 (6): visible help at the field, not a tooltip
+Then('erklärt die Bearbeitungsseite die Bemerkung mit {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(notesHelp).toBe(help);
+});

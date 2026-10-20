@@ -2,6 +2,7 @@ import type { Activity } from '../screenplay/actor';
 import { Click, DownloadFrom, Enter, Navigate, Select, Wait } from '../screenplay/interactions';
 import {
 	draftFilter,
+	settledFilter,
 	generateStatementsButton,
 	nextPageLink,
 	openStatementLink,
@@ -47,6 +48,13 @@ export const showDraftsOfBuilding = (buildingId: string): Activity => (actor) =>
 		showStatementsOfBuilding(buildingId),
 		Click.on(draftFilter),
 		filteredBy({ building: buildingId, status: 'draft' })
+	);
+
+export const showSettledOfBuilding = (buildingId: string): Activity => (actor) =>
+	actor.attemptsTo(
+		showStatementsOfBuilding(buildingId),
+		Click.on(settledFilter),
+		filteredBy({ building: buildingId, status: 'settled' })
 	);
 
 export const turnToNextPage = Click.on(nextPageLink);

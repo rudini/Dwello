@@ -503,7 +503,8 @@ describe('Zahlteil der Mahnung', () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
 		const statementId = await statement('sent');
 		const letter = (await remind(statementId)).document;
-		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		// paid as recorded: the period of this statement may end after today, before which the API refuses it (#448)
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId));
 		await api('PUT', `/api/v1/documents/${letter.id}/sent`);
 		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
 

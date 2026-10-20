@@ -823,7 +823,7 @@ describe('PDF eines Entwurfs nach einer Änderung bei Mieter oder Einstellungen'
 		const [settled] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statementId));
 		await db.update(utilityStatements).set({ status: 'draft', balance, paidDate: null, paidAmount: null, paymentRecordedAt: null }).where(eq(utilityStatements.id, statementId));
 
-		expect(settled.status).toBe('paid');
+		expect(settled.status).toBe('settled'); // «Erledigt» (#448)
 		expect(settled.pdfGeneratedAt).not.toBeNull();
 	});
 });

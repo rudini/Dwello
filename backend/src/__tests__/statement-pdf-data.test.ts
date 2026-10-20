@@ -70,6 +70,30 @@ describe('Daten der Abrechnung im PDF', () => {
 		});
 	});
 
+	// #448: unter CHF 5 übertragen, ausser auf der Schlussabrechnung; nach #94 erledigt bleibt der damalige Text
+	it.each([
+		[{ balance: '3.00', status: 'settled' }, { carried: true }],
+		[{ balance: '-3.00', status: 'draft' }, { carried: true }],
+		[{ balance: '3.00', status: 'sent', final: true }, {}],
+		// Fachreview 448-2 V-17: erledigt bleibt erledigt, auch wenn das Vertragsende danach in die Periode fällt
+		[{ balance: '3.00', status: 'settled', final: true }, { carried: true }],
+		[{ balance: '3.00', status: 'paid', paidDate: '2025-02-01', paidAmount: '0.00' }, { waived: true }],
+		[{ balance: '0.00', status: 'settled' }, {}],
+		[{ balance: '5.00', status: 'sent' }, {}]
+	])('übernimmt bei %o, was mit einem kleinen Saldo geschieht', (overrides, expected) => {
+		const data = toPdfData({ ...statement, ...overrides } as StatementWithDetails, categories, 'de');
+		expect({ carried: data.carried, waived: data.waived }).toEqual({ carried: undefined, waived: undefined, ...expected });
+	});
+
+	it('übernimmt den Übertrag und die Bemerkung', () => {
+		const data = toPdfData(
+			{ ...statement, notes: 'Berichtigt', carriedFrom: { id: 's0', statementNumber: 'NK-0', balance: '-3.00' } } as StatementWithDetails,
+			categories,
+			'de'
+		);
+		expect(data).toMatchObject({ notes: 'Berichtigt', carryOver: { statementNumber: 'NK-0', amount: -3 } });
+	});
+
 	// #120: die berichtigte Abrechnung nennt die ersetzte und was darauf schon bezahlt ist
 	it('übernimmt die ersetzte Abrechnung und das schon Bezahlte', () => {
 		const corrected = {
@@ -83,7 +107,8 @@ describe('Daten der Abrechnung im PDF', () => {
 			statementNumber: 'NK-0',
 			statementDate: '2026-02-01',
 			paidOn: ['NK-0'],
-			priorPayments: 100
+			priorPayments: 100,
+			offsetWith: []
 		});
 		expect(toPdfData(statement, categories, 'de').replaces).toBeUndefined();
 	});

@@ -406,6 +406,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Wait.until(on.shown('document-marked-sent'))
 		),
 	'mark-paid-dialog': () => openDialog(on.markPaidButton),
+	// a day after the end of the seeded Abrechnungsperiode 2025, before the Abrechnungsdatum of today (#448)
+	'mark-paid-early': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(on.markPaidButton),
+			EnterDate.of('2026-01-15').into(on.paidDateInput),
+			Click.on(on.markPaidConfirm),
+			Wait.until(on.earlyPaidWarning)
+		),
 	'reset-payment-dialog': () => openDialog(on.resetPaymentButton),
 	'correct-dialog': () => openDialog(on.correctButton),
 	'formula-tested': () => (actor) =>

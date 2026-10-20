@@ -1,5 +1,5 @@
 {
-	"error": "Payment date before the statement date",
-	"code": "PAID_DATE_BEFORE_STATEMENT",
-	"params": { "date": "2026-01-05" }
+	"error": "Payment date before the end of the period",
+	"code": "PAID_DATE_BEFORE_PERIOD_END",
+	"params": { "date": "2024-12-31" }
 }
