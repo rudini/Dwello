@@ -27,7 +27,8 @@ import {
 	periodStartInput,
 	previewCount,
 	showStatementsButton,
-	downloadZipButton
+	downloadZipButton,
+	previewSkippedLink,
 } from '../targets/statement-generate';
 import { closeDraftNotice, discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { generateStatementsViaApi, openPreviewViaApi, type RunOptions } from './statement-generate-api';
@@ -168,3 +169,6 @@ export const chooseAllBuildings = Check.the(allBuildingsCheckbox);
 export const discardInput = Click.on(discardDraftButton);
 export const confirmDiscarding = Click.on(discardDraftConfirm);
 export const closeRestoredNotice = Click.on(closeDraftNotice);
+
+// #453 (#327): the link of a contract «Abgerechnet bis» covers in full
+export const openSkippedContract = (contractId: string) => Click.on(previewSkippedLink(contractId));

@@ -64,16 +64,22 @@ function stateIn(statement: Statement, now: PeriodInvoice | undefined, invoiceId
 	return { billed, missed };
 }
 
+type Billing = { id: string; statementNumber: string; status: string };
+
 /**
  * The periods with statements of the invoice's building that bill it (in any state: billedIn) and that lack it as it
- * is now (missedIn: created before it was recorded or changed); a period can be in both. Null without the invoice
+ * is now (missedIn: created before it was recorded or changed); a period can be in both. And each statement that bills
+ * it, with its number and status (#455). Null without the invoice
  */
-export async function invoiceStatements(invoiceId: string): Promise<{ billedIn: Period[]; missedIn: Period[] } | null> {
+export async function invoiceStatements(
+	invoiceId: string
+): Promise<{ billedIn: Period[]; missedIn: Period[]; statements: Billing[] } | null> {
 	const [invoice] = await db.select({ buildingId: invoices.buildingId }).from(invoices).where(eq(invoices.id, invoiceId));
 	if (!invoice) return null;
 	const { statements } = await listStatements({ buildingId: invoice.buildingId, limit: 1000 });
 	const billedIn = new Map<string, Period>();
 	const missedIn = new Map<string, Period>();
+	const billing: Billing[] = [];
 	const nowIn = new Map<string, PeriodInvoice | undefined>(); // the invoice as each period bills it now, if at all
 	for (const statement of statements) {
 		const period = { start: statement.periodStart, end: statement.periodEnd };
@@ -82,7 +88,8 @@ export async function invoiceStatements(invoiceId: string): Promise<{ billedIn: 
 			nowIn.set(key, (await getInvoicesForStatement(invoice.buildingId, period.start, period.end)).find((one) => one.id === invoiceId));
 		const { billed, missed } = stateIn(statement, nowIn.get(key), invoiceId);
 		if (billed) billedIn.set(key, period);
+		if (billed) billing.push({ id: statement.id, statementNumber: statement.statementNumber, status: statement.status });
 		if (missed) missedIn.set(key, period);
 	}
-	return { billedIn: [...billedIn.values()], missedIn: [...missedIn.values()] };
+	return { billedIn: [...billedIn.values()], missedIn: [...missedIn.values()], statements: billing };
 }

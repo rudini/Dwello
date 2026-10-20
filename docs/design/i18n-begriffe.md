@@ -44,6 +44,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Beleg (hochgeladene Datei einer Rechnung, #217) | pièce justificative | giustificativo | supporting document |
 | Gutschrift (eines Rechnungsstellers) | note de crédit | nota di credito | credit note |
 | Akontorechnung (eines Rechnungsstellers) | facture d’acompte | fattura d’acconto | advance invoice |
+| Schlussrechnung (eines Rechnungsstellers) | facture finale | fattura finale | final invoice |
 | Mahnung eines Rechnungsstellers | rappel (de l’émetteur de la facture) | sollecito (dell’emittente della fattura) | payment reminder (from the invoice issuer) |
 | Auslesen | lire (les indications) | leggere (i dati) | read (the details) |
 | Mahngebühr / Verzugszins | frais de rappel / intérêt moratoire | spese di sollecito / interesse di mora | reminder fee / default interest |
@@ -55,7 +56,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Umlagefähig | répercutable (not «imputable»: Art. 259a CO uses it for «vom Mieter zu verantworten») | addebitabile | allocable |
 | Umlagefähigkeit | caractère répercutable | addebitabilità | allocability |
 | Akonto verrechnen | imputer (never for «umlagefähig») | compensare | set off |
-| abgerechnet (Rechnung, #409) | décomptée | conteggiata | billed |
+| abgerechnet (Rechnung, #409) | décomptée | conteggiata | in a statement |
 | Wartung (umlagefähig, Art. 5 Abs. 2 lit. g VMWG; nicht «Unterhalt» nach Art. 256 OR) | maintenance (nicht «entretien») | manutenzione | servicing (nicht «maintenance») |
 | Vollservicevertrag (Lift) | contrat de maintenance complet | contratto di manutenzione completo | full-service contract |
 | Verordnung über die Miete (VMWG) | ordonnance sur le bail (OBLF) | ordinanza concernente la locazione (OLAL) | Tenancy Ordinance (VMWG) |

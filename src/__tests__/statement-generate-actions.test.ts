@@ -68,6 +68,40 @@ describe('Vorschau der Abrechnungen', () => {
 		expect(result.data.error).toContain('Die gewählte Abrechnungsperiode überschneidet sich');
 	});
 
+	// #453 (#327): a contract «Abgerechnet bis» covers in full is named; its building has its own text when all are
+	it('nennt pro Gebäude die Mietverträge, die «Abgerechnet bis» in der Periode ganz abdeckt', async () => {
+		const form = new FormData();
+		for (const [name, value] of Object.entries(run)) form.append(name, value);
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		const covered = { ...buildingContracts.contracts[0], startDate: '2020-01-01', endDate: null, billedUntil: '2024-12-31' };
+		const fetch = async (url: string) =>
+			Response.json(url.includes('/for-statement/') ? [] : { contracts: [covered], data: [], total: 0 });
+		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({ fetch, request })) as {
+			invoices: { skipped?: unknown[]; allSkipped?: boolean }[];
+		};
+		expect(result.invoices[0]).toMatchObject({
+			skipped: [{ id: covered.id, tenantName: covered.tenantName, billedUntil: '2024-12-31' }],
+			allSkipped: true
+		});
+	});
+
+	// fach review 453-1 V-1: one contract has a Dwello statement of the period, the other is billed outside Dwello
+	it('sagt nicht, alle seien ausserhalb von Dwello abgerechnet, wenn einer eine Abrechnung in Dwello hat', async () => {
+		const form = new FormData();
+		for (const [name, value] of Object.entries(run)) form.append(name, value);
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		const covered = { ...buildingContracts.contracts[0], id: 'eva', startDate: '2020-01-01', endDate: '2024-03-31', billedUntil: '2024-12-31' };
+		const billed = { ...buildingContracts.contracts[0], id: 'marc', startDate: '2024-05-01', endDate: null };
+		const statement = { ...periodStatements.data[0], contractId: 'marc', periodStart: '2024-01-01', periodEnd: '2024-12-31' };
+		const fetch = async (url: string) =>
+			Response.json(url.includes('/for-statement/') ? [] : { contracts: [covered, billed], data: [statement], total: 1 });
+		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({ fetch, request })) as {
+			invoices: { skipped?: { id: string }[]; allSkipped?: boolean }[];
+		};
+		expect(result.invoices[0].skipped!.map((c) => c.id)).toEqual(['eva']);
+		expect(result.invoices[0].allSkipped).toBe(false);
+	});
+
 	// #76: neue Nebenkosten gelten für das ganze Gebäude; ein laufender befristeter Mietvertrag darin ändert den Hinweis
 	it('sagt pro Gebäude, ob ein laufender befristeter Mietvertrag abgerechnet wird', async () => {
 		const form = new FormData();

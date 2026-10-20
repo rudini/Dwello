@@ -10,7 +10,8 @@
 		forAvailability,
 		initialContractValues,
 		overlapWarning,
-		validateContract
+		validateContract,
+		billedUntilError
 	} from '$lib/contract-form';
 	import {
 		billsIn,
@@ -184,8 +185,10 @@
 		if (pastConfirmed) errors.pastConfirmed = pastConfirmed;
 		// a typed «Abgerechnet bis» that is no date is not sent as none (code review C-2); the field says why
 		const billedText = form?.querySelector<HTMLInputElement>('#billedUntil')?.value.trim();
+		const billed = billedUntilError(values, today); // #453 (#337)
 		if (billedText && !values.billedUntil)
 			errors.billedUntil = m.ui_date_not_a_date({ example: '31.12.2024' });
+		else if (billed) errors.billedUntil = billed;
 		return Object.keys(errors).length === 0;
 	}
 

@@ -31,6 +31,38 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
     Und der Mietvertrag von "Anna Keller" ist in der Liste auffindbar
 
+  # #453 (#328): beim Wechsel zu Dwello erfasst der Liegenschaftsverwalter laufende Mietverträge; was schon ausserhalb von
+  # Dwello abgerechnet ist, trägt er gleich im Assistenten ein
+  Szenario: Der Hinweis zum Vertragsbeginn in der Vergangenheit nennt «Abgerechnet bis»
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter den Vertragsbeginn "2020-01-01" einträgt
+    Dann sieht der Liegenschaftsverwalter beim Vertragsbeginn die Warnung "Sind die Nebenkosten schon ausserhalb von Dwello abgerechnet, tragen Sie unten «Abgerechnet bis» ein."
+
+  Szenario: «Abgerechnet bis» im neuen Mietvertrag eintragen
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2020-01-01" für "950" Franken bis "2024-12-31" abgerechnet bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Abgerechnet bis" mit "Dienstag, 31. Dezember 2024"
+    Wenn der Liegenschaftsverwalter den Mietvertrag speichert
+    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
+    Wenn der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" ansieht
+    Dann zeigt der Mietvertrag «Abgerechnet bis» "31.12.2024"
+
+  # #453 (#328): mit einem Vertragsbeginn ab heute ist noch nichts abgerechnet
+  Szenario: Bei einem künftigen Vertragsbeginn fragt der Assistent nicht nach «Abgerechnet bis»
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter den Vertragsbeginn "2099-01-01" einträgt
+    Dann fragt der Assistent nach dem Vertragsbeginn, aber nicht nach «Abgerechnet bis»
+
+  # #453 (#337): eine Abrechnung entsteht erst nach dem Ende ihrer Periode; ein Datum vor dem Vertragsbeginn wirkt nicht
+  Szenario: «Abgerechnet bis» in der Zukunft im neuen Mietvertrag
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter ab dem Vertragsbeginn "2020-01-01" einträgt, dass die Nebenkosten bis "2099-12-31" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Abgerechnet bis kann nicht in der Zukunft liegen. Tragen Sie den letzten Tag der letzten Abrechnung ein, die ausserhalb von Dwello erstellt wurde."
+
+  Szenario: «Abgerechnet bis» vor dem Vertragsbeginn im neuen Mietvertrag
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter ab dem Vertragsbeginn "2020-01-01" einträgt, dass die Nebenkosten bis "2019-12-31" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Abgerechnet bis liegt vor dem Vertragsbeginn 01.01.2020. Lassen Sie das Feld leer, wenn für diesen Mietvertrag noch nichts ausserhalb von Dwello abgerechnet ist."
+
   Szenario: Ohne Mieter geht es nicht weiter
     Wenn der Liegenschaftsverwalter ohne Angaben weitergeht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus."

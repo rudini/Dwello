@@ -4,7 +4,7 @@
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
 	import { addToast } from '$lib/stores';
-	import type { InvoiceWithDetails } from '$lib/types';
+	import type { BilledStatement, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -25,6 +25,7 @@
 			invoice: InvoiceWithDetails;
 			billedIn?: { start: string; end: string }[];
 			missedIn?: { start: string; end: string }[];
+			statements?: BilledStatement[];
 		};
 	} = $props();
 
@@ -97,7 +98,7 @@
 
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex flex-col gap-8 lg:col-span-2">
-			<InvoiceFacts {invoice} />
+			<InvoiceFacts {invoice} statements={data.statements ?? []} />
 			<CategorizationPanel
 				{invoice}
 				busy={recategorizing}

@@ -1,5 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
-import { billsIn, localToday } from '$lib/contract-status';
+import { billingStart, billsIn, localToday } from '$lib/contract-status';
 import { overlappedBy, periodDays, periodsOf, uncovered } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
@@ -112,12 +112,15 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 			const overlapping = (statements as Billing[]).filter(
 				(s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s)
 			);
-			const inPeriod = (contracts as Contract[]).filter((c) =>
-				billsIn(c, { start: periodStart, end: periodEnd })
+			const period = { start: periodStart, end: periodEnd };
+			const inPeriod = (contracts as Contract[]).filter((c) => billsIn(c, period));
+			// #453 (#327): in the period by its dates, but «Abgerechnet bis» leaves it no Mietstage there
+			const skipped = (contracts as Contract[]).filter(
+				(c) => !billsIn(c, period) && billsIn({ ...c, billedUntil: null }, period)
 			);
 			const billed = inPeriod.filter((c) => overlapping.some((s) => s.contractId === c.id));
-			const overlap = overlapOf({ start: periodStart, end: periodEnd }, contracts, statements);
-			return { buildingId, inPeriod, billed, overlap };
+			const overlap = overlapOf(period, contracts, statements);
+			return { buildingId, inPeriod, billed, overlap, skipped };
 		})
 	);
 }
@@ -149,21 +152,31 @@ async function contractsInPeriod(fetch: Fetch, request: Run) {
 	);
 }
 
+// #453 (#327): a contract «Abgerechnet bis» covers in the period, as the preview names it
+const skippedOf = ({ id, tenantName, billedUntil }: Contract) => ({
+	id,
+	tenantName,
+	billedUntil: billedUntil!
+});
+
 /**
  * Per building: its contracts in the period, how many of them have a statement there already, whether the period
  * overlaps one of the building's (wizard step 2), and those this run bills without an agreed Verwaltungspauschale
  * (#89, step «Einstellungen»)
  */
 export async function billedContracts(fetch: Fetch, request: Run) {
-	return (await contractsOf(fetch, request)).map(({ buildingId, inPeriod, billed, overlap }) => ({
-		buildingId,
-		contracts: inPeriod.length,
-		billed: billed.length,
-		overlap,
-		withoutFee: inPeriod
-			.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
-			.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }))
-	}));
+	return (await contractsOf(fetch, request)).map(
+		({ buildingId, inPeriod, billed, overlap, skipped }) => ({
+			buildingId,
+			contracts: inPeriod.length,
+			billed: billed.length,
+			overlap,
+			withoutFee: inPeriod
+				.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
+				.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber })),
+			...(skipped.length ? { skipped: skipped.map(skippedOf) } : {})
+		})
+	);
 }
 
 /**
@@ -213,6 +226,13 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			balance: Number(preview.balance),
 			rentalDays: Number(preview.rentalDays),
 			totalPeriodDays: Number(preview.totalPeriodDays),
+			rentalStart: preview.rentalStart as string,
+			rentalEnd: preview.rentalEnd as string,
+			// #453 (#327): «Abgerechnet bis» where it shortens the Mietstage in the period
+			billedUntil:
+				billingStart(contract) > [contract.startDate.slice(0, 10), periodStart].sort()[1]
+					? contract.billedUntil!
+					: undefined,
 			movedOut,
 			// befristet, its end not reached: no Kündigungstermin before it (#76)
 			fixedTerm: !!contract.endDate && !contract.terminated && !movedOut,

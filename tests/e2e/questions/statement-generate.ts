@@ -36,6 +36,9 @@ import {
 	previewAkontoHint,
 	previewRow,
 	previewRows,
+	previewVacancyNote,
+	previewSkipped,
+	previewAllSkipped,
 	tankQuestion,
 	wizardChoices,
 	wizardPresetNotice
@@ -156,3 +159,9 @@ export const notAgreedCostsOf = (contractId: string) => Text.of(notAgreedCostsLi
 export const oldAddressWarning = Text.of(oldAddress);
 export const agreementsFailure = Text.of(agreementsFailed);
 export const agreementsWaiting = Text.of(agreementsWait);
+
+// #453 (#327): what the preview says per contract, on its total, and on contracts «Abgerechnet bis» covers
+export const previewRowText = (tenantName: string) => Text.of(previewRow(tenantName));
+export const vacancyNoteText = Text.of(previewVacancyNote);
+export const skippedContractText = (contractId: string) => Text.of(previewSkipped(contractId));
+export const allSkippedText = (buildingId: string) => Text.of(previewAllSkipped(buildingId));

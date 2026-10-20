@@ -181,6 +181,7 @@
 	>
 		{words}
 	</p>
-	<!-- the focus is in the next field when the check on leaving fails: say it -->
-	<p class="sr-only" aria-live="assertive">{spoken}</p>
+	<!-- the focus is in the next field when the check on leaving fails: say it; no paragraph, which a screen reader
+	     would read as an empty one while nothing is said (#268) -->
+	<div class="sr-only" aria-live="assertive">{spoken}</div>
 </div>

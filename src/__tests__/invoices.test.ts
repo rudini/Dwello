@@ -211,8 +211,9 @@ describe('Rechnung erfassen und bearbeiten', () => {
 			const data = (await load({ params: { id: 'i1' }, fetch } as never)) as {
 				billedIn: unknown;
 				missedIn: unknown;
+				statements: unknown;
 			};
-			return { billedIn: data.billedIn, missedIn: data.missedIn, urls };
+			return { billedIn: data.billedIn, missedIn: data.missedIn, statements: data.statements, urls };
 		};
 
 		it('nennt die Perioden, die das Backend als abgerechnet und als ohne diese Rechnung nennt', async () => {
@@ -223,6 +224,12 @@ describe('Rechnung erfassen und bearbeiten', () => {
 				expect(missedIn).toEqual([{ start: '2025-07-01', end: '2026-06-30' }]);
 				expect(urls).toContain(`${API}/invoices/i1/statements`);
 			}
+		});
+
+		// #455: the statements the invoice is in, with number and status, for «In Abrechnungen enthalten»
+		it('gibt die Abrechnungen mit Nummer und Status weiter, und keine, wenn das Backend keine nennt', async () => {
+			expect((await periods(detailLoad, invoiceStatements)).statements).toEqual(invoiceStatements.statements);
+			expect((await periods(detailLoad, null)).statements).toEqual([]);
 		});
 	});
 

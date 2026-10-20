@@ -1,7 +1,9 @@
+import type { SkippedContract } from '$lib/statement-wizard';
 import { fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
 import { toHeatingProfile } from '$lib/server/heating-profile';
 import {
+	billedContracts,
 	generateStatements,
 	invoicesInPeriod,
 	previewStatements,
@@ -99,6 +101,9 @@ const generationRequest = (formData: FormData): GenerationRequest => ({
 	managementFeePercent: Number(formData.get('managementFeePercent'))
 });
 
+const skippedIn = (row?: { contracts: number; skipped?: SkippedContract[] }) =>
+	row?.skipped ? { skipped: row.skipped, allSkipped: row.contracts === 0 } : {};
+
 const failed = (err: unknown) =>
 	fail(400, { error: err instanceof Error ? err.message : String(err) });
 
@@ -106,10 +111,12 @@ export const actions: Actions = {
 	preview: async ({ request, fetch }) => {
 		try {
 			const run = generationRequest(await request.formData());
-			const [preview, invoices] = await Promise.all([
+			const [preview, invoices, billed] = await Promise.all([
 				previewStatements(fetch, run),
-				invoicesInPeriod(fetch, run)
+				invoicesInPeriod(fetch, run),
+				billedContracts(fetch, run)
 			]);
+			const byBuilding = new Map(billed.map((row) => [row.buildingId, row]));
 			// new costs are the building's: say whether it bills a running befristeter Mietvertrag (#76)
 			const fixedTerm = (id: string) =>
 				preview.some((row) => row.buildingId === id && row.fixedTerm);
@@ -117,6 +124,8 @@ export const actions: Actions = {
 				preview,
 				invoices: invoices.map((row) => ({
 					...row,
+					// #453 (#327): contracts «Abgerechnet bis» covers, and whether no contract is left to bill
+					...skippedIn(byBuilding.get(row.buildingId)),
 					fixedTerm: fixedTerm(row.buildingId)
 				}))
 			};

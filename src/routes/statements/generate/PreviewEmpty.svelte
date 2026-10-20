@@ -5,6 +5,7 @@
 	// No contract to bill in the period: either none at all, or every contract already has a statement
 	let {
 		billed,
+		explained = false,
 		error
 	}: {
 		billed: {
@@ -12,6 +13,7 @@
 			name: string;
 			changed: ChangedStatement[];
 		}[];
+		explained?: boolean; // #453: every building says itself why it has no contract to bill
 		error?: string;
 	} = $props();
 	// the run creates nothing: only drafts missing invoices matter, not settings of new statements (#132)
@@ -21,7 +23,9 @@
 			.map((s) => ({ ...s, profile: null, profileEdited: null, fee: null }));
 </script>
 
-<p class="text-ink-muted" data-testid="preview-empty">{m.statements_preview_empty()}</p>
+{#if !explained}
+	<p class="text-ink-muted" data-testid="preview-empty">{m.statements_preview_empty()}</p>
+{/if}
 <!-- all contracts already billed (e.g. after a late invoice): how to recalculate, and where the statements are -->
 {#if billed.length}
 	<p class="text-ink" data-testid="preview-all-billed">

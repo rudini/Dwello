@@ -101,6 +101,12 @@ describe('Antwort der KI zu einem Beleg', () => {
 		expect(parseExtractionResponse(answer({ documentType: 'Quittung' }))?.documentType).toBe('invoice');
 	});
 
+	// #455 (#262): eine Akontorechnung allein ist eine eigene Dokumentart
+	it('erkennt eine Akontorechnung und fragt im Prompt nach ihr', () => {
+		expect(parseExtractionResponse(answer({ documentType: 'advance_invoice' }))?.documentType).toBe('advance_invoice');
+		expect(buildExtractionPrompt('Werke Akonto.pdf')).toContain('"advance_invoice" für eine Akontorechnung');
+	});
+
 	it('gibt nichts zurück, wenn die Antwort kein JSON ist', () => {
 		expect(parseExtractionResponse('Ich kann das Bild nicht lesen.')).toBeNull();
 	});
