@@ -2009,9 +2009,11 @@ Branch `w9-issue-455-resultlist`. Product owner (via coordinator), for #455: the
 
 - [x] `src/lib/ui/ResultList.svelte`, used by the lists of buildings, apartments, contracts, invoices, statements and tenants; each keeps its list class; `docs/design/token-referenz.md` (Lists)
 - [x] Slice review round 1 (`docs/reviews/resultlist-review-1.md`, no Blocker/Major; C-1 token reference and C-2 apartment list fixed); closing round 2 (`docs/reviews/resultlist-review-2.md`, no findings)
+- [x] CI: «Mietvertrag ohne vereinbarte Verwaltungspauschale öffnen» red once in Firefox; cause: the task clicked the link and did not wait for the navigation, the next step's 5 s expectation ran out while the contract page loaded (reproduced with its data 6 s late); the task and `openContractWithNotAgreedCosts` now wait for the contract's address
+- [x] Closing round 3 (`docs/reviews/resultlist-review-3.md`: no Blocker/Major; C-1 the second task fixed)
 - [x] PR `Refs #455`
 
-Files: `src/lib/ui/ResultList.svelte`, `src/routes/{buildings,apartments,contracts,invoices,statements,tenants}/+page.svelte`, `docs/design/token-referenz.md`, `docs/reviews/resultlist-review-{1,2}.md`.
+Files: `src/lib/ui/ResultList.svelte`, `tests/e2e/tasks/statement-generate.ts`, `src/routes/{buildings,apartments,contracts,invoices,statements,tenants}/+page.svelte`, `docs/design/token-referenz.md`, `docs/reviews/resultlist-review-{1,2,3}.md`.
 ## Session C1: E2E in every browser on pull requests
 
 Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.

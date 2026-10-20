@@ -150,7 +150,12 @@ export const recordNoTankFromQuestion = (buildingId: string): Activity => (actor
 // #91, step «Einstellungen»: the answer whether the contract agrees a category; stored at once
 export const answerAgreement = (contractId: string, categoryId: string, agreed: boolean): Activity => (actor) =>
 	actor.attemptsTo(Click.on(agreementChoice(contractId, categoryId, agreed)), Wait.until(agreementAnswered(contractId, categoryId)));
-export const openContractWithNotAgreedCosts = (contractId: string) => Click.on(notAgreedCostsLink(contractId));
+// waits for the contract page, as `openContractWithoutFee` (#494)
+export const openContractWithNotAgreedCosts = (contractId: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(notAgreedCostsLink(contractId)),
+		Wait.forUrl((url) => url.pathname === `/contracts/${contractId}`)
+	);
 // saving an answer fails (the BFF route the browser calls)
 export const agreementsCannotBeChecked = FailRequests.to('/api/statements/agreements', {});
 export const agreementsCheckAgain: Activity = (actor) => actor.attemptsTo(FailRequests.noLonger, Click.on(agreementsRetry));
