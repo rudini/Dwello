@@ -379,6 +379,14 @@ describe('Abrechnung berichtigen fällig', () => {
 			expect(await due(id)).toBe(false);
 		}));
 
+	// a sent statement whose Zahlungsfrist passed reads «Überfällig» (computed from the deadline)
+	it('ist auch bei einer überfälligen Abrechnung fällig', () =>
+		sent(async (id) => {
+			await db.update(utilityStatements).set({ paymentDeadline: '2025-01-31' }).where(eq(utilityStatements.id, id));
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			expect(await due(id)).toBe(true);
+		}));
+
 	// Fachreview 454-2 V-23: also an erledigte Abrechnung (#448)
 	it('ist auch bei einer erledigten Abrechnung fällig', () =>
 		sent(async (id) => {

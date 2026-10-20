@@ -64,7 +64,7 @@ const sameStock = (a: Stock, b: Stock) =>
 const fuelStockChanged = async (statement: StatementWithDetails & { building: { id: string } }) =>
 	!sameStock(statement.fuelStock, await agreedStock({ buildingId: statement.building.id, periodStart: statement.periodStart, periodEnd: statement.periodEnd }, statement.agreedCategoryIds));
 
-const CORRECTED = ['sent', 'paid', 'settled']; // what a berichtigte Abrechnung replaces (Fachreview 454-2 V-23)
+const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte Abrechnung replaces (Fachreview 454-2 V-23); overdue: sent, past its Zahlungsfrist
 
 /**
  * What changed in a statement's period since it was created: its invoices (#96) and its Tankbestand (#454); for a
