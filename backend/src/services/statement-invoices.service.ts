@@ -70,7 +70,8 @@ const CORRECTED = ['sent', 'overdue', 'paid', 'settled']; // what a berichtigte 
  * What changed in a statement's period since it was created: its invoices (#96) and its Tankbestand (#454); for a
  * statement a berichtigte Abrechnung would replace, whether correcting it is due: only when the hint names a change and
  * recalculating changes the Saldo or a share of the tenant, unless the landlord chose «Nicht berichtigen» for that very
- * result (Fachreview 454-1 E-3, E-6, 454-2 V-18, V-21), and whether he may: only when it would raise the Saldo (M-3 B).
+ * result (Fachreview 454-1 E-3, E-6, 454-2 V-18, V-21), and whether he may: only when the Saldo as claimed does not
+ * fall (M-3 B, 454-3 V-30 A).
  * Null without the statement
  */
 export async function statementChanges(statementId: string) {
@@ -93,7 +94,7 @@ export async function statementChanges(statementId: string) {
 	};
 }
 
-/** «Nicht berichtigen» (#454, E-6): remembers the day and the result; refused unless the recalculation raises the Saldo */
+/** «Nicht berichtigen» (#454, E-6): remembers the day and the result; refused when the recalculation lowers the Saldo */
 export async function declineCorrection(statementId: string) {
 	const changes = await statementChanges(statementId);
 	if (!changes) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');

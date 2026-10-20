@@ -443,8 +443,8 @@ describe('Abrechnung berichtigen fällig', () => {
 			expect(await due(id)).toBe(false);
 		}));
 
-	// PO 2026-10-20 (Fachreview 454-2 M-3 B): «Nicht berichtigen» only when the Saldo would rise
-	it('erlaubt «Nicht berichtigen» nur, wenn die Neuberechnung den Saldo erhöht', () =>
+	// PO 2026-10-20 (Fachreview 454-2 M-3 B, 454-3 V-30 A): «Nicht berichtigen» only when the Saldo does not fall
+	it('erlaubt «Nicht berichtigen» nur, wenn die Neuberechnung den Saldo nicht senkt', () =>
 		sent(async (id) => {
 			await db.update(utilityStatements).set({ balance: '9999.00' }).where(eq(utilityStatements.id, id));
 			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
@@ -516,6 +516,18 @@ describe('Abrechnung berichtigen fällig', () => {
 			await whole.remove();
 		}
 	});
+
+	// code review 454-3 C-12: a Schlussabrechnung (the contract ends 31.03.) has no Mindestbetrag: 4.00 → 2.45 falls
+	it('nimmt bei einer Schlussabrechnung auch einen Saldo unter CHF 5 beim Wort', () =>
+		sent(async (id) => {
+			await db.update(utilityStatements).set({ balance: '4.00' }).where(eq(utilityStatements.id, id));
+			await invoice({ amount: '10.00', invoiceDate: '2024-02-15' });
+			const changes = (await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as {
+				correctionDeclinable: boolean;
+				correctionLowers: boolean;
+			};
+			expect(changes).toMatchObject({ correctionDeclinable: false, correctionLowers: true });
+		}));
 
 	it('erlaubt «Nicht berichtigen», wenn die Neuberechnung den Saldo erhöht', () =>
 		sent(async (id) => {
