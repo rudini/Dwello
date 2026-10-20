@@ -33,10 +33,13 @@ const contractQuerySchema = t.Object({
 	offset: t.Optional(t.String())
 });
 
-// «Verwaltungspauschale vereinbart» (#89): without it a contract has none; an own rate from 0 to 10 % (#124)
+// «Verwaltungspauschale vereinbart» (#89): without it a contract has none; an own rate greater than 0 up to 10 %
+// (#124; 0 % means «Nein», #447)
 const managementFee = {
 	managementFeeAgreed: t.Optional(t.Boolean()),
-	managementFeePercent: t.Optional(t.Nullable(t.String({ pattern: '^(10(\\.0{1,2})?|\\d(\\.\\d{1,2})?)$' })))
+	managementFeePercent: t.Optional(
+		t.Nullable(t.String({ pattern: '^(10(\\.0{1,2})?|[1-9](\\.\\d{1,2})?|0\\.(0[1-9]|[1-9]\\d?))$' }))
+	)
 };
 
 // #91: the categories the contract agrees; every other umlagefähige one is not agreed
@@ -48,6 +51,7 @@ const contractBodySchema = t.Object({
 	startDate: t.String({ format: 'date' }),
 	endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 	terminated: t.Optional(t.Boolean()),
+	billedUntil: t.Optional(t.Nullable(t.String({ format: 'date' }))), // «Abgerechnet bis» in the wizard (#453)
 	baseRent: t.String(),
 	additionalRent: t.Optional(t.Nullable(t.String())),
 	monthlyAdvancePayment: t.String(),

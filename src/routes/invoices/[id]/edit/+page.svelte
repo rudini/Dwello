@@ -35,6 +35,9 @@
 		};
 	} = $props();
 
+	// Akontorechnungen deducted on the Beleg, said at the Betrag (#455)
+	const deducted = $derived(data.invoice.beleg?.deductedAmount);
+
 	// The values as loaded, to see what the user changed; the form then holds its own copy
 	const initial = untrack(() => ({
 		buildingId: data.invoice.buildingId,
@@ -138,6 +141,7 @@
 			bind:servicePeriodStart={values.servicePeriodStart}
 			bind:servicePeriodEnd={values.servicePeriodEnd}
 			bind:amount={values.amount}
+			{deducted}
 			bind:billingEntity={values.billingEntity}
 			bind:description={values.description}
 			buildings={data.buildings}

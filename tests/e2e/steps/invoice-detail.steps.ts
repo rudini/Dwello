@@ -2,6 +2,9 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	amountOfInvoice,
+	deductedHintAtAmount,
+	deductedRuleAtAmount,
+	statementsOfInvoice,
 	numberOfInvoice,
 	categoryOfInvoice,
 	distributionKeyOfInvoice,
@@ -15,9 +18,11 @@ import {
 	tenancyLawNotes,
 	utilityCostOfInvoice
 } from '../questions/invoice-detail';
-import { pageAddressInApp } from '../questions/statements';
+import { pageAddressInApp, statementPath } from '../questions/statements';
+import { inDays } from '../fixtures/dates';
 import {
 	deleteInvoice,
+	openStatementOfInvoice,
 	openBuildingOfInvoice,
 	openInvoice,
 	openMissedStatements,
@@ -152,3 +157,52 @@ Then('warnt die Rechnung {string}', async ({ verwalter }, text: string) => {
 When('der Liegenschaftsverwalter die Abrechnungen ohne diese Rechnung öffnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openMissedStatements);
 });
+
+Given(
+	'{string} stellt dem Gebäude {string} {string} Franken für {string} in der Kategorie {string} in Rechnung, auf dem Beleg sind Akontorechnungen von {string} Franken abgezogen',
+	async ({ seed }, supplier: string, building: string, amount: string, description: string, category: string, deducted: string) => {
+		const beleg = { fileName: `${supplier}.pdf`, deductedAmount: deducted, nonAllocableItems: false };
+		await seed.supplierInvoice(supplier, building, amount, description, category, beleg);
+	}
+);
+
+for (const [step, question] of [
+	['steht beim Betrag der Rechnung {string}', deductedHintAtAmount],
+	['steht im Formular beim Betrag {string}', deductedHintAtAmount]
+] as const)
+	Then(step, async ({ verwalter }, text: string) => {
+		await verwalter.sees(question).toContain(text);
+	});
+
+for (const step of ['erklärt der Hinweis beim Betrag der Rechnung {string}', 'erklärt der Hinweis im Formular beim Betrag {string}'])
+	Then(step, async ({ verwalter }, text: string) => {
+		await verwalter.sees(deductedRuleAtAmount).toBe(text);
+	});
+
+// the statements of the year the invoice dated today is in (seeded with «… des laufenden Jahres»)
+const thisYear = () => Number(inDays(0).slice(0, 4));
+
+Then(
+	'nennt die Rechnung als enthalten in die Abrechnung des laufenden Jahres von {string} im Status {string}',
+	async ({ verwalter, seed }, tenant: string, status: string) => {
+		await verwalter.sees(statementsOfInvoice).toContain(`${await seed.statementNumber(tenant, thisYear())}, ${status}`);
+	}
+);
+
+Then('nennt die Rechnung als enthalten in {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(statementsOfInvoice).toBe(text);
+});
+
+When(
+	'der Liegenschaftsverwalter die Abrechnung des laufenden Jahres von {string} öffnet, in der die Rechnung enthalten ist',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.attemptsTo(openStatementOfInvoice(await seed.statementNumber(tenant, thisYear())));
+	}
+);
+
+Then(
+	'ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung des laufenden Jahres von {string}',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.sees(pageAddressInApp).toBe(statementPath(seed, tenant, thisYear()));
+	}
+);

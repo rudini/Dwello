@@ -1,0 +1,5 @@
+{
+	"error": "«Abgerechnet bis» lies before the contract start",
+	"code": "BILLED_UNTIL_BEFORE_START",
+	"params": { "date": "2024-01-01" }
+}

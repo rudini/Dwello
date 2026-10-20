@@ -37,6 +37,7 @@ export type ContractData = {
 	advancePayment?: string;
 	flatRateUtilityCharge?: string; // «Nebenkostenpauschale» (#429)
 	confirmPastStart?: boolean; // the wizard asks once about a start in the past
+	billedUntil?: string; // «Abgerechnet bis», offered for a start in the past (#453)
 	managementFee?: string | null; // own rate in percent, 'run' for the run's rate (default), null for no choice (#89)
 	notAgreed?: string[]; // categories the lease does not agree, unticked (#91)
 };
@@ -74,9 +75,10 @@ const fillContract = (contract: Omit<ContractData, 'tenantId'>): Activity => asy
 	await actor.attemptsTo(
 		Select.option(contract.apartmentId).from(apartmentSelect),
 		goToNextStep,
-		EnterDate.of(contract.startDate).into(startDateInput),
-		goToNextStep
+		EnterDate.of(contract.startDate).into(startDateInput)
 	);
+	if (contract.billedUntil) await actor.attemptsTo(EnterDate.of(contract.billedUntil).into(billedUntilInput));
+	await actor.attemptsTo(goToNextStep);
 	if (contract.confirmPastStart) await actor.attemptsTo(goToNextStep);
 	await actor.attemptsTo(Enter.theValue(contract.baseRent).into(baseRentInput));
 	if (contract.advancePayment) await actor.attemptsTo(Enter.theValue(contract.advancePayment).into(advancePaymentInput));
@@ -160,9 +162,9 @@ export const withdrawNotice: Activity = (actor) =>
 // «Bearbeiten»: another Vertragsbeginn
 export const saveStartDate = (isoDate: string): Activity => (actor) =>
 	actor.attemptsTo(EnterDate.of(isoDate).into(startDateInput), Click.on(contractSubmitButton));
-// «Bearbeiten»: the fee is agreed at the run's rate
-export const agreeManagementFee: Activity = (actor) =>
-	actor.attemptsTo(Click.on(feeChoice('run')), Click.on(contractSubmitButton));
+// «Bearbeiten»: the fee is agreed at the run's rate, or at an own rate in percent
+export const agreeManagementFee = (fee = 'run'): Activity => (actor) =>
+	actor.attemptsTo(chooseManagementFee(fee), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: the Nebenkosten are billed outside Dwello up to the day given (#133)
 export const enterBilledUntil = (isoDate: string): Activity => (actor) =>
@@ -195,3 +197,9 @@ export const untickAllCategories: Activity = async (actor) => {
 	const boxes = await actor.answer(Count.of(agreedCategoryBoxes));
 	for (let box = 0; box < boxes; box++) await actor.attemptsTo(Uncheck.the(agreedCategoryBoxAt(box)));
 };
+
+// Step «Mietdauer» (#453): the Vertragsbeginn, and with it «Abgerechnet bis», then on
+export const enterStartDate = (isoDate: string) => EnterDate.of(isoDate).into(startDateInput);
+export const enterStartAndBilledUntil = (startDate: string, billedUntil: string): Activity => (actor) =>
+	actor.attemptsTo(enterStartDate(startDate), EnterDate.of(billedUntil).into(billedUntilInput), goToNextStep);
+export const saveContract = Click.on(contractSubmitButton);

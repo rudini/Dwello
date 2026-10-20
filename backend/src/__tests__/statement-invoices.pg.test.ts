@@ -6,7 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, fuelStocks, invoices, utilityStatementLineItems } from '../db/schema';
+import { categories, fuelStocks, invoices, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { deleteStatement, generateStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { createRental } from './helpers/rental';
@@ -164,7 +164,11 @@ describe('Unbekannte Abrechnung oder Rechnung', () => {
 });
 
 describe('Abrechnungen einer Rechnung', () => {
-	type Periods = { billedIn: { start: string; end: string }[]; missedIn: { start: string; end: string }[] };
+	type Periods = {
+		billedIn: { start: string; end: string }[];
+		missedIn: { start: string; end: string }[];
+		statements: { id: string; statementNumber: string; status: string }[];
+	};
 	const periodsOf = async (invoiceId: string) =>
 		(await (await callApi(`/api/v1/invoices/${invoiceId}/statements`)).json()) as Periods;
 	const year = { start: '2024-01-01', end: '2024-12-31' };
@@ -173,14 +177,27 @@ describe('Abrechnungen einer Rechnung', () => {
 		await clear();
 		const billed = await invoice();
 		await statement();
-		expect(await periodsOf(billed)).toEqual({ billedIn: [year], missedIn: [] });
+		expect(await periodsOf(billed)).toMatchObject({ billedIn: [year], missedIn: [] });
+	});
+
+	// #455 (#263): abgerechnet heisst enthalten, gleich welchen Status die Abrechnung hat; jede mit Nummer und Status
+	it('nennt jede Abrechnung, in der die Rechnung enthalten ist, mit Nummer und Status', async () => {
+		await clear();
+		const billed = await invoice();
+		const { id, statementNumber } = await statement();
+		expect((await periodsOf(billed)).statements).toEqual([{ id, statementNumber, status: 'draft' }]);
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, id));
+		expect((await periodsOf(billed)).statements).toEqual([{ id, statementNumber, status: 'sent' }]);
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, id)); // deletable again
+		const later = await invoice({ amount: '100.00' });
+		expect((await periodsOf(later)).statements).toEqual([]);
 	});
 
 	it('nennt die Periode einer Abrechnung ohne die Rechnung als verpasst', async () => {
 		await clear();
 		await statement();
 		const later = await invoice();
-		expect(await periodsOf(later)).toEqual({ billedIn: [], missedIn: [year] });
+		expect(await periodsOf(later)).toMatchObject({ billedIn: [], missedIn: [year] });
 	});
 
 	// abgerechnet mit dem früheren Stand: beide Hinweise
@@ -189,7 +206,7 @@ describe('Abrechnungen einer Rechnung', () => {
 		const billed = await invoice();
 		await statement();
 		await sendJson('PUT', `/api/v1/invoices/${billed}`, { amount: '800.00' });
-		expect(await periodsOf(billed)).toEqual({ billedIn: [year], missedIn: [year] });
+		expect(await periodsOf(billed)).toMatchObject({ billedIn: [year], missedIn: [year] });
 	});
 
 	// M-2: abgerechnet und danach als nicht umlagefähig markiert: die Abrechnung verrechnet sie noch
@@ -198,7 +215,7 @@ describe('Abrechnungen einer Rechnung', () => {
 		const billed = await invoice();
 		const { id } = await statement();
 		await db.update(invoices).set({ isValidUtilityCost: false }).where(eq(invoices.id, billed));
-		expect(await periodsOf(billed)).toEqual({ billedIn: [year], missedIn: [] });
+		expect(await periodsOf(billed)).toMatchObject({ billedIn: [year], missedIn: [] });
 		expect(await changed(id)).toEqual([billed]);
 	});
 
@@ -209,14 +226,14 @@ describe('Abrechnungen einer Rechnung', () => {
 		const { lineItems } = await statement();
 		await forget(lineItems[0].id);
 		const later = await invoice({ amount: '100.00' });
-		expect(await periodsOf(billed)).toEqual({ billedIn: [year], missedIn: [] });
-		expect(await periodsOf(later)).toEqual({ billedIn: [], missedIn: [year] });
+		expect(await periodsOf(billed)).toMatchObject({ billedIn: [year], missedIn: [] });
+		expect(await periodsOf(later)).toMatchObject({ billedIn: [], missedIn: [year] });
 	});
 
 	it('nennt bei einer nicht umlagefähigen Rechnung keine verpasste Periode', async () => {
 		await clear();
 		await statement();
 		const excluded = await invoice({ isValidUtilityCost: false });
-		expect(await periodsOf(excluded)).toEqual({ billedIn: [], missedIn: [] });
+		expect(await periodsOf(excluded)).toMatchObject({ billedIn: [], missedIn: [] });
 	});
 });

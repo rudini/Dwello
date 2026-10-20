@@ -120,7 +120,12 @@ type Coverage = {
 	check?: InvoiceCheck;
 	changed?: ChangedStatement[];
 	fixedTerm?: boolean; // the run bills a running befristeter Mietvertrag here (#76)
+	skipped?: SkippedContract[]; // #453 (#327): no Mietstage after «Abgerechnet bis» in the period
+	allSkipped?: boolean; // no contract of the building is left to bill
 };
+
+/** A contract «Abgerechnet bis» covers in the whole period (#453) */
+export type SkippedContract = { id: string; tenantName: string; billedUntil: string };
 
 const invoices = (count: number) =>
 	count === 1 ? m.statements_invoices_one() : m.statements_invoices_many({ count });
@@ -282,6 +287,8 @@ export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name:
 		changed: c.changed ?? [],
 		partlyBilled: c.partlyBilled ?? 0,
 		fixedTerm: !!c.fixedTerm,
+		skipped: c.skipped ?? [],
+		allSkipped: !!c.allSkipped,
 		...categoryCheck(c.check)
 	}));
 

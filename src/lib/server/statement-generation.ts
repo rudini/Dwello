@@ -76,8 +76,11 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 			const overlapping = (
 				statements as (Period & { contractId: string; status?: string })[]
 			).filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart && !replacedHere(s));
-			const inPeriod = (contracts as Contract[]).filter((c) =>
-				billsIn(c, { start: periodStart, end: periodEnd })
+			const period = { start: periodStart, end: periodEnd };
+			const inPeriod = (contracts as Contract[]).filter((c) => billsIn(c, period));
+			// #453 (#327): in the period by its dates, but «Abgerechnet bis» leaves it no Mietstage there
+			const skipped = (contracts as Contract[]).filter(
+				(c) => !billsIn(c, period) && billsIn({ ...c, billedUntil: null }, period)
 			);
 			const billed = inPeriod.filter((c) => overlapping.some((s) => s.contractId === c.id));
 			// its days in the period that none of its statements covers stay unbilled (Fachreview M-1, #199)
@@ -89,7 +92,7 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 						c.endDate && c.endDate < periodEnd ? c.endDate : periodEnd
 					)
 			);
-			return { buildingId, inPeriod, billed, partly };
+			return { buildingId, inPeriod, billed, partly, skipped };
 		})
 	);
 }
@@ -102,21 +105,31 @@ async function contractsInPeriod(fetch: Fetch, request: Run) {
 	);
 }
 
+// #453 (#327): a contract «Abgerechnet bis» covers in the period, as the preview names it
+const skippedOf = ({ id, tenantName, billedUntil }: Contract) => ({
+	id,
+	tenantName,
+	billedUntil: billedUntil!
+});
+
 /**
  * Per building: its contracts in the period, how many of them have a statement there already and how many of these
  * leave days unbilled (wizard steps 2 and 4), and those this run bills without an agreed Verwaltungspauschale (#89,
  * step «Einstellungen»)
  */
 export async function billedContracts(fetch: Fetch, request: Run) {
-	return (await contractsOf(fetch, request)).map(({ buildingId, inPeriod, billed, partly }) => ({
-		buildingId,
-		contracts: inPeriod.length,
-		billed: billed.length,
-		partly: partly.length,
-		withoutFee: inPeriod
-			.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
-			.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber }))
-	}));
+	return (await contractsOf(fetch, request)).map(
+		({ buildingId, inPeriod, billed, partly, skipped }) => ({
+			buildingId,
+			contracts: inPeriod.length,
+			billed: billed.length,
+			partly: partly.length,
+			withoutFee: inPeriod
+				.filter((c) => !billed.includes(c) && !c.managementFeeAgreed)
+				.map(({ id, tenantName, apartmentNumber }) => ({ id, tenantName, apartmentNumber })),
+			...(skipped.length ? { skipped: skipped.map(skippedOf) } : {})
+		})
+	);
 }
 
 /**
@@ -166,6 +179,13 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			balance: Number(preview.balance),
 			rentalDays: Number(preview.rentalDays),
 			totalPeriodDays: Number(preview.totalPeriodDays),
+			rentalStart: preview.rentalStart as string,
+			rentalEnd: preview.rentalEnd as string,
+			// #453 (#327): «Abgerechnet bis» where it shortens the Mietstage in the period
+			billedUntil:
+				billingStart(contract) > [contract.startDate.slice(0, 10), periodStart].sort()[1]
+					? contract.billedUntil!
+					: undefined,
 			movedOut,
 			// befristet, its end not reached: no Kündigungstermin before it (#76)
 			fixedTerm: !!contract.endDate && !contract.terminated && !movedOut,

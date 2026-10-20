@@ -188,6 +188,13 @@ Funktionalität: Abrechnungsdetail
     Dann ist der Seitentitel lesbar
     Und scrollt die Seite nicht seitwärts
 
+  # Leere Bereiche für spätere Meldungen lassen keine Lücke über der Kostenaufstellung
+  Szenario: Die Kostenaufstellung folgt im üblichen Abstand auf den Status
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann folgt die Kostenaufstellung im üblichen Abstand auf den Status
+
   Szenario: Entwurf löschen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
@@ -233,6 +240,19 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF
+
+  # #453 (#325): mit «Abgerechnet bis» in der Periode sagt das PDF, was schon abgerechnet ist und ab wann das Akonto
+  # zählt; 01.03. bis 31.03.2024 = 31 Mietstage von 366 Tagen
+  Szenario: Das PDF nennt, was vor «Abgerechnet bis» schon abgerechnet ist
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und der Mietvertrag von "Eva Frei" hat "120" Franken Akonto
+    Und der Mietvertrag von "Eva Frei" ist bis "2024-02-29" ausserhalb von Dwello abgerechnet
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024. Ihre Nebenkosten und Akontobeiträge bis 29.02.2024 sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst 01.03.2024 – 31.03.2024 (31 Mietstage von 366 Tagen)."
+    Und steht im PDF "Akontobeiträge ab 01.03.2024"
 
   # Eine Korrespondenzadresse im Ausland: das Land steht allein auf der letzten Zeile des Adressfelds und als Ländercode
   # vor der PLZ im Zahlteil der QR-Rechnung, den die Nachzahlung braucht (ohne Akonto) (#102)
@@ -281,7 +301,6 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Marktstätte 3 78462 Konstanz DEUTSCHLAND"
 
-  # TODO(fachlich prüfen, #294): «Abrechnungsnummer» steht im Glossar; die Hilfetexte folgen
   # Die Datei heisst wie die Abrechnungsnummer auf dem PDF, damit der Liegenschaftsverwalter die Dateien unterscheidet (#101)
   Szenario: Das PDF heisst wie die Abrechnungsnummer
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
@@ -750,6 +769,23 @@ Funktionalität: Abrechnungsdetail
     Dann sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert bleibt
     Und nennt die Bestätigung die Verjährung nach fünf Jahren
     Und hat die Abrechnung den Status "Versendet"
+
+  # #447, Fachreview V-1: in einer Kette rechnet die berichtigte Abrechnung alles an, was auf die ersetzten Abrechnungen
+  # geflossen ist. Lea Graf erhielt mit 200 Franken Akonto im Monat eine Rückerstattung, die Nachzahlung der
+  # berichtigten Abrechnung (Hauswart) ist kleiner: netto hat der Vermieter zurückerstattet
+  Szenario: Vor dem Berichtigen einer Kette nennt die Bestätigung, was insgesamt zurückerstattet ist
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-01-01" für "1200" Franken mit "200" Franken Akonto
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Lea Graf" ist versendet
+    Und die Abrechnung 2024 von "Lea Graf" ist bezahlt
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und die Abrechnung 2024 von "Lea Graf" ist berichtigt
+    Und die berichtigte Abrechnung 2024 von "Lea Graf" ist versendet und bezahlt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung 2024 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter die Abrechnung berichtigen will
+    Dann sagt die Bestätigung, dass die berichtigte Abrechnung anrechnet, was der Liegenschaftsverwalter auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet hat
 
   # #120: eine später erfasste Rechnung wird mit der berichtigten Abrechnung nachverlangt; bezahlt sind 430.00 + 3 %
   # Verwaltungspauschale = 442.90. Neu: 430.00 + 182.00 (Hauswart 732.00 × 91/366) + 3 % = 630.36, abzüglich 442.90

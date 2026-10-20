@@ -8,6 +8,7 @@
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import { fieldNote } from '$lib/invoice-upload';
+	import DeductedHint from './DeductedHint.svelte';
 
 	// What the invoice says: building, date, amount, supplier and service; shared by "Neue Rechnung" and "Rechnung bearbeiten"
 	let {
@@ -25,7 +26,8 @@
 		idPrefix = '',
 		chooseBuilding = true,
 		fuel = false,
-		read = { unsure: [], missing: [] }
+		read = { unsure: [], missing: [] },
+		deducted
 	}: {
 		buildingId: string;
 		invoiceDate: string;
@@ -42,6 +44,7 @@
 		chooseBuilding?: boolean; // false where the building is chosen once for all (the upload dialog)
 		fuel?: boolean; // a delivery into the building's tank: it counts in the period of its delivery day (#451, M-1)
 		read?: { unsure: string[]; missing: string[] }; // fields the KI read without being sure, or did not find
+		deducted?: string | null; // Akontorechnungen deducted on the saved Beleg, said at the Betrag (#455)
 	} = $props();
 
 	// the year of the date fields' examples (DateInput), so the help names one year (#250)
@@ -129,6 +132,7 @@
 	note={fieldNote(read, 'amount')}
 	testid="invoice-amount-input"
 />
+{#if deducted}<DeductedHint amount={deducted} />{/if}
 
 <TextInput
 	id="{idPrefix}billingEntity"

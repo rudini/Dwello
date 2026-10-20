@@ -1,6 +1,6 @@
 # UI terms in four languages
 
-One French, Italian and English term per German domain term from `UBIQUITOUS_LANGUAGE.md` (which stays German and unchanged). The UI texts in `messages/{fr,it,en}.json` use exactly these words. Where the statement PDF (`backend/src/services/pdf.service.ts`) already translates a term, the UI reuses its translation. Where the official Swiss texts (Fedlex: OR and VMWG in French and Italian) have a word for the term, it is used (#83); English keeps plain words. Terms marked with ❓ have no Fedlex word and wait for a native speaker: issue #342.
+One French, Italian and English term per German domain term from `UBIQUITOUS_LANGUAGE.md` (which stays German and unchanged). The UI texts in `messages/{fr,it,en}.json` use exactly these words. Where the statement PDF (`backend/src/services/pdf.service.ts`) already translates a term, the UI reuses its translation. Where the official Swiss texts (Fedlex: OR and VMWG in French and Italian) have a word for the term, it is used (#83); English keeps plain words. Terms without a Fedlex word were decided by the product owner in #405 (implemented in #461).
 
 Style: French guillemets with a non-breaking space inside (« Immeubles »), Italian and German without; formal address (vous, Lei), buttons start with a verb (French and Italian in the infinitive: «Enregistrer», «Salvare»), Swiss conventions (CHF, «NPA», Italian «pigione»).
 
@@ -9,7 +9,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Gebäude, Liegenschaft | immeuble | immobile | building |
 | Gebäudetyp | type d’immeuble | tipo di immobile | building type |
 | Baujahr | année de construction | anno di costruzione | year built |
-| Gebäuderegister (#479, Glossar #488) | registre des bâtiments | registro degli edifici | building register |
+| Gebäuderegister | registre des bâtiments | registro degli edifici | building register |
 | eidgenössisches Gebäude- und Wohnungsregister (GWR) | Registre fédéral des bâtiments et des logements (RegBL) | Registro federale degli edifici e delle abitazioni (REA) | Federal Register of Buildings and Dwellings (RBD) |
 | PLZ / Ort / Kanton | NPA / localité / canton | NPA / località / cantone | postcode / town / canton |
 | Wohnung | appartement | appartamento | apartment |
@@ -31,8 +31,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Vertragsstatus: laufend / künftig / beendet | en cours / futur / terminé | in corso / futuro / terminato | current / future / ended |
 | Befristet / Unbefristet | durée déterminée / durée indéterminée | a tempo determinato / a tempo indeterminato | fixed-term / open-ended |
 | Nachmieter / Mieterwechsel | nouveau locataire / changement de locataire | nuovo inquilino / cambio d’inquilino | new tenant / change of tenant |
-| Ersatzmieter | locataire de remplacement | nuovo inquilino ❓ (#405) | replacement tenant |
-| Kündigung / gekündigt / Kündigungstermin / Kündigung aufheben | résiliation / résilié / terme de congé / annuler la résiliation | disdetta / disdetto / scadenza di disdetta / revocare la disdetta ❓ | notice of termination / terminated by notice / termination date / withdraw notice |
+| Ersatzmieter | locataire de remplacement | inquilino sostitutivo (BGE 117 II 156 «conduttore sostitutivo»; «nuovo inquilino» is the Nachmieter) | replacement tenant |
+| Kündigung / gekündigt / Kündigungstermin / Kündigung aufheben | résiliation / résilié / terme de congé / annuler la résiliation | disdetta / disdetto / scadenza di disdetta / annullare la disdetta | notice of termination / terminated by notice / termination date / withdraw notice |
 | Kündigungsfrist | délai de congé | termine di preavviso | notice period |
 | Nettomiete (Mietzins) | loyer net (loyer) | pigione netta (pigione) | net rent (rent) |
 | Zusatzmiete | loyer supplémentaire | pigione supplementare | additional rent |
@@ -44,6 +44,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Beleg (hochgeladene Datei einer Rechnung, #217) | pièce justificative | giustificativo | supporting document |
 | Gutschrift (eines Rechnungsstellers) | note de crédit | nota di credito | credit note |
 | Akontorechnung (eines Rechnungsstellers) | facture d’acompte | fattura d’acconto | advance invoice |
+| Schlussrechnung (eines Rechnungsstellers) | facture finale | fattura finale | final invoice |
 | Mahnung eines Rechnungsstellers | rappel (de l’émetteur de la facture) | sollecito (dell’emittente della fattura) | payment reminder (from the invoice issuer) |
 | Auslesen | lire (les indications) | leggere (i dati) | read (the details) |
 | Mahngebühr / Verzugszins | frais de rappel / intérêt moratoire | spese di sollecito / interesse di mora | reminder fee / default interest |
@@ -52,19 +53,22 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Rechnungsnummer / Rechnungsdatum | numéro de facture / date de facture | numero di fattura / data della fattura | invoice number / invoice date |
 | Betrag | montant | importo | amount |
 | Fälligkeitsdatum / Zahlungsdatum | date d’échéance / date de paiement | data di scadenza / data di pagamento | due date / payment date |
-| Umlagefähig | imputable ❓ | addebitabile | allocable |
-| abgerechnet (Rechnung, #409) | décomptée | conteggiata | billed |
+| Umlagefähig | répercutable (not «imputable»: Art. 259a CO uses it for «vom Mieter zu verantworten») | addebitabile | allocable |
+| Umlagefähigkeit | caractère répercutable | addebitabilità | allocability |
+| Akonto verrechnen | imputer (never for «umlagefähig») | compensare | set off |
+| abgerechnet (Rechnung, #409) | décomptée | conteggiata | in a statement |
 | Wartung (umlagefähig, Art. 5 Abs. 2 lit. g VMWG; nicht «Unterhalt» nach Art. 256 OR) | maintenance (nicht «entretien») | manutenzione | servicing (nicht «maintenance») |
 | Vollservicevertrag (Lift) | contrat de maintenance complet | contratto di manutenzione completo | full-service contract |
 | Verordnung über die Miete (VMWG) | ordonnance sur le bail (OBLF) | ordinanza concernente la locazione (OLAL) | Tenancy Ordinance (VMWG) |
 | Kategorie / Kategorisierung | catégorie / catégorisation | categoria / categorizzazione | category / categorisation |
 | Vordefinierte Kategorie «Von Dwello» / Eigene Kategorie «Eigene» (#166, #205) | «De Dwello» / «Personnalisée» | «Da Dwello» / «Personalizzata» | «From Dwello» / «Custom» |
 | KI / KI-Kategorie | IA / catégorie proposée par l’IA | IA / categoria proposta dall’IA | AI / AI category |
-| Konfidenz | fiabilité ❓ | affidabilità ❓ | confidence |
+| Konfidenz | degré de confiance («fiabilité» only for the reliability of the KI overall) | grado di certezza | confidence |
 | Manuell überschrieben / Grund der Änderung | modifié manuellement / motif de la modification | modificato manualmente / motivo della modifica | manually overridden / reason for the change |
 | Verteilschlüssel / Eigener Verteilschlüssel | clé de répartition / clé de répartition personnalisée | chiave di riparto / chiave di riparto personalizzata | distribution key / custom distribution key |
 | Wohnungsanteil | part du logement | quota appartamento | apartment share |
 | Heizprofil / Standard-Heizprofil | profil de chauffage / profil de chauffage par défaut | profilo di riscaldamento / profilo di riscaldamento predefinito | heating profile / default heating profile |
+| Vordefiniert (nicht «Standard»; Kategorien, Verteilschlüssel, Heizprofile) | prédéfini | preimpostato / preimpostata (not «predefinito», which is «Standard») | predefined |
 | Nebenkosten | frais accessoires | spese accessorie | utility costs |
 | Nebenkostenabrechnung | décompte des charges | conteggio spese accessorie | utility cost statement |
 | Abrechnung (short) | décompte | conteggio | statement |
@@ -73,10 +77,12 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Abrechnungsposition | poste du décompte | voce del conteggio | statement line |
 | Abrechnungsnummer / Abrechnungsdatum | numéro de décompte / date du décompte | numero di conteggio / data del conteggio | statement number / statement date |
 | Leistungszeitraum | période de prestation | periodo di prestazione | service period |
-| Kosten des Gebäudes | coûts de l’immeuble | costi immobile | building costs |
-| Verwaltungspauschale | frais de gestion | spese di gestione | management fee |
+| Kosten des Gebäudes | coûts de l’immeuble | costi dell’immobile | building costs |
+| Verwaltungspauschale | frais d’administration (Art. 4 al. 3 OBLF) | spese amministrative (Art. 4 cpv. 3 OLAL) | management fee |
+| Eigener Satz (#447, #485) | taux propre | aliquota propria | own rate |
+| Satz des Abrechnungslaufs (#447, #485) | taux de l’établissement des décomptes | aliquota dell’allestimento dei conteggi | rate of the statement run |
 | Zahlung zurücksetzen | Retirer le paiement saisi | Rimuovere il pagamento registrato | Reset payment |
-| Nebenkostenpauschale (#66) | forfait de frais accessoires ❓ | forfait per le spese accessorie ❓ | flat-rate utility charge |
+| Nebenkostenpauschale | forfait de frais accessoires (Art. 4 al. 2 OBLF «de manière forfaitaire») | forfait per le spese accessorie (Art. 4 cpv. 2 OLAL «computo forfettario») | flat-rate utility charge |
 | Saldo / Nachzahlung / Rückerstattung | solde / montant à payer / remboursement | saldo / importo dovuto / rimborso | balance / amount due / refund |
 | Berichtigte Abrechnung (#120) | décompte rectificatif | conteggio rettificato | corrected statement |
 | Ersetzt (Abrechnungsstatus, #120) | remplacé | sostituito | replaced |

@@ -1,0 +1,6 @@
+# Workflow notes: malformed id answers 404, gap above the cost panel (session B1)
+
+| Rule location | What happened in this task | Proposed change |
+|---|---|---|
+| `CLAUDE.md`, Workflow 4, 5 («If you cannot start subagents, list the missing reviews under "Blocked on me"») and 9 | The task ran as a subagent without a tool to start subagents. Both slices were done and every check passed, but `code-reviewer` and the persona review could not run, so "Done means" did not hold and nothing was pushed, although the product owner had asked for the pull request to be merged. | Say what a session without subagents does next: either push and open the pull request as a draft with the missing reviews named, so the parent session can run them on it, or have the parent run the reviewers before it delegates the push. |
+| `CLAUDE.md`, Workflow 8 («move a finished earlier session (every item ticked)») | The plan held session C1 whose last item was unticked although its pull request #473 was merged; `open-work.test.ts` allows one session, so the new session could start only after ticking that item for the other session and archiving it. | «A session whose pull request is merged counts as finished: tick its last item with the pull request number and archive it.» |

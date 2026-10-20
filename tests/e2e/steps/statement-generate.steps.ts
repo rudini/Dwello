@@ -50,7 +50,11 @@ import {
 	discardQuestion,
 	statementsInPreview,
 	tankQuestions,
-	totalCostsOf
+	totalCostsOf,
+	previewRowText,
+	vacancyNoteText,
+	skippedContractText,
+	allSkippedText,
 } from '../questions/statement-generate';
 import { restoredDraftShown, restoredDraftText } from '../questions/wizard';
 import {
@@ -81,7 +85,8 @@ import {
 	downloadCreatedStatementsZip,
 	requestCreatedStatementsZip,
 	tryNextWithoutConfirmation,
-	typeManagementFee
+	typeManagementFee,
+	openSkippedContract,
 } from '../tasks/statement-generate';
 import { francs, signedFrancs } from '../questions/amounts';
 import { filesInDownloadedZip } from '../questions/download';
@@ -650,3 +655,34 @@ When(
 		await verwalter.attemptsTo(recordNoTankFromQuestion(seed.idOf(building)!));
 	}
 );
+
+// #453 (#327): days, Akonto and «Abgerechnet bis» per contract; contracts «Abgerechnet bis» covers in full
+Then('nennt die Vorschau bei {string} {string}', async ({ verwalter, names }, tenant: string, text: string) => {
+	await verwalter.sees(previewRowText(names.get(tenant)!)).toContain(text);
+});
+
+Then('nennt die Vorschau bei {string} nicht {string}', async ({ verwalter, names }, tenant: string, text: string) => {
+	await verwalter.sees(previewRowText(names.get(tenant)!)).not.toContain(text);
+});
+
+Then('sagt die Vorschau zum Total {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(vacancyNoteText).toBe(text);
+});
+
+Then(
+	'nennt die Vorschau den übergangenen Mietvertrag von {string}: {string}',
+	async ({ verwalter, seed, names }, tenant: string, text: string) => {
+		await verwalter.sees(skippedContractText(seed.idOf(`Mietvertrag ${tenant}`)!)).toContain(`${names.get(tenant)}: ${text}`);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter in der Vorschau den übergangenen Mietvertrag von {string} öffnet',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.attemptsTo(openSkippedContract(seed.idOf(`Mietvertrag ${tenant}`)!));
+	}
+);
+
+Then('sagt die leere Vorschau zu {string} {string}', async ({ verwalter, seed, names }, building: string, text: string) => {
+	await verwalter.sees(allSkippedText(seed.idOf(building)!)).toBe(text.replace(building, names.get(building)!));
+});

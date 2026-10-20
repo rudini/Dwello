@@ -16,7 +16,7 @@ export interface ContractFormValues {
 	endDate: string;
 	isUnlimited: boolean;
 	terminated?: boolean; // the end is a Kündigungstermin of an open-ended contract (A-1), only when editing
-	billedUntil?: string; // «Abgerechnet bis» (#133), only when editing; '' for none
+	billedUntil?: string; // «Abgerechnet bis» (#133); in the wizard only for a Vertragsbeginn before today (#453); '' for none
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
@@ -81,6 +81,7 @@ export function initialContractValues(
 			startDate: impossible(start) ? '' : start, // the day after the contract it follows (#156), never one the date check refuses (#296)
 			endDate: '',
 			isUnlimited: true,
+			billedUntil: '',
 			baseRent: '',
 			additionalRent: '',
 			advancePayment: '',
@@ -130,6 +131,13 @@ function baseRentError(baseRent: string) {
 const amountError = (amount: string) =>
 	amount && !FRANCS.test(String(amount)) ? amountHint() : undefined;
 
+// An own rate is greater than 0 up to 10 %: 0 % means «Nein» (#447, decided in #402)
+function ownRateError(typed: string) {
+	const rate = parsePercent(typed);
+	if (rate === 0) return m.contracts_error_fee_rate_zero();
+	return isFeeRate(rate) ? undefined : m.contracts_error_fee_rate();
+}
+
 /** Error message per field; empty when the contract can be saved */
 export function validateContract(values: ContractFormValues): Record<string, string> {
 	const errors = {
@@ -147,14 +155,20 @@ export function validateContract(values: ContractFormValues): Record<string, str
 		flatRateUtilityCharge: amountError(values.flatRateUtilityCharge ?? ''),
 		managementFee: values.managementFee ? undefined : m.contracts_error_fee_choice(),
 		managementFeeRate:
-			values.managementFee === 'own' && !isFeeRate(parsePercent(values.managementFeeRate))
-				? m.statements_error_fee()
-				: undefined
+			values.managementFee === 'own' ? ownRateError(values.managementFeeRate) : undefined
 	};
 	return Object.fromEntries(Object.entries(errors).filter(([, message]) => message)) as Record<
 		string,
 		string
 	>;
+}
+
+/** #453 (#337): «Abgerechnet bis» after today or before the Vertragsbeginn, refused as the backend does */
+export function billedUntilError({ billedUntil, startDate }: ContractFormValues, today: string) {
+	if (!billedUntil) return undefined;
+	if (billedUntil > today) return m.backend_billed_until_future();
+	if (startDate && billedUntil < startDate)
+		return m.backend_billed_until_before_start({ date: formatDate(startDate) });
 }
 
 /** Request body of the contract API */

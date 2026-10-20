@@ -188,7 +188,7 @@
 
 	<!-- Full width so every amount is visible; min-w-0: if still too wide it scrolls inside, not the page -->
 	<div class="min-w-0">
-		<Panel title={m.statements_cost_breakdown()}>
+		<Panel title={m.statements_cost_breakdown()} testid="statement-cost-breakdown">
 			<CostTable {statement} />
 		</Panel>
 	</div>

@@ -26,7 +26,8 @@ import {
 	periodStartInput,
 	previewCount,
 	showStatementsButton,
-	downloadZipButton
+	downloadZipButton,
+	previewSkippedLink,
 } from '../targets/statement-generate';
 import { closeDraftNotice, discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { generateStatementsViaApi, openPreviewViaApi, type RunOptions } from './statement-generate-api';
@@ -129,7 +130,12 @@ export const recordInvoiceFromWarning: Activity = (actor) =>
 		Click.on(newInvoiceFromWarning),
 		Wait.forUrl((url) => /\/invoices\/new/.test(url.href))
 	);
-export const openContractWithoutFee = (contractId: string) => Click.on(feeNotAgreedLink(contractId));
+// the contract page loads before the next step looks: its data can take longer than an expectation waits (#494)
+export const openContractWithoutFee = (contractId: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(feeNotAgreedLink(contractId)),
+		Wait.forUrl((url) => url.pathname === `/contracts/${contractId}`)
+	);
 
 // The edit link of an invoice a hint of the preview names
 export const editHintedInvoice = (date: string): Activity => (actor) =>
@@ -145,7 +151,12 @@ export const recordNoTankFromQuestion = (buildingId: string): Activity => (actor
 // #91, step «Einstellungen»: the answer whether the contract agrees a category; stored at once
 export const answerAgreement = (contractId: string, categoryId: string, agreed: boolean): Activity => (actor) =>
 	actor.attemptsTo(Click.on(agreementChoice(contractId, categoryId, agreed)), Wait.until(agreementAnswered(contractId, categoryId)));
-export const openContractWithNotAgreedCosts = (contractId: string) => Click.on(notAgreedCostsLink(contractId));
+// waits for the contract page, as `openContractWithoutFee` (#494)
+export const openContractWithNotAgreedCosts = (contractId: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(notAgreedCostsLink(contractId)),
+		Wait.forUrl((url) => url.pathname === `/contracts/${contractId}`)
+	);
 // saving an answer fails (the BFF route the browser calls)
 export const agreementsCannotBeChecked = FailRequests.to('/api/statements/agreements', {});
 export const agreementsCheckAgain: Activity = (actor) => actor.attemptsTo(FailRequests.noLonger, Click.on(agreementsRetry));
@@ -155,3 +166,6 @@ export const chooseAllBuildings = Check.the(allBuildingsCheckbox);
 export const discardInput = Click.on(discardDraftButton);
 export const confirmDiscarding = Click.on(discardDraftConfirm);
 export const closeRestoredNotice = Click.on(closeDraftNotice);
+
+// #453 (#327): the link of a contract «Abgerechnet bis» covers in full
+export const openSkippedContract = (contractId: string) => Click.on(previewSkippedLink(contractId));

@@ -282,6 +282,9 @@ export interface HeatingProfile {
 // Statement types
 export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'replaced';
 
+/** A statement an invoice is in: its number and status, to link it (#455) */
+export type BilledStatement = { id: string; statementNumber: string; status: StatementStatus };
+
 export interface StatementLineItem {
 	id: string;
 	categoryId: string;

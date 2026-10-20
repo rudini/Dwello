@@ -137,13 +137,30 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale zum Satz des Abrechnungslaufs vereinbart ist
     Dann zeigt der Mietvertrag bei der Verwaltungspauschale "Vereinbart, Satz des Abrechnungslaufs"
 
+  # #447 (Entscheid in #402, Punkt 2): auch beim Bearbeiten heisst ein eigener Satz von 0 % «Nein»
+  Szenario: Eigener Satz von 0 % wird beim Bearbeiten abgelehnt
+    Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag die Verwaltungspauschale mit einem eigenen Satz von "0" % vereinbart ist
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Ein eigener Satz von 0 % heisst: keine Verwaltungspauschale. Wählen Sie dann «Nein»."
+
   # #133: vor dem Wechsel zu Dwello hat der Liegenschaftsverwalter die Nebenkosten selbst abgerechnet
   Szenario: Ausserhalb von Dwello abgerechnete Zeit eintragen
     Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2025-12-31" ausserhalb von Dwello abgerechnet sind
     Dann zeigt der Mietvertrag «Abgerechnet bis» "31.12.2025"
 
+  # #453 (#337): eine Abrechnung entsteht erst nach dem Ende ihrer Periode; ein Datum vor dem Vertragsbeginn wirkt nicht
+  Szenario: «Abgerechnet bis» in der Zukunft
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2099-12-31" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Abgerechnet bis kann nicht in der Zukunft liegen. Tragen Sie den letzten Tag der letzten Abrechnung ein, die ausserhalb von Dwello erstellt wurde."
+
+  Szenario: «Abgerechnet bis» vor dem Vertragsbeginn
+    Wenn der Liegenschaftsverwalter einträgt, dass die Nebenkosten bis "2024-03-31" ausserhalb von Dwello abgerechnet sind
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Abgerechnet bis liegt vor dem Vertragsbeginn 01.04.2024. Lassen Sie das Feld leer, wenn für diesen Mietvertrag noch nichts ausserhalb von Dwello abgerechnet ist."
+
+  # #480: auch ein Mietvertrag, der bis «Abgerechnet bis» endet, erhält keine Abrechnung
   Szenario: Hilfe zu «Abgerechnet bis»
     Dann erfährt der Liegenschaftsverwalter, dass Dwello die Nebenkosten erst ab dem Tag nach «Abgerechnet bis» abrechnet
+    Und erfährt der Liegenschaftsverwalter, dass Dwello keine Abrechnung erstellt, wenn der Mietvertrag bis «Abgerechnet bis» endet
 
   # F-23 (#155): beim Tod des Mieters geht der Mietvertrag auf die Erben über, er endet nicht
   Szenario: Beim Tod des Mieters läuft der Mietvertrag weiter

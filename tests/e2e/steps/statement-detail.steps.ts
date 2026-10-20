@@ -5,6 +5,7 @@ import { downloadedFileHeader, downloadedFileName, downloadedPdfText, downloaded
 import {
 	balanceAmount,
 	changeOffers,
+	gapAboveCostBreakdown,
 	correctConfirmation,
 	deadlineShown,
 	paymentText,
@@ -404,6 +405,11 @@ Given('die Abrechnung {int} von {string} ist berichtigt', async ({ seed }, year:
 	await seed.replaceStatement(tenant, year, true);
 });
 
+Given('die berichtigte Abrechnung {int} von {string} ist versendet und bezahlt', async ({ seed }, year: number, tenant: string) => {
+	await seed.sendStatement(tenant, year, 'Berichtigte Abrechnung');
+	await seed.markPaid(tenant, year, 'Berichtigte Abrechnung');
+});
+
 Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite der berichtigten Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
@@ -463,6 +469,13 @@ Then('sagt die Bestätigung, dass die Abrechnung ersetzt wird und unverändert b
 	await verwalter.sees(correctConfirmation).toContain('bleibt unverändert erhalten');
 });
 
+Then(
+	'sagt die Bestätigung, dass die berichtigte Abrechnung anrechnet, was der Liegenschaftsverwalter auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet hat',
+	async ({ verwalter }) => {
+		await verwalter.sees(correctConfirmation).toContain('die Sie auf diese und die ersetzten Abrechnungen insgesamt zurückerstattet haben.');
+	}
+);
+
 Then('nennt die Bestätigung die Verjährung nach fünf Jahren', async ({ verwalter }) => {
 	await verwalter.sees(correctConfirmation).toContain('fünf Jahren (Art. 128 Ziff. 1 OR)');
 });
@@ -519,3 +532,7 @@ Then(
 		await verwalter.sees(oldAddressWarningText).toContain(`${names.get(tenant)} ist ausgezogen. ${rest}`);
 	}
 );
+
+Then('folgt die Kostenaufstellung im üblichen Abstand auf den Status', async ({ verwalter }) => {
+	await verwalter.sees(gapAboveCostBreakdown).toBe(32);
+});

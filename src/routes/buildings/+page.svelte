@@ -7,16 +7,19 @@
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Pagination from '$lib/ui/Pagination.svelte';
+	import ResultList from '$lib/ui/ResultList.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import BuildingCard from './BuildingCard.svelte';
 
 	let { data }: { data: BuildingsListData } = $props();
 
-	// follow the address, so a link, back or forward shows the filters of the list shown (#159)
-	let searchTerm = $derived($page.url.searchParams.get('search') || '');
-	let cityFilter = $derived($page.url.searchParams.get('city') || '');
-	const filtered = $derived(['search', 'city'].some((key) => $page.url.searchParams.get(key)));
+	// follow the address, so a link, back or forward shows the filters of the list shown (#159); only the address:
+	// the store also reports other changes, and these reset a term typed meanwhile (O-41)
+	const query = $derived($page.url.search);
+	const param = (key: string) => new URLSearchParams(query).get(key) || '';
+	let searchTerm = $derived(param('search'));
+	let cityFilter = $derived(param('city'));
+	const filtered = $derived(['search', 'city'].some((key) => param(key)));
 
 	function handleSearch(event: SubmitEvent) {
 		event.preventDefault();
@@ -101,16 +104,20 @@
 			{/if}
 		</section>
 	{:else}
-		<section aria-labelledby="buildings-count" class="flex flex-col gap-4">
-			<h2 id="buildings-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{(data.total === 1 ? m.buildings_count_one : m.buildings_count_many)({ count: data.total })}
-			</h2>
-			<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-				{#each data.buildings as building (building.id)}
-					<BuildingCard {building} />
-				{/each}
-			</ul>
-		</section>
-		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
+		<ResultList
+			id="buildings-count"
+			heading={(data.total === 1 ? m.buildings_count_one : m.buildings_count_many)({
+				count: data.total
+			})}
+			listClass="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+			url={$page.url}
+			page={data.page}
+			pageSize={data.pageSize}
+			total={data.total}
+		>
+			{#each data.buildings as building (building.id)}
+				<BuildingCard {building} />
+			{/each}
+		</ResultList>
 	{/if}
 </div>

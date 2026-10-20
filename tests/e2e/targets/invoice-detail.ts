@@ -23,3 +23,13 @@ export const missedStatementsLink = target('Abrechnungen ohne diese Rechnung', (
 );
 export const categoryReason = target('Grund der Umlagefähigkeit der Kategorie', (page) => page.getByTestId('category-reason'));
 export const distributionKeyRow = target('Verteilschlüssel der Rechnung', (page) => page.getByTestId('invoice-key-row'));
+// the hint on Akontorechnungen deducted on the Beleg, at the Betrag of the detail page and of «Rechnung bearbeiten» (#455)
+export const deductedHint = target('Hinweis Akontorechnungen beim Betrag', (page) => page.getByTestId('invoice-deducted-hint'));
+export const deductedRule = target('Regel zu den Akontorechnungen beim Betrag', (page) =>
+	page.getByTestId('invoice-deducted-rule')
+);
+export const billedIn = target('In Abrechnungen enthalten', (page) => page.getByTestId('invoice-billed-in'));
+export const billedInLink = (statementNumber: string) =>
+	target(`Abrechnung ${statementNumber} der Rechnung`, (page) =>
+		page.getByTestId('invoice-billed-in-link').filter({ hasText: statementNumber })
+	);

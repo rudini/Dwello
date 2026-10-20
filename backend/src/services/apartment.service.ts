@@ -13,7 +13,7 @@ import {
 	type Apartment,
 	type NewApartment
 } from '../db/schema';
-import { everyWordIn } from './word-search';
+import { everyWordIn, withoutApartmentWord } from './word-search';
 import { sqlToday, swissToday } from './today';
 
 export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
@@ -111,12 +111,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 	const conditions = [];
 
 	if (search) {
-		// «Wohnung 3.02», as the card names it, finds 3.02
-		const words = search
-			.split(/\s+/)
-			.filter((word) => word.toLowerCase() !== 'wohnung')
-			.join(' ');
-		conditions.push(everyWordIn(words, [apartments.number, buildings.name, buildings.address, buildings.city]));
+		conditions.push(everyWordIn(withoutApartmentWord(search), [apartments.number, buildings.name, buildings.address, buildings.city]));
 	}
 
 	if (buildingId) {

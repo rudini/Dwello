@@ -45,6 +45,7 @@ const translations: Record<Language, Record<string, string>> = {
 		managementFee: 'Verwaltungspauschale',
 		colon: ': ',
 		advancePayments: 'Akontobeiträge',
+		advancePaymentsFrom: 'Akontobeiträge ab {date}', // #477: the line is «Akontobeiträge»
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
 		advanceMonths: '{n} Monate × CHF {amount} ({from} – {to})',
 		advanceMonth: '1 Monat × CHF {amount} ({from} – {to})',
@@ -79,6 +80,7 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
 		heatingNoteParts: 'Heizkosten nach Heizprofil «{profile}»: {percent} % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
 		heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses: {months}',
+		heatingMonthsBilled: 'Anteile der abgerechneten Monate Ihres Mietverhältnisses: {months}',
 		heatingPeriodSums: '; zusammen {tenant}\u00a0%. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen {period}\u00a0%.',
 		heatingPeriodMonths: '; zusammen {tenant}\u00a0%. Anteile der Monate der Abrechnungsperiode im Heizprofil: {months}; zusammen {period}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
 		months: 'Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez',
@@ -95,6 +97,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partShare: 'Ihr Anteil{colon}{apartment} × Zeitanteil ({sum}) / {costs} = {share}',
 		partShareZero: 'Ihr Anteil{colon}({sum}) × {keyShare} (Anteil Ihrer Wohnung nach dem Verteilschlüssel) = {share}',
 		partProfile: ', Anteile der Monate im Heizprofil: {periodMonths}; zusammen {period}\u00a0%. Anteile der Monate Ihres Mietverhältnisses darin: {months}; zusammen {tenant}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
+		partProfileBilled: ', Anteile der Monate im Heizprofil: {periodMonths}; zusammen {period}\u00a0%. Anteile der abgerechneten Monate Ihres Mietverhältnisses darin: {months}; zusammen {tenant}\u00a0%. Anteil nach Heizprofil: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', Anteil nach Heizprofil: {percent}\u00a0% (siehe Heiz- und Warmwasserkosten)',
 		partProfileNone: 'keine',
 		partNamed: '{name}, {line}',
@@ -106,7 +109,7 @@ const translations: Record<Language, Record<string, string>> = {
 		yourCosts: 'Ihre Nebenkosten',
 		pageOf: 'Seite {page} von {pages}',
 		tenancyLine: 'Ihr Mietverhältnis in dieser Periode: {start} – {end} ({days} Mietstage von {total} Tagen)',
-		tenancyBilledLine: 'Ihr Mietverhältnis in dieser Periode: {tenancyStart} – {end}. Abgerechnet bis {billedUntil}; diese Abrechnung umfasst {start} – {end} ({days} Mietstage von {total} Tagen)',
+		tenancyBilledLine: 'Ihr Mietverhältnis in dieser Periode: {tenancyStart} – {end}. Ihre Nebenkosten und Akontobeiträge bis {billedUntil} sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst {start} – {end} ({days} Mietstage von {total} Tagen).',
 		payBy: 'Bitte bezahlen Sie den Betrag bis {date} mit dem Zahlteil.',
 		payNoDate: 'Bitte bezahlen Sie den Betrag mit dem Zahlteil.',
 		paidOn: 'Bezahlt am {date}. Vielen Dank.',
@@ -152,9 +155,10 @@ const translations: Record<Language, Record<string, string>> = {
 		totalAmount: 'Coûts de l’immeuble',
 		yourShare: 'Votre part',
 		subtotal: 'Sous-total',
-		managementFee: 'Frais de gestion',
+		managementFee: 'Frais d’administration',
 		colon: '\u00a0: ',
 		advancePayments: 'Acomptes',
+		advancePaymentsFrom: 'Acomptes à partir du {date}',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
 		advanceMonths: '{n} mois × CHF {amount} ({from} – {to})',
 		advanceMonth: '1 mois × CHF {amount} ({from} – {to})',
@@ -189,6 +193,7 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% des frais de chauffage de votre logement pour la période de décompte',
 		heatingNoteParts: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% pour une facture sans période de prestation. Pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
 		heatingMonths: 'Parts des mois de votre bail\u00a0: {months}',
+		heatingMonthsBilled: 'Parts des mois de votre bail compris dans ce décompte\u00a0: {months}',
 		heatingPeriodSums: '\u00a0; au total {tenant}\u00a0%. Les mois de la période de décompte totalisent {period}\u00a0% dans le profil de chauffage.',
 		heatingPeriodMonths: '\u00a0; au total {tenant}\u00a0%. Parts des mois de la période de décompte dans le profil de chauffage\u00a0: {months}\u00a0; au total {period}\u00a0%. Part selon le profil de chauffage\u00a0: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
 		months: 'janv.,févr.,mars,avr.,mai,juin,juil.,août,sept.,oct.,nov.,déc.',
@@ -204,6 +209,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partShare: 'Votre part{colon}{apartment} × part temporelle ({sum}) / {costs} = {share}',
 		partShareZero: 'Votre part{colon}({sum}) × {keyShare} (part de votre logement selon la clé de répartition) = {share}',
 		partProfile: ', parts des mois dans le profil de chauffage\u00a0: {periodMonths}\u00a0; au total {period}\u00a0%. Parts des mois de votre bail dans cette période\u00a0: {months}\u00a0; au total {tenant}\u00a0%. Part selon le profil de chauffage\u00a0: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
+		partProfileBilled: ', parts des mois dans le profil de chauffage\u00a0: {periodMonths}\u00a0; au total {period}\u00a0%. Parts des mois de votre bail compris dans ce décompte\u00a0: {months}\u00a0; au total {tenant}\u00a0%. Part selon le profil de chauffage\u00a0: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', part selon le profil de chauffage\u00a0: {percent}\u00a0% (voir «\u00a0Frais de chauffage et d’eau chaude\u00a0»)',
 		partProfileNone: 'aucune',
 		partNamed: '{name}, {line}',
@@ -214,8 +220,8 @@ const translations: Record<Language, Record<string, string>> = {
 		monthSplit: '{month}\u00a0{percent}\u00a0% ({full}\u00a0% × {days}/{total} jours)',
 		yourCosts: 'Vos frais accessoires',
 		pageOf: 'Page {page} sur {pages}',
-		tenancyLine: 'Votre bail pendant la période : {start} – {end} ({days} jours sur {total})',
-		tenancyBilledLine: 'Votre bail pendant la période : {tenancyStart} – {end}. Décompté jusqu’au {billedUntil} ; ce décompte couvre {start} – {end} ({days} jours sur {total})',
+		tenancyLine: 'Votre bail pendant cette période\u00a0: {start} – {end} ({days} jours de location sur {total})',
+		tenancyBilledLine: 'Votre bail pendant cette période\u00a0: {tenancyStart} – {end}. Vos frais accessoires et vos acomptes jusqu’au {billedUntil} ont fait l’objet d’un décompte antérieur. Ce décompte couvre la période {start} – {end} ({days} jours de location sur {total}).',
 		payBy: 'Veuillez payer le montant au plus tard le {date} au moyen de la section paiement.',
 		payNoDate: 'Veuillez payer le montant au moyen de la section paiement.',
 		paidOn: 'Payé le {date}. Merci.',
@@ -258,12 +264,13 @@ const translations: Record<Language, Record<string, string>> = {
 		building: 'Immobile',
 		costBreakdown: 'Riepilogo costi',
 		category: 'Categoria',
-		totalAmount: 'Costi immobile',
+		totalAmount: 'Costi dell’immobile',
 		yourShare: 'La sua quota',
 		subtotal: 'Subtotale',
-		managementFee: 'Spese di gestione',
+		managementFee: 'Spese amministrative',
 		colon: ': ',
 		advancePayments: 'Acconti',
+		advancePaymentsFrom: 'Acconti dal {date}',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
 		advanceMonths: '{n} mesi × CHF {amount} ({from} – {to})',
 		advanceMonth: '1 mese × CHF {amount} ({from} – {to})',
@@ -297,7 +304,8 @@ const translations: Record<Language, Record<string, string>> = {
 		and: 'e',
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
 		heatingNoteParts: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura senza periodo di prestazione. Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
-		heatingMonths: 'Quote dei mesi della sua locazione: {months}',
+		heatingMonths: 'Quote dei mesi del suo rapporto di locazione: {months}',
+		heatingMonthsBilled: 'Quote dei mesi conteggiati del suo rapporto di locazione: {months}',
 		heatingPeriodSums: '; in totale {tenant}\u00a0%. I mesi del periodo di conteggio totalizzano {period}\u00a0% nel profilo di riscaldamento.',
 		heatingPeriodMonths: '; in totale {tenant}\u00a0%. Quote dei mesi del periodo di conteggio nel profilo di riscaldamento: {months}; in totale {period}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
 		months: 'gen,feb,mar,apr,mag,giu,lug,ago,set,ott,nov,dic',
@@ -313,6 +321,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partShare: 'La sua quota{colon}{apartment} × quota temporale ({sum}) / {costs} = {share}',
 		partShareZero: 'La sua quota{colon}({sum}) × {keyShare} (quota del suo appartamento secondo la chiave di riparto) = {share}',
 		partProfile: ', quote dei mesi nel profilo di riscaldamento: {periodMonths}; in totale {period}\u00a0%. Quote dei mesi della sua locazione in tale periodo: {months}; in totale {tenant}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
+		partProfileBilled: ', quote dei mesi nel profilo di riscaldamento: {periodMonths}; in totale {period}\u00a0%. Quote dei mesi conteggiati del suo rapporto di locazione in tale periodo: {months}; in totale {tenant}\u00a0%. Quota secondo il profilo di riscaldamento: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', quota secondo il profilo di riscaldamento: {percent}\u00a0% (vedi spese di riscaldamento e acqua calda)',
 		partProfileNone: 'nessuna',
 		partNamed: '{name}, {line}',
@@ -323,8 +332,8 @@ const translations: Record<Language, Record<string, string>> = {
 		monthSplit: '{month}\u00a0{percent}\u00a0% ({full}\u00a0% × {days}/{total} giorni)',
 		yourCosts: 'Le sue spese accessorie',
 		pageOf: 'Pagina {page} di {pages}',
-		tenancyLine: 'La sua locazione in questo periodo: {start} – {end} ({days} giorni su {total})',
-		tenancyBilledLine: 'La sua locazione in questo periodo: {tenancyStart} – {end}. Conteggiato fino al {billedUntil}; questo conteggio comprende {start} – {end} ({days} giorni su {total})',
+		tenancyLine: 'Il suo rapporto di locazione in questo periodo: {start} – {end} ({days} giorni di locazione su {total})',
+		tenancyBilledLine: 'Il suo rapporto di locazione in questo periodo: {tenancyStart} – {end}. Le sue spese accessorie e i suoi acconti fino al {billedUntil} figurano in un conteggio precedente. Questo conteggio comprende il periodo {start} – {end} ({days} giorni di locazione su {total}).',
 		payBy: 'La preghiamo di pagare l’importo entro il {date} tramite la sezione pagamento.',
 		payNoDate: 'La preghiamo di pagare l’importo tramite la sezione pagamento.',
 		paidOn: 'Pagato il {date}. Grazie.',
@@ -336,7 +345,7 @@ const translations: Record<Language, Record<string, string>> = {
 		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla né riceve alcun rimborso.',
 		waivedDue: 'L’importo è inferiore a CHF 5.00. Vi rinunciamo; non deve pagare nulla.',
 		waivedRefund: 'L’importo è inferiore a CHF 5.00. Non glielo bonifichiamo.',
-		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: la quota dei costi dell’immobile a carico del suo appartamento secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio.{days}{parts} La sua quota è la quota appartamento moltiplicata per la quota temporale.{rounded}{heating}',
+		sharesNote: 'Costi dell’immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: la quota dei costi dell’immobile a carico del suo appartamento secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio.{days}{parts} La sua quota è la quota appartamento moltiplicata per la quota temporale.{rounded}{heating}',
 		sharesNoteDays: ' Per una fattura con periodo di prestazione contano i suoi giorni di locazione in tale periodo.',
 		sharesNoteParts: ' Se una voce del conteggio comprende fatture relative a giorni diversi, il calcolo è riportato sotto la voce.',
 		sharesNoteRounded: ' La percentuale è arrotondata; la sua quota risulta dal calcolo sotto la voce.',
@@ -345,7 +354,7 @@ const translations: Record<Language, Record<string, string>> = {
 		sharesNoteBelow: ' Una quota temporale negativa risulta da una nota di credito (importo negativo) relativa ai suoi giorni di locazione, mentre le fatture della stessa voce non li riguardano: Lei riceve la sua parte della nota di credito.',
 		sharesNoteHeating: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento.',
 		sharesNoteHeatingParts: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento; per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo. Se questi mesi totalizzano 0\u00a0% nel profilo di riscaldamento, contano invece i suoi giorni di locazione in tale periodo.',
-		sharesNoteFuel: 'Costi immobile per il combustibile del serbatoio: il consumo (vedi spese di riscaldamento e acqua calda). Conta per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.',
+		sharesNoteFuel: 'Costi dell’immobile per il combustibile in cisterna: il consumo (vedi spese di riscaldamento e acqua calda). Conta per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
 		fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
 		fuelOpening: 'Scorta iniziale al {date}',
@@ -373,6 +382,7 @@ const translations: Record<Language, Record<string, string>> = {
 		managementFee: 'Management fee',
 		colon: ': ',
 		advancePayments: 'Advance payments',
+		advancePaymentsFrom: 'Advance payments from {date}',
 		// #464: the Akonto per amount and split month, below its total (domain review 464-1)
 		advanceMonths: '{n} months × CHF {amount} ({from} – {to})',
 		advanceMonth: '1 month × CHF {amount} ({from} – {to})',
@@ -407,6 +417,7 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Heating costs under the heating profile ‘{profile}’: {percent} % of your apartment’s heating costs for the billing period',
 		heatingNoteParts: 'Heating costs under the heating profile ‘{profile}’: {percent} % for an invoice without a service period. For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.',
 		heatingMonths: 'Monthly shares during your tenancy: {months}',
+		heatingMonthsBilled: 'Monthly shares of the months of your tenancy covered by this statement: {months}',
 		heatingPeriodSums: '; in total {tenant}\u00a0%. The months of the billing period total {period}\u00a0% in the heating profile.',
 		heatingPeriodMonths: '; in total {tenant}\u00a0%. Monthly shares of the billing period in the heating profile: {months}; in total {period}\u00a0%. Share under the heating profile: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%.',
 		months: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
@@ -422,6 +433,7 @@ const translations: Record<Language, Record<string, string>> = {
 		partShare: 'Your share{colon}{apartment} × time share ({sum}) / {costs} = {share}',
 		partShareZero: 'Your share{colon}({sum}) × {keyShare} (your apartment’s share under the distribution key) = {share}',
 		partProfile: ', monthly shares in the heating profile: {periodMonths}; in total {period}\u00a0%. Monthly shares during your tenancy within it: {months}; in total {tenant}\u00a0%. Share under the heating profile: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
+		partProfileBilled: ', monthly shares in the heating profile: {periodMonths}; in total {period}\u00a0%. Of these, the months of your tenancy covered by this statement: {months}; in total {tenant}\u00a0%. Share under the heating profile: {tenant}\u00a0% / {period}\u00a0% = {percent}\u00a0%',
 		partProfileRun: ', share under the heating profile: {percent}\u00a0% (see ‘Heating and hot water costs’)',
 		partProfileNone: 'none',
 		partNamed: '{name}, {line}',
@@ -432,8 +444,8 @@ const translations: Record<Language, Record<string, string>> = {
 		monthSplit: '{month}\u00a0{percent}\u00a0% ({full}\u00a0% × {days}/{total} days)',
 		yourCosts: 'Your utility costs',
 		pageOf: 'Page {page} of {pages}',
-		tenancyLine: 'Your tenancy in this period: {start} – {end} ({days} of {total} days)',
-		tenancyBilledLine: 'Your tenancy in this period: {tenancyStart} – {end}. Billed until {billedUntil}; this statement covers {start} – {end} ({days} of {total} days)',
+		tenancyLine: 'Your tenancy in this period: {start} – {end} ({days} of {total} days rented)',
+		tenancyBilledLine: 'Your tenancy in this period: {tenancyStart} – {end}. Your utility costs and advance payments up to {billedUntil} have already been billed in an earlier statement. This statement covers {start} – {end} ({days} of {total} days rented).',
 		payBy: 'Please pay the amount by {date} using the payment part.',
 		payNoDate: 'Please pay the amount using the payment part.',
 		paidOn: 'Paid on {date}. Thank you.',
@@ -591,11 +603,13 @@ function winAnsi(text: string) {
 }
 
 // The floor as tenants write it: ground floor, above, below
+// English counts floors with ordinals: 1st, 2nd, 3rd, 4th (461-native-en, EN-32)
+const ORDINAL: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other: 'th' };
 const FLOORS: Record<Language, [string, (n: number) => string, (n: number) => string]> = {
 	de: ['EG', (n) => `${n}. OG`, (n) => `${n}. UG`],
 	fr: ['rez-de-chaussée', (n) => (n === 1 ? '1er étage' : `${n}e étage`), (n) => (n === 1 ? '1er sous-sol' : `${n}e sous-sol`)],
 	it: ['pianterreno', (n) => `${n}° piano`, (n) => `${n}° piano interrato`],
-	en: ['ground floor', (n) => `floor ${n}`, (n) => `basement ${n}`]
+	en: ['ground floor', (n) => `${n}${ORDINAL[new Intl.PluralRules('en', { type: 'ordinal' }).select(n)]} floor`, (n) => `basement ${n}`]
 };
 
 function formatFloor(floor: number, lang: Language): string {
@@ -678,8 +692,8 @@ function title({ doc, t, data }: Page, y: number) {
 		.fillColor(COLORS.muted)
 		.text(`${t.statementNumber} ${data.statementNumber} · ${t.statementDate} ${formatDate(data.statementDate)}`)
 		.fillColor(COLORS.ink)
+		.moveDown(0.4) // its own paragraph, not a continuation of the number (data check 453-1 D-2)
 		.text(
-			// TODO(fachlich prüfen, #325): the line with «Abgerechnet bis» is the domain review's proposal
 			fill(data.billed ? t.tenancyBilledLine : t.tenancyLine, {
 				start: formatDate(data.rentalStart),
 				end: formatDate(data.rentalEnd),
@@ -722,7 +736,6 @@ const totalRows = (data: StatementPDFData, t: Record<string, string>) =>
 	(rounding(data) ? 6 : 4) + (priorLine(data, t) ? 1 : 0) + (data.advanceLines?.length ?? 0);
 const priorRow = (doc: Doc, prior: ReturnType<typeof priorLine>, top: number) => (prior ? row(doc, total(prior.label, prior.amount), top) : top);
 // «Bereits bezahlt auf NK-… und NK-…», or what the landlord already refunded
-// TODO(fachlich prüfen, #362): «Bereits bezahlt» / «Bereits zurückerstattet» have their glossary row; the help texts follow
 function priorLine(data: StatementPDFData, t: Record<string, string>) {
 	const prior = priorOf(data);
 	if (!prior) return null;
@@ -1063,7 +1076,6 @@ function heatingSection(page: Page, y: number) {
 // (Art. 8 VMWG); kept on one page
 function notes({ doc, t, data, config }: Page, y: number) {
 	const contact = `${config.companyName}, ${config.address}, ${config.postalCode} ${config.city}`;
-	// TODO(fachlich prüfen, #369): «vereinbarte Nebenkosten»
 	const agreed = data.agreedCosts?.length ? [fill(t.agreedCosts, { categories: data.agreedCosts.join(', ') })] : [];
 	const advance = data.totalAdvancePayments > 0 ? [t.noteAdvance] : [];
 	const lines = [...agreed, ...advance, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
@@ -1240,12 +1252,23 @@ function printableDoc(doc: Doc) {
 	return doc;
 }
 
+// #453 (#325): with «Abgerechnet bis» in the period the Akonto and the tenant's months are those from the day after
+const billedTexts = (t: Record<string, string>, data: StatementPDFData) =>
+	data.billed
+		? {
+				...t,
+				advancePayments: fill(t.advancePaymentsFrom, { date: formatDate(data.rentalStart) }),
+				heatingMonths: t.heatingMonthsBilled,
+				partProfile: t.partProfileBilled
+			}
+		: t;
+
 /**
  * Generate utility statement PDF: A4, header and footer on every page, the balance first, then how each cost is
  * shared, the heating costs and the tenant's rights; the QR-bill at the bottom of the last page for an amount due
  */
 async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig, language: Language = 'de'): Promise<Buffer> {
-	const t = { ...translations.de, ...translations[language] };
+	const t = billedTexts({ ...translations.de, ...translations[language] }, data);
 	const qr = await qrCodeFor(data, config, t);
 
 	return new Promise((resolve, reject) => {

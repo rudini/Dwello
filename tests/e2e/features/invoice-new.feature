@@ -69,6 +69,10 @@ Funktionalität: Neue Rechnung erfassen
   Szenario: Der Leistungszeitraum erklärt Kosten über mehrere Jahre
     Dann erklärt das Formular beim Leistungszeitraum "Kosten, die nur alle paar Jahre anfallen, verteilen Sie mit dem Leistungszeitraum über diese Jahre."
 
+  # #455 (#276): kommt die Arbeit früher oder später wieder, bleibt der Leistungszeitraum der letzten Rechnung
+  Szenario: Der Leistungszeitraum erklärt, wenn die Arbeit früher oder später wiederkommt
+    Dann erklärt das Formular beim Leistungszeitraum "Kommt die Arbeit früher wieder, ändern Sie den Leistungszeitraum der letzten Rechnung nicht: Sonst ändern sich die Teile, die schon abgerechnet sind. Bis zu seinem Ende zählen dann beide Rechnungen. Kommt sie später, zählt in den Monaten dazwischen keine."
+
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
