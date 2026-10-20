@@ -8,6 +8,7 @@
 	import Icon from '$lib/ui/Icon.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import { controlClass } from '$lib/ui/field';
+	import NameTranslations from '../NameTranslations.svelte';
 	import SaveForm from '../SaveForm.svelte';
 
 	let {
@@ -113,4 +114,6 @@
 	</fieldset>
 
 	<HeatingProfileChart {shares} />
+
+	<NameTranslations names={profile} help={m.profiles_translations_help()} testid="heating-profile" />
 </SaveForm>

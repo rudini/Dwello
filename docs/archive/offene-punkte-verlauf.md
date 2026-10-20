@@ -325,3 +325,7 @@ U-23 lost its map parts when the building map was removed: the map said nothing 
 ## O-38 – E2E leftovers fixed
 
 O-38 (a scenario's sent, paid or replaced statement kept its tenant, apartment and building in `dwello_e2e`; with the building lists at 1000 since #440 the statement wizard's buildings step sent two requests per leftover building, so the Firefox and WebKit shards on `main` timed out in the wizard from run 595 on): the cleanup (`tests/e2e/fixtures/backend.ts`) now deletes the scenario's statements and their documents directly in the E2E database (`backend/scripts/e2e-purge-statements.ts`, refuses any other database) before it removes the rest through the API.
+
+## O-41 – lost building search fixed
+
+O-41 («Suche ohne Treffer», `buildings.feature`, failed in Firefox on #473 and again on #514, run 39385274329): the building list bound its search field to a `$derived` of the `$page` store, and the store also reports changes without a new address, which reset a term typed meanwhile; «Suchen» then searched for nothing. The list now derives the field from the address only (`src/routes/buildings/+page.svelte`, #514); `src/__tests__/list-filters.dom.test.ts` «behält die Eingabe, wenn sich die Seite ohne neue Adresse ändert» was red for the building list only.

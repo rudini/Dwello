@@ -13,8 +13,7 @@ import {
 	createDistributionKey,
 	updateDistributionKey,
 	deleteDistributionKey,
-	testFormulaWithSamples,
-	initializePredefinedKeys
+	testFormulaWithSamples
 } from '../services/distribution-key.service';
 import { parseFormula, validateFormulaForDistribution } from '../services/formula.service';
 
@@ -46,16 +45,6 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 			})
 		}
 	)
-
-	// Initialize predefined distribution keys
-	.post('/initialize', async () => {
-		const result = await initializePredefinedKeys();
-		return {
-			message: 'Predefined distribution keys initialized',
-			created: result.created,
-			existing: result.existing
-		};
-	})
 
 	// Test a formula
 	.post(
@@ -147,9 +136,9 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 			body: t.Object({
 				name: t.String({ minLength: 1 }),
 				nameDE: t.Optional(t.String()),
-				nameFR: t.Optional(t.String()),
-				nameIT: t.Optional(t.String()),
-				nameEN: t.Optional(t.String()),
+				nameFR: t.Optional(t.Nullable(t.String())),
+				nameIT: t.Optional(t.Nullable(t.String())),
+				nameEN: t.Optional(t.Nullable(t.String())),
 				type: t.Optional(t.String()),
 				formula: t.Optional(t.String()),
 				description: t.Optional(t.String()),
@@ -192,9 +181,9 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 			body: t.Object({
 				name: t.Optional(t.String({ minLength: 1 })),
 				nameDE: t.Optional(t.String()),
-				nameFR: t.Optional(t.String()),
-				nameIT: t.Optional(t.String()),
-				nameEN: t.Optional(t.String()),
+				nameFR: t.Optional(t.Nullable(t.String())),
+				nameIT: t.Optional(t.Nullable(t.String())),
+				nameEN: t.Optional(t.Nullable(t.String())),
 				formula: t.Optional(t.String()),
 				description: t.Optional(t.String()),
 				sortOrder: t.Optional(t.Number())
