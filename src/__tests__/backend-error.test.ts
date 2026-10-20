@@ -157,4 +157,12 @@ describe('Formel, die sich nicht berechnen lässt', () => {
 			'Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /, %), die Klammern und die Variablen {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.'
 		);
 	});
+
+	// #449 (Entscheid in #404, Punkt 2): the refusal names the previous Mahnstufe in the UI language
+	it('nennt die vorige Mahnstufe beim Namen', () => {
+		expect(backendMessage({ code: 'REMINDER_PREVIOUS_NOT_SENT', params: { reminderLevel: 1 } }, '')).toBe(
+			'Die Zahlungserinnerung ist noch nicht versendet. Markieren Sie sie unter «Dokumente» als versendet. Die nächste Mahnstufe ist nach ihrer Zahlungsfrist möglich.'
+		);
+		expect(backendMessage({ code: 'REMINDER_PREVIOUS_NOT_SENT', params: { reminderLevel: 2 } }, '')).toContain('Die 2. Mahnung ist noch nicht versendet.');
+	});
 });

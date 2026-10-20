@@ -81,7 +81,11 @@ describe('Stockwerk im englischen PDF', () => {
 		[1, 'A2, 1st floor'],
 		[2, 'A2, 2nd floor'],
 		[3, 'A2, 3rd floor'],
-		[4, 'A2, 4th floor']
+		[4, 'A2, 4th floor'],
+		// #449 (Entscheid in #404, Punkt 5.3): below ground as in the UI
+		[0, 'A2, ground floor,'],
+		[-1, 'A2, basement,'],
+		[-2, 'A2, 2nd basement,']
 	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
 		const data = { ...refund, apartment: { ...refund.apartment, floor } };
 		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'en'), 'base64'));

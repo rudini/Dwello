@@ -13,3 +13,5 @@ export const markLetterSent = (title: string, tenantName: string) => Click.on(ma
 
 export const downloadDocument = (title: string, tenantName: string): Activity => (actor) =>
 	actor.attemptsTo(openDocuments, DownloadFrom(openDocumentLink(title, tenantName)));
+
+export const openReminder = Click.on(reminderButton);

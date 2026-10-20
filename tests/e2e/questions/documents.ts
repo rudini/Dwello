@@ -9,6 +9,7 @@ import {
 	reminderButton,
 	reminderFeedback
 } from '../targets/documents';
+import { reminderDeliveryInfo } from '../targets/documents';
 
 type Mail = { to: string; subject: string; attachments: string[] };
 
@@ -29,3 +30,4 @@ export const mailsTo = (address: string) =>
 			.filter((mail) => mail.to === address)
 			.map((mail) => [mail.subject.split(' – ')[0], mail.attachments.map((name) => /\.pdf$/.test(name))])
 	);
+export const reminderDelivery = Text.of(reminderDeliveryInfo);

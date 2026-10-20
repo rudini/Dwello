@@ -30,6 +30,26 @@ const documents = (
 ) =>
 	show(DocumentsPage, { data: { documents: list, status }, form } as never);
 
+// #449 (V-2 A, N-1 A): a reminder of a statement paid or replaced since; no new Versandstatus, a derived row
+describe('Mahnung, die nicht mehr hinausgeht', () => {
+	it('nennt den Grund, bietet kein Markieren an und nennt keine Zahlungsfrist', () => {
+		documents([
+			letter({ notToSend: 'paid', paymentDeadline: '2025-03-11' }),
+			letter({ id: 'd2', notToSend: 'replaced', paymentDeadline: '2025-03-11' })
+		]);
+
+		const [paid, replaced] = allByTestId('document-row');
+		expect(paid.querySelector('[data-testid="document-status"]')!.textContent!.trim()).toBe(
+			'Nicht mehr versenden: Abrechnung bezahlt'
+		);
+		expect(replaced.querySelector('[data-testid="document-status"]')!.textContent!.trim()).toBe(
+			'Nicht mehr versenden: Abrechnung ersetzt'
+		);
+		expect(paid.textContent).not.toContain('Zahlungsfrist');
+		expect(paid.textContent).not.toContain('Als versendet markieren');
+	});
+});
+
 describe('Dokumente', () => {
 	it('nennt Empfänger, Datum, Weg und Versandstatus jedes Briefs', () => {
 		documents([letter(), letter({ id: 'd2', status: 'sent', channel: 'email' })]);

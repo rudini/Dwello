@@ -1,0 +1,5 @@
+{
+	"error": "The statement is paid; do not send this reminder any more",
+	"code": "REMINDER_STATEMENT_PAID",
+	"params": {}
+}

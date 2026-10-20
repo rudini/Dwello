@@ -61,9 +61,9 @@ async function statement(status: 'draft' | 'sent') {
 	return created.id;
 }
 
-// The deadlines of the statement's reminders have passed, so the next Mahnstufe is possible
+// The statement's reminders are posted and their deadlines have passed, so the next Mahnstufe is possible (#449)
 const expireReminders = (statementId: string) =>
-	db.update(documents).set({ paymentDeadline: '2020-02-10' }).where(eq(documents.statementId, statementId));
+	db.update(documents).set({ paymentDeadline: '2020-02-10', status: 'sent' }).where(eq(documents.statementId, statementId));
 
 // The text of a PDF from pdfkit: its compressed streams inflated, the hex strings of each TJ joined
 const pdfText = (pdf: Buffer) =>
@@ -192,12 +192,22 @@ describe('Mahnung per E-Mail, die der Mailserver ablehnt', () => {
 		expect((await listed(result.document.id))?.deliveryErrorCode).toBe('MAIL_DELIVERY_FAILED');
 	});
 
-	it('nennt den Mieter ohne E-Mail-Adresse mit seinem eigenen Code', async () => {
+	// #449, persona Dr. Weber P-1/P-2 (Entscheid A): ohne Adresse wird keine E-Mail versucht, die Mahnung ist ein Brief
+	it('legt die Mahnung ohne E-Mail-Adresse als Brief an, ohne Zustellfehler', async () => {
 		await updateTenant(rental.tenant, { email: '', correspondenceChannel: 'email' });
 
 		const result = await remind(await statement('sent'));
 
-		expect(result.document).toMatchObject({ status: 'to_send', deliveryErrorCode: 'TENANT_NO_EMAIL' });
+		expect(result.document).toMatchObject({ status: 'to_send', channel: 'letter', deliveryError: null });
+		expect(result.deliveryError).toBeUndefined();
+	});
+
+	it('nennt einen früher gespeicherten Mieter ohne E-Mail-Adresse mit seinem eigenen Code', async () => {
+		const { result } = await refusedReminder();
+		// as stored before #449, when Dwello still tried the e-mail without an address
+		await db.update(documents).set({ deliveryError: 'Der Mieter hat keine E-Mail-Adresse.' }).where(eq(documents.id, result.document.id));
+
+		expect((await listed(result.document.id))?.deliveryErrorCode).toBe('TENANT_NO_EMAIL');
 	});
 });
 
@@ -328,8 +338,8 @@ describe('Zahlungsfrist der Mahnung', () => {
 	});
 
 	it('lehnt die nächste Mahnstufe ab, solange die Zahlungsfrist der letzten Mahnung läuft', async () => {
-		// the last day of the deadline
-		await db.update(documents).set({ paymentDeadline: swissToday() }).where(eq(documents.statementId, statementId));
+		// the last day of the deadline of the posted reminder (one still to send is refused first, #449)
+		await db.update(documents).set({ paymentDeadline: swissToday(), status: 'sent' }).where(eq(documents.statementId, statementId));
 		const result = await remind(statementId);
 
 		expect(result.status).toBe(400);
@@ -338,16 +348,38 @@ describe('Zahlungsfrist der Mahnung', () => {
 	});
 
 	it('nennt bei einer bezahlten Abrechnung keinen Tag für eine nächste Mahnung', async () => {
-		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId)); // #448: as recorded
 
 		expect(await nextReminderFrom(statementId)).toBeNull();
 		await db.update(utilityStatements).set({ status: 'sent', paidDate: null }).where(eq(utilityStatements.id, statementId));
 	});
 
-	it('erlaubt die nächste Mahnstufe ab dem Tag nach der Zahlungsfrist', async () => {
+	// #449 (Entscheid in #404, Punkt 2): erst wenn die vorige Mahnung als versendet markiert ist
+	// Fachreview V-1: die Übersicht schlägt dann keine Mahnung vor
+	it('sagt bei der Abrechnung, dass eine Mahnung noch zu versenden ist', async () => {
+		const reminderToSend = async () =>
+			((await (await api('GET', `/api/v1/statements/${statementId}`)).json()) as { reminderToSend: boolean }).reminderToSend;
+		await db.update(documents).set({ status: 'to_send' }).where(eq(documents.statementId, statementId));
+
+		expect(await reminderToSend()).toBe(true);
+	});
+
+	it('lehnt die nächste Mahnstufe ab, solange die vorige Mahnung nicht versendet ist, auch nach ihrer Zahlungsfrist', async () => {
 		await db
 			.update(documents)
-			.set({ paymentDeadline: daysAfter(swissToday(), -1) })
+			.set({ paymentDeadline: daysAfter(swissToday(), -1), status: 'to_send' })
+			.where(eq(documents.statementId, statementId));
+		const result = await remind(statementId);
+
+		expect(result.status).toBe(400);
+		expect(result.code).toBe('REMINDER_PREVIOUS_NOT_SENT');
+		expect((result as { params?: object }).params).toEqual({ reminderLevel: 1 });
+	});
+
+	it('erlaubt die nächste Mahnstufe ab dem Tag nach der Zahlungsfrist der versendeten Mahnung', async () => {
+		await db
+			.update(documents)
+			.set({ paymentDeadline: daysAfter(swissToday(), -1), status: 'sent' })
 			.where(eq(documents.statementId, statementId));
 
 		expect((await remind(statementId)).document).toMatchObject({ reminderLevel: 2 });
@@ -406,7 +438,9 @@ describe('Brief, der später versendet wird', () => {
 describe('Mahnung nach gescheiterter E-Mail per Post versendet', () => {
 	it('hält den Brief als Versandweg fest', async () => {
 		await updateTenant(rental.tenant, { email: '', correspondenceChannel: 'email' });
-		const { document } = await remind(await statement('sent'));
+		const { document: made } = await remind(await statement('sent'));
+		// as an e-mail the mail server refused leaves it (since #449 a reminder without an address is a letter at once)
+		const [document] = await db.update(documents).set({ channel: 'email', deliveryError: 'MAIL_DELIVERY_FAILED' }).where(eq(documents.id, made.id)).returning();
 
 		const sent = (await (await api('PUT', `/api/v1/documents/${document.id}/sent`)).json()) as Document;
 
@@ -498,18 +532,77 @@ describe('Zahlteil der Mahnung', () => {
 		expect(text).toContain('Récépissé');
 	});
 
-	// Fachreview W6c V-1: sonst bezahlt der Mieter mit einem Scan ein zweites Mal
-	it('druckt keinen Zahlteil in den Brief, der erst nach der Zahlung versendet wird', async () => {
+	// #449 (Entscheid in #404, Punkt 3, #322): eine Mahnung nach der Zahlung geht nicht mehr hinaus; der Brief bleibt
+	// Entscheid V-2 A: der Brief bleibt unter «Dokumente», zählt aber nicht mehr als «Zu versenden»
+	it('zählt die Mahnung einer bezahlten Abrechnung nicht mehr als zu versenden', async () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
 		const statementId = await statement('sent');
 		const letter = (await remind(statementId)).document;
-		// paid as recorded: the period of this statement may end after today, before which the API refuses it (#448)
-		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId));
-		await api('PUT', `/api/v1/documents/${letter.id}/sent`);
-		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId)); // #448: as recorded
+		const toSend = (await (await api('GET', '/api/v1/documents?status=to_send')).json()) as { data: { id: string }[] };
+		const all = (await (await api('GET', `/api/v1/documents?statementId=${statementId}`)).json()) as {
+			data: { id: string; status: string; notToSend: string | null }[];
+		};
 
-		expect(pdfText(pdf)).toContain('Freundliche Grüsse');
-		expect(pdfText(pdf)).not.toContain('Zahlteil');
+		expect(toSend.data.map((document) => document.id)).not.toContain(letter.id);
+		// no new status: the letter stays as it was, the row knows its statement is paid
+		expect(all.data.find((document) => document.id === letter.id)).toMatchObject({ status: 'to_send', notToSend: 'paid' });
+	});
+
+	// Entscheid V-4: eine ersetzte Abrechnung wird nicht gemahnt
+	it('lehnt das Markieren als versendet ab, wenn die Abrechnung inzwischen ersetzt ist', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const letter = (await remind(statementId)).document;
+		await db.update(utilityStatements).set({ status: 'replaced' }).where(eq(utilityStatements.id, statementId));
+		const response = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'REMINDER_STATEMENT_REPLACED' });
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, statementId));
+	});
+
+	// Entscheid N-1 A: ersetzt vor bezahlt, auch für eine bezahlte Abrechnung, die danach ersetzt wird
+	it('zählt die Mahnung einer ersetzten Abrechnung nicht mehr als zu versenden', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const letter = (await remind(statementId)).document;
+		await db.update(utilityStatements).set({ status: 'replaced', paidDate: swissToday() }).where(eq(utilityStatements.id, statementId));
+		const toSend = (await (await api('GET', '/api/v1/documents?status=to_send')).json()) as { data: { id: string }[] };
+		const all = (await (await api('GET', `/api/v1/documents?statementId=${statementId}`)).json()) as {
+			data: { id: string; notToSend: string | null }[];
+		};
+		await db.update(utilityStatements).set({ status: 'sent', paidDate: null }).where(eq(utilityStatements.id, statementId));
+
+		expect(toSend.data.map((document) => document.id)).not.toContain(letter.id);
+		expect(all.data.find((document) => document.id === letter.id)?.notToSend).toBe('replaced');
+	});
+
+	// Fachreview N-5: nach «Zahlung zurücksetzen» ist die Forderung wieder offen, der Brief wieder zu versenden
+	it('zählt die Mahnung nach dem Zurücksetzen der Zahlung wieder als zu versenden', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const letter = (await remind(statementId)).document;
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId)); // #448: as recorded
+		await api('POST', `/api/v1/statements/${statementId}/payment-reset`, {});
+		const toSend = (await (await api('GET', '/api/v1/documents?status=to_send')).json()) as { data: { id: string }[] };
+		const marked = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+
+		expect(toSend.data.map((document) => document.id)).toContain(letter.id);
+		expect(marked.status).toBe(200);
+	});
+
+	it('lehnt das Markieren als versendet ab, wenn die Abrechnung inzwischen bezahlt ist', async () => {
+		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
+		const statementId = await statement('sent');
+		const letter = (await remind(statementId)).document;
+		await db.update(utilityStatements).set({ status: 'paid', paidDate: swissToday(), paidAmount: '120.00' }).where(eq(utilityStatements.id, statementId)); // #448: as recorded
+		const response = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+		const [after] = await db.select().from(documents).where(eq(documents.id, letter.id));
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual(await Bun.file(`${import.meta.dir}/../../../tests/contracts/reminder-paid-refused.json`).json());
+		expect(after.status).toBe('to_send');
 	});
 
 	it('druckt ohne IBAN keinen Zahlteil', async () => {

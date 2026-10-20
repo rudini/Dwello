@@ -202,6 +202,7 @@ export const load = async ({
 			tenantName: tenantOf(s),
 			paymentDeadline: String(s.paymentDeadline),
 			nextReminderFrom: s.nextReminderFrom as string | null,
+			reminderToSend: Boolean(s.reminderToSend),
 			refund: Number(s.balance) < 0
 		})),
 		paymentDeadlineDays: Number(stored.payment_deadline_days ?? 30),

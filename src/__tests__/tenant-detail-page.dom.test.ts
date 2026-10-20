@@ -177,6 +177,13 @@ describe('Mieterdetail', () => {
 		expect(byTestId('document-delete-button')!.getAttribute('aria-label')).toBe('Löschen: Ausweiskopie');
 	});
 
+	// #449 (Fachreview N-2): dieselbe Zeile wie unter «Dokumente», sonst druckt der Verwalter den Brief doch aus
+	it('nennt bei der Mahnung einer bezahlten Abrechnung, dass sie nicht mehr hinausgeht', () => {
+		open([], null, [{ ...document_, status: 'to_send', notToSend: 'paid' }]);
+
+		expect(text('document-status')).toBe('Nicht mehr versenden: Abrechnung bezahlt');
+	});
+
 	it('bietet bei einer Mahnung kein Löschen an', () => {
 		open();
 		expect(byTestId('document-row')).not.toBeNull();

@@ -246,6 +246,23 @@ describe('Aufgaben der Übersicht', () => {
 		expect(titles(null)).toContain('Überfällige Abrechnungen prüfen');
 	});
 
+	// #449 (Fachreview V-1): die vorige Mahnung liegt noch «Zu versenden»; die nächste Mahnstufe ist dann nicht möglich,
+	// auch wenn die Zahlungsfrist dieser Mahnung abgelaufen ist
+	it('zählt keine Abrechnung, deren letzte Mahnung noch zu versenden ist', () => {
+		const titles = (reminderToSend: boolean) =>
+			overviewTasks(
+				input({
+					statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 1 },
+					dueStatements: [
+						{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-09-20', nextReminderFrom: '2026-10-01', reminderToSend }
+					]
+				})
+			).map((task) => task.title);
+
+		expect(titles(true)).not.toContain('Überfällige Abrechnungen prüfen');
+		expect(titles(false)).toContain('Überfällige Abrechnungen prüfen');
+	});
+
 	// #64: «Überfällig» ab dem Tag nach der Zahlungsfrist, eine Mahnung schlägt die Übersicht erst nach der Mahnfrist vor
 	it('schlägt eine Mahnung erst nach der Mahnfrist vor', () => {
 		const titles = (paymentDeadline: string, reminderAfterDays: number) =>

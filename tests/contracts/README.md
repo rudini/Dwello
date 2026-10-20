@@ -46,6 +46,7 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `building-apartment-number-taken.json` | `POST /api/v1/buildings` mit Wohnungen, deren Wohnungsnummer zweimal vorkommt (409, #479) |
 | `contract-delete-refused.json` | `DELETE /api/v1/contracts/:id?confirmMistake=true` eines Mietvertrags mit Abrechnung (409) |
 | `statement-pdf-refused.json` | `GET /api/v1/statements/:id/pdf` einer Abrechnung, die es nicht gibt (404) |
+| `reminder-paid-refused.json` | `PUT /api/v1/documents/:id/sent` einer Mahnung «Zu versenden», deren Abrechnung inzwischen bezahlt ist (400, #449; `reminders.pg.test.ts`) |
 | `statement-pdf-creditor-refused.json` | `POST /api/v1/statements/:id/generate-pdf` einer Abrechnung mit Zahlteil, solange Name, PLZ oder Ort der Firmenadresse fehlen (400, #450); dieselbe Antwort gibt `PUT /api/v1/documents/:id/sent` einer Mahnung «Zu versenden» (`reminders.pg.test.ts`) |
 | `statement-calculation-refused.json` | `POST /api/v1/statements/preview` für einen Mietvertrag, den die Berechnung nicht lesen kann (400) |
 | `statement-pdf-failed.json` | `POST /api/v1/statements/:id/generate-pdf`, die aus einem unerwarteten Grund scheitert (500) |
