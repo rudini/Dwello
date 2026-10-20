@@ -29,7 +29,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 │  ├─ Buildings, apartments, tenants          │
 │  ├─ Contracts, invoices                     │
 │  ├─ Statement generation wizard             │
-│  └─ Address lookup (OpenPLZ, from browser)  │
+│  └─ Address lookup (geo.admin.ch, via BFF)  │
 │                                              │
 │  Cookies: dwello_session (HTTPOnly),        │
 │           dwello_xsrf (readable)            │
@@ -83,7 +83,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 
 ┌─────────────────────────────────────────────┐
 │    External Services                        │
-│  ├─ OpenPLZ: postal code / street lookup    │
+│  ├─ geo.admin.ch: Gebäuderegister (GWR)     │
 │  │  (called from the browser)               │
 │  ├─ OAuth providers: Google, Microsoft      │
 │  └─ SMTP or Resend: reminder e-mails        │
@@ -147,9 +147,9 @@ Svelte's built-in stores are sufficient for a single-user application. Page data
 
 No date library; formatting uses the built-in `Intl` APIs / `Date`.
 
-### Address Lookup: OpenPLZ
+### Address Lookup: Gebäuderegister (geo.admin.ch)
 
-`src/lib/services/openplz.ts` calls `https://openplzapi.org/ch` directly from the browser (postal codes, localities, streets).
+The address search of «Neues Gebäude» asks the BFF (`/api/addresses`), which calls `https://api3.geo.admin.ch` (swisstopo; the federal Gebäude- und Wohnungsregister) in `src/lib/server/building-register.ts`: addresses with house number, then the building's type, year and Wohnungen (#479). The browser never calls it. `GEO_ADMIN_URL` points elsewhere; E2E uses the stand-in `backend/scripts/gwr-stub.ts` on 2529. The frontend server needs direct internet access for it: Node's `fetch` ignores `HTTPS_PROXY` unless started with `NODE_USE_ENV_PROXY=1` (Node 22.21+, not the Node 20 image; O-42).
 
 ### Build & Tooling
 
@@ -388,7 +388,7 @@ dwello/
 │   ├── lib/
 │   │   ├── ui/              # Design system: components, icons, illustrations
 │   │   ├── server/          # BFF: auth, api-proxy, form handling, mapping
-│   │   ├── services/        # e.g. openplz.ts
+│   │   ├── server/          # BFF code, e.g. building-register.ts
 │   │   ├── stores.ts
 │   │   └── api.ts           # apiCall() wrapper
 │   └── styles/globals.css

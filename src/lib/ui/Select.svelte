@@ -32,7 +32,7 @@
 		optional?: boolean;
 		disabled?: boolean;
 		onchange?: (value: string) => void;
-		note?: { text: string; testid: string }; // a caution about the value
+		note?: { text: string; testid: string }; // see Field
 		testid?: string;
 	} = $props();
 </script>

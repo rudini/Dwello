@@ -23,6 +23,7 @@ import {
 	otherTankCategory
 } from '../services/fuel-stock.service';
 import { isRealDate } from '../services/real-date';
+import { numberTakenError } from './apartments';
 
 const fuelStockParams = t.Object({ id: t.String({ format: 'uuid' }) });
 
@@ -50,6 +51,18 @@ const buildingBodySchema = t.Object({
 });
 
 const buildingUpdateSchema = t.Partial(buildingBodySchema);
+
+// A new building may bring its Wohnungen along (taken from the Gebäuderegister, #479), all created or none
+const newApartmentSchema = t.Object({
+	number: t.String({ minLength: 1, maxLength: 20 }),
+	floor: t.Number(),
+	area: t.String({ minLength: 1 }),
+	rooms: t.String({ minLength: 1 })
+});
+const buildingCreateSchema = t.Composite([
+	buildingBodySchema,
+	t.Object({ apartments: t.Optional(t.Array(newApartmentSchema)) })
+]);
 
 export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 	.use(authMiddleware)
@@ -91,9 +104,14 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 	// Create building
 	.post(
 		'/',
-		async ({ body, set }) => {
+		async ({ body: { apartments = [], ...body }, set }) => {
+			const twice = apartments.find((a, i) => apartments.findIndex((b) => b.number === a.number) !== i);
+			if (twice) {
+				set.status = 409;
+				return numberTakenError(twice.number);
+			}
 			try {
-				const building = await createBuilding(body);
+				const building = await createBuilding(body, apartments);
 				set.status = 201;
 				return building;
 			} catch (error) {
@@ -102,7 +120,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 			}
 		},
 		{
-			body: buildingBodySchema
+			body: buildingCreateSchema
 		}
 	)
 	// Update building
