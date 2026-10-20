@@ -354,7 +354,7 @@ const translations: Record<Language, Record<string, string>> = {
 		sharesNoteBelow: ' Una quota temporale negativa risulta da una nota di credito (importo negativo) relativa ai suoi giorni di locazione, mentre le fatture della stessa voce non li riguardano: Lei riceve la sua parte della nota di credito.',
 		sharesNoteHeating: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento.',
 		sharesNoteHeatingParts: ' Per le spese di riscaldamento la quota temporale è la quota secondo il profilo di riscaldamento; per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo. Se questi mesi totalizzano 0\u00a0% nel profilo di riscaldamento, contano invece i suoi giorni di locazione in tale periodo.',
-		sharesNoteFuel: 'Costi dell’immobile per il combustibile in cisterna: il consumo (vedi spese di riscaldamento e acqua calda). Conta per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.',
+		sharesNoteFuel: 'Costi dell’immobile per il combustibile del serbatoio: il consumo (vedi spese di riscaldamento e acqua calda). Conta per l’intero periodo di conteggio, anche se una fornitura ha un periodo di prestazione.',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
 		fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
 		fuelOpening: 'Scorta iniziale al {date}',
