@@ -155,11 +155,11 @@ export function testData(api: CallTheApi) {
 			await put(`buildings/${ids.get(title)}`, { latitude: '47.5000000', longitude: '8.7200000' });
 		},
 
-		async apartment(buildingTitle: string, number: string, status: string, area = '70') {
+		async apartment(buildingTitle: string, number: string, status: string, area = '70', floor = 1) {
 			const apartment = await post('apartments', {
 				buildingId: ids.get(buildingTitle),
 				number,
-				floor: 1,
+				floor,
 				area,
 				rooms: '3.5',
 				status

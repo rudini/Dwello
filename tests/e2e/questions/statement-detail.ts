@@ -2,43 +2,7 @@ import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
 import { Accessible, Attribute, Count, Gap, Text } from '../screenplay/questions';
 import { successToast } from '../targets/form';
-import {
-	advanceDiffers,
-	costBreakdown,
-	statementAdvancePaid,
-	correctDialog,
-	paymentDeadline,
-	paymentSummary,
-	correctStatementButton,
-	markPaidButton,
-	priorPayments,
-	reminderButton,
-	replacesLink,
-	resetPaymentButton,
-	statementBalance,
-	statementEditButton,
-	deleteStatementButton,
-	paidDateInput,
-	pdfLanguage,
-	pdfRefusalMessage,
-	resetPaymentDialog,
-	sendDialog,
-	sendPdfLink,
-	sendRecipient,
-	statementHeatingProfile,
-	statementHistory,
-	lineItemAmount,
-	lineItemApartmentShare,
-	lineItemInvoice,
-	lineItemInvoices,
-	lineItemShare,
-	lineItemTimeShare,
-	statementLaterInvoices,
-	statementTenancy,
-	statementTotalLabel,
-	statementStatus,
-	oldAddressWarning
-} from '../targets/statement-detail';
+import { advanceDiffers, confirmSendButton, correctDialog, correctStatementButton, costBreakdown, deleteStatementButton, letterInsteadLink, lineItemAmount, lineItemApartmentShare, lineItemInvoice, lineItemInvoices, lineItemShare, lineItemTimeShare, markPaidButton, oldAddressWarning, paidDateInput, paymentDeadline, paymentSummary, pdfLanguage, pdfRefusalMessage, priorPayments, reminderButton, replacesLink, resetPaymentButton, resetPaymentDialog, sendDialog, sendPdfLink, sendRecipient, statementAdvancePaid, statementBalance, statementEditButton, statementHeatingProfile, statementHistory, statementLaterInvoices, statementStatus, statementTenancy, statementTotalLabel } from '../targets/statement-detail';
 import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
 
@@ -116,3 +80,5 @@ export const gapAboveCostBreakdown = Gap.between(statementStatus, costBreakdown)
 // #464: the Akonto the statement deducts, e.g. «− CHF 400.00»
 export const advancePaidOfStatement = Text.of(statementAdvancePaid);
 export const advanceDiffersText = Text.of(advanceDiffers);
+export const sendConfirmLabel = Text.of(confirmSendButton);
+export const letterInsteadOffers = Count.of(letterInsteadLink);

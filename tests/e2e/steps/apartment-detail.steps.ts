@@ -1,17 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import {
-	apartmentInfo,
-	buildingOfApartmentShown,
-	contractHistoryNaming,
-	currentContractsListed,
-	currentTenant,
-	earlierContractShown,
-	earlierContractsListed,
-	monthlyTotalOfApartment,
-	nextTenant,
-	vacancyShown
-} from '../questions/apartment-detail';
+import { apartmentInfo, buildingOfApartmentShown, contractHistoryNaming, currentContractsListed, currentTenant, earlierContractShown, earlierContractsListed, monthlyTotalOfApartment, nextTenant, vacancyShown } from '../questions/apartment-detail';
 import {
 	editApartment,
 	openApartmentDetail,
@@ -109,3 +98,14 @@ Then(
 Then('erklärt der Mietvertrag von {string} {string}', async ({ verwalter, names }, tenant: string, help: string) => {
 	await verwalter.sees(earlierContractShown(names.get(tenant)!)).toContain(help);
 });
+
+Then('nennt die Wohnung das Stockwerk {string}', async ({ verwalter }, floor: string) => {
+	await verwalter.sees(apartmentInfo('floor')).toContain(floor);
+});
+
+Given(
+	'im Gebäude {string} gibt es die leere Wohnung {string} im Stockwerk {int}',
+	async ({ seed }, building: string, number: string, floor: number) => {
+		await seed.apartment(building, number, 'vacant', '70', floor);
+	}
+);

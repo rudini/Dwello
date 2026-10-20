@@ -87,3 +87,16 @@ describe('Mahnschreiben', () => {
 		expect(reminderLetter({ ...input, language: 'it' }).text).toContain('Se ha già effettuato il pagamento, non tenga conto della presente.');
 	});
 });
+
+// #449 (Entscheid in #404, Punkt 5.2): die 3. Mahnung setzt eine Frist; «umgehend» widerspricht ihr
+describe('3. Mahnung', () => {
+	it('verlangt die Zahlung nicht «umgehend», nennt aber die Frist', () => {
+		const words: Record<string, string> = { de: 'umgehend', fr: 'sans délai', it: 'senza indugio', en: 'immediately' };
+		for (const language of ['de', 'fr', 'it', 'en'] as const) {
+			const letter = reminderLetter({ ...input, level: 3, language });
+
+			expect({ language, said: letter.text.includes(words[language]) }).toEqual({ language, said: false });
+			expect(letter.text).toContain('31.03.2025');
+		}
+	});
+});

@@ -10,10 +10,11 @@ import {
 	nextReminder,
 	printOffers,
 	reminderOffers,
+	reminderDelivery,
 	reminderOutcome
 } from '../questions/documents';
 import { listedStatement } from '../questions/statements';
-import { downloadDocument, markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from '../tasks/documents';
+import { downloadDocument, markLetterSent, openDocuments, openDocumentsToSend, openReminder, sendReminder } from '../tasks/documents';
 import { openStatementList } from '../tasks/statements';
 
 const { Given, When, Then } = createBdd(test);
@@ -150,5 +151,30 @@ Then(
 	async ({ verwalter, names }, title: string, tenant: string) => {
 		await verwalter.sees(justMarkedSent).toContain(`«${title}» an ${names.get(tenant) ?? tenant} ist als versendet markiert.`);
 		await verwalter.sees(printOffers).toBe(1);
+	}
+);
+
+When('der Liegenschaftsverwalter eine Mahnung senden will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openReminder);
+});
+
+Then('sagt die Mahnung vor dem Senden {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(reminderDelivery).toContain(text);
+});
+
+Then(
+	'sagt die Mahnung vor dem Senden, dass für {string} keine E-Mail-Adresse erfasst ist',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.sees(reminderDelivery).toBe(
+			`Für ${names.get(tenant) ?? tenant} ist keine E-Mail-Adresse erfasst. Dwello erstellt die Mahnung als PDF. Sie liegt danach unter «Dokumente» zum Ausdrucken.`
+		);
+	}
+);
+
+Then(
+	'liegt die {string} an {string} weiter bei den zu versendenden Dokumenten',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await verwalter.attemptsTo(openDocumentsToSend);
+		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(1);
 	}
 );

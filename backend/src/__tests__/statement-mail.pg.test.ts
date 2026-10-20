@@ -131,6 +131,8 @@ describe('Abrechnung per E-Mail versenden', () => {
 		expect(mail.attachments[0].contentType).toBe('application/pdf');
 		expect(mail.attachments[0].content.subarray(0, 4).toString()).toBe('%PDF');
 		expect(result.document).toMatchObject({ type: 'statement', channel: 'email', status: 'sent', title: 'Nebenkostenabrechnung', paymentDeadline: null });
+		// #449 (Punkt 7): the Verlauf names the address it went to
+		expect(result.document).toMatchObject({ recipient: 'nora.beispiel@dwello.test' });
 		const [stored] = await storedFor(id);
 		expect(Buffer.from(stored.content, 'base64').equals(mail.attachments[0].content)).toBe(true);
 		expect(await pdfKept(id)).toBe(true);
@@ -209,7 +211,8 @@ describe('Abrechnung, die nicht gesendet werden kann (code review C-4)', () => {
 });
 
 describe('Abrechnung per Brief', () => {
-	it('markiert sie nur als versendet, ohne E-Mail und ohne Dokument', async () => {
+	// #449 (Entscheid in #404, Punkt 7): auch der Brief ist ein Dokument, mit dem PDF, wie es versendet wurde
+	it('markiert sie als versendet und legt das PDF als Dokument per Brief ab, ohne E-Mail', async () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter' });
 		const id = await draft();
 		const before = mails.length;
@@ -218,9 +221,11 @@ describe('Abrechnung per Brief', () => {
 
 		expect(result.status).toBe(200);
 		expect(result.statement).toMatchObject({ status: 'sent', statementDate: swissToday() });
-		expect(result.document).toBeUndefined();
+		expect(result.document).toMatchObject({ type: 'statement', channel: 'letter', status: 'sent', recipient: null });
 		expect(mails.length).toBe(before);
-		expect(await storedFor(id)).toHaveLength(0);
+		const [stored] = await storedFor(id);
+		const [{ pdf }] = await db.select({ pdf: utilityStatements.pdfBlob }).from(utilityStatements).where(eq(utilityStatements.id, id));
+		expect(stored.content).toBe(pdf!);
 		expect(await pdfKept(id)).toBe(true);
 	});
 
@@ -238,7 +243,7 @@ describe('Abrechnung per Brief', () => {
 			statementDate: today,
 			paymentDeadline: daysAfter(today, await getTypedConfig('payment_deadline_days'))
 		});
-		expect(await storedFor(id)).toHaveLength(0);
+		expect(await storedFor(id)).toMatchObject([{ channel: 'letter', status: 'sent' }]);
 	});
 
 	it('verweigert eine bereits versendete Abrechnung', async () => {

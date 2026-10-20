@@ -1038,6 +1038,31 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Per E-Mail senden');
 	});
 
+	// #449 (Entscheid in #404, Punkt 6): der Brief statt der E-Mail, ohne den Korrespondenzkanal zu ändern
+	it('bietet im E-Mail-Dialog den Brief an und sagt, was bei einer unzustellbaren E-Mail zu tun ist', () => {
+		detail({ tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
+		click('statement-send-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Kommt die E-Mail später als unzustellbar zurück, stellen Sie die Abrechnung per Brief zu.'
+		);
+
+		click('send-by-letter-instead');
+		flushSync();
+
+		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
+		expect(byTestId('send-recipient')!.textContent).toContain('Ahornweg 3, 8400 Winterthur');
+		expect(document.querySelector<HTMLInputElement>('input[name="byLetter"]')?.value).toBe('true');
+	});
+
+	it('bietet ohne E-Mail-Adresse nur den Brief an', () => {
+		detail({ tenantEmail: null, tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
+		click('statement-send-button');
+
+		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
+		expect(byTestId('send-by-letter-instead')).toBeNull();
+		expect(document.querySelector<HTMLInputElement>('input[name="byLetter"]')?.value).toBe('true');
+	});
+
 	it('sagt nach einer gescheiterten E-Mail, was schiefging, und bietet den Brief an', () => {
 		detail({ tenantAddress: 'Ahornweg 3, 8400 Winterthur' }, { sendError: 'Die E-Mail wurde nicht zugestellt.' });
 		expect(text()).toContain('Abrechnung nicht versendet');
@@ -1287,6 +1312,21 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Ab dem Versand läuft die Frist: der Verlauf zeigt, wann versendet und wann bezahlt wurde
+	// #449 (Entscheid in #404, Punkt 7): der Verlauf nennt den Weg des Versands
+	it('nennt im Verlauf, wie die Abrechnung versendet wurde', () => {
+		const delivered = (delivery: object) =>
+			show(StatementPage, {
+				data: { statement: statement({ status: 'sent', statementDate: '2026-09-28' }), reminders: [], delivery },
+				form: null
+			} as never);
+
+		delivered({ channel: 'letter', recipient: null, sentAt: '2026-09-28T08:15:00Z' });
+		expect(text().replace(/\s+/g, ' ')).toContain('Versendet per Brief 28.09.2026');
+		document.body.innerHTML = '';
+		delivered({ channel: 'email', recipient: 'anna@example.ch', sentAt: '2026-09-28T08:15:00Z' });
+		expect(text().replace(/\s+/g, ' ')).toContain('Versendet per E-Mail an anna@example.ch 28.09.2026, 10:15');
+	});
+
 	it('führt im Verlauf Versand und Zahlung', () => {
 		detail({ status: 'paid', statementDate: '2026-09-28', paidDate: '2026-10-05' });
 		const history = text().replace(/\s+/g, ' ');
@@ -1362,6 +1402,27 @@ describe('Abrechnungsdetail', () => {
 		detail({ status: 'sent', statementDate: '2025-01-15', paymentResets: [reset, reset] });
 
 		expect(text().replace(/\s+/g, ' ').split('Zahlung vom 05.02.2025 zurückgesetzt 10.02.2025')).toHaveLength(3);
+	});
+
+	// #449 (Entscheid in #404, Punkt 4): der Dialog nennt die Sprache, in der Dwello die Mahnung schreibt
+	it('nennt vor der Mahnung die Sprache, in der sie geschrieben ist', () => {
+		detail({ status: 'overdue', tenantLanguage: 'fr' });
+		click('statement-reminder-button');
+
+		expect(byTestId('reminder-delivery-info')!.textContent).toContain(
+			'Dwello erstellt die Zahlungserinnerung auf Französisch als PDF'
+		);
+	});
+
+	// #449 (Punkt 6, #283): Kanal E-Mail, aber keine Adresse: vorher sagen, dass der Brief unter «Dokumente» liegt
+	it('sagt vor der Mahnung, wenn für den Mieter keine E-Mail-Adresse erfasst ist', () => {
+		detail({ status: 'overdue', tenantEmail: null });
+		click('statement-reminder-button');
+
+		expect(byTestId('reminder-delivery-info')!.textContent).toBe(
+			'Für Anna Keller ist keine E-Mail-Adresse erfasst. Dwello erstellt die Mahnung als PDF. Sie liegt danach unter «Dokumente» zum Ausdrucken.'
+		);
+		expect(text()).not.toContain('per E-Mail an .');
 	});
 
 	it('kündigt die nächste Mahnung mit ihrem Versandweg an', () => {

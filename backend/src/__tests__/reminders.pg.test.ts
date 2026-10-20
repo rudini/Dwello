@@ -61,9 +61,9 @@ async function statement(status: 'draft' | 'sent') {
 	return created.id;
 }
 
-// The deadlines of the statement's reminders have passed, so the next Mahnstufe is possible
+// The statement's reminders are posted and their deadlines have passed, so the next Mahnstufe is possible (#449)
 const expireReminders = (statementId: string) =>
-	db.update(documents).set({ paymentDeadline: '2020-02-10' }).where(eq(documents.statementId, statementId));
+	db.update(documents).set({ paymentDeadline: '2020-02-10', status: 'sent' }).where(eq(documents.statementId, statementId));
 
 // The text of a PDF from pdfkit: its compressed streams inflated, the hex strings of each TJ joined
 const pdfText = (pdf: Buffer) =>
@@ -344,10 +344,23 @@ describe('Zahlungsfrist der Mahnung', () => {
 		await db.update(utilityStatements).set({ status: 'sent', paidDate: null }).where(eq(utilityStatements.id, statementId));
 	});
 
-	it('erlaubt die nächste Mahnstufe ab dem Tag nach der Zahlungsfrist', async () => {
+	// #449 (Entscheid in #404, Punkt 2): erst wenn die vorige Mahnung als versendet markiert ist
+	it('lehnt die nächste Mahnstufe ab, solange die vorige Mahnung nicht versendet ist, auch nach ihrer Zahlungsfrist', async () => {
 		await db
 			.update(documents)
 			.set({ paymentDeadline: daysAfter(swissToday(), -1) })
+			.where(eq(documents.statementId, statementId));
+		const result = await remind(statementId);
+
+		expect(result.status).toBe(400);
+		expect(result.code).toBe('REMINDER_PREVIOUS_NOT_SENT');
+		expect((result as { params?: object }).params).toEqual({ reminderLevel: 1 });
+	});
+
+	it('erlaubt die nächste Mahnstufe ab dem Tag nach der Zahlungsfrist der versendeten Mahnung', async () => {
+		await db
+			.update(documents)
+			.set({ paymentDeadline: daysAfter(swissToday(), -1), status: 'sent' })
 			.where(eq(documents.statementId, statementId));
 
 		expect((await remind(statementId)).document).toMatchObject({ reminderLevel: 2 });
@@ -498,17 +511,18 @@ describe('Zahlteil der Mahnung', () => {
 		expect(text).toContain('Récépissé');
 	});
 
-	// Fachreview W6c V-1: sonst bezahlt der Mieter mit einem Scan ein zweites Mal
-	it('druckt keinen Zahlteil in den Brief, der erst nach der Zahlung versendet wird', async () => {
+	// #449 (Entscheid in #404, Punkt 3, #322): eine Mahnung nach der Zahlung geht nicht mehr hinaus; der Brief bleibt
+	it('lehnt das Markieren als versendet ab, wenn die Abrechnung inzwischen bezahlt ist', async () => {
 		await updateTenant(rental.tenant, { correspondenceChannel: 'letter', language: 'de' });
 		const statementId = await statement('sent');
 		const letter = (await remind(statementId)).document;
 		await api('PUT', `/api/v1/statements/${statementId}/status`, { status: 'paid', paidDate: swissToday() });
-		await api('PUT', `/api/v1/documents/${letter.id}/sent`);
-		const pdf = Buffer.from(await (await api('GET', `/api/v1/documents/${letter.id}/pdf`)).arrayBuffer());
+		const response = await api('PUT', `/api/v1/documents/${letter.id}/sent`);
+		const [after] = await db.select().from(documents).where(eq(documents.id, letter.id));
 
-		expect(pdfText(pdf)).toContain('Freundliche Grüsse');
-		expect(pdfText(pdf)).not.toContain('Zahlteil');
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'REMINDER_STATEMENT_PAID' });
+		expect(after.status).toBe('to_send');
 	});
 
 	it('druckt ohne IBAN keinen Zahlteil', async () => {
