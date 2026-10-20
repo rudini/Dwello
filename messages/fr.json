@@ -1294,7 +1294,7 @@
 	"statements_marked_sent": "Décompte marqué comme envoyé",
 	"statements_mark_sent_title": "Marquer le décompte comme envoyé",
 	"statements_mark_sent": "Marquer comme envoyé",
-	"statements_send_text_1": "Dwello n’envoie pas le décompte lui-même. Marquez le décompte comme envoyé le jour où vous le remettez au locataire. Dwello le classe ensuite sous « Documents ». Imprimez-le depuis cette page.",
+	"statements_send_text_1": "Dwello n’envoie pas le décompte lui-même. Marquez le décompte comme envoyé le jour où vous le remettez au locataire. Dwello le classe ensuite sous « Documents ». Imprimez-le à partir de là.",
 	"statements_send_text_2": "Dwello date le décompte du jour où vous le marquez comme envoyé. Remettez donc le PDF le même jour.",
 	"statements_send_email": "Envoyer par e-mail",
 	"statements_send_email_title": "Envoyer le décompte par e-mail",
