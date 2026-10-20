@@ -2053,7 +2053,7 @@ Branch `w6-issue-458`, worker W6 of a coordinated run (the checklist was kept in
 - [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-458.md`, `dr-weber-458.md`); Dr. Weber P-1 (deletion after retention) moved to #459
 - [x] Anchors on the privacy sections, glossary note «in der Datenschutzerklärung geplant, #411» removed on the PO's order (8807e6ae)
 - [x] fach-reviewer round 2 (`docs/reviews/458-fachreview-2.md`): links, when and how, export, Art. 9 DSG on /terms (b6006970), tests and a navigation scenario seen red
-- [x] Closing code-reviewer round (`docs/reviews/458-review-2.md`)
+- [x] Closing code-reviewer rounds (`docs/reviews/458-review-2.md`, after the date fix R-12 and the merge with #479 `458-review-3.md`: no finding)
 - [x] Affected E2E (chromium) green; PR `Fixes #458`, `Fixes #330`, `Fixes #333`
 ## Session G1: Gebäude mit allen Wohnungen aus dem Gebäuderegister (#479)
 
