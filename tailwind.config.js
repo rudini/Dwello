@@ -33,8 +33,6 @@ export default {
 		borderRadius: { control: 'var(--radius-control)', panel: 'var(--radius-panel)' },
 		boxShadow: { none: 'none', raised: 'var(--shadow-raised)', overlay: 'var(--shadow-overlay)' },
 		extend: {
-			// Bare `border`/`divide-y` without a colour class get the line token, not the text colour
-			borderColor: { DEFAULT: 'var(--color-line)' },
 			transitionDuration: { fast: 'var(--duration-fast)' },
 			maxHeight: { 'below-header': 'calc(100vh - var(--size-header))' }, // sticky sidebar
 			// summary rows: label, value, action (phones: value with its action)

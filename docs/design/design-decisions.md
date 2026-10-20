@@ -8,7 +8,7 @@ Target users: private landlords with little experience who use Dwello a few time
 
 | # | Decision | Why | Where |
 |---|---|---|---|
-| D1 | Inter Variable, bundled locally; tabular figures for amounts, dates and tables. | Legible at 16 px, no external CDN. | `globals.css`, `tokens.css` |
+| D1 | Inter Variable, bundled locally; tabular figures for amounts, dates and tables. | Legible at 16 px, no external CDN. | `src/routes/+layout.svelte`, `tokens.css` |
 | D2 | Type scale 14/16/18/20/24/30 px; body, inputs and help texts 16 px; 14 px only for badges and navigation group labels. Line height 1.5. | Readable for older users; few steps make the hierarchy obvious. | `token-referenz.md` |
 | D3 | Neutral cool-grey base, one petrol-blue accent, three semantic colours (positive, caution, critical); text ≥ 7:1, accent and status text ≥ 6:1, UI boundaries ≥ 3:1. Status always has a word, alerts an icon and a title. | Calm administration look; AAA text; colour never alone. | `tokens.css`, `tokens.test.ts` |
 | D4 | Dark mode follows the system setting (`prefers-color-scheme`), token overrides only, no toggle. Switched on in stage 8 when every screen used tokens; the axe check runs light and dark. | No half-dark screens during the migration; a toggle nobody asked for is not built. | `tokens.css` |
