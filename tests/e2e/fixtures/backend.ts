@@ -419,8 +419,8 @@ export function testData(api: CallTheApi) {
 		// A Tankbestand recorded anew for its day, e.g. corrected after a statement (#454)
 		async changeFuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const building = ids.get(buildingTitle);
-			const { data } = await get(`buildings/${building}/fuel-stocks`);
-			const old = (data as { id: string; readingDate: string; categoryId: string }[]).find((s) => s.readingDate === readingDate)!;
+			const stocks: { id: string; readingDate: string; categoryId: string }[] = await get(`buildings/${building}/fuel-stocks`);
+			const old = stocks.find((s) => s.readingDate === readingDate)!;
 			await remove(`buildings/${building}/fuel-stocks/${old.id}`);
 			await post(`buildings/${building}/fuel-stocks`, { readingDate, amount, categoryId: old.categoryId });
 		},
