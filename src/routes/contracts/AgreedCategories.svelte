@@ -20,6 +20,8 @@
 	} = $props();
 
 	const isAgreed = (id: string) => agreed?.includes(id) ?? true;
+	// the boxes decide: an agreed category the form does not list ticks none of them
+	const noneTicked = $derived(!!agreed && !categories.some((category) => agreed!.includes(category.id)));
 	function choose(id: string, on: boolean) {
 		const list = (agreed ?? categories.map((category) => category.id)).filter(
 			(other) => other !== id
@@ -50,7 +52,7 @@
 	</div>
 	<!-- persona Marco W10c P-1: no tick bills no Nebenkosten at all, which should not happen unnoticed -->
 	<div role="status">
-		{#if agreed?.length === 0}
+		{#if noneTicked}
 			<Alert
 				tone={flatRate && !advance ? 'info' : 'caution'}
 				title={m.contracts_agreed_costs_none_title()}
