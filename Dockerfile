@@ -4,7 +4,7 @@
 # ============================================
 # Stage 1: Dependencies
 # ============================================
-FROM node:20-alpine AS deps
+FROM node:26-alpine AS deps
 
 # Bun is the package manager; Node stays the runtime
 COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
@@ -24,7 +24,7 @@ RUN rm -rf node_modules && bun install --frozen-lockfile --production --ignore-s
 # ============================================
 # Stage 2: Build
 # ============================================
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 
 COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
 
@@ -42,7 +42,7 @@ RUN bun run build
 # ============================================
 # Stage 3: Production Runtime
 # ============================================
-FROM node:20-alpine AS runner
+FROM node:26-alpine AS runner
 
 WORKDIR /app
 
