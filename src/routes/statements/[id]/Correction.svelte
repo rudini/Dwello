@@ -4,6 +4,8 @@
 	import type { StatementWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import MoneyInput from '$lib/ui/MoneyInput.svelte';
+	import { FRANCS } from '$lib/contract-form';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import FormDialog from './FormDialog.svelte';
 
@@ -20,12 +22,23 @@
 	};
 	// what the berichtigte Abrechnung will offset: the payment recorded and what this one offset itself, or nothing
 	// yet; a refund is paid by the landlord (Fachreview W2e V-1, V-6, V-12, V-13)
+	// a settled one, or a refund settled under #94, whose Saldo may be carried over already (#448, Fachreview 448-3 V-25)
+	const carried = $derived(
+		(statement.status === 'settled' && statement.balance !== 0) || // a Saldo of 0.00 is never carried over (448-4 V-32)
+			(statement.status === 'paid' && statement.paidAmount === 0 && statement.balance < 0 && statement.balance > -5)
+	);
+	// not paid: a sent or overdue one, or one whose Saldo is carried over
+	const unpaidConsequence = (number: string) =>
+		carried
+			? m.statements_correct_open_settled({ number })
+			: statement.status === 'settled' // a Saldo of 0.00: nothing open, nothing carried (448-review-3 C-18)
+				? m.statements_correct_settled({ number })
+				: statement.balance < 0
+					? m.statements_correct_open_refund({ number })
+					: m.statements_correct_open({ number });
 	const consequence = $derived.by(() => {
 		const number = statement.statementNumber;
-		if (statement.status !== 'paid' || !statement.paidDate)
-			return statement.balance < 0
-				? m.statements_correct_open_refund({ number })
-				: m.statements_correct_open({ number });
+		if (carried || statement.status !== 'paid' || !statement.paidDate) return unpaidConsequence(number);
 		const offset = (statement.paidAmount ?? 0) + (statement.priorPayments ?? 0);
 		if (Math.abs(offset) < 0.005) return m.statements_correct_settled({ number });
 		const paid = {
@@ -35,6 +48,15 @@
 		};
 		return offsetText[offset < 0 ? 'refunded' : 'paid'][statement.priorPayments ? 1 : 0](paid);
 	});
+	// #448 (5): what was already paid on a sent or overdue statement, also a part; on a refund by the landlord
+	const askPaid = $derived(statement.status === 'sent' || statement.status === 'overdue');
+	let paidAmount = $state('0.00');
+	let paidError = $state('');
+	function checkPaid() {
+		const valid = !askPaid || FRANCS.test(paidAmount.trim());
+		paidError = valid ? '' : m.backend_statement_paid_amount_invalid({ amount: paidAmount });
+		return valid;
+	}
 	let creating = $state(false); // a second click would create a second berichtigte Abrechnung
 	// #464 (domain review F-4, decision A): the Akonto comes from the contract; a different one is checked before sending
 	const advanceBefore = $derived(Number(statement.replaces?.totalAdvancePayments));
@@ -122,11 +144,27 @@
 	title={m.statements_correct()}
 	confirmLabel={m.statements_correct()}
 	confirmTestid="statement-correct-confirm"
+	fields={askPaid ? { paidAmount } : {}}
+	check={checkPaid}
 	success={m.statements_replaced_done()}
 	danger
 >
 	<!-- the real consequence, what is offset, and the limitation -->
 	<p>{consequence}</p>
+	{#if askPaid}
+		<MoneyInput
+			id="paidAmount"
+			label={statement.balance < 0
+				? m.statements_correct_refunded_amount()
+				: m.statements_correct_paid_amount()}
+			help={statement.balance < 0
+				? m.statements_correct_refunded_help()
+				: m.statements_correct_paid_help()}
+			error={paidError}
+			bind:value={paidAmount}
+			testid="statement-correct-paid-amount"
+		/>
+	{/if}
 	<p>{m.statements_correct_next()}</p>
 	<p class="font-semibold">{m.statements_correct_final()}</p>
 	<p>{m.statements_correct_limit()}</p>

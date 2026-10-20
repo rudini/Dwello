@@ -9,7 +9,9 @@ Funktionalität: Einstellungen
     Angenommen der Liegenschaftsverwalter ist auf den Einstellungen
 
   # P-2 (#87): Zahlungsfrist und Mahnfrist als Vorgabewerte. Nur dieses Szenario speichert das ganze Formular: die
-  # Einstellungen gelten für alle parallel laufenden Szenarien, und ein leeres Feld setzt den Wert zurück
+  # Einstellungen gelten für alle parallel laufenden Szenarien, und ein leeres Feld setzt den Wert zurück.
+  # @einstellungen-global: wer die IBAN speichert und nachliest, hat die Einstellungen für sich (O-34)
+  @einstellungen-global
   Szenario: Absender und Fristen hinterlegen
     Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
       | Firmenname           | Muster Immobilien AG  |
@@ -28,10 +30,30 @@ Funktionalität: Einstellungen
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine gültige IBAN aus der Schweiz oder aus Liechtenstein ein."
 
   # Die QR-Rechnung nimmt Konten in der Schweiz und in Liechtenstein an, die Einstellungen auch (#191)
+  @einstellungen-global
   Szenario: IBAN aus Liechtenstein hinterlegen
-    Wenn der Liegenschaftsverwalter die IBAN "LI21 0881 0000 2324 013A A" speichert
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | Firmenname | Muster Immobilien AG       |
+      | PLZ        | 8001                       |
+      | Ort        | Zürich                     |
+      | IBAN       | LI21 0881 0000 2324 013A A |
     Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
     Und nach erneutem Öffnen der Einstellungen ist die IBAN "LI21 0881 0000 2324 013A A" hinterlegt
+
+  # #450 (Entscheid in #404, Punkt 8): der Zahlteil nennt den Liegenschaftsverwalter als Zahlungsempfänger, nie
+  # einen erfundenen. Die Seite speichert dabei nichts
+  Szenario: IBAN ohne Firmenadresse
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | Firmenname |                            |
+      | PLZ        |                            |
+      | Ort        |                            |
+      | IBAN       | CH93 0076 2011 6238 5295 7 |
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Mit einer IBAN braucht es die Firmenadresse. Erfassen Sie Name, PLZ und Ort."
+    Und kennzeichnen die Einstellungen Firmenname, PLZ und Ort als fehlend
+
+  # #490 (Entscheid des Product Owners): die Hilfe sagt es vor dem Speichern
+  Szenario: Die Einstellungen sagen, was eine IBAN braucht
+    Dann erklären die Einstellungen bei der IBAN "Mit einer IBAN braucht es Firmenname, PLZ und Ort."
 
   Szenario: Ungültige PLZ
     Wenn der Liegenschaftsverwalter die PLZ "80" speichert

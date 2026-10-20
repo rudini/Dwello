@@ -1,3 +1,4 @@
+import { withSettingsLock } from './settings-lock';
 import { execFileSync } from 'child_process';
 import { randomUUID } from 'crypto';
 import type { CallTheApi } from '../screenplay/abilities';
@@ -305,9 +306,16 @@ export function testData(api: CallTheApi) {
 			ids.set(`Mahnung ${tenantTitle} ${year}`, document.id);
 		},
 
-		// Global setting: every scenario that needs one uses the same IBAN, so parallel runs agree
+		// Global setting: every scenario that needs one uses the same IBAN and Firmenadresse (the one of «Absender und
+		// Fristen hinterlegen»), so parallel runs agree; an IBAN is saved only with the Firmenadresse (#450)
 		async iban(iban: string) {
-			await put('config', { iban: iban.replace(/\s/g, '') });
+			await withSettingsLock(() => put('config', {
+				company_name: 'Muster Immobilien AG',
+				company_address: 'Bahnhofstrasse 1',
+				company_postal_code: '8001',
+				company_city: 'Zürich',
+				iban: iban.replace(/\s/g, '')
+			}));
 		},
 
 		async removeBuilding(title: string) {
@@ -319,8 +327,10 @@ export function testData(api: CallTheApi) {
 			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`) ?? (await statementOf(tenantTitle, year)).id}`);
 		},
 
+		// the statement the scenario made, else the one a run made; a berichtigte Abrechnung shares its year (#403)
 		async statementNumber(tenantTitle: string, year: number, status?: string): Promise<string> {
-			return (await statementOf(tenantTitle, year, status)).statementNumber;
+			const id = status ? undefined : ids.get(`Abrechnung ${tenantTitle} ${year}`);
+			return (id ? await get(`statements/${id}`) : await statementOf(tenantTitle, year, status)).statementNumber;
 		},
 
 		async statementPdf(tenantTitle: string, year: number) {
@@ -354,10 +364,11 @@ export function testData(api: CallTheApi) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { startDate });
 		},
 
-		// #120: the statement is replaced; `correct` also creates its berichtigte Abrechnung
-		async replaceStatement(tenantTitle: string, year: number, correct = false) {
+		// #120: the statement is replaced; `correct` also creates its berichtigte Abrechnung; `paidAmount`: «Bereits
+		// bezahlt» on it (#403)
+		async replaceStatement(tenantTitle: string, year: number, correct = false, paidAmount?: string) {
 			const id = ids.get(`Abrechnung ${tenantTitle} ${year}`);
-			await post(`statements/${id}/replace`, {});
+			await post(`statements/${id}/replace`, paidAmount ? { paidAmount } : {});
 			if (correct) await this.correctStatement(tenantTitle, year);
 		},
 

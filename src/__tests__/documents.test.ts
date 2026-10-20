@@ -3,6 +3,7 @@ import { actions, load } from '../routes/documents/+page.server';
 import { GET as pdf } from '../routes/documents/[id]/pdf/+server';
 import { runAction } from './helpers/action';
 import documentList from '../../tests/contracts/documents.json';
+import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 
 const API = 'http://localhost:3001/api/v1/documents';
 
@@ -50,6 +51,19 @@ describe('Dokumente', () => {
 
 		expect(await result).toEqual({
 			sent: { id: 'd1', title: '2. Mahnung', tenantName: 'Marco Bernasconi' }
+		});
+	});
+
+	// #450, Fachreview V-1: a reminder still to send is remade on marking; without the Firmenadresse it is refused
+	it('sagt beim Markieren einer Mahnung, dass für den Zahlteil die Firmenadresse fehlt', async () => {
+		const { result } = runAction(actions.markSent, '', 400, { id: 'd1' }, creditorRefused);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				actionError:
+					'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
+			}
 		});
 	});
 

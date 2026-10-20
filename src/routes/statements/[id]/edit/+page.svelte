@@ -9,7 +9,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
-	import { belowMinimum } from '$lib/statement';
+	import { unpaid } from '$lib/statement';
 	import CostTable from '../CostTable.svelte';
 	import type { ActionData } from './$types';
 
@@ -68,7 +68,8 @@
 	{/if}
 
 	<Panel title={m.statements_deadline_notes()}>
-		{#if !belowMinimum(statement.balance)}
+		<!-- no payment, no Frist: a Saldo of 0 or one carried over; a Schlussabrechnung claims every Saldo (#448) -->
+		{#if !unpaid(statement)}
 			<DateInput
 				id="paymentDeadline"
 				name="paymentDeadline"
@@ -83,7 +84,7 @@
 			id="notes"
 			name="notes"
 			label={m.statements_notes()}
-			help={m.statements_notes_help()}
+			help={statement.replaces ? m.statements_notes_help_correction() : m.statements_notes_help()}
 			optional
 			value={statement.notes ?? ''}
 			testid="statement-notes-input"

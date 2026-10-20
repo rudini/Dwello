@@ -9,6 +9,7 @@ import { GET as getZip } from '../routes/statements/zip/+server';
 import { unzipSync } from 'fflate';
 import buildingContracts from '../../tests/contracts/building-contracts.json';
 import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
+import creditorRefused from '../../tests/contracts/statement-pdf-creditor-refused.json';
 import { localToday } from '$lib/contract-status';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
@@ -35,17 +36,17 @@ function call(handler: unknown, status: number, answer: object) {
 
 describe('POST /statements/[id]/mark-paid', () => {
 	// #138: die Liste sendet das Abrechnungsdatum mit; ein früherer Tag geht nicht ans Backend
-	it('lehnt ein Zahlungsdatum vor dem Abrechnungsdatum ab, ohne zu speichern', async () => {
+	it('lehnt ein Zahlungsdatum vor dem Ende der Abrechnungsperiode ab, ohne zu speichern', async () => {
 		const calls: unknown[] = [];
 		const fetch = async (url: string) => (calls.push(url), Response.json({}));
 		const request = new Request('http://localhost/', {
 			method: 'POST',
-			body: JSON.stringify({ paidDate: '2026-01-04', statementDate: '2026-01-05' })
+			body: JSON.stringify({ paidDate: '2024-12-30', periodEnd: '2024-12-31' })
 		});
 		const response = await (markPaid as (event: never) => Promise<Response>)({ params: { id: 's1' }, fetch, request } as never);
 
 		expect(response.status).toBe(400);
-		expect((await response.json()).message).toContain('vor dem Abrechnungsdatum vom 05.01.2026');
+		expect((await response.json()).message).toContain('vor dem Ende der Abrechnungsperiode am 31.12.2024');
 		expect(calls).toEqual([]);
 	});
 
@@ -164,6 +165,28 @@ describe('GET /statements/[id]/pdf', () => {
 	it('nennt beim Ansehen den Grund, den das Backend mit Code angibt', async () => {
 		const response = await get(async () => Response.json(refusedPdf, { status: 404 }), '?ansehen');
 		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
+	});
+
+	// #450: an installation from before has an IBAN without the Firmenadresse; the page says where to add it
+	it('sagt, dass für den Zahlteil die Firmenadresse fehlt und wo man sie ergänzt', async () => {
+		const response = await get(async () => Response.json(creditorRefused, { status: 400 }));
+		expect(await sentenceOf(response)).toBe(
+			'Für den Zahlteil fehlt die Firmenadresse. Ergänzen Sie Name, PLZ und Ort unter «Einstellungen».'
+		);
+	});
+
+	// persona Dr. Weber P-2 (#450): the way to where the landlord adds what is missing, only when the settings help
+	it('führt bei fehlender Firmenadresse auch zu den Einstellungen', async () => {
+		const settingsLink = /<a [^>]*href="\/config"[^>]*>Zu den Einstellungen<\/a>/;
+		const pageFor = async (body: object, status = 400) =>
+			(await get(async () => Response.json(body, { status }))).text();
+
+		for (const code of ['CREDITOR_ADDRESS_MISSING', 'IBAN_MISSING', 'IBAN_INVALID']) {
+			const page = await pageFor({ ...creditorRefused, code });
+			expect({ code, link: settingsLink.test(page) }).toEqual({ code, link: true });
+			expect(page).toContain('Zu den Nebenkostenabrechnungen');
+		}
+		expect(await pageFor(refusedPdf, 404)).not.toMatch(settingsLink);
 	});
 
 	// Helga, Marco (#125): the sentence stood on a bare page, tiny on a phone, without a way back into Dwello

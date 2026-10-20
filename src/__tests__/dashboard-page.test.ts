@@ -36,7 +36,7 @@ const data = {
 		overdueAmount: 400,
 		paidThisMonth: 900
 	},
-	statements: { draft: 4, sent: 2, paid: 7, overdue: 1 },
+	statements: { draft: 4, sent: 2, paid: 7, settled: 3, overdue: 1 },
 	recentActivity: [],
 	buildingOccupancy: [
 		{
@@ -119,10 +119,11 @@ describe('Übersicht', () => {
 		expect(body).toMatch(
 			/<a[^>]*href="\/statements\?status=overdue"[^>]*data-testid="stat-overdue-amount"[\s\S]*?Überfällige Beträge/
 		);
-		for (const status of ['draft', 'sent', 'paid', 'overdue']) {
+		for (const status of ['draft', 'sent', 'paid', 'settled', 'overdue']) {
 			expect(body).toContain(`href="/statements?status=${status}"`);
 		}
 		expect(body).toMatch(/data-testid="statements-draft-count"[^>]*>4</);
+		expect(body).toMatch(/data-testid="statements-settled-count"[^>]*>3</); // «Erledigt» (#448)
 	});
 
 	// F-1 (#55): nur «x/y vermietet», ohne Anteil in Prozent

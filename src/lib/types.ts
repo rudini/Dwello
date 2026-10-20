@@ -280,7 +280,7 @@ export interface HeatingProfile {
 }
 
 // Statement types
-export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'replaced';
+export type StatementStatus = 'draft' | 'sent' | 'paid' | 'settled' | 'overdue' | 'replaced';
 
 /** A statement an invoice is in: its number and status, to link it (#455) */
 export type BilledStatement = { id: string; statementNumber: string; status: StatementStatus };
@@ -371,6 +371,10 @@ export interface StatementWithDetails extends Statement {
 	replacedBy?: { id: string; statementNumber: string } | null;
 	priorPayments?: number;
 	priorPaidOn?: string[];
+	// #448: a Schlussabrechnung, the Übertrag from the previous statement, a replaced Saldo the next one counted
+	final?: boolean;
+	carriedFrom?: { id: string; statementNumber: string; balance: number } | null;
+	offsetWith?: { statementNumber: string; amount: number }[];
 }
 
 export interface StatementsListData {
@@ -385,6 +389,7 @@ export interface StatementsListData {
 		draft: number;
 		sent: number;
 		paid: number;
+		settled: number;
 		overdue: number;
 	};
 }

@@ -33,6 +33,18 @@ Funktionalität: Nebenkostenabrechnungen
     Dann sieht der Liegenschaftsverwalter die Abrechnung von "Anna Keller" mit dem Status "Entwurf"
     Und die Abrechnungsliste enthält genau 1 Abrechnung
 
+  # #403 (2): ohne Akonto und ohne Kosten ist der Saldo 0.00; mit dem Versand ist die Abrechnung erledigt. Der Entwurf
+  # von Anna Keller passt nicht zum Filter
+  Szenario: Nur erledigte Abrechnungen anzeigen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Nina Brunner" existiert
+    Und "Nina Brunner" mietet die Wohnung "2.02" seit "2024-01-01" für "1200" Franken mit "0" Franken Akonto
+    Und für "Nina Brunner" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2024
+    Und die Abrechnung 2024 von "Nina Brunner" ist versendet
+    Wenn der Liegenschaftsverwalter nur die erledigten Abrechnungen im Gebäude "Ahornhof" anzeigt
+    Dann sieht der Liegenschaftsverwalter die Abrechnung von "Nina Brunner" mit dem Status "Erledigt"
+    Und die Abrechnungsliste enthält genau 1 Abrechnung
+
   Szenario: Abrechnungen erstellen
     Wenn der Liegenschaftsverwalter neue Abrechnungen erstellen will
     Dann ist der Liegenschaftsverwalter auf der Seite "Abrechnungen erstellen"
