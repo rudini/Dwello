@@ -20,10 +20,11 @@ Sources, in this order:
 
 Change no file except your report. Write it in German to the path the caller names:
 
-- One table: ID (`V-n`, `M-n`, `R-n`), role, severity (Blocker / Major / Minor / Nit), short finding.
-- Per Blocker/Major: evidence (file:line, scenario line or Fedlex quote), why it is wrong, what would fix it. A Minor/Nit needs nothing beyond its row (its short finding names evidence and fix in a few words).
+- One table: ID (`V-n`, `M-n`, `R-n`), role, severity (Blocker / Major / Minor), short finding. A Minor is a real defect that does not block the merge (a term used inconsistently, a help text that says something false) and needs nothing beyond its row; it starts no round of its own. Report no Nits: wording and style that change nothing stay out of the report, since each costs a triage and, once fixed, a closing round.
+- Per Blocker/Major: evidence (file:line, scenario line or Fedlex quote), why it is wrong, what would fix it. A Minor's short finding names evidence and fix in a few words.
 - On a re-review (the caller names the previous report): only the status of its open IDs and the new findings in the delta; confirmed rules are not listed again.
 - Missing terms: propose a wording; the caller opens an issue for it (labels `fachlich`, `entscheiden`).
 - A section "Nicht bestätigt": what you could not confirm and where you looked.
+- Nothing else: what you checked and found sound gets one line «Geprüft: …» at most, since the caller and the next round read the whole report.
 
 Done when every rule, term and formula in the subject is either confirmed with a source or listed as a finding or as not confirmed.

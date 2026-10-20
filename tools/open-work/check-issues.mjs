@@ -1,7 +1,7 @@
 // Fails when a `TODO(fachlich prüfen, #n)` marker names an issue that is closed, missing or a pull request, when a
 // pull request closes an issue (`Fixes #n`) that a marker still names (CLAUDE.md, "Open work"), and when it closes an
 // issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1), and when an open issue
-// waits for a decision («Proposed (confirm before starting)») without the label `entscheiden` (CLAUDE.md, "Open work").
+// waits for a decision («Proposed (confirm before starting)») without the label `entscheiden` (skill `issue-work`).
 // CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
 import { execFileSync } from 'node:child_process';
 

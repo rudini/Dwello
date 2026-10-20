@@ -13,6 +13,10 @@ bunx bddgen && bunx playwright test --project=chromium -g "Bildschirm ohne .* co
 bun run test:e2e:wip                               # the @wip scenarios, to see them fail (-- -g "Szenarioname" for one)
 ```
 
+Locally run the feature files the change affects and the axe and language rows of its screens (`-g`); the full suite runs in CI. The run builds from the tree when it starts: while one waits or builds, neither run `bun run i18n` nor merge `main`.
+
+The run builds the frontend into `build/` and its servers load their pages from there; `docs/design/tools/persona-stack.sh` builds into its own `/tmp/persona-app` (`BUILD_DIR`, `svelte.config.js`) with its KI stand-in on 2528, so E2E may run while personas run (both compete for the machine: give E2E a longer Bash timeout). Stop the servers by port (`fuser -k 3100/tcp`), never with `pkill -f <pattern>`: the pattern is in the command's own shell too, which it kills. In cloud sessions `.claude/hooks/session-start.sh` installs dependencies, starts PostgreSQL with the role `dwello` and, when Playwright expects another Chromium build than the image has, sets `PLAYWRIGHT_BROWSERS_PATH` to a shim; if E2E cannot start a browser or reach the database, run it again.
+
 Run `@wip` only through `test:e2e:wip`: when `bddgen` fails (a missing step, `$lib` not synced), a separate `playwright test` runs the old files in `.features-gen` and reports them green. Give a run a Bash timeout anyway; a step waiting for a missing element fails after 10 s (`actionTimeout`).
 
 `bddgen` loads the steps, and the API driver imports BFF server code with `$lib` paths: on a fresh checkout run `bunx svelte-kit sync` once before calling `bddgen` directly (`bun run test:e2e` does it).
@@ -66,7 +70,8 @@ A state the E2E stack cannot produce gets a lower-layer test and `No scenario: <
 - the server's clock or time zone (a test with a set clock);
 - the backend start or a CLI script;
 - how the UI shows a refusal its own checks never send to the backend (a DOM test with the body from a contract);
-- the quality of a KI answer.
+- the quality of a KI answer;
+- a state of a global setting (`configuration`, one record for every scenario running in parallel) that would break the other scenarios.
 
 ## Rules
 
