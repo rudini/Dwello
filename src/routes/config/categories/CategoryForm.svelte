@@ -44,9 +44,7 @@
 		}))
 	);
 	// The reason of a predefined category follows the choice in the form, not the saved one
-	const chosen = $derived(
-		category && { ...category, isAllowedUtilityCost: values.allowed === 'true' }
-	);
+	const chosen = $derived(category && { ...category, isAllowedUtilityCost: values.allowed === 'true' });
 	const allowance = [
 		{
 			value: 'true',
