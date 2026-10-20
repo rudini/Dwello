@@ -21,6 +21,7 @@ import {
 	missingStatements,
 	shortPeriodHelp,
 	missingStatementLink,
+	missingStatementInvoicesLink,
 	fixedTermCheck,
 	fixedTermError,
 	contractFlatRate
@@ -44,6 +45,7 @@ export const endConfirmationInWindow = question(
 // The periods the contract page names as missing a statement (A-10, #142)
 export const missingStatementsText = Text.of(missingStatements);
 export const missingStatementsShown = Visibility.of(missingStatements);
+export const missingStatementInvoicesLabel = (periodStart: string) => Text.of(missingStatementInvoicesLink(periodStart));
 export const shortPeriodHelpText = Text.of(shortPeriodHelp);
 // the way into the wizard for the missing days from that day on
 export const missingStatementOffer = (periodStart: string) => Text.of(missingStatementLink(periodStart));

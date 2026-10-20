@@ -359,6 +359,11 @@ export function testData(api: CallTheApi) {
 			await put(`statements/${ids.get(`${which} ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
+		// «Nicht berichtigen» of the tenant's statement of the year (#454)
+		async declineCorrection(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/decline-correction`, {});
+		},
+
 		async contractStart(tenantTitle: string, startDate: string) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { startDate });
 		},
@@ -425,6 +430,15 @@ export function testData(api: CallTheApi) {
 			await put(`buildings/${ids.get(buildingTitle)}`, { noTank: true });
 		},
 
+		// A Tankbestand recorded anew for its day, e.g. corrected after a statement (#454)
+		async changeFuelStock(buildingTitle: string, readingDate: string, amount: string) {
+			const building = ids.get(buildingTitle);
+			const stocks: { id: string; readingDate: string; categoryId: string }[] = await get(`buildings/${building}/fuel-stocks`);
+			const old = stocks.find((s) => s.readingDate === readingDate)!;
+			await remove(`buildings/${building}/fuel-stocks/${old.id}`);
+			await post(`buildings/${building}/fuel-stocks`, { readingDate, amount, categoryId: old.categoryId });
+		},
+
 		// Value of the heating oil in the building's tank on a reading day (removed with the building)
 		async fuelStock(buildingTitle: string, readingDate: string, amount: string) {
 			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
@@ -438,6 +452,11 @@ export function testData(api: CallTheApi) {
 			const id = await invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
 			ids.set(`Rechnung ${categoryName} ${date}`, id);
 			return id;
+		},
+
+		// A recorded invoice deleted afterwards, e.g. one recorded twice (#454)
+		async deleteInvoice(key: string) {
+			await remove(`invoices/${ids.get(key)}`);
 		},
 
 		// A recorded invoice that costs another amount afterwards

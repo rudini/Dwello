@@ -111,7 +111,8 @@ export function toInvoice(r: Record<string, unknown>, names: Named[] = []): Invo
 			? named({ id: suggested.id as string, name: toCategory(suggested).name })
 			: undefined,
 		categorizationStatus: categorizationStatus(r),
-		beleg: (r.beleg as { fileName: string; mimeType: string } | null) ?? null
+		beleg: (r.beleg as { fileName: string; mimeType: string } | null) ?? null,
+		inPeriodAmount: (r.inPeriod as { amount: number } | undefined)?.amount
 	};
 }
 

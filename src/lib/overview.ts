@@ -28,7 +28,20 @@ export interface OverviewInput {
 	reminderAfterDays: number;
 	lettersToSend: number;
 	// per building the parts of ended Abrechnungsperioden without a statement, the latest first (#211)
-	missingStatements?: { building: string; periods: { start: string; end: string }[] }[];
+	missingStatements?: { building: string; buildingId: string; periods: { start: string; end: string }[] }[];
+	// drafts with a change since and sent, paid or settled statements due for correcting, with what changed (#454)
+	outdatedStatements?: {
+		id: string;
+		statementNumber: string;
+		tenantName: string;
+		status: string;
+		buildingId: string;
+		building: string;
+		periodStart: string;
+		periodEnd: string;
+		invoices: number; // recorded, changed or deleted since
+		fuelStock: boolean; // the Tankbestand changed since
+	}[];
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
 	// moved out with a draft statement, still at the building's address (A-5, #114)
 	oldAddresses?: { tenantId: string; tenantName: string }[];
@@ -56,6 +69,7 @@ export interface Task {
 	icon: IconName;
 	illustration?: IllustrationName; // set-up steps, where a new landlord starts
 	link?: { href: string; label: string }; // a second way, shown as a text link beside the one action
+	links?: { href: string; label: string }[]; // several of them, one per building and period (#454)
 }
 
 // Set-up in the order a new landlord needs it; only the first missing step is shown.
@@ -104,16 +118,19 @@ const count = (n: number, one: CountMessage, many: CountMessage) =>
 	(n === 1 ? one : many)({ count: n });
 
 /**
- * The invoices of a period, of one building or all: the list filters the Rechnungsdatum by calendar year, so a period
- * across the turn of the year has none (#211)
+ * The invoices of a building that fall into an Abrechnungsperiode (#211, #454): «Rechnungen 2025 ansehen», another
+ * range by its days; named the building where the text names several (Fachreview 454-2 V-22)
  */
-export function invoicesOf({ start, end }: { start: string; end: string }, building?: string) {
-	const year = start.slice(0, 4);
-	const filter = new URLSearchParams(building ? { building } : {});
-	if (end.startsWith(year)) filter.set('year', year);
+export function invoicesOf(period: { start: string; end: string }, building: string, named?: string) {
+	const name = periodName(period);
+	const filter = new URLSearchParams({ building, periodStart: period.start, periodEnd: period.end });
 	return {
-		href: `/invoices${filter.size ? `?${filter}` : ''}`,
-		label: filter.has('year') ? m.dashboard_invoices_of_year({ year }) : m.dashboard_invoices()
+		href: `/invoices?${filter}`,
+		label: named
+			? m.dashboard_invoices_of_building({ building: named, period: name })
+			: name === period.start.slice(0, 4)
+				? m.dashboard_invoices_of_year({ year: name })
+				: m.dashboard_invoices_of_period({ period: name })
 	};
 }
 
@@ -127,8 +144,64 @@ function missingText(missing: Missing) {
 		? m.dashboard_task_missing_period_text({ buildings })
 		: m.dashboard_task_missing_periods_text({ buildings });
 }
-const newest = (missing: Missing) =>
-	missing.flatMap((b) => b.periods).sort((a, b) => b.start.localeCompare(a.start))[0];
+// the newest period without a statement, with its building
+function newestInvoices(missing: Missing) {
+	const [newest] = missing
+		.flatMap((b) => b.periods.map((period) => ({ period, b })))
+		.sort((x, y) => y.period.start.localeCompare(x.period.start));
+	return invoicesOf(newest.period, newest.b.buildingId, missing.length > 1 ? newest.b.building : undefined);
+}
+
+type Outdated = NonNullable<OverviewInput['outdatedStatements']>;
+const FIVE_YEARS_AGO = (today: string) => {
+	const [year, month, day] = today.split('-').map(Number);
+	const back = new Date(Date.UTC(year - 5, month - 1, day));
+	if (back.getUTCMonth() !== month - 1) back.setUTCDate(0); // the 29th of February to the 28th (Fachreview 454-2 V-27)
+	return back.toISOString().slice(0, 10);
+};
+
+// #454 (#408 point 7): the drafts no longer current, one way per building and period (Fachreview 454-1 V-14)
+function outdatedDraftsTask(drafts: Outdated): Task | false {
+	if (!drafts.length) return false;
+	const ways = new Map<string, { href: string; label: string }>();
+	for (const d of drafts) {
+		const filter = new URLSearchParams({ building: d.buildingId, periodStart: d.periodStart, periodEnd: d.periodEnd, status: 'draft' });
+		const label = `${d.building}, ${periodName({ start: d.periodStart, end: d.periodEnd })}`;
+		ways.set(String(filter), { href: `/statements?${filter}`, label });
+	}
+	return {
+		id: 'outdated-drafts',
+		title: count(drafts.length, m.dashboard_task_outdated_drafts_one, m.dashboard_task_outdated_drafts_many),
+		text: m.dashboard_task_outdated_drafts_text(),
+		href: '/statements?status=draft',
+		action: m.dashboard_task_drafts_action(),
+		icon: 'statement',
+		links: [...ways.values()]
+	};
+}
+
+// What changed since a statement, as the statement page says it (#454, Fachreview 454-1 V-8)
+export function laterText(invoices: number, fuelStock: boolean) {
+	const changed = invoices === 1 ? m.statements_later_one() : m.statements_later_many({ count: invoices });
+	if (!fuelStock) return changed;
+	return invoices ? m.statements_later_and_fuel_stock({ later: changed }) : m.statements_later_fuel_stock();
+}
+
+// #454 (#408 point 7, PO 2026-10-20 E-4, E-5): a sent, paid or settled statement to correct
+const correctTasks = (statements: Outdated, today: string): Task[] =>
+	statements.map((s) => ({
+		id: `correct-${s.id}`,
+		title: m.statements_correct(),
+		text: [
+			m.dashboard_task_correct_text({ number: s.statementNumber, tenant: s.tenantName, later: laterText(s.invoices, s.fuelStock) }),
+			s.periodEnd < FIVE_YEARS_AGO(today) && m.dashboard_task_correct_old()
+		]
+			.filter(Boolean)
+			.join(' '),
+		href: `/statements/${s.id}`,
+		action: m.dashboard_task_correct_action(),
+		icon: 'statement'
+	}));
 
 // Recurring work, most urgent first: money already late, letters waiting at home, statements not yet sent
 function workTasks({
@@ -137,8 +210,11 @@ function workTasks({
 	dueStatements,
 	lettersToSend,
 	missingStatements = [],
+	outdatedStatements = [],
 	reminderAfterDays
 }: OverviewInput): Task[] {
+	const outdatedDrafts = outdatedStatements.filter((s) => s.status === 'draft');
+	const currentDrafts = statementCounts.draft - outdatedDrafts.length; // only current drafts are to send (#454)
 	// «Überfällig» from the day after the Zahlungsfrist, but a Mahnung is proposed only after the Mahnfrist (#64), the
 	// next one after the Zahlungsfrist of the last Mahnung (#107); a Rückerstattung is due at once (Fachreview V-1)
 	const waiting = (s: OverviewInput['dueStatements'][number]) =>
@@ -150,6 +226,11 @@ function workTasks({
 		statementCounts.overdue -
 		dueStatements.filter((s) => s.paymentDeadline < today && waiting(s)).length;
 	const tasks: (Task | false)[] = [
+		// before a Mahnung of the same statement (Fachreview 454-1 V-12)
+		...correctTasks(
+			outdatedStatements.filter((s) => s.status !== 'draft'),
+			today
+		),
 		overdue > 0 && {
 			id: 'overdue',
 			title: m.dashboard_task_overdue(),
@@ -178,13 +259,14 @@ function workTasks({
 			href: '/statements/generate',
 			action: m.dashboard_create_statements(),
 			icon: 'calculate',
-			link: invoicesOf(newest(missingStatements))
+			link: newestInvoices(missingStatements)
 		},
-		statementCounts.draft > 0 && {
+		outdatedDraftsTask(outdatedDrafts),
+		currentDrafts > 0 && {
 			id: 'drafts',
 			title: m.dashboard_task_drafts(),
 			text: count(
-				statementCounts.draft,
+				currentDrafts,
 				m.dashboard_task_drafts_text_one,
 				m.dashboard_task_drafts_text_many
 			),

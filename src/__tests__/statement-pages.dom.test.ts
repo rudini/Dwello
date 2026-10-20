@@ -600,16 +600,108 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
-	const later = (laterInvoices: number, status: 'draft' | 'sent' = 'draft') =>
+	const later = (
+		invoices: number,
+		status: 'draft' | 'sent' = 'draft',
+		more: { fuelStock?: boolean; correctionDue?: boolean; correctionDeclinable?: boolean; correctionLowers?: boolean } = {},
+		overrides: object = {}
+	) =>
 		show(StatementPage, {
-			data: { statement: statement({ status }), reminders: [], laterInvoices },
+			data: {
+				statement: statement({ status, ...overrides }),
+				reminders: [],
+				later: { invoices, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false, ...more }
+			},
 			form: null
 		} as never);
+	const laterText = () => byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ');
+
+	// #454 (#408 point 8): the Tankbestand changed since; titles decided 2026-10-20 (Fachreview 454-1 E-4)
+	it('weist auf einen danach geänderten Tankbestand hin', () => {
+		later(0, 'draft', { fuelStock: true });
+		expect(laterText()).toMatch(/^\s*Tankbestand seit der Abrechnung geändert/);
+		expect(laterText()).toContain('Seit dem Erstellen dieses Entwurfs wurde der Tankbestand der Abrechnungsperiode geändert.');
+	});
+
+	// Fachreview 454-1 V-8
+	it('nennt danach geänderte Rechnungen und Tankbestand in einem Satz', () => {
+		later(2, 'sent', { fuelStock: true });
+		expect(laterText()).toMatch(/^\s*Rechnungen und Tankbestand seit der Abrechnung geändert/);
+		expect(laterText()).toContain(
+			'Seit dem Erstellen dieser Abrechnung wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht, und der Tankbestand wurde geändert.'
+		);
+	});
+
+	// PO 2026-10-20 (Fachreview 454-1 E-6): only where the task «Abrechnung berichtigen» shows (E-3)
+	// PO 2026-10-20 (Fachreview 454-2 M-3 B): only when the Saldo would rise, so the landlord waives an additional claim
+	it('bietet «Nicht berichtigen» an, wenn das Berichtigen den Saldo des Mieters erhöhen würde', () => {
+		later(1, 'sent', { correctionDue: true, correctionDeclinable: true });
+		click('statement-decline-correction-button');
+		// Fachreview 454-2 V-24
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die Abrechnung NK-2024-0001 bleibt, wie sie ist. Die Aufgabe «Abrechnung berichtigen» verschwindet von der Übersicht, und der Verlauf der Abrechnung hält fest, dass Sie nicht berichtigt haben. Sie können die Abrechnung später trotzdem berichtigen. Ändert eine weitere Rechnung oder der Tankbestand den Saldo oder eine Position noch einmal, erscheint die Aufgabe wieder.'
+		);
+	});
+
+	it('bietet «Nicht berichtigen» nicht an, wenn das Berichtigen den Saldo senken würde', () => {
+		later(1, 'sent', { correctionDue: true, correctionLowers: true });
+		// Fachreview 454-3 V-32: and says why
+		expect(laterText()).toContain(
+			'Die Neuberechnung ergibt für Anna Keller eine tiefere Nachzahlung oder eine höhere Rückerstattung. Berichtigen Sie die Abrechnung, sonst verlangen Sie mehr als die tatsächlichen Kosten.'
+		);
+		expect(laterText()).toContain('Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen»');
+		expect(byTestId('statement-decline-correction-button')).toBeNull();
+	});
+
+	// PO 2026-10-20 (Fachreview 454-2 V-17 A): the sentence after the change depends on the state
+	it('sagt, dass die Abrechnung nicht zu berichtigen ist, wenn das Berichtigen nichts ändert', () => {
+		later(1, 'sent');
+		expect(laterText()).toContain(
+			'wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. Für Anna Keller ändert das weder den Saldo noch eine Position. Sie müssen die Abrechnung nicht berichtigen.'
+		);
+		expect(laterText()).not.toContain('Versendete Abrechnungen berichtigen Sie');
+		expect(byTestId('statement-decline-correction-button')).toBeNull();
+	});
+
+	// Persona Anna 454 P-1: the hint leads to correcting where it says so, not only to «Nicht berichtigen»
+	it('bietet im Hinweis «Abrechnung berichtigen» an, wenn das Berichtigen fällig ist', () => {
+		later(1, 'sent', { correctionDue: true, correctionDeclinable: true });
+		click('statement-later-correct-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain('berichtigte Abrechnung ersetzt');
+	});
+
+	it('bietet im Hinweis kein Berichtigen an, wenn es nichts ändert', () => {
+		later(1, 'sent');
+		expect(byTestId('statement-later-correct-button')).toBeNull();
+	});
+
+	// Persona Anna 454 P-7: nothing left to do is no warning
+	it('warnt nicht mehr, wenn nichts zu berichtigen ist', () => {
+		later(1, 'sent');
+		expect(byTestId('statement-later-invoices')!.dataset.tone).toBe('info');
+	});
+
+	it('warnt, solange das Berichtigen fällig ist', () => {
+		later(1, 'sent', { correctionDue: true });
+		expect(byTestId('statement-later-invoices')!.dataset.tone).toBe('caution');
+	});
+
+	it('nennt den Entscheid, die Abrechnung nicht zu berichtigen', () => {
+		later(1, 'sent', {}, { correctionDeclined: { on: '2026-10-20' } });
+		expect(laterText()).toContain('Am 20.10.2026 haben Sie entschieden, die Abrechnung nicht zu berichtigen.');
+		expect(laterText()).not.toContain('Versendete Abrechnungen berichtigen Sie');
+	});
+
+	it('nennt im Verlauf, dass die Abrechnung nicht berichtigt wurde', () => {
+		detail({ status: 'sent', correctionDeclined: { on: '2026-10-20' } });
+		expect(document.body.textContent!.replace(/\s+/g, ' ')).toMatch(/Nicht berichtigt ?20\.10\.2026/);
+	});
 
 	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
 		later(2);
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Wählen Sie «Neu berechnen», dann rechnet er die Rechnungen ab, wie sie jetzt sind.'
+			// Fachreview 454-2 V-20: also after a change of the Tankbestand
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht. Wählen Sie «Neu berechnen», dann rechnet er mit den Rechnungen und dem Tankbestand, wie sie jetzt sind.'
 		);
 	});
 
@@ -623,7 +715,7 @@ describe('Abrechnungsdetail', () => {
 
 	// Versendet: der Mieter hat die Abrechnung ohne die Rechnung erhalten
 	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
-		later(1, 'sent');
+		later(1, 'sent', { correctionDue: true });
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. ' +
 				'Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung. Die berichtigte Abrechnung rechnet an, was schon bezahlt ist. ' +
@@ -820,7 +912,7 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('weist bei einer ersetzten Abrechnung nicht mehr auf später erfasste Rechnungen hin', () => {
-		show(StatementPage, { data: { statement: statement({ status: 'replaced' }), reminders: [], laterInvoices: 1 }, form: null } as never);
+		show(StatementPage, { data: { statement: statement({ status: 'replaced' }), reminders: [], later: { invoices: 1, fuelStock: true, correctionDue: false } }, form: null } as never);
 		expect(byTestId('statement-replaced')).not.toBeNull();
 		expect(byTestId('statement-later-invoices')).toBeNull();
 	});

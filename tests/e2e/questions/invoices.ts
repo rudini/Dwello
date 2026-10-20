@@ -1,12 +1,15 @@
 import { Count, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	invoiceBuildingFilter,
+	invoiceGroupOf,
 	invoiceRow,
 	invoiceRows,
+	invoicePeriodFilter,
 	invoicesEmptyNotice,
 	invoiceYearFilter,
 	rowAmount,
 	rowCategory,
+	rowInPeriod,
 	rowStatus
 } from '../targets/invoices';
 
@@ -18,3 +21,7 @@ export const statusOfListedInvoice = (supplier: string) => Text.of(rowStatus(sup
 export const invoiceListEmpty = Visibility.of(invoicesEmptyNotice);
 export const chosenInvoiceBuilding = Value.chosenIn(invoiceBuildingFilter);
 export const chosenInvoiceYear = Value.chosenIn(invoiceYearFilter);
+export const invoicePeriodFilterText = Text.of(invoicePeriodFilter);
+export const groupOfListedInvoice = (supplier: string) => Text.of(invoiceGroupOf(supplier));
+export const inPeriodOfListedInvoice = (supplier: string) => Text.of(rowInPeriod(supplier));
+export const invoiceShown = (description: string) => Visibility.of(invoiceRow(description));

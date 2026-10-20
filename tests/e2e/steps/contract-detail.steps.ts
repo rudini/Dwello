@@ -1,4 +1,5 @@
 import { createBdd } from 'playwright-bdd';
+import { invoicePeriodFilterText } from '../questions/invoices';
 import { test } from '../fixtures/test';
 import {
 	apartmentOfContract,
@@ -15,6 +16,7 @@ import {
 	missingStatementsText,
 	missingStatementsShown,
 	shortPeriodHelpText,
+	missingStatementInvoicesLabel,
 	missingStatementOffer,
 	billedUntilOfContract,
 	nextStepsText,
@@ -274,6 +276,26 @@ When(
 	'der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung {int} anzeigt',
 	async ({ verwalter }, year: number) => {
 		await verwalter.attemptsTo(showMissingStatementInvoices(`${year}-01-01`));
+	}
+);
+
+Then(
+	'bietet der Mietvertrag für die Tage ab {string} die Rechnungen {string} an',
+	async ({ verwalter }, periodStart: string, label: string) => {
+		await verwalter.sees(missingStatementInvoicesLabel(periodStart)).toBe(label);
+	}
+);
+
+When('der Liegenschaftsverwalter die Rechnungen der fehlenden Tage ab {string} anzeigt', async ({ verwalter }, periodStart: string) => {
+	await verwalter.attemptsTo(showMissingStatementInvoices(periodStart));
+});
+
+// #454: the link sets building and period; the list names the filter
+Then(
+	'zeigt die Rechnungsliste die Rechnungen der Abrechnungsperiode vom {string} bis {string} im Gebäude {string}',
+	async ({ verwalter, seed, names }, start: string, end: string, building: string) => {
+		await verwalter.sees(pageAddress).toMatch(new RegExp(`/invoices\\?building=${seed.idOf(building)}&periodStart=${start}&periodEnd=${end}`));
+		await verwalter.sees(invoicePeriodFilterText).toContain(names.get(building)!);
 	}
 );
 

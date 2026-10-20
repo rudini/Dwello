@@ -104,11 +104,16 @@ describe('Fehlende Abrechnungen am Mietvertrag', () => {
 		end,
 		href: `/statements/generate?building=b1&start=${way.start}&end=${way.end}`,
 		way: { kind, ...way },
+		// #454, Fachreview 454-1 V-2: the invoices the offered statement takes, of its period; a calendar year by its number
 		invoices: {
-			href: `/invoices?building=b1&year=${start.slice(0, 4)}`,
-			label: `Rechnungen ${start.slice(0, 4)} ansehen`
+			href: `/invoices?building=b1&periodStart=${way.start}&periodEnd=${way.end}`,
+			label:
+				way.start.endsWith('-01-01') && way.end === `${way.start.slice(0, 4)}-12-31`
+					? `Rechnungen ${way.start.slice(0, 4)} ansehen`
+					: `Rechnungen für ${day(way.start)} – ${day(way.end)} ansehen`
 		}
 	});
+	const day = (date: string) => date.split('-').reverse().join('.');
 	const missingYear = (y: number) => missing(`${y}-01-01`, `${y}-12-31`, 'whole');
 	// backend answers as checked against the real API (tests/contracts); the statements filter by contractId as the
 	// backend does: a previous tenant's statement in the same apartment comes back only without that filter

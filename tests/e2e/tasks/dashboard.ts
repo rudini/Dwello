@@ -1,5 +1,5 @@
 import { Click, Navigate } from '../screenplay/interactions';
-import { occupancyBuilding, overviewTaskLink, overviewTaskLinkFor, quickAction, statementsTile, statTile } from '../targets/dashboard';
+import { occupancyBuilding, outdatedDraftsLink, overviewTaskLink, overviewTaskLinkFor, quickAction, statementsTile, statTile } from '../targets/dashboard';
 
 // Labels contain each other ("Vermietet" / "Vermietet ab …"), so tiles are found by their test id
 const tiles: Record<string, string> = {
@@ -20,3 +20,6 @@ export const openStatementsWithStatus = (label: string) => Click.on(statementsTi
 export const chooseQuickAction = (label: string) => Click.on(quickAction(label));
 export const startOverviewTask = (title: string) => Click.on(overviewTaskLink(title));
 export const startOverviewTaskFor = (title: string, name: string) => Click.on(overviewTaskLinkFor(title, name));
+
+// #454: the drafts of one building and period the task names as not current
+export const openOutdatedDrafts = (name: string) => Click.on(outdatedDraftsLink(name));

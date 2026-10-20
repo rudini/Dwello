@@ -22,6 +22,34 @@ const query: Record<string, string> = {
 const address = (screen: { path: string; queries?: object }, state: string) =>
 	screen.path + ((screen.queries as Record<string, string> | undefined)?.[state] ?? query[state] ?? '');
 
+// #454 (code review 454-1 C-6): sent statements of 2025 with an invoice for October to December recorded after them:
+// Mia, moved out on 30.06., bears none of it; Nora's Saldo rises, and she was told «Nicht berichtigen»
+async function correctionStates(seed: TestData) {
+	await seed.building('Rebhof', 'Winterthur');
+	await seed.apartment('Rebhof', '5.01', 'vacant');
+	await seed.apartment('Rebhof', '5.02', 'vacant');
+	await seed.tenant('Mia');
+	await seed.tenant('Nora');
+	await seed.contract('Mia', '5.01', { startDate: '2025-01-01', endDate: '2025-06-30', baseRent: '1200.00' });
+	await seed.notice('Mia', '2025-06-30');
+	await seed.contract('Nora', '5.02', { startDate: '2025-01-01', baseRent: '1200.00' });
+	for (const tenant of ['Mia', 'Nora']) {
+		await seed.statement(tenant, 'Rebhof', 2025, 'Standard');
+		await seed.sendStatement(tenant, 2025);
+	}
+	await seed.invoiceOn('Rebhof', 'Hauswart', '300.00', '2025-12-15', ['2025-10-01', '2025-12-31']);
+	await seed.declineCorrection('Nora', 2025);
+	// a billed invoice deleted afterwards: Olga's Saldo would fall, so «Nicht berichtigen» is missing (code review 454-2 C-9)
+	await seed.building('Ried', 'Winterthur');
+	await seed.apartment('Ried', '6.01', 'vacant');
+	await seed.tenant('Olga');
+	await seed.contract('Olga', '6.01', { startDate: '2025-01-01', baseRent: '1200.00' });
+	await seed.invoiceOn('Ried', 'Hauswart', '600.00', '2025-03-15');
+	await seed.statement('Olga', 'Ried', 2025, 'Standard');
+	await seed.sendStatement('Olga', 2025);
+	await seed.deleteInvoice('Rechnung Hauswart 2025-03-15');
+}
+
 /** The example's address with its ids filled in, and the buildings the statement wizard checks */
 export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string; heatingProfile: string };
 
@@ -201,6 +229,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.agreement('Ines', 'Video', true);
 	// a change the Protokoll lists and whose entry can be deleted (#357)
 	await seed.category('Rasenpflege', true);
+	await correctionStates(seed);
 	await seed.categoryAllowance('Rasenpflege', false);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	// the stand-in reads «Elektro Blitz» as Allgemeinstrom: this invoice's key is proposed, so the file can be created (#452)
@@ -228,6 +257,9 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		remindedStatement: seed.idOf('Abrechnung Bruno 2024'),
 		replacedStatement: seed.idOf('Abrechnung Carla 2022'),
 		settledStatement: seed.idOf('Abrechnung Carla 2021'),
+		unaffectedStatement: seed.idOf('Abrechnung Mia 2025'),
+		declinedStatement: seed.idOf('Abrechnung Nora 2025'),
+		loweredStatement: seed.idOf('Abrechnung Olga 2025'),
 		carriedStatement: seed.idOf('Abrechnung Jana 2023'),
 		carryStatement: seed.idOf('Abrechnung Jana 2024'),
 		offsetStatement: seed.idOf('Berichtigte Abrechnung Kai 2023'),

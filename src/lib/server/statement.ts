@@ -123,20 +123,34 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 			resetOn,
 			paidDate
 		})),
+		correctionDeclined: data.correctionDeclined ? { on: data.correctionDeclined.on } : null,
 		lineItems: (data.lineItems || []).map((item: BackendStatement) =>
 			toLineItem(item, data.heatingShare?.byDays === false ? data.heatingShare.percent : undefined)
 		)
 	};
 }
 
-/** How many invoices of its period were recorded, changed or deleted since the statement was created (#96); only a
- *  hint: 0 if they cannot be loaded */
-export async function changedInvoiceCount(fetch: typeof globalThis.fetch, id: string) {
+/** What changed since the statement was created: how many invoices of its period were recorded, changed or deleted
+ *  (#96), whether its Tankbestand changed, and whether correcting it is due and may be declined (#454); only a hint:
+ *  nothing if it cannot be loaded */
+export async function laterChanges(fetch: typeof globalThis.fetch, id: string) {
 	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/changed-invoices`).catch(
 		() => null
 	);
-	const changed: { invoiceIds?: string[] } = response?.ok ? await response.json() : {};
-	return changed.invoiceIds?.length ?? 0;
+	const changed: {
+		invoiceIds?: string[];
+		fuelStockChanged?: boolean;
+		correctionDue?: boolean;
+		correctionDeclinable?: boolean;
+		correctionLowers?: boolean;
+	} = response?.ok ? await response.json() : {};
+	return {
+		invoices: changed.invoiceIds?.length ?? 0,
+		fuelStock: !!changed.fuelStockChanged,
+		correctionDue: !!changed.correctionDue,
+		correctionDeclinable: !!changed.correctionDeclinable,
+		correctionLowers: !!changed.correctionLowers
+	};
 }
 
 /** Names of categories or distribution keys in the UI language by id; the backend's lists only carry ids and the English or German name */

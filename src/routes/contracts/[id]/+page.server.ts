@@ -111,9 +111,51 @@ async function missingStatements(
 			end,
 			href: open ? wizardLink(building, way.start, way.end) : null,
 			way,
-			invoices: invoicesOf({ start, end }, building)
+			invoices: invoicesOf(way, building) // the invoices the offered statement takes (Fachreview 454-1 V-2)
 		})
 	);
+}
+
+// Each field as the backend sends it, or its default when empty or when the record is missing
+const filled = <T extends Record<string, unknown>>(values: Record<string, unknown> | null | undefined, defaults: T) =>
+	Object.fromEntries(Object.entries(defaults).map(([key, value]) => [key, values?.[key] || value])) as T;
+
+// The contract as the page shows it, with tenant, apartment and building
+function toContract(
+	data: ReturnType<typeof JSON.parse> // the backend's answer
+): RentalContract & { tenant: Tenant; apartment: Apartment; building: Building } {
+	const none = null as string | null;
+	return {
+		id: data.id,
+		apartmentId: data.apartmentId,
+		tenantId: data.tenantId,
+		startDate: data.startDate,
+		...filled(data, { endDate: none, baseRent: '0', additionalRent: none, monthlyAdvancePayment: '0', flatRateUtilityCharge: '0' }),
+		terminated: !!data.terminated,
+		noticeReceivedOn: data.noticeReceivedOn ?? null,
+		billedUntil: data.billedUntil ?? null,
+		advancePayments: data.advancePayments,
+		managementFeeAgreed: !!data.managementFeeAgreed,
+		managementFeePercent: data.managementFeePercent ?? null,
+		tenant: filled(data.tenant, {
+			id: data.tenantId as string,
+			firstName: '',
+			lastName: '',
+			email: none,
+			phone: none,
+			language: 'de' as Tenant['language']
+		}),
+		apartment: filled(data.apartment, {
+			id: data.apartmentId as string,
+			buildingId: '',
+			number: '',
+			floor: 0,
+			area: '0',
+			rooms: '0',
+			status: 'occupied' as ApartmentStatus
+		}),
+		building: filled(data.building, { id: '', name: '', address: '', postalCode: '', city: '', canton: '' })
+	};
 }
 
 export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractDetailsData> => {
@@ -133,50 +175,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 		const additionalRent = Number(data.additionalRent) || 0;
 		const advancePayment = Number(data.monthlyAdvancePayment || data.advancePayment) || 0;
 
-		const apartmentStatus: ApartmentStatus = data.apartment?.status || 'occupied';
-		const contract: RentalContract & { tenant: Tenant; apartment: Apartment; building: Building } =
-			{
-				id: data.id,
-				apartmentId: data.apartmentId,
-				tenantId: data.tenantId,
-				startDate: data.startDate,
-				endDate: data.endDate || null,
-				terminated: !!data.terminated,
-				noticeReceivedOn: data.noticeReceivedOn ?? null,
-				billedUntil: data.billedUntil ?? null,
-				baseRent: data.baseRent || '0',
-				additionalRent: data.additionalRent || null,
-				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
-				advancePayments: data.advancePayments,
-				flatRateUtilityCharge: data.flatRateUtilityCharge || '0',
-				managementFeeAgreed: !!data.managementFeeAgreed,
-				managementFeePercent: data.managementFeePercent ?? null,
-				tenant: {
-					id: data.tenant?.id || data.tenantId,
-					firstName: data.tenant?.firstName || '',
-					lastName: data.tenant?.lastName || '',
-					email: data.tenant?.email || null,
-					phone: data.tenant?.phone || null,
-					language: data.tenant?.language || 'de'
-				},
-				apartment: {
-					id: data.apartment?.id || data.apartmentId,
-					buildingId: data.apartment?.buildingId || '',
-					number: data.apartment?.number || '',
-					floor: data.apartment?.floor || 0,
-					area: data.apartment?.area || '0',
-					rooms: data.apartment?.rooms || '0',
-					status: apartmentStatus
-				},
-				building: {
-					id: data.building?.id || '',
-					name: data.building?.name || '',
-					address: data.building?.address || '',
-					postalCode: data.building?.postalCode || '',
-					city: data.building?.city || '',
-					canton: data.building?.canton || ''
-				}
-			};
+		const contract = toContract(data);
 
 		const statements = await rows(fetch, `statements?contractId=${data.id}&limit=1000`);
 		return {

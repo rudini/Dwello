@@ -15,6 +15,7 @@
 		sentOn,
 		paidOn,
 		paymentResets = [],
+		correctionDeclinedOn,
 		delivery = null
 	}: {
 		createdAt?: string | null;
@@ -22,6 +23,7 @@
 		sentOn?: string | null;
 		paidOn?: string | null;
 		paymentResets?: { resetOn: string; paidDate: string | null }[]; // payments taken back (#92)
+		correctionDeclinedOn?: string | null; // «Nicht berichtigen» (#454)
 		delivery?: Delivery | null; // without a Dokument (before #449, or no PDF) only «Versendet»
 	} = $props();
 
@@ -54,7 +56,11 @@
 				}),
 				date: formatDate(reset.resetOn)
 			})),
-			{ label: m.statements_status_paid(), date: paidOn && formatDate(paidOn) }
+			{ label: m.statements_status_paid(), date: paidOn && formatDate(paidOn) },
+			{
+				label: m.statements_history_correction_declined(),
+				date: correctionDeclinedOn && formatDate(correctionDeclinedOn)
+			}
 		].filter((row) => row.date)
 	);
 </script>

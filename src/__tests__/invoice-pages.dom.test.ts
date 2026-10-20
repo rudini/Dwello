@@ -189,6 +189,59 @@ describe('Rechnungsliste', () => {
 		expect(goto).toHaveBeenCalledWith('/invoices?year=2025&page=1');
 	});
 
+	// #454 (#408 point 1): the list filtered by an Abrechnungsperiode names the filter and the rule
+	it('nennt den Filter «Abrechnungsperiode» mit Gebäude und Tagen', () => {
+		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-10-01&periodEnd=2025-12-31');
+		list([invoice()]);
+		expect(byTestId('invoice-period-filter')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+			'Rechnungen von Seeblick, die in die Abrechnungsperiode 01.10.2025 – 31.12.2025 fallen (nach Leistungszeitraum, sonst Rechnungsdatum)'
+		);
+	});
+
+	// PO 2026-10-20 (Fachreview 454-1 E-1): also the non-allocable ones, apart
+	it('trennt in der Abrechnungsperiode die umlagefähigen von den nicht umlagefähigen Rechnungen', () => {
+		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-10-01&periodEnd=2025-12-31');
+		list([invoice(), invoice({ id: 'i2', description: 'Dachreparatur', isValidUtilityCost: false })]);
+		const group = (testid: string) => byTestId(testid)!.textContent!.replace(/\s+/g, ' ');
+		expect(byTestId('invoice-group-allocable')!.querySelector('[data-testid="invoice-group-title"]')!.textContent).toBe(
+			'Umlagefähige Kosten'
+		);
+		expect(group('invoice-group-allocable')).toContain('Hauswartung März');
+		expect(group('invoice-group-not-allocable')).toMatch(/^\s*Nicht umlagefähige Kosten.*Dachreparatur/);
+		expect(group('invoice-group-allocable')).not.toContain('Dachreparatur');
+	});
+
+	// Fachreview 454-1 V-11: a Leistungszeitraum beyond the period counts with its days in it
+	it('nennt in der Abrechnungsperiode den Teil einer Rechnung, der in sie fällt', () => {
+		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-10-01&periodEnd=2025-12-31');
+		list([invoice({ amount: 1200, inPeriodAmount: 413.33 }), invoice({ id: 'i2', description: 'Ganz', inPeriodAmount: 450 })]);
+		expect(byTestId('invoice-row-i1')!.querySelector('[data-testid="invoice-in-period"]')!.textContent!.replace(/\s/g, ' ').trim()).toBe(
+			'davon CHF 413.33 in der Abrechnungsperiode'
+		);
+		expect(byTestId('invoice-row-i2')!.querySelector('[data-testid="invoice-in-period"]')).toBeNull();
+	});
+
+	// code review 454-1 C-5: only the filter the loader sends
+	it('nennt keinen Filter «Abrechnungsperiode» bei einem ungültigen Datum', () => {
+		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-13&periodEnd=2025-12-31');
+		list([invoice()]);
+		expect(byTestId('invoice-period-filter')).toBeNull();
+	});
+
+	it('trennt ohne Abrechnungsperiode nicht nach Umlagefähigkeit', () => {
+		url = new URL('http://localhost/invoices?building=b1');
+		list([invoice(), invoice({ id: 'i2', description: 'Dachreparatur', isValidUtilityCost: false })]);
+		expect(byTestId('invoice-group-not-allocable')).toBeNull();
+	});
+
+	it('nennt den Filter «Abrechnungsperiode» ohne Gebäude', () => {
+		url = new URL('http://localhost/invoices?periodStart=2024-07-01&periodEnd=2025-06-30');
+		list([]);
+		expect(byTestId('invoice-period-filter')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+			'Rechnungen, die in die Abrechnungsperiode 01.07.2024 – 30.06.2025 fallen (nach Leistungszeitraum, sonst Rechnungsdatum)'
+		);
+	});
+
 	it('sagt bei einem Jahr ohne Rechnungen, dass noch keine erfasst sind, statt einen Filterfehler zu vermuten', () => {
 		url = new URL('http://localhost/invoices?year=2025');
 		list([]);

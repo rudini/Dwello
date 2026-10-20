@@ -1,7 +1,7 @@
 import { m } from '$lib/paraglide/messages';
 import { fetchRecord } from '$lib/server/save-form';
 import { missingByContract } from '$lib/server/missing-statements';
-import { overviewDeadlines, overviewTasks, type Deadline, type Task } from '$lib/overview';
+import { overviewDeadlines, overviewTasks, type Deadline, type OverviewInput, type Task } from '$lib/overview';
 import { localToday } from '$lib/contract-status';
 import { reletStarts } from '$lib/apartment';
 import { formerTenantDocuments } from '$lib/former-tenant-documents';
@@ -65,9 +65,11 @@ async function missingStatements(fetch: typeof globalThis.fetch, contracts: Row[
 	const missing = await missingByContract(fetch, contracts);
 	if (!missing) return []; // unknown: better no task than every building
 	const byBuilding = new Map<string, Map<string, { start: string; end: string }>>();
+	const ids = new Map<string, string>(); // the building's id by its name, for the link to its invoices (#454)
 	for (const c of contracts)
 		for (const range of missing.get(String(c.id)) ?? []) {
 			const building = String(c.buildingName);
+			ids.set(building, String(c.buildingId));
 			if (!byBuilding.has(building)) byBuilding.set(building, new Map());
 			byBuilding.get(building)!.set(`${range.start}/${range.end}`, range);
 		}
@@ -75,6 +77,7 @@ async function missingStatements(fetch: typeof globalThis.fetch, contracts: Row[
 		.sort(([a], [b]) => a.localeCompare(b, 'de-CH'))
 		.map(([building, ranges]) => ({
 			building,
+			buildingId: ids.get(building)!,
 			periods: [...ranges.values()].sort(
 				(a, b) => b.start.localeCompare(a.start) || b.end.localeCompare(a.end)
 			)
@@ -163,7 +166,8 @@ export const load = async ({
 		allContracts,
 		stored,
 		drafts,
-		documents
+		documents,
+		outdated
 	] = await Promise.all([
 		fetchRecord(
 			fetch,
@@ -178,7 +182,8 @@ export const load = async ({
 		list(fetch, 'contracts?limit=1000', 'contracts'),
 		config,
 		list(fetch, 'statements?status=draft&limit=100', 'data'),
-		list(fetch, 'documents', 'data')
+		list(fetch, 'documents', 'data'),
+		list(fetch, 'statements/outdated', 'statements') // #454
 	]);
 	const inBuilding = (buildingId: string) => apartments.filter((a) => a.buildingId === buildingId);
 	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
@@ -209,6 +214,7 @@ export const load = async ({
 		reminderAfterDays: Number(stored.reminder_after_days ?? 14),
 		lettersToSend: letters.length,
 		missingStatements: await missingStatements(fetch, allContracts).catch(() => []),
+		outdatedStatements: outdated as OverviewInput['outdatedStatements'],
 		noticedContracts,
 		oldAddresses: oldAddresses(drafts),
 		expiredContracts: expired(allContracts, today),
