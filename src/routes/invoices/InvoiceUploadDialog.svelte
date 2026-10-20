@@ -53,7 +53,7 @@
 	$effect(() => {
 		for (const row of rows) {
 			const proposal = proposedKey(latestKeys, buildingId, row.values.categoryId, defaultDistributionKeyId);
-			if (!row.keyChosen && row.values.distributionKeyId !== proposal)
+			if (!row.keyChosen && proposal && row.values.distributionKeyId !== proposal)
 				row.values.distributionKeyId = proposal;
 		}
 	});
