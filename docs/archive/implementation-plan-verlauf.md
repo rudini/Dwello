@@ -2285,3 +2285,16 @@ Branch `w8-issue-452`. Issue #452 (points 1, 2, 4, 5, 6, 7 of #407; point 3 is #
 - [x] PR `Refs #452`
 
 Files: `backend/src/services/{category,invoice,statement,statement-pdf,fuel-stock}.service.ts`, `backend/src/routes/invoices.ts`, `backend/src/config/llm.ts`, `backend/scripts/{llm-eval,e2e-client,e2e-invoice-without-key,e2e-purge-statements}.ts`, `backend/migrations/0029_lift_waste_descriptions.sql`, `src/lib/{invoice,invoice-upload,statement-wizard}.ts`, `src/lib/server/statement-generation.ts`, `src/lib/ui/Select.svelte`, `src/routes/config/categories/` (`CategoryForm`, `AllocabilityQuestion`, `HeatingChoice`, `SaveForm`), `src/routes/invoices/` (`InvoiceCategoryFields`, `InvoiceUploadDialog`, `InvoiceUploadRow`, `UploadRowFields`, `[id]/edit/`), `src/routes/statements/generate/` (`StatementWizard`, `PreviewChecks`, `InvoiceHint`), `messages/*.json`, `docs/nebenkostenabrechnung-anforderungen.md`, `tests/a11y/screens.json`, tests and E2E layers.
+## Session: faster CI round trips (GitHub bottleneck, 2026-10-20)
+
+Request: implement proposals 1 and 2 of the CI analysis (42 % of PR runs came from merging `main`, 48 % from docs commits).
+
+- [x] Push to `main` runs the E2E tests and the axe check (`.github/workflows/ci.yml`), so a pull request no longer needs to be up to date with `main`
+- [x] Turn off "Require branches to be up to date" and turn on auto-merge (GitHub settings)
+- [x] A pull request push that changes only documentation since the last green run of its branch skips the backend tests, E2E and axe (`tools/ci/docs-only-since.mjs`, `.github/workflows/ci.yml`)
+- [x] Skill `pull-request`: merge `main` and auto-merge as the new settings allow
+- [x] `code-reviewer` round 1: `docs/reviews/ci-speed-review-1.md`
+- [x] Workflow note: none, no rule was unclear or in the way
+- [x] PR to `main`
+- No scenario: CI configuration, no app behaviour changes
+- Files: `.github/workflows/ci.yml`, `tools/ci/docs-only-since.mjs`, `tools/ci/docs-only-since.test.ts`, `docs/test-pyramid.md`, `docs/tech-stack.md`, `.claude/skills/pull-request/SKILL.md`
