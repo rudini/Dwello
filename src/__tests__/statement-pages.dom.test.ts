@@ -712,6 +712,11 @@ describe('Abrechnungsdetail', () => {
 		detail({ status: 'settled', balance: 0 });
 		click('statement-correct-button');
 		expect(correctDialog()).not.toContain('Übertrag');
+		// 448-review-3 C-18: no «Bereits bezahlt» field on a settled one, so the text does not point to it
+		expect(correctDialog()).toContain(
+			'Die Abrechnung NK-2024-0001 wird durch eine berichtigte Abrechnung ersetzt. Die bisherige bleibt unverändert erhalten.'
+		);
+		expect(correctDialog()).not.toContain('Bereits bezahlt');
 	});
 
 	it.each(['paid', 'settled'])('fragt beim Berichtigen einer Abrechnung im Status %s nicht nach dem bereits Bezahlten', (status) => {

@@ -31,9 +31,11 @@
 	const unpaidConsequence = (number: string) =>
 		carried
 			? m.statements_correct_open_settled({ number })
-			: statement.balance < 0
-				? m.statements_correct_open_refund({ number })
-				: m.statements_correct_open({ number });
+			: statement.status === 'settled' // a Saldo of 0.00: nothing open, nothing carried (448-review-3 C-18)
+				? m.statements_correct_settled({ number })
+				: statement.balance < 0
+					? m.statements_correct_open_refund({ number })
+					: m.statements_correct_open({ number });
 	const consequence = $derived.by(() => {
 		const number = statement.statementNumber;
 		if (carried || statement.status !== 'paid' || !statement.paidDate) return unpaidConsequence(number);
