@@ -359,7 +359,7 @@ describe('Gebäude im PDF', () => {
 
 	it.each([
 		['fr', 'Immeuble Seepark', 'Coûts de l’immeuble', 'la part des coûts de l’immeuble qui revient à votre logement'],
-		['it', 'Immobile Seepark', 'Costi immobile', 'la quota dei costi dell’immobile a carico del suo appartamento'],
+		['it', 'Immobile Seepark', 'Costi dell’immobile', 'la quota dei costi dell’immobile a carico del suo appartamento'],
 		['en', 'Building Seepark', 'Building costs', 'your apartment’s part of the building costs']
 	] as const)('sagt auf %s die Worte der App', async (language, building, costs, apartmentShare) => {
 		const { flowing } = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, language), 'base64'));
@@ -367,6 +367,7 @@ describe('Gebäude im PDF', () => {
 		expect(flowing).toContain(building);
 		expect(flowing).toContain(costs);
 		expect(flowing).toContain(apartmentShare);
+		expect(flowing).not.toContain('Costi immobile'); // #447: also the notes, not only the column
 	});
 });
 

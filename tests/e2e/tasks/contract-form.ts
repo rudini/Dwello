@@ -162,9 +162,9 @@ export const withdrawNotice: Activity = (actor) =>
 // «Bearbeiten»: another Vertragsbeginn
 export const saveStartDate = (isoDate: string): Activity => (actor) =>
 	actor.attemptsTo(EnterDate.of(isoDate).into(startDateInput), Click.on(contractSubmitButton));
-// «Bearbeiten»: the fee is agreed at the run's rate
-export const agreeManagementFee: Activity = (actor) =>
-	actor.attemptsTo(Click.on(feeChoice('run')), Click.on(contractSubmitButton));
+// «Bearbeiten»: the fee is agreed at the run's rate, or at an own rate in percent
+export const agreeManagementFee = (fee = 'run'): Activity => (actor) =>
+	actor.attemptsTo(chooseManagementFee(fee), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: the Nebenkosten are billed outside Dwello up to the day given (#133)
 export const enterBilledUntil = (isoDate: string): Activity => (actor) =>

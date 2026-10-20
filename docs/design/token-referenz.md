@@ -63,7 +63,7 @@ Radii and shadows are replaced as well: only `rounded-control`, `rounded-panel`,
 | Forms | `Field` (label, help, example, error, optional), `TextInput`, `MoneyInput`, `Select`, `EarlySelect` (keeps a choice made before hydration), `Textarea`, `Checkbox`, `RadioGroup`; `focus-error.ts` (focus the first faulty field) |
 | Feedback | `Alert`, `Badge`, `EmptyState`, `ToastRegion` (live region, `addToast` in `$lib/stores`), `SaveStatus`, `ProgressBar`, `DraftNotice` |
 | Overlays | `Dialog` (focus trap, Escape, inert background), `ActionDialog` (dialog posting a form action) |
-| Lists | `Table`, `Pagination` |
+| Lists | `Table`, `Pagination`, `ResultList` (the records of a list page: the heading that counts them, the list, its `Pagination`) |
 | Wizards | `Stepper`, `WizardNav` |
 | Data | `HeatingProfileChart` |
 | Icons and illustrations | `Icon` with the names of `icons.ts` (Lucide), `Illustration` with 10 motifs in `illustrations/` (building, apartment, contract, receipts, meter, statement, envelope, done, no results, problem) |

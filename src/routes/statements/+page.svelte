@@ -14,7 +14,7 @@
 	import { localToday } from '$lib/contract-status';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Pagination from '$lib/ui/Pagination.svelte';
+	import ResultList from '$lib/ui/ResultList.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import StatementRow from './StatementRow.svelte';
 	import StatementSearch from './StatementSearch.svelte';
@@ -145,26 +145,28 @@
 			{/if}
 		</div>
 	{:else}
-		<section class="flex flex-col gap-4" aria-labelledby="statements-count">
-			<h2 id="statements-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{data.total === 1
-					? m.statements_count_one()
-					: m.statements_count_many({ count: data.total })}
-			</h2>
-			<ul class="divide-y divide-line rounded-panel border border-line bg-surface">
-				{#each data.statements as statement (statement.id)}
-					<StatementRow
-						{statement}
-						onmarkpaid={(chosen) => (
-							(paying = chosen),
-							(paidDate = localToday()),
-							(paidError = '')
-						)}
-					/>
-				{/each}
-			</ul>
-		</section>
-		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
+		<ResultList
+			id="statements-count"
+			heading={data.total === 1
+				? m.statements_count_one()
+				: m.statements_count_many({ count: data.total })}
+			listClass="divide-y divide-line rounded-panel border border-line bg-surface"
+			url={$page.url}
+			page={data.page}
+			pageSize={data.pageSize}
+			total={data.total}
+		>
+			{#each data.statements as statement (statement.id)}
+				<StatementRow
+					{statement}
+					onmarkpaid={(chosen) => (
+						(paying = chosen),
+						(paidDate = localToday()),
+						(paidError = '')
+					)}
+				/>
+			{/each}
+		</ResultList>
 	{/if}
 </div>
 

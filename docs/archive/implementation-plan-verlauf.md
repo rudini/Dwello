@@ -2003,6 +2003,17 @@ Branch `ccr-3dfff432-ljcit4`. Product owner: after the review against «Getting 
 
 Files: `.claude/agents/code-reviewer.md`, `docs/reviews/nits-review-1.md`.
 
+## Session W9a: one list section for the list pages (2026-10-19)
+
+Branch `w9-issue-455-resultlist`. Product owner (via coordinator), for #455: the fallow clone group dup:4489c5c6 (count heading, list, Pagination of the list pages) blocked a change to `src/routes/invoices/+page.svelte`; it moves into one component, with no change in behaviour. No scenario: refactoring without behaviour change.
+
+- [x] `src/lib/ui/ResultList.svelte`, used by the lists of buildings, apartments, contracts, invoices, statements and tenants; each keeps its list class; `docs/design/token-referenz.md` (Lists)
+- [x] Slice review round 1 (`docs/reviews/resultlist-review-1.md`, no Blocker/Major; C-1 token reference and C-2 apartment list fixed); closing round 2 (`docs/reviews/resultlist-review-2.md`, no findings)
+- [x] CI: «Mietvertrag ohne vereinbarte Verwaltungspauschale öffnen» red once in Firefox; cause: the task clicked the link and did not wait for the navigation, the next step's 5 s expectation ran out while the contract page loaded (reproduced with its data 6 s late); the task and `openContractWithNotAgreedCosts` now wait for the contract's address
+- [x] Closing round 3 (`docs/reviews/resultlist-review-3.md`: no Blocker/Major; C-1 the second task fixed)
+- [x] PR `Refs #455`
+
+Files: `src/lib/ui/ResultList.svelte`, `tests/e2e/tasks/statement-generate.ts`, `src/routes/{buildings,apartments,contracts,invoices,statements,tenants}/+page.svelte`, `docs/design/token-referenz.md`, `docs/reviews/resultlist-review-{1,2,3}.md`.
 ## Session C1: E2E in every browser on pull requests
 
 Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.
@@ -2059,6 +2070,20 @@ Branch `w1-issue-453`, worker W1 of a parallel run; the checklist lived in the p
 - [x] PR `Fixes #453`, `Fixes #325`, `Fixes #480`
 
 Files: `backend/src/services/{contract,pdf}.service.ts`, `backend/src/routes/contracts.ts`, `src/lib/{contract-form,contract-wizard,statement-wizard}.ts`, `src/lib/server/statement-generation.ts`, `src/routes/contracts/{ContractForm.svelte,new/ContractWizard.svelte,new/PeriodStep.svelte}`, `src/routes/statements/generate/` (`+page.server.ts`, `PreviewStep`, `PreviewSkipped`, `PreviewEmpty`), `messages/*.json`, `UBIQUITOUS_LANGUAGE.md`, tests and E2E files.
+## Session W7: glossary help texts of #402 (#447) (2026-10-19)
+
+Branch `w7-issue-447`. Issue #447 (closes #286, #294, #362, #369, #370, #485). Worker W7 of the parallel run; the checklist was kept in the pull request (coordinator rule for `implementation_plan.md`).
+
+- [x] Scenarios «Eigener Satz von 0 % wird abgelehnt» (`contract-new.feature`), «… beim Bearbeiten abgelehnt» (`contract-edit.feature`), help examples «Verwaltungspauschale», «Saldo» (`help.feature`), «Vor dem Berichtigen einer Kette nennt die Bestätigung, was insgesamt zurückerstattet ist» (`statement-detail.feature`); all seen red
+- [x] Fach-review before implementing (`docs/reviews/447-fachreview-1.md`): V-1 to V-12 and M-1 fixed; V-7 became #485 (decided: rows in `i18n-begriffe.md`)
+- [x] Own rate above 0: `src/lib/contract-form.ts`, `backend/src/routes/contracts.ts`, `contracts_error_fee_rate_zero`, `contracts_error_fee_rate`
+- [x] «bis 3 %» with Art. 4 Abs. 3 VMWG; it «Costi dell’immobile»; `glossary_balance_text`, `audit_empty_text`, `statements_correct_refunded_chain`; markers removed
+- [x] Slice review round 1 (`docs/reviews/447-review-1.md`): C-1 fixed with the chain scenario
+- [x] Personas Helga and Dr. Weber (`docs/design/personas/helga-447.md`, `weber-447.md`): no Blocker/Major; Minors stay in the reports
+- [x] Native readings of #461 on `glossary_fee_text` and `config_help_management_fee` (fr FR-7, it IT-17, IT-18, IT-20) applied
+- [x] Closing review and PR
+
+Files: `messages/{de,fr,it,en}.json`, `src/lib/contract-form.ts`, `src/routes/statements/[id]/Correction.svelte`, `backend/src/routes/contracts.ts`, `backend/src/services/pdf.service.ts`, marker files, `docs/design/i18n-begriffe.md`, `docs/nebenkostenabrechnung-anforderungen.md`, tests and scenarios above.
 ## Session G1: Gebäude mit allen Wohnungen aus dem Gebäuderegister (#479)
 
 Branch `claude/nifty-tesla-gmus4a`. «Setze #479 um»: address search through the BFF against geo.admin.ch (GWR) instead of OpenPLZ; a preview of the register's Wohnungen; Gebäude and Wohnungen created in one transaction.
@@ -2099,3 +2124,10 @@ Branch `ccr-3510fafb-cx2ywk`. Product owner 2026-10-19: proposals A, C, D and th
 - [x] Slice review (`docs/reviews/c2-review-1.md`): C-1 (Minor, plan said fallow does not run on push) fixed
 - [x] Workflow note (`docs/reviews/workflow-notes-ci-less-runs.md`)
 - [x] PR: pushed after this archive
+
+## Session G2: Glossar «Gebäuderegister» (#488)
+
+Branch `claude/nifty-tesla-gmus4a` (anew from `main`). Product owner 2026-10-20: the proposal of #488 as it stands, entered by this session. No scenario: glossary only.
+
+- [x] `UBIQUITOUS_LANGUAGE.md`: row «Gebäuderegister»; `docs/design/i18n-begriffe.md` without the issue note
+- [x] PR `Fixes #488`
