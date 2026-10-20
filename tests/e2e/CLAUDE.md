@@ -6,7 +6,7 @@ Scenarios describe what the property manager wants. Background and rules: `docs/
 
 ```bash
 bun run test:e2e -- --project=chromium --project=api   # routine run
-bun run test:e2e                                   # all browsers (Firefox and WebKit too, as in CI)
+bun run test:e2e                                   # all browsers (Firefox and WebKit too, as on main in CI)
 bunx bddgen && bunx playwright test --project=chromium -g "Szenarioname"   # one scenario
 bunx bddgen && bunx playwright test --project=api    # only the @api scenarios through the backend API
 bunx bddgen && bunx playwright test --project=chromium -g "Bildschirm ohne .* contract-edit "   # axe and language rows of one screen (trailing space: not contract-edit-notice)
