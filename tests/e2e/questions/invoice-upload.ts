@@ -15,8 +15,10 @@ import {
 	belegInvoiceNumber,
 	belegMessage,
 	belegSelected,
+	belegSelectedHelp,
 	belegUnsure,
 	deleteBelegNote,
+	discardConfirm,
 	discardMessage,
 	keepOriginalHint,
 	uploadBuildingSelect,
@@ -56,3 +58,5 @@ export const fileChooserLabel = Text.of(uploadFileChoose);
 export const hintsOfUploadOrNone = question('the hints from the upload at the Beleg', async (actor) => (await actor.answer(hintsOfUpload)) ?? '');
 export const proposedKey = (fileName: string) => Value.chosenIn(belegDistributionKey(fileName));
 export const billedRuleOnDelete = Text.of(deleteBilledText);
+export const whyBelegSelectedOrNot = (fileName: string) => Text.of(belegSelectedHelp(fileName));
+export const discardButtonLabel = Text.of(discardConfirm);

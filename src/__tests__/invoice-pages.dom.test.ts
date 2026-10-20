@@ -369,6 +369,19 @@ describe('Rechnungsdetail', () => {
 		);
 	});
 
+	// #245 (Dr. Weber P-5 of #233): also the delete confirmation names the statements and their state
+	it('nennt beim Löschen einer abgerechneten Rechnung die Abrechnungen mit Nummer und Status', () => {
+		show(InvoicePage, {
+			data: {
+				invoice: invoice(),
+				billedIn: [{ start: '2024-01-01', end: '2024-12-31' }],
+				statements: [{ id: 's1', statementNumber: 'NK-2024-0001', status: 'sent' }]
+			}
+		} as never);
+		click('invoice-delete-button');
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain('NK-2024-0001, Versendet');
+	});
+
 	it('löscht die Rechnung nach Bestätigung und kehrt zur Liste zurück', async () => {
 		const calls = fakeBff(() => [204]);
 		show(InvoicePage, { data: { invoice: invoice() } });
@@ -867,6 +880,39 @@ describe('Rechnung bearbeiten', () => {
 		expect(byTestId('invoice-deducted-rule')!.textContent).toBe(
 			'Prüfen Sie, dass die Akontorechnungen nicht zusätzlich erfasst sind. Ist eine noch erfasst, löschen Sie sie auf ihrer Seite mit «Rechnung löschen», auch wenn sie schon abgerechnet ist, und führen Sie danach die Abrechnungen mit ihr nach: Entwürfe mit «Neu berechnen», versendete oder bezahlte mit «Abrechnung berichtigen». Der Leistungszeitraum ist der auf dem Beleg.'
 		);
+	});
+
+	// #245 (product owner): the Kategorie is required here as on upload
+	it('verlangt die Kategorie, wie beim Hochladen', () => {
+		const calls = fakeBff();
+		edit({ categoryId: undefined, category: undefined });
+		expect(document.querySelector('label[for="category"]')!.textContent).not.toContain('optional');
+		submit('submit-button');
+		expect(text()).toContain('Wählen Sie eine Kategorie.');
+		expect(calls).toEqual([]);
+	});
+
+	// #245 (Dr. Weber P-5 of #233): the warning says in which statements, and in what state, the invoice is
+	it('nennt in der Warnung die Abrechnungen mit Nummer und Status', () => {
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice(),
+				buildings,
+				categories,
+				distributionKeys,
+				billedIn: [{ start: '2024-01-01', end: '2024-12-31' }],
+				statements: [{ id: 's1', statementNumber: 'NK-2024-0001', status: 'draft' }]
+			}
+		} as never);
+		expect(byTestId('invoice-billed-warning')!.textContent).toContain('NK-2024-0001, Entwurf');
+	});
+
+	// #245 (Helga P-6 of #233): a checkbox that cannot be ticked looks so
+	it('zeigt «Umlagefähig» bei einer nicht umlagefähigen Kategorie gesperrt', () => {
+		edit({ categoryId: 'c2', category: categories[1], isValidUtilityCost: false });
+		const box = byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!;
+		expect(box.disabled).toBe(true);
+		expect(box.closest('label')!.className).toContain('opacity-60');
 	});
 
 	it('warnt, wenn die Rechnung schon in Abrechnungen steckt, und nennt die Folge', () => {

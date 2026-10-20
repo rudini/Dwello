@@ -90,7 +90,8 @@ describe('Rechnungen hochladen', () => {
 		click('invoice-upload-create-button');
 		await settle();
 		// open: what was chosen but not created; not a Gutschrift, which is not to be created (C-4)
-		expect(byTestId('invoice-upload-result')!.textContent).toContain('Noch offen: werke.pdf.');
+		// with its reason (#245, Anna P-1 of #233)
+		expect(byTestId('invoice-upload-result')!.textContent).toContain('werke.pdf: Wählen Sie eine Kategorie.');
 		expect(byTestId('invoice-upload-result')!.textContent).not.toContain('gutschrift.pdf');
 		expect(byTestId('invoice-upload-result')!.querySelector('a')!.textContent).toBe('Elektro Blitz AG, 31.03.2026');
 
@@ -99,6 +100,8 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-discard-message')!.textContent).toBe(
 			'Erstellte Rechnungen bleiben gespeichert. Die übrigen Dateien und Ihre Eingaben gehen verloren.'
 		);
+		// the created invoices stay: the button discards only the others (#245, Marco P-6 of #233)
+		expect(byTestId('invoice-upload-discard-confirm')!.textContent!.trim()).toBe('Übrige Dateien verwerfen');
 		click('invoice-upload-discard-confirm');
 		await settle();
 		expect(oncreated).toHaveBeenCalledWith([{ id: 'i9', name: 'Elektro Blitz AG, 31.03.2026' }]);
@@ -128,7 +131,7 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		await upload(pdf('blitz.pdf'), word);
 		const status = () => byTestId('invoice-upload-progress')!.textContent?.trim();
-		expect(status()).toBe('2 von 2 Dateien gelesen. Bitte prüfen: 1. Nicht möglich: 1.');
+		expect(status()).toBe('Gelesen: 1 von 1. Bitte prüfen: 1. Nicht möglich: 1.');
 		allByTestId('invoice-upload-row-remove')[1].click();
 		await settle();
 		expect(status()).toBe('notizen.docx entfernt.');
@@ -287,6 +290,36 @@ describe('Rechnungen hochladen', () => {
 			expect(hint.textContent).toContain(text);
 			expect(byTestId(field)!.getAttribute('aria-describedby')).toContain(hint.id);
 		}
+	});
+
+	// #245 (Helga P-4 of #233): a value not found in an optional field is no warning, only a hint
+	it('zeigt «nicht gefunden» unter einem freiwilligen Feld als Hinweis, nicht als Warnung', async () => {
+		open(() => [200, { ...read, fields: { ...extraction.fields, dueDate: null } }]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-row-toggle');
+		const missing = byTestId('invoice-upload-missing-dueDate')!;
+		expect(missing.className).toContain('text-ink-muted');
+		expect(missing.className).not.toContain('font-semibold');
+		expect(byTestId('invoice-upload-unsure-invoiceDate')!.className).toContain('text-caution');
+	});
+
+	// #245 (domain review 233 V-10): the summary does not borrow the row's button-like status
+	it('nennt eine Datei, deren Lesen scheiterte, in der Zusammenfassung «Nicht gelesen»', async () => {
+		open(() => [500, {}]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		expect(byTestId('invoice-upload-progress')!.textContent!.trim()).toBe('Gelesen: 1 von 1. Nicht gelesen: 1.');
+	});
+
+	// #245 (Weber P-5 of #217 round 2, Marco P-3): an unticked row says why, at its checkbox
+	it('sagt bei einer nicht ausgewählten Gutschrift an ihrem Häkchen, warum', async () => {
+		open(() => [200, { ...read, documentType: 'credit_note' }]);
+		chooseBuilding();
+		await upload(pdf('gutschrift.pdf'));
+		expect(byTestId('invoice-upload-row-select-help')!.textContent).toContain('weil aus einer Gutschrift keine Rechnung entsteht');
+		click('invoice-upload-row-select');
+		expect(byTestId('invoice-upload-row-select-help')).toBeNull();
 	});
 
 	it('lehnt eine Datei ab, die weder PDF noch Bild ist, ohne sie der KI zu zeigen', async () => {
@@ -461,7 +494,7 @@ describe('Rechnungen hochladen', () => {
 		await upload(pdf('a.pdf'), pdf('b.pdf'));
 		const status = byTestId('invoice-upload-progress')!;
 		expect(status.getAttribute('role')).toBe('status');
-		expect(status.textContent).toContain('2 von 2 Dateien gelesen');
+		expect(status.textContent).toContain('Gelesen: 2 von 2');
 	});
 
 	it('gibt nach dem Entfernen einer Datei den Fokus der Dateiauswahl', async () => {
