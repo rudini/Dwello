@@ -14,6 +14,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Liegenschaft** | Synonym für Gebäude im Verwaltungskontext. | — |
 | **Gebäudetyp** | Klassifikation: Mehrfamilienhaus, Einfamilienhaus, Geschäftshaus, Gewerbegebäude, Mischnutzung. | `building_type` Feld |
 | **Baujahr** | Jahr der Erstellung des Gebäudes. | `year_built` Feld |
+| **Gebäuderegister** | Eidgenössisches Gebäude- und Wohnungsregister (GWR) des Bundesamts für Statistik; Gemeinde oder Kanton tragen die Angaben nach. Dwello übernimmt beim Erfassen eines Gebäudes daraus Adresse, Kanton, Baujahr, Gebäudetyp und die Wohnungen. Enthält keine Geschäftsräume. | `src/lib/server/building-register.ts` (geo.admin.ch, #479) |
 | **Wohnung** | Einzelne Mieteinheit innerhalb eines Gebäudes. Besitzt Wohnungsnummer, Stockwerk, Fläche (m²) und Zimmeranzahl. | `apartments` Tabelle |
 | **Wohnungsnummer** | Bezeichnung der Wohnung im Gebäude (z.B. 3.01), pro Gebäude eindeutig. | `number` Feld |
 | **Stockwerk** | Lage der Wohnung: UG, EG, 1. OG, 2. OG usw. | `floor` Feld (Zahl: -1 = UG, 0 = EG) |
