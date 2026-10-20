@@ -6,6 +6,9 @@ import { tick } from 'svelte';
  */
 export async function focusFirstError(form: Element | null | undefined): Promise<void> {
 	await tick();
+	// after SvelteKit's own focus reset, which moves the focus to the address's #fragment (e.g. «#main-content» of the
+	// skip link) in a timeout of its own (persona Sven on #479, P-2)
+	await new Promise((resolve) => setTimeout(resolve));
 	const target =
 		form?.querySelector<HTMLElement>(
 			':is(input, select, textarea)[aria-invalid="true"], [role="radiogroup"][aria-invalid="true"] input'

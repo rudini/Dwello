@@ -4,9 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The full run on main (every browser, the axe check): a merge has run it on its up-to-date pull request already
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # the nightly run neither replaces nor is replaced by a waiting push to main
+  group: ci-${{ github.ref }}-${{ github.event_name }}
   # A newer push to a pull request replaces its run; on main every run finishes and only the newest waiting one is kept,
   # so quick merges are tested together instead of cancelling each other
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -15,7 +20,8 @@ env:
   NODE_VERSION: 22
 
 jobs:
-  # On pull requests: which parts the change touches, so tests of untouched parts are skipped; pushes to main run everything
+  # On pull requests: which parts the change touches, so tests of untouched parts are skipped; pushes to main run all but
+  # the E2E tests and the axe check, which the nightly and manual runs add
   changes:
     name: Changes
     runs-on: ubuntu-latest
@@ -29,6 +35,9 @@ jobs:
           fetch-depth: 0
       - id: diff
         run: |
+          if [ "${{ github.event_name }}" = push ]; then
+            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=false" >> "$GITHUB_OUTPUT" && echo "ui=false" >> "$GITHUB_OUTPUT" && exit 0
+          fi
           if [ "${{ github.event_name }}" != pull_request ]; then
             echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && echo "ui=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
@@ -144,13 +153,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Five shards each: Playwright splits by test count, and the slow screen checks (accessibility.feature,
-        # sprachen-bildschirme.feature) would otherwise fill one shard that runs twice as long as the others
+        # E2E in five shards: Playwright splits by test count, and the slow screen checks (sprachen-bildschirme.feature)
+        # would otherwise fill one shard that runs twice as long as the others; the axe check in three (5 to 8 minutes each in five)
         suite: [e2e, a11y]
         shard: [1, 2, 3, 4, 5]
+        exclude:
+          - { suite: a11y, shard: 4 }
+          - { suite: a11y, shard: 5 }
         include:
           - { suite: e2e, name: E2E tests, filter: --grep-invert @a11y, reports: e2e-reports, shards: 5 }
-          - { suite: a11y, name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shards: 5 }
+          - { suite: a11y, name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shards: 3 }
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
@@ -219,22 +231,30 @@ jobs:
     permissions:
       actions: read
     strategy:
+      # one check failing must not cancel the other (run 634)
+      fail-fast: false
       matrix:
         include:
           - { name: E2E tests, shards: 5 }
-          - { name: Accessibility (axe), shards: 5 }
+          - { name: Accessibility (axe), shards: 3 }
     steps:
       - env:
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ "${{ needs.changes.result }}" != success ]; then echo "::error::The job Changes failed, so no shard ran."; exit 1; fi
           if [ "${{ needs.changes.outputs.app }}" != true ]; then exit 0; fi
-          passed=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100" \
-            --jq '[.jobs[] | select(.name | startswith("${{ matrix.name }} (")) | select(.conclusion == "success")] | length')
+          # three tries: one HTTP 502 of the API turned run 634 red with every shard green
+          for attempt in 1 2 3; do
+            passed=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100" \
+              --jq '[.jobs[] | select(.name | startswith("${{ matrix.name }} (")) | select(.conclusion == "success")] | length') && break
+            sleep 15
+          done
           if [ "$passed" != "${{ matrix.shards }}" ]; then echo "::error::$passed of ${{ matrix.shards }} shards passed."; exit 1; fi
 
   fallow:
     name: Fallow audit
+    # the nightly and manual runs have no commits to compare
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

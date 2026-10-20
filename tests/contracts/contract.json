@@ -12,6 +12,7 @@
 	"baseRent": "950.00",
 	"additionalRent": "0.00",
 	"monthlyAdvancePayment": "150.00",
+	"advancePayments": [{ "validFrom": "2024-04-01", "amount": "150.00" }],
 	"flatRateUtilityCharge": "0.00",
 	"managementFeeAgreed": true,
 	"managementFeePercent": null,

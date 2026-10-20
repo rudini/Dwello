@@ -2012,3 +2012,81 @@ Branch `w9-issue-455-resultlist`. Product owner (via coordinator), for #455: the
 - [x] PR `Refs #455`
 
 Files: `src/lib/ui/ResultList.svelte`, `src/routes/{buildings,apartments,contracts,invoices,statements,tenants}/+page.svelte`, `docs/design/token-referenz.md`, `docs/reviews/resultlist-review-{1,2}.md`.
+## Session C1: E2E in every browser on pull requests
+
+Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.
+
+- [x] `ci.yml`: E2E on pull requests with Chromium, Firefox, WebKit and `api` (60 min, as `main`); the axe check stays Chromium; `docs/test-pyramid.md`, `tests/e2e/CLAUDE.md`
+- [x] Slice review (`docs/reviews/ci-browsers-review-1.md`): C-1 `docs/tech-stack.md` fixed; C-2 (the axe shards get 60 min on pull requests too) kept, harmless
+- [x] PR (#473, merged): the first pull request with every browser shows the time it takes; its first run found a Firefox failure in «Suche ohne Treffer», cause not found (O-41)
+## Session I2: open issues, one after another, continued (2026-10-19)
+
+Branch `ccr-6c5f45f8-br8wl9`. Product owner: «Weiter mit issues» after Session I1. No open bug; #470 waits for a decision.
+
+### #464 Akonto with a validity date and PDF line months × amount
+
+Design: a table of Akonto amounts per Mietvertrag with the day from which each applies (migration: one row per contract from its Vertragsbeginn with today's amount; sent statements keep their stored totals); the statement sums each amount over the months (split months by days, as today) it applied; a berichtigte Abrechnung recalculates and so uses the amounts of its period; the contract keeps `monthlyAdvancePayment` as the amount that applies today. Coordinate with #453 (Akonto row «ab {Datum}»).
+
+- [x] @wip scenarios (contract-edit, statement-generate, statement-detail), committed; fach-reviewer before the implementation (domain rule, amounts, PDF)
+- [x] Steps and tests red until the review reports
+- [x] fach-reviewer round 1 (`docs/reviews/464-fachreview-1.md`: F-1 to F-6 Major, F-7 to F-14 Minor, F-15 Nit); product owner 2026-10-19 (recorded in #464): F-4 option A (warning at the correction), «Gültig ab» only the first of a month within the contract, refusal when a stored statement's Akonto would change, the same day replaces and later entries can be deleted; glossary issue #477 (F-11, marker on «Gültig ab»)
+- [x] Scenarios after the review: correction with a change inside 2024 (F-8), PDF lines with closed ranges and «Monate», total and the note (F-6, F-7, F-9), refusal (F-3), warning (F-4); all seven seen red at the missing behaviour
+- [x] Migration and schema; calculation over several amounts; contract API and form (amount with «gültig ab»); contract page lists the amounts; PDF lines; help texts in four languages (backend 7ff3c3db; frontend: `contract-form.ts`, `RentStep.svelte`, `ContractForm.svelte`, `ContractTerms.svelte`, contract page action `deleteAdvance`, `Correction.svelte`, `CostTable.svelte`, `messages/*.json`, `docs/data-model.md`, `docs/api-specification.md`)
+- [x] Delete a later Akonto (product owner on F-13): scenario «Ein späteres Akonto löschen», seen red; axe and language state `advance-delete-dialog`; the berichtigte Abrechnung of the axe check warns (Carla 2024)
+- [x] The first amount keeps its day when the Vertragsbeginn moves (pg test seen red); refusals before the start and after the end name the day
+- [x] All eight scenarios green without `@wip`
+- [x] Fallow: the action `end` uses `endOnFormDay`, `endDeletingDraft` keeps its order (review C-3); the Akonto rows and «Gültig ab» are components of their own (`AdvancePeriods.svelte`, `AdvanceFrom.svelte`)
+- [x] Slice review round 1 (`docs/reviews/464-review-1.md`), fach-reviewer round 2 (`docs/reviews/464-fachreview-2.md`), personas Helga and Dr. Weber (`docs/design/personas/helga-464.md`, `weber-464.md`: both stopped at saving, demo contracts had no Akonto rows; fixed in 8fd1c700)
+- [x] Fixes: refusal compares with the stored total too; first amount moves with the Vertragsbeginn, start or end beyond a later Akonto refused; own codes for a refused delete; «Gültig ab» proposes the next first in a running contract, an unchanged Akonto is not sent, an empty «Gültig ab» is refused; the rules of an increase only in a running contract; texts V-4, V-7 to V-9; scenario «Ein Akonto, das eine Abrechnung zählt, lässt sich nicht löschen» and axe states `advance-delete-refused`, `advance-refused`
+- [x] Re-reviews: code-reviewer round 2 (`docs/reviews/464-review-2.md`), fach-reviewer round 3 (`docs/reviews/464-fachreview-3.md`), personas again (`docs/design/personas/helga-464-2.md`, `weber-464-2.md`)
+- [x] Fixes: V-12 (the new Vertragsbeginn as «Gültig ab» corrects the first amount), V-14, V-15; C-10/C-11 («Beenden» shows a refusal with its message, scenario «Mietvertrag vor einem späteren Akonto beenden», states `end-dialog-advance-refused`, `advance-from-missing`); C-12 (codes as literals), C-13 (contracts for the delete and end refusals, API spec); Helga P-1 (the form lists the amounts), P-2 and Weber P-1 (the refusal says when to correct and names the earliest day), P-3 (example a first of a month), P-4 (toast after deleting)
+- [x] daten-pruefer (`docs/reviews/464-datenpruefung-1.md`: no finding above Nit)
+- [x] Closing code-review round 1 (`docs/reviews/464-review-3.md`): C-14 (toast after deleting, DOM test with reactive props seen red), C-15 (scenarios «Das Formular nennt die eingetragenen Akonto-Beträge», «Vertragsbeginn und erstes Akonto zusammen korrigieren», toast step in «Ein späteres Akonto löschen», two seen red), C-12 (codes written out), C-17 (subject of d486f1e2 reworded before the push)
+- [x] Closing code-review round 2 (`docs/reviews/464-review-4.md`): no finding open above Minor
+- [x] #477 part (product owner 2026-10-19, recorded in #477): the line «Geleistete Akontobeiträge» becomes «Akontobeiträge» in the app, the PDF and the help texts, in this pull request; @wip scenario seen red, then folded into «Das PDF nennt das Akonto als Monate mal Betrag» (fach review 477-1 V-5); fach-reviewer round 1 (`docs/reviews/477-fachreview-1.md`): V-2 to V-8 fixed, V-1 (glossary row) is the product owner's edit; render test per language and DOM test seen red
+- [x] Code-review of the #477 part (`docs/reviews/464-review-5.md`: no finding)
+- [x] Re-sign the commits `git filter-branch` left unsigned (now aa2e0360, 3fa73919, bcb86319)
+- [x] PR `Fixes #464`, `Refs #477`: pushed after this archive; merged once the product owner changed the glossary row (fach review 477-1 V-1)
+- [x] Slice review, persona, daten-pruefer, closing review; PR `Fixes #464` (items below)
+- [x] Workflow note: Session C1 of another branch is on `main` unfinished, so `open-work.test.ts` counted two sessions; moved below this one as a section, as in Session I1 (`docs/reviews/workflow-notes-issue-464.md`; collected review `docs/reviews/workflow-rules-review-2026-10-19-2.md`)
+
+## Session G1: Gebäude mit allen Wohnungen aus dem Gebäuderegister (#479)
+
+Branch `claude/nifty-tesla-gmus4a`. «Setze #479 um»: address search through the BFF against geo.admin.ch (GWR) instead of OpenPLZ; a preview of the register's Wohnungen; Gebäude and Wohnungen created in one transaction.
+
+- [x] Scenarios in `building-new.feature` (17), `privacy.feature`; GWR stand-in `backend/scripts/gwr-stub.ts` (2529)
+- [x] fach-reviewer round 1 (`docs/reviews/479-fachreview-1.md`), product owner answers in #479 (V-1, V-2, V-3, V-10); round 2 (`docs/reviews/479-fachreview-2.md`); glossary issue #488
+- [x] Backend: `POST /buildings` with `apartments[]` in one transaction (`building.routes.pg.test.ts`; response unchanged, no contract change)
+- [x] BFF: `/api/addresses`, `/api/addresses/[egid]`, `src/lib/server/building-register.ts`, `parseRegisterApartments` (unit tests)
+- [x] UI: `AddressSearch.svelte`, `RegisterApartments.svelte`, `BuildingForm.svelte` (hints, preview); `Select` takes a `note`; OpenPLZ removed
+- [x] Privacy statement, texts in four languages, docs (`tech-stack.md`, `PRD-Dwello.md`, `api-specification.md`, U-23 P-7/P-8)
+- [x] a11y and language screens: `building-new` states `register-preview`, `register-submit-missing`, `register-no-apartments`, `register-no-hit`, `register-unreachable`
+- [x] Code review round 1 (`docs/reviews/479-review-1.md`): C-1 contract `building-apartment-number-taken.json` and BFF test (kept behaviour), C-2 = V-15, C-3 proposals of a second address, C-5 coordinates removed; C-4 kept (no test for a failing `/api/addresses/<egid>`)
+- [x] fach-reviewer round 3 (`docs/reviews/479-fachreview-3.md`): V-15 numbers checked (comma, > 0, half rooms), V-16 apartment form keeps values outside its choices, V-17, V-18 (`i18n-begriffe.md`), V-19
+- [x] Persona round 1 (`docs/design/personas/{helga,marco,weber,sven,anna}-479.md`): the persona server could not reach geo.admin.ch (Node `fetch` ignores `HTTPS_PROXY`): `persona-stack.sh` starts with `NODE_USE_ENV_PROXY=1`, O-42; Sven P-1 hints announced (live region), P-3 clearing the search; P-2 existing before (O-43)
+- [x] Persona round 2 (same reports, «Runde 2»): every task done; fixed: focus after a refused save behind the skip link (Sven P-2, made more visible by the Wohnungen; `focus-error.ts`, scenario), unit m² at «Fläche» (five personas), Wohnungen ordered by floor and number (Marco P-2, Weber P-12); rejected: saving an address already entered (Anna P-5, Helga P-9: decided in #479)
+- [x] Workflow note `docs/reviews/workflow-notes-issue-479.md`
+- [x] Closing review round 2 (`docs/reviews/479-review-2.md`): no Blocker/Major; C-4, C-6 to C-9 Minor, kept (C-9: the test «behält, was der Liegenschaftsverwalter selbst eingetragen hat» pins kept behaviour)
+- [x] PR `Fixes #479` (the pull request that archives this session)
+
+Files: `backend/scripts/gwr-stub.ts`, `backend/src/routes/{buildings,apartments}.ts`, `backend/src/services/building.service.ts`, `src/lib/server/{building-register,building-form}.ts`, `src/routes/api/addresses/`, `src/routes/buildings/{AddressSearch,BuildingForm,RegisterApartments,RegisterNotices}.svelte`, `src/lib/{apartment.ts,ui/Select.svelte,ui/focus-error.ts}`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `tests/e2e/…`, `tests/contracts/building-apartment-number-taken.json`, docs.
+## Session C1: E2E in every browser on pull requests
+
+Branch `ccr-01e823d6-yhj5kc`. Product owner 2026-10-19: instead of a merge queue (only for repositories of an organisation), pull requests run the E2E tests in every browser, so a race only Firefox or WebKit loses shows before the merge (runs 595 to 614 on `main`). No scenario: CI only.
+
+- [x] `ci.yml`: E2E on pull requests with Chromium, Firefox, WebKit and `api` (60 min, as `main`); the axe check stays Chromium; `docs/test-pyramid.md`, `tests/e2e/CLAUDE.md`
+- [x] Slice review (`docs/reviews/ci-browsers-review-1.md`): C-1 `docs/tech-stack.md` fixed; C-2 (the axe shards get 60 min on pull requests too) kept, harmless
+- [x] PR (#473, merged): the first pull request with every browser shows the time it takes; its first run found a Firefox failure in «Suche ohne Treffer», cause not found (O-41)
+
+## Session C2: less CI per change, run 634 (2026-10-19)
+
+Branch `ccr-3510fafb-cx2ywk`. Product owner 2026-10-19: proposals A, C, D and the cause of the red run 634 on `main`. Merge queues exist only for organisations (Session C1), so the pull request stays the full check. No scenario: CI only.
+
+- [x] A: pushes to `main` run build, lint, unit tests and fallow only; the full run (every browser, axe) runs nightly and on `workflow_dispatch`; `main` has no branch protection yet (API 2026-10-19): the product owner turns it on with «Require branches to be up to date»
+- [x] C: the axe check in 3 shards instead of 5
+- [x] D: skill `pull-request`: reports, plan and archive are committed before the first push
+- [x] Run 634: `gh api` answered HTTP 502 in the job "Accessibility (axe)" of `e2e-results`, and `fail-fast` cancelled "E2E tests"; retry and no fail-fast (simulated with a `gh` that answers 502 once: old step exit 1, new exit 0; always 502: exit 1)
+- [x] `docs/test-pyramid.md`, `docs/tech-stack.md`; files: `.github/workflows/ci.yml`, `.claude/skills/pull-request/SKILL.md`
+- [x] Slice review (`docs/reviews/c2-review-1.md`): C-1 (Minor, plan said fallow does not run on push) fixed
+- [x] Workflow note (`docs/reviews/workflow-notes-ci-less-runs.md`)
+- [x] PR: pushed after this archive

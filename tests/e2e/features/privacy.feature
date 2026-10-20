@@ -43,7 +43,7 @@ Funktionalität: Datenschutz
 
   Szenario: Dienste Dritter, die der Browser aufruft
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "CARTO"
-    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "OpenPLZ"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "OpenPLZ"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Google Fonts"
 
@@ -85,11 +85,15 @@ Funktionalität: Datenschutz
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Resend"
 
   Szenario: Länder und Datenschutzerklärungen der Dienste, die der Browser aufruft
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "OpenPLZ" in "Deutschland" mit seiner Datenschutzerklärung "https://legal.stueber.de/privacy.php"
-    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps" in "USA" mit seiner Datenschutzerklärung "https://policies.google.com/privacy"
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps" in "USA" mit seiner Datenschutzerklärung "https://policies.google.com/privacy"
 
   Szenario: Wie lange die Anmeldung gilt
     Dann erfährt der Liegenschaftsverwalter unter "Cookies", dass "dwello_session" und "dwello_xsrf" 7 Tage gelten
 
   Szenario: Cookies im Browser ablehnen
     Dann erfährt der Liegenschaftsverwalter unter "Cookies", dass er Cookies im Browser ablehnen kann, sich dann aber nicht anmelden kann
+
+  # Gebäuderegister (#479): der Server von Dwello fragt geo.admin.ch, nicht der Browser
+  Szenario: Die Adresssuche fragt das Gebäuderegister des Bundes
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "swisstopo" in "Schweiz" mit seiner Datenschutzerklärung "https://www.swisstopo.admin.ch/en/legal-framework"
+    Und erfährt der Liegenschaftsverwalter unter "Weitergabe an Dritte", dass swisstopo den Suchbegriff und die IP-Adresse des Servers erhält, nicht die des Browsers

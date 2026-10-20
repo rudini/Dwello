@@ -77,7 +77,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	lineItems: UtilityStatementLineItem[];
 	// a berichtigte Abrechnung and the statement it replaces, and the replaced ones of its chain paid on (#120); only
 	// in the detail
-	replaces?: { id: string; statementNumber: string; statementDate: string } | null;
+	replaces?: { id: string; statementNumber: string; statementDate: string; totalAdvancePayments: string } | null;
 	replacedBy?: { id: string; statementNumber: string } | null;
 	priorPaidOn?: string[];
 	heatingProfile?: {
@@ -315,7 +315,7 @@ async function correctionsOf(statement: { id: string; replacesId: string | null 
 	const chain = [];
 	for (let next = statement.replacesId; next; ) {
 		const [replaced] = await db
-			.select({ ...columns, statementDate: utilityStatements.statementDate, paidAmount: utilityStatements.paidAmount, replacesId: utilityStatements.replacesId })
+			.select({ ...columns, statementDate: utilityStatements.statementDate, paidAmount: utilityStatements.paidAmount, replacesId: utilityStatements.replacesId, totalAdvancePayments: utilityStatements.totalAdvancePayments })
 			.from(utilityStatements)
 			.where(eq(utilityStatements.id, next));
 		chain.push(replaced);
@@ -323,7 +323,10 @@ async function correctionsOf(statement: { id: string; replacesId: string | null 
 	}
 	const [replacedBy] = await db.select(columns).from(utilityStatements).where(eq(utilityStatements.replacesId, statement.id));
 	const [first] = chain;
-	const replaces = first ? { id: first.id, statementNumber: first.statementNumber, statementDate: first.statementDate } : null;
+	// its Akonto, so the page can say when the correction deducts another (#464, product owner on F-4)
+	const replaces = first
+		? { id: first.id, statementNumber: first.statementNumber, statementDate: first.statementDate, totalAdvancePayments: first.totalAdvancePayments }
+		: null;
 	const priorPaidOn = chain.filter((s) => Number(s.paidAmount ?? 0) !== 0).map((s) => s.statementNumber).reverse();
 	return { replaces, replacedBy: replacedBy ?? null, priorPaidOn };
 }
@@ -398,6 +401,7 @@ async function calculatedRows(input: StatementInput & { buildingId: string }) {
 		rentalEnd: calculation.rentalEnd,
 		totalCosts: String(calculation.totalCosts),
 		totalAdvancePayments: String(calculation.totalAdvancePayments),
+		advanceLines: calculation.advanceLines,
 		managementFee: String(calculation.managementFee),
 		managementFeePercent: String(calculation.managementFeePercent),
 		heatingProfileId: input.heatingProfileId || null,

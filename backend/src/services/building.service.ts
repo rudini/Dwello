@@ -5,7 +5,7 @@
 
 import { eq, ilike, sql, desc, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { buildings, apartments, type Building, type NewBuilding } from '../db/schema';
+import { buildings, apartments, type Building, type NewApartment, type NewBuilding } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
 import { everyWordIn } from './word-search';
 
@@ -165,9 +165,17 @@ export async function getBuildingWithApartments(id: string): Promise<{
 /**
  * Create a new building
  */
-export async function createBuilding(data: NewBuilding): Promise<Building> {
-	const [building] = await db.insert(buildings).values(data).returning();
-	return building;
+export async function createBuilding(
+	data: NewBuilding,
+	newApartments: Omit<NewApartment, 'buildingId'>[] = []
+): Promise<Building> {
+	return db.transaction(async (tx) => {
+		const [building] = await tx.insert(buildings).values(data).returning();
+		if (newApartments.length) {
+			await tx.insert(apartments).values(newApartments.map((a) => ({ ...a, buildingId: building.id, status: 'vacant' })));
+		}
+		return building;
+	});
 }
 
 /**

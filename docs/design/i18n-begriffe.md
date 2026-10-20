@@ -9,6 +9,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Gebäude, Liegenschaft | immeuble | immobile | building |
 | Gebäudetyp | type d’immeuble | tipo di immobile | building type |
 | Baujahr | année de construction | anno di costruzione | year built |
+| Gebäuderegister (#479, Glossar #488) | registre des bâtiments | registro degli edifici | building register |
+| eidgenössisches Gebäude- und Wohnungsregister (GWR) | Registre fédéral des bâtiments et des logements (RegBL) | Registro federale degli edifici e delle abitazioni (REA) | Federal Register of Buildings and Dwellings (RBD) |
 | PLZ / Ort / Kanton | NPA / localité / canton | NPA / località / cantone | postcode / town / canton |
 | Wohnung | appartement | appartamento | apartment |
 | Wohnungsnummer | numéro d’appartement | numero dell’appartamento | apartment number |
@@ -35,7 +37,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Nettomiete (Mietzins) | loyer net (loyer) | pigione netta (pigione) | net rent (rent) |
 | Zusatzmiete | loyer supplémentaire | pigione supplementare | additional rent |
 | Akonto | acompte | acconto | advance payment |
-| Geleistete Akontobeiträge | acomptes versés | acconti versati | advance payments made |
+| Akontobeiträge (#477, bis dahin «Geleistete Akontobeiträge») | acomptes | acconti | advance payments |
 | Vereinbarte Nebenkosten / Nicht vereinbart | frais accessoires convenus / non convenue | spese accessorie pattuite / non pattuita | agreed utility costs / not agreed |
 | Referenzindex | taux de référence | tasso di riferimento | reference rate |
 | Rechnung | facture | fattura | invoice |

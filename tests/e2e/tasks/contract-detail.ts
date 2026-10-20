@@ -13,6 +13,8 @@ import {
 	contractStatementsLink,
 	contractTenantLink,
 	deleteContractButton,
+	advanceDeleteButton,
+	confirmAdvanceDeleteButton,
 	deleteDialogStatementLink,
 	deleteMistakeConfirmation,
 	deleteDraftAndEndButton,
@@ -83,3 +85,7 @@ export const continueOpenEnded = Click.on(continueOpenEndedButton);
 export const confirmMovedOut: Activity = (actor) =>
 	actor.attemptsTo(Click.on(movedOutButton), Click.on(confirmMovedOutButton));
 export const deleteDraftAndContinue = Click.on(deleteDraftAndContinueButton);
+
+// #464: a later Akonto is deleted; the one before applies again from then on
+export const deleteAdvance = (amount: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(advanceDeleteButton(amount)), Click.on(confirmAdvanceDeleteButton));
