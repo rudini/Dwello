@@ -1152,6 +1152,16 @@ describe('Verteilschlüssel einer Rechnung', () => {
 		expect(key().value).toBe('k3');
 	});
 
+	// Persona Helga 452 P-1: the proposal of the category chosen before does not stay
+	it('nimmt den Vorschlag zurück, wenn die neue Kategorie keinen hat', () => {
+		newInvoice('');
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c1');
+		choose('invoice-category-select', 'c2');
+
+		expect(key().value).toBe('');
+	});
+
 	it('überschreibt einen selbst gewählten Verteilschlüssel nicht', () => {
 		newInvoice();
 		choose('invoice-distribution-key-select', 'k3');

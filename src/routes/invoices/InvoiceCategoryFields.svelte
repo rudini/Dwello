@@ -49,7 +49,7 @@
 	$effect(() => {
 		const proposal = proposedKey(latestKeys, buildingId, categoryId, defaultKeyId);
 		untrack(() => {
-			if (!keyChosen && proposal) distributionKeyId = proposal;
+			if (!keyChosen) distributionKeyId = proposal; // also none: a proposal of the category before does not stay
 		});
 	});
 
