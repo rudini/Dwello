@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { inDays } from '../fixtures/dates';
+import { thisYear } from '../fixtures/dates';
 import {
 	billedWarningText,
 	categoryLabelText,
@@ -170,7 +170,7 @@ When('der Liegenschaftsverwalter die Kategorie der Rechnung entfernt und speiche
 Then(
 	'nennt die Warnung die Abrechnung des laufenden Jahres von {string} im Status {string}',
 	async ({ verwalter, seed }, tenant: string, status: string) => {
-		const number = await seed.statementNumber(tenant, Number(inDays(0).slice(0, 4)));
+		const number = await seed.statementNumber(tenant, thisYear());
 		await verwalter.sees(billedWarningText).toContain(`${number}, ${status}`);
 	}
 );

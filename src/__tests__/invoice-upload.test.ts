@@ -257,6 +257,9 @@ describe('Vorschlag der KI für eine Datei', () => {
 			'Das Häkchen bei «Diese Rechnung erstellen» fehlt, weil Sie zuerst den Betrag aufteilen müssen. Setzen Sie es danach.'
 		);
 		expect(selectionHelp({ ...mixed, selected: true })).toBeUndefined();
+		// unticked for another reason: several invoices, a duplicate, an Akontorechnung (code review 245 C-1)
+		for (const values of [{ invoiceCount: 2 }, { duplicateOf: 'i1' }, { documentType: 'advance_invoice' }])
+			expect(selectionHelp(withProposal(newRow(3, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true, ...values })))).toBeUndefined();
 	});
 
 	// #245 (Anna P-1 of #233): the result names why a file is still open

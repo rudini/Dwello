@@ -292,6 +292,21 @@ describe('Rechnungen hochladen', () => {
 		}
 	});
 
+	// two files of one name, both still open, are both named (code review 245 C-2)
+	it('nennt zwei offene Dateien mit demselben Namen beide', async () => {
+		const answers = (call: { path: string; body: unknown }) =>
+			call.path === '/invoices'
+				? [201, { id: 'i9' }]
+				: [200, (call.body as { fileName: string }).fileName === 'scan.pdf' ? { ...read, categorization: null } : read];
+		open(answers as never);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'), pdf('scan.pdf'), pdf('scan.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		const items = [...byTestId('invoice-upload-result')!.querySelectorAll('li')].map((li) => li.textContent);
+		expect(items.filter((text) => text?.startsWith('scan.pdf:'))).toHaveLength(2);
+	});
+
 	// #245 (Helga P-4 of #233): a value not found in an optional field is no warning, only a hint
 	it('zeigt «nicht gefunden» unter einem freiwilligen Feld als Hinweis, nicht als Warnung', async () => {
 		open(() => [200, { ...read, fields: { ...extraction.fields, dueDate: null } }]);

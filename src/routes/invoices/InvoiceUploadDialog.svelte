@@ -79,7 +79,7 @@
 	const chosen = $derived(rows.filter((row) => row.selected && row.status !== 'reading' && row.status !== 'refused'));
 	const resultShown = $derived(created.length > 0);
 	// after creating: the files chosen but not created, because they still lack something (persona Anna, C-4)
-	const stillOpen = $derived(chosen.map((row) => ({ name: row.file.name, reason: openReason(row) })));
+	const stillOpen = $derived(chosen.map((row) => ({ key: row.key, name: row.file.name, reason: openReason(row) })));
 	const buildingOptions = $derived(buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` })));
 	const buildingHelp = $derived(rows.length ? m.invoices_upload_building_locked() : undefined);
 	const discardText = $derived(

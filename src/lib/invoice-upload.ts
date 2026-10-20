@@ -206,7 +206,9 @@ const mixedCosts = (row: UploadRow) => row.hints.nonAllocableItems && row.values
 export function selectionHelp(row: UploadRow) {
 	if (row.selected || row.status !== 'check') return undefined;
 	if (row.documentType === 'credit_note') return m.invoices_upload_unticked_credit();
-	if (mixedCosts(row)) return m.invoices_upload_unticked_mixed();
+	// only a single invoice not entered yet waits for its amount to be split (code review 245 C-1)
+	if (mixedCosts(row) && row.documentType === 'invoice' && !row.several && !row.duplicateOf)
+		return m.invoices_upload_unticked_mixed();
 }
 
 // Akontorechnungen the Rechnungssteller deducted, with the total the KI proposes as the Betrag (#455)

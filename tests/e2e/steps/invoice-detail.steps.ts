@@ -20,7 +20,7 @@ import {
 	utilityCostOfInvoice
 } from '../questions/invoice-detail';
 import { pageAddressInApp, statementPath } from '../questions/statements';
-import { inDays } from '../fixtures/dates';
+import { thisYear } from '../fixtures/dates';
 import {
 	deleteInvoice,
 	openStatementOfInvoice,
@@ -169,8 +169,6 @@ for (const step of ['erklärt der Hinweis beim Betrag der Rechnung {string}', 'e
 		await verwalter.sees(deductedRuleAtAmount).toBe(text);
 	});
 
-// the statements of the year the invoice dated today is in (seeded with «… des laufenden Jahres»)
-const thisYear = () => Number(inDays(0).slice(0, 4));
 
 Then(
 	'nennt die Rechnung als enthalten in die Abrechnung des laufenden Jahres von {string} im Status {string}',
