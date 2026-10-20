@@ -224,7 +224,16 @@ describe('Aufgaben der Übersicht', () => {
 
 	// #454 (#408 point 7, #386): drafts that miss what changed since are no drafts to send
 	describe('Abrechnungen, die nicht aktuell sind', () => {
-		const outdated = (id: string, status: string, buildingId: string, building: string, start: string, end: string) => ({
+		// what changed since: the count of invoices, and whether the Tankbestand did (#307)
+		const outdated = (
+			id: string,
+			status: string,
+			buildingId: string,
+			building: string,
+			start: string,
+			end: string,
+			changed = { invoices: 1, fuelStock: false }
+		) => ({
 			id,
 			statementNumber: `NK-${id}`,
 			tenantName: `Mieter ${id}`,
@@ -232,7 +241,8 @@ describe('Aufgaben der Übersicht', () => {
 			buildingId,
 			building,
 			periodStart: start,
-			periodEnd: end
+			periodEnd: end,
+			...changed
 		});
 		const outdatedStatements = [
 			outdated('s1', 'draft', 'b1', 'Seeblick', '2025-01-01', '2025-12-31'),
@@ -248,7 +258,7 @@ describe('Aufgaben der Übersicht', () => {
 			const task = tasks.find((one) => one.id === 'outdated-drafts')!;
 			expect(task.title).toBe('3 Entwürfe sind nicht aktuell');
 			expect(task.text).toBe(
-				'Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen.'
+				'Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht oder der Tankbestand geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen.'
 			);
 			expect(task.links).toEqual([
 				{
@@ -294,8 +304,47 @@ describe('Aufgaben der Übersicht', () => {
 			);
 			const task = tasks.find((one) => one.id === 'correct-s4')!;
 			expect(task).toMatchObject({ title: 'Abrechnung berichtigen', href: '/statements/s4' });
-			expect(task.text).toContain('NK-s4');
-			expect(task.text).toContain('Mieter s4');
+			// PO 2026-10-20 (Fachreview 454-1 E-4)
+			expect(task.text).toBe(
+				'Seit dem Erstellen der Abrechnung NK-s4 von Mieter s4 wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen». Die berichtigte Abrechnung rechnet an, was schon bezahlt ist.'
+			);
+		});
+
+		const correctText = (changed: { invoices: number; fuelStock: boolean }, end = '2024-12-31') =>
+			overviewTasks(
+				input({
+					statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 0 },
+					outdatedStatements: [outdated('s5', 'paid', 'b1', 'Seeblick', `${end.slice(0, 4)}-01-01`, end, changed)]
+				})
+			).find((one) => one.id === 'correct-s5')!.text;
+
+		it('nennt einen geänderten Tankbestand', () => {
+			expect(correctText({ invoices: 0, fuelStock: true })).toContain(
+				'von Mieter s5 wurde der Tankbestand der Abrechnungsperiode geändert. Berichtigen Sie'
+			);
+		});
+
+		// Fachreview 454-1 V-8
+		it('nennt Rechnungen und Tankbestand in einem Satz', () => {
+			expect(correctText({ invoices: 2, fuelStock: true })).toContain(
+				'von Mieter s5 wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht, und der Tankbestand wurde geändert. Berichtigen Sie'
+			);
+		});
+
+		// PO 2026-10-20 (Fachreview 454-1 E-5): also after five years, with the sentence on the Verjährung
+		it('weist bei einer Abrechnungsperiode, die vor mehr als fünf Jahren endete, auf die Verjährung hin', () => {
+			const old = 'Diese Abrechnungsperiode endete vor mehr als fünf Jahren. Lassen Sie sich beraten, ob die Forderung verjährt ist.';
+			expect(correctText({ invoices: 1, fuelStock: false }, '2021-10-09')).toMatch(new RegExp(`${old}$`));
+			expect(correctText({ invoices: 1, fuelStock: false }, '2021-10-10')).not.toContain(old);
+		});
+
+		// Fachreview 454-1 V-12: a Mahnung of a statement that needs correcting comes after the correction
+		it('nennt das Berichtigen vor den überfälligen Abrechnungen', () => {
+			const ids = overviewTasks(
+				input({ statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 1 }, outdatedStatements })
+			).map((one) => one.id);
+			expect(ids).toContain('correct-s4');
+			expect(ids.indexOf('correct-s4')).toBeLessThan(ids.indexOf('overdue'));
 		});
 	});
 

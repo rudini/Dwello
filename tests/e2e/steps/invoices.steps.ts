@@ -6,6 +6,8 @@ import {
 	invoiceListEmpty,
 	listedInvoiceCount,
 	listedInvoicesOf,
+	groupOfListedInvoice,
+	inPeriodOfListedInvoice,
 	invoicePeriodFilterText,
 	invoiceShown,
 	statusOfListedInvoice
@@ -122,4 +124,15 @@ Then('nennt die Rechnungsliste den Filter {string}', async ({ verwalter, names }
 
 Then('sieht der Liegenschaftsverwalter die Rechnung {string}', async ({ verwalter }, description: string) => {
 	await verwalter.sees(invoiceShown(description)).toBe(true);
+});
+
+Then(
+	'nennt die Rechnungsliste die Rechnung {string} unter {string}',
+	async ({ verwalter }, description: string, group: string) => {
+		await verwalter.sees(groupOfListedInvoice(description)).toBe(group);
+	}
+);
+
+Then('nennt die Rechnungsliste bei der Rechnung {string} {string}', async ({ verwalter }, description: string, text: string) => {
+	await verwalter.sees(inPeriodOfListedInvoice(description)).toBe(text);
 });

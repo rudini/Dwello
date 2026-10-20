@@ -600,11 +600,54 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
-	const later = (laterInvoices: number, status: 'draft' | 'sent' = 'draft') =>
+	const later = (
+		invoices: number,
+		status: 'draft' | 'sent' = 'draft',
+		more: { fuelStock?: boolean; correctionDue?: boolean } = {}
+	) =>
 		show(StatementPage, {
-			data: { statement: statement({ status }), reminders: [], laterInvoices },
+			data: {
+				statement: statement({ status }),
+				reminders: [],
+				later: { invoices, fuelStock: false, correctionDue: false, ...more }
+			},
 			form: null
 		} as never);
+	const laterText = () => byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ');
+
+	// #454 (#408 point 8): the Tankbestand changed since; titles decided 2026-10-20 (Fachreview 454-1 E-4)
+	it('weist auf einen danach geänderten Tankbestand hin', () => {
+		later(0, 'draft', { fuelStock: true });
+		expect(laterText()).toMatch(/^\s*Tankbestand seit der Abrechnung geändert/);
+		expect(laterText()).toContain('Seit dem Erstellen dieses Entwurfs wurde der Tankbestand der Abrechnungsperiode geändert.');
+	});
+
+	// Fachreview 454-1 V-8
+	it('nennt danach geänderte Rechnungen und Tankbestand in einem Satz', () => {
+		later(2, 'sent', { fuelStock: true });
+		expect(laterText()).toMatch(/^\s*Rechnungen und Tankbestand seit der Abrechnung geändert/);
+		expect(laterText()).toContain(
+			'Seit dem Erstellen dieser Abrechnung wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht, und der Tankbestand wurde geändert.'
+		);
+	});
+
+	// PO 2026-10-20 (Fachreview 454-1 E-6): only where the task «Abrechnung berichtigen» shows (E-3)
+	it('bietet «Nicht berichtigen» an, wenn das Berichtigen den Saldo oder eine Position ändert', () => {
+		later(1, 'sent', { correctionDue: true });
+		click('statement-decline-correction-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain('bleibt, wie sie ist.');
+	});
+
+	it('bietet «Nicht berichtigen» nicht an, wenn das Berichtigen nichts ändert', () => {
+		later(1, 'sent');
+		expect(byTestId('statement-later-invoices')).not.toBeNull();
+		expect(byTestId('statement-decline-correction-button')).toBeNull();
+	});
+
+	it('nennt im Verlauf, dass die Abrechnung nicht berichtigt wurde', () => {
+		detail({ status: 'sent', correctionDeclined: { on: '2026-10-20' } });
+		expect(document.body.textContent!.replace(/\s+/g, ' ')).toMatch(/Nicht berichtigt ?20\.10\.2026/);
+	});
 
 	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
 		later(2);
@@ -820,7 +863,7 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('weist bei einer ersetzten Abrechnung nicht mehr auf später erfasste Rechnungen hin', () => {
-		show(StatementPage, { data: { statement: statement({ status: 'replaced' }), reminders: [], laterInvoices: 1 }, form: null } as never);
+		show(StatementPage, { data: { statement: statement({ status: 'replaced' }), reminders: [], later: { invoices: 1, fuelStock: true, correctionDue: false } }, form: null } as never);
 		expect(byTestId('statement-replaced')).not.toBeNull();
 		expect(byTestId('statement-later-invoices')).toBeNull();
 	});

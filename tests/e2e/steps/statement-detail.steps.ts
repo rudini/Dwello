@@ -56,6 +56,7 @@ import {
 	correctStatement,
 	correctStatementPaid,
 	recalculateDraft,
+	declineCorrection,
 	createCorrection,
 	openCorrectConfirmation,
 	openCorrection,
@@ -346,6 +347,20 @@ Then('weist die Abrechnung darauf hin: {string}', async ({ verwalter }, text: st
 
 Then('weist die Abrechnung auf keine geänderten Rechnungen hin', async ({ verwalter }) => {
 	await verwalter.sees(laterInvoicesHints).toBe(0);
+});
+
+// #454: invoices or the Tankbestand (Fachreview 454-1 V-15)
+Then('weist die Abrechnung auf keine Änderung seit dem Erstellen hin', async ({ verwalter }) => {
+	await verwalter.sees(laterInvoicesHints).toBe(0);
+});
+
+// the title leads the hint
+Then('nennt der Hinweis auf Änderungen seit dem Erstellen den Titel {string}', async ({ verwalter }, title: string) => {
+	await verwalter.sees(laterInvoicesHint).toMatch(new RegExp(`^${title}`));
+});
+
+When('der Liegenschaftsverwalter die Abrechnung nicht berichtigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(declineCorrection);
 });
 
 Then('nennt die Abrechnung {string}', async ({ verwalter }, language: string) => {

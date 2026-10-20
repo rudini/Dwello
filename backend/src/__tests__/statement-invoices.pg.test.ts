@@ -8,6 +8,7 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, fuelStocks, invoices, utilityStatementLineItems, utilityStatements } from '../db/schema';
 import { deleteStatement, generateStatement } from '../services/statement.service';
+import { swissToday } from '../services/today';
 import { callApi, sendJson } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
@@ -313,5 +314,94 @@ describe('Abrechnungen einer Rechnung', () => {
 		await statement();
 		const excluded = await invoice({ isValidUtilityCost: false });
 		expect(await periodsOf(excluded)).toMatchObject({ billedIn: [], missedIn: [] });
+	});
+});
+
+// #454 (#408 point 7), PO 2026-10-20 (Fachreview 454-1 E-3, E-6): a sent statement is due for correcting only when
+// recalculating it changes this contract's Saldo or a position; «Nicht berichtigen» leaves it as it is until a change
+// after that changes them again
+describe('Abrechnung berichtigen fällig', () => {
+	const due = async (id: string) =>
+		((await (await callApi(`/api/v1/statements/${id}/changed-invoices`)).json()) as { correctionDue: boolean }).correctionDue;
+	const decline = (id: string) => sendJson('POST', `/api/v1/statements/${id}/decline-correction`, {});
+	const sent = async (check: (id: string) => Promise<void>) => {
+		await clear();
+		const { id } = await statement();
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, id));
+		try {
+			await check(id);
+		} finally {
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, id)); // deletable again
+		}
+	};
+
+	it('ist fällig, wenn das Neuberechnen den Anteil des Mieters ändert', () =>
+		sent(async (id) => {
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			expect(await due(id)).toBe(true);
+		}));
+
+	it('ist nicht fällig, wenn die Rechnung keine Mietstage des Mietvertrags trifft', () =>
+		sent(async (id) => {
+			await invoice({ amount: '100.00', invoiceDate: '2024-12-15', servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' });
+			expect(await changed(id)).toHaveLength(1);
+			expect(await due(id)).toBe(false);
+		}));
+
+	it('ist bei einem Entwurf nie fällig', async () => {
+		await clear();
+		const { id } = await statement();
+		await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+		expect(await due(id)).toBe(false);
+	});
+
+	it('ist nach «Nicht berichtigen» nicht mehr fällig, bis eine weitere Änderung den Saldo ändert', () =>
+		sent(async (id) => {
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			const declined = await decline(id);
+			expect(declined.status).toBe(200);
+			expect(((await declined.json()) as { correctionDeclined: { on: string } }).correctionDeclined.on).toBe(swissToday());
+			expect(await due(id)).toBe(false);
+			await invoice({ amount: '50.00', invoiceDate: '2024-03-15' });
+			expect(await due(id)).toBe(true);
+		}));
+
+	it('verweigert «Nicht berichtigen», wenn kein Berichtigen fällig ist', async () => {
+		await clear();
+		const { id } = await statement();
+		const refused = await decline(id);
+		expect(refused.status).toBe(409);
+		expect(((await refused.json()) as { code: string }).code).toBe('STATEMENT_CORRECTION_NOT_DUE');
+	});
+});
+
+// #454 (#408 point 7): for the Übersicht, the drafts with a change since and the sent or paid statements to correct
+describe('Nicht aktuelle Abrechnungen', () => {
+	type Outdated = { id: string; status: string; invoices: number; fuelStock: boolean; buildingId: string; periodEnd: string };
+	const outdated = async (id: string) =>
+		((await (await callApi('/api/v1/statements/outdated')).json()) as { statements: Outdated[] }).statements.find(
+			(one) => one.id === id
+		);
+
+	it('nennt einen Entwurf mit einer danach erfassten Rechnung, mit Gebäude und Periode', async () => {
+		await clear();
+		const { id } = await statement();
+		expect(await outdated(id)).toBeUndefined();
+		await invoice({ amount: '100.00', invoiceDate: '2024-12-15', servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' });
+		expect(await outdated(id)).toMatchObject({ status: 'draft', invoices: 1, fuelStock: false, buildingId: rental.building, periodEnd: '2024-12-31' });
+	});
+
+	it('nennt eine versendete Abrechnung nur, wenn ihr Berichtigen fällig ist', async () => {
+		await clear();
+		const { id } = await statement();
+		await db.update(utilityStatements).set({ status: 'sent' }).where(eq(utilityStatements.id, id));
+		try {
+			await invoice({ amount: '100.00', invoiceDate: '2024-12-15', servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' });
+			expect(await outdated(id)).toBeUndefined();
+			await invoice({ amount: '100.00', invoiceDate: '2024-02-15' });
+			expect(await outdated(id)).toMatchObject({ status: 'sent', invoices: 2 });
+		} finally {
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, id));
+		}
 	});
 });

@@ -6,6 +6,18 @@ export const invoiceRow = (supplier: string) =>
 	);
 // #454: the filter «Abrechnungsperiode», named above the list
 export const invoicePeriodFilter = target('Filter Abrechnungsperiode', (page) => page.getByTestId('invoice-period-filter'));
+// #454 (Fachreview 454-1 E-1, V-11): the period filter groups by allocability and names the part in the period
+export const invoiceGroupOf = (supplier: string) =>
+	target(`Gruppe der Rechnung von ${supplier}`, (page) =>
+		page
+			.getByTestId(/^invoice-group-/)
+			.filter({ has: page.getByTestId(/^invoice-row-/).filter({ hasText: supplier }) })
+			.getByTestId('invoice-group-title')
+	);
+export const rowInPeriod = (supplier: string) =>
+	target(`Teil in der Periode der Rechnung von ${supplier}`, (page) =>
+		invoiceRow(supplier).locate(page).getByTestId('invoice-in-period')
+	);
 export const invoiceRows = target('Rechnungen in der Liste', (page) => page.getByTestId(/^invoice-row-/));
 export const invoiceSearchInput = target('Suche Rechnungen', (page) => page.getByTestId('invoice-search-input'));
 export const invoiceSearchButton = target('Suchen', (page) => page.getByTestId('invoice-search-submit'));

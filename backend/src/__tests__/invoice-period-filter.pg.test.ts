@@ -47,9 +47,21 @@ describe('Rechnungen einer Abrechnungsperiode', () => {
 	it('zeigt die Rechnungen, die eine Abrechnung der Periode nimmt', async () => {
 		expect(await listed(`buildingId=${rental.building}&periodStart=2025-10-01&periodEnd=2025-12-31`)).toEqual([
 			'by date inside',
+			'not allocable',
 			'service across the year end',
 			'service touching, dated after'
 		]);
+	});
+
+	// PO 2026-10-20 (Fachreview 454-1 E-1): the allocable ones first, so the list can group them; each with its part
+	// in the period (V-11): 31 of the 90 days of 01.12.2025 – 28.02.2026
+	it('nennt die umlagefähigen zuerst, jede mit ihrem Teil in der Periode', async () => {
+		const response = (await (
+			await callApi(`/api/v1/invoices?buildingId=${rental.building}&periodStart=2025-10-01&periodEnd=2025-12-31`)
+		).json()) as { invoices: { description: string; isValidUtilityCost: boolean; inPeriod: { amount: number } }[] };
+		expect(response.invoices.map((invoice) => invoice.isValidUtilityCost)).toEqual([true, true, true, false]);
+		const across = response.invoices.find((invoice) => invoice.description === 'service across the year end')!;
+		expect(across.inPeriod.amount).toBe(413.33);
 	});
 
 	it('gilt auch für eine Periode über den Jahreswechsel', async () => {
@@ -64,6 +76,6 @@ describe('Rechnungen einer Abrechnungsperiode', () => {
 		const response = (await (
 			await callApi(`/api/v1/invoices?buildingId=${rental.building}&periodStart=2025-10-01&periodEnd=2025-12-31`)
 		).json()) as { total: number };
-		expect(response.total).toBe(3);
+		expect(response.total).toBe(4);
 	});
 });

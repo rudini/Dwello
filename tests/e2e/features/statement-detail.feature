@@ -690,7 +690,7 @@ Funktionalität: Abrechnungsdetail
     Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter den Entwurf neu berechnet
-    Dann bestätigt Dwello "Der Entwurf ist neu berechnet. Er rechnet die Rechnungen ab, wie sie jetzt sind."
+    Dann bestätigt Dwello "Der Entwurf ist neu berechnet. Er rechnet mit den Rechnungen und dem Tankbestand, wie sie jetzt sind."
     Und nennt die Position "Hauswart" "Hauswart 2024-12-31"
     Und weist die Abrechnung auf keine geänderten Rechnungen hin
 
@@ -712,6 +712,31 @@ Funktionalität: Abrechnungsdetail
     Und der Tankbestand vom "2024-12-31" im Gebäude "Lindenhof" ist danach "200" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde der Tankbestand der Abrechnungsperiode geändert."
+    Und nennt der Hinweis auf Änderungen seit dem Erstellen den Titel "Tankbestand seit der Abrechnung geändert"
+
+  # PO 2026-10-20 (Fachreview 454-1 E-2): auch andere Stichtage oder Werte mit demselben Verbrauch, denn das PDF druckt
+  # Anfangs- und Endbestand
+  @wip
+  Szenario: Entwurf weist auf einen danach geänderten Tankbestand mit demselben Verbrauch hin
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Tankbestand vom "2023-12-31" im Gebäude "Lindenhof" ist danach "700" Franken
+    Und der Tankbestand vom "2024-12-31" im Gebäude "Lindenhof" ist danach "200" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde der Tankbestand der Abrechnungsperiode geändert."
+
+  # Fachreview 454-1 V-8: Rechnungen und Tankbestand in einem Satz
+  @wip
+  Szenario: Entwurf weist auf danach geänderte Rechnungen und Tankbestand hin
+    Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Tankbestand vom "2024-12-31" im Gebäude "Lindenhof" ist danach "200" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2024-06-15"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht, und der Tankbestand wurde geändert."
+    Und nennt der Hinweis auf Änderungen seit dem Erstellen den Titel "Rechnungen und Tankbestand seit der Abrechnung geändert"
 
   @wip
   Szenario: Versendete Abrechnung weist auf einen danach geänderten Tankbestand hin
@@ -723,15 +748,14 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieser Abrechnung wurde der Tankbestand der Abrechnungsperiode geändert."
 
-  # ein Tankbestand mit demselben Verbrauch ändert die Heizkosten nicht
-  @wip
+  # ein Tankbestand, der seit dem Erstellen gleich blieb, gibt keinen Hinweis (Fachreview 454-1 V-5, V-15)
   Szenario: Kein Hinweis, wenn der Tankbestand der Periode unverändert ist
     Angenommen im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
     Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann hat die Abrechnung den Status "Entwurf"
-    Und weist die Abrechnung auf keine geänderten Rechnungen hin
+    Und weist die Abrechnung auf keine Änderung seit dem Erstellen hin
 
   Szenario: Kein Hinweis, solange die Rechnungen der Periode unverändert sind
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"

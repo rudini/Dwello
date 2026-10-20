@@ -259,8 +259,9 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { laterInvoices: number };
-		expect(data.laterInvoices).toBe(1);
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { later: unknown };
+		// #454: and whether the Tankbestand changed, and whether a correction is due (Fachreview 454-1 E-3)
+		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false });
 		expect(urls).toContain('http://localhost:3001/api/v1/statements/s1/changed-invoices');
 	});
 
@@ -273,8 +274,8 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { laterInvoices: number };
-		expect(data.laterInvoices).toBe(0);
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { later: unknown };
+		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false });
 	});
 });
 

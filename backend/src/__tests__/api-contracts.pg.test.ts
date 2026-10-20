@@ -146,6 +146,18 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #454: the statements no longer current, for the Übersicht (a draft with an invoice recorded after it)
+	it('GET /statements/outdated liefert die Felder von statements-outdated.json', async () => {
+		await insertInvoice(rental.building, { amount: '80.00', invoiceDate: '2024-11-30', description: `Nachzügler ${token}` });
+		try {
+			const { statements } = (await (await callApi('/api/v1/statements/outdated')).json()) as { statements: { id: string }[] };
+			const actual = { statements: statements.filter((one) => one.id === statementId) };
+			expect(drift(await sample('statements-outdated'), actual)).toEqual([]);
+		} finally {
+			await db.delete(invoices).where(eq(invoices.description, `Nachzügler ${token}`));
+		}
+	});
+
 	it('GET /invoices/:id/statements liefert die Felder von invoice-statements.json', async () => {
 		const [billed] = await db.select({ id: invoices.id }).from(invoices).where(and(eq(invoices.buildingId, rental.building), eq(invoices.invoiceDate, '2024-03-31')));
 		const actual = await (await callApi(`/api/v1/invoices/${billed.id}/statements`)).json();

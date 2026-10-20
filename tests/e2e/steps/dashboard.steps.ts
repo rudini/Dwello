@@ -12,6 +12,7 @@ import {
 	outdatedDraftsAnd,
 	overviewTaskShown,
 	overviewTaskShownFor,
+	overviewTaskTextFor,
 	overviewTaskText,
 	overviewTasksNaming,
 	rentedApartmentsOf,
@@ -27,6 +28,7 @@ import {
 	startOverviewTask,
 	startOverviewTaskFor
 } from '../tasks/dashboard';
+import { pageAddress } from '../questions/navigation';
 import type { TestData } from '../fixtures/backend';
 import { inDays } from '../fixtures/dates';
 
@@ -245,6 +247,18 @@ Then('nicht die Aufgabe {string} für {string}', async ({ verwalter, names }, ti
 // recorded after the statement: a statement of the last year lacks it (#96)
 Given('im Gebäude {string} gibt es danach eine Rechnung des letzten Jahres', async ({ seed }, building: string) => {
 	await seed.invoiceOn(building, 'Hauswart', '300.00', `${lastYear}-06-15`);
+});
+
+// for the time after the move-out on 30.09. of the last year: the tenant bears nothing of it
+Given(
+	'im Gebäude {string} gibt es danach eine Rechnung für die Zeit nach dem Auszug von {string}',
+	async ({ seed }, building: string, _tenant: string) => {
+		await seed.invoiceOn(building, 'Hauswart', '300.00', `${lastYear}-12-15`, [`${lastYear}-10-01`, `${lastYear}-12-31`]);
+	}
+);
+
+Then('sagt die Aufgabe {string} für {string} {string}', async ({ verwalter, names }, title: string, tenant: string, text: string) => {
+	await verwalter.sees(overviewTaskTextFor(title, names.get(tenant)!)).toContain(text);
 });
 
 Then(

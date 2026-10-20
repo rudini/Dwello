@@ -34,6 +34,7 @@ export const occupancyHelp = Text.of(occupancyVacancyHelp);
 export const occupancyShown = (building: string) => Visibility.of(occupancyRow(building));
 export const overviewTaskShown = (title: string) => Visibility.of(overviewTask(title));
 export const overviewTaskText = (title: string) => Text.of(overviewTask(title));
+export const overviewTaskTextFor = (title: string, name: string) => Text.of(overviewTaskFor(title, name));
 export const overviewTaskShownFor = (title: string, name: string) => Visibility.of(overviewTaskFor(title, name));
 export const overviewTasksNaming = (name: string) => Count.of(overviewTasksOf(name));
 export const deadlineText = (kind: string, name: string) => Text.of(overviewDeadline(kind, name));

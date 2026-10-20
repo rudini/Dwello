@@ -4,6 +4,7 @@ import { load as detailLoad } from '../routes/invoices/[id]/+page.server';
 import { load as editLoad } from '../routes/invoices/[id]/edit/+page.server';
 import { load as newLoad } from '../routes/invoices/new/+page.server';
 import { localPath, suggestionProvenance, validateInvoice } from '../lib/invoice';
+import { toInvoice } from '../lib/server/invoice';
 import backendInvoice from '../../tests/contracts/invoice.json';
 import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 
@@ -77,6 +78,12 @@ describe('Rechnungsliste', () => {
 		expect(urls).toContainEqual(
 			expect.stringMatching(/\/invoices\?.*buildingId=b1.*periodStart=2019-07-01.*periodEnd=2020-06-30/)
 		);
+	});
+
+	// Fachreview 454-1 V-11: the part of each invoice in the period, as the backend names it
+	it('übernimmt den Teil jeder Rechnung in der Abrechnungsperiode', () => {
+		expect(toInvoice({ id: 'i1', amount: '1200.00', inPeriod: { amount: 413.33 } }).inPeriodAmount).toBe(413.33);
+		expect(toInvoice({ id: 'i1', amount: '1200.00' }).inPeriodAmount).toBeUndefined();
 	});
 
 	// Wie in den anderen Listen: ?building= kommt z. B. vom Mietvertrag

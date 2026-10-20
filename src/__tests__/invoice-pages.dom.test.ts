@@ -198,6 +198,35 @@ describe('Rechnungsliste', () => {
 		);
 	});
 
+	// PO 2026-10-20 (Fachreview 454-1 E-1): also the non-allocable ones, apart
+	it('trennt in der Abrechnungsperiode die umlagefähigen von den nicht umlagefähigen Rechnungen', () => {
+		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-10-01&periodEnd=2025-12-31');
+		list([invoice(), invoice({ id: 'i2', description: 'Dachreparatur', isValidUtilityCost: false })]);
+		const group = (testid: string) => byTestId(testid)!.textContent!.replace(/\s+/g, ' ');
+		expect(byTestId('invoice-group-allocable')!.querySelector('[data-testid="invoice-group-title"]')!.textContent).toBe(
+			'Umlagefähige Kosten'
+		);
+		expect(group('invoice-group-allocable')).toContain('Hauswartung März');
+		expect(group('invoice-group-not-allocable')).toMatch(/^\s*Nicht umlagefähige Kosten.*Dachreparatur/);
+		expect(group('invoice-group-allocable')).not.toContain('Dachreparatur');
+	});
+
+	// Fachreview 454-1 V-11: a Leistungszeitraum beyond the period counts with its days in it
+	it('nennt in der Abrechnungsperiode den Teil einer Rechnung, der in sie fällt', () => {
+		url = new URL('http://localhost/invoices?building=b1&periodStart=2025-10-01&periodEnd=2025-12-31');
+		list([invoice({ amount: 1200, inPeriodAmount: 413.33 }), invoice({ id: 'i2', description: 'Ganz', inPeriodAmount: 450 })]);
+		expect(byTestId('invoice-row-i1')!.querySelector('[data-testid="invoice-in-period"]')!.textContent!.trim()).toBe(
+			'davon CHF 413.33 in der Abrechnungsperiode'
+		);
+		expect(byTestId('invoice-row-i2')!.querySelector('[data-testid="invoice-in-period"]')).toBeNull();
+	});
+
+	it('trennt ohne Abrechnungsperiode nicht nach Umlagefähigkeit', () => {
+		url = new URL('http://localhost/invoices?building=b1');
+		list([invoice(), invoice({ id: 'i2', description: 'Dachreparatur', isValidUtilityCost: false })]);
+		expect(byTestId('invoice-group-not-allocable')).toBeNull();
+	});
+
 	it('nennt den Filter «Abrechnungsperiode» ohne Gebäude', () => {
 		url = new URL('http://localhost/invoices?periodStart=2024-07-01&periodEnd=2025-06-30');
 		list([]);
