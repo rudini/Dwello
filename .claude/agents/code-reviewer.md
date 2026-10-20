@@ -32,9 +32,10 @@ Always check these, and report a missing one as Major:
 
 Change no file except your report. Write it in German to the path the caller names:
 
-- One table of all findings: ID (`C-n`), severity (Blocker / Major / Minor), file:line, short finding. A Minor is a real defect of the diff that does not block the merge (wrong behaviour at an edge, a changed line without its test, code left unused, a comment or text that says something false) and needs nothing beyond its row. Report no Nits: wording, style, naming and redundancy that change nothing stay out of the report, since each costs a triage and, once fixed in code, a closing round.
+- One table of all findings: ID (`C-n`), severity (Blocker / Major / Minor), file:line, short finding. A Minor is a real defect of the diff that does not block the merge (wrong behaviour at an edge, a changed line without its test, code left unused, a comment or text that says something false) and needs nothing beyond its row; it starts no round of its own. Report no Nits: wording, style, naming and redundancy that change nothing stay out of the report, since each costs a triage and, once fixed in code, a closing round.
 - Blocker/Major: only problems you would block the merge for, each under its ID with why it is wrong and how to show it fails.
 - On a re-review (the caller names the previous report): only the status of its open IDs and the new findings in the delta.
 - A section "Nicht bestätigt": what you could not verify and where you looked.
+- Nothing else: what you checked and found sound gets one line «Geprüft: …» at most, since the caller and the next round read the whole report.
 
 Done when every changed file in the diff has been read and every requirement line is either confirmed by code and a test (for a change that alters no behavior, such as docs or agent instructions: by the changed text), or listed as a finding or under "Nicht bestätigt".

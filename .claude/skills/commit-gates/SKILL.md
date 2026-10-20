@@ -11,7 +11,7 @@ Three `PreToolUse` hooks (`.claude/settings.json`) run before every `git commit`
 
 - Blocks new unused exports or files, duplication, and complexity/CRAP findings. Fix them by un-exporting, deleting or splitting the function. `bunx fallow audit` shows the findings before committing; CI runs the same audit.
 - A CRAP finding on a Svelte template is estimated, not measured: move expressions into `$derived` or a function, or a loop into a child component.
-- A duplication finding in code the change only touches: fix it when it is small and changes no behavior (note it in the plan), else ask the product owner.
+- Only findings the change introduces block (`fallow audit` default gate `new-only`; a clone group on the base commit stays `"introduced": false` when a touched file's lines move around it). A duplication finding in code the change only touches: check `introduced` in `bunx fallow audit --format json` first; never reshape the code only to get past an inherited one. One the change introduces: fix it when it is small and changes no behavior (note it in the plan), else ask the product owner.
 - The gate audits the working tree: to commit one slice while the next is in progress, `git stash push --keep-index -u` first and `git stash pop` after.
 - When it finds no base branch (a single-branch clone) it blocks: `git fetch origin main:refs/remotes/origin/main` fixes it.
 
