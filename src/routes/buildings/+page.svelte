@@ -13,10 +13,13 @@
 
 	let { data }: { data: BuildingsListData } = $props();
 
-	// follow the address, so a link, back or forward shows the filters of the list shown (#159)
-	let searchTerm = $derived($page.url.searchParams.get('search') || '');
-	let cityFilter = $derived($page.url.searchParams.get('city') || '');
-	const filtered = $derived(['search', 'city'].some((key) => $page.url.searchParams.get(key)));
+	// follow the address, so a link, back or forward shows the filters of the list shown (#159); only the address:
+	// the store also reports other changes, and these reset a term typed meanwhile (O-41)
+	const query = $derived($page.url.search);
+	const param = (key: string) => new URLSearchParams(query).get(key) || '';
+	let searchTerm = $derived(param('search'));
+	let cityFilter = $derived(param('city'));
+	const filtered = $derived(['search', 'city'].some((key) => param(key)));
 
 	function handleSearch(event: SubmitEvent) {
 		event.preventDefault();
