@@ -104,3 +104,18 @@ Auf die Rückmeldung eines Kollegen («kommt etwas kühl rüber») haben die fü
 **Was stören würde:** Bewegung im ersten Bildschirm, hochzählende Zahlen, einfliegende Texte beim Scrollen, Karussells, ein tippendes Terminal oder Chat, Parallax, Videos (auch eingebettet von YouTube), Siegel wie «rechtssicher», Sternbewertungen.
 
 **Nebenbei beobachtet:** Das erste App-Bild zeigt «Noch nicht abgerechnet … 2018–2023» und wirkt auf Helga bedrohlich; das Bild des Upload-Dialogs ist unten abgeschnitten; das Handy lädt beim Öffnen rund 200 KB Bilder, die es (noch) nicht zeigt (dunkle Varianten, Handy-Foto); das Heiz-Beispiel vergleicht im Text Januar mit Juli, in der Bildunterschrift mit August.
+
+## Abstimmung über den Claim
+
+Der Product Owner hat entschieden, den Claim «Ihre Liegenschaft. Ihre Daten. Ihr Server.» zu ersetzen (W-5), und die Personas über drei Varianten abstimmen lassen; jede sah nur den ersten Bildschirm, in eigener Reihenfolge. Einzelberichte: `<persona>-landing-claim.md`. Punkte: 1. Rang 3, 2. Rang 2, 3. Rang 1.
+
+| Variante | Helga | Marco | Dr. Weber | Sven | Anna | Punkte |
+|---|---|---|---|---|---|---|
+| A «Ihre Nebenkostenabrechnung, einfach gemacht.» | 1. | 3. | 2. | 2. | 1. | 11 |
+| B «Ihre Nebenkostenabrechnung, ohne Excel und ohne Abo.» | 2. | 2. | 1. | 1. | 2. | **12** |
+| C «Ihre Liegenschaft. Ihre Abrechnung. Ganz einfach.» | 3. | 1. | 3. | 3. | 3. | 7 |
+
+- **B** nennt zwei prüfbare Erleichterungen (Dr. Weber, Sven: einziger Claim mit einem konkreten Grund weiterzulesen). Aber «ohne Excel» spricht Erfahrene an, nicht Anfängerinnen (Helga, Anna), «ohne Abo» steht im ersten Bildschirm zweimal mehr und ist nur halb wahr, wenn eine bezahlte externe KI läuft (Dr. Weber: «ohne Abo-Gebühr für Dwello»), «ohne Excel» wiederholt die erste h2.
+- **A** beruhigt Anfängerinnen am meisten (Helga, Anna); «einfach» verspricht neben dem Hinweis zur Einrichtung etwas viel (Helga: «einfacher gemacht»), für Sven eine Floskel.
+- **C** wirkt am wärmsten, sagt aber nicht, welche Abrechnung, und «Liegenschaft» passt nicht zu einer einzelnen Wohnung; Marco wählte es nur, weil A und B auf dem Handy abgeschnitten waren.
+- **Fehler, unabhängig vom Ergebnis:** Bei 390 px ist «Nebenkostenabrechnung» in 40 px Schrift breiter als der Bildschirm und wird abgeschnitten (Marco); nötig ist eine Trennstelle.
