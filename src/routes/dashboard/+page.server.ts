@@ -181,7 +181,7 @@ export const load = async ({
 		list(fetch, 'apartments?limit=1000', 'apartments'),
 		list(fetch, 'contracts?limit=1000', 'contracts'),
 		config,
-		list(fetch, 'statements?status=draft&limit=100', 'data'),
+		list(fetch, 'statements?status=draft&limit=1000', 'data'),
 		list(fetch, 'documents', 'data'),
 		list(fetch, 'statements/outdated', 'statements') // #454
 	]);
@@ -202,6 +202,7 @@ export const load = async ({
 		today,
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
+		draftIds: drafts.map((s) => String(s.id)),
 		dueStatements: [...overdue, ...sent].map((s) => ({
 			id: String(s.id),
 			tenantName: tenantOf(s),
