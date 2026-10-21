@@ -36,7 +36,7 @@ Dwello has no passwords of its own yet (a one-step installer with its own sign-i
 cp .env.example .env
 ```
 
-Open `.env` in a text editor and set these values; Docker Compose reads them from this file (of the other values, `docker-compose.prod.yml` uses only `PUBLIC_APP_URL`, `COOKIE_DOMAIN`, `CORS_ORIGIN` and `LLM_*`; their defaults fit a PC):
+Open `.env` in a text editor and set these values; Docker Compose reads them from this file (of the other values in it, the defaults fit a PC; the optional ones follow below the table):
 
 | Setting | Value |
 |---|---|
@@ -59,7 +59,7 @@ docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
 The first start builds Dwello, which takes several minutes; the AI model is about 6 GB. `docker-compose.prod.yml` publishes the backend (3001), the database (5432) and the AI (11434) on all network interfaces, also on a PC: keep them closed in the firewall of the PC or router. Then open `http://localhost:3000` and sign in with the address from `ALLOWED_EMAILS`. The overview shows the landlord what to do first.
 
 - **Update:** `git pull`, then `docker compose -f docker-compose.prod.yml up -d --build`.
-- **Back up** the database regularly, e.g. `docker exec dwello-postgres pg_dump -U dwello dwello > dwello-backup.sql`, and keep the copy on another device. Uploaded invoices and PDFs are stored in the database too.
+- **Back up** the database regularly, e.g. `docker exec dwello-postgres pg_dump -U dwello --clean --if-exists dwello > dwello-backup.sql`, and keep the copy on another device. Uploaded invoices and PDFs are stored in the database too. To restore a copy: `docker exec -i dwello-postgres psql -U dwello dwello < dwello-backup.sql` (it replaces the data in the database).
 - **E-mail to tenants:** `docker-compose.prod.yml` does not pass the mail settings on yet (#568). Until then Dwello files e-mails as «zu versenden», and the landlord sends the PDFs or prints the letters.
 
 ## 6. Without 16 GB of memory: an external AI

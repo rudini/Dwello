@@ -90,7 +90,6 @@ h1, h2, h3, h4 { line-height: 1.15; margin: 0; text-wrap: balance; font-weight: 
 p { margin: 0; }
 .wrap { max-width: var(--max); margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 @media (min-width: 720px) { .wrap { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
-.num { font-variant-numeric: tabular-nums; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
@@ -178,7 +177,7 @@ section { padding-block: 96px; }
 /* Upload in three steps */
 .flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: flow; }
 .flow li { counter-increment: flow; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
-.flow li::before { content: counter(flow); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.flow li::before { content: counter(flow); display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-control); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 /* A cost split into equal shares, one of them marked */
 .split { display: grid; gap: 12px; margin-top: 8px; }
 .split-bar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
@@ -419,7 +418,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
 				<a class="btn btn-secondary" href="#installieren">So kommen Sie zu Dwello</a>
 			</div>
-			<p class="hero-note">Kostenlos und ohne Abo. Einrichten muss Dwello jemand, der sich mit Computern auskennt. Für die Arbeit mit Dwello brauchen Sie danach keine technischen Kenntnisse; Updates und Datensicherungen erledigt diese Person ab und zu.</p>
+			<p class="hero-note">Kostenlos und ohne Abo. Einrichten muss Dwello jemand, der sich mit Computern auskennt. Für die Arbeit mit Dwello brauchen Sie danach keine technischen Kenntnisse; Updates und regelmässige Datensicherungen erledigt diese Person.</p>
 		</div>
 		<div class="stage">
 			<figure class="shot desk">
@@ -442,7 +441,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<ul>
 			<li><b>CHF 0.–</b><span>ohne Abo und ohne Werbung</span></li>
 			<li><b>4</b><span>Sprachen: Deutsch, Français, Italiano, English</span></li>
-			<li><b>50</b><span>Wohnungen: für private Vermieterinnen und Vermieter</span></li>
+			<li><b>bis 50</b><span>Wohnungen, für private Vermieterinnen und Vermieter</span></li>
 			<li><b>0</b><span>Daten gehen an uns. Dwello läuft bei Ihnen.</span></li>
 		</ul>
 	</div>
@@ -474,9 +473,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<polyline points="420,72 440,86 460,72" fill="none" stroke="var(--accent)" stroke-width="3"/>
 		</svg>
 		<ol class="steps">
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg><span class="n">Einmal, zu Beginn</span></div><h3>Gebäude erfassen</h3><p>Adresse suchen, Wohnungen mit Fläche und Zimmern anlegen, Mieter und Mietverträge erfassen.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg><span class="n">Einmal, zu Beginn</span></div><h3>Gebäude erfassen</h3><p>Adresse suchen, Wohnungen mit Fläche und Zimmern anlegen, Mieter und Mietverträge mit den vereinbarten Nebenkosten und Akontozahlungen erfassen.</p></li>
 			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span class="n">Das ganze Jahr</span></div><h3>Rechnungen hochladen</h3><p>PDFs hineinziehen. Die KI liest Betrag, Datum und Kategorie und sagt, was Sie prüfen sollten.</p></li>
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><span class="n">Im Frühling</span></div><h3>Abrechnungen erstellen</h3><p>Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><span class="n">Im Frühling</span></div><h3>Abrechnungen erstellen</h3><p>Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil. Die bezahlten Akontozahlungen zieht Dwello ab.</p></li>
 			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg><span class="n">Gleich danach</span></div><h3>Prüfen und versenden</h3><p>Per E-Mail oder als Brief, mit Swiss QR-Rechnung und in der Sprache Ihrer Mieter.</p></li>
 		</ol>
 	</div>
@@ -503,7 +502,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 					<li>Sie prüfen die Angaben und bestätigen.</li>
 				</ol>
 				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Lokale KI mit Ollama, ohne Cloud<small>Ihre Belege verlassen den Server nicht. Wer will, verbindet jede OpenAI-kompatible KI.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Lokale KI mit Ollama, ohne Cloud<small>Mit der lokalen KI verlassen Ihre Belege den Server nicht. Wer will, verbindet stattdessen jede OpenAI-kompatible KI.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Hinweis auf fehlende Rechnungen<small>Dwello erwartet, was letztes Jahr kam. Fehlt die Wasserrechnung, sehen Sie es vor der Abrechnung.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Umlagefähig oder nicht<small>Kosten, die Sie nicht auf die Mieter umlegen dürfen, kommen nicht in die Abrechnung.</small></span></li>
 				</ul>
@@ -697,8 +696,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	<div class="wrap">
 		<div class="sec-head">
 			<span class="kicker">Installieren</span>
-			<h2>Einmal einrichten lassen, dann läuft es.</h2>
-			<p>Die Einrichtung macht einmal jemand, der sich mit Computern auskennt: jemand aus der Familie, eine Bekannte oder Ihr IT-Dienst. Geben Sie dieser Person die Anleitung; sie braucht rund eine Stunde. Danach arbeiten Sie im Browser, ohne technische Kenntnisse. Updates und Datensicherungen macht diese Person ab und zu; die Anleitung beschreibt sie.</p>
+			<h2>Einrichten lassen, dann im Browser arbeiten.</h2>
+			<p>Die Einrichtung macht einmal jemand, der sich mit Computern auskennt: jemand aus der Familie, eine Bekannte oder Ihr IT-Dienst. Geben Sie dieser Person die Anleitung; sie braucht rund eine Stunde. Danach arbeiten Sie im Browser, ohne technische Kenntnisse. Updates und regelmässige Datensicherungen macht diese Person; die Anleitung beschreibt sie.</p>
 			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Anleitung zum Weitergeben (Englisch)</a></div>
 		</div>
 		<div class="tabs" role="tablist" aria-label="Wo soll Dwello laufen?">
@@ -772,7 +771,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an. Bei der Einrichtung wird dafür einmal ein Schlüssel bei Google angelegt; die Anleitung zeigt, wie. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 auf GitHub">#497</a>).</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an. Bei der Einrichtung wird dafür einmal ein Schlüssel bei Google angelegt; die Anleitung zeigt, wie. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 auf GitHub: Installer in einem Schritt">#497</a>).</span></div>
 	</div>
 </section>
 
@@ -837,14 +836,14 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Roadmap</span>
 			<h2>Was als Nächstes kommt.</h2>
-			<p>Dwello wird offen weiterentwickelt. Diese Punkte sind geplant; zu jedem gibt es ein Issue auf GitHub, in dem Sie mitreden können.</p>
+			<p>Dwello wird offen weiterentwickelt. Diese Punkte sind geplant; zu den meisten gibt es ein Issue auf GitHub, in dem Sie mitreden können.</p>
 		</div>
 		<div class="road">
-			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 auf GitHub">#497</a><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>MCP-Server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener" aria-label="Issue 495 auf GitHub">#495</a><p>Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>Vollständiger Export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener" aria-label="Issue 496 auf GitHub">#496</a><p>Alle Daten als CSV und JSON, jederzeit, mit einem Klick.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 auf GitHub: Installer in einem Schritt">#497</a><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>MCP-Server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener" aria-label="Issue 495 auf GitHub: MCP-Server">#495</a><p>Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Vollständiger Export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener" aria-label="Issue 496 auf GitHub: Vollständiger Export">#496</a><p>Alle Daten als CSV und JSON, jederzeit, mit einem Klick.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>Berichte und Auswertungen</h3><p>Einnahmen, Ausgaben und Nebenkosten über die Jahre, für Steuererklärung und Treuhand.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>Link zum Quellcode in der App</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/498" rel="noopener" aria-label="Issue 498 auf GitHub">#498</a><p>Jede Installation zeigt, wo ihr Quellcode liegt, wie es die AGPL verlangt.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Link zum Quellcode in der App</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/498" rel="noopener" aria-label="Issue 498 auf GitHub: Link zum Quellcode in der App">#498</a><p>Jede Installation zeigt, wo ihr Quellcode liegt, wie es die AGPL verlangt.</p></article>
 		</div>
 	</div>
 </section>
@@ -857,11 +856,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Häufige Fragen.</h2>
 		</div>
 		<div class="faq">
-			<details open><summary>Brauche ich technische Kenntnisse?</summary><p>Für die Einrichtung, und danach ab und zu für Updates und Datensicherungen. Bitten Sie jemanden, der sich mit Computern auskennt, und geben Sie dieser Person die Anleitung. Für die Arbeit mit Dwello brauchen Sie keine Vorkenntnisse: Jeder Begriff wird am Feld erklärt.</p></details>
+			<details open><summary>Brauche ich technische Kenntnisse?</summary><p>Für die Einrichtung, und danach für Updates und regelmässige Datensicherungen. Bitten Sie jemanden, der sich mit Computern auskennt, und geben Sie dieser Person die Anleitung. Für die Arbeit mit Dwello brauchen Sie keine Vorkenntnisse: Jeder Begriff wird am Feld erklärt.</p></details>
 			<details><summary>Kostet Dwello wirklich nichts?</summary><p>Ja. Dwello ist Open Source und kostenlos. Sie bezahlen höchstens Ihren eigenen Server oder den Strom für Ihren PC und das Porto für Briefe. Wenn Sie eine externe KI statt der lokalen nutzen, bezahlen Sie diese direkt beim Anbieter.</p></details>
 			<details><summary>Für wie viele Wohnungen eignet sich Dwello?</summary><p>Für private Vermieterinnen und Vermieter mit einem bis fünf Gebäuden und bis zu 50 Wohnungen. Für grosse Verwaltungen mit Teams ist Dwello nicht gemacht.</p></details>
 			<details><summary>Was passiert, wenn die KI eine Rechnung falsch liest?</summary><p>Nichts, ohne dass Sie es bestätigen. Die KI schlägt die Angaben vor und Dwello sagt, welche Sie prüfen sollten. Erst wenn Sie bestätigen, wird die Rechnung erstellt. Sie können jede Rechnung auch selbst erfassen.</p></details>
-			<details><summary>Ist Dwello rechtlich geprüft?</summary><p>Dwello rechnet nach den Regeln des Obligationenrechts und wird mit automatischen Tests gegen diese Regeln geprüft. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.</p></details>
+			<details><summary>Ist Dwello rechtlich geprüft?</summary><p>Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen, dass es diese Regeln einhält. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.</p></details>
 			<details><summary>Kann ich Dwello ausprobieren, ohne etwas zu installieren?</summary><p>Ja. Die Demo auf demo.dwello.ch zeigt drei Gebäude in Zürich, Luzern und Interlaken mit 13 Wohnungen. Sie wird jede Nacht zurückgesetzt.</p></details>
 		</div>
 	</div>
@@ -918,6 +917,13 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
 	}
 	document.querySelectorAll('[data-copy]').forEach(function (b) { b.addEventListener('click', function () { copy(b); }); });
+
+	// the menu closes when a link in it is chosen, on a tap outside it, on Escape and when focus leaves it
+	var menu = document.querySelector('.menu');
+	menu.addEventListener('click', function (e) { if (e.target.closest('a')) menu.open = false; });
+	document.addEventListener('click', function (e) { if (menu.open && !menu.contains(e.target)) menu.open = false; });
+	document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); } });
+	menu.addEventListener('focusout', function (e) { if (e.relatedTarget && !menu.contains(e.relatedTarget)) menu.open = false; });
 
 	var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
 	function select(tab) {
