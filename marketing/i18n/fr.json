@@ -337,5 +337,20 @@
 	"Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil. Dwello zieht das vereinbarte Akonto ab; fehlende Zahlungen regeln Sie ausserhalb der Abrechnung.": "Pour tout l’immeuble en une fois, au jour près lors d’un changement de locataire et avec profil de chauffage. Dwello déduit les acomptes convenus ; les paiements manquants se règlent en dehors du décompte.",
 	"Nach Periodenende": "Après la fin de la période",
 	"Schauen Sie sich die Demo an und lassen Sie Dwello einrichten. Dann erfassen Sie Ihr Gebäude und laden die Rechnungen hoch, sobald sie kommen. Ist die Abrechnungsperiode vorbei, ist die Abrechnung schnell gemacht.": "Regardez la démo et faites installer Dwello. Saisissez ensuite votre immeuble et téléversez les factures dès qu’elles arrivent. Une fois la période de décompte terminée, le décompte est vite fait.",
-	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "Non, ni par une avocate, un avocat ni une association. Dwello calcule selon le Code des obligations et l’ordonnance sur le bail (OBLF), et des tests automatiques vérifient les règles qu’il en met en œuvre. Cela ne remplace pas un conseil juridique : en cas de litige, l’association des propriétaires ou l’autorité de conciliation vous aident."
+	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "Non, ni par une avocate, un avocat ni une association. Dwello calcule selon le Code des obligations et l’ordonnance sur le bail (OBLF), et des tests automatiques vérifient les règles qu’il en met en œuvre. Cela ne remplace pas un conseil juridique : en cas de litige, l’association des propriétaires ou l’autorité de conciliation vous aident.",
+	"Rechnungssteller": "Émetteur de la facture",
+	"Betrag": "Montant",
+	"Datum": "Date",
+	"Bitte prüfen": "À vérifier",
+	"Kategorie": "Catégorie",
+	"Kaltwasser": "Eau froide",
+	"Ablauf abspielen": "Lire le déroulement",
+	"Lift": "Ascenseur",
+	"Verteilung abspielen": "Lire la répartition",
+	"js:'Weiter abspielen'": "'Reprendre'",
+	"js:'Anhalten'": "'Mettre en pause'",
+	"js:'Nochmals abspielen'": "'Relire'",
+	"Animation: So kommt eine Rechnung in Dwello": "Animation : comment une facture arrive dans Dwello",
+	"Animation: So verteilt Dwello die Kosten des Lifts": "Animation : comment Dwello répartit les coûts de l’ascenseur",
+	"Beispiel in der Animation: Rechnungssteller Wasserversorgung Zürich, Betrag CHF 930.00, Datum 31.03.2025 mit dem Hinweis «Bitte prüfen», Kategorie Kaltwasser.": "Exemple de l’animation : émetteur de la facture Wasserversorgung Zürich, montant CHF 930.00, date 31.03.2025 avec la mention « À vérifier », catégorie Eau froide."
 }

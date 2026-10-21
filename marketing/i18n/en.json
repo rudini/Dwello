@@ -333,5 +333,19 @@
 	"Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil. Dwello zieht das vereinbarte Akonto ab; fehlende Zahlungen regeln Sie ausserhalb der Abrechnung.": "For the whole building at once, to the day when a tenant changes, and with a heating profile. Dwello deducts the agreed advance payments; missing payments are settled outside the statement.",
 	"Nach Periodenende": "After the period ends",
 	"Schauen Sie sich die Demo an und lassen Sie Dwello einrichten. Dann erfassen Sie Ihr Gebäude und laden die Rechnungen hoch, sobald sie kommen. Ist die Abrechnungsperiode vorbei, ist die Abrechnung schnell gemacht.": "Look at the demo and have Dwello set up. Then enter your building and upload the invoices as they come in. Once the billing period is over, the statement is quickly done.",
-	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "No, not by a lawyer or an association. Dwello calculates by the Swiss Code of Obligations and the Tenancy Ordinance (VMWG), and automated tests check the rules from them that Dwello applies. That does not replace legal advice: in a dispute, the homeowners’ association or the conciliation authority can help you."
+	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "No, not by a lawyer or an association. Dwello calculates by the Swiss Code of Obligations and the Tenancy Ordinance (VMWG), and automated tests check the rules from them that Dwello applies. That does not replace legal advice: in a dispute, the homeowners’ association or the conciliation authority can help you.",
+	"Rechnungssteller": "Invoice issuer",
+	"Betrag": "Amount",
+	"Datum": "Date",
+	"Bitte prüfen": "Please check",
+	"Kategorie": "Category",
+	"Kaltwasser": "Cold Water",
+	"Ablauf abspielen": "Play the steps",
+	"Verteilung abspielen": "Play the split",
+	"js:'Weiter abspielen'": "'Resume'",
+	"js:'Anhalten'": "'Pause'",
+	"js:'Nochmals abspielen'": "'Play again'",
+	"Animation: So kommt eine Rechnung in Dwello": "Animation: how an invoice gets into Dwello",
+	"Animation: So verteilt Dwello die Kosten des Lifts": "Animation: how Dwello splits the cost of the lift",
+	"Beispiel in der Animation: Rechnungssteller Wasserversorgung Zürich, Betrag CHF 930.00, Datum 31.03.2025 mit dem Hinweis «Bitte prüfen», Kategorie Kaltwasser.": "Example in the animation: invoice issuer Wasserversorgung Zürich, amount CHF 930.00, date 31.03.2025 marked «Please check», category Cold Water."
 }
