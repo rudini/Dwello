@@ -10,8 +10,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const get = (path: string) => fetch(`${API}/${path}`).then((response) => response.json());
 	const [config, heatingProfiles, distributionKeys] = await Promise.all([
 		get('config'),
-		get('heating-profiles?limit=100'),
-		get('distribution-keys?limit=100')
+		get('heating-profiles?limit=1000'), // all of them (#588)
+		get('distribution-keys?limit=1000')
 	]);
 
 	return {

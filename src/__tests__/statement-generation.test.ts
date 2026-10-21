@@ -660,7 +660,9 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 			}
 			if (url.includes('/statements?')) return Response.json({ ...statements, data });
 			if (url.includes('/contracts?')) return Response.json({ contracts: [...buildingContracts.contracts, ownRate, notAgreed] });
-			if (url.includes('/heating-profiles?')) return Response.json({ ...heatingProfiles, data: known });
+			// as the backend: at most as many as asked for (#588)
+			if (url.includes('/heating-profiles?'))
+				return Response.json({ ...heatingProfiles, data: known.slice(0, Number(new URL(url).searchParams.get('limit') ?? 100)) });
 			if (url.includes('/invoices/completeness/')) return Response.json(invoiceCompleteness);
 			return Response.json([]);
 		}) as typeof globalThis.fetch;
@@ -703,6 +705,14 @@ describe('Bestehende Abrechnungen in der Vorschau', () => {
 		const fetch = fetchWith([statement('1', c1, 'paid', 'hp2', '4.50')]);
 
 		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Winter', run: 'Heizung Mittelland' } })]);
+	});
+
+	// #588: a Heizprofil after the 100th is named too
+	it('nennt auch ein Heizprofil nach dem hundertsten beim Namen', async () => {
+		const many = [...profiles, ...Array.from({ length: 148 }, (_, i) => profile(`hp${i + 3}`, `Eintrag ${i + 3}`))];
+		const fetch = fetchWith([statement('1', c1, 'paid', 'hp120', '4.50')], {}, [], many);
+
+		expect(await changedOf(fetch)).toEqual([named('1', { profile: { used: 'Eintrag 120', run: 'Heizung Mittelland' } })]);
 	});
 
 	// a deleted Heizprofil is stored as none; the statement keeps its name since #209

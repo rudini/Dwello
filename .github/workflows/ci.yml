@@ -271,10 +271,12 @@ jobs:
           if [ "${{ needs.changes.outputs.app }}" != true ]; then exit 0; fi
           # every shard of both suites passed: no need to ask the API, which can still list a finished shard as running (PR #591)
           if [ "${{ needs.e2e-tests.result }}" = success ]; then exit 0; fi
-          # three tries: one HTTP 502 of the API turned run 634 red with every shard green
+          # three tries: one HTTP 502 of the API turned run 634 red with every shard green, and an answer
+          # seconds after the last shard can still count fewer (PR #592: «1 of 3» with all three green)
           for attempt in 1 2 3; do
             passed=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100" \
-              --jq '[.jobs[] | select(.name | startswith("${{ matrix.name }} (")) | select(.conclusion == "success")] | length') && break
+              --jq '[.jobs[] | select(.name | startswith("${{ matrix.name }} (")) | select(.conclusion == "success")] | length') \
+              && [ "$passed" = "${{ matrix.shards }}" ] && break
             sleep 15
           done
           if [ "$passed" != "${{ matrix.shards }}" ]; then echo "::error::$passed of ${{ matrix.shards }} shards passed."; exit 1; fi

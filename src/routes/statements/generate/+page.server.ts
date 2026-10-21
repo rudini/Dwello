@@ -61,7 +61,7 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
 	const [buildings, heatingProfiles, config] = await Promise.all([
 		json(fetch, 'buildings?limit=1000'),
-		json(fetch, 'heating-profiles?limit=100'),
+		json(fetch, 'heating-profiles?limit=1000'), // all of them (#588)
 		json(fetch, 'config')
 	]);
 	const buildingList = (buildings.buildings ?? []) as (Building & { apartmentCount: number })[];
