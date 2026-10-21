@@ -22,8 +22,11 @@ const generated = (feature: string) => `.features-gen/tests/e2e/features/${featu
 const usesExtraInstances =
 	!existsSync('.features-gen') ||
 	['accessibility', 'sprachen-bildschirme', 'demo'].some((feature) => existsSync(generated(feature)));
-// The fresh installation (#577: no account, no provider, the KI model still downloading) for einrichtung.feature
-const usesFreshInstallation = !existsSync('.features-gen') || existsSync(generated('einrichtung'));
+// The fresh installation (#577: no account, no provider, the KI model still downloading) for einrichtung.feature and
+// the overview's state 'ki-model-loading'
+const usesFreshInstallation =
+	!existsSync('.features-gen') ||
+	['einrichtung', 'accessibility', 'sprachen-bildschirme'].some((feature) => existsSync(generated(feature)));
 const freshDatabaseUrl = (() => {
 	const url = new URL(E2E_DATABASE_URL);
 	url.pathname = `${url.pathname}_fresh`;
@@ -141,7 +144,8 @@ export default defineConfig<{ driver: Driver }>({
 		...(usesExtraInstances
 			? [
 				{
-					// Empty backend for the axe check of 'empty' and 'first-use' (tests/e2e/tasks/accessibility.ts)
+					// Empty backend for the axe check of 'empty', 'first-use', 'fresh-installation' and 'setup-error'
+					// (tests/e2e/tasks/accessibility.ts)
 					command: 'cd backend && bun run e2e-db && bun run src/index.ts',
 					port: 3103,
 					reuseExistingServer: false,
@@ -163,7 +167,11 @@ export default defineConfig<{ driver: Driver }>({
 						...frontendEnv,
 						PORT: '3102',
 						ORIGIN: 'http://localhost:3102',
-						BACKEND_URL: 'http://localhost:3103'
+						BACKEND_URL: 'http://localhost:3103',
+						// no provider and an account never made: the states 'fresh-installation' and 'setup-error' (#577)
+						OAUTH_GOOGLE_CLIENT_ID: '',
+						OAUTH_GOOGLE_CLIENT_SECRET: '',
+						OAUTH_GOOGLE_REDIRECT_URI: ''
 					}
 				},
 				{

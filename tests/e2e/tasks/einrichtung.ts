@@ -17,14 +17,15 @@ export const openSetup = Navigate.to(`${FRESH_APP}/setup`);
 export const openSetupPrivacy = Click.on(setupPrivacyLink);
 export const openSetupTerms = Click.on(setupTermsLink);
 
+/** Fills in the setup and sends it; `repeat` differs from the password only when a scenario wants it to */
 export const setUpDwello =
-	(code: string, account: { email: string; password: string }): Activity =>
+	(code: string, account: { email: string; password: string }, repeat = account.password): Activity =>
 	(actor) =>
 		actor.attemptsTo(
 			Enter.theValue(code).into(setupCodeInput),
 			Enter.theValue(account.email).into(setupEmailInput),
 			Enter.theValue(account.password).into(setupPasswordInput),
-			Enter.theValue(account.password).into(setupPasswordRepeatInput),
+			Enter.theValue(repeat).into(setupPasswordRepeatInput),
 			Click.on(setupSubmitButton)
 		);
 

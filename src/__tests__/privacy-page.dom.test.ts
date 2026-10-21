@@ -297,7 +297,8 @@ describe('Datenschutzerklärung nach #82', () => {
 		expect(text).toContain(
 			'sind Sie als Vermieter verantwortlich. Der Betreiber dieser Dwello-Installation hat seinen Namen und seine Adresse noch nicht hinterlegt.'
 		);
-		expect(text).toContain('Betreiben Sie Dwello selbst, tragen Sie sie bei der Einrichtung ein');
+		// #577: the setup asks for no operator details (product owner, 2026-10-21)
+		expect(text).toContain('Betreiben Sie Dwello selbst, tragen Sie sie in der Einstellungsdatei ein, wie die Installationsanleitung beschreibt');
 	});
 
 	// #458 (#333): the server's country only when OPERATOR_SERVER_COUNTRY is set (Art. 19 Abs. 4 DSG)
@@ -469,7 +470,7 @@ describe('Datenschutzerklärung zur Anmeldung mit Passwort', () => {
 	it('erklärt das Konto mit Passwort ohne leere Anbieterliste, wenn Google nicht eingerichtet ist', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: [], password: true } } as never);
 
-		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an.');
+		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an; das Konto legen Sie bei der Einrichtung von Dwello an.');
 		expect(login()).toContain('Daraus lässt sich das Passwort nicht zurückrechnen, nur durch Ausprobieren erraten.');
 		expect(login()).toContain('Dazu speichert Dwello die Zahl der Fehlversuche und das Ende einer allfälligen Sperre bis zur nächsten erfolgreichen Anmeldung.');
 		expect(login()).toContain('Jeder Fehlversuch mit Passwort und jede Sperre wird mit der eingetippten E-Mail-Adresse im Protokoll des Servers festgehalten');
@@ -488,7 +489,7 @@ describe('Datenschutzerklärung zur Anmeldung mit Passwort', () => {
 	it('nennt neben dem Passwort auch Google, wenn beides eingerichtet ist', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], password: true } } as never);
 
-		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an.');
+		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an; das Konto legen Sie bei der Einrichtung von Dwello an.');
 		expect(login()).toContain('Sie können sich über Google anmelden.');
 		expect(login()).toContain('Ihr Passwort beim Anbieter sieht Dwello nie.');
 	});
@@ -496,6 +497,24 @@ describe('Datenschutzerklärung zur Anmeldung mit Passwort', () => {
 	it('erwähnt kein Passwort, wenn es kein Konto mit Passwort gibt', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
-		expect(login()).not.toContain('Sie melden sich mit E-Mail-Adresse und Passwort an.');
+		expect(login()).not.toContain('Sie melden sich mit E-Mail-Adresse und Passwort an');
+	});
+});
+
+// #577, fach review 577 R-2: the local KI fetches its model from Ollama by itself
+describe('Datenschutzerklärung zum Download des KI-Modells', () => {
+	const third = () => document.getElementById('third')?.textContent ?? '';
+
+	it('nennt Ollama, wenn die KI auf dem Server läuft', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: [], password: true } } as never);
+
+		expect(third()).toContain('lädt Dwello es einmal bei Ollama (Ollama Inc., USA) herunter');
+	});
+
+	it('nennt Ollama nicht bei einem Anbieter der KI ausserhalb des Servers', () => {
+		show(PrivacyPage, { data: { recipient: { provider: 'OpenAI', country: 'USA' }, providers: [], password: true } } as never);
+
+		expect(third()).toContain('swisstopo');
+		expect(third()).not.toContain('Ollama');
 	});
 });

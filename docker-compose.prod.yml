@@ -5,6 +5,22 @@ version: '3.8'
 
 services:
   # ============================================
+  # Keys of the installation (#577): made once on the first start, kept in the volume dwello_secrets; a value set in
+  # .env wins (older installations)
+  # ============================================
+  secrets:
+    image: alpine:3.20
+    container_name: dwello-secrets
+    command: ["sh", "/init-secrets.sh", "/run/dwello", "/pgdata"]
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
+    volumes:
+      - ./docker/init-secrets.sh:/init-secrets.sh:ro
+      - dwello_secrets:/run/dwello
+      - postgres_data:/pgdata:ro
+
+  # ============================================
   # Frontend - SvelteKit Application
   # ============================================
   frontend:
@@ -15,6 +31,9 @@ services:
         APP_VERSION: ${APP_VERSION:-}
     container_name: dwello-frontend
     restart: unless-stopped
+    command: ["sh", "-c", "export JWT_SECRET=$$(cat /run/dwello/jwt_secret) && exec node build"]
+    volumes:
+      - dwello_secrets:/run/dwello:ro
     ports:
       - "3000:3000"
     environment:
@@ -30,8 +49,8 @@ services:
       - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
       # the address Dwello is opened at: without it the Node server takes every request for https and refuses forms sent over http
       - ORIGIN=${PUBLIC_APP_URL:-http://localhost:3000}
-      - JWT_SECRET=${JWT_SECRET}
-      # Who may sign in (#51): comma-separated e-mail addresses, «*» for every account; without it the frontend does not start
+      # Who may sign in with a provider like Google (#51): comma-separated e-mail addresses, «*» for every account;
+      # with a provider and without it the frontend does not start
       - ALLOWED_EMAILS=${ALLOWED_EMAILS:-}
       - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID:-}
       - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET:-}
@@ -39,6 +58,8 @@ services:
       - COOKIE_DOMAIN=${COOKIE_DOMAIN:-localhost}
       - COOKIE_SECURE=${COOKIE_SECURE:-true}
     depends_on:
+      secrets:
+        condition: service_completed_successfully
       backend:
         condition: service_healthy
     networks:
@@ -58,13 +79,20 @@ services:
       dockerfile: Dockerfile
     container_name: dwello-backend
     restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - >-
+        export DATABASE_URL=postgresql://dwello:$$(cat /run/dwello/db_password)@postgres:5432/dwello
+        JWT_SECRET=$$(cat /run/dwello/jwt_secret) ENCRYPTION_KEY=$$(cat /run/dwello/encryption_key)
+        && bun scripts/migrate.ts && exec bun run src/index.ts
+    volumes:
+      - dwello_secrets:/run/dwello:ro
     ports:
       - "3001:3001"
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - DATABASE_URL=postgresql://dwello:${POSTGRES_PASSWORD:-dwello}@postgres:5432/dwello
-      - JWT_SECRET=${JWT_SECRET}
       - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434/v1}
       - LLM_API_KEY=${LLM_API_KEY:-}
       - LLM_PROVIDER=${LLM_PROVIDER:-}
@@ -81,6 +109,8 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD:-}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
     depends_on:
+      secrets:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     networks:
@@ -100,12 +130,16 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: dwello
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dwello}
+      POSTGRES_PASSWORD_FILE: /run/dwello/db_password
       POSTGRES_DB: dwello
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - dwello_secrets:/run/dwello:ro
+    depends_on:
+      secrets:
+        condition: service_completed_successfully
     networks:
       - dwello-network
     healthcheck:
@@ -127,8 +161,7 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - dwello-network
-    # Note: After first start, run: docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
-    # Not needed when LLM_BASE_URL points to an external provider
+    # The backend downloads the model on its first start (#577); not needed when LLM_BASE_URL points to an external provider
 
   # ============================================
   # Nginx Reverse Proxy (Optional)
@@ -153,6 +186,9 @@ networks:
     driver: bridge
 
 volumes:
+  # the keys of the installation (#577): back it up with the database
+  dwello_secrets:
+    driver: local
   postgres_data:
     driver: local
   ollama_data:

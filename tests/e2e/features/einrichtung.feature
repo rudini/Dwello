@@ -1,5 +1,5 @@
 # language: de
-@einrichtung @wip
+@einrichtung
 Funktionalität: Einrichtung beim ersten Aufruf
   Als Liegenschaftsverwalter
   möchte ich Dwello nach der Installation im Browser einrichten
@@ -24,7 +24,20 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Angenommen Dwello ist frisch installiert
     Und ein Besucher hat die Einrichtung geöffnet
     Wenn der Besucher mit einem falschen Einrichtungscode ein Konto mit Passwort anlegt
-    Dann sieht der Besucher in der Einrichtung den Hinweis "Der Einrichtungscode stimmt nicht. Sie finden ihn im Protokoll des Servers (docker logs dwello-backend). Geben Sie ihn erneut ein."
+    Dann sieht der Besucher in der Einrichtung den Hinweis "Der Einrichtungscode stimmt nicht. Sie finden ihn im Protokoll des Servers mit dem Befehl docker logs dwello-backend; es gilt der zuletzt angezeigte Code. Geben Sie ihn erneut ein."
+
+  # Fachreview 577 V-4: die Fehlzustände der Einrichtung
+  Szenario: Einrichtung mit zwei verschiedenen Passwörtern
+    Angenommen Dwello ist frisch installiert
+    Und ein Besucher hat die Einrichtung geöffnet
+    Wenn der Besucher das Passwort bei der Einrichtung zweimal verschieden eingibt
+    Dann sieht der Besucher in der Einrichtung den Hinweis "Die beiden Passwörter stimmen nicht überein. Geben Sie das Passwort zweimal gleich ein."
+
+  Szenario: Einrichtung mit einem zu kurzen Passwort
+    Angenommen Dwello ist frisch installiert
+    Und ein Besucher hat die Einrichtung geöffnet
+    Wenn der Besucher bei der Einrichtung das Passwort "kurz" wählt
+    Dann sieht der Besucher in der Einrichtung den Hinweis "Das Passwort ist zu kurz. Wählen Sie eines mit mindestens 8 Zeichen, am besten ein langes, das Sie sonst nirgends verwenden."
 
   Szenario: Nach der Einrichtung führt Dwello zur Anmeldung
     Angenommen Dwello ist eingerichtet
@@ -40,7 +53,14 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Angenommen Dwello ist frisch installiert
     Und ein Besucher hat die Einrichtung geöffnet
     Wenn der Besucher in der Einrichtung die Datenschutzerklärung öffnet
-    Dann ist der Besucher auf der Seite "Datenschutzerklärung"
+    Dann ist der Besucher auf der Seite "Datenschutz"
+
+  # Fachreview 577 R-1: wer das Konto anlegt, liest vorher, was mit E-Mail-Adresse und Passwort geschieht (Art. 19 DSG)
+  Szenario: Die Datenschutzerklärung erklärt bei der Einrichtung das Konto mit Passwort
+    Angenommen Dwello ist frisch installiert
+    Und ein Besucher hat die Einrichtung geöffnet
+    Wenn der Besucher in der Einrichtung die Datenschutzerklärung öffnet
+    Dann nennt die Datenschutzerklärung unter "Anmeldung" "das Konto legen Sie bei der Einrichtung von Dwello an"
 
   Szenario: Von der Einrichtung zu den Nutzungsbedingungen
     Angenommen Dwello ist frisch installiert
@@ -53,5 +73,4 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Angenommen Dwello ist eingerichtet
     Und das KI-Modell ist zu 40 % geladen
     Wenn der Liegenschaftsverwalter der frischen Installation die Übersicht öffnet
-    Dann zeigt die Übersicht den Hinweis "Das KI-Modell wird geladen: 40 %"
-    Und sagt der Hinweis, dass der Liegenschaftsverwalter Rechnungen bis dahin von Hand erfasst
+    Dann zeigt die Übersicht den Hinweis "Das KI-Modell wird geladen: 40 %. Bis es geladen ist, erfassen Sie Rechnungen von Hand."

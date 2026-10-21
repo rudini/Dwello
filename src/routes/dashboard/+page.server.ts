@@ -40,8 +40,11 @@ export interface DashboardData {
 	}[];
 }
 
+/** How far the local KI's model is (#577); unknown with a KI outside the server or when the backend cannot say */
+export type KiModel = { state: 'ready' | 'failed' | 'unknown' } | { state: 'loading'; percent: number };
+
 /** What the overview page shows: the dashboard figures plus today's tasks and deadlines */
-export type OverviewData = DashboardData & { tasks: Task[]; deadlines: Deadline[] };
+export type OverviewData = DashboardData & { tasks: Task[]; deadlines: Deadline[]; kiModel: KiModel };
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -156,6 +159,9 @@ export const load = async ({
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
 	const config = settings(fetch).catch(() => ({}) as Record<string, string>);
+	const kiModel: Promise<KiModel> = fetch(`${BACKEND_URL}/api/v1/ki/model`)
+		.then((response) => (response.ok ? response.json() : { state: 'unknown' }))
+		.catch(() => ({ state: 'unknown' }));
 	const [
 		figures,
 		overdue,
@@ -229,5 +235,5 @@ export const load = async ({
 				endDate: String(c.endDate)
 			}))
 	};
-	return { ...figures, tasks: overviewTasks(input), deadlines: overviewDeadlines(input) };
+	return { ...figures, tasks: overviewTasks(input), deadlines: overviewDeadlines(input), kiModel: await kiModel };
 };

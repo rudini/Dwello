@@ -4,6 +4,8 @@ import { fail, redirect, type Cookies } from '@sveltejs/kit';
 import { generateJwt, setSessionCookie, setXsrfToken } from './auth';
 import { logOAuthEvent } from './error-handler';
 import { recordLogin, safeTarget } from './login-flow';
+import { getConfiguredProviders } from './oauth';
+import { backendMessage, type BackendError } from '$lib/backend-error';
 
 // Konto mit Passwort (#576): the backend checks the password, the BFF issues the session as after OAuth
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/auth/password`;
@@ -49,12 +51,51 @@ export async function signInWithPassword(fetch: Fetch, cookies: Cookies, form: F
 	}
 	// a failing backend is neither a wrong password nor a Sperre, and the backend counted no failed attempt
 	if (!response?.ok) return fail(502, { email, error: m.login_error_failed() });
-	const account = (await response.json()) as { sub: string; email: string; name: string };
+	await startSession(await response.json(), fetch, cookies);
+	redirect(303, safeTarget(form.get('redirectTo') as string | null));
+}
+
+/** The session of a Konto mit Passwort, as after OAuth, in the Protokoll des Servers too (fach review 576 R-8, 577 R-4) */
+async function startSession(account: { sub: string; email: string; name: string }, fetch: Fetch, cookies: Cookies) {
 	const jwt = await generateJwt({ ...account, provider: 'local' });
-	// the Protokoll des Servers, as after OAuth (fach review 576 R-8)
 	logOAuthEvent('login_complete', 'local', { userId: account.sub, email: account.email });
 	await recordLogin(jwt, 'local', fetch);
 	setSessionCookie(cookies, jwt);
 	setXsrfToken(cookies);
-	redirect(303, safeTarget(form.get('redirectTo') as string | null));
+}
+
+// The setup on the first visit (#577): only while there is neither a Konto mit Passwort nor a provider like Google
+const SETUP = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/setup`;
+
+/** Whether a fresh installation still has to be set up (false when the backend does not answer) */
+export async function setupNeeded(fetch: Fetch): Promise<boolean> {
+	if (getConfiguredProviders().length) return false;
+	try {
+		const response = await fetch(SETUP);
+		return response.ok && ((await response.json()) as { needed: boolean }).needed;
+	} catch {
+		return false;
+	}
+}
+
+export async function setUpDwello(fetch: Fetch, cookies: Cookies, form: FormData) {
+	const [code, email, password, repeat] = ['code', 'email', 'password', 'repeat'].map((name) => String(form.get(name) ?? ''));
+	if (password !== repeat) return fail(400, { email, error: m.setup_error_repeat() });
+	const response = await fetch(SETUP, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ code, email, password })
+	}).catch(() => null);
+	if (!response) return fail(502, { email, error: m.login_error_failed() });
+	if (response.status !== 201) {
+		const refusal = (await response.json().catch(() => ({}))) as BackendError;
+		if (refusal.code === 'SETUP_DONE') redirect(303, '/login');
+		const error =
+			refusal.code === 'SETUP_LOCKED'
+				? m.setup_error_locked({ time: swissTime(String(refusal.params?.until)) })
+				: backendMessage(refusal, m.login_error_failed());
+		return fail(response.status, { email, error });
+	}
+	await startSession(await response.json(), fetch, cookies);
+	redirect(303, '/dashboard');
 }

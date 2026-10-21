@@ -3,7 +3,7 @@ import { fetchRecord } from '$lib/server/save-form';
 import { jwtConfig } from '$lib/server/jwt-config';
 import { getConfiguredProviders, PROVIDER_NAMES } from '$lib/server/oauth';
 import { loadHosting, loadOperator } from '$lib/server/operator';
-import { passwordAvailable } from '$lib/server/password-login';
+import { passwordAvailable, setupNeeded } from '$lib/server/password-login';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({
 		recipient: { provider: string; country: string } | null;
 		enabled?: boolean;
 		providers: string[];
-		password: boolean; // a Konto mit Passwort exists (#576)
+		password: boolean; // a Konto mit Passwort exists (#576) or the setup makes it (#577)
 		mail: 'smtp' | 'resend' | null;
 		operator: ReturnType<typeof loadOperator>;
 		sessionSeconds: number;
@@ -30,7 +30,8 @@ export const load: PageServerLoad = async ({
 				fetchRecord(fetch, `${BACKEND_URL}/api/v1/${path}`, m.privacy_record())
 			)
 		),
-		passwordAvailable(fetch)
+		// a Konto mit Passwort exists, or is about to be made in the setup (#577, fach review 577 R-1)
+		Promise.all([passwordAvailable(fetch), setupNeeded(fetch)]).then((answers) => answers.some(Boolean))
 	]);
 	return {
 		...llm,

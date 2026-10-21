@@ -50,12 +50,37 @@ const data = {
 		task('overdue', 'Überfällige Abrechnungen prüfen', '/statements?status=overdue'),
 		task('drafts', 'Abrechnungen prüfen und versenden', '/statements?status=draft')
 	],
-	deadlines: [deadline]
+	deadlines: [deadline],
+	kiModel: { state: 'ready' }
 };
 
 const page = (overrides = {}) =>
 	render(DashboardPage, { props: { data: { ...data, ...overrides } } as never }).body;
 const tasksOf = (body: string) => body.match(/data-testid="overview-task"[\s\S]*?<\/li>/g) ?? [];
+
+// #577: the local KI's model downloads in the background after the first start
+describe('Übersicht während das KI-Modell lädt', () => {
+	const hint = (body: string) => body.match(/data-testid="ki-model-loading"[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? '';
+
+	it('zeigt, wie weit das KI-Modell geladen ist, und dass Rechnungen bis dahin von Hand gehen', () => {
+		const text = hint(page({ kiModel: { state: 'loading', percent: 40 } }));
+
+		expect(text).toContain('Das KI-Modell wird geladen: 40 %.');
+		expect(text).toContain('Bis es geladen ist, erfassen Sie Rechnungen von Hand.');
+	});
+
+	it('sagt, wenn das KI-Modell nicht geladen werden konnte', () => {
+		const text = hint(page({ kiModel: { state: 'failed' } }));
+
+		expect(text).toContain('Das KI-Modell konnte nicht geladen werden.');
+		expect(text).toContain('Dwello versucht es beim nächsten Start erneut.');
+	});
+
+	it('zeigt nichts, wenn das Modell bereit ist oder die KI ausserhalb des Servers läuft', () => {
+		expect(page({ kiModel: { state: 'ready' } })).not.toContain('ki-model-loading');
+		expect(page({ kiModel: { state: 'unknown' } })).not.toContain('ki-model-loading');
+	});
+});
 
 describe('Übersicht', () => {
 	it('heisst Übersicht und beginnt mit dem, was jetzt zu tun ist', () => {

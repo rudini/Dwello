@@ -7,6 +7,7 @@ import config from '../../tests/contracts/config.json';
 import statementList from '../../tests/contracts/statements.json';
 import documentList from '../../tests/contracts/documents.json';
 import outdatedStatements from '../../tests/contracts/statements-outdated.json';
+import kiModelLoading from '../../tests/contracts/ki-model-loading.json';
 
 const API = 'http://localhost:3001/api/v1';
 // an apartment of the API contract, without the dates it does not have
@@ -245,6 +246,25 @@ describe('Übersicht laden', () => {
 		const data = await load({ fetch } as never);
 		expect(data.tasks.map((one) => one.id)).not.toContain('outdated-drafts');
 		expect(data.tasks.map((one) => one.id)).toContain('drafts');
+	});
+
+	// #577: how far the local KI's model is; a model the backend cannot tell about shows nothing
+	it('nennt, wie weit das KI-Modell geladen ist', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const answers = backend(200, both);
+		const fetch = (async (url: string) =>
+			url.endsWith('/ki/model') ? Response.json(kiModelLoading) : answers(url)) as typeof globalThis.fetch;
+
+		expect((await load({ fetch } as never)).kiModel).toEqual({ state: 'loading', percent: 40 });
+	});
+
+	it('zeigt die Übersicht auch, wenn der Stand des KI-Modells nicht zu laden ist', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const answers = backend(200, both);
+		const fetch = (async (url: string) =>
+			url.endsWith('/ki/model') ? new Response(null, { status: 500 }) : answers(url)) as typeof globalThis.fetch;
+
+		expect((await load({ fetch } as never)).kiModel).toEqual({ state: 'unknown' });
 	});
 
 	// Fachreview 454-1 V-10: the link of the missing statements names the building of the newest period

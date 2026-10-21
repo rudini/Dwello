@@ -30,6 +30,7 @@ import {
 	discardMessage,
 	uploadResult
 } from '../targets/invoice-upload';
+import { setUpDwello } from './einrichtung';
 import { invoicePdf, uploadBelege } from './invoice-upload';
 import { goToGeneration } from './statement-generate';
 import { buildingInvoiceCount, generateButton, heatingProfileSelect } from '../targets/statement-generate';
@@ -37,6 +38,8 @@ import { Visibility } from '../screenplay/questions';
 import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
+import { kiModelLoading, setupError } from '../targets/einrichtung';
+import { FRESH_APP } from '../fixtures/fresh-installation';
 import { userMenuButton } from '../targets/app-frame';
 import { passwordSubmitButton } from '../targets/authentication';
 import { failSignIns, signInWithPassword } from './authentication';
@@ -197,6 +200,11 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'login-locked': (example) => (actor) =>
 		// each attempt on a freshly opened page, the 5th answered with the Sperre (code review 576 C-6)
 		actor.attemptsTo(failSignIns(example.account!.email, 5)),
+	// #577: the setup of a fresh installation, its refusal (two passwords, refused before the backend) and the overview
+	// while the local KI's model downloads
+	'setup-error': () => (actor) =>
+		actor.attemptsTo(setUpDwello('E2E7-K4QX', { email: 'a11y@dwello.test', password: 'ein-langes-Passwort' }, 'ein-anderes'), Wait.until(setupError)),
+	'ki-model-loading': () => Wait.until(kiModelLoading),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// the Gebäuderegister of «Neues Gebäude» (#479), answered by its stand-in (backend/scripts/gwr-stub.ts)
@@ -629,8 +637,16 @@ function draftOf(name: string, values: object) {
 // 'empty' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts);
 // 'demo' the instance with DEMO=on. Both start only for the features playwright.config.ts names in `usesExtraInstances`
 const EMPTY_INSTANCE = 'http://localhost:3102';
-const instanceOf = (state: string) =>
-	['empty', 'first-use'].includes(state) ? EMPTY_INSTANCE : state === 'demo' ? DEMO_INSTANCE : '';
+// The setup (#577) needs no account and no provider: the empty instance has neither and never gets one, so it is
+// looked at there in every state; 'ki-model-loading' on the fresh installation, whose KI stand-in is still downloading
+const instanceOf = ({ state, path }: Example) =>
+	['empty', 'first-use'].includes(state) || path === '/setup'
+		? EMPTY_INSTANCE
+		: state === 'demo'
+			? DEMO_INSTANCE
+			: state === 'ki-model-loading'
+				? FRESH_APP
+				: '';
 
 /** Public screens are looked at without a session */
 const leaveSessionFor =
@@ -654,7 +670,7 @@ const lookAt =
 			Browser.resizeTo(viewports[viewport]),
 			Browser.useColorScheme(scheme),
 			Browser.clearLocalStorage, // no draft from the previous viewport
-			Navigate.to(instanceOf(example.state) + example.path)
+			Navigate.to(instanceOf(example) + example.path)
 		);
 		const noted = note(look, prefix);
 		if (example.state !== 'every-wizard-step') {

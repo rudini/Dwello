@@ -8,8 +8,9 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
-import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts } from '../db/schema';
+import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { loadModel } from '../services/ki-model.service';
 import { app } from '../app';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
@@ -689,6 +690,44 @@ describe('API-Verträge der Berichtigung', () => {
 			expect(drift(await sample('auth-password-locked'), await (await post('Vertrags-Passwort')).json())).toEqual([]);
 		} finally {
 			await callApi(`/api/v1/local-accounts/${encodeURIComponent(email)}`, { method: 'DELETE' });
+		}
+	});
+
+	// #577: the setup before there is any account, and the download of the local KI's model
+	it('/setup liefert die Felder von setup*.json', async () => {
+		const post = (code: string) =>
+			app.handle(
+				new Request('http://localhost/api/v1/setup', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ code, email: `einrichtung-${token}@dwello.test`, password: 'Vertrags-Passwort' })
+				})
+			);
+		process.env.SETUP_CODE = 'VERT-RAG1';
+		await db.delete(localAccounts);
+		try {
+			expect(drift(await sample('setup-needed'), await (await app.handle(new Request('http://localhost/api/v1/setup'))).json())).toEqual([]);
+			expect(drift(await sample('setup-code-invalid'), await (await post('FALS-CHER')).json())).toEqual([]);
+			expect(drift(await sample('setup'), await (await post('VERT-RAG1')).json())).toEqual([]);
+		} finally {
+			delete process.env.SETUP_CODE;
+			await db.delete(localAccounts);
+		}
+	});
+
+	it('/ki/model liefert die Felder von ki-model-loading.json', async () => {
+		const ollama = Bun.serve({
+			port: 0,
+			fetch: (request) =>
+				new URL(request.url).pathname === '/api/tags'
+					? Response.json({ models: [] })
+					: new Response(`${JSON.stringify({ status: 'pulling x', total: 100, completed: 40 })}\n`)
+		});
+		try {
+			await loadModel({ baseUrl: `http://127.0.0.1:${ollama.port}/v1`, model: 'm', local: true });
+			expect(drift(await sample('ki-model-loading'), await (await callApi('/api/v1/ki/model')).json())).toEqual([]);
+		} finally {
+			ollama.stop(true);
 		}
 	});
 });

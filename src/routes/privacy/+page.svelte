@@ -134,6 +134,8 @@
 					policy: { provider: 'swisstopo', href: 'https://www.swisstopo.admin.ch/en/legal-framework' }
 				},
 				{ text: m.privacy_third_4(), policy: GOOGLE },
+				// the local KI fetches a missing model from Ollama by itself (#577, fach review 577 R-2)
+				...(llmNotice === m.privacy_llm_local() ? [{ text: m.privacy_third_ollama() }] : []),
 				{ text: m.privacy_third_5() }
 			]
 		},

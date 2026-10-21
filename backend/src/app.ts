@@ -13,13 +13,14 @@ import { contractRoutes } from './routes/contracts';
 import { categoryRoutes } from './routes/categories';
 import { invoiceRoutes } from './routes/invoices';
 import { llmConfig, llmRecipient } from './config/llm';
+import { modelState } from './services/ki-model.service';
 import { distributionKeyRoutes } from './routes/distribution-keys';
 import { heatingProfileRoutes } from './routes/heating-profiles';
 import { configRoutes } from './routes/config';
 import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
 import { auditLogRoutes } from './routes/audit-log';
-import { localAccountRoutes, passwordSignInRoutes } from './routes/local-accounts';
+import { localAccountRoutes, passwordSignInRoutes, setupRoutes } from './routes/local-accounts';
 import { authMiddleware } from './middleware/auth';
 import { mailTransportName } from './mail';
 import { refusal } from './services/coded-error';
@@ -83,9 +84,12 @@ export const app = new Elysia()
 	.get('/api/v1/mail-transport', () => ({ transport: mailTransportName() }))
 	// Sign-in with a Konto mit Passwort (#576): the BFF asks before there is a session
 	.use(passwordSignInRoutes)
+	.use(setupRoutes)
 	// Everything below requires a valid JWT
 	.use(authMiddleware)
 	.use(localAccountRoutes)
+	// How far the local KI's model is (#577), for the overview
+	.get('/api/v1/ki/model', () => modelState())
 	.use(dashboardRoutes)
 	// Register route modules
 	.use(buildingRoutes)

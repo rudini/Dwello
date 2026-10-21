@@ -530,12 +530,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Copier</button></div>
 <pre id="code-pc" tabindex="0"><span class="c"># 1. Télécharger Dwello</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
-<span class="c"># 2. Créer les réglages, puis les remplir (guide)</span>
-<span class="p">$ </span>cp .env.example .env
-<span class="c"># 3. Démarrer : application, base de données et IA locale</span>
+<span class="c"># 2. Démarrer : application, base de données et IA locale, qui télécharge son modèle elle-même</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
-<span class="c"># 4. Charger le modèle d’IA (une fois, env. 6 Go)</span>
-<span class="p">$ </span>docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
+<span class="c"># 3. Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="ok">✓ Dwello tourne sur http://localhost:3000</span></pre>
 			</div>
 			<div class="panel needs">

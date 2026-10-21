@@ -10,7 +10,7 @@ const BACKEND_ORIGIN = new URL(process.env.BACKEND_URL || 'http://localhost:3001
 
 // Reachable without signing in: the login page, the OAuth round trip, the health check, help and the legal pages
 const isPublic = (path: string) =>
-	['/login', '/health', '/help', '/privacy', '/terms'].includes(path) || path.startsWith('/auth/');
+	['/login', '/setup', '/health', '/help', '/privacy', '/terms'].includes(path) || path.startsWith('/auth/');
 
 async function sessionUser(cookies: Parameters<typeof getJwtFromCookie>[0]) {
 	const jwt = getJwtFromCookie(cookies);

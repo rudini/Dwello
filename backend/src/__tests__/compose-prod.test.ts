@@ -11,6 +11,7 @@ const root = join(import.meta.dir, '../../..');
 const compose = readFileSync(join(root, 'docker-compose.prod.yml'), 'utf8');
 const backendService = compose.slice(compose.indexOf('\n  backend:'), compose.indexOf('\n  postgres:'));
 const frontendService = compose.slice(compose.indexOf('\n  frontend:'), compose.indexOf('\n  backend:'));
+const postgresService = compose.slice(compose.indexOf('\n  postgres:'), compose.indexOf('\n  ollama:'));
 const envExample = readFileSync(join(root, '.env.example'), 'utf8');
 
 // Every variable the mail module reads that .env.example documents (commented-out ones included)
@@ -45,6 +46,23 @@ describe('Installation mit docker-compose.prod.yml', () => {
 
 	// code review 576 C-3: without ORIGIN, adapter-node takes every request for https, refuses the sign-in form
 	// sent over http (SvelteKit's origin check) and never shows the hint on an unencrypted connection
+	// #577: a fresh installation starts without a .env to fill in; the keys come from the volume init-secrets.sh fills
+	it('erzeugt die Schlüssel vor dem Start, statt sie in der .env zu verlangen', () => {
+		const secretsService = compose.slice(compose.indexOf('\n  secrets:'), compose.indexOf('\n  frontend:'));
+		expect(secretsService).toContain('docker/init-secrets.sh');
+		for (const service of [frontendService, backendService, postgresService])
+			expect(service).toContain('condition: service_completed_successfully');
+		expect(compose).not.toMatch(/JWT_SECRET=\$\{JWT_SECRET\}/);
+		expect(postgresService).toContain('POSTGRES_PASSWORD_FILE: /run/dwello/db_password');
+		expect(frontendService).toContain('cat /run/dwello/jwt_secret');
+		expect(backendService).toContain('cat /run/dwello/db_password');
+		expect(backendService).toContain('cat /run/dwello/encryption_key');
+	});
+
+	it('verlangt in .env.example keinen Wert mehr', () => {
+		expect(envExample).not.toMatch(/^(JWT_SECRET|POSTGRES_PASSWORD|ALLOWED_EMAILS)=/m);
+	});
+
 	it('nennt dem Frontend die Adresse, unter der Dwello geöffnet wird', () => {
 		expect(frontendService).toContain('- ORIGIN=${PUBLIC_APP_URL:-http://localhost:3000}');
 	});

@@ -8,7 +8,7 @@
  *   bun run llm-stub      http://127.0.0.1:2527/v1
  *
  * With LLM_STUB_PULL=on it stands in for an Ollama that has not got the model yet (the fresh installation, #577): the
- * model list is empty and a pull reports, every half second, the progress a scenario set with POST /stub/pull {percent}.
+ * model list is empty and a pull reports the progress a scenario sets with POST /stub/pull {percent}, at once.
  */
 
 const PORT = Number(process.env.LLM_STUB_PORT ?? 2527);
@@ -169,8 +169,9 @@ function answer(content: Content) {
 Bun.serve({
 	port: PORT,
 	hostname: '127.0.0.1',
-	// Bun closes an idle request after 10 s by default; the slow answer needs longer
-	idleTimeout: 60,
+	// Bun closes an idle request after 10 s by default; the slow answer needs longer, and the model download of the
+	// fresh installation streams for the whole run
+	idleTimeout: PULL ? 0 : 60,
 	fetch: (request) => routes[new URL(request.url).pathname]?.(request) ?? new Response(null, { status: 503 })
 });
 
@@ -186,25 +187,28 @@ function ollama(): Record<string, Route> {
 		'/api/pull': () => pullProgress(),
 		'/stub/pull': async (request) => {
 			pulled = ((await request.json()) as { percent: number }).percent;
+			// at once, not with the next tick: the scenario opens the overview right after
+			for (const send of pulls) send();
 			return Response.json({ percent: pulled });
 		}
 	};
 }
 
 // Ollama's pull stream (NDJSON): one line per update, bytes of the model's layer
+const pulls = new Set<() => void>();
 function pullProgress() {
 	const total = 6_000_000_000;
-	let timer: ReturnType<typeof setInterval>;
+	let send: () => void;
 	const body = new ReadableStream({
 		start(controller) {
-			const send = () =>
+			send = () =>
 				controller.enqueue(
 					new TextEncoder().encode(`${JSON.stringify({ status: 'pulling model', total, completed: (total * pulled) / 100 })}\n`)
 				);
+			pulls.add(send);
 			send();
-			timer = setInterval(send, 500);
 		},
-		cancel: () => clearInterval(timer)
+		cancel: () => void pulls.delete(send)
 	});
 	return new Response(body, { headers: { 'content-type': 'application/x-ndjson' } });
 }

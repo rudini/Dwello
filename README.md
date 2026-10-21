@@ -274,6 +274,8 @@ docker-compose -f docker-compose.dev.yml up
 APP_VERSION=$(git describe --tags --match 'v*') docker-compose -f docker-compose.prod.yml up --build
 ```
 
+**First start (#577):** no `.env` is needed. The service `secrets` (`docker/init-secrets.sh`) makes the session key, the database password and the key for stored secrets once into the volume `dwello_secrets` (back it up with the database; values in `.env` win, so older installations keep theirs). While no Konto mit Passwort exists and no provider is configured, every visitor gets «Dwello einrichten» (`/setup`), which needs the Einrichtungscode from `docker logs dwello-backend` (made on each start; 5 wrong codes lock the setup for 15 minutes). The backend downloads the local KI's model on start when Ollama lacks it; the overview shows the progress.
+
 **Public demo** (demo.dwello.ch, shared data reset every night): [deploy/demo/README.md](./deploy/demo/README.md).
 
 ### Versions
@@ -282,9 +284,9 @@ Every merge to `main` gets the next version as a tag and a GitHub Release (`.git
 
 ### Environment Variables
 
-See [.env.example](./.env.example) for all required environment variables.
+See [.env.example](./.env.example) for the optional environment variables; an installation needs none (#577).
 
-**Konto mit Passwort (#576):** the default sign-in. The Betreiber creates the account in the backend container with `docker exec -it dwello-backend bun run account` (e-mail address, password of at least 8 characters, stored only as Argon2id hash); the same command sets a forgotten password, lifts a Sperre (5 failed attempts lock sign-in for 15 minutes) and ends the open sessions of that account. The sign-in page offers the password form as soon as an account exists, and Google as soon as `OAUTH_GOOGLE_*` is set; both can be used side by side. See `docs/installation.md`.
+**Konto mit Passwort (#576):** the default sign-in. The landlord creates the account in the setup on the first visit (#577), or the Betreiber in the backend container with `docker exec -it dwello-backend bun run account` (e-mail address, password of at least 8 characters, stored only as Argon2id hash); the same command sets a forgotten password, lifts a Sperre (5 failed attempts lock sign-in for 15 minutes) and ends the open sessions of that account. The sign-in page offers the password form as soon as an account exists, and Google as soon as `OAUTH_GOOGLE_*` is set; both can be used side by side. See `docs/installation.md`.
 
 **Who may sign in with Google:** `ALLOWED_EMAILS`, set for the frontend, lists the e-mail addresses that may sign in with a provider, separated by commas; spaces and case do not count. Only Google accounts whose address Google reports as verified are let in, and Microsoft accounts are refused while the list is set. `ALLOWED_EMAILS=*` lets every account in (the public demo). With `NODE_ENV=production`, a provider configured and no `ALLOWED_EMAILS` the frontend refuses to start; a Konto mit Passwort needs no list. An address removed from the list loses its open sessions in the app at its next request; the backend accepts its session token until it expires (`JWT_EXPIRY`), so a backend published on the host (see `docker-compose.prod.yml`) stays reachable with it until then. Changing `JWT_SECRET` ends every open session at once: everyone signs in again.
 
@@ -306,7 +308,7 @@ This is a checklist, not legal advice.
 
 **OpenRouter (optional):** reading uploaded invoices needs a model that reads images. Through OpenRouter, for example: `LLM_BASE_URL=https://openrouter.ai/api/v1`, `LLM_API_KEY=<key>`, `LLM_MODEL=qwen/qwen3-vl-8b-instruct` (the default model), `LLM_PROVIDER=OpenRouter`, `LLM_PROVIDER_COUNTRY=USA`. Check the checklist above first: OpenRouter is based in the USA and passes each request on to a model provider of its own choice. Restrict the routing in the OpenRouter account to providers you have checked, and name all recipients with their countries in `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` (e.g. `LLM_PROVIDER="OpenRouter, Alibaba Cloud"`, `LLM_PROVIDER_COUNTRY="USA, Singapur"`), so the privacy statement names them (Art. 19 DSG).
 
-**Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen3-vl:8b-instruct` (Ollama 0.12.7 or later); pull it (`docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct`) or set `LLM_MODEL` to the model you have. The old variables are ignored.
+**Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen3-vl:8b-instruct` (Ollama 0.12.7 or later); the backend downloads it on start when Ollama lacks it (#577), or set `LLM_MODEL` to the model you have. The old variables are ignored.
 
 **Upgrading from the default model `qwen2.5vl:7b`** (#419): an installation without `LLM_MODEL` now asks Ollama for `qwen3-vl:8b-instruct`. Update the Ollama image first (`docker compose -f docker-compose.prod.yml pull ollama`, then `up -d`), pull the model (command above), or keep the old model with `LLM_MODEL=qwen2.5vl:7b`; until one of them is done, the KI suggests nothing. Ollama's plain `qwen3-vl:8b` is the thinking variant, a different and slower model. Without a GPU (4 CPU cores) the new model needs about 40 s to categorize an invoice (the old one about 20 s) and about 80 s to read an uploaded file; `LLM_TIMEOUT` therefore defaults to 120000 ms.
 

@@ -36,6 +36,14 @@ When('der Besucher mit einem falschen Einrichtungscode ein Konto mit Passwort an
 	await besucher.attemptsTo(setUpDwello('FALS-CHER', frisch.newAccount()));
 });
 
+When('der Besucher das Passwort bei der Einrichtung zweimal verschieden eingibt', async ({ besucher, frisch }) => {
+	await besucher.attemptsTo(setUpDwello(SETUP_CODE, frisch.newAccount(), 'ein-anderes-Passwort'));
+});
+
+When('der Besucher bei der Einrichtung das Passwort {string} wählt', async ({ besucher, frisch }, password: string) => {
+	await besucher.attemptsTo(setUpDwello(SETUP_CODE, { ...frisch.newAccount(), password }));
+});
+
 Then('zeigt die Kopfzeile die E-Mail-Adresse des neuen Kontos', async ({ besucher, frisch }) => {
 	await besucher.sees(shownUserName).toBe(frisch.account.email);
 });
@@ -61,9 +69,6 @@ When('der Liegenschaftsverwalter der frischen Installation die Übersicht öffne
 });
 
 Then('zeigt die Übersicht den Hinweis {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(kiModelHint).toContain(text);
+	await verwalter.sees(kiModelHint).toBe(text);
 });
 
-Then('sagt der Hinweis, dass der Liegenschaftsverwalter Rechnungen bis dahin von Hand erfasst', async ({ verwalter }) => {
-	await verwalter.sees(kiModelHint).toContain('von Hand');
-});

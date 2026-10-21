@@ -120,3 +120,8 @@ Funktionalität: Datenschutz
   Szenario: Die Adresssuche fragt das Gebäuderegister des Bundes
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "swisstopo" in "Schweiz" mit seiner Datenschutzerklärung "https://www.swisstopo.admin.ch/en/legal-framework"
     Und erfährt der Liegenschaftsverwalter unter "Weitergabe an Dritte", dass swisstopo den Suchbegriff und die IP-Adresse des Servers erhält, nicht die des Browsers
+
+  # #577, Fachreview 577 R-2: fehlt das KI-Modell, lädt Dwello es selbst bei Ollama herunter
+  Szenario: Der Download des KI-Modells bei Ollama
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "lädt Dwello es einmal bei Ollama (Ollama Inc., USA) herunter"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Ollama erhält dabei die IP-Adresse des Servers und den Namen des Modells, keine Daten, die Sie in Dwello erfassen"
