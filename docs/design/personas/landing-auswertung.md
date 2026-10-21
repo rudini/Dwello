@@ -119,3 +119,28 @@ Der Product Owner hat entschieden, den Claim «Ihre Liegenschaft. Ihre Daten. Ih
 - **A** beruhigt Anfängerinnen am meisten (Helga, Anna); «einfach» verspricht neben dem Hinweis zur Einrichtung etwas viel (Helga: «einfacher gemacht»), für Sven eine Floskel.
 - **C** wirkt am wärmsten, sagt aber nicht, welche Abrechnung, und «Liegenschaft» passt nicht zu einer einzelnen Wohnung; Marco wählte es nur, weil A und B auf dem Handy abgeschnitten waren.
 - **Fehler, unabhängig vom Ergebnis:** Bei 390 px ist «Nebenkostenabrechnung» in 40 px Schrift breiter als der Bildschirm und wird abgeschnitten (Marco); nötig ist eine Trennstelle.
+
+## Zweite Runde: vorher und nachher
+
+Dieselben fünf Personas mit dem ganzen Fragebogen (1–24) auf dem überarbeiteten Stand (`8d029a3`: Zielgruppe A, neuer Claim, Zeichnungen, korrigierte Aussagen, vier Sprachen). Einzelberichte: `<persona>-landing-2.md`.
+
+| Frage | Ø vorher | Helga | Marco | Dr. Weber | Sven | Anna | Ø nachher |
+|---|---|---|---|---|---|---|---|
+| 2 Angesprochen | 3.6 | 4 | 5 | 4 | 4 | 5 | 4.4 |
+| 4 Vertrauenswürdig | 3.8 | 4 | 4 | 4 | 4 | 4 | 4.0 |
+| 5 Verständlich | 2.8 | 3 | 4 | 4 | 4 | 3 | 3.6 |
+| 6 Verfügbar oder geplant | 4.0 | 5 | 5 | 4 | 3 | 5 | 4.4 |
+| 7 Bilder | 3.6 | 4 | 3 | 5 | 4 | 4 | 4.0 |
+| 11 Glaubhaft | 3.8 | 4 | 4 | 4 | 4 | 4 | 4.0 |
+| 12 Weiss, wie anfangen | **2.4** | 4 | 4 | 4 | 4 | 4 | **4.0** |
+| 14 Gefunden | 3.4 | 4 | 4 | 5 | 4 | 4 | 4.2 |
+| 15 Lesbar und bedienbar | 4.0 | 4 | 4 | 5 | 4 | 4 | 4.2 |
+| 17 Würde ausprobieren | 2.8 | 3 | 4 | 4 | 4 | 4 | 3.8 |
+| 18 Würde empfehlen | **2.4** | 3 | 4 | 3 | 4 | 4 | **3.6** |
+| 20 Wirkung (kühl 1 – warm 5) | 2.2 | 3 | 3 | 3 | 3 | 3 | 3.0 |
+
+**Behoben nach Runde 2:** das Menü blieb nach der Wahl eines Punkts offen (Marco P-1, Helga P-1, Sven P-1/P-2, Code-Review C-2; schliesst jetzt beim Link, beim Tippen daneben, mit Escape und wenn der Fokus es verlässt); was man für die erste Abrechnung braucht (Anna P-2: Mietverträge mit vereinbarten Nebenkosten und Akonto, Akonto wird abgezogen); die FAQ «Ist Dwello rechtlich geprüft?» antwortet jetzt mit Nein (Dr. Weber P-1, Entscheid des Product Owners); Issue-Links nennen ihr Thema (Sven P-4); «bis 50 Wohnungen» (Helga P-6); Roadmap «zu den meisten» (Dr. Weber P-6); lokale KI (Dr. Weber P-4).
+
+**Abgelehnt mit Entscheid des Product Owners:** Anleitung nur auf Englisch (Anna P-1, Helga P-5); Repository noch privat, Links auf GitHub bis zur Freischaltung 404 (Code-Review C-1).
+
+**Offen, schon vor der Überarbeitung so (nicht in diesem Pull Request):** Seitenlänge (rund 30 Bildschirme auf dem Handy), unlesbare Desktop-Bildschirmfotos auf dem Handy, Technikzahlen im Abschnitt «Einfach zu bedienen», Sprachlinks «DE/FR/IT/EN» in Kopf- und Fusszeile, kleine Links in der Fusszeile, «Verfügbar»/«Geplant» vor statt in der Überschrift, Vergleichstabelle mit Mitbewerbern ohne Beleg.
