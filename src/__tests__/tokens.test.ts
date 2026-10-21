@@ -92,6 +92,14 @@ describe('Grundstile', () => {
 		expect(globals).toMatch(/\*,[^{]*::before[^{]*\{\s*border-color: var\(--color-line\)/);
 	});
 
+	// Tailwind 4's preflight resets both; Tailwind 3 left them to the browser (dimmed select, file button with a frame)
+	it('überlassen die gesperrte Auswahl und den Dateiknopf dem Browser', () => {
+		expect(globals).toMatch(/select:disabled \{\s*opacity: revert;/);
+		expect(globals).toMatch(
+			/::file-selector-button \{\s*border: revert;\s*padding: revert;\s*background-color: revert;\s*color: revert;/
+		);
+	});
+
 	// Tailwind 4 inlines CSS imports without rebasing their url(./files/…), so the font files would not be found
 	it('laden die Schrift Inter über Vite, nicht über einen CSS-Import', () => {
 		expect(globals).not.toContain('@fontsource');
