@@ -1,0 +1,14 @@
+{
+	"data": [
+		{
+			"id": "k1",
+			"name": "Per Area (m²)",
+			"nameDE": "Pro Fläche (m²)",
+			"nameFR": "Par surface (m²)",
+			"nameIT": "Per superficie (m²)",
+			"nameEN": "Per Area (m²)",
+			"type": "predefined",
+			"formula": "{area}"
+		}
+	]
+}

@@ -377,7 +377,7 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 	// loaded once, only when a building has statements of the period to compare (#132)
 	let profiles: Promise<Profile[]> | undefined;
 	const loadProfiles = () =>
-		(profiles ??= call(fetch, 'heating-profiles?limit=100').then((body) => body.data ?? []));
+		(profiles ??= call(fetch, 'heating-profiles?limit=1000').then((body) => body.data ?? []));
 	const [rows, categories] = await Promise.all([
 		Promise.all(
 			buildingIds.map(async (buildingId) => {

@@ -124,7 +124,7 @@ describe('Heizprofil löschen', () => {
 describe('Heizprofile laden', () => {
 	it('lädt alle Heizprofile für die Übersicht', async () => {
 		const fetch = (async (url: string) => {
-			expect(url).toBe('http://localhost:3001/api/v1/heating-profiles?limit=100');
+			expect(url).toBe('http://localhost:3001/api/v1/heating-profiles?limit=1000');
 			return Response.json({
 				data: [{ id: 'hp1', name: 'Winter', type: 'custom', januaryPct: '18' }]
 			});

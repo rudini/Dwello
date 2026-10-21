@@ -561,8 +561,14 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statements'), actual)).toEqual([]);
 	});
 
+	// #588: the Verteilschlüssel page, the invoice forms and the settings list every key from here
+	it('GET /distribution-keys liefert die Felder von distribution-keys.json', async () => {
+		const actual = await (await callApi('/api/v1/distribution-keys?limit=1000')).json();
+		expect(drift(await sample('distribution-keys'), actual)).toEqual([]);
+	});
+
 	it('GET /heating-profiles liefert die Felder von heating-profiles.json', async () => {
-		const actual = await (await callApi('/api/v1/heating-profiles?limit=100')).json();
+		const actual = await (await callApi('/api/v1/heating-profiles?limit=1000')).json();
 		expect(drift(await sample('heating-profiles'), actual)).toEqual([]);
 	});
 

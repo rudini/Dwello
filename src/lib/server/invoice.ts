@@ -43,7 +43,7 @@ export async function invoiceChoices(fetch: typeof globalThis.fetch) {
 			.catch(() => ({}));
 	const [categories, keys, defaultKey, latestKeys] = await Promise.all([
 		get('categories?limit=1000'), // all of them: the limit counts the non-umlagefähige ones too (#583)
-		get('distribution-keys?limit=100'),
+		get('distribution-keys?limit=1000'), // all of them (#588)
 		get('config/default_distribution_key_id'),
 		// the key each category last had in each building, which the form proposes (#379)
 		fetch(`${BACKEND_URL}/api/v1/invoices/latest-keys`)
