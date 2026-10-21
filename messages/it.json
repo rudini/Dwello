@@ -1956,7 +1956,7 @@
 	"backend_invalid_credentials": "L’indirizzo e-mail o la password non sono corretti. Verifichi i dati inseriti e riprovi.",
 	"backend_account_locked": "Dopo diversi tentativi falliti l’accesso è bloccato. Riprovi più tardi.",
 	"backend_password_too_short": "La password è troppo corta. Ne scelga una di almeno {min} caratteri, meglio una lunga che non usa altrove.",
-	"privacy_login_local_1": "Lei accede con indirizzo e-mail e password; l’account lo crea durante la configurazione iniziale di Dwello. Dwello salva a tale scopo il Suo indirizzo e-mail e la password solo in forma trasformata (hash): da essa la password non si può ricalcolare, solo indovinare per tentativi. Scelga quindi una password lunga che non usa altrove. Dwello salva inoltre il numero di tentativi falliti e la fine di un eventuale blocco fino al prossimo accesso riuscito. L’intestazione mostra il Suo indirizzo e-mail.",
+	"privacy_login_local_1": "Lei accede con indirizzo e-mail e password; l’account lo crea durante la configurazione iniziale di Dwello, oppure lo crea per Lei il gestore. Dwello salva a tale scopo il Suo indirizzo e-mail e la password solo in forma trasformata (hash): da essa la password non si può ricalcolare, solo indovinare per tentativi. Scelga quindi una password lunga che non usa altrove. Dwello salva inoltre il numero di tentativi falliti e la fine di un eventuale blocco fino al prossimo accesso riuscito. L’intestazione mostra il Suo indirizzo e-mail.",
 	"privacy_login_local_log": "Ogni tentativo fallito con password e ogni blocco vengono annotati nel registro del server con l’indirizzo e-mail inserito, senza indirizzo IP.",
 	"audit_login_password": "Accesso con password",
 	"setup_title": "Configurare Dwello",
@@ -1974,6 +1974,7 @@
 	"ki_model_loading_title": "Il modello di IA viene scaricato: {percent} %.",
 	"ki_model_loading_text": "Finché non è scaricato, registri le fatture a mano.",
 	"ki_model_failed_title": "Non è stato possibile scaricare il modello di IA.",
-	"ki_model_failed_text": "Registri le fatture a mano; Dwello riprova al prossimo avvio.",
-	"privacy_third_ollama": "Se sul server manca il modello di IA, ad esempio al primo avvio, Dwello lo scarica una volta da Ollama (Ollama Inc., USA), circa 6 GB. Ollama riceve l’indirizzo IP del server e il nome del modello, nessun dato che Lei inserisce in Dwello; queste indicazioni possono giungere negli USA."
+	"ki_model_failed_text": "Registri le fatture a mano. Dwello riprova quando il gestore riavvia Dwello; se gestisce Dwello Lei stesso, il comando si trova nella guida all’installazione.",
+	"privacy_third_ollama": "Se sul server manca il modello di IA, ad esempio al primo avvio, Dwello lo scarica una volta da Ollama (Ollama Inc., USA), circa 6 GB. Ollama riceve l’indirizzo IP del server e il nome del modello, nessun dato che Lei inserisce in Dwello; queste indicazioni possono giungere negli USA.",
+	"setup_error_empty": "Compili tutti i campi: il codice di configurazione, il Suo indirizzo e-mail e due volte la password."
 }

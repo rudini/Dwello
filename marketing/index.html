@@ -555,6 +555,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="c"># Ohne starke Hardware: externe KI eintragen</span>
 <span class="c"># LLM_BASE_URL=https://ihr-ki-anbieter.example/v1</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="c"># Einrichtungscode zeigen, dann im Browser «Dwello einrichten»</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="c"># HTTPS mit Ihrer Domain: siehe Anleitung</span>
 <span class="ok">✓ Dwello läuft auf https://dwello.ihre-domain.ch</span></pre>
 			</div>
@@ -575,6 +577,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="c"># Einrichtungscode zeigen, dann im Browser «Dwello einrichten»</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="c"># HTTPS mit Caddy: siehe Anleitung</span>
 <span class="ok">✓ Dwello läuft auf https://dwello.ihre-domain.ch</span></pre>
 			</div>

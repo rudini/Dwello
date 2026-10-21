@@ -1956,7 +1956,7 @@
 	"backend_invalid_credentials": "L’adresse e-mail ou le mot de passe est incorrect. Vérifiez votre saisie et réessayez.",
 	"backend_account_locked": "Après plusieurs tentatives échouées, la connexion est bloquée. Réessayez plus tard.",
 	"backend_password_too_short": "Le mot de passe est trop court. Choisissez-en un d’au moins {min} caractères, de préférence un long que vous n’utilisez nulle part ailleurs.",
-	"privacy_login_local_1": "Vous vous connectez avec adresse e-mail et mot de passe ; vous créez le compte lors de la configuration initiale de Dwello. Dwello enregistre pour cela votre adresse e-mail et le mot de passe uniquement sous forme transformée (hachage) : on ne peut pas en recalculer le mot de passe, seulement le deviner par essais. Choisissez donc un mot de passe long que vous n’utilisez nulle part ailleurs. Dwello enregistre en outre le nombre de tentatives échouées et la fin d’un éventuel blocage jusqu’à la prochaine connexion réussie. L’en-tête affiche votre adresse e-mail.",
+	"privacy_login_local_1": "Vous vous connectez avec adresse e-mail et mot de passe ; vous créez le compte lors de la configuration initiale de Dwello, ou l’exploitant le crée pour vous. Dwello enregistre pour cela votre adresse e-mail et le mot de passe uniquement sous forme transformée (hachage) : on ne peut pas en recalculer le mot de passe, seulement le deviner par essais. Choisissez donc un mot de passe long que vous n’utilisez nulle part ailleurs. Dwello enregistre en outre le nombre de tentatives échouées et la fin d’un éventuel blocage jusqu’à la prochaine connexion réussie. L’en-tête affiche votre adresse e-mail.",
 	"privacy_login_local_log": "Chaque tentative échouée avec mot de passe et chaque blocage sont consignés dans le journal du serveur avec l’adresse e-mail saisie, sans adresse IP.",
 	"audit_login_password": "Connexion avec mot de passe",
 	"setup_title": "Configurer Dwello",
@@ -1974,6 +1974,7 @@
 	"ki_model_loading_title": "Le modèle d’IA est en cours de téléchargement : {percent} %.",
 	"ki_model_loading_text": "D’ici là, saisissez les factures à la main.",
 	"ki_model_failed_title": "Le modèle d’IA n’a pas pu être téléchargé.",
-	"ki_model_failed_text": "Saisissez les factures à la main ; Dwello réessaiera au prochain démarrage.",
-	"privacy_third_ollama": "Si le modèle d’IA manque sur le serveur, par exemple au premier démarrage, Dwello le télécharge une fois auprès d’Ollama (Ollama Inc., États-Unis), environ 6 Go. Ollama reçoit alors l’adresse IP du serveur et le nom du modèle, aucune donnée que vous saisissez dans Dwello ; ces indications peuvent parvenir aux États-Unis."
+	"ki_model_failed_text": "Saisissez les factures à la main. Dwello réessaiera lorsque l’exploitant redémarrera Dwello ; si vous exploitez Dwello vous-même, la commande figure dans le guide d’installation.",
+	"privacy_third_ollama": "Si le modèle d’IA manque sur le serveur, par exemple au premier démarrage, Dwello le télécharge une fois auprès d’Ollama (Ollama Inc., États-Unis), environ 6 Go. Ollama reçoit alors l’adresse IP du serveur et le nom du modèle, aucune donnée que vous saisissez dans Dwello ; ces indications peuvent parvenir aux États-Unis.",
+	"setup_error_empty": "Remplissez tous les champs : le code de configuration, votre adresse e-mail et deux fois le mot de passe."
 }

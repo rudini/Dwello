@@ -80,6 +80,8 @@ export async function setupNeeded(fetch: Fetch): Promise<boolean> {
 
 export async function setUpDwello(fetch: Fetch, cookies: Cookies, form: FormData) {
 	const [code, email, password, repeat] = ['code', 'email', 'password', 'repeat'].map((name) => String(form.get(name) ?? ''));
+	// empty fields are a missing input, not an invalid request (persona Anna 577 P-1)
+	if (!code.trim() || !email.trim() || !password.trim()) return fail(400, { email, error: m.setup_error_empty() });
 	if (password !== repeat) return fail(400, { email, error: m.setup_error_repeat() });
 	const response = await fetch(SETUP, {
 		method: 'POST',

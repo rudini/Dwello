@@ -1956,7 +1956,7 @@
 	"backend_invalid_credentials": "The email address or password is not correct. Check what you entered and try again.",
 	"backend_account_locked": "After several failed attempts, sign-in is locked. Try again later.",
 	"backend_password_too_short": "The password is too short. Choose one with at least {min} characters, best a long one you use nowhere else.",
-	"privacy_login_local_1": "You sign in with email address and password; you create the account when you set up Dwello. For this, Dwello stores your email address and the password only in a transformed form (a hash): the password cannot be calculated back from it, only guessed by trying. So choose a long password that you use nowhere else. Dwello also stores the number of failed attempts and the end of a lock until the next successful sign-in. The header shows your email address.",
+	"privacy_login_local_1": "You sign in with email address and password; you create the account when you set up Dwello, or the operator creates it for you. For this, Dwello stores your email address and the password only in a transformed form (a hash): the password cannot be calculated back from it, only guessed by trying. So choose a long password that you use nowhere else. Dwello also stores the number of failed attempts and the end of a lock until the next successful sign-in. The header shows your email address.",
 	"privacy_login_local_log": "Every failed attempt with a password and every lock is recorded in the server log with the email address entered, without the IP address.",
 	"audit_login_password": "Sign-in with password",
 	"setup_title": "Set up Dwello",
@@ -1974,6 +1974,7 @@
 	"ki_model_loading_title": "The AI model is being downloaded: {percent} %.",
 	"ki_model_loading_text": "Until it is downloaded, enter invoices by hand.",
 	"ki_model_failed_title": "The AI model could not be downloaded.",
-	"ki_model_failed_text": "Enter invoices by hand; Dwello tries again at the next start.",
-	"privacy_third_ollama": "If the AI model is missing on the server, for example at the first start, Dwello downloads it once from Ollama (Ollama Inc., USA), about 6 GB. Ollama receives the server’s IP address and the name of the model, no data you enter in Dwello; this information may reach the USA."
+	"ki_model_failed_text": "Enter invoices by hand. Dwello tries again when the operator restarts Dwello; if you run Dwello yourself, the command is in the installation guide.",
+	"privacy_third_ollama": "If the AI model is missing on the server, for example at the first start, Dwello downloads it once from Ollama (Ollama Inc., USA), about 6 GB. Ollama receives the server’s IP address and the name of the model, no data you enter in Dwello; this information may reach the USA.",
+	"setup_error_empty": "Fill in every field: the setup code, your email address and the password twice."
 }

@@ -60,6 +60,24 @@ describe('KI-Modell der lokalen KI', () => {
 		expect(modelState()).toEqual({ state: 'failed' });
 	});
 
+	// fach review 577 V-8: Ollama reports each layer of the model on its own; the notice counts the whole model
+	it('rechnet den Fortschritt über alle Schichten des Modells', async () => {
+		await loadModel(
+			standIn([], [
+				{ status: 'pulling a', digest: 'a', total: 6000, completed: 6000 },
+				{ status: 'pulling b', digest: 'b', total: 100, completed: 0 }
+			])
+		);
+
+		expect(modelState()).toEqual({ state: 'loading', percent: 98 });
+	});
+
+	it('meldet ein Modell erst mit «success» als geladen, nicht schon mit seiner ersten fertigen Schicht', async () => {
+		await loadModel(standIn([], [{ status: 'pulling a', digest: 'a', total: 6000, completed: 6000 }]));
+
+		expect(modelState()).toEqual({ state: 'loading', percent: 99 });
+	});
+
 	it('meldet während des Ladens, wie weit es ist', async () => {
 		const config = standIn([], [{ status: 'pulling x', total: 200, completed: 80 }]);
 

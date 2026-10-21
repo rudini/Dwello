@@ -155,6 +155,14 @@ describe('Einrichtung beim ersten Aufruf', () => {
 		}
 	});
 
+	// persona Anna 577 P-1: an empty form is a missing input, not an invalid request to reload
+	it.each(['code', 'email', 'password'])('sagt bei leerem Feld %s, was fehlt, ohne das Backend zu fragen', async (field) => {
+		const { result, calls } = await setUp({ ...fields, [field]: ' ', ...(field === 'password' && { repeat: ' ' }) }, answering(201, account));
+
+		expect(result).toMatchObject({ status: 400, data: { error: m.setup_error_empty() } });
+		expect(calls).toEqual([]);
+	});
+
 	it('legt kein Konto an, wenn die beiden Passwörter nicht übereinstimmen', async () => {
 		const { result, calls } = await setUp(
 			{ ...fields, repeat: 'ein-anderes-Passwort' },

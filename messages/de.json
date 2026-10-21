@@ -1956,7 +1956,7 @@
 	"backend_invalid_credentials": "E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
 	"backend_account_locked": "Nach mehreren Fehlversuchen ist die Anmeldung gesperrt. Versuchen Sie es später erneut.",
 	"backend_password_too_short": "Das Passwort ist zu kurz. Wählen Sie eines mit mindestens {min} Zeichen, am besten ein langes, das Sie sonst nirgends verwenden.",
-	"privacy_login_local_1": "Sie melden sich mit E-Mail-Adresse und Passwort an; das Konto legen Sie bei der Einrichtung von Dwello an. Dwello speichert dafür Ihre E-Mail-Adresse und das Passwort nur in umgerechneter Form (Hash): Daraus lässt sich das Passwort nicht zurückrechnen, nur durch Ausprobieren erraten. Wählen Sie deshalb ein langes Passwort, das Sie sonst nirgends verwenden. Dazu speichert Dwello die Zahl der Fehlversuche und das Ende einer allfälligen Sperre bis zur nächsten erfolgreichen Anmeldung. Die Kopfzeile zeigt Ihre E-Mail-Adresse.",
+	"privacy_login_local_1": "Sie melden sich mit E-Mail-Adresse und Passwort an; das Konto legen Sie bei der Einrichtung von Dwello an, oder der Betreiber legt es für Sie an. Dwello speichert dafür Ihre E-Mail-Adresse und das Passwort nur in umgerechneter Form (Hash): Daraus lässt sich das Passwort nicht zurückrechnen, nur durch Ausprobieren erraten. Wählen Sie deshalb ein langes Passwort, das Sie sonst nirgends verwenden. Dazu speichert Dwello die Zahl der Fehlversuche und das Ende einer allfälligen Sperre bis zur nächsten erfolgreichen Anmeldung. Die Kopfzeile zeigt Ihre E-Mail-Adresse.",
 	"privacy_login_local_log": "Jeder Fehlversuch mit Passwort und jede Sperre wird mit der eingetippten E-Mail-Adresse im Protokoll des Servers festgehalten, ohne IP-Adresse.",
 	"audit_login_password": "Anmeldung mit Passwort",
 	"setup_title": "Dwello einrichten",
@@ -1974,6 +1974,7 @@
 	"ki_model_loading_title": "Das KI-Modell wird geladen: {percent} %.",
 	"ki_model_loading_text": "Bis es geladen ist, erfassen Sie Rechnungen von Hand.",
 	"ki_model_failed_title": "Das KI-Modell konnte nicht geladen werden.",
-	"ki_model_failed_text": "Erfassen Sie Rechnungen von Hand; Dwello versucht es beim nächsten Start erneut.",
-	"privacy_third_ollama": "Fehlt das KI-Modell auf dem Server, etwa beim ersten Start, lädt Dwello es einmal bei Ollama (Ollama Inc., USA) herunter, rund 6 GB. Ollama erhält dabei die IP-Adresse des Servers und den Namen des Modells, keine Daten, die Sie in Dwello erfassen; die Angaben können in die USA gelangen."
+	"ki_model_failed_text": "Erfassen Sie Rechnungen von Hand. Dwello versucht es erneut, wenn der Betreiber Dwello neu startet; betreiben Sie Dwello selbst, steht der Befehl in der Installationsanleitung.",
+	"privacy_third_ollama": "Fehlt das KI-Modell auf dem Server, etwa beim ersten Start, lädt Dwello es einmal bei Ollama (Ollama Inc., USA) herunter, rund 6 GB. Ollama erhält dabei die IP-Adresse des Servers und den Namen des Modells, keine Daten, die Sie in Dwello erfassen; die Angaben können in die USA gelangen.",
+	"setup_error_empty": "Füllen Sie alle Felder aus: den Einrichtungscode, Ihre E-Mail-Adresse und zweimal das Passwort."
 }

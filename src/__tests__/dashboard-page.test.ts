@@ -73,7 +73,8 @@ describe('Übersicht während das KI-Modell lädt', () => {
 		const text = hint(page({ kiModel: { state: 'failed' } }));
 
 		expect(text).toContain('Das KI-Modell konnte nicht geladen werden.');
-		expect(text).toContain('Dwello versucht es beim nächsten Start erneut.');
+		// fach review 577 V-7: on a server that runs on, the next start is the operator's
+		expect(text).toContain('Dwello versucht es erneut, wenn der Betreiber Dwello neu startet');
 	});
 
 	it('zeigt nichts, wenn das Modell bereit ist oder die KI ausserhalb des Servers läuft', () => {

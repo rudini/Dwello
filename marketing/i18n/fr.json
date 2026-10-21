@@ -247,5 +247,6 @@
 	"Eine Zeile zum Einfügen installiert Docker und Dwello, danach geht es im Browser weiter.": "Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur.",
 	"Ein NAS oder einen Mini-PC mit Docker. Für den Zugriff von anderen Geräten empfohlen: eine eigene Domain mit HTTPS. Für die lokale KI 16 GB Arbeitsspeicher.": "Un NAS ou un mini-PC avec Docker. Recommandé pour l’accès depuis d’autres appareils : votre propre domaine en HTTPS. Pour l’IA locale, 16 Go de mémoire vive.",
 	"code:# 2. Starten: App, Datenbank und lokale KI, die ihr Modell selbst lädt": "# 2. Démarrer : application, base de données et IA locale, qui télécharge son modèle elle-même",
-	"code:# 3. Einrichtungscode zeigen, dann im Browser «Dwello einrichten»": "# 3. Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur"
+	"code:# 3. Einrichtungscode zeigen, dann im Browser «Dwello einrichten»": "# 3. Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur",
+	"code:# Einrichtungscode zeigen, dann im Browser «Dwello einrichten»": "# Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur"
 }

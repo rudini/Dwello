@@ -33,19 +33,28 @@ export async function loadModel(config: { baseUrl: string; model: string; local:
 	}
 }
 
-// Ollama's pull stream: one JSON object per line, with the bytes done of the layer being loaded
+type Line = { status?: string; digest?: string; total?: number; completed?: number; error?: string };
+
+// Ollama's pull stream: one JSON object per line, with the bytes done of the layer (digest) being loaded; the notice
+// counts the whole model (fach review 577 V-8)
 async function follow(stream: ReadableStream<Uint8Array>) {
 	current = { state: 'loading', percent: 0 };
+	const layers = new Map<string, { total: number; completed: number }>();
 	let rest = '';
 	for await (const chunk of stream.pipeThrough(new TextDecoderStream())) {
 		const lines = (rest + chunk).split('\n');
 		rest = lines.pop()!;
-		for (const line of lines.filter(Boolean)) progress(JSON.parse(line));
+		for (const line of lines.filter(Boolean)) progress(JSON.parse(line), layers);
 	}
 }
 
-function progress(line: { status?: string; total?: number; completed?: number; error?: string }) {
+function progress(line: Line, layers: Map<string, { total: number; completed: number }>) {
 	if (line.error) throw new Error(line.error);
 	if (line.status === 'success') current = { state: 'ready' };
-	else if (line.total) current = { state: 'loading', percent: Math.floor(((line.completed ?? 0) / line.total) * 100) };
+	else if (line.total) {
+		layers.set(line.digest ?? line.status ?? '', { total: line.total, completed: line.completed ?? 0 });
+		const sum = (key: 'total' | 'completed') => [...layers.values()].reduce((all, layer) => all + layer[key], 0);
+		// at most 99: Ollama names the next layer only when it starts on it, and «success» says the model is there
+		current = { state: 'loading', percent: Math.min(99, Math.floor((sum('completed') / sum('total')) * 100)) };
+	}
 }

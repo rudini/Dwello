@@ -470,7 +470,7 @@ describe('Datenschutzerklärung zur Anmeldung mit Passwort', () => {
 	it('erklärt das Konto mit Passwort ohne leere Anbieterliste, wenn Google nicht eingerichtet ist', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: [], password: true } } as never);
 
-		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an; das Konto legen Sie bei der Einrichtung von Dwello an.');
+		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an; das Konto legen Sie bei der Einrichtung von Dwello an, oder der Betreiber legt es für Sie an.');
 		expect(login()).toContain('Daraus lässt sich das Passwort nicht zurückrechnen, nur durch Ausprobieren erraten.');
 		expect(login()).toContain('Dazu speichert Dwello die Zahl der Fehlversuche und das Ende einer allfälligen Sperre bis zur nächsten erfolgreichen Anmeldung.');
 		expect(login()).toContain('Jeder Fehlversuch mit Passwort und jede Sperre wird mit der eingetippten E-Mail-Adresse im Protokoll des Servers festgehalten');
@@ -489,7 +489,7 @@ describe('Datenschutzerklärung zur Anmeldung mit Passwort', () => {
 	it('nennt neben dem Passwort auch Google, wenn beides eingerichtet ist', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], password: true } } as never);
 
-		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an; das Konto legen Sie bei der Einrichtung von Dwello an.');
+		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an; das Konto legen Sie bei der Einrichtung von Dwello an, oder der Betreiber legt es für Sie an.');
 		expect(login()).toContain('Sie können sich über Google anmelden.');
 		expect(login()).toContain('Ihr Passwort beim Anbieter sieht Dwello nie.');
 	});
