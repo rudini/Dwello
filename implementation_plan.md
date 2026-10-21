@@ -70,4 +70,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #500 code review round 1: `docs/reviews/500-review-1.md`; Minors fixed: C-1 (Italian «1° piano interrato» on floor 1 dropped a contradicting floor; the longer below-ground name now keeps it, test red before), C-2 (rows for comma, hyphen and «1-OG»)
 - [x] #500 fachreview round 2: `docs/reviews/500-fachreview-2.md` (V-1 to V-4 closed, no new findings)
 - [x] #500 daten-pruefer: `docs/reviews/500-datenpruefung-1.md` (no findings; only Laura Keller's German line changes, amounts and QR fields to the Rappen; its observation on the demo seed became #598)
-- [ ] #500 closing review, PR merged
+- [x] #500 closing review round 2: `docs/reviews/500-review-2.md` (C-1, C-2 closed, no new findings)
+- [ ] #500 PR merged
