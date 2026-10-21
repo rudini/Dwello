@@ -71,6 +71,7 @@ def build(lang, tag, name, page, table, used):
     # links between the language versions: the German pages one folder up, the others beside it
     page = re.sub(r'href="(fr|it|en)/([a-z]+\.html)"', r'href="../\1/\2"', page)
     page = re.sub(r'href="([a-z]+\.html)" hreflang="de"', r'href="../\1" hreflang="de"', page)
+    page = re.sub(r'hreflang="de-CH" href="([a-z]+\.html)"', r'hreflang="de-CH" href="../\1"', page)
     # other links to a page: to the one in this language when it is built, else to the German one
     page = re.sub(r'href="([a-z]+\.html)"', lambda m: m.group(0) if m.group(1) in PAGES else f'href="../{m.group(1)}"', page)
     page = page.replace(f'href="../{lang}/', 'href="')
