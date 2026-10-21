@@ -680,7 +680,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="sec-head">
 				<span class="kicker">Datenschutz</span>
 				<h2>Nach dem Schweizer Datenschutzgesetz gebaut.</h2>
-				<p>Mieterdaten sind Personendaten. Dwello behandelt sie so: Sie bleiben auf Ihrem Server, nichts geht an uns, und Sie können jederzeit Auskunft geben. Nach aussen geht nur, was eine Aufgabe braucht: die Anmeldung bei Google, die Adresssuche im Gebäuderegister des Bundes, Ihre E-Mails an Mieter und, wenn Sie es so einrichten, Rechnungen an eine externe KI. Verantwortlich für die Daten Ihrer Mieter bleiben Sie.</p>
+				<p>Mieterdaten sind Personendaten. Dwello behandelt sie so: Sie bleiben auf Ihrem Server, nichts geht an uns, und Sie können jederzeit Auskunft geben. Nach aussen geht nur, was eine Aufgabe braucht: die Anmeldung bei Google, wenn Sie sie nutzen, die Adresssuche im Gebäuderegister des Bundes, Ihre E-Mails an Mieter und, wenn Sie es so einrichten, Rechnungen an eine externe KI. Verantwortlich für die Daten Ihrer Mieter bleiben Sie.</p>
 			</div>
 			<!-- In the app's illustration style: line, fill, one accent stroke -->
 			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Ein Haus mit einem Server darin" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -768,8 +768,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Ideal für den Start</h3>
 				<dl>
-					<div><dt>Sie brauchen</dt><dd>Docker Desktop, ein Google-Konto und 16 GB Arbeitsspeicher für die lokale KI. Mit weniger Arbeitsspeicher tragen Sie eine externe KI ein.</dd></div>
-					<div><dt>Zeitaufwand</dt><dd>Rund eine Stunde, mit der Google-Anmeldung und dem Download des KI-Modells.</dd></div>
+					<div><dt>Sie brauchen</dt><dd>Docker Desktop und 16 GB Arbeitsspeicher für die lokale KI. Mit weniger Arbeitsspeicher tragen Sie eine externe KI ein.</dd></div>
+					<div><dt>Zeitaufwand</dt><dd>Rund eine Stunde, mit dem Download des KI-Modells.</dd></div>
 					<div><dt>Gut zu wissen</dt><dd>Dwello läuft nur, wenn Ihr PC an ist. Für den Zugriff vom Handy eignet sich ein Homeserver.</dd></div>
 				</dl>
 			</div>
@@ -790,7 +790,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Immer erreichbar, im eigenen Haus</h3>
 				<dl>
-					<div><dt>Sie brauchen</dt><dd>Ein NAS oder einen Mini-PC mit Docker und eine eigene Domain mit HTTPS, weil die Google-Anmeldung das verlangt. Für die lokale KI 16 GB Arbeitsspeicher.</dd></div>
+					<div><dt>Sie brauchen</dt><dd>Ein NAS oder einen Mini-PC mit Docker. Für den Zugriff von anderen Geräten empfohlen: eine eigene Domain mit HTTPS. Für die lokale KI 16 GB Arbeitsspeicher.</dd></div>
 					<div><dt>Zugriff von unterwegs</dt><dd>Über Ihr VPN oder einen Tunnel wie Tailscale. Dwello muss nicht ins offene Internet.</dd></div>
 					<div><dt>Gut zu wissen</dt><dd>Kleine Geräte nutzen besser eine externe KI. Was dann nach aussen geht, steht unter Datenschutz.</dd></div>
 				</dl>
@@ -817,7 +817,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an. Bei der Einrichtung wird dafür einmal ein Schlüssel bei Google angelegt; die Anleitung zeigt, wie. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 auf GitHub: Installer in einem Schritt">#497</a>).</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Anmeldung mit Passwort</b>Bei der Einrichtung wird ein Konto mit E-Mail-Adresse und Passwort angelegt. Wer will, meldet sich stattdessen mit dem Google-Konto an; die Anleitung zeigt beides. Ein Installer in einem Schritt ist geplant (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 auf GitHub: Installer in einem Schritt">#579</a>).</span></div>
 	</div>
 </section>
 
@@ -885,7 +885,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello wird offen weiterentwickelt. Diese Punkte sind geplant; zu den meisten gibt es ein Issue auf GitHub, in dem Sie mitreden können.</p>
 		</div>
 		<div class="road">
-			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 auf GitHub: Installer in einem Schritt">#497</a><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 auf GitHub: Installer in einem Schritt">#579</a><p>Eine Zeile zum Einfügen installiert Docker und Dwello, danach geht es im Browser weiter.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>MCP-Server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener" aria-label="Issue 495 auf GitHub: MCP-Server">#495</a><p>Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>Vollständiger Export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener" aria-label="Issue 496 auf GitHub: Vollständiger Export">#496</a><p>Alle Daten als CSV und JSON, jederzeit, mit einem Klick.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>Berichte und Auswertungen</h3><p>Einnahmen, Ausgaben und Nebenkosten über die Jahre, für Steuererklärung und Treuhand.</p></article>

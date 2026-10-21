@@ -3,9 +3,17 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
-	import type { PageData } from './$types';
+	import PasswordForm from './PasswordForm.svelte';
+	import type { ActionData, PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	// a request that fails before the backend answered (fach review 576 V-1): not a wrong password, not a Sperre
+	let failed = $state(false);
+	const error = $derived(failed ? m.login_error_failed() : (form?.error ?? data.error));
+	const intro = $derived(data.password ? m.login_intro_password() : m.login_intro());
+	// without any sign-in set up, the hint how to create one (fach review 576 V-2)
+	const unavailable = $derived(!data.password && !data.providers.length);
 </script>
 
 <svelte:head>
@@ -19,12 +27,26 @@
 			<p class="text-xl font-bold text-accent">Dwello</p>
 			<h1 class="text-3xl font-bold text-ink">{m.login_title()}</h1>
 			<p class="text-ink-muted">
-				{m.login_intro()}
+				{intro}
 			</p>
 		</div>
 
-		{#if data.error}
-			<Alert tone="critical" title={data.error} testid="login-error" />
+		{#if error}
+			<Alert tone="critical" title={error} testid="login-error" />
+		{/if}
+
+		{#if data.insecure}
+			<Alert tone="caution" title={m.login_insecure_title()} testid="login-insecure">
+				<p>{m.login_insecure_text()}</p>
+			</Alert>
+		{/if}
+
+		{#if data.password}
+			<PasswordForm
+				redirectTo={data.redirectTo}
+				email={form?.email ?? ''}
+				onfailed={(value) => (failed = value)}
+			/>
 		{/if}
 
 		<div class="flex flex-col gap-4">
@@ -38,11 +60,12 @@
 					<Icon name="user" />
 					{m.login_with({ provider: provider.name })}
 				</a>
-			{:else}
+			{/each}
+			{#if unavailable}
 				<Alert tone="caution" title={m.login_unavailable_title()} testid="login-unavailable">
 					<p>{m.login_unavailable_text()}</p>
 				</Alert>
-			{/each}
+			{/if}
 		</div>
 
 		<p class="text-center text-ink-muted" data-testid="login-legal">

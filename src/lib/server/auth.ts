@@ -15,7 +15,7 @@ export interface JwtPayload {
 	sub: string; // User ID
 	email: string;
 	name: string;
-	provider: 'google' | 'microsoft' | 'swisseid';
+	provider: 'google' | 'microsoft' | 'swisseid' | 'local'; // local: Konto mit Passwort (#576)
 }
 
 /**

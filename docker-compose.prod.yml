@@ -31,9 +31,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       # Who may sign in (#51): comma-separated e-mail addresses, «*» for every account; without it the frontend does not start
       - ALLOWED_EMAILS=${ALLOWED_EMAILS:-}
-      - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID}
-      - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET}
-      - OAUTH_GOOGLE_REDIRECT_URI=${OAUTH_GOOGLE_REDIRECT_URI}
+      - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID:-}
+      - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET:-}
+      - OAUTH_GOOGLE_REDIRECT_URI=${OAUTH_GOOGLE_REDIRECT_URI:-}
       - COOKIE_DOMAIN=${COOKIE_DOMAIN:-localhost}
       - COOKIE_SECURE=${COOKIE_SECURE:-true}
     depends_on:

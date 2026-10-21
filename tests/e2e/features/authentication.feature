@@ -67,21 +67,18 @@ Funktionalität: Anmeldung
     Dann lässt Dwello den Besucher bei Google das Konto wählen
 
   # #576: ein Konto mit Passwort (E-Mail-Adresse und Passwort), ohne Google
-  @wip
   Szenario: Anmeldeseite bietet Passwort und Google an
     Angenommen ein Konto mit Passwort ist eingerichtet
     Wenn ein Besucher die Anmeldeseite öffnet
     Dann kann sich der Besucher mit E-Mail-Adresse und Passwort anmelden
     Und kann sich der Besucher mit "Google" anmelden
 
-  @wip
   Szenario: Anmeldung mit Passwort
     Angenommen ein Konto mit Passwort ist eingerichtet
     Und ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmeldet
     Dann ist der Besucher auf der Seite "Übersicht"
 
-  @wip
   Szenario: Anmeldung mit falschem Passwort
     Angenommen ein Konto mit Passwort ist eingerichtet
     Und ein Besucher hat die Anmeldeseite geöffnet
@@ -90,7 +87,6 @@ Funktionalität: Anmeldung
     Und sieht der Besucher den Hinweis "E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut."
 
   # 5 Fehlversuche sperren die Anmeldung für 15 Minuten; der Befehl im Container hebt die Sperre auf
-  @wip
   Szenario: Nach fünf Fehlversuchen ist die Anmeldung gesperrt
     Angenommen ein Konto mit Passwort ist eingerichtet
     Und der Besucher hat sich fünfmal mit einem falschen Passwort angemeldet
@@ -99,7 +95,6 @@ Funktionalität: Anmeldung
     Und sieht der Besucher einen Hinweis, der mit "Nach mehreren Fehlversuchen ist die Anmeldung gesperrt bis" beginnt
 
   # fach-review 576 V-1: ein Fehler beim Prüfen zählt nicht als Fehlversuch und meldet kein falsches Passwort
-  @wip
   Szenario: Anmeldung mit Passwort fehlgeschlagen
     Angenommen ein Konto mit Passwort ist eingerichtet
     Und ein Besucher hat die Anmeldeseite geöffnet
@@ -108,7 +103,6 @@ Funktionalität: Anmeldung
     Dann ist der Besucher auf der Seite "Anmelden"
     Und sieht der Besucher den Hinweis "Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut."
 
-  @wip
   Szenario: Abmelden nach der Anmeldung mit Passwort
     Angenommen ein Konto mit Passwort ist eingerichtet
     Und ein Besucher hat die Anmeldeseite geöffnet

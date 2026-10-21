@@ -39,6 +39,11 @@ Given('der Liegenschaftsverwalter liest die Datenschutzerklärung', async ({ ver
 	await verwalter.attemptsTo(openPage('/privacy'));
 });
 
+// after a precondition that changes what the statement says, e.g. a Konto mit Passwort (#576)
+When('der Liegenschaftsverwalter die Datenschutzerklärung erneut liest', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openPage('/privacy'));
+});
+
 Given('der Liegenschaftsverwalter liest die Nutzungsbedingungen', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openPage('/terms'));
 });

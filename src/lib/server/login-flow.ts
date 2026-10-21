@@ -26,7 +26,7 @@ export const LOGIN_ERRORS = {
 export const loginPage = (error: keyof typeof LOGIN_ERRORS) => `/login?error=${error}`;
 
 /** Only pages of this app: a relative path, never "//host" or "/\host" */
-const safeTarget = (target: string | null) =>
+export const safeTarget = (target: string | null) =>
 	target && /^\/(?![/\\])/.test(target) ? target : '/dashboard';
 
 export function rememberLoginFlow(
@@ -61,11 +61,11 @@ export function takeLoginFlow(
  * The login goes into the Protokoll under «Einstellungen» (#357), with its provider only; a backend that cannot record
  * it does not stop the login
  */
-export async function recordLogin(jwt: string, provider: OAuthProvider) {
+export async function recordLogin(jwt: string, provider: OAuthProvider | 'local', send: typeof fetch = fetch) {
 	const timeout = new AbortController();
 	const timer = setTimeout(() => timeout.abort(), 5000); // a hanging backend does not hold up the login
 	try {
-		await fetch(`${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/audit-log/logins`, {
+		await send(`${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/audit-log/logins`, {
 			method: 'POST',
 			headers: { Authorization: `Bearer ${jwt}`, 'Content-Type': 'application/json' },
 			body: JSON.stringify({ provider }),

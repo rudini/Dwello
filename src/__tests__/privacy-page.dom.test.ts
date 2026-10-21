@@ -168,7 +168,7 @@ describe('Datenschutzerklärung zur Anmeldung', () => {
 			section.querySelector('h2')?.textContent?.includes('Anmeldung')
 		);
 		expect(login?.textContent).toContain(
-			'Jede Anmeldung, jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) und jede Abmeldung wird im Protokoll des Servers festgehalten, mit der Kennung des Kontos beim Anbieter und, ausser bei der Abmeldung, der E-Mail-Adresse.'
+			'Jede Anmeldung, jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) und jede Abmeldung wird im Protokoll des Servers festgehalten, mit der Kennung des Kontos und, ausser bei der Abmeldung, der E-Mail-Adresse.'
 		);
 		expect(login?.textContent).toContain('Das Protokoll dient der Sicherheit und der Fehlersuche; nur der Betreiber liest es.');
 		expect(login?.textContent).not.toContain('verwendet sie nur');
@@ -182,10 +182,10 @@ describe('Datenschutzerklärung zu Anmeldung, Dritten und Cookies', () => {
 	};
 
 	it('nennt nur die eingerichteten Anmeldeanbieter', () => {
-		expect(page(['Google'])).toContain('Die Anmeldung erfolgt über Google.');
+		expect(page(['Google'])).toContain('Sie können sich über Google anmelden.');
 		expect(page(['Google'])).not.toContain('Microsoft');
 		expect(page(['Google', 'Microsoft'])).toContain(
-			'Die Anmeldung erfolgt über Google oder Microsoft.'
+			'Sie können sich über Google oder Microsoft anmelden.'
 		);
 	});
 
@@ -459,5 +459,34 @@ describe('Stand der Datenschutzerklärung', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
 		expect(byTestId('legal-as-of')?.textContent).toBe('Stand: 20. Oktober 2026');
+	});
+});
+
+// #576: the sign-in with a Konto mit Passwort (fach review 576 R-2 to R-5)
+describe('Datenschutzerklärung zur Anmeldung mit Passwort', () => {
+	const login = () => document.getElementById('login')?.textContent ?? '';
+
+	it('erklärt das Konto mit Passwort ohne leere Anbieterliste, wenn Google nicht eingerichtet ist', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: [], password: true } } as never);
+
+		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an.');
+		expect(login()).toContain('Daraus lässt sich das Passwort nicht zurückrechnen, nur durch Ausprobieren erraten.');
+		expect(login()).toContain('Jeder Fehlversuch mit Passwort und jede Sperre wird mit der eingetippten E-Mail-Adresse im Protokoll des Servers festgehalten');
+		expect(login()).not.toContain('Google');
+		expect(login()).not.toContain('über .');
+	});
+
+	it('nennt neben dem Passwort auch Google, wenn beides eingerichtet ist', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], password: true } } as never);
+
+		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an.');
+		expect(login()).toContain('Sie können sich über Google anmelden.');
+		expect(login()).toContain('Ihr Passwort beim Anbieter sieht Dwello nie.');
+	});
+
+	it('erwähnt kein Passwort, wenn es kein Konto mit Passwort gibt', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		expect(login()).not.toContain('Sie melden sich mit E-Mail-Adresse und Passwort an.');
 	});
 });

@@ -42,9 +42,9 @@ Funktionalität: Datenschutz
     Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Microsoft"
 
   # #576: mit einem Konto mit Passwort kennt Dwello das Passwort nur umgerechnet, und Fehlversuche kommen ins Protokoll
-  @wip
   Szenario: Anmeldung mit Passwort in der Datenschutzerklärung
     Angenommen ein Konto mit Passwort ist eingerichtet
+    Wenn der Liegenschaftsverwalter die Datenschutzerklärung erneut liest
     Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass Dwello das Passwort nur umgerechnet speichert, sodass es sich nicht zurückrechnen lässt
     Und erfährt der Liegenschaftsverwalter unter "Anmeldung", dass jeder Fehlversuch mit der eingetippten E-Mail-Adresse protokolliert wird
 

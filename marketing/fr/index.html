@@ -680,7 +680,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="sec-head">
 				<span class="kicker">Protection des données</span>
 				<h2>Conçu selon la loi suisse sur la protection des données.</h2>
-				<p>Les données des locataires sont des données personnelles. Dwello les traite ainsi : elles restent sur votre serveur, rien ne nous parvient, et vous pouvez renseigner à tout moment. Ne sort que ce qu’une tâche exige : la connexion via Google, la recherche d’adresse dans le registre des bâtiments de la Confédération, vos e-mails aux locataires et, si vous le configurez ainsi, les factures vers une IA externe. Vous restez responsable des données de vos locataires.</p>
+				<p>Les données des locataires sont des données personnelles. Dwello les traite ainsi : elles restent sur votre serveur, rien ne nous parvient, et vous pouvez renseigner à tout moment. Ne sort que ce qu’une tâche exige : la connexion via Google, si vous l’utilisez, la recherche d’adresse dans le registre des bâtiments de la Confédération, vos e-mails aux locataires et, si vous le configurez ainsi, les factures vers une IA externe. Vous restez responsable des données de vos locataires.</p>
 			</div>
 			<!-- In the app's illustration style: line, fill, one accent stroke -->
 			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Une maison avec un serveur à l’intérieur" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -768,8 +768,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Idéal pour commencer</h3>
 				<dl>
-					<div><dt>Il vous faut</dt><dd>Docker Desktop, un compte Google et 16 Go de mémoire vive pour l’IA locale. Avec moins de mémoire, indiquez une IA externe.</dd></div>
-					<div><dt>Durée</dt><dd>Environ une heure, avec la connexion Google et le téléchargement du modèle d’IA.</dd></div>
+					<div><dt>Il vous faut</dt><dd>Docker Desktop et 16 Go de mémoire vive pour l’IA locale. Avec moins de mémoire, indiquez une IA externe.</dd></div>
+					<div><dt>Durée</dt><dd>Environ une heure, avec le téléchargement du modèle d’IA.</dd></div>
 					<div><dt>Bon à savoir</dt><dd>Dwello ne tourne que si votre PC est allumé. Pour y accéder depuis le téléphone, un serveur domestique convient mieux.</dd></div>
 				</dl>
 			</div>
@@ -790,7 +790,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Toujours accessible, dans votre propre maison</h3>
 				<dl>
-					<div><dt>Il vous faut</dt><dd>Un NAS ou un mini-PC avec Docker et votre propre domaine en HTTPS, car la connexion Google l’exige. Pour l’IA locale, 16 Go de mémoire vive.</dd></div>
+					<div><dt>Il vous faut</dt><dd>Un NAS ou un mini-PC avec Docker. Recommandé pour l’accès depuis d’autres appareils : votre propre domaine en HTTPS. Pour l’IA locale, 16 Go de mémoire vive.</dd></div>
 					<div><dt>Accès en déplacement</dt><dd>Par votre VPN ou un tunnel comme Tailscale. Dwello n’a pas besoin d’être ouvert sur Internet.</dd></div>
 					<div><dt>Bon à savoir</dt><dd>Les petits appareils utilisent plutôt une IA externe. Ce qui sort alors est indiqué sous Protection des données.</dd></div>
 				</dl>
@@ -817,7 +817,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Aujourd’hui encore avec connexion Google</b>Vous vous connectez avec votre compte Google. Lors de l’installation, une clé est créée une fois chez Google ; le guide montre comment. Un installateur en une étape avec sa propre connexion, sans Google, est prévu (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 sur GitHub : installateur en une étape">#497</a>).</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Connexion avec mot de passe</b>Lors de l’installation, un compte avec adresse e-mail et mot de passe est créé. Qui le souhaite se connecte plutôt avec son compte Google ; le guide montre les deux. Un installateur en une étape est prévu (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 sur GitHub : installateur en une étape">#579</a>).</span></div>
 	</div>
 </section>
 
@@ -885,7 +885,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello est développé ouvertement. Ces points sont prévus ; la plupart ont leur ticket sur GitHub, où vous pouvez donner votre avis.</p>
 		</div>
 		<div class="road">
-			<article><span class="badge plan">Prévu</span><h3>Installateur en une étape</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 sur GitHub : installateur en une étape">#497</a><p>Une commande, une question sur votre e-mail, terminé. Avec sa propre connexion, sans compte Google.</p></article>
+			<article><span class="badge plan">Prévu</span><h3>Installateur en une étape</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 sur GitHub : installateur en une étape">#579</a><p>Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur.</p></article>
 			<article><span class="badge plan">Prévu</span><h3>Serveur MCP</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener" aria-label="Issue 495 sur GitHub : serveur MCP">#495</a><p>Dwello comme outil pour votre assistant IA, en local et avec votre autorisation.</p></article>
 			<article><span class="badge plan">Prévu</span><h3>Export complet</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener" aria-label="Issue 496 sur GitHub : export complet">#496</a><p>Toutes les données en CSV et JSON, à tout moment, en un clic.</p></article>
 			<article><span class="badge plan">Prévu</span><h3>Rapports et analyses</h3><p>Recettes, dépenses et frais accessoires au fil des ans, pour la déclaration d’impôt et la fiduciaire.</p></article>

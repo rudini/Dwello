@@ -228,7 +228,7 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 |---|---|---|
 | GET | `/api/v1/auth/password` | → `{ available }`: whether a Konto mit Passwort exists |
 | POST | `/api/v1/auth/password` | Body: `{ email, password }` → `{ sub, email, name }`. 401 `INVALID_CREDENTIALS` (wrong password or unknown address); 423 `ACCOUNT_LOCKED` with `params.until` (ISO time): 5 failed attempts lock for 15 minutes |
-| PUT | `/api/v1/local-accounts` | Session required. Body: `{ email, password }`: creates the account or sets a new password (lifts a Sperre, ends older sessions). 204; 400 `PASSWORD_TOO_SHORT` (`params.min`) |
+| PUT | `/api/v1/local-accounts` | Session required. Body: `{ email, password }`: creates the account or sets a new password (lifts a Sperre, ends older sessions) → `{ email }`; 400 `PASSWORD_TOO_SHORT` (`params.min`) |
 | DELETE | `/api/v1/local-accounts/:email` | Session required. 204. 404 |
 
 ## 12. Utility statements `/api/v1/statements`

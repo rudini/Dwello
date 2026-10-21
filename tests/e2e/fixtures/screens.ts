@@ -51,12 +51,23 @@ async function correctionStates(seed: TestData) {
 }
 
 /** The example's address with its ids filled in, and the buildings the statement wizard checks */
-export type Example = { path: string; state: string; public: boolean; building: string; tankBuilding: string; heatingProfile: string };
+export type Example = {
+	path: string;
+	state: string;
+	public: boolean;
+	building: string;
+	tankBuilding: string;
+	heatingProfile: string;
+	account?: { email: string; password: string }; // a Konto mit Passwort for the login states (#576)
+};
 
 /** A screen in a state, with the records it needs */
 export async function exampleOf(seed: TestData, name: string, state: string): Promise<Example> {
 	const screen = screenList.screens.find((candidate) => candidate.name === name)!;
-	return { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, address(screen, state), state)) };
+	const example = { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, address(screen, state), state)) };
+	if (!state.startsWith('login-password') && state !== 'login-locked') return example;
+	await seed.localAccount();
+	return { ...example, account: { email: seed.names.get('E-Mail Konto')!, password: seed.names.get('Passwort Konto')! } };
 }
 
 /** Title of the document uploaded to the tenant Anna: a file name, not a German word the language check would flag */

@@ -115,6 +115,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Firmenname / Firmenadresse | nom de l’entreprise / adresse de l’entreprise | nome dell’azienda / indirizzo dell’azienda | company name / company address |
 | Protokoll (Einstellungen) / Protokoll des Servers | journal / journal du serveur | registro / registro del server | log / server log |
 | Betreiber / Verantwortlicher (DSG) / Auftragsbearbeiter (DSG) | exploitant / responsable du traitement / sous-traitant | gestore / titolare del trattamento / responsabile del trattamento | operator / controller / processor |
+| Konto mit Passwort (#576) | compte avec mot de passe | account con password | password account |
+| Sperre (Anmeldung, #576) | blocage (de la connexion) | blocco (dell’accesso) | lock (sign-in) |
 | Mietzinsdepot / Freigabe des Mietzinsdepots | garantie de loyer / libération de la garantie de loyer | deposito di garanzia / svincolo del deposito di garanzia | rent deposit / release of the rent deposit |
 | Übersicht | vue d’ensemble | panoramica | overview |
 

@@ -41,8 +41,7 @@ export const localAccountRoutes = new Elysia({ prefix: '/api/v1/local-accounts' 
 			} catch (error) {
 				return refused(error, set);
 			}
-			set.status = 204;
-			return null;
+			return { email: body.email.trim().toLowerCase() };
 		},
 		{ body: credentials }
 	)

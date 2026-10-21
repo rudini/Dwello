@@ -35,4 +35,10 @@ describe('Installation mit docker-compose.prod.yml', () => {
 	it('lässt den SMTP-Port ohne Angabe auf 587, nicht auf 0', () => {
 		expect(backendService).toContain('- SMTP_PORT=${SMTP_PORT:-587}');
 	});
+
+	// #576: a copied .env signs in with a Konto mit Passwort; Google only when the Betreiber fills in its values, and
+	// a placeholder client would show a Google button that cannot work and make ALLOWED_EMAILS required
+	it('richtet in .env.example keinen Anbieter mit Platzhaltern ein', () => {
+		expect(envExample).not.toMatch(/^OAUTH_(GOOGLE|MICROSOFT)_CLIENT_ID=./m);
+	});
 });

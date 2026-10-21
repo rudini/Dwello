@@ -45,7 +45,7 @@ const codeOf = async (response: Response) => ((await response.json()) as { code:
 
 const account = async (email: string, password = 'richtiges-Passwort') => {
 	const response = await sendJson('PUT', '/api/v1/local-accounts', { email, password });
-	expect(response.status).toBe(204);
+	expect(response.status).toBe(200);
 };
 
 afterEach(() => setSystemTime());
