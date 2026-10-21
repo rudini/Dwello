@@ -195,11 +195,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'login-password-error': (example) => (actor) =>
 		actor.attemptsTo(signInWithPassword(example.account!.email, 'falsches-Passwort'), Wait.until(on.loginError)),
 	'login-locked': (example) => (actor) =>
-		actor.attemptsTo(
-			failSignIns(example.account!.email, 5),
-			signInWithPassword(example.account!.email, example.account!.password),
-			Wait.until(on.loginError)
-		),
+		// each attempt on a freshly opened page, the 5th answered with the Sperre (code review 576 C-6)
+		actor.attemptsTo(failSignIns(example.account!.email, 5)),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// the Gebäuderegister of «Neues Gebäude» (#479), answered by its stand-in (backend/scripts/gwr-stub.ts)

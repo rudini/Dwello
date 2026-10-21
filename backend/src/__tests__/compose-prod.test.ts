@@ -10,6 +10,7 @@ import { join } from 'path';
 const root = join(import.meta.dir, '../../..');
 const compose = readFileSync(join(root, 'docker-compose.prod.yml'), 'utf8');
 const backendService = compose.slice(compose.indexOf('\n  backend:'), compose.indexOf('\n  postgres:'));
+const frontendService = compose.slice(compose.indexOf('\n  frontend:'), compose.indexOf('\n  backend:'));
 const envExample = readFileSync(join(root, '.env.example'), 'utf8');
 
 // Every variable the mail module reads that .env.example documents (commented-out ones included)
@@ -40,5 +41,11 @@ describe('Installation mit docker-compose.prod.yml', () => {
 	// a placeholder client would show a Google button that cannot work and make ALLOWED_EMAILS required
 	it('richtet in .env.example keinen Anbieter mit Platzhaltern ein', () => {
 		expect(envExample).not.toMatch(/^OAUTH_(GOOGLE|MICROSOFT)_CLIENT_ID=./m);
+	});
+
+	// code review 576 C-3: without ORIGIN, adapter-node takes every request for https, refuses the sign-in form
+	// sent over http (SvelteKit's origin check) and never shows the hint on an unencrypted connection
+	it('nennt dem Frontend die Adresse, unter der Dwello geöffnet wird', () => {
+		expect(frontendService).toContain('- ORIGIN=${PUBLIC_APP_URL:-http://localhost:3000}');
 	});
 });

@@ -5,6 +5,7 @@
  */
 
 import { eq, sql } from 'drizzle-orm';
+import { z } from 'zod';
 import { db } from '../db/connection';
 import { localAccounts } from '../db/schema';
 import { CodedError } from './coded-error';
@@ -18,7 +19,12 @@ const unknownHash = Bun.password.hash('unknown-account');
 
 const normal = (email: string) => email.trim().toLowerCase();
 
+// the session check (middleware/auth.ts) takes only these addresses: any other account could never use Dwello (code review 576 C-8)
+export const usableEmail = (email: string) => z.string().email().safeParse(normal(email)).success;
+export const UNUSABLE_EMAIL = 'Diese E-Mail-Adresse kann Dwello nicht verwenden. Geben Sie eine Adresse wie name@example.ch ein.';
+
 export async function setLocalAccount(email: string, password: string): Promise<void> {
+	if (!usableEmail(email)) throw new Error(UNUSABLE_EMAIL);
 	if (password.length < MIN_PASSWORD_LENGTH)
 		throw new CodedError('PASSWORD_TOO_SHORT', `Das Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`, {
 			min: MIN_PASSWORD_LENGTH
@@ -65,20 +71,25 @@ export async function checkPassword(email: string, password: string): Promise<{ 
 		await db.update(localAccounts).set({ failedAttempts: 0, lockedUntil: null }).where(eq(localAccounts.id, account.id));
 		return { sub: `local:${account.id}`, email: account.email, name: account.email };
 	}
-	// counted in SQL, so parallel attempts cannot both stay below the limit; a run out lock starts the count anew
+	// counted and locked in one statement, so parallel attempts can neither stay below the limit nor lift a lock
+	// another one just set; a run out lock starts the count anew (code review 576 C-1)
+	const at = sql`${new Date(now).toISOString()}::timestamptz`;
+	const until = new Date(now + LOCK_MS);
+	const count = sql`CASE WHEN ${localAccounts.lockedUntil} <= ${at} THEN 1 ELSE ${localAccounts.failedAttempts} + 1 END`;
 	const [failed] = await db
 		.update(localAccounts)
 		.set({
-			failedAttempts: sql`CASE WHEN ${localAccounts.lockedUntil} IS NOT NULL THEN 1 ELSE ${localAccounts.failedAttempts} + 1 END`,
-			lockedUntil: null
+			failedAttempts: count,
+			lockedUntil: sql`CASE WHEN ${localAccounts.lockedUntil} > ${at} THEN ${localAccounts.lockedUntil}
+				WHEN ${count} >= ${MAX_FAILED_ATTEMPTS} THEN ${until.toISOString()}::timestamptz END`
 		})
 		.where(eq(localAccounts.id, account.id))
-		.returning({ failedAttempts: localAccounts.failedAttempts });
+		.returning({ failedAttempts: localAccounts.failedAttempts, lockedUntil: localAccounts.lockedUntil });
 	console.warn('[auth] Anmeldung mit Passwort abgelehnt', { email: address, failedAttempts: failed.failedAttempts });
-	if (failed.failedAttempts >= MAX_FAILED_ATTEMPTS) {
-		const until = new Date(now + LOCK_MS);
-		await db.update(localAccounts).set({ lockedUntil: until }).where(eq(localAccounts.id, account.id));
-		console.warn('[auth] Konto mit Passwort gesperrt', { email: address, until: until.toISOString() });
+	// the attempt that locks says so at once (persona Dr. Weber 576 P-1)
+	if (failed.lockedUntil) {
+		if (failed.lockedUntil.getTime() === until.getTime()) console.warn('[auth] Konto mit Passwort gesperrt', { email: address, until: until.toISOString() });
+		throw locked(failed.lockedUntil, address);
 	}
 	throw invalid();
 }

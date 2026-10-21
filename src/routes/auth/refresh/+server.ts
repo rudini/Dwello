@@ -49,7 +49,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			sub: payload.sub,
 			email: payload.email,
 			name: payload.name,
-			provider: payload.provider
+			provider: payload.provider,
+			auth_time: payload.auth_time ?? payload.iat
 		});
 
 		// Set new session cookie

@@ -28,6 +28,8 @@ services:
       - MAIL_PROVIDER_COUNTRY=${MAIL_PROVIDER_COUNTRY:-}
       - PUBLIC_APP_NAME=Dwello
       - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
+      # the address Dwello is opened at: without it the Node server takes every request for https and refuses forms sent over http
+      - ORIGIN=${PUBLIC_APP_URL:-http://localhost:3000}
       - JWT_SECRET=${JWT_SECRET}
       # Who may sign in (#51): comma-separated e-mail addresses, «*» for every account; without it the frontend does not start
       - ALLOWED_EMAILS=${ALLOWED_EMAILS:-}

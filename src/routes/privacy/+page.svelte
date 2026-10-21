@@ -143,7 +143,8 @@
 			paragraphs: [
 				m.privacy_cookies_1(),
 				m.privacy_cookies_2({ lifetime: lifetime(data.sessionSeconds) }),
-				m.privacy_cookies_3(),
+				// only an installation with a provider sets the cookies of the OAuth flow (fach review 576 R-10)
+				...(data.providers.length ? [m.privacy_cookies_3()] : []),
 				m.privacy_cookies_4(),
 				m.privacy_cookies_5()
 			].map((text) => ({ text }))

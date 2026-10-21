@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { actions, load } from '../routes/login/+page.server';
+import { POST as refresh } from '../routes/auth/refresh/+server';
 import { verifyJwt } from '$lib/server/auth';
 import { isAllowed } from '$lib/server/allowed-emails';
 import available from '../../tests/contracts/auth-password-available.json';
@@ -74,6 +75,41 @@ describe('Anmeldung mit Passwort', () => {
 		const audit = calls.find((call) => call.url.endsWith('/api/v1/audit-log/logins'));
 		expect(JSON.parse(String(audit?.init?.body))).toEqual({ provider: 'local' });
 		expect(JSON.parse(String(calls[0].init?.body))).toEqual({ email: 'helga@example.ch', password: 'ein-Passwort' });
+	});
+
+	it('schreibt die Anmeldung mit Kennung und E-Mail-Adresse ins Protokoll des Servers', async () => {
+		const info = vi.spyOn(console, 'info').mockImplementation(() => {});
+		try {
+			await signIn(answering(200, account));
+
+			const lines = info.mock.calls.map(([line]) => JSON.parse(String(line)));
+			expect(lines).toContainEqual(
+				expect.objectContaining({ context: expect.objectContaining({ event: 'login_complete', provider: 'local', userId: account.sub, email: account.email }) })
+			);
+		} finally {
+			info.mockRestore();
+		}
+	});
+
+	// code review 576 C-2: the backend ends the sessions from before a new password by the time of the sign-in
+	it('behält beim Verlängern der Sitzung die Zeit der Anmeldung', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-21T10:00:00Z'), toFake: ['Date'] });
+		try {
+			const { jar } = await signIn(answering(200, account));
+			const signedInAt = (await verifyJwt(jar.get('dwello_session')!)).auth_time;
+			vi.setSystemTime(new Date('2026-10-21T10:50:00Z'));
+			const cookies = { set: (name: string, value: string) => jar.set(name, value), get: (name: string) => jar.get(name), delete: () => {} };
+			const request = new Request('http://localhost/auth/refresh', { method: 'POST', headers: { 'X-XSRF-TOKEN': jar.get('dwello_xsrf')! } });
+
+			expect((await refresh({ request, cookies } as never)).status).toBe(200);
+
+			const renewed = await verifyJwt(jar.get('dwello_session')!);
+			expect(signedInAt).toBe(Date.parse('2026-10-21T10:00:00Z') / 1000);
+			expect(renewed.iat).toBe(Date.parse('2026-10-21T10:50:00Z') / 1000);
+			expect(renewed.auth_time).toBe(signedInAt);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it('führt nur zu Seiten von Dwello', async () => {

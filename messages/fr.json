@@ -1952,7 +1952,7 @@
 	"backend_invalid_credentials": "L’adresse e-mail ou le mot de passe est incorrect. Vérifiez votre saisie et réessayez.",
 	"backend_account_locked": "Après plusieurs tentatives échouées, la connexion est bloquée. Réessayez plus tard.",
 	"backend_password_too_short": "Le mot de passe doit comporter au moins {min} caractères.",
-	"privacy_login_local_1": "Vous vous connectez avec adresse e-mail et mot de passe. Dwello enregistre pour cela votre adresse e-mail et le mot de passe uniquement sous forme transformée (hachage) : on ne peut pas en recalculer le mot de passe, seulement le deviner par essais. Choisissez donc un mot de passe long que vous n’utilisez nulle part ailleurs. Dwello enregistre en outre le nombre de tentatives échouées jusqu’à la prochaine connexion réussie et un éventuel blocage jusqu’à son expiration. L’en-tête affiche votre adresse e-mail.",
+	"privacy_login_local_1": "Vous vous connectez avec adresse e-mail et mot de passe. Dwello enregistre pour cela votre adresse e-mail et le mot de passe uniquement sous forme transformée (hachage) : on ne peut pas en recalculer le mot de passe, seulement le deviner par essais. Choisissez donc un mot de passe long que vous n’utilisez nulle part ailleurs. Dwello enregistre en outre le nombre de tentatives échouées et la fin d’un éventuel blocage jusqu’à la prochaine connexion réussie. L’en-tête affiche votre adresse e-mail.",
 	"privacy_login_local_log": "Chaque tentative échouée avec mot de passe et chaque blocage sont consignés dans le journal du serveur avec l’adresse e-mail saisie, sans adresse IP.",
 	"audit_login_password": "Connexion avec mot de passe"
 }

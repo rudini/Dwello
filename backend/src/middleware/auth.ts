@@ -19,6 +19,7 @@ const JwtPayloadSchema = z.object({
 	name: z.string(),
 	provider: z.string(),
 	iat: z.number(),
+	auth_time: z.number().optional(), // the sign-in, kept by every refresh of the session (code review 576 C-2)
 	exp: z.number()
 });
 
@@ -66,7 +67,7 @@ export const authMiddleware = new Elysia({ name: 'auth' })
 		const token = authHeader.substring(7);
 		const payload = await verifyJwt(token);
 
-		if (!payload || (payload.provider === 'local' && !(await localSessionHolds(payload.sub, payload.iat)))) {
+		if (!payload || (payload.provider === 'local' && !(await localSessionHolds(payload.sub, payload.auth_time ?? payload.iat)))) {
 			set.status = 401;
 			return {
 				user: null,

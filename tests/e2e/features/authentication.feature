@@ -85,6 +85,16 @@ Funktionalität: Anmeldung
     Wenn der Besucher sich mit der E-Mail-Adresse des Kontos und einem falschen Passwort anmeldet
     Dann ist der Besucher auf der Seite "Anmelden"
     Und sieht der Besucher den Hinweis "E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut."
+    # Persona Helga 576 P-1: die Meldung ist im Blick und wird vorgelesen; das falsche Passwort steht nicht mehr im Feld
+    Und steht der Fokus auf dem Hinweis
+    Und ist das Feld "Passwort" leer
+
+  # Personas Marco und Sven 576 P-1: leere Felder sind kein Fehler beim Prüfen
+  Szenario: Anmeldung mit Passwort ohne Eingabe
+    Angenommen ein Konto mit Passwort ist eingerichtet
+    Und ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher sich ohne E-Mail-Adresse und Passwort anmeldet
+    Dann sieht der Besucher den Hinweis "E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut."
 
   # 5 Fehlversuche sperren die Anmeldung für 15 Minuten; der Befehl im Container hebt die Sperre auf
   Szenario: Nach fünf Fehlversuchen ist die Anmeldung gesperrt

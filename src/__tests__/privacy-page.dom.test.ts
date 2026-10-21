@@ -471,9 +471,18 @@ describe('Datenschutzerklärung zur Anmeldung mit Passwort', () => {
 
 		expect(login()).toContain('Sie melden sich mit E-Mail-Adresse und Passwort an.');
 		expect(login()).toContain('Daraus lässt sich das Passwort nicht zurückrechnen, nur durch Ausprobieren erraten.');
+		expect(login()).toContain('Dazu speichert Dwello die Zahl der Fehlversuche und das Ende einer allfälligen Sperre bis zur nächsten erfolgreichen Anmeldung.');
 		expect(login()).toContain('Jeder Fehlversuch mit Passwort und jede Sperre wird mit der eingetippten E-Mail-Adresse im Protokoll des Servers festgehalten');
 		expect(login()).not.toContain('Google');
 		expect(login()).not.toContain('über .');
+	});
+
+	it('nennt die Cookies der Anmeldung über einen Anbieter nur, wenn einer eingerichtet ist', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: [], password: true } } as never);
+
+		const cookies = document.getElementById('cookies')?.textContent ?? '';
+		expect(cookies).toContain('dwello_session');
+		expect(cookies).not.toContain('«dwello_oauth_state» schützt die Anmeldung vor gefälschten Antworten');
 	});
 
 	it('nennt neben dem Passwort auch Google, wenn beides eingerichtet ist', () => {

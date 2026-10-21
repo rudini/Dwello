@@ -3,11 +3,11 @@
  * In the container: docker exec -it dwello-backend bun run account [email]
  */
 
-import { MIN_PASSWORD_LENGTH, setLocalAccount } from '../src/services/local-account.service';
+import { MIN_PASSWORD_LENGTH, setLocalAccount, UNUSABLE_EMAIL, usableEmail } from '../src/services/local-account.service';
 
 const email = (process.argv[2] ?? prompt('E-Mail-Adresse:') ?? '').trim();
-if (!email.includes('@')) {
-	console.error('Bitte geben Sie eine E-Mail-Adresse an.');
+if (!usableEmail(email)) {
+	console.error(UNUSABLE_EMAIL);
 	process.exit(1);
 }
 const password = prompt(`Neues Passwort (mindestens ${MIN_PASSWORD_LENGTH} Zeichen):`) ?? '';

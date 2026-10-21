@@ -1952,7 +1952,7 @@
 	"backend_invalid_credentials": "E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
 	"backend_account_locked": "Nach mehreren Fehlversuchen ist die Anmeldung gesperrt. Versuchen Sie es später erneut.",
 	"backend_password_too_short": "Das Passwort braucht mindestens {min} Zeichen.",
-	"privacy_login_local_1": "Sie melden sich mit E-Mail-Adresse und Passwort an. Dwello speichert dafür Ihre E-Mail-Adresse und das Passwort nur in umgerechneter Form (Hash): Daraus lässt sich das Passwort nicht zurückrechnen, nur durch Ausprobieren erraten. Wählen Sie deshalb ein langes Passwort, das Sie sonst nirgends verwenden. Dazu speichert Dwello die Zahl der Fehlversuche bis zur nächsten erfolgreichen Anmeldung und eine allfällige Sperre, bis sie abläuft. Die Kopfzeile zeigt Ihre E-Mail-Adresse.",
+	"privacy_login_local_1": "Sie melden sich mit E-Mail-Adresse und Passwort an. Dwello speichert dafür Ihre E-Mail-Adresse und das Passwort nur in umgerechneter Form (Hash): Daraus lässt sich das Passwort nicht zurückrechnen, nur durch Ausprobieren erraten. Wählen Sie deshalb ein langes Passwort, das Sie sonst nirgends verwenden. Dazu speichert Dwello die Zahl der Fehlversuche und das Ende einer allfälligen Sperre bis zur nächsten erfolgreichen Anmeldung. Die Kopfzeile zeigt Ihre E-Mail-Adresse.",
 	"privacy_login_local_log": "Jeder Fehlversuch mit Passwort und jede Sperre wird mit der eingetippten E-Mail-Adresse im Protokoll des Servers festgehalten, ohne IP-Adresse.",
 	"audit_login_password": "Anmeldung mit Passwort"
 }

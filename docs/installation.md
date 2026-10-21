@@ -122,4 +122,14 @@ Over plain `http` the password and every page cross the network unencrypted, and
 4. With Google (section 3): add `https://dwello.example.ch/auth/callback` as redirect URI.
 5. `docker-compose.prod.yml` also publishes the backend (3001), the database (5432) and the AI (11434). Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
 
+Without HTTPS, only inside your home network (not recommended: the password and every page cross the network unencrypted, and the sign-in page says so), skip Caddy and set in `.env` the address the other devices open, e.g. `homeserver.local`:
+
+```bash
+PUBLIC_APP_URL=http://homeserver.local:3000
+COOKIE_DOMAIN=homeserver.local
+CORS_ORIGIN=http://homeserver.local:3000
+```
+
+and keep `COOKIE_SECURE=false`. Dwello accepts the sign-in only at the address in `PUBLIC_APP_URL`.
+
 For a home server that should stay out of the internet, Caddy can get the certificate through the DNS of the domain instead (see the Caddy documentation, «DNS challenge»); access from outside then goes through a VPN such as Tailscale.

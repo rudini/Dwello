@@ -3,11 +3,12 @@
  * for 15 minutes, and the public check the BFF calls before it issues a session (real PostgreSQL database)
  */
 
-import { afterAll, afterEach, describe, expect, it, setSystemTime } from 'bun:test';
+import { afterAll, afterEach, describe, expect, it, setSystemTime, spyOn } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { app } from '../app';
 import { db } from '../db/connection';
 import { localAccounts } from '../db/schema';
+import { setLocalAccount } from '../services/local-account.service';
 import * as jose from 'jose';
 import { callApi, sendJson } from './helpers/auth';
 
@@ -29,8 +30,8 @@ const signIn = (email: string, password: string) =>
 	);
 
 // a session as the BFF issues it after a sign-in with password, issued now (Bun's clock)
-const sessionOf = async (sub: string, email: string) =>
-	new jose.SignJWT({ email, name: email, provider: 'local' })
+const sessionOf = async (sub: string, email: string, signedInAt?: number) =>
+	new jose.SignJWT({ email, name: email, provider: 'local', ...(signedInAt ? { auth_time: signedInAt } : {}) })
 		.setProtectedHeader({ alg: 'HS256' })
 		.setSubject(sub)
 		.setIssuer('dwello')
@@ -126,6 +127,26 @@ describe('lokales Konto', () => {
 		expect(new Date(body.params.until).getTime()).toBe(now.getTime() + 15 * 60_000);
 	});
 
+	it('nennt die Sperre schon beim 5. Fehlversuch', async () => {
+		const email = newEmail();
+		await account(email);
+		for (let attempt = 0; attempt < 4; attempt++) expect((await signIn(email, 'falsch')).status).toBe(401);
+
+		const fifth = await signIn(email, 'falsch');
+
+		expect(fifth.status).toBe(423);
+		expect(await codeOf(fifth)).toBe('ACCOUNT_LOCKED');
+	});
+
+	it('hält die Sperre auch bei vielen gleichzeitigen Fehlversuchen', async () => {
+		const email = newEmail();
+		await account(email);
+
+		await Promise.all(Array.from({ length: 7 }, () => signIn(email, 'falsch')));
+
+		expect((await signIn(email, 'richtiges-Passwort')).status).toBe(423);
+	});
+
 	it('gibt die Anmeldung nach 15 Minuten wieder frei', async () => {
 		const email = newEmail();
 		await account(email);
@@ -158,6 +179,29 @@ describe('lokales Konto', () => {
 
 		expect((await signIn(email, 'richtiges-Passwort')).status).toBe(401);
 		expect((await signIn(email, 'neues-Passwort-2026')).status).toBe(200);
+	});
+
+	// code review 576 C-8: the backend refuses every session of an address its session check does not take
+	it.each(['verwalter@homeserver', 'jürg@example.ch'])('legt kein Konto für %s an, dessen Sitzungen nicht gälten', async (email) => {
+		await expect(setLocalAccount(email, 'richtiges-Passwort')).rejects.toThrow('E-Mail-Adresse');
+		expect(await db.select().from(localAccounts).where(eq(localAccounts.email, email))).toEqual([]);
+	});
+
+	it('hält jeden Fehlversuch und die Sperre mit der eingetippten E-Mail-Adresse im Protokoll des Servers fest', async () => {
+		const email = newEmail();
+		await account(email);
+		const warn = spyOn(console, 'warn').mockImplementation(() => {});
+		let lines: { message: unknown; details: unknown }[];
+		try {
+			for (let attempt = 0; attempt < 5; attempt++) await signIn(email, 'falsch');
+			lines = warn.mock.calls.map(([message, details]) => ({ message, details }));
+		} finally {
+			warn.mockRestore();
+		}
+
+		expect(lines.filter((line) => line.message === '[auth] Anmeldung mit Passwort abgelehnt')).toHaveLength(5);
+		expect(lines).toContainEqual({ message: '[auth] Konto mit Passwort gesperrt', details: expect.objectContaining({ email }) });
+		expect(JSON.stringify(lines)).not.toMatch(/\bip\b|address/i);
 	});
 
 	it('verlangt ein Passwort mit mindestens 8 Zeichen', async () => {
@@ -205,6 +249,22 @@ describe('lokales Konto', () => {
 		await account(email, 'neues-Passwort-2026');
 
 		expect((await withSession(token)).status).toBe(401);
+	});
+
+	it('beendet auch eine nach dem neuen Passwort verlängerte Sitzung von vorher', async () => {
+		const email = newEmail();
+		const start = Date.now();
+		setSystemTime(new Date(start - 60_000));
+		await account(email);
+		const { sub } = (await (await signIn(email, 'richtiges-Passwort')).json()) as { sub: string };
+		setSystemTime(new Date(start - 30_000));
+		const signedInAt = Math.floor(Date.now() / 1000);
+		setSystemTime();
+		await account(email, 'neues-Passwort-2026');
+
+		const renewed = await sessionOf(sub, email, signedInAt);
+
+		expect((await withSession(renewed)).status).toBe(401);
 	});
 
 	it('beendet die Sitzungen eines gelöschten Kontos', async () => {

@@ -16,6 +16,7 @@ export interface JwtPayload {
 	email: string;
 	name: string;
 	provider: 'google' | 'microsoft' | 'swisseid' | 'local'; // local: Konto mit Passwort (#576)
+	auth_time?: number; // the sign-in, kept by every refresh: a new password ends the sessions from before (code review 576 C-2)
 }
 
 /**
@@ -40,7 +41,8 @@ export async function generateJwt(user: JwtPayload): Promise<string> {
 		sub: user.sub,
 		email: user.email,
 		name: user.name,
-		provider: user.provider
+		provider: user.provider,
+		auth_time: user.auth_time ?? Math.floor(Date.now() / 1000)
 	})
 		.setProtectedHeader({ alg: jwtConfig.algorithm })
 		.setIssuedAt()

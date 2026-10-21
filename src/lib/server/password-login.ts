@@ -2,6 +2,7 @@ import { m } from '$lib/paraglide/messages';
 import { getLocale } from '$lib/paraglide/runtime';
 import { fail, redirect, type Cookies } from '@sveltejs/kit';
 import { generateJwt, setSessionCookie, setXsrfToken } from './auth';
+import { logOAuthEvent } from './error-handler';
 import { recordLogin, safeTarget } from './login-flow';
 
 // Konto mit Passwort (#576): the backend checks the password, the BFF issues the session as after OAuth
@@ -29,10 +30,13 @@ const swissTime = (iso: string) =>
 
 export async function signInWithPassword(fetch: Fetch, cookies: Cookies, form: FormData) {
 	const email = String(form.get('email') ?? '');
+	const password = String(form.get('password') ?? '');
+	// empty fields are a wrong input, not a failed check (personas Marco and Sven 576 P-1)
+	if (!email.trim() || !password) return fail(400, { email, error: m.login_error_invalid() });
 	const response = await fetch(API, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ email, password: String(form.get('password') ?? '') })
+		body: JSON.stringify({ email, password })
 	}).catch(() => null);
 	if (response?.status === 401) return fail(400, { email, error: m.login_error_invalid() });
 	if (response?.status === 423) {
@@ -43,6 +47,8 @@ export async function signInWithPassword(fetch: Fetch, cookies: Cookies, form: F
 	if (!response?.ok) return fail(502, { email, error: m.login_error_failed() });
 	const account = (await response.json()) as { sub: string; email: string; name: string };
 	const jwt = await generateJwt({ ...account, provider: 'local' });
+	// the Protokoll des Servers, as after OAuth (fach review 576 R-8)
+	logOAuthEvent('login_complete', 'local', { userId: account.sub, email: account.email });
 	await recordLogin(jwt, 'local', fetch);
 	setSessionCookie(cookies, jwt);
 	setXsrfToken(cookies);

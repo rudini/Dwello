@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { googleSignInParameter, loginHint, loginLegalText, passwordSignInOffered, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
+import { enteredPassword, focusOnLoginHint, googleSignInParameter, loginHint, loginLegalText, passwordSignInOffered, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
 import { expireSession, failPasswordCheck, failSignIns, holdSessionWithoutAccess, signInWith, signInWithPassword, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
@@ -113,6 +113,18 @@ When('der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmel
 
 When('der Besucher sich mit der E-Mail-Adresse des Kontos und einem falschen Passwort anmeldet', async ({ besucher, names }) => {
 	await besucher.attemptsTo(signInWithPassword(names.get('E-Mail Konto')!, 'falsches-Passwort'));
+});
+
+When('der Besucher sich ohne E-Mail-Adresse und Passwort anmeldet', async ({ besucher }) => {
+	await besucher.attemptsTo(signInWithPassword('', ''));
+});
+
+Then('steht der Fokus auf dem Hinweis', async ({ besucher }) => {
+	await besucher.sees(focusOnLoginHint).toBe(true);
+});
+
+Then('ist das Feld "Passwort" leer', async ({ besucher }) => {
+	await besucher.sees(enteredPassword).toBe('');
 });
 
 Given('der Besucher hat sich fünfmal mit einem falschen Passwort angemeldet', async ({ besucher, names }) => {

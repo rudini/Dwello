@@ -3,6 +3,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 
 	// Konto mit Passwort (#576); onfailed: the request failed before the backend answered (fach review 576 V-1)
 	let {
@@ -18,13 +19,17 @@
 	method="POST"
 	action="?/password"
 	class="flex flex-col gap-4"
-	use:enhance={() => {
+	use:enhance={({ formElement }) => {
 		busy = true;
 		onfailed(false);
 		return async ({ result, update }) => {
 			busy = false;
 			if (result.type === 'error') onfailed(true);
 			else await update({ reset: false });
+			if (result.type === 'redirect') return;
+			// a refused sign-in: the wrong password goes, the hint above the form gets the focus and is in view (persona Helga 576 P-1)
+			formElement.querySelector<HTMLInputElement>('[name=password]')!.value = '';
+			await focusFirstError(formElement.parentElement);
 		};
 	}}
 >

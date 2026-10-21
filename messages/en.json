@@ -1952,7 +1952,7 @@
 	"backend_invalid_credentials": "The email address or password is not correct. Check what you entered and try again.",
 	"backend_account_locked": "After several failed attempts, sign-in is locked. Try again later.",
 	"backend_password_too_short": "The password needs at least {min} characters.",
-	"privacy_login_local_1": "You sign in with email address and password. For this, Dwello stores your email address and the password only in a transformed form (a hash): the password cannot be calculated back from it, only guessed by trying. So choose a long password that you use nowhere else. Dwello also stores the number of failed attempts until the next successful sign-in, and a lock until it ends. The header shows your email address.",
+	"privacy_login_local_1": "You sign in with email address and password. For this, Dwello stores your email address and the password only in a transformed form (a hash): the password cannot be calculated back from it, only guessed by trying. So choose a long password that you use nowhere else. Dwello also stores the number of failed attempts and the end of a lock until the next successful sign-in. The header shows your email address.",
 	"privacy_login_local_log": "Every failed attempt with a password and every lock is recorded in the server log with the email address entered, without the IP address.",
 	"audit_login_password": "Sign-in with password"
 }
