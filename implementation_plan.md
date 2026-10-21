@@ -85,4 +85,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #507 `LineInvoices.svelte`: an invoice part by the Heizprofil says «Anteil nach Heizprofil: … %» instead of the days, four new keys `statements_part_*_profile` in de/fr/it/en (terms of the PDF's `partProfileRun`); DOM tests (181), lint, check, changed and message tests green; statement-detail.feature chromium + api: 100 passed
 - [x] #507 fachreview: `docs/reviews/507-fachreview-1.md` (no findings)
 - [x] #507 code review round 1: `docs/reviews/507-review-1.md` (no findings)
+- [x] #507 persona Dr. Weber: `docs/design/personas/dr-weber-507.md` (no Blocker/Major; page and PDF agree; Minor P-1, the months only in the PDF, is what the issue allows; P-2 to P-4 existed before and stay in the report)
 - [ ] #507 Workflow note: since O-47 (#587) a failed local E2E run leaves `playwright-report/trace/assets/*.js`, which `bun run lint` checks and fails on; fix in its own pull request after #507 (ESLint ignores `playwright-report/**`, `test-results/**`)
