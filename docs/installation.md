@@ -59,7 +59,19 @@ docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
 The first start builds Dwello, which takes several minutes; the AI model is about 6 GB. `docker-compose.prod.yml` publishes the backend (3001), the database (5432) and the AI (11434) on all network interfaces, also on a PC: keep them closed in the firewall of the PC or router. Then open `http://localhost:3000` and sign in with the address from `ALLOWED_EMAILS`. The overview shows the landlord what to do first.
 
 - **Update:** `git pull`, then `docker compose -f docker-compose.prod.yml up -d --build`.
-- **Back up** the database regularly, e.g. `docker exec dwello-postgres pg_dump -U dwello --clean --if-exists dwello > dwello-backup.sql`, and keep the copy on another device. Uploaded invoices and PDFs are stored in the database too. To restore a copy: `docker exec -i dwello-postgres psql -U dwello dwello < dwello-backup.sql` (it replaces the data in the database).
+- **Back up** the database regularly and keep the copy on another device; uploaded invoices and PDFs are stored in the database too. These commands work in every terminal, Windows PowerShell included:
+
+  ```bash
+  docker exec dwello-postgres pg_dump -U dwello --clean --if-exists -f /tmp/dwello-backup.sql dwello
+  docker cp dwello-postgres:/tmp/dwello-backup.sql dwello-backup.sql
+  ```
+
+  To restore a copy (it replaces the data in the database):
+
+  ```bash
+  docker cp dwello-backup.sql dwello-postgres:/tmp/dwello-backup.sql
+  docker exec dwello-postgres psql -U dwello -f /tmp/dwello-backup.sql dwello
+  ```
 - **E-mail to tenants:** `docker-compose.prod.yml` does not pass the mail settings on yet (#568). Until then Dwello files e-mails as «zu versenden», and the landlord sends the PDFs or prints the letters.
 
 ## 6. Without 16 GB of memory: an external AI
