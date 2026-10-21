@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="it-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Informativa sulla protezione dei dati – Dwello</title>
+<meta name="description" content="Come il sito di Dwello tratta i dati personali: nessun cookie, nessun tracciamento, solo i log del server web.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../assets/dwello-mark.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="de-CH" href="../datenschutz.html">
+<link rel="alternate" hreflang="fr-CH" href="../fr/datenschutz.html">
+<link rel="alternate" hreflang="it-CH" href="datenschutz.html">
+<link rel="alternate" hreflang="en" href="../en/datenschutz.html">
+<style>
+/* Imprint and privacy pages: the app's tokens and a readable text column */
+@font-face { font-family: "Inter"; src: url("../fonts/inter-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+:root {
+	--canvas: #f5f7f8; --surface: #ffffff; --line: #d3dae0; --ink: #161c21; --ink-muted: #3f4a54;
+	--accent: #1b5873; --accent-soft: #e3eef3; --focus: #1b5873;
+	--font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--canvas: #111518; --surface: #1a1f23; --line: #3a444c; --ink: #eceff2; --ink-muted: #b4bec7;
+		--accent: #86bfda; --accent-soft: #172c37; --focus: #f0c27a;
+		color-scheme: dark;
+	}
+}
+:root[data-theme="dark"] {
+	--canvas: #111518; --surface: #1a1f23; --line: #3a444c; --ink: #eceff2; --ink-muted: #b4bec7;
+	--accent: #86bfda; --accent-soft: #172c37; --focus: #f0c27a;
+	color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font: 400 1.0625rem/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 760px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.site-header { background: var(--surface); border-bottom: 1px solid var(--line); }
+.site-header .wrap, .site-footer .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; min-height: 64px; }
+.logo { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; color: var(--ink); text-decoration: none; font-size: 1.25rem; font-weight: 700; }
+.logo .ic { width: 24px; height: 24px; fill: none; stroke: var(--accent); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.langs, .site-footer nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.langs a, .site-footer nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 6px; text-decoration: none; color: var(--ink-muted); font-weight: 600; font-size: 0.9375rem; }
+.langs a[aria-current], .site-footer nav a[aria-current] { background: var(--accent-soft); color: var(--accent); }
+.prose { padding-block: 48px 64px; }
+.prose h1 { font-size: clamp(2rem, 5vw, 2.75rem); line-height: 1.15; letter-spacing: -0.025em; margin: 0 0 24px; }
+.prose h2 { font-size: 1.375rem; line-height: 1.25; letter-spacing: -0.015em; margin: 40px 0 12px; }
+.prose h3 { font-size: 1.125rem; margin: 24px 0 8px; }
+.prose p, .prose ul { margin: 0 0 12px; }
+.prose ul { padding-left: 22px; }
+.prose li { margin-bottom: 6px; }
+.prose .lead { font-size: 1.1875rem; color: var(--ink-muted); }
+.prose .stand { margin-top: 32px; color: var(--ink-muted); font-size: 0.9375rem; }
+.site-footer { border-top: 1px solid var(--line); background: var(--surface); color: var(--ink-muted); font-size: 0.9375rem; }
+</style>
+</head>
+<body>
+<header class="site-header">
+	<div class="wrap">
+		<a class="logo" href="index.html" aria-label="Dwello, alla pagina iniziale"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Dwello</span></a>
+		<nav class="langs" aria-label="Lingua"><a href="../datenschutz.html" hreflang="de" lang="de">DE</a><a href="../fr/datenschutz.html" hreflang="fr" lang="fr">FR</a><a href="datenschutz.html" hreflang="it" lang="it" aria-current="page">IT</a><a href="../en/datenschutz.html" hreflang="en" lang="en">EN</a></nav>
+	</div>
+</header>
+<main class="wrap prose">
+	<h1>Informativa sulla protezione dei dati</h1>
+	<p class="lead">Questa informativa vale per il sito di Dwello. Non vale per l’app Dwello che installa Lei stesso. Dei dati dei Suoi inquilini nell’app è responsabile Lei. L’app ha per questo una propria informativa sulla protezione dei dati.</p>
+
+	<h2>In breve</h2>
+	<ul>
+		<li>Questo sito non usa cookie e non misura ciò che Lei fa.</li>
+		<li>Non carica nulla da server di terzi, né caratteri né video.</li>
+		<li>Sono trattati solo i dati che ogni server web registra quando si apre una pagina, e la Sua e-mail se ci scrive.</li>
+		<li>Conserviamo tutti i dati in Svizzera e non ne trasmettiamo nessuno all’estero.</li>
+	</ul>
+
+	<h2>Titolare del trattamento</h2>
+	<p>Roger Rudin, Svizzera</p>
+	<p>E-mail: <a href="mailto:info@dwello.ch">info@dwello.ch</a></p>
+
+	<h2>Quali dati trattiamo</h2>
+	<h3>Quando visita il sito</h3>
+	<p>A ogni accesso il Suo browser invia dati tecnici al server web. Il server li registra: il Suo indirizzo IP, data e ora, l’indirizzo richiesto, la pagina da cui proviene, e browser e sistema operativo come li indica il Suo browser.</p>
+	<p>Il server ha bisogno di questi log per fornire il sito, trovare i guasti e respingere gli attacchi. Non li analizziamo, non ne ricaviamo profili e non li colleghiamo ad altri dati.</p>
+	<h3>Quando ci scrive</h3>
+	<p>Se scrive a info@dwello.ch, trattiamo il Suo indirizzo e-mail e il contenuto del Suo messaggio per risponderLe. Cancelliamo il messaggio quando la questione è conclusa, salvo che un obbligo legale richieda di conservarlo. Non pubblichiamo il Suo messaggio, nemmeno su GitHub, salvo che Lei sia d’accordo.</p>
+	<h3>Cosa non facciamo</h3>
+	<p>Non usiamo cookie e non salviamo nulla nel Suo browser. Non usiamo servizi di analisi o pubblicità, plugin di social media o contenuti incorporati di altri fornitori.</p>
+
+	<h2>Chi riceve i dati</h2>
+	<p>Il sito è ospitato dall’hoster svizzero Infomaniak Network SA a Ginevra, in centri di calcolo in Svizzera. Infomaniak tratta i log del server web e le e-mail a info@dwello.ch per nostro conto e solo per gestire questi servizi. Per il resto non trasmettiamo i Suoi dati a nessuno, salvo che la legge ci obblighi, e mai all’estero. Se rispondiamo alla Sua e-mail, la risposta va al Suo fornitore di posta elettronica, anche se si trova all’estero.</p>
+
+	<h2>Per quanto tempo conserviamo i dati</h2>
+	<p>Infomaniak conserva i log del server web per il tempo necessario al funzionamento e alla sicurezza, poi li cancella. Le e-mail le cancelliamo, come descritto sopra, quando la questione è conclusa.</p>
+
+	<h2>Link ad altri siti</h2>
+	<p>Il sito rimanda a GitHub, dove si trova il codice sorgente di Dwello, e alla demo su demo.dwello.ch. Se segue un tale link, vale l’informativa sulla protezione dei dati del rispettivo fornitore. La demo ha una propria informativa sulla protezione dei dati.</p>
+
+	<h2>I Suoi diritti</h2>
+	<p>Può chiedere in ogni momento quali dati trattiamo su di Lei. Può chiedere che correggiamo dati errati, che cancelliamo dati o smettiamo di trattarli, e che Le consegniamo i Suoi dati. Scriva a questo scopo a info@dwello.ch. L’informazione è gratuita e la riceve entro 30 giorni. Possiamo chiederLe di provare la Sua identità.</p>
+	<p>Può rivolgersi in ogni momento all’Incaricato federale della protezione dei dati e della trasparenza (IFPDT): Feldeggweg 1, 3003 Berna, <a href="https://www.edoeb.admin.ch" rel="noopener">www.edoeb.admin.ch</a>. Può far valere i Suoi diritti anche davanti a un tribunale civile.</p>
+
+	<h2>Modifiche</h2>
+	<p>Se modifichiamo il sito in modo che tratti altri dati, adeguiamo questa informativa. Fa stato la versione pubblicata qui.</p>
+	<p class="stand">Stato: 21 ottobre 2026</p>
+</main>
+<footer class="site-footer">
+	<div class="wrap">
+		<span>© 2026 Roger Rudin</span>
+		<nav aria-label="Note giuridiche"><a href="index.html">Pagina iniziale</a><a href="impressum.html">Note legali</a><a href="datenschutz.html" aria-current="page">Informativa sulla protezione dei dati</a></nav>
+	</div>
+</footer>
+</body>
+</html>

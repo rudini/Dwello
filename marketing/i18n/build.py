@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LANGS = {"fr": "fr-CH", "it": "it-CH", "en": "en"}
-PAGES = ["index.html"]  # impressum.html, datenschutz.html follow once their translations are reviewed
+PAGES = ["index.html", "impressum.html", "datenschutz.html"]
 # Texts that stay the same in every language (names, numbers, technical terms)
 SAME = {"Dwello", "DE", "FR", "IT", "EN", "CHF 0.–", "48 px", "390 px", "7 : 1", "CHF 215.80", "AGPL-3.0", "Open Source",
         "GitHub", "dwello.next_steps", "dwello.deadlines", "(days: 14)", "Installation", "Community", "Mobile first",
@@ -71,6 +71,7 @@ def build(lang, tag, name, page, table, used):
     # links between the language versions: the German pages one folder up, the others beside it
     page = re.sub(r'href="(fr|it|en)/([a-z]+\.html)"', r'href="../\1/\2"', page)
     page = re.sub(r'href="([a-z]+\.html)" hreflang="de"', r'href="../\1" hreflang="de"', page)
+    page = re.sub(r'hreflang="de-CH" href="([a-z]+\.html)"', r'hreflang="de-CH" href="../\1"', page)
     # other links to a page: to the one in this language when it is built, else to the German one
     page = re.sub(r'href="([a-z]+\.html)"', lambda m: m.group(0) if m.group(1) in PAGES else f'href="../{m.group(1)}"', page)
     page = page.replace(f'href="../{lang}/', 'href="')

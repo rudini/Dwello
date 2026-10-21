@@ -16,19 +16,19 @@
 @font-face { font-family: "Inter"; src: url("fonts/inter-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
 :root {
 	--canvas: #f5f7f8; --surface: #ffffff; --line: #d3dae0; --ink: #161c21; --ink-muted: #3f4a54;
-	--accent: #1b5873; --accent-soft: #e3eef3; --caution: #663e00; --caution-soft: #fbf0dc; --focus: #1b5873;
+	--accent: #1b5873; --accent-soft: #e3eef3; --focus: #1b5873;
 	--font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme="light"]) {
 		--canvas: #111518; --surface: #1a1f23; --line: #3a444c; --ink: #eceff2; --ink-muted: #b4bec7;
-		--accent: #86bfda; --accent-soft: #172c37; --caution: #f0c27a; --caution-soft: #3a2c14; --focus: #f0c27a;
+		--accent: #86bfda; --accent-soft: #172c37; --focus: #f0c27a;
 		color-scheme: dark;
 	}
 }
 :root[data-theme="dark"] {
 	--canvas: #111518; --surface: #1a1f23; --line: #3a444c; --ink: #eceff2; --ink-muted: #b4bec7;
-	--accent: #86bfda; --accent-soft: #172c37; --caution: #f0c27a; --caution-soft: #3a2c14; --focus: #f0c27a;
+	--accent: #86bfda; --accent-soft: #172c37; --focus: #f0c27a;
 	color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -52,8 +52,6 @@ a { color: var(--accent); text-underline-offset: 3px; }
 .prose li { margin-bottom: 6px; }
 .prose .lead { font-size: 1.1875rem; color: var(--ink-muted); }
 .prose .stand { margin-top: 32px; color: var(--ink-muted); font-size: 0.9375rem; }
-/* The operator is still open: shown as a marked gap; the deploy refuses pages that contain it */
-[data-pending] { background: var(--caution-soft); color: var(--caution); border-left: 4px solid var(--caution); padding: 8px 12px; border-radius: 6px; font-weight: 600; }
 .site-footer { border-top: 1px solid var(--line); background: var(--surface); color: var(--ink-muted); font-size: 0.9375rem; }
 </style>
 </head>
@@ -66,18 +64,18 @@ a { color: var(--accent); text-underline-offset: 3px; }
 </header>
 <main class="wrap prose">
 	<h1>Datenschutzerklärung</h1>
-	<p class="lead">Diese Erklärung gilt für die Website von Dwello. Sie gilt nicht für die App Dwello, die Sie selbst installieren: Dort sind Sie selbst für die Daten Ihrer Mieterinnen und Mieter verantwortlich, und die App bringt dafür eine eigene Datenschutzerklärung mit.</p>
+	<p class="lead">Diese Erklärung gilt für die Website von Dwello. Sie gilt nicht für die App Dwello, die Sie selbst installieren. Für die Daten Ihrer Mieterinnen und Mieter in der App sind Sie selbst verantwortlich. Die App bringt dafür eine eigene Datenschutzerklärung mit.</p>
 
 	<h2>Kurz gesagt</h2>
 	<ul>
 		<li>Diese Website setzt keine Cookies und misst nicht, was Sie tun.</li>
 		<li>Sie lädt nichts von fremden Servern, auch keine Schriften und keine Videos.</li>
 		<li>Bearbeitet werden nur die Angaben, die jeder Webserver beim Aufruf einer Seite protokolliert, und Ihre E-Mail, wenn Sie uns schreiben.</li>
-		<li>Alle Daten bleiben in der Schweiz.</li>
+		<li>Wir speichern alle Daten in der Schweiz und geben keine ins Ausland weiter.</li>
 	</ul>
 
 	<h2>Verantwortlich</h2>
-	<p data-pending="betreiber">[Name und Postadresse des Betreibers]</p>
+	<p>Roger Rudin, Schweiz</p>
 	<p>E-Mail: <a href="mailto:info@dwello.ch">info@dwello.ch</a></p>
 
 	<h2>Welche Daten wir bearbeiten</h2>
@@ -85,30 +83,30 @@ a { color: var(--accent); text-underline-offset: 3px; }
 	<p>Ihr Browser sendet bei jedem Aufruf technische Angaben an den Webserver. Der Server protokolliert sie: Ihre IP-Adresse, Datum und Uhrzeit, die aufgerufene Adresse, die Seite, von der Sie kamen, und Browser und Betriebssystem, wie Ihr Browser sie angibt.</p>
 	<p>Diese Protokolle braucht der Server, um die Website auszuliefern, Störungen zu finden und Angriffe abzuwehren. Wir werten sie nicht aus, erstellen damit keine Profile und verbinden sie nicht mit anderen Daten.</p>
 	<h3>Wenn Sie uns schreiben</h3>
-	<p>Schreiben Sie an info@dwello.ch, bearbeiten wir Ihre E-Mail-Adresse und den Inhalt Ihrer Nachricht, um Ihnen zu antworten. Wir löschen die Nachricht, wenn sie erledigt ist, ausser eine gesetzliche Pflicht verlangt, sie aufzubewahren.</p>
+	<p>Schreiben Sie an info@dwello.ch, bearbeiten wir Ihre E-Mail-Adresse und den Inhalt Ihrer Nachricht, um Ihnen zu antworten. Wir löschen die Nachricht, wenn sie erledigt ist, ausser eine gesetzliche Pflicht verlangt, sie aufzubewahren. Wir veröffentlichen Ihre Nachricht nicht, auch nicht auf GitHub, ausser Sie sind einverstanden.</p>
 	<h3>Was wir nicht tun</h3>
 	<p>Wir setzen keine Cookies und speichern nichts in Ihrem Browser. Wir nutzen keine Analyse- oder Werbedienste, keine Social-Media-Plugins und keine eingebetteten Inhalte anderer Anbieter.</p>
 
 	<h2>Wer die Daten erhält</h2>
-	<p>Die Website liegt beim Schweizer Hoster Infomaniak Network SA in Genf, in Rechenzentren in der Schweiz. Infomaniak bearbeitet die Protokolle des Webservers und die E-Mails an info@dwello.ch in unserem Auftrag und nur für den Betrieb dieser Dienste. Wir geben Ihre Daten niemandem sonst weiter und nicht ins Ausland.</p>
+	<p>Die Website liegt beim Schweizer Hoster Infomaniak Network SA in Genf, in Rechenzentren in der Schweiz. Infomaniak bearbeitet die Protokolle des Webservers und die E-Mails an info@dwello.ch in unserem Auftrag und nur für den Betrieb dieser Dienste. Sonst geben wir Ihre Daten niemandem weiter, ausser das Gesetz verpflichtet uns dazu, und nie ins Ausland. Antworten wir auf Ihre E-Mail, geht die Antwort an Ihren E-Mail-Anbieter, auch wenn er im Ausland ist.</p>
 
 	<h2>Wie lange wir Daten aufbewahren</h2>
-	<p>Die Protokolle des Webservers bewahrt Infomaniak für den Betrieb und die Sicherheit auf und löscht sie danach. E-Mails löschen wir, wie oben beschrieben, wenn sie erledigt sind.</p>
+	<p>Die Protokolle des Webservers bewahrt Infomaniak so lange auf, wie es für Betrieb und Sicherheit nötig ist, und löscht sie danach. E-Mails löschen wir, wie oben beschrieben, wenn sie erledigt sind.</p>
 
 	<h2>Links zu anderen Websites</h2>
 	<p>Die Website verlinkt auf GitHub, wo der Quellcode von Dwello liegt, und auf die Demo unter demo.dwello.ch. Folgen Sie einem solchen Link, gilt dort die Datenschutzerklärung des jeweiligen Anbieters. Die Demo hat eine eigene Datenschutzerklärung.</p>
 
 	<h2>Ihre Rechte</h2>
-	<p>Sie können jederzeit Auskunft verlangen, welche Daten wir über Sie bearbeiten. Sie können verlangen, dass wir falsche Daten berichtigen, Daten löschen oder nicht mehr bearbeiten, und dass wir Ihnen Ihre Daten herausgeben. Schreiben Sie dafür an info@dwello.ch. Wir können verlangen, dass Sie Ihre Identität nachweisen.</p>
-	<p>Sind Sie mit unserer Antwort nicht einverstanden, können Sie sich an den Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB) wenden: <a href="https://www.edoeb.admin.ch" rel="noopener">www.edoeb.admin.ch</a>.</p>
+	<p>Sie können jederzeit Auskunft verlangen, welche Daten wir über Sie bearbeiten. Sie können verlangen, dass wir falsche Daten berichtigen, Daten löschen oder nicht mehr bearbeiten, und dass wir Ihnen Ihre Daten herausgeben. Schreiben Sie dafür an info@dwello.ch. Die Auskunft ist kostenlos, und Sie erhalten sie innert 30 Tagen. Wir können verlangen, dass Sie Ihre Identität nachweisen.</p>
+	<p>Sie können sich jederzeit an den Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB) wenden: Feldeggweg 1, 3003 Bern, <a href="https://www.edoeb.admin.ch" rel="noopener">www.edoeb.admin.ch</a>. Ihre Rechte können Sie auch vor einem Zivilgericht geltend machen.</p>
 
 	<h2>Änderungen</h2>
 	<p>Ändern wir die Website so, dass sie andere Daten bearbeitet, passen wir diese Erklärung an. Es gilt die Fassung, die hier steht.</p>
-	<p class="stand">Stand: 19. Oktober 2026</p>
+	<p class="stand">Stand: 21. Oktober 2026</p>
 </main>
 <footer class="site-footer">
 	<div class="wrap">
-		<span>© 2026 Dwello</span>
+		<span>© 2026 Roger Rudin</span>
 		<nav aria-label="Rechtliches"><a href="index.html">Startseite</a><a href="impressum.html">Impressum</a><a href="datenschutz.html" aria-current="page">Datenschutzerklärung</a></nav>
 	</div>
 </footer>
