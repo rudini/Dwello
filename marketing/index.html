@@ -172,6 +172,18 @@ section { padding-block: 96px; }
 .steps .n { font-size: 0.875rem; font-weight: 600; color: var(--ink-muted); }
 .steps h3 { font-size: 1.25rem; }
 .steps p { color: var(--ink-muted); font-size: 1rem; }
+/* The year in order: a chevron between the step cards where they stand in one row */
+@media (min-width: 1100px) { .steps li { position: relative; } .steps li + li::before { content: ""; position: absolute; left: -13px; top: 50%; width: 8px; height: 8px; border-top: 2px solid var(--line-strong); border-right: 2px solid var(--line-strong); transform: translateY(-50%) rotate(45deg); } }
+.journey { display: block; width: min(560px, 100%); margin: 0 auto 32px; }
+/* Upload in three steps */
+.flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: flow; }
+.flow li { counter-increment: flow; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
+.flow li::before { content: counter(flow); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+/* A cost split into equal shares, one of them marked */
+.split { display: grid; gap: 12px; margin-top: 8px; }
+.split-bar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.split-bar span { display: grid; place-items: center; min-height: 48px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-control); font-weight: 600; font-variant-numeric: tabular-nums; }
+.split-bar .me { background: var(--accent-soft); border: 2px solid var(--accent); color: var(--accent); }
 
 /* Feature rows */
 .feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 64px; border-top: 1px solid var(--line); }
@@ -401,7 +413,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	<div class="wrap">
 		<div class="hero-copy">
 			<span class="badge info"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Open Source · Gratis · Für die Schweiz</span>
-			<h1>Ihre Liegenschaft. Ihre Daten. <span>Ihr Server.</span></h1>
+			<h1>Ihre Nebenkosten­abrechnung, <span>einfacher gemacht.</span></h1>
 			<p class="lede">Dwello macht die Nebenkostenabrechnung für private Vermieterinnen und Vermieter. Rechnungen hineinziehen, Abrechnung prüfen, mit QR-Rechnung versenden. Die Software läuft bei Ihnen, und die KI liest Ihre Belege auf Ihrem eigenen Rechner oder, wenn Sie es so einrichten, bei einem Anbieter Ihrer Wahl.</p>
 			<div class="actions">
 				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
@@ -444,11 +456,28 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Vier Schritte. Einmal im Jahr. Ohne Excel.</h2>
 			<p>Dwello ist für Menschen gemacht, die eine Liegenschaft besitzen und keine Verwaltung führen wollen. Die Übersicht sagt Ihnen, was als Nächstes zu tun ist, und jedes Feld erklärt seinen Begriff.</p>
 		</div>
+		<!-- Building, statement, tenant: line, fill, one accent stroke, as the drawing in the privacy band -->
+		<svg class="journey" viewBox="0 0 480 120" role="img" aria-label="Vom Gebäude über die Abrechnung zur Mieterin" fill="var(--accent-soft)" stroke="var(--line-strong)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<line x1="16" y1="104" x2="132" y2="104" fill="none"/>
+			<polyline points="24,52 74,16 124,52" fill="none"/>
+			<rect x="34" y="46" width="80" height="58"/>
+			<rect x="46" y="58" width="16" height="14" fill="var(--surface)"/><rect x="86" y="58" width="16" height="14" fill="var(--surface)"/>
+			<rect x="66" y="80" width="16" height="24" fill="var(--surface)"/>
+			<path d="M146 62h40m-8-8l8 8-8 8" fill="none"/>
+			<rect x="204" y="18" width="72" height="90" rx="4" fill="var(--surface)"/>
+			<line x1="216" y1="36" x2="264" y2="36" fill="none"/><line x1="216" y1="50" x2="256" y2="50" fill="none"/><line x1="216" y1="64" x2="260" y2="64" fill="none"/>
+			<line x1="216" y1="88" x2="264" y2="88" fill="none" stroke="var(--accent)" stroke-width="4"/>
+			<path d="M294 62h40m-8-8l8 8-8 8" fill="none"/>
+			<circle cx="398" cy="38" r="16"/>
+			<path d="M366 104c0-22 14-36 32-36s32 14 32 36z"/>
+			<rect x="420" y="70" width="40" height="28" rx="2" fill="var(--surface)"/>
+			<polyline points="420,72 440,86 460,72" fill="none" stroke="var(--accent)" stroke-width="3"/>
+		</svg>
 		<ol class="steps">
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg><span class="n">Einmalig</span></div><h3>Gebäude erfassen</h3><p>Adresse suchen, Wohnungen mit Fläche und Zimmern anlegen, Mieter und Mietverträge erfassen.</p></li>
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span class="n">Laufend</span></div><h3>Rechnungen hochladen</h3><p>PDFs hineinziehen. Die KI liest Betrag, Datum und Kategorie und sagt, was Sie prüfen sollten.</p></li>
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><span class="n">Einmal im Jahr</span></div><h3>Abrechnungen erstellen</h3><p>Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil.</p></li>
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg><span class="n">Fertig</span></div><h3>Prüfen und versenden</h3><p>Per E-Mail oder als Brief, mit Swiss QR-Rechnung und in der Sprache Ihrer Mieter.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg><span class="n">Einmal, zu Beginn</span></div><h3>Gebäude erfassen</h3><p>Adresse suchen, Wohnungen mit Fläche und Zimmern anlegen, Mieter und Mietverträge erfassen.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span class="n">Das ganze Jahr</span></div><h3>Rechnungen hochladen</h3><p>PDFs hineinziehen. Die KI liest Betrag, Datum und Kategorie und sagt, was Sie prüfen sollten.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><span class="n">Im Frühling</span></div><h3>Abrechnungen erstellen</h3><p>Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg><span class="n">Gleich danach</span></div><h3>Prüfen und versenden</h3><p>Per E-Mail oder als Brief, mit Swiss QR-Rechnung und in der Sprache Ihrer Mieter.</p></li>
 		</ol>
 	</div>
 </section>
@@ -468,6 +497,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<span class="badge info">Rechnungen und KI</span>
 				<h3>Rechnungen per Drag &amp; Drop. Gelesen auf Ihrem eigenen Rechner.</h3>
 				<p>Ziehen Sie bis zu 20 Rechnungen auf einmal in Dwello. Die KI liest Rechnungssteller, Betrag, Datum und Leistungszeitraum und ordnet die Kategorie zu. Was sie nicht sicher weiss, zeigt Dwello als Hinweis. Erst wenn Sie bestätigen, wird die Rechnung erstellt.</p>
+				<ol class="flow" aria-label="So kommt eine Rechnung in Dwello">
+					<li>Sie ziehen eine Rechnung hinein, etwa die der Wasserversorgung.</li>
+					<li>Die KI liest Betrag, Datum und Kategorie.</li>
+					<li>Sie prüfen die Angaben und bestätigen.</li>
+				</ol>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Lokale KI mit Ollama, ohne Cloud<small>Ihre Belege verlassen den Server nicht. Wer will, verbindet jede OpenAI-kompatible KI.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Hinweis auf fehlende Rechnungen<small>Dwello erwartet, was letztes Jahr kam. Fehlt die Wasserrechnung, sehen Sie es vor der Abrechnung.</small></span></li>
@@ -485,7 +519,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col">
 				<span class="badge info">Nebenkostenabrechnung</span>
 				<h3>Eine Abrechnung, die jede Zahl erklärt.</h3>
-				<p>Dwello rechnet nach den Regeln des Mietrechts und zeigt für jede Kategorie die Kosten des Gebäudes, den Anteil der Wohnung und die Mietstage. Ihre Mieter sehen dieselbe Aufstellung im PDF. Prüfen Sie jede Abrechnung, bevor Sie sie versenden: Dwello ersetzt keine Rechtsberatung.</p>
+				<p>Dwello rechnet nach den Regeln des Mietrechts und zeigt für jede Kategorie die Kosten des Gebäudes, den Anteil der Wohnung und die Mietstage. Ihre Mieter sehen dieselbe Aufstellung im PDF: Hans Müller in der Wohnung 1.01 des Musterhauses Zentrum etwa zahlt für 2025 CHF 215.80 nach. Prüfen Sie jede Abrechnung, bevor Sie sie versenden: Dwello ersetzt keine Rechtsberatung.</p>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Nur was der Vertrag erlaubt <span class="law">Art. 257a OR</span><small>Abgerechnet werden nur die Nebenkosten, die im Mietvertrag vereinbart sind.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Tagesgenau bei Mieterwechsel und Leerstand<small>Die Nebenkosten einer leeren Wohnung trägt der Vermieter.</small></span></li>
@@ -493,7 +527,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				</ul>
 			</div>
 			<figure class="shot">
-				<img class="l" src="shots/statement-light.webp" width="1600" height="1105" loading="lazy" alt="Abrechnung NK-11111111-2025-0001 für Hans Müller, Musterhaus Zentrum, Wohnung 1.01: Kostenaufstellung mit Lift und Allgemeinstrom.">
+				<img class="l" src="shots/statement-light.webp" width="1600" height="1105" loading="lazy" alt="Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa Lift und Allgemeinstrom, die Kosten des Gebäudes und der Anteil seiner Wohnung.">
 				<img class="d" src="shots/statement-dark.webp" width="1600" height="1105" loading="lazy" alt="" aria-hidden="true">
 			</figure>
 		</div>
@@ -503,7 +537,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col" style="max-width:760px">
 				<span class="badge info">Verteilschlüssel und Heizprofile</span>
 				<h3>Gerecht verteilt, auch im Winter.</h3>
-				<p>Kosten nach Fläche, Zimmern, Einheiten oder als eigene Formel, etwa 70 % nach Fläche und 30 % pro Wohnung. Heizkosten folgen einem Heizprofil: Im Januar zählt ein Mietstag mehr als im Juli. Für Mittelland, Bergregion und Tessin ist je ein Profil dabei, dazu eines für Heizung mit Warmwasser.</p>
+				<p>Kosten nach Fläche, Zimmern, Einheiten oder als eigene Formel, etwa 70 % nach Fläche und 30 % pro Wohnung. Heizkosten folgen einem Heizprofil: Im Januar zählt ein Mietstag mehr als im Sommer. Für Mittelland, Bergregion und Tessin ist je ein Profil dabei, dazu eines für Heizung mit Warmwasser.</p>
+				<div class="split">
+					<p>Ein Beispiel aus den Demodaten: Der Lift im Musterhaus Zentrum kostet CHF 1'690.00 im Jahr. Pro Einheit verteilt, trägt jede der sechs Wohnungen CHF 281.67, auch die Wohnung 1.01 von Hans Müller.</p>
+					<div class="split-bar" aria-hidden="true"><span class="me">1.01</span><span>1.02</span><span>2.01</span><span>2.02</span><span>3.01</span><span>3.02</span></div>
+				</div>
 			</div>
 			<div class="duo">
 				<figure class="figure">
@@ -511,7 +549,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 						<img class="l" src="shots/keys-light.webp" width="1600" height="1193" loading="lazy" alt="Liste der Verteilschlüssel: Pro Einheit, Pro Fläche, Pro Zimmer und Heizung mit der Formel 0.7 mal Fläche plus 0.3 mal Einheiten.">
 						<img class="d" src="shots/keys-dark.webp" width="1600" height="1193" loading="lazy" alt="" aria-hidden="true">
 					</div>
-					<figcaption class="caption">Verteilschlüssel als Formel: <code>0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}</code></figcaption>
+					<figcaption class="caption">Auch eine eigene Formel ist möglich, etwa 70 % nach Fläche und 30 % pro Wohnung.</figcaption>
 				</figure>
 				<figure class="figure">
 					<div class="shot">
@@ -734,7 +772,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an. Bei der Einrichtung wird dafür einmal ein Schlüssel bei Google angelegt; die Anleitung zeigt, wie. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a>).</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an. Bei der Einrichtung wird dafür einmal ein Schlüssel bei Google angelegt; die Anleitung zeigt, wie. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 auf GitHub">#497</a>).</span></div>
 	</div>
 </section>
 
@@ -802,11 +840,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello wird offen weiterentwickelt. Diese Punkte sind geplant; zu jedem gibt es ein Issue auf GitHub, in dem Sie mitreden können.</p>
 		</div>
 		<div class="road">
-			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>MCP-Server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener">#495</a><p>Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>Vollständiger Export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener">#496</a><p>Alle Daten als CSV und JSON, jederzeit, mit einem Klick.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Installer in einem Schritt</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 auf GitHub">#497</a><p>Ein Befehl, eine Frage nach Ihrer E-Mail, fertig. Mit eigener Anmeldung, ohne Google-Konto.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>MCP-Server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener" aria-label="Issue 495 auf GitHub">#495</a><p>Dwello als Werkzeug für Ihren KI-Assistenten, lokal und mit Ihrer Freigabe.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Vollständiger Export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener" aria-label="Issue 496 auf GitHub">#496</a><p>Alle Daten als CSV und JSON, jederzeit, mit einem Klick.</p></article>
 			<article><span class="badge plan">Geplant</span><h3>Berichte und Auswertungen</h3><p>Einnahmen, Ausgaben und Nebenkosten über die Jahre, für Steuererklärung und Treuhand.</p></article>
-			<article><span class="badge plan">Geplant</span><h3>Link zum Quellcode in der App</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/498" rel="noopener">#498</a><p>Jede Installation zeigt, wo ihr Quellcode liegt, wie es die AGPL verlangt.</p></article>
+			<article><span class="badge plan">Geplant</span><h3>Link zum Quellcode in der App</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/498" rel="noopener" aria-label="Issue 498 auf GitHub">#498</a><p>Jede Installation zeigt, wo ihr Quellcode liegt, wie es die AGPL verlangt.</p></article>
 		</div>
 	</div>
 </section>
