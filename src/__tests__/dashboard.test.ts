@@ -117,7 +117,7 @@ function backend(
 		},
 		'/contracts?limit=1000': { contracts, total: contracts.length },
 		// A-5 (#114): drafts for moved-out tenants, one still with the building's address (twice: two periods)
-		'/statements?status=draft&limit=100': {
+		'/statements?status=draft&limit=1000': {
 			data: [
 				{ ...statementList.data[0], id: 's3', tenantId: 't9', oldAddress: true },
 				{ ...statementList.data[0], id: 's4', tenantId: 't9', oldAddress: true },

@@ -22,6 +22,8 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 	paymentDeadlineDays: 30,
 	reminderAfterDays: 14,
 	expiredContracts: [],
+	// the drafts the counts name, unless a test lists them (#602)
+	draftIds: Array.from({ length: overrides.statementCounts?.draft ?? 0 }, (_, i) => `s${i + 1}`),
 	...overrides
 });
 
@@ -278,6 +280,19 @@ describe('Aufgaben der Übersicht', () => {
 		it('zählt bei den Entwürfen zum Zustellen nur die aktuellen', () => {
 			const tasks = overviewTasks(
 				input({ statementCounts: { draft: 4, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			expect(tasks.find((one) => one.id === 'drafts')!.text).toContain('1 Nebenkostenabrechnung ist');
+		});
+
+		// #602: Zählung und Liste der nicht aktuellen Entwürfe kommen aus zwei Abfragen; ändern sich die Entwürfe
+		// dazwischen, zählt die Aufgabe trotzdem jeden gelisteten aktuellen Entwurf
+		it('zählt die gelisteten Entwürfe, die nicht unter den nicht aktuellen sind', () => {
+			const tasks = overviewTasks(
+				input({
+					statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 0 },
+					draftIds: ['s1', 's2', 's3', 's5'],
+					outdatedStatements
+				})
 			);
 			expect(tasks.find((one) => one.id === 'drafts')!.text).toContain('1 Nebenkostenabrechnung ist');
 		});
