@@ -54,4 +54,7 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #588 BFF tests red (`master-data-lists.test.ts`: Verteilschlüssel page, invoice forms, Heizprofile page, Einstellungen, statement run; 150 records, 100 shown); the seven loads ask for `limit=1000`, green; contract `tests/contracts/distribution-keys.json` with its check; No scenario: it needs more than 100 Verteilschlüssel or Heizprofile in the shared E2E database
 - [x] #588 slice review round 1: `docs/reviews/588-review-1.md`; Minor C-1 fixed (test of the statement run naming a Heizprofil after the 100th, red with limit=100)
 - [x] #588 closing review round 2: `docs/reviews/588-review-2.md` (C-1 closed, no new findings)
-- [ ] #588 PR merged
+- [x] #588 PR #592 merged (its «Accessibility (axe)» check was red with all three shards green: the summary job read a stale jobs API answer; re-run once, green)
+- [x] CI: the summary job `e2e-results` retries until the count of green shards equals the shards (a stale API answer seconds after the last shard counted «1 of 3», PR #592); loop checked locally with a stand-in for `gh`
+- [x] CI fix review round 1: `docs/reviews/ci-review-1.md` (no findings)
+- [ ] CI fix PR merged
