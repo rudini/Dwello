@@ -33,6 +33,11 @@ Then('sieht der Liegenschaftsverwalter die Fehlermeldung {string}', async ({ ver
 	await verwalter.sees(errorMessageShown(text)).toBe(true);
 });
 
+// a negative check: the step before it names what the page shows instead
+Then('sieht der Liegenschaftsverwalter die Fehlermeldung {string} nicht mehr', async ({ verwalter }, text: string) => {
+	await verwalter.sees(errorMessageShown(text)).toBe(false);
+});
+
 Then('kann der Liegenschaftsverwalter das Löschen nicht bestätigen', async ({ verwalter }) => {
 	await verwalter.sees(deletionConfirmable).toBe(false);
 });
