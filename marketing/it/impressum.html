@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="it-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Note legali – Dwello</title>
+<meta name="description" content="Chi gestisce il sito di Dwello e come contattarci.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="../assets/dwello-mark.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="de-CH" href="impressum.html">
+<link rel="alternate" hreflang="fr-CH" href="../fr/impressum.html">
+<link rel="alternate" hreflang="it-CH" href="impressum.html">
+<link rel="alternate" hreflang="en" href="../en/impressum.html">
+<style>
+/* Imprint and privacy pages: the app's tokens and a readable text column */
+@font-face { font-family: "Inter"; src: url("../fonts/inter-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+:root {
+	--canvas: #f5f7f8; --surface: #ffffff; --line: #d3dae0; --ink: #161c21; --ink-muted: #3f4a54;
+	--accent: #1b5873; --accent-soft: #e3eef3; --focus: #1b5873;
+	--font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--canvas: #111518; --surface: #1a1f23; --line: #3a444c; --ink: #eceff2; --ink-muted: #b4bec7;
+		--accent: #86bfda; --accent-soft: #172c37; --focus: #f0c27a;
+		color-scheme: dark;
+	}
+}
+:root[data-theme="dark"] {
+	--canvas: #111518; --surface: #1a1f23; --line: #3a444c; --ink: #eceff2; --ink-muted: #b4bec7;
+	--accent: #86bfda; --accent-soft: #172c37; --focus: #f0c27a;
+	color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font: 400 1.0625rem/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 760px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.site-header { background: var(--surface); border-bottom: 1px solid var(--line); }
+.site-header .wrap, .site-footer .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; min-height: 64px; }
+.logo { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; color: var(--ink); text-decoration: none; font-size: 1.25rem; font-weight: 700; }
+.logo .ic { width: 24px; height: 24px; fill: none; stroke: var(--accent); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.langs, .site-footer nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.langs a, .site-footer nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 6px; text-decoration: none; color: var(--ink-muted); font-weight: 600; font-size: 0.9375rem; }
+.langs a[aria-current], .site-footer nav a[aria-current] { background: var(--accent-soft); color: var(--accent); }
+.prose { padding-block: 48px 64px; }
+.prose h1 { font-size: clamp(2rem, 5vw, 2.75rem); line-height: 1.15; letter-spacing: -0.025em; margin: 0 0 24px; }
+.prose h2 { font-size: 1.375rem; line-height: 1.25; letter-spacing: -0.015em; margin: 40px 0 12px; }
+.prose h3 { font-size: 1.125rem; margin: 24px 0 8px; }
+.prose p, .prose ul { margin: 0 0 12px; }
+.prose ul { padding-left: 22px; }
+.prose li { margin-bottom: 6px; }
+.prose .lead { font-size: 1.1875rem; color: var(--ink-muted); }
+.prose .stand { margin-top: 32px; color: var(--ink-muted); font-size: 0.9375rem; }
+.site-footer { border-top: 1px solid var(--line); background: var(--surface); color: var(--ink-muted); font-size: 0.9375rem; }
+</style>
+</head>
+<body>
+<header class="site-header">
+	<div class="wrap">
+		<a class="logo" href="index.html" aria-label="Dwello, alla pagina iniziale"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Dwello</span></a>
+		<nav class="langs" aria-label="Lingua"><a href="../impressum.html" hreflang="de" lang="de">DE</a><a href="../fr/impressum.html" hreflang="fr" lang="fr">FR</a><a href="impressum.html" hreflang="it" lang="it" aria-current="page">IT</a><a href="../en/impressum.html" hreflang="en" lang="en">EN</a></nav>
+	</div>
+</header>
+<main class="wrap prose">
+	<h1>Note legali</h1>
+
+	<h2>Gestore</h2>
+	<p>Roger Rudin, Svizzera</p>
+	<p>E-mail: <a href="mailto:info@dwello.ch">info@dwello.ch</a></p>
+
+	<h2>Hosting</h2>
+	<p>Infomaniak Network SA, Ginevra, Svizzera</p>
+
+	<h2>Dwello è software libero</h2>
+	<p>Dwello è pubblicato con la licenza GNU Affero General Public License, versione 3 o successiva (AGPL-3.0-or-later). Trova il codice sorgente su <a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a>. Dwello è fornito senza garanzia, nella misura consentita dalla legge. I dettagli sono nella licenza.</p>
+	<p>Installa e gestisce Dwello da sé ed è responsabile della Sua installazione e dei Suoi dati. Dwello La aiuta a conteggiare le spese accessorie secondo il diritto di locazione (Codice delle obbligazioni e ordinanza sulla locazione). Non sostituisce una consulenza legale. Fa stato ciò che il Suo contratto di locazione pattuisce come spese accessorie. Verifichi i Suoi conteggi prima di inviarli.</p>
+
+	<h2>Contenuti e link</h2>
+	<p>Redigiamo i contenuti di questo sito con cura, ma non garantiamo che siano corretti, completi e aggiornati. Dei contenuti dei siti a cui rimandiamo rispondono i rispettivi gestori.</p>
+	<p>Le immagini dell’app su questo sito mostrano dati dimostrativi. Persone, numeri di conto e importi sono inventati. Gli indirizzi sono scelti liberamente; gli immobili a questi indirizzi non hanno nulla a che fare con Dwello.</p>
+
+	<h2>Diritto d’autore</h2>
+	<p>I diritti su testi, immagini e logo di questo sito spettano al gestore o alle persone che li hanno creati, salvo indicazione contraria. Le immagini dell’app mostrano Dwello, pubblicato con l’AGPL-3.0-or-later.</p>
+	<p>Il carattere Inter è pubblicato con la SIL Open Font License 1.1 (© The Inter Project Authors, <a href="https://github.com/rsms/inter/blob/master/LICENSE.txt" rel="noopener">testo della licenza</a>). Le icone di Lucide sono pubblicate con la licenza ISC (© Lucide Icons and Contributors, <a href="https://github.com/lucide-icons/lucide/blob/main/LICENSE" rel="noopener">testo della licenza</a>).</p>
+</main>
+<footer class="site-footer">
+	<div class="wrap">
+		<span>© 2026 Roger Rudin</span>
+		<nav aria-label="Note giuridiche"><a href="index.html">Pagina iniziale</a><a href="impressum.html" aria-current="page">Note legali</a><a href="datenschutz.html">Informativa sulla protezione dei dati</a></nav>
+	</div>
+</footer>
+</body>
+</html>

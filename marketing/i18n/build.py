@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LANGS = {"fr": "fr-CH", "it": "it-CH", "en": "en"}
-PAGES = ["index.html"]  # impressum.html, datenschutz.html follow once their translations are reviewed
+PAGES = ["index.html", "impressum.html", "datenschutz.html"]
 # Texts that stay the same in every language (names, numbers, technical terms)
 SAME = {"Dwello", "DE", "FR", "IT", "EN", "CHF 0.–", "48 px", "390 px", "7 : 1", "CHF 215.80", "AGPL-3.0", "Open Source",
         "GitHub", "dwello.next_steps", "dwello.deadlines", "(days: 14)", "Installation", "Community", "Mobile first",
