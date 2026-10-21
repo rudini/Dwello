@@ -117,6 +117,13 @@ describe('Mietvertrag Schritt für Schritt', () => {
 		expect(flatRateNotice(flat, [])).toBeNull();
 	});
 
+	// #522: a category the form does not list is not billed, so it does not count as ticked
+	it('zählt für die Warnung zur Nebenkostenpauschale nur angezeigte Nebenkosten', () => {
+		const categories = [{ id: 'c1', name: 'Heizung' }];
+		const flat = { ...filled, advancePayment: '', flatRateUtilityCharge: '120' };
+		expect(flatRateNotice({ ...flat, agreedCategoryIds: ['hidden'] }, categories)).toBeNull();
+	});
+
 	// #432 (Product Owner): auch mit Akonto rechnet Dwello alle angekreuzten Nebenkosten ab, auch die der Pauschale
 	it('warnt mit Akonto und Nebenkostenpauschale vor angekreuzten Nebenkosten', () => {
 		const categories = [{ id: 'c1', name: 'Heizung' }];

@@ -1384,6 +1384,47 @@ describe('Verteilschlüssel einer Rechnung', () => {
 		expect(calls).toEqual([]);
 	});
 
+	// #573 (persona Helga 548 P-1 on the upload): the Kategorie brings its Verteilschlüssel, so the field no longer asks for one
+	it('nimmt den Fehler am Verteilschlüssel zurück, sobald die gewählte Kategorie ihn mitbringt', async () => {
+		fakeBff();
+		newInvoice('');
+		submit('submit-button');
+		expect(text()).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+
+		choose('invoice-building-select', 'b1');
+		choose('invoice-category-select', 'c1');
+		await settle();
+
+		expect(key().value).toBe('k2');
+		expect(text()).not.toContain('Wählen Sie, wie die Kosten verteilt werden.');
+	});
+
+	it('nimmt beim Bearbeiten den Fehler am Verteilschlüssel zurück, sobald die gewählte Kategorie ihn mitbringt', async () => {
+		fakeBff();
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice({
+					categoryId: 'c3',
+					distributionKeyId: undefined,
+					distributionKey: undefined
+				}),
+				buildings,
+				categories: [...categories, { id: 'c3', name: 'Lift', isAllowedUtilityCost: true }],
+				distributionKeys: keys,
+				latestKeys,
+				defaultDistributionKeyId: ''
+			}
+		} as never);
+		submit('submit-button');
+		expect(text()).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+
+		choose('invoice-category-select', 'c1');
+		await settle();
+
+		expect(key().value).toBe('k2');
+		expect(text()).not.toContain('Wählen Sie, wie die Kosten verteilt werden.');
+	});
+
 	it('schlägt einer Rechnung ohne Verteilschlüssel beim Bearbeiten den Verteilschlüssel vor', () => {
 		show(EditInvoicePage, {
 			data: {

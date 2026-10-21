@@ -234,7 +234,7 @@
 		saving = true;
 		const response = await apiCall('/contracts', {
 			method: 'POST',
-			body: contractBody(offeredBilledUntil(values, today))
+			body: contractBody(offeredBilledUntil(values, today), categories)
 		});
 		saving = false;
 		if (response.error) {

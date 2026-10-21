@@ -26,7 +26,8 @@ const data = {
 		{ id: 'a1', unit: '2.01', building: 'Ahornhof' },
 		{ id: 'a2', unit: '2.02', building: 'Ahornhof' },
 		{ id: 'a3', unit: '2.03', building: 'Ahornhof' }
-	]
+	],
+	categories: [] // the boxes of the agreed Nebenkosten (#91)
 };
 // As the contract list answers: a2 is rented without end, a1's last contract ended long ago
 const contractsOf: Record<string, unknown[]> = {

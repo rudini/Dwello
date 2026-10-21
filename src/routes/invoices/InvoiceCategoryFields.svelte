@@ -104,6 +104,7 @@
 	{/snippet}
 </Field>
 
+<!-- the error only while no key is set: a key the Kategorie brings comes without an input that would take it away (#548, #573) -->
 <Select
 	id="{idPrefix}distributionKey"
 	label={m.glossary_key_term()}
@@ -112,7 +113,7 @@
 	options={distributionKeys.map((key) => ({ value: key.id, label: key.name }))}
 	bind:value={distributionKeyId}
 	onchange={() => (keyChosen = true)}
-	error={keyError}
+	error={distributionKeyId ? undefined : keyError}
 	note={keyNote}
 	testid="invoice-distribution-key-select"
 />

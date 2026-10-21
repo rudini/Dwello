@@ -176,7 +176,8 @@ export default defineConfig<{ driver: Driver }>({
 		locale: 'de-CH',
 		screenshot: 'only-on-failure',
 		video: 'off',
-		trace: 'on-first-retry'
+		// kept for every failing test: without retries, «on-first-retry» never recorded one (O-47)
+		trace: 'retain-on-failure'
 	},
 	projects: [
 		{
