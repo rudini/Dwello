@@ -2465,3 +2465,11 @@ Branch `ccr-75acfcf1-m4asdv`, restarted on `main` after #562. #553 bumps `action
 
 - [x] Test accepts any major version (red against #553's workflow file, green with v4 and v7)
 - [x] PR: pushed after this archive
+
+## Session: red main in WebKit, «Abrechnung bearbeiten» (2026-10-21)
+
+Branch `ccr-75acfcf1-m4asdv`, restarted on `main` after #564. Fixes #560: since #554 (Playwright 1.64 WebKit) WebKit's own form validation stopped «Abrechnung bearbeiten» at DateInput's hidden calendar field once the Frist was emptied. The scenarios «Zahlungsfrist fehlt» and «statement-edit submit-cleared» show it in WebKit on main.
+
+- [x] `novalidate` on the form, as on every other form with a DateInput; DOM test red first
+- [x] code-reviewer round 1 (`docs/reviews/webkit-review-1.md`): C-1 fixed; the Tankbestand form's same risk → #566
+- [x] PR: pushed after this archive
