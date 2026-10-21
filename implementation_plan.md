@@ -48,4 +48,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] O-47 review round 1: `docs/reviews/o47-review-1.md` (no findings)
 - [x] O-47 PR #587 merged
 - [x] #585 BFF tests red (`category-lists.test.ts`: categories page, building page, `namesById`, 150 categories, 100 shown); the three loads ask for `limit=1000`, green; No scenario: it needs more than 100 categories in the shared E2E database
-- [ ] #585 slice review, PR merged
+- [x] #585 slice review round 1: `docs/reviews/585-review-1.md`; Minor C-1 fixed (the building test also checks the name of a Tankbestand in category c149, red without the change); the other 100-limits (Verteilschlüssel, Heizprofile) became #588
+- [ ] #585 closing review, PR merged
