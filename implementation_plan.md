@@ -8,3 +8,11 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session 2026-10-21: open bugs, then ready issues (one pull request each)
+
+- [x] #568 test first: `backend/src/__tests__/compose-prod.test.ts` red (8 mail keys missing in the backend service)
+- [x] #568 `docker-compose.prod.yml` passes `MAIL_TRANSPORT`, `MAIL_FROM`, `SMTP_*`, `RESEND_API_KEY`; `docker compose config` with `.env.example` shows them; No scenario: the E2E stack does not run `docker-compose.prod.yml`
+- [x] #568 slice review round 1: `docs/reviews/568-review-1.md`; Minors C-1 (comment), C-2 (test of the SMTP_PORT default, seen red) fixed
+- [x] #568 closing review round 2: `docs/reviews/568-review-2.md`
+- [ ] #568 PR merged
