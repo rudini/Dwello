@@ -12,6 +12,7 @@ import {
 import { runAction } from './helpers/action';
 import { agreeableCategories } from '$lib/server/category';
 import proposal from '../../tests/contracts/category-proposal.json';
+import allowed from '../../tests/contracts/categories-allowed.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
 import invalid from '../../tests/contracts/validation-refused.json';
 import contract from '../../tests/contracts/category.json';
@@ -348,19 +349,12 @@ describe('Kategorie löschen', () => {
 describe('Kategorien, die ein Mietvertrag vereinbaren kann', () => {
 	const answer = (status = 200) =>
 		(async (url: string) =>
-			url === `${API}?limit=100`
-				? Response.json(
-						{
-							categories: [
-								{ ...contract, id: 'c1', nameDE: 'Internet' },
-								{ ...contract, id: 'c2', nameDE: 'Verwaltung', isAllowedUtilityCost: false }
-							]
-						},
-						{ status }
-					)
+			url === `${API}/allowed`
+				? Response.json([{ ...allowed[0], id: 'c1', nameDE: 'Internet' }], { status })
 				: Response.json({}, { status: 404 })) as typeof globalThis.fetch;
 
-	it('nennt nur die umlagefähigen', async () => {
+	// every umlagefähige one, as the backend lists them without a limit (#522)
+	it('nennt die umlagefähigen beim Namen', async () => {
 		expect(await agreeableCategories(answer())).toEqual([{ id: 'c1', name: 'Internet' }]);
 	});
 

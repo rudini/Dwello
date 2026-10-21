@@ -205,7 +205,7 @@
 	// backend deletes with the change, or keeps when it refuses it (#141)
 	async function put(next: string, deleteDraft?: string) {
 		saving = true;
-		const body = { ...contractBody(values), deleteDraft };
+		const body = { ...contractBody(values, categories), deleteDraft };
 		const response = await apiCall(back, { method: 'PUT', body });
 		saving = false;
 		if (response.error) {

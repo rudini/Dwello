@@ -180,7 +180,7 @@ describe('validateContract', () => {
 
 describe('contractBody', () => {
 	it('sends amounts as strings, empty optional amounts as 0 and no end for an unlimited contract', () => {
-		expect(contractBody({ ...filled, endDate: '2026-01-01', advancePayment: '120' })).toEqual({
+		expect(contractBody({ ...filled, endDate: '2026-01-01', advancePayment: '120' }, [])).toEqual({
 			tenantId: 't1',
 			apartmentId: 'a1',
 			startDate: '2025-01-01',
@@ -191,7 +191,8 @@ describe('contractBody', () => {
 			monthlyAdvancePayment: '120',
 			flatRateUtilityCharge: '0',
 			managementFeeAgreed: true,
-			managementFeePercent: null
+			managementFeePercent: null,
+			agreedCategoryIds: []
 		});
 	});
 
@@ -221,13 +222,13 @@ describe('contractBody', () => {
 	it('sendet Akonto und «Gültig ab» nur, wenn sich der Betrag geändert hat', () => {
 		const values = edited('2024-04-01', null);
 
-		expect(contractBody(values)).not.toHaveProperty('monthlyAdvancePayment');
-		expect(contractBody({ ...values, advancePaymentFrom: '2030-01-01' })).not.toHaveProperty('advancePaymentFrom');
-		expect(contractBody({ ...values, advancePayment: '90' })).toMatchObject({
+		expect(contractBody(values, [])).not.toHaveProperty('monthlyAdvancePayment');
+		expect(contractBody({ ...values, advancePaymentFrom: '2030-01-01' }, [])).not.toHaveProperty('advancePaymentFrom');
+		expect(contractBody({ ...values, advancePayment: '90' }, [])).toMatchObject({
 			monthlyAdvancePayment: '90',
 			advancePaymentFrom: values.advancePaymentFrom
 		});
-		expect(contractBody(filled)).not.toHaveProperty('advancePaymentFrom');
+		expect(contractBody(filled, [])).not.toHaveProperty('advancePaymentFrom');
 	});
 
 	// review 464-1 C-2: ein leeres oder falsch getipptes «Gültig ab» ändert nicht still den ersten Betrag
@@ -242,31 +243,36 @@ describe('contractBody', () => {
 
 	// #429: die Nebenkostenpauschale geht mit, leer als 0, und kommt beim Bearbeiten zurück ins Formular
 	it('sendet die Nebenkostenpauschale und liest sie beim Bearbeiten', () => {
-		expect(contractBody({ ...filled, flatRateUtilityCharge: '120' }).flatRateUtilityCharge).toBe('120');
+		expect(contractBody({ ...filled, flatRateUtilityCharge: '120' }, []).flatRateUtilityCharge).toBe('120');
 		const contract = { ...filled, id: 'c1', monthlyAdvancePayment: '0', flatRateUtilityCharge: '120.00' };
 		expect(initialContractValues(contract as never, new URLSearchParams()).flatRateUtilityCharge).toBe('120.00');
 	});
 
 	// #133: only the edit form has «Abgerechnet bis»; emptied, it is forgotten
 	it('sendet «Abgerechnet bis» beim Bearbeiten, leer als kein Datum', () => {
-		expect(contractBody({ ...filled, billedUntil: '2024-12-31' }).billedUntil).toBe('2024-12-31');
-		expect(contractBody({ ...filled, billedUntil: '' }).billedUntil).toBeNull();
-		expect(contractBody(filled)).not.toHaveProperty('billedUntil');
+		expect(contractBody({ ...filled, billedUntil: '2024-12-31' }, []).billedUntil).toBe('2024-12-31');
+		expect(contractBody({ ...filled, billedUntil: '' }, []).billedUntil).toBeNull();
+		expect(contractBody(filled, [])).not.toHaveProperty('billedUntil');
 		const contract = { ...filled, id: 'c1', billedUntil: '2024-12-31', monthlyAdvancePayment: '0' };
 		expect(initialContractValues(contract as never, new URLSearchParams()).billedUntil).toBe(
 			'2024-12-31'
 		);
 	});
 
-	// #91: ohne Auswahl vereinbart das Backend alle umlagefähigen Kategorien
-	it('sendet die vereinbarten Nebenkosten nur, wenn sie gewählt sind', () => {
-		expect(contractBody(filled)).not.toHaveProperty('agreedCategoryIds');
-		expect(contractBody({ ...filled, agreedCategoryIds: [] })).toHaveProperty('agreedCategoryIds', []);
+	// #91, #522: what the boxes show is what Dwello bills; without a click every box is ticked, and a category the
+	// form does not list is neither agreed nor kept
+	it('sendet genau die angezeigten und angekreuzten Nebenkosten', () => {
+		const shown = [{ id: 'c1' }, { id: 'c2' }];
+		expect(contractBody(filled, shown).agreedCategoryIds).toEqual(['c1', 'c2']);
+		expect(
+			contractBody({ ...filled, agreedCategoryIds: ['c2', 'hidden'] }, shown).agreedCategoryIds
+		).toEqual(['c2']);
+		expect(contractBody({ ...filled, agreedCategoryIds: [] }, shown).agreedCategoryIds).toEqual([]);
 	});
 
 		it('sendet die Verwaltungspauschale: vereinbart mit eigenem Satz, zum Satz des Laufs oder nicht', () => {
 		const fee = (values: Partial<ContractFormValues>) => {
-			const { managementFeeAgreed, managementFeePercent } = contractBody({ ...filled, ...values });
+			const { managementFeeAgreed, managementFeePercent } = contractBody({ ...filled, ...values }, []);
 			return { managementFeeAgreed, managementFeePercent };
 		};
 		expect(fee({ managementFee: 'own', managementFeeRate: '2,5' })).toEqual({

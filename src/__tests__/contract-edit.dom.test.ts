@@ -39,7 +39,8 @@ const contract = (endDate: string | null = null, terminated = false) => ({
 const data = (endDate: string | null = null, terminated = false) => ({
 	contract: contract(endDate, terminated),
 	tenant: 'Anna Keller',
-	apartment: 'Wohnung 2.01 · Ahornhof'
+	apartment: 'Wohnung 2.01 · Ahornhof',
+	categories: [] // the boxes of the agreed Nebenkosten (#91)
 });
 
 let calls: ReturnType<typeof fakeBff>;

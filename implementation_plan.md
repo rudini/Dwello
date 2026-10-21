@@ -33,4 +33,10 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #573 scenario «Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück» (`invoice-new.feature`), green; no red run of its own (the DOM tests were seen red); No scenario for the edit page: it shares the field component, covered by its DOM test
 - [x] #573 slice review round 1: `docs/reviews/573-review-1.md` (no findings)
 - [x] #573 persona Helga: `docs/design/personas/helga-573.md` (no findings; observations pre-existing, stay in the report)
-- [ ] #573 PR merged
+- [x] #573 PR #582 merged
+- [x] #522 BFF load test red: `agreeableCategories` reads `/categories/allowed` (every umlagefähige category, no limit); contract `tests/contracts/categories-allowed.json` with its check in `api-contracts.pg.test.ts`
+- [x] #522 `contractBody` test red: the body always names the shown and ticked categories (no click: every box), a category the form does not list is neither agreed nor kept; `flatRateNotice` test red: counts only shown boxes
+- [x] #522 No scenario: it needs more than 100 categories in the shared E2E database or a change in another tab while the form loads; contract E2E features (145) green
+- [x] #522 slice review round 1: `docs/reviews/522-review-1.md`; Minor C-2 fixed (one helper `ticked`); Minor C-1 (a category changed in another tab while the form loads is answered without a word; needs the backend to answer only shown ids) stays in the report, named in the PR; the invoice form limit became #583
+- [x] #522 closing review round 2: `docs/reviews/522-review-2.md` (no new findings)
+- [ ] #522 PR merged

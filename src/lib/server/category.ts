@@ -52,15 +52,14 @@ export const kiEnabled = (fetch: typeof globalThis.fetch) =>
  * would save every category as not agreed, so the page fails instead
  */
 export async function agreeableCategories(fetch: typeof globalThis.fetch) {
-	const response = await fetch(`${API}?limit=100`);
+	// every umlagefähige one: a limit counting all categories left some without a box (#522)
+	const response = await fetch(`${API}/allowed`);
 	if (!response.ok) throw error(response.status, m.buildings_categories_load_failed());
-	const { categories } = (await response.json()) as { categories: Record<string, unknown>[] };
-	return categories
-		.filter((category) => category.isAllowedUtilityCost)
-		.map((category) => ({
-			id: category.id as string,
-			name: localName(category as Parameters<typeof localName>[0])
-		}));
+	const categories = (await response.json()) as Record<string, unknown>[];
+	return categories.map((category) => ({
+		id: category.id as string,
+		name: localName(category as Parameters<typeof localName>[0])
+	}));
 }
 
 export const fetchCategory = async (fetch: typeof globalThis.fetch, id: string) =>
