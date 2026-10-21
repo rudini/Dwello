@@ -20,7 +20,7 @@ PAGES = ["index.html", "impressum.html", "datenschutz.html"]
 SAME = {"Dwello", "DE", "FR", "IT", "EN", "CHF 0.–", "48 px", "390 px", "7 : 1", "CHF 215.80", "AGPL-3.0", "Open Source",
         "GitHub", "dwello.next_steps", "dwello.deadlines", "(days: 14)", "Installation", "Community", "Mobile first",
         "Terminal · Windows, macOS, Linux", "SSH · Synology, Unraid, Mini-PC", "Linux-Server · Infomaniak, Exoscale, Hetzner",
-        "Homeserver / NAS", "Roadmap", "Demo", "MCP-Server", "AGPL-3.0-or-later", "Deutsch", "Français", "Italiano", "English"}
+        "Homeserver / NAS", "Roadmap", "Demo", "MCP-Server", "AGPL-3.0-or-later", "Deutsch", "Français", "Italiano", "English", "Lift", "Wasserversorgung Zürich", "CHF 930.00", "CHF 1'690.00"}
 # German words that must not survive a translation
 GERMAN = re.compile(r"\b(und|oder|nicht|Sie|Ihre?n?|Wohnung\w*|Gebäude|Rechnung\w*|Abrechnung\w*|Mieter\w*|für|mit|auf|der|die|das|ist|wird)\b")
 

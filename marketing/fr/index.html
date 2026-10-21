@@ -181,8 +181,30 @@ section { padding-block: 96px; }
 /* A cost split into equal shares, one of them marked */
 .split { display: grid; gap: 12px; margin-top: 8px; }
 .split-bar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
-.split-bar span { display: grid; place-items: center; min-height: 48px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-control); font-weight: 600; font-variant-numeric: tabular-nums; }
+.split-bar span { display: grid; place-content: center; justify-items: center; min-height: 64px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-control); font-weight: 600; font-variant-numeric: tabular-nums; }
 .split-bar .me { background: var(--accent-soft); border: 2px solid var(--accent); color: var(--accent); }
+.split-bar small { display: block; font-size: 0.875rem; font-weight: 400; color: var(--ink-muted); }
+.split-total { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; background: var(--accent-soft); border: 2px solid var(--accent); border-radius: var(--radius-control); color: var(--accent); font-weight: 600; }
+/* Animations: start only on the button, play once, can be paused; without them (no JS, reduced motion) the end state shows */
+.anim { display: grid; gap: 12px; margin: 0; }
+.anim-art { display: block; width: 100%; height: auto; }
+.anim-art text { font-family: var(--font); }
+.anim-play { justify-self: start; }
+.anim .a-chk { transform-box: fill-box; transform-origin: center; }
+.anim.run .a-doc { animation: a-drop .7s ease-out backwards; }
+.anim.run .a-v { animation: a-in .4s ease-out backwards; }
+.anim.run .a-v1 { animation-delay: 1s; } .anim.run .a-v2 { animation-delay: 1.5s; } .anim.run .a-v3 { animation-delay: 2s; } .anim.run .a-v4 { animation-delay: 2.5s; }
+.anim.run .a-chk { animation: a-pop .4s ease-out 3.2s backwards; }
+.anim.run .split-total { animation: a-in .5s ease-out backwards; }
+.anim.run .split-bar span { animation: a-pop .35s ease-out backwards; }
+.anim.run .split-bar span:nth-child(2) { animation-delay: 1.05s; } .anim.run .split-bar span:nth-child(3) { animation-delay: 1.3s; } .anim.run .split-bar span:nth-child(4) { animation-delay: 1.55s; } .anim.run .split-bar span:nth-child(5) { animation-delay: 1.8s; } .anim.run .split-bar span:nth-child(6) { animation-delay: 2.05s; }
+.anim.run .split-bar .me { animation: a-pop .35s ease-out .8s backwards, a-mark .6s ease-out 2.7s backwards; }
+.anim.paused * { animation-play-state: paused !important; }
+@keyframes a-drop { from { opacity: 0; transform: translateY(-48px); } }
+@keyframes a-in { from { opacity: 0; transform: translateX(-8px); } }
+@keyframes a-pop { from { opacity: 0; transform: scale(.85); } }
+@keyframes a-mark { from { background: var(--sunken); border-color: var(--line); color: var(--ink); } }
+@media (prefers-reduced-motion: reduce) { .anim-play { display: none; } }
 
 /* Feature rows */
 .feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 64px; border-top: 1px solid var(--line); }
@@ -501,6 +523,26 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 					<li>L’IA lit le montant, la date et la catégorie.</li>
 					<li>Vous vérifiez les données et confirmez.</li>
 				</ol>
+				<figure class="anim" data-anim data-end="a-pop">
+					<svg class="anim-art" viewBox="0 0 320 200" aria-hidden="true">
+						<rect x="1" y="1" width="318" height="198" rx="12" fill="var(--surface)" stroke="var(--line)"/>
+						<g class="a-doc">
+							<rect x="20" y="44" width="68" height="88" rx="4" fill="var(--sunken)" stroke="var(--line-strong)" stroke-width="2"/>
+							<line x1="32" y1="64" x2="76" y2="64" stroke="var(--line-strong)" stroke-width="2"/><line x1="32" y1="78" x2="68" y2="78" stroke="var(--line-strong)" stroke-width="2"/><line x1="32" y1="92" x2="72" y2="92" stroke="var(--line-strong)" stroke-width="2"/>
+							<line x1="32" y1="114" x2="76" y2="114" stroke="var(--accent)" stroke-width="3"/>
+						</g>
+						<text x="108" y="34" font-size="13" fill="var(--ink-muted)">Émetteur de la facture</text>
+						<text class="a-v a-v1" x="108" y="54" font-size="16" font-weight="600" fill="var(--ink)">Wasserversorgung Zürich</text>
+						<text x="108" y="80" font-size="13" fill="var(--ink-muted)">Montant</text>
+						<text class="a-v a-v2" x="108" y="100" font-size="16" font-weight="600" fill="var(--ink)">CHF 930.00</text>
+						<text x="108" y="126" font-size="13" fill="var(--ink-muted)">Date</text>
+						<text class="a-v a-v3" x="108" y="146" font-size="16" font-weight="600" fill="var(--caution)">31.03.2025</text>
+						<g class="a-chk"><rect x="204" y="128" width="104" height="26" rx="6" fill="var(--caution-soft)" stroke="var(--caution)"/><text x="256" y="146" font-size="13" font-weight="600" fill="var(--caution)" text-anchor="middle">À vérifier</text></g>
+						<text x="108" y="172" font-size="13" fill="var(--ink-muted)">Catégorie</text>
+						<text class="a-v a-v4" x="108" y="192" font-size="16" font-weight="600" fill="var(--ink)">Eau froide</text>
+					</svg>
+					<button class="btn btn-secondary anim-play" type="button">Lire le déroulement</button>
+				</figure>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>IA locale avec Ollama, sans cloud<small>Avec l’IA locale, vos pièces justificatives ne quittent pas le serveur. Qui le souhaite connecte à la place n’importe quelle IA compatible OpenAI.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Indication des factures manquantes<small>Dwello attend ce qui est arrivé l’an dernier. S’il manque la facture d’eau, vous le voyez avant le décompte.</small></span></li>
@@ -537,10 +579,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<span class="badge info">Clés de répartition et profils de chauffage</span>
 				<h3>Une répartition juste, même en hiver.</h3>
 				<p>Coûts selon la surface, les pièces, les unités ou une formule personnalisée, par exemple 70 % selon la surface et 30 % par appartement. Les frais de chauffage suivent un profil de chauffage : en janvier, un jour de location compte plus qu’en été. Un profil est fourni pour le Plateau, la montagne et le Tessin, plus un pour le chauffage avec eau chaude.</p>
-				<div class="split">
+				<figure class="anim split" data-anim data-end="a-mark">
 					<p>Un exemple tiré des données de démo : l’ascenseur du Musterhaus Zentrum coûte CHF 1'690.00 par an. Réparti par unité, chacun des six appartements en supporte CHF 281.67, y compris l’appartement 1.01 de Hans Müller.</p>
-					<div class="split-bar" aria-hidden="true"><span class="me">1.01</span><span>1.02</span><span>2.01</span><span>2.02</span><span>3.01</span><span>3.02</span></div>
-				</div>
+					<div class="split-total" aria-hidden="true"><span>Ascenseur</span><span>CHF 1'690.00</span></div>
+					<div class="split-bar" aria-hidden="true"><span class="me">1.01<small>281.67</small></span><span>1.02<small>281.67</small></span><span>2.01<small>281.67</small></span><span>2.02<small>281.67</small></span><span>3.01<small>281.67</small></span><span>3.02<small>281.67</small></span></div>
+					<button class="btn btn-secondary anim-play" type="button">Lire la répartition</button>
+				</figure>
 			</div>
 			<div class="duo">
 				<figure class="figure">
@@ -924,6 +968,26 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	document.addEventListener('click', function (e) { if (menu.open && !menu.contains(e.target)) menu.open = false; });
 	document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); } });
 	menu.addEventListener('focusout', function (e) { if (e.relatedTarget && !menu.contains(e.relatedTarget)) menu.open = false; });
+
+	// an animation plays once from its button, which then pauses, resumes and replays it
+	document.querySelectorAll('[data-anim]').forEach(function (f) {
+		var b = f.querySelector('.anim-play');
+		b.addEventListener('click', function () {
+			if (f.classList.contains('run') && !f.classList.contains('done')) {
+				b.textContent = f.classList.toggle('paused') ? 'Reprendre' : 'Pause';
+				return;
+			}
+			f.classList.remove('run', 'paused', 'done');
+			void f.offsetWidth;
+			f.classList.add('run');
+			b.textContent = 'Pause';
+		});
+		f.addEventListener('animationend', function (e) {
+			if (e.animationName !== f.getAttribute('data-end')) return;
+			f.classList.add('done');
+			b.textContent = 'Relire';
+		});
+	});
 
 	var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
 	function select(tab) {
