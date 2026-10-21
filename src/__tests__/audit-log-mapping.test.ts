@@ -20,6 +20,11 @@ describe('Protokoll aus dem Backend', () => {
 		});
 	});
 
+	// #576: a sign-in with a Konto mit Passwort names no provider
+	it('nennt eine Anmeldung mit Passwort', () => {
+		expect(textOf(login, { provider: 'local' })).toBe('Anmeldung mit Passwort');
+	});
+
 	it('nennt, was sich geändert hat', () => {
 		expect(entries.map((entry) => entry.text)).toEqual([
 			'Anmeldung mit Google',

@@ -541,8 +541,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Ideal to get started</h3>
 				<dl>
-					<div><dt>You need</dt><dd>Docker Desktop, a Google account and 16 GB of memory for the local AI. With less memory, enter an external AI.</dd></div>
-					<div><dt>Time needed</dt><dd>About an hour, including the Google sign-in and the download of the AI model.</dd></div>
+					<div><dt>You need</dt><dd>Docker Desktop and 16 GB of memory for the local AI. With less memory, enter an external AI.</dd></div>
+					<div><dt>Time needed</dt><dd>About an hour, including the download of the AI model.</dd></div>
 					<div><dt>Good to know</dt><dd>Dwello only runs while your PC is on. For access from your phone, a home server is a better fit.</dd></div>
 				</dl>
 			</div>
@@ -563,7 +563,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Always reachable, in your own home</h3>
 				<dl>
-					<div><dt>You need</dt><dd>A NAS or mini PC with Docker and your own domain with HTTPS, because Google sign-in requires it. For the local AI, 16 GB of memory.</dd></div>
+					<div><dt>You need</dt><dd>A NAS or mini PC with Docker. Recommended for access from other devices: your own domain with HTTPS. For the local AI, 16 GB of memory.</dd></div>
 					<div><dt>Access on the go</dt><dd>Through your VPN or a tunnel such as Tailscale. Dwello does not need to face the open internet.</dd></div>
 					<div><dt>Good to know</dt><dd>Small devices are better off with an external AI. What then goes out is listed under Privacy.</dd></div>
 				</dl>
@@ -590,7 +590,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Google sign-in for now</b>You sign in with your Google account. During setup a key is created at Google once; the guide shows how. A one-step installer with its own sign-in, without Google, is planned (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 on GitHub: one-step installer">#497</a>).</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Sign-in with password</b>During setup, an account with email address and password is created. If you prefer, sign in with your Google account instead; the guide shows both. A one-step installer is planned (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 on GitHub: one-step installer">#579</a>).</span></div>
 	</div>
 </section>
 
@@ -601,7 +601,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="sec-head">
 				<span class="kicker">Privacy</span>
 				<h2>Built for the Swiss Data Protection Act.</h2>
-				<p>Tenant data is personal data. Dwello treats it that way: it stays on your server, nothing comes to us, and you can answer any information request at any time. Only what a task needs goes out: sign-in with Google, the address search in the federal building register, your e-mails to tenants and, if you set it up that way, invoices to an external AI. You remain responsible for your tenants’ data.</p>
+				<p>Tenant data is personal data. Dwello treats it that way: it stays on your server, nothing comes to us, and you can answer any information request at any time. Only what a task needs goes out: sign-in with Google, if you use it, the address search in the federal building register, your e-mails to tenants and, if you set it up that way, invoices to an external AI. You remain responsible for your tenants’ data.</p>
 			</div>
 			<!-- In the app's illustration style: line, fill, one accent stroke -->
 			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="A house with a server inside" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -668,7 +668,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello is developed in the open. These points are planned; most have an issue on GitHub where you can have your say.</p>
 		</div>
 		<div class="road">
-			<article><span class="badge plan">Planned</span><h3>One-step installer</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 on GitHub: one-step installer">#497</a><p>One command, one question about your email, done. With its own sign-in, no Google account.</p></article>
+			<article><span class="badge plan">Planned</span><h3>One-step installer</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 on GitHub: one-step installer">#579</a><p>One line to paste installs Docker and Dwello; the rest happens in the browser.</p></article>
 			<article><span class="badge plan">Planned</span><h3>MCP server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener" aria-label="Issue 495 on GitHub: MCP server">#495</a><p>Dwello as a tool for your AI assistant, local and with your permission.</p></article>
 			<article><span class="badge plan">Planned</span><h3>Full export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener" aria-label="Issue 496 on GitHub: full export">#496</a><p>All data as CSV and JSON, at any time, in one click.</p></article>
 			<article><span class="badge plan">Planned</span><h3>Reports and analysis</h3><p>Income, expenses and utility costs over the years, for your tax return and your accountant.</p></article>

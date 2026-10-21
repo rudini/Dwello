@@ -14,6 +14,10 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | Datei | Endpunkt |
 |---|---|
 | `statement.json` | `GET /api/v1/statements/:id` |
+| `auth-password-available.json` | `GET /api/v1/auth/password` (gibt es ein Konto mit Passwort, #576) |
+| `auth-password.json` | `POST /api/v1/auth/password` mit richtigem Passwort |
+| `auth-password-invalid.json` | `POST /api/v1/auth/password` mit falschem Passwort (401) |
+| `auth-password-locked.json` | `POST /api/v1/auth/password` nach 5 Fehlversuchen (423, Sperre) |
 | `statement-payment-reset.json` | `POST /api/v1/statements/:id/payment-reset` (die Abrechnung mit dem Zurücksetzen im Verlauf) |
 | `statement-paid-date-refused.json` | `PUT /api/v1/statements/:id/status` mit einem Zahlungsdatum vor dem Abrechnungsdatum |
 | `statement-send-refused.json` | `POST /api/v1/statements/:id/send`, wenn die E-Mail an einen Mieter mit Korrespondenzkanal E-Mail nicht hinausgeht (400) |

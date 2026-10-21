@@ -40,6 +40,11 @@ Given('der Liegenschaftsverwalter liest die Datenschutzerklärung', async ({ ver
 	await verwalter.attemptsTo(openPage('/privacy'));
 });
 
+// after a precondition that changes what the statement says, e.g. a Konto mit Passwort (#576)
+When('der Liegenschaftsverwalter die Datenschutzerklärung erneut liest', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openPage('/privacy'));
+});
+
 Given('der Liegenschaftsverwalter liest die Nutzungsbedingungen', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openPage('/terms'));
 });
@@ -102,6 +107,20 @@ Then(
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(llmRecipientNotice(heading)).toContain('neue Kategorien');
 		await verwalter.sees(llmRecipientNotice(heading)).toContain('verlassen dafür den Server nicht');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello das Passwort nur umgerechnet speichert, sodass es sich nicht zurückrechnen lässt',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Daraus lässt sich das Passwort nicht zurückrechnen');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass jeder Fehlversuch mit der eingetippten E-Mail-Adresse protokolliert wird',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Jeder Fehlversuch mit Passwort und jede Sperre wird mit der eingetippten E-Mail-Adresse im Protokoll des Servers festgehalten');
 	}
 );
 

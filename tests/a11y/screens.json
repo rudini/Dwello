@@ -95,6 +95,9 @@
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
 		"login-error": "Login page showing a sign-in error (?error=failed).",
 		"login-not-allowed": "Login page after an account outside ALLOWED_EMAILS was refused (?error=not_allowed, #51).",
+		"login-password": "Login page with a Konto mit Passwort: the form for e-mail address and password next to Google (#576).",
+		"login-password-error": "Login page after a wrong password: the hint that e-mail address or password are not correct (#576).",
+		"login-locked": "Login page after five failed attempts: the Sperre with the time until it ends (#576).",
 		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
 		"user-menu-open": "User menu in the header open.",
 		"dialog-open": "A confirmation dialog of the page open.",
@@ -124,6 +127,9 @@
 				"default",
 				"login-error",
 				"login-not-allowed",
+				"login-password",
+				"login-password-error",
+				"login-locked",
 				"other-language",
 				"demo"
 			]

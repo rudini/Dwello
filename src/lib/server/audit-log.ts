@@ -17,7 +17,7 @@ const PROVIDERS: Record<string, string> = { google: 'Google', microsoft: 'Micros
 
 // The entry in the UI language, built when it is shown (fach review V-9)
 const TEXTS: Record<string, (d: Details) => string> = {
-	login: (d) => m.audit_login({ provider: PROVIDERS[String(d.provider)] }),
+	login: (d) => (d.provider === 'local' ? m.audit_login_password() : m.audit_login({ provider: PROVIDERS[String(d.provider)] })),
 	management_fee_changed: (d) =>
 		m.audit_fee({ from: normalizeDecimal(String(d.from)), to: normalizeDecimal(String(d.to)) }),
 	category_allocability_changed: (d) => {

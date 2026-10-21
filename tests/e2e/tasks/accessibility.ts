@@ -38,6 +38,8 @@ import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } fro
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { userMenuButton } from '../targets/app-frame';
+import { passwordSubmitButton } from '../targets/authentication';
+import { failSignIns, signInWithPassword } from './authentication';
 import {
 	confirmDeleteContractButton,
 	confirmEndContractButton,
@@ -188,6 +190,13 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'first-use': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Erstes Gebäude erfassen')))),
 	'login-error': () => Wait.until(on.loginError),
 	'login-not-allowed': () => Wait.until(on.loginError),
+	// #576: the sign-in with a Konto mit Passwort, offered, refused and locked
+	'login-password': () => Wait.until(passwordSubmitButton),
+	'login-password-error': (example) => (actor) =>
+		actor.attemptsTo(signInWithPassword(example.account!.email, 'falsches-Passwort'), Wait.until(on.loginError)),
+	'login-locked': (example) => (actor) =>
+		// each attempt on a freshly opened page, the 5th answered with the Sperre (code review 576 C-6)
+		actor.attemptsTo(failSignIns(example.account!.email, 5)),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// the Gebäuderegister of «Neues Gebäude» (#479), answered by its stand-in (backend/scripts/gwr-stub.ts)

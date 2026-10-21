@@ -1,12 +1,16 @@
 import { getConfiguredProviders, PROVIDER_NAMES } from '$lib/server/oauth';
 import { LOGIN_ERRORS } from '$lib/server/login-flow';
-import type { PageServerLoad } from './$types';
+import { insecureConnection, passwordAvailable, signInWithPassword } from '$lib/server/password-login';
+import type { Actions, PageServerLoad } from './$types';
 
 // Signed-in users never get here (hooks.server.ts sends them to the dashboard)
-export const load: PageServerLoad = ({ url }) => {
+export const load: PageServerLoad = async ({ url, fetch }) => {
 	const redirectTo = url.searchParams.get('redirectTo');
 	const error = url.searchParams.get('error');
 	return {
+		password: await passwordAvailable(fetch),
+		insecure: insecureConnection(url),
+		redirectTo,
 		providers: getConfiguredProviders().map((id) => ({
 			id,
 			name: PROVIDER_NAMES[id],
@@ -17,4 +21,8 @@ export const load: PageServerLoad = ({ url }) => {
 				? LOGIN_ERRORS[error as keyof typeof LOGIN_ERRORS]
 				: null
 	};
+};
+
+export const actions: Actions = {
+	password: async ({ request, cookies, fetch }) => signInWithPassword(fetch, cookies, await request.formData())
 };

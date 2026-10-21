@@ -1,5 +1,5 @@
 /**
- * Protokoll routes (#357): the list under «Einstellungen», deleting an entry, and the login the BFF reports after OAuth
+ * Protokoll routes (#357): the list under «Einstellungen», deleting an entry, and the login the BFF reports after OAuth or a password (#576)
  */
 
 import { Elysia, t } from 'elysia';
@@ -16,7 +16,7 @@ export const auditLogRoutes = new Elysia({ prefix: '/api/v1/audit-log' })
 			set.status = 201;
 			return null;
 		},
-		{ body: t.Object({ provider: t.Union([t.Literal('google'), t.Literal('microsoft')]) }) }
+		{ body: t.Object({ provider: t.Union([t.Literal('google'), t.Literal('microsoft'), t.Literal('local')]) }) }
 	)
 
 	.delete(

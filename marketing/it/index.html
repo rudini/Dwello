@@ -541,8 +541,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Ideale per iniziare</h3>
 				<dl>
-					<div><dt>Le serve</dt><dd>Docker Desktop, un account Google e 16 GB di memoria per l’IA locale. Con meno memoria indichi un’IA esterna.</dd></div>
-					<div><dt>Tempo necessario</dt><dd>Circa un’ora, con l’accesso Google e il download del modello di IA.</dd></div>
+					<div><dt>Le serve</dt><dd>Docker Desktop e 16 GB di memoria per l’IA locale. Con meno memoria indichi un’IA esterna.</dd></div>
+					<div><dt>Tempo necessario</dt><dd>Circa un’ora, con il download del modello di IA.</dd></div>
 					<div><dt>Buono a sapersi</dt><dd>Dwello funziona solo quando il Suo PC è acceso. Per l’accesso dal telefono è più adatto un server domestico.</dd></div>
 				</dl>
 			</div>
@@ -563,7 +563,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Sempre raggiungibile, a casa Sua</h3>
 				<dl>
-					<div><dt>Le serve</dt><dd>Un NAS o un mini-PC con Docker e un dominio proprio con HTTPS, perché l’accesso Google lo richiede. Per l’IA locale 16 GB di memoria.</dd></div>
+					<div><dt>Le serve</dt><dd>Un NAS o un mini-PC con Docker. Consigliato per l’accesso da altri dispositivi: un dominio proprio con HTTPS. Per l’IA locale 16 GB di memoria.</dd></div>
 					<div><dt>Accesso in viaggio</dt><dd>Tramite la Sua VPN o un tunnel come Tailscale. Dwello non deve essere aperto su Internet.</dd></div>
 					<div><dt>Buono a sapersi</dt><dd>I piccoli dispositivi usano meglio un’IA esterna. Cosa esce allora è indicato sotto Protezione dei dati.</dd></div>
 				</dl>
@@ -590,7 +590,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Oggi ancora con accesso Google</b>Accede con il Suo account Google. Durante l’installazione si crea una volta una chiave presso Google; la guida mostra come. È previsto un installatore in un solo passo con accesso proprio, senza Google (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 su GitHub: installatore in un solo passo">#497</a>).</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Accesso con password</b>Durante l’installazione si crea un account con indirizzo e-mail e password. Chi vuole accede invece con l’account Google; la guida mostra entrambe le cose. È previsto un installatore in un solo passo (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 su GitHub: installatore in un solo passo">#579</a>).</span></div>
 	</div>
 </section>
 
@@ -601,7 +601,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="sec-head">
 				<span class="kicker">Protezione dei dati</span>
 				<h2>Costruito secondo la legge svizzera sulla protezione dei dati.</h2>
-				<p>I dati degli inquilini sono dati personali. Dwello li tratta così: restano sul Suo server, nulla arriva a noi, e Lei può fornire informazioni in qualsiasi momento. Esce solo ciò che serve a un compito: l’accesso tramite Google, la ricerca dell’indirizzo nel registro degli edifici della Confederazione, le Sue e-mail agli inquilini e, se lo configura così, le fatture verso un’IA esterna. Responsabile dei dati dei Suoi inquilini resta Lei.</p>
+				<p>I dati degli inquilini sono dati personali. Dwello li tratta così: restano sul Suo server, nulla arriva a noi, e Lei può fornire informazioni in qualsiasi momento. Esce solo ciò che serve a un compito: l’accesso tramite Google, se lo usa, la ricerca dell’indirizzo nel registro degli edifici della Confederazione, le Sue e-mail agli inquilini e, se lo configura così, le fatture verso un’IA esterna. Responsabile dei dati dei Suoi inquilini resta Lei.</p>
 			</div>
 			<!-- In the app's illustration style: line, fill, one accent stroke -->
 			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Una casa con un server all’interno" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -668,7 +668,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello viene sviluppato apertamente. Questi punti sono previsti; per la maggior parte c’è una segnalazione su GitHub in cui può dire la Sua.</p>
 		</div>
 		<div class="road">
-			<article><span class="badge plan">Previsto</span><h3>Installazione in un passo</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 su GitHub: installatore in un solo passo">#497</a><p>Un comando, una domanda sulla Sua e-mail, fatto. Con un proprio accesso, senza account Google.</p></article>
+			<article><span class="badge plan">Previsto</span><h3>Installazione in un passo</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 su GitHub: installatore in un solo passo">#579</a><p>Una riga da incollare installa Docker e Dwello, poi si continua nel browser.</p></article>
 			<article><span class="badge plan">Previsto</span><h3>Server MCP</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener" aria-label="Issue 495 su GitHub: server MCP">#495</a><p>Dwello come strumento per il Suo assistente IA, in locale e con la Sua autorizzazione.</p></article>
 			<article><span class="badge plan">Previsto</span><h3>Esportazione completa</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener" aria-label="Issue 496 su GitHub: esportazione completa">#496</a><p>Tutti i dati in CSV e JSON, in qualsiasi momento, con un clic.</p></article>
 			<article><span class="badge plan">Previsto</span><h3>Rapporti e analisi</h3><p>Entrate, uscite e spese accessorie negli anni, per la dichiarazione d’imposta e la fiduciaria.</p></article>

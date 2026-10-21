@@ -4,6 +4,7 @@ import { getJwtFromCookie, verifyJwt } from '$lib/server/auth';
 import { cookieConfig } from '$lib/server/jwt-config';
 import { isAllowed } from '$lib/server/allowed-emails';
 import { loginPage } from '$lib/server/login-flow';
+import { getConfiguredProviders } from '$lib/server/oauth';
 
 const BACKEND_ORIGIN = new URL(process.env.BACKEND_URL || 'http://localhost:3001').origin;
 
@@ -22,9 +23,10 @@ async function sessionUser(cookies: Parameters<typeof getJwtFromCookie>[0]) {
 	}
 }
 
-// Production without ALLOWED_EMAILS would let every Google or Microsoft account in (#51); «*» says so on purpose
+// Production without ALLOWED_EMAILS would let every Google or Microsoft account in (#51); «*» says so on purpose. Without
+// a provider only a Konto mit Passwort signs in, and the list has nothing to limit (#576)
 export const init: ServerInit = () => {
-	if (process.env.NODE_ENV === 'production' && !process.env.ALLOWED_EMAILS?.trim())
+	if (process.env.NODE_ENV === 'production' && getConfiguredProviders().length && !process.env.ALLOWED_EMAILS?.trim())
 		throw new Error(
 			'ALLOWED_EMAILS is not set: name the e-mail addresses that may sign in, or «*» for every account'
 		);

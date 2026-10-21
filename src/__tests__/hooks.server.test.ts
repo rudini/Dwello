@@ -1,6 +1,7 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { generateJwt } from '$lib/server/auth';
 import { handle, handleFetch, init } from '../hooks.server';
+import { env as mockEnv } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
 
 async function forwarded(url: string, session?: string) {
 	let sent: Request | undefined;
@@ -75,6 +76,20 @@ describe('Start in Produktion (#51)', () => {
 		vi.stubEnv('ALLOWED_EMAILS', '');
 
 		expect(() => init()).toThrow('ALLOWED_EMAILS');
+	});
+
+	// #576: ALLOWED_EMAILS names who may sign in through a provider; a Konto mit Passwort needs no list
+	it('startet ohne ALLOWED_EMAILS, wenn kein Anbieter eingerichtet ist', () => {
+		vi.stubEnv('NODE_ENV', 'production');
+		vi.stubEnv('ALLOWED_EMAILS', '');
+		const ids = [mockEnv.OAUTH_GOOGLE_CLIENT_ID, mockEnv.OAUTH_MICROSOFT_CLIENT_ID];
+		mockEnv.OAUTH_GOOGLE_CLIENT_ID = '';
+		mockEnv.OAUTH_MICROSOFT_CLIENT_ID = '';
+		try {
+			expect(() => init()).not.toThrow();
+		} finally {
+			[mockEnv.OAUTH_GOOGLE_CLIENT_ID, mockEnv.OAUTH_MICROSOFT_CLIENT_ID] = ids;
+		}
 	});
 
 	it('startet mit einer Liste und ausserhalb der Produktion auch ohne', () => {

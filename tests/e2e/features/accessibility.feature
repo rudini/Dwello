@@ -20,6 +20,9 @@ Funktionalität: Barrierefreiheit
       | login                  | default             |
       | login                  | login-error         |
       | login                  | login-not-allowed   |
+      | login                  | login-password      |
+      | login                  | login-password-error |
+      | login                  | login-locked        |
       | login                  | other-language      |
       | login                  | demo                |
       | error-404              | default             |

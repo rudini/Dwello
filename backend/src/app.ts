@@ -19,6 +19,7 @@ import { configRoutes } from './routes/config';
 import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
 import { auditLogRoutes } from './routes/audit-log';
+import { localAccountRoutes, passwordSignInRoutes } from './routes/local-accounts';
 import { authMiddleware } from './middleware/auth';
 import { mailTransportName } from './mail';
 import { refusal } from './services/coded-error';
@@ -80,8 +81,11 @@ export const app = new Elysia()
 	.get('/api/v1/invoices/llm-recipient', () => ({ recipient: llmRecipient(), enabled: llmConfig.enabled }))
 	// Which mail provider receives tenants' data, for the same notice (#82)
 	.get('/api/v1/mail-transport', () => ({ transport: mailTransportName() }))
+	// Sign-in with a Konto mit Passwort (#576): the BFF asks before there is a session
+	.use(passwordSignInRoutes)
 	// Everything below requires a valid JWT
 	.use(authMiddleware)
+	.use(localAccountRoutes)
 	.use(dashboardRoutes)
 	// Register route modules
 	.use(buildingRoutes)

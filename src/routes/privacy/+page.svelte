@@ -105,13 +105,21 @@
 			id: 'login',
 			title: m.privacy_login_title(),
 			paragraphs: [
-				{
-					text: m.privacy_login_1({
-						providers: new Intl.ListFormat(getLocale(), { type: 'disjunction' }).format(
-							data.providers
-						)
-					})
-				},
+				// #576: the Konto mit Passwort first; the provider sentence only with a provider (fach review 576 R-2)
+				...(data.password
+					? [{ text: m.privacy_login_local_1() }, { text: m.privacy_login_local_log() }]
+					: []),
+				...(data.providers.length
+					? [
+							{
+								text: m.privacy_login_1({
+									providers: new Intl.ListFormat(getLocale(), { type: 'disjunction' }).format(
+										data.providers
+									)
+								})
+							}
+						]
+					: []),
 				...data.providers.flatMap((provider) => signIn[provider]?.() ?? []),
 				{ text: m.privacy_login_log() }
 			]
@@ -135,7 +143,8 @@
 			paragraphs: [
 				m.privacy_cookies_1(),
 				m.privacy_cookies_2({ lifetime: lifetime(data.sessionSeconds) }),
-				m.privacy_cookies_3(),
+				// only an installation with a provider sets the cookies of the OAuth flow (fach review 576 R-10)
+				...(data.providers.length ? [m.privacy_cookies_3()] : []),
 				m.privacy_cookies_4(),
 				m.privacy_cookies_5()
 			].map((text) => ({ text }))

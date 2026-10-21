@@ -469,6 +469,21 @@ details     JSONB NOT NULL         -- snapshot of what the entry names (API: doc
 No foreign keys: an entry stays readable after its record changed or was deleted, and stays until the landlord
 deletes it under «Einstellungen» › «Protokoll». A login stores only the provider. Migration `0019_audit_log.sql`.
 
+### local_accounts (Konto mit Passwort, #576)
+
+```sql
+id                  UUID PRIMARY KEY
+email               VARCHAR(255) NOT NULL UNIQUE   -- trimmed, lower case
+password_hash       TEXT NOT NULL                  -- Argon2id (Bun.password), never the password
+failed_attempts     INTEGER NOT NULL DEFAULT 0     -- since the last successful sign-in
+locked_until        TIMESTAMPTZ                    -- Sperre: set at the 5th failed attempt, for 15 minutes
+password_changed_at TIMESTAMPTZ NOT NULL           -- sessions issued before it end (the reset command)
+created_at, updated_at TIMESTAMPTZ NOT NULL
+```
+
+Set by `bun run account` (the Betreiber) or `PUT /api/v1/local-accounts`; a new password also clears the failed
+attempts and the Sperre. Migration `0032_local_accounts.sql`.
+
 ---
 
 ## Seed data (`0002_stammdaten.sql`)

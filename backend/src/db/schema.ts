@@ -612,6 +612,18 @@ export const auditLog = pgTable('audit_log', {
 	details: jsonb('details').$type<Record<string, unknown>>().notNull()
 });
 
+// Konto mit Passwort (#576): the sign-in without a provider; the password only as Argon2id hash
+export const localAccounts = pgTable('local_accounts', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	email: varchar('email', { length: 255 }).notNull().unique(),
+	passwordHash: text('password_hash').notNull(),
+	failedAttempts: integer('failed_attempts').notNull().default(0),
+	lockedUntil: timestamp('locked_until', { withTimezone: true }),
+	passwordChangedAt: timestamp('password_changed_at', { withTimezone: true }).defaultNow().notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+});
+
 // ============================================================================
 // Type Exports for Use in Application
 // ============================================================================

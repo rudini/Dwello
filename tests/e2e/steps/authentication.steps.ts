@@ -1,8 +1,8 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { googleSignInParameter, loginHint, loginLegalText, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
+import { enteredPassword, focusOnLoginHint, googleSignInParameter, loginHint, loginLegalText, passwordSignInOffered, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
-import { expireSession, holdSessionWithoutAccess, signInWith, signOut } from '../tasks/authentication';
+import { expireSession, failPasswordCheck, failSignIns, holdSessionWithoutAccess, signInWith, signInWithPassword, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
 
 const { Given, When, Then } = createBdd(test);
@@ -97,4 +97,57 @@ Then(
 Then('führt die Übersicht den Liegenschaftsverwalter wieder zur Anmeldung', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openPage('/dashboard'));
 	await verwalter.sees(pageTitle).toBe('Anmelden - Dwello');
+});
+
+Given('ein Konto mit Passwort ist eingerichtet', async ({ seed }) => {
+	await seed.localAccount();
+});
+
+Then('kann sich der Besucher mit E-Mail-Adresse und Passwort anmelden', async ({ besucher }) => {
+	await besucher.sees(passwordSignInOffered).toBe(true);
+});
+
+When('der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmeldet', async ({ besucher, names }) => {
+	await besucher.attemptsTo(signInWithPassword(names.get('E-Mail Konto')!, names.get('Passwort Konto')!));
+});
+
+When('der Besucher sich mit der E-Mail-Adresse des Kontos und einem falschen Passwort anmeldet', async ({ besucher, names }) => {
+	await besucher.attemptsTo(signInWithPassword(names.get('E-Mail Konto')!, 'falsches-Passwort'));
+});
+
+When('der Besucher sich ohne E-Mail-Adresse und Passwort anmeldet', async ({ besucher }) => {
+	await besucher.attemptsTo(signInWithPassword('', ''));
+});
+
+Then('steht der Fokus auf dem Hinweis', async ({ besucher }) => {
+	await besucher.sees(focusOnLoginHint).toBe(true);
+});
+
+Then('steht das falsche Passwort nicht mehr da', async ({ besucher }) => {
+	await besucher.sees(enteredPassword).toBe('');
+});
+
+Given('der Besucher hat sich viermal mit einem falschen Passwort angemeldet', async ({ besucher, names }) => {
+	await besucher.attemptsTo(failSignIns(names.get('E-Mail Konto')!, 4));
+});
+
+Given('der Besucher hat sich fünfmal mit einem falschen Passwort angemeldet', async ({ besucher, names }) => {
+	await besucher.attemptsTo(failSignIns(names.get('E-Mail Konto')!, 5));
+});
+
+Then('sieht der Besucher einen Hinweis, der mit {string} beginnt', async ({ besucher }, text: string) => {
+	const start = text.replace(/[.*+?^$()|[\]\\{}]/g, '\\$&');
+	await besucher.sees(loginHint).toMatch(new RegExp(`^${start}`));
+});
+
+Given('die Anmeldung mit Passwort schlägt fehl', async ({ besucher }) => {
+	await besucher.attemptsTo(failPasswordCheck);
+});
+
+Given('der Besucher hat sich mit der E-Mail-Adresse und dem Passwort des Kontos angemeldet', async ({ besucher, names }) => {
+	await besucher.attemptsTo(signInWithPassword(names.get('E-Mail Konto')!, names.get('Passwort Konto')!));
+});
+
+When('der Besucher sich abmeldet', async ({ besucher }) => {
+	await besucher.attemptsTo(signOut);
 });

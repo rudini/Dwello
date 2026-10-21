@@ -10,6 +10,7 @@ import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
 import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { app } from '../app';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
 import { insertInvoice } from './helpers/records';
@@ -672,5 +673,22 @@ describe('API-Verträge der Berichtigung', () => {
 
 		expect(refused.status).toBe(409);
 		expect(drift(await sample('statement-correction-refused'), await refused.json())).toEqual([]);
+	});
+
+	// #576: the sign-in page asks before there is a session
+	it('/auth/password liefert die Felder von auth-password*.json', async () => {
+		const email = `vertrag-${token}@dwello.test`;
+		const post = (password: string) =>
+			app.handle(new Request('http://localhost/api/v1/auth/password', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password }) }));
+		await sendJson('PUT', '/api/v1/local-accounts', { email, password: 'Vertrags-Passwort' });
+		try {
+			expect(drift(await sample('auth-password-available'), await (await app.handle(new Request('http://localhost/api/v1/auth/password'))).json())).toEqual([]);
+			expect(drift(await sample('auth-password'), await (await post('Vertrags-Passwort')).json())).toEqual([]);
+			expect(drift(await sample('auth-password-invalid'), await (await post('falsch')).json())).toEqual([]);
+			for (let attempt = 0; attempt < 4; attempt++) await post('falsch');
+			expect(drift(await sample('auth-password-locked'), await (await post('Vertrags-Passwort')).json())).toEqual([]);
+		} finally {
+			await callApi(`/api/v1/local-accounts/${encodeURIComponent(email)}`, { method: 'DELETE' });
+		}
 	});
 });
