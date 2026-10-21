@@ -2439,3 +2439,14 @@ Branch `w2-issue-454` (worker W2; reviewers started by the coordinator). Fixes #
 - [x] Workflow note: `docs/reviews/workflow-notes-issue-454.md`
 
 Files: `backend/src/services/{invoice,statement,statement-invoices,contract}.service.ts`, `backend/src/routes/{invoices,statements}.ts`, `backend/migrations/0031_statement_correction_declined.sql`, `backend/src/db/schema.ts`, `src/lib/{overview,statement-wizard,types}.ts`, `src/lib/server/{invoice,statement,statement-actions,statement-generation}.ts`, `src/routes/dashboard/`, `src/routes/invoices/`, `src/routes/statements/[id]/`, `src/routes/contracts/[id]/+page.server.ts`, `messages/*.json`, `docs/{api-specification,data-model}.md`, tests and E2E files.
+
+## Session: Tailwind CSS 4, the red CI of #556 (2026-10-21)
+
+Branch `ccr-75acfcf1-m4asdv`. Request: «Fix failing ci builds»; the only red CI was Dependabot's #556 (tailwindcss 3 → 4: the PostCSS plugin moved to `@tailwindcss/postcss`). No scenario: a dependency migration without a visible change; the generated CSS was compared rule by rule with the Tailwind 3 build, axe green (239 screens).
+
+- [x] Tailwind 4 with `@config` and `source('..')`; base layer for the line-token border colour and the button pointer; global element rules in `@layer base`; autoprefixer removed
+- [x] Inter loaded through Vite in the layout (Tailwind 4 inlined the CSS import without rebasing its font URLs); test red first
+- [x] code-reviewer rounds 1 and 2 (`docs/reviews/tw4-review-1.md`, `-2.md`): C-1 to C-3 fixed
+- [x] PR: pushed after this archive
+
+Files: `package.json`, `bun.lock`, `postcss.config.js`, `tailwind.config.js`, `src/styles/globals.css`, `src/routes/+layout.svelte`, `src/__tests__/tokens.test.ts`, `docs/tech-stack.md`, `docs/design/design-decisions.md`.
