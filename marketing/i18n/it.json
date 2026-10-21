@@ -52,16 +52,10 @@
 	"Geplant": "Previsto",
 	"Alles auf einen Blick": "Tutto in uno sguardo",
 	"Was in Dwello steckt.": "Cosa c’è in Dwello.",
-	"Vier Sprachen": "Quattro lingue",
-	"Deutsch, Französisch, Italienisch und Englisch. Abrechnungen und Mahnungen in der Sprache der Mieter.": "Tedesco, francese, italiano e inglese. Conteggi e solleciti nella lingua degli inquilini.",
 	"Dunkelmodus": "Modalità scura",
 	"Folgt der Einstellung Ihres Geräts. Alle Kontraste sind geprüft, auch im Dunkeln.": "Segue l’impostazione del Suo dispositivo. Tutti i contrasti sono verificati, anche al buio.",
-	"Übersicht mit nächstem Schritt": "Panoramica con prossimo passo",
-	"Was jetzt zu tun ist, welche Fristen anstehen und welche Wohnungen leer sind.": "Cosa c’è da fare ora, quali scadenze si avvicinano e quali appartamenti sono sfitti.",
 	"Mietverträge und Vertragsende": "Contratti di locazione e fine del contratto",
 	"Befristet oder unbefristet. Beim Ende zeigt Dwello die Kündigungsfrist und fragt nach der neuen Adresse.": "A tempo determinato o indeterminato. Alla fine, Dwello mostra il termine di preavviso e chiede il nuovo indirizzo.",
-	"Versand per E-Mail oder Brief": "Invio per e-mail o per lettera",
-	"Wer E-Mail möchte, bekommt das PDF. Für alle anderen druckt Dwello den Brief.": "Chi desidera l’e-mail riceve il PDF. Per tutti gli altri Dwello stampa la lettera.",
 	"Dokumente pro Mieter": "Documenti per inquilino",
 	"Briefe, Abrechnungen und Mahnungen an einem Ort.": "Lettere, conteggi e solleciti in un unico posto.",
 	"Gebäude und Wohnungen mit Fläche, Stockwerk und Zimmern aus dem eidgenössischen Register übernehmen.": "Riprendere immobili e appartamenti con superficie, piano e locali dal registro federale.",
@@ -253,5 +247,6 @@
 	"Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil. Dwello zieht das vereinbarte Akonto ab; fehlende Zahlungen regeln Sie ausserhalb der Abrechnung.": "Per tutto l’immobile in una volta, al giorno esatto in caso di cambio d’inquilino e con profilo di riscaldamento. Dwello deduce gli acconti pattuiti; i pagamenti mancanti si regolano al di fuori del conteggio.",
 	"Nach Periodenende": "Dopo la fine del periodo",
 	"Schauen Sie sich die Demo an und lassen Sie Dwello einrichten. Dann erfassen Sie Ihr Gebäude und laden die Rechnungen hoch, sobald sie kommen. Ist die Abrechnungsperiode vorbei, ist die Abrechnung schnell gemacht.": "Guardi la demo e faccia installare Dwello. Poi registri il Suo immobile e carichi le fatture appena arrivano. Finito il periodo di conteggio, il conteggio è fatto in fretta.",
-	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "No, né da un’avvocata, un avvocato o un’associazione. Dwello calcola secondo il Codice delle obbligazioni e l’ordinanza concernente la locazione (OLAL), e test automatici verificano le regole che Dwello ne applica. Ciò non sostituisce una consulenza giuridica: in caso di controversia La aiutano l’associazione dei proprietari o l’autorità di conciliazione."
+	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "No, né da un’avvocata, un avvocato o un’associazione. Dwello calcola secondo il Codice delle obbligazioni e l’ordinanza concernente la locazione (OLAL), e test automatici verificano le regole che Dwello ne applica. Ciò non sostituisce una consulenza giuridica: in caso di controversia La aiutano l’associazione dei proprietari o l’autorità di conciliazione.",
+	"Ein Haus mit einem Server darin": "Una casa con un server all’interno"
 }

@@ -52,16 +52,10 @@
 	"Geplant": "Prévu",
 	"Alles auf einen Blick": "Tout en un coup d’œil",
 	"Was in Dwello steckt.": "Ce que Dwello contient.",
-	"Vier Sprachen": "Quatre langues",
-	"Deutsch, Französisch, Italienisch und Englisch. Abrechnungen und Mahnungen in der Sprache der Mieter.": "Allemand, français, italien et anglais. Décomptes et rappels dans la langue des locataires.",
 	"Dunkelmodus": "Mode sombre",
 	"Folgt der Einstellung Ihres Geräts. Alle Kontraste sind geprüft, auch im Dunkeln.": "Suit le réglage de votre appareil. Tous les contrastes sont vérifiés, aussi dans le sombre.",
-	"Übersicht mit nächstem Schritt": "Vue d’ensemble avec prochaine étape",
-	"Was jetzt zu tun ist, welche Fristen anstehen und welche Wohnungen leer sind.": "Ce qu’il faut faire maintenant, les délais à venir et les appartements vacants.",
 	"Mietverträge und Vertragsende": "Contrats de bail et fin du contrat",
 	"Befristet oder unbefristet. Beim Ende zeigt Dwello die Kündigungsfrist und fragt nach der neuen Adresse.": "À durée déterminée ou indéterminée. À la fin, Dwello indique le délai de congé et demande la nouvelle adresse.",
-	"Versand per E-Mail oder Brief": "Envoi par e-mail ou par lettre",
-	"Wer E-Mail möchte, bekommt das PDF. Für alle anderen druckt Dwello den Brief.": "Qui souhaite un e-mail reçoit le PDF. Pour tous les autres, Dwello imprime la lettre.",
 	"Dokumente pro Mieter": "Documents par locataire",
 	"Briefe, Abrechnungen und Mahnungen an einem Ort.": "Lettres, décomptes et rappels au même endroit.",
 	"Gebäude und Wohnungen mit Fläche, Stockwerk und Zimmern aus dem eidgenössischen Register übernehmen.": "Reprendre immeubles et appartements avec surface, étage et pièces du registre fédéral.",
@@ -253,5 +247,6 @@
 	"Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil. Dwello zieht das vereinbarte Akonto ab; fehlende Zahlungen regeln Sie ausserhalb der Abrechnung.": "Pour tout l’immeuble en une fois, au jour près lors d’un changement de locataire et avec profil de chauffage. Dwello déduit les acomptes convenus ; les paiements manquants se règlent en dehors du décompte.",
 	"Nach Periodenende": "Après la fin de la période",
 	"Schauen Sie sich die Demo an und lassen Sie Dwello einrichten. Dann erfassen Sie Ihr Gebäude und laden die Rechnungen hoch, sobald sie kommen. Ist die Abrechnungsperiode vorbei, ist die Abrechnung schnell gemacht.": "Regardez la démo et faites installer Dwello. Saisissez ensuite votre immeuble et téléversez les factures dès qu’elles arrivent. Une fois la période de décompte terminée, le décompte est vite fait.",
-	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "Non, ni par une avocate, un avocat ni une association. Dwello calcule selon le Code des obligations et l’ordonnance sur le bail (OBLF), et des tests automatiques vérifient les règles qu’il en met en œuvre. Cela ne remplace pas un conseil juridique : en cas de litige, l’association des propriétaires ou l’autorité de conciliation vous aident."
+	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "Non, ni par une avocate, un avocat ni une association. Dwello calcule selon le Code des obligations et l’ordonnance sur le bail (OBLF), et des tests automatiques vérifient les règles qu’il en met en œuvre. Cela ne remplace pas un conseil juridique : en cas de litige, l’association des propriétaires ou l’autorité de conciliation vous aident.",
+	"Ein Haus mit einem Server darin": "Une maison avec un serveur à l’intérieur"
 }

@@ -102,7 +102,6 @@ p { margin: 0; }
 .btn .ic { width: 20px; height: 20px; }
 .badge { justify-self: start; display: inline-flex; align-items: center; gap: 4px; font: 600 0.875rem/1 var(--font); padding: 4px 8px; border-radius: var(--radius-control); border: 1px solid currentColor; white-space: nowrap; }
 .badge .ic { width: 14px; height: 14px; stroke-width: 2; }
-.badge.ok { background: var(--positive-soft); color: var(--positive); }
 .badge.info { background: var(--accent-soft); color: var(--accent); }
 .badge.plan { background: var(--sunken); color: var(--ink-muted); border-style: dashed; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
@@ -176,7 +175,7 @@ section { padding-block: 96px; }
 /* Feature rows */
 .feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 64px; border-top: 1px solid var(--line); }
 .feature:first-of-type { border-top: 0; padding-top: 0; }
-@media (min-width: 980px) { .feature { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 64px; } .feature.flip > .copy-col { order: 2; } .feature.flip { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); } .feature.wide { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 980px) { .feature { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 64px; } .feature.flip > .copy-col { order: 2; } .feature.flip { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); } }
 .copy-col { display: grid; gap: 20px; min-width: 0; }
 .copy-col h3 { font-size: clamp(1.75rem, 3vw, 2.25rem); }
 .copy-col > p { color: var(--ink-muted); font-size: 1.125rem; max-width: 34em; }
@@ -211,6 +210,7 @@ section { padding-block: 96px; }
 .promises b { display: block; font-size: 1.125rem; margin-bottom: 2px; }
 .promises span { color: var(--band-muted); }
 .promises .ref { color: var(--band-ink); font-weight: 600; }
+.illu { --illu-line: var(--band-muted); --illu-fill: #1b4b61; --illu-surface: #123f54; --illu-accent: #86bfda; }
 
 
 /* Install */
@@ -318,11 +318,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	<symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
 	<symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
 	<symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="8" r="3"/><path d="M6 9v6M18 11c0 4-6 3-11 6"/></symbol>
-	<symbol id="i-lang" viewBox="0 0 24 24"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></symbol>
 	<symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
-	<symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol>
 	<symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></symbol>
-	<symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
 	<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></symbol>
 	<symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
 	<symbol id="i-table" viewBox="0 0 24 24"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18"/></symbol>
@@ -410,7 +407,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Quattro passi. Una volta all’anno. Senza Excel.</h2>
 			<p>Dwello è fatto per chi possiede un immobile e non vuole gestire un’amministrazione. La panoramica Le dice cosa fare dopo, e ogni campo spiega il suo termine.</p>
 		</div>
-		<!-- Building, statement, tenant: line, fill, one accent stroke -->
+		<!-- Building, statement, tenant: line, fill, one accent stroke, as the drawing in the privacy band -->
 		<svg class="journey" viewBox="0 0 480 120" role="img" aria-label="Dall’immobile al conteggio, fino all’inquilina" fill="var(--accent-soft)" stroke="var(--line-strong)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 			<line x1="16" y1="104" x2="132" y2="104" fill="none"/>
 			<polyline points="24,52 74,16 124,52" fill="none"/>
@@ -505,11 +502,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Cosa c’è in Dwello.</h2>
 		</div>
 		<div class="grid-feat">
-			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-lang"/></svg><h3>Quattro lingue</h3><p>Tedesco, francese, italiano e inglese. Conteggi e solleciti nella lingua degli inquilini.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><h3>Modalità scura</h3><p>Segue l’impostazione del Suo dispositivo. Tutti i contrasti sono verificati, anche al buio.</p></article>
-			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><h3>Panoramica con prossimo passo</h3><p>Cosa c’è da fare ora, quali scadenze si avvicinano e quali appartamenti sono sfitti.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><h3>Contratti di locazione e fine del contratto</h3><p>A tempo determinato o indeterminato. Alla fine, Dwello mostra il termine di preavviso e chiede il nuovo indirizzo.</p></article>
-			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg><h3>Invio per e-mail o per lettera</h3><p>Chi desidera l’e-mail riceve il PDF. Per tutti gli altri Dwello stampa la lettera.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><h3>Documenti per inquilino</h3><p>Lettere, conteggi e solleciti in un unico posto.</p></article>
 			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><h3>Immobile dal registro degli edifici</h3><p>Riprendere immobili e appartamenti con superficie, piano e locali dal registro federale.</p></article>
 		</div>
@@ -609,6 +603,18 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<h2>Costruito secondo la legge svizzera sulla protezione dei dati.</h2>
 				<p>I dati degli inquilini sono dati personali. Dwello li tratta così: restano sul Suo server, nulla arriva a noi, e Lei può fornire informazioni in qualsiasi momento. Esce solo ciò che serve a un compito: l’accesso tramite Google, la ricerca dell’indirizzo nel registro degli edifici della Confederazione, le Sue e-mail agli inquilini e, se lo configura così, le fatture verso un’IA esterna. Responsabile dei dati dei Suoi inquilini resta Lei.</p>
 			</div>
+			<!-- In the app's illustration style: line, fill, one accent stroke -->
+			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Una casa con un server all’interno" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="16" y1="104" x2="144" y2="104" fill="none"/>
+				<rect x="36" y="50" width="88" height="54"/>
+				<polyline points="26,56 80,18 134,56" fill="none"/>
+				<rect x="56" y="62" width="48" height="16" rx="2" fill="var(--illu-surface)"/>
+				<rect x="56" y="82" width="48" height="16" rx="2" fill="var(--illu-surface)"/>
+				<line x1="64" y1="70" x2="80" y2="70" fill="none"/>
+				<line x1="64" y1="90" x2="80" y2="90" fill="none"/>
+				<line x1="92" y1="70" x2="96" y2="70" fill="none" stroke="var(--illu-accent)" stroke-width="3"/>
+				<line x1="92" y1="90" x2="96" y2="90" fill="none" stroke="var(--illu-accent)" stroke-width="3"/>
+			</svg>
 		</div>
 		<ul class="promises">
 			<li><svg class="ic" aria-hidden="true"><use href="#i-server"/></svg><span><b>Il Suo server, la Sua banca dati</b>Dwello funziona sul Suo PC, sul Suo NAS o presso un hoster a Sua scelta, anche in un centro dati in Svizzera.</span></li>

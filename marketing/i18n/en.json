@@ -52,16 +52,10 @@
 	"Geplant": "Planned",
 	"Alles auf einen Blick": "Everything at a glance",
 	"Was in Dwello steckt.": "What is in Dwello.",
-	"Vier Sprachen": "Four languages",
-	"Deutsch, Französisch, Italienisch und Englisch. Abrechnungen und Mahnungen in der Sprache der Mieter.": "German, French, Italian and English. Statements and reminders in the tenant’s language.",
 	"Dunkelmodus": "Dark mode",
 	"Folgt der Einstellung Ihres Geräts. Alle Kontraste sind geprüft, auch im Dunkeln.": "Follows your device setting. Every contrast is checked, in the dark too.",
-	"Übersicht mit nächstem Schritt": "Overview with the next step",
-	"Was jetzt zu tun ist, welche Fristen anstehen und welche Wohnungen leer sind.": "What to do now, which deadlines are coming up and which apartments are vacant.",
 	"Mietverträge und Vertragsende": "Rental contracts and contract end",
 	"Befristet oder unbefristet. Beim Ende zeigt Dwello die Kündigungsfrist und fragt nach der neuen Adresse.": "Fixed-term or open-ended. At the end, Dwello shows the notice period and asks for the new address.",
-	"Versand per E-Mail oder Brief": "Sent by email or letter",
-	"Wer E-Mail möchte, bekommt das PDF. Für alle anderen druckt Dwello den Brief.": "Tenants who want email get the PDF. For everyone else, Dwello prints the letter.",
 	"Dokumente pro Mieter": "Documents per tenant",
 	"Briefe, Abrechnungen und Mahnungen an einem Ort.": "Letters, statements and reminders in one place.",
 	"Gebäude und Wohnungen mit Fläche, Stockwerk und Zimmern aus dem eidgenössischen Register übernehmen.": "Take over buildings and apartments with area, floor and rooms from the federal register.",
@@ -250,5 +244,6 @@
 	"Für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil. Dwello zieht das vereinbarte Akonto ab; fehlende Zahlungen regeln Sie ausserhalb der Abrechnung.": "For the whole building at once, to the day when a tenant changes, and with a heating profile. Dwello deducts the agreed advance payments; missing payments are settled outside the statement.",
 	"Nach Periodenende": "After the period ends",
 	"Schauen Sie sich die Demo an und lassen Sie Dwello einrichten. Dann erfassen Sie Ihr Gebäude und laden die Rechnungen hoch, sobald sie kommen. Ist die Abrechnungsperiode vorbei, ist die Abrechnung schnell gemacht.": "Look at the demo and have Dwello set up. Then enter your building and upload the invoices as they come in. Once the billing period is over, the statement is quickly done.",
-	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "No, not by a lawyer or an association. Dwello calculates by the Swiss Code of Obligations and the Tenancy Ordinance (VMWG), and automated tests check the rules from them that Dwello applies. That does not replace legal advice: in a dispute, the homeowners’ association or the conciliation authority can help you."
+	"Nein, nicht von einer Anwältin, einem Anwalt oder einem Verband. Dwello rechnet nach dem Obligationenrecht und der Verordnung über die Miete (VMWG), und automatische Tests prüfen die Regeln daraus, die Dwello umsetzt. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.": "No, not by a lawyer or an association. Dwello calculates by the Swiss Code of Obligations and the Tenancy Ordinance (VMWG), and automated tests check the rules from them that Dwello applies. That does not replace legal advice: in a dispute, the homeowners’ association or the conciliation authority can help you.",
+	"Ein Haus mit einem Server darin": "A house with a server inside"
 }
