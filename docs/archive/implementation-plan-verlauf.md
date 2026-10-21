@@ -2473,3 +2473,14 @@ Branch `ccr-75acfcf1-m4asdv`, restarted on `main` after #564. Fixes #560: since 
 - [x] `novalidate` on the form, as on every other form with a DateInput; DOM test red first
 - [x] code-reviewer round 1 (`docs/reviews/webkit-review-1.md`): C-1 fixed; the Tankbestand form's same risk → #566
 - [x] PR: pushed after this archive
+
+## Session: landing page for laypeople, persona survey (2026-10-21)
+
+Branch `ccr-8b7da2b0-52xa3f`. The product owner asked for persona feedback on the landing page with one questionnaire, then for audience A (laypeople, set-up by a helper), a warmer page and a new claim chosen by persona vote. No scenario: static marketing site outside the app's E2E stack.
+
+- [x] Questionnaire `docs/design/personas/landing-fragebogen.md` (1–24); five personas, rounds 1 and 2, warmth questions, claim vote; summary `landing-auswertung.md`
+- [x] Claims checked against the code; #568 (mail settings in `docker-compose.prod.yml`, fixed on main meanwhile); O-46 (published ports)
+- [x] Page reworked: demo as main action, `docs/installation.md` (English, PO decision), menu for phones and zoom, corrected claims, claim «Ihre Nebenkostenabrechnung, einfacher gemacht.», drawings, worked cost split, fr/it/en
+- [x] fach-reviewer rounds 1–2 (`docs/reviews/landing-fachreview-1.md`, `-2.md`): all fixed except R-1 (private repository, PO makes it public later)
+- [x] code-reviewer rounds 1–3 (`docs/reviews/landing-review-1.md` to `-3.md`): all fixed except C-1 (same as R-1)
+- [x] PR: pushed after this archive
