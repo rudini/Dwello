@@ -1,5 +1,6 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Click, FailRequests } from '../screenplay/interactions';
+import { Browser, Click, FailRequests, Wait } from '../screenplay/interactions';
+import { text } from '../targets/accessibility';
 import {
 	errorPageToOverview,
 	footerLink,
@@ -33,5 +34,7 @@ export const chooseInHelpContents = (label: string) => Click.on(helpContentsLink
 export const goToOverviewWhileItFails: Activity = (actor) =>
 	actor.attemptsTo(
 		FailRequests.to('/dashboard/__data.json', { 'x-sveltekit-invalidated': '11' }),
-		Click.on(errorPageToOverview)
+		Click.on(errorPageToOverview),
+		// the error page of the failed load, not the 404 page it came from
+		Wait.until(text('Versuchen Sie es später erneut.'))
 	);

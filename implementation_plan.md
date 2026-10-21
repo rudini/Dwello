@@ -60,4 +60,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] CI fix PR #595 merged (Fixes #594: main red after #587 with all five E2E shards green)
 - [x] #519 test red (`error-page.test.ts`: «Internal Error», «Unknown Error», «Error: 502» from SvelteKit); `+error.svelte` shows `error_unexpected` instead of SvelteKit's own words, a load's own message stays, green
 - [x] #519 scenario «Die Fehlerseite nennt einen unerwarteten Fehler in Worten» (`navigation.feature`), seen red without the change («Internal Error»), green; axe and language rows `error-server` green
-- [ ] #519 slice review, persona, PR merged
+- [x] #519 slice review round 1: `docs/reviews/519-review-1.md`; Minor C-1 fixed (the task waits for the error page of the failed load)
+- [x] #519 persona Anna: `docs/design/personas/anna-519.md` (the heading in de, fr, it, en confirmed; Minor P-1 on the pre-existing hint text stays in the report)
+- [ ] #519 closing review, PR merged
