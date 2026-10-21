@@ -1106,6 +1106,34 @@ describe('Abrechnungsdetail', () => {
 		expect(invoicesText()).toContain('Ihr Anteil: 750.84 × (1’520.00 × 44.20 % + 1’410.00 × 100.00 %) / 2’930.00 = 533.16');
 	});
 
+	// #507 (Persona Dr. Weber P-7 von #451): jede Rechnung nach Heizprofil nennt ihren Anteil nach Heizprofil wie das
+	// PDF, nicht die Mietstage
+	it('nennt bei einer Heizrechnung nach Heizprofil den Anteil nach Heizprofil statt der Mietstage', () => {
+		const profile = (percent: number) => ({ percent, months: [], periodMonths: [] });
+		const invoices = [
+			{ id: 'i1', description: 'Fernwärme Q1', amount: 1520, start: '2025-01-01', end: '2025-12-31', part: { days: 184, total: 365, noPeriod: true, profile: profile(44.2) } },
+			{ id: 'i2', description: 'Fernwärme Q4', amount: 1410, start: '2025-10-01', end: '2025-12-31', part: { days: 92, total: 92, profile: profile(100) } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 2930, apartmentShare: 750.84, tenantShare: 533.16 })] });
+		expect(invoicesText()).toContain('Leistungszeitraum 01.10.2025 – 31.12.2025: CHF 1’410.00, Anteil nach Heizprofil: 100.00 %');
+		expect(invoicesText()).toContain('Ohne Leistungszeitraum: CHF 1’520.00, Anteil nach Heizprofil: 44.20 %');
+		expect(invoicesText()).not.toContain('Mietstage');
+	});
+
+	// #507: auch eine Rechnung über die Periode hinaus und die Veränderung des Tankbestands nach Heizprofil
+	it('nennt bei Tankbestand und Rechnung über die Periode hinaus den Anteil nach Heizprofil', () => {
+		const profile = { percent: 43, months: [], periodMonths: [] };
+		const whole = { start: '2024-10-01', end: '2025-03-31', amount: 1820 };
+		const invoices = [
+			{ id: 'i1', description: 'Heizöl', amount: 905.03, start: '2025-01-01', end: '2025-03-31', part: { days: 90, total: 90, whole, profile } },
+			{ id: 'fuel-stock-2025-12-31', description: 'Veränderung Tankbestand', amount: 500, start: '2025-01-01', end: '2025-12-31', fuelStock: true, part: { days: 365, total: 365, profile } }
+		];
+		detail({ lineItems: [line({ invoices, totalAmount: 1405.03, apartmentShare: 702.52, tenantShare: 302.08 })] });
+		expect(invoicesText()).toContain('Leistungszeitraum 01.10.2024 – 31.03.2025 (Rechnung CHF 1’820.00), davon 01.01.2025 – 31.03.2025: CHF 905.03, Anteil nach Heizprofil: 43.00 %');
+		expect(invoicesText()).toContain('Veränderung Tankbestand 01.01.2025 – 31.12.2025: CHF 500.00, Anteil nach Heizprofil: 43.00 %');
+		expect(invoicesText()).not.toContain('Mietstage');
+	});
+
 	// #451, Punkt 1 (Code-Review C-3): Rechnungen, die zusammen null ergeben, haben keinen Zeitanteil; Ihr Anteil ist die
 	// Summe ihrer Teile mal der Anteil der Wohnung nach dem Verteilschlüssel, wie im PDF
 	it('rechnet Rechnungen, die zusammen null ergeben, je Rechnung wie das PDF', () => {

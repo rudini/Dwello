@@ -13,19 +13,28 @@
 	const factor = (part: NonNullable<StatementLineInvoice['part']>) =>
 		part.profile ? `${part.profile.percent.toFixed(2)} %` : `${part.days}/${part.total}`;
 
+	// by the Heizprofil its share instead of the days, as the PDF (#507)
 	function partText({ part, start, end, amount, fuelStock }: StatementLineInvoice) {
-		const values = { start: formatDate(start), end: formatDate(end), amount: formatCurrency(amount), days: part!.days, total: part!.total };
-		if (fuelStock) return m.statements_part_stock(values);
-		if (part!.noPeriod) return m.statements_part_no_period(values);
-		const whole = part!.whole;
-		if (whole)
-			return m.statements_part_beyond({
-				...values,
-				wholeStart: formatDate(whole.start),
-				wholeEnd: formatDate(whole.end),
-				wholeAmount: formatCurrency(whole.amount)
-			});
-		return m.statements_part_line(values);
+		const { days, total, noPeriod, whole, profile } = part!;
+		const values = {
+			start: formatDate(start),
+			end: formatDate(end),
+			amount: formatCurrency(amount),
+			days,
+			total,
+			wholeStart: whole ? formatDate(whole.start) : '',
+			wholeEnd: whole ? formatDate(whole.end) : '',
+			wholeAmount: whole ? formatCurrency(whole.amount) : '',
+			percent: profile?.percent.toFixed(2) ?? ''
+		};
+		const [byDays, byProfile] = fuelStock
+			? [m.statements_part_stock, m.statements_part_stock_profile]
+			: noPeriod
+				? [m.statements_part_no_period, m.statements_part_no_period_profile]
+				: whole
+					? [m.statements_part_beyond, m.statements_part_beyond_profile]
+					: [m.statements_part_line, m.statements_part_line_profile];
+		return (profile ? byProfile : byDays)(values);
 	}
 
 	// invoices summing to zero: their parts times the apartment's share by the key, as the PDF (#237)

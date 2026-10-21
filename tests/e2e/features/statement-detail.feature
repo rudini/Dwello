@@ -737,6 +737,17 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
     Dann nennt die Position "Heizung" "Ihr Anteil: 2’000.00 × (1’000.00 × 0.00 % + 1’000.00 × 52.00 %) / 2’000.00 = 520.00"
 
+  # #507 (Persona Dr. Weber P-7 von #451): jede Rechnung unter den Heizkosten nach Heizprofil nennt ihren Anteil nach
+  # Heizprofil wie das PDF, nicht die Mietstage: Marc Huber (ab Mai) trägt nichts von Januar bis März und 52 % der
+  # Rechnung ohne Leistungszeitraum
+  Szenario: Kostenposition nennt bei Heizkosten nach Heizprofil den Anteil jeder Rechnung wie das PDF
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-04-10" für die Zeit vom "2024-01-01" bis "2024-03-31"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Dann nennt die Position "Heizung" die Rechnung "Heizung 2024-04-10" mit "Leistungszeitraum 01.01.2024 – 31.03.2024: CHF 1’000.00, Anteil nach Heizprofil: 0.00 %"
+    Und nennt die Position "Heizung" die Rechnung "Heizöl 2024" mit "Ohne Leistungszeitraum: CHF 1’000.00, Anteil nach Heizprofil: 52.00 %"
+    Und nennt die Position "Heizung" nicht "Mietstage"
+
   # #104: jede Kostenposition führt zu den Rechnungen, die sie abrechnet
   Szenario: Rechnung einer Kostenposition öffnen
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
