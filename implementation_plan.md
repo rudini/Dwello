@@ -27,4 +27,8 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #548 persona Helga: `docs/design/personas/helga-548.md`; Major P-1 (key field stays red after the Kategorie brought a Verteilschlüssel, pre-existing, met in the task) fixed with a DOM test seen red; Minors P-2, P-3 stay in the report (pre-existing, not trivial)
 - [x] #548 closing review round 2: `docs/reviews/548-review-2.md`; Major C-2 (no scenario for P-1) fixed: scenario «Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück», new step «… die Fehlermeldung … nicht mehr»; its note on new/edit invoice became #573
 - [x] #548 review round 3: `docs/reviews/548-review-3.md` (C-2 closed, no new findings)
-- [ ] #548 PR merged
+- [x] #548 PR #574 merged
+- [x] #575 (main red after #571): Firefox «Suche ohne Treffer» (`buildings.feature`), not #571's (no DateInput there); not reproduced locally in 225 Firefox runs; analysis in #575; cause open
+- [x] #573 DOM tests red (`invoice-pages.dom.test.ts`, new and edit page: key error stays after the Kategorie brought a key); `InvoiceCategoryFields.svelte` shows the key error only while no key is set (the #548 condition in `UploadRowFields.svelte` moved there), green
+- [x] #573 scenario «Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück» (`invoice-new.feature`), green; no red run of its own (the DOM tests were seen red); No scenario for the edit page: it shares the field component, covered by its DOM test
+- [ ] #573 slice review, PR merged

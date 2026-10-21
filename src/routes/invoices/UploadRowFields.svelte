@@ -109,7 +109,7 @@
 			{distributionKeys}
 			{...keyProposal}
 			bind:keyChosen={row.keyChosen}
-			keyError={row.values.distributionKeyId ? undefined : errors.distributionKeyId}
+			keyError={errors.distributionKeyId}
 		/>
 	</div>
 </div>
