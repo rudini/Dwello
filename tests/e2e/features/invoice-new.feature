@@ -107,3 +107,14 @@ Funktionalität: Neue Rechnung erfassen
   Szenario: Ohne Verteilschlüssel speichert das Formular die Rechnung nicht
     Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "450.00" Franken für "Treppenhausreinigung Q1" im Gebäude "Seeblick" in der Kategorie "Hauswart" ohne Verteilschlüssel erfasst
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie, wie die Kosten verteilt werden."
+
+  # #573: wählt der Liegenschaftsverwalter danach eine Kategorie, die ihren Verteilschlüssel mitbringt, fragt das Feld nicht mehr danach
+  Szenario: Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück
+    Angenommen "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
+    Und die Rechnung von "Hauswart Huber" wird nach dem Verteilschlüssel "Pro Zimmer" verteilt
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"
+    Wenn der Liegenschaftsverwalter die Rechnung ohne Angaben speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie, wie die Kosten verteilt werden."
+    Wenn der Liegenschaftsverwalter im Gebäude "Seeblick" die Kategorie "Hauswart" wählt
+    Dann ist im Rechnungsformular der Verteilschlüssel "Pro Zimmer" gewählt
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Wählen Sie, wie die Kosten verteilt werden." nicht mehr
