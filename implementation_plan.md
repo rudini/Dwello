@@ -79,3 +79,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #509 fachreview round 2: `docs/reviews/509-fachreview-2.md` (M-1, V-1 to V-4 closed; V-5 = C-1 fixed; Minor M-2, the month line of an invoice shared by days because its profile months carry 0 %, existed before and stays in the report)
 - [x] #509 persona Dr. Weber: `docs/design/personas/dr-weber-509.md` (no Blocker/Major; Minors P-1, P-2 and Nits P-3, P-4 on texts the change kept stay in the report; the observation on the detail page is #507)
 - [x] #509 daten-pruefer: `docs/reviews/509-datenpruefung-1.md` (no findings above Nit; only the 8 PDFs of Meier and Brunner change, by exactly the run share and the month line; amounts and QR fields to the Rappen)
+- [x] #509 closing review round 2: `docs/reviews/509-review-2.md` (C-1 closed, no new findings)
+- [ ] #509 PR merged
