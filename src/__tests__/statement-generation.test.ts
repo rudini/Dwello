@@ -827,7 +827,7 @@ describe('Vereinbarte Nebenkosten der Mietverträge des Laufs', () => {
 		asked.push(url);
 		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: [] });
 		if (url === `${API}/contracts?buildingId=b1&limit=1000`) return Response.json({ contracts: [contracts[2]] });
-		if (url === `${API}/categories?limit=100`) return Response.json({ categories: names });
+		if (url === `${API}/categories?limit=1000`) return Response.json({ categories: names });
 		return Response.json(contractAgreements);
 	}) as typeof globalThis.fetch;
 

@@ -46,4 +46,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #583 PR #586 merged
 - [x] O-47 (product owner, 2026-10-21: «Ja, als eigener PR»): `playwright.config.ts` keeps the trace of every failing E2E test (`retain-on-failure`), so the next Firefox failure of «Suche ohne Treffer» (#575) shows its cause; row O-47 in `docs/design/offene-punkte.md`
 - [x] O-47 review round 1: `docs/reviews/o47-review-1.md` (no findings)
-- [ ] O-47 PR merged
+- [x] O-47 PR #587 merged
+- [x] #585 BFF tests red (`category-lists.test.ts`: categories page, building page, `namesById`, 150 categories, 100 shown); the three loads ask for `limit=1000`, green; No scenario: it needs more than 100 categories in the shared E2E database
+- [ ] #585 slice review, PR merged
