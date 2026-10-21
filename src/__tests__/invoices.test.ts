@@ -9,6 +9,7 @@ import backendInvoice from '../../tests/contracts/invoice.json';
 import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 import periodList from '../../tests/contracts/invoice-list-period.json';
 import fuelStocks from '../../tests/contracts/fuel-stocks.json';
+import categoryList from '../../tests/contracts/categories.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -244,7 +245,7 @@ describe('Rechnung erfassen und bearbeiten', () => {
 	// #583: the backend sends at most as many categories as asked for, counting the non-umlagefähige ones too
 	it('bietet jede Kategorie an, auch mit mehr als 100 Kategorien', async () => {
 		const many = Array.from({ length: 150 }, (_, i) => ({
-			...caretaker,
+			...categoryList.categories[0],
 			id: `c${i}`,
 			nameDE: `Kategorie ${i}`
 		}));

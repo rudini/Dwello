@@ -257,6 +257,12 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #583: the invoice forms list every category from here
+	it('GET /categories liefert die Felder von categories.json', async () => {
+		const actual = await (await callApi('/api/v1/categories?limit=1000')).json();
+		expect(drift(await sample('categories'), actual)).toEqual([]);
+	});
+
 	// #522: the contract form lists every umlagefähige category from here
 	it('GET /categories/allowed liefert die Felder von categories-allowed.json', async () => {
 		const actual = await (await callApi('/api/v1/categories/allowed')).json();
