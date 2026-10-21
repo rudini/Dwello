@@ -62,4 +62,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #519 scenario «Die Fehlerseite nennt einen unerwarteten Fehler in Worten» (`navigation.feature`), seen red without the change («Internal Error»), green; axe and language rows `error-server` green
 - [x] #519 slice review round 1: `docs/reviews/519-review-1.md`; Minor C-1 fixed (the task waits for the error page of the failed load)
 - [x] #519 persona Anna: `docs/design/personas/anna-519.md` (the heading in de, fr, it, en confirmed; Minor P-1 on the pre-existing hint text stays in the report)
-- [ ] #519 closing review, PR merged
+- [x] #519 closing review round 2: `docs/reviews/519-review-2.md` (C-1 closed, no new findings)
+- [ ] #519 PR merged
