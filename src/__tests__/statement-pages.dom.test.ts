@@ -1851,6 +1851,13 @@ describe('Abrechnung bearbeiten', () => {
 		expect(byTestId('statement-recalculate-hint')).not.toBeNull();
 	});
 
+	// the page names a missing Frist; the browser's own check stopped the form in WebKit at the hidden calendar field
+	it('überlässt die Prüfung der Seite, nicht dem Browser', () => {
+		edit();
+
+		expect(document.querySelector('form')!.noValidate).toBe(true);
+	});
+
 	it('nennt die Frist einer Rückerstattung nicht Zahlungsfrist', () => {
 		edit({ balance: -83.45 });
 
