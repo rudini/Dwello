@@ -204,6 +204,22 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-row-retry')).not.toBeNull();
 	});
 
+	// #548 (code review 548-1 C-1): one of the marked fields filled, the others still empty
+	it('sagt «Füllen Sie die markierten Felder aus.» weiter, solange ein markiertes Feld leer ist', async () => {
+		open(() => [502, unreadable]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+
+		fireEvent(byTestId<HTMLInputElement>('invoice-billing-entity-input')!, 'input', 'Elektro Blitz');
+		await settle();
+
+		expect(byTestId('invoice-upload-row-message')!.textContent).toContain(
+			'Füllen Sie die markierten Felder aus.'
+		);
+	});
+
 	it('beschreibt sich mit seinem ersten Satz, nicht mit dem ganzen Inhalt (Persona Sven)', () => {
 		open(() => [200, read]);
 		const described = document.getElementById(document.querySelector('[role=dialog]')!.getAttribute('aria-describedby') ?? '');
