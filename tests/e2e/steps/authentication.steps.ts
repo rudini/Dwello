@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { googleSignInParameter, loginHint, loginLegalText, passwordSignInOffered, shownUserName, signInOffered, signInOptions } from '../questions/authentication';
 import { pageTitle } from '../questions/navigation';
-import { expireSession, failSignIns, holdSessionWithoutAccess, signInWith, signInWithPassword, signOut } from '../tasks/authentication';
+import { expireSession, failPasswordCheck, failSignIns, holdSessionWithoutAccess, signInWith, signInWithPassword, signOut } from '../tasks/authentication';
 import { openPage } from '../tasks/navigation';
 
 const { Given, When, Then } = createBdd(test);
@@ -99,7 +99,7 @@ Then('führt die Übersicht den Liegenschaftsverwalter wieder zur Anmeldung', as
 	await verwalter.sees(pageTitle).toBe('Anmelden - Dwello');
 });
 
-Given('ein lokales Konto ist eingerichtet', async ({ seed }) => {
+Given('ein Konto mit Passwort ist eingerichtet', async ({ seed }) => {
 	await seed.localAccount();
 });
 
@@ -122,4 +122,16 @@ Given('der Besucher hat sich fünfmal mit einem falschen Passwort angemeldet', a
 Then('sieht der Besucher einen Hinweis, der mit {string} beginnt', async ({ besucher }, text: string) => {
 	const start = text.replace(/[.*+?^$()|[\]\\{}]/g, '\\$&');
 	await besucher.sees(loginHint).toMatch(new RegExp(`^${start}`));
+});
+
+Given('die Anmeldung mit Passwort schlägt fehl', async ({ besucher }) => {
+	await besucher.attemptsTo(failPasswordCheck);
+});
+
+Given('der Besucher hat sich mit der E-Mail-Adresse und dem Passwort des Kontos angemeldet', async ({ besucher, names }) => {
+	await besucher.attemptsTo(signInWithPassword(names.get('E-Mail Konto')!, names.get('Passwort Konto')!));
+});
+
+When('der Besucher sich abmeldet', async ({ besucher }) => {
+	await besucher.attemptsTo(signOut);
 });

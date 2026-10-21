@@ -1,6 +1,6 @@
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
-import { Click, Cookies, Enter, NoticeRequest, Navigate, Wait } from '../screenplay/interactions';
+import { Click, Cookies, Enter, FailRequests, NoticeRequest, Navigate, Wait } from '../screenplay/interactions';
 import { userMenuButton } from '../targets/app-frame';
 import { loginButton, loginError, logoutButton, passwordEmailInput, passwordInput, passwordSubmitButton } from '../targets/authentication';
 
@@ -37,3 +37,6 @@ export const failSignIns = (email: string, times: number): Activity => async (ac
 		await actor.attemptsTo(Navigate.to('/login'), signInWithPassword(email, `falsch-${attempt}`), Wait.until(loginError));
 	}
 };
+
+// the form action of the sign-in page answers 500, as when the backend cannot check the password
+export const failPasswordCheck = FailRequests.to('/login', { '/password': '' });

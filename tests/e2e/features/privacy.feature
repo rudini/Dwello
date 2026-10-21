@@ -34,18 +34,19 @@ Funktionalität: Datenschutz
 
   # Protokoll unter den Einstellungen (#357, Fachprüfung R-1, R-2): Zweck, Inhalt und Aufbewahrung, getrennt vom Protokoll des Servers
   Szenario: Anmeldungen und Änderungen im Protokoll unter den Einstellungen
-    Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "jede Anmeldung mit dem gewählten Anbieter (ohne Namen und E-Mail-Adresse)"
+    Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "jede Anmeldung mit dem gewählten Anbieter oder mit Passwort (ohne Namen und E-Mail-Adresse)"
     Und nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "Die Einträge bleiben, auch wenn Sie die Rechnung löschen, bis Sie sie im Protokoll löschen."
 
   Szenario: Anmeldung nur über die eingerichteten Anbieter
     Dann nennt die Datenschutzerklärung unter "Anmeldung" "Google"
     Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Microsoft"
 
-  # #576: mit einem lokalen Konto kennt Dwello das Passwort, aber nur als nicht umkehrbaren Hash
+  # #576: mit einem Konto mit Passwort kennt Dwello das Passwort nur umgerechnet, und Fehlversuche kommen ins Protokoll
   @wip
   Szenario: Anmeldung mit Passwort in der Datenschutzerklärung
-    Angenommen ein lokales Konto ist eingerichtet
-    Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass Dwello das Passwort nur in einer Form speichert, aus der es sich nicht zurückgewinnen lässt
+    Angenommen ein Konto mit Passwort ist eingerichtet
+    Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass Dwello das Passwort nur umgerechnet speichert, sodass es sich nicht zurückrechnen lässt
+    Und erfährt der Liegenschaftsverwalter unter "Anmeldung", dass jeder Fehlversuch mit der eingetippten E-Mail-Adresse protokolliert wird
 
   Szenario: Dienste Dritter, die der Browser aufruft
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "CARTO"

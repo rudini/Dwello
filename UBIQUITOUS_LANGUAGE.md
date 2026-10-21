@@ -245,6 +245,8 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Verantwortlicher (DSG)** | Wer über Zweck und Mittel der Bearbeitung von Personendaten entscheidet (Art. 5 Bst. j DSG). Für die Daten, die in Dwello erfasst werden, auch die der Mieter, der Vermieter; für Anmeldung, Protokoll des Servers und Cookies der Betreiber. |
 | **Auftragsbearbeiter (DSG)** | Wer Personendaten im Auftrag des Verantwortlichen bearbeitet (Art. 5 Bst. k DSG), etwa ein Anbieter, der Dwello für den Vermieter betreibt. |
 | **Protokoll des Servers** | Aufzeichnung des Servers über Anmeldungen, Verlängerungen der Sitzung und Abmeldungen, mit Kennung des Kontos und E-Mail-Adresse, sowie über Fehler; nur der Betreiber liest es, er bestimmt die Aufbewahrung. Nicht zu verwechseln mit dem Protokoll unter «Einstellungen». |
+| **Konto mit Passwort** | Zugang zu einer Dwello-Installation mit E-Mail-Adresse und Passwort, ohne Anbieter wie Google. Der Betreiber legt es mit einem Befehl auf dem Server an und setzt damit ein vergessenes Passwort zurück (bis #577). Dwello speichert das Passwort nur als Argon2id-Hash; die Kopfzeile zeigt die E-Mail-Adresse. Nicht zu verwechseln mit der Anmeldung über einen Anbieter. Code: Tabelle `local_accounts` (#576). |
+| **Sperre (Anmeldung)** | Nach 5 Fehlversuchen ist die Anmeldung mit Passwort 15 Minuten gesperrt; die Anmeldeseite nennt die Uhrzeit, bis zu der sie gilt. Der Befehl des Betreibers hebt sie auf, eine erfolgreiche Anmeldung setzt die Zahl der Fehlversuche zurück. Jeder Fehlversuch und jede Sperre kommt mit der eingetippten E-Mail-Adresse ins Protokoll des Servers. Code: `local_accounts.locked_until` (#576). |
 
 ---
 
