@@ -71,3 +71,24 @@ Keine fehlenden Domänenbegriffe; die Seiten verwenden nur Nebenkosten, Mietvert
 - **Amtliche Kurztitel der VMWG in fr/it:** nicht auf Fedlex nachgeschlagen; die Kurzformen folgen i18n-begriffe.md:85 (OBLF, OLAL).
 - **Englische DSG-Fassung:** für den Stand 7.7.2025 im Filestore nicht vorhanden; geprüft gegen die Fassung vom 1.9.2023 (nicht amtlich).
 - **Lucide-Lizenz:** ob der Hausumriss im Logo aus einem Feather-Icon (MIT) stammt, für das Lucides LICENSE einen eigenen Hinweis vorsieht, nicht geprüft.
+
+## Round 2b (Commit 1c4bc2ec)
+
+Gelesen über `git show 1c4bc2ec:<pfad>`.
+
+| ID | Status | Beleg |
+|---|---|---|
+| R-10 | erledigt | it/datenschutz.html:77 «Titolare del trattamento» (LPD Art. 5 lett. j) |
+| V-4 | erledigt | it/datenschutz.html:71 «non misura ciò che Lei fa» |
+| R-12 | erledigt | fr/datenschutz.html:91 «pour notre compte», it/datenschutz.html:91 «per nostro conto» (Art. 5 let./lett. k) |
+| V-5 | erledigt | fr/impressum.html:76 «Vous trouverez …», en/impressum.html:76 «The source code is on GitHub.» |
+| V-6 | erledigt | fr/datenschutz.html:86 «… nulle part, ni sur GitHub ni ailleurs, sans votre accord», :105 «État au 21 octobre 2026» |
+| V-7 | erledigt | Alle Doppelpunkte im Text beider französischen Rechtsseiten mit U+00A0 (impressum 1, datenschutz 4 inkl. meta description), kein normales Leerzeichen vor «:» mehr |
+| V-8 | erledigt | en/impressum.html:77 «sets out as utility costs», en/datenschutz.html:100 «Access is free of charge, and you receive the information within 30 days» |
+| V-9 | erledigt | build.py: neue Regel für `hreflang="de-CH"`; alle neun übersetzten Seiten (index, impressum, datenschutz × fr/it/en) zeigen auf `../<seite>.html` |
+| R-11 | offen, vom PO akzeptiert | unverändert, Minor |
+| R-13 | offen, optional | unverändert, Nit |
+
+Neu: nichts ausser einer Kleinigkeit. fr/datenschutz.html:86 «nulle part, ni sur GitHub ni ailleurs» sagt dasselbe zweimal; «Nous ne publions votre message nulle part, pas même sur GitHub, sans votre accord.» wäre knapper. Optional, keine ID. Die Fixes bleiben treu zum deutschen Text; keine neuen deutschen Reste.
+
+Offene Blocker/Major: keine.
