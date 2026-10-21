@@ -42,4 +42,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #522 PR #584 merged
 - [x] #583 BFF test red (`invoices.test.ts`: 150 categories, the form got 100); `invoiceChoices` asks for `categories?limit=1000` (the backend's own «all»), green; No scenario: it needs more than 100 categories in the shared E2E database; the other loads with the same limit became #585
 - [x] #583 slice review round 1: `docs/reviews/583-review-1.md`; Minor C-1 fixed (contract `tests/contracts/categories.json` with its check in `api-contracts.pg.test.ts`, used by the new test)
-- [ ] #583 closing review, PR merged
+- [x] #583 closing review round 2: `docs/reviews/583-review-2.md` (C-1 closed, no new findings)
+- [ ] #583 PR merged
