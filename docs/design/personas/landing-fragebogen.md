@@ -44,3 +44,13 @@ Antwort pro Frage: eine Note von 1 (trifft gar nicht zu) bis 5 (trifft voll zu),
 ## Bericht
 
 Die Persona schreibt `docs/design/personas/<persona>-landing.md` im Aufbau des Agenten `persona`; der Teil «Fragebogen» enthält die Fragen 1–19 mit Note und Begründung, die Befundtabelle (`P-n`) nur, was auf der Landing Page geändert werden sollte. Die Zusammenfassung über alle Personas steht in `landing-auswertung.md`.
+
+## Zusatz: Wirkung, Bilder und Animationen
+
+Für die Frage, ob die Seite zu kühl wirkt (Rückmeldung eines Kollegen des Product Owners). Gleiche Notenskala.
+
+20. Wie wirkt die Seite auf Sie: warm und einladend oder kühl und technisch? (1 = kühl, 5 = warm) Woran liegt das?
+21. Fehlen Ihnen Bilder (Menschen, Häuser, Alltag einer Vermieterin), oder reichen die Bildschirmfotos der App? Welche Bilder würden Ihnen helfen, welche nicht?
+22. An welchen Stellen würde eine Animation Ihnen etwas erklären (z. B. wie eine Rechnung hochgeladen wird oder wie sich die Kosten verteilen)? Nennen Sie die Abschnitte.
+23. Wo würde Bewegung Sie stören, ablenken oder die Seite langsamer machen?
+24. Ihre drei besten Ideen, damit die Seite wärmer wirkt, ohne an Klarheit zu verlieren.
