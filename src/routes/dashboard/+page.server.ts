@@ -102,11 +102,6 @@ function noticed(contracts: Row[]) {
 		}));
 }
 
-// Each statement once: a Zahlungsfrist changed between the reads of overdue and sent lists it in both; the first stays,
-// a key twice broke the page while loading (#605)
-const once = (statements: Row[]) =>
-	statements.filter((s, i) => statements.findIndex((o) => o.id === s.id) === i);
-
 // Drafts that would go to the apartment a moved-out tenant left, once per tenant (A-5, #114)
 const oldAddresses = (drafts: Row[]) => [
 	...new Map(
@@ -163,8 +158,7 @@ export const load = async ({
 	const config = settings(fetch).catch(() => ({}) as Record<string, string>);
 	const [
 		figures,
-		overdue,
-		sent,
+		open,
 		letters,
 		contracts,
 		apartments,
@@ -179,8 +173,9 @@ export const load = async ({
 			`${BACKEND_URL}/api/v1/dashboard`,
 			m.nav_overview()
 		) as Promise<DashboardData>,
-		list(fetch, 'statements?status=overdue&limit=100', 'data'),
-		list(fetch, 'statements?status=sent&limit=100', 'data'),
+		// overdue and sent in one read: read apart, a Zahlungsfrist changed in between listed one statement twice (its
+		// duplicate key stopped the page) or not at all (#605)
+		list(fetch, 'statements?status=open&limit=1000', 'data'),
 		list(fetch, 'documents?status=to_send', 'data'),
 		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
 		list(fetch, 'apartments?limit=1000', 'apartments'),
@@ -208,7 +203,7 @@ export const load = async ({
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
 		draftIds: drafts.map((s) => String(s.id)),
-		dueStatements: once([...overdue, ...sent]).map((s) => ({
+		dueStatements: open.map((s) => ({
 			id: String(s.id),
 			tenantName: tenantOf(s),
 			paymentDeadline: String(s.paymentDeadline),
