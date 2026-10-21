@@ -79,6 +79,8 @@ export async function setupNeeded(fetch: Fetch): Promise<boolean> {
 }
 
 export async function setUpDwello(fetch: Fetch, cookies: Cookies, form: FormData) {
+	// the setup exists only without a provider, also for a form sent to it directly (code review 577 C-8)
+	if (getConfiguredProviders().length) redirect(303, '/login');
 	const [code, email, password, repeat] = ['code', 'email', 'password', 'repeat'].map((name) => String(form.get(name) ?? ''));
 	// empty fields are a missing input, not an invalid request (persona Anna 577 P-1)
 	if (!code.trim() || !email.trim() || !password.trim()) return fail(400, { email, error: m.setup_error_empty() });

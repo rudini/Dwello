@@ -67,6 +67,8 @@ describe('Übersicht während das KI-Modell lädt', () => {
 
 		expect(text).toContain('Das KI-Modell wird geladen: 40 %.');
 		expect(text).toContain('Bis es geladen ist, erfassen Sie Rechnungen von Hand.');
+		// code review 577 C-1: decided in #497 with a progress bar
+		expect(text).toMatch(/role="progressbar"[^>]*aria-valuenow="40"[^>]*aria-valuemax="100"/);
 	});
 
 	it('sagt, wenn das KI-Modell nicht geladen werden konnte', () => {

@@ -1976,5 +1976,6 @@
 	"ki_model_failed_title": "Le modèle d’IA n’a pas pu être téléchargé.",
 	"ki_model_failed_text": "Saisissez les factures à la main. Dwello réessaiera lorsque l’exploitant redémarrera Dwello ; si vous exploitez Dwello vous-même, la commande figure dans le guide d’installation.",
 	"privacy_third_ollama": "Si le modèle d’IA manque sur le serveur, par exemple au premier démarrage, Dwello le télécharge une fois auprès d’Ollama (Ollama Inc., États-Unis), environ 6 Go. Ollama reçoit alors l’adresse IP du serveur et le nom du modèle, aucune donnée que vous saisissez dans Dwello ; ces indications peuvent parvenir aux États-Unis.",
-	"setup_error_empty": "Remplissez tous les champs : le code de configuration, votre adresse e-mail et deux fois le mot de passe."
+	"setup_error_empty": "Remplissez tous les champs : le code de configuration, votre adresse e-mail et deux fois le mot de passe.",
+	"backend_email_unusable": "Dwello ne peut pas utiliser cette adresse e-mail. Saisissez une adresse comme nom@example.ch."
 }

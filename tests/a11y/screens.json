@@ -109,7 +109,8 @@
 		"language-menu-open": "The language menu in the header open.",
 		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement and the terms also their section on the demo.",
 		"setup-error": "The setup refused: the two passwords differ. The setup screen («Dwello einrichten», #577) runs in every state on the empty instance of the E2E stack, which has no account and no provider.",
-		"ki-model-loading": "Overview while the local KI downloads its model, on the fresh installation of the E2E stack (#577)."
+		"ki-model-loading": "Overview while the local KI downloads its model, on the fresh installation of the E2E stack (#577).",
+		"ki-model-failed": "Overview after the local KI could not download its model, on the empty instance of the E2E stack (#577)."
 	},
 	"screens": [
 		{
@@ -168,6 +169,7 @@
 				"old-address-task",
 				"first-use",
 				"ki-model-loading",
+				"ki-model-failed",
 				"mobile-menu-open",
 				"user-menu-open",
 				"other-language",

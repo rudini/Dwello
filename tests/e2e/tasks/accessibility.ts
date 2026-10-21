@@ -205,6 +205,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'setup-error': () => (actor) =>
 		actor.attemptsTo(setUpDwello('E2E7-K4QX', { email: 'a11y@dwello.test', password: 'ein-langes-Passwort' }, 'ein-anderes'), Wait.until(setupError)),
 	'ki-model-loading': () => Wait.until(kiModelLoading),
+	'ki-model-failed': () => Wait.until(kiModelLoading),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// the Gebäuderegister of «Neues Gebäude» (#479), answered by its stand-in (backend/scripts/gwr-stub.ts)
@@ -638,9 +639,10 @@ function draftOf(name: string, values: object) {
 // 'demo' the instance with DEMO=on. Both start only for the features playwright.config.ts names in `usesExtraInstances`
 const EMPTY_INSTANCE = 'http://localhost:3102';
 // The setup (#577) needs no account and no provider: the empty instance has neither and never gets one, so it is
-// looked at there in every state; 'ki-model-loading' on the fresh installation, whose KI stand-in is still downloading
+// looked at there in every state, as is 'ki-model-failed' (its KI stand-in fails the download); 'ki-model-loading' on
+// the fresh installation, whose KI stand-in is still downloading
 const instanceOf = ({ state, path }: Example) =>
-	['empty', 'first-use'].includes(state) || path === '/setup'
+	['empty', 'first-use', 'ki-model-failed'].includes(state) || path === '/setup'
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE

@@ -11,6 +11,7 @@ import { db } from '../db/connection';
 import { buildings, categories, configuration, documents, heatingProfiles, invoiceDocuments, invoices, tenants, utilityStatements, contractAdvancePayments, rentalContracts, localAccounts } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { loadModel } from '../services/ki-model.service';
+import { resetSetupAttempts } from '../services/setup.service';
 import { app } from '../app';
 import { callApi, sendJson } from './helpers/auth';
 import { openAiCompatible } from './helpers/llm';
@@ -709,7 +710,12 @@ describe('API-Verträge der Berichtigung', () => {
 			expect(drift(await sample('setup-needed'), await (await app.handle(new Request('http://localhost/api/v1/setup'))).json())).toEqual([]);
 			expect(drift(await sample('setup-code-invalid'), await (await post('FALS-CHER')).json())).toEqual([]);
 			expect(drift(await sample('setup'), await (await post('VERT-RAG1')).json())).toEqual([]);
+			expect(drift(await sample('setup-done'), await (await post('VERT-RAG1')).json())).toEqual([]);
+			await db.delete(localAccounts);
+			for (let attempt = 0; attempt < 4; attempt++) await post('FALS-CHER');
+			expect(drift(await sample('setup-locked'), await (await post('VERT-RAG1')).json())).toEqual([]);
 		} finally {
+			resetSetupAttempts();
 			delete process.env.SETUP_CODE;
 			await db.delete(localAccounts);
 		}

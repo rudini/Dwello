@@ -40,11 +40,16 @@ export async function announceSetupCode() {
 	console.log(`[setup] Einrichtungscode: ${setupCode()} (Dwello einrichten: die Adresse von Dwello im Browser öffnen)`);
 }
 
+const done = () => new CodedError('SETUP_DONE', 'Dwello ist schon eingerichtet.');
+
 export async function setUpFirstAccount(code: string, email: string, password: string) {
+	// once set up, no request waits for the lock (code review 577 C-2)
+	if (await hasLocalAccount()) throw done();
 	return db.transaction(async (tx) => {
-		// one setup at a time: two at once could each find no account yet
+		// one setup at a time, two at once could each find no account yet; check and insert on the transaction's own
+		// connection, so a waiting setup holds one connection only
 		await tx.execute(sql`SELECT pg_advisory_xact_lock(577)`);
-		if (await hasLocalAccount()) throw new CodedError('SETUP_DONE', 'Dwello ist schon eingerichtet.');
+		if (await hasLocalAccount(tx)) throw done();
 		if (Date.now() < lockedUntil)
 			throw new CodedError('SETUP_LOCKED', 'Die Einrichtung ist gesperrt.', { until: new Date(lockedUntil).toISOString() });
 		if (normal(code) !== normal(setupCode())) {
@@ -55,8 +60,8 @@ export async function setUpFirstAccount(code: string, email: string, password: s
 			}
 			throw new CodedError('SETUP_CODE_INVALID', 'Der Einrichtungscode stimmt nicht.');
 		}
-		await setLocalAccount(email, password);
-		const [account] = await db.select({ id: localAccounts.id, email: localAccounts.email }).from(localAccounts).where(eq(localAccounts.email, email.trim().toLowerCase()));
+		await setLocalAccount(email, password, tx);
+		const [account] = await tx.select({ id: localAccounts.id, email: localAccounts.email }).from(localAccounts).where(eq(localAccounts.email, email.trim().toLowerCase()));
 		return { sub: `local:${account.id}`, email: account.email, name: account.email };
 	});
 }

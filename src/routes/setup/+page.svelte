@@ -44,9 +44,8 @@
 					if (result.type === 'error') failed = true;
 					else await update({ reset: false });
 					if (result.type === 'redirect') return;
-					// a refused setup: the passwords go, the hint above the form gets the focus (as on the sign-in page)
-					for (const field of formElement.querySelectorAll<HTMLInputElement>('[type=password]'))
-						field.value = '';
+					// a refused setup: the hint above the form gets the focus; the passwords stay, so after a wrong code only
+					// the code is entered again (persona Sven 577 P-1)
 					await focusFirstError(formElement.parentElement);
 				};
 			}}

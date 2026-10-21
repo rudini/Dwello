@@ -78,6 +78,18 @@ describe('KI-Modell der lokalen KI', () => {
 		expect(modelState()).toEqual({ state: 'loading', percent: 99 });
 	});
 
+	it('liest auch eine letzte Zeile ohne Zeilenumbruch', async () => {
+		ollama = Bun.serve({
+			port: 0,
+			fetch: (request) =>
+				new URL(request.url).pathname === '/api/tags' ? Response.json({ models: [] }) : Response.json({ error: 'pull failed' })
+		});
+
+		await loadModel({ baseUrl: `http://127.0.0.1:${ollama.port}/v1`, model: MODEL, local: true });
+
+		expect(modelState()).toEqual({ state: 'failed' });
+	});
+
 	it('meldet während des Ladens, wie weit es ist', async () => {
 		const config = standIn([], [{ status: 'pulling x', total: 200, completed: 80 }]);
 

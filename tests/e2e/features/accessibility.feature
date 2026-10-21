@@ -34,6 +34,7 @@ Funktionalität: Barrierefreiheit
       | dashboard              | old-address-task    |
       | dashboard              | first-use           |
       | dashboard              | ki-model-loading    |
+      | dashboard              | ki-model-failed     |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
       | dashboard              | other-language      |

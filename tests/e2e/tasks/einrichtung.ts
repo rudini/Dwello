@@ -1,4 +1,4 @@
-import { FRESH_APP } from '../fixtures/fresh-installation';
+import { EMPTY_APP, FRESH_APP } from '../fixtures/fresh-installation';
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
 import { Click, Cookies, Enter, Navigate } from '../screenplay/interactions';
@@ -32,3 +32,7 @@ export const setUpDwello =
 /** The overview of the fresh installation, signed in like the Liegenschaftsverwalter of the main stack */
 export const openFreshOverview: Activity = async (actor) =>
 	actor.attemptsTo(Cookies.add(await sessionCookies(FRESH_APP)), Navigate.to(`${FRESH_APP}/dashboard`));
+
+/** The overview of the empty instance, whose KI stand-in fails the model download */
+export const openOverviewWithFailedModel: Activity = async (actor) =>
+	actor.attemptsTo(Cookies.add(await sessionCookies(EMPTY_APP)), Navigate.to(`${EMPTY_APP}/dashboard`));

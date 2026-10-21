@@ -7,6 +7,8 @@ import { load as loadLogin } from '../routes/login/+page.server';
 import needed from '../../tests/contracts/setup-needed.json';
 import account from '../../tests/contracts/setup.json';
 import invalid from '../../tests/contracts/setup-code-invalid.json';
+import locked from '../../tests/contracts/setup-locked.json';
+import done from '../../tests/contracts/setup-done.json';
 import available from '../../tests/contracts/auth-password-available.json';
 
 // The setup on the first visit (#577): only while there is neither a Konto mit Passwort nor a provider like Google
@@ -46,7 +48,7 @@ const open = (backend: Backend) =>
 		} as never)
 	);
 
-async function setUp(fields: Record<string, string>, backend: Backend) {
+async function send(fields: Record<string, string>, backend: Backend) {
 	const jar = new Map<string, string>();
 	const cookies = {
 		set: (name: string, value: string) => jar.set(name, value),
@@ -69,6 +71,10 @@ async function setUp(fields: Record<string, string>, backend: Backend) {
 	);
 	return { result, jar, calls };
 }
+
+/** The setup form of a fresh installation, which has no provider */
+const setUp = (fields: Record<string, string>, backend: Backend) =>
+	withoutProviders(() => send(fields, backend));
 
 const fields = {
 	code: 'E2E7-K4QX',
@@ -114,6 +120,14 @@ describe('Einrichtung beim ersten Aufruf', () => {
 		expect(await open(fresh)).toMatchObject({ status: 303, location: '/login' });
 	});
 
+	// code review 577 C-8: the setup exists only without a provider, also for a form sent to it directly
+	it('legt mit einem eingerichteten Anbieter kein Konto an, sondern führt zur Anmeldung', async () => {
+		const { result, calls } = await send(fields, answering(201, account));
+
+		expect(result).toMatchObject({ status: 303, location: '/login' });
+		expect(calls.filter((call) => call.init?.method === 'POST')).toEqual([]);
+	});
+
 	it('legt das Konto an, meldet es an und führt zur Übersicht', async () => {
 		const { result, jar, calls } = await setUp(fields, answering(201, account));
 
@@ -156,12 +170,18 @@ describe('Einrichtung beim ersten Aufruf', () => {
 	});
 
 	// persona Anna 577 P-1: an empty form is a missing input, not an invalid request to reload
-	it.each(['code', 'email', 'password'])('sagt bei leerem Feld %s, was fehlt, ohne das Backend zu fragen', async (field) => {
-		const { result, calls } = await setUp({ ...fields, [field]: ' ', ...(field === 'password' && { repeat: ' ' }) }, answering(201, account));
+	it.each(['code', 'email', 'password'])(
+		'sagt bei leerem Feld %s, was fehlt, ohne das Backend zu fragen',
+		async (field) => {
+			const { result, calls } = await setUp(
+				{ ...fields, [field]: ' ', ...(field === 'password' && { repeat: ' ' }) },
+				answering(201, account)
+			);
 
-		expect(result).toMatchObject({ status: 400, data: { error: m.setup_error_empty() } });
-		expect(calls).toEqual([]);
-	});
+			expect(result).toMatchObject({ status: 400, data: { error: m.setup_error_empty() } });
+			expect(calls).toEqual([]);
+		}
+	);
 
 	it('legt kein Konto an, wenn die beiden Passwörter nicht übereinstimmen', async () => {
 		const { result, calls } = await setUp(
@@ -184,5 +204,30 @@ describe('Einrichtung beim ersten Aufruf', () => {
 			data: { error: m.backend_setup_code_invalid(), email: account.email }
 		});
 		expect(jar.has('dwello_session')).toBe(false);
+	});
+
+	// code review 577 C-4: the refusals no scenario reaches (the lock would hold the fresh installation for 15 minutes)
+	it('nennt bei einer Sperre der Einrichtung die Uhrzeit in der Schweiz', async () => {
+		const { result } = await setUp(fields, answering(423, locked));
+
+		expect(result).toMatchObject({
+			status: 423,
+			data: { error: m.setup_error_locked({ time: '14:45' }) }
+		});
+	});
+
+	it('führt zur Anmeldung, wenn Dwello inzwischen eingerichtet ist', async () => {
+		expect((await setUp(fields, answering(409, done))).result).toMatchObject({
+			status: 303,
+			location: '/login'
+		});
+	});
+
+	it('meldet ein Backend, das nicht antwortet, nicht als falschen Code', async () => {
+		const { result } = await setUp(fields, () => {
+			throw new TypeError('fetch failed');
+		});
+
+		expect(result).toMatchObject({ status: 502, data: { error: m.login_error_failed() } });
 	});
 });

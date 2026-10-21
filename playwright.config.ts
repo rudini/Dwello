@@ -21,7 +21,7 @@ const E2E_EMPTY_DATABASE_URL = (() => {
 const generated = (feature: string) => `.features-gen/tests/e2e/features/${feature}.feature.spec.js`;
 const usesExtraInstances =
 	!existsSync('.features-gen') ||
-	['accessibility', 'sprachen-bildschirme', 'demo'].some((feature) => existsSync(generated(feature)));
+	['accessibility', 'sprachen-bildschirme', 'demo', 'einrichtung'].some((feature) => existsSync(generated(feature)));
 // The fresh installation (#577: no account, no provider, the KI model still downloading) for einrichtung.feature and
 // the overview's state 'ki-model-loading'
 const usesFreshInstallation =
@@ -144,6 +144,13 @@ export default defineConfig<{ driver: Driver }>({
 		...(usesExtraInstances
 			? [
 				{
+					command: 'cd backend && bun run llm-stub',
+					port: 2532,
+					reuseExistingServer: false,
+					timeout: 30000,
+					env: { LLM_STUB_PORT: '2532', LLM_STUB_PULL: 'fail' }
+				},
+				{
 					// Empty backend for the axe check of 'empty', 'first-use', 'fresh-installation' and 'setup-error'
 					// (tests/e2e/tasks/accessibility.ts)
 					command: 'cd backend && bun run e2e-db && bun run src/index.ts',
@@ -154,7 +161,8 @@ export default defineConfig<{ driver: Driver }>({
 						PORT: '3103',
 						DATABASE_URL: E2E_EMPTY_DATABASE_URL,
 						JWT_SECRET: E2E_JWT_SECRET,
-						LLM_BASE_URL: 'http://127.0.0.1:9/v1'
+						// an Ollama whose model download fails: the overview's state 'ki-model-failed' (#577, code review C-3)
+						LLM_BASE_URL: 'http://127.0.0.1:2532/v1'
 					}
 				},
 				{

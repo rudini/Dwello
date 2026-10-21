@@ -25,6 +25,8 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Und ein Besucher hat die Einrichtung geöffnet
     Wenn der Besucher mit einem falschen Einrichtungscode ein Konto mit Passwort anlegt
     Dann sieht der Besucher in der Einrichtung den Hinweis "Der Einrichtungscode stimmt nicht. Sie finden ihn im Protokoll des Servers mit dem Befehl docker logs dwello-backend; es gilt der zuletzt angezeigte Code. Geben Sie ihn erneut ein."
+    # Persona Sven 577 P-1: nach einem falschen Code ist nur der Code neu einzugeben
+    Und stehen in der Einrichtung die Passwörter noch da
 
   # Fachreview 577 V-4: die Fehlzustände der Einrichtung
   Szenario: Einrichtung mit zwei verschiedenen Passwörtern
@@ -74,3 +76,8 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Und das KI-Modell ist zu 40 % geladen
     Wenn der Liegenschaftsverwalter der frischen Installation die Übersicht öffnet
     Dann zeigt die Übersicht den Hinweis "Das KI-Modell wird geladen: 40 %. Bis es geladen ist, erfassen Sie Rechnungen von Hand."
+
+  # Codereview 577 C-3: auf der leeren Installation des Stacks scheitert der Download
+  Szenario: Die Übersicht sagt, wenn das KI-Modell nicht geladen werden konnte
+    Wenn der Liegenschaftsverwalter die Übersicht einer Installation öffnet, deren KI-Modell nicht geladen werden konnte
+    Dann zeigt die Übersicht den Hinweis "Das KI-Modell konnte nicht geladen werden. Erfassen Sie Rechnungen von Hand. Dwello versucht es erneut, wenn der Betreiber Dwello neu startet; betreiben Sie Dwello selbst, steht der Befehl in der Installationsanleitung."

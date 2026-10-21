@@ -46,6 +46,7 @@ async function follow(stream: ReadableStream<Uint8Array>) {
 		rest = lines.pop()!;
 		for (const line of lines.filter(Boolean)) progress(JSON.parse(line), layers);
 	}
+	if (rest.trim()) progress(JSON.parse(rest), layers);
 }
 
 function progress(line: Line, layers: Map<string, { total: number; completed: number }>) {

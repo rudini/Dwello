@@ -7,6 +7,8 @@ import type { CallTheApi } from '../screenplay/abilities';
 export const FRESH_APP = 'http://localhost:3106';
 export const FRESH_API = 'http://localhost:3105/api/v1';
 export const FRESH_KI_STUB = 'http://127.0.0.1:2530';
+// the empty instance (playwright.config.ts): its KI stand-in fails the model download
+export const EMPTY_APP = 'http://localhost:3102';
 export const SETUP_CODE = 'E2E7-K4QX';
 
 export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {

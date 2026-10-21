@@ -2,8 +2,8 @@ import { createBdd } from 'playwright-bdd';
 import { SETUP_CODE } from '../fixtures/fresh-installation';
 import { test } from '../fixtures/test';
 import { shownUserName } from '../questions/authentication';
-import { kiModelHint, setupHint } from '../questions/einrichtung';
-import { openFreshDwello, openFreshOverview, openSetup, openSetupPrivacy, openSetupTerms, setUpDwello } from '../tasks/einrichtung';
+import { enteredSetupPassword, kiModelHint, repeatedSetupPassword, setupHint } from '../questions/einrichtung';
+import { openFreshDwello, openFreshOverview, openOverviewWithFailedModel, openSetup, openSetupPrivacy, openSetupTerms, setUpDwello } from '../tasks/einrichtung';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -72,3 +72,15 @@ Then('zeigt die Übersicht den Hinweis {string}', async ({ verwalter }, text: st
 	await verwalter.sees(kiModelHint).toBe(text);
 });
 
+
+Then('stehen in der Einrichtung die Passwörter noch da', async ({ besucher, frisch }) => {
+	await besucher.sees(enteredSetupPassword).toBe(frisch.account.password);
+	await besucher.sees(repeatedSetupPassword).toBe(frisch.account.password);
+});
+
+When(
+	'der Liegenschaftsverwalter die Übersicht einer Installation öffnet, deren KI-Modell nicht geladen werden konnte',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(openOverviewWithFailedModel);
+	}
+);

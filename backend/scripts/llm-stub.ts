@@ -8,11 +8,12 @@
  *   bun run llm-stub      http://127.0.0.1:2527/v1
  *
  * With LLM_STUB_PULL=on it stands in for an Ollama that has not got the model yet (the fresh installation, #577): the
- * model list is empty and a pull reports the progress a scenario sets with POST /stub/pull {percent}, at once.
+ * model list is empty and a pull reports the progress a scenario sets with POST /stub/pull {percent}, at once. With
+ * LLM_STUB_PULL=fail the pull fails (the empty instance of the stack).
  */
 
 const PORT = Number(process.env.LLM_STUB_PORT ?? 2527);
-const PULL = process.env.LLM_STUB_PULL === 'on';
+const PULL = process.env.LLM_STUB_PULL; // 'on' or 'fail'
 let pulled = 0; // percent of the model download
 
 type Language = 'Deutsch' | 'Französisch' | 'Italienisch' | 'Englisch';
@@ -171,7 +172,7 @@ Bun.serve({
 	hostname: '127.0.0.1',
 	// Bun closes an idle request after 10 s by default; the slow answer needs longer, and the model download of the
 	// fresh installation streams for the whole run
-	idleTimeout: PULL ? 0 : 60,
+	idleTimeout: PULL === 'on' ? 0 : 60,
 	fetch: (request) => routes[new URL(request.url).pathname]?.(request) ?? new Response(null, { status: 503 })
 });
 
@@ -184,7 +185,7 @@ const routes: Record<string, Route> = { '/v1/chat/completions': chat, '/chat/com
 function ollama(): Record<string, Route> {
 	return {
 		'/api/tags': () => Response.json({ models: [] }),
-		'/api/pull': () => pullProgress(),
+		'/api/pull': () => (PULL === 'fail' ? Response.json({ error: 'no space left on device' }) : pullProgress()),
 		'/stub/pull': async (request) => {
 			pulled = ((await request.json()) as { percent: number }).percent;
 			// at once, not with the next tick: the scenario opens the overview right after

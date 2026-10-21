@@ -1976,5 +1976,6 @@
 	"ki_model_failed_title": "The AI model could not be downloaded.",
 	"ki_model_failed_text": "Enter invoices by hand. Dwello tries again when the operator restarts Dwello; if you run Dwello yourself, the command is in the installation guide.",
 	"privacy_third_ollama": "If the AI model is missing on the server, for example at the first start, Dwello downloads it once from Ollama (Ollama Inc., USA), about 6 GB. Ollama receives the server’s IP address and the name of the model, no data you enter in Dwello; this information may reach the USA.",
-	"setup_error_empty": "Fill in every field: the setup code, your email address and the password twice."
+	"setup_error_empty": "Fill in every field: the setup code, your email address and the password twice.",
+	"backend_email_unusable": "Dwello cannot use this email address. Enter an address like name@example.ch."
 }

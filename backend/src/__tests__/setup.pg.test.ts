@@ -67,6 +67,15 @@ describe('Einrichtung', () => {
 		expect(await codeOf(response)).toBe('PASSWORD_TOO_SHORT');
 	});
 
+	// code review 577 C-5: an address the session check would refuse is a refusal the page can name, not a failure
+	it('lehnt eine E-Mail-Adresse ab, mit der Dwello keine Sitzung gälte', async () => {
+		const response = await setUp({ code: CODE, email: 'verwalter@localhost', password: account.password });
+
+		expect(response.status).toBe(400);
+		expect(await codeOf(response)).toBe('EMAIL_UNUSABLE');
+		expect(await db.select().from(localAccounts)).toEqual([]);
+	});
+
 	it('ist nach der Einrichtung geschlossen, auch mit dem richtigen Code', async () => {
 		await setUp({ code: CODE, ...account });
 
@@ -103,6 +112,17 @@ describe('Einrichtung', () => {
 
 		expect(answer).not.toContain(CODE);
 	});
+
+	// code review 577 C-2: each setup holds a connection while it waits for the lock; the check must not need another
+	it('beantwortet mehr gleichzeitige Einrichtungen, als die Datenbank Verbindungen hat', async () => {
+		const started = Date.now();
+		const answers = await Promise.all(
+			Array.from({ length: 25 }, (_, n) => setUp({ code: CODE, email: `n${n}@dwello.test`, password: 'ein-langes-Passwort' }))
+		);
+
+		expect(answers.map((answer) => answer.status).sort()).toEqual([201, ...Array(24).fill(409)]);
+		expect(Date.now() - started).toBeLessThan(5000);
+	}, 30_000);
 
 	it('legt bei gleichzeitigen Einrichtungen nur ein Konto an', async () => {
 		const answers = await Promise.all(

@@ -1976,5 +1976,6 @@
 	"ki_model_failed_title": "Das KI-Modell konnte nicht geladen werden.",
 	"ki_model_failed_text": "Erfassen Sie Rechnungen von Hand. Dwello versucht es erneut, wenn der Betreiber Dwello neu startet; betreiben Sie Dwello selbst, steht der Befehl in der Installationsanleitung.",
 	"privacy_third_ollama": "Fehlt das KI-Modell auf dem Server, etwa beim ersten Start, lädt Dwello es einmal bei Ollama (Ollama Inc., USA) herunter, rund 6 GB. Ollama erhält dabei die IP-Adresse des Servers und den Namen des Modells, keine Daten, die Sie in Dwello erfassen; die Angaben können in die USA gelangen.",
-	"setup_error_empty": "Füllen Sie alle Felder aus: den Einrichtungscode, Ihre E-Mail-Adresse und zweimal das Passwort."
+	"setup_error_empty": "Füllen Sie alle Felder aus: den Einrichtungscode, Ihre E-Mail-Adresse und zweimal das Passwort.",
+	"backend_email_unusable": "Diese E-Mail-Adresse kann Dwello nicht verwenden. Geben Sie eine Adresse wie name@example.ch ein."
 }
