@@ -15,6 +15,7 @@ import {
 	belegCategory,
 	belegDistributionKey,
 	belegInvoiceDate,
+	anyBelegRow,
 	belegRow,
 	belegSelected,
 	belegUploadButton,
@@ -97,7 +98,8 @@ export const chooseKey = (fileName: string, key: string): Activity => async (act
 };
 
 export const createInvoices = Click.on(createInvoicesButton);
-export const startCancellingUpload = Click.on(cancelUploadButton);
+// once the files are listed: a click right after choosing them closed the dialog without asking (#607, firefox in CI)
+export const startCancellingUpload: Activity = (actor) => actor.attemptsTo(Wait.until(anyBelegRow), Click.on(cancelUploadButton));
 export const confirmCancelling = Click.on(discardConfirm);
 
 // The BFF endpoints the dialog calls, answered with an error
