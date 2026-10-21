@@ -41,6 +41,12 @@ Funktionalität: Datenschutz
     Dann nennt die Datenschutzerklärung unter "Anmeldung" "Google"
     Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Microsoft"
 
+  # #576: mit einem lokalen Konto kennt Dwello das Passwort, aber nur als nicht umkehrbaren Hash
+  @wip
+  Szenario: Anmeldung mit Passwort in der Datenschutzerklärung
+    Angenommen ein lokales Konto ist eingerichtet
+    Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass Dwello das Passwort nur in einer Form speichert, aus der es sich nicht zurückgewinnen lässt
+
   Szenario: Dienste Dritter, die der Browser aufruft
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "CARTO"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "OpenPLZ"

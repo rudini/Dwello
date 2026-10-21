@@ -65,3 +65,35 @@ Funktionalität: Anmeldung
     Angenommen ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher sich mit "Google" anmeldet
     Dann lässt Dwello den Besucher bei Google das Konto wählen
+
+  # #576: ein lokales Konto mit E-Mail-Adresse und Passwort, ohne Google
+  @wip
+  Szenario: Anmeldeseite bietet Passwort und Google an
+    Angenommen ein lokales Konto ist eingerichtet
+    Wenn ein Besucher die Anmeldeseite öffnet
+    Dann kann sich der Besucher mit E-Mail-Adresse und Passwort anmelden
+    Und kann sich der Besucher mit "Google" anmelden
+
+  @wip
+  Szenario: Anmeldung mit Passwort
+    Angenommen ein lokales Konto ist eingerichtet
+    Und ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmeldet
+    Dann ist der Besucher auf der Seite "Übersicht"
+
+  @wip
+  Szenario: Anmeldung mit falschem Passwort
+    Angenommen ein lokales Konto ist eingerichtet
+    Und ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher sich mit der E-Mail-Adresse des Kontos und einem falschen Passwort anmeldet
+    Dann ist der Besucher auf der Seite "Anmelden"
+    Und sieht der Besucher den Hinweis "E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut."
+
+  # 5 Fehlversuche sperren die Anmeldung für 15 Minuten; der Befehl im Container hebt die Sperre auf
+  @wip
+  Szenario: Nach fünf Fehlversuchen ist die Anmeldung gesperrt
+    Angenommen ein lokales Konto ist eingerichtet
+    Und der Besucher hat sich fünfmal mit einem falschen Passwort angemeldet
+    Wenn der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmeldet
+    Dann ist der Besucher auf der Seite "Anmelden"
+    Und sieht der Besucher einen Hinweis, der mit "Nach mehreren Fehlversuchen ist die Anmeldung gesperrt bis" beginnt

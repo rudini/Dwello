@@ -602,6 +602,17 @@ export function testData(api: CallTheApi) {
 			await invoice(buildingTitle, { distributionKeyId: ids.get(keyTitle) }, 'Hauswart Q1', '900.00', '2026-03-31');
 		},
 
+		// A local account with e-mail and password (#576); several scenarios hold one each, so each has its own address
+		async localAccount() {
+			const token = randomUUID().replaceAll('-', '').slice(0, 12);
+			const email = `konto-${token}@dwello.test`;
+			const password = `Passwort-${randomUUID()}`;
+			await put('local-accounts', { email, password });
+			names.set('E-Mail Konto', email);
+			names.set('Passwort Konto', password);
+			extras.push(`local-accounts/${encodeURIComponent(email)}`);
+		},
+
 		async cleanUp() {
 			for (const restore of restores) await restore();
 			purgeStatements(tokens);

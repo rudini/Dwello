@@ -105,6 +105,13 @@ Then(
 );
 
 Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello das Passwort nur in einer Form speichert, aus der es sich nicht zurückgewinnen lässt',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('aus dem sich das Passwort nicht zurückgewinnen lässt');
+	}
+);
+
+Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(sectionText(heading)).toContain(

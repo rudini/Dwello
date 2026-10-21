@@ -1,8 +1,8 @@
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
-import { Click, Cookies, NoticeRequest, Navigate, Wait } from '../screenplay/interactions';
+import { Click, Cookies, Enter, NoticeRequest, Navigate, Wait } from '../screenplay/interactions';
 import { userMenuButton } from '../targets/app-frame';
-import { loginButton, logoutButton } from '../targets/authentication';
+import { loginButton, loginError, logoutButton, passwordEmailInput, passwordInput, passwordSubmitButton } from '../targets/authentication';
 
 export const GOOGLE_SIGN_IN = 'Anmeldung bei Google';
 
@@ -27,3 +27,13 @@ export const loseSession = Cookies.clear;
 
 export const signInAgain = (baseURL: string): Activity => async (actor) =>
 	actor.attemptsTo(Cookies.add(await sessionCookies(baseURL)), Navigate.to('/dashboard'));
+
+export const signInWithPassword = (email: string, password: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(email).into(passwordEmailInput), Enter.theValue(password).into(passwordInput), Click.on(passwordSubmitButton));
+
+/** Wrong passwords one after the other, each refused before the next (the sign-in page answers each with its hint) */
+export const failSignIns = (email: string, times: number): Activity => async (actor) => {
+	for (let attempt = 1; attempt <= times; attempt++) {
+		await actor.attemptsTo(Navigate.to('/login'), signInWithPassword(email, `falsch-${attempt}`), Wait.until(loginError));
+	}
+};
