@@ -78,6 +78,10 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+/* Skip link: hidden until it gets keyboard focus */
+.skip { position: absolute; left: 16px; top: -64px; z-index: 100; padding: 12px 16px; background: var(--surface); color: var(--accent); border: 2px solid var(--accent); border-radius: var(--radius-control); font-weight: 600; }
+.skip:focus { top: 16px; }
 body { margin: 0; background: var(--canvas); color: var(--ink); font: 400 1.0625rem/1.55 var(--font); -webkit-font-smoothing: antialiased; }
 img, svg { max-width: 100%; }
 a { color: var(--accent); text-underline-offset: 3px; }
@@ -309,7 +313,7 @@ section { padding-block: 96px; }
 footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface); border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 0.9375rem; }
 .foot { display: grid; gap: 40px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .foot { grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)); } }
-.foot h4 { font-size: 0.875rem; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
+.foot h2 { font-size: 0.875rem; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
 .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .foot a { color: var(--ink-muted); text-decoration: none; }
 .foot a:hover { color: var(--accent); text-decoration: underline; }
@@ -359,6 +363,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></symbol>
 </svg>
 
+<a class="skip" href="#top">Aller au contenu</a>
 <header class="site-header">
 	<div class="wrap">
 		<a class="logo" href="#top" aria-label="Dwello, vers la page d’accueil">
@@ -377,7 +382,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	</div>
 </header>
 
-<main id="top">
+<main id="top" tabindex="-1">
 
 <!-- HERO -->
 <section class="hero">
@@ -391,7 +396,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="btn btn-secondary" href="https://demo.dwello.ch/dashboard" rel="noopener">Voir la démo</a>
 			</div>
 			<div class="cmd" role="group" aria-label="Commande de démarrage">
-				<code id="hero-cmd">docker compose -f docker-compose.prod.yml up -d</code>
+				<code id="hero-cmd" tabindex="0">docker compose -f docker-compose.prod.yml up -d</code>
 				<button class="copy" type="button" data-copy="hero-cmd">Copier</button>
 			</div>
 			<p class="hero-note">Gratuit, sans abonnement et sans compte chez nous. Pour des immeubles jusqu’à 50 appartements.</p>
@@ -627,7 +632,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<div class="chat-head"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>Assistant IA connecté à Dwello <span class="badge plan" style="margin-left:auto">Ébauche</span></div>
 				<div class="chat-body">
 					<div class="msg me">Que dois-je faire cette semaine pour mes immeubles ?</div>
-					<div class="tool"><b>dwello.next_steps</b>() · <b>dwello.deadlines</b>(days: 14)</div>
+					<div class="tool" tabindex="0"><b>dwello.next_steps</b>() · <b>dwello.deadlines</b>(days: 14)</div>
 					<div class="msg ai">Un délai et deux tâches :
 						<table><tbody>
 							<tr><td>Délai de paiement Hans Müller, Musterhaus Zentrum, appartement 1.01</td><td class="r">CHF 215.80</td></tr>
@@ -659,7 +664,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="install" id="panel-pc" role="tabpanel" aria-labelledby="tab-pc">
 			<div class="term">
 				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Copier</button></div>
-<pre id="code-pc"><span class="c"># 1. Télécharger Dwello</span>
+<pre id="code-pc" tabindex="0"><span class="c"># 1. Télécharger Dwello</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="c"># 2. Reprendre les réglages (votre e-mail, clés)</span>
 <span class="p">$ </span>cp .env.example .env
@@ -682,7 +687,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="install" id="panel-home" role="tabpanel" aria-labelledby="tab-home" hidden>
 			<div class="term">
 				<div class="term-bar"><span>SSH · Synology, Unraid, Mini-PC</span><button type="button" data-copy="code-home">Copier</button></div>
-<pre id="code-home"><span class="c"># Sur le serveur domestique, par SSH</span>
+<pre id="code-home" tabindex="0"><span class="c"># Sur le serveur domestique, par SSH</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
 <span class="c"># Sans matériel puissant : indiquer une IA externe</span>
@@ -703,7 +708,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="install" id="panel-cloud" role="tabpanel" aria-labelledby="tab-cloud" hidden>
 			<div class="term">
 				<div class="term-bar"><span>Linux-Server · Infomaniak, Exoscale, Hetzner</span><button type="button" data-copy="code-cloud">Copier</button></div>
-<pre id="code-cloud"><span class="c"># Sur un serveur Linux neuf avec Docker</span>
+<pre id="code-cloud" tabindex="0"><span class="c"># Sur un serveur Linux neuf avec Docker</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
@@ -839,27 +844,31 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="logo" href="#top" aria-label="Dwello, vers la page d’accueil"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg><svg class="wm" viewBox="0 0 6488 1512" aria-hidden="true"><use href="#wm"/></svg></a>
 				<p style="max-width:24em">Logiciel open source pour les bailleresses et bailleurs privés en Suisse.</p>
 			</div>
-			<div><h4>Produit</h4><ul><li><a href="#funktionen">Fonctions</a></li><li><a href="#datenschutz">Protection des données</a></li><li><a href="#mcp">IA et MCP</a></li><li><a href="#roadmap">Feuille de route</a></li></ul></div>
-			<div><h4>Commencer</h4><ul><li><a href="#installieren">Installation</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Démo</a></li><li><a href="#faq">Questions fréquentes</a></li></ul></div>
-			<div><h4>Savoir</h4><ul><li><a href="#funktionen">Décompter les frais accessoires</a></li><li><a href="#funktionen">Clés de répartition</a></li><li><a href="#funktionen">QR-facture</a></li></ul></div>
-			<div><h4>Communauté</h4><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Signaler une erreur</a></li><li><a href="../brand.html">Manuel de marque</a></li></ul></div>
+			<div><h2>Produit</h2><ul><li><a href="#funktionen">Fonctions</a></li><li><a href="#datenschutz">Protection des données</a></li><li><a href="#mcp">IA et MCP</a></li><li><a href="#roadmap">Feuille de route</a></li></ul></div>
+			<div><h2>Commencer</h2><ul><li><a href="#installieren">Installation</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Démo</a></li><li><a href="#faq">Questions fréquentes</a></li></ul></div>
+			<div><h2>Savoir</h2><ul><li><a href="#funktionen">Décompter les frais accessoires</a></li><li><a href="#funktionen">Clés de répartition</a></li><li><a href="#funktionen">QR-facture</a></li></ul></div>
+			<div><h2>Communauté</h2><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Signaler une erreur</a></li><li><a href="../brand.html">Manuel de marque</a></li></ul></div>
 		</div>
 		<div class="legal">
 			<span>© 2026 Roger Rudin · Fait pour la Suisse · Licence <a href="https://github.com/rudini/Dwello/blob/main/LICENSE" rel="noopener">AGPL-3.0</a></span>
 			<span class="legal-links"><a href="impressum.html">Mentions légales</a> · <a href="datenschutz.html">Déclaration de protection des données</a></span>
-			<nav class="langs" aria-label="Langue"><a href="../index.html" hreflang="de" lang="de">DE</a><a href="index.html" hreflang="fr" lang="fr" aria-current="page">FR</a><a href="../it/index.html" hreflang="it" lang="it">IT</a><a href="../en/index.html" hreflang="en" lang="en">EN</a></nav>
+			<nav class="langs" aria-label="Choisir la langue"><a href="../index.html" hreflang="de" lang="de">DE</a><a href="index.html" hreflang="fr" lang="fr" aria-current="page">FR</a><a href="../it/index.html" hreflang="it" lang="it">IT</a><a href="../en/index.html" hreflang="en" lang="en">EN</a></nav>
 		</div>
 	</div>
 </footer>
 
+<p class="sr-only" role="status" id="copy-status"></p>
 <script>
 (function () {
+	var status = document.getElementById('copy-status');
 	function copy(btn) {
 		var el = document.getElementById(btn.getAttribute('data-copy'));
 		var text = el.innerText.split('\n').filter(function (l) { l = l.trim(); return l && l[0] !== '#' && l[0] !== '✓'; }).map(function (l) { return l.replace(/^\$\s/, ''); }).join('\n');
 		var label = btn.textContent;
-		var done = function () { btn.textContent = 'Copié'; setTimeout(function () { btn.textContent = label; }, 1600); };
-		var fallback = function () { var r = document.createRange(); r.selectNodeContents(el); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Sélectionné'; };
+		// the status region tells screen readers what happened; the button text only shows it
+		var tell = function (msg) { status.textContent = ''; setTimeout(function () { status.textContent = msg; }, 50); btn.textContent = msg; };
+		var done = function () { tell('Copié'); setTimeout(function () { btn.textContent = label; }, 1600); };
+		var fallback = function () { var r = document.createRange(); r.selectNodeContents(el); var s = getSelection(); s.removeAllRanges(); s.addRange(r); tell('Sélectionné'); };
 		try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
 	}
 	document.querySelectorAll('[data-copy]').forEach(function (b) { b.addEventListener('click', function () { copy(b); }); });
@@ -878,6 +887,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		t.addEventListener('keydown', function (e) {
 			if (e.key === 'ArrowRight') select(tabs[(i + 1) % tabs.length]);
 			if (e.key === 'ArrowLeft') select(tabs[(i - 1 + tabs.length) % tabs.length]);
+			if (e.key === 'Home') select(tabs[0]);
+			if (e.key === 'End') select(tabs[tabs.length - 1]);
 		});
 	});
 })();
