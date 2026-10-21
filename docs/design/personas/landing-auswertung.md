@@ -30,7 +30,7 @@ Am besten bewertet werden Lesbarkeit und Bedienung (4.0) und die Kennzeichnung �
 | L-4 | Major | Auf dem Handy und bei 150 %/200 % Zoom verschwinden Navigation und Sprachwechsel, ohne Menü-Knopf; FAQ, Impressum und Sprache sind erst in der Fusszeile, rund 29 bis 33 Bildschirme tiefer. | Marco P-1, Helga P-4, Anna P-6 |
 | L-5 | Major | Fachjargon ohne Erklärung (Docker, OAuth, Ollama, MCP, WCAG, axe, AGPL, NAS, SSH …), ausgerechnet auch im Abschnitt «Klare Wörter statt Fachjargon». | Helga P-3, Marco P-8 |
 | L-6 | Major | «100 % Ihrer Daten bleiben auf Ihrem Server» widerspricht Google-Login, Adresssuche, E-Mail-Versand und externer KI; dass ein Google-Konto nötig ist, steht nur in einem Reiter. | Dr. Weber P-2, P-3 |
-| L-7 | Major | Rundung: «zugunsten der Mieter», aber Guthaben unter CHF 5 werden nicht ausbezahlt. | Dr. Weber P-1 |
+| L-7 | Minor | Rundung: Der Satz «Kleinstbeträge unter CHF 5 werden weder gefordert noch ausbezahlt» lässt weg, dass sie als Gutschrift oder Nachforderung auf die nächste Abrechnung übertragen und mit der Schlussabrechnung beim Auszug ausgeglichen werden. So liest Dr. Weber, Guthaben verfielen. Der Befund trifft nur den Text der Seite, nicht das Verhalten der App (Korrektur des Product Owners; Dr. Weber hatte Major). | Dr. Weber P-1 |
 | L-8 | Major | Impressum und Datenschutzerklärung ohne Postadresse. | Dr. Weber P-4 |
 | L-9 | Major | «Rechnet so, wie es das Mietrecht verlangt» ohne Einschränkung; das FAQ «rechtlich geprüft?» weicht auf automatische Tests aus. | Dr. Weber P-5 |
 | L-10 | Minor | Seite zu lang und mit Wiederholungen (29 bis 33 Bildschirme); die wichtigste Frage «Kann ich das überhaupt?» steht fast am Schluss. | Marco P-5, Helga P-5 |
@@ -56,4 +56,4 @@ Am besten bewertet werden Lesbarkeit und Bedienung (4.0) und die Kennzeichnung �
 1. Den ersten Bildschirm für Laien bauen: «Demo ansehen» als Hauptaktion, die Installation als zweiten Weg mit dem Hinweis «Für die Einrichtung brauchen Sie jemanden, der sich mit Computern auskennt» (L-1, L-3).
 2. Eine vollständige, verlinkte Installationsanleitung inklusive `.env` und Google-Anmeldung, zum Weitergeben an eine Helferin (L-2).
 3. Ein Menü für Handy und Zoom (L-4).
-4. Die Aussagen zu Datenschutz, Rundung und Mietrecht richtigstellen und eine Postadresse ins Impressum (L-6 bis L-9); das sollte `fach-reviewer` vor der Änderung prüfen.
+4. Die Aussagen zu Datenschutz und Mietrecht richtigstellen, den Übertrag der Kleinstbeträge nennen und eine Postadresse ins Impressum (L-6 bis L-9); das sollte `fach-reviewer` vor der Änderung prüfen.
