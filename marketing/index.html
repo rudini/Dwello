@@ -145,11 +145,6 @@ section { padding-block: 96px; }
 .hero h1 span { color: var(--accent); }
 .hero .lede { font-size: clamp(1.125rem, 1.7vw, 1.3125rem); color: var(--ink-muted); max-width: 36em; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.cmd { display: flex; align-items: stretch; max-width: 600px; border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--surface); overflow: hidden; }
-.cmd code { flex: 1; min-width: 0; font: 500 0.9375rem/1.4 var(--mono); padding: 14px 16px; overflow-x: auto; white-space: nowrap; }
-.cmd code::before { content: "$ "; color: var(--ink-muted); }
-.copy { border: 0; border-left: 1px solid var(--line); background: var(--sunken); color: var(--ink); font: 600 0.9375rem var(--font); padding: 0 16px; cursor: pointer; min-height: 48px; }
-.copy:hover { background: var(--accent-soft); color: var(--accent); }
 .hero-note { font-size: 0.9375rem; color: var(--ink-muted); }
 .stage { position: relative; margin-top: 56px; margin-bottom: -1px; }
 .stage .shot.desk { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 0; }
@@ -161,7 +156,7 @@ section { padding-block: 96px; }
 /* Facts */
 .facts { background: var(--surface); border-bottom: 1px solid var(--line); }
 .facts ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-@media (min-width: 900px) { .facts ul { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .facts ul { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .facts li { padding: 24px 16px 24px 0; display: grid; gap: 4px; align-content: start; }
 @media (min-width: 900px) { .facts li { padding: 32px 24px; border-left: 1px solid var(--line); } .facts li:first-child { border-left: 0; padding-left: 0; } }
 .facts b { font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1.1; }
@@ -312,7 +307,7 @@ section { padding-block: 96px; }
 @media (max-width: 719px) { .final-house { display: none; } }
 footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface); border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 0.9375rem; }
 .foot { display: grid; gap: 40px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 900px) { .foot { grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .foot { grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); } }
 .foot h2 { font-size: 0.875rem; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
 .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .foot a { color: var(--ink-muted); text-decoration: none; }
@@ -323,7 +318,17 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 .langs a[aria-current] { background: var(--accent-soft); color: var(--accent); }
 .head-langs { display: none; }
 @media (min-width: 1180px) { .head-langs { display: flex; margin-left: 8px; } }
-@media (min-width: 1000px) and (max-width: 1179px) { .nav { margin-left: auto; } }
+/* Below the width where navigation and languages fit, one menu holds both */
+.menu { position: relative; margin-left: auto; }
+.menu summary { list-style: none; display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border: 2px solid var(--line-strong); border-radius: var(--radius-control); font-weight: 600; cursor: pointer; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu-panel { position: absolute; right: 0; top: calc(100% + 8px); display: grid; min-width: 240px; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); box-shadow: var(--shadow-overlay); }
+.menu-panel a { display: flex; align-items: center; min-height: 48px; padding: 0 12px; color: var(--ink); text-decoration: none; border-radius: var(--radius-control); }
+.menu-panel a:hover { background: var(--accent-soft); color: var(--accent); }
+.menu-panel .langs { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; }
+@media (min-width: 1180px) { .menu { display: none; } }
+@media (max-width: 1179px) { .nav { display: none; } .header-cta { margin-left: 0; } }
+@media (max-width: 479px) { .header-cta { display: none; } }
 </style>
 </head>
 <body>
@@ -373,12 +378,19 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<nav class="nav" aria-label="Hauptnavigation">
 			<a href="#funktionen">Funktionen</a>
 			<a href="#datenschutz">Datenschutz</a>
-			<a href="#installieren">Installieren</a>
+			<a href="#installieren">Einrichten</a>
 			<a href="#open-source">Open Source</a>
 			<a href="#faq">Fragen</a>
 		</nav>
 		<nav class="langs head-langs" aria-label="Sprache"><a href="index.html" hreflang="de" lang="de" aria-current="page">DE</a><a href="fr/index.html" hreflang="fr" lang="fr">FR</a><a href="it/index.html" hreflang="it" lang="it">IT</a><a href="en/index.html" hreflang="en" lang="en">EN</a></nav>
-		<a class="btn btn-primary header-cta" href="#installieren">Installieren</a>
+		<details class="menu">
+			<summary>Menü</summary>
+			<div class="menu-panel">
+				<nav aria-label="Hauptnavigation"><a href="#funktionen">Funktionen</a><a href="#datenschutz">Datenschutz</a><a href="#installieren">Einrichten</a><a href="#open-source">Open Source</a><a href="#faq">Fragen</a><a href="impressum.html">Impressum</a></nav>
+				<nav class="langs" aria-label="Sprache"><a href="index.html" hreflang="de" lang="de" aria-current="page">Deutsch</a><a href="fr/index.html" hreflang="fr" lang="fr">Français</a><a href="it/index.html" hreflang="it" lang="it">Italiano</a><a href="en/index.html" hreflang="en" lang="en">English</a></nav>
+			</div>
+		</details>
+		<a class="btn btn-primary header-cta" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen</a>
 	</div>
 </header>
 
@@ -392,14 +404,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h1>Ihre Liegenschaft. Ihre Daten. <span>Ihr Server.</span></h1>
 			<p class="lede">Dwello macht die Nebenkostenabrechnung für private Vermieterinnen und Vermieter. Rechnungen hineinziehen, Abrechnung prüfen, mit QR-Rechnung versenden. Die Software läuft bei Ihnen, und die KI liest Ihre Belege auf Ihrem eigenen Rechner.</p>
 			<div class="actions">
-				<a class="btn btn-primary" href="#installieren">Dwello installieren <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-				<a class="btn btn-secondary" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen</a>
+				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+				<a class="btn btn-secondary" href="#installieren">So kommen Sie zu Dwello</a>
 			</div>
-			<div class="cmd" role="group" aria-label="Startbefehl">
-				<code id="hero-cmd" tabindex="0">docker compose -f docker-compose.prod.yml up -d</code>
-				<button class="copy" type="button" data-copy="hero-cmd">Kopieren</button>
-			</div>
-			<p class="hero-note">Kostenlos, ohne Abo und ohne Konto bei uns. Für Liegenschaften bis 50 Wohnungen.</p>
+			<p class="hero-note">Kostenlos und ohne Abo. Einrichten muss Dwello einmal jemand, der sich mit Computern auskennt. Danach brauchen Sie keine technischen Kenntnisse.</p>
 		</div>
 		<div class="stage">
 			<figure class="shot desk">
@@ -420,11 +428,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <div class="facts">
 	<div class="wrap">
 		<ul>
-			<li><b>CHF 0.–</b><span>für immer, ohne Abo und ohne Werbung</span></li>
+			<li><b>CHF 0.–</b><span>ohne Abo und ohne Werbung</span></li>
 			<li><b>4</b><span>Sprachen: Deutsch, Français, Italiano, English</span></li>
-			<li><b>0</b><span>Verstösse gegen WCAG 2.2 AA, hell und dunkel</span></li>
-			<li><b class="num">609</b><span>automatische Prüf-Szenarien, auf Deutsch geschrieben</span></li>
-			<li><b>100 %</b><span>Ihrer Daten bleiben auf Ihrem Server</span></li>
+			<li><b>50</b><span>Wohnungen: für private Vermieterinnen und Vermieter</span></li>
+			<li><b>0</b><span>Daten gehen an uns. Dwello läuft bei Ihnen.</span></li>
 		</ul>
 	</div>
 </div>
@@ -478,11 +485,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col">
 				<span class="badge info">Nebenkostenabrechnung</span>
 				<h3>Eine Abrechnung, die jede Zahl erklärt.</h3>
-				<p>Dwello rechnet so, wie es das Mietrecht verlangt, und zeigt für jede Kategorie die Kosten des Gebäudes, den Anteil der Wohnung und die Mietstage. Ihre Mieter sehen dieselbe Aufstellung im PDF.</p>
+				<p>Dwello rechnet nach den Regeln des Mietrechts und zeigt für jede Kategorie die Kosten des Gebäudes, den Anteil der Wohnung und die Mietstage. Ihre Mieter sehen dieselbe Aufstellung im PDF. Prüfen Sie jede Abrechnung, bevor Sie sie versenden: Dwello ersetzt keine Rechtsberatung.</p>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Nur was der Vertrag erlaubt <span class="law">Art. 257a OR</span><small>Abgerechnet werden nur die Nebenkosten, die im Mietvertrag vereinbart sind.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Tagesgenau bei Mieterwechsel und Leerstand<small>Die Nebenkosten einer leeren Wohnung trägt der Vermieter.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Auf 5 Rappen gerundet, zugunsten der Mieter<small>Kleinstbeträge unter CHF 5 werden weder gefordert noch ausbezahlt.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Auf 5 Rappen gerundet, zugunsten der Mieter<small>Beträge unter CHF 5 werden nicht sofort gefordert oder ausbezahlt, sondern auf die nächste Abrechnung übertragen und spätestens beim Auszug ausgeglichen.</small></span></li>
 				</ul>
 			</div>
 			<figure class="shot">
@@ -496,7 +503,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col" style="max-width:760px">
 				<span class="badge info">Verteilschlüssel und Heizprofile</span>
 				<h3>Gerecht verteilt, auch im Winter.</h3>
-				<p>Kosten nach Fläche, Zimmern, Einheiten oder als eigene Formel, etwa 70 % nach Fläche und 30 % pro Wohnung. Heizkosten folgen einem Heizprofil: Im Januar zählt ein Mietstag mehr als im Juli. Für Mittelland, Bergregion und Tessin ist je ein Profil dabei.</p>
+				<p>Kosten nach Fläche, Zimmern, Einheiten oder als eigene Formel, etwa 70 % nach Fläche und 30 % pro Wohnung. Heizkosten folgen einem Heizprofil: Im Januar zählt ein Mietstag mehr als im Juli. Für Mittelland, Bergregion und Tessin ist je ein Profil dabei, dazu eines für Heizung mit Warmwasser.</p>
 			</div>
 			<div class="duo">
 				<figure class="figure">
@@ -590,7 +597,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="sec-head">
 				<span class="kicker">Datenschutz</span>
 				<h2>Nach dem Schweizer Datenschutzgesetz gebaut.</h2>
-				<p>Mieterdaten sind Personendaten. Dwello behandelt sie so: Sie bleiben auf Ihrem Gerät, nichts geht an uns, und Sie können jederzeit Auskunft geben.</p>
+				<p>Mieterdaten sind Personendaten. Dwello behandelt sie so: Sie bleiben auf Ihrem Server, nichts geht an uns, und Sie können jederzeit Auskunft geben. Nach aussen geht nur, was eine Aufgabe braucht: die Anmeldung bei Google, die Adresssuche im Gebäuderegister des Bundes, Ihre E-Mails an Mieter und, wenn Sie es so einrichten, Rechnungen an eine externe KI. Verantwortlich für die Daten Ihrer Mieter bleiben Sie.</p>
 			</div>
 			<!-- In the app's illustration style: line, fill, one accent stroke -->
 			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Ein Haus mit einem Server darin" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -621,14 +628,14 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="feature" style="padding:0;border:0">
 			<div class="copy-col">
 				<span class="badge plan">Geplant · MCP</span>
-				<h3 style="font-size:clamp(2rem,4.2vw,3rem)">Fragen Sie Ihre Liegenschaft einfach.</h3>
-				<p>Mit dem Model Context Protocol verbindet sich Dwello mit Ihrem KI-Assistenten: Claude, ChatGPT oder eine lokale KI. Sie fragen in Ihren Worten, der Assistent schaut in Dwello nach. Er liest nur, was Sie freigeben, und ändert nichts ohne Ihre Bestätigung.</p>
+				<h2 style="font-size:clamp(2rem,4.2vw,3rem)">Fragen Sie Ihre Liegenschaft einfach.</h2>
+				<p>Geplant ist, dass sich Dwello mit dem Model Context Protocol mit Ihrem KI-Assistenten verbindet: Claude, ChatGPT oder eine lokale KI. Sie fragen in Ihren Worten, der Assistent schaut in Dwello nach. Er soll nur lesen, was Sie freigeben, und nichts ohne Ihre Bestätigung ändern.</p>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Offene Beträge, Fristen, fehlende Rechnungen<small>Antworten aus Ihren echten Daten, mit Quelle.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Läuft auf Ihrem Server<small>Der MCP-Server ist Teil der Installation. Kein Umweg über uns.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Soll auf Ihrem Server laufen<small>Der MCP-Server wird Teil der Installation. Kein Umweg über uns.</small></span></li>
 				</ul>
 			</div>
-			<div class="panel chat" aria-label="Entwurf: Gespräch mit einem KI-Assistenten über Dwello">
+			<div class="panel chat" role="figure" aria-label="Erfundenes Beispiel: so könnte ein Gespräch mit einem KI-Assistenten über Dwello aussehen">
 				<div class="chat-head"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>KI-Assistent mit Dwello verbunden <span class="badge plan" style="margin-left:auto">Entwurf</span></div>
 				<div class="chat-body">
 					<div class="msg me">Was muss ich diese Woche bei meinen Liegenschaften erledigen?</div>
@@ -652,8 +659,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	<div class="wrap">
 		<div class="sec-head">
 			<span class="kicker">Installieren</span>
-			<h2>Läuft dort, wo Sie es wollen.</h2>
-			<p>Ein Docker-Befehl startet Dwello mit Datenbank und lokaler KI. Wählen Sie, wo es laufen soll.</p>
+			<h2>Einmal einrichten lassen, dann läuft es.</h2>
+			<p>Die Einrichtung macht einmal jemand, der sich mit Computern auskennt: jemand aus der Familie, eine Bekannte oder Ihr IT-Dienst. Geben Sie dieser Person die Anleitung; sie braucht rund eine Stunde. Danach arbeiten Sie im Browser, ohne technische Kenntnisse.</p>
+			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Anleitung zum Weitergeben (Englisch)</a></div>
 		</div>
 		<div class="tabs" role="tablist" aria-label="Wo soll Dwello laufen?">
 			<button class="tab" role="tab" id="tab-pc" aria-selected="true" aria-controls="panel-pc"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg>Eigener PC</button>
@@ -666,7 +674,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Kopieren</button></div>
 <pre id="code-pc" tabindex="0"><span class="c"># 1. Dwello herunterladen</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
-<span class="c"># 2. Einstellungen übernehmen (Ihre E-Mail, Schlüssel)</span>
+<span class="c"># 2. Einstellungen anlegen, dann ausfüllen (Anleitung)</span>
 <span class="p">$ </span>cp .env.example .env
 <span class="c"># 3. Starten: App, Datenbank und lokale KI</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
@@ -677,8 +685,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Ideal für den Start</h3>
 				<dl>
-					<div><dt>Sie brauchen</dt><dd>Docker Desktop und 16 GB Arbeitsspeicher für die lokale KI.</dd></div>
-					<div><dt>Zeitaufwand</dt><dd>Rund 15 Minuten, inklusive Download des KI-Modells.</dd></div>
+					<div><dt>Sie brauchen</dt><dd>Docker Desktop, ein Google-Konto und 16 GB Arbeitsspeicher für die lokale KI. Mit weniger Arbeitsspeicher tragen Sie eine externe KI ein.</dd></div>
+					<div><dt>Zeitaufwand</dt><dd>Rund eine Stunde, mit der Google-Anmeldung und dem Download des KI-Modells.</dd></div>
 					<div><dt>Gut zu wissen</dt><dd>Dwello läuft nur, wenn Ihr PC an ist. Für den Zugriff vom Handy eignet sich ein Homeserver.</dd></div>
 				</dl>
 			</div>
@@ -693,12 +701,13 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="c"># Ohne starke Hardware: externe KI eintragen</span>
 <span class="c"># LLM_BASE_URL=https://ihr-ki-anbieter.example/v1</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
-<span class="ok">✓ Dwello läuft auf http://homeserver.local:3000</span></pre>
+<span class="c"># HTTPS mit Ihrer Domain: siehe Anleitung</span>
+<span class="ok">✓ Dwello läuft auf https://dwello.ihre-domain.ch</span></pre>
 			</div>
 			<div class="panel needs">
 				<h3>Immer erreichbar, im eigenen Haus</h3>
 				<dl>
-					<div><dt>Sie brauchen</dt><dd>Ein NAS oder einen Mini-PC mit Docker. Für die lokale KI 16 GB Arbeitsspeicher.</dd></div>
+					<div><dt>Sie brauchen</dt><dd>Ein NAS oder einen Mini-PC mit Docker und eine eigene Domain mit HTTPS, weil die Google-Anmeldung das verlangt. Für die lokale KI 16 GB Arbeitsspeicher.</dd></div>
 					<div><dt>Zugriff von unterwegs</dt><dd>Über Ihr VPN oder einen Tunnel wie Tailscale. Dwello muss nicht ins offene Internet.</dd></div>
 					<div><dt>Gut zu wissen</dt><dd>Kleine Geräte nutzen besser eine externe KI. Alles andere bleibt lokal.</dd></div>
 				</dl>
@@ -712,7 +721,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
-<span class="c"># HTTPS mit Caddy: Vorlage in deploy/demo/</span>
+<span class="c"># HTTPS mit Caddy: siehe Anleitung</span>
 <span class="ok">✓ Dwello läuft auf https://dwello.ihre-domain.ch</span></pre>
 			</div>
 			<div class="panel needs">
@@ -720,12 +729,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<dl>
 					<div><dt>Sie brauchen</dt><dd>Einen Linux-Server mit Docker und eine eigene Domain.</dd></div>
 					<div><dt>Daten in der Schweiz</dt><dd>Wählen Sie ein Rechenzentrum in der Schweiz. Unsere Demo läuft in Zürich.</dd></div>
-					<div><dt>Gut zu wissen</dt><dd>Die Demo-Vorlage richtet HTTPS automatisch mit Caddy ein.</dd></div>
+					<div><dt>Gut zu wissen</dt><dd>Die Anleitung zeigt, wie Caddy HTTPS automatisch einrichtet.</dd></div>
 				</dl>
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an und richten dafür einmal einen OAuth-Schlüssel ein. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a>).</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Heute noch mit Google-Anmeldung</b>Sie melden sich mit Ihrem Google-Konto an. Bei der Einrichtung wird dafür einmal ein Schlüssel bei Google angelegt; die Anleitung zeigt, wie. Ein Installer in einem Schritt mit eigener Anmeldung ohne Google ist geplant (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a>).</span></div>
 	</div>
 </section>
 
@@ -761,7 +770,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<span class="kicker">Open Source</span>
 			<p class="price">0.–<small> CHF pro Jahr</small></p>
 			<h2 style="font-size:clamp(1.75rem,3.4vw,2.5rem);max-width:18em">Gratis heisst bei Dwello: offen, ohne Haken.</h2>
-			<p style="color:var(--ink-muted);font-size:1.125rem;max-width:34em">Der ganze Quellcode ist öffentlich, unter der Lizenz GNU AGPL-3.0. Sie können ihn lesen, prüfen, anpassen und weitergeben. Es gibt kein Premium-Abo, keine Limite pro Wohnung und keine Funktion, die später kostenpflichtig wird. Die AGPL sorgt dafür, dass auch jede veränderte Version, die andere online nutzen, offen bleibt.</p>
+			<p style="color:var(--ink-muted);font-size:1.125rem;max-width:34em">Der ganze Quellcode ist öffentlich, unter der Lizenz GNU AGPL-3.0-or-later. Sie können ihn lesen, prüfen, anpassen und weitergeben. Es gibt kein Premium-Abo, keine Limite pro Wohnung und keine Funktion, die später kostenpflichtig wird. Die AGPL sorgt dafür, dass auch jede veränderte Version, die andere online nutzen, offen bleibt.</p>
 			<div class="actions">
 				<a class="btn btn-primary" href="https://github.com/rudini/Dwello" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-git"/></svg>Quellcode auf GitHub</a>
 				<a class="btn btn-secondary" href="https://github.com/rudini/Dwello/issues" rel="noopener">Idee oder Fehler melden</a>
@@ -777,7 +786,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 					<tr><td>KI liest Belege</td><td class="d">lokal</td><td>in der Cloud</td></tr>
 					<tr><td>Wenn der Anbieter aufhört</td><td class="d">läuft weiter</td><td>Daten weg</td></tr>
 					<tr><td>Quellcode prüfbar</td><td class="d">ja</td><td>nein</td></tr>
-					<tr><td>Lizenz</td><td class="d">AGPL-3.0</td><td>proprietär</td></tr>
+					<tr><td>Lizenz</td><td class="d">AGPL-3.0-or-later</td><td>proprietär</td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -810,8 +819,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Häufige Fragen.</h2>
 		</div>
 		<div class="faq">
-			<details open><summary>Kostet Dwello wirklich nichts?</summary><p>Ja. Dwello ist Open Source und kostenlos. Sie bezahlen höchstens Ihren eigenen Server oder den Strom für Ihren PC. Wenn Sie eine externe KI statt der lokalen nutzen, bezahlen Sie diese direkt beim Anbieter.</p></details>
-			<details><summary>Brauche ich technische Kenntnisse?</summary><p>Für die Installation sollten Sie ein paar Befehle im Terminal eingeben können, oder Sie kennen jemanden, der das kann. Die App selbst ist für Menschen ohne Vorkenntnisse gemacht: Jeder Begriff wird am Feld erklärt.</p></details>
+			<details open><summary>Brauche ich technische Kenntnisse?</summary><p>Nur für die Einrichtung, und nur einmal. Bitten Sie jemanden, der sich mit Computern auskennt, und geben Sie dieser Person die Anleitung. Für die Arbeit mit Dwello brauchen Sie keine Vorkenntnisse: Jeder Begriff wird am Feld erklärt.</p></details>
+			<details><summary>Kostet Dwello wirklich nichts?</summary><p>Ja. Dwello ist Open Source und kostenlos. Sie bezahlen höchstens Ihren eigenen Server oder den Strom für Ihren PC und das Porto für Briefe. Wenn Sie eine externe KI statt der lokalen nutzen, bezahlen Sie diese direkt beim Anbieter.</p></details>
 			<details><summary>Für wie viele Wohnungen eignet sich Dwello?</summary><p>Für private Vermieterinnen und Vermieter mit einem bis fünf Gebäuden und bis zu 50 Wohnungen. Für grosse Verwaltungen mit Teams ist Dwello nicht gemacht.</p></details>
 			<details><summary>Was passiert, wenn die KI eine Rechnung falsch liest?</summary><p>Nichts, ohne dass Sie es bestätigen. Die KI schlägt die Angaben vor und Dwello sagt, welche Sie prüfen sollten. Erst wenn Sie bestätigen, wird die Rechnung erstellt. Sie können jede Rechnung auch selbst erfassen.</p></details>
 			<details><summary>Ist Dwello rechtlich geprüft?</summary><p>Dwello rechnet nach den Regeln des Obligationenrechts und wird mit automatischen Tests gegen diese Regeln geprüft. Eine Rechtsberatung ersetzt das nicht: Bei Streitfällen helfen Ihnen der Hauseigentümerverband oder die Schlichtungsbehörde.</p></details>
@@ -826,10 +835,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="final-box">
 			<svg class="ic final-house" aria-hidden="true"><use href="#i-home"/></svg>
 			<h2>Die nächste Abrechnung machen Sie mit Dwello.</h2>
-			<p>Installieren Sie Dwello heute, erfassen Sie Ihr Gebäude und laden Sie die Rechnungen hoch, sobald sie kommen. Im Frühling ist die Abrechnung dann schnell gemacht.</p>
+			<p>Schauen Sie sich die Demo an und lassen Sie Dwello einrichten. Dann erfassen Sie Ihr Gebäude und laden die Rechnungen hoch, sobald sie kommen. Im Frühling ist die Abrechnung schnell gemacht.</p>
 			<div class="actions">
-				<a class="btn btn-primary" href="#installieren">Dwello installieren</a>
-				<a class="btn btn-secondary" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen</a>
+				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">Demo ansehen</a>
+				<a class="btn btn-secondary" href="#installieren">Dwello einrichten lassen</a>
 			</div>
 		</div>
 	</div>
@@ -845,12 +854,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<p style="max-width:24em">Open-Source-Software für private Vermieterinnen und Vermieter in der Schweiz.</p>
 			</div>
 			<div><h2>Produkt</h2><ul><li><a href="#funktionen">Funktionen</a></li><li><a href="#datenschutz">Datenschutz</a></li><li><a href="#mcp">KI und MCP</a></li><li><a href="#roadmap">Roadmap</a></li></ul></div>
-			<div><h2>Loslegen</h2><ul><li><a href="#installieren">Installation</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Demo</a></li><li><a href="#faq">Häufige Fragen</a></li></ul></div>
-			<div><h2>Wissen</h2><ul><li><a href="#funktionen">Nebenkosten abrechnen</a></li><li><a href="#funktionen">Verteilschlüssel</a></li><li><a href="#funktionen">QR-Rechnung</a></li></ul></div>
+			<div><h2>Loslegen</h2><ul><li><a href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Anleitung zum Einrichten</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Demo</a></li><li><a href="#faq">Häufige Fragen</a></li></ul></div>
 			<div><h2>Community</h2><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Fehler melden</a></li><li><a href="brand.html">Markenhandbuch</a></li></ul></div>
 		</div>
 		<div class="legal">
-			<span>© 2026 Roger Rudin · Gemacht für die Schweiz · Lizenz <a href="https://github.com/rudini/Dwello/blob/main/LICENSE" rel="noopener">AGPL-3.0</a></span>
+			<span>© 2026 Roger Rudin · Gemacht für die Schweiz · Lizenz <a href="https://github.com/rudini/Dwello/blob/main/LICENSE" rel="noopener">AGPL-3.0-or-later</a></span>
 			<span class="legal-links"><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutzerklärung</a></span>
 			<nav class="langs" aria-label="Sprache wählen"><a href="index.html" hreflang="de" lang="de" aria-current="page">DE</a><a href="fr/index.html" hreflang="fr" lang="fr">FR</a><a href="it/index.html" hreflang="it" lang="it">IT</a><a href="en/index.html" hreflang="en" lang="en">EN</a></nav>
 		</div>
