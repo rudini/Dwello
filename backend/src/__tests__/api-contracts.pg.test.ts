@@ -257,6 +257,12 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	// #522: the contract form lists every umlagefähige category from here
+	it('GET /categories/allowed liefert die Felder von categories-allowed.json', async () => {
+		const actual = await (await callApi('/api/v1/categories/allowed')).json();
+		expect(drift(await sample('categories-allowed'), actual)).toEqual([]);
+	});
+
 	it('GET /invoices/llm-recipient eines externen Anbieters liefert die Felder von llm-recipient.json', async () => {
 		const configured = { ...llmConfig };
 		Object.assign(llmConfig, { baseUrl: 'https://llm.example.com/v1', provider: 'Beispiel AG', providerCountry: 'Schweiz' });

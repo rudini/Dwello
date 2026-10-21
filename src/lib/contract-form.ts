@@ -171,8 +171,8 @@ export function billedUntilError({ billedUntil, startDate }: ContractFormValues,
 		return m.backend_billed_until_before_start({ date: formatDate(startDate) });
 }
 
-/** Request body of the contract API */
-export const contractBody = (values: ContractFormValues) => ({
+/** Request body of the contract API; `shown`: the categories the form has a box for (#91) */
+export const contractBody = (values: ContractFormValues, shown: { id: string }[]) => ({
 	tenantId: values.tenantId,
 	apartmentId: values.apartmentId,
 	startDate: values.startDate,
@@ -189,7 +189,10 @@ export const contractBody = (values: ContractFormValues) => ({
 	managementFeePercent:
 		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null,
 	...(values.billedUntil !== undefined && { billedUntil: values.billedUntil || null }),
-	...(values.agreedCategoryIds && { agreedCategoryIds: values.agreedCategoryIds })
+	// the ticked boxes, also without a click: a category the form does not list is neither agreed nor kept (#522)
+	agreedCategoryIds: shown
+		.map((category) => category.id)
+		.filter((id) => values.agreedCategoryIds?.includes(id) ?? true)
 });
 
 /** The names of the agreed Nebenkosten among the categories shown; without a choice every one (#91) */

@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { load } from '../routes/contracts/[id]/edit/+page.server';
 import contract from '../../tests/contracts/contract.json';
 
-import category from '../../tests/contracts/category.json';
+import allowed from '../../tests/contracts/categories-allowed.json';
 
 const backend: Record<string, unknown> = {
 	'/api/v1/contracts/c1': contract,
-	'/api/v1/categories?limit=100': { categories: [category] }
+	'/api/v1/categories/allowed': allowed
 };
 
 const fetch = async (url: string) =>
@@ -32,7 +32,7 @@ describe('Mietvertrag bearbeiten laden', () => {
 		const data = await load({ params: { id: 'c1' }, fetch } as never);
 
 		expect(data).toMatchObject({
-			categories: [{ id: category.id, name: 'Internet' }],
+			categories: [{ id: allowed[0].id, name: 'Internet' }],
 			contract: { agreedCategoryIds: contract.agreedCategoryIds }
 		});
 	});

@@ -914,7 +914,7 @@ describe('Entwurf löschen und Mietvertrag unbefristet weiterführen', () => {
 describe('Vereinbarte Nebenkosten am Mietvertrag', () => {
 	const backend = (categories: Response) =>
 		(async (url: string) =>
-			url.endsWith('/categories?limit=100')
+			url.endsWith('/categories/allowed')
 				? categories
 				: url.endsWith('/contracts/c1')
 					? Response.json(contractDetail)
@@ -927,12 +927,10 @@ describe('Vereinbarte Nebenkosten am Mietvertrag', () => {
 		).agreedCosts;
 
 	it('nennt die vereinbarten Kategorien beim Namen', async () => {
-		const listed = Response.json({
-			categories: [
-				{ ...category, id: contractDetail.agreedCategoryIds[0], nameDE: 'Internet' },
-				{ ...category, id: 'other', nameDE: 'Lift' }
-			]
-		});
+		const listed = Response.json([
+			{ ...category, id: contractDetail.agreedCategoryIds[0], nameDE: 'Internet' },
+			{ ...category, id: 'other', nameDE: 'Lift' }
+		]);
 		expect(await agreedCosts(listed)).toEqual(['Internet']);
 	});
 

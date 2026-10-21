@@ -105,12 +105,18 @@ export function advancePaymentNotice(values: ContractFormValues): string | null 
 const amount = (value: string) => parseFloat(value) || 0;
 
 /** #429, #432: a Nebenkostenpauschale with ticked Nebenkosten (none chosen yet: all ticked) */
-export function flatRateNotice(values: ContractFormValues, categories?: { id: string }[]): string | null {
-	const ticked = values.agreedCategoryIds?.length ?? categories?.length ?? 0;
+export function flatRateNotice(
+	values: ContractFormValues,
+	categories: { id: string }[]
+): string | null {
+	// only the boxes count: a category the form does not list is not billed (#522)
+	const ticked = categories.filter(
+		(category) => values.agreedCategoryIds?.includes(category.id) ?? true
+	).length;
 	if (!(amount(values.flatRateUtilityCharge ?? '') > 0) || ticked === 0) return null;
 	if (!(amount(values.advancePayment) > 0)) return m.contracts_flat_rate_warning_text();
 	// with an Akonto some ticks are right: warn only while every box is still ticked (#432, Helga 432 P-1)
-	return ticked >= (categories?.length ?? 0) ? m.contracts_flat_rate_warning_text_advance() : null;
+	return ticked === categories.length ? m.contracts_flat_rate_warning_text_advance() : null;
 }
 
 /** The amounts in the form the checks and the backend read */
