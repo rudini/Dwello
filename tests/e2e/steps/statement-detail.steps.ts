@@ -345,6 +345,10 @@ Then('nennt die Position {string} {string}', async ({ verwalter }, category: str
 	await verwalter.sees(invoicesOfPosition(category)).toContain(text);
 });
 
+Then('nennt die Position {string} nicht {string}', async ({ verwalter }, category: string, text: string) => {
+	await verwalter.sees(invoicesOfPosition(category)).not.toContain(text);
+});
+
 When(
 	'der Liegenschaftsverwalter die Rechnung {string} der Position {string} öffnet',
 	async ({ verwalter }, invoice: string, category: string) => {

@@ -80,4 +80,7 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #509 persona Dr. Weber: `docs/design/personas/dr-weber-509.md` (no Blocker/Major; Minors P-1, P-2 and Nits P-3, P-4 on texts the change kept stay in the report; the observation on the detail page is #507)
 - [x] #509 daten-pruefer: `docs/reviews/509-datenpruefung-1.md` (no findings above Nit; only the 8 PDFs of Meier and Brunner change, by exactly the run share and the month line; amounts and QR fields to the Rappen)
 - [x] #509 closing review round 2: `docs/reviews/509-review-2.md` (C-1 closed, no new findings)
-- [ ] #509 PR merged
+- [x] #509 PR merged (#600)
+- [x] #507 scenario «Kostenposition nennt bei Heizkosten nach Heizprofil den Anteil jeder Rechnung wie das PDF» red at «Ihre Mietstage 0 von 91 Tagen»; DOM tests (`statement-pages.dom.test.ts`) red, one per behaviour: line and no period, then beyond and Tankbestand
+- [x] #507 `LineInvoices.svelte`: an invoice part by the Heizprofil says «Anteil nach Heizprofil: … %» instead of the days, four new keys `statements_part_*_profile` in de/fr/it/en (terms of the PDF's `partProfileRun`); DOM tests (181), lint, check, changed and message tests green; statement-detail.feature chromium + api: 100 passed
+- [ ] #507 Workflow note: since O-47 (#587) a failed local E2E run leaves `playwright-report/trace/assets/*.js`, which `bun run lint` checks and fails on; fix in its own pull request after #507 (ESLint ignores `playwright-report/**`, `test-results/**`)
