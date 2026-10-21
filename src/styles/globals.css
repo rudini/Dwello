@@ -9,14 +9,25 @@
 	*,
 	::after,
 	::before,
-	::backdrop,
-	::file-selector-button {
+	::backdrop {
 		border-color: var(--color-line);
 	}
 
 	button:not(:disabled),
 	[role='button']:not(:disabled) {
 		cursor: pointer;
+	}
+
+	/* Tailwind 4's preflight resets these too; Tailwind 3 left them to the browser */
+	select:disabled {
+		opacity: revert;
+	}
+
+	::file-selector-button {
+		border: revert;
+		padding: revert;
+		background-color: revert;
+		color: revert;
 	}
 
 	body {
