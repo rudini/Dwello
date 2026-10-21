@@ -56,4 +56,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #588 closing review round 2: `docs/reviews/588-review-2.md` (C-1 closed, no new findings)
 - [x] #588 PR #592 merged (its «Accessibility (axe)» check was red with all three shards green: the summary job read a stale jobs API answer; re-run once, green)
 - [x] CI: the summary job `e2e-results` retries until the count of green shards equals the shards (a stale API answer seconds after the last shard counted «1 of 3», PR #592); loop checked locally with a stand-in for `gh`
-- [ ] CI fix review, PR merged
+- [x] CI fix review round 1: `docs/reviews/ci-review-1.md` (no findings)
+- [ ] CI fix PR merged
