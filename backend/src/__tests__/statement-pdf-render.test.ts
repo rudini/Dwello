@@ -721,20 +721,30 @@ describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
 		expect((await textOf(heated)).flowing).toContain('44.20 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
 	});
 
-	// #509: hat keine Heizrechnung einen fehlenden Leistungszeitraum, nennt der Satz keinen Anteil für eine solche
+	// #509: hat keine Heizrechnung einen fehlenden Leistungszeitraum, nennt der Satz keinen Anteil für eine solche und
+	// keine Monate, aus denen er käme; jede Rechnungszeile zeigt ihre Monate (der Text liest geschützte Leerzeichen als Leerzeichen)
+	const quarter = { start: '2024-04-01', end: '2024-06-30', amount: 1000, days: 61, total: 91, profile: { percent: 40, months: months([[5, 2], [6, 0]]), periodMonths: months([[4, 3], [5, 2], [6, 0]]) } };
+	const quarters = { ...winter.lineItems[0], invoiceParts: [invoiceParts[0], quarter], periodShare: 0.2, tenantShare: 400 };
 	it.each([
 		['de', 'Heizkosten nach Heizprofil «Winter»: Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.', 'ohne Leistungszeitraum', 'Anteile der Monate Ihres Mietverhältnisses:'],
-		['fr', 'Frais de chauffage selon le profil «\u00a0Winter\u00a0»\u00a0: Pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.', 'sans période de prestation', 'Parts des mois de votre bail\u00a0:'],
-		['it', 'Spese di riscaldamento secondo il profilo «Winter»: Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.', 'senza periodo di prestazione', 'Quote dei mesi del suo rapporto di locazione:'],
+		['fr', 'Frais de chauffage selon le profil « Winter » : pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent ; sa part figure sous le poste du décompte.', 'sans période de prestation', 'Parts des mois de votre bail :'],
+		['it', 'Spese di riscaldamento secondo il profilo «Winter»: per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.', 'senza periodo di prestazione', 'Quote dei mesi del suo rapporto di locazione:'],
 		['en', 'Heating costs under the heating profile ‘Winter’: For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.', 'without a service period', 'Monthly shares during your tenancy:']
 	] as const)('nennt auf %s keinen Anteil für eine Rechnung ohne Leistungszeitraum, wenn keine fehlt', async (language, note, absent, runMonths) => {
-		const quarter = { start: '2024-04-01', end: '2024-06-30', amount: 1000, days: 61, total: 91, profile: { percent: 40, months: months([[5, 2], [6, 0]]), periodMonths: months([[4, 3], [5, 2], [6, 0]]) } };
-		const data = { ...winter, lineItems: [{ ...winter.lineItems[0], invoiceParts: [invoiceParts[0], quarter] }] };
-		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64({ ...winter, lineItems: [quarters] }, config, language), 'base64')).flowing;
 		expect(text).toContain(note);
-		expect(text).not.toContain('52.00\u00a0%');
+		expect(text).not.toContain('52.00 %');
 		expect(text).not.toContain(absent);
 		expect(text).not.toContain(runMonths);
+	});
+
+	// Fachreview #509, M-1: eine zweite Heizposition über die Periode trägt den Anteil des Laufs ohne Rechnungszeilen; er
+	// bleibt mit seinen Monaten nachrechenbar (hält das bisherige Verhalten fest)
+	it('nennt den Anteil des Laufs, solange eine Heizposition ihn ohne Rechnungszeilen trägt', async () => {
+		const hotWater = { category: 'Warmwasser', key: 'Pro Fläche (m²)', totalAmount: 500, apartmentShare: 500, periodShare: 0.52, byProfile: true, heating: true, tenantShare: 260 };
+		const text = (await textOf({ ...winter, lineItems: [quarters, hotWater] })).flowing;
+		expect(text).toContain('Heizkosten nach Heizprofil «Winter»: 52.00 % für eine Rechnung ohne Leistungszeitraum.');
+		expect(text).toContain('Anteile der Monate Ihres Mietverhältnisses: Mai 2.00 %');
 	});
 
 	// Fachreview 1, V-1: der Teil in der Periode nach Tagen, mit dem Beleg wie #241; darin die Monate des Heizprofils

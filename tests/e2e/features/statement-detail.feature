@@ -258,7 +258,6 @@ Funktionalität: Abrechnungsdetail
   # #509 (Persona Dr. Weber P-8): hat jede Heizkostenrechnung ihren Leistungszeitraum, nennt das PDF keinen Anteil für
   # eine Rechnung ohne Leistungszeitraum; die Rechnung von 2024 aus der Grundlage zählt 2025 nicht, Lea Graf
   # mietet ab Februar (nicht die ganze Periode: sonst nach Tagen)
-  @wip
   Szenario: Das PDF nennt keinen Heizkostenanteil für eine fehlende Rechnung ohne Leistungszeitraum
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
@@ -271,6 +270,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann steht im PDF "Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition."
     Und steht im PDF nicht "ohne Leistungszeitraum"
+    Und steht im PDF nicht "Anteile der Monate Ihres Mietverhältnisses:"
 
   # #453 (#325): mit «Abgerechnet bis» in der Periode sagt das PDF, was schon abgerechnet ist und ab wann das Akonto
   # zählt; 01.03. bis 31.03.2024 = 31 Mietstage von 366 Tagen

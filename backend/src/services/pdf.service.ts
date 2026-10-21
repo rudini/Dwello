@@ -85,6 +85,7 @@ const translations: Record<Language, Record<string, string>> = {
 		and: 'und',
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
 		heatingNoteParts: 'Heizkosten nach Heizprofil «{profile}»: {percent} % für eine Rechnung ohne Leistungszeitraum. Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
+		heatingNoteOwn: 'Heizkosten nach Heizprofil «{profile}»: Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.',
 		heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses: {months}',
 		heatingMonthsBilled: 'Anteile der abgerechneten Monate Ihres Mietverhältnisses: {months}',
 		heatingPeriodSums: '; zusammen {tenant}\u00a0%. Die Monate der Abrechnungsperiode haben im Heizprofil zusammen {period}\u00a0%.',
@@ -204,6 +205,7 @@ const translations: Record<Language, Record<string, string>> = {
 		and: 'et',
 		heatingNote: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% des frais de chauffage de votre logement pour la période de décompte',
 		heatingNoteParts: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: {percent}\u00a0% pour une facture sans période de prestation. Pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
+		heatingNoteOwn: 'Frais de chauffage selon le profil «\u00a0{profile}\u00a0»\u00a0: pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.',
 		heatingMonths: 'Parts des mois de votre bail\u00a0: {months}',
 		heatingMonthsBilled: 'Parts des mois de votre bail compris dans ce décompte\u00a0: {months}',
 		heatingPeriodSums: '\u00a0; au total {tenant}\u00a0%. Les mois de la période de décompte totalisent {period}\u00a0% dans le profil de chauffage.',
@@ -322,6 +324,7 @@ const translations: Record<Language, Record<string, string>> = {
 		and: 'e',
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
 		heatingNoteParts: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % per una fattura senza periodo di prestazione. Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
+		heatingNoteOwn: 'Spese di riscaldamento secondo il profilo «{profile}»: per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.',
 		heatingMonths: 'Quote dei mesi del suo rapporto di locazione: {months}',
 		heatingMonthsBilled: 'Quote dei mesi conteggiati del suo rapporto di locazione: {months}',
 		heatingPeriodSums: '; in totale {tenant}\u00a0%. I mesi del periodo di conteggio totalizzano {period}\u00a0% nel profilo di riscaldamento.',
@@ -440,6 +443,7 @@ const translations: Record<Language, Record<string, string>> = {
 		and: 'and',
 		heatingNote: 'Heating costs under the heating profile ‘{profile}’: {percent} % of your apartment’s heating costs for the billing period',
 		heatingNoteParts: 'Heating costs under the heating profile ‘{profile}’: {percent} % for an invoice without a service period. For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.',
+		heatingNoteOwn: 'Heating costs under the heating profile ‘{profile}’: For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.',
 		heatingMonths: 'Monthly shares during your tenancy: {months}',
 		heatingMonthsBilled: 'Monthly shares of the months of your tenancy covered by this statement: {months}',
 		heatingPeriodSums: '; in total {tenant}\u00a0%. The months of the billing period total {period}\u00a0% in the heating profile.',
@@ -1009,6 +1013,9 @@ const monthSum = (shares: { month: number; percentage: number }[]) =>
 	(shares.reduce((total, m) => total + Math.round(m.percentage * 100), 0) / 100).toFixed(2);
 // a heating position with invoices by their own days (the Heizprofil's months in them, or days): the run's share is not theirs (#71)
 const ownProfileDays = (data: StatementPDFData) => data.lineItems.some((item) => item.byProfile && item.invoiceParts);
+// every heating position by the profile has its invoices with their own Leistungszeitraum: the run's share bills none (#509)
+const noRunShare = (data: StatementPDFData) =>
+	data.lineItems.filter((item) => item.byProfile).every((item) => item.invoiceParts && !item.invoiceParts.some((part) => part.noPeriod));
 
 // An invoice line says what its dates are: the Leistungszeitraum, the part of one beyond the period, or none (#241);
 // the change of the Tankbestand is no invoice and says so (#239)
@@ -1099,29 +1106,30 @@ function amountLine(doc: Doc, label: string, amount: string, y: number, bold = f
 	return y + Math.max(15, doc.heightOfString(label, { width: 340 }) + 4);
 }
 
-// the run's share; only for invoices without a Leistungszeitraum where a position has invoices with their own (#71)
-const heatingNote = (data: StatementPDFData, t: Record<string, string>, profile: string, percent: string) =>
-	fill(ownProfileDays(data) ? t.heatingNoteParts : t.heatingNote, { profile, percent });
+// the run's share; only for invoices without a Leistungszeitraum where a position has invoices with their own (#71),
+// none where every position counts its invoices' own months (#509)
+const heatingNoteKey = (data: StatementPDFData) =>
+	!ownProfileDays(data) ? 'heatingNote' : noRunShare(data) ? 'heatingNoteOwn' : 'heatingNoteParts';
 
 // The heating profile's share, with the months of a tenancy over part of the period
 function heatingLines({ t, data }: Page) {
 	if (!data.heating) return [];
-	const { profile, percent, months, periodPercent, periodMonths } = data.heating;
+	const key = heatingNoteKey(data);
+	const { profile, percent, months } = data.heating;
 	const shown = (Math.round(percent * 100) / 100).toFixed(2);
-	const lines = [heatingNote(data, t, profile, shown)];
-	if (!months?.length || percent >= 100) return lines;
-	// a period whose months do not carry 100 % (under a year): both sums, from the printed months (#229); since #232 the
-	// period's months and the division the share comes from
-	const sum = monthSum(months);
-	const period = periodPercent?.toFixed(2) ?? '';
-	const sums =
-		periodPercent == null || periodPercent === 100
-			? ''
-			: periodMonths
-				? fill(t.heatingPeriodMonths, { tenant: sum, months: monthList(periodMonths, t), period, percent: shown })
-				: fill(t.heatingPeriodSums, { tenant: sum, period });
-	lines.push(fill(t.heatingMonths, { months: monthList(months, t) }) + sums);
-	return lines;
+	const note = fill(t[key], { profile, percent: shown });
+	if (key === 'heatingNoteOwn' || !months?.length || percent >= 100) return [note];
+	return [note, fill(t.heatingMonths, { months: monthList(months, t) }) + periodSums(data.heating, shown, t)];
+}
+
+// a period whose months do not carry 100 % (under a year): both sums, from the printed months (#229); since #232 the
+// period's months and the division the share comes from
+function periodSums({ months, periodPercent, periodMonths }: NonNullable<StatementPDFData['heating']>, shown: string, t: Record<string, string>) {
+	if (periodPercent == null || periodPercent === 100) return '';
+	const [tenant, period] = [monthSum(months!), periodPercent.toFixed(2)];
+	return periodMonths
+		? fill(t.heatingPeriodMonths, { tenant, months: monthList(periodMonths, t), period, percent: shown })
+		: fill(t.heatingPeriodSums, { tenant, period });
 }
 
 // Heating profile, and for a tank the consumption: opening stock + invoices – closing stock (Art. 5 VMWG); kept on
