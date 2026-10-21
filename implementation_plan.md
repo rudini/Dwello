@@ -92,3 +92,4 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #602 code review round 1: `docs/reviews/602-review-1.md` (no findings)
 - [x] #602 PR merged (#603)
 - [x] #507 Workflow note: since O-47 (#587) a failed local E2E run leaves `playwright-report/trace/assets/*.js`, which `bun run lint` checks and fails on; fixed in its own pull request: ESLint ignores `playwright-report/**` (`test-results/` holds no scripts); `eslint-ignores.test.ts` red first
+- [x] O-47 lint code review: `docs/reviews/o47-lint-review-1.md` (no findings)
