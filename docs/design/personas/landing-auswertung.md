@@ -73,3 +73,34 @@ Die Personas kennen nur den Text der Seite. Dr. Webers Aussagen über die App si
 4. Die Aussagen zu Datenschutz und Mietrecht richtigstellen, den Übertrag der Kleinstbeträge nennen (L-6, L-7, L-9); das sollte `fach-reviewer` vor der Änderung prüfen.
 
 Zielgruppe (Product Owner): A. Laien bleiben die Zielgruppe; die Installation wird ehrlich als Aufgabe für eine Helferin beschrieben, mit vollständiger Anleitung zum Weitergeben, und die Demo wird die Hauptaktion im ersten Bildschirm.
+
+## Wirkung, Bilder und Animationen (Fragen 20–24)
+
+Auf die Rückmeldung eines Kollegen («kommt etwas kühl rüber») haben die fünf Personas den überarbeiteten Stand (`8d6d26c`) mit den Zusatzfragen beurteilt. Einzelberichte: `<persona>-landing-bilder.md`.
+
+| Frage | Helga | Marco | Dr. Weber | Sven | Anna | Ø |
+|---|---|---|---|---|---|---|
+| 20 Wirkung (1 = kühl, 5 = warm) | 2 | 2 | 2 | 3 | 2 | **2.2** |
+
+**Warum kühl:** nicht wegen fehlender Fotos, sondern wegen der Technik zwischen den warmen Sätzen: «Ihr Server.» als hervorgehobenes Schlusswort der Überschrift, Zahlen wie «48 px» und «7 : 1», die Formel `{area} / {area_total}`, das Terminal, viele gleich aussehende Karten und Tabellen-Bildschirmfotos, die auf dem Handy und bei 150 % kaum lesbar sind. Die warmen Sätze («Ihr Vermieterjahr», «Für Menschen, die das nur ein paar Mal im Jahr machen», «Im Frühling ist die Abrechnung schnell gemacht») gehen dazwischen unter. Dr. Weber liest die Sachlichkeit als Plus für die Glaubwürdigkeit.
+
+**Bilder:** Alle fünf lehnen Stockfotos, erfundene Kundenstimmen, Bilder von Rechenzentren und Roboter für die KI ab. Die App-Bilder bleiben, sollen aber lesbar sein (auf dem Handy die Handy-Fotos, Ausschnitte vergrössert und beschriftet). Gewünscht: Strichzeichnungen im Stil der vorhandenen Zeichnung «Haus mit Server» (ein Schweizer Mehrfamilienhaus, der Brief mit QR-Zahlteil, den die Mieterin bekommt).
+
+**Ideen, nach Zahl der Nennungen:**
+
+| # | Abschnitt | Idee | Erklärt | Genannt von |
+|---|---|---|---|---|
+| W-1 | Vier Schritte | Das Vermieterjahr als Zeitleiste Januar bis Dezember: wann was zu tun ist | den Ablauf übers Jahr | Anna, Dr. Weber, Helga, Marco, Sven |
+| W-2 | Verteilschlüssel und Heizprofile | Eine Rechnung, die sich auf die Wohnungen verteilt, mit Demo-Zahlen statt der Formel (z. B. Lift CHF 1'690.00, 1/6 = CHF 281.67) | den Verteilschlüssel | alle fünf |
+| W-3 | Rechnungen und KI | Upload als Abfolge in drei Bildern: Datei ziehen, KI füllt aus, «Bitte prüfen», bestätigen | was «Drag & Drop» und die KI tun | alle fünf |
+| W-4 | ganze Seite | Ein durchgehendes Beispiel mit Namen: Musterhaus Zentrum, Hans Müller zahlt CHF 215.80 nach, Marco Bernasconi bekommt seine Abrechnung auf Italienisch | macht die Seite persönlich | Anna, Dr. Weber, Marco, Sven |
+| W-5 | Erster Bildschirm | Überschrift auf den Nutzen statt auf den Server, dazu eine Strichzeichnung «Haus → Abrechnung → Mieterin» | wofür Dwello da ist | Anna, Helga, Marco |
+| W-6 | Datenschutz | Ruhige Zeichnung: was auf Ihrem Server bleibt und was nach aussen geht | die Datenflüsse | Dr. Weber |
+| W-7 | Swiss QR-Rechnung | Eine Zeile wechselt von offen auf bezahlt | den Zahlungseingang | Anna, Marco, Sven |
+| W-8 | Bildschirmfotos | Alt-Texte, die die Bedeutung sagen statt den Bildschirm aufzuzählen; Links nach ihrem Ziel benennen statt «#497» | Screenreader-Nutzern dasselbe wie das Bild | Sven |
+
+**Bedingungen für jede Bewegung** (alle fünf, Sven ausführlich): startet nur auf Klick oder einmal beim Hineinscrollen, keine Schleife, kein Autoplay; über 5 s mit Pause-Knopf, per Tastatur bedienbar (WCAG 2.2.2); `prefers-reduced-motion` hält alles an (2.3.3); kein Blinken; der Inhalt steht auch als Text auf der Seite; nichts von fremden Servern; leicht (Marco: die Seite wiegt heute rund 890 KB).
+
+**Was stören würde:** Bewegung im ersten Bildschirm, hochzählende Zahlen, einfliegende Texte beim Scrollen, Karussells, ein tippendes Terminal oder Chat, Parallax, Videos (auch eingebettet von YouTube), Siegel wie «rechtssicher», Sternbewertungen.
+
+**Nebenbei beobachtet:** Das erste App-Bild zeigt «Noch nicht abgerechnet … 2018–2023» und wirkt auf Helga bedrohlich; das Bild des Upload-Dialogs ist unten abgeschnitten; das Handy lädt beim Öffnen rund 200 KB Bilder, die es (noch) nicht zeigt (dunkle Varianten, Handy-Foto); das Heiz-Beispiel vergleicht im Text Januar mit Juli, in der Bildunterschrift mit August.
