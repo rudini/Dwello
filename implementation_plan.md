@@ -50,4 +50,8 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #585 BFF tests red (`category-lists.test.ts`: categories page, building page, `namesById`, 150 categories, 100 shown); the three loads ask for `limit=1000`, green; No scenario: it needs more than 100 categories in the shared E2E database
 - [x] #585 slice review round 1: `docs/reviews/585-review-1.md`; Minor C-1 fixed (the building test also checks the name of a Tankbestand in category c149, red without the change); the other 100-limits (Verteilschlüssel, Heizprofile) became #588
 - [x] #585 closing review round 2: `docs/reviews/585-review-2.md` (C-1 closed, no new findings)
-- [ ] #585 PR merged
+- [x] #585 PR #589 merged
+- [x] #588 BFF tests red (`master-data-lists.test.ts`: Verteilschlüssel page, invoice forms, Heizprofile page, Einstellungen, statement run; 150 records, 100 shown); the seven loads ask for `limit=1000`, green; contract `tests/contracts/distribution-keys.json` with its check; No scenario: it needs more than 100 Verteilschlüssel or Heizprofile in the shared E2E database
+- [x] #588 slice review round 1: `docs/reviews/588-review-1.md`; Minor C-1 fixed (test of the statement run naming a Heizprofil after the 100th, red with limit=100)
+- [x] #588 closing review round 2: `docs/reviews/588-review-2.md` (C-1 closed, no new findings)
+- [ ] #588 PR merged
