@@ -13,13 +13,21 @@ type Backend = (url: string, init?: RequestInit) => Response;
 
 const cookieJar = () => {
 	const jar = new Map<string, string>();
-	return { jar, cookies: { set: (name: string, value: string) => jar.set(name, value), get: (name: string) => jar.get(name), delete: (name: string) => jar.delete(name) } };
+	return {
+		jar,
+		cookies: {
+			set: (name: string, value: string) => jar.set(name, value),
+			get: (name: string) => jar.get(name),
+			delete: (name: string) => jar.delete(name)
+		}
+	};
 };
 
 const open = (page: string, backend: Backend = () => Response.json(available)) =>
-	load({ url: new URL(page), fetch: async (url: string, init?: RequestInit) => backend(url, init) } as never) as Promise<
-		Record<string, unknown>
-	>;
+	load({
+		url: new URL(page),
+		fetch: async (url: string, init?: RequestInit) => backend(url, init)
+	} as never) as Promise<Record<string, unknown>>;
 
 async function signIn(backend: Backend, redirectTo = '') {
 	const { jar, cookies } = cookieJar();
@@ -34,15 +42,23 @@ async function signIn(backend: Backend, redirectTo = '') {
 	};
 	let result: unknown;
 	try {
-		result = await actions.password({ request: new Request('http://localhost/login', { method: 'POST', body }), cookies, fetch } as never);
+		result = await actions.password({
+			request: new Request('http://localhost/login', { method: 'POST', body }),
+			cookies,
+			fetch
+		} as never);
 	} catch (thrown) {
 		result = thrown;
 	}
 	return { result, jar, calls };
 }
 
-const answering = (status: number, json: object): Backend => (url) =>
-	url.endsWith('/audit-log/logins') ? new Response(null, { status: 201 }) : Response.json(json, { status });
+const answering =
+	(status: number, json: object): Backend =>
+	(url) =>
+		url.endsWith('/audit-log/logins')
+			? new Response(null, { status: 201 })
+			: Response.json(json, { status });
 
 describe('Anmeldeseite mit Konto mit Passwort', () => {
 	it('bietet das Passwort an, wenn es ein Konto mit Passwort gibt', async () => {
@@ -50,7 +66,10 @@ describe('Anmeldeseite mit Konto mit Passwort', () => {
 	});
 
 	it('bietet kein Passwort an, wenn das Backend nicht antwortet', async () => {
-		expect((await open('http://localhost:3000/login', () => new Response(null, { status: 500 }))).password).toBe(false);
+		expect(
+			(await open('http://localhost:3000/login', () => new Response(null, { status: 500 })))
+				.password
+		).toBe(false);
 	});
 
 	it.each([
@@ -70,11 +89,19 @@ describe('Anmeldung mit Passwort', () => {
 
 		expect(result).toMatchObject({ status: 303, location: '/buildings' });
 		const session = await verifyJwt(jar.get('dwello_session')!);
-		expect(session).toMatchObject({ sub: account.sub, email: account.email, name: account.email, provider: 'local' });
+		expect(session).toMatchObject({
+			sub: account.sub,
+			email: account.email,
+			name: account.email,
+			provider: 'local'
+		});
 		expect(jar.get('dwello_xsrf')).toBeTruthy();
 		const audit = calls.find((call) => call.url.endsWith('/api/v1/audit-log/logins'));
 		expect(JSON.parse(String(audit?.init?.body))).toEqual({ provider: 'local' });
-		expect(JSON.parse(String(calls[0].init?.body))).toEqual({ email: 'helga@example.ch', password: 'ein-Passwort' });
+		expect(JSON.parse(String(calls[0].init?.body))).toEqual({
+			email: 'helga@example.ch',
+			password: 'ein-Passwort'
+		});
 	});
 
 	it('schreibt die Anmeldung mit Kennung und E-Mail-Adresse ins Protokoll des Servers', async () => {
@@ -84,7 +111,14 @@ describe('Anmeldung mit Passwort', () => {
 
 			const lines = info.mock.calls.map(([line]) => JSON.parse(String(line)));
 			expect(lines).toContainEqual(
-				expect.objectContaining({ context: expect.objectContaining({ event: 'login_complete', provider: 'local', userId: account.sub, email: account.email }) })
+				expect.objectContaining({
+					context: expect.objectContaining({
+						event: 'login_complete',
+						provider: 'local',
+						userId: account.sub,
+						email: account.email
+					})
+				})
 			);
 		} finally {
 			info.mockRestore();
@@ -98,8 +132,15 @@ describe('Anmeldung mit Passwort', () => {
 			const { jar } = await signIn(answering(200, account));
 			const signedInAt = (await verifyJwt(jar.get('dwello_session')!)).auth_time;
 			vi.setSystemTime(new Date('2026-10-21T10:50:00Z'));
-			const cookies = { set: (name: string, value: string) => jar.set(name, value), get: (name: string) => jar.get(name), delete: () => {} };
-			const request = new Request('http://localhost/auth/refresh', { method: 'POST', headers: { 'X-XSRF-TOKEN': jar.get('dwello_xsrf')! } });
+			const cookies = {
+				set: (name: string, value: string) => jar.set(name, value),
+				get: (name: string) => jar.get(name),
+				delete: () => {}
+			};
+			const request = new Request('http://localhost/auth/refresh', {
+				method: 'POST',
+				headers: { 'X-XSRF-TOKEN': jar.get('dwello_xsrf')! }
+			});
 
 			expect((await refresh({ request, cookies } as never)).status).toBe(200);
 
@@ -113,7 +154,9 @@ describe('Anmeldung mit Passwort', () => {
 	});
 
 	it('führt nur zu Seiten von Dwello', async () => {
-		expect((await signIn(answering(200, account), '//boese.example')).result).toMatchObject({ location: '/dashboard' });
+		expect((await signIn(answering(200, account), '//boese.example')).result).toMatchObject({
+			location: '/dashboard'
+		});
 	});
 
 	it('sagt bei falschem Passwort, was geschah und was zu tun ist', async () => {
@@ -121,7 +164,11 @@ describe('Anmeldung mit Passwort', () => {
 
 		expect(result).toMatchObject({
 			status: 400,
-			data: { error: 'E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut.', email: 'helga@example.ch' }
+			data: {
+				error:
+					'E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut.',
+				email: 'helga@example.ch'
+			}
 		});
 		expect(jar.has('dwello_session')).toBe(false);
 	});
@@ -130,18 +177,31 @@ describe('Anmeldung mit Passwort', () => {
 		['', 'ein-Passwort'],
 		['   ', 'ein-Passwort'],
 		['helga@example.ch', '']
-	])('nennt leere Felder (E-Mail «%s», Passwort «%s») eine falsche Eingabe, ohne das Backend zu fragen', async (email, password) => {
-		const body = new FormData();
-		body.set('email', email);
-		body.set('password', password);
-		const calls: string[] = [];
-		const fetch = async (url: string) => (calls.push(url), Response.json(account));
+	])(
+		'nennt leere Felder (E-Mail «%s», Passwort «%s») eine falsche Eingabe, ohne das Backend zu fragen',
+		async (email, password) => {
+			const body = new FormData();
+			body.set('email', email);
+			body.set('password', password);
+			const calls: string[] = [];
+			const fetch = async (url: string) => (calls.push(url), Response.json(account));
 
-		const result = await actions.password({ request: new Request('http://localhost/login', { method: 'POST', body }), cookies: cookieJar().cookies, fetch } as never);
+			const result = await actions.password({
+				request: new Request('http://localhost/login', { method: 'POST', body }),
+				cookies: cookieJar().cookies,
+				fetch
+			} as never);
 
-		expect(result).toMatchObject({ status: 400, data: { error: 'E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut.' } });
-		expect(calls).toEqual([]);
-	});
+			expect(result).toMatchObject({
+				status: 400,
+				data: {
+					error:
+						'E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut.'
+				}
+			});
+			expect(calls).toEqual([]);
+		}
+	);
 
 	it('nennt bei einer Sperre die Uhrzeit in der Schweiz', async () => {
 		const { result } = await signIn(answering(423, locked));
@@ -158,7 +218,10 @@ describe('Anmeldung mit Passwort', () => {
 	it('meldet einen Fehler des Backends weder als falsches Passwort noch als Sperre', async () => {
 		const { result } = await signIn(() => new Response(null, { status: 500 }));
 
-		expect(result).toMatchObject({ status: 502, data: { error: 'Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut.' } });
+		expect(result).toMatchObject({
+			status: 502,
+			data: { error: 'Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut.' }
+		});
 	});
 });
 

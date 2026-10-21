@@ -26,7 +26,11 @@ export const insecureConnection = (url: URL) =>
 
 // the end of a Sperre in the Swiss time, whatever the server's zone (fach review 576 V-5)
 const swissTime = (iso: string) =>
-	new Intl.DateTimeFormat(getLocale(), { timeZone: 'Europe/Zurich', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+	new Intl.DateTimeFormat(getLocale(), {
+		timeZone: 'Europe/Zurich',
+		hour: '2-digit',
+		minute: '2-digit'
+	}).format(new Date(iso));
 
 export async function signInWithPassword(fetch: Fetch, cookies: Cookies, form: FormData) {
 	const email = String(form.get('email') ?? '');
