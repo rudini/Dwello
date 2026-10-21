@@ -17,6 +17,7 @@ import {
 	openBuildingDetail,
 	openBuildingInvoices,
 	recordFuelStock,
+	saveFuelStockWithoutDate,
 	startDeletingBuilding,
 	startEditing,
 	startFirstApartment,
@@ -113,6 +114,13 @@ When(
 	'der Liegenschaftsverwalter für das Gebäude {string} den Tankbestand vom {string} mit {string} Franken erfasst',
 	async ({ verwalter, seed }, title: string, date: string, amount: string) => {
 		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!), recordFuelStock(date, amount));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter für das Gebäude {string} einen Tankbestand mit {string} Franken speichert, nachdem er den Stichtag {string} eingegeben und wieder gelöscht hat',
+	async ({ verwalter, seed }, title: string, amount: string, date: string) => {
+		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!), saveFuelStockWithoutDate(date, amount));
 	}
 );
 

@@ -256,6 +256,15 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		);
 	});
 
+	// #566: WebKit's own check stopped a form without novalidate at the hidden calendar field, so the page's error never showed
+	it('überlässt die Prüfung des Formulars der Seite, auch ohne novalidate', () => {
+		const form = document.createElement('form');
+		document.body.append(form);
+		show(DateInput, { id: 'readingDate', label: 'Datum', testid: 'date-input', value: '2024-01-31', min: '2025-01-01' }, form);
+
+		expect(form.checkValidity()).toBe(true);
+	});
+
 	it('sendet in einem Formular das Datum als JJJJ-MM-TT', () => {
 		date('2024-12-31', { name: 'paymentDeadline' });
 

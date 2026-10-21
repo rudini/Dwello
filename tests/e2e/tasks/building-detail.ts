@@ -41,3 +41,12 @@ export const recordFuelStock = (date: string, amount: string): Activity => async
 		Wait.forCount(fuelStockRows, listed + 1)
 	);
 };
+
+// Types a reading day and empties it again, then saves: the page names the missing day (#566)
+export const saveFuelStockWithoutDate = (typedDate: string, amount: string): Activity => (actor) =>
+	actor.attemptsTo(
+		EnterDate.of(typedDate).into(fuelStockDate),
+		EnterDate.of('').into(fuelStockDate),
+		Enter.theValue(amount).into(fuelStockAmount),
+		Click.on(saveFuelStockButton)
+	);
