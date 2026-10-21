@@ -241,6 +241,23 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		'/config/default_distribution_key_id': { value: 'k1' }
 	};
 
+	// #583: the backend sends at most as many categories as asked for, counting the non-umlagefähige ones too
+	it('bietet jede Kategorie an, auch mit mehr als 100 Kategorien', async () => {
+		const many = Array.from({ length: 150 }, (_, i) => ({
+			...caretaker,
+			id: `c${i}`,
+			nameDE: `Kategorie ${i}`
+		}));
+		const fetch = (async (url: string) => {
+			const { pathname, searchParams } = new URL(url);
+			if (!pathname.endsWith('/categories')) return Response.json({});
+			return Response.json({ categories: many.slice(0, Number(searchParams.get('limit') ?? 100)) });
+		}) as typeof globalThis.fetch;
+		const url = new URL('http://localhost/invoices/new');
+		const data = (await newLoad({ url, fetch } as never)) as { categories: unknown[] };
+		expect(data.categories).toHaveLength(150);
+	});
+
 	// Wer eine schon abgerechnete Rechnung ändert oder löscht, verschiebt Kosten zwischen den Perioden; welche
 	// Abrechnungen sie abrechnen, wissen die Abrechnungen selbst (#96)
 	describe('Perioden mit Abrechnungen, die diese Rechnung enthalten', () => {

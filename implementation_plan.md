@@ -39,4 +39,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #522 No scenario: it needs more than 100 categories in the shared E2E database or a change in another tab while the form loads; contract E2E features (145) green
 - [x] #522 slice review round 1: `docs/reviews/522-review-1.md`; Minor C-2 fixed (one helper `ticked`); Minor C-1 (a category changed in another tab while the form loads is answered without a word; needs the backend to answer only shown ids) stays in the report, named in the PR; the invoice form limit became #583
 - [x] #522 closing review round 2: `docs/reviews/522-review-2.md` (no new findings)
-- [ ] #522 PR merged
+- [x] #522 PR #584 merged
+- [x] #583 BFF test red (`invoices.test.ts`: 150 categories, the form got 100); `invoiceChoices` asks for `categories?limit=1000` (the backend's own «all»), green; No scenario: it needs more than 100 categories in the shared E2E database; the other loads with the same limit became #585
+- [ ] #583 slice review, PR merged
