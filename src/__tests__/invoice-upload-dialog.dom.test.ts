@@ -54,8 +54,8 @@ const rowText = () => allByTestId('invoice-upload-row').map((row) => row.textCon
 
 // #452 Punkt 7 (#379): auch eine hochgeladene Rechnung bekommt den Verteilschlüssel ihrer Kategorie im Gebäude
 describe('Verteilschlüssel beim Hochladen', () => {
-	const openWith = (defaultDistributionKeyId: string) => {
-		const calls = fakeBff((call) => (call.path === '/invoices' ? [201, { id: 'i9' }] : [200, read]));
+	const openWith = (defaultDistributionKeyId: string, answer: object = read) => {
+		const calls = fakeBff((call) => (call.path === '/invoices' ? [201, { id: 'i9' }] : [200, answer]));
 		show(InvoiceUploadDialog, {
 			open: true,
 			buildings,
@@ -83,6 +83,39 @@ describe('Verteilschlüssel beim Hochladen', () => {
 		await settle();
 
 		expect(sentKey(calls)).toBe('k2');
+	});
+
+	// #548: the sentence went only with the next «Rechnungen erstellen», also after the Verteilschlüssel was chosen
+	it('nimmt «Füllen Sie die markierten Felder aus.» zurück, sobald der Verteilschlüssel gewählt ist', async () => {
+		openWith('');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-upload-building-select')!, 'change', 'b2'); // no Verteilschlüssel to propose
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		const notes = () => byTestId('invoice-upload-row-message')?.textContent ?? '';
+		expect(notes()).toContain('Füllen Sie die markierten Felder aus.');
+
+		fireEvent(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!, 'change', 'k1');
+		await settle();
+
+		expect(notes()).not.toContain('Füllen Sie die markierten Felder aus.');
+	});
+
+	// #548 (persona Helga P-1): the Kategorie brings its Verteilschlüssel, so the field no longer asks for one
+	it('nimmt den Fehler am Verteilschlüssel zurück, sobald die gewählte Kategorie ihn mitbringt', async () => {
+		openWith('', { ...read, categorization: null });
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		const row = () => byTestId('invoice-upload-row')!.textContent!;
+		expect(row()).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		await settle();
+
+		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k2');
+		expect(row()).not.toContain('Wählen Sie, wie die Kosten verteilt werden.');
 	});
 
 	// Code-Review 452-1 C-2: folding and unfolding the row keeps the landlord's own choice
@@ -186,6 +219,22 @@ describe('Rechnungen hochladen', () => {
 		);
 		expect(byTestId('invoice-upload-row-message')!.textContent).not.toContain('nicht geantwortet');
 		expect(byTestId('invoice-upload-row-retry')).not.toBeNull();
+	});
+
+	// #548 (code review 548-1 C-1): one of the marked fields filled, the others still empty
+	it('sagt «Füllen Sie die markierten Felder aus.» weiter, solange ein markiertes Feld leer ist', async () => {
+		open(() => [502, unreadable]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+
+		fireEvent(byTestId<HTMLInputElement>('invoice-billing-entity-input')!, 'input', 'Elektro Blitz');
+		await settle();
+
+		expect(byTestId('invoice-upload-row-message')!.textContent).toContain(
+			'Füllen Sie die markierten Felder aus.'
+		);
 	});
 
 	it('beschreibt sich mit seinem ersten Satz, nicht mit dem ganzen Inhalt (Persona Sven)', () => {

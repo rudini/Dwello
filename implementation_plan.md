@@ -19,5 +19,12 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #566 DOM test red (`date-input.dom.test.ts`: form with the calendar below its min fails checkValidity); `DateInput` keeps its calendar out of every form (`form=""`), green
 - [x] #566 scenario «Ein Tankbestand ohne Stichtag nennt den fehlenden Stichtag» (`building-detail.feature`), green in Chromium; no red run of its own (the DOM test was seen red)
 - [x] #566 slice review round 1: `docs/reviews/566-review-1.md` (no findings; no closing round, no code since)
-- [ ] #566 PR merged (subject reworded after CI «Commit subjects», force-push approved by the product owner)
+- [x] #566 PR #571 merged (subject reworded after CI «Commit subjects», force-push approved by the product owner)
 - [ ] Workflow note: the local commit-msg hook let `git commit -F -` through with a 53-character subject; only CI caught it
+- [x] #548 DOM test red (`invoice-upload-dialog.dom.test.ts`: sentence stays after the Verteilschlüssel is chosen); `UploadRowNotes.svelte` shows it only while a marked field is still open (`checkRow`), green
+- [x] #548 scenario «Rechnung ohne KI aus einer Datei erfassen» checks the sentence and that the note goes (new step «hat die Datei von … keinen Hinweis mehr»); no red run of its own (the DOM test was seen red)
+- [x] #548 slice review round 1: `docs/reviews/548-review-1.md`; Minor C-1 fixed (test: one of two marked fields filled, sentence stays; pins kept behaviour, fails with `every` instead of `some`)
+- [x] #548 persona Helga: `docs/design/personas/helga-548.md`; Major P-1 (key field stays red after the Kategorie brought a Verteilschlüssel, pre-existing, met in the task) fixed with a DOM test seen red; Minors P-2, P-3 stay in the report (pre-existing, not trivial)
+- [x] #548 closing review round 2: `docs/reviews/548-review-2.md`; Major C-2 (no scenario for P-1) fixed: scenario «Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück», new step «… die Fehlermeldung … nicht mehr»; its note on new/edit invoice became #573
+- [x] #548 review round 3: `docs/reviews/548-review-3.md` (C-2 closed, no new findings)
+- [ ] #548 PR merged
