@@ -19,4 +19,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #566 DOM test red (`date-input.dom.test.ts`: form with the calendar below its min fails checkValidity); `DateInput` keeps its calendar out of every form (`form=""`), green
 - [x] #566 scenario «Ein Tankbestand ohne Stichtag nennt den fehlenden Stichtag» (`building-detail.feature`), green in Chromium; no red run of its own (the DOM test was seen red)
 - [x] #566 slice review round 1: `docs/reviews/566-review-1.md` (no findings; no closing round, no code since)
-- [ ] #566 PR merged
+- [ ] #566 PR merged (subject reworded after CI «Commit subjects», force-push approved by the product owner)
+- [ ] Workflow note: the local commit-msg hook let `git commit -F -` through with a 53-character subject; only CI caught it
