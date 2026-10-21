@@ -24,4 +24,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #548 DOM test red (`invoice-upload-dialog.dom.test.ts`: sentence stays after the Verteilschlüssel is chosen); `UploadRowNotes.svelte` shows it only while a marked field is still open (`checkRow`), green
 - [x] #548 scenario «Rechnung ohne KI aus einer Datei erfassen» checks the sentence and that the note goes (new step «hat die Datei von … keinen Hinweis mehr»); no red run of its own (the DOM test was seen red)
 - [x] #548 slice review round 1: `docs/reviews/548-review-1.md`; Minor C-1 fixed (test: one of two marked fields filled, sentence stays; pins kept behaviour, fails with `every` instead of `some`)
-- [ ] #548 persona Helga, closing review, PR merged
+- [x] #548 persona Helga: `docs/design/personas/helga-548.md`; Major P-1 (key field stays red after the Kategorie brought a Verteilschlüssel, pre-existing, met in the task) fixed with a DOM test seen red; Minors P-2, P-3 stay in the report (pre-existing, not trivial)
+- [ ] #548 closing review, PR merged

@@ -54,8 +54,8 @@ const rowText = () => allByTestId('invoice-upload-row').map((row) => row.textCon
 
 // #452 Punkt 7 (#379): auch eine hochgeladene Rechnung bekommt den Verteilschlüssel ihrer Kategorie im Gebäude
 describe('Verteilschlüssel beim Hochladen', () => {
-	const openWith = (defaultDistributionKeyId: string) => {
-		const calls = fakeBff((call) => (call.path === '/invoices' ? [201, { id: 'i9' }] : [200, read]));
+	const openWith = (defaultDistributionKeyId: string, answer: object = read) => {
+		const calls = fakeBff((call) => (call.path === '/invoices' ? [201, { id: 'i9' }] : [200, answer]));
 		show(InvoiceUploadDialog, {
 			open: true,
 			buildings,
@@ -99,6 +99,23 @@ describe('Verteilschlüssel beim Hochladen', () => {
 		await settle();
 
 		expect(notes()).not.toContain('Füllen Sie die markierten Felder aus.');
+	});
+
+	// #548 (persona Helga P-1): the Kategorie brings its Verteilschlüssel, so the field no longer asks for one
+	it('nimmt den Fehler am Verteilschlüssel zurück, sobald die gewählte Kategorie ihn mitbringt', async () => {
+		openWith('', { ...read, categorization: null });
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		const row = () => byTestId('invoice-upload-row')!.textContent!;
+		expect(row()).toContain('Wählen Sie, wie die Kosten verteilt werden.');
+
+		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c1');
+		await settle();
+
+		expect(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!.value).toBe('k2');
+		expect(row()).not.toContain('Wählen Sie, wie die Kosten verteilt werden.');
 	});
 
 	// Code-Review 452-1 C-2: folding and unfolding the row keeps the landlord's own choice
