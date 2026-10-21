@@ -55,6 +55,12 @@ Funktionalität: Navigation
   Szenario: Die Fusszeile zeigt die Version der App
     Dann zeigt die Fusszeile die Version "1.4.0"
 
+  # #519: ein unerwarteter Fehler beim Laden heisst in der Sprache der Seite, nicht «Internal Error» wie bei SvelteKit
+  Szenario: Die Fehlerseite nennt einen unerwarteten Fehler in Worten
+    Angenommen der Liegenschaftsverwalter öffnet eine Seite, die es nicht gibt
+    Wenn der Liegenschaftsverwalter von dort zur Übersicht wechselt, deren Daten nicht geladen werden können
+    Dann sagt die Fehlerseite "Ein unerwarteter Fehler ist aufgetreten."
+
   # Eine Kennung, die keine sein kann, ist wie eine unbekannte: die Seite gibt es nicht, kein Fehler beim Laden
   Szenariogrundriss: Eine Seite mit ungültiger Kennung gibt es nicht
     Wenn der Liegenschaftsverwalter die Seite "<Pfad>" öffnet

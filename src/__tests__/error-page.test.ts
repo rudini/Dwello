@@ -28,6 +28,13 @@ describe('Fehlerseite', () => {
 		expect(body).not.toContain('Prüfen Sie die Adresse');
 	});
 
+	// #519: SvelteKit's own message of an unexpected failure is English in every language
+	it.each(['Internal Error', 'Unknown Error', 'Error: 502'])('nennt «%s» von SvelteKit in der Sprache der Seite', async (message) => {
+		const body = await page(500, message);
+		expect(body).toMatch(/<h1[^>]*>Ein unerwarteter Fehler ist aufgetreten\.<\/h1>/);
+		expect(body).not.toContain(message);
+	});
+
 	it('verspricht nichts, was die Seite nicht weiss', async () => {
 		expect(await page(404)).not.toContain('nicht betroffen');
 	});

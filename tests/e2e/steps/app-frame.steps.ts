@@ -24,6 +24,7 @@ import {
 	chooseInHelpContents,
 	chooseInMainNav,
 	chooseLogo,
+	goToOverviewWhileItFails,
 	openPrivacySectionFromTerms,
 	openSettingsFromUserMenu,
 	useWindowWidth
@@ -299,6 +300,13 @@ Then('erklärt die Seite {string} {string}', async ({ verwalter }, title: string
 When('der Liegenschaftsverwalter die Seite {string} öffnet', async ({ verwalter }, path: string) => {
 	await verwalter.attemptsTo(openPage(path));
 });
+
+When(
+	'der Liegenschaftsverwalter von dort zur Übersicht wechselt, deren Daten nicht geladen werden können',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(goToOverviewWhileItFails);
+	}
+);
 
 Then('sagt die Fehlerseite {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(pageTitleText).toBe(message);

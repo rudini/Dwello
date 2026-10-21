@@ -8,8 +8,12 @@
 		404: m.error_404,
 		403: m.error_403
 	};
+	// SvelteKit's own words for an unexpected failure are English in every language (#519); a load's own message stays
+	const ownWords = /^(Internal Error|Unknown Error|Error: \d+)$/;
 	const message = $derived(
-		messages[$page.status]?.() ?? $page.error?.message ?? m.error_unexpected()
+		messages[$page.status]?.() ??
+			(ownWords.test($page.error?.message ?? '') ? undefined : $page.error?.message) ??
+			m.error_unexpected()
 	);
 	const hint = $derived($page.status === 404 ? m.error_hint_404() : m.error_hint_retry());
 </script>
@@ -24,6 +28,8 @@
 	<p class="max-w-prose text-lg text-ink-muted">{hint}</p>
 	<div class="flex flex-wrap justify-center gap-4">
 		<Button onclick={() => history.back()} icon="arrow-back">{m.ui_back()}</Button>
-		<Button variant="primary" href="/dashboard" icon="overview">{m.error_to_overview()}</Button>
+		<Button variant="primary" href="/dashboard" icon="overview" testid="error-to-overview"
+			>{m.error_to_overview()}</Button
+		>
 	</div>
 </div>

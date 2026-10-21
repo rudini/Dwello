@@ -53,3 +53,7 @@ export const glossaryExplanation = (term: string) =>
 			.filter({ has: page.getByTestId('glossary-term').getByText(term, { exact: true }) })
 			.getByTestId('glossary-explanation')
 	);
+
+export const errorPageToOverview = target('Zur Übersicht auf der Fehlerseite', (page) =>
+	page.getByTestId('error-to-overview')
+);
