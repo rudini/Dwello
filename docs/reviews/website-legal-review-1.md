@@ -1,0 +1,99 @@
+# Fachreview 1: Datenschutzerklärung und Impressum der Marketing-Website
+
+Gegenstand: `marketing/datenschutz.html` und `marketing/impressum.html` (Branch `claude/dwello-marketing-page-s6uece`, Commit `633a64b6`, Arbeitsbaum `/home/user/Dwello`), Kontext `marketing/index.html`, `marketing/.htaccess`.
+Rollen: R = Rechtstexte (DSG, FMG, UWG, OR, URG), V = Verwalter (Praxis, Wortlaut), M = Mietrecht.
+Gesetzestexte: Fedlex, aktuelle Fassungen über den Fedlex-SPARQL-Endpunkt abgerufen (DSG SR 235.1, Stand 7.7.2025; DSV SR 235.11, Stand 1.12.2025; UWG SR 241, Stand 1.1.2025; OR SR 220, Stand 1.10.2026; URG SR 231.1, Stand 1.7.2025; FMG SR 784.10, Stand 1.6.2026; ZGB SR 210, Stand 1.7.2026; VMWG SR 221.213.11, Stand 1.10.2025).
+Platzhalter `[Name und Postadresse des Betreibers]` ist kein Befund (siehe Abschnitt «Was vom Betreiber abhängt»).
+
+Ergebnis: kein Blocker, kein Major. Die Texte erfüllen Art. 19 DSG inhaltlich, sobald der Platzhalter gefüllt ist. Ein paar Sätze sagen mehr, als die Fakten tragen, oder sind ungenau.
+
+## Befunde
+
+| ID | Rolle | Schwere | Befund |
+|---|---|---|---|
+| R-1 | Rechtstexte | Minor | «Alle Daten bleiben in der Schweiz.» (datenschutz.html:32) und «… und nicht ins Ausland» (:49) sagen mehr, als der Betreiber in der Hand hat (E-Mail-Weg über den Anbieter der Besucherin, Antwort an deren Adresse). Nur das behaupten, was der Betreiber tut. |
+| R-2 | Rechtstexte | Minor | «Texte, Bilder und Logo dieser Website gehören dem Betreiber» (impressum.html:42): Urheber ist immer eine natürliche Person (Art. 6 URG); ein Verein hat Rechte nur durch Übertragung (Art. 16 URG); die Screenshots zeigen die AGPL-App. «Rechte liegen bei …» und Hinweis auf die AGPL. |
+| R-3 | Rechtstexte | Minor | Lucide-Icons (ISC) verlangen den Copyright- und Erlaubnis-Hinweis «in all copies»; das Impressum nennt nur den Lizenznamen (impressum.html:42). Hinweis ergänzen oder verlinken. |
+| M-1 | Mietrecht | Minor | «Dwello rechnet nach den Regeln des Obligationenrechts» (impressum.html:35): Die Nebenkostenregeln stehen auch in der VMWG (Art. 4–8) und im Mietvertrag (Art. 257a Abs. 2 OR); der Mindestbetrag CHF 5.00 ist eine Dwello-Regel, keine des OR (#352 offen). Zurückhaltender formulieren. |
+| V-1 | Verwalter | Minor | «Personen, Adressen, Kontonummern und Beträge darin sind erfunden» (impressum.html:39): Die Demo-Adressen sind echte Adressen (Bahnhofstrasse 42, 8001 Zürich; Hirschmattstrasse 21 und Seeweg 15, 6003 Luzern; Bergstrasse 8, 3800 Interlaken; `backend/demo/demo-data.sql`). Die IBAN ist die Beispiel-QR-IBAN von SIX. Wortlaut anpassen. |
+| R-4 | Rechtstexte | Nit | «Wir geben Ihre Daten niemandem sonst weiter» (datenschutz.html:49) ohne Vorbehalt für gesetzliche Pflichten (Behördenanfragen). «ausser das Gesetz verpflichtet uns dazu» ergänzen. |
+| R-5 | Rechtstexte | Nit | «Sind Sie mit unserer Antwort nicht einverstanden, können Sie sich an den EDÖB wenden» (:59) klingt wie eine Voraussetzung; Anzeige beim EDÖB (Art. 49 DSG) und Klage (Art. 32 DSG) sind jederzeit möglich. Postadresse des EDÖB nennen (in der Schweizer Praxis üblich). |
+| R-6 | Rechtstexte | Nit | Rechte (:58): «kostenlos» (Art. 25 Abs. 6 DSG) und «innert 30 Tagen» (Art. 18 DSV) ergänzen; schafft Vertrauen, kostet einen Satz. |
+| R-7 | Rechtstexte | Nit | Aufbewahrung der Server-Protokolle (:52) «löscht sie danach» ist inhaltsleer. Art. 19 DSG verlangt keine Dauer, Art. 25 Abs. 2 lit. d DSG bei einer Auskunft aber Dauer oder Kriterien. Kriterium nennen und die Dauer im Infomaniak-Manager nachsehen. |
+| R-8 | Rechtstexte | Nit | Kontakt-E-Mails: Bei Fehlermeldungen liegt es nahe, den Inhalt in ein GitHub-Issue zu übernehmen (GitHub, USA). Das wäre eine Bekanntgabe ins Ausland (Art. 19 Abs. 4 DSG). Zusage ergänzen «nur mit Ihrem Einverständnis». |
+| R-9 | Rechtstexte | Nit | «Dwello wird ohne Gewähr zur Verfügung gestellt» (impressum.html:34) ist haltbar (siehe Bestätigt). Präziser: «soweit das Gesetz es zulässt». Optional. |
+| V-2 | Verwalter | Nit | Copy: Der Lead (datenschutz.html:25) ist ein Satz mit Doppelpunkt und zwei Teilsätzen. Aufteilen. Footer «© 2026 Dwello»: Dwello ist keine Person; nach dem Entscheid den Betreiber nennen. |
+| V-3 | Verwalter | Nit | Die Übersetzungen fr/it/en (`marketing/{fr,it,en}/datenschutz.html`, `impressum.html`) müssen jede Änderung aus diesem Bericht mitnehmen; nicht geprüft. |
+
+## Einzelheiten
+
+### R-1 (Minor): «Alle Daten bleiben in der Schweiz» / «nicht ins Ausland»
+- Sätze: datenschutz.html:32 «Alle Daten bleiben in der Schweiz.»; :49 «Wir geben Ihre Daten niemandem sonst weiter und nicht ins Ausland.»
+- Quelle: Art. 19 Abs. 4 DSG: «Werden die Personendaten ins Ausland bekanntgegeben, so teilt er der betroffenen Person auch den Staat oder das internationale Organ und gegebenenfalls die Garantien nach Artikel 16 Absatz 2 oder die Anwendung einer Ausnahme nach Artikel 17 mit.» Art. 6 Abs. 2 DSG: «Die Bearbeitung muss nach Treu und Glauben erfolgen und verhältnismässig sein.»
+- Warum: Für die Bearbeitung durch den Betreiber stimmt die Aussage (Infomaniak, Rechenzentren in der Schweiz; die Links zu GitHub und zur Demo ruft der Browser der Besucherin auf, der Betreiber gibt dabei nichts bekannt; `Referrer-Policy: strict-origin-when-cross-origin` sendet nur `https://dwello.ch`, keine Personendaten). «Alle Daten bleiben in der Schweiz» ist aber absolut. Eine E-Mail der Besucherin läuft über deren Anbieter (oft im Ausland), und die Antwort geht dorthin zurück. Ob Infomaniak für Mail oder Webhosting Unterauftragsbearbeiter im Ausland einsetzt, ist nicht bestätigt (siehe «Nicht bestätigt»). Eine Pflichtverletzung liegt nicht vor. Bricht die Aussage aber, ist sie eine falsche Angabe in der Datenschutzerklärung.
+- Vorschlag (Kurz gesagt): «Wir speichern alle Daten in der Schweiz und geben keine ins Ausland weiter.»
+- Vorschlag (Wer die Daten erhält, letzter Satz): «Sonst geben wir Ihre Daten niemandem weiter, ausser das Gesetz verpflichtet uns dazu, und nie ins Ausland. Antworten wir auf Ihre E-Mail, geht die Antwort an Ihren E-Mail-Anbieter, auch wenn er im Ausland ist.»
+
+### R-2 (Minor): Urheberrecht
+- Satz: impressum.html:42 «Texte, Bilder und Logo dieser Website gehören dem Betreiber, soweit nichts anderes angegeben ist.»
+- Quelle: Art. 6 URG: «Urheber oder Urheberin ist die natürliche Person, die das Werk geschaffen hat.» Art. 16 Abs. 1 URG: «Das Urheberrecht ist übertragbar und vererblich.» Art. 2 Abs. 1 URG: «Werke sind, unabhängig von ihrem Wert oder Zweck, geistige Schöpfungen der Literatur und Kunst, die individuellen Charakter haben.»
+- Warum: «gehören» meint Eigentum, nicht Urheberrecht. Ist der Betreiber ein Verein, hat er Rechte nur, wenn die Urheber sie übertragen haben. Die Bilder sind Screenshots der App: deren Oberfläche steht unter der AGPL, die Rechte liegen bei den Beitragenden. Ob Texte, die eine KI erstellt hat, Werke im Sinn von Art. 2 URG sind, ist offen. Der Satz behauptet mehr Schutz, als es vielleicht gibt.
+- Vorschlag: «Die Rechte an Texten, Bildern und Logo dieser Website liegen beim Betreiber oder bei den Personen, die sie geschaffen haben, soweit nichts anderes angegeben ist. Die Bilder der App zeigen Dwello, das unter der AGPL-3.0-or-later steht. Die Schrift Inter steht unter der SIL Open Font License 1.1 (© The Inter Project Authors), die Icons von Lucide unter der ISC-Lizenz (© Lucide Icons and Contributors).»
+
+### R-3 (Minor): Lizenzhinweis Lucide (und Inter)
+- Satz: impressum.html:42 «… die Icons von Lucide unter der ISC-Lizenz.»
+- Quelle: `node_modules/lucide/LICENSE`: «Permission to use, copy, modify, and/or distribute this software … is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.» Inter: Die Schrift (`marketing/fonts/inter-latin.woff2`) trägt im name-Table den Copyright-Hinweis (ID 0) und die Lizenz-URL (ID 14), aber nicht den Lizenztext (ID 13); die OFL 1.1 erlaubt Hinweis und Lizenz «in the appropriate machine-readable metadata fields».
+- Warum: Die Seite enthält die SVG-Pfade von Lucide, also Kopien. Ohne Copyright- und Erlaubnis-Hinweis ist die Lizenzbedingung nicht erfüllt (Fedlex regelt das nicht, die Lizenz tut es).
+- Vorschlag: Copyright-Zeile wie in R-2 und ein Link auf den Lizenztext, z. B. «(Lizenztext: github.com/lucide-icons/lucide/blob/main/LICENSE)», oder eine Datei `marketing/LICENSES.txt` mit beiden Lizenztexten und Link darauf.
+
+### M-1 (Minor): «rechnet nach den Regeln des Obligationenrechts»
+- Satz: impressum.html:35 «Dwello rechnet nach den Regeln des Obligationenrechts, ersetzt aber keine Rechtsberatung.»
+- Quelle: Art. 257a Abs. 2 OR: «Der Mieter muss die Nebenkosten nur bezahlen, wenn er dies mit dem Vermieter besonders vereinbart hat.» Art. 4 Abs. 1 VMWG: «Erhebt der Vermieter die Nebenkosten aufgrund einer Abrechnung, muss er diese jährlich mindestens einmal erstellen und dem Mieter vorlegen.»
+- Warum: Massgebend sind OR, VMWG und vor allem der Mietvertrag. Dwello weiss nicht, was im Vertrag als Nebenkosten vereinbart ist, ausser die Vermieterin erfasst es richtig. Ein Saldo unter CHF 5.00 wird nach `docs/nebenkostenabrechnung-anforderungen.md:152` «weder eingefordert noch ausbezahlt». Das ist eine Dwello-Regel; ob eine kleine Rückerstattung einbehalten werden darf, ist offen (#352). Ein Laie liest «nach den Regeln des OR» als Zusage, die Abrechnung sei rechtlich richtig. «ersetzt keine Rechtsberatung» und «Prüfen Sie …» mildern das, darum nur Minor. Dieselbe Zusage steht in index.html:476 («so, wie es das Mietrecht verlangt»; nicht Prüfgegenstand).
+- Vorschlag: «Dwello hilft Ihnen, die Nebenkosten nach dem Mietrecht abzurechnen (Obligationenrecht und Verordnung über die Miete). Es ersetzt keine Rechtsberatung. Massgebend ist, was Ihr Mietvertrag als Nebenkosten vereinbart. Prüfen Sie Ihre Abrechnungen, bevor Sie sie versenden.»
+
+### V-1 (Minor): Demodaten «erfunden»
+- Satz: impressum.html:39 «Personen, Adressen, Kontonummern und Beträge darin sind erfunden.»
+- Beleg: `backend/demo/demo-data.sql`: «Bahnhofstrasse 42', '8001', 'Zürich'», «Seeweg 15', '6003', 'Luzern'», «Hirschmattstrasse 21', '6003', 'Luzern'», «Bergstrasse 8', '3800', 'Interlaken'»; IBAN `CH4431999123000889012` (Beispiel-QR-IBAN von SIX).
+- Warum: Die Adressen existieren (Bahnhofstrasse 42 in Zürich ist ein bekanntes Geschäftshaus). Wer dort wohnt oder das Haus besitzt, könnte mit den erfundenen Mietern und Abrechnungen in Verbindung gebracht werden. Der Satz verspricht etwas, das nicht stimmt.
+- Vorschlag: «Personen, Kontonummern und Beträge darin sind erfunden. Die Adressen sind frei gewählt; die Gebäude an diesen Adressen haben mit Dwello nichts zu tun.» Besser auf Dauer: Demo-Adressen ohne echte Hausnummern (eigenes Issue, Label `fachlich`).
+
+### Wortlaut für die Nits
+- R-4: siehe Vorschlag in R-1 («…, ausser das Gesetz verpflichtet uns dazu, …»).
+- R-5 (Quelle: Art. 49 Abs. 1 DSG: «Der EDÖB eröffnet von Amtes wegen oder auf Anzeige hin eine Untersuchung …»; Art. 32 Abs. 2 DSG): «Sie können sich jederzeit an den Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB) wenden: Feldeggweg 1, 3003 Bern, www.edoeb.admin.ch. Ihre Rechte können Sie auch vor einem Zivilgericht geltend machen.»
+- R-6 (Art. 25 Abs. 6 DSG: «Der Verantwortliche muss kostenlos Auskunft erteilen.»; Art. 18 Abs. 1 DSV: «Die Auskunft muss innerhalb von 30 Tagen seit dem Eingang des Begehrens erteilt werden.»): «Die Auskunft ist kostenlos, und Sie erhalten sie innert 30 Tagen.»
+- R-7: «Die Protokolle des Webservers bewahrt Infomaniak so lange auf, wie es für Betrieb und Sicherheit nötig ist, und löscht sie danach.» Steht im Manager eine Dauer, diese nennen.
+- R-8: «Wir veröffentlichen Ihre Nachricht nicht, auch nicht auf GitHub, ausser Sie sind einverstanden.»
+- R-9: «Dwello wird ohne Gewähr zur Verfügung gestellt, soweit das Gesetz es zulässt; die Einzelheiten stehen in der Lizenz.»
+- V-2: Lead: «Diese Erklärung gilt für die Website von Dwello. Sie gilt nicht für die App Dwello, die Sie selbst installieren. Für die Daten Ihrer Mieterinnen und Mieter in der App sind Sie selbst verantwortlich. Die App bringt dafür eine eigene Datenschutzerklärung mit.»
+
+## Was vom Betreiber abhängt
+
+- **Private Person:** vollständiger Name und Postadresse. Nach der Lehre genügt ein Postfach als «Kontaktadresse» nach Art. 3 Abs. 1 lit. s Ziff. 1 UWG nicht (**unsicher**, Lehrmeinung, nicht Fedlex). Das «wir» in beiden Texten passt dann nur bedingt. Es ist zulässig, kann aber ein Team vortäuschen: «ich» erwägen oder lassen (Nit).
+- **Verein, nicht im Handelsregister** (Eintragung freiwillig, Art. 61 Abs. 1 ZGB: «… so ist der Verein befugt, sich in das Handelsregister eintragen zu lassen.»; Pflicht nur nach Abs. 2, z. B. «für seinen Zweck ein nach kaufmännischer Art geführtes Gewerbe betreibt», was hier nicht zutrifft): Name des Vereins, Sitz, Postadresse. Eine UID gibt es nur, wenn eine zugeteilt ist; dann ist ihre Angabe üblich, aber keine Pflicht (**unsicher**).
+- **Verein im Handelsregister:** Art. 954a Abs. 1 OR: «In der Korrespondenz, auf Bestellscheinen und Rechnungen sowie in Bekanntmachungen muss die im Handelsregister eingetragene Firma oder der im Handelsregister eingetragene Name vollständig und unverändert angegeben werden.» Also exakt der eingetragene Name. Üblich sind zusätzlich UID (CHE-…) und Handelsregisteramt.
+- **Für beide Fälle:** Wer im DSG-Sinn verantwortlich ist (Art. 5 lit. j DSG: «private Person …, die … über den Zweck und die Mittel der Bearbeitung entscheidet»), muss derselbe sein, der den Vertrag mit Infomaniak hat. Ist das ein Verein, braucht er die Rechte an Texten und Logo (R-2, Art. 16 URG). Der Footer «© 2026 Dwello» nennt dann den Betreiber (V-2). Datenschutzerklärung und Impressum müssen denselben Namen tragen.
+
+## Bestätigt
+
+- **Art. 19 Abs. 2 DSG** («mindestens: a. die Identität und die Kontaktdaten des Verantwortlichen; b. den Bearbeitungszweck; c. gegebenenfalls die Empfängerinnen und Empfänger oder die Kategorien von Empfängerinnen und Empfängern»): lit. a ist mit dem Platzhalter und info@dwello.ch abgedeckt, lit. b mit «um die Website auszuliefern, Störungen zu finden und Angriffe abzuwehren» bzw. «um Ihnen zu antworten», lit. c mit Infomaniak als Auftragsbearbeiter (Art. 9 DSG). Die Kategorien der Daten werden genannt, obwohl Abs. 3 das nur für Daten verlangt, die nicht bei der Person beschafft werden.
+- **Art. 19 Abs. 4 DSG:** keine Bekanntgabe ins Ausland durch den Betreiber; GitHub und Demo erreicht die Besucherin nur über einen Link. Die Formulierung datenschutz.html:55 ist richtig (vorbehältlich R-1).
+- **Aufbewahrungsdauer:** Art. 19 DSG verlangt keine Dauer; dass keine genannt wird, ist zulässig (zu Art. 25 Abs. 2 lit. d DSG siehe R-7).
+- **Rechte:** Auskunft (Art. 25 Abs. 1 DSG: «Jede Person kann vom Verantwortlichen Auskunft darüber verlangen, ob Personendaten über sie bearbeitet werden.»), Berichtigung (Art. 32 Abs. 1 DSG), Löschung und Verbot der Bearbeitung (Art. 32 Abs. 2 lit. a und c DSG), Herausgabe (Art. 28 DSG; das Versprechen geht weiter als Art. 28 Abs. 1 lit. a–b, was zulässig ist). Identitätsnachweis: Art. 16 Abs. 5 DSV: «Der Verantwortliche muss angemessene Massnahmen treffen, um die betroffene Person zu identifizieren. Diese ist zur Mitwirkung verpflichtet.» Ein EDÖB-Hinweis ist nicht vorgeschrieben, aber üblich.
+- **Cookies:** Art. 45c FMG («Das Bearbeiten von Daten auf fremden Geräten durch fernmeldetechnische Übertragung ist nur erlaubt: … b. wenn die Benutzerinnen und Benutzer über die Bearbeitung und ihren Zweck informiert und darauf hingewiesen werden, dass sie die Bearbeitung ablehnen können.») greift nicht, weil die Website nichts im Browser speichert. Die Aussage «Wir setzen keine Cookies und speichern nichts in Ihrem Browser» stimmt mit dem Code überein (ein Inline-Script für Kopieren und Tabs; CSP `default-src 'self'` in `marketing/.htaccess`).
+- **Keine fremden Server:** CSP `default-src 'self'; img-src 'self' data:` und selbst gehostete Schrift bestätigen datenschutz.html:30 und :46.
+- **App-Hinweis** (datenschutz.html:25): Die App hat eine eigene Datenschutzerklärung (`src/routes/privacy`, Texte `privacy_*` in `messages/de.json`, mit «Verantwortlich … ist ihr Betreiber»). Die Aussage stimmt.
+- **«ohne Gewähr» / Software** (impressum.html:34): Das schliesst die Gewährleistung aus, nicht die Haftung. Bei einer unentgeltlichen Überlassung entspricht es dem Gesetz, falls sie als Schenkung gilt: Art. 248 OR: «Der Schenker ist dem Beschenkten für den Schaden, der diesem aus der Schenkung erwächst, nur im Falle der absichtlichen oder der grobfahrlässigen Schädigung verantwortlich. Er hat ihm für die geschenkte Sache … nur die Gewähr zu leisten, die er ihm versprochen hat.» Ob Open-Source-Lizenzen als Schenkung gelten, ist **unsicher** (Lehre uneinig). Den weitergehenden Haftungsausschluss der AGPL (§ 16) begrenzt Art. 100 Abs. 1 OR: «Eine zum voraus getroffene Verabredung, wonach die Haftung für rechtswidrige Absicht oder grobe Fahrlässigkeit ausgeschlossen sein würde, ist nichtig.» § 17 AGPL verweist selbst auf das lokale Recht. Der Satz verweist nur auf die Lizenz und behauptet keinen Ausschluss über Art. 100 OR hinaus, er ist also nicht irreführend (optional R-9).
+- **«keine Rechtsberatung», «Prüfen Sie Ihre Abrechnungen»:** sachlich richtig und in der Praxis üblich.
+- **«keine Gewähr, dass sie richtig, vollständig und aktuell sind» / Links** (impressum.html:38): Zwischen Betreiber und Besucherin besteht kein Vertrag; der Satz ist eine Klarstellung ohne konstitutive Wirkung und schützt nicht vor einer Haftung für absichtlich falsche Angaben. In der Schweizer Praxis üblich, nicht irreführend.
+- **Impressum nach Art. 3 Abs. 1 lit. s UWG** («Waren, Werke oder Leistungen im elektronischen Geschäftsverkehr anbietet und es dabei unterlässt: 1. klare und vollständige Angaben über seine Identität und seine Kontaktadresse einschliesslich derjenigen der elektronischen Post zu machen …»): Ob ein unentgeltliches Open-Source-Projekt ohne Bestellvorgang darunter fällt, ist **unsicher** (die Lehre bezieht lit. s auf geschäftlichen Verkehr; Fedlex entscheidet es nicht). Mit gefülltem Platzhalter erfüllt das Impressum Ziff. 1 ohnehin (Name, Postadresse, E-Mail). Ziff. 2–4 betreffen Bestellungen und greifen nicht.
+- **Copy-Regeln:** formelles «Sie», «ss» durchgehend (kein «ß»), aktive kurze Sätze, keine Fachwörter ausser den gesetzlichen (EDÖB, Auftrag). Ausnahme V-2.
+
+## Nicht bestätigt
+
+- **Unterauftragsbearbeiter und Log-Dauer bei Infomaniak:** `www.infomaniak.com` ist aus dieser Umgebung nicht erreichbar (DNS-Fehler bei WebFetch, curl-Status 000). Die Suche (`mmx search`) fand nur, dass Apache-Zugriffsprotokolle im Infomaniak-Manager einsehbar sind (FAQ 1926), keine Dauer und keine Liste der Unterauftragsbearbeiter. Vor dem Livegang im Manager und im Auftragsbearbeitungsvertrag von Infomaniak prüfen (betrifft R-1, R-7).
+- **Cookies des Hosters:** ob Infomaniak auf der Live-Site ein Cookie setzt (z. B. Load-Balancer). dwello.ch antwortet hier mit 403 vom Proxy. Nach dem Deploy in den Entwicklertools des Browsers prüfen.
+- **Demo-Datenschutzerklärung:** `demo.dwello.ch/privacy` nicht erreichbar (curl 000). Bestätigt ist nur, dass die App die Seite `src/routes/privacy` hat.
+- **EDÖB-Adresse:** «Feldeggweg 1, 3003 Bern» laut Suchtreffer von edoeb.admin.ch/de/kontakt (Snippet); die Seite selbst ist nicht erreichbar.
+- **Art. 8 UWG auf die AGPL:** Ob eine private Vermieterin hier Konsumentin ist und eine Standard-Open-Source-Lizenz AGB im Sinn von Art. 8 UWG («… ein erhebliches und ungerechtfertigtes Missverhältnis zwischen den vertraglichen Rechten und den vertraglichen Pflichten vorsehen.») ist: **unsicher**. Ohne Gegenleistung ist ein Missverhältnis kaum begründbar.
+- **Übersetzungen** fr/it/en der beiden Seiten: nicht geprüft.

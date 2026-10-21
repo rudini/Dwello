@@ -113,7 +113,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 
 ### UI Framework: Tailwind CSS
 
-- Tailwind CSS 3 (`tailwind.config.js` at the repo root)
+- Tailwind CSS 4 (`tailwind.config.js` at the repo root, loaded with `@config` in `src/styles/globals.css`)
 - Design tokens (colours, Inter font, spacing, radius, shadow) in `src/styles/tokens.css`, see `docs/design/token-referenz.md`
 - Base styles (body, focus outline, placeholder) in `src/styles/globals.css`; components in `src/lib/ui`
 - Dark mode follows the system setting (`prefers-color-scheme`), token overrides only

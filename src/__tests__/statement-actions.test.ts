@@ -3,6 +3,7 @@ import { runAction } from './helpers/action';
 import { actions } from '../routes/statements/[id]/+page.server';
 import { localToday } from '$lib/contract-status';
 import paidDateRefused from '../../tests/contracts/statement-paid-date-refused.json';
+import correctionNotDue from '../../tests/contracts/statement-correction-not-due.json';
 import correctionRefused from '../../tests/contracts/statement-correction-refused.json';
 import sendRefused from '../../tests/contracts/statement-send-refused.json';
 
@@ -154,6 +155,25 @@ describe('Zahlung zurücksetzen', () => {
 	});
 });
 
+// #454 (Fachreview 454-1 E-6): «Nicht berichtigen»
+describe('Abrechnung nicht berichtigen', () => {
+	it('lässt das Backend festhalten, dass die Abrechnung nicht berichtigt wird', async () => {
+		const { calls, result } = runAction(actions.declineCorrection, 's1');
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/decline-correction`, body: undefined }]);
+	});
+
+	it('zeigt die Ablehnung des Backends in Worten', async () => {
+		const { result } = runAction(actions.declineCorrection, 's1', 409, {}, correctionNotDue);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { actionError: 'Diese Abrechnung muss nicht mehr berichtigt werden. Laden Sie die Seite neu.' }
+		});
+	});
+});
+
 describe('Abrechnung löschen', () => {
 	it('löscht die Abrechnung und kehrt zur Abrechnungsliste zurück', async () => {
 		const { calls, result } = runAction(actions.delete, 's1', 204);
@@ -259,8 +279,9 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { laterInvoices: number };
-		expect(data.laterInvoices).toBe(1);
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { later: unknown };
+		// #454: and whether the Tankbestand changed, and whether a correction is due (Fachreview 454-1 E-3)
+		expect(data.later).toEqual({ invoices: 1, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false });
 		expect(urls).toContain('http://localhost:3001/api/v1/statements/s1/changed-invoices');
 	});
 
@@ -273,8 +294,8 @@ describe('Abrechnung laden', () => {
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
-		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { laterInvoices: number };
-		expect(data.laterInvoices).toBe(0);
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as { later: unknown };
+		expect(data.later).toEqual({ invoices: 0, fuelStock: false, correctionDue: false, correctionDeclinable: false, correctionLowers: false });
 	});
 });
 

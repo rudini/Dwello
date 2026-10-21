@@ -7,7 +7,8 @@
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import ResultList from '$lib/ui/ResultList.svelte';
-	import InvoiceRow from './InvoiceRow.svelte';
+	import InvoiceItems from './InvoiceItems.svelte';
+	import { formatDate } from '$lib/utils/format';
 	import InvoiceSearch from './InvoiceSearch.svelte';
 	import UploadResult from './UploadResult.svelte';
 	import InvoiceUploadDialog, { type Created } from './InvoiceUploadDialog.svelte';
@@ -24,15 +25,27 @@
 
 	// Only the year is chosen: an empty list means nothing is recorded yet, not a filter mistake
 	const onlyYear = $derived(
-		['search', 'building', 'categoryId', 'validity'].some((key) => $page.url.searchParams.get(key))
+		['search', 'building', 'categoryId', 'validity', 'periodStart'].some((key) =>
+			$page.url.searchParams.get(key)
+		)
 			? ''
 			: ($page.url.searchParams.get('year') ?? '')
 	);
 	const filtered = $derived(
-		['search', 'building', 'categoryId', 'validity', 'year'].some((key) =>
+		['search', 'building', 'categoryId', 'validity', 'year', 'periodStart'].some((key) =>
 			$page.url.searchParams.get(key)
 		)
 	);
+	// #454: the filter «Abrechnungsperiode», named with its building and rule
+	const period = $derived.by(() => {
+		const [start, end] = ['periodStart', 'periodEnd'].map((key) => $page.url.searchParams.get(key) ?? '');
+		if (![start, end].every((day) => /^\d{4}-\d{2}-\d{2}$/.test(day))) return null; // as the loader sends them
+		const building = data.buildings.find((b) => b.id === $page.url.searchParams.get('building'));
+		const days = { start: formatDate(start), end: formatDate(end) };
+		return building
+			? m.invoices_period_filter({ building: building.name, ...days })
+			: m.invoices_period_filter_all(days);
+	});
 </script>
 
 <svelte:head>
@@ -77,6 +90,8 @@
 		/>
 	{/key}
 
+	{#if period}<p class="text-ink" data-testid="invoice-period-filter">{period}</p>{/if}
+
 	{#if data.invoices.length === 0}
 		<div data-testid="invoices-empty">
 			{#if onlyYear}
@@ -113,9 +128,7 @@
 			pageSize={data.pageSize}
 			total={data.total}
 		>
-			{#each data.invoices as invoice (invoice.id)}
-				<InvoiceRow {invoice} />
-			{/each}
+			<InvoiceItems invoices={data.invoices} grouped={!!period} />
 		</ResultList>
 	{/if}
 </div>

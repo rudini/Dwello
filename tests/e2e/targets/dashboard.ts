@@ -33,3 +33,12 @@ export const overviewDeadline = (kind: string, name: string) =>
 	);
 export const overviewTaskLinkFor = (title: string, name: string) =>
 	target(`Aufgabe «${title}» für ${name} beginnen`, (page) => overviewTaskFor(title, name).locate(page).getByRole('link'));
+// #454: the task on drafts no longer current, its link per building and period, the order of the tasks
+export const outdatedDraftsTask = target('Aufgabe zu nicht aktuellen Entwürfen', (page) =>
+	page.getByTestId('overview-task').filter({ hasText: /nicht aktuell/ })
+);
+export const outdatedDraftsLink = (name: string) =>
+	target(`Nicht aktuelle Entwürfe von ${name}`, (page) =>
+		outdatedDraftsTask.locate(page).getByTestId('overview-task-link').filter({ hasText: name })
+	);
+export const overviewTaskTitles = target('Titel der Aufgaben', (page) => page.getByTestId('overview-task').locator('h3'));

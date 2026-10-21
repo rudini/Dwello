@@ -26,6 +26,8 @@
 	import FormDialog from './FormDialog.svelte';
 	import { localToday } from '$lib/contract-status';
 	import MetadataCard, { type Delivery } from './MetadataCard.svelte';
+	import LaterChanges from './LaterChanges.svelte';
+	import type { ComponentProps } from 'svelte';
 	import MoreActions from './MoreActions.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
@@ -48,18 +50,12 @@
 			statement: StatementWithDetails;
 			reminders: StatementDocument[];
 			delivery?: Delivery | null;
-			laterInvoices?: number;
+			later?: ComponentProps<typeof LaterChanges>['later'];
 		};
 		form: ActionData;
 	} = $props();
 
 	const statement = $derived(data.statement);
-	// invoices of the period recorded after the draft was created: it lacks them
-	const laterInvoices = $derived(
-		data.laterInvoices === 1
-			? m.statements_later_one()
-			: m.statements_later_many({ count: data.laterInvoices ?? 0 })
-	);
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
 	let showDelete = $state(false);
@@ -70,8 +66,6 @@
 	const sendError = $derived(form?.sendError);
 	let showResetPayment = $state(false);
 	let showCorrect = $state(false);
-	// a replaced statement is corrected by its berichtigte Abrechnung: no hint on it (#120)
-	const laterHint = $derived(statement.status === 'replaced' ? 0 : data.laterInvoices);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
 	let paidError = $state('');
@@ -181,15 +175,9 @@
 	<Correction {statement} bind:open={showCorrect} />
 	<OldAddressWarning {statement} testid="statement-old-address" />
 
-	{#if laterHint}
-		<!-- a draft is recalculated (#338); a sent statement is corrected by a berichtigte Abrechnung -->
-		<Alert tone="caution" title={m.statements_later_title()} testid="statement-later-invoices">
-			{#if statement.status === 'draft'}
-				<p>{m.statements_later_draft({ later: laterInvoices })}</p>
-			{:else}
-				<p>{m.statements_later_sent({ later: laterInvoices })}</p>
-			{/if}
-		</Alert>
+	<!-- a replaced statement is corrected by its berichtigte Abrechnung: no hint on it (#120) -->
+	{#if data.later}
+		<LaterChanges {statement} later={data.later} oncorrect={() => (showCorrect = true)} />
 	{/if}
 
 	{#if form?.actionError}
@@ -228,6 +216,7 @@
 				delivery={data.delivery}
 				paidOn={statement.paidDate}
 				paymentResets={statement.paymentResets}
+				correctionDeclinedOn={statement.correctionDeclined?.on}
 			/>
 		</div>
 	</div>

@@ -39,6 +39,8 @@ const invoiceQuerySchema = t.Object({
 	dateTo: t.Optional(t.String()),
 	isValidUtilityCost: t.Optional(t.String()), // 'true' or 'false'
 	wasManuallyOverridden: t.Optional(t.String()),
+	periodStart: t.Optional(t.String({ format: 'date' })),
+	periodEnd: t.Optional(t.String({ format: 'date' })),
 	limit: t.Optional(t.String()),
 	offset: t.Optional(t.String())
 });
@@ -103,6 +105,8 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 					query.wasManuallyOverridden !== undefined
 						? query.wasManuallyOverridden === 'true'
 						: undefined,
+				periodStart: query.periodStart,
+				periodEnd: query.periodEnd,
 				limit: query.limit ? parseInt(query.limit, 10) : undefined,
 				offset: query.offset ? parseInt(query.offset, 10) : undefined
 			};

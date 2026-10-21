@@ -462,10 +462,11 @@ async function openReplaced({ contractId, periodStart, periodEnd }: StatementInp
 	return replaced;
 }
 
-// The Tankbestand readings the statement bills by, only when the contract agrees the tank's category (#91, V-3)
-const agreedStock = async (input: StatementInput & { buildingId: string }, agreedCategoryIds: string[]) => {
+// The Tankbestand readings the statement bills by, only when the contract agrees the tank's category (#91, V-3); a
+// statement from before #91 (agreed: null) billed every category
+export const agreedStock = async (input: { buildingId: string; periodStart: string; periodEnd: string }, agreedCategoryIds: string[] | null) => {
 	const [change] = await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd);
-	return change && agreedCategoryIds.includes(change.categoryId) ? change.stock : null;
+	return change && (!agreedCategoryIds || agreedCategoryIds.includes(change.categoryId)) ? change.stock : null;
 };
 
 // The columns and positions a calculation gives a statement: shared by a new draft and a recalculated one (#338)
@@ -562,6 +563,47 @@ export async function generateStatement(
 	);
 }
 
+// What «Neu berechnen» gives a statement now (#338): its Heizprofil and Verwaltungspauschale, what was paid on the
+// statement it replaces
+async function recalculated(statement: StatementWithDetails) {
+	const { contractId, periodStart, periodEnd, heatingProfileId, managementFeePercent } = statement;
+	const rows = await calculatedRows({
+		contractId,
+		buildingId: statement.building!.id,
+		periodStart,
+		periodEnd,
+		heatingProfileId: heatingProfileId ?? undefined,
+		managementFeePercent: managementFeePercent === null ? undefined : Number(managementFeePercent)
+	});
+	const { totalCosts, totalAdvancePayments } = rows.values;
+	const balance = calculateBalance(Number(totalCosts) + rows.carryOver, Number(totalAdvancePayments) + Number(statement.priorPayments));
+	return { ...rows, balance: String(balance) };
+}
+
+// The tenant's share per position, as a key to compare (#454, Fachreview 454-1 E-3)
+const sharesOf = (items: { categoryId: string | null; distributionKeyId: string | null; tenantShare: string }[]) =>
+	JSON.stringify(
+		items
+			.filter((item) => Number(item.tenantShare) !== 0)
+			.map((item) => `${item.categoryId}/${item.distributionKeyId}/${Number(item.tenantShare).toFixed(2)}`)
+			.sort()
+	);
+
+/**
+ * #454 (Fachreview 454-1 E-3): whether recalculating a sent statement would change its Saldo or the tenant's share of a
+ * position, and the result (to remember a «Nicht berichtigen», E-6); null when it cannot be recalculated
+ */
+export async function recalculation(statement: StatementWithDetails) {
+	const now = await recalculated(statement).catch(() => null);
+	if (!now) return null;
+	const result = JSON.stringify([now.balance, sharesOf(now.lineItems)]);
+	const changes = result !== JSON.stringify([String(Number(statement.balance)), sharesOf(statement.lineItems)]);
+	// as claimed: a Saldo below CHF 5 is neither claimed nor paid out, but in a Schlussabrechnung (PO 2026-10-20, V-30 A)
+	const claimed = (balance: string) => (!statement.final && belowMinimum(Number(balance)) ? 0 : Number(balance));
+	const [before, after] = [claimed(statement.balance), claimed(now.balance)];
+	return { changes, result, raises: after >= before, lowers: after < before };
+}
+
 /**
  * Calculate a draft again from the invoices as they are now (#338): same number, Heizprofil and Verwaltungspauschale,
  * new amounts and positions; a sent or paid statement is corrected by a berichtigte Abrechnung instead (#120)
@@ -571,24 +613,11 @@ export async function recalculateStatement(id: string): Promise<StatementWithDet
 	if (!draft) throw new CodedError('STATEMENT_NOT_FOUND', 'Statement not found');
 	if (draft.status !== 'draft') throw new CodedError('STATEMENT_NOT_RECALCULABLE', 'Only a draft can be recalculated');
 	// the wizard asks only for contracts without a statement: the landlord deletes the draft first (review 338-1 C-3)
-	const { contractId, periodStart, periodEnd } = draft;
-	await refuseOpenAgreements(contractId, draft.building!.id, periodStart, periodEnd, 'STATEMENT_RECALCULATION_AGREEMENTS_OPEN');
-	await refuseUncategorized(draft.building!.id, periodStart, periodEnd, 'STATEMENT_RECALCULATION_UNCATEGORIZED_INVOICES');
-	const { values, lineItems, carryOver } = await calculatedRows({
-		contractId,
-		buildingId: draft.building!.id,
-		periodStart,
-		periodEnd,
-		heatingProfileId: draft.heatingProfileId ?? undefined,
-		managementFeePercent: draft.managementFeePercent === null ? undefined : Number(draft.managementFeePercent)
-	});
+	await refuseOpenAgreements(draft.contractId, draft.building!.id, draft.periodStart, draft.periodEnd, 'STATEMENT_RECALCULATION_AGREEMENTS_OPEN');
+	await refuseUncategorized(draft.building!.id, draft.periodStart, draft.periodEnd, 'STATEMENT_RECALCULATION_UNCATEGORIZED_INVOICES');
+	const { values, lineItems, balance } = await recalculated(draft);
 	// a berichtigte Abrechnung keeps the statement it replaces and what was paid on it (review 338-1 C-1)
-	const priorPayments = Number(draft.priorPayments);
-	const kept = {
-		replacesId: draft.replacesId,
-		priorPayments: draft.priorPayments,
-		balance: String(calculateBalance(Number(values.totalCosts) + carryOver, Number(values.totalAdvancePayments) + priorPayments))
-	};
+	const kept = { replacesId: draft.replacesId, priorPayments: draft.priorPayments, balance };
 	await db.transaction(async (tx) => {
 		await tx.delete(utilityStatementLineItems).where(eq(utilityStatementLineItems.statementId, id));
 		await tx

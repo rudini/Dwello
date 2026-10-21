@@ -2422,3 +2422,46 @@ No scenario: repository files and CI only, no app change.
 - [x] CI: commit subjects via `commit-msg-gate.mjs --check`, Prettier on new files, dependency review (public repository only)
 - [x] code-reviewer round 1: `docs/reviews/contrib-review-1.md`
 - [x] PR: pushed after this archive
+
+## Session W2-454: statements no longer current, the period filter, a changed Tankbestand (#454) (2026-10-20)
+
+Branch `w2-issue-454` (worker W2; reviewers started by the coordinator). Fixes #454 (#408 points 1, 7, 8) with the product owner's decisions of 2026-10-20 recorded in #454 (E-1 to E-6, V-17 A, M-3 B, V-30 A, V-33). The checklist was kept in the pull request description (coordinator's rule for parallel workers).
+
+- [x] `@wip` scenarios (invoices, contract-detail, dashboard, statement-detail, statement-generate), red at the missing behaviour; «Kein Hinweis, wenn der Tankbestand der Periode unverändert ist» pins kept behaviour
+- [x] Domain reviews 1 to 3 (`docs/reviews/454-fachreview-1.md` to `-3.md`): E-1 to E-6, V-17, M-3, V-30, V-33 decided by the product owner; V-1 to V-35 fixed or kept with a reason (V-28, V-34 stay in the report)
+- [x] Backend: invoice filter «Abrechnungsperiode» (rule 1, allocable first, `inPeriod`); `statementChanges` (Tankbestand against `fuel_stock`, «fällig» only with a change and another result, overdue and settled included), `GET /statements/outdated`, `POST /statements/:id/decline-correction`, migration 0031 `correction_declined`
+- [x] Frontend: Übersicht tasks «Entwürfe sind nicht aktuell» and «Abrechnung berichtigen» (Verjährung after five calendar years), links with building and period; hint, «Abrechnung berichtigen» and «Nicht berichtigen» on the statement, Verlauf «Nicht berichtigt»; invoice list grouped with «davon CHF …»; wizard names a changed Tankbestand; texts in de/fr/it/en
+- [x] Screen states `invoices/period-filter`, `statement-sent-detail/decline-dialog`, `statement-unaffected-detail`, `statement-declined-detail`, `statement-lowered-detail` (axe and languages green)
+- [x] code-reviewer rounds 1 to 3 (`docs/reviews/454-review-1.md` to `-3.md`)
+- [x] Personas Anna and Dr. Weber (`docs/design/personas/anna-454.md`, `weber-454.md`): P-1, P-7 fixed; amount of the change → #546, sending a draft not current → #547 (both open, product owner: merge without them); the other findings stay in the reports
+- [x] daten-pruefer (`docs/reviews/454-datenpruefung-1.md`): amounts correct; D-1 fixed
+- [x] Glossary terms: «Nicht aktuelle Abrechnung» #529, «Nicht berichtigt» #538 (marker in `schema.ts`)
+- [x] Workflow note: `docs/reviews/workflow-notes-issue-454.md`
+
+Files: `backend/src/services/{invoice,statement,statement-invoices,contract}.service.ts`, `backend/src/routes/{invoices,statements}.ts`, `backend/migrations/0031_statement_correction_declined.sql`, `backend/src/db/schema.ts`, `src/lib/{overview,statement-wizard,types}.ts`, `src/lib/server/{invoice,statement,statement-actions,statement-generation}.ts`, `src/routes/dashboard/`, `src/routes/invoices/`, `src/routes/statements/[id]/`, `src/routes/contracts/[id]/+page.server.ts`, `messages/*.json`, `docs/{api-specification,data-model}.md`, tests and E2E files.
+
+## Session: Tailwind CSS 4, the red CI of #556 (2026-10-21)
+
+Branch `ccr-75acfcf1-m4asdv`. Request: «Fix failing ci builds»; the only red CI was Dependabot's #556 (tailwindcss 3 → 4: the PostCSS plugin moved to `@tailwindcss/postcss`). No scenario: a dependency migration without a visible change; the generated CSS was compared rule by rule with the Tailwind 3 build, axe green (239 screens).
+
+- [x] Tailwind 4 with `@config` and `source('..')`; base layer for the line-token border colour and the button pointer; global element rules in `@layer base`; autoprefixer removed
+- [x] Inter loaded through Vite in the layout (Tailwind 4 inlined the CSS import without rebasing its font URLs); test red first
+- [x] code-reviewer rounds 1 and 2 (`docs/reviews/tw4-review-1.md`, `-2.md`): C-1 to C-3 fixed
+- [x] PR: pushed after this archive
+
+Files: `package.json`, `bun.lock`, `postcss.config.js`, `tailwind.config.js`, `src/styles/globals.css`, `src/routes/+layout.svelte`, `src/__tests__/tokens.test.ts`, `docs/tech-stack.md`, `docs/design/design-decisions.md`.
+
+## Session: Tailwind 4 follow-up, disabled select and file button (2026-10-21)
+
+Branch `ccr-75acfcf1-m4asdv`, restarted on `main` after #561. The UI screenshots of #561 showed two Tailwind 4 preflight resets: a disabled select no longer dimmed, the file input's button without its frame. No scenario: restores the look of the Tailwind 3 build; the CI screenshot job covers it.
+
+- [x] Base rules revert both to the browser defaults; computed styles equal the Tailwind 3 build (Chromium); test red first
+- [x] code-reviewer round 3 (`docs/reviews/tw4-review-3.md`): C-1 fixed
+- [x] PR: pushed after this archive
+
+## Session: red CI of Dependabot's #553 (2026-10-21)
+
+Branch `ccr-75acfcf1-m4asdv`, restarted on `main` after #562. #553 bumps `actions/upload-artifact` to v7; `tools/deepcheck/test/workflows.test.ts` pinned v4. No scenario: a test of a workflow file, no app change.
+
+- [x] Test accepts any major version (red against #553's workflow file, green with v4 and v7)
+- [x] PR: pushed after this archive

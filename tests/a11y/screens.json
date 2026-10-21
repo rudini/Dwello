@@ -45,6 +45,8 @@
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
 		"mark-paid-early": "The dialog that marks a statement as paid, with a day before the Abrechnungsdatum entered and confirmed once: the question whether to save it anyway (#448).",
 		"reset-payment-dialog": "The dialog that resets the payment of a paid statement open (#92).",
+		"decline-dialog": "Sent statement with an invoice recorded after it that raises the Saldo, «Nicht berichtigen» chosen (#454): the confirmation that the statement stays as it is and the task returns after a further change.",
+		"period-filter": "Invoice list filtered by an Abrechnungsperiode, as the warnings on missing statements link to it (#454): the filter named with its building and rule, the invoices grouped by allocability.",
 		"correct-dialog": "The confirmation before a sent, paid or settled statement is replaced by a berichtigte Abrechnung open, with the amount it offsets, on a sent one the field «Bereits bezahlt» (#448), and the limitation (#120).",
 		"generation-result": "«Abrechnungen erstellen» after creating the drafts of a year without invoices: how many were created, «Entwürfe ansehen», «Alle als ZIP herunterladen» (#356) and «Weitere Abrechnungen erstellen».",
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
@@ -399,10 +401,14 @@
 		{
 			"name": "invoices",
 			"path": "/invoices",
+			"queries": {
+				"period-filter": "?building={building}&periodStart=2025-01-01&periodEnd=2025-12-31"
+			},
 			"states": [
 				"default",
 				"empty",
 				"filtered-empty",
+				"period-filter",
 				"upload-dialog",
 				"upload-discard-dialog",
 				"upload-partial",
@@ -551,6 +557,27 @@
 			]
 		},
 		{
+			"name": "statement-unaffected-detail",
+			"path": "/statements/{unaffectedStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-lowered-detail",
+			"path": "/statements/{loweredStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-declined-detail",
+			"path": "/statements/{declinedStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-sent-detail",
 			"path": "/statements/{sentStatement}",
 			"states": [
@@ -559,7 +586,8 @@
 				"mark-paid-dialog",
 				"mark-paid-early",
 				"action-error",
-				"correct-dialog"
+				"correct-dialog",
+				"decline-dialog"
 			]
 		},
 		{
