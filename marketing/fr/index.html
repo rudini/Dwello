@@ -102,7 +102,6 @@ p { margin: 0; }
 .btn .ic { width: 20px; height: 20px; }
 .badge { justify-self: start; display: inline-flex; align-items: center; gap: 4px; font: 600 0.875rem/1 var(--font); padding: 4px 8px; border-radius: var(--radius-control); border: 1px solid currentColor; white-space: nowrap; }
 .badge .ic { width: 14px; height: 14px; stroke-width: 2; }
-.badge.ok { background: var(--positive-soft); color: var(--positive); }
 .badge.info { background: var(--accent-soft); color: var(--accent); }
 .badge.plan { background: var(--sunken); color: var(--ink-muted); border-style: dashed; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
@@ -132,8 +131,6 @@ section { padding-block: 96px; }
 .shot { margin: 0; position: relative; border-radius: var(--radius-panel); overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-overlay); min-width: 0; }
 .shot img { display: block; width: 100%; height: auto; }
 .shot .d { display: none; }
-.caption { font-size: 0.9375rem; color: var(--ink-muted); overflow-wrap: anywhere; }
-.figure { display: grid; gap: 12px; min-width: 0; margin: 0; }
 .paper { margin: 0; background: #fff; border-radius: 4px; box-shadow: var(--shadow-overlay); overflow: hidden; border: 1px solid var(--line); }
 .paper img { display: block; width: 100%; height: auto; }
 
@@ -174,43 +171,11 @@ section { padding-block: 96px; }
 /* The year in order: a chevron between the step cards where they stand in one row */
 @media (min-width: 1100px) { .steps li { position: relative; } .steps li + li::before { content: ""; position: absolute; left: -13px; top: 50%; width: 8px; height: 8px; border-top: 2px solid var(--line-strong); border-right: 2px solid var(--line-strong); transform: translateY(-50%) rotate(45deg); } }
 .journey { display: block; width: min(560px, 100%); margin: 0 auto 32px; }
-/* Upload in three steps */
-.flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: flow; }
-.flow li { counter-increment: flow; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
-.flow li::before { content: counter(flow); display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-control); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
-/* A cost split into equal shares, one of them marked */
-.split { display: grid; gap: 12px; margin-top: 8px; }
-.split-bar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
-.split-bar span { display: grid; place-content: center; justify-items: center; min-height: 64px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-control); font-weight: 600; font-variant-numeric: tabular-nums; }
-.split-bar .me { background: var(--accent-soft); border: 2px solid var(--accent); color: var(--accent); }
-.split-bar small { display: block; font-size: 0.875rem; font-weight: 400; color: var(--ink-muted); }
-.split-total { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; background: var(--accent-soft); border: 2px solid var(--accent); border-radius: var(--radius-control); color: var(--accent); font-weight: 600; }
-/* Animations: start only on the button, play once, can be paused; without them (no JS, reduced motion) the end state shows */
-.anim { display: grid; gap: 12px; margin: 0; }
-.anim-art { display: block; width: 100%; max-width: 480px; height: auto; }
-.anim-art text { font-family: var(--font); }
-.anim-play { justify-self: start; }
-.anim-play[hidden] { display: none; }
-.anim .a-chk { transform-box: fill-box; transform-origin: center; }
-.anim.run .a-doc { animation: a-drop 1s ease-out backwards; }
-.anim.run .a-v { animation: a-in .5s ease-out backwards; }
-.anim.run .a-v1 { animation-delay: 1.4s; } .anim.run .a-v2 { animation-delay: 2.2s; } .anim.run .a-v3 { animation-delay: 3s; } .anim.run .a-v4 { animation-delay: 3.8s; }
-.anim.run .a-chk { animation: a-pop .5s ease-out 4.6s backwards; }
-.anim.run .split-total { animation: a-in .5s ease-out backwards; }
-.anim.run .split-bar span { animation: a-pop .35s ease-out backwards; }
-.anim.run .split-bar span:nth-child(2) { animation-delay: 1.05s; } .anim.run .split-bar span:nth-child(3) { animation-delay: 1.3s; } .anim.run .split-bar span:nth-child(4) { animation-delay: 1.55s; } .anim.run .split-bar span:nth-child(5) { animation-delay: 1.8s; } .anim.run .split-bar span:nth-child(6) { animation-delay: 2.05s; }
-.anim.run .split-bar .me { animation: a-pop .35s ease-out .8s backwards, a-mark .6s ease-out 2.7s backwards; }
-.anim.paused * { animation-play-state: paused !important; }
-@keyframes a-drop { from { opacity: 0; transform: translate(-56px, -24px); } }
-@keyframes a-in { from { opacity: 0; transform: translateX(-8px); } }
-@keyframes a-pop { from { opacity: 0; transform: scale(.85); } }
-@keyframes a-mark { from { background: var(--sunken); border-color: var(--line); color: var(--ink); } }
-@media (prefers-reduced-motion: reduce) { .anim-play { display: none; } }
 
 /* Feature rows */
 .feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 64px; border-top: 1px solid var(--line); }
 .feature:first-of-type { border-top: 0; padding-top: 0; }
-@media (min-width: 980px) { .feature { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 64px; } .feature.flip > .copy-col { order: 2; } .feature.flip { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); } .feature.wide { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 980px) { .feature { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 64px; } .feature.flip > .copy-col { order: 2; } .feature.flip { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); } }
 .copy-col { display: grid; gap: 20px; min-width: 0; }
 .copy-col h3 { font-size: clamp(1.75rem, 3vw, 2.25rem); }
 .copy-col > p { color: var(--ink-muted); font-size: 1.125rem; max-width: 34em; }
@@ -219,8 +184,6 @@ section { padding-block: 96px; }
 .checks li > .ic { width: 22px; height: 22px; color: var(--positive); margin-top: 1px; stroke-width: 2; }
 .checks small { display: block; color: var(--ink-muted); font-size: 0.9375rem; font-weight: 400; margin-top: 2px; }
 .law { font-weight: 600; color: var(--accent); white-space: nowrap; }
-.duo { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 760px) { .duo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
 .pdfs { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); align-items: start; }
 @media (min-width: 600px) { .pdfs { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); } .pdfs .paper.qr { margin-top: 96px; } }
 
@@ -228,13 +191,11 @@ section { padding-block: 96px; }
 .grid-feat { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 640px) { .grid-feat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .grid-feat { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.grid-feat article { padding: 24px; display: grid; grid-template-rows: auto auto 1fr; gap: 10px; }
-.grid-feat article.planned { background: transparent; border-style: dashed; border-color: var(--line-strong); }
-.grid-feat .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.grid-feat .top > .ic { color: var(--accent); width: 28px; height: 28px; }
+.grid-feat article { padding: 16px 20px; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 4px 16px; align-content: start; }
+.grid-feat article > .ic { grid-row: span 2; color: var(--accent); width: 28px; height: 28px; }
+@media (max-width: 639px) { .grid-feat { gap: 0; } .grid-feat article { padding-inline: 0; background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; } }
 .grid-feat h3 { font-size: 1.1875rem; letter-spacing: -0.01em; }
 .grid-feat p { color: var(--ink-muted); font-size: 1rem; }
-.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 24px; color: var(--ink-muted); font-size: 0.9375rem; align-items: center; }
 
 /* Privacy band */
 .band { background: var(--band); color: var(--band-ink); }
@@ -251,19 +212,6 @@ section { padding-block: 96px; }
 .promises .ref { color: var(--band-ink); font-weight: 600; }
 .illu { --illu-line: var(--band-muted); --illu-fill: #1b4b61; --illu-surface: #123f54; --illu-accent: #86bfda; }
 
-/* MCP chat, in app panel style */
-.chat { overflow: hidden; box-shadow: var(--shadow-overlay); min-width: 0; }
-.chat-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); font-weight: 600; }
-.chat-head .ic { color: var(--accent); }
-.chat-body { padding: 20px; display: grid; gap: 14px; }
-.msg { max-width: 92%; padding: 12px 16px; border-radius: var(--radius-panel); font-size: 1rem; }
-.msg.me { justify-self: end; background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 4px; }
-.msg.ai { background: var(--sunken); border-bottom-left-radius: 4px; }
-.tool { font: 500 0.875rem/1.5 var(--mono); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 10px 12px; color: var(--ink-muted); overflow-x: auto; white-space: nowrap; }
-.tool b { color: var(--accent); font-weight: 600; }
-.msg table { width: 100%; border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; font-size: 0.9375rem; }
-.msg td { padding: 8px 0; border-top: 1px solid var(--line); vertical-align: top; }
-.msg td.r { text-align: right; font-weight: 600; white-space: nowrap; padding-left: 12px; }
 
 /* Install */
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -289,9 +237,8 @@ section { padding-block: 96px; }
 .alert b { color: var(--caution); display: block; }
 
 /* Accessibility */
-.a11y { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; align-items: center; }
-@media (min-width: 980px) { .a11y { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); } }
-.a11y .phone { width: min(320px, 100%); margin-inline: auto; }
+.a11y { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (min-width: 980px) { .a11y { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; } }
 .rules { list-style: none; margin: 0; padding: 0; display: grid; }
 .rules li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding-block: 18px; border-top: 1px solid var(--line); }
 .rules .m { font-size: 1.5rem; font-weight: 750; color: var(--accent); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.2; }
@@ -300,23 +247,14 @@ section { padding-block: 96px; }
 /* Open source */
 .oss { background: var(--surface); border-block: 1px solid var(--line); }
 .oss-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; }
-@media (min-width: 980px) { .oss-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
 .price { font-size: clamp(4.5rem, 12vw, 8rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.9; }
 .price small { font-size: 0.26em; letter-spacing: -0.01em; font-weight: 600; color: var(--ink-muted); }
-.table-wrap { overflow-x: auto; }
-.compare { width: 100%; border-collapse: collapse; font-size: 1rem; }
-.compare th, .compare td { padding: 14px 16px; border-bottom: 1px solid var(--line); text-align: left; }
-.compare tr:last-child td { border-bottom: 0; }
-.compare thead th { background: var(--sunken); font-weight: 600; }
-.compare td:first-child { color: var(--ink-muted); }
-.compare td.d { font-weight: 600; color: var(--accent); }
-@media (max-width: 479px) { .compare th, .compare td { padding: 12px 8px; } }
 
 /* Roadmap */
 .road { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 760px) { .road { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .road { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.road article { border: 1px dashed var(--line-strong); border-radius: var(--radius-panel); padding: 24px; display: grid; gap: 10px; align-content: start; }
+.road article { border: 1px dashed var(--line-strong); border-radius: var(--radius-panel); padding: 16px 20px; display: grid; gap: 10px; align-content: start; }
 .road h3 { font-size: 1.1875rem; }
 .road p { color: var(--ink-muted); }
 .road .issue { justify-self: start; font-size: 0.9375rem; font-weight: 600; }
@@ -380,21 +318,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	<symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
 	<symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
 	<symbol id="i-git" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="8" r="3"/><path d="M6 9v6M18 11c0 4-6 3-11 6"/></symbol>
-	<symbol id="i-a11y" viewBox="0 0 24 24"><circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1M5 8l3-3 5.5 3-2.36 3.5M4.24 14.5a5 5 0 0 0 6.88 6M13.76 17.5a5 5 0 0 0-6.88-6"/></symbol>
-	<symbol id="i-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
-	<symbol id="i-lang" viewBox="0 0 24 24"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></symbol>
 	<symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
-	<symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol>
 	<symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></symbol>
-	<symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
-	<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></symbol>
-	<symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
-	<symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.510 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
 	<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></symbol>
 	<symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
 	<symbol id="i-table" viewBox="0 0 24 24"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18"/></symbol>
 	<symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
-	<symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
 	<symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/></symbol>
 	<symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></symbol>
 	<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49M14.084 14.158a3 3 0 0 1-4.242-4.242M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></symbol>
@@ -411,8 +340,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		</a>
 		<nav class="nav" aria-label="Navigation principale">
 			<a href="#funktionen">Fonctions</a>
-			<a href="#datenschutz">Protection des données</a>
 			<a href="#installieren">Installer</a>
+			<a href="#datenschutz">Protection des données</a>
 			<a href="#open-source">Open Source</a>
 			<a href="#faq">Questions</a>
 		</nav>
@@ -420,7 +349,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<details class="menu">
 			<summary>Menu</summary>
 			<div class="menu-panel">
-				<nav aria-label="Navigation principale"><a href="#funktionen">Fonctions</a><a href="#datenschutz">Protection des données</a><a href="#installieren">Installer</a><a href="#open-source">Open Source</a><a href="#faq">Questions</a><a href="impressum.html">Mentions légales</a></nav>
+				<nav aria-label="Navigation principale"><a href="#funktionen">Fonctions</a><a href="#installieren">Installer</a><a href="#datenschutz">Protection des données</a><a href="#open-source">Open Source</a><a href="#faq">Questions</a><a href="impressum.html">Mentions légales</a></nav>
 				<nav class="langs" aria-label="Langue"><a href="../index.html" hreflang="de" lang="de">Deutsch</a><a href="index.html" hreflang="fr" lang="fr" aria-current="page">Français</a><a href="../it/index.html" hreflang="it" lang="it">Italiano</a><a href="../en/index.html" hreflang="en" lang="en">English</a></nav>
 			</div>
 		</details>
@@ -519,32 +448,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<span class="badge info">Factures et IA</span>
 				<h3>Les factures par glisser-déposer. Lues sur votre propre ordinateur.</h3>
 				<p>Glissez jusqu’à 20 factures à la fois dans Dwello. L’IA lit l’émetteur, le montant, la date et la période de prestation et attribue la catégorie. Ce dont elle n’est pas sûre, Dwello l’indique. La facture n’est créée que lorsque vous confirmez.</p>
-				<ol class="flow" aria-label="Comment une facture arrive dans Dwello">
-					<li>Vous glissez une facture, par exemple celle du service des eaux.</li>
-					<li>L’IA lit le montant, la date et la catégorie.</li>
-					<li>Vous vérifiez les données et confirmez.</li>
-				</ol>
-				<figure class="anim" data-anim data-end="a-pop" aria-label="Animation : comment une facture arrive dans Dwello">
-					<button class="btn btn-secondary anim-play" type="button" hidden>Lire le déroulement</button>
-					<svg class="anim-art" viewBox="0 0 320 200" aria-hidden="true">
-						<rect x="1" y="1" width="318" height="198" rx="12" fill="var(--surface)" stroke="var(--line)"/>
-						<g class="a-doc">
-							<rect x="20" y="44" width="68" height="88" rx="4" fill="var(--sunken)" stroke="var(--line-strong)" stroke-width="2"/>
-							<line x1="32" y1="64" x2="76" y2="64" stroke="var(--line-strong)" stroke-width="2"/><line x1="32" y1="78" x2="68" y2="78" stroke="var(--line-strong)" stroke-width="2"/><line x1="32" y1="92" x2="72" y2="92" stroke="var(--line-strong)" stroke-width="2"/>
-							<line x1="32" y1="114" x2="76" y2="114" stroke="var(--accent)" stroke-width="3"/>
-						</g>
-						<text x="108" y="34" font-size="13" fill="var(--ink-muted)">Émetteur de la facture</text>
-						<text class="a-v a-v1" x="108" y="54" font-size="16" font-weight="600" fill="var(--ink)">Wasserversorgung Zürich</text>
-						<text x="108" y="80" font-size="13" fill="var(--ink-muted)">Montant</text>
-						<text class="a-v a-v2" x="108" y="100" font-size="16" font-weight="600" fill="var(--ink)">CHF 930.00</text>
-						<text x="108" y="126" font-size="13" fill="var(--ink-muted)">Date</text>
-						<text class="a-v a-v3" x="108" y="146" font-size="16" font-weight="600" fill="var(--caution)">31.03.2025</text>
-						<g class="a-chk"><rect x="204" y="128" width="104" height="26" rx="6" fill="var(--caution-soft)" stroke="var(--caution)"/><text x="256" y="146" font-size="13" font-weight="600" fill="var(--caution)" text-anchor="middle">À vérifier</text></g>
-						<text x="108" y="172" font-size="13" fill="var(--ink-muted)">Catégorie</text>
-						<text class="a-v a-v4" x="108" y="192" font-size="16" font-weight="600" fill="var(--ink)">Eau froide</text>
-					</svg>
-					<figcaption class="sr-only">Exemple de l’animation : émetteur de la facture Wasserversorgung Zürich, montant CHF 930.00, date 31.03.2025 avec la mention « À vérifier », catégorie Eau froide.</figcaption>
-				</figure>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>IA locale avec Ollama, sans cloud<small>Avec l’IA locale, vos pièces justificatives ne quittent pas le serveur. Qui le souhaite connecte à la place n’importe quelle IA compatible OpenAI.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Indication des factures manquantes<small>Dwello attend ce qui est arrivé l’an dernier. S’il manque la facture d’eau, vous le voyez avant le décompte.</small></span></li>
@@ -563,59 +466,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<span class="badge info">Décompte des charges</span>
 				<h3>Un décompte qui explique chaque chiffre.</h3>
 				<p>Dwello calcule selon les règles du droit du bail et montre pour chaque catégorie les coûts de l’immeuble, la part du logement et les jours de location. Vos locataires voient le même détail dans le PDF : Hans Müller, appartement 1.01 du Musterhaus Zentrum, doit par exemple payer CHF 215.80 pour 2025. Vérifiez chaque décompte avant de l’envoyer : Dwello ne remplace pas un conseil juridique.</p>
+				<p>Chaque décompte est un PDF avec section paiement selon la norme suisse, dans la langue de la locataire ou du locataire. Si un paiement manque, Dwello rédige le rappel de paiement et les rappels, chacun avec sa propre section paiement QR.</p>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Seulement ce que le contrat permet <span class="law">art. 257a CO</span><small>Seuls les frais accessoires convenus dans le contrat de bail sont décomptés.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Au jour près, en cas de changement de locataire et de vacance<small>Les frais accessoires d’un appartement vacant sont à la charge du bailleur.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Arrondi à 5 centimes, en faveur des locataires<small>Les montants inférieurs à CHF 5 ne sont ni réclamés ni versés tout de suite, mais reportés sur le décompte suivant. Le décompte final après le départ solde chaque montant.</small></span></li>
-				</ul>
-			</div>
-			<figure class="shot">
-				<img class="l" src="../shots/fr/statement-light.webp" width="1600" height="1105" loading="lazy" alt="Le décompte 2025 de Hans Müller, appartement 1.01 du Musterhaus Zentrum : pour chaque catégorie, par exemple ascenseur et électricité des parties communes, les coûts de l’immeuble et la part de son logement.">
-				<img class="d" src="../shots/fr/statement-dark.webp" width="1600" height="1105" loading="lazy" alt="" aria-hidden="true">
-			</figure>
-		</div>
-
-		<!-- Keys + heating -->
-		<div class="feature wide">
-			<div class="copy-col" style="max-width:760px">
-				<span class="badge info">Clés de répartition et profils de chauffage</span>
-				<h3>Une répartition juste, même en hiver.</h3>
-				<p>Coûts selon la surface, les pièces, les unités ou une formule personnalisée, par exemple 70 % selon la surface et 30 % par appartement. Les frais de chauffage suivent un profil de chauffage : en janvier, un jour de location compte plus qu’en été. Un profil est fourni pour le Plateau, la montagne et le Tessin, plus un pour le chauffage avec eau chaude.</p>
-				<figure class="anim split" data-anim data-end="a-mark" aria-label="Animation : comment Dwello répartit les coûts de l’ascenseur">
-					<p>Un exemple tiré des données de démo : l’ascenseur du Musterhaus Zentrum coûte CHF 1'690.00 par an. Réparti par unité, chacun des six appartements en supporte CHF 281.67, y compris l’appartement 1.01 de Hans Müller.</p>
-					<button class="btn btn-secondary anim-play" type="button" hidden>Lire la répartition</button>
-					<div class="split-total" aria-hidden="true"><span>Ascenseur</span><span>CHF 1'690.00</span></div>
-					<div class="split-bar" aria-hidden="true"><span class="me">1.01<small>281.67</small></span><span>1.02<small>281.67</small></span><span>2.01<small>281.67</small></span><span>2.02<small>281.67</small></span><span>3.01<small>281.67</small></span><span>3.02<small>281.67</small></span></div>
-				</figure>
-			</div>
-			<div class="duo">
-				<figure class="figure">
-					<div class="shot">
-						<img class="l" src="../shots/fr/keys-light.webp" width="1600" height="1193" loading="lazy" alt="Liste des clés de répartition : par unité, par surface, par pièces et chauffage avec la formule 0,7 fois la surface plus 0,3 fois les unités.">
-						<img class="d" src="../shots/fr/keys-dark.webp" width="1600" height="1193" loading="lazy" alt="" aria-hidden="true">
-					</div>
-					<figcaption class="caption">Une formule personnalisée est aussi possible, par exemple 70 % selon la surface et 30 % par appartement.</figcaption>
-				</figure>
-				<figure class="figure">
-					<div class="shot">
-						<img class="l" src="../shots/fr/heating-light.webp" width="1600" height="916" loading="lazy" alt="Profil de chauffage Chauffage + eau chaude : parts mensuelles de 13,6 % en janvier à 3,6 % en août.">
-						<img class="d" src="../shots/fr/heating-dark.webp" width="1600" height="916" loading="lazy" alt="" aria-hidden="true">
-					</div>
-					<figcaption class="caption">Profil de chauffage avec parts mensuelles : janvier 13,6 %, août 3,6 %</figcaption>
-				</figure>
-			</div>
-		</div>
-
-		<!-- QR -->
-		<div class="feature">
-			<div class="copy-col">
-				<span class="badge info">QR-facture suisse et rappels</span>
-				<h3>Vos locataires paient avec leur téléphone. Vous voyez qui doit encore payer.</h3>
-				<p>Chaque décompte est un PDF avec section paiement selon la norme suisse, dans la langue de la locataire ou du locataire. Si un paiement manque, Dwello rédige le rappel de paiement et les rappels, chacun avec sa propre section paiement QR.</p>
-				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Section paiement QR selon la norme SIX<small>Scanner, vérifier, payer. Sans recopier l’IBAN ni la référence.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Dans la langue des locataires<small>Pierre Dubois, à Zurich, reçoit son décompte en français.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Rappel de paiement, 2e et 3e rappel<small>Par e-mail ou par lettre. Tous les PDF d’un immeuble aussi en ZIP.</small></span></li>
 				</ul>
 			</div>
 			<div class="pdfs">
@@ -624,21 +479,16 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<!-- Buildings -->
-		<div class="feature flip">
+		<!-- Keys + heating -->
+		<div class="feature">
 			<div class="copy-col">
-				<span class="badge info">Immeubles et appartements</span>
-				<h3>Saisir un immeuble en deux minutes.</h3>
-				<p>Saisissez la rue, le numéro et la localité et choisissez un résultat : Dwello reprend l’immeuble et ses appartements du registre des bâtiments. Chaque champ a son explication et un exemple juste en dessous.</p>
-				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Recherche d’adresse par rue, numéro et localité<small>Sans résultat, vous saisissez l’immeuble à la main.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Appartements avec surface, pièces, volume<small>La base de chaque clé de répartition.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Immeuble depuis le registre des bâtiments<small>Choisissez l’adresse, et tous les appartements avec surface, étage et pièces viennent du Registre fédéral des bâtiments et des logements (RegBL). Vous les vérifiez avant d’enregistrer.</small></span></li>
-				</ul>
+				<span class="badge info">Clés de répartition et profils de chauffage</span>
+				<h3>Une répartition juste, même en hiver.</h3>
+				<p>Coûts selon la surface, les pièces, les unités ou une formule personnalisée, par exemple 70 % selon la surface et 30 % par appartement. Les frais de chauffage suivent un profil de chauffage : en janvier, un jour de location compte plus qu’en été. Un profil est fourni pour le Plateau, la montagne et le Tessin, plus un pour le chauffage avec eau chaude.</p>
 			</div>
 			<figure class="shot">
-				<img class="l" src="../shots/fr/building-register-light.webp" width="1532" height="1836" loading="lazy" alt="Formulaire Nouvel immeuble : appartements 101 et 102 du registre des bâtiments, chacun avec numéro, étage, surface et nombre de pièces à vérifier.">
-				<img class="d" src="../shots/fr/building-register-dark.webp" width="1532" height="1836" loading="lazy" alt="" aria-hidden="true">
+				<img class="l" src="../shots/fr/keys-light.webp" width="1600" height="1193" loading="lazy" alt="Liste des clés de répartition : par unité, par surface, par pièces et chauffage avec la formule 0,7 fois la surface plus 0,3 fois les unités.">
+				<img class="d" src="../shots/fr/keys-dark.webp" width="1600" height="1193" loading="lazy" alt="" aria-hidden="true">
 			</figure>
 		</div>
 	</div>
@@ -650,89 +500,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Tout en un coup d’œil</span>
 			<h2>Ce que Dwello contient.</h2>
-			<p>Chaque fonction est couverte par des tests automatiques. Ce qui n’est pas encore prêt est indiqué comme prévu.</p>
 		</div>
-		<div class="legend"><span class="badge ok"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Disponible</span> aujourd’hui dans Dwello <span class="badge plan">Prévu</span> dans la feuille de route</div>
 		<div class="grid-feat">
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-a11y"/></svg><span class="badge ok">Disponible</span></div><h3>Accessible selon les WCAG 2.2 AA</h3><p>Chaque vue est testée avec axe, sur téléphone, tablette et ordinateur, en mode clair et sombre. Sans exception.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg><span class="badge ok">Disponible</span></div><h3>Mobile d’abord</h3><p>Fonctionne dès 390 pixels de large sans défilement horizontal. Boutons d’au moins 48 pixels de haut.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-lang"/></svg><span class="badge ok">Disponible</span></div><h3>Quatre langues</h3><p>Allemand, français, italien et anglais. Décomptes et rappels dans la langue des locataires.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span class="badge ok">Disponible</span></div><h3>Mode sombre</h3><p>Suit le réglage de votre appareil. Tous les contrastes sont vérifiés, aussi dans le sombre.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span class="badge ok">Disponible</span></div><h3>Vue d’ensemble avec prochaine étape</h3><p>Ce qu’il faut faire maintenant, les délais à venir et les appartements vacants.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><span class="badge ok">Disponible</span></div><h3>Contrats de bail et fin du contrat</h3><p>À durée déterminée ou indéterminée. À la fin, Dwello indique le délai de congé et demande la nouvelle adresse.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-flame"/></svg><span class="badge ok">Disponible</span></div><h3>Frais de chauffage avec profil de chauffage</h3><p>Parts mensuelles pour le Plateau, la montagne, le Tessin ou le chauffage avec eau chaude. Mazout selon la consommation.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg><span class="badge ok">Disponible</span></div><h3>Clés de répartition personnalisées</h3><p>Selon la surface, les pièces, le volume, les unités ou mélangées dans une formule.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-mail"/></svg><span class="badge ok">Disponible</span></div><h3>Envoi par e-mail ou par lettre</h3><p>Qui souhaite un e-mail reçoit le PDF. Pour tous les autres, Dwello imprime la lettre.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="badge ok">Disponible</span></div><h3>Données des locataires en un clic</h3><p>Tout sur une locataire ou un locataire en ZIP, pour la remise des données selon l’art. 28 LPD.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span class="badge ok">Disponible</span></div><h3>Journal de toutes les modifications</h3><p>Connexions et chaque modification qui touche un décompte, avec l’heure et l’état précédent.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><span class="badge ok">Disponible</span></div><h3>Documents par locataire</h3><p>Lettres, décomptes et rappels au même endroit.</p></article>
-			<article class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><span class="badge ok">Disponible</span></div><h3>Immeuble depuis le registre des bâtiments</h3><p>Reprendre immeubles et appartements avec surface, étage et pièces du registre fédéral.</p></article>
-			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span class="badge plan">Prévu</span></div><h3>Exporter toutes les données</h3><p>Toutes vos données à tout moment en CSV et JSON. Vos données vous appartiennent, même si vous changez.</p></article>
-			<article class="panel planned"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg><span class="badge plan">Prévu</span></div><h3>Serveur MCP pour assistants IA</h3><p>Demandez à votre assistant IA les montants ouverts, les délais ou les factures manquantes.</p></article>
-		</div>
-	</div>
-</section>
-
-<!-- PRIVACY -->
-<section id="datenschutz" class="band">
-	<div class="wrap band-grid">
-		<div>
-			<div class="sec-head">
-				<span class="kicker">Protection des données</span>
-				<h2>Conçu selon la loi suisse sur la protection des données.</h2>
-				<p>Les données des locataires sont des données personnelles. Dwello les traite ainsi : elles restent sur votre serveur, rien ne nous parvient, et vous pouvez renseigner à tout moment. Ne sort que ce qu’une tâche exige : la connexion via Google, si vous l’utilisez, la recherche d’adresse dans le registre des bâtiments de la Confédération, vos e-mails aux locataires et, si vous le configurez ainsi, les factures vers une IA externe. Vous restez responsable des données de vos locataires.</p>
-			</div>
-			<!-- In the app's illustration style: line, fill, one accent stroke -->
-			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Une maison avec un serveur à l’intérieur" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<line x1="16" y1="104" x2="144" y2="104" fill="none"/>
-				<rect x="36" y="50" width="88" height="54"/>
-				<polyline points="26,56 80,18 134,56" fill="none"/>
-				<rect x="56" y="62" width="48" height="16" rx="2" fill="var(--illu-surface)"/>
-				<rect x="56" y="82" width="48" height="16" rx="2" fill="var(--illu-surface)"/>
-				<line x1="64" y1="70" x2="80" y2="70" fill="none"/>
-				<line x1="64" y1="90" x2="80" y2="90" fill="none"/>
-				<line x1="92" y1="70" x2="96" y2="70" fill="none" stroke="var(--illu-accent)" stroke-width="3"/>
-				<line x1="92" y1="90" x2="96" y2="90" fill="none" stroke="var(--illu-accent)" stroke-width="3"/>
-			</svg>
-		</div>
-		<ul class="promises">
-			<li><svg class="ic" aria-hidden="true"><use href="#i-server"/></svg><span><b>Votre serveur, votre base de données</b>Dwello tourne sur votre PC, votre NAS ou chez l’hébergeur de votre choix, aussi dans un centre de données en Suisse.</span></li>
-			<li><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><span><b>Les pièces justificatives restent à la maison</b>L’IA tourne avec Ollama sur votre serveur. Aucune facture ne part vers un service cloud, sauf si vous le voulez.</span></li>
-			<li><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span><b>Remise des données en un clic</b><span class="ref">Art. 28 LPD.</span> Toutes les données d’une locataire ou d’un locataire en ZIP, avec des dossiers dans sa langue.</span></li>
-			<li><svg class="ic" aria-hidden="true"><use href="#i-eye-off"/></svg><span><b>Aucun suivi</b>Pas de publicité, pas de cookies d’analyse. Nous ne savons pas que vous utilisez Dwello.</span></li>
-			<li><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span><b>Journal et déclaration de protection des données</b>Chaque modification des données de décompte est journalisée. Une déclaration de protection des données pour vos locataires est incluse.</span></li>
-		</ul>
-	</div>
-</section>
-
-<!-- MCP -->
-<section id="mcp">
-	<div class="wrap">
-		<div class="feature" style="padding:0;border:0">
-			<div class="copy-col">
-				<span class="badge plan">Prévu · MCP</span>
-				<h2 style="font-size:clamp(2rem,4.2vw,3rem)">Posez simplement vos questions à votre immeuble.</h2>
-				<p>Il est prévu que Dwello se connecte à votre assistant IA via le Model Context Protocol : Claude, ChatGPT ou une IA locale. Vous posez vos questions avec vos mots, l’assistant consulte Dwello. Il ne devra lire que ce que vous autorisez et ne rien modifier sans votre confirmation.</p>
-				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Montants ouverts, délais, factures manquantes<small>Des réponses tirées de vos vraies données, avec la source.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Devra tourner sur votre serveur<small>Le serveur MCP fera partie de l’installation. Sans détour par nous.</small></span></li>
-				</ul>
-			</div>
-			<div class="panel chat" role="figure" aria-label="Exemple inventé : à quoi pourrait ressembler une conversation avec un assistant IA sur Dwello">
-				<div class="chat-head"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>Assistant IA connecté à Dwello <span class="badge plan" style="margin-left:auto">Ébauche</span></div>
-				<div class="chat-body">
-					<div class="msg me">Que dois-je faire cette semaine pour mes immeubles ?</div>
-					<div class="tool" tabindex="0"><b>dwello.next_steps</b>() · <b>dwello.deadlines</b>(days: 14)</div>
-					<div class="msg ai">Un délai et deux tâches :
-						<table><tbody>
-							<tr><td>Délai de paiement Hans Müller, Musterhaus Zentrum, appartement 1.01</td><td class="r">CHF 215.80</td></tr>
-							<tr><td>Vérifier et envoyer les décomptes en brouillon</td><td class="r">7</td></tr>
-							<tr><td>Établir le décompte 2025 d’Alpenblick</td><td class="r">1</td></tr>
-						</tbody></table>
-						<p style="margin-top:8px">Le délai de M. Müller échoit le 28.10.2026. Dois-je d’abord ouvrir les brouillons de Seepark Residenz ?</p>
-					</div>
-				</div>
-			</div>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><h3>Mode sombre</h3><p>Suit le réglage de votre appareil. Tous les contrastes sont vérifiés, aussi dans le sombre.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><h3>Contrats de bail et fin du contrat</h3><p>À durée déterminée ou indéterminée. À la fin, Dwello indique le délai de congé et demande la nouvelle adresse.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg><h3>Documents par locataire</h3><p>Lettres, décomptes et rappels au même endroit.</p></article>
+			<article class="panel"><svg class="ic" aria-hidden="true"><use href="#i-table"/></svg><h3>Immeuble depuis le registre des bâtiments</h3><p>Reprendre immeubles et appartements avec surface, étage et pièces du registre fédéral.</p></article>
 		</div>
 	</div>
 </section>
@@ -821,28 +594,52 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	</div>
 </section>
 
+<!-- PRIVACY -->
+<section id="datenschutz" class="band">
+	<div class="wrap band-grid">
+		<div>
+			<div class="sec-head">
+				<span class="kicker">Protection des données</span>
+				<h2>Conçu selon la loi suisse sur la protection des données.</h2>
+				<p>Les données des locataires sont des données personnelles. Dwello les traite ainsi : elles restent sur votre serveur, rien ne nous parvient, et vous pouvez renseigner à tout moment. Ne sort que ce qu’une tâche exige : la connexion via Google, si vous l’utilisez, la recherche d’adresse dans le registre des bâtiments de la Confédération, vos e-mails aux locataires et, si vous le configurez ainsi, les factures vers une IA externe. Vous restez responsable des données de vos locataires.</p>
+			</div>
+			<!-- In the app's illustration style: line, fill, one accent stroke -->
+			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="Une maison avec un serveur à l’intérieur" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="16" y1="104" x2="144" y2="104" fill="none"/>
+				<rect x="36" y="50" width="88" height="54"/>
+				<polyline points="26,56 80,18 134,56" fill="none"/>
+				<rect x="56" y="62" width="48" height="16" rx="2" fill="var(--illu-surface)"/>
+				<rect x="56" y="82" width="48" height="16" rx="2" fill="var(--illu-surface)"/>
+				<line x1="64" y1="70" x2="80" y2="70" fill="none"/>
+				<line x1="64" y1="90" x2="80" y2="90" fill="none"/>
+				<line x1="92" y1="70" x2="96" y2="70" fill="none" stroke="var(--illu-accent)" stroke-width="3"/>
+				<line x1="92" y1="90" x2="96" y2="90" fill="none" stroke="var(--illu-accent)" stroke-width="3"/>
+			</svg>
+		</div>
+		<ul class="promises">
+			<li><svg class="ic" aria-hidden="true"><use href="#i-server"/></svg><span><b>Votre serveur, votre base de données</b>Dwello tourne sur votre PC, votre NAS ou chez l’hébergeur de votre choix, aussi dans un centre de données en Suisse.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><span><b>Les pièces justificatives restent à la maison</b>L’IA tourne avec Ollama sur votre serveur. Aucune facture ne part vers un service cloud, sauf si vous le voulez.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span><b>Remise des données en un clic</b><span class="ref">Art. 28 LPD.</span> Toutes les données d’une locataire ou d’un locataire en ZIP, avec des dossiers dans sa langue.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-eye-off"/></svg><span><b>Aucun suivi</b>Pas de publicité, pas de cookies d’analyse. Nous ne savons pas que vous utilisez Dwello.</span></li>
+			<li><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span><b>Journal et déclaration de protection des données</b>Chaque modification des données de décompte est journalisée. Une déclaration de protection des données pour vos locataires est incluse.</span></li>
+		</ul>
+	</div>
+</section>
+
 <!-- ACCESSIBILITY -->
 <section id="barrierefrei">
 	<div class="wrap a11y">
-		<div>
-			<div class="sec-head" style="margin-bottom:32px">
-				<span class="kicker">Simple à utiliser</span>
-				<h2>Pour les personnes qui ne font cela que quelques fois par an.</h2>
-				<p>Dwello n’est pas fait pour les professionnels, mais pour vous. Des mots clairs plutôt que du jargon, une action principale par page, et avant toute action définitive, Dwello vous dit exactement ce qui va se passer.</p>
-			</div>
-			<ul class="rules">
-				<li><span class="m">48 px</span><span><b>De grands boutons</b><span>Faciles à atteindre, au doigt comme à la souris.</span></span></li>
-				<li><span class="m">1</span><span><b>Une action principale par page</b><span>La vue d’ensemble montre toujours la prochaine étape.</span></span></li>
-				<li><span class="m">7 : 1</span><span><b>Contraste pour les textes d’aide</b><span>Même les textes gris sont bien lisibles, au soleil comme dans le noir.</span></span></li>
-				<li><span class="m">390 px</span><span><b>Entièrement sur le téléphone</b><span>Chaque page tient sur le téléphone, sans défilement horizontal.</span></span></li>
-			</ul>
+		<div class="sec-head" style="margin-bottom:0">
+			<span class="kicker">Simple à utiliser</span>
+			<h2>Pour les personnes qui ne font cela que quelques fois par an.</h2>
+			<p>Dwello n’est pas fait pour les professionnels, mais pour vous. Des mots clairs plutôt que du jargon, une action principale par page, et avant toute action définitive, Dwello vous dit exactement ce qui va se passer.</p>
 		</div>
-		<div class="phone">
-			<figure class="shot">
-				<img class="l" src="../shots/fr/mobile-dashboard-light.webp" width="780" height="1688" loading="lazy" alt="Dwello sur le téléphone : la vue d’ensemble avec la prochaine étape, établir les décomptes des charges.">
-				<img class="d" src="../shots/fr/mobile-dashboard-dark.webp" width="780" height="1688" loading="lazy" alt="" aria-hidden="true">
-			</figure>
-		</div>
+		<ul class="rules">
+			<li><span class="m">48 px</span><span><b>De grands boutons</b><span>Faciles à atteindre, au doigt comme à la souris.</span></span></li>
+			<li><span class="m">1</span><span><b>Une action principale par page</b><span>La vue d’ensemble montre toujours la prochaine étape.</span></span></li>
+			<li><span class="m">7 : 1</span><span><b>Contraste pour les textes d’aide</b><span>Même les textes gris sont bien lisibles, au soleil comme dans le noir.</span></span></li>
+			<li><span class="m">390 px</span><span><b>Entièrement sur le téléphone</b><span>Chaque page tient sur le téléphone, sans défilement horizontal.</span></span></li>
+		</ul>
 	</div>
 </section>
 
@@ -858,20 +655,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="btn btn-primary" href="https://github.com/rudini/Dwello" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-git"/></svg>Code source sur GitHub</a>
 				<a class="btn btn-secondary" href="https://github.com/rudini/Dwello/issues" rel="noopener">Signaler une idée ou une erreur</a>
 			</div>
-		</div>
-		<div class="panel table-wrap">
-			<table class="compare">
-				<caption class="sr-only">Dwello comparé aux abonnements de gérance habituels</caption>
-				<thead><tr><th scope="col"><span class="sr-only">Critère</span></th><th scope="col">Dwello</th><th scope="col">Abonnement habituel</th></tr></thead>
-				<tbody>
-					<tr><td>Coût par an</td><td class="d">CHF 0.–</td><td>par appartement</td></tr>
-					<tr><td>Où sont vos données</td><td class="d">chez vous</td><td>chez le fournisseur</td></tr>
-					<tr><td>L’IA lit les pièces</td><td class="d">en local ou chez votre fournisseur</td><td>dans le cloud</td></tr>
-					<tr><td>Si le fournisseur arrête</td><td class="d">continue de tourner</td><td>données perdues</td></tr>
-					<tr><td>Code source vérifiable</td><td class="d">oui</td><td>non</td></tr>
-					<tr><td>Licence</td><td class="d">AGPL-3.0-or-later</td><td>propriétaire</td></tr>
-				</tbody>
-			</table>
 		</div>
 	</div>
 </section>
@@ -936,7 +719,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<a class="logo" href="#top" aria-label="Dwello, vers la page d’accueil"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg><svg class="wm" viewBox="0 0 6488 1512" aria-hidden="true"><use href="#wm"/></svg></a>
 				<p style="max-width:24em">Logiciel open source pour les bailleresses et bailleurs privés en Suisse.</p>
 			</div>
-			<div><h2>Produit</h2><ul><li><a href="#funktionen">Fonctions</a></li><li><a href="#datenschutz">Protection des données</a></li><li><a href="#mcp">IA et MCP</a></li><li><a href="#roadmap">Feuille de route</a></li></ul></div>
+			<div><h2>Produit</h2><ul><li><a href="#funktionen">Fonctions</a></li><li><a href="#datenschutz">Protection des données</a></li><li><a href="#roadmap">Feuille de route</a></li></ul></div>
 			<div><h2>Commencer</h2><ul><li><a href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide d’installation</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Démo</a></li><li><a href="#faq">Questions fréquentes</a></li></ul></div>
 			<div><h2>Communauté</h2><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Signaler une erreur</a></li><li><a href="../brand.html">Manuel de marque</a></li></ul></div>
 		</div>
@@ -970,29 +753,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	document.addEventListener('click', function (e) { if (menu.open && !menu.contains(e.target)) menu.open = false; });
 	document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); } });
 	menu.addEventListener('focusout', function (e) { if (e.relatedTarget && !menu.contains(e.relatedTarget)) menu.open = false; });
-
-	// an animation plays once from its button, which then pauses, resumes and replays it
-	document.querySelectorAll('[data-anim]').forEach(function (f) {
-		var b = f.querySelector('.anim-play');
-		// the button names its animation, so two buttons in the same state stay apart for screen readers
-		var label = function (text) { b.textContent = text; b.setAttribute('aria-label', text + ', ' + f.getAttribute('aria-label')); };
-		b.hidden = false;
-		b.addEventListener('click', function () {
-			if (f.classList.contains('run') && !f.classList.contains('done')) {
-				label(f.classList.toggle('paused') ? 'Reprendre' : 'Mettre en pause');
-				return;
-			}
-			f.classList.remove('run', 'paused', 'done');
-			void f.offsetWidth;
-			f.classList.add('run');
-			label('Mettre en pause');
-		});
-		f.addEventListener('animationend', function (e) {
-			if (e.animationName !== f.getAttribute('data-end')) return;
-			f.classList.add('done');
-			label('Relire');
-		});
-	});
 
 	var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
 	function select(tab) {

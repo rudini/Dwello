@@ -41,7 +41,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 async function fuelStockData(fetch: Fetch, buildingId: string) {
 	const [stocksRes, categoriesRes] = await Promise.all([
 		fetch(`${BACKEND_URL}/api/v1/buildings/${buildingId}/fuel-stocks`),
-		fetch(`${BACKEND_URL}/api/v1/categories?limit=100`)
+		fetch(`${BACKEND_URL}/api/v1/categories?limit=1000`) // all of them (#585)
 	]);
 	const stocks = stocksRes.ok ? await stocksRes.json() : null;
 	// without the categories the page still shows, only the choice is empty

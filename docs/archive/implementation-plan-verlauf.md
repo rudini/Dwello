@@ -2506,3 +2506,11 @@ Branch `ccr-8b7da2b0-52xa3f`. Decisions of the product owner recorded in #576 (c
 - [x] fach-reviewer round 2 (`docs/reviews/576-fachreview-2.md`): R-8 to R-10 fixed; V-10 (glossary row «Protokoll des Servers», not decided) stays in the report
 - [x] Personas Helga, Sven, Anna, Dr. Weber, Marco (`docs/design/personas/*-576.md`): Majors Helga P-1 (focus on the hint) and Dr. Weber P-1 (the 5th attempt names the Sperre) fixed with tests seen red; Minors stay in the reports
 - [x] PR: pushed after this archive
+## Session 2026-10-21: compact landing page (parallel session, branch claude/jolly-mccarthy-9vdez8)
+
+- [x] Proposal measured (desktop 18.3, mobile 31.3 screens); product owner chose option A
+- [x] `marketing/index.html` shortened, fr/it/en rebuilt, unused keys and screenshots removed; No scenario: static marketing site outside the app; axe 0 violations (4 languages, light/dark, 1440/768/390)
+- [x] Slice review round 1: `docs/reviews/landing-kompakt-review-1.md`; C-1, C-2, C-4 fixed, C-3 rejected
+- [x] Personas Helga and Marco: `docs/design/personas/helga-landing-kompakt.md`, `marco-landing-kompakt.md` (no Blocker/Major; Helga P-2 fixed with C-1, other Minors stay in the reports)
+- [x] Closing review round 2: `docs/reviews/landing-kompakt-review-2.md` (no findings)
+- [x] PR pushed after this archive
