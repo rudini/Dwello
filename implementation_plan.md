@@ -31,4 +31,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #575 (main red after #571): Firefox «Suche ohne Treffer» (`buildings.feature`), not #571's (no DateInput there); not reproduced locally in 225 Firefox runs; analysis in #575; cause open
 - [x] #573 DOM tests red (`invoice-pages.dom.test.ts`, new and edit page: key error stays after the Kategorie brought a key); `InvoiceCategoryFields.svelte` shows the key error only while no key is set (the #548 condition in `UploadRowFields.svelte` moved there), green
 - [x] #573 scenario «Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück» (`invoice-new.feature`), green; no red run of its own (the DOM tests were seen red); No scenario for the edit page: it shares the field component, covered by its DOM test
-- [ ] #573 slice review, PR merged
+- [x] #573 slice review round 1: `docs/reviews/573-review-1.md` (no findings)
+- [ ] #573 persona Helga, PR merged
