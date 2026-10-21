@@ -427,7 +427,7 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 	// #71, Fachreview 2 M-4: die einzige Heizrechnung liegt in Monaten mit 0 % (Juni bis August) und wird nach Tagen
 	// geteilt, 920 × 62/92 = 620.00; der Satz zum Heizprofil nennt nicht den Anteil der Position, und seit #509 auch nicht
 	// den des Laufs: keine Rechnung ist ohne Leistungszeitraum
-	it('nennt bei einer Heizposition nach Tagen im Leistungszeitraum den Anteil nach Heizprofil des Laufs', async () => {
+	it('nennt bei einer Heizposition nach Tagen im Leistungszeitraum keinen Anteil nach Heizprofil', async () => {
 		const july = await createRental(crypto.randomUUID(), { startDate: '2025-07-01', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 		await insertInvoice(july.building, { categoryId: heating.id, amount: '920.00', description: 'Fernwärme Sommer', invoiceDate: '2025-09-30', servicePeriodStart: '2025-06-01', servicePeriodEnd: '2025-08-31' });
