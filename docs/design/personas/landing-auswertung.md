@@ -31,8 +31,8 @@ Am besten bewertet werden Lesbarkeit und Bedienung (4.0) und die Kennzeichnung �
 | L-5 | Major | Fachjargon ohne Erklärung (Docker, OAuth, Ollama, MCP, WCAG, axe, AGPL, NAS, SSH …), ausgerechnet auch im Abschnitt «Klare Wörter statt Fachjargon». | Helga P-3, Marco P-8 |
 | L-6 | Major | «100 % Ihrer Daten bleiben auf Ihrem Server» widerspricht Google-Login, Adresssuche, E-Mail-Versand und externer KI; dass ein Google-Konto nötig ist, steht nur in einem Reiter. | Dr. Weber P-2, P-3 |
 | L-7 | Minor | Rundung: Der Satz «Kleinstbeträge unter CHF 5 werden weder gefordert noch ausbezahlt» lässt weg, dass sie als Gutschrift oder Nachforderung auf die nächste Abrechnung übertragen und mit der Schlussabrechnung beim Auszug ausgeglichen werden. So liest Dr. Weber, Guthaben verfielen. Der Befund trifft nur den Text der Seite, nicht das Verhalten der App (Korrektur des Product Owners; Dr. Weber hatte Major). | Dr. Weber P-1 |
-| L-8 | Major | Impressum und Datenschutzerklärung ohne Postadresse. | Dr. Weber P-4 |
-| L-9 | Major | «Rechnet so, wie es das Mietrecht verlangt» ohne Einschränkung; das FAQ «rechtlich geprüft?» weicht auf automatische Tests aus. | Dr. Weber P-5 |
+| L-8 | entschieden | Impressum und Datenschutzerklärung ohne Postadresse. Abgelehnt: Der Product Owner hat entschieden, dass «Roger Rudin, Schweiz» und die E-Mail-Adresse genügen (Commit `873e3a5`). | Dr. Weber P-4 |
+| L-9 | Minor | «Rechnet so, wie es das Mietrecht verlangt» ohne Einschränkung; das FAQ «rechtlich geprüft?» weicht auf automatische Tests aus. | Dr. Weber P-5 |
 | L-10 | Minor | Seite zu lang und mit Wiederholungen (29 bis 33 Bildschirme); die wichtigste Frage «Kann ich das überhaupt?» steht fast am Schluss. | Marco P-5, Helga P-5 |
 | L-11 | Minor | Die Links in der Fusszeile unter «Wissen» springen alle zu `#funktionen`. | alle fünf |
 | L-12 | Minor | Der MCP-Abschnitt (geplant) steht im Präsens, als h3 unter Datenschutz, und das erfundene Chat-Beispiel wird als echter Inhalt vorgelesen. | Dr. Weber P-7, Sven P-1, P-2, Helga Q6 |
@@ -42,6 +42,20 @@ Am besten bewertet werden Lesbarkeit und Bedienung (4.0) und die Kennzeichnung �
 | L-16 | Minor | Weitere Aussagen: «0 Verstösse WCAG» beruht nur auf axe, die Vergleichstabelle verallgemeinert über Mitbewerber, «für immer» gratis, «nach DSG gebaut» ohne Hinweis auf die Verantwortung des Vermieters. | Dr. Weber P-6, P-8, P-10, P-11 |
 | L-17 | Minor | Kein Hilfe- oder Kontaktweg für alle, die nicht selbst installieren können; kein Ausweg bei weniger als 16 GB Arbeitsspeicher. | Anna P-4, P-5 |
 | L-18 | Nit | Heizprofile: drei im Abschnitt, vier in der Kachel; Lizenz «AGPL-3.0» gegenüber «AGPL-3.0-or-later»; «+»/«–» werden im FAQ mitgelesen; Titel und Text in Aufzählungen ohne Pause. | Dr. Weber P-12, P-13, Sven P-5, P-9 |
+
+## Prüfung gegen die App
+
+Die Personas kennen nur den Text der Seite. Dr. Webers Aussagen über die App sind hier gegen den Code geprüft:
+
+| Befund | Ergebnis | Beleg |
+|---|---|---|
+| P-1 Rundung (L-7) | Trifft nur den Text: Ein Saldo unter CHF 5 wird übertragen und spätestens mit der Schlussabrechnung ausgeglichen; die Rundung auf 5 Rappen fällt immer zugunsten der Mieter aus. | `statement.service.ts:397`, `pdf-format.ts:20` |
+| P-2 Daten verlassen den Server (L-6) | Stimmt: Die Anmeldung läuft über Google oder Microsoft, die Adresssuche fragt `api3.geo.admin.ch` (swisstopo), E-Mails gehen über den eigenen SMTP-Server oder Resend, die KI wahlweise an einen externen Anbieter. «100 % Ihrer Daten bleiben auf Ihrem Server» und «nichts geht an uns» müssen das nennen; «nichts geht an uns» selbst stimmt. | `oauth.ts`, `building-register.ts`, `backend/src/mail/`, `.env.example` |
+| P-3 Google-Konto Pflicht (L-6) | Stimmt nur halb: Neben Google ist auch Microsoft eingebaut; ein Konto bei einem der beiden ist heute nötig. Die Seite nennt nur Google. | `oauth.ts:9`, `login/+page.server.ts` |
+| P-5 Mietrecht (L-9) | Teilweise: Das FAQ sagt «Eine Rechtsberatung ersetzt das nicht» und nennt Hauseigentümerverband und Schlichtungsbehörde; ohne Einschränkung steht nur der Satz «Dwello rechnet so, wie es das Mietrecht verlangt». Deshalb Minor. | `marketing/index.html:481`, `:817` |
+| P-6 WCAG (L-16) | Stimmt: Geprüft wird mit axe (`tests/a11y`); «0 Verstösse gegen WCAG 2.2 AA» behauptet mehr, als axe findet. | `marketing/index.html:425` |
+| P-12 Heizprofile (L-18) | Stimmt: Es gibt vier Profile (mit «Heizung + Warmwasser»); der Abschnitt nennt drei. | `heating-profile.service.ts:5`, `marketing/index.html:499` |
+| P-13 Lizenz (L-18) | Stimmt: Die Lizenz ist AGPL-3.0-or-later; die Landing Page schreibt «AGPL-3.0». | `package.json`, `marketing/index.html:780` |
 
 ## Was gut ankam
 
@@ -56,4 +70,6 @@ Am besten bewertet werden Lesbarkeit und Bedienung (4.0) und die Kennzeichnung �
 1. Den ersten Bildschirm für Laien bauen: «Demo ansehen» als Hauptaktion, die Installation als zweiten Weg mit dem Hinweis «Für die Einrichtung brauchen Sie jemanden, der sich mit Computern auskennt» (L-1, L-3).
 2. Eine vollständige, verlinkte Installationsanleitung inklusive `.env` und Google-Anmeldung, zum Weitergeben an eine Helferin (L-2).
 3. Ein Menü für Handy und Zoom (L-4).
-4. Die Aussagen zu Datenschutz und Mietrecht richtigstellen, den Übertrag der Kleinstbeträge nennen und eine Postadresse ins Impressum (L-6 bis L-9); das sollte `fach-reviewer` vor der Änderung prüfen.
+4. Die Aussagen zu Datenschutz und Mietrecht richtigstellen, den Übertrag der Kleinstbeträge nennen (L-6, L-7, L-9); das sollte `fach-reviewer` vor der Änderung prüfen.
+
+Zielgruppe (Product Owner): A. Laien bleiben die Zielgruppe; die Installation wird ehrlich als Aufgabe für eine Helferin beschrieben, mit vollständiger Anleitung zum Weitergeben, und die Demo wird die Hauptaktion im ersten Bildschirm.
