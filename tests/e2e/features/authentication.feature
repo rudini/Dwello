@@ -87,7 +87,7 @@ Funktionalität: Anmeldung
     Und sieht der Besucher den Hinweis "E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut."
     # Persona Helga 576 P-1: die Meldung ist im Blick und wird vorgelesen; das falsche Passwort steht nicht mehr im Feld
     Und steht der Fokus auf dem Hinweis
-    Und ist das Feld "Passwort" leer
+    Und steht das falsche Passwort nicht mehr da
 
   # Personas Marco und Sven 576 P-1: leere Felder sind kein Fehler beim Prüfen
   Szenario: Anmeldung mit Passwort ohne Eingabe
@@ -103,6 +103,13 @@ Funktionalität: Anmeldung
     Wenn der Besucher sich mit der E-Mail-Adresse und dem Passwort des Kontos anmeldet
     Dann ist der Besucher auf der Seite "Anmelden"
     Und sieht der Besucher einen Hinweis, der mit "Nach mehreren Fehlversuchen ist die Anmeldung gesperrt bis" beginnt
+
+  # Persona Dr. Weber 576 P-1: der Fehlversuch, der sperrt, sagt es gleich
+  Szenario: Der fünfte Fehlversuch nennt die Sperre
+    Angenommen ein Konto mit Passwort ist eingerichtet
+    Und der Besucher hat sich viermal mit einem falschen Passwort angemeldet
+    Wenn der Besucher sich mit der E-Mail-Adresse des Kontos und einem falschen Passwort anmeldet
+    Dann sieht der Besucher einen Hinweis, der mit "Nach mehreren Fehlversuchen ist die Anmeldung gesperrt bis" beginnt
 
   # fach-review 576 V-1: ein Fehler beim Prüfen zählt nicht als Fehlversuch und meldet kein falsches Passwort
   Szenario: Anmeldung mit Passwort fehlgeschlagen

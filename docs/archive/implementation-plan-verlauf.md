@@ -2493,3 +2493,16 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #572. The product owner 
 - [x] Personas Helga, Marco, Sven (`docs/design/personas/*-landing-anim.md`); Helga P-1 (Major) fixed and re-checked (`helga-landing-anim-2.md`)
 - [x] code-reviewer rounds 1–2 (`docs/reviews/landing-anim-review-1.md`, `-2.md`): all fixed
 - [x] PR: pushed after this archive
+
+## Session: Konto mit Passwort, #576 (2026-10-21)
+
+Branch `ccr-8b7da2b0-52xa3f`. Decisions of the product owner recorded in #576 (command in the container, password form and Google side by side, 5 attempts / 15 minutes, table in the backend, log without IP, unknown addresses never locked, terms «Konto mit Passwort» and «Sperre (Anmeldung)», header shows the e-mail). Self-decided: minimum length 8; a signed-in user may create accounts through the API (E2E seeding). Kept in the plan's parallel session's place (this file is appended, `implementation_plan.md` untouched).
+
+- [x] `@wip` scenarios in `authentication.feature`, `privacy.feature`; fach-reviewer round 1 (`docs/reviews/576-fachreview-1.md`) before code, all findings fixed
+- [x] Backend: migration 0032 `local_accounts`, `local-account.service.ts`, routes, `bun run account`, session revocation; `local-account.pg.test.ts` red first
+- [x] BFF and login page: form action, plain-http hint, privacy statement, audit log, docs, landing page; unit, DOM and E2E red first
+- [x] No scenario: the `bun run account` command (CLI script), the plain-http hint (the E2E stack fixes `ORIGIN` to localhost, never insecure; `login-view.test.ts`, `password-login.test.ts`), the session revocation (`local-account.pg.test.ts`), the privacy text without Google and the text without any sign-in (`privacy-page.dom.test.ts`, `login-view.test.ts`)
+- [x] code-reviewer rounds 1–3 (`docs/reviews/576-review-1.md` to `-3.md`): Majors C-1 to C-4, C-11 fixed; Minors C-7, C-10, C-12, C-13 stay in the reports
+- [x] fach-reviewer round 2 (`docs/reviews/576-fachreview-2.md`): R-8 to R-10 fixed; V-10 (glossary row «Protokoll des Servers», not decided) stays in the report
+- [x] Personas Helga, Sven, Anna, Dr. Weber, Marco (`docs/design/personas/*-576.md`): Majors Helga P-1 (focus on the hint) and Dr. Weber P-1 (the 5th attempt names the Sperre) fixed with tests seen red; Minors stay in the reports
+- [x] PR: pushed after this archive

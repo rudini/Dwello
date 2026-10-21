@@ -126,6 +126,23 @@ describe('Anmeldung mit Passwort', () => {
 		expect(jar.has('dwello_session')).toBe(false);
 	});
 
+	it.each([
+		['', 'ein-Passwort'],
+		['   ', 'ein-Passwort'],
+		['helga@example.ch', '']
+	])('nennt leere Felder (E-Mail «%s», Passwort «%s») eine falsche Eingabe, ohne das Backend zu fragen', async (email, password) => {
+		const body = new FormData();
+		body.set('email', email);
+		body.set('password', password);
+		const calls: string[] = [];
+		const fetch = async (url: string) => (calls.push(url), Response.json(account));
+
+		const result = await actions.password({ request: new Request('http://localhost/login', { method: 'POST', body }), cookies: cookieJar().cookies, fetch } as never);
+
+		expect(result).toMatchObject({ status: 400, data: { error: 'E-Mail-Adresse oder Passwort stimmen nicht. Prüfen Sie Ihre Eingabe und versuchen Sie es erneut.' } });
+		expect(calls).toEqual([]);
+	});
+
 	it('nennt bei einer Sperre die Uhrzeit in der Schweiz', async () => {
 		const { result } = await signIn(answering(423, locked));
 

@@ -123,8 +123,12 @@ Then('steht der Fokus auf dem Hinweis', async ({ besucher }) => {
 	await besucher.sees(focusOnLoginHint).toBe(true);
 });
 
-Then('ist das Feld "Passwort" leer', async ({ besucher }) => {
+Then('steht das falsche Passwort nicht mehr da', async ({ besucher }) => {
 	await besucher.sees(enteredPassword).toBe('');
+});
+
+Given('der Besucher hat sich viermal mit einem falschen Passwort angemeldet', async ({ besucher, names }) => {
+	await besucher.attemptsTo(failSignIns(names.get('E-Mail Konto')!, 4));
 });
 
 Given('der Besucher hat sich fünfmal mit einem falschen Passwort angemeldet', async ({ besucher, names }) => {
