@@ -2458,3 +2458,10 @@ Branch `ccr-75acfcf1-m4asdv`, restarted on `main` after #561. The UI screenshots
 - [x] Base rules revert both to the browser defaults; computed styles equal the Tailwind 3 build (Chromium); test red first
 - [x] code-reviewer round 3 (`docs/reviews/tw4-review-3.md`): C-1 fixed
 - [x] PR: pushed after this archive
+
+## Session: red CI of Dependabot's #553 (2026-10-21)
+
+Branch `ccr-75acfcf1-m4asdv`, restarted on `main` after #562. #553 bumps `actions/upload-artifact` to v7; `tools/deepcheck/test/workflows.test.ts` pinned v4. No scenario: a test of a workflow file, no app change.
+
+- [x] Test accepts any major version (red against #553's workflow file, green with v4 and v7)
+- [x] PR: pushed after this archive
