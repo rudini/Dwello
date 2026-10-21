@@ -32,4 +32,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #573 DOM tests red (`invoice-pages.dom.test.ts`, new and edit page: key error stays after the Kategorie brought a key); `InvoiceCategoryFields.svelte` shows the key error only while no key is set (the #548 condition in `UploadRowFields.svelte` moved there), green
 - [x] #573 scenario «Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück» (`invoice-new.feature`), green; no red run of its own (the DOM tests were seen red); No scenario for the edit page: it shares the field component, covered by its DOM test
 - [x] #573 slice review round 1: `docs/reviews/573-review-1.md` (no findings)
-- [ ] #573 persona Helga, PR merged
+- [x] #573 persona Helga: `docs/design/personas/helga-573.md` (no findings; observations pre-existing, stay in the report)
+- [ ] #573 PR merged
