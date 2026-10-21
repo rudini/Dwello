@@ -43,6 +43,7 @@
 		};
 	}}
 	class="mx-auto flex max-w-3xl flex-col gap-8"
+	novalidate
 >
 	<PageHeader
 		title={m.statements_edit_title()}
