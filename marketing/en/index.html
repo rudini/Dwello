@@ -187,20 +187,21 @@ section { padding-block: 96px; }
 .split-total { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; background: var(--accent-soft); border: 2px solid var(--accent); border-radius: var(--radius-control); color: var(--accent); font-weight: 600; }
 /* Animations: start only on the button, play once, can be paused; without them (no JS, reduced motion) the end state shows */
 .anim { display: grid; gap: 12px; margin: 0; }
-.anim-art { display: block; width: 100%; height: auto; }
+.anim-art { display: block; width: 100%; max-width: 480px; height: auto; }
 .anim-art text { font-family: var(--font); }
 .anim-play { justify-self: start; }
+.anim-play[hidden] { display: none; }
 .anim .a-chk { transform-box: fill-box; transform-origin: center; }
-.anim.run .a-doc { animation: a-drop .7s ease-out backwards; }
-.anim.run .a-v { animation: a-in .4s ease-out backwards; }
-.anim.run .a-v1 { animation-delay: 1s; } .anim.run .a-v2 { animation-delay: 1.5s; } .anim.run .a-v3 { animation-delay: 2s; } .anim.run .a-v4 { animation-delay: 2.5s; }
-.anim.run .a-chk { animation: a-pop .4s ease-out 3.2s backwards; }
+.anim.run .a-doc { animation: a-drop 1s ease-out backwards; }
+.anim.run .a-v { animation: a-in .5s ease-out backwards; }
+.anim.run .a-v1 { animation-delay: 1.4s; } .anim.run .a-v2 { animation-delay: 2.2s; } .anim.run .a-v3 { animation-delay: 3s; } .anim.run .a-v4 { animation-delay: 3.8s; }
+.anim.run .a-chk { animation: a-pop .5s ease-out 4.6s backwards; }
 .anim.run .split-total { animation: a-in .5s ease-out backwards; }
 .anim.run .split-bar span { animation: a-pop .35s ease-out backwards; }
 .anim.run .split-bar span:nth-child(2) { animation-delay: 1.05s; } .anim.run .split-bar span:nth-child(3) { animation-delay: 1.3s; } .anim.run .split-bar span:nth-child(4) { animation-delay: 1.55s; } .anim.run .split-bar span:nth-child(5) { animation-delay: 1.8s; } .anim.run .split-bar span:nth-child(6) { animation-delay: 2.05s; }
 .anim.run .split-bar .me { animation: a-pop .35s ease-out .8s backwards, a-mark .6s ease-out 2.7s backwards; }
 .anim.paused * { animation-play-state: paused !important; }
-@keyframes a-drop { from { opacity: 0; transform: translateY(-48px); } }
+@keyframes a-drop { from { opacity: 0; transform: translate(-56px, -24px); } }
 @keyframes a-in { from { opacity: 0; transform: translateX(-8px); } }
 @keyframes a-pop { from { opacity: 0; transform: scale(.85); } }
 @keyframes a-mark { from { background: var(--sunken); border-color: var(--line); color: var(--ink); } }
@@ -523,7 +524,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 					<li>The AI reads the amount, date and category.</li>
 					<li>You check the details and confirm.</li>
 				</ol>
-				<figure class="anim" data-anim data-end="a-pop">
+				<figure class="anim" data-anim data-end="a-pop" aria-label="Animation: how an invoice gets into Dwello">
+					<button class="btn btn-secondary anim-play" type="button" hidden>Play the steps</button>
 					<svg class="anim-art" viewBox="0 0 320 200" aria-hidden="true">
 						<rect x="1" y="1" width="318" height="198" rx="12" fill="var(--surface)" stroke="var(--line)"/>
 						<g class="a-doc">
@@ -541,7 +543,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 						<text x="108" y="172" font-size="13" fill="var(--ink-muted)">Category</text>
 						<text class="a-v a-v4" x="108" y="192" font-size="16" font-weight="600" fill="var(--ink)">Cold Water</text>
 					</svg>
-					<button class="btn btn-secondary anim-play" type="button">Play the steps</button>
+					<figcaption class="sr-only">Example in the animation: invoice issuer Wasserversorgung Zürich, amount CHF 930.00, date 31.03.2025 marked «Please check», category Cold Water.</figcaption>
 				</figure>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Local AI with Ollama, no cloud<small>With the local AI your supporting documents never leave the server. If you like, connect any OpenAI-compatible AI instead.</small></span></li>
@@ -579,11 +581,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<span class="badge info">Distribution keys and heating profiles</span>
 				<h3>Shared fairly, even in winter.</h3>
 				<p>Costs by area, rooms, units or a custom formula, say 70 % by area and 30 % per apartment. Heating costs follow a heating profile: a day rented in January counts more than one in summer. One profile each is included for the Central Plateau, the mountains and Ticino, plus one for heating with hot water.</p>
-				<figure class="anim split" data-anim data-end="a-mark">
+				<figure class="anim split" data-anim data-end="a-mark" aria-label="Animation: how Dwello splits the cost of the lift">
 					<p>An example from the demo data: the lift in Musterhaus Zentrum costs CHF 1'690.00 a year. Split per unit, each of the six apartments bears CHF 281.67, Hans Müller’s apartment 1.01 included.</p>
+					<button class="btn btn-secondary anim-play" type="button" hidden>Play the split</button>
 					<div class="split-total" aria-hidden="true"><span>Lift</span><span>CHF 1'690.00</span></div>
 					<div class="split-bar" aria-hidden="true"><span class="me">1.01<small>281.67</small></span><span>1.02<small>281.67</small></span><span>2.01<small>281.67</small></span><span>2.02<small>281.67</small></span><span>3.01<small>281.67</small></span><span>3.02<small>281.67</small></span></div>
-					<button class="btn btn-secondary anim-play" type="button">Play the split</button>
 				</figure>
 			</div>
 			<div class="duo">
@@ -972,20 +974,23 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	// an animation plays once from its button, which then pauses, resumes and replays it
 	document.querySelectorAll('[data-anim]').forEach(function (f) {
 		var b = f.querySelector('.anim-play');
+		// the button names its animation, so two buttons in the same state stay apart for screen readers
+		var label = function (text) { b.textContent = text; b.setAttribute('aria-label', text + ', ' + f.getAttribute('aria-label')); };
+		b.hidden = false;
 		b.addEventListener('click', function () {
 			if (f.classList.contains('run') && !f.classList.contains('done')) {
-				b.textContent = f.classList.toggle('paused') ? 'Resume' : 'Pause';
+				label(f.classList.toggle('paused') ? 'Resume' : 'Pause');
 				return;
 			}
 			f.classList.remove('run', 'paused', 'done');
 			void f.offsetWidth;
 			f.classList.add('run');
-			b.textContent = 'Pause';
+			label('Pause');
 		});
 		f.addEventListener('animationend', function (e) {
 			if (e.animationName !== f.getAttribute('data-end')) return;
 			f.classList.add('done');
-			b.textContent = 'Play again';
+			label('Play again');
 		});
 	});
 

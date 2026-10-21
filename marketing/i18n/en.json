@@ -344,5 +344,8 @@
 	"Verteilung abspielen": "Play the split",
 	"js:'Weiter abspielen'": "'Resume'",
 	"js:'Anhalten'": "'Pause'",
-	"js:'Nochmals abspielen'": "'Play again'"
+	"js:'Nochmals abspielen'": "'Play again'",
+	"Animation: So kommt eine Rechnung in Dwello": "Animation: how an invoice gets into Dwello",
+	"Animation: So verteilt Dwello die Kosten des Lifts": "Animation: how Dwello splits the cost of the lift",
+	"Beispiel in der Animation: Rechnungssteller Wasserversorgung Zürich, Betrag CHF 930.00, Datum 31.03.2025 mit dem Hinweis «Bitte prüfen», Kategorie Kaltwasser.": "Example in the animation: invoice issuer Wasserversorgung Zürich, amount CHF 930.00, date 31.03.2025 marked «Please check», category Cold Water."
 }

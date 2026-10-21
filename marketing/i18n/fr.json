@@ -348,6 +348,9 @@
 	"Lift": "Ascenseur",
 	"Verteilung abspielen": "Lire la répartition",
 	"js:'Weiter abspielen'": "'Reprendre'",
-	"js:'Anhalten'": "'Pause'",
-	"js:'Nochmals abspielen'": "'Relire'"
+	"js:'Anhalten'": "'Mettre en pause'",
+	"js:'Nochmals abspielen'": "'Relire'",
+	"Animation: So kommt eine Rechnung in Dwello": "Animation : comment une facture arrive dans Dwello",
+	"Animation: So verteilt Dwello die Kosten des Lifts": "Animation : comment Dwello répartit les coûts de l’ascenseur",
+	"Beispiel in der Animation: Rechnungssteller Wasserversorgung Zürich, Betrag CHF 930.00, Datum 31.03.2025 mit dem Hinweis «Bitte prüfen», Kategorie Kaltwasser.": "Exemple de l’animation : émetteur de la facture Wasserversorgung Zürich, montant CHF 930.00, date 31.03.2025 avec la mention « À vérifier », catégorie Eau froide."
 }
