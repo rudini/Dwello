@@ -63,4 +63,12 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #519 slice review round 1: `docs/reviews/519-review-1.md`; Minor C-1 fixed (the task waits for the error page of the failed load)
 - [x] #519 persona Anna: `docs/design/personas/anna-519.md` (the heading in de, fr, it, en confirmed; Minor P-1 on the pre-existing hint text stays in the report)
 - [x] #519 closing review round 2: `docs/reviews/519-review-2.md` (C-1 closed, no new findings)
-- [ ] #519 PR merged
+- [x] #519 PR #596 merged
+- [x] #500 render tests (`statement-pdf-render.test.ts`): «Wohnung EG» on floor 0 and «1. OG» on floor 1 in German red («Wohnung EG, EG»); fr, it, en keep the floor's own name (pins kept behaviour); No scenario: a PDF layout detail, the render test shows it (issue)
+- [x] #500 fachreview before implementing: `docs/reviews/500-fachreview-1.md`; Major V-1 (the import proposes «EG Links»: compare at a word boundary) and Minors V-2 (case, spaces), V-3 (fr row), V-4 (contradicting floor stays) taken into the tests before the change; V-5 («UG» vs «1. UG», pre-existing) and the missing floor terms became #597
+- [x] #500 `pdf.service.ts` leaves the floor out when the number starts with its name in the PDF language at a word boundary (case and spaces ignored); render tests green (129)
+- [x] #500 code review round 1: `docs/reviews/500-review-1.md`; Minors fixed: C-1 (Italian «1° piano interrato» on floor 1 dropped a contradicting floor; the longer below-ground name now keeps it, test red before), C-2 (rows for comma, hyphen and «1-OG»)
+- [x] #500 fachreview round 2: `docs/reviews/500-fachreview-2.md` (V-1 to V-4 closed, no new findings)
+- [x] #500 daten-pruefer: `docs/reviews/500-datenpruefung-1.md` (no findings; only Laura Keller's German line changes, amounts and QR fields to the Rappen; its observation on the demo seed became #598)
+- [x] #500 closing review round 2: `docs/reviews/500-review-2.md` (C-1, C-2 closed, no new findings)
+- [ ] #500 PR merged

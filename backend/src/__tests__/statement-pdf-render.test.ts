@@ -75,6 +75,46 @@ describe('Stockwerk im französischen PDF', () => {
 	});
 });
 
+// #500: an apartment named by its floor («EG» on the ground floor) does not print the floor twice; in another language
+// the floor's own name still says what «EG» means
+describe('Wohnung, die nach ihrem Stockwerk heisst', () => {
+	it.each([
+		['de', 'EG', 0, 'Wohnung EG, 82.00 m²'],
+		['de', '1. OG', 1, 'Wohnung 1. OG, 82.00 m²'],
+		// Fachreview 500-1: the numbers the Gebäuderegister import proposes («EG Links»), typed without care («eg», «1.OG»)
+		['de', 'EG Links', 0, 'Wohnung EG Links, 82.00 m²'],
+		['de', '2. OG Links', 2, 'Wohnung 2. OG Links, 82.00 m²'],
+		['de', 'eg', 0, 'Wohnung eg, 82.00 m²'],
+		['de', '1.OG', 1, 'Wohnung 1.OG, 82.00 m²'],
+		['fr', 'rez-de-chaussée', 0, 'Appartement rez-de-chaussée, 82.00'],
+		// the floor stays when it contradicts the number or is only the start of a word
+		['de', 'EG', 1, 'Wohnung EG, 1. OG, 82.00 m²'],
+		['de', 'EGG', 0, 'Wohnung EGG, EG, 82.00 m²'],
+		// code review 500-1: a comma or a hyphen ends the floor's name; a dot is a dot, not any sign («1-OG»)
+		['de', 'EG, links', 0, 'Wohnung EG, links, 82.00 m²'],
+		['de', 'EG-1', 0, 'Wohnung EG-1, 82.00 m²'],
+		['de', '1-OG', 1, 'Wohnung 1-OG, 1. OG, 82.00 m²'],
+		// «1° piano» is the start of «1° piano interrato»: below ground on floor 1 contradicts it
+		['it', '1° piano interrato', 1, 'Appartamento 1° piano interrato, 1° piano, 82.00'],
+		// in another language the floor's own name says what «EG» means
+		['fr', 'EG', 0, 'Appartement EG, rez-de-chaussée, 82.00'],
+		['it', 'EG', 0, 'Appartamento EG, pianterreno, 82.00'],
+		['en', 'EG', 0, 'Apartment EG, ground floor, 82.00']
+	] as const)('nennt auf %s die Wohnung «%s» im Stockwerk %i als «%s»', async (language, number, floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, number, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
+	});
+
+	it('nennt das Stockwerk weiter, wenn es zur Nummer etwas sagt', async () => {
+		const data = { ...refund, apartment: { ...refund.apartment, number: '2.01', floor: 2 } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
+
+		expect(pdf.flowing).toContain('Wohnung 2.01, 2. OG, 82.00 m²');
+	});
+});
+
 // British English counts «1st floor», «2nd floor» above the ground floor (461-native-en, EN-32), as the UI does
 describe('Stockwerk im englischen PDF', () => {
 	it.each([
