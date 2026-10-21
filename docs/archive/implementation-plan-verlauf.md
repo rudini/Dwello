@@ -2484,3 +2484,12 @@ Branch `ccr-8b7da2b0-52xa3f`. The product owner asked for persona feedback on th
 - [x] fach-reviewer rounds 1–2 (`docs/reviews/landing-fachreview-1.md`, `-2.md`): all fixed except R-1 (private repository, PO makes it public later)
 - [x] code-reviewer rounds 1–3 (`docs/reviews/landing-review-1.md` to `-3.md`): all fixed except C-1 (same as R-1)
 - [x] PR: pushed after this archive
+
+## Session: landing page animations (2026-10-21)
+
+Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #572. The product owner asked for real animations after the personas' warmth survey: upload and cost split, started by a button. No scenario: static marketing site outside the app's E2E stack.
+
+- [x] Two animations (upload of demo invoice MZ-2025-003, lift split CHF 1'690.00 / 6), play once, pause, replay; end state without JS or with reduced motion; fr/it/en
+- [x] Personas Helga, Marco, Sven (`docs/design/personas/*-landing-anim.md`); Helga P-1 (Major) fixed and re-checked (`helga-landing-anim-2.md`)
+- [x] code-reviewer rounds 1–2 (`docs/reviews/landing-anim-review-1.md`, `-2.md`): all fixed
+- [x] PR: pushed after this archive
