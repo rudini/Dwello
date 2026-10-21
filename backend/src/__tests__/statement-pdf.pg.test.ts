@@ -425,9 +425,9 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 	});
 
 	// #71, Fachreview 2 M-4: die einzige Heizrechnung liegt in Monaten mit 0 % (Juni bis August) und wird nach Tagen
-	// geteilt, 920 × 62/92 = 620.00; der Satz zum Heizprofil nennt den Anteil des Laufs, Juli bis Dezember im geänderten
-	// Profil 0 + 0 + 0 + 30 + 5 + 5 = 40 %, nicht den der Position
-	it('nennt bei einer Heizposition nach Tagen im Leistungszeitraum den Anteil nach Heizprofil des Laufs', async () => {
+	// geteilt, 920 × 62/92 = 620.00; der Satz zum Heizprofil nennt nicht den Anteil der Position, und seit #509 auch nicht
+	// den des Laufs: keine Rechnung ist ohne Leistungszeitraum
+	it('nennt bei einer Heizposition nach Tagen im Leistungszeitraum keinen Anteil nach Heizprofil', async () => {
 		const july = await createRental(crypto.randomUUID(), { startDate: '2025-07-01', monthlyAdvancePayment: '0' });
 		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 		await insertInvoice(july.building, { categoryId: heating.id, amount: '920.00', description: 'Fernwärme Sommer', invoiceDate: '2025-09-30', servicePeriodStart: '2025-06-01', servicePeriodEnd: '2025-08-31' });
@@ -438,7 +438,8 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		await july.remove();
 
 		expect(summer).toContain('Leistungszeitraum 01.06.2025 – 31.08.2025: CHF 920.00, Ihre Mietstage 62 von 92 Tagen');
-		expect(summer).toContain('40.00 % für eine Rechnung ohne Leistungszeitraum');
+		expect(summer).toContain('»: Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin');
+		expect(summer).not.toContain('für eine Rechnung ohne Leistungszeitraum');
 		expect(summer).not.toContain('67.39 % der Heizkosten');
 		expect(summer).toContain('Haben diese Monate im Heizprofil zusammen 0 %, zählen stattdessen Ihre Mietstage darin.');
 	});

@@ -71,4 +71,13 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #500 fachreview round 2: `docs/reviews/500-fachreview-2.md` (V-1 to V-4 closed, no new findings)
 - [x] #500 daten-pruefer: `docs/reviews/500-datenpruefung-1.md` (no findings; only Laura Keller's German line changes, amounts and QR fields to the Rappen; its observation on the demo seed became #598)
 - [x] #500 closing review round 2: `docs/reviews/500-review-2.md` (C-1, C-2 closed, no new findings)
-- [ ] #500 PR merged
+- [x] #500 PR merged (#599)
+- [x] #509 render tests (de/fr/it/en) and @wip scenario «Das PDF nennt keinen Heizkostenanteil für eine fehlende Rechnung ohne Leistungszeitraum»: red at the missing behaviour
+- [x] #509 fachreview before implementing: `docs/reviews/509-fachreview-1.md`; Majors M-1 (a second heating position over the period carries the run's share without invoice lines: keep today's text then; render test pins it) and V-1 (the PDF text reads protected spaces as spaces: expectations fixed), Minors V-2 (scenario checks the month line is gone), V-3 (recomputable test data), V-4 (fr/it lower case after the colon: own key `heatingNoteOwn`) taken in before the change
+- [x] #509 `pdf.service.ts`: with every heating position by the profile on invoice lines and none without a Leistungszeitraum, the heating section prints only `heatingNoteOwn` (no run share, no month line); render tests (138) and `statement-pdf.pg.test.ts` (56; the #71 test that expected the run's share for a single invoice with a Leistungszeitraum now expects the new sentence) green; scenario green without @wip (statement-detail.feature, chromium and api: 99 passed)
+- [x] #509 code review round 1: `docs/reviews/509-review-1.md` (Minor C-1, test name, fixed)
+- [x] #509 fachreview round 2: `docs/reviews/509-fachreview-2.md` (M-1, V-1 to V-4 closed; V-5 = C-1 fixed; Minor M-2, the month line of an invoice shared by days because its profile months carry 0 %, existed before and stays in the report)
+- [x] #509 persona Dr. Weber: `docs/design/personas/dr-weber-509.md` (no Blocker/Major; Minors P-1, P-2 and Nits P-3, P-4 on texts the change kept stay in the report; the observation on the detail page is #507)
+- [x] #509 daten-pruefer: `docs/reviews/509-datenpruefung-1.md` (no findings above Nit; only the 8 PDFs of Meier and Brunner change, by exactly the run share and the month line; amounts and QR fields to the Rappen)
+- [x] #509 closing review round 2: `docs/reviews/509-review-2.md` (C-1 closed, no new findings)
+- [ ] #509 PR merged
