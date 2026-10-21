@@ -1,6 +1,6 @@
 # Installing Dwello
 
-For the person who sets up Dwello for a landlord, once. Afterwards the landlord works in the browser and needs no technical knowledge. Plan for about an hour, most of it the Google sign-in and the download of the KI model.
+For the person who sets up Dwello for a landlord. Afterwards the landlord works in the browser and needs no technical knowledge; updates and backups (section 5) stay with you. Plan for about an hour, most of it the Google sign-in and the download of the AI model.
 
 Two ways:
 
@@ -10,9 +10,9 @@ Two ways:
 ## 1. What you need
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (on a Linux server: Docker Engine with Compose v2) and [Git](https://git-scm.com/downloads).
-- 16 GB of memory for the local KI, which reads invoices on this machine. With less, use an external KI (section 6).
+- 16 GB of memory for the local AI, which reads invoices on this machine. With less, use an external AI (section 6).
 - The landlord's Google account: they sign in with it, and Dwello admits no other account.
-- About 10 GB of disk space (images, KI model, database).
+- About 10 GB of disk space (images, AI model, database).
 
 ## 2. Download
 
@@ -36,7 +36,7 @@ Dwello has no passwords of its own yet (a one-step installer with its own sign-i
 cp .env.example .env
 ```
 
-Open `.env` in a text editor and set these values; Docker Compose reads them from this file (the others in it are for development and are ignored):
+Open `.env` in a text editor and set these values; Docker Compose reads them from this file (of the other values, `docker-compose.prod.yml` uses only `PUBLIC_APP_URL`, `COOKIE_DOMAIN`, `CORS_ORIGIN` and `LLM_*`; their defaults fit a PC):
 
 | Setting | Value |
 |---|---|
@@ -45,9 +45,9 @@ Open `.env` in a text editor and set these values; Docker Compose reads them fro
 | `ALLOWED_EMAILS` | the landlord's Google address; several separated by commas. Without it Dwello does not start |
 | `OAUTH_GOOGLE_CLIENT_ID`, `OAUTH_GOOGLE_CLIENT_SECRET` | from section 3 |
 | `OAUTH_GOOGLE_REDIRECT_URI` | `http://localhost:3000/auth/callback` (already set) |
-| `COOKIE_SECURE` | add this line: `false` on a PC, because Dwello is opened over plain `http://localhost` there |
+| `COOKIE_SECURE` | keep `false` on a PC, because Dwello is opened over plain `http://localhost` there |
 
-Optional, shown in the terms of use and the privacy statement Dwello gives the tenants: `OPERATOR_NAME`, `OPERATOR_ADDRESS`, `OPERATOR_CONTACT` (who runs the installation and backs up its data), and `OPERATOR_SERVER_COUNTRY`, required when the server is outside Switzerland. Keep `.env` private: it holds the keys.
+Optional, shown in the terms of use and the privacy statement of the app (which are addressed to the landlord; informing the tenants stays the landlord's duty, Art. 19 DSG): `OPERATOR_NAME`, `OPERATOR_ADDRESS`, `OPERATOR_CONTACT` (who runs the installation and backs up its data), and `OPERATOR_SERVER_COUNTRY`, required when the server is outside Switzerland. When an IT service or hoster runs the server, it processes the tenants' data on the landlord's behalf: the landlord needs a data processing agreement with it (Art. 9 DSG). Keep `.env` private: it holds the keys.
 
 ## 5. Start
 
@@ -56,13 +56,13 @@ docker compose -f docker-compose.prod.yml up -d
 docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
 ```
 
-The first start builds Dwello, which takes several minutes; the KI model is about 6 GB. Then open `http://localhost:3000` and sign in with the address from `ALLOWED_EMAILS`. The overview shows the landlord what to do first.
+The first start builds Dwello, which takes several minutes; the AI model is about 6 GB. `docker-compose.prod.yml` publishes the backend (3001), the database (5432) and the AI (11434) on all network interfaces, also on a PC: keep them closed in the firewall of the PC or router. Then open `http://localhost:3000` and sign in with the address from `ALLOWED_EMAILS`. The overview shows the landlord what to do first.
 
 - **Update:** `git pull`, then `docker compose -f docker-compose.prod.yml up -d --build`.
 - **Back up** the database regularly, e.g. `docker exec dwello-postgres pg_dump -U dwello dwello > dwello-backup.sql`, and keep the copy on another device. Uploaded invoices and PDFs are stored in the database too.
 - **E-mail to tenants:** `docker-compose.prod.yml` does not pass the mail settings on yet (#568). Until then Dwello files e-mails as «zu versenden», and the landlord sends the PDFs or prints the letters.
 
-## 6. Without 16 GB of memory: an external KI
+## 6. Without 16 GB of memory: an external AI
 
 Any OpenAI-compatible service that reads images works. Add to `.env`:
 
@@ -100,6 +100,6 @@ Google accepts a plain `http` address only for `localhost`. On a server Dwello t
 
    and remove `COOKIE_SECURE=false`.
 4. At Google (section 3): add `https://dwello.example.ch/auth/callback` as redirect URI.
-5. `docker-compose.prod.yml` also publishes the backend (3001), the database (5432) and the KI (11434). Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
+5. `docker-compose.prod.yml` also publishes the backend (3001), the database (5432) and the AI (11434). Block every port but 22, 80 and 443 in the firewall of your provider or router: Docker's published ports bypass `ufw`.
 
 For a home server that should stay out of the internet, Caddy can get the certificate through the DNS of the domain instead (see the Caddy documentation, «DNS challenge»); access from outside then goes through a VPN such as Tailscale.
