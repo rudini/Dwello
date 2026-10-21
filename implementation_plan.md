@@ -52,4 +52,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #585 closing review round 2: `docs/reviews/585-review-2.md` (C-1 closed, no new findings)
 - [x] #585 PR #589 merged
 - [x] #588 BFF tests red (`master-data-lists.test.ts`: Verteilschlüssel page, invoice forms, Heizprofile page, Einstellungen, statement run; 150 records, 100 shown); the seven loads ask for `limit=1000`, green; contract `tests/contracts/distribution-keys.json` with its check; No scenario: it needs more than 100 Verteilschlüssel or Heizprofile in the shared E2E database
-- [ ] #588 slice review, PR merged
+- [x] #588 slice review round 1: `docs/reviews/588-review-1.md`; Minor C-1 fixed (test of the statement run naming a Heizprofil after the 100th, red with limit=100)
+- [ ] #588 closing review, PR merged
