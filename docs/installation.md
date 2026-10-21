@@ -72,7 +72,7 @@ The first start builds Dwello, which takes several minutes; the AI model is abou
   docker cp dwello-backup.sql dwello-postgres:/tmp/dwello-backup.sql
   docker exec dwello-postgres psql -U dwello -f /tmp/dwello-backup.sql dwello
   ```
-- **E-mail to tenants:** `docker-compose.prod.yml` does not pass the mail settings on yet (#568). Until then Dwello files e-mails as «zu versenden», and the landlord sends the PDFs or prints the letters.
+- **E-mail to tenants:** `.env.example` sets `MAIL_TRANSPORT=smtp` with placeholder values. Fill in `MAIL_FROM` and `SMTP_*` from the landlord's mail provider (or set `MAIL_TRANSPORT=resend` and `RESEND_API_KEY`), and for SMTP also `MAIL_PROVIDER_NAME` and `MAIL_PROVIDER_COUNTRY`, which the privacy statement names (required when the mail server is outside Switzerland). Or remove the `MAIL_TRANSPORT` line: Dwello then sends no e-mail, and the landlord sends the PDFs or prints the letters.
 
 ## 6. Without 16 GB of memory: an external AI
 
