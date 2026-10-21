@@ -81,9 +81,19 @@ describe('Wohnung, die nach ihrem Stockwerk heisst', () => {
 	it.each([
 		['de', 'EG', 0, 'Wohnung EG, 82.00 m²'],
 		['de', '1. OG', 1, 'Wohnung 1. OG, 82.00 m²'],
-		['fr', 'EG', 0, 'EG, rez-de-chaussée, 82.00'],
-		['it', 'EG', 0, 'EG, pianterreno, 82.00'],
-		['en', 'EG', 0, 'EG, ground floor, 82.00']
+		// Fachreview 500-1: the numbers the Gebäuderegister import proposes («EG Links»), typed without care («eg», «1.OG»)
+		['de', 'EG Links', 0, 'Wohnung EG Links, 82.00 m²'],
+		['de', '2. OG Links', 2, 'Wohnung 2. OG Links, 82.00 m²'],
+		['de', 'eg', 0, 'Wohnung eg, 82.00 m²'],
+		['de', '1.OG', 1, 'Wohnung 1.OG, 82.00 m²'],
+		['fr', 'rez-de-chaussée', 0, 'Appartement rez-de-chaussée, 82.00'],
+		// the floor stays when it contradicts the number or is only the start of a word
+		['de', 'EG', 1, 'Wohnung EG, 1. OG, 82.00 m²'],
+		['de', 'EGG', 0, 'Wohnung EGG, EG, 82.00 m²'],
+		// in another language the floor's own name says what «EG» means
+		['fr', 'EG', 0, 'Appartement EG, rez-de-chaussée, 82.00'],
+		['it', 'EG', 0, 'Appartamento EG, pianterreno, 82.00'],
+		['en', 'EG', 0, 'Apartment EG, ground floor, 82.00']
 	] as const)('nennt auf %s die Wohnung «%s» im Stockwerk %i als «%s»', async (language, number, floor, text) => {
 		const data = { ...refund, apartment: { ...refund.apartment, number, floor } };
 		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64'));

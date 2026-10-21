@@ -65,4 +65,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #519 closing review round 2: `docs/reviews/519-review-2.md` (C-1 closed, no new findings)
 - [x] #519 PR #596 merged
 - [x] #500 render tests (`statement-pdf-render.test.ts`): «Wohnung EG» on floor 0 and «1. OG» on floor 1 in German red («Wohnung EG, EG»); fr, it, en keep the floor's own name (pins kept behaviour); No scenario: a PDF layout detail, the render test shows it (issue)
-- [ ] #500 fach-reviewer on the rule before implementing, implementation, review, PR merged
+- [x] #500 fachreview before implementing: `docs/reviews/500-fachreview-1.md`; Major V-1 (the import proposes «EG Links»: compare at a word boundary) and Minors V-2 (case, spaces), V-3 (fr row), V-4 (contradicting floor stays) taken into the tests before the change; V-5 («UG» vs «1. UG», pre-existing) and the missing floor terms became #597
+- [x] #500 `pdf.service.ts` leaves the floor out when the number starts with its name in the PDF language at a word boundary (case and spaces ignored); render tests green (129)
+- [ ] #500 code review, fachreview round 2, daten-pruefer, PR merged

@@ -657,6 +657,11 @@ function formatFloor(floor: number, lang: Language): string {
 	return floor === 0 ? ground : floor > 0 ? above(floor) : below(-floor);
 }
 
+// «EG», «eg» or «EG Links» on the ground floor already name the floor: the PDF does not print it twice (#500);
+// spaces and case do not count («1.OG»), a longer word does («EGG»)
+const namedByFloor = (number: string, floor: string) =>
+	new RegExp(`^${floor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s*')}(?=$|[\\s,-])`, 'i').test(number.trim());
+
 const fill = (text: string, values: Record<string, string | number>) =>
 	Object.entries(values).reduce((result, [key, value]) => result.split(`{${key}}`).join(String(value)), text);
 
@@ -709,7 +714,10 @@ function addresses({ doc, t, data, language }: Page) {
 		countryLine(data.tenant.country)
 	].filter(Boolean) as string[];
 	doc.font('Helvetica').fontSize(10).fillColor(COLORS.ink).text(tenant.join('\n'), 118 * MM, top, { width: 82 * MM });
-	const apartment = `${t.apartment} ${data.apartment.number}, ${formatFloor(data.apartment.floor, language)}, ${data.apartment.area} ${t.sqm}`;
+	const floor = formatFloor(data.apartment.floor, language);
+	const apartment = [`${t.apartment} ${data.apartment.number}`, !namedByFloor(data.apartment.number, floor) && floor, `${data.apartment.area} ${t.sqm}`]
+		.filter(Boolean)
+		.join(', ');
 	doc
 		.fontSize(9)
 		.font('Helvetica-Bold')
