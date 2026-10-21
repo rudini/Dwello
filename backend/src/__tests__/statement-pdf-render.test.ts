@@ -90,6 +90,12 @@ describe('Wohnung, die nach ihrem Stockwerk heisst', () => {
 		// the floor stays when it contradicts the number or is only the start of a word
 		['de', 'EG', 1, 'Wohnung EG, 1. OG, 82.00 m²'],
 		['de', 'EGG', 0, 'Wohnung EGG, EG, 82.00 m²'],
+		// code review 500-1: a comma or a hyphen ends the floor's name; a dot is a dot, not any sign («1-OG»)
+		['de', 'EG, links', 0, 'Wohnung EG, links, 82.00 m²'],
+		['de', 'EG-1', 0, 'Wohnung EG-1, 82.00 m²'],
+		['de', '1-OG', 1, 'Wohnung 1-OG, 1. OG, 82.00 m²'],
+		// «1° piano» is the start of «1° piano interrato»: below ground on floor 1 contradicts it
+		['it', '1° piano interrato', 1, 'Appartamento 1° piano interrato, 1° piano, 82.00'],
 		// in another language the floor's own name says what «EG» means
 		['fr', 'EG', 0, 'Appartement EG, rez-de-chaussée, 82.00'],
 		['it', 'EG', 0, 'Appartamento EG, pianterreno, 82.00'],
