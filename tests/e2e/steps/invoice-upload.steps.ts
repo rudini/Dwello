@@ -207,6 +207,11 @@ Then('sagt die Datei von {string} nicht {string}', async ({ verwalter, names }, 
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toContain(text);
 });
 
+// nothing left to do, also not «Füllen Sie die markierten Felder aus.» of the last attempt (#548)
+Then('hat die Datei von {string} keinen Hinweis mehr', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).toBeNull();
+});
+
 Then('ist die Datei von {string} nicht zum Erstellen ausgewählt', async ({ verwalter, names }, supplier: string) => {
 	await verwalter.sees(noteOnBeleg(names.get(supplier)!)).not.toBeNull();
 	await verwalter.sees(belegChosenForCreating(names.get(supplier)!)).toBe(false);

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { toDoOf, type UploadRow } from '$lib/invoice-upload';
+	import { checkRow, toDoOf, type UploadRow } from '$lib/invoice-upload';
 	import Alert from '$lib/ui/Alert.svelte';
 
 	// What the property manager should know about a file, then what keeps its invoice from being created
 	let { row, errors }: { row: UploadRow; errors: Record<string, string> } = $props();
 
+	const open = $derived(checkRow(row)); // what still keeps the invoice from being created
 	// a sentence once: the Kategorie missing after creating is the note the row had before
 	const messages = $derived([
 		...new Set(
@@ -14,7 +15,9 @@
 				...toDoOf(row),
 				// gone once a Kategorie is chosen after creating (#245, persona Helga P-1)
 				!row.values.categoryId && errors.category,
-				Object.keys(errors).some((field) => field !== 'category') && m.invoices_upload_fields_missing(),
+				// gone once every field the last attempt marked is filled, the Verteilschlüssel too (#548)
+				Object.keys(errors).some((field) => field !== 'category' && field in open) &&
+					m.invoices_upload_fields_missing(),
 				row.createError,
 				// after what is to do, so the long rule below does not push it down (#455, persona Marco of #222)
 				row.deducted

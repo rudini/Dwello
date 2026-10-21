@@ -113,6 +113,7 @@ Funktionalität: Rechnungsliste
     Dann zeigt ein neuer Tab die Datei als PDF
 
   # #245: der Hinweis sagt, dass die KI diese Datei nicht gelesen hat, und geht, sobald die Pflichtfelder ausgefüllt sind; die Felder in der Reihenfolge des Formulars
+  # #548: «Füllen Sie die markierten Felder aus.» geht mit dem Hinweis, sobald der Verteilschlüssel gewählt ist, nicht erst beim nächsten Erstellen
   Szenario: Rechnung ohne KI aus einer Datei erfassen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
     Dann sagt die Datei von "Elektro Blitz" "Die KI hat diese Datei nicht gelesen. Füllen Sie die Felder aus."
@@ -120,11 +121,13 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter bei der Datei den Rechnungssteller "Elektro Blitz", die Beschreibung "Treppenhauslicht", den Betrag "180.00" und das Rechnungsdatum "2026-03-31" erfasst
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt die Datei von "Elektro Blitz" "Wählen Sie eine Kategorie."
+    Und sagt die Datei von "Elektro Blitz" "Füllen Sie die markierten Felder aus."
     Und sagt die Datei von "Elektro Blitz" nicht "Die KI hat diese Datei nicht gelesen"
     Wenn der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" die Kategorie "Allgemeinstrom" wählt
     Dann sagt die Datei von "Elektro Blitz" nicht "Wählen Sie eine Kategorie."
     Wenn der Liegenschaftsverwalter bei der Datei von "Elektro Blitz" den Verteilschlüssel "Pro Fläche (m²)" wählt
     Dann bietet Dwello "1 Rechnung erstellen" an
+    Und hat die Datei von "Elektro Blitz" keinen Hinweis mehr
     Wenn der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "1 Rechnung erstellt"
 

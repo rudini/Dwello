@@ -85,6 +85,22 @@ describe('Verteilschlüssel beim Hochladen', () => {
 		expect(sentKey(calls)).toBe('k2');
 	});
 
+	// #548: the sentence went only with the next «Rechnungen erstellen», also after the Verteilschlüssel was chosen
+	it('nimmt «Füllen Sie die markierten Felder aus.» zurück, sobald der Verteilschlüssel gewählt ist', async () => {
+		openWith('');
+		fireEvent(byTestId<HTMLSelectElement>('invoice-upload-building-select')!, 'change', 'b2'); // no Verteilschlüssel to propose
+		await upload(pdf('blitz.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		const notes = () => byTestId('invoice-upload-row-message')?.textContent ?? '';
+		expect(notes()).toContain('Füllen Sie die markierten Felder aus.');
+
+		fireEvent(byTestId<HTMLSelectElement>('invoice-distribution-key-select')!, 'change', 'k1');
+		await settle();
+
+		expect(notes()).not.toContain('Füllen Sie die markierten Felder aus.');
+	});
+
 	// Code-Review 452-1 C-2: folding and unfolding the row keeps the landlord's own choice
 	it('behält einen selbst gewählten Verteilschlüssel nach dem Zu- und Aufklappen', async () => {
 		openWith('k1');
