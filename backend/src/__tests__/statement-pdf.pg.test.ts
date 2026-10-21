@@ -974,6 +974,35 @@ describe('PDF ohne vollständige Firmenadresse', () => {
 			expect(text).not.toContain('Firmenweg 9, 8001');
 		}));
 
+	// #503: ein Entwurf, dessen PDF jetzt abgelehnt wird, behält kein früheres PDF: der Verlauf nennt kein «PDF erstellt»
+	it('verwirft beim Entwurf das frühere PDF, wenn das neue abgelehnt wird', async () => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		try {
+			await expect(getStatementPdf(statement.id)).rejects.toMatchObject({ code: 'CREDITOR_ADDRESS_MISSING' });
+			const [stored] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statement.id));
+			expect({ pdfBlob: stored.pdfBlob, pdfGeneratedAt: stored.pdfGeneratedAt }).toEqual({ pdfBlob: null, pdfGeneratedAt: null });
+		} finally {
+			await setConfig('company_city', company.company_city);
+			await deleteStatement(statement.id);
+		}
+	});
+
+	it('verwirft beim Entwurf das frühere PDF auch ohne IBAN', async () => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		await db.delete(configuration).where(eq(configuration.key, 'iban'));
+		try {
+			expect(await getStatementPdf(statement.id)).toMatchObject({ status: 400, refusal: { code: 'IBAN_MISSING' } });
+			const [stored] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statement.id));
+			expect({ pdfBlob: stored.pdfBlob, pdfGeneratedAt: stored.pdfGeneratedAt }).toEqual({ pdfBlob: null, pdfGeneratedAt: null });
+		} finally {
+			await setConfig('iban', company.iban);
+			await deleteStatement(statement.id);
+		}
+	});
+
 	// Fachreview V-2: die Adresse (Strasse) bleibt freiwillig; Kopfzeile und Belegeinsicht nennen nur, was erfasst ist
 	it('nennt ohne Adresse den Absender ohne leere Teile', () =>
 		without('company_address')(async (id) => {
