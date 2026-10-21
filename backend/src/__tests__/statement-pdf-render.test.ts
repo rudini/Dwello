@@ -75,6 +75,30 @@ describe('Stockwerk im französischen PDF', () => {
 	});
 });
 
+// #500: an apartment named by its floor («EG» on the ground floor) does not print the floor twice; in another language
+// the floor's own name still says what «EG» means
+describe('Wohnung, die nach ihrem Stockwerk heisst', () => {
+	it.each([
+		['de', 'EG', 0, 'Wohnung EG, 82.00 m²'],
+		['de', '1. OG', 1, 'Wohnung 1. OG, 82.00 m²'],
+		['fr', 'EG', 0, 'EG, rez-de-chaussée, 82.00'],
+		['it', 'EG', 0, 'EG, pianterreno, 82.00'],
+		['en', 'EG', 0, 'EG, ground floor, 82.00']
+	] as const)('nennt auf %s die Wohnung «%s» im Stockwerk %i als «%s»', async (language, number, floor, text) => {
+		const data = { ...refund, apartment: { ...refund.apartment, number, floor } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64'));
+
+		expect(pdf.flowing).toContain(text);
+	});
+
+	it('nennt das Stockwerk weiter, wenn es zur Nummer etwas sagt', async () => {
+		const data = { ...refund, apartment: { ...refund.apartment, number: '2.01', floor: 2 } };
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
+
+		expect(pdf.flowing).toContain('Wohnung 2.01, 2. OG, 82.00 m²');
+	});
+});
+
 // British English counts «1st floor», «2nd floor» above the ground floor (461-native-en, EN-32), as the UI does
 describe('Stockwerk im englischen PDF', () => {
 	it.each([

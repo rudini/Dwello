@@ -63,4 +63,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #519 slice review round 1: `docs/reviews/519-review-1.md`; Minor C-1 fixed (the task waits for the error page of the failed load)
 - [x] #519 persona Anna: `docs/design/personas/anna-519.md` (the heading in de, fr, it, en confirmed; Minor P-1 on the pre-existing hint text stays in the report)
 - [x] #519 closing review round 2: `docs/reviews/519-review-2.md` (C-1 closed, no new findings)
-- [ ] #519 PR merged
+- [x] #519 PR #596 merged
+- [x] #500 render tests (`statement-pdf-render.test.ts`): «Wohnung EG» on floor 0 and «1. OG» on floor 1 in German red («Wohnung EG, EG»); fr, it, en keep the floor's own name (pins kept behaviour); No scenario: a PDF layout detail, the render test shows it (issue)
+- [ ] #500 fach-reviewer on the rule before implementing, implementation, review, PR merged
