@@ -102,6 +102,11 @@ function noticed(contracts: Row[]) {
 		}));
 }
 
+// Each statement once: a Zahlungsfrist changed between the reads of overdue and sent lists it in both; the first stays,
+// a key twice broke the page while loading (#605)
+const once = (statements: Row[]) =>
+	statements.filter((s, i) => statements.findIndex((o) => o.id === s.id) === i);
+
 // Drafts that would go to the apartment a moved-out tenant left, once per tenant (A-5, #114)
 const oldAddresses = (drafts: Row[]) => [
 	...new Map(
@@ -203,7 +208,7 @@ export const load = async ({
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
 		draftIds: drafts.map((s) => String(s.id)),
-		dueStatements: [...overdue, ...sent].map((s) => ({
+		dueStatements: once([...overdue, ...sent]).map((s) => ({
 			id: String(s.id),
 			tenantName: tenantOf(s),
 			paymentDeadline: String(s.paymentDeadline),

@@ -228,6 +228,21 @@ describe('Übersicht laden', () => {
 		expect(payment.tasks.map((task) => task.id)).not.toContain('overdue');
 	});
 
+	// #605: überfällig und versendet kommen aus zwei Abfragen; ändert sich die Zahlungsfrist dazwischen, steht dieselbe
+	// Abrechnung in beiden Listen. Die Übersicht nennt sie einmal (zweimal brach die Seite beim Laden ab)
+	it('nennt eine Abrechnung aus beiden Listen nur einmal', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const bruno = { ...statementList.data[0], id: 's9', tenant: { firstName: 'Bruno', lastName: 'Meier' } };
+		const data = await load({
+			fetch: backend(200, both, {
+				'/statements?status=overdue&limit=100': { data: [{ ...bruno, paymentDeadline: '2026-09-28' }] },
+				'/statements?status=sent&limit=100': { data: [{ ...bruno, paymentDeadline: '2026-11-09' }] }
+			})
+		} as never);
+
+		expect(data.deadlines.filter((d) => d.id === 's9').map((d) => d.date)).toEqual(['2026-09-28']);
+	});
+
 	// #454 (#408 point 7): the statements no longer current, from the backend; a sent one to correct (Fachreview 454-1 E-3)
 	it('nennt die versendeten Abrechnungen, die zu berichtigen sind', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
