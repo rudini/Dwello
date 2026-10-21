@@ -154,10 +154,11 @@
 					onclick={() => calendar?.showPicker?.()}
 					testid="{testid}-calendar"
 				/>
-				<!-- the browser's own calendar, opened by the button; typing stays in the text field -->
+				<!-- the browser's own calendar, opened by the button; typing stays in the text field. In no form (form=""): the page checks the date, a browser's own check (WebKit) stopped the form here (#566) -->
 				<input
 					bind:this={calendar}
 					type="date"
+					form=""
 					tabindex="-1"
 					aria-hidden="true"
 					class="sr-only"

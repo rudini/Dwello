@@ -64,6 +64,11 @@ Funktionalität: Gebäudedetail
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Dann heisst der Abschnitt zum Heizmaterial auf der Gebäudeseite "Tankbestand"
 
+  # #566: Safaris eigene Prüfung hielt das Formular am versteckten Kalender an, die Seite nannte nichts
+  Szenario: Ein Tankbestand ohne Stichtag nennt den fehlenden Stichtag
+    Wenn der Liegenschaftsverwalter für das Gebäude "Birkenhof" einen Tankbestand mit "500" Franken speichert, nachdem er den Stichtag "2024-12-31" eingegeben und wieder gelöscht hat
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie den Stichtag ein."
+
   # Nur eine Kategorie für Brennstoff hat einen Tankbestand (#100); ein Heizungsservice und der Kaminfeger werden
   # wie Heizkosten verteilt, sind aber kein Brennstoff
   Szenario: Der Tankbestand bietet nur Kategorien für Brennstoff an
