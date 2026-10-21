@@ -93,3 +93,8 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #602 PR merged (#603)
 - [x] #507 Workflow note: since O-47 (#587) a failed local E2E run leaves `playwright-report/trace/assets/*.js`, which `bun run lint` checks and fails on; fixed in its own pull request: ESLint ignores `playwright-report/**` (`test-results/` holds no scripts); `eslint-ignores.test.ts` red first
 - [x] O-47 lint code review: `docs/reviews/o47-lint-review-1.md` (no findings)
+- [x] O-47 lint PR merged (#604)
+- [x] #605 (main red after #603, firefox «Bildschirm ohne deutschen Text, dashboard default»): the page never hydrated, `each_key_duplicate`: one statement in the overdue and the sent list (its Zahlungsfrist changed between the two reads, trace of the run) gave two deadlines with one key. Load test red first (`dashboard.test.ts`); `+page.server.ts` lists each statement once, the first (overdue) stays; dashboard tests (31), lint, check, dashboard.feature chromium + api (50) green. No scenario: a race between two reads; the failing language row is the scenario
+- [x] #605 code review round 1: `docs/reviews/605-review-1.md`; Minor C-1 (two reads can also lose a statement whose Zahlungsfrist passes in between) fixed: one read `statements?status=open&limit=1000` replaces both and `once`; the load test reads it (red on main); dashboard tests (31), dashboard.feature (50), language rows of the overview in chromium (16) green; firefox is not installed in this container after its restart
+- [x] #605 closing review round 2: `docs/reviews/605-review-2.md` (C-1 closed, no new findings)
+- [ ] #605 PR merged
