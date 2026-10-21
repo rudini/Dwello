@@ -37,4 +37,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #522 BFF load test red: `agreeableCategories` reads `/categories/allowed` (every umlagefähige category, no limit); contract `tests/contracts/categories-allowed.json` with its check in `api-contracts.pg.test.ts`
 - [x] #522 `contractBody` test red: the body always names the shown and ticked categories (no click: every box), a category the form does not list is neither agreed nor kept; `flatRateNotice` test red: counts only shown boxes
 - [x] #522 No scenario: it needs more than 100 categories in the shared E2E database or a change in another tab while the form loads; contract E2E features (145) green
-- [ ] #522 slice review, PR merged
+- [x] #522 slice review round 1: `docs/reviews/522-review-1.md`; Minor C-2 fixed (one helper `ticked`); Minor C-1 (a category changed in another tab while the form loads is answered without a word; needs the backend to answer only shown ids) stays in the report, named in the PR; the invoice form limit became #583
+- [ ] #522 closing review, PR merged

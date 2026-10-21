@@ -190,14 +190,15 @@ export const contractBody = (values: ContractFormValues, shown: { id: string }[]
 		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null,
 	...(values.billedUntil !== undefined && { billedUntil: values.billedUntil || null }),
 	// the ticked boxes, also without a click: a category the form does not list is neither agreed nor kept (#522)
-	agreedCategoryIds: shown
-		.map((category) => category.id)
-		.filter((id) => values.agreedCategoryIds?.includes(id) ?? true)
+	agreedCategoryIds: ticked(values.agreedCategoryIds, shown).map((category) => category.id)
 });
 
-/** The names of the agreed Nebenkosten among the categories shown; without a choice every one (#91) */
+/** The agreed Nebenkosten among the categories shown; without a choice every one (#91) */
+export const ticked = <C extends { id: string }>(agreed: string[] | undefined, categories: C[]) =>
+	categories.filter((category) => agreed?.includes(category.id) ?? true);
+
 export const agreedNames = (agreed: string[] | undefined, categories: { id: string; name: string }[]) =>
-	categories.filter((category) => agreed?.includes(category.id) ?? true).map((category) => category.name);
+	ticked(agreed, categories).map((category) => category.name);
 
 /**
  * An apartment's contracts as the contract list answers them, in the shape the availability check reads; null when
