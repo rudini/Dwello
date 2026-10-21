@@ -1003,6 +1003,24 @@ describe('PDF ohne vollständige Firmenadresse', () => {
 		}
 	});
 
+	// Code-Review 503 C-1: eine versendete Abrechnung behält ihr PDF, wie es versendet wurde (hält das Verhalten fest)
+	it('behält bei einer versendeten Abrechnung das PDF, wenn ein neues abgelehnt wird', async () => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await updateStatementStatus(statement.id, 'sent');
+		await generateStatementPdf(statement.id, 'de');
+		await db.delete(configuration).where(eq(configuration.key, 'company_city'));
+		try {
+			const response = await sendJson('POST', `/api/v1/statements/${statement.id}/generate-pdf`, {});
+			const [stored] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statement.id));
+			expect(response.status).toBe(400);
+			expect([stored.pdfBlob, stored.pdfGeneratedAt].every(Boolean)).toBe(true);
+		} finally {
+			await setConfig('company_city', company.company_city);
+			await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statement.id));
+			await deleteStatement(statement.id);
+		}
+	});
+
 	// Fachreview V-2: die Adresse (Strasse) bleibt freiwillig; Kopfzeile und Belegeinsicht nennen nur, was erfasst ist
 	it('nennt ohne Adresse den Absender ohne leere Teile', () =>
 		without('company_address')(async (id) => {
