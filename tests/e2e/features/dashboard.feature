@@ -116,6 +116,88 @@ Funktionalität: Übersicht
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Übersicht die Aufgabe "Abrechnungen prüfen und versenden"
 
+  # #454 (#408 Punkt 7, #386): ein Entwurf, dem eine danach erfasste Rechnung fehlt, ist nicht aktuell; die Übersicht
+  # nennt ihn vor den Entwürfen zum Zustellen und führt zu den Entwürfen des Gebäudes und der Periode
+  # ein aktueller Entwurf in einem anderen Gebäude: die Entwurfsaufgabe zählt nur ihn, unabhängig von parallelen Läufen
+  Szenario: Nicht aktuelle Entwürfe als eigene Aufgabe
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.01" seit "2020-01-01" für "900" Franken
+    Und "Bruno Meier" hat die Abrechnung des letzten Jahres für das Gebäude "Ahornhof"
+    Und "Anna Keller" hat eine Abrechnung im Entwurf
+    Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Aufgabe zu nicht aktuellen Entwürfen die Entwürfe von "Seeblick" des letzten Jahres
+    Und sagt die Aufgabe zu nicht aktuellen Entwürfen "Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht, oder der Tankbestand wurde geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen."
+    Und steht die Aufgabe zu nicht aktuellen Entwürfen vor der Aufgabe "Abrechnungen prüfen und versenden"
+
+  Szenario: Von den nicht aktuellen Entwürfen zu den Entwürfen des Gebäudes
+    Angenommen "Anna Keller" hat eine Abrechnung im Entwurf
+    Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
+    Und der Liegenschaftsverwalter öffnet die Übersicht
+    Wenn der Liegenschaftsverwalter die nicht aktuellen Entwürfe von "Seeblick" des letzten Jahres öffnet
+    Dann zeigt die Abrechnungsliste die Entwürfe von "Seeblick" des letzten Jahres
+
+  # #454 (#408 Punkt 7): eine versendete Abrechnung mit demselben Hinweis wird berichtigt, nicht zugestellt
+  Szenario: Versendete Abrechnung mit danach erfasster Rechnung als Aufgabe
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
+    Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Abrechnung berichtigen" für "Anna Keller"
+    Und sagt die Aufgabe "Abrechnung berichtigen" für "Anna Keller" "wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen». Die berichtigte Abrechnung rechnet an, was schon bezahlt ist."
+
+  # code review 454-1 C-1: auch eine überfällige Abrechnung wird berichtigt
+  Szenario: Überfällige Abrechnung mit danach erfasster Rechnung als Aufgabe
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 15 Tagen abgelaufen ist
+    Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Abrechnung berichtigen" für "Anna Keller"
+
+  # PO 2026-10-20 (Fachreview 454-1 E-3): nur wenn das Neuberechnen den Saldo oder eine Position dieses Mietvertrags
+  # ändert; Bruno trägt von einer Rechnung für die Zeit nach seinem Auszug nichts
+  Szenario: Keine Aufgabe «Abrechnung berichtigen», wenn die Änderung den Mieter nicht trifft
+    Angenommen der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" ist im letzten Jahr aus der Wohnung "1.02" ausgezogen
+    Und "Bruno Meier" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
+    Und im Gebäude "Seeblick" gibt es danach eine Rechnung für die Zeit nach dem Auszug von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann ist die Frist "Zahlungsfrist Bruno Meier" "in 10 Tagen"
+    Und nicht die Aufgabe "Abrechnung berichtigen" für "Bruno Meier"
+    # PO 2026-10-20 (Fachreview 454-2 V-17 A): die Abrechnung sagt dasselbe
+    Wenn der Liegenschaftsverwalter die Abrechnung des letzten Jahres von "Bruno Meier" öffnet
+    Dann weist die Abrechnung darauf hin: "ändert das weder den Saldo noch eine Position. Sie müssen die Abrechnung nicht berichtigen."
+
+  # PO 2026-10-20 (Fachreview 454-1 E-5): auch nach mehr als fünf Jahren, mit dem Hinweis auf die Verjährung
+  Szenario: Aufgabe «Abrechnung berichtigen» für eine Abrechnungsperiode vor mehr als fünf Jahren
+    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2020-01-01" bis "2020-12-31" im Gebäude "Seeblick"
+    Und die Abrechnung 2020 von "Anna Keller" ist versendet
+    Und im Gebäude "Seeblick" gibt es eine Rechnung der Kategorie "Hauswart" über "300" Franken vom "2020-06-15"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann sagt die Aufgabe "Abrechnung berichtigen" für "Anna Keller" "Diese Abrechnungsperiode endete vor mehr als fünf Jahren. Lassen Sie sich beraten, ob die Forderung verjährt ist."
+
+  # PO 2026-10-20 (Fachreview 454-1 E-6): der Liegenschaftsverwalter darf auf das Berichtigen verzichten; der Verlauf der
+  # Abrechnung hält es fest
+  Szenario: Abrechnung nicht berichtigen
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
+    Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
+    Und der Liegenschaftsverwalter öffnet die Übersicht
+    Wenn der Liegenschaftsverwalter die Aufgabe "Abrechnung berichtigen" für "Anna Keller" beginnt
+    Und der Liegenschaftsverwalter die Abrechnung nicht berichtigt
+    Dann nennt der Verlauf "Nicht berichtigt" am heutigen Tag
+    Und weist die Abrechnung darauf hin: "haben Sie entschieden, die Abrechnung nicht zu berichtigen."
+    Und bietet die Abrechnung «Nicht berichtigen» nicht mehr an
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann ist die Frist "Zahlungsfrist Anna Keller" "in 10 Tagen"
+    Und nicht die Aufgabe "Abrechnung berichtigen" für "Anna Keller"
+
+  Szenario: Von der Aufgabe «Abrechnung berichtigen» zur Abrechnung
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
+    Und im Gebäude "Seeblick" gibt es danach eine Rechnung des letzten Jahres
+    Und der Liegenschaftsverwalter öffnet die Übersicht
+    Wenn der Liegenschaftsverwalter die Aufgabe "Abrechnung berichtigen" für "Anna Keller" beginnt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung des letzten Jahres von "Anna Keller"
+
   Szenario: Bevorstehende Zahlungsfrist
     Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
     Wenn der Liegenschaftsverwalter die Übersicht öffnet

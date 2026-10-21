@@ -21,7 +21,7 @@ import {
 	recalculateStatement
 } from '../services/statement.service';
 import { changeStatementStatus, generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
-import { changedInvoices } from '../services/statement-invoices.service';
+import { declineCorrection, outdatedStatements, statementChanges } from '../services/statement-invoices.service';
 import { sendStatement } from '../services/statement-send.service';
 
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
@@ -44,6 +44,8 @@ const calculationBody = t.Object({
 });
 
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
+	// The drafts with a change since and the statements due for correcting, for the Übersicht (#454)
+	.get('/outdated', async () => ({ statements: await outdatedStatements() }))
 	// List all statements
 	.get(
 		'/',
@@ -161,15 +163,31 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		}
 	)
 
-	// The invoices of its period recorded, changed or deleted since the statement was created (#96)
+	// The invoices of its period recorded, changed or deleted since the statement was created (#96), its Tankbestand,
+	// and whether a correction is due (#454)
 	.get('/:id/changed-invoices', async ({ params, set }) => {
-		const invoiceIds = await changedInvoices(params.id);
-		if (!invoiceIds) {
+		const changes = await statementChanges(params.id);
+		if (!changes) {
 			set.status = 404;
 			return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
 		}
-		return { invoiceIds };
+		const { result: _result, ...shown } = changes;
+		return shown;
 	})
+
+	// «Nicht berichtigen» (#454)
+	.post(
+		'/:id/decline-correction',
+		async ({ params, set }) => {
+			try {
+				return await declineCorrection(params.id);
+			} catch (error) {
+				set.status = correctionStatus(error);
+				return codedBody(error, 'CALCULATION_FAILED', 'Declining the correction failed');
+			}
+		},
+		{ params: t.Object({ id: t.String() }) }
+	)
 
 	// Update a statement
 	.put(

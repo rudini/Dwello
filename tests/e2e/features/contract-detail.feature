@@ -291,12 +291,33 @@ Funktionalität: Mietvertragsdetail
     Wenn der Liegenschaftsverwalter die fehlende Abrechnung ab "2024-04-01" erstellen will
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" vom "2023-07-01" bis "2024-06-30"
 
-  # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode
+  # #211: der Hinweis führt zu den Rechnungen des Gebäudes in der fehlenden Periode; #454 (#408 Punkt 1): gefiltert nach
+  # der Abrechnungsperiode, wie eine Abrechnung sie nimmt
   Szenario: Rechnungen der fehlenden Periode anzeigen
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter die Rechnungen der fehlenden Abrechnung 2024 anzeigt
-    Dann zeigt die Rechnungsliste die Rechnungen des Jahres 2024 im Gebäude "Ahornhof"
+    Dann zeigt die Rechnungsliste die Rechnungen der Abrechnungsperiode vom "2024-01-01" bis "2024-12-31" im Gebäude "Ahornhof"
+
+  # #454 (#408 Punkt 1): für einen Teil der Periode genau die fehlenden Tage
+  Szenario: Rechnungen der fehlenden Tage anzeigen
+    Angenommen für "Anna Keller" gibt es die Abrechnung vom "2024-04-01" bis "2024-09-30" im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann bietet der Mietvertrag für die Tage ab "2024-10-01" die Rechnungen "Rechnungen für 01.10.2024 – 31.12.2024 ansehen" an
+    Wenn der Liegenschaftsverwalter die Rechnungen der fehlenden Tage ab "2024-10-01" anzeigt
+    Dann zeigt die Rechnungsliste die Rechnungen der Abrechnungsperiode vom "2024-10-01" bis "2024-12-31" im Gebäude "Ahornhof"
+
+  # Fachreview 454-1 V-2: für Tage in der Abrechnungsperiode einer bestehenden Abrechnung des Gebäudes zeigt der Link die
+  # Rechnungen dieser Periode, denn die angebotene Abrechnung nimmt sie (Regel 1)
+  Szenario: Rechnungen der Abrechnungsperiode eines anderen Mietvertrags anzeigen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Ben Meier" existiert
+    Und "Ben Meier" mietete die Wohnung "2.02" von "2023-07-01" bis "2024-06-30" für "900" Franken
+    Und für "Ben Meier" gibt es die Abrechnung vom "2023-07-01" bis "2024-06-30" im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann bietet der Mietvertrag für die Tage ab "2024-04-01" die Rechnungen "Rechnungen für 01.07.2023 – 30.06.2024 ansehen" an
+    Wenn der Liegenschaftsverwalter die Rechnungen der fehlenden Tage ab "2024-04-01" anzeigt
+    Dann zeigt die Rechnungsliste die Rechnungen der Abrechnungsperiode vom "2023-07-01" bis "2024-06-30" im Gebäude "Ahornhof"
 
   Szenario: Abrechnungen eines Mietvertrags anzeigen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"

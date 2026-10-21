@@ -607,6 +607,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann sagt die Vorschau zur Abrechnung 2024 von "Eva Frei" "Seit dem Erstellen dieses Entwurfs wurden Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht."
     Und sagt die Vorschau "Bestehende Abrechnungen bleiben, wie sie sind, auch Entwürfe."
 
+  # #454 (#408 Punkt 8), Fachreview 454-2 V-19: ein danach geänderter Tankbestand zählt wie eine geänderte Rechnung
+  Szenario: Vorschau nennt einen Entwurf mit danach geändertem Tankbestand
+    Angenommen es gibt das Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale
+    Und der Tankbestand vom "2024-12-31" im Gebäude "Lindenhof" ist danach "200" Franken
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 3 % Verwaltungspauschale öffnet
+    Dann sagt die Vorschau zur Abrechnung 2024 von "Eva Frei" "Seit dem Erstellen dieses Entwurfs wurde der Tankbestand der Abrechnungsperiode geändert."
+
   # #132: der übliche Fall nach einer nachträglichen Rechnung: alle Mietverträge haben schon einen Entwurf
   Szenario: Vorschau ohne neue Abrechnung nennt einen Entwurf, dem eine danach erfasste Rechnung fehlt
     Angenommen es gibt das Heizprofil "Winter"

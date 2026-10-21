@@ -7,6 +7,7 @@
 
 	// One task: what, why, and the way there; the next step is highlighted and holds the main action
 	let { task, next }: { task: Task; next: boolean } = $props();
+	const links = $derived(task.link ? [task.link] : (task.links ?? []));
 </script>
 
 <li
@@ -24,13 +25,13 @@
 		{#if next}<p class="font-semibold text-accent">{m.dashboard_next_step()}</p>{/if}
 		<h3 class="text-xl font-bold text-ink">{task.title}</h3>
 		<p class="text-ink-muted">{task.text}</p>
-		{#if task.link}
+		{#each links as link (link.href)}
 			<a
-				href={task.link.href}
+				href={link.href}
 				class="inline-flex min-h-12 items-center self-start text-accent underline underline-offset-4 hover:text-accent-strong"
-				data-testid="overview-task-link">{task.link.label}</a
+				data-testid="overview-task-link">{link.label}</a
 			>
-		{/if}
+		{/each}
 	</div>
 	<Button variant={next ? 'primary' : 'secondary'} href={task.href}>{task.action}</Button>
 </li>

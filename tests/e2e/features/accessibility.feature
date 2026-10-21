@@ -125,6 +125,7 @@ Funktionalität: Barrierefreiheit
       | invoices               | default             |
       | invoices               | empty               |
       | invoices               | filtered-empty      |
+      | invoices               | period-filter       |
       | invoices               | upload-dialog       |
       | invoices               | upload-discard-dialog |
       | invoices               | upload-partial      |
@@ -184,6 +185,10 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | mark-paid-early     |
       | statement-sent-detail  | action-error        |
       | statement-sent-detail  | correct-dialog      |
+      | statement-sent-detail  | decline-dialog      |
+      | statement-unaffected-detail | default        |
+      | statement-declined-detail | default          |
+      | statement-lowered-detail | default           |
       | statement-paid-detail  | default             |
       | statement-paid-detail  | reset-payment-dialog |
       | statement-paid-detail  | correct-dialog      |

@@ -6,6 +6,7 @@ import apartmentList from '../../tests/contracts/apartments.json';
 import config from '../../tests/contracts/config.json';
 import statementList from '../../tests/contracts/statements.json';
 import documentList from '../../tests/contracts/documents.json';
+import outdatedStatements from '../../tests/contracts/statements-outdated.json';
 
 const API = 'http://localhost:3001/api/v1';
 // an apartment of the API contract, without the dates it does not have
@@ -124,6 +125,7 @@ function backend(
 			]
 		},
 		'/documents?status=to_send': { data: [{ id: 'd1' }, { id: 'd2' }] },
+		'/statements/outdated': { statements: [] },
 		'/contracts?status=active&limit=100': {
 			contracts: [
 				{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-11-01' },
@@ -224,6 +226,34 @@ describe('Übersicht laden', () => {
 
 		expect(refund.tasks.map((task) => task.id)).toContain('overdue');
 		expect(payment.tasks.map((task) => task.id)).not.toContain('overdue');
+	});
+
+	// #454 (#408 point 7): the statements no longer current, from the backend; a sent one to correct (Fachreview 454-1 E-3)
+	it('nennt die versendeten Abrechnungen, die zu berichtigen sind', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const data = await load({ fetch: backend(200, both, { '/statements/outdated': outdatedStatements }) } as never);
+		const task = data.tasks.find((one) => one.id === 'correct-s7')!;
+		expect(task.text).toContain('Seit dem Erstellen der Abrechnung NK-2025-0007 von Eva Frei wurde 1 Rechnung');
+		expect(task.href).toBe('/statements/s7');
+	});
+
+	it('zeigt die Übersicht auch, wenn die nicht aktuellen Abrechnungen nicht zu laden sind', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const failing = backend(200, both);
+		const fetch = (async (url: string) =>
+			url.endsWith('/statements/outdated') ? new Response(null, { status: 500 }) : failing(url)) as typeof globalThis.fetch;
+		const data = await load({ fetch } as never);
+		expect(data.tasks.map((one) => one.id)).not.toContain('outdated-drafts');
+		expect(data.tasks.map((one) => one.id)).toContain('drafts');
+	});
+
+	// Fachreview 454-1 V-10: the link of the missing statements names the building of the newest period
+	it('führt von den fehlenden Abrechnungen zu den Rechnungen eines Gebäudes', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const data = await load({ fetch: backend(200, []) } as never);
+		expect(data.tasks.find((one) => one.id === 'missing-period')!.link!.href).toMatch(
+			/^\/invoices\?building=[^&]+&periodStart=\d{4}-\d{2}-\d{2}&periodEnd=\d{4}-\d{2}-\d{2}$/
+		);
 	});
 
 	it('erinnert an die abgelaufene Abrechnungsperiode, für die es noch keine Abrechnung gibt', async () => {

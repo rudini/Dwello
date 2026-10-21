@@ -20,6 +20,7 @@ import {
 	invoicesOfPosition,
 	laterInvoicesHint,
 	laterInvoicesHints,
+	declineCorrectionOffered,
 	languageOfPdf,
 	carryOver,
 	correctPaidAmount,
@@ -56,8 +57,10 @@ import {
 	correctStatement,
 	correctStatementPaid,
 	recalculateDraft,
+	declineCorrection,
 	createCorrection,
 	openCorrectConfirmation,
+	openCorrectionFromHint,
 	openCorrection,
 	openReplacedContract,
 	openReplacedStatement,
@@ -357,6 +360,26 @@ Then('weist die Abrechnung auf keine geänderten Rechnungen hin', async ({ verwa
 	await verwalter.sees(laterInvoicesHints).toBe(0);
 });
 
+// #454: invoices or the Tankbestand (Fachreview 454-1 V-15)
+Then('weist die Abrechnung auf keine Änderung seit dem Erstellen hin', async ({ verwalter }) => {
+	await verwalter.sees(laterInvoicesHints).toBe(0);
+});
+
+// the title leads the hint
+Then('nennt der Hinweis auf Änderungen seit dem Erstellen den Titel {string}', async ({ verwalter }, title: string) => {
+	await verwalter.sees(laterInvoicesHint).toMatch(new RegExp(`^${title}`));
+});
+
+When('der Liegenschaftsverwalter die Abrechnung nicht berichtigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(declineCorrection);
+});
+
+// after a positive check on the same page
+Then('bietet die Abrechnung «Nicht berichtigen» nicht mehr an', async ({ verwalter }) => {
+	await verwalter.sees(declineCorrectionOffered).toBe(0);
+});
+
+
 Then('nennt die Abrechnung {string}', async ({ verwalter }, language: string) => {
 	await verwalter.sees(languageOfPdf).toBe(language);
 });
@@ -373,7 +396,7 @@ When('der Liegenschaftsverwalter die Abrechnung als am Tag des Versands bezahlt 
 	await verwalter.attemptsTo(markStatementPaidOn(inDays(0)));
 });
 
-Then('nennt der Verlauf {string} am Tag des Versands', async ({ verwalter }, label: string) => {
+Then(/^nennt der Verlauf "([^"]+)" am (?:Tag des Versands|heutigen Tag)$/, async ({ verwalter }, label: string) => {
 	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${sendingDay().replace(/\./g, '\\.')}`));
 });
 
@@ -450,6 +473,15 @@ When('der Liegenschaftsverwalter die Abrechnung berichtigt', async ({ verwalter 
 
 When('der Liegenschaftsverwalter die Abrechnung berichtigen will', async ({ verwalter }) => {
 	await verwalter.attemptsTo(openCorrectConfirmation);
+});
+
+// #454 (persona Anna 454 P-1): from the hint on what changed since
+When('der Liegenschaftsverwalter die Abrechnung aus dem Hinweis berichtigen will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openCorrectionFromHint);
+});
+
+Given('die Rechnung {string} ist danach gelöscht', async ({ seed }, invoice: string) => {
+	await seed.deleteInvoice(`Rechnung ${invoice}`);
 });
 
 When('der Liegenschaftsverwalter die berichtigte Abrechnung erstellt', async ({ verwalter }) => {
@@ -626,3 +658,10 @@ Then(
 Then('folgt die Kostenaufstellung im üblichen Abstand auf den Status', async ({ verwalter }) => {
 	await verwalter.sees(gapAboveCostBreakdown).toBe(32);
 });
+
+Given(
+	'der Tankbestand vom {string} im Gebäude {string} ist danach {string} Franken',
+	async ({ seed }, date: string, building: string, amount: string) => {
+		await seed.changeFuelStock(building, date, amount);
+	}
+);

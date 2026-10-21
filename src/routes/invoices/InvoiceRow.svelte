@@ -46,6 +46,12 @@
 	</p>
 	<p class="font-semibold tabular-nums text-ink xl:w-32 xl:shrink-0 xl:text-right">
 		<span data-testid="invoice-amount">{formatCurrency(invoice.amount)}</span>
+		<!-- a Leistungszeitraum beyond the Abrechnungsperiode counts with its days in it (Fachreview 454-1 V-11) -->
+		{#if invoice.inPeriodAmount !== undefined && invoice.inPeriodAmount !== invoice.amount}
+			<span class="block font-normal text-ink-muted" data-testid="invoice-in-period"
+				>{m.invoices_in_period({ amount: formatCurrency(invoice.inPeriodAmount) })}</span
+			>
+		{/if}
 	</p>
 	<div class="flex flex-wrap gap-2 xl:w-40 xl:shrink-0">
 		<Badge

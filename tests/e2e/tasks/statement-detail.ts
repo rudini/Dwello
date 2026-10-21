@@ -6,7 +6,10 @@ import {
 	confirmEarlyPaidDateButton,
 	correctPaidAmountInput,
 	correctStatementButton,
+	laterCorrectButton,
 	confirmRecalculateButton,
+	confirmDeclineCorrectionButton,
+	declineCorrectionButton,
 	recalculateButton,
 	createCorrectionButton,
 	replacedByLink,
@@ -78,12 +81,17 @@ export const openResetPaymentConfirmation = Click.on(resetPaymentButton);
 export const resetPayment: Activity = (actor) =>
 	actor.attemptsTo(Click.on(resetPaymentButton), Click.on(confirmResetPaymentButton));
 
+// #454 (Fachreview 454-1 E-6): a sent statement left as it is, after the confirmation
+export const declineCorrection: Activity = (actor) =>
+	actor.attemptsTo(Click.on(declineCorrectionButton), Click.on(confirmDeclineCorrectionButton));
+
 // #338: a draft is calculated again from the invoices as they are now, after the confirmation names the consequence
 export const recalculateDraft: Activity = (actor) =>
 	actor.attemptsTo(Click.on(recalculateButton), Click.on(confirmRecalculateButton));
 
 // #120: replacing names its consequence first; the berichtigte Abrechnung is created on the replaced one
 export const openCorrectConfirmation = Click.on(correctStatementButton);
+export const openCorrectionFromHint = Click.on(laterCorrectButton);
 export const correctStatement: Activity = (actor) =>
 	actor.attemptsTo(Click.on(correctStatementButton), Click.on(confirmCorrectButton));
 export const createCorrection = Click.on(createCorrectionButton);

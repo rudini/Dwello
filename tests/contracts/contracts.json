@@ -15,6 +15,7 @@
 			"flatRateUtilityCharge": "0.00",
 			"tenantName": "Anna Keller",
 			"apartmentNumber": "2.01",
+			"buildingId": "b1",
 			"buildingName": "Ahornhof",
 			"buildingAddress": "Ahornweg 1"
 		}

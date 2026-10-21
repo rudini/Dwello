@@ -8,6 +8,7 @@ import {
 	costBreakdown,
 	statementAdvancePaid,
 	correctDialog,
+	declineCorrectionButton,
 	correctPaidAmountInput,
 	earlyPaidDateWarning,
 	paymentDeadline,
@@ -133,3 +134,6 @@ export const advancePaidOfStatement = Text.of(statementAdvancePaid);
 export const advanceDiffersText = Text.of(advanceDiffers);
 export const sendConfirmLabel = Text.of(confirmSendButton);
 export const letterInsteadOffers = Count.of(letterInsteadLink);
+
+// #454 (Fachreview 454-1 E-6)
+export const declineCorrectionOffered = Count.of(declineCorrectionButton);

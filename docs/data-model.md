@@ -320,6 +320,7 @@ payment_recorded_at    TIMESTAMP               -- when the payment was recorded;
 replaces_id            UUID → utility_statements(id) -- a berichtigte Abrechnung: the statement it replaces (#120, unique)
 prior_payments         DECIMAL(12,2) NOT NULL DEFAULT 0 -- paid on the replaced statement and its own replaced ones; a refund paid negative (#120)
 carried_from_id        UUID → utility_statements(id) -- the Übertrag: the earlier statement of the contract whose Saldo below CHF 5 this one counts in (#448)
+correction_declined    JSONB -- «Nicht berichtigt» (#454): { on, result }, the day and the recalculated Saldo and shares the landlord did not correct to
 reminder_sent_date     DATE
 pdf_blob               TEXT                    -- Base64 PDF with QR-bill
 pdf_generated_at       TIMESTAMP

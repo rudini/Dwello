@@ -7,6 +7,9 @@ import {
 	occupancyVacancyHelp,
 	overviewDeadline,
 	overviewTask,
+	outdatedDraftsTask,
+	outdatedDraftsLink,
+	overviewTaskTitles,
 	overviewTaskFor,
 	overviewTasksOf
 } from '../targets/dashboard';
@@ -31,6 +34,7 @@ export const occupancyHelp = Text.of(occupancyVacancyHelp);
 export const occupancyShown = (building: string) => Visibility.of(occupancyRow(building));
 export const overviewTaskShown = (title: string) => Visibility.of(overviewTask(title));
 export const overviewTaskText = (title: string) => Text.of(overviewTask(title));
+export const overviewTaskTextFor = (title: string, name: string) => Text.of(overviewTaskFor(title, name));
 export const overviewTaskShownFor = (title: string, name: string) => Visibility.of(overviewTaskFor(title, name));
 export const overviewTasksNaming = (name: string) => Count.of(overviewTasksOf(name));
 export const deadlineText = (kind: string, name: string) => Text.of(overviewDeadline(kind, name));
@@ -41,3 +45,12 @@ export const statusFilterShown = question('the status filter of the list', async
 	const status = new URL(await actor.answer(pageAddress)).searchParams.get('status');
 	return Object.keys(statuses).find((label) => statuses[label] === status) ?? status;
 });
+export const outdatedDraftsText = Text.of(outdatedDraftsTask);
+export const outdatedDraftsOf = (name: string) => Text.of(outdatedDraftsLink(name));
+// the titles of the outdated-drafts task and of another one, in the order the page shows them
+export const outdatedDraftsAnd = (title: string) =>
+	question(`the order of «nicht aktuell» and «${title}»`, async (actor) =>
+		(await actor.answer(Text.ofAll(overviewTaskTitles)))
+			.map((shown) => (/nicht aktuell/.test(shown) ? 'nicht aktuell' : shown))
+			.filter((shown) => shown === 'nicht aktuell' || shown === title)
+	);

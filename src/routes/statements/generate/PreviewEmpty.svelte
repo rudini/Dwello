@@ -19,7 +19,7 @@
 	// the run creates nothing: only drafts missing invoices matter, not settings of new statements (#132)
 	const outdated = (changed: ChangedStatement[]) =>
 		changed
-			.filter((s) => s.outdated)
+			.filter((s) => s.outdated || s.fuelStock)
 			.map((s) => ({ ...s, profile: null, profileEdited: null, fee: null }));
 </script>
 

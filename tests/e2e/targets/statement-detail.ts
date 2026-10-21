@@ -91,6 +91,13 @@ export const paymentDeadline = target('Zahlungsfrist der Abrechnung', (page) => 
 export const reminderButton = target('Mahnung senden', (page) => page.getByTestId('statement-reminder-button'));
 export const oldAddressWarning = target('Warnung vor der alten Adresse', (page) => page.getByTestId('statement-old-address'));
 
+// #454 (persona Anna 454 P-1): «Abrechnung berichtigen» in the hint on what changed since
+export const laterCorrectButton = target('Abrechnung berichtigen im Hinweis', (page) => page.getByTestId('statement-later-correct-button'));
+// #454 (Fachreview 454-1 E-6): a sent statement left as it is, after the confirmation
+export const declineCorrectionButton = target('Nicht berichtigen', (page) => page.getByTestId('statement-decline-correction-button'));
+export const confirmDeclineCorrectionButton = target('Nicht berichtigen bestätigen', (page) =>
+	page.getByTestId('statement-decline-correction-confirm')
+);
 // #338: «Neu berechnen» and its confirmation
 export const recalculateButton = target('Neu berechnen', (page) => page.getByTestId('statement-recalculate-button'));
 export const confirmRecalculateButton = target('Neu berechnen bestätigen', (page) => page.getByTestId('statement-recalculate-confirm'));

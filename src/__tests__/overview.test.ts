@@ -152,7 +152,7 @@ describe('Aufgaben der Übersicht', () => {
 			input({
 				statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 1 },
 				missingStatements: [
-					{ building: 'Seeblick', periods: [{ start: '2025-01-01', end: '2025-12-31' }] }
+					{ building: 'Seeblick', buildingId: 'b1', periods: [{ start: '2025-01-01', end: '2025-12-31' }] }
 				]
 			})
 		);
@@ -167,8 +167,9 @@ describe('Aufgaben der Übersicht', () => {
 		});
 		expect(tasks[1].text).toContain('Noch nicht abgerechnet: Seeblick (2025).');
 		// the invoices come first, so the task leads to them as well
+		// #454: the invoices a statement of the period takes
 		expect(tasks[1].link).toEqual({
-			href: '/invoices?year=2025',
+			href: '/invoices?building=b1&periodStart=2025-01-01&periodEnd=2025-12-31',
 			label: 'Rechnungen 2025 ansehen'
 		});
 	});
@@ -180,12 +181,13 @@ describe('Aufgaben der Übersicht', () => {
 				missingStatements: [
 					{
 						building: 'Ahornhof',
+						buildingId: 'b2',
 						periods: [
 							{ start: '2025-01-01', end: '2025-12-31' },
 							{ start: '2024-07-01', end: '2024-12-31' }
 						]
 					},
-					{ building: 'Seeblick', periods: [{ start: '2023-01-01', end: '2023-12-31' }] }
+					{ building: 'Seeblick', buildingId: 'b1', periods: [{ start: '2023-01-01', end: '2023-12-31' }] }
 				]
 			})
 		);
@@ -193,8 +195,12 @@ describe('Aufgaben der Übersicht', () => {
 		expect(task.text).toContain(
 			'Noch nicht abgerechnet: Ahornhof (2025, 01.07.2024 – 31.12.2024), Seeblick (2023).'
 		);
-		// the invoices of the newest period come first
-		expect(task.link).toEqual({ href: '/invoices?year=2025', label: 'Rechnungen 2025 ansehen' });
+		// the invoices of the newest period come first, of its building (Fachreview 454-1 V-10), named when the text
+		// names several (Fachreview 454-2 V-22)
+		expect(task.link).toEqual({
+			href: '/invoices?building=b2&periodStart=2025-01-01&periodEnd=2025-12-31',
+			label: 'Rechnungen von Ahornhof für 2025 ansehen'
+		});
 	});
 
 	it('erinnert nicht, wenn jeder Mietvertrag abgerechnet ist', () => {
@@ -202,17 +208,166 @@ describe('Aufgaben der Übersicht', () => {
 		expect(tasks.map((task) => task.id)).not.toContain('missing-period');
 	});
 
-	it('führt bei einer Abrechnungsperiode über den Jahreswechsel zu allen Rechnungen', () => {
+	// #454 (#408 point 1): also across the turn of the year, by the period's days
+	it('führt bei einer Abrechnungsperiode über den Jahreswechsel zu ihren Rechnungen', () => {
 		const tasks = overviewTasks(
 			input({
 				missingStatements: [
-					{ building: 'Seeblick', periods: [{ start: '2024-07-01', end: '2025-06-30' }] }
+					{ building: 'Seeblick', buildingId: 'b1', periods: [{ start: '2024-07-01', end: '2025-06-30' }] }
 				]
 			})
 		);
 		expect(tasks.find((task) => task.id === 'missing-period')!.link).toEqual({
-			href: '/invoices',
-			label: 'Rechnungen ansehen'
+			href: '/invoices?building=b1&periodStart=2024-07-01&periodEnd=2025-06-30',
+			label: 'Rechnungen für 01.07.2024 – 30.06.2025 ansehen'
+		});
+	});
+
+	// #454 (#408 point 7, #386): drafts that miss what changed since are no drafts to send
+	describe('Abrechnungen, die nicht aktuell sind', () => {
+		// what changed since: the count of invoices, and whether the Tankbestand did (#307)
+		const outdated = (
+			id: string,
+			status: string,
+			buildingId: string,
+			building: string,
+			start: string,
+			end: string,
+			changed = { invoices: 1, fuelStock: false }
+		) => ({
+			id,
+			statementNumber: `NK-${id}`,
+			tenantName: `Mieter ${id}`,
+			status,
+			buildingId,
+			building,
+			periodStart: start,
+			periodEnd: end,
+			...changed
+		});
+		const outdatedStatements = [
+			outdated('s1', 'draft', 'b1', 'Seeblick', '2025-01-01', '2025-12-31'),
+			outdated('s2', 'draft', 'b1', 'Seeblick', '2025-01-01', '2025-12-31'),
+			outdated('s3', 'draft', 'b2', 'Ahornhof', '2024-07-01', '2025-06-30'),
+			outdated('s4', 'sent', 'b1', 'Seeblick', '2024-01-01', '2024-12-31')
+		];
+
+		it('nennt die nicht aktuellen Entwürfe vor den Entwürfen, mit einem Weg je Gebäude und Periode', () => {
+			const tasks = overviewTasks(
+				input({ statementCounts: { draft: 4, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			const task = tasks.find((one) => one.id === 'outdated-drafts')!;
+			expect(task.title).toBe('3 Entwürfe sind nicht aktuell');
+			expect(task.text).toBe(
+				'Seit dem Erstellen wurden Rechnungen ihrer Abrechnungsperiode erfasst, geändert oder gelöscht, oder der Tankbestand wurde geändert. Berechnen Sie diese Entwürfe neu, bevor Sie sie zustellen.'
+			);
+			expect(task.links).toEqual([
+				{
+					href: '/statements?building=b1&periodStart=2025-01-01&periodEnd=2025-12-31&status=draft',
+					label: 'Seeblick, 2025'
+				},
+				{
+					href: '/statements?building=b2&periodStart=2024-07-01&periodEnd=2025-06-30&status=draft',
+					label: 'Ahornhof, 01.07.2024 – 30.06.2025'
+				}
+			]);
+			const ids = tasks.map((one) => one.id);
+			expect(ids.indexOf('outdated-drafts')).toBeLessThan(ids.indexOf('drafts'));
+		});
+
+		it('zählt bei den Entwürfen zum Zustellen nur die aktuellen', () => {
+			const tasks = overviewTasks(
+				input({ statementCounts: { draft: 4, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			expect(tasks.find((one) => one.id === 'drafts')!.text).toContain('1 Nebenkostenabrechnung ist');
+		});
+
+		it('nennt keine Entwürfe zum Zustellen, wenn keiner aktuell ist', () => {
+			const tasks = overviewTasks(
+				input({ statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			expect(tasks.map((one) => one.id)).not.toContain('drafts');
+		});
+
+		it('nennt einen einzelnen nicht aktuellen Entwurf in der Einzahl', () => {
+			const tasks = overviewTasks(
+				input({
+					statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 0 },
+					outdatedStatements: outdatedStatements.slice(0, 1)
+				})
+			);
+			expect(tasks.find((one) => one.id === 'outdated-drafts')!.title).toBe('1 Entwurf ist nicht aktuell');
+		});
+
+		it('nennt eine versendete Abrechnung mit demselben Hinweis als «Abrechnung berichtigen»', () => {
+			const tasks = overviewTasks(
+				input({ statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 0 }, outdatedStatements })
+			);
+			const task = tasks.find((one) => one.id === 'correct-s4')!;
+			expect(task).toMatchObject({ title: 'Abrechnung berichtigen', href: '/statements/s4' });
+			// PO 2026-10-20 (Fachreview 454-1 E-4)
+			expect(task.text).toBe(
+				'Seit dem Erstellen der Abrechnung NK-s4 von Mieter s4 wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. Berichtigen Sie die Abrechnung mit «Abrechnung berichtigen». Die berichtigte Abrechnung rechnet an, was schon bezahlt ist.'
+			);
+		});
+
+		const correctText = (changed: { invoices: number; fuelStock: boolean }, end = '2024-12-31') =>
+			overviewTasks(
+				input({
+					statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 0 },
+					outdatedStatements: [outdated('s5', 'paid', 'b1', 'Seeblick', `${end.slice(0, 4)}-01-01`, end, changed)]
+				})
+			).find((one) => one.id === 'correct-s5')!.text;
+
+		it('nennt einen geänderten Tankbestand', () => {
+			expect(correctText({ invoices: 0, fuelStock: true })).toContain(
+				'von Mieter s5 wurde der Tankbestand der Abrechnungsperiode geändert. Berichtigen Sie'
+			);
+		});
+
+		// Fachreview 454-1 V-8
+		it('nennt Rechnungen und Tankbestand in einem Satz', () => {
+			expect(correctText({ invoices: 2, fuelStock: true })).toContain(
+				'von Mieter s5 wurden 2 Rechnungen der Abrechnungsperiode erfasst, geändert oder gelöscht, und der Tankbestand wurde geändert. Berichtigen Sie'
+			);
+		});
+
+		// PO 2026-10-20 (Fachreview 454-1 E-5): also after five years, with the sentence on the Verjährung
+		it('weist bei einer Abrechnungsperiode, die vor mehr als fünf Jahren endete, auf die Verjährung hin', () => {
+			const old = 'Diese Abrechnungsperiode endete vor mehr als fünf Jahren. Lassen Sie sich beraten, ob die Forderung verjährt ist.';
+			expect(correctText({ invoices: 1, fuelStock: false }, '2021-10-09')).toMatch(new RegExp(`${old}$`));
+			expect(correctText({ invoices: 1, fuelStock: false }, '2021-10-10')).not.toContain(old);
+		});
+
+		// Fachreview 454-2 V-27: five calendar years back from the Swiss day, the 29th of February to the 28th
+		it('rechnet die fünf Jahre nach dem Kalender', () => {
+			const text = (end: string) =>
+				overviewTasks({
+					...input({
+						statementCounts: { draft: 0, sent: 1, paid: 0, overdue: 0 },
+						outdatedStatements: [outdated('s6', 'sent', 'b1', 'Seeblick', '2022-03-01', end)]
+					}),
+					today: '2028-02-29'
+				}).find((one) => one.id === 'correct-s6')!.text;
+			expect(text('2023-02-27')).toContain('vor mehr als fünf Jahren');
+			expect(text('2023-02-28')).not.toContain('vor mehr als fünf Jahren');
+		});
+
+		// Fachreview 454-2 V-23: also an erledigte Abrechnung (#448) is corrected
+		it('nennt auch eine erledigte Abrechnung als «Abrechnung berichtigen»', () => {
+			const tasks = overviewTasks(
+				input({ outdatedStatements: [outdated('s8', 'settled', 'b1', 'Seeblick', '2024-01-01', '2024-12-31')] })
+			);
+			expect(tasks.find((one) => one.id === 'correct-s8')!.title).toBe('Abrechnung berichtigen');
+		});
+
+		// Fachreview 454-1 V-12: a Mahnung of a statement that needs correcting comes after the correction
+		it('nennt das Berichtigen vor den überfälligen Abrechnungen', () => {
+			const ids = overviewTasks(
+				input({ statementCounts: { draft: 3, sent: 1, paid: 0, overdue: 1 }, outdatedStatements })
+			).map((one) => one.id);
+			expect(ids).toContain('correct-s4');
+			expect(ids.indexOf('correct-s4')).toBeLessThan(ids.indexOf('overdue'));
 		});
 	});
 
