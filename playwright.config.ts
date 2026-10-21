@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
+import { SETUP_CODE } from './tests/e2e/fixtures/fresh-installation';
 import { E2E_JWT_SECRET } from './tests/e2e/fixtures/session';
 import type { Driver } from './tests/e2e/fixtures/test';
 
@@ -21,6 +22,13 @@ const generated = (feature: string) => `.features-gen/tests/e2e/features/${featu
 const usesExtraInstances =
 	!existsSync('.features-gen') ||
 	['accessibility', 'sprachen-bildschirme', 'demo'].some((feature) => existsSync(generated(feature)));
+// The fresh installation (#577: no account, no provider, the KI model still downloading) for einrichtung.feature
+const usesFreshInstallation = !existsSync('.features-gen') || existsSync(generated('einrichtung'));
+const freshDatabaseUrl = (() => {
+	const url = new URL(E2E_DATABASE_URL);
+	url.pathname = `${url.pathname}_fresh`;
+	return url.href;
+})();
 
 // The frontend's environment (sessions, sign-in test credentials, operator, gallery)
 const frontendEnv = {
@@ -165,6 +173,47 @@ export default defineConfig<{ driver: Driver }>({
 					reuseExistingServer: !process.env.CI,
 					timeout: 60000,
 					env: { ...frontendEnv, PORT: '3104', ORIGIN: 'http://localhost:3104', DEMO: 'on' }
+				}
+				]
+			: []),
+		...(usesFreshInstallation
+			? [
+				{
+					// An Ollama that is still downloading the model (backend/scripts/llm-stub.ts, LLM_STUB_PULL)
+					command: 'cd backend && bun run llm-stub',
+					port: 2530,
+					reuseExistingServer: false,
+					timeout: 30000,
+					env: { LLM_STUB_PORT: '2530', LLM_STUB_PULL: 'on' }
+				},
+				{
+					command: 'cd backend && bun run e2e-db && bun run src/index.ts',
+					port: 3105,
+					reuseExistingServer: false,
+					timeout: 60000,
+					env: {
+						PORT: '3105',
+						DATABASE_URL: freshDatabaseUrl,
+						JWT_SECRET: E2E_JWT_SECRET,
+						SETUP_CODE,
+						LLM_BASE_URL: 'http://127.0.0.1:2530/v1'
+					}
+				},
+				{
+					// The same build as on 3100 (started after it), without any provider, talking to the fresh backend
+					command: 'node build',
+					port: 3106,
+					reuseExistingServer: !process.env.CI,
+					timeout: 60000,
+					env: {
+						...frontendEnv,
+						PORT: '3106',
+						ORIGIN: 'http://localhost:3106',
+						BACKEND_URL: 'http://localhost:3105',
+						OAUTH_GOOGLE_CLIENT_ID: '',
+						OAUTH_GOOGLE_CLIENT_SECRET: '',
+						OAUTH_GOOGLE_REDIRECT_URI: ''
+					}
 				}
 				]
 			: [])

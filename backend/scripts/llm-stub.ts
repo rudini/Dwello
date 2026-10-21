@@ -6,9 +6,14 @@
  * see an unreachable KI.
  *
  *   bun run llm-stub      http://127.0.0.1:2527/v1
+ *
+ * With LLM_STUB_PULL=on it stands in for an Ollama that has not got the model yet (the fresh installation, #577): the
+ * model list is empty and a pull reports, every half second, the progress a scenario set with POST /stub/pull {percent}.
  */
 
 const PORT = Number(process.env.LLM_STUB_PORT ?? 2527);
+const PULL = process.env.LLM_STUB_PULL === 'on';
+let pulled = 0; // percent of the model download
 
 type Language = 'Deutsch' | 'Französisch' | 'Italienisch' | 'Englisch';
 
@@ -166,8 +171,40 @@ Bun.serve({
 	hostname: '127.0.0.1',
 	// Bun closes an idle request after 10 s by default; the slow answer needs longer
 	idleTimeout: 60,
-	fetch: async (request) =>
-		new URL(request.url).pathname.endsWith('/chat/completions')
-			? answer(((await request.json()) as { messages: { content: Content }[] }).messages[0].content)
-			: new Response(null, { status: 503 })
+	fetch: (request) => routes[new URL(request.url).pathname]?.(request) ?? new Response(null, { status: 503 })
 });
+
+type Route = (request: Request) => Response | Promise<Response>;
+const chat: Route = async (request) =>
+	answer(((await request.json()) as { messages: { content: Content }[] }).messages[0].content);
+// the OpenAI-compatible API; Ollama's own only with LLM_STUB_PULL=on
+const routes: Record<string, Route> = { '/v1/chat/completions': chat, '/chat/completions': chat, ...(PULL ? ollama() : {}) };
+
+function ollama(): Record<string, Route> {
+	return {
+		'/api/tags': () => Response.json({ models: [] }),
+		'/api/pull': () => pullProgress(),
+		'/stub/pull': async (request) => {
+			pulled = ((await request.json()) as { percent: number }).percent;
+			return Response.json({ percent: pulled });
+		}
+	};
+}
+
+// Ollama's pull stream (NDJSON): one line per update, bytes of the model's layer
+function pullProgress() {
+	const total = 6_000_000_000;
+	let timer: ReturnType<typeof setInterval>;
+	const body = new ReadableStream({
+		start(controller) {
+			const send = () =>
+				controller.enqueue(
+					new TextEncoder().encode(`${JSON.stringify({ status: 'pulling model', total, completed: (total * pulled) / 100 })}\n`)
+				);
+			send();
+			timer = setInterval(send, 500);
+		},
+		cancel: () => clearInterval(timer)
+	});
+	return new Response(body, { headers: { 'content-type': 'application/x-ndjson' } });
+}

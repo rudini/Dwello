@@ -3,7 +3,8 @@ import { Actor } from '../screenplay/actor';
 import { BrowseTheWeb, CallTheApi } from '../screenplay/abilities';
 import { Cookies } from '../screenplay/interactions';
 import { testData, type TestData } from './backend';
-import { withSettingsLock } from './settings-lock';
+import { FRESH_API, FRESH_KI_STUB, freshInstallation, type FreshInstallation } from './fresh-installation';
+import { withLock, withSettingsLock } from './settings-lock';
 import { sessionCookies, sessionToken } from './session';
 
 // Protocol driver the scenarios talk to the system through (Dave Farley): the browser, or the backend API.
@@ -17,6 +18,7 @@ export const test = base.extend<{
 	besucher: Actor;
 	seed: TestData;
 	names: Map<string, string>;
+	frisch: FreshInstallation;
 	globalSettings: void;
 }>({
 	driver: ['ui', { option: true }],
@@ -49,6 +51,23 @@ export const test = base.extend<{
 	},
 
 	names: async ({ seed }, use) => use(seed.names),
+
+	// The fresh installation (#577) has one account at most: its scenarios take turns and remove what they created
+	frisch: async ({ request }, use, testInfo) => {
+		const installation = freshInstallation(
+			new CallTheApi(request, await sessionToken(), FRESH_API),
+			new CallTheApi(request, '', FRESH_KI_STUB)
+		);
+		// the turns of the other scenarios do not count against this one's time
+		const timeout = testInfo.timeout;
+		const waiting = Date.now();
+		testInfo.setTimeout(0);
+		await withLock('installation', async () => {
+			testInfo.setTimeout(timeout + Date.now() - waiting);
+			await use(installation);
+			await installation.cleanUp();
+		});
+	},
 
 	// A scenario tagged @einstellungen-global saves the IBAN and reads it back: it has the settings to itself (O-34)
 	globalSettings: [
