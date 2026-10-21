@@ -71,4 +71,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #500 fachreview round 2: `docs/reviews/500-fachreview-2.md` (V-1 to V-4 closed, no new findings)
 - [x] #500 daten-pruefer: `docs/reviews/500-datenpruefung-1.md` (no findings; only Laura Keller's German line changes, amounts and QR fields to the Rappen; its observation on the demo seed became #598)
 - [x] #500 closing review round 2: `docs/reviews/500-review-2.md` (C-1, C-2 closed, no new findings)
-- [ ] #500 PR merged
+- [x] #500 PR merged (#599)
+- [ ] #509 render tests (de/fr/it/en) and @wip scenario «Das PDF nennt keinen Heizkostenanteil für eine fehlende Rechnung ohne Leistungszeitraum»: red at the missing behaviour
+- [ ] #509 fachreview before implementing: `docs/reviews/509-fachreview-1.md`
