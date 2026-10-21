@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm';
 import { app } from '../app';
 import { db } from '../db/connection';
 import { localAccounts } from '../db/schema';
+import * as jose from 'jose';
 import { callApi, sendJson } from './helpers/auth';
 
 const emails: string[] = [];
@@ -26,6 +27,21 @@ const signIn = (email: string, password: string) =>
 			body: JSON.stringify({ email, password })
 		})
 	);
+
+// a session as the BFF issues it after a sign-in with password, issued now (Bun's clock)
+const sessionOf = async (sub: string, email: string) =>
+	new jose.SignJWT({ email, name: email, provider: 'local' })
+		.setProtectedHeader({ alg: 'HS256' })
+		.setSubject(sub)
+		.setIssuer('dwello')
+		.setAudience('dwello-app')
+		.setIssuedAt(Math.floor(Date.now() / 1000))
+		.setExpirationTime('1h')
+		.sign(new TextEncoder().encode(process.env.JWT_SECRET || 'development-secret-key-change-in-production'));
+const withSession = async (token: string) =>
+	app.handle(new Request('http://localhost/api/v1/buildings', { headers: { authorization: `Bearer ${token}` } }));
+
+const codeOf = async (response: Response) => ((await response.json()) as { code: string }).code;
 
 const account = async (email: string, password = 'richtiges-Passwort') => {
 	const response = await sendJson('PUT', '/api/v1/local-accounts', { email, password });
@@ -64,8 +80,24 @@ describe('lokales Konto', () => {
 
 		expect(wrong.status).toBe(401);
 		expect(unknown.status).toBe(401);
-		expect((await wrong.json()).code).toBe('INVALID_CREDENTIALS');
-		expect((await unknown.json()).code).toBe('INVALID_CREDENTIALS');
+		expect(await codeOf(wrong)).toBe('INVALID_CREDENTIALS');
+		expect(await codeOf(unknown)).toBe('INVALID_CREDENTIALS');
+	});
+
+	it('sperrt eine unbekannte Adresse nie, auch nach vielen Fehlversuchen', async () => {
+		const email = `unbekannt-${crypto.randomUUID()}@dwello.test`;
+		for (let attempt = 0; attempt < 6; attempt++) await signIn(email, 'falsch');
+
+		const response = await signIn(email, 'falsch');
+
+		expect(response.status).toBe(401);
+		expect(await codeOf(response)).toBe('INVALID_CREDENTIALS');
+	});
+
+	it('nimmt eine Anmeldung mit Passwort ins Protokoll unter «Einstellungen» auf', async () => {
+		const response = await sendJson('POST', '/api/v1/audit-log/logins', { provider: 'local' });
+
+		expect(response.status).toBe(201);
 	});
 
 	it('speichert das Passwort nur als Argon2id-Hash', async () => {
@@ -89,7 +121,7 @@ describe('lokales Konto', () => {
 		const locked = await signIn(email, 'richtiges-Passwort');
 
 		expect(locked.status).toBe(423);
-		const body = await locked.json();
+		const body = (await locked.json()) as { code: string; params: { until: string } };
 		expect(body.code).toBe('ACCOUNT_LOCKED');
 		expect(new Date(body.params.until).getTime()).toBe(now.getTime() + 15 * 60_000);
 	});
@@ -132,7 +164,7 @@ describe('lokales Konto', () => {
 		const response = await sendJson('PUT', '/api/v1/local-accounts', { email: newEmail(), password: 'kurz' });
 
 		expect(response.status).toBe(400);
-		expect((await response.json()).code).toBe('PASSWORD_TOO_SHORT');
+		expect(await codeOf(response)).toBe('PASSWORD_TOO_SHORT');
 	});
 
 	it('lässt Konten nur mit einer Sitzung anlegen und löschen', async () => {
@@ -157,6 +189,33 @@ describe('lokales Konto', () => {
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ available: true });
+	});
+
+	it('beendet die Sitzungen eines Kontos, dessen Passwort neu gesetzt wurde', async () => {
+		const email = newEmail();
+		const start = Date.now();
+		setSystemTime(new Date(start - 60_000));
+		await account(email);
+		const { sub } = (await (await signIn(email, 'richtiges-Passwort')).json()) as { sub: string };
+		setSystemTime(new Date(start - 30_000));
+		const token = await sessionOf(sub, email);
+		setSystemTime();
+		expect((await withSession(token)).status).toBe(200);
+
+		await account(email, 'neues-Passwort-2026');
+
+		expect((await withSession(token)).status).toBe(401);
+	});
+
+	it('beendet die Sitzungen eines gelöschten Kontos', async () => {
+		const email = newEmail();
+		await account(email);
+		const { sub } = (await (await signIn(email, 'richtiges-Passwort')).json()) as { sub: string };
+		const token = await sessionOf(sub, email);
+
+		await callApi(`/api/v1/local-accounts/${encodeURIComponent(email)}`, { method: 'DELETE' });
+
+		expect((await withSession(token)).status).toBe(401);
 	});
 
 	it('meldet ein gelöschtes Konto nicht mehr an', async () => {

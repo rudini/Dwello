@@ -6,6 +6,7 @@
 import { Elysia } from 'elysia';
 import * as jose from 'jose';
 import { z } from 'zod';
+import { localSessionHolds } from '../services/local-account.service';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key-change-in-production';
 
@@ -65,7 +66,7 @@ export const authMiddleware = new Elysia({ name: 'auth' })
 		const token = authHeader.substring(7);
 		const payload = await verifyJwt(token);
 
-		if (!payload) {
+		if (!payload || (payload.provider === 'local' && !(await localSessionHolds(payload.sub, payload.iat)))) {
 			set.status = 401;
 			return {
 				user: null,

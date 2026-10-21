@@ -207,7 +207,7 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 
 | `action` | Written by | `details` |
 |---|---|---|
-| `login` | the BFF after the OAuth callback | `provider` (`google` \| `microsoft`) |
+| `login` | the BFF after the OAuth callback or a sign-in with password | `provider` (`google` \| `microsoft` \| `local`) |
 | `management_fee_changed` | `PUT /config`, `PUT`/`DELETE /config/management_fee_pct` | `from`, `to` |
 | `category_allocability_changed` | `PUT /categories/:id` | `categoryId`, `name`, `nameDE`…`nameEN`, `allocable`; when not allocable `invoices` (how many it made not allocable) |
 | `invoice_allocability_changed` | `PUT /invoices/:id`, `POST /invoices/:id/recategorize` | `invoiceId`, `description`, `supplier`, `invoiceDate`, `amount`, `building`, `allocable` |
@@ -219,6 +219,17 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 | GET | `/` | → `{ data: [entry] }`, newest first |
 | POST | `/logins` | Body: `{ provider }`. 201; 422 other provider |
 | DELETE | `/:id` | 204. 404 |
+
+## 11b. Konto mit Passwort `/api/v1/auth/password`, `/api/v1/local-accounts` (#576)
+
+`/api/v1/auth/password` is public (the BFF calls it before there is a session); the BFF issues the session JWT with `provider: 'local'` and `sub` from the answer. Sessions of a Konto mit Passwort hold only while the account exists and were issued after its password was last set.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/v1/auth/password` | → `{ available }`: whether a Konto mit Passwort exists |
+| POST | `/api/v1/auth/password` | Body: `{ email, password }` → `{ sub, email, name }`. 401 `INVALID_CREDENTIALS` (wrong password or unknown address); 423 `ACCOUNT_LOCKED` with `params.until` (ISO time): 5 failed attempts lock for 15 minutes |
+| PUT | `/api/v1/local-accounts` | Session required. Body: `{ email, password }`: creates the account or sets a new password (lifts a Sperre, ends older sessions). 204; 400 `PASSWORD_TOO_SHORT` (`params.min`) |
+| DELETE | `/api/v1/local-accounts/:email` | Session required. 204. 404 |
 
 ## 12. Utility statements `/api/v1/statements`
 
