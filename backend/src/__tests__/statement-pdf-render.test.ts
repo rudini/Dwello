@@ -721,6 +721,22 @@ describe('Heizkosten mit Leistungszeitraum nach dem Heizprofil im PDF', () => {
 		expect((await textOf(heated)).flowing).toContain('44.20 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
 	});
 
+	// #509: hat keine Heizrechnung einen fehlenden Leistungszeitraum, nennt der Satz keinen Anteil für eine solche
+	it.each([
+		['de', 'Heizkosten nach Heizprofil «Winter»: Bei einer Rechnung mit Leistungszeitraum zählen die Monate des Heizprofils darin; ihr Anteil steht unter der Abrechnungsposition.', 'ohne Leistungszeitraum', 'Anteile der Monate Ihres Mietverhältnisses:'],
+		['fr', 'Frais de chauffage selon le profil «\u00a0Winter\u00a0»\u00a0: Pour une facture avec période de prestation, ce sont les mois du profil de chauffage compris dans cette période qui comptent\u00a0; sa part figure sous le poste du décompte.', 'sans période de prestation', 'Parts des mois de votre bail\u00a0:'],
+		['it', 'Spese di riscaldamento secondo il profilo «Winter»: Per una fattura con periodo di prestazione contano i mesi del profilo di riscaldamento compresi in tale periodo; la quota di tale fattura figura sotto la voce del conteggio.', 'senza periodo di prestazione', 'Quote dei mesi del suo rapporto di locazione:'],
+		['en', 'Heating costs under the heating profile ‘Winter’: For an invoice with a service period, the months of the heating profile within it count; its share is shown below the statement line.', 'without a service period', 'Monthly shares during your tenancy:']
+	] as const)('nennt auf %s keinen Anteil für eine Rechnung ohne Leistungszeitraum, wenn keine fehlt', async (language, note, absent, runMonths) => {
+		const quarter = { start: '2024-04-01', end: '2024-06-30', amount: 1000, days: 61, total: 91, profile: { percent: 40, months: months([[5, 2], [6, 0]]), periodMonths: months([[4, 3], [5, 2], [6, 0]]) } };
+		const data = { ...winter, lineItems: [{ ...winter.lineItems[0], invoiceParts: [invoiceParts[0], quarter] }] };
+		const text = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64')).flowing;
+		expect(text).toContain(note);
+		expect(text).not.toContain('52.00\u00a0%');
+		expect(text).not.toContain(absent);
+		expect(text).not.toContain(runMonths);
+	});
+
 	// Fachreview 1, V-1: der Teil in der Periode nach Tagen, mit dem Beleg wie #241; darin die Monate des Heizprofils
 	it('nennt bei einem Leistungszeitraum über die Periode hinaus den Beleg und die Monate in der Periode', async () => {
 		const beyond = { start: '2024-01-01', end: '2024-03-31', amount: 905.03, days: 91, total: 91, whole: { start: '2023-10-01', end: '2024-03-31', amount: 1820 }, profile: { percent: 100, months: months([[1, 18], [2, 14], [3, 11]]), periodMonths: months([[1, 18], [2, 14], [3, 11]]) } };
