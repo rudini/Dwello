@@ -1,6 +1,8 @@
 import type { Activity } from '../screenplay/actor';
-import { Browser, Click } from '../screenplay/interactions';
+import { Browser, Click, FailRequests, Wait } from '../screenplay/interactions';
+import { text } from '../targets/accessibility';
 import {
+	errorPageToOverview,
 	footerLink,
 	helpContentsLink,
 	logo,
@@ -26,3 +28,13 @@ export const openPrivacyFromLogin = Click.on(privacyLinkOnLogin);
 export const openLoginFromPublicPage = Click.on(publicLoginLink);
 export const openHelpFromPublicPage = Click.on(publicHelpLink);
 export const chooseInHelpContents = (label: string) => Click.on(helpContentsLink(label));
+
+// From the error page to the overview while only the overview's data request fails (#519; as the axe state
+// `server-error`, tasks/accessibility.ts)
+export const goToOverviewWhileItFails: Activity = (actor) =>
+	actor.attemptsTo(
+		FailRequests.to('/dashboard/__data.json', { 'x-sveltekit-invalidated': '11' }),
+		Click.on(errorPageToOverview),
+		// the error page of the failed load, not the 404 page it came from
+		Wait.until(text('Versuchen Sie es später erneut.'))
+	);

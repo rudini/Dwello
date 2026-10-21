@@ -57,4 +57,10 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #588 PR #592 merged (its «Accessibility (axe)» check was red with all three shards green: the summary job read a stale jobs API answer; re-run once, green)
 - [x] CI: the summary job `e2e-results` retries until the count of green shards equals the shards (a stale API answer seconds after the last shard counted «1 of 3», PR #592); loop checked locally with a stand-in for `gh`
 - [x] CI fix review round 1: `docs/reviews/ci-review-1.md` (no findings)
-- [ ] CI fix PR merged
+- [x] CI fix PR #595 merged (Fixes #594: main red after #587 with all five E2E shards green)
+- [x] #519 test red (`error-page.test.ts`: «Internal Error», «Unknown Error», «Error: 502» from SvelteKit); `+error.svelte` shows `error_unexpected` instead of SvelteKit's own words, a load's own message stays, green
+- [x] #519 scenario «Die Fehlerseite nennt einen unerwarteten Fehler in Worten» (`navigation.feature`), seen red without the change («Internal Error»), green; axe and language rows `error-server` green
+- [x] #519 slice review round 1: `docs/reviews/519-review-1.md`; Minor C-1 fixed (the task waits for the error page of the failed load)
+- [x] #519 persona Anna: `docs/design/personas/anna-519.md` (the heading in de, fr, it, en confirmed; Minor P-1 on the pre-existing hint text stays in the report)
+- [x] #519 closing review round 2: `docs/reviews/519-review-2.md` (C-1 closed, no new findings)
+- [ ] #519 PR merged
