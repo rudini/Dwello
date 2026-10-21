@@ -18,4 +18,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #568 PR #569 merged
 - [x] #566 DOM test red (`date-input.dom.test.ts`: form with the calendar below its min fails checkValidity); `DateInput` keeps its calendar out of every form (`form=""`), green
 - [x] #566 scenario «Ein Tankbestand ohne Stichtag nennt den fehlenden Stichtag» (`building-detail.feature`), green in Chromium; no red run of its own (the DOM test was seen red)
-- [ ] #566 slice review, closing review, PR merged
+- [x] #566 slice review round 1: `docs/reviews/566-review-1.md` (no findings; no closing round, no code since)
+- [ ] #566 PR merged
