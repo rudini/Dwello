@@ -1,6 +1,6 @@
 /**
  * A self-hosted install (docker-compose.prod.yml with the .env from .env.example) passes the mail settings
- * to the backend container; without them every e-mail to a tenant is filed as «zu versenden» (#568)
+ * to the backend container; without them no e-mail reaches a tenant (#568)
  */
 
 import { describe, expect, it } from 'bun:test';
@@ -30,5 +30,9 @@ describe('Installation mit docker-compose.prod.yml', () => {
 	it('gibt dem Backend jede Mail-Einstellung aus der .env weiter', () => {
 		const missing = mailKeys.filter((key) => !backendService.includes(`- ${key}=\${${key}`));
 		expect(missing).toEqual([]);
+	});
+
+	it('lässt den SMTP-Port ohne Angabe auf 587, nicht auf 0', () => {
+		expect(backendService).toContain('- SMTP_PORT=${SMTP_PORT:-587}');
 	});
 });
