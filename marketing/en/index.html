@@ -90,7 +90,6 @@ h1, h2, h3, h4 { line-height: 1.15; margin: 0; text-wrap: balance; font-weight: 
 p { margin: 0; }
 .wrap { max-width: var(--max); margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 @media (min-width: 720px) { .wrap { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
-.num { font-variant-numeric: tabular-nums; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
@@ -145,11 +144,6 @@ section { padding-block: 96px; }
 .hero h1 span { color: var(--accent); }
 .hero .lede { font-size: clamp(1.125rem, 1.7vw, 1.3125rem); color: var(--ink-muted); max-width: 36em; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.cmd { display: flex; align-items: stretch; max-width: 600px; border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--surface); overflow: hidden; }
-.cmd code { flex: 1; min-width: 0; font: 500 0.9375rem/1.4 var(--mono); padding: 14px 16px; overflow-x: auto; white-space: nowrap; }
-.cmd code::before { content: "$ "; color: var(--ink-muted); }
-.copy { border: 0; border-left: 1px solid var(--line); background: var(--sunken); color: var(--ink); font: 600 0.9375rem var(--font); padding: 0 16px; cursor: pointer; min-height: 48px; }
-.copy:hover { background: var(--accent-soft); color: var(--accent); }
 .hero-note { font-size: 0.9375rem; color: var(--ink-muted); }
 .stage { position: relative; margin-top: 56px; margin-bottom: -1px; }
 .stage .shot.desk { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 0; }
@@ -161,7 +155,7 @@ section { padding-block: 96px; }
 /* Facts */
 .facts { background: var(--surface); border-bottom: 1px solid var(--line); }
 .facts ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-@media (min-width: 900px) { .facts ul { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .facts ul { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .facts li { padding: 24px 16px 24px 0; display: grid; gap: 4px; align-content: start; }
 @media (min-width: 900px) { .facts li { padding: 32px 24px; border-left: 1px solid var(--line); } .facts li:first-child { border-left: 0; padding-left: 0; } }
 .facts b { font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 750; letter-spacing: -0.03em; line-height: 1.1; }
@@ -177,6 +171,18 @@ section { padding-block: 96px; }
 .steps .n { font-size: 0.875rem; font-weight: 600; color: var(--ink-muted); }
 .steps h3 { font-size: 1.25rem; }
 .steps p { color: var(--ink-muted); font-size: 1rem; }
+/* The year in order: a chevron between the step cards where they stand in one row */
+@media (min-width: 1100px) { .steps li { position: relative; } .steps li + li::before { content: ""; position: absolute; left: -13px; top: 50%; width: 8px; height: 8px; border-top: 2px solid var(--line-strong); border-right: 2px solid var(--line-strong); transform: translateY(-50%) rotate(45deg); } }
+.journey { display: block; width: min(560px, 100%); margin: 0 auto 32px; }
+/* Upload in three steps */
+.flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: flow; }
+.flow li { counter-increment: flow; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
+.flow li::before { content: counter(flow); display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-control); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+/* A cost split into equal shares, one of them marked */
+.split { display: grid; gap: 12px; margin-top: 8px; }
+.split-bar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.split-bar span { display: grid; place-items: center; min-height: 48px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-control); font-weight: 600; font-variant-numeric: tabular-nums; }
+.split-bar .me { background: var(--accent-soft); border: 2px solid var(--accent); color: var(--accent); }
 
 /* Feature rows */
 .feature { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 64px; border-top: 1px solid var(--line); }
@@ -312,7 +318,7 @@ section { padding-block: 96px; }
 @media (max-width: 719px) { .final-house { display: none; } }
 footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface); border-top: 1px solid var(--line); color: var(--ink-muted); font-size: 0.9375rem; }
 .foot { display: grid; gap: 40px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 900px) { .foot { grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .foot { grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); } }
 .foot h2 { font-size: 0.875rem; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
 .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .foot a { color: var(--ink-muted); text-decoration: none; }
@@ -323,7 +329,17 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 .langs a[aria-current] { background: var(--accent-soft); color: var(--accent); }
 .head-langs { display: none; }
 @media (min-width: 1180px) { .head-langs { display: flex; margin-left: 8px; } }
-@media (min-width: 1000px) and (max-width: 1179px) { .nav { margin-left: auto; } }
+/* Below the width where navigation and languages fit, one menu holds both */
+.menu { position: relative; margin-left: auto; }
+.menu summary { list-style: none; display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border: 2px solid var(--line-strong); border-radius: var(--radius-control); font-weight: 600; cursor: pointer; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu-panel { position: absolute; right: 0; top: calc(100% + 8px); display: grid; min-width: 240px; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); box-shadow: var(--shadow-overlay); }
+.menu-panel a { display: flex; align-items: center; min-height: 48px; padding: 0 12px; color: var(--ink); text-decoration: none; border-radius: var(--radius-control); }
+.menu-panel a:hover { background: var(--accent-soft); color: var(--accent); }
+.menu-panel .langs { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; }
+@media (min-width: 1180px) { .menu { display: none; } }
+@media (max-width: 1179px) { .nav { display: none; } .header-cta { margin-left: 0; } }
+@media (max-width: 479px) { .header-cta { display: none; } }
 </style>
 </head>
 <body>
@@ -373,12 +389,19 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<nav class="nav" aria-label="Main navigation">
 			<a href="#funktionen">Features</a>
 			<a href="#datenschutz">Privacy</a>
-			<a href="#installieren">Install</a>
+			<a href="#installieren">Set up</a>
 			<a href="#open-source">Open Source</a>
 			<a href="#faq">Questions</a>
 		</nav>
 		<nav class="langs head-langs" aria-label="Language"><a href="../index.html" hreflang="de" lang="de">DE</a><a href="../fr/index.html" hreflang="fr" lang="fr">FR</a><a href="../it/index.html" hreflang="it" lang="it">IT</a><a href="index.html" hreflang="en" lang="en" aria-current="page">EN</a></nav>
-		<a class="btn btn-primary header-cta" href="#installieren">Install</a>
+		<details class="menu">
+			<summary>Menu</summary>
+			<div class="menu-panel">
+				<nav aria-label="Main navigation"><a href="#funktionen">Features</a><a href="#datenschutz">Privacy</a><a href="#installieren">Set up</a><a href="#open-source">Open Source</a><a href="#faq">Questions</a><a href="impressum.html">Legal notice</a></nav>
+				<nav class="langs" aria-label="Language"><a href="../index.html" hreflang="de" lang="de">Deutsch</a><a href="../fr/index.html" hreflang="fr" lang="fr">Français</a><a href="../it/index.html" hreflang="it" lang="it">Italiano</a><a href="index.html" hreflang="en" lang="en" aria-current="page">English</a></nav>
+			</div>
+		</details>
+		<a class="btn btn-primary header-cta" href="https://demo.dwello.ch/dashboard" rel="noopener">See the demo</a>
 	</div>
 </header>
 
@@ -389,17 +412,13 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	<div class="wrap">
 		<div class="hero-copy">
 			<span class="badge info"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Open source · Free · Made for Switzerland</span>
-			<h1>Your building. Your data. <span>Your server.</span></h1>
-			<p class="lede">Dwello does the utility cost statement for private landlords. Drop in your invoices, check the statement, send it with a QR-bill. The software runs on your machine, and the AI reads your invoices on your own computer.</p>
+			<h1>Your utility cost statement, <span>made easier.</span></h1>
+			<p class="lede">Dwello prepares the utility cost statement for private landlords. Drop in the invoices, check the statement, send it with a QR-bill. The software runs on your own machine, and the AI reads your supporting documents on your own computer or, if you set it up that way, at a provider of your choice.</p>
 			<div class="actions">
-				<a class="btn btn-primary" href="#installieren">Install Dwello <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-				<a class="btn btn-secondary" href="https://demo.dwello.ch/dashboard" rel="noopener">See the demo</a>
+				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">See the demo <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+				<a class="btn btn-secondary" href="#installieren">How to get Dwello</a>
 			</div>
-			<div class="cmd" role="group" aria-label="Start command">
-				<code id="hero-cmd" tabindex="0">docker compose -f docker-compose.prod.yml up -d</code>
-				<button class="copy" type="button" data-copy="hero-cmd">Copy</button>
-			</div>
-			<p class="hero-note">Free, with no subscription and no account with us. For buildings with up to 50 apartments.</p>
+			<p class="hero-note">Free and without a subscription. Someone who knows computers has to set Dwello up. After that you need no technical knowledge to work with Dwello; that person takes care of updates and regular backups.</p>
 		</div>
 		<div class="stage">
 			<figure class="shot desk">
@@ -420,11 +439,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <div class="facts">
 	<div class="wrap">
 		<ul>
-			<li><b>CHF 0.–</b><span>for good, with no subscription and no ads</span></li>
+			<li><b>CHF 0.–</b><span>no subscription and no ads</span></li>
 			<li><b>4</b><span>languages: Deutsch, Français, Italiano, English</span></li>
-			<li><b>0</b><span>WCAG 2.2 AA violations, in light and dark mode</span></li>
-			<li><b class="num">609</b><span>automated test scenarios</span></li>
-			<li><b>100 %</b><span>of your data stays on your server</span></li>
+			<li><b>up to 50</b><span>apartments, for private landlords</span></li>
+			<li><b>0</b><span>data comes to us. Dwello runs on your machine.</span></li>
 		</ul>
 	</div>
 </div>
@@ -437,11 +455,28 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Four steps. Once a year. No spreadsheets.</h2>
 			<p>Dwello is made for people who own a building and do not want to run a property management business. The overview tells you what to do next, and every field explains its term.</p>
 		</div>
+		<!-- Building, statement, tenant: line, fill, one accent stroke, as the drawing in the privacy band -->
+		<svg class="journey" viewBox="0 0 480 120" role="img" aria-label="From the building to the statement to the tenant" fill="var(--accent-soft)" stroke="var(--line-strong)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<line x1="16" y1="104" x2="132" y2="104" fill="none"/>
+			<polyline points="24,52 74,16 124,52" fill="none"/>
+			<rect x="34" y="46" width="80" height="58"/>
+			<rect x="46" y="58" width="16" height="14" fill="var(--surface)"/><rect x="86" y="58" width="16" height="14" fill="var(--surface)"/>
+			<rect x="66" y="80" width="16" height="24" fill="var(--surface)"/>
+			<path d="M146 62h40m-8-8l8 8-8 8" fill="none"/>
+			<rect x="204" y="18" width="72" height="90" rx="4" fill="var(--surface)"/>
+			<line x1="216" y1="36" x2="264" y2="36" fill="none"/><line x1="216" y1="50" x2="256" y2="50" fill="none"/><line x1="216" y1="64" x2="260" y2="64" fill="none"/>
+			<line x1="216" y1="88" x2="264" y2="88" fill="none" stroke="var(--accent)" stroke-width="4"/>
+			<path d="M294 62h40m-8-8l8 8-8 8" fill="none"/>
+			<circle cx="398" cy="38" r="16"/>
+			<path d="M366 104c0-22 14-36 32-36s32 14 32 36z"/>
+			<rect x="420" y="70" width="40" height="28" rx="2" fill="var(--surface)"/>
+			<polyline points="420,72 440,86 460,72" fill="none" stroke="var(--accent)" stroke-width="3"/>
+		</svg>
 		<ol class="steps">
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg><span class="n">Once</span></div><h3>Add your building</h3><p>Search the address, add the apartments with area and rooms, add tenants and rental contracts.</p></li>
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span class="n">Ongoing</span></div><h3>Upload invoices</h3><p>Drop in the PDFs. The AI reads amount, date and category and tells you what to check.</p></li>
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><span class="n">Once a year</span></div><h3>Create statements</h3><p>For the whole building at once, to the day when a tenant changes, and with a heating profile.</p></li>
-			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg><span class="n">Done</span></div><h3>Check and send</h3><p>By email or by letter, with a Swiss QR-bill and in your tenants’ language.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg><span class="n">Once, at the start</span></div><h3>Add your building</h3><p>Search the address, add the apartments with area and rooms, add tenants and rental contracts with the agreed utility costs and advance payment.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><span class="n">All year</span></div><h3>Upload invoices</h3><p>Drop in the PDFs. The AI reads amount, date and category and tells you what to check.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg><span class="n">After the period ends</span></div><h3>Create statements</h3><p>For the whole building at once, to the day when a tenant changes, and with a heating profile. Dwello deducts the agreed advance payments; missing payments are settled outside the statement.</p></li>
+			<li class="panel"><div class="top"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg><span class="n">Right after</span></div><h3>Check and send</h3><p>By email or by letter, with a Swiss QR-bill and in your tenants’ language.</p></li>
 		</ol>
 	</div>
 </section>
@@ -461,8 +496,13 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<span class="badge info">Invoices and AI</span>
 				<h3>Invoices by drag and drop. Read on your own computer.</h3>
 				<p>Drop up to 20 invoices into Dwello at once. The AI reads the invoice issuer, amount, date and service period and assigns the category. Whatever it is not sure about, Dwello points out. The invoice is only created once you confirm.</p>
+				<ol class="flow" aria-label="How an invoice gets into Dwello">
+					<li>You drop in an invoice, say the one from the water utility.</li>
+					<li>The AI reads the amount, date and category.</li>
+					<li>You check the details and confirm.</li>
+				</ol>
 				<ul class="checks">
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Local AI with Ollama, no cloud<small>Your invoices never leave the server. If you prefer, connect any OpenAI-compatible AI.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Local AI with Ollama, no cloud<small>With the local AI your supporting documents never leave the server. If you like, connect any OpenAI-compatible AI instead.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Missing invoices flagged<small>Dwello expects what came last year. If the water invoice is missing, you see it before the statement.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Allocable or not<small>Costs you may not pass on to tenants stay out of the statement.</small></span></li>
 				</ul>
@@ -478,15 +518,15 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col">
 				<span class="badge info">Utility cost statement</span>
 				<h3>A statement that explains every number.</h3>
-				<p>Dwello calculates the way Swiss tenancy law requires and shows, for every category, the building costs, the apartment share and the days rented. Your tenants see the same breakdown in the PDF.</p>
+				<p>Dwello calculates by the rules of Swiss tenancy law and shows, for each category, the building’s costs, the apartment share and the days rented. Your tenants see the same breakdown in the PDF: Hans Müller in apartment 1.01 of Musterhaus Zentrum, for example, owes CHF 215.80 for 2025. Check every statement before you send it: Dwello is no substitute for legal advice.</p>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Only what the contract allows <span class="law">Art. 257a CO</span><small>Only the utility costs agreed in the rental contract are billed.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>To the day for tenant changes and vacancy<small>The landlord bears the utility costs of a vacant apartment.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Rounded to 5 centimes, in the tenant’s favour<small>Amounts below CHF 5 are neither charged nor paid out.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Rounded to 5 centimes, in the tenant’s favour<small>Amounts under CHF 5 are neither claimed nor paid out right away but carried over to the next statement. The final statement after move-out settles every amount.</small></span></li>
 				</ul>
 			</div>
 			<figure class="shot">
-				<img class="l" src="../shots/en/statement-light.webp" width="1600" height="1105" loading="lazy" alt="Statement NK-22222222-2025-0003 for Nina Brunner, Seepark Residenz, apartment A2: cost overview by category.">
+				<img class="l" src="../shots/en/statement-light.webp" width="1600" height="1105" loading="lazy" alt="The 2025 statement of Hans Müller, apartment 1.01 in Musterhaus Zentrum: for each category, such as lift and common-area electricity, the building’s costs and his apartment’s share.">
 				<img class="d" src="../shots/en/statement-dark.webp" width="1600" height="1105" loading="lazy" alt="" aria-hidden="true">
 			</figure>
 		</div>
@@ -496,7 +536,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="copy-col" style="max-width:760px">
 				<span class="badge info">Distribution keys and heating profiles</span>
 				<h3>Shared fairly, even in winter.</h3>
-				<p>Costs by area, rooms, units or a formula of your own, such as 70 % by area and 30 % per apartment. Heating costs follow a heating profile: a day rented in January counts more than one in July. Profiles for the Swiss plateau, the mountains and Ticino are included.</p>
+				<p>Costs by area, rooms, units or a custom formula, say 70 % by area and 30 % per apartment. Heating costs follow a heating profile: a day rented in January counts more than one in summer. One profile each is included for the Central Plateau, the mountains and Ticino, plus one for heating with hot water.</p>
+				<div class="split">
+					<p>An example from the demo data: the lift in Musterhaus Zentrum costs CHF 1'690.00 a year. Split per unit, each of the six apartments bears CHF 281.67, Hans Müller’s apartment 1.01 included.</p>
+					<div class="split-bar" aria-hidden="true"><span class="me">1.01</span><span>1.02</span><span>2.01</span><span>2.02</span><span>3.01</span><span>3.02</span></div>
+				</div>
 			</div>
 			<div class="duo">
 				<figure class="figure">
@@ -504,7 +548,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 						<img class="l" src="../shots/en/keys-light.webp" width="1600" height="1193" loading="lazy" alt="List of distribution keys: per unit, per area, per room and heating with the formula 0.7 times area plus 0.3 times units.">
 						<img class="d" src="../shots/en/keys-dark.webp" width="1600" height="1193" loading="lazy" alt="" aria-hidden="true">
 					</div>
-					<figcaption class="caption">Distribution key as a formula: <code>0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}</code></figcaption>
+					<figcaption class="caption">A custom formula works too, say 70 % by area and 30 % per apartment.</figcaption>
 				</figure>
 				<figure class="figure">
 					<div class="shot">
@@ -590,7 +634,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="sec-head">
 				<span class="kicker">Privacy</span>
 				<h2>Built for the Swiss Data Protection Act.</h2>
-				<p>Tenant data is personal data. Dwello treats it that way: it stays on your device, nothing comes to us, and you can answer any information request at any time.</p>
+				<p>Tenant data is personal data. Dwello treats it that way: it stays on your server, nothing comes to us, and you can answer any information request at any time. Only what a task needs goes out: sign-in with Google, the address search in the federal building register, your e-mails to tenants and, if you set it up that way, invoices to an external AI. You remain responsible for your tenants’ data.</p>
 			</div>
 			<!-- In the app's illustration style: line, fill, one accent stroke -->
 			<svg class="illu" viewBox="0 0 160 120" role="img" aria-label="A house with a server inside" style="width:min(320px,100%)" fill="var(--illu-fill)" stroke="var(--illu-line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -621,14 +665,14 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="feature" style="padding:0;border:0">
 			<div class="copy-col">
 				<span class="badge plan">Planned · MCP</span>
-				<h3 style="font-size:clamp(2rem,4.2vw,3rem)">Just ask your building.</h3>
-				<p>With the Model Context Protocol, Dwello connects to your AI assistant: Claude, ChatGPT or a local AI. You ask in your own words, the assistant looks it up in Dwello. It reads only what you allow and changes nothing without your confirmation.</p>
+				<h2 style="font-size:clamp(2rem,4.2vw,3rem)">Just ask your building.</h2>
+				<p>Dwello is planned to connect to your AI assistant through the Model Context Protocol: Claude, ChatGPT or a local AI. You ask in your own words, the assistant looks it up in Dwello. It is to read only what you allow and change nothing without your confirmation.</p>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Open amounts, deadlines, missing invoices<small>Answers from your real data, with the source.</small></span></li>
-					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Runs on your server<small>The MCP server is part of the installation. No detour through us.</small></span></li>
+					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>To run on your server<small>The MCP server will be part of the installation. No detour via us.</small></span></li>
 				</ul>
 			</div>
-			<div class="panel chat" aria-label="Draft: a conversation with an AI assistant about Dwello">
+			<div class="panel chat" role="figure" aria-label="Made-up example: what a conversation with an AI assistant about Dwello could look like">
 				<div class="chat-head"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>AI assistant connected to Dwello <span class="badge plan" style="margin-left:auto">Draft</span></div>
 				<div class="chat-body">
 					<div class="msg me">What do I need to do for my buildings this week?</div>
@@ -652,8 +696,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 	<div class="wrap">
 		<div class="sec-head">
 			<span class="kicker">Install</span>
-			<h2>Runs wherever you want.</h2>
-			<p>One Docker command starts Dwello with its database and local AI. Choose where it should run.</p>
+			<h2>Have it set up, then work in the browser.</h2>
+			<p>Someone who knows computers sets it up once: a family member, a friend or your IT service. Give that person the guide; it takes about an hour. After that you work in the browser, with no technical knowledge. That person does updates and regular backups; the guide describes them.</p>
+			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide to hand on</a></div>
 		</div>
 		<div class="tabs" role="tablist" aria-label="Where should Dwello run?">
 			<button class="tab" role="tab" id="tab-pc" aria-selected="true" aria-controls="panel-pc"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg>Your PC</button>
@@ -666,7 +711,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Copy</button></div>
 <pre id="code-pc" tabindex="0"><span class="c"># 1. Download Dwello</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
-<span class="c"># 2. Copy the settings (your email, keys)</span>
+<span class="c"># 2. Create the settings, then fill them in (guide)</span>
 <span class="p">$ </span>cp .env.example .env
 <span class="c"># 3. Start: app, database and local AI</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
@@ -677,8 +722,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<div class="panel needs">
 				<h3>Ideal to get started</h3>
 				<dl>
-					<div><dt>You need</dt><dd>Docker Desktop and 16 GB of memory for the local AI.</dd></div>
-					<div><dt>Time needed</dt><dd>About 15 minutes, including the download of the AI model.</dd></div>
+					<div><dt>You need</dt><dd>Docker Desktop, a Google account and 16 GB of memory for the local AI. With less memory, enter an external AI.</dd></div>
+					<div><dt>Time needed</dt><dd>About an hour, including the Google sign-in and the download of the AI model.</dd></div>
 					<div><dt>Good to know</dt><dd>Dwello only runs while your PC is on. For access from your phone, a home server is a better fit.</dd></div>
 				</dl>
 			</div>
@@ -693,14 +738,15 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="c"># Without powerful hardware: set an external AI</span>
 <span class="c"># LLM_BASE_URL=https://your-ai-provider.example/v1</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
-<span class="ok">✓ Dwello is running at http://homeserver.local:3000</span></pre>
+<span class="c"># HTTPS with your domain: see the guide</span>
+<span class="ok">✓ Dwello is running at https://dwello.your-domain.ch</span></pre>
 			</div>
 			<div class="panel needs">
 				<h3>Always reachable, in your own home</h3>
 				<dl>
-					<div><dt>You need</dt><dd>A NAS or a mini PC with Docker. For the local AI, 16 GB of memory.</dd></div>
+					<div><dt>You need</dt><dd>A NAS or mini PC with Docker and your own domain with HTTPS, because Google sign-in requires it. For the local AI, 16 GB of memory.</dd></div>
 					<div><dt>Access on the go</dt><dd>Through your VPN or a tunnel such as Tailscale. Dwello does not need to face the open internet.</dd></div>
-					<div><dt>Good to know</dt><dd>Small devices do better with an external AI. Everything else stays local.</dd></div>
+					<div><dt>Good to know</dt><dd>Small devices are better off with an external AI. What then goes out is listed under Privacy.</dd></div>
 				</dl>
 			</div>
 		</div>
@@ -712,7 +758,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
-<span class="c"># HTTPS with Caddy: template in deploy/demo/</span>
+<span class="c"># HTTPS with Caddy: see the guide</span>
 <span class="ok">✓ Dwello is running at https://dwello.your-domain.ch</span></pre>
 			</div>
 			<div class="panel needs">
@@ -720,12 +766,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<dl>
 					<div><dt>You need</dt><dd>A Linux server with Docker and a domain of your own.</dd></div>
 					<div><dt>Data in Switzerland</dt><dd>Choose a data centre in Switzerland. Our demo runs in Zurich.</dd></div>
-					<div><dt>Good to know</dt><dd>The demo template sets up HTTPS automatically with Caddy.</dd></div>
+					<div><dt>Good to know</dt><dd>The guide shows how Caddy sets up HTTPS automatically.</dd></div>
 				</dl>
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Google sign-in for now</b>You sign in with your Google account and set up an OAuth key once for it. A one-step installer with its own sign-in, without Google, is planned (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a>).</span></div>
+		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Google sign-in for now</b>You sign in with your Google account. During setup a key is created at Google once; the guide shows how. A one-step installer with its own sign-in, without Google, is planned (<a href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 on GitHub: one-step installer">#497</a>).</span></div>
 	</div>
 </section>
 
@@ -761,7 +807,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<span class="kicker">Open Source</span>
 			<p class="price">0.–<small> CHF a year</small></p>
 			<h2 style="font-size:clamp(1.75rem,3.4vw,2.5rem);max-width:18em">Free at Dwello means open, with no catch.</h2>
-			<p style="color:var(--ink-muted);font-size:1.125rem;max-width:34em">All the source code is public, under the GNU AGPL-3.0 licence. You can read it, check it, adapt it and pass it on. There is no premium plan, no limit per apartment and no feature that will cost money later. The AGPL makes sure that every modified version others use online stays open too.</p>
+			<p style="color:var(--ink-muted);font-size:1.125rem;max-width:34em">All the source code is public, under the GNU AGPL-3.0-or-later licence. You can read it, check it, adapt it and pass it on. There is no premium plan, no limit per apartment and no feature that will cost money later. The AGPL makes sure that every modified version others use online stays open too.</p>
 			<div class="actions">
 				<a class="btn btn-primary" href="https://github.com/rudini/Dwello" rel="noopener"><svg class="ic" aria-hidden="true"><use href="#i-git"/></svg>Source code on GitHub</a>
 				<a class="btn btn-secondary" href="https://github.com/rudini/Dwello/issues" rel="noopener">Suggest an idea or report a bug</a>
@@ -774,10 +820,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<tbody>
 					<tr><td>Cost per year</td><td class="d">CHF 0.–</td><td>per apartment</td></tr>
 					<tr><td>Where your data lives</td><td class="d">with you</td><td>with the provider</td></tr>
-					<tr><td>AI reads invoices</td><td class="d">locally</td><td>in the cloud</td></tr>
+					<tr><td>AI reads invoices</td><td class="d">locally or at your provider</td><td>in the cloud</td></tr>
 					<tr><td>If the provider shuts down</td><td class="d">keeps running</td><td>data gone</td></tr>
 					<tr><td>Source code open to review</td><td class="d">yes</td><td>no</td></tr>
-					<tr><td>Licence</td><td class="d">AGPL-3.0</td><td>proprietary</td></tr>
+					<tr><td>Licence</td><td class="d">AGPL-3.0-or-later</td><td>proprietary</td></tr>
 				</tbody>
 			</table>
 		</div>
@@ -790,14 +836,14 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Roadmap</span>
 			<h2>What comes next.</h2>
-			<p>Dwello is developed in the open. These points are planned; each has an issue on GitHub where you can have your say.</p>
+			<p>Dwello is developed in the open. These points are planned; most have an issue on GitHub where you can have your say.</p>
 		</div>
 		<div class="road">
-			<article><span class="badge plan">Planned</span><h3>One-step installer</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener">#497</a><p>One command, one question about your email, done. With its own sign-in, no Google account.</p></article>
-			<article><span class="badge plan">Planned</span><h3>MCP server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener">#495</a><p>Dwello as a tool for your AI assistant, local and with your permission.</p></article>
-			<article><span class="badge plan">Planned</span><h3>Full export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener">#496</a><p>All data as CSV and JSON, at any time, in one click.</p></article>
+			<article><span class="badge plan">Planned</span><h3>One-step installer</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/497" rel="noopener" aria-label="Issue 497 on GitHub: one-step installer">#497</a><p>One command, one question about your email, done. With its own sign-in, no Google account.</p></article>
+			<article><span class="badge plan">Planned</span><h3>MCP server</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/495" rel="noopener" aria-label="Issue 495 on GitHub: MCP server">#495</a><p>Dwello as a tool for your AI assistant, local and with your permission.</p></article>
+			<article><span class="badge plan">Planned</span><h3>Full export</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/496" rel="noopener" aria-label="Issue 496 on GitHub: full export">#496</a><p>All data as CSV and JSON, at any time, in one click.</p></article>
 			<article><span class="badge plan">Planned</span><h3>Reports and analysis</h3><p>Income, expenses and utility costs over the years, for your tax return and your accountant.</p></article>
-			<article><span class="badge plan">Planned</span><h3>Link to the source code in the app</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/498" rel="noopener">#498</a><p>Every installation shows where its source code lives, as the AGPL requires.</p></article>
+			<article><span class="badge plan">Planned</span><h3>Link to the source code in the app</h3><a class="issue" href="https://github.com/rudini/Dwello/issues/498" rel="noopener" aria-label="Issue 498 on GitHub: link to the source code in the app">#498</a><p>Every installation shows where its source code lives, as the AGPL requires.</p></article>
 		</div>
 	</div>
 </section>
@@ -810,11 +856,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<h2>Frequently asked questions.</h2>
 		</div>
 		<div class="faq">
-			<details open><summary>Is Dwello really free?</summary><p>Yes. Dwello is open source and free. At most you pay for your own server or the electricity for your PC. If you use an external AI instead of the local one, you pay its provider directly.</p></details>
-			<details><summary>Do I need technical knowledge?</summary><p>For the installation you should be able to type a few commands into a terminal, or know someone who can. The app itself is made for people with no prior knowledge: every term is explained at its field.</p></details>
+			<details open><summary>Do I need technical knowledge?</summary><p>For the setup, and after that for updates and regular backups. Ask someone who knows computers and give them the guide. To work with Dwello you need no prior knowledge: every term is explained at its field.</p></details>
+			<details><summary>Is Dwello really free?</summary><p>Yes. Dwello is open source and free. At most you pay for your own server or the power for your PC, and the postage for letters. If you use an external AI instead of the local one, you pay the provider directly.</p></details>
 			<details><summary>How many apartments is Dwello suited for?</summary><p>For private landlords with one to five buildings and up to 50 apartments. Dwello is not made for large property management firms with teams.</p></details>
 			<details><summary>What happens if the AI misreads an invoice?</summary><p>Nothing happens without your confirmation. The AI suggests the details and Dwello tells you which ones to check. The invoice is only created once you confirm. You can also add any invoice yourself.</p></details>
-			<details><summary>Has Dwello been checked legally?</summary><p>Dwello calculates by the rules of the Swiss Code of Obligations and is checked against those rules with automated tests. That does not replace legal advice: in a dispute, the homeowners’ association or the conciliation authority can help you.</p></details>
+			<details><summary>Has Dwello been checked legally?</summary><p>No, not by a lawyer or an association. Dwello calculates by the Swiss Code of Obligations and the Tenancy Ordinance (VMWG), and automated tests check the rules from them that Dwello applies. That does not replace legal advice: in a dispute, the homeowners’ association or the conciliation authority can help you.</p></details>
 			<details><summary>Can I try Dwello without installing anything?</summary><p>Yes. The demo at demo.dwello.ch shows three buildings in Zurich, Lucerne and Interlaken with 13 apartments. It is reset every night.</p></details>
 		</div>
 	</div>
@@ -826,10 +872,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="final-box">
 			<svg class="ic final-house" aria-hidden="true"><use href="#i-home"/></svg>
 			<h2>Do your next statement with Dwello.</h2>
-			<p>Install Dwello today, add your building and upload the invoices as they arrive. Come spring, the statement is done in no time.</p>
+			<p>Look at the demo and have Dwello set up. Then enter your building and upload the invoices as they come in. Once the billing period is over, the statement is quickly done.</p>
 			<div class="actions">
-				<a class="btn btn-primary" href="#installieren">Install Dwello</a>
-				<a class="btn btn-secondary" href="https://demo.dwello.ch/dashboard" rel="noopener">See the demo</a>
+				<a class="btn btn-primary" href="https://demo.dwello.ch/dashboard" rel="noopener">See the demo</a>
+				<a class="btn btn-secondary" href="#installieren">Have Dwello set up</a>
 			</div>
 		</div>
 	</div>
@@ -845,12 +891,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<p style="max-width:24em">Open-source software for private landlords in Switzerland.</p>
 			</div>
 			<div><h2>Product</h2><ul><li><a href="#funktionen">Features</a></li><li><a href="#datenschutz">Privacy</a></li><li><a href="#mcp">AI and MCP</a></li><li><a href="#roadmap">Roadmap</a></li></ul></div>
-			<div><h2>Get started</h2><ul><li><a href="#installieren">Installation</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Demo</a></li><li><a href="#faq">FAQ</a></li></ul></div>
-			<div><h2>Learn</h2><ul><li><a href="#funktionen">Billing utility costs</a></li><li><a href="#funktionen">Distribution keys</a></li><li><a href="#funktionen">QR-bill</a></li></ul></div>
+			<div><h2>Get started</h2><ul><li><a href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Setup guide</a></li><li><a href="https://demo.dwello.ch/dashboard" rel="noopener">Demo</a></li><li><a href="#faq">FAQ</a></li></ul></div>
 			<div><h2>Community</h2><ul><li><a href="https://github.com/rudini/Dwello" rel="noopener">GitHub</a></li><li><a href="https://github.com/rudini/Dwello/issues" rel="noopener">Report a bug</a></li><li><a href="../brand.html">Brand manual</a></li></ul></div>
 		</div>
 		<div class="legal">
-			<span>© 2026 Roger Rudin · Made for Switzerland · Licence <a href="https://github.com/rudini/Dwello/blob/main/LICENSE" rel="noopener">AGPL-3.0</a></span>
+			<span>© 2026 Roger Rudin · Made for Switzerland · Licence <a href="https://github.com/rudini/Dwello/blob/main/LICENSE" rel="noopener">AGPL-3.0-or-later</a></span>
 			<span class="legal-links"><a href="impressum.html">Legal notice</a> · <a href="datenschutz.html">Privacy statement</a></span>
 			<nav class="langs" aria-label="Choose language"><a href="../index.html" hreflang="de" lang="de">DE</a><a href="../fr/index.html" hreflang="fr" lang="fr">FR</a><a href="../it/index.html" hreflang="it" lang="it">IT</a><a href="index.html" hreflang="en" lang="en" aria-current="page">EN</a></nav>
 		</div>
@@ -872,6 +917,13 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
 	}
 	document.querySelectorAll('[data-copy]').forEach(function (b) { b.addEventListener('click', function () { copy(b); }); });
+
+	// the menu closes when a link in it is chosen, on a tap outside it, on Escape and when focus leaves it
+	var menu = document.querySelector('.menu');
+	menu.addEventListener('click', function (e) { if (e.target.closest('a')) menu.open = false; });
+	document.addEventListener('click', function (e) { if (menu.open && !menu.contains(e.target)) menu.open = false; });
+	document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); } });
+	menu.addEventListener('focusout', function (e) { if (e.relatedTarget && !menu.contains(e.relatedTarget)) menu.open = false; });
 
 	var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
 	function select(tab) {
