@@ -382,9 +382,20 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'agreed-costs-none': () => async (actor) => {
 		await actor.attemptsTo(toRentStep, untickAllCategories, Wait.until(on.shown('contract-agreed-costs-none')));
 	},
-	// a Nebenkostenpauschale without Akonto, the boxes ticked, not saved: the warning that they are still billed (#429)
 	// Emil's ended contract (fixtures/screens.ts): its agreed Nebenkosten taken over, the help says so (#368)
-	'rent-follow-up': () => toRentStep,
+	'rent-follow-up': () => async (actor) =>
+		actor.attemptsTo(
+			toRentStep,
+			Wait.until(
+				on.text(
+					await say(
+						actor,
+						'Dwello hat die vereinbarten Nebenkosten aus dem bisherigen Mietvertrag übernommen. Vergleichen Sie sie mit dem unterschriebenen neuen Mietvertrag: Kreuzen Sie jede an, die dort steht, und entfernen Sie das Häkchen bei jeder, die dort nicht steht. Nur angekreuzte Nebenkosten rechnet Dwello dem Mieter ab.'
+					)
+				)
+			)
+		),
+	// a Nebenkostenpauschale without Akonto, the boxes ticked, not saved: the warning that they are still billed (#429)
 	'flat-rate-warning': () => (actor) =>
 		actor.attemptsTo(
 			toRentStep,
