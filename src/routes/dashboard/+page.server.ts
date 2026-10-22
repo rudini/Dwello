@@ -164,8 +164,7 @@ export const load = async ({
 		.catch(() => ({ state: 'unknown' }));
 	const [
 		figures,
-		overdue,
-		sent,
+		open,
 		letters,
 		contracts,
 		apartments,
@@ -180,14 +179,15 @@ export const load = async ({
 			`${BACKEND_URL}/api/v1/dashboard`,
 			m.nav_overview()
 		) as Promise<DashboardData>,
-		list(fetch, 'statements?status=overdue&limit=100', 'data'),
-		list(fetch, 'statements?status=sent&limit=100', 'data'),
+		// overdue and sent in one read: read apart, a Zahlungsfrist changed in between listed one statement twice (its
+		// duplicate key stopped the page) or not at all (#605)
+		list(fetch, 'statements?status=open&limit=1000', 'data'),
 		list(fetch, 'documents?status=to_send', 'data'),
 		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
 		list(fetch, 'apartments?limit=1000', 'apartments'),
 		list(fetch, 'contracts?limit=1000', 'contracts'),
 		config,
-		list(fetch, 'statements?status=draft&limit=100', 'data'),
+		list(fetch, 'statements?status=draft&limit=1000', 'data'),
 		list(fetch, 'documents', 'data'),
 		list(fetch, 'statements/outdated', 'statements') // #454
 	]);
@@ -208,7 +208,8 @@ export const load = async ({
 		today,
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
-		dueStatements: [...overdue, ...sent].map((s) => ({
+		draftIds: drafts.map((s) => String(s.id)),
+		dueStatements: open.map((s) => ({
 			id: String(s.id),
 			tenantName: tenantOf(s),
 			paymentDeadline: String(s.paymentDeadline),

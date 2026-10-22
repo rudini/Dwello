@@ -9,6 +9,8 @@ export const cancelUploadButton = target('Hochladen abbrechen', (page) => page.g
 export const discardMessage = target('Rückfrage Abbrechen', (page) => page.getByTestId('invoice-upload-discard-message'));
 export const discardConfirm = target('Abbrechen bestätigen', (page) => page.getByTestId('invoice-upload-discard-confirm'));
 
+/** Any file's row: the dialog lists the chosen files */
+export const anyBelegRow = target('ein Beleg', (page) => page.getByTestId('invoice-upload-row').first());
 /** The row of one file in the dialog, by its file name */
 export const belegRow = (fileName: string) =>
 	target(`Beleg «${fileName}»`, (page) => page.getByTestId('invoice-upload-row').filter({ hasText: fileName }));

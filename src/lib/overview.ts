@@ -14,6 +14,7 @@ export interface OverviewInput {
 		reletApartments: number;
 	};
 	statementCounts: { draft: number; sent: number; paid: number; overdue: number };
+	draftIds: string[]; // the listed drafts, to count the current ones by id (#602)
 	// with the day from which the next Mahnung is possible, after the last reminder's Zahlungsfrist (#107)
 	dueStatements: {
 		id: string;
@@ -207,6 +208,7 @@ const correctTasks = (statements: Outdated, today: string): Task[] =>
 function workTasks({
 	today,
 	statementCounts,
+	draftIds,
 	dueStatements,
 	lettersToSend,
 	missingStatements = [],
@@ -214,7 +216,10 @@ function workTasks({
 	reminderAfterDays
 }: OverviewInput): Task[] {
 	const outdatedDrafts = outdatedStatements.filter((s) => s.status === 'draft');
-	const currentDrafts = statementCounts.draft - outdatedDrafts.length; // only current drafts are to send (#454)
+	// only current drafts are to send (#454): by the count, or the listed drafts not outdated where the two reads differ
+	// (#602); the list alone would lose them when it cannot be loaded
+	const listed = draftIds.filter((id) => !outdatedDrafts.some((s) => s.id === id)).length;
+	const currentDrafts = Math.max(statementCounts.draft - outdatedDrafts.length, listed);
 	// «Überfällig» from the day after the Zahlungsfrist, but a Mahnung is proposed only after the Mahnfrist (#64), the
 	// next one after the Zahlungsfrist of the last Mahnung (#107); a Rückerstattung is due at once (Fachreview V-1)
 	const waiting = (s: OverviewInput['dueStatements'][number]) =>

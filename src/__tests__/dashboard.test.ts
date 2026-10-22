@@ -91,18 +91,15 @@ function backend(
 			data: statementsOfAllPeriods,
 			total: statementsOfAllPeriods.length
 		},
-		'/statements?status=overdue&limit=100': {
+		// overdue and sent in one read (#605)
+		'/statements?status=open&limit=1000': {
 			data: [
 				{
 					id: 's1',
 					// 12 days ago: after the Mahnfrist of 10 days, a Mahnung is proposed (#64)
 					paymentDeadline: '2026-09-28',
 					tenant: { firstName: 'Anna', lastName: 'Keller' }
-				}
-			]
-		},
-		'/statements?status=sent&limit=100': {
-			data: [
+				},
 				{
 					id: 's2',
 					paymentDeadline: '2026-10-20',
@@ -118,7 +115,7 @@ function backend(
 		},
 		'/contracts?limit=1000': { contracts, total: contracts.length },
 		// A-5 (#114): drafts for moved-out tenants, one still with the building's address (twice: two periods)
-		'/statements?status=draft&limit=100': {
+		'/statements?status=draft&limit=1000': {
 			data: [
 				{ ...statementList.data[0], id: 's3', tenantId: 't9', oldAddress: true },
 				{ ...statementList.data[0], id: 's4', tenantId: 't9', oldAddress: true },
@@ -217,7 +214,7 @@ describe('Übersicht laden', () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
 		const overdue = (balance: string) =>
 			backend(200, both, {
-				'/statements?status=overdue&limit=100': {
+				'/statements?status=open&limit=1000': {
 					data: [{ ...statementList.data[0], paymentDeadline: '2026-10-05', balance }]
 				}
 			});
@@ -227,6 +224,22 @@ describe('Übersicht laden', () => {
 
 		expect(refund.tasks.map((task) => task.id)).toContain('overdue');
 		expect(payment.tasks.map((task) => task.id)).not.toContain('overdue');
+	});
+
+	// #605: überfällig und versendet aus zwei Abfragen: änderte sich die Zahlungsfrist dazwischen, stand dieselbe
+	// Abrechnung in beiden Listen (die Seite brach beim Laden ab) oder in keiner. Eine Abfrage liest beide zusammen
+	it('liest überfällige und versendete Abrechnungen in einer Abfrage', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const bruno = { ...statementList.data[0], id: 's9', tenant: { firstName: 'Bruno', lastName: 'Meier' } };
+		const data = await load({
+			fetch: backend(200, both, {
+				'/statements?status=overdue&limit=100': { data: [{ ...bruno, paymentDeadline: '2026-09-28' }] },
+				'/statements?status=sent&limit=100': { data: [{ ...bruno, paymentDeadline: '2026-11-09' }] },
+				'/statements?status=open&limit=1000': { data: [{ ...bruno, paymentDeadline: '2026-09-28' }] }
+			})
+		} as never);
+
+		expect(data.deadlines.filter((d) => d.id === 's9').map((d) => d.date)).toEqual(['2026-09-28']);
 	});
 
 	// #454 (#408 point 7): the statements no longer current, from the backend; a sent one to correct (Fachreview 454-1 E-3)
