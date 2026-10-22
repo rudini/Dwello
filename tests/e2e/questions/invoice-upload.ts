@@ -23,10 +23,12 @@ import {
 	keepOriginalHint,
 	uploadBuildingSelect,
 	uploadFileChoose,
+	uploadPurpose,
 	uploadResult,
 	uploadStatus
 } from '../targets/invoice-upload';
 
+export const uploadPurposeText = Text.of(uploadPurpose);
 export const proposedAmount = (fileName: string) => Value.of(belegAmount(fileName));
 export const proposedInvoiceNumber = (fileName: string) => Value.of(belegInvoiceNumber(fileName));
 export const unsureNote = (fileName: string, field: string) => Text.of(belegUnsure(fileName, field));

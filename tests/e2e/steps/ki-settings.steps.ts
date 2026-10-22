@@ -1,5 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { uploadPurposeText } from '../questions/invoice-upload';
 import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, modelDownloadOffered, shownKiAddress } from '../questions/ki-settings';
 import {
 	checkConnection,
@@ -8,6 +9,7 @@ import {
 	openFreshKi,
 	openKiWithFailedModel,
 	openFreshSettingsKi,
+	openFreshUpload,
 	openKi,
 	readFreshPrivacy,
 	saveMode,
@@ -141,4 +143,13 @@ When('der Liegenschaftsverwalter die Verbindung zu einer neuen Adresse ohne API-
 	await verwalter.attemptsTo(
 		checkConnection({ ...stubProvider('Muster KI AG', 'Deutschland'), address: 'http://127.0.0.1:2531/v1', key: '' })
 	);
+});
+
+// #626: «Rechnungen hochladen» on the fresh installation, after «Keine KI»
+When('der Liegenschaftsverwalter in der frischen Installation "Rechnungen hochladen" öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openFreshUpload);
+});
+
+Then('sagt der Dialog "Rechnungen hochladen" {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uploadPurposeText).toBe(text);
 });

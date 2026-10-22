@@ -17,6 +17,7 @@ import {
 	kiSaveAnswer,
 	kiSaveButton
 } from '../targets/ki-settings';
+import { uploadInvoicesButton } from '../targets/invoice-upload';
 
 /** A provider as the KI stand-in answers it (backend/scripts/llm-stub.ts): it refuses the key «falsch» and reads no
  * images with the model «text-modell»; nothing listens on port 9 */
@@ -37,6 +38,8 @@ export const openFreshSettingsKi: Activity = (actor) =>
 	actor.attemptsTo(signInFresh, Navigate.to(`${FRESH_APP}/config`), Click.on(kiLinkInSettings));
 export const openFreshKi: Activity = (actor) => actor.attemptsTo(signInFresh, Navigate.to(`${FRESH_APP}/config/ki`));
 export const openKi = Navigate.to('/config/ki');
+export const openFreshUpload: Activity = (actor) =>
+	actor.attemptsTo(signInFresh, Navigate.to(`${FRESH_APP}/invoices`), Click.on(uploadInvoicesButton));
 
 const fillProvider =
 	(provider: Provider): Activity =>

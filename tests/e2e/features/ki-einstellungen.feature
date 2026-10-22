@@ -42,6 +42,14 @@ Funktionalität: KI in den Einstellungen wählen
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Rechnungen und Kategorien werden nicht von einer KI bearbeitet."
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Muster KI AG"
 
+  # #626: ohne KI liest niemand die Dateien; der Dialog sagt es mit dem Begriff der Seite «KI»
+  @wip
+  Szenario: Rechnungen hochladen, wenn keine KI gewählt ist
+    Angenommen Dwello ist eingerichtet
+    Und in der frischen Installation ist keine KI gewählt
+    Wenn der Liegenschaftsverwalter in der frischen Installation "Rechnungen hochladen" öffnet
+    Dann sagt der Dialog "Rechnungen hochladen" "Wählen Sie das Gebäude und die Dateien Ihrer Rechnungen. Es ist «Keine KI» gewählt: Sie geben die Angaben selbst ein, bevor Dwello die Rechnungen erstellt."
+
   Szenario: Zur lokalen KI zurückkehren
     Angenommen Dwello ist eingerichtet
     Und der Anbieter "Muster KI AG" in "Deutschland" ist gespeichert

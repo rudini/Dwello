@@ -240,7 +240,7 @@
 	onrequestclose={requestClose}
 	onconfirm={create}
 >
-	<p id="invoice-upload-purpose" class="text-ink">{m.invoices_upload_purpose()}</p>
+	<p id="invoice-upload-purpose" class="text-ink" data-testid="invoice-upload-purpose">{m.invoices_upload_purpose()}</p>
 	<p class="text-ink-muted" data-testid="invoice-keep-original">
 		{m.invoices_upload_kept()}
 		{m.invoices_upload_keep_original()}

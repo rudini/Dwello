@@ -4,6 +4,7 @@ export const uploadInvoicesButton = target('Rechnungen hochladen', (page) => pag
 export const uploadBuildingSelect = target('Gebäude der Belege', (page) => page.getByTestId('invoice-upload-building-select'));
 export const uploadFileInput = target('Dateien der Belege', (page) => page.getByTestId('invoice-upload-file-input'));
 export const createInvoicesButton = target('Rechnungen erstellen', (page) => page.getByTestId('invoice-upload-create-button'));
+export const uploadPurpose = target('Zweck des Hochladens', (page) => page.getByTestId('invoice-upload-purpose'));
 export const uploadResult = target('Ergebnis des Hochladens', (page) => page.getByTestId('invoice-upload-result'));
 export const cancelUploadButton = target('Hochladen abbrechen', (page) => page.getByTestId('dialog-cancel'));
 export const discardMessage = target('Rückfrage Abbrechen', (page) => page.getByTestId('invoice-upload-discard-message'));
