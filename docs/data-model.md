@@ -497,7 +497,7 @@ updated_at        TIMESTAMPTZ NOT NULL
 
 The KI the landlord chooses under «Einstellungen» › «KI». Without a row, or while the operator sets any `LLM_*` variable,
 the variables apply (`backend/src/config/llm.ts`). Every change is also an `audit_log` entry `ki_setting_changed`.
-Migration `0033_ki_settings.sql`.
+Migration `0034_ki_settings.sql`.
 
 ---
 
