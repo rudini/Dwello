@@ -136,7 +136,8 @@
 			apartmentIds: apartments.map((a) => a.id)
 		};
 		const start = startValues(given, draft.values, known);
-		values = start.values;
+		// a contract from the old one keeps that one's agreed Nebenkosten (#368, code review C-1)
+		values = { ...start.values, ...(agreed && { agreedCategoryIds: agreed }) };
 		restored = { at: draft.savedAt, dropped: start.dropped };
 	}
 

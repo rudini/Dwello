@@ -135,8 +135,30 @@ describe('Mietvertrag erfassen', () => {
 		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
 		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
 		expect(document.getElementById('agreed-costs-help')!.textContent).toBe(
-			'Dwello hat die vereinbarten Nebenkosten aus dem bisherigen Mietvertrag übernommen. Kreuzen Sie Nebenkosten an, die Sie mit dem amtlichen Formular neu eingeführt haben, und entfernen Sie das Häkchen bei jeder, die im neuen Mietvertrag nicht mehr gilt.'
+			// persona Helga #368 A P-1: compare with the signed new contract, no official form needed for it
+			'Dwello hat die vereinbarten Nebenkosten aus dem bisherigen Mietvertrag übernommen. Vergleichen Sie sie mit dem unterschriebenen neuen Mietvertrag: Kreuzen Sie jede an, die dort steht, und entfernen Sie das Häkchen bei jeder, die dort nicht steht. Nur angekreuzte Nebenkosten rechnet Dwello dem Mieter ab.'
 		);
+	});
+
+	// code review #368 C-1: a draft kept in the browser does not undo the takeover
+	it('übernimmt die vereinbarten Nebenkosten auch über einen Entwurf hinweg', async () => {
+		const categories = [
+			{ id: 'k1', name: 'Heizung' },
+			{ id: 'k2', name: 'Lift' }
+		];
+		writeDraft(localStorage, 'contract', { tenantId: 't1', agreedCategoryIds: ['k2'] }, new Date());
+		show(NewContractPage, { data: { ...data, categories, agreed: ['k1'] } } as never);
+		await settle();
+		next();
+		await settle();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+
+		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
+		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
+		localStorage.clear();
 	});
 
 	it('verliert beim Zurückgehen keine Angaben', async () => {

@@ -383,6 +383,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(toRentStep, untickAllCategories, Wait.until(on.shown('contract-agreed-costs-none')));
 	},
 	// a Nebenkostenpauschale without Akonto, the boxes ticked, not saved: the warning that they are still billed (#429)
+	// Emil's ended contract (fixtures/screens.ts): its agreed Nebenkosten taken over, the help says so (#368)
+	'rent-follow-up': () => toRentStep,
 	'flat-rate-warning': () => (actor) =>
 		actor.attemptsTo(
 			toRentStep,
