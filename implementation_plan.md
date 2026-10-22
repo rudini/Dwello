@@ -179,4 +179,14 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #387 code review round 1 (`docs/reviews/387-review-1.md`)
 - [x] #387 code review round 2 of the fixes (`docs/reviews/387-review-2.md`)
 - [x] #387 persona Dr. Weber (`docs/design/personas/weber-387.md`)
-- [ ] #387 closing review not needed (nothing after round 2), pull request `Fixes #387`, merged on green CI
+- [x] #387 closing review not needed (nothing after round 2), pull request #631 merged on green CI (e6b3623a)
+- [x] #452: implemented and merged before (PR #539, `Refs #452`, KI case): the product owner closes it
+- [x] #465 scenarios @wip (statement-detail.feature: letter, Heizprofil source, special characters, phone and e-mail; settings.feature: phone and e-mail, invalid e-mail), red at the missing behaviour
+- [x] #465 fachreview before implementing (`docs/reviews/465-fachreview-1.md`): V-1, V-2 Major and V-3 to V-6 taken; the glossary term «Quelle der Monatsanteile» and the choices decided in #465 under the standing instruction
+- [x] #465 font: Liberation Sans (SIL OFL) embedded in statement and reminder PDFs; test helper reads ToUnicode maps
+- [x] #465 settings: company_phone, company_email (backend, form, help texts)
+- [x] #465 PDF letter: letterhead, place and date, salutation, introduction, greeting; Heizprofil source (migration 0037, snapshot in heating_share); scenarios green without @wip
+- [ ] #465 code review round 1 (`docs/reviews/465-review-1.md`)
+- [ ] #465 personas Dr. Weber (PDF) and Helga (settings), daten-pruefer on Weber's PDF
+- [x] #465 glossary row «Quelle der Monatsanteile» (decided in #465)
+- [ ] #465 closing review, pull request `Fixes #465`, merged on green CI

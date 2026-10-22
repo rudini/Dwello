@@ -154,6 +154,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Gebäude ohne Tank** | Merkmal eines Gebäudes: Es hat keinen Tank und kein Lager für Heizmaterial, oder der Tank ist stillgelegt. Der Abrechnungslauf fragt dann nicht nach dem Tankbestand, ausser die Abrechnungsperiode hat noch Heizmaterial (Anfangsbestand über 0) oder einen erfassten Tankbestand mit Stichtag in der Periode. In der Oberfläche «Kein Tank oder Tank stillgelegt». | `no_tank` Feld |
 | **Vordefinierte Heizprofile** | Mit Dwello gelieferte Heizprofile: Heizung Mittelland, Heizung Bergregion, Heizung Tessin, Heizung + Warmwasser. | `type = 'predefined'` |
 | **Eigenes Heizprofil** | Vom Liegenschaftsverwalter erfasstes Profil. | `type = 'custom'` |
+| **Quelle der Monatsanteile** | Woher die Monatsanteile eines Heizprofils stammen: bei einem vordefinierten Heizprofil Merkblatt, Herausgeber und Tabelle, bei einem eigenen «Eigenes Profil des Vermieters». Steht im PDF unter der Zeile zum Heizprofil, wie die Abrechnung erstellt wurde (#465). | `heating_profiles.source_de` … `source_en`; `utility_statements.heating_share` (`sources`) |
 
 ---
 
