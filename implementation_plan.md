@@ -171,5 +171,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #368 slice B code review round 1 (`docs/reviews/368-B-review-1.md`)
 - [x] #368 slice B personas Helga (`docs/design/personas/helga-368-b.md`) and Dr. Weber (`docs/design/personas/weber-368-b.md`)
 - [x] #368 slice B daten-pruefer on Weber's statement (`docs/reviews/368-B-datenpruefung-1.md`)
-- [ ] #368 slice B code review round 2 of the fixes (`docs/reviews/368-B-review-2.md`)
+- [x] #368 slice B code review round 2 of the fixes (`docs/reviews/368-B-review-2.md`)
 - [ ] #368 slice B closing review, merge origin/main, pull request `Fixes #368`, merged on green CI
