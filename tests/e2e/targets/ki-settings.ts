@@ -17,3 +17,8 @@ export const kiCheckButton = target('Verbindung prüfen', (page) => page.getByTe
 export const kiSaveButton = target('KI speichern', (page) => page.getByTestId('ki-save-button'));
 export const kiCheckResult = target('Ergebnis der Prüfung', (page) => page.getByTestId('ki-check-result'));
 export const kiModelDownloadButton = target('KI-Modell herunterladen', (page) => page.getByTestId('ki-model-download-button'));
+// what the page answers to «KI speichern»: saved, or a refusal at a field or for the whole form
+export const kiSaveAnswer = target('Antwort auf das Speichern', (page) =>
+	page.locator('[data-testid="ki-saved"], [data-testid="form-error"], [data-testid="ki-settings-page"] [aria-invalid="true"]')
+);
+export const kiModelOffline = target('Hinweis, dass die lokale KI nicht antwortet', (page) => page.getByTestId('ki-model-offline'));

@@ -162,6 +162,25 @@ describe('Verbindung prüfen', () => {
 		expect(calls[0]).toMatchObject({ method: 'POST', url: `${API}/ki-settings/check` });
 	});
 
+	// Personas Anna P-5, Sven P-4: ohne Adresse gibt es nichts zu prüfen
+	it('sagt ohne Adresse, dass sie fehlt, statt den Anbieter zu fragen', async () => {
+		const { calls, result } = runAction(
+			actions.check,
+			'',
+			200,
+			{ ...provider, baseUrl: '' },
+			checked
+		);
+
+		expect(await result).toMatchObject({
+			data: {
+				check:
+					'Geben Sie die Adresse der KI an, die Ihnen der Anbieter nennt, zum Beispiel https://api.anbieter.ch/v1.'
+			}
+		});
+		expect(calls).toEqual([]);
+	});
+
 	// Fachreview 580-2 F-16
 	it('sagt, wenn eine neue Adresse den API-Schlüssel braucht', async () => {
 		const { result } = runAction(

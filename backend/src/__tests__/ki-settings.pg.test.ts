@@ -86,6 +86,46 @@ afterAll(() => {
 });
 
 describe('KI in den Einstellungen', () => {
+	// Codereview 580 C-1: LLM_LOCAL_URL sagt nur, wo die lokale KI läuft, auch auf einem anderen Rechner im Netz
+	it('gilt ohne Einstellung die lokale KI, auch unter einer Adresse im eigenen Netz', async () => {
+		Object.assign(llmConfig, { baseUrl: 'http://192.168.1.20:11434/v1' });
+		try {
+			expect(await settings()).toMatchObject({ mode: 'local', byOperator: false });
+			expect(await recipient()).toEqual({ recipient: null, enabled: true });
+		} finally {
+			Object.assign(llmConfig, { baseUrl: configured.baseUrl });
+		}
+	});
+
+	// Codereview 580 C-2: die Übersicht sagt nicht mehr, das Modell lade, und Ollama lädt nichts weiter herunter
+	it('beendet das Laden des KI-Modells, sobald ein Anbieter oder keine KI gewählt ist', async () => {
+		const ollama = Bun.serve({
+			port: 0,
+			idleTimeout: 0,
+			fetch: (request) =>
+				new URL(request.url).pathname === '/api/tags'
+					? Response.json({ models: [] })
+					: new Response(
+							new ReadableStream({
+								start: (controller) =>
+									controller.enqueue(new TextEncoder().encode(`${JSON.stringify({ status: 'pulling', total: 100, completed: 40 })}\n`))
+							})
+						)
+		});
+		Object.assign(llmConfig, { baseUrl: `http://127.0.0.1:${ollama.port}/v1` });
+		try {
+			await save({ mode: 'local' });
+			expect(await (await callApi('/api/v1/ki/model')).json()).toEqual({ state: 'loading', percent: 40 });
+
+			await save({ mode: 'none' });
+
+			expect(await (await callApi('/api/v1/ki/model')).json()).toEqual({ state: 'unknown' });
+		} finally {
+			ollama.stop(true);
+			Object.assign(llmConfig, { baseUrl: configured.baseUrl });
+		}
+	});
+
 	it('gilt ohne Einstellung die lokale KI', async () => {
 		expect(await settings()).toMatchObject({
 			mode: 'local',
@@ -351,6 +391,23 @@ describe('Vom Betreiber festgelegte KI', () => {
 		expect(await response.json()).toMatchObject({ code: 'KI_SET_BY_OPERATOR' });
 	});
 
+	// llm:eval setzt nur Adresse, Schlüssel und Modell; den Anbieter verlangt erst der Start des Servers
+	it('fragt die KI des Betreibers auch ohne Namen und Land des Anbieters', async () => {
+		Object.assign(llmConfig, {
+			byOperator: true,
+			baseUrl: `http://127.0.0.2:${provider.port}/v1`,
+			apiKey: 'richtig',
+			model: 'bild-modell'
+		});
+		try {
+			const response = await sendJson('POST', '/api/v1/categories/propose', { name: 'Treppenhausreinigung', description: '' });
+
+			expect(response.status).toBe(200);
+		} finally {
+			Object.assign(llmConfig, { apiKey: configured.apiKey, model: configured.model });
+		}
+	});
+
 	it('geht einer gespeicherten Einstellung vor', async () => {
 		await save(muster);
 		Object.assign(llmConfig, {
@@ -379,6 +436,20 @@ describe('Verbindung prüfen', () => {
 		expect(await (await check({ ...muster, baseUrl: 'http://127.0.0.1:9/v1' })).json()).toEqual({
 			result: 'unreachable'
 		});
+	});
+
+	// Codereview 580 C-7: ein Serverfehler oder zu viele Anfragen sagen nichts über das Modell
+	it('meldet einen Anbieter, der mit einem Serverfehler oder «nicht gefunden» antwortet, als nicht erreichbar', async () => {
+		for (const status of [503, 404]) {
+			const failing = Bun.serve({ port: 0, fetch: () => new Response(null, { status }) });
+			try {
+				const result = await check({ ...muster, baseUrl: `http://127.0.0.1:${failing.port}/v1` });
+
+				expect(await result.json()).toEqual({ result: 'unreachable' });
+			} finally {
+				failing.stop(true);
+			}
+		}
 	});
 
 	it('meldet ein Modell, das keine Bilder liest', async () => {

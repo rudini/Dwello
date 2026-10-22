@@ -1,11 +1,12 @@
 import { EMPTY_APP, FRESH_APP, FRESH_KI_STUB } from '../fixtures/fresh-installation';
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, Cookies, Enter, Navigate } from '../screenplay/interactions';
+import { Check, Click, Cookies, Enter, Navigate, Wait } from '../screenplay/interactions';
 import {
 	kiApiKeyInput,
 	kiBaseUrlInput,
 	kiCheckButton,
+	kiCheckResult,
 	kiCountryInput,
 	kiLinkInSettings,
 	kiMode,
@@ -13,6 +14,7 @@ import {
 	kiModelInput,
 	kiPrivacyConfirm,
 	kiProviderInput,
+	kiSaveAnswer,
 	kiSaveButton
 } from '../targets/ki-settings';
 
@@ -52,17 +54,17 @@ const fillProvider =
 export const saveProvider =
 	(provider: Provider): Activity =>
 	(actor) =>
-		actor.attemptsTo(openFreshKi, fillProvider(provider), Click.on(kiSaveButton));
+		actor.attemptsTo(openFreshKi, fillProvider(provider), Click.on(kiSaveButton), Wait.until(kiSaveAnswer));
 
 export const checkConnection =
 	(provider: Provider): Activity =>
 	(actor) =>
-		actor.attemptsTo(openFreshKi, fillProvider(provider), Click.on(kiCheckButton));
+		actor.attemptsTo(openFreshKi, fillProvider(provider), Click.on(kiCheckButton), Wait.until(kiCheckResult));
 
 export const saveMode =
 	(mode: 'local' | 'none'): Activity =>
 	(actor) =>
-		actor.attemptsTo(openFreshKi, Click.on(kiMode(mode)), Click.on(kiSaveButton));
+		actor.attemptsTo(openFreshKi, Click.on(kiMode(mode)), Click.on(kiSaveButton), Wait.until(kiSaveAnswer));
 
 export const readFreshPrivacy = Navigate.to(`${FRESH_APP}/privacy`);
 

@@ -209,8 +209,11 @@ function ollama(): Record<string, Route> {
 		},
 		// #580: «failed» ends the running downloads with an error (a new one runs again), «offline» answers nothing
 		// until «online»
+		// also as GET ?state=…, so the axe check reaches the state through the browser (code review 580 C-5)
 		'/stub/ollama': async (request) => {
-			const { state } = (await request.json()) as { state: 'failed' | 'offline' | 'online' };
+			type Wanted = { state: 'failed' | 'offline' | 'online' };
+			const asked = new URL(request.url).searchParams.get('state');
+			const { state } = (asked ? { state: asked } : await request.json()) as Wanted;
 			offline = state === 'offline';
 			if (state === 'failed') for (const fail of failures) fail();
 			return Response.json({ state });

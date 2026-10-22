@@ -1998,7 +1998,6 @@
 	"ki_settings_model_help": "A model that reads images, so that Dwello can read uploaded invoices.",
 	"ki_settings_provider_name": "Name of the provider",
 	"ki_settings_provider_country": "Country where the provider processes the data",
-	"ki_settings_names_help": "If several companies or countries process the data, name them all, separated by commas.",
 	"ki_settings_checklist_title": "Before you choose a provider",
 	"ki_settings_checklist_1": "You have a contract with the provider under which it processes the data only on your behalf, protects it and does not use it to train its AI (Art. 9 FADP). It engages other companies only with your consent. If the AI runs on a server you run yourself, this point does not apply.",
 	"ki_settings_checklist_2": "The provider and every company it engages process the data only in Switzerland or in a country whose data protection the Federal Council recognises as adequate (Art. 16 para. 1 FADP); in the USA only companies certified under the Swiss-U.S. Data Privacy Framework. Dwello does not support other providers: the privacy statement cannot name additional safeguards.",
@@ -2022,7 +2021,7 @@
 	"ki_settings_locked": "Set by the operator in the configuration file. If you run Dwello yourself, change the AI there; otherwise contact the operator.",
 	"ki_settings_model_ready": "The AI model is loaded.",
 	"ki_settings_model_failed": "Check that the server reaches the internet and has about 6 GB of free space, then download it again. If someone else runs Dwello, contact the operator.",
-	"ki_settings_model_offline": "The local AI does not answer. If Dwello runs with Docker, the operator starts it as the installation guide says; otherwise choose a provider or no AI.",
+	"ki_settings_model_offline": "The local AI does not answer. Until it does, enter invoices by hand. If you run Dwello yourself, start the local AI as the installation guide describes; otherwise contact the operator or choose a provider or no AI above.",
 	"ki_settings_model_download": "Download the AI model",
 	"backend_ki_set_by_operator": "The AI is set by the operator in the configuration file and cannot be changed here.",
 	"backend_ki_not_local": "The AI model is downloaded only for the local AI. Choose «Local AI on this server» first.",
@@ -2031,5 +2030,7 @@
 	"backend_ki_encryption_key_missing": "The server has no key to store the API key encrypted. The operator sets ENCRYPTION_KEY as the installation guide describes.",
 	"audit_ki_provider": "AI chosen: {provider} ({country})",
 	"audit_ki_local": "AI chosen: local AI",
-	"audit_ki_none": "AI chosen: no AI"
+	"audit_ki_none": "AI chosen: no AI",
+	"ki_settings_provider_name_help": "The company’s name as it appears in your contract with it. The privacy statement names it. If several companies process the data, name them all, separated by commas.",
+	"ki_settings_country_help": "The country where the provider’s data centres are. The privacy statement names it. If data centres in several countries process the data, name them all, separated by commas."
 }

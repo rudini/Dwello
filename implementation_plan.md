@@ -23,10 +23,12 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] Frontend: page `/config/ki` linked from `/config` (BFF test, DOM tests seen red by taking the code out), texts in four languages, Protokoll entry, privacy text (8419e6c)
 - [x] E2E: the fresh installation without LLM_* (`LLM_LOCAL_URL`, `ENCRYPTION_KEY`), the empty one unlocked; stub: key, image, failed and offline Ollama; axe and language looks at the fresh installation take the installation lock
 - [x] Screens in `tests/a11y/screens.json` (`ki-settings`: default, ki-model-loading, ki-model-failed, ki-provider, ki-provider-submit-empty), `accessibility.feature`, `sprachen-bildschirme.feature`; 30 rows green
-- [ ] `bun run llm:eval` before and after (prompt unchanged): before 47 of 48 (98 %), `qwen/qwen3-vl-8b-instruct` via OpenRouter
+- [x] `bun run llm:eval` before and after (prompt unchanged): 47 of 48 (98 %) both, `qwen/qwen3-vl-8b-instruct` via OpenRouter
 - [x] Docs: `docs/installation.md` section 6, README «External LLM provider», `.env.example`, `docker-compose.prod.yml` (no LLM_* defaults, test red first), data model, API spec, glossary rows decided in #580 (a408918)
-- [ ] code-reviewer round 1 (backend and frontend)
-- [ ] personas Dr. Weber, Helga, Marco, Sven, Anna (new screen); persona stack without LLM_* lock
-- [ ] fach-reviewer round 4 (feature review of the implementation)
+- [x] code-reviewer round 1: `docs/reviews/580-review-1.md`; Majors C-1 (a local KI in the own network), C-2 (a running download after choosing a provider), C-3 (E2E tasks without waiting), C-5 (states missing in the screen checks) fixed with tests seen red; C-4 rejected (glossary rows came in a408918, after the reviewed commit); Minors C-6 to C-10 fixed, C-9's copied model type stays in the report
+- [x] fach-reviewer round 4 (feature review): `docs/reviews/580-fachreview-4.md`; Major F-23 (LLM_LOCAL_URL on another machine) fixed: the backend refuses to start; Minors F-24 (only 400 means no images), F-25 (ENCRYPTION_KEY), F-26 (no fields with the KI switched off by the operator) fixed
+- [x] personas Dr. Weber, Helga, Marco, Sven, Anna (`docs/design/personas/*-580.md`): Majors Marco/Dr. Weber P-1 (typed values reset after the check), Sven P-1 (focus lost after the check), Anna P-1 (local KI not answering) fixed with DOM tests seen red; Minors on one cause fixed (model notice only with «Lokale KI», own help texts for name and country, a check without address)
+- [x] `llm:eval` after: 47 of 48 (98 %), unchanged; a first run at 0 % showed that the operator's KI without provider name threw on every call, fixed with a test seen red
+- [ ] code-reviewer round 2, fach-reviewer feature round 2 (F-23), persona Anna again (new text)
 - [ ] closing round
 - [ ] Workflow notes, archive, PR

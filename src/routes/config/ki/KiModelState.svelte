@@ -7,7 +7,8 @@
 	import type { KiModel } from '../../dashboard/+page.server';
 
 	// #580: the local KI's model on the page «KI»: its progress as on the overview, else whether it is there, and a new
-	// download when it failed or the local KI does not answer (domain review 580 F-5)
+	// download when it failed (domain review 580 F-5); a local KI that does not answer gets no download (persona Anna
+	// 580 P-1)
 	let { model }: { model: KiModel } = $props();
 	let downloading = $state(false);
 	const failed = $derived(model.state === 'failed');
@@ -24,25 +25,27 @@
 			title={failed ? m.ki_model_failed_title() : m.ki_settings_model_offline()}
 			testid={failed ? 'ki-model-loading' : 'ki-model-offline'}
 		>
-			{#if failed}<p>{m.ki_settings_model_failed()}</p>{/if}
-			<form
-				method="POST"
-				action="?/download"
-				use:enhance={() => {
-					downloading = true;
-					return async ({ update }) => {
-						await update();
-						downloading = false;
-					};
-				}}
-			>
-				<Button
-					type="submit"
-					icon="document-download"
-					busy={downloading}
-					testid="ki-model-download-button">{m.ki_settings_model_download()}</Button
+			{#if failed}
+				<p>{m.ki_settings_model_failed()}</p>
+				<form
+					method="POST"
+					action="?/download"
+					use:enhance={() => {
+						downloading = true;
+						return async ({ update }) => {
+							await update();
+							downloading = false;
+						};
+					}}
 				>
-			</form>
+					<Button
+						type="submit"
+						icon="document-download"
+						busy={downloading}
+						testid="ki-model-download-button">{m.ki_settings_model_download()}</Button
+					>
+				</form>
+			{/if}
 		</Alert>
 	{/if}
 </section>

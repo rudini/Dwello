@@ -39,9 +39,9 @@ import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } fro
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { kiModelLoading, setupError } from '../targets/einrichtung';
-import { FRESH_APP } from '../fixtures/fresh-installation';
+import { FRESH_APP, FRESH_KI_STUB } from '../fixtures/fresh-installation';
 import { withLock } from '../fixtures/settings-lock';
-import { kiMode, kiSaveButton } from '../targets/ki-settings';
+import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
 import { userMenuButton } from '../targets/app-frame';
 import { passwordSubmitButton } from '../targets/authentication';
 import { failSignIns, signInWithPassword } from './authentication';
@@ -210,6 +210,18 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'ki-model-failed': () => Wait.until(kiModelLoading),
 	// #580: the page «KI» with a provider chosen (fields and checklist), and that choice saved without input
 	'ki-provider': () => Click.on(kiMode('provider')),
+	// the answers of the page: saved (the local KI again, which changes nothing), the result of a check, and a local KI
+	// that does not answer (its stand-in told so through the browser, and back afterwards in `inTurn`)
+	'ki-saved': () => (actor) => actor.attemptsTo(Click.on(kiSaveButton), Wait.until(kiSaveAnswer)),
+	'ki-check-result': () => (actor) =>
+		actor.attemptsTo(Click.on(kiMode('provider')), Click.on(kiCheckButton), Wait.until(kiCheckResult)),
+	'ki-model-offline': () => (actor) =>
+		actor.attemptsTo(
+			Navigate.outsideApp(`${FRESH_KI_STUB}/stub/ollama?state=offline`),
+			Navigate.to(`${FRESH_APP}/config/ki`),
+			Click.on(kiSaveButton),
+			Wait.until(kiModelOffline)
+		),
 	'ki-provider-submit-empty': () => (actor) =>
 		actor.attemptsTo(Click.on(kiMode('provider')), Click.on(kiSaveButton), Wait.until(on.formProblem)),
 	demo: () => Wait.until(demoNotice),
@@ -652,7 +664,7 @@ const instanceOf = ({ state, path }: Example) =>
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE
-			: ['ki-model-loading', 'ki-provider', 'ki-provider-submit-empty'].includes(state)
+			: ['ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline'].includes(state)
 				? FRESH_APP
 				: '';
 
@@ -660,7 +672,20 @@ const instanceOf = ({ state, path }: Example) =>
 const inTurn =
 	(example: Example, look: Activity): Activity =>
 	(actor) =>
-		instanceOf(example) === FRESH_APP ? withLock('installation', () => actor.attemptsTo(look)) : actor.attemptsTo(look);
+		instanceOf(example) === FRESH_APP
+			? withLock('installation', () =>
+					actor.attemptsTo(look, ...(example.state === 'ki-model-offline' ? [localKiAnswersAgain] : []))
+				)
+			: actor.attemptsTo(look);
+
+// the local KI of the fresh installation answers again and downloads its model, as its scenarios expect
+const localKiAnswersAgain: Activity = (actor) =>
+	actor.attemptsTo(
+		Navigate.outsideApp(`${FRESH_KI_STUB}/stub/ollama?state=online`),
+		Navigate.to(`${FRESH_APP}/config/ki`),
+		Click.on(kiSaveButton),
+		Wait.until(kiSaveAnswer)
+	);
 
 /** Public screens are looked at without a session */
 const leaveSessionFor =

@@ -1998,7 +1998,6 @@
 	"ki_settings_model_help": "Ein Modell, das Bilder liest, damit Dwello hochgeladene Rechnungen auslesen kann.",
 	"ki_settings_provider_name": "Name des Anbieters",
 	"ki_settings_provider_country": "Land, in dem der Anbieter die Daten bearbeitet",
-	"ki_settings_names_help": "Bearbeiten mehrere Firmen oder Länder die Daten, nennen Sie alle, mit Komma getrennt.",
 	"ki_settings_checklist_title": "Bevor Sie einen Anbieter wählen",
 	"ki_settings_checklist_1": "Sie haben mit dem Anbieter einen Vertrag, nach dem er die Daten nur in Ihrem Auftrag bearbeitet, sie schützt und nicht für das Training seiner KI verwendet (Art. 9 DSG). Andere Firmen zieht er nur mit Ihrer Zustimmung bei. Läuft die KI auf einem Server, den Sie selbst betreiben, entfällt dieser Punkt.",
 	"ki_settings_checklist_2": "Der Anbieter und alle Firmen, die er beizieht, bearbeiten die Daten nur in der Schweiz oder in einem Land, dessen Datenschutz der Bundesrat als angemessen anerkennt (Art. 16 Abs. 1 DSG); in den USA nur Firmen, die nach dem Swiss-U.S. Data Privacy Framework zertifiziert sind. Andere Anbieter unterstützt Dwello nicht: Die Datenschutzerklärung kann keine zusätzlichen Garantien nennen.",
@@ -2022,7 +2021,7 @@
 	"ki_settings_locked": "Vom Betreiber in der Einstellungsdatei festgelegt. Betreiben Sie Dwello selbst, ändern Sie die KI dort; sonst wenden Sie sich an den Betreiber.",
 	"ki_settings_model_ready": "Das KI-Modell ist geladen.",
 	"ki_settings_model_failed": "Prüfen Sie, ob der Server das Internet erreicht und rund 6 GB Speicherplatz frei hat, und laden Sie es erneut herunter. Betreibt jemand anderes Dwello, wenden Sie sich an den Betreiber.",
-	"ki_settings_model_offline": "Die lokale KI antwortet nicht. Läuft Dwello mit Docker, startet der Betreiber sie mit der Installationsanleitung; sonst wählen Sie einen Anbieter oder keine KI.",
+	"ki_settings_model_offline": "Die lokale KI antwortet nicht. Bis sie antwortet, erfassen Sie Rechnungen von Hand. Betreiben Sie Dwello selbst, starten Sie die lokale KI, wie die Installationsanleitung beschreibt; sonst wenden Sie sich an den Betreiber oder wählen oben einen Anbieter oder keine KI.",
 	"ki_settings_model_download": "KI-Modell herunterladen",
 	"backend_ki_set_by_operator": "Die KI ist vom Betreiber in der Einstellungsdatei festgelegt und lässt sich hier nicht ändern.",
 	"backend_ki_not_local": "Das KI-Modell wird nur für die lokale KI heruntergeladen. Wählen Sie zuerst «Lokale KI auf diesem Server».",
@@ -2031,5 +2030,7 @@
 	"backend_ki_encryption_key_missing": "Der Server hat keinen Schlüssel, um den API-Schlüssel verschlüsselt zu speichern. Der Betreiber setzt ENCRYPTION_KEY, wie die Installationsanleitung beschreibt.",
 	"audit_ki_provider": "KI gewählt: {provider} ({country})",
 	"audit_ki_local": "KI gewählt: Lokale KI",
-	"audit_ki_none": "KI gewählt: Keine KI"
+	"audit_ki_none": "KI gewählt: Keine KI",
+	"ki_settings_provider_name_help": "Der Name der Firma, wie er im Vertrag mit ihr steht. Die Datenschutzerklärung nennt ihn. Bearbeiten mehrere Firmen die Daten, nennen Sie alle, mit Komma getrennt.",
+	"ki_settings_country_help": "Das Land, in dem die Rechenzentren des Anbieters stehen. Die Datenschutzerklärung nennt es. Bearbeiten Rechenzentren in mehreren Ländern die Daten, nennen Sie alle, mit Komma getrennt."
 }

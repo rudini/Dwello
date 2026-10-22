@@ -1998,7 +1998,6 @@
 	"ki_settings_model_help": "Un modello che legge le immagini, affinché Dwello possa leggere le fatture caricate.",
 	"ki_settings_provider_name": "Nome del fornitore",
 	"ki_settings_provider_country": "Paese in cui il fornitore tratta i dati",
-	"ki_settings_names_help": "Se più aziende o paesi trattano i dati, li indichi tutti, separati da una virgola.",
 	"ki_settings_checklist_title": "Prima di scegliere un fornitore",
 	"ki_settings_checklist_1": "Lei ha con il fornitore un contratto secondo cui tratta i dati solo su Suo incarico, li protegge e non li usa per addestrare la sua IA (art. 9 LPD). Si avvale di altre aziende solo con il Suo consenso. Se l’IA funziona su un server che gestisce Lei stesso, questo punto non si applica.",
 	"ki_settings_checklist_2": "Il fornitore e tutte le aziende di cui si avvale trattano i dati solo in Svizzera o in un paese la cui protezione dei dati è riconosciuta adeguata dal Consiglio federale (art. 16 cpv. 1 LPD); negli Stati Uniti solo aziende certificate secondo lo Swiss-U.S. Data Privacy Framework. Dwello non supporta altri fornitori: l’informativa sulla protezione dei dati non può indicare garanzie supplementari.",
@@ -2022,7 +2021,7 @@
 	"ki_settings_locked": "Definito dal gestore nel file di configurazione. Se gestisce Dwello Lei stesso, modifichi l’IA in quel file; altrimenti si rivolga al gestore.",
 	"ki_settings_model_ready": "Il modello di IA è caricato.",
 	"ki_settings_model_failed": "Verifichi che il server raggiunga Internet e abbia circa 6 GB di spazio libero, poi lo scarichi di nuovo. Se Dwello è gestito da qualcun altro, si rivolga al gestore.",
-	"ki_settings_model_offline": "L’IA locale non risponde. Se Dwello funziona con Docker, il gestore la avvia secondo le istruzioni d’installazione; altrimenti scelga un fornitore o nessuna IA.",
+	"ki_settings_model_offline": "L’IA locale non risponde. Finché non risponde, registri le fatture a mano. Se gestisce Dwello Lei stesso, avvii l’IA locale come descritto nelle istruzioni d’installazione; altrimenti si rivolga al gestore o scelga sopra un fornitore o nessuna IA.",
 	"ki_settings_model_download": "Scaricare il modello di IA",
 	"backend_ki_set_by_operator": "L’IA è definita dal gestore nel file di configurazione e non può essere modificata qui.",
 	"backend_ki_not_local": "Il modello di IA viene scaricato solo per l’IA locale. Scelga prima «IA locale su questo server».",
@@ -2031,5 +2030,7 @@
 	"backend_ki_encryption_key_missing": "Il server non ha una chiave per salvare la chiave API in modo cifrato. Il gestore imposta ENCRYPTION_KEY come descritto nelle istruzioni d’installazione.",
 	"audit_ki_provider": "IA scelta: {provider} ({country})",
 	"audit_ki_local": "IA scelta: IA locale",
-	"audit_ki_none": "IA scelta: nessuna IA"
+	"audit_ki_none": "IA scelta: nessuna IA",
+	"ki_settings_provider_name_help": "Il nome dell’azienda come figura nel contratto con essa. L’informativa sulla protezione dei dati lo menziona. Se più aziende trattano i dati, le indichi tutte, separate da una virgola.",
+	"ki_settings_country_help": "Il paese in cui si trovano i centri dati del fornitore. L’informativa sulla protezione dei dati lo menziona. Se i dati sono trattati da centri dati in più paesi, li indichi tutti, separati da una virgola."
 }

@@ -18,22 +18,23 @@ let running = new AbortController();
 // settles once the running load knows its first state, so the page «KI» shows it right after a save (#580); a silent
 // Ollama is waited for 5 s at most
 let started: Promise<void> = Promise.resolve();
-let known = () => {};
 export const modelStarted = () => Promise.race([started, Bun.sleep(5000)]);
 
 export async function loadModel(config: { baseUrl: string; model: string; local: boolean }) {
 	running.abort();
 	const own = (running = new AbortController());
+	// this load's own resolver: an aborted one cannot settle the next (code review 580 C-6)
+	let known = () => {};
 	started = new Promise((resolve) => (known = resolve));
 	current = { state: 'unknown' };
 	try {
-		await load(config, own);
+		await load(config, own, known);
 	} finally {
 		known();
 	}
 }
 
-async function load(config: { baseUrl: string; model: string; local: boolean }, own: AbortController) {
+async function load(config: { baseUrl: string; model: string; local: boolean }, own: AbortController, known: () => void) {
 	if (!config.local) return;
 	const ollama = ollamaOf(config.baseUrl);
 	try {
@@ -50,7 +51,7 @@ async function load(config: { baseUrl: string; model: string; local: boolean }, 
 			timeout: false,
 			signal: own.signal
 		});
-		await follow(pull.body!);
+		await follow(pull.body!, known);
 	} catch (error) {
 		if (own.signal.aborted) return;
 		// no answer from the local KI: say nothing; once it answers, the next start tries again
@@ -64,7 +65,7 @@ type Line = { status?: string; digest?: string; total?: number; completed?: numb
 
 // Ollama's pull stream: one JSON object per line, with the bytes done of the layer (digest) being loaded; the notice
 // counts the whole model (fach review 577 V-8)
-async function follow(stream: ReadableStream<Uint8Array>) {
+async function follow(stream: ReadableStream<Uint8Array>, known: () => void) {
 	current = { state: 'loading', percent: 0 };
 	const layers = new Map<string, { total: number; completed: number }>();
 	let rest = '';

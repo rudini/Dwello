@@ -225,6 +225,9 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | ki-settings            | ki-model-failed     |
       | ki-settings            | ki-provider         |
       | ki-settings            | ki-provider-submit-empty |
+      | ki-settings            | ki-model-offline    |
+      | ki-settings            | ki-check-result     |
+      | ki-settings            | ki-saved            |
       | audit-log              | default             |
       | audit-log              | empty               |
       | audit-log              | delete-dialog       |

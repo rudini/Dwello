@@ -91,7 +91,7 @@ The AI model (about 6 GB) then downloads by itself; the overview shows how far i
 
 Any OpenAI-compatible service that reads images works. Open Dwello, go to «Einstellungen» › «KI», choose «KI eines Anbieters» and fill in the address, the API key, a model that reads images, the name of the provider and the country where it processes the data. «Verbindung prüfen» says whether the key is accepted and the model reads invoice images. Before saving, Dwello asks you to confirm the three data protection points (data processing agreement, country, retention; also in the README, «External LLM provider»). The next invoice uses the provider, without a restart, and the privacy statement names it. Dwello then downloads no model.
 
-The API key is stored encrypted with the key for stored secrets (back it up, section 5); it is never shown again.
+The API key is stored encrypted with the key for stored secrets (`ENCRYPTION_KEY`, which Dwello makes on the first start; back it up, section 5); it is never shown again.
 
 To fix the KI for the installation instead, as on a demo, the operator adds to `.env` (the page «KI» then shows these values and cannot change them):
 

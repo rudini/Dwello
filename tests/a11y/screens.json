@@ -112,7 +112,10 @@
 		"ki-model-loading": "Overview while the local KI downloads its model, on the fresh installation of the E2E stack (#577).",
 		"ki-model-failed": "Overview after the local KI could not download its model, on the empty instance of the E2E stack (#577).",
 		"ki-provider": "The page «KI» with «KI eines Anbieters» chosen: its fields and the checklist, on the fresh installation, whose operator set no KI (#580).",
-		"ki-provider-submit-empty": "The page «KI» with «KI eines Anbieters» saved without input: every missing field named, on the fresh installation (#580)."
+		"ki-provider-submit-empty": "The page «KI» with «KI eines Anbieters» saved without input: every missing field named, on the fresh installation (#580).",
+		"ki-model-offline": "The page «KI» while the local KI does not answer, on the fresh installation, whose KI stand-in is told so for the look (#580, code review C-5).",
+		"ki-check-result": "The page «KI» after «Verbindung prüfen» without an address: the result under the button, on the fresh installation (#580).",
+		"ki-saved": "The page «KI» after «KI speichern» with the local KI: the message that it is saved, on the fresh installation (#580)."
 	},
 	"screens": [
 		{
@@ -735,8 +738,11 @@
 				"default",
 				"ki-model-loading",
 				"ki-model-failed",
+				"ki-model-offline",
 				"ki-provider",
-				"ki-provider-submit-empty"
+				"ki-provider-submit-empty",
+				"ki-check-result",
+				"ki-saved"
 			]
 		},
 		{

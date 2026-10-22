@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { llmRecipient } from '../config/llm';
+import { checkLocalKi, llmRecipient } from '../config/llm';
 
 const config = (baseUrl: string, provider = '', providerCountry = '', enabled = true) => ({
 	baseUrl,
@@ -93,5 +93,19 @@ describe('Vom Betreiber festgelegte KI', () => {
 		const config = await configWith({ LLM_LOCAL_URL: 'http://ollama:11434/v1' });
 
 		expect(config).toMatchObject({ byOperator: false, baseUrl: 'http://ollama:11434/v1' });
+	});
+});
+
+// Fachreview 580 F-23: die lokale KI muss auf dem Server laufen, sonst stimmt «verlassen den Server nicht» nicht
+describe('Adresse der lokalen KI', () => {
+	it('nimmt eine Adresse auf dem Server an', () => {
+		expect(() => checkLocalKi('http://ollama:11434/v1')).not.toThrow();
+		expect(() => checkLocalKi('http://127.0.0.1:11434/v1')).not.toThrow();
+	});
+
+	it('verweigert eine Adresse auf einem anderen Rechner und sagt, was zu tun ist', () => {
+		expect(() => checkLocalKi('http://192.168.1.20:11434/v1')).toThrow(
+			'LLM_LOCAL_URL is not on this server: choose a provider under «Einstellungen» › «KI» or set LLM_BASE_URL, LLM_PROVIDER and LLM_PROVIDER_COUNTRY'
+		);
 	});
 });

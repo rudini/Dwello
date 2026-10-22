@@ -33,6 +33,11 @@
 		},
 		{ value: 'none', label: m.ki_settings_none(), description: m.ki_settings_none_help() }
 	]);
+	// after SvelteKit's own focus reset, as focusFirstError waits for it
+	const keepFocus = async (element: HTMLElement | null) => {
+		await new Promise((resolve) => setTimeout(resolve));
+		element?.focus();
+	};
 	const chosen = $derived(choices.find((choice) => choice.value === ki.mode)?.label ?? '');
 </script>
 
@@ -47,19 +52,25 @@
 		<Alert tone="info" title={chosen} testid="ki-locked">
 			<p>{m.ki_settings_locked()}</p>
 		</Alert>
-		<Panel title={m.ki_settings_title()}>
-			<ProviderFields {ki} {errors} locked />
-		</Panel>
+		{#if ki.mode !== 'none'}
+			<Panel title={m.ki_settings_title()}>
+				<ProviderFields {ki} {errors} locked />
+			</Panel>
+		{/if}
 	{:else}
 		<form
 			method="POST"
 			action="?/save"
-			use:enhance={({ action }) => {
+			use:enhance={({ action, submitter }) => {
 				busy = action.search;
+				// a check saves nothing: no reload of the page's data, and the focus stays at its button (persona Sven
+				// 580 P-1)
+				const checking = action.search === '?/check';
 				return async ({ update, formElement }) => {
-					await update({ reset: false });
+					await update({ reset: false, invalidateAll: !checking });
 					busy = '';
-					focusFirstError(formElement);
+					if (checking) await keepFocus(submitter);
+					else focusFirstError(formElement);
 				};
 			}}
 			class="flex flex-col gap-8"
@@ -113,7 +124,7 @@
 		</form>
 	{/if}
 
-	{#if ki.mode === 'local'}
+	{#if ki.mode === 'local' && (ki.byOperator || mode === 'local')}
 		<KiModelState model={data.model} />
 	{/if}
 </div>

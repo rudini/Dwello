@@ -70,7 +70,8 @@ Funktionalität: KI in den Einstellungen wählen
     Angenommen Dwello ist eingerichtet
     Und die lokale KI antwortet nicht
     Wenn der Liegenschaftsverwalter "Lokale KI" speichert
-    Dann sagt die Seite "KI" "Die lokale KI antwortet nicht. Läuft Dwello mit Docker, startet der Betreiber sie mit der Installationsanleitung; sonst wählen Sie einen Anbieter oder keine KI."
+    # Persona Anna 580 P-1: was das für die Rechnungen heisst und wer etwas tun kann; ein Download hilft hier nicht
+    Dann sagt die Seite "KI" "Die lokale KI antwortet nicht. Bis sie antwortet, erfassen Sie Rechnungen von Hand. Betreiben Sie Dwello selbst, starten Sie die lokale KI, wie die Installationsanleitung beschreibt; sonst wenden Sie sich an den Betreiber oder wählen oben einen Anbieter oder keine KI."
 
   # Ohne Bestätigung, Anbieter oder Land nennt die Datenschutzerklärung nicht, wer die Rechnungen erhält (Art. 19 DSG)
   Szenariogrundriss: Ein Anbieter ohne <Angabe> wird nicht gespeichert

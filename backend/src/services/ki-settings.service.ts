@@ -6,7 +6,7 @@
  * Every change goes into the Protokoll (F-4).
  */
 
-import { llmConfig, llmRecipient } from '../config/llm';
+import { llmConfig, onOperatorServer } from '../config/llm';
 import { db } from '../db/connection';
 import { kiSettings } from '../db/schema';
 import { recordAudit } from './audit-log.service';
@@ -84,10 +84,11 @@ const fromOperator = (mode: Mode): Ki => {
 
 /** The KI of the operator when set, else the one saved in the browser */
 export async function currentKi(): Promise<Ki> {
-	// nothing saved yet: the variables as before #580, by default the local KI
-	const row = llmConfig.byOperator ? undefined : await stored();
-	if (!row)
-		return fromOperator(llmConfig.enabled ? (llmRecipient() ? 'provider' : 'local') : 'none');
+	if (llmConfig.byOperator)
+		return fromOperator(llmConfig.enabled ? (onOperatorServer(llmConfig.baseUrl) ? 'local' : 'provider') : 'none');
+	// nothing saved yet: the local KI, wherever LLM_LOCAL_URL says it runs (code review 580 C-1)
+	const row = await stored();
+	if (!row) return fromOperator(llmConfig.enabled ? 'local' : 'none');
 	if (row.mode !== 'provider') return fromOperator(row.mode);
 	return {
 		mode: 'provider',
@@ -143,10 +144,9 @@ export async function saveKiSettings(input: KiInput) {
 			await tx.insert(kiSettings).values({ mode: input.mode });
 			await recordAudit('ki_setting_changed', { mode: input.mode }, tx);
 		});
-		if (input.mode === 'local') {
-			void loadModel({ ...llmConfig, local: llmConfig.enabled });
-			await modelStarted();
-		}
+		// the local KI loads its model; any other choice ends a running download (code review 580 C-2)
+		void loadModel({ ...llmConfig, local: input.mode === 'local' && llmConfig.enabled });
+		await modelStarted();
 		return kiSettingsView();
 	}
 	const values = trimmed(input);
@@ -168,6 +168,7 @@ export async function saveKiSettings(input: KiInput) {
 		await tx.insert(kiSettings).values({ mode: 'provider', ...values, apiKeyEncrypted });
 		await recordAudit('ki_setting_changed', { mode: 'provider', provider, country }, tx);
 	});
+	void loadModel({ ...llmConfig, local: false });
 	return kiSettingsView();
 }
 
@@ -208,5 +209,8 @@ export async function checkKiConnection(
 		return { result: 'unreachable' };
 	}
 	if (response.status === 401 || response.status === 403) return { result: 'wrong-key' };
-	return { result: response.ok ? 'ok' : 'no-images' };
+	if (response.ok) return { result: 'ok' };
+	// only a refused request is about the image; a wrong address or model (404), no credit or too many requests, or a
+	// server error say nothing about it (code review 580 C-7, domain review 580 F-24)
+	return { result: response.status === 400 ? 'no-images' : 'unreachable' };
 }

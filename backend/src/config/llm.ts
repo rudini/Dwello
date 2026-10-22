@@ -22,7 +22,6 @@ const localUrl = (process.env.LLM_LOCAL_URL || 'http://localhost:11434/v1').repl
 export const llmConfig = {
 	byOperator: OPERATOR_VARIABLES.some((name) => process.env[name]),
 
-	localUrl,
 
 	// OpenAI-compatible API base URL, e.g. https://api.openai.com/v1 (a trailing slash is dropped)
 	baseUrl: (process.env.LLM_BASE_URL || localUrl).replace(/\/$/, ''),
@@ -50,12 +49,22 @@ export const llmConfig = {
 
 // Hosts on the operator's server: the local Ollama, or its container in docker-compose
 const OPERATOR_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'ollama'];
+export const onOperatorServer = (url: string) => OPERATOR_HOSTS.includes(new URL(url).hostname);
+
+/** The local KI runs on this server, or the privacy statement's «verlassen den Server nicht» would be wrong
+ * (domain review 580 F-23): checked on start while the landlord chooses the KI */
+export function checkLocalKi(url: string) {
+	if (!onOperatorServer(url))
+		throw new Error(
+			'LLM_LOCAL_URL is not on this server: choose a provider under «Einstellungen» › «KI» or set LLM_BASE_URL, LLM_PROVIDER and LLM_PROVIDER_COUNTRY'
+		);
+}
 
 /** Who receives invoice data for categorization; null while the model runs on the operator's server */
 export function llmRecipient(
 	config: Pick<typeof llmConfig, 'baseUrl' | 'provider' | 'providerCountry' | 'enabled'> = llmConfig
 ): { provider: string; country: string } | null {
-	if (!config.enabled || OPERATOR_HOSTS.includes(new URL(config.baseUrl).hostname)) return null;
+	if (!config.enabled || onOperatorServer(config.baseUrl)) return null;
 	if (!config.provider || !config.providerCountry) {
 		throw new Error(
 			'LLM_BASE_URL is an external provider: set LLM_PROVIDER and LLM_PROVIDER_COUNTRY for the privacy statement'
