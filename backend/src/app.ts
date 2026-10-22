@@ -12,8 +12,8 @@ import { tenantRoutes } from './routes/tenants';
 import { contractRoutes } from './routes/contracts';
 import { categoryRoutes } from './routes/categories';
 import { invoiceRoutes } from './routes/invoices';
-import { llmConfig, llmRecipient } from './config/llm';
-import { modelState } from './services/ki-model.service';
+import { currentKi, kiRecipient } from './services/ki-settings.service';
+import { kiSettingsRoutes } from './routes/ki-settings';
 import { distributionKeyRoutes } from './routes/distribution-keys';
 import { heatingProfileRoutes } from './routes/heating-profiles';
 import { configRoutes } from './routes/config';
@@ -79,7 +79,10 @@ export const app = new Elysia()
 		service: 'dwello-backend'
 	}))
 	// Who receives invoice data for the KI categorisation: the privacy notice is public, so this is too
-	.get('/api/v1/invoices/llm-recipient', () => ({ recipient: llmRecipient(), enabled: llmConfig.enabled }))
+	.get('/api/v1/invoices/llm-recipient', async () => ({
+		recipient: await kiRecipient(),
+		enabled: (await currentKi()).mode !== 'none'
+	}))
 	// Which mail provider receives tenants' data, for the same notice (#82)
 	.get('/api/v1/mail-transport', () => ({ transport: mailTransportName() }))
 	// Sign-in with a Konto mit Passwort (#576): the BFF asks before there is a session
@@ -88,8 +91,8 @@ export const app = new Elysia()
 	// Everything below requires a valid JWT
 	.use(authMiddleware)
 	.use(localAccountRoutes)
-	// How far the local KI's model is (#577), for the overview
-	.get('/api/v1/ki/model', () => modelState())
+	// The KI set in the browser (#580) and the local KI's model (#577)
+	.use(kiSettingsRoutes)
 	.use(dashboardRoutes)
 	// Register route modules
 	.use(buildingRoutes)

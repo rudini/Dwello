@@ -290,8 +290,10 @@ describe('Empfänger der Rechnungsdaten für die Datenschutzerklärung', () => {
 		expect(await response.json()).toEqual({ recipient: null, enabled: true });
 	});
 
+	// with the operator's LLM_* variables (#580: without them the landlord chooses in the browser)
 	it('nennt Anbieter und Land eines externen Anbieters, nie den API-Key', async () => {
 		Object.assign(llmConfig, {
+			byOperator: true,
 			baseUrl: 'https://llm.example.com/v1',
 			apiKey: 'geheim',
 			provider: 'Beispiel AG',
@@ -302,7 +304,7 @@ describe('Empfänger der Rechnungsdaten für die Datenschutzerklärung', () => {
 
 			expect(await response.json()).toEqual({ recipient: { provider: 'Beispiel AG', country: 'Schweiz' }, enabled: true });
 		} finally {
-			Object.assign(llmConfig, { baseUrl: 'http://127.0.0.1:9', apiKey: '', provider: '', providerCountry: '' });
+			Object.assign(llmConfig, { byOperator: false, baseUrl: 'http://127.0.0.1:9', apiKey: '', provider: '', providerCountry: '' });
 		}
 	});
 });

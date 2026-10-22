@@ -18,6 +18,10 @@ export const Navigate = {
 		await pageOf(actor).goto(path);
 		await hydrated(pageOf(actor));
 	},
+	// An address outside the app (a stand-in's control), which never hydrates
+	outsideApp: (url: string): Activity => async (actor) => {
+		await pageOf(actor).goto(url);
+	},
 	reload: (async (actor) => {
 		await pageOf(actor).reload();
 		await hydrated(pageOf(actor));

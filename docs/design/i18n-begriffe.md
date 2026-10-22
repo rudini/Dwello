@@ -123,6 +123,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Sperre (Anmeldung, #576) | blocage (de la connexion) | blocco (dell’accesso) | lock (sign-in) |
 | Einrichtung / Einrichtungscode / Dwello einrichten (#577) | configuration initiale / code de configuration / Configurer Dwello | configurazione iniziale / codice di configurazione / Configurare Dwello | setup / setup code / Set up Dwello |
 | KI-Modell (#577) | modèle d’IA | modello di IA | AI model |
+| KI-Einstellung / Lokale KI / Anbieter der KI (#580) | réglage de l’IA / IA locale / fournisseur de l’IA | impostazione dell’IA / IA locale / fornitore dell’IA | AI setting / local AI / AI provider |
+| Adresse der KI / API-Schlüssel / Verbindung prüfen (#580) | adresse de l’IA / clé API / vérifier la connexion | indirizzo dell’IA / chiave API / verificare la connessione | AI address / API key / check connection |
 | Mietzinsdepot / Freigabe des Mietzinsdepots | garantie de loyer / libération de la garantie de loyer | deposito di garanzia / svincolo del deposito di garanzia | rent deposit / release of the rent deposit |
 | Übersicht | vue d’ensemble | panoramica | overview |
 

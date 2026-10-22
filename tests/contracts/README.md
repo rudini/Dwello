@@ -23,6 +23,9 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `setup-code-invalid.json` | `POST /api/v1/setup` mit falschem Einrichtungscode (403) |
 | `setup-locked.json` | `POST /api/v1/setup` nach 5 falschen Einrichtungscodes (423) |
 | `setup-done.json` | `POST /api/v1/setup`, wenn es schon ein Konto mit Passwort gibt (409) |
+| `ki-settings.json` | `GET /api/v1/ki-settings` (die KI der Einstellungen, ohne den API-Schlüssel, #580) |
+| `ki-settings-incomplete.json` | `PUT /api/v1/ki-settings` mit einem Anbieter ohne Namen und Bestätigung (422) |
+| `ki-settings-check.json` | `POST /api/v1/ki-settings/check` («Verbindung prüfen») |
 | `ki-model-loading.json` | `GET /api/v1/ki/model`, während das Modell der lokalen KI lädt (#577) |
 | `statement-payment-reset.json` | `POST /api/v1/statements/:id/payment-reset` (die Abrechnung mit dem Zurücksetzen im Verlauf) |
 | `statement-paid-date-refused.json` | `PUT /api/v1/statements/:id/status` mit einem Zahlungsdatum vor dem Abrechnungsdatum |
