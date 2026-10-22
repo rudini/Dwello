@@ -250,9 +250,15 @@ describe('Mieterdetail', () => {
 	it('meldet ein hochgeladenes Dokument', async () => {
 		toasts.set([]);
 		open([], null, []);
+		const input = byTestId<HTMLInputElement>('tenant-document-file-input')!;
+		Object.defineProperty(input, 'files', { value: [new File(['%PDF-'], 'ausweis.pdf')], configurable: true });
+		input.dispatchEvent(new Event('change', { bubbles: true }));
 		const after = actions.get('?/upload')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'success', data: { uploaded: 'Ausweiskopie' } } });
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Dokument «Ausweiskopie» hochgeladen']);
+		// the form is empty again: the file chosen goes too (code review 489 C-1)
+		flushSync();
+		expect(text('tenant-document-file-chosen')).toBe('Keine Datei ausgewählt');
 		// stays where it was: at the form, below the new document
 		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-file-input')));
 	});
