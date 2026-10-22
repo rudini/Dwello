@@ -10,6 +10,7 @@ import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 import periodList from '../../tests/contracts/invoice-list-period.json';
 import fuelStocks from '../../tests/contracts/fuel-stocks.json';
 import categoryList from '../../tests/contracts/categories.json';
+import kiSettings from '../../tests/contracts/ki-settings.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -160,6 +161,19 @@ describe('Rechnungsliste mit «Rechnungen hochladen»', () => {
 		expect(data.distributionKeys.map((key) => key.id)).toEqual(['k1']);
 		expect(data.defaultDistributionKeyId).toBe('k1');
 		expect(urls.filter((url) => url.includes('/categories'))).toHaveLength(1);
+	});
+	// #626: with «Keine KI» the dialog says that nobody reads the files
+	it('sagt dem Dialog, ob «Keine KI» gewählt ist', async () => {
+		const load = async (mode: string) =>
+			(
+				(await listLoad({
+					url: new URL('http://localhost/invoices'),
+					fetch: backend({ '/ki-settings': { ...kiSettings, mode } }).fetch
+				} as never)) as { kiOff: boolean }
+			).kiOff;
+
+		expect(await load('none')).toBe(true);
+		expect(await load('local')).toBe(false);
 	});
 });
 

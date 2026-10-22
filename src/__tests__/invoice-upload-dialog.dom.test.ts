@@ -154,6 +154,23 @@ describe('Verteilschlüssel beim Hochladen', () => {
 });
 
 describe('Rechnungen hochladen', () => {
+	// #626: with «Keine KI» nobody reads the files; said with the term of the page «KI»
+	it('sagt bei «Keine KI», dass der Liegenschaftsverwalter die Angaben selbst eingibt', () => {
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [],
+			defaultDistributionKeyId: '',
+			kiOff: true,
+			oncreated: vi.fn()
+		});
+
+		expect(byTestId('invoice-upload-purpose')!.textContent).toBe(
+			'Wählen Sie das Gebäude und die Dateien Ihrer Rechnungen. Es ist «Keine KI» gewählt: Sie geben die Angaben selbst ein, bevor Dwello die Rechnungen erstellt.'
+		);
+	});
+
 	it('nimmt Dateien erst, wenn das Gebäude gewählt ist, und erinnert an die Originalrechnung', () => {
 		open(() => [200, read]);
 		expect(byTestId<HTMLInputElement>('invoice-upload-file-input')!.disabled).toBe(true);

@@ -43,7 +43,6 @@ Funktionalität: KI in den Einstellungen wählen
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Muster KI AG"
 
   # #626: ohne KI liest niemand die Dateien; der Dialog sagt es mit dem Begriff der Seite «KI»
-  @wip
   Szenario: Rechnungen hochladen, wenn keine KI gewählt ist
     Angenommen Dwello ist eingerichtet
     Und in der frischen Installation ist keine KI gewählt

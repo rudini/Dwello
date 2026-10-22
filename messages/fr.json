@@ -1014,6 +1014,7 @@
 	"invoices_delete_billed_text": "Ne supprimez que les factures saisies par erreur ou les factures d’acompte que remplace une facture finale. Si une facture finale remplace cette facture d’acompte, saisissez d’abord la facture finale. Les brouillons contiennent toujours cette facture : recalculez ensuite les brouillons avec « Recalculer » sur leur page. Les décomptes envoyés ou payés se rectifient avec « Rectifier le décompte » sur le décompte ; le décompte rectificatif prend en compte ce qui est déjà payé. Conservez la facture originale : le locataire peut demander à la consulter.",
 	"invoices_upload_open": "Téléverser des factures",
 	"invoices_upload_purpose": "Choisissez l’immeuble et les fichiers de vos factures. L’IA lit les indications ; vous les vérifiez avant que Dwello crée les factures.",
+	"invoices_upload_purpose_no_ki": "Choisissez l’immeuble et les fichiers de vos factures. « Pas d’IA » est choisi. Vous saisissez vous-même les indications avant que Dwello crée les factures.",
 	"invoices_upload_building_first": "Choisissez d’abord l’immeuble.",
 	"invoices_upload_files_label": "Glisser les fichiers ici ou les choisir",
 	"invoices_upload_files_choose": "Choisir des fichiers",
