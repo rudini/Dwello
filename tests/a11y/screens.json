@@ -37,7 +37,7 @@
 		"pdf-missing": "Statement list of the seeded building's drafts, whose PDF is not created yet: each row says «PDF noch nicht erstellt» with a link to its statement (#253).",
 		"list-scoped": "List opened from a link that names a Mietvertrag or an Abrechnungsperiode: a sentence above the list says which statements it shows and links to all.",
 		"link-preset": "Statement wizard opened from a link that names a building and a period (after a changed Vertragsende): it starts at the settings step and says what the link chose.",
-		"send-dialog": "The confirmation before sending a statement open: marking it as sent for a letter (also for a tenant who wants e-mail but has no address, #449), sending it by e-mail with the offer to send a letter instead for a tenant who wants e-mail (#86, #449).",
+		"send-dialog": "The confirmation before sending a statement open: marking it as sent for a letter (also for a tenant who wants e-mail but has no address, #449), sending it by e-mail with the offer to send a letter instead for a tenant who wants e-mail (#86, #449); a draft that is not current says so first, with «Neu berechnen» (#547: the draft of statement-detail has an invoice recorded after it).",
 		"send-refused": "A draft statement sent by e-mail that fails (here: the tenant wants e-mail but has no address, posted without the dialog, which offers only the letter since #449): it stays a draft, the alert says why and offers to deliver it by letter (#86).",
 		"recalculate-dialog": "Draft statement, «Neu berechnen» chosen (#338): the confirmation that names what stays and what changes.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",

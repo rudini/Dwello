@@ -778,6 +778,18 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Dann weist die Abrechnung darauf hin: "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht."
 
+  # #547 (Personas Anna P-3, Dr. Weber P-2 von #454): der Versand eines nicht aktuellen Entwurfs sagt das zuerst und bietet
+  # «Neu berechnen» an; versenden bleibt möglich
+  Szenario: Der Versand eines nicht aktuellen Entwurfs rät zum Neu berechnen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "732" Franken vom "2024-12-31"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
+    Dann sagt die Bestätigung vor dem Versand "Dieser Entwurf ist nicht aktuell"
+    Und sagt die Bestätigung vor dem Versand "Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. Berechnen Sie ihn neu, bevor Sie ihn zustellen."
+    Wenn der Liegenschaftsverwalter den Entwurf aus der Bestätigung neu berechnet
+    Dann bestätigt Dwello "Der Entwurf ist neu berechnet. Er rechnet mit den Rechnungen und dem Tankbestand, wie sie jetzt sind."
+
   # #338: ein Entwurf wird mit den Rechnungen von jetzt neu berechnet und behält seine Nummer
   Szenario: Entwurf neu berechnen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

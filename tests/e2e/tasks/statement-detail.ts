@@ -11,6 +11,7 @@ import {
 	confirmDeclineCorrectionButton,
 	declineCorrectionButton,
 	recalculateButton,
+	sendRecalculateButton,
 	createCorrectionButton,
 	replacedByLink,
 	replacedContractLink,
@@ -88,6 +89,9 @@ export const declineCorrection: Activity = (actor) =>
 // #338: a draft is calculated again from the invoices as they are now, after the confirmation names the consequence
 export const recalculateDraft: Activity = (actor) =>
 	actor.attemptsTo(Click.on(recalculateButton), Click.on(confirmRecalculateButton));
+// #547: from the send dialog of a draft that is not current
+export const recalculateFromSending: Activity = (actor) =>
+	actor.attemptsTo(Click.on(sendRecalculateButton), Click.on(confirmRecalculateButton));
 
 // #120: replacing names its consequence first; the berichtigte Abrechnung is created on the replaced one
 export const openCorrectConfirmation = Click.on(correctStatementButton);
