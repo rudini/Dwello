@@ -137,7 +137,6 @@
 
 	// What the KI reads from a file; without the KI or a readable file the property manager fills in the fields
 	async function read(key: number) {
-		if (kiOff) return update(key, (row) => withoutKi(row, 'off'));
 		update(key, (row) => ({ ...row, status: 'reading' }));
 		const { file } = rows.find((one) => one.key === key)!;
 		if (!pages[key]) {
@@ -149,6 +148,8 @@
 				return update(key, (one) => withoutKi(one, 'unreadable'));
 			}
 		}
+		// «Keine KI»: the pages stay in the browser for the preview, nothing is sent to be read (persona Anna 626 P-2)
+		if (kiOff) return update(key, (one) => withoutKi(one, 'off'));
 		const answer = await api.post<Proposal>('/invoices/extract', {
 			buildingId,
 			fileName: file.name,

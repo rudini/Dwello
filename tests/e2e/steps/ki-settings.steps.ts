@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { uploadPurposeText } from '../questions/invoice-upload';
+import { belegRowText, uploadPurposeText } from '../questions/invoice-upload';
+import { addBelege, invoicePdf } from '../tasks/invoice-upload';
 import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, modelDownloadOffered, shownKiAddress } from '../questions/ki-settings';
 import {
 	checkConnection,
@@ -153,3 +154,19 @@ When('der Liegenschaftsverwalter in der frischen Installation "Rechnungen hochla
 Then('sagt der Dialog "Rechnungen hochladen" {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(uploadPurposeText).toBe(text);
 });
+
+Given('in der frischen Installation gibt es ein Gebäude', async ({ frisch }) => {
+	await frisch.building();
+});
+
+When('der Liegenschaftsverwalter dort die Rechnung {string} wählt', async ({ verwalter, frisch }, fileName: string) => {
+	await verwalter.attemptsTo(addBelege(frisch.buildingId, [invoicePdf(fileName)]));
+});
+
+Then(
+	'zeigt der Dialog "Rechnungen hochladen" die Datei {string} ohne Hinweis auf eine KI',
+	async ({ verwalter }, fileName: string) => {
+		await verwalter.sees(belegRowText(fileName)).toContain(fileName);
+		await verwalter.sees(belegRowText(fileName)).not.toContain('KI');
+	}
+);

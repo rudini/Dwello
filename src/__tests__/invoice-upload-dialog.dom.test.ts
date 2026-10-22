@@ -195,6 +195,10 @@ describe('Rechnungen hochladen', () => {
 		expect(rowText()[0]).toContain('rechnung.pdf');
 		expect(rowText()[0]).not.toContain('KI');
 		expect(rowText()[0]).not.toContain('nicht öffnen');
+		// code review 626 C-3: the pages are made in the browser, so the preview stays
+		click('invoice-upload-row-toggle');
+		await settle();
+		expect(document.querySelector('img[alt="Vorschau von rechnung.pdf"]')).not.toBeNull();
 	});
 
 	it('nimmt Dateien erst, wenn das Gebäude gewählt ist, und erinnert an die Originalrechnung', () => {

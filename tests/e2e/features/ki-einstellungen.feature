@@ -46,8 +46,12 @@ Funktionalität: KI in den Einstellungen wählen
   Szenario: Rechnungen hochladen, wenn keine KI gewählt ist
     Angenommen Dwello ist eingerichtet
     Und in der frischen Installation ist keine KI gewählt
+    Und in der frischen Installation gibt es ein Gebäude
     Wenn der Liegenschaftsverwalter in der frischen Installation "Rechnungen hochladen" öffnet
     Dann sagt der Dialog "Rechnungen hochladen" "Wählen Sie das Gebäude und die Dateien Ihrer Rechnungen. Es ist «Keine KI» gewählt: Sie geben die Angaben selbst ein, bevor Dwello die Rechnungen erstellt."
+    # Code-Review 626 C-4, Persona Anna 626 P-1: auch die Datei nennt danach keine KI
+    Wenn der Liegenschaftsverwalter dort die Rechnung "Hauswartung.pdf" wählt
+    Dann zeigt der Dialog "Rechnungen hochladen" die Datei "Hauswartung.pdf" ohne Hinweis auf eine KI
 
   Szenario: Zur lokalen KI zurückkehren
     Angenommen Dwello ist eingerichtet

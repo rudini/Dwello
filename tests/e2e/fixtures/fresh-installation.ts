@@ -13,6 +13,7 @@ export const SETUP_CODE = 'E2E7-K4QX';
 
 export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 	const accounts: string[] = [];
+	const buildings: string[] = [];
 	const account = { email: '', password: '' };
 	return {
 		account,
@@ -33,6 +34,19 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 		/** The running model download ends with an error, or the local KI answers nothing (#580) */
 		modelFailed: () => kiStub.post('stub/ollama', { state: 'failed' }),
 		localKiOffline: () => kiStub.post('stub/ollama', { state: 'offline' }),
+		/** A building of the fresh installation, removed afterwards (#626: to upload invoices to) */
+		buildingId: '',
+		async building() {
+			const { id } = (await api.post('buildings', {
+				name: `Lindenhof ${randomUUID().replaceAll('-', '').slice(0, 12)}`,
+				address: 'Testweg 1',
+				postalCode: '8400',
+				city: 'Winterthur',
+				canton: 'ZH'
+			})) as { id: string };
+			buildings.push(id);
+			this.buildingId = id;
+		},
 		/** No KI chosen (#620: «Später entscheiden» at the setup) */
 		kiNone: () => api.put('ki-settings', { mode: 'none' }),
 		/** A provider of the KI saved through the API (#580); the clean-up returns to the local KI */
@@ -55,6 +69,7 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 			const { data } = (await api.get('audit-log')) as { data: { id: string; action: string }[] };
 			for (const entry of data.filter(({ action }) => action === 'ki_setting_changed'))
 				await api.remove(`audit-log/${entry.id}`);
+			for (const id of buildings) await api.remove(`buildings/${id}`);
 			for (const email of accounts) await api.remove(`local-accounts/${encodeURIComponent(email)}`);
 		}
 	};

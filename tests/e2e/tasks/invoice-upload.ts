@@ -60,12 +60,11 @@ export function invoicePdf(name: string): File {
 }
 
 /** Opens the dialog on the invoice list, chooses the building and adds the files */
+/** In the open dialog: the building, then the files */
+export const addBelege = (buildingId: string, files: File[]): Activity => (actor) =>
+	actor.attemptsTo(Select.option(buildingId).from(uploadBuildingSelect), Upload.theFile(files).into(uploadFileInput));
 export const uploadBelege = (buildingId: string, files: File[]): Activity => (actor) =>
-	actor.attemptsTo(
-		Click.on(uploadInvoicesButton),
-		Select.option(buildingId).from(uploadBuildingSelect),
-		Upload.theFile(files).into(uploadFileInput)
-	);
+	actor.attemptsTo(Click.on(uploadInvoicesButton), addBelege(buildingId, files));
 
 export const openBeleg = (fileName: string) => Click.on(belegDetailsToggle(fileName));
 // a file the KI reads for longer than the usual wait: its row opens once the reading ended
