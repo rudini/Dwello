@@ -44,6 +44,20 @@ describe('Dokumente eines ehemaligen Mieters (#178)', () => {
 		});
 	});
 
+	// Fachreview #459 V-2: the check belongs to the last contract; a later one is unchecked
+	it('nimmt die Prüfung des letzten Mietvertrags, nicht die eines früheren', () => {
+		const documents = [uploadedOn('2023-05-01T09:00:00.000Z')];
+		const earlier = { ...contract('2020-04-01', '2022-03-31'), id: 'c1', documentsCheckedOn: '2022-05-01' };
+		const later = { ...contract('2026-01-01', '2026-03-31'), id: 'c2', documentsCheckedOn: null };
+
+		expect(formerTenantDocuments([earlier, later], documents, '2026-10-16')).toEqual({
+			endDate: '2026-03-31',
+			documents,
+			contractId: 'c2',
+			checkedOn: null
+		});
+	});
+
 	const ended = [contract('2025-04-01', '2026-03-31')];
 
 	it('nennt kein Dokument vom Tag des Vertragsendes oder später, etwa das Rückgabeprotokoll', () => {

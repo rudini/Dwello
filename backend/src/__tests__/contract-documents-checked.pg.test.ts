@@ -36,4 +36,12 @@ describe('Dokumente als geprüft markieren', () => {
 		expect((await put({ endDate: '2026-03-31' })).status).toBe(200);
 		expect(await stored()).toMatchObject({ endDate: '2026-03-31', documentsCheckedOn: null });
 	});
+
+	// Fachreview #459 V-3: «Bearbeiten» sends the stored end again
+	it('behält die Prüfung beim selben Vertragsende', async () => {
+		expect((await put({ documentsChecked: true })).status).toBe(200);
+		expect((await put({ endDate: '2026-03-31', notes: 'Schlüssel zurück' })).status).toBe(200);
+
+		expect(await stored()).toMatchObject({ documentsCheckedOn: swissToday() });
+	});
 });

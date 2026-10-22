@@ -367,6 +367,8 @@ describe('Mieterdetail', () => {
 
 		expect(text('tenant-former-documents-checked')).toBe('Geprüft am 20.10.2026');
 		expect(byTestId('tenant-former-documents-check')).toBeNull();
+		// Fachreview #459 V-5: a checked notice no longer reads as an open task
+		expect(byTestId('tenant-former-documents')?.getAttribute('data-tone')).toBe('info');
 	});
 
 	it('zeigt den Hinweis nicht, solange es keine solchen Dokumente gibt', () => {
