@@ -1,9 +1,11 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, shownKiAddress } from '../questions/ki-settings';
+import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, modelDownloadOffered, shownKiAddress } from '../questions/ki-settings';
 import {
 	checkConnection,
+	openFreshAuditLog,
 	openFreshKi,
+	openKiWithFailedModel,
 	openFreshSettingsKi,
 	openKi,
 	readFreshPrivacy,
@@ -47,10 +49,12 @@ When(/^der Liegenschaftsverwalter "(Keine KI|Lokale KI)" speichert$/, async ({ v
 const without: Record<string, Partial<Provider>> = {
 	Bestätigung: { confirmed: false },
 	'Namen des Anbieters': { provider: '' },
-	Land: { country: '' }
+	Land: { country: '' },
+	Adresse: { address: '' },
+	Modell: { model: '' }
 };
 When(
-	/^der Liegenschaftsverwalter einen Anbieter der KI ohne (Bestätigung|Namen des Anbieters|Land) speichert$/,
+	/^der Liegenschaftsverwalter einen Anbieter der KI ohne (Bestätigung|Namen des Anbieters|Land|Adresse|Modell) speichert$/,
 	async ({ verwalter }, missing: string) => {
 		await verwalter.attemptsTo(saveProvider({ ...stubProvider('Muster KI AG', 'Deutschland'), ...without[missing] }));
 	}
@@ -70,11 +74,11 @@ When('der Liegenschaftsverwalter die Datenschutzerklärung der frischen Installa
 	await verwalter.attemptsTo(readFreshPrivacy);
 });
 
-Then(/^sieht der Liegenschaftsverwalter bei der KI (?:die Meldung|den Fehler) "(.+)"$/, async ({ verwalter }, text: string) => {
+Then(/^sieht der Liegenschaftsverwalter auf der Seite "KI" (?:die Meldung|den Fehler) "(.+)"$/, async ({ verwalter }, text: string) => {
 	await verwalter.sees(kiPageText).toContain(text);
 });
 
-Then('sagt die KI {string}', async ({ verwalter }, text: string) => {
+Then('sagt die Seite "KI" {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(kiPageText).toContain(text);
 });
 
@@ -82,7 +86,7 @@ Then('ist das Feld für den API-Schlüssel leer', async ({ verwalter }) => {
 	await verwalter.sees(enteredApiKey).toBe('');
 });
 
-Then('zeigt die KI die Adresse {string}', async ({ verwalter }, address: string) => {
+Then('zeigt die Seite "KI" die Adresse {string}', async ({ verwalter }, address: string) => {
 	await verwalter.sees(shownKiAddress).toBe(address);
 });
 
@@ -92,4 +96,30 @@ Then('kann der Liegenschaftsverwalter die KI nicht speichern', async ({ verwalte
 
 Then('sagt die Prüfung der Verbindung {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(kiCheckText).toBe(text);
+});
+
+When(
+	'der Liegenschaftsverwalter den Anbieter {string} in {string} ohne Bestätigung speichert',
+	async ({ verwalter }, provider: string, country: string) => {
+		await verwalter.attemptsTo(saveProvider({ ...stubProvider(provider, country), confirmed: false }));
+	}
+);
+
+When('der Liegenschaftsverwalter für den Anbieter eine neue Adresse ohne API-Schlüssel speichert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(saveProvider({ ...stubProvider('Muster KI AG', 'Deutschland'), address: 'http://127.0.0.1:2531/v1', key: '' }));
+});
+
+When('der Liegenschaftsverwalter das Protokoll der frischen Installation öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openFreshAuditLog);
+});
+
+When(
+	'der Liegenschaftsverwalter die KI einer Installation öffnet, deren KI-Modell nicht geladen werden konnte',
+	async ({ verwalter }) => {
+		await verwalter.attemptsTo(openKiWithFailedModel);
+	}
+);
+
+Then('kann der Liegenschaftsverwalter das KI-Modell erneut herunterladen', async ({ verwalter }) => {
+	await verwalter.sees(modelDownloadOffered).toBe(true);
 });

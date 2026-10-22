@@ -1,4 +1,4 @@
-import { FRESH_APP, FRESH_KI_STUB } from '../fixtures/fresh-installation';
+import { EMPTY_APP, FRESH_APP, FRESH_KI_STUB } from '../fixtures/fresh-installation';
 import { sessionCookies } from '../fixtures/session';
 import type { Activity } from '../screenplay/actor';
 import { Check, Click, Cookies, Enter, Navigate } from '../screenplay/interactions';
@@ -64,3 +64,9 @@ export const saveMode =
 		actor.attemptsTo(openFreshKi, Click.on(kiMode(mode)), Click.on(kiSaveButton));
 
 export const readFreshPrivacy = Navigate.to(`${FRESH_APP}/privacy`);
+
+export const openFreshAuditLog: Activity = (actor) => actor.attemptsTo(signInFresh, Navigate.to(`${FRESH_APP}/config/audit-log`));
+
+/** The KI of the empty instance, whose KI stand-in fails the model download */
+export const openKiWithFailedModel: Activity = async (actor) =>
+	actor.attemptsTo(Cookies.add(await sessionCookies(EMPTY_APP)), Navigate.to(`${EMPTY_APP}/config/ki`));

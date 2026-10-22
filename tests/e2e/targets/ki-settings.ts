@@ -16,3 +16,4 @@ export const kiPrivacyConfirm = target('Punkte zum Datenschutz geprüft', (page)
 export const kiCheckButton = target('Verbindung prüfen', (page) => page.getByTestId('ki-check-button'));
 export const kiSaveButton = target('KI speichern', (page) => page.getByTestId('ki-save-button'));
 export const kiCheckResult = target('Ergebnis der Prüfung', (page) => page.getByTestId('ki-check-result'));
+export const kiModelDownloadButton = target('KI-Modell herunterladen', (page) => page.getByTestId('ki-model-download-button'));
