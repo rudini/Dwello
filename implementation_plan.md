@@ -153,4 +153,7 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #459 slice B pull request merged on green CI (#624, 00d95ad; migration renumbered to 0035 at the merge of main)
 - [x] #368 decided by recommendation (standing instruction), recorded in the issue: option 2 (a change from a date is a new Mietvertrag from the termination date) and (a) the follow-up contract copies the agreed Nebenkosten; implemented in the pull request that closes #368
 - [x] #368 scenario @wip in contract-edit.feature («Der neue Mietvertrag übernimmt die vereinbarten Nebenkosten»), red at the missing behaviour
-- [ ] #368 fachreview before implementing: `docs/reviews/368-fachreview-1.md`
+- [x] #368 fachreview before implementing: `docs/reviews/368-fachreview-1.md`: V-1 Blocker (my «by recommendation» entry contradicted the product owner's decision in #407 point 3: option 1 with follow-up contract (a)); the entry in #368 is corrected and withdrawn; M-1, V-2, V-3 concern only option 2 and fall away; V-4 (own help on the follow-up contract) taken with its wording; V-5 (open categories become «nicht vereinbart» on the follow-up) stays as a Minor
+- [x] Workflow note: before deciding an issue «by recommendation», search the other issues for an earlier decision on it (here #407 had decided #368); I missed it
+- [x] #368 split by recommendation: slice A (follow-up contract copies the agreed Nebenkosten, `Refs #368`) and slice B («Vereinbart ab», `Fixes #368`)
+- [x] #368 slice A red tests: contract-new-load.test.ts (load takes `?from=`), contract-wizard.dom.test.ts (ticks and help)

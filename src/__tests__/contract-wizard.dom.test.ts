@@ -117,6 +117,28 @@ describe('Mietvertrag erfassen', () => {
 		expect(document.activeElement).toBe(document.querySelector('h2'));
 	});
 
+	// #368 (#407 point 3, follow-up contract (a)): the new contract keeps the old one's agreed Nebenkosten and says so
+	it('übernimmt beim neuen Mietvertrag aus dem bisherigen die vereinbarten Nebenkosten', async () => {
+		const categories = [
+			{ id: 'k1', name: 'Heizung' },
+			{ id: 'k2', name: 'Lift' }
+		];
+		show(NewContractPage, { data: { ...data, categories, agreed: ['k1'] } } as never);
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+
+		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
+		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
+		expect(document.getElementById('agreed-costs-help')!.textContent).toBe(
+			'Dwello hat die vereinbarten Nebenkosten aus dem bisherigen Mietvertrag übernommen. Kreuzen Sie Nebenkosten an, die Sie mit dem amtlichen Formular neu eingeführt haben, und entfernen Sie das Häkchen bei jeder, die im neuen Mietvertrag nicht mehr gilt.'
+		);
+	});
+
 	it('verliert beim Zurückgehen keine Angaben', async () => {
 		await open();
 		select('contract-tenant-select', 't2');
