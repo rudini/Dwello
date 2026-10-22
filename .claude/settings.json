@@ -65,7 +65,19 @@
       "Bash(bash docs/design/tools/persona-stack.sh*)",
       "Bash(fuser -k 3300/tcp*)",
       "Bash(fuser -k 3301/tcp*)",
-      "Bash(fuser -k 2527/tcp*)"
+      "Bash(fuser -k 2527/tcp*)",
+      "Bash(rm -rf /tmp/claude-0/*)",
+      "Bash(rm -r /tmp/claude-0/*)",
+      "Bash(rm -rf test-results*)",
+      "Bash(rm -rf playwright-report*)",
+      "Bash(git worktree remove --force /tmp/*)",
+      "Bash(git worktree prune)",
+      "Bash(PGPASSWORD=dwello psql -h localhost -U dwello -d dwello_persona*)",
+      "Bash(PGPASSWORD=dwello psql -h localhost -U dwello -d dwello_test*)",
+      "Bash(PGPASSWORD=dwello psql -h localhost -U dwello -d dwello_e2e*)",
+      "Bash(psql -h localhost -U dwello -d dwello_persona*)",
+      "Bash(psql -h localhost -U dwello -d dwello_test*)",
+      "Bash(psql -h localhost -U dwello -d dwello_e2e*)"
     ],
     "ask": [
       "Bash(git push *--force*)",

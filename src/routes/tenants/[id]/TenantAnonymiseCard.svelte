@@ -15,6 +15,8 @@
 	// the year of the last event: the first day is 1 January 11 years later
 	const year = $derived(Number(from.slice(0, 4)) - 11);
 	let confirming = $state(false);
+	// the name before saving: the page reloads with the replacement name before the toast (code review C-1)
+	let anonymised = '';
 </script>
 
 <Panel title={m.tenants_anonymise()}>
@@ -24,7 +26,10 @@
 				{m.tenants_anonymise_help({ year, name })}
 			</p>
 			<Button
-				onclick={() => (confirming = true)}
+				onclick={() => {
+					anonymised = name;
+					confirming = true;
+				}}
 				icon="user"
 				describedby="tenant-anonymise-help"
 				testid="tenant-anonymise-button">{m.tenants_anonymise()}</Button
@@ -45,7 +50,7 @@
 	danger
 	confirmTestid="tenant-anonymise-confirm"
 	{error}
-	onsuccess={() => addToast('success', m.tenants_anonymised_toast({ name }))}
+	onsuccess={() => addToast('success', m.tenants_anonymised_toast({ name: anonymised }))}
 >
 	<p data-testid="tenant-anonymise-message">{m.tenants_anonymise_text({ name })}</p>
 </ActionDialog>

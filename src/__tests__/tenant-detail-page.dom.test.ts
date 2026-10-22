@@ -319,7 +319,8 @@ describe('Mieterdetail', () => {
 		expect(byTestId('tenant-anonymise-button')).toBeNull();
 	});
 
-	// No scenario: the E2E stack cannot make the backend refuse (the day passes only with the server's clock)
+	// No scenario: only a change between loading the page and confirming (another tab, as for #522) or the server's
+	// clock reaches a refusal (code review #459 C-3)
 	it('nennt im Dialog, warum der Mieter nicht anonymisiert wurde', () => {
 		open([], { anonymiseError: 'Diesen Mieter können Sie erst ab dem 01.01.2036 anonymisieren.' }, [], false, null, '2025-01-01');
 		click('tenant-anonymise-button');

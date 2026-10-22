@@ -6,6 +6,7 @@ import {
 	anonymiseConsequenceText,
 	anonymiseFromText,
 	anonymiseOffered,
+	anonymisedToast,
 	monthlyRent,
 	rentalStartDate,
 	rentedApartment
@@ -106,6 +107,11 @@ When('der Liegenschaftsverwalter das Anonymisieren bestätigt', async ({ verwalt
 Then('nennt die Bestätigung die Folge {string}', async ({ verwalter, names }, text: string) => {
 	const named = [...names.entries()].reduce((t, [written, stored]) => t.replaceAll(written, stored), text);
 	await verwalter.sees(anonymiseConsequenceText).toBe(named);
+});
+
+// code review #459 C-1: the toast names the tenant as he was called before
+Then('meldet Dwello, dass {string} anonymisiert ist', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.sees(anonymisedToast).toBe(`Mieter «${names.get(tenant)}» anonymisiert`);
 });
 
 Then('heisst der Mieter {string}', async ({ verwalter, names }, name: string) => {

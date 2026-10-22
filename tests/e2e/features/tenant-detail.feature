@@ -73,7 +73,8 @@ Funktionalität: Mieterdetail
     Wenn der Liegenschaftsverwalter den Mieter anonymisieren will
     Dann nennt die Bestätigung die Folge "Name, Kontaktdaten und Dokumente von Lea Frei werden endgültig entfernt. Die Beträge der Abrechnungen bleiben."
     Wenn der Liegenschaftsverwalter das Anonymisieren bestätigt
-    Dann heisst der Mieter "Anonymisierter Mieter"
+    Dann meldet Dwello, dass "Lea Frei" anonymisiert ist
+    Und heisst der Mieter "Anonymisierter Mieter"
     Wenn der Liegenschaftsverwalter die Seite "/tenants" öffnet
     Dann findet der Liegenschaftsverwalter den Mieter "Lea Frei" nicht mehr
 

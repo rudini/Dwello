@@ -1,4 +1,5 @@
 import { Text, Visibility } from '../screenplay/questions';
+import { successToast } from '../targets/form';
 import {
 	anonymiseConsequence,
 	anonymiseFrom,
@@ -17,3 +18,4 @@ export const correspondenceAddress = Text.of(tenantAddress);
 export const anonymiseConsequenceText = Text.of(anonymiseConsequence);
 export const anonymiseFromText = Text.of(anonymiseFrom);
 export const anonymiseOffered = Visibility.of(anonymiseTenantButton);
+export const anonymisedToast = Text.of(successToast);
