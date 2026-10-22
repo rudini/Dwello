@@ -3,7 +3,7 @@
  * so no command is needed; the overview shows how far the download is. A local Bun.serve stands in for Ollama.
  */
 
-import { afterEach, describe, expect, it } from 'bun:test';
+import { afterEach, describe, expect, it, spyOn } from 'bun:test';
 import { loadModel, modelState } from '../services/ki-model.service';
 
 type Server = ReturnType<typeof Bun.serve>;
@@ -88,6 +88,20 @@ describe('KI-Modell der lokalen KI', () => {
 		await loadModel({ baseUrl: `http://127.0.0.1:${ollama.port}/v1`, model: MODEL, local: true });
 
 		expect(modelState()).toEqual({ state: 'failed' });
+	});
+
+	// main run 825: Bun's fetch ends a response after 6 minutes without data (a probe: TimeoutError at 360 s, not with
+	// `timeout: false`); showing it here would take 6 silent minutes
+	it('lässt den Download des Modells ohne Zeitlimit laufen', async () => {
+		const sent = spyOn(globalThis, 'fetch');
+		try {
+			await loadModel(standIn([], [{ status: 'success' }]));
+			const pull = sent.mock.calls.find(([url]) => String(url).endsWith('/api/pull'));
+
+			expect((pull?.[1] as { timeout?: boolean })?.timeout).toBe(false);
+		} finally {
+			sent.mockRestore();
+		}
 	});
 
 	it('meldet während des Ladens, wie weit es ist', async () => {

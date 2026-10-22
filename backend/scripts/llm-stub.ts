@@ -200,6 +200,7 @@ const pulls = new Set<() => void>();
 function pullProgress() {
 	const total = 6_000_000_000;
 	let send: () => void;
+	let timer: ReturnType<typeof setInterval>;
 	const body = new ReadableStream({
 		start(controller) {
 			send = () =>
@@ -208,8 +209,13 @@ function pullProgress() {
 				);
 			pulls.add(send);
 			send();
+			// as a real Ollama does while it downloads: never silent for long (main run 825 lost a silent stream)
+			timer = setInterval(send, 10_000);
 		},
-		cancel: () => void pulls.delete(send)
+		cancel: () => {
+			pulls.delete(send);
+			clearInterval(timer);
+		}
 	});
 	return new Response(body, { headers: { 'content-type': 'application/x-ndjson' } });
 }
