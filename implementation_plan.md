@@ -186,7 +186,7 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #465 font: Liberation Sans (SIL OFL) embedded in statement and reminder PDFs; test helper reads ToUnicode maps
 - [x] #465 settings: company_phone, company_email (backend, form, help texts)
 - [x] #465 PDF letter: letterhead, place and date, salutation, introduction, greeting; Heizprofil source (migration 0037, snapshot in heating_share); scenarios green without @wip
-- [ ] #465 code review round 1 (`docs/reviews/465-review-1.md`)
-- [ ] #465 personas Dr. Weber (PDF) and Helga (settings), daten-pruefer on Weber's PDF
+- [x] #465 code review round 1 (`docs/reviews/465-review-1.md`): C-1 Major (glossary row) fixed in bf6fdbcb; C-2 to C-5 Minor fixed (tests seen red)
+- [x] #465 personas Helga (`docs/design/personas/helga-465.md`) and Dr. Weber (`weber-465.md`): no Blocker/Major; daten-pruefer (`docs/reviews/465-datenpruefung-1.md`): no findings
 - [x] #465 glossary row «Quelle der Monatsanteile» (decided in #465)
 - [ ] #465 closing review, pull request `Fixes #465`, merged on green CI

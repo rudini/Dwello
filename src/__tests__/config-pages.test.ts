@@ -70,6 +70,9 @@ describe('Einstellungen', () => {
 		const body = settingsPage().replace(/\s+/g, ' ');
 
 		expect(body).toContain('value="044 123 45 67"');
+		// code review 465-1 C-4: the keypad of a phone number and of an e-mail, as in the tenant form
+		expect(body).toMatch(/inputmode="tel"[^>]*name="companyPhone"|name="companyPhone"[^>]*inputmode="tel"/);
+		expect(body).toMatch(/inputmode="email"[^>]*name="companyEmail"|name="companyEmail"[^>]*inputmode="email"/);
 		expect(body).toContain('value="info@muster.ch"');
 		expect(body).toContain('Freiwillig. Steht im Kopf der Nebenkostenabrechnung, damit Ihre Mieter Sie bei Fragen erreichen.');
 		expect(body).toContain('Freiwillig. Steht im Kopf der Nebenkostenabrechnung, damit Ihre Mieter Ihnen schreiben können.');

@@ -453,6 +453,8 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | `company_address` | `''` | <= 500 characters |
 | `company_postal_code` | `''` | four digits |
 | `company_city` | `''` | <= 100 characters |
+| `company_phone` | `''` | <= 50 characters; in the statement's letterhead (#465) |
+| `company_email` | `''` | empty or an e-mail address, <= 255 characters (#465) |
 | `iban` | `''` | CH or LI IBAN, 21 characters, MOD-97 checksum |
 | `payment_deadline_days` | `30` | 7–90 |
 | `reminder_after_days` | `14` | 7–60 |

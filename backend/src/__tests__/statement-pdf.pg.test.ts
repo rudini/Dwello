@@ -531,6 +531,29 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		);
 	});
 
+	// code review 465-1 C-2: created before #465, no source kept: the profile's as it is now, none once it is deleted
+	it('nennt bei einer vor #465 erstellten Abrechnung die Quelle des Profils, wie es jetzt ist', async () => {
+		const create = async (heatingProfileId: string) => {
+			const statement = await generateStatement({ contractId: moved.contract, buildingId: moved.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId, managementFeePercent: 0 });
+			const { sources: _, ...before } = statement.heatingShare as { sources?: unknown };
+			await db.update(utilityStatements).set({ heatingShare: before as typeof statement.heatingShare }).where(eq(utilityStatements.id, statement.id));
+			return statement.id;
+		};
+		const printed = async (id: string) => {
+			await generateStatementPdf(id, 'de');
+			const text = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
+			await deleteStatement(id);
+			return text;
+		};
+		const predefined = await create((await getHeatingProfileByName('Heating Mittelland'))!.id);
+		const own = (await createHeatingProfile({ name: `Alt ${crypto.randomUUID()}`, type: 'custom', ...shares([18.6, 13.9, 11.2, 6.1, 2.3, 0, 0, 0.08, 1.8, 7.7, 13.4, 24.92]) })).id;
+		const deleted = await create(own);
+		await deleteHeatingProfile(own);
+
+		expect(await printed(predefined)).toContain('Quelle der Monatsanteile: Merkblatt «Nebenkostenabrechnung beim Umzug');
+		expect(await printed(deleted)).not.toContain('Quelle der Monatsanteile');
+	});
+
 	// Vor #209 erstellt: kein Anteil gespeichert; die Abrechnung wird nicht neu gerechnet, das PDF nennt kein Heizprofil
 	// mit Anteil und Monaten (#232, C-5), erklärt aber den Prozentwert der Heizposition (Fachprüfung w4-2, M-5)
 	it('nennt bei einer vor #209 erstellten Abrechnung keinen Anteil nach Heizprofil', async () => {

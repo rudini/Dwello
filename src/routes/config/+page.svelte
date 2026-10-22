@@ -113,6 +113,7 @@
 			</div>
 			<!-- #465: in the statement's letterhead only (Fachreview 465-1 V-3) -->
 			<SettingField
+				type="tel"
 				name="companyPhone"
 				label={m.tenants_phone()}
 				value={settings.companyPhone}
@@ -120,6 +121,7 @@
 				example="044 123 45 67"
 			/>
 			<SettingField
+				type="email"
 				name="companyEmail"
 				label={m.tenants_email()}
 				value={settings.companyEmail}

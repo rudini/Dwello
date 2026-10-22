@@ -35,7 +35,7 @@
 		optional?: boolean;
 		placeholder?: string;
 		autocomplete?: HTMLInputElement['autocomplete'];
-		inputmode?: 'decimal' | 'numeric';
+		inputmode?: 'decimal' | 'numeric' | 'tel' | 'email';
 		min?: string;
 		max?: string;
 		disabled?: boolean;
