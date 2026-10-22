@@ -84,7 +84,6 @@ Funktionalität: Einrichtung beim ersten Aufruf
 
   # #620: bei der Einrichtung nur «Lokale KI» oder «Später entscheiden»; einen Anbieter wählt der Liegenschaftsverwalter
   # danach unter «Einstellungen» › «KI»
-  @wip
   Szenario: Bei der Einrichtung die KI auf später verschieben
     Angenommen Dwello ist frisch installiert
     Und ein Besucher hat die Einrichtung geöffnet
@@ -93,7 +92,6 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Wenn der Liegenschaftsverwalter die Datenschutzerklärung der frischen Installation liest
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Rechnungen und Kategorien werden nicht von einer KI bearbeitet."
 
-  @wip
   Szenario: Bei der Einrichtung die lokale KI wählen
     Angenommen Dwello ist frisch installiert
     Und das KI-Modell ist zu 40 % geladen
@@ -101,7 +99,6 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Wenn der Besucher mit dem Einrichtungscode ein Konto mit Passwort anlegt und die lokale KI wählt
     Dann zeigt die Übersicht nach der Einrichtung den Hinweis "Das KI-Modell wird geladen: 40 %. Bis es geladen ist, erfassen Sie Rechnungen von Hand."
 
-  @wip
   Szenario: Von der Übersicht zur KI
     Angenommen Dwello ist eingerichtet
     Und in der frischen Installation ist keine KI gewählt

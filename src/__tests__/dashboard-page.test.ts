@@ -79,6 +79,15 @@ describe('Übersicht während das KI-Modell lädt', () => {
 		expect(text).toContain('Dwello versucht es erneut, wenn der Betreiber Dwello neu startet');
 	});
 
+	// #620: nach «Später entscheiden» bei der Einrichtung
+	it('sagt, dass noch keine KI gewählt ist, und führt zur Seite KI', () => {
+		const text = hint(page({ kiModel: { state: 'none' } }));
+
+		expect(text).toContain('Sie haben noch keine KI gewählt.');
+		expect(text).toContain('Bis dahin erfassen Sie Rechnungen von Hand.');
+		expect(text).toMatch(/href="\/config\/ki"[^>]*data-testid="ki-settings-link"/);
+	});
+
 	it('zeigt nichts, wenn das Modell bereit ist oder die KI ausserhalb des Servers läuft', () => {
 		expect(page({ kiModel: { state: 'ready' } })).not.toContain('ki-model-loading');
 		expect(page({ kiModel: { state: 'unknown' } })).not.toContain('ki-model-loading');

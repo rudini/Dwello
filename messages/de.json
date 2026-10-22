@@ -2049,5 +2049,11 @@
 	"audit_ki_local": "KI gewählt: Lokale KI",
 	"audit_ki_none": "KI gewählt: Keine KI",
 	"ki_settings_provider_name_help": "Der Name der Firma, wie er im Vertrag mit ihr steht. Die Datenschutzerklärung nennt ihn. Läuft die KI auf einem Server, den Sie selbst betreiben, schreiben Sie Ihren Namen und «eigener Server». Bearbeiten mehrere Firmen die Daten, nennen Sie alle, mit Komma getrennt.",
-	"ki_settings_country_help": "Die Länder, in denen der Anbieter und die Firmen, die er beizieht, die Daten bearbeiten, auch wenn sie nur darauf zugreifen. Sie stehen meist im Vertrag oder in der Liste der Unterauftragnehmer. Die Datenschutzerklärung nennt sie. Mehrere Länder trennen Sie mit Komma."
+	"ki_settings_country_help": "Die Länder, in denen der Anbieter und die Firmen, die er beizieht, die Daten bearbeiten, auch wenn sie nur darauf zugreifen. Sie stehen meist im Vertrag oder in der Liste der Unterauftragnehmer. Die Datenschutzerklärung nennt sie. Mehrere Länder trennen Sie mit Komma.",
+	"ki_none_title": "Sie haben noch keine KI gewählt.",
+	"ki_none_text": "Bis dahin erfassen Sie Rechnungen von Hand.",
+	"ki_none_link": "Wählen Sie die KI unter «Einstellungen» › «KI».",
+	"setup_ki_legend": "Welche KI soll Rechnungen lesen?",
+	"setup_ki_later": "Später entscheiden",
+	"setup_ki_later_help": "Bis Sie unter «Einstellungen» › «KI» eine KI wählen, erfassen Sie Rechnungen von Hand. Dort wählen Sie auch eine KI eines Anbieters."
 }

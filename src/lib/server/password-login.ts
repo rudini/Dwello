@@ -67,28 +67,34 @@ async function startSession(account: { sub: string; email: string; name: string 
 // The setup on the first visit (#577): only while there is neither a Konto mit Passwort nor a provider like Google
 const SETUP = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/setup`;
 
-/** Whether a fresh installation still has to be set up (false when the backend does not answer) */
-export async function setupNeeded(fetch: Fetch): Promise<boolean> {
-	if (getConfiguredProviders().length) return false;
+/** Whether a fresh installation still has to be set up, and whether its KI is chosen there (#620: not while the
+ * operator set it); not needed when the backend does not answer */
+export async function setupState(fetch: Fetch): Promise<{ needed: boolean; kiChoice: boolean }> {
+	if (getConfiguredProviders().length) return { needed: false, kiChoice: false };
 	try {
 		const response = await fetch(SETUP);
-		return response.ok && ((await response.json()) as { needed: boolean }).needed;
+		if (!response.ok) return { needed: false, kiChoice: false };
+		const state = (await response.json()) as { needed: boolean; kiChoice: boolean };
+		return { needed: state.needed, kiChoice: state.kiChoice };
 	} catch {
-		return false;
+		return { needed: false, kiChoice: false };
 	}
 }
+
+export const setupNeeded = async (fetch: Fetch) => (await setupState(fetch)).needed;
 
 export async function setUpDwello(fetch: Fetch, cookies: Cookies, form: FormData) {
 	// the setup exists only without a provider, also for a form sent to it directly (code review 577 C-8)
 	if (getConfiguredProviders().length) redirect(303, '/login');
 	const [code, email, password, repeat] = ['code', 'email', 'password', 'repeat'].map((name) => String(form.get(name) ?? ''));
+	const ki = form.get('ki'); // #620: «Lokale KI» or «Später entscheiden»
 	// empty fields are a missing input, not an invalid request (persona Anna 577 P-1)
 	if (!code.trim() || !email.trim() || !password.trim()) return fail(400, { email, error: m.setup_error_empty() });
 	if (password !== repeat) return fail(400, { email, error: m.setup_error_repeat() });
 	const response = await fetch(SETUP, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ code, email, password })
+		body: JSON.stringify({ code, email, password, ...((ki === 'local' || ki === 'none') && { ki }) })
 	}).catch(() => null);
 	if (!response) return fail(502, { email, error: m.login_error_failed() });
 	if (response.status !== 201) {

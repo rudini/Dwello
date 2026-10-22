@@ -8,6 +8,7 @@ import statementList from '../../tests/contracts/statements.json';
 import documentList from '../../tests/contracts/documents.json';
 import outdatedStatements from '../../tests/contracts/statements-outdated.json';
 import kiModelLoading from '../../tests/contracts/ki-model-loading.json';
+import kiSettings from '../../tests/contracts/ki-settings.json';
 
 const API = 'http://localhost:3001/api/v1';
 // an apartment of the API contract, without the dates it does not have
@@ -295,6 +296,33 @@ describe('Übersicht laden', () => {
 		const answers = backend(200, both);
 		const fetch = (async (url: string) =>
 			url.endsWith('/ki/model') ? new Response(null, { status: 500 }) : answers(url)) as typeof globalThis.fetch;
+
+		expect((await load({ fetch } as never)).kiModel).toEqual({ state: 'unknown' });
+	});
+
+	// #620: «Später entscheiden» bei der Einrichtung: keine KI gewählt, die Übersicht nennt die Seite «KI»
+	it('meldet, wenn der Liegenschaftsverwalter noch keine KI gewählt hat', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const answers = backend(200, both);
+		const fetch = (async (url: string) =>
+			url.endsWith('/ki-settings')
+				? Response.json({ ...kiSettings, mode: 'none' })
+				: url.endsWith('/ki/model')
+					? Response.json({ state: 'unknown' })
+					: answers(url)) as typeof globalThis.fetch;
+
+		expect((await load({ fetch } as never)).kiModel).toEqual({ state: 'none' });
+	});
+
+	it('meldet keine fehlende Wahl, wenn der Betreiber die KI abgeschaltet hat', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const answers = backend(200, both);
+		const fetch = (async (url: string) =>
+			url.endsWith('/ki-settings')
+				? Response.json({ ...kiSettings, mode: 'none', byOperator: true })
+				: url.endsWith('/ki/model')
+					? Response.json({ state: 'unknown' })
+					: answers(url)) as typeof globalThis.fetch;
 
 		expect((await load({ fetch } as never)).kiModel).toEqual({ state: 'unknown' });
 	});

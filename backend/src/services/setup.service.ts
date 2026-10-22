@@ -9,6 +9,8 @@ import { db } from '../db/connection';
 import { localAccounts } from '../db/schema';
 import { CodedError } from './coded-error';
 import { hasLocalAccount, setLocalAccount } from './local-account.service';
+import { llmConfig } from '../config/llm';
+import { saveKiSettings } from './ki-settings.service';
 
 const MAX_WRONG_CODES = 5;
 const LOCK_MS = 15 * 60_000;
@@ -42,7 +44,14 @@ export async function announceSetupCode() {
 
 const done = () => new CodedError('SETUP_DONE', 'Dwello ist schon eingerichtet.');
 
-export async function setUpFirstAccount(code: string, email: string, password: string) {
+export async function setUpFirstAccount(code: string, email: string, password: string, ki: 'local' | 'none' = 'local') {
+	const account = await createFirstAccount(code, email, password);
+	// #620: «Später entscheiden» means no KI until one is chosen under «Einstellungen» › «KI»; the operator's choice stays
+	if (ki === 'none' && !llmConfig.byOperator) await saveKiSettings({ mode: 'none' });
+	return account;
+}
+
+async function createFirstAccount(code: string, email: string, password: string) {
 	// once set up, no request waits for the lock (code review 577 C-2)
 	if (await hasLocalAccount()) throw done();
 	return db.transaction(async (tx) => {

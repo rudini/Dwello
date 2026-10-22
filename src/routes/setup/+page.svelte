@@ -4,12 +4,20 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
+	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
-	import type { ActionData } from './$types';
+	import type { ActionData, PageData } from './$types';
 
 	// The setup on the first visit (#577): the Einrichtungscode from the server log creates the Konto mit Passwort
-	let { form }: { form: ActionData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	// #620: only «Lokale KI» or «Später entscheiden» here, unless the operator set the KI; a provider follows in the settings
+	let ki = $state('local');
+	const kiChoices = $derived([
+		{ value: 'local', label: m.ki_settings_local(), description: m.ki_settings_local_help() },
+		{ value: 'none', label: m.setup_ki_later(), description: m.setup_ki_later_help() }
+	]);
 
 	let busy = $state(false);
 	let failed = $state(false);
@@ -84,6 +92,15 @@
 				autocomplete="new-password"
 				testid="setup-password-repeat-input"
 			/>
+			{#if data.kiChoice}
+				<RadioGroup
+					name="ki"
+					legend={m.setup_ki_legend()}
+					options={kiChoices}
+					bind:value={ki}
+					testid="setup-ki"
+				/>
+			{/if}
 			<Button type="submit" variant="primary" full {busy} testid="setup-submit"
 				>{m.setup_submit()}</Button
 			>

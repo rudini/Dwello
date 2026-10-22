@@ -2049,5 +2049,11 @@
 	"audit_ki_local": "AI chosen: local AI",
 	"audit_ki_none": "AI chosen: no AI",
 	"ki_settings_provider_name_help": "The company’s name as it appears in your contract with it. The privacy statement names it. If the AI runs on a server you run yourself, write your name and «own server». If several companies process the data, name them all, separated by commas.",
-	"ki_settings_country_help": "The countries where the provider and the companies it engages process the data, even if they only access it. They are usually in the contract or in the list of subprocessors. The privacy statement names them. Separate several countries with commas."
+	"ki_settings_country_help": "The countries where the provider and the companies it engages process the data, even if they only access it. They are usually in the contract or in the list of subprocessors. The privacy statement names them. Separate several countries with commas.",
+	"ki_none_title": "You have not chosen an AI yet.",
+	"ki_none_text": "Until then, you enter invoices by hand.",
+	"ki_none_link": "Choose the AI under «Settings» › «AI».",
+	"setup_ki_legend": "Which AI should read invoices?",
+	"setup_ki_later": "Decide later",
+	"setup_ki_later_help": "Until you choose an AI under «Settings» › «AI», you enter invoices by hand. That is also where you choose an AI provider."
 }

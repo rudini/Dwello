@@ -2049,5 +2049,11 @@
 	"audit_ki_local": "IA scelta: IA locale",
 	"audit_ki_none": "IA scelta: nessuna IA",
 	"ki_settings_provider_name_help": "Il nome dell’azienda come figura nel contratto con essa. L’informativa sulla protezione dei dati lo menziona. Se l’IA funziona su un server che gestisce Lei stesso, scriva il Suo nome e «server proprio». Se più aziende trattano i dati, le indichi tutte, separate da una virgola.",
-	"ki_settings_country_help": "I paesi in cui il fornitore e le aziende di cui si avvale trattano i dati, anche se vi accedono soltanto. Figurano di solito nel contratto o nell’elenco dei subappaltatori. L’informativa sulla protezione dei dati li menziona. Separi più paesi con una virgola."
+	"ki_settings_country_help": "I paesi in cui il fornitore e le aziende di cui si avvale trattano i dati, anche se vi accedono soltanto. Figurano di solito nel contratto o nell’elenco dei subappaltatori. L’informativa sulla protezione dei dati li menziona. Separi più paesi con una virgola.",
+	"ki_none_title": "Non ha ancora scelto un’IA.",
+	"ki_none_text": "Fino ad allora registra le fatture a mano.",
+	"ki_none_link": "Scelga l’IA in «Impostazioni» › «IA».",
+	"setup_ki_legend": "Quale IA deve leggere le fatture?",
+	"setup_ki_later": "Decidere più tardi",
+	"setup_ki_later_help": "Finché non sceglie un’IA in «Impostazioni» › «IA», registra le fatture a mano. Lì sceglie anche l’IA di un fornitore."
 }

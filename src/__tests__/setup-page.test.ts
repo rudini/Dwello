@@ -104,7 +104,14 @@ describe('Einrichtung beim ersten Aufruf', () => {
 	});
 
 	it('zeigt die Einrichtung, solange Dwello nicht eingerichtet ist', async () => {
-		expect(await withoutProviders(() => open(fresh))).toEqual({});
+		expect(await withoutProviders(() => open(fresh))).toEqual({ kiChoice: true });
+	});
+
+	// #620: hat der Betreiber die KI festgelegt, gibt es bei der Einrichtung nichts zu wählen
+	it('bietet keine Wahl der KI, wenn der Betreiber sie festgelegt hat', async () => {
+		const operator: Backend = (url) => (url.endsWith('/setup') ? Response.json({ ...needed, kiChoice: false }) : fresh(url));
+
+		expect(await withoutProviders(() => open(operator))).toEqual({ kiChoice: false });
 	});
 
 	it('führt zur Anmeldung, sobald es ein Konto mit Passwort gibt', async () => {
@@ -145,6 +152,13 @@ describe('Einrichtung beim ersten Aufruf', () => {
 		expect(
 			JSON.parse(String(calls.find((call) => call.url.endsWith('/audit-log/logins'))?.init?.body))
 		).toEqual({ provider: 'local' });
+	});
+
+	// #620: «Später entscheiden» geht mit dem Konto an das Backend, das «Keine KI» speichert
+	it('schickt die gewählte KI mit', async () => {
+		const { calls } = await setUp({ ...fields, ki: 'none' }, answering(201, account));
+
+		expect(JSON.parse(String(calls[0].init?.body))).toMatchObject({ ki: 'none' });
 	});
 
 	// fach review 577 R-4: the sign-in after the setup is in the Protokoll des Servers like every other

@@ -35,6 +35,7 @@ Funktionalität: Barrierefreiheit
       | dashboard              | first-use           |
       | dashboard              | ki-model-loading    |
       | dashboard              | ki-model-failed     |
+      | dashboard              | ki-none             |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
       | dashboard              | other-language      |
