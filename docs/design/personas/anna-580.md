@@ -76,3 +76,60 @@ Etwa 4 Minuten und 5 Schritte bis zur Seite: Übersicht → Rechnungen (Sackgass
 - «KI-Modell herunterladen»: Nicht gedrückt, weil der Download den geteilten Server verändert. Wie die Seite den Zustand während und nach dem Download zeigt, ist offen.
 - Eine erfolgreiche «Verbindung prüfen»: Der Stand-in lehnte den leeren Schlüssel ab, eine echte Anbieter-Adresse habe ich nicht verwendet (externer Dienst).
 - Ob das Hochladen von Rechnungen mit der aktuellen Einstellung tatsächlich funktioniert: nicht ausprobiert, weil ich auf keinem Gebäude speichern sollte.
+
+## Zweiter Durchgang
+
+Nur der Bildschirm von P-1: «Einstellungen» › «KI» (/config/ki). Neu gebauter Persona-Stack, die lokale KI antwortet nicht. Desktop 1440 × 900 mit Maus, kurz auch auf dem Handy (390 × 844). «KI speichern» habe ich nicht gedrückt. Skripte und Screenshots liegen in `/tmp/claude-0/-home-user-Dwello/85153f7a-2aaa-560a-b0b0-dad45152fc6d/scratchpad/anna-580-r2/`.
+
+**Status P-1: geschlossen.** Der neue Hinweis lautet wörtlich: «Die lokale KI antwortet nicht. Bis sie antwortet, erfassen Sie Rechnungen von Hand. Betreiben Sie Dwello selbst, starten Sie die lokale KI, wie die Installationsanleitung beschreibt; sonst wenden Sie sich an den Betreiber oder wählen oben einen Anbieter oder keine KI.» Jetzt weiss ich, was das für meine Rechnungen heisst: Ich erfasse sie von Hand, bis die KI wieder antwortet. Ich weiss auch, wer etwas tun kann. Habe ich Dwello selbst eingerichtet, starte ich die KI. Hat das jemand anderes gemacht, frage ich diese Person. Oder ich wähle oben eine andere Option. Mit «Betreiben Sie Dwello selbst» kann ich die Frage «Bin ich der Betreiber?» selbst beantworten. Der Knopf «KI-Modell herunterladen» steht in diesem Zustand nicht mehr da, damit ist auch meine Verwirrung um den Download weg. Offen bleibt nur, wo die Installationsanleitung liegt (P-8). Das ist eine kleinere Lücke, denn der Weg über den Betreiber oder über eine andere Option bleibt mir.
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-8 | Minor | KI, Hinweis «Die lokale KI antwortet nicht.» | «… starten Sie die lokale KI, wie die Installationsanleitung beschreibt …»: Die Seite verlinkt die Anleitung nicht und sagt auch nicht, wo sie liegt. Im Hauptbereich gibt es keinen einzigen Link. Wer Dwello selbst betreibt und nach Monaten zurückkommt, weiss nicht, wo er die Anleitung suchen soll. |
+| P-9 | Nit | KI eines Anbieters, Feld «Land, in dem der Anbieter die Daten bearbeitet» | Der Hilfetext sagt, was das Feld will: «Das Land, in dem die Rechenzentren des Anbieters stehen.» Wo ich das erfahre, sagt er nicht, zum Beispiel «steht im Vertrag oder auf der Datenschutzseite des Anbieters». Beim Feld «Name des Anbieters» ist das gelöst («wie er im Vertrag mit ihr steht»). |
+
+### Ablauf
+
+1. **/config/ki öffnen** (Screenshot 01-ki-lokal.png). Erwartet: ein Hinweis, der sagt, was mit meinen Rechnungen passiert und was ich tun kann. Gesehen: «Lokale KI auf diesem Server» ist ausgewählt. Unter «KI speichern» steht ein gelber Kasten mit Warndreieck und dem Text oben. Kein Download-Knopf, kein Link. Den Hinweis verstehe ich beim ersten Lesen.
+2. **«Keine KI» angeklickt, ohne zu speichern** (02-keine.png). Erwartet: Der Hinweis verschwindet. Gesehen: Er verschwindet, unter «KI speichern» steht nichts mehr.
+3. **«KI eines Anbieters» angeklickt** (03-anbieter.png). Erwartet: kein Hinweis zur lokalen KI und verständliche Hilfetexte. Gesehen: kein Hinweis. Die Hilfetexte der beiden Felder:
+   - «Name des Anbieters»: «Der Name der Firma, wie er im Vertrag mit ihr steht. Die Datenschutzerklärung nennt ihn. Bearbeiten mehrere Firmen die Daten, nennen Sie alle, mit Komma getrennt.» Das ist klar. Ich schreibe den Firmennamen aus dem Vertrag hinein und weiss jetzt auch, wozu er dient.
+   - «Land, in dem der Anbieter die Daten bearbeitet»: «Das Land, in dem die Rechenzentren des Anbieters stehen. Die Datenschutzerklärung nennt es. Bearbeiten Rechenzentren in mehreren Ländern die Daten, nennen Sie alle, mit Komma getrennt.» Was das Feld will, ist jetzt klar. Wo ich die Angabe finde, steht nicht da (P-9).
+4. **Zurück auf «Lokale KI auf diesem Server»** (04-zurueck-lokal.png). Erwartet: Der Hinweis kommt wieder. Gesehen: Er kommt wieder, mit demselben Text.
+5. **Handy 390 × 844** (05-mobile.png). Kein seitliches Scrollen (scrollWidth 390).
+
+### Beobachtungen
+
+- P-3 aus dem ersten Durchgang ist zum Teil erledigt: Der Hinweis erscheint nur noch, solange «Lokale KI» gewählt ist. Er steht aber weiterhin unter «KI speichern» und nicht bei der Option. Ich lese ihn erst nach dem Knopf.
+- «wählen oben einen Anbieter oder keine KI»: Das «oben» hilft, weil der Hinweis unter dem Knopf steht. Stünde er bei der Option, bräuchte es das «oben» nicht.
+- P-2 bleibt unverändert: Ob «Lokale KI» die gespeicherte Wahl ist, sagt die Seite weiterhin nicht. Der Hinweis «antwortet nicht» lässt mich das nur vermuten.
+- P-6 (wozu «Verbindung prüfen» dient) und P-7 (zweimal «KI» als Überschrift) sind unverändert. Sie gehörten nicht zu diesem Auftrag.
+
+### Aufgabe geschafft: ja
+
+Den Hinweis verstehe ich: Meine Rechnungen erfasse ich vorerst von Hand. Wer Dwello betreibt, startet die KI; ich kann auch eine andere Option wählen. Beim Wechsel der Option verschwindet der Hinweis, und die beiden Hilfetexte sagen, was die Felder wollen.
+
+### Aufwand
+
+Etwa 2 Minuten, 5 Schritte (öffnen, drei Optionen anklicken, Handy).
+
+### Verwirrung
+
+- «Installationsanleitung»: Wo finde ich sie? (P-8)
+- «Rechenzentren»: Ich verstehe das Wort. Wo ich nachlese, in welchem Land sie stehen, weiss ich nicht. (P-9)
+
+### Fehlerrisiken
+
+- Wer Dwello selbst betreibt, findet die Anleitung nicht. Dann wählt er vielleicht aus Bequemlichkeit «KI eines Anbieters» und schickt Mieterdaten an einen Anbieter, obwohl die lokale KI mit der Anleitung zu starten wäre.
+- Ich trage beim Land den Firmensitz ein (etwa «USA», weil die Firma dort sitzt) statt des Orts der Rechenzentren, weil ich nicht weiss, wo diese Angabe steht.
+
+### Vorschläge
+
+- **P-8:** /config/ki öffnen, während die lokale KI nicht antwortet. Im Hinweis «Installationsanleitung» als Link setzen oder sagen, wo sie liegt (zum Beispiel «in der Hilfe unter …»).
+- **P-9:** /config/ki → «KI eines Anbieters». Den Hilfetext beim Land um die Quelle ergänzen, etwa «Sie finden es im Vertrag oder in der Datenschutzerklärung des Anbieters.»
+
+### Nicht geprüft
+
+- «KI speichern»: laut Auftrag nicht gedrückt.
+- Ob das Hochladen von Rechnungen in diesem Zustand wirklich zur Erfassung von Hand führt: nicht ausprobiert, weil ich kein Gebäude zum Speichern bekommen habe.
+- Den Hinweis in fr/it/en habe ich nicht angesehen, weil die Sprache am Konto gespeichert ist und andere Personas gleichzeitig laufen.
