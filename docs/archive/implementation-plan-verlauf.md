@@ -2514,3 +2514,16 @@ Branch `ccr-8b7da2b0-52xa3f`. Decisions of the product owner recorded in #576 (c
 - [x] Personas Helga and Marco: `docs/design/personas/helga-landing-kompakt.md`, `marco-landing-kompakt.md` (no Blocker/Major; Helga P-2 fixed with C-1, other Minors stay in the reports)
 - [x] Closing review round 2: `docs/reviews/landing-kompakt-review-2.md` (no findings)
 - [x] PR pushed after this archive
+
+## Session: Einrichtung beim ersten Aufruf, #577 (2026-10-21/22)
+
+Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the product owner in #577: the Einrichtungscode (setup code) in the server log; the glossary rows Einrichtung, Einrichtungscode, KI-Modell and the changes to «Konto mit Passwort» and «Protokoll des Servers»; no operator details in the setup. `implementation_plan.md` holds a parallel session and stays untouched.
+
+- [x] Workflow notes of #576 (`docs/reviews/workflow-notes-issue-576.md`)
+- [x] `@wip` scenarios (`einrichtung.feature`) on a fresh installation of the E2E stack (3105/3106, KI stand-in 2530, lock per scenario); fach-reviewer round 1 (`docs/reviews/577-fachreview-1.md`) before code, R-1 to R-5 and V-1 to V-5 fixed
+- [x] Keys: `docker/init-secrets.sh` and the `secrets` service; setup route and service (code, lock after 5 wrong codes); model download with progress; setup page, privacy, overview notice; guide, README, landing page; tests red first
+- [x] No scenario: the setup lock (it would hold the fresh installation for 15 minutes for every other scenario; BFF and backend tests), the CLI and the key script (`init-secrets.test.ts`, `compose-prod.test.ts`); the compose file is not run with a Docker daemon (none in the session)
+- [x] fach-reviewer round 2 (`docs/reviews/577-fachreview-2.md`): R-6, V-6, V-7, V-8 fixed
+- [x] code-reviewer rounds 1–2 (`docs/reviews/577-review-1.md`, `-2.md`): Majors C-1 to C-4 fixed; C-5, C-8 (partly), C-10, C-11 fixed; C-6, C-7, C-9 stay Minors
+- [x] Personas Helga, Sven, Anna, Dr. Weber, Marco, each on its own fresh installation (`docs/design/personas/*-577.md`): Sven P-1 (Major, passwords emptied) fixed with a step seen red; Anna P-1 fixed; the other Minors stay in the reports
+- [x] PR: pushed after this archive

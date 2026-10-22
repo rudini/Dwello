@@ -3,7 +3,7 @@
 	"stateMeanings": {
 		"default": "The page as loaded with the seeded records.",
 		"empty": "A list with no records at all, on the empty instance of the E2E stack (second backend on an empty database).",
-		"first-use": "Overview without any building, on the empty instance of the E2E stack.",
+		"first-use": "Overview without any building, on the empty instance of the E2E stack; its KI stand-in fails the model download, so the overview also shows that notice (#577).",
 		"filtered-empty": "A list whose search matches nothing (?search=…).",
 		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
 		"register-preview": "«Neues Gebäude» after choosing an address of the Gebäuderegister: the hints and the Wohnungen to check, some marked as missing in the register (#479).",
