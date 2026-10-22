@@ -2699,3 +2699,16 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the pro
 - [x] personas Anna and Helga on two fresh installations (`docs/design/personas/anna-620.md`, `helga-620.md`): no Blocker/Major; Anna P-1 and Helga P-3 fixed with C-2 (DOM tests red first); the 16 GB note (P-2), the static 40 % (Helga P-1) and the terms «Server», «Kategorien» (Nits) come from #577/#580 and stay in the reports; Anna's observation on the upload dialog → #626
 - [x] closing round: `docs/reviews/620-review-2.md`
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-620.md`; archive; PR pushed after this archive
+
+## Session 2026-10-22: #626 Rechnungen hochladen ohne KI
+
+- [x] Decision recorded in #626 under the standing instruction: the upload stays; with «Keine KI» the purpose says the property manager enters the details
+- [x] @wip scenario «Rechnungen hochladen, wenn keine KI gewählt ist» (`ki-einstellungen.feature`), red at the old text; no step-1 fach-reviewer (a UI text, no domain rule or legal text)
+- [x] Invoices load gives `kiOff` (`src/lib/server/ki-settings.ts`), dialog text in four languages (load and DOM tests red first); screen state `invoices` `upload-ki-none` in `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
+- [x] code-reviewer round 1: `docs/reviews/626-review-1.md`; Major C-1 (files help still named the KI) and Minor C-2 (list without an answer about the KI) fixed, tests red first
+- [x] code-reviewer round 2: `docs/reviews/626-review-2.md`; C-1, C-2 closed
+- [x] persona Anna on a fresh installation (`docs/design/personas/anna-626.md`): no Blocker/Major; P-1 and P-2 (file sent to be read, row naming the KI) fixed with a DOM test red first; P-3 («Angaben prüfen» on empty fields) and Nit P-4 are older and stay in the report
+- [x] closing round: `docs/reviews/626-review-3.md`; Majors C-3 (preview lost with «Keine KI») and C-4 (no scenario for the row) fixed, C-5 with C-3; DOM test red first, the scenario uploads a file on the fresh installation
+- [x] closing round 2: `docs/reviews/626-review-4.md`; C-3, C-5 closed; C-4 still open (the row was checked while being read): the step waits for the reading to end, seen red with the reading put back; Minor C-6 (doc comments) fixed
+- [x] closing round 3: `docs/reviews/626-review-5.md`
+- [x] Workflow note: none new (the fresh installation for personas as in `docs/reviews/workflow-notes-issue-620.md`); archive; PR pushed after this archive
