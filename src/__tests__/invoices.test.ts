@@ -10,6 +10,7 @@ import invoiceStatements from '../../tests/contracts/invoice-statements.json';
 import periodList from '../../tests/contracts/invoice-list-period.json';
 import fuelStocks from '../../tests/contracts/fuel-stocks.json';
 import categoryList from '../../tests/contracts/categories.json';
+import kiSettings from '../../tests/contracts/ki-settings.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -160,6 +161,34 @@ describe('Rechnungsliste mit «Rechnungen hochladen»', () => {
 		expect(data.distributionKeys.map((key) => key.id)).toEqual(['k1']);
 		expect(data.defaultDistributionKeyId).toBe('k1');
 		expect(urls.filter((url) => url.includes('/categories'))).toHaveLength(1);
+	});
+	// #626: with «Keine KI» the dialog says that nobody reads the files
+	it('sagt dem Dialog, ob «Keine KI» gewählt ist', async () => {
+		const load = async (mode: string) =>
+			(
+				(await listLoad({
+					url: new URL('http://localhost/invoices'),
+					fetch: backend({ '/ki-settings': { ...kiSettings, mode } }).fetch
+				} as never)) as { kiOff: boolean }
+			).kiOff;
+
+		expect(await load('none')).toBe(true);
+		expect(await load('local')).toBe(false);
+	});
+
+	// code review 626 C-2: without an answer about the KI the list still loads, with the usual text
+	it('zeigt die Liste, auch wenn die KI-Einstellung nicht antwortet', async () => {
+		const { fetch: answers } = backend({ '/invoices': { invoices: [invoice()], total: 1 } });
+		const fetch = (async (url: string) =>
+			url.includes('/ki-settings') ? Promise.reject(new Error('down')) : answers(url)) as typeof globalThis.fetch;
+
+		const data = (await listLoad({ url: new URL('http://localhost/invoices'), fetch } as never)) as {
+			invoices: unknown[];
+			kiOff: boolean;
+		};
+
+		expect(data.invoices).toHaveLength(1);
+		expect(data.kiOff).toBe(false);
 	});
 });
 

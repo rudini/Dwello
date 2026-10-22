@@ -143,6 +143,7 @@ Funktionalität: Barrierefreiheit
       | invoices               | upload-partial      |
       | invoices               | upload-discard-created |
       | invoices               | upload-unreadable   |
+      | invoices               | upload-ki-none      |
       | invoice-new            | default             |
       | invoice-new            | submit-empty        |
       | invoice-detail         | default             |

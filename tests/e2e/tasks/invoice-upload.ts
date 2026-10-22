@@ -59,13 +59,15 @@ export function invoicePdf(name: string): File {
 	return { name, mimeType: 'application/pdf', buffer: Buffer.from(pdf, 'latin1') };
 }
 
+/** In the open dialog: the building, then the files */
+const addBelege = (buildingId: string, files: File[]): Activity => (actor) =>
+	actor.attemptsTo(Select.option(buildingId).from(uploadBuildingSelect), Upload.theFile(files).into(uploadFileInput));
 /** Opens the dialog on the invoice list, chooses the building and adds the files */
 export const uploadBelege = (buildingId: string, files: File[]): Activity => (actor) =>
-	actor.attemptsTo(
-		Click.on(uploadInvoicesButton),
-		Select.option(buildingId).from(uploadBuildingSelect),
-		Upload.theFile(files).into(uploadFileInput)
-	);
+	actor.attemptsTo(Click.on(uploadInvoicesButton), addBelege(buildingId, files));
+/** In the open dialog: one file, its row once the reading ended (code review 626 C-4) */
+export const addBelegOnceRead = (buildingId: string, fileName: string): Activity => (actor) =>
+	actor.attemptsTo(addBelege(buildingId, [invoicePdf(fileName)]), Wait.until(belegDetailsToggle(fileName)));
 
 export const openBeleg = (fileName: string) => Click.on(belegDetailsToggle(fileName));
 // a file the KI reads for longer than the usual wait: its row opens once the reading ended

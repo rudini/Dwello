@@ -24,6 +24,7 @@
 		"upload-discard-dialog": "«Rechnungen hochladen» with a file in it, cancelled: the confirmation that the files and entries are lost.",
 		"upload-partial": "«Rechnungen hochladen» after creating one of two invoices: the result naming the file still open, that file with its missing Kategorie, the button counting the incomplete one.",
 		"upload-discard-created": "«Rechnungen hochladen» after creating one of two invoices, cancelled: the confirmation that created invoices stay.",
+		"upload-ki-none": "«Rechnungen hochladen» open with «Keine KI» chosen on the fresh installation: the purpose says the property manager enters the details (#626).",
 		"upload-unreadable": "«Rechnungen hochladen» with a file the KI answered nothing readable for: the row with its note and «Erneut versuchen».",
 		"fuel-stock-dialog": "Building page with a Tankbestand reading: the confirmation before deleting it open.",
 		"end-dialog": "The dialog that ends a rental contract open.",
@@ -459,7 +460,8 @@
 				"upload-discard-dialog",
 				"upload-partial",
 				"upload-discard-created",
-				"upload-unreadable"
+				"upload-unreadable",
+				"upload-ki-none"
 			]
 		},
 		{

@@ -254,6 +254,7 @@ export interface InvoicesListData {
 	distributionKeys: { id: string; name: string }[]; // offered for the invoices of «Rechnungen hochladen»
 	defaultDistributionKeyId: string; // preselected there, as set in the settings
 	latestKeys: LatestKey[]; // proposed there (#379)
+	kiOff: boolean; // «Keine KI»: the dialog says that nobody reads the files (#626)
 }
 
 // Heating Profile types

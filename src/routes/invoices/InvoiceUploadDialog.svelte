@@ -38,6 +38,7 @@
 		distributionKeys,
 		defaultDistributionKeyId,
 		latestKeys = [],
+		kiOff = false,
 		oncreated
 	}: {
 		open?: boolean;
@@ -46,9 +47,11 @@
 		distributionKeys: { id: string; name: string }[];
 		defaultDistributionKeyId: string;
 		latestKeys?: LatestKey[];
+		kiOff?: boolean; // «Keine KI»: nobody reads the files, the property manager enters them (#626)
 		oncreated: (created: Created[]) => void;
 	} = $props();
 
+	const purpose = $derived(kiOff ? m.invoices_upload_purpose_no_ki() : m.invoices_upload_purpose());
 	let buildingId = $state('');
 	const tank = $derived(buildings.find((building) => building.id === buildingId)?.tank);
 	// #379: also a folded row gets the key of its category's latest invoice in the building (code review 452-1 C-1)
@@ -145,6 +148,8 @@
 				return update(key, (one) => withoutKi(one, 'unreadable'));
 			}
 		}
+		// «Keine KI»: the pages stay in the browser for the preview, nothing is sent to be read (persona Anna 626 P-2)
+		if (kiOff) return update(key, (one) => withoutKi(one, 'off'));
 		const answer = await api.post<Proposal>('/invoices/extract', {
 			buildingId,
 			fileName: file.name,
@@ -240,7 +245,9 @@
 	onrequestclose={requestClose}
 	onconfirm={create}
 >
-	<p id="invoice-upload-purpose" class="text-ink">{m.invoices_upload_purpose()}</p>
+	<p id="invoice-upload-purpose" class="text-ink" data-testid="invoice-upload-purpose">
+		{purpose}
+	</p>
 	<p class="text-ink-muted" data-testid="invoice-keep-original">
 		{m.invoices_upload_kept()}
 		{m.invoices_upload_keep_original()}
@@ -259,7 +266,7 @@
 		testid="invoice-upload-building-select"
 	/>
 
-	<UploadFiles enabled={!!buildingId} onfiles={(files) => void add(files)} />
+	<UploadFiles enabled={!!buildingId} {kiOff} onfiles={(files) => void add(files)} />
 
 	{#if tooMany}
 		<Alert tone="caution" title={m.invoices_upload_too_many_title()}><p>{m.invoices_upload_too_many()}</p></Alert>

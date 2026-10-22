@@ -154,6 +154,53 @@ describe('Verteilschlüssel beim Hochladen', () => {
 });
 
 describe('Rechnungen hochladen', () => {
+	// #626: with «Keine KI» nobody reads the files; said with the term of the page «KI»
+	it('sagt bei «Keine KI», dass der Liegenschaftsverwalter die Angaben selbst eingibt', () => {
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [],
+			defaultDistributionKeyId: '',
+			kiOff: true,
+			oncreated: vi.fn()
+		});
+
+		expect(byTestId('invoice-upload-purpose')!.textContent).toBe(
+			'Wählen Sie das Gebäude und die Dateien Ihrer Rechnungen. Es ist «Keine KI» gewählt: Sie geben die Angaben selbst ein, bevor Dwello die Rechnungen erstellt.'
+		);
+		// code review 626 C-1: also the help at the files, once the building is chosen
+		chooseBuilding();
+		expect(document.body.textContent).toContain('bis zu 20 Dateien auf einmal.');
+		expect(document.body.textContent).not.toContain('liest die KI');
+	});
+
+	// persona Anna 626 P-1, P-2: with «Keine KI» the file is not sent to be read, and no note says a KI did not read it
+	it('schickt bei «Keine KI» keine Datei zum Auslesen und nennt keine KI', async () => {
+		const calls = fakeBff(() => [503, { code: 'EXTRACTION_UNAVAILABLE' }]);
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [],
+			defaultDistributionKeyId: '',
+			kiOff: true,
+			oncreated: vi.fn()
+		});
+		chooseBuilding();
+
+		await upload(pdf('rechnung.pdf'));
+
+		expect(calls.map((call) => call.path)).not.toContain('/invoices/extract');
+		expect(rowText()[0]).toContain('rechnung.pdf');
+		expect(rowText()[0]).not.toContain('KI');
+		expect(rowText()[0]).not.toContain('nicht öffnen');
+		// code review 626 C-3: the pages are made in the browser, so the preview stays
+		click('invoice-upload-row-toggle');
+		await settle();
+		expect(document.querySelector('img[alt="Vorschau von rechnung.pdf"]')).not.toBeNull();
+	});
+
 	it('nimmt Dateien erst, wenn das Gebäude gewählt ist, und erinnert an die Originalrechnung', () => {
 		open(() => [200, read]);
 		expect(byTestId<HTMLInputElement>('invoice-upload-file-input')!.disabled).toBe(true);

@@ -74,6 +74,7 @@
 		distributionKeys={data.distributionKeys}
 		defaultDistributionKeyId={data.defaultDistributionKeyId}
 		latestKeys={data.latestKeys}
+		kiOff={data.kiOff}
 		oncreated={(list) => {
 			created = list;
 			invalidateAll();

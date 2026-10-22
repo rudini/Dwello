@@ -280,11 +280,12 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 }
 
 /** The row to fill in by hand: the KI is not available, or the file cannot be opened to show it to the KI */
-export const withoutKi = (row: UploadRow, reason: 'unavailable' | 'unreadable'): UploadRow => ({
+// 'off': «Keine KI» is chosen, the file is not sent to be read and no note names a KI (persona Anna 626 P-1, P-2)
+export const withoutKi = (row: UploadRow, reason: 'unavailable' | 'unreadable' | 'off'): UploadRow => ({
 	...row,
 	status: 'check',
 	// without the KI the to-dos say it while fields are missing (#245, persona Helga of #233)
-	notes: reason === 'unavailable' ? [] : [m.invoices_upload_unreadable()],
+	notes: reason === 'unreadable' ? [m.invoices_upload_unreadable()] : [],
 	notRead: reason === 'unavailable',
 	byHand: true
 });

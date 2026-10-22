@@ -28,6 +28,7 @@ import {
 	cancelUploadButton,
 	createInvoicesButton,
 	discardMessage,
+	uploadPurpose,
 	uploadResult
 } from '../targets/invoice-upload';
 import { setUpDwello } from './einrichtung';
@@ -217,15 +218,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'ki-check-result': () => (actor) =>
 		actor.attemptsTo(Click.on(kiMode('provider')), Click.on(kiCheckButton), Wait.until(kiCheckResult)),
 	// #620: no KI chosen yet, the overview names the page «KI» (chosen there for the look, the local KI again after it)
-	'ki-none': () => (actor) =>
-		actor.attemptsTo(
-			Navigate.to(`${FRESH_APP}/config/ki`),
-			Click.on(kiMode('none')),
-			Click.on(kiSaveButton),
-			Wait.until(kiSaveAnswer),
-			Navigate.to(`${FRESH_APP}/dashboard`),
-			Wait.until(kiModelLoading)
-		),
+	'ki-none': () => withoutKi('/dashboard', kiModelLoading),
+	// #626: «Rechnungen hochladen» with «Keine KI» (chosen for the look, the local KI again after it)
+	'upload-ki-none': () => withoutKi('/invoices?upload', uploadPurpose),
 	'ki-model-offline': () => (actor) =>
 		actor.attemptsTo(
 			Navigate.outsideApp(`${FRESH_KI_STUB}/stub/ollama?state=offline`),
@@ -690,7 +685,7 @@ const instanceOf = ({ state, path }: Example) =>
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE
-			: ['ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none'].includes(state)
+			: ['ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline', 'ki-none', 'upload-ki-none'].includes(state)
 				? FRESH_APP
 				: '';
 
@@ -704,10 +699,23 @@ const inTurn =
 					try {
 						await actor.attemptsTo(look);
 					} finally {
-						if (['ki-model-offline', 'ki-none'].includes(example.state)) await actor.attemptsTo(localKiAnswersAgain);
+						if (['ki-model-offline', 'ki-none', 'upload-ki-none'].includes(example.state)) await actor.attemptsTo(localKiAnswersAgain);
 					}
 				})
 			: actor.attemptsTo(look);
+
+// «Keine KI» saved on the fresh installation, then the page to look at (#620, #626)
+const withoutKi =
+	(path: string, shown: Parameters<typeof Wait.until>[0]): Activity =>
+	(actor) =>
+		actor.attemptsTo(
+			Navigate.to(`${FRESH_APP}/config/ki`),
+			Click.on(kiMode('none')),
+			Click.on(kiSaveButton),
+			Wait.until(kiSaveAnswer),
+			Navigate.to(`${FRESH_APP}${path}`),
+			Wait.until(shown)
+		);
 
 // the local KI of the fresh installation answers again and downloads its model, as its scenarios expect
 const localKiAnswersAgain: Activity = (actor) =>

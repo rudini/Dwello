@@ -144,6 +144,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | invoices               | upload-partial      |
       | invoices               | upload-discard-created |
       | invoices               | upload-unreadable   |
+      | invoices               | upload-ki-none      |
       | invoice-new            | default             |
       | invoice-new            | submit-empty        |
       | invoice-detail         | default             |

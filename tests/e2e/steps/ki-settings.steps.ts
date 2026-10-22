@@ -1,5 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { belegRowText, uploadPurposeText } from '../questions/invoice-upload';
+import { addBelegOnceRead } from '../tasks/invoice-upload';
 import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, modelDownloadOffered, shownKiAddress } from '../questions/ki-settings';
 import {
 	checkConnection,
@@ -8,6 +10,7 @@ import {
 	openFreshKi,
 	openKiWithFailedModel,
 	openFreshSettingsKi,
+	openFreshUpload,
 	openKi,
 	readFreshPrivacy,
 	saveMode,
@@ -142,3 +145,28 @@ When('der Liegenschaftsverwalter die Verbindung zu einer neuen Adresse ohne API-
 		checkConnection({ ...stubProvider('Muster KI AG', 'Deutschland'), address: 'http://127.0.0.1:2531/v1', key: '' })
 	);
 });
+
+// #626: «Rechnungen hochladen» on the fresh installation, after «Keine KI»
+When('der Liegenschaftsverwalter in der frischen Installation "Rechnungen hochladen" öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openFreshUpload);
+});
+
+Then('sagt der Dialog "Rechnungen hochladen" {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(uploadPurposeText).toBe(text);
+});
+
+Given('in der frischen Installation gibt es ein Gebäude', async ({ frisch }) => {
+	await frisch.building();
+});
+
+When('der Liegenschaftsverwalter dort die Rechnung {string} wählt', async ({ verwalter, frisch }, fileName: string) => {
+	await verwalter.attemptsTo(addBelegOnceRead(frisch.buildingId, fileName));
+});
+
+Then(
+	'zeigt der Dialog "Rechnungen hochladen" die Datei {string} ohne Hinweis auf eine KI',
+	async ({ verwalter }, fileName: string) => {
+		await verwalter.sees(belegRowText(fileName)).toContain(fileName);
+		await verwalter.sees(belegRowText(fileName)).not.toContain('KI');
+	}
+);

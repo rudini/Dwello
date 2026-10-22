@@ -1,5 +1,6 @@
 import type { InvoicesListData } from '$lib/types';
 import { invoiceChoices, tankCategories, toInvoice } from '$lib/server/invoice';
+import { kiOff } from '$lib/server/ki-settings';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -43,10 +44,11 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 	try {
 		const params = invoiceQuery(url, page, pageSize);
 
-		const [invoicesRes, buildingsRes, choices] = await Promise.all([
+		const [invoicesRes, buildingsRes, choices, noKi] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/invoices?${params}`),
 			fetch(`${BACKEND_URL}/api/v1/buildings?limit=1000`),
-			invoiceChoices(fetch)
+			invoiceChoices(fetch),
+			kiOff(fetch)
 		]);
 
 		const invoicesData = await invoicesRes.json();
@@ -78,7 +80,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			years,
 			distributionKeys: choices.distributionKeys,
 			defaultDistributionKeyId: choices.defaultDistributionKeyId,
-			latestKeys: choices.latestKeys
+			latestKeys: choices.latestKeys,
+			kiOff: noKi
 		};
 	} catch (err) {
 		console.error('Failed to fetch invoices:', err);
@@ -92,7 +95,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			years,
 			distributionKeys: [],
 			defaultDistributionKeyId: '',
-			latestKeys: []
+			latestKeys: [],
+			kiOff: false
 		};
 	}
 };

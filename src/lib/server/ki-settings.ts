@@ -30,6 +30,13 @@ const toKiSettings = (ki: KiSettings): KiSettings => ({
 	byOperator: ki.byOperator
 });
 
+/** Whether «Keine KI» is chosen (also by the operator): nobody reads uploaded invoices (#626) */
+export const kiOff = (fetch: typeof globalThis.fetch) =>
+	fetch(`${API()}/ki-settings`)
+		.then((response) => response.json())
+		.then((ki: KiSettings) => ki.mode === 'none')
+		.catch(() => false);
+
 export async function loadKiSettings(fetch: typeof globalThis.fetch) {
 	const get = (path: string) => fetch(`${API()}/${path}`).then((response) => response.json());
 	const [ki, model] = await Promise.all([get('ki-settings'), get('ki/model')]);
