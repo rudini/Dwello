@@ -1,0 +1,1 @@
+{ "error": "Es fehlen Angaben zum Anbieter der KI.", "code": "KI_PROVIDER_INCOMPLETE", "params": { "missing": ["provider", "confirmed"] } }
