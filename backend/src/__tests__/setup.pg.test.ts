@@ -162,8 +162,9 @@ describe('KI bei der Einrichtung', () => {
 		Object.assign(llmConfig, { byOperator: true });
 
 		const needed = await app.handle(new Request('http://localhost/api/v1/setup'));
-		await setUp({ code: CODE, ...account, ki: 'none' });
+		const created = await setUp({ code: CODE, ...account, ki: 'none' });
 
+		expect(created.status).toBe(201);
 		expect(await needed.json()).toEqual({ needed: true, kiChoice: false });
 		expect((await db.execute(sql`SELECT * FROM ki_settings`)).rows).toEqual([]);
 	});
