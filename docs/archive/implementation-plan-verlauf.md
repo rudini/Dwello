@@ -2688,3 +2688,14 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the pro
 - [x] code-reviewer round 2: `docs/reviews/580-review-2.md`; C-1, C-2, C-3, C-5 closed; Minors C-11 (with F-28), C-12 (test seen red), C-14, C-15, C-16 fixed; C-13 (a test of the abort race) stays in the report
 - [x] closing round: `docs/reviews/580-review-3.md` (no new findings; C-13 stays a Minor in 580-review-2)
 - [x] Workflow notes `docs/reviews/workflow-notes-issue-580.md`; archive; PR pushed after this archive
+
+## Session 2026-10-22: #620 KI bei der Einrichtung
+
+- [x] @wip scenarios in `einrichtung.feature` (later, local, from the overview to «KI») and steps, red at the missing choice; no step-1 fach-reviewer (no domain rule, amount or legal text changes: «Später entscheiden» saves the «Keine KI» of #580)
+- [x] Backend: `GET /api/v1/setup` names `kiChoice`, `POST` takes `ki` (pg tests red first); contract `setup-needed.json`
+- [x] Frontend: choice on `/setup` only without the operator's KI, overview notice with a link to «KI» (BFF and DOM tests red first), texts in four languages; screen state `dashboard` `ki-none` in `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
+- [x] Docs: `docs/installation.md`, README, API spec
+- [x] code-reviewer round 1: `docs/reviews/620-review-1.md`; Minors C-1 (test of the operator's answer, seen red) and C-2 (overview text after a deliberate «Keine KI», with Anna P-1) fixed
+- [x] personas Anna and Helga on two fresh installations (`docs/design/personas/anna-620.md`, `helga-620.md`): no Blocker/Major; Anna P-1 and Helga P-3 fixed with C-2 (DOM tests red first); the 16 GB note (P-2), the static 40 % (Helga P-1) and the terms «Server», «Kategorien» (Nits) come from #577/#580 and stay in the reports; Anna's observation on the upload dialog → #626
+- [x] closing round: `docs/reviews/620-review-2.md`
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-620.md`; archive; PR pushed after this archive

@@ -41,7 +41,8 @@ export interface DashboardData {
 }
 
 /** How far the local KI's model is (#577); unknown with a KI outside the server or when the backend cannot say */
-export type KiModel = { state: 'ready' | 'failed' | 'unknown' } | { state: 'loading'; percent: number };
+// 'none': no KI chosen yet (#620, «Später entscheiden» at the setup), as long as the operator did not set it
+export type KiModel = { state: 'ready' | 'failed' | 'unknown' | 'none' } | { state: 'loading'; percent: number };
 
 /** What the overview page shows: the dashboard figures plus today's tasks and deadlines */
 export type OverviewData = DashboardData & { tasks: Task[]; deadlines: Deadline[]; kiModel: KiModel };
@@ -159,9 +160,13 @@ export const load = async ({
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
 	const config = settings(fetch).catch(() => ({}) as Record<string, string>);
-	const kiModel: Promise<KiModel> = fetch(`${BACKEND_URL}/api/v1/ki/model`)
-		.then((response) => (response.ok ? response.json() : { state: 'unknown' }))
-		.catch(() => ({ state: 'unknown' }));
+	const answer = (path: string) =>
+		fetch(`${BACKEND_URL}/api/v1/${path}`)
+			.then((response) => (response.ok ? response.json() : null))
+			.catch(() => null);
+	const kiModel: Promise<KiModel> = Promise.all([answer('ki-settings'), answer('ki/model')]).then(([ki, model]) =>
+		ki?.mode === 'none' && !ki.byOperator ? { state: 'none' } : (model ?? { state: 'unknown' })
+	);
 	const [
 		figures,
 		open,

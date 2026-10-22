@@ -81,3 +81,26 @@ Funktionalität: Einrichtung beim ersten Aufruf
   Szenario: Die Übersicht sagt, wenn das KI-Modell nicht geladen werden konnte
     Wenn der Liegenschaftsverwalter die Übersicht einer Installation öffnet, deren KI-Modell nicht geladen werden konnte
     Dann zeigt die Übersicht den Hinweis "Das KI-Modell konnte nicht geladen werden. Erfassen Sie Rechnungen von Hand. Dwello versucht es erneut, wenn der Betreiber Dwello neu startet; betreiben Sie Dwello selbst, steht der Befehl in der Installationsanleitung."
+
+  # #620: bei der Einrichtung nur «Lokale KI» oder «Später entscheiden»; einen Anbieter wählt der Liegenschaftsverwalter
+  # danach unter «Einstellungen» › «KI»
+  Szenario: Bei der Einrichtung die KI auf später verschieben
+    Angenommen Dwello ist frisch installiert
+    Und ein Besucher hat die Einrichtung geöffnet
+    Wenn der Besucher mit dem Einrichtungscode ein Konto mit Passwort anlegt und die KI später wählt
+    Dann zeigt die Übersicht nach der Einrichtung den Hinweis "Es ist «Keine KI» gewählt. Sie erfassen Rechnungen von Hand. Eine KI wählen Sie unter «Einstellungen» › «KI»."
+    Wenn der Liegenschaftsverwalter die Datenschutzerklärung der frischen Installation liest
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Rechnungen und Kategorien werden nicht von einer KI bearbeitet."
+
+  Szenario: Bei der Einrichtung die lokale KI wählen
+    Angenommen Dwello ist frisch installiert
+    Und das KI-Modell ist zu 40 % geladen
+    Und ein Besucher hat die Einrichtung geöffnet
+    Wenn der Besucher mit dem Einrichtungscode ein Konto mit Passwort anlegt und die lokale KI wählt
+    Dann zeigt die Übersicht nach der Einrichtung den Hinweis "Das KI-Modell wird geladen: 40 %. Bis es geladen ist, erfassen Sie Rechnungen von Hand."
+
+  Szenario: Von der Übersicht zur KI
+    Angenommen Dwello ist eingerichtet
+    Und in der frischen Installation ist keine KI gewählt
+    Wenn der Liegenschaftsverwalter in der Übersicht der frischen Installation die KI öffnet
+    Dann ist der Liegenschaftsverwalter auf der Seite "KI"

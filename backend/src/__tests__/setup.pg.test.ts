@@ -5,7 +5,10 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { app } from '../app';
+import { sql } from 'drizzle-orm';
+import { llmConfig } from '../config/llm';
 import { newSetupCode, resetSetupAttempts } from '../services/setup.service';
+import { callApi } from './helpers/auth';
 import { db } from '../db/connection';
 import { localAccounts } from '../db/schema';
 
@@ -37,7 +40,7 @@ describe('Einrichtung', () => {
 	it('sagt, dass Dwello noch einzurichten ist, solange es kein Konto mit Passwort gibt', async () => {
 		const response = await app.handle(new Request('http://localhost/api/v1/setup'));
 
-		expect(await response.json()).toEqual({ needed: true });
+		expect(await response.json()).toEqual({ needed: true, kiChoice: true });
 	});
 
 	it('legt mit dem Einrichtungscode das erste Konto mit Passwort an und nennt es', async () => {
@@ -83,7 +86,7 @@ describe('Einrichtung', () => {
 
 		expect(again.status).toBe(409);
 		expect(await codeOf(again)).toBe('SETUP_DONE');
-		expect(await (await app.handle(new Request('http://localhost/api/v1/setup'))).json()).toEqual({ needed: false });
+		expect(await (await app.handle(new Request('http://localhost/api/v1/setup'))).json()).toMatchObject({ needed: false });
 		expect((await db.select().from(localAccounts)).map((row) => row.email)).toEqual([account.email]);
 	});
 
@@ -131,5 +134,38 @@ describe('Einrichtung', () => {
 
 		expect(answers.filter((answer) => answer.status === 201)).toHaveLength(1);
 		expect(await db.select().from(localAccounts)).toHaveLength(1);
+	});
+});
+
+// #620: bei der Einrichtung nur «Lokale KI» oder «Später entscheiden»; ein Anbieter folgt unter «Einstellungen» › «KI»
+describe('KI bei der Einrichtung', () => {
+	const kiMode = async () => ((await (await callApi('/api/v1/ki-settings')).json()) as { mode: string }).mode;
+	afterEach(async () => {
+		Object.assign(llmConfig, { byOperator: false });
+		await db.execute(sql`DELETE FROM ki_settings`);
+		await db.execute(sql`DELETE FROM audit_log WHERE action = 'ki_setting_changed'`);
+	});
+
+	it('verschiebt die KI auf später: keine KI, bis eine gewählt ist', async () => {
+		expect((await setUp({ code: CODE, ...account, ki: 'none' })).status).toBe(201);
+
+		expect(await kiMode()).toBe('none');
+	});
+
+	it('behält mit der lokalen KI die lokale KI', async () => {
+		expect((await setUp({ code: CODE, ...account, ki: 'local' })).status).toBe(201);
+
+		expect(await kiMode()).toBe('local');
+	});
+
+	it('bietet keine Wahl, wenn der Betreiber die KI festgelegt hat, und ändert sie nicht', async () => {
+		Object.assign(llmConfig, { byOperator: true });
+
+		const needed = await app.handle(new Request('http://localhost/api/v1/setup'));
+		const created = await setUp({ code: CODE, ...account, ki: 'none' });
+
+		expect(created.status).toBe(201);
+		expect(await needed.json()).toEqual({ needed: true, kiChoice: false });
+		expect((await db.execute(sql`SELECT * FROM ki_settings`)).rows).toEqual([]);
 	});
 });

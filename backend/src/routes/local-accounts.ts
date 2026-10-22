@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { llmConfig } from '../config/llm';
 import { refusedWith } from '../services/coded-error';
 import { checkPassword, deleteLocalAccount, hasLocalAccount, setLocalAccount } from '../services/local-account.service';
 import { setUpFirstAccount } from '../services/setup.service';
@@ -39,19 +40,25 @@ export const passwordSignInRoutes = new Elysia({ prefix: '/api/v1/auth/password'
 
 /** Before the auth middleware: the setup of a fresh installation (#577) */
 export const setupRoutes = new Elysia({ prefix: '/api/v1/setup' })
-	.get('/', async () => ({ needed: !(await hasLocalAccount()) }))
+	// #620: the KI is chosen at the setup only while the operator did not set it
+	.get('/', async () => ({ needed: !(await hasLocalAccount()), kiChoice: !llmConfig.byOperator }))
 	.post(
 		'/',
 		async ({ body, set }) => {
 			try {
-				const account = await setUpFirstAccount(body.code, body.email, body.password);
+				const account = await setUpFirstAccount(body.code, body.email, body.password, body.ki);
 				set.status = 201;
 				return account;
 			} catch (error) {
 				return refused(error, set);
 			}
 		},
-		{ body: t.Composite([credentials, t.Object({ code: t.String({ maxLength: 64 }) })]) }
+		{
+			body: t.Composite([
+				credentials,
+				t.Object({ code: t.String({ maxLength: 64 }), ki: t.Optional(t.Union([t.Literal('local'), t.Literal('none')])) })
+			])
+		}
 	);
 
 export const localAccountRoutes = new Elysia({ prefix: '/api/v1/local-accounts' })

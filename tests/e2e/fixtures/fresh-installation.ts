@@ -33,6 +33,8 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 		/** The running model download ends with an error, or the local KI answers nothing (#580) */
 		modelFailed: () => kiStub.post('stub/ollama', { state: 'failed' }),
 		localKiOffline: () => kiStub.post('stub/ollama', { state: 'offline' }),
+		/** No KI chosen (#620: «Später entscheiden» at the setup) */
+		kiNone: () => api.put('ki-settings', { mode: 'none' }),
 		/** A provider of the KI saved through the API (#580); the clean-up returns to the local KI */
 		async kiProvider(provider: { address: string; key: string; model: string; provider: string; country: string }) {
 			await api.put('ki-settings', {
