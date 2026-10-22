@@ -13,10 +13,10 @@ const ORDINAL: Record<string, string> = { one: 'st', two: 'nd', few: 'rd', other
 const englishOrdinal = (n: number) =>
 	`${n}${ORDINAL[new Intl.PluralRules('en', { type: 'ordinal' }).select(n)]}`;
 
-// below ground the UI shows one floor; English counts them, as the statement PDF does (#449)
+// the first floor below ground has no number, from the second on it is counted, as in the statement PDF (#449, #597)
 const belowGround = (floor: number) =>
-	floor < -1 && getLocale() === 'en'
-		? m.apartments_floor_lower({ floor: englishOrdinal(-floor) })
+	floor < -1
+		? m.apartments_floor_lower({ floor: getLocale() === 'en' ? englishOrdinal(-floor) : -floor })
 		: m.apartments_floor_basement();
 
 /** The floor in the words of the statement PDF */

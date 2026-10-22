@@ -94,6 +94,9 @@ describe('Wohnung, die nach ihrem Stockwerk heisst', () => {
 		['fr', 'rez-de-chaussée', 0, 'Appartement rez-de-chaussée, 82.00'],
 		// #597 (Fachreview 500-1 V-5): «UG» on the first floor below ground names it
 		['de', 'UG', -1, 'Wohnung UG, 82.00 m²'],
+		// Fachreview 597-1 V-2: a number typed with the count still names the first floor below ground
+		['de', '1. UG', -1, 'Wohnung 1. UG, 82.00 m²'],
+		['fr', '1er sous-sol', -1, 'Appartement 1er sous-sol, 82.00'],
 		// the floor stays when it contradicts the number or is only the start of a word
 		['de', 'EG', 1, 'Wohnung EG, 1. OG, 82.00 m²'],
 		['de', 'EGG', 0, 'Wohnung EGG, EG, 82.00 m²'],
