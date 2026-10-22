@@ -182,6 +182,25 @@ describe('Übersicht laden', () => {
 		expect(data.tasks.map((task) => task.id)).not.toContain('fixed-term-k9');
 	});
 
+	// #459 (#331): documents marked as checked for the last contract end the task
+	it('nennt einen ehemaligen Mieter nicht mehr, dessen Dokumente geprüft sind', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const [upload] = documentList.data;
+		const former = { ...contracts[0], id: 'k9', tenantId: 't9', tenantName: 'Ida Alt', apartmentId: 'a9', startDate: '2020-01-01', endDate: '2026-03-31', terminated: true, movedOut: false, documentsCheckedOn: '2026-10-01' };
+		const base = backend();
+		const fetch = (async (url: string) => {
+			const path = url.replace(API, '');
+			if (path === '/documents')
+				return Response.json({ data: [{ ...upload, tenantId: 't9', createdAt: '2024-05-01T09:00:00.000Z' }] });
+			if (path === '/contracts?limit=1000') return Response.json({ contracts: [...contracts, former] });
+			return base(url);
+		}) as typeof globalThis.fetch;
+
+		const data = await load({ fetch } as never);
+
+		expect(data.tasks.map((task) => task.id)).not.toContain('former-documents-t9');
+	});
+
 	it('liefert die Kennzahlen und daraus die Aufgaben und Fristen von heute', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
 		const data = await load({ fetch: backend() } as never);

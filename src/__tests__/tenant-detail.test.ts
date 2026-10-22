@@ -192,6 +192,25 @@ describe('Mieter löschen', () => {
 	});
 });
 
+// #459 (#331): «Als geprüft markieren» stores today on the last contract
+describe('Dokumente als geprüft markieren', () => {
+	it('speichert die Prüfung am letzten Mietvertrag', async () => {
+		const { calls, result } = runAction(actions.checkDocuments, 't1', 200, { contractId: 'c1' }, contractResponse);
+
+		expect(await result).toBeUndefined();
+		expect(calls).toEqual([{ method: 'PUT', url: `${API}/contracts/c1`, body: { documentsChecked: true } }]);
+	});
+
+	it('sagt, wenn die Prüfung nicht gespeichert wurde', async () => {
+		const { result } = runAction(actions.checkDocuments, 't1', 500, { contractId: 'c1' });
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { checkError: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.' }
+		});
+	});
+});
+
 describe('Mieterliste', () => {
 	// F-4 (#58): aktiv mit laufendem, künftig nur mit künftigem Mietvertrag
 	it('kennzeichnet Mieter als aktiv oder künftig, wie das Backend sie einordnet', async () => {

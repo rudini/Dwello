@@ -1,19 +1,23 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { tick } from 'svelte';
+	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import { addToast } from '$lib/stores';
 	import type { StatementDocument } from '$lib/types';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import { formatDate } from '$lib/utils/format';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import TenantDocumentRow from './TenantDocumentRow.svelte';
 	import TenantDocumentUpload from './TenantDocumentUpload.svelte';
 
 	// Letters and e-mails to the tenant (e.g. Mahnungen), each with its Versandstatus and PDF, and the files the
 	// property manager uploaded, which can be deleted
-	// former: a former tenant's uploads from before the last Vertragsende, to look at and delete (#178)
+	// former: a former tenant's uploads from before the last Vertragsende, to look at and delete (#178); once marked
+	// as checked on the last contract, the day (#459)
 	let {
 		documents,
 		former = null,
@@ -22,22 +26,51 @@
 		demo = false
 	}: {
 		documents: StatementDocument[];
-		former?: { endDate: string; documents: Pick<StatementDocument, 'title'>[] } | null;
+		former?: {
+			endDate: string;
+			documents: Pick<StatementDocument, 'title'>[];
+			contractId?: string;
+			checkedOn?: string | null;
+		} | null;
 		name?: string;
-		form?: { title?: string; uploadError?: string; titleError?: string; deleteError?: string } | null;
+		form?: {
+			title?: string;
+			uploadError?: string;
+			titleError?: string;
+			deleteError?: string;
+			checkError?: string;
+		} | null;
 		demo?: boolean;
 	} = $props();
 
 	let deleting = $state<Pick<StatementDocument, 'id' | 'title'>>({ id: '', title: '' });
 	let deleteOpen = $state(false);
 	let list = $state<HTMLElement>();
+	let checking = $state(false);
+	let notice = $state<HTMLElement>();
+	const check: SubmitFunction = () => {
+		checking = true;
+		return async ({ update }) => {
+			await update();
+			checking = false;
+			// the button the focus was on goes away; the notice now says the day or the error (code review C-1)
+			await tick();
+			notice?.focus();
+		};
+	};
+	// a checked notice no longer reads as an open task (Fachreview #459 V-5)
+	const formerTone = $derived(former?.checkedOn ? 'info' : 'caution');
 </script>
 
 <Panel title={m.nav_documents()}>
 	<div class="flex flex-col gap-6">
 		{#if former}
-			<Alert tone="caution" title={m.tenants_former_documents_title()} testid="tenant-former-documents">
-				<!-- TODO(fachlich prüfen, #334): «Mietzinsdepot» has its glossary row; the help texts follow -->
+			<Alert
+				bind:element={notice}
+				tone={formerTone}
+				title={m.tenants_former_documents_title()}
+				testid="tenant-former-documents"
+			>
 				<p>
 					{m.tenants_former_documents_text({
 						name,
@@ -47,6 +80,38 @@
 						)
 					})}
 				</p>
+				<p>{m.tenants_former_documents_end_day()}</p>
+				{#if former.checkedOn}
+					<p class="font-semibold" data-testid="tenant-former-documents-checked">
+						{m.tenants_former_documents_checked({ date: formatDate(former.checkedOn) })}
+					</p>
+				{:else}
+					<!-- what the button does (persona Helga #459 A P-1) -->
+					<p
+						id="tenant-former-documents-check-help"
+						data-testid="tenant-former-documents-check-help"
+					>
+						{m.tenants_former_documents_check_help()}
+					</p>
+					<form method="POST" action="?/checkDocuments" use:enhance={check}>
+						<input type="hidden" name="contractId" value={former.contractId} />
+						<Button
+							type="submit"
+							icon="check"
+							busy={checking}
+							describedby="tenant-former-documents-check-help"
+							testid="tenant-former-documents-check">{m.tenants_former_documents_check()}</Button
+						>
+					</form>
+					{#if form?.checkError}
+						<p
+							class="font-semibold text-critical"
+							data-testid="tenant-former-documents-check-error"
+						>
+							{form.checkError}
+						</p>
+					{/if}
+				{/if}
 			</Alert>
 		{/if}
 		<ul

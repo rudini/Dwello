@@ -142,7 +142,7 @@ function formerTenants(contracts: Row[], documents: Row[], today: string) {
 			contracts as Contracts
 		);
 		const tenantName = String(contracts.find((c) => c.tenantId === tenantId)?.tenantName);
-		return former
+		return former && !former.checkedOn
 			? [{ tenantId: String(tenantId), tenantName, endDate: former.endDate, count: former.documents.length }]
 			: [];
 	});

@@ -2650,7 +2650,17 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the pro
 - [x] #609 decided under the standing instruction by the issue's first way: a draft's Verlauf names no «PDF erstellt» (its PDF is made anew on every request); `+page.svelte` passes no `pdfGeneratedAt` to `MetadataCard` for a draft; DOM test red first (a sent statement still names it); scenario «Der Verlauf eines Entwurfs nennt kein erstelltes PDF» (statement-detail.feature, new step «nennt der Verlauf nicht {string}») red with main's page after downloading the PDF and opening the page anew (a first version passed on main: the negative check ran before the page had the PDF), green now; DOM (184), statement-detail chromium + api (103 before the last scenario fix, the scenario alone green in both), lint, check
 - [x] #609 code review round 1: `docs/reviews/609-review-1.md` (no findings)
 - [x] #609 persona Dr. Weber: `docs/design/personas/dr-weber-609.md` (task done; no Blocker/Major; P-1 the demo seed's «PDF erstellt» after «Versendet» (load time), P-2 to P-4 on existing texts and formats; all stay in the report); no closing round: only docs since the code review
-- [x] #609 PR #618 merged
+- [x] #609 PR merged (#618)
+- [x] #459 slice A («Als geprüft markieren», end-day sentence, help texts per glossary): red tests in former-tenant-documents.test.ts, contract-documents-checked.pg.test.ts (stored on the last contract with the Swiss day, forgotten when its end changes, as «Mieter ist ausgezogen»), tenant-detail-page.dom.test.ts (button, «Geprüft am», end-day sentence), dashboard.test.ts (a checked tenant gets no task). No scenario for slice A: a document uploaded before a past contract end needs the server's clock (tests/e2e/CLAUDE.md, «No scenario»); slice B (anonymise) gets its scenarios
+- [x] #459 fachreview before implementing slice A: `docs/reviews/459-fachreview-1.md`: no Blocker/Major; V-1, V-2, V-3, V-5 got red tests (6ef1eef) and are fixed; V-4 became #619 (glossary «Dokumente geprüft»); texts as proposed there
+- [x] #459 slice A implemented: migration 0033, `documentsChecked` on PUT /contracts/:id, form action `checkDocuments`, notice tone «info» once checked, markers #331/#334 removed
+- [x] #459 slice A code review: `docs/reviews/459-A-code-1.md`: no Blocker/Major; C-1 (focus after «Als geprüft markieren») fixed test-first, C-2 (api-specification) fixed
+- [x] #459 slice A personas: `docs/design/personas/459-A-helga.md`, `459-A-sven.md` (a former tenant's upload dated before the end by SQL INSERT into dwello_persona). Helga P-1 Major (what the button does) fixed test-first with a help sentence the button names (also Sven P-2); the other Minors/Nits stay in the reports
+- [x] #459 slice A persona Helga round 2 (`459-A-helga-2.md`): P-1 Major resolved; new Minor (notice gone after deleting the last document) and Nit stay in the report
+- [x] #459 slice A closing code review (`docs/reviews/459-A-code-2.md`): no Blocker/Major; C-3 (describedby untested) fixed, assertion seen red by removing the attribute
+- [x] #459 slice A closing round on C-3 (`docs/reviews/459-A-code-3.md`): nothing found
+- [x] #459 split (standing instruction: decide by recommendation): slice A goes as its own pull request with `Fixes #331` and `Refs #459`; slice B (anonymise) follows in a second pull request with `Fixes #459`
+- [x] #459 slice A pull request #621 merged on green CI
 
 ## Session 2026-10-22: #580 KI im Browser einstellen
 

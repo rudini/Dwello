@@ -38,6 +38,7 @@ const contractFields = {
 	noticeReceivedOn: rentalContracts.noticeReceivedOn,
 	billedUntil: rentalContracts.billedUntil,
 	movedOut: rentalContracts.movedOut,
+	documentsCheckedOn: rentalContracts.documentsCheckedOn,
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
 	monthlyAdvancePayment: currentAdvance, // the Akonto of today, of the Vertragsbeginn or the Vertragsende (#464)
@@ -437,6 +438,15 @@ async function checkBilledByDwello(current: RentalContract, billedUntil: string 
 	throw new CodedError('BILLED_UNTIL_BILLED', '«Abgerechnet bis» covers days a sent or paid statement bills', { number, start, end, date });
 }
 
+/**
+ * «Mieter ist ausgezogen» (A-6) and «Als geprüft markieren» (#459) belong to the end they were confirmed for: a new
+ * end forgets both; `documentsChecked` stores today
+ */
+const confirmedForEnd = (endDate: string | null | undefined, currentEnd: string | null, documentsChecked?: boolean) => ({
+	...(endDate !== undefined && endDate !== currentEnd && { movedOut: false, documentsCheckedOn: null }),
+	...(documentsChecked && { documentsCheckedOn: swissToday() })
+});
+
 /** The changed statements are just the draft named */
 const onlyDraft = (statements: { id: string; status: string }[], draft?: string) =>
 	statements.length === 1 && statements[0].id === draft && statements[0].status === 'draft';
@@ -446,7 +456,12 @@ const onlyDraft = (statements: { id: string; status: string }[], draft?: string)
  */
 export async function updateContract(
 	id: string,
-	{ agreedCategoryIds, advancePaymentFrom, ...data }: Partial<NewRentalContract> & AgreedList & { advancePaymentFrom?: string },
+	{
+		agreedCategoryIds,
+		advancePaymentFrom,
+		documentsChecked,
+		...data
+	}: Partial<NewRentalContract> & AgreedList & { advancePaymentFrom?: string; documentsChecked?: boolean },
 	deleteDraft?: string
 ): Promise<RentalContract | null> {
 	const current = await getContract(id);
@@ -468,7 +483,7 @@ export async function updateContract(
 			// without an end there is no notice: withdrawing it makes the contract open-ended again; without a notice
 			// there is no day it arrived; a move-out belongs to the end it was confirmed for (A-6)
 			.set({
-				...(data.endDate !== undefined && data.endDate !== current.endDate && { movedOut: false }),
+				...confirmedForEnd(data.endDate, current.endDate, documentsChecked),
 				...feeRate(data, data.managementFeeAgreed ?? current.managementFeeAgreed),
 				...(data.endDate === null && { terminated: false }),
 				...((data.endDate === null || data.terminated === false) && { noticeReceivedOn: null }),
