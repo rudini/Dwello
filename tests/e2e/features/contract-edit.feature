@@ -198,7 +198,6 @@ Funktionalität: Mietvertrag bearbeiten
     Und schlägt der neue Mietvertrag den Vertragsbeginn "2099-04-01" vor
 
   # #368: der neue Mietvertrag desselben Mieters übernimmt die vereinbarten Nebenkosten des alten
-  @wip
   Szenario: Der neue Mietvertrag übernimmt die vereinbarten Nebenkosten
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
     Und im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart

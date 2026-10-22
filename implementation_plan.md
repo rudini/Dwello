@@ -157,3 +157,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] Workflow note: before deciding an issue «by recommendation», search the other issues for an earlier decision on it (here #407 had decided #368); I missed it
 - [x] #368 split by recommendation: slice A (follow-up contract copies the agreed Nebenkosten, `Refs #368`) and slice B («Vereinbart ab», `Fixes #368`)
 - [x] #368 slice A red tests: contract-new-load.test.ts (load takes `?from=`), contract-wizard.dom.test.ts (ticks and help)
+- [x] #368 slice A implemented: the link «Neuen Mietvertrag … erfassen» passes `from`, the page loads that contract's `agreedCategoryIds`, the wizard ticks them and says so (`contracts_agreed_costs_help_follow_up`, 4 languages from the fachreview); rule 12 names the exception; scenario green without @wip
+- [ ] #368 slice A code review: `docs/reviews/368-A-code-1.md`

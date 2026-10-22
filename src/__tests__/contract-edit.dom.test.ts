@@ -409,7 +409,7 @@ describe('Mietvertrag bearbeiten', () => {
 			'Neuen Mietvertrag für Anna Keller erfassen'
 		);
 		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe(
-			'/contracts/new?tenant=t1&start=2099-04-01'
+			'/contracts/new?tenant=t1&start=2099-04-01&from=c1' // and its agreed Nebenkosten (#368)
 		);
 	});
 
