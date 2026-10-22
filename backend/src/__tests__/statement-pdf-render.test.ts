@@ -63,13 +63,18 @@ describe('PDF einer Rückerstattung', () => {
 });
 
 // #84 FR-7: «1er», not «1e»
-describe('Stockwerk im französischen PDF', () => {
+// #597: the first floor below ground has no number in any language, from the second on it is counted (as the screens)
+describe('Stockwerk unter dem Boden im PDF', () => {
 	it.each([
-		[-1, 'A2, 1er sous-sol'],
-		[-2, 'A2, 2e sous-sol']
-	])('nennt das Stockwerk %i als «%s»', async (floor, text) => {
+		['de', -1, 'Wohnung A2, UG, 82.00'],
+		['de', -2, 'Wohnung A2, 2. UG, 82.00'],
+		['fr', -1, 'Appartement A2, sous-sol, 82.00'],
+		['fr', -2, 'Appartement A2, 2e sous-sol, 82.00'],
+		['it', -1, 'Appartamento A2, piano interrato, 82.00'],
+		['it', -2, 'Appartamento A2, 2° piano interrato, 82.00']
+	] as const)('nennt auf %s das Stockwerk %i als «%s»', async (language, floor, text) => {
 		const data = { ...refund, apartment: { ...refund.apartment, floor } };
-		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'fr'), 'base64'));
+		const pdf = readPdf(Buffer.from(await generateStatementPDFBase64(data, config, language), 'base64'));
 
 		expect(pdf.flowing).toContain(text);
 	});
@@ -87,6 +92,8 @@ describe('Wohnung, die nach ihrem Stockwerk heisst', () => {
 		['de', 'eg', 0, 'Wohnung eg, 82.00 m²'],
 		['de', '1.OG', 1, 'Wohnung 1.OG, 82.00 m²'],
 		['fr', 'rez-de-chaussée', 0, 'Appartement rez-de-chaussée, 82.00'],
+		// #597 (Fachreview 500-1 V-5): «UG» on the first floor below ground names it
+		['de', 'UG', -1, 'Wohnung UG, 82.00 m²'],
 		// the floor stays when it contradicts the number or is only the start of a word
 		['de', 'EG', 1, 'Wohnung EG, 1. OG, 82.00 m²'],
 		['de', 'EGG', 0, 'Wohnung EGG, EG, 82.00 m²'],

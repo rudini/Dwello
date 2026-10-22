@@ -276,7 +276,9 @@ describe('Belegung eines Gebäudes', () => {
 
 describe('Stockwerk', () => {
 	it.each([
+		// #597: the first floor below ground has no number, from the second on it is counted
 		[-1, 'UG'],
+		[-2, '2. UG'],
 		[0, 'EG'],
 		[3, '3. OG']
 	])('zeigt Stockwerk %i als %s', (floor, label) => {

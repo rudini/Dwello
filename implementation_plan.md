@@ -110,4 +110,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #489 code review round 1: `docs/reviews/489-review-1.md`; Minor C-1 (the reset of the chosen name untested) fixed in «meldet ein hochgeladenes Dokument» (red with the reset line removed)
 - [x] #489 persona Sven: `docs/design/personas/sven-489.md` (no Blocker/Major; Minor P-1 «Datei Datei auswählen» is FileInput's second label from #455 (WCAG 2.5.3), Minor P-2 and Nit P-3 existed before; all stay in the report)
 - [x] #489 closing review round 2: `docs/reviews/489-review-2.md` (C-1 closed, no new findings)
-- [ ] #489 PR merged
+- [x] #489 PR merged (#612)
+- [x] #597 tests red: UI `floorLabel` −2 «2. UG» (apartment.test.ts), fr «2e sous-sol», it «piano interrato»/«2° piano interrato» (buildings-i18n.test.ts); PDF −1 without number in de/fr/it, the −2 rows pin the counted names, «Wohnung UG» on −1 without the floor (statement-pdf-render.test.ts); floor rows in `docs/design/i18n-begriffe.md`
+- [ ] #597 fachreview before implementing: `docs/reviews/597-fachreview-1.md`

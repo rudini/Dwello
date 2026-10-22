@@ -15,6 +15,10 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Wohnung | appartement | appartamento | apartment |
 | Wohnungsnummer | numéro d’appartement | numero dell’appartamento | apartment number |
 | Stockwerk | étage | piano | floor |
+| EG (Stockwerk 0) | rez-de-chaussée | pianterreno | ground floor |
+| 1. OG, 2. OG … | 1er étage, 2e étage … | 1° piano, 2° piano … | 1st floor, 2nd floor … |
+| UG (Stockwerk −1, ohne Zahl) | sous-sol | piano interrato | basement |
+| 2. UG, 3. UG … | 2e sous-sol, 3e sous-sol … | 2° piano interrato, 3° piano interrato … | 2nd basement, 3rd basement … |
 | Fläche | surface | superficie | area |
 | Zimmeranzahl | nombre de pièces | numero di locali | number of rooms |
 | Mietstatus | statut de location | stato di locazione | rental status |
