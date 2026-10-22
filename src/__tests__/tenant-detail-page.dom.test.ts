@@ -363,6 +363,9 @@ describe('Mieterdetail', () => {
 		expect(text('tenant-former-documents-check-help')).toBe(
 			'Haben Sie gelöscht, was Sie nicht mehr brauchen, markieren Sie die Dokumente als geprüft. Dwello löscht dabei nichts; die Aufgabe in der Übersicht entfällt.'
 		);
+		expect(byTestId('tenant-former-documents-check')!.getAttribute('aria-describedby')).toBe(
+			byTestId('tenant-former-documents-check-help')!.id
+		);
 		expect(byTestId('tenant-former-documents-checked')).toBeNull();
 		const form = byTestId('tenant-former-documents-check')!.closest('form')!;
 		expect(form.getAttribute('action')).toBe('?/checkDocuments');

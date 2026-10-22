@@ -137,4 +137,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #459 slice A implemented: migration 0033, `documentsChecked` on PUT /contracts/:id, form action `checkDocuments`, notice tone «info» once checked, markers #331/#334 removed
 - [x] #459 slice A code review: `docs/reviews/459-A-code-1.md`: no Blocker/Major; C-1 (focus after «Als geprüft markieren») fixed test-first, C-2 (api-specification) fixed
 - [x] #459 slice A personas: `docs/design/personas/459-A-helga.md`, `459-A-sven.md` (a former tenant's upload dated before the end by SQL INSERT into dwello_persona). Helga P-1 Major (what the button does) fixed test-first with a help sentence the button names (also Sven P-2); the other Minors/Nits stay in the reports
-- [ ] #459 slice A closing code review before push
+- [x] #459 slice A persona Helga round 2 (`459-A-helga-2.md`): P-1 Major resolved; new Minor (notice gone after deleting the last document) and Nit stay in the report
+- [x] #459 slice A closing code review (`docs/reviews/459-A-code-2.md`): no Blocker/Major; C-3 (describedby untested) fixed, assertion seen red by removing the attribute
