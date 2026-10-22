@@ -161,4 +161,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #368 slice A code review: `docs/reviews/368-A-code-1.md`: C-1 (a draft undid the takeover), C-2 (the next-steps link lacked `from`) fixed test-first; C-3 a11y/language state `contract-new` `rent-follow-up` added; C-4 (glossary row 56 still says «all ticked»): the row is the product owner's, named in the pull request
 - [x] #368 slice A persona Helga (`docs/design/personas/368-A-helga.md`): P-1 Major (the help sent her to the official form for a new contract) fixed test-first with a new wording (compare with the signed new contract); P-2 and the observations stay in the report
 - [x] #368 slice A closing code review: `docs/reviews/368-A-code-2.md`: no Blocker/Major; C-5 (comment order) and C-6 (the a11y state now waits for the follow-up help) fixed; C-4 stays for the product owner
-- [ ] #368 slice A persona Helga round 2: `docs/design/personas/368-A-helga-2.md`
+- [x] #368 slice A persona Helga round 2: `docs/design/personas/368-A-helga-2.md`: P-1 resolved, nothing new
+- [ ] #368 slice A pull request merged on green CI
