@@ -229,6 +229,41 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		});
 	});
 
+	// #387 (#406 point 7): at a tenant change the Heizprofil of the same apartment's statement, so both tenants carry
+	// 100 % of the heating costs; the Verwaltungspauschale still from the settings
+	it('nimmt beim Mieterwechsel das Heizprofil der Abrechnung derselben Wohnung', async () => {
+		const rental = (id: string, apartmentId: string, startDate: string, endDate: string | null) => ({
+			...contract(id, true, null),
+			apartmentId,
+			startDate,
+			endDate
+		});
+		const loaded = await load({
+			fetch: async (url: string) => {
+				if (url.includes('/config'))
+					return Response.json({ data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' } });
+				if (url.includes('/contracts?'))
+					return Response.json({
+						contracts: [
+							rental('eva', 'a1', '2024-01-01', '2025-03-31'),
+							rental('marc', 'a1', '2025-05-01', null),
+							rental('lea', 'a2', '2020-01-01', null)
+						]
+					});
+				if (url.includes('/statements?'))
+					return Response.json({ data: [statement('eva', '4.50', 'hp8'), statement('lea', '4.50', 'hp9')] });
+				return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
+			},
+			url: new URL('http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31')
+		} as never);
+
+		expect(loaded).toMatchObject({
+			defaultHeatingProfileId: 'hp8',
+			defaultManagementFeePercent: 3,
+			preset: { differing: true, profileFromApartment: true }
+		});
+	});
+
 	it('nimmt die Einstellungen, wenn die übrigen Abrechnungen zum Satz des Laufs verschiedene Sätze haben', async () => {
 		expect(await openWith([statement('lauf', '4.50'), statement('lauf2', '2.50')])).toMatchObject({
 			defaultHeatingProfileId: 'hp1',
