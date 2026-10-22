@@ -1840,6 +1840,8 @@
 	"contracts_notice_hint_link": "Record the notice with «End contract»",
 	"tenants_document_upload_heading": "Upload a document",
 	"tenants_document_file_label": "File",
+	"tenants_document_file_choose": "Choose file",
+	"tenants_document_file_none": "No file chosen",
 	"tenants_document_file_help": "PDF, JPG or PNG, at most 10 MB. Delete copies of ID documents and debt collection register extracts as soon as you no longer need them.",
 	"tenants_document_title_label": "Title",
 	"tenants_document_title_help": "Without a title, the document is named after the file, without its extension.",

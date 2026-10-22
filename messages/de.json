@@ -1840,6 +1840,8 @@
 	"contracts_notice_hint_link": "Kündigung mit «Beenden» eintragen",
 	"tenants_document_upload_heading": "Dokument hochladen",
 	"tenants_document_file_label": "Datei",
+	"tenants_document_file_choose": "Datei auswählen",
+	"tenants_document_file_none": "Keine Datei ausgewählt",
 	"tenants_document_file_help": "PDF, JPG oder PNG, höchstens 10 MB. Löschen Sie Ausweiskopien und Betreibungsauszüge, sobald Sie sie nicht mehr brauchen.",
 	"tenants_document_title_label": "Titel",
 	"tenants_document_title_help": "Ohne Titel heisst das Dokument wie die Datei, ohne Endung.",

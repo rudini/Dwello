@@ -8,6 +8,7 @@
 	let {
 		input = $bindable(),
 		control,
+		name,
 		choose,
 		chosen,
 		multiple = false,
@@ -17,6 +18,7 @@
 	}: {
 		input?: HTMLInputElement;
 		control: FieldControl;
+		name?: string; // sent with a form
 		choose: string; // the button's text
 		chosen?: string; // the file chosen, or that none is: shown beside the button
 		multiple?: boolean;
@@ -30,6 +32,7 @@
 	<input
 		bind:this={input}
 		id={control.id}
+		{name}
 		type="file"
 		{multiple}
 		accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
