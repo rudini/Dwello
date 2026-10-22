@@ -293,8 +293,13 @@ export async function generateStatementPdf(id: string, language?: string) {
 	const found = await getStatement(id);
 	if (!found) return 'not-found';
 
+	// a draft whose PDF is refused now keeps no earlier one: its Verlauf would claim a PDF that cannot be opened (#503)
+	const discard = async () => {
+		if (found.status === 'draft')
+			await db.update(utilityStatements).set({ pdfBlob: null, pdfGeneratedAt: null }).where(eq(utilityStatements.id, id));
+	};
 	const qrConfig = await qrBillConfig();
-	if (!qrConfig) return 'no-iban';
+	if (!qrConfig) return discard().then(() => 'no-iban' as const);
 	// A draft's PDF shows the statement as if sent today; sending dates it again
 	const dates = found.status === 'draft' ? await datedToday(found.paymentDeadline) : {};
 	const statement = { ...found, ...dates };
@@ -305,7 +310,10 @@ export async function generateStatementPdf(id: string, language?: string) {
 	const run = await runDetailsOf(statement, names, pdfLanguage, hasHeating);
 	const keys = await keyNamesOf(statement);
 	const pdfData = toPdfData(statement, names, pdfLanguage, run, keys, await keySharesOf(statement, keys, pdfLanguage));
-	const pdfBase64 = await generateStatementPDFBase64(pdfData, qrConfig, pdfLanguage);
+	const pdfBase64 = await generateStatementPDFBase64(pdfData, qrConfig, pdfLanguage).catch(async (error) => {
+		await discard();
+		throw error;
+	});
 	// Only a QR-IBAN carries a QR reference on the bill
 	const qrReference = isQRIBAN(qrConfig.iban) ? statementQRReference(statement.id) : null;
 
