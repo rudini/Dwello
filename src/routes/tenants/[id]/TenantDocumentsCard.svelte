@@ -86,12 +86,20 @@
 						{m.tenants_former_documents_checked({ date: formatDate(former.checkedOn) })}
 					</p>
 				{:else}
+					<!-- what the button does (persona Helga #459 A P-1) -->
+					<p
+						id="tenant-former-documents-check-help"
+						data-testid="tenant-former-documents-check-help"
+					>
+						{m.tenants_former_documents_check_help()}
+					</p>
 					<form method="POST" action="?/checkDocuments" use:enhance={check}>
 						<input type="hidden" name="contractId" value={former.contractId} />
 						<Button
 							type="submit"
 							icon="check"
 							busy={checking}
+							describedby="tenant-former-documents-check-help"
 							testid="tenant-former-documents-check">{m.tenants_former_documents_check()}</Button
 						>
 					</form>

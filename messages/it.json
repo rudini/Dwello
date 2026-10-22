@@ -694,6 +694,7 @@
 	"tenants_former_documents_text": "L’ultimo contratto di locazione di {name} è terminato il {date}. Prima di quel giorno ha caricato: {titles}. Elimini ciò che non le serve più, per esempio le copie di documenti d’identità e gli estratti del registro delle esecuzioni. Conservi i verbali di consegna finché il deposito di garanzia non è svincolato.",
 	"tenants_former_documents_end_day": "Dwello non indica qui i documenti che ha caricato il giorno della fine del contratto o dopo, per esempio il verbale di consegna al trasloco.",
 	"tenants_former_documents_check": "Segnare come verificato",
+	"tenants_former_documents_check_help": "Dopo aver eliminato ciò che non le serve più, segni i documenti come verificati. Dwello non elimina nulla; il compito scompare dalla panoramica.",
 	"tenants_former_documents_checked": "Verificato il {date}",
 	"tenants_rent_upcoming": "Pigione futura",
 	"tenants_rent_current": "Pigione attuale",

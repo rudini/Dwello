@@ -359,6 +359,10 @@ describe('Mieterdetail', () => {
 			'Dokumente, die Sie am Tag des Vertragsendes oder danach hochgeladen haben, etwa das Übergabeprotokoll vom Auszug, nennt Dwello hier nicht.'
 		);
 		expect(text('tenant-former-documents-check')).toBe('Als geprüft markieren');
+		// persona Helga #459 A P-1: what the button does
+		expect(text('tenant-former-documents-check-help')).toBe(
+			'Haben Sie gelöscht, was Sie nicht mehr brauchen, markieren Sie die Dokumente als geprüft. Dwello löscht dabei nichts; die Aufgabe in der Übersicht entfällt.'
+		);
 		expect(byTestId('tenant-former-documents-checked')).toBeNull();
 		const form = byTestId('tenant-former-documents-check')!.closest('form')!;
 		expect(form.getAttribute('action')).toBe('?/checkDocuments');

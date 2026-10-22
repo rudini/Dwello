@@ -694,6 +694,7 @@
 	"tenants_former_documents_text": "Le dernier contrat de bail de {name} a pris fin le {date}. Avant ce jour, vous avez téléversé : {titles}. Supprimez ce dont vous n’avez plus besoin, par exemple les copies de pièces d’identité et les extraits du registre des poursuites. Conservez les procès-verbaux de remise jusqu’à la libération de la garantie de loyer.",
 	"tenants_former_documents_end_day": "Dwello ne mentionne pas ici les documents que vous avez téléversés le jour de la fin du contrat ou après, par exemple le procès-verbal de remise lors du déménagement.",
 	"tenants_former_documents_check": "Marquer comme vérifié",
+	"tenants_former_documents_check_help": "Une fois que vous avez supprimé ce dont vous n’avez plus besoin, marquez les documents comme vérifiés. Dwello ne supprime alors rien et la tâche disparaît de la vue d’ensemble.",
 	"tenants_former_documents_checked": "Vérifié le {date}",
 	"tenants_rent_upcoming": "Loyer futur",
 	"tenants_rent_current": "Loyer actuel",
