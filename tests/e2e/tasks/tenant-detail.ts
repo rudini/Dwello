@@ -2,6 +2,8 @@ import type { Activity } from '../screenplay/actor';
 import { Click, DownloadFrom, Navigate } from '../screenplay/interactions';
 import { historyLink } from '../targets/apartment-detail';
 import {
+	anonymiseTenantButton,
+	confirmAnonymiseTenantButton,
 	confirmDeleteTenantButton,
 	deleteTenantButton,
 	editTenantButton,
@@ -28,3 +30,7 @@ export const startDeletingTenant = Click.on(deleteTenantButton);
 
 export const deleteTenant: Activity = (actor) =>
 	actor.attemptsTo(startDeletingTenant, Click.on(confirmDeleteTenantButton));
+
+export const startAnonymisingTenant = Click.on(anonymiseTenantButton);
+
+export const confirmAnonymising = Click.on(confirmAnonymiseTenantButton);

@@ -1,7 +1,15 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { contractHistoryNaming } from '../questions/apartment-detail';
-import { monthlyRent, rentalStartDate, rentedApartment } from '../questions/tenant-detail';
+import { pageTitleText } from '../questions/app-frame';
+import {
+	anonymiseConsequenceText,
+	anonymiseFromText,
+	anonymiseOffered,
+	monthlyRent,
+	rentalStartDate,
+	rentedApartment
+} from '../questions/tenant-detail';
 import { emptyTenantListShown, listedTenantCount } from '../questions/tenants';
 import {
 	deleteTenant,
@@ -9,6 +17,8 @@ import {
 	openContractOfApartment,
 	openTenantApartment,
 	openTenantDetail,
+	confirmAnonymising,
+	startAnonymisingTenant,
 	startContractForTenant,
 	startDeletingTenant
 } from '../tasks/tenant-detail';
@@ -80,5 +90,32 @@ Then(
 		await verwalter.attemptsTo(searchTenant(names.get(tenant)!));
 		await verwalter.sees(emptyTenantListShown).toBe(true);
 		await verwalter.sees(listedTenantCount(names.get(tenant)!)).toBe(0);
+	}
+);
+
+// #459 (#332): «Mieter anonymisieren» after the retention
+When('der Liegenschaftsverwalter den Mieter anonymisieren will', async ({ verwalter }) => {
+	await verwalter.attemptsTo(startAnonymisingTenant);
+});
+
+When('der Liegenschaftsverwalter das Anonymisieren bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmAnonymising);
+});
+
+// the scenario names the tenant as written; the seed gave it a unique name
+Then('nennt die Bestätigung die Folge {string}', async ({ verwalter, names }, text: string) => {
+	const named = [...names.entries()].reduce((t, [written, stored]) => t.replaceAll(written, stored), text);
+	await verwalter.sees(anonymiseConsequenceText).toBe(named);
+});
+
+Then('heisst der Mieter {string}', async ({ verwalter }, name: string) => {
+	await verwalter.sees(pageTitleText).toBe(name);
+});
+
+Then(
+	'kann der Liegenschaftsverwalter den Mieter erst ab dem {string} anonymisieren',
+	async ({ verwalter }, date: string) => {
+		await verwalter.sees(anonymiseFromText).toContain(date);
+		await verwalter.sees(anonymiseOffered).toBe(false);
 	}
 );

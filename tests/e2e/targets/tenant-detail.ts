@@ -12,3 +12,12 @@ export const confirmDeleteTenantButton = target('Mieter löschen bestätigen', (
 	page.getByTestId('tenant-delete-confirm')
 );
 export const tenantAddress = target('Korrespondenzadresse', (page) => page.getByTestId('tenant-address'));
+// #459: «Mieter anonymisieren» after the retention, and from when before it
+export const anonymiseTenantButton = target('Mieter anonymisieren', (page) => page.getByTestId('tenant-anonymise-button'));
+export const confirmAnonymiseTenantButton = target('Anonymisieren bestätigen', (page) =>
+	page.getByTestId('tenant-anonymise-confirm')
+);
+export const anonymiseConsequence = target('Folge des Anonymisierens', (page) =>
+	page.getByTestId('tenant-anonymise-message')
+);
+export const anonymiseFrom = target('Anonymisieren ab', (page) => page.getByTestId('tenant-anonymise-from'));

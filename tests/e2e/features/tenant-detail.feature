@@ -65,3 +65,20 @@ Funktionalität: Mieterdetail
   Szenario: Mieter ohne E-Mail-Adresse
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Dann kann der Liegenschaftsverwalter "Lea Frei" keine E-Mail schreiben
+
+  # #459 (#332): 10 Jahre nach dem Ende des Jahres des letzten Ereignisses (Art. 958f Abs. 1, Art. 127 OR; Art. 6 Abs. 4 DSG)
+  @wip
+  Szenario: Ehemaligen Mieter nach Ablauf der Aufbewahrung anonymisieren
+    Angenommen "Lea Frei" mietete die Wohnung "1.01" von "2010-01-01" bis "2014-12-31" für "700" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Wenn der Liegenschaftsverwalter den Mieter anonymisieren will
+    Dann nennt die Bestätigung die Folge "Name, Kontaktdaten und Dokumente von Lea Frei werden endgültig entfernt. Die Beträge der Abrechnungen bleiben."
+    Wenn der Liegenschaftsverwalter das Anonymisieren bestätigt
+    Dann heisst der Mieter "Ehemaliger Mieter"
+    Und findet der Liegenschaftsverwalter den Mieter "Lea Frei" nicht mehr
+
+  @wip
+  Szenario: Mieter vor Ablauf der Aufbewahrung nicht anonymisieren
+    Angenommen "Lea Frei" mietete die Wohnung "1.01" von "2015-01-01" bis "2019-12-31" für "700" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Dann kann der Liegenschaftsverwalter den Mieter erst ab dem "01.01.2030" anonymisieren

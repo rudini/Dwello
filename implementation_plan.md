@@ -141,4 +141,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #459 slice A closing code review (`docs/reviews/459-A-code-2.md`): no Blocker/Major; C-3 (describedby untested) fixed, assertion seen red by removing the attribute
 - [x] #459 slice A closing round on C-3 (`docs/reviews/459-A-code-3.md`): nothing found
 - [x] #459 split (standing instruction: decide by recommendation): slice A goes as its own pull request with `Fixes #331` and `Refs #459`; slice B (anonymise) follows in a second pull request with `Fixes #459`
-- [ ] #459 slice A pull request merged on green CI
+- [x] #459 slice A pull request merged on green CI (#621, e3ca7b1)
+- [x] #459 slice B scenarios @wip: tenant-detail.feature (anonymise after the retention, too early), privacy.feature (retention sentence); red at the missing behaviour. Glossary issue #623 («Mieter anonymisieren», `fachlich`, `entscheiden`) for the marker
+- [ ] #459 slice B fachreview before implementing: `docs/reviews/459-B-fachreview-1.md`
