@@ -360,6 +360,15 @@ describe('Mieterdetail', () => {
 		);
 		expect(text('tenant-former-documents-check')).toBe('Als geprüft markieren');
 		expect(byTestId('tenant-former-documents-checked')).toBeNull();
+		const form = byTestId('tenant-former-documents-check')!.closest('form')!;
+		expect(form.getAttribute('action')).toBe('?/checkDocuments');
+		expect((form.elements.namedItem('contractId') as HTMLInputElement).value).toBe('c1');
+	});
+
+	it('sagt, wenn die Prüfung nicht gespeichert wurde', () => {
+		open([], { checkError: 'nicht gespeichert' }, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: null });
+
+		expect(text('tenant-former-documents-check-error')).toBe('nicht gespeichert');
 	});
 
 	it('nennt den Tag der Prüfung und bietet sie nicht mehr an', () => {

@@ -320,15 +320,16 @@ const fixedTermTasks = ({ expiredContracts }: OverviewInput): Task[] =>
 			action: m.dashboard_task_fixed_term_action(),
 			icon: 'contract'
 		}));
-// TODO(fachlich prüfen, #331): the task stays while the landlord rightly keeps a document
-// TODO(fachlich prüfen, #334): «Mietzinsdepot» has its glossary row; the help texts follow
+const formerCount = (count: number, endDate: string) =>
+	(count === 1
+		? m.dashboard_task_former_documents_text_one
+		: m.dashboard_task_former_documents_text_many)({ count, date: formatDate(endDate) });
+// ends once the landlord marks the documents as checked (#459); documents from the end day on are not counted
 const formerDocumentTasks = ({ formerTenants = [] }: OverviewInput): Task[] =>
 	formerTenants.map((t) => ({
 		id: `former-documents-${t.tenantId}`,
 		title: m.dashboard_task_former_documents({ name: t.tenantName }),
-		text: (t.count === 1
-			? m.dashboard_task_former_documents_text_one
-			: m.dashboard_task_former_documents_text_many)({ count: t.count, date: formatDate(t.endDate) }),
+		text: `${formerCount(t.count, t.endDate)} ${m.tenants_former_documents_end_day()}`,
 		href: `/tenants/${t.tenantId}`,
 		action: m.dashboard_task_former_documents_action(),
 		icon: 'document'

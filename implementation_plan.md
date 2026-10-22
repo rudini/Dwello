@@ -133,4 +133,7 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #609 persona Dr. Weber: `docs/design/personas/dr-weber-609.md` (task done; no Blocker/Major; P-1 the demo seed's «PDF erstellt» after «Versendet» (load time), P-2 to P-4 on existing texts and formats; all stay in the report); no closing round: only docs since the code review
 - [x] #609 PR merged (#618)
 - [x] #459 slice A («Als geprüft markieren», end-day sentence, help texts per glossary): red tests in former-tenant-documents.test.ts, contract-documents-checked.pg.test.ts (stored on the last contract with the Swiss day, forgotten when its end changes, as «Mieter ist ausgezogen»), tenant-detail-page.dom.test.ts (button, «Geprüft am», end-day sentence), dashboard.test.ts (a checked tenant gets no task). No scenario for slice A: a document uploaded before a past contract end needs the server's clock (tests/e2e/CLAUDE.md, «No scenario»); slice B (anonymise) gets its scenarios
-- [ ] #459 fachreview before implementing slice A: `docs/reviews/459-fachreview-1.md`
+- [x] #459 fachreview before implementing slice A: `docs/reviews/459-fachreview-1.md`: no Blocker/Major; V-1, V-2, V-3, V-5 got red tests (6ef1eef) and are fixed; V-4 became #619 (glossary «Dokumente geprüft»); texts as proposed there
+- [x] #459 slice A implemented: migration 0033, `documentsChecked` on PUT /contracts/:id, form action `checkDocuments`, notice tone «info» once checked, markers #331/#334 removed
+- [ ] #459 slice A code review: `docs/reviews/459-A-code-1.md`
+- [ ] #459 slice A persona Helga: `docs/reviews/459-A-persona-helga.md`

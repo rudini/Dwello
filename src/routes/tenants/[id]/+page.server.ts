@@ -66,6 +66,16 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 export const actions: Actions = {
 	upload: async ({ params, fetch, request }) => uploadDocument(fetch, params.id, await request.formData()),
 	deleteDocument: async ({ fetch, request }) => deleteDocument(fetch, await request.formData()),
+	// «Als geprüft markieren» (#459): stored on the last contract, so the overview task ends
+	checkDocuments: async ({ fetch, request }) => {
+		const contractId = (await request.formData()).get('contractId');
+		const response = await fetch(`${API}/contracts/${contractId}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ documentsChecked: true })
+		});
+		if (!response.ok) return fail(response.status, { checkError: m.contracts_save_failed() });
+	},
 	delete: async ({ params, fetch }) => {
 		const response = await fetch(`${API}/tenants/${params.id}`, { method: 'DELETE' });
 		// The backend keeps tenants with rental contracts: statements and documents refer to them
