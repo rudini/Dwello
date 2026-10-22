@@ -164,4 +164,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #368 slice A persona Helga round 2: `docs/design/personas/368-A-helga-2.md`: P-1 resolved, nothing new
 - [x] #368 slice A pull request merged on green CI (#625, fb208f4; glossary row 56 adapted on the product owner's request; the main run on a4e7fe2 failed only in invoice-new.feature from #627, commented on #628)
 - [x] #368 slice B scenarios @wip: statement-agreed-costs.feature (amount from a day, a day after the period, the answer «Vereinbart ab» in the wizard), contract-edit.feature (the field on the Mietvertrag); red at the missing behaviour
-- [ ] #368 slice B fachreview before implementing: `docs/reviews/368-B-fachreview-1.md`
+- [x] #368 slice B fachreview before implementing: `docs/reviews/368-B-fachreview-1.md`: M-1 Major (the PDF names the day and the time share), M-2 (refuse a day before the start or after the end), V-1 (two keys), V-2 (wizard without a day), V-5 (heating and credit tests), V-6 (toggle) taken; V-3, V-4 (decided texts say what to enter) decided by recommendation and recorded in #368; texts as in the report
+- [x] #368 slice B red pg tests for M-1, M-2, V-5 (agreed-from.pg.test.ts)

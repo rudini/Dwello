@@ -9,7 +9,10 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, invoices, utilityStatements } from '../db/schema';
+import { categories, heatingProfiles, invoices, utilityStatements } from '../db/schema';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
+import { readPdf } from './helpers/pdf-text';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -87,6 +90,15 @@ describe('Vereinbart ab', () => {
 		const [statement] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, id));
 		expect(statement.agreedFrom).toEqual({ [ids.Elevator]: '2024-10-01' });
 		expect(Number(statement.totalCosts)).toBe(1092);
+
+		// Fachreview 368-B M-1: the PDF names the day and says the days count from it, not as the Mietstage
+		const iban = await getConfig('iban');
+		await setConfig('iban', 'CH4431999123000889012');
+		await generateStatementPdf(id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
+		await (iban ? setConfig('iban', iban) : deleteConfig('iban'));
+		expect(text).toContain('Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: Hauswart, Lift (ab 01.10.2024).');
+		expect(text).toContain('Ist eine Kategorie erst ab einem Tag vereinbart (unten bei den vereinbarten Nebenkosten mit «ab» genannt), zählen nur Ihre Mietstage ab diesem Tag; bei Heizkosten die Monate des Heizprofils ab diesem Tag.');
 	});
 
 	it('lehnt einen Tag vor dem Vertragsbeginn ab', async () => {
@@ -94,5 +106,63 @@ describe('Vereinbart ab', () => {
 
 		expect(refused.status).toBe(400);
 		expect(await refused.json()).toMatchObject({ code: 'AGREED_FROM_BEFORE_START' });
+		// the day of the Vertragsbeginn itself means the same as no day
+		expect((await answer({ categoryId: ids.Elevator, agreed: true, from: '2020-01-01' })).status).toBe(200);
+	});
+});
+
+// Fachreview 368-B M-2, V-5: a day after the Vertragsende; Heizkosten by the Heizprofil and a credit from a day
+describe('Vereinbart ab: Heizprofil, Gutschrift und Vertragsende', () => {
+	let heated: Awaited<ReturnType<typeof createRental>>;
+	let heatingId: string;
+	let profile: typeof heatingProfiles.$inferSelect;
+	const months = ['october', 'november', 'december'] as const;
+
+	beforeAll(async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		heatingId = heating.id;
+		[profile] = await db.select().from(heatingProfiles).limit(1);
+		heated = await createRental(crypto.randomUUID(), { startDate: '2020-01-01', endDate: '2025-06-30', monthlyAdvancePayment: '0' });
+		await insertInvoice(heated.building, { categoryId: heatingId, description: 'Heizöl 2024', amount: '1000.00', invoiceDate: '2024-03-31' });
+		await insertInvoice(heated.building, { categoryId: ids.Elevator, description: 'Lift 2024', amount: '366.00', invoiceDate: '2024-06-30' });
+		await insertInvoice(heated.building, { categoryId: ids.Elevator, description: 'Gutschrift Lift', amount: '-183.00', invoiceDate: '2024-08-31' });
+	});
+
+	afterAll(async () => {
+		await db.delete(invoices).where(eq(invoices.buildingId, heated.building));
+		await heated.remove();
+	});
+
+	const items = async () =>
+		(
+			(await (
+				await sendJson('POST', '/api/v1/statements/preview', {
+					contractId: heated.contract,
+					...period,
+					heatingProfileId: profile.id,
+					managementFeePercent: 0
+				})
+			).json()) as { lineItems: { categoryId: string; tenantShare: number }[] }
+		).lineItems;
+	const put = (body: Record<string, unknown>) => sendJson('PUT', `/api/v1/contracts/${heated.contract}/agreements`, body);
+
+	it('rechnet Heizkosten ab einem Tag nach den Monaten des Heizprofils ab diesem Tag', async () => {
+		await put({ categoryId: heatingId, agreed: true, from: '2024-10-01' });
+
+		const share = months.reduce((sum, month) => sum + Number(profile[`${month}Pct`]), 0);
+		expect((await items()).find((item) => item.categoryId === heatingId)?.tenantShare).toBe(Math.round(1000 * share) / 100);
+	});
+
+	it('rechnet auch eine Gutschrift nur ab diesem Tag ab', async () => {
+		await put({ categoryId: ids.Elevator, agreed: true, from: '2024-10-01' });
+
+		expect((await items()).find((item) => item.categoryId === ids.Elevator)?.tenantShare).toBe(46); // 183 × 92 / 366
+	});
+
+	it('lehnt einen Tag nach dem Vertragsende ab', async () => {
+		const refused = await put({ categoryId: ids.Elevator, agreed: true, from: '2025-07-01' });
+
+		expect(refused.status).toBe(400);
+		expect(await refused.json()).toMatchObject({ code: 'AGREED_FROM_AFTER_END' });
 	});
 });
