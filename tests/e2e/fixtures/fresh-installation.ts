@@ -49,6 +49,10 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 			// every scenario of the KI settings may change it in the browser: back to the local KI of a fresh installation
 			await kiStub.post('stub/ollama', { state: 'online' });
 			await api.put('ki-settings', { mode: 'local' });
+			// the KI changes of this scenario and its clean-up, so the next one finds only its own in the Protokoll
+			const { data } = (await api.get('audit-log')) as { data: { id: string; action: string }[] };
+			for (const entry of data.filter(({ action }) => action === 'ki_setting_changed'))
+				await api.remove(`audit-log/${entry.id}`);
 			for (const email of accounts) await api.remove(`local-accounts/${encodeURIComponent(email)}`);
 		}
 	};

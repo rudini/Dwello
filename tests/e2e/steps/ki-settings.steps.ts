@@ -136,3 +136,9 @@ Given('die lokale KI antwortet nicht', async ({ frisch }) => {
 When('der Liegenschaftsverwalter auf der Seite "KI" das KI-Modell erneut herunterlädt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(downloadModelAgain);
 });
+
+When('der Liegenschaftsverwalter die Verbindung zu einer neuen Adresse ohne API-Schlüssel prüft', async ({ verwalter }) => {
+	await verwalter.attemptsTo(
+		checkConnection({ ...stubProvider('Muster KI AG', 'Deutschland'), address: 'http://127.0.0.1:2531/v1', key: '' })
+	);
+});

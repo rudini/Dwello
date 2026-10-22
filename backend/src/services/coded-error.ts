@@ -37,3 +37,11 @@ export function errorBody(error: unknown, fallback: string): { error: string } |
 		return { ...refusal(error.code, error.message, error.params), ...(error.causes && { causes: error.causes }) };
 	return { error: error instanceof Error ? error.message : fallback };
 }
+
+/** A route's answer to a coded refusal with the status its code has in `status`; any other error is thrown on */
+export const refusedWith =
+	(status: Record<string, number>) => (error: unknown, set: { status?: number | string }) => {
+		if (!(error instanceof CodedError) || !status[error.code]) throw error;
+		set.status = status[error.code];
+		return errorBody(error, error.message);
+	};

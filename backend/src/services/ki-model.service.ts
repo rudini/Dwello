@@ -15,11 +15,25 @@ const ollamaOf = (baseUrl: string) => baseUrl.replace(/\/v1\/?$/, '');
 
 // the running download; a new one (another start from the page «KI», #580) ends it
 let running = new AbortController();
+// settles once the running load knows its first state, so the page «KI» shows it right after a save (#580); a silent
+// Ollama is waited for 5 s at most
+let started: Promise<void> = Promise.resolve();
+let known = () => {};
+export const modelStarted = () => Promise.race([started, Bun.sleep(5000)]);
 
 export async function loadModel(config: { baseUrl: string; model: string; local: boolean }) {
 	running.abort();
 	const own = (running = new AbortController());
+	started = new Promise((resolve) => (known = resolve));
 	current = { state: 'unknown' };
+	try {
+		await load(config, own);
+	} finally {
+		known();
+	}
+}
+
+async function load(config: { baseUrl: string; model: string; local: boolean }, own: AbortController) {
 	if (!config.local) return;
 	const ollama = ollamaOf(config.baseUrl);
 	try {
@@ -58,6 +72,7 @@ async function follow(stream: ReadableStream<Uint8Array>) {
 		const lines = (rest + chunk).split('\n');
 		rest = lines.pop()!;
 		for (const line of lines.filter(Boolean)) progress(JSON.parse(line), layers);
+		known();
 	}
 	if (rest.trim()) progress(JSON.parse(rest), layers);
 }

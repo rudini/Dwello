@@ -33,6 +33,21 @@
 
 	<ConfigLinks />
 
+	<!-- #580: which KI reads and categorizes invoices -->
+	<ConfigLinks
+		title={m.ki_settings_title()}
+		testid="ki-links"
+		links={[
+			{
+				key: 'ki',
+				href: '/config/ki',
+				label: m.ki_settings_title(),
+				text: m.ki_settings_link(),
+				icon: 'ai-suggestion'
+			}
+		]}
+	/>
+
 	<ConfigLinks
 		title={m.audit_title()}
 		testid="audit-log-links"

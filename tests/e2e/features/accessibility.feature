@@ -219,6 +219,11 @@ Funktionalität: Barrierefreiheit
       | documents              | empty               |
       | documents              | marked-sent         |
       | config                 | default             |
+      | ki-settings            | default             |
+      | ki-settings            | ki-model-loading    |
+      | ki-settings            | ki-model-failed     |
+      | ki-settings            | ki-provider         |
+      | ki-settings            | ki-provider-submit-empty |
       | audit-log              | default             |
       | audit-log              | empty               |
       | audit-log              | delete-dialog       |

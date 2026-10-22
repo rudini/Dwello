@@ -11,7 +11,7 @@ import { db } from '../db/connection';
 import { kiSettings } from '../db/schema';
 import { recordAudit } from './audit-log.service';
 import { CodedError } from './coded-error';
-import { loadModel } from './ki-model.service';
+import { loadModel, modelStarted } from './ki-model.service';
 
 type Mode = 'local' | 'provider' | 'none';
 
@@ -143,7 +143,10 @@ export async function saveKiSettings(input: KiInput) {
 			await tx.insert(kiSettings).values({ mode: input.mode });
 			await recordAudit('ki_setting_changed', { mode: input.mode }, tx);
 		});
-		if (input.mode === 'local') void loadModel({ ...llmConfig, local: llmConfig.enabled });
+		if (input.mode === 'local') {
+			void loadModel({ ...llmConfig, local: llmConfig.enabled });
+			await modelStarted();
+		}
 		return kiSettingsView();
 	}
 	const values = trimmed(input);

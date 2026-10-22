@@ -1,5 +1,4 @@
 # language: de
-@wip
 Funktionalität: KI in den Einstellungen wählen
   Als Liegenschaftsverwalter
   möchte ich im Browser wählen, welche KI meine Rechnungen liest
@@ -104,6 +103,13 @@ Funktionalität: KI in den Einstellungen wählen
     Und der Anbieter "Muster KI AG" in "Deutschland" ist gespeichert
     Wenn der Liegenschaftsverwalter für den Anbieter eine neue Adresse ohne API-Schlüssel speichert
     Dann sieht der Liegenschaftsverwalter auf der Seite "KI" den Fehler "Geben Sie den API-Schlüssel erneut ein. Dwello schickt den gespeicherten Schlüssel nicht an eine andere Adresse."
+
+  # Fachreview 580-3 F-22: auch die Prüfung schickt den gespeicherten Schlüssel nicht an eine andere Adresse
+  Szenario: Eine neue Adresse prüfen braucht den API-Schlüssel erneut
+    Angenommen Dwello ist eingerichtet
+    Und der Anbieter "Muster KI AG" in "Deutschland" ist gespeichert
+    Wenn der Liegenschaftsverwalter die Verbindung zu einer neuen Adresse ohne API-Schlüssel prüft
+    Dann sagt die Prüfung der Verbindung "Geben Sie den API-Schlüssel erneut ein. Dwello schickt den gespeicherten Schlüssel nicht an eine andere Adresse."
 
   # Fachreview 580 F-3: die Prüfung schickt nur ein festes Testbild und einen festen Text, nie erfasste Daten
   Szenariogrundriss: Die Verbindung zur KI prüfen

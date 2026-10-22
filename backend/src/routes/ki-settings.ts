@@ -5,8 +5,8 @@
 
 import { Elysia, t } from 'elysia';
 import { llmConfig } from '../config/llm';
-import { CodedError, errorBody } from '../services/coded-error';
-import { loadModel, modelState } from '../services/ki-model.service';
+import { CodedError, refusedWith } from '../services/coded-error';
+import { loadModel, modelStarted, modelState } from '../services/ki-model.service';
 import {
 	checkKiConnection,
 	currentKi,
@@ -22,11 +22,7 @@ const STATUS: Record<string, number> = {
 	KI_ENCRYPTION_KEY_MISSING: 422
 };
 
-const refused = (error: unknown, set: { status?: number | string }) => {
-	if (!(error instanceof CodedError) || !STATUS[error.code]) throw error;
-	set.status = STATUS[error.code];
-	return errorBody(error, error.message);
-};
+const refused = refusedWith(STATUS);
 
 const text = t.Optional(t.String({ maxLength: 2048 }));
 const ki = t.Object({
@@ -71,6 +67,7 @@ export const kiSettingsRoutes = new Elysia({ prefix: '/api/v1' })
 		if (mode !== 'local')
 			return refused(new CodedError('KI_NOT_LOCAL', 'Die lokale KI ist nicht gewählt.'), set);
 		void loadModel({ baseUrl, model, local: llmConfig.enabled });
+		await modelStarted();
 		set.status = 202;
 		return modelState();
 	});

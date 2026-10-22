@@ -42,7 +42,14 @@ const TEXTS: Record<string, (d: Details) => string> = {
 		d.paidDate
 			? m.audit_payment_reset({ number: String(d.number), date: formatDate(String(d.paidDate)) })
 			: m.audit_payment_reset_undated({ number: String(d.number) }),
-	statement_corrected: (d) => m.audit_statement_corrected({ number: String(d.number) })
+	statement_corrected: (d) => m.audit_statement_corrected({ number: String(d.number) }),
+	// #580: the KI chosen in the settings, with whom invoices went to
+	ki_setting_changed: (d) =>
+		d.mode === 'provider'
+			? m.audit_ki_provider({ provider: String(d.provider), country: String(d.country) })
+			: d.mode === 'none'
+				? m.audit_ki_none()
+				: m.audit_ki_local()
 };
 
 export const toAuditEntries = (entries: BackendEntry[]): AuditEntry[] =>
