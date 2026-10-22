@@ -2651,3 +2651,30 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the pro
 - [x] #609 code review round 1: `docs/reviews/609-review-1.md` (no findings)
 - [x] #609 persona Dr. Weber: `docs/design/personas/dr-weber-609.md` (task done; no Blocker/Major; P-1 the demo seed's «PDF erstellt» after «Versendet» (load time), P-2 to P-4 on existing texts and formats; all stay in the report); no closing round: only docs since the code review
 - [x] #609 PR #618 merged
+
+## Session 2026-10-22: #580 KI im Browser einstellen
+
+- [x] Design: `ki_settings` row (mode local/provider/none, address, model, provider, country, key encrypted with `ENCRYPTION_KEY`); any non-empty `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_PROVIDER`, `LLM_PROVIDER_COUNTRY`, `LLM_ENABLED` locks it («vom Betreiber festgelegt»); the local KI's address `LLM_LOCAL_URL`; in provider mode the privacy statement names provider and country whatever the host
+- [x] @wip scenarios (`ki-einstellungen.feature`) and steps, committed
+- [x] fach-reviewer round 1: `docs/reviews/580-fachreview-1.md`; decisions under the standing instruction recorded in #580 (F-1 to F-5, F-13, glossary rows), scenarios revised
+- [x] fach-reviewer round 2: `docs/reviews/580-fachreview-2.md`; F-1 to F-4 closed; F-5 (download, local KI not answering) and F-16 (check sends the stored key to a new address) answered with two scenarios and a pg test; Minors F-17 to F-20 go into the texts
+- [x] fach-reviewer round 3: `docs/reviews/580-fachreview-3.md`; F-5 and F-16 closed; Minors F-21 (pg test with a closed port) and F-22 (scenario for the check of a new address) done
+- [x] @wip run red at the missing behaviour (404 on `/ki-settings`, missing elements), no missing step
+- [x] Backend: precedence of the environment, encryption of the key, refusal without confirmation, provider or country (pg tests red first); API contracts `ki-settings*.json` (09610ae)
+- [x] Backend: «Verbindung prüfen» (success, wrong key, unreachable, model without images), only a fixed text and image
+- [x] Backend: KI calls, privacy recipient and model download read the current setting; no restart; a new download aborts the running one
+- [x] Frontend: page `/config/ki` linked from `/config` (BFF test, DOM tests seen red by taking the code out), texts in four languages, Protokoll entry, privacy text (8419e6c)
+- [x] E2E: the fresh installation without LLM_* (`LLM_LOCAL_URL`, `ENCRYPTION_KEY`), the empty one unlocked; stub: key, image, failed and offline Ollama; axe and language looks at the fresh installation take the installation lock
+- [x] Screens in `tests/a11y/screens.json` (`ki-settings`: default, ki-model-loading, ki-model-failed, ki-provider, ki-provider-submit-empty), `accessibility.feature`, `sprachen-bildschirme.feature`; 30 rows green
+- [x] `bun run llm:eval` before and after (prompt unchanged): 47 of 48 (98 %) both, `qwen/qwen3-vl-8b-instruct` via OpenRouter
+- [x] Docs: `docs/installation.md` section 6, README «External LLM provider», `.env.example`, `docker-compose.prod.yml` (no LLM_* defaults, test red first), data model, API spec, glossary rows decided in #580 (a408918)
+- [x] code-reviewer round 1: `docs/reviews/580-review-1.md`; Majors C-1 (a local KI in the own network), C-2 (a running download after choosing a provider), C-3 (E2E tasks without waiting), C-5 (states missing in the screen checks) fixed with tests seen red; C-4 rejected (glossary rows came in a408918, after the reviewed commit); Minors C-6 to C-10 fixed, C-9's copied model type stays in the report
+- [x] fach-reviewer round 4 (feature review): `docs/reviews/580-fachreview-4.md`; Major F-23 (LLM_LOCAL_URL on another machine) fixed: the backend refuses to start; Minors F-24 (only 400 means no images), F-25 (ENCRYPTION_KEY), F-26 (no fields with the KI switched off by the operator) fixed
+- [x] personas Dr. Weber, Helga, Marco, Sven, Anna (`docs/design/personas/*-580.md`): Majors Marco/Dr. Weber P-1 (typed values reset after the check), Sven P-1 (focus lost after the check), Anna P-1 (local KI not answering) fixed with DOM tests seen red; Minors on one cause fixed (model notice only with «Lokale KI», own help texts for name and country, a check without address)
+- [x] `llm:eval` after: 47 of 48 (98 %), unchanged; a first run at 0 % showed that the operator's KI without provider name threw on every call, fixed with a test seen red
+- [x] persona Anna again (`anna-580.md`, «Zweiter Durchgang»): P-1 closed; Minor P-8, Nit P-9 stay in the report
+- [x] fach-reviewer feature round 2: `docs/reviews/580-fachreview-5.md`; F-23, F-25, F-26 closed; Major F-27 (country help narrower than the processing) fixed with the proposed wording, DOM test red first; Minors F-28 (start message), F-29 (how to start the local KI), F-30 (own server) fixed; F-24's rest (a text of its own for 402/429) stays in the report
+- [x] fach-reviewer feature round 3: `docs/reviews/580-fachreview-6.md`; F-27 to F-30 closed; Minor F-31 (the own server's wording in the privacy statement) fixed
+- [x] code-reviewer round 2: `docs/reviews/580-review-2.md`; C-1, C-2, C-3, C-5 closed; Minors C-11 (with F-28), C-12 (test seen red), C-14, C-15, C-16 fixed; C-13 (a test of the abort race) stays in the report
+- [x] closing round: `docs/reviews/580-review-3.md` (no new findings; C-13 stays a Minor in 580-review-2)
+- [x] Workflow notes `docs/reviews/workflow-notes-issue-580.md`; archive; PR pushed after this archive
