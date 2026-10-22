@@ -137,7 +137,10 @@ export function toPdfData(
 		// without a category, which no contract agrees (round 2 M-1)
 		agreedCosts:
 			statement.agreedCategoryIds && statement.lineItems.every((item) => item.categoryId)
-				? [...new Set(statement.lineItems.flatMap((item) => nameIn(categoryNames, item.categoryId, language) ?? []))]
+				? [...new Set(statement.lineItems.flatMap((item) => item.categoryId ?? []))].flatMap((id) => {
+						const name = nameIn(categoryNames, id, language);
+						return name ? [{ name, from: statement.agreedFrom?.[id] }] : [];
+					})
 				: undefined,
 		...minimumOf(statement),
 		...(statement.carriedFrom && {

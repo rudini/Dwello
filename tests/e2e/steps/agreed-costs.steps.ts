@@ -31,18 +31,17 @@ Given(
 	}
 );
 
+// the same activity, as a precondition and as an action
+const openSettings: Parameters<typeof When>[1] = async ({ verwalter, seed }, year: number, building: string, fee: number) => {
+	await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
+};
 Given(
 	'der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale geöffnet',
-	async ({ verwalter, seed }, year: number, building: string, fee: number) => {
-		await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
-	}
+	openSettings
 );
-
 When(
 	'der Liegenschaftsverwalter die Einstellungen der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale öffnet',
-	async ({ verwalter, seed }, year: number, building: string, fee: number) => {
-		await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
-	}
+	openSettings
 );
 
 Given('das Prüfen der vereinbarten Nebenkosten ist gestört', async ({ verwalter }) => {

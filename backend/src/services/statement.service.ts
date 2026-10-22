@@ -490,6 +490,7 @@ async function calculatedRows(input: StatementInput & { buildingId: string }) {
 		heatingShare: calculation.heating,
 		fuelStock: await agreedStock(input, calculation.agreedCategoryIds),
 		agreedCategoryIds: calculation.agreedCategoryIds,
+		agreedFrom: calculation.agreedFrom,
 		keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 		balance: String(calculation.balance),
 		replacesId: calculation.replacesId,

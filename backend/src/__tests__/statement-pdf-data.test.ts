@@ -126,7 +126,7 @@ describe('Vereinbarte Nebenkosten im PDF', () => {
 	const categorised = { ...agreed, lineItems: agreed.lineItems.filter((item) => item.categoryId) } as StatementWithDetails;
 
 	it('nennt die vereinbarten Kategorien, die die Abrechnung abrechnet', () => {
-		expect(toPdfData(categorised, categories, 'de').agreedCosts).toEqual(['Heizung']);
+		expect(toPdfData(categorised, categories, 'de').agreedCosts).toEqual([{ name: 'Heizung' }]); // with «Vereinbart ab» when it has one (#368)
 	});
 
 	it('nennt sie nicht neben einer Position ohne Kategorie, und nicht vor #91', () => {

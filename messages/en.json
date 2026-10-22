@@ -443,6 +443,8 @@
 	"statements_status_draft": "Draft",
 	"statements_status_sent": "Sent",
 	"backend_paid_date_before_period_end": "The payment date is before the end of the billing period on {date}. Enter this date or a later one.",
+	"backend_agreed_from_before_start": "This day is before the contract start. If the utility costs have been agreed since the contract start, do not enter a day.",
+	"backend_agreed_from_after_end": "This day is after the contract end. Check the day.",
 	"statements_paid_date_before_period": "The payment date is before the end of the billing period on {date}. Enter this date or a later one.",
 	"statements_paid_date_early": "The payment date is before the statement date of {date}. Save anyway?",
 	"statements_save_anyway": "Save anyway",

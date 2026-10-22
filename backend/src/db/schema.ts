@@ -186,7 +186,8 @@ export const contractCategories = pgTable(
 		categoryId: uuid('category_id')
 			.notNull()
 			.references(() => categories.id, { onDelete: 'cascade' }),
-		agreed: boolean('agreed').notNull()
+		agreed: boolean('agreed').notNull(),
+		agreedFrom: date('agreed_from') // «Vereinbart ab» (#368); null: from the start of the contract
 	},
 	(table) => [primaryKey({ columns: [table.contractId, table.categoryId] })]
 );
@@ -459,6 +460,7 @@ export const utilityStatements = pgTable(
 		// #464: the Akonto lines as calculated (months × amount); null: created before, the PDF prints only the total
 		advanceLines: jsonb('advance_lines').$type<AdvanceLine[]>(),
 		agreedCategoryIds: jsonb('agreed_category_ids').$type<string[]>(), // agreed when created (#91); null: before
+		agreedFrom: jsonb('agreed_from').$type<Record<string, string>>(), // «Vereinbart ab» per category when created (#368)
 		paymentResets: jsonb('payment_resets').$type<PaymentReset[]>().notNull().default([]), // payments taken back (#92)
 		paymentRecordedAt: timestamp('payment_recorded_at'), // when the payment was recorded (#92)
 		// «Nicht berichtigt» (#454): the day and the result of the recalculation the landlord did not correct to

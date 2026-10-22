@@ -443,6 +443,8 @@
 	"statements_status_draft": "Brouillon",
 	"statements_status_sent": "Envoyé",
 	"backend_paid_date_before_period_end": "La date de paiement est antérieure à la fin de la période de décompte, le {date}. Saisissez cette date ou une date ultérieure.",
+	"backend_agreed_from_before_start": "Ce jour est antérieur au début du contrat. Si les frais accessoires sont convenus depuis le début du contrat, n’indiquez pas de jour.",
+	"backend_agreed_from_after_end": "Ce jour est postérieur à la fin du contrat. Vérifiez le jour.",
 	"statements_paid_date_before_period": "La date de paiement est antérieure à la fin de la période de décompte, le {date}. Saisissez cette date ou une date ultérieure.",
 	"statements_paid_date_early": "La date de paiement est antérieure à la date du décompte du {date}. Enregistrer quand même ?",
 	"statements_save_anyway": "Enregistrer quand même",

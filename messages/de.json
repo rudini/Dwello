@@ -443,6 +443,8 @@
 	"statements_status_draft": "Entwurf",
 	"statements_status_sent": "Versendet",
 	"backend_paid_date_before_period_end": "Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am {date}. Geben Sie frühestens dieses Datum ein.",
+	"backend_agreed_from_before_start": "Dieser Tag liegt vor dem Vertragsbeginn. Sind die Nebenkosten seit Vertragsbeginn vereinbart, geben Sie keinen Tag an.",
+	"backend_agreed_from_after_end": "Dieser Tag liegt nach dem Vertragsende. Prüfen Sie den Tag.",
 	"statements_paid_date_before_period": "Das Zahlungsdatum liegt vor dem Ende der Abrechnungsperiode am {date}. Geben Sie frühestens dieses Datum ein.",
 	"statements_paid_date_early": "Das Zahlungsdatum liegt vor dem Abrechnungsdatum vom {date}. Trotzdem speichern?",
 	"statements_save_anyway": "Trotzdem speichern",

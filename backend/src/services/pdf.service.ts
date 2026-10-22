@@ -146,6 +146,9 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelTotal: '= Heizkosten nach Verbrauch',
 		notes: 'Hinweise',
 		agreedCosts: 'Abgerechnet sind nur die im Mietvertrag vereinbarten Nebenkosten: {categories}.',
+		agreedFromItem: '{category} (ab {date})',
+		sharesNoteAgreedFrom:
+			' Ist eine Kategorie erst ab einem Tag vereinbart (unten bei den vereinbarten Nebenkosten mit «ab» genannt), zählen nur Ihre Mietstage ab diesem Tag; bei Heizkosten die Monate des Heizprofils ab diesem Tag.',
 		noteReceipts: 'Sie oder eine bevollmächtigte Person können die Belege einsehen. Melden Sie sich dafür bei {contact} (Art. 257b Abs. 2 OR).',
 		noteHeating: 'Sie können eine detaillierte Abrechnung der Heiz- und Warmwasserkosten verlangen (Art. 8 Abs. 1 VMWG).',
 		noteStock: 'Über den Anfangs- und Endbestand des Heizmaterials erhalten Sie Auskunft (Art. 8 Abs. 2 VMWG).',
@@ -265,6 +268,9 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelTotal: '= Frais de chauffage selon la consommation',
 		notes: 'Remarques',
 		agreedCosts: 'Seuls les frais accessoires convenus dans le contrat de bail sont décomptés : {categories}.',
+		agreedFromItem: '{category} (dès le {date})',
+		sharesNoteAgreedFrom:
+			' Si une catégorie n’est convenue qu’à partir d’un jour (indiqué par «\u00a0dès le\u00a0» dans les frais accessoires convenus ci-dessous), seuls vos jours de location à partir de ce jour comptent\u00a0; pour les frais de chauffage, les mois du profil de chauffage à partir de ce jour.',
 		noteReceipts: 'Vous-même ou une personne mandatée pouvez consulter les pièces justificatives. Adressez-vous à {contact} (art. 257b al. 2 CO).',
 		noteHeating: 'Vous pouvez demander un décompte détaillé des frais de chauffage et d’eau chaude (art. 8 al. 1 OBLF).',
 		noteStock: 'Vous pouvez obtenir des renseignements sur les stocks initial et final de combustible (art. 8 al. 2 OBLF).',
@@ -384,6 +390,9 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelTotal: '= Spese di riscaldamento secondo il consumo',
 		notes: 'Osservazioni',
 		agreedCosts: 'Sono conteggiate solo le spese accessorie pattuite nel contratto di locazione: {categories}.',
+		agreedFromItem: '{category} (dal {date})',
+		sharesNoteAgreedFrom:
+			' Se una categoria è pattuita solo da un giorno (indicato con «dal» nelle spese accessorie pattuite qui sotto), contano solo i suoi giorni di locazione da quel giorno; per le spese di riscaldamento i mesi del profilo di riscaldamento da quel giorno.',
 		noteReceipts: 'Lei o una persona da lei incaricata può consultare i giustificativi. Si rivolga a {contact} (art. 257b cpv. 2 CO).',
 		noteHeating: 'Può chiedere un conteggio dettagliato delle spese di riscaldamento e acqua calda (art. 8 cpv. 1 OLAL).',
 		noteStock: 'Può ottenere informazioni sulla scorta iniziale e finale di combustibile (art. 8 cpv. 2 OLAL).',
@@ -503,6 +512,9 @@ const translations: Record<Language, Record<string, string>> = {
 		fuelTotal: '= Heating costs based on consumption',
 		notes: 'Notes',
 		agreedCosts: 'Only the utility costs agreed in the rental contract are billed: {categories}.',
+		agreedFromItem: '{category} (from {date})',
+		sharesNoteAgreedFrom:
+			' If a category is agreed only from a day (marked «from» in the agreed utility costs below), only your days rented from that day count; for heating costs, the months of the heating profile from that day.',
 		noteReceipts: 'You or a person you authorise may inspect the supporting documents. To do so, please contact {contact} (Art. 257b para. 2 CO).',
 		noteHeating: 'You may request a detailed statement of the heating and hot water costs (Art. 8 para. 1 VMWG).',
 		noteStock: 'You may ask for information on the opening and closing fuel stock (Art. 8 para. 2 VMWG).',
@@ -614,7 +626,7 @@ export interface StatementPDFData {
 	// Payment info
 	paymentDeadline?: string;
 	paidDate?: string; // paid: no payment part, or the tenant pays twice
-	agreedCosts?: string[]; // the agreed categories it bills (#91); absent on a statement created before
+	agreedCosts?: { name: string; from?: string }[]; // the agreed categories it bills (#91), «Vereinbart ab» (#368); absent before
 }
 
 /** CHF 1'234.56 */
@@ -1092,7 +1104,9 @@ function sharesNote(data: StatementPDFData, t: Record<string, string>) {
 		rounded: roundedNote(data, t, parts, byProfile),
 		heating: byProfile ? (ownProfileDays(data) ? t.sharesNoteHeatingParts : t.sharesNoteHeating) : ''
 	});
-	return data.fuel ? `${shares} ${t.sharesNoteFuel}` : shares;
+	// «Vereinbart ab» (#368, Fachreview 368-B M-1): those days are not the Mietstage of the header
+	const from = data.agreedCosts?.some((cost) => cost.from) ? t.sharesNoteAgreedFrom : '';
+	return data.fuel ? `${shares}${from} ${t.sharesNoteFuel}` : shares + from;
 }
 
 // The rounded percentage, also of a share by the Heizprofil (#256); a credit over other days than an invoice of its
@@ -1176,7 +1190,8 @@ const senderParts = (config: QRBillConfig) =>
 // (Art. 8 VMWG); kept on one page
 function notes({ doc, t, data, config }: Page, y: number) {
 	const contact = senderParts(config).join(', ');
-	const agreed = data.agreedCosts?.length ? [fill(t.agreedCosts, { categories: data.agreedCosts.join(', ') })] : [];
+	const names = data.agreedCosts?.map(({ name, from }) => (from ? fill(t.agreedFromItem, { category: name, date: formatDate(from) }) : name));
+	const agreed = names?.length ? [fill(t.agreedCosts, { categories: names.join(', ') })] : [];
 	const advance = data.totalAdvancePayments > 0 ? [t.noteAdvance] : [];
 	const lines = [...(data.notes ? [data.notes] : []), ...agreed, ...advance, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
 	const width = PAGE.right - PAGE.left;

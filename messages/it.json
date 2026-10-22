@@ -443,6 +443,8 @@
 	"statements_status_draft": "Bozza",
 	"statements_status_sent": "Inviato",
 	"backend_paid_date_before_period_end": "La data di pagamento è anteriore alla fine del periodo di conteggio, il {date}. Inserisca questa data o una data successiva.",
+	"backend_agreed_from_before_start": "Questo giorno è anteriore all’inizio del contratto. Se le spese accessorie sono pattuite dall’inizio del contratto, non indichi alcun giorno.",
+	"backend_agreed_from_after_end": "Questo giorno è posteriore alla fine del contratto. Verifichi il giorno.",
 	"statements_paid_date_before_period": "La data di pagamento è anteriore alla fine del periodo di conteggio, il {date}. Inserisca questa data o una data successiva.",
 	"statements_paid_date_early": "La data di pagamento è anteriore alla data del conteggio del {date}. Salvare comunque?",
 	"statements_save_anyway": "Salvare comunque",

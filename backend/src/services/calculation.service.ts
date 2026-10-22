@@ -24,7 +24,7 @@ import {
 import { getApartment, listApartments } from './apartment.service';
 import { advanceLines, advancesOf } from './advance-payment.service';
 import { billingStart, getContract } from './contract.service';
-import { agreedCategoryIds } from './agreed-category.service';
+import { agreedCategoryIds, agreedFromDays } from './agreed-category.service';
 import { calculateHeatingShare, getHeatingProfile } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
@@ -72,6 +72,7 @@ export interface StatementCalculation {
 	balance: number; // Positive = tenant owes, Negative = refund
 	heating: HeatingShare | null; // as the heating costs were shared (#209)
 	agreedCategoryIds: string[]; // the categories the contract agreed (#91)
+	agreedFrom: Record<string, string>; // «Vereinbart ab» of those with a day (#368)
 }
 
 /**
@@ -197,6 +198,14 @@ async function byRunProfile(group: InvoiceGroup, apartmentShare: number, run: Gr
 	const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
 	const result = await handleMidYearMoves(heatingProfileId, new Date(billingStart(contract)), contractEnd, periodStart, periodEnd, apartmentShare);
 	return result.byDays ? null : result;
+}
+
+// «Vereinbart ab» (#368, Art. 269d Abs. 3 OR): only the rent days from that day, as if the contract began then
+// (Heizkosten by the Heizprofil, else by days); null: a day after the contract's days in the period bills nothing
+function fromDay(from: string | undefined, run: GroupRun, rental: { start: string; end: string }) {
+	if (from && from > rental.end) return null;
+	if (!from || from <= rental.start) return { run, rental };
+	return { run: { ...run, contract: { ...run.contract, startDate: from, billedUntil: null }, wholePeriod: false }, rental: { start: from, end: rental.end } };
 }
 
 type GroupRun = { contract: { startDate: string; endDate: string | null; billedUntil: string | null }; periodStart: Date; periodEnd: Date; heatingProfileId?: string; wholePeriod: boolean };
@@ -350,6 +359,7 @@ export async function calculateStatementForContract(
 	// Group invoices by category; only the categories the contract agrees (#91, Art. 257a Abs. 2 OR): the share of its
 	// apartment in the others is the landlord's. An invoice without a Kategorie has nothing to agree and is billed
 	const agreed = await agreedCategoryIds(contractId);
+	const agreedFrom = await agreedFromDays(contractId); // «Vereinbart ab» (#368)
 	const invoiceGroups = groupInvoicesByCategory(invoices).filter((group) => !group.categoryId || agreed.includes(group.categoryId));
 
 	// All apartments of the building share its costs according to the distribution key
@@ -368,6 +378,9 @@ export async function calculateStatementForContract(
 	const rental = { start: isoDay(contractOverlap.overlapStart), end: isoDay(contractOverlap.overlapEnd) };
 
 	for (const group of invoiceGroups) {
+		const days = fromDay(group.categoryId ? agreedFrom[group.categoryId] : undefined, run, rental);
+		if (!days) continue;
+
 		// Calculate apartment's share of building costs
 		const apartmentShareResult = await calculateApartmentShare(
 			buildingApartments,
@@ -376,7 +389,7 @@ export async function calculateStatementForContract(
 			group.distributionKeyId
 		);
 
-		const { tenantShare, periodShare, shareDays } = await shareOfGroup(group, apartmentShareResult, run, rental);
+		const { tenantShare, periodShare, shareDays } = await shareOfGroup(group, apartmentShareResult, days.run, days.rental);
 
 		lineItems.push({
 			categoryId: group.categoryId,
@@ -444,7 +457,8 @@ export async function calculateStatementForContract(
 		advanceLines: advance,
 		balance,
 		heating,
-		agreedCategoryIds: agreed
+		agreedCategoryIds: agreed,
+		agreedFrom
 	};
 }
 
