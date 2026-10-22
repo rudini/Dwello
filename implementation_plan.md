@@ -168,6 +168,8 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #368 slice B red pg tests for M-1, M-2, V-5 (agreed-from.pg.test.ts)
 - [x] #368 slice B backend: `agreed_from` on contract categories and statements (migration 0036), the calculation counts the days from then (Heizkosten by the Heizprofil), refusals before the start and after the end, the PDF names the day and explains the share (M-1)
 - [x] #368 slice B frontend: toggle and «Vereinbart ab» fields in the contract form, «(ab …)» on the contract page and in the wizard review, the wizard answer «Vereinbart ab» with its day, help texts per #407 and V-3/V-4, marker #368 removed; new a11y and language states `agreed-from` (contract-new, contract-edit) and `agreement-from` (statement-generate); scenarios green without @wip
-- [ ] #368 slice B code review round 1 (`docs/reviews/368-B-review-1.md`)
-- [ ] #368 slice B personas Helga (`docs/design/personas/helga-368-b.md`) and Dr. Weber (`docs/design/personas/weber-368-b.md`), then daten-pruefer on Weber's statement
+- [x] #368 slice B code review round 1 (`docs/reviews/368-B-review-1.md`)
+- [x] #368 slice B personas Helga (`docs/design/personas/helga-368-b.md`) and Dr. Weber (`docs/design/personas/weber-368-b.md`)
+- [x] #368 slice B daten-pruefer on Weber's statement (`docs/reviews/368-B-datenpruefung-1.md`)
+- [ ] #368 slice B code review round 2 of the fixes (`docs/reviews/368-B-review-2.md`)
 - [ ] #368 slice B closing review, merge origin/main, pull request `Fixes #368`, merged on green CI
