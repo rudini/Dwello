@@ -96,8 +96,7 @@ const CHECK_RESULT: Record<string, () => string> = {
 export async function checkKiConnection(fetch: typeof globalThis.fetch, request: Request) {
 	const body = await entered(request);
 	// nothing to ask without an address (personas Anna P-5, Sven P-4)
-	if (!body.baseUrl?.trim())
-		return fail(400, { check: m.ki_settings_missing_base_url() });
+	if (!body.baseUrl?.trim()) return fail(400, { check: m.ki_settings_missing_base_url() });
 	const response = await send(fetch, 'POST', 'ki-settings/check', body);
 	const answer = await response.json().catch(() => ({}));
 	if (!response.ok)
