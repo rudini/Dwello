@@ -25,7 +25,14 @@ interface Apartment {
 	status: ApartmentStatus;
 }
 
-export const load: PageServerLoad = async ({ fetch }) => {
+// #368 (#407 point 3): a new contract from the old one of the same tenant starts with its agreed Nebenkosten
+async function agreedOf(fetch: typeof globalThis.fetch, contractId: string | null | undefined) {
+	if (!contractId) return null;
+	const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${contractId}`);
+	return response.ok ? ((await response.json()).agreedCategoryIds as string[]) : null;
+}
+
+export const load: PageServerLoad = async ({ fetch, url }) => {
 	// Fetch tenants and apartments in parallel
 	const [tenantsRes, apartmentsRes] = await Promise.all([
 		fetch(`${BACKEND_URL}/api/v1/tenants?limit=1000`), // far more than a small portfolio has
@@ -62,5 +69,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		status: statusLabels[a.status]
 	}));
 
-	return { tenants, apartments, categories: await agreeableCategories(fetch) };
+	return {
+		tenants,
+		apartments,
+		categories: await agreeableCategories(fetch),
+		agreed: await agreedOf(fetch, url?.searchParams.get('from'))
+	};
 };

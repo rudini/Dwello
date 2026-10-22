@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { load } from '../routes/contracts/new/+page.server';
 import allowed from '../../tests/contracts/categories-allowed.json';
+import contract from '../../tests/contracts/contract.json';
 
 describe('Neuer Mietvertrag laden', () => {
 	// A tenant just created must be in the list, however many tenants exist (the backend sends 50 by default)
@@ -16,6 +17,24 @@ describe('Neuer Mietvertrag laden', () => {
 			'http://localhost:3001/api/v1/apartments?limit=1000',
 			'http://localhost:3001/api/v1/categories/allowed' // the boxes of the agreed Nebenkosten (#91), all of them (#522)
 		]);
+	});
+
+	// #368 (#407 point 3, follow-up contract (a)): a new contract from the old one starts with its agreed Nebenkosten
+	it('übernimmt beim neuen Mietvertrag aus dem bisherigen dessen vereinbarte Nebenkosten', async () => {
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			if (url.endsWith('/contracts/c1')) return Response.json(contract);
+			return Response.json(url.includes('categories') ? [] : { tenants: [], apartments: [] });
+		}) as typeof globalThis.fetch;
+		const from = (query: string) =>
+			load({ fetch, url: new URL(`http://localhost:3000/contracts/new${query}`) } as never) as Promise<{
+				agreed: string[] | null;
+			}>;
+
+		expect((await from('?tenant=t1&start=2099-04-01&from=c1')).agreed).toEqual(contract.agreedCategoryIds);
+		expect(urls).toContain('http://localhost:3001/api/v1/contracts/c1');
+		expect((await from('?tenant=t1')).agreed).toBeNull();
 	});
 
 	// #522: the form lists every umlagefähige category; a limit counting all categories hid some

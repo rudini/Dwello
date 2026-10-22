@@ -88,6 +88,7 @@ Funktionalität: Barrierefreiheit
       | contract-new           | every-wizard-step   |
       | contract-new           | overlap-warning     |
       | contract-new           | rent-taken-over     |
+      | contract-new           | rent-follow-up      |
       | contract-new           | draft-restored      |
       | contract-new           | draft-discard-dialog |
       | contract-new           | contracts-unknown   |

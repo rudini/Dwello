@@ -146,7 +146,8 @@ describe('Mietvertragsdetail', () => {
 		expect(links).toEqual([
 			['Nachmieter erfassen', '/contracts/new?apartment=a1'],
 			// B-16 (#156): wer innerhalb des Hauses umzieht, braucht einen neuen Mietvertrag
-			['Neuen Mietvertrag für Anna Keller erfassen', '/contracts/new?tenant=t1'],
+			// #368 (code review C-2): with the agreed Nebenkosten of this contract
+			['Neuen Mietvertrag für Anna Keller erfassen', '/contracts/new?tenant=t1&from=c1'],
 			['Neue Adresse eintragen', '/tenants/t1/edit']
 		]);
 	});

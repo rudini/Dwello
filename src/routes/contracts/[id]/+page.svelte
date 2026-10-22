@@ -146,6 +146,7 @@
 		shown={data.nextSteps}
 		apartmentId={contract.apartmentId}
 		tenantId={contract.tenantId}
+		contractId={contract.id}
 		{name}
 	/>
 	<FixedTermCheck shown={data.fixedTermCheck} endDate={contract.endDate} {name} {form} />

@@ -7,6 +7,7 @@
 		tenants: { id: string; name: string; place?: string }[];
 		apartments: { id: string; unit: string; building: string; status: string }[];
 		categories: { id: string; name: string }[];
+		agreed: string[] | null;
 	}
 	let { data }: { data: PageData } = $props();
 </script>
@@ -21,5 +22,10 @@
 		purpose={m.contracts_new_purpose()}
 		trail={[{ href: '/contracts', label: m.nav_contracts() }]}
 	/>
-	<ContractWizard tenants={data.tenants} apartments={data.apartments} categories={data.categories} />
+	<ContractWizard
+		tenants={data.tenants}
+		apartments={data.apartments}
+		categories={data.categories}
+		agreed={data.agreed}
+	/>
 </div>

@@ -301,7 +301,7 @@
 			{#if contract.endDate}
 				<!-- for the same tenant, e.g. a move within the house (#156); the name keeps it from the Nachmieter -->
 				<a
-					href="/contracts/new?tenant={contract.tenantId}&start={nextDay(contract.endDate)}"
+					href="/contracts/new?tenant={contract.tenantId}&start={nextDay(contract.endDate)}&from={contract.id}"
 					class={link}
 					data-testid="contract-parties-new">{m.contracts_new_for_tenant({ name: tenant })}</a
 				>

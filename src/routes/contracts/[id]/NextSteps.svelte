@@ -10,11 +10,13 @@
 		shown,
 		apartmentId,
 		tenantId,
+		contractId,
 		name
 	}: {
 		shown: { successor: boolean; ended: boolean } | null;
 		apartmentId: string;
 		tenantId: string;
+		contractId: string; // the new contract of the same tenant takes its agreed Nebenkosten (#368)
 		name: string;
 	} = $props();
 </script>
@@ -36,7 +38,7 @@
 					>
 				{/if}
 				{#if !shown.ended}
-					<Button href="/contracts/new?tenant={tenantId}" icon="contract"
+					<Button href="/contracts/new?tenant={tenantId}&from={contractId}" icon="contract"
 						>{m.contracts_new_for_tenant({ name })}</Button
 					>
 				{/if}

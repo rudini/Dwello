@@ -53,11 +53,13 @@
 	let {
 		tenants,
 		apartments,
-		categories
+		categories,
+		agreed = null
 	}: {
 		tenants: { id: string; name: string; place?: string }[];
 		apartments: { id: string; unit: string; building: string; size?: string }[];
 		categories: { id: string; name: string }[]; // the umlagefähige ones it can agree (#91)
+		agreed?: string[] | null; // a contract from the old one: its agreed Nebenkosten (#368)
 	} = $props();
 
 	const DRAFT = 'contract';
@@ -66,8 +68,14 @@
 	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
 	const params = untrack(() => $page.url.searchParams);
 	const today = new Date().toLocaleDateString('sv-SE'); // local YYYY-MM-DD
-	let values = $state(initialContractValues(undefined, params));
+	let values = $state(
+		untrack(() => ({
+			...initialContractValues(undefined, params),
+			...(agreed && { agreedCategoryIds: agreed })
+		}))
+	);
 	let step = $state(1);
+	const agreedHelp = $derived(agreed ? m.contracts_agreed_costs_help_follow_up() : undefined);
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
 	let savedAt = $state<Date | null>(null);
@@ -128,7 +136,8 @@
 			apartmentIds: apartments.map((a) => a.id)
 		};
 		const start = startValues(given, draft.values, known);
-		values = start.values;
+		// a contract from the old one keeps that one's agreed Nebenkosten (#368, code review C-1)
+		values = { ...start.values, ...(agreed && { agreedCategoryIds: agreed }) };
 		restored = { at: draft.savedAt, dropped: start.dropped };
 	}
 
@@ -341,7 +350,13 @@
 				{errors}
 			/>
 		{:else if step === 4}
-			<RentStep bind:values {errors} {takenFrom} {categories} />
+			<RentStep
+				bind:values
+				{errors}
+				{takenFrom}
+				{categories}
+				{agreedHelp}
+			/>
 		{:else}
 			<ReviewStep
 				values={offeredBilledUntil(values, today)}

@@ -117,6 +117,50 @@ describe('Mietvertrag erfassen', () => {
 		expect(document.activeElement).toBe(document.querySelector('h2'));
 	});
 
+	// #368 (#407 point 3, follow-up contract (a)): the new contract keeps the old one's agreed Nebenkosten and says so
+	it('übernimmt beim neuen Mietvertrag aus dem bisherigen die vereinbarten Nebenkosten', async () => {
+		const categories = [
+			{ id: 'k1', name: 'Heizung' },
+			{ id: 'k2', name: 'Lift' }
+		];
+		show(NewContractPage, { data: { ...data, categories, agreed: ['k1'] } } as never);
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+
+		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
+		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
+		expect(document.getElementById('agreed-costs-help')!.textContent).toBe(
+			// persona Helga #368 A P-1: compare with the signed new contract, no official form needed for it
+			'Dwello hat die vereinbarten Nebenkosten aus dem bisherigen Mietvertrag übernommen. Vergleichen Sie sie mit dem unterschriebenen neuen Mietvertrag: Kreuzen Sie jede an, die dort steht, und entfernen Sie das Häkchen bei jeder, die dort nicht steht. Nur angekreuzte Nebenkosten rechnet Dwello dem Mieter ab.'
+		);
+	});
+
+	// code review #368 C-1: a draft kept in the browser does not undo the takeover
+	it('übernimmt die vereinbarten Nebenkosten auch über einen Entwurf hinweg', async () => {
+		const categories = [
+			{ id: 'k1', name: 'Heizung' },
+			{ id: 'k2', name: 'Lift' }
+		];
+		writeDraft(localStorage, 'contract', { tenantId: 't1', agreedCategoryIds: ['k2'] }, new Date());
+		show(NewContractPage, { data: { ...data, categories, agreed: ['k1'] } } as never);
+		await settle();
+		next();
+		await settle();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '01.01.2027');
+		next();
+
+		expect(byTestId<HTMLInputElement>('contract-category-k1')!.checked).toBe(true);
+		expect(byTestId<HTMLInputElement>('contract-category-k2')!.checked).toBe(false);
+		localStorage.clear();
+	});
+
 	it('verliert beim Zurückgehen keine Angaben', async () => {
 		await open();
 		select('contract-tenant-select', 't2');
