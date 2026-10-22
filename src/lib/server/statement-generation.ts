@@ -16,6 +16,7 @@ type Contract = {
 	billedUntil?: string | null;
 	terminated?: boolean;
 	tenantName: string;
+	apartmentId?: string;
 	apartmentNumber: string;
 	managementFeeAgreed?: boolean;
 	managementFeePercent?: string | null; // its own rate, before the run's (#89)
@@ -149,6 +150,13 @@ async function contractsInPeriod(fetch: Fetch, request: Run) {
 	if (refusals.length) throw new Error(refusals.join(' '));
 	return buildings.flatMap(({ buildingId, inPeriod, billed }) =>
 		inPeriod.filter((c) => !billed.includes(c)).map((contract) => ({ buildingId, contract }))
+	);
+}
+
+// The contracts a run would bill: in the period and without a statement there yet (#387, Fachreview 387-1 V-3)
+export async function unbilledContracts(fetch: Fetch, request: Run) {
+	return (await contractsOf(fetch, request)).flatMap(({ inPeriod, billed }) =>
+		inPeriod.filter((c) => !billed.includes(c))
 	);
 }
 

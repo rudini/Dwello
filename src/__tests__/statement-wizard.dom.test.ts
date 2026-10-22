@@ -206,7 +206,7 @@ describe('Abrechnungen erstellen', () => {
 		} as never);
 		await settle();
 		expect(byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Das Heizprofil ist wie bei der Nebenkostenabrechnung des Vor- oder Nachmieters derselben Wohnung eingestellt, die Verwaltungspauschale kommt aus den Einstellungen. Prüfen Sie beides und gehen Sie weiter zur Vorschau.'
+			'Beim Mieterwechsel ist das Heizprofil wie bei der bestehenden Nebenkostenabrechnung derselben Wohnung eingestellt, die Verwaltungspauschale kommt aus den Einstellungen. Prüfen Sie beides und gehen Sie weiter zur Vorschau.'
 		);
 	});
 
