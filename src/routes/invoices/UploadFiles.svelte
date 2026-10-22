@@ -3,10 +3,15 @@
 	import Field from '$lib/ui/Field.svelte';
 	import FileInput from '$lib/ui/FileInput.svelte';
 
-	// Where files are chosen or dropped; closed until the building is chosen
-	let { enabled, onfiles }: { enabled: boolean; onfiles: (files: File[]) => void } = $props();
+	// Where files are chosen or dropped; closed until the building is chosen; with «Keine KI» nobody reads them (#626)
+	let {
+		enabled,
+		kiOff = false,
+		onfiles
+	}: { enabled: boolean; kiOff?: boolean; onfiles: (files: File[]) => void } = $props();
 
-	const help = $derived(enabled ? m.invoices_upload_files_help() : m.invoices_upload_building_first());
+	const filesHelp = () => (kiOff ? m.invoices_upload_files_help_no_ki() : m.invoices_upload_files_help());
+	const help = $derived(enabled ? filesHelp() : m.invoices_upload_building_first());
 
 	function choose(event: Event) {
 		const input = event.target as HTMLInputElement;

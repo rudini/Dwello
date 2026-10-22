@@ -1019,6 +1019,7 @@
 	"invoices_upload_files_label": "Dateien hierher ziehen oder auswählen",
 	"invoices_upload_files_choose": "Dateien auswählen",
 	"invoices_upload_files_help": "PDF, JPG oder PNG, je höchstens 10 MB, bis zu 20 Dateien auf einmal. Ausgewählte Dateien liest die KI sofort aus.",
+	"invoices_upload_files_help_no_ki": "PDF, JPG oder PNG, je höchstens 10 MB, bis zu 20 Dateien auf einmal.",
 	"invoices_upload_too_many": "Sie können höchstens 20 Dateien auf einmal hochladen. Die übrigen wurden nicht hinzugefügt.",
 	"invoices_upload_keep_original": "Bewahren Sie die Originalrechnung auf; Mieter dürfen sie einsehen.",
 	"invoices_upload_kept": "Dwello speichert die Datei jeder erstellten Rechnung als Beleg. Dateien, aus denen Sie keine Rechnung erstellen, speichert Dwello nicht.",

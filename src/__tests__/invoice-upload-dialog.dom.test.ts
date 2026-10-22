@@ -169,6 +169,10 @@ describe('Rechnungen hochladen', () => {
 		expect(byTestId('invoice-upload-purpose')!.textContent).toBe(
 			'Wählen Sie das Gebäude und die Dateien Ihrer Rechnungen. Es ist «Keine KI» gewählt: Sie geben die Angaben selbst ein, bevor Dwello die Rechnungen erstellt.'
 		);
+		// code review 626 C-1: also the help at the files, once the building is chosen
+		chooseBuilding();
+		expect(document.body.textContent).toContain('bis zu 20 Dateien auf einmal.');
+		expect(document.body.textContent).not.toContain('liest die KI');
 	});
 
 	it('nimmt Dateien erst, wenn das Gebäude gewählt ist, und erinnert an die Originalrechnung', () => {

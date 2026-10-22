@@ -264,7 +264,7 @@
 		testid="invoice-upload-building-select"
 	/>
 
-	<UploadFiles enabled={!!buildingId} onfiles={(files) => void add(files)} />
+	<UploadFiles enabled={!!buildingId} {kiOff} onfiles={(files) => void add(files)} />
 
 	{#if tooMany}
 		<Alert tone="caution" title={m.invoices_upload_too_many_title()}><p>{m.invoices_upload_too_many()}</p></Alert>

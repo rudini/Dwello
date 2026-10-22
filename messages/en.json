@@ -1019,6 +1019,7 @@
 	"invoices_upload_files_label": "Drag files here or choose them",
 	"invoices_upload_files_choose": "Choose files",
 	"invoices_upload_files_help": "PDF, JPG or PNG, at most 10 MB each, up to 20 files at once. The AI reads the chosen files immediately.",
+	"invoices_upload_files_help_no_ki": "PDF, JPG or PNG, at most 10 MB each, up to 20 files at once.",
 	"invoices_upload_too_many": "You can upload at most 20 files at once. The others were not added.",
 	"invoices_upload_keep_original": "Keep the original invoice; tenants may inspect it.",
 	"invoices_upload_kept": "Dwello stores the file of each invoice created as its supporting document. Files from which you create no invoice are not stored.",

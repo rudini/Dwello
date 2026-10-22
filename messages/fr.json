@@ -1019,6 +1019,7 @@
 	"invoices_upload_files_label": "Glisser les fichiers ici ou les choisir",
 	"invoices_upload_files_choose": "Choisir des fichiers",
 	"invoices_upload_files_help": "PDF, JPG ou PNG, 10 Mo au plus chacun, jusqu’à 20 fichiers à la fois. L’IA lit les fichiers choisis immédiatement.",
+	"invoices_upload_files_help_no_ki": "PDF, JPG ou PNG, 10 Mo au plus chacun, jusqu’à 20 fichiers à la fois.",
 	"invoices_upload_too_many": "Vous pouvez téléverser 20 fichiers au plus à la fois. Les autres n’ont pas été ajoutés.",
 	"invoices_upload_keep_original": "Conservez la facture originale ; les locataires ont le droit de la consulter.",
 	"invoices_upload_kept": "Dwello enregistre le fichier de chaque facture créée comme pièce justificative. Dwello n’enregistre pas les fichiers dont vous ne créez pas de facture.",

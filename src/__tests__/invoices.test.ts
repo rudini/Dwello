@@ -175,6 +175,21 @@ describe('Rechnungsliste mit «Rechnungen hochladen»', () => {
 		expect(await load('none')).toBe(true);
 		expect(await load('local')).toBe(false);
 	});
+
+	// code review 626 C-2: without an answer about the KI the list still loads, with the usual text
+	it('zeigt die Liste, auch wenn die KI-Einstellung nicht antwortet', async () => {
+		const { fetch: answers } = backend({ '/invoices': { invoices: [invoice()], total: 1 } });
+		const fetch = (async (url: string) =>
+			url.includes('/ki-settings') ? Promise.reject(new Error('down')) : answers(url)) as typeof globalThis.fetch;
+
+		const data = (await listLoad({ url: new URL('http://localhost/invoices'), fetch } as never)) as {
+			invoices: unknown[];
+			kiOff: boolean;
+		};
+
+		expect(data.invoices).toHaveLength(1);
+		expect(data.kiOff).toBe(false);
+	});
 });
 
 describe('Rechnungsdetail', () => {
