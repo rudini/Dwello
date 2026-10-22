@@ -58,7 +58,7 @@ docker logs dwello-backend
 
 The first start builds Dwello, which takes several minutes. `docker-compose.prod.yml` publishes the backend (3001), the database (5432) and the AI (11434) on all network interfaces, also on a PC: keep them closed in the firewall of the PC or router.
 
-The log of the backend shows the **Einrichtungscode** (setup code), e.g. `[setup] Einrichtungscode: K7QF-2MXD`. Open `http://localhost:3000`: Dwello shows «Dwello einrichten». The landlord enters the code, their e-mail address and a password twice (at least 8 characters, best a long one used nowhere else), and is then signed in. Only who knows the code can set Dwello up; a new code is made on each start until the account exists, and 5 wrong codes lock the setup for 15 minutes.
+The log of the backend shows the **Einrichtungscode** (setup code), e.g. `[setup] Einrichtungscode: K7QF-2MXD`. Open `http://localhost:3000`: Dwello shows «Dwello einrichten». The landlord enters the code, their e-mail address and a password twice (at least 8 characters, best a long one used nowhere else), chooses «Lokale KI auf diesem Server» or «Später entscheiden» (then no KI reads invoices and no model is downloaded until a KI is chosen under «Einstellungen» › «KI», section 6), and is then signed in. Only who knows the code can set Dwello up; a new code is made on each start until the account exists, and 5 wrong codes lock the setup for 15 minutes.
 
 The AI model (about 6 GB) then downloads by itself; the overview shows how far it is, and until then invoices are entered by hand. If the download fails, Dwello tries again at the next start (`docker compose -f docker-compose.prod.yml restart backend`).
 
