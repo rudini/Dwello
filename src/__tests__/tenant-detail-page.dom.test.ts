@@ -231,6 +231,22 @@ describe('Mieterdetail', () => {
 		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-upload-button')));
 	});
 
+	// #489 (#455): der Knopf des Browsers spricht die Sprache des Browsers; ein eigener Knopf spricht die der Oberfläche
+	it('bietet die Datei des Dokuments mit einem eigenen Knopf an und nennt die gewählte Datei', () => {
+		open();
+		const input = byTestId<HTMLInputElement>('tenant-document-file-input')!;
+		const choose = byTestId('tenant-document-file-choose')!;
+		expect(choose.textContent!.trim()).toBe('Datei auswählen');
+		expect(choose.closest('label')!.htmlFor).toBe(input.id);
+		expect(input.classList).toContain('sr-only');
+		expect(input.name).toBe('file');
+		expect(text('tenant-document-file-chosen')).toBe('Keine Datei ausgewählt');
+		Object.defineProperty(input, 'files', { value: [new File(['%PDF-'], 'betreibung.pdf')], configurable: true });
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+		expect(text('tenant-document-file-chosen')).toBe('betreibung.pdf');
+	});
+
 	it('meldet ein hochgeladenes Dokument', async () => {
 		toasts.set([]);
 		open([], null, []);

@@ -8,7 +8,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
-	import { controlClass } from '$lib/ui/field';
+	import FileInput from '$lib/ui/FileInput.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 
 	// Adds a file to the tenant: PDF, JPG or PNG up to 10 MB with a title; a refusal shows at its field
@@ -30,6 +30,10 @@
 	let uploadForm = $state<HTMLFormElement>();
 
 	let unanswered = $state(false);
+	let chosenName = $state(''); // the file chosen, said beside its button: the browser's own speaks its language (#489)
+	let fileInput = $state<HTMLInputElement>();
+	const chosen = $derived(chosenName || m.tenants_document_file_none());
+	const choose = () => (chosenName = fileInput?.files?.[0]?.name ?? '');
 
 	async function notAnswered() {
 		unanswered = true;
@@ -40,6 +44,7 @@
 	async function uploaded(title_: string) {
 		uploadForm?.reset();
 		title = '';
+		chosenName = '';
 		addToast('success', m.tenants_document_uploaded_toast({ title: title_ }));
 		await tick();
 		uploadForm?.querySelector<HTMLElement>('input[type="file"]')?.focus();
@@ -91,15 +96,14 @@
 		error={failed ?? form?.uploadError}
 	>
 		{#snippet children(control)}
-			<input
-				id={control.id}
+			<FileInput
+				bind:input={fileInput}
+				{control}
 				name="file"
-				type="file"
-				accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-				aria-describedby={control.describedBy}
-				aria-invalid={control.invalid || undefined}
-				class={controlClass(control.invalid)}
-				data-testid="tenant-document-file-input"
+				choose={m.tenants_document_file_choose()}
+				{chosen}
+				onchange={choose}
+				testid="tenant-document-file"
 			/>
 		{/snippet}
 	</Field>

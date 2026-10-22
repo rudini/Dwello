@@ -251,9 +251,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(changeAdvancePaymentFrom('2025-01-01', '230.00'), Wait.until(on.formProblem)),
 	// the tenant's uploaded document (fixtures/screens.ts)
 	'document-delete-dialog': () => openDialog(deleteDocumentButton(UPLOADED)),
-	// a file Dwello does not take: the refusal at the file field
+	// a file Dwello does not take: the refusal at the file field; its name shows beside the button (#489), so no German word
 	'upload-refused': () => (actor) =>
-		actor.attemptsTo(uploadDocument(wordFile('notizen.docx'), ''), Wait.until(on.formProblem)),
+		actor.attemptsTo(uploadDocument(wordFile('notes.docx'), ''), Wait.until(on.formProblem)),
 	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),
 	'upload-dialog': (example) => (actor) => {
 		// the stand-in finds deducted amounts and costs that are not allocable in a file so named; the UUID marks it user data

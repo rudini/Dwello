@@ -1840,6 +1840,8 @@
 	"contracts_notice_hint_link": "Saisir la résiliation avec « Terminer »",
 	"tenants_document_upload_heading": "Téléverser un document",
 	"tenants_document_file_label": "Fichier",
+	"tenants_document_file_choose": "Choisir un fichier",
+	"tenants_document_file_none": "Aucun fichier choisi",
 	"tenants_document_file_help": "PDF, JPG ou PNG, 10 Mo au maximum. Supprimez les copies de pièces d’identité et les extraits du registre des poursuites dès que vous n’en avez plus besoin.",
 	"tenants_document_title_label": "Titre",
 	"tenants_document_title_help": "Sans titre, le document porte le nom du fichier, sans extension.",

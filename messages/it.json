@@ -1840,6 +1840,8 @@
 	"contracts_notice_hint_link": "Registrare la disdetta con «Terminare»",
 	"tenants_document_upload_heading": "Caricare un documento",
 	"tenants_document_file_label": "File",
+	"tenants_document_file_choose": "Scegliere un file",
+	"tenants_document_file_none": "Nessun file scelto",
 	"tenants_document_file_help": "PDF, JPG o PNG, al massimo 10 MB. Elimini le copie di documenti d’identità e gli estratti del registro delle esecuzioni non appena non le servono più.",
 	"tenants_document_title_label": "Titolo",
 	"tenants_document_title_help": "Senza titolo, il documento porta il nome del file, senza estensione.",
