@@ -137,6 +137,7 @@
 
 	// What the KI reads from a file; without the KI or a readable file the property manager fills in the fields
 	async function read(key: number) {
+		if (kiOff) return update(key, (row) => withoutKi(row, 'off'));
 		update(key, (row) => ({ ...row, status: 'reading' }));
 		const { file } = rows.find((one) => one.key === key)!;
 		if (!pages[key]) {

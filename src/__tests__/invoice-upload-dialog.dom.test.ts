@@ -175,6 +175,28 @@ describe('Rechnungen hochladen', () => {
 		expect(document.body.textContent).not.toContain('liest die KI');
 	});
 
+	// persona Anna 626 P-1, P-2: with «Keine KI» the file is not sent to be read, and no note says a KI did not read it
+	it('schickt bei «Keine KI» keine Datei zum Auslesen und nennt keine KI', async () => {
+		const calls = fakeBff(() => [503, { code: 'EXTRACTION_UNAVAILABLE' }]);
+		show(InvoiceUploadDialog, {
+			open: true,
+			buildings,
+			categories: categories as never,
+			distributionKeys: [],
+			defaultDistributionKeyId: '',
+			kiOff: true,
+			oncreated: vi.fn()
+		});
+		chooseBuilding();
+
+		await upload(pdf('rechnung.pdf'));
+
+		expect(calls.map((call) => call.path)).not.toContain('/invoices/extract');
+		expect(rowText()[0]).toContain('rechnung.pdf');
+		expect(rowText()[0]).not.toContain('KI');
+		expect(rowText()[0]).not.toContain('nicht öffnen');
+	});
+
 	it('nimmt Dateien erst, wenn das Gebäude gewählt ist, und erinnert an die Originalrechnung', () => {
 		open(() => [200, read]);
 		expect(byTestId<HTMLInputElement>('invoice-upload-file-input')!.disabled).toBe(true);
