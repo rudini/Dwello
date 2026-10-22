@@ -111,6 +111,24 @@
 					/>
 				</div>
 			</div>
+			<!-- #465: in the statement's letterhead only (Fachreview 465-1 V-3) -->
+			<SettingField
+				type="tel"
+				name="companyPhone"
+				label={m.tenants_phone()}
+				value={settings.companyPhone}
+				help={m.settings_phone_help()}
+				example="044 123 45 67"
+			/>
+			<SettingField
+				type="email"
+				name="companyEmail"
+				label={m.tenants_email()}
+				value={settings.companyEmail}
+				error={errors.companyEmail}
+				help={m.settings_email_help()}
+				example="info@example.ch"
+			/>
 			<SettingField
 				name="iban"
 				label="IBAN"

@@ -152,6 +152,9 @@ export interface StatementMailInput {
 /** What the statement's Dokument is called in the tenant's language, sent by e-mail or by letter */
 export const statementTitle = (language: Language) => WORDING[language].statementTitle;
 
+// The salutation and greeting of a letter, shared with the statement PDF (#465)
+export const greetingWords = (language: Language) => ({ salutation: WORDING[language].salutation, closing: WORDING[language].closing });
+
 /** The e-mail that sends a statement's PDF: its title also names the stored Dokument */
 export function statementMail(input: StatementMailInput) {
 	const w = WORDING[input.language];

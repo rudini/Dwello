@@ -19,7 +19,7 @@
 		help?: string;
 		example?: string;
 		invalidBy?: string; // see Field
-		type?: 'text' | 'decimal' | 'number'; // decimal: a text field with the decimal keypad, takes a comma; number: whole numbers
+		type?: 'text' | 'decimal' | 'number' | 'tel' | 'email'; // decimal: a text field with the decimal keypad, takes a comma; number: whole numbers; tel, email: their keypads (#465)
 	} = $props();
 </script>
 
@@ -28,7 +28,7 @@
 	{name}
 	{label}
 	type="text"
-	inputmode={type === 'text' ? undefined : type === 'decimal' ? 'decimal' : 'numeric'}
+	inputmode={type === 'text' ? undefined : type === 'number' ? 'numeric' : type}
 	{value}
 	{error}
 	{help}

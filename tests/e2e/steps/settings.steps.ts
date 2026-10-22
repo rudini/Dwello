@@ -11,6 +11,8 @@ const FIELDS: Record<string, string> = {
 	Adresse: 'companyAddress',
 	PLZ: 'companyPostalCode',
 	Ort: 'companyCity',
+	Telefon: 'companyPhone',
+	'E-Mail': 'companyEmail',
 	IBAN: 'iban',
 	Zahlungsfrist: 'paymentDeadlineDays',
 	'Zahlungsfrist (Tage)': 'paymentDeadlineDays',
@@ -44,6 +46,15 @@ Then(
 	async ({ verwalter }, iban: string) => {
 		await verwalter.attemptsTo(openSettings);
 		await verwalter.sees(storedSetting('iban')).toBe(iban);
+	}
+);
+
+Then(
+	'nach erneutem Öffnen der Einstellungen sind das Telefon {string} und die E-Mail {string} hinterlegt',
+	async ({ verwalter }, phone: string, email: string) => {
+		await verwalter.attemptsTo(openSettings);
+		await verwalter.sees(storedSetting('companyPhone')).toBe(phone);
+		await verwalter.sees(storedSetting('companyEmail')).toBe(email);
 	}
 );
 

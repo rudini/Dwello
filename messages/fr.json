@@ -1514,6 +1514,8 @@
 	"config_help_accounting_period": "Période pour laquelle vous décomptez les frais accessoires, par exemple année civile (01.01.–31.12.), juillet–juin ou novembre–octobre.",
 	"settings_purpose": "Expéditeur des décomptes et des rappels, propositions pour les nouveaux décomptes et factures, et données de base.",
 	"settings_sender": "Expéditeur",
+	"settings_phone_help": "Facultatif. Figure en en-tête du décompte des charges, pour que vos locataires puissent vous joindre en cas de question.",
+	"settings_email_help": "Facultatif. Figure en en-tête du décompte des charges, pour que vos locataires puissent vous écrire.",
 	"settings_sender_text": "Figure sur chaque décompte et chaque rappel. Avec l’IBAN, Dwello crée la QR-facture.",
 	"settings_company_name": "Nom de l’entreprise",
 	"settings_company_name_example": "Immobilier Modèle SA",

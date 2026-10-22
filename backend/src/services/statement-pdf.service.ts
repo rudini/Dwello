@@ -5,7 +5,7 @@
 
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, utilityStatements, type KeyValues } from '../db/schema';
+import { categories, distributionKeys, utilityStatements, type HeatingSources, type KeyValues } from '../db/schema';
 import { belowMinimum, roundToRappen } from './pdf-format';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
@@ -13,6 +13,7 @@ import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.ser
 import { datedToday, getStatement, keyValuesOf, updateStatementStatus, type StatementWithDetails } from './statement.service';
 import { refusal } from './coded-error';
 import { billingStart, getContract } from './contract.service';
+import { sourcesOf } from './heating-profile.service';
 
 // Creditor of the QR-bill from the company configuration, as entered (#450); null without IBAN
 export async function qrBillConfig(): Promise<QRBillConfig | null> {
@@ -23,7 +24,8 @@ export async function qrBillConfig(): Promise<QRBillConfig | null> {
 	const iban = await getTypedConfig('iban');
 	if (!iban) return null;
 
-	return { iban, companyName, address: companyAddress, postalCode: companyPostalCode, city: companyCity };
+	const [phone, email] = [await getTypedConfig('company_phone'), await getTypedConfig('company_email')];
+	return { iban, companyName, address: companyAddress, postalCode: companyPostalCode, city: companyCity, phone, email };
 }
 
 // Name and postal address as stored; a statement without tenant prints no recipient
@@ -169,6 +171,13 @@ function minimumOf(statement: StatementWithDetails) {
 	return statement.final && statement.status !== 'settled' ? {} : { carried: true };
 }
 
+// Where the monthly shares come from, as created (#465, Fachreview 465-1 V-4): null an own profile; one created before
+// names its profile's as it is now, none when it was deleted
+function sourceOf(stored: HeatingSources | null | undefined, profile: StatementWithDetails['heatingProfile'], language: Language) {
+	const sources = stored !== undefined ? stored : profile ? sourcesOf(profile) : undefined;
+	return sources === null ? null : sources && (sources[language] ?? sources.de);
+}
+
 // The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs
 function heatingOf(statement: StatementWithDetails, language: Language, hasHeating: boolean, lineShare?: string | null) {
 	// as the statement was calculated, also after the profile changed (#209); one created before gets no note (#232, C-5)
@@ -177,7 +186,8 @@ function heatingOf(statement: StatementWithDetails, language: Language, hasHeati
 	// the heating position's share where there is one: shares stored under #209 were rounded differently (#229)
 	const percent = lineShare == null ? stored.percent : parseFloat(lineShare) * 100;
 	const { months, periodPercent, periodMonths } = stored;
-	return { heating: { profile: localName(stored.names, language), percent, months, periodPercent, periodMonths } };
+	const source = sourceOf(stored.sources, statement.heatingProfile, language);
+	return { heating: { profile: localName(stored.names, language), percent, months, periodPercent, periodMonths, source } };
 }
 
 // A tank in the period: its category's costs are opening stock + the invoices – closing stock (Art. 5 Abs. 2 lit. a VMWG),

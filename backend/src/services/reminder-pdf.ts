@@ -1,6 +1,6 @@
 import { once } from 'events';
 import PDFDocument from 'pdfkit';
-import { addPaymentPart, type Language } from './pdf.service';
+import { addPaymentPart, embedFonts, FONT, type Language } from './pdf.service';
 import type { QRBillConfig } from './qr-bill.service';
 import { countryLine } from './postal-address';
 import type { reminderLetter } from './reminder-letter';
@@ -33,16 +33,16 @@ export async function renderReminderPdf(
 		language: Language;
 	}
 ) {
-	const doc = new PDFDocument({ size: 'A4', margins: { top: 50, bottom: 50, left: 70, right: 60 } });
+	const doc = embedFonts(new PDFDocument({ size: 'A4', margins: { top: 50, bottom: 50, left: 70, right: 60 } }));
 	const finished = once(doc, 'end');
 	const pages: Buffer[] = [];
 	doc.on('data', (page: Buffer) => pages.push(page));
 
-	doc.font('Helvetica').fontSize(9).fillColor('#616f89').text(lines(sender), 70, 50);
+	doc.font(FONT.regular).fontSize(9).fillColor('#616f89').text(lines(sender), 70, 50);
 	doc.fontSize(11).fillColor('#111318').text(lines(recipient), 330, 140, { width: 200 });
 	doc.text(`${sender.city ?? ''}, ${date}`.replace(/^, /, ''), 70, 215);
-	doc.font('Helvetica-Bold').fontSize(14).text(letter.subject, 70, 245);
-	doc.font('Helvetica').fontSize(11).moveDown().text(`${letter.salutation},`);
+	doc.font(FONT.bold).fontSize(14).text(letter.subject, 70, 245);
+	doc.font(FONT.regular).fontSize(11).moveDown().text(`${letter.salutation},`);
 	for (const paragraph of letter.paragraphs) doc.moveDown().text(paragraph, { width: 455 });
 	doc.moveDown(1.5).text(letter.closing);
 	if (payment) await addPaymentPart(doc, payment.statement, payment.config, payment.language);

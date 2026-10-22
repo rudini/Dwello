@@ -67,6 +67,17 @@ export const CONFIG_KEYS = {
 		validator: (v: string) => v.length <= 100,
 		default: ''
 	},
+	// #465 (#103, DMR-09): the Verwaltung's phone and e-mail in the statement's letterhead, both optional
+	company_phone: {
+		type: 'string',
+		validator: (v: string) => v.length <= 50,
+		default: ''
+	},
+	company_email: {
+		type: 'string',
+		validator: (v: string) => v === '' || (v.length <= 255 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)),
+		default: ''
+	},
 	iban: {
 		type: 'string',
 		// Checksum too: the QR-bill cannot be created with a wrong IBAN

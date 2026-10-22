@@ -286,10 +286,12 @@ describe('PDF einer Nachzahlung', () => {
 		expect(pdf.flowing.split('Kategorie Verteilschlüssel').length - 1).toBe(pdf.pages - 1);
 	});
 
-	it('schreibt Zeichen ausserhalb der Schrift lesbar, statt sie zu verstümmeln', async () => {
+	// #465 (#103, CD-8): the embedded font prints every character as entered
+	it('druckt jedes Zeichen eines Namens so, wie es erfasst ist', async () => {
 		const pdf = await textOf({ ...due, tenant: { ...due.tenant, firstName: 'Łukasz', lastName: 'Dragoș' } });
 
-		expect(pdf.flowing).toContain('Lukasz Dragos');
+		expect(pdf.flowing).toContain('Łukasz Dragoș');
+		expect(pdf.flowing).not.toContain('Lukasz');
 	});
 
 	it('nennt die Grundlage der Verwaltungspauschale als Zwischensumme', async () => {
@@ -542,12 +544,11 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 
 	// #451, Punkt 3 (#256 P-5): «Ihre / Mietstage» brach über zwei Zeilen; ein geschütztes Leerzeichen hält es zusammen
 	it('trennt «Ihre Mietstage» nicht über zwei Zeilen', async () => {
-		const { streams } = await textOf(mixed);
-		const printed = streams.join('').replace(/>\s*-?[\d.]+\s*</g, '').toLowerCase(); // the hex strings, kerning removed
-		const hex = (text: string) => Buffer.from(text, 'latin1').toString('hex');
+		const { text } = await textOf(mixed);
 
-		expect(printed).toContain(hex('Ihre\u00a0Mietstage 47'));
-		expect(printed).not.toContain(hex('Ihre Mietstage 47'));
+		// each line of the PDF is one piece of text: the protected space keeps both words on one line
+		expect(text).toContain('Ihre Mietstage 47');
+		expect(text).not.toMatch(/Ihre\s*\n\s*Mietstage/);
 	});
 
 	// #451, Punkt 1 (Fachreview V-6): eine Gutschrift über die Mietstage, die Rechnung davor: der Zeitanteil ist negativ,
@@ -964,5 +965,45 @@ describe('Akonto als Monate mal Betrag im PDF', () => {
 
 	it('zeigt bei einer älteren Abrechnung ohne gespeicherte Zeilen nur die Summe', async () => {
 		expect((await textOf(refund)).flowing).not.toContain('Monate ×');
+	});
+});
+
+// #465 (#103, DIV-14, DMR-09, DMR-10; Fachreview 465-1): the statement is a letter: letterhead with the Verwaltung's
+// contact, place and date, salutation and introduction, the greeting after the notes; the Heizprofil's source
+describe('Brief im PDF', () => {
+	const contact = { ...config, phone: '044 123 45 67', email: 'info@muster.ch' };
+	const letterOf = async (data: StatementPDFData, sender: object = contact, language: 'de' | 'fr' = 'de') =>
+		readPdf(Buffer.from(await generateStatementPDFBase64(data, sender as typeof config, language), 'base64'));
+
+	it('beginnt mit Briefkopf, Ort und Datum, Anrede und Einleitung und endet mit dem Gruss', async () => {
+		const { flowing, pageTexts } = await letterOf(due);
+
+		expect(pageTexts[0]).toContain('Muster Immobilien AG\nFirmenweg 9\n8001 Zürich\nTelefon 044 123 45 67\ninfo@muster.ch');
+		expect(flowing).toContain('Zürich, 15.02.2026');
+		expect(flowing).toContain('Guten Tag Nina Brunner, Sie erhalten die Nebenkostenabrechnung für die Abrechnungsperiode 01.01.2025 – 31.12.2025.');
+		expect(flowing).toMatch(/Art\. 257b Abs\. 2 OR\)\. Freundliche Grüsse Muster Immobilien AG/);
+		expect(flowing.indexOf('Freundliche Grüsse')).toBeLessThan(flowing.indexOf('Empfangsschein'));
+	});
+
+	it('lässt Telefon und E-Mail weg, wenn sie fehlen', async () => {
+		const { pageTexts } = await letterOf(due, config);
+
+		expect(pageTexts[0]).toContain('Muster Immobilien AG\nFirmenweg 9\n8001 Zürich\n');
+		expect(pageTexts[0]).not.toContain('Telefon');
+	});
+
+	it('schreibt den Brief in der Sprache des Mieters', async () => {
+		const { flowing } = await letterOf(due, contact, 'fr');
+
+		expect(flowing).toContain('Téléphone 044 123 45 67');
+		expect(flowing).toContain('Bonjour Nina Brunner, Veuillez trouver ci-dessous le décompte des charges pour la période de décompte du 01.01.2025 au 31.12.2025.');
+		expect(flowing).toContain('Meilleures salutations Muster Immobilien AG');
+	});
+
+	it('nennt die Quelle der Monatsanteile des Heizprofils', async () => {
+		const months = [{ month: 1, percentage: 18 }];
+		const { flowing } = await letterOf({ ...heated, heating: { profile: 'Winter', percent: 18, months, source: 'Eigenes Profil des Vermieters' } });
+
+		expect(flowing).toContain('Quelle der Monatsanteile: Eigenes Profil des Vermieters');
 	});
 });

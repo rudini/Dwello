@@ -26,3 +26,10 @@ describe('Adresse im Mahnschreiben', () => {
 		expect(await textOf({ ...abroad, country: 'CH' })).not.toContain('SCHWEIZ');
 	});
 });
+
+// #465 (code review 465-1 C-3): the reminder embeds the statement's font, so every character prints as entered
+describe('Zeichen im Mahnschreiben', () => {
+	it('druckt einen Namen mit Sonderzeichen so, wie er erfasst ist', async () => {
+		expect(await textOf({ name: 'Łukasz Dragoș', address: 'Seeweg 15', postalCode: '6003', city: 'Luzern' })).toContain('Łukasz Dragoș Seeweg 15');
+	});
+});

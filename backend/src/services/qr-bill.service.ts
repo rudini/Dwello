@@ -85,6 +85,8 @@ export interface QRBillConfig {
 	address: string;
 	postalCode: string;
 	city: string;
+	phone?: string; // #465: in the statement's letterhead
+	email?: string;
 }
 
 // Liechtenstein's postal codes lie within the Swiss range (#450)

@@ -10,6 +10,7 @@
  */
 
 import PDFDocument from 'pdfkit';
+import { fileURLToPath } from 'url';
 import {
 	generateQRBillForStatement,
 	formatIBANForDisplay,
@@ -20,6 +21,7 @@ import {
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { countryLine, qrTown } from './postal-address';
+import { greetingWords } from './reminder-letter';
 import type { AdvanceLine, InvoicePart, MonthShare } from '../db/schema';
 
 /**
@@ -70,6 +72,10 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Annahmestelle',
 		statementNumber: 'Abrechnungsnr.',
 		statementDate: 'Abrechnungsdatum',
+		letterPhone: 'Telefon {phone}',
+		letterIntro: 'Sie erhalten die Nebenkostenabrechnung für die Abrechnungsperiode {start} – {end}.',
+		heatingSource: 'Quelle der Monatsanteile: {source}',
+		heatingSourceOwn: 'Eigenes Profil des Vermieters',
 		replacesNote: 'Diese Abrechnung ersetzt die Abrechnung {number} vom {date}. Die Abrechnung {number} gilt nicht mehr.',
 		replacesPay: ' Bezahlen Sie nur noch den Saldo dieser Abrechnung.',
 		priorPaid: 'Bereits bezahlt auf {numbers}',
@@ -193,6 +199,10 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Point de dépôt',
 		statementNumber: 'N° de décompte',
 		statementDate: 'Date du décompte',
+		letterPhone: 'Téléphone {phone}',
+		letterIntro: 'Veuillez trouver ci-dessous le décompte des charges pour la période de décompte du {start} au {end}.',
+		heatingSource: 'Source des parts mensuelles\u00a0: {source}',
+		heatingSourceOwn: 'Profil établi par le bailleur',
 		replacesNote: 'Ce décompte remplace le décompte {number} du {date}. Le décompte {number} n’est plus valable.',
 		replacesPay: ' Payez uniquement le solde du présent décompte.',
 		priorPaid: 'Déjà payé sur {numbers}',
@@ -315,6 +325,10 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Punto di accettazione',
 		statementNumber: 'N. conteggio',
 		statementDate: 'Data del conteggio',
+		letterPhone: 'Telefono {phone}',
+		letterIntro: 'Le inviamo qui di seguito il conteggio spese accessorie per il periodo di conteggio dal {start} al {end}.',
+		heatingSource: 'Fonte delle quote mensili: {source}',
+		heatingSourceOwn: 'Profilo stabilito dal locatore',
 		replacesNote: 'Questo conteggio sostituisce il conteggio {number} del {date}. Il conteggio {number} non è più valido.',
 		replacesPay: ' Paghi solo il saldo di questo conteggio.',
 		priorPaid: 'Già pagato su {numbers}',
@@ -437,6 +451,10 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Acceptance point',
 		statementNumber: 'Statement no.',
 		statementDate: 'Statement date',
+		letterPhone: 'Phone {phone}',
+		letterIntro: 'Please find below your utility cost statement for the billing period {start} – {end}.',
+		heatingSource: 'Source of the monthly shares: {source}',
+		heatingSourceOwn: 'The landlord’s own profile',
 		replacesNote: 'This statement replaces statement {number} of {date}. Statement {number} no longer applies.',
 		replacesPay: ' Pay only the balance of this statement.',
 		priorPaid: 'Already paid on {numbers}',
@@ -594,6 +612,7 @@ export interface StatementPDFData {
 		months?: MonthShare[];
 		periodPercent?: number;
 		periodMonths?: MonthShare[];
+		source?: string | null; // where the monthly shares come from (#465, DMR-10), in the tenant's language; null an own profile
 	};
 	// A tank: the heating costs of its category are opening stock + invoices – closing stock
 	fuel?: { category: string; openingDate: string; opening: number; invoices: number; closingDate: string; closing: number; total: number };
@@ -639,22 +658,6 @@ const qrAmount = (amount: number) => formatCHF(amount).replace(/'/g, ' ');
 
 /** 0.6694 → 66.94 % (always two places) */
 const formatShare = (share: number) => `${(Math.round(share * 10000) / 100).toFixed(2)} %`;
-
-// Windows-1252 beyond ASCII and Latin-1: what the standard fonts can print
-const WIN_ANSI = '€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ';
-const NEAREST: Record<string, string> = { Ł: 'L', ł: 'l', Đ: 'D', đ: 'd', ı: 'i', '−': '-', '→': '->' };
-const printable = (char: string) => char <= '\x7f' || (char >= '\xa0' && char <= '\xff') || WIN_ANSI.includes(char);
-
-/** Names and categories with characters the standard fonts lack: "Łukasz Dragoș" → "Lukasz Dragos" */
-function winAnsi(text: string) {
-	return [...text]
-		.map((char) => {
-			if (printable(char)) return char;
-			const plain = char.normalize('NFD').replace(/[̀-ͯ]/g, '');
-			return [...plain].every(printable) ? plain : (NEAREST[char] ?? '?');
-		})
-		.join('');
-}
 
 // The floor as tenants write it: ground floor, above, below
 // English counts floors with ordinals: 1st, 2nd, 3rd, 4th (461-native-en, EN-32)
@@ -711,6 +714,16 @@ const PAYMENT_PART = 105 * MM;
 const COLORS = { ink: '#111318', muted: '#4b5563', line: '#9ca3af' };
 
 type Doc = InstanceType<typeof PDFDocument>;
+
+// #465 (CD-8): Liberation Sans (SIL OFL 1.1, assets/fonts/LICENSE.txt), with the metrics of Helvetica, embedded as
+// the subset a PDF uses, so every character prints as entered
+export const FONT = { regular: 'LiberationSans', bold: 'LiberationSans-Bold' };
+const fontFile = (file: string) => fileURLToPath(new URL(`../../assets/fonts/${file}`, import.meta.url));
+export function embedFonts(doc: Doc) {
+	doc.registerFont(FONT.regular, fontFile('LiberationSans-Regular.ttf'));
+	doc.registerFont(FONT.bold, fontFile('LiberationSans-Bold.ttf'));
+	return doc.font(FONT.regular);
+}
 type Page = { doc: Doc; t: Record<string, string>; data: StatementPDFData; config: QRBillConfig; language: Language };
 
 // Moves to a new page when the next block of this height does not fit; returns where it starts (after a repeated
@@ -723,7 +736,7 @@ function room(doc: Doc, y: number, height: number, header?: (y: number) => numbe
 
 function heading(doc: Doc, text: string, y: number, keep = 40) {
 	const top = room(doc, y, keep);
-	doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.ink).text(text, PAGE.left, top);
+	doc.font(FONT.bold).fontSize(11).fillColor(COLORS.ink).text(text, PAGE.left, top);
 	return doc.y + 6;
 }
 
@@ -736,33 +749,42 @@ function addresses({ doc, t, data, language }: Page) {
 		[data.tenant.postalCode, data.tenant.city].filter(Boolean).join(' '),
 		countryLine(data.tenant.country)
 	].filter(Boolean) as string[];
-	doc.font('Helvetica').fontSize(10).fillColor(COLORS.ink).text(tenant.join('\n'), 118 * MM, top, { width: 82 * MM });
+	doc.font(FONT.regular).fontSize(10).fillColor(COLORS.ink).text(tenant.join('\n'), 118 * MM, top, { width: 82 * MM });
 	const floor = formatFloor(data.apartment.floor, language);
 	const apartment = [`${t.apartment} ${data.apartment.number}`, !namedByFloor(data.apartment.number, data.apartment.floor, language) && floor, `${data.apartment.area} ${t.sqm}`]
 		.filter(Boolean)
 		.join(', ');
 	doc
 		.fontSize(9)
-		.font('Helvetica-Bold')
+		.font(FONT.bold)
 		.text(t.building, PAGE.left, top)
-		.font('Helvetica')
+		.font(FONT.regular)
 		.text([data.building.name, data.building.address, data.building.place, apartment].filter(Boolean).join('\n'), { width: 82 * MM });
 	return Math.max(doc.y, top + 60) + 24;
 }
 
 // Title with the period, number and date, the tenant's days in the period
-function title({ doc, t, data }: Page, y: number) {
+function title({ doc, t, data, config, language }: Page, y: number) {
+	// #465 (DIV-14): a letter: place and date, then the title as its subject
+	doc.font(FONT.regular).fontSize(10).fillColor(COLORS.ink).text([config.city, formatDate(data.statementDate)].filter(Boolean).join(', '), PAGE.left, y);
 	doc
-		.font('Helvetica-Bold')
+		.moveDown(1.2)
+		.font(FONT.bold)
 		.fontSize(16)
 		.fillColor(COLORS.ink)
-		.text(`${t.title} ${formatDate(data.periodStart)} – ${formatDate(data.periodEnd)}`, PAGE.left, y, { width: PAGE.right - PAGE.left });
+		.text(`${t.title} ${formatDate(data.periodStart)} – ${formatDate(data.periodEnd)}`, PAGE.left, doc.y, { width: PAGE.right - PAGE.left });
 	doc
-		.font('Helvetica')
+		.font(FONT.regular)
 		.fontSize(9)
 		.fillColor(COLORS.muted)
 		.text(`${t.statementNumber} ${data.statementNumber} · ${t.statementDate} ${formatDate(data.statementDate)}`)
 		.fillColor(COLORS.ink)
+		.moveDown(0.8)
+		.fontSize(10)
+		.text(`${greetingWords(language).salutation} ${data.tenant.firstName} ${data.tenant.lastName},`.replace(/ +,/, ','))
+		.moveDown(0.4)
+		.text(fill(t.letterIntro, { start: formatDate(data.periodStart), end: formatDate(data.periodEnd) }))
+		.fontSize(9)
 		.moveDown(0.4) // its own paragraph, not a continuation of the number (data check 453-1 D-2)
 		.text(
 			fill(data.billed ? t.tenancyBilledLine : t.tenancyLine, {
@@ -777,7 +799,7 @@ function title({ doc, t, data }: Page, y: number) {
 	if (data.replaces) {
 		const note = fill(t.replacesNote, { number: data.replaces.statementNumber, date: formatDate(data.replaces.statementDate) });
 		const pay = data.balance > 0 && !data.paidDate;
-		doc.font('Helvetica-Bold').text(pay ? note + t.replacesPay : note).font('Helvetica');
+		doc.font(FONT.bold).text(pay ? note + t.replacesPay : note).font(FONT.regular);
 	}
 	return doc.y + 14;
 }
@@ -866,16 +888,16 @@ function balanceBox(page: Page, y: number) {
 	const carry = carryLine(data, t);
 	const parts = [prior, offset, carry].map((line) => (line ? ` ${line.short}` : '')).join('');
 	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${parts}${rounded}`;
-	doc.font('Helvetica').fontSize(9);
+	doc.font(FONT.regular).fontSize(9);
 	const height = 46 + doc.heightOfString(what, { width: width - 24 }) + doc.heightOfString(how, { width: width - 24 });
 	doc.lineWidth(1.5).strokeColor(COLORS.ink).rect(PAGE.left, y, width, height).stroke();
 	doc
-		.font('Helvetica-Bold')
+		.font(FONT.bold)
 		.fontSize(13)
 		.text(balanceLabel(page), PAGE.left + 12, y + 12)
 		.text(formatCurrency(data.balance), PAGE.left + 12, y + 12, { width: width - 24, align: 'right' });
 	doc
-		.font('Helvetica')
+		.font(FONT.regular)
 		.fontSize(9)
 		.text(what, PAGE.left + 12, y + 34, { width: width - 24 })
 		.fillColor(COLORS.muted)
@@ -901,17 +923,17 @@ function rule(doc: Doc, y: number, width = 0.5) {
 const rowHeight = (doc: Doc, cells: string[]) => Math.max(...cells.map((cell, i) => doc.heightOfString(cell, { width: COLUMNS[i].width })));
 
 function row(doc: Doc, cells: string[], y: number, options: { bold?: boolean; header?: (y: number) => number; above?: number } = {}) {
-	doc.font(options.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(8.5).fillColor(COLORS.ink);
+	doc.font(options.bold ? FONT.bold : FONT.regular).fontSize(8.5).fillColor(COLORS.ink);
 	const height = rowHeight(doc, cells);
 	const top = room(doc, y, height + 6, options.header);
 	if (options.above) rule(doc, top - 2, options.above); // the line above a total stays with it
-	doc.font(options.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(8.5).fillColor(COLORS.ink);
+	doc.font(options.bold ? FONT.bold : FONT.regular).fontSize(8.5).fillColor(COLORS.ink);
 	cells.forEach((cell, i) => doc.text(cell, COLUMNS[i].x, top, { width: COLUMNS[i].width, align: COLUMNS[i].align }));
 	return top + height + 6;
 }
 
 function tableHeader({ doc, t }: Page, y: number) {
-	doc.font('Helvetica-Bold').fontSize(7.5).fillColor(COLORS.muted);
+	doc.font(FONT.bold).fontSize(7.5).fillColor(COLORS.muted);
 	const labels = [t.category, t.keyColumn, t.totalAmount, t.apartmentShareColumn, t.timeShareColumn, t.yourShare];
 	labels.forEach((label, i) => doc.text(label, COLUMNS[i].x, y, { width: COLUMNS[i].width, align: COLUMNS[i].align }));
 	const bottom = y + Math.max(...labels.map((label, i) => doc.heightOfString(label, { width: COLUMNS[i].width }))) + 4;
@@ -939,12 +961,12 @@ function costTable(page: Page, y: number) {
 	// Subtotal to balance stay on one page: the balance alone on the next page lost its derivation
 	const width = COLUMNS[4].x + COLUMNS[4].width - PAGE.left;
 	const fee = `${t.managementFee}${t.colon}${feeBasis(data, t)}`;
-	doc.font('Helvetica-Bold').fontSize(8.5);
+	doc.font(FONT.bold).fontSize(8.5);
 	const feeHeight = data.managementFee > 0 ? doc.heightOfString(fee, { width }) + 6 : 0;
 	top = room(doc, top, totalRows(data, t) * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
 	top = row(doc, total(t.subtotal, formatCHF(data.subtotal)), top + 2, { bold: true, above: 0.5 });
 	if (feeHeight) {
-		doc.font('Helvetica').fontSize(8.5);
+		doc.font(FONT.regular).fontSize(8.5);
 		doc.text(fee, PAGE.left, top, { width });
 		doc.text(formatCHF(data.managementFee), COLUMNS[5].x, top, { width: COLUMNS[5].width, align: 'right' });
 		top += feeHeight;
@@ -962,7 +984,7 @@ function costTable(page: Page, y: number) {
 	}
 	top = row(doc, total(balanceLabel(page), formatCHF(Math.abs(data.balance))), top + 2, { bold: true, above: 1 });
 	const note = sharesNote(data, t);
-	doc.font('Helvetica').fontSize(7.5);
+	doc.font(FONT.regular).fontSize(7.5);
 	const height = doc.heightOfString(note, { width: PAGE.right - PAGE.left });
 	doc.fillColor(COLORS.muted).text(note, PAGE.left, room(doc, top + 4, height), { width: PAGE.right - PAGE.left });
 	return doc.y + 18;
@@ -1059,7 +1081,7 @@ const partValues = ({ start, end, amount, days, total, whole }: InvoicePart, col
 const PARTS_WIDTH = COLUMNS[4].x + COLUMNS[4].width - COLUMNS[0].x - 8;
 
 function positionHeight(doc: Doc, cells: string[], lines: string[]) {
-	doc.font('Helvetica').fontSize(8.5);
+	doc.font(FONT.regular).fontSize(8.5);
 	const height = rowHeight(doc, cells) + 6;
 	doc.fontSize(7.5);
 	return height + doc.heightOfString(lines.join('\n'), { width: PARTS_WIDTH }) + 3;
@@ -1075,7 +1097,7 @@ function advanceRows(doc: Doc, lines: AdvanceLine[], t: Record<string, string>, 
 			'days' in line
 				? fill(t.advanceDays, { ...values, days: String(line.days), daysInMonth: String(line.daysInMonth) })
 				: fill(line.months === 1 ? t.advanceMonth : t.advanceMonths, { ...values, n: String(line.months) });
-		doc.font('Helvetica').fontSize(7.5).fillColor(COLORS.muted);
+		doc.font(FONT.regular).fontSize(7.5).fillColor(COLORS.muted);
 		doc.text(text, COLUMNS[0].x + 8, top, { width: PARTS_WIDTH });
 		doc.text(formatCHF(line.total), COLUMNS[5].x, top, { width: COLUMNS[5].width, align: 'right' });
 		top += doc.heightOfString(text, { width: PARTS_WIDTH }) + 3;
@@ -1085,7 +1107,7 @@ function advanceRows(doc: Doc, lines: AdvanceLine[], t: Record<string, string>, 
 
 function partsBelow(doc: Doc, lines: string[], y: number) {
 	if (!lines.length) return y;
-	doc.font('Helvetica').fontSize(7.5).fillColor(COLORS.muted);
+	doc.font(FONT.regular).fontSize(7.5).fillColor(COLORS.muted);
 	const text = lines.join('\n');
 	doc.text(text, COLUMNS[0].x + 8, y - 3, { width: PARTS_WIDTH });
 	return y - 3 + doc.heightOfString(text, { width: PARTS_WIDTH }) + 6;
@@ -1119,7 +1141,7 @@ function roundedNote(data: StatementPDFData, t: Record<string, string>, parts: b
 
 // A long label wraps and pushes the next line down
 function amountLine(doc: Doc, label: string, amount: string, y: number, bold = false) {
-	doc.font(bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(9).fillColor(COLORS.ink);
+	doc.font(bold ? FONT.bold : FONT.regular).fontSize(9).fillColor(COLORS.ink);
 	doc.text(label, PAGE.left, y, { width: 340 }).text(amount, PAGE.right - 120, y, { width: 120, align: 'right' });
 	return y + Math.max(15, doc.heightOfString(label, { width: 340 }) + 4);
 }
@@ -1136,8 +1158,9 @@ function heatingLines({ t, data }: Page) {
 	const { profile, percent, months } = data.heating;
 	const shown = (Math.round(percent * 100) / 100).toFixed(2);
 	const note = fill(t[key], { profile, percent: shown });
-	if (key === 'heatingNoteOwn' || !months?.length || percent >= 100) return [note];
-	return [note, fill(t.heatingMonths, { months: monthList(months, t) }) + periodSums(data.heating, shown, t)];
+	const source = data.heating.source !== undefined ? [fill(t.heatingSource, { source: data.heating.source ?? t.heatingSourceOwn })] : [];
+	if (key === 'heatingNoteOwn' || !months?.length || percent >= 100) return [note, ...source];
+	return [note, fill(t.heatingMonths, { months: monthList(months, t) }) + periodSums(data.heating, shown, t), ...source];
 }
 
 // a period whose months do not carry 100 % (under a year): both sums, from the printed months (#229); since #232 the
@@ -1166,13 +1189,13 @@ function heatingSection(page: Page, y: number) {
 			]
 		: [];
 	const width = PAGE.right - PAGE.left;
-	doc.font('Helvetica').fontSize(9);
+	doc.font(FONT.regular).fontSize(9);
 	const height =
 		[...lines, fuel ? t.fuelIntro : ''].reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 8, 0) +
 		amounts.reduce((sum, [label]) => sum + Math.max(15, doc.heightOfString(label, { width: 340 }) + 4), 0);
 	let top = heading(doc, t.heatingSection, y, height + 30);
 	for (const line of lines) {
-		doc.font('Helvetica').fontSize(9).fillColor(COLORS.ink).text(line, PAGE.left, top, { width });
+		doc.font(FONT.regular).fontSize(9).fillColor(COLORS.ink).text(line, PAGE.left, top, { width });
 		top = doc.y + 8;
 	}
 	if (!fuel) return top + 10;
@@ -1186,23 +1209,30 @@ function heatingSection(page: Page, y: number) {
 const senderParts = (config: QRBillConfig) =>
 	[config.companyName, config.address, config.postalCode && config.city && `${config.postalCode} ${config.city}`].filter(Boolean);
 
+// The letterhead: the landlord, then phone and e-mail where entered (#465, DMR-09)
+const letterhead = (config: QRBillConfig, t: Record<string, string>) =>
+	[...senderParts(config), config.phone && fill(t.letterPhone, { phone: config.phone }), config.email].filter(Boolean) as string[];
+
 // What the tenant may ask for: the receipts (Art. 257b Abs. 2 OR), the detailed heating statement and the stock
 // (Art. 8 VMWG); kept on one page
-function notes({ doc, t, data, config }: Page, y: number) {
+function notes({ doc, t, data, config, language }: Page, y: number) {
 	const contact = senderParts(config).join(', ');
 	const names = data.agreedCosts?.map(({ name, from }) => (from ? fill(t.agreedFromItem, { category: name, date: formatDate(from) }) : name));
 	const agreed = names?.length ? [fill(t.agreedCosts, { categories: names.join(', ') })] : [];
 	const advance = data.totalAdvancePayments > 0 ? [t.noteAdvance] : [];
 	const lines = [...(data.notes ? [data.notes] : []), ...agreed, ...advance, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
 	const width = PAGE.right - PAGE.left;
-	doc.font('Helvetica').fontSize(9);
-	const height = lines.reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 6, 0);
+	doc.font(FONT.regular).fontSize(9);
+	const closing = [greetingWords(language).closing, config.companyName].filter(Boolean).join('\n');
+	const height = [...lines, closing].reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 6, 0) + 10;
 	let top = heading(doc, t.notes, y, height + 30);
 	for (const line of lines) {
-		doc.font('Helvetica').fontSize(9).fillColor(COLORS.ink).text(line, PAGE.left, top, { width });
+		doc.font(FONT.regular).fontSize(9).fillColor(COLORS.ink).text(line, PAGE.left, top, { width });
 		top = doc.y + 6;
 	}
-	return top;
+	// #465 (DIV-14): the greeting after the notes, so they belong to the letter; the payment part stays last
+	doc.fontSize(10).text(closing, PAGE.left, top + 10, { width });
+	return doc.y + 6;
 }
 
 type QRResult = Awaited<ReturnType<typeof generateQRBillForStatement>>;
@@ -1214,9 +1244,9 @@ function qrBlocks(doc: Doc, blocks: [string, (string | null | undefined)[]][], x
 	for (const [label, lines] of blocks) {
 		const printed = lines.filter(Boolean) as string[];
 		if (printed.length === 0) continue;
-		doc.font('Helvetica-Bold').fontSize(sizes[0]).text(label, x, top, { width });
+		doc.font(FONT.bold).fontSize(sizes[0]).text(label, x, top, { width });
 		top = doc.y + 1;
-		doc.font('Helvetica').fontSize(sizes[1]);
+		doc.font(FONT.regular).fontSize(sizes[1]);
 		for (const line of printed) {
 			doc.text(line, x, top, { width });
 			top = doc.y + 0.5;
@@ -1229,7 +1259,7 @@ function qrBlocks(doc: Doc, blocks: [string, (string | null | undefined)[]][], x
 // SIX: without a debtor in the QR code, «Zahlbar durch (Name/Adresse)» over a blank field with corner marks
 // (3 mm, 0.75 pt) for the payer to write in; it ends above `limit` when long details above it leave less room
 function blankField(doc: Doc, label: string, x: number, y: number, size: number, [width, height]: [number, number], limit = Infinity) {
-	doc.font('Helvetica-Bold').fontSize(size).text(label, x, y, { width });
+	doc.font(FONT.bold).fontSize(size).text(label, x, y, { width });
 	const [top, right, mark] = [doc.y + 1, x + width, 3 * MM];
 	const bottom = Math.min(top + height, limit);
 	doc.lineWidth(0.75).strokeColor(COLORS.ink)
@@ -1261,7 +1291,7 @@ function paymentPart(
 	const top = PAGE.height - PAYMENT_PART;
 	const receiptWidth = 62 * MM;
 	doc.page.margins.bottom = 0; // printing down to the edge, or pdfkit breaks each line onto a new page
-	doc.font('Helvetica').fontSize(7).fillColor(COLORS.ink).text(t.separate, 0, top - 12, { width: PAGE.width, align: 'center' });
+	doc.font(FONT.regular).fontSize(7).fillColor(COLORS.ink).text(t.separate, 0, top - 12, { width: PAGE.width, align: 'center' });
 	doc.lineWidth(0.5).strokeColor(COLORS.ink).dash(3, { space: 2 });
 	doc.moveTo(0, top).lineTo(PAGE.width, top).stroke();
 	doc.moveTo(receiptWidth, top).lineTo(receiptWidth, PAGE.height).stroke().undash();
@@ -1275,20 +1305,20 @@ function paymentPart(
 
 	// Receipt
 	const left = 5 * MM;
-	doc.font('Helvetica-Bold').fontSize(11).fillColor(COLORS.ink).text(t.receiptSection, left, top + 5 * MM, { lineBreak: false });
+	doc.font(FONT.bold).fontSize(11).fillColor(COLORS.ink).text(t.receiptSection, left, top + 5 * MM, { lineBreak: false });
 	const receiptEnd = qrBlocks(doc, [[`${t.account} / ${t.payableTo}`, creditor], [t.reference, reference], [t.payableBy, debtor]], left, top + 12 * MM, [6, 8], 52 * MM);
 	if (debtor.length === 0) blankField(doc, t.payableByName, left, receiptEnd, 6, [52 * MM, 20 * MM], top + 66 * MM);
-	doc.font('Helvetica-Bold').fontSize(6).text(t.currency, left, top + 68 * MM).text(t.amount, left + 12 * MM, top + 68 * MM);
-	doc.font('Helvetica').fontSize(8).text('CHF', left, top + 71 * MM).text(amount, left + 12 * MM, top + 71 * MM, { lineBreak: false });
-	doc.font('Helvetica-Bold').fontSize(6).text(t.acceptancePoint, left, top + 82 * MM, { width: 52 * MM, align: 'right' });
+	doc.font(FONT.bold).fontSize(6).text(t.currency, left, top + 68 * MM).text(t.amount, left + 12 * MM, top + 68 * MM);
+	doc.font(FONT.regular).fontSize(8).text('CHF', left, top + 71 * MM).text(amount, left + 12 * MM, top + 71 * MM, { lineBreak: false });
+	doc.font(FONT.bold).fontSize(6).text(t.acceptancePoint, left, top + 82 * MM, { width: 52 * MM, align: 'right' });
 
 	// Payment part: title, QR code with the Swiss cross, amount; the details on the right
 	const x = receiptWidth + 5 * MM;
-	doc.font('Helvetica-Bold').fontSize(11).text(t.qrBillSection, x, top + 5 * MM, { lineBreak: false });
+	doc.font(FONT.bold).fontSize(11).text(t.qrBillSection, x, top + 5 * MM, { lineBreak: false });
 	doc.image(qr.qrCodeImage, x, top + 17 * MM, { width: 46 * MM, height: 46 * MM });
 	swissCross(doc, x + 19.5 * MM, top + 36.5 * MM);
-	doc.font('Helvetica-Bold').fontSize(8).text(t.currency, x, top + 68 * MM).text(t.amount, x + 14 * MM, top + 68 * MM);
-	doc.font('Helvetica').fontSize(10).text('CHF', x, top + 72 * MM).text(amount, x + 14 * MM, top + 72 * MM, { lineBreak: false });
+	doc.font(FONT.bold).fontSize(8).text(t.currency, x, top + 68 * MM).text(t.amount, x + 14 * MM, top + 68 * MM);
+	doc.font(FONT.regular).fontSize(10).text('CHF', x, top + 72 * MM).text(amount, x + 14 * MM, top + 72 * MM, { lineBreak: false });
 	const details: [string, (string | null | undefined)[]][] = [
 		[`${t.account} / ${t.payableTo}`, creditor],
 		[t.reference, reference],
@@ -1328,11 +1358,13 @@ function frame({ doc, t, data, config }: Page, qrPage: number | null) {
 	for (let i = start; i < start + count; i++) {
 		doc.switchToPage(i);
 		doc.page.margins.bottom = 0;
-		doc.font('Helvetica').fontSize(8).fillColor(COLORS.muted);
-		const sender = senderParts(config).join(' · ');
-		doc.text(sender, PAGE.left, 40, { width: 290, height: 10, ellipsis: true, lineBreak: false });
+		doc.font(FONT.regular).fontSize(8).fillColor(COLORS.muted);
+		// #465 (Fachreview 465-1 V-2): page 1 a letterhead, a line each, with phone and e-mail; later pages one line
+		const head = i === start ? letterhead(config, t).join('\n') : senderParts(config).join(' · ');
+		doc.text(head, PAGE.left, 40, { width: 290, ...(i !== start && { height: 10, ellipsis: true, lineBreak: false }) });
+		const rule = Math.max(54, doc.y + 4);
 		doc.text(`${data.statementNumber} · ${fill(t.pageOf, { page: i + 1, pages: count })}`, PAGE.right - 180, 40, { width: 180, align: 'right' });
-		doc.lineWidth(0.5).strokeColor(COLORS.line).moveTo(PAGE.left, 54).lineTo(PAGE.right, 54).stroke();
+		doc.lineWidth(0.5).strokeColor(COLORS.line).moveTo(PAGE.left, rule).lineTo(PAGE.right, rule).stroke();
 		if (i === qrPage) continue;
 		doc.text(`${data.building.name} · ${t.period} ${formatDate(data.periodStart)} – ${formatDate(data.periodEnd)}`, PAGE.left, PAGE.height - 40, {
 			width: PAGE.right - PAGE.left,
@@ -1358,16 +1390,6 @@ async function qrCodeFor(data: StatementPDFData, config: QRBillConfig, t: Record
 	}
 }
 
-// Every text goes through `winAnsi`: the standard fonts print Windows-1252 only
-function printableDoc(doc: Doc) {
-	const text = doc.text.bind(doc);
-	const heightOfString = doc.heightOfString.bind(doc);
-	doc.text = ((value: unknown, ...rest: unknown[]) =>
-		(text as (...args: unknown[]) => Doc)(typeof value === 'string' ? winAnsi(value) : value, ...rest)) as Doc['text'];
-	doc.heightOfString = ((value: string, options?: object) => heightOfString(winAnsi(value), options)) as Doc['heightOfString'];
-	return doc;
-}
-
 // #453 (#325): with «Abgerechnet bis» in the period the Akonto and the tenant's months are those from the day after
 const billedTexts = (t: Record<string, string>, data: StatementPDFData) =>
 	data.billed
@@ -1389,7 +1411,7 @@ async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig
 
 	return new Promise((resolve, reject) => {
 		try {
-			const doc = printableDoc(
+			const doc = embedFonts(
 				new PDFDocument({
 					size: 'A4',
 					bufferPages: true,

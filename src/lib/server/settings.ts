@@ -10,6 +10,8 @@ const KEYS = {
 	companyAddress: 'company_address',
 	companyPostalCode: 'company_postal_code',
 	companyCity: 'company_city',
+	companyPhone: 'company_phone',
+	companyEmail: 'company_email',
 	iban: 'iban',
 	accountingPeriod: 'accounting_period',
 	managementFeePercent: 'management_fee_pct',
@@ -44,6 +46,8 @@ export function toSettings(stored: Record<string, string | null>): Settings {
 // A filled field that breaks its rule gets its message; an empty one is reset to its default
 const RULES: [keyof Settings, (value: string) => boolean, () => string][] = [
 	['companyPostalCode', (v) => /^\d{4}$/.test(v), m.buildings_error_postal_code_digits],
+	// as the tenant's e-mail (#465)
+	['companyEmail', (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), m.tenants_error_email_invalid],
 	[
 		'iban',
 		// Switzerland or Liechtenstein, as the QR-bill takes them (#191)

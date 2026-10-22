@@ -15,6 +15,8 @@ const valid = {
 	companyAddress: 'Bahnhofstrasse 1',
 	companyPostalCode: '8001',
 	companyCity: 'Zürich',
+	companyPhone: '044 123 45 67',
+	companyEmail: 'info@muster.ch',
 	iban: 'CH93 0076 2011 6238 5295 7',
 	accountingPeriod: 'calendar',
 	managementFeePercent: '3',
@@ -38,6 +40,8 @@ describe('Einstellungen laden', () => {
 			companyAddress: 'Bahnhofstrasse 1',
 			companyPostalCode: '8001',
 			companyCity: 'Zürich',
+			companyPhone: '044 123 45 67',
+			companyEmail: 'info@muster.ch',
 			iban: 'CH93 0076 2011 6238 5295 7',
 			accountingPeriod: 'july-june',
 			managementFeePercent: '2.5',
@@ -83,6 +87,8 @@ describe('Einstellungen speichern', () => {
 					company_address: 'Bahnhofstrasse 1',
 					company_postal_code: '8001',
 					company_city: 'Zürich',
+					company_phone: '044 123 45 67',
+					company_email: 'info@muster.ch',
 					iban: 'CH9300762011623852957',
 					accounting_period: 'calendar',
 					management_fee_pct: '3',
@@ -148,6 +154,17 @@ describe('Einstellungen speichern', () => {
 						'Bitte geben Sie einen Prozentsatz von 0 bis 10 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 				}
 			}
+		});
+		expect(calls).toEqual([]);
+	});
+
+	// #465 (DMR-09): die E-Mail der Verwaltung wie die des Mieters geprüft, am Feld
+	it('lehnt eine ungültige E-Mail der Verwaltung am Feld ab', async () => {
+		const { calls, result } = runAction(actions.default, '', 200, { ...valid, companyEmail: 'info@muster' });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { companyEmail: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.' } }
 		});
 		expect(calls).toEqual([]);
 	});

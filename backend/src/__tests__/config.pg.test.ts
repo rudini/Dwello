@@ -35,6 +35,22 @@ describe('Einstellungen speichern', () => {
 		expect(await getConfig('company_city')).toBe('Winterthur');
 	});
 
+	// #465 (#103, DMR-09): Telefon und E-Mail der Verwaltung für den Kopf des PDF, beide freiwillig
+	it('speichert Telefon und E-Mail der Verwaltung und lehnt eine ungültige E-Mail ab', async () => {
+		const [phone, email] = [await getConfig('company_phone'), await getConfig('company_email')];
+		const saved = await sendJson('PUT', '/api/v1/config', { company_phone: '044 123 45 67', company_email: 'info@muster.ch' });
+		const refused = await sendJson('PUT', '/api/v1/config', { company_email: 'info@muster' });
+		const stored = [await getConfig('company_phone'), await getConfig('company_email')];
+		const cleared = await sendJson('PUT', '/api/v1/config', { company_phone: '', company_email: '' });
+		await (phone ? setConfig('company_phone', phone) : deleteConfig('company_phone'));
+		await (email ? setConfig('company_email', email) : deleteConfig('company_email'));
+
+		expect(saved.status).toBe(200);
+		expect(refused.status).toBe(400);
+		expect(stored).toEqual(['044 123 45 67', 'info@muster.ch']);
+		expect(cleared.status).toBe(200);
+	});
+
 	// Mit falscher Prüfziffer entstünde der Einzahlungsschein nicht, das PDF käme ohne Zahlteil
 	it('lehnt eine IBAN mit falscher Prüfziffer ab', async () => {
 		const response = await sendJson('PUT', '/api/v1/config', {
