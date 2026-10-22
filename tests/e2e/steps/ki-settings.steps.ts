@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { belegRowText, uploadPurposeText } from '../questions/invoice-upload';
-import { addBelege, invoicePdf } from '../tasks/invoice-upload';
+import { addBelegOnceRead } from '../tasks/invoice-upload';
 import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, modelDownloadOffered, shownKiAddress } from '../questions/ki-settings';
 import {
 	checkConnection,
@@ -160,7 +160,7 @@ Given('in der frischen Installation gibt es ein Gebäude', async ({ frisch }) =>
 });
 
 When('der Liegenschaftsverwalter dort die Rechnung {string} wählt', async ({ verwalter, frisch }, fileName: string) => {
-	await verwalter.attemptsTo(addBelege(frisch.buildingId, [invoicePdf(fileName)]));
+	await verwalter.attemptsTo(addBelegOnceRead(frisch.buildingId, fileName));
 });
 
 Then(
