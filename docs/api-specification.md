@@ -230,6 +230,9 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 | POST | `/api/v1/auth/password` | Body: `{ email, password }` → `{ sub, email, name }`. 401 `INVALID_CREDENTIALS` (wrong password or unknown address); 423 `ACCOUNT_LOCKED` with `params.until` (ISO time): 5 failed attempts lock for 15 minutes |
 | PUT | `/api/v1/local-accounts` | Session required. Body: `{ email, password }`: creates the account or sets a new password (lifts a Sperre, ends older sessions) → `{ email }`; 400 `PASSWORD_TOO_SHORT` (`params.min`) |
 | DELETE | `/api/v1/local-accounts/:email` | Session required. 204. 404 |
+| GET | `/api/v1/setup` | Public (#577). → `{ needed }`: true while no Konto mit Passwort exists; the code is never in an answer |
+| POST | `/api/v1/setup` | Public (#577). Body: `{ code, email, password }`: creates the first Konto mit Passwort with the Einrichtungscode from the server log → 201 `{ sub, email, name }`. 403 `SETUP_CODE_INVALID`; 409 `SETUP_DONE` once an account exists; 423 `SETUP_LOCKED` with `params.until` after 5 wrong codes, for 15 minutes; 400 `PASSWORD_TOO_SHORT` |
+| GET | `/api/v1/ki/model` | Session required (#577). → `{ state }`: `ready`, `loading` with `percent`, `failed`, or `unknown` (a KI outside the server, or Ollama does not answer) |
 
 ## 12. Utility statements `/api/v1/statements`
 

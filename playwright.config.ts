@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
+import { SETUP_CODE } from './tests/e2e/fixtures/fresh-installation';
 import { E2E_JWT_SECRET } from './tests/e2e/fixtures/session';
 import type { Driver } from './tests/e2e/fixtures/test';
 
@@ -20,7 +21,17 @@ const E2E_EMPTY_DATABASE_URL = (() => {
 const generated = (feature: string) => `.features-gen/tests/e2e/features/${feature}.feature.spec.js`;
 const usesExtraInstances =
 	!existsSync('.features-gen') ||
-	['accessibility', 'sprachen-bildschirme', 'demo'].some((feature) => existsSync(generated(feature)));
+	['accessibility', 'sprachen-bildschirme', 'demo', 'einrichtung'].some((feature) => existsSync(generated(feature)));
+// The fresh installation (#577: no account, no provider, the KI model still downloading) for einrichtung.feature and
+// the overview's state 'ki-model-loading'
+const usesFreshInstallation =
+	!existsSync('.features-gen') ||
+	['einrichtung', 'accessibility', 'sprachen-bildschirme'].some((feature) => existsSync(generated(feature)));
+const freshDatabaseUrl = (() => {
+	const url = new URL(E2E_DATABASE_URL);
+	url.pathname = `${url.pathname}_fresh`;
+	return url.href;
+})();
 
 // The frontend's environment (sessions, sign-in test credentials, operator, gallery)
 const frontendEnv = {
@@ -133,7 +144,15 @@ export default defineConfig<{ driver: Driver }>({
 		...(usesExtraInstances
 			? [
 				{
-					// Empty backend for the axe check of 'empty' and 'first-use' (tests/e2e/tasks/accessibility.ts)
+					command: 'cd backend && bun run llm-stub',
+					port: 2532,
+					reuseExistingServer: false,
+					timeout: 30000,
+					env: { LLM_STUB_PORT: '2532', LLM_STUB_PULL: 'fail' }
+				},
+				{
+					// Empty backend for the axe check of 'empty', 'first-use', 'fresh-installation' and 'setup-error'
+					// (tests/e2e/tasks/accessibility.ts)
 					command: 'cd backend && bun run e2e-db && bun run src/index.ts',
 					port: 3103,
 					reuseExistingServer: false,
@@ -142,7 +161,8 @@ export default defineConfig<{ driver: Driver }>({
 						PORT: '3103',
 						DATABASE_URL: E2E_EMPTY_DATABASE_URL,
 						JWT_SECRET: E2E_JWT_SECRET,
-						LLM_BASE_URL: 'http://127.0.0.1:9/v1'
+						// an Ollama whose model download fails: the overview's state 'ki-model-failed' (#577, code review C-3)
+						LLM_BASE_URL: 'http://127.0.0.1:2532/v1'
 					}
 				},
 				{
@@ -155,7 +175,11 @@ export default defineConfig<{ driver: Driver }>({
 						...frontendEnv,
 						PORT: '3102',
 						ORIGIN: 'http://localhost:3102',
-						BACKEND_URL: 'http://localhost:3103'
+						BACKEND_URL: 'http://localhost:3103',
+						// no provider and an account never made: the states 'fresh-installation' and 'setup-error' (#577)
+						OAUTH_GOOGLE_CLIENT_ID: '',
+						OAUTH_GOOGLE_CLIENT_SECRET: '',
+						OAUTH_GOOGLE_REDIRECT_URI: ''
 					}
 				},
 				{
@@ -165,6 +189,47 @@ export default defineConfig<{ driver: Driver }>({
 					reuseExistingServer: !process.env.CI,
 					timeout: 60000,
 					env: { ...frontendEnv, PORT: '3104', ORIGIN: 'http://localhost:3104', DEMO: 'on' }
+				}
+				]
+			: []),
+		...(usesFreshInstallation
+			? [
+				{
+					// An Ollama that is still downloading the model (backend/scripts/llm-stub.ts, LLM_STUB_PULL)
+					command: 'cd backend && bun run llm-stub',
+					port: 2530,
+					reuseExistingServer: false,
+					timeout: 30000,
+					env: { LLM_STUB_PORT: '2530', LLM_STUB_PULL: 'on' }
+				},
+				{
+					command: 'cd backend && bun run e2e-db && bun run src/index.ts',
+					port: 3105,
+					reuseExistingServer: false,
+					timeout: 60000,
+					env: {
+						PORT: '3105',
+						DATABASE_URL: freshDatabaseUrl,
+						JWT_SECRET: E2E_JWT_SECRET,
+						SETUP_CODE,
+						LLM_BASE_URL: 'http://127.0.0.1:2530/v1'
+					}
+				},
+				{
+					// The same build as on 3100 (started after it), without any provider, talking to the fresh backend
+					command: 'node build',
+					port: 3106,
+					reuseExistingServer: !process.env.CI,
+					timeout: 60000,
+					env: {
+						...frontendEnv,
+						PORT: '3106',
+						ORIGIN: 'http://localhost:3106',
+						BACKEND_URL: 'http://localhost:3105',
+						OAUTH_GOOGLE_CLIENT_ID: '',
+						OAUTH_GOOGLE_CLIENT_SECRET: '',
+						OAUTH_GOOGLE_REDIRECT_URI: ''
+					}
 				}
 				]
 			: [])

@@ -3,7 +3,7 @@
 	"stateMeanings": {
 		"default": "The page as loaded with the seeded records.",
 		"empty": "A list with no records at all, on the empty instance of the E2E stack (second backend on an empty database).",
-		"first-use": "Overview without any building, on the empty instance of the E2E stack.",
+		"first-use": "Overview without any building, on the empty instance of the E2E stack; its KI stand-in fails the model download, so the overview also shows that notice (#577).",
 		"filtered-empty": "A list whose search matches nothing (?search=…).",
 		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
 		"register-preview": "«Neues Gebäude» after choosing an address of the Gebäuderegister: the hints and the Wohnungen to check, some marked as missing in the register (#479).",
@@ -107,7 +107,10 @@
 		"server-error": "The error page for a failed load (not 404): message and the hint to try again.",
 		"other-language": "The page in French, chosen with the language selection (it reloads in French).",
 		"language-menu-open": "The language menu in the header open.",
-		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement and the terms also their section on the demo."
+		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement and the terms also their section on the demo.",
+		"setup-error": "The setup refused: the two passwords differ. The setup screen («Dwello einrichten», #577) runs in every state on the empty instance of the E2E stack, which has no account and no provider.",
+		"ki-model-loading": "Overview while the local KI downloads its model, on the fresh installation of the E2E stack (#577).",
+		"ki-model-failed": "Overview after the local KI could not download its model, on the empty instance of the E2E stack (#577)."
 	},
 	"screens": [
 		{
@@ -135,6 +138,15 @@
 			]
 		},
 		{
+			"name": "setup",
+			"path": "/setup",
+			"public": true,
+			"states": [
+				"default",
+				"setup-error"
+			]
+		},
+		{
 			"name": "error-404",
 			"path": "/gibt-es-nicht",
 			"states": [
@@ -156,6 +168,8 @@
 				"default",
 				"old-address-task",
 				"first-use",
+				"ki-model-loading",
+				"ki-model-failed",
 				"mobile-menu-open",
 				"user-menu-open",
 				"other-language",

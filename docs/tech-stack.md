@@ -266,7 +266,7 @@ const allBuildings = await db.select().from(buildings)
 **Deployment:**
 ```bash
 # docker-compose.prod.yml includes the Ollama service
-docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
+# the backend downloads the model on its first start when Ollama lacks it (#577)
 ```
 
 **Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`); configuration in `backend/src/config/llm.ts`. The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen3-vl:8b-instruct`). Further: `LLM_TIMEOUT` (ms, default 120000: without a GPU the default model needs about 40 s to categorize and 80 s to read an invoice; the BFF waits 300 s for these requests, `src/lib/server/api-proxy.ts`), `LLM_ENABLED` (`false` turns categorization off), `LLM_CACHE_TTL` (s, default 3600; in-memory cache of categorization results). With an external provider, the invoice's billing entity, description and amount leave the server, and so do uploaded invoice files (their pages as images, with the file name); `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` name it in the privacy statement (`GET /api/v1/invoices/llm-recipient`), and the backend refuses to start without them (README, "External LLM provider").
@@ -329,7 +329,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
-docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
+# the backend downloads the model on its first start when Ollama lacks it (#577)
 ```
 
 ### Environment Configuration

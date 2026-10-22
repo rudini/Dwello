@@ -1,6 +1,6 @@
 # Installing Dwello
 
-For the person who sets up Dwello for a landlord. Afterwards the landlord works in the browser and needs no technical knowledge; updates and backups (section 5) stay with you. Plan for about an hour, most of it the download of the AI model.
+For the person who sets up Dwello for a landlord. Afterwards the landlord works in the browser and needs no technical knowledge; updates and backups (section 5) stay with you. Plan for about an hour, most of it the download of the AI model, which Dwello starts by itself.
 
 Two ways:
 
@@ -11,7 +11,7 @@ Two ways:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (on a Linux server: Docker Engine with Compose v2) and [Git](https://git-scm.com/downloads).
 - 16 GB of memory for the local AI, which reads invoices on this machine. With less, use an external AI (section 6).
-- The landlord's e-mail address: you create their Konto mit Passwort with it (section 5). Google sign-in is optional (section 3).
+- Nothing to invent: Dwello makes its keys itself, and the landlord creates their Konto mit Passwort in the browser (section 5). Google sign-in is optional (section 3).
 - About 10 GB of disk space (images, AI model, database).
 
 ## 2. Download
@@ -23,29 +23,29 @@ cd Dwello
 
 ## 3. Optional: Google sign-in
 
-The landlord signs in with e-mail address and password (section 5). Only if they want to sign in with their Google account as well, create a sign-in key at Google once:
+The landlord signs in with e-mail address and password, set up in the browser (section 5). Only if they want to sign in with their Google account as well, create a sign-in key at Google once:
 
 1. Open the [Google Cloud Console](https://console.cloud.google.com/) with any Google account and create a project, e.g. «Dwello».
 2. **Google Auth Platform** (formerly «OAuth consent screen»): app name «Dwello», a support e-mail, audience **External**. Set the publishing status to **In production**: in «Testing» only listed test users can sign in. Dwello asks only for e-mail and profile, which needs no verification by Google.
 3. **Clients, Create client**: type **Web application**, authorized redirect URI `http://localhost:3000/auth/callback` (on a server: section 7).
 4. Copy the **Client ID** and the **Client secret**.
 
-## 4. Settings
+## 4. Optional settings
+
+On a PC Dwello needs no settings: on the first start it makes its keys itself (the key of the sessions, the database password and the key for stored secrets) and keeps them in the Docker volume `dwello_secrets`. Only for Google, the operator details, e-mail to tenants (section 5) or an external AI (section 6), copy the example file and fill in what you need; Docker Compose reads it:
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` in a text editor and set these values; Docker Compose reads them from this file (of the other values in it, the defaults fit a PC; the optional ones follow below the table):
-
 | Setting | Value |
 |---|---|
-| `JWT_SECRET` | a random string of at least 32 characters, e.g. from `openssl rand -base64 32`; it signs the sessions |
-| `POSTGRES_PASSWORD` | add this line: a random password for the database; it takes effect on the first start only |
 | `ALLOWED_EMAILS` | only with Google (section 3): the landlord's Google address; several separated by commas. With Google, Dwello does not start without it |
 | `OAUTH_GOOGLE_CLIENT_ID`, `OAUTH_GOOGLE_CLIENT_SECRET` | only with Google: from section 3 |
 | `OAUTH_GOOGLE_REDIRECT_URI` | only with Google: `http://localhost:3000/auth/callback` |
 | `COOKIE_SECURE` | keep `false` on a PC, because Dwello is opened over plain `http://localhost` there |
+
+An installation from before #577 keeps the `JWT_SECRET` and `POSTGRES_PASSWORD` of its `.env`; leave them there.
 
 Optional, shown in the terms of use and the privacy statement of the app (which are addressed to the landlord; informing the tenants stays the landlord's duty, Art. 19 DSG): `OPERATOR_NAME`, `OPERATOR_ADDRESS`, `OPERATOR_CONTACT` (who runs the installation and backs up its data), and `OPERATOR_SERVER_COUNTRY`, required when the server is outside Switzerland. When an IT service or hoster runs the server, it processes the tenants' data on the landlord's behalf: the landlord needs a data processing agreement with it (Art. 9 DSG). Keep `.env` private: it holds the keys.
 
@@ -53,25 +53,24 @@ Optional, shown in the terms of use and the privacy statement of the app (which 
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d
-docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
+docker logs dwello-backend
 ```
 
-The first start builds Dwello, which takes several minutes; the AI model is about 6 GB. `docker-compose.prod.yml` publishes the backend (3001), the database (5432) and the AI (11434) on all network interfaces, also on a PC: keep them closed in the firewall of the PC or router. Then create the landlord's Konto mit Passwort; the command asks for the e-mail address and the password twice (at least 8 characters, best a long one used nowhere else):
+The first start builds Dwello, which takes several minutes. `docker-compose.prod.yml` publishes the backend (3001), the database (5432) and the AI (11434) on all network interfaces, also on a PC: keep them closed in the firewall of the PC or router.
 
-```bash
-docker exec -it dwello-backend bun run account
-```
+The log of the backend shows the **Einrichtungscode** (setup code), e.g. `[setup] Einrichtungscode: K7QF-2MXD`. Open `http://localhost:3000`: Dwello shows «Dwello einrichten». The landlord enters the code, their e-mail address and a password twice (at least 8 characters, best a long one used nowhere else), and is then signed in. Only who knows the code can set Dwello up; a new code is made on each start until the account exists, and 5 wrong codes lock the setup for 15 minutes.
 
-Open `http://localhost:3000` and sign in with that address and password. The overview shows the landlord what to do first.
+The AI model (about 6 GB) then downloads by itself; the overview shows how far it is, and until then invoices are entered by hand. If the download fails, Dwello tries again at the next start (`docker compose -f docker-compose.prod.yml restart backend`).
 
-- **Forgotten password or Sperre:** the same command sets a new password; it also lifts the Sperre after 5 failed attempts and ends the sessions that were open.
+- **Forgotten password or Sperre:** `docker exec -it dwello-backend bun run account` sets a new password; it also lifts the Sperre after 5 failed attempts and ends the sessions that were open.
 
 - **Update:** `git pull`, then `docker compose -f docker-compose.prod.yml up -d --build`.
-- **Back up** the database regularly and keep the copy on another device; uploaded invoices and PDFs are stored in the database too. These commands work in every terminal, Windows PowerShell included:
+- **Back up** the database and the keys regularly and keep the copy on another device; uploaded invoices and PDFs are stored in the database too. Without the key for stored secrets, secrets Dwello stores encrypted (such as the key of an external AI) cannot be read after a restore. These commands work in every terminal, Windows PowerShell included:
 
   ```bash
   docker exec dwello-postgres pg_dump -U dwello --clean --if-exists -f /tmp/dwello-backup.sql dwello
   docker cp dwello-postgres:/tmp/dwello-backup.sql dwello-backup.sql
+  docker cp dwello-postgres:/run/dwello dwello-keys
   ```
 
   To restore a copy (it replaces the data in the database):
@@ -79,6 +78,12 @@ Open `http://localhost:3000` and sign in with that address and password. The ove
   ```bash
   docker cp dwello-backup.sql dwello-postgres:/tmp/dwello-backup.sql
   docker exec dwello-postgres psql -U dwello -f /tmp/dwello-backup.sql dwello
+  ```
+
+  On a new machine, put the keys back **before its first start**, so the new database gets the saved password; then start it (`up -d`) and restore the database as above:
+
+  ```bash
+  docker compose -f docker-compose.prod.yml run --rm --no-deps -v "$PWD/dwello-keys:/keys:ro" secrets sh -c 'cp /keys/* /run/dwello/'
   ```
 - **E-mail to tenants:** `.env.example` sets `MAIL_TRANSPORT=smtp` with placeholder values. Fill in `MAIL_FROM` and `SMTP_*` from the landlord's mail provider (or set `MAIL_TRANSPORT=resend` and `RESEND_API_KEY`), and for SMTP also `MAIL_PROVIDER_NAME` and `MAIL_PROVIDER_COUNTRY`, which the privacy statement names (required when the mail server is outside Switzerland). Or remove the `MAIL_TRANSPORT` line: Dwello then sends no e-mail, and the landlord sends the PDFs or prints the letters.
 
@@ -94,7 +99,7 @@ LLM_PROVIDER=<name of the provider>
 LLM_PROVIDER_COUNTRY=<country where the data is processed>
 ```
 
-Invoice data, uploaded invoice files included, then goes to that provider, and the privacy statement names it. Read the checklist in the README («External LLM provider») first: data processing agreement, country, retention. Skip the `ollama pull`.
+Invoice data, uploaded invoice files included, then goes to that provider, and the privacy statement names it. Read the checklist in the README («External LLM provider») first: data processing agreement, country, retention. Dwello then downloads no model.
 
 ## 7. On a server, reachable from other devices
 

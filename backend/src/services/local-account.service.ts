@@ -23,15 +23,18 @@ const normal = (email: string) => email.trim().toLowerCase();
 export const usableEmail = (email: string) => z.string().email().safeParse(normal(email)).success;
 export const UNUSABLE_EMAIL = 'Diese E-Mail-Adresse kann Dwello nicht verwenden. Geben Sie eine Adresse wie name@example.ch ein.';
 
-export async function setLocalAccount(email: string, password: string): Promise<void> {
-	if (!usableEmail(email)) throw new Error(UNUSABLE_EMAIL);
+/** The database, or a transaction of it (the setup, #577) */
+type Executor = Pick<typeof db, 'select' | 'insert'>;
+
+export async function setLocalAccount(email: string, password: string, executor: Executor = db): Promise<void> {
+	if (!usableEmail(email)) throw new CodedError('EMAIL_UNUSABLE', UNUSABLE_EMAIL);
 	if (password.length < MIN_PASSWORD_LENGTH)
 		throw new CodedError('PASSWORD_TOO_SHORT', `Das Passwort braucht mindestens ${MIN_PASSWORD_LENGTH} Zeichen.`, {
 			min: MIN_PASSWORD_LENGTH
 		});
 	const passwordHash = await Bun.password.hash(password);
 	// a new password also lifts a Sperre: the same command resets both
-	await db
+	await executor
 		.insert(localAccounts)
 		.values({ email: normal(email), passwordHash, passwordChangedAt: new Date() })
 		.onConflictDoUpdate({
@@ -52,8 +55,8 @@ export async function localSessionHolds(sub: string, issuedAt: number): Promise<
 	return !!account && Math.floor(account.changed.getTime() / 1000) <= issuedAt;
 }
 
-export async function hasLocalAccount(): Promise<boolean> {
-	return (await db.select({ id: localAccounts.id }).from(localAccounts).limit(1)).length > 0;
+export async function hasLocalAccount(executor: Executor = db): Promise<boolean> {
+	return (await executor.select({ id: localAccounts.id }).from(localAccounts).limit(1)).length > 0;
 }
 
 /** The account the BFF puts into the session, or a refusal: INVALID_CREDENTIALS, ACCOUNT_LOCKED with the end */

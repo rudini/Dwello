@@ -136,8 +136,6 @@
 	"js:Kopiert": "Copié",
 	"js:Markiert": "Sélectionné",
 	"code:# 1. Dwello herunterladen": "# 1. Télécharger Dwello",
-	"code:# 3. Starten: App, Datenbank und lokale KI": "# 3. Démarrer : application, base de données et IA locale",
-	"code:# 4. KI-Modell laden (einmalig, ca. 6 GB)": "# 4. Charger le modèle d’IA (une fois, env. 6 Go)",
 	"code:✓ Dwello läuft auf": "✓ Dwello tourne sur",
 	"code:# Auf dem Homeserver per SSH": "# Sur le serveur domestique, par SSH",
 	"code:# Ohne starke Hardware: externe KI eintragen": "# Sans matériel puissant : indiquer une IA externe",
@@ -220,7 +218,6 @@
 	"Ja. Dwello ist Open Source und kostenlos. Sie bezahlen höchstens Ihren eigenen Server oder den Strom für Ihren PC und das Porto für Briefe. Wenn Sie eine externe KI statt der lokalen nutzen, bezahlen Sie diese direkt beim Anbieter.": "Oui. Dwello est open source et gratuit. Vous payez tout au plus votre propre serveur ou l’électricité de votre PC, et l’affranchissement des lettres. Si vous utilisez une IA externe au lieu de l’IA locale, vous la payez directement au fournisseur.",
 	"Dwello einrichten lassen": "Faire installer Dwello",
 	"Anleitung zum Einrichten": "Guide d’installation",
-	"code:# 2. Einstellungen anlegen, dann ausfüllen (Anleitung)": "# 2. Créer les réglages, puis les remplir (guide)",
 	"code:# HTTPS mit Ihrer Domain: siehe Anleitung": "# HTTPS avec votre domaine : voir le guide",
 	"code:# HTTPS mit Caddy: siehe Anleitung": "# HTTPS avec Caddy : voir le guide",
 	"Der ganze Quellcode ist öffentlich, unter der Lizenz GNU AGPL-3.0-or-later. Sie können ihn lesen, prüfen, anpassen und weitergeben. Es gibt kein Premium-Abo, keine Limite pro Wohnung und keine Funktion, die später kostenpflichtig wird. Die AGPL sorgt dafür, dass auch jede veränderte Version, die andere online nutzen, offen bleibt.": "Tout le code source est public, sous licence GNU AGPL-3.0-or-later. Vous pouvez le lire, le vérifier, l’adapter et le transmettre. Il n’y a pas d’abonnement premium, pas de limite par appartement et aucune fonction qui deviendra payante plus tard. L’AGPL garantit que toute version modifiée utilisée en ligne par d’autres reste ouverte, elle aussi.",
@@ -248,5 +245,8 @@
 	"Issue 579 auf GitHub: Installer in einem Schritt": "Issue 579 sur GitHub : installateur en une étape",
 	"Docker Desktop und 16 GB Arbeitsspeicher für die lokale KI. Mit weniger Arbeitsspeicher tragen Sie eine externe KI ein.": "Docker Desktop et 16 Go de mémoire vive pour l’IA locale. Avec moins de mémoire, indiquez une IA externe.",
 	"Eine Zeile zum Einfügen installiert Docker und Dwello, danach geht es im Browser weiter.": "Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur.",
-	"Ein NAS oder einen Mini-PC mit Docker. Für den Zugriff von anderen Geräten empfohlen: eine eigene Domain mit HTTPS. Für die lokale KI 16 GB Arbeitsspeicher.": "Un NAS ou un mini-PC avec Docker. Recommandé pour l’accès depuis d’autres appareils : votre propre domaine en HTTPS. Pour l’IA locale, 16 Go de mémoire vive."
+	"Ein NAS oder einen Mini-PC mit Docker. Für den Zugriff von anderen Geräten empfohlen: eine eigene Domain mit HTTPS. Für die lokale KI 16 GB Arbeitsspeicher.": "Un NAS ou un mini-PC avec Docker. Recommandé pour l’accès depuis d’autres appareils : votre propre domaine en HTTPS. Pour l’IA locale, 16 Go de mémoire vive.",
+	"code:# 2. Starten: App, Datenbank und lokale KI, die ihr Modell selbst lädt": "# 2. Démarrer : application, base de données et IA locale, qui télécharge son modèle elle-même",
+	"code:# 3. Einrichtungscode zeigen, dann im Browser «Dwello einrichten»": "# 3. Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur",
+	"code:# Einrichtungscode zeigen, dann im Browser «Dwello einrichten»": "# Afficher le code de configuration, puis « Configurer Dwello » dans le navigateur"
 }

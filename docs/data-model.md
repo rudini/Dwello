@@ -481,7 +481,7 @@ password_changed_at TIMESTAMPTZ NOT NULL           -- sessions issued before it 
 created_at, updated_at TIMESTAMPTZ NOT NULL
 ```
 
-Set by `bun run account` (the Betreiber) or `PUT /api/v1/local-accounts`; a new password also clears the failed
+Set by the setup on the first visit (`POST /api/v1/setup`, #577, only while no account exists), `bun run account` (the Betreiber) or `PUT /api/v1/local-accounts`; a new password also clears the failed
 attempts and the Sperre. Migration `0032_local_accounts.sql`.
 
 ---

@@ -25,12 +25,16 @@ Funktionalität: Barrierefreiheit
       | login                  | login-locked        |
       | login                  | other-language      |
       | login                  | demo                |
+      | setup                  | default             |
+      | setup                  | setup-error         |
       | error-404              | default             |
       | error-server           | default             |
       | error-server           | server-error        |
       | dashboard              | default             |
       | dashboard              | old-address-task    |
       | dashboard              | first-use           |
+      | dashboard              | ki-model-loading    |
+      | dashboard              | ki-model-failed     |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
       | dashboard              | other-language      |
