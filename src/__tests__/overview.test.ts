@@ -28,7 +28,8 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 });
 
 describe('Aufgaben der Übersicht', () => {
-	// #178: a former tenant's uploads from before the last Vertragsende, to look at and delete
+	// #178: a former tenant's uploads from before the last Vertragsende, to look at and delete; the end-day
+	// sentence (#459, Fachreview V-1)
 	it('nennt für jeden ehemaligen Mieter die Dokumente von vor dem Vertragsende', () => {
 		const tasks = overviewTasks(
 			input({
@@ -42,7 +43,7 @@ describe('Aufgaben der Übersicht', () => {
 			expect.objectContaining({
 				id: 'former-documents-t1',
 				title: 'Dokumente von Ida Alt prüfen',
-				text: 'Der letzte Mietvertrag endete am 31.03.2026. 1 hochgeladenes Dokument stammt aus der Zeit davor. Löschen Sie, was Sie nicht mehr brauchen; behalten Sie Übergabeprotokolle, bis das Mietzinsdepot freigegeben ist.',
+				text: 'Der letzte Mietvertrag endete am 31.03.2026. 1 hochgeladenes Dokument stammt aus der Zeit davor. Löschen Sie, was Sie nicht mehr brauchen; behalten Sie Übergabeprotokolle, bis das Mietzinsdepot freigegeben ist. Dokumente, die Sie am Tag des Vertragsendes oder danach hochgeladen haben, etwa das Übergabeprotokoll vom Auszug, nennt Dwello hier nicht.',
 				href: '/tenants/t1',
 				action: 'Dokumente ansehen'
 			})

@@ -350,6 +350,53 @@ describe('Mieterdetail', () => {
 		);
 	});
 
+	// #459 (#331, persona Helga P-1 to P-3): the landlord who keeps a document marks the documents as checked; the
+	// notice then says when, without the button; documents from the end day on are not named, and the notice says so
+	it('bietet an, die Dokumente als geprüft zu markieren, und nennt Dokumente ab dem Vertragsende nicht', () => {
+		open([], null, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: null });
+
+		expect(text('tenant-former-documents')).toContain(
+			'Dokumente, die Sie am Tag des Vertragsendes oder danach hochgeladen haben, etwa das Übergabeprotokoll vom Auszug, nennt Dwello hier nicht.'
+		);
+		expect(text('tenant-former-documents-check')).toBe('Als geprüft markieren');
+		// persona Helga #459 A P-1: what the button does
+		expect(text('tenant-former-documents-check-help')).toBe(
+			'Haben Sie gelöscht, was Sie nicht mehr brauchen, markieren Sie die Dokumente als geprüft. Dwello löscht dabei nichts; die Aufgabe in der Übersicht entfällt.'
+		);
+		expect(byTestId('tenant-former-documents-check')!.getAttribute('aria-describedby')).toBe(
+			byTestId('tenant-former-documents-check-help')!.id
+		);
+		expect(byTestId('tenant-former-documents-checked')).toBeNull();
+		const form = byTestId('tenant-former-documents-check')!.closest('form')!;
+		expect(form.getAttribute('action')).toBe('?/checkDocuments');
+		expect((form.elements.namedItem('contractId') as HTMLInputElement).value).toBe('c1');
+	});
+
+	// code review #459 C-1: the button the focus was on goes away
+	it('setzt den Fokus nach der Prüfung auf den Hinweis', async () => {
+		open([], null, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: null });
+
+		const after = actions.get('?/checkDocuments')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-former-documents')));
+	});
+
+	it('sagt, wenn die Prüfung nicht gespeichert wurde', () => {
+		open([], { checkError: 'nicht gespeichert' }, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: null });
+
+		expect(text('tenant-former-documents-check-error')).toBe('nicht gespeichert');
+	});
+
+	it('nennt den Tag der Prüfung und bietet sie nicht mehr an', () => {
+		open([], null, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: '2026-10-20' });
+
+		expect(text('tenant-former-documents-checked')).toBe('Geprüft am 20.10.2026');
+		expect(byTestId('tenant-former-documents-check')).toBeNull();
+		// Fachreview #459 V-5: a checked notice no longer reads as an open task
+		expect(byTestId('tenant-former-documents')?.getAttribute('data-tone')).toBe('info');
+	});
+
 	it('zeigt den Hinweis nicht, solange es keine solchen Dokumente gibt', () => {
 		open([], null, [upload]);
 

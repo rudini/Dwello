@@ -124,6 +124,7 @@ terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date is the Kündi
 notice_received_on      DATE              -- the day the notice arrived (A-3, #112), optional; only with terminated
 billed_until            DATE              -- «Abgerechnet bis» (#133), optional: billed outside Dwello up to this day; Mietstage and Akonto count from the day after
 moved_out               BOOLEAN NOT NULL DEFAULT FALSE -- «Mieter ist ausgezogen» after an agreed end (A-6, #115); cleared when end_date changes
+documents_checked_on    DATE                  -- a former tenant's documents «Als geprüft markieren» (#459); cleared when end_date changes
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto before #464; the amounts are in contract_advance_payments (read: the one that applies today)
