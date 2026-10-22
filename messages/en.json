@@ -1514,6 +1514,8 @@
 	"config_help_accounting_period": "The period for which you bill the utility costs, for example calendar year (01.01.–31.12.), July–June or November–October.",
 	"settings_purpose": "Sender for statements and reminders, suggestions for new statements and invoices, and the master data.",
 	"settings_sender": "Sender",
+	"settings_phone_help": "Optional. Shown in the header of the utility cost statement so your tenants can reach you with questions.",
+	"settings_email_help": "Optional. Shown in the header of the utility cost statement so your tenants can write to you.",
 	"settings_sender_text": "Appears on every statement and every reminder. Dwello uses the IBAN to create the QR-bill.",
 	"settings_company_name": "Company name",
 	"settings_company_name_example": "Sample Properties AG",

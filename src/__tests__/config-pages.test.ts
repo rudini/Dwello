@@ -10,6 +10,8 @@ const settings: Settings = {
 	companyAddress: 'Bahnhofstrasse 1',
 	companyPostalCode: '8001',
 	companyCity: 'Zürich',
+	companyPhone: '044 123 45 67',
+	companyEmail: 'info@muster.ch',
 	iban: 'CH93 0076 2011 6238 5295 7',
 	managementFeePercent: '3',
 	accountingPeriod: 'july-june',
@@ -61,6 +63,16 @@ describe('Einstellungen', () => {
 
 		expect(body).toContain('value="Muster Immobilien AG"');
 		expect(body).toContain('value="CH93 0076 2011 6238 5295 7"');
+	});
+
+	// #465 (DMR-09, Fachreview 465-1 V-3): Telefon und E-Mail stehen nur im Kopf der Nebenkostenabrechnung
+	it('bietet Telefon und E-Mail der Verwaltung an und sagt, wo sie stehen', () => {
+		const body = settingsPage().replace(/\s+/g, ' ');
+
+		expect(body).toContain('value="044 123 45 67"');
+		expect(body).toContain('value="info@muster.ch"');
+		expect(body).toContain('Freiwillig. Steht im Kopf der Nebenkostenabrechnung, damit Ihre Mieter Sie bei Fragen erreichen.');
+		expect(body).toContain('Freiwillig. Steht im Kopf der Nebenkostenabrechnung, damit Ihre Mieter Ihnen schreiben können.');
 	});
 
 	it('bietet nur Heizprofile mit genau 100 % als Standard an', () => {

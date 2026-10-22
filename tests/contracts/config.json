@@ -8,6 +8,8 @@
 		"company_address": "Bahnhofstrasse 1",
 		"company_postal_code": "8001",
 		"company_city": "Zürich",
+		"company_phone": "044 123 45 67",
+		"company_email": "info@muster.ch",
 		"iban": "CH9300762011623852957",
 		"payment_deadline_days": "45",
 		"reminder_after_days": "10"
