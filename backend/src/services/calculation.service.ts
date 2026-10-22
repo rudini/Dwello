@@ -25,7 +25,7 @@ import { getApartment, listApartments } from './apartment.service';
 import { advanceLines, advancesOf } from './advance-payment.service';
 import { billingStart, getContract } from './contract.service';
 import { agreedCategoryIds, agreedFromDays } from './agreed-category.service';
-import { calculateHeatingShare, getHeatingProfile } from './heating-profile.service';
+import { calculateHeatingShare, getHeatingProfile, sourcesOf } from './heating-profile.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 
@@ -487,7 +487,7 @@ async function heatingOfRun(
 	const { percentage: percent, monthBreakdown: months, periodPercentage: periodPercent } = result;
 	// the period's months where they do not carry 100 %, for the division in the PDF (#232, F-7)
 	const periodMonths = periodPercent === 100 ? undefined : result.periodBreakdown;
-	return { byDays: false, percent, months, periodPercent, periodMonths, names };
+	return { byDays: false, percent, months, periodPercent, periodMonths, names, sources: sourcesOf(profile) };
 }
 
 /**

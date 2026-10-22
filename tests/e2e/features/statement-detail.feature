@@ -286,7 +286,6 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "Akontobeiträge ab 01.03.2024"
 
   # #465 (#103, DIV-14): das PDF ist ein Brief an den Mieter: Ort und Datum, Anrede wie die Mahnung (#88, #449) und Gruss
-  @wip
   Szenario: Das PDF der Abrechnung ist ein Brief an den Mieter
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -298,7 +297,6 @@ Funktionalität: Abrechnungsdetail
 
   # #465 (#103, DMR-10): eine Position nach Heizprofil nennt die Quelle seiner Monatsanteile; ein eigenes Profil ohne
   # Beschreibung sagt, dass es das eigene des Vermieters ist
-  @wip
   Szenario: Das PDF nennt die Quelle der Monatsanteile eines eigenen Heizprofils
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
@@ -308,7 +306,6 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "Quelle der Monatsanteile: Eigenes Profil des Vermieters"
 
   # #465 (#103, CD-8): jedes Zeichen steht im PDF so, wie es erfasst ist
-  @wip
   Szenario: Das PDF druckt einen Namen mit Sonderzeichen unverändert
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und der Mieter "Łukasz Dragoș" existiert
@@ -322,7 +319,6 @@ Funktionalität: Abrechnungsdetail
 
   # #465 (#103, DMR-09): Telefon und E-Mail der Verwaltung stehen im Kopf des PDF. Eine globale Einstellung: jedes
   # Szenario hinterlegt dieselben Angaben, wie bei der IBAN (O-34)
-  @wip
   Szenario: Das PDF nennt Telefon und E-Mail der Verwaltung
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und die Verwaltung hat das Telefon "044 123 45 67" und die E-Mail "info@muster-immobilien.ch" hinterlegt

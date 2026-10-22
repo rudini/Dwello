@@ -104,6 +104,11 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 		nameFR: string | null;
 		nameIT: string | null;
 		nameEN: string | null;
+		type: string; // with its sources: the PDF of a statement created before #465
+		sourceDE: string | null;
+		sourceFR: string | null;
+		sourceIT: string | null;
+		sourceEN: string | null;
 	} | null;
 }
 
@@ -293,7 +298,12 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 				nameDE: heatingProfiles.nameDE,
 				nameFR: heatingProfiles.nameFR,
 				nameIT: heatingProfiles.nameIT,
-				nameEN: heatingProfiles.nameEN
+				nameEN: heatingProfiles.nameEN,
+				type: heatingProfiles.type,
+				sourceDE: heatingProfiles.sourceDE,
+				sourceFR: heatingProfiles.sourceFR,
+				sourceIT: heatingProfiles.sourceIT,
+				sourceEN: heatingProfiles.sourceEN
 			}
 		})
 		.from(utilityStatements)

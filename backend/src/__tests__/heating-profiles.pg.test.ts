@@ -46,6 +46,24 @@ describe('Monatsanteile der vordefinierten Heizprofile', () => {
 	});
 });
 
+// #465 (DMR-10, Fachreview 465-1 V-1): the fact sheet the four profiles match value for value, in all four languages
+describe('Quelle der Monatsanteile der vordefinierten Heizprofile', () => {
+	const sheet = 'Merkblatt «Nebenkostenabrechnung beim Umzug während der Abrechnungsperiode» des Mieterinnen- und Mieterverbands (mieterverband.ch), Tabelle';
+
+	it('nennt Merkblatt, Herausgeber und Tabelle', async () => {
+		const result = await db.execute(sql`SELECT name, source_de, source_fr, source_it, source_en FROM heating_profiles WHERE type = 'predefined'`);
+		const of = (name: string) => result.rows.find((row) => row.name === name)!;
+
+		expect(of('Heating Mittelland').source_de).toBe(`${sheet} «Heizungsanlage ohne Warmwasseraufbereitung»`);
+		expect(of('Heating + Hot Water').source_de).toBe(`${sheet} «Heizungsanlage mit Warmwasseraufbereitung»`);
+		expect(of('Heating Mountain').source_de).toBe(`${sheet} «Verteilungsschlüssel in Bergebieten und im Tessin», Zeile «Berggebiete»`);
+		expect(of('Heating Tessin').source_de).toBe(`${sheet} «Verteilungsschlüssel in Bergebieten und im Tessin», Zeile «Tessin»`);
+		expect(of('Heating Tessin').source_fr).toContain('ligne «\u00a0Tessin\u00a0» (Tessin)');
+		expect(of('Heating Mountain').source_it).toContain('riga «Berggebiete» (regioni di montagna)');
+		expect(of('Heating + Hot Water').source_en).toContain('table ‘Heizungsanlage mit Warmwasseraufbereitung’ (heating with hot water)');
+	});
+});
+
 describe('Vordefinierter Heizschlüssel 70/30', () => {
 	it('rechnet mit den Summen des Gebäudes, damit Fläche und Einheit wirklich 70 % und 30 % tragen', async () => {
 		const result = await db.execute(sql`SELECT formula FROM distribution_keys WHERE name = 'Heating (Area 70% / Unit 30%)'`);

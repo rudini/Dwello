@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, configuration, fuelStocks, invoices, tenants, utilityStatements } from '../db/schema';
+import { categories, configuration, fuelStocks, heatingProfiles, invoices, tenants, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createFuelStock } from '../services/fuel-stock.service';
@@ -161,7 +161,9 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	it('nummeriert die Seiten und nennt in der Kopfzeile Absender und Abrechnung', () => {
 		expect(pdf.flowing).toContain('Seite 1 von 2');
 		expect(pdf.flowing).toContain('Seite 2 von 2');
-		expect(occurrences('Muster Immobilien AG · Firmenweg 9 · 8001 Zürich')).toBe(2);
+		// #465 (Fachreview 465-1 V-2): page 1 the letterhead a line each, the next pages one line
+		expect(pdf.pageTexts[0]).toContain('Muster Immobilien AG\nFirmenweg 9\n8001 Zürich');
+		expect(occurrences('Muster Immobilien AG · Firmenweg 9 · 8001 Zürich')).toBe(1);
 	});
 
 	// Der Mieter sieht zuerst, was er bezahlt, dann wie es zustande kommt
@@ -486,6 +488,8 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 
 		expect(rounded).toContain("1'000.00 1'000.00 70.98 %");
 		expect(rounded).toContain('70.98 % der Heizkosten');
+		// #465 (Fachreview 465-1 V-6): an own profile is the landlord's, whatever it describes
+		expect(rounded).toContain('Quelle der Monatsanteile: Eigenes Profil des Vermieters');
 	});
 
 	// Gespeichert wie gedruckt, auf zwei Stellen: «Heizung + Warmwasser» Juli bis Dezember 3.7 + 3.6 + 3.7 + 9.5 + 10.7 + 13
@@ -502,6 +506,29 @@ describe('Heizanteil, mit dem die Abrechnung erstellt wurde', () => {
 		await deleteStatement(statement.id);
 
 		expect(statement.heatingShare).toMatchObject({ byDays: false, percent: 44.2 });
+	});
+
+	// #465 (DMR-10, Fachreview 465-1 V-4): the source of a predefined profile kept with the statement, as its names: a
+	// later change does not reach a PDF made again
+	it('nennt die Quelle der Monatsanteile, wie die Abrechnung erstellt wurde', async () => {
+		const profile = (await getHeatingProfileByName('Heating + Hot Water'))!;
+		const statement = await generateStatement({
+			contractId: moved.contract,
+			buildingId: moved.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			heatingProfileId: profile.id,
+			managementFeePercent: 0
+		});
+		await db.update(heatingProfiles).set({ sourceDE: 'Geändert' }).where(eq(heatingProfiles.id, profile.id));
+		await generateStatementPdf(statement.id, 'de');
+		const printed = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await db.update(heatingProfiles).set({ sourceDE: profile.sourceDE }).where(eq(heatingProfiles.id, profile.id));
+		await deleteStatement(statement.id);
+
+		expect(printed).toContain(
+			'Quelle der Monatsanteile: Merkblatt «Nebenkostenabrechnung beim Umzug während der Abrechnungsperiode» des Mieterinnen- und Mieterverbands (mieterverband.ch), Tabelle «Heizungsanlage mit Warmwasseraufbereitung»'
+		);
 	});
 
 	// Vor #209 erstellt: kein Anteil gespeichert; die Abrechnung wird nicht neu gerechnet, das PDF nennt kein Heizprofil

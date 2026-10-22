@@ -21,6 +21,7 @@ import {
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 import { CodedError } from './coded-error';
 import { countryLine, qrTown } from './postal-address';
+import { greetingWords } from './reminder-letter';
 import type { AdvanceLine, InvoicePart, MonthShare } from '../db/schema';
 
 /**
@@ -71,6 +72,10 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Annahmestelle',
 		statementNumber: 'Abrechnungsnr.',
 		statementDate: 'Abrechnungsdatum',
+		letterPhone: 'Telefon {phone}',
+		letterIntro: 'Sie erhalten die Nebenkostenabrechnung für die Abrechnungsperiode {start} – {end}.',
+		heatingSource: 'Quelle der Monatsanteile: {source}',
+		heatingSourceOwn: 'Eigenes Profil des Vermieters',
 		replacesNote: 'Diese Abrechnung ersetzt die Abrechnung {number} vom {date}. Die Abrechnung {number} gilt nicht mehr.',
 		replacesPay: ' Bezahlen Sie nur noch den Saldo dieser Abrechnung.',
 		priorPaid: 'Bereits bezahlt auf {numbers}',
@@ -194,6 +199,10 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Point de dépôt',
 		statementNumber: 'N° de décompte',
 		statementDate: 'Date du décompte',
+		letterPhone: 'Téléphone {phone}',
+		letterIntro: 'Veuillez trouver ci-dessous le décompte des charges pour la période de décompte du {start} au {end}.',
+		heatingSource: 'Source des parts mensuelles\u00a0: {source}',
+		heatingSourceOwn: 'Profil établi par le bailleur',
 		replacesNote: 'Ce décompte remplace le décompte {number} du {date}. Le décompte {number} n’est plus valable.',
 		replacesPay: ' Payez uniquement le solde du présent décompte.',
 		priorPaid: 'Déjà payé sur {numbers}',
@@ -316,6 +325,10 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Punto di accettazione',
 		statementNumber: 'N. conteggio',
 		statementDate: 'Data del conteggio',
+		letterPhone: 'Telefono {phone}',
+		letterIntro: 'Le inviamo qui di seguito il conteggio spese accessorie per il periodo di conteggio dal {start} al {end}.',
+		heatingSource: 'Fonte delle quote mensili: {source}',
+		heatingSourceOwn: 'Profilo stabilito dal locatore',
 		replacesNote: 'Questo conteggio sostituisce il conteggio {number} del {date}. Il conteggio {number} non è più valido.',
 		replacesPay: ' Paghi solo il saldo di questo conteggio.',
 		priorPaid: 'Già pagato su {numbers}',
@@ -438,6 +451,10 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Acceptance point',
 		statementNumber: 'Statement no.',
 		statementDate: 'Statement date',
+		letterPhone: 'Phone {phone}',
+		letterIntro: 'Please find below your utility cost statement for the billing period {start} – {end}.',
+		heatingSource: 'Source of the monthly shares: {source}',
+		heatingSourceOwn: 'The landlord’s own profile',
 		replacesNote: 'This statement replaces statement {number} of {date}. Statement {number} no longer applies.',
 		replacesPay: ' Pay only the balance of this statement.',
 		priorPaid: 'Already paid on {numbers}',
@@ -595,6 +612,7 @@ export interface StatementPDFData {
 		months?: MonthShare[];
 		periodPercent?: number;
 		periodMonths?: MonthShare[];
+		source?: string | null; // where the monthly shares come from (#465, DMR-10), in the tenant's language; null an own profile
 	};
 	// A tank: the heating costs of its category are opening stock + invoices – closing stock
 	fuel?: { category: string; openingDate: string; opening: number; invoices: number; closingDate: string; closing: number; total: number };
@@ -746,18 +764,27 @@ function addresses({ doc, t, data, language }: Page) {
 }
 
 // Title with the period, number and date, the tenant's days in the period
-function title({ doc, t, data }: Page, y: number) {
+function title({ doc, t, data, config, language }: Page, y: number) {
+	// #465 (DIV-14): a letter: place and date, then the title as its subject
+	doc.font(FONT.regular).fontSize(10).fillColor(COLORS.ink).text([config.city, formatDate(data.statementDate)].filter(Boolean).join(', '), PAGE.left, y);
 	doc
+		.moveDown(1.2)
 		.font(FONT.bold)
 		.fontSize(16)
 		.fillColor(COLORS.ink)
-		.text(`${t.title} ${formatDate(data.periodStart)} – ${formatDate(data.periodEnd)}`, PAGE.left, y, { width: PAGE.right - PAGE.left });
+		.text(`${t.title} ${formatDate(data.periodStart)} – ${formatDate(data.periodEnd)}`, PAGE.left, doc.y, { width: PAGE.right - PAGE.left });
 	doc
 		.font(FONT.regular)
 		.fontSize(9)
 		.fillColor(COLORS.muted)
 		.text(`${t.statementNumber} ${data.statementNumber} · ${t.statementDate} ${formatDate(data.statementDate)}`)
 		.fillColor(COLORS.ink)
+		.moveDown(0.8)
+		.fontSize(10)
+		.text(`${greetingWords(language).salutation} ${data.tenant.firstName} ${data.tenant.lastName},`.replace(/ +,/, ','))
+		.moveDown(0.4)
+		.text(fill(t.letterIntro, { start: formatDate(data.periodStart), end: formatDate(data.periodEnd) }))
+		.fontSize(9)
 		.moveDown(0.4) // its own paragraph, not a continuation of the number (data check 453-1 D-2)
 		.text(
 			fill(data.billed ? t.tenancyBilledLine : t.tenancyLine, {
@@ -1131,8 +1158,9 @@ function heatingLines({ t, data }: Page) {
 	const { profile, percent, months } = data.heating;
 	const shown = (Math.round(percent * 100) / 100).toFixed(2);
 	const note = fill(t[key], { profile, percent: shown });
-	if (key === 'heatingNoteOwn' || !months?.length || percent >= 100) return [note];
-	return [note, fill(t.heatingMonths, { months: monthList(months, t) }) + periodSums(data.heating, shown, t)];
+	const source = data.heating.source !== undefined ? [fill(t.heatingSource, { source: data.heating.source ?? t.heatingSourceOwn })] : [];
+	if (key === 'heatingNoteOwn' || !months?.length || percent >= 100) return [note, ...source];
+	return [note, fill(t.heatingMonths, { months: monthList(months, t) }) + periodSums(data.heating, shown, t), ...source];
 }
 
 // a period whose months do not carry 100 % (under a year): both sums, from the printed months (#229); since #232 the
@@ -1181,9 +1209,13 @@ function heatingSection(page: Page, y: number) {
 const senderParts = (config: QRBillConfig) =>
 	[config.companyName, config.address, config.postalCode && config.city && `${config.postalCode} ${config.city}`].filter(Boolean);
 
+// The letterhead: the landlord, then phone and e-mail where entered (#465, DMR-09)
+const letterhead = (config: QRBillConfig, t: Record<string, string>) =>
+	[...senderParts(config), config.phone && fill(t.letterPhone, { phone: config.phone }), config.email].filter(Boolean) as string[];
+
 // What the tenant may ask for: the receipts (Art. 257b Abs. 2 OR), the detailed heating statement and the stock
 // (Art. 8 VMWG); kept on one page
-function notes({ doc, t, data, config }: Page, y: number) {
+function notes({ doc, t, data, config, language }: Page, y: number) {
 	const contact = senderParts(config).join(', ');
 	const names = data.agreedCosts?.map(({ name, from }) => (from ? fill(t.agreedFromItem, { category: name, date: formatDate(from) }) : name));
 	const agreed = names?.length ? [fill(t.agreedCosts, { categories: names.join(', ') })] : [];
@@ -1191,13 +1223,16 @@ function notes({ doc, t, data, config }: Page, y: number) {
 	const lines = [...(data.notes ? [data.notes] : []), ...agreed, ...advance, fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
 	const width = PAGE.right - PAGE.left;
 	doc.font(FONT.regular).fontSize(9);
-	const height = lines.reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 6, 0);
+	const closing = [greetingWords(language).closing, config.companyName].filter(Boolean).join('\n');
+	const height = [...lines, closing].reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 6, 0) + 10;
 	let top = heading(doc, t.notes, y, height + 30);
 	for (const line of lines) {
 		doc.font(FONT.regular).fontSize(9).fillColor(COLORS.ink).text(line, PAGE.left, top, { width });
 		top = doc.y + 6;
 	}
-	return top;
+	// #465 (DIV-14): the greeting after the notes, so they belong to the letter; the payment part stays last
+	doc.fontSize(10).text(closing, PAGE.left, top + 10, { width });
+	return doc.y + 6;
 }
 
 type QRResult = Awaited<ReturnType<typeof generateQRBillForStatement>>;
@@ -1324,10 +1359,12 @@ function frame({ doc, t, data, config }: Page, qrPage: number | null) {
 		doc.switchToPage(i);
 		doc.page.margins.bottom = 0;
 		doc.font(FONT.regular).fontSize(8).fillColor(COLORS.muted);
-		const sender = senderParts(config).join(' · ');
-		doc.text(sender, PAGE.left, 40, { width: 290, height: 10, ellipsis: true, lineBreak: false });
+		// #465 (Fachreview 465-1 V-2): page 1 a letterhead, a line each, with phone and e-mail; later pages one line
+		const head = i === start ? letterhead(config, t).join('\n') : senderParts(config).join(' · ');
+		doc.text(head, PAGE.left, 40, { width: 290, ...(i !== start && { height: 10, ellipsis: true, lineBreak: false }) });
+		const rule = Math.max(54, doc.y + 4);
 		doc.text(`${data.statementNumber} · ${fill(t.pageOf, { page: i + 1, pages: count })}`, PAGE.right - 180, 40, { width: 180, align: 'right' });
-		doc.lineWidth(0.5).strokeColor(COLORS.line).moveTo(PAGE.left, 54).lineTo(PAGE.right, 54).stroke();
+		doc.lineWidth(0.5).strokeColor(COLORS.line).moveTo(PAGE.left, rule).lineTo(PAGE.right, rule).stroke();
 		if (i === qrPage) continue;
 		doc.text(`${data.building.name} · ${t.period} ${formatDate(data.periodStart)} – ${formatDate(data.periodEnd)}`, PAGE.left, PAGE.height - 40, {
 			width: PAGE.right - PAGE.left,

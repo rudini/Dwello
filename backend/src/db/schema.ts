@@ -269,6 +269,11 @@ export const heatingProfiles = pgTable('heating_profiles', {
 	novemberPct: decimal('november_pct', { precision: 5, scale: 2 }).notNull(),
 	decemberPct: decimal('december_pct', { precision: 5, scale: 2 }).notNull(),
 	description: text('description'),
+	// #465: where the monthly shares come from, per language; only the predefined profiles have one
+	sourceDE: text('source_de'),
+	sourceFR: text('source_fr'),
+	sourceIT: text('source_it'),
+	sourceEN: text('source_en'),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
@@ -405,6 +410,7 @@ export type BilledInvoice = { id: string; description: string; invoiceDate?: str
 
 // The heating costs as the statement shares them (#209): by days, or by the profile with its names at the time
 type HeatingProfileNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+export type HeatingSources = { de: string; fr: string | null; it: string | null; en: string | null };
 /** A payment taken back (#92): the day of the reset and what it cleared */
 export type PaymentReset = { resetOn: string; paidDate: string | null; paidAmount: string | null };
 
@@ -418,6 +424,7 @@ export type HeatingShare =
 			periodPercent?: number; // the period's months in the profile (#229); absent on statements of #209
 			periodMonths?: MonthShare[]; // where they do not carry 100 % (#232); absent before
 			names: HeatingProfileNames;
+			sources?: HeatingSources | null; // a predefined profile's source (#465), null an own profile's; absent before
 	  };
 
 // The last statement number given per prefix NK-{building}-{year}-, so a deleted draft's number is not given again (#97)

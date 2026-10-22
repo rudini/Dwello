@@ -214,6 +214,7 @@ name_de, name_fr, name_it, name_en VARCHAR(100)
 type         VARCHAR(20)  NOT NULL DEFAULT 'predefined'
 january_pct … december_pct  DECIMAL(5,2) NOT NULL   -- 12 columns, one per month
 description  TEXT
+source_de, source_fr, source_it, source_en  TEXT   -- where the monthly shares come from (#465); predefined profiles only
 CHECK (type IN ('predefined', 'custom'))
 ```
 
@@ -337,7 +338,7 @@ Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_
 `statements_status_idx`, `statements_tenant_period_idx (tenant_id, period_start)`, unique
 `statements_number_idx (statement_number)`, unique `statements_replaces_idx (replaces_id)`.
 
-`heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }` with the chosen profile's names and why it was not applied (`reason`: `wholePeriod` or `noHeatingMonths`, #247), or the percent of the period's heating costs, the months with their shares (rounded to two places; the percent is their division, #232), for a period whose months do not carry 100 % the period's percent and months (`periodPercent`, `periodMonths`), and the profile's names (`name`, `name_de` … as camelCase keys), so the PDF and the detail page print them after an own profile was changed, renamed or deleted. Empty without a heating profile, without heating costs and for statements created before; the PDF of one created before names no heating profile (#232, C-5).
+`heating_share` (migration `0004`, #209) keeps how the heating costs were shared when the statement was created: `{ "byDays": true }` with the chosen profile's names and why it was not applied (`reason`: `wholePeriod` or `noHeatingMonths`, #247), or the percent of the period's heating costs, the months with their shares (rounded to two places; the percent is their division, #232), for a period whose months do not carry 100 % the period's percent and months (`periodPercent`, `periodMonths`), and the profile's names (`name`, `name_de` … as camelCase keys) and sources (`sources`: `{ de, fr, it, en }` of a predefined profile, `null` an own one; #465), so the PDF and the detail page print them after an own profile was changed, renamed or deleted. Empty without a heating profile, without heating costs and for statements created before; the PDF of one created before names no heating profile (#232, C-5).
 
 **Status (Abrechnungsstatus)** — transitions allowed by `updateStatementStatus` in
 `backend/src/services/statement.service.ts`:
@@ -540,7 +541,8 @@ Gebäudeversicherung and Verwaltung where the landlord had not changed the text 
 | Heizung Bergregion | 14 | 11.5 | 11.5 | 9 | 7 | 4.5 | 1 | 4 | 5.5 | 8.5 | 10.5 | 13 |
 | Heizung Tessin | 21.5 | 17 | 15.5 | 5 | 0 | 0 | 0 | 0 | 0 | 6 | 15 | 20 |
 
-Values from the Swiss table «Mieterwechsel: So werden die Heizkosten verteilt». There is no «Nur Warmwasser» profile:
+Values from the Mieterverband's fact sheet «Nebenkostenabrechnung beim Umzug während der Abrechnungsperiode», which
+`source_de` … `source_en` name with its table (migration `0037`, #465; the statement PDF prints it). There is no «Nur Warmwasser» profile:
 separate Warmwasser is shared by days, and as the heating profile of a run it would spread the heating costs evenly
 over the year.
 

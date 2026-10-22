@@ -125,7 +125,7 @@
 				value={settings.companyEmail}
 				error={errors.companyEmail}
 				help={m.settings_email_help()}
-				example="info@muster-immobilien.ch"
+				example="info@example.ch"
 			/>
 			<SettingField
 				name="iban"

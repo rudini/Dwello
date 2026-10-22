@@ -381,3 +381,9 @@ export function calculateHeatingShare(
 		monthBreakdown
 	};
 }
+
+// Where a profile's monthly shares come from (#465): a predefined profile's fact sheet, null an own profile
+export const sourcesOf = (profile: { type: string; sourceDE: string | null; sourceFR: string | null; sourceIT: string | null; sourceEN: string | null }) =>
+	profile.type === 'predefined' && profile.sourceDE
+		? { de: profile.sourceDE, fr: profile.sourceFR, it: profile.sourceIT, en: profile.sourceEN }
+		: null;
