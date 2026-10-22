@@ -125,4 +125,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #547 fachreview: `docs/reviews/547-fachreview-1.md` (no Blocker/Major; «sending stays possible» confirmed; Minor V-1, Italian «consegnare» beside «recapitare» in the dialog, fixed in the new text and in the overview text of #454)
 - [x] #547 code review round 1: `docs/reviews/547-review-1.md`; Minor C-1 (the current-draft DOM test pins kept behaviour, fc52082 does not say so) noted here and in the PR; the open point on focus settled by an assertion in the DOM test (green: the focus moves to «Abbrechen» of the confirmation)
 - [x] #547 persona Anna: `docs/design/personas/anna-547.md` (task done; no Blocker/Major; P-2 and P-3 are what #547 decided (no button in the hint, sending stays possible), P-1, P-4, P-5 concern existing screens; all stay in the report)
-- [ ] #547 closing review
+- [x] #547 closing review round 2: `docs/reviews/547-review-2.md` (C-1 and focus closed, no new findings)
+- [ ] #547 PR merged
