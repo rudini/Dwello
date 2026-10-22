@@ -722,6 +722,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann schlägt der Assistent das Heizprofil "Winter" vor
     Und sagt der Assistent "Beim Mieterwechsel ist das Heizprofil wie bei der bestehenden Nebenkostenabrechnung derselben Wohnung eingestellt, die Verwaltungspauschale kommt aus den Einstellungen. Prüfen Sie beides und gehen Sie weiter zur Vorschau."
 
+  # Fachreview 387-1 V-1: eine ersetzte Abrechnung zählt nicht als Abrechnung der Periode, auch nicht für das Heizprofil
+  Szenario: Eine ersetzte Abrechnung gibt kein Heizprofil vor
+    Angenommen es gibt das Heizprofil "Winter"
+    Und es gibt das Heizprofil "Sommer"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Sommer"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und die Abrechnung 2024 von "Eva Frei" ist ersetzt
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann schlägt der Assistent das Heizprofil "Sommer" vor
+
   # #464: jedes Akonto zählt für die Monate, in denen es galt. Hauswart 732.00 für 366 Tage = 2.00 pro Tag;
   # Marc Huber 245 Tage = 490.00 + 3 % = 504.70; Akonto Mai und Juni 2 × 50.00, Juli bis Dezember 6 × 80.00 = 580.00
   @api

@@ -70,11 +70,12 @@ async function apartmentProfile(
 	profiles: Row[],
 	contracts: Row[]
 ) {
+	// not loaded: no same apartment's statement, as the rest of the link falls back to the settings (code review 387-1 C-3)
 	const missing = await unbilledContracts(fetch, {
 		buildingIds: [buildingId],
 		periodStart: start,
 		periodEnd: end
-	});
+	}).catch(() => []);
 	const apartments = new Set(missing.map((c) => c.apartmentId));
 	const apartmentOf = (contractId: unknown) =>
 		contracts.find((c) => c.id === contractId)?.apartmentId;
