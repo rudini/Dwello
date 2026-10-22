@@ -1684,6 +1684,16 @@ describe('Abrechnungsdetail', () => {
 		expect(text().replace(/\s+/g, ' ')).toContain('Versendet per E-Mail an anna@example.ch 28.09.2026, 10:15');
 	});
 
+	// #609 (persona Dr. Weber P-1 of #503): a draft's PDF is made anew on every request, so its Verlauf claims none;
+	// a sent statement keeps the PDF as sent and names it
+	it('nennt im Verlauf eines Entwurfs kein erstelltes PDF', () => {
+		detail({ pdfGeneratedAt: '2026-10-05T08:00:00Z' });
+		expect(text().replace(/\s+/g, ' ')).not.toMatch(/PDF erstellt \d/);
+		document.body.innerHTML = '';
+		detail({ status: 'sent', statementDate: '2026-09-28', pdfGeneratedAt: '2026-09-28T08:00:00Z' });
+		expect(text().replace(/\s+/g, ' ')).toMatch(/PDF erstellt 28\.09\.2026/);
+	});
+
 	it('führt im Verlauf Versand und Zahlung', () => {
 		detail({ status: 'paid', statementDate: '2026-09-28', paidDate: '2026-10-05' });
 		const history = text().replace(/\s+/g, ' ');

@@ -790,6 +790,18 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter den Entwurf aus der Bestätigung neu berechnet
     Dann bestätigt Dwello "Der Entwurf ist neu berechnet. Er rechnet mit den Rechnungen und dem Tankbestand, wie sie jetzt sind."
 
+  # #609 (Persona Dr. Weber P-1 von #503): das PDF eines Entwurfs entsteht bei jedem Öffnen neu; der Verlauf behauptet
+  # keines, das sich vielleicht nicht mehr öffnen lässt
+  Szenario: Der Verlauf eines Entwurfs nennt kein erstelltes PDF
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Dann nennt der Verlauf "Erstellt" am heutigen Tag
+    Und nennt der Verlauf nicht "PDF erstellt"
+
   # #338: ein Entwurf wird mit den Rechnungen von jetzt neu berechnet und behält seine Nummer
   Szenario: Entwurf neu berechnen
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

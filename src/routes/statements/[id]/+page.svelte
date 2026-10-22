@@ -219,9 +219,10 @@
 				oncorrect={() => (showCorrect = true)}
 				ondelete={() => (showDelete = true)}
 			/>
+			<!-- a draft's PDF is made anew on every request: its Verlauf claims none (#609) -->
 			<MetadataCard
 				createdAt={statement.createdAt}
-				{pdfGeneratedAt}
+				pdfGeneratedAt={statement.status === 'draft' ? null : pdfGeneratedAt}
 				sentOn={statement.status === 'draft' ? null : statement.statementDate}
 				delivery={data.delivery}
 				paidOn={statement.paidDate}
