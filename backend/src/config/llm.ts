@@ -56,7 +56,7 @@ export const onOperatorServer = (url: string) => OPERATOR_HOSTS.includes(new URL
 export function checkLocalKi(url: string) {
 	if (!onOperatorServer(url))
 		throw new Error(
-			'LLM_LOCAL_URL is not on this server: choose a provider under «Einstellungen» › «KI» or set LLM_BASE_URL, LLM_PROVIDER and LLM_PROVIDER_COUNTRY'
+			'LLM_LOCAL_URL is not on this server: point it to localhost or the compose service ollama, or remove it and choose a provider under «Einstellungen» › «KI» after the start'
 		);
 }
 

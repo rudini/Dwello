@@ -87,6 +87,12 @@ The AI model (about 6 GB) then downloads by itself; the overview shows how far i
   ```
 - **E-mail to tenants:** `.env.example` sets `MAIL_TRANSPORT=smtp` with placeholder values. Fill in `MAIL_FROM` and `SMTP_*` from the landlord's mail provider (or set `MAIL_TRANSPORT=resend` and `RESEND_API_KEY`), and for SMTP also `MAIL_PROVIDER_NAME` and `MAIL_PROVIDER_COUNTRY`, which the privacy statement names (required when the mail server is outside Switzerland). Or remove the `MAIL_TRANSPORT` line: Dwello then sends no e-mail, and the landlord sends the PDFs or prints the letters.
 
+If the page «KI» says that the local KI does not answer, start it again (Docker Desktop shows the container `dwello-ollama`, or in a terminal):
+
+```bash
+docker compose -f docker-compose.prod.yml up -d ollama
+```
+
 ## 6. Without 16 GB of memory: an external AI
 
 Any OpenAI-compatible service that reads images works. Open Dwello, go to «Einstellungen» › «KI», choose «KI eines Anbieters» and fill in the address, the API key, a model that reads images, the name of the provider and the country where it processes the data. «Verbindung prüfen» says whether the key is accepted and the model reads invoice images. Before saving, Dwello asks you to confirm the three data protection points (data processing agreement, country, retention; also in the README, «External LLM provider»). The next invoice uses the provider, without a restart, and the privacy statement names it. Dwello then downloads no model.

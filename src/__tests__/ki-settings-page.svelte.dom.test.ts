@@ -121,10 +121,11 @@ describe('Seite KI', () => {
 		page({ mode: 'provider' });
 
 		expect(text()).toContain(
-			'Der Name der Firma, wie er im Vertrag mit ihr steht. Die Datenschutzerklärung nennt ihn.'
+			'Der Name der Firma, wie er im Vertrag mit ihr steht. Läuft die KI auf einem Server, den Sie selbst betreiben, schreiben Sie «eigener Server».'
 		);
 		expect(text()).toContain(
-			'Das Land, in dem die Rechenzentren des Anbieters stehen. Die Datenschutzerklärung nennt es.'
+			// Fachreview 580-5 F-27: auch Länder, aus denen nur zugegriffen wird, und die der beigezogenen Firmen
+			'Die Länder, in denen der Anbieter und die Firmen, die er beizieht, die Daten bearbeiten, auch wenn sie nur darauf zugreifen. Sie stehen meist im Vertrag oder in der Liste der Unterauftragnehmer.'
 		);
 	});
 });

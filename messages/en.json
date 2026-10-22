@@ -2031,6 +2031,6 @@
 	"audit_ki_provider": "AI chosen: {provider} ({country})",
 	"audit_ki_local": "AI chosen: local AI",
 	"audit_ki_none": "AI chosen: no AI",
-	"ki_settings_provider_name_help": "The company’s name as it appears in your contract with it. The privacy statement names it. If several companies process the data, name them all, separated by commas.",
-	"ki_settings_country_help": "The country where the provider’s data centres are. The privacy statement names it. If data centres in several countries process the data, name them all, separated by commas."
+	"ki_settings_provider_name_help": "The company’s name as it appears in your contract with it. If the AI runs on a server you run yourself, write «own server». The privacy statement names it. If several companies process the data, name them all, separated by commas.",
+	"ki_settings_country_help": "The countries where the provider and the companies it engages process the data, even if they only access it. They are usually in the contract or in the list of subprocessors. The privacy statement names them. Separate several countries with commas."
 }

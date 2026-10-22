@@ -2031,6 +2031,6 @@
 	"audit_ki_provider": "IA choisie : {provider} ({country})",
 	"audit_ki_local": "IA choisie : IA locale",
 	"audit_ki_none": "IA choisie : pas d’IA",
-	"ki_settings_provider_name_help": "Le nom de l’entreprise tel qu’il figure dans votre contrat avec elle. La déclaration de protection des données le mentionne. Si plusieurs entreprises traitent les données, indiquez-les toutes, séparées par une virgule.",
-	"ki_settings_country_help": "Le pays où se trouvent les centres de données du fournisseur. La déclaration de protection des données le mentionne. Si des centres de données de plusieurs pays traitent les données, indiquez-les tous, séparés par une virgule."
+	"ki_settings_provider_name_help": "Le nom de l’entreprise tel qu’il figure dans votre contrat avec elle. Si l’IA fonctionne sur un serveur que vous exploitez vous-même, écrivez « serveur propre ». La déclaration de protection des données le mentionne. Si plusieurs entreprises traitent les données, indiquez-les toutes, séparées par une virgule.",
+	"ki_settings_country_help": "Les pays dans lesquels le fournisseur et les entreprises auxquelles il fait appel traitent les données, même s’ils ne font qu’y accéder. Ils figurent généralement dans le contrat ou dans la liste des sous-traitants. La déclaration de protection des données les mentionne. Séparez plusieurs pays par une virgule."
 }

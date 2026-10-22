@@ -105,7 +105,7 @@ describe('Adresse der lokalen KI', () => {
 
 	it('verweigert eine Adresse auf einem anderen Rechner und sagt, was zu tun ist', () => {
 		expect(() => checkLocalKi('http://192.168.1.20:11434/v1')).toThrow(
-			'LLM_LOCAL_URL is not on this server: choose a provider under «Einstellungen» › «KI» or set LLM_BASE_URL, LLM_PROVIDER and LLM_PROVIDER_COUNTRY'
+			'LLM_LOCAL_URL is not on this server: point it to localhost or the compose service ollama, or remove it and choose a provider under «Einstellungen» › «KI» after the start'
 		);
 	});
 });

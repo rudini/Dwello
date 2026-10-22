@@ -2031,6 +2031,6 @@
 	"audit_ki_provider": "KI gewählt: {provider} ({country})",
 	"audit_ki_local": "KI gewählt: Lokale KI",
 	"audit_ki_none": "KI gewählt: Keine KI",
-	"ki_settings_provider_name_help": "Der Name der Firma, wie er im Vertrag mit ihr steht. Die Datenschutzerklärung nennt ihn. Bearbeiten mehrere Firmen die Daten, nennen Sie alle, mit Komma getrennt.",
-	"ki_settings_country_help": "Das Land, in dem die Rechenzentren des Anbieters stehen. Die Datenschutzerklärung nennt es. Bearbeiten Rechenzentren in mehreren Ländern die Daten, nennen Sie alle, mit Komma getrennt."
+	"ki_settings_provider_name_help": "Der Name der Firma, wie er im Vertrag mit ihr steht. Läuft die KI auf einem Server, den Sie selbst betreiben, schreiben Sie «eigener Server». Die Datenschutzerklärung nennt ihn. Bearbeiten mehrere Firmen die Daten, nennen Sie alle, mit Komma getrennt.",
+	"ki_settings_country_help": "Die Länder, in denen der Anbieter und die Firmen, die er beizieht, die Daten bearbeiten, auch wenn sie nur darauf zugreifen. Sie stehen meist im Vertrag oder in der Liste der Unterauftragnehmer. Die Datenschutzerklärung nennt sie. Mehrere Länder trennen Sie mit Komma."
 }

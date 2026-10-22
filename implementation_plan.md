@@ -29,6 +29,9 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] fach-reviewer round 4 (feature review): `docs/reviews/580-fachreview-4.md`; Major F-23 (LLM_LOCAL_URL on another machine) fixed: the backend refuses to start; Minors F-24 (only 400 means no images), F-25 (ENCRYPTION_KEY), F-26 (no fields with the KI switched off by the operator) fixed
 - [x] personas Dr. Weber, Helga, Marco, Sven, Anna (`docs/design/personas/*-580.md`): Majors Marco/Dr. Weber P-1 (typed values reset after the check), Sven P-1 (focus lost after the check), Anna P-1 (local KI not answering) fixed with DOM tests seen red; Minors on one cause fixed (model notice only with «Lokale KI», own help texts for name and country, a check without address)
 - [x] `llm:eval` after: 47 of 48 (98 %), unchanged; a first run at 0 % showed that the operator's KI without provider name threw on every call, fixed with a test seen red
-- [ ] code-reviewer round 2, fach-reviewer feature round 2 (F-23), persona Anna again (new text)
+- [x] persona Anna again (`anna-580.md`, «Zweiter Durchgang»): P-1 closed; Minor P-8, Nit P-9 stay in the report
+- [x] fach-reviewer feature round 2: `docs/reviews/580-fachreview-5.md`; F-23, F-25, F-26 closed; Major F-27 (country help narrower than the processing) fixed with the proposed wording, DOM test red first; Minors F-28 (start message), F-29 (how to start the local KI), F-30 (own server) fixed; F-24's rest (a text of its own for 402/429) stays in the report
+- [ ] fach-reviewer feature round 3 on F-27
+- [ ] code-reviewer round 2
 - [ ] closing round
 - [ ] Workflow notes, archive, PR
