@@ -673,9 +673,14 @@ const inTurn =
 	(example: Example, look: Activity): Activity =>
 	(actor) =>
 		instanceOf(example) === FRESH_APP
-			? withLock('installation', () =>
-					actor.attemptsTo(look, ...(example.state === 'ki-model-offline' ? [localKiAnswersAgain] : []))
-				)
+			? withLock('installation', async () => {
+					// also after a failed look, or the scenarios of the fresh installation fail after it (code review 580-2 C-15)
+					try {
+						await actor.attemptsTo(look);
+					} finally {
+						if (example.state === 'ki-model-offline') await actor.attemptsTo(localKiAnswersAgain);
+					}
+				})
 			: actor.attemptsTo(look);
 
 // the local KI of the fresh installation answers again and downloads its model, as its scenarios expect

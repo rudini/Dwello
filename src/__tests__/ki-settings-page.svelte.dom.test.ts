@@ -121,7 +121,7 @@ describe('Seite KI', () => {
 		page({ mode: 'provider' });
 
 		expect(text()).toContain(
-			'Der Name der Firma, wie er im Vertrag mit ihr steht. Läuft die KI auf einem Server, den Sie selbst betreiben, schreiben Sie «eigener Server».'
+			'Der Name der Firma, wie er im Vertrag mit ihr steht. Die Datenschutzerklärung nennt ihn. Läuft die KI auf einem Server, den Sie selbst betreiben, schreiben Sie Ihren Namen und «eigener Server».'
 		);
 		expect(text()).toContain(
 			// Fachreview 580-5 F-27: auch Länder, aus denen nur zugegriffen wird, und die der beigezogenen Firmen

@@ -86,7 +86,8 @@ const fromOperator = (mode: Mode): Ki => {
 export async function currentKi(): Promise<Ki> {
 	if (llmConfig.byOperator)
 		return fromOperator(llmConfig.enabled ? (onOperatorServer(llmConfig.baseUrl) ? 'local' : 'provider') : 'none');
-	// nothing saved yet: the local KI, wherever LLM_LOCAL_URL says it runs (code review 580 C-1)
+	// nothing saved yet: the local KI under LLM_LOCAL_URL, on the server as the start checked (code review 580 C-1,
+	// domain review 580 F-23)
 	const row = await stored();
 	if (!row) return fromOperator(llmConfig.enabled ? 'local' : 'none');
 	if (row.mode !== 'provider') return fromOperator(row.mode);

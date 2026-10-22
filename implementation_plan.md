@@ -31,7 +31,7 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] `llm:eval` after: 47 of 48 (98 %), unchanged; a first run at 0 % showed that the operator's KI without provider name threw on every call, fixed with a test seen red
 - [x] persona Anna again (`anna-580.md`, «Zweiter Durchgang»): P-1 closed; Minor P-8, Nit P-9 stay in the report
 - [x] fach-reviewer feature round 2: `docs/reviews/580-fachreview-5.md`; F-23, F-25, F-26 closed; Major F-27 (country help narrower than the processing) fixed with the proposed wording, DOM test red first; Minors F-28 (start message), F-29 (how to start the local KI), F-30 (own server) fixed; F-24's rest (a text of its own for 402/429) stays in the report
-- [ ] fach-reviewer feature round 3 on F-27
-- [ ] code-reviewer round 2
+- [x] fach-reviewer feature round 3: `docs/reviews/580-fachreview-6.md`; F-27 to F-30 closed; Minor F-31 (the own server's wording in the privacy statement) fixed
+- [x] code-reviewer round 2: `docs/reviews/580-review-2.md`; C-1, C-2, C-3, C-5 closed; Minors C-11 (with F-28), C-12 (test seen red), C-14, C-15, C-16 fixed; C-13 (a test of the abort race) stays in the report
 - [ ] closing round
 - [ ] Workflow notes, archive, PR

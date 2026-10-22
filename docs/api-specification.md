@@ -236,7 +236,7 @@ Logins and changes that affect statements (#357), each `{ id, occurredAt, action
 | POST | `/api/v1/ki/model` | Session required (#580). Downloads the local KI's model again → 202 `{ state }` once Ollama answered (at most 5 s); 409 `KI_NOT_LOCAL` while another KI is chosen |
 | GET | `/api/v1/ki-settings` | Session required (#580). → `{ mode, baseUrl, model, provider, providerCountry, apiKeyStored, byOperator }`: `local`, `provider` or `none`; never the API key |
 | PUT | `/api/v1/ki-settings` | Session required (#580). Body: `{ mode, baseUrl?, apiKey?, model?, provider?, providerCountry?, confirmed? }`; an empty `apiKey` keeps the stored one for the same address. → the settings as GET. 409 `KI_SET_BY_OPERATOR` while an `LLM_*` variable is set; 422 `KI_PROVIDER_INCOMPLETE` with `params.missing` (comma-separated: `baseUrl`, `model`, `provider`, `providerCountry`, `confirmed`); 422 `KI_KEY_FOR_NEW_ADDRESS` (an empty key for a changed address); 422 `KI_ENCRYPTION_KEY_MISSING` (a key without `ENCRYPTION_KEY`). Each save is an audit entry `ki_setting_changed` |
-| POST | `/api/v1/ki-settings/check` | Session required (#580). Body as PUT, nothing saved: sends a fixed text and image → `{ result }`: `ok`, `wrong-key` (401/403), `unreachable`, `no-images` (any other refusal); 422 `KI_KEY_FOR_NEW_ADDRESS` |
+| POST | `/api/v1/ki-settings/check` | Session required (#580). Body as PUT, nothing saved: sends a fixed text and image → `{ result }`: `ok`, `wrong-key` (401/403), `no-images` (400), `unreachable` (no answer, or any other refusal such as 404, 429 or 5xx); 422 `KI_KEY_FOR_NEW_ADDRESS` |
 
 ## 12. Utility statements `/api/v1/statements`
 

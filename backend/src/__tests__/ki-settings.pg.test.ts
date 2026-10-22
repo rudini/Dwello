@@ -86,9 +86,10 @@ afterAll(() => {
 });
 
 describe('KI in den Einstellungen', () => {
-	// Codereview 580 C-1: LLM_LOCAL_URL sagt nur, wo die lokale KI läuft, auch auf einem anderen Rechner im Netz
-	it('gilt ohne Einstellung die lokale KI, auch unter einer Adresse im eigenen Netz', async () => {
-		Object.assign(llmConfig, { baseUrl: 'http://192.168.1.20:11434/v1' });
+	// Codereview 580 C-1: ohne Einstellung fragt Dwello nicht nach einem Empfänger; LLM_LOCAL_URL liegt auf dem Server
+	// (Fachreview 580 F-23: sonst startet das Backend nicht), hier der Container ollama
+	it('gilt ohne Einstellung die lokale KI unter LLM_LOCAL_URL', async () => {
+		Object.assign(llmConfig, { baseUrl: 'http://ollama:11434/v1' });
 		try {
 			expect(await settings()).toMatchObject({ mode: 'local', byOperator: false });
 			expect(await recipient()).toEqual({ recipient: null, enabled: true });
@@ -118,6 +119,12 @@ describe('KI in den Einstellungen', () => {
 			expect(await (await callApi('/api/v1/ki/model')).json()).toEqual({ state: 'loading', percent: 40 });
 
 			await save({ mode: 'none' });
+
+			expect(await (await callApi('/api/v1/ki/model')).json()).toEqual({ state: 'unknown' });
+
+			// Codereview 580-2 C-12: auch ein Anbieter beendet das Laden
+			await save({ mode: 'local' });
+			await save(muster);
 
 			expect(await (await callApi('/api/v1/ki/model')).json()).toEqual({ state: 'unknown' });
 		} finally {
