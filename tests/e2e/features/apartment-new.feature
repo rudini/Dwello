@@ -20,6 +20,17 @@ Funktionalität: Neue Wohnung
     Und hat die Wohnung den Status "Leer"
     Und hat die Wohnung "2.5" Zimmer und "68 m²" im Stockwerk "2. OG"
 
+  # #597 (Persona Dr. Weber P-1): ein zweites Untergeschoss lässt sich wählen, nicht nur aus dem Gebäuderegister übernehmen
+  Szenario: Wohnung im zweiten Untergeschoss erfassen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"
+    Wenn der Liegenschaftsverwalter im Gebäude "Birkenhof" folgende Wohnung erfasst:
+      | Nummer    | K2  |
+      | Stockwerk | -2  |
+      | Fläche    | 40  |
+      | Zimmer    | 1.5 |
+    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung K2"
+    Und hat die Wohnung "1.5" Zimmer und "40 m²" im Stockwerk "2. UG"
+
   Szenario: Wohnung im Gebäude erfassen
     Angenommen der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude "Birkenhof"
     Wenn der Liegenschaftsverwalter folgende Wohnung erfasst:

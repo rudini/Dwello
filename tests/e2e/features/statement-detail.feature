@@ -285,6 +285,20 @@ Funktionalität: Abrechnungsdetail
     Dann steht im PDF "Ihr Mietverhältnis in dieser Periode: 01.01.2024 – 31.03.2024. Ihre Nebenkosten und Akontobeiträge bis 29.02.2024 sind mit einer früheren Abrechnung abgerechnet. Diese Abrechnung umfasst 01.03.2024 – 31.03.2024 (31 Mietstage von 366 Tagen)."
     Und steht im PDF "Akontobeiträge ab 01.03.2024"
 
+  # #597 (Fachreview 500-1 V-5): das erste Untergeschoss heisst im PDF «UG» ohne Zahl; heisst die Wohnung so, steht es
+  # einmal
+  Szenario: Das PDF nennt eine Wohnung im Untergeschoss beim Namen des Stockwerks
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "UG" im Stockwerk -1
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "UG" seit "2024-01-01" für "900" Franken
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Wohnung UG, 70.00 m²"
+    Und steht im PDF nicht "1. UG"
+
   # Eine Korrespondenzadresse im Ausland: das Land steht allein auf der letzten Zeile des Adressfelds und als Ländercode
   # vor der PLZ im Zahlteil der QR-Rechnung, den die Nachzahlung braucht (ohne Akonto) (#102)
   Szenario: Abrechnung an eine Korrespondenzadresse im Ausland

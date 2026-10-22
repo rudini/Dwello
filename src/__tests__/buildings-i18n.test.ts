@@ -19,12 +19,16 @@ const french = () => overwriteGetLocale(() => 'fr');
 describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 	it('nennt das Stockwerk wie die Abrechnung', () => {
 		french();
-		expect([-2, 0, 1, 3].map(floorLabel)).toEqual([
+		// #597: the first floor below ground has no number, from the second on it is counted
+		expect([-1, -2, 0, 1, 3].map(floorLabel)).toEqual([
 			'sous-sol',
+			'2e sous-sol',
 			'rez-de-chaussée',
 			'1er étage',
 			'3e étage'
 		]);
+		overwriteGetLocale(() => 'it');
+		expect([-1, -2].map(floorLabel)).toEqual(['piano interrato', '2° piano interrato']);
 		// British English counts «1st floor», «2nd floor» above the ground floor (461-native-en, EN-32)
 		overwriteGetLocale(() => 'en');
 		expect([1, 2, 3, 4, 11, 22].map(floorLabel)).toEqual([
