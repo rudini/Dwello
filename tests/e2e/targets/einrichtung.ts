@@ -10,3 +10,7 @@ export const setupError = target('Fehler der Einrichtung', (page) => page.getByT
 export const setupPrivacyLink = target('Datenschutzerklärung der Einrichtung', (page) => page.getByTestId('setup-privacy-link'));
 export const setupTermsLink = target('Nutzungsbedingungen der Einrichtung', (page) => page.getByTestId('setup-terms-link'));
 export const kiModelLoading = target('Hinweis zum Laden des KI-Modells', (page) => page.getByTestId('ki-model-loading'));
+// #620: the KI chosen at the setup, and the overview's way to the page «KI»
+export const setupKiChoice = (choice: 'local' | 'none') =>
+	target(`Wahl der KI bei der Einrichtung (${choice})`, (page) => page.getByTestId(`setup-ki-${choice}`));
+export const overviewKiLink = target('Link zur KI in der Übersicht', (page) => page.getByTestId('ki-settings-link'));

@@ -9,6 +9,8 @@ import {
 	setupPasswordRepeatInput,
 	setupPrivacyLink,
 	setupSubmitButton,
+	setupKiChoice,
+	overviewKiLink,
 	setupTermsLink
 } from '../targets/einrichtung';
 
@@ -28,6 +30,14 @@ export const setUpDwello =
 			Enter.theValue(repeat).into(setupPasswordRepeatInput),
 			Click.on(setupSubmitButton)
 		);
+
+/** The setup with a choice of the KI (#620): the local KI, or none until it is chosen in the settings */
+export const setUpDwelloWithKi =
+	(code: string, account: { email: string; password: string }, ki: 'local' | 'none'): Activity =>
+	(actor) =>
+		actor.attemptsTo(Click.on(setupKiChoice(ki)), setUpDwello(code, account));
+
+export const openKiFromFreshOverview: Activity = (actor) => actor.attemptsTo(openFreshOverview, Click.on(overviewKiLink));
 
 /** The overview of the fresh installation, signed in like the Liegenschaftsverwalter of the main stack */
 export const openFreshOverview: Activity = async (actor) =>

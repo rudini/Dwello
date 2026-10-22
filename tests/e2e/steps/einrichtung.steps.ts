@@ -3,7 +3,7 @@ import { SETUP_CODE } from '../fixtures/fresh-installation';
 import { test } from '../fixtures/test';
 import { shownUserName } from '../questions/authentication';
 import { enteredSetupPassword, kiModelHint, repeatedSetupPassword, setupHint } from '../questions/einrichtung';
-import { openFreshDwello, openFreshOverview, openOverviewWithFailedModel, openSetup, openSetupPrivacy, openSetupTerms, setUpDwello } from '../tasks/einrichtung';
+import { openFreshDwello, openFreshOverview, openKiFromFreshOverview, openOverviewWithFailedModel, openSetup, openSetupPrivacy, openSetupTerms, setUpDwello, setUpDwelloWithKi } from '../tasks/einrichtung';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -84,3 +84,23 @@ When(
 		await verwalter.attemptsTo(openOverviewWithFailedModel);
 	}
 );
+
+// #620: the KI chosen at the setup
+When(
+	/^der Besucher mit dem Einrichtungscode ein Konto mit Passwort anlegt und die (KI später|lokale KI) wählt$/,
+	async ({ besucher, frisch }, choice: string) => {
+		await besucher.attemptsTo(setUpDwelloWithKi(SETUP_CODE, frisch.newAccount(), choice === 'lokale KI' ? 'local' : 'none'));
+	}
+);
+
+Then('zeigt die Übersicht nach der Einrichtung den Hinweis {string}', async ({ besucher }, text: string) => {
+	await besucher.sees(kiModelHint).toBe(text);
+});
+
+Given('in der frischen Installation ist keine KI gewählt', async ({ frisch }) => {
+	await frisch.kiNone();
+});
+
+When('der Liegenschaftsverwalter in der Übersicht der frischen Installation die KI öffnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(openKiFromFreshOverview);
+});
