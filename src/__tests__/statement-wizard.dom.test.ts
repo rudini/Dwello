@@ -189,6 +189,27 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
+	// #387: beim Mieterwechsel das Heizprofil der Abrechnung derselben Wohnung
+	it('sagt, wenn das Heizprofil von der Abrechnung derselben Wohnung kommt', async () => {
+		const preset = {
+			building: 'Seeblick',
+			start: '2025-01-01',
+			end: '2025-12-31',
+			fromStatements: false,
+			feeFromSettings: true,
+			differing: true,
+			profileFromApartment: true
+		};
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b1'], preset },
+			form: null
+		} as never);
+		await settle();
+		expect(byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Beim Mieterwechsel ist das Heizprofil wie bei der bestehenden Nebenkostenabrechnung derselben Wohnung eingestellt, die Verwaltungspauschale kommt aus den Einstellungen. Prüfen Sie beides und gehen Sie weiter zur Vorschau.'
+		);
+	});
+
 	it('beginnt mit der vorgeschlagenen Abrechnungsperiode, in Worten wiederholt', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');

@@ -183,6 +183,7 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 	const contract = (id: string, managementFeeAgreed: boolean, managementFeePercent: string | null) => ({
 		...buildingContracts.contracts[0],
 		id,
+		apartmentId: id,
 		managementFeeAgreed,
 		managementFeePercent
 	});
@@ -194,7 +195,9 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 		...periodStatements.data[0],
 		contractId,
 		heatingProfileId,
-		managementFeePercent
+		managementFeePercent,
+		periodStart: '2025-01-01',
+		periodEnd: '2025-12-31'
 	});
 	const openWith = (statements: unknown[]) =>
 		load({
@@ -226,6 +229,102 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 			defaultHeatingProfileId: 'hp1',
 			defaultManagementFeePercent: 3,
 			preset: { differing: true }
+		});
+	});
+
+	// #387 (#406 point 7): at a tenant change the Heizprofil of the same apartment's statement, so both tenants carry
+	// 100 % of the heating costs; the Verwaltungspauschale still from the settings
+	const rental = (
+		id: string,
+		apartmentId: string,
+		startDate: string,
+		endDate: string | null = null
+	) => ({
+		...contract(id, true, null),
+		apartmentId,
+		startDate,
+		endDate
+	});
+	const of2025 = (contractId: string, heatingProfileId: string, status = 'sent') => ({
+		...statement(contractId, '4.50', heatingProfileId),
+		status
+	});
+	const atChange = (contracts: unknown[], statements: unknown[]) =>
+		load({
+			fetch: async (url: string) => {
+				if (url.includes('/config'))
+					return Response.json({
+						data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
+					});
+				if (url.includes('/contracts?')) return Response.json({ contracts });
+				if (url.includes('/statements?')) return Response.json({ data: statements });
+				return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
+			},
+			url: new URL(
+				'http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+			)
+		} as never);
+	const eva = rental('eva', 'a1', '2024-01-01', '2025-03-31');
+	const marc = rental('marc', 'a1', '2025-05-01');
+
+	it('nimmt beim Mieterwechsel das Heizprofil der Abrechnung derselben Wohnung', async () => {
+		const lea = rental('lea', 'a2', '2020-01-01');
+
+		expect(
+			await atChange([eva, marc, lea], [of2025('eva', 'hp8'), of2025('lea', 'hp9')])
+		).toMatchObject({
+			defaultHeatingProfileId: 'hp8',
+			defaultManagementFeePercent: 3,
+			preset: { differing: true, profileFromApartment: true }
+		});
+	});
+
+	// Fachreview 387-1 V-4: the apartments of the missing statements name different profiles: none fits both
+	it('nimmt die Einstellungen, wenn die Wohnungen verschiedene Heizprofile haben', async () => {
+		const lea = rental('lea', 'a2', '2020-01-01', '2025-06-30');
+		const tim = rental('tim', 'a2', '2025-07-01');
+
+		expect(
+			await atChange([eva, marc, lea, tim], [of2025('eva', 'hp8'), of2025('lea', 'hp9')])
+		).toMatchObject({
+			defaultHeatingProfileId: 'hp1',
+			preset: { differing: true, profileFromApartment: false }
+		});
+	});
+
+	// code review 387-1 C-3: the building's statements cannot be loaded: as without a same apartment's statement
+	it('nimmt die Einstellungen, wenn die Abrechnungen des Gebäudes nicht laden', async () => {
+		const lea = rental('lea', 'a2', '2020-01-01');
+		const loaded = await load({
+			fetch: async (url: string) => {
+				if (url.includes('/config'))
+					return Response.json({
+						data: { management_fee_pct: '3', default_heating_profile_id: 'hp1' }
+					});
+				if (url.includes('/contracts?')) return Response.json({ contracts: [eva, marc, lea] });
+				if (url.includes('/statements?') && url.includes('periodStart'))
+					return Response.json({ data: [of2025('eva', 'hp8'), of2025('lea', 'hp9')] });
+				if (url.includes('/statements?')) return new Response(null, { status: 500 });
+				return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
+			},
+			url: new URL(
+				'http://localhost/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+			)
+		} as never);
+
+		expect(loaded).toMatchObject({
+			defaultHeatingProfileId: 'hp1',
+			preset: { differing: true, profileFromApartment: false }
+		});
+	});
+
+	// Fachreview 387-1 V-1: a replaced statement does not count as a statement of the period (glossary «Ersetzt»)
+	it('übergeht eine ersetzte Abrechnung', async () => {
+		expect(
+			await atChange([eva, marc], [of2025('eva', 'hp8', 'replaced'), of2025('marc', 'hp9')])
+		).toMatchObject({
+			defaultHeatingProfileId: 'hp9',
+			preset: { differing: false, fromStatements: true }
 		});
 	});
 

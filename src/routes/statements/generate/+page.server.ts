@@ -6,6 +6,7 @@ import {
 	billedContracts,
 	generateStatements,
 	invoicesInPeriod,
+	unbilledContracts,
 	previewStatements,
 	type GenerationRequest
 } from '$lib/server/statement-generation';
@@ -39,7 +40,8 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 		json(fetch, `statements?buildingId=${id}&periodStart=${start}&periodEnd=${end}&limit=1000`),
 		json(fetch, `contracts?buildingId=${id}&limit=1000`)
 	]);
-	const others = (statements.data ?? []) as Row[];
+	// a replaced statement does not count as one of the period (Fachreview 387-1 V-1, glossary «Ersetzt»)
+	const others = ((statements.data ?? []) as Row[]).filter((s) => s.status !== 'replaced');
 	// a statement stores its contract's rate (#89): only one at the run's rate tells the run's rate (fach-review V-1);
 	// the heating profile comes from any of them, as before #89 (closing review C-1)
 	const ofBuilding = (contracts.contracts ?? []) as Row[];
@@ -49,13 +51,40 @@ async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]
 		)
 	);
 	// set differently, they tell nothing: both from the settings (#119); a deleted profile is no setting (fach-review V-5)
-	// TODO(fachlich prüfen, #387): at a tenant change the settings' Heizprofil may differ from the other tenant's
 	const profiles = others.filter((s) => s.heatingProfileId);
 	const differing =
 		new Set(profiles.map((s) => s.heatingProfileId)).size > 1 ||
 		new Set(runRates.map((s) => Number(s.managementFeePercent))).size > 1;
-	const [other, runRate] = differing ? [] : [profiles[0], runRates[0]];
-	return { building, period: { start: start!, end: end! }, other, runRate, differing };
+	const period = { start: start!, end: end! };
+	if (!differing) return { building, period, other: profiles[0], runRate: runRates[0], differing };
+	const other = await apartmentProfile(fetch, String(id), period, profiles, ofBuilding);
+	return { building, period, other, differing, profileFromApartment: !!other };
+}
+
+// At a tenant change the Heizprofil of the same apartment's statement, when the apartments of the contracts the run
+// bills name one: so the tenants of an apartment carry 100 % of its heating costs (#387, #406 point 7)
+async function apartmentProfile(
+	fetch: typeof globalThis.fetch,
+	buildingId: string,
+	{ start, end }: { start: string; end: string },
+	profiles: Row[],
+	contracts: Row[]
+) {
+	// not loaded: no same apartment's statement, as the rest of the link falls back to the settings (code review 387-1 C-3)
+	const missing = await unbilledContracts(fetch, {
+		buildingIds: [buildingId],
+		periodStart: start,
+		periodEnd: end
+	}).catch(() => []);
+	const apartments = new Set(missing.map((c) => c.apartmentId));
+	const apartmentOf = (contractId: unknown) =>
+		contracts.find((c) => c.id === contractId)?.apartmentId;
+	const named = new Set(
+		profiles
+			.filter((s) => apartments.has(apartmentOf(s.contractId) as string))
+			.map((s) => s.heatingProfileId)
+	);
+	return named.size === 1 ? { heatingProfileId: [...named][0] } : undefined;
 }
 
 export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
@@ -88,7 +117,8 @@ export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url
 			...pick.period,
 			fromStatements: !!pick.other,
 			feeFromSettings: !pick.runRate,
-			differing: pick.differing
+			differing: pick.differing,
+			profileFromApartment: !!pick.profileFromApartment
 		}
 	};
 };

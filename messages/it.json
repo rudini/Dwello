@@ -1846,6 +1846,7 @@
 	"contracts_draft_deleted_toast": "Bozza {number} eliminata. Il contratto di locazione di {name} termina il {date}. Allestisca ora di nuovo il conteggio spese accessorie.",
 	"statements_preset_title": "Selezione: {building}, periodo di conteggio {period}",
 	"statements_preset_from_statements": "Il profilo di riscaldamento e le spese amministrative sono impostati come negli altri conteggi spese accessorie di questo periodo di conteggio. Li verifichi e passi all’anteprima.",
+	"statements_preset_profile_from_apartment": "In caso di cambio d’inquilino, il profilo di riscaldamento è impostato come nel conteggio spese accessorie esistente dello stesso appartamento, le spese amministrative provengono dalle impostazioni. Li verifichi entrambi e passi all’anteprima.",
 	"statements_preset_differing": "Gli altri conteggi spese accessorie di questo periodo di conteggio sono impostati in modo diverso. Il profilo di riscaldamento e le spese amministrative provengono quindi dalle impostazioni. Li verifichi e passi all’anteprima.",
 	"statements_preset_from_settings": "Il profilo di riscaldamento e le spese amministrative provengono dalle impostazioni. Li verifichi e passi all’anteprima.",
 	"statements_preset_profile_from_statements": "Il profilo di riscaldamento è impostato come negli altri conteggi spese accessorie di questo periodo di conteggio, le spese amministrative provengono dalle impostazioni. Li verifichi e passi all’anteprima.",

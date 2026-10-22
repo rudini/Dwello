@@ -15,9 +15,19 @@
 			fromStatements: boolean;
 			feeFromSettings: boolean; // no other statement at the run's rate (#89)
 			differing?: boolean; // the other statements are set differently: both from the settings (#119)
+			profileFromApartment?: boolean; // then the Heizprofil of the same apartment's statement (#387)
 		} | null;
 		step: number; // said on the settings step, where the link opens the wizard
 	} = $props();
+
+	function notice(p: NonNullable<typeof preset>) {
+		if (p.profileFromApartment) return m.statements_preset_profile_from_apartment();
+		if (p.differing) return m.statements_preset_differing();
+		if (!p.fromStatements) return m.statements_preset_from_settings();
+		return p.feeFromSettings
+			? m.statements_preset_profile_from_statements()
+			: m.statements_preset_from_statements();
+	}
 </script>
 
 {#if preset && step === 3}
@@ -30,13 +40,7 @@
 		testid="wizard-preset"
 	>
 		<p>
-			{preset.differing
-				? m.statements_preset_differing()
-				: !preset.fromStatements
-					? m.statements_preset_from_settings()
-					: preset.feeFromSettings
-						? m.statements_preset_profile_from_statements()
-						: m.statements_preset_from_statements()}
+			{notice(preset)}
 		</p>
 	</Alert>
 {/if}
