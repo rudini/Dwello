@@ -18,6 +18,12 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `auth-password.json` | `POST /api/v1/auth/password` mit richtigem Passwort |
 | `auth-password-invalid.json` | `POST /api/v1/auth/password` mit falschem Passwort (401) |
 | `auth-password-locked.json` | `POST /api/v1/auth/password` nach 5 Fehlversuchen (423, Sperre) |
+| `setup-needed.json` | `GET /api/v1/setup` (ist Dwello noch einzurichten, #577) |
+| `setup.json` | `POST /api/v1/setup` mit dem Einrichtungscode (201, das erste Konto mit Passwort) |
+| `setup-code-invalid.json` | `POST /api/v1/setup` mit falschem Einrichtungscode (403) |
+| `setup-locked.json` | `POST /api/v1/setup` nach 5 falschen Einrichtungscodes (423) |
+| `setup-done.json` | `POST /api/v1/setup`, wenn es schon ein Konto mit Passwort gibt (409) |
+| `ki-model-loading.json` | `GET /api/v1/ki/model`, während das Modell der lokalen KI lädt (#577) |
 | `statement-payment-reset.json` | `POST /api/v1/statements/:id/payment-reset` (die Abrechnung mit dem Zurücksetzen im Verlauf) |
 | `statement-paid-date-refused.json` | `PUT /api/v1/statements/:id/status` mit einem Zahlungsdatum vor dem Abrechnungsdatum |
 | `statement-send-refused.json` | `POST /api/v1/statements/:id/send`, wenn die E-Mail an einen Mieter mit Korrespondenzkanal E-Mail nicht hinausgeht (400) |

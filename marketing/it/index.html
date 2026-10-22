@@ -530,12 +530,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Copiare</button></div>
 <pre id="code-pc" tabindex="0"><span class="c"># 1. Scaricare Dwello</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
-<span class="c"># 2. Creare le impostazioni, poi compilarle (guida)</span>
-<span class="p">$ </span>cp .env.example .env
-<span class="c"># 3. Avviare: applicazione, banca dati e IA locale</span>
+<span class="c"># 2. Avviare: app, banca dati e IA locale, che scarica da sé il suo modello</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
-<span class="c"># 4. Caricare il modello di IA (una volta, circa 6 GB)</span>
-<span class="p">$ </span>docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
+<span class="c"># 3. Mostrare il codice di configurazione, poi «Configurare Dwello» nel browser</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="ok">✓ Dwello funziona su http://localhost:3000</span></pre>
 			</div>
 			<div class="panel needs">
@@ -557,6 +555,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="c"># Senza hardware potente: indicare un’IA esterna</span>
 <span class="c"># LLM_BASE_URL=https://suo-fornitore-ia.example/v1</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="c"># Mostrare il codice di configurazione, poi «Configurare Dwello» nel browser</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="c"># HTTPS con il Suo dominio: vedi guida</span>
 <span class="ok">✓ Dwello funziona su https://dwello.suo-dominio.ch</span></pre>
 			</div>
@@ -577,6 +577,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="c"># Mostrare il codice di configurazione, poi «Configurare Dwello» nel browser</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="c"># HTTPS con Caddy: vedi guida</span>
 <span class="ok">✓ Dwello funziona su https://dwello.suo-dominio.ch</span></pre>
 			</div>

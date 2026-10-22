@@ -19,33 +19,34 @@ export class CallTheApi {
 
 	constructor(
 		private readonly request: APIRequestContext,
-		token: string
+		token: string,
+		private readonly api = BACKEND_API // the fresh installation's backend (fixtures/fresh-installation.ts) is another
 	) {
 		this.headers = { Authorization: `Bearer ${token}` };
 	}
 
 	get(path: string) {
-		return this.request.get(`${BACKEND_API}/${path}`, { headers: this.headers }).then(body);
+		return this.request.get(`${this.api}/${path}`, { headers: this.headers }).then(body);
 	}
 
 	post(path: string, data: object) {
-		return this.request.post(`${BACKEND_API}/${path}`, { data, headers: this.headers }).then(body);
+		return this.request.post(`${this.api}/${path}`, { data, headers: this.headers }).then(body);
 	}
 
 	put(path: string, data: object) {
-		return this.request.put(`${BACKEND_API}/${path}`, { data, headers: this.headers }).then(body);
+		return this.request.put(`${this.api}/${path}`, { data, headers: this.headers }).then(body);
 	}
 
 	/** The backend API as `fetch` for the BFF's own server code (`src/lib/server`), which builds its URLs itself */
 	readonly fetch: typeof globalThis.fetch = (input, init) =>
-		globalThis.fetch(`${BACKEND_API}/${String(input).replace(/^.*?\/api\/v1\//, '')}`, {
+		globalThis.fetch(`${this.api}/${String(input).replace(/^.*?\/api\/v1\//, '')}`, {
 			...init,
 			headers: { ...(init?.headers as Record<string, string> | undefined), ...this.headers }
 		});
 
 	/** Removes a record; a record that is already gone is no error */
 	remove(path: string) {
-		return this.request.delete(`${BACKEND_API}/${path}`, { headers: this.headers });
+		return this.request.delete(`${this.api}/${path}`, { headers: this.headers });
 	}
 }
 

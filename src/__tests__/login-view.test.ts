@@ -49,8 +49,10 @@ describe('Anmeldeseite (Ansicht)', () => {
 	});
 
 	// #576: the unavailable hint sends a self-hoster to the Konto mit Passwort (fach review 576 V-2)
-	it('erklärt ohne jede Anmeldung, wie ein Konto mit Passwort entsteht', () => {
-		expect(page({ providers: [] })).toContain('Legen Sie ein Konto mit E-Mail-Adresse und Passwort an, wie in der Installationsanleitung beschrieben.');
+	// #577: without an account and a provider the sign-in page leads to the setup; this is left for a backend that does
+	// not answer (fach review 577 V-5)
+	it('sagt ohne jede Anmeldung, dass Dwello seinen Server nicht erreicht und was zu tun ist', () => {
+		expect(page({ providers: [] })).toContain('Dwello erreicht seinen Server gerade nicht. Versuchen Sie es in einigen Minuten erneut');
 		expect(page({ providers: [], password: true })).not.toContain('data-testid="login-unavailable"');
 	});
 });

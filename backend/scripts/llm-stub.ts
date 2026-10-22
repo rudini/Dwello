@@ -6,9 +6,15 @@
  * see an unreachable KI.
  *
  *   bun run llm-stub      http://127.0.0.1:2527/v1
+ *
+ * With LLM_STUB_PULL=on it stands in for an Ollama that has not got the model yet (the fresh installation, #577): the
+ * model list is empty and a pull reports the progress a scenario sets with POST /stub/pull {percent}, at once. With
+ * LLM_STUB_PULL=fail the pull fails (the empty instance of the stack).
  */
 
 const PORT = Number(process.env.LLM_STUB_PORT ?? 2527);
+const PULL = process.env.LLM_STUB_PULL; // 'on' or 'fail'
+let pulled = 0; // percent of the model download
 
 type Language = 'Deutsch' | 'Französisch' | 'Italienisch' | 'Englisch';
 
@@ -164,10 +170,46 @@ function answer(content: Content) {
 Bun.serve({
 	port: PORT,
 	hostname: '127.0.0.1',
-	// Bun closes an idle request after 10 s by default; the slow answer needs longer
-	idleTimeout: 60,
-	fetch: async (request) =>
-		new URL(request.url).pathname.endsWith('/chat/completions')
-			? answer(((await request.json()) as { messages: { content: Content }[] }).messages[0].content)
-			: new Response(null, { status: 503 })
+	// Bun closes an idle request after 10 s by default; the slow answer needs longer, and the model download of the
+	// fresh installation streams for the whole run
+	idleTimeout: PULL === 'on' ? 0 : 60,
+	fetch: (request) => routes[new URL(request.url).pathname]?.(request) ?? new Response(null, { status: 503 })
 });
+
+type Route = (request: Request) => Response | Promise<Response>;
+const chat: Route = async (request) =>
+	answer(((await request.json()) as { messages: { content: Content }[] }).messages[0].content);
+// the OpenAI-compatible API; Ollama's own only with LLM_STUB_PULL=on
+const routes: Record<string, Route> = { '/v1/chat/completions': chat, '/chat/completions': chat, ...(PULL ? ollama() : {}) };
+
+function ollama(): Record<string, Route> {
+	return {
+		'/api/tags': () => Response.json({ models: [] }),
+		'/api/pull': () => (PULL === 'fail' ? Response.json({ error: 'no space left on device' }) : pullProgress()),
+		'/stub/pull': async (request) => {
+			pulled = ((await request.json()) as { percent: number }).percent;
+			// at once, not with the next tick: the scenario opens the overview right after
+			for (const send of pulls) send();
+			return Response.json({ percent: pulled });
+		}
+	};
+}
+
+// Ollama's pull stream (NDJSON): one line per update, bytes of the model's layer
+const pulls = new Set<() => void>();
+function pullProgress() {
+	const total = 6_000_000_000;
+	let send: () => void;
+	const body = new ReadableStream({
+		start(controller) {
+			send = () =>
+				controller.enqueue(
+					new TextEncoder().encode(`${JSON.stringify({ status: 'pulling model', total, completed: (total * pulled) / 100 })}\n`)
+				);
+			pulls.add(send);
+			send();
+		},
+		cancel: () => void pulls.delete(send)
+	});
+	return new Response(body, { headers: { 'content-type': 'application/x-ndjson' } });
+}

@@ -530,12 +530,10 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<div class="term-bar"><span>Terminal · Windows, macOS, Linux</span><button type="button" data-copy="code-pc">Copy</button></div>
 <pre id="code-pc" tabindex="0"><span class="c"># 1. Download Dwello</span>
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
-<span class="c"># 2. Create the settings, then fill them in (guide)</span>
-<span class="p">$ </span>cp .env.example .env
-<span class="c"># 3. Start: app, database and local AI</span>
+<span class="c"># 2. Start: app, database and local AI, which downloads its model itself</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
-<span class="c"># 4. Load the AI model (once, about 6 GB)</span>
-<span class="p">$ </span>docker exec dwello-ollama ollama pull qwen3-vl:8b-instruct
+<span class="c"># 3. Show the setup code, then «Set up Dwello» in the browser</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="ok">✓ Dwello is running at http://localhost:3000</span></pre>
 			</div>
 			<div class="panel needs">
@@ -557,6 +555,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="c"># Without powerful hardware: set an external AI</span>
 <span class="c"># LLM_BASE_URL=https://your-ai-provider.example/v1</span>
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="c"># Show the setup code, then «Set up Dwello» in the browser</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="c"># HTTPS with your domain: see the guide</span>
 <span class="ok">✓ Dwello is running at https://dwello.your-domain.ch</span></pre>
 			</div>
@@ -577,6 +577,8 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 <span class="p">$ </span>git clone https://github.com/rudini/Dwello.git &amp;&amp; cd Dwello
 <span class="p">$ </span>cp .env.example .env
 <span class="p">$ </span>docker compose -f docker-compose.prod.yml up -d
+<span class="c"># Show the setup code, then «Set up Dwello» in the browser</span>
+<span class="p">$ </span>docker logs dwello-backend
 <span class="c"># HTTPS with Caddy: see the guide</span>
 <span class="ok">✓ Dwello is running at https://dwello.your-domain.ch</span></pre>
 			</div>

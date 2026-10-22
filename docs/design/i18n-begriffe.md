@@ -117,6 +117,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Betreiber / Verantwortlicher (DSG) / Auftragsbearbeiter (DSG) | exploitant / responsable du traitement / sous-traitant | gestore / titolare del trattamento / responsabile del trattamento | operator / controller / processor |
 | Konto mit Passwort (#576) | compte avec mot de passe | account con password | password account |
 | Sperre (Anmeldung, #576) | blocage (de la connexion) | blocco (dell’accesso) | lock (sign-in) |
+| Einrichtung / Einrichtungscode / Dwello einrichten (#577) | configuration initiale / code de configuration / Configurer Dwello | configurazione iniziale / codice di configurazione / Configurare Dwello | setup / setup code / Set up Dwello |
+| KI-Modell (#577) | modèle d’IA | modello di IA | AI model |
 | Mietzinsdepot / Freigabe des Mietzinsdepots | garantie de loyer / libération de la garantie de loyer | deposito di garanzia / svincolo del deposito di garanzia | rent deposit / release of the rent deposit |
 | Übersicht | vue d’ensemble | panoramica | overview |
 

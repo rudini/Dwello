@@ -6,8 +6,17 @@
 import { Elysia, t } from 'elysia';
 import { CodedError, errorBody } from '../services/coded-error';
 import { checkPassword, deleteLocalAccount, hasLocalAccount, setLocalAccount } from '../services/local-account.service';
+import { setUpFirstAccount } from '../services/setup.service';
 
-const STATUS: Record<string, number> = { INVALID_CREDENTIALS: 401, ACCOUNT_LOCKED: 423, PASSWORD_TOO_SHORT: 400 };
+const STATUS: Record<string, number> = {
+	INVALID_CREDENTIALS: 401,
+	ACCOUNT_LOCKED: 423,
+	PASSWORD_TOO_SHORT: 400,
+	EMAIL_UNUSABLE: 400,
+	SETUP_CODE_INVALID: 403,
+	SETUP_DONE: 409,
+	SETUP_LOCKED: 423
+};
 
 const refused = (error: unknown, set: { status?: number | string }) => {
 	if (!(error instanceof CodedError) || !STATUS[error.code]) throw error;
@@ -30,6 +39,23 @@ export const passwordSignInRoutes = new Elysia({ prefix: '/api/v1/auth/password'
 			}
 		},
 		{ body: credentials }
+	);
+
+/** Before the auth middleware: the setup of a fresh installation (#577) */
+export const setupRoutes = new Elysia({ prefix: '/api/v1/setup' })
+	.get('/', async () => ({ needed: !(await hasLocalAccount()) }))
+	.post(
+		'/',
+		async ({ body, set }) => {
+			try {
+				const account = await setUpFirstAccount(body.code, body.email, body.password);
+				set.status = 201;
+				return account;
+			} catch (error) {
+				return refused(error, set);
+			}
+		},
+		{ body: t.Composite([credentials, t.Object({ code: t.String({ maxLength: 64 }) })]) }
 	);
 
 export const localAccountRoutes = new Elysia({ prefix: '/api/v1/local-accounts' })
