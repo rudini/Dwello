@@ -395,7 +395,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'agreed-from-refused': () => async (actor) => {
 		const wizard = (await actor.answer(pageAddress)).includes('/contracts/new');
 		await actor.attemptsTo(toRentStep, Click.on(agreedFromToggle), EnterDate.of('2000-01-01').into(on.firstAgreedFromInput));
-		if (wizard) await actor.attemptsTo(Click.on(nextButton));
+		if (wizard) await actor.attemptsTo(Enter.theValue('1500.00').into(baseRentInput), Click.on(feeChoice('none')), Click.on(nextButton));
 		await actor.attemptsTo(Click.on(contractSubmitButton), Wait.until(on.formProblem));
 	},
 	// Emil's ended contract (fixtures/screens.ts): its agreed Nebenkosten taken over, the help says so (#368)

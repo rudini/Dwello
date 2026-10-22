@@ -78,4 +78,4 @@ export const firstAgreementYes = target('Erste Antwort «Vereinbart»', (page) =
 export const firstAgreementFrom = target('Erste Antwort «Vereinbart ab»', (page) => page.getByTestId(/^agreement-.+-from$/).first());
 export const firstAgreementFromDate = target('Erster Tag «Vereinbart ab»', (page) => page.getByTestId(/^agreement-.+-from-date$/).first());
 // #368: the first «Vereinbart ab» field of the contract form
-export const firstAgreedFromInput = target('Erstes Feld «Vereinbart ab»', (page) => page.getByTestId(/^contract-category-from-/).first());
+export const firstAgreedFromInput = target('Erstes Feld «Vereinbart ab»', (page) => page.getByTestId(/^contract-category-from-(?!.*-(field|help|calendar|words)$)/).first());
