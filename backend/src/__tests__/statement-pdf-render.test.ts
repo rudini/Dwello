@@ -286,10 +286,12 @@ describe('PDF einer Nachzahlung', () => {
 		expect(pdf.flowing.split('Kategorie Verteilschlüssel').length - 1).toBe(pdf.pages - 1);
 	});
 
-	it('schreibt Zeichen ausserhalb der Schrift lesbar, statt sie zu verstümmeln', async () => {
+	// #465 (#103, CD-8): the embedded font prints every character as entered
+	it('druckt jedes Zeichen eines Namens so, wie es erfasst ist', async () => {
 		const pdf = await textOf({ ...due, tenant: { ...due.tenant, firstName: 'Łukasz', lastName: 'Dragoș' } });
 
-		expect(pdf.flowing).toContain('Lukasz Dragos');
+		expect(pdf.flowing).toContain('Łukasz Dragoș');
+		expect(pdf.flowing).not.toContain('Lukasz');
 	});
 
 	it('nennt die Grundlage der Verwaltungspauschale als Zwischensumme', async () => {
