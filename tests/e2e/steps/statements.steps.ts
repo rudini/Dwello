@@ -142,6 +142,14 @@ Given('die Verwaltung hat die IBAN {string} hinterlegt', async ({ seed }, iban: 
 	await seed.iban(iban);
 });
 
+// #465: a global setting; every scenario sets the same phone and e-mail
+Given(
+	'die Verwaltung hat das Telefon {string} und die E-Mail {string} hinterlegt',
+	async ({ seed }, phone: string, email: string) => {
+		await seed.contact(phone, email);
+	}
+);
+
 Given('für die Abrechnung {int} von {string} gibt es ein PDF', async ({ seed }, year: number, tenant: string) => {
 	await seed.statementPdf(tenant, year);
 });

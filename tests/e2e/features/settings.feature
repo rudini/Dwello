@@ -14,16 +14,32 @@ Funktionalität: Einstellungen
   @einstellungen-global
   Szenario: Absender und Fristen hinterlegen
     Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
-      | Firmenname           | Muster Immobilien AG  |
-      | Adresse              | Bahnhofstrasse 1      |
-      | PLZ                  | 8001                  |
-      | Ort                  | Zürich                |
-      | IBAN                 | CH9300762011623852957 |
-      | Zahlungsfrist (Tage) | 30                    |
-      | Mahnfrist (Tage)     | 14                    |
+      | Firmenname           | Muster Immobilien AG      |
+      | Adresse              | Bahnhofstrasse 1          |
+      | PLZ                  | 8001                      |
+      | Ort                  | Zürich                    |
+      | Telefon              | 044 123 45 67             |
+      | E-Mail               | info@muster-immobilien.ch |
+      | IBAN                 | CH9300762011623852957     |
+      | Zahlungsfrist (Tage) | 30                        |
+      | Mahnfrist (Tage)     | 14                        |
     Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
     Und nach erneutem Öffnen der Einstellungen ist die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und sind die Zahlungsfrist "30" und die Mahnfrist "14" hinterlegt
+
+  # #465 (#103, DMR-09): Telefon und E-Mail für den Kopf des PDF, beide freiwillig; dieselben Angaben wie überall (O-34)
+  @wip @einstellungen-global
+  Szenario: Telefon und E-Mail der Verwaltung hinterlegen
+    Wenn der Liegenschaftsverwalter folgende Einstellungen speichert:
+      | Telefon | 044 123 45 67             |
+      | E-Mail  | info@muster-immobilien.ch |
+    Dann bestätigt die Seite, dass die Einstellungen gespeichert sind
+    Und nach erneutem Öffnen der Einstellungen sind das Telefon "044 123 45 67" und die E-Mail "info@muster-immobilien.ch" hinterlegt
+
+  @wip
+  Szenario: Ungültige E-Mail der Verwaltung
+    Wenn der Liegenschaftsverwalter die E-Mail "info@muster" speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine gültige E-Mail-Adresse ein."
 
   Szenario: Ungültige IBAN
     Wenn der Liegenschaftsverwalter die IBAN "DE89 3704 0044 0532 0130 00" speichert

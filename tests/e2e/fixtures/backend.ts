@@ -318,6 +318,11 @@ export function testData(api: CallTheApi) {
 			}));
 		},
 
+		// #465: the Verwaltung's phone and e-mail in the PDF header; global, so every scenario sets the same (as the IBAN)
+		async contact(phone: string, email: string) {
+			await withSettingsLock(() => put('config', { company_phone: phone, company_email: email }));
+		},
+
 		async removeBuilding(title: string) {
 			await remove(`buildings/${ids.get(title)}`);
 		},
