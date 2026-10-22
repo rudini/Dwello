@@ -371,11 +371,14 @@ export async function calculateStatementForContract(
 	}));
 
 	// Calculate line items
-	const heating = await heatingOfRun(invoiceGroups, contract, periodStart, periodEnd, heatingProfileId);
 	const lineItems: CalculatedLineItem[] = [];
 	let subtotal = 0;
 	const run = { contract, periodStart, periodEnd, heatingProfileId, wholePeriod: rentalDays === totalPeriodDays };
 	const rental = { start: isoDay(contractOverlap.overlapStart), end: isoDay(contractOverlap.overlapEnd) };
+	// the profile's share kept with the statement counts from the heating costs' «Vereinbart ab» too (368-B C-1)
+	const heatingFrom = invoiceGroups.find((group) => group.isHeatingCost && group.categoryId && agreedFrom[group.categoryId]);
+	const heatingRun = fromDay(heatingFrom ? agreedFrom[heatingFrom.categoryId!] : undefined, run, rental)?.run ?? run;
+	const heating = await heatingOfRun(invoiceGroups, heatingRun.contract, periodStart, periodEnd, heatingProfileId);
 
 	for (const group of invoiceGroups) {
 		const days = fromDay(group.categoryId ? agreedFrom[group.categoryId] : undefined, run, rental);

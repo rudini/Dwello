@@ -100,6 +100,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-new           | flat-rate-warning-advance |
       | contract-new           | agreed-costs-none-advance |
       | contract-new           | agreed-from               |
+      | contract-new           | agreed-from-refused |
       | contract-new           | billed-until-refused |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
@@ -126,6 +127,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-edit          | flat-rate-warning-advance |
       | contract-edit          | agreed-costs-none-advance |
       | contract-edit          | agreed-from               |
+      | contract-edit          | agreed-from-refused |
       | contract-edit          | billed-until-refused |
       | contract-edit          | billed-until-statement |
       | contract-detail-notice | default             |
@@ -186,6 +188,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statement-generate     | agreed-costs        |
       | statement-generate     | agreement-save-failed |
       | statement-generate     | agreement-from        |
+      | statement-generate     | agreement-from-refused |
       | statement-generate     | agreements-failed     |
       | statement-generate     | generation-result   |
       | statement-generate     | preview-skipped     |

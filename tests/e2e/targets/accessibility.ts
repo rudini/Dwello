@@ -76,3 +76,6 @@ export const shown = (testId: string) => bySelector(testId, `[data-testid="${tes
 // #91: the first answer «Vereinbart» in the statement wizard's step 3
 export const firstAgreementYes = target('Erste Antwort «Vereinbart»', (page) => page.getByTestId(/^agreement-.+-yes$/).first());
 export const firstAgreementFrom = target('Erste Antwort «Vereinbart ab»', (page) => page.getByTestId(/^agreement-.+-from$/).first());
+export const firstAgreementFromDate = target('Erster Tag «Vereinbart ab»', (page) => page.getByTestId(/^agreement-.+-from-date$/).first());
+// #368: the first «Vereinbart ab» field of the contract form
+export const firstAgreedFromInput = target('Erstes Feld «Vereinbart ab»', (page) => page.getByTestId(/^contract-category-from-/).first());

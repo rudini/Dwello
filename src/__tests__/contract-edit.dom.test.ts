@@ -429,6 +429,10 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('contract-agreed-from-help')!.textContent!.trim()).toBe(
 			'Leer lassen, wenn die Nebenkosten seit Beginn des Mietvertrags vereinbart sind. Haben Sie sie mit dem amtlichen Formular neu eingeführt, tragen Sie den Tag ein, ab dem sie gelten.'
 		);
+		// Weber 368-B P-1: a changed agreement reaches a draft only with «Neu berechnen»
+		expect(document.getElementById('agreed-costs-help')!.textContent).toContain(
+			'Bestehende Abrechnungen ändern sich dadurch nicht: Berechnen Sie danach die Entwürfe dieses Mietvertrags mit «Neu berechnen» auf ihrer Seite neu.'
+		);
 		type('contract-category-from-k1', '01.11.2025');
 		await save();
 		expect(puts().at(-1)!.body).toMatchObject({ agreedFrom: { k1: '2025-11-01', k2: '2025-10-01' } });

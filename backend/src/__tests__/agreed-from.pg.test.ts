@@ -153,6 +153,24 @@ describe('Vereinbart ab: Heizprofil, Gutschrift und Vertragsende', () => {
 		expect((await items()).find((item) => item.categoryId === heatingId)?.tenantShare).toBe(Math.round(1000 * share) / 100);
 	});
 
+	// code review 368-B C-1: the profile's share kept with the statement, as the PDF prints it, counts from the day too
+	it('hält den Heizanteil ab diesem Tag mit der erstellten Abrechnung fest', async () => {
+		await put({ categoryId: heatingId, agreed: true, from: '2024-10-01' });
+		const created = await sendJson('POST', '/api/v1/statements/generate', {
+			contractId: heated.contract,
+			buildingId: heated.building,
+			...period,
+			heatingProfileId: profile.id,
+			managementFeePercent: 0
+		});
+		const { id } = (await created.json()) as { id: string };
+
+		const [statement] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, id));
+		await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+		const share = months.reduce((sum, month) => sum + Number(profile[`${month}Pct`]), 0);
+		expect(statement.heatingShare).toMatchObject({ byDays: false, percent: Math.round(share * 100) / 100 });
+	});
+
 	it('rechnet auch eine Gutschrift nur ab diesem Tag ab', async () => {
 		await put({ categoryId: ids.Elevator, agreed: true, from: '2024-10-01' });
 
