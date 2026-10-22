@@ -4,7 +4,6 @@
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it, setSystemTime, spyOn } from 'bun:test';
-import { inflateSync } from 'zlib';
 import { eq, inArray } from 'drizzle-orm';
 import { SMTPServer } from 'smtp-server';
 import { simpleParser, type ParsedMail } from 'mailparser';
@@ -17,6 +16,7 @@ import { updateTenant } from '../services/tenant.service';
 import { daysAfter, swissToday } from '../services/today';
 import { formatSwissDate } from '../services/pdf-format';
 import { callApi } from './helpers/auth';
+import { readPdf } from './helpers/pdf-text';
 import { createRental } from './helpers/rental';
 
 type Document = {
@@ -65,13 +65,8 @@ async function statement(status: 'draft' | 'sent') {
 const expireReminders = (statementId: string) =>
 	db.update(documents).set({ paymentDeadline: '2020-02-10', status: 'sent' }).where(eq(documents.statementId, statementId));
 
-// The text of a PDF from pdfkit: its compressed streams inflated, the hex strings of each TJ joined
-const pdfText = (pdf: Buffer) =>
-	[...pdf.toString('latin1').matchAll(/stream\r?\n([\s\S]*?)endstream/g)]
-		.map((stream) => inflateSync(Buffer.from(stream[1], 'latin1')).toString('latin1'))
-		.flatMap((content) => [...content.matchAll(/\[(.*?)\] TJ/g)])
-		.map((tj) => [...tj[1].matchAll(/<([0-9a-f]*)>/g)].map((hex) => Buffer.from(hex[1], 'hex').toString('latin1')).join(''))
-		.join('\n');
+// The text of a PDF from pdfkit, each piece of text on its own line (the embedded font decoded, #465)
+const pdfText = (pdf: Buffer) => readPdf(pdf).text;
 
 const nextReminderFrom = async (statementId: string) =>
 	((await (await api('GET', `/api/v1/statements/${statementId}`)).json()) as { nextReminderFrom: string | null })

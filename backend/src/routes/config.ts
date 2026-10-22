@@ -88,6 +88,8 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 				company_address: t.Optional(t.String()),
 				company_postal_code: t.Optional(t.String()),
 				company_city: t.Optional(t.String()),
+				company_phone: t.Optional(t.String()),
+				company_email: t.Optional(t.String()),
 				iban: t.Optional(t.String()),
 				payment_deadline_days: t.Optional(t.String()),
 				reminder_after_days: t.Optional(t.String()),

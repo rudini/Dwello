@@ -544,12 +544,11 @@ describe('Rechnungen einer Position über verschiedene Tage im PDF', () => {
 
 	// #451, Punkt 3 (#256 P-5): «Ihre / Mietstage» brach über zwei Zeilen; ein geschütztes Leerzeichen hält es zusammen
 	it('trennt «Ihre Mietstage» nicht über zwei Zeilen', async () => {
-		const { streams } = await textOf(mixed);
-		const printed = streams.join('').replace(/>\s*-?[\d.]+\s*</g, '').toLowerCase(); // the hex strings, kerning removed
-		const hex = (text: string) => Buffer.from(text, 'latin1').toString('hex');
+		const { text } = await textOf(mixed);
 
-		expect(printed).toContain(hex('Ihre\u00a0Mietstage 47'));
-		expect(printed).not.toContain(hex('Ihre Mietstage 47'));
+		// each line of the PDF is one piece of text: the protected space keeps both words on one line
+		expect(text).toContain('Ihre Mietstage 47');
+		expect(text).not.toMatch(/Ihre\s*\n\s*Mietstage/);
 	});
 
 	// #451, Punkt 1 (Fachreview V-6): eine Gutschrift über die Mietstage, die Rechnung davor: der Zeitanteil ist negativ,
