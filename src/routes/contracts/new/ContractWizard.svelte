@@ -75,7 +75,7 @@
 		}))
 	);
 	let step = $state(1);
-	const agreedHelp = agreed ? m.contracts_agreed_costs_help_follow_up() : undefined;
+	const agreedHelp = $derived(agreed ? m.contracts_agreed_costs_help_follow_up() : undefined);
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
 	let savedAt = $state<Date | null>(null);
