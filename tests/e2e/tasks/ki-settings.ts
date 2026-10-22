@@ -9,6 +9,7 @@ import {
 	kiCountryInput,
 	kiLinkInSettings,
 	kiMode,
+	kiModelDownloadButton,
 	kiModelInput,
 	kiPrivacyConfirm,
 	kiProviderInput,
@@ -70,3 +71,5 @@ export const openFreshAuditLog: Activity = (actor) => actor.attemptsTo(signInFre
 /** The KI of the empty instance, whose KI stand-in fails the model download */
 export const openKiWithFailedModel: Activity = async (actor) =>
 	actor.attemptsTo(Cookies.add(await sessionCookies(EMPTY_APP)), Navigate.to(`${EMPTY_APP}/config/ki`));
+
+export const downloadModelAgain: Activity = (actor) => actor.attemptsTo(openFreshKi, Click.on(kiModelDownloadButton));

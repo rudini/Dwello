@@ -218,28 +218,15 @@ describe('Schlüssel und Protokoll', () => {
 		expect(await response.json()).toMatchObject({ code: 'KI_KEY_FOR_NEW_ADDRESS' });
 	});
 
-	it('prüft eine neue Adresse nicht mit dem gespeicherten Schlüssel', async () => {
+	// Fachreview 580-2 F-16: auch die Prüfung schickt den gespeicherten Schlüssel nie an eine andere Adresse
+	it('verlangt den API-Schlüssel erneut, um eine neue Adresse zu prüfen', async () => {
 		await save(muster);
-		const elsewhere = Bun.serve({
-			port: 0,
-			fetch: (request) => {
-				requests.push({
-					authorization: request.headers.get('authorization'),
-					model: '',
-					images: 0,
-					text: '',
-					image: ''
-				});
-				return new Response(null, { status: 401 });
-			}
-		});
-		try {
-			await check({ ...muster, baseUrl: `http://127.0.0.1:${elsewhere.port}/v1`, apiKey: '' });
+		requests.length = 0;
 
-			expect(requests.map((request) => request.authorization)).toEqual([null]);
-		} finally {
-			elsewhere.stop(true);
-		}
+		const response = await check({ ...muster, baseUrl: 'http://127.0.0.1:9/v1', apiKey: '' });
+
+		expect(response.status).toBe(422);
+		expect(await response.json()).toMatchObject({ code: 'KI_KEY_FOR_NEW_ADDRESS' });
 	});
 
 	// Fachreview 580 F-4: an wen bis wann Rechnungen gingen, bleibt für die Auskunft nach Art. 25 DSG nachvollziehbar
@@ -386,6 +373,9 @@ describe('Verbindung prüfen', () => {
 	// nur eine Antwort auf ein Bild zeigt, dass das Modell Rechnungsbilder liest; Fachreview 580 F-3: die Datenschutzerklärung
 	// nennt den Anbieter noch nicht, darum gehen nur ein festes Testbild und ein fester Text, nie erfasste Daten
 	it('schickt nur ein festes Testbild und einen festen Text', async () => {
+		// Fachreview 580-2 F-18: eine erfasste Kategorie mit einem Namen darin geht nicht mit
+		const name = `Hauswart Meier ${crypto.randomUUID()}`;
+		await sendJson('POST', '/api/v1/categories', { name, isAllowedUtilityCost: true });
 		await check(muster);
 		await check({ ...muster, model: 'anderes-modell' });
 
@@ -394,5 +384,7 @@ describe('Verbindung prüfen', () => {
 		expect(requests[0].image).toBe(requests[1].image);
 		expect(requests[0].text).toContain('Verbindungstest');
 		expect(requests[0].image).toStartWith('data:image/png;base64,');
+		expect(requests[0].text).not.toContain(name);
+		await db.execute(sql`DELETE FROM categories WHERE name = ${name}`);
 	});
 });

@@ -55,8 +55,23 @@ Funktionalität: KI in den Einstellungen wählen
   # Fachreview 580 F-5: auf der leeren Installation des Stacks scheitert der Download; die Seite sagt, was zu tun ist
   Szenario: Die Seite KI sagt, wenn das KI-Modell nicht geladen werden konnte
     Wenn der Liegenschaftsverwalter die KI einer Installation öffnet, deren KI-Modell nicht geladen werden konnte
-    Dann sagt die Seite "KI" "Das KI-Modell konnte nicht geladen werden. Prüfen Sie, ob der Server das Internet erreicht und rund 6 GB Speicherplatz frei hat, und laden Sie es erneut herunter."
+    Dann sagt die Seite "KI" "Das KI-Modell konnte nicht geladen werden. Prüfen Sie, ob der Server das Internet erreicht und rund 6 GB Speicherplatz frei hat, und laden Sie es erneut herunter. Betreibt jemand anderes Dwello, wenden Sie sich an den Betreiber."
     Und kann der Liegenschaftsverwalter das KI-Modell erneut herunterladen
+
+  # Fachreview 580-2 F-5: der Liegenschaftsverwalter startet den Download selbst und sieht, wie weit er ist
+  Szenario: Das KI-Modell erneut herunterladen
+    Angenommen Dwello ist eingerichtet
+    Und das Herunterladen des KI-Modells ist gescheitert
+    Und das KI-Modell ist zu 40 % geladen
+    Wenn der Liegenschaftsverwalter auf der Seite "KI" das KI-Modell erneut herunterlädt
+    Dann sagt die Seite "KI" "Das KI-Modell wird geladen: 40 %. Bis es geladen ist, erfassen Sie Rechnungen von Hand."
+
+  # Auf einer Installation ohne lokale KI (Installationsanleitung, Abschnitt 6) antwortet niemand
+  Szenario: Die lokale KI antwortet nicht
+    Angenommen Dwello ist eingerichtet
+    Und die lokale KI antwortet nicht
+    Wenn der Liegenschaftsverwalter "Lokale KI" speichert
+    Dann sagt die Seite "KI" "Die lokale KI antwortet nicht. Läuft Dwello mit Docker, startet der Betreiber sie mit der Installationsanleitung; sonst wählen Sie einen Anbieter oder keine KI."
 
   # Ohne Bestätigung, Anbieter oder Land nennt die Datenschutzerklärung nicht, wer die Rechnungen erhält (Art. 19 DSG)
   Szenariogrundriss: Ein Anbieter ohne <Angabe> wird nicht gespeichert

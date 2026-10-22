@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import { enteredApiKey, kiCheckText, kiPageText, kiSaveButtons, modelDownloadOffered, shownKiAddress } from '../questions/ki-settings';
 import {
 	checkConnection,
+	downloadModelAgain,
 	openFreshAuditLog,
 	openFreshKi,
 	openKiWithFailedModel,
@@ -122,4 +123,16 @@ When(
 
 Then('kann der Liegenschaftsverwalter das KI-Modell erneut herunterladen', async ({ verwalter }) => {
 	await verwalter.sees(modelDownloadOffered).toBe(true);
+});
+
+Given('das Herunterladen des KI-Modells ist gescheitert', async ({ frisch }) => {
+	await frisch.modelFailed();
+});
+
+Given('die lokale KI antwortet nicht', async ({ frisch }) => {
+	await frisch.localKiOffline();
+});
+
+When('der Liegenschaftsverwalter auf der Seite "KI" das KI-Modell erneut herunterlädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(downloadModelAgain);
 });
