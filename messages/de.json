@@ -1256,6 +1256,8 @@
 	"statements_recalculate_text": "Dwello berechnet den Entwurf {number} mit den Rechnungen und dem Tankbestand, wie sie jetzt sind. Nummer, Heizprofil, Verwaltungspauschale, Abrechnungsdatum, Zahlungsfrist und Bemerkung bleiben. Beträge, Positionen und Saldo ändern sich. Ein schon erstelltes PDF wird verworfen.",
 	"statements_recalculated": "Der Entwurf ist neu berechnet. Er rechnet mit den Rechnungen und dem Tankbestand, wie sie jetzt sind.",
 	"statements_recalculate_failed": "Der Entwurf wurde nicht neu berechnet. Bitte versuchen Sie es nochmals.",
+	"statements_send_outdated_title": "Dieser Entwurf ist nicht aktuell",
+	"statements_send_outdated": "Seit dem Erstellen dieses Entwurfs {later}. Berechnen Sie ihn neu, bevor Sie ihn zustellen.",
 	"statements_later_sent": "Seit dem Erstellen dieser Abrechnung {later}. Versendete Abrechnungen berichtigen Sie mit «Abrechnung berichtigen» auf der Abrechnung. Die berichtigte Abrechnung rechnet an, was schon bezahlt ist. Forderungen aus der Nebenkostenabrechnung verjähren in der Regel nach fünf Jahren (Art. 128 Ziff. 1 OR); ab wann die Frist läuft, ist nicht einheitlich geklärt. Lassen Sie sich im Zweifel beraten.",
 	"statements_later_sent_none": "Seit dem Erstellen dieser Abrechnung {later}. Für {tenant} ändert das weder den Saldo noch eine Position. Sie müssen die Abrechnung nicht berichtigen.",
 	"statements_later_sent_declined": "Seit dem Erstellen dieser Abrechnung {later}. Am {date} haben Sie entschieden, die Abrechnung nicht zu berichtigen.",

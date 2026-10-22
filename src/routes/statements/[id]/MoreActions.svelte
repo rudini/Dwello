@@ -9,10 +9,14 @@
 	let {
 		statement,
 		oncorrect,
-		ondelete
-	}: { statement: StatementWithDetails; oncorrect: () => void; ondelete: () => void } = $props();
-
-	let showRecalculate = $state(false);
+		ondelete,
+		recalculating = $bindable(false) // also opened from the send dialog of a draft that is not current (#547)
+	}: {
+		statement: StatementWithDetails;
+		oncorrect: () => void;
+		ondelete: () => void;
+		recalculating?: boolean;
+	} = $props();
 </script>
 
 {#if statement.status !== 'replaced'}
@@ -29,7 +33,7 @@
 				<!-- #338: a draft is calculated again from the invoices as they are now, with the same number -->
 				<Button
 					icon="refresh"
-					onclick={() => (showRecalculate = true)}
+					onclick={() => (recalculating = true)}
 					testid="statement-recalculate-button">{m.statements_recalculate()}</Button
 				>
 				<!-- Only a draft can be deleted; once sent, the statement stays as the tenant received it -->
@@ -46,7 +50,7 @@
 
 <!-- Helga 338 P-1, P-2: the confirmation names what stays and what changes; the result is said at the top -->
 <FormDialog
-	bind:open={showRecalculate}
+	bind:open={recalculating}
 	action="?/recalculate"
 	title={m.statements_recalculate_title()}
 	confirmLabel={m.statements_recalculate()}

@@ -57,6 +57,7 @@ import {
 	correctStatement,
 	correctStatementPaid,
 	recalculateDraft,
+	recalculateFromSending,
 	declineCorrection,
 	createCorrection,
 	openCorrectConfirmation,
@@ -418,6 +419,10 @@ When('der Liegenschaftsverwalter das frühere Zahlungsdatum bestätigt', async (
 	await verwalter.attemptsTo(confirmEarlyPaidDate);
 });
 
+Then('nennt der Verlauf nicht {string}', async ({ verwalter }, label: string) => {
+	await verwalter.sees(history).not.toContain(label);
+});
+
 Then('nennt der Verlauf {string} am {string}', async ({ verwalter }, label: string, date: string) => {
 	await verwalter.sees(history).toMatch(new RegExp(`${label}\\s*${date.replace(/\./g, '\\.')}`));
 });
@@ -469,6 +474,10 @@ Given(
 
 When('der Liegenschaftsverwalter den Entwurf neu berechnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(recalculateDraft);
+});
+
+When('der Liegenschaftsverwalter den Entwurf aus der Bestätigung neu berechnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(recalculateFromSending);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung berichtigt', async ({ verwalter }) => {

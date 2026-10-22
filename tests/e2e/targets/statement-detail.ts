@@ -58,6 +58,7 @@ export const letterInsteadLink = target('Stattdessen per Brief zustellen', (page
 export const deliverByLetterButton = target('Selbst per Brief zustellen', (page) => page.getByTestId('statement-send-by-letter'));
 export const sendRecipient = target('Empfänger', (page) => page.getByTestId('send-recipient'));
 export const sendPdfLink = target('PDF ansehen', (page) => page.getByTestId('send-pdf-view'));
+export const sendRecalculateButton = target('Neu berechnen in der Bestätigung des Versands', (page) => page.getByTestId('send-recalculate'));
 export const paidDateInput = target('Bezahlt am', (page) => page.getByTestId('paid-date-input'));
 export const statementHistory = target('Verlauf', (page) =>
 	page.getByRole('heading', { name: 'Verlauf' }).locator('xpath=ancestor::*[.//dl][1]')

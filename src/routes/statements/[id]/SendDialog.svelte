@@ -4,6 +4,7 @@
 	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import type { StatementWithDetails } from '$lib/types';
+	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import OldAddressWarning from './OldAddressWarning.svelte';
@@ -13,8 +14,16 @@
 	let {
 		open = $bindable(),
 		statement,
-		byLetter = false
-	}: { open: boolean; statement: StatementWithDetails; byLetter?: boolean } = $props();
+		byLetter = false,
+		outdated,
+		onrecalculate
+	}: {
+		open: boolean;
+		statement: StatementWithDetails;
+		byLetter?: boolean;
+		outdated?: string; // what changed since a draft was created: it is not current (#547)
+		onrecalculate?: () => void;
+	} = $props();
 
 	let form = $state<HTMLFormElement>();
 	let sending = $state(false);
@@ -79,6 +88,17 @@
 	confirmTestid="statement-send-confirm"
 	onconfirm={() => form?.requestSubmit()}
 >
+	<!-- #547: a draft that is not current is said first, with «Neu berechnen»; sending stays possible -->
+	{#if outdated}
+		<Alert tone="caution" title={m.statements_send_outdated_title()} testid="send-outdated">
+			<p>{m.statements_send_outdated({ later: outdated })}</p>
+			<div>
+				<Button icon="refresh" onclick={onrecalculate} testid="send-recalculate"
+					>{m.statements_recalculate()}</Button
+				>
+			</div>
+		</Alert>
+	{/if}
 	{#if byEmail}
 		<p>{m.statements_send_email_text()}</p>
 		<p>{m.statements_send_email_bounce()}</p>

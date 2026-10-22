@@ -616,6 +616,33 @@ describe('Abrechnungsdetail', () => {
 		} as never);
 	const laterText = () => byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ');
 
+	// #547: the send dialog of a draft that is not current says so first and offers «Neu berechnen»; sending stays possible
+	it('rät beim Versand eines nicht aktuellen Entwurfs zum Neu berechnen', () => {
+		later(1, 'draft');
+		click('statement-send-button');
+		const dialog = () => document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		expect(dialog()).toContain('Dieser Entwurf ist nicht aktuell');
+		expect(dialog()).toContain(
+			'Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. Berechnen Sie ihn neu, bevor Sie ihn zustellen.'
+		);
+		expect(byTestId('statement-send-confirm')).not.toBeNull();
+		click('send-recalculate');
+		flushSync();
+		expect(byTestId('send-recipient')).toBeNull();
+		expect(byTestId('statement-recalculate-confirm')).not.toBeNull();
+		// code review 547-1: the focus moves into the confirmation, not behind it (persona Sven's rule of the dialogs)
+		const recalculate = byTestId('statement-recalculate-confirm')!.closest('[role="dialog"]')!;
+		expect(recalculate.contains(document.activeElement)).toBe(true);
+		expect(document.activeElement!.getAttribute('data-testid')).toBe('dialog-cancel');
+	});
+
+	it('warnt beim Versand eines aktuellen Entwurfs nicht', () => {
+		detail();
+		click('statement-send-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain('nicht aktuell');
+		expect(byTestId('send-recalculate')).toBeNull();
+	});
+
 	// #454 (#408 point 8): the Tankbestand changed since; titles decided 2026-10-20 (Fachreview 454-1 E-4)
 	it('weist auf einen danach geänderten Tankbestand hin', () => {
 		later(0, 'draft', { fuelStock: true });
@@ -1655,6 +1682,16 @@ describe('Abrechnungsdetail', () => {
 		document.body.innerHTML = '';
 		delivered({ channel: 'email', recipient: 'anna@example.ch', sentAt: '2026-09-28T08:15:00Z' });
 		expect(text().replace(/\s+/g, ' ')).toContain('Versendet per E-Mail an anna@example.ch 28.09.2026, 10:15');
+	});
+
+	// #609 (persona Dr. Weber P-1 of #503): a draft's PDF is made anew on every request, so its Verlauf claims none;
+	// a sent statement keeps the PDF as sent and names it
+	it('nennt im Verlauf eines Entwurfs kein erstelltes PDF', () => {
+		detail({ pdfGeneratedAt: '2026-10-05T08:00:00Z' });
+		expect(text().replace(/\s+/g, ' ')).not.toMatch(/PDF erstellt \d/);
+		document.body.innerHTML = '';
+		detail({ status: 'sent', statementDate: '2026-09-28', pdfGeneratedAt: '2026-09-28T08:00:00Z' });
+		expect(text().replace(/\s+/g, ' ')).toMatch(/PDF erstellt 28\.09\.2026/);
 	});
 
 	it('führt im Verlauf Versand und Zahlung', () => {
