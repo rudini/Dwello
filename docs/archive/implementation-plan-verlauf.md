@@ -2527,3 +2527,116 @@ Branch `ccr-8b7da2b0-52xa3f`, restarted on `main` after #591. Decided by the pro
 - [x] code-reviewer rounds 1–2 (`docs/reviews/577-review-1.md`, `-2.md`): Majors C-1 to C-4 fixed; C-5, C-8 (partly), C-10, C-11 fixed; C-6, C-7, C-9 stay Minors
 - [x] Personas Helga, Sven, Anna, Dr. Weber, Marco, each on its own fresh installation (`docs/design/personas/*-577.md`): Sven P-1 (Major, passwords emptied) fixed with a step seen red; Anna P-1 fixed; the other Minors stay in the reports
 - [x] PR: pushed after this archive
+
+## Session 2026-10-21: open bugs, then ready issues (one pull request each)
+
+- [x] #568 test first: `backend/src/__tests__/compose-prod.test.ts` red (8 mail keys missing in the backend service)
+- [x] #568 `docker-compose.prod.yml` passes `MAIL_TRANSPORT`, `MAIL_FROM`, `SMTP_*`, `RESEND_API_KEY`; `docker compose config` with `.env.example` shows them; No scenario: the E2E stack does not run `docker-compose.prod.yml`
+- [x] #568 slice review round 1: `docs/reviews/568-review-1.md`; Minors C-1 (comment), C-2 (test of the SMTP_PORT default, seen red) fixed
+- [x] #568 closing review round 2: `docs/reviews/568-review-2.md`
+- [x] #568 PR #569 merged
+- [x] #566 DOM test red (`date-input.dom.test.ts`: form with the calendar below its min fails checkValidity); `DateInput` keeps its calendar out of every form (`form=""`), green
+- [x] #566 scenario «Ein Tankbestand ohne Stichtag nennt den fehlenden Stichtag» (`building-detail.feature`), green in Chromium; no red run of its own (the DOM test was seen red)
+- [x] #566 slice review round 1: `docs/reviews/566-review-1.md` (no findings; no closing round, no code since)
+- [x] #566 PR #571 merged (subject reworded after CI «Commit subjects», force-push approved by the product owner)
+- [ ] Workflow note: the local commit-msg hook let `git commit -F -` through with a 53-character subject; only CI caught it
+- [x] #548 DOM test red (`invoice-upload-dialog.dom.test.ts`: sentence stays after the Verteilschlüssel is chosen); `UploadRowNotes.svelte` shows it only while a marked field is still open (`checkRow`), green
+- [x] #548 scenario «Rechnung ohne KI aus einer Datei erfassen» checks the sentence and that the note goes (new step «hat die Datei von … keinen Hinweis mehr»); no red run of its own (the DOM test was seen red)
+- [x] #548 slice review round 1: `docs/reviews/548-review-1.md`; Minor C-1 fixed (test: one of two marked fields filled, sentence stays; pins kept behaviour, fails with `every` instead of `some`)
+- [x] #548 persona Helga: `docs/design/personas/helga-548.md`; Major P-1 (key field stays red after the Kategorie brought a Verteilschlüssel, pre-existing, met in the task) fixed with a DOM test seen red; Minors P-2, P-3 stay in the report (pre-existing, not trivial)
+- [x] #548 closing review round 2: `docs/reviews/548-review-2.md`; Major C-2 (no scenario for P-1) fixed: scenario «Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück», new step «… die Fehlermeldung … nicht mehr»; its note on new/edit invoice became #573
+- [x] #548 review round 3: `docs/reviews/548-review-3.md` (C-2 closed, no new findings)
+- [x] #548 PR #574 merged
+- [x] #575 (main red after #571): Firefox «Suche ohne Treffer» (`buildings.feature`), not #571's (no DateInput there); not reproduced locally in 225 Firefox runs; analysis in #575; cause open
+- [x] #573 DOM tests red (`invoice-pages.dom.test.ts`, new and edit page: key error stays after the Kategorie brought a key); `InvoiceCategoryFields.svelte` shows the key error only while no key is set (the #548 condition in `UploadRowFields.svelte` moved there), green
+- [x] #573 scenario «Die Kategorie bringt den Verteilschlüssel und nimmt seinen Fehler zurück» (`invoice-new.feature`), green; no red run of its own (the DOM tests were seen red); No scenario for the edit page: it shares the field component, covered by its DOM test
+- [x] #573 slice review round 1: `docs/reviews/573-review-1.md` (no findings)
+- [x] #573 persona Helga: `docs/design/personas/helga-573.md` (no findings; observations pre-existing, stay in the report)
+- [x] #573 PR #582 merged
+- [x] #522 BFF load test red: `agreeableCategories` reads `/categories/allowed` (every umlagefähige category, no limit); contract `tests/contracts/categories-allowed.json` with its check in `api-contracts.pg.test.ts`
+- [x] #522 `contractBody` test red: the body always names the shown and ticked categories (no click: every box), a category the form does not list is neither agreed nor kept; `flatRateNotice` test red: counts only shown boxes
+- [x] #522 No scenario: it needs more than 100 categories in the shared E2E database or a change in another tab while the form loads; contract E2E features (145) green
+- [x] #522 slice review round 1: `docs/reviews/522-review-1.md`; Minor C-2 fixed (one helper `ticked`); Minor C-1 (a category changed in another tab while the form loads is answered without a word; needs the backend to answer only shown ids) stays in the report, named in the PR; the invoice form limit became #583
+- [x] #522 closing review round 2: `docs/reviews/522-review-2.md` (no new findings)
+- [x] #522 PR #584 merged
+- [x] #583 BFF test red (`invoices.test.ts`: 150 categories, the form got 100); `invoiceChoices` asks for `categories?limit=1000` (the backend's own «all»), green; No scenario: it needs more than 100 categories in the shared E2E database; the other loads with the same limit became #585
+- [x] #583 slice review round 1: `docs/reviews/583-review-1.md`; Minor C-1 fixed (contract `tests/contracts/categories.json` with its check in `api-contracts.pg.test.ts`, used by the new test)
+- [x] #583 closing review round 2: `docs/reviews/583-review-2.md` (C-1 closed, no new findings)
+- [x] #583 PR #586 merged
+- [x] O-47 (product owner, 2026-10-21: «Ja, als eigener PR»): `playwright.config.ts` keeps the trace of every failing E2E test (`retain-on-failure`), so the next Firefox failure of «Suche ohne Treffer» (#575) shows its cause; row O-47 in `docs/design/offene-punkte.md`
+- [x] O-47 review round 1: `docs/reviews/o47-review-1.md` (no findings)
+- [x] O-47 PR #587 merged
+- [x] #585 BFF tests red (`category-lists.test.ts`: categories page, building page, `namesById`, 150 categories, 100 shown); the three loads ask for `limit=1000`, green; No scenario: it needs more than 100 categories in the shared E2E database
+- [x] #585 slice review round 1: `docs/reviews/585-review-1.md`; Minor C-1 fixed (the building test also checks the name of a Tankbestand in category c149, red without the change); the other 100-limits (Verteilschlüssel, Heizprofile) became #588
+- [x] #585 closing review round 2: `docs/reviews/585-review-2.md` (C-1 closed, no new findings)
+- [x] #585 PR #589 merged
+- [x] #588 BFF tests red (`master-data-lists.test.ts`: Verteilschlüssel page, invoice forms, Heizprofile page, Einstellungen, statement run; 150 records, 100 shown); the seven loads ask for `limit=1000`, green; contract `tests/contracts/distribution-keys.json` with its check; No scenario: it needs more than 100 Verteilschlüssel or Heizprofile in the shared E2E database
+- [x] #588 slice review round 1: `docs/reviews/588-review-1.md`; Minor C-1 fixed (test of the statement run naming a Heizprofil after the 100th, red with limit=100)
+- [x] #588 closing review round 2: `docs/reviews/588-review-2.md` (C-1 closed, no new findings)
+- [x] #588 PR #592 merged (its «Accessibility (axe)» check was red with all three shards green: the summary job read a stale jobs API answer; re-run once, green)
+- [x] CI: the summary job `e2e-results` retries until the count of green shards equals the shards (a stale API answer seconds after the last shard counted «1 of 3», PR #592); loop checked locally with a stand-in for `gh`
+- [x] CI fix review round 1: `docs/reviews/ci-review-1.md` (no findings)
+- [x] CI fix PR #595 merged (Fixes #594: main red after #587 with all five E2E shards green)
+- [x] #519 test red (`error-page.test.ts`: «Internal Error», «Unknown Error», «Error: 502» from SvelteKit); `+error.svelte` shows `error_unexpected` instead of SvelteKit's own words, a load's own message stays, green
+- [x] #519 scenario «Die Fehlerseite nennt einen unerwarteten Fehler in Worten» (`navigation.feature`), seen red without the change («Internal Error»), green; axe and language rows `error-server` green
+- [x] #519 slice review round 1: `docs/reviews/519-review-1.md`; Minor C-1 fixed (the task waits for the error page of the failed load)
+- [x] #519 persona Anna: `docs/design/personas/anna-519.md` (the heading in de, fr, it, en confirmed; Minor P-1 on the pre-existing hint text stays in the report)
+- [x] #519 closing review round 2: `docs/reviews/519-review-2.md` (C-1 closed, no new findings)
+- [x] #519 PR #596 merged
+- [x] #500 render tests (`statement-pdf-render.test.ts`): «Wohnung EG» on floor 0 and «1. OG» on floor 1 in German red («Wohnung EG, EG»); fr, it, en keep the floor's own name (pins kept behaviour); No scenario: a PDF layout detail, the render test shows it (issue)
+- [x] #500 fachreview before implementing: `docs/reviews/500-fachreview-1.md`; Major V-1 (the import proposes «EG Links»: compare at a word boundary) and Minors V-2 (case, spaces), V-3 (fr row), V-4 (contradicting floor stays) taken into the tests before the change; V-5 («UG» vs «1. UG», pre-existing) and the missing floor terms became #597
+- [x] #500 `pdf.service.ts` leaves the floor out when the number starts with its name in the PDF language at a word boundary (case and spaces ignored); render tests green (129)
+- [x] #500 code review round 1: `docs/reviews/500-review-1.md`; Minors fixed: C-1 (Italian «1° piano interrato» on floor 1 dropped a contradicting floor; the longer below-ground name now keeps it, test red before), C-2 (rows for comma, hyphen and «1-OG»)
+- [x] #500 fachreview round 2: `docs/reviews/500-fachreview-2.md` (V-1 to V-4 closed, no new findings)
+- [x] #500 daten-pruefer: `docs/reviews/500-datenpruefung-1.md` (no findings; only Laura Keller's German line changes, amounts and QR fields to the Rappen; its observation on the demo seed became #598)
+- [x] #500 closing review round 2: `docs/reviews/500-review-2.md` (C-1, C-2 closed, no new findings)
+- [x] #500 PR merged (#599)
+- [x] #509 render tests (de/fr/it/en) and @wip scenario «Das PDF nennt keinen Heizkostenanteil für eine fehlende Rechnung ohne Leistungszeitraum»: red at the missing behaviour
+- [x] #509 fachreview before implementing: `docs/reviews/509-fachreview-1.md`; Majors M-1 (a second heating position over the period carries the run's share without invoice lines: keep today's text then; render test pins it) and V-1 (the PDF text reads protected spaces as spaces: expectations fixed), Minors V-2 (scenario checks the month line is gone), V-3 (recomputable test data), V-4 (fr/it lower case after the colon: own key `heatingNoteOwn`) taken in before the change
+- [x] #509 `pdf.service.ts`: with every heating position by the profile on invoice lines and none without a Leistungszeitraum, the heating section prints only `heatingNoteOwn` (no run share, no month line); render tests (138) and `statement-pdf.pg.test.ts` (56; the #71 test that expected the run's share for a single invoice with a Leistungszeitraum now expects the new sentence) green; scenario green without @wip (statement-detail.feature, chromium and api: 99 passed)
+- [x] #509 code review round 1: `docs/reviews/509-review-1.md` (Minor C-1, test name, fixed)
+- [x] #509 fachreview round 2: `docs/reviews/509-fachreview-2.md` (M-1, V-1 to V-4 closed; V-5 = C-1 fixed; Minor M-2, the month line of an invoice shared by days because its profile months carry 0 %, existed before and stays in the report)
+- [x] #509 persona Dr. Weber: `docs/design/personas/dr-weber-509.md` (no Blocker/Major; Minors P-1, P-2 and Nits P-3, P-4 on texts the change kept stay in the report; the observation on the detail page is #507)
+- [x] #509 daten-pruefer: `docs/reviews/509-datenpruefung-1.md` (no findings above Nit; only the 8 PDFs of Meier and Brunner change, by exactly the run share and the month line; amounts and QR fields to the Rappen)
+- [x] #509 closing review round 2: `docs/reviews/509-review-2.md` (C-1 closed, no new findings)
+- [x] #509 PR merged (#600)
+- [x] #507 scenario «Kostenposition nennt bei Heizkosten nach Heizprofil den Anteil jeder Rechnung wie das PDF» red at «Ihre Mietstage 0 von 91 Tagen»; DOM tests (`statement-pages.dom.test.ts`) red, one per behaviour: line and no period, then beyond and Tankbestand
+- [x] #507 `LineInvoices.svelte`: an invoice part by the Heizprofil says «Anteil nach Heizprofil: … %» instead of the days, four new keys `statements_part_*_profile` in de/fr/it/en (terms of the PDF's `partProfileRun`); DOM tests (181), lint, check, changed and message tests green; statement-detail.feature chromium + api: 100 passed
+- [x] #507 fachreview: `docs/reviews/507-fachreview-1.md` (no findings)
+- [x] #507 code review round 1: `docs/reviews/507-review-1.md` (no findings)
+- [x] #507 persona Dr. Weber: `docs/design/personas/dr-weber-507.md` (no Blocker/Major; page and PDF agree; Minor P-1, the months only in the PDF, is what the issue allows; P-2 to P-4 existed before and stay in the report)
+- [x] #507 daten-pruefer: `docs/reviews/507-datenpruefung-1.md` (no findings; percents and amounts agree in DB, page in four languages and PDF)
+- [x] #507 PR merged (#601)
+- [x] #602 (main red after #600: «Nicht aktuelle Entwürfe als eigene Aufgabe» lost «Abrechnungen prüfen und versenden»): the overview computed the current drafts as the draft count minus the outdated drafts, two global reads; a parallel scenario that adds outdated drafts between them takes the result to 0. Unit test red first (`overview.test.ts`); `overview.ts` counts also the listed drafts not outdated (the larger of both: the count alone breaks in the race, the list alone when it cannot be loaded); the drafts list loads with limit=1000. overview, dashboard, buildings-i18n, dashboard-page tests (77), lint, check, dashboard.feature chromium + api (50) green. No scenario: a race between two reads under parallel scenarios; the failing scenario in dashboard.feature is the scenario
+- [x] #602 code review round 1: `docs/reviews/602-review-1.md` (no findings)
+- [x] #602 PR merged (#603)
+- [x] #507 Workflow note: since O-47 (#587) a failed local E2E run leaves `playwright-report/trace/assets/*.js`, which `bun run lint` checks and fails on; fixed in its own pull request: ESLint ignores `playwright-report/**` (`test-results/` holds no scripts); `eslint-ignores.test.ts` red first
+- [x] O-47 lint code review: `docs/reviews/o47-lint-review-1.md` (no findings)
+- [x] O-47 lint PR merged (#604)
+- [x] #605 (main red after #603, firefox «Bildschirm ohne deutschen Text, dashboard default»): the page never hydrated, `each_key_duplicate`: one statement in the overdue and the sent list (its Zahlungsfrist changed between the two reads, trace of the run) gave two deadlines with one key. Load test red first (`dashboard.test.ts`); `+page.server.ts` lists each statement once, the first (overdue) stays; dashboard tests (31), lint, check, dashboard.feature chromium + api (50) green. No scenario: a race between two reads; the failing language row is the scenario
+- [x] #605 code review round 1: `docs/reviews/605-review-1.md`; Minor C-1 (two reads can also lose a statement whose Zahlungsfrist passes in between) fixed: one read `statements?status=open&limit=1000` replaces both and `once`; the load test reads it (red on main); dashboard tests (31), dashboard.feature (50), language rows of the overview in chromium (16) green; firefox is not installed in this container after its restart
+- [x] #605 closing review round 2: `docs/reviews/605-review-2.md` (C-1 closed, no new findings)
+- [x] #605 PR merged (#606)
+- [x] #607 (main red after #604, firefox «Hochladen abbrechen verwirft die Dateien»; opened by hand because #605 was open): the trace shows the click on «Abbrechen» 13 ms after choosing the file, before the dialog listed it, so the dialog closed without asking. `startCancellingUpload` waits until a file is listed. Not reproducible on demand (firefox timing, firefox not installed here); the two cancel scenarios 5 times each in chromium (10) green, lint and check green. No scenario: a race in the test
+- [x] #607 PR merged (#608)
+- [x] #503 `statement-pdf.pg.test.ts`: a draft whose PDF was made, then refused (CREDITOR_ADDRESS_MISSING; IBAN_MISSING), keeps no PDF and no `pdfGeneratedAt`: both red first; `generateStatementPdf` discards a draft's stored PDF when a fresh one is refused; statement-pdf (59), routes, mail, reminders, error-codes pg tests (94), type-check green. No scenario: the state needs a global setting (company address or IBAN) changed, which breaks parallel scenarios (tests/e2e/CLAUDE.md, «No scenario»; as the issue says)
+- [x] #503 code review round 1: `docs/reviews/503-review-1.md`; Minor C-1 (the draft condition untested) fixed with a pg test that a sent statement keeps its PDF when a new one is refused (pins kept behaviour; red with the condition removed)
+- [x] #503 persona Dr. Weber: `docs/design/personas/dr-weber-503.md` (the product owner allowed the `DELETE FROM configuration WHERE key = 'company_city'` in `dwello_persona`); Major P-1 (the Verlauf says «PDF erstellt» until the refused attempt) is the way the issue names: product owner 2026-10-22, merge as it is, P-1 became #609; Minors P-2 to P-5 (texts and links of the refusal, existing since #450) stay in the report
+- [x] #503 closing review round 2: `docs/reviews/503-review-2.md` (C-1 closed, no new findings)
+- [x] #503 PR merged (#610)
+- [x] Product owner 2026-10-22: «Bei Fragen oder entscheiden issues, entscheide selbst gemäss deiner Empfehlung. Frage mich nur, wenn es keine Empfehlung gibt.» #597 decided by that rule (UG for −1, counted from −2; floor names into i18n-begriffe.md), label `entscheiden` removed
+- [x] #489 DOM test (`tenant-detail-page.dom.test.ts`) red: the tenant document upload uses `FileInput` (own button «Datei auswählen», the chosen file or «Keine Datei ausgewählt», keys `tenants_document_file_choose`/`_none` in four languages), `FileInput` passes `name`; tenant-detail tests (26), changed (656) and message tests (514), lint, check green; tenant-documents.feature chromium + api (8), axe and language rows of tenant-detail (10) green; the state `upload-refused` uploads «notes.docx» (the name now shows and «notizen» read as German). No scenario: the language rows of tenant-detail in sprachen-bildschirme.feature check the button's text in fr/it/en, the DOM test the rest
+- [x] #489 code review round 1: `docs/reviews/489-review-1.md`; Minor C-1 (the reset of the chosen name untested) fixed in «meldet ein hochgeladenes Dokument» (red with the reset line removed)
+- [x] #489 persona Sven: `docs/design/personas/sven-489.md` (no Blocker/Major; Minor P-1 «Datei Datei auswählen» is FileInput's second label from #455 (WCAG 2.5.3), Minor P-2 and Nit P-3 existed before; all stay in the report)
+- [x] #489 closing review round 2: `docs/reviews/489-review-2.md` (C-1 closed, no new findings)
+- [x] #489 PR merged (#612)
+- [x] #597 tests red: UI `floorLabel` −2 «2. UG» (apartment.test.ts), fr «2e sous-sol», it «piano interrato»/«2° piano interrato» (buildings-i18n.test.ts); PDF −1 without number in de/fr/it, the −2 rows pin the counted names, «Wohnung UG» on −1 without the floor (statement-pdf-render.test.ts); floor rows in `docs/design/i18n-begriffe.md`
+- [x] #597 fachreview before implementing: `docs/reviews/597-fachreview-1.md`; Minor V-1 (two floors below ground: «UG» beside «2. UG») kept as decided; Minor V-2 (a typed «1. UG» on −1) taken in: rows in the render test (green before, pin it), `namedByFloor` accepts the counted form on −1; missing term «Stockwerk» decided under the standing instruction (#597 point 4) and written into `UBIQUITOUS_LANGUAGE.md`
+- [x] #597 `pdf.service.ts` (`FLOORS` with the name of −1, `formatFloor`, `namedByFloor`) and `apartment.ts` (`floorLabel` counts from −2 in every language); render tests (145), statement-pdf pg (59), apartment and buildings-i18n (43), vitest --changed (333), lint, check, type-check green. render tests show it
+- [x] #597 code review round 1: `docs/reviews/597-review-1.md`; Major C-1 (no scenario for a visible change) fixed: «Stockwerke unter dem Erdgeschoss» (sprachen.feature, «2. UG») and «Das PDF nennt eine Wohnung im Untergeschoss beim Namen des Stockwerks» (statement-detail.feature), both red with the code of 562443c, green now
+- [x] #597 daten-pruefer: `docs/reviews/597-datenpruefung-1.md` (no findings: 17 statements × 4 languages, only the apartment line on −1 changes)
+- [x] #597 persona Dr. Weber: `docs/design/personas/dr-weber-597.md`; Major P-1 (the floor selection offers no 2. UG) met in its task: decided under the standing instruction (#597 point 6) and fixed, `floorOptions` offers −2 (unit test red first); P-2 follows from P-1; Nit P-3 (lower case floor headings in fr/it) stays in the report; sprachen, statement-detail, apartment-detail, apartments features chromium + api (148) and the apartment rows (55) green
+- [x] #597 code review round 2: `docs/reviews/597-review-2.md`; C-1 closed; Major C-2 (the new «2. UG» choice without a scenario) fixed: «Wohnung im zweiten Untergeschoss erfassen» (apartment-new.feature), red with apartment.ts of 4874c0f (the option −2 missing), apartment-new.feature chromium + api (7) green
+- [x] #597 persona Dr. Weber, second run (section «Zweiter Durchgang» in `docs/design/personas/dr-weber-597.md`): P-1 and P-2 closed; Minor P-4 («UG» beside «2. UG») is V-1 of the domain review, kept as decided (#597 point 5); Nits P-3, P-5 (help text names no 2. UG) stay in the report
+- [x] #597 code review round 3 (closing): `docs/reviews/597-review-3.md` (C-2 closed, no new findings)
+- [x] #597 PR #615 merged

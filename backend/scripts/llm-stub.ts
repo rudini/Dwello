@@ -9,7 +9,8 @@
  *
  * With LLM_STUB_PULL=on it stands in for an Ollama that has not got the model yet (the fresh installation, #577): the
  * model list is empty and a pull reports the progress a scenario sets with POST /stub/pull {percent}, at once. With
- * LLM_STUB_PULL=fail the pull fails (the empty instance of the stack).
+ * LLM_STUB_PULL=fail the pull fails (the empty instance of the stack). «Verbindung prüfen» of the KI settings (#580)
+ * succeeds with the key «gueltig» and a model other than «text-modell».
  */
 
 const PORT = Number(process.env.LLM_STUB_PORT ?? 2527);
@@ -177,8 +178,18 @@ Bun.serve({
 });
 
 type Route = (request: Request) => Response | Promise<Response>;
-const chat: Route = async (request) =>
-	answer(((await request.json()) as { messages: { content: Content }[] }).messages[0].content);
+const chat: Route = async (request) => {
+	const { model, messages } = (await request.json()) as { model: string; messages: { content: Content }[] };
+	const content = messages[0].content;
+	return textOf(content).includes('Verbindungstest') ? connectionCheck(request, model) : answer(content);
+};
+
+// «Verbindung prüfen» of the KI settings (#580): the key «gueltig» is accepted, the model «text-modell» reads no images
+function connectionCheck(request: Request, model: string) {
+	if (request.headers.get('Authorization') !== 'Bearer gueltig') return Response.json({ error: { message: 'Invalid API key' } }, { status: 401 });
+	if (model === 'text-modell') return Response.json({ error: { message: 'This model does not support image input' } }, { status: 400 });
+	return Response.json({ choices: [{ message: { content: 'OK' } }] });
+}
 // the OpenAI-compatible API; Ollama's own only with LLM_STUB_PULL=on
 const routes: Record<string, Route> = { '/v1/chat/completions': chat, '/chat/completions': chat, ...(PULL ? ollama() : {}) };
 

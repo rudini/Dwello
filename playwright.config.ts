@@ -26,7 +26,9 @@ const usesExtraInstances =
 // the overview's state 'ki-model-loading'
 const usesFreshInstallation =
 	!existsSync('.features-gen') ||
-	['einrichtung', 'accessibility', 'sprachen-bildschirme'].some((feature) => existsSync(generated(feature)));
+	['einrichtung', 'ki-einstellungen', 'accessibility', 'sprachen-bildschirme'].some((feature) =>
+		existsSync(generated(feature))
+	);
 const freshDatabaseUrl = (() => {
 	const url = new URL(E2E_DATABASE_URL);
 	url.pathname = `${url.pathname}_fresh`;
@@ -212,7 +214,9 @@ export default defineConfig<{ driver: Driver }>({
 						DATABASE_URL: freshDatabaseUrl,
 						JWT_SECRET: E2E_JWT_SECRET,
 						SETUP_CODE,
-						LLM_BASE_URL: 'http://127.0.0.1:2530/v1'
+						// no LLM_* variable: the landlord sets the KI in the browser (#580); the local KI is the stand-in
+						LLM_LOCAL_URL: 'http://127.0.0.1:2530/v1',
+						ENCRYPTION_KEY: 'e2e-encryption-key-of-the-fresh-installation'
 					}
 				},
 				{

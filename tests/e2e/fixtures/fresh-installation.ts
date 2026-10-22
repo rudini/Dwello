@@ -30,7 +30,21 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 		},
 		/** How far the KI stand-in reports the model download */
 		modelLoaded: (percent: number) => kiStub.post('stub/pull', { percent }),
+		/** A provider of the KI saved through the API (#580); the clean-up returns to the local KI */
+		async kiProvider(provider: { address: string; key: string; model: string; provider: string; country: string }) {
+			await api.put('ki-settings', {
+				mode: 'provider',
+				baseUrl: provider.address,
+				apiKey: provider.key,
+				model: provider.model,
+				provider: provider.provider,
+				providerCountry: provider.country,
+				confirmed: true
+			});
+		},
 		async cleanUp() {
+			// every scenario of the KI settings may change it in the browser: back to the local KI of a fresh installation
+			await api.put('ki-settings', { mode: 'local' });
 			for (const email of accounts) await api.remove(`local-accounts/${encodeURIComponent(email)}`);
 		}
 	};
