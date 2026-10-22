@@ -68,6 +68,8 @@
 		"agreed-costs-none": "Contract form with every box of the agreed Nebenkosten unticked (#91): the note that the tenant is then billed no Nebenkosten (not saved).",
 		"flat-rate-warning": "Contract form at the step «Miete» with a Nebenkostenpauschale, no Akonto and ticked Nebenkosten (#429): the warning that Dwello still bills the ticked Nebenkosten (not saved).",
 		"flat-rate-warning-advance": "Contract form at the step «Miete» with an Akonto, a Nebenkostenpauschale and every Nebenkosten ticked (#432): the warning to leave ticked only the Nebenkosten with Akonto (not saved).",
+		"agreed-from": "Contract form with «Nebenkosten ab einem Tag vereinbaren» open (#368): the help and a «Vereinbart ab» field per ticked category (not saved).",
+		"agreement-from": "Statement wizard at the settings step (#368): the answer «Vereinbart ab» chosen without its day, then «Weiter»: the date field and the error asking for the day (nothing stored).",
 		"agreed-costs-none-advance": "Contract form at the step «Miete» with an Akonto and every Nebenkosten unticked (#444): the caution that Dwello bills no Nebenkosten and the Akonto is paid back (not saved).",
 		"agreed-costs": "Statement wizard at the settings step (#91): «Weiter» with the questions whether a category is agreed not answered (their errors), and the contract whose answered «nicht vereinbart» category has costs in the period.",
 		"agreements-failed": "Statement wizard at the settings step (#91) when whether the contracts agree the period's Nebenkosten cannot be checked (that request answers an error): the alert with «Erneut versuchen», and after «Weiter» the note that the wizard waits for the check (#439).",
@@ -344,6 +346,7 @@
 				"flat-rate-warning",
 				"flat-rate-warning-advance",
 				"agreed-costs-none-advance",
+				"agreed-from",
 				"billed-until-refused"
 			],
 			"queries": {
@@ -355,6 +358,7 @@
 				"contracts-unknown": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown-review": "?tenant={tenant}&apartment={freeApartment}",
 				"agreed-costs-none": "?tenant={tenant}&apartment={freeApartment}",
+				"agreed-from": "?tenant={tenant}&apartment={freeApartment}",
 				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
 				"rent-taken-over": "?tenant={tenant}&apartment={noticedApartment}",
 				"rent-follow-up": "?tenant={endedTenant}&apartment={freeApartment}&from={endedContract}",
@@ -408,6 +412,7 @@
 				"flat-rate-warning",
 				"flat-rate-warning-advance",
 				"agreed-costs-none-advance",
+				"agreed-from",
 				"billed-until-refused",
 				"billed-until-statement"
 			]
@@ -568,6 +573,7 @@
 				"link-preset",
 				"agreed-costs",
 				"agreement-save-failed",
+				"agreement-from",
 				"agreements-failed",
 				"generation-result",
 				"preview-skipped"
@@ -576,6 +582,7 @@
 				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31",
 				"agreed-costs": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
 				"agreement-save-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
+				"agreement-from": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31",
 				"agreements-failed": "?building={agreedBuilding}&start=2025-01-01&end=2025-12-31"
 			}
 		},

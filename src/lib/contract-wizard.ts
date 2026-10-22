@@ -222,7 +222,9 @@ export function contractSummary(
 		},
 		{
 			label: m.contracts_agreed_costs_label(),
-			value: agreedNames(values.agreedCategoryIds, categories).join(', ') || m.contracts_agreed_costs_none(),
+			value:
+				agreedNames(values.agreedCategoryIds, categories, values.agreedFrom).join(', ') ||
+				m.contracts_agreed_costs_none(),
 			step: 4,
 			field: 'agreedCosts'
 		},

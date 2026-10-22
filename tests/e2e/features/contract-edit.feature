@@ -214,7 +214,6 @@ Funktionalität: Mietvertrag bearbeiten
     Aber nicht die Nebenkosten "Lift"
 
   # #368 (#407 Punkt 3): mit dem amtlichen Formular neu eingeführte Nebenkosten gelten ab einem Tag
-  @wip
   Szenario: Nebenkosten ab einem Tag als vereinbart eintragen
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag "Lift" ab "2025-10-01" vereinbart ist
     Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Lift (ab 01.10.2025)"

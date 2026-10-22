@@ -187,21 +187,20 @@ Funktionalität: Nur vereinbarte Nebenkosten abrechnen
 
   # #368 (#407 Punkt 3): «Vereinbart ab», z. B. Lift mit dem amtlichen Formular ab 01.10.2024 eingeführt (Art. 269d Abs. 3 OR);
   # Lift von Anna Keller 100 Franken × 92 / 366 Tage = 25.14
-  @api @wip
+  @api
   Szenario: Ab einem Tag vereinbarte Nebenkosten zählen erst ab diesem Tag
     Angenommen im Mietvertrag von "Anna Keller" ist "Lift" ab "2024-10-01" vereinbart
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
     Dann kostet die Abrechnung von "Anna Keller" "CHF 275.14"
     Und kostet die Abrechnung von "Beat Huber" "CHF 1’050.00"
 
-  @api @wip
+  @api
   Szenario: Ab einem Tag nach der Periode vereinbarte Nebenkosten zählen nicht
     Angenommen im Mietvertrag von "Anna Keller" ist "Lift" ab "2025-04-01" vereinbart
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 0 % Verwaltungspauschale öffnet
     Dann kostet die Abrechnung von "Anna Keller" "CHF 250.00"
 
   # Treppenhausreinigung von Anna Keller 50 Franken × 92 / 366 Tage = 12.57
-  @wip
   Szenario: Die Antwort «Vereinbart ab» gilt ab diesem Tag
     Angenommen es gibt die umlagefähige Kategorie "Treppenhausreinigung"
     Und im Gebäude "Rosenhof" gibt es eine Rechnung der eigenen Kategorie "Treppenhausreinigung" über "200" Franken vom "2024-05-31"

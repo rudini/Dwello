@@ -27,6 +27,7 @@ export interface ContractFormValues {
 	managementFee: '' | 'run' | 'own' | 'none';
 	managementFeeRate: string; // the own rate as typed, comma or point
 	agreedCategoryIds?: string[]; // #91: the agreed Nebenkosten; absent on a new contract: every umlagefähige category
+	agreedFrom?: Record<string, string>; // #368: «Vereinbart ab» per category, '' for none
 }
 
 /** «Verwaltungspauschale» of a contract in words: not agreed, at the run's rate or its own rate (#89) */
@@ -106,7 +107,8 @@ export function initialContractValues(
 		flatRateUtilityCharge: String(contract.flatRateUtilityCharge || ''),
 		managementFee: feeChoice(contract),
 		managementFeeRate: contract.managementFeePercent ?? '',
-		agreedCategoryIds: contract.agreedCategoryIds
+		agreedCategoryIds: contract.agreedCategoryIds,
+		agreedFrom: contract.agreedFrom
 	};
 }
 
@@ -190,15 +192,27 @@ export const contractBody = (values: ContractFormValues, shown: { id: string }[]
 		values.managementFee === 'own' ? String(parsePercent(values.managementFeeRate)) : null,
 	...(values.billedUntil !== undefined && { billedUntil: values.billedUntil || null }),
 	// the ticked boxes, also without a click: a category the form does not list is neither agreed nor kept (#522)
-	agreedCategoryIds: ticked(values.agreedCategoryIds, shown).map((category) => category.id)
+	agreedCategoryIds: ticked(values.agreedCategoryIds, shown).map((category) => category.id),
+	// #368: the day of a ticked category only
+	agreedFrom: Object.fromEntries(
+		ticked(values.agreedCategoryIds, shown)
+			.map((category) => [category.id, values.agreedFrom?.[category.id]])
+			.filter(([, from]) => from)
+	)
 });
 
 /** The agreed Nebenkosten among the categories shown; without a choice every one (#91) */
 export const ticked = <C extends { id: string }>(agreed: string[] | undefined, categories: C[]) =>
 	categories.filter((category) => agreed?.includes(category.id) ?? true);
 
-export const agreedNames = (agreed: string[] | undefined, categories: { id: string; name: string }[]) =>
-	ticked(agreed, categories).map((category) => category.name);
+export const agreedNames = (
+	agreed: string[] | undefined,
+	categories: { id: string; name: string }[],
+	from: Record<string, string> = {}
+) =>
+	ticked(agreed, categories).map(({ id, name }) =>
+		from[id] ? m.contracts_agreed_from_item({ category: name, date: formatDate(from[id]) }) : name
+	);
 
 /**
  * An apartment's contracts as the contract list answers them, in the shape the availability check reads; null when

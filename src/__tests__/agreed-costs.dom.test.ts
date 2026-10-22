@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import AgreedCosts from '../routes/statements/generate/AgreedCosts.svelte';
-import { byTestId, click, fakeBff, settle, show } from './helpers/dom';
+import { byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
+import refused from '../../tests/contracts/contract-agreement-from-refused.json';
 
 // #91, step 3 of «Abrechnungen erstellen»: whether the run's contracts agree the period's Nebenkosten
 const period = { start: '2024-01-01', end: '2024-12-31' };
@@ -64,6 +65,52 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 			path: '/contracts/c1/agreements',
 			body: { categoryId: 'k1', agreed: true }
 		});
+	});
+
+	// #368 (#407 point 3): «Vereinbart ab» a day; without a day it is no answer yet (Fachreview 368-B V-2)
+	it('speichert «Vereinbart ab» erst mit dem Tag', async () => {
+		const { calls, props } = await agreedCosts((call) =>
+			call.method === 'PUT' ? [200, {}] : [200, [anna]]
+		);
+
+		expect(byTestId('agreement-c1-k1-from')!.closest('label')!.textContent).toContain('Vereinbart ab');
+		click('agreement-c1-k1-from');
+		await settle();
+		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
+		expect(props.blocking).toBe(true);
+
+		fireEvent(byTestId<HTMLInputElement>('agreement-c1-k1-from-date')!, 'input', '01.10.2024');
+		fireEvent(byTestId<HTMLInputElement>('agreement-c1-k1-from-date')!, 'change', '01.10.2024');
+		await settle();
+
+		expect(calls.at(-1)).toMatchObject({
+			method: 'PUT',
+			path: '/contracts/c1/agreements',
+			body: { categoryId: 'k1', agreed: true, from: '2024-10-01' }
+		});
+		expect(props.blocking).toBe(false);
+	});
+
+	it('nennt bei «Vereinbart ab» ohne Tag, was fehlt', async () => {
+		await agreedCosts((call) => (call.method === 'PUT' ? [200, {}] : [200, [anna]]), 'Bitte wählen Sie.');
+
+		click('agreement-c1-k1-from');
+		await settle();
+
+		expect(byTestId('agreement-c1-k1')!.textContent).toContain(
+			'Bitte geben Sie den Tag ein, ab dem diese Nebenkosten vereinbart sind.'
+		);
+	});
+
+	// #368: the backend refuses a day before the Vertragsbeginn; a failed save still says it was not saved
+	it('nennt den Grund, wenn Dwello den Tag «Vereinbart ab» ablehnt', async () => {
+		await agreedCosts((call) => (call.method === 'PUT' ? [400, refused] : [200, [anna]]));
+
+		click('agreement-c1-k1-from');
+		fireEvent(byTestId<HTMLInputElement>('agreement-c1-k1-from-date')!, 'input', '31.12.2019');
+		await settle();
+
+		expect(byTestId('agreement-c1-k1')!.textContent).toContain('Dieser Tag liegt vor dem Vertragsbeginn.');
 	});
 
 	it('meldet eine Antwort, die nicht gespeichert wurde, und hält «Weiter» an', async () => {

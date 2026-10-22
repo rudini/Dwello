@@ -192,7 +192,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			contract,
 			// the agreed Nebenkosten (#91); without the categories the page still shows the rest
 			agreedCosts: await agreeableCategories(fetch).then(
-				(categories) => agreedNames(data.agreedCategoryIds ?? [], categories),
+				(categories) => agreedNames(data.agreedCategoryIds ?? [], categories, data.agreedFrom),
 				() => null
 			),
 			rentBreakdown: {

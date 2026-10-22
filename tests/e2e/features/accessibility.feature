@@ -98,6 +98,7 @@ Funktionalität: Barrierefreiheit
       | contract-new           | flat-rate-warning        |
       | contract-new           | flat-rate-warning-advance |
       | contract-new           | agreed-costs-none-advance |
+      | contract-new           | agreed-from               |
       | contract-new           | billed-until-refused |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
@@ -123,6 +124,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | flat-rate-warning   |
       | contract-edit          | flat-rate-warning-advance |
       | contract-edit          | agreed-costs-none-advance |
+      | contract-edit          | agreed-from               |
       | contract-edit          | billed-until-refused |
       | contract-edit          | billed-until-statement |
       | contract-detail-notice | default             |
@@ -182,6 +184,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | link-preset         |
       | statement-generate     | agreed-costs        |
       | statement-generate     | agreement-save-failed |
+      | statement-generate     | agreement-from        |
       | statement-generate     | agreements-failed     |
       | statement-generate     | generation-result   |
       | statement-generate     | preview-skipped     |
