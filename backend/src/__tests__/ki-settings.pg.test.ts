@@ -7,14 +7,22 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
 import { sql } from 'drizzle-orm';
 import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
+import { auditLog } from '../db/schema';
+import { modelState } from '../services/ki-model.service';
 import { callApi, sendJson } from './helpers/auth';
 
 const configured = { ...llmConfig };
 const encryptionKey = process.env.ENCRYPTION_KEY;
 
 // A provider that accepts only the key «richtig» and reads images only with a model other than «text-modell»
-const requests: { authorization: string | null; model: string; images: number }[] = [];
-type Part = { type: string };
+const requests: {
+	authorization: string | null;
+	model: string;
+	images: number;
+	text: string;
+	image: string;
+}[] = [];
+type Part = { type: string; text?: string; image_url?: { url: string } };
 const provider = Bun.serve({
 	port: 0,
 	fetch: async (request) => {
@@ -58,6 +66,7 @@ beforeAll(() => {
 afterEach(async () => {
 	requests.length = 0;
 	await db.execute(sql`DELETE FROM ki_settings`);
+	await db.delete(auditLog);
 });
 afterAll(() => {
 	provider.stop();
@@ -131,7 +140,7 @@ describe('KI in den Einstellungen', () => {
 		});
 
 		expect(response.status).toBe(200);
-		expect(requests).toEqual([
+		expect(requests).toMatchObject([
 			{ authorization: 'Bearer richtig', model: 'bild-modell', images: 0 }
 		]);
 	});
@@ -195,6 +204,105 @@ describe('KI in den Einstellungen', () => {
 		} finally {
 			process.env.ENCRYPTION_KEY = 'test-encryption-key';
 		}
+	});
+});
+
+describe('Schlüssel und Protokoll', () => {
+	// Fachreview 580 F-13: der gespeicherte Schlüssel geht nie an einen anderen Host
+	it('verlangt den API-Schlüssel erneut, wenn sich die Adresse ändert', async () => {
+		await save(muster);
+
+		const response = await save({ ...muster, baseUrl: 'http://127.0.0.1:9/v1', apiKey: '' });
+
+		expect(response.status).toBe(422);
+		expect(await response.json()).toMatchObject({ code: 'KI_KEY_FOR_NEW_ADDRESS' });
+	});
+
+	it('prüft eine neue Adresse nicht mit dem gespeicherten Schlüssel', async () => {
+		await save(muster);
+		const elsewhere = Bun.serve({
+			port: 0,
+			fetch: (request) => {
+				requests.push({
+					authorization: request.headers.get('authorization'),
+					model: '',
+					images: 0,
+					text: '',
+					image: ''
+				});
+				return new Response(null, { status: 401 });
+			}
+		});
+		try {
+			await check({ ...muster, baseUrl: `http://127.0.0.1:${elsewhere.port}/v1`, apiKey: '' });
+
+			expect(requests.map((request) => request.authorization)).toEqual([null]);
+		} finally {
+			elsewhere.stop(true);
+		}
+	});
+
+	// Fachreview 580 F-4: an wen bis wann Rechnungen gingen, bleibt für die Auskunft nach Art. 25 DSG nachvollziehbar
+	it('hält jeden Wechsel der KI mit Anbieter und Land im Protokoll fest', async () => {
+		await save(muster);
+		await save({ mode: 'none' });
+		await save({ mode: 'local' });
+
+		const entries = await db.select().from(auditLog).orderBy(auditLog.occurredAt);
+		expect(entries.map(({ action, details }) => ({ action, details }))).toEqual([
+			{
+				action: 'ki_setting_changed',
+				details: { mode: 'provider', provider: 'Muster KI AG', country: 'Deutschland' }
+			},
+			{ action: 'ki_setting_changed', details: { mode: 'none' } },
+			{ action: 'ki_setting_changed', details: { mode: 'local' } }
+		]);
+	});
+
+	it('schreibt nichts ins Protokoll, wenn das Speichern scheitert', async () => {
+		await save({ mode: 'provider' });
+
+		expect(await db.select().from(auditLog)).toEqual([]);
+	});
+});
+
+describe('KI-Modell der lokalen KI', () => {
+	// Fachreview 580 F-5: der Liegenschaftsverwalter lädt das Modell auf der Seite «KI» erneut herunter
+	it('lädt das KI-Modell auf Wunsch erneut herunter', async () => {
+		const pulls: string[] = [];
+		const ollama = Bun.serve({
+			port: 0,
+			fetch: async (request) => {
+				const path = new URL(request.url).pathname;
+				if (path === '/api/tags') return Response.json({ models: [] });
+				pulls.push(((await request.json()) as { model: string }).model);
+				return new Response(`${JSON.stringify({ status: 'success' })}\n`);
+			}
+		});
+		Object.assign(llmConfig, {
+			baseUrl: `http://127.0.0.1:${ollama.port}/v1`,
+			model: 'lokal-modell'
+		});
+		try {
+			const response = await callApi('/api/v1/ki/model', { method: 'POST' });
+
+			expect(response.status).toBe(202);
+			await Bun.sleep(50);
+			expect(pulls).toEqual(['lokal-modell']);
+			expect(modelState()).toEqual({ state: 'ready' });
+		} finally {
+			ollama.stop(true);
+			Object.assign(llmConfig, { baseUrl: configured.baseUrl, model: configured.model });
+		}
+	});
+
+	it('lädt kein KI-Modell, solange ein Anbieter gewählt ist', async () => {
+		await save(muster);
+
+		const response = await callApi('/api/v1/ki/model', { method: 'POST' });
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ code: 'KI_NOT_LOCAL' });
 	});
 });
 
@@ -275,10 +383,16 @@ describe('Verbindung prüfen', () => {
 		expect(await (await check({ ...muster, apiKey: '' })).json()).toEqual({ result: 'ok' });
 	});
 
-	// nur eine Antwort auf ein Bild zeigt, dass das Modell Rechnungsbilder liest
-	it('schickt dem Modell ein Bild', async () => {
+	// nur eine Antwort auf ein Bild zeigt, dass das Modell Rechnungsbilder liest; Fachreview 580 F-3: die Datenschutzerklärung
+	// nennt den Anbieter noch nicht, darum gehen nur ein festes Testbild und ein fester Text, nie erfasste Daten
+	it('schickt nur ein festes Testbild und einen festen Text', async () => {
 		await check(muster);
+		await check({ ...muster, model: 'anderes-modell' });
 
-		expect(requests.map((request) => request.images)).toEqual([1]);
+		expect(requests.map((request) => request.images)).toEqual([1, 1]);
+		expect(requests[0].text).toBe(requests[1].text);
+		expect(requests[0].image).toBe(requests[1].image);
+		expect(requests[0].text).toContain('Verbindungstest');
+		expect(requests[0].image).toStartWith('data:image/png;base64,');
 	});
 });
