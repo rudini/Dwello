@@ -174,6 +174,8 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #368 slice B code review round 2 of the fixes (`docs/reviews/368-B-review-2.md`)
 - [x] #368 slice B closing review not needed (only reports after round 2), pull request #630 merged on green CI (6e3ba1e5)
 - [x] #387 scenario @wip «Beim Mieterwechsel das Heizprofil der Abrechnung derselben Wohnung» (statement-generate.feature), red at the missing behaviour; red load test and DOM test
-- [ ] #387 fachreview before implementing (`docs/reviews/387-fachreview-1.md`)
-- [ ] #387 implementation: `chosen` takes the Heizprofil of the same apartment's statement when the others differ; notice text in four languages; marker #387 removed
-- [ ] #387 code review, persona, closing review, pull request `Fixes #387`, merged on green CI
+- [x] #387 fachreview before implementing (`docs/reviews/387-fachreview-1.md`): V-1 Major (a replaced statement counted) fixed test-first; V-2 wording taken; V-3 (the run's own source) and V-4 (different profiles per apartment) taken with load tests
+- [x] #387 implementation: `chosen` takes the Heizprofil of the same apartment's statement when the others differ; notice text in four languages; marker #387 removed; scenario green without @wip
+- [ ] #387 code review round 1 (`docs/reviews/387-review-1.md`)
+- [ ] #387 persona Dr. Weber (`docs/design/personas/weber-387.md`)
+- [ ] #387 closing review, pull request `Fixes #387`, merged on green CI
