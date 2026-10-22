@@ -92,6 +92,7 @@ export interface RentalContract {
 	managementFeeAgreed?: boolean; // #89: without it no Verwaltungspauschale
 	managementFeePercent?: string | null; // own rate, before the run's
 	agreedCategoryIds?: string[]; // #91: the umlagefähige categories it agrees
+	agreedFrom?: Record<string, string>; // #368: «Vereinbart ab» per category
 	referenceIndex?: string | number | null;
 	contractPdf?: string | null;
 	notes?: string | null;

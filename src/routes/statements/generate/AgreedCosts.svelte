@@ -69,7 +69,6 @@
 <AgreementsCheck {status} {error} onretry={() => attempt++} />
 
 {#if asked.length}
-	<!-- TODO(fachlich prüfen, #368): an agreement from a date (Art. 269d OR), until then the help text -->
 	<Alert tone="caution" title={m.statements_agreements_title()} testid="agreement-questions">
 		<p>{m.statements_agreements_text()}</p>
 		{#each asked as contract (contract.contractId)}
@@ -78,6 +77,7 @@
 					<AgreementQuestion
 						contractId={contract.contractId}
 						categoryId={category.categoryId}
+						category={category.name}
 						legend={m.statements_agreement_question({
 							category: category.name,
 							tenant: contract.tenantName,

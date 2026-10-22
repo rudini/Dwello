@@ -413,6 +413,40 @@ describe('Mietvertrag bearbeiten', () => {
 		);
 	});
 
+	// #368 (#407 point 3, Fachreview 368-B V-6): «Vereinbart ab» behind a toggle, open when a day is saved; unticking a
+	// category or closing the toggle drops the days, so the form shows what Dwello bills
+	it('zeigt «Vereinbart ab» der angekreuzten Nebenkosten und speichert es', async () => {
+		const categories = [
+			{ id: 'k1', name: 'Heizung' },
+			{ id: 'k2', name: 'Lift' }
+		];
+		const saved = { ...contract(), agreedCategoryIds: ['k1', 'k2'], agreedFrom: { k2: '2025-10-01' } };
+		show(EditPage, { data: { ...data(), contract: saved, categories } } as never);
+		await settle();
+
+		expect(byTestId('contract-agreed-from-toggle')!.getAttribute('aria-expanded')).toBe('true');
+		expect(byTestId<HTMLInputElement>('contract-category-from-k2')!.value).toBe('01.10.2025');
+		expect(byTestId('contract-agreed-from-help')!.textContent!.trim()).toBe(
+			'Leer lassen, wenn die Nebenkosten seit Beginn des Mietvertrags vereinbart sind. Haben Sie sie mit dem amtlichen Formular neu eingeführt, tragen Sie den Tag ein, ab dem sie gelten.'
+		);
+		// Weber 368-B P-1: a changed agreement reaches a draft only with «Neu berechnen»
+		expect(document.getElementById('agreed-costs-help')!.textContent).toContain(
+			'Bestehende Abrechnungen ändern sich dadurch nicht: Berechnen Sie danach die Entwürfe dieses Mietvertrags mit «Neu berechnen» auf ihrer Seite neu.'
+		);
+		type('contract-category-from-k1', '01.11.2025');
+		await save();
+		expect(puts().at(-1)!.body).toMatchObject({ agreedFrom: { k1: '2025-11-01', k2: '2025-10-01' } });
+
+		byTestId<HTMLInputElement>('contract-category-k2')!.click();
+		await settle();
+		expect(byTestId('contract-category-from-k2')).toBeNull();
+		click('contract-agreed-from-toggle');
+		await settle();
+		expect(byTestId('contract-category-from-k1')).toBeNull();
+		await save();
+		expect(puts().at(-1)!.body).toMatchObject({ agreedFrom: {} });
+	});
+
 	it('kehrt beim Abbrechen zum Mietvertrag zurück', async () => {
 		await open();
 		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/contracts/c1');

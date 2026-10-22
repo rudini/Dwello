@@ -220,9 +220,10 @@ export function testData(api: CallTheApi) {
 		},
 
 		// Whether the contract agrees a category (#91): an own category by its title, else a predefined one by its German name
-		async agreement(tenantTitle: string, categoryTitle: string, agreed: boolean) {
+		// #368: agreed only from a day
+		async agreement(tenantTitle: string, categoryTitle: string, agreed: boolean, from?: string) {
 			const categoryId = ids.get(categoryTitle) ?? (await predefinedCategory(categoryTitle)).id;
-			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}/agreements`, { categoryId, agreed });
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}/agreements`, { categoryId, agreed, ...(from && { from }) });
 		},
 
 		// A whole year, or the period given (a statement of a shorter period is still named by its year)

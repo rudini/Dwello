@@ -11,6 +11,7 @@ import {
 	buildingInvoiceCount,
 	feeNotAgreedLink,
 	agreementAnswered,
+	agreementFromDate,
 	agreementsLoading,
 	agreementChoice,
 	notAgreedCostsLink,
@@ -154,6 +155,13 @@ export const recordNoTankFromQuestion = (buildingId: string): Activity => (actor
 // #91, step «Einstellungen»: the answer whether the contract agrees a category; stored at once
 export const answerAgreement = (contractId: string, categoryId: string, agreed: boolean): Activity => (actor) =>
 	actor.attemptsTo(Click.on(agreementChoice(contractId, categoryId, agreed)), Wait.until(agreementAnswered(contractId, categoryId)));
+// #368: «Vereinbart ab» a day, stored once the day is entered
+export const answerAgreementFrom = (contractId: string, categoryId: string, isoDate: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(agreementChoice(contractId, categoryId, 'from')),
+		EnterDate.of(isoDate).into(agreementFromDate(contractId, categoryId)),
+		Wait.until(agreementAnswered(contractId, categoryId))
+	);
 // waits for the contract page, as `openContractWithoutFee` (#494)
 export const openContractWithNotAgreedCosts = (contractId: string): Activity => (actor) =>
 	actor.attemptsTo(

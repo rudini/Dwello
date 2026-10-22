@@ -147,6 +147,7 @@
 <AgreedCategories
 	{categories}
 	bind:agreed={values.agreedCategoryIds}
+	bind:from={values.agreedFrom}
 	help={agreedHelp}
 	flatRate={parseFloat(plainAmount(values.flatRateUtilityCharge ?? '')) > 0}
 	advance={parseFloat(plainAmount(values.advancePayment)) > 0}

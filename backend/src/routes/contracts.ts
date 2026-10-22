@@ -6,7 +6,7 @@
 import { Elysia, t } from 'elysia';
 import { errorBody, refusal } from '../services/coded-error';
 import { advancesOf, deleteAdvance } from '../services/advance-payment.service';
-import { agreedCategoryIds, agreementsInPeriod, answerAgreement } from '../services/agreed-category.service';
+import { agreedCategoryIds, agreedFromDays, agreementsInPeriod, answerAgreement, checkAgreedFrom } from '../services/agreed-category.service';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listContracts,
@@ -44,6 +44,8 @@ const managementFee = {
 
 // #91: the categories the contract agrees; every other umlagefähige one is not agreed
 const agreedList = t.Optional(t.Array(t.String({ format: 'uuid' })));
+// #368: «Vereinbart ab» per agreed category; one without a day is agreed from the start of the contract
+const agreedFrom = t.Optional(t.Record(t.String({ format: 'uuid' }), t.String({ format: 'date' })));
 
 const contractBodySchema = t.Object({
 	apartmentId: t.String({ format: 'uuid' }),
@@ -58,6 +60,7 @@ const contractBodySchema = t.Object({
 	flatRateUtilityCharge: t.Optional(t.String()), // «Nebenkostenpauschale» (#429)
 	...managementFee,
 	agreedCategoryIds: agreedList,
+	agreedFrom,
 	referenceIndex: t.Optional(t.Nullable(t.String())),
 	contractPdf: t.Optional(t.Nullable(t.String())),
 	notes: t.Optional(t.Nullable(t.String()))
@@ -81,6 +84,7 @@ const contractUpdateSchema = t.Partial(
 		flatRateUtilityCharge: t.String(),
 		...managementFee,
 		agreedCategoryIds: agreedList,
+		agreedFrom,
 		referenceIndex: t.Optional(t.Nullable(t.String())),
 		contractPdf: t.Optional(t.Nullable(t.String())),
 		notes: t.Optional(t.Nullable(t.String())),
@@ -122,7 +126,12 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 			set.status = 404;
 			return { error: 'Contract not found' };
 		}
-		return { ...contract, agreedCategoryIds: await agreedCategoryIds(params.id), advancePayments: await advancesOf(params.id) };
+		return {
+			...contract,
+			agreedCategoryIds: await agreedCategoryIds(params.id),
+			agreedFrom: await agreedFromDays(params.id), // «Vereinbart ab» (#368)
+			advancePayments: await advancesOf(params.id)
+		};
 	})
 	// The categories with costs for the contract in the period and whether it agrees each (#91)
 	.get(
@@ -142,14 +151,22 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 	.put(
 		'/:id/agreements',
 		async ({ params, body, set }) => {
-			if (!(await getContract(params.id))) {
+			const contract = await getContract(params.id);
+			if (!contract) {
 				set.status = 404;
 				return refusal('CONTRACT_NOT_FOUND', 'Contract not found');
 			}
-			await answerAgreement(params.id, body.categoryId, body.agreed);
+			try {
+				checkAgreedFrom(contract, [body.agreed ? body.from : undefined]);
+			} catch (error) {
+				set.status = 400;
+				return errorBody(error, 'Failed to save the answer');
+			}
+			await answerAgreement(params.id, body.categoryId, body.agreed, body.from);
 			return body;
 		},
-		{ body: t.Object({ categoryId: t.String({ format: 'uuid' }), agreed: t.Boolean() }) }
+		// «Vereinbart ab» a day (#368)
+		{ body: t.Object({ categoryId: t.String({ format: 'uuid' }), agreed: t.Boolean(), from: t.Optional(t.String({ format: 'date' })) }) }
 	)
 	// Get active contract for apartment at date
 	.get(

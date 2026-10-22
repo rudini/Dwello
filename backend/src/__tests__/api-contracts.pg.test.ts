@@ -470,6 +470,18 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract-tenant-refused'), await response.json())).toEqual([]);
 	});
 
+	// #368: «Vereinbart ab» before the Vertragsbeginn 01.01.2024
+	it('PUT /contracts/:id/agreements mit «Vereinbart ab» vor dem Vertragsbeginn liefert die Felder von contract-agreement-from-refused.json', async () => {
+		const [category] = await db.select().from(categories).limit(1);
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}/agreements`, {
+			categoryId: category.id,
+			agreed: true,
+			from: '2023-12-31'
+		});
+		expect(response.status).toBe(400);
+		expect(drift(await sample('contract-agreement-from-refused'), await response.json())).toEqual([]);
+	});
+
 	// #453 (#337): «Abgerechnet bis» before the Vertragsbeginn 01.01.2024
 	it('PUT /contracts/:id mit «Abgerechnet bis» vor dem Vertragsbeginn liefert die Felder von contract-billed-until-refused.json', async () => {
 		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { billedUntil: '2023-12-31' });

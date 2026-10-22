@@ -58,6 +58,7 @@ import {
 	endContractButton
 } from '../targets/contract-detail';
 import {
+	agreedFromToggle,
 	apartmentContractsUnknown,
 	apartmentSelect,
 	baseRentInput,
@@ -387,6 +388,16 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'agreed-costs-none': () => async (actor) => {
 		await actor.attemptsTo(toRentStep, untickAllCategories, Wait.until(on.shown('contract-agreed-costs-none')));
 	},
+	// #368: «Nebenkosten ab einem Tag vereinbaren» open, a «Vereinbart ab» field per ticked category, not saved
+	'agreed-from': () => (actor) =>
+		actor.attemptsTo(toRentStep, Click.on(agreedFromToggle), Wait.until(on.shown('contract-agreed-from-help'))),
+	// #368 (368-B C-2): a «Vereinbart ab» before the Vertragsbeginn, saved: the refusal, nothing stored
+	'agreed-from-refused': () => async (actor) => {
+		const wizard = (await actor.answer(pageAddress)).includes('/contracts/new');
+		await actor.attemptsTo(toRentStep, Click.on(agreedFromToggle), EnterDate.of('2000-01-01').into(on.firstAgreedFromInput));
+		if (wizard) await actor.attemptsTo(Enter.theValue('1500.00').into(baseRentInput), Click.on(feeChoice('none')), Click.on(nextButton));
+		await actor.attemptsTo(Click.on(contractSubmitButton), Wait.until(on.formProblem));
+	},
 	// Emil's ended contract (fixtures/screens.ts): its agreed Nebenkosten taken over, the help says so (#368)
 	'rent-follow-up': () => async (actor) =>
 		actor.attemptsTo(
@@ -440,6 +451,17 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(
 			FailRequests.toPathsMatching(/^\/api\/contracts\/[^/]+\/agreements$/),
 			Click.on(on.firstAgreementYes),
+			Wait.until(on.formProblem)
+		),
+	// #368: «Vereinbart ab» without its day, then «Weiter»: the date field and the error asking for the day; nothing is
+	// stored without the day
+	'agreement-from': () => (actor) =>
+		actor.attemptsTo(Click.on(on.firstAgreementFrom), Click.on(nextButton), Wait.until(on.formProblem)),
+	// #368 (368-B C-2): a day before the Vertragsbeginn: the refusal at the question, nothing stored
+	'agreement-from-refused': () => (actor) =>
+		actor.attemptsTo(
+			Click.on(on.firstAgreementFrom),
+			EnterDate.of('2000-01-01').into(on.firstAgreementFromDate),
 			Wait.until(on.formProblem)
 		),
 	// «Weiter» with the questions open: their errors; and the contract not agreeing a category. No answer: it would be

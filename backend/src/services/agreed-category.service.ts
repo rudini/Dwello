@@ -8,14 +8,18 @@ import { db } from '../db/connection';
 import { categories, contractCategories } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { fuelStockChange } from './fuel-stock.service';
+import { CodedError } from './coded-error';
 
 type Query = Pick<typeof db, 'insert' | 'execute'>;
 
-const answer = (rows: { contractId: string; categoryId: string; agreed: boolean }[], q: Query = db) =>
+const answer = (rows: { contractId: string; categoryId: string; agreed: boolean; agreedFrom?: string | null }[], q: Query = db) =>
 	q
 		.insert(contractCategories)
 		.values(rows)
-		.onConflictDoUpdate({ target: [contractCategories.contractId, contractCategories.categoryId], set: { agreed: sql`excluded.agreed` } });
+		.onConflictDoUpdate({
+			target: [contractCategories.contractId, contractCategories.categoryId],
+			set: { agreed: sql`excluded.agreed`, agreedFrom: sql`excluded.agreed_from` }
+		});
 
 /** The ids of the umlagefähige categories the contract agrees; one no longer umlagefähig bills nothing anyway */
 export async function agreedCategoryIds(contractId: string): Promise<string[]> {
@@ -58,9 +62,36 @@ export async function setAgreedCategories(
 		ON CONFLICT (contract_id, category_id) DO UPDATE SET agreed = excluded.agreed`);
 }
 
-/** The landlord's answer whether the contract agrees one category */
-export const answerAgreement = (contractId: string, categoryId: string, agreed: boolean) =>
-	answer([{ contractId, categoryId, agreed }]);
+/** The landlord's answer whether the contract agrees one category, «Vereinbart ab» a day (#368); «nicht vereinbart» has none */
+export const answerAgreement = (contractId: string, categoryId: string, agreed: boolean, from?: string) =>
+	answer([{ contractId, categoryId, agreed, agreedFrom: (agreed && from) || null }]);
+
+/** «Vereinbart ab» of the agreed categories that have a day (#368) */
+export async function agreedFromDays(contractId: string): Promise<Record<string, string>> {
+	const rows = await db
+		.select({ id: contractCategories.categoryId, from: contractCategories.agreedFrom })
+		.from(contractCategories)
+		.where(and(eq(contractCategories.contractId, contractId), eq(contractCategories.agreed, true), sql`${contractCategories.agreedFrom} IS NOT NULL`));
+	return Object.fromEntries(rows.map((row) => [row.id, row.from!]));
+}
+
+/** The form's days (#368): every agreed category of the contract gets its day, or none */
+export async function setAgreedFrom(contractId: string, days: Record<string, string>, q: Query = db) {
+	await q.execute(sql`UPDATE contract_categories SET agreed_from = NULL WHERE contract_id = ${contractId}::uuid`);
+	for (const [categoryId, from] of Object.entries(days))
+		await q.execute(
+			sql`UPDATE contract_categories SET agreed_from = ${from}::date WHERE contract_id = ${contractId}::uuid AND category_id = ${categoryId}::uuid AND agreed`
+		);
+}
+
+/** A day before the Vertragsbeginn or after the Vertragsende is refused (Fachreview 368-B M-2); the start itself is allowed */
+export function checkAgreedFrom(contract: { startDate: string; endDate: string | null }, days: (string | undefined)[]) {
+	for (const day of days) {
+		if (!day) continue;
+		if (day < contract.startDate) throw new CodedError('AGREED_FROM_BEFORE_START', 'The day is before the contract start', { date: day });
+		if (contract.endDate && day > contract.endDate) throw new CodedError('AGREED_FROM_AFTER_END', 'The day is after the contract end', { date: day });
+	}
+}
 
 /**
  * The categories with costs for the contract in the period (amounts not summing to zero over days it rents) and its

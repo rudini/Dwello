@@ -213,6 +213,11 @@ Funktionalität: Mietvertrag bearbeiten
     Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Heizung"
     Aber nicht die Nebenkosten "Lift"
 
+  # #368 (#407 Punkt 3): mit dem amtlichen Formular neu eingeführte Nebenkosten gelten ab einem Tag
+  Szenario: Nebenkosten ab einem Tag als vereinbart eintragen
+    Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag "Lift" ab "2025-10-01" vereinbart ist
+    Dann nennt der Mietvertrag die vereinbarten Nebenkosten "Lift (ab 01.10.2025)"
+
   # Persona Marco W10c P-1: ohne Häkchen rechnet Dwello keine Nebenkosten ab, das soll nicht unbemerkt geschehen
   # Persona Helga 66b P-2: bei einer Nebenkostenpauschale bleiben die Häkchen leer (#66)
   Szenario: Das Formular warnt, wenn keine Nebenkosten vereinbart sind

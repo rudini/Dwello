@@ -4,8 +4,8 @@ import { agreedCostsOfContract } from '../questions/contract-detail';
 import { noAgreedCostsTone, noAgreedCostsWarning, reviewed } from '../questions/contract-form';
 import { agreementQuestionsOf, agreementQuestionsShown, agreementsFailure, agreementsWaiting, notAgreedCostsOf } from '../questions/statement-generate';
 import { openContract } from '../tasks/contract-detail';
-import { leaveOutCategory, reviewContract, untickAllCategories } from '../tasks/contract-form';
-import { agreementsCannotBeChecked, agreementsCheckAgain, agreementsCannotBeSaved, answerAgreement, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
+import { agreeCategoryFrom, leaveOutCategory, reviewContract, untickAllCategories } from '../tasks/contract-form';
+import { agreementsCannotBeChecked, agreementsCheckAgain, agreementsCannotBeSaved, answerAgreement, answerAgreementFrom, openContractWithNotAgreedCosts, openSettingsFor } from '../tasks/statement-generate';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -31,18 +31,17 @@ Given(
 	}
 );
 
+// the same activity, as a precondition and as an action
+const openSettings: Parameters<typeof When>[1] = async ({ verwalter, seed }, year: number, building: string, fee: number) => {
+	await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
+};
 Given(
 	'der Liegenschaftsverwalter hat die Einstellungen der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale geöffnet',
-	async ({ verwalter, seed }, year: number, building: string, fee: number) => {
-		await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
-	}
+	openSettings
 );
-
 When(
 	'der Liegenschaftsverwalter die Einstellungen der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale öffnet',
-	async ({ verwalter, seed }, year: number, building: string, fee: number) => {
-		await verwalter.attemptsTo(openSettingsFor(year, seed.idOf(building)!, fee));
-	}
+	openSettings
 );
 
 Given('das Prüfen der vereinbarten Nebenkosten ist gestört', async ({ verwalter }) => {
@@ -169,3 +168,25 @@ Then('weist das Formular ohne Warnung darauf hin, dass keine Nebenkosten vereinb
 	await verwalter.sees(noAgreedCostsWarning).toContain('Keine Nebenkosten vereinbart');
 	await verwalter.sees(noAgreedCostsTone).toBe('info');
 });
+
+// #368 (#407 point 3): agreed only from a day (Art. 269d Abs. 3 OR)
+Given(
+	'im Mietvertrag von {string} ist {string} ab {string} vereinbart',
+	async ({ seed }, tenant: string, category: string, from: string) => {
+		await seed.agreement(tenant, category, true, from);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter angibt, dass {string} im Mietvertrag von {string} ab {string} vereinbart ist',
+	async ({ verwalter, seed }, category: string, tenant: string, from: string) => {
+		await verwalter.attemptsTo(answerAgreementFrom(contractOf(seed, tenant), await categoryId(seed, category), from));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter einträgt, dass im Mietvertrag {string} ab {string} vereinbart ist',
+	async ({ verwalter, seed }, category: string, from: string) => {
+		await verwalter.attemptsTo(agreeCategoryFrom(await categoryId(seed, category), from));
+	}
+);

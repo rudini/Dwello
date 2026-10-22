@@ -162,4 +162,14 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #368 slice A persona Helga (`docs/design/personas/368-A-helga.md`): P-1 Major (the help sent her to the official form for a new contract) fixed test-first with a new wording (compare with the signed new contract); P-2 and the observations stay in the report
 - [x] #368 slice A closing code review: `docs/reviews/368-A-code-2.md`: no Blocker/Major; C-5 (comment order) and C-6 (the a11y state now waits for the follow-up help) fixed; C-4 stays for the product owner
 - [x] #368 slice A persona Helga round 2: `docs/design/personas/368-A-helga-2.md`: P-1 resolved, nothing new
-- [ ] #368 slice A pull request merged on green CI
+- [x] #368 slice A pull request merged on green CI (#625, fb208f4; glossary row 56 adapted on the product owner's request; the main run on a4e7fe2 failed only in invoice-new.feature from #627, commented on #628)
+- [x] #368 slice B scenarios @wip: statement-agreed-costs.feature (amount from a day, a day after the period, the answer «Vereinbart ab» in the wizard), contract-edit.feature (the field on the Mietvertrag); red at the missing behaviour
+- [x] #368 slice B fachreview before implementing: `docs/reviews/368-B-fachreview-1.md`: M-1 Major (the PDF names the day and the time share), M-2 (refuse a day before the start or after the end), V-1 (two keys), V-2 (wizard without a day), V-5 (heating and credit tests), V-6 (toggle) taken; V-3, V-4 (decided texts say what to enter) decided by recommendation and recorded in #368; texts as in the report
+- [x] #368 slice B red pg tests for M-1, M-2, V-5 (agreed-from.pg.test.ts)
+- [x] #368 slice B backend: `agreed_from` on contract categories and statements (migration 0036), the calculation counts the days from then (Heizkosten by the Heizprofil), refusals before the start and after the end, the PDF names the day and explains the share (M-1)
+- [x] #368 slice B frontend: toggle and «Vereinbart ab» fields in the contract form, «(ab …)» on the contract page and in the wizard review, the wizard answer «Vereinbart ab» with its day, help texts per #407 and V-3/V-4, marker #368 removed; new a11y and language states `agreed-from` (contract-new, contract-edit) and `agreement-from` (statement-generate); scenarios green without @wip
+- [x] #368 slice B code review round 1 (`docs/reviews/368-B-review-1.md`)
+- [x] #368 slice B personas Helga (`docs/design/personas/helga-368-b.md`) and Dr. Weber (`docs/design/personas/weber-368-b.md`)
+- [x] #368 slice B daten-pruefer on Weber's statement (`docs/reviews/368-B-datenpruefung-1.md`)
+- [x] #368 slice B code review round 2 of the fixes (`docs/reviews/368-B-review-2.md`)
+- [ ] #368 slice B closing review, merge origin/main, pull request `Fixes #368`, merged on green CI

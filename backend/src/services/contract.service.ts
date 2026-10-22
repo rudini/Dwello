@@ -16,7 +16,7 @@ import {
 	type NewRentalContract
 } from '../db/schema';
 import { alignAdvances, currentAdvance, setAdvance } from './advance-payment.service';
-import { setAgreedCategories } from './agreed-category.service';
+import { checkAgreedFrom, setAgreedCategories, setAgreedFrom } from './agreed-category.service';
 import { apartmentStatus } from './apartment.service';
 import { CodedError, refusal, type Refusal } from './coded-error';
 import { oldAddress } from './old-address';
@@ -25,7 +25,7 @@ import { daysAfter, swissToday } from './today';
 /** The database, or a transaction of it */
 type Query = Pick<typeof db, 'select' | 'delete'>;
 // the categories the form names as agreed (#91); every other umlagefähige one is not
-type AgreedList = { agreedCategoryIds?: string[] };
+type AgreedList = { agreedCategoryIds?: string[]; agreedFrom?: Record<string, string> };
 
 /** Contract with the names of its tenant, apartment and building; selected with those three tables joined */
 const contractFields = {
@@ -313,8 +313,9 @@ const feeRate = <T extends Partial<NewRentalContract>>(data: T, agreed = data.ma
 /**
  * Create a new contract
  */
-export async function createContract({ agreedCategoryIds, ...data }: NewRentalContract & AgreedList): Promise<RentalContract> {
+export async function createContract({ agreedCategoryIds, agreedFrom, ...data }: NewRentalContract & AgreedList): Promise<RentalContract> {
 	checkNotice(data.terminated, data.endDate);
+	checkAgreedFrom({ startDate: data.startDate, endDate: data.endDate ?? null }, Object.values(agreedFrom ?? {}));
 	checkBilledUntil(data.startDate, data.billedUntil, true);
 	// Check for overlapping contracts
 	const { hasOverlap, overlappingContract } = await checkContractOverlap(
@@ -333,6 +334,7 @@ export async function createContract({ agreedCategoryIds, ...data }: NewRentalCo
 	return db.transaction(async (tx) => {
 		const [contract] = await tx.insert(rentalContracts).values(feeRate(data)).returning();
 		await setAgreedCategories(contract.id, agreedCategoryIds, tx);
+		if (agreedFrom) await setAgreedFrom(contract.id, agreedFrom, tx);
 		await setAdvance(contract.id, data.monthlyAdvancePayment, data.startDate, tx);
 		return contract;
 	});
@@ -458,6 +460,7 @@ export async function updateContract(
 	id: string,
 	{
 		agreedCategoryIds,
+		agreedFrom,
 		advancePaymentFrom,
 		documentsChecked,
 		...data
@@ -473,11 +476,13 @@ export async function updateContract(
 	// removing the end withdraws the notice (below), whatever flag comes with it
 	if (data.endDate !== null) checkNotice(data.terminated, data.endDate ?? current.endDate);
 	const { startDate, billedUntil } = { ...current, ...newDates(data) };
+	checkAgreedFrom({ startDate, endDate: data.endDate === undefined ? current.endDate : data.endDate }, Object.values(agreedFrom ?? {}));
 	checkBilledUntil(startDate, billedUntil, data.billedUntil !== undefined || !!data.startDate);
 	// the draft delete and the change in one transaction: a refused change keeps the draft (#141)
 	const [contract] = await db.transaction(async (tx) => {
 		await checkNewDates(current, data, tx, deleteDraft);
 		if (agreedCategoryIds) await setAgreedCategories(id, agreedCategoryIds, tx, { answeredOnly: true });
+		if (agreedFrom) await setAgreedFrom(id, agreedFrom, tx);
 		const updated = await tx
 			.update(rentalContracts)
 			// without an end there is no notice: withdrawing it makes the contract open-ended again; without a notice

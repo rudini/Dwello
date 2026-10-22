@@ -23,7 +23,9 @@ import {
 	runningContractLink,
 	billedUntilInput,
 	startDateInput,
-	tenantSelect
+	tenantSelect,
+	agreedFromInput,
+	agreedFromToggle
 } from '../targets/contract-form';
 import { errorToast, successToast } from '../targets/form';
 import { discardDraftButton, discardDraftConfirm, finishedStep, nextButton, saveStatus } from '../targets/wizard';
@@ -173,6 +175,10 @@ export const enterBilledUntil = (isoDate: string): Activity => (actor) =>
 // «Bearbeiten»: the lease does not agree this category (#91)
 export const leaveOutCategory = (categoryId: string): Activity => (actor) =>
 	actor.attemptsTo(Uncheck.the(agreedCategory(categoryId)), Click.on(contractSubmitButton));
+
+// «Bearbeiten»: the category is agreed only from a day (#368, Art. 269d Abs. 3 OR)
+export const agreeCategoryFrom = (categoryId: string, isoDate: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(agreedFromToggle), EnterDate.of(isoDate).into(agreedFromInput(categoryId)), Click.on(contractSubmitButton));
 
 export const openRunningContract = Click.on(runningContractLink);
 export const newContractAfterEnd = Click.on(newContractAfterEndLink);

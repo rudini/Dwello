@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
 	apartmentOption,
 	availableFrom,
+	agreedNames,
 	contractBody,
 	initialContractValues,
 	overlapWarning,
@@ -192,7 +193,8 @@ describe('contractBody', () => {
 			flatRateUtilityCharge: '0',
 			managementFeeAgreed: true,
 			managementFeePercent: null,
-			agreedCategoryIds: []
+			agreedCategoryIds: [],
+			agreedFrom: {}
 		});
 	});
 
@@ -268,6 +270,22 @@ describe('contractBody', () => {
 			contractBody({ ...filled, agreedCategoryIds: ['c2', 'hidden'] }, shown).agreedCategoryIds
 		).toEqual(['c2']);
 		expect(contractBody({ ...filled, agreedCategoryIds: [] }, shown).agreedCategoryIds).toEqual([]);
+	});
+
+	// #368: the contract page and the wizard's review name the day (Fachreview 368-B)
+	it('nennt bei den vereinbarten Nebenkosten den Tag «Vereinbart ab»', () => {
+		const categories = [{ id: 'c1', name: 'Heizung' }, { id: 'c2', name: 'Lift' }];
+		expect(agreedNames(['c1', 'c2'], categories, { c2: '2025-10-01' })).toEqual(['Heizung', 'Lift (ab 01.10.2025)']);
+	});
+
+	// #368: «Vereinbart ab» only of a ticked category with a day; the form sends every day it shows
+	it('sendet «Vereinbart ab» der angekreuzten Nebenkosten mit einem Tag', () => {
+		const shown = [{ id: 'c1' }, { id: 'c2' }];
+		const values = { ...filled, agreedCategoryIds: ['c1'], agreedFrom: { c1: '2025-10-01', c2: '2025-11-01' } };
+		expect(contractBody(values, shown).agreedFrom).toEqual({ c1: '2025-10-01' });
+		expect(contractBody({ ...filled, agreedFrom: { c1: '' } }, shown).agreedFrom).toEqual({});
+		const contract = { ...filled, id: 'c1', monthlyAdvancePayment: '0', agreedFrom: { c1: '2025-10-01' } };
+		expect(initialContractValues(contract as never, new URLSearchParams()).agreedFrom).toEqual({ c1: '2025-10-01' });
 	});
 
 		it('sendet die Verwaltungspauschale: vereinbart mit eigenem Satz, zum Satz des Laufs oder nicht', () => {

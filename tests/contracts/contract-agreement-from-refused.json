@@ -1,0 +1,5 @@
+{
+	"error": "The day is before the contract start",
+	"code": "AGREED_FROM_BEFORE_START",
+	"params": { "date": "2023-12-31" }
+}

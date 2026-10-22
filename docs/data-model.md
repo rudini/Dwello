@@ -150,6 +150,7 @@ That contracts of one apartment must not overlap is enforced in the application,
 contract_id  UUID    NOT NULL  -- rental_contracts (CASCADE)
 category_id  UUID    NOT NULL  -- categories (CASCADE)
 agreed       BOOLEAN NOT NULL  -- true: the contract agrees the category; false: answered «nicht vereinbart»
+agreed_from  DATE              -- «Vereinbart ab» (#368): agreed only from this day; NULL: from the start of the contract
 PRIMARY KEY (contract_id, category_id)
 ```
 
@@ -311,6 +312,7 @@ fuel_stock             JSONB                   -- Tankbestand readings at creati
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
 heating_share          JSONB                   -- heating costs as calculated (#209): { byDays: true, reason, names } or percent, months, profile names
 agreed_category_ids    JSONB                   -- ids of the categories the contract agreed at creation (#91); NULL: created before, billed every category
+agreed_from            JSONB                   -- «Vereinbart ab» per category id at creation (#368); NULL: created before
 balance                DECIMAL(12,2) NOT NULL  -- Saldo, to 5 Rappen in the tenant's favour (#79; sent before: commercially): positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
