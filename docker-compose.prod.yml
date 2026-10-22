@@ -93,11 +93,15 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434/v1}
+      # The KI (#580): the landlord sets it under «Einstellungen» › «KI»; any LLM_* set in .env takes precedence and
+      # locks that page. LLM_LOCAL_URL only says where the local KI runs
+      - LLM_LOCAL_URL=http://ollama:11434/v1
+      - LLM_BASE_URL=${LLM_BASE_URL:-}
       - LLM_API_KEY=${LLM_API_KEY:-}
       - LLM_PROVIDER=${LLM_PROVIDER:-}
       - LLM_PROVIDER_COUNTRY=${LLM_PROVIDER_COUNTRY:-}
-      - LLM_MODEL=${LLM_MODEL:-qwen3-vl:8b-instruct}
+      - LLM_MODEL=${LLM_MODEL:-}
+      - LLM_ENABLED=${LLM_ENABLED:-}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
       # E-mail to tenants (#568); without MAIL_TRANSPORT reminders are filed as «zu versenden» and statements are not sent
       - MAIL_TRANSPORT=${MAIL_TRANSPORT:-}
@@ -161,7 +165,7 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - dwello-network
-    # The backend downloads the model on its first start (#577); not needed when LLM_BASE_URL points to an external provider
+    # The backend downloads the model on its first start (#577); not needed when the KI is an external provider (#580)
 
   # ============================================
   # Nginx Reverse Proxy (Optional)

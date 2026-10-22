@@ -123,5 +123,6 @@ Funktionalität: Datenschutz
 
   # #577, Fachreview 577 R-2: fehlt das KI-Modell, lädt Dwello es selbst bei Ollama herunter
   Szenario: Der Download des KI-Modells bei Ollama
-    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "lädt Dwello es einmal bei Ollama (Ollama Inc., USA) herunter"
+    # #580 (Fachreview 580 F-6, F-17): auch wenn der Liegenschaftsverwalter die lokale KI wählt oder das Modell erneut herunterlädt
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "lädt Dwello es bei Ollama (Ollama Inc., USA) herunter, rund 6 GB: beim Start, wenn Sie die lokale KI wählen, und wenn Sie es unter «Einstellungen» › «KI» erneut herunterladen."
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Ollama erhält dabei die IP-Adresse des Servers und den Namen des Modells, keine Daten, die Sie in Dwello erfassen"

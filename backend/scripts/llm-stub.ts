@@ -9,12 +9,15 @@
  *
  * With LLM_STUB_PULL=on it stands in for an Ollama that has not got the model yet (the fresh installation, #577): the
  * model list is empty and a pull reports the progress a scenario sets with POST /stub/pull {percent}, at once. With
- * LLM_STUB_PULL=fail the pull fails (the empty instance of the stack).
+ * LLM_STUB_PULL=fail the pull fails (the empty instance of the stack). «Verbindung prüfen» of the KI settings (#580)
+ * succeeds with the key «gueltig» and a model other than «text-modell»; POST /stub/ollama {state} ends the running
+ * download with an error or lets Ollama answer nothing.
  */
 
 const PORT = Number(process.env.LLM_STUB_PORT ?? 2527);
 const PULL = process.env.LLM_STUB_PULL; // 'on' or 'fail'
 let pulled = 0; // percent of the model download
+let offline = false; // Ollama answers nothing (#580)
 
 type Language = 'Deutsch' | 'Französisch' | 'Italienisch' | 'Englisch';
 
@@ -177,45 +180,78 @@ Bun.serve({
 });
 
 type Route = (request: Request) => Response | Promise<Response>;
-const chat: Route = async (request) =>
-	answer(((await request.json()) as { messages: { content: Content }[] }).messages[0].content);
+const chat: Route = async (request) => {
+	const { model, messages } = (await request.json()) as { model: string; messages: { content: Content }[] };
+	const content = messages[0].content;
+	return textOf(content).includes('Verbindungstest') ? connectionCheck(request, model) : answer(content);
+};
+
+// «Verbindung prüfen» of the KI settings (#580): the key «gueltig» is accepted, the model «text-modell» reads no images
+function connectionCheck(request: Request, model: string) {
+	if (request.headers.get('Authorization') !== 'Bearer gueltig') return Response.json({ error: { message: 'Invalid API key' } }, { status: 401 });
+	if (model === 'text-modell') return Response.json({ error: { message: 'This model does not support image input' } }, { status: 400 });
+	return Response.json({ choices: [{ message: { content: 'OK' } }] });
+}
 // the OpenAI-compatible API; Ollama's own only with LLM_STUB_PULL=on
 const routes: Record<string, Route> = { '/v1/chat/completions': chat, '/chat/completions': chat, ...(PULL ? ollama() : {}) };
 
 function ollama(): Record<string, Route> {
+	const down = () => new Response(null, { status: 503 });
 	return {
-		'/api/tags': () => Response.json({ models: [] }),
-		'/api/pull': () => (PULL === 'fail' ? Response.json({ error: 'no space left on device' }) : pullProgress()),
+		'/api/tags': () => (offline ? down() : Response.json({ models: [] })),
+		'/api/pull': () =>
+			offline ? down() : PULL === 'fail' ? Response.json({ error: 'no space left on device' }) : pullProgress(),
 		'/stub/pull': async (request) => {
 			pulled = ((await request.json()) as { percent: number }).percent;
 			// at once, not with the next tick: the scenario opens the overview right after
 			for (const send of pulls) send();
 			return Response.json({ percent: pulled });
+		},
+		// #580: «failed» ends the running downloads with an error (a new one runs again), «offline» answers nothing
+		// until «online»
+		// also as GET ?state=…, so the axe check reaches the state through the browser (code review 580 C-5)
+		'/stub/ollama': async (request) => {
+			type Wanted = { state: 'failed' | 'offline' | 'online' };
+			const asked = new URL(request.url).searchParams.get('state');
+			const { state } = (asked ? { state: asked } : await request.json()) as Wanted;
+			offline = state === 'offline';
+			if (state === 'failed') for (const fail of failures) fail();
+			return Response.json({ state });
 		}
 	};
 }
 
 // Ollama's pull stream (NDJSON): one line per update, bytes of the model's layer
 const pulls = new Set<() => void>();
+const failures = new Set<() => void>();
 function pullProgress() {
 	const total = 6_000_000_000;
 	let send: () => void;
+	let fail: () => void;
 	let timer: ReturnType<typeof setInterval>;
+	const end = () => {
+		pulls.delete(send);
+		failures.delete(fail);
+		clearInterval(timer);
+	};
 	const body = new ReadableStream({
 		start(controller) {
 			send = () =>
 				controller.enqueue(
 					new TextEncoder().encode(`${JSON.stringify({ status: 'pulling model', total, completed: (total * pulled) / 100 })}\n`)
 				);
+			fail = () => {
+				end();
+				controller.enqueue(new TextEncoder().encode(`${JSON.stringify({ error: 'connection reset' })}\n`));
+				controller.close();
+			};
 			pulls.add(send);
+			failures.add(fail);
 			send();
 			// as a real Ollama does while it downloads: never silent for long (main run 825 lost a silent stream)
 			timer = setInterval(send, 10_000);
 		},
-		cancel: () => {
-			pulls.delete(send);
-			clearInterval(timer);
-		}
+		cancel: end
 	});
 	return new Response(body, { headers: { 'content-type': 'application/x-ndjson' } });
 }

@@ -21,12 +21,16 @@ const E2E_EMPTY_DATABASE_URL = (() => {
 const generated = (feature: string) => `.features-gen/tests/e2e/features/${feature}.feature.spec.js`;
 const usesExtraInstances =
 	!existsSync('.features-gen') ||
-	['accessibility', 'sprachen-bildschirme', 'demo', 'einrichtung'].some((feature) => existsSync(generated(feature)));
+	['accessibility', 'sprachen-bildschirme', 'demo', 'einrichtung', 'ki-einstellungen'].some((feature) =>
+		existsSync(generated(feature))
+	);
 // The fresh installation (#577: no account, no provider, the KI model still downloading) for einrichtung.feature and
 // the overview's state 'ki-model-loading'
 const usesFreshInstallation =
 	!existsSync('.features-gen') ||
-	['einrichtung', 'accessibility', 'sprachen-bildschirme'].some((feature) => existsSync(generated(feature)));
+	['einrichtung', 'ki-einstellungen', 'accessibility', 'sprachen-bildschirme'].some((feature) =>
+		existsSync(generated(feature))
+	);
 const freshDatabaseUrl = (() => {
 	const url = new URL(E2E_DATABASE_URL);
 	url.pathname = `${url.pathname}_fresh`;
@@ -161,8 +165,9 @@ export default defineConfig<{ driver: Driver }>({
 						PORT: '3103',
 						DATABASE_URL: E2E_EMPTY_DATABASE_URL,
 						JWT_SECRET: E2E_JWT_SECRET,
-						// an Ollama whose model download fails: the overview's state 'ki-model-failed' (#577, code review C-3)
-						LLM_BASE_URL: 'http://127.0.0.1:2532/v1'
+						// an Ollama whose model download fails: the overview's state 'ki-model-failed' (#577, code review C-3);
+						// the local KI, not set by the operator, so the page «KI» offers to download it again (#580)
+						LLM_LOCAL_URL: 'http://127.0.0.1:2532/v1'
 					}
 				},
 				{
@@ -212,7 +217,9 @@ export default defineConfig<{ driver: Driver }>({
 						DATABASE_URL: freshDatabaseUrl,
 						JWT_SECRET: E2E_JWT_SECRET,
 						SETUP_CODE,
-						LLM_BASE_URL: 'http://127.0.0.1:2530/v1'
+						// no LLM_* variable: the landlord sets the KI in the browser (#580); the local KI is the stand-in
+						LLM_LOCAL_URL: 'http://127.0.0.1:2530/v1',
+						ENCRYPTION_KEY: 'e2e-encryption-key-of-the-fresh-installation'
 					}
 				},
 				{

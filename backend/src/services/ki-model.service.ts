@@ -13,12 +13,32 @@ export const modelState = (): State => current;
 /** Ollama's own API: the OpenAI-compatible address without its /v1 */
 const ollamaOf = (baseUrl: string) => baseUrl.replace(/\/v1\/?$/, '');
 
+// the running download; a new one (another start from the page «KI», #580) ends it
+let running = new AbortController();
+// settles once the running load knows its first state, so the page «KI» shows it right after a save (#580); a silent
+// Ollama is waited for 5 s at most
+let started: Promise<void> = Promise.resolve();
+export const modelStarted = () => Promise.race([started, Bun.sleep(5000)]);
+
 export async function loadModel(config: { baseUrl: string; model: string; local: boolean }) {
+	running.abort();
+	const own = (running = new AbortController());
+	// this load's own resolver: an aborted one cannot settle the next (code review 580 C-6)
+	let known = () => {};
+	started = new Promise((resolve) => (known = resolve));
 	current = { state: 'unknown' };
+	try {
+		await load(config, own, known);
+	} finally {
+		known();
+	}
+}
+
+async function load(config: { baseUrl: string; model: string; local: boolean }, own: AbortController, known: () => void) {
 	if (!config.local) return;
 	const ollama = ollamaOf(config.baseUrl);
 	try {
-		const { models } = (await (await fetch(`${ollama}/api/tags`)).json()) as { models: { name: string }[] };
+		const { models } = (await (await fetch(`${ollama}/api/tags`, { signal: own.signal })).json()) as { models: { name: string }[] };
 		if (models.some((model) => model.name === config.model)) {
 			current = { state: 'ready' };
 			return;
@@ -28,10 +48,12 @@ export async function loadModel(config: { baseUrl: string; model: string; local:
 		const pull = await fetch(`${ollama}/api/pull`, {
 			method: 'POST',
 			body: JSON.stringify({ model: config.model, stream: true }),
-			timeout: false
+			timeout: false,
+			signal: own.signal
 		});
-		await follow(pull.body!);
+		await follow(pull.body!, known);
 	} catch (error) {
+		if (own.signal.aborted) return;
 		// no answer from the local KI: say nothing; once it answers, the next start tries again
 		if (current.state === 'unknown') return;
 		console.warn('[ki] KI-Modell konnte nicht geladen werden', { model: config.model, error: String(error) });
@@ -43,7 +65,7 @@ type Line = { status?: string; digest?: string; total?: number; completed?: numb
 
 // Ollama's pull stream: one JSON object per line, with the bytes done of the layer (digest) being loaded; the notice
 // counts the whole model (fach review 577 V-8)
-async function follow(stream: ReadableStream<Uint8Array>) {
+async function follow(stream: ReadableStream<Uint8Array>, known: () => void) {
 	current = { state: 'loading', percent: 0 };
 	const layers = new Map<string, { total: number; completed: number }>();
 	let rest = '';
@@ -51,6 +73,7 @@ async function follow(stream: ReadableStream<Uint8Array>) {
 		const lines = (rest + chunk).split('\n');
 		rest = lines.pop()!;
 		for (const line of lines.filter(Boolean)) progress(JSON.parse(line), layers);
+		known();
 	}
 	if (rest.trim()) progress(JSON.parse(rest), layers);
 }

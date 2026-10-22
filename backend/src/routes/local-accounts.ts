@@ -4,7 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { CodedError, errorBody } from '../services/coded-error';
+import { refusedWith } from '../services/coded-error';
 import { checkPassword, deleteLocalAccount, hasLocalAccount, setLocalAccount } from '../services/local-account.service';
 import { setUpFirstAccount } from '../services/setup.service';
 
@@ -18,11 +18,7 @@ const STATUS: Record<string, number> = {
 	SETUP_LOCKED: 423
 };
 
-const refused = (error: unknown, set: { status?: number | string }) => {
-	if (!(error instanceof CodedError) || !STATUS[error.code]) throw error;
-	set.status = STATUS[error.code];
-	return errorBody(error, error.message);
-};
+const refused = refusedWith(STATUS);
 
 const credentials = t.Object({ email: t.String({ minLength: 1, maxLength: 255 }), password: t.String({ maxLength: 1024 }) });
 

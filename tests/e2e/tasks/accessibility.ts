@@ -39,7 +39,9 @@ import { fuelCheckbox, heatingCheckbox, nameInput, proposal, proposeButton } fro
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { kiModelLoading, setupError } from '../targets/einrichtung';
-import { FRESH_APP } from '../fixtures/fresh-installation';
+import { FRESH_APP, FRESH_KI_STUB } from '../fixtures/fresh-installation';
+import { withLock } from '../fixtures/settings-lock';
+import { kiCheckButton, kiCheckResult, kiMode, kiModelOffline, kiSaveAnswer, kiSaveButton } from '../targets/ki-settings';
 import { userMenuButton } from '../targets/app-frame';
 import { passwordSubmitButton } from '../targets/authentication';
 import { failSignIns, signInWithPassword } from './authentication';
@@ -206,6 +208,22 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(setUpDwello('E2E7-K4QX', { email: 'a11y@dwello.test', password: 'ein-langes-Passwort' }, 'ein-anderes'), Wait.until(setupError)),
 	'ki-model-loading': () => Wait.until(kiModelLoading),
 	'ki-model-failed': () => Wait.until(kiModelLoading),
+	// #580: the page «KI» with a provider chosen (fields and checklist), and that choice saved without input
+	'ki-provider': () => Click.on(kiMode('provider')),
+	// the answers of the page: saved (the local KI again, which changes nothing), the result of a check, and a local KI
+	// that does not answer (its stand-in told so through the browser, and back afterwards in `inTurn`)
+	'ki-saved': () => (actor) => actor.attemptsTo(Click.on(kiSaveButton), Wait.until(kiSaveAnswer)),
+	'ki-check-result': () => (actor) =>
+		actor.attemptsTo(Click.on(kiMode('provider')), Click.on(kiCheckButton), Wait.until(kiCheckResult)),
+	'ki-model-offline': () => (actor) =>
+		actor.attemptsTo(
+			Navigate.outsideApp(`${FRESH_KI_STUB}/stub/ollama?state=offline`),
+			Navigate.to(`${FRESH_APP}/config/ki`),
+			Click.on(kiSaveButton),
+			Wait.until(kiModelOffline)
+		),
+	'ki-provider-submit-empty': () => (actor) =>
+		actor.attemptsTo(Click.on(kiMode('provider')), Click.on(kiSaveButton), Wait.until(on.formProblem)),
 	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
 	// the Gebäuderegister of «Neues Gebäude» (#479), answered by its stand-in (backend/scripts/gwr-stub.ts)
@@ -646,9 +664,33 @@ const instanceOf = ({ state, path }: Example) =>
 		? EMPTY_INSTANCE
 		: state === 'demo'
 			? DEMO_INSTANCE
-			: state === 'ki-model-loading'
+			: ['ki-model-loading', 'ki-provider', 'ki-provider-submit-empty', 'ki-saved', 'ki-check-result', 'ki-model-offline'].includes(state)
 				? FRESH_APP
 				: '';
+
+// The scenarios of the KI settings (#580) change the fresh installation's KI: a look at it waits for their turn
+const inTurn =
+	(example: Example, look: Activity): Activity =>
+	(actor) =>
+		instanceOf(example) === FRESH_APP
+			? withLock('installation', async () => {
+					// also after a failed look, or the scenarios of the fresh installation fail after it (code review 580-2 C-15)
+					try {
+						await actor.attemptsTo(look);
+					} finally {
+						if (example.state === 'ki-model-offline') await actor.attemptsTo(localKiAnswersAgain);
+					}
+				})
+			: actor.attemptsTo(look);
+
+// the local KI of the fresh installation answers again and downloads its model, as its scenarios expect
+const localKiAnswersAgain: Activity = (actor) =>
+	actor.attemptsTo(
+		Navigate.outsideApp(`${FRESH_KI_STUB}/stub/ollama?state=online`),
+		Navigate.to(`${FRESH_APP}/config/ki`),
+		Click.on(kiSaveButton),
+		Wait.until(kiSaveAnswer)
+	);
 
 /** Public screens are looked at without a session */
 const leaveSessionFor =
@@ -686,17 +728,19 @@ const lookAt =
 	};
 
 /** axe on the example in every viewport and colour scheme */
-export const checkAccessibilityOf = (example: Example): Activity => async (actor) => {
-	await actor.attemptsTo(leaveSessionFor(example));
-	for (const { viewport, scheme } of variants)
-		await actor.attemptsTo(lookAt(example, viewport, scheme, accessibilityViolations, `${viewport}, ${scheme}: `));
-};
+export const checkAccessibilityOf = (example: Example): Activity =>
+	inTurn(example, async (actor) => {
+		await actor.attemptsTo(leaveSessionFor(example));
+		for (const { viewport, scheme } of variants)
+			await actor.attemptsTo(lookAt(example, viewport, scheme, accessibilityViolations, `${viewport}, ${scheme}: `));
+	});
 
 /** The example on a phone in French, Italian and English: German left and text that does not fit; scenario records
  * (`userData`) are no UI text */
-export const checkLanguagesOf = (example: Example, userData: string[]): Activity => async (actor) => {
-	await actor.attemptsTo(leaveSessionFor(example));
-	// 'other-language' chooses French itself
-	for (const language of example.state === 'other-language' ? ['fr'] : ['fr', 'it', 'en'])
-		await actor.attemptsTo(useLanguage(language), lookAt(example, 'mobile', 'light', languageFindings(language, userData)));
-};
+export const checkLanguagesOf = (example: Example, userData: string[]): Activity =>
+	inTurn(example, async (actor) => {
+		await actor.attemptsTo(leaveSessionFor(example));
+		// 'other-language' chooses French itself
+		for (const language of example.state === 'other-language' ? ['fr'] : ['fr', 'it', 'en'])
+			await actor.attemptsTo(useLanguage(language), lookAt(example, 'mobile', 'light', languageFindings(language, userData)));
+	});

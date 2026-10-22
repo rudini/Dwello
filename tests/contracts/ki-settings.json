@@ -1,0 +1,9 @@
+{
+	"mode": "provider",
+	"baseUrl": "https://api.example.ch/v1",
+	"model": "bild-modell",
+	"provider": "Muster KI AG",
+	"providerCountry": "Deutschland",
+	"apiKeyStored": true,
+	"byOperator": false
+}

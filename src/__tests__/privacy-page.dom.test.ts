@@ -114,7 +114,7 @@ describe('Datenschutzerklärung zum Protokoll', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
 
 		expect(document.body.textContent).toContain(
-			'sowie zurückgesetzte Zahlungen (mit Abrechnungsnummer und Zahlungsdatum) und Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden (mit ihrer Nummer).'
+			'sowie zurückgesetzte Zahlungen (mit Abrechnungsnummer und Zahlungsdatum) und Abrechnungen, die durch eine berichtigte Abrechnung ersetzt wurden (mit ihrer Nummer)'
 		);
 	});
 });
@@ -508,7 +508,9 @@ describe('Datenschutzerklärung zum Download des KI-Modells', () => {
 	it('nennt Ollama, wenn die KI auf dem Server läuft', () => {
 		show(PrivacyPage, { data: { recipient: null, providers: [], password: true } } as never);
 
-		expect(third()).toContain('lädt Dwello es einmal bei Ollama (Ollama Inc., USA) herunter');
+		expect(third()).toContain(
+		'lädt Dwello es bei Ollama (Ollama Inc., USA) herunter, rund 6 GB: beim Start, wenn Sie die lokale KI wählen, und wenn Sie es unter «Einstellungen» › «KI» erneut herunterladen.'
+	);
 	});
 
 	it('nennt Ollama nicht bei einem Anbieter der KI ausserhalb des Servers', () => {

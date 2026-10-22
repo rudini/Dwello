@@ -4,7 +4,9 @@
  */
 
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test';
+import { sql } from 'drizzle-orm';
 import { llmConfig } from '../config/llm';
+import { db } from '../db/connection';
 import { clearCategorizationCache } from '../services/llm.service';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { callApi, sendJson } from './helpers/auth';
@@ -102,6 +104,27 @@ describe('Datei auslesen', () => {
 		expect(response.status).toBe(503);
 		expect(await response.json()).toMatchObject({ code: 'EXTRACTION_UNAVAILABLE' });
 		expect(server.prompts).toEqual([]);
+	});
+
+	// #580 (Codereview 580 C-10): «Keine KI» aus den Einstellungen gilt ab der nächsten Datei, ohne Neustart
+	it('fragt keine KI, wenn in den Einstellungen «Keine KI» gewählt ist', async () => {
+		const server = ki();
+		await sendJson('PUT', '/api/v1/ki-settings', { mode: 'none' });
+		try {
+			const response = await extract();
+			const categorizing = await sendJson('POST', '/api/v1/invoices/categorize', {
+				billingEntityName: 'Elektro Blitz AG',
+				description: 'Allgemeinstrom',
+				amount: '120.00'
+			});
+
+			expect(response.status).toBe(503);
+			expect(((await categorizing.json()) as { category: unknown }).category).toBeNull();
+			expect(server.prompts).toEqual([]);
+		} finally {
+			await db.execute(sql`DELETE FROM ki_settings`);
+			await db.execute(sql`DELETE FROM audit_log WHERE action = 'ki_setting_changed'`);
+		}
 	});
 
 	it('kennt kein unbekanntes Gebäude', async () => {

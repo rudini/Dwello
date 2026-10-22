@@ -80,3 +80,20 @@ describe('Protokoll aus dem Backend', () => {
 		);
 	});
 });
+
+// #580 (Fachreview 580 F-4): an wen bis wann Rechnungen gingen, bleibt für die Auskunft nach Art. 25 DSG nachvollziehbar
+describe('Wechsel der KI im Protokoll', () => {
+	const kiText = (details: object) =>
+		textOf({ ...login, action: 'ki_setting_changed' }, details as never);
+
+	it('nennt den gewählten Anbieter mit Land', () => {
+		expect(kiText({ mode: 'provider', provider: 'Muster KI AG', country: 'Deutschland' })).toBe(
+			'KI gewählt: Muster KI AG (Deutschland)'
+		);
+	});
+
+	it('nennt die lokale KI und keine KI', () => {
+		expect(kiText({ mode: 'local' })).toBe('KI gewählt: Lokale KI');
+		expect(kiText({ mode: 'none' })).toBe('KI gewählt: Keine KI');
+	});
+});

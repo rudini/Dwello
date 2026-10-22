@@ -721,6 +721,28 @@ describe('API-Verträge der Berichtigung', () => {
 		}
 	});
 
+	// #580: the KI set in the browser
+	it('/ki-settings liefert die Felder von ki-settings*.json', async () => {
+		const { byOperator } = llmConfig;
+		const encryptionKey = process.env.ENCRYPTION_KEY;
+		llmConfig.byOperator = false;
+		process.env.ENCRYPTION_KEY = 'vertrags-schluessel';
+		const provider = { mode: 'provider', baseUrl: 'http://127.0.0.1:9/v1', apiKey: 'falsch', model: 'bild-modell' };
+		try {
+			const incomplete = await sendJson('PUT', '/api/v1/ki-settings', { ...provider, providerCountry: 'Deutschland' });
+			expect(drift(await sample('ki-settings-incomplete'), await incomplete.json())).toEqual([]);
+			await sendJson('PUT', '/api/v1/ki-settings', { ...provider, provider: 'Muster KI AG', providerCountry: 'Deutschland', confirmed: true });
+			expect(drift(await sample('ki-settings'), await (await callApi('/api/v1/ki-settings')).json())).toEqual([]);
+			const check = await sendJson('POST', '/api/v1/ki-settings/check', provider);
+			expect(drift(await sample('ki-settings-check'), await check.json())).toEqual([]);
+		} finally {
+			await db.execute(sql`DELETE FROM ki_settings`);
+			llmConfig.byOperator = byOperator;
+			if (encryptionKey === undefined) delete process.env.ENCRYPTION_KEY;
+			else process.env.ENCRYPTION_KEY = encryptionKey;
+		}
+	});
+
 	it('/ki/model liefert die Felder von ki-model-loading.json', async () => {
 		const ollama = Bun.serve({
 			port: 0,

@@ -30,7 +30,29 @@ export function freshInstallation(api: CallTheApi, kiStub: CallTheApi) {
 		},
 		/** How far the KI stand-in reports the model download */
 		modelLoaded: (percent: number) => kiStub.post('stub/pull', { percent }),
+		/** The running model download ends with an error, or the local KI answers nothing (#580) */
+		modelFailed: () => kiStub.post('stub/ollama', { state: 'failed' }),
+		localKiOffline: () => kiStub.post('stub/ollama', { state: 'offline' }),
+		/** A provider of the KI saved through the API (#580); the clean-up returns to the local KI */
+		async kiProvider(provider: { address: string; key: string; model: string; provider: string; country: string }) {
+			await api.put('ki-settings', {
+				mode: 'provider',
+				baseUrl: provider.address,
+				apiKey: provider.key,
+				model: provider.model,
+				provider: provider.provider,
+				providerCountry: provider.country,
+				confirmed: true
+			});
+		},
 		async cleanUp() {
+			// every scenario of the KI settings may change it in the browser: back to the local KI of a fresh installation
+			await kiStub.post('stub/ollama', { state: 'online' });
+			await api.put('ki-settings', { mode: 'local' });
+			// the KI changes of this scenario and its clean-up, so the next one finds only its own in the Protokoll
+			const { data } = (await api.get('audit-log')) as { data: { id: string; action: string }[] };
+			for (const entry of data.filter(({ action }) => action === 'ki_setting_changed'))
+				await api.remove(`audit-log/${entry.id}`);
 			for (const email of accounts) await api.remove(`local-accounts/${encodeURIComponent(email)}`);
 		}
 	};
