@@ -708,6 +708,21 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
     Dann sagt der Assistent "Die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode sind verschieden eingestellt. Heizprofil und Verwaltungspauschale kommen deshalb aus den Einstellungen."
 
+  # #387 (#406 Punkt 7): beim Mieterwechsel gilt das Heizprofil der Abrechnung derselben Wohnung, auch wenn die übrigen
+  # Abrechnungen der Periode verschieden eingestellt sind; so tragen Vor- und Nachmieter zusammen 100 % der Heizkosten
+  @wip
+  Szenario: Beim Mieterwechsel das Heizprofil der Abrechnung derselben Wohnung
+    Angenommen es gibt das Heizprofil "Winter"
+    Und es gibt das Heizprofil "Sommer"
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Roth" existiert
+    Und "Lea Roth" mietet die Wohnung "3.02" seit "2023-01-01" für "900" Franken
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für "Lea Roth" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Sommer"
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann schlägt der Assistent das Heizprofil "Winter" vor
+    Und sagt der Assistent "Das Heizprofil ist wie bei der Nebenkostenabrechnung des Vor- oder Nachmieters derselben Wohnung eingestellt, die Verwaltungspauschale kommt aus den Einstellungen. Prüfen Sie beides und gehen Sie weiter zur Vorschau."
+
   # #464: jedes Akonto zählt für die Monate, in denen es galt. Hauswart 732.00 für 366 Tage = 2.00 pro Tag;
   # Marc Huber 245 Tage = 490.00 + 3 % = 504.70; Akonto Mai und Juni 2 × 50.00, Juli bis Dezember 6 × 80.00 = 580.00
   @api
