@@ -2050,10 +2050,10 @@
 	"audit_ki_none": "IA choisie : pas d’IA",
 	"ki_settings_provider_name_help": "Le nom de l’entreprise tel qu’il figure dans votre contrat avec elle. La déclaration de protection des données le mentionne. Si l’IA fonctionne sur un serveur que vous exploitez vous-même, écrivez votre nom et « serveur propre ». Si plusieurs entreprises traitent les données, indiquez-les toutes, séparées par une virgule.",
 	"ki_settings_country_help": "Les pays dans lesquels le fournisseur et les entreprises auxquelles il fait appel traitent les données, même s’ils ne font qu’y accéder. Ils figurent généralement dans le contrat ou dans la liste des sous-traitants. La déclaration de protection des données les mentionne. Séparez plusieurs pays par une virgule.",
-	"ki_none_title": "Vous n’avez pas encore choisi d’IA.",
-	"ki_none_text": "D’ici là, vous saisissez les factures à la main.",
-	"ki_none_link": "Choisissez l’IA sous « Paramètres » › « IA ».",
+	"ki_none_title": "« Pas d’IA » est choisi.",
+	"ki_none_text": "Vous saisissez les factures à la main.",
+	"ki_none_link": "Choisissez une IA sous « Paramètres » › « IA ».",
 	"setup_ki_legend": "Quelle IA doit lire les factures ?",
 	"setup_ki_later": "Décider plus tard",
-	"setup_ki_later_help": "Tant que vous ne choisissez pas d’IA sous « Paramètres » › « IA », vous saisissez les factures à la main. C’est là aussi que vous choisissez l’IA d’un fournisseur."
+	"setup_ki_later_help": "Dwello enregistre « Pas d’IA ». Tant que vous ne choisissez pas d’IA sous « Paramètres » › « IA », vous saisissez les factures à la main."
 }

@@ -80,11 +80,12 @@ describe('Übersicht während das KI-Modell lädt', () => {
 	});
 
 	// #620: nach «Später entscheiden» bei der Einrichtung
-	it('sagt, dass noch keine KI gewählt ist, und führt zur Seite KI', () => {
+	// code review 620 C-2, persona Anna P-1: also true after «Keine KI» on the page KI, named as there
+	it('sagt, dass «Keine KI» gewählt ist, und führt zur Seite KI', () => {
 		const text = hint(page({ kiModel: { state: 'none' } }));
 
-		expect(text).toContain('Sie haben noch keine KI gewählt.');
-		expect(text).toContain('Bis dahin erfassen Sie Rechnungen von Hand.');
+		expect(text).toContain('Es ist «Keine KI» gewählt.');
+		expect(text).toContain('Sie erfassen Rechnungen von Hand.');
 		expect(text).toMatch(/href="\/config\/ki"[^>]*data-testid="ki-settings-link"/);
 	});
 

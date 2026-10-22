@@ -88,7 +88,7 @@ Funktionalität: Einrichtung beim ersten Aufruf
     Angenommen Dwello ist frisch installiert
     Und ein Besucher hat die Einrichtung geöffnet
     Wenn der Besucher mit dem Einrichtungscode ein Konto mit Passwort anlegt und die KI später wählt
-    Dann zeigt die Übersicht nach der Einrichtung den Hinweis "Sie haben noch keine KI gewählt. Bis dahin erfassen Sie Rechnungen von Hand. Wählen Sie die KI unter «Einstellungen» › «KI»."
+    Dann zeigt die Übersicht nach der Einrichtung den Hinweis "Es ist «Keine KI» gewählt. Sie erfassen Rechnungen von Hand. Eine KI wählen Sie unter «Einstellungen» › «KI»."
     Wenn der Liegenschaftsverwalter die Datenschutzerklärung der frischen Installation liest
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Rechnungen und Kategorien werden nicht von einer KI bearbeitet."
 
