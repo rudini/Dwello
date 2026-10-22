@@ -630,6 +630,10 @@ describe('Abrechnungsdetail', () => {
 		flushSync();
 		expect(byTestId('send-recipient')).toBeNull();
 		expect(byTestId('statement-recalculate-confirm')).not.toBeNull();
+		// code review 547-1: the focus moves into the confirmation, not behind it (persona Sven's rule of the dialogs)
+		const recalculate = byTestId('statement-recalculate-confirm')!.closest('[role="dialog"]')!;
+		expect(recalculate.contains(document.activeElement)).toBe(true);
+		expect(document.activeElement!.getAttribute('data-testid')).toBe('dialog-cancel');
 	});
 
 	it('warnt beim Versand eines aktuellen Entwurfs nicht', () => {
