@@ -350,6 +350,25 @@ describe('Mieterdetail', () => {
 		);
 	});
 
+	// #459 (#331, persona Helga P-1 to P-3): the landlord who keeps a document marks the documents as checked; the
+	// notice then says when, without the button; documents from the end day on are not named, and the notice says so
+	it('bietet an, die Dokumente als geprüft zu markieren, und nennt Dokumente ab dem Vertragsende nicht', () => {
+		open([], null, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: null });
+
+		expect(text('tenant-former-documents')).toContain(
+			'Dokumente, die Sie am Tag des Vertragsendes oder danach hochgeladen haben, etwa das Übergabeprotokoll vom Auszug, nennt Dwello hier nicht.'
+		);
+		expect(text('tenant-former-documents-check')).toBe('Als geprüft markieren');
+		expect(byTestId('tenant-former-documents-checked')).toBeNull();
+	});
+
+	it('nennt den Tag der Prüfung und bietet sie nicht mehr an', () => {
+		open([], null, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: '2026-10-20' });
+
+		expect(text('tenant-former-documents-checked')).toBe('Geprüft am 20.10.2026');
+		expect(byTestId('tenant-former-documents-check')).toBeNull();
+	});
+
 	it('zeigt den Hinweis nicht, solange es keine solchen Dokumente gibt', () => {
 		open([], null, [upload]);
 

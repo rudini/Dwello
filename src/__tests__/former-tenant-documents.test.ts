@@ -25,6 +25,25 @@ describe('Dokumente eines ehemaligen Mieters (#178)', () => {
 		).toEqual({ endDate: '2026-03-31', documents });
 	});
 
+	// #459 (#331): «Als geprüft markieren» is stored on the last contract; it holds for that contract and its end
+	it('nennt den Vertrag und, wenn geprüft, das Datum der Prüfung', () => {
+		const documents = [uploadedOn('2025-03-10T09:00:00.000Z')];
+		const last = { ...contract('2025-04-01', '2026-03-31'), id: 'c1', documentsCheckedOn: '2026-10-20' };
+
+		expect(formerTenantDocuments([last], documents, '2026-10-21')).toEqual({
+			endDate: '2026-03-31',
+			documents,
+			contractId: 'c1',
+			checkedOn: '2026-10-20'
+		});
+		expect(formerTenantDocuments([{ ...last, documentsCheckedOn: null }], documents, '2026-10-21')).toEqual({
+			endDate: '2026-03-31',
+			documents,
+			contractId: 'c1',
+			checkedOn: null
+		});
+	});
+
 	const ended = [contract('2025-04-01', '2026-03-31')];
 
 	it('nennt kein Dokument vom Tag des Vertragsendes oder später, etwa das Rückgabeprotokoll', () => {
