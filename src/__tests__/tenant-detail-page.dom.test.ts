@@ -365,6 +365,16 @@ describe('Mieterdetail', () => {
 		expect((form.elements.namedItem('contractId') as HTMLInputElement).value).toBe('c1');
 	});
 
+	// code review #459 C-1: the button the focus was on goes away
+	it('setzt den Fokus nach der Prüfung auf den Hinweis', async () => {
+		open([], null, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: null });
+
+		const after = actions.get('?/checkDocuments')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-former-documents')));
+	});
+
 	it('sagt, wenn die Prüfung nicht gespeichert wurde', () => {
 		open([], { checkError: 'nicht gespeichert' }, [upload], false, { endDate: '2026-03-31', documents: [upload], contractId: 'c1', checkedOn: null });
 

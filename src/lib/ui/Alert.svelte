@@ -9,18 +9,21 @@
 		title,
 		children,
 		action,
-		testid
+		testid,
+		element = $bindable()
 	}: {
 		tone?: Exclude<Tone, 'neutral'>;
 		title: string;
 		children?: Snippet;
 		action?: Snippet;
 		testid?: string;
+		element?: HTMLElement; // to move the focus to the message
 	} = $props();
 	const style = $derived(toneStyle[tone]);
 </script>
 
 <div
+	bind:this={element}
 	class="flex gap-4 rounded-control border-l-4 p-4 text-ink {style.box}"
 	role={tone === 'critical' ? 'alert' : undefined}
 	tabindex="-1"

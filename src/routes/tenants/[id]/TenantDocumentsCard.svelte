@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { tick } from 'svelte';
 	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import { addToast } from '$lib/stores';
 	import type { StatementDocument } from '$lib/types';
 	import { getLocale } from '$lib/paraglide/runtime';
@@ -46,6 +47,17 @@
 	let deleteOpen = $state(false);
 	let list = $state<HTMLElement>();
 	let checking = $state(false);
+	let notice = $state<HTMLElement>();
+	const check: SubmitFunction = () => {
+		checking = true;
+		return async ({ update }) => {
+			await update();
+			checking = false;
+			// the button the focus was on goes away; the notice now says the day or the error (code review C-1)
+			await tick();
+			notice?.focus();
+		};
+	};
 	// a checked notice no longer reads as an open task (Fachreview #459 V-5)
 	const formerTone = $derived(former?.checkedOn ? 'info' : 'caution');
 </script>
@@ -54,6 +66,7 @@
 	<div class="flex flex-col gap-6">
 		{#if former}
 			<Alert
+				bind:element={notice}
 				tone={formerTone}
 				title={m.tenants_former_documents_title()}
 				testid="tenant-former-documents"
@@ -73,17 +86,7 @@
 						{m.tenants_former_documents_checked({ date: formatDate(former.checkedOn) })}
 					</p>
 				{:else}
-					<form
-						method="POST"
-						action="?/checkDocuments"
-						use:enhance={() => {
-							checking = true;
-							return async ({ update }) => {
-								await update();
-								checking = false;
-							};
-						}}
-					>
+					<form method="POST" action="?/checkDocuments" use:enhance={check}>
 						<input type="hidden" name="contractId" value={former.contractId} />
 						<Button
 							type="submit"
