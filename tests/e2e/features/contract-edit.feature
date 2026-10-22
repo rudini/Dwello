@@ -197,6 +197,17 @@ Funktionalität: Mietvertrag bearbeiten
     Dann ist im Mietvertrag der Mieter "Anna Keller" gewählt
     Und schlägt der neue Mietvertrag den Vertragsbeginn "2099-04-01" vor
 
+  # #368: der neue Mietvertrag desselben Mieters übernimmt die vereinbarten Nebenkosten des alten
+  @wip
+  Szenario: Der neue Mietvertrag übernimmt die vereinbarten Nebenkosten
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
+    Und im Mietvertrag von "Anna Keller" ist "Lift" nicht vereinbart
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter aus dem Mietvertrag einen neuen Mietvertrag erfassen will
+    Und der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2099-04-01" für "980" Franken mit "150" Franken Akonto bis zur Prüfung erfasst
+    Dann zeigt die Prüfung "Vereinbarte Nebenkosten" mit "Heizung"
+    Aber zeigt die Prüfung "Vereinbarte Nebenkosten" ohne "Lift"
+
   # #91: die vereinbarten Nebenkosten stehen beim Mietvertrag; nicht vereinbarte rechnet Dwello nicht ab
   Szenario: Nebenkosten als nicht vereinbart eintragen
     Wenn der Liegenschaftsverwalter einträgt, dass im Mietvertrag "Lift" nicht vereinbart ist

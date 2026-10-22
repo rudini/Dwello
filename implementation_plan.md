@@ -150,4 +150,7 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #459 slice B feature review: Sarah Meier made anonymisable by SQL in dwello_persona (contract 2008–2014, statement dates 2015, an upload). Dr. Weber (`docs/design/personas/459-B-weber.md`) and Helga (`459-B-helga.md`): no Blocker/Major; Helga P-3 was C-1 (fixed); the other Minors/Nits stay in the reports. daten-pruefer (`docs/reviews/459-B-daten.md`): amounts to the Rappen, regenerated PDFs, no trace of the tenant, QR-bill without debtor; one Nit
 - [x] #459 slice B closing code review: `docs/reviews/459-B-code-2.md`: D-1 Major and D-3/D-4 resolved by taking the settings change back; D-2 (no DOM test reproduces C-1; the scenario does) stays
 - [x] #459 slice B re-review of the D-1 fix (`docs/reviews/459-B-code-3.md`): resolved
-- [ ] #459 slice B pull request merged on green CI
+- [x] #459 slice B pull request merged on green CI (#624, 00d95ad; migration renumbered to 0035 at the merge of main)
+- [x] #368 decided by recommendation (standing instruction), recorded in the issue: option 2 (a change from a date is a new Mietvertrag from the termination date) and (a) the follow-up contract copies the agreed Nebenkosten; implemented in the pull request that closes #368
+- [x] #368 scenario @wip in contract-edit.feature («Der neue Mietvertrag übernimmt die vereinbarten Nebenkosten»), red at the missing behaviour
+- [ ] #368 fachreview before implementing: `docs/reviews/368-fachreview-1.md`
