@@ -67,3 +67,18 @@ describe('Installation mit docker-compose.prod.yml', () => {
 		expect(frontendService).toContain('- ORIGIN=${PUBLIC_APP_URL:-http://localhost:3000}');
 	});
 });
+
+// #580: ohne LLM_* in der .env wählt der Liegenschaftsverwalter die KI im Browser; ein Standardwert in der Compose-Datei
+// würde sie für jede Installation als «vom Betreiber festgelegt» sperren
+describe('KI einer Installation mit docker-compose.prod.yml', () => {
+	const llmLines = backendService.split('\n').filter((line) => /- LLM_(?!LOCAL_URL)/.test(line));
+
+	it('setzt keine LLM_*-Variable, die der Betreiber nicht in die .env schreibt', () => {
+		expect(llmLines.length).toBeGreaterThan(0);
+		expect(llmLines.filter((line) => !/=\$\{(LLM_[A-Z_]+):-\}$/.test(line.trim()))).toEqual([]);
+	});
+
+	it('findet die lokale KI im Container ollama', () => {
+		expect(backendService).toContain('- LLM_LOCAL_URL=http://ollama:11434/v1');
+	});
+});

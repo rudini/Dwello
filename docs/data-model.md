@@ -30,7 +30,7 @@ utility_statements ──> tenants, apartments, rental_contracts (contract_id)
 utility_statements 1─n utility_statement_line_items ──> categories, distribution_keys
 documents ──> tenants, utility_statements (optional)
 
-heating_profiles, configuration, audit_log: no foreign keys
+heating_profiles, configuration, audit_log, ki_settings: no foreign keys
 ```
 
 | Foreign key | On delete |
@@ -462,7 +462,8 @@ The IBAN is stored in plain text.
 id          UUID PRIMARY KEY
 occurred_at TIMESTAMPTZ NOT NULL DEFAULT now()
 action      VARCHAR(50) NOT NULL   -- login, management_fee_changed, category_allocability_changed,
-                                   -- invoice_allocability_changed, payment_reset, statement_corrected
+                                   -- invoice_allocability_changed, payment_reset, statement_corrected,
+                                   -- ki_setting_changed (#580: mode, provider, country)
 details     JSONB NOT NULL         -- snapshot of what the entry names (API: docs/api-specification.md, 11a)
 ```
 
@@ -483,6 +484,20 @@ created_at, updated_at TIMESTAMPTZ NOT NULL
 
 Set by the setup on the first visit (`POST /api/v1/setup`, #577, only while no account exists), `bun run account` (the Betreiber) or `PUT /api/v1/local-accounts`; a new password also clears the failed
 attempts and the Sperre. Migration `0032_local_accounts.sql`.
+
+### ki_settings (KI-Einstellung, #580)
+
+```sql
+id                INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1)   -- one row
+mode              VARCHAR(10) NOT NULL   -- local, provider, none
+base_url, model, provider, provider_country TEXT   -- only for a provider; provider and country named by the privacy statement
+api_key_encrypted TEXT                   -- AES-256-GCM with ENCRYPTION_KEY, «iv.ciphertext» in base64; never in clear
+updated_at        TIMESTAMPTZ NOT NULL
+```
+
+The KI the landlord chooses under «Einstellungen» › «KI». Without a row, or while the operator sets any `LLM_*` variable,
+the variables apply (`backend/src/config/llm.ts`). Every change is also an `audit_log` entry `ki_setting_changed`.
+Migration `0033_ki_settings.sql`.
 
 ---
 
