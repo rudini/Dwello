@@ -624,6 +624,18 @@ export const localAccounts = pgTable('local_accounts', {
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 });
 
+// #580: the KI set in the browser, one row; the API key only encrypted (ki-settings.service.ts)
+export const kiSettings = pgTable('ki_settings', {
+	id: integer('id').primaryKey().default(1),
+	mode: varchar('mode', { length: 10 }).notNull().$type<'local' | 'provider' | 'none'>(),
+	baseUrl: text('base_url'),
+	model: text('model'),
+	provider: text('provider'),
+	providerCountry: text('provider_country'),
+	apiKeyEncrypted: text('api_key_encrypted'),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+});
+
 // ============================================================================
 // Type Exports for Use in Application
 // ============================================================================

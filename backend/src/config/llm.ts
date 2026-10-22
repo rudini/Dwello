@@ -6,9 +6,26 @@ import { roundToRappen } from '../services/pdf-format';
  * Any provider with an OpenAI-compatible API (/chat/completions, /models); by default the local Ollama
  */
 
+// Set by the operator: any of them, not empty, takes precedence over the KI set in the browser and locks it (#580)
+const OPERATOR_VARIABLES = [
+	'LLM_BASE_URL',
+	'LLM_API_KEY',
+	'LLM_MODEL',
+	'LLM_PROVIDER',
+	'LLM_PROVIDER_COUNTRY',
+	'LLM_ENABLED'
+];
+
+// Where the local KI runs, e.g. the compose service ollama; it sets nothing for the landlord
+const localUrl = (process.env.LLM_LOCAL_URL || 'http://localhost:11434/v1').replace(/\/$/, '');
+
 export const llmConfig = {
+	byOperator: OPERATOR_VARIABLES.some((name) => process.env[name]),
+
+	localUrl,
+
 	// OpenAI-compatible API base URL, e.g. https://api.openai.com/v1 (a trailing slash is dropped)
-	baseUrl: (process.env.LLM_BASE_URL || 'http://localhost:11434/v1').replace(/\/$/, ''),
+	baseUrl: (process.env.LLM_BASE_URL || localUrl).replace(/\/$/, ''),
 
 	// Sent as a Bearer token; the local Ollama needs none
 	apiKey: process.env.LLM_API_KEY || '',

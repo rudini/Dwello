@@ -7,10 +7,11 @@ import { app } from './app';
 import { llmConfig, llmRecipient } from './config/llm';
 import { testConnection } from './db/connection';
 import { loadModel } from './services/ki-model.service';
+import { currentKi } from './services/ki-settings.service';
 import { announceSetupCode } from './services/setup.service';
 
 // Refuse to start with an external LLM the privacy statement could not name
-llmRecipient();
+if (llmConfig.byOperator) llmRecipient();
 
 // Test database connection on startup
 testConnection().then((connected) => {
@@ -23,7 +24,9 @@ app.listen(Number(process.env.PORT) || 3001);
 
 // #577: the Einrichtungscode while Dwello has no account yet, and the local KI's model when it is missing
 announceSetupCode().catch((error) => console.warn('⚠️ Einrichtungscode nicht erzeugt', error));
-void loadModel({ baseUrl: llmConfig.baseUrl, model: llmConfig.model, local: llmConfig.enabled && !llmRecipient() });
+void currentKi().then(({ mode, baseUrl, model }) =>
+	loadModel({ baseUrl, model, local: mode === 'local' })
+);
 
 console.log(`🚀 Dwello Backend running at http://${app.server?.hostname}:${app.server?.port}`);
 console.log(`📚 Swagger API docs at http://${app.server?.hostname}:${app.server?.port}/swagger`);

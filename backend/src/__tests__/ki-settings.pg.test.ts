@@ -31,9 +31,15 @@ const provider = Bun.serve({
 			messages: { content: string | Part[] }[];
 		};
 		const { content } = messages[0];
-		const images =
-			typeof content === 'string' ? 0 : content.filter((part) => part.type === 'image_url').length;
-		requests.push({ authorization: request.headers.get('authorization'), model, images });
+		const parts = typeof content === 'string' ? [{ type: 'text', text: content } as Part] : content;
+		const images = parts.filter((part) => part.type === 'image_url');
+		requests.push({
+			authorization: request.headers.get('authorization'),
+			model,
+			images: images.length,
+			text: parts.map((part) => part.text ?? '').join(''),
+			image: images[0]?.image_url?.url ?? ''
+		});
 		if (request.headers.get('authorization') !== 'Bearer richtig')
 			return new Response(null, { status: 401 });
 		if (model === 'text-modell')
@@ -56,7 +62,11 @@ const muster = {
 const settings = async () => (await callApi('/api/v1/ki-settings')).json();
 const save = (body: object) => sendJson('PUT', '/api/v1/ki-settings', body);
 const check = (body: object) => sendJson('POST', '/api/v1/ki-settings/check', body);
-const recipient = async () => (await callApi('/api/v1/invoices/llm-recipient')).json();
+const recipient = async () =>
+	(await (await callApi('/api/v1/invoices/llm-recipient')).json()) as {
+		recipient: { provider: string; country: string } | null;
+		enabled: boolean;
+	};
 
 beforeAll(() => {
 	// as on an installation whose operator set no LLM_* variable
@@ -174,7 +184,7 @@ describe('KI in den Einstellungen', () => {
 		expect(response.status).toBe(422);
 		expect(await response.json()).toMatchObject({
 			code: 'KI_PROVIDER_INCOMPLETE',
-			params: { missing: ['baseUrl', 'model', 'provider', 'providerCountry', 'confirmed'] }
+			params: { missing: 'baseUrl,model,provider,providerCountry,confirmed' }
 		});
 		expect(await settings()).toMatchObject({ mode: 'local' });
 	});
@@ -280,6 +290,19 @@ describe('KI-Modell der lokalen KI', () => {
 		} finally {
 			ollama.stop(true);
 			Object.assign(llmConfig, { baseUrl: configured.baseUrl, model: configured.model });
+		}
+	});
+
+	// Fachreview 580-3 F-21: ohne lokale KI (Installationsanleitung, Abschnitt 6) antwortet unter der Adresse niemand
+	it('meldet keinen Zustand des KI-Modells, wenn die lokale KI nicht antwortet', async () => {
+		Object.assign(llmConfig, { baseUrl: 'http://127.0.0.1:9/v1' });
+		try {
+			await save({ mode: 'local' });
+			await Bun.sleep(50);
+
+			expect(await (await callApi('/api/v1/ki/model')).json()).toEqual({ state: 'unknown' });
+		} finally {
+			Object.assign(llmConfig, { baseUrl: configured.baseUrl });
 		}
 	});
 

@@ -15,6 +15,7 @@ import {
 	type LLMCategorizationResult
 } from '../config/llm';
 import { getCategoryByName, listCategories } from './category.service';
+import { currentKi } from './ki-settings.service';
 import { CodedError } from './coded-error';
 import type { Category } from '../db/schema';
 
@@ -59,13 +60,16 @@ function cacheResult(key: string, result: LLMCategorizationResult): void {
 	}
 }
 
-/** Headers for the configured provider; the key only when one is set */
-function llmHeaders(): Record<string, string> {
+/** Headers for the chosen provider; the key only when one is set */
+function llmHeaders(apiKey: string): Record<string, string> {
 	return {
 		'Content-Type': 'application/json',
-		...(llmConfig.apiKey && { Authorization: `Bearer ${llmConfig.apiKey}` })
+		...(apiKey && { Authorization: `Bearer ${apiKey}` })
 	};
 }
+
+/** Whether «Keine KI» is chosen (#580), read anew for every request */
+const kiOff = async () => (await currentKi()).mode === 'none';
 
 // A prompt, or a prompt followed by images (data URLs) for a model that reads them
 type Content = string | ({ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } })[];
@@ -74,15 +78,16 @@ type Content = string | ({ type: 'text'; text: string } | { type: 'image_url'; i
  * Call the OpenAI-compatible chat completions API
  */
 async function callLlm(prompt: Content): Promise<string> {
+	const ki = await currentKi();
 	const controller = new AbortController();
 	const timeoutId = setTimeout(() => controller.abort(), llmConfig.timeout);
 
 	try {
-		const response = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
+		const response = await fetch(`${ki.baseUrl}/chat/completions`, {
 			method: 'POST',
-			headers: llmHeaders(),
+			headers: llmHeaders(ki.apiKey),
 			body: JSON.stringify({
-				model: llmConfig.model,
+				model: ki.model,
 				// No max_tokens or temperature: reasoning models reject both; the prompt asks for short JSON
 				messages: [{ role: 'user', content: prompt }]
 			}),
@@ -112,12 +117,13 @@ async function callLlm(prompt: Content): Promise<string> {
  * Check if the configured LLM provider answers
  */
 export async function isLlmAvailable(): Promise<boolean> {
-	if (!llmConfig.enabled) return false;
+	const ki = await currentKi();
+	if (ki.mode === 'none') return false;
 
 	try {
-		const response = await fetch(`${llmConfig.baseUrl}/models`, {
+		const response = await fetch(`${ki.baseUrl}/models`, {
 			method: 'GET',
-			headers: llmHeaders(),
+			headers: llmHeaders(ki.apiKey),
 			signal: AbortSignal.timeout(5000)
 		});
 		return response.ok;
@@ -141,7 +147,7 @@ export async function categorizeInvoice(invoice: {
 	source: 'llm' | 'cache' | 'fallback';
 }> {
 	// Check if LLM is enabled
-	if (!llmConfig.enabled) {
+	if (await kiOff()) {
 		return {
 			category: null,
 			confidence: 0,
@@ -218,7 +224,7 @@ const unavailable = () => new CodedError('KI_PROPOSAL_UNAVAILABLE', 'Die KI ist 
 export async function proposeAllocability(
 	category: Parameters<typeof buildAllocabilityPrompt>[0]
 ): Promise<{ isAllowedUtilityCost: boolean; reasoning: string }> {
-	if (!llmConfig.enabled) throw unavailable();
+	if (await kiOff()) throw unavailable();
 	const { categories } = await listCategories({ limit: 1000 });
 	const predefined = categories.filter((c) => c.type === 'predefined');
 	const response = await callLlm(buildAllocabilityPrompt(category, predefined)).catch((error) => {
@@ -235,7 +241,7 @@ export async function proposeAllocability(
  * not answer with the fields
  */
 export async function extractInvoice(fileName: string, pages: string[]): Promise<Extraction | 'unreadable' | null> {
-	if (!llmConfig.enabled) return null;
+	if (await kiOff()) return null;
 	let answer: string;
 	try {
 		const content: Content = [

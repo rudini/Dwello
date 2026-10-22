@@ -13,12 +13,17 @@ export const modelState = (): State => current;
 /** Ollama's own API: the OpenAI-compatible address without its /v1 */
 const ollamaOf = (baseUrl: string) => baseUrl.replace(/\/v1\/?$/, '');
 
+// the running download; a new one (another start from the page «KI», #580) ends it
+let running = new AbortController();
+
 export async function loadModel(config: { baseUrl: string; model: string; local: boolean }) {
+	running.abort();
+	const own = (running = new AbortController());
 	current = { state: 'unknown' };
 	if (!config.local) return;
 	const ollama = ollamaOf(config.baseUrl);
 	try {
-		const { models } = (await (await fetch(`${ollama}/api/tags`)).json()) as { models: { name: string }[] };
+		const { models } = (await (await fetch(`${ollama}/api/tags`, { signal: own.signal })).json()) as { models: { name: string }[] };
 		if (models.some((model) => model.name === config.model)) {
 			current = { state: 'ready' };
 			return;
@@ -28,10 +33,12 @@ export async function loadModel(config: { baseUrl: string; model: string; local:
 		const pull = await fetch(`${ollama}/api/pull`, {
 			method: 'POST',
 			body: JSON.stringify({ model: config.model, stream: true }),
-			timeout: false
+			timeout: false,
+			signal: own.signal
 		});
 		await follow(pull.body!);
 	} catch (error) {
+		if (own.signal.aborted) return;
 		// no answer from the local KI: say nothing; once it answers, the next start tries again
 		if (current.state === 'unknown') return;
 		console.warn('[ki] KI-Modell konnte nicht geladen werden', { model: config.model, error: String(error) });
