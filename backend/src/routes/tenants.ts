@@ -11,9 +11,12 @@ import {
 	getTenantWithHistory,
 	createTenant,
 	updateTenant,
-	deleteTenant
+	deleteTenant,
+	tenantExists
 } from '../services/tenant.service';
 import { exportTenant } from '../services/tenant-export.service';
+import { anonymisableFrom, anonymiseTenant } from '../services/tenant-anonymise.service';
+import { errorBody } from '../services/coded-error';
 
 // Validation schemas
 const tenantQuerySchema = t.Object({
@@ -65,8 +68,26 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 			set.status = 404;
 			return { error: 'Tenant not found' };
 		}
-		return tenant;
+		return { ...tenant, anonymisableFrom: await anonymisableFrom(params.id) };
 	})
+	// «Mieter anonymisieren» after the retention (#459); the body: the replacement name in the landlord's language
+	.post(
+		'/:id/anonymise',
+		async ({ params, body, set }) => {
+			if (!(await tenantExists(params.id))) {
+				set.status = 404;
+				return { error: 'Tenant not found' };
+			}
+			try {
+				await anonymiseTenant(params.id, body);
+				return { success: true };
+			} catch (error) {
+				set.status = 409;
+				return errorBody(error, 'Failed to anonymise the tenant');
+			}
+		},
+		{ body: t.Object({ firstName: t.String({ minLength: 1 }), lastName: t.String({ minLength: 1 }) }) }
+	)
 	// Everything Dwello holds about the tenant, for the right to data handover (#435)
 	.get('/:id/export', async ({ params, set }) => {
 		const result = await exportTenant(params.id);

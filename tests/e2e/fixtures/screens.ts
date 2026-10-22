@@ -253,6 +253,8 @@ async function seedFor(seed: TestData, path: string, state: string) {
 		noticedContract: seed.idOf('Mietvertrag Dora'),
 		vacantApartment: seed.idOf('2.02'),
 		endedContract: seed.idOf('Mietvertrag Emil'),
+		endedTenant: seed.idOf('Emil'), // ended 2014: «Mieter anonymisieren» is offered (#459)
+		expiredTenant: seed.idOf('Gina'), // ended 2025: the page names the first day (#459)
 		expiredContract: seed.idOf('Mietvertrag Gina'),
 		movedOutContract: seed.idOf('Mietvertrag Ida'),
 		partlyBilledContract: seed.idOf('Mietvertrag Lea'),

@@ -32,6 +32,10 @@ Funktionalität: Datenschutz
   Szenario: Anmeldungen im Protokoll des Servers
     Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird
 
+  # #459 (#332): das Ende der Aufbewahrung; Wortlaut nach Fachprüfung 459-B R-3 (Product Owner 2026-10-22)
+  Szenario: Ehemalige Mieter nach Ablauf der Aufbewahrung anonymisieren
+    Dann nennt die Datenschutzerklärung unter "Aufbewahrung" "Ist ein Mieter ehemalig und sind seit dem Ende des Jahres, in dem das Letzte davon geschah (sein letzter Mietvertrag endete, die letzte Abrechnung oder Mahnung ging an ihn), 10 Jahre vergangen, können Sie ihn anonymisieren: Dwello entfernt dann Name, Kontaktdaten und Dokumente; die Beträge der Abrechnungen bleiben."
+
   # Protokoll unter den Einstellungen (#357, Fachprüfung R-1, R-2): Zweck, Inhalt und Aufbewahrung, getrennt vom Protokoll des Servers
   Szenario: Anmeldungen und Änderungen im Protokoll unter den Einstellungen
     Dann nennt die Datenschutzerklärung unter "Welche Daten Dwello speichert" "jede Anmeldung mit dem gewählten Anbieter oder mit Passwort (ohne Namen und E-Mail-Adresse)"

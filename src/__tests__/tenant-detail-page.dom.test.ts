@@ -66,11 +66,12 @@ function open(
 	form: unknown = null,
 	documents: unknown[] = [document_],
 	demo = false,
-	formerDocuments: unknown = null
+	formerDocuments: unknown = null,
+	anonymisableFrom: string | null = null
 ) {
 	show(TenantPage, {
 		data: {
-			tenant,
+			tenant: { ...tenant, anonymisableFrom },
 			rental: {
 				contractId: 'c2',
 				apartmentId: 'a2',
@@ -283,6 +284,62 @@ describe('Mieterdetail', () => {
 		expect(text('delete-dialog-message')).toBe(
 			'Lea Frei wird endgültig gelöscht, zusammen mit den hochgeladenen Dokumenten. Das lässt sich nicht rückgängig machen.'
 		);
+	});
+
+	// #459 (#332): «Mieter anonymisieren» 10 years after the end of the year of the last event
+	it('bietet nach Ablauf der Aufbewahrung an, den Mieter zu anonymisieren, und nennt die Folge', () => {
+		open([], null, [], false, null, '2025-01-01');
+
+		expect(text('tenant-anonymise-help')).toBe(
+			'Seit dem Ende des Jahres 2014 sind 10 Jahre vergangen: Damals endete der letzte Mietvertrag oder ging die letzte Abrechnung oder Mahnung an Lea Frei. Läuft noch eine Betreibung oder ein Verfahren, warten Sie damit.'
+		);
+		expect(byTestId('tenant-anonymise-button')!.getAttribute('aria-describedby')).toBe(
+			byTestId('tenant-anonymise-help')!.id
+		);
+		click('tenant-anonymise-button');
+		flushSync();
+		expect(text('tenant-anonymise-message')).toBe(
+			'Name, Kontaktdaten und Dokumente von Lea Frei werden endgültig entfernt. Die Beträge der Abrechnungen bleiben.'
+		);
+		expect(document.querySelector('form[action="?/anonymise"]')).not.toBeNull();
+		expect(byTestId('tenant-anonymise-from')).toBeNull();
+	});
+
+	it('nennt vor Ablauf der Aufbewahrung den Tag, ab dem der Mieter anonymisiert werden kann', () => {
+		open([], null, [], false, null, '2036-01-01');
+
+		expect(text('tenant-anonymise-from')).toBe('Anonymisieren können Sie Lea Frei ab dem 01.01.2036.');
+		expect(byTestId('tenant-anonymise-button')).toBeNull();
+	});
+
+	it('bietet das Anonymisieren nicht an, solange ein Mietvertrag läuft', () => {
+		open([], null, [], false, null, null);
+
+		expect(byTestId('tenant-anonymise-from')).toBeNull();
+		expect(byTestId('tenant-anonymise-button')).toBeNull();
+	});
+
+	// No scenario: only a change between loading the page and confirming (another tab, as for #522) or the server's
+	// clock reaches a refusal (code review #459 C-3)
+	it('nennt im Dialog, warum der Mieter nicht anonymisiert wurde', () => {
+		open([], { anonymiseError: 'Diesen Mieter können Sie erst ab dem 01.01.2036 anonymisieren.' }, [], false, null, '2025-01-01');
+		click('tenant-anonymise-button');
+		flushSync();
+
+		expect(allByTestId('form-error').map((alert) => alert.textContent)).toContainEqual(
+			expect.stringContaining('Diesen Mieter können Sie erst ab dem 01.01.2036 anonymisieren.')
+		);
+	});
+
+	it('meldet das Anonymisieren mit dem bisherigen Namen', async () => {
+		open([], null, [], false, null, '2025-01-01');
+		click('tenant-anonymise-button');
+
+		const after = actions.get('?/anonymise')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		flushSync();
+
+		expect(get(toasts).map((toast) => toast.message)).toContain('Mieter «Lea Frei» anonymisiert');
 	});
 
 	it('lehnt eine Datei über 10 MB ab, bevor sie gesendet wird', async () => {

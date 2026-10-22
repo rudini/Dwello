@@ -18,6 +18,7 @@
 		"advance-from-missing": "The contract form saved with a changed Akonto and an emptied «Gültig ab»: the error at the field (#464).",
 		"advance-refused": "The contract form saved with a new Akonto from a day a draft statement already bills: the refusal names the draft (#464).",
 		"document-delete-dialog": "The confirmation dialog for deleting a document the property manager uploaded to the tenant, open.",
+		"anonymise-dialog": "A former tenant whose last contract ended in 2014 (#459): the confirmation of «Mieter anonymisieren» with its consequence, open (not confirmed, the record stays).",
 		"upload-refused": "A file Dwello does not take (a Word file) uploaded to the tenant: the refusal at the file field.",
 		"upload-dialog": "«Rechnungen hochladen» open with a building chosen, a PDF the KI stand-in read (deducted amounts, costs not allocable, an unsure Rechnungsdatum) opened for checking, and a refused Word file.",
 		"upload-discard-dialog": "«Rechnungen hochladen» with a file in it, cancelled: the confirmation that the files and entries are lost.",
@@ -287,6 +288,21 @@
 				"document-delete-dialog",
 				"upload-refused",
 				"demo"
+			]
+		},
+		{
+			"name": "tenant-detail-former",
+			"path": "/tenants/{endedTenant}",
+			"states": [
+				"default",
+				"anonymise-dialog"
+			]
+		},
+		{
+			"name": "tenant-detail-recent",
+			"path": "/tenants/{expiredTenant}",
+			"states": [
+				"default"
 			]
 		},
 		{

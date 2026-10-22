@@ -211,6 +211,39 @@ describe('Dokumente als geprüft markieren', () => {
 	});
 });
 
+// #459 (#332): the replacement name in the landlord's language; a refusal in its words
+describe('Mieter anonymisieren', () => {
+	it('ersetzt den Namen durch «Anonymisierter Mieter»', async () => {
+		const { calls, result } = runAction(actions.anonymise, 't1', 200, {}, { success: true });
+
+		expect(await result).toBeUndefined();
+		expect(calls).toEqual([
+			{ method: 'POST', url: `${API}/tenants/t1/anonymise`, body: { firstName: 'Anonymisierter', lastName: 'Mieter' } }
+		]);
+	});
+
+	it('nennt den Tag, wenn das Backend zu früh ablehnt', async () => {
+		const refused = { error: 'too early', code: 'TENANT_ANONYMISE_TOO_EARLY', params: { date: '2036-01-01' } };
+		const { result } = runAction(actions.anonymise, 't1', 409, {}, refused);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { anonymiseError: 'Diesen Mieter können Sie erst ab dem 01.01.2036 anonymisieren.' }
+		});
+	});
+
+	it('sagt, wenn Dwello nicht geantwortet hat', async () => {
+		const { result } = runAction(actions.anonymise, 't1', 500);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: {
+				anonymiseError: 'Der Mieter wurde nicht anonymisiert, weil Dwello nicht geantwortet hat. Versuchen Sie es später erneut.'
+			}
+		});
+	});
+});
+
 describe('Mieterliste', () => {
 	// F-4 (#58): aktiv mit laufendem, künftig nur mit künftigem Mietvertrag
 	it('kennzeichnet Mieter als aktiv oder künftig, wie das Backend sie einordnet', async () => {

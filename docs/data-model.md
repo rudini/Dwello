@@ -108,6 +108,7 @@ postal_code            VARCHAR(10)
 city                   VARCHAR(100)
 country                VARCHAR(2)   NOT NULL DEFAULT 'CH'      -- ISO 3166 code of the Korrespondenzadresse (#102)
 correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
+anonymised_on        DATE                                -- «Mieter anonymisieren» (#459): name replaced, contact data and documents removed
 CHECK (language IN ('de', 'fr', 'it', 'en'))  -- rm removed in 0012 (#63)
 ```
 

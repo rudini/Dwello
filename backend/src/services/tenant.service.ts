@@ -64,6 +64,7 @@ const tenantFields = {
 	city: tenants.city,
 	country: tenants.country,
 	correspondenceChannel: tenants.correspondenceChannel,
+	anonymisedOn: tenants.anonymisedOn,
 	createdAt: tenants.createdAt,
 	updatedAt: tenants.updatedAt,
 	contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = "tenants"."id")`.as(

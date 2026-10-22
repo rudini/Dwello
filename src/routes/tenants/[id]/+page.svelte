@@ -5,6 +5,7 @@
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import TenantAnonymiseCard from './TenantAnonymiseCard.svelte';
 	import TenantContactCard from './TenantContactCard.svelte';
 	import TenantContracts from './TenantContracts.svelte';
 	import TenantDocumentsCard from './TenantDocumentsCard.svelte';
@@ -59,6 +60,9 @@
 			<TenantContactCard {tenant} />
 			<TenantRentalCard rental={data.rental} />
 			<TenantExportCard id={tenant.id} />
+			{#if tenant.anonymisableFrom}
+				<TenantAnonymiseCard from={tenant.anonymisableFrom} {name} error={form?.anonymiseError} />
+			{/if}
 		</div>
 		<div class="flex flex-col gap-6 lg:col-span-2">
 			<TenantContracts contracts={data.contractHistory} />

@@ -9,5 +9,7 @@
 	"postalCode": "8002",
 	"city": "Zürich",
 	"country": "CH",
-	"correspondenceChannel": "email"
+	"correspondenceChannel": "email",
+	"anonymisedOn": null,
+	"anonymisableFrom": null
 }
