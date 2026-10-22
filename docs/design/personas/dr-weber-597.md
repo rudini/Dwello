@@ -59,3 +59,68 @@ Etwa 10 Minuten, rund 25 Schritte (Gebäude öffnen, zweimal das Formular «Neue
 - Englisch: Das gehört nicht zur Aufgabe.
 - Wo das Stockwerk sonst noch erscheint (Mietvertrag, Nebenkostenabrechnung, PDF): Dafür hätte ich einen Mietvertrag für die neuen Wohnungen anlegen müssen, was über die Aufgabe hinausgeht.
 - Ob die Sortierung bei zwei Untergeschossen stimmt (2. UG vor 1. UG): Ohne 2. UG lässt sich das nicht prüfen.
+
+## Zweiter Durchgang
+
+Nach der Korrektur von P-1. Persona: Dr. Weber, Desktop 1440 × 900, Maus. App: http://localhost:3300 mit frischen Demodaten. Gebäude: wieder Alpenblick (Bergstrasse 8, 3800 Interlaken), damit ich mit dem ersten Durchgang vergleichen kann.
+Aufgabe: eine Wohnung im ersten und eine im zweiten Untergeschoss erfassen; prüfen, wie die Stockwerke in der Auswahl, auf der Gebäudeseite und auf der Wohnungsseite heissen, auf Deutsch, Französisch und Italienisch, und ob das eindeutig ist.
+
+| ID | Schwere | Bildschirm | Befund |
+|---|---|---|---|
+| P-1 | behoben | Neue Wohnung / Wohnung bearbeiten, Feld «Stockwerk» | Die Auswahl bietet jetzt «2. UG» und «UG». Die Wohnung im 2. UG liess sich erfassen und speichern; beim Bearbeiten ist «2. UG» vorausgewählt. |
+| P-2 | behoben | Gebäudeseite, Wohnungsliste, Wohnungsseite (de/fr/it) | Die beiden Wohnungen sind jetzt getrennt: «2. UG» / «2e sous-sol» / «2° piano interrato» und «UG» / «sous-sol» / «piano interrato». Die Reihenfolge stimmt (2. UG oberhalb von UG, dann EG). |
+| P-4 | Minor | Auswahl, Gebäudeseite, Wohnungsliste, Wohnungsseite (de/fr/it) | Das obere Untergeschoss heisst ohne Nummer «UG» / «sous-sol» / «piano interrato», das untere mit Nummer «2. UG» / «2e sous-sol» / «2° piano interrato». Aus der Reihenfolge erschliesse ich, dass «UG» das 1. UG ist; auf der Wohnungsseite steht aber allein «Stockwerk: UG», ohne die Reihe daneben. In einem Gebäude mit zwei Untergeschossen ist das nicht eindeutig; ich erwarte «1. UG» / «1er sous-sol» / «1° piano interrato». |
+| P-5 | Nit | Neue Wohnung / Wohnung bearbeiten, Hilfetext beim Feld «Stockwerk» | Der Hilfetext lautet weiterhin «Lage der Wohnung im Gebäude: UG, EG, 1. OG, 2. OG usw.» (fr «sous-sol, rez-de-chaussée, 1er étage, 2e étage, etc.», it «piano interrato, pianterreno, 1° piano, 2° piano ecc.»). Das neue «2. UG» erwähnt er nicht. |
+| P-3 | Nit (unverändert) | Gebäudeseite, Französisch und Italienisch | Die Zwischenüberschriften beginnen weiterhin klein, jetzt auch die neue: «2e sous-sol», «sous-sol», «rez-de-chaussée»; «2° piano interrato», «piano interrato», «pianterreno». |
+
+### Beobachtungen
+
+- Die Stockwerksnamen sind in Auswahl, Gebäudeseite, Wohnungsliste und Wohnungsseite in allen drei Sprachen dieselben Wörter. Das ist gut so.
+- Die französische Ordnungszahl «2e sous-sol» und die italienische «2° piano interrato» halte ich für die Schweiz für korrekt, passend zu «2e étage» und «2° piano».
+- Die Auswahl reicht nach unten nur bis «2. UG». Ein drittes Untergeschoss kommt bei Wohnungen selten vor; ich vermisse es für diese Aufgabe nicht.
+- Unverändert aus dem ersten Durchgang: «1.5 pièce» (Einzahl) neben «2 pièces» und Punkt statt Komma als Dezimalzeichen auf Französisch; nicht Teil dieser Aufgabe.
+- Das Speichern beider Wohnungen klappte ohne Fehlermeldung; nach dem Speichern landete ich jeweils auf der neuen Wohnungsseite.
+
+### Aufgabe geschafft: ja
+
+Beide Stockwerke sind wählbar, beide Wohnungen sind mit dem richtigen Geschoss gespeichert und werden überall getrennt angezeigt. Eindeutig ist es mit der Einschränkung P-4.
+
+### Aufwand
+
+Etwa 6 Minuten, rund 20 Schritte (Gebäude öffnen, zweimal «Wohnung erfassen», Gebäudeseite, Wohnungsliste, zwei Wohnungsseiten, Bearbeiten-Formular; Sprache auf Français und Italiano wechseln und dieselben Seiten wieder ansehen; zurück auf Deutsch).
+
+### Ablauf
+
+1. **Gebäude → Alpenblick.** Erwartet: wie beim ersten Mal EG, 1. OG, 2. OG. Gesehen: genau das, 3 Wohnungen.
+2. **«Wohnung erfassen», Feld «Stockwerk».** Erwartet: «2. UG, 1. UG, EG …». Gesehen: «Stockwerk wählen, 2. UG, UG, EG, 1. OG … 6. OG». Das 2. UG ist da; das obere Untergeschoss heisst aber weiterhin nur «UG». Der Hilfetext darüber nennt «UG, EG, 1. OG, 2. OG usw.», das 2. UG nicht.
+3. **Wohnung U1.01 erfassen** (UG, 45 m², 2 Zimmer). Gespeichert, Weiterleitung auf die Wohnungsseite.
+4. **Wohnung U2.01 erfassen** (2. UG, 38 m², 1.5 Zimmer). Gespeichert, diesmal ohne Umweg.
+5. **Gebäudeseite Alpenblick.** Erwartet: zwei getrennte Gruppen, das tiefere Geschoss zuerst. Gesehen: Zwischenüberschriften «2. UG» (U2.01), «UG» (U1.01), «EG», «1. OG», «2. OG»; oben «5, davon 2 vermietet und 3 leer». Wie erwartet, bis auf das unnummerierte «UG».
+6. **Wohnungsliste, gefiltert auf Alpenblick.** Gesehen: U2.01 mit «2. UG», U1.01 mit «UG», dann EG, OG1, OG2. Reihenfolge stimmt.
+7. **Wohnungsseiten.** U1.01: «Stockwerk: UG». U2.01: «Stockwerk: 2. UG». Erwartet hätte ich bei U1.01 «1. UG»: Wer nur diese Seite liest, weiss nicht, dass es darunter noch ein Geschoss gibt, und «UG» allein könnte auch «irgendein Untergeschoss» heissen.
+8. **Wohnung U2.01 bearbeiten.** Dieselbe Auswahl, «2. UG» vorausgewählt. Richtig.
+9. **Sprache Français.** Auswahl «Choisir l’étage, 2e sous-sol, sous-sol, rez-de-chaussée, 1er étage …». Gebäudeseite (Screenshot: unter «Appartements» die klein geschriebenen Zwischentitel «2e sous-sol» mit Appartement U2.01, «sous-sol» mit U1.01, dann «rez-de-chaussée», «1er étage», «2e étage»), Liste und Wohnungsseiten («Étage: sous-sol» bzw. «Étage: 2e sous-sol») einheitlich.
+10. **Sprache Italiano.** Auswahl «Scegliere il piano, 2° piano interrato, piano interrato, pianterreno, 1° piano …». Gebäudeseite, Liste und Wohnungsseiten («Piano: piano interrato» bzw. «Piano: 2° piano interrato») einheitlich, Überschriften klein.
+11. **Sprache zurück auf Deutsch.** Klappt, das Menü zeigt wieder «Sprache: Deutsch».
+
+### Verwirrung
+
+- «UG» neben «2. UG»: Wo es ein «2.» gibt, erwarte ich auch ein «1.». Ohne Nummer frage ich mich kurz, ob «UG» etwas anderes meint als das 1. Untergeschoss. In der Auswahl löst die Reihenfolge das auf, auf der Wohnungsseite nicht.
+- Gleiches im Französischen («sous-sol» neben «2e sous-sol») und Italienischen («piano interrato» neben «2° piano interrato»).
+
+### Fehlerrisiken
+
+- Wird die Stockwerksangabe der Wohnungsseite später anderswo übernommen (etwa in die Bezeichnung des Mietobjekts im Mietvertrag), steht dort für die Wohnung im 1. UG nur «UG». In einem Gebäude mit zwei Untergeschossen ist das eine ungenaue Objektbezeichnung. Das ist weniger schwer als die falsche Angabe aus dem ersten Durchgang, aber nicht ganz sauber.
+
+### Vorschläge
+
+- **P-4:** Reproduktion: Gebäude Alpenblick → «Wohnung erfassen» → Stockwerk «UG» speichern, dann eine zweite mit «2. UG»; Wohnungsseite der ersten zeigt «Stockwerk: UG». Hilfreich: das obere Untergeschoss «1. UG» / «1er sous-sol» / «1° piano interrato» nennen, in Auswahl und Anzeige gleich (Wortlaut fachlich prüfen lassen). Bestehende Wohnungen mit «UG» würden dann ebenfalls «1. UG» heissen, was auch bei nur einem Untergeschoss korrekt ist.
+- **P-5:** Reproduktion: «Wohnung erfassen» → Hilfetext beim Feld «Stockwerk». Hilfreich: «Lage der Wohnung im Gebäude: 2. UG, 1. UG, EG, 1. OG usw.» und entsprechend in fr/it.
+- **P-3:** wie im ersten Durchgang: Zwischenüberschriften auf der Gebäudeseite gross beginnen («2e sous-sol» bleibt, «Sous-sol», «Rez-de-chaussée»; «Piano interrato», «Pianterreno»).
+
+### Nicht geprüft
+
+- Englisch: nicht Teil der Aufgabe.
+- Wo das Stockwerk sonst erscheint (Mietvertrag, Abrechnung, PDF): dafür hätte ich Mietverträge für die neuen Wohnungen anlegen müssen, was über die Aufgabe hinausgeht.
+- Ein drittes Untergeschoss: wird nicht angeboten; ob das gewollt ist, kann ich als Benutzer nicht beurteilen.
+- Die Ansicht auf dem Telefon: nicht mein Gerät.
