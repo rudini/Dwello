@@ -4,7 +4,7 @@ import { load as listLoad } from '../routes/apartments/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { monthlyTotal } from '../lib/server/contract-history';
-import { floorLabel, occupancyParts, statusHelp, statusLabels, statusText } from '../lib/apartment';
+import { floorLabel, floorOptions, occupancyParts, statusHelp, statusLabels, statusText } from '../lib/apartment';
 import { runAction } from './helpers/action';
 
 const API = 'http://localhost:3001/api/v1';
@@ -283,6 +283,13 @@ describe('Stockwerk', () => {
 		[3, '3. OG']
 	])('zeigt Stockwerk %i als %s', (floor, label) => {
 		expect(floorLabel(floor)).toBe(label);
+	});
+});
+
+// #597 (persona Dr. Weber P-1): a second floor below ground can be chosen, not only taken from the Gebäuderegister
+describe('Auswahl der Stockwerke', () => {
+	it('bietet zwei Untergeschosse an', () => {
+		expect(floorOptions().slice(0, 3).map((option) => option.label)).toEqual(['2. UG', 'UG', 'EG']);
 	});
 });
 

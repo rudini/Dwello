@@ -29,9 +29,10 @@ export const floorLabel = (floor: number) =>
 				? m.apartments_floor_first()
 				: m.apartments_floor_upper({ floor: getLocale() === 'en' ? englishOrdinal(floor) : floor });
 
-/** The usual floors, and the given one when it lies outside them (taken from the Gebäuderegister, #479) */
+/** The usual floors, two of them below ground (#597), and the given one when it lies outside them (taken from the
+ * Gebäuderegister, #479) */
 export const floorOptions = (current?: number | null) =>
-	[...new Set([-1, 0, 1, 2, 3, 4, 5, 6, ...(current == null ? [] : [current])])]
+	[...new Set([-2, -1, 0, 1, 2, 3, 4, 5, 6, ...(current == null ? [] : [current])])]
 		.sort((a, b) => a - b)
 		.map((floor) => ({ value: String(floor), label: floorLabel(floor) }));
 

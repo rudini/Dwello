@@ -29,6 +29,13 @@ Funktionalität: Sprache der Oberfläche
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "K2"
     Dann nennt die Wohnung das Stockwerk "2nd basement"
 
+  # #597: das erste Untergeschoss heisst «UG», ab dem zweiten wird gezählt, auf dem Bildschirm wie im PDF
+  Szenario: Stockwerke unter dem Erdgeschoss
+    Angenommen das Gebäude "Ulmenhof" in "Winterthur" existiert
+    Und im Gebäude "Ulmenhof" gibt es die leere Wohnung "K2" im Stockwerk -2
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "K2"
+    Dann nennt die Wohnung das Stockwerk "2. UG"
+
   Szenario: Die Sprache des ersten Besuchs bleibt, auch wenn der Browser später eine andere bevorzugt
     Angenommen der Browser des Liegenschaftsverwalters bevorzugt Englisch
     Und der Liegenschaftsverwalter öffnet die Übersicht
