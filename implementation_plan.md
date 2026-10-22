@@ -162,4 +162,6 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #368 slice A persona Helga (`docs/design/personas/368-A-helga.md`): P-1 Major (the help sent her to the official form for a new contract) fixed test-first with a new wording (compare with the signed new contract); P-2 and the observations stay in the report
 - [x] #368 slice A closing code review: `docs/reviews/368-A-code-2.md`: no Blocker/Major; C-5 (comment order) and C-6 (the a11y state now waits for the follow-up help) fixed; C-4 stays for the product owner
 - [x] #368 slice A persona Helga round 2: `docs/design/personas/368-A-helga-2.md`: P-1 resolved, nothing new
-- [ ] #368 slice A pull request merged on green CI
+- [x] #368 slice A pull request merged on green CI (#625, fb208f4; glossary row 56 adapted on the product owner's request; the main run on a4e7fe2 failed only in invoice-new.feature from #627, commented on #628)
+- [x] #368 slice B scenarios @wip: statement-agreed-costs.feature (amount from a day, a day after the period, the answer «Vereinbart ab» in the wizard), contract-edit.feature (the field on the Mietvertrag); red at the missing behaviour
+- [ ] #368 slice B fachreview before implementing: `docs/reviews/368-B-fachreview-1.md`

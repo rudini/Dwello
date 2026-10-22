@@ -81,6 +81,10 @@ export const withdrawNoticeOption = target('Option «Kündigung aufheben» mit H
 // #91: one box per umlagefähige category, ticked when the contract agrees it
 export const agreedCategory = (categoryId: string) =>
 	target(`Vereinbarte Nebenkosten ${categoryId}`, (page) => page.getByTestId(`contract-category-${categoryId}`));
+// #368: «Vereinbart ab» of a ticked category, behind a toggle
+export const agreedFromToggle = target('Nebenkosten ab einem Tag vereinbaren', (page) => page.getByTestId('contract-agreed-from-toggle'));
+export const agreedFromInput = (categoryId: string) =>
+	target(`Vereinbart ab ${categoryId}`, (page) => page.getByTestId(`contract-category-from-${categoryId}`));
 export const agreedCategoryBoxes = target('Kästchen der vereinbarten Nebenkosten', (page) => page.getByTestId(/^contract-category-/));
 export const agreedCategoryBoxAt = (index: number) =>
 	target(`Kästchen ${index + 1} der vereinbarten Nebenkosten`, (page) => page.getByTestId(/^contract-category-/).nth(index));

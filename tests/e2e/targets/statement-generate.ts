@@ -113,9 +113,14 @@ export const existingStatementLink = (statementId: string) =>
 export const agreementQuestions = target('Fragen nach vereinbarten Nebenkosten', (page) => page.getByTestId('agreement-questions'));
 export const agreementsOf = (contractId: string) =>
 	target(`Fragen zum Mietvertrag ${contractId}`, (page) => page.getByTestId(`agreement-contract-${contractId}`));
-export const agreementChoice = (contractId: string, categoryId: string, agreed: boolean) =>
-	target(`Antwort ${agreed ? 'vereinbart' : 'nicht vereinbart'} für ${categoryId} im Mietvertrag ${contractId}`, (page) =>
-		page.getByTestId(`agreement-${contractId}-${categoryId}-${agreed ? 'yes' : 'no'}`)
+export const agreementChoice = (contractId: string, categoryId: string, agreed: boolean | 'from') =>
+	target(`Antwort ${agreed === 'from' ? 'vereinbart ab' : agreed ? 'vereinbart' : 'nicht vereinbart'} für ${categoryId} im Mietvertrag ${contractId}`, (page) =>
+		page.getByTestId(`agreement-${contractId}-${categoryId}-${agreed === 'from' ? 'from' : agreed ? 'yes' : 'no'}`)
+	);
+// #368: the day of the answer «Vereinbart ab»
+export const agreementFromDate = (contractId: string, categoryId: string) =>
+	target(`Vereinbart ab für ${categoryId} im Mietvertrag ${contractId}`, (page) =>
+		page.getByTestId(`agreement-${contractId}-${categoryId}-from-date`)
 	);
 // the answer stored («Beim Mietvertrag gespeichert.») or refused (the question's error)
 export const agreementAnswered = (contractId: string, categoryId: string) =>
