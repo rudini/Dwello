@@ -23,7 +23,13 @@ export async function loadModel(config: { baseUrl: string; model: string; local:
 			current = { state: 'ready' };
 			return;
 		}
-		const pull = await fetch(`${ollama}/api/pull`, { method: 'POST', body: JSON.stringify({ model: config.model, stream: true }) });
+		// without a time limit: Bun's fetch ends a response after 6 minutes without data, and Ollama can be silent that long
+		// (verifying a layer of the 6 GB model; main run 825)
+		const pull = await fetch(`${ollama}/api/pull`, {
+			method: 'POST',
+			body: JSON.stringify({ model: config.model, stream: true }),
+			timeout: false
+		});
 		await follow(pull.body!);
 	} catch (error) {
 		// no answer from the local KI: say nothing; once it answers, the next start tries again
