@@ -1256,6 +1256,8 @@
 	"statements_recalculate_text": "Dwello recalculates draft {number} using the invoices and the fuel stock as they are now. The number, heating profile, management fee, statement date, payment deadline and notes stay unchanged. The amounts, statement lines and balance change. Any PDF already created is discarded.",
 	"statements_recalculated": "The draft is recalculated. It bills the invoices and the fuel stock as they are now.",
 	"statements_recalculate_failed": "The draft was not recalculated. Please try again.",
+	"statements_send_outdated_title": "This draft is not up to date",
+	"statements_send_outdated": "Since this draft was created, {later}. Recalculate it before you deliver it.",
 	"statements_later_sent": "Since this statement was created, {later}. To correct sent statements, use «Correct statement» on the statement. The corrected statement takes into account what has already been paid. Claims arising from the utility cost statement are usually time-barred after five years (Art. 128 No. 1 CO); there is no consistent view on when the limitation period starts. If in doubt, seek advice.",
 	"statements_later_sent_none": "Since this statement was created, {later}. For {tenant}, this changes neither the balance nor any statement line. You do not need to correct the statement.",
 	"statements_later_sent_declined": "Since this statement was created, {later}. On {date}, you decided not to correct the statement.",

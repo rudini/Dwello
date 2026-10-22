@@ -616,6 +616,29 @@ describe('Abrechnungsdetail', () => {
 		} as never);
 	const laterText = () => byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ');
 
+	// #547: the send dialog of a draft that is not current says so first and offers «Neu berechnen»; sending stays possible
+	it('rät beim Versand eines nicht aktuellen Entwurfs zum Neu berechnen', () => {
+		later(1, 'draft');
+		click('statement-send-button');
+		const dialog = () => document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ');
+		expect(dialog()).toContain('Dieser Entwurf ist nicht aktuell');
+		expect(dialog()).toContain(
+			'Seit dem Erstellen dieses Entwurfs wurde 1 Rechnung der Abrechnungsperiode erfasst, geändert oder gelöscht. Berechnen Sie ihn neu, bevor Sie ihn zustellen.'
+		);
+		expect(byTestId('statement-send-confirm')).not.toBeNull();
+		click('send-recalculate');
+		flushSync();
+		expect(byTestId('send-recipient')).toBeNull();
+		expect(byTestId('statement-recalculate-confirm')).not.toBeNull();
+	});
+
+	it('warnt beim Versand eines aktuellen Entwurfs nicht', () => {
+		detail();
+		click('statement-send-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent).not.toContain('nicht aktuell');
+		expect(byTestId('send-recalculate')).toBeNull();
+	});
+
 	// #454 (#408 point 8): the Tankbestand changed since; titles decided 2026-10-20 (Fachreview 454-1 E-4)
 	it('weist auf einen danach geänderten Tankbestand hin', () => {
 		later(0, 'draft', { fuelStock: true });

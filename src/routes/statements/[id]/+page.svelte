@@ -4,6 +4,7 @@
 	import { backendMessage } from '$lib/backend-error';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
+	import { laterText } from '$lib/overview';
 	import {
 		balanceLabel,
 		claimed,
@@ -60,6 +61,14 @@
 	let showReminder = $state(false);
 	let showDelete = $state(false);
 	let showSend = $state(false);
+	let showRecalculate = $state(false);
+	// a draft whose invoices or Tankbestand changed since it was created is not current (#454, #547)
+	const later = $derived(data.later);
+	const outdated = $derived(
+		statement.status === 'draft' && later && (later.invoices || later.fuelStock)
+			? laterText(later.invoices, later.fuelStock)
+			: undefined
+	);
 	let sendByLetter = $state(false); // after a failed e-mail (#86)
 	// without an e-mail address the letter is the only way, from the button on (#449, persona Helga P-2)
 	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email' && !!statement.tenantEmail);
@@ -206,6 +215,7 @@
 			<PartiesPanel {statement} />
 			<MoreActions
 				{statement}
+				bind:recalculating={showRecalculate}
 				oncorrect={() => (showCorrect = true)}
 				ondelete={() => (showDelete = true)}
 			/>
@@ -257,6 +267,12 @@
 
 <ResetPaymentDialog bind:open={showResetPayment} {statement} />
 
-<SendDialog bind:open={showSend} {statement} byLetter={sendByLetter} />
+<SendDialog
+	bind:open={showSend}
+	{statement}
+	byLetter={sendByLetter}
+	{outdated}
+	onrecalculate={() => ((showSend = false), (showRecalculate = true))}
+/>
 
 <ReminderModal bind:open={showReminder} {statement} sentReminders={data.reminders.length} />

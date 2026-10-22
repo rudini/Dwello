@@ -1256,6 +1256,8 @@
 	"statements_recalculate_text": "Dwello ricalcola la bozza {number} con le fatture e la scorta di combustibile come sono ora. Il numero, il profilo di riscaldamento, le spese amministrative, la data del conteggio, il termine di pagamento e le osservazioni restano. Gli importi, le voci e il saldo cambiano. Un PDF già creato viene scartato.",
 	"statements_recalculated": "La bozza è ricalcolata. Conteggia le fatture e la scorta di combustibile come sono ora.",
 	"statements_recalculate_failed": "La bozza non è stata ricalcolata. Riprovi.",
+	"statements_send_outdated_title": "Questa bozza non è aggiornata",
+	"statements_send_outdated": "Dalla creazione di questa bozza {later}. La ricalcoli prima di consegnarla.",
 	"statements_later_sent": "Dall’allestimento di questo conteggio {later}. I conteggi inviati li rettifica con «Rettificare il conteggio» sul conteggio. Il conteggio rettificato computa quanto è già stato pagato. I crediti derivanti dal conteggio delle spese accessorie si prescrivono di regola in cinque anni (art. 128 n. 1 CO); da quando decorre il termine non è chiarito in modo uniforme. In caso di dubbio si faccia consigliare.",
 	"statements_later_sent_none": "Dall’allestimento di questo conteggio {later}. Per {tenant} ciò non cambia né il saldo né alcuna voce. Non deve rettificare il conteggio.",
 	"statements_later_sent_declined": "Dall’allestimento di questo conteggio {later}. Il {date} ha deciso di non rettificare il conteggio.",

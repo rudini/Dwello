@@ -57,6 +57,7 @@ import {
 	correctStatement,
 	correctStatementPaid,
 	recalculateDraft,
+	recalculateFromSending,
 	declineCorrection,
 	createCorrection,
 	openCorrectConfirmation,
@@ -469,6 +470,10 @@ Given(
 
 When('der Liegenschaftsverwalter den Entwurf neu berechnet', async ({ verwalter }) => {
 	await verwalter.attemptsTo(recalculateDraft);
+});
+
+When('der Liegenschaftsverwalter den Entwurf aus der Bestätigung neu berechnet', async ({ verwalter }) => {
+	await verwalter.attemptsTo(recalculateFromSending);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung berichtigt', async ({ verwalter }) => {

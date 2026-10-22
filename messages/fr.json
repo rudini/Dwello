@@ -1256,6 +1256,8 @@
 	"statements_recalculate_text": "Dwello recalcule le brouillon {number} avec les factures et le stock de combustible tels qu’ils sont maintenant. Le numéro, le profil de chauffage, les frais d’administration, la date du décompte, le délai de paiement et la remarque restent. Les montants, les postes et le solde changent. Un PDF déjà établi est supprimé.",
 	"statements_recalculated": "Le brouillon est recalculé. Il tient compte des factures et du stock de combustible tels qu’ils sont maintenant.",
 	"statements_recalculate_failed": "Le brouillon n’a pas été recalculé. Veuillez réessayer.",
+	"statements_send_outdated_title": "Ce brouillon n’est pas à jour",
+	"statements_send_outdated": "Depuis la création de ce brouillon, {later}. Recalculez-le avant de le remettre.",
 	"statements_later_sent": "Depuis l’établissement de ce décompte, {later}. Les décomptes envoyés se rectifient avec « Rectifier le décompte » sur le décompte. Le décompte rectificatif prend en compte ce qui est déjà payé. Les créances issues du décompte des charges se prescrivent en règle générale par cinq ans (art. 128 ch. 1 CO) ; le point de départ du délai n’est pas clarifié de manière uniforme. En cas de doute, faites-vous conseiller.",
 	"statements_later_sent_none": "Depuis l’établissement de ce décompte, {later}. Pour {tenant}, cela ne change ni le solde ni aucun poste. Vous n’avez pas besoin de rectifier le décompte.",
 	"statements_later_sent_declined": "Depuis l’établissement de ce décompte, {later}. Le {date}, vous avez décidé de ne pas rectifier le décompte.",
