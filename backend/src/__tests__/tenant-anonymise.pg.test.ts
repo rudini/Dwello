@@ -1,7 +1,7 @@
 /**
  * «Mieter anonymisieren» (#459, #332): a former tenant 10 years after the end of the year of the last contract end,
  * sent statement or reminder (Art. 958f Abs. 1, Art. 127 OR); Dwello removes name, contact data and documents, the
- * amounts and the sent statement PDFs stay
+ * amounts stay; the statement PDFs go too (product owner 2026-10-22, Fachreview 459-B R-1)
  */
 
 import { afterAll, describe, expect, it } from 'bun:test';
@@ -20,7 +20,7 @@ const rental = async (endDate?: string) => {
 };
 const tenant = async (id: string) => (await (await callApi(`/api/v1/tenants/${id}`)).json()) as Record<string, unknown>;
 const anonymise = (id: string) =>
-	sendJson('POST', `/api/v1/tenants/${id}/anonymise`, { firstName: 'Ehemaliger', lastName: 'Mieter' });
+	sendJson('POST', `/api/v1/tenants/${id}/anonymise`, { firstName: 'Anonymisierter', lastName: 'Mieter' });
 
 let number = 0;
 async function statement(of: Awaited<ReturnType<typeof rental>>, values: Partial<typeof utilityStatements.$inferInsert>) {
@@ -97,14 +97,14 @@ describe('Mieter anonymisieren', () => {
 		expect(await response.json()).toMatchObject({ code: 'TENANT_NOT_FORMER' });
 	});
 
-	it('entfernt Name, Kontaktdaten und Dokumente; die Beträge und die versendeten Abrechnungen bleiben', async () => {
+	it('entfernt Name, Kontaktdaten, Dokumente und die PDFs der Abrechnungen; die Beträge bleiben', async () => {
 		const ended = await rental('2014-12-31');
 		await db
 			.update(tenants)
 			.set({ email: 'anna@example.ch', phone: '079 000 00 00', address: 'Testweg 1', postalCode: '8400', city: 'Winterthur' })
 			.where(eq(tenants.id, ended.tenant));
 		await db.update(rentalContracts).set({ notes: 'Anna Keller zog nach Bern', contractPdf: 'JVBERi0=' }).where(eq(rentalContracts.id, ended.contract));
-		await statement(ended, { status: 'paid', pdfBlob: 'JVBERi0=' });
+		await statement(ended, { status: 'paid', pdfBlob: 'JVBERi0=', notes: 'Anna Keller zahlte bar' });
 		await document(ended, { type: 'upload' });
 		await document(ended, { type: 'reminder', status: 'sent', sentAt: new Date('2015-05-01T08:00:00Z') });
 		await document(ended, { type: 'statement', status: 'sent', title: 'Abrechnung 2014' });
@@ -112,7 +112,7 @@ describe('Mieter anonymisieren', () => {
 		expect((await anonymise(ended.tenant)).status).toBe(200);
 
 		expect(await tenant(ended.tenant)).toMatchObject({
-			firstName: 'Ehemaliger',
+			firstName: 'Anonymisierter',
 			lastName: 'Mieter',
 			email: null,
 			phone: null,
@@ -122,10 +122,9 @@ describe('Mieter anonymisieren', () => {
 			anonymisedOn: swissToday(),
 			anonymisableFrom: null
 		});
-		const kept = await db.select().from(documents).where(eq(documents.tenantId, ended.tenant));
-		expect(kept.map((d) => d.type)).toEqual(['statement']);
+		expect(await db.select().from(documents).where(eq(documents.tenantId, ended.tenant))).toEqual([]);
 		const [billed] = await db.select().from(utilityStatements).where(eq(utilityStatements.tenantId, ended.tenant));
-		expect(billed).toMatchObject({ balance: '200.00', totalCosts: '1200.00', pdfBlob: 'JVBERi0=' });
+		expect(billed).toMatchObject({ balance: '200.00', totalCosts: '1200.00', status: 'paid', pdfBlob: null, notes: null });
 		const [contract] = await db.select().from(rentalContracts).where(eq(rentalContracts.id, ended.contract));
 		expect(contract).toMatchObject({ notes: null, contractPdf: null, endDate: '2014-12-31' });
 	});

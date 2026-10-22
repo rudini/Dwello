@@ -5,6 +5,7 @@ import { loadTenant } from '$lib/server/tenant';
 import { contractStatus, monthlyTotal, toContractHistory } from '$lib/server/contract-history';
 import { localToday } from '$lib/contract-status';
 import { formerTenantDocuments } from '$lib/former-tenant-documents';
+import { backendMessage } from '$lib/backend-error';
 import type { Actions, PageServerLoad } from './$types';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -75,6 +76,24 @@ export const actions: Actions = {
 			body: JSON.stringify({ documentsChecked: true })
 		});
 		if (!response.ok) return fail(response.status, { checkError: m.contracts_save_failed() });
+	},
+	// «Mieter anonymisieren» (#459): the replacement name in the landlord's language
+	anonymise: async ({ params, fetch }) => {
+		const response = await fetch(`${API}/tenants/${params.id}/anonymise`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				firstName: m.tenants_anonymised_first_name(),
+				lastName: m.tenants_anonymised_last_name()
+			})
+		});
+		if (!response.ok)
+			return fail(response.status, {
+				anonymiseError: backendMessage(
+					await response.json().catch(() => null),
+					m.tenants_anonymise_failed()
+				)
+			});
 	},
 	delete: async ({ params, fetch }) => {
 		const response = await fetch(`${API}/tenants/${params.id}`, { method: 'DELETE' });

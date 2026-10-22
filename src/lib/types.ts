@@ -69,6 +69,7 @@ export interface Tenant {
 	city?: string | null;
 	country?: string; // ISO 3166 code of the Korrespondenzadresse, CH by default
 	correspondenceChannel?: 'email' | 'letter';
+	anonymisableFrom?: string | null; // the first day «Mieter anonymisieren» is allowed; null while it is not (#459)
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }

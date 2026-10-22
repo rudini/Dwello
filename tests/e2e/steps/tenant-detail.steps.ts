@@ -108,8 +108,8 @@ Then('nennt die Bestätigung die Folge {string}', async ({ verwalter, names }, t
 	await verwalter.sees(anonymiseConsequenceText).toBe(named);
 });
 
-Then('heisst der Mieter {string}', async ({ verwalter }, name: string) => {
-	await verwalter.sees(pageTitleText).toBe(name);
+Then('heisst der Mieter {string}', async ({ verwalter, names }, name: string) => {
+	await verwalter.sees(pageTitleText).toBe(names.get(name) ?? name);
 });
 
 Then(

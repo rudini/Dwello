@@ -79,6 +79,7 @@ import { changeAdvancePaymentFrom, tickAllCategories, untickAllCategories } from
 import { advancePaymentFromInput, advancePaymentInput, agreedCategoryBoxes, flatRateInput } from '../targets/contract-form';
 import { uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
+import { anonymiseTenantButton } from '../targets/tenant-detail';
 import { chooseRegisterAddress, registerUnreachable, searchRegister } from './building-register';
 import { registerNotice } from '../targets/building-register';
 import { advanceDeleteButton } from '../targets/contract-detail';
@@ -260,6 +261,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		actor.attemptsTo(changeAdvancePaymentFrom('2025-01-01', '230.00'), Wait.until(on.formProblem)),
 	// the tenant's uploaded document (fixtures/screens.ts)
 	'document-delete-dialog': () => openDialog(deleteDocumentButton(UPLOADED)),
+	// Emil's page (fixtures/screens.ts); not confirmed, so the record stays (#459)
+	'anonymise-dialog': () => openDialog(anonymiseTenantButton),
 	// a file Dwello does not take: the refusal at the file field; its name shows beside the button (#489), so no German word
 	'upload-refused': () => (actor) =>
 		actor.attemptsTo(uploadDocument(wordFile('notes.docx'), ''), Wait.until(on.formProblem)),
