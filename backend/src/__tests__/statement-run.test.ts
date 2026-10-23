@@ -460,6 +460,13 @@ describe('Hinweise zu den Heizkosten eines Laufs', () => {
 		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', replaced).heatingWithoutServicePeriod).toEqual(hinted);
 	});
 
+	// Fachreview 647-1 F-1: a statement replaced in another, overlapping period still bills the contract there (#199)
+	it('nennt sie nicht, wenn die ersetzte Abrechnung des Mietvertrags mit dem Einzug eine andere Periode hat', () => {
+		const other = [{ ...statement('einzug', '2023-07-01', '2024-06-30', 'replaced'), id: 's1', apartmentId: 'w1' }];
+
+		expect(hintsOf([tenancy('ganz', 'w2', '2020-01-01', null), tenancy('einzug', 'w1', '2024-05-01', null)], 'hp1', other).heatingWithoutServicePeriod).toEqual([]);
+	});
+
 	// #335 (#451, point 5): the sent statement of the previous tenant still shares the heating costs without the months in
 	// the Leistungszeitraum (by the check); the preview names it when the run bills the next tenant of the same apartment
 	it.each([
