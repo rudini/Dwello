@@ -4,7 +4,7 @@ import { floorLabel, occupancyParts, statusLabels, statusText } from '$lib/apart
 import { contractPeriod, statusBadges } from '$lib/contract-status';
 import { localName } from '$lib/names';
 import { overviewDeadlines, overviewTasks } from '$lib/overview';
-import { parseBuildingForm } from '$lib/server/building-form';
+import { parseBuildingForm, refusedFields } from '$lib/server/building-form';
 import { buildingTypeLabel } from '$lib/building-type';
 import {
 	load as detailLoad,
@@ -75,8 +75,8 @@ describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
 
 	it('meldet fehlende Angaben im Gebäudeformular auf Französisch', () => {
 		french();
-		const { errors } = parseBuildingForm(new FormData());
-		expect(errors.postalCode).toBe('Le NPA est obligatoire.');
+		const refused = { code: 'POSTAL_CODE_REQUIRED', causes: [{ code: 'POSTAL_CODE_REQUIRED', params: { field: 'postalCode' } }] };
+		expect(refusedFields(refused).postalCode).toBe('Le NPA est obligatoire.');
 	});
 
 	it('nennt Stammdaten mit ihrem Namen in der gewählten Sprache', () => {
