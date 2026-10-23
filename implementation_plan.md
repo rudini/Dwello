@@ -202,4 +202,5 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [x] #477 @wip example «Akonto» in `help.feature`, seen red
 - [x] #477 fach review of the scenario and the texts (`docs/reviews/477-fachreview-2.md`); V-1 decided under the standing instruction and recorded in #477
 - [x] #477 glossary rows «Gültig ab (Akonto)» and «Akonto» (decided rows), `glossary_advance_text` in four languages, marker removed, row in `i18n-begriffe.md` (V-2)
-- [ ] #477 code review, closing review, pull request `Fixes #477`, merged on green CI
+- [x] #477 code review round 1 (`docs/reviews/477-review-1.md`)
+- [ ] #477 persona Dr. Weber, closing review, pull request `Fixes #477`, merged on green CI
