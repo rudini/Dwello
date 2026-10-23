@@ -1072,6 +1072,7 @@
 	"invoices_upload_unticked_mixed": "La casella «Creare questa fattura» non è spuntata perché deve prima ripartire l’importo. La spunti poi.",
 	"invoices_upload_unticked_credit": "La casella «Creare questa fattura» non è spuntata perché da una nota di credito non si crea una fattura. Se il file è comunque una fattura, la spunti.",
 	"invoices_upload_details_show": "Verificare i dati",
+	"invoices_upload_details_enter": "Inserire i dati",
 	"invoices_upload_details_hide": "Nascondere i dati",
 	"invoices_upload_remove": "Rimuovere il file",
 	"invoices_upload_preview": "Anteprima di {name}",

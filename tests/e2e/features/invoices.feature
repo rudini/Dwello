@@ -214,6 +214,7 @@ Funktionalität: Rechnungsliste
     Dann sagt die Datei von "Elektro Blitz" "Die Datei wurde nicht gelesen, weil Dwello nicht geantwortet hat. Wählen Sie «Erneut versuchen» oder füllen Sie die Felder aus."
     Und sagt die Datei von "Elektro Blitz" "Füllen Sie aus: Rechnungsdatum, Betrag, Rechnungssteller, Beschreibung."
     Und meldet Dwello "Fertig: 1 von 1. Nicht gelesen: 1."
+    Und bietet die Datei von "Elektro Blitz" "Angaben eingeben" an
 
   Szenario: Das Erstellen scheitert
     Angenommen das Erstellen von Rechnungen ist gestört

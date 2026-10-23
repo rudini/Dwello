@@ -1072,6 +1072,7 @@
 	"invoices_upload_unticked_mixed": "«Create this invoice» is not ticked because you must split the amount first. Tick it afterwards.",
 	"invoices_upload_unticked_credit": "«Create this invoice» is not ticked because no invoice is created from a credit note. If the file is an invoice after all, tick it.",
 	"invoices_upload_details_show": "Check the details",
+	"invoices_upload_details_enter": "Enter the details",
 	"invoices_upload_details_hide": "Hide the details",
 	"invoices_upload_remove": "Remove the file",
 	"invoices_upload_preview": "Preview of {name}",

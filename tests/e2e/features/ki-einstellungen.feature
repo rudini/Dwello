@@ -52,6 +52,8 @@ Funktionalität: KI in den Einstellungen wählen
     # Code-Review 626 C-4, Persona Anna 626 P-1: auch die Datei nennt danach keine KI
     Wenn der Liegenschaftsverwalter dort die Rechnung "Hauswartung.pdf" wählt
     Dann zeigt der Dialog "Rechnungen hochladen" die Datei "Hauswartung.pdf" ohne Hinweis auf eine KI
+    # #760: die leeren Angaben gibt der Liegenschaftsverwalter ein, er prüft sie nicht
+    Und bietet der Dialog "Rechnungen hochladen" zur Datei "Hauswartung.pdf" "Angaben eingeben" an
 
   Szenario: Zur lokalen KI zurückkehren
     Angenommen Dwello ist eingerichtet
