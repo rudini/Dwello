@@ -881,6 +881,7 @@
 	"statements_agreements_title": "Are these utility costs agreed?",
 	"statements_agreements_text": "These categories have costs in the billing period, and the rental contract does not say yet whether they are agreed. A category is agreed if it is listed in the signed rental contract or you have validly introduced it on the official form. Dwello bills only agreed utility costs; you bear those not agreed. Dwello stores your answer with the rental contract. If the agreement applies only from a day in this period, choose «Agreed from» and enter that day: Dwello bills the costs only from then.",
 	"statements_buildings_loading": "Dwello is counting the invoices and checking the existing statements of the buildings …",
+	"statements_late_checks_below": "Read the notes below before you continue.",
 	"statements_agreements_loading": "Dwello is checking whether the utility costs of this period are agreed in the rental contracts …",
 	"statements_agreements_failed_title": "Agreed utility costs not checked",
 	"statements_agreements_failed_text": "Dwello could not check whether all utility costs of this period are agreed in the rental contracts. You cannot continue without this check. Choose «Try again».",

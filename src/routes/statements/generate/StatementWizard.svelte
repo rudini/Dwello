@@ -81,6 +81,7 @@
 	// the step still loads what it shows: «Weiter» waits (#468); step 2 its buildings' rows, step 3 the checks below
 	let buildingsLoading = $state(false);
 	let checksLoading = $state(false);
+	let checksNoted = $state(false); // step 3 shows notes below «Weiter» (persona Marco 470 P-1)
 	const loading = $derived(buildingsLoading || checksLoading);
 	// #470: said at the top of the step, seen without scrolling
 	// its place is kept once loaded, so it does not move «Weiter» up (code review 470-1 C-2)
@@ -305,6 +306,15 @@
 	</section>
 
 	{#if form?.created == null}
+		<!-- its place kept from the start, so it does not move «Weiter» once it is said (#470) -->
+		<p
+			class="font-semibold text-ink"
+			class:hidden={step !== 3}
+			class:invisible={!checksNoted}
+			data-testid="late-checks-note"
+		>
+			{m.statements_late_checks_below()}
+		</p>
 		<SaveStatus {savedAt} />
 		<WizardNav
 			{step}
@@ -323,6 +333,7 @@
 			period={{ start: selection.periodStart, end: selection.periodEnd }}
 			bind:blocking={agreementsBlocking}
 			bind:loading={checksLoading}
+			bind:noted={checksNoted}
 			error={errors.agreements}
 		/>
 	{/if}

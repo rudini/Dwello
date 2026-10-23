@@ -1636,9 +1636,14 @@ describe('Spät geladene Inhalte im Assistenten', () => {
 		);
 		expect(follows('step-loading', 'heating-profile-select')).toBe(true);
 		expect(byTestId('wizard-status')!.textContent).toContain('Dwello prüft, ob die Mietverträge');
+		// persona Marco 470 P-1: a line above «Weiter», its place kept from the start, says to read what is below
+		expect(byTestId('late-checks-note')!.classList.contains('invisible')).toBe(true);
 		release();
 		await settle();
 		expect(follows('wizard-next', 'management-fee-not-agreed')).toBe(true);
+		expect(byTestId('late-checks-note')!.classList.contains('invisible')).toBe(false);
+		expect(byTestId('late-checks-note')!.textContent!.trim()).toBe('Lesen Sie die Hinweise unten, bevor Sie weitergehen.');
+		expect(follows('late-checks-note', 'wizard-next')).toBe(true);
 		// code review 470-1 C-2: its place stays, so «Weiter» does not move up when it is said
 		expect(byTestId('step-loading')!.classList.contains('invisible')).toBe(true);
 		expect(byTestId('step-loading')!.classList.contains('hidden')).toBe(false);

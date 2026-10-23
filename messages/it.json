@@ -881,6 +881,7 @@
 	"statements_agreements_title": "Queste spese accessorie sono pattuite?",
 	"statements_agreements_text": "Per queste categorie ci sono costi nel periodo di conteggio, e nel contratto di locazione non è ancora indicato se sono pattuite. Una categoria è pattuita se figura nel contratto di locazione firmato o se l’ha introdotta validamente con il modulo ufficiale. Dwello conteggia solo le spese accessorie pattuite; quelle non pattuite restano a suo carico. Dwello registra la sua risposta nel contratto di locazione. Se l’accordo vale solo da un giorno di questo periodo, scelga «Pattuita dal» e inserisca quel giorno: Dwello conteggia le spese solo da quel giorno.",
 	"statements_buildings_loading": "Dwello conta le fatture e verifica i conteggi esistenti degli immobili …",
+	"statements_late_checks_below": "Legga le indicazioni qui sotto prima di proseguire.",
 	"statements_agreements_loading": "Dwello verifica se i contratti di locazione prevedono le spese accessorie di questo periodo …",
 	"statements_agreements_failed_title": "Spese accessorie pattuite non verificate",
 	"statements_agreements_failed_text": "Dwello non ha potuto verificare se i contratti di locazione prevedono tutte le spese accessorie di questo periodo. Senza questa verifica non si può proseguire. Scelga «Riprovare».",

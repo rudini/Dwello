@@ -8,11 +8,13 @@
 	let {
 		buildingIds,
 		period,
-		loading = $bindable(false)
+		loading = $bindable(false),
+		noted = $bindable(false)
 	}: {
 		buildingIds: string[];
 		period: { start: string; end: string };
 		loading?: boolean; // until the contracts are known (#468)
+		noted?: boolean; // it names contracts (#470)
 	} = $props();
 
 	type Contract = { id: string; tenantName: string; apartmentNumber: string };
@@ -29,6 +31,7 @@
 			.then(({ data }) => {
 				if (left) return;
 				contracts = data?.flatMap((row) => row.withoutFee) ?? [];
+				noted = contracts.length > 0;
 				loading = false;
 			});
 		return () => {
