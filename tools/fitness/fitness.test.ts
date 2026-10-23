@@ -188,4 +188,20 @@ describe('advise', () => {
 		expect(advise({ technicalAdded: 0 }, ratchet)).toEqual([]);
 		expect(advise({ technicalAdded: -1 }, ratchet)).toEqual([]);
 	});
+
+	it('warns when a field new since the base is declared by hand in more than 4 production files outside the DB', () => {
+		const w = advise(
+			{
+				newFields: [
+					{ field: 'tenants.mailCountry', files: 5 },
+					{ field: 'tenants.mailZip', files: 4 }
+				]
+			},
+			ratchet
+		);
+		expect(w.map((f) => f.check)).toEqual(['new-field']);
+		expect(w[0].message).toContain('tenants.mailCountry');
+		expect(w[0].message).not.toContain('mailZip');
+	});
 });
+

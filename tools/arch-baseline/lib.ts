@@ -130,3 +130,18 @@ const statusAlt = STATUS.join('|');
 export const STATUS_CMP = new RegExp(`[!=]==\\s*['"\`](${statusAlt})['"\`]|['"\`](${statusAlt})['"\`]\\s*[!=]==`, 'g');
 export const ANCHORED_RE = /\/\^[^/\n]+\$\/[a-z]*/g;
 
+/** Drizzle tables of a schema.ts text and their fields (05-knowledge, tools/fitness). */
+export function tablesOf(schema: string): { table: string; fields: string[] }[] {
+	return [...schema.matchAll(/export const (\w+) = pgTable\(\s*'(\w+)',\s*\{/g)].map((m) => {
+		let depth = 1;
+		let i = m.index! + m[0].length;
+		const start = i;
+		while (depth && i < schema.length) {
+			if (schema[i] === '{') depth++;
+			else if (schema[i] === '}') depth--;
+			i++;
+		}
+		const body = schema.slice(start, i - 1);
+		return { table: m[1], fields: [...body.matchAll(/^\t{1,3}(\w+):\s*\w+\(/gm)].map((f) => f[1]) };
+	});
+}

@@ -16,6 +16,7 @@ Stand: 23.10.2026, Basis `origin/main` 868aef9. Die Checks prüfen die Szenarien
 | Ä1 | `module-cycle` | Zyklen auf Modulebene, nur Produktivmodule (`cycles-module.csv`, Tarjan aus `02-imports`) | (gleicher Lauf) | wie oben | kein neuer Zyklus; Ausnahmeliste | 2 |
 | AP1, Architektur BFF | `boundary-import` | Laufzeit-Import zwischen `src/` und `backend/` in eine der beiden Richtungen (`imports-file.csv`, `type_only = no`) | (gleicher Lauf) | wie oben | 0, ohne Ausnahme (`import type` bleibt erlaubt, damit AP1 Typen aus dem Backend ableiten kann) | 0 |
 | alle | `ratchet` | `ratchet.json` gegen die Datei der Merge-Base: keine Schwelle höher, keine Ausnahmeliste länger | < 1 s | wie oben | Ausnahmen schrumpfen nur | – |
+| Ä1 | `new-field` | Felder in `schema.ts`, die die Merge-Base nicht hat, und ihre Streuung (`m4-field-spread.csv`) | < 1 s | wie oben, PR und Push | **Warnung** über 4 Produktivdateien ausserhalb der DB (Ziel Ä1; Entscheid PO 23.10.2026: Warnung, nicht blockierend) | – |
 | Ä4, AP2 | `technical` | Einträge in `technical` gegenüber der Merge-Base | < 1 s | wie oben | **Warnung** bei jedem neuen Eintrag (Review prüft: Format, keine Fachregel) | 7 |
 | Ä1 (Ä3) | `pr-size` | Produktivdateien, -module und -schichten des PR-Diffs gegen die Merge-Base (Definition M1) | < 1 s | wie oben, PR (gegen die Merge-Base) und Push auf `main` (Diff des Pushs) | **Warnung** über P90 der Features: 31 Dateien, 20 Module, 5 Schichten | – |
 | Ä1, AP1 | `co-change` | Dateipaare verschiedener Produktivschichten, die in den letzten 6 Monaten ≥ 5-mal mit Kopplungsgrad ≥ 30 % gemeinsam geändert wurden, ohne Import (`m2-file-pairs-units-prod.csv`, Skripte 02–04) | 13 s | wie oben, nur nächtlich (`schedule`) | **Warnung** über 26 | 26 |
@@ -46,6 +47,7 @@ Lokal auf 643f84ef, Verletzung nur im Arbeitsbaum, danach zurückgesetzt (nichts
 | `module-cycle` | `src/lib/utils/format.ts` importiert `$lib/accounting-period` | rot: «fe:lib/accounting-period fe:lib/utils import each other» |
 | `boundary-import` | `import { kiSettings } from '../../backend/src/db/schema'` unter `src/lib` | rot, nennt beide Dateien |
 | `ratchet` | `fieldSpread.max` 60 → 61 in `ratchet.json` | rot: «fieldSpread.max rose from 60 to 61» |
+| `new-field` | neues Feld `tenants.mailCountry` in `schema.ts`, als Schlüssel in 5 Dateien unter `src/` | Warnung: «the new field tenants.mailCountry is declared by hand in 5 production files outside the DB (target 4)» |
 | `technical` | zusätzlicher Eintrag in `technical` | Warnung: «has 1 technical check(s) in the BFF that the base does not list»; ebenso, wenn ein Eintrag ausgetauscht wird (Befund C-5) |
 | `pr-size` | `--base v0.80.0` | Warnung: «156 files, 96 modules and 5 layers» |
 | `co-change` | `coChangeWarn` 26 → 20 | Warnung: «26 pairs … (ratchet 20)» |

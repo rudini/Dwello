@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { appendFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { ANCHORED_RE, ARCH_LAYERS, ROOT, STATUS_CMP, changedFiles, classify, git, median, quantile } from '../arch-baseline/lib';
+import { ANCHORED_RE, ARCH_LAYERS, ROOT, STATUS_CMP, changedFiles, classify, git, median, quantile, tablesOf } from '../arch-baseline/lib';
 
 type Spread = { median: number; p90: number; max: number };
 type Exception = { reason: string; scenario: string };
@@ -75,7 +75,13 @@ export function judge(m: Measured, r: Ratchet): Finding[] {
 }
 
 /** Warnings, never failures: metrics that vary with the task or the time window. */
-export function advise(a: { prSize?: Ratchet['prSizeWarn']; coChange?: number; technicalAdded?: number }, r: Ratchet): Finding[] {
+/** Ä1 target (utility-tree.md): a new field is declared by hand in at most 4 production files outside the DB */
+const NEW_FIELD_MAX = 4;
+
+export function advise(
+	a: { prSize?: Ratchet['prSizeWarn']; coChange?: number; technicalAdded?: number; newFields?: { field: string; files: number }[] },
+	r: Ratchet
+): Finding[] {
 	const w = r.prSizeWarn;
 	const s = a.prSize;
 	const findings: Finding[] = [];
@@ -94,6 +100,12 @@ export function advise(a: { prSize?: Ratchet['prSizeWarn']; coChange?: number; t
 			check: 'technical',
 			message: `Ä4/AP2: tools/fitness/ratchet.json has ${a.technicalAdded} technical check(s) in the BFF that the base does not list. Confirm in the review that each new entry checks a format (UUID, ISO date of a query parameter), not a domain rule or form input; those belong to the backend.`
 		});
+	for (const f of a.newFields ?? [])
+		if (f.files > NEW_FIELD_MAX)
+			findings.push({
+				check: 'new-field',
+				message: `Ä1/AP1 «Eine Form hat eine Quelle»: the new field ${f.field} is declared by hand in ${f.files} production files outside the DB (target ${NEW_FIELD_MAX}). Fix: take it from the area's mapper or the backend's API type instead of declaring it again in each layer.`
+			});
 	return findings;
 }
 
@@ -210,6 +222,13 @@ function prSize(base: string) {
 	return { files: prod.length, modules: new Set(prod.map((c) => c.module)).size, layers: new Set(prod.map((c) => c.layer)).size };
 }
 
+/** Fields of schema.ts that the base does not have, with their spread from the measurement in `out`. */
+function newFields(out: string, base: string) {
+	const known = new Set(tablesOf(git(['show', `${base}:backend/src/db/schema.ts`])).flatMap((t) => t.fields.map((f) => `${t.table}.${f}`)));
+	const spread: Record<string, string>[] = JSON.parse(readFileSync(join(out, 'm4-field-spread.csv.json'), 'utf8'));
+	return spread.map((r) => ({ field: `${r.table}.${r.field}`, files: +r.prod_files })).filter((f) => !known.has(f.field));
+}
+
 function coChange(out: string) {
 	const since = new Date(Date.now() - 183 * 864e5).toISOString().slice(0, 10);
 	const read = scripts(out, ['02-imports.ts', '03-history.ts', '04-metrics.ts'], { ARCH_SINCE: since, ARCH_BASE: 'HEAD' });
@@ -237,7 +256,7 @@ if (import.meta.main) {
 	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet) : [])];
 	const pairs = cochange ? coChange(out) : undefined;
 	const technicalAdded = baseRatchet ? unlisted(ratchet.technical, baseRatchet.technical, (t) => `${t.path}\t${t.line}`).length : 0;
-	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs, technicalAdded }, ratchet);
+	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs, technicalAdded, newFields: base && m ? newFields(out, base) : undefined }, ratchet);
 	if (pairs !== undefined) console.log(`Fitness: ${pairs} production file pairs across layers change together without an import (6 months)`);
 	const say = (level: 'error' | 'warning', f: Finding) => console.log(github ? `::${level} title=Fitness ${f.check}::${f.message}` : `${level} [${f.check}] ${f.message}`);
 	errors.forEach((f) => say('error', f));
