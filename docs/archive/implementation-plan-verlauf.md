@@ -3055,3 +3055,13 @@ Request: implement the seven points of the landing review (animations back with 
 - [x] BFF sends what was entered and maps refusals to fields; texts as `backend_<code>` in four languages, 6 unused keys removed
 - [x] `code-reviewer` round 1 (`docs/reviews/h28f-review-1.md`: K-1 Major, the E2E seed «keine Korrespondenzadresse»; K-2..K-4 Minor), round 2 (`h28f-review-2.md`: K-1..K-3 fixed, K-5 Minor), closing round (`h28f-review-3.md`: K-5 fixed; K-4 stays)
 - [x] Before complete; PR pushed after this archive
+
+## Session: stable invoice order in statements (#759)
+
+Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request. Cause: `getInvoicesForStatement` orders by invoice date only, so invoices of one day come in arbitrary order, and with them the statement's positions and the PDF's list of agreed categories.
+
+- [x] Reproducing pg test, seen red (two invoices of one day, the first edited after the second was entered)
+- [x] Fix: deterministic tiebreaker in `getInvoicesForStatement`
+- [x] Checks: backend suite 1525 pass (coverage 96.3 % lines), lint, check, type-check, Prettier on added files
+- [x] Code review of the slice: `docs/reviews/invoice-order-review-1.md` (no finding)
+- [x] Archive; PR with `Fixes #759`, `No scenario`, pushed after this archive
