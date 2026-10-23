@@ -2973,3 +2973,14 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Review round 2: `docs/reviews/h28c-review-2.md` (E-1..E-3 fixed)
 - [x] Workflow note: commit-msg gate misses `-F` (`docs/reviews/workflow-notes-h28-heating-hints.md`)
 - [x] Merge `main` after #646 (clean), before complete; PR pushed after this archive
+
+## Session #647: heating hints for a berichtigte Abrechnung
+
+#647 (decided 23.10.2026, option 1): the contracts that count for the heating hints of a run (#339, #335) are the ones the run bills (`planRun`), a contract whose statement of the period is replaced included. Scenario «Hinweis auf Rechnungen der Heizkosten ohne Leistungszeitraum beim Lauf einer berichtigten Abrechnung» (`statement-generate.feature`).
+
+- [x] `@wip` scenario, seen failing at the missing hint; `fach-reviewer` on it before implementing: `docs/reviews/647-fachreview-1.md` (F-1, F-2 fixed)
+- [x] Unit tests in `statement-run.test.ts`: the replaced case flipped (#339), and #335 with a replaced statement; red first
+- [x] `runHeatingHints` counts by `planRun`
+- [x] Slice review `code-reviewer`: `docs/reviews/647-review-1.md` (no findings)
+- [x] Feature review: persona Dr. Weber (`docs/design/personas/weber-647.md`): task done, Minors P-1..P-4 stay in the report
+- [x] Before complete; PR `Fixes #647` pushed after this archive
