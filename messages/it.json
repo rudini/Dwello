@@ -89,7 +89,7 @@
 	"glossary_period_term": "Periodo di conteggio",
 	"glossary_period_text": "L’anno per cui conteggia le spese accessorie, per esempio l’anno civile o da luglio a giugno. Senza periodo di prestazione, la data della fattura determina in quale periodo di conteggio rientra una fattura. Con un periodo di prestazione contano solo i giorni di quest’ultimo compresi nel periodo di conteggio.",
 	"glossary_advance_term": "Acconto",
-	"glossary_advance_text": "L’anticipo mensile dell’inquilino per le spese accessorie. Il conteggio spese accessorie lo compensa con i costi effettivi.",
+	"glossary_advance_text": "L’anticipo mensile dell’inquilino per le spese accessorie. Il conteggio spese accessorie lo compensa con i costi effettivi. Il conteggio spese accessorie deduce l’acconto pattuito, non quello pagato. Regoli i pagamenti mancanti al di fuori di Dwello.",
 	"glossary_net_rent_term": "Pigione netta",
 	"glossary_net_rent_text": "La pigione mensile di base, senza spese accessorie.",
 	"glossary_additional_rent_term": "Pigione supplementare",

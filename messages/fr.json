@@ -89,7 +89,7 @@
 	"glossary_period_term": "Période de décompte",
 	"glossary_period_text": "L’année pour laquelle vous décomptez les frais accessoires, par exemple l’année civile ou de juillet à juin. Sans période de prestation, la date de facture détermine dans quelle période de décompte tombe une facture. Avec une période de prestation, seuls ses jours compris dans la période de décompte comptent.",
 	"glossary_advance_term": "Acompte",
-	"glossary_advance_text": "L’avance mensuelle du locataire pour les frais accessoires. Le décompte des charges l’impute sur les coûts effectifs.",
+	"glossary_advance_text": "L’avance mensuelle du locataire pour les frais accessoires. Le décompte des charges l’impute sur les coûts effectifs. Le décompte des charges déduit l’acompte convenu, pas l’acompte payé. Réglez les paiements manquants en dehors de Dwello.",
 	"glossary_net_rent_term": "Loyer net",
 	"glossary_net_rent_text": "Le loyer mensuel de base, sans les frais accessoires.",
 	"glossary_additional_rent_term": "Loyer supplémentaire",
