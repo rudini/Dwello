@@ -1,7 +1,0 @@
-# Workflow notes: #479 (Gebäude mit allen Wohnungen aus dem Gebäuderegister)
-
-| Rule | What happened | Proposed change |
-|---|---|---|
-| `docs/design/personas/README.md`, "Running a review" | The change calls an outside service (api3.geo.admin.ch) from the frontend server. All five personas of round 1 ran against the persona stack and every search answered «nicht erreichbar»: Node's `fetch` ignores `HTTPS_PROXY` in the cloud container. One whole persona round (five agents) was spent before the cause was found. | When a change calls an outside service, the caller checks one call through the persona stack (`/api/...` with the persona-kit cookie) before starting personas; `persona-stack.sh` now starts the frontend with `NODE_USE_ENV_PROXY=1`. |
-| `CLAUDE.md`, "Done means" (a finding that existed before the change) | Sven's P-2 (focus to `main` after the skip link) was on the base commit, but the Wohnungen made it far more visible (the error 30 tabs down). The rule says such a finding belongs to the slice; first I took it as existing before and wrote a row, then removed it and fixed it. | Name the test: «visible to the persona in the task of this change» counts as more visible; say it in the persona README too. |
-| Stop hook outside the repo (`~/.claude/stop-hook-git-check.sh`) | As in `workflow-notes-ci-main-runs.md`: it asked four times to push or commit while personas were still writing reports. | As there. |

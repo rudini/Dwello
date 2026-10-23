@@ -1,7 +1,0 @@
-# Workflow notes: #112 and #52 (session W7b)
-
-| Rule | What happened | Proposed change |
-|---|---|---|
-| Skill `pull-request`, "Which pull requests" vs. coordinator prompt | As in `workflow-notes-issue-116-141.md` and `workflow-notes-issue-247-230-232.md`. New: here the two issues were independent (#52 only a help text), so I followed the skill, but only after both were implemented on one branch: the #52 part had to be copied file by file onto a second branch from `main`, and the #112 branch keeps the same lines until #301 is merged. | `CLAUDE.md`, "Working on an issue": a request with several issues starts one branch per issue (or names the issues that share code and get one pull request) before the first scenario, not at the push. |
-| Skill `slice-review`, 1. Worktree (symlinked `node_modules`) | In a worktree with the symlink, `bunx vitest run src/__tests__/form-selects.dom.test.ts` fails (`Cannot find module …/node_modules/.ssr-*/…`: the hydrate helper writes its SSR build under `node_modules`, which points to the main tree); the code reviewer could not run vitest either, so every check in its report is "vom Aufrufer gemeldet". | Name it in `slice-review` (or make `hydrate.ts` write outside `node_modules`), so a reviewer or a second branch's worktree can run the whole vitest suite. |
-| Stop hook `~/.claude/stop-hook-git-check.sh` | Asked four times to commit and push while reviewers ran; CLAUDE.md already says it overrides neither step 4 nor 9. | As in earlier notes; nothing new. |

@@ -1,5 +1,0 @@
-# Workflow notes: #620 (KI bei der Einrichtung)
-
-| Rule | What happened in this task | Proposed change |
-|---|---|---|
-| `docs/design/personas/README.md`, "Running a review" (the app) and `docs/design/tools/persona-stack.sh` | The change is on the setup page, which only a fresh installation shows (no account, no OAuth). The persona stack always loads the demo data and configures OAuth, so it never shows the setup. I built the persona app with the script, then started two fresh installations of my own on the build (no demo data, no OAuth variables, a fixed `SETUP_CODE`, the KI stand-in with `LLM_STUB_PULL=on`): one per persona, because the setup can be done only once. The personas of #577 also used an improvised fresh installation (`anna-577.md`, :3323). | Give `persona-stack.sh` a `--fresh` option (no demo data, no OAuth, a fixed `SETUP_CODE`, `LLM_STUB_PULL=on`) and a port offset for a second instance, and say in the README that each persona that sets Dwello up gets its own fresh instance. |

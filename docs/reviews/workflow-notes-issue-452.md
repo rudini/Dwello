@@ -1,7 +1,0 @@
-# Workflow notes: issue 452 (categories, required Verteilschlüssel)
-
-| Rule location | What happened in this task | Proposed change |
-|---|---|---|
-| `backend/CLAUDE.md` (migrations) | Missing for parallel workers: the migration of #452 was renamed twice (0026, 0027, 0028), because other branches merged their own migrations with the same number first. Each rename meant changing the file, its journal entry and the tests that name it. The coordinator added a rule only during the run: check `git ls-tree origin/main backend/migrations/` before each push; whoever merges first keeps the number. | Add that rule to `backend/CLAUDE.md`: take the next free number on `origin/main`, check it again before each push, and rename the file only then. |
-| `CLAUDE.md`, "Design-Regeln", "Process" (`tests/a11y/screens.json`) | Unclear: a new screen needs a `default` state as its first state. Only the a11y test showed this, after the rows were written. | Add one sentence: each screen in `screens.json` starts with the state `default`. |
-| `docs/design/personas/README.md`, "Running a review" | Missing: to show the old state «invoice without a Verteilschlüssel», the persona data was set by SQL. The app cannot make this state after #452. The persona then reported the state as a Major (two «Hauswart» lines), and the triage had to show that it existed before (#379, now #528). | When a review seeds a state by SQL that the change no longer lets the app make, the persona task says so. Then the finding is marked as a legacy state, and its triage is known before the run. |
