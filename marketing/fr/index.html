@@ -104,6 +104,7 @@ p { margin: 0; }
 .badge .ic { width: 14px; height: 14px; stroke-width: 2; }
 .badge.info { background: var(--accent-soft); color: var(--accent); }
 .badge.caution { background: var(--caution-soft); color: var(--caution); }
+.badge.plan { background: var(--sunken); color: var(--ink-muted); border-style: dashed; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
 
 /* Header: the app's header */
@@ -137,7 +138,10 @@ section { padding-block: 96px; }
 /* Hero */
 .hero { padding-block: 72px 64px; border-bottom: 1px solid var(--line); }
 .hero-grid { display: grid; gap: 48px; align-items: center; }
-@media (min-width: 980px) { .hero-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); } }
+@media (min-width: 980px) { .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+/* In one column the letter follows the sentence that points at it, before the buttons */
+@media (max-width: 979px) { .hero .hero-copy { display: contents; } .hero-grid { gap: 24px; } .hero .pdfs { order: 3; margin-block: 8px; } .hero .actions, .hero-note { order: 4; } }
+.hero .paper a { display: block; }
 .hero-copy { display: grid; gap: 24px; max-width: 820px; }
 .hero h1 { font-size: clamp(2.5rem, 5vw, 3.75rem); letter-spacing: -0.035em; line-height: 1.04; font-weight: 750; }
 .hero h1 span { color: var(--accent); }
@@ -177,10 +181,13 @@ section { padding-block: 96px; }
 .flow li { counter-increment: flow; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
 .flow li::before { content: counter(flow); display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-control); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 .anim { display: grid; gap: 12px; margin: 0; min-width: 0; }
+.anim.run .flow li { animation: a-step .4s ease-out both; }
+.anim.run .flow li:nth-child(2) { animation-delay: 1.4s; } .anim.run .flow li:nth-child(3) { animation-delay: 4.6s; }
+@keyframes a-step { to { background: var(--accent-soft); border-color: var(--accent); } }
 .anim-play { justify-self: start; }
 .anim-play[hidden] { display: none; }
 .anim-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; align-items: start; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
-.anim-doc { width: 96px; height: auto; fill: var(--sunken); stroke: var(--line-strong); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.anim-doc { width: 96px; height: auto; fill: var(--sunken); stroke: var(--ink-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .anim-fields { margin: 0; display: grid; gap: 12px; }
 .anim-fields dt { font-size: 0.9375rem; color: var(--ink-muted); }
 .anim-fields dd { margin: 0; font-weight: 600; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -395,7 +402,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p class="hero-note">Gratuit et sans abonnement. L’installation, les mises à jour et les sauvegardes sont faites par quelqu’un qui s’y connaît en informatique ; pour travailler avec Dwello, vous n’avez besoin d’aucune connaissance technique.</p>
 		</div>
 		<div class="pdfs">
-			<figure class="paper"><img src="../shots/fr/pdf-page-1.webp" width="1100" height="1555" alt="Page 1 du décompte des charges de Pierre Dubois : montant à payer CHF 142.35, récapitulatif des coûts par catégorie."></figure>
+			<figure class="paper"><a href="../shots/fr/pdf-page-1.webp" aria-label="Afficher le décompte en grand"><img src="../shots/fr/pdf-page-1.webp" width="1100" height="1555" alt="Page 1 du décompte des charges de Pierre Dubois : montant à payer CHF 142.35, récapitulatif des coûts par catégorie."></a></figure>
 			<figure class="paper qr"><img src="../shots/fr/pdf-qr-part.webp" width="1240" height="666" alt="Section paiement QR avec croix suisse, compte, référence et montant CHF 142.35."></figure>
 		</div>
 	</div>
@@ -410,7 +417,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello est fait pour les personnes qui possèdent un immeuble et ne veulent pas tenir une gérance. La vue d’ensemble vous dit quoi faire ensuite, et chaque champ explique son terme.</p>
 		</div>
 		<!-- The app's motifs Gebäude, Abrechnung and Versand (src/lib/ui/illustrations), as the brand manual asks: line, fill, one accent stroke -->
-		<svg class="journey" viewBox="0 0 520 120" role="img" aria-label="De l’immeuble au décompte, jusqu’à la lettre aux locataires" fill="var(--sunken)" stroke="var(--line-strong)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<svg class="journey" viewBox="0 0 520 120" role="img" aria-label="De l’immeuble au décompte, jusqu’à la lettre aux locataires" fill="var(--sunken)" stroke="var(--ink-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 			<line x1="16" y1="104" x2="144" y2="104" fill="none"/>
 			<rect x="44" y="50" width="72" height="54"/>
 			<polyline points="34,56 80,20 126,56" fill="none"/>
@@ -446,7 +453,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Voici Dwello</span>
 			<h2>Le logiciel fait le travail. Vous décidez.</h2>
-			<p>Toutes les images de cette page viennent de la vraie application avec les données de démonstration : trois immeubles à Zurich, Lucerne et Interlaken.</p>
+			<p>Les captures d’écran et les exemples de cette page viennent de la vraie application avec les données de démonstration : trois immeubles à Zurich, Lucerne et Interlaken.</p>
 		</div>
 
 		<!-- Invoices -->
@@ -455,11 +462,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<span class="badge info">Factures et IA</span>
 				<h3>Les factures par glisser-déposer. Lues sur votre propre ordinateur.</h3>
 				<p>Glissez jusqu’à 20 factures à la fois dans Dwello. L’IA lit l’émetteur, le montant, la date et la période de prestation et attribue la catégorie. Ce dont elle n’est pas sûre, Dwello l’indique. La facture n’est créée que lorsque vous confirmez.</p>
-				<ol class="flow" aria-label="Comment une facture arrive dans Dwello">
-					<li>Vous glissez une facture, par exemple celle du service des eaux.</li>
-					<li>L’IA lit le montant, la date et la catégorie.</li>
-					<li>Vous vérifiez les données et confirmez.</li>
-				</ol>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>IA locale avec Ollama, sans cloud<small>Avec l’IA locale, vos pièces justificatives ne quittent pas le serveur. Qui le souhaite connecte à la place n’importe quelle IA compatible OpenAI.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Indication des factures manquantes<small>Dwello attend ce qui est arrivé l’an dernier. S’il manque la facture d’eau, vous le voyez avant le décompte.</small></span></li>
@@ -467,7 +469,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				</ul>
 			</div>
 			<figure class="anim" data-anim data-end="a-pop" aria-label="Animation : comment une facture arrive dans Dwello">
-				<button class="btn btn-secondary anim-play" type="button" hidden>Lire le déroulement</button>
+				<ol class="flow" aria-label="Comment une facture arrive dans Dwello">
+					<li>Vous glissez une facture, par exemple celle du service des eaux.</li>
+					<li>L’IA lit le montant, la date et la catégorie.</li>
+					<li>Vous vérifiez les données et confirmez.</li>
+				</ol>
 				<div class="anim-card">
 					<!-- The app's motif Rechnungen; the fields next to it are text, as the brand manual asks (no text in a drawing) -->
 					<svg class="anim-doc a-doc" viewBox="0 0 160 120" aria-hidden="true">
@@ -479,10 +485,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 					<dl class="anim-fields">
 						<div><dt>Émetteur de la facture</dt><dd class="a-v a-v1">Wasserversorgung Zürich</dd></div>
 						<div><dt>Montant</dt><dd class="a-v a-v2">CHF 930.00</dd></div>
-						<div><dt>Date</dt><dd class="a-v a-v3">31.03.2025 <span class="badge caution a-chk">À vérifier</span></dd></div>
+						<div><dt>Date</dt><dd class="a-v a-v3">31.03.2025 <span class="badge caution a-chk"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>À vérifier</span></dd></div>
 						<div><dt>Catégorie</dt><dd class="a-v a-v4">Eau froide</dd></div>
 					</dl>
 				</div>
+				<button class="btn btn-secondary anim-play" type="button" hidden>Lire le déroulement</button>
 			</figure>
 		</div>
 
@@ -514,9 +521,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 			<figure class="anim" data-anim data-end="a-mark" aria-label="Animation : comment Dwello répartit les coûts de l’ascenseur">
 				<p>Un exemple tiré des données de démo : l’ascenseur du Musterhaus Zentrum coûte CHF 1'690.00 par an. Réparti par unité, chacun des six appartements en supporte CHF 281.67, y compris l’appartement 1.01 de Hans Müller.</p>
-				<button class="btn btn-secondary anim-play" type="button" hidden>Lire la répartition</button>
 				<div class="split-total" aria-hidden="true"><span>Ascenseur</span><span>CHF 1'690.00</span></div>
 				<div class="split-bar" aria-hidden="true"><span class="me">1.01<small>281.67</small></span><span>1.02<small>281.67</small></span><span>2.01<small>281.67</small></span><span>2.02<small>281.67</small></span><span>3.01<small>281.67</small></span><span>3.02<small>281.67</small></span></div>
+				<button class="btn btn-secondary anim-play" type="button" hidden>Lire la répartition</button>
 			</figure>
 		</div>
 	</div>
@@ -544,11 +551,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Installer</span>
 			<h2>Faire installer, puis travailler dans le navigateur.</h2>
-			<p>L’installation est faite une fois par quelqu’un qui s’y connaît en informatique : un membre de la famille, une connaissance ou votre service informatique. Donnez-lui le guide ; il faut environ une heure. Ensuite, vous travaillez dans le navigateur, sans connaissances techniques. Cette personne fait les mises à jour et les sauvegardes régulières ; le guide les décrit.</p>
+			<p>L’installation est faite une fois par quelqu’un qui s’y connaît en informatique : un membre de la famille, une connaissance ou votre service informatique. Donnez-lui le guide ; il faut environ une heure. Ensuite, vous travaillez dans le navigateur, sans connaissances techniques. Cette personne fait les mises à jour et les sauvegardes régulières ; le guide les décrit. Sur votre propre PC, Dwello ne tourne que tant qu’il est allumé ; sur un serveur domestique ou un serveur dans le cloud, il est toujours accessible, aussi depuis le téléphone.</p>
 			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide à transmettre (en anglais)</a></div>
 		</div>
+		<div class="alert" style="margin-bottom:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Connexion avec mot de passe</b>Lors de l’installation, un compte avec adresse e-mail et mot de passe est créé. Qui le souhaite se connecte plutôt avec son compte Google ; le guide montre les deux. Un installateur en une étape est prévu (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 sur GitHub : installateur en une étape">#579</a>).</span></div>
 		<details class="helper">
-			<summary class="btn btn-secondary">Pour la personne qui installe : les commandes</summary>
+			<summary class="btn btn-secondary">Pour la personne qui installe : PC, serveur domestique ou cloud, et les commandes</summary>
 			<div class="helper-body">
 		<div class="tabs" role="tablist" aria-label="Où Dwello doit-il tourner ?">
 			<button class="tab" role="tab" id="tab-pc" aria-selected="true" aria-controls="panel-pc"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg>Votre PC</button>
@@ -623,7 +631,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Connexion avec mot de passe</b>Lors de l’installation, un compte avec adresse e-mail et mot de passe est créé. Qui le souhaite se connecte plutôt avec son compte Google ; le guide montre les deux. Un installateur en une étape est prévu (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 sur GitHub : installateur en une étape">#579</a>).</span></div>
 			</div>
 		</details>
 	</div>
@@ -721,11 +728,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello est développé ouvertement. Ces points sont prévus ; la plupart ont leur ticket sur GitHub, où vous pouvez donner votre avis.</p>
 		</div>
 		<ul class="road">
-			<li><a href="https://github.com/rudini/Dwello/issues/579" rel="noopener">Installateur en une étape</a><span>Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur.</span></li>
-			<li><a href="https://github.com/rudini/Dwello/issues/495" rel="noopener">Serveur MCP</a><span>Dwello comme outil pour votre assistant IA, en local et avec votre autorisation.</span></li>
-			<li><a href="https://github.com/rudini/Dwello/issues/496" rel="noopener">Export complet</a><span>Toutes les données en CSV et JSON, à tout moment, en un clic.</span></li>
-			<li><b>Rapports et analyses</b><span>Recettes, dépenses et frais accessoires au fil des ans, pour la déclaration d’impôt et la fiduciaire.</span></li>
-			<li><a href="https://github.com/rudini/Dwello/issues/498" rel="noopener">Lien vers le code source dans l’application</a><span>Chaque installation indique où se trouve son code source, comme l’exige l’AGPL.</span></li>
+			<li><span class="badge plan">Prévu</span><a href="https://github.com/rudini/Dwello/issues/579" rel="noopener">Installateur en une étape</a><span>Une ligne à coller installe Docker et Dwello, la suite se fait dans le navigateur.</span></li>
+			<li><span class="badge plan">Prévu</span><a href="https://github.com/rudini/Dwello/issues/495" rel="noopener">Serveur MCP</a><span>Dwello comme outil pour votre assistant IA, en local et avec votre autorisation.</span></li>
+			<li><span class="badge plan">Prévu</span><a href="https://github.com/rudini/Dwello/issues/496" rel="noopener">Export complet</a><span>Toutes les données en CSV et JSON, à tout moment, en un clic.</span></li>
+			<li><span class="badge plan">Prévu</span><b>Rapports et analyses</b><span>Recettes, dépenses et frais accessoires au fil des ans, pour la déclaration d’impôt et la fiduciaire.</span></li>
+			<li><span class="badge plan">Prévu</span><a href="https://github.com/rudini/Dwello/issues/498" rel="noopener">Lien vers le code source dans l’application</a><span>Chaque installation indique où se trouve son code source, comme l’exige l’AGPL.</span></li>
 		</ul>
 	</div>
 </section>

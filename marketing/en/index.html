@@ -104,6 +104,7 @@ p { margin: 0; }
 .badge .ic { width: 14px; height: 14px; stroke-width: 2; }
 .badge.info { background: var(--accent-soft); color: var(--accent); }
 .badge.caution { background: var(--caution-soft); color: var(--caution); }
+.badge.plan { background: var(--sunken); color: var(--ink-muted); border-style: dashed; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
 
 /* Header: the app's header */
@@ -137,7 +138,10 @@ section { padding-block: 96px; }
 /* Hero */
 .hero { padding-block: 72px 64px; border-bottom: 1px solid var(--line); }
 .hero-grid { display: grid; gap: 48px; align-items: center; }
-@media (min-width: 980px) { .hero-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); } }
+@media (min-width: 980px) { .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+/* In one column the letter follows the sentence that points at it, before the buttons */
+@media (max-width: 979px) { .hero .hero-copy { display: contents; } .hero-grid { gap: 24px; } .hero .pdfs { order: 3; margin-block: 8px; } .hero .actions, .hero-note { order: 4; } }
+.hero .paper a { display: block; }
 .hero-copy { display: grid; gap: 24px; max-width: 820px; }
 .hero h1 { font-size: clamp(2.5rem, 5vw, 3.75rem); letter-spacing: -0.035em; line-height: 1.04; font-weight: 750; }
 .hero h1 span { color: var(--accent); }
@@ -177,10 +181,13 @@ section { padding-block: 96px; }
 .flow li { counter-increment: flow; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
 .flow li::before { content: counter(flow); display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-control); background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 .anim { display: grid; gap: 12px; margin: 0; min-width: 0; }
+.anim.run .flow li { animation: a-step .4s ease-out both; }
+.anim.run .flow li:nth-child(2) { animation-delay: 1.4s; } .anim.run .flow li:nth-child(3) { animation-delay: 4.6s; }
+@keyframes a-step { to { background: var(--accent-soft); border-color: var(--accent); } }
 .anim-play { justify-self: start; }
 .anim-play[hidden] { display: none; }
 .anim-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; align-items: start; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); }
-.anim-doc { width: 96px; height: auto; fill: var(--sunken); stroke: var(--line-strong); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.anim-doc { width: 96px; height: auto; fill: var(--sunken); stroke: var(--ink-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .anim-fields { margin: 0; display: grid; gap: 12px; }
 .anim-fields dt { font-size: 0.9375rem; color: var(--ink-muted); }
 .anim-fields dd { margin: 0; font-weight: 600; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -395,7 +402,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p class="hero-note">Free and without a subscription. Someone who knows computers does the setup, updates and backups; to work with Dwello you need no technical knowledge.</p>
 		</div>
 		<div class="pdfs">
-			<figure class="paper"><img src="../shots/en/pdf-page-1.webp" width="1100" height="1555" alt="Page 1 of Nina Brunner’s utility cost statement: amount due CHF 113.75, cost overview by category."></figure>
+			<figure class="paper"><a href="../shots/en/pdf-page-1.webp" aria-label="Show the statement enlarged"><img src="../shots/en/pdf-page-1.webp" width="1100" height="1555" alt="Page 1 of Nina Brunner’s utility cost statement: amount due CHF 113.75, cost overview by category."></a></figure>
 			<figure class="paper qr"><img src="../shots/en/pdf-qr-part.webp" width="1240" height="666" alt="QR payment part with the Swiss cross, account, reference and amount CHF 113.75."></figure>
 		</div>
 	</div>
@@ -410,7 +417,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello is made for people who own a building and do not want to run a property management business. The overview tells you what to do next, and every field explains its term.</p>
 		</div>
 		<!-- The app's motifs Gebäude, Abrechnung and Versand (src/lib/ui/illustrations), as the brand manual asks: line, fill, one accent stroke -->
-		<svg class="journey" viewBox="0 0 520 120" role="img" aria-label="From the building to the statement to the letter to the tenants" fill="var(--sunken)" stroke="var(--line-strong)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<svg class="journey" viewBox="0 0 520 120" role="img" aria-label="From the building to the statement to the letter to the tenants" fill="var(--sunken)" stroke="var(--ink-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 			<line x1="16" y1="104" x2="144" y2="104" fill="none"/>
 			<rect x="44" y="50" width="72" height="54"/>
 			<polyline points="34,56 80,20 126,56" fill="none"/>
@@ -446,7 +453,7 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">This is Dwello</span>
 			<h2>The software does the work. You decide.</h2>
-			<p>Every picture on this page comes from the real app with its demo data: three buildings in Zurich, Lucerne and Interlaken.</p>
+			<p>The screenshots and examples on this page come from the real app with its demo data: three buildings in Zurich, Lucerne and Interlaken.</p>
 		</div>
 
 		<!-- Invoices -->
@@ -455,11 +462,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				<span class="badge info">Invoices and AI</span>
 				<h3>Invoices by drag and drop. Read on your own computer.</h3>
 				<p>Drop up to 20 invoices into Dwello at once. The AI reads the invoice issuer, amount, date and service period and assigns the category. Whatever it is not sure about, Dwello points out. The invoice is only created once you confirm.</p>
-				<ol class="flow" aria-label="How an invoice gets into Dwello">
-					<li>You drop in an invoice, say the one from the water utility.</li>
-					<li>The AI reads the amount, date and category.</li>
-					<li>You check the details and confirm.</li>
-				</ol>
 				<ul class="checks">
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Local AI with Ollama, no cloud<small>With the local AI your supporting documents never leave the server. If you like, connect any OpenAI-compatible AI instead.</small></span></li>
 					<li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Missing invoices flagged<small>Dwello expects what came last year. If the water invoice is missing, you see it before the statement.</small></span></li>
@@ -467,7 +469,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 				</ul>
 			</div>
 			<figure class="anim" data-anim data-end="a-pop" aria-label="Animation: how an invoice gets into Dwello">
-				<button class="btn btn-secondary anim-play" type="button" hidden>Play the steps</button>
+				<ol class="flow" aria-label="How an invoice gets into Dwello">
+					<li>You drop in an invoice, say the one from the water utility.</li>
+					<li>The AI reads the amount, date and category.</li>
+					<li>You check the details and confirm.</li>
+				</ol>
 				<div class="anim-card">
 					<!-- The app's motif Rechnungen; the fields next to it are text, as the brand manual asks (no text in a drawing) -->
 					<svg class="anim-doc a-doc" viewBox="0 0 160 120" aria-hidden="true">
@@ -479,10 +485,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 					<dl class="anim-fields">
 						<div><dt>Invoice issuer</dt><dd class="a-v a-v1">Wasserversorgung Zürich</dd></div>
 						<div><dt>Amount</dt><dd class="a-v a-v2">CHF 930.00</dd></div>
-						<div><dt>Date</dt><dd class="a-v a-v3">31.03.2025 <span class="badge caution a-chk">Please check</span></dd></div>
+						<div><dt>Date</dt><dd class="a-v a-v3">31.03.2025 <span class="badge caution a-chk"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg>Please check</span></dd></div>
 						<div><dt>Category</dt><dd class="a-v a-v4">Cold Water</dd></div>
 					</dl>
 				</div>
+				<button class="btn btn-secondary anim-play" type="button" hidden>Play the steps</button>
 			</figure>
 		</div>
 
@@ -514,9 +521,9 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 			<figure class="anim" data-anim data-end="a-mark" aria-label="Animation: how Dwello splits the cost of the elevator">
 				<p>An example from the demo data: the elevator in Musterhaus Zentrum costs CHF 1'690.00 a year. Split per unit, each of the six apartments bears CHF 281.67, Hans Müller’s apartment 1.01 included.</p>
-				<button class="btn btn-secondary anim-play" type="button" hidden>Play the split</button>
 				<div class="split-total" aria-hidden="true"><span>Elevator</span><span>CHF 1'690.00</span></div>
 				<div class="split-bar" aria-hidden="true"><span class="me">1.01<small>281.67</small></span><span>1.02<small>281.67</small></span><span>2.01<small>281.67</small></span><span>2.02<small>281.67</small></span><span>3.01<small>281.67</small></span><span>3.02<small>281.67</small></span></div>
+				<button class="btn btn-secondary anim-play" type="button" hidden>Play the split</button>
 			</figure>
 		</div>
 	</div>
@@ -544,11 +551,12 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 		<div class="sec-head">
 			<span class="kicker">Install</span>
 			<h2>Have it set up, then work in the browser.</h2>
-			<p>Someone who knows computers sets it up once: a family member, a friend or your IT service. Give that person the guide; it takes about an hour. After that you work in the browser, with no technical knowledge. That person does updates and regular backups; the guide describes them.</p>
+			<p>Someone who knows computers sets it up once: a family member, a friend or your IT service. Give that person the guide; it takes about an hour. After that you work in the browser, with no technical knowledge. That person does updates and regular backups; the guide describes them. On your own PC Dwello runs only while it is switched on; on a home server or a server in the cloud it is always reachable, from your phone too.</p>
 			<div class="actions"><a class="btn btn-primary" href="https://github.com/rudini/Dwello/blob/main/docs/installation.md" rel="noopener">Guide to hand on</a></div>
 		</div>
+		<div class="alert" style="margin-bottom:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Sign-in with password</b>During setup, an account with email address and password is created. If you prefer, sign in with your Google account instead; the guide shows both. A one-step installer is planned (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 on GitHub: one-step installer">#579</a>).</span></div>
 		<details class="helper">
-			<summary class="btn btn-secondary">For the person who sets it up: the commands</summary>
+			<summary class="btn btn-secondary">For the person who sets it up: PC, home server or cloud, and the commands</summary>
 			<div class="helper-body">
 		<div class="tabs" role="tablist" aria-label="Where should Dwello run?">
 			<button class="tab" role="tab" id="tab-pc" aria-selected="true" aria-controls="panel-pc"><svg class="ic" aria-hidden="true"><use href="#i-monitor"/></svg>Your PC</button>
@@ -623,7 +631,6 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			</div>
 		</div>
 
-		<div class="alert" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span><b>Sign-in with password</b>During setup, an account with email address and password is created. If you prefer, sign in with your Google account instead; the guide shows both. A one-step installer is planned (<a href="https://github.com/rudini/Dwello/issues/579" rel="noopener" aria-label="Issue 579 on GitHub: one-step installer">#579</a>).</span></div>
 			</div>
 		</details>
 	</div>
@@ -721,11 +728,11 @@ footer { padding-block: 64px 32px; margin-top: 96px; background: var(--surface);
 			<p>Dwello is developed in the open. These points are planned; most have an issue on GitHub where you can have your say.</p>
 		</div>
 		<ul class="road">
-			<li><a href="https://github.com/rudini/Dwello/issues/579" rel="noopener">One-step installer</a><span>One line to paste installs Docker and Dwello; the rest happens in the browser.</span></li>
-			<li><a href="https://github.com/rudini/Dwello/issues/495" rel="noopener">MCP server</a><span>Dwello as a tool for your AI assistant, local and with your permission.</span></li>
-			<li><a href="https://github.com/rudini/Dwello/issues/496" rel="noopener">Full export</a><span>All data as CSV and JSON, at any time, in one click.</span></li>
-			<li><b>Reports and analysis</b><span>Income, expenses and utility costs over the years, for your tax return and your accountant.</span></li>
-			<li><a href="https://github.com/rudini/Dwello/issues/498" rel="noopener">Link to the source code in the app</a><span>Every installation shows where its source code lives, as the AGPL requires.</span></li>
+			<li><span class="badge plan">Planned</span><a href="https://github.com/rudini/Dwello/issues/579" rel="noopener">One-step installer</a><span>One line to paste installs Docker and Dwello; the rest happens in the browser.</span></li>
+			<li><span class="badge plan">Planned</span><a href="https://github.com/rudini/Dwello/issues/495" rel="noopener">MCP server</a><span>Dwello as a tool for your AI assistant, local and with your permission.</span></li>
+			<li><span class="badge plan">Planned</span><a href="https://github.com/rudini/Dwello/issues/496" rel="noopener">Full export</a><span>All data as CSV and JSON, at any time, in one click.</span></li>
+			<li><span class="badge plan">Planned</span><b>Reports and analysis</b><span>Income, expenses and utility costs over the years, for your tax return and your accountant.</span></li>
+			<li><span class="badge plan">Planned</span><a href="https://github.com/rudini/Dwello/issues/498" rel="noopener">Link to the source code in the app</a><span>Every installation shows where its source code lives, as the AGPL requires.</span></li>
 		</ul>
 	</div>
 </section>
