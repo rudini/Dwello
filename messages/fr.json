@@ -880,6 +880,8 @@
 	"statements_fee_not_agreed_item": "{tenant}, appartement {apartment}",
 	"statements_agreements_title": "Ces frais accessoires sont-ils convenus ?",
 	"statements_agreements_text": "Ces catégories ont des coûts pendant la période de décompte, et le contrat de bail n’indique pas encore si elles sont convenues. Une catégorie est convenue si elle figure dans le contrat de bail signé ou si vous l’avez introduite valablement avec la formule officielle. Dwello ne décompte que les frais accessoires convenus ; ceux qui ne le sont pas restent à votre charge. Dwello enregistre votre réponse dans le contrat de bail. Si la convention ne vaut qu’à partir d’un jour de cette période, choisissez « Convenue dès le » et indiquez ce jour : Dwello ne décompte les frais qu’à partir de ce jour.",
+	"statements_buildings_loading": "Dwello compte les factures et vérifie les décomptes existants des immeubles…",
+	"statements_late_checks_below": "Lisez les remarques ci-dessous avant de continuer.",
 	"statements_agreements_loading": "Dwello vérifie si les contrats de bail prévoient les frais accessoires de cette période…",
 	"statements_agreements_failed_title": "Frais accessoires convenus non vérifiés",
 	"statements_agreements_failed_text": "Dwello n’a pas pu vérifier si les contrats de bail prévoient tous les frais accessoires de cette période. Sans cette vérification, vous ne pouvez pas continuer. Choisissez « Réessayer ».",

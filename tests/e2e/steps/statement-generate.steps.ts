@@ -13,6 +13,8 @@ import {
 	buildingSelectable,
 	categoryFindingOf,
 	contractsWithoutFee,
+	lateChecksNoteAboveNext,
+	lateChecksNoteText,
 	confirmationAsked,
 	invoiceWithoutServicePeriodOn,
 	countOfInvoicesWithoutServicePeriodOn,
@@ -488,6 +490,12 @@ Then(
 		await verwalter.sees(contractsWithoutFee).toContain(names.get(tenant)!);
 	}
 );
+
+// #470: the notes come below «Weiter»; a line above it says so
+Then('sagt der Assistent über «Weiter», dass unten Hinweise stehen', async ({ verwalter }) => {
+	await verwalter.sees(lateChecksNoteText).toBe('Lesen Sie die Hinweise unten, bevor Sie weitergehen.');
+	await verwalter.sees(lateChecksNoteAboveNext).toBeGreaterThanOrEqual(0);
+});
 
 Then('nicht den Mietvertrag von {string}', async ({ verwalter, names }, tenant: string) => {
 	await verwalter.sees(contractsWithoutFee).not.toContain(names.get(tenant)!);

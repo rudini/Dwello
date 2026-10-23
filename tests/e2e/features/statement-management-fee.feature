@@ -65,6 +65,7 @@ Funktionalität: Verwaltungspauschale berechnen
     Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale auf 3 % setzt
     Dann nennt der Assistent den Mietvertrag von "Anna Keller" ohne vereinbarte Verwaltungspauschale
     Aber nicht den Mietvertrag von "Beat Huber"
+    Und sagt der Assistent über «Weiter», dass unten Hinweise stehen
 
   Szenario: Mietvertrag ohne vereinbarte Verwaltungspauschale öffnen
     Angenommen im Mietvertrag von "Anna Keller" ist keine Verwaltungspauschale vereinbart

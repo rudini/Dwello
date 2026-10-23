@@ -1592,6 +1592,113 @@ describe('Mietverträge ohne vereinbarte Verwaltungspauschale', () => {
 	});
 });
 
+// #470 (persona Marco P-1 to P-3, Sven P-2): what a step loads late never moves «Weiter», and the step says it loads
+// where the landlord sees it without scrolling
+describe('Spät geladene Inhalte im Assistenten', () => {
+	const follows = (first: string, second: string) =>
+		!!(byTestId(first)!.compareDocumentPosition(byTestId(second)!) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+	it('sagt bei den Gebäuden oben im Schritt, dass Rechnungen und Abrechnungen laden', async () => {
+		globalThis.fetch = (() => new Promise<Response>(() => {})) as typeof fetch;
+		open();
+		next();
+		await settle();
+
+		expect(byTestId('step-loading')!.textContent!.trim()).toBe(
+			'Dwello zählt die Rechnungen und prüft die bestehenden Abrechnungen der Gebäude …'
+		);
+		expect(follows('step-loading', 'generate-all-buildings')).toBe(true);
+	});
+
+	it('zeigt die Hinweise der Einstellungen unter «Weiter» und sagt oben, dass sie laden', async () => {
+		let release = () => {};
+		const loaded = new Promise<void>((resolve) => (release = resolve));
+		fakeBff((call) =>
+			call.path.startsWith('/statements/billed')
+				? [200, [{ buildingId: 'b1', contracts: 2, billed: 0, withoutFee: [{ id: 'c7', tenantName: 'Anna Keller', apartmentNumber: '1.01' }] }]]
+				: [200, { invoices: [], total: 0 }]
+		);
+		const answered = globalThis.fetch;
+		open();
+		await settle();
+		next();
+		await settle();
+		click('generate-building-b1');
+		globalThis.fetch = (async (...args: Parameters<typeof fetch>) => {
+			await loaded;
+			return answered(...args);
+		}) as typeof fetch;
+		next();
+		await settle();
+
+		expect(byTestId('step-loading')!.textContent!.trim()).toBe(
+			'Dwello prüft, ob die Mietverträge die Nebenkosten dieser Periode vereinbaren …'
+		);
+		expect(follows('step-loading', 'heating-profile-select')).toBe(true);
+		expect(byTestId('wizard-status')!.textContent).toContain('Dwello prüft, ob die Mietverträge');
+		// persona Marco 470 P-1: a line above «Weiter», its place kept from the start, says to read what is below
+		expect(byTestId('late-checks-note')!.classList.contains('invisible')).toBe(true);
+		release();
+		await settle();
+		expect(follows('wizard-next', 'management-fee-not-agreed')).toBe(true);
+		expect(byTestId('late-checks-note')!.classList.contains('invisible')).toBe(false);
+		expect(byTestId('late-checks-note')!.textContent!.trim()).toBe('Lesen Sie die Hinweise unten, bevor Sie weitergehen.');
+		expect(follows('late-checks-note', 'wizard-next')).toBe(true);
+		// code review 470-1 C-2: its place stays, so «Weiter» does not move up when it is said
+		expect(byTestId('step-loading')!.classList.contains('invisible')).toBe(true);
+		expect(byTestId('step-loading')!.classList.contains('hidden')).toBe(false);
+		expect(byTestId('wizard-status')!.textContent!.trim()).toBe('');
+	});
+
+	// code review 470-1 C-1: the open questions below «Weiter» get the focus as before
+	it('setzt bei «Weiter» mit offenen Fragen den Fokus auf die erste', async () => {
+		const anna = { contractId: 'c1', tenantName: 'Anna Keller', apartmentNumber: '1.01', open: [{ categoryId: 'k1', name: 'Lift' }], notAgreed: [] };
+		fakeBff((call) =>
+			call.path.startsWith('/statements/agreements')
+				? [200, [anna]]
+				: call.path.startsWith('/statements/billed')
+					? [200, [{ buildingId: 'b1', contracts: 1, billed: 0, withoutFee: [] }]]
+					: [200, { invoices: [], total: 0 }]
+		);
+		open();
+		await settle();
+		next();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+		next();
+		await settle();
+
+		expect(document.activeElement!.closest('[role="radiogroup"]')).not.toBeNull();
+	});
+
+	it('hält «Weiter» an seiner Stelle, wenn die Zeilen der Gebäude ankommen', async () => {
+		let release = () => {};
+		const loaded = new Promise<void>((resolve) => (release = resolve));
+		globalThis.fetch = (async (url: string) => {
+			await loaded;
+			return Response.json(String(url).includes('/invoices') ? { invoices: [] } : []);
+		}) as typeof fetch;
+		const scrolled = vi.spyOn(window, 'scrollBy').mockImplementation(() => {});
+		// «Weiter» 300 px down while the step loads, 520 once the buildings' rows are in
+		const top = () => (document.querySelector('[data-testid^="generate-building-invoices-"]') ? 520 : 300);
+		const rect = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+			return { top: this.dataset.testid === 'wizard-next' ? top() : 0 } as DOMRect;
+		});
+		open();
+		next();
+		await settle();
+		release();
+		await settle();
+		const calls = scrolled.mock.calls;
+		rect.mockRestore();
+		scrolled.mockRestore();
+
+		expect(calls).toContainEqual([0, 220]);
+	});
+});
+
 describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 	const billed = (
 		rows: { buildingId: string; contracts: number; billed: number; overlap?: unknown; withoutFee?: [] }[]

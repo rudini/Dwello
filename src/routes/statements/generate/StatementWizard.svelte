@@ -20,6 +20,7 @@
 	import WizardNav from '$lib/ui/WizardNav.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import { browserStorage, clearDraft, readDraft, writeDraft } from '$lib/wizard-draft';
+	import LateChecks from './LateChecks.svelte';
 	import PresetNotice from './PresetNotice.svelte';
 	import StatementStep from './StatementStep.svelte';
 	import type { PreviewRow } from './preview';
@@ -77,7 +78,20 @@
 	let confirmed = $state(false); // statements despite buildings without invoices, for this preview only
 	let agreementsBlocking = $state(false); // step 3: whether the contracts agree the period's costs is open (#91)
 	let busy = $state(false); // the server is calculating the preview or creating the drafts
-	let loading = $state(false); // the step still loads what it shows: «Weiter» waits (#468)
+	// the step still loads what it shows: «Weiter» waits (#468); step 2 its buildings' rows, step 3 the checks below
+	let buildingsLoading = $state(false);
+	let checksLoading = $state(false);
+	let checksNoted = $state(false); // step 3 shows notes below «Weiter» (persona Marco 470 P-1)
+	const loading = $derived(buildingsLoading || checksLoading);
+	// #470: said at the top of the step, seen without scrolling
+	// its place is kept once loaded, so it does not move «Weiter» up (code review 470-1 C-2)
+	const loadingText = $derived(
+		step === 2
+			? m.statements_buildings_loading()
+			: step === 3
+				? m.statements_agreements_loading()
+				: ''
+	);
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
 	let restoredAt = $state<Date | null>(null);
@@ -91,7 +105,7 @@
 	let invoices = $state(untrack(() => form?.invoices ?? []));
 	let shownError = $state(untrack(() => form?.error ?? '')); // only until the user moves on
 	const confirmationNeeded = $derived(needsConfirmation(invoices));
-	const statusText = $derived(busy ? busyLabels[step] : '');
+	const statusText = $derived(busy ? busyLabels[step] : loading ? loadingText : '');
 	const periodLabel = $derived(
 		`${formatDate(selection.periodStart)} – ${formatDate(selection.periodEnd)}`
 	);
@@ -111,6 +125,17 @@
 		const back = new URL(location.href).searchParams.get('schritt') === '3';
 		step = restoredStep(back ? 3 : left, selection, dropped);
 		resumed = back && step === 3;
+	});
+
+	// #470: what a step loads late never moves «Weiter» on the screen: the page scrolls by the height it added above
+	$effect.pre(() => {
+		if (loading) return;
+		const next = untrack(() => wizard?.querySelector<HTMLElement>('[data-testid="wizard-next"]'));
+		const before = next?.getBoundingClientRect().top;
+		tick().then(() => {
+			const moved = before === undefined ? 0 : next!.getBoundingClientRect().top - before;
+			if (moved) window.scrollBy(0, moved);
+		});
 	});
 
 	$effect(() => {
@@ -134,9 +159,10 @@
 		section?.querySelector<HTMLElement>('h2')?.focus();
 	}
 
+	// in the whole form: step 3's questions are below «Weiter» (#470, code review 470-1 C-1)
 	async function showErrors() {
 		await tick();
-		section
+		wizard
 			?.querySelector<HTMLElement>(
 				':is(input, select, textarea)[aria-invalid="true"], [role="radiogroup"][aria-invalid="true"] input, [data-testid="confirm-missing-invoices"]'
 			)
@@ -250,6 +276,16 @@
 			<span data-step-label data-testid="statement-step-label">{statementSteps[step - 1]}</span>
 		</h2>
 		<PresetNotice preset={data.preset} {step} />
+		<!-- read out by the wizard's status above -->
+		<p
+			aria-hidden="true"
+			class="text-ink-muted"
+			class:hidden={!loadingText}
+			class:invisible={!loading}
+			data-testid="step-loading"
+		>
+			{loadingText}
+		</p>
 		{#if shownError}
 			<Alert tone="critical" title={m.ui_action_failed()} testid="server-error">
 				<p>{shownError}</p>
@@ -260,8 +296,7 @@
 			{data}
 			bind:selection
 			bind:confirmed
-			bind:agreementsBlocking
-			bind:loading
+			bind:loading={buildingsLoading}
 			{errors}
 			{previewRows}
 			{invoices}
@@ -271,6 +306,15 @@
 	</section>
 
 	{#if form?.created == null}
+		<!-- its place kept from the start, so it does not move «Weiter» once it is said (#470) -->
+		<p
+			class="font-semibold text-ink"
+			class:hidden={step !== 3}
+			class:invisible={!checksNoted}
+			data-testid="late-checks-note"
+		>
+			{m.statements_late_checks_below()}
+		</p>
 		<SaveStatus {savedAt} />
 		<WizardNav
 			{step}
@@ -282,6 +326,15 @@
 			{loading}
 			busyLabel={busyLabels[step]}
 			cancelHref="/statements"
+		/>
+		<LateChecks
+			{step}
+			buildingIds={selection.buildingIds}
+			period={{ start: selection.periodStart, end: selection.periodEnd }}
+			bind:blocking={agreementsBlocking}
+			bind:loading={checksLoading}
+			bind:noted={checksNoted}
+			error={errors.agreements}
 		/>
 	{/if}
 </form>

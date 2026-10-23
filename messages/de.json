@@ -880,6 +880,8 @@
 	"statements_fee_not_agreed_item": "{tenant}, Wohnung {apartment}",
 	"statements_agreements_title": "Sind diese Nebenkosten vereinbart?",
 	"statements_agreements_text": "Für diese Kategorien gibt es in der Abrechnungsperiode Kosten, und beim Mietvertrag ist noch nicht angegeben, ob sie vereinbart sind. Vereinbart ist eine Kategorie, wenn sie im unterschriebenen Mietvertrag steht oder Sie sie mit dem amtlichen Formular wirksam eingeführt haben. Dwello rechnet nur vereinbarte Nebenkosten ab; nicht vereinbarte tragen Sie selbst. Ihre Antwort speichert Dwello beim Mietvertrag. Gilt die Vereinbarung erst ab einem Tag in dieser Periode, wählen Sie «Vereinbart ab» und tragen Sie diesen Tag ein: Dwello rechnet die Kosten erst ab dann ab.",
+	"statements_buildings_loading": "Dwello zählt die Rechnungen und prüft die bestehenden Abrechnungen der Gebäude …",
+	"statements_late_checks_below": "Lesen Sie die Hinweise unten, bevor Sie weitergehen.",
 	"statements_agreements_loading": "Dwello prüft, ob die Mietverträge die Nebenkosten dieser Periode vereinbaren …",
 	"statements_agreements_failed_title": "Vereinbarte Nebenkosten nicht geprüft",
 	"statements_agreements_failed_text": "Dwello konnte nicht prüfen, ob die Mietverträge alle Nebenkosten dieser Periode vereinbaren. Ohne diese Prüfung geht es nicht weiter. Wählen Sie «Erneut versuchen».",

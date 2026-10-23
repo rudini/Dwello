@@ -16,7 +16,7 @@ const anna = {
 async function agreedCosts(answer: Parameters<typeof fakeBff>[0], error?: string) {
 	const calls = fakeBff(answer);
 	// the bound «blocking» comes back through the setter, as a parent's bind: would see it
-	const bound = { blocking: false };
+	const bound = { blocking: false, noted: false };
 	show(AgreedCosts, {
 		buildingIds: ['b1'],
 		period,
@@ -26,6 +26,12 @@ async function agreedCosts(answer: Parameters<typeof fakeBff>[0], error?: string
 		},
 		set blocking(blocking: boolean) {
 			bound.blocking = blocking;
+		},
+		get noted() {
+			return bound.noted;
+		},
+		set noted(noted: boolean) {
+			bound.noted = noted;
 		}
 	});
 	await settle();
@@ -42,6 +48,8 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 			'Ist «Treppenhausreinigung» im Mietvertrag von Anna Keller (Wohnung 1.01) vereinbart?'
 		);
 		expect(props.blocking).toBe(true);
+		// #470 review C-5: the wizard says above «Weiter» that the questions stand below it
+		expect(props.noted).toBe(true);
 
 		click('agreement-c1-k1-no');
 		await settle();
@@ -134,6 +142,8 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 
 		expect(byTestId('agreements-failed')!.textContent).toContain('Dwello konnte nicht prüfen');
 		expect(props.blocking).toBe(true);
+		// #470 review C-3: the failure below «Weiter» is announced above it too
+		expect(props.noted).toBe(true);
 
 		failing = false;
 		click(byTestId('agreements-failed')!.querySelector('button')!);
@@ -149,7 +159,7 @@ describe('Vereinbarte Nebenkosten im Assistenten', () => {
 		show(AgreedCosts, { buildingIds: ['b1'], period, error: 'Weiter ohne Antwort' });
 		await settle();
 
-		expect(byTestId('agreements-loading')).not.toBeNull();
+		// #470: that it loads, the wizard says at the top of the step
 		expect(byTestId('agreements-wait')!.textContent).toContain(
 			'Dwello geht weiter, sobald die Mietverträge geprüft sind.'
 		);

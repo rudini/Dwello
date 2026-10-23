@@ -1,6 +1,6 @@
 import { throughUiOrApi } from '../screenplay/abilities';
 import { type Question, question } from '../screenplay/actor';
-import { Accessible, Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { Accessible, Checked, Count, Enabled, Gap, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	allBuildingsNote,
 	confirmMissingInvoices,
@@ -19,6 +19,7 @@ import {
 	uncategorizedInvoices,
 	draftsOnlyNote,
 	feeNotAgreed,
+	lateChecksNote,
 	agreementQuestions,
 	agreementsFailed,
 	agreementsWait,
@@ -45,7 +46,7 @@ import {
 	wizardChoices,
 	wizardPresetNotice
 } from '../targets/statement-generate';
-import { discardDraftMessage } from '../targets/wizard';
+import { discardDraftMessage, nextButton } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
 import { amountAfter, signedFrancs } from './amounts';
 
@@ -156,6 +157,9 @@ export const existingStatementsText = Text.of(existingStatements);
 // the warnings the confirmation confirms, read with its checkbox
 export const currentStep = Text.of(stepLabel);
 export const contractsWithoutFee = Text.of(feeNotAgreed);
+export const lateChecksNoteText = Text.of(lateChecksNote);
+// null while the line is hidden; 0 or more when it stands above «Weiter» (#470)
+export const lateChecksNoteAboveNext = Gap.between(lateChecksNote, nextButton);
 export const presetNoticeText = Text.of(wizardPresetNotice);
 export const notesOnExistingStatement = (statementId: string) => Text.of(existingStatementNotes(statementId));
 
