@@ -219,7 +219,7 @@ dwello/
 - **Tech Stack:** [docs/tech-stack.md](./docs/tech-stack.md)
 - **Design System:** [docs/design/token-referenz.md](./docs/design/token-referenz.md)
 - **Test Pyramid:** [docs/test-pyramid.md](./docs/test-pyramid.md)
-- **Architecture (MVA):** [docs/migration-mva.md](./docs/migration-mva.md)
+- **Architecture (quality scenarios, risks, principles):** [docs/architecture/utility-tree.md](./docs/architecture/utility-tree.md)
 - **Domain Language:** [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md)
 - **Implementation Plan:** [implementation_plan.md](./implementation_plan.md)
 - **Project Context:** [CLAUDE.md](./CLAUDE.md)

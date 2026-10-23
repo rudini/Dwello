@@ -461,7 +461,7 @@ No Docker image is built or pushed in CI.
 |--------|--------|--------------|
 | API Response Time | <500ms (p95) | Query optimization, caching |
 | PDF Generation | <5s | |
-| Statement Generation (50 apts) | <60s (open: PRD states 10 s, see docs/migration-mva.md P1) | |
+| Statement Generation (50 apts) | ≤30s on a VM like the demo (see docs/architecture/utility-tree.md P1) | |
 | LLM Categorization | <2s | In-memory result cache |
 
 ### Database Performance
@@ -471,7 +471,7 @@ No Docker image is built or pushed in CI.
 | Query Latency | <100ms (p95) | Indexing, connection pooling |
 | Statement Generation Query | <5s | Composite indexes, query optimization |
 
-None of these targets is measured yet (see `docs/migration-mva.md`).
+None of these targets is measured yet (see `docs/architecture/utility-tree.md`).
 
 ---
 

@@ -1232,7 +1232,7 @@ BALANCE (refund): CHF 30
 | API response time | <500ms (95th percentile) |
 | PDF generation per statement | <5 seconds |
 | Invoice bulk entry | 10 invoices in <30 seconds |
-| Statement generation | <10 seconds for 50 apartments (open, see docs/migration-mva.md P1) |
+| Statement generation | ≤30 seconds for 50 apartments on a VM like the demo (see docs/architecture/utility-tree.md P1) |
 | Dashboard load | <1.5 seconds |
 | Search response | <300ms |
 
@@ -1693,7 +1693,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 - Page load time <2 seconds (95th percentile)
 - API response time <500ms (95th percentile)
 - PDF generation <5 seconds per statement
-- Statement batch generation (50 statements) <60 seconds (open, see docs/migration-mva.md P1)
+- Statement batch generation (50 statements) ≤30 seconds (see docs/architecture/utility-tree.md P1)
 - No performance degradation with 200+ tenants
 
 ### Reliability Metrics
@@ -1869,4 +1869,4 @@ Key Legal Requirements Addressed (see the status note below for what is implemen
 
 ---
 
-*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. Open work is listed as GitHub issues; the architecture status is in `docs/migration-mva.md`. Future enhancements are documented in Section 12.*
+*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. Open work is listed as GitHub issues; the architecture status is in `docs/architecture/utility-tree.md`. Future enhancements are documented in Section 12.*
