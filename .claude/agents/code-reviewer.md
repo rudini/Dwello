@@ -21,7 +21,7 @@ Check against `CLAUDE.md` and the docs it names:
   - Tasks are domain activities and wait for the state they lead to before the next step (no two clicks in a row on an asynchronous step).
   - The rules of `tests/e2e/CLAUDE.md`, "Rules" (isolation, negative checks, failure states, `@api`).
   - Features say what the Liegenschaftsverwalter wants, not how (no «klickt», «Button», «Feld»).
-  - The same scenarios and the same strictness as before, unless the requirement changes them.
+  - The same scenarios and the same strictness as before (`tests/e2e/CLAUDE.md`, "Rules", specification): a step definition used by a scenario without `@wip` on `main` that drops, loosens or redirects a check is a Blocker unless the pull request's `Spec change approved: #<n>` issue decides it.
 
 Always check these, and report a missing one as Major:
 - A behavior change (a bug fix a user can see included) has a scenario in `tests/e2e/features`, without `@wip`.

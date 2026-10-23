@@ -124,7 +124,7 @@ jobs:
       - name: Prettier on new files
         if: github.event_name == 'pull_request'
         run: git diff --name-only --diff-filter=A -z "origin/${{ github.base_ref }}...HEAD" | xargs -0 -r bunx prettier --check --ignore-unknown
-      # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work")
+      # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work"); a changed scenario without @wip is approved (Workflow 1)
       - run: node tools/open-work/check-issues.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}

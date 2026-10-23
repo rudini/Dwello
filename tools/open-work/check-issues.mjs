@@ -1,7 +1,8 @@
 // Fails when a `TODO(fachlich prüfen, #n)` marker names an issue that is closed, missing or a pull request, when a
 // pull request closes an issue (`Fixes #n`) that a marker still names (CLAUDE.md, "Open work"), and when it closes an
 // issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1), and when an open issue
-// waits for a decision («Proposed (confirm before starting)») without the label `entscheiden` (skill `issue-work`).
+// waits for a decision («Proposed (confirm before starting)») without the label `entscheiden` (skill `issue-work`), and when
+// it changes a scenario that is not @wip on the base branch without `Spec change approved: #n` (CLAUDE.md, Workflow 1).
 // CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
 // With PR_NUMBER and a token the text comes from the API: the event's PR_BODY is the text from when the run started.
 import { execFileSync } from 'node:child_process';
@@ -66,6 +67,31 @@ if (base && closing.length && !/\bno scenario:/i.test(prBody)) {
 		);
 }
 
+// A scenario without @wip on the base branch is the specification: a pull request that changes or removes one of its
+// lines, or tags it @wip, needs the product owner's approval, `Spec change approved: #n` (CLAUDE.md, Workflow 1)
+const approvals = [...prBody.matchAll(/\bspec change approved:\s*#(\d+)/gi)].map(([, n]) => n);
+const specChanges = [];
+if (base) {
+	const git = (...args) => execFileSync('git', args, { encoding: 'utf8' });
+	const from = git('merge-base', `origin/${base}`, 'HEAD').trim();
+	const show = (rev, file) => (git('ls-tree', '--name-only', rev, file).trim() ? git('show', `${rev}:${file}`) : '');
+	for (const file of git('diff', '--name-only', '--no-renames', from, 'HEAD', '--', 'tests/e2e/features/').split('\n')) {
+		if (!file.endsWith('.feature')) continue;
+		const spec = scenarios(show(from, file));
+		const changed = new Set();
+		for (const [, start, count] of git('diff', '-U0', from, 'HEAD', '--', file).matchAll(/^@@ -(\d+)(?:,(\d+))? /gm))
+			for (let line = +start; line < +start + +(count ?? 1); line++) changed.add(spec[line]);
+		for (const { name, wip } of scenarios(show('HEAD', file)).filter(Boolean))
+			if (wip) changed.add(spec.find((scenario) => scenario?.name === name));
+		for (const scenario of changed) if (scenario && !scenario.wip) specChanges.push(`${file}:${scenario.line} «${scenario.name}»`);
+	}
+}
+if (!approvals.length)
+	for (const place of specChanges)
+		failures.push(
+			`${place} changes the specification; fix the code, or ask the product owner and say "Spec change approved: #<issue>" in the pull request text`
+		);
+
 if (!process.env.GITHUB_TOKEN) {
 	console.log(`Skipped the issue lookup: GITHUB_TOKEN is not set (CI sets it); ${refs.size} issues named by markers`);
 } else {
@@ -74,6 +100,21 @@ if (!process.env.GITHUB_TOKEN) {
 		const issue = response.ok ? await response.json() : null;
 		const state = !issue ? `missing (HTTP ${response.status})` : issue.pull_request ? 'a pull request' : issue.state;
 		if (state !== 'open') failures.push(`#${n} is ${state}; remove or repoint these markers: ${places.join(', ')}`);
+	}
+	// the approval is an issue whose «Decided (product owner)» holds the change (skill `issue-work`)
+	for (const n of specChanges.length ? approvals : []) {
+		const response = await get(`issues/${n}`);
+		const issue = response.ok ? await response.json() : null;
+		const why = !issue
+			? `it is missing (HTTP ${response.status})`
+			: issue.pull_request
+				? 'it is a pull request'
+				: issue.state_reason === 'not_planned'
+					? 'it is closed as not planned'
+					: issue.labels?.some((label) => label.name === 'entscheiden')
+						? 'it is still labelled entscheiden'
+						: '';
+		if (why) failures.push(`#${n} does not approve a specification change: ${why}`);
 	}
 	for (let page = 1; ; page++) {
 		const response = await get(`issues?state=open&per_page=100&page=${page}`);
@@ -89,6 +130,27 @@ if (!process.env.GITHUB_TOKEN) {
 				failures.push(`#${issue.number} has "Proposed (confirm before starting)" but not the label entscheiden`);
 		}
 	}
+}
+
+/** The scenario each line of a feature file belongs to (index = line number); the header and Background count for all */
+function scenarios(text) {
+	const lines = ['', ...text.split('\n')];
+	const fileWip = /@wip\b/.test(text.split(/^\s*Funktionalität:/m)[0]);
+	const header = { line: 1, name: 'Funktionalität und Grundlage', wip: fileWip };
+	const owner = [];
+	let current = header;
+	lines.forEach((line, i) => {
+		const keyword = /^\s*(?:Szenario|Szenariogrundriss|Beispiel):\s*(.*)/.exec(line);
+		if (keyword) {
+			let first = i;
+			while (/^\s*@/.test(lines[first - 1] ?? '')) first--;
+			current = { line: i, name: keyword[1].trim(), wip: fileWip || /@wip\b/.test(lines.slice(first, i).join(' ')) };
+			owner.fill(current, first, i);
+		}
+		owner[i] = current;
+	});
+	header.wip = owner.every((scenario) => scenario.wip || scenario === header);
+	return owner;
 }
 
 if (failures.length) {

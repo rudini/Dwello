@@ -8,3 +8,13 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session: spec scenarios need approval (#643)
+
+- [ ] Rule text: `CLAUDE.md` (Workflow 1, "When to ask"), `tests/e2e/CLAUDE.md` ("Rules")
+- [ ] `code-reviewer` checks step definitions for weakened assertions
+- [ ] CI check (`tools/open-work/check-issues.mjs`): a changed or removed line of a scenario that is non-`@wip` on the base branch fails without `Spec change approved: #n`
+- [ ] Additions (new scenario, new Examples row) and `@wip` scenarios pass
+- [ ] Adding `@wip` to a protected scenario fails
+- [ ] `Spec change approved: #n` passes only for a decided issue (exists, no pull request, not `entscheiden`, not closed as not planned)
+- [ ] Slice review, closing round, archive, PR
