@@ -184,7 +184,7 @@ Wichtigkeit = geschäftliche Wichtigkeit, Schwierigkeit = Abstand zum Ziel. Die 
 | O1 | H | Ein fehlgeschlagenes Backup muss sofort erkennbar sein. | M | Es fehlt ganz, hängt aber nur an R1. |
 | T1 | H | Der PO hat das strengste Ziel gewählt, für PR und `main`. | H | `main` 43–79 min, also das Drei- bis Fünffache des Ziels. 4 von 7 abgeschlossenen Läufen auf `main` waren rot. |
 | P1 | M | Selten genutzt, der Assistent zeigt den Fortschritt. | M | Nicht gemessen. Die Schleife im BFF ist ein Verdacht, kein Beleg. |
-| P2 | M (Vorschlag) | Als eigenes Ziel gewollt (vom Nutzer bestätigt). Einen Ausfall bedeutet eine Verfehlung nicht. | M (Vorschlag) | Nicht gemessen. Ein Benutzer und wenige Daten sprechen für einen kleinen Abstand, `routes/dashboard.ts` fragt die DB aber ohne Service ab (`migration-mva.md`). |
+| P2 | M (Vorschlag) | Als eigenes Ziel gewollt (vom Nutzer bestätigt). Wird es verfehlt, fällt nichts aus. | M (Vorschlag) | Nicht gemessen. Ein Benutzer und wenige Daten sprechen für einen kleinen Abstand, `routes/dashboard.ts` fragt die DB aber ohne Service ab (`migration-mva.md`). |
 | S1 | H | Vom Nutzer auf H gesetzt | L | Gebaut. Es fehlt ein Test. |
 
 **Kandidaten für die ersten Refactorings (H/H):** Ä1, U1, T1, R1. **Quick Win (H/L):** S1.
