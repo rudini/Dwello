@@ -4,12 +4,14 @@ Stand: 23.10.2026, Basis `origin/main` d4d508cc2, Fenster ab 23.04.2026. Alle Za
 
 **Entscheid Product Owner (23.10.2026): Änderbarkeit zählt nur Produktivdateien** (Schichten FE inkl. i18n, BFF, Backend, DB, `src/lib/types.ts`). Test-, Doku- und Prozessdateien bleiben als Kontext im Report, sind aber nicht Teil der Messgrössen, der Kopplungsanalyse (M2 primär) und der Szenarien.
 
+**Entscheid Product Owner (23.10.2026): Der BFF trifft keine fachlichen Entscheidungen.** Jede Fachregel im BFF ist damit eine Abweichung vom Zielbild (Abschnitt 4, H2, Szenario Ä4).
+
 ## 1. Zusammenfassung
 
 1. Ein Feature (`feat`, 113 Einheiten) ändert im Median **12 Produktivdateien** (P90 31) in **7 Produktivmodulen** (P90 20) und **3 Produktivschichten** (P90 5); 54 % der Features berühren ≥ 3 Schichten. Features mit genau einem feat-Commit: Median 9,5, P90 25. Ein Fix (150): Median 2, P90 9. [gemessen]
 2. Nur Produktivcode betrachtet: 68 Dateipaare ändern sich überdurchschnittlich oft gemeinsam (≥ 5-mal, Kopplungsgrad ≥ 30 %), **28 davon schichtübergreifend ohne Import-Beziehung**. Die zwei stärksten Paare hängen an `src/lib/types.ts`: mit den i18n-Texten (36 gemeinsame Änderungen) und mit `schema.ts` (26). [gemessen]
 3. FE/BFF importieren **0** Backend-Dateien; `types.ts` spiegelt das DB-Schema von Hand. Ein DB-Feld wird im Median in **6 Produktivdateien** ausserhalb der DB deklariert (P90 19). [gemessen]
-4. Fachregeln über Status werden in mehreren Schichten entschieden: der Statuswert `'replaced'` steht in 19 Produktivdateien (FE 8, BFF 2, Backend 8); die Regel „eine ersetzte Abrechnung zählt nicht“ wurde in Backend und BFF getrennt eingebaut (e6644bea3, 5d6888eb2). [gemessen/abgeleitet]
+4. Der BFF trifft entgegen dem Entscheid fachliche Entscheidungen: **9 Status-Vergleiche in 5 BFF-Dateien** und **10 fachliche Prüfregeln in 4 BFF-Dateien** (PLZ, IBAN, E-Mail, Zimmer in halben Schritten …). Die Regel „eine ersetzte Abrechnung zählt nicht“ steht in Backend und BFF getrennt (e6644bea3, 5d6888eb2). [gemessen/abgeleitet]
 5. Die Hotspots (Änderungen × Komplexität) liegen alle in Abrechnung und Mietvertrag, verteilt über Backend, BFF und FE; zwei BFF-Dateien sind komplexer als die meisten Backend-Services. [gemessen]
 6. Textuelle Duplikation 0,87 %, keine Laufzeit-Zyklen, 0 flache Module (Deepcheck): Die Guardrails wirken. Die Amplifikation entsteht durch **semantisch dupliziertes Wissen**, nicht durch kopierten Code. [gemessen/abgeleitet]
 
@@ -231,6 +233,16 @@ Abgeleitet: alle Top-10 gehören zur Abrechnung bzw. zum Mietvertrag und verteil
 
 **Textuelle Klone** (fallow dupes): 22 Gruppen, 585 Zeilen, 0,87 %, keine über Schichten.
 
+**Fachliche Entscheidungen ausserhalb des Backends** (`m4-decisions-*.csv`): Vergleiche gegen einen Statuswert (`status !== 'replaced'`) und verankerte Regex-Literale (`/^\d{4}$/`) pro Schicht [gemessen]:
+
+| Schicht | Dateien mit Status-Vergleich | Status-Vergleiche | Dateien mit Regex | Regex | zykl. Σ der Schicht |
+|---|---|---|---|---|---|
+| FE | 20 | 54 | 9 | 14 | 3128 |
+| BFF | 5 | 9 | 11 | 19 | 1832 |
+| Backend | 9 | 33 | 6 | 9 | 2605 |
+
+Gelesen [abgeleitet]: Alle **9 Status-Vergleiche im BFF** sind fachliche Entscheidungen: welche Abrechnungen eine Periode belegen (`statement-generation.ts` 3, `statements/generate/+page.server.ts` 1), welcher Mietvertrag aktuell oder künftig ist (`tenants/[id]/+page.server.ts` 3, `lib/server/apartment.ts` 1), welcher Entwurf zum Mietvertrag gehört (`contracts/[id]/+page.server.ts` 1). Von den **19 Regex im BFF** sind **10 fachliche Prüfregeln** in 4 Dateien: `settings.ts` 4 (PLZ, E-Mail, IBAN CH/LI, Tage „within the limits the backend accepts“), `building-form.ts` 3 (PLZ, Fläche und Zimmer nach den DB-Spalten `decimal(8,2)`/`decimal(3,1)`, Zimmer in halben Schritten), `tenant-form.ts` 2 (E-Mail, PLZ), `buildings/[id]/+page.server.ts` 1 (Tankbestand-Betrag). Die übrigen 9 sind technisch (UUID, ISO-Datum und Jahr als Query-Parameter, JWT-Dauer, EGID). Im FE sind die Status-Vergleiche nicht einzeln gelesen; der Entscheid betrifft den BFF.
+
 ## 4. Klassifizierte Kandidaten (Vorschlag für das Review)
 
 Grundlage: gelesene Diffs der Beispiel-Commits (alles **[abgeleitet]**; Vorschlag, keine Entscheidung). Für #9 war der kleinste Commit (047d704db) nur eine Kommentaränderung; gelesen habe ich stattdessen 3ae2b1d6a.
@@ -241,7 +253,7 @@ Grundlage: gelesene Diffs der Beispiel-Commits (alles **[abgeleitet]**; Vorschla
 | #2 `schema.ts` ↔ `types.ts` | **akzidentell** | acdcc9ab4: `isHeatingCost` in `schema.ts` und in `types.ts` von Hand, mit identischem Kommentar „Art. 5 VMWG“. Gleiches Muster in PR#361 (`country`, 6 Orte) und PR#539 (`allocableInvoiceCount`, 5 Orte). |
 | #3 `pdf.service` ↔ `statement-pdf.service` | **essenziell** | f0f8a92c9: Hinweis „ersetzt die Abrechnung …“: Text (in `pdf.service`, eigene Übersetzungstabelle für das PDF in 4 Sprachen) und Daten (`statement-pdf.service`). Darstellung und Daten getrennt ist gewollt. Am Rand: das PDF hat eine zweite i18n-Quelle neben `messages/*`. |
 | #4 `be/routes/contracts` ↔ `contract.service` | **Grenzfall, eher akzidentell** | 64d2b16fa: neuer Filter `search` wird im Routen-Schema deklariert und 1:1 durchgereicht (`search: query.search`). Validierung an der Grenze ist legitim; die Eingabeform steht aber zweimal. |
-| #5 `contract.service` ↔ `contracts/[id]/+page.server.ts` | **akzidentell** | e6644bea3: die Regel „eine ersetzte Abrechnung zählt nicht“ wird im Backend (`ne(status, 'replaced')`) und im BFF (`s.status !== 'replaced'`) getrennt eingebaut. |
+| #5 `contract.service` ↔ `contracts/[id]/+page.server.ts` | **akzidentell, widerspricht Entscheid** | e6644bea3: die Regel „eine ersetzte Abrechnung zählt nicht“ wird im Backend (`ne(status, 'replaced')`) und im BFF (`s.status !== 'replaced'`) getrennt eingebaut. |
 | #6 `schema.ts` ↔ `statement.service` | **essenziell** | a94beff36: „überfällig“ wird berechnet statt gespeichert: Speicherung und Statusübergänge ändern sich zusammen. |
 | #7 `schema.ts` ↔ `calculation.service` | **essenziell** | 3130fb793: neue Spalte `managementFeePercent` und ihre Verwendung in der Berechnung. |
 | #8 `schema.ts` ↔ `statement-pdf.service` | **essenziell** | 67053378d: Heizkostenanteil wird gespeichert (`heatingShare`, jsonb) und im PDF so gedruckt. |
@@ -249,12 +261,12 @@ Grundlage: gelesene Diffs der Beispiel-Commits (alles **[abgeleitet]**; Vorschla
 | #10 `+page.server.ts` ↔ `+page.svelte` (Mietvertrag) | **essenziell** | ad6c5cc98: neue Formular-Actions „beenden/löschen“ und ihre Knöpfe; SvelteKit-Seitenpaar. |
 | #11 `contract-form.ts` ↔ `ContractForm.svelte` | **essenziell** | 2062c4b98: Logik bewusst aus der Komponente ausgelagert; beide ändern sich gemeinsam. |
 | #12 `calculation.service` ↔ `statement-pdf.service` | **gemischt** | 67053378d: der Heizkostenanteil wird in der Berechnung bestimmt und gespeichert; `statement-pdf.service` rechnet ihn für ältere Abrechnungen selbst nach („recomputed only for one created before“) → zweiter Ort für dieselbe Regel. |
-| #13 `overview.ts` ↔ `dashboard/+page.server.ts` | **akzidentell** | 618786772: die Zahl der zu sendenden Entwürfe wird im FE aus zwei Backend-Antworten zusammengesetzt (`Math.max(count − outdated, listed)`). Eine fachliche Zählung im FE. |
+| #13 `overview.ts` ↔ `dashboard/+page.server.ts` | **akzidentell, widerspricht Entscheid** | 618786772: die Zahl der zu sendenden Entwürfe wird aus zwei Backend-Antworten zusammengesetzt (`Math.max(count − outdated, listed)`). `overview.ts` liegt in `src/lib` (Schicht FE), läuft aber in der BFF-Ladefunktion des Dashboards: eine fachliche Zählung im BFF. |
 | #14 `ContractForm.svelte` ↔ `ContractWizard.svelte` | **akzidentell** | 427f89303: „Folgevertrag übernimmt vereinbarte Nebenkosten“ muss in beiden Formularen (Bearbeiten, Neu) eingebaut werden; dazu `ContractFormValues` in 3 Dateien und `/overlap/i` in beiden. |
 | #15 `invoice-upload.ts` ↔ `InvoiceUploadDialog.svelte` | **essenziell** | 87fee8a8b: neuer Grund `'off'` und seine Verwendung im Dialog. |
-| #16 BFF `statement-generation` ↔ FE `statement-wizard` | **akzidentell** | 3edc96311: die Regel, wann ein Heizprofil als „seit der Abrechnung geändert“ gilt (`editedSince`, `byDays`), steht im BFF; das FE zeigt sie. Fachregel im BFF. |
+| #16 BFF `statement-generation` ↔ FE `statement-wizard` | **akzidentell, widerspricht Entscheid** | 3edc96311: die Regel, wann ein Heizprofil als „seit der Abrechnung geändert“ gilt (`editedSince`, `byDays`), steht im BFF; das FE zeigt sie. Fachregel im BFF. |
 | #17 `be/routes/contracts` ↔ BFF `contracts/[id]/+page.server.ts` | **akzidentell** | fa6f5df22: Umbenennung `StatementsAfterEndError` → `BilledDaysError` im Backend zieht die BFF-Auswertung der 409-Antwort nach; der Fehlervertrag ist nur durch Konvention geteilt. |
-| #18 BFF `statement-generation` ↔ `generate/+page.server.ts` | **akzidentell** | 5d6888eb2: „eine ersetzte Abrechnung zählt nicht zur Periode“ ein weiteres Mal im BFF (`filter((s) => s.status !== 'replaced')`), dazu `unbilledContracts` im BFF. |
+| #18 BFF `statement-generation` ↔ `generate/+page.server.ts` | **akzidentell, widerspricht Entscheid** | 5d6888eb2: „eine ersetzte Abrechnung zählt nicht zur Periode“ ein weiteres Mal im BFF (`filter((s) => s.status !== 'replaced')`), dazu `unbilledContracts` im BFF. |
 | #19 BFF `statement-actions` ↔ `statements/[id]/+page.server.ts` | **essenziell** | a4fa94603: Modul vertieft (Prüfung und Ablehnung in `statement-actions`), Aufrufer angepasst; ein Refactoring. |
 | #20 `contract.service` ↔ `ContractForm.svelte` | **essenziell** | b39a53d53: neue Prüfung im Backend (`checkBilledByDwello`), das FE zeigt den Fehlercode am Feld (`backendMessage`). Regel nur im Backend, so gewollt. |
 | Feature PR#32 (Redesign, 294 prod) | **essenziell, einmalig** | Umbau auf Tokens/Komponenten (269 FE-Dateien). Nicht repräsentativ. |
@@ -263,19 +275,19 @@ Grundlage: gelesene Diffs der Beispiel-Commits (alles **[abgeleitet]**; Vorschla
 | Feature PR#238 (48 prod) | **überwiegend essenziell** | Neue durchgehende Fähigkeit: Belege speichern (Migration, `document.service`, `file-response`), KI-Extraktion (`llm.ts` +118, `llm.service`), Upload-Route und -Dialog. Akzidenteller Anteil: Rechnungsform zusätzlich in `types.ts` und BFF `invoice.ts`. |
 | Feature PR#539 (38 prod) | **gemischt** | Essenziell: Migration, UI, Regeln. Akzidentell: `allocableInvoiceCount` von Hand im Backend-Typ, im SQL, im BFF-Typ `CategoryWithUsage`, im BFF-Mapper (`Number(c.allocableInvoiceCount) \|\| 0`) und in der Fixture. |
 
-Zählung: von den 20 Paaren 10 essenziell, 9 akzidentell (davon einer Grenzfall), 1 gemischt.
+Zählung: von den 20 Paaren 10 essenziell, 9 akzidentell (davon einer Grenzfall, 4 widersprechen dem Entscheid zum BFF), 1 gemischt.
 
 ## 5. Hypothesen
 
 **H1 – Kein gemeinsamer Vertrag zwischen den Schichten: Entitätsformen werden von Hand gespiegelt.**
 - Belege: 0 Importe FE/BFF → Backend; `types.ts` „Match backend schema“; Paar #2 `schema.ts` ↔ `types.ts` 26 gemeinsame Änderungen ohne Import; DB-Feld im Median in 6 Produktivdateien deklariert (P90 19); 13 schichtübergreifende identische Wertelisten; Paar #17 (Fehlervertrag nur per Konvention); PR#361 (`country` an 6 Orten), PR#539. [gemessen/abgeleitet]
 - Widerlegt, wenn: die Deklarationsorte überwiegend eigene Logik oder bewusst abweichende Formen enthalten (BFF als Anti-Corruption-Layer) und ein generierter Vertrag die Dateizahl pro Feld nicht senken würde.
-- Frage ans Team: Soll der BFF ein eigenes Modell haben, das bewusst vom Backend abweicht, oder soll er die Backend-Antworten nur durchreichen und aufbereiten?
+- Frage ans Team: Da der BFF nicht fachlich entscheidet, bleibt ihm Aufbereiten und Durchreichen. Soll er die Antworten für die Seite umbauen (Mapping im BFF), oder soll das Backend seitengerechte Antworten liefern, die der BFF unverändert weitergibt?
 
-**H2 – Fachregeln werden in mehreren Schichten entschieden (Logik im BFF/FE statt nur im Backend).**
-- Belege: `'replaced'` in 19 Produktivdateien (FE 8, BFF 2, Backend 8); Paare #5, #18 (dieselbe Regel in Backend und zweimal im BFF), #13 (Zählung im FE), #16 (Heizprofil-Regel im BFF), #12 (Nachrechnen im PDF); BFF-Dateien unter den Hotspots (zykl. Σ 152 und 115); Validierungs-Regex in BFF und Backend doppelt. [gemessen/abgeleitet]
-- Widerlegt, wenn: die BFF-/FE-Stellen beim Lesen überwiegend Darstellung sind (Beschriftung je Status), nicht Entscheidungen, und eine Statusregel sich heute in einer Datei ändern lässt.
-- Frage: Darf der BFF fachliche Entscheidungen treffen (z. B. welche Abrechnungen eine Periode belegen), oder soll er dafür einen Backend-Endpunkt fragen?
+**H2 – Fachregeln werden in mehreren Schichten entschieden; der BFF entscheidet entgegen dem Zielbild mit.**
+- Belege: 9 fachliche Status-Vergleiche in 5 BFF-Dateien und 10 fachliche Prüfregeln in 4 BFF-Dateien (M4); `'replaced'` in 19 Produktivdateien (FE 8, BFF 2, Backend 8); Paare #5, #18 (dieselbe Regel in Backend und zweimal im BFF), #13 (Zählung im BFF), #16 (Heizprofil-Regel im BFF), #12 (Nachrechnen im PDF); BFF-Dateien unter den Hotspots (zykl. Σ 152 und 115). Der Entscheid vom 23.10.2026 bestätigt, dass das eine Abweichung ist; offen ist nur, wie viel der Kopplung sie erklärt. [gemessen/abgeleitet]
+- Widerlegt (als Ursache der Amplifikation), wenn: Änderungen an diesen Regeln selten den BFF mitziehen, d. h. die BFF-Stellen in der Historie kaum gemeinsam mit den Backend-Regeln geändert werden. Messbar über Ä4 und die Paare #5, #16, #18.
+- Frage: Zählt eine Eingabeprüfung im Formular (PLZ hat 4 Ziffern, Zimmer in halben Schritten) als fachliche Entscheidung, die ins Backend gehört (BFF zeigt dann die Fehlercodes des Backends, wie bei #20), oder darf der BFF sie für schnelle Rückmeldung zusätzlich prüfen?
 
 **H3 – Zentrale Sammeldateien koppeln unabhängige Features.**
 - Belege: die zwei stärksten Produktivpaare hängen an `types.ts` (#1: 36, #2: 26 gemeinsame Änderungen); `types.ts` in 37 von 113 Features; `schema.ts` 61 Commits in 48 PRs, Fan-in 81, trägt auch die Fachtypen der JSON-Spalten (#9); 5 der Top-10-Paare hängen an `schema.ts`. [gemessen]
@@ -303,24 +315,25 @@ Zählung: von den 20 Paaren 10 essenziell, 9 akzidentell (davon einer Grenzfall)
 - **Import-Graph** per Regex: dynamische Pfade, `./$types` (SvelteKit) und HTTP-Aufrufe sind unsichtbar. „Import: nein“ zwischen BFF und Backend oder zwischen `+page.server.ts` und `+page.svelte` heisst „keine statische Abhängigkeit“, nicht „unabhängig“. 14 Test-/Tool-Dateien enthalten Import-Strings als Testdaten (nicht auflösbar, ignoriert).
 - **CRAP** ist geschätzt (`static_estimated`), nicht gemessen; echte Werte bräuchten Istanbul-Coverage (FE nutzt v8, Backend lcov). Darum Rangfolge nach zyklomatischer Komplexität.
 - **M4 ist heuristisch:** Ein Schlüssel `field:` kann Nutzung statt Definition sein (Drizzle-Projektionen zählen als „kennt die Feldliste“); Felder, die in zwei Tabellen vorkommen (z. B. `country`), sind aus der Feld-Statistik ausgenommen; Statuswerte wie `'draft'` kommen auch in anderer Bedeutung vor (Entwurf eines Formulars); Validierungsregeln in Svelte-Markup (`maxlength=`) sind nur grob erfasst.
+- **Fachliche Entscheidungen im BFF** werden über zwei Muster gefunden (Vergleich gegen einen Statuswert, verankerte Regex); Entscheidungen in anderer Form (z. B. Datumsvergleiche, Rundungen, Zählungen wie #13) erfasst das Skript nicht. Die Einordnung fachlich/technisch der 28 Treffer ist gelesen, nicht gemessen.
 - **Beispiel-Commits** sind der kleinste Commit mit beiden Dateien; ein einzelner Diff belegt das Muster, nicht seine Häufigkeit.
 - fallow und Deepcheck lesen das Arbeitsverzeichnis und zählen die Skripte unter `tools/arch-baseline/` mit (ohne Historie, ohne Einfluss auf M3).
 - Die Basis `origin/main` hat sich während der Analyse um 6 Commits bewegt; alle Zahlen stammen aus dem letzten Lauf auf d4d508cc2.
 
 ## 7. Vorschlag: messbare Szenarien für Änderbarkeit
 
-Alle drei messen nur Produktivdateien (Entscheid 23.10.2026).
+Alle vier messen nur Produktivdateien (Entscheid 23.10.2026).
 
-| | Ä1 Neues Feld an bestehender Entität | Ä2 Statusregel ändern | Ä3 Fachliche Erweiterung |
-|---|---|---|---|
-| Auslöser | Product Owner verlangt ein neues Attribut (z. B. Land der Korrespondenzadresse) | Product Owner ändert, was ein Status bedeutet (z. B. wann eine ersetzte Abrechnung noch zählt) | Ein Issue mit einer neuen Fachregel, umgesetzt als ein feat-PR |
-| Umgebung | Entwicklung, bestehende Entität mit Liste, Detail, Formular | Entwicklung, Status mit Wirkung auf Liste, Übersicht, Erstellung, PDF | Entwicklung nach ATDD-Workflow |
-| Reaktion | Feld ist in DB, API, BFF und UI verfügbar und validiert | Alle Stellen, die nach dem Status entscheiden, folgen der neuen Regel | Regel umgesetzt, Szenario grün |
-| Messgrösse | Produktivdateien ausserhalb der DB, die das Feld von Hand deklarieren (`m4-field-spread.csv`) | Produktivdateien, die den Statuswert nennen (`m4-status-literals.csv`) | geänderte Produktivdateien pro feat-PR mit 1 feat-Commit (`m1-summary.csv`, Gruppe `feat-single`) |
-| Ausgangswert | Median **6**, P90 **19** (125 Felder) | `replaced` **19** Dateien in 4 Schichten (FE 8, BFF 2, Backend 8, Shared 1); `draft` 29, `paid` 21 | Median **9,5**, P90 **25**; Schichten Median 2 / P90 5 |
-| Zielwert | vom Team festzulegen | vom Team festzulegen | vom Team festzulegen |
+| | Ä1 Neues Feld an bestehender Entität | Ä2 Statusregel ändern | Ä3 Fachliche Erweiterung | Ä4 Fachregel nur im Backend |
+|---|---|---|---|---|
+| Auslöser | Product Owner verlangt ein neues Attribut (z. B. Land der Korrespondenzadresse) | Product Owner ändert, was ein Status bedeutet (z. B. wann eine ersetzte Abrechnung noch zählt) | Ein Issue mit einer neuen Fachregel, umgesetzt als ein feat-PR | Eine Fachregel ändert sich (Status, Prüfregel) |
+| Umgebung | Entwicklung, bestehende Entität mit Liste, Detail, Formular | Entwicklung, Status mit Wirkung auf Liste, Übersicht, Erstellung, PDF | Entwicklung nach ATDD-Workflow | Entwicklung, Regel heute in Backend und BFF |
+| Reaktion | Feld ist in DB, API, BFF und UI verfügbar und validiert | Alle Stellen, die nach dem Status entscheiden, folgen der neuen Regel | Regel umgesetzt, Szenario grün | Die Änderung erfolgt nur im Backend; der BFF übernimmt Ergebnis oder Fehlercode |
+| Messgrösse | Produktivdateien ausserhalb der DB, die das Feld von Hand deklarieren (`m4-field-spread.csv`) | Produktivdateien, die den Statuswert nennen (`m4-status-literals.csv`) | geänderte Produktivdateien pro feat-PR mit 1 feat-Commit (`m1-summary.csv`, Gruppe `feat-single`) | fachliche Status-Vergleiche und Prüfregeln im BFF (`m4-decisions-outside-backend.csv`, gelesen wie in M4) |
+| Ausgangswert | Median **6**, P90 **19** (125 Felder) | `replaced` **19** Dateien in 4 Schichten (FE 8, BFF 2, Backend 8, Shared 1); `draft` 29, `paid` 21 | Median **9,5**, P90 **25**; Schichten Median 2 / P90 5 | **9** Status-Vergleiche in 5 Dateien, **10** Prüfregeln in 4 Dateien |
+| Zielwert | vom Team festzulegen | vom Team festzulegen | vom Team festzulegen | **0** (aus dem Entscheid; Prüfregeln abhängig von der Frage zu H2) |
 
-Alle drei Werte lassen sich nach jedem Refactoring mit `tools/arch-baseline/run.sh` neu messen.
+Alle vier Werte lassen sich nach jedem Refactoring mit `tools/arch-baseline/run.sh` neu messen.
 
 ## Wiederholen
 

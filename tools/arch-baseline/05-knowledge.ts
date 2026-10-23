@@ -202,3 +202,33 @@ csv(
 		return { value, files: files.length, FE: per('FE'), BFF: per('BFF'), Backend: per('Backend'), DB: per('DB'), Shared: per('Shared/Contracts'), layers: layersOf(files) };
 	})
 );
+
+// G4: signs of domain decisions outside the backend (product owner, 23.10.2026: the BFF makes no domain
+// decisions). Per FE/BFF production file: comparisons against a status value (`status !== 'replaced'`) and
+// anchored regex literals (`/^\d{4}$/`, validation rules), plus fallow's cyclomatic sum.
+const statusAlt = STATUS.join('|');
+const STATUS_CMP = new RegExp(`[!=]==\\s*['"\`](${statusAlt})['"\`]|['"\`](${statusAlt})['"\`]\\s*[!=]==`, 'g');
+const ANCHORED_RE = /\/\^[^/\n]+\$\/[a-z]*/g;
+const health = JSON.parse(readFileSync(join(OUT, 'fallow-health.json'), 'utf8'));
+const cyclo = new Map<string, number>(health.file_scores.map((f: { path: string; total_cyclomatic: number }) => [f.path, f.total_cyclomatic]));
+const decisionRows = prod
+	.filter((p) => ['FE', 'BFF'].includes(layer(p)))
+	.map((p) => ({ path: p, layer: layer(p), status_comparisons: [...text.get(p)!.matchAll(STATUS_CMP)].length, anchored_regex: [...text.get(p)!.matchAll(ANCHORED_RE)].length, total_cyclomatic: cyclo.get(p) ?? 0 }))
+	.filter((r) => r.status_comparisons + r.anchored_regex > 0)
+	.sort((a, b) => b.status_comparisons + b.anchored_regex - (a.status_comparisons + a.anchored_regex));
+csv('m4-decisions-outside-backend.csv', decisionRows);
+csv(
+	'm4-decisions-per-layer.csv',
+	['FE', 'BFF', 'Backend'].map((l) => {
+		const files = prod.filter((p) => layer(p) === l);
+		const count = (re: RegExp, p: string) => [...text.get(p)!.matchAll(re)].length;
+		return {
+			layer: l,
+			files_with_status_comparison: files.filter((p) => count(STATUS_CMP, p) > 0).length,
+			status_comparisons: files.reduce((s, p) => s + count(STATUS_CMP, p), 0),
+			files_with_anchored_regex: files.filter((p) => count(ANCHORED_RE, p) > 0).length,
+			anchored_regex: files.reduce((s, p) => s + count(ANCHORED_RE, p), 0),
+			total_cyclomatic: files.reduce((s, p) => s + (cyclo.get(p) ?? 0), 0)
+		};
+	})
+);

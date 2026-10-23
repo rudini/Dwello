@@ -40,7 +40,7 @@ feat units by number of feat commits inside: 0: 2, 1: 82, 2-3: 21, >=4: 8
 | binary (screenshot, font, PDF) | 145 |
 | lockfile | 2 |
 | data dump (demo data SQL) | 1 |
-| this analysis itself | 58 |
+| this analysis itself | 60 |
 
 ### Layers (HEAD)
 
@@ -460,7 +460,7 @@ fallow coverage_model: static_estimated; files scored 951; functions above thres
 
 | total_files | files_with_clones | clone_groups | duplicated_lines | duplication_percentage |
 |---|---|---|---|---|
-| 679 | 34 | 22 | 585 | 0.8717031738936075 |
+| 679 | 34 | 22 | 585 | 0.8712747419686341 |
 
 clone groups spanning layers: 0 of 22; FE/BFF files importing backend code: 0
 
@@ -494,6 +494,31 @@ clone groups spanning layers: 0 of 22; FE/BFF files importing backend code: 0
 | active | 11 | 4 | 2 | 4 | 0 | 1 |
 | ended | 9 | 5 | 1 | 2 | 0 | 1 |
 | future | 12 | 4 | 3 | 4 | 0 | 1 |
+
+### M4 domain decisions outside the backend (status comparisons, anchored regex)
+
+| layer | files_with_status_comparison | status_comparisons | files_with_anchored_regex | anchored_regex | total_cyclomatic |
+|---|---|---|---|---|---|
+| FE | 20 | 54 | 9 | 14 | 3128 |
+| BFF | 5 | 9 | 11 | 19 | 1832 |
+| Backend | 9 | 33 | 6 | 9 | 2605 |
+
+| path | status_comparisons | anchored_regex | total_cyclomatic |
+|---|---|---|---|
+| src/lib/server/settings.ts | 0 | 4 | 39 |
+| src/lib/server/building-form.ts | 0 | 3 | 27 |
+| src/lib/server/statement-generation.ts | 3 | 0 | 152 |
+| routes/tenants/[id]/+page.server.ts | 3 | 0 | 26 |
+| src/lib/server/tenant-form.ts | 0 | 2 | 38 |
+| routes/buildings/[id]/+page.server.ts | 0 | 2 | 49 |
+| routes/contracts/[id]/+page.server.ts | 1 | 1 | 115 |
+| routes/invoices/+page.server.ts | 0 | 2 | 26 |
+| routes/statements/generate/+page.server.ts | 1 | 1 | 64 |
+| src/lib/server/apartment.ts | 1 | 0 | 22 |
+| src/lib/server/jwt-config.ts | 0 | 1 | 19 |
+| routes/api/addresses/[egid]/+server.ts | 0 | 1 | 3 |
+| routes/invoices/new/+page.server.ts | 0 | 1 | 16 |
+| routes/statements/+page.server.ts | 0 | 1 | 27 |
 
 ### Baselines for the modifiability scenarios
 

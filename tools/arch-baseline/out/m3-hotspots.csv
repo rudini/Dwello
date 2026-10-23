@@ -281,7 +281,7 @@ rank_cyclo,rank_crap,path,layer,kind,commits,units,total_cyclomatic,crap_max,mai
 280,636,tests/e2e/targets/statements.ts,Tests-Acceptance,test,6,4,22,1.2,84,38,2,132,7.2,4
 281,264,backend/src/services/tenant-export.service.ts,Backend,prod,4,2,33,13.6,86.8,180,1,132,54.4,0.9
 282,477,tests/e2e/steps/tenants.steps.ts,Tests-Acceptance,test,6,3,22,2.9,85.9,95,0,132,17.4,1.5
-283,293,src/__tests__/invoice-upload-endpoints.test.ts,Tests-Unit,test,6,2,22,7.5,88.2,122,0,132,45,1.3
+283,293,src/__tests__/invoice-upload-endpoints.test.ts,Tests-Unit,test,6,2,22,7.5,88.2,122,0,132,45,1.2
 284,85,src/routes/tenants/[id]/+page.svelte,FE,prod,13,7,10,17.6,87.4,101,1,130,228.8,1.6
 285,66,src/routes/tenants/[id]/TenantDocumentsCard.svelte,FE,prod,13,6,10,21.8,89,163,1,130,283.4,0.9
 286,111,src/routes/contracts/[id]/MissingStatement.svelte,FE,prod,10,5,13,17.6,90,85,1,130,176,1.7
@@ -550,7 +550,7 @@ rank_cyclo,rank_crap,path,layer,kind,commits,units,total_cyclomatic,crap_max,mai
 549,519,tests/e2e/questions/authentication.ts,Tests-Acceptance,test,5,3,6,2.9,90,24,2,30,14.5,1.4
 550,242,src/routes/buildings/new/+page.server.ts,BFF,prod,6,4,5,10.4,92.5,43,1,30,62.4,0.8
 551,287,src/routes/invoices/MissedWarning.svelte,FE,prod,10,6,3,4.9,93.9,32,2,30,49,1
-552,243,src/routes/tenants/[id]/TenantRentalCard.svelte,FE,prod,6,4,5,10.4,92.7,44,1,30,62.4,0.9
+552,243,src/routes/tenants/[id]/TenantRentalCard.svelte,FE,prod,6,4,5,10.4,92.7,44,1,30,62.4,0.8
 553,660,tests/e2e/tasks/statement-edit.ts,Tests-Acceptance,test,5,4,6,1.2,90.8,19,1,30,6,1.8
 554,333,src/routes/statements/[id]/edit/+page.server.ts,BFF,prod,5,3,6,7.5,93.6,38,1,30,37.5,0.9
 555,579,src/lib/stores.ts,FE,prod,5,4,6,2,96.4,50,41,30,10,0.8

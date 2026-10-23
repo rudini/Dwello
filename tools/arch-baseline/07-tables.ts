@@ -138,6 +138,9 @@ table(readCsv('s4-ritual-files.csv'), ['type', 'units', 'units_touching_any_ritu
 
 h('M4 status values: production files naming them, per layer');
 table(readCsv('m4-status-literals.csv'), ['value', 'files', 'FE', 'BFF', 'Backend', 'DB', 'Shared']);
+h('M4 domain decisions outside the backend (status comparisons, anchored regex)');
+table(readCsv('m4-decisions-per-layer.csv'), ['layer', 'files_with_status_comparison', 'status_comparisons', 'files_with_anchored_regex', 'anchored_regex', 'total_cyclomatic']);
+table(readCsv('m4-decisions-outside-backend.csv').filter((r) => r.layer === 'BFF').map((r) => ({ ...r, path: short(r.path) })), ['path', 'status_comparisons', 'anchored_regex', 'total_cyclomatic']);
 h('Baselines for the modifiability scenarios');
 const fs = readCsv('m4-field-spread.csv');
 const fv = fs.map((r) => +r.prod_files).sort((a, b) => a - b);
