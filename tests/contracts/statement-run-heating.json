@@ -1,0 +1,13 @@
+{
+	"heatingWithoutServicePeriod": [
+		{
+			"id": "d0000000-0000-4000-8000-000000000002",
+			"billingEntityName": "Fernwärme AG",
+			"description": "Fernwärme Q1 2025",
+			"invoiceDate": "2025-03-31",
+			"amount": "1520.00",
+			"categoryId": "c0000000-0000-4000-8000-000000000002"
+		}
+	],
+	"oldHeatingRule": []
+}

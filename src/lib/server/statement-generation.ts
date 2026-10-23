@@ -1,5 +1,5 @@
 import { backendMessage } from '$lib/backend-error';
-import { billingStart, billsIn, localToday } from '$lib/contract-status';
+import { billingStart, localToday } from '$lib/contract-status';
 import { periodDays } from '$lib/accounting-period';
 import { m } from '$lib/paraglide/messages';
 import { localName } from '$lib/names';
@@ -219,6 +219,15 @@ type Names = Parameters<typeof localName>[0];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON, mapped by toStatement
 type Listed = Record<string, any>;
 
+// The building, the period and the Heizprofil of a run, as the backend's run routes take them
+const runQuery = (buildingId: string, run: GenerationRequest) =>
+	new URLSearchParams({
+		buildingId,
+		periodStart: run.periodStart,
+		periodEnd: run.periodEnd,
+		...(run.heatingProfileId ? { heatingProfileId: run.heatingProfileId } : {})
+	});
+
 const nameOf = (names: Names | null) => (names ? localName(names) : m.common_unknown());
 
 /** What the backend finds a kept statement doing differently from the run (#132, H-28 pair #16) */
@@ -241,13 +250,8 @@ async function changedStatements(
 	overlapping: Listed[],
 	oldRule: (listed: Listed) => boolean
 ): Promise<ChangedStatement[]> {
-	const query = new URLSearchParams({
-		buildingId,
-		periodStart: run.periodStart,
-		periodEnd: run.periodEnd,
-		...(run.heatingProfileId ? { heatingProfileId: run.heatingProfileId } : {}),
-		managementFeePercent: String(run.managementFeePercent)
-	});
+	const query = runQuery(buildingId, run);
+	query.set('managementFeePercent', String(run.managementFeePercent));
 	// only a hint (code review C-1): without the answer no settings are compared
 	const { statements: differences = [] }: { statements?: Difference[] } = overlapping.length
 		? await call(fetch, `statements/run-differences?${query}`).catch(() => ({}))
@@ -272,33 +276,15 @@ async function changedStatements(
 	return changed.filter((one) => one !== null);
 }
 
-// The building's contracts this run bills: Mietstage in the period and no statement there yet (as contractsOf); only a
-// hint, none when they do not load
-async function runContracts(fetch: Fetch, buildingId: string, run: Run, overlapping: Listed[]) {
-	const { contracts = [] }: { contracts?: Contract[] } = await call(fetch, `contracts?buildingId=${encodeURIComponent(buildingId)}&limit=1000`).catch(() => ({}));
-	return contracts.filter(
-		(c) => billsIn(c, { start: run.periodStart, end: run.periodEnd }) && !overlapping.some((s) => s.contractId === c.id)
-	);
-}
-
-// A contract moving in or out in the period: by the Heizprofil a heating invoice with a Leistungszeitraum counts only its
-// months (#339)
-const movesIn = (c: Contract, { periodStart, periodEnd }: Run) =>
-	billingStart(c) > periodStart || (!!c.endDate && c.endDate < periodEnd);
-
-// The hints on heating by the Heizprofil need the contracts this run bills (#335, #339): heating invoices without
-// Leistungszeitraum only at a move-in or move-out, a sent statement under the old rule only when the run bills another
-// contract of its apartment
-async function heatingHints(fetch: Fetch, buildingId: string, run: GenerationRequest, overlapping: Listed[], check?: InvoiceCheck) {
+// The hints on heating by the Heizprofil that concern this run (#335, #339), as the backend decides them (H-28); asked
+// only when the check has some, none when they do not load
+async function heatingHints(fetch: Fetch, buildingId: string, run: GenerationRequest, check?: InvoiceCheck) {
 	const { heatingWithoutServicePeriod: hinted = [], oldHeatingRule: sent = [] } = check ?? {};
-	const billed = hinted.length + sent.length ? await runContracts(fetch, buildingId, run, overlapping) : [];
-	const change = !!run.heatingProfileId && billed.some((c) => movesIn(c, run));
-	return { found: check && { ...check, heatingWithoutServicePeriod: change ? hinted : [] }, oldRule: rebills(sent, billed) };
+	const forRun: Partial<Pick<InvoiceCheck, 'heatingWithoutServicePeriod' | 'oldHeatingRule'>> =
+		hinted.length + sent.length ? await call(fetch, `statements/run-heating?${runQuery(buildingId, run)}`).catch(() => ({})) : {};
+	const { heatingWithoutServicePeriod = [], oldHeatingRule = [] } = forRun;
+	return { found: check && { ...check, heatingWithoutServicePeriod }, oldRule: (listed: Listed) => oldHeatingRule.includes(listed.id) };
 }
-
-// a sent statement under the old rule whose apartment the run bills again, by another contract
-const rebills = (sent: string[], billed: Contract[]) => (listed: Listed) =>
-	sent.includes(listed.id) && billed.some((c) => c.id !== listed.contractId && c.apartmentNumber === listed.apartment?.number);
 
 /** Per building: the utility invoices of the period, the statements whose period overlaps it and the check per category */
 export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
@@ -333,7 +319,7 @@ export async function invoicesInPeriod(fetch: Fetch, run: GenerationRequest) {
 					)
 					.sort();
 				const overlapping = (statements as Listed[]).filter((s) => overlaps(s as Period));
-				const { found, oldRule } = await heatingHints(fetch, buildingId, run, overlapping, check as InvoiceCheck | undefined);
+				const { found, oldRule } = await heatingHints(fetch, buildingId, run, check as InvoiceCheck | undefined);
 				return {
 					buildingId,
 					count: invoices.length,

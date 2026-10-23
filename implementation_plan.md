@@ -9,3 +9,4 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 
 Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
+
