@@ -8,13 +8,3 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8); `open-work.test.ts
 - Parallel sessions (workers of one coordinator, or another branch's session open on `main`): leave this file untouched, keep the checklist in the pull request description and append the session to the archive at the end.
 
 Open work: GitHub issues (non-functional ones with an `nfr:` category label), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
-
-## Session: stable invoice order in statements (#759)
-
-Request: fix the red `agreed-from.pg.test.ts` on `main` in its own pull request. Cause: `getInvoicesForStatement` orders by invoice date only, so invoices of one day come in arbitrary order, and with them the statement's positions and the PDF's list of agreed categories.
-
-- [x] Reproducing pg test, seen red (two invoices of one day, the first edited after the second was entered)
-- [x] Fix: deterministic tiebreaker in `getInvoicesForStatement`
-- [x] Checks: backend suite 1525 pass (coverage 96.3 % lines), lint, check, type-check, Prettier on added files
-- [ ] Code review of the slice
-- [ ] Archive, PR with `Fixes #759`, `No scenario`
