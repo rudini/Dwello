@@ -18,15 +18,19 @@ const tracked = new Set(git(['ls-files', '-z']).split('\0'));
 const IMPORT_RE =
 	/(?:import|export)\s+(type\s+)?(?:([\w*{}\s,$]+?)\s+from\s+)?['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 
-/** `import type …`, or `import { type A, type B }`: every name of the clause is a type */
-const typeOnlyImport = (keyword?: string, clause?: string) =>
+/**
+ * `import type …`, or in the backend `import { type A, type B }`: every name of the clause is a type. The frontend
+ * compiles with `verbatimModuleSyntax`, which keeps such an import at runtime
+ */
+const typeOnlyImport = (file: string, keyword?: string, clause?: string) =>
 	!!keyword ||
+	(file.startsWith('backend/') &&
 	(!!clause &&
 		/^\{[^}]*\}$/.test(clause.trim()) &&
 		clause
 			.replace(/[{}]/g, '')
 			.split(',')
-			.every((n) => !n.trim() || n.trim().startsWith('type ')));
+			.every((n) => !n.trim() || n.trim().startsWith('type '))));
 
 /** Path a specifier points to before extensions are tried: $lib alias or relative; null for packages. */
 function basePath(from: string, spec: string): string | null {
@@ -59,7 +63,7 @@ for (const f of files) {
 		if (spec.endsWith('/$types') || spec.includes('paraglide')) continue;
 		const to = resolve(f, spec);
 		if (to) {
-			const typeOnly = typeOnlyImport(m[1], m[2]);
+			const typeOnly = typeOnlyImport(f, m[1], m[2]);
 			const prev = edges.find((e) => e.from === f && e.to === to);
 			if (prev) prev.typeOnly &&= typeOnly;
 			else if (to !== f) edges.push({ from: f, to, typeOnly });

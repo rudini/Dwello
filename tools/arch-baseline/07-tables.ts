@@ -30,7 +30,7 @@ md.push(`window: since ${SINCE} on ${BASE}; units ${units.length}; commits (non-
 const featUnits = units.filter((u) => u.type === 'feat');
 const fc = (f: (n: number) => boolean) => featUnits.filter((u) => f(+u.feat_commits)).length;
 md.push(`feat units by number of feat commits inside: 0: ${fc((n) => n === 0)}, 1: ${fc((n) => n === 1)}, 2-3: ${fc((n) => n >= 2 && n <= 3)}, >=4: ${fc((n) => n >= 4)}`, '');
-md.push(`unit titles naming an issue (#n): ${units.filter((u) => /#\d+/.test(u.title)).length} of ${units.length}`, '');
+md.push(`unit titles naming an issue (#n other than the unit's own PR number): ${units.filter((u) => /#\d+/.test(u.title.replace(`(#${u.id.replace('PR#', '')})`, ''))).length} of ${units.length}`, '');
 h('Excluded units and commits');
 table(readCsv('excluded-units.csv'), ['sha', 'pr', 'title', 'reason']);
 h('Excluded files (HEAD)');

@@ -19,7 +19,7 @@ window: since 2026-04-23 on d4d508cc2; units 408; commits (non-merge) 1937
 
 feat units by number of feat commits inside: 0: 2, 1: 82, 2-3: 21, >=4: 8
 
-unit titles naming an issue (#n): 34 of 408
+unit titles naming an issue (#n other than the unit's own PR number): 32 of 408
 
 ### Excluded units and commits
 
@@ -351,7 +351,7 @@ production pairs: 68; cross-layer without import: 28, of which naming contract f
 | tests/e2e/fixtures/backend.ts | 92 | 55 | 154 | 21.8 | 637 |
 | src/__tests__/invoice-pages.dom.test.ts | 72 | 26 | 174 | 4.9 | 1463 |
 
-fallow coverage_model: static_estimated; files scored 951; functions above threshold 7; files whose crap_max is exactly 26.5: 46
+fallow coverage_model: static_estimated; files scored 951; functions above threshold 8; files whose crap_max is exactly 26.5: 46
 
 ### M4 entity mirrors (files outside DB that declare >= threshold of a table's distinctive fields)
 
@@ -467,7 +467,7 @@ fallow coverage_model: static_estimated; files scored 951; functions above thres
 
 | total_files | files_with_clones | clone_groups | duplicated_lines | duplication_percentage |
 |---|---|---|---|---|
-| 679 | 34 | 22 | 585 | 0.871106081362797 |
+| 679 | 34 | 22 | 585 | 0.8705098062557661 |
 
 clone groups spanning layers: 0 of 22; FE/BFF files importing backend code: 0
 
