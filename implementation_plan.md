@@ -193,4 +193,7 @@ Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-fu
 - [ ] #465 pull request `Fixes #465`, merged on green CI
 - [x] #470 DOM tests red first: loading sentence at the top of steps 2 and 3, step 3's late content below «Weiter», «Weiter» kept on the screen when step 2's rows arrive
 - [x] #470 implementation: FeeNotAgreed and AgreedCosts below «Weiter» (reserved place), the loading sentence at the top (new text step 2 in four languages), the page scrolls by what loads above «Weiter»; No scenario: the loading state cannot be held open in the E2E stack (#468)
-- [ ] #470 code review, persona Marco on a phone, closing review, pull request `Fixes #470`, merged on green CI
+- [x] #470 code review round 1 (`docs/reviews/470-review-1.md`), persona Marco round 1 (`docs/design/personas/marco-470.md`)
+- [x] #470 code review round 2 (`docs/reviews/470-review-2.md`); fixes: the line above «Weiter» also for a failed check, the scenario «Der Assistent nennt die Mietverträge ohne vereinbarte Verwaltungspauschale» checks it
+- [x] #470 code review round 3 (`docs/reviews/470-review-3.md`)
+- [ ] #470 persona Marco round 2 (step 3 only), closing review, pull request `Fixes #470`, merged on green CI
