@@ -5,8 +5,8 @@ privately, never as a public issue or pull request.
 
 ## How to report
 
-Use GitHub's private vulnerability reporting: **Security → Report a vulnerability** in this repository. Describe what
-you found, how to reproduce it and what an attacker could reach.
+Use GitHub's private vulnerability reporting (**Security → Report a vulnerability** in this repository) or write to
+[info@dwello.ch](mailto:info@dwello.ch). Describe what you found, how to reproduce it and what an attacker could reach.
 
 ## What happens next
 

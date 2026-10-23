@@ -2931,3 +2931,10 @@ No scenario: the E2E stack does not run the demo's compose files (`deploy/demo`)
 - [x] `reset-demo.sh` sets `DATABASE_URL` from `/run/dwello/db_password` (`compose run … sh -c` replaces the backend's command) — seen red
 - [x] Slice review (`code-reviewer`), `docs/reviews/demo-postgres-review-1.md`: no findings
 - [x] Archive, PR: pushed after this archive
+
+## Session 2026-10-23: contact address for contributors
+
+No scenario: repository documents only, no app change.
+
+- [x] `info@dwello.ch` as the contact in `CODE_OF_CONDUCT.md` and `SECURITY.md` (product owner's answer)
+- [x] PR: pushed after this archive
