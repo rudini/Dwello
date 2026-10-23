@@ -10,13 +10,9 @@ const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 type Fetch = typeof globalThis.fetch;
 type Contract = {
 	id: string;
-	startDate: string;
-	endDate: string | null;
-	billedUntil?: string | null;
 	tenantName: string;
 	apartmentId?: string;
 	apartmentNumber: string;
-	managementFeeAgreed?: boolean;
 	managementFeePercent?: string | null; // its own rate, before the run's (#89)
 	oldAddress?: boolean; // A-5 (#114): moved out, still with the building's address
 };

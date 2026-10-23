@@ -16,7 +16,7 @@ export function contractStatusOn(
 }
 
 /** Its first day to bill: the day after «Abgerechnet bis» (#133), otherwise the Vertragsbeginn */
-export function billingStart(contract: { startDate: string; billedUntil?: string | null }) {
+function billingStart(contract: { startDate: string; billedUntil?: string | null }) {
 	const begin = contract.startDate.slice(0, 10);
 	const until = contract.billedUntil;
 	return until && until >= begin
