@@ -348,9 +348,27 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('category-fuel-refused'), await response.json())).toEqual([]);
 	});
 
+	// H-28 (#717): the apartment names its current and its next contract
+	it('GET /apartments/:id liefert die Felder von apartment.json', async () => {
+		const actual = await (await callApi(`/api/v1/apartments/${rental.apartment}`)).json();
+		expect(drift(await sample('apartment'), actual)).toEqual([]);
+	});
+
 	it('GET /contracts/:id liefert die Felder von contract.json', async () => {
 		const actual = await (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
 		expect(drift(await sample('contract'), actual)).toEqual([]);
+	});
+
+	// H-28 (#717): a draft named that the change does not touch
+	it('PUT /contracts/:id liefert für einen fremden Entwurf die Felder von contract-draft-not-affected.json', async () => {
+		const other = await createRental(`${token}-draft`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		try {
+			const response = await sendJson('PUT', `/api/v1/contracts/${other.contract}`, { endDate: null, deleteDraft: statementId });
+			expect(response.status).toBe(400);
+			expect(drift(await sample('contract-draft-not-affected'), await response.json())).toEqual([]);
+		} finally {
+			await other.remove();
+		}
 	});
 
 	it('GET /contracts/:id/agreements liefert die Felder von contract-agreements.json', async () => {

@@ -1,0 +1,5 @@
+{
+	"error": "The named draft is not one this change would delete",
+	"code": "CONTRACT_DRAFT_NOT_AFFECTED",
+	"params": {}
+}
