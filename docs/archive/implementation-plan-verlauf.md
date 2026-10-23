@@ -2974,6 +2974,19 @@ H-28 (`docs/design/offene-punkte.md`), statement rules: which heating hints a ru
 - [x] Workflow note: commit-msg gate misses `-F` (`docs/reviews/workflow-notes-h28-heating-hints.md`)
 - [x] Merge `main` after #646 (clean), before complete; PR pushed after this archive
 
+## Session: spec scenarios need approval (#643)
+
+- [x] Rule text: `CLAUDE.md` (Workflow 1, "When to ask"), `tests/e2e/CLAUDE.md` ("Rules")
+- [x] `code-reviewer` checks step definitions for weakened assertions
+- [x] CI check (`tools/open-work/check-issues.mjs`): a changed or removed line of a scenario that is non-`@wip` on the base branch fails without `Spec change approved: #n`
+- [x] Additions (new scenario, new Examples row) and `@wip` scenarios pass
+- [x] Adding `@wip` to a protected scenario fails
+- [x] `Spec change approved: #n` passes only for a decided issue (exists, no pull request, not `needs-decision`, not closed as not planned)
+- [x] Slice review round 1: `docs/reviews/spec643-review-1.md`
+- [x] Slice review round 2 (C-1, C-2): `docs/reviews/spec643-review-2.md`
+- [x] Closing round: `docs/reviews/spec643-review-3.md`, `docs/reviews/spec643-review-4.md` (C-4 fixed)
+- [x] Workflow note: `grill-me` assumes an issue; `docs/reviews/workflow-notes-issue-643.md`
+- [x] Archive, PR: pushed after this archive
 ## Session H-28 step 1: preview flags from the run plan
 
 #717 (H-28): `movedOut`, `fixedTerm` (#76), `shortenedTo` (#453) and `withoutFee` (#89) come from the backend's run plan; the BFF passes them on. No scenario: behaviour unchanged. Parallel session (checklist in the pull request).
