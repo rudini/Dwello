@@ -334,11 +334,11 @@ jobs:
     needs: [changes, build, static-checks, unit-tests, e2e-results, fallow, fitness]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
-    continue-on-error: true # a report: an API or clock error must not turn the run red
     permissions:
       actions: read
     steps:
-      - env:
+      - continue-on-error: true # a report: an API or clock error must not turn the check red
+        env:
           GH_TOKEN: ${{ github.token }}
           RUNS: repos/${{ github.repository }}/actions
         run: |

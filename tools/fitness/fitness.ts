@@ -92,7 +92,7 @@ export function advise(a: { prSize?: Ratchet['prSizeWarn']; coChange?: number; t
 	if ((a.technicalAdded ?? 0) > 0)
 		findings.push({
 			check: 'technical',
-			message: `Ä4/AP2: tools/fitness/ratchet.json lists ${a.technicalAdded} more technical check(s) in the BFF than the base. Confirm in the review that each new entry checks a format (UUID, ISO date of a query parameter), not a domain rule or form input; those belong to the backend.`
+			message: `Ä4/AP2: tools/fitness/ratchet.json has ${a.technicalAdded} technical check(s) in the BFF that the base does not list. Confirm in the review that each new entry checks a format (UUID, ISO date of a query parameter), not a domain rule or form input; those belong to the backend.`
 		});
 	return findings;
 }
@@ -236,7 +236,7 @@ if (import.meta.main) {
 	}
 	const errors = [...(m ? judge(m, ratchet) : []), ...(baseRatchet ? loosened(ratchet, baseRatchet) : [])];
 	const pairs = cochange ? coChange(out) : undefined;
-	const technicalAdded = baseRatchet ? ratchet.technical.length - baseRatchet.technical.length : 0;
+	const technicalAdded = baseRatchet ? unlisted(ratchet.technical, baseRatchet.technical, (t) => `${t.path}\t${t.line}`).length : 0;
 	const warnings = advise({ prSize: base && !cochange ? prSize(base) : undefined, coChange: pairs, technicalAdded }, ratchet);
 	if (pairs !== undefined) console.log(`Fitness: ${pairs} production file pairs across layers change together without an import (6 months)`);
 	const say = (level: 'error' | 'warning', f: Finding) => console.log(github ? `::${level} title=Fitness ${f.check}::${f.message}` : `${level} [${f.check}] ${f.message}`);

@@ -22,5 +22,7 @@ No scenario: tooling and CI only, no app behaviour changes. Request: Phase 2a of
 - [x] Proof: each check fails on a deliberate local violation
 - [x] `docs/architecture/fitness-functions.md`
 - [ ] Workflow note: the phase 0 scripts list files with `git ls-files`, so a local fitness run misses new untracked files (`git add -N`); CI sees them
-- [ ] Slice review (`code-reviewer`), "Before marking anything complete"
+- [x] Slice review round 1 (`docs/reviews/fitness-review-1.md`)
+- [x] Closing review round 2 (`docs/reviews/fitness-review-2.md`)
+- [x] "Before marking anything complete"
 - [ ] Report to the product owner, wait for 2b approval

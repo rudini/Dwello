@@ -46,7 +46,7 @@ Lokal auf 643f84ef, Verletzung nur im Arbeitsbaum, danach zurückgesetzt (nichts
 | `module-cycle` | `src/lib/utils/format.ts` importiert `$lib/accounting-period` | rot: «fe:lib/accounting-period fe:lib/utils import each other» |
 | `boundary-import` | `import { kiSettings } from '../../backend/src/db/schema'` unter `src/lib` | rot, nennt beide Dateien |
 | `ratchet` | `fieldSpread.max` 60 → 61 in `ratchet.json` | rot: «fieldSpread.max rose from 60 to 61» |
-| `technical` | zusätzlicher Eintrag in `technical` | Warnung: «lists 1 more technical check(s) in the BFF than the base» |
+| `technical` | zusätzlicher Eintrag in `technical` | Warnung: «has 1 technical check(s) in the BFF that the base does not list»; ebenso, wenn ein Eintrag ausgetauscht wird (Befund C-5) |
 | `pr-size` | `--base v0.80.0` | Warnung: «156 files, 96 modules and 5 layers» |
 | `co-change` | `coChangeWarn` 26 → 20 | Warnung: «26 pairs … (ratchet 20)» |
 | `upgrade` | Migration `DELETE FROM fuel_stocks;` | rot: «fuel_stocks 6 -> 0» |
