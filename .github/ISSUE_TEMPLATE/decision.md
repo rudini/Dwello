@@ -1,10 +1,10 @@
 ---
 name: Decision
 about: A functional point that needs a product-owner or domain decision before it can be implemented
-labels: [entscheiden]
+labels: [needs-decision]
 ---
 
-<!-- Add the topic label: fachlich, produkt or bug. English; German for UI texts and domain terms. -->
+<!-- Add the topic label: domain, product, bug, or nfr with its category. English; German for UI texts and domain terms. -->
 
 ## Problem
 What is open and why it matters to the landlord.
