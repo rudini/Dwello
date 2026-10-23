@@ -231,7 +231,7 @@
 	"Sie ziehen eine Rechnung hinein, etwa die der Wasserversorgung.": "Vous glissez une facture, par exemple celle du service des eaux.",
 	"Die KI liest Betrag, Datum und Kategorie.": "L’IA lit le montant, la date et la catégorie.",
 	"Sie prüfen die Angaben und bestätigen.": "Vous vérifiez les données et confirmez.",
-	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa Lift und Allgemeinstrom, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "Le décompte 2025 de Hans Müller, appartement 1.01 du Musterhaus Zentrum : pour chaque catégorie, par exemple ascenseur et électricité des parties communes, les coûts de l’immeuble et la part de son logement.",
+	"Die Abrechnung 2025 von Hans Müller, Wohnung 1.01 im Musterhaus Zentrum: für jede Kategorie, etwa Lift und Allgemeinstrom, die Kosten des Gebäudes und der Anteil seiner Wohnung.": "Le décompte 2025 de Pierre Dubois, appartement 2.01 du Musterhaus Zentrum : pour chaque catégorie, par exemple ascenseur et électricité des parties communes, les coûts de l’immeuble et la part de son logement.",
 	"Ein Beispiel aus den Demodaten: Der Lift im Musterhaus Zentrum kostet CHF 1'690.00 im Jahr. Pro Einheit verteilt, trägt jede der sechs Wohnungen CHF 281.67, auch die Wohnung 1.01 von Hans Müller.": "Un exemple tiré des données de démo : l’ascenseur du Musterhaus Zentrum coûte CHF 1'690.00 par an. Réparti par unité, chacun des six appartements en supporte CHF 281.67, y compris l’appartement 1.01 de Hans Müller.",
 	"Rechnungssteller": "Émetteur de la facture",
 	"Betrag": "Montant",
@@ -248,14 +248,14 @@
 	"Animation: So kommt eine Rechnung in Dwello": "Animation : comment une facture arrive dans Dwello",
 	"Animation: So verteilt Dwello die Kosten des Lifts": "Animation : comment Dwello répartit les coûts de l’ascenseur",
 	"Dwello macht die Nebenkostenabrechnung für private Vermieterinnen und Vermieter: Rechnungen hineinziehen, Abrechnung prüfen, mit QR-Rechnung versenden. Ihre Mieter bekommen einen Brief wie diesen.": "Dwello établit le décompte des charges pour les bailleresses et bailleurs privés : glisser les factures, vérifier le décompte, l’envoyer avec la QR-facture. Vos locataires reçoivent une lettre comme celle-ci.",
-	"Kostenlos und ohne Abo. Die Einrichtung macht einmal jemand, der sich mit Computern auskennt; für die Arbeit mit Dwello brauchen Sie keine technischen Kenntnisse.": "Gratuit et sans abonnement. L’installation est faite une fois par quelqu’un qui s’y connaît en informatique ; pour travailler avec Dwello, vous n’avez besoin d’aucune connaissance technique.",
 	"Vom Gebäude über die Abrechnung zum Brief an die Mieter": "De l’immeuble au décompte, jusqu’à la lettre aux locataires",
-	"Januar bis Dezember": "De janvier à décembre",
-	"Im neuen Jahr": "Dans la nouvelle année",
 	"PDFs hineinziehen, sobald sie kommen, etwa die der Wasserversorgung. Die KI liest Betrag, Datum und Kategorie und sagt, was Sie prüfen sollten.": "Glissez les PDF dès qu’ils arrivent, par exemple celui du service des eaux. L’IA lit le montant, la date et la catégorie et vous dit quoi vérifier.",
-	"Sobald die Abrechnungsperiode vorbei ist, meist das Kalenderjahr: für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil. Dwello zieht das vereinbarte Akonto ab; fehlende Zahlungen regeln Sie ausserhalb der Abrechnung.": "Dès que la période de décompte est terminée, le plus souvent l’année civile : pour tout l’immeuble en une fois, au jour près lors d’un changement de locataire et avec profil de chauffage. Dwello déduit les acomptes convenus ; les paiements manquants se règlent en dehors du décompte.",
 	"Per E-Mail oder als Brief, mit Swiss QR-Rechnung und in der Sprache Ihrer Mieter: Hans Müller bekommt seine auf Deutsch, Maria Rossi ihre auf Italienisch.": "Par e-mail ou par lettre, avec QR-facture suisse et dans la langue de vos locataires : Hans Müller reçoit le sien en allemand, Maria Rossi le sien en italien.",
 	"Für die Person, die einrichtet: die Befehle": "Pour la personne qui installe : les commandes",
 	"Lesbar bei Sonne und im Dunkeln": "Lisible au soleil et dans le noir",
-	"Auch graue Hilfetexte sind gut lesbar, und der Dunkelmodus folgt Ihrem Gerät.": "Même les textes d’aide gris sont bien lisibles, et le mode sombre suit votre appareil."
+	"Auch graue Hilfetexte sind gut lesbar, und der Dunkelmodus folgt Ihrem Gerät.": "Même les textes d’aide gris sont bien lisibles, et le mode sombre suit votre appareil.",
+	"Sobald die Abrechnungsperiode vorbei ist, etwa Juli bis Juni oder das Kalenderjahr: für das ganze Gebäude auf einmal, tagesgenau bei Mieterwechsel und mit Heizprofil. Dwello zieht das vereinbarte Akonto ab; fehlende Zahlungen regeln Sie ausserhalb der Abrechnung.": "Dès que la période de décompte est terminée, par exemple de juillet à juin ou l’année civile : pour tout l’immeuble en une fois, au jour près lors d’un changement de locataire et avec profil de chauffage. Dwello déduit les acomptes convenus ; les paiements manquants se règlent en dehors du décompte.",
+	"Kostenlos und ohne Abo. Die Einrichtung, Updates und Datensicherungen macht jemand, der sich mit Computern auskennt; für die Arbeit mit Dwello brauchen Sie keine technischen Kenntnisse.": "Gratuit et sans abonnement. L’installation, les mises à jour et les sauvegardes sont faites par quelqu’un qui s’y connaît en informatique ; pour travailler avec Dwello, vous n’avez besoin d’aucune connaissance technique.",
+	"Das ganze Jahr": "Toute l’année",
+	"Nach Periodenende": "Après la fin de la période"
 }
