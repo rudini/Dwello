@@ -127,13 +127,17 @@
 		resumed = back && step === 3;
 	});
 
-	// #470: what a step loads late never moves «Weiter» on the screen: the page scrolls by the height it added above
+	// #470: what a step loads late never moves «Weiter» on the screen: the page scrolls by the height it added above;
+	// only while «Weiter» is in the window, else the page would jump under a landlord reading the top (#637)
 	$effect.pre(() => {
 		if (loading) return;
 		const next = untrack(() => wizard?.querySelector<HTMLElement>('[data-testid="wizard-next"]'));
 		const before = next?.getBoundingClientRect().top;
 		tick().then(() => {
-			const moved = before === undefined ? 0 : next!.getBoundingClientRect().top - before;
+			const moved =
+				before === undefined || before > window.innerHeight
+					? 0
+					: next!.getBoundingClientRect().top - before;
 			if (moved) window.scrollBy(0, moved);
 		});
 	});

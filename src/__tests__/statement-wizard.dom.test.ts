@@ -1673,7 +1673,8 @@ describe('Spät geladene Inhalte im Assistenten', () => {
 		expect(document.activeElement!.closest('[role="radiogroup"]')).not.toBeNull();
 	});
 
-	it('hält «Weiter» an seiner Stelle, wenn die Zeilen der Gebäude ankommen', async () => {
+	// «Weiter» at `from` px while the step loads, 220 px lower once the buildings' rows are in; the scrolls asked for
+	async function rowsArrive(from: number) {
 		let release = () => {};
 		const loaded = new Promise<void>((resolve) => (release = resolve));
 		globalThis.fetch = (async (url: string) => {
@@ -1681,8 +1682,7 @@ describe('Spät geladene Inhalte im Assistenten', () => {
 			return Response.json(String(url).includes('/invoices') ? { invoices: [] } : []);
 		}) as typeof fetch;
 		const scrolled = vi.spyOn(window, 'scrollBy').mockImplementation(() => {});
-		// «Weiter» 300 px down while the step loads, 520 once the buildings' rows are in
-		const top = () => (document.querySelector('[data-testid^="generate-building-invoices-"]') ? 520 : 300);
+		const top = () => (document.querySelector('[data-testid^="generate-building-invoices-"]') ? from + 220 : from);
 		const rect = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
 			return { top: this.dataset.testid === 'wizard-next' ? top() : 0 } as DOMRect;
 		});
@@ -1694,8 +1694,16 @@ describe('Spät geladene Inhalte im Assistenten', () => {
 		const calls = scrolled.mock.calls;
 		rect.mockRestore();
 		scrolled.mockRestore();
+		return calls;
+	}
 
-		expect(calls).toContainEqual([0, 220]);
+	// main CI #637: a landlord reading the top of the step keeps their place; the axe check met the jump
+	it('scrollt nicht, wenn «Weiter» noch unter dem Fenster liegt', async () => {
+		expect(await rowsArrive(window.innerHeight + 100)).toEqual([]);
+	});
+
+	it('hält «Weiter» an seiner Stelle, wenn die Zeilen der Gebäude ankommen', async () => {
+		expect(await rowsArrive(300)).toContainEqual([0, 220]);
 	});
 });
 
