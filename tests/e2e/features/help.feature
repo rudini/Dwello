@@ -52,6 +52,12 @@ Funktionalität: Hilfe
       | Begriff  | Erklärung                                                  |
       | Erledigt | Ein übertragener Betrag ist damit noch nicht bezahlt       |
 
+    # #477 (Entscheid Product Owner 2026-10-19): abgezogen wird das vereinbarte Akonto, nicht das bezahlte
+    @wip
+    Beispiele:
+      | Begriff | Erklärung                                                                   |
+      | Akonto  | Die Nebenkostenabrechnung zieht das vereinbarte Akonto ab, nicht das bezahlte. |
+
   # Inhaltsverzeichnis (#109)
   Szenario: Die Hilfe führt vom Inhalt direkt zu den Begriffen
     Angenommen das Browserfenster ist 390 Pixel breit
